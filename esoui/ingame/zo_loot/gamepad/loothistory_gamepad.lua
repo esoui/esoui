@@ -54,7 +54,7 @@ do
         ["LevelUpRewardsClaimGamepad"] = true,
         ["giftInventoryViewGamepad"] = true,
         ["playerSubmenu"] = true, -- Need this for daily login since this is the scene it exists in
-        ["mailManagerGamepad"] = true,
+        ["mailGamepad"] = true,
         ["gamepad_market_purchase"] = true,
         ["codeRedemptionGamepad"] = true,
     }

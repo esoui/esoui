@@ -158,7 +158,7 @@ do
 
         if self.goalObject and self.hexType == SCRYING_HEX_TYPE_OWNED then
             -- Update goal state
-            self.goalObject:SetState(SO_SCRYING_GOAL_STATE_OWNING)
+            self.goalObject:SetState(ZO_SCRYING_GOAL_STATE_OWNING)
         end
     end
 

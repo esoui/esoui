@@ -224,10 +224,17 @@ function ZO_ChatMenu_Gamepad:SetupLogMessage(control, data, selected, reselectin
     else
         r, g, b = GetChatCategoryColor(entryData.category)
     end
-    local useSelectedColor = selected and self.chatEntryPanelFocalArea:IsFocused()
-    local colorSelectedModifier = useSelectedColor and 1 or ZO_CHAT_MENU_GAMEPAD_COLOR_MODIFIER
+    local isSelected = selected and self.chatEntryPanelFocalArea:IsFocused()
+    control.marker:SetHidden(not isSelected)
+    if isSelected then
+        control.label:SetAnchor(TOPLEFT, control.marker, TOPRIGHT)
+    else
+        control.label:SetAnchor(TOPLEFT, control.marker, TOPLEFT)
+    end
+
+    local colorSelectedModifier = isSelected and 1 or ZO_CHAT_MENU_GAMEPAD_COLOR_MODIFIER
     control.label:SetColor(r * colorSelectedModifier, g * colorSelectedModifier, b * colorSelectedModifier, 1)
-    control.label:SetDesaturation(useSelectedColor and 0 or ZO_CHAT_MENU_GAMEPAD_DESATURATION_MODIFIER)
+    control.label:SetDesaturation(isSelected and 0 or ZO_CHAT_MENU_GAMEPAD_DESATURATION_MODIFIER)
 end
 
 function ZO_ChatMenu_Gamepad:AddMessage(message, category, targetChannel, fromDisplayName, rawMessageText, narrationMessage, overrideColorDef)

@@ -398,7 +398,15 @@ function ZO_CollectibleData:IsOwned()
 end
 
 function ZO_CollectibleData:IsPurchasable()
+    -- Will only return true if this collectible is directly purchasable
     return IsCollectiblePurchasable(self.collectibleId)
+end
+
+function ZO_CollectibleData:GetPurchasableCollectibleId()
+    -- Will either be an override collectible if this collectible can only be purchased by purchasing the other,
+    -- or will simply return the id passed if it can be purchased directly
+    -- or 0 if it cannot be purchased
+    return GetPurchasableCollectibleIdForCollectible(self.collectibleId)
 end
 
 function ZO_CollectibleData:CanAcquire()
@@ -544,13 +552,27 @@ function ZO_CollectibleData:GetQuestDescription()
     return questDescription
 end
 
+function ZO_CollectibleData:IsSkillStyle()
+    return self:GetCategoryType() == COLLECTIBLE_CATEGORY_TYPE_ABILITY_FX_OVERRIDE
+end
+
+function ZO_CollectibleData:GetSkillStyleProgressionId()
+    if self:IsSkillStyle() then
+        return GetAbilityFxOverrideProgressionId(self.referenceId)
+    end
+    return 0
+end
+
 function ZO_CollectibleData:IsHouse()
     return self:GetCategoryType() == COLLECTIBLE_CATEGORY_TYPE_HOUSE
 end
 
 function ZO_CollectibleData:GetHouseLocation()
-    local houseFoundInZoneId = GetHouseFoundInZoneId(self.referenceId)
-    return GetZoneNameById(houseFoundInZoneId)
+    if self:IsHouse() then
+        local houseFoundInZoneId = GetHouseFoundInZoneId(self.referenceId)
+        return GetZoneNameById(houseFoundInZoneId)
+    end
+    return ""
 end
 
 function ZO_CollectibleData:GetFormattedHouseLocation()
@@ -558,7 +580,10 @@ function ZO_CollectibleData:GetFormattedHouseLocation()
 end
 
 function ZO_CollectibleData:GetHouseCategoryType()
-    return GetHouseCategoryType(self.referenceId)
+    if self:IsHouse() then
+        return GetHouseCategoryType(self.referenceId)
+    end
+    return 0
 end
 
 function ZO_CollectibleData:IsPrimaryResidence()
@@ -700,6 +725,11 @@ function ZO_CollectibleData:GetPrimaryInteractionStringId(actorCategory)
             else
                 return SI_COLLECTIBLE_ACTION_SET_ACTIVE
             end
+        elseif categoryType == COLLECTIBLE_CATEGORY_TYPE_ABILITY_FX_OVERRIDE then
+            return nil
+        elseif categoryType == COLLECTIBLE_CATEGORY_TYPE_ACCOUNT_UPGRADE then
+            local hasQuestBestowal = self:GetReferenceId() ~= 0
+            return hasQuestBestowal and SI_COLLECTIBLE_ACTION_ACCEPT_QUEST or nil
         else
             return SI_COLLECTIBLE_ACTION_SET_ACTIVE
         end
@@ -807,6 +837,8 @@ function ZO_CollectibleData:ShouldSuppressActiveState(actorCategory)
         return true
     elseif self:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_COMPANION) and HasSuppressedCompanion() then
         return true
+    elseif self:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_ABILITY_FX_OVERRIDE) then
+        return true
     end
     return false
 end
@@ -822,6 +854,10 @@ end
 -- Determines whether the collectible is a placeable furnishing that can be placed in the current house.
 function ZO_CollectibleData:CanPlaceInCurrentHouse()
     return self:IsPlaceableFurniture() and ZO_CanPlaceFurnitureInCurrentHouse() and HousingEditorCanPlaceCollectible(self.collectibleId)
+end
+
+function ZO_CollectibleData:GetLinkedAchievement()
+    return GetCollectibleLinkedAchievement(self.collectibleId)
 end
 
 -----------------------------------

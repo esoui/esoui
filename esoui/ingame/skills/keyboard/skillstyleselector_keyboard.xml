@@ -1,0 +1,45 @@
+<GuiXml>
+    <Controls>
+       <Control name="ZO_SkillStyle_SelectorIcon_Keyboard_Control" mouseEnabled="true" virtual="true">
+            <Dimensions x="ZO_SKILL_STYLE_ICON_SELECTOR_PICK_KEYBOARD_SIZE" y="ZO_SKILL_STYLE_ICON_SELECTOR_PICK_KEYBOARD_SIZE"/>
+            <Controls>
+                <Control name="$(parent)IconContainer">
+                    <Anchor point="TOPLEFT" offsetX="ZO_SKILL_STYLE_ICON_SELECTOR_ICON_KEYBOARD_OFFSET_X" offsetY="ZO_SKILL_STYLE_ICON_SELECTOR_ICON_KEYBOARD_OFFSET_Y" />
+                    <Dimensions x="ZO_SKILL_STYLE_ICON_SELECTOR_ICON_KEYBOARD_SIZE" y="ZO_SKILL_STYLE_ICON_SELECTOR_ICON_KEYBOARD_SIZE"/>
+                    <Controls>
+                        <Button name="$(parent)Frame" inherits="ZO_CheckButton" tier="MEDIUM">
+                            <AnchorFill/>
+                           <OnMouseEnter>
+                                ZO_SkillStyle_SelectorIcon_Keyboard_OnMouseEnter(self:GetParent():GetParent())
+                            </OnMouseEnter>
+                            <OnMouseExit>
+                                ZO_SkillStyle_SelectorIcon_Keyboard_OnMouseExit(self:GetParent():GetParent())
+                            </OnMouseExit>
+                            <Textures
+                                normal="EsoUI/Art/Progression/styleFrame64_up.dds"
+                                pressed="EsoUI/Art/Progression/styleFrame64_down.dds"
+                                mouseOver="EsoUI/Art/Progression/styleFrame64_over.dds"
+                                pressedMouseOver="EsoUI/Art/Progression/styleFrame64_over.dds"
+                                disabled="EsoUI/Art/Progression/styleFrame64_disabled.dds"
+                            />
+                        </Button>
+
+                        <Texture name="$(parent)Icon" tier="LOW">
+                            <AnchorFill/>
+                        </Texture>
+
+                        <Texture name="$(parent)SelectedBorder" tier="HIGH" hidden="true" excludeFromResizeToFitExtents="true" textureFile="EsoUI/Art/Progression/styleFrame64_selectionCorner.dds">
+                            <Dimensions x="128" y="128"/>
+                            <Anchor point="CENTER" />
+                        </Texture>
+
+                        <Texture name="$(parent)Lock" textureFile="EsoUI/Art/Progression/styleIcon64_styleLocked.dds" tier="HIGH" hidden="true">
+                            <Dimensions x="64" y="64"/>
+                            <Anchor point="CENTER" relativeTo="$(parent)Icon" />
+                        </Texture>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

@@ -31,7 +31,7 @@ function CMapHandlers:InitializeEvents()
     end
     EVENT_MANAGER:RegisterForEvent("CMapHandler", EVENT_KEEP_ALLIANCE_OWNER_CHANGED, RefreshKeep)
     EVENT_MANAGER:RegisterForEvent("CMapHandler", EVENT_KEEP_UNDER_ATTACK_CHANGED, RefreshKeep)
-    EVENT_MANAGER:RegisterForEvent("CMapHandler", EVENT_KEEP_PASSABLE_CHANGED, RefreshKeep)
+    EVENT_MANAGER:RegisterForEvent("CMapHandler", EVENT_KEEP_IS_PASSABLE_CHANGED, RefreshKeep) 
     EVENT_MANAGER:RegisterForEvent("CMapHandler", EVENT_KEEP_PIECE_DIRECTIONAL_ACCESS_CHANGED, RefreshKeep)
     EVENT_MANAGER:RegisterForEvent("CMapHandler", EVENT_KEEP_INITIALIZED, RefreshKeep)
 

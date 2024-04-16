@@ -465,10 +465,26 @@ end
 
 function ZO_Tracker:AssistNext(ignoreSceneRestriction)
     local isShowingBase = SCENE_MANAGER:IsShowingBaseScene()
+    
+    local wasZoneStoryAssisted = IsZoneStoryAssisted()
+    if wasZoneStoryAssisted then
+        ZO_ZoneStories_Manager.SetTrackedZoneStoryAssisted(false)
+    end
+
     if ignoreSceneRestriction or isShowingBase then
         --if we are showing one quest now, find the next one to show ordered by the order they appear in the quest journal
         if self.assistedData then
-            local nextQuestIndex = QUEST_JOURNAL_MANAGER:GetNextSortedQuestForQuestIndex(self.assistedData.arg1)
+            local nextQuestIndex, wasShowingLastQuest = QUEST_JOURNAL_MANAGER:GetNextSortedQuestForQuestIndex(self.assistedData.arg1)
+            if wasShowingLastQuest then
+                -- Looped past all the quests.  Check if we want to display a zone guide before displaying the first item.
+               
+                -- if the zone story was visible and we just closed it, don't reopen it.
+                if not wasZoneStoryAssisted and IsZoneStoryTracked() then
+                    ZO_ZoneStories_Manager.SetTrackedZoneStoryAssisted(true)    
+                    return -- Don't advance the quest now, wait for the zone tracker to be hidden.
+                end
+            end
+
             if nextQuestIndex then
                 if self:BeginTracking(TRACK_TYPE_QUEST, nextQuestIndex) then
                     CALLBACK_MANAGER:FireCallbacks("QuestTrackerUpdatedOnScreen")

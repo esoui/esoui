@@ -352,7 +352,7 @@ function ZO_SetTitleFragment:Show()
     local currentScene = SCENE_MANAGER:GetCurrentScene()
     local titleFragment = currentScene:GetFragmentWithCategory(FRAGMENT_CATEGORY_TITLE)
     local titleControl = titleFragment:GetControl()
-    GetControl(titleControl, "Label"):SetText(self.title)
+    titleControl:GetNamedChild("Label"):SetText(self.title)
     self:OnShown()
 end
 
@@ -905,6 +905,9 @@ TOP_BAR_FRAGMENT = ZO_FadeSceneFragment:New(ZO_TopBar)
 
 TITLE_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedTitle)
 TITLE_FRAGMENT:SetCategory(FRAGMENT_CATEGORY_TITLE)
+
+RIGHT_PANEL_TITLE_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedRightPanelTitle)
+RIGHT_PANEL_TITLE_FRAGMENT:SetCategory(FRAGMENT_CATEGORY_TITLE)
 
 MAIL_INBOX_FRAGMENT = ZO_FadeSceneFragment:New(ZO_MailInbox)
 MAIL_SEND_FRAGMENT = ZO_FadeSceneFragment:New(ZO_MailSend)

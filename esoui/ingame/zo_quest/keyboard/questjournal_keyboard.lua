@@ -237,8 +237,12 @@ function ZO_QuestJournal_Keyboard:InitializeScenes()
                     self:RefreshQuestList()
                 end
 
-                self:FocusQuestWithIndex(QUEST_JOURNAL_MANAGER:GetFocusedQuestIndex())
-
+                -- Quest items in inventory can link via "Show in Journal" to here.
+                local questToFocus = self:GetPendingJournalQuestIndex() or QUEST_JOURNAL_MANAGER:GetFocusedQuestIndex()
+                -- We only need to open this once.
+                self:ClearPendingJournalQuestIndex()
+                self:FocusQuestWithIndex(questToFocus)
+                
                 KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
             elseif(newState == SCENE_HIDDEN) then
                 KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
@@ -419,6 +423,11 @@ function ZO_QuestJournal_Keyboard:RefreshDetails()
     end
 end
 
+function ZO_QuestJournal_Keyboard:OpenQuestJournalToQuest(questIndex)
+    self:QueuePendingJournalQuestIndex(questIndex)
+    SCENE_MANAGER:Show(self:GetSceneName())
+end
+
 --XML Handlers
 
 function ZO_QuestJournalNavigationEntry_GetTextColor(self)
@@ -458,7 +467,7 @@ function ZO_QuestJournalNavigationEntry_OnMouseUp(label, button, upInside)
         return
     end
 
-    ZO_ZoneStories_Manager.StopZoneStoryTracking()
+    ZO_ZoneStories_Manager.SetTrackedZoneStoryAssisted(false)
 
     ZO_TreeEntry_OnMouseUp(label, upInside)
 end

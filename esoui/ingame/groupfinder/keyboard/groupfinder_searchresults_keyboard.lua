@@ -210,11 +210,9 @@ function ZO_GroupFinder_SearchResultsList_Keyboard:TryShowApplyDialog(data)
         local collectibleId = data:GetFirstLockingCollectibleId()
         if collectibleId ~= 0 then
             local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
-            local collectibleName = collectibleData:GetName()
-            local categoryName = collectibleData:GetCategoryData():GetName()
             local message = zo_strformat(SI_GROUP_FINDER_APPLY_JOIN_DIALOG_COLLECTIBLE_LOCKED_FAILURE, ZO_SELECTED_TEXT:Colorize(data:GetTitle()))
             local marketOperation = MARKET_OPEN_OPERATION_GROUP_FINDER
-            ZO_Dialogs_ShowPlatformDialog("COLLECTIBLE_REQUIREMENT_FAILED", { collectibleData = collectibleData, marketOpenOperation = marketOperation }, { mainTextParams = { message, collectibleName, categoryName } })
+            ZO_Dialogs_ShowCollectibleRequirementFailedPlatformDialog(collectibleData, message, marketOperation)
         end
     else
         ZO_Dialogs_ShowPlatformDialog("GROUP_FINDER_APPLICATION_KEYBOARD", data)

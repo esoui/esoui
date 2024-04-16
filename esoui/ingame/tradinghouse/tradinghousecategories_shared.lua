@@ -577,7 +577,7 @@ do
     end
 end
 
-local AddAllConsumablesCategory, AddConsumableCategory, AddRecipeCategory
+local AddAllConsumablesCategory, AddConsumableCategory, AddRecipeCategory, AddMiscItemTypesCategory
 do
     local g_allConsumableItemTypes = {}
     local function AddItemTypeToAllConsumables(itemType)
@@ -602,7 +602,7 @@ do
         AddAllSubcategory(categoryParams)
     end
 
-    local SPECIALIZED_ITEM_TYPES_FOR_CONSUMABLE_ITEM_TYPE = 
+    local SPECIALIZED_ITEM_TYPES_FOR_CONSUMABLE_ITEM_TYPE =
     {
         [ITEMTYPE_RACIAL_STYLE_MOTIF] =
         {
@@ -751,6 +751,31 @@ do
         -- this will be called more than once, but that's okay because we deduplicate inside of AddItemTypeToAllConsumables().
         AddItemTypeToAllConsumables(ITEMTYPE_RECIPE)
     end
+
+    function AddMiscItemTypesCategory(categoryHeader, ...)
+        local allItemTypes = { ... }
+        local categoryParams = AddCategory("Miscellaneous")
+
+        local function ApplyItemTypeToSearch(search, specializedItemType)
+            if specializedItemType then
+                search:SetFilter(TRADING_HOUSE_FILTER_TYPE_SPECIALIZED_ITEM, specializedItemType)
+            else
+                search:SetFilter(TRADING_HOUSE_FILTER_TYPE_ITEM, allItemTypes)
+            end
+        end
+
+        categoryParams:SetName(GetString("SI_TRADINGHOUSECATEGORYHEADER", TRADING_HOUSE_CATEGORY_HEADER_MISC))
+        categoryParams:SetHeader(categoryHeader)
+
+        local SUBCATEGORY_ENUM_KEY_PREFIX = "SpecializedItemType"
+        categoryParams:SetApplyToSearchCallback(ApplyItemTypeToSearch)
+
+        AddAllSubcategory(categoryParams)
+
+        for _, itemType in ipairs(allItemTypes) do
+            AddItemTypeToAllConsumables(itemType)
+        end
+    end
 end
 
 local AddAllMaterialsCategory
@@ -779,6 +804,8 @@ do
         categoryParams:SetApplyToSearchCallback(ApplyAllMaterialsToSearch)
         -- No features
         AddAllSubcategory(categoryParams)
+
+        AddItemTypeToAllMaterials(ITEMTYPE_SCRIBING_INK)
     end
 
     internalassert(CRAFTING_TYPE_MAX_VALUE == 8, "Add new tradeskill to trading house")
@@ -1422,7 +1449,6 @@ do
     end
 end
 
-
 -----------------------
 -- Search Categories --
 -----------------------
@@ -1433,8 +1459,8 @@ end
     Any item that could be sold on the trading house should be categorized.
 ]]--
 
-internalassert(ITEMTYPE_MAX_VALUE == 71, "Do you need to update the trading house with your new itemtype?")
-internalassert(SPECIALIZED_ITEMTYPE_MAX_VALUE == 3150, "Do you need to update the trading house with your new specialized itemtype?")
+internalassert(ITEMTYPE_MAX_VALUE == 74, "Do you need to update the trading house with your new itemtype?")
+internalassert(SPECIALIZED_ITEMTYPE_MAX_VALUE == 3300, "Do you need to update the trading house with your new specialized itemtype?")
 internalassert(EQUIP_TYPE_MAX_VALUE == 15, "Do you need to update the trading house with your new equip type?")
 
 -- All Items
@@ -1471,6 +1497,7 @@ AddRecipeCategory(PROVISIONER_SPECIAL_INGREDIENT_TYPE_FURNISHING)
 AddConsumableCategory(ITEMTYPE_MASTER_WRIT)
 AddConsumableCategory(ITEMTYPE_CONTAINER, ITEMTYPE_CONTAINER_CURRENCY)
 AddConsumableCategory(ITEMTYPE_AVA_REPAIR)
+AddMiscItemTypesCategory(TRADING_HOUSE_CATEGORY_HEADER_CONSUMABLES, ITEMTYPE_CRAFTED_ABILITY, ITEMTYPE_CRAFTED_ABILITY_SCRIPT)
 
 -- Materials
 AddAllMaterialsCategory()
@@ -1513,3 +1540,9 @@ AddMiscCategory(ITEMTYPE_TOOL)
 AddMiscCategory(ITEMTYPE_SIEGE)
 AddTrophyCategory()
 AddGuildTabardCategory()
+
+-- TODO Scribing: Find the correct categories for scribing related items: 
+-- ITEMTYPE_CRAFTED_ABILITY
+-- SPECIALIZED_ITEMTYPE_CRAFTED_ABILITY_SCRIPT_PRIMARY
+-- SPECIALIZED_ITEMTYPE_CRAFTED_ABILITY_SCRIPT_SECONDARY
+-- SPECIALIZED_ITEMTYPE_CRAFTED_ABILITY_SCRIPT_TERTIARY

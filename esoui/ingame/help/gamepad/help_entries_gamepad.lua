@@ -81,7 +81,7 @@ function ZO_HelpTutorialsEntries_Gamepad:AddHelpEntry(categoryIndex, helpIndex)
             description2 = gamepadDescription2 == "" and description2 or gamepadDescription2
             return { SCREEN_NARRATION_MANAGER:CreateNarratableObject(helpEntryData.text), SCREEN_NARRATION_MANAGER:CreateNarratableObject(description1), SCREEN_NARRATION_MANAGER:CreateNarratableObject(description2) }
         end
-        self.itemList:AddEntry("ZO_GamepadMenuEntryTemplate", entryData)
+        self.itemList:AddEntry("ZO_GamepadSubMenuEntryTemplate", entryData)
     end
 end
 

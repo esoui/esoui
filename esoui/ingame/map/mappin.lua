@@ -1485,8 +1485,7 @@ local WAYSHRINE_LMB =
                 if pin:GetLinkedCollectibleType() == COLLECTIBLE_CATEGORY_TYPE_CHAPTER then
                     ZO_ShowChapterUpgradePlatformScreen(MARKET_OPEN_OPERATION_DLC_FAILURE_WORLD_MAP)
                 else
-                    local collectibleId = GetFastTravelNodeLinkedCollectibleId(pin:GetFastTravelNodeIndex())
-                    local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+                    local collectibleData = pin:GetLinkedCollectibleData()
                     local searchTerm = zo_strformat(SI_CROWN_STORE_SEARCH_FORMAT_STRING, collectibleData:GetName())
                     ShowMarketAndSearch(searchTerm, MARKET_OPEN_OPERATION_DLC_FAILURE_WORLD_MAP)
                 end
@@ -1530,8 +1529,7 @@ local WAYSHRINE_LMB =
                 if pin:GetLinkedCollectibleType() == COLLECTIBLE_CATEGORY_TYPE_CHAPTER then
                     ZO_ShowChapterUpgradePlatformScreen(MARKET_OPEN_OPERATION_DLC_FAILURE_WORLD_MAP)
                 else
-                    local collectibleId = GetFastTravelNodeLinkedCollectibleId(pin:GetFastTravelNodeIndex())
-                    local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+                    local collectibleData = pin:GetLinkedCollectibleData()
                     local searchTerm = zo_strformat(SI_CROWN_STORE_SEARCH_FORMAT_STRING, collectibleData:GetName())
                     ShowMarketAndSearch(searchTerm, MARKET_OPEN_OPERATION_DLC_FAILURE_WORLD_MAP)
                 end
@@ -2483,10 +2481,21 @@ function ZO_MapPin:IsLockedByLinkedCollectible()
     return false
 end
 
-function ZO_MapPin:GetLinkedCollectibleType()
-    if self:IsPOI() or self:IsFastTravelWayShrine() then
+function ZO_MapPin:GetLinkedCollectibleData()
+    if self:IsFastTravelWayShrine() then
         local collectibleId = GetFastTravelNodeLinkedCollectibleId(self:GetFastTravelNodeIndex())
-        local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+        -- Will either be an override collectible or the passed in id
+        local purchasableCollectibleId = GetPurchasableCollectibleIdForCollectible(collectibleId)
+        local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(purchasableCollectibleId)
+        return collectibleData
+    end
+    -- TODO: Handle if self:IsPOI()?
+    return nil
+end
+
+function ZO_MapPin:GetLinkedCollectibleType()
+    local collectibleData = self:GetLinkedCollectibleData()
+    if collectibleData then
         return collectibleData:GetCategoryType()
     end
     return COLLECTIBLE_CATEGORY_TYPE_DLC

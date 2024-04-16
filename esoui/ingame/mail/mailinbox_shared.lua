@@ -1,11 +1,3 @@
-MAIL_ENTRY_SORT_KEYS =
-{
-    ["secsSinceReceived"]  = { numeric = true, tiebreaker = "mailId" },
-    ["priority"] = { numeric = true, tiebreaker = "secsSinceReceived" },
-    ["mailId"] = { isId64 = true },
-}
-MAIL_ENTRY_FIRST_SORT_KEY = "priority"
-
 local function FormatSubject(subject, returned)
     local formattedSubject
     if(subject == "") then
@@ -60,11 +52,11 @@ local function GetReceivedText(self)
 end
 
 local function IsExpirationImminent(self)
-    return self.expiresInDays and self.expiresInDays <= 3
+    return self.expiresInDays and self.expiresInDays <= MAIL_EXPIRATION_IMMINENT_THRESHOLD_DAYS
 end
 
 function ZO_MailInboxShared_PopulateMailData(dataTable, mailId)
-    local senderDisplayName, senderCharacterName, subject, icon, unread, fromSystem, fromCS, returned, numAttachments, attachedMoney, codAmount, expiresInDays, secsSinceReceived = GetMailItemInfo(mailId)
+    local senderDisplayName, senderCharacterName, subject, firstItemIcon, unread, fromSystem, fromCS, returned, numAttachments, attachedMoney, codAmount, expiresInDays, secsSinceReceived, category = GetMailItemInfo(mailId)
     dataTable.mailId = mailId
     dataTable.subject = subject
     dataTable.returned = returned
@@ -79,13 +71,14 @@ function ZO_MailInboxShared_PopulateMailData(dataTable, mailId)
     dataTable.fromSystem = fromSystem
     dataTable.fromCS = fromCS
     dataTable.isFromPlayer = not (fromSystem or fromCS)
-    dataTable.priority = fromCS and 1 or 2
     dataTable.GetFormattedSubject = GetFormattedSubject
     dataTable.GetFormattedReplySubject = GetFormattedReplySubject
     dataTable.GetExpiresText = GetExpiresText
     dataTable.GetReceivedText = GetReceivedText
     dataTable.isReadInfoReady = IsReadMailInfoReady(mailId)
     dataTable.IsExpirationImminent = IsExpirationImminent
+    dataTable.firstItemIcon = firstItemIcon
+    dataTable.category = category
 end
 
 function ZO_GetNextMailIdIter(state, var1)
@@ -93,11 +86,8 @@ function ZO_GetNextMailIdIter(state, var1)
 end
 
 function ZO_MailInboxShared_TakeAll(mailId)
-	local numAttachments = GetMailAttachmentInfo(mailId)
-	if numAttachments then
-		TakeMailAttachedItems(mailId)
-	end
-    TakeMailAttachedMoney(mailId)
+    local deleteOnClaim = MAIL_MANAGER:ShouldDeleteOnClaim()
+    TakeMailAttachments(mailId, deleteOnClaim)
 end
 
 function ZO_MailInboxShared_UpdateInbox(mailData, fromControl, subjectControl, expiresControl, receivedControl, bodyControl)

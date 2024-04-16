@@ -395,7 +395,6 @@ COLLECTIONS_BOOK_SCENE:AddFragmentGroup(FRAGMENT_GROUP.FRAME_TARGET_STANDARD_RIG
 COLLECTIONS_BOOK_SCENE:AddFragmentGroup(FRAGMENT_GROUP.PLAYER_PROGRESS_BAR_KEYBOARD_CURRENT)
 COLLECTIONS_BOOK_SCENE:AddFragment(COLLECTIBLE_PREVIEW_OPTIONS_FRAGMENT)
 COLLECTIONS_BOOK_SCENE:AddFragment(ITEM_PREVIEW_KEYBOARD:GetFragment())
-COLLECTIONS_BOOK_SCENE:AddFragment(ITEM_PREVIEW_KEYBOARD:GetFragment())
 COLLECTIONS_BOOK_SCENE:AddFragment(COLLECTIONS_BOOK_FRAGMENT)
 COLLECTIONS_BOOK_SCENE:AddFragment(RIGHT_BG_FRAGMENT)
 COLLECTIONS_BOOK_SCENE:AddFragment(FRAME_EMOTE_FRAGMENT_JOURNAL)
@@ -814,11 +813,28 @@ skillsScene:AddFragment(FRAME_PLAYER_FRAGMENT)
 skillsScene:AddFragment(RIGHT_BG_FRAGMENT)
 skillsScene:AddFragment(TREE_UNDERLAY_FRAGMENT)
 skillsScene:AddFragment(TITLE_FRAGMENT)
+skillsScene:AddFragment(SKILLS_TITLE_FRAGMENT)
 skillsScene:AddFragment(SKILLS_FRAGMENT)
 skillsScene:AddFragment(FRAME_EMOTE_FRAGMENT_SKILLS)
-skillsScene:AddFragment(SKILLS_TITLE_FRAGMENT)
 skillsScene:AddFragment(SKILLS_WINDOW_SOUNDS)
 skillsScene:AddFragment(ZO_TutorialTriggerFragment:New(TUTORIAL_TRIGGER_COMBAT_SKILLS_OPENED))
+skillsScene:AddFragment(ZO_TutorialTriggerFragment:New(TUTORIAL_TRIGGER_SKILLS_SKILL_STYLING))
+
+----------------
+-- Scribing Library Scene
+----------------
+
+local scribingLibraryScene = SCENE_MANAGER:GetScene("scribingLibraryKeyboard")
+scribingLibraryScene:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW)
+scribingLibraryScene:AddFragmentGroup(FRAGMENT_GROUP.PLAYER_PROGRESS_BAR_KEYBOARD_CURRENT)
+scribingLibraryScene:AddFragment(FRAME_PLAYER_FRAGMENT)
+scribingLibraryScene:AddFragment(RIGHT_PANEL_BG_FRAGMENT)
+scribingLibraryScene:AddFragment(RIGHT_PANEL_TITLE_FRAGMENT)
+-- this needs to be a separate set title fragment since we are using a different title fragment
+-- otherwise the title won't be properly set when switching between the skills scene and this one
+scribingLibraryScene:AddFragment(ZO_SetTitleFragment:New(SI_WINDOW_TITLE_SKILLS))
+scribingLibraryScene:AddFragment(FRAME_EMOTE_FRAGMENT_SKILLS)
+scribingLibraryScene:AddFragment(SKILLS_WINDOW_SOUNDS)
 
 ------------------------
 --Gift Inventory Scene
@@ -1093,7 +1109,41 @@ MAIN_MENU_KEYBOARD:AddScene(MENU_CATEGORY_CHARACTER, "stats")
 
 --Skills
 
-MAIN_MENU_KEYBOARD:AddScene(MENU_CATEGORY_SKILLS, "skills")
+do
+    local iconData =
+    {
+        {
+            categoryName = SI_SKILLS_MENU_ASSIGNMENT,
+            descriptor = "skills",
+            normal = "EsoUI/Art/Skills/Keyboard/skills_tabIcon_skills_up.dds",
+            pressed = "EsoUI/Art/Skills/Keyboard/skills_tabIcon_skills_down.dds",
+            highlight = "EsoUI/Art/Skills/Keyboard/skills_tabIcon_skills_over.dds",
+        },
+        {
+            categoryName = SI_SKILLS_MENU_SCRIBING_LIBRARY,
+            descriptor = "scribingLibraryKeyboard",
+            normal = "EsoUI/Art/Skills/Keyboard/skills_tabIcon_scribingLibrary_up.dds",
+            pressed = "EsoUI/Art/Skills/Keyboard/skills_tabIcon_scribingLibrary_down.dds",
+            highlight = "EsoUI/Art/Skills/Keyboard/skills_tabIcon_scribingLibrary_over.dds",
+            disabled = "EsoUI/Art/Skills/Keyboard/skills_tabIcon_scribingLibrary_disabled.dds",
+            enabled = function()
+                return SCRIBING_DATA_MANAGER:IsScribingUnlocked()
+            end,
+            alwaysShowTooltip = true,
+            CustomTooltipFunction = function(tooltip)
+                if SCRIBING_DATA_MANAGER:IsScribingUnlocked() then
+                    tooltip:AddLine(GetString(SI_SCRIBING_TITLE), "", ZO_NORMAL_TEXT:UnpackRGBA())
+                else
+                    tooltip:AddLine(GetString(SI_SCRIBING_LIBRARY_DESCRIPTION), "", ZO_NORMAL_TEXT:UnpackRGBA())
+                    tooltip:AddLine(ZO_Tooltip:GetRequiredScribingCollectibleText(), "", ZO_NORMAL_TEXT:UnpackRGBA())
+                end
+            end,
+        },
+    }
+
+    SCENE_MANAGER:AddSceneGroup("skillsSceneGroup", ZO_SceneGroup:New("skills", "scribingLibraryKeyboard"))
+    MAIN_MENU_KEYBOARD:AddSceneGroup(MENU_CATEGORY_SKILLS, "skillsSceneGroup", iconData)
+end
 
 --Champion
 
@@ -1422,3 +1472,13 @@ end
 ENDLESS_DUNGEON_BUFF_SELECTOR_SCENE_KEYBOARD:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW)
 ENDLESS_DUNGEON_BUFF_SELECTOR_SCENE_KEYBOARD:AddFragment(UNIFORM_BLUR_FRAGMENT)
 ENDLESS_DUNGEON_BUFF_SELECTOR_SCENE_KEYBOARD:AddFragment(MINIMIZE_CHAT_FRAGMENT)
+
+-----------------------
+--Scribing Scene
+-----------------------
+
+SCRIBING_SCENE_KEYBOARD:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW)
+SCRIBING_SCENE_KEYBOARD:AddFragment(CRAFTING_RESULTS_FRAGMENT)
+SCRIBING_SCENE_KEYBOARD:AddFragment(RIGHT_PANEL_BG_FRAGMENT)
+SCRIBING_SCENE_KEYBOARD:AddFragment(ZO_WindowSoundFragment:New(SOUNDS.SCRIBING_OPENED, SOUNDS.SCRIBING_CLOSED))
+SCRIBING_SCENE_KEYBOARD:AddFragment(PLAYER_PROGRESS_BAR_FRAGMENT)

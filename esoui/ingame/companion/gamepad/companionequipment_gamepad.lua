@@ -16,7 +16,7 @@ function ZO_CompanionEquipment_Gamepad:Initialize(control)
     COMPANION_EQUIPMENT_GAMEPAD_SCENE:AddFragment(COMPANION_EQUIPMENT_GAMEPAD_FRAGMENT)
 
     local ACTIVATE_ON_SHOW = true
-    ZO_Gamepad_ParametricList_BagsSearch_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE, ACTIVATE_ON_SHOW, COMPANION_EQUIPMENT_GAMEPAD_SCENE)
+    ZO_Gamepad_ParametricList_BagsSearch_Screen.Initialize(self, "companionEquipmentTextSearch", control, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE, ACTIVATE_ON_SHOW, COMPANION_EQUIPMENT_GAMEPAD_SCENE)
 
     local function OnCancelDestroyItemRequest()
         if self.listWaitingOnDestroyRequest then
@@ -47,8 +47,6 @@ function ZO_CompanionEquipment_Gamepad:Initialize(control)
     control:RegisterForEvent(EVENT_CANCEL_MOUSE_REQUEST_DESTROY_ITEM, OnCancelDestroyItemRequest)
     control:RegisterForEvent(EVENT_VISUAL_LAYER_CHANGED, RefreshVisualLayer)
     control:SetHandler("OnUpdate", OnUpdate)
-
-    self:SetTextSearchContext("companionEquipmentTextSearch")
 
     -- Initialize needed bags
     SHARED_INVENTORY:GetOrCreateBagCache(BAG_BACKPACK)
@@ -207,7 +205,7 @@ do
     end
 end
 
-function ZO_CompanionEquipment_Gamepad:OnUpdatedSearchResults()
+function ZO_CompanionEquipment_Gamepad:OnUpdateSearchResults()
     self:RefreshCategoryList()
     self:RefreshItemList()
 end
@@ -732,7 +730,7 @@ end
 
 function ZO_CompanionEquipment_Gamepad:GetItemDataFilterComparator(filteredEquipSlot, nonEquipableFilterType)
     return function(itemData)
-        if not self:IsSlotInSearchTextResults(itemData.bagId, itemData.slotIndex) then
+        if not self:IsDataInSearchTextResults(itemData.bagId, itemData.slotIndex) then
             return false
         end
 

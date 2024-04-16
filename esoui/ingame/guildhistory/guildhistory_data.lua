@@ -406,7 +406,10 @@ end
 
 function ZO_GuildHistoryEventCategoryData:GetEventsInTimeRange(newestTimeS, oldestTimeS)
     local newestIndex, oldestIndex = GetGuildHistoryEventIndicesForTimeRange(self.guildData:GetId(), self.eventCategory, newestTimeS, oldestTimeS)
-    return self:GetEventsInIndexRange(newestIndex, oldestIndex)
+    if newestIndex then
+        return self:GetEventsInIndexRange(newestIndex, oldestIndex)
+    end
+    return {}
 end
 
 function ZO_GuildHistoryEventCategoryData:GetEventsInIndexRange(newestIndex, oldestIndex)

@@ -747,6 +747,12 @@ function ZO_Achievements_Gamepad:AddAchievements(categoryIndex, subCategoryIndex
 
             local postSelectedPadding = IsAchievementALine(nextAchievementId) and 48 or 0
             self.itemList:AddEntry(template, entryData, nil, nil, nil, postSelectedPadding)
+
+            if self.achievementId and DoesAchievementLineContainAchievement(achievementId, self.achievementId) then
+                -- currentIndex is only in the current category.  self.itemList:GetNumItems() has all current items.
+                self.selectedAchievementIndices[self.selectedCategoryId] = self.itemList:GetNumItems()
+                self.achievementId = nil
+            end
         end
     end
 end
@@ -822,8 +828,9 @@ function ZO_Achievements_Gamepad:PerformUpdate()
         self:SetRecentAchievementsHidden(false)
         self.headerData.titleText = GetString(SI_JOURNAL_MENU_ACHIEVEMENTS)
     else
-        selectedIndex = self.selectedAchievementIndices[self.visibleCategoryId] or 1
         self:PopulateAchievements(self.visibleCategoryId)
+        -- Determine the selected index AFTER PopulateAchievements because Populate will mark any specific self.achievementId requested.
+        selectedIndex = self.selectedAchievementIndices[self.visibleCategoryId] or 1
         self:SetRecentAchievementsHidden(true)
         self.headerData.titleText = GetAchievementCategoryInfo(self.visibleCategoryId)
     end

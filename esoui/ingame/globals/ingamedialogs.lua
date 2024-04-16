@@ -705,97 +705,15 @@ ESO_Dialogs["DELETE_MAIL"] =
     {
         [1] =
         {
-            text =      SI_MAIL_DELETE,
-            callback =  function(dialog)
-                            dialog.data.callback(dialog.data.mailId)
-                        end
+            text = SI_MAIL_DELETE,
+            callback = function(dialog)
+                dialog.data.confirmationCallback(dialog.data.mailId)
+            end,
         },
-        
         [2] =
         {
-            text =      SI_DIALOG_CANCEL,
-        }
-    }
-}
-
-ESO_Dialogs["DELETE_MAIL_ATTACHMENTS"] = 
-{
-    title =
-    {
-        text = SI_PROMPT_TITLE_DELETE_MAIL_ATTACHMENTS,
-    },
-    mainText = 
-    {
-        text = SI_MAIL_CONFIRM_DELETE_ATTACHMENTS,
-    },
-    buttons =
-    {
-        [1] =
-        {
-            text =      SI_DIALOG_YES,
-            callback =  function(dialog)
-                            MAIL_INBOX:ConfirmDelete(dialog.data)
-                        end
+            text = SI_DIALOG_CANCEL,
         },
-        
-        [2] =
-        {
-            text =      SI_DIALOG_NO,
-        }
-    }
-}
-
-ESO_Dialogs["DELETE_MAIL_MONEY"] = 
-{
-    title =
-    {
-        text = SI_PROMPT_TITLE_DELETE_MAIL_MONEY,
-    },
-    mainText = 
-    {
-        text = SI_MAIL_CONFIRM_DELETE_MONEY,
-    },
-    buttons =
-    {
-        [1] =
-        {
-            text =      SI_DIALOG_YES,
-            callback =  function(dialog)
-                            MAIL_INBOX:ConfirmDelete(dialog.data)
-                        end
-        },
-        
-        [2] =
-        {
-            text =      SI_DIALOG_NO,
-        }
-    }
-}
-
-ESO_Dialogs["DELETE_MAIL_ATTACHMENTS_AND_MONEY"] = 
-{
-    title =
-    {
-        text = SI_PROMPT_TITLE_DELETE_MAIL_ATTACHMENTS,
-    },
-    mainText = 
-    {
-        text = SI_MAIL_CONFIRM_DELETE_ATTACHMENTS_AND_MONEY,
-    },
-    buttons =
-    {
-        [1] =
-        {
-            text =      SI_DIALOG_YES,
-            callback =  function(dialog)
-                            MAIL_INBOX:ConfirmDelete(dialog.data)
-                        end
-        },
-        
-        [2] =
-        {
-            text =      SI_DIALOG_NO,
-        }
     }
 }
 
@@ -839,6 +757,7 @@ ESO_Dialogs["MAIL_RETURN_ATTACHMENTS"] =
     {
         text = SI_MAIL_CONFIRM_RETURN_ATTACHMENTS,
     },
+    canQueue = true,
     buttons =
     {
         {
@@ -856,6 +775,49 @@ ESO_Dialogs["MAIL_RETURN_ATTACHMENTS"] =
             dialog.data.finishedCallback()
         end
     end,
+}
+
+ESO_Dialogs["MAIL_CONFIRM_TAKE_ALL"] =
+{
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    title =
+    {
+        text = function(dialog)
+            local category = dialog.data.category
+            return zo_strformat(SI_MAIL_CONFIRM_TAKE_ALL_TITLE, GetString("SI_MAILCATEGORY", category))
+        end,
+    },
+    mainText =
+    {
+        text = function(dialog)
+            local category = dialog.data.category
+            local shouldDeleteOnClaim = MAIL_MANAGER:ShouldDeleteOnClaim()
+            local descriptionText = GetString("SI_MAILCATEGORY_CONFIRMTAKEALLPROMPT", category)
+
+            if category == MAIL_CATEGORY_SYSTEM_MAIL and shouldDeleteOnClaim then
+               return ZO_GenerateParagraphSeparatedList({ descriptionText, GetString(SI_MAIL_CONFIRM_TAKE_ALL_DELETE_AFTER_CLAIM_ENABLED) })
+            else
+                return descriptionText
+            end
+        end,
+    },
+    buttons =
+    {
+        {
+            text = function(dialog)
+                return GetString("SI_MAILCATEGORY_TAKEALL", dialog.data.category)
+            end,
+            callback = function(dialog)
+                TakeAllMailAttachmentsInCategory(dialog.data.category, MAIL_MANAGER:ShouldDeleteOnClaim())
+            end
+        },
+        {
+            text = SI_DIALOG_CANCEL,
+        },
+    },
 }
 
 ESO_Dialogs["TOO_FREQUENT_BUG_SCREENSHOT"] = 
@@ -2134,20 +2096,20 @@ ESO_Dialogs["CONFIRM_INTERACTION"] =
     },
 
     noChoiceCallback = function(dialog)
-                            SetPendingInteractionConfirmed(false)
+                            ReplyToPendingInteraction(false)
                         end,
     buttons =
     {
         {
             text = SI_CONFIRM_MUNDUS_STONE_ACCEPT,
             callback =  function(dialog)
-                            SetPendingInteractionConfirmed(true)
+                            ReplyToPendingInteraction(true)
                         end
         },
         {
             text = SI_CONFIRM_MUNDUS_STONE_DECLINE,
             callback =  function(dialog)
-                            SetPendingInteractionConfirmed(false)
+                            ReplyToPendingInteraction(false)
                         end
         }  
     },
@@ -3027,10 +2989,13 @@ ESO_Dialogs["COLLECTIBLE_REQUIREMENT_FAILED"] =
     mainText =
     {
         text = function(dialog)
-            if dialog.data.collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_CHAPTER) then
+            local collectibleData = dialog.data.collectibleData
+            if collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_CHAPTER) then
                 return SI_COLLECTIBLE_LOCKED_FAILURE_CHAPTER_DIALOG_BODY
-            else
+            elseif collectibleData:IsUnlockedViaSubscription() then
                 return SI_COLLECTIBLE_LOCKED_FAILURE_DLC_DIALOG_BODY
+            else
+                return SI_COLLECTIBLE_LOCKED_FAILURE_NON_ESO_PLUS_DIALOG_BODY
             end
         end,
     },
@@ -3046,10 +3011,11 @@ ESO_Dialogs["COLLECTIBLE_REQUIREMENT_FAILED"] =
             end,
             callback = function(dialog)
                 local openSource = dialog.data.marketOpenOperation or MARKET_OPEN_OPERATION_COLLECTIBLE_FAILURE
-                if dialog.data.collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_CHAPTER) then
+                local collectibleData = dialog.data.collectibleData
+                if collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_CHAPTER) then
                     ZO_ShowChapterUpgradePlatformScreen(openSource)
                 else
-                    local searchTerm = zo_strformat(SI_CROWN_STORE_SEARCH_FORMAT_STRING, dialog.data.collectibleData:GetName())
+                    local searchTerm = zo_strformat(SI_CROWN_STORE_SEARCH_FORMAT_STRING, collectibleData:GetName())
                     ShowMarketAndSearch(searchTerm, openSource)
                 end
             end,
@@ -3059,6 +3025,17 @@ ESO_Dialogs["COLLECTIBLE_REQUIREMENT_FAILED"] =
         },
     },
 }
+
+function ZO_Dialogs_ShowCollectibleRequirementFailedPlatformDialog(collectibleData, message, marketOpenOperation)
+    local relevantCollectibleData = collectibleData
+    local purchasableCollectibleId = collectibleData:GetPurchasableCollectibleId()
+    if purchasableCollectibleId ~= 0 and purchasableCollectibleId ~= collectibleData:GetId() then
+        relevantCollectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(purchasableCollectibleId)
+    end
+    local collectibleName = relevantCollectibleData:GetName()
+    local categoryName = relevantCollectibleData:GetCategoryData():GetName()
+    ZO_Dialogs_ShowPlatformDialog("COLLECTIBLE_REQUIREMENT_FAILED", { collectibleData = relevantCollectibleData, marketOpenOperation = marketOpenOperation }, { mainTextParams = { message, collectibleName, categoryName } })
+end
 
 ESO_Dialogs["CONFIRM_RESET_TUTORIALS"] = 
 {

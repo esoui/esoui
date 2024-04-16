@@ -115,7 +115,7 @@ function ZO_BattlegroundTeamSection:UpdateScore()
                 (currentScorePercent > nearingVictoryPercent or zo_floatsAreEqual(currentScorePercent, nearingVictoryPercent)) then
                 local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_MAJOR_TEXT, SOUNDS.BATTLEGROUND_NEARING_VICTORY)
                 local text
-                if self.battlegroundAlliance == GetUnitBattlegroundAlliance("player") then
+                if self.battlegroundAlliance == GetUnitBattlegroundTeam("player") then
                     text = zo_strformat(SI_BATTLEGROUND_NEARING_VICTORY_OWN_TEAM, GetColoredBattlegroundYourTeamText(self.battlegroundAlliance))
                 else
                     text = zo_strformat(SI_BATTLEGROUND_NEARING_VICTORY_OTHER_TEAM, GetColoredBattlegroundAllianceName(self.battlegroundAlliance))
@@ -181,9 +181,9 @@ function ZO_BattlegroundScoreHud:CreateTeamSections()
     end
 
     self.teamSections = {}
-    for bgAlliance = BATTLEGROUND_ALLIANCE_ITERATION_BEGIN, BATTLEGROUND_ALLIANCE_ITERATION_END do
-        local control = CreateControlFromVirtual("$(parent)Section", self.teamsControl, "ZO_BattlegroundTeamSection", bgAlliance)
-        table.insert(self.teamSections, ZO_BattlegroundTeamSection:New(control, bgAlliance))
+    for bgTeam = BATTLEGROUND_TEAM_ITERATION_BEGIN, BATTLEGROUND_TEAM_ITERATION_END do
+        local control = CreateControlFromVirtual("$(parent)Section", self.teamsControl, "ZO_BattlegroundTeamSection", bgTeam)
+        table.insert(self.teamSections, ZO_BattlegroundTeamSection:New(control, bgTeam))
     end
     local DONT_ANIMATE = false
     self:SortTeamSections(DONT_ANIMATE)
@@ -201,7 +201,7 @@ function ZO_BattlegroundScoreHud:SortTeamSections(animate)
 end
 
 function ZO_BattlegroundScoreHud:RefreshPlayerTeamIndicator()
-    local playerBattlegroundAlliance = GetUnitBattlegroundAlliance("player")
+    local playerBattlegroundAlliance = GetUnitBattlegroundTeam("player")
     for _, section in ipairs(self.teamSections) do
         if section:GetBattlegroundAlliance() == playerBattlegroundAlliance then
             local sectionControl = section:GetControl()

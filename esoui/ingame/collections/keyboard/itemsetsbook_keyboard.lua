@@ -10,6 +10,8 @@ function ZO_ItemSetsBook_Keyboard:New(...)
 end
 
 function ZO_ItemSetsBook_Keyboard:Initialize(control)
+    self.searchEditBox = control:GetNamedChild("FiltersSearchBox")
+
     ZO_ItemSetsBook_Shared.Initialize(self, control)
 
     self.collapsedSetIds = {}
@@ -463,7 +465,7 @@ function ZO_ItemSetsBook_Keyboard:RefreshCategories()
     end
 
     local selectedCategory = self:GetSelectedCategory()
-    if #categoryList == 0 and not ITEM_SET_COLLECTIONS_DATA_MANAGER:HasSearchFilter() then
+    if #categoryList == 0 and not self:HasSearchFilter() then
         -- Add all categories, regardless of current filters, if no categories are visible and a search is not in progress.
         categoryFilters = nil
         for _, topLevelCategoryData in ITEM_SET_COLLECTIONS_DATA_MANAGER:TopLevelItemSetCollectionCategoryIterator() do
@@ -564,10 +566,6 @@ end
 
 --[[Global functions]]--
 ------------------------
-
-function ZO_ItemSetsBook_Keyboard_OnSearchTextChanged(editBox)
-    ITEM_SET_COLLECTIONS_DATA_MANAGER:SetSearchString(editBox:GetText())
-end
 
 function ZO_ItemSetsBook_Keyboard_OnInitialize(control)
     ITEM_SET_COLLECTIONS_BOOK_KEYBOARD = ZO_ItemSetsBook_Keyboard:New(control)

@@ -88,7 +88,7 @@
             <Controls>
                 <Button name="$(parent)Slot" inherits="ZO_Skills_AbilitySlot">
                     <Anchor point="LEFT" offsetX="117" />
-                    
+
                     <MouseButton button="RIGHT" enabled="true" />
 
                     <OnDragStart>
@@ -111,10 +111,15 @@
                             <Dimensions x="32" y="32"/>
                             <Anchor point="CENTER" relativeTo="$(parent)Icon" />
                         </Texture>
-                        
+
                         <Texture name="$(parent)SelectedSkillBuildIconAnim" inherits="ZO_ActionButton_FlipCardControl" blendMode="COLOR_DODGE" textureFile="EsoUI/Art/SkillsAdvisor/animation_square_4096x128.dds" hidden="true" layer="CONTROLS" level="3" >
                             <Dimensions x="56" y="56"/>
                             <Anchor point="CENTER" relativeTo="$(parent)Icon" />
+                        </Texture>
+
+                        <Texture name="$(parent)StatusIcon" tier="HIGH" inherits="ZO_MultiIcon">
+                            <Dimensions x="32" y="32" />
+                            <Anchor point="TOP" relativePoint="BOTTOM" offsetY="-16" />
                         </Texture>
                     </Controls>
                 </Button>
@@ -122,7 +127,7 @@
                 <Button name="$(parent)Increase" hidden="true">
                     <Dimensions x="64" y="64"/>
                     <Anchor point="RIGHT" relativeTo="$(parent)Slot" relativePoint="LEFT" />
-                    
+
                     <OnClicked>
                         ZO_Skills_AbilityIncrease_OnClicked(self, shift)
                     </OnClicked>
@@ -139,7 +144,7 @@
                 <Button name="$(parent)Decrease" hidden="true">
                     <Dimensions x="64" y="64"/>
                     <Anchor point="RIGHT" relativeTo="$(parent)Increase" relativePoint="LEFT" />
-                    
+
                     <OnClicked>
                         ZO_Skills_AbilityDecrease_OnClicked(self, shift)
                     </OnClicked>
@@ -151,7 +156,7 @@
                     <OnMouseExit>
                         ZO_Skills_AbilityDecrease_OnMouseExit(self)
                     </OnMouseExit>
-                    
+
                     <Textures
                         normal="EsoUI/Art/Progression/removePoints_up.dds"
                         pressed="EsoUI/Art/Progression/removePoints_down.dds"
@@ -159,7 +164,73 @@
                         disabled="EsoUI/Art/Progression/removePoints_disabled.dds"
                     />
                 </Button>
-                
+
+                <Control name="$(parent)SkillStyle" hidden="true">
+                    <Dimensions x="40" y="40"/>
+                    <Anchor point="RIGHT" relativeTo="$(parent)Increase" relativePoint="LEFT" />
+
+                    <Controls>
+                        <Button name="$(parent)DefaultStyle" excludeFromResizeToFitExtents="true" hidden="true">
+                            <AnchorFill/>
+
+                            <OnClicked>
+                                ZO_Skills_SkillStyle_OnClicked(self:GetParent())
+                            </OnClicked>
+
+                            <OnMouseEnter>
+                                ZO_Skills_SkillStyle_OnMouseEnter(self:GetParent())
+                            </OnMouseEnter>
+
+                            <OnMouseExit>
+                                ZO_Skills_SkillStyle_OnMouseExit(self:GetParent())
+                            </OnMouseExit>
+
+                            <Textures
+                                normal="EsoUI/Art/Progression/skillStyling_default_up.dds"
+                                pressed="EsoUI/Art/Progression/skillStyling_default_down.dds"
+                                mouseOver="EsoUI/Art/Progression/skillStyling_default_over.dds"
+                                disabled="EsoUI/Art/Progression/skillStyling_default_disabled.dds"
+                            />
+                        </Button>
+
+                        <Control name="$(parent)SelectedStyle">
+                            <AnchorFill/>
+                            <Controls>
+                                <Button name="$(parent)Frame" inherits="ZO_CheckButton" tier="MEDIUM">
+                                    <AnchorFill/>
+
+                                    <OnClicked>
+                                        ZO_Skills_SkillStyle_OnClicked(self:GetParent():GetParent())
+                                    </OnClicked>
+
+                                    <OnMouseEnter>
+                                        ZO_SkillStyle_SelectorIcon_Keyboard_OnMouseEnter(self:GetParent():GetParent())
+                                    </OnMouseEnter>
+                                    <OnMouseExit>
+                                        ZO_SkillStyle_SelectorIcon_Keyboard_OnMouseExit(self:GetParent():GetParent())
+                                    </OnMouseExit>
+                                    <Textures
+                                        normal="EsoUI/Art/Progression/styleFrame64_up.dds"
+                                        pressed="EsoUI/Art/Progression/styleFrame64_down.dds"
+                                        mouseOver="EsoUI/Art/Progression/styleFrame64_over.dds"
+                                        pressedMouseOver="EsoUI/Art/Progression/styleFrame64_over.dds"
+                                        disabled="EsoUI/Art/Progression/styleFrame64_disabled.dds"
+                                    />
+                                </Button>
+
+                                <Texture name="$(parent)Icon" tier="LOW">
+                                    <AnchorFill/>
+                                </Texture>
+                            </Controls>
+                        </Control>
+
+                        <Texture name="$(parent)StatusIcon" inherits="ZO_MultiIcon" tier="HIGH">
+                            <Dimensions x="32" y="32" />
+                            <Anchor point="TOP" relativePoint="BOTTOM" offsetY="-16" />
+                        </Texture>
+                    </Controls>
+                </Control>
+
                 <Texture name="$(parent)SelectedSkillBuildIncreaseAnim" inherits="ZO_ActionButton_FlipCardControl" textureFile="EsoUI/Art/SkillsAdvisor/animation_add_4096x128.dds" hidden="true" layer="CONTROLS" level="3" >
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Increase" />
                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Increase" />

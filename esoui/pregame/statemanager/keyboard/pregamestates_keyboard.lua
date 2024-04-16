@@ -75,7 +75,7 @@ local pregameStates =
             ZO_PREGAME_CHARACTER_COUNT = 0
 
             Pregame_ShowScene("gameMenuPregame")
-
+            StartPregameMusic()
             if IsErrorQueuedFromIngame() then
                 ZO_Pregame_DisplayServerDisconnectedError()
             end

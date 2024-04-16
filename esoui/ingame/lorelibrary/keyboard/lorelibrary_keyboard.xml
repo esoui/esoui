@@ -1,6 +1,7 @@
 <GuiXml>
     <Controls>
-        <Label name="ZO_LoreLibraryNavigationEntry" virtual="true" font="ZoFontHeader" inherits="ZO_SelectableLabel">
+        <Label name="ZO_LoreLibraryNavigationEntry" virtual="true" font="ZoFontHeader" inherits="ZO_SelectableLabel ZO_TooltipIfTruncatedLabel" maxLineCount="1" wrapMode="ELLIPSIS" >
+            <Dimensions x="340" />
             <OnMouseUp>
                 ZO_TreeEntry_OnMouseUp(self, upInside)
             </OnMouseUp>
@@ -49,7 +50,28 @@
                 </Label>
             </Controls>
         </Control>
-        
+
+        <Control name="ZO_LoreLibrary_HirelingMessageHeader" mouseEnabled="true" virtual="true">
+            <Dimensions x="450" y="60"/>
+
+            <OnInitialized>
+                self.text = self:GetNamedChild("Text")
+                self.icon = self:GetNamedChild("Icon")
+            </OnInitialized>
+
+            <Controls>
+                <Texture name="$(parent)Icon" level="2" hidden="true">
+                    <Dimensions x="40" y="40" />
+                    <Anchor point="CENTER" relativePoint="LEFT" offsetX="47" />
+                </Texture>
+
+                <Label name="$(parent)Text" inherits="ZO_TooltipIfTruncatedLabel" font="ZoFontGameShadow" maxLineCount="1" wrapMode="ELLIPSIS">
+                    <Dimensions x="400" />
+                    <Anchor point="LEFT" offsetX="25" />
+                </Label>
+            </Controls>
+        </Control>
+
         <TopLevelControl name="ZO_LoreLibrary" inherits="ZO_RightPanelFootPrint" hidden="true">
             <OnInitialized>
                 ZO_LoreLibrary_OnInitialize(self)

@@ -16,6 +16,8 @@ ATTRIBUTE_BAR_STATE_NORMAL = 1
 ATTRIBUTE_BAR_STATE_EXPANDED = 2
 ATTRIBUTE_BAR_STATE_SHRUNK = 3
 
+local NEXT_UNIT_ATTRIBUTE_VISUALIZER_NAMESPACE_INDEX = 0
+
 ZO_UnitAttributeVisualizer = ZO_CallbackObject:Subclass()
 
 function ZO_UnitAttributeVisualizer:New(...)
@@ -48,7 +50,9 @@ function ZO_UnitAttributeVisualizer:Initialize(unitTag, soundTable, healthBarCon
         end
     end
 
-    local eventNamespace = "ZO_UnitAttributeVisualizer" .. unitTag
+    local eventNamespace = "ZO_UnitAttributeVisualizer" .. unitTag .. NEXT_UNIT_ATTRIBUTE_VISUALIZER_NAMESPACE_INDEX
+    NEXT_UNIT_ATTRIBUTE_VISUALIZER_NAMESPACE_INDEX = NEXT_UNIT_ATTRIBUTE_VISUALIZER_NAMESPACE_INDEX + 1
+
     EVENT_MANAGER:RegisterForEvent(eventNamespace, EVENT_UNIT_ATTRIBUTE_VISUAL_ADDED, function(eventCode, ...) self:OnUnitAttributeVisualAdded(...) end)
     EVENT_MANAGER:AddFilterForEvent(eventNamespace, EVENT_UNIT_ATTRIBUTE_VISUAL_ADDED, REGISTER_FILTER_UNIT_TAG, self.unitTag)
     EVENT_MANAGER:RegisterForEvent(eventNamespace, EVENT_UNIT_ATTRIBUTE_VISUAL_UPDATED, function(eventCode, ...) self:OnUnitAttributeVisualUpdated(...) end)
@@ -154,5 +158,11 @@ end
 function ZO_UnitAttributeVisualizer:ApplyPlatformStyle()
     for _, module in pairs(self.visualModules) do
         module:ApplyPlatformStyle()
+    end
+end
+
+function ZO_UnitAttributeVisualizer:DoAlphaUpdate(isNearby)
+    for _, module in pairs(self.visualModules) do
+        module:DoAlphaUpdate(isNearby)
     end
 end

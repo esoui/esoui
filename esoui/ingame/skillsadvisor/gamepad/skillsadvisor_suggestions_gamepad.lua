@@ -54,6 +54,8 @@ function SkillsAdvisorSuggestions_Gamepad:Activate()
     self.keybindStripId = KEYBIND_STRIP:PushKeybindGroupState()
     KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor, self.keybindStripId)
     KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripRightDescriptor, self.keybindStripId)
+
+    TriggerTutorial(TUTORIAL_TRIGGER_SKILL_BUILD_SELECTION_GAMEPAD)
 end
 
 function SkillsAdvisorSuggestions_Gamepad:Deactivate()
@@ -79,7 +81,11 @@ function SkillsAdvisorSuggestions_Gamepad:InitializeKeybinds()
             name = GetString(SI_GAMEPAD_SELECT_OPTION),
             keybind = "UI_SHORTCUT_PRIMARY",
             callback =  function()
-                ZO_SKILLS_ADVISOR_SINGLETON:OnRequestSelectSkillLine()
+                local selectedData = self:GetSelectedData()
+                if selectedData and selectedData.skillProgressionData then
+                    local RETURN_TO_SKILLS_ADVISOR = true
+                    GAMEPAD_SKILLS:SelectSkillLineBySkillData(selectedData.skillProgressionData:GetSkillData(), RETURN_TO_SKILLS_ADVISOR)
+                end
             end
         },
         {

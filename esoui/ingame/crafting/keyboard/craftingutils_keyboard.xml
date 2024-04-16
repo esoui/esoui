@@ -52,6 +52,12 @@
             <TextureCoords left="0" top="0" right="0.76171875" bottom=".625" />
         </Texture>
 
+        <Texture name="ZO_CraftingContainerTallBackground" textureFile="EsoUI/Art/Crafting/crafting_tall_slottingBG.dds" virtual="true">
+            <Dimensions x="256" y="864" />
+            <Anchor point="TOPLEFT" offsetX="-8" offsetY="-90" />
+            <TextureCoords left="0" top="0" right="1" bottom="0.84375" />
+        </Texture>
+
         <Control name="ZO_CraftingModeButton" inherits="ZO_MenuBarTooltipButton" virtual="true">
             <OnInitialized name="ZO_CraftingModeButton">
                 self.questPin = self:GetNamedChild("QuestPin")

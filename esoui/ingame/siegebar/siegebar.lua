@@ -8,17 +8,25 @@ function ZO_SiegeHUDFragment:New()
     return fragment
 end
 
-function ZO_SiegeHUDFragment:Show()
-    TUTORIAL_SYSTEM:SuppressTutorialType(TUTORIAL_TYPE_HUD_INFO_BOX, false, TUTORIAL_SUPPRESSED_BY_SCENE)
-    SHARED_INFORMATION_AREA:SetSupressed(false, "HUDFragment")
+function ZO_SiegeHUDFragment:UpdateVisibility()
+    if self:GetState() == SCENE_FRAGMENT_HIDDEN then
+        return
+    end
 
+    local fragmentHidden = not self:IsShowing()
+
+    TUTORIAL_SYSTEM:SuppressTutorialType(TUTORIAL_TYPE_HUD_INFO_BOX, fragmentHidden, TUTORIAL_SUPPRESSED_BY_SCENE)
+    SetFloatingMarkerGlobalAlpha(fragmentHidden and 0 or 1)
+    SHARED_INFORMATION_AREA:SetSupressed(fragmentHidden, "HUDFragment")
+end
+
+function ZO_SiegeHUDFragment:Show()
+    self:UpdateVisibility()
     self:OnShown()
 end
 
 function ZO_SiegeHUDFragment:Hide()
-    TUTORIAL_SYSTEM:SuppressTutorialType(TUTORIAL_TYPE_HUD_INFO_BOX, true, TUTORIAL_SUPPRESSED_BY_SCENE)
-    SHARED_INFORMATION_AREA:SetSupressed(true, "HUDFragment")
-
+    self:UpdateVisibility()
     self:OnHidden()
 end
 

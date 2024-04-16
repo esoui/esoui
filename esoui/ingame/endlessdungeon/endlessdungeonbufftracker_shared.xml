@@ -19,10 +19,6 @@
                 <Label name="$(parent)Header" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER" modifyTextType="UPPERCASE">
                     <Anchor point="TOP" />
                     <Dimensions x="100%" />
-
-                    <OnRectHeightChanged>
-                        self:GetOwningWindow().object:ResizeGridListToFitHeaderLabelControl(self)
-                    </OnRectHeightChanged>
                 </Label>
             </Controls>
         </Control>
@@ -34,7 +30,7 @@
                     <Anchor point="BOTTOMRIGHT" offsetX="20" offsetY="20" />
                 </Backdrop>
 
-                <Label name="$(parent)Title" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" text="SI_ENDLESS_DUNGEON_BUFF_TRACKER_TITLE">
+                <Label name="$(parent)Title" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE">
                     <Anchor point="TOP" offsetY="15" />
                 </Label>
 
@@ -43,10 +39,10 @@
                 </Label>
 
                 <Label name="$(parent)Empty" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_ENDLESS_DUNGEON_BUFF_TRACKER_EMPTY">
-                    <Anchor point="TOP" relativeTo="$(parent)Progress" relativePoint="BOTTOM" offsetY="15" />
+                    <Anchor point="TOP" relativeTo="$(parent)Progress" relativePoint="BOTTOM" offsetY="ZO_ENDLESS_DUNGEON_BUFF_TRACKER_GRID_LIST_OFFSET_Y" />
                 </Label>
 
-                <Control name="$(parent)KeybindContainer" excludeFromResizeToFitExtents="true" resizeToFitDescendents="true">
+                <Control name="$(parent)KeybindContainer" resizeToFitDescendents="true">
                     <Controls>
                         <Control name="$(parent)SwitchToSummary" inherits="ZO_KeybindButton" hidden="true">
                             <Anchor point="TOPLEFT" />

@@ -22,6 +22,7 @@ ZO_KEYBOARD_NOTIFICATION_ICONS =
     [NOTIFICATION_TYPE_GROUP_ELECTION] = "EsoUI/Art/Notifications/notificationIcon_autoTransfer.dds",
     [NOTIFICATION_TYPE_DUEL] = "EsoUI/Art/Notifications/notificationIcon_duel.dds",
     [NOTIFICATION_TYPE_ESO_PLUS_SUBSCRIPTION] = "EsoUI/Art/Notifications/notificationIcon_ESO+.dds",
+    [NOTIFICATION_TYPE_CRAFTED_ABILITY_RESET] = function(data) return data.icon end,
     [NOTIFICATION_TYPE_GIFT_RECEIVED] = "EsoUI/Art/Notifications/notificationIcon_gift.dds",
     [NOTIFICATION_TYPE_GIFT_CLAIMED] = "EsoUI/Art/Notifications/notificationIcon_gift.dds",
     [NOTIFICATION_TYPE_GIFT_RETURNED] = "EsoUI/Art/Notifications/notificationIcon_gift.dds",
@@ -342,6 +343,7 @@ function ZO_KeyboardNotificationManager:InitializeNotificationList(control)
         ZO_TradeInviteProvider:New(self),
         ZO_QuestShareProvider:New(self),
         ZO_KeyboardPointsResetProvider:New(self),
+        ZO_CraftedAbilityResetProvider:New(self),
         ZO_PledgeOfMaraProvider:New(self),
         ZO_KeyboardAgentChatRequestProvider:New(self),
         ZO_KeyboardLeaderboardScoreProvider:New(self),
@@ -554,7 +556,11 @@ function ZO_KeyboardNotificationManager:SetupBaseRow(control, data)
 
     control.data = data
 
-    control:GetNamedChild("Icon"):SetTexture(ZO_KEYBOARD_NOTIFICATION_ICONS[notificationType])
+    local icon = ZO_KEYBOARD_NOTIFICATION_ICONS[notificationType]
+    if type(icon) == "function" then
+        icon = icon(data)
+    end
+    control:GetNamedChild("Icon"):SetTexture(icon)
     control:GetNamedChild("Type"):SetText(zo_strformat(SI_NOTIFICATIONS_TYPE_FORMATTER, GetString("SI_NOTIFICATIONTYPE", notificationType)))
 end
 

@@ -72,11 +72,17 @@ function ZO_SortFilterList:SetAlternateRowBackgrounds(alternate)
     self.alternateRowBackgrounds = alternate
 end
 
+--This class uses :SetEmptyText(), not :SetNoItemText()
 function ZO_SortFilterList:SetEmptyText(emptyText)
     if not self.emptyRow then
         self.emptyRow = CreateControlFromVirtual("$(parent)EmptyRow", self.list, "ZO_SortFilterListEmptyRow_Keyboard")
     end
     self.emptyRow:GetNamedChild("Message"):SetText(emptyText)
+end
+
+--This class uses :GetEmptyText(), not :GetNoItemText()
+function ZO_SortFilterList:GetEmptyText(emptyText)
+    return self.emptyText
 end
 
 function ZO_SortFilterList:SetAutomaticallyColorRows(autoColorRows)
@@ -320,6 +326,7 @@ function ZO_SortFilterList:GetSelectedData()
     return ZO_ScrollList_GetSelectedData(self.list)
 end
 
+--This class uses :HasEntries(), not :IsEmpty()
 function ZO_SortFilterList:HasEntries()
     local dataList = ZO_ScrollList_GetDataList(self.list)
     return #dataList > 0

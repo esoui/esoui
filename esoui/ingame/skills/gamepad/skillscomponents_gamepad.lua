@@ -10,8 +10,23 @@ do
         [ZO_SKILL_POINT_ACTION.REMORPH] = "EsoUI/Art/Progression/Gamepad/gp_remorph.dds",
     }
 
+    local POINT_ACTION_NARRATIONS =
+    {
+        [ZO_SKILL_POINT_ACTION.PURCHASE] = GetString(SI_GAMEPAD_SKILLS_PURCHASE),
+        [ZO_SKILL_POINT_ACTION.SELL] = GetString(SI_GAMEPAD_SKILLS_SELL_NARRATION),
+        [ZO_SKILL_POINT_ACTION.INCREASE_RANK] = GetString(SI_GAMEPAD_SKILLS_PURCHASE),
+        [ZO_SKILL_POINT_ACTION.DECREASE_RANK] = GetString(SI_GAMEPAD_SKILLS_SELL_NARRATION),
+        [ZO_SKILL_POINT_ACTION.MORPH] = GetString(SI_GAMEPAD_SKILLS_MORPH),
+        [ZO_SKILL_POINT_ACTION.UNMORPH] = GetString(SI_GAMEPAD_SKILLS_SELL_NARRATION),
+        [ZO_SKILL_POINT_ACTION.REMORPH] = GetString(SI_GAMEPAD_SKILLS_MORPH),
+    }
+
     function ZO_Skills_GetGamepadSkillPointActionIcon(skillPointAction)
         return POINT_ACTION_TEXTURES[skillPointAction]
+    end
+
+    function ZO_Skills_GetGamepadSkillPointActionIconNarrationText(skillPointAction)
+        return POINT_ACTION_NARRATIONS[skillPointAction]
     end
 end
 
@@ -153,6 +168,11 @@ do
             return indicatorRightWidth
         end
         local skillPointAllocator = skillData:GetPointAllocator()
+        local skillProgressionData = skillPointAllocator:GetProgressionData()
+        local isActive = skillData:IsActive()
+        local isNonCraftedActive = isActive and not skillData:IsCraftedAbility()
+        local isMorph = isNonCraftedActive and skillProgressionData.IsMorph and skillProgressionData:IsMorph()
+        local showSkillStyle = not showDecrease and isActive and skillProgressionData.GetNumSkillStyles and skillProgressionData:GetNumSkillStyles() ~= 0
 
         local increaseMultiIcon
         local decreaseMultiIcon
@@ -194,6 +214,13 @@ do
 
             --Always carve out space for the decrease icon even if it isn't active so the name doesn't dance around as it appears and disappears
             indicatorRightWidth = 40
+        elseif showSkillStyle then
+            local collectibleData = skillProgressionData:GetSelectedSkillStyleCollectibleData()
+            if collectibleData then
+                increaseMultiIcon:AddIcon(collectibleData:GetIcon())
+            else
+                increaseMultiIcon:AddIcon("EsoUI/Art/Progression/Gamepad/gp_skillStyleEmpty.dds")
+            end
         end
 
         --New Indicator
@@ -215,11 +242,13 @@ do
 
     function ZO_GamepadSkillEntryTemplate_Setup(control, skillEntry, selected, activated, displayView)
         --Some skill entries want to target a specific progression data (such as the morph dialog showing two specific morphs). Otherwise they use the skill progression that matches the current point spending.
-        local skillData = skillEntry.skillData or skillEntry.skillProgressionData:GetSkillData()
+        local skillData = skillEntry.skillData or skillEntry.skillProgressionData and skillEntry.skillProgressionData:GetSkillData() or skillEntry.craftedAbilityData and skillEntry.craftedAbilityData:GetSkillData()
         local skillProgressionData = skillEntry.skillProgressionData or skillData:GetPointAllocatorProgressionData()
         local skillPointAllocator = skillData:GetPointAllocator()
         local isUnlocked = skillProgressionData:IsUnlocked()
-        local isMorph = skillData:IsActive() and skillProgressionData:IsMorph()
+        local isActive = skillData:IsActive()
+        local isNonCraftedActive = isActive and not skillData:IsCraftedAbility()
+        local isMorph = isNonCraftedActive and skillProgressionData:IsMorph()
         local isPurchased = skillPointAllocator:IsPurchased()
         local isInSkillBuild = skillProgressionData:IsAdvised()
 
@@ -233,7 +262,7 @@ do
             end
         end
 
-        SetupAbilityIconFrame(control, skillData:IsPassive(), skillData:IsActive(), isInSkillBuild)
+        SetupAbilityIconFrame(control, skillData:IsPassive(), isActive, isInSkillBuild)
 
         --Label Color
         if displayView == ZO_SKILL_ABILITY_DISPLAY_INTERACTIVE then
@@ -242,7 +271,7 @@ do
             end
         else
             control.label:SetColor(PURCHASED_COLOR:UnpackRGBA())
-        end    
+        end
 
         --Lock Icon
         if control.lock then
@@ -250,7 +279,7 @@ do
         end
 
         local labelWidth = SKILL_ENTRY_LABEL_WIDTH
-        
+
         local showIncrease = (displayView == ZO_SKILL_ABILITY_DISPLAY_INTERACTIVE)
         local showDecrease = SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeAllowDecrease()
         local showNew = (displayView == ZO_SKILL_ABILITY_DISPLAY_INTERACTIVE)
@@ -296,7 +325,7 @@ do
             end
         else
             control.label:SetColor(PURCHASED_COLOR:UnpackRGBA())
-        end    
+        end
 
         --Lock Icon
         if control.lock then
@@ -350,7 +379,9 @@ do
         local skillPointAllocator = skillData:GetPointAllocator()
         local isUnlocked = skillProgressionData:IsUnlocked()
         local isPurchased = overrideHotbar ~= nil or skillPointAllocator:IsPurchased()
-        local isMorph = skillData:IsPlayerSkill() and skillData:IsActive() and skillProgressionData:IsMorph()
+        local isActive = skillData:IsActive()
+        local isNonCraftedActive = isActive and not skillData:IsCraftedAbility()
+        local isMorph = skillData:IsPlayerSkill() and isNonCraftedActive and skillProgressionData:IsMorph()
 
         --Icon
         local iconTexture = control.icon
@@ -361,7 +392,7 @@ do
             iconTexture:SetColor(ZO_DEFAULT_DISABLED_COLOR:UnpackRGBA())
         end
 
-        SetupAbilityIconFrame(control, skillData:IsPassive(), skillData:IsActive(), skillProgressionData:IsAdvised())
+        SetupAbilityIconFrame(control, skillData:IsPassive(), isActive, skillProgressionData:IsAdvised())
 
         --Label
         control.label:SetText(skillProgressionData:GetDetailedGamepadName())

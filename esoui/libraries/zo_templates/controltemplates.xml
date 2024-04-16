@@ -44,6 +44,16 @@
             </OnMouseDown>
         </Control>
 
+        <Control name="ZO_PropagateMouseDragBehavior" mouseEnabled="true" virtual="true">
+            <OnDragStart name="ZO_PropagateMouseDragBehavior">
+                ZO_PropagateHandlerToParent("OnDragStart", ...)
+            </OnDragStart>
+
+            <OnReceiveDrag name="ZO_PropagateMouseDragBehavior">
+                ZO_PropagateHandlerToParent("OnReceiveDrag", ...)
+            </OnReceiveDrag>
+        </Control>
+
         <Control name="ZO_MouseTooltipBehavior" mouseEnabled="true" virtual="true">
             <OnInitialized name="ZO_MouseTooltipBehavior">
                 ZO_MouseTooltipBehavior_OnInitialized(self)

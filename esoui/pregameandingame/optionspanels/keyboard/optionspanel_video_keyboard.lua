@@ -83,6 +83,19 @@ panelBuilder:AddSetting({
 })
 
 panelBuilder:AddSetting({
+    controlName = "Options_Video_HDR_ENABLED",
+    settingType = SETTING_TYPE_GRAPHICS,
+    settingId = GRAPHICS_SETTING_HDR_ENABLED,
+    header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_DISPLAY,
+    initializeControlFunction = function(control)
+        ZO_OptionsWindow_InitializeControl(control)
+        EVENT_MANAGER:RegisterForEvent("ZO_OptionsPanel_Video", EVENT_ACTIVE_MONITOR_CHANGED, function()
+            ZO_OptionsPanel_Video_OnHDREnabledChanged(control)
+        end)
+    end,
+})
+
+panelBuilder:AddSetting({
     controlName = "Options_Video_HDR_Peak_Brightness",
     settingType = SETTING_TYPE_GRAPHICS,
     settingId = GRAPHICS_SETTING_HDR_PEAK_BRIGHTNESS,
@@ -114,6 +127,13 @@ panelBuilder:AddSetting({
     controlName = "Options_Video_HDR_UI_Contrast",
     settingType = SETTING_TYPE_GRAPHICS,
     settingId = GRAPHICS_SETTING_HDR_UI_CONTRAST,
+    header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_DISPLAY,
+})
+
+panelBuilder:AddSetting({
+    controlName = "Options_Video_HDR_Mode",
+    settingType = SETTING_TYPE_GRAPHICS,
+    settingId = GRAPHICS_SETTING_HDR_MODE,
     header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_DISPLAY,
 })
 
@@ -278,6 +298,14 @@ panelBuilder:AddSetting({
     controlName = "Options_Video_Depth_Of_Field_Mode",
     settingType = SETTING_TYPE_GRAPHICS,
     settingId = GRAPHICS_SETTING_DEPTH_OF_FIELD_MODE,
+    header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_GRAPHICS,
+    indentLevel = 1,
+})
+
+panelBuilder:AddSetting({
+    controlName = "Options_Video_Character_Resolution",
+    settingType = SETTING_TYPE_GRAPHICS,
+    settingId = GRAPHICS_SETTING_CHARACTER_RESOLUTION,
     header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_GRAPHICS,
     indentLevel = 1,
 })

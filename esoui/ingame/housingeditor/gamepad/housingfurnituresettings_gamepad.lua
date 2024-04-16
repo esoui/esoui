@@ -175,7 +175,7 @@ function ZO_HousingFurnitureSettings_Gamepad:InitializeKeybindStripDescriptors()
                 local ownerDisplayName = GetCurrentHouseOwner()
                 local link = ZO_HousingBook_GetHouseLink(houseId, ownerDisplayName)
                 if link then
-                    MAIL_MANAGER_GAMEPAD.inbox:InsertBodyText(link)
+                    MAIL_GAMEPAD.inbox:InsertBodyText(link)
                 end
             end,
             alignment = KEYBIND_STRIP_ALIGN_RIGHT,
@@ -291,6 +291,16 @@ do
                     -- excluding the Occupants subcategory (which is accessible to all role types).
                     local entry = ZO_GamepadEntryData:New(self:GetCategoryInfo(optionId))
                     entry.permissionOption = optionId
+                    entry.narrationText = function(entryData, entryControl)
+                        local narrations = {}
+                        ZO_AppendNarration(narrations, ZO_GetSharedGamepadEntryDefaultNarrationText(entryData, entryControl))
+
+                        if self.activePanel ~= nil then
+                            ZO_AppendNarration(narrations, self.activePanel:GetEmptyRowNarration())
+                        end
+                        return narrations
+                    end
+                    
                     self.mainList:AddEntry("ZO_HousingPermissionsSettingsRow_Gamepad", entry)
                 end
             end

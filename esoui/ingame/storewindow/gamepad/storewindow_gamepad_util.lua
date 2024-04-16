@@ -190,7 +190,7 @@ local function GetSellItems(searchContext)
 
     --- Setup sort filter
     for _, itemData in ipairs(items) do
-        if itemData.bagId ~= BAG_WORN and not itemData.stolen and not itemData.isPlayerLocked  and searchContext and TEXT_SEARCH_MANAGER:IsItemInSearchTextResults(searchContext, BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT, itemData.bagId, itemData.slotIndex) then
+        if itemData.bagId ~= BAG_WORN and not itemData.stolen and not itemData.isPlayerLocked  and searchContext and TEXT_SEARCH_MANAGER:IsDataInSearchTextResults(searchContext, BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT, itemData.bagId, itemData.slotIndex) then
             itemData.isEquipped = false
             itemData.meetsRequirementsToBuy = true
             itemData.meetsRequirementsToEquip = itemData.meetsUsageRequirements
@@ -208,7 +208,7 @@ end
 local function GetBuybackItems(searchContext)
     local items = {}
     for entryIndex = 1, GetNumBuybackItems() do
-        if searchContext and TEXT_SEARCH_MANAGER:IsItemInSearchTextResults(searchContext, BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT, BAG_BUYBACK, entryIndex) then
+        if searchContext and TEXT_SEARCH_MANAGER:IsDataInSearchTextResults(searchContext, BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT, BAG_BUYBACK, entryIndex) then
             local icon, name, stackCount, price, functionalQuality, meetsRequirementsToEquip, displayQuality = GetBuybackItemInfo(entryIndex)
             if stackCount > 0 then
                 local itemLink = GetBuybackItemLink(entryIndex)
@@ -255,7 +255,7 @@ end
 
 local function GatherDamagedEquipmentFromBag(searchContext, bagId, itemTable)
     for slotIndex in ZO_IterateBagSlots(bagId) do
-        if searchContext and TEXT_SEARCH_MANAGER:IsItemInSearchTextResults(searchContext, BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT, bagId, slotIndex) then
+        if searchContext and TEXT_SEARCH_MANAGER:IsDataInSearchTextResults(searchContext, BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT, bagId, slotIndex) then
             local condition = GetItemCondition(bagId, slotIndex)
             if condition < 100 and not IsItemStolen(bagId, slotIndex) then
                 local _, stackCount = GetItemInfo(bagId, slotIndex)
@@ -321,7 +321,7 @@ end
 
 local function GetStolenSellItems(searchContext)
     local function TextSearchFilterFunction(itemData)
-        return IsStolenItemSellable(itemData) and searchContext and TEXT_SEARCH_MANAGER:IsItemInSearchTextResults(searchContext, BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT, itemData.bagId, itemData.slotIndex)
+        return IsStolenItemSellable(itemData) and searchContext and TEXT_SEARCH_MANAGER:IsDataInSearchTextResults(searchContext, BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT, itemData.bagId, itemData.slotIndex)
     end
     -- can't sell stolen things from BAG_WORN so just check BACKPACK
     return GetStolenItems(TextSearchFilterFunction, BAG_BACKPACK)
@@ -329,7 +329,7 @@ end
 
 local function GetLaunderItems(searchContext)
     local function TextSearchFilterFunction(itemData)
-        return searchContext and TEXT_SEARCH_MANAGER:IsItemInSearchTextResults(searchContext, BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT, itemData.bagId, itemData.slotIndex)
+        return searchContext and TEXT_SEARCH_MANAGER:IsDataInSearchTextResults(searchContext, BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT, itemData.bagId, itemData.slotIndex)
     end
 
     return GetStolenItems(TextSearchFilterFunction, BAG_WORN, BAG_BACKPACK)
@@ -383,12 +383,14 @@ local MODE_TO_UPDATE_FUNC = {
         [ZO_MODE_STORE_STABLE] =       {updateFunc = GetStableItems},
     }
 
+-- These functions are appropriated by ZO_GamepadStoreListComponent without inheriting.
 ZO_GamepadStoreList = ZO_GamepadVerticalParametricScrollList:Subclass()
 
 function ZO_GamepadStoreList:Initialize(control, mode, setupFunction, overrideTemplate, overrideHeaderTemplateSetupFunction)
     self:SetMode(mode, setupFunction, overrideTemplate, overrideHeaderTemplateSetupFunction)
 end
 
+-- These functions are appropriated by ZO_GamepadStoreListComponent without inheriting.
 function ZO_GamepadStoreList:SetSearchContext(context)
     self.searchContext = context
 end
@@ -409,6 +411,7 @@ function ZO_GamepadStoreList:SetMode(mode, setupFunction, overrideTemplate, over
     self:AddDataTemplateWithHeader(self.template, setupFunction, ZO_GamepadMenuEntryTemplateParametricListFunction, DEFAULT_EQUALITY_FUNCTION, "ZO_GamepadMenuEntryHeaderTemplate", headerTemplateSetupFunction, headerPrefix)
 end
 
+-- These functions are appropriated by ZO_GamepadStoreListComponent without inheriting.
 function ZO_GamepadStoreList:AddItems(items, prePaddingOverride, postPaddingOverride)
     local currentBestCategoryName = nil
 
@@ -466,6 +469,7 @@ function ZO_GamepadStoreList:AddItems(items, prePaddingOverride, postPaddingOver
     self:Commit()
 end
 
+-- These functions are appropriated by ZO_GamepadStoreListComponent without inheriting.
 function ZO_GamepadStoreList:UpdateList()
     self:Clear()
     local items = self.updateFunc(self.searchContext)

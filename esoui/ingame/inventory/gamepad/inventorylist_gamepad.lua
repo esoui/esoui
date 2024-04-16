@@ -499,7 +499,7 @@ do
         local slots = self:GenerateSlotTable()
         local currentBestCategoryName = nil
         for _, itemData in ipairs(slots) do
-            local passesTextFilter = TEXT_SEARCH_MANAGER:IsItemInSearchTextResults(self.searchContext, BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT, itemData.bagId, itemData.slotIndex)
+            local passesTextFilter = TEXT_SEARCH_MANAGER:IsDataInSearchTextResults(self.searchContext, BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT, itemData.bagId, itemData.slotIndex)
             local passesCategoryFilter = IsInFilteredCategories(self.filterCategories, itemData)
             if passesTextFilter and passesCategoryFilter then
                 local entry = ZO_GamepadEntryData:New(itemData.name, itemData.iconFile)

@@ -14,6 +14,7 @@ function ZO_SkillsDataManager:Initialize()
     self.skillTypeObjectPool = ZO_ObjectPool:New(ZO_SkillTypeData, ZO_ObjectPool_DefaultResetObject)
     self.skillLineObjectPool = ZO_ObjectPool:New(ZO_SkillLineData, ZO_ObjectPool_DefaultResetObject)
     self.activeSkillObjectPool = ZO_ObjectPool:New(ZO_ActiveSkillData, ZO_ObjectPool_DefaultResetObject)
+    self.craftedActiveSkillObjectPool = ZO_ObjectPool:New(ZO_CraftedActiveSkillData, ZO_ObjectPool_DefaultResetObject)
     self.passiveSkillObjectPool = ZO_ObjectPool:New(ZO_PassiveSkillData, ZO_ObjectPool_DefaultResetObject)
     self.activeSkillProgressionObjectPool = ZO_ObjectPool:New(ZO_ActiveSkillProgressionData, ZO_ObjectPool_DefaultResetObject)
     self.passiveSkillProgressionObjectPool = ZO_ObjectPool:New(ZO_PassiveSkillProgressionData, ZO_ObjectPool_DefaultResetObject)
@@ -47,6 +48,22 @@ function ZO_SkillsDataManager:RegisterForEvents()
     EVENT_MANAGER:RegisterForEvent("ZO_SkillsDataManager", EVENT_SKILL_XP_UPDATE, GenerateGatedEventCallbackFunction(ZO_SkillsDataManager.OnSkillLineXPUpdated))
     EVENT_MANAGER:RegisterForEvent("ZO_SkillsDataManager", EVENT_ABILITY_PROGRESSION_RANK_UPDATE, GenerateGatedEventCallbackFunction(ZO_SkillsDataManager.OnSkillProgressionUpdated))
     EVENT_MANAGER:RegisterForEvent("ZO_SkillsDataManager", EVENT_ABILITY_PROGRESSION_XP_UPDATE, GenerateGatedEventCallbackFunction(ZO_SkillsDataManager.OnSkillProgressionUpdated))
+
+    local function OnCollectionUpdated(collectionUpdateType, collectiblesByNewUnlockState)
+        if collectionUpdateType == ZO_COLLECTION_UPDATE_TYPE.UNLOCK_STATE_CHANGED then
+            for unlockedState, unlockedCollectibles in pairs(collectiblesByNewUnlockState) do
+                for index, collectibleData in ipairs(unlockedCollectibles) do
+                    if collectibleData:IsSkillStyle() then
+                        local progressionId = collectibleData:GetSkillStyleProgressionId()
+                        local skillData = SKILLS_DATA_MANAGER:GetSkillDataByProgressionId(progressionId)
+                        skillData:SetUpdatedStatusByType(ZO_SKILL_DATA_NEW_STATE.STYLE_COLLECTIBLE, collectibleData:IsUnlocked())
+                    end
+                end
+            end
+        end
+    end
+
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", OnCollectionUpdated)
 end
 
 function ZO_SkillsDataManager:IsGatingEventUpdates()
@@ -66,9 +83,11 @@ function ZO_SkillsDataManager:GetSkillLineObjectPool()
     return self.skillLineObjectPool
 end
 
-function ZO_SkillsDataManager:GetSkillObjectPool(isPassive)
+function ZO_SkillsDataManager:GetSkillObjectPool(isPassive, isCrafted)
     if isPassive then
         return self.passiveSkillObjectPool
+    elseif isCrafted then
+        return self.craftedActiveSkillObjectPool
     else
         return self.activeSkillObjectPool
     end
@@ -176,6 +195,15 @@ do
             self:FireCallbacks("SkillProgressionUpdated", skillData)
         end
         --There are progressions set up on dummy skill lines that can come through here, so just ignore them
+    end
+
+    function ZO_SkillsDataManager:OnCraftedAbilityUpdated(craftedAbilityId)
+        local skillType, skillLineIndex, skillIndex = GetSkillAbilityIndicesFromCraftedAbilityId(craftedAbilityId)
+        local skillData = self:GetSkillDataByIndices(skillType, skillLineIndex, skillIndex)
+        if skillData then
+            skillData:RefreshDynamicData(REFRESH_CHILDREN)
+            self:FireCallbacks("CraftedAbilityUpdated", skillData)
+        end
     end
 
     function ZO_SkillsDataManager:OnSkillLineNewStatusChanged(skillLineData)

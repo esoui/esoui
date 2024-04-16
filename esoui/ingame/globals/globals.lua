@@ -44,10 +44,8 @@ end
 
 local function OnZoneCollectibleRequirementFailed(eventId, collectibleId, message)
     local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
-    local collectibleName = collectibleData:GetName()
-    local categoryName = collectibleData:GetCategoryData():GetName()
     local marketOperation = MARKET_OPEN_OPERATION_DLC_FAILURE_TELEPORT_TO_ZONE
-    ZO_Dialogs_ShowPlatformDialog("COLLECTIBLE_REQUIREMENT_FAILED", { collectibleData = collectibleData, marketOpenOperation = marketOperation }, { mainTextParams = { message, collectibleName, categoryName } })
+    ZO_Dialogs_ShowCollectibleRequirementFailedPlatformDialog(collectibleData, message, marketOperation)
 end
 
 local function OnLinkNotHandled(link, button, ...)

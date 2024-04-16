@@ -36,11 +36,10 @@
             </Controls>
         </Control>
 
-        <TopLevelControl name="ZO_EndDunBuffTracker_Keyboard" inherits="ZO_EndDunBuffTracker_Shared" resizeToFitConstrains="Y">
+        <TopLevelControl name="ZO_EndDunBuffTracker_Keyboard" inherits="ZO_EndDunBuffTracker_Shared">
             <Anchor point="TOPRIGHT" offsetX="-50" offsetY="150" />
-            <Dimensions x="420" />
-            <DimensionConstraints minY="50" />
-            <ResizeToFitPadding height="85" />
+            <DimensionConstraints minX="200" minY="50" />
+            <ResizeToFitPadding width="50" height="23"/>
 
             <OnInitialized>
                 ZO_EndlessDungeonBuffTracker_Keyboard.OnControlInitialized(self)
@@ -55,15 +54,13 @@
 
                 <Label name="$(parent)Empty" override="true" font="ZoFontGameLarge" />
 
-                <Control name="$(parent)List" inherits="ZO_GridScrollList_Keyboard">
+                <Control name="$(parent)List" inherits="ZO_GridScrollList_CenteredResize_Keyboard">
                     <Anchor point="TOP" relativeTo="$(parent)Progress" relativePoint="BOTTOM" offsetX="ZO_ENDLESS_DUNGEON_BUFF_TRACKER_GRID_LIST_OFFSET_X" offsetY="ZO_ENDLESS_DUNGEON_BUFF_TRACKER_GRID_LIST_OFFSET_Y" />
-                    <!-- The height of this list is adjusted dynamically by ZO_EndlessDungeonBuffTracker_Keyboard:UpdateGridListDimensions -->
-                    <Dimensions x="ZO_ENDLESS_DUNGEON_BUFF_TRACKER_GRID_LIST_MAX_WIDTH_KEYBOARD" />
-                    <DimensionConstraints maxY="500" />
+                    <DimensionConstraints minX="50" minY="23" maxX="ZO_ENDLESS_DUNGEON_BUFF_TRACKER_GRID_LIST_MAX_WIDTH_KEYBOARD" maxY="500" />
                 </Control>
 
                 <Control name="$(parent)KeybindContainer" override="true">
-                    <Anchor point="BOTTOM" offsetY="-15" />
+                    <Anchor point="TOP" relativeTo="$(parent)List" relativePoint="BOTTOM" offsetX="-8" offsetY="15" />
                 </Control>
             </Controls>
         </TopLevelControl>

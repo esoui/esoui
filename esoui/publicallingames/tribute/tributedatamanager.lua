@@ -43,7 +43,11 @@ function ZO_TributeDataManager:RegisterForEvents()
     EVENT_MANAGER:RegisterForEvent("ZO_TributeDataManager", EVENT_ADD_ON_LOADED, OnAddOnLoaded)
     EVENT_MANAGER:RegisterForEvent("ZO_TributeDataManager", EVENT_COLLECTIBLES_UNLOCK_STATE_CHANGED, function(_, ...) self:OnCollectiblesUnlockStateChanged(...) end)
     EVENT_MANAGER:RegisterForEvent("ZO_TributeDataManager", EVENT_TRIBUTE_PATRON_PROGRESSION_DATA_CHANGED, OnPatronProgressionDataChanged)
-    EVENT_MANAGER:RegisterForEvent("ZO_TributeDataManager", EVENT_TRIBUTE_PATRONS_SEARCH_RESULTS_READY, function() self:UpdateSearchResults() end)
+
+    if EVENT_TRIBUTE_PATRONS_SEARCH_RESULTS_READY ~= nil then
+        -- This event only exists in public Ingame, not in internal.
+        EVENT_MANAGER:RegisterForEvent("ZO_TributeDataManager", EVENT_TRIBUTE_PATRONS_SEARCH_RESULTS_READY, function() self:UpdateSearchResults() end)
+    end
 end
 
 do
@@ -147,32 +151,6 @@ end
 
 function ZO_TributeDataManager:OnProgressionUpgradeStatusChanged(patronId, changedProgressions, refreshReason)
     self:FireCallbacks("ProgressionUpgradeStatusChanged", patronId, changedProgressions, refreshReason)
-end
-
--- Search
-function ZO_TributeDataManager:GetSearchResultsVersion()
-    return self.searchResultsVersion
-end
-
-function ZO_TributeDataManager:HasSearchFilter()
-    return zo_strlen(self.searchString) > 1
-end
-
-function ZO_TributeDataManager:SetSearchString(searchString)
-    self.searchString = searchString or ""
-    StartTributePatronSearch(self.searchString)
-end
-
-function ZO_TributeDataManager:UpdateSearchResults()
-    self.searchResultsVersion = self.searchResultsVersion + 1
-
-    for i = 1, GetNumTributePatronSearchResults() do
-        local patronId = GetTributePatronSearchResult(i)
-        local patronData = self:GetTributePatronData(patronId)
-        patronData:SetSearchResultsVersion(self.searchResultsVersion)
-    end
-
-    self:FireCallbacks("UpdateSearchResults")
 end
 
 -- Global singleton

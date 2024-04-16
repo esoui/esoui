@@ -669,18 +669,21 @@ end
 
 function ZO_Tooltip:GetRequiredCollectibleText(collectibleId)
     if collectibleId ~= 0 then
-        local collectibleName = GetCollectibleName(collectibleId)
+        -- Will either be an override collectible, the passed in id, or 0 if it cannot be purchased
+        local purchasableCollectibleId = GetPurchasableCollectibleIdForCollectible(collectibleId)
+        local relevantCollectible = (purchasableCollectibleId == 0) and collectibleId or purchasableCollectibleId
+        local collectibleName = GetCollectibleName(relevantCollectible)
         if collectibleName ~= "" then
             local formatterStringId
-            local collectibleCategory = GetCollectibleCategoryType(collectibleId)
+            local collectibleCategory = GetCollectibleCategoryType(relevantCollectible)
             if collectibleCategory == COLLECTIBLE_CATEGORY_TYPE_CHAPTER then
                 formatterStringId = SI_COLLECTIBLE_REQUIRED_TO_USE_ITEM_UPGRADE
-            elseif IsCollectiblePurchasable(collectibleId) then
+            elseif IsCollectiblePurchasable(relevantCollectible) then
                 formatterStringId = SI_COLLECTIBLE_REQUIRED_TO_USE_ITEM_CROWN_STORE
             else
                 formatterStringId = SI_COLLECTIBLE_REQUIRED_TO_USE_ITEM
             end
-            return zo_strformat(formatterStringId, collectibleName, GetCollectibleCategoryNameByCollectibleId(collectibleId))
+            return zo_strformat(formatterStringId, collectibleName, GetCollectibleCategoryNameByCollectibleId(relevantCollectible))
         end
     end
 
@@ -1042,6 +1045,89 @@ function ZO_Tooltip:LayoutMasterWritItem(itemLink, tradeBoPData, extraData)
     self:AddPrioritySellText(itemLink)
     self:AddItemTags(itemLink)
     self:LayoutTradeBoPInfo(tradeBoPData)
+end
+
+function ZO_Tooltip:LayoutCraftedAbilityItem(itemLink, itemName, tradeBoPData)
+    -- The functions that make this work are only available in ingame.
+    -- If we need to support internalingame, we'll need to refactor
+    assert(ZO_IsIngameUI(), "CRAFTED_ABILITY item tooltips are not supported in the Crown Store.")
+    local isItemUseTypeCraftedAbilityScript = GetItemLinkItemUseType(itemLink) == ITEM_USE_TYPE_CRAFTED_ABILITY
+    local craftedAbilityId = isItemUseTypeCraftedAbilityScript and GetItemLinkItemUseReferenceId(itemLink) or 0
+    local craftedAbilityData = SCRIBING_DATA_MANAGER:GetCraftedAbilityData(craftedAbilityId)
+    
+    self:AddTopSection(itemLink)
+    self:AddItemTitle(itemLink, itemName)
+
+    if internalassert(craftedAbilityData ~= nil, "Trying to layout tooltip for ItemType CRAFTED_ABILITY but could not get CraftedAbilityData from onUseValue") then
+        local description = craftedAbilityData:GetDescription()
+        if description ~= "" then
+            local descriptionSection = self:AcquireSection(self:GetStyle("bodySection"))
+            descriptionSection:AddLine(description, self:GetStyle("bodyDescription"))
+            self:AddSection(descriptionSection)
+        end
+
+        local skillData = craftedAbilityData:GetSkillData()
+        if skillData then
+            local skillLineData = skillData:GetSkillLineData()
+            local onUseInfo = zo_strformat(SI_ITEM_TOOLTIP_CRAFTED_ABILITY_ON_USE_FORMATTER, craftedAbilityData:GetDisplayName(), skillLineData:GetName())
+            local onUseSection = self:AcquireSection(self:GetStyle("bodySection"))
+            onUseSection:AddLine(onUseInfo, self:GetStyle("bodyDescription"))
+            self:AddSection(onUseSection)
+        end
+    end
+
+    self:AddFlavorText(itemLink)
+
+    if craftedAbilityData and craftedAbilityData:IsUnlocked() then
+        local alreadyKnownSection = self:AcquireSection(self:GetStyle("bodySection"))
+        alreadyKnownSection:AddLine(GetString(SI_ITEM_TOOLTIP_CRAFTED_ABILITY_ALREADY_KNOWN), self:GetStyle("bodyDescription"))
+        self:AddSection(alreadyKnownSection)
+    end
+
+    self:AddPrioritySellText(itemLink)
+    self:AddItemTags(itemLink)
+    self:LayoutTradeBoPInfo(tradeBoPData)
+    self:AddItemValue(itemLink)
+end
+
+function ZO_Tooltip:LayoutCraftedAbilityScriptItem(itemLink, itemName, tradeBoPData)
+    -- The functions that make this work are only available in ingame.
+    -- If we need to support internalingame, we'll need to refactor
+    assert(ZO_IsIngameUI(), "CRAFTED_ABILITY_SCRIPT item tooltips are not supported in the Crown Store.")
+    local isItemUseTypeCraftedAbilityScript = GetItemLinkItemUseType(itemLink) == ITEM_USE_TYPE_CRAFTED_ABILITY_SCRIPT
+    local craftedAbilityScriptId = isItemUseTypeCraftedAbilityScript and GetItemLinkItemUseReferenceId(itemLink) or 0
+    local craftedAbilityScriptData = SCRIBING_DATA_MANAGER:GetCraftedAbilityScriptData(craftedAbilityScriptId)
+    internalassert(craftedAbilityScriptData ~= nil, "Trying to layout tooltip for ItemType CRAFTED_ABILITY_SCRIPT but could not get CraftedAbilityScriptData from onUseValue")
+    self:AddTopSection(itemLink)
+    self:AddItemTitle(itemLink, itemName)
+
+    if craftedAbilityScriptData then
+        local description = craftedAbilityScriptData:GetGeneralDescription()
+        if description ~= "" then
+            local descriptionSection = self:AcquireSection(self:GetStyle("bodySection"))
+            descriptionSection:AddLine(description, self:GetStyle("bodyDescription"))
+            self:AddSection(descriptionSection)
+        end
+        
+        local slot = GetString("SI_SCRIBINGSLOT_SHORT", craftedAbilityScriptData:GetScribingSlot())
+        local onUseInfo = zo_strformat(SI_ITEM_TOOLTIP_CRAFTED_ABILITY_SCRIPT_ON_USE_FORMATTER, craftedAbilityScriptData:GetDisplayName(), slot)
+        local onUseSection = self:AcquireSection(self:GetStyle("bodySection"))
+        onUseSection:AddLine(onUseInfo, self:GetStyle("bodyDescription"))
+        self:AddSection(onUseSection)
+    end
+
+    self:AddFlavorText(itemLink)
+
+    if craftedAbilityScriptData and craftedAbilityScriptData:IsUnlocked() then
+        local alreadyKnownSection = self:AcquireSection(self:GetStyle("bodySection"))
+        alreadyKnownSection:AddLine(GetString(SI_ITEM_TOOLTIP_CRAFTED_ABILITY_SCRIPT_ALREADY_KNOWN), self:GetStyle("bodyDescription"))
+        self:AddSection(alreadyKnownSection)
+    end
+
+    self:AddPrioritySellText(itemLink)
+    self:AddItemTags(itemLink)
+    self:LayoutTradeBoPInfo(tradeBoPData)
+    self:AddItemValue(itemLink)
 end
 
 function ZO_Tooltip:LayoutBook(itemLink, tradeBoPData)
@@ -1599,6 +1685,9 @@ do
         [ITEMTYPE_AVA_REPAIR] = function(self, itemLink, creatorName, itemName, tradeBoPData, extraData) self:LayoutAvARepair(itemLink, itemName, extraData) end,
 
         [ITEMTYPE_DYE_STAMP] = function(self, itemLink, creatorName, itemName, tradeBoPData, extraData) self:LayoutDyeStamp(itemLink, itemName, extraData) end,
+
+        [ITEMTYPE_CRAFTED_ABILITY] = function(self, itemLink, creatorName, itemName, tradeBoPData, extraData) self:LayoutCraftedAbilityItem(itemLink, itemName, tradeBoPData) end,
+        [ITEMTYPE_CRAFTED_ABILITY_SCRIPT] = function(self, itemLink, creatorName, itemName, tradeBoPData, extraData) self:LayoutCraftedAbilityScriptItem(itemLink, itemName, tradeBoPData) end,
     }
 
     --TODO: Get creatorName from itemLink?
@@ -1652,19 +1741,18 @@ function ZO_Tooltip:LayoutItemWithStackCount(itemLink, equipped, creatorName, fo
     local isValidItemLink = itemLink ~= ""
     if isValidItemLink then
         local stackCount
-        local bagCount, bankCount, craftBagCount, houseBanksCount = GetItemLinkStacks(itemLink)
         if customOrBagStackCount == ZO_ITEM_TOOLTIP_INVENTORY_TITLE_COUNT then
-            stackCount = bagCount
+            stackCount = GetItemLinkInventoryCount(itemLink, INVENTORY_COUNT_BAG_OPTION_BACKPACK)
         elseif customOrBagStackCount == ZO_ITEM_TOOLTIP_BANK_TITLE_COUNT then
-            stackCount = bankCount
+            stackCount = GetItemLinkInventoryCount(itemLink, INVENTORY_COUNT_BAG_OPTION_BANK)
         elseif customOrBagStackCount == ZO_ITEM_TOOLTIP_INVENTORY_AND_BANK_TITLE_COUNT then
-            stackCount = bagCount + bankCount
+            stackCount = GetItemLinkInventoryCount(itemLink, INVENTORY_COUNT_BAG_OPTION_BACKPACK_AND_BANK)
         elseif customOrBagStackCount == ZO_ITEM_TOOLTIP_CRAFTBAG_TITLE_COUNT then
-            stackCount = craftBagCount
+            stackCount = GetItemLinkInventoryCount(itemLink, INVENTORY_COUNT_BAG_OPTION_CRAFT_BAG)
         elseif customOrBagStackCount == ZO_ITEM_TOOLTIP_INVENTORY_AND_BANK_AND_CRAFTBAG_TITLE_COUNT then
-            stackCount = bagCount + bankCount + craftBagCount
+            stackCount = GetItemLinkInventoryCount(itemLink, INVENTORY_COUNT_BAG_OPTION_BACKPACK_AND_BANK_AND_CRAFT_BAG)
         elseif customOrBagStackCount == ZO_ITEM_TOOLTIP_HOUSE_BANKS_TITLE_COUNT then
-            stackCount = houseBanksCount
+            stackCount = GetItemLinkInventoryCount(itemLink, INVENTORY_COUNT_BAG_OPTION_HOUSE_BANKS)
         else
             stackCount = customOrBagStackCount
         end

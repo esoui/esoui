@@ -28,11 +28,10 @@
             </Controls>
         </Control>
         
-        <TopLevelControl name="ZO_EndDunBuffTracker_Gamepad" inherits="ZO_EndDunBuffTracker_Shared" resizeToFitConstrains="Y">
+        <TopLevelControl name="ZO_EndDunBuffTracker_Gamepad" inherits="ZO_EndDunBuffTracker_Shared" resizeToFitDescendents="true">
             <Anchor point="CENTER" offsetY="-100" />
-            <Dimensions x="605" />
-            <DimensionConstraints minY="60" />
-            <ResizeToFitPadding height="30" />
+            <DimensionConstraints minX="605" minY="60" />
+            <ResizeToFitPadding width="50" height="30" />
 
             <OnInitialized>
                 ZO_EndlessDungeonBuffTracker_Gamepad.OnControlInitialized(self)
@@ -47,14 +46,12 @@
 
                 <Label name="$(parent)Empty" override="true" font="ZoFontGamepadBold27" />
 
-                <Control name="$(parent)List" inherits="ZO_GridScrollList_Gamepad">
+                <Control name="$(parent)List" inherits="ZO_GridScrollList_CenteredResize_Gamepad">
                     <Anchor point="TOP" relativeTo="$(parent)Progress" relativePoint="BOTTOM" offsetX="ZO_ENDLESS_DUNGEON_BUFF_TRACKER_GRID_LIST_OFFSET_X" offsetY="ZO_ENDLESS_DUNGEON_BUFF_TRACKER_GRID_LIST_OFFSET_Y" />
-                    <!-- The height of this list is adjusted dynamically by ZO_EndlessDungeonBuffTracker_Gamepad:UpdateGridListDimensions -->
-                    <Dimensions x="ZO_ENDLESS_DUNGEON_BUFF_TRACKER_GRID_LIST_MAX_WIDTH_GAMEPAD" />
-                    <DimensionConstraints maxY="730" minY="1" />
+                    <DimensionConstraints maxX="ZO_ENDLESS_DUNGEON_BUFF_TRACKER_GRID_LIST_MAX_WIDTH_GAMEPAD" maxY="730" minY="1" />
                 </Control>
 
-                <Control name="$(parent)KeybindContainer" override="true">
+                <Control name="$(parent)KeybindContainer" override="true" excludeFromResizeToFitExtents="true">
                     <Anchor point="TOP" relativePoint="BOTTOM" offsetY="20" />
                 </Control>
             </Controls>

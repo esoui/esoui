@@ -23,7 +23,7 @@ ZO_GamepadInventory = ZO_Gamepad_ParametricList_BagsSearch_Screen:Subclass()
 
 function ZO_GamepadInventory:Initialize(control)
     GAMEPAD_INVENTORY_ROOT_SCENE = ZO_Scene:New(ZO_GAMEPAD_INVENTORY_SCENE_NAME, SCENE_MANAGER)
-    ZO_Gamepad_ParametricList_BagsSearch_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_CREATE, false, GAMEPAD_INVENTORY_ROOT_SCENE)
+    ZO_Gamepad_ParametricList_BagsSearch_Screen.Initialize(self, "playerInventoryTextSearch", control, ZO_GAMEPAD_HEADER_TABBAR_CREATE, false, GAMEPAD_INVENTORY_ROOT_SCENE)
 
     -- need this earlier than deferred init so trade can split stacks before inventory is possibly viewed
     self:InitializeSplitStackDialog()
@@ -59,8 +59,6 @@ function ZO_GamepadInventory:Initialize(control)
     control:RegisterForEvent(EVENT_CANCEL_MOUSE_REQUEST_DESTROY_ITEM, OnCancelDestroyItemRequest)
     control:RegisterForEvent(EVENT_VISUAL_LAYER_CHANGED, RefreshVisualLayer)
     control:SetHandler("OnUpdate", OnUpdate)
-
-    self:SetTextSearchContext("playerInventoryTextSearch")
 
     -- Initialize needed bags
     SHARED_INVENTORY:GetOrCreateBagCache(BAG_BACKPACK)
@@ -241,7 +239,7 @@ function ZO_GamepadInventory:OnInventoryShown()
     end
 end
 
-function ZO_GamepadInventory:OnUpdatedSearchResults()
+function ZO_GamepadInventory:OnUpdateSearchResults()
     self:RefreshCategoryList()
     self:RefreshItemList()
     self:RefreshCraftBagList()
@@ -661,7 +659,16 @@ function ZO_GamepadInventory:InitializeKeybindStrip()
             keybind = "UI_SHORTCUT_TERTIARY",
             order = 1000,
             visible = function()
-                return self.selectedItemUniqueId ~= nil
+                if self.selectedItemUniqueId ~= nil then
+                    return true
+                end
+
+                local inventorySlot = self.itemList:GetTargetData()
+                if inventorySlot ~= nil and inventorySlot.dataSource ~= nil and inventorySlot.dataSource.questIndex ~= nil and inventorySlot.dataSource.questIndex > 0 then
+                    return self.selectedItemFilterType == ITEMFILTERTYPE_QUEST
+                end
+
+                return false
             end,
             callback = function()
                 self:ShowActions()
@@ -987,7 +994,7 @@ function ZO_GamepadInventory:AddFilteredBackpackCategoryIfPopulated(filterType, 
 end
 
 function ZO_GamepadInventory:GetQuestItemDataFilterComparator(questItemId)
-    return self:IsSlotInSearchTextResults(ZO_QUEST_ITEMS_FILTER_BAG, questItemId)
+    return self:IsDataInSearchTextResults(ZO_QUEST_ITEMS_FILTER_BAG, questItemId)
 end
 
 function ZO_GamepadInventory:RefreshCategoryList(selectDefaultEntry)
@@ -1035,16 +1042,16 @@ function ZO_GamepadInventory:RefreshCategoryList(selectDefaultEntry)
         -- Quest Items
         do
             local questCache = SHARED_INVENTORY:GenerateFullQuestCache()
-            local textSearchFilterdQuestCache = {}
+            local textSearchFilteredQuestCache = {}
             for _, questItems in pairs(questCache) do
                 for _, questItem in pairs(questItems) do
                     if self:GetQuestItemDataFilterComparator(questItem.questItemId) then
-                        table.insert(textSearchFilterdQuestCache, questCache)
+                        table.insert(textSearchFilteredQuestCache, questCache)
                     end
                 end
             end
 
-            if next(textSearchFilterdQuestCache) then
+            if next(textSearchFilteredQuestCache) then
                 local name = GetString(SI_GAMEPAD_INVENTORY_QUEST_ITEMS)
                 local iconFile = "EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_quest.dds"
                 local data = ZO_GamepadEntryData:New(name, iconFile)
@@ -1238,7 +1245,7 @@ end
 
 function ZO_GamepadInventory:GetItemDataFilterComparator(filteredEquipSlot, nonEquipableFilterType)
     return function(itemData)
-        if not self:IsSlotInSearchTextResults(itemData.bagId, itemData.slotIndex) then
+        if not self:IsDataInSearchTextResults(itemData.bagId, itemData.slotIndex) then
             return false
         end
 

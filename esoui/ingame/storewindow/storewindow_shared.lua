@@ -104,7 +104,7 @@ function ZO_StoreManager_GetStoreItems()
 
     for entryIndex = 1, GetNumStoreItems() do
         local icon, name, stack, price, sellPrice, meetsRequirementsToBuy, meetsRequirementsToEquip, displayQuality, questNameColor, currencyType1, currencyQuantity1,
-            currencyType2, currencyQuantity2, entryType, buyStoreFailure, buyErrorStringId = GetStoreEntryInfo(entryIndex)
+            currencyType2, currencyQuantity2, entryType, buyStoreFailure, buyErrorStringId, actorCategory = GetStoreEntryInfo(entryIndex)
         local requiredToBuyErrorText
         if not meetsRequirementsToBuy then
             requiredToBuyErrorText = ZO_StoreManager_GetRequiredToBuyErrorText(buyStoreFailure, buyErrorStringId)
@@ -147,6 +147,7 @@ function ZO_StoreManager_GetStoreItems()
                 traitInformationSortOrder = ZO_GetItemTraitInformation_SortOrder(traitInformation),
                 sellInformation = sellInformation,
                 sellInformationSortOrder = ZO_GetItemSellInformationCustomSortOrder(sellInformation),
+                actorCategory = actorCategory,
             }
 
             if entryType == STORE_ENTRY_TYPE_QUEST_ITEM then

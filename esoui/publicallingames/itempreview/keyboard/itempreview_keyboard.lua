@@ -85,7 +85,7 @@ function ZO_ItemPreview_Keyboard:SetVariationControlsHidden(hidden)
 end
 
 function ZO_ItemPreview_Keyboard:SetVariationLabel(variationName)
-    self.variationLabel:SetText(variationName)
+    self.variationLabel:SetText(zo_strformat(SI_COLLECTIBLE_NAME_FORMATTER, variationName))
 end
 
 function ZO_ItemPreview_Keyboard:SetCanChangePreview(canChangePreview)

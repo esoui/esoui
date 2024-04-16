@@ -38,6 +38,16 @@ function ZO_AlertText_Keyboard:Initialize(control)
     local MAX_DISPLAYED_ENTRIES_KEYBOARD = 3
     self.alerts = ZO_FadingControlBuffer:New(control, MAX_DISPLAYED_ENTRIES_KEYBOARD, nil, nil, "AlertFade", "AlertTranslate", ZO_Anchor:New(TOPRIGHT, GuiRoot))
     self.alerts:AddTemplate(DEFAULT_KEYBOARD_ALERT_TEMPLATE, {setup = SetupFunction})
+
+    local function OnAppGuiHiddenStateChanged(_, hidden)
+        self.alerts:SetHoldDisplayingEntries(not hidden)
+    end
+
+    EVENT_MANAGER:RegisterForEvent("AlertText_Keyboard", EVENT_APP_GUI_HIDDEN_STATE_CHANGED, OnAppGuiHiddenStateChanged)
+
+    if not GetGuiHidden("App") then
+        self.alerts:SetHoldDisplayingEntries(true)
+    end
 end
 
 function ZO_AlertTextKeyboard_OnInitialized(control)

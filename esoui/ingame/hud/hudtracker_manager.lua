@@ -19,10 +19,11 @@ function HUDTracker_Manager:Initialize()
 end
 
 function HUDTracker_Manager:UpdateVisibility()
-    local isZoneStoryTracking = IsZoneStoryActivelyTracking()
-
-    FOCUSED_QUEST_TRACKER:GetFragment():SetHiddenForReason("TrackingZoneStory", isZoneStoryTracking, DEFAULT_HUD_DURATION, DEFAULT_HUD_DURATION)
-    ZONE_STORY_TRACKER:GetFragment():SetHiddenForReason("NoTrackedZoneStory", not isZoneStoryTracking, DEFAULT_HUD_DURATION, DEFAULT_HUD_DURATION)
+    local isZoneStoryAssisted = IsZoneStoryAssisted()
+    
+    local FADE_INSTANT_MS = 0
+    FOCUSED_QUEST_TRACKER:GetFragment():SetHiddenForReason("TrackingZoneStory", isZoneStoryAssisted, FADE_INSTANT_MS, FADE_INSTANT_MS)
+    ZONE_STORY_TRACKER:GetFragment():SetHiddenForReason("NoTrackedZoneStory", not isZoneStoryAssisted, FADE_INSTANT_MS, FADE_INSTANT_MS)
 end
 
 HUD_TRACKER_MANAGER = HUDTracker_Manager:New()

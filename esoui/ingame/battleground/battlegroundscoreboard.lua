@@ -81,7 +81,7 @@ function Battleground_Scoreboard_Fragment:Initialize(control)
     self.alliancePanels = {}
     self.playerEntryData = {}
 
-    for i = BATTLEGROUND_ALLIANCE_ITERATION_BEGIN, BATTLEGROUND_ALLIANCE_ITERATION_END do
+    for i = BATTLEGROUND_TEAM_ITERATION_BEGIN, BATTLEGROUND_TEAM_ITERATION_END do
         local alliancePanelControl = CreateControlFromVirtual("$(parent)AlliancePanel", control, "ZO_Battleground_Scoreboard_Alliance_Panel", i)
         local alliancePanel = Battleground_Scoreboard_Alliance_Panel:New(alliancePanelControl, i)
         self.alliancePanels[i] = alliancePanel
@@ -161,7 +161,7 @@ function Battleground_Scoreboard_Fragment:ApplyPlatformStyle(style)
     ApplyTemplateToControl(self.headers, style.headers)
     self.gamepadBackground:SetHidden(not style.useGamepadBackground)
     self.keyboardBackground:SetHidden(not style.useKeyboardBackground)
-    for i = BATTLEGROUND_ALLIANCE_ITERATION_BEGIN, BATTLEGROUND_ALLIANCE_ITERATION_END do
+    for i = BATTLEGROUND_TEAM_ITERATION_BEGIN, BATTLEGROUND_TEAM_ITERATION_END do
         self.alliancePanels[i]:ApplyPlatformStyle(style)
     end
     self:UpdateAll()
@@ -180,7 +180,7 @@ function Battleground_Scoreboard_Fragment:InitializeNarrationInfo()
             local selectedData = self.selectedPlayerData
 
             -- Team Info for Selected Row
-            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString("SI_BATTLEGROUNDALLIANCE", selectedData.battlegroundAlliance)))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString("SI_BATTLEGROUNDTEAM", selectedData.battlegroundAlliance)))
             ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_BATTLEGROUND_SCOREBOARD_HEADER_TEAM_SCORE)))
             ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.alliancePanels[selectedData.battlegroundAlliance]:GetScore()))
 
@@ -259,21 +259,21 @@ function Battleground_Scoreboard_Fragment:OnUpdate(control, timeS)
 end
 
 do
-    local BATTLEGROUND_ALLIANCE_SORT_ORDER =
+    local BATTLEGROUND_TEAM_SORT_ORDER =
     {
-        BATTLEGROUND_ALLIANCE_PIT_DAEMONS,
-        BATTLEGROUND_ALLIANCE_STORM_LORDS,
-        BATTLEGROUND_ALLIANCE_FIRE_DRAKES
+        BATTLEGROUND_TEAM_PIT_DAEMONS,
+        BATTLEGROUND_TEAM_STORM_LORDS,
+        BATTLEGROUND_TEAM_FIRE_DRAKES
     }
 
-    local KEYED_BATTLEGROUND_ALLIANCE_SORT_ORDER = {}
-    for index, alliance in ipairs(BATTLEGROUND_ALLIANCE_SORT_ORDER) do
-        KEYED_BATTLEGROUND_ALLIANCE_SORT_ORDER[alliance] = index
+    local KEYED_BATTLEGROUND_TEAM_SORT_ORDER = {}
+    for index, alliance in ipairs(BATTLEGROUND_TEAM_SORT_ORDER) do
+        KEYED_BATTLEGROUND_TEAM_SORT_ORDER[alliance] = index
     end
 
     local function SortPlayerData(leftData, rightData)
-        local leftAllianceSortOrder = KEYED_BATTLEGROUND_ALLIANCE_SORT_ORDER[leftData.battlegroundAlliance]
-        local rightAllianceSortOrder = KEYED_BATTLEGROUND_ALLIANCE_SORT_ORDER[rightData.battlegroundAlliance]
+        local leftAllianceSortOrder = KEYED_BATTLEGROUND_TEAM_SORT_ORDER[leftData.battlegroundAlliance]
+        local rightAllianceSortOrder = KEYED_BATTLEGROUND_TEAM_SORT_ORDER[rightData.battlegroundAlliance]
         if leftAllianceSortOrder == rightAllianceSortOrder then
             if leftData.medalScore == rightData.medalScore then
                 if leftData.deaths == rightData.deaths then
@@ -304,7 +304,7 @@ do
         self:UpdateAnchors()
 
         if self.playMatchResultSound then
-            local playerAlliance = GetUnitBattlegroundAlliance("player")
+            local playerAlliance = GetUnitBattlegroundTeam("player")
 
             alliancePanel = self.alliancePanels[playerAlliance]
             local playerTeamWon = alliancePanel:GetScore() == self.highestPanelScore
@@ -398,7 +398,7 @@ do
 
     function Battleground_Scoreboard_Fragment:UpdateAnchors()
         local previousControl = self.headers
-        for _, bgOrder in ipairs(BATTLEGROUND_ALLIANCE_SORT_ORDER) do
+        for _, bgOrder in ipairs(BATTLEGROUND_TEAM_SORT_ORDER) do
             local currentPanel = self.alliancePanels[bgOrder]
             local control = currentPanel.control
             control:ClearAnchors()
@@ -624,7 +624,7 @@ function Battleground_Scoreboard_Alliance_Panel:Initialize(control, battleground
     self.score = 0
 
     self.iconControl:SetTexture(ZO_GetLargeBattlegroundAllianceSymbolIcon(battlegroundAlliance))
-    self.nameControl:SetText(zo_strformat(SI_ALLIANCE_NAME, GetString("SI_BATTLEGROUNDALLIANCE", battlegroundAlliance)))
+    self.nameControl:SetText(zo_strformat(SI_ALLIANCE_NAME, GetString("SI_BATTLEGROUNDTEAM", battlegroundAlliance)))
 
     local function PlayerRowFactory(pool)
         local playerRowControl = ZO_ObjectPool_CreateNamedControl("$(parent)PlayerRow", "ZO_Battleground_Scoreboard_Player_Row", pool, self.control)
@@ -636,11 +636,11 @@ function Battleground_Scoreboard_Alliance_Panel:Initialize(control, battleground
 end
     
 do
-    local BATTLEGROUND_ALLIANCE_TO_BG_TEXTURE =
+    local BATTLEGROUND_TEAM_TO_BG_TEXTURE =
     {
-        [BATTLEGROUND_ALLIANCE_FIRE_DRAKES] = "EsoUI/Art/Battlegrounds/battlegrounds_scoreboardBG_orange.dds",
-        [BATTLEGROUND_ALLIANCE_PIT_DAEMONS] = "EsoUI/Art/Battlegrounds/battlegrounds_scoreboardBG_green.dds",
-        [BATTLEGROUND_ALLIANCE_STORM_LORDS] = "EsoUI/Art/Battlegrounds/battlegrounds_scoreboardBG_purple.dds",
+        [BATTLEGROUND_TEAM_FIRE_DRAKES] = "EsoUI/Art/Battlegrounds/battlegrounds_scoreboardBG_orange.dds",
+        [BATTLEGROUND_TEAM_PIT_DAEMONS] = "EsoUI/Art/Battlegrounds/battlegrounds_scoreboardBG_green.dds",
+        [BATTLEGROUND_TEAM_STORM_LORDS] = "EsoUI/Art/Battlegrounds/battlegrounds_scoreboardBG_purple.dds",
     }
 
     function Battleground_Scoreboard_Alliance_Panel:ApplyPlatformStyle(style)
@@ -649,7 +649,7 @@ do
             self.bgControl:SetColor(GetBattlegroundAllianceColor(self.battlegroundAlliance):UnpackRGBA())
             self.bgControl:SetTexture("")
         else
-            self.bgControl:SetTexture(BATTLEGROUND_ALLIANCE_TO_BG_TEXTURE[self.battlegroundAlliance])
+            self.bgControl:SetTexture(BATTLEGROUND_TEAM_TO_BG_TEXTURE[self.battlegroundAlliance])
         end
 
         for _, playerRow in ipairs(self.sortedPlayerRows) do
@@ -767,9 +767,9 @@ end
 do
     local HIGHLIGHT_KEYBOARD_TEXTURES =
     {
-        [BATTLEGROUND_ALLIANCE_FIRE_DRAKES] = "EsoUI/Art/Battlegrounds/battlegrounds_scoreboard_highlightStrip_orange.dds",
-        [BATTLEGROUND_ALLIANCE_STORM_LORDS] = "EsoUI/Art/Battlegrounds/battlegrounds_scoreboard_highlightStrip_purple.dds",
-        [BATTLEGROUND_ALLIANCE_PIT_DAEMONS] = "EsoUI/Art/Battlegrounds/battlegrounds_scoreboard_highlightStrip_green.dds",
+        [BATTLEGROUND_TEAM_FIRE_DRAKES] = "EsoUI/Art/Battlegrounds/battlegrounds_scoreboard_highlightStrip_orange.dds",
+        [BATTLEGROUND_TEAM_STORM_LORDS] = "EsoUI/Art/Battlegrounds/battlegrounds_scoreboard_highlightStrip_purple.dds",
+        [BATTLEGROUND_TEAM_PIT_DAEMONS] = "EsoUI/Art/Battlegrounds/battlegrounds_scoreboard_highlightStrip_green.dds",
     }
 
     function Battleground_Scoreboard_Player_Row:SetupOnAcquire(panel, poolKey, data)

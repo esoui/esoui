@@ -256,7 +256,7 @@ end
 
 function ZO_MarketAnnouncement_Shared.GetZoneStoriesTilesData(tileInfoList)
     local zoneId
-    if IsZoneStoryActivelyTracking() then
+    if IsZoneStoryTracked() then
         zoneId = GetTrackedZoneStoryActivityInfo()
     else
         local zoneIndex = GetUnitZoneIndex("player")

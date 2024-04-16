@@ -266,8 +266,8 @@ local BUILTIN_MESSAGE_FORMATTERS = {
         local killerAllianceName
         local victimAllianceName
         if isBattleground then
-            killerAllianceName = GetString("SI_BATTLEGROUNDALLIANCE", killerAlliance)
-            victimAllianceName = GetString("SI_BATTLEGROUNDALLIANCE", victimAlliance)
+            killerAllianceName = GetString("SI_BATTLEGROUNDTEAM", killerAlliance)
+            victimAllianceName = GetString("SI_BATTLEGROUNDTEAM", victimAlliance)
         else
             killerAllianceName = ZO_CachedStrFormat(SI_ALLIANCE_NAME, GetAllianceName(killerAlliance))
             victimAllianceName = ZO_CachedStrFormat(SI_ALLIANCE_NAME, GetAllianceName(victimAlliance))

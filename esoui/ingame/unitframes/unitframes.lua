@@ -21,22 +21,22 @@ local COMPANION_HEALTH_GRADIENT_GAIN = ZO_ColorDef:New("D0FFBC")
 
 local SMALL_GROUP_ELECTION_ICON_INFO =
 {
-    [GROUP_VOTE_CHOICE_ABSTAIN] = 
+    [GROUP_VOTE_CHOICE_ABSTAIN] =
     {
         icon = "EsoUI/Art/UnitFrames/votedIcon_notYet.dds",
         color =  ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_DISABLED)),
     },
-    [GROUP_VOTE_CHOICE_FOR] = 
+    [GROUP_VOTE_CHOICE_FOR] =
     {
         icon = "EsoUI/Art/UnitFrames/votedIcon_yes.dds",
         color = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_SUCCEEDED)),
     },
-    [GROUP_VOTE_CHOICE_AGAINST] = 
+    [GROUP_VOTE_CHOICE_AGAINST] =
     {
         icon = "EsoUI/Art/UnitFrames/votedIcon_no.dds",
         color = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_FAILED)),
     },
-    [GROUP_VOTE_CHOICE_INVALID] = 
+    [GROUP_VOTE_CHOICE_INVALID] =
     {
         icon = "EsoUI/Art/UnitFrames/votedIcon_notYet.dds",
         color = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_DISABLED)),
@@ -306,11 +306,15 @@ function ZO_UnitFrames_Manager:GetFrame(unitTag)
     end
 end
 
-function ZO_UnitFrames_Manager:CreateFrame(unitTag, anchors, barTextMode, style, templateName)
+function ZO_UnitFrames_Manager:CreateFrame(unitTag, anchors, barTextMode, style, templateName, visualizerSetupFunction)
     local unitFrame = self:GetFrame(unitTag)
     if unitFrame == nil then
         local unitFrameTable = self:GetUnitFrameLookupTable(unitTag)
         unitFrame = ZO_UnitFrameObject:New(unitTag, anchors, barTextMode, style, templateName)
+
+        if visualizerSetupFunction then
+            visualizerSetupFunction(unitFrame)
+        end
 
         if unitFrameTable then
              unitFrameTable[unitTag] = unitFrame
@@ -1116,7 +1120,7 @@ local function LayoutUnitFrameName(nameLabel, layoutData, indented)
         local nameWidth = layoutData.nameWidth or 0
 
         if indented then
-            nameLabel:SetWidth(indentedNameWidth or nameWidth)
+            nameLabel:SetWidth(layoutData.indentedNameWidth or nameWidth)
             if layoutData.baseMinX then
                 nameLabel:SetDimensionConstraints(layoutData.indentedMinX, 0, layoutData.indentedMaxX, 0)
             end
@@ -1199,7 +1203,7 @@ function ZO_UnitFrameObject:Initialize(unitTag, anchors, barTextMode, style, tem
     self.rightBracket = self:AddFadeComponent("RightBracket")
     self.rightBracketGlow = GetControl(self.frame, "RightBracketGlow")
     self.rightBracketUnderlay = GetControl(self.frame, "RightBracketUnderlay")
-    
+
     self.barTextMode = barTextMode
 
     self.healthBar = ZO_UnitFrameBar:New(baseWindowName.."Hp", self.frame, barTextMode, style, COMBAT_MECHANIC_FLAGS_HEALTH)
@@ -1491,6 +1495,10 @@ function ZO_UnitFrameObject:DoAlphaUpdate(isNearby)
         end
         fadeComponent:SetAlpha(alphaValue)
     end
+
+    if self.attributeVisualizer then
+        self.attributeVisualizer:DoAlphaUpdate(isNearby)
+    end
 end
 
 function ZO_UnitFrameObject:GetBuffTracker()
@@ -1611,9 +1619,9 @@ function ZO_UnitFrameObject:UpdateAssignment()
         local unitTag = self:GetUnitTag()
         local assignmentTexture = nil
         if IsActiveWorldBattleground() then
-            local battlegroundAlliance = GetUnitBattlegroundAlliance(unitTag)
-            if battlegroundAlliance ~= BATTLEGROUND_ALLIANCE_NONE then
-                assignmentTexture = ZO_GetBattlegroundTeamIcon(battlegroundAlliance)
+            local battlegroundTeam = GetUnitBattlegroundTeam(unitTag)
+            if battlegroundTeam ~= BATTLEGROUND_TEAM_INVALID then
+                assignmentTexture = ZO_GetBattlegroundTeamIcon(battlegroundTeam)
             end
         else
             local selectedRole = GetGroupMemberSelectedRole(unitTag)
@@ -2023,11 +2031,8 @@ local TARGET_ATTRIBUTE_VISUALIZER_SOUNDS =
     },
 }
 
-local function CreateTargetFrame()
-    local targetFrameAnchor = ZO_Anchor:New(TOP, GuiRoot, TOP, 0, 88)
-    local targetFrame = UnitFrames:CreateFrame("reticleover", targetFrameAnchor, ZO_UNIT_FRAME_BAR_TEXT_MODE_HIDDEN, "ZO_TargetUnitFrame")
-    targetFrame:SetAnimateShowHide(true)
-    local visualizer = targetFrame:CreateAttributeVisualizer(TARGET_ATTRIBUTE_VISUALIZER_SOUNDS)
+local function CreateTargetFrameVisualizer(frame)
+    local visualizer = frame:CreateAttributeVisualizer(TARGET_ATTRIBUTE_VISUALIZER_SOUNDS)
 
     visualizer:AddModule(ZO_UnitVisualizer_ArrowRegenerationModule:New())
 
@@ -2106,10 +2111,33 @@ local function CreateTargetFrame()
         barRightOverlayTemplate = "ZO_PowerShieldBarRightOverlayAngle",
     }
     visualizer:AddModule(ZO_UnitVisualizer_PowerShieldModule:New(VISUALIZER_ANGLE_POWER_SHIELD_LAYOUT_DATA))
+end
+
+local function CreateGroupFrameVisualizer(frame, template, noHealingGradientOverride, fakeHealthGradientOverride)
+    local visualizer = frame:CreateAttributeVisualizer(TARGET_ATTRIBUTE_VISUALIZER_SOUNDS)
+
+    local VISUALIZER_POWER_SHIELD_LAYOUT_DATA =
+    {
+        barLeftOverlayTemplate = template,
+        noHealingGradientOverride = noHealingGradientOverride,
+        fakeHealthGradientOverride = fakeHealthGradientOverride,
+    }
+    visualizer:AddModule(ZO_UnitVisualizer_PowerShieldModule:New(VISUALIZER_POWER_SHIELD_LAYOUT_DATA))
+end
+
+local function CreateTargetFrame()
+    local targetFrameAnchor = ZO_Anchor:New(TOP, GuiRoot, TOP, 0, 88)
+    local NO_TEMPLATE = nil
+    local targetFrame = UnitFrames:CreateFrame("reticleover", targetFrameAnchor, ZO_UNIT_FRAME_BAR_TEXT_MODE_HIDDEN, "ZO_TargetUnitFrame", NO_TEMPLATE, CreateTargetFrameVisualizer)
+    targetFrame:SetAnimateShowHide(true)
 
     ZO_UnitFrames_UpdateWindow("reticleover", UNIT_CHANGED)
 
     CALLBACK_MANAGER:FireCallbacks("TargetFrameCreated", targetFrame)
+end
+
+local function CreateCompanionGroupFrameVisualizer(frame)
+    CreateGroupFrameVisualizer(frame, "ZO_PowerShieldBarGroupFrameOverlay")
 end
 
 local function CreateLocalCompanion()
@@ -2117,7 +2145,8 @@ local function CreateLocalCompanion()
         return
     end
     local COMPANION_FRAME_ANCHOR = ZO_Anchor:New(TOPLEFT, ZO_SmallGroupAnchorFrame, TOPLEFT, 0, 0)
-    local frame = UnitFrames:CreateFrame("companion", COMPANION_FRAME_ANCHOR, ZO_UNIT_FRAME_BAR_TEXT_MODE_HIDDEN, COMPANION_UNIT_FRAME)
+    local NO_TEMPLATE = nil
+    local frame = UnitFrames:CreateFrame("companion", COMPANION_FRAME_ANCHOR, ZO_UNIT_FRAME_BAR_TEXT_MODE_HIDDEN, COMPANION_UNIT_FRAME, NO_TEMPLATE, CreateCompanionGroupFrameVisualizer)
     frame:SetHiddenForReason("disabled", IsUnitGrouped("player"))
     ZO_UnitFrames_UpdateWindow("companion", UNIT_CHANGED)
 end
@@ -2128,20 +2157,29 @@ local function CreateGroupMember(frameIndex, unitTag, groupSize)
     end
 
     local frameStyle = GROUP_UNIT_FRAME
+    local visualizerTemplate = "ZO_PowerShieldBarGroupFrameOverlay"
+    local noHealingGradientOverride
     if groupSize > STANDARD_GROUP_SIZE_THRESHOLD then
         frameStyle = RAID_UNIT_FRAME
+        visualizerTemplate = "ZO_PowerShieldBarRaidFrameOverlay"
+        noHealingGradientOverride = { ZO_ColorDef:New("1D0000"), ZO_ColorDef:New("722323"), }
     end
 
     local previousGroupTag = GetGroupUnitTagByIndex(frameIndex - 1)
     local previousCompanionTag = GetCompanionUnitTagByGroupUnitTag(previousGroupTag)
     local anchor = GetGroupFrameAnchor(frameIndex, groupSize, UnitFrames:GetFrame(previousGroupTag), UnitFrames:GetFrame(previousCompanionTag))
-    local frame = UnitFrames:CreateFrame(unitTag, anchor, ZO_UNIT_FRAME_BAR_TEXT_MODE_HIDDEN, frameStyle)
+    local NO_TEMPLATE = nil
+    local function visualizerSetupFunction(frame)
+        CreateGroupFrameVisualizer(frame, visualizerTemplate, noHealingGradientOverride)
+    end
+
+    local frame = UnitFrames:CreateFrame(unitTag, anchor, ZO_UNIT_FRAME_BAR_TEXT_MODE_HIDDEN, frameStyle, NO_TEMPLATE, visualizerSetupFunction)
 
     --Create the corresponding companion frame for this group member
     local companionTag = GetCompanionUnitTagByGroupUnitTag(unitTag)
     if companionTag and frameStyle == GROUP_UNIT_FRAME then
-         local companionFrame = UnitFrames:CreateFrame(companionTag, anchor, ZO_UNIT_FRAME_BAR_TEXT_MODE_HIDDEN, COMPANION_GROUP_UNIT_FRAME)
-         companionFrame:SetHiddenForReason("disabled", false)
+        local companionFrame = UnitFrames:CreateFrame(companionTag, anchor, ZO_UNIT_FRAME_BAR_TEXT_MODE_HIDDEN, COMPANION_GROUP_UNIT_FRAME, NO_TEMPLATE, visualizerSetupFunction)
+        companionFrame:SetHiddenForReason("disabled", false)
     end
     frame:SetHiddenForReason("disabled", false)
 
@@ -2166,13 +2204,22 @@ local function CreateGroupsAfter(startIndex)
         local maxCompanionFrames = zo_min(UnitFrames:GetCompanionGroupSize(), MAX_GROUP_SIZE_THRESHOLD - groupSize)
         if maxCompanionFrames > 0 then
 
+            local noHealingGradientOverride = { ZO_ColorDef:New("1D0000"), ZO_ColorDef:New("722323"), }
+            local fakeHealthGradientOverride
+            local visualizerTemplate = "ZO_PowerShieldBarRaidFrameOverlay"
+            local function visualizerSetupFunction(frame)
+                CreateGroupFrameVisualizer(frame, visualizerTemplate, noHealingGradientOverride, fakeHealthGradientOverride)
+            end
+
             --We want to prioritize showing the local player's companion, so do that one first
             local playerGroupTag = GetLocalPlayerGroupUnitTag()
             local playerCompanionTag = GetCompanionUnitTagByGroupUnitTag(playerGroupTag)
             if playerCompanionTag and (DoesUnitExist(playerCompanionTag) or HasPendingCompanion()) then
                 numCompanionFrames = numCompanionFrames + 1
                 local anchor = GetGroupFrameAnchor(groupSize + numCompanionFrames, combinedGroupSize)
-                local frame = UnitFrames:CreateFrame(playerCompanionTag, anchor, ZO_UNIT_FRAME_BAR_TEXT_MODE_HIDDEN, COMPANION_RAID_UNIT_FRAME)
+                fakeHealthGradientOverride = COMPANION_HEALTH_GRADIENT
+                local NO_TEMPLATE = nil
+                local frame = UnitFrames:CreateFrame(playerCompanionTag, anchor, ZO_UNIT_FRAME_BAR_TEXT_MODE_HIDDEN, COMPANION_RAID_UNIT_FRAME, NO_TEMPLATE, visualizerSetupFunction)
                 frame:SetHiddenForReason("disabled", false)
                 ZO_UnitFrames_UpdateWindow(playerCompanionTag, UNIT_CHANGED)
             end
@@ -2188,7 +2235,8 @@ local function CreateGroupsAfter(startIndex)
                 if companionTag and companionTag ~= playerCompanionTag and DoesUnitExist(companionTag) then
                     numCompanionFrames = numCompanionFrames + 1
                     local anchor = GetGroupFrameAnchor(groupSize + numCompanionFrames, combinedGroupSize)
-                    local frame = UnitFrames:CreateFrame(companionTag, anchor, ZO_UNIT_FRAME_BAR_TEXT_MODE_HIDDEN, COMPANION_RAID_UNIT_FRAME)
+                    local NO_TEMPLATE = nil
+                    local frame = UnitFrames:CreateFrame(companionTag, anchor, ZO_UNIT_FRAME_BAR_TEXT_MODE_HIDDEN, COMPANION_RAID_UNIT_FRAME, NO_TEMPLATE, visualizerSetupFunction)
                     frame:SetHiddenForReason("disabled", false)
                     ZO_UnitFrames_UpdateWindow(companionTag, UNIT_CHANGED)
                 end

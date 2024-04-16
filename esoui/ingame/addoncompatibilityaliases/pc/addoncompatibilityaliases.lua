@@ -1329,6 +1329,26 @@ STORE_FAILURE_NOT_ENOUGH_ENDLESS_DUNGEON_CURRENCY = STORE_FAILURE_NOT_ENOUGH_ARC
 LOOT_TYPE_ENDLESS_DUNGEON_CURRENCY = LOOT_TYPE_ARCHIVAL_FORTUNES
 TUTORIAL_TRIGGER_CURRENCY_GAINED_ENDLESS_DUNGEON = TUTORIAL_TRIGGER_CURRENCY_GAINED_ARCHIVAL_FORTUNES
 
+--
+IsZoneStoryActivelyTracked = IsZoneStoryTracked
+
+-- Renaming battleground related enum prefixes and values
+BATTLEGROUND_ALLIANCE_NONE = BATTLEGROUND_TEAM_INVALID
+BATTLEGROUND_ALLIANCE_FIRE_DRAKES = BATTLEGROUND_TEAM_FIRE_DRAKES
+BATTLEGROUND_ALLIANCE_STORM_LORDS = BATTLEGROUND_TEAM_STORM_LORDS
+BATTLEGROUND_ALLIANCE_PIT_DAEMONS = BATTLEGROUND_TEAM_PIT_DAEMONS
+BATTLEGROUND_ALLIANCE_ITERATION_BEGIN = BATTLEGROUND_TEAM_ITERATION_BEGIN
+BATTLEGROUND_ALLIANCE_ITERATION_END = BATTLEGROUND_TEAM_ITERATION_END
+BATTLEGROUND_ALLIANCE_MIN_VALUE = BATTLEGROUND_TEAM_MIN_VALUE
+BATTLEGROUND_ALLIANCE_MAX_VALUE = BATTLEGROUND_TEAM_MAX_VALUE
+INTERFACE_COLOR_TYPE_BATTLEGROUND_ALLIANCE = INTERFACE_COLOR_TYPE_BATTLEGROUND_TEAM
+
+-- Renaming battleground related functions
+GetUnitBattlegroundAlliance = GetUnitBattlegroundTeam
+GetBattlegroundAllianceName = GetBattlegroundTeamName
+GetScoreboardEntryBattlegroundAlliance = GetScoreboardEntryBattlegroundTeam
+GetKillingAttackerBattlegroundAlliance = GetKillingAttackerBattlegroundTeam
+
 --[[
     multiselect combo box ui widget for keyboard screens.
     Uses a custom control definition with the box border, selected item label, and a dropdown button.
@@ -1496,3 +1516,29 @@ ZO_ComboBox_Entry_OnSelected = ZO_ComboBoxDropdown_Keyboard.OnEntryMouseUp
 IsTributeMechanicSetbackForPlayer = function(...)
     return GetTributeMechanicSetbackTypeForPlayer(...) ~= TRIBUTE_MECHANIC_SETBACK_TYPE_NONE 
 end
+
+-- Renaming 'SetPendingInteractionConfirmed' to 'ReplyToPendingInteraction'
+SetPendingInteractionConfirmed = ReplyToPendingInteraction
+
+-- Gamepad Mail Rename
+ZO_MailManager_Gamepad = ZO_Mail_Gamepad_TopLevel
+ZO_MailManager_Gamepad_OnInitialized = ZO_Mail_Gamepad.OnControlInitialized
+GAMEPAD_MAIL_MANAGER_FRAGMENT = GAMEPAD_MAIL_FRAGMENT
+MAIL_MANAGER_GAMEPAD = MAIL_GAMEPAD
+MAIL_MANAGER_GAMEPAD_SCENE = MAIL_GAMEPAD_SCENE
+INBOX_TAB_INDEX = ZO_MAIL_TAB_INDEX.INBOX
+SEND_TAB_INDEX = ZO_MAIL_TAB_INDEX.SEND
+
+-- Gamepad OnUpdatedSearchResults Rename for text search
+ZO_TextSearchObject.OnUpdatedSearchResults = ZO_TextSearchObject.OnUpdateSearchResults
+ZO_TextSearchManager.IsItemInSearchTextResults = ZO_TextSearchManager.IsDataInSearchTextResults
+ZO_Gamepad_ParametricList_BagsSearch_Screen.IsSlotInSearchTextResults = ZO_Gamepad_ParametricList_BagsSearch_Screen.IsDataInSearchTextResults
+
+function GetAbilityCostOverTime(abilityId, mechanic, overrideRank, casterUnitTag)
+    local cost = GetAbilityCostPerTick(abilityId, mechanic, overrideRank)
+    local frequencyMS = GetAbilityFrequencyMS(abilityId, casterUnitTag)
+    return cost, frequencyMS
+end
+
+-- System Mail Improvements
+MAX_LOCAL_MAILS = MAX_MAILS_PER_CATEGORY

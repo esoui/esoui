@@ -79,7 +79,7 @@
                     <Dimensions x="512" y="16" />
                     <TextureCoords left="0" right="1" top="0" bottom="0.75" />
                     <LeadingEdgeTextureCoords left="0" right="1" top="0" bottom="0.6" />
-                    <LeadingEdge alpha="0.3" textureFile="EsoUI/Art/Miscellaneous/progressbar_genericFill_leadingEdge.dds" width="8" height="20" />
+                    <LeadingEdge textureFile="EsoUI/Art/Miscellaneous/progressbar_genericFill_leadingEdge.dds" width="8" height="20" />
                     <Anchor point="TOPLEFT" />
                     <Anchor point="BOTTOMRIGHT" offsetY="-1"/>
                 </StatusBar>

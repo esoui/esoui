@@ -40,11 +40,7 @@
                             <Anchor point="BOTTOMLEFT" offsetX="9" />
 
                             <Controls>
-                                <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop" defaultText="SI_ENTER_KEYWORD_SEARCH_EDIT_DEFAULT">
-                                    <OnTextChanged>
-                                        ZO_TributePatronBook_Keyboard_OnSearchTextChanged(self)
-                                    </OnTextChanged>
-                                </EditBox>
+                                <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop" defaultText="SI_ENTER_KEYWORD_SEARCH_EDIT_DEFAULT" />
                             </Controls>
                         </Backdrop>
 

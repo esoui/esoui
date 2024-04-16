@@ -155,7 +155,7 @@ ZO_CATEGORY_LAYOUT_INFO =
         highlight = "EsoUI/Art/MainMenu/menuBar_skills_over.dds",
 
         indicators = function()
-            if SKILLS_DATA_MANAGER and SKILLS_DATA_MANAGER:AreAnyPlayerSkillLinesNew() then
+            if SKILLS_DATA_MANAGER and SKILLS_DATA_MANAGER:AreAnyPlayerSkillLinesOrAbilitiesNew() then
                 return { ZO_KEYBOARD_NEW_ICON }
             end
         end,
@@ -522,6 +522,7 @@ function MainMenu_Keyboard:AddRawScene(sceneName, category, categoryInfo, sceneG
                 -- however for scene groups we want to show the active scene not necessarily the last shown scene
                 self:SetLastSceneName(categoryInfo, sceneName)
             else
+                ZO_MenuBar_SelectDescriptor(self.sceneGroupBar, sceneName, skipAnimation)
                 -- if we are part of a scene group, when we show the scene, make sure to
                 -- flag this scene as the active one
                 local sceneGroup = SCENE_MANAGER:GetSceneGroup(sceneGroupName)
@@ -550,7 +551,7 @@ function MainMenu_Keyboard:HasLast(categoryInfo)
 end
 
 function MainMenu_Keyboard:AddScene(category, sceneName)
-    local categoryInfo = self.categoryInfo[category]    
+    local categoryInfo = self.categoryInfo[category]
     self:AddRawScene(sceneName, category, categoryInfo)
     if(not self:HasLast(categoryInfo)) then
         self:SetLastSceneName(categoryInfo, sceneName)
@@ -746,18 +747,26 @@ function MainMenu_Keyboard:SetupSceneGroupBar(category, sceneGroupName)
         for i, layoutData in ipairs(menuBarIconData) do
             local sceneName = layoutData.descriptor
             layoutData.callback = function()
-                if not self.ignoreCallbacks then
-                    self.sceneGroupBarLabel:SetText(GetString(layoutData.categoryName))
+                local currentCategoryName = self.sceneGroupBarLabel:GetText()
+                self.sceneGroupBarLabel:SetText(GetString(layoutData.categoryName))
 
+                if not self.ignoreCallbacks then
                     if MAIN_MENU_MANAGER:HasBlockingScene() then
                         local CLICKED_BY_MOUSE = true
-                        local sceneData = {
+                        local sceneData =
+                        {
                             category = category,
                             sceneName = sceneName,
                             sceneGroup = sceneGroup,
                         }
                         MAIN_MENU_MANAGER:ActivatedBlockingScene_Scene(sceneData, CLICKED_BY_MOUSE)
                     else
+                        -- If the current scene will need confirmation to hide then go back to the previous button. We'll select the button for this scene group if and when the scene shows.
+                        if SCENE_MANAGER:WillCurrentSceneConfirmHide() then
+                            local SKIP_ANIMATION = true
+                            ZO_MenuBar_RestoreLastClickedButton(self.sceneGroupBar, SKIP_ANIMATION)
+                            self.sceneGroupBarLabel:SetText(currentCategoryName)
+                        end
                         SCENE_MANAGER:Show(sceneName)
                     end
 
@@ -767,7 +776,11 @@ function MainMenu_Keyboard:SetupSceneGroupBar(category, sceneGroupName)
                 end
             end
             ZO_MenuBar_AddButton(self.sceneGroupBar, layoutData)
-            ZO_MenuBar_SetDescriptorEnabled(self.sceneGroupBar, layoutData.descriptor, (layoutData.enabled == nil or layoutData.enabled == true))
+            local enabled = layoutData.enabled == nil or layoutData.enabled == true
+            if layoutData.enabled and type(layoutData.enabled) == "function" then
+                enabled = layoutData.enabled()
+            end
+            ZO_MenuBar_SetDescriptorEnabled(self.sceneGroupBar, layoutData.descriptor, enabled)
         end
 
         local activeSceneName = sceneGroup:GetActiveScene()
@@ -974,10 +987,11 @@ end
 --Events
 
 function MainMenu_Keyboard:OnCategoryClicked(category)
-    if(not self.ignoreCallbacks) then
-        if(MAIN_MENU_MANAGER:HasBlockingScene()) then
+    if not self.ignoreCallbacks then
+        if MAIN_MENU_MANAGER:HasBlockingScene() then
             local CLICKED_BY_MOUSE = true
-            local sceneData = {
+            local sceneData =
+            {
                 category = category,
             }
             MAIN_MENU_MANAGER:ActivatedBlockingScene_Scene(sceneData, CLICKED_BY_MOUSE)
@@ -993,7 +1007,7 @@ function MainMenu_Keyboard:OnCategoryClicked(category)
 end
 
 function MainMenu_Keyboard:OnSceneGroupTabClicked(sceneGroupName)
-    if(not self.ignoreCallbacks) then
+    if not self.ignoreCallbacks then
         self:ShowSceneGroup(sceneGroupName)
     end
 end

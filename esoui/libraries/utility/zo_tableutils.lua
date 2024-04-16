@@ -180,6 +180,14 @@ function ZO_ClearTableWithCallback(t, c)
     end
 end
 
+function ZO_ShallowNumericallyIndexedTableCopy(source, dest)
+    dest = dest or {}
+    for k, v in ipairs(source) do
+        dest[k] = v
+    end
+    return dest
+end
+
 function ZO_ShallowTableCopy(source, dest)
     dest = dest or {}
     for k, v in pairs(source) do

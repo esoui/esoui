@@ -27,8 +27,6 @@ EsoUI\PublicAllIngames\Tooltip\MarketTooltips.lua
 EsoUI\PublicAllIngames\Tooltip\RewardTooltips.lua
 EsoUI\PublicAllIngames\Tooltip\TributeTooltips.lua
 
-EsoUI\PublicAllIngames\Gamepad\GamepadGamercard.lua
-
 EsoUI\PublicAllIngames\Dialogs\PublicAllIngamesDialogs.xml
 
 EsoUI\PublicAllIngames\ItemPreview\ItemPreview_Shared.lua

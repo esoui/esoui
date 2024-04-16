@@ -39,9 +39,15 @@ function ZO_EndlessDungeonBuffTracker_Gamepad:InitializeControls()
 end
 
 function ZO_EndlessDungeonBuffTracker_Gamepad:InitializeGridList()
-    ZO_EndlessDungeonBuffTracker_Shared.InitializeGridList(self, ZO_GridScrollList_Gamepad, "ZO_EndDunBuffTrackerGridEntry_Gamepad", "ZO_EndDunBuffTrackerGridHeader_Gamepad", "ZO_GridScrollList_Highlight_Gamepad")
+    ZO_EndlessDungeonBuffTracker_Shared.InitializeGridList(self, "ZO_EndDunBuffTrackerGridEntry_Gamepad", "ZO_EndDunBuffTrackerGridHeader_Gamepad")
 
     self.entryDataObjectPool = ZO_EntryDataPool:New(ZO_EntryData)
+
+    local NO_AUTO_FILL_ROWS = nil
+    local RESIZE_TO_FIT_COLUMN_MAX = 5
+    local RESIZE_TO_FIT_ROW_MAX = 6
+    self.gridList = ZO_GridScrollList_Gamepad:New(self.gridListControl, "ZO_GridScrollList_Highlight_Gamepad", NO_AUTO_FILL_ROWS, RESIZE_TO_FIT_COLUMN_MAX, RESIZE_TO_FIT_ROW_MAX)
+
     local NO_HIDE_CALLBACK = nil
     local gridList = self.gridList
     gridList:AddHeaderTemplate("ZO_EndDunBuffTrackerGridHeader_Gamepad", ZO_ENDLESS_DUNGEON_BUFF_GRID_HEADER_ROW_HEIGHT_GAMEPAD, ZO_EndlessDungeonBuffTracker_Shared.SetupGridHeader)

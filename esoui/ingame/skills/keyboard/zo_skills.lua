@@ -285,7 +285,7 @@ function ZO_InitializeKeyboardRespecConfirmationGoldDialog(control)
         {
             text = SI_SKILL_RESPEC_CONFIRM_DIALOG_TITLE,
         },
-        mainText = 
+        mainText =
         {
             text = SI_SKILL_RESPEC_CONFIRM_DIALOG_BODY_INTRO,
         },
@@ -310,7 +310,7 @@ end
 
 local function InitializeKeyboardSkillRespecConfirmClearDialog()
     local control = ZO_SkillRespecConfirmClearDialog
-    
+
     -- Radio buttons
     local skillLineRadioButton = control:GetNamedChild("SkillLineRadioButton")
     local skillLineRadioButtonLabel = skillLineRadioButton:GetNamedChild("Label")
@@ -337,7 +337,7 @@ local function InitializeKeyboardSkillRespecConfirmClearDialog()
                 return GetString("SI_SKILLPOINTALLOCATIONMODE_CLEARKEYBIND", SKILLS_AND_ACTION_BAR_MANAGER:GetSkillPointAllocationMode())
             end,
         },
-        mainText = 
+        mainText =
         {
             text = function()
                 return GetString("SI_SKILLPOINTALLOCATIONMODE_CLEARCHOICEHEADERKEYBOARD", SKILLS_AND_ACTION_BAR_MANAGER:GetSkillPointAllocationMode())
@@ -367,19 +367,81 @@ local function InitializeKeyboardSkillRespecConfirmClearDialog()
     })
 end
 
+function ZO_SelectSkillStyleDialog_OnInitialized(control)
+    control.selectSkillStyleContainerControl = control:GetNamedChild("SkillStyleContainer")
+    control.selectSkillStyleGridListControl = control.selectSkillStyleContainerControl:GetNamedChild("Panel")
+    control.defaultStyleButton = control:GetNamedChild("DefaultStyle")
+    control.defaultStyleBorder = control:GetNamedChild("DefaultSelectedBorder")
+    control.skillStylesLabel = control:GetNamedChild("SkillStylesLabel")
+    control.notPurchasedLabel = control:GetNamedChild("NotPurchasedLabel")
+
+    local function OnDefaultStyleMouseUp()
+        control.skillStyleSelector:TryClearSelection()
+    end
+
+    control.defaultStyleButton:SetHandler("OnMouseUp", OnDefaultStyleMouseUp)
+
+    local function OnSkillStyleIconSelected(newIconIndex)
+        control.defaultStyleBorder:SetHidden(newIconIndex ~= nil)
+    end
+
+    control.skillStyleSelector = ZO_SkillStyleIconSelector_Keyboard:New(control.selectSkillStyleGridListControl)
+    control.skillStyleSelector:SetSkillStyleIconSelectedCallback(OnSkillStyleIconSelected)
+
+    local function SetupSelectSkillStyleDialog(dialog, data)
+        control.skillStyleSelector:SetSkillData(data.skillData)
+        control.skillStyleSelector:BuildSkillStyleSelectorIconGridList()
+        control.defaultStyleBorder:SetHidden(dialog.skillStyleSelector:GetActiveData() ~= nil)
+        if data.skillData.isPurchased then
+            control.selectSkillStyleContainerControl:ClearAnchors()
+            control.selectSkillStyleContainerControl:SetAnchor(TOP, control.skillStylesLabel, BOTTOM, 0, 5)
+            control.notPurchasedLabel:SetHidden(true)
+        else
+            control.selectSkillStyleContainerControl:ClearAnchors()
+            control.selectSkillStyleContainerControl:SetAnchor(TOP, control.notPurchasedLabel, BOTTOM, 0, 5)
+            control.notPurchasedLabel:SetHidden(false)
+        end
+    end
+
+    ZO_Dialogs_RegisterCustomDialog("SKILL_STYLE_SELECT_KEYBOARD",
+    {
+        customControl = control,
+        setup = SetupSelectSkillStyleDialog,
+        title =
+        {
+            text = function(dialog)
+                local data = dialog.data
+                local skillType = data.skillData.skillLineData.skillTypeData.skillType
+                local skillLineIndex = data.skillData.skillLineData.skillLineIndex
+                local skillIndex = data.skillData.skillIndex
+                return zo_strformat(SI_SKILL_STYLING_DIALOG_TITLE, GetProgressionSkillProgressionName(skillType, skillLineIndex, skillIndex))
+            end,
+        },
+        mainText =
+        {
+            text = "",
+        },
+        buttons =
+        {
+            {
+                keybind = "DIALOG_NEGATIVE",
+                control = control:GetNamedChild("Close"),
+                text = SI_DIALOG_CLOSE,
+                callback = function(dialog)
+                    ClearTooltip(ItemTooltip)
+                end,
+            },
+        }
+    })
+end
+
 -- Skill Manager
 --------------------
 
 local SKILL_ABILITY_DATA = 1
 local SKILL_HEADER_DATA = 2
 
-ZO_SkillsManager = ZO_CallbackObject:Subclass()
-
-function ZO_SkillsManager:New(...)
-    local manager = ZO_CallbackObject.New(self)
-    manager:Initialize(...)
-    return manager
-end
+ZO_SkillsManager = ZO_InitializingCallbackObject:Subclass()
 
 function ZO_SkillsManager:Initialize(control)
     self.control = control
@@ -422,18 +484,18 @@ function ZO_SkillsManager:InitializeSkillLineList()
         control.text:SetModifyTextType(MODIFY_TEXT_TYPE_UPPERCASE)
         control.text:SetText(skillTypeData:GetName())
         local up, down, over = skillTypeData:GetKeyboardIcons()
-        
+
         control.icon:SetTexture(open and down or up)
         control.iconHighlight:SetTexture(over)
 
         control.statusIcon:ClearIcons()
 
-        if skillTypeData:AreAnySkillLinesNew() then
+        if skillTypeData:AreAnySkillLinesOrAbilitiesNew() then
             control.statusIcon:AddIcon(ZO_KEYBOARD_NEW_ICON)
         end
 
         control.statusIcon:Show()
-        
+
         ZO_IconHeader_Setup(control, open)
     end
 
@@ -448,7 +510,7 @@ function ZO_SkillsManager:InitializeSkillLineList()
 
         control.statusIcon:ClearIcons()
 
-        if skillLineData:IsNew() or skillLineData:IsAdvised() then
+        if skillLineData:IsSkillLineOrAbilitiesNew() or skillLineData:IsAdvised() then
             control.statusIcon:AddIcon(ZO_KEYBOARD_NEW_ICON)
         end
 
@@ -523,7 +585,6 @@ end
 function ZO_SkillsManager:InitializeKeybindDescriptors()
     self.keybindStripDescriptor =
     {
-        
         alignment = KEYBIND_STRIP_ALIGN_CENTER,
 
         {
@@ -561,6 +622,33 @@ function ZO_SkillsManager:InitializeKeybindDescriptors()
 
             visible = function()
                 return SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeAllowDecrease()
+            end
+        },
+
+        {
+            name = function()
+                local collectibleData = SCRIBING_DATA_MANAGER:GetScribingPurchasableCollectibleData()
+                if collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_CHAPTER) then
+                    return GetString(SI_SCRIBING_ACTION_UPGRADE)
+                else
+                    return GetString(SI_GAMEPAD_DLC_BOOK_ACTION_OPEN_CROWN_STORE)
+                end
+            end,
+
+            keybind = "UI_SHORTCUT_TERTIARY",
+
+            callback = function()
+                local collectibleData = SCRIBING_DATA_MANAGER:GetScribingPurchasableCollectibleData()
+                if collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_CHAPTER) then
+                    ZO_ShowChapterUpgradePlatformScreen(MARKET_OPEN_OPERATION_COLLECTIONS_DLC)
+                else
+                    local searchTerm = zo_strformat(SI_CROWN_STORE_SEARCH_FORMAT_STRING, collectibleData:GetName())
+                    ShowMarketAndSearch(searchTerm, MARKET_OPEN_OPERATION_COLLECTIONS_DLC)
+                end
+            end,
+
+            visible = function()
+                return not SCRIBING_DATA_MANAGER:IsScribingUnlocked()
             end
         },
 
@@ -660,21 +748,73 @@ function ZO_SkillsManager:RegisterForEvents()
         TUTORIAL_SYSTEM:RemoveTutorialByTrigger(TUTORIAL_TYPE_POINTER_BOX, TUTORIAL_TRIGGER_WEAPON_SWAP_SHOWN_IN_SKILLS_AFTER_UNLOCK_POINTER_BOX)
     end)
 
+    local function OnConfirmHideScene(...)
+        self:OnConfirmHideScene(...)
+    end
+
     local function OnSkillPointAllocationModeChanged()
         self.skillLinesTreeRefreshGroup:MarkDirty("Visible")
         self.skillListRefreshGroup:MarkDirty("Visible")
         self:UpdateKeybinds()
+
+        -- Only set a hide confirmation callback when we are in a mode where you will lose your changes when leaving
+        -- If we always have a callback we will cause a small visual hiccup with the main menu tabs if we don't
+        -- actually show a confirmation and immediately accept.
+        if SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeBatchSave() then
+            KEYBOARD_SKILLS_SCENE:SetHideSceneConfirmationCallback(OnConfirmHideScene)
+        else
+            KEYBOARD_SKILLS_SCENE:SetHideSceneConfirmationCallback(nil)
+        end
     end
     SKILLS_AND_ACTION_BAR_MANAGER:RegisterCallback("SkillPointAllocationModeChanged", OnSkillPointAllocationModeChanged)
     SKILLS_AND_ACTION_BAR_MANAGER:RegisterCallback("RespecStateReset", OnFullSystemUpdated)
 
+    -- make sure we've correctly set our hide confirmation callback to start with
+    if SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeBatchSave() then
+        KEYBOARD_SKILLS_SCENE:SetHideSceneConfirmationCallback(OnConfirmHideScene)
+    end
+
     control:RegisterForEvent(EVENT_PLAYER_DEACTIVATED, function() self:OnPlayerDeactivated() end)
-    KEYBOARD_SKILLS_SCENE:SetHideSceneConfirmationCallback(function(...) self:OnConfirmHideScene(...) end)
 
     local function OnPurchaseLockStateChanged()
         self.skillListRefreshGroup:MarkDirty("Visible")
     end
     control:RegisterForEvent(EVENT_ACTION_BAR_LOCKED_REASON_CHANGED, OnPurchaseLockStateChanged)
+
+    local function OnCollectibleUpdated(collectibleId)
+        local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+        if collectibleData:IsSkillStyle() then
+            local entries = ZO_ScrollList_GetDataList(self.skillList)
+            for index, entry in ipairs(entries) do
+                if entry.data.skillData and entry.control and entry.data.skillData.progressionId == collectibleData:GetSkillStyleProgressionId() then
+                    local entryCollectibleId = GetActiveProgressionSkillAbilityFxOverrideCollectibleId(entry.data.skillData.progressionId)
+                    if entryCollectibleId == 0 then
+                        entry.control.skillStyleControl.defaultStyleButton:SetHidden(false)
+                        entry.control.skillStyleControl.selectedStyleButton:SetHidden(true)
+                    else
+                        entry.control.skillStyleControl.defaultStyleButton:SetHidden(true)
+                        entry.control.skillStyleControl.selectedStyleButton:SetHidden(false)
+                        entry.control.skillStyleControl.selectedStyleButton.icon:SetTexture(collectibleData:GetIcon())
+                    end
+                end
+            end
+        end
+    end
+
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleUpdated", OnCollectibleUpdated)
+
+    local function OnCollectionUpdated(collectionUpdateType, collectiblesByNewUnlockState)
+        local scribingCollectibleData = SCRIBING_DATA_MANAGER:GetScribingUnlockCollectibleData()
+        for _, unlockStateTable in pairs(collectiblesByNewUnlockState) do
+            for _, collectibleData in ipairs(unlockStateTable) do
+                if collectibleData == scribingCollectibleData then
+                    MAIN_MENU_KEYBOARD:UpdateSceneGroupButtons("skillsSceneGroup")
+                end
+            end
+        end
+    end
+
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", OnCollectionUpdated)
 end
 
 function ZO_SkillsManager:GetSelectedSkillLineData()
@@ -912,7 +1052,11 @@ do
         ZO_ScrollList_Clear(self.skillList)
         ZO_ClearTable(g_shownHeaderTexts)
 
-        for _, skillData in skillLineData:SkillIterator() do
+        local function IsSkillVisible(skillData)
+            return not skillData:IsHidden()
+        end
+
+        for _, skillData in skillLineData:SkillIterator({ IsSkillVisible }) do
             local headerText = skillData:GetHeaderText()
             if not g_shownHeaderTexts[headerText] then
                 table.insert(scrollData, ZO_ScrollList_CreateDataEntry(SKILL_HEADER_DATA, { headerText = headerText }))
@@ -1050,4 +1194,30 @@ end
 function ZO_SkillsNavigationEntry_OnInitialized(self)
     ZO_SelectableLabel_OnInitialized(self)
     self.statusIcon = self:GetNamedChild("StatusIcon")
+end
+
+function ZO_SkillStyle_SelectorIcon_Keyboard_OnMouseEnter(self)
+    if self.data and self.data.collectibleData then
+        local offsetX = ZO_SelectSkillStyleDialog:GetRight() - self:GetRight() + 5
+        InitializeTooltip(ItemTooltip, self, LEFT, offsetX, 0, RIGHT)
+        local SHOW_NICKNAME = true
+        local SHOW_PURCHASABLE_HINT = true
+        local SHOW_BLOCK_REASON = true
+        ItemTooltip:SetCollectible(self.data.collectibleData:GetId(), SHOW_NICKNAME, SHOW_PURCHASABLE_HINT, SHOW_BLOCK_REASON, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
+    end
+end
+
+function ZO_SkillStyle_SelectorIcon_Keyboard_OnMouseExit(self)
+    ClearTooltip(ItemTooltip)
+end
+
+function ZO_SelectSkillStyleDialog_DefaultStyle_Keyboard_OnMouseEnter(self)
+    local offsetX = ZO_SelectSkillStyleDialog:GetRight() - self:GetRight() + 5
+    InitializeTooltip(InformationTooltip, self, LEFT, offsetX, 0, RIGHT)
+    InformationTooltip:AddLine(GetString(SI_SKILL_STYLING_TOOLTIP_DEFAULT_TITLE), "", ZO_NORMAL_TEXT:UnpackRGBA())
+    InformationTooltip:AddLine(GetString(SI_SKILL_STYLING_TOOLTIP_DEFAULT_DESCRIPTION), "", ZO_NORMAL_TEXT:UnpackRGBA())
+end
+
+function ZO_SelectSkillStyleDialog_DefaultStyle_Keyboard_OnMouseExit(self)
+    ClearTooltip(InformationTooltip)
 end

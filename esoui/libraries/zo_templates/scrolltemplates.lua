@@ -2124,7 +2124,7 @@ end
 function ZO_ScrollList_Commit(self)
     local windowHeight = ZO_ScrollList_GetHeight(self)
     local selectionsEnabled = AreSelectionsEnabled(self)
-        
+
     --the window isn't big enough to show anything (its anchors probably haven't been processed yet), so delay the commit until that happens
     if windowHeight <= 0 then
         self.contents:SetHandler("OnUpdate", OnContentsUpdate)
@@ -2134,9 +2134,9 @@ function ZO_ScrollList_Commit(self)
     self.contents:SetHandler("OnUpdate", nil)
 
     CheckRunHandler(self, "OnMouseExit")
-    
+
     ZO_ClearNumericallyIndexedTable(self.visibleData)
-    
+
     local scrollableDistance = 0
     local foundSelected = false
     if self.mode == SCROLL_LIST_UNIFORM then
@@ -2157,7 +2157,7 @@ function ZO_ScrollList_Commit(self)
             currentY = currentY + GetDataTypeInfo(self, currentData.typeId).height
             currentData.bottom = currentY
             table.insert(self.visibleData, i)
-            
+
             if selectionsEnabled and AreDataEqualSelections(self, currentData.data, self.selectedData) then
                 foundSelected = true
                 ZO_ScrollList_SelectData(self, currentData.data, NO_DATA_CONTROL, RESELECTING_DURING_REBUILD, ANIMATE_INSTANTLY)
@@ -2177,10 +2177,21 @@ function ZO_ScrollList_Commit(self)
         end
         local currentX = layoutInfo.startPos
         local currentY = 0
+        self.maxDimensionX = 0
+        self.maxDimensionY = 0
         for i, currentData in ipairs(self.data) do
             local currentOperation = GetDataTypeInfo(self, currentData.typeId)
             if currentOperation:IsDataVisible(currentData.data) then
                 currentX, currentY = currentOperation:GetPositionsAndAdvance(layoutInfo, currentX, currentY, currentData)
+                if currentX > self.maxDimensionX then
+                    self.maxDimensionX = currentX
+                end
+                if currentY > self.maxDimensionY then
+                    self.maxDimensionY = currentY
+                end
+                if currentY < currentData.bottom then
+                    self.maxDimensionY = currentData.bottom
+                end
                 table.insert(self.visibleData, i)
 
                 if selectionsEnabled and AreDataEqualSelections(self, currentData.data, self.selectedData) then
@@ -2189,6 +2200,7 @@ function ZO_ScrollList_Commit(self)
                 end
             end
         end
+
         if #self.visibleData > 0 then
             local lastVisibleDataIndex = self.visibleData[#self.visibleData]
             scrollableDistance = self.data[lastVisibleDataIndex].bottom - windowHeight
@@ -2196,9 +2208,9 @@ function ZO_ScrollList_Commit(self)
             scrollableDistance = 0
         end
     end
-    
+
     ResizeScrollBar(self, scrollableDistance)
-    
+
     --nuke the active list since things may have left it
     local i = #self.activeControls
     while i >= 1 do

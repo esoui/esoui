@@ -42,7 +42,6 @@ function ZO_EndlessDungeonLeaderboardsManager_Shared:RegisterForEvents()
 
     local control = self.control
     control:RegisterForEvent(EVENT_ENDLESS_DUNGEON_LEADERBOARD_PLAYER_DATA_CHANGED, function() self:UpdatePlayerInfo() end)
-    control:RegisterForEvent(EVENT_ENDLESS_DUNGEON_TIMER_STATE_UPDATE, function() self:UpdatePlayerParticipationStatus() end)
     control:RegisterForEvent(EVENT_ENDLESS_DUNGEON_SCORE_UPDATED, function() self:UpdateEndlessDungeonScore() end)
     control:RegisterForEvent(EVENT_PLAYER_ACTIVATED, SelectCurrentEndlessDungeon)
     control:RegisterForEvent(EVENT_ENDLESS_DUNGEON_OF_THE_WEEK_TURNOVER, function() self:HandleWeeklyTurnover() end)

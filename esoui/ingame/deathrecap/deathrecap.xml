@@ -2,23 +2,28 @@
     <Animations>
         <AnimationTimeline name="ZO_DeathRecapAttackAnimation">
             <Animations>
-                <AnimationTimeline>                    
+                <AnimationTimeline>
                     <Animations>
                         <!-- Icon -->
                         <AlphaAnimation duration="100" delay="166" startAlpha="0" endAlpha="1" />
                         <ScaleAnimation duration="266" startScale="0" endScale="1.3" />
                         <ScaleAnimation duration="400" delay="266" startScale="1.3" endScale="1" />
-                        
+
+                        <!-- Style Icon -->
+                        <AlphaAnimation duration="100" delay="166" startAlpha="0" endAlpha="1" />
+                        <ScaleAnimation duration="266" startScale="0" endScale="1.3" />
+                        <ScaleAnimation duration="400" delay="266" startScale="1.3" endScale="1" />
+
                         <!-- Label -->
                         <AlphaAnimation duration="500" delay="166" startAlpha="0" endAlpha="1" />
-                        
+
                         <!-- Damage Over Time Count -->
                         <AlphaAnimation duration="100" delay="166" startAlpha="0" endAlpha="1" />
                         <ScaleAnimation duration="266" startScale="0" endScale="1.3" />
                         <ScaleAnimation duration="400" delay="266" startScale="1.3" endScale="1" />
                     </Animations>
                     <Callbacks>
-                        <Callback delay="166">                            
+                        <Callback delay="166">
                             if(self.isKillingBlow) then
                                 PlaySound(SOUNDS.DEATH_RECAP_KILLING_BLOW_SHOWN)
                             else
@@ -64,7 +69,7 @@
             </Animations>
         </AnimationTimeline>
     </Animations>
-    
+
     <Controls>
         <Control name="ZO_DeathRecapBackground" virtual="true">
             <Controls>
@@ -110,13 +115,13 @@
                 </Control>
             </Controls>
         </Control>
-        
+
         <Control name="ZO_DeathRecapAttack" resizeToFitDescendents="true" virtual="true">
             <DimensionConstraints minY="64" />
             <Controls>
                 <Texture name="$(parent)Icon" tier="MEDIUM" excludeFromResizeToFitExtents="true">
                     <Dimensions x="56" y="56"/>
-                    <Anchor point="CENTER" offsetX="110" offsetY="32" relativePoint="TOPLEFT"/>
+                    <Anchor point="CENTER" offsetX="150" offsetY="32" relativePoint="TOPLEFT"/>
                     <Controls>
                         <Control name="$(parent)Border" hidden="true">
                             <Anchor point="CENTER"/>
@@ -152,6 +157,16 @@
                         </Control>
                     </Controls>
                 </Texture>
+                <Control name="$(parent)SkillStyle" excludeFromResizeToFitExtents="true" hidden="true">
+                    <Dimensions x="40" y="40"/>
+                    <Anchor point="RIGHT" relativeTo="$(parent)Icon" relativePoint="LEFT" offsetX="-15" />
+
+                    <Controls>
+                        <Texture name="$(parent)Icon" tier="LOW">
+                            <AnchorFill/>
+                        </Texture>
+                    </Controls>
+                </Control>
                 <Control name="$(parent)NumAttackHits" resizeToFitDescendents="true" excludeFromResizeToFitExtents="true" hidden="true">
                     <Anchor point="RIGHT" relativeTo="$(parent)Icon" relativePoint="LEFT" offsetX="-15" />
                     <Controls>

@@ -216,7 +216,7 @@ function ZO_HousingFurnitureList_Gamepad:InitializeKeybindStripDescriptors()
                 local ownerDisplayName = GetCurrentHouseOwner()
                 local link = ZO_HousingBook_GetHouseLink(houseId, ownerDisplayName)
                 if link then
-                    MAIL_MANAGER_GAMEPAD.inbox:InsertBodyText(link)
+                    MAIL_GAMEPAD.inbox:InsertBodyText(link)
                 end
             end,
             alignment = KEYBIND_STRIP_ALIGN_RIGHT,
@@ -667,29 +667,46 @@ function ZO_HousingFurnitureList_Gamepad:UpdateLists()
     self:BuildCategoryList()
 
     if self.currentList then
-        local success = self.currentList.buildListFunction()
-        --if the list was empty with the new data then switch back to the top level category list
-        if not success then
-            self:SwitchActiveList(self.categoryList)
-        end
+        self.currentList.buildListFunction()
     end
 
     self:UpdateCurrentKeybinds()
 end
 
 function ZO_HousingFurnitureList_Gamepad:ViewCategory()
+    self.currentCategoryData = nil
+    self.currentCategoryId = nil
+    self.currentCategoryName = nil
     self:RefreshCurrentCategoryData()
     self:BuildFurnitureList()
     self:SwitchActiveList(self.furnitureList)
 end
 
 function ZO_HousingFurnitureList_Gamepad:RefreshCurrentCategoryData()
-    local entryData = self.categoryList.list:GetTargetData()
-    if entryData ~= nil then
-        local categoryTreeData = self:GetCategoryTreeDataRoot()
-        self.currentCategoryData = categoryTreeData:GetSubcategory(entryData.categoryId)
+    if self.currentCategoryId == nil then
+        -- Stepping into the new category.  Grab its data.
+        local entryData = self.categoryList.list:GetTargetData()
+        if entryData ~= nil then
+            local categoryTreeData = self:GetCategoryTreeDataRoot()
+            self.currentCategoryData = categoryTreeData:GetSubcategory(entryData.categoryId)
+            -- When searches return 0 results, I need to stay in that category and display some data.  Cache off the important bits.
+            self.currentCategoryId = entryData.categoryId
+            self.currentCategoryName = self.currentCategoryData:GetName()
+        else
+            self.currentCategoryData = nil
+            self.currentCategoryId = nil
+            self.currentCategoryName = nil
+        end
     else
-        self.currentCategoryData = nil
+        -- The data tree has been rebuilt.  Set our category to the new data.
+        local categoryTreeData = self:GetCategoryTreeDataRoot()
+        self.currentCategoryData = categoryTreeData:GetSubcategory(self.currentCategoryId)
+    end
+    
+    if self.currentCategoryName then
+        GAMEPAD_HOUSING_FURNITURE_BROWSER:SetTitleText(self.currentCategoryName)
+    else
+        GAMEPAD_HOUSING_FURNITURE_BROWSER:SetTitleText(nil)
     end
 end
 
@@ -747,8 +764,10 @@ function ZO_HousingFurnitureList_Gamepad:SwitchActiveList(list)
 
         if list == self.categoryList then
             self:SetFurnitureRightInfoState(RIGHT_INFO_STATE.HOUSE_INFO)
+            GAMEPAD_HOUSING_FURNITURE_BROWSER:SetTitleText(nil)
         elseif list == self.furnitureList then
             self:SetFurnitureRightInfoState(RIGHT_INFO_STATE.FURNITURE_INFO)
+            GAMEPAD_HOUSING_FURNITURE_BROWSER:SetTitleText(self.currentCategoryName)
         end
     else
         self.owner:SetCurrentList(nil)
@@ -942,16 +961,28 @@ function ZO_HousingFurnitureList_Gamepad:BuildFurnitureList()
 
     furnitureList:Clear()
 
-    if not self.currentCategoryData then
-        return false
-    end
-
-    self:BuildFurnitureEntriesInCategory(self.currentCategoryData)
-    for _, subCategory in ipairs(self.currentCategoryData:GetAllSubcategories()) do
-        self:BuildFurnitureEntriesInCategory(subCategory)
+    if self.currentCategoryData then
+        self:BuildFurnitureEntriesInCategory(self.currentCategoryData)
+        for _, subCategory in ipairs(self.currentCategoryData:GetAllSubcategories()) do
+            self:BuildFurnitureEntriesInCategory(subCategory)
+        end
     end
 
     if furnitureList:IsEmpty() then
+        if self.currentCategoryName == nil then
+            -- No category name.  We're at the root level.
+            furnitureList:SetNoItemText(self:GetNoItemText())
+        else
+            local categoryTreeData = self:GetCategoryTreeDataRoot()
+            if categoryTreeData and #categoryTreeData:GetAllSubcategories() > 0 then
+                -- No items in this category, but exist elsewhere.
+                furnitureList:SetNoItemText(zo_strformat(SI_HOUSING_FURNITURE_NO_SEARCH_RESULTS_IN_CATEGORY, self.currentCategoryName))
+            else
+                -- No items in any category.
+                furnitureList:SetNoItemText(GetString(SI_HOUSING_FURNITURE_NO_SEARCH_RESULTS))
+            end
+        end
+        
         furnitureList:Commit()
         return false
     end

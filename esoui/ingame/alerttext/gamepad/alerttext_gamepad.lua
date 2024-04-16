@@ -64,6 +64,16 @@ function ZO_AlertText_Gamepad:Initialize(control)
     self.alerts:SetHoldTimes(6000)
     self.alerts:SetAdditionalVerticalSpacing(9)
     self.alerts:SetFadesInImmediately(true)
+
+    local function OnAppGuiHiddenStateChanged(_, hidden)
+        self.alerts:SetHoldDisplayingEntries(not hidden)
+    end
+
+    EVENT_MANAGER:RegisterForEvent("AlertText_Gamepad", EVENT_APP_GUI_HIDDEN_STATE_CHANGED, OnAppGuiHiddenStateChanged)
+
+    if not GetGuiHidden("App") then
+        self.alerts:SetHoldDisplayingEntries(true)
+    end
 end
 
 function ZO_AlertText_Gamepad:HasActiveEntries()

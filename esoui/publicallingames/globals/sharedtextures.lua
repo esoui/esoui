@@ -28,9 +28,9 @@ end
 do
     local LARGE_BATTLEGROUND_ALLIANCE_ICONS =
     {
-        [BATTLEGROUND_ALLIANCE_FIRE_DRAKES] = "EsoUI/Art/Stats/battleground_alliance_badge_Fire_Drakes.dds",
-        [BATTLEGROUND_ALLIANCE_PIT_DAEMONS] = "EsoUI/Art/Stats/battleground_alliance_badge_Pit_Daemons.dds",
-        [BATTLEGROUND_ALLIANCE_STORM_LORDS] = "EsoUI/Art/Stats/battleground_alliance_badge_Storm_Lords.dds",
+        [BATTLEGROUND_TEAM_FIRE_DRAKES] = "EsoUI/Art/Stats/battleground_alliance_badge_Fire_Drakes.dds",
+        [BATTLEGROUND_TEAM_PIT_DAEMONS] = "EsoUI/Art/Stats/battleground_alliance_badge_Pit_Daemons.dds",
+        [BATTLEGROUND_TEAM_STORM_LORDS] = "EsoUI/Art/Stats/battleground_alliance_badge_Storm_Lords.dds",
     }
 
     function ZO_GetLargeBattlegroundAllianceSymbolIcon(bgAlliance)
@@ -41,9 +41,9 @@ end
 do
     local COUNTDOWN_BATTLEGROUND_ALLIANCE_ICONS =
     {
-        [BATTLEGROUND_ALLIANCE_FIRE_DRAKES] = "EsoUI/Art/HUD/HUD_Countdown_Badge_BG_orange.dds",
-        [BATTLEGROUND_ALLIANCE_PIT_DAEMONS] = "EsoUI/Art/HUD/HUD_Countdown_Badge_BG_green.dds",
-        [BATTLEGROUND_ALLIANCE_STORM_LORDS] = "EsoUI/Art/HUD/HUD_Countdown_Badge_BG_purple.dds",
+        [BATTLEGROUND_TEAM_FIRE_DRAKES] = "EsoUI/Art/HUD/HUD_Countdown_Badge_BG_orange.dds",
+        [BATTLEGROUND_TEAM_PIT_DAEMONS] = "EsoUI/Art/HUD/HUD_Countdown_Badge_BG_green.dds",
+        [BATTLEGROUND_TEAM_STORM_LORDS] = "EsoUI/Art/HUD/HUD_Countdown_Badge_BG_purple.dds",
     }
 
     function ZO_GetCountdownBattlegroundAllianceSymbolIcon(bgAlliance)
@@ -298,9 +298,9 @@ end
 do
     local KEYBOARD_BATTLEGROUND_TEAM_ICONS =
     {
-        [BATTLEGROUND_ALLIANCE_FIRE_DRAKES] = "EsoUI/Art/Battlegrounds/battlegrounds_teamIcon_orange.dds",
-        [BATTLEGROUND_ALLIANCE_PIT_DAEMONS] = "EsoUI/Art/Battlegrounds/battlegrounds_teamIcon_green.dds",
-        [BATTLEGROUND_ALLIANCE_STORM_LORDS] = "EsoUI/Art/Battlegrounds/battlegrounds_teamIcon_purple.dds",
+        [BATTLEGROUND_TEAM_FIRE_DRAKES] = "EsoUI/Art/Battlegrounds/battlegrounds_teamIcon_orange.dds",
+        [BATTLEGROUND_TEAM_PIT_DAEMONS] = "EsoUI/Art/Battlegrounds/battlegrounds_teamIcon_green.dds",
+        [BATTLEGROUND_TEAM_STORM_LORDS] = "EsoUI/Art/Battlegrounds/battlegrounds_teamIcon_purple.dds",
     }
 
     function ZO_GetKeyboardBattlegroundTeamIcon(battlegroundAlliance)
@@ -311,9 +311,9 @@ end
 do
     local GAMEPAD_BATTLEGROUND_TEAM_ICONS =
     {
-        [BATTLEGROUND_ALLIANCE_FIRE_DRAKES] = "EsoUI/Art/Battlegrounds/Gamepad/gp_battlegrounds_teamIcon_orange.dds",
-        [BATTLEGROUND_ALLIANCE_PIT_DAEMONS] = "EsoUI/Art/Battlegrounds/Gamepad/gp_battlegrounds_teamIcon_green.dds",
-        [BATTLEGROUND_ALLIANCE_STORM_LORDS] = "EsoUI/Art/Battlegrounds/Gamepad/gp_battlegrounds_teamIcon_purple.dds",
+        [BATTLEGROUND_TEAM_FIRE_DRAKES] = "EsoUI/Art/Battlegrounds/Gamepad/gp_battlegrounds_teamIcon_orange.dds",
+        [BATTLEGROUND_TEAM_PIT_DAEMONS] = "EsoUI/Art/Battlegrounds/Gamepad/gp_battlegrounds_teamIcon_green.dds",
+        [BATTLEGROUND_TEAM_STORM_LORDS] = "EsoUI/Art/Battlegrounds/Gamepad/gp_battlegrounds_teamIcon_purple.dds",
     }
 
     function ZO_GetGamepadBattlegroundTeamIcon(battlegroundAlliance)

@@ -735,8 +735,10 @@ end
 function ZO_ParametricScrollList:Commit(dontReselect, blockSelectionChangedCallback)
     self.lastContinousTargetOffset = nil
     self:SetMoving(false)
-    MoveSelectedToOldSelected(self)
+    -- Order matters for the following functions; resetting our controls after MoveSelectedToOldSelected wipes the information about our selected data risks a UI error (ESO-644830).
+    -- The OnRectChange callback in SetHandleDynamicViewProperties involves calling UpdateAnchors which will explode if we don't have a valid selected index.
     ReleaseAllControls(self)
+    MoveSelectedToOldSelected(self)
 
     self.validGradientDirty = true
     local dataListSize = #self.dataList
@@ -1404,7 +1406,7 @@ function ZO_ParametricScrollList:SetHandleDynamicViewProperties(handleDynamicVie
                     if not zo_floatsAreEqual(newTop, oldTop) or not zo_floatsAreEqual(newBottom, oldBottom) then
                         --If the list has less than ZO_VERTICAL_PARAMETRIC_LIST_DEFAULT_FADE_GRADIENT_SIZE UI units from its center control to the scroll top or bottom then automatically size the fade gradients to not overlap the center control.
                         self.validGradientDirty = true
-                        
+
                         --If the list changes height we need to update anchors because that function is responsible for hiding controls that went out of view or showing controls that are now in view.
                         self:RefreshVisible()
                     end

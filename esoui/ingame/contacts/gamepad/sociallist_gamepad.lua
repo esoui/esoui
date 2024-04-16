@@ -106,6 +106,9 @@ function ZO_GamepadSocialListPanel:InitializeKeybinds()
             SetSetting(SETTING_TYPE_UI, UI_SETTING_SOCIAL_LIST_HIDE_OFFLINE, tostring(not GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_SOCIAL_LIST_HIDE_OFFLINE)))
             self:RefreshFilters()
             self:UpdateKeybinds()
+
+            local DONT_NARRATE_HEADER = false
+            self:NarrateSelection(DONT_NARRATE_HEADER)
         end,
     }
     self:AddUniversalKeybind(hideOfflineKeybind)

@@ -59,7 +59,9 @@ function ZO_TributePatronBook_Keyboard:Initialize(control)
         },
     }
 
-     local infoContainerControl = control:GetNamedChild("InfoContainer")
+    self.searchEditBox = control:GetNamedChild("FiltersSearchBox")
+
+    local infoContainerControl = control:GetNamedChild("InfoContainer")
     ZO_TributePatronBook_Shared.Initialize(self, control, infoContainerControl, TEMPLATE_DATA)
 
     self.categoryNodeLookupData = {}
@@ -89,20 +91,20 @@ function ZO_TributePatronBook_Keyboard:OnFragmentShowing()
     ZO_TributePatronBook_Shared.OnFragmentShowing(self)
 end
 
-function ZO_TributePatronBook_Keyboard:AddCategory(tributePatronCategoryData, categoryFilters)
+function ZO_TributePatronBook_Keyboard:AddCategory(tributePatronCategoryData, patronFilters)
     local tree = self.categoryTree
 
     local entryData = ZO_EntryData:New(tributePatronCategoryData)
     entryData.node = tree:AddNode("ZO_TributePatronBook_StatusIconHeader", entryData)
 
-    for _, patronData in tributePatronCategoryData:PatronIterator(categoryFilters) do
-        self:AddPatron(patronData, entryData.node, categoryFilters)
+    for _, patronData in tributePatronCategoryData:PatronIterator(patronFilters) do
+        self:AddPatron(patronData, entryData.node)
     end
 
     self.categoryNodeLookupData[tributePatronCategoryData:GetId()] = entryData.node
 end
 
-function ZO_TributePatronBook_Keyboard:AddPatron(tributePatronData, parentNode, categoryFilters)
+function ZO_TributePatronBook_Keyboard:AddPatron(tributePatronData, parentNode)
     local tree = self.categoryTree
 
     local entryData = ZO_EntryData:New(tributePatronData)
@@ -232,12 +234,13 @@ function ZO_TributePatronBook_Keyboard:RefreshCategories()
 
     local categoryList = {}
     local categoryFilters = self.categoryFilters
+    local patronFilters = self.patronFilters
     for _, tributePatronCategoryData in TRIBUTE_DATA_MANAGER:TributePatronCategoryIterator(categoryFilters) do
         table.insert(categoryList, tributePatronCategoryData)
     end
 
     local selectedCategory = self:GetSelectedCategory()
-    if #categoryList == 0 and not TRIBUTE_DATA_MANAGER:HasSearchFilter() then
+    if #categoryList == 0 and not self:HasSearchFilter() then
         -- Add all categories, regardless of current filters, if no categories are visible and a search is not in progress.
         categoryFilters = nil
         for _, tributePatronCategoryData in TRIBUTE_DATA_MANAGER:TributePatronCategoryIterator() do
@@ -246,7 +249,7 @@ function ZO_TributePatronBook_Keyboard:RefreshCategories()
     end
 
     for _, tributePatronCategoryData in ipairs(categoryList) do
-        self:AddCategory(tributePatronCategoryData, categoryFilters)
+        self:AddCategory(tributePatronCategoryData, patronFilters)
 
         if selectedPatronId then
             local categoryNode = self.categoryNodeLookupData[tributePatronCategoryData:GetId()]
@@ -344,10 +347,6 @@ end
 
 --[[Global functions]]--
 ------------------------
-
-function ZO_TributePatronBook_Keyboard_OnSearchTextChanged(editBox)
-    TRIBUTE_DATA_MANAGER:SetSearchString(editBox:GetText())
-end
 
 function ZO_TributePatronBook_Keyboard_OnInitialize(control)
     TRIBUTE_PATRON_BOOK_KEYBOARD = ZO_TributePatronBook_Keyboard:New(control)

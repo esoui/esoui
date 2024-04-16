@@ -687,6 +687,7 @@ function ZO_AntiquityJournalListGamepad:InitializeControl(control)
     self.fragment = ZO_SimpleSceneFragment:New(self.control)
     ZO_ANTIQUITY_JOURNAL_LIST_GAMEPAD_FRAGMENT = self.fragment
     self.fragment:RegisterCallback("StateChange", OnStateChanged)
+    CALLBACK_MANAGER:RegisterCallback("AllDialogsHidden", function() self:OnAllDialogsHidden() end)
 end
 
 function ZO_AntiquityJournalListGamepad:InitializeControlPools()
@@ -1048,7 +1049,7 @@ function ZO_AntiquityJournalListGamepad:InitializeOptionsDialog()
                     end
                 end
             end
-        end
+        end,
     })
 end
 
@@ -1154,6 +1155,13 @@ function ZO_AntiquityJournalListGamepad:OnSelectionChanged(oldData, newData)
         end
     else
         self:ClearAntiquityTooltip()
+    end
+end
+
+function ZO_AntiquityJournalListGamepad:OnAllDialogsHidden()
+    if self:IsActivated() then
+        local NARRATE_HEADER = true
+        SCREEN_NARRATION_MANAGER:QueueSortFilterListEntry(self, NARRATE_HEADER)
     end
 end
 

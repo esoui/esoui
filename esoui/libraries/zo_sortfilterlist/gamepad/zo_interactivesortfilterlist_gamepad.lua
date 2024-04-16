@@ -401,17 +401,21 @@ end
 --Events/Callbacks--
 function ZO_GamepadInteractiveSortFilterList:OnAllDialogsHidden()
     --Re-narrate the current focus upon closing dialogs
+    local NARRATE_HEADER = true
+    self:NarrateSelection(NARRATE_HEADER)
+end
+
+function ZO_GamepadInteractiveSortFilterList:NarrateSelection(narrateHeader)
     if self:IsActivated() then
-        local NARRATE_HEADER = true
         --Determine if we need to narrate the filter switcher, sort header group, or list entry
         if self:IsCurrentFocusArea(self.filtersFocalArea) then
-            SCREEN_NARRATION_MANAGER:QueueFocus(self.filterSwitcher, NARRATE_HEADER)
+            SCREEN_NARRATION_MANAGER:QueueFocus(self.filterSwitcher, narrateHeader)
         elseif self:IsCurrentFocusArea(self.headersFocalArea) then
             if self.sortHeaderGroup then
-                SCREEN_NARRATION_MANAGER:QueueSelectedSortHeader(self, self.sortHeaderGroup, self.sortHeaderGroup:GetKeyForCurrentSelectedIndex(), NARRATE_HEADER)
+                SCREEN_NARRATION_MANAGER:QueueSelectedSortHeader(self, self.sortHeaderGroup, self.sortHeaderGroup:GetKeyForCurrentSelectedIndex(), narrateHeader)
             end
         elseif self:IsCurrentFocusArea(self.panelFocalArea) then
-            SCREEN_NARRATION_MANAGER:QueueSortFilterListEntry(self, NARRATE_HEADER)
+            SCREEN_NARRATION_MANAGER:QueueSortFilterListEntry(self, narrateHeader)
         end
     end
 end
@@ -524,6 +528,7 @@ function ZO_GamepadInteractiveSortFilterList:RefreshHeader()
     ZO_GamepadGenericHeader_RefreshData(self.contentHeader, self.contentHeaderData)
 end
 
+--This class uses :SetEmptyText(), not :SetNoItemText()
 function ZO_GamepadInteractiveSortFilterList:SetEmptyText(emptyText)
     if not self.emptyRow then
         self.emptyRow = self.container:GetNamedChild("EmptyRow")
@@ -559,6 +564,7 @@ function ZO_GamepadInteractiveSortFilterList:GetCurrentSearch()
     return self.searchEdit:GetText()
 end
 
+--This class uses :HasEntries(), not :IsEmpty()
 function ZO_GamepadInteractiveSortFilterList:HasEntries(ignoreFilters)
     if ignoreFilters then
         return self.masterList and #self.masterList > 0 or false

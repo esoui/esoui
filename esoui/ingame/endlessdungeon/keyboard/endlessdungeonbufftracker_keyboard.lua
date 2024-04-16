@@ -32,9 +32,15 @@ function ZO_EndlessDungeonBuffTracker_Keyboard:InitializeControls()
 end
 
 function ZO_EndlessDungeonBuffTracker_Keyboard:InitializeGridList()
-    ZO_EndlessDungeonBuffTracker_Shared.InitializeGridList(self, ZO_GridScrollList_Keyboard, "ZO_EndDunBuffTrackerGridEntry_Keyboard", "ZO_EndDunBuffTrackerGridHeader_Keyboard")
+    ZO_EndlessDungeonBuffTracker_Shared.InitializeGridList(self, "ZO_EndDunBuffTrackerGridEntry_Keyboard", "ZO_EndDunBuffTrackerGridHeader_Keyboard")
 
     self.entryDataObjectPool = ZO_EntryDataPool:New(ZO_EntryData)
+
+    local NO_AUTO_FILL_ROWS = nil
+    local RESIZE_TO_FIT_COLUMN_MAX = 5
+    local RESIZE_TO_FIT_ROW_MAX = 6
+    self.gridList = ZO_GridScrollList_Keyboard:New(self.gridListControl, NO_AUTO_FILL_ROWS, RESIZE_TO_FIT_COLUMN_MAX, RESIZE_TO_FIT_ROW_MAX)
+
     local HIDE_CALLBACK = nil
     local gridList = self.gridList
     gridList:AddEntryTemplate("ZO_EndDunBuffTrackerGridEntry_Keyboard", ZO_ENDLESS_DUNGEON_BUFF_GRID_ENTRY_DIMENSIONS_KEYBOARD_X, ZO_ENDLESS_DUNGEON_BUFF_GRID_ENTRY_DIMENSIONS_KEYBOARD_Y, ZO_GetCallbackForwardingFunction(self, self.SetupGridEntry), HIDE_CALLBACK, ZO_GetCallbackForwardingFunction(self, self.ResetGridEntry), ZO_ENDLESS_DUNGEON_BUFF_GRID_ENTRY_PADDING_KEYBOARD_X, ZO_ENDLESS_DUNGEON_BUFF_GRID_ENTRY_PADDING_KEYBOARD_Y)

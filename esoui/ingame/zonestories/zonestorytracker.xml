@@ -12,6 +12,14 @@
                             <Dimensions x="32" y ="32" />
                             <Anchor point="RIGHT" relativeTo="$(parent)Header" relativePoint="LEFT" />
                         </Texture>
+                        <Control name="$(parent)Assisted" inherits="ZO_KeybindButton" excludeFromResizeToFitExtents="true">
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Container" relativePoint="TOPLEFT" offsetX="-5" offsetY="-5"/>
+                            <OnInitialized>
+                                ZO_KeybindButtonTemplate_OnInitialized(self)
+                                local HIDE_UNBOUND = false
+                                self:SetKeybind("ASSIST_NEXT_TRACKED_QUEST", HIDE_UNBOUND)
+                            </OnInitialized>
+                        </Control>
                     </Controls>
                 </Control>
             </Controls>

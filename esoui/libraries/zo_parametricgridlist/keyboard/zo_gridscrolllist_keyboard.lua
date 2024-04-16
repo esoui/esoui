@@ -24,7 +24,7 @@ function ZO_GridScrollList_Keyboard:New(...)
     return ZO_AbstractGridScrollList.New(self, ...)
 end
 
-function ZO_GridScrollList_Keyboard:Initialize(control, autofillRows)
-    ZO_AbstractGridScrollList.Initialize(self, control, autofillRows)
+function ZO_GridScrollList_Keyboard:Initialize(control, autofillRows, resizeToFitColumnMax, resizeToFitRowMax)
+    ZO_AbstractGridScrollList.Initialize(self, control, autofillRows, resizeToFitColumnMax, resizeToFitRowMax)
     ZO_AbstractGridScrollList_Keyboard.Initialize(self, control)
 end

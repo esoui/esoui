@@ -78,7 +78,13 @@ function ZO_HousingFurnitureBrowser_Gamepad:InitializeHeader()
     local tabBarEntries =
     {
         {
-            text = GetString(SI_HOUSING_FURNITURE_TAB_PLACE),
+            text = function() 
+                if self.titleText then
+                    return self.titleText
+                else
+                    return GetString(SI_HOUSING_FURNITURE_TAB_PLACE)
+                end
+            end,
             callback = function()
                 self:SetMode(HOUSING_BROWSER_MODE.PLACEMENT)
             end,
@@ -281,6 +287,11 @@ do
         end
         ZO_GamepadGenericHeader_Refresh(self.header, self.headerData)
     end
+end
+
+function ZO_HousingFurnitureBrowser_Gamepad:SetTitleText(text)
+    self.titleText = text
+    self:RefreshCategoryHeaderData()
 end
 
 --

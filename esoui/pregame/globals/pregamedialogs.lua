@@ -596,6 +596,36 @@ ESO_Dialogs["BAD_LOGIN_ACCOUNT_SUSPENDED"] =
     end,
 }
 
+ESO_Dialogs["BAD_LOGIN_NO_USERNAME_OR_PASSWORD"] = 
+{
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    title =
+    {
+        text = function(dialog)
+            return dialog.data.title or SI_PROMPT_TITLE_ERROR
+        end,
+    },
+    mainText = 
+    {
+        text = function(dialog) 
+            return dialog.data.body
+        end,
+        align = TEXT_ALIGN_LEFT,
+    },
+    buttons =
+    {
+        [1] =
+        {
+            text = SI_OK,
+            keybind = "DIALOG_NEGATIVE",
+            clickSound = SOUNDS.DIALOG_ACCEPT,
+        }
+    }
+}
+
 ESO_Dialogs["HANDLE_ERROR"] = 
 {
     title =
@@ -606,6 +636,10 @@ ESO_Dialogs["HANDLE_ERROR"] =
     {
         text = SI_ERROR_REASON,
         align = TEXT_ALIGN_LEFT,
+    },
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
     },
     buttons =
     {

@@ -322,14 +322,6 @@ function ZO_ComboBox_Base:GetItemHighlightColor(item)
     return item.m_highlightColor or self.m_highlightColor
 end
 
-function ZO_ComboBox_Base:SetEnabled(enabled)
-    self.m_container:SetMouseEnabled(enabled)
-    self.m_openDropdown:SetEnabled(enabled)
-    self.m_selectedItemText:SetColor(self:GetSelectedTextColor(enabled))
-
-    self:HideDropdown()
-end
-
 function ZO_ComboBox_Base:SetItemEnabled(item, enabled)
     local isEnabled = enabled
     if isEnabled == nil then

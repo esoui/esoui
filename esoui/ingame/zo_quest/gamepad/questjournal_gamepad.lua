@@ -192,7 +192,12 @@ function ZO_QuestJournal_Gamepad:SwitchActiveList(listDescriptor)
             end
 
             if self.previousListType == nil then
-                self:FocusQuestWithIndex(QUEST_JOURNAL_MANAGER:GetFocusedQuestIndex())
+                -- Quest items in inventory can link via "Show in Journal" to here.
+                local questToFocus = self:GetPendingJournalQuestIndex() or QUEST_JOURNAL_MANAGER:GetFocusedQuestIndex()
+                -- We only need to open the requested quest once.
+                self:ClearPendingJournalQuestIndex()
+                self:RefreshQuestList(questToFocus)
+                
             elseif self.previousListType == OPTIONS_LIST then
                 if self.questList:IsEmpty() then
                     self:RefreshDetails()
@@ -612,9 +617,10 @@ do
         return narrations
     end
 
-    function ZO_QuestJournal_Gamepad:RefreshQuestList()
+    function ZO_QuestJournal_Gamepad:RefreshQuestList(desiredQuestIndex)
         self.questList:Clear()
 
+        local desiredSelection = nil
         local lastCategoryName
         local masterQuestList = QUEST_JOURNAL_MANAGER:GetQuestList()
         for i, quest in ipairs(masterQuestList) do
@@ -635,8 +641,15 @@ do
             else
                 self.questList:AddEntry(QUEST_TEMPLATE, entry)
             end
+            
+            if quest.questIndex == desiredQuestIndex then
+                desiredSelection = i
+            end
         end
 
+        if desiredSelection ~= nil then
+            self.questList:SetSelectedIndexWithoutAnimation(desiredSelection)
+        end
         self.questList:Commit()
 
         self:RefreshDetails()
@@ -649,11 +662,11 @@ function ZO_QuestJournal_Gamepad:FocusQuestWithIndex(index)
     self:FireCallbacks("QuestSelected", index)
     -- The quest tracker performs focus logic on quest/remove/update, only force focus if the player has clicked on the quest through the journal UI
     if SCENE_MANAGER:IsShowing(self.sceneName) then
-        ZO_ZoneStories_Manager.StopZoneStoryTracking()
+        ZO_ZoneStories_Manager.SetTrackedZoneStoryAssisted(false)
         FOCUSED_QUEST_TRACKER:ForceAssist(index)
     end
 
-    self:RefreshQuestList()
+    self:RefreshQuestList(index)
 end
 
 function ZO_QuestJournal_Gamepad:SetKeybindButtonGroup(descriptor)
@@ -666,6 +679,11 @@ function ZO_QuestJournal_Gamepad:SetKeybindButtonGroup(descriptor)
     end
 
     self.currentKeybindButtonGroup = descriptor
+end
+
+function ZO_QuestJournal_Gamepad:OpenQuestJournalToQuest(questIndex)
+    self:QueuePendingJournalQuestIndex(questIndex)
+    SCENE_MANAGER:Show(self:GetSceneName())
 end
 
 function ZO_QuestJournal_Gamepad_OnInitialized(control)

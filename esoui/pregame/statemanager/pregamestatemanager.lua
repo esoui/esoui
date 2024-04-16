@@ -520,6 +520,12 @@ function PregameStateManager_SetState(stateName, ...)
         end
     end
 
+    if not PregameStateManager_CanHideGui() and GetGuiHidden("pregame") then
+        if ToggleShowPregameGui then
+            ToggleShowPregameGui()
+        end
+    end
+
     WriteToInterfaceLog(string.format("PregameStateManager_SetState - from: %s, to: %s", tostring(g_previousState), tostring(g_currentStateName)))
     g_currentStateData = newPregameState
     newPregameState.OnEnter(select(2, unpack(stateArgs)))
@@ -773,6 +779,27 @@ end
 
 function PregameStateManager_ClearError()
     ZO_PREGAME_HAD_GLOBAL_ERROR = false
+end
+
+do
+    local g_validStatesForHideGui =
+    {
+        "CharacterSelect",
+        "CharacterSelect_FromIngame",
+        "CharacterCreate",
+        "CharacterCreate_Barbershop",
+    }
+
+    function PregameStateManager_CanHideGui()
+        local currentState = PregameStateManager_GetCurrentState()
+        for _, state in ipairs(g_validStatesForHideGui) do
+            if state == currentState then
+                return true
+            end
+        end
+
+        return false
+    end
 end
 
 local function OnDisplayNameReady()

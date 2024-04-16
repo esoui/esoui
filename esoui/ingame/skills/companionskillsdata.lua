@@ -12,13 +12,11 @@ local COMPANION_PROGRESSION_KEY = nil -- should we consider using a sentinel val
 
 ZO_CompanionSkillProgressionData = ZO_SkillProgressionData_Base:Subclass()
 
+-- Begin overriding methods in ZO_SkillProgressionData_Base --
+
 function ZO_CompanionSkillProgressionData:BuildStaticData(skillData)
     ZO_SkillProgressionData_Base.BuildStaticData(self, skillData, COMPANION_PROGRESSION_KEY)
     self:SetAbilityId(self.skillData:GetAbilityId())
-end
-
-function ZO_CompanionSkillProgressionData:GetDetailedName()
-    return self:GetFormattedName()
 end
 
 function ZO_CompanionSkillProgressionData:IsUnlocked()
@@ -26,11 +24,15 @@ function ZO_CompanionSkillProgressionData:IsUnlocked()
     return self.skillData:IsPurchased()
 end
 
-function ZO_CompanionSkillProgressionData:IsAdvised()
-    return false
+function ZO_CompanionSkillProgressionData:TryPickup()
+    PickupCompanionAbilityById(self:GetAbilityId())
 end
 
-function ZO_CompanionSkillProgressionData:HasRankData()
+-- End overriding methods in ZO_SkillProgressionData_Base --
+
+-- Begin implementing methods in ZO_SkillProgressionData_Base --
+
+function ZO_CompanionSkillProgressionData:IsAdvised()
     return false
 end
 
@@ -38,60 +40,7 @@ function ZO_CompanionSkillProgressionData:SetKeyboardTooltip(tooltipControl, unu
     tooltipControl:SetCompanionSkill(self:GetAbilityId())
 end
 
-function ZO_CompanionSkillProgressionData:TryPickup()
-    PickupCompanionAbilityById(self:GetAbilityId())
-end
-
------------------------
--- Skill Progression --
------------------------
-
--- TODO: add to SKILL_POINT_ALLOCATION_MANAGER and subclass a normal point allocator
-ZO_CompanionReadOnlyPointAllocator = ZO_InitializingObject:Subclass()
-
-function ZO_CompanionReadOnlyPointAllocator:Initialize(skillData)
-    self.skillData = skillData
-end
-
-function ZO_CompanionReadOnlyPointAllocator:GetProgressionData()
-    return self.skillData:GetCurrentProgressionData()
-end
-
-function ZO_CompanionReadOnlyPointAllocator:IsPurchased()
-    return self.skillData:IsPurchased()
-end
-
-function ZO_CompanionReadOnlyPointAllocator:CanSell()
-    return false
-end
-
-function ZO_CompanionReadOnlyPointAllocator:CanPurchase()
-    return false
-end
-
-function ZO_CompanionReadOnlyPointAllocator:CanIncreaseRank()
-    return false
-end
-
-function ZO_CompanionReadOnlyPointAllocator:CanDecreaseRank()
-    return false
-end
-
-function ZO_CompanionReadOnlyPointAllocator:CanMorph()
-    return false
-end
-
-function ZO_CompanionReadOnlyPointAllocator:CanMaxout()
-    return false
-end
-
-function ZO_CompanionReadOnlyPointAllocator:GetIncreaseSkillAction()
-    return ZO_SKILL_POINT_ACTION.NONE
-end
-
-function ZO_CompanionReadOnlyPointAllocator:GetDecreaseSkillAction()
-    return ZO_SKILL_POINT_ACTION.NONE
-end
+-- End implementing methods in ZO_SkillProgressionData_Base --
 
 --[[
     A ZO_CompanionSkillData is an entry in a ZO_SkillLineData. A skill can be upgraded to various levels, denoted by ZO_CompanionSkillProgressionData objects.
@@ -103,17 +52,10 @@ end
 
 ZO_CompanionSkillData = ZO_SkillData_Base:Subclass()
 
--- implements method in ZO_SkillData_Base
+-- Begin implementing methods in ZO_SkillData_Base --
+
 function ZO_CompanionSkillData:Reset()
     self.skillProgressionData = nil
-end
-
-function ZO_CompanionSkillData:GetAbilityId()
-    return self.abilityId
-end
-
-function ZO_CompanionSkillData:GetCompanionIndices()
-    return self.skillLineData:GetId(), self:GetAbilityId()
 end
 
 function ZO_CompanionSkillData:BuildStaticData(skillLineData, skillIndex)
@@ -121,7 +63,6 @@ function ZO_CompanionSkillData:BuildStaticData(skillLineData, skillIndex)
     local skillLineId = self.skillLineData:GetId()
     self.abilityId = GetCompanionAbilityId(skillLineId, skillIndex)
 
-    self.noActionsPointAllocator = ZO_CompanionReadOnlyPointAllocator:New(self)
     self.skillProgressionData = ZO_CompanionSkillProgressionData:New()
     self.skillProgressionData:BuildStaticData(self)
 
@@ -146,43 +87,43 @@ function ZO_CompanionSkillData:RefreshDynamicData(refreshChildren)
     end
 end
 
--- implements method in ZO_SkillData_Base
 function ZO_CompanionSkillData:GetSkillLineData()
     return self.skillLineData
 end
 
--- implements method in ZO_SkillData_Base
 function ZO_CompanionSkillData:IsPassive()
     return IsAbilityPassive(self.abilityId)
 end
 
--- implements method in ZO_SkillData_Base
 function ZO_CompanionSkillData:IsActive()
     return not self:IsPassive()
 end
 
--- implements method in ZO_SkillData_Base
 function ZO_CompanionSkillData:IsUltimate()
     return IsAbilityUltimate(self.abilityId)
 end
 
--- implements method in ZO_SkillData_Base
+function ZO_CompanionSkillData:MeetsLinePurchaseRequirement()
+    return true
+end
+
 function ZO_CompanionSkillData:IsPurchased()
     return self.isPurchased
 end
 
--- implements method in ZO_SkillData_Base
 function ZO_CompanionSkillData:IsAdvised()
     return false
 end
 
--- implements method in ZO_SkillData_Base
+function ZO_CompanionSkillData:HasPointsToClear()
+    return false
+end
+
 function ZO_CompanionSkillData:GetProgressionData(skillProgressionKey)
     -- there's only one progression, so key is ignored
     return self.skillProgressionData
 end
 
--- implements method in ZO_SkillData_Base
 function ZO_CompanionSkillData:GetHeaderText()
     if self:IsUltimate() then
         return GetString(SI_SKILLS_ULTIMATE_ABILITIES)
@@ -193,32 +134,33 @@ function ZO_CompanionSkillData:GetHeaderText()
     end
 end
 
--- implements method in ZO_SkillData_Base
+function ZO_CompanionSkillData:GetNumPointsAllocated()
+    return 0
+end
+
 function ZO_CompanionSkillData:GetCurrentSkillProgressionKey()
     return COMPANION_PROGRESSION_KEY
 end
 
--- implements method in ZO_SkillData_Base
 function ZO_CompanionSkillData:GetCurrentProgressionData()
     return self:GetProgressionData(self:GetCurrentSkillProgressionKey())
 end
 
--- implements method in ZO_SkillData_Base
 function ZO_CompanionSkillData:GetPointAllocator()
+    if not self.noActionsPointAllocator then
+        self.noActionsPointAllocator = SKILL_POINT_ALLOCATION_MANAGER:GenerateNoActionsAllocator(self)
+    end
     return self.noActionsPointAllocator
 end
 
--- implements method in ZO_SkillData_Base
 function ZO_CompanionSkillData:GetPointAllocatorProgressionData()
     return self:GetPointAllocator():GetProgressionData()
 end
 
--- implements method in ZO_SkillData_Base
 function ZO_CompanionSkillData:HasUpdatedStatus()
     return self.hasUpdatedStatus
 end
 
--- implements method in ZO_SkillData_Base
 function ZO_CompanionSkillData:SetHasUpdatedStatus(hasUpdatedStatus)
     if hasUpdatedStatus then
         -- we only use updated status for a single CSA, so we don't really need
@@ -231,28 +173,31 @@ function ZO_CompanionSkillData:SetHasUpdatedStatus(hasUpdatedStatus)
     end
 end
 
--- implements method in ZO_SkillData_Base
 function ZO_CompanionSkillData:ClearUpdate()
     self:SetHasUpdatedStatus(false)
 end
 
--- implements method in ZO_SkillData_Base
 function ZO_CompanionSkillData:CanPointAllocationsBeAltered(isFullRespec)
     return false
 end
 
--- implements method in ZO_SkillData_Base
 function ZO_CompanionSkillData:IsCompanionSkill()
     return true
+end
+
+-- End implementing methods in ZO_SkillData_Base --
+
+function ZO_CompanionSkillData:GetAbilityId()
+    return self.abilityId
+end
+
+function ZO_CompanionSkillData:GetCompanionIndices()
+    return self.skillLineData:GetId(), self:GetAbilityId()
 end
 
 function ZO_CompanionSkillData:GetSkillLineRankRequired()
     return GetCompanionAbilityRankRequired(self.abilityId)
 end
-
-----------------
--- Skill Line --
-----------------
 
 
 --[[
@@ -265,6 +210,8 @@ end
 
 ZO_CompanionSkillLineData = ZO_SkillLineData_Base:Subclass()
 
+-- Begin overriding methods in ZO_SkillLineData_Base --
+
 function ZO_CompanionSkillLineData:Initialize()
     ZO_SkillLineData_Base.Initialize(self, COMPANION_SKILLS_DATA_MANAGER)
     self.orderedSkills = {}
@@ -276,6 +223,21 @@ function ZO_CompanionSkillLineData:Reset()
     ZO_ClearNumericallyIndexedTable(self.orderedSkills)
     self.skillMetaPool:ReleaseAllObjects()
 end
+
+-- unique to Companion skill lines
+function ZO_CompanionSkillLineData:IsCompanionSkillLine()
+    return true
+end
+
+function ZO_CompanionSkillLineData:IsAdvised()
+    -- all companion skill lines should either be available, (in which case they are visible as unlocked in the UI) or advised (so they're still in the UI, just with an unlock hint)
+    -- some shared code assumes these are mutually exclusive so we'll only mark things as advised if they're not available
+    return not self:IsAvailable()
+end
+
+-- End overriding methods in ZO_SkillLineData_Base --
+
+-- Begin implementing methods in ZO_SkillLineData_Base --
 
 function ZO_CompanionSkillLineData:BuildStaticData(skillTypeData, skillLineIndex)
     self.skillTypeData, self.skillLineIndex = skillTypeData, skillLineIndex
@@ -315,30 +277,6 @@ function ZO_CompanionSkillLineData:RefreshDynamicData(refreshChildren)
     self:AllowMarkingNew()
 end
 
-function ZO_CompanionSkillLineData:GetSkillTypeData()
-    return self.skillTypeData
-end
-
-function ZO_CompanionSkillLineData:GetSkillLineIndex()
-    return self.skillLineIndex
-end
-
-function ZO_CompanionSkillLineData:GetIndices()
-    return self.skillTypeData:GetSkillType(), self.skillLineIndex
-end
-
-function ZO_CompanionSkillLineData:GetNumSkills()
-    return #self.orderedSkills
-end
-
-function ZO_CompanionSkillLineData:GetSkillDataByIndex(skillIndex)
-    return self.orderedSkills[skillIndex]
-end
-
-function ZO_CompanionSkillLineData:SkillIterator(skillFilterFunctions)
-    return ZO_FilteredNumericallyIndexedTableIterator(self.orderedSkills, skillFilterFunctions)
-end
-
 function ZO_CompanionSkillLineData:GetName()
     return self.name
 end
@@ -353,12 +291,6 @@ end
 
 function ZO_CompanionSkillLineData:IsDiscovered()
     return self.isDiscovered
-end
-
-function ZO_CompanionSkillLineData:IsAdvised()
-    -- all companion skill lines should either be available, (in which case they are visible as unlocked in the UI) or advised (so they're still in the UI, just with an unlock hint)
-    -- some shared code assumes these are mutually exclusive so we'll only mark things as advised if they're not available
-    return not self:IsAvailable()
 end
 
 function ZO_CompanionSkillLineData:IsActive()
@@ -381,7 +313,28 @@ function ZO_CompanionSkillLineData:GetCurrentRankXP()
     return self.currentXP
 end
 
--- unique to Companion skill lines
-function ZO_CompanionSkillLineData:IsCompanionSkillLine()
-    return true
+function ZO_CompanionSkillLineData:GetNumSkills()
+    return #self.orderedSkills
+end
+
+function ZO_CompanionSkillLineData:GetSkillDataByIndex(skillIndex)
+    return self.orderedSkills[skillIndex]
+end
+
+function ZO_CompanionSkillLineData:SkillIterator(skillFilterFunctions)
+    return ZO_FilteredNumericallyIndexedTableIterator(self.orderedSkills, skillFilterFunctions)
+end
+
+-- End implementing methods in ZO_SkillLineData_Base --
+
+function ZO_CompanionSkillLineData:GetSkillTypeData()
+    return self.skillTypeData
+end
+
+function ZO_CompanionSkillLineData:GetSkillLineIndex()
+    return self.skillLineIndex
+end
+
+function ZO_CompanionSkillLineData:GetIndices()
+    return self.skillTypeData:GetSkillType(), self.skillLineIndex
 end

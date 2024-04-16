@@ -355,7 +355,7 @@ function ZO_GamepadGuildRosterManager:BuildShowGamerCardOption()
         local callback = function()
             ZO_ShowGamerCardFromDisplayNameOrFallback(self.socialData.displayName, ZO_ID_REQUEST_TYPE_GUILD_INFO, self.guildId, self.socialData.index)
         end
-        return self:BuildOptionEntry(nil, GetGamerCardStringId(), callback)
+        return self:BuildOptionEntry(nil, ZO_GetGamerCardStringId(), callback)
     end
 end
 

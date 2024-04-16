@@ -1,5 +1,5 @@
 local g_currentGamma = GetCVar("GAMMA_ADJUSTMENT")
-local DEFAULT_INITIAL_GAMMA = 100 -- this should match the gamma adjustment setting in the RenderSettings
+local DEFAULT_INITIAL_GAMMA = 100 -- this should match the gamma adjustment setting in the ZoRenderSettings
 
 local function GammaDialogInitialize(dialogControl)
     ZO_Dialogs_RegisterCustomDialog("ADJUST_GAMMA_DIALOG",

@@ -312,6 +312,28 @@ function ZO_GameStartup_Gamepad:InitializeKeybindDescriptor()
             callback = function()
                 local data = self.mainList:GetTargetData()
                 if data.entryType == ENTRY_TYPE.PLAY_BUTTON then
+                    if not IsUsingLinkedLogin() then
+                        local username = self:GetEnteredUserName()
+                        local password = self:GetEnteredPassword()
+                        if username == "" then
+                            local dialogData =
+                            {
+                                title = GetString(SI_ESO_ACCOUNT_LOGIN_ERROR_NO_USERNAME_TITLE), 
+                                body = GetString(SI_ESO_ACCOUNT_LOGIN_ERROR_NO_USERNAME_TEXT), 
+                            }
+                            ZO_Dialogs_ShowPlatformDialog("BAD_LOGIN_NO_USERNAME_OR_PASSWORD", dialogData )
+                            return
+                        elseif password == "" then
+                            local dialogData =
+                            {
+                                title = GetString(SI_ESO_ACCOUNT_LOGIN_ERROR_NO_PASSWORD_TITLE), 
+                                body = GetString(SI_ESO_ACCOUNT_LOGIN_ERROR_NO_PASSWORD_TEXT), 
+                            }
+                            ZO_Dialogs_ShowPlatformDialog("BAD_LOGIN_NO_USERNAME_OR_PASSWORD", dialogData )
+                            return
+                        end
+                    end
+
                     if self.isWaitingForDurangoAccountSelection == false then
                         self.serverSelector:OnPlayButtonPressed()
                         PregameStateManager_AdvanceStateFromState("GameStartup") -- only advance state from startup state (button spam protection)
@@ -520,6 +542,8 @@ function ZO_GameStartup_Gamepad:InitializeLists()
             local initialText = data.initialTextFunction and data.initialTextFunction() or ""
             editBox:SetText(initialText)
 
+            editBox:SetDefaultText(data.defaultText or "")
+
             control.highlight:SetHidden(not selected)
         end
         local DEFAULT_EQUALITY_FUNCTION = nil
@@ -547,6 +571,7 @@ function ZO_GameStartup_Gamepad:PopulateMainList()
             usernameEntryData.header = GetString(SI_ACCOUNT_NAME)
             usernameEntryData.entryType = ENTRY_TYPE.EDIT_BOX
             usernameEntryData.initialTextFunction = function() return self.username end
+            usernameEntryData.defaultText = GetString(SI_LOGON_ACCOUNT_NAME_DEFAULT_TEXT)
             usernameEntryData.maxInputChars = MAX_EMAIL_LENGTH
             usernameEntryData.onTextChanged = function(control)
                 self.username = control:GetText()
@@ -557,6 +582,7 @@ function ZO_GameStartup_Gamepad:PopulateMainList()
             passwordEntryData.header = GetString(SI_PASSWORD)
             passwordEntryData.entryType = ENTRY_TYPE.EDIT_BOX
             passwordEntryData.initialTextFunction = function() return self.password end
+            passwordEntryData.defaultText = GetString(SI_PASSWORD)
             passwordEntryData.maxInputChars = MAX_PASSWORD_LENGTH
             passwordEntryData.isPassword = true
             passwordEntryData.onTextChanged = function(control)

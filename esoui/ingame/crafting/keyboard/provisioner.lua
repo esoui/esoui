@@ -15,7 +15,7 @@ function ZO_Provisioner:Initialize(control)
 
     self.resultTooltip = self.control:GetNamedChild("Tooltip")
     if IsChatSystemAvailableForCurrentPlatform() then
-        local function OnTooltipMouseUp(control, button, upInside)
+        local function OnTooltipMouseUp(controlParameter, button, upInside)
             if upInside and button == MOUSE_BUTTON_INDEX_RIGHT then
                 ClearMenu()
 
@@ -104,7 +104,7 @@ function ZO_Provisioner:Initialize(control)
 
             if self.filterType == PROVISIONER_SPECIAL_INGREDIENT_TYPE_FILLET then
                 TriggerTutorial(TUTORIAL_TRIGGER_FILLETING_OPENED)
-            else
+            elseif craftingType == CRAFTING_TYPE_PROVISIONING and self.filterType ~= PROVISIONER_SPECIAL_INGREDIENT_TYPE_FURNISHING then
                 TriggerTutorial(TUTORIAL_TRIGGER_PROVISIONING_OPENED)
             end
 
@@ -252,7 +252,10 @@ function ZO_Provisioner:OnTabFilterChanged(filterData)
         end
         self:ResetMultiCraftNumIterations()
         self:DirtyRecipeList()
-        TriggerTutorial(TUTORIAL_TRIGGER_PROVISIONING_OPENED)
+
+        if GetCraftingInteractionType() == CRAFTING_TYPE_PROVISIONING and self.filterType ~= PROVISIONER_SPECIAL_INGREDIENT_TYPE_FURNISHING then
+            TriggerTutorial(TUTORIAL_TRIGGER_PROVISIONING_OPENED)
+        end
     end
 end
 
@@ -711,6 +714,9 @@ function ZO_ProvisionerRow:UpdateColors()
     local ingredientCount = self.ingredientCount
     local requiredQuantity = self.requiredQuantity
 
+    --Despite the name these only touch the label alpha
+    local MEETS_USAGE_REQUIREMENTS = true
+
     if ingredientCount >= requiredQuantity then
         -- self.quality is deprecated, included here for addon backwards compatibility
         local displayQuality = self.displayQuality or self.quality
@@ -731,8 +737,6 @@ function ZO_ProvisionerRow:UpdateColors()
         ZO_ItemSlot_SetupIconUsableAndLockedColor(self.icon, MEETS_USAGE_REQUIREMENTS, DISABLED)
     end
 
-    --Despite the name these only touch the label alpha
-    local MEETS_USAGE_REQUIREMENTS = true
     ZO_ItemSlot_SetupTextUsableAndLockedColor(self.nameLabel, MEETS_USAGE_REQUIREMENTS, not self.enabled)
     ZO_ItemSlot_SetupTextUsableAndLockedColor(self.haveLabel, MEETS_USAGE_REQUIREMENTS, not self.enabled)
     ZO_ItemSlot_SetupTextUsableAndLockedColor(self.countControl, MEETS_USAGE_REQUIREMENTS, not self.enabled)

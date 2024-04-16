@@ -7,6 +7,9 @@ ZO_ATTRIBUTE_BAR_POWER_SHIELD_FAKE_HEALTH_GLOSS_LEVEL = 4001
 ZO_ATTRIBUTE_BAR_POWER_SHIELD_FAKE_NO_HEALING_OUTER_LEVEL = 5000
 ZO_ATTRIBUTE_BAR_POWER_SHIELD_FAKE_NO_HEALING_INNER_LEVEL = 5001
 
+local FULL_ALPHA_VALUE = 1
+local FADED_ALPHA_VALUE = 0.3
+
 local RELEVANT_VISUAL_TYPES =
 {
     ATTRIBUTE_VISUAL_POWER_SHIELDING,
@@ -125,7 +128,7 @@ function ZO_UnitVisualizer_PowerShieldModule:OnUnitAttributeVisualAdded(visualTy
     info.value = info.value + value
     info.maxValue = info.maxValue + maxValue
     self:OnValueChanged(barControl, barInfo, visualType)
-    barControl:RegisterForEvent(EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function() self:OnValueChanged(barControl, barInfo, visualType) end)
+    self:DoAlphaUpdate(IsUnitInGroupSupportRange(self:GetUnitTag()))
 end
 
 function ZO_UnitVisualizer_PowerShieldModule:OnUnitAttributeVisualUpdated(visualType, stat, attribute, powerType, oldValue, newValue, oldMaxValue, newMaxValue)
@@ -143,48 +146,64 @@ function ZO_UnitVisualizer_PowerShieldModule:OnUnitAttributeVisualRemoved(visual
     info.value = info.value - value
     info.maxValue = info.maxValue - maxValue
     self:OnValueChanged(barControl, barInfo, visualType)
-    barControl:UnregisterForEvent(EVENT_GAMEPAD_PREFERRED_MODE_CHANGED)
 end
 
 local function ApplyPlatformStyleToShield(left, right, leftOverlay, rightOverlay)
     ApplyTemplateToControl(left, ZO_GetPlatformTemplate(leftOverlay))
-    ApplyTemplateToControl(right, ZO_GetPlatformTemplate(rightOverlay))
+    if rightOverlay then
+        ApplyTemplateToControl(right, ZO_GetPlatformTemplate(rightOverlay))
+    end
 end
 
 local LEFT_BAR, RIGHT_BAR = 1, 2
 local SHIELD_COLOR_GRADIENT = { ZO_ColorDef:New(.5, .5, 1, .3), ZO_ColorDef:New(.25, .25, .5, .5) }
 local TRAUMA_COLOR_GRADIENT = { ZO_ColorDef:New("ab1c6473"), ZO_ColorDef:New("ab76bcc3") }
 local NO_HEALING_FILL_COLOR_GRADIENT = { ZO_ColorDef:New("1a0909"), ZO_ColorDef:New("1a0909") }
+local NO_HEALING_FILL_GROUP_FRAME_COLOR_GRADIENT = { ZO_ColorDef:New("501212"), ZO_ColorDef:New("501212") }
 local NO_HEALING_BORDER_COLOR_GRADIENT = { ZO_ColorDef:New("da3030"), ZO_ColorDef:New("722323") }
+
 function ZO_UnitVisualizer_PowerShieldModule:ShowOverlay(attributeBar, info)
     if not info.overlayControls then
         local leftStatusBar, rightStatusBar = unpack(attributeBar.barControls)
 
         local shieldLeftOverlay = CreateControlFromVirtual("$(parent)PowerShieldLeftOverlay", attributeBar, self.layoutData.barLeftOverlayTemplate)
-        local shieldRightOverlay = CreateControlFromVirtual("$(parent)PowerShieldRightOverlay", attributeBar, self.layoutData.barRightOverlayTemplate)
+        local shieldRightOverlay = (rightStatusBar and self.layoutData.barRightOverlayTemplate) and CreateControlFromVirtual("$(parent)PowerShieldRightOverlay", attributeBar, self.layoutData.barRightOverlayTemplate)
 
         info.overlayControls = { shieldLeftOverlay, shieldRightOverlay }
+
+        local noHealingFillGradient
+        if self.layoutData.noHealingGradientOverride then
+            noHealingFillGradient = self.layoutData.noHealingGradientOverride
+        elseif rightStatusBar then
+            noHealingFillGradient = NO_HEALING_FILL_COLOR_GRADIENT
+        else
+            noHealingFillGradient = NO_HEALING_FILL_GROUP_FRAME_COLOR_GRADIENT
+        end
+
+        local fakeHealthGradient = self.layoutData.fakeHealthGradientOverride or ZO_POWER_BAR_GRADIENT_COLORS[COMBAT_MECHANIC_FLAGS_HEALTH]
 
         for _, overlay in ipairs(info.overlayControls) do
             ZO_StatusBar_SetGradientColor(overlay, SHIELD_COLOR_GRADIENT)
             ZO_StatusBar_SetGradientColor(overlay.traumaBar, TRAUMA_COLOR_GRADIENT)
-            ZO_StatusBar_SetGradientColor(overlay.fakeHealthBar, ZO_POWER_BAR_GRADIENT_COLORS[COMBAT_MECHANIC_FLAGS_HEALTH])
-            ZO_StatusBar_SetGradientColor(overlay.noHealingInner, NO_HEALING_FILL_COLOR_GRADIENT)
-            ZO_StatusBar_SetGradientColor(overlay.noHealingOuter, NO_HEALING_BORDER_COLOR_GRADIENT)
-            ZO_StatusBar_SetGradientColor(overlay.fakeNoHealingInner, NO_HEALING_FILL_COLOR_GRADIENT)
-            ZO_StatusBar_SetGradientColor(overlay.fakeNoHealingOuter, NO_HEALING_BORDER_COLOR_GRADIENT)
+            ZO_StatusBar_SetGradientColor(overlay.fakeHealthBar, fakeHealthGradient)
+            ZO_StatusBar_SetGradientColor(overlay.noHealingInner, noHealingFillGradient)
+            ZO_StatusBar_SetGradientColor(overlay.fakeNoHealingInner, noHealingFillGradient)
+            if overlay.noHealingOuter and overlay.fakeNoHealingOuter then
+                ZO_StatusBar_SetGradientColor(overlay.noHealingOuter, NO_HEALING_BORDER_COLOR_GRADIENT)
+                ZO_StatusBar_SetGradientColor(overlay.fakeNoHealingOuter, NO_HEALING_BORDER_COLOR_GRADIENT)
+            end
             overlay:SetValue(1)
         end
 
-        ZO_PreHookHandler(leftStatusBar, "OnMinMaxValueChanged", function(_, min, max)
+        leftStatusBar:SetHandler("OnMinMaxValueChanged", function(_, min, max)
             info.attributeMax = max
             self:OnStatusBarValueChanged(attributeBar, info)
-        end)
+        end, "PowerShield")
 
-        ZO_PreHookHandler(leftStatusBar, "OnValueChanged", function(_, value)
+        leftStatusBar:SetHandler("OnValueChanged", function(_, value)
             info.attributeValue = value
             self:OnStatusBarValueChanged(attributeBar, info)
-        end)
+        end, "PowerShield")
 
         info.attributeMax = select(2, leftStatusBar:GetMinMax())
         info.attributeValue = leftStatusBar:GetValue()
@@ -210,26 +229,35 @@ function ZO_UnitVisualizer_PowerShieldModule:ApplyValueToBar(attributeBar, barIn
     -- arbitrary hardcoded threshold to avoid "too-small" values
     if percentOfBarRequested <= .01 then
         leftControl:SetHidden(true)
-        rightControl:SetHidden(true)
+        if rightControl then 
+            rightControl:SetHidden(true)
+        end
         return
     else
         leftControl:SetHidden(false)
-        rightControl:SetHidden(false)
+        if rightControl then
+            rightControl:SetHidden(false)
+        end
     end
 
     local leftAttributeBar, rightAttributeBar = unpack(attributeBar.barControls)
     local halfWidth = leftAttributeBar:GetWidth()
     local leftOffsetX = halfWidth * (1 - percentOfBarRequested)
-    -- Add an extra 0.5 to resolve pixel rounding issues in gamepad UI.
-    local rightOffsetX = leftOffsetX + halfWidth * percentOfBarRequested + 0.5
 
-    leftControl:ClearAnchors()
-    leftControl:SetAnchor(LEFT, leftAttributeBar, LEFT, leftOffsetX, 0)
-    leftControl:SetAnchor(RIGHT, leftAttributeBar, LEFT, rightOffsetX, 0)
+    if rightControl and rightAttributeBar then
+        leftControl:ClearAnchors()
+        leftControl:SetAnchor(LEFT, leftAttributeBar, LEFT, leftOffsetX, 0)
+        leftControl:SetAnchor(RIGHT, leftAttributeBar, RIGHT)
 
-    rightControl:ClearAnchors()
-    rightControl:SetAnchor(RIGHT, rightAttributeBar, RIGHT, -leftOffsetX, 0)
-    rightControl:SetAnchor(LEFT, rightAttributeBar, RIGHT, -rightOffsetX, 0)
+        rightControl:ClearAnchors()
+        rightControl:SetAnchor(RIGHT, rightAttributeBar, RIGHT, -leftOffsetX, 0)
+        rightControl:SetAnchor(LEFT, rightAttributeBar, LEFT)
+    else
+        -- In the case that we only have a single bar, that bar grows left-to-right.
+        leftControl:ClearAnchors()
+        leftControl:SetAnchor(RIGHT, leftAttributeBar, RIGHT, -leftOffsetX, 0)
+        leftControl:SetAnchor(LEFT, leftAttributeBar, RIGHT, -halfWidth, 0)
+    end
 end
 
 function ZO_UnitVisualizer_PowerShieldModule:OnStatusBarValueChanged(attributeBar, barInfo)
@@ -243,9 +271,19 @@ function ZO_UnitVisualizer_PowerShieldModule:OnStatusBarValueChanged(attributeBa
         -- We don't do this for health because the parent attribute bar provides us with half-values.
         -- The anti-healing status is binary; if its value is positive, the overlay is on, otherwise it's off.
         local health = barInfo.attributeValue
-        local shield = shieldInfo.value * .5
-        local trauma = traumaInfo.value * .5
+        local shield = shieldInfo.value
+        local trauma = traumaInfo.value
         local noHealing = noHealingInfo.value
+
+        -- In the case where we're a brand new visualizer on a unit with an already extant visualized effect, it's possible for us to not have a max health value. In that case, we'll try to grab it from the bar.
+        if attributeBar.barControls[ATTRIBUTE_HEALTH].max and barInfo.attributeMax ~= attributeBar.barControls[ATTRIBUTE_HEALTH].max then
+            barInfo.attributeMax = attributeBar.barControls[ATTRIBUTE_HEALTH].max
+        end
+
+        if rightOverlay then
+            shield = shield * .5
+            trauma = trauma * .5
+        end
 
         -- Shields add to your original health bar, so they grow out of that value.
         -- When that amount extends beyond your max health we need shrink your fakehealth to compensate, which we carry over as shieldOverflow
@@ -256,24 +294,30 @@ function ZO_UnitVisualizer_PowerShieldModule:OnStatusBarValueChanged(attributeBa
         -- Trauma starts at your current health value, minus any shield overflow.
         -- This means that you should perceive the size of this bar as being your "health", it just needs to be overhealed before you can benefit from extra heal.
         local traumaBarSize = health - shieldOverflow
-        self:ApplyValueToBar(attributeBar, barInfo, leftOverlay.traumaBar, rightOverlay.traumaBar, traumaBarSize)
+        self:ApplyValueToBar(attributeBar, barInfo, leftOverlay.traumaBar, rightOverlay and rightOverlay.traumaBar, traumaBarSize)
 
         -- Then the fakehealth starts at the step 2 interpretation of health minus any trauma experienced.
         -- Sometimes trauma and shield overflow will be 0, in which case this value is the same as your actual health, otherwise it shrinks to fit each effect.
         local fakeHealthSize = traumaBarSize - trauma
-        self:ApplyValueToBar(attributeBar, barInfo, leftOverlay.fakeHealthBar, rightOverlay.fakeHealthBar, fakeHealthSize)
+        self:ApplyValueToBar(attributeBar, barInfo, leftOverlay.fakeHealthBar, rightOverlay and rightOverlay.fakeHealthBar, fakeHealthSize)
 
         -- The anti-healing overlay always matches the current health value if it's on.
         local noHealingSize = noHealing > 0 and health or 0
-        self:ApplyValueToBar(attributeBar, barInfo, leftOverlay.noHealingInner, rightOverlay.noHealingInner, noHealingSize)
-        self:ApplyValueToBar(attributeBar, barInfo, leftOverlay.noHealingOuter, rightOverlay.noHealingOuter, noHealingSize)
+        self:ApplyValueToBar(attributeBar, barInfo, leftOverlay.noHealingInner, rightOverlay and rightOverlay.noHealingInner, noHealingSize)
+        if leftOverlay.noHealingOuter then
+            self:ApplyValueToBar(attributeBar, barInfo, leftOverlay.noHealingOuter, rightOverlay and rightOverlay.noHealingOuter, noHealingSize)
+        end
 
         local fakeNoHealingSize = noHealing > 0 and fakeHealthSize or 0
-        self:ApplyValueToBar(attributeBar, barInfo, leftOverlay.fakeNoHealingInner, rightOverlay.fakeNoHealingInner, fakeNoHealingSize)
-        self:ApplyValueToBar(attributeBar, barInfo, leftOverlay.fakeNoHealingOuter, rightOverlay.fakeNoHealingOuter, fakeNoHealingSize)
+        self:ApplyValueToBar(attributeBar, barInfo, leftOverlay.fakeNoHealingInner, rightOverlay and rightOverlay.fakeNoHealingInner, fakeNoHealingSize)
+        if leftOverlay.fakeNoHealingOuter then
+            self:ApplyValueToBar(attributeBar, barInfo, leftOverlay.fakeNoHealingOuter, rightOverlay and rightOverlay.fakeNoHealingOuter, fakeNoHealingSize)
+        end
     else
         leftOverlay:SetHidden(true)
-        rightOverlay:SetHidden(true)
+        if rightOverlay then
+            rightOverlay:SetHidden(true)
+        end
     end
 end
 
@@ -315,10 +359,28 @@ function ZO_UnitVisualizer_PowerShieldModule:OnValueChanged(attributeBar, barInf
 end
 
 function ZO_UnitVisualizer_PowerShieldModule:ApplyPlatformStyle()
-    if self.attributeInfo then
-        for _, info in pairs(self.attributeInfo) do
-            if info.overlayControls then
-                ApplyPlatformStyleToShield(info.overlayControls[LEFT_BAR], info.overlayControls[RIGHT_BAR], self.layoutData.barLeftOverlayTemplate, self.layoutData.barRightOverlayTemplate)
+    if IsPlayerActivated() then
+        for attribute, bar in pairs(self.attributeBarControls) do
+            local barInfo = self.attributeInfo and self.attributeInfo[attribute]
+            if barInfo and barInfo.overlayControls then
+                ApplyPlatformStyleToShield(barInfo.overlayControls[LEFT_BAR], barInfo.overlayControls[RIGHT_BAR], self.layoutData.barLeftOverlayTemplate, self.layoutData.barRightOverlayTemplate)
+            end
+            for visualType in pairs(barInfo.visualInfo) do
+                self:OnValueChanged(bar, barInfo, visualType)
+            end
+        end
+    end
+end
+
+function ZO_UnitVisualizer_PowerShieldModule:DoAlphaUpdate(isNearby)
+    if IsPlayerActivated() then
+        for attribute, bar in ipairs(self.attributeBarControls) do
+            local barInfo = self.attributeInfo and self.attributeInfo[attribute]
+            if barInfo and barInfo.overlayControls then
+                for _, overlay in pairs(barInfo.overlayControls) do
+                    local alpha = isNearby and FULL_ALPHA_VALUE or FADED_ALPHA_VALUE
+                    overlay:SetAlpha(alpha)
+                end
             end
         end
     end

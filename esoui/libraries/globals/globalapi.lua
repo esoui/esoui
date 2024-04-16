@@ -338,6 +338,22 @@ function zo_clampLength2D(x, y, maxLength)
     return math.cos(angleRadians) * distance, math.sin(angleRadians) * distance
 end
 
+ZO_TOKENIZE_BY_SPACES_PATTERN = "%s*(%S+)"
+ZO_TOKENIZE_INTEGERS_PATTERN = "([0-9]+)"
+ZO_TOKENIZE_FLOATS_PATTERN = "([0-9]+[.]?[0-9]*)"
+
+-- Split string into tokens via given pattern.  Defaults to split by spaces.
+function zo_tokenize(sourceString, pattern)
+    pattern = pattern or ZO_TOKENIZE_BY_SPACES_PATTERN
+
+    local splitArgs = {}
+    for arg in zo_strgmatch(sourceString, pattern) do
+        table.insert(splitArgs, arg)
+    end
+
+    return splitArgs;
+end
+
 -- Rotate 2D coordinates about the origin by the specified angle.
 function ZO_Rotate2D(angle, x, y)
     local cosine = zo_cos(angle)

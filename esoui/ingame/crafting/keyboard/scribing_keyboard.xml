@@ -1,0 +1,239 @@
+<GuiXml>
+    <Controls>
+        <Button name="ZO_ScribingSlotBase" mouseOverBlendMode="ADD" virtual="true">
+            <Dimensions x="140" y="120" />
+            <MouseButton button="RIGHT" enabled="true" />
+
+            <OnInitialized>
+                self.animation = ANIMATION_MANAGER:CreateTimelineFromVirtual("CraftingGlowAlphaAnimation", self:GetNamedChild("Glow"))
+            </OnInitialized>
+
+            <OnMouseEnter>
+                self.animation:PlayForward()
+                ZO_InventorySlot_SetHighlightHidden(self, false)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                self.animation:PlayBackward()
+                ZO_InventorySlot_SetHighlightHidden(self, true)
+            </OnMouseExit>
+
+            <Controls>
+                <Texture name="$(parent)Icon" pixelRoundingEnabled="false" level="2" alpha="0.85">
+                    <Dimensions x="64" y="64" />
+                    <Anchor point="CENTER" relativePoint="TOP" offsetY="32" />
+                </Texture>
+
+                <Texture name="$(parent)Glow" textureFile="EsoUI/Art/Quickslots/quickslot_highlight_blob.dds" pixelRoundingEnabled="false" alpha="0" level="0">
+                    <Dimensions x="128" y="128"/>
+                    <Anchor point="CENTER" relativeTo="$(parent)Icon" />
+                </Texture>
+                
+                <Texture name="$(parent)DropCallout" layer="OVERLAY" hidden="true" textureFile="EsoUI/Art/ActionBar/actionBar_mouseOver.dds">
+                    <Dimensions x="64" y="64" />
+                    <Anchor point="CENTER" relativeTo="$(parent)Icon" />
+                </Texture>
+
+                <Label name="$(parent)Name" font="ZoFontWindowSubtitle" horizontalAlignment="CENTER" maxLineCount="2" wrapMode="ELLIPSIS">
+                    <Dimensions x="100%" />
+                    <Anchor point="TOP" relativeTo="$(parent)Icon" relativePoint="CENTER" offsetY="36" />
+                </Label>
+            </Controls>
+        </Button>
+        
+        <Button name="ZO_ScribingCraftedAbilitySlot" inherits="ZO_ScribingSlotBase" virtual="true">
+            <Dimensions x="140" y="140" />
+            <OnMouseEnter name="CraftedAbility">
+                ZO_Scribing_Keyboard.OnCraftedAbilitySlotMouseEnter(...)
+            </OnMouseEnter>
+
+            <OnMouseExit name="CraftedAbility">
+                ZO_Scribing_Keyboard.OnCraftedAbilitySlotMouseExit(...)
+            </OnMouseExit>
+
+            <OnMouseUp>
+                ZO_Scribing_Keyboard.OnCraftedAbilitySlotMouseUp(...)
+            </OnMouseUp>
+
+            <OnDragStart>
+                ZO_Scribing_Keyboard.OnCraftedAbilitySlotStartDrag(...)
+            </OnDragStart>
+
+            <OnReceiveDrag>
+                ZO_Scribing_Keyboard.OnCraftedAbilitySlotReceiveDrag(...)
+            </OnReceiveDrag>
+
+            <Controls>
+                <Texture name="$(parent)Icon" override="true">
+                    <Dimensions x="84" y="84" />
+                    <Anchor point="CENTER" relativePoint="TOP" offsetY="42" />
+                </Texture>
+
+                <Texture name="$(parent)Glow" override="true">
+                    <Dimensions x="148" y="148"/>
+                </Texture>
+
+                <Texture name="$(parent)DropCallout" override="true">
+                    <Dimensions x="84" y="84" />
+                </Texture>
+            </Controls>
+        </Button>
+
+        <Button name="ZO_ScribingCraftedAbilityScriptSlot" inherits="ZO_ScribingSlotBase" virtual="true">
+            <OnMouseEnter name="Script">
+                ZO_Scribing_Keyboard.OnCraftedAbilityScriptSlotMouseEnter(...)
+            </OnMouseEnter>
+
+            <OnMouseExit name="Script">
+                ZO_Scribing_Keyboard.OnCraftedAbilityScriptSlotMouseExit(...)
+            </OnMouseExit>
+
+            <OnMouseUp>
+                ZO_Scribing_Keyboard.OnCraftedAbilityScriptSlotMouseUp(...)
+            </OnMouseUp>
+
+            <OnDragStart>
+                ZO_Scribing_Keyboard.OnCraftedAbilityScriptSlotStartDrag(...)
+            </OnDragStart>
+
+            <OnReceiveDrag>
+                ZO_Scribing_Keyboard.OnCraftedAbilityScriptSlotReceiveDrag(...)
+            </OnReceiveDrag>
+        </Button>
+
+        <Control name="ZO_Scribing_RecentCraftedAbilityRow_Keyboard" inherits="ZO_ListEntry_BackdropAndHighlight_Template" mouseEnabled="true" virtual="true">
+            <Dimensions x="509" y="ZO_SCRIBING_RECENT_CRAFTED_ABILITY_ENTRY_HEIGHT_KEYBOARD" />
+
+            <OnMouseEnter>
+                ZO_Scribing_Keyboard.OnMouseEnterRecentCraftedAbility(...)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_Scribing_Keyboard.OnMouseExitRecentCraftedAbility(...)
+            </OnMouseExit>
+
+            <OnMouseUp>
+                ZO_Scribing_Keyboard.OnMouseClickRecentCraftedAbility(...)
+            </OnMouseUp>
+
+            <Controls>
+                <Texture name="$(parent)Icon">
+                    <Dimensions x="40" y="40" />
+                    <Anchor point="CENTER" relativePoint="TOPLEFT" offsetX="70" offsetY="26" />
+                </Texture>
+
+                <Label name="$(parent)Name" font="ZoFontGameShadow" maxLineCount="2" wrapMode="ELLIPSIS">
+                    <Dimensions x="270" />
+                    <Anchor point="LEFT" offsetX="110" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_Scribing_Keyboard_TL" inherits="ZO_ScribingLayout_Keyboard_TL" hidden="true">
+            <AnchorFill />
+
+            <OnInitialized>
+                ZO_Scribing_Keyboard.OnControlInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)ModeMenu">
+                    <Dimensions y="ZO_SCENE_MENU_HEIGHT" />
+                    <Anchor point="TOPRIGHT" relativeTo="ZO_SharedRightPanelBackground" offsetX="-40"/>
+                    <Controls>
+                        <Control name="$(parent)Bar" inherits="ZO_CraftingModeTabs">
+                            <Anchor point="TOPRIGHT" />
+                        </Control>
+
+                        <Control name="$(parent)Divider" inherits="ZO_DynamicHorizontalDivider">
+                            <Dimensions x="550" />
+                            <Anchor point="BOTTOM" offsetX="-269" offsetY="4" />
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)Library" mouseEnabled="true" override="true">
+                    <Controls>
+                        <Control name="$(parent)FilterDivider" override="true" />
+
+                        <Button name="$(parent)IsUsableCheckbox" inherits="ZO_CheckButton">
+                            <Anchor point="LEFT" relativeTo="$(parent)Search" relativePoint="RIGHT" offsetX="25" />
+                        </Button>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)SlotsContainer">
+                    <Dimensions x="160" y="585" />
+                    <Anchor point="BOTTOM" offsetY="-140" />
+                    
+                    <Controls>
+                        <Texture name="$(parent)BG" inherits="ZO_CraftingContainerTallBackground" />
+                        
+                        <Label name="$(parent)Header" font="ZoFontWinH2" horizontalAlignment="CENTER" text="SI_SCRIBING_COMPONENT_SLOTS_HEADER">
+                            <Dimensions x="140" />
+                            <Anchor point="TOP" />
+                        </Label>
+
+                        <Button name="$(parent)CraftedAbilitySlot" inherits="ZO_ScribingCraftedAbilitySlot">
+                            <Anchor point="CENTER" relativeTo="$(parent)Header" relativePoint="BOTTOM" offsetY="80" />
+                        </Button>
+
+                        <Button name="$(parent)PrimarySlot" inherits="ZO_ScribingCraftedAbilityScriptSlot">
+                            <Anchor point="CENTER" relativeTo="$(parent)CraftedAbilitySlot" relativePoint="CENTER" offsetY="130" />
+                        </Button>
+                        
+                        <Button name="$(parent)SecondarySlot" inherits="ZO_ScribingCraftedAbilityScriptSlot">
+                            <Anchor point="CENTER" relativeTo="$(parent)PrimarySlot" relativePoint="CENTER" offsetY="120" />
+                        </Button>
+                
+                        <Button name="$(parent)TertiarySlot" inherits="ZO_ScribingCraftedAbilityScriptSlot">
+                            <Anchor point="CENTER" relativeTo="$(parent)SecondarySlot" relativePoint="CENTER" offsetY="120" />
+                        </Button>
+
+                        <Label name="$(parent)InkCost" font="ZoFontWinH2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" hidden="true">
+                            <Anchor point="TOP" relativeTo="$(parent)TertiarySlot" relativePoint="CENTER" offsetY="65" />
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)Recent" hidden="true">
+                    <Dimensions x="565" />
+                    <Anchor point="TOPLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="45" />
+                    <Anchor point="BOTTOMLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="-30" />
+
+                    <Controls>
+                        <Control name="$(parent)FilterDivider" inherits="ZO_DynamicHorizontalDivider">
+                            <Dimensions x="550" y="4"/>
+                            <Anchor point="TOP" relativeTo="ZO_SharedRightPanelBackground" offsetX="-22" offsetY="DEFAULT_INVENTORY_FILTER_DIVIDER_TOP_OFFSET_Y" />
+                        </Control>
+
+                        <Backdrop name="$(parent)Search" tier="HIGH" inherits="ZO_SingleLineEditBackdrop_Keyboard">
+                            <Dimensions x="240"/>
+                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)FilterDivider" relativePoint="TOPLEFT" offsetX="45" offsetY="-15" />
+
+                            <Controls>
+                                <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop" defaultText="SI_ENTER_KEYWORD_SEARCH_EDIT_DEFAULT" />
+                            </Controls>
+                        </Backdrop>
+
+                        <Control name="$(parent)ScribedAbilities" inherits="ZO_ScrollList">
+                            <Dimensions x="100%" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)FilterDivider" relativePoint="BOTTOMRIGHT" offsetY="2" />
+                            <Anchor point="BOTTOMRIGHT" />
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Tooltip name="$(parent)ResultTooltip" tier="HIGH" inherits="ZO_BaseTooltip ZO_CraftingTooltip_AddGlow" headerVerticalOffset="11">
+                    <ResizeToFitPadding width="32" height="40" />
+                    <DimensionConstraints minX="384" maxX="384" />
+                    <Anchor point="RIGHT" relativeTo="$(parent)SlotsContainer" relativePoint="LEFT" offsetX="-10" />
+
+                    <OnInitialized>
+                        self:GetNamedChild("BG"):SetDrawTier(DT_MEDIUM)
+                    </OnInitialized>
+                </Tooltip>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

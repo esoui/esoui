@@ -414,7 +414,7 @@ function ZO_Tribute:RegisterDialogs()
         template = "ZO_GamepadFullWidthLeftLabelEntryTemplate",
         templateData =
         {
-            text = GetString(GetGamerCardStringId()),
+            text = GetString(ZO_GetGamerCardStringId()),
             setup = ZO_SharedGamepadEntry_OnSetup,
             callback = function(dialog)
                 ZO_ShowGamerCardFromDisplayName(dialog.data.opponentName)
@@ -680,13 +680,13 @@ do
             end
         end)
         
-        control:RegisterForEvent(EVENT_TRIBUTE_AGENT_DEFEAT_COST_CHANGED, function(_, cardInstanceId, delta, newDefeatCost, shouldPlayFx)
+        control:RegisterForEvent(EVENT_TRIBUTE_AGENT_DEFEAT_COST_CHANGED, function(_, cardInstanceId, delta, newDefeatCost, shouldPlayFx, shouldSuppressSounds)
             local cardObject = self.cardInstanceIdToCardObject[cardInstanceId]
             if cardObject then
                 self:ResetCardPopupAndTooltip(ANY_ACTIVE_CARD)
 
                 if shouldPlayFx then
-                    cardObject:UpdateDefeatCost(newDefeatCost, delta)
+                    cardObject:UpdateDefeatCost(newDefeatCost, delta, shouldSuppressSounds)
                 else
                     cardObject:RefreshDefeatCost()
                 end

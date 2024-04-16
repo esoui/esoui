@@ -32,6 +32,14 @@ function ZO_HelpTutorialsGamepad:SetupSearchHeaderData(searchString, headerData)
     end
 end
 
+function ZO_HelpTutorialsGamepad:SetupList(list)
+    ZO_Gamepad_ParametricList_Screen.SetupList(self, list)
+
+    local DEFAULT_EQUALITY_FUNCTION = nil
+    list:AddDataTemplate("ZO_GamepadSubMenuEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
+    list:AddDataTemplateWithHeader("ZO_GamepadSubMenuEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, DEFAULT_EQUALITY_FUNCTION, "ZO_GamepadMenuEntryHeaderTemplate")
+end
+
 --[[Tutorial Info Display]]--
 
 ZO_HelpTutorialsDisplay_Gamepad = ZO_InitializingObject:Subclass()
@@ -125,7 +133,7 @@ ESO_Dialogs["HELP_TUTORIALS_OVERLAY_DIALOG"] =
 
                         local listItem =
                         {
-                            template = "ZO_GamepadItemEntryTemplate",
+                            template = "ZO_GamepadSubMenuEntryTemplate",
                             entryData = entryData,
                             header = categoryName,
                         }

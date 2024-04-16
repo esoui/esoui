@@ -43,16 +43,11 @@ function ZO_EndlessDungeonBuffTracker_Shared:InitializeControls()
     self.keybindContainer = self.control:GetNamedChild("KeybindContainer")
     self.switchToSummaryKeybindButton = self.keybindContainer:GetNamedChild("SwitchToSummary")
     self.closeKeybindButton = self.keybindContainer:GetNamedChild("Close")
-
-    self.keybindContainer:SetHandler("OnRectChanged", function()
-        self:UpdateWindowDimensions()
-    end)
 end
 
-function ZO_EndlessDungeonBuffTracker_Shared:InitializeGridList(gridScrollListTemplate, gridEntryTemplateName, gridHeaderTemplateName, gridSelectionTemplateName)
+function ZO_EndlessDungeonBuffTracker_Shared:InitializeGridList(gridEntryTemplateName, gridHeaderTemplateName)
     self.gridEntryTemplateName = gridEntryTemplateName
     self.gridHeaderTemplateName = gridHeaderTemplateName
-    self.gridList = gridScrollListTemplate:New(self.gridListControl, gridSelectionTemplateName)
 end
 
 function ZO_EndlessDungeonBuffTracker_Shared:InitializeKeybindStripDescriptor()
@@ -186,8 +181,6 @@ function ZO_EndlessDungeonBuffTracker_Shared:UpdateKeybinds()
     else
         self.closeKeybindButton:SetAnchor(TOPLEFT, self.switchToSummaryKeybindButton, TOPRIGHT, 40, 0)
     end
-
-    self:UpdateWindowDimensions()
 end
 
 function ZO_EndlessDungeonBuffTracker_Shared:UpdateProgress()
@@ -213,12 +206,12 @@ function ZO_EndlessDungeonBuffTracker_Shared:AddGridListBuffEntries(buffType, he
     local gridHeaderTemplateName = self.gridHeaderTemplateName
     local buffEntries = {}
     for abilityId, stackCount in pairs(buffTable) do
-        local buffType, isAvatarVision = GetAbilityEndlessDungeonBuffType(abilityId)
+        local abilityBuffType, isAvatarVision = GetAbilityEndlessDungeonBuffType(abilityId)
         local buffData =
         {
             abilityId = abilityId,
             abilityName = GetAbilityName(abilityId),
-            buffType = buffType,
+            buffType = abilityBuffType,
             iconTexture = GetAbilityIcon(abilityId),
             instanceIntervalOffset = self:GetNextInstanceIntervalOffsetS(),
             isAvatarVision = isAvatarVision,
@@ -256,78 +249,7 @@ function ZO_EndlessDungeonBuffTracker_Shared:UpdateGridList()
     local numVisionEntries = self:AddGridListBuffEntries(ENDLESS_DUNGEON_BUFF_TYPE_VISION, GetString(SI_ENDLESS_DUNGEON_SUMMARY_VISIONS_HEADER))
     local isListEmpty = (numVerseEntries + numVisionEntries) == 0
     self.emptyLabel:SetHidden(not isListEmpty)
-    self:UpdateGridListDimensions(numVerseEntries, numVisionEntries)
     gridList:CommitGridList()
-end
-
-function ZO_EndlessDungeonBuffTracker_Shared:UpdateGridListDimensions(numVerseEntries, numVisionEntries, maxGridWidth, gridHeaderFont, gridEntryWidth, gridEntryRowHeight, gridHeaderRowHeight, gridPaddingY)
-    local maxColumns = zo_floor(maxGridWidth / gridEntryWidth)
-    local numRowsAvailable = ZO_ENDLESS_DUNGEON_BUFF_TRACKER_GRID_LIST_MAX_ENTRY_ROWS
-    local minGridWidth = 0
-    local DEFAULT_SCALE = 1.0
-
-    local versesHeight = 0
-    if numVerseEntries > 0 then
-        local numVerseRows = zo_min(zo_ceil(numVerseEntries / maxColumns), numRowsAvailable)
-        numRowsAvailable = numRowsAvailable - numVerseRows
-        versesHeight = gridHeaderRowHeight + numVerseRows * gridEntryRowHeight
-
-        local versesWidth = GetStringWidthScaled(gridHeaderFont, GetString(SI_ENDLESS_DUNGEON_SUMMARY_VERSES_HEADER), DEFAULT_SCALE, SPACE_INTERFACE)
-        minGridWidth = zo_max(minGridWidth, versesWidth + ZO_ENDLESS_DUNGEON_BUFF_TRACKER_GRID_LIST_OFFSET_X)
-    end
-
-    local visionsHeight = 0
-    if numVisionEntries > 0 then
-        local numVisionRows = zo_min(zo_ceil(numVisionEntries / maxColumns), numRowsAvailable)
-        visionsHeight = gridHeaderRowHeight + numVisionRows * gridEntryRowHeight
-
-        local visionsWidth = GetStringWidthScaled(gridHeaderFont, GetString(SI_ENDLESS_DUNGEON_SUMMARY_VISIONS_HEADER), DEFAULT_SCALE, SPACE_INTERFACE)
-        minGridWidth = zo_max(minGridWidth, visionsWidth + ZO_ENDLESS_DUNGEON_BUFF_TRACKER_GRID_LIST_OFFSET_X)
-    end
-
-    local sectionPadding = (versesHeight > 0 and visionsHeight > 0) and gridPaddingY or 0
-    local GRID_HEIGHT_PADDING = 5
-    local totalHeight = versesHeight + visionsHeight + sectionPadding + GRID_HEIGHT_PADDING
-    self.gridListControl:SetHeight(totalHeight)
-
-    local maxBuffsByType = zo_max(numVerseEntries, numVisionEntries)
-    local numColumns = zo_min(maxBuffsByType, maxColumns)
-    local gridWidth = zo_clamp(numColumns * gridEntryWidth, minGridWidth, maxGridWidth)
-    local gridWidthMargin = numColumns > 0 and (maxGridWidth % gridEntryWidth) or 0
-    self.gridListControl:SetWidth(gridWidth + gridWidthMargin)
-
-    self:UpdateWindowDimensions()
-end
-
-function ZO_EndlessDungeonBuffTracker_Shared:UpdateWindowDimensions()
-    local minWidth = zo_max(self.progressLabel:GetWidth(), self.titleLabel:GetWidth())
-    minWidth = zo_max(minWidth, self.keybindContainer:GetWidth())
-    if self.emptyLabel:IsHidden() then
-        minWidth = zo_max(minWidth, self.gridListControl:GetWidth())
-    else
-        minWidth = zo_max(minWidth, self.emptyLabel:GetWidth())
-    end
-
-    local WINDOW_WIDTH_MARGIN = 50
-    local windowWidth = minWidth + WINDOW_WIDTH_MARGIN
-    self.control:SetWidth(windowWidth)
-end
-
-function ZO_EndlessDungeonBuffTracker_Shared:ResizeGridListToFitHeaderLabelControl(labelControl)
-    local numExcessLines = labelControl:GetNumLines() - 1
-    if numExcessLines < 1 then
-        -- The label control is not wrapping; no padding is necessary.
-        return
-    end
-
-    -- Expand the grid list width incrementally in order to accommodate
-    -- the full width of the specified label control.
-    local gridWidth = self.gridListControl:GetWidth()
-    local labelWidthPadding = numExcessLines * labelControl:GetWidth()
-    self.gridListControl:SetWidth(gridWidth + labelWidthPadding)
-
-    -- Resize the top level window accordingly.
-    self:UpdateWindowDimensions()
 end
 
 function ZO_EndlessDungeonBuffTracker_Shared:OnBuffStackCountChanged(buffType, abilityId, stackCount, previousStackCount)
@@ -353,6 +275,8 @@ end
 function ZO_EndlessDungeonBuffTracker_Shared:OnShown()
     KEYBIND_STRIP:RemoveDefaultExit()
     KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
+    -- ESO-851958: This is required to force the buff tracker to resize to fit decendents properly when shown as that doesn't always happen reliably
+    self.titleLabel:SetText(GetString(SI_ENDLESS_DUNGEON_BUFF_TRACKER_TITLE))
     self:UpdateKeybinds()
     self.refreshGroups:UpdateRefreshGroups()
 end

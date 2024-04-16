@@ -74,7 +74,9 @@ function ZO_GroupList_Manager:RegisterForEvents()
     EVENT_MANAGER:RegisterForEvent("ZO_GroupList_Manager", EVENT_LEADER_UPDATE, RegisterDelayedRefresh)
     EVENT_MANAGER:RegisterForEvent("ZO_GroupList_Manager", EVENT_GROUP_UPDATE, RegisterDelayedRefresh)
     EVENT_MANAGER:RegisterForEvent("ZO_GroupList_Manager", EVENT_PLAYER_ACTIVATED, RegisterDelayedRefresh)
-    EVENT_MANAGER:RegisterForEvent("ZO_GroupList_Manager", EVENT_GROUP_MEMBER_ACCOUNT_NAME_UPDATED, RefreshData)
+    if IsConsoleUI() then
+        EVENT_MANAGER:RegisterForEvent("ZO_GroupList_Manager", EVENT_GROUP_MEMBER_ACCOUNT_NAME_UPDATED, RefreshData) -- PublicConsoleIngameEvent.xml
+    end
 end
 
 function ZO_GroupList_Manager:BuildMasterList()

@@ -237,8 +237,9 @@ end
 function ZO_QuestJournal_Manager:GetNextSortedQuestForQuestIndex(questIndex)
     for i, quest in ipairs(self.quests) do
         if quest.questIndex == questIndex then
-            local nextQuest = (i == #self.quests) and 1 or (i + 1)
-            return self.quests[nextQuest].questIndex
+            local wasLastQuest = (i == #self.quests)
+            local nextQuest = wasLastQuest and 1 or (i + 1)
+            return self.quests[nextQuest].questIndex, wasLastQuest
         end
     end
 end

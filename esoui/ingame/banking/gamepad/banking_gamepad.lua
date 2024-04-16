@@ -84,7 +84,7 @@ do
 
             local currentBestCategoryName = nil
             for _, itemData in ipairs(slots) do
-                local passesTextFilter = TEXT_SEARCH_MANAGER:IsItemInSearchTextResults(self.searchContext, BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT, itemData.bagId, itemData.slotIndex)
+                local passesTextFilter = TEXT_SEARCH_MANAGER:IsDataInSearchTextResults(self.searchContext, BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT, itemData.bagId, itemData.slotIndex)
                 local passesCategoryFilter = IsInFilteredCategories(self.filterCategories, itemData)
                 if passesTextFilter and passesCategoryFilter then
                     local entry = ZO_GamepadEntryData:New(itemData.name, itemData.iconFile)
@@ -122,7 +122,7 @@ ZO_GamepadBanking = ZO_BankingCommon_Gamepad:Subclass()
 
 function ZO_GamepadBanking:Initialize(control)
     GAMEPAD_BANKING_SCENE = ZO_InteractScene:New(GAMEPAD_BANKING_SCENE_NAME, SCENE_MANAGER, BANKING_INTERACTION)
-    ZO_BankingCommon_Gamepad.Initialize(self, control, GAMEPAD_BANKING_SCENE)
+    ZO_BankingCommon_Gamepad.Initialize(self, "", control, GAMEPAD_BANKING_SCENE)
     self.itemActions = ZO_ItemSlotActionsController:New(KEYBIND_STRIP_ALIGN_LEFT)
 
     self:SetCarriedBag(BAG_BACKPACK)

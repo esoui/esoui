@@ -132,6 +132,8 @@ end
 function LoginManager_Keyboard:OnCreateLinkLoadingError(loginError, linkingError, debugInfo)
     ZO_Dialogs_ReleaseDialog("LINKED_LOGIN_KEYBOARD")
 
+    WriteToInterfaceLog(string.format("Create Linked Loading Error!\nLogin error: %d \nLinking error: %d\nDebug info: %s", loginError or -1, linkingError or -1, debugInfo or ""))
+
     local dialogName
     local errorString
     local formattedErrorString

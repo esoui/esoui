@@ -80,9 +80,9 @@ local ALLIANCE_COLORS =
 
 local BATTLEGROUND_ALLIANCE_COLORS =
 {
-    [BATTLEGROUND_ALLIANCE_FIRE_DRAKES] = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_BATTLEGROUND_ALLIANCE, BATTLEGROUND_ALLIANCE_FIRE_DRAKES)),
-    [BATTLEGROUND_ALLIANCE_PIT_DAEMONS] = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_BATTLEGROUND_ALLIANCE, BATTLEGROUND_ALLIANCE_PIT_DAEMONS)),
-    [BATTLEGROUND_ALLIANCE_STORM_LORDS] = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_BATTLEGROUND_ALLIANCE, BATTLEGROUND_ALLIANCE_STORM_LORDS)),
+    [BATTLEGROUND_TEAM_FIRE_DRAKES] = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_BATTLEGROUND_TEAM, BATTLEGROUND_TEAM_FIRE_DRAKES)),
+    [BATTLEGROUND_TEAM_PIT_DAEMONS] = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_BATTLEGROUND_TEAM, BATTLEGROUND_TEAM_PIT_DAEMONS)),
+    [BATTLEGROUND_TEAM_STORM_LORDS] = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_BATTLEGROUND_TEAM, BATTLEGROUND_TEAM_STORM_LORDS)),
 }
 
 function GetAllianceColor(alliance)
@@ -108,7 +108,7 @@ function GetColoredBattlegroundAllianceName(battlegroundAlliance)
     local coloredName = COLORED_BATTLEGROUND_ALLIANCE_NAMES[battlegroundAlliance]
     if coloredName == nil then
         local color = GetBattlegroundAllianceColor(battlegroundAlliance)
-        COLORED_BATTLEGROUND_ALLIANCE_NAMES[battlegroundAlliance] = color:Colorize(GetBattlegroundAllianceName(battlegroundAlliance))
+        COLORED_BATTLEGROUND_ALLIANCE_NAMES[battlegroundAlliance] = color:Colorize(GetBattlegroundTeamName(battlegroundAlliance))
         return COLORED_BATTLEGROUND_ALLIANCE_NAMES[battlegroundAlliance]
     end
 
@@ -253,9 +253,9 @@ ZO_CONDITION_GRADIENT_COLORS = {
 
 ZO_BATTLEGROUND_ALLIANCE_STATUS_BAR_GRADIENTS =
 {
-    [BATTLEGROUND_ALLIANCE_PIT_DAEMONS] = { ZO_ColorDef:New(0.161, 0.306, 0.047), ZO_ColorDef:New(0.345, 0.592, 0.149) },
-    [BATTLEGROUND_ALLIANCE_STORM_LORDS] = { ZO_ColorDef:New(0.314, 0.125, 0.416), ZO_ColorDef:New(0.475, 0.286, 0.576) },
-    [BATTLEGROUND_ALLIANCE_FIRE_DRAKES] = { ZO_ColorDef:New(0.451, 0.153, 0.035), ZO_ColorDef:New(0.757, 0.341, 0.176) },
+    [BATTLEGROUND_TEAM_PIT_DAEMONS] = { ZO_ColorDef:New(0.161, 0.306, 0.047), ZO_ColorDef:New(0.345, 0.592, 0.149) },
+    [BATTLEGROUND_TEAM_STORM_LORDS] = { ZO_ColorDef:New(0.314, 0.125, 0.416), ZO_ColorDef:New(0.475, 0.286, 0.576) },
+    [BATTLEGROUND_TEAM_FIRE_DRAKES] = { ZO_ColorDef:New(0.451, 0.153, 0.035), ZO_ColorDef:New(0.757, 0.341, 0.176) },
 }
 
 -- Lua doesn't need entries for every status effect color, this is just a quick lookup for the commonly used ones.

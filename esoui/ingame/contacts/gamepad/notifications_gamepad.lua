@@ -21,6 +21,7 @@ ZO_GAMEPAD_NOTIFICATION_ICONS =
     [NOTIFICATION_TYPE_GROUP_ELECTION] = "EsoUI/Art/Notifications/Gamepad/gp_notificationIcon_autoTransfer.dds",
     [NOTIFICATION_TYPE_DUEL] = "EsoUI/Art/Notifications/Gamepad/gp_notificationIcon_duel.dds",
     [NOTIFICATION_TYPE_ESO_PLUS_SUBSCRIPTION] = "EsoUI/Art/Notifications/Gamepad/gp_notification_ESO+.dds",
+    [NOTIFICATION_TYPE_CRAFTED_ABILITY_RESET] = function(data) return data.icon end,
     [NOTIFICATION_TYPE_GIFT_RECEIVED] = "EsoUI/Art/Notifications/Gamepad/gp_notificationIcon_gift.dds",
     [NOTIFICATION_TYPE_GIFT_CLAIMED] = "EsoUI/Art/Notifications/Gamepad/gp_notificationIcon_gift.dds",
     [NOTIFICATION_TYPE_GIFT_RETURNED] = "EsoUI/Art/Notifications/Gamepad/gp_notificationIcon_gift.dds",
@@ -572,6 +573,7 @@ function ZO_GamepadNotificationManager:InitializeNotificationList(control)
         ZO_GamepadTradeInviteProvider:New(self),
         ZO_GamepadQuestShareProvider:New(self),
         ZO_GamepadPointsResetProvider:New(self),
+        ZO_CraftedAbilityResetProvider:New(self),
         ZO_GamepadPledgeOfMaraProvider:New(self),
         ZO_GamepadAgentChatRequestProvider:New(self),
         ZO_GamepadLeaderboardScoreProvider:New(self),
@@ -709,7 +711,7 @@ function ZO_GamepadNotificationManager:InitializeKeybindStripDescriptors()
 
         --View Gamercard
         {
-            name = GetString(GetGamerCardStringId()),
+            name = GetString(ZO_GetGamerCardStringId()),
             keybind = "UI_SHORTCUT_TERTIARY",
             callback = function()
                 local data = self:GetTargetData()
@@ -851,7 +853,11 @@ function ZO_GamepadNotificationManager:RefreshVisible()
 end
 
 function ZO_GamepadNotificationManager:AddDataEntry(dataType, data, isHeader)
-    local entryData = ZO_GamepadEntryData:New(data.shortDisplayText, ZO_GAMEPAD_NOTIFICATION_ICONS[data.notificationType])
+    local icon = ZO_GAMEPAD_NOTIFICATION_ICONS[data.notificationType]
+    if type(icon) == "function" then
+        icon = icon(data)
+    end
+    local entryData = ZO_GamepadEntryData:New(data.shortDisplayText, icon)
     entryData.data = data
     entryData:SetIconTintOnSelection(true)
     entryData:SetIconDisabledTintOnSelection(true)

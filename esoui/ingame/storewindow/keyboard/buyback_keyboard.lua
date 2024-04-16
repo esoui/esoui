@@ -151,7 +151,7 @@ function BuyBack:UpdateList()
         local scrollData = ZO_ScrollList_GetDataList(self.list)
 
         for entryIndex = 1, GetNumBuybackItems() do
-            if TEXT_SEARCH_MANAGER:IsItemInSearchTextResults("storeTextSearch", BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT, BAG_BUYBACK, entryIndex) then
+            if TEXT_SEARCH_MANAGER:IsDataInSearchTextResults("storeTextSearch", BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT, BAG_BUYBACK, entryIndex) then
                 local icon, name, stack, price, functionalQuality, meetsRequirements, displayQuality = GetBuybackItemInfo(entryIndex)
                 if stack > 0 then
                     local buybackData =

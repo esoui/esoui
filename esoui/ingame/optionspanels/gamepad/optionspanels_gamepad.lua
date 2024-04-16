@@ -220,6 +220,12 @@ GAMEPAD_SETTINGS_DATA =
         {
             panel = SETTING_PANEL_VIDEO,
             system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_CHARACTER_RESOLUTION,
+            header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_GRAPHICS,
+        },
+        {
+            panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_GRAPHICS,
             settingId = GRAPHICS_SETTING_BLOOM,
             header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_GRAPHICS,
         },
@@ -503,6 +509,11 @@ GAMEPAD_SETTINGS_DATA =
             panel = SETTING_PANEL_ACCESSIBILITY,
             system = SETTING_TYPE_ACCESSIBILITY,
             settingId = ACCESSIBILITY_SETTING_SCREEN_NARRATION,
+        },
+        {
+            panel = SETTING_PANEL_ACCESSIBILITY,
+            system = SETTING_TYPE_ACCESSIBILITY,
+            settingId = ACCESSIBILITY_SETTING_TEXT_INPUT_NARRATION,
         },
         {
             panel = SETTING_PANEL_ACCESSIBILITY,

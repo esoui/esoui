@@ -125,6 +125,10 @@ function ZO_TextSearchManager:GetSearchText(context)
     return self.contextSearches[context] and self.contextSearches[context].searchText or ""
 end
 
+function ZO_TextSearchManager:HasSearchFilter(context)
+    return ZO_TextSearchManager.CanFilterByText(self:GetSearchText(context))
+end
+
 function ZO_TextSearchManager:SetSearchText(context, searchText)
     local contextSearch = self.contextSearches[context]
     if contextSearch then
@@ -156,6 +160,16 @@ function ZO_TextSearchManager:MarkDirtyByFilterTargetAndPrimaryKey(filterTarget,
                     break
                 end
             end
+        end
+    end
+end
+
+function ZO_TextSearchManager:MarkDirtyByFilterTarget(filterTarget, shouldSuppressSearchUpdate)
+    for context, contextSearch in pairs(self.contextSearches) do
+        local filterTargetData = contextSearch.filterTargetDescriptors[filterTarget]
+        if filterTargetData then
+            contextSearch.isDirty = true
+            self:CleanSearch(context, shouldSuppressSearchUpdate)
         end
     end
 end
@@ -229,12 +243,27 @@ function ZO_TextSearchManager:ExecuteSearch(context)
                     for slotIndex in ZO_IterateBagSlots(primaryKey) do
                         AddBackgroundListFilterEntry(searchTaskId, primaryKey, slotIndex)
                     end
+                elseif filterTarget == BACKGROUND_LIST_FILTER_TARGET_ITEM_SET_ID then
+                    -- Filter Target is a Quest Item Filter, primary key is a questItemId
+                    AddBackgroundListFilterEntry(searchTaskId, primaryKey)
                 elseif filterTarget == BACKGROUND_LIST_FILTER_TARGET_QUEST_ITEM_ID then
                     -- Filter Target is a Quest Item Filter, primary key is a questItemId
                     AddBackgroundListFilterEntry(searchTaskId, primaryKey)
                 elseif filterTarget == BACKGROUND_LIST_FILTER_TARGET_COLLECTIBLE_ID then
                     -- Filter Target is a Collections Filter, primary key is a collectibleId
                     AddBackgroundListFilterEntry(searchTaskId, primaryKey)
+                elseif filterTarget == BACKGROUND_LIST_FILTER_TARGET_TRIBUTE_PATRON_ID then
+                    -- Filter Target is a Collections Filter, primary key is a tributePatronId
+                    AddBackgroundListFilterEntry(searchTaskId, primaryKey)
+                elseif filterTarget == BACKGROUND_LIST_FILTER_TARGET_CRAFTED_ABILITY_ID then
+                    -- Filter Target is a Crafted Ability Filter, primary key is a craftedAbilityId
+                    AddBackgroundListFilterEntry(searchTaskId, primaryKey)
+                elseif filterTarget == BACKGROUND_LIST_FILTER_TARGET_CRAFTED_ABILITY_COMBINATION then
+                    -- Filter Target is a Crafted Ability Combination Filter, primary key is craftedAbilityId, scripts follow
+                    AddBackgroundListFilterEntry(searchTaskId, unpack(primaryKey))
+                elseif filterTarget == BACKGROUND_LIST_FILTER_TARGET_CRAFTED_ABILITY_SCRIPT_ID then
+                    -- Filter Target is a Crafted Ability Script Filter, primary key is a craftedAbilityScriptId, second param is associated craftedAbilityId
+                    AddBackgroundListFilterEntry(searchTaskId, unpack(primaryKey))
                 end
             end
         end
@@ -274,17 +303,41 @@ function ZO_TextSearchManager:OnBackgroundListFilterComplete(taskId)
         end
 
         for filterResultIndex = 1, GetNumBackgroundListFilterResults(taskId) do
-            local primaryKey, secondaryKey = GetBackgroundListFilterResult(taskId, filterResultIndex)
+            local primaryKey, secondaryKey, tertiaryKey, quaternaryKey = GetBackgroundListFilterResult(taskId, filterResultIndex)
 
             if filterTarget == BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT then
                 if not searchResults[primaryKey] then
                     searchResults[primaryKey] = {}
                 end
-
                 searchResults[primaryKey][secondaryKey] = true
+            elseif filterTarget == BACKGROUND_LIST_FILTER_TARGET_ITEM_SET_ID then
+                searchResults[primaryKey] = true
             elseif filterTarget == BACKGROUND_LIST_FILTER_TARGET_QUEST_ITEM_ID then
                 searchResults[primaryKey] = true
             elseif filterTarget == BACKGROUND_LIST_FILTER_TARGET_COLLECTIBLE_ID then
+                searchResults[primaryKey] = true
+            elseif filterTarget == BACKGROUND_LIST_FILTER_TARGET_TRIBUTE_PATRON_ID then
+                searchResults[primaryKey] = true
+            elseif filterTarget == BACKGROUND_LIST_FILTER_TARGET_CRAFTED_ABILITY_ID then
+                searchResults[primaryKey] = true
+            elseif filterTarget == BACKGROUND_LIST_FILTER_TARGET_CRAFTED_ABILITY_COMBINATION then
+                local primaryResult = searchResults[primaryKey]
+                if not primaryResult then
+                    primaryResult = {}
+                    searchResults[primaryKey] = primaryResult
+                end
+                local secondaryResult = primaryResult[secondaryKey]
+                if not secondaryResult then
+                    secondaryResult = {}
+                    primaryResult[secondaryKey] = secondaryResult
+                end
+                local tertiaryResult = secondaryResult[tertiaryKey]
+                if not tertiaryResult then
+                    tertiaryResult = {}
+                    secondaryResult[tertiaryKey] = tertiaryResult
+                end
+                tertiaryResult[quaternaryKey] = true
+            elseif filterTarget == BACKGROUND_LIST_FILTER_TARGET_CRAFTED_ABILITY_SCRIPT_ID then
                 searchResults[primaryKey] = true
             end
         end
@@ -298,7 +351,7 @@ function ZO_TextSearchManager:OnBackgroundListFilterComplete(taskId)
     end
 end
 
-function ZO_TextSearchManager:IsItemInSearchTextResults(context, filterTarget, primaryKey, secondaryKey)
+function ZO_TextSearchManager:IsDataInSearchTextResults(context, filterTarget, primaryKey, secondaryKey)
     local contextSearch = self.contextSearches[context]
     if not contextSearch or not ZO_TextSearchManager.CanFilterByText(contextSearch.searchText) then
         return true
@@ -306,10 +359,26 @@ function ZO_TextSearchManager:IsItemInSearchTextResults(context, filterTarget, p
 
     local searchResults = contextSearch.searchResults[filterTarget]
     if searchResults then
-        if primaryKey and secondaryKey then
-            return searchResults[primaryKey] and searchResults[primaryKey][secondaryKey]
-        elseif primaryKey then
-            return searchResults[primaryKey]
+        local tertiaryKey = nil
+        local quaternaryKey = nil
+        if type(primaryKey) == "table" then
+            local keys = primaryKey
+            primaryKey, secondaryKey, tertiaryKey, quaternaryKey = unpack(keys)
+        end
+        if primaryKey then
+            local primaryResult = searchResults[primaryKey]
+            if secondaryKey then
+                local secondaryResult = primaryResult and primaryResult[secondaryKey]
+                if tertiaryKey then
+                    local tertiaryResult = secondaryResult and secondaryResult[tertiaryKey]
+                    if quaternaryKey then
+                        return tertiaryResult and tertiaryResult[quaternaryKey]
+                    end
+                    return tertiaryResult
+                end
+                return secondaryResult
+            end
+            return primaryResult
         end
     end
 

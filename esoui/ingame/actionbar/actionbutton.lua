@@ -201,13 +201,14 @@ end
 
 SetupSlotHandlers =
 {
-    [ACTION_TYPE_ABILITY]       = SetupAbilitySlot,
-    [ACTION_TYPE_ITEM]          = SetupItemSlot,
-    [ACTION_TYPE_COLLECTIBLE]   = SetupCollectibleActionSlot,
-    [ACTION_TYPE_QUEST_ITEM]    = SetupQuestItemActionSlot,
-    [ACTION_TYPE_EMOTE]         = SetupEmoteActionSlot,
-    [ACTION_TYPE_QUICK_CHAT]    = SetupQuickChatActionSlot,
-    [ACTION_TYPE_NOTHING]       = SetupEmptyActionSlot,
+    [ACTION_TYPE_ABILITY]           = SetupAbilitySlot,
+    [ACTION_TYPE_ITEM]              = SetupItemSlot,
+    [ACTION_TYPE_CRAFTED_ABILITY]   = SetupAbilitySlot,
+    [ACTION_TYPE_COLLECTIBLE]       = SetupCollectibleActionSlot,
+    [ACTION_TYPE_QUEST_ITEM]        = SetupQuestItemActionSlot,
+    [ACTION_TYPE_EMOTE]             = SetupEmoteActionSlot,
+    [ACTION_TYPE_QUICK_CHAT]        = SetupQuickChatActionSlot,
+    [ACTION_TYPE_NOTHING]           = SetupEmptyActionSlot,
 }
 
 function ActionButton:SetupCount()
@@ -339,7 +340,7 @@ function ActionButton:SetTimer(durationMS)
     local hotbarCategory = self:GetHotbarCategory()
     local actionType = GetSlotType(slotNum, hotbarCategory) 
     local abilityId = GetSlotBoundId(slotNum, hotbarCategory)
-    if actionType == ACTION_TYPE_ABILITY and ShouldAbilityShowAsUsableWithDuration(abilityId) then
+    if (actionType == ACTION_TYPE_ABILITY or actionType == ACTION_TYPE_CRAFTED_ABILITY) and ShouldAbilityShowAsUsableWithDuration(abilityId) then
         self.timerOverlay:SetHidden(true)
     else
         self.timerOverlay:SetHidden(false)
@@ -380,7 +381,7 @@ function ActionButton:UpdateUseFailure()
     local soulGemFailure = false
     if slotType == ACTION_TYPE_ITEM then
         self.itemQtyFailure = (GetSlotItemCount(slotNum, hotbarCategory) == 0)
-    elseif slotType == ACTION_TYPE_ABILITY then
+    elseif slotType == ACTION_TYPE_ABILITY or slotType == ACTION_TYPE_CRAFTED_ABILITY then
         local isSoulGemAbility = IsSlotSoulTrap(slotNum)
         if isSoulGemAbility and not DoesInventoryContainEmptySoulGem() then
             soulGemFailure = true
@@ -471,7 +472,7 @@ function ActionButton:UpdateCooldown(options)
     local slotType = GetSlotType(slotNum, hotbarCategory)
     local showGlobalCooldownForCollectible = global and slotType == ACTION_TYPE_COLLECTIBLE and globalSlotType == ACTION_TYPE_COLLECTIBLE
     local showCooldown = isInCooldown and (g_showGlobalCooldown or not global or showGlobalCooldownForCollectible)
-    local updateChromaQuickslot = slotType ~= ACTION_TYPE_ABILITY and ZO_RZCHROMA_EFFECTS
+    local updateChromaQuickslot = (slotType ~= ACTION_TYPE_ABILITY or slotType ~= ACTION_TYPE_CRAFTED_ABILITY) and ZO_RZCHROMA_EFFECTS
     self.cooldown:SetHidden(not showCooldown)
 
     if showCooldown then
@@ -910,27 +911,22 @@ do
     end
 end
 
-function ActionButton:UpdateUltimateNumber()
-    local ultimateCount
+function ActionButton:GetUltimateCount()
     if self:GetHotbarCategory() == HOTBAR_CATEGORY_COMPANION then
-        ultimateCount = GetUnitPower("companion", COMBAT_MECHANIC_FLAGS_ULTIMATE)
+        return GetUnitPower("companion", COMBAT_MECHANIC_FLAGS_ULTIMATE)
     else
-        ultimateCount = GetUnitPower("player", COMBAT_MECHANIC_FLAGS_ULTIMATE)
+        return GetUnitPower("player", COMBAT_MECHANIC_FLAGS_ULTIMATE)
     end
-    self.countText:SetText(ultimateCount)
+end
+
+function ActionButton:UpdateUltimateNumber()
+    self.countText:SetText(self:GetUltimateCount())
 end
 
 function ActionButton:UpdateUltimateMeter()
     local SET_ULTIMATE_METER_NO_ANIM = true
     self:UpdateCurrentUltimateMax()
-    local ultimateCount
-    if self:GetHotbarCategory() == HOTBAR_CATEGORY_COMPANION then
-        ultimateCount = GetUnitPower("companion", COMBAT_MECHANIC_FLAGS_ULTIMATE)
-    else
-        ultimateCount = GetUnitPower("player", COMBAT_MECHANIC_FLAGS_ULTIMATE)
-    end
-
-    self:SetUltimateMeter(ultimateCount, SET_ULTIMATE_METER_NO_ANIM)
+    self:SetUltimateMeter(self:GetUltimateCount(), SET_ULTIMATE_METER_NO_ANIM)
 end
 
 function ActionButton:UpdateCurrentUltimateMax()

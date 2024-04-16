@@ -131,11 +131,9 @@ do
             if campaignData.isImperialCityCampaign then
                 local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(GetImperialCityCollectibleId())
                 if not collectibleData:IsUnlocked() then
-                    local collectibleName = collectibleData:GetName()
-                    local categoryName = collectibleData:GetCategoryData():GetName()
                     local message = GetString(SI_COLLECTIBLE_LOCKED_FAILURE_CAUSED_BY_CAMPAIGN_QUEUE)
                     local marketOperation = MARKET_OPEN_OPERATION_DLC_FAILURE_CAMPAIGN_QUEUE
-                    ZO_Dialogs_ShowPlatformDialog("COLLECTIBLE_REQUIREMENT_FAILED", { collectibleData = collectibleData, marketOpenOperation = marketOperation }, { mainTextParams = { message, collectibleName, categoryName } })
+                    ZO_Dialogs_ShowCollectibleRequirementFailedPlatformDialog(collectibleData, message, marketOperation)
                     return
                 end
             end

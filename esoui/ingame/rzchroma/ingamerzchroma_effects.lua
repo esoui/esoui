@@ -40,7 +40,7 @@ function ZO_IngameRzChroma_Effects:RegisterForEvents()
 
     local function OnPlayerActivated()
         if GetCurrentBattlegroundId() ~= 0 then
-            self:SetAlliance(GetUnitBattlegroundAlliance("player"), true)
+            self:SetAlliance(GetUnitBattlegroundTeam("player"), true)
         else
             self:SetAlliance(GetUnitAlliance("player"), false)
         end

@@ -277,6 +277,7 @@ do
         ["dailyLoginRewards"] = true,
         ["tradinghouse"] = true,
         ["guildHeraldry"] = true,
+        ["store"] = true,
     }
 
     function ZO_IngameSceneManager:DoesCurrentSceneOverrideMountStateChange()

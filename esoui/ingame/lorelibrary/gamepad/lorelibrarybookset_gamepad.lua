@@ -29,6 +29,8 @@ function ZO_LoreLibraryBookSet_Gamepad:InitializeEvents()
 
     self.control:RegisterForEvent(EVENT_LORE_LIBRARY_INITIALIZED, Refresh)
     self.control:RegisterForEvent(EVENT_LORE_BOOK_LEARNED, Refresh)
+    self.control:RegisterForEvent(EVENT_UNLOCKED_HIRELING_CORRESPONDENCE_INITIALIZED, Refresh)
+    self.control:RegisterForEvent(EVENT_UNLOCKED_HIRELING_CORRESPONDENCE_UPDATED, Refresh)
 end
 
 function ZO_LoreLibraryBookSet_Gamepad:InitializeKeybindStripDescriptors()
@@ -44,10 +46,14 @@ function ZO_LoreLibraryBookSet_Gamepad:InitializeKeybindStripDescriptors()
             callback = function()
                 local selectedData = self:GetMainList():GetTargetData()
                 if selectedData and selectedData.bookIndex then
-                    if selectedData.enabled then
-                        ZO_LoreLibrary_ReadBook(self.categoryIndex, self.collectionIndex, selectedData.bookIndex)
+                    if self.hirelingType then
+                        ZO_LoreLibrary_ReadHirelingCorrespondence(self.hirelingType, selectedData.bookIndex)
                     else
-                        ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(SI_LORE_LIBRARY_UNKNOWN_BOOK, selectedData.text))
+                        if selectedData.enabled then
+                            ZO_LoreLibrary_ReadBook(self.categoryIndex, self.collectionIndex, selectedData.bookIndex)
+                        else
+                            ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(SI_LORE_LIBRARY_UNKNOWN_BOOK, selectedData.text))
+                        end
                     end
                 end
             end,
@@ -61,8 +67,12 @@ function ZO_LoreLibraryBookSet_Gamepad:InitializeKeybindStripDescriptors()
             name = GetString(SI_LORE_LIBRARY_TO_ACHIEVEMENT_ACTION),
             keybind = "UI_SHORTCUT_SECONDARY",
             visible = function()
-                local achievementId = GetLoreBookCollectionLinkedAchievement(self.categoryIndex, self.collectionIndex)
-                return achievementId ~= 0
+                if self.hirelingType then
+                    return false
+                else
+                    local achievementId = GetLoreBookCollectionLinkedAchievement(self.categoryIndex, self.collectionIndex)
+                    return achievementId ~= 0
+                end
             end,
             callback = function()
                 local achievementId = GetLoreBookCollectionLinkedAchievement(self.categoryIndex, self.collectionIndex)
@@ -85,7 +95,8 @@ function ZO_LoreLibraryBookSet_Gamepad:Push(libraryData)
     local bookListIndex = libraryData.bookListIndex or 1
     local categoryIndex = libraryData.categoryIndex
     local collectionIndex = libraryData.collectionIndex
-    if (self.bookListIndex ~= bookListIndex) or (self.categoryIndex ~= categoryIndex) or (self.collectionIndex ~= collectionIndex) then
+    local hirelingType = libraryData.hirelingType
+    if (self.bookListIndex ~= bookListIndex) or (self.categoryIndex ~= categoryIndex) or (self.collectionIndex ~= collectionIndex) or (self.hirelingType ~= hirelingType) then
         self.dirty = true
     end
 
@@ -93,7 +104,18 @@ function ZO_LoreLibraryBookSet_Gamepad:Push(libraryData)
     self.bookListIndex = bookListIndex
     self.categoryIndex = categoryIndex
     self.collectionIndex = collectionIndex
+    self.hirelingType = hirelingType
     SCENE_MANAGER:Push("bookSetGamepad")
+end
+
+function ZO_LoreLibraryBookSet_Gamepad:PerformUpdate()
+    self.dirty = false
+    --Layout the list differently depending on if this is a hireling category or not
+    if self.hirelingType then
+        self:LayoutHirelingCollection()
+    else
+        self:LayoutBookCollection()
+    end
 end
 
 do
@@ -105,16 +127,14 @@ do
         return left.enabled
     end
 
-    function ZO_LoreLibraryBookSet_Gamepad:PerformUpdate()
-        self.dirty = false
+    function ZO_LoreLibraryBookSet_Gamepad:LayoutBookCollection()
         local mainList = self:GetMainList()
-
         mainList:Clear()
 
         -- Get the list of books we need to show.
         local categoryIndex = self.categoryIndex
         local collectionIndex = self.collectionIndex
-        local collectionName, description, numKnownBooks, totalBooks, hidden = GetLoreCollectionInfo(categoryIndex, collectionIndex)
+        local collectionName, _, _, totalBooks = GetLoreCollectionInfo(categoryIndex, collectionIndex)
         local books = {}
         local knownBooks = 0
         for bookIndex = 1, totalBooks do
@@ -169,6 +189,54 @@ do
         self.headerData.titleText = collectionName
         ZO_GamepadGenericHeader_Refresh(self.header, self.headerData)
     end
+end
+
+function ZO_LoreLibraryBookSet_Gamepad:LayoutHirelingCollection()
+    local mainList = self:GetMainList()
+    mainList:Clear()
+
+    -- Get the list of correspondences we need to show.
+    local hirelingType = self.hirelingType
+    local currentUnlocked = GetNumUnlockedHirelingCorrespondence(hirelingType)
+
+    local currentSender = ""
+    for index = 1, currentUnlocked do
+        local sender, subject, _, icon = GetHirelingCorrespondenceInfoByIndex(hirelingType, index)
+        local entryData = ZO_GamepadEntryData:New(zo_strformat(SI_LORE_LIBRARY_HIRELING_CORRESPONDENCE_ENTRY_FORMATTER, subject, index), icon)
+        entryData.bookIndex = index
+        entryData.bookListIndex = index
+        entryData.enabled = true
+        entryData:SetFontScaleOnSelection(false)
+        entryData:SetShowUnselectedSublabels(true)
+        entryData:SetNameColors(ZO_SELECTED_TEXT, ZO_CONTRAST_TEXT)
+        entryData:SetIconDesaturation(0)
+
+        local templateName
+        --Any time the sender changes, make a new header
+        if zo_strlower(sender) ~= zo_strlower(currentSender) then
+            entryData:SetHeader(sender)
+            templateName = "ZO_GamepadSubMenuEntryTemplateWithHeader"
+            currentSender = sender
+        else
+            templateName = "ZO_GamepadSubMenuEntryTemplate"
+        end
+
+        mainList:AddEntry(templateName, entryData)
+    end
+
+    mainList:CommitWithoutReselect()
+    mainList:SetSelectedIndexWithoutAnimation(self.bookListIndex)
+
+    -- Update the collection count label.
+    self.headerData.data1HeaderText = GetString(SI_GAMEPAD_LORE_LIBRARY_TOTAL_COLLECTED_TITLE)
+    self.headerData.data1Text = ZO_SELECTED_TEXT:Colorize(zo_strformat(SI_GAMEPAD_LORE_LIBRARY_HIRELING_CORRESPONDENCE_TOTAL_COLLECTED, currentUnlocked))
+
+    -- Update the key bindings.
+    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+
+    -- Update the header.
+    self.headerData.titleText = GetString("SI_HIRELINGTYPE", hirelingType)
+    ZO_GamepadGenericHeader_Refresh(self.header, self.headerData)
 end
 
 function ZO_LoreLibraryBookSet_Gamepad:OnSelectionChanged(_, selectedData)

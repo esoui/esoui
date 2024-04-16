@@ -1,0 +1,78 @@
+<GuiXml>
+    <Controls>
+        <Button name="ZO_GamepadCraftedAbilitySlot" inherits="ZO_CraftingSlot_Gamepad" virtual="true">
+            <Controls>
+                <Label name="$(parent)Name" font="ZoFontGamepad34" verticalAlignment="CENTER" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                    <Dimensions x="106" y="80" />
+                    <Anchor point="TOP" relativePoint="BOTTOM" />
+                    <OnInitialized>
+                        local fonts =
+                        {
+                            {
+                                font = "ZoFontGamepad34",
+                            },
+                            {
+                                font = "ZoFontGamepad27",
+                            },
+                            {
+                                font = "ZoFontGamepad25",
+                            }
+                        }
+                        ZO_FontAdjustingWrapLabel_OnInitialized(self, fonts, TEXT_WRAP_MODE_ELLIPSIS)
+                    </OnInitialized>
+                </Label>
+            </Controls>
+        </Button>
+
+        <Button name="ZO_GamepadCraftedAbilityScriptSlot" inherits="ZO_CraftingSlot_Gamepad" virtual="true">
+            <Controls>
+                <Label name="$(parent)Name" font="ZoFontGamepad34" verticalAlignment="CENTER" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                    <Dimensions x="106" y="80" />
+                    <Anchor point="TOP" relativePoint="BOTTOM" />
+                    <OnInitialized>
+                        local fonts =
+                        {
+                            {
+                                font = "ZoFontGamepad34",
+                            },
+                            {
+                                font = "ZoFontGamepad27",
+                            },
+                            {
+                                font = "ZoFontGamepad25",
+                            }
+                        }
+                        ZO_FontAdjustingWrapLabel_OnInitialized(self, fonts, TEXT_WRAP_MODE_ELLIPSIS)
+                    </OnInitialized>
+                </Label>
+            </Controls>
+        </Button>
+
+        <TopLevelControl name="ZO_Scribing_Gamepad_TL" inherits="ZO_Gamepad_ParametricList_Screen ZO_AnchoredToQuadrant1Background" hidden="true">
+            <OnInitialized>
+                ZO_Scribing_Gamepad.OnControlInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)InkRequired" hidden="true">
+                    <Anchor point="BOTTOM" relativeTo="GuiRoot" relativePoint="BOTTOMLEFT" offsetX="ZO_GAMEPAD_PANEL_FLOATING_CENTER_QUADRANT_1_SHOWN" offsetY="ZO_GAMEPAD_CRAFTING_UTILS_FLOATING_BOTTOM_OFFSET"/>
+                    <Dimensions x="64" y="32" />
+                    <Controls>
+                        <Backdrop name="$(parent)InkBg" inherits="ZO_DefaultBackdrop_Gamepad" excludeFromResizeToFitExtents="true">
+                            <Anchor point="TOPLEFT" offsetX="-65" offsetY="-12" />
+                            <Anchor point="BOTTOMRIGHT" offsetX="65" offsetY="12" />
+                        </Backdrop>
+                        <Label name="$(parent)Text" font="ZoFontGamepad34" verticalAlignment="CENTER" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                            <Anchor point="CENTER" />
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)SlotsContainer" inherits="ZO_GamepadCraftingIngredientBarTemplate" hidden="true">
+                    <ClearAnchors />
+                    <Anchor point="BOTTOM" relativeTo="$(parent)InkRequired" relativePoint="TOP" offsetY="-30" />
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

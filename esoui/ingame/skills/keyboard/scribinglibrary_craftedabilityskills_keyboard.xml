@@ -1,0 +1,64 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_ScribingLibrary_CraftedAbilitySkills_Entry" inherits="ZO_Skills_Ability" virtual="true" >
+            <Controls>
+                <Button name="$(parent)Slot" override="true">
+                    <Anchor point="LEFT" offsetX="50" />
+
+                    <OnMouseEnter>
+                        ZO_ScribingLibrary_CraftedAbilitySkills_Keyboard.OnMouseEnter(self:GetParent())
+                    </OnMouseEnter>
+
+                    <!-- Disable drag from parent object -->
+                    <OnDragStart />
+
+                    <OnClicked>
+                        if button == MOUSE_BUTTON_INDEX_LEFT then
+                            ZO_ScribingLibrary_CraftedAbilitySkills_Keyboard.OnClick(self:GetParent())
+                        end
+                    </OnClicked>
+                </Button>
+                <Label name="$(parent)Name" font="ZoFontGameLargeBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" override="true"  wrapMode="ELLIPSIS" maxLineCount="2" >
+                    <Dimensions x="190" />
+                    <Anchor point="LEFT" relativeTo="$(parent)Slot" relativePoint="RIGHT" offsetX="10" />
+                </Label>
+
+                <StatusBar name="$(parent)XPBar" override="true" hidden="true" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_ScribingLibrary_CraftedAbilitySkills_Label" virtual="true" >
+            <Controls>
+                <Label name="$(parent)Text" font="ZoFontGameLargeBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" >
+                    <Anchor point="TOPLEFT" offsetY="5" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_ScribingLibrary_CraftedAbilitySkills_Keyboard_TopLevel" tier="MEDIUM" hidden="true">
+            <Anchor point="TOPLEFT" relativeTo="ZO_SharedMediumLeftPanelBackground" />
+            <Anchor point="BOTTOMRIGHT" relativeTo="ZO_SharedMediumLeftPanelBackground" offsetX="-20" offsetY="-15"/>
+
+            <OnInitialized>
+                ZO_ScribingLibrary_CraftedAbilitySkills_Keyboard.OnControlInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)Divider" inherits="ZO_LeftPanel_HorizontalDivider" >
+                    <Anchor point="TOPLEFT" offsetX="10" offsetY="35" />
+                    <Anchor point="RIGHT" relativeTo="ZO_SharedMediumLeftPanelBackground" relativePoint="RIGHT" constrains="X" />
+                </Control>
+
+                <Label name="$(parent)Title" text="SI_SCRIBING_CRAFTED_ABILITIES" font="ZoFontHeader3" modifyTextType="UPPERCASE">
+                    <Dimensions x="225" />
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Divider" relativePoint="TOPLEFT" />
+                </Label>
+
+                <Control name="$(parent)List" inherits="ZO_ScrollList">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Divider" relativePoint="BOTTOMLEFT" />
+                    <Anchor point="BOTTOMRIGHT"/>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

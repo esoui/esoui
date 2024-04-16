@@ -44,6 +44,7 @@ EsoUI\Ingame\Tooltip\HousingTooltips.lua
 EsoUI\Ingame\Tooltip\MapTooltips.lua
 EsoUI\Ingame\Tooltip\NotificationsTooltips.lua
 EsoUI\Ingame\Tooltip\OutfitTooltips.lua
+EsoUI\Ingame\Tooltip\ScribingTooltips.lua
 EsoUI\Ingame\Tooltip\SkillBuildTooltips.lua
 EsoUI\Ingame\Tooltip\SkillTooltips.lua
 EsoUI\Ingame\Tooltip\SocialTooltips.lua
@@ -58,6 +59,7 @@ EsoUI\Ingame\Utility\TextSearchManager.lua
 
 EsoUI\Ingame\Inventory\ItemFilterUtils.lua
 
+EsoUI\Ingame\Gamepad\ZO_GamepadParametricScrollList_Search_Screen.lua
 EsoUI\Ingame\Inventory\Gamepad\ZO_GamepadParametricScrollList_BagsSearch_Screen.lua
 
 EsoUI\Ingame\Inventory\Gamepad\InventoryUtils_Gamepad.lua
@@ -90,6 +92,9 @@ EsoUI\Ingame\Skills\CompanionSkillsDataManager.lua
 EsoUI\Ingame\Skills\SkillsAndActionBarManager.lua
 EsoUI\Ingame\Skills\SkillPointAllocationManager.lua
 EsoUI\Ingame\Skills\ActionBarAssignmentManager.lua
+
+EsoUI\Ingame\Crafting\ScribingData.lua
+EsoUI\Ingame\Crafting\ScribingDataManager.lua
 
 EsoUI\Ingame\Antiquities\AntiquityData.lua
 EsoUI\Ingame\Antiquities\AntiquityCategoryData.lua
@@ -577,6 +582,7 @@ EsoUI\Ingame\TradeWindow\Keyboard\TradeWindow_Keyboard.xml
 EsoUI\Ingame\TradeWindow\Gamepad\TradeWindow_Gamepad.lua
 EsoUI\Ingame\TradeWindow\Gamepad\TradeWindow_Gamepad.xml
 
+EsoUI\Ingame\Mail\Mail_Manager.lua
 EsoUI\Ingame\Mail\MailInbox_Shared.lua
 EsoUI\Ingame\Mail\MailSend_Shared.lua
 
@@ -590,8 +596,8 @@ EsoUI\Ingame\Mail\Gamepad\MailInbox_Gamepad.lua
 EsoUI\Ingame\Mail\Gamepad\MailInbox_Gamepad.xml
 EsoUI\Ingame\Mail\Gamepad\MailSend_Gamepad.lua
 EsoUI\Ingame\Mail\Gamepad\MailSend_Gamepad.xml
-EsoUI\Ingame\Mail\Gamepad\MailManager_Gamepad.lua
-EsoUI\Ingame\Mail\Gamepad\MailManager_Gamepad.xml
+EsoUI\Ingame\Mail\Gamepad\Mail_Gamepad.lua
+EsoUI\Ingame\Mail\Gamepad\Mail_Gamepad.xml
 
 EsoUI\Ingame\Companion\Companion_Manager.lua
 
@@ -714,6 +720,8 @@ EsoUI\Ingame\Tutorial\Tutorial.xml
 EsoUI\Ingame\SkillsAdvisor\SkillsAdvisor_Manager.lua
 EsoUI\Ingame\Skills\SkillsComponents_Shared.lua
 EsoUI\Ingame\Skills\SkillsComponents_Shared.xml
+EsoUI\Ingame\Skills\Keyboard\SkillStyleSelector_Keyboard.lua
+EsoUI\Ingame\Skills\Keyboard\SkillStyleSelector_Keyboard.xml
 EsoUI\Ingame\Skills\Keyboard\SkillsComponents_Keyboard.lua
 EsoUI\Ingame\Skills\Keyboard\SkillsComponents_Keyboard.xml
 EsoUI\Ingame\Skills\Keyboard\KeyboardAssignableActionBar.lua
@@ -726,6 +734,19 @@ EsoUI\Ingame\Skills\Gamepad\GamepadAssignableActionBar.lua
 EsoUI\Ingame\Skills\Gamepad\GamepadAssignableActionBar.xml
 EsoUI\Ingame\Skills\Gamepad\GamepadSkills.lua
 EsoUI\Ingame\Skills\Gamepad\GamepadSkills.xml
+
+EsoUI\Ingame\Skills\Keyboard\ScribingLibrary_CraftedAbilitySkills_Keyboard.lua
+EsoUI\Ingame\Skills\Keyboard\ScribingLibrary_CraftedAbilitySkills_Keyboard.xml
+EsoUI\Ingame\Crafting\Keyboard\ScribingLayout_Keyboard.lua
+EsoUI\Ingame\Crafting\Keyboard\ScribingLayout_Keyboard.xml
+EsoUI\Ingame\Skills\Keyboard\ScribingLibrary_Keyboard.lua
+EsoUI\Ingame\Skills\Keyboard\ScribingLibrary_Keyboard.xml
+
+EsoUI\Ingame\Crafting\Gamepad\ScribingLayout_Gamepad.lua
+EsoUI\Ingame\Skills\Gamepad\ScribingLibrary_Gamepad.lua
+EsoUI\Ingame\Skills\Gamepad\ScribingLibrary_Gamepad.xml
+EsoUI\Ingame\Skills\Gamepad\ScribingLibrary_CraftedAbilitySkills_Gamepad.lua
+EsoUI\Ingame\Skills\Gamepad\ScribingLibrary_CraftedAbilitySkills_Gamepad.xml
 
 EsoUI\Ingame\Stats\BountyDisplay.lua
 EsoUI\Ingame\Stats\BountyDisplay.xml
@@ -920,6 +941,15 @@ EsoUI\Ingame\Retrait\Keyboard\ZO_RetraitStation_Keyboard.lua
 EsoUI\Ingame\Retrait\Keyboard\ZO_RetraitStation_Keyboard.xml
 EsoUI\Ingame\Retrait\Gamepad\ZO_RetraitStation_Gamepad.lua
 EsoUI\Ingame\Retrait\Gamepad\ZO_RetraitStation_Gamepad.xml
+
+
+EsoUI\Ingame\Crafting\Scribing_Shared.lua
+EsoUI\Ingame\Crafting\Scribing_Shared.xml
+EsoUI\Ingame\Crafting\Scribing_Manager.lua
+EsoUI\Ingame\Crafting\Keyboard\Scribing_Keyboard.lua
+EsoUI\Ingame\Crafting\Keyboard\Scribing_Keyboard.xml
+EsoUI\Ingame\Crafting\Gamepad\Scribing_Gamepad.lua
+EsoUI\Ingame\Crafting\Gamepad\Scribing_Gamepad.xml
 
 EsoUI\Ingame\Inventory\Gamepad\BuySpaceCommon_Gamepad.lua
 EsoUI\Ingame\Inventory\Gamepad\BuySpaceCommon_Gamepad.xml

@@ -277,6 +277,8 @@ end
 function ZO_GamepadCollectionsBook:OnShowing()
     ZO_Gamepad_ParametricList_Screen.OnShowing(self)
     self:ShowList(self.categoryList)
+    GAMEPAD_TOOLTIPS:SetTooltipResetScrollOnClear(GAMEPAD_LEFT_TOOLTIP, false)
+
     local browseInfo = self.browseToCollectibleInfo
     if browseInfo ~= nil then
         local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(browseInfo.collectibleId)
@@ -322,6 +324,7 @@ function ZO_GamepadCollectionsBook:OnHiding()
 
     CALLBACK_MANAGER:UnregisterCallback("OnGamepadDialogShowing", self.OnGamepadDialogShowing)
     CALLBACK_MANAGER:UnregisterCallback("OnGamepadDialogHidden", self.OnGamepadDialogHidden)
+    GAMEPAD_TOOLTIPS:SetTooltipResetScrollOnClear(GAMEPAD_LEFT_TOOLTIP, true)
 
     self.shouldFrameRight = nil
 end
@@ -556,7 +559,7 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
                 if collectibleData then
                      if collectibleData.IsHouse and collectibleData:IsHouse() then
                         return true
-                    elseif collectibleData:IsUsable(GAMEPLAY_ACTOR_CATEGORY_PLAYER) then
+                    elseif collectibleData:IsUsable(GAMEPLAY_ACTOR_CATEGORY_PLAYER) and collectibleData:GetPrimaryInteractionStringId() ~= nil then
                         return true
                     elseif collectibleData.CanPlaceInCurrentHouse and collectibleData:CanPlaceInCurrentHouse() then
                         return true
@@ -1317,6 +1320,14 @@ function ZO_GamepadCollectionsBook:OnSelectionChanged(list, selectedData, oldSel
             end
         end
 
+        -- Since this screen disabled resetting scroll in order to stop tooltip jitter when timers update,
+        -- now we need to reset the scroll manually.
+        local newCollectibleName = GetCollectibleName(selectedData.dataSource.collectibleId)
+        if newCollectibleName ~= self.currentCollectibleName then
+            self.currentCollectibleName = newCollectibleName
+            GAMEPAD_TOOLTIPS:ResetScrollTooltipToTop(GAMEPAD_LEFT_TOOLTIP)
+        end
+
         self.clearNewStatusOnSelectionChanged = false
 
         if selectedData then
@@ -1688,7 +1699,7 @@ end
 function ZO_GamepadCollectionsBook:InitializeActionsDialog()
     ZO_Dialogs_RegisterCustomDialog(GAMEPAD_COLLECTIONS_ACTIONS_DIALOG_NAME,
     {
-        gamepadInfo = 
+        gamepadInfo =
         {
             dialogType = GAMEPAD_DIALOGS.PARAMETRIC,
         },
@@ -1710,7 +1721,8 @@ function ZO_GamepadCollectionsBook:InitializeActionsDialog()
                     local nameStringId = collectibleData:GetPrimaryInteractionStringId(GAMEPLAY_ACTOR_CATEGORY_PLAYER)
                     return GetString(nameStringId)
                 end,
-                templateData = {
+                templateData =
+                {
                     setup = ZO_SharedGamepadEntry_OnSetup,
                     callback = function(dialog)
                         local collectibleData = dialog.data
@@ -1721,7 +1733,7 @@ function ZO_GamepadCollectionsBook:InitializeActionsDialog()
                         if not collectibleData then
                             return false
                         end
-                        return collectibleData:IsUsable(GAMEPLAY_ACTOR_CATEGORY_PLAYER)
+                        return collectibleData:IsUsable(GAMEPLAY_ACTOR_CATEGORY_PLAYER) and not collectibleData:IsSkillStyle()
                     end,
                     enabled = function(dialog)
                         local collectibleData = dialog.data
@@ -1742,7 +1754,8 @@ function ZO_GamepadCollectionsBook:InitializeActionsDialog()
             -- Place Furniture
             {
                 template = "ZO_GamepadMenuEntryTemplate",
-                templateData = {
+                templateData = 
+                {
                     text = GetString(SI_ITEM_ACTION_PLACE_FURNITURE),
                     setup = ZO_SharedGamepadEntry_OnSetup,
                     callback = function(dialog)
@@ -1758,7 +1771,8 @@ function ZO_GamepadCollectionsBook:InitializeActionsDialog()
             -- Link In Chat
             {
                 template = "ZO_GamepadMenuEntryTemplate",
-                templateData = {
+                templateData = 
+                {
                     text = GetString(SI_ITEM_ACTION_LINK_TO_CHAT),
                     setup = ZO_SharedGamepadEntry_OnSetup,
                     callback = function(dialog)
@@ -1773,7 +1787,8 @@ function ZO_GamepadCollectionsBook:InitializeActionsDialog()
             -- Link Invite In Chat (Housing)
             {
                 template = "ZO_GamepadMenuEntryTemplate",
-                templateData = {
+                templateData = 
+                {
                     text = GetString(SI_HOUSING_LINK_IN_CHAT),
                     setup = ZO_SharedGamepadEntry_OnSetup,
                     callback = function(dialog)
@@ -1789,7 +1804,8 @@ function ZO_GamepadCollectionsBook:InitializeActionsDialog()
             -- Link Invite in Mail (Housing)
             {
                 template = "ZO_GamepadMenuEntryTemplate",
-                templateData = {
+                templateData = 
+                {
                     text = GetString(SI_HOUSING_LINK_IN_MAIL),
                     setup = ZO_SharedGamepadEntry_OnSetup,
                     callback = function(dialog)
@@ -1797,7 +1813,7 @@ function ZO_GamepadCollectionsBook:InitializeActionsDialog()
                         local ownerDisplayName = GetDisplayName()
                         local link = ZO_HousingBook_GetHouseLink(houseId, ownerDisplayName)
                         if link then
-                            MAIL_MANAGER_GAMEPAD.inbox:InsertBodyText(link)
+                            MAIL_GAMEPAD.inbox:InsertBodyText(link)
                         end
                     end,
                     visible = function(dialog)
@@ -1805,10 +1821,58 @@ function ZO_GamepadCollectionsBook:InitializeActionsDialog()
                     end,
                 },
             },
+            -- Show Achievement
+            {
+                template = "ZO_GamepadMenuEntryTemplate",
+                templateData = 
+                {
+                    text = GetString(SI_COLLECTIBLE_ACTION_SHOW_ACHIEVEMENT),
+                    setup = ZO_SharedGamepadEntry_OnSetup,
+                    callback = function(dialog)
+                        local collectibleData = self:GetCurrentTargetData()
+                        local linkedAchievement = collectibleData:GetLinkedAchievement()
+                        SYSTEMS:GetObject("achievements"):ShowAchievement(linkedAchievement)
+                    end,
+                    visible = function(dialog)
+                        local collectibleData = self:GetCurrentTargetData()
+                        if collectibleData and collectibleData:IsInstanceOf(ZO_CollectibleData) then
+                            local linkedAchievement = collectibleData:GetLinkedAchievement()
+                            return linkedAchievement > 0
+                        end
+                        return false
+                    end,
+                },
+            },
+            -- Show in Skills
+            {
+                template = "ZO_GamepadMenuEntryTemplate",
+                templateData = 
+                {
+                    text = GetString(SI_COLLECTIBLE_ACTION_SHOW_IN_SKILLS),
+                    setup = ZO_SharedGamepadEntry_OnSetup,
+                    callback = function(dialog)
+                        local collectibleData = self:GetCurrentTargetData()
+                        local skillStyleProgressionId = collectibleData:GetSkillStyleProgressionId()
+                        local skillData = SKILLS_DATA_MANAGER:GetSkillDataByProgressionId(skillStyleProgressionId)
+                        MAIN_MENU_GAMEPAD:ShowScene("gamepad_skills_root")
+                        GAMEPAD_SKILLS:SelectSkillLineBySkillData(skillData)
+                    end,
+                    visible = function(dialog)
+                        local collectibleData = self:GetCurrentTargetData()
+                        if collectibleData and collectibleData:IsInstanceOf(ZO_CollectibleData) then
+                            local skillStyleProgressionId = collectibleData:GetSkillStyleProgressionId()
+                            local skillData = SKILLS_DATA_MANAGER:GetSkillDataByProgressionId(skillStyleProgressionId)
+                            return collectibleData:IsSkillStyle() and skillData:IsPurchased()
+                        end
+                        return false
+                    end,
+                },
+            },
             -- Rename
             {
                 template = "ZO_GamepadMenuEntryTemplate",
-                templateData = {
+                templateData = 
+                {
                     text = GetString(SI_COLLECTIBLE_ACTION_RENAME),
                     setup = ZO_SharedGamepadEntry_OnSetup,
                     callback = function(dialog)
@@ -1829,7 +1893,8 @@ function ZO_GamepadCollectionsBook:InitializeActionsDialog()
             -- Unlock Permanently (Purchase)
             {
                 template = "ZO_GamepadMenuEntryTemplate",
-                templateData = {
+                templateData = 
+                {
                     text = GetString(SI_GAMEPAD_DLC_BOOK_ACTION_OPEN_CROWN_STORE),
                     setup = ZO_SharedGamepadEntry_OnSetup,
                     callback = function(dialog)
@@ -1844,7 +1909,8 @@ function ZO_GamepadCollectionsBook:InitializeActionsDialog()
             -- Chapter Upgrade
             {
                 template = "ZO_GamepadMenuEntryTemplate",
-                templateData = {
+                templateData = 
+                {
                     text = GetString(SI_DLC_BOOK_ACTION_CHAPTER_UPGRADE),
                     setup = ZO_SharedGamepadEntry_OnSetup,
                     callback = function(dialog)
@@ -1861,7 +1927,8 @@ function ZO_GamepadCollectionsBook:InitializeActionsDialog()
                 text = function(dialog)
                     return dialog.data:IsFavorite() and GetString(SI_COLLECTIBLE_ACTION_REMOVE_FAVORITE) or GetString(SI_COLLECTIBLE_ACTION_ADD_FAVORITE)
                 end,
-                templateData = {
+                templateData = 
+                {
                     setup = ZO_SharedGamepadEntry_OnSetup,
                     callback = function(dialog)
                         SetOrClearCollectibleUserFlag(dialog.data:GetId(), COLLECTIBLE_USER_FLAG_FAVORITE, not dialog.data:IsFavorite())
@@ -1875,7 +1942,8 @@ function ZO_GamepadCollectionsBook:InitializeActionsDialog()
             {
                 template = "ZO_GamepadMenuEntryTemplate",
                 text = GetString(SI_HOUSING_FURNITURE_SETTINGS_GENERAL_PRIMARY_RESIDENCE_BUTTON_TEXT),
-                templateData = {
+                templateData = 
+                {
                     setup = ZO_SharedGamepadEntry_OnSetup,
                     callback = function(dialog)
                         COLLECTIONS_BOOK_SINGLETON:SetPrimaryResidence(dialog.data:GetReferenceId())
@@ -1975,7 +2043,8 @@ function ZO_GamepadCollectionsBook:InitializeRenameCollectibleDialog()
             -- user name
             {
                 template = "ZO_Gamepad_GenericDialog_Parametric_TextFieldItem",
-                templateData = {
+                templateData = 
+                {
                     nameField = true,
                     textChangedCallback = function(control) 
                         inputText = control:GetText()
@@ -2032,7 +2101,6 @@ function ZO_GamepadCollectionsBook:InitializeRenameCollectibleDialog()
                     data.control.editBoxControl:SetText("")
                 end,
             },
-
             {
                 keybind = "DIALOG_NEGATIVE",
                 text = SI_DIALOG_CANCEL,

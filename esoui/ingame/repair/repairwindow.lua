@@ -126,7 +126,7 @@ end
 do
     local function GatherDamagedEquipmentFromBag(bagId, dataTable)
         for slotIndex in ZO_IterateBagSlots(bagId) do
-            if TEXT_SEARCH_MANAGER:IsItemInSearchTextResults("storeTextSearch", BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT, bagId, slotIndex) then
+            if TEXT_SEARCH_MANAGER:IsDataInSearchTextResults("storeTextSearch", BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT, bagId, slotIndex) then
                 local condition = GetItemCondition(bagId, slotIndex)
                 if condition < 100 and not IsItemStolen(bagId, slotIndex) then
                     local icon, stackCount, _, _, _, _, _, functionalQuality, displayQuality = GetItemInfo(bagId, slotIndex)

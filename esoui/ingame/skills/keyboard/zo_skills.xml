@@ -46,7 +46,7 @@
 
         <TopLevelControl name="ZO_SkillsConfirmDialog" inherits="ZO_CustomDialogBase">
             <Controls>
-                <Label name="$(parent)Description" inherits="ZO_DialogContentAnchors" font="ZoFontGameMedium" text="SI_SKILLS_CONFIRM_DESCRIPTION"  color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"/>
+                <Label name="$(parent)Description" inherits="ZO_DialogContentAnchors" font="ZoFontGameMedium" text="SI_SKILLS_CONFIRM_DESCRIPTION" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" />
 
                 <Button name="$(parent)Ability" inherits="ZO_Skills_AbilitySlot_NonClickable ZO_Skills_DialogAbilitySlot_MouseOverBehavior">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Description" relativePoint="BOTTOMLEFT" offsetX="30" offsetY="20" />
@@ -182,7 +182,69 @@
                 <Control name="$(parent)Confirm" inherits="ZO_CustomDialogButton"/>
             </Controls>
         </TopLevelControl>
-        
+
+        <TopLevelControl name="ZO_SelectSkillStyleDialog" inherits="ZO_CustomDialogBase">
+            <OnInitialized>
+                ZO_SelectSkillStyleDialog_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Label name="$(parent)DefaultLabel" inherits="ZO_DialogContentAnchors" font="ZoFontHeader" text="SI_SKILL_STYLING_DEFAULT_NAME">
+                    <Anchor point="TOP" relativeTo="$(parent)Divider" relativePoint="BOTTOM" offsetY="5" />
+                </Label>
+
+                <Button name="$(parent)DefaultStyle">
+                    <Dimensions x="64" y="64"/>
+                    <Anchor point="TOP" relativeTo="$(parent)DefaultLabel" relativePoint="BOTTOM" />
+
+                    <OnMouseEnter>
+                        ZO_SelectSkillStyleDialog_DefaultStyle_Keyboard_OnMouseEnter(self)
+                    </OnMouseEnter>
+
+                    <OnMouseExit>
+                        ZO_SelectSkillStyleDialog_DefaultStyle_Keyboard_OnMouseExit(self)
+                    </OnMouseExit>
+
+                    <Textures
+                        normal="EsoUI/Art/Progression/skillStyling_default_up.dds"
+                        pressed="EsoUI/Art/Progression/skillStyling_default_down.dds"
+                        mouseOver="EsoUI/Art/Progression/skillStyling_default_over.dds"
+                        disabled="EsoUI/Art/Progression/skillStyling_default_disabled.dds"
+                    />
+                </Button>
+
+                <Texture name="$(parent)DefaultSelectedBorder" tier="HIGH" hidden="true" excludeFromResizeToFitExtents="true" textureFile="EsoUI/Art/Progression/styleFrame64_selectionCorner.dds">
+                    <Dimensions x="128" y="128"/>
+                    <Anchor point="CENTER" relativeTo="$(parent)DefaultStyle"/>
+                </Texture>
+
+                <Texture name="$(parent)DefaultDivider" inherits="ZO_DialogDivider">
+                    <ClearAnchors/>
+                    <Anchor point="TOP" relativeTo="$(parent)DefaultStyle" relativePoint="BOTTOM" offsetY="20" />
+                </Texture>
+
+                <Label name="$(parent)SkillStylesLabel" font="ZoFontHeader" text="SI_SKILL_STYLING_ADDITIONAL_NAME">
+                    <Anchor point="TOP" relativeTo="$(parent)DefaultDivider" relativePoint="BOTTOM" offsetY="5" />
+                </Label>
+
+                <Label name="$(parent)NotPurchasedLabel" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_SKILL_STYLING_SKILL_NOT_PURCHASED" hidden="true">
+                    <Anchor point="TOP" relativeTo="$(parent)SkillStylesLabel" relativePoint="BOTTOM" offsetY="5" />
+                </Label>
+
+                <Control name="$(parent)SkillStyleContainer">
+                    <Anchor point="TOP" relativeTo="$(parent)SkillStylesLabel" relativePoint="BOTTOM" offsetY="5" />
+                    <Controls>
+                        <Control name="$(parent)Panel" inherits="ZO_GridScrollList_CenteredResize_Keyboard">
+                            <DimensionConstraints maxX="480" maxY="250" />
+                            <Anchor point="TOP" offsetX="0" />
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)Close" inherits="ZO_CustomDialogButton"/>
+            </Controls>
+        </TopLevelControl>
+
         <Label name="ZO_SkillsNavigationEntry" virtual="true" font="ZoFontHeader" inherits="ZO_SelectableLabel">
             <OnInitialized>
                 ZO_SkillsNavigationEntry_OnInitialized(self)

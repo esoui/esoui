@@ -20,7 +20,20 @@
                 </Control>
             </Controls>
         </Control>
-        
+
+        <Control name="ZO_GridScrollList_CenteredResize_Keyboard" virtual="true" resizeToFitDescendents="true">
+            <Controls>
+                <Control name="$(parent)Container" resizeToFitDescendents="true">
+                    <Anchor point="CENTER" />
+                    <Controls>
+                        <Control name="$(parent)List" inherits="ZO_ScrollList">
+                            <Anchor point="CENTER" />
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
         <Label name="ZO_GridScrollList_Entry_Header_Keyboard" font="ZoFontWinH3" maxLineCount="1" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" mouseEnabled="true" virtual="true" />
 
         <Control name="ZO_GridScrollList_Entry_Keyboard" mouseEnabled="true" virtual="true">

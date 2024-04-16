@@ -62,10 +62,8 @@ function ZO_GamepadTradeWindow:Initialize(control)
     self.tradeScene = ZO_Scene:New("gamepadTrade", SCENE_MANAGER)
 
     local DONT_ACTIVATE_ON_SHOW = false
-    ZO_Gamepad_ParametricList_BagsSearch_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE, DONT_ACTIVATE_ON_SHOW, self.tradeScene)
+    ZO_Gamepad_ParametricList_BagsSearch_Screen.Initialize(self, "tradeTextSearch", control, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE, DONT_ACTIVATE_ON_SHOW, self.tradeScene)
     ZO_SharedTradeWindow.Initialize(self, self.control)
-
-    self:SetTextSearchContext("tradeTextSearch")
 end
 
 function ZO_GamepadTradeWindow:OnDeferredInitialize()
@@ -182,7 +180,7 @@ do
     end
 end
 
-function ZO_GamepadTradeWindow:OnUpdatedSearchResults()
+function ZO_GamepadTradeWindow:OnUpdateSearchResults()
     local list = self:GetCurrentList()
     if list == self.inventoryList then
         list:RefreshList()
