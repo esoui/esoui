@@ -874,6 +874,10 @@ function ZO_ScrollListOperation:GetControlHeight()
     return nil  -- Can be overridden in derived classes
 end
 
+function ZO_ScrollListOperation:GetHeaderTextWidth(data, headerText)
+    return 0 -- Can be overridden in derived classes
+end
+
 function ZO_ScrollListOperation:GetPositionsAndAdvance(layoutInfo, currentX, currentY, data)
     assert(false) -- Override in derived classes
 end
@@ -1001,6 +1005,30 @@ function ZO_ScrollList_AddControl_Operation:IsDataVisible(data)
         return self.visibilityFunction(data)
     end
     return true
+end
+
+function ZO_ScrollList_AddControl_Operation:GetHeaderTextWidth(headerText)
+    local headerStringWidth = 0
+    if self.considerHeaderWidth and self.categoryHeader then
+        local controlPool = self.pool
+        if controlPool then
+            local control, key = controlPool:AcquireObject()
+            local labelControl = control
+            if not labelControl.SetText then
+                if type(labelControl.GetTextLabel) == "function" then
+                    labelControl = labelControl:GetTextLabel()
+                else
+                    labelControl = labelControl:GetNamedChild("Text")
+                end
+            end
+            if labelControl and labelControl.SetText then
+                labelControl:SetText(headerText)
+                headerStringWidth = labelControl:GetTextWidth()
+            end
+            controlPool:ReleaseObject(control)
+        end
+    end
+    return headerStringWidth
 end
 
 function ZO_ScrollList_AddControl_Operation:SetScrollUpdateCallbacks(setupCallback, hideCallback)
@@ -1166,6 +1194,10 @@ end
 
 function ZO_ScrollList_SetTypeCategoryHeader(self, typeId, isHeader)
     self.dataTypes[typeId].categoryHeader = isHeader
+end
+
+function ZO_ScrollList_SetConsiderHeaderWidth(self, typeId, considerHeaderWidth)
+    self.dataTypes[typeId].considerHeaderWidth = considerHeaderWidth
 end
 
 function ZO_ScrollList_SetEqualityFunction(self, typeId, equalityFunction)
@@ -2182,6 +2214,10 @@ function ZO_ScrollList_Commit(self)
         for i, currentData in ipairs(self.data) do
             local currentOperation = GetDataTypeInfo(self, currentData.typeId)
             if currentOperation:IsDataVisible(currentData.data) then
+                local headerStringWidth = currentOperation:GetHeaderTextWidth(currentData.data.header)
+                if headerStringWidth > self.maxDimensionX then
+                    self.maxDimensionX = headerStringWidth
+                end
                 currentX, currentY = currentOperation:GetPositionsAndAdvance(layoutInfo, currentX, currentY, currentData)
                 if currentX > self.maxDimensionX then
                     self.maxDimensionX = currentX

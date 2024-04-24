@@ -424,6 +424,7 @@ function ActivityFinderRoot_Manager:UpdateLocationData()
 end
 
 function ActivityFinderRoot_Manager:ClearSelections()
+    local previousNumSelected = self.numSelected
     for _, locationsByActivity in pairs(self.sortedLocationsData) do
         for _, location in ipairs(locationsByActivity) do
             location:SetSelected(false)
@@ -431,6 +432,10 @@ function ActivityFinderRoot_Manager:ClearSelections()
     end
 
     self.numSelected = 0
+
+    if previousNumSelected > 0 then
+        self:FireCallbacks("OnSelectionsChanged")
+    end
 end
 
 function ActivityFinderRoot_Manager:RebuildSelections(activityTypes)

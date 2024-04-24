@@ -172,7 +172,7 @@ function ZO_ScribingLayout_Keyboard:PerformDeferredInitialization()
     self.libraryContainer = self.control:GetNamedChild("Library")
 
     self:InitializeLists()
-    self.inkNameLabel:SetText(zo_strformat(SI_TOOLTIP_ITEM_NAME, ZO_Scribing_Manager.GetScribingInkName()))
+    self.inkNameLabel:SetText(ZO_Scribing_Manager.GetFormattedScribingInkName())
 
     local function OnInventoryUpdated()
         if self:IsShowing() then

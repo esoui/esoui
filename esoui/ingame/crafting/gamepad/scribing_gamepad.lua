@@ -20,7 +20,7 @@ function ZO_Scribing_Gamepad:Initialize(control)
         end,
         data1HeaderText = function()
             if self:IsCurrentList(self.scriptsList) then
-                return ZO_Scribing_Manager.GetScribingInkName()
+                return ZO_Scribing_Manager.GetFormattedScribingInkName()
             end
         end,
         data1Text = function()
@@ -575,12 +575,16 @@ function ZO_Scribing_Gamepad:RefreshRecentCraftedAbilitiesList(resetToTop)
             local craftedAbilityId = recentCraftedAbility[ZO_RECENT_SCRIBE_SAVED_VAR_INDEX.CRAFTED_ABILITY]
             local craftedAbilityData = SCRIBING_DATA_MANAGER:GetCraftedAbilityData(craftedAbilityId)
             if craftedAbilityData and not craftedAbilityData:IsDisabled() then
-                local primaryScriptId, secondaryScriptId, tertiaryScriptId = craftedAbilityData:GetActiveScriptIds()
+                local primaryScriptId = recentCraftedAbility[ZO_RECENT_SCRIBE_SAVED_VAR_INDEX.PRIMARY_SCRIPT]
+                local secondaryScriptId = recentCraftedAbility[ZO_RECENT_SCRIBE_SAVED_VAR_INDEX.SECONDARY_SCRIPT]
+                local tertiaryScriptId = recentCraftedAbility[ZO_RECENT_SCRIBE_SAVED_VAR_INDEX.TERTIARY_SCRIPT]
+                local activePrimaryScriptId, activeSecondaryScriptId, activeTertiaryScriptId = craftedAbilityData:GetActiveScriptIds()
+
                 craftedAbilityData:SetScriptIdSelectionOverride(primaryScriptId, secondaryScriptId, tertiaryScriptId)
 
-                if not (recentCraftedAbility[ZO_RECENT_SCRIBE_SAVED_VAR_INDEX.PRIMARY_SCRIPT] == primaryScriptId
-                    and recentCraftedAbility[ZO_RECENT_SCRIBE_SAVED_VAR_INDEX.SECONDARY_SCRIPT] == secondaryScriptId
-                    and recentCraftedAbility[ZO_RECENT_SCRIBE_SAVED_VAR_INDEX.TERTIARY_SCRIPT] == tertiaryScriptId) then
+                if not (primaryScriptId == activePrimaryScriptId
+                    and secondaryScriptId == activeSecondaryScriptId
+                    and tertiaryScriptId == activeTertiaryScriptId) then
 
                     local representativeAbilityId = craftedAbilityData:GetRepresentativeAbilityId()
                     local abilityName = ZO_CachedStrFormat(SI_ABILITY_NAME, GetAbilityName(representativeAbilityId))

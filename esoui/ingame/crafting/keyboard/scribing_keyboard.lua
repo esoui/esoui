@@ -553,12 +553,16 @@ function ZO_Scribing_Keyboard:RefreshRecentCraftedAbilitiesList(resetToTop)
                 local craftedAbilityId = recentCraftedAbility[ZO_RECENT_SCRIBE_SAVED_VAR_INDEX.CRAFTED_ABILITY]
                 local craftedAbilityData = SCRIBING_DATA_MANAGER:GetCraftedAbilityData(craftedAbilityId)
                 if craftedAbilityData and not craftedAbilityData:IsDisabled() then
-                    local primaryScriptId, secondaryScriptId, tertiaryScriptId = craftedAbilityData:GetActiveScriptIds()
+                    local primaryScriptId = recentCraftedAbility[ZO_RECENT_SCRIBE_SAVED_VAR_INDEX.PRIMARY_SCRIPT]
+                    local secondaryScriptId = recentCraftedAbility[ZO_RECENT_SCRIBE_SAVED_VAR_INDEX.SECONDARY_SCRIPT]
+                    local tertiaryScriptId = recentCraftedAbility[ZO_RECENT_SCRIBE_SAVED_VAR_INDEX.TERTIARY_SCRIPT]
+                    local activePrimaryScriptId, activeSecondaryScriptId, activeTertiaryScriptId = craftedAbilityData:GetActiveScriptIds()
+
                     craftedAbilityData:SetScriptIdSelectionOverride(primaryScriptId, secondaryScriptId, tertiaryScriptId)
 
-                    if not (recentCraftedAbility[ZO_RECENT_SCRIBE_SAVED_VAR_INDEX.PRIMARY_SCRIPT] == primaryScriptId
-                        and recentCraftedAbility[ZO_RECENT_SCRIBE_SAVED_VAR_INDEX.SECONDARY_SCRIPT] == secondaryScriptId
-                        and recentCraftedAbility[ZO_RECENT_SCRIBE_SAVED_VAR_INDEX.TERTIARY_SCRIPT] == tertiaryScriptId) then
+                    if not (primaryScriptId == activePrimaryScriptId
+                        and secondaryScriptId == activeSecondaryScriptId
+                        and tertiaryScriptId == activeTertiaryScriptId) then
 
                         local representativeAbilityId = craftedAbilityData:GetRepresentativeAbilityId()
                         local entryData =
@@ -871,10 +875,6 @@ function ZO_Scribing_Keyboard.OnMouseEnterRecentCraftedAbility(control)
 end
 
 function ZO_Scribing_Keyboard.OnMouseExitRecentCraftedAbility(control)
-    if not SCRIBING_KEYBOARD:IsShowing() then
-        return
-    end
-
     SCRIBING_KEYBOARD:OnRecentCraftedAbilityEntryMouseExit(control)
 end
 

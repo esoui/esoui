@@ -1351,25 +1351,26 @@ function ZO_GamepadCollectionsBook:TrySetClearNewFlag(callId)
 end
 
 function ZO_GamepadCollectionsBook:RefreshRightPanel(entryData)
-    if self:IsViewingCollectionsList() then
-        if entryData then
-            if entryData.dataSource:IsInstanceOf(ZO_RandomMountCollectibleData) then
-                self:RefreshRandomMountTooltip(entryData)
-            elseif entryData:IsStory() then
-                self:RefreshDLCTooltip(entryData)
-            elseif entryData:IsHouse() then
-                self:RefreshHousingTooltip(entryData)
-            else
-                self:RefreshStandardTooltip(entryData)
-            end
+    if self.pendingUtilityWheelCollectibleData then
+        -- Don't cover the wheel if it's open.
+        return
+    elseif entryData ~= nil and entryData.dataSource:IsInstanceOf(ZO_CollectibleCategoryData) then
+        self:UpdateGridPanelVisibility(entryData)
+        SCENE_MANAGER:RemoveFragment(GAMEPAD_COLLECTIONS_BOOK_DLC_PANEL_FRAGMENT)
+        SCENE_MANAGER:RemoveFragment(GAMEPAD_COLLECTIONS_BOOK_HOUSING_PANEL_FRAGMENT)
+        GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
+    elseif entryData then
+        if entryData.dataSource:IsInstanceOf(ZO_RandomMountCollectibleData) then
+            self:RefreshRandomMountTooltip(entryData)
+        elseif entryData:IsStory() then
+            self:RefreshDLCTooltip(entryData)
+        elseif entryData:IsHouse() then
+            self:RefreshHousingTooltip(entryData)
         else
-            SCENE_MANAGER:RemoveFragment(GAMEPAD_NAV_QUADRANT_2_3_BACKGROUND_FRAGMENT)
-            SCENE_MANAGER:RemoveFragment(GAMEPAD_COLLECTIONS_BOOK_DLC_PANEL_FRAGMENT)
-            SCENE_MANAGER:RemoveFragment(GAMEPAD_COLLECTIONS_BOOK_HOUSING_PANEL_FRAGMENT)
-            GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
+            self:RefreshStandardTooltip(entryData)
         end
     else
-        self:UpdateGridPanelVisibility(entryData)
+        SCENE_MANAGER:RemoveFragment(GAMEPAD_NAV_QUADRANT_2_3_BACKGROUND_FRAGMENT)
         SCENE_MANAGER:RemoveFragment(GAMEPAD_COLLECTIONS_BOOK_DLC_PANEL_FRAGMENT)
         SCENE_MANAGER:RemoveFragment(GAMEPAD_COLLECTIONS_BOOK_HOUSING_PANEL_FRAGMENT)
         GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)

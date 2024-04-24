@@ -185,6 +185,10 @@ do
         return GetItemLinkName(itemLink)
     end
 
+    function ZO_Scribing_Manager.GetFormattedScribingInkName()
+        return zo_strformat(SI_TOOLTIP_ITEM_NAME, ZO_Scribing_Manager.GetScribingInkName())
+    end
+
     function ZO_Scribing_Manager.GetScribingInkIcon()
         local itemLink = GetInkItemLink()
         return GetItemLinkIcon(itemLink)

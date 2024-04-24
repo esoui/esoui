@@ -158,7 +158,7 @@ function ZO_Stats_Common:GetDropdownTitleIndex(dropdown)
         return item.titleIndex == currentTitleIndex
     end
     if currentTitleIndex == nil then
-        return nil
+        return 1
     end
     return dropdown:GetIndexByEval(IsItemCurrentTitle)
 end

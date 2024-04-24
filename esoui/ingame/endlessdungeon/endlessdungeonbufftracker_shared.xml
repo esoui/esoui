@@ -15,6 +15,9 @@
         </Control>
 
         <Control name="ZO_EndDunBuffTrackerGridHeader_Shared" virtual="true">
+            <OnInitialized>
+                self.GetTextLabel = function() return self:GetNamedChild("Header") end
+            </OnInitialized>
             <Controls>
                 <Label name="$(parent)Header" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER" modifyTextType="UPPERCASE">
                     <Anchor point="TOP" />

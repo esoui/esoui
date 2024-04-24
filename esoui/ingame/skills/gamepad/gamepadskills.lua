@@ -1582,26 +1582,28 @@ do
                 for index = 1, GetNumProgressionSkillAbilityFxOverrides(progressionId) do
                     local collectibleId = GetProgressionSkillAbilityFxOverrideCollectibleIdByIndex(progressionId, index)
                     local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
-                    local entryData = ZO_GamepadEntryData:New(collectibleData:GetFormattedName())
-                    entryData.setup = ZO_SharedGamepadEntry_OnSetup
-                    entryData:AddIcon(collectibleData:GetIcon())
-                    entryData.iconIndex = index
-                    entryData.collectibleId = collectibleId
-                    entryData.collectibleData = collectibleData
-                    entryData.isCurrent = function()
-                        return collectibleId == currentCollectibleId
+                    if collectibleData then
+                        local entryData = ZO_GamepadEntryData:New(collectibleData:GetFormattedName())
+                        entryData.setup = ZO_SharedGamepadEntry_OnSetup
+                        entryData:AddIcon(collectibleData:GetIcon())
+                        entryData.iconIndex = index
+                        entryData.collectibleId = collectibleId
+                        entryData.collectibleData = collectibleData
+                        entryData.isCurrent = function()
+                            return collectibleId == currentCollectibleId
+                        end
+
+                        entryData:InitializeCollectibleVisualData(collectibleData, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
+                        entryData:SetEnabled(isSkillLinePurchased and collectibleData:IsUnlocked())
+                        entryData:SetSelected(entryData.isCurrent())
+
+                        local listItem =
+                        {
+                            template = "ZO_GamepadItemEntryTemplate",
+                            entryData = entryData,
+                        }
+                        table.insert(parametricListEntries, listItem)
                     end
-
-                    entryData:InitializeCollectibleVisualData(collectibleData, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
-                    entryData:SetEnabled(isSkillLinePurchased and collectibleData:IsUnlocked())
-                    entryData:SetSelected(entryData.isCurrent())
-
-                    local listItem =
-                    {
-                        template = "ZO_GamepadItemEntryTemplate",
-                        entryData = entryData,
-                    }
-                    table.insert(parametricListEntries, listItem)
                 end
 
                 ZO_GenericGamepadDialog_ShowTooltip(dialog)
