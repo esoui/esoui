@@ -3,7 +3,7 @@
         <Button name="ZO_GamepadCraftedAbilitySlot" inherits="ZO_CraftingSlot_Gamepad" virtual="true">
             <Controls>
                 <Label name="$(parent)Name" font="ZoFontGamepad34" verticalAlignment="CENTER" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
-                    <Dimensions x="106" y="80" />
+                    <Dimensions x="175" y="80" />
                     <Anchor point="TOP" relativePoint="BOTTOM" />
                     <OnInitialized>
                         local fonts =
@@ -27,7 +27,7 @@
         <Button name="ZO_GamepadCraftedAbilityScriptSlot" inherits="ZO_CraftingSlot_Gamepad" virtual="true">
             <Controls>
                 <Label name="$(parent)Name" font="ZoFontGamepad34" verticalAlignment="CENTER" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
-                    <Dimensions x="106" y="80" />
+                    <Dimensions x="175" y="80" />
                     <Anchor point="TOP" relativePoint="BOTTOM" />
                     <OnInitialized>
                         local fonts =

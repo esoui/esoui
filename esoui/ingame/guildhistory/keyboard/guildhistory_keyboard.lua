@@ -217,8 +217,10 @@ function ZO_GuildHistory_Keyboard:SetupEventRow(control, eventData)
     ZO_GuildHistory_Shared.SetupEventRow(self, control, eventData, IS_KEYBOARD)
 end
 
-function ZO_GuildHistory_Keyboard:SetShowLoadingSpinner(showLoadingSpinner)
+function ZO_GuildHistory_Keyboard:SetShowLoadingSpinner(showLoadingSpinner, isTargetingEvents)
     if showLoadingSpinner then
+        local loadingText = isTargetingEvents and GetString(SI_GUILD_HISTORY_RETRIEVING_ADDITIONAL) or GetString(SI_GUILD_HISTORY_RETRIEVING)
+        self.loadingIcon:SetText(loadingText)
         self.loadingIcon:Show()
     else
         self.loadingIcon:Hide()

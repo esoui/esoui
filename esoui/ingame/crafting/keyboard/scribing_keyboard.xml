@@ -1,7 +1,7 @@
 <GuiXml>
     <Controls>
         <Button name="ZO_ScribingSlotBase" mouseOverBlendMode="ADD" virtual="true">
-            <Dimensions x="140" y="120" />
+            <Dimensions x="160" y="120" />
             <MouseButton button="RIGHT" enabled="true" />
 
             <OnInitialized>
@@ -42,7 +42,7 @@
         </Button>
         
         <Button name="ZO_ScribingCraftedAbilitySlot" inherits="ZO_ScribingSlotBase" virtual="true">
-            <Dimensions x="140" y="140" />
+            <Dimensions y="140" />
             <OnMouseEnter name="CraftedAbility">
                 ZO_Scribing_Keyboard.OnCraftedAbilitySlotMouseEnter(...)
             </OnMouseEnter>

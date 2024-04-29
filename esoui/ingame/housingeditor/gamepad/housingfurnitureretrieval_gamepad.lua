@@ -19,62 +19,73 @@ function ZO_HousingFurnitureRetrieval_Gamepad:InitializeKeybindStripDescriptors(
 
     self:AddFurnitureListKeybind({
         order = 0,
-        name =  GetString(SI_HOUSING_EDITOR_MODIFY),
+        name = GetString(SI_HOUSING_EDITOR_MODIFY),
         keybind = "UI_SHORTCUT_PRIMARY",
-        callback =  function() 
-                        local targetData = self.furnitureList.list:GetTargetData()
-                        if targetData.furnitureObject:GetDataType() == ZO_HOUSING_PATH_NODE_DATA_TYPE then
-                            ZO_HousingFurnitureBrowser_Base.SelectNodeForReplacement(targetData.furnitureObject)
-                        else
-                            ZO_HousingFurnitureBrowser_Base.SelectFurnitureForReplacement(targetData.furnitureObject)
-                        end
-                        SCENE_MANAGER:HideCurrentScene()
-                    end,
-        visible = function()
-            return HOUSING_EDITOR_STATE:CanLocalPlayerEditHouse()
+        callback = function()
+            local targetData = self.furnitureList.list:GetTargetData()
+            if targetData.furnitureObject:GetDataType() == ZO_HOUSING_PATH_NODE_DATA_TYPE then
+                ZO_HousingFurnitureBrowser_Base.SelectNodeForReplacement(targetData.furnitureObject)
+            else
+                ZO_HousingFurnitureBrowser_Base.SelectFurnitureForReplacement(targetData.furnitureObject)
+            end
+            SCENE_MANAGER:HideCurrentScene()
         end,
-    })
-
-    self:AddFurnitureListKeybind({    
-        order = 1,
-        name =  GetString(SI_HOUSING_EDITOR_PRECISION_EDIT),
-        keybind = "UI_SHORTCUT_QUINARY",
-        callback =  function()
-                        local targetData = self.furnitureList.list:GetTargetData()
-                        if targetData.furnitureObject:GetDataType() == ZO_HOUSING_PATH_NODE_DATA_TYPE then
-                            ZO_HousingFurnitureBrowser_Base.SelectNodeForPrecisionEdit(targetData.furnitureObject)
-                        else
-                            ZO_HousingFurnitureBrowser_Base.SelectFurnitureForPrecisionEdit(targetData.furnitureObject)
-                        end
-                        SCENE_MANAGER:HideCurrentScene()
-                    end,
-        visible = function()
-            return HOUSING_EDITOR_STATE:CanLocalPlayerEditHouse()
-        end,
-    })
-
-    self:AddFurnitureListKeybind({    
-        order = 4,
-        name =  function()
-                    local targetData = self.furnitureList.list:GetTargetData()
-                    if targetData and targetData.furnitureObject:GetDataType() == ZO_HOUSING_PATH_NODE_DATA_TYPE then
-                        return GetString(SI_HOUSING_EDITOR_PATH_REMOVE_NODE)
-                    else
-                        return GetString(SI_HOUSING_EDITOR_PUT_AWAY)
-                    end
-                end,
-        keybind = "UI_SHORTCUT_SECONDARY",
-        callback =  function() 
-                        local targetData = self.furnitureList.list:GetTargetData()
-                        if targetData.furnitureObject:GetDataType() == ZO_RECALLABLE_HOUSING_DATA_TYPE then
-                            ZO_HousingFurnitureBrowser_Base.PutAwayFurniture(targetData.furnitureObject)
-                        else
-                            ZO_HousingFurnitureBrowser_Base.PutAwayNode(targetData.furnitureObject)
-                        end
-                    end,
         visible = function()
             local targetData = self.furnitureList.list:GetTargetData()
-            if targetData and targetData.furnitureObject:GetDataType() == ZO_HOUSING_PATH_NODE_DATA_TYPE then
+            if not targetData then
+                return false
+            end
+            return HOUSING_EDITOR_STATE:CanLocalPlayerEditHouse()
+        end,
+    })
+
+    self:AddFurnitureListKeybind({
+        order = 1,
+        name = GetString(SI_HOUSING_EDITOR_PRECISION_EDIT),
+        keybind = "UI_SHORTCUT_QUINARY",
+        callback = function()
+            local targetData = self.furnitureList.list:GetTargetData()
+            if targetData.furnitureObject:GetDataType() == ZO_HOUSING_PATH_NODE_DATA_TYPE then
+                ZO_HousingFurnitureBrowser_Base.SelectNodeForPrecisionEdit(targetData.furnitureObject)
+            else
+                ZO_HousingFurnitureBrowser_Base.SelectFurnitureForPrecisionEdit(targetData.furnitureObject)
+            end
+            SCENE_MANAGER:HideCurrentScene()
+        end,
+        visible = function()
+            local targetData = self.furnitureList.list:GetTargetData()
+            if not targetData then
+                return false
+            end
+            return HOUSING_EDITOR_STATE:CanLocalPlayerEditHouse()
+        end,
+    })
+
+    self:AddFurnitureListKeybind({
+        order = 4,
+        name = function()
+            local targetData = self.furnitureList.list:GetTargetData()
+            if targetData.furnitureObject:GetDataType() == ZO_HOUSING_PATH_NODE_DATA_TYPE then
+                return GetString(SI_HOUSING_EDITOR_PATH_REMOVE_NODE)
+            else
+                return GetString(SI_HOUSING_EDITOR_PUT_AWAY)
+            end
+        end,
+        keybind = "UI_SHORTCUT_SECONDARY",
+        callback = function()
+            local targetData = self.furnitureList.list:GetTargetData()
+            if targetData.furnitureObject:GetDataType() == ZO_RECALLABLE_HOUSING_DATA_TYPE then
+                ZO_HousingFurnitureBrowser_Base.PutAwayFurniture(targetData.furnitureObject)
+            else
+                ZO_HousingFurnitureBrowser_Base.PutAwayNode(targetData.furnitureObject)
+            end
+        end,
+        visible = function()
+            local targetData = self.furnitureList.list:GetTargetData()
+            if not targetData then
+                return false
+            end
+            if targetData.furnitureObject:GetDataType() == ZO_HOUSING_PATH_NODE_DATA_TYPE then
                 return HOUSING_EDITOR_STATE:CanLocalPlayerEditHouse()
             else
                 return HOUSING_EDITOR_STATE:IsLocalPlayerHouseOwner()
@@ -102,16 +113,16 @@ function ZO_HousingFurnitureRetrieval_Gamepad:InitializeKeybindStripDescriptors(
 
     self:AddFurnitureListKeybind({
         order = 5,
-        name =  GetString(SI_HOUSING_FURNITURE_SET_STARTING_NODE),
+        name = GetString(SI_HOUSING_FURNITURE_SET_STARTING_NODE),
         keybind = "UI_SHORTCUT_QUATERNARY",
-        callback =  function() 
-                        local targetData = self.furnitureList.list:GetTargetData()
-                        ZO_HousingFurnitureBrowser_Base.SetAsStartingNode(targetData.furnitureObject)
-                    end,
-        visible =   function()
-                        local targetData = self.furnitureList.list:GetTargetData()
-                        return targetData and targetData.furnitureObject:GetDataType() == ZO_HOUSING_PATH_NODE_DATA_TYPE and not targetData.furnitureObject:IsStartingPathNode() and HOUSING_EDITOR_STATE:CanLocalPlayerEditHouse()
-                    end,
+        callback = function()
+            local targetData = self.furnitureList.list:GetTargetData()
+            ZO_HousingFurnitureBrowser_Base.SetAsStartingNode(targetData.furnitureObject)
+        end,
+        visible = function()
+            local targetData = self.furnitureList.list:GetTargetData()
+            return targetData and targetData.furnitureObject:GetDataType() == ZO_HOUSING_PATH_NODE_DATA_TYPE and not targetData.furnitureObject:IsStartingPathNode() and HOUSING_EDITOR_STATE:CanLocalPlayerEditHouse()
+        end,
     })
 end
 

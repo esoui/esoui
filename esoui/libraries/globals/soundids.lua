@@ -751,6 +751,7 @@ SOUNDS =
 
     SCRIBING_SCRIBE_SLOT_ANIMATED           = "Scribing_Scribe_Slot_Animated",
     SCRIBING_SCRIBE_TOOLTIP_GLOW            = "Scribing_Scribe_Tooltip_Glow",
+    SCRIBING_SCRIBE_COMPLETE_ANNOUNCE       = "Scribing_Scribe_Complete_Announce",
 
     --Customer Service
     AGENT_CHAT_ACTIVE                       = "Agent_Chat_Active",

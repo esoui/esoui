@@ -40,8 +40,12 @@ function ZO_GuildHistoryRequest:IsRequestResponsePending()
     return ZO_FlagHelpers.MaskHasFlag(self:GetFlags(), GUILD_HISTORY_REQUEST_FLAG_RESPONSE_PENDING)
 end
 
-function ZO_GuildHistoryRequest:RequestMoreEvents(queueRequestIfOnCooldown)
-    local guildHistoryDataReadyState = RequestMoreGuildHistoryEvents(self.requestId, queueRequestIfOnCooldown)
+function ZO_GuildHistoryRequest:IsTargetingEvents()
+    return IsGuildHistoryRequestTargetingEvents(self.requestId)
+end
+
+function ZO_GuildHistoryRequest:RequestMoreEvents(queueRequestIfOnCooldown, newestEventId, oldestEventId)
+    local guildHistoryDataReadyState = RequestMoreGuildHistoryEvents(self.requestId, queueRequestIfOnCooldown, newestEventId, oldestEventId)
     return guildHistoryDataReadyState
 end
 
@@ -69,9 +73,15 @@ function ZO_GuildHistoryEventData_Base:Dirty()
 end
 
 function ZO_GuildHistoryEventData_Base:Clean()
-    -- The relationship between index and event id got shifted, invalidate eventInfo
-    if self.eventInfo.dirty and self.eventInfo.eventId and self.eventInfo.eventId ~= GetGuildHistoryEventId(self:GetGuildId(), self:GetEventCategory(), self.eventIndex) then
-        self:ResetEventInfo()
+    if self.eventInfo.dirty then
+            -- The relationship between index and event id got shifted, invalidate eventInfo
+        local eventIdMismatch = self.eventInfo.eventId and self.eventInfo.eventId ~= GetGuildHistoryEventId(self:GetGuildId(), self:GetEventCategory(), self.eventIndex)
+
+        -- The redacted state changed, invalidate eventInfo
+        local redactedMismatch = self.eventInfo.isRedacted ~= IsGuildHistoryEventRedacted(self:GetGuildId(), self:GetEventCategory(), self.eventIndex)
+        if eventIdMismatch or redactedMismatch then
+            self:ResetEventInfo()
+        end
     end
     self.eventInfo.dirty = nil
 end
@@ -404,6 +414,10 @@ function ZO_GuildHistoryEventCategoryData:GetOldestEventForUpToDateEventsWithout
     return nil
 end
 
+function ZO_GuildHistoryEventCategoryData:HasUpToDateEvents()
+    return DoesGuildHistoryEventCategoryHaveUpToDateEvents(self.guildData:GetId(), self.eventCategory)
+end
+
 function ZO_GuildHistoryEventCategoryData:GetEventsInTimeRange(newestTimeS, oldestTimeS)
     local newestIndex, oldestIndex = GetGuildHistoryEventIndicesForTimeRange(self.guildData:GetId(), self.eventCategory, newestTimeS, oldestTimeS)
     if newestIndex then
@@ -416,11 +430,15 @@ function ZO_GuildHistoryEventCategoryData:GetEventsInIndexRange(newestIndex, old
     local numEvents = self:GetNumEvents()
     assert((newestIndex <= oldestIndex) and (oldestIndex <= numEvents))
     local events = {}
+    local redactedEvents = {}
     for eventIndex = newestIndex, oldestIndex do
         local event = self.events:AcquireObject(eventIndex)
         table.insert(events, event)
+        if event:IsRedacted() then
+            table.insert(redactedEvents, event)
+        end
     end
-    return events
+    return events, redactedEvents
 end
 
 ----------------

@@ -1498,8 +1498,10 @@ function ZO_CenterScreenAnnounce_InitializePriorities()
     end
 
     -- Quest Advancement displays all the "appropriate" conditions that the player needs to do to advance the current step
-    local function OnQuestAdvanced(eventId, questIndex, questName, isPushed, isComplete, mainStepChanged)
-        if(not mainStepChanged) then return end
+    local function OnQuestAdvanced(eventId, questIndex, questName, isPushed, isComplete, mainStepChanged, doesConditionHideAnnouncements)
+        if not mainStepChanged or doesConditionHideAnnouncements then
+            return
+        end
 
         local announceObject = CENTER_SCREEN_ANNOUNCE
         local sound = SOUNDS.QUEST_OBJECTIVE_STARTED

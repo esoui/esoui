@@ -12,7 +12,13 @@ function ZO_Scribing_Gamepad:Initialize(control)
 
     self.headerData =
     {
-        titleText = GetString(SI_SCRIBING_GAMEPAD_SCRIBING_TITLE),
+        titleText = function()
+            if self:IsCurrentList(self.recentCraftedAbilitiesList) then
+                return GetString(SI_SCRIBING_RECENT_TITLE)
+            else
+                return GetString(SI_SCRIBING_GAMEPAD_SCRIBING_TITLE)
+            end
+        end,
         subtitleText = function()
             if self:IsCurrentList(self.craftedAbilityList) then
                 return GetString(SI_CRAFTED_ABILITY_SUBTITLE)

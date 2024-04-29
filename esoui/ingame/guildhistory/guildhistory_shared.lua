@@ -171,26 +171,15 @@ function ZO_GuildHistory_Shared:BuildMasterList()
         -- Even if we made the initial requests, we might have some info already from pushes, so show those right away
         local guildData = GUILD_HISTORY_MANAGER:GetGuildData(self.guildId)
         local eventCategoryData = guildData:GetEventCategoryData(self.selectedEventCategory)
-        local oldestEventIndexWithoutGaps = eventCategoryData:GetOldestEventIndexForUpToDateEventsWithoutGaps()
-        --Only pull events up to the first gap
-        if oldestEventIndexWithoutGaps then
-            self.masterList = eventCategoryData:GetEventsInIndexRange(1, oldestEventIndexWithoutGaps)
+        local oldestEventIndex = eventCategoryData:GetNumEvents()
+        --Pull all known events and redacted events
+        if oldestEventIndex > 0 then
+            self.masterList, self.redactedEvents = eventCategoryData:GetEventsInIndexRange(1, oldestEventIndex)
         else
             self.masterList = {}
+            self.redactedEvents = {}
         end
         ZO_ClearTable(self.cachedEventIndicesByPage) -- Always reset the cache when resetting the master list
-
-        local request = self:GetRequestForSelection()
-        --Make a request for more info if we dont have enough to fill the first page
-        if self.autoRequestEnabled and #self.masterList < ENTRIES_PER_PAGE and not request:IsComplete() then
-            -- Need to make a request,
-            -- which will come back into BuildMasterList when the response comes.
-            local QUEUE_IF_ON_COOLDOWN = true
-            local readyState = request:RequestMoreEvents(QUEUE_IF_ON_COOLDOWN)
-
-            --Since more events were requested, refresh the visibility of the loading spinner
-            self:RefreshLoadingSpinner()
-        end
     end
 end
 
@@ -200,60 +189,105 @@ function ZO_GuildHistory_Shared:FilterScrollList()
     self.entryDataPool:ReleaseAllObjects()
     self.hasNextPage = false
 
-    --Refresh the loading spinner whenever the filters are refreshed
-    self:RefreshLoadingSpinner()
-
-    if #self.masterList == 0 then
-        return
-    end
-
-    local startIndex = 1
-    local numEventsToSkip = 0
-    local numEventsSkipped = 0
-    local cachedPageEventIndices = self.cachedEventIndicesByPage[self.currentPage]
-    if cachedPageEventIndices then
-        -- We've already processed this page, so we know exactly what eventIndex to start with
-        startIndex = cachedPageEventIndices.startIndex
-    elseif self.currentPage > 1 then
-        local previousCachedPageEventIndices = self.cachedEventIndicesByPage[self.currentPage - 1]
-        if previousCachedPageEventIndices then
-            -- We've already processed the previous page, so we know that had the right start and the right number of events,
-            -- so we know we can at least start after the last event from that page to save loops
-            startIndex = previousCachedPageEventIndices.endIndex + 1
-        else
-            -- We don't have enough cached information to start ahead, so instead we need to skip events based on what page we're on.
-            -- This is because the page indices cache will get cleared if new events come in, but that doesn't mean we reset our current page
-            numEventsToSkip = (self.currentPage - 1) * ENTRIES_PER_PAGE
-        end
-    end
-
-    for i = startIndex, #self.masterList do
-        local data = self.masterList[i]
-        if not data:IsRedacted() and self.selectedSubcategoryIndex == data:GetUISubcategoryIndex() then
-            if numEventsSkipped == numEventsToSkip then
-                if #scrollData == ENTRIES_PER_PAGE then
-                    self.hasNextPage = true
-                    break
-                end
-                local entryData = self.entryDataPool:AcquireObject()
-                entryData:SetDataSource(data)
-                entryData:SetupAsScrollListDataEntry(GUILD_EVENT_DATA)
-                table.insert(scrollData, entryData)
+    if #self.masterList > 0 then
+        local startIndex = 1
+        local numEventsToSkip = 0
+        local numEventsSkipped = 0
+        local cachedPageEventIndices = self.cachedEventIndicesByPage[self.currentPage]
+        if cachedPageEventIndices then
+            -- We've already processed this page, so we know exactly what eventIndex to start with
+            startIndex = cachedPageEventIndices.startIndex
+        elseif self.currentPage > 1 then
+            local previousCachedPageEventIndices = self.cachedEventIndicesByPage[self.currentPage - 1]
+            if previousCachedPageEventIndices then
+                -- We've already processed the previous page, so we know that had the right start and the right number of events,
+                -- so we know we can at least start after the last event from that page to save loops
+                startIndex = previousCachedPageEventIndices.endIndex + 1
             else
-                numEventsSkipped = numEventsSkipped + 1
+                -- We don't have enough cached information to start ahead, so instead we need to skip events based on what page we're on.
+                -- This is because the page indices cache will get cleared if new events come in, but that doesn't mean we reset our current page
+                numEventsToSkip = (self.currentPage - 1) * ENTRIES_PER_PAGE
             end
         end
+
+        for i = startIndex, #self.masterList do
+            local data = self.masterList[i]
+            if not data:IsRedacted() and self.selectedSubcategoryIndex == data:GetUISubcategoryIndex() then
+                if numEventsSkipped == numEventsToSkip then
+                    if #scrollData == ENTRIES_PER_PAGE then
+                        self.hasNextPage = true
+                        break
+                    end
+                    local entryData = self.entryDataPool:AcquireObject()
+                    entryData:SetDataSource(data)
+                    entryData:SetupAsScrollListDataEntry(GUILD_EVENT_DATA)
+                    table.insert(scrollData, entryData)
+                else
+                    numEventsSkipped = numEventsSkipped + 1
+                end
+            end
+        end
+
+        -- If we found no events for the filter, the cache won't matter because we won't be able to refresh the filters again anyway
+        if not cachedPageEventIndices and #scrollData > 0 then
+            cachedPageEventIndices =
+            {
+                startIndex = scrollData[1]:GetEventIndex(),
+                endIndex = scrollData[#scrollData]:GetEventIndex(),
+            }
+            self.cachedEventIndicesByPage[self.currentPage] = cachedPageEventIndices
+        end
     end
 
-    -- If we found no events for the filter, the cache won't matter because we won't be able to refresh the filters again anyway
-    if not cachedPageEventIndices and #scrollData > 0 then
-        cachedPageEventIndices =
-        {
-            startIndex = scrollData[1]:GetEventIndex(),
-            endIndex = scrollData[#scrollData]:GetEventIndex(),
-        }
-        self.cachedEventIndicesByPage[self.currentPage] = cachedPageEventIndices
+    if self.autoRequestEnabled and self.guildId and self.selectedEventCategory then
+        local guildData = GUILD_HISTORY_MANAGER:GetGuildData(self.guildId)
+        local eventCategoryData = guildData:GetEventCategoryData(self.selectedEventCategory)
+
+        --The newest event id should be either the oldest up to date event or newest redacted event (whichever is newer)
+        local newestEventId
+        local oldestUpToDateEvent = eventCategoryData:GetOldestEventForUpToDateEventsWithoutGaps()
+        if oldestUpToDateEvent then
+            newestEventId = oldestUpToDateEvent:GetEventId()
+        end
+
+        local oldestRedactedEvent
+        if #self.redactedEvents > 0 then
+            local newestRedactedEvent = self.redactedEvents[1]
+            oldestRedactedEvent = self.redactedEvents[#self.redactedEvents]
+            if newestEventId == nil or newestRedactedEvent:GetEventId() > newestEventId then
+                newestEventId = newestRedactedEvent:GetEventId()
+            end
+        end
+
+        --The oldest event id will either be the last event on the page or the oldest redacted event
+        local oldestEventId
+        if #scrollData > 0 then
+            oldestEventId = scrollData[#scrollData]:GetEventId()
+        elseif oldestRedactedEvent then
+            oldestEventId = oldestRedactedEvent:GetEventId()
+        end
+
+        local request = self:GetRequestForSelection()
+        if not eventCategoryData:HasUpToDateEvents() then
+            -- Need to make an initial request
+            -- which will come back into FilterScrollList when the response comes.
+            local QUEUE_IF_ON_COOLDOWN = true
+            local readyState = request:RequestMoreEvents(QUEUE_IF_ON_COOLDOWN)
+        elseif newestEventId and oldestEventId and newestEventId > oldestEventId then
+            -- Need to make a request to fill gaps and/or unredact,
+            -- which will come back into FilterScrollList when the response comes.
+            local QUEUE_IF_ON_COOLDOWN = true
+            local readyState = request:RequestMoreEvents(QUEUE_IF_ON_COOLDOWN, newestEventId, oldestEventId)
+        elseif #self.masterList < ENTRIES_PER_PAGE and not request:IsComplete() then
+            -- Need to make a request to fill up the page if we are on the first page,
+            -- which will come back into FilterScrollList when the response comes.
+            local QUEUE_IF_ON_COOLDOWN = true
+            local readyState = request:RequestMoreEvents(QUEUE_IF_ON_COOLDOWN)
+        end
     end
+
+    --Refresh the loading spinner whenever the filters are refreshed
+    self:RefreshLoadingSpinner()
 end
 
 function ZO_GuildHistory_Shared:SetupEventRow(control, eventData, isGamepad)
@@ -294,15 +328,18 @@ end
 
 function ZO_GuildHistory_Shared:RefreshLoadingSpinner()
     local showLoadingSpinner = false
+    local isTargetingEvents = false
+
     if self.guildId and self.selectedEventCategory then
         local request = self:GetRequestForSelection()
         --If the request is queued or pending, we want to show the loading spinner
         if request:IsRequestQueued() or request:IsRequestQueuedFromAddon() or request:IsRequestResponsePending() then
             showLoadingSpinner = true
+            isTargetingEvents = request:IsTargetingEvents()
         end
     end
 
-    self:SetShowLoadingSpinner(showLoadingSpinner)
+    self:SetShowLoadingSpinner(showLoadingSpinner, isTargetingEvents)
 end
 
 ZO_GuildHistory_Shared:MUST_IMPLEMENT("SetShowLoadingSpinner")

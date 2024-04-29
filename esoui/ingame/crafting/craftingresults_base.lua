@@ -481,7 +481,7 @@ do
                 local skillLineData = skillData:GetSkillLineData()
                 local skillTypeData = skillLineData:GetSkillTypeData()
 
-                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
+                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.SCRIBING_SCRIBE_COMPLETE_ANNOUNCE)
                 messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_CRAFTING_RESULTS)
                 local bodyText = zo_strformat(SI_CRAFTED_ABILITY_NAME_AND_SKILL_LINE_FORMATTER, GetAbilityName(abilityId), skillTypeData:GetName(), skillLineData:GetName())
                 messageParams:SetText(GetString(SI_SCRIBING_ABILITY_CRAFTED_ANNOUNCEMENT_TITLE), bodyText)

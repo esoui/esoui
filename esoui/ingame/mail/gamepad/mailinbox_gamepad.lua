@@ -476,7 +476,7 @@ function ZO_MailInbox_Gamepad:InitializeKeybindDescriptors()
             name = function()
                 return GetString("SI_MAILCATEGORY_TAKEALL", self:GetActiveMailCategory())
             end,
-            keybind = "UI_SHORTCUT_QUATERNARY",
+            keybind = "UI_SHORTCUT_QUINARY",
             callback = function()
                 ZO_Dialogs_ShowPlatformDialog("MAIL_CONFIRM_TAKE_ALL", { category = self:GetActiveMailCategory() })
             end,

@@ -656,7 +656,7 @@ do
         local currencyQuantity1 = selectedData.currencyQuantity1
         local playerCurrencyAmount = GetCurrencyAmount(currencyType, GetCurrencyPlayerStoredLocation(currencyType))
 
-        if currencyType and currencyQuantity1 and currencyQuantity1 > 0 and currencyQuantity1 > playerCurrencyAmount then
+        if currencyType and currencyType ~= CURT_NONE and currencyQuantity1 and currencyQuantity1 > 0 and currencyQuantity1 > playerCurrencyAmount then
             if currencyType == CURT_MONEY then
                 return false, GetString(SI_NOT_ENOUGH_MONEY)
             end

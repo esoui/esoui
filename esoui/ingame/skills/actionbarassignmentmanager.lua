@@ -552,8 +552,15 @@ function ZO_ActionBarAssignmentManager_Hotbar:DoesSlotHavePendingChanges(actionS
 
     local actionType = GetSlotType(actionSlotIndex, self.hotbarCategory)
     local actionId = GetSlotBoundId(actionSlotIndex, self.hotbarCategory)
+
     local pendingActionType = pendingAction:GetActionType()
-    local pendingActionId = pendingAction:GetActionId()
+    local pendingActionId
+    if pendingActionType == ACTION_TYPE_ABILITY then
+        pendingActionId = pendingAction:GetEffectiveAbilityId()
+    else
+        pendingActionId = pendingAction:GetActionId()   
+    end
+
     return pendingActionType ~= actionType or pendingActionId ~= actionId
 end
 

@@ -63,7 +63,7 @@ LoadingScreen_Base = {}
 function LoadingScreen_Base:Log(text)
     local gamepadMode = IsInGamepadPreferredMode()
     if gamepadMode and self == GamepadLoadingScreen or
-    not gamepadMode and self == LoadingScreen then         
+    not gamepadMode and self == LoadingScreen then
         WriteToInterfaceLog(text)
     end
 end
@@ -183,7 +183,7 @@ local GAMEPAD_BATTLEGROUND_TEAM_TEXTURES =
 }
 
 function LoadingScreen_Base:Show(zoneName, zoneDescription, loadingTexture, zoneDisplayType)
-    if self:IsPreferredScreen() then
+    if self:IsHidden() and self:IsPreferredScreen() then
         self:Log("Load Screen - Show")
         self.lastUpdate = GetFrameTimeMilliseconds()
         --Some of the logic in this file can cause use to briefly hide the load screen, so we set this to make sure we dont clear narration due to a hide while this function is running

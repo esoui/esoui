@@ -21,7 +21,7 @@ function BossBar:Initialize(control)
     end
 
     self.bossUnitTags = {}
-    for i = 1, MAX_BOSSES do
+    for i = BOSS_RANK_ITERATION_BEGIN, BOSS_RANK_ITERATION_END do
         self.bossUnitTags["boss"..i] = true
     end
 
