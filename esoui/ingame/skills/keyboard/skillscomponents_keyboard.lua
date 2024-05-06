@@ -368,40 +368,63 @@ function ZO_Skills_AbilitySlot_OnDoubleClick(control)
     end
 end
 
-function ZO_Skills_AbilitySlot_OnClick(control)
+function ZO_Skills_AbilitySlot_OnMouseUp(control)
     local hotbar = ACTION_BAR_ASSIGNMENT_MANAGER:GetCurrentHotbar()
     local skillData = control.skillProgressionData:GetSkillData()
-    if not skillData:IsPassive() and skillData:GetPointAllocator():IsPurchased() then
-        ClearMenu()
-        if skillData:IsUltimate() then
-            local ultimateSlotIndex = ACTION_BAR_ULTIMATE_SLOT_INDEX + 1
-            if hotbar:GetExpectedSkillSlotResult(ultimateSlotIndex, skillData) == HOT_BAR_RESULT_SUCCESS then
-                AddMenuItem(GetString(SI_SKILL_ABILITY_ASSIGN_TO_ULTIMATE_SLOT), function()
-                    if hotbar:AssignSkillToSlot(ultimateSlotIndex, skillData) then
-                        PlaySound(SOUNDS.ABILITY_SLOTTED)
-                    end
-                end)
-            end
-        else
-            local slotId = hotbar:FindEmptySlotForSkill(skillData)
-            if slotId then
-                AddMenuItem(GetString(SI_SKILL_ABILITY_ASSIGN_TO_EMPTY_SLOT), function()
-                    if hotbar:AssignSkillToSlot(slotId, skillData) then
-                        PlaySound(SOUNDS.ABILITY_SLOTTED)
-                    end
-                end)
-            end
 
-            for actionSlotIndex = ACTION_BAR_FIRST_NORMAL_SLOT_INDEX + 1, ACTION_BAR_ULTIMATE_SLOT_INDEX do
-                if hotbar:GetExpectedSkillSlotResult(actionSlotIndex, skillData) == HOT_BAR_RESULT_SUCCESS then
-                    AddMenuItem(zo_strformat(SI_SKILL_ABILITY_ASSIGN_TO_SLOT, actionSlotIndex - 2), function()
-                        if hotbar:AssignSkillToSlot(actionSlotIndex, skillData) then
+    local function OnLinkInChat()
+        if skillData:IsCraftedAbility() then
+            local craftedAbilityId = skillData:GetCraftedAbilityId()
+            local craftedAbilityData = SCRIBING_DATA_MANAGER:GetCraftedAbilityData(craftedAbilityId)
+            local primaryScriptId, secondaryScriptId, tertiaryScriptId = craftedAbilityData:GetActiveScriptIds()
+            if primaryScriptId ~= 0 and secondaryScriptId ~= 0 and tertiaryScriptId ~= 0 then
+                ZO_LinkHandler_InsertLink(ZO_LinkHandler_CreateChatLink(GetCraftedAbilityLink, craftedAbilityId, primaryScriptId, secondaryScriptId, tertiaryScriptId))
+                return
+            else
+                internalassert(false, "Crafted Ability should never have any scripts of id 0 on the skills screen.")
+            end
+        end
+        ZO_LinkHandler_InsertLink(ZO_LinkHandler_CreateChatLink(GetAbilityLink, control.skillProgressionData:GetAbilityId()))
+    end
+
+    if skillData:IsPassive() then
+        ClearMenu()
+        AddMenuItem(GetString(SI_ITEM_ACTION_LINK_TO_CHAT), OnLinkInChat)
+        ShowMenu(control)
+    else
+        ClearMenu()
+        if skillData:GetPointAllocator():IsPurchased() and control.skillProgressionData == skillData:GetCurrentProgressionData() then
+            if skillData:IsUltimate() then
+                local ultimateSlotIndex = ACTION_BAR_ULTIMATE_SLOT_INDEX + 1
+                if hotbar:GetExpectedSkillSlotResult(ultimateSlotIndex, skillData) == HOT_BAR_RESULT_SUCCESS then
+                    AddMenuItem(GetString(SI_SKILL_ABILITY_ASSIGN_TO_ULTIMATE_SLOT), function()
+                        if hotbar:AssignSkillToSlot(ultimateSlotIndex, skillData) then
                             PlaySound(SOUNDS.ABILITY_SLOTTED)
                         end
                     end)
                 end
+            else
+                local slotId = hotbar:FindEmptySlotForSkill(skillData)
+                if slotId then
+                    AddMenuItem(GetString(SI_SKILL_ABILITY_ASSIGN_TO_EMPTY_SLOT), function()
+                        if hotbar:AssignSkillToSlot(slotId, skillData) then
+                            PlaySound(SOUNDS.ABILITY_SLOTTED)
+                        end
+                    end)
+                end
+
+                for actionSlotIndex = ACTION_BAR_FIRST_NORMAL_SLOT_INDEX + 1, ACTION_BAR_ULTIMATE_SLOT_INDEX do
+                    if hotbar:GetExpectedSkillSlotResult(actionSlotIndex, skillData) == HOT_BAR_RESULT_SUCCESS then
+                        AddMenuItem(zo_strformat(SI_SKILL_ABILITY_ASSIGN_TO_SLOT, actionSlotIndex - 2), function()
+                            if hotbar:AssignSkillToSlot(actionSlotIndex, skillData) then
+                                PlaySound(SOUNDS.ABILITY_SLOTTED)
+                            end
+                        end)
+                    end
+                end
             end
         end
+        AddMenuItem(GetString(SI_ITEM_ACTION_LINK_TO_CHAT), OnLinkInChat)
         ShowMenu(control)
     end
 end

@@ -180,47 +180,23 @@ function ZO_HousingFurnitureList_Gamepad:InitializeKeybindStripDescriptors()
         },
         -- Options
         {
-            name = function()
-                if optionsDialogName and not HOUSING_EDITOR_STATE:IsHousePreview() then
-                    return GetString(SI_GAMEPAD_HOUSING_FURNITURE_BROWSER_OPTIONS_KEYBIND)
-                else
-                    return GetString(SI_GAMEPAD_FURNITURE_TEXT_FILTER_KEYBIND_TEXT)
-                end
-            end,
+            name = GetString(SI_GAMEPAD_HOUSING_FURNITURE_BROWSER_OPTIONS_KEYBIND),
             keybind = "UI_SHORTCUT_TERTIARY",
             callback = function()
-                if optionsDialogName and not HOUSING_EDITOR_STATE:IsHousePreview() then
-                    ShowOptionsDialog()
-                else
-                    self.owner:SelectTextFilter()
-                end
+                ShowOptionsDialog()
             end,
-        },
-        -- Link House Invite in Chat
-        {
-            name = GetString(SI_HOUSING_LINK_IN_CHAT),
-            keybind = "UI_SHORTCUT_RIGHT_STICK",
-            callback = ZO_HousingBook_LinkCurrentHouseInChat,
-            alignment = KEYBIND_STRIP_ALIGN_RIGHT,
-            order = 100,
             visible = function()
-                return not HOUSING_EDITOR_STATE:IsHousePreview()
+                return optionsDialogName and not HOUSING_EDITOR_STATE:IsHousePreview()
             end,
         },
-        -- Link House Invite in Mail
+
+        -- Send Invite
         {
-            name = GetString(SI_HOUSING_LINK_IN_MAIL),
-            keybind = "UI_SHORTCUT_QUATERNARY",
+            name = GetString(SI_GAMEPAD_HOUSING_SEND_INVITE),
+            keybind = "UI_SHORTCUT_RIGHT_STICK",
             callback = function()
-                local houseId = GetCurrentZoneHouseId()
-                local ownerDisplayName = GetCurrentHouseOwner()
-                local link = ZO_HousingBook_GetHouseLink(houseId, ownerDisplayName)
-                if link then
-                    MAIL_GAMEPAD.inbox:InsertBodyText(link)
-                end
+                ZO_Dialogs_ShowGamepadDialog("GAMEPAD_HOUSING_EDITOR_LINK_INVITE")
             end,
-            alignment = KEYBIND_STRIP_ALIGN_RIGHT,
-            order = 110,
             visible = function()
                 return not HOUSING_EDITOR_STATE:IsHousePreview()
             end,
@@ -255,20 +231,13 @@ function ZO_HousingFurnitureList_Gamepad:InitializeKeybindStripDescriptors()
 
         -- Options
         {
-            name = function()
-                if optionsDialogName and not HOUSING_EDITOR_STATE:IsHousePreview() then
-                    return GetString(SI_GAMEPAD_HOUSING_FURNITURE_BROWSER_OPTIONS_KEYBIND)
-                else
-                    return GetString(SI_GAMEPAD_FURNITURE_TEXT_FILTER_KEYBIND_TEXT)
-                end
-            end,
+            name = GetString(SI_GAMEPAD_HOUSING_FURNITURE_BROWSER_OPTIONS_KEYBIND),
             keybind = "UI_SHORTCUT_TERTIARY",
             callback = function()
-                if optionsDialogName and not HOUSING_EDITOR_STATE:IsHousePreview() then
-                    ShowOptionsDialog()
-                else
-                    self.owner:SelectTextFilter()
-                end
+                ShowOptionsDialog()
+            end,
+            visible = function()
+                return optionsDialogName and not HOUSING_EDITOR_STATE:IsHousePreview()
             end,
         },
 
@@ -532,24 +501,7 @@ function ZO_HousingFurnitureList_Gamepad:InitializeOptionsDialog()
             dialog:setupFunc()
         end,
 
-        parametricList =
-        {
-            -- Text search
-            {
-                template = "ZO_GamepadFullWidthLeftLabelEntryTemplate",
-
-                templateData =
-                {
-                    text = GetString(SI_GAMEPAD_FURNITURE_TEXT_FILTER_KEYBIND_TEXT),
-                    setup = ZO_SharedGamepadEntry_OnSetup,
-
-                    callback = function(dialog)
-                        ZO_Dialogs_ReleaseDialogOnButtonPress(optionsDialogName)
-                        self.owner:SelectTextFilter()
-                    end,
-                },
-            },
-        },
+        parametricList = { },
 
         blockDialogReleaseOnPress = true,
 
@@ -571,7 +523,7 @@ function ZO_HousingFurnitureList_Gamepad:InitializeOptionsDialog()
             -- Back
             {
                 keybind = "DIALOG_NEGATIVE",
-                text = SI_DIALOG_CANCEL,
+                text = SI_DIALOG_CLOSE,
 
                 callback = function()
                     ZO_Dialogs_ReleaseDialogOnButtonPress(optionsDialogName)

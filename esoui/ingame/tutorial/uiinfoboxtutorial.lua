@@ -18,6 +18,7 @@ function ZO_UiInfoBoxTutorial:Initialize()
     self.dialogDescription = self.dialogScrollChild:GetNamedChild("Description")
     self.dialogInfo =
     {
+        canQueue = true,
         title = {},
         customControl = dialogControl,
         noChoiceCallback = function(dialog)

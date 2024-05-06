@@ -227,3 +227,28 @@ function ZO_HousingBook_LinkCurrentHouseInChat()
     local ownerDisplayName = GetCurrentHouseOwner()
     ZO_HousingBook_LinkHouseInChat(houseId, ownerDisplayName)
 end
+
+-- Links a specific house in mail.
+function ZO_HousingBook_LinkHouseInMail(houseId, ownerDisplayName)
+    local link = ZO_HousingBook_GetHouseLink(houseId, ownerDisplayName)
+    if not link then
+        -- Invalid houseId.
+        return
+    end
+
+    if IsInGamepadPreferredMode() then
+        MAIL_GAMEPAD:GetInbox():InsertBodyText(link)
+    else
+        local bodyText = MAIL_SEND.body:GetText()
+        bodyText = bodyText .. link
+        MAIL_SEND.body:SetText(bodyText)
+        MAIN_MENU_KEYBOARD:ShowScene("mailSend")
+    end
+end
+
+-- Links the current house in mail, if any.
+function ZO_HousingBook_LinkCurrentHouseInMail()
+    local houseId = HOUSING_EDITOR_STATE:GetHouseId()
+    local ownerDisplayName = HOUSING_EDITOR_STATE:GetOwnerName()
+    ZO_HousingBook_LinkHouseInMail(houseId, ownerDisplayName)
+end

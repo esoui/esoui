@@ -2484,9 +2484,10 @@ end
 function ZO_MapPin:GetLinkedCollectibleData()
     if self:IsFastTravelWayShrine() then
         local collectibleId = GetFastTravelNodeLinkedCollectibleId(self:GetFastTravelNodeIndex())
-        -- Will either be an override collectible or the passed in id
+        -- Will either be an override collectible, the passed in id, or 0 if it cannot be purchased
         local purchasableCollectibleId = GetPurchasableCollectibleIdForCollectible(collectibleId)
-        local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(purchasableCollectibleId)
+        local relevantCollectibleId = purchasableCollectibleId ~= 0 and purchasableCollectibleId or collectibleId
+        local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(relevantCollectibleId)
         return collectibleData
     end
     -- TODO: Handle if self:IsPOI()?

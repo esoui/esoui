@@ -34,6 +34,11 @@
             <OnMouseEnter>
                 ZO_Skills_DialogAbilitySlot_OnMouseEnter(self)
             </OnMouseEnter>
+            <OnMouseUp>
+                if button == MOUSE_BUTTON_INDEX_RIGHT then
+                    ZO_Skills_AbilitySlot_OnMouseUp(self)
+                end
+            </OnMouseUp>
         </Button>
         
         <Button name="ZO_Skills_MorphAbilitySlot" virtual="true" inherits="ZO_Skills_AbilitySlot ZO_Skills_DialogAbilitySlot_MouseOverBehavior">

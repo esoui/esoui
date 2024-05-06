@@ -1177,8 +1177,7 @@ function ZO_MapPanAndZoom:ComputeMaxZoom()
             local tilePixelWidth = ZO_WorldMapContainer1:GetTextureFileDimensions()
             local totalPixels = numTiles * tilePixelWidth
             local mapAreaUIUnits = ZO_WorldMapScroll:GetHeight()
-            local mapAreaPixels = mapAreaUIUnits * GetUIGlobalScale()
-            local maxZoomToStayBelowNative = totalPixels / mapAreaPixels
+            local maxZoomToStayBelowNative = totalPixels / mapAreaUIUnits
             return zo_max(maxZoomToStayBelowNative * ZO_MapPanAndZoom.MAX_OVER_ZOOM, 1)
         end
     end

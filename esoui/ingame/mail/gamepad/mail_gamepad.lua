@@ -397,6 +397,10 @@ function ZO_Mail_Gamepad:SwitchToKeybind(keybindDescriptor)
     end
 end
 
+function ZO_Mail_Gamepad:GetInbox()
+    return self.inbox
+end
+
 function ZO_Mail_Gamepad:GetSend()
     return self.send
 end

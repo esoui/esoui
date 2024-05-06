@@ -40,6 +40,39 @@ function ZO_HousingFurnitureBrowser_Gamepad:PerformUpdate()
 end
 
 --Overridden
+function ZO_HousingFurnitureBrowser_Gamepad:OnEnterHeader()
+    -- override function for implementation specific functionality
+
+    -- Swap keybinds to text search keybinds if there is a text search
+    if self.textSearchHeaderFocus and self.mode ~= HOUSING_BROWSER_MODE.SETTINGS then
+        if self.currentPanel.currentList and self.currentPanel.currentList.keybinds then
+            KEYBIND_STRIP:RemoveKeybindButtonGroup(self.currentPanel.currentList.keybinds)
+        end
+
+        if self.textSearchKeybindStripDescriptor then
+            KEYBIND_STRIP:AddKeybindButtonGroup(self.textSearchKeybindStripDescriptor)
+        end
+    end
+end
+
+--Overridden
+function ZO_HousingFurnitureBrowser_Gamepad:OnLeaveHeader()
+    -- override function for implementation specific functionality
+
+    -- Swap keybinds from text search keybinds if there is a text search
+    if self.textSearchHeaderFocus and mode ~= HOUSING_BROWSER_MODE.SETTINGS then
+        self:SetTextSearchFocused(false)
+
+        if self.textSearchKeybindStripDescriptor then
+            KEYBIND_STRIP:RemoveKeybindButtonGroup(self.textSearchKeybindStripDescriptor)
+        end
+
+        if self.currentPanel.currentList and self.currentPanel.currentList.keybinds and self:IsShowing() then
+            KEYBIND_STRIP:AddKeybindButtonGroup(self.currentPanel.currentList.keybinds)
+        end
+    end
+end
+
 function ZO_HousingFurnitureBrowser_Gamepad:UpdatePlaceablePanel()
     self.placementPanel:UpdateLists()
     self:RefreshCategoryHeaderData()
@@ -134,14 +167,24 @@ function ZO_HousingFurnitureBrowser_Gamepad:InitializeHeader()
 
     ZO_GamepadGenericHeader_Initialize(self.header, ZO_GAMEPAD_HEADER_TABBAR_CREATE)
 
-    local headerContainer = self:GetHeaderContainer()
-    self.headerTextFilterControl = headerContainer:GetNamedChild("Filter")
-    self.headerTextFilterEditBox = self.headerTextFilterControl:GetNamedChild("SearchEdit")
-    self.headerTextFilterHighlight = self.headerTextFilterControl:GetNamedChild("Highlight")
-    self.headerTextFilterIcon = self.headerTextFilterControl:GetNamedChild("Icon")
-    self.headerBGTexture = self.headerTextFilterControl:GetNamedChild("BG")
 
-    self.headerTextFilterEditBox:SetHandler("OnTextChanged", function(editBox)
+    self.textSearchKeybindStripDescriptor =
+    {
+        alignment = KEYBIND_STRIP_ALIGN_LEFT,
+        -- Select
+        {
+            keybind = "UI_SHORTCUT_PRIMARY",
+            name = GetString(SI_GAMEPAD_SELECT_OPTION),
+            visible = function()
+                return not ZO_CraftingUtils_IsPerformingCraftProcess()
+            end,
+            callback = function()
+                self:SetTextSearchFocused(true)
+            end,
+        },
+    }
+
+    local function OnTextChanged(editBox)
         local text = editBox:GetText()
         if self.mode == HOUSING_BROWSER_MODE.PLACEMENT then
             SHARED_FURNITURE:SetPlaceableTextFilter(text)
@@ -150,21 +193,13 @@ function ZO_HousingFurnitureBrowser_Gamepad:InitializeHeader()
         elseif self.mode == HOUSING_BROWSER_MODE.PRODUCTS then
             SHARED_FURNITURE:SetMarketProductTextFilter(text)
         end
-    end)
+    end
 
-    ZO_PreHookHandler(self.headerTextFilterEditBox, "OnFocusGained", function(editBox)
-        self:DeactivateCurrentList()
-        self.headerTextFilterHighlight:SetHidden(false)
-        self.headerTextFilterIcon:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
-        self.headerBGTexture:SetHidden(false)
-    end)
+    -- Order matters
+    self:AddSearch(self.textSearchKeybindStripDescriptor, OnTextChanged)
 
-    ZO_PreHookHandler(self.headerTextFilterEditBox, "OnFocusLost", function(editBox)
-        self.headerTextFilterHighlight:SetHidden(true)
-        self.headerTextFilterIcon:SetColor(ZO_DISABLED_TEXT:UnpackRGBA())
-        self.headerBGTexture:SetHidden(true)
-        self:ActivateCurrentList()
-    end)
+    self.headerTextFilterControl = self.textSearchHeaderControl:GetNamedChild("Filter")
+    self.headerTextFilterEditBox = self.headerTextFilterControl:GetNamedChild("SearchEdit")
 end
 
 function ZO_HousingFurnitureBrowser_Gamepad:RequestNewList()
@@ -216,6 +251,7 @@ function ZO_HousingFurnitureBrowser_Gamepad:OnHiding()
 end
 
 function ZO_HousingFurnitureBrowser_Gamepad:OnHide()
+    ZO_Gamepad_ParametricList_Screen.OnHide(self)
     self:SetMode(HOUSING_BROWSER_MODE.NONE)
     ITEM_PREVIEW_GAMEPAD:UnregisterCallback("RefreshActions", self.OnRefreshActions)
 end
@@ -253,6 +289,10 @@ function ZO_HousingFurnitureBrowser_Gamepad:SetMode(mode)
             self:RefreshCategoryHeaderData()
         end
     end
+end
+
+function ZO_HousingFurnitureBrowser_Gamepad:IsTextFilterActive()
+    return self.headerTextFilterEditBox:HasFocus()
 end
 
 function ZO_HousingFurnitureBrowser_Gamepad:GetTextFilter()

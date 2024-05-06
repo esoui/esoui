@@ -101,11 +101,11 @@
                             ZO_Skills_AbilitySlot_OnDoubleClick(self)
                         end
                     </OnMouseDoubleClick>
-                    <OnClicked>
+                    <OnMouseUp>
                         if button == MOUSE_BUTTON_INDEX_RIGHT then
-                            ZO_Skills_AbilitySlot_OnClick(self)
+                            ZO_Skills_AbilitySlot_OnMouseUp(self)
                         end
-                    </OnClicked>
+                    </OnMouseUp>
                     <Controls>
                         <Texture name="$(parent)Lock" textureFile="EsoUI/Art/Progression/lock.dds" tier="HIGH" hidden="true">
                             <Dimensions x="32" y="32"/>

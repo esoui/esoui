@@ -823,13 +823,18 @@ function ZO_Market_Keyboard:GetMarketProductPresentations(categoryIndex, subcate
 
         local id, presentationIndex = GetMarketProductPresentationIds(self:GetDisplayGroup(), categoryIndex, subcategoryIndex, index)
         if self:ShouldAddMarketProductPresentation(id, presentationIndex) then
-            local productData = ZO_MarketProductData:New(id, presentationIndex)
-            table.insert(marketProductPresentations, productData)
+            marketProductPresentations = self:AddNewMarketProductPresentationToList(marketProductPresentations, id, presentationIndex)
         end
 
         index = index - 1
         return self:GetMarketProductPresentations(categoryIndex, subcategoryIndex, index, marketProductPresentations)
     end
+end
+
+function ZO_Market_Keyboard:AddNewMarketProductPresentationToList(marketProductPresentionList, id, presentationIndex)
+    local productData = ZO_MarketProductData:New(id, presentationIndex)
+    table.insert(marketProductPresentionList, productData)
+    return marketProductPresentionList
 end
 
 function ZO_Market_Keyboard:ClearMarketProducts()

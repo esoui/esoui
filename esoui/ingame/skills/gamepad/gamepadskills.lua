@@ -218,6 +218,8 @@ function ZO_GamepadSkills:Initialize(control)
     self:AddSkillsAdvisorDescriptor(self.categoryKeybindStripDescriptor)
     self.lineFilterKeybindStripDescriptor = { alignment = KEYBIND_STRIP_ALIGN_LEFT }
     self:AddWeaponSwapDescriptor(self.lineFilterKeybindStripDescriptor)
+
+    self:InitializeOptionsDialog()
 end
 
 function ZO_GamepadSkills.OnConfirmHideScene(scene, nextSceneName, bypassHideSceneConfirmationReason)
@@ -529,6 +531,20 @@ function ZO_GamepadSkills:InitializeLineFilterKeybindStrip()
             if skillEntry then
                 local skillData = skillEntry.skillData
                 ZO_Dialogs_ShowGamepadDialog("GAMEPAD_SKILL_STYLE_SELECTION", { skillData = skillEntry.skillData })
+            end
+        end,
+    })
+
+    table.insert(self.lineFilterKeybindStripDescriptor,
+    {
+        name = GetString(SI_GAMEPAD_OPTIONS_MENU),
+
+        keybind = "UI_SHORTCUT_QUINARY",
+
+        callback = function()
+            local skillEntry = self.lineFilterList:GetTargetData()
+            if skillEntry then
+                ZO_Dialogs_ShowPlatformDialog("SKILLS_OPTIONS_DIALOG_GAMEPAD", { skillData = skillEntry.skillData })
             end
         end,
     })
@@ -2151,6 +2167,82 @@ function ZO_GamepadSkills:StartSingleAbilityAssignment(skillData)
     self.actionBarAnimation:PlayForward()
     self:SetMode(ZO_GAMEPAD_SKILLS_SINGLE_ABILITY_ASSIGN_MODE)
     self.selectedTooltipRefreshGroup:MarkDirty("Full")
+end
+
+function ZO_GamepadSkills:InitializeOptionsDialog()
+    local function ReleaseDialog()
+        ZO_Dialogs_ReleaseDialogOnButtonPress("SKILLS_OPTIONS_DIALOG_GAMEPAD")
+    end
+
+    local linkInChat = ZO_GamepadEntryData:New(zo_strformat(SI_ITEM_ACTION_LINK_TO_CHAT))
+    linkInChat.setup = ZO_SharedGamepadEntry_OnSetup
+    linkInChat.callback = function(entryData)
+        local skillData = entryData.data.skillData
+        if skillData:IsCraftedAbility() then
+            local craftedAbilityId = skillData:GetCraftedAbilityId()
+            local craftedAbilityData = SCRIBING_DATA_MANAGER:GetCraftedAbilityData(craftedAbilityId)
+            local primaryScriptId, secondaryScriptId, tertiaryScriptId = craftedAbilityData:GetActiveScriptIds()
+            if primaryScriptId ~= 0 and secondaryScriptId ~= 0 and tertiaryScriptId ~= 0 then
+                ZO_LinkHandler_InsertLinkAndSubmit(ZO_LinkHandler_CreateChatLink(GetCraftedAbilityLink, craftedAbilityId, primaryScriptId, secondaryScriptId, tertiaryScriptId))
+                ReleaseDialog()
+                return
+            else
+                internalassert(false, "Crafted Ability should never have any scripts of id 0 on the skills screen.")
+            end
+        end
+        local progressionData = skillData:GetCurrentProgressionData()
+        ZO_LinkHandler_InsertLinkAndSubmit(ZO_LinkHandler_CreateChatLink(GetAbilityLink, progressionData:GetAbilityId()))
+        ReleaseDialog()
+    end
+
+    ZO_Dialogs_RegisterCustomDialog("SKILLS_OPTIONS_DIALOG_GAMEPAD",
+    {
+        blockDialogReleaseOnPress = true,
+
+        canQueue = true,
+
+        gamepadInfo =
+        {
+            dialogType = GAMEPAD_DIALOGS.PARAMETRIC,
+            allowRightStickPassThrough = true,
+        },
+
+        setup = function(dialog)
+            dialog:setupFunc()
+        end,
+
+        title =
+        {
+            text = SI_GAMEPAD_OPTIONS_MENU,
+        },
+        parametricList =
+        {
+            {
+                template = "ZO_GamepadMenuEntryTemplate",
+                entryData = linkInChat,
+            },
+        },
+        buttons =
+        {
+            {
+                keybind = "DIALOG_PRIMARY",
+                text = SI_GAMEPAD_SELECT_OPTION,
+                callback = function(dialog)
+                    local targetData = dialog.entryList:GetTargetData()
+                    if targetData and targetData.callback then
+                        targetData.callback(dialog)
+                    end
+                end,
+            },
+            {
+                keybind = "DIALOG_NEGATIVE",
+                text = SI_DIALOG_CANCEL,
+                callback = function()
+                    ReleaseDialog()
+                end,
+            },
+        }
+    })
 end
 
 function ZO_GamepadSkills_OnInitialize(control)

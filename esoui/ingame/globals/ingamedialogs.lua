@@ -4786,3 +4786,74 @@ ESO_Dialogs["GROUP_FINDER_CREATE_RESCIND_APPLICATION"] =
         }
     },
 }
+
+ESO_Dialogs["GAMEPAD_HOUSING_EDITOR_LINK_INVITE"] =
+{
+    buttons =
+    {
+        {
+            keybind = "DIALOG_PRIMARY",
+            text = SI_OK,
+            callback = function(dialog)
+                local data = dialog.entryList:GetTargetData()
+                data.callback(dialog)
+            end,
+        },
+
+        {
+            keybind = "DIALOG_NEGATIVE",
+            text = SI_DIALOG_CANCEL,
+        },
+    },
+
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.PARAMETRIC,
+    },
+
+    parametricList =
+    {
+        -- Link Invite In Chat
+        {
+            template = "ZO_GamepadMenuEntryTemplate",
+
+            templateData = 
+            {
+                callback = function(dialog)
+                    ZO_HousingBook_LinkCurrentHouseInChat()
+                end,
+                setup = ZO_SharedGamepadEntry_OnSetup,
+                text = GetString(SI_HOUSING_LINK_IN_CHAT),
+                visible = function(dialog)
+                    return HOUSING_EDITOR_STATE:IsHouse() and not HOUSING_EDITOR_STATE:IsHousePreview() and IsChatSystemAvailableForCurrentPlatform()
+                end,
+            },
+        },
+
+        -- Link Invite In Mail
+        {
+            template = "ZO_GamepadMenuEntryTemplate",
+
+            templateData = 
+            {
+                callback = function(dialog)
+                    ZO_HousingBook_LinkCurrentHouseInMail()
+                end,
+                setup = ZO_SharedGamepadEntry_OnSetup,
+                text = GetString(SI_HOUSING_LINK_IN_MAIL),
+                visible = function(dialog)
+                    return HOUSING_EDITOR_STATE:IsHouse() and not HOUSING_EDITOR_STATE:IsHousePreview()
+                end,
+            },
+        },
+    },
+
+    setup = function(dialog)
+        dialog:setupFunc()
+    end,
+
+    title =
+    {
+        text = SI_GAMEPAD_HOUSING_SEND_INVITE,
+    },
+}

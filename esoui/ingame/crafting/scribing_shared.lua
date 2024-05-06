@@ -138,10 +138,18 @@ function ZO_Scribing_Shared:OnScribeComplete()
 
     if self:IsShowing() then
         self:ShowCraftedAbilities()
-        TriggerTutorial(TUTORIAL_TRIGGER_SCRIBING_ABILITY_SCRIBED)
+        local canSeeAbilityScribedTutorial = CanTutorialBeSeen(TUTORIAL_TRIGGER_SCRIBING_ABILITY_SCRIBED)
+        if canSeeAbilityScribedTutorial then
+            TriggerTutorial(TUTORIAL_TRIGGER_SCRIBING_ABILITY_SCRIBED)
+        end
 
         if self.initialScribe then
-            ZO_Dialogs_ShowPlatformDialog("SCRIBING_OPEN_SKILLS_CONFIRM", { skillsData = craftedAbilityData:GetSkillData() })
+            if canSeeAbilityScribedTutorial then
+                -- we need to delay the open skill dialog until after the tutorial is shown
+                zo_callLater(function() ZO_Dialogs_ShowPlatformDialog("SCRIBING_OPEN_SKILLS_CONFIRM", { skillsData = craftedAbilityData:GetSkillData() }) end, 500)
+            else
+                ZO_Dialogs_ShowPlatformDialog("SCRIBING_OPEN_SKILLS_CONFIRM", { skillsData = craftedAbilityData:GetSkillData() })
+            end
         end
         self.initialScribe = nil
     end
