@@ -249,7 +249,7 @@ function ZO_ChatMenu_Gamepad:AddMessage(message, category, targetChannel, fromDi
             ZO_ExtractLinksFromText(rawMessageText, ZO_VALID_LINK_TYPES_CHAT, links)
             links = #links > 0 and links or nil
         end
-
+        
         local messageEntry = ZO_GamepadEntryData:New(message)
         messageEntry:SetFontScaleOnSelection(false)
         messageEntry.data =
@@ -478,6 +478,9 @@ function ZO_ChatMenu_Gamepad:RefreshTooltip(targetData)
             local links = currentTargetData.data.links
             self.activeLinks:AddLinksTable(links)
             self.activeLinks:Show()
+            if self.activeLinks:GetCurrentLink() == CRAFTED_ABILITY_LINK_TYPE then
+                ResetCraftedAbilityScriptSelectionOverride()
+            end
         end
     end
 end

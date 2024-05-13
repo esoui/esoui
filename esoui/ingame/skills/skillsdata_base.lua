@@ -205,6 +205,15 @@ function ZO_SkillData_Base:GetSlotOnCurrentHotbar()
     return ACTION_BAR_ASSIGNMENT_MANAGER:GetCurrentHotbar():FindSlotMatchingSkill(self)
 end
 
+function ZO_SkillData_Base:GetCurrentProgressionLink()
+    if self:IsCraftedAbility() then
+        local craftedAbilityId = self:GetCraftedAbilityId()
+        local craftedAbilityData = SCRIBING_DATA_MANAGER:GetCraftedAbilityData(craftedAbilityId)
+        return craftedAbilityData:GetActiveConfigurationLink()
+    end
+    return ZO_LinkHandler_CreateChatLink(GetAbilityLink, self:GetCurrentProgressionData():GetAbilityId())
+end
+
 
 --[[
     A ZO_SkillLineData_Base is an entry in ZO_SkillTypeData. A skill line has multiple skills to purchase and upgrade, denoted by ZO_SkillData objects.

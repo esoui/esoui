@@ -373,18 +373,10 @@ function ZO_Skills_AbilitySlot_OnMouseUp(control)
     local skillData = control.skillProgressionData:GetSkillData()
 
     local function OnLinkInChat()
-        if skillData:IsCraftedAbility() then
-            local craftedAbilityId = skillData:GetCraftedAbilityId()
-            local craftedAbilityData = SCRIBING_DATA_MANAGER:GetCraftedAbilityData(craftedAbilityId)
-            local primaryScriptId, secondaryScriptId, tertiaryScriptId = craftedAbilityData:GetActiveScriptIds()
-            if primaryScriptId ~= 0 and secondaryScriptId ~= 0 and tertiaryScriptId ~= 0 then
-                ZO_LinkHandler_InsertLink(ZO_LinkHandler_CreateChatLink(GetCraftedAbilityLink, craftedAbilityId, primaryScriptId, secondaryScriptId, tertiaryScriptId))
-                return
-            else
-                internalassert(false, "Crafted Ability should never have any scripts of id 0 on the skills screen.")
-            end
+        local link = skillData:GetCurrentProgressionLink()
+        if internalassert(link, "Unable to generate link for skill.") then
+            ZO_LinkHandler_InsertLink(link)
         end
-        ZO_LinkHandler_InsertLink(ZO_LinkHandler_CreateChatLink(GetAbilityLink, control.skillProgressionData:GetAbilityId()))
     end
 
     if skillData:IsPassive() then

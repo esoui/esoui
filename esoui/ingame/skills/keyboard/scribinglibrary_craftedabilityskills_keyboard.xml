@@ -12,11 +12,9 @@
                     <!-- Disable drag from parent object -->
                     <OnDragStart />
 
-                    <OnClicked>
-                        if button == MOUSE_BUTTON_INDEX_LEFT then
-                            ZO_ScribingLibrary_CraftedAbilitySkills_Keyboard.OnClick(self:GetParent())
-                        end
-                    </OnClicked>
+                    <OnMouseUp>
+                        ZO_ScribingLibrary_CraftedAbilitySkills_Keyboard.OnMouseUp(self:GetParent(), button, upInside)
+                    </OnMouseUp>
                 </Button>
                 <Label name="$(parent)Name" font="ZoFontGameLargeBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" override="true"  wrapMode="ELLIPSIS" maxLineCount="2" >
                     <Dimensions x="190" />

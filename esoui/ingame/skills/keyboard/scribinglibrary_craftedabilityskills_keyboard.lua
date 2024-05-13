@@ -85,11 +85,25 @@ function ZO_ScribingLibrary_CraftedAbilitySkills_Keyboard.OnMouseEnter(control)
     end
 end
 
-function ZO_ScribingLibrary_CraftedAbilitySkills_Keyboard.OnClick(control)
-    local skillData = control.dataEntry and control.dataEntry.data
-    if skillData then
-        MAIN_MENU_KEYBOARD:ShowScene("skills")
-        SKILLS_WINDOW:BrowseToSkill(skillData)
+function ZO_ScribingLibrary_CraftedAbilitySkills_Keyboard.OnMouseUp(control, button, upInside)
+    if upInside then
+        local skillData = control.dataEntry and control.dataEntry.data
+        if button == MOUSE_BUTTON_INDEX_LEFT then
+            if skillData then
+                MAIN_MENU_KEYBOARD:ShowScene("skills")
+                SKILLS_WINDOW:BrowseToSkill(skillData)
+            end
+        else
+            local function OnLinkInChat()
+                local link = skillData:GetCurrentProgressionLink()
+                if internalassert(link, "Unable to generate link for skill.") then
+                    ZO_LinkHandler_InsertLink(link)
+                end
+            end
+            ClearMenu()
+            AddMenuItem(GetString(SI_ITEM_ACTION_LINK_TO_CHAT), OnLinkInChat)
+            ShowMenu(control)
+        end
     end
 end
 

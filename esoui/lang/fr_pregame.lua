@@ -1935,7 +1935,7 @@ SafeAddString(SI_GRAPHICS_OPTIONS_VIDEO_GAMMA_ADJUSTMENT, "Ajustement du gamma",
 SafeAddString(SI_GRAPHICS_OPTIONS_VIDEO_GAMMA_ADJUSTMENT_TOOLTIP, "Règle le gamma (luminosité) général du jeu sans impact sur ses performances. Changez ce réglage si le jeu semble trop lumineux ou trop sombre.", 0)
 SafeAddString(SI_GRAPHICS_OPTIONS_VIDEO_GOD_RAYS, "Rayons de soleil", 0)
 SafeAddString(SI_GRAPHICS_OPTIONS_VIDEO_GOD_RAYS_TOOLTIP, "Cette option affiche des rayons de soleil suivant l'angle de ce dernier par rapport à la caméra. Désactiver cette option peut améliorer les performances.", 0)
-SafeAddString(SI_GRAPHICS_OPTIONS_VIDEO_HDR_ENABLED, "HDR", 0)
+SafeAddString(SI_GRAPHICS_OPTIONS_VIDEO_HDR_ENABLED, "HDR", 1)
 SafeAddString(SI_GRAPHICS_OPTIONS_VIDEO_HDR_ENABLED_TOOLTIP, "Active le HDR si le jeu est affiché sur un moniteur HDR avec le HDR activé.", 0)
 SafeAddString(SI_GRAPHICS_OPTIONS_VIDEO_HDR_MODE, "Mode HDR", 0)
 SafeAddString(SI_GRAPHICS_OPTIONS_VIDEO_HDR_MODE_TOOLTIP, "Définit le mode HDR", 0)

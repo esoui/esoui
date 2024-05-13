@@ -34,7 +34,12 @@ panelBuilder:AddSetting({
     settingType = SETTING_TYPE_GRAPHICS,
     settingId = GRAPHICS_SETTING_RESOLUTION,
     header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_DISPLAY,
-    initializeControlFunction = ZO_OptionsPanel_Video_InitializeResolution
+    initializeControlFunction = function(control)
+        ZO_OptionsPanel_Video_InitializeResolution(control)
+        EVENT_MANAGER:RegisterForEvent("ZO_OptionsPanel_Video", EVENT_ACTIVE_MONITOR_CHANGED, function()
+            ZO_OptionsPanel_Video_OnDisplayResolutionChanged(control)
+        end)
+    end,
 })
 
 panelBuilder:AddSetting({
@@ -80,19 +85,6 @@ panelBuilder:AddSetting({
     settingType = SETTING_TYPE_CUSTOM,
     settingId = OPTIONS_CUSTOM_SETTING_GAMMA_ADJUST,
     header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_DISPLAY,
-})
-
-panelBuilder:AddSetting({
-    controlName = "Options_Video_HDR_ENABLED",
-    settingType = SETTING_TYPE_GRAPHICS,
-    settingId = GRAPHICS_SETTING_HDR_ENABLED,
-    header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_DISPLAY,
-    initializeControlFunction = function(control)
-        ZO_OptionsWindow_InitializeControl(control)
-        EVENT_MANAGER:RegisterForEvent("ZO_OptionsPanel_Video", EVENT_ACTIVE_MONITOR_CHANGED, function()
-            ZO_OptionsPanel_Video_OnHDREnabledChanged(control)
-        end)
-    end,
 })
 
 panelBuilder:AddSetting({

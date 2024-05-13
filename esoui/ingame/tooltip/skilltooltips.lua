@@ -10,6 +10,10 @@ function ZO_Tooltip:LayoutSkillProgression(skillProgressionData, showRankNeededL
     local isPassive = skillData:IsPassive()
     local isActive = not isPassive
     local isCraftedAbility = skillData:IsCraftedAbility()
+    if isCraftedAbility then
+        -- We always want to show the actual skill, never an override
+        ResetCraftedAbilityScriptSelectionOverride()
+    end
     local isNonCraftedActive = isActive and not isCraftedAbility
     local skillPointAllocator = skillData:GetPointAllocator()
     local isPurchased = skillPointAllocator:IsPurchased()

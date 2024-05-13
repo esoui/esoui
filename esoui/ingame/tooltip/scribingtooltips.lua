@@ -15,6 +15,11 @@ function ZO_Tooltip:GetRequiredScribingCollectibleText()
     return ""
 end
 
+function ZO_Tooltip:LayoutCraftedAbilityLink(link, options)
+    local craftedAbilityId, primaryScriptId, secondaryScriptId, tertiaryScriptId = GetCraftedAbilityIdsFromLink(link)
+    self:LayoutCraftedAbilityByIds(craftedAbilityId, primaryScriptId, secondaryScriptId, tertiaryScriptId)
+end
+
 function ZO_Tooltip:LayoutCraftedAbilityByIds(craftedAbilityId, primaryScriptId, secondaryScriptId, tertiaryScriptId, options)
     local craftedAbilityData = SCRIBING_DATA_MANAGER:GetCraftedAbilityData(craftedAbilityId)
     if craftedAbilityData then

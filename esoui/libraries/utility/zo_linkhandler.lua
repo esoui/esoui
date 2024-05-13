@@ -16,6 +16,8 @@ COLLECTIBLE_LINK_TYPE = "collectible"
 GUILD_LINK_TYPE = "guild"
 HELP_LINK_TYPE = "help"
 HOUSING_LINK_TYPE = "housing"
+ABILITY_LINK_TYPE = "ability"
+CRAFTED_ABILITY_LINK_TYPE = "crafted_ability"
 
 ZO_VALID_LINK_TYPES_CHAT =
 {
@@ -25,6 +27,8 @@ ZO_VALID_LINK_TYPES_CHAT =
     [HELP_LINK_TYPE] = true,
     [HOUSING_LINK_TYPE] = true,
     [ITEM_LINK_TYPE] = true,
+    [ABILITY_LINK_TYPE] = true,
+    [CRAFTED_ABILITY_LINK_TYPE] = true,
 }
 
 function ZO_LinkHandler_InsertLink(link)

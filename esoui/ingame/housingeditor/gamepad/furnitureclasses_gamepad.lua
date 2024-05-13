@@ -620,9 +620,9 @@ function ZO_HousingFurnitureList_Gamepad:UpdateLists()
 
     if self.currentList then
         self.currentList.buildListFunction()
-    end
 
-    self:UpdateCurrentKeybinds()
+        self:UpdateCurrentKeybinds()
+    end
 end
 
 function ZO_HousingFurnitureList_Gamepad:ViewCategory()

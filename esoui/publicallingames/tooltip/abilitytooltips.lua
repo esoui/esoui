@@ -382,3 +382,8 @@ function ZO_Tooltip:LayoutEndlessDungeonBuffAbility(buffAbilityId, includeLifeti
     self:AddLine(formattedAbilityName, self:GetStyle("title"))
     self:AddAbilityDescription(buffAbilityId)
 end
+
+function ZO_Tooltip:LayoutAbilityLink(link, options)
+    local abilityId = GetAbilityIdFromLink(link)
+    self:LayoutSimpleAbility(abilityId, options)
+end

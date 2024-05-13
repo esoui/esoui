@@ -2178,20 +2178,10 @@ function ZO_GamepadSkills:InitializeOptionsDialog()
     linkInChat.setup = ZO_SharedGamepadEntry_OnSetup
     linkInChat.callback = function(entryData)
         local skillData = entryData.data.skillData
-        if skillData:IsCraftedAbility() then
-            local craftedAbilityId = skillData:GetCraftedAbilityId()
-            local craftedAbilityData = SCRIBING_DATA_MANAGER:GetCraftedAbilityData(craftedAbilityId)
-            local primaryScriptId, secondaryScriptId, tertiaryScriptId = craftedAbilityData:GetActiveScriptIds()
-            if primaryScriptId ~= 0 and secondaryScriptId ~= 0 and tertiaryScriptId ~= 0 then
-                ZO_LinkHandler_InsertLinkAndSubmit(ZO_LinkHandler_CreateChatLink(GetCraftedAbilityLink, craftedAbilityId, primaryScriptId, secondaryScriptId, tertiaryScriptId))
-                ReleaseDialog()
-                return
-            else
-                internalassert(false, "Crafted Ability should never have any scripts of id 0 on the skills screen.")
-            end
+        local link = skillData:GetCurrentProgressionLink()
+        if internalassert(link, "Unable to generate link for skill.") then
+            ZO_LinkHandler_InsertLinkAndSubmit(link)
         end
-        local progressionData = skillData:GetCurrentProgressionData()
-        ZO_LinkHandler_InsertLinkAndSubmit(ZO_LinkHandler_CreateChatLink(GetAbilityLink, progressionData:GetAbilityId()))
         ReleaseDialog()
     end
 

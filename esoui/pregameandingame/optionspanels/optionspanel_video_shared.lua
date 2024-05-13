@@ -16,7 +16,7 @@ local function InitializeDisplays(control, numDisplays)
 
     ZO_OptionsWindow_InitializeControl(control)
 
-    ZO_Options_SetOptionActiveOrInactive(control, GetSetting(SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_FULLSCREEN) == FULLSCREEN_MODE_FULLSCREEN_EXCLUSIVE)
+    ZO_Options_SetOptionActiveOrInactive(control, tonumber(GetSetting(SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_FULLSCREEN)) == FULLSCREEN_MODE_FULLSCREEN_EXCLUSIVE)
 end
 
 local function GetResolutionInfo(w, h)
@@ -43,7 +43,7 @@ local function InitializeResolution(control, ...)
 
     ZO_OptionsWindow_InitializeControl(control)
 
-    ZO_Options_SetOptionActiveOrInactive(control, GetSetting(SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_FULLSCREEN) == FULLSCREEN_MODE_FULLSCREEN_EXCLUSIVE)
+    ZO_Options_SetOptionActiveOrInactive(control, tonumber(GetSetting(SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_FULLSCREEN)) == FULLSCREEN_MODE_FULLSCREEN_EXCLUSIVE)
 end
 
 local function DoesGammaSettingExist()
@@ -78,7 +78,7 @@ function ZO_OptionsPanel_Video_InitializeDisplays(control)
 end
 
 function ZO_OptionsPanel_Video_OnActiveDisplayChanged(control)
-    ZO_OptionsWindow_InitializeControl(control)
+    ZO_OptionsPanel_Video_InitializeDisplays(control)
     ZO_Options_UpdateOption(control)
 end
 
@@ -94,6 +94,13 @@ end
 function ZO_OptionsPanel_Video_InitializeResolution(control)
     local DEFAULT_DISPLAY_INDEX = 1
     InitializeResolution(control, GetDisplayModes(DEFAULT_DISPLAY_INDEX))
+end
+
+function ZO_OptionsPanel_Video_OnDisplayResolutionChanged(control)
+    -- GetDisplayModes expects the index to start at 1
+    local displayIndex = 1 + tonumber(GetSetting(SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_ACTIVE_DISPLAY))
+    InitializeResolution(control, GetDisplayModes(displayIndex))
+    ZO_Options_UpdateOption(control)
 end
 
 function ZO_OptionsPanel_Video_SetCustomScale(self, formattedValueString)
@@ -342,7 +349,7 @@ local ZO_OptionsPanel_Video_ControlData =
             minValue = 75,
             maxValue = 150,
             valueFormat = "%.2f",
-            exists = DoesGammaSettingExist,
+            exists = IsSystemNotUsingHDR,
             eventCallbacks =
             {
                 ["OnHDRToggled"] = OnGammaToggleUpdated,
@@ -721,11 +728,7 @@ local ZO_OptionsPanel_Video_ControlData =
             minValue = 200,
             maxValue = 1000,
             valueFormat = "%.2f",
-            visible = DoesSystemSupportHDR,
-            eventCallbacks =
-            {
-                ["OnHDRToggled"] = OnHDRToggleUpdated,
-            },
+            visible = IsSystemUsingHDR,
         },
         [GRAPHICS_SETTING_HDR_SCENE_BRIGHTNESS] =
         {
@@ -738,11 +741,7 @@ local ZO_OptionsPanel_Video_ControlData =
             minValue = 0.8,
             maxValue = 2.0,
             valueFormat = "%.2f",
-            visible = DoesSystemSupportHDR,
-            eventCallbacks =
-            {
-                ["OnHDRToggled"] = OnHDRToggleUpdated,
-            },
+            visible = IsSystemUsingHDR,
         },
         [GRAPHICS_SETTING_HDR_SCENE_CONTRAST] =
         {
@@ -755,11 +754,7 @@ local ZO_OptionsPanel_Video_ControlData =
             minValue = 0.8,
             maxValue = 2.4,
             valueFormat = "%.2f",
-            visible = DoesSystemSupportHDR,
-            eventCallbacks =
-            {
-                ["OnHDRToggled"] = OnHDRToggleUpdated,
-            },
+            visible = IsSystemUsingHDR,
         },
         [GRAPHICS_SETTING_HDR_UI_BRIGHTNESS] =
         {
@@ -772,11 +767,7 @@ local ZO_OptionsPanel_Video_ControlData =
             minValue = 0.8,
             maxValue = 1.5,
             valueFormat = "%.2f",
-            visible = DoesSystemSupportHDR,
-            eventCallbacks =
-            {
-                ["OnHDRToggled"] = OnHDRToggleUpdated,
-            },
+            visible = IsSystemUsingHDR,
         },
         [GRAPHICS_SETTING_HDR_UI_CONTRAST] =
         {
@@ -789,27 +780,7 @@ local ZO_OptionsPanel_Video_ControlData =
             minValue = 0.8,
             maxValue = 1.4,
             valueFormat = "%.2f",
-            visible = DoesSystemSupportHDR,
-            eventCallbacks =
-            {
-                ["OnHDRToggled"] = OnHDRToggleUpdated,
-            }
-        },
-        [GRAPHICS_SETTING_HDR_ENABLED] =
-        {
-            controlType = OPTIONS_CHECKBOX,
-            system = SETTING_TYPE_GRAPHICS,
-            settingId = GRAPHICS_SETTING_HDR_ENABLED,
-            panel = SETTING_PANEL_VIDEO,
-            text = SI_GRAPHICS_OPTIONS_VIDEO_HDR_ENABLED,
-            tooltipText = SI_GRAPHICS_OPTIONS_VIDEO_HDR_ENABLED_TOOLTIP,
-            valueStringPrefix = "SI_HDREnabled",
-            visible = DoesSystemSupportHDR,
-            exists = ZO_IsPCUI,
-            events = {
-                [true]  = "OnHDRToggled",
-                [false] = "OnHDRToggled",
-            },
+            visible = IsSystemUsingHDR,
         },
         [GRAPHICS_SETTING_HDR_MODE] =
         {
@@ -821,11 +792,7 @@ local ZO_OptionsPanel_Video_ControlData =
             tooltipText = SI_GRAPHICS_OPTIONS_VIDEO_HDR_MODE_TOOLTIP,
             valid = { HDR_MODE_DEFAULT, HDR_MODE_VIBRANT },
             valueStringPrefix = "SI_HDRMODE",
-            visible = DoesSystemSupportHDR,
-            eventCallbacks =
-            {
-                ["OnHDRToggled"] = OnHDRToggleUpdated,
-            }
+            visible = IsSystemUsingHDR,
         },
         [GRAPHICS_SETTING_SHOW_ADDITIONAL_ALLY_EFFECTS] =
         {

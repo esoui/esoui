@@ -250,6 +250,8 @@ end
 -- Begin implementing methods in ZO_SkillProgressionData_Base --
 
 function ZO_CraftedActiveSkillProgressionData:SetKeyboardTooltip(tooltipControl, unusedShowSkillPointCost, unusedShowUpgradeText, unusedShowAdvised, unusedShowBadMorph)
+    -- We always want to show the actual skill, never an override
+    ResetCraftedAbilityScriptSelectionOverride()
     tooltipControl:SetAbilityId(self:GetAbilityId())
 end
 

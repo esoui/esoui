@@ -192,3 +192,11 @@ function ZO_CraftedAbilityData:IsSlottedOnHotBar()
     local slotIndex = GetAssignedSlotFromSkillAbility(skillType, skillLineIndex, skillIndex)
     return slotIndex ~= nil
 end
+
+function ZO_CraftedAbilityData:GetActiveConfigurationLink()
+    local primaryScriptId, secondaryScriptId, tertiaryScriptId = self:GetActiveScriptIds()
+    if primaryScriptId ~= 0 and secondaryScriptId ~= 0 and tertiaryScriptId ~= 0 then
+        return ZO_LinkHandler_CreateChatLink(GetCraftedAbilityLink, self.craftedAbilityId, primaryScriptId, secondaryScriptId, tertiaryScriptId)
+    end
+    return nil
+end

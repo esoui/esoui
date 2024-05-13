@@ -10,7 +10,12 @@ do
         [LINK_TYPE_HELP] = "LayoutHelpLink",
         [LINK_TYPE_HOUSING] = "LayoutHousingLink",
         [LINK_TYPE_ITEM] = "LayoutItem",
+        [LINK_TYPE_ABILITY] = "LayoutAbilityLink",
+        [LINK_TYPE_CRAFTED_ABILITY] = "LayoutCraftedAbilityLink",
     }
+
+    -- TODO: Consider adding handlers for LINK_TYPE_QUEST_ITEM and LINK_TYPE_BOOK
+    internalassert(LINK_TYPE_MAX_VALUE == 10)
 
     function GetLinkLayoutHandlerName(linkType)
         return LINK_LAYOUT_HANDLERS[linkType]

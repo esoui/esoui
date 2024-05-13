@@ -53,6 +53,10 @@ local function OnLinkNotHandled(link, button, ...)
     if button == MOUSE_BUTTON_INDEX_LEFT then
         if ZO_ChatSystem_ShouldUseKeyboardChatSystem() then
             ZO_PopupTooltip_SetLink(link)
+            local _, _, linkType = ZO_LinkHandler_ParseLink(link)
+            if linkType == CRAFTED_ABILITY_LINK_TYPE then
+                ResetCraftedAbilityScriptSelectionOverride()
+            end
         else
             SCENE_MANAGER:Push("gamepadChatMenu")
             CHAT_MENU_GAMEPAD:SelectMessageEntryByLink(link)
