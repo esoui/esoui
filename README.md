@@ -1,4 +1,4 @@
-© 2023 ZENIMAX MEDIA INC. TRADEMARKS BELONG TO THEIR RESPECTIVE OWNERS. ALL RIGHTS RESERVED.
+© 2024 ZENIMAX MEDIA INC. TRADEMARKS BELONG TO THEIR RESPECTIVE OWNERS. ALL RIGHTS RESERVED.
 
 This is the source code for "The Elder Scrolls Online" user interface and it's presented here unchanged for reference only.
 
@@ -8,7 +8,6 @@ This repo is also available at http://www.esoui.com/downloads/info1213-ESOUI-The
 
 **Last update: 10.0.5 (API 101042) on 03 Jun 2024.**
 
-*Join ESOUI Dev Community on Gitter :*
+*Join the ESOUI Dev Community on Matrix:*
 
-[![Join the chat at https://gitter.im/esoui/esoui](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/ESOUI/ESOUI?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-
+[![Matrix](https://img.shields.io/matrix/esoui_esoui%3Agitter.im?server_fqdn=matrix.org)](https://matrix.to/#/#esoui_esoui:gitter.im)
