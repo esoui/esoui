@@ -388,6 +388,8 @@ function ZO_Scribing_Gamepad:OnShow()
 
     local RESET_TO_TOP = true
     self:ShowCraftedAbilities(RESET_TO_TOP)
+
+    GAMEPAD_CRAFTING_RESULTS:SetTooltipAnimationSounds(SOUNDS.SCRIBING_SCRIBE_TOOLTIP_GLOW)
 end
 
 function ZO_Scribing_Gamepad:OnHiding()

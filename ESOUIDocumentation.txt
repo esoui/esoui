@@ -438,9 +438,11 @@ h5. LinkStyle
 
 
 h5. LinkType
+* LINK_TYPE_ABILITY
 * LINK_TYPE_ACHIEVEMENT
 * LINK_TYPE_BOOK
 * LINK_TYPE_COLLECTIBLE
+* LINK_TYPE_CRAFTED_ABILITY
 * LINK_TYPE_GUILD
 * LINK_TYPE_HELP
 * LINK_TYPE_HOUSING
@@ -1265,7 +1267,6 @@ h5. Globals
 * MAX_DEVICE_ID_LENGTH
 * DISPLAY_NAME_PREFIX_BYTE
 * MAX_ACTION_BAR_ABILITY_SLOTS
-* MAX_BOSSES
 * MAXIMUM_CHAMPION_RANK
 * MAX_CHATTER_OPTIONS
 * NO_POWER_INDEX
@@ -13255,6 +13256,9 @@ h2. Game API
 * GetAbilityIdByIndex(*luaindex* _abilityIndex_)
 ** _Returns:_ *integer* _abilityId_
 
+* GetAbilityLink(*integer* _abilityId_, *[LinkStyle|#LinkStyle]* _linkStyle_)
+** _Returns:_ *string* _link_
+
 * DoesAbilityExist(*integer* _abilityId_)
 ** _Returns:_ *bool* _exists_
 
@@ -16000,6 +16004,9 @@ h2. Game API
 * IsScribingEnabled()
 ** _Returns:_ *bool* _isScribingEnabled_
 
+* GetCraftedAbilityLink(*integer* _craftedAbilityId_, *integer* _primaryScriptId_, *integer* _secondaryScriptId_, *integer* _tertiaryScriptId_, *[LinkStyle|#LinkStyle]* _linkStyle_)
+** _Returns:_ *string* _link_
+
 * GetNumCraftedAbilities()
 ** _Returns:_ *integer* _numCraftedAbilities_
 
@@ -16080,6 +16087,9 @@ h2. Game API
 
 * GetCraftedAbilityRepresentativeAbilityId(*integer* _craftedAbilityId_, *string* _casterUnitTag_)
 ** _Returns:_ *integer* _abilityId_
+
+* GetCraftedAbilityIdsFromLink(*string* _link_)
+** _Returns:_ *integer* _craftedAbilityId_, *integer* _primaryScriptId_, *integer* _secondaryScriptId_, *integer* _tertiaryScriptId_
 
 * IsSmithingCraftingType(*[TradeskillType|#TradeskillType]* _tradeskillType_)
 ** _Returns:_ *bool* _isSmithingType_
@@ -18114,6 +18124,9 @@ h2. Game API
 * GetOldestGuildHistoryEventIndexForUpToDateEventsWithoutGaps(*integer* _guildId_, *[GuildHistoryEventCategory|#GuildHistoryEventCategory]* _category_)
 ** _Returns:_ *luaindex:nilable* _oldestEventIndex_
 
+* DoesGuildHistoryEventCategoryHaveUpToDateEvents(*integer* _guildId_, *[GuildHistoryEventCategory|#GuildHistoryEventCategory]* _category_)
+** _Returns:_ *bool* _hasUpToDateEvents_
+
 * GetNumGuildHistoryEventRanges(*integer* _guildId_, *[GuildHistoryEventCategory|#GuildHistoryEventCategory]* _category_)
 ** _Returns:_ *integer* _numGuildHistoryEventRanges_
 
@@ -18177,10 +18190,13 @@ h2. Game API
 * IsGuildHistoryRequestComplete(*integer* _requestId_)
 ** _Returns:_ *bool* _isComplete_
 
+* IsGuildHistoryRequestTargetingEvents(*integer* _requestId_)
+** _Returns:_ *bool* _isTargetingEvents_
+
 * DoesGuildHistoryHaveOutstandingRequest()
 ** _Returns:_ *bool* _hasOutstandingRequest_
 
-* RequestMoreGuildHistoryEvents(*integer* _requestId_, *bool* _queueRequestIfOnCooldown_)
+* RequestMoreGuildHistoryEvents(*integer* _requestId_, *bool* _queueRequestIfOnCooldown_, *integer53:nilable* _targetNewestEventId_, *integer53:nilable* _targetOldestEventId_)
 ** _Returns:_ *[GuildHistoryDataReadyState|#GuildHistoryDataReadyState]* _readyState_
 
 * DestroyGuildHistoryRequest(*integer* _requestId_)
@@ -21219,6 +21235,12 @@ h2. Game API
 
 * GetAbilityEndlessDungeonBuffBucketType(*integer* _abilityId_)
 ** _Returns:_ *[EndlessDungeonBuffBucketType|#EndlessDungeonBuffBucketType]* _buffBucketType_
+
+* GetAbilityCraftedAbilityId(*integer* _abilityId_)
+** _Returns:_ *integer* _craftedAbilityId_
+
+* GetAbilityIdFromLink(*string* _link_)
+** _Returns:_ *integer* _abilityId_
 
 * DoesPlatformSupportCodeRedemption()
 ** _Returns:_ *bool* _supportsCodeRedemption_
@@ -24737,7 +24759,7 @@ h2. Events
 * EVENT_POWER_UPDATE (*string* _unitTag_, *luaindex* _powerIndex_, *[CombatMechanicFlags|#CombatMechanicFlags]* _powerType_, *integer* _powerValue_, *integer* _powerMax_, *integer* _powerEffectiveMax_)
 * EVENT_PVP_KILL_FEED_DEATH (*string* _killLocation_, *string* _killerPlayerDisplayName_, *string* _killerPlayerCharacterName_, *[Alliance|#Alliance]* _killerPlayerAlliance_, *integer* _killerPlayerRank_, *string* _victimPlayerDisplayName_, *string* _victimPlayerCharacterName_, *[Alliance|#Alliance]* _victimPlayerAlliance_, *integer* _victimPlayerRank_, *bool* _isKillLocation_)
 * EVENT_QUEST_ADDED (*luaindex* _journalIndex_, *string* _questName_, *string* _objectiveName_)
-* EVENT_QUEST_ADVANCED (*luaindex* _journalIndex_, *string* _questName_, *bool* _isPushed_, *bool* _isComplete_, *bool* _mainStepChanged_)
+* EVENT_QUEST_ADVANCED (*luaindex* _journalIndex_, *string* _questName_, *bool* _isPushed_, *bool* _isComplete_, *bool* _mainStepChanged_, *bool* _hideAnnouncement_)
 * EVENT_QUEST_COMPLETE (*string* _questName_, *integer* _level_, *integer* _previousExperience_, *integer* _currentExperience_, *integer* _championPoints_, *[QuestType|#QuestType]* _questType_, *[ZoneDisplayType|#ZoneDisplayType]* _zoneDisplayType_)
 * EVENT_QUEST_COMPLETE_ATTEMPT_FAILED_INVENTORY_FULL
 * EVENT_QUEST_COMPLETE_DIALOG (*luaindex* _journalIndex_)
