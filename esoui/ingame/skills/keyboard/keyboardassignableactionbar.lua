@@ -47,10 +47,9 @@ function ZO_KeyboardAssignableActionBar:Initialize(control)
 
     local function OnCursorPickup(eventCode, cursorType, ...)
         if cursorType == MOUSE_CONTENT_ACTION then
-            local actionType, _, actionId = ...
-            if actionType == ACTION_TYPE_ABILITY and actionId ~= 0 then
-                local abilityIndex = actionId
-                self:ShowDropCalloutsForAbility(abilityIndex)
+            local actionType, _, actionValue = ...
+            if ZO_ABILITY_DROP_CALLOUT_VALIDITY_FUNCTION_BY_ACTION_TYPE[actionType] and actionValue ~= 0 then
+                self:ShowAppropriateAbilityActionButtonDropCallouts(actionType, actionValue)
                 PlaySound(SOUNDS.ABILITY_PICKED_UP)
             end
         end
@@ -94,9 +93,10 @@ function ZO_KeyboardAssignableActionBar:HideDropCallouts()
     end
 end
 
-function ZO_KeyboardAssignableActionBar:ShowDropCalloutsForAbility(abilityIndex)
+function ZO_KeyboardAssignableActionBar:ShowAppropriateAbilityActionButtonDropCallouts(actionType, actionValue)
+    local validityFunction = ZO_ABILITY_DROP_CALLOUT_VALIDITY_FUNCTION_BY_ACTION_TYPE[actionType]
     for _, button in ipairs(self.buttons) do
-        local isValid = IsValidAbilityForSlot(abilityIndex, button.slotId)
+        local isValid = validityFunction(actionValue, button.slotId)
         button:ShowDropCallout(isValid)
     end
 end

@@ -51,8 +51,16 @@
         <!-- Fake health bar. Since health effects and health take up the same space, sometimes we need to shrink the percieved health value to make room. -->
 
         <StatusBar name="ZO_PowerShieldFakeHealthBarArrow" inherits="ZO_PlayerAttributeStatusBar" level="ZO_ATTRIBUTE_BAR_POWER_SHIELD_FAKE_HEALTH_LEVEL" virtual="true" />
-        <StatusBar name="ZO_PowerShieldFakeHealthBarArrow_Keyboard_Template" inherits="ZO_PlayerAttributeStatusBar_Keyboard_Template" virtual="true" />
-        <StatusBar name="ZO_PowerShieldFakeHealthBarArrow_Gamepad_Template" inherits="ZO_PlayerAttributeStatusBar_Gamepad_Template" virtual="true" />
+        <StatusBar name="ZO_PowerShieldFakeHealthBarArrow_Keyboard_Template" inherits="ZO_PlayerAttributeStatusBar_Keyboard_Template" virtual="true">
+            <Controls>
+                <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGloss_Keyboard_Template" />
+            </Controls>
+        </StatusBar>
+        <StatusBar name="ZO_PowerShieldFakeHealthBarArrow_Gamepad_Template" inherits="ZO_PlayerAttributeStatusBar_Gamepad_Template" virtual="true">
+            <Controls>
+                <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGloss_Gamepad_Template" />
+            </Controls>
+        </StatusBar>
 
         <StatusBar name="ZO_PowerShieldFakeHealthBarAngle" inherits="ZO_TargetAttributeStatusBar" level="ZO_ATTRIBUTE_BAR_POWER_SHIELD_FAKE_HEALTH_LEVEL" virtual="true" />
         <StatusBar name="ZO_PowerShieldFakeHealthBarAngle_Keyboard_Template" inherits="ZO_TargetAttributeStatusBar_Keyboard_Template" virtual="true" />
@@ -146,6 +154,11 @@
             <LeadingEdge textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_targetBar_dynamic_noHealing_outer_leadingEdge.dds" width="10" height="64" />
         </StatusBar>
 
+        <StatusBar name="ZO_PowerShieldGroupFrameBar_Gamepad" textureFile="EsoUI/Art/Miscellaneous/progressbar_genericFill_tall.dds" virtual="true">
+            <Dimensions y="8" />
+            <LeadingEdge textureFile="EsoUI/Art/Miscellaneous/progressbar_genericFill_leadingEdge_blunt.dds" />
+        </StatusBar>
+
         <!-- Overlay -->
 
         <StatusBar name="ZO_PowerShieldBarLeftOverlayArrow" inherits="ZO_PowerShieldBarArrow" barAlignment="REVERSE" virtual="true">
@@ -187,19 +200,8 @@
         <StatusBar name="ZO_PowerShieldBarLeftOverlayArrow_Keyboard_Template" inherits="ZO_PowerShieldBarArrow_Keyboard_Template" virtual="true">
             <Controls>
                 <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGloss_Keyboard_Template"/>
-
-                <StatusBar name="$(parent)Trauma" inherits="ZO_PowerShieldFakeHealthBarArrow_Keyboard_Template">
-                    <Controls>
-                        <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGloss_Keyboard_Template" />
-                    </Controls>
-                </StatusBar>
-
-                <StatusBar name="$(parent)FakeHealth" inherits="ZO_PowerShieldFakeHealthBarArrow_Keyboard_Template">
-                    <Controls>
-                        <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGloss_Keyboard_Template" />
-                    </Controls>
-                </StatusBar>
-
+                <StatusBar name="$(parent)Trauma" inherits="ZO_PowerShieldFakeHealthBarArrow_Keyboard_Template" />
+                <StatusBar name="$(parent)FakeHealth" inherits="ZO_PowerShieldFakeHealthBarArrow_Keyboard_Template" />
                 <StatusBar name="$(parent)NoHealingInner" inherits="ZO_PowerShieldNoHealingInnerArrow_Keyboard_Template" />
                 <StatusBar name="$(parent)NoHealingOuter" inherits="ZO_PowerShieldNoHealingOuterArrow_Keyboard_Template" />
                 <StatusBar name="$(parent)FakeNoHealingInner" inherits="ZO_PowerShieldFakeNoHealingInnerArrow_Keyboard_Template" />
@@ -210,19 +212,8 @@
         <StatusBar name="ZO_PowerShieldBarLeftOverlayArrow_Gamepad_Template" inherits="ZO_PowerShieldBarArrow_Gamepad_Template"  virtual="true">
             <Controls>
                 <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGloss_Gamepad_Template" />
-
-                <StatusBar name="$(parent)Trauma" inherits="ZO_PowerShieldFakeHealthBarArrow_Gamepad_Template">
-                    <Controls>
-                        <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGloss_Gamepad_Template" />
-                    </Controls>
-                </StatusBar>
-
-                <StatusBar name="$(parent)FakeHealth" inherits="ZO_PowerShieldFakeHealthBarArrow_Gamepad_Template">
-                    <Controls>
-                        <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGloss_Gamepad_Template" />
-                    </Controls>
-                </StatusBar>
-
+                <StatusBar name="$(parent)Trauma" inherits="ZO_PowerShieldFakeHealthBarArrow_Gamepad_Template" />
+                <StatusBar name="$(parent)FakeHealth" inherits="ZO_PowerShieldFakeHealthBarArrow_Gamepad_Template" />
                 <StatusBar name="$(parent)NoHealingInner" inherits="ZO_PowerShieldNoHealingInnerArrow_Gamepad_Template" />
                 <StatusBar name="$(parent)NoHealingOuter" inherits="ZO_PowerShieldNoHealingOuterArrow_Gamepad_Template" />
                 <StatusBar name="$(parent)FakeNoHealingInner" inherits="ZO_PowerShieldFakeNoHealingInnerArrow_Gamepad_Template" />
@@ -269,19 +260,8 @@
         <StatusBar name="ZO_PowerShieldBarRightOverlayArrow_Keyboard_Template" inherits="ZO_PowerShieldBarArrow_Keyboard_Template" virtual="true">
             <Controls>
                 <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGloss_Keyboard_Template"/>
-
-                <StatusBar name="$(parent)Trauma" inherits="ZO_PowerShieldFakeHealthBarArrow_Keyboard_Template">
-                    <Controls>
-                        <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGloss_Keyboard_Template" />
-                    </Controls>
-                </StatusBar>
-
-                <StatusBar name="$(parent)FakeHealth" inherits="ZO_PowerShieldFakeHealthBarArrow_Keyboard_Template">
-                    <Controls>
-                        <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGloss_Keyboard_Template" />
-                    </Controls>
-                </StatusBar>
-
+                <StatusBar name="$(parent)Trauma" inherits="ZO_PowerShieldFakeHealthBarArrow_Keyboard_Template" />
+                <StatusBar name="$(parent)FakeHealth" inherits="ZO_PowerShieldFakeHealthBarArrow_Keyboard_Template" />
                 <StatusBar name="$(parent)NoHealingInner" inherits="ZO_PowerShieldNoHealingInnerArrow_Keyboard_Template" />
                 <StatusBar name="$(parent)NoHealingOuter" inherits="ZO_PowerShieldNoHealingOuterArrow_Keyboard_Template" />
                 <StatusBar name="$(parent)FakeNoHealingInner" inherits="ZO_PowerShieldFakeNoHealingInnerArrow_Keyboard_Template" />
@@ -292,19 +272,8 @@
         <StatusBar name="ZO_PowerShieldBarRightOverlayArrow_Gamepad_Template" inherits="ZO_PowerShieldBarArrow_Gamepad_Template" virtual="true">
             <Controls>
                 <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGloss_Gamepad_Template"/>
-
-                <StatusBar name="$(parent)Trauma" inherits="ZO_PowerShieldFakeHealthBarArrow_Gamepad_Template">
-                    <Controls>
-                        <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGloss_Gamepad_Template" />
-                    </Controls>
-                </StatusBar>
-
-                <StatusBar name="$(parent)FakeHealth" inherits="ZO_PowerShieldFakeHealthBarArrow_Gamepad_Template">
-                    <Controls>
-                        <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGloss_Gamepad_Template" />
-                    </Controls>
-                </StatusBar>
-
+                <StatusBar name="$(parent)Trauma" inherits="ZO_PowerShieldFakeHealthBarArrow_Gamepad_Template" />
+                <StatusBar name="$(parent)FakeHealth" inherits="ZO_PowerShieldFakeHealthBarArrow_Gamepad_Template" />
                 <StatusBar name="$(parent)NoHealingInner" inherits="ZO_PowerShieldNoHealingInnerArrow_Gamepad_Template" />
                 <StatusBar name="$(parent)NoHealingOuter" inherits="ZO_PowerShieldNoHealingOuterArrow_Gamepad_Template" />
                 <StatusBar name="$(parent)FakeNoHealingInner" inherits="ZO_PowerShieldFakeNoHealingInnerArrow_Gamepad_Template" />
@@ -498,6 +467,181 @@
 
                 <StatusBar name="$(parent)FakeNoHealingOuter" inherits="ZO_PowerShieldFakeNoHealingOuterAngle_Gamepad_Template">
                     <Anchor point="RIGHT" relativePoint="LEFT" offsetX="15" />
+                </StatusBar>
+            </Controls>
+        </StatusBar>
+
+        <StatusBar name="ZO_PowerShieldBarGroupFrameOverlay" inherits="ZO_PowerShieldBarArrow" virtual="true">
+            <Controls>
+                <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGloss"/>
+
+                <StatusBar name="$(parent)Trauma" inherits="ZO_PowerShieldFakeHealthBarArrow">
+                    <Anchor point="RIGHT" relativePoint="LEFT" offsetX="11" />
+                    <Controls>
+                        <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGloss" level="ZO_ATTRIBUTE_BAR_POWER_SHIELD_TRAUMA_GLOSS_LEVEL" />
+                    </Controls>
+                </StatusBar>
+
+                <StatusBar name="$(parent)FakeHealth" inherits="ZO_PowerShieldFakeHealthBarArrow">
+                    <Anchor point="RIGHT" relativeTo="$(parent)Trauma" relativePoint="LEFT" offsetX="11" />
+                    <Controls>
+                        <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGloss" level="ZO_ATTRIBUTE_BAR_POWER_SHIELD_FAKE_HEALTH_GLOSS_LEVEL" />
+                    </Controls>
+                </StatusBar>
+
+                <StatusBar name="$(parent)NoHealingInner" inherits="ZO_PowerShieldNoHealingInnerArrow">
+                    <Anchor point="RIGHT" relativeTo="$(parent)Trauma" relativePoint="LEFT" offsetX="11" />
+                </StatusBar>
+
+                <StatusBar name="$(parent)NoHealingOuter" inherits="ZO_PowerShieldNoHealingOuterArrow">
+                    <Anchor point="RIGHT" relativeTo="$(parent)Trauma" relativePoint="LEFT" offsetX="11" />
+                </StatusBar>
+
+                <StatusBar name="$(parent)FakeNoHealingInner" inherits="ZO_PowerShieldFakeNoHealingInnerArrow">
+                    <Anchor point="RIGHT" relativeTo="$(parent)Trauma" relativePoint="LEFT" offsetX="11" />
+                </StatusBar>
+
+                <StatusBar name="$(parent)FakeNoHealingOuter" inherits="ZO_PowerShieldFakeNoHealingOuterArrow">
+                    <Anchor point="RIGHT" relativeTo="$(parent)Trauma" relativePoint="LEFT" offsetX="11" />
+                </StatusBar>
+            </Controls>
+        </StatusBar>
+
+        <StatusBar name="ZO_PowerShieldBarGroupFrameOverlay_Keyboard_Template" inherits="ZO_PowerShieldBarArrow_Keyboard_Template" virtual="true">
+            <Dimensions y="9" />
+            <Controls>
+                <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGloss_Keyboard_Template">
+                    <Dimensions y="9" />
+                </StatusBar>
+
+                <StatusBar name="$(parent)Trauma" inherits="ZO_PowerShieldFakeHealthBarArrow_Keyboard_Template">
+                    <Dimensions y="9" />
+                </StatusBar>
+
+                <StatusBar name="$(parent)FakeHealth" inherits="ZO_PowerShieldFakeHealthBarArrow_Keyboard_Template">
+                    <Dimensions y="9" />
+                </StatusBar>
+
+                <StatusBar name="$(parent)NoHealingInner" inherits="ZO_PowerShieldNoHealingInnerArrow_Keyboard_Template">
+                    <Dimensions y="9" />
+                </StatusBar>
+
+                <StatusBar name="$(parent)NoHealingOuter" inherits="ZO_PowerShieldNoHealingOuterArrow_Keyboard_Template">
+                    <Dimensions y="9" />
+                </StatusBar>
+
+                <StatusBar name="$(parent)FakeNoHealingInner" inherits="ZO_PowerShieldFakeNoHealingInnerArrow_Keyboard_Template">
+                    <Dimensions y="9" />
+                </StatusBar>
+
+                <StatusBar name="$(parent)FakeNoHealingOuter" inherits="ZO_PowerShieldFakeNoHealingOuterArrow_Keyboard_Template">
+                    <Dimensions y="9" />
+                </StatusBar>
+            </Controls>
+        </StatusBar>
+
+        <StatusBar name="ZO_PowerShieldBarGroupFrameOverlay_Gamepad_Template" inherits="ZO_PowerShieldBarArrow_Gamepad_Template ZO_PowerShieldGroupFrameBar_Gamepad" virtual="true">
+            <Controls>
+                <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGloss_Gamepad_Template" textureFile="EsoUI/Art/Miscellaneous/timerBar_genericFill_gloss.dds">
+                    <LeadingEdge textureFile="EsoUI/Art/Miscellaneous/timerBar_genericFill_leadingEdge_gloss.dds" />
+                </StatusBar>
+
+                <StatusBar name="$(parent)Trauma" inherits="ZO_PowerShieldFakeHealthBarArrow_Gamepad_Template ZO_PowerShieldGroupFrameBar_Gamepad" textureFile="EsoUI/Art/Miscellaneous/timerBar_genericFill_gloss.dds">
+                    <Controls>
+                        <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGloss_Gamepad_Template ZO_PowerShieldGroupFrameBar_Gamepad" textureFile="EsoUI/Art/Miscellaneous/timerBar_genericFill_gloss.dds" override="true">
+                            <LeadingEdge textureFile="EsoUI/Art/Miscellaneous/timerBar_genericFill_leadingEdge_gloss.dds" />
+                        </StatusBar>
+                    </Controls>
+                </StatusBar>
+
+                <StatusBar name="$(parent)FakeHealth" inherits="ZO_PowerShieldFakeHealthBarArrow_Gamepad_Template ZO_PowerShieldGroupFrameBar_Gamepad">
+                    <Controls>
+                        <StatusBar name="$(parent)Gloss" inherits="ZO_PlayerAttributeStatusBarGloss_Gamepad_Template" textureFile="EsoUI/Art/Miscellaneous/timerBar_genericFill_gloss.dds" override="true">
+                            <LeadingEdge textureFile="EsoUI/Art/Miscellaneous/timerBar_genericFill_leadingEdge_gloss.dds" />
+                        </StatusBar>
+                    </Controls>
+                </StatusBar>
+
+                <StatusBar name="$(parent)NoHealingInner" inherits="ZO_PowerShieldNoHealingInnerArrow_Gamepad_Template" textureFile="EsoUI\Art\UnitAttributeVisualizer\Gamepad\gp_groupBar_dynamic_noHealing_inner_fill_blunt.dds">
+                    <LeadingEdge textureFile="EsoUI\Art\UnitAttributeVisualizer\Gamepad\gp_groupBar_dynamic_noHealing_inner_leadingEdge_blunt.dds" />
+                    <Dimensions y="8" />
+                </StatusBar>
+
+                <StatusBar name="$(parent)NoHealingOuter" inherits="ZO_PowerShieldNoHealingOuterArrow_Gamepad_Template" textureFile="EsoUI\Art\UnitAttributeVisualizer\Gamepad\gp_groupBar_dynamic_noHealing_outer_fill_blunt.dds">
+                    <LeadingEdge textureFile="EsoUI\Art\UnitAttributeVisualizer\Gamepad\gp_groupBar_dynamic_noHealing_outer_leadingEdge_blunt.dds" />
+                    <Dimensions y="8" />
+                </StatusBar>
+
+                <StatusBar name="$(parent)FakeNoHealingInner" inherits="ZO_PowerShieldFakeNoHealingInnerArrow_Gamepad_Template" textureFile="EsoUI\Art\UnitAttributeVisualizer\Gamepad\gp_groupBar_dynamic_noHealing_inner_fill_blunt.dds">
+                    <LeadingEdge textureFile="EsoUI\Art\UnitAttributeVisualizer\Gamepad\gp_groupBar_dynamic_fakeNoHealing_inner_leadingEdge_blunt.dds" />
+                    <Dimensions y="8" />
+                </StatusBar>
+
+                <StatusBar name="$(parent)FakeNoHealingOuter" inherits="ZO_PowerShieldFakeNoHealingOuterArrow_Gamepad_Template" textureFile="EsoUI\Art\UnitAttributeVisualizer\Gamepad\gp_groupBar_dynamic_noHealing_outer_fill_blunt.dds">
+                    <LeadingEdge textureFile="EsoUI\Art\UnitAttributeVisualizer\Gamepad\gp_groupBar_dynamic_noHealing_outer_leadingEdge_blunt.dds" />
+                    <Dimensions y="8" />
+                </StatusBar>
+            </Controls>
+        </StatusBar>
+
+        <StatusBar name="ZO_PowerShieldBarRaidFrameOverlay" inherits="ZO_PowerShieldBar" virtual="true">
+            <Controls>
+                <StatusBar name="$(parent)Trauma" inherits="ZO_DefaultStatusBarBase" level="ZO_ATTRIBUTE_BAR_POWER_SHIELD_TRAUMA_LEVEL">
+                    <Anchor point="RIGHT" relativePoint="LEFT" offsetX="11" />
+                </StatusBar>
+
+                <StatusBar name="$(parent)FakeHealth" inherits="ZO_DefaultStatusBarBase" level="ZO_ATTRIBUTE_BAR_POWER_SHIELD_FAKE_HEALTH_LEVEL">
+                    <Anchor point="RIGHT" relativeTo="$(parent)Trauma" relativePoint="LEFT" offsetX="11" />
+                </StatusBar>
+
+                <StatusBar name="$(parent)NoHealingInner" inherits="ZO_DefaultStatusBarBase" level="ZO_ATTRIBUTE_BAR_POWER_SHIELD_NO_HEALING_LEVEL">
+                    <Anchor point="RIGHT" relativeTo="$(parent)Trauma" relativePoint="LEFT" offsetX="11" />
+                </StatusBar>
+
+                <StatusBar name="$(parent)FakeNoHealingInner" inherits="ZO_DefaultStatusBarBase" level="ZO_ATTRIBUTE_BAR_POWER_SHIELD_FAKE_NO_HEALING_INNER_LEVEL">
+                    <Anchor point="RIGHT" relativeTo="$(parent)Trauma" relativePoint="LEFT" offsetX="11" />
+                </StatusBar>
+            </Controls>
+        </StatusBar>
+
+        <StatusBar name="ZO_PowerShieldBarRaidFrameOverlay_Keyboard_Template" inherits="ZO_PowerShieldBar ZO_DefaultStatusBarBase" virtual="true">
+            <Dimensions y="45" />
+            <Controls>
+                <StatusBar name="$(parent)Trauma" inherits="ZO_DefaultStatusBarBase">
+                    <Dimensions y="39" />
+                </StatusBar>
+
+                <StatusBar name="$(parent)FakeHealth" inherits="ZO_DefaultStatusBarBase">
+                    <Dimensions y="39" />
+                </StatusBar>
+
+                <StatusBar name="$(parent)NoHealingInner" inherits="ZO_DefaultStatusBarBase">
+                    <Dimensions y="39" />
+                </StatusBar>
+
+                <StatusBar name="$(parent)FakeNoHealingInner" inherits="ZO_DefaultStatusBarBase">
+                    <Dimensions y="39" />
+                </StatusBar>
+            </Controls>
+        </StatusBar>
+
+        <StatusBar name="ZO_PowerShieldBarRaidFrameOverlay_Gamepad_Template" inherits="ZO_PowerShieldBar ZO_DefaultStatusBarBase" virtual="true">
+            <Dimensions y="45" />
+            <Controls>
+                <StatusBar name="$(parent)Trauma" inherits="ZO_DefaultStatusBarBase">
+                    <Dimensions y="38" />
+                </StatusBar>
+
+                <StatusBar name="$(parent)FakeHealth" inherits="ZO_DefaultStatusBarBase">
+                    <Dimensions y="38" />
+                </StatusBar>
+
+                <StatusBar name="$(parent)NoHealingInner" inherits="ZO_DefaultStatusBarBase">
+                    <Dimensions y="38" />
+                </StatusBar>
+
+                <StatusBar name="$(parent)FakeNoHealingInner" inherits="ZO_DefaultStatusBarBase">
+                    <Dimensions y="38" />
                 </StatusBar>
             </Controls>
         </StatusBar>

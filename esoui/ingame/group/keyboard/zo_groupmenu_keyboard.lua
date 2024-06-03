@@ -120,7 +120,8 @@ function GroupMenu_Keyboard:InitializeCategories()
     end
 
     local function SetupChildNode(node, control, categoryData, open)
-        control:SetSelected(false)
+        local selected = node:IsSelected()
+        control:SetSelected(selected)
         control:SetText(categoryData.name)
     end
 

@@ -335,15 +335,11 @@ function ZO_TributePatronData:SetSearchResultsVersion(searchResultsVersion)
 end
 
 function ZO_TributePatronData:IsSearchResult()
-    if self.searchResultsVersion then
-        if self.searchResultsVersion == TRIBUTE_DATA_MANAGER:GetSearchResultsVersion() then
-            return true
-        else
-            -- Old search result, might as well clean it up while we're here
-            self.searchResultsVersion = nil
-        end
+    local searchContext = "tributePatronTextSearch"
+    local filterTarget = BACKGROUND_LIST_FILTER_TARGET_TRIBUTE_PATRON_ID
+    if TEXT_SEARCH_MANAGER:IsActiveTextSearch(searchContext) and ZO_TextSearchManager.CanFilterByText(TEXT_SEARCH_MANAGER:GetSearchText(searchContext)) then
+        return TEXT_SEARCH_MANAGER:IsDataInSearchTextResults(searchContext, filterTarget, self.patronId)
     end
-    return false
 end
 
 -- Call this from the data manager when the player unlock data changes
@@ -508,12 +504,13 @@ function ZO_TributePatronCategoryData:SetSearchResultsVersion(searchResultsVersi
 end
 
 function ZO_TributePatronCategoryData:IsSearchResult()
-    if self.searchResultsVersion then
-        if self.searchResultsVersion == TRIBUTE_DATA_MANAGER:GetSearchResultsVersion() then
-            return true
-        else
-            -- Old search result, might as well clean it up while we're here
-            self.searchResultsVersion = nil
+    local searchContext = "tributePatronTextSearch"
+    local filterTarget = BACKGROUND_LIST_FILTER_TARGET_TRIBUTE_PATRON_ID
+    if TEXT_SEARCH_MANAGER:IsActiveTextSearch(searchContext) and ZO_TextSearchManager.CanFilterByText(TEXT_SEARCH_MANAGER:GetSearchText(searchContext)) then
+        for i, patronData in ipairs(self.tributePatrons) do
+            if TEXT_SEARCH_MANAGER:IsDataInSearchTextResults(searchContext, filterTarget, patronData:GetId()) then
+                return true
+            end
         end
     end
     return false

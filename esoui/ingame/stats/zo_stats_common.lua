@@ -152,10 +152,21 @@ function ZO_Stats_Common:GetPendingStatBonuses(statType)
     return self.statBonuses[statType]
 end
 
-function ZO_Stats_Common:UpdateTitleDropdownSelection(dropdown)
+function ZO_Stats_Common:GetDropdownTitleIndex(dropdown)
     local currentTitleIndex = GetCurrentTitleIndex()
-    if currentTitleIndex then
-        dropdown:SelectItemByIndex(currentTitleIndex + 1, ZO_COMBOBOX_SUPPRESS_UPDATE)
+    local function IsItemCurrentTitle(item)
+        return item.titleIndex == currentTitleIndex
+    end
+    if currentTitleIndex == nil then
+        return 1
+    end
+    return dropdown:GetIndexByEval(IsItemCurrentTitle)
+end
+
+function ZO_Stats_Common:UpdateTitleDropdownSelection(dropdown)
+    local dropdownTitleIndex = self:GetDropdownTitleIndex(dropdown)
+    if dropdownTitleIndex then
+        dropdown:SelectItemByIndex(dropdownTitleIndex, ZO_COMBOBOX_SUPPRESS_UPDATE)
     else
         dropdown:SelectItemByIndex(1, ZO_COMBOBOX_SUPPRESS_UPDATE)
     end
@@ -164,9 +175,24 @@ end
 function ZO_Stats_Common:UpdateTitleDropdownTitles(dropdown)
     dropdown:ClearItems()
 
+    -- Sort the valid items...
+    local sortedTitles = {}
+    for i = 1, GetNumTitles() do
+        local titleListItem = dropdown:CreateItemEntry(zo_strformat(GetTitle(i), GetRawUnitName("player")), function() SelectTitle(i) end)
+        titleListItem.titleIndex = i
+        table.insert(sortedTitles, titleListItem)
+    end
+    local function CompareTitleItems(item1, item2) 
+        return ZO_TableOrderingFunction(item1, item2, "name", dropdown.m_sortType, dropdown.m_sortOrder) 
+    end
+    table.sort(sortedTitles, CompareTitleItems)
+
+    -- First add the none item into the start of the dropdown list 
     dropdown:AddItem(dropdown:CreateItemEntry(GetString(SI_STATS_NO_TITLE), function() SelectTitle(nil) end), ZO_COMBOBOX_SUPPRESS_UPDATE)
-    for i=1, GetNumTitles() do
-        dropdown:AddItem(dropdown:CreateItemEntry(zo_strformat(GetTitle(i), GetRawUnitName("player")) , function() SelectTitle(i) end), ZO_COMBOBOX_SUPPRESS_UPDATE)
+    
+    -- Then append the sorted items below that.
+    for index, titleListItem in ipairs(sortedTitles) do
+        dropdown:AddItem(titleListItem, ZO_COMBOBOX_SUPPRESS_UPDATE)
     end
 
     dropdown:UpdateItems()

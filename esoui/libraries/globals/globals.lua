@@ -57,13 +57,6 @@ end
 
 EVENT_MANAGER:RegisterForEvent("Globals_Common", EVENT_GLOBAL_MOUSE_DOWN, OnGlobalMouseDown)
 
-
-local function OnPlayerDeactivated()
-    ZO_Dialogs_ReleaseAllDialogs(true)
-end
-
-EVENT_MANAGER:RegisterForEvent("Globals_Common", EVENT_PLAYER_DEACTIVATED, OnPlayerDeactivated)
-
 function SetupEditControlForNameValidation(editControl, maxNameLength)
     editControl:SetMaxInputChars(maxNameLength or CHARNAME_MAX_LENGTH)
     editControl:AddValidCharacter('\'')

@@ -263,12 +263,11 @@ do
     end
 
     local function SetText(self, text)
-        local textControl = GetControl(self, "Text")
+        local textControl = self:GetNamedChild("Text")
         if textControl then
             textControl:SetText(text)
-        else
-            self.text = text
         end
+        self.text = text
     end
 
     local function ApplyTemplateToLabel(self, labelTemplate)

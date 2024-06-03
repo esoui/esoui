@@ -3,11 +3,11 @@ ZO_GRID_SCROLL_LIST_DONT_AUTOFILL = false
 
 ZO_AbstractGridScrollList = ZO_InitializingCallbackObject:Subclass()
 
-function ZO_AbstractGridScrollList:Initialize(control, autofillRows)
+function ZO_AbstractGridScrollList:Initialize(control, autofillRows, resizeToFitColumnMax, resizeToFitRowMax)
     self.control = control
     self.container = control:GetNamedChild("Container")
     self.list = self.container:GetNamedChild("List")
-    ZO_ScrollList_AddResizeOnScreenResize(self.list)
+    self:AddResizeOnScreenResize()
     self.scrollbar = self.list:GetNamedChild("ScrollBar")
     self.currentHeaderName = nil -- Maintaining backwards compatability
     self.currentHeaderData = nil
@@ -17,7 +17,29 @@ function ZO_AbstractGridScrollList:Initialize(control, autofillRows)
     self.headerPostPadding = 0
     self.templateOperationIds = {}
     self.autoFillRows = autofillRows or false
+    self.resizeToFitColumnMax = resizeToFitColumnMax or 0
+    self.resizeToFitRowMax = resizeToFitRowMax or 0
+    local minWidth, minHeight, maxWidth, maxHeight = self.control:GetDimensionConstraints()
+    self.minWidth = minWidth
+    self.minHeight = minHeight
+    self.maxWidth = maxWidth
+    self.maxHeight = maxHeight
     self.controlsAddedSinceLastFill = 0
+    if self.resizeToFitColumnMax > 0 then
+        self.numCellsPerRow = self.resizeToFitColumnMax
+        self.list:SetWidth(self.maxWidth + self.scrollbar:GetWidth())
+    end
+    if self.resizeToFitRowMax > 0 then
+        self.list:SetHeight(self.maxHeight)
+    end
+end
+
+function ZO_AbstractGridScrollList:AddResizeOnScreenResize()
+    local function OnScreenResized()
+        ZO_ScrollList_SetHeight(self.list, self.list:GetHeight())
+        self:CommitGridList()
+    end
+    self.list:RegisterForEvent(EVENT_SCREEN_RESIZED, OnScreenResized)
 end
 
 function ZO_AbstractGridScrollList:SetHeaderPrePadding(prePadding)
@@ -37,7 +59,7 @@ function ZO_AbstractGridScrollList:SetYDistanceFromEdgeWhereSelectionCausesScrol
     ZO_ScrollList_SetYDistanceFromEdgeWhereSelectionCausesScroll(self.list, yDistanceFromEdgeWhereSelectionCausesScroll)
 end
 
-function ZO_AbstractGridScrollList:AddHeaderTemplate(templateName, height, setupFunc, onHideFunc, resetControlFunc)
+function ZO_AbstractGridScrollList:AddHeaderTemplate(templateName, height, setupFunc, onHideFunc, resetControlFunc, considerHeaderWidth)
     if self.templateOperationIds[templateName] == nil then
         local operationId = self.nextOperationId
         local SPACING_XY = 0
@@ -46,6 +68,7 @@ function ZO_AbstractGridScrollList:AddHeaderTemplate(templateName, height, setup
 
         ZO_ScrollList_AddControlOperation(self.list, operationId, templateName, WIDTH, height, resetControlFunc, setupFunc, onHideFunc, SPACING_XY, SPACING_XY, self.indentAmount, NOT_SELECTABLE)
         ZO_ScrollList_SetTypeCategoryHeader(self.list, operationId, true)
+        ZO_ScrollList_SetConsiderHeaderWidth(self.list, operationId, considerHeaderWidth)
 
         self.nextOperationId = self.nextOperationId + 1
         self.templateOperationIds[templateName] = operationId
@@ -145,7 +168,24 @@ function ZO_AbstractGridScrollList:CommitGridList()
     if #scrollData > 0 then -- only try to fill in a row if there exists a row to fill in
         self:FillRowWithEmptyCells(self.currentHeaderData)
     end
+
+    if self.resizeToFitColumnMax ~= 0 then
+        self.list:SetWidth(self.maxWidth)
+    end
+
+    if self.resizeToFitRowMax ~= 0 then
+        self.list:SetHeight(self.maxHeight)
+    end
+
     ZO_ScrollList_Commit(self.list)
+
+    if self.resizeToFitColumnMax ~= 0 then
+        self.list:SetWidth(self.list.maxDimensionX + self.scrollbar:GetWidth())
+    end
+
+    if self.resizeToFitRowMax ~= 0 then
+        self.list:SetHeight(zo_min(self.maxHeight, self.list.maxDimensionY))
+    end
 end
 
 function ZO_AbstractGridScrollList:RecalculateVisibleEntries()

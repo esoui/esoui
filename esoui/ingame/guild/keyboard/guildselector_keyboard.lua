@@ -127,12 +127,6 @@ function GuildSelector:InitializeGuilds()
         if guildId == lastTradingHouseGuildId then
             isLastTradingHouseGuildFound = true
         end
-
-        if not playerIsGuildMaster then
-            if IsPlayerGuildMaster(guildId) then
-                playerIsGuildMaster = true
-            end
-        end
     end
 
     if not isLastTradingHouseGuildFound and selectedEntry then

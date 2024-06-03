@@ -114,6 +114,10 @@ ZO_TOOLTIP_STYLES =
     {
         fontColorField = GAMEPAD_TOOLTIP_COLOR_FAILED,
     },
+    disabled =
+    {
+        fontColorField = GENERAL_COLOR_GREY,
+    },
     bodySection =
     {
         customSpacing = 30,

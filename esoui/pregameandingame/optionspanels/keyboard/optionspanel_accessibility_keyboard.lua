@@ -43,6 +43,14 @@ panelBuilder:AddSetting({
 })
 
 panelBuilder:AddSetting({
+    controlName = "Options_Accessibility_TextInputNarration",
+    settingType = SETTING_TYPE_ACCESSIBILITY,
+    settingId = ACCESSIBILITY_SETTING_TEXT_INPUT_NARRATION,
+    header = SI_ACCESSIBILITY_OPTIONS_GENERAL,
+    indentLevel = 2,
+})
+
+panelBuilder:AddSetting({
     controlName = "Options_Accessibility_NarrationVolume",
     settingType = SETTING_TYPE_ACCESSIBILITY,
     settingId = ACCESSIBILITY_SETTING_NARRATION_VOLUME,
@@ -81,6 +89,9 @@ panelBuilder:AddSetting({
     settingType = SETTING_TYPE_ACCESSIBILITY,
     settingId = ACCESSIBILITY_SETTING_GAMEPAD_AIM_ASSIST_INTENSITY,
     header = SI_ACCESSIBILITY_OPTIONS_ARCANIST,
+    exists = function()
+        return ZO_IsIngameUI()
+    end,
 })
 
 panelBuilder:AddSetting({
@@ -88,4 +99,7 @@ panelBuilder:AddSetting({
     settingType = SETTING_TYPE_ACCESSIBILITY,
     settingId = ACCESSIBILITY_SETTING_MOUSE_AIM_ASSIST_INTENSITY,
     header = SI_ACCESSIBILITY_OPTIONS_ARCANIST,
+    exists = function()
+        return ZO_IsIngameUI()
+    end,
 })

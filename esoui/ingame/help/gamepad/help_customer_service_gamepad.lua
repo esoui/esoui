@@ -457,6 +457,17 @@ function ZO_Help_Customer_Service_Gamepad:OnShow()
     self:RefreshExternalInfoTooltip()
 end
 
+function ZO_Help_Customer_Service_Gamepad:OnHiding()
+    ZO_Help_GenericTicketSubmission_Gamepad.OnHiding(self)
+
+    local targetData = self.itemList:GetTargetData()
+    if targetData and targetData.isDropdown then
+        local targetControl = self.itemList:GetTargetControl()
+        local dropdown = targetControl.dropdown
+        dropdown:Deactivate()
+    end
+end
+
 function ZO_Help_Customer_Service_Gamepad:SetupTicket(impact, category, subcategory, externalInfo)
     self:ResetTicket()
     self:SetCategories(impact, category, subcategory)

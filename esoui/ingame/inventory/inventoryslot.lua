@@ -382,7 +382,7 @@ end
 local function IsSendingMail()
     if MAIL_SEND and not MAIL_SEND:IsHidden() then
         return true
-    elseif MAIL_MANAGER_GAMEPAD and MAIL_MANAGER_GAMEPAD:GetSend():IsAttachingItems() then
+    elseif MAIL_GAMEPAD and MAIL_GAMEPAD:GetSend():IsAttachingItems() then
         return true
     end
     return false
@@ -1860,6 +1860,12 @@ local actionHandlers =
         end
     end,
 
+    ["link_to_quest"] = function(inventorySlot, slotActions)
+        slotActions:AddSlotAction(SI_ITEM_ACTION_SHOW_QUEST, function()  
+            SYSTEMS:GetObject("questJournal"):OpenQuestJournalToQuest(inventorySlot.questIndex)
+        end, "link_to_quest")
+    end,
+
     ["report_item"] = function(inventorySlot, slotActions)
         if ZO_InventorySlot_GetStackCount(inventorySlot) > 0 or ZO_ItemSlot_GetAlwaysShowStackCount(inventorySlot) then
             DiscoverSlotActionFromType(linkHelperActions, inventorySlot, slotActions, "report_item")
@@ -2077,7 +2083,7 @@ local NON_INTERACTABLE_ITEM_ACTIONS = { "link_to_chat", "report_item" }
 -- The order of the rest of the secondary actions in the table determines the order they appear on the context menu
 local potentialActionsForSlotType =
 {
-    [SLOT_TYPE_QUEST_ITEM] =                           { "quickslot", "use", "link_to_chat" },
+    [SLOT_TYPE_QUEST_ITEM] =                           { "quickslot", "use", "link_to_chat", "link_to_quest" },
     [SLOT_TYPE_ITEM] =                                 { "quickslot", "mail_attach", "mail_detach", "trade_add", "trade_remove", "trading_house_post", "trading_house_remove_pending_post", "trading_house_search_from_sell", "bank_deposit", "guild_bank_deposit", "sell", "launder", "place_furniture", "equip", "use", "preview_dye_stamp", "show_map_keep_recall", "start_skill_respec", "start_attribute_respec", "split_stack", "enchant", "preview", "mark_as_locked", "unmark_as_locked", "bind", "charge", "kit_repair", "move_to_craft_bag", "link_to_chat", "mark_as_junk", "unmark_as_junk", "convert_to_imperial_style", "convert_to_morag_tong_style", "destroy", "report_item" },
     [SLOT_TYPE_EQUIPMENT] =                            { "unequip", "enchant", "mark_as_locked", "unmark_as_locked", "bind", "charge", "kit_repair", "link_to_chat", "convert_to_imperial_style", "convert_to_morag_tong_style", "destroy", "report_item" },
     [SLOT_TYPE_MY_TRADE] =                             { "trade_remove", "link_to_chat", "report_item" },

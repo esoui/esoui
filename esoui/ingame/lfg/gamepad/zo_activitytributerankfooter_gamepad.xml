@@ -1,6 +1,8 @@
 <GuiXml>
     <Controls>
         <TopLevelControl name="ZO_ActivityTributeRankFooter_Gamepad_TL" inherits="ZO_GamepadXPBarFooter" resizeToFitDescendents="true" hidden="true">
+            <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" offsetX="-ZO_GAMEPAD_SCREEN_PADDING" offsetY="-ZO_GAMEPAD_SAFE_ZONE_INSET_Y" />
+            
             <OnInitialized>
                 ZO_ActivityTributeRankFooterGamepad_OnInitialized(self)
             </OnInitialized>

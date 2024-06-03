@@ -14,7 +14,7 @@ function ZO_GamepadStoreManager:Initialize(control)
     GAMEPAD_VENDOR_SCENE = ZO_InteractScene:New(self.sceneName, SCENE_MANAGER, STORE_INTERACTION)
 
     local DONT_ACTIVATE_LIST_ON_SHOW = false
-    ZO_Gamepad_ParametricList_BagsSearch_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_CREATE, DONT_ACTIVATE_LIST_ON_SHOW, GAMEPAD_VENDOR_SCENE)
+    ZO_Gamepad_ParametricList_BagsSearch_Screen.Initialize(self, "storeTextSearch", control, ZO_GAMEPAD_HEADER_TABBAR_CREATE, DONT_ACTIVATE_LIST_ON_SHOW, GAMEPAD_VENDOR_SCENE)
 
     self.spinner = control:GetNamedChild("SpinnerContainer")
     self.spinner:InitializeSpinner()
@@ -221,7 +221,7 @@ function ZO_GamepadStoreManager:AddComponent(component)
     self.components[component:GetStoreMode()] = component
 end
 
-function ZO_GamepadStoreManager:OnUpdatedSearchResults()
+function ZO_GamepadStoreManager:OnUpdateSearchResults()
     local activeComponent = self:GetActiveComponent()
     if activeComponent and ZO_STORE_MODE_HAS_TEXT_SEARCH[activeComponent:GetStoreMode()] then
         activeComponent:Refresh()
@@ -656,7 +656,7 @@ do
         local currencyQuantity1 = selectedData.currencyQuantity1
         local playerCurrencyAmount = GetCurrencyAmount(currencyType, GetCurrencyPlayerStoredLocation(currencyType))
 
-        if currencyType and currencyQuantity1 and currencyQuantity1 > 0 and currencyQuantity1 > playerCurrencyAmount then
+        if currencyType and currencyType ~= CURT_NONE and currencyQuantity1 and currencyQuantity1 > 0 and currencyQuantity1 > playerCurrencyAmount then
             if currencyType == CURT_MONEY then
                 return false, GetString(SI_NOT_ENOUGH_MONEY)
             end

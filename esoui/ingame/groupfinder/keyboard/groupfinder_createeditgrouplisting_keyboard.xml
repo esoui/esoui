@@ -163,7 +163,7 @@
                         <Backdrop name="$(parent)Description" inherits="ZO_MultiLineEditBackdrop_Keyboard">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)GroupTitle" relativePoint="BOTTOMLEFT" offsetY="10" />
                             <Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" offsetY="10" constrains="X" />
-                            <Dimensions y="180"/>
+                            <Dimensions y="100"/>
                             <Controls>
                                 <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditMultiLineForBackdrop" maxInputCharacters="GROUP_FINDER_GROUP_LISTING_DESCRIPTION_MAX_LENGTH" defaultText="SI_GROUP_FINDER_CREATE_DESCRIPTION_DEFAULT_TEXT">
                                     <OnTextChanged>

@@ -103,7 +103,7 @@ do
                     if previousBattlegroundTimeMS > COUNTDOWN_TIMER_START_MS then
                         local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_COUNTDOWN_TEXT, SOUNDS.BATTLEGROUND_COUNTDOWN_FINISH )
                         messageParams:SetLifespanMS(COUNTDOWN_TIMER_START_MS)
-                        messageParams:SetIconData(ZO_GetCountdownBattlegroundAllianceSymbolIcon(GetUnitBattlegroundAlliance("player")))
+                        messageParams:SetIconData(ZO_GetCountdownBattlegroundAllianceSymbolIcon(GetUnitBattlegroundTeam("player")))
                         messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_COUNTDOWN)
                         CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
                     end

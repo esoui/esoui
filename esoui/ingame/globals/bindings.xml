@@ -724,6 +724,7 @@
             <AllowAction name="START_CHAT_ENTER"/>
             <AllowAction name="START_CHAT_SLASH"/>
             <AllowAction name="CHAT_REPLY_TO_LAST_WHISPER"/>
+            <AllowAction name="ASSIST_NEXT_TRACKED_QUEST"/>
             <AllowAction name="TOGGLE_HUD_UI"/>
             <AllowAction name="GAME_CAMERA_GAMEPAD_ZOOM"/>
             <AllowAction name="CLEAR_ACTIVE_NARRATION"/>

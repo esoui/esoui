@@ -11,9 +11,7 @@ function ZO_PooledSkillDataObject:BuildData(...)
     self:RefreshDynamicData()
 end
 
-function ZO_PooledSkillDataObject:BuildStaticData(...)
-    assert(false) -- Must be overridden
-end
+ZO_PooledSkillDataObject:MUST_IMPLEMENT("BuildStaticData", ...)
 
 function ZO_PooledSkillDataObject:RefreshDynamicData(...)
     -- Can be overridden
@@ -41,10 +39,6 @@ function ZO_SkillProgressionData_Base:BuildStaticData(skillData, skillProgressio
     self.skillData, self.skillProgressionKey = skillData, skillProgressionKey
 end
 
-function ZO_SkillProgressionData_Base:RefreshDynamicData(...)
-    --Nothing to refresh, for now
-end
-
 function ZO_SkillProgressionData_Base:GetIndices()
     local skillType, skillLineIndex, skillIndex = self.skillData:GetIndices()
     return skillType, skillLineIndex, skillIndex, self.skillProgressionKey
@@ -53,6 +47,7 @@ end
 -- Actives and passives progress differently.
 -- In actives, progression key corresponds to morph slots.
 -- In passives, progression key corresponds to rank.
+-- Crafted/Companion abilities don't progress at all, so the key is nil
 function ZO_SkillProgressionData_Base:GetSkillProgressionKey()
     return self.skillProgressionKey
 end
@@ -76,11 +71,11 @@ function ZO_SkillProgressionData_Base:GetName()
 end
 
 function ZO_SkillProgressionData_Base:GetFormattedName(formatter)
-    return ZO_CachedStrFormat(formatter or SI_ABILITY_NAME, self.name)
+    return ZO_CachedStrFormat(formatter or SI_ABILITY_NAME, self:GetName())
 end
 
 function ZO_SkillProgressionData_Base:GetDetailedName()
-    assert(false) -- Must be overridden
+    return self:GetFormattedName()
 end
 
 function ZO_SkillProgressionData_Base:GetDetailedGamepadName()
@@ -111,20 +106,18 @@ function ZO_SkillProgressionData_Base:IsLocked()
     return not self:IsUnlocked()
 end
 
-function ZO_SkillProgressionData_Base:IsAdvised()
-    assert(false) -- Must be overridden
-end
+-- abstract methods (must be overridden)
+ZO_SkillProgressionData_Base:MUST_IMPLEMENT("IsAdvised")
 
+ZO_SkillProgressionData_Base:MUST_IMPLEMENT("SetKeyboardTooltip")
+
+-- Optional overrides
 function ZO_SkillProgressionData_Base:HasRankData()
-    assert(false) -- Must be overridden
-end
-
-function ZO_SkillProgressionData_Base:SetKeyboardTooltip()
-    assert(false) -- Must be overridden
+    return false
 end
 
 function ZO_SkillProgressionData_Base:TryPickup()
-    -- can be overridden, return true if the skill is picked up
+    -- returns true if the skill is picked up
     return false
 end
 
@@ -141,101 +134,54 @@ end
 
 ZO_SkillData_Base = ZO_PooledSkillDataObject:Subclass()
 
-function ZO_SkillData_Base:Reset()
-    assert(false)
-end
+-- abstract methods (must be overridden)
+ZO_SkillData_Base:MUST_IMPLEMENT("Reset")
 
-function ZO_SkillData_Base:BuildStaticData(skillLineData, skillIndex)
-    assert(false)
-end
+ZO_SkillData_Base:MUST_IMPLEMENT("BuildStaticData", skillLineData, skillIndex)
 
-function ZO_SkillData_Base:RefreshDynamicData(refreshChildren)
-    assert(false)
-end
+ZO_SkillData_Base:MUST_IMPLEMENT("RefreshDynamicData", refreshChildren)
 
-function ZO_SkillData_Base:GetSkillLineData()
-    assert(false)
-end
+ZO_SkillData_Base:MUST_IMPLEMENT("GetSkillLineData")
 
-function ZO_SkillData_Base:IsPassive()
-    assert(false)
-end
+ZO_SkillData_Base:MUST_IMPLEMENT("IsPassive")
 
-function ZO_SkillData_Base:IsActive()
-    assert(false)
-end
+ZO_SkillData_Base:MUST_IMPLEMENT("IsActive")
 
-function ZO_SkillData_Base:IsUltimate()
-    assert(false)
-end
+ZO_SkillData_Base:MUST_IMPLEMENT("IsUltimate")
 
-function ZO_SkillData_Base:GetLineRankNeededToPurchase()
-    assert(false)
-end
+ZO_SkillData_Base:MUST_IMPLEMENT("MeetsLinePurchaseRequirement")
 
-function ZO_SkillData_Base:MeetsLinePurchaseRequirement()
-    assert(false)
-end
+ZO_SkillData_Base:MUST_IMPLEMENT("IsPurchased")
 
-function ZO_SkillData_Base:IsAutoGrant()
-    assert(false)
-end
+ZO_SkillData_Base:MUST_IMPLEMENT("IsAdvised")
 
-function ZO_SkillData_Base:IsPurchased()
-    assert(false)
-end
+ZO_SkillData_Base:MUST_IMPLEMENT("HasPointsToClear", clearMorphsOnly)
 
-function ZO_SkillData_Base:IsAdvised()
-    assert(false)
-end
+ZO_SkillData_Base:MUST_IMPLEMENT("GetProgressionData", skillProgressionKey)
 
-function ZO_SkillData_Base:HasPointsToClear(clearMorphsOnly)
-    assert(false) -- Must be overridden
-end
+ZO_SkillData_Base:MUST_IMPLEMENT("GetHeaderText")
 
-function ZO_SkillData_Base:GetProgressionData(skillProgressionKey)
-    assert(false)
-end
+ZO_SkillData_Base:MUST_IMPLEMENT("GetNumPointsAllocated")
 
-function ZO_SkillData_Base:GetHeaderText()
-    assert(false) -- Must be overridden
-end
+ZO_SkillData_Base:MUST_IMPLEMENT("GetCurrentSkillProgressionKey")
 
-function ZO_SkillData_Base:GetCurrentSkillProgressionKey()
-    assert(false) -- Must be overridden
-end
+ZO_SkillData_Base:MUST_IMPLEMENT("GetCurrentProgressionData")
 
-function ZO_SkillData_Base:GetNumPointsAllocated()
-    assert(false) -- Must be overridden
-end
+ZO_SkillData_Base:MUST_IMPLEMENT("GetPointAllocator")
 
-function ZO_SkillData_Base:GetCurrentProgressionData()
-    assert(false)
-end
+ZO_SkillData_Base:MUST_IMPLEMENT("GetPointAllocatorProgressionData")
 
-function ZO_SkillData_Base:GetPointAllocator()
-    assert(false)
-end
+ZO_SkillData_Base:MUST_IMPLEMENT("HasUpdatedStatus")
 
-function ZO_SkillData_Base:GetPointAllocatorProgressionData()
-    assert(false)
-end
+ZO_SkillData_Base:MUST_IMPLEMENT("SetHasUpdatedStatus", hasUpdatedStatus)
 
-function ZO_SkillData_Base:HasUpdatedStatus()
-    assert(false)
-end
+ZO_SkillData_Base:MUST_IMPLEMENT("ClearUpdate")
 
-function ZO_SkillData_Base:SetHasUpdatedStatus(hasUpdatedStatus)
-    assert(false)
-end
+ZO_SkillData_Base:MUST_IMPLEMENT("CanPointAllocationsBeAltered", isFullRespec)
 
-function ZO_SkillData_Base:ClearUpdate()
-    assert(false)
-end
+ZO_SkillData_Base:STUB("GetLineRankNeededToPurchase") -- Only used for purchaseable skills
 
-function ZO_SkillData_Base:CanPointAllocationsBeAltered(isFullRespec)
-    assert(false)
-end
+ZO_SkillData_Base:STUB("IsAutoGrant") -- Only matters for point allocation checks, not always needed
 
 -- Optional overrides
 function ZO_SkillData_Base:IsPlayerSkill()
@@ -246,9 +192,26 @@ function ZO_SkillData_Base:IsCompanionSkill()
     return false
 end
 
+function ZO_SkillData_Base:IsCraftedAbility()
+    return false
+end
+
+function ZO_SkillData_Base:IsHidden()
+    return false
+end
+
 -- convenience methods
 function ZO_SkillData_Base:GetSlotOnCurrentHotbar()
     return ACTION_BAR_ASSIGNMENT_MANAGER:GetCurrentHotbar():FindSlotMatchingSkill(self)
+end
+
+function ZO_SkillData_Base:GetCurrentProgressionLink()
+    if self:IsCraftedAbility() then
+        local craftedAbilityId = self:GetCraftedAbilityId()
+        local craftedAbilityData = SCRIBING_DATA_MANAGER:GetCraftedAbilityData(craftedAbilityId)
+        return craftedAbilityData:GetActiveConfigurationLink()
+    end
+    return ZO_LinkHandler_CreateChatLink(GetAbilityLink, self:GetCurrentProgressionData():GetAbilityId())
 end
 
 
@@ -262,78 +225,39 @@ end
 
 ZO_SkillLineData_Base = ZO_PooledSkillDataObject:Subclass()
 
+function ZO_SkillLineData_Base:Initialize(dataManager)
+    self.dataManager = dataManager
+    self.skillsWithUpdatesCache = {}
+end
+
 -- abstract methods (must be overridden)
-function ZO_SkillLineData_Base:BuildStaticData(skillTypeData, skillLineIndex)
-    assert(false)
-end
+ZO_SkillLineData_Base:MUST_IMPLEMENT("BuildStaticData", skillTypeData, skillLineIndex)
 
-function ZO_SkillLineData_Base:RefreshDynamicData(refreshChildren)
-    assert(false)
-end
+ZO_SkillLineData_Base:MUST_IMPLEMENT("RefreshDynamicData", refreshChildren)
 
-function ZO_SkillLineData_Base:GetId()
-    return self.id
-end
+ZO_SkillLineData_Base:MUST_IMPLEMENT("GetName")
 
-function ZO_SkillLineData_Base:GetName()
-    assert(false)
-end
+ZO_SkillLineData_Base:MUST_IMPLEMENT("GetUnlockText")
 
-function ZO_SkillLineData_Base:GetUnlockText()
-    assert(false)
-end
+ZO_SkillLineData_Base:MUST_IMPLEMENT("GetOrderingIndex")
 
-function ZO_SkillLineData_Base:GetOrderingIndex()
-    assert(false)
-end
+ZO_SkillLineData_Base:MUST_IMPLEMENT("IsDiscovered")
 
-function ZO_SkillLineData_Base:GetAnnounceIcon()
-    return GetSkillLineAnnouncementIconById(self.id)
-end
+ZO_SkillLineData_Base:MUST_IMPLEMENT("IsActive")
 
-function ZO_SkillLineData_Base:GetDetailedIcon()
-    return GetSkillLineDetailedIconById(self.id)
-end
+ZO_SkillLineData_Base:MUST_IMPLEMENT("GetCurrentRank")
 
-function ZO_SkillLineData_Base:IsDiscovered()
-    assert(false)
-end
+ZO_SkillLineData_Base:MUST_IMPLEMENT("GetLastRankXP")
 
-function ZO_SkillLineData_Base:IsActive()
-    assert(false)
-end
+ZO_SkillLineData_Base:MUST_IMPLEMENT("GetNextRankXP")
 
-function ZO_SkillLineData_Base:GetCurrentRank()
-    assert(false)
-end
+ZO_SkillLineData_Base:MUST_IMPLEMENT("GetCurrentRankXP")
 
-function ZO_SkillLineData_Base:GetLastRankXP()
-    assert(false)
-end
+ZO_SkillLineData_Base:MUST_IMPLEMENT("GetNumSkills")
 
-function ZO_SkillLineData_Base:GetNextRankXP()
-    assert(false)
-end
+ZO_SkillLineData_Base:MUST_IMPLEMENT("GetSkillDataByIndex", skillIndex)
 
-function ZO_SkillLineData_Base:GetCurrentRankXP()
-    assert(false)
-end
-
-function ZO_SkillLineData_Base:GetNumSkills()
-    assert(false)
-end
-
-function ZO_SkillLineData_Base:GetSkillDataByIndex(skillIndex)
-    assert(false)
-end
-
-function ZO_SkillLineData_Base:SkillIterator(skillFilterFunctions)
-    assert(false)
-end
-
-function ZO_SkillLineData_Base:AnySkillHasUpdatedStatus()
-    assert(false)
-end
+ZO_SkillLineData_Base:MUST_IMPLEMENT("SkillIterator", skillFilterFunctions)
 
 -- optional methods (can be overidden)
 function ZO_SkillLineData_Base:IsPlayerSkillLine()
@@ -349,10 +273,6 @@ function ZO_SkillLineData_Base:IsAdvised()
 end
 
 -- additional state
-function ZO_SkillLineData_Base:Initialize(dataManager)
-    self.dataManager = dataManager
-    self.skillsWithUpdatesCache = {}
-end
 
 function ZO_SkillLineData_Base:Reset()
     ZO_ClearTable(self.skillsWithUpdatesCache)
@@ -400,6 +320,18 @@ end
 
 -- helpers
 
+function ZO_SkillLineData_Base:GetId()
+    return self.id
+end
+
+function ZO_SkillLineData_Base:GetAnnounceIcon()
+    return GetSkillLineAnnouncementIconById(self.id)
+end
+
+function ZO_SkillLineData_Base:GetDetailedIcon()
+    return GetSkillLineDetailedIconById(self.id)
+end
+
 function ZO_SkillLineData_Base:GetFormattedName()
     return ZO_CachedStrFormat(SI_SKILLS_ENTRY_LINE_NAME_FORMAT, self:GetName())
 end
@@ -432,11 +364,6 @@ ZO_SkillTypeData = ZO_PooledSkillDataObject:Subclass()
 
 function ZO_SkillTypeData:Initialize()
     self.orderedSkillLines = {}
-end
-
-function ZO_SkillTypeData:GetNumSkillLines()
-    -- override me
-    assert(false)
 end
 
 function ZO_SkillTypeData:Reset()
@@ -522,5 +449,3 @@ function ZO_SkillTypeData:AreAnySkillLinesOrAbilitiesNew()
     end
     return false
 end
-
-

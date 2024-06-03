@@ -6,6 +6,10 @@ local function IsTextChatNarrationEnabled()
     return GetSetting_Bool(SETTING_TYPE_ACCESSIBILITY, ACCESSIBILITY_SETTING_TEXT_CHAT_NARRATION)
 end
 
+local function IsScreenNarrationEnabled()
+    return GetSetting_Bool(SETTING_TYPE_ACCESSIBILITY, ACCESSIBILITY_SETTING_SCREEN_NARRATION)
+end
+
 local ZO_Panel_Accessibility_ControlData =
 {
     [SETTING_TYPE_ACCESSIBILITY] =
@@ -108,6 +112,11 @@ local ZO_Panel_Accessibility_ControlData =
             panel = SETTING_PANEL_ACCESSIBILITY,
             text = SI_ACCESSIBILITY_OPTIONS_SCREEN_NARRATION,
             tooltipText = SI_ACCESSIBILITY_OPTIONS_SCREEN_NARRATION_TOOLTIP,
+            events =
+            {
+                [true] = "OnScreenNarrationEnabled",
+                [false] = "OnScreenNarrationDisabled",
+            },
             eventCallbacks =
             {
                 ["OnAccessibilityModeEnabled"] = ZO_Options_UpdateOption,
@@ -115,8 +124,33 @@ local ZO_Panel_Accessibility_ControlData =
             },
             enabled = IsAccessibilityModeEnabled,
             gamepadIsEnabledCallback = IsAccessibilityModeEnabled,
+            gamepadHasEnabledDependencies = true,
             gamepadCustomTooltipFunction = function(tooltip)
                 GAMEPAD_TOOLTIPS:LayoutSettingAccessibilityTooltipWarning(tooltip, GetString(SI_ACCESSIBILITY_OPTIONS_SCREEN_NARRATION_TOOLTIP), GetString(SI_OPTIONS_ACCESSIBILITY_MODE_REQUIRED_WARNING), not IsAccessibilityModeEnabled())
+            end,
+        },
+        -- Options_Accessibility_TextInputNarration
+        [ACCESSIBILITY_SETTING_TEXT_INPUT_NARRATION] =
+        {
+            controlType = OPTIONS_CHECKBOX,
+            system = SETTING_TYPE_ACCESSIBILITY,
+            settingId = ACCESSIBILITY_SETTING_TEXT_INPUT_NARRATION,
+            panel = SETTING_PANEL_ACCESSIBILITY,
+            text = SI_ACCESSIBILITY_OPTIONS_TEXT_INPUT_NARRATION,
+            tooltipText = SI_ACCESSIBILITY_OPTIONS_TEXT_INPUT_NARRATION_TOOLTIP,
+            eventCallbacks =
+            {
+                ["OnAccessibilityModeEnabled"] = ZO_Options_UpdateOption,
+                ["OnAccessibilityModeDisabled"] = ZO_Options_UpdateOption,
+                ["OnScreenNarrationEnabled"] = ZO_Options_UpdateOption,
+                ["OnScreenNarrationDisabled"] = ZO_Options_UpdateOption,
+            },
+            enabled = IsScreenNarrationEnabled,
+            gamepadIsEnabledCallback = IsScreenNarrationEnabled,
+            gamepadCustomTooltipFunction = function(tooltip)
+                local shouldDisplayWarning = not IsAccessibilityModeEnabled() or not IsScreenNarrationEnabled()
+                local warningText = IsAccessibilityModeEnabled() and GetString(SI_OPTIONS_SCREEN_NARRATION_REQUIRED_WARNING) or GetString(SI_OPTIONS_ACCESSIBILITY_MODE_REQUIRED_WARNING)
+                GAMEPAD_TOOLTIPS:LayoutSettingAccessibilityTooltipWarning(tooltip, GetString(SI_ACCESSIBILITY_OPTIONS_TEXT_INPUT_NARRATION_TOOLTIP), warningText, shouldDisplayWarning)
             end,
         },
         -- Options_Accessibility_NarrationVolume
@@ -208,6 +242,9 @@ local ZO_Panel_Accessibility_ControlData =
             minValue = 0,
             maxValue = 100,
             showValue = true,
+            exists = function()
+                return ZO_IsIngameUI()
+            end,
         },
         --Options_Accessibility_MouseAimAssistIntensity
         [ACCESSIBILITY_SETTING_MOUSE_AIM_ASSIST_INTENSITY] =
@@ -222,7 +259,7 @@ local ZO_Panel_Accessibility_ControlData =
             maxValue = 100,
             showValue = true,
             exists = function()
-                return not IsConsoleUI()
+                return not IsConsoleUI() and ZO_IsIngameUI()
             end,
         },
     }

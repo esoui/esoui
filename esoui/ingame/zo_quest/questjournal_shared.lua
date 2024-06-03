@@ -212,3 +212,24 @@ end
 function ZO_QuestJournal_Shared:GetNextSortedQuestForQuestIndex(questIndex)
     return QUEST_JOURNAL_MANAGER:GetNextSortedQuestForQuestIndex(questIndex)
 end
+
+function ZO_QuestJournal_Shared:GetSceneName()
+    -- Should be overridden
+end
+
+function ZO_QuestJournal_Shared:OpenQuestJournalToQuest()
+    -- Should be overridden
+end
+
+-- When the next Quest Journal screen opens, it will open to this quest.
+function ZO_QuestJournal_Shared:QueuePendingJournalQuestIndex(questIndex)
+    self.pendingJournalQuestIndex = questIndex
+end
+
+function ZO_QuestJournal_Shared:GetPendingJournalQuestIndex()
+    return self.pendingJournalQuestIndex
+end
+
+function ZO_QuestJournal_Shared:ClearPendingJournalQuestIndex()
+    self.pendingJournalQuestIndex = nil
+end

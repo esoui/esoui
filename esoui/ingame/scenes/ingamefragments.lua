@@ -352,7 +352,7 @@ function ZO_SetTitleFragment:Show()
     local currentScene = SCENE_MANAGER:GetCurrentScene()
     local titleFragment = currentScene:GetFragmentWithCategory(FRAGMENT_CATEGORY_TITLE)
     local titleControl = titleFragment:GetControl()
-    GetControl(titleControl, "Label"):SetText(self.title)
+    titleControl:GetNamedChild("Label"):SetText(self.title)
     self:OnShown()
 end
 
@@ -906,6 +906,9 @@ TOP_BAR_FRAGMENT = ZO_FadeSceneFragment:New(ZO_TopBar)
 TITLE_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedTitle)
 TITLE_FRAGMENT:SetCategory(FRAGMENT_CATEGORY_TITLE)
 
+RIGHT_PANEL_TITLE_FRAGMENT = ZO_FadeSceneFragment:New(ZO_SharedRightPanelTitle)
+RIGHT_PANEL_TITLE_FRAGMENT:SetCategory(FRAGMENT_CATEGORY_TITLE)
+
 MAIL_INBOX_FRAGMENT = ZO_FadeSceneFragment:New(ZO_MailInbox)
 MAIL_SEND_FRAGMENT = ZO_FadeSceneFragment:New(ZO_MailSend)
 MAIL_TITLE_FRAGMENT = ZO_SetTitleFragment:New(SI_WINDOW_TITLE_MAIL)
@@ -1021,6 +1024,7 @@ CHAMPION_WINDOW_SOUNDS = ZO_WindowSoundFragment:New(SOUNDS.CHAMPION_WINDOW_OPENE
 MARKET_WINDOW_SOUNDS = ZO_WindowSoundFragment:New(SOUNDS.MARKET_WINDOW_OPENED, SOUNDS.MARKET_WINDOW_CLOSED)
 COLLECTIONS_WINDOW_SOUNDS = ZO_WindowSoundFragment:New(SOUNDS.COLLECTIONS_WINDOW_OPEN, SOUNDS.COLLECTIONS_WINDOW_CLOSE)
 CROWN_CRATES_GEMIFICATION_WINDOW_SOUNDS = ZO_WindowSoundFragment:New(SOUNDS.DEFAULT_WINDOW_OPEN, SOUNDS.DEFAULT_WINDOW_CLOSE)
+SCRIBING_WINDOW_SOUNDS = ZO_WindowSoundFragment:New(SOUNDS.SCRIBING_OPENED, SOUNDS.SCRIBING_CLOSED)
 
 --Action Layers
 UI_SHORTCUTS_ACTION_LAYER_FRAGMENT = ZO_ActionLayerFragment:New(GetString(SI_KEYBINDINGS_LAYER_USER_INTERFACE_SHORTCUTS))

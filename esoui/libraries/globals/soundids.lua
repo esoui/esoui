@@ -730,6 +730,29 @@ SOUNDS =
     RETRAITING_RETRAIT_TOOLTIP_GLOW_SUCCESS = "Retraiting_Retrait_Tooltip_Glow_Success",
     RETRAITING_START_RETRAIT                = "Retraiting_Start_Retrait",
 
+    -- Scribing
+    CRAFTED_ABILITY_UNLOCKED                = "CraftedAbility_Unlocked",
+    CRAFTED_ABILITY_SCRIPT_UNLOCKED         = "CraftedAbilityScript_Unlocked",
+
+    SCRIBING_OPENED                         = "Scribing_Opened",
+    SCRIBING_CLOSED                         = "Scribing_Closed",
+
+    SCRIBING_CRAFTED_ABILITY_PLACED         = "Scribing_CraftedAbility_Placed",
+    SCRIBING_CRAFTED_ABILITY_REMOVED        = "Scribing_CraftedAbility_Removed",
+    SCRIBING_PRIMARY_SCRIPT_PLACED          = "Scribing_PrimaryScript_Placed",
+    SCRIBING_PRIMARY_SCRIPT_REMOVED         = "Scribing_PrimaryScript_Removed",
+    SCRIBING_SECONDARY_SCRIPT_PLACED        = "Scribing_SecondaryScript_Placed",
+    SCRIBING_SECONDARY_SCRIPT_REMOVED       = "Scribing_SecondaryScript_Removed",
+    SCRIBING_TERTIARY_SCRIPT_PLACED         = "Scribing_TertiaryScript_Placed",
+    SCRIBING_TERTIARY_SCRIPT_REMOVED        = "Scribing_TertiaryScript_Removed",
+
+    SCRIBING_SLOT_CATEGORY_EXPANDED         = "Scribing_SlotCategory_Expanded",
+    SCRIBING_SLOT_CATEGORY_COLLAPSED        = "Scribing_SlotCategory_Collapsed",
+
+    SCRIBING_SCRIBE_SLOT_ANIMATED           = "Scribing_Scribe_Slot_Animated",
+    SCRIBING_SCRIBE_TOOLTIP_GLOW            = "Scribing_Scribe_Tooltip_Glow",
+    SCRIBING_SCRIBE_COMPLETE_ANNOUNCE       = "Scribing_Scribe_Complete_Announce",
+
     --Customer Service
     AGENT_CHAT_ACTIVE                       = "Agent_Chat_Active",
 

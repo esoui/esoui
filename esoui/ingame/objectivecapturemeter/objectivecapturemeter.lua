@@ -32,9 +32,9 @@ local ALLIANCE_BADGE_TEXTURES =
 
 local BATTLEGROUND_TEAM_BADGE_TEXTURES =
 {
-    [BATTLEGROUND_ALLIANCE_FIRE_DRAKES] = "EsoUI/Art/Battlegrounds/battlegroundsCaptureBar_teamBadge_orange.dds",
-    [BATTLEGROUND_ALLIANCE_STORM_LORDS] = "EsoUI/Art/Battlegrounds/battlegroundsCaptureBar_teamBadge_purple.dds",
-    [BATTLEGROUND_ALLIANCE_PIT_DAEMONS] = "EsoUI/Art/Battlegrounds/battlegroundsCaptureBar_teamBadge_green.dds",
+    [BATTLEGROUND_TEAM_FIRE_DRAKES] = "EsoUI/Art/Battlegrounds/battlegroundsCaptureBar_teamBadge_orange.dds",
+    [BATTLEGROUND_TEAM_STORM_LORDS] = "EsoUI/Art/Battlegrounds/battlegroundsCaptureBar_teamBadge_purple.dds",
+    [BATTLEGROUND_TEAM_PIT_DAEMONS] = "EsoUI/Art/Battlegrounds/battlegroundsCaptureBar_teamBadge_green.dds",
 }
 
 -- bar textures
@@ -47,9 +47,9 @@ local ALLIANCE_BAR_TEXTURES =
 
 local BATTLEGROUND_TEAM_BAR_TEXTURES =
 {
-    [BATTLEGROUND_ALLIANCE_FIRE_DRAKES] = "EsoUI/Art/Battlegrounds/battlegroundsCaptureBar_fill_orange.dds",
-    [BATTLEGROUND_ALLIANCE_STORM_LORDS] = "EsoUI/Art/Battlegrounds/battlegroundsCaptureBar_fill_purple.dds",
-    [BATTLEGROUND_ALLIANCE_PIT_DAEMONS] = "EsoUI/Art/Battlegrounds/battlegroundsCaptureBar_fill_green.dds",
+    [BATTLEGROUND_TEAM_FIRE_DRAKES] = "EsoUI/Art/Battlegrounds/battlegroundsCaptureBar_fill_orange.dds",
+    [BATTLEGROUND_TEAM_STORM_LORDS] = "EsoUI/Art/Battlegrounds/battlegroundsCaptureBar_fill_purple.dds",
+    [BATTLEGROUND_TEAM_PIT_DAEMONS] = "EsoUI/Art/Battlegrounds/battlegroundsCaptureBar_fill_green.dds",
 }
 
 -- point textures
@@ -62,9 +62,9 @@ local ALLIANCE_POINT_TEXTURES =
 
 local BATTLEGROUND_TEAM_POINT_TEXTURES =
 {
-    [BATTLEGROUND_ALLIANCE_FIRE_DRAKES] = "EsoUI/Art/Battlegrounds/battlegroundsCaptureBar_point_orange.dds",
-    [BATTLEGROUND_ALLIANCE_STORM_LORDS] = "EsoUI/Art/Battlegrounds/battlegroundsCaptureBar_point_purple.dds",
-    [BATTLEGROUND_ALLIANCE_PIT_DAEMONS] = "EsoUI/Art/Battlegrounds/battlegroundsCaptureBar_point_green.dds",
+    [BATTLEGROUND_TEAM_FIRE_DRAKES] = "EsoUI/Art/Battlegrounds/battlegroundsCaptureBar_point_orange.dds",
+    [BATTLEGROUND_TEAM_STORM_LORDS] = "EsoUI/Art/Battlegrounds/battlegroundsCaptureBar_point_purple.dds",
+    [BATTLEGROUND_TEAM_PIT_DAEMONS] = "EsoUI/Art/Battlegrounds/battlegroundsCaptureBar_point_green.dds",
 }
 
 -- tail textures
@@ -77,9 +77,9 @@ local ALLIANCE_TAIL_TEXTURES =
 
 local BATTLEGROUND_TEAM_TAIL_TEXTURES =
 {
-    [BATTLEGROUND_ALLIANCE_FIRE_DRAKES] = "EsoUI/Art/Battlegrounds/battlegroundsCaptureBar_point-inverse_orange.dds",
-    [BATTLEGROUND_ALLIANCE_STORM_LORDS] = "EsoUI/Art/Battlegrounds/battlegroundsCaptureBar_point-inverse_purple.dds",
-    [BATTLEGROUND_ALLIANCE_PIT_DAEMONS] = "EsoUI/Art/Battlegrounds/battlegroundsCaptureBar_point-inverse_green.dds",
+    [BATTLEGROUND_TEAM_FIRE_DRAKES] = "EsoUI/Art/Battlegrounds/battlegroundsCaptureBar_point-inverse_orange.dds",
+    [BATTLEGROUND_TEAM_STORM_LORDS] = "EsoUI/Art/Battlegrounds/battlegroundsCaptureBar_point-inverse_purple.dds",
+    [BATTLEGROUND_TEAM_PIT_DAEMONS] = "EsoUI/Art/Battlegrounds/battlegroundsCaptureBar_point-inverse_green.dds",
 }
 
 -------------------

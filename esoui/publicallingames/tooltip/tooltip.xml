@@ -139,7 +139,7 @@
 
         <TopLevelControl name="AbilityTooltipTopLevel" inherits="TooltipTopLevel">
             <Controls>
-                <Tooltip name="AbilityTooltip" inherits="ZO_BaseTooltip">
+                <Tooltip name="AbilityTooltip" inherits="ZO_BaseTooltip" headerVerticalOffset="11">
                     <ResizeToFitPadding width="32" height="40"/>
                     <DimensionConstraints minX="384" maxX="384" />
                 </Tooltip>
@@ -149,6 +149,15 @@
         <TopLevelControl name="AbilityIconTooltipTopLevel" inherits="TooltipTopLevel">
             <Controls>
                 <Tooltip name="AbilityIconTooltip" inherits="ZO_BaseTooltip ZO_IconTooltip_Base" headerVerticalOffset="11">
+                    <ResizeToFitPadding width="32" height="40"/>
+                    <DimensionConstraints minX="384" maxX="384" />
+                </Tooltip>
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ComparativeAbilityTooltip1TopLevel" inherits="TooltipTopLevel">
+            <Controls>
+                <Tooltip name="ComparativeAbilityTooltip1" inherits="ZO_BaseTooltip ZO_IconTooltip_Base" headerVerticalOffset="11">
                     <ResizeToFitPadding width="32" height="40"/>
                     <DimensionConstraints minX="384" maxX="384" />
                 </Tooltip>

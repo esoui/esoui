@@ -1,5 +1,5 @@
-local MUST_IMPLEMENT_SENTINEL = function()
-    error(2, "Attempted to call unimplemented method!")
+local function MUST_IMPLEMENT_SENTINEL()
+    error("Attempted to access unimplemented field!", 2)
 end
 
 function ZO_VerifyClassImplementation(finalClass, classTraceback)
@@ -8,7 +8,7 @@ function ZO_VerifyClassImplementation(finalClass, classTraceback)
         for fieldName, fieldValue in pairs(currentClass) do
             if fieldValue == MUST_IMPLEMENT_SENTINEL and finalClass[fieldName] == MUST_IMPLEMENT_SENTINEL then
                 local NO_STACK_TRACE = 0
-                error("Class has unimplemented method: " .. fieldName .. "\n" .. classTraceback, NO_STACK_TRACE)
+                error("Class has unimplemented field: " .. fieldName .. "\n" .. classTraceback, NO_STACK_TRACE)
             end
         end
 
@@ -114,12 +114,33 @@ end
 -- Example A: ZO_MyAbstractClass.MyAbstractFunction = ZO_MyAbstractClass:MUST_IMPLEMENT()
 -- Example B: ZO_MyAbstractClass:MUST_IMPLEMENT("MyAbstractFunction")
 function ZO_Object:MUST_IMPLEMENT(fieldName)
-    self.__isAbstractClass = true
-    RemoveConcreteClass(self)
+    self:IGNORE_UNIMPLEMENTED()
     if fieldName then
         self[fieldName] = MUST_IMPLEMENT_SENTINEL
     end
     return MUST_IMPLEMENT_SENTINEL
+end
+
+--- Use IGNORE_UNIMPLEMENTED_FUNCTIONS to mark a class as abstract. Typically used to denote an abstract derived class that
+-- does not have any of its own MUST_IMPLEMENT fields, but inherits from another abstract class that does.
+-- Example: ZO_MyAbstractDerivedClass:IGNORE_UNIMPLEMENTED()
+function ZO_Object:IGNORE_UNIMPLEMENTED()
+    self.__isAbstractClass = true
+    RemoveConcreteClass(self)
+end
+
+--- Use STUB to create a field that doesn't have to be implemented by subclasses, but will error if called.
+-- Example A: ZO_MyParentClass.MyStubbedFunction = ZO_MyAbstractClass:STUB()
+-- Example B: ZO_MyParentClass:STUB("MyStubbedFunction")
+local function STUB_SENTINEL()
+    assert(false, "Attempted to access unimplemented field!")
+end
+
+function ZO_Object:STUB(fieldName)
+    if fieldName then
+        self[fieldName] = STUB_SENTINEL
+    end
+    return STUB_SENTINEL
 end
 
 function ZO_Object:IsInstanceOf(checkClass)

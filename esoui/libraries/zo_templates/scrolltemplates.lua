@@ -874,6 +874,10 @@ function ZO_ScrollListOperation:GetControlHeight()
     return nil  -- Can be overridden in derived classes
 end
 
+function ZO_ScrollListOperation:GetHeaderTextWidth(data, headerText)
+    return 0 -- Can be overridden in derived classes
+end
+
 function ZO_ScrollListOperation:GetPositionsAndAdvance(layoutInfo, currentX, currentY, data)
     assert(false) -- Override in derived classes
 end
@@ -1001,6 +1005,30 @@ function ZO_ScrollList_AddControl_Operation:IsDataVisible(data)
         return self.visibilityFunction(data)
     end
     return true
+end
+
+function ZO_ScrollList_AddControl_Operation:GetHeaderTextWidth(headerText)
+    local headerStringWidth = 0
+    if self.considerHeaderWidth and self.categoryHeader then
+        local controlPool = self.pool
+        if controlPool then
+            local control, key = controlPool:AcquireObject()
+            local labelControl = control
+            if not labelControl.SetText then
+                if type(labelControl.GetTextLabel) == "function" then
+                    labelControl = labelControl:GetTextLabel()
+                else
+                    labelControl = labelControl:GetNamedChild("Text")
+                end
+            end
+            if labelControl and labelControl.SetText then
+                labelControl:SetText(headerText)
+                headerStringWidth = labelControl:GetTextWidth()
+            end
+            controlPool:ReleaseObject(control)
+        end
+    end
+    return headerStringWidth
 end
 
 function ZO_ScrollList_AddControl_Operation:SetScrollUpdateCallbacks(setupCallback, hideCallback)
@@ -1166,6 +1194,10 @@ end
 
 function ZO_ScrollList_SetTypeCategoryHeader(self, typeId, isHeader)
     self.dataTypes[typeId].categoryHeader = isHeader
+end
+
+function ZO_ScrollList_SetConsiderHeaderWidth(self, typeId, considerHeaderWidth)
+    self.dataTypes[typeId].considerHeaderWidth = considerHeaderWidth
 end
 
 function ZO_ScrollList_SetEqualityFunction(self, typeId, equalityFunction)
@@ -2124,7 +2156,7 @@ end
 function ZO_ScrollList_Commit(self)
     local windowHeight = ZO_ScrollList_GetHeight(self)
     local selectionsEnabled = AreSelectionsEnabled(self)
-        
+
     --the window isn't big enough to show anything (its anchors probably haven't been processed yet), so delay the commit until that happens
     if windowHeight <= 0 then
         self.contents:SetHandler("OnUpdate", OnContentsUpdate)
@@ -2134,9 +2166,9 @@ function ZO_ScrollList_Commit(self)
     self.contents:SetHandler("OnUpdate", nil)
 
     CheckRunHandler(self, "OnMouseExit")
-    
+
     ZO_ClearNumericallyIndexedTable(self.visibleData)
-    
+
     local scrollableDistance = 0
     local foundSelected = false
     if self.mode == SCROLL_LIST_UNIFORM then
@@ -2157,7 +2189,7 @@ function ZO_ScrollList_Commit(self)
             currentY = currentY + GetDataTypeInfo(self, currentData.typeId).height
             currentData.bottom = currentY
             table.insert(self.visibleData, i)
-            
+
             if selectionsEnabled and AreDataEqualSelections(self, currentData.data, self.selectedData) then
                 foundSelected = true
                 ZO_ScrollList_SelectData(self, currentData.data, NO_DATA_CONTROL, RESELECTING_DURING_REBUILD, ANIMATE_INSTANTLY)
@@ -2177,10 +2209,25 @@ function ZO_ScrollList_Commit(self)
         end
         local currentX = layoutInfo.startPos
         local currentY = 0
+        self.maxDimensionX = 0
+        self.maxDimensionY = 0
         for i, currentData in ipairs(self.data) do
             local currentOperation = GetDataTypeInfo(self, currentData.typeId)
             if currentOperation:IsDataVisible(currentData.data) then
+                local headerStringWidth = currentOperation:GetHeaderTextWidth(currentData.data.header)
+                if headerStringWidth > self.maxDimensionX then
+                    self.maxDimensionX = headerStringWidth
+                end
                 currentX, currentY = currentOperation:GetPositionsAndAdvance(layoutInfo, currentX, currentY, currentData)
+                if currentX > self.maxDimensionX then
+                    self.maxDimensionX = currentX
+                end
+                if currentY > self.maxDimensionY then
+                    self.maxDimensionY = currentY
+                end
+                if currentY < currentData.bottom then
+                    self.maxDimensionY = currentData.bottom
+                end
                 table.insert(self.visibleData, i)
 
                 if selectionsEnabled and AreDataEqualSelections(self, currentData.data, self.selectedData) then
@@ -2189,6 +2236,7 @@ function ZO_ScrollList_Commit(self)
                 end
             end
         end
+
         if #self.visibleData > 0 then
             local lastVisibleDataIndex = self.visibleData[#self.visibleData]
             scrollableDistance = self.data[lastVisibleDataIndex].bottom - windowHeight
@@ -2196,9 +2244,9 @@ function ZO_ScrollList_Commit(self)
             scrollableDistance = 0
         end
     end
-    
+
     ResizeScrollBar(self, scrollableDistance)
-    
+
     --nuke the active list since things may have left it
     local i = #self.activeControls
     while i >= 1 do

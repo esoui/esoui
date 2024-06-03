@@ -14,7 +14,6 @@ local GAMEPAD_PROVISIONER_OPTION_FILTER_QUESTS = 3
 
 local optionFilterIngredients =
 {
-    header = GetString(SI_GAMEPAD_PROVISIONER_OPTIONS),
     filterName = GetString(SI_PROVISIONER_HAVE_INGREDIENTS),
     filterTooltip = GetString(SI_CRAFTING_HAVE_INGREDIENTS_TOOLTIP),
     checked = false,
@@ -108,7 +107,7 @@ function ZO_GamepadProvisioner:Initialize(control, scene)
         if newState == SCENE_SHOWING then
             ZO_Skills_TieSkillInfoHeaderToCraftingSkill(self.control:GetNamedChild("SkillInfo"), GetCraftingInteractionType())
 
-            if GetCraftingInteractionType() == CRAFTING_TYPE_PROVISIONING then
+            if GetCraftingInteractionType() == CRAFTING_TYPE_PROVISIONING and self.filterType ~= PROVISIONER_SPECIAL_INGREDIENT_TYPE_FURNISHING then
                 TriggerTutorial(TUTORIAL_TRIGGER_PROVISIONING_OPENED)
             end
 
@@ -594,8 +593,7 @@ function ZO_GamepadProvisioner:SaveFilters()
 end
 
 function ZO_GamepadProvisioner:InitializeDetails()
-    local PROVISIONER_INGREDIENT_SLOT_SPACING = 211
-    self.ingredientsBar = ZO_GamepadCraftingIngredientBar:New(self.control:GetNamedChild("IngredientsBar"), PROVISIONER_INGREDIENT_SLOT_SPACING)
+    self.ingredientsBar = ZO_GamepadCraftingIngredientBar:New(self.control:GetNamedChild("IngredientsBar"))
 
     self.ingredientsBar:AddDataTemplate("ZO_ProvisionerIngredientBarSlotTemplate", ZO_ProvisionerIngredientBarSlotTemplateSetup, ZO_ProvisionerIngredientBarSlotTemplateGetNarration)
 

@@ -275,7 +275,7 @@ do
                 self.barFadeAnim:FadeOut(HIDE_FADE_DELAY_MS, HIDE_FADE_DURATION_MS, ZO_ALPHA_ANIMATION_OPTION_USE_CURRENT_ALPHA, function()
                     self.control:SetHidden(true)
                     self:OnHidden()
-                end)
+                end, ZO_ALPHA_ANIMATION_OPTION_USE_CURRENT_SHOWN)
             else
                 self.control:SetHidden(true)
                 self:OnHidden()

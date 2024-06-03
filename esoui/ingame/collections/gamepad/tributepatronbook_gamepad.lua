@@ -86,7 +86,7 @@ function ZO_TributePatronBook_Gamepad:ViewCategory(tributePatronCategoryData)
         entryData:SetDataSource(patronData)
         entryData:SetIconTintOnSelection(true)
 
-        patronList:AddEntry("ZO_GamepadNewMenuEntryTemplate", entryData)
+        patronList:AddEntry("ZO_GamepadSubMenuEntryTemplateWithStatus", entryData)
     end
 
     patronList:Commit()
@@ -318,7 +318,7 @@ function ZO_TributePatronBook_Gamepad:OnShowing()
         local patronList = self.patronListDescriptor.list
         self:ViewCategory(tributePatronCategoryData)
         
-        local patronIndex = patronList:GetIndexForData("ZO_GamepadNewMenuEntryTemplate", patronData)
+        local patronIndex = patronList:GetIndexForData("ZO_GamepadSubMenuEntryLabelTemplate", patronData)
         patronList:SetSelectedIndexWithoutAnimation(patronIndex)
         self.browseToCollectibleInfo = nil
 
@@ -341,17 +341,20 @@ end
 
 
 function ZO_TributePatronBook_Gamepad:SetupList(list)
-    local function TributePatronEntrySetup(control, data, selected, reselectingDuringRebuild, enabled, active)
-        if data.HasAnyNewPatronCollectibles then
-            data:SetNew(data:HasAnyNewPatronCollectibles())
-        else
-            data:SetNew(data.dataSource:IsNew())
-        end
+    local function TributePatronCategoryEntrySetup(control, data, selected, reselectingDuringRebuild, enabled, active)
+        data:SetNew(data:HasAnyNewPatronCollectibles())
         ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
     end
 
-    list:AddDataTemplateWithHeader("ZO_GamepadNewMenuEntryTemplate", TributePatronEntrySetup, ZO_GamepadMenuEntryTemplateParametricListFunction, ZO_TributePatronCategoryData.Equals, "ZO_GamepadMenuEntryHeaderTemplate")
-    list:AddDataTemplate("ZO_GamepadNewMenuEntryTemplate", TributePatronEntrySetup, ZO_GamepadMenuEntryTemplateParametricListFunction, ZO_TributePatronCategoryData.Equals)
+    local function TributePatronEntrySetup(control, data, selected, reselectingDuringRebuild, enabled, active)
+        data:SetNew(data.dataSource:IsNew())
+        ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
+    end
+
+    list:AddDataTemplateWithHeader("ZO_GamepadNewMenuEntryTemplate", TributePatronCategoryEntrySetup, ZO_GamepadMenuEntryTemplateParametricListFunction, ZO_TributePatronCategoryData.Equals, "ZO_GamepadMenuEntryHeaderTemplate")
+    list:AddDataTemplate("ZO_GamepadNewMenuEntryTemplate", TributePatronCategoryEntrySetup, ZO_GamepadMenuEntryTemplateParametricListFunction, ZO_TributePatronCategoryData.Equals)
+    list:AddDataTemplateWithHeader("ZO_GamepadSubMenuEntryTemplateWithStatus", TributePatronEntrySetup, ZO_GamepadMenuEntryTemplateParametricListFunction, ZO_TributePatronData.Equals, "ZO_GamepadMenuEntryHeaderTemplate")
+    list:AddDataTemplate("ZO_GamepadSubMenuEntryTemplateWithStatus", TributePatronEntrySetup, ZO_GamepadMenuEntryTemplateParametricListFunction, ZO_TributePatronData.Equals)
     list:SetReselectBehavior(ZO_PARAMETRIC_SCROLL_LIST_RESELECT_BEHAVIOR.MATCH_OR_RESET_TO_DEFAULT)
 end
 

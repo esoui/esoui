@@ -6,7 +6,7 @@
         </Texture>
         
         <Label name="ZO_GamepadStatsCharacterNameTemplate" font="ZoFontGamepad42" verticalAlignment="BOTTOM" wrapMode="ELLIPSIS" virtual="true">
-            <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT "/>
+            <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT"/>
             <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" />
             <Dimensions y="40" />
         </Label>

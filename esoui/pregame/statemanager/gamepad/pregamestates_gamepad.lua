@@ -100,6 +100,7 @@ local pregameStates =
 
                 SCENE_MANAGER:Show("PregameInitialScreen_Gamepad")
             end
+            StartPregameMusic()
         end,
 
         OnExit = function()

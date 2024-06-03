@@ -438,7 +438,7 @@ function ZO_GuildRecruitment_Applications_Gamepad:InitializeOptionsDialog()
                     text = GetString(SI_SOCIAL_MENU_SEND_MAIL),
                     setup = ZO_SharedGamepadEntry_OnSetup,
                     callback = function(dialog)
-                        MAIL_MANAGER_GAMEPAD:GetSend():ComposeMailTo(ZO_FormatUserFacingCharacterOrDisplayName(dialog.data.name))
+                        MAIL_GAMEPAD:GetSend():ComposeMailTo(ZO_FormatUserFacingCharacterOrDisplayName(dialog.data.name))
                         ReleaseDialog()
                     end,
                 },
@@ -475,7 +475,7 @@ function ZO_GuildRecruitment_Applications_Gamepad:InitializeOptionsDialog()
                 template = "ZO_GamepadTextFieldSubmitItem",
                 templateData =
                 {
-                    text = GetString(GetGamerCardStringId()),
+                    text = GetString(ZO_GetGamerCardStringId()),
                     setup = ZO_SharedGamepadEntry_OnSetup,
                     visible = IsConsoleUI,
                     callback = function()

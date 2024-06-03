@@ -6,7 +6,6 @@ local GAMEPAD_SMITHING_TOGGLE_TYPE_STYLE = 1
 
 local optionFilterMaterials =
 {
-    header = SI_GAMEPAD_SMITHING_FILTERS,
     filterName = GetString(SI_SMITHING_HAVE_MATERIALS),
     filterTooltip = GetString(SI_CRAFTING_HAVE_MATERIALS_TOOLTIP),
     checked = false,

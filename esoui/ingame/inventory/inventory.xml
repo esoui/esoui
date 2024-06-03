@@ -201,22 +201,11 @@
             </Controls>
         </TopLevelControl>
 
-        <Control name="ZO_DepositWithdrawComboBoxEntry" level="3" mouseEnabled="true" virtual="true">
+        <Control name="ZO_DepositWithdrawComboBoxEntry" inherits="ZO_ComboBoxEntry" virtual="true">
             <Dimensions y="ZO_WITHDRAW_DEPOSIT_COMBO_BOX_ENTRY_TEMPLATE_HEIGHT" />
-            <OnMouseEnter>
-                ZO_ComboBoxDropdown_Keyboard.OnEntryMouseEnter(self)
-            </OnMouseEnter>
-
-            <OnMouseExit>
-                ZO_ComboBoxDropdown_Keyboard.OnEntryMouseExit(self)
-            </OnMouseExit>
-
-            <OnMouseUp>
-                ZO_ComboBoxDropdown_Keyboard.OnEntryMouseUp(self, button, upInside)
-            </OnMouseUp>
 
             <Controls>
-                <Label name="$(parent)Label" wrapMode="ELLIPSIS" minLineCount="2" maxLineCount="2">
+                <Label name="$(parent)Label" override="true" minLineCount="2" maxLineCount="2">
                     <Anchor point="LEFT" offsetX="ZO_COMBO_BOX_ENTRY_TEMPLATE_LABEL_PADDING" />
                     <Anchor point="RIGHT" offsetX="-ZO_COMBO_BOX_ENTRY_TEMPLATE_LABEL_PADDING" />
                 </Label>

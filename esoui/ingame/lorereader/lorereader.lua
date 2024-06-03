@@ -180,187 +180,206 @@ function LoreReader:OnHide()
     PlaySound(self.CloseSound)
 end
 
-local READER_MEDIA = {
+local READER_MEDIA =
+{
     [BOOK_MEDIUM_NONE] = {}, -- Intentionally left blank to cause UI errors if referenced.
-    [BOOK_MEDIUM_YELLOWED_PAPER] = {
+    [BOOK_MEDIUM_YELLOWED_PAPER] =
+    {
         NumPages = 2,
         Bg = "EsoUI/Art/LoreLibrary/loreLibrary_paperBook.dds",
-
-        keyboardFonts = {
-                            TitleFont = "ZoFontBookPaperTitle",
-                            BodyFont = "ZoFontBookPaper",
-                        },
-        gamepadFonts = {
-                            TitleFont = "ZoFontGamepadBookPaperTitle",
-                            BodyFont = "ZoFontGamepadBookPaper",
-                        },
-
+        keyboardFonts =
+        {
+            TitleFont = "ZoFontBookPaperTitle",
+            BodyFont = "ZoFontBookPaper",
+        },
+        gamepadFonts =
+        {
+            TitleFont = "ZoFontGamepadBookPaperTitle",
+            BodyFont = "ZoFontGamepadBookPaper",
+        },
         OpenSound = SOUNDS.BOOK_OPEN,
         CloseSound = SOUNDS.BOOK_CLOSE,
         TurnPageSound = SOUNDS.BOOK_PAGE_TURN,
     },
-    [BOOK_MEDIUM_ANIMAL_SKIN] = {
+    [BOOK_MEDIUM_ANIMAL_SKIN] =
+    {
         NumPages = 2,
         Bg = "EsoUI/Art/LoreLibrary/loreLibrary_skinBook.dds",
-
-        keyboardFonts = {
-                            TitleFont = "ZoFontBookSkinTitle",
-                            BodyFont = "ZoFontBookSkin",
-                        },
-        gamepadFonts = {
-                            TitleFont = "ZoFontGamepadBookSkinTitle",
-                            BodyFont = "ZoFontGamepadBookSkin",
-                        },
-
+        keyboardFonts =
+        {
+            TitleFont = "ZoFontBookSkinTitle",
+            BodyFont = "ZoFontBookSkin",
+        },
+        gamepadFonts =
+        {
+            TitleFont = "ZoFontGamepadBookSkinTitle",
+            BodyFont = "ZoFontGamepadBookSkin",
+        },
         OpenSound = SOUNDS.BOOK_OPEN,
         CloseSound = SOUNDS.BOOK_CLOSE,
         TurnPageSound = SOUNDS.BOOK_PAGE_TURN,
     },
-    [BOOK_MEDIUM_RUBBING_PAPER] = {
+    [BOOK_MEDIUM_RUBBING_PAPER] =
+    {
         NumPages = 2,
         Bg = "EsoUI/Art/LoreLibrary/loreLibrary_rubbingBook.dds",
-
-        keyboardFonts = {
-                            TitleFont = "ZoFontBookRubbingTitle",
-                            BodyFont = "ZoFontBookRubbing",
-                        },
-        gamepadFonts = {
-                            TitleFont = "ZoFontGamepadBookRubbingTitle",
-                            BodyFont = "ZoFontGamepadBookRubbing",
-                        },
-
+        keyboardFonts =
+        {
+            TitleFont = "ZoFontBookRubbingTitle",
+            BodyFont = "ZoFontBookRubbing",
+        },
+        gamepadFonts =
+        {
+            TitleFont = "ZoFontGamepadBookRubbingTitle",
+            BodyFont = "ZoFontGamepadBookRubbing",
+        },
         OpenSound = SOUNDS.BOOK_OPEN,
         CloseSound = SOUNDS.BOOK_CLOSE,
         TurnPageSound = SOUNDS.BOOK_PAGE_TURN,
     },
-    [BOOK_MEDIUM_LETTER] = {
+    [BOOK_MEDIUM_LETTER] =
+    {
         NumPages = 1,
-
         Bg = "EsoUI/Art/LoreLibrary/loreLibrary_letter.dds",
-
-        keyboardFonts = {
-                            TitleFont = "ZoFontBookLetterTitle",
-                            BodyFont = "ZoFontBookLetter",
-                        },
-        gamepadFonts = {
-                            TitleFont = "ZoFontGamepadBookLetterTitle",
-                            BodyFont = "ZoFontGamepadBookLetter",
-                        },
-
+        keyboardFonts =
+        {
+            TitleFont = "ZoFontBookLetterTitle",
+            BodyFont = "ZoFontBookLetter",
+        },
+        gamepadFonts =
+        {
+            TitleFont = "ZoFontGamepadBookLetterTitle",
+            BodyFont = "ZoFontGamepadBookLetter",
+        },
         PageWidth = 520,
         PageHeight = 725,
-
         OpenSound = SOUNDS.LORE_NOTE_OPEN,
         CloseSound = SOUNDS.LORE_NOTE_CLOSE,
         TurnPageSound = SOUNDS.LORE_NOTE_PAGE_TURN,
     },
-    [BOOK_MEDIUM_NOTE] = {
+    [BOOK_MEDIUM_NOTE] =
+    {
         NumPages = 1,
-
         Bg = "EsoUI/Art/LoreLibrary/loreLibrary_note.dds",
-
-        keyboardFonts = {
-                            TitleFont = "ZoFontBookNoteTitle",
-                            BodyFont = "ZoFontBookNote",
-                        },
-        gamepadFonts = {
-                            TitleFont = "ZoFontGamepadBookNoteTitle",
-                            BodyFont = "ZoFontGamepadBookNote",
-                        },
-
+        keyboardFonts =
+        {
+            TitleFont = "ZoFontBookNoteTitle",
+            BodyFont = "ZoFontBookNote",
+        },
+        gamepadFonts =
+        {
+            TitleFont = "ZoFontGamepadBookNoteTitle",
+            BodyFont = "ZoFontGamepadBookNote",
+        },
         PageWidth = 520,
         PageHeight = 725,
-
         OpenSound = SOUNDS.LORE_NOTE_OPEN,
         CloseSound = SOUNDS.LORE_NOTE_CLOSE,
         TurnPageSound = SOUNDS.LORE_NOTE_PAGE_TURN,
     },
-    [BOOK_MEDIUM_SCROLL] = {
+    [BOOK_MEDIUM_SCROLL] =
+    {
         NumPages = 1,
-
         Bg = "EsoUI/Art/LoreLibrary/loreLibrary_scroll.dds",
-
-        keyboardFonts = {
-                            TitleFont = "ZoFontBookScrollTitle",
-                            BodyFont = "ZoFontBookScroll",
-                        },
-        gamepadFonts = {
-                            TitleFont = "ZoFontGamepadBookScrollTitle",
-                            BodyFont = "ZoFontGamepadBookScroll",
-                        },
-
+        keyboardFonts =
+        {
+            TitleFont = "ZoFontBookScrollTitle",
+            BodyFont = "ZoFontBookScroll",
+        },
+        gamepadFonts ={
+            TitleFont = "ZoFontGamepadBookScrollTitle",
+            BodyFont = "ZoFontGamepadBookScroll",
+        },
         PageWidth = 480,
         PageHeight = 650,
         FontAlpha = .65,
-
         OpenSound = SOUNDS.LORE_NOTE_OPEN,
         CloseSound = SOUNDS.LORE_NOTE_CLOSE,
         TurnPageSound = SOUNDS.LORE_NOTE_PAGE_TURN,
     },
-    [BOOK_MEDIUM_STONE_TABLET] = {
+    [BOOK_MEDIUM_STONE_TABLET] =
+    {
         NumPages = 1,
-
         Bg = "EsoUI/Art/LoreLibrary/loreLibrary_stoneTablet.dds",
-
-        keyboardFonts = {
-                            TitleFont = "ZoFontBookTabletTitle",
-                            BodyFont = "ZoFontBookTablet",
-                        },
-        gamepadFonts = {
-                            TitleFont = "ZoFontGamepadBookTabletTitle",
-                            BodyFont = "ZoFontGamepadBookTablet",
-                        },
-
+        keyboardFonts =
+        {
+            TitleFont = "ZoFontBookTabletTitle",
+            BodyFont = "ZoFontBookTablet",
+        },
+        gamepadFonts =
+        {
+            TitleFont = "ZoFontGamepadBookTabletTitle",
+            BodyFont = "ZoFontGamepadBookTablet",
+        },
         PageHeight = 765,
         PageWidth = 780,
         FontAlpha = .65,
         FontStyleColor = ZO_ColorDef:New(1, 1, 1, .8),
-
         OpenSound = SOUNDS.TABLET_OPEN,
         CloseSound = SOUNDS.TABLET_CLOSE,
         TurnPageSound = SOUNDS.TABLET_PAGE_TURN,
     },
-    [BOOK_MEDIUM_METAL] = {
+    [BOOK_MEDIUM_METAL] =
+    {
         NumPages = 2,
         Bg = "EsoUI/Art/LoreLibrary/loreLibrary_dwemerBook.dds",
-
-        keyboardFonts = {
-                            TitleFont = "ZoFontBookMetalTitle",
-                            BodyFont = "ZoFontBookMetal",
-                        },
-        gamepadFonts = {
-                            TitleFont = "ZoFontGamepadBookMetalTitle",
-                            BodyFont = "ZoFontGamepadBookMetal",
-                        },
-
+        keyboardFonts =
+        {
+            TitleFont = "ZoFontBookMetalTitle",
+            BodyFont = "ZoFontBookMetal",
+        },
+        gamepadFonts =
+        {
+            TitleFont = "ZoFontGamepadBookMetalTitle",
+            BodyFont = "ZoFontGamepadBookMetal",
+        },
         LeftPageXOffset = 95,
         RightPageXOffset = -80,
         FontStyleColor = ZO_ColorDef:New(1, 1, 1, .4),
-
         OpenSound = SOUNDS.BOOK_METAL_OPEN,
         CloseSound = SOUNDS.BOOK_METAL_CLOSE,
         TurnPageSound = SOUNDS.BOOK_METAL_PAGE_TURN,
     },
-    [BOOK_MEDIUM_METAL_TABLET] = {
+    [BOOK_MEDIUM_METAL_TABLET] =
+    {
         NumPages = 1,
         Bg = "EsoUI/Art/LoreLibrary/loreLibrary_dwemerPage.dds",
-
-        keyboardFonts = {
-                            TitleFont = "ZoFontBookMetalTitle",
-                            BodyFont = "ZoFontBookMetal",
-                        },
-        gamepadFonts = {
-                            TitleFont = "ZoFontGamepadBookMetalTitle",
-                            BodyFont = "ZoFontGamepadBookMetal",
-                        },
-
+        keyboardFonts =
+        {
+            TitleFont = "ZoFontBookMetalTitle",
+            BodyFont = "ZoFontBookMetal",
+        },
+        gamepadFonts =
+        {
+            TitleFont = "ZoFontGamepadBookMetalTitle",
+            BodyFont = "ZoFontGamepadBookMetal",
+        },
         PageWidth = 520,
         PageHeight = 725,
         FontStyleColor = ZO_ColorDef:New(1, 1, 1, .4),
-
         OpenSound = SOUNDS.BOOK_METAL_OPEN,
         CloseSound = SOUNDS.BOOK_METAL_CLOSE,
         TurnPageSound = SOUNDS.BOOK_METAL_PAGE_TURN,
+    },
+    [BOOK_MEDIUM_ELVEN_SCROLL] =
+    {
+        NumPages = 1,
+        Bg = "EsoUI/Art/LoreLibrary/loreLibrary_RiteOfPropagation.dds",
+        keyboardFonts =
+        {
+            TitleFont = "ZoFontBookScrollTitle",
+            BodyFont ="ZoFontBookScroll",
+        },
+        gamepadFonts ={
+            TitleFont = "ZoFontGamepadBookScrollTitle",
+            BodyFont = "ZoFontGamepadBookScroll",
+        },
+        PageWidth = 480,
+        PageHeight = 650,
+        PageYOffset = -4,
+        OpenSound = SOUNDS.LORE_NOTE_OPEN,
+        CloseSound = SOUNDS.LORE_NOTE_CLOSE,
+        TurnPageSound = SOUNDS.LORE_NOTE_PAGE_TURN,
     },
 }
 

@@ -320,19 +320,11 @@ function ZO_ItemSetCollectionData:GetPieceDataBySlot(itemSetCollectionSlot)
     return nil
 end
 
-function ZO_ItemSetCollectionData:SetSearchResultsVersion(searchResultsVersion)
-    self.searchResultsVersion = searchResultsVersion
-    self.itemSetCollectionCategoryData:SetSearchResultsVersion(searchResultsVersion)
-end
-
 function ZO_ItemSetCollectionData:IsSearchResult()
-    if self.searchResultsVersion then
-        if self.searchResultsVersion == ITEM_SET_COLLECTIONS_DATA_MANAGER:GetSearchResultsVersion() then
-            return true
-        else
-            -- Old search result, might as well clean it up while we're here
-            self.searchResultsVersion = nil
-        end
+    local searchContext = "itemSetTextSearch"
+    local filterTarget = BACKGROUND_LIST_FILTER_TARGET_ITEM_SET_ID
+    if TEXT_SEARCH_MANAGER:IsActiveTextSearch(searchContext) then
+        return TEXT_SEARCH_MANAGER:IsDataInSearchTextResults(searchContext, filterTarget, self.itemSetId)
     end
     return false
 end
@@ -592,20 +584,14 @@ function ZO_ItemSetCollectionCategoryData:ClearNew(dontBroadcast)
     end
 end
 
-function ZO_ItemSetCollectionCategoryData:SetSearchResultsVersion(searchResultsVersion)
-    self.searchResultsVersion = searchResultsVersion
-    if self.parentCategoryData then
-        self.parentCategoryData:SetSearchResultsVersion(searchResultsVersion)
-    end
-end
-
 function ZO_ItemSetCollectionCategoryData:IsSearchResult()
-    if self.searchResultsVersion then
-        if self.searchResultsVersion == ITEM_SET_COLLECTIONS_DATA_MANAGER:GetSearchResultsVersion() then
-            return true
-        else
-            -- Old search result, might as well clean it up while we're here
-            self.searchResultsVersion = nil
+    local searchContext = "itemSetTextSearch"
+    local filterTarget = BACKGROUND_LIST_FILTER_TARGET_ITEM_SET_ID
+    if TEXT_SEARCH_MANAGER:IsActiveTextSearch(searchContext) and TEXT_SEARCH_MANAGER:HasSearchFilter(searchContext) then
+        for _, itemSetCollectionData in self:CollectionIterator() do
+            if itemSetCollectionData:IsSearchResult() then
+                return true
+            end
         end
     end
     return false

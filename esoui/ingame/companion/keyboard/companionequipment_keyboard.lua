@@ -350,7 +350,7 @@ do
             return false
         end
 
-        return ZO_ItemFilterUtils.IsCompanionSlotInItemTypeDisplayCategoryAndSubcategory(itemData, self.currentFilter.descriptor, self.currentSubFilter.descriptor) and TEXT_SEARCH_MANAGER:IsItemInSearchTextResults("companionEquipmentTextSearch", BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT, itemData.bagId, itemData.slotIndex)
+        return ZO_ItemFilterUtils.IsCompanionSlotInItemTypeDisplayCategoryAndSubcategory(itemData, self.currentFilter.descriptor, self.currentSubFilter.descriptor) and TEXT_SEARCH_MANAGER:IsDataInSearchTextResults("companionEquipmentTextSearch", BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT, itemData.bagId, itemData.slotIndex)
     end
 end
 

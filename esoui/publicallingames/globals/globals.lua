@@ -25,3 +25,9 @@ function ZO_GetMarketProductDisplayState(marketProductId)
 
     return MARKET_PRODUCT_DISPLAY_STATE_NOT_PURCHASED
 end
+
+local function OnPlayerDeactivated()
+    ZO_Dialogs_ReleaseAllDialogs(true)
+end
+
+EVENT_MANAGER:RegisterForEvent("Globals_PublicAllIngame", EVENT_PLAYER_DEACTIVATED, OnPlayerDeactivated)

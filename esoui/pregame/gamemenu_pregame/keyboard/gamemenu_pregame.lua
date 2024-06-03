@@ -107,6 +107,10 @@ function ZO_GameMenu_PreGame_Keyboard:BuildMenu()
     self.horizontalMenu:AddMenuItem("Credits", GetString(SI_GAME_MENU_CREDITS), OnShowCredits, OnHideCredits)
 
     -- Version Menu Option
+    local function OnMouseClickVersion(label)
+        CopyToClipboard(GetESOFullVersionString())
+    end
+    
     local function OnMouseEnterVersion(label)
         ZO_SelectableLabel_OnMouseEnter(label)
         InitializeTooltip(InformationTooltip, label, TOPLEFT, 0, -10, BOTTOMLEFT)
@@ -120,7 +124,7 @@ function ZO_GameMenu_PreGame_Keyboard:BuildMenu()
 
     local NO_ACTIVATE_FUNCTION = nil
     local NO_DEACTIVATE_FUNCTION = nil
-    self.horizontalMenu:AddMenuItem("Version", GetString(SI_VERSION_MENU_ENTRY), NO_ACTIVATE_FUNCTION, NO_DEACTIVATE_FUNCTION, OnMouseEnterVersion, OnMouseExitVersion)
+    self.horizontalMenu:AddMenuItem("Version", GetString(SI_VERSION_MENU_ENTRY), OnMouseClickVersion, NO_DEACTIVATE_FUNCTION, OnMouseEnterVersion, OnMouseExitVersion)
 end
 
 function ZO_GameMenu_PreGame_Keyboard:IsLoginSceneShowing()

@@ -17,13 +17,7 @@ local DONT_BROADCAST = false
 --Skill Point Allocator Base --
 -------------------------------
 
-ZO_SkillPointAllocator = ZO_Object:Subclass()
-
-function ZO_SkillPointAllocator:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
+ZO_SkillPointAllocator = ZO_InitializingObject:Subclass()
 
 function ZO_SkillPointAllocator:Initialize(manager)
     self.manager = manager
@@ -65,6 +59,7 @@ end
 function ZO_SkillPointAllocator:GetMorphSlot()
     -- Alias
     assert(not self.skillData:IsPassive(), "Passive skill, use GetRank() or GetSkillProgressionKey()")
+    assert(not self.skillData:IsCraftedAbility(), "Crafted Ability skill, use GetSkillProgressionKey()")
     return self.skillProgressionKey
 end
 
@@ -85,11 +80,11 @@ end
 -- Delta --
 
 function ZO_SkillPointAllocator:IsPurchasedChangePending()
-    return self.isPurchased ~= self.skillData:IsPurchased()
+    return self:IsPurchased() ~= self.skillData:IsPurchased()
 end
 
 function ZO_SkillPointAllocator:IsSellPending()
-    return self.skillData:IsPurchased() and not self.isPurchased
+    return self.skillData:IsPurchased() and not self:IsPurchased()
 end
 
 function ZO_SkillPointAllocator:IsSkillProgressionKeyChangePending()
@@ -384,7 +379,7 @@ end
 -- Utility --
 
 function ZO_SkillPointAllocator:IsProgressedToKey(skillProgressionKey)
-    if self.isPurchased then
+    if self:IsPurchased() then
         if self.skillData:IsPassive() then
             return self.skillProgressionKey >= skillProgressionKey
         else
@@ -452,10 +447,6 @@ end
 
 ZO_PurchaseOnlySkillPointAllocator = ZO_SkillPointAllocator:Subclass()
 
-function ZO_PurchaseOnlySkillPointAllocator:New(...)
-    return ZO_SkillPointAllocator.New(self, ...)
-end
-
 function ZO_PurchaseOnlySkillPointAllocator:CanSell()
     return false
 end
@@ -484,10 +475,6 @@ end
 --------------------------------------
 
 ZO_MorphsOnlySkillPointAllocator = ZO_SkillPointAllocator:Subclass()
-
-function ZO_MorphsOnlySkillPointAllocator:New(...)
-    return ZO_SkillPointAllocator.New(self, ...)
-end
 
 function ZO_MorphsOnlySkillPointAllocator:CanSell()
     if ZO_SkillPointAllocator.CanSell(self) then
@@ -522,10 +509,6 @@ end
 
 ZO_FullSkillPointAllocator = ZO_SkillPointAllocator:Subclass()
 
-function ZO_FullSkillPointAllocator:New(...)
-    return ZO_SkillPointAllocator.New(self, ...)
-end
-
 function ZO_FullSkillPointAllocator.GetPurchaseSound()
     return SOUNDS.SKILL_RESPEC_PURCHASED
 end
@@ -536,6 +519,95 @@ end
 
 function ZO_FullSkillPointAllocator.GetMorphChosenSound()
     return SOUNDS.ACTIVE_SKILL_RESPEC_MORPH_CHOSEN
+end
+
+--------------------------------------
+-- No Actions Skill Point Allocator --
+--------------------------------------
+
+-- These are for skills that have nothing to allocate points to/from (i.e. Companion and Crafted Ability skills)
+
+ZO_NoActionsPointAllocator = ZO_SkillPointAllocator:Subclass()
+
+function ZO_NoActionsPointAllocator:Initialize(manager, skillData)
+    self.manager = manager
+    self:SetSkillData(skillData)
+end
+
+function ZO_NoActionsPointAllocator:IsPurchased()
+    return self.skillData:IsPurchased()
+end
+
+function ZO_NoActionsPointAllocator:CanSell()
+    return false
+end
+
+function ZO_NoActionsPointAllocator:CanPurchase()
+    return false
+end
+
+function ZO_NoActionsPointAllocator:IsPurchasedChangePending()
+    return false
+end
+
+function ZO_NoActionsPointAllocator:IsSellPending()
+    return false
+end
+
+function ZO_NoActionsPointAllocator:IsSkillProgressionKeyChangePending()
+    return false
+end
+
+function ZO_NoActionsPointAllocator:IsSkillProgressionKeyDowngradePending()
+    return false
+end
+
+function ZO_NoActionsPointAllocator:IsSkillProgressionKeySidegradePending()
+    return false
+end
+
+function ZO_NoActionsPointAllocator:IsAnyChangePending()
+    return false
+end
+
+function ZO_NoActionsPointAllocator:DoPendingChangesIncurCost()
+    return false
+end
+
+function ZO_NoActionsPointAllocator:GetPendingPointAllocationDelta()
+    return 0
+end
+
+function ZO_NoActionsPointAllocator:GetNumPointsAllocated()
+    return 0
+end
+
+function ZO_NoActionsPointAllocator:CanIncreaseRank()
+    return false
+end
+
+function ZO_NoActionsPointAllocator:CanDecreaseRank()
+    return false
+end
+
+function ZO_NoActionsPointAllocator:CanMorph()
+    return false
+end
+
+function ZO_NoActionsPointAllocator:CanUnmorph()
+    return false
+end
+
+function ZO_NoActionsPointAllocator:CanMaxout()
+    return false
+end
+
+function ZO_NoActionsPointAllocator:GetIncreaseSkillAction()
+    return ZO_SKILL_POINT_ACTION.NONE
+end
+
+function ZO_NoActionsPointAllocator:GetDecreaseSkillAction()
+    return ZO_SKILL_POINT_ACTION.NONE
 end
 
 -----------------------------------
@@ -585,6 +657,10 @@ end
 
 function ZO_SkillPointAllocationManager:GetAllocatorPool()
     return self.allocatorPools[SKILLS_AND_ACTION_BAR_MANAGER:GetSkillPointAllocationMode()]
+end
+
+function ZO_SkillPointAllocationManager:GenerateNoActionsAllocator(skillData)
+    return ZO_NoActionsPointAllocator:New(self, skillData)
 end
 
 function ZO_SkillPointAllocationManager:GetSkillPointAllocatorForSkillData(skillData)
@@ -767,9 +843,8 @@ function ZO_SkillPointAllocationManager:ClearPointsOnSkillLine(skillLineData, ig
 
         local function CanClearPoints(skillData)
             -- We don't want to make allocators if they don't already exist and we don't need them
-            local allocatorPool = self:GetAllocatorPool()
             local allocatorKey = skillData.allocatorKey
-            local allocator = allocatorKey and allocatorPool:GetActiveObject(allocatorKey)
+            local allocator = allocatorKey and self:GetAllocatorPool():GetActiveObject(allocatorKey)
             if allocator then
                 return allocator:CanClear()
             else

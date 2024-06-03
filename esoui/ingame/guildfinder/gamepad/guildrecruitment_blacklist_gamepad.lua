@@ -341,7 +341,7 @@ function ZO_GuildRecruitment_Blacklist_Gamepad:InitializeSelectBlacklistEntryDia
                 template = "ZO_GamepadTextFieldSubmitItem",
                 templateData =
                 {
-                    text = GetString(GetGamerCardStringId()),
+                    text = GetString(ZO_GetGamerCardStringId()),
                     setup = ZO_SharedGamepadEntry_OnSetup,
                     visible = IsConsoleUI,
                     callback = function(dialog)

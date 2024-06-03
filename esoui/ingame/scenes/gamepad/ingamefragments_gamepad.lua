@@ -204,7 +204,7 @@ GAMEPAD_APPLY_ENCHANT_FRAGMENT = ZO_CreateQuadrantConveyorFragment(ZO_Gamepad_Ap
 
 GAMEPAD_SOUL_GEM_ITEM_CHARGER_FRAGMENT = ZO_CreateQuadrantConveyorFragment(ZO_Gamepad_SoulGemItemCharger)
 
-GAMEPAD_MAIL_MANAGER_FRAGMENT = ZO_FadeSceneFragment:New(ZO_MailManager_Gamepad)
+GAMEPAD_MAIL_FRAGMENT = ZO_FadeSceneFragment:New(ZO_Mail_Gamepad_TopLevel)
 
 GAMEPAD_AVA_FRAGMENT = ZO_SimpleSceneFragment:New(ZO_CampaignBrowser_GamepadTopLevel)
 GAMEPAD_AVA_FRAGMENT:SetHideOnSceneHidden(true)

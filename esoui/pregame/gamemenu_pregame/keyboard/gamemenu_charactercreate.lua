@@ -36,27 +36,27 @@ end
 local function AddPreviewEntries(entryTable)
     local characterMode = ZO_CHARACTERCREATE_MANAGER:GetCharacterMode()
     if characterMode == CHARACTER_MODE_CREATION then
-        local startingGearOption = {name = GetString("SI_CHARACTERCREATEDRESSINGOPTION", DRESSING_OPTION_STARTING_GEAR), categoryName = GetString(SI_GAME_MENU_PREVIEW), callback = SelectStartingGear, unselectedCallback = HideCharacterCreate}
+        local startingGearOption = {name = GetString("SI_CHARACTERCREATEDRESSINGOPTION", DRESSING_OPTION_STARTING_GEAR), categoryName = GetString(SI_GAME_MENU_PREVIEW), callback = SelectStartingGear,}
         table.insert(entryTable, startingGearOption)
     elseif characterMode == CHARACTER_MODE_EDIT then
         -- match the first appearance here to the default apperance set in PregameCharacterManager to avoid reloading the character
-        local currentGearAndCollectiblesOption = {name = GetString("SI_CHARACTERCREATEDRESSINGOPTION", DRESSING_OPTION_YOUR_GEAR_AND_COLLECTIBLES), categoryName = GetString(SI_GAME_MENU_PREVIEW), callback = SelectCurrentGearAndCollectibles, unselectedCallback = HideCharacterCreate}
+        local currentGearAndCollectiblesOption = {name = GetString("SI_CHARACTERCREATEDRESSINGOPTION", DRESSING_OPTION_YOUR_GEAR_AND_COLLECTIBLES), categoryName = GetString(SI_GAME_MENU_PREVIEW), callback = SelectCurrentGearAndCollectibles,}
         table.insert(entryTable, currentGearAndCollectiblesOption)
-        local currentGearOption = {name = GetString("SI_CHARACTERCREATEDRESSINGOPTION", DRESSING_OPTION_YOUR_GEAR), categoryName = GetString(SI_GAME_MENU_PREVIEW), callback = SelectCurrentGear, unselectedCallback = HideCharacterCreate}
+        local currentGearOption = {name = GetString("SI_CHARACTERCREATEDRESSINGOPTION", DRESSING_OPTION_YOUR_GEAR), categoryName = GetString(SI_GAME_MENU_PREVIEW), callback = SelectCurrentGear,}
         table.insert(entryTable, currentGearOption)
     end
 
-    local championGearOption = {name = GetString("SI_CHARACTERCREATEDRESSINGOPTION", DRESSING_OPTION_WARDROBE_1), categoryName = GetString(SI_GAME_MENU_PREVIEW), callback = SelectChampionGear, unselectedCallback = HideCharacterCreate}
+    local championGearOption = {name = GetString("SI_CHARACTERCREATEDRESSINGOPTION", DRESSING_OPTION_WARDROBE_1), categoryName = GetString(SI_GAME_MENU_PREVIEW), callback = SelectChampionGear,}
     table.insert(entryTable, championGearOption)
 
-    local nudeOption = {name = GetString("SI_CHARACTERCREATEDRESSINGOPTION", DRESSING_OPTION_NUDE), categoryName = GetString(SI_GAME_MENU_PREVIEW), callback = SelectNoGear, unselectedCallback = HideCharacterCreate}
+    local nudeOption = {name = GetString("SI_CHARACTERCREATEDRESSINGOPTION", DRESSING_OPTION_NUDE), categoryName = GetString(SI_GAME_MENU_PREVIEW), callback = SelectNoGear,}
     table.insert(entryTable, nudeOption)
 end
 
 -- Settings
 
 local function AddSettingsEntries(entryTable)
-    local settingsHeaderData = {name = GetString(SI_GAME_MENU_SETTINGS)}
+    local settingsHeaderData = {name = GetString(SI_GAME_MENU_SETTINGS), selectedCallback=HideCharacterCreate,}
     table.insert(entryTable, settingsHeaderData)
 end
 

@@ -497,7 +497,7 @@
                 </StatusBar>
                 <StatusBar name="$(parent)BarRight" inherits="ZO_TargetAttributeStatusBar_Keyboard_Template">
                     <Anchor point="RIGHT" offsetX="-7"/>
-                    <Anchor point="LEFT" relativePoint="CENTER" />
+                    <Anchor point="LEFT" relativeTo="$(parent)BarLeft" relativePoint="RIGHT" />
                     <Controls>
                         <StatusBar name="$(parent)Gloss" inherits="ZO_TargetAttributeStatusBarGloss_Keyboard_Template" />
                     </Controls>
@@ -555,7 +555,7 @@
                 </StatusBar>
                 <StatusBar name="$(parent)BarRight" inherits="ZO_TargetAttributeStatusBar_Gamepad_Template">
                     <Anchor point="RIGHT" offsetX="-9" />
-                    <Anchor point="LEFT" relativePoint="CENTER" />
+                    <Anchor point="LEFT" relativeTo="$(parent)BarLeft" relativePoint="RIGHT" />
                     <Controls>
                         <StatusBar name="$(parent)Gloss" inherits="ZO_TargetAttributeStatusBarGloss_Gamepad_Template" />
                     </Controls>

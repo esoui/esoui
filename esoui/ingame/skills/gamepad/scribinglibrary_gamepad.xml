@@ -1,0 +1,9 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_ScribingLibrary_GamepadTL" inherits="ZO_Gamepad_ParametricList_Screen">
+            <OnInitialized>
+                ZO_ScribingLibrary_Gamepad.OnControlInitialized(self)
+            </OnInitialized>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

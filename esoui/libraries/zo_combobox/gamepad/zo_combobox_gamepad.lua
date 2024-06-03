@@ -245,6 +245,10 @@ function ZO_ComboBox_Gamepad:GetSelectItemKeybindText()
     return GetString(SI_GAMEPAD_SELECT_OPTION)
 end
 
+function ZO_ComboBox_Gamepad:GetSelectItemKeybindNarrationText()
+    return GetString(SI_GAMEPAD_SELECT_OPTION)
+end
+
 function ZO_ComboBox_Gamepad:SelectItemByIndex(index, ignoreCallback)
     self.m_highlightedIndex = index
     return ZO_ComboBox_Base.SelectItemByIndex(self, index, ignoreCallback)
@@ -327,6 +331,9 @@ function ZO_ComboBox_Gamepad:InitializeKeybindStripDescriptors()
             name = function()
                 return self:GetSelectItemKeybindText()
             end,
+            narrationOverrideName = function()
+                return self:GetSelectItemKeybindNarrationText()
+            end,
             callback = function()
                 self:SelectHighlightedItem()
             end,
@@ -340,6 +347,9 @@ function ZO_ComboBox_Gamepad:InitializeKeybindStripDescriptors()
             keybind = "DIALOG_PRIMARY",
             name = function()
                 return self:GetSelectItemKeybindText()
+            end,
+            narrationOverrideName = function()
+                return self:GetSelectItemKeybindNarrationText()
             end,
             callback = function()
                 self:SelectHighlightedItem()
@@ -594,6 +604,15 @@ function ZO_MultiSelection_ComboBox_Gamepad:GetSelectItemKeybindText()
         return zo_strformat(SI_COMBO_BOX_MAX_SELECTIONS_KEYBIND_FORMATTER, ZO_ComboBox_Gamepad.GetSelectItemKeybindText(self), self:GetNumSelectedEntries(), self.m_maxNumSelections)
     else
         return ZO_ComboBox_Gamepad.GetSelectItemKeybindText(self)
+    end
+end
+
+-- Overridden function
+function ZO_MultiSelection_ComboBox_Gamepad:GetSelectItemKeybindNarrationText()
+    if self.m_maxNumSelections then
+        return zo_strformat(SI_SCREEN_NARRATION_MULTI_SELECT_DROPDOWN_MAX_SELECTIONS_KEYBIND_FORMATTER, ZO_ComboBox_Gamepad.GetSelectItemKeybindNarrationText(self), self:GetNumSelectedEntries(), self.m_maxNumSelections)
+    else
+        return ZO_ComboBox_Gamepad.GetSelectItemKeybindNarrationText()
     end
 end
 

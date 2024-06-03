@@ -11,7 +11,10 @@ function DailyLoginRewards_Manager:New(...)
 end
 
 function DailyLoginRewards_Manager:Initialize()
-    EVENT_MANAGER:RegisterForEvent("DailyLoginRewardsManager", EVENT_SHOW_DAILY_LOGIN_REWARDS_SCENE, function() self:ShowDailyLoginRewardsScene() end)
+    if EVENT_SHOW_DAILY_LOGIN_REWARDS_SCENE ~= nil then
+        -- This event is only supported on ingame, not on internal.
+        EVENT_MANAGER:RegisterForEvent("DailyLoginRewardsManager", EVENT_SHOW_DAILY_LOGIN_REWARDS_SCENE, function() self:ShowDailyLoginRewardsScene() end)
+    end
 end
 
 function DailyLoginRewards_Manager:ShowDailyLoginRewardsScene()

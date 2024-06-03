@@ -19,6 +19,19 @@
             </Controls>
         </Control>
 
+        <Control name="ZO_GridScrollList_CenteredResize_Gamepad" virtual="true" resizeToFitDescendents="true">
+            <Controls>
+                <Control name="$(parent)Container" resizeToFitDescendents="true">
+                    <Anchor point="CENTER" />
+                    <Controls>
+                        <Control name="$(parent)List" inherits="ZO_ScrollList_Gamepad">
+                            <Anchor point="CENTER" />
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
         <Label name="ZO_GridScrollList_Entry_Header_Template_Gamepad" font="ZoFontGamepad27" modifyTextType="UPPERCASE" maxLineCount="1" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" wrapMode="ELLIPSIS" virtual="true" />
 
         <Backdrop name="ZO_GridScrollList_Highlight_Gamepad" inherits="ZO_GamepadInteractiveSortFilterDefaultHighlight"  virtual="true">

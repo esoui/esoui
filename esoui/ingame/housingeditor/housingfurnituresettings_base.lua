@@ -73,8 +73,12 @@ function ZO_HousingFurnitureSettings_Base:UpdateLists()
     self:BuildCategories()
 end
 
+function ZO_HousingFurnitureSettings_Base:CanShowCopyDialog()
+    return GetTotalUnlockedCollectiblesByCategoryType(COLLECTIBLE_CATEGORY_TYPE_HOUSE) > 1
+end
+
 function ZO_HousingFurnitureSettings_Base:TryShowCopyDialog()
-    if GetTotalUnlockedCollectiblesByCategoryType(COLLECTIBLE_CATEGORY_TYPE_HOUSE) > 1 then
+    if self:CanShowCopyDialog() then
         local data = { currentHouse = GetCurrentZoneHouseId() }
         self:ShowCopyDialog(data)
     else

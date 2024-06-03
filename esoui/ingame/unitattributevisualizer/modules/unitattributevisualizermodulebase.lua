@@ -120,3 +120,8 @@ function ZO_UnitAttributeVisualizerModuleBase:ApplyPlatformStyle()
     -- Intended to be overridden
     -- Called when gamepad preferred mode changes
 end
+
+function ZO_UnitAttributeVisualizerModuleBase:DoAlphaUpdate(isNearby)
+    -- Intended to be overridden
+    -- Called when Unit Frames update their alpha values due to the unit entering or leaving "nearby" range
+end

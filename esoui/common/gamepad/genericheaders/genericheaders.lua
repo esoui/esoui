@@ -509,8 +509,9 @@ local function AdjustHeaderFocusControlAnchors(control, refreshResults)
             anchorToControl = control.controls[previousTarget]
         elseif control.tabBar and control.tabBar.control then
             anchorToControl = control.tabBar.control
+        elseif control.controls[DIVIDER_SIMPLE] then
+            anchorToControl = control.controls[DIVIDER_SIMPLE]
         end
-
 
         control.headerFocusControl:ClearAnchors()
         if anchorToControl then

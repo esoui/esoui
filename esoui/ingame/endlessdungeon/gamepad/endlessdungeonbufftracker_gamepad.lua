@@ -39,12 +39,20 @@ function ZO_EndlessDungeonBuffTracker_Gamepad:InitializeControls()
 end
 
 function ZO_EndlessDungeonBuffTracker_Gamepad:InitializeGridList()
-    ZO_EndlessDungeonBuffTracker_Shared.InitializeGridList(self, ZO_GridScrollList_Gamepad, "ZO_EndDunBuffTrackerGridEntry_Gamepad", "ZO_EndDunBuffTrackerGridHeader_Gamepad", "ZO_GridScrollList_Highlight_Gamepad")
+    ZO_EndlessDungeonBuffTracker_Shared.InitializeGridList(self, "ZO_EndDunBuffTrackerGridEntry_Gamepad", "ZO_EndDunBuffTrackerGridHeader_Gamepad")
 
     self.entryDataObjectPool = ZO_EntryDataPool:New(ZO_EntryData)
+
+    local NO_AUTO_FILL_ROWS = nil
+    local RESIZE_TO_FIT_COLUMN_MAX = 5
+    local RESIZE_TO_FIT_ROW_MAX = 6
+    self.gridList = ZO_GridScrollList_Gamepad:New(self.gridListControl, "ZO_GridScrollList_Highlight_Gamepad", NO_AUTO_FILL_ROWS, RESIZE_TO_FIT_COLUMN_MAX, RESIZE_TO_FIT_ROW_MAX)
+
     local NO_HIDE_CALLBACK = nil
+    local NO_RESET_CALLBACK = nil
+    local CONSIDER_HEADER_WIDTH = true
     local gridList = self.gridList
-    gridList:AddHeaderTemplate("ZO_EndDunBuffTrackerGridHeader_Gamepad", ZO_ENDLESS_DUNGEON_BUFF_GRID_HEADER_ROW_HEIGHT_GAMEPAD, ZO_EndlessDungeonBuffTracker_Shared.SetupGridHeader)
+    gridList:AddHeaderTemplate("ZO_EndDunBuffTrackerGridHeader_Gamepad", ZO_ENDLESS_DUNGEON_BUFF_GRID_HEADER_ROW_HEIGHT_GAMEPAD, ZO_EndlessDungeonBuffTracker_Shared.SetupGridHeader, NO_HIDE_CALLBACK, NO_RESET_CALLBACK, CONSIDER_HEADER_WIDTH)
     gridList:AddEntryTemplate("ZO_EndDunBuffTrackerGridEntry_Gamepad", ZO_ENDLESS_DUNGEON_BUFF_GRID_ENTRY_DIMENSIONS_GAMEPAD_X, ZO_ENDLESS_DUNGEON_BUFF_GRID_ENTRY_DIMENSIONS_GAMEPAD_Y, ZO_GetCallbackForwardingFunction(self, self.SetupGridEntry), NO_HIDE_CALLBACK, ZO_GetCallbackForwardingFunction(self, self.ResetGridEntry), ZO_ENDLESS_DUNGEON_BUFF_GRID_ENTRY_PADDING_GAMEPAD_X, ZO_ENDLESS_DUNGEON_BUFF_GRID_ENTRY_PADDING_GAMEPAD_Y)
     gridList:SetAutoFillEntryTemplate("ZO_EndDunBuffTrackerEmptyGridEntry_Gamepad")
     gridList:SetEntryTemplateEqualityFunction("ZO_EndDunBuffTrackerGridEntry_Gamepad", self.CompareGridEntries)

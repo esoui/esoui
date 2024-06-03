@@ -192,6 +192,14 @@ function ZO_EsoPlusOffers_Keyboard:HideCustomTopLevelCategories()
     self.subscriptionPage:SetHidden(true)
 end
 
+function ZO_EsoPlusOffers_Keyboard:AddNewMarketProductPresentationToList(marketProductPresentionList, id, presentationIndex)
+    if not self.marketProductPresentationsIdMap[id] then
+        self.marketProductPresentationsIdMap[id] = true
+        return ZO_Market_Keyboard.AddNewMarketProductPresentationToList(self, marketProductPresentionList, id, presentationIndex)
+    end
+    return marketProductPresentionList
+end
+
 -- End ZO_Market_Keyboard overrides
 
 function ZO_EsoPlusOffers_Keyboard:BuildEsoPlusMarketProductList(data)

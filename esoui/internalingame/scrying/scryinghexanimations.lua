@@ -58,7 +58,7 @@ function ZO_ScryingGoal:SetState(state)
             self.control:SetTexture("EsoUI/Art/Scrying/goal_idle_flipbook.dds")
             self.currentAnimation = self.unownedLoop
             self.currentAnimation:PlayFromStart()
-        elseif state == SO_SCRYING_GOAL_STATE_OWNING then
+        elseif state == ZO_SCRYING_GOAL_STATE_OWNING then
             self.control:SetTexture("EsoUI/Art/Scrying/goal_activate_flipbook.dds")
             self.currentAnimation = self.activateAnim
             self.currentAnimation:PlayFromStart()

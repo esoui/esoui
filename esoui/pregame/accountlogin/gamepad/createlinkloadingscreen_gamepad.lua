@@ -117,6 +117,14 @@ do
     end
 end
 
+-- There's a window between when EVENT_WORLD_SELECTED and EVENT_LOGIN_SUCCESSFUL are sent where 
+-- the user could attempt to cancel Login but fail to.  That leads to undesirable results in the
+-- interface in Loading or Character Select.
+-- Prevent this by disabling the Back/Cancel button during that window.
+function ZO_CreateLinkLoading_Gamepad:OnWorldSelected(eventFlags, worldName)
+    KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
+end
+
 local function OnServerMaintenance(eventID, requeryTime)
     PREGAME_INITIAL_SCREEN_GAMEPAD:ShowError(GetString(SI_SERVER_MAINTENANCE_DIALOG_TITLE), GetString(SI_SERVER_MAINTENANCE_DIALOG_TEXT))
 end
@@ -235,6 +243,7 @@ end
 function ZO_CreateLinkLoading_Gamepad:RegisterEvents()
     -- "Success" Cases
     self:RegisterForEvent(EVENT_LOGIN_SUCCESSFUL, OnLoggedIn)
+    self:RegisterForEvent(EVENT_WORLD_SELECTED,  function(...) self:OnWorldSelected(...) end)
     self:RegisterForEvent(EVENT_WORLD_LIST_RECEIVED, OnWorldListReceived)
     self:RegisterForEvent(EVENT_ACCOUNT_LINK_SUCCESSFUL, OnSuccess)
     self:RegisterForEvent(EVENT_ACCOUNT_CREATE_SUCCESSFUL, OnSuccess)

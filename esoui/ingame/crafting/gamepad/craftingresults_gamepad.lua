@@ -2,10 +2,6 @@ local GAMEPAD_CRAFTING_RESULTS_TEMPLATE = "ZO_GamepadCraftingResultsTemplate"
 
 ZO_CraftingResults_Gamepad = ZO_CraftingResults_Base:Subclass()
 
-function ZO_CraftingResults_Gamepad:New(...)
-    return ZO_CraftingResults_Base.New(self, ...)
-end
-
 function ZO_CraftingResults_Gamepad:Initialize(control)
     local SHOW_IN_GAMEPAD_PREFERRED_MODE = true
     ZO_CraftingResults_Base.Initialize(self, control, SHOW_IN_GAMEPAD_PREFERRED_MODE)

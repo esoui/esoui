@@ -372,9 +372,12 @@ function ZO_SkillTooltip_Initialize(tooltipControl)
     tooltipControl.xpBar = tooltipControl:GetNamedChild("Progression")
     ZO_StatusBar_SetGradientColor(tooltipControl.xpBar, ZO_XP_BAR_GRADIENT_COLORS)
 
-    EVENT_MANAGER:RegisterForEvent("SkillTooltip", EVENT_ABILITY_PROGRESSION_XP_UPDATE, function(_, ...)
-        OnTooltipActiveSkillProgressionXPUpdate(tooltipControl, ...)
-    end)
+    if EVENT_ABILITY_PROGRESSION_XP_UPDATE ~= nil then
+        -- This event only exists in public Ingame, not in internal.
+        EVENT_MANAGER:RegisterForEvent("SkillTooltip", EVENT_ABILITY_PROGRESSION_XP_UPDATE, function(_, ...)
+            OnTooltipActiveSkillProgressionXPUpdate(tooltipControl, ...)
+        end)
+    end
 end
 
 function ZO_SkillTooltip_Cleared(tooltipControl)

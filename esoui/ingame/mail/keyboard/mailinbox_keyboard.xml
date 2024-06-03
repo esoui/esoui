@@ -29,11 +29,11 @@
         
         <Texture name="ZO_MailInboxRowBg" inherits="ZO_ThinListBgStrip" excludeFromResizeToFitExtents="true" virtual="true">
             <ClearAnchors />
-            <Dimensions x="ZO_MAIL_INDBOX_KEYBOARD_NODE_WDITH" y="ZO_MAIL_INDBOX_KEYBOARD_NODE_HEIGHT" />
+            <Dimensions x="ZO_MAIL_INBOX_KEYBOARD_NODE_WIDTH" y="ZO_MAIL_INBOX_KEYBOARD_NODE_HEIGHT" />
         </Texture>
         
         <Control name="ZO_MailInboxRow" mouseEnabled="true" virtual="true">
-            <Dimensions x="ZO_MAIL_INDBOX_KEYBOARD_NODE_INDENTED_WDITH" y="ZO_MAIL_INDBOX_KEYBOARD_NODE_HEIGHT" />
+            <Dimensions x="ZO_MAIL_INBOX_KEYBOARD_NODE_INDENTED_WIDTH" y="ZO_MAIL_INBOX_KEYBOARD_NODE_HEIGHT" />
             
             <OnInitialized>
                 ZO_MailInboxRow_OnInitialized(self)
@@ -53,18 +53,18 @@
             
             <Controls>
                 <Texture name="$(parent)Icon" inherits="ZO_MultiIcon">
-                    <Anchor point="LEFT"/>
-                    <Dimensions x="32" y="32"/>
+                    <Anchor point="LEFT" />
+                    <Dimensions x="32" y="32" />
                 </Texture>
                 
                 <Control name="$(parent)TextContainer" resizeToFitDescendents="true">
-                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="9"/>
-                    <Anchor point="RIGHT"/>
+                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="9" />
+                    <Anchor point="RIGHT" />
                     
                     <Controls>
                         <Label name="$(parent)Subject" font="ZoFontGame" maxLineCount="1" wrapMode="ELLIPSIS">
                             <Anchor point="TOPLEFT" />
-                            <Anchor point="TOPRIGHT"/>
+                            <Anchor point="TOPRIGHT" />
                         </Label>
                         
                         <Label name="$(parent)Expiration" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_GENERAL:INTERFACE_GENERAL_COLOR_ERROR" wrapMode="ELLIPSIS" maxLineCount="1" hidden="true">
@@ -77,7 +77,7 @@
         </Control>
         
         <Control name="ZO_MailInboxEmptyRow" virtual="true">
-            <Dimensions x="ZO_MAIL_INDBOX_KEYBOARD_NODE_INDENTED_WDITH" y="ZO_MAIL_INDBOX_KEYBOARD_NODE_HEIGHT" />
+            <Dimensions x="ZO_MAIL_INBOX_KEYBOARD_NODE_INDENTED_WIDTH" y="ZO_MAIL_INBOX_KEYBOARD_NODE_HEIGHT" />
             <OnInitialized>
                 self.textLabel = self:GetNamedChild("Text")
             </OnInitialized>
@@ -102,7 +102,7 @@
                     <OnMouseExit>
                         ZO_MailInboxUnread_OnMouseExit(self)
                     </OnMouseExit>
-                    <Anchor point="TOPLEFT"/>
+                    <Anchor point="TOPLEFT" />
                     <Controls>
                         <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Mail/mail_inbox_unreadMessage.dds">
                             <Anchor point="TOPLEFT" />
@@ -121,34 +121,34 @@
                     </OnInitialized>
                 </Control>
 
-                <Label name="$(parent)Full" font="ZoFontGame" text="SI_MAIL_INBOX_FULL" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" hidden="true">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Unread" relativePoint="BOTTOMLEFT" offsetX="5" offsetY="4"/>
-                    <Dimensions x="350"/>
+                <Label name="$(parent)Full" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" hidden="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Unread" relativePoint="BOTTOMLEFT" offsetX="5" offsetY="4" />
+                    <Dimensions x="350" />
                 </Label>
 
                 <Control name="$(parent)NavigationContainer" inherits="ZO_ScrollContainer">
-                    <Dimensions x="ZO_MAIL_INDBOX_KEYBOARD_TREE_WDITH" />
-                    <Anchor point="TOPLEFT" offsetX="-17" offsetY="90"/>
-                    <Anchor point="BOTTOMLEFT" offsetX="-17" />
+                    <Dimensions x="ZO_MAIL_INBOX_KEYBOARD_TREE_WIDTH" />
+                    <Anchor point="TOPLEFT" offsetX="-17" offsetY="90" />
+                    <Anchor point="BOTTOMLEFT" offsetX="-17" offsetY="-60" />
                 </Control>
 
                 <Control name="$(parent)Message" hidden="true">
-                    <Anchor point="TOPLEFT" offsetX="410" offsetY="5"/>
-                    <Anchor point="BOTTOMRIGHT" offsetX="-10" offsetY="-32"/>
+                    <Anchor point="TOPLEFT" offsetX="410" offsetY="5" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-10" offsetY="-32" />
                     <Controls>
                         <Texture name="$(parent)BGLeft" textureFile="EsoUI/Art/Mail/mail_inbox_messageBG_left.dds">
-                            <Anchor point="TOPLEFT" offsetX="-50" offsetY="104"/>
-                            <Dimensions x="525" y="600"/>
+                            <Anchor point="TOPLEFT" offsetX="-50" offsetY="104" />
+                            <Dimensions x="525" y="600" />
                         </Texture>
                         <Texture name="$(parent)BGRight" textureFile="EsoUI/Art/Mail/mail_inbox_messageBG_right.dds">
-                            <Dimensions x="64" y="600"/>
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)BGLeft" relativePoint="TOPRIGHT"/>
+                            <Dimensions x="64" y="600" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)BGLeft" relativePoint="TOPRIGHT" />
                         </Texture>
                         <Label name="$(parent)FromLabel" font="ZoFontWinH4" text="SI_MAIL_READ_FROM_LABEL" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                            <Anchor point="TOPLEFT"/>
+                            <Anchor point="TOPLEFT" />
                         </Label>
                         <Label name="$(parent)From" font="ZoFontWinH4" mouseEnabled="true">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)FromLabel" relativePoint="TOPRIGHT" offsetX="5"/>
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)FromLabel" relativePoint="TOPRIGHT" offsetX="5" />
                             <OnMouseEnter>
                                 ZO_MailInboxMessageFrom_OnMouseEnter(self)
                             </OnMouseEnter>
@@ -157,30 +157,30 @@
                             </OnMouseExit>
                         </Label>
                         <Label name="$(parent)ReceivedLabel" font="ZoFontWinH4" text="SI_MAIL_READ_RECEIVED_LABEL" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)FromLabel" relativePoint="BOTTOMLEFT" offsetY="5"/>
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)FromLabel" relativePoint="BOTTOMLEFT" offsetY="5" />
                         </Label>
                         <Label name="$(parent)Received" font="ZoFontWinH4">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)ReceivedLabel" relativePoint="TOPRIGHT" offsetX="5"/>
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)ReceivedLabel" relativePoint="TOPRIGHT" offsetX="5" />
                         </Label>
                         <Label name="$(parent)Expires" font="ZoFontWinH4">
-                            <Anchor point="TOPRIGHT" offsetX="-30"/>
+                            <Anchor point="TOPRIGHT" offsetX="-30" />
                         </Label>
                         <Label name="$(parent)ExpiresLabel" font="ZoFontWinH4" text="SI_MAIL_INBOX_EXPIRES_HEADER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Expires" relativePoint="TOPLEFT" offsetX="-3"/>
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Expires" relativePoint="TOPLEFT" offsetX="-3" />
                         </Label>
                         <Label name="$(parent)Subject" font="ZoFontWinH4" linkEnabled="true" mouseEnabled="true">
-                            <Anchor point="TOPLEFT" offsetY="82"/>
-                            <Anchor point="TOPRIGHT" offsetX="-10" offsetY="82"/>
+                            <Anchor point="TOPLEFT" offsetY="82" />
+                            <Anchor point="TOPRIGHT" offsetX="-10" offsetY="82" />
                             <OnLinkMouseUp>
                                 ZO_LinkHandler_OnLinkMouseUp(linkText, button, self)
                             </OnLinkMouseUp>
                         </Label>
                         <Control name="$(parent)Pane" inherits="ZO_ScrollContainer">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)Subject" relativePoint="BOTTOMLEFT" offsetY="35"/>
-                            <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" offsetX="-10" offsetY="536"/>
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Subject" relativePoint="BOTTOMLEFT" offsetY="35" />
+                            <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" offsetX="-10" offsetY="536" />
                         </Control>
                         <Label name="$(parent)Body" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" linkEnabled="true" mouseEnabled="true">
-                            <Dimensions x="480"/>
+                            <Dimensions x="480" />
                             <OnInitialized>
                                 local scrollChild = GetControl(self:GetParent(),"PaneScrollChild")
                                 self:SetParent(scrollChild)
@@ -191,27 +191,27 @@
                             </OnLinkMouseUp>
                         </Label>
                         <Texture name="$(parent)AttachmentsDivider" textureFile="EsoUI/Art/Mail/mail_divider.dds">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)Pane" relativePoint="BOTTOMLEFT" offsetY="40"/>
-                            <Dimensions x="512" y="4"/>
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Pane" relativePoint="BOTTOMLEFT" offsetY="40" />
+                            <Dimensions x="512" y="4" />
                         </Texture>
                         <Label name="$(parent)AttachmentsHeader" font="ZoFontWinH3" text="SI_MAIL_ATTACHMENTS_HEADER" modifyTextType="UPPERCASE">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)AttachmentsDivider" relativePoint="BOTTOMLEFT" offsetY="5"/>
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)AttachmentsDivider" relativePoint="BOTTOMLEFT" offsetY="5" />
                         </Label>
                         <Control name="$(parent)Attachments" resizeToFitDescendents="true">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)AttachmentsHeader" relativePoint="BOTTOMLEFT" offsetY="15" offsetX="24"/>
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)AttachmentsHeader" relativePoint="BOTTOMLEFT" offsetY="15" offsetX="24" />
                         </Control>
                         <Control name="$(parent)COD">
-                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Pane" relativePoint="BOTTOMRIGHT" offsetY="15"/>
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)AttachmentsHeader" relativePoint="TOPRIGHT"/>
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Pane" relativePoint="BOTTOMRIGHT" offsetY="15" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)AttachmentsHeader" relativePoint="TOPRIGHT" />
                             <Controls>
                                 <Label name="$(parent)Currency" inherits="ZO_CurrencyTemplate">
-                                    <Anchor point="TOPRIGHT"/>
+                                    <Anchor point="TOPRIGHT" />
                                 </Label>
                                 <Label name="$(parent)Header" text="SI_MAIL_READ_COD_LABEL" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                                    <Anchor point="RIGHT" relativeTo="$(parent)Currency" relativePoint="LEFT" offsetX="-3"/>
+                                    <Anchor point="RIGHT" relativeTo="$(parent)Currency" relativePoint="LEFT" offsetX="-3" />
                                 </Label>
                                 <Texture name="$(parent)Help" inherits="ZO_HelpIcon">
-                                    <Anchor point="RIGHT" relativeTo="$(parent)Header" relativePoint="LEFT" offsetX="-3"/>
+                                    <Anchor point="RIGHT" relativeTo="$(parent)Header" relativePoint="LEFT" offsetX="-3" />
                                     <OnInitialized>
                                         ZO_HelpIcon_Initialize(self, GetString(SI_MAIL_READ_COD_TOOLTIP), BOTTOM)
                                     </OnInitialized>
@@ -219,19 +219,27 @@
                             </Controls>
                         </Control>
                         <Control name="$(parent)SentMoney">
-                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Pane" relativePoint="BOTTOMRIGHT" offsetY="15"/>
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)AttachmentsHeader" relativePoint="TOPRIGHT"/>
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Pane" relativePoint="BOTTOMRIGHT" offsetY="15" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)AttachmentsHeader" relativePoint="TOPRIGHT" />
                             <Controls>
                                 <Label name="$(parent)Currency" inherits="ZO_CurrencyTemplate">
-                                    <Anchor point="TOPRIGHT"/>
+                                    <Anchor point="TOPRIGHT" />
                                 </Label>
                                 <Label name="$(parent)Header" text="SI_MAIL_READ_SENT_GOLD_LABEL" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                                    <Anchor point="RIGHT" relativeTo="$(parent)Currency" relativePoint="LEFT" offsetX="-3"/>
+                                    <Anchor point="RIGHT" relativeTo="$(parent)Currency" relativePoint="LEFT" offsetX="-3" />
                                 </Label>
                             </Controls>
                         </Control>
                     </Controls>
                 </Control>
+                
+                <Label name="$(parent)InventoryUsage" font="ZoFontGameLargeBold" verticalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMLEFT" offsetX="10" />
+                </Label>
+
+                <Button name="$(parent)DeleteOnClaim" inherits="ZO_CheckButton">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)InventoryUsage" relativePoint="TOPLEFT" offsetY="-10" />
+                </Button>
             </Controls>
         </TopLevelControl>
 
@@ -240,7 +248,7 @@
                 ZO_TakeAttachmentCODDialog_OnInitialized(self)
             </OnInitialized>
             <Controls>
-                <Label name="$(parent)ConfirmText" inherits="ZO_DialogContentAnchors" text="SI_MAIL_CONFIRM_TAKE_ATTACHMENT_COD" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"/>
+                <Label name="$(parent)ConfirmText" inherits="ZO_DialogContentAnchors" text="SI_MAIL_CONFIRM_TAKE_ATTACHMENT_COD" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" />
 
                 <Control name="$(parent)CurrentGoldContainer" inherits="ZO_DialogCurrencyLabelValueContainer_Keyboard">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)ConfirmText" relativePoint="BOTTOMLEFT" offsetY="20" />
@@ -258,8 +266,8 @@
                     </Controls>
                 </Control>
 
-                <Control name="$(parent)Decline" inherits="ZO_CustomDialogButton"/>
-                <Control name="$(parent)Accept" inherits="ZO_CustomDialogButton"/>
+                <Control name="$(parent)Decline" inherits="ZO_CustomDialogButton" />
+                <Control name="$(parent)Accept" inherits="ZO_CustomDialogButton" />
             </Controls>
         </TopLevelControl>
     </Controls>

@@ -136,7 +136,7 @@ do
 end
 
 do
-    internalassert(TRIBUTE_MECHANIC_ITERATION_END == 17, "A new Tribute mechanic has been added. Does the MECHANIC_PARAM_MODIFIERS need special modifiers for this mechanic?")
+    internalassert(TRIBUTE_MECHANIC_ITERATION_END == 18, "A new Tribute mechanic has been added. Does the MECHANIC_PARAM_MODIFIERS need special modifiers for this mechanic?")
     local MECHANIC_PARAM_MODIFIERS =
     {
         [TRIBUTE_MECHANIC_HEAL_AGENT] =

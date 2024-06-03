@@ -113,7 +113,7 @@ do
             local template = self.template
             local currentBestCategoryName = nil
             for _, itemData in ipairs(slots) do
-                local passesTextFilter = TEXT_SEARCH_MANAGER:IsItemInSearchTextResults(self.searchContext, BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT, itemData.bagId, itemData.slotIndex)
+                local passesTextFilter = TEXT_SEARCH_MANAGER:IsDataInSearchTextResults(self.searchContext, BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT, itemData.bagId, itemData.slotIndex)
                 local passesCategoryFilter = IsInFilteredCategories(self.filterCategories, itemData)
                 if passesTextFilter and passesCategoryFilter then
                     local entry = ZO_GamepadEntryData:New(itemData.name, itemData.iconFile)
@@ -169,7 +169,7 @@ function ZO_GuildBank_Gamepad:Initialize(control)
     self.withdrawLoadingControlShown = false
 
     GAMEPAD_GUILD_BANK_SCENE = ZO_InteractScene:New(GAMEPAD_GUILD_BANK_SCENE_NAME, SCENE_MANAGER, GUILD_BANKING_INTERACTION)
-    ZO_BankingCommon_Gamepad.Initialize(self, control, GAMEPAD_GUILD_BANK_SCENE)
+    ZO_BankingCommon_Gamepad.Initialize(self, "guildBankTextSearch", control, GAMEPAD_GUILD_BANK_SCENE)
 
     self:ClearBankedBags()
     self:AddBankedBag(BAG_GUILDBANK)
@@ -191,8 +191,6 @@ function ZO_GuildBank_Gamepad:Initialize(control)
 
     self.control:RegisterForEvent(EVENT_OPEN_GUILD_BANK, OnOpenGuildBank)
     self.control:RegisterForEvent(EVENT_CLOSE_GUILD_BANK, OnCloseGuildBank)
-
-    self:SetTextSearchContext("guildBankTextSearch")
 end
 
 function ZO_GuildBank_Gamepad:ActivateTextSearch()

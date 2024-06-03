@@ -90,9 +90,7 @@ local function RequirementFailedAlertHandler(errorStringId)
         local collectibleId = GetErrorStringLockedByCollectibleId(errorStringId)
         if collectibleId ~= 0 then
             local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
-            local collectibleName = collectibleData:GetName()
-            local categoryName = collectibleData:GetCategoryData():GetName()
-            ZO_Dialogs_ShowPlatformDialog("COLLECTIBLE_REQUIREMENT_FAILED", { collectibleData = collectibleData }, { mainTextParams = { message, collectibleName, categoryName } })
+            ZO_Dialogs_ShowCollectibleRequirementFailedPlatformDialog(collectibleData, message)
         elseif message ~= "" then
             return ERROR, message, SOUNDS.ABILITY_FAILED_REQUIREMENTS
         end
@@ -1189,6 +1187,48 @@ local AlertHandlers =
     [EVENT_GROUP_FINDER_MEMBER_ALERT] = function(alert)
         return ALERT, GetString("SI_GROUPFINDERMEMBERALERT", alert), SOUNDS.GENERAL_ALERT_ERROR
     end,
+
+    [EVENT_SCRIBING_ITEM_USE_RESULT] = function(result)
+        if result ~= SCRIBING_ITEM_USE_RESULT_NONE then
+            return ALERT, GetString("SI_SCRIBINGITEMUSERESULT", result), SOUNDS.GENERAL_ALERT_ERROR
+        end
+    end,
+
+    [EVENT_SCRIBING_ERROR_RESULT] = function(result)
+        if result ~= SCRIBING_ERROR_RESULT_NONE then
+            return ALERT, GetString("SI_SCRIBINGERRORRESULT", result), SOUNDS.GENERAL_ALERT_ERROR
+        end
+    end,
+
+    [EVENT_SKILL_STYLE_DISABLED_BY_SERVER] = function(disabled)
+        if disabled then
+            return ALERT, GetString(SI_SKILL_STYLING_DISABLED)
+        else
+            return ALERT, GetString(SI_SKILL_STYLING_ENABLED)
+        end
+    end,
+
+    [EVENT_SCRIBING_DISABLED] = function()
+        return ERROR, GetString(SI_ERROR_SCRIBING_DISABLED), SOUNDS.GENERAL_ALERT_ERROR
+    end,
+
+    [EVENT_NEW_HIRELING_CORRESPONDENCE_RECEIVED] = function()
+        return ALERT, GetString(SI_LORE_LIBRARY_ALERT_CORRESPONDENCE_RECEIVED)
+    end,
+
+    [EVENT_MAIL_WITH_ATTACHMENTS_AVAILABLE] = function(hasAttachments, hasExpiringAttachments)
+        if hasExpiringAttachments then
+            return ALERT, GetString(SI_MAIL_ALERT_ATTACHMENTS_EXPIRING)
+        elseif hasAttachments then
+            return ALERT, GetString(SI_MAIL_ALERT_ATTACHMENTS_AVAILABLE)
+        end
+    end,
+
+    [EVENT_MAIL_TAKE_ALL_ATTACHMENTS_IN_CATEGORY_RESPONSE] = function(result, category, headersRemoved)
+        if result ~= MAIL_TAKE_ATTACHMENT_RESULT_SUCCESS then
+            return ERROR, GetString("SI_MAILTAKEATTACHMENTRESULT", result), SOUNDS.GENERAL_ALERT_ERROR
+        end
+   end,
 }
 
 ZO_AntiquityScryingResultsToAlert =

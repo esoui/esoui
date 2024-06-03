@@ -84,6 +84,13 @@ function ZO_Skills_AbilitySlot_OnMouseEnter(control)
     local DONT_SHOW_ADVISED = false
     local SHOW_BAD_MORPH = true
     control.skillProgressionData:SetKeyboardTooltip(SkillTooltip, SHOW_SKILL_POINT_COST, DONT_SHOW_UPGRADE_TEXT, DONT_SHOW_ADVISED, SHOW_BAD_MORPH)
+
+    local skillData = control.skillProgressionData.skillData
+    if skillData:HasUpdatedStatus() then
+        skillData:SetUpdatedStatusByType(ZO_SKILL_DATA_NEW_STATE.MORPHABLE, false)
+        skillData:SetUpdatedStatusByType(ZO_SKILL_DATA_NEW_STATE.CRAFTED_ABILITY, false)
+        control.statusIcon:SetHidden(not skillData:HasUpdatedStatus())
+    end
 end
 
 function ZO_Skills_AbilitySlot_OnMouseExit()
@@ -99,6 +106,14 @@ function ZO_Skills_AbilityEntry_OnInitialized(control)
     control.slot = control:GetNamedChild("Slot")
     control.slotIcon = control:GetNamedChild("SlotIcon")
     control.slotLock = control:GetNamedChild("SlotLock")
+    control.slot.statusIcon = control:GetNamedChild("SlotStatusIcon")
+    control.slot.statusIcon:AddIcon(ZO_KEYBOARD_NEW_ICON)
+    control.skillStyleControl = control:GetNamedChild("SkillStyle")
+    control.skillStyleControl.statusIcon = control:GetNamedChild("SkillStyleStatusIcon")
+    control.skillStyleControl.statusIcon:AddIcon(ZO_KEYBOARD_NEW_ICON)
+    control.skillStyleControl.defaultStyleButton = control.skillStyleControl:GetNamedChild("DefaultStyle")
+    control.skillStyleControl.selectedStyleButton = control.skillStyleControl:GetNamedChild("SelectedStyle")
+    control.skillStyleControl.selectedStyleButton.icon = control.skillStyleControl.selectedStyleButton:GetNamedChild("Icon")
 
     local xpBarControl = control:GetNamedChild("XPBar")
     control.xpBar = ZO_WrappingStatusBar:New(xpBarControl)
@@ -150,6 +165,7 @@ do
         local lastSkillProgressionData = control.skillProgressionData
         control.skillProgressionData = skillProgressionData
         control.slot.skillProgressionData = skillProgressionData
+        control.slot.skillData = skillData
 
         -- slot
         control.slotIcon:SetTexture(skillProgressionData:GetIcon())
@@ -157,6 +173,16 @@ do
         ZO_ActionSlot_SetUnusable(control.slotIcon, not isPurchased)
         control.slot:SetEnabled(isPurchased and isActive)
         control.slotLock:SetHidden(isUnlocked)
+
+        local hasSlotStatusUpdated = skillData:HasUpdatedStatusByType(ZO_SKILL_DATA_NEW_STATE.MORPHABLE) or skillData:HasUpdatedStatusByType(ZO_SKILL_DATA_NEW_STATE.CRAFTED_ABILITY)
+        control.slot.statusIcon:SetHidden(not hasSlotStatusUpdated)
+
+        if skillProgressionData:IsActive() and skillProgressionData:GetNumSkillStyles() > 0 then
+            local collectibleData = skillProgressionData:GetSelectedSkillStyleCollectibleData()
+            if collectibleData then
+                control.skillStyleControl.selectedStyleButton.icon:SetTexture(collectibleData:GetIcon())
+            end
+        end
 
         -- xp bar
         local showXPBar = skillProgressionData:HasRankData()
@@ -253,6 +279,33 @@ do
 
         increaseButton:SetHidden(hideIncreaseButton)
         decreaseButton:SetHidden(hideDecreaseButton)
+
+        -- Don't show skill style functionality if in respec mode (decrease button showing)
+        local skillStyleControl = control.skillStyleControl
+        if hideDecreaseButton then
+            skillStyleControl:ClearAnchors()
+            if hideIncreaseButton then
+                skillStyleControl:SetAnchor(RIGHT, control.slot, LEFT, -12)
+            else
+                skillStyleControl:SetAnchor(RIGHT, increaseButton, LEFT)
+            end
+
+            if isActive and skillProgressionData:GetNumSkillStyles() ~= 0 then
+                skillStyleControl:SetHidden(false)
+                if skillProgressionData:IsSkillStyleSelected() then
+                    skillStyleControl.defaultStyleButton:SetHidden(true)
+                    skillStyleControl.selectedStyleButton:SetHidden(false)
+                else
+                    skillStyleControl.defaultStyleButton:SetHidden(false)
+                    skillStyleControl.selectedStyleButton:SetHidden(true)
+                end
+                skillStyleControl.statusIcon:SetHidden(not skillData:HasUpdatedStatusByType(ZO_SKILL_DATA_NEW_STATE.STYLE_COLLECTIBLE))
+            else
+                skillStyleControl:SetHidden(true)
+            end
+        else
+            skillStyleControl:SetHidden(true)
+        end
     end
 
     function ZO_Skills_CompanionSkillEntry_Setup(control, skillData)
@@ -315,40 +368,55 @@ function ZO_Skills_AbilitySlot_OnDoubleClick(control)
     end
 end
 
-function ZO_Skills_AbilitySlot_OnClick(control)
+function ZO_Skills_AbilitySlot_OnMouseUp(control)
     local hotbar = ACTION_BAR_ASSIGNMENT_MANAGER:GetCurrentHotbar()
     local skillData = control.skillProgressionData:GetSkillData()
-    if not skillData:IsPassive() and skillData:GetPointAllocator():IsPurchased() then
-        ClearMenu()
-        if skillData:IsUltimate() then
-            local ultimateSlotIndex = ACTION_BAR_ULTIMATE_SLOT_INDEX + 1
-            if hotbar:GetExpectedSkillSlotResult(ultimateSlotIndex, skillData) == HOT_BAR_RESULT_SUCCESS then
-                AddMenuItem(GetString(SI_SKILL_ABILITY_ASSIGN_TO_ULTIMATE_SLOT), function()
-                    if hotbar:AssignSkillToSlot(ultimateSlotIndex, skillData) then
-                        PlaySound(SOUNDS.ABILITY_SLOTTED)
-                    end
-                end)
-            end
-        else
-            local slotId = hotbar:FindEmptySlotForSkill(skillData)
-            if slotId then
-                AddMenuItem(GetString(SI_SKILL_ABILITY_ASSIGN_TO_EMPTY_SLOT), function()
-                    if hotbar:AssignSkillToSlot(slotId, skillData) then
-                        PlaySound(SOUNDS.ABILITY_SLOTTED)
-                    end
-                end)
-            end
 
-            for actionSlotIndex = ACTION_BAR_FIRST_NORMAL_SLOT_INDEX + 1, ACTION_BAR_ULTIMATE_SLOT_INDEX do
-                if hotbar:GetExpectedSkillSlotResult(actionSlotIndex, skillData) == HOT_BAR_RESULT_SUCCESS then
-                    AddMenuItem(zo_strformat(SI_SKILL_ABILITY_ASSIGN_TO_SLOT, actionSlotIndex - 2), function()
-                        if hotbar:AssignSkillToSlot(actionSlotIndex, skillData) then
+    local function OnLinkInChat()
+        local link = skillData:GetCurrentProgressionLink()
+        if internalassert(link, "Unable to generate link for skill.") then
+            ZO_LinkHandler_InsertLink(link)
+        end
+    end
+
+    if skillData:IsPassive() then
+        ClearMenu()
+        AddMenuItem(GetString(SI_ITEM_ACTION_LINK_TO_CHAT), OnLinkInChat)
+        ShowMenu(control)
+    else
+        ClearMenu()
+        if skillData:GetPointAllocator():IsPurchased() and control.skillProgressionData == skillData:GetCurrentProgressionData() then
+            if skillData:IsUltimate() then
+                local ultimateSlotIndex = ACTION_BAR_ULTIMATE_SLOT_INDEX + 1
+                if hotbar:GetExpectedSkillSlotResult(ultimateSlotIndex, skillData) == HOT_BAR_RESULT_SUCCESS then
+                    AddMenuItem(GetString(SI_SKILL_ABILITY_ASSIGN_TO_ULTIMATE_SLOT), function()
+                        if hotbar:AssignSkillToSlot(ultimateSlotIndex, skillData) then
                             PlaySound(SOUNDS.ABILITY_SLOTTED)
                         end
                     end)
                 end
+            else
+                local slotId = hotbar:FindEmptySlotForSkill(skillData)
+                if slotId then
+                    AddMenuItem(GetString(SI_SKILL_ABILITY_ASSIGN_TO_EMPTY_SLOT), function()
+                        if hotbar:AssignSkillToSlot(slotId, skillData) then
+                            PlaySound(SOUNDS.ABILITY_SLOTTED)
+                        end
+                    end)
+                end
+
+                for actionSlotIndex = ACTION_BAR_FIRST_NORMAL_SLOT_INDEX + 1, ACTION_BAR_ULTIMATE_SLOT_INDEX do
+                    if hotbar:GetExpectedSkillSlotResult(actionSlotIndex, skillData) == HOT_BAR_RESULT_SUCCESS then
+                        AddMenuItem(zo_strformat(SI_SKILL_ABILITY_ASSIGN_TO_SLOT, actionSlotIndex - 2), function()
+                            if hotbar:AssignSkillToSlot(actionSlotIndex, skillData) then
+                                PlaySound(SOUNDS.ABILITY_SLOTTED)
+                            end
+                        end)
+                    end
+                end
             end
         end
+        AddMenuItem(GetString(SI_ITEM_ACTION_LINK_TO_CHAT), OnLinkInChat)
         ShowMenu(control)
     end
 end
@@ -428,6 +496,21 @@ end
 
 function ZO_Skills_AbilityDecrease_OnMouseExit(control)
     ClearTooltip(InformationTooltip)
+end
+
+function ZO_Skills_SkillStyle_OnClicked(control)
+    local skillProgressionData = control:GetParent().skillProgressionData
+    local skillData = skillProgressionData:GetSkillData()
+    ZO_Dialogs_ShowDialog("SKILL_STYLE_SELECT_KEYBOARD", { skillData = skillData })
+end
+
+function ZO_Skills_SkillStyle_OnMouseEnter(control)
+    control.statusIcon:SetHidden(true)
+    control:GetParent().slot.skillData:SetUpdatedStatusByType(ZO_SKILL_DATA_NEW_STATE.STYLE_COLLECTIBLE, false)
+end
+
+function ZO_Skills_SkillStyle_OnMouseExit(control)
+    -- TODO SkillStyle: Implement
 end
 
 ZO_Skills_SkillLineAdvisedOverlay = ZO_InitializingObject:Subclass()

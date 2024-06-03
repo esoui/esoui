@@ -248,21 +248,6 @@
             <Anchor point="TOPLEFT" offsetX="-8" offsetY="-2"/>
         </Texture>
 
-        <TopLevelControl name="ZO_PanelTitle" virtual="true">
-            <Dimensions x="1024" y="50" />
-            <Anchor point="RIGHT" relativeTo="GuiRoot" offsetX="30" offsetY="-335" />
-            <Controls>
-                <Label name="$(parent)Label" font="ZoFontWindowTitle" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE">
-                    <Anchor point="LEFT" offsetX="50" />
-                </Label>
-
-                <Texture name="$(parent)Divider" textureFile="EsoUI/Art/Miscellaneous/centerscreen_topDivider.dds">
-                    <Dimensions x="1024" y="4" />
-                    <Anchor point="BOTTOM"/>
-                </Texture>
-            </Controls>
-        </TopLevelControl>
-
         <TopLevelControl name="ZO_NarrowRightPanelFootPrint" virtual="true">
             <Dimensions x="551" y="730" />
             <Anchor point="RIGHT" relativeTo="GuiRoot" offsetX="-14" offsetY="17" />
@@ -750,6 +735,21 @@
                 </Texture>
             </Controls>
         </Control>
+
+        <TopLevelControl name="ZO_PanelTitle" virtual="true">
+            <Dimensions x="1024" y="50" />
+            <Anchor point="RIGHT" relativeTo="GuiRoot" offsetX="30" offsetY="-335" />
+            <Controls>
+                <Label name="$(parent)Label" font="ZoFontWindowTitle" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE">
+                    <Anchor point="LEFT" offsetX="50" />
+                </Label>
+
+                <Control name="$(parent)Divider" inherits="ZO_DynamicHorizontalDivider">
+                    <Anchor point="BOTTOMLEFT" offsetX="60" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-60" />
+                </Control>
+            </Controls>
+        </TopLevelControl>
 
         <Texture name="ZO_BaseTooltipDivider" virtual="true" hidden="true" inherits="ZO_HorizontalDivider">
             <Dimensions x="372" y="5"/>

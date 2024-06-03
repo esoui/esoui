@@ -197,7 +197,7 @@ function ZO_SocialOptionsDialogGamepad:BuildSendMailOption()
         elseif IsUnitInCombat("player") then
             ZO_AlertEvent(EVENT_UI_ERROR, SI_CANNOT_DO_THAT_WHILE_IN_COMBAT)
         else
-            MAIL_MANAGER_GAMEPAD:GetSend():ComposeMailTo(ZO_FormatUserFacingCharacterOrDisplayName(self.socialData.displayName))
+            MAIL_GAMEPAD:GetSend():ComposeMailTo(ZO_FormatUserFacingCharacterOrDisplayName(self.socialData.displayName))
         end
     end
     local unusedHeader = nil
@@ -290,7 +290,7 @@ function ZO_SocialOptionsDialogGamepad:BuildGamerCardOption()
                 ZO_Dialogs_ShowGamepadDialog("GAMERCARD_UNAVAILABLE")
             end
         end
-        return self:BuildOptionEntry(nil, GetGamerCardStringId(), callback)
+        return self:BuildOptionEntry(nil, ZO_GetGamerCardStringId(), callback)
     end
     return nil
 end

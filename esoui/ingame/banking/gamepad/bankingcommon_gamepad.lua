@@ -63,7 +63,7 @@ end
 
 ZO_BankingCommon_Gamepad = ZO_Gamepad_ParametricList_BagsSearch_Screen:Subclass()
 
-function ZO_BankingCommon_Gamepad:Initialize(control, bankScene)
+function ZO_BankingCommon_Gamepad:Initialize(searchContext, control, bankScene)
     self.isInitialized = false
     self.mode = BANKING_GAMEPAD_MODE_WITHDRAW
 
@@ -72,7 +72,7 @@ function ZO_BankingCommon_Gamepad:Initialize(control, bankScene)
     self:CreateEventTable()
 
     local DONT_ACTIVATE_LIST_ON_SHOW = false
-    ZO_Gamepad_ParametricList_BagsSearch_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_CREATE, DONT_ACTIVATE_LIST_ON_SHOW, bankScene)
+    ZO_Gamepad_ParametricList_BagsSearch_Screen.Initialize(self, searchContext, control, ZO_GAMEPAD_HEADER_TABBAR_CREATE, DONT_ACTIVATE_LIST_ON_SHOW, bankScene)
 
     self:InitializeFiltersDialog()
 end

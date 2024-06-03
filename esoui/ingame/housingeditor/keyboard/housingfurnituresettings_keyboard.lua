@@ -159,7 +159,7 @@ function ZO_HousingFurnitureSettings_Keyboard:InitializeKeybindStrip()
             end,
 
             visible = function()
-                return self.activePanel ~= self.occupantsOptionsPanel
+                return self.activePanel ~= self.occupantsOptionsPanel and self:CanShowCopyDialog()
             end,
         },
     }

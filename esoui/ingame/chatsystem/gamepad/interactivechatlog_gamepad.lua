@@ -279,5 +279,6 @@ do
         ZO_SharedGamepadEntry_OnInitialized(self)
         self.GetHeight = GetHeight
         self.label = self:GetNamedChild("Label")
+        self.marker = self:GetNamedChild("Marker")
     end
 end

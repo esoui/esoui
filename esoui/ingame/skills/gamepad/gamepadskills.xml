@@ -8,13 +8,13 @@
             <Dimensions y="36"/>
             <Controls>
                 <Control name="$(parent)Increase" inherits="ZO_KeybindButton">
-                    <Anchor point="TOPLEFT" offsetX="-5"/>
+                    <Anchor point="TOPLEFT" />
                     <OnInitialized>
                         ZO_GamepadSkills_RespecBindingsBinding_OnInitialized(self, "UI_SHORTCUT_LEFT_SHOULDER")
                     </OnInitialized>
                 </Control>
                 <Control name="$(parent)Decrease" inherits="ZO_KeybindButton">
-                    <Anchor point="TOPRIGHT" offsetX="5"/>
+                    <Anchor point="TOPRIGHT" />
                     <OnInitialized>
                         ZO_GamepadSkills_RespecBindingsBinding_OnInitialized(self, "UI_SHORTCUT_RIGHT_SHOULDER")
                     </OnInitialized>

@@ -263,8 +263,10 @@ function ZO_CompanionCollectionBook_Gamepad:SetupList(list)
         ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
     end
 
-    list:AddDataTemplate("ZO_GamepadCompanionCollectible", CollectibleEntrySetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
-    list:AddDataTemplateWithHeader("ZO_GamepadCompanionCollectible", CollectibleEntrySetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
+    local DEFAULT_EQUALITY_FUNCTION = nil
+    local DEFAULT_HEADER_SETUP_FUNCTION = nil
+    list:AddDataTemplate("ZO_GamepadCompanionCollectible", CollectibleEntrySetup, ZO_GamepadMenuEntryTemplateParametricListFunction, DEFAULT_EQUALITY_FUNCTION, "CompanionCollectible")
+    list:AddDataTemplateWithHeader("ZO_GamepadCompanionCollectible", CollectibleEntrySetup, ZO_GamepadMenuEntryTemplateParametricListFunction, DEFAULT_EQUALITY_FUNCTION, "ZO_GamepadMenuEntryHeaderTemplate", DEFAULT_HEADER_SETUP_FUNCTION, "CompanionCollectible")
 end
 
 function ZO_CompanionCollectionBook_Gamepad:OnShowing()

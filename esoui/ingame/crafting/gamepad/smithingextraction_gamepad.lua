@@ -5,7 +5,6 @@ local g_filters =
 {
     [GAMEPAD_SMITHING_EXTRACTION_FILTER_INCLUDE_BANKED] =
     {
-        header = GetString(SI_GAMEPAD_SMITHING_FILTERS),
         filterName = GetString(SI_CRAFTING_INCLUDE_BANKED),
         filterTooltip = GetString(SI_CRAFTING_INCLUDE_BANKED_TOOLTIP),
         checked = false,

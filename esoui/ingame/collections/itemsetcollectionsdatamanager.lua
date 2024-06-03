@@ -17,9 +17,6 @@ function ZO_ItemSetCollectionsDataManager:Initialize()
         table.insert(self.reconstructionCurrencyOptionTypes, GetItemReconstructionCurrencyOptionType(currencyOptionIndex))
     end
 
-    self.searchString = ""
-    self.searchResultsVersion = 0
-
     self.queuedSlotsJustUnlocked = {}
 
     self:RegisterForEvents()
@@ -236,24 +233,6 @@ function ZO_ItemSetCollectionsDataManager:GetOrCreateItemSetCollectionCategoryDa
     end
 end
 
--- Search
-function ZO_ItemSetCollectionsDataManager:SetSearchString(searchString)
-    self.searchString = searchString or ""
-    StartItemSetCollectionSearch(self.searchString)
-end
-
-function ZO_ItemSetCollectionsDataManager:UpdateSearchResults()
-    self.searchResultsVersion = self.searchResultsVersion + 1
-
-    for i = 1, GetNumItemSetCollectionSearchResults() do
-        local itemSetId = GetItemSetCollectionSearchResult(i)
-        local itemSetCollectionData = self:GetItemSetCollectionData(itemSetId)
-        itemSetCollectionData:SetSearchResultsVersion(self.searchResultsVersion)
-    end
-
-    self:FireCallbacks("UpdateSearchResults")
-end
-
 function ZO_ItemSetCollectionsDataManager:OnCollectionSlotNewStatusCleared(itemSetId, itemSetCollectionSlot)
     local itemSetCollectionData = self:GetItemSetCollectionData(itemSetId)
     local itemSetCollectionPieceData = itemSetCollectionData:GetPieceDataBySlot(itemSetCollectionSlot)
@@ -270,14 +249,6 @@ end
 
 function ZO_ItemSetCollectionsDataManager:HasAnyNewPieces()
     return DoesItemSetCollectionsHaveAnyNewPieces()
-end
-
-function ZO_ItemSetCollectionsDataManager:GetSearchResultsVersion()
-    return self.searchResultsVersion
-end
-
-function ZO_ItemSetCollectionsDataManager:HasSearchFilter()
-    return zo_strlen(self.searchString) > 1
 end
 
 function ZO_ItemSetCollectionsDataManager:GetShowLocked()

@@ -437,7 +437,7 @@ local MENU_ENTRY_DATA =
             },
             [MENU_SOCIAL_ENTRIES.MAIL] =
             {
-                scene = "mailManagerGamepad",
+                scene = "mailGamepad",
                 name = GetString(SI_MAIN_MENU_MAIL),
                 icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_mail.dds",
                 isNewCallback = function()

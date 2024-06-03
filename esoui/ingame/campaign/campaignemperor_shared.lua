@@ -51,7 +51,7 @@ function CampaignEmperor_Shared:InitializeMenu()
 
     local function InitializeMenuEntry(alliance)
         local entry = { alliance = alliance,  textString = zo_strformat(SI_ALLIANCE_NAME, GetAllianceName(alliance)) }
-        entry.callback = function() OnEntryClicked(entry) end,
+        entry.callback = function() OnEntryClicked(entry) end
         
         table.insert(self.menuEntries, entry)
 

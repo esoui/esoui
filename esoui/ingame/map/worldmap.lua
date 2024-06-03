@@ -262,9 +262,15 @@ function ZO_WorldMap_GetWayshrineTooltipCollectibleLockedText(pin)
     --Otherwise we'd run superflous code to return useless information
     assert(pin:IsLockedByLinkedCollectible())
 
-    local collectibleId = GetFastTravelNodeLinkedCollectibleId(pin:GetFastTravelNodeIndex())
-    local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
-    local stringId = collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_CHAPTER) and SI_TOOLTIP_POI_LINKED_CHAPTER_COLLECTIBLE_LOCKED or SI_TOOLTIP_POI_LINKED_DLC_COLLECTIBLE_LOCKED
+    local collectibleData = pin:GetLinkedCollectibleData()
+    local stringId
+    if collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_CHAPTER) then
+        stringId = SI_TOOLTIP_POI_LINKED_CHAPTER_COLLECTIBLE_LOCKED
+    elseif collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_DLC) then
+        stringId = SI_TOOLTIP_POI_LINKED_DLC_COLLECTIBLE_LOCKED
+    else
+        stringId = SI_TOOLTIP_POI_LINKED_CROWN_STORE_COLLECTIBLE_LOCKED
+    end
     return zo_strformat(stringId, collectibleData:GetName(), collectibleData:GetCategoryData():GetName())
 end
 
@@ -1171,8 +1177,7 @@ function ZO_MapPanAndZoom:ComputeMaxZoom()
             local tilePixelWidth = ZO_WorldMapContainer1:GetTextureFileDimensions()
             local totalPixels = numTiles * tilePixelWidth
             local mapAreaUIUnits = ZO_WorldMapScroll:GetHeight()
-            local mapAreaPixels = mapAreaUIUnits * GetUIGlobalScale()
-            local maxZoomToStayBelowNative = totalPixels / mapAreaPixels
+            local maxZoomToStayBelowNative = totalPixels / mapAreaUIUnits
             return zo_max(maxZoomToStayBelowNative * ZO_MapPanAndZoom.MAX_OVER_ZOOM, 1)
         end
     end
@@ -4671,7 +4676,7 @@ do
 
     function ZO_WorldMapManager:RefreshSuggestionPins()
         g_mapPinManager:RemovePins("suggestion")
-        if IsZoneStoryActivelyTracking() then
+        if IsZoneStoryTracked() then
             local zoneId, zoneCompletionType, activityId = GetTrackedZoneStoryActivityInfo()
             if not ZONE_COMPLETION_TYPE_WITHOUT_PIN[zoneCompletionType] then
                 local normalizedX, normalizedY, normalizedRadius, isShownInCurrentMap = GetNormalizedPositionForZoneStoryActivityId(zoneId, zoneCompletionType, activityId)

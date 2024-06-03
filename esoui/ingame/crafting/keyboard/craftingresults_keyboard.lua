@@ -2,10 +2,6 @@ local CRAFTING_RESULTS_TEMPLATE = "ZO_CraftingResultItem"
 
 ZO_CraftingResults_Keyboard = ZO_CraftingResults_Base:Subclass()
 
-function ZO_CraftingResults_Keyboard:New(...)
-    return ZO_CraftingResults_Base.New(self, ...)
-end
-
 local MAX_RUNE_ROWS = 3
 local function RegisterEnchantDialog(dialogName, control)
     local function SetupEnchantDialog(dialog)
@@ -210,7 +206,7 @@ do
 
         control:SetText(data.text)
 
-        local inventorySlot = GetControl(control, "Button")
+        local inventorySlot = control:GetNamedChild("Button")
         ZO_Inventory_SetupSlot(inventorySlot, data.stack, data.icon, data.meetsUsageRequirement)
     end
 

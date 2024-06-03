@@ -249,7 +249,7 @@ function ZO_GuildHistory_Gamepad:FocusEventsList()
     self:RefreshFooter()
 end
 
-function ZO_GuildHistory_Gamepad:SetShowLoadingSpinner(showLoadingSpinner)
+function ZO_GuildHistory_Gamepad:SetShowLoadingSpinner(showLoadingSpinner, isTargetingEvents)
     self.loadingIcon:SetHidden(not showLoadingSpinner)
 end
 

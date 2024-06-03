@@ -174,7 +174,7 @@ function WorldMapQuests_Gamepad:InitializeKeybindDescriptor()
                 end
 
                 ZO_WorldMap_PanToQuest(questIndex)
-                ZO_ZoneStories_Manager.StopZoneStoryTracking()
+                ZO_ZoneStories_Manager.SetTrackedZoneStoryAssisted(false)
                 FOCUSED_QUEST_TRACKER:ForceAssist(questIndex)
                 self.questList:RefreshVisible()
                 self:SetupQuestDetails()
@@ -183,7 +183,7 @@ function WorldMapQuests_Gamepad:InitializeKeybindDescriptor()
 
             enabled = function()
                 local targetData = self.questList:GetTargetData()
-                return targetData ~= nil and targetData.questInfo ~= nil and targetData.questInfo.questIndex ~= nil and (not targetData.isAssisted or IsZoneStoryActivelyTracking())
+                return targetData ~= nil and targetData.questInfo ~= nil and targetData.questInfo.questIndex ~= nil and (not targetData.isAssisted or IsZoneStoryAssisted())
             end
         },
     }

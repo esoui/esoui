@@ -87,7 +87,7 @@ function ZO_ItemPreview_Gamepad:SetVariationControlsHidden(shouldHide)
 end
 
 function ZO_ItemPreview_Gamepad:SetVariationLabel(variationName)
-    self.variationLabel:SetText(variationName)
+    self.variationLabel:SetText(zo_strformat(SI_COLLECTIBLE_NAME_FORMATTER, variationName))
 end
 
 function ZO_ItemPreview_Gamepad:SetHorizontalPaddings(paddingLeft, paddingRight)

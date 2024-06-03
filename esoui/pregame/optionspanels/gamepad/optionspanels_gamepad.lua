@@ -236,6 +236,11 @@ GAMEPAD_SETTINGS_DATA =
         {
             panel = SETTING_PANEL_ACCESSIBILITY,
             system = SETTING_TYPE_ACCESSIBILITY,
+            settingId = ACCESSIBILITY_SETTING_TEXT_INPUT_NARRATION,
+        },
+        {
+            panel = SETTING_PANEL_ACCESSIBILITY,
+            system = SETTING_TYPE_ACCESSIBILITY,
             settingId = ACCESSIBILITY_SETTING_NARRATION_VOLUME,
         },
         {
@@ -252,18 +257,6 @@ GAMEPAD_SETTINGS_DATA =
             panel = SETTING_PANEL_ACCESSIBILITY,
             system = SETTING_TYPE_ACCESSIBILITY,
             settingId = ACCESSIBILITY_SETTING_ACCESSIBLE_QUICKWHEELS,
-        },
-        {
-            panel = SETTING_PANEL_ACCESSIBILITY,
-            system = SETTING_TYPE_ACCESSIBILITY,
-            settingId = ACCESSIBILITY_SETTING_GAMEPAD_AIM_ASSIST_INTENSITY,
-            header = SI_ACCESSIBILITY_OPTIONS_ARCANIST,
-        },
-        {
-            panel = SETTING_PANEL_ACCESSIBILITY,
-            system = SETTING_TYPE_ACCESSIBILITY,
-            settingId = ACCESSIBILITY_SETTING_MOUSE_AIM_ASSIST_INTENSITY,
-            header = SI_ACCESSIBILITY_OPTIONS_ARCANIST,
         },
     },
 }

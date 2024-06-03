@@ -247,6 +247,18 @@
             <Dimensions x="320" y="320" />
         </Texture>
 
+        <Control name="ZO_CraftingTooltip_AddGlow" virtual="true">
+            <Controls>
+                <Backdrop name="$(parent)Glow" tier="LOW" excludeFromResizeToFitExtents="true" level="0" alpha="0">
+                    <Anchor point="TOPLEFT" offsetX="-31" offsetY="-31" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="30" offsetY="30" />
+
+                    <!-- Edge file determined in Lua -->
+                    <Center file="EsoUI/Art/Crafting/crafting_toolTip_glow_center.dds" />
+                </Backdrop>
+            </Controls>
+        </Control>
+
         <Control name="ZO_CraftingTooltip_AddBurstAndGlow" virtual="true">
             <Controls>
                 <Control name="$(parent)Icon" override="true">

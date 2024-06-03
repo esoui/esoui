@@ -1,5 +1,6 @@
 -- Globals used by multiple crafting files
 ZO_GAMEPAD_CRAFTING_UTILS_INGREDIENT_SLOT_AND_MARGIN_WIDTH = 231
+ZO_GAMEPAD_CRAFTING_UTILS_INGREDIENT_SLOT_AND_MARGIN_HEIGHT = 205
 ZO_GAMEPAD_CRAFTING_UTILS_FLOATING_PADDING_Y = 50
 ZO_GAMEPAD_CRAFTING_UTILS_FLOATING_SLOT_STANDARD_HEIGHT = 190
 ZO_GAMEPAD_CRAFTING_UTILS_FLOATING_BOTTOM_OFFSET = ZO_GAMEPAD_QUADRANT_BOTTOM_OFFSET - ZO_GAMEPAD_CRAFTING_UTILS_FLOATING_PADDING_Y
@@ -26,6 +27,18 @@ ZO_IS_IN_ARMORY_STATUS_ICON_OVERRIDE =
 {
     iconTexture = ZO_IN_ARMORY_BUILD_ICON,
     iconNarration = GetString(SI_SCREEN_NARRATION_IN_ARMORY_BUILD_ICON_NARRATION),
+}
+
+ZO_IS_ACTIVELY_SCRIBED_STATUS_ICON_OVERRIDE =
+{
+    iconTexture = "EsoUI/Art/Crafting/Gamepad/gp_crafting_menuIcon_activeScribe.dds",
+    iconNarration = GetString(SI_SCREEN_NARRATION_ACTIVE_ICON_NARRATION),
+}
+
+ZO_IS_CRAFTED_ABILITY_ON_HOT_BAR_STATUS_ICON_OVERRIDE =
+{
+    iconTexture = "EsoUI/Art/Skills/gamepad/gp_scribing_grimoire_equipped.dds",
+    iconNarration = GetString(SI_SCREEN_NARRATION_ACTIVE_ICON_NARRATION),
 }
 
 -- Note: call this towards the end of your keybind setup function...if you call this before you do something like self.keybindStripDescriptor = {keybinds} you'll destroy these
@@ -518,18 +531,13 @@ function ZO_GamepadCraftingUtils_ShowDeconstructPartialStackDialog(bagId, slotIn
 end
 
 --[[ Gamepad Crafting Ingredient Bar ]]--
-ZO_GamepadCraftingIngredientBar = ZO_Object:Subclass()
+ZO_GamepadCraftingIngredientBar = ZO_InitializingObject:Subclass()
 
-function ZO_GamepadCraftingIngredientBar:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
-
-function ZO_GamepadCraftingIngredientBar:Initialize(control)
+function ZO_GamepadCraftingIngredientBar:Initialize(control, isVertical)
     self.control = control
 
     self.slotCenterControl = self.control:GetNamedChild("SlotCenter")
+    self.isVertical = isVertical
 
     self.dataTypes = {}
     self:Clear()
@@ -561,7 +569,7 @@ function ZO_GamepadCraftingIngredientBar:AddEntry(templateName, data)
     local dataTypeInfo = self.dataTypes[templateName]
     if dataTypeInfo then
         table.insert(self.dataList, data)
-        
+
         local control, key = dataTypeInfo.pool:AcquireObject()
         control.key = key
         control.templateName = templateName
@@ -574,14 +582,25 @@ function ZO_GamepadCraftingIngredientBar:AddEntry(templateName, data)
 end
 
 function ZO_GamepadCraftingIngredientBar:Commit()
-    local numIngredients = #self.dataList  
-    -- Start the leftmost slot at the width of all slots halved. This way the collection of slots will be visually centered
-    local offsetX = (numIngredients - 1) * -ZO_GAMEPAD_CRAFTING_UTILS_INGREDIENT_SLOT_AND_MARGIN_WIDTH * 0.5
+    local numIngredients = #self.dataList
+    if self.isVertical then
+        -- Start the topmost slot at the height of all slots. This way the collection of slots will be visually centered
+        local offsetY = (numIngredients - 1) * -ZO_GAMEPAD_CRAFTING_UTILS_INGREDIENT_SLOT_AND_MARGIN_HEIGHT
 
-    for i, data in ipairs(self.dataList) do
-        data.control:SetAnchor(CENTER, self.slotCenterControl, CENTER, offsetX, 0)
-        -- Anchor the next slot to the right of this one
-        offsetX = offsetX + ZO_GAMEPAD_CRAFTING_UTILS_INGREDIENT_SLOT_AND_MARGIN_WIDTH
+        for i, data in ipairs(self.dataList) do
+            data.control:SetAnchor(CENTER, self.slotCenterControl, CENTER, 0, offsetY)
+            -- Anchor the next slot to the bottom of this one
+            offsetY = offsetY + ZO_GAMEPAD_CRAFTING_UTILS_INGREDIENT_SLOT_AND_MARGIN_HEIGHT
+        end
+    else
+        -- Start the leftmost slot at the width of all slots halved. This way the collection of slots will be visually centered
+        local offsetX = (numIngredients - 1) * -ZO_GAMEPAD_CRAFTING_UTILS_INGREDIENT_SLOT_AND_MARGIN_WIDTH * 0.5
+
+        for i, data in ipairs(self.dataList) do
+            data.control:SetAnchor(CENTER, self.slotCenterControl, CENTER, offsetX, 0)
+            -- Anchor the next slot to the right of this one
+            offsetX = offsetX + ZO_GAMEPAD_CRAFTING_UTILS_INGREDIENT_SLOT_AND_MARGIN_WIDTH
+        end
     end
 end
 

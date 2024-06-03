@@ -48,14 +48,24 @@ function ZO_ZoneStories_Manager:ShowZoneStoriesScene(zoneId)
 end
 
 function ZO_ZoneStories_Manager.OnQuestAdded(questIndex)
-    if IsZoneStoryActivelyTracking() and IsJournalQuestIndexInTrackedZoneStory(questIndex) then
+    if IsZoneStoryAssisted() and IsJournalQuestIndexInTrackedZoneStory(questIndex) then
         ClearTrackedZoneStory()
+        FOCUSED_QUEST_TRACKER:ForceAssist(questIndex)
+    elseif GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_AUTOMATIC_QUEST_TRACKING) then
+       ZO_ZoneStories_Manager.SetTrackedZoneStoryAssisted(false)
     end
 end
 
 function ZO_ZoneStories_Manager.StopZoneStoryTracking()
-    if IsZoneStoryActivelyTracking() then
+    if IsZoneStoryTracked() then
         ClearTrackedZoneStory()
+    end
+end
+
+function ZO_ZoneStories_Manager.SetTrackedZoneStoryAssisted(assisted)
+    if IsZoneStoryTracked() and IsZoneStoryAssisted() ~= assisted then
+        SetTrackedZoneStoryAssisted(assisted)
+        HUD_TRACKER_MANAGER:UpdateVisibility()
     end
 end
 

@@ -670,7 +670,7 @@ CENTER_SCREEN_EVENT_HANDLERS[EVENT_CAPTURE_AREA_STATE_CHANGED] = function(object
             local text, soundId
             --150% because the icon textures contain a good bit of empty space
             local captureAreaIcon = zo_iconFormat(ZO_MapPin.GetStaticPinTexture(pinType), "150%", "150%")
-            if owningAlliance == GetUnitBattlegroundAlliance("player") then
+            if owningAlliance == GetUnitBattlegroundTeam("player") then
                 text = zo_strformat(SI_BATTLEGROUND_CAPTURE_AREA_CAPTURED, GetColoredBattlegroundYourTeamText(owningAlliance), captureAreaIcon)
                 soundId = SOUNDS.BATTLEGROUND_CAPTURE_AREA_CAPTURED_OWN_TEAM
             else
@@ -704,7 +704,7 @@ CENTER_SCREEN_EVENT_HANDLERS[EVENT_CAPTURE_FLAG_STATE_CHANGED] = function(object
         local flagIcon = zo_iconFormat(ZO_MapPin.GetStaticPinTexture(pinType), "150%", "150%")
         if objectiveControlEvent == OBJECTIVE_CONTROL_EVENT_FLAG_TAKEN then
             local text, soundId
-            if holderAlliance == GetUnitBattlegroundAlliance("player") then
+            if holderAlliance == GetUnitBattlegroundTeam("player") then
                 text = zo_strformat(SI_BATTLEGROUND_FLAG_PICKED_UP, GetColoredBattlegroundYourTeamText(holderAlliance), flagIcon)
                 soundId = SOUNDS.BATTLEGROUND_CAPTURE_FLAG_TAKEN_OWN_TEAM
             else
@@ -714,7 +714,7 @@ CENTER_SCREEN_EVENT_HANDLERS[EVENT_CAPTURE_FLAG_STATE_CHANGED] = function(object
             return CreatePvPMessageParams(soundId, text, CENTER_SCREEN_ANNOUNCE_TYPE_BATTLEGROUND_OBJECTIVE)
         elseif objectiveControlEvent == OBJECTIVE_CONTROL_EVENT_FLAG_DROPPED then
             local text, soundId
-            if lastHolderAlliance == GetUnitBattlegroundAlliance("player") then
+            if lastHolderAlliance == GetUnitBattlegroundTeam("player") then
                 text = zo_strformat(SI_BATTLEGROUND_FLAG_DROPPED, GetColoredBattlegroundYourTeamText(lastHolderAlliance), flagIcon)
                 soundId = SOUNDS.BATTLEGROUND_CAPTURE_FLAG_DROPPED_OWN_TEAM
             else
@@ -726,7 +726,7 @@ CENTER_SCREEN_EVENT_HANDLERS[EVENT_CAPTURE_FLAG_STATE_CHANGED] = function(object
             return CreatePvPMessageParams(SOUNDS.BATTLEGROUND_CAPTURE_FLAG_RETURNED, zo_strformat(SI_BATTLEGROUND_FLAG_RETURNED, flagIcon), CENTER_SCREEN_ANNOUNCE_TYPE_BATTLEGROUND_OBJECTIVE)
         elseif objectiveControlEvent == OBJECTIVE_CONTROL_EVENT_CAPTURED then
             local text, soundId
-            if lastHolderAlliance == GetUnitBattlegroundAlliance("player") then
+            if lastHolderAlliance == GetUnitBattlegroundTeam("player") then
                 text = zo_strformat(SI_BATTLEGROUND_FLAG_CAPTURED, GetColoredBattlegroundYourTeamText(lastHolderAlliance), flagIcon)
                 soundId = SOUNDS.BATTLEGROUND_CAPTURE_FLAG_CAPTURED_BY_OWN_TEAM
             else
@@ -744,7 +744,7 @@ CENTER_SCREEN_EVENT_HANDLERS[EVENT_MURDERBALL_STATE_CHANGED] = function(objectiv
         local murderballIcon = zo_iconFormat(ZO_MapPin.GetStaticPinTexture(pinType), "150%", "150%")
         if objectiveControlEvent == OBJECTIVE_CONTROL_EVENT_FLAG_TAKEN then
             local text, soundId
-            if holderAlliance == GetUnitBattlegroundAlliance("player") then
+            if holderAlliance == GetUnitBattlegroundTeam("player") then
                 text = zo_strformat(SI_BATTLEGROUND_MURDERBALL_PICKED_UP, GetColoredBattlegroundYourTeamText(holderAlliance), murderballIcon)
                 soundId = SOUNDS.BATTLEGROUND_MURDERBALL_TAKEN_OWN_TEAM
             else
@@ -754,7 +754,7 @@ CENTER_SCREEN_EVENT_HANDLERS[EVENT_MURDERBALL_STATE_CHANGED] = function(objectiv
             return CreatePvPMessageParams(soundId, text, CENTER_SCREEN_ANNOUNCE_TYPE_BATTLEGROUND_OBJECTIVE)
         elseif objectiveControlEvent == OBJECTIVE_CONTROL_EVENT_FLAG_DROPPED then
             local text, soundId
-            if lastHolderAlliance == GetUnitBattlegroundAlliance("player") then
+            if lastHolderAlliance == GetUnitBattlegroundTeam("player") then
                 text = zo_strformat(SI_BATTLEGROUND_MURDERBALL_DROPPED, GetColoredBattlegroundYourTeamText(lastHolderAlliance), murderballIcon)
                 soundId = SOUNDS.BATTLEGROUND_MURDERBALL_DROPPED_OWN_TEAM
             else
@@ -1070,6 +1070,26 @@ CENTER_SCREEN_EVENT_HANDLERS[EVENT_FORCE_RESPEC] = function(respecType)
     messageParams:SetText(GetString("SI_RESPECTYPE_POINTSRESETTITLE", respecType), GetString("SI_RESPECTYPE", respecType))
     messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_FORCE_RESPEC)
     return messageParams
+end
+
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_CRAFTED_ABILITY_RESET] = function(craftedAbilityId, totalNumReset, isLastReset)
+    local RESET_GROUPING_THRESHOLD = 5
+    if totalNumReset < RESET_GROUPING_THRESHOLD then
+        local craftedAbilityData = SCRIBING_DATA_MANAGER:GetCraftedAbilityData(craftedAbilityId)
+        local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
+        messageParams:SetText(GetString(SI_CRAFTED_ABILITY_RESET_ANNOUNCE_TITLE), craftedAbilityData:GetFormattedNameWithSkillLine())
+        -- Treat these the same way we treat force respec
+        messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_FORCE_RESPEC)
+        messageParams:SetIconData(craftedAbilityData:GetIcon())
+        messageParams:MarkSuppressIconFrame()
+        return messageParams
+    elseif isLastReset then
+        local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
+        messageParams:SetText(GetString(SI_CRAFTED_ABILITIES_RESET_ANNOUNCE_TITLE), zo_strformat(SI_CRAFTED_ABILITIES_RESET_ANNOUNCE_BODY, totalNumReset))
+        -- Treat these the same way we treat force respec
+        messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_FORCE_RESPEC)
+        return messageParams
+    end
 end
 
 CENTER_SCREEN_EVENT_HANDLERS[EVENT_ACTIVITY_FINDER_ACTIVITY_COMPLETE] = function()
@@ -1478,8 +1498,10 @@ function ZO_CenterScreenAnnounce_InitializePriorities()
     end
 
     -- Quest Advancement displays all the "appropriate" conditions that the player needs to do to advance the current step
-    local function OnQuestAdvanced(eventId, questIndex, questName, isPushed, isComplete, mainStepChanged)
-        if(not mainStepChanged) then return end
+    local function OnQuestAdvanced(eventId, questIndex, questName, isPushed, isComplete, mainStepChanged, doesConditionHideAnnouncements)
+        if not mainStepChanged or doesConditionHideAnnouncements then
+            return
+        end
 
         local announceObject = CENTER_SCREEN_ANNOUNCE
         local sound = SOUNDS.QUEST_OBJECTIVE_STARTED
@@ -1806,6 +1828,38 @@ local CENTER_SCREEN_CALLBACK_HANDLERS =
                 end
             end)
             return messageParams
+        end,
+    },
+
+    {
+        callbackManager = SCRIBING_DATA_MANAGER,
+        callbackRegistration = "CraftedAbilityLockStateChanged",
+        callbackFunction = function(craftedAbilityData, isUnlocked)
+            if isUnlocked then
+                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.CRAFTED_ABILITY_UNLOCKED)
+                -- Treat these the same way we treat collectibles
+                messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_SINGLE_COLLECTIBLE_UPDATED)
+                messageParams:SetText(GetString(SI_CRAFTED_ABILITY_UNLOCKED_ANNOUNCE_TITLE), craftedAbilityData:GetFormattedNameWithSkillLine())
+                messageParams:SetIconData(craftedAbilityData:GetIcon())
+                messageParams:MarkSuppressIconFrame()
+                return messageParams
+            end
+        end,
+    },
+
+    {
+        callbackManager = SCRIBING_DATA_MANAGER,
+        callbackRegistration = "CraftedAbilityScriptLockStateChanged",
+        callbackFunction = function(craftedAbilityScriptData, isUnlocked)
+            if isUnlocked then
+                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.CRAFTED_ABILITY_SCRIPT_UNLOCKED)
+                -- Treat these the same way we treat collectibles
+                messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_SINGLE_COLLECTIBLE_UPDATED)
+                messageParams:SetText(GetString(SI_CRAFTED_ABILITY_SCRIPT_UNLOCKED_ANNOUNCE_TITLE), craftedAbilityScriptData:GetFormattedNameWithSlot())
+                messageParams:SetIconData(craftedAbilityScriptData:GetIcon())
+                messageParams:MarkSuppressIconFrame()
+                return messageParams
+            end
         end,
     },
 }

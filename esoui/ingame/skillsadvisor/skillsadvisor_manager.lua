@@ -148,10 +148,6 @@ do
     end
 end
 
-function SkillsAdvisor_Manager:OnRequestSelectSkillLine()
-    self:FireCallbacks("OnRequestSelectSkillLine")
-end
-
 function SkillsAdvisor_Manager:OnBuildSelectionUpdated()
     self:UpdateSkillBuildData()
 

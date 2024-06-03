@@ -236,8 +236,8 @@ function ZO_GridScrollList_Gamepad:New(...)
     return ZO_AbstractGridScrollList.New(self, ...)
 end
 
-function ZO_GridScrollList_Gamepad:Initialize(control, selectionTemplate, autofillRows)
-    ZO_AbstractGridScrollList.Initialize(self, control, autofillRows)
+function ZO_GridScrollList_Gamepad:Initialize(control, selectionTemplate, autofillRows, resizeToFitColumnMax, resizeToFitRowMax)
+    ZO_AbstractGridScrollList.Initialize(self, control, autofillRows, resizeToFitColumnMax, resizeToFitRowMax)
     ZO_AbstractGridScrollList_Gamepad.Initialize(self, control, selectionTemplate)
 end
 

@@ -34,6 +34,10 @@ function ZO_GameMenu_Base:InitializeTree()
         BaseTreeHeaderSetup(node, control, data, open)
 
         if open and userRequested then
+            if data.selectedCallback then
+                data.selectedCallback(control)
+            end
+
             self.navigationTree:SelectFirstChild(node)
         end
     end
@@ -121,7 +125,7 @@ function ZO_GameMenu_Base:AddEntry(data)
     else
         -- It's a header...determine what type
         if not self.headerControls[data.name] then
-            if data.callback then
+            if data.callback then --TODO: Changing behavior on existence of callback is strange.
                 -- No children...does it have a selected state?
                 if data.hasSelectedState then
                     self.headerControls[data.name] = self.navigationTree:AddNode("ZO_GameMenu_ChildlessHeader_WithSelectedState", data)

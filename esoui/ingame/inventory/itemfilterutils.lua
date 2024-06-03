@@ -850,6 +850,7 @@ local ITEM_TYPE_DISPLAY_CATEGORY_ITEMTYPES =
     {
         ITEMTYPE_FISH,
         ITEMTYPE_RECALL_STONE,
+        ITEMTYPE_SCRIBING_INK,
     },
     [ITEM_TYPE_DISPLAY_CATEGORY_APPEARANCE] =
     {
@@ -1112,6 +1113,7 @@ local ITEM_TYPE_DISPLAY_CATEGORY_SUBCATEGORY_TYPES =
         ITEM_TYPE_DISPLAY_CATEGORY_STYLE_MATERIAL,
         ITEM_TYPE_DISPLAY_CATEGORY_TRAIT_ITEM,
         ITEM_TYPE_DISPLAY_CATEGORY_FURNISHING_MATERIAL,
+        ITEM_TYPE_DISPLAY_CATEGORY_MISCELLANEOUS,
     },
     [ITEM_TYPE_DISPLAY_CATEGORY_FURNISHING] =
     {
@@ -1223,7 +1225,7 @@ local ITEM_TYPE_DISPLAY_CATEGORY_SUBCATEGORY_TYPES =
         ITEMTYPE_JEWELRY_RAW_TRAIT,
         ITEMTYPE_JEWELRY_TRAIT,
         ITEMTYPE_FURNISHING_MATERIAL,
-    }
+    },
 }
 
 -- Text Search Types
@@ -1532,6 +1534,16 @@ function ZO_ItemFilterUtils.IsSlotInItemTypeDisplayCategoryAndSubcategory(slot, 
     elseif itemTypeDisplayCategoryFilterInfoType == FILTER_INFO_TYPE_SPECIALIZED_ITEM_TYPE then
         return ZO_ItemFilterUtils.IsSlotInSpecializedItemType(slot, itemTypeDisplayCategory, itemTypeSubCategory)
     elseif itemTypeDisplayCategoryFilterInfoType == FILTER_INFO_TYPE_MISCELLANEOUS_TYPE then
+        local itemType = GetItemType(slot.bagId, slot.slotIndex)
+        if slot.bagId == BAG_VIRTUAL then
+            if itemType == ITEMTYPE_LURE then
+                return false
+            end
+        else
+            if itemType == ITEMTYPE_SCRIBING_INK then
+                return false
+            end
+        end
         return ZO_ItemFilterUtils.IsSlotInMiscellaneousSubcategory(slot, itemTypeSubCategory)
     elseif itemTypeDisplayCategoryFilterInfoType == FILTER_INFO_TYPE_PROVISIONING_TYPE then
         return ZO_ItemFilterUtils.IsSlotInProvisioningSubcategory(slot, itemTypeSubCategory)
@@ -1564,6 +1576,16 @@ function ZO_ItemFilterUtils.IsCompanionSlotInItemTypeDisplayCategoryAndSubcatego
     elseif itemTypeDisplayCategoryFilterInfoType == FILTER_INFO_TYPE_SPECIALIZED_ITEM_TYPE then
         return ZO_ItemFilterUtils.IsSlotInSpecializedItemType(slot, itemTypeDisplayCategory, itemTypeSubCategory)
     elseif itemTypeDisplayCategoryFilterInfoType == FILTER_INFO_TYPE_MISCELLANEOUS_TYPE then
+        local itemType = GetItemType(slot.bagId, slot.slotIndex)
+        if slot.bagId == BAG_VIRTUAL then
+            if itemType == ITEMTYPE_LURE then
+                return false
+            end
+        else
+            if itemType == ITEMTYPE_SCRIBING_INK then
+                return false
+            end
+        end
         return ZO_ItemFilterUtils.IsSlotInMiscellaneousSubcategory(slot, itemTypeSubCategory)
     elseif itemTypeDisplayCategoryFilterInfoType == FILTER_INFO_TYPE_PROVISIONING_TYPE then
         return ZO_ItemFilterUtils.IsSlotInProvisioningSubcategory(slot, itemTypeSubCategory)

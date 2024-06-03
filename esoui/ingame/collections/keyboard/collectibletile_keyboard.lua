@@ -235,6 +235,26 @@ function ZO_CollectibleTile_Keyboard:AddMenuOptions()
         AddMenuItem(GetString(SI_ITEM_ACTION_LINK_TO_CHAT), function() ZO_LinkHandler_InsertLink(GetCollectibleLink(collectibleId, LINK_STYLE_BRACKETS)) end)
     end
 
+    -- Achievement
+    local linkedAchievement = collectibleData:GetLinkedAchievement()
+    if linkedAchievement > 0 then
+        AddMenuItem(GetString(SI_COLLECTIBLE_ACTION_SHOW_ACHIEVEMENT), function()
+            SYSTEMS:GetObject("achievements"):ShowAchievement(linkedAchievement)
+        end)
+    end
+
+    -- Go to Skill
+    if collectibleData:IsSkillStyle() then
+        local skillStyleProgressionId = collectibleData:GetSkillStyleProgressionId()
+        local skillData = SKILLS_DATA_MANAGER:GetSkillDataByProgressionId(skillStyleProgressionId)
+        if skillData:IsPurchased() then
+            AddMenuItem(GetString(SI_COLLECTIBLE_ACTION_SHOW_IN_SKILLS), function()
+                MAIN_MENU_KEYBOARD:ShowScene("skills")
+                SKILLS_WINDOW:BrowseToSkill(skillData)
+            end)
+        end
+    end
+
     --Rename
     if collectibleData:IsRenameable() then
         AddMenuItem(GetString(SI_COLLECTIBLE_ACTION_RENAME), ZO_CollectionsBook.GetShowRenameDialogClosure(collectibleId))
@@ -525,7 +545,7 @@ end
 function ZO_CollectibleTile_Keyboard:OnMouseDoubleClick(button)
     if button == MOUSE_BUTTON_INDEX_LEFT then
         local collectibleData = self.collectibleData
-        if collectibleData and collectibleData:IsUsable(self:GetActorCategory()) then
+        if collectibleData and collectibleData:IsUsable(self:GetActorCategory()) and not self.collectibleData:IsSkillStyle() then
             if IsCurrentlyPreviewing() then
                 ITEM_PREVIEW_KEYBOARD:EndCurrentPreview()
             end

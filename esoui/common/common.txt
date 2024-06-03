@@ -70,6 +70,8 @@ EsoUI\Common\ZO_SaveLoadDialog\ZO_SaveLoadDialog.lua
 
 EsoUI\Common\Scenes\CommonFragments.lua
 
+EsoUI\Common\TextSearch\TextSearchObject.lua
+
 EsoUI\Common\ZO_PlayerInventoryFooter\Gamepad\ZO_PlayerInventoryFooter_Gamepad.lua
 EsoUI\Common\ZO_PlayerInventoryFooter\Gamepad\ZO_PlayerInventoryFooter_Gamepad.xml
 

@@ -2,7 +2,7 @@
     <Animations>
         <AnimationTimeline name="ZO_InteractiveChatLog_Gamepad_MoreBelowAnimation">
             <Animations>
-                <AlphaAnimation duration="300" startAlpha="0" endAlpha="1"/>
+                <AlphaAnimation duration="300" startAlpha="0" endAlpha="1" />
             </Animations>
         </AnimationTimeline>
     </Animations>
@@ -15,13 +15,18 @@
 
             <Controls>
                 <Control name="$(parent)RootSpacer">
-                    <Anchor point="TOPLEFT"/>
-                    <Dimensions x="ZO_INTERACTIVE_CHAT_LOG_GAMEPAD_LOG_LINE_WIDTH" y="4"/>
+                    <Anchor point="TOPLEFT" />
+                    <Dimensions x="ZO_INTERACTIVE_CHAT_LOG_GAMEPAD_LOG_LINE_WIDTH" y="4" />
                 </Control>
 
+                <Texture name="$(parent)Marker" textureFile="EsoUI/Art/Miscellaneous/Gamepad/spinner_arrow_right_up.dds" hidden="true">
+                    <Dimensions x="25" y="25" />
+                    <Anchor point="LEFT" />
+                </Texture>
+                
                 <Label name="$(parent)Label" font="ZoFontGamepad42">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)RootSpacer"/>
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)RootSpacer"/>
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Marker" relativePoint="TOPRIGHT" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)RootSpacer" />
                 </Label>
             </Controls>
         </Control>
@@ -54,24 +59,24 @@
                         <Control name="$(parent)MoreBelow" tier="HIGH" alpha="0">
                             <Anchor point="BOTTOMLEFT" relativeTo="$(parent)TextInput" relativePoint="TOPLEFT" offsetY ="-5" />
                             <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)TextInput" relativePoint="TOPRIGHT" offsetY ="-5" />
-                            <Dimensions y="38"/>
+                            <Dimensions y="38" />
                             <Controls>
                                 <Texture name="$(parent)BG" color="000000" alpha="0.8">
                                     <AnchorFill/>
                                 </Texture>
 
                                 <Texture name="$(parent)LeftArrow" textureFile="EsoUI/Art/Miscellaneous/Gamepad/arrow_down.dds">
-                                    <Dimensions x="26" y="26"/>
-                                    <Anchor point="LEFT" offsetX="8"/>
+                                    <Dimensions x="26" y="26" />
+                                    <Anchor point="LEFT" offsetX="8" />
                                 </Texture>
 
                                 <Texture name="$(parent)RightArrow" textureFile="EsoUI/Art/Miscellaneous/Gamepad/arrow_down.dds">
-                                    <Dimensions x="26" y="26"/>
-                                    <Anchor point="RIGHT" offsetX="-8"/>
+                                    <Dimensions x="26" y="26" />
+                                    <Anchor point="RIGHT" offsetX="-8" />
                                 </Texture>
 
                                 <Label name="$(parent)Label" font="ZoFontGamepad27" text="SI_GAMEPAD_CHAT_MENU_MORE_BELOW">
-                                    <Anchor point="CENTER"/>
+                                    <Anchor point="CENTER" />
                                 </Label>
                             </Controls>
                         </Control>
@@ -83,8 +88,8 @@
 
                             <Controls>
                                 <Control name="$(parent)HeaderContainer" inherits="ZO_GamepadScreenHeaderContainer">
-                                    <Anchor point="TOPLEFT"/>
-                                    <Anchor point="TOPRIGHT"/>
+                                    <Anchor point="TOPLEFT" />
+                                    <Anchor point="TOPRIGHT" />
                                 </Control>
                             </Controls>
                         </Control>

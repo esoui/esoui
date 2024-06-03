@@ -6,49 +6,6 @@
             </OnInitialized>
 
             <Controls>
-                <Control name="$(parent)Mask" override="true">
-                    <Controls>
-                        <Control name="$(parent)Container" override="true">
-                            <Controls>
-                                <Control name="$(parent)HeaderContainer" override="true">
-                                    <Controls>
-                                        <Control name="$(parent)Filter">
-                                            <Anchor point="TOP" relativeTo="$(parent)Header" relativePoint="BOTTOM" offsetY="10"/>
-                                            <Dimensions x="365" y="56"/>
-                                            <Controls>
-                                                <Texture name="$(parent)BG" color="444444" alpha="0.5" hidden="true">
-                                                    <AnchorFill/>
-                                                </Texture>
-
-                                                <Control name="$(parent)Search">
-                                                    <Anchor point="TOPRIGHT" offsetX="-5"/>
-                                                    <Dimensions x="296"/>
-                                                    <OnInitialized>
-                                                        ZO_SingleLineEditContainerSize_Gamepad_OnInitialized(self)
-                                                    </OnInitialized>
-                                                    <Controls>
-                                                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop_Gamepad" defaultText="SI_HOUSING_FURNITURE_TEXT_FILTER_DEFAULT_TEXT" />
-                                                    </Controls>
-                                                </Control>
-
-                                                <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_icon_search_64.dds" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED">
-                                                    <Anchor point="RIGHT" relativeTo="$(parent)Search" relativePoint="LEFT" offsetX="-5"/>
-                                                    <Dimensions x="48" y="48"/>
-                                                </Texture>
-
-                                                <Backdrop name="$(parent)Highlight" inherits="ZO_GamepadInteractiveFilterHighlight" hidden="true">
-                                                    <Anchor point="TOPLEFT" offsetX="-5" offsetY="-5"/>
-                                                    <Anchor point="BOTTOMRIGHT" offsetX="5" offsetY="5"/>
-                                                </Backdrop>
-                                            </Controls>
-                                        </Control>
-                                    </Controls>
-                                </Control>
-                            </Controls>
-                        </Control>
-                    </Controls>
-                </Control>
-                
                 <Control name="$(parent)Occupants" inherits="ZO_HousingOccupants_Gamepad" />
                 <Control name="$(parent)Visitors" inherits="ZO_HousingPermissionsVisitors_Gamepad" />
                 <Control name="$(parent)BanList" inherits="ZO_HousingPermissionsBanList_Gamepad" />

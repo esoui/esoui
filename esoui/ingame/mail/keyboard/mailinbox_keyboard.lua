@@ -1,11 +1,14 @@
 local MailInbox = ZO_InitializingObject:Subclass()
 
 local MAX_READ_ATTACHMENTS = MAIL_MAX_ATTACHED_ITEMS + 1
-ZO_MAIL_INDBOX_KEYBOARD_TREE_WDITH = 386
-ZO_MAIL_INDBOX_KEYBOARD_NODE_WDITH = ZO_MAIL_INDBOX_KEYBOARD_TREE_WDITH - ZO_SCROLL_BAR_WIDTH
+ZO_MAIL_INBOX_KEYBOARD_TREE_WIDTH = 386
+ZO_MAIL_INBOX_KEYBOARD_NODE_WIDTH = ZO_MAIL_INBOX_KEYBOARD_TREE_WIDTH - ZO_SCROLL_BAR_WIDTH
 local TREE_CHILD_INDENT = 33
-ZO_MAIL_INDBOX_KEYBOARD_NODE_INDENTED_WDITH = ZO_MAIL_INDBOX_KEYBOARD_NODE_WDITH - TREE_CHILD_INDENT
-ZO_MAIL_INDBOX_KEYBOARD_NODE_HEIGHT = 50
+ZO_MAIL_INBOX_KEYBOARD_NODE_INDENTED_WIDTH = ZO_MAIL_INBOX_KEYBOARD_NODE_WIDTH - TREE_CHILD_INDENT
+ZO_MAIL_INBOX_KEYBOARD_NODE_HEIGHT = 50
+
+local ICON_MAIL_EXPIRING = "EsoUI/Art/Miscellaneous/timerRed_32.dds"
+local ICON_CATEGORY_FULL = "EsoUI/Art/Mail/mail_category_full.dds"
 
 function MailInbox:Initialize(control)
     self.control = control
@@ -17,6 +20,17 @@ function MailInbox:Initialize(control)
             if self.inboxDirty then
                 self:RefreshData()
             end
+
+            if self.attachmentsDirty then
+                if self.mailId then
+                    self:RefreshAttachmentSlots()
+                    self:RefreshAttachmentsHeaderShown()
+                    self:RefreshMoneyControls()
+                end
+                self.attachmentsDirty = false
+            end
+
+            ZO_CheckButton_SetCheckState(self.deleteOnClaimCheckButton, MAIL_MANAGER:ShouldDeleteOnClaim())
         elseif newState == SCENE_HIDING then
             CURRENCY_INPUT:Hide()
         elseif newState == SCENE_HIDDEN then
@@ -26,10 +40,25 @@ function MailInbox:Initialize(control)
     
     self.masterList = {}
     self.reportedMailIds = {}
-    self.playerMailNodeData = { text = GetString(SI_MAIL_NO_PLAYER_MAIL_HEADER), unreadData = {} }
-    self.systemMailNodeData = { text = GetString(SI_MAIL_NO_SYSTEM_MAIL_HEADER), unreadData = {} }
-    self.playerMailEmptyNodeData = { text = GetString(SI_MAIL_NO_PLAYER_MAIL_ENTRY) }
-    self.systemMailEmptyNodeData = { text = GetString(SI_MAIL_NO_SYSTEM_MAIL_ENTRY) }
+    self.categoryNodeData =
+    {
+        [MAIL_CATEGORY_PLAYER_MAIL] =
+        {
+            text = GetString("SI_MAILCATEGORY", MAIL_CATEGORY_PLAYER_MAIL),
+            unreadData = {},
+        },
+        [MAIL_CATEGORY_SYSTEM_MAIL] =
+        {
+            text = GetString("SI_MAILCATEGORY", MAIL_CATEGORY_SYSTEM_MAIL),
+            unreadData = {},
+        },
+        [MAIL_CATEGORY_INFO_ONLY_SYSTEM_MAIL] =
+        {
+            text = GetString("SI_MAILCATEGORY", MAIL_CATEGORY_INFO_ONLY_SYSTEM_MAIL),
+            unreadData = {},
+        },
+    }
+
     self.isFirstTimeOpening = true
 
     self:InitializeControls()
@@ -59,17 +88,28 @@ function MailInbox:InitializeControls()
     self.navigationContainer = control:GetNamedChild("NavigationContainer")
     self.fullLabel = control:GetNamedChild("Full")
     self.nodeBGControlPool = ZO_ControlPool:New("ZO_MailInboxRowBg", self.navigationContainer:GetNamedChild("ScrollChild"))
-    self.minNumBackgroundControls = zo_ceil(self.navigationContainer:GetHeight() / ZO_MAIL_INDBOX_KEYBOARD_NODE_HEIGHT / 2)
+    self.minNumBackgroundControls = zo_ceil(self.navigationContainer:GetHeight() / ZO_MAIL_INBOX_KEYBOARD_NODE_HEIGHT / 2)
     self.loadingIcon = control:GetNamedChild("LoadingIcon")
+    self.inventoryUsage = control:GetNamedChild("InventoryUsage")
+
+    --Set up the delete on claim checkbox
+    self.deleteOnClaimCheckButton = control:GetNamedChild("DeleteOnClaim")
+    ZO_CheckButton_SetLabelText(self.deleteOnClaimCheckButton, GetString(SI_MAIL_INBOX_DELETE_AFTER_CLAIM))
+
+    local function OnDeleteOnClaimChanged()
+        MAIL_MANAGER:SetDeleteOnClaim(ZO_CheckButton_IsChecked(self.deleteOnClaimCheckButton))
+        KEYBIND_STRIP:UpdateKeybindButtonGroup(self.selectionKeybindStripDescriptor)
+    end
+    ZO_CheckButton_SetToggleFunction(self.deleteOnClaimCheckButton, OnDeleteOnClaimChanged)
 
     self:SetNumUnread(GetNumUnreadMail())
 end
 
 function MailInbox:InitializeList()
-    local navigationTree = ZO_Tree:New(self.navigationContainer:GetNamedChild("ScrollChild"), 0, 0, ZO_MAIL_INDBOX_KEYBOARD_NODE_WDITH)
+    local navigationTree = ZO_Tree:New(self.navigationContainer:GetNamedChild("ScrollChild"), 0, 0, ZO_MAIL_INBOX_KEYBOARD_NODE_WIDTH)
 
     local function UpdateSize(control)
-        control:SetDimensions(ZO_MAIL_INDBOX_KEYBOARD_NODE_WDITH, ZO_MAIL_INDBOX_KEYBOARD_NODE_HEIGHT)
+        control:SetDimensions(ZO_MAIL_INBOX_KEYBOARD_NODE_WIDTH, ZO_MAIL_INBOX_KEYBOARD_NODE_HEIGHT)
     end
 
     local function TreeHeaderSetup(node, control, headerData, open, userRequested)
@@ -88,7 +128,15 @@ function MailInbox:InitializeList()
         if NonContiguousCount(headerData.unreadData) > 0 then
             control.statusIcon:AddIcon(ZO_KEYBOARD_NEW_ICON)
         end
+        
+        if headerData.hasExpiringChildren then
+            control.statusIcon:AddIcon(ICON_MAIL_EXPIRING)
+        end
 
+        if headerData.isFull then
+            control.statusIcon:AddIcon(ICON_CATEGORY_FULL)
+        end
+        
         control.statusIcon:Show()
 
         if userRequested then
@@ -120,7 +168,7 @@ function MailInbox:InitializeList()
     local function MailEntrySetup(node, control, mailData, open)
         control.subjectLabel:SetText(mailData:GetFormattedSubject())
 
-        local subjectColor = nil
+        local subjectColor
         if control.isMouseOverTarget or node.selected then
             subjectColor = ZO_SELECTED_TEXT
         elseif mailData.unread then
@@ -137,14 +185,19 @@ function MailInbox:InitializeList()
             iconTexture:AddIcon(ZO_KEYBOARD_NEW_ICON)
         end
 
-        if mailData.fromSystem then
+        if mailData.firstItemIcon ~= ZO_NO_TEXTURE_FILE then
+            iconTexture:AddIcon(mailData.firstItemIcon)
+        end
+
+        --Only show the system mail icon for system mail in the "System Alerts" category
+        if mailData.fromSystem and mailData.category == MAIL_CATEGORY_INFO_ONLY_SYSTEM_MAIL then
             iconTexture:AddIcon("EsoUI/Art/Mail/mail_systemIcon.dds")
         elseif mailData.fromCS then
             iconTexture:AddIcon("EsoUI/Art/Mail/mail_CSIcon.dds")
         end
 
         if mailData:IsExpirationImminent() then
-            iconTexture:AddIcon("EsoUI/Art/Miscellaneous/timerRed_32.dds")
+            iconTexture:AddIcon(ICON_MAIL_EXPIRING)
             local expiresText = zo_strformat(SI_MAIL_INBOX_EXPIRES_TEXT, mailData:GetExpiresText())
             control.expirationLabel:SetText(expiresText)
             control.expirationLabel:SetHidden(false)
@@ -183,6 +236,7 @@ function MailInbox:RegisterForEvents()
     control:RegisterForEvent(EVENT_MAIL_TAKE_ATTACHED_MONEY_SUCCESS, function(_, mailId) self:OnTakeAttachedMoneySuccess(mailId) end)
     control:RegisterForEvent(EVENT_MAIL_REMOVED, function(_, mailId) self:OnMailRemoved(mailId) end)
     control:RegisterForEvent(EVENT_MAIL_NUM_UNREAD_CHANGED, function(_, numUnread) self:OnMailNumUnreadChanged(numUnread) end)
+    control:RegisterForEvent(EVENT_MAIL_TAKE_ALL_ATTACHMENTS_IN_CATEGORY_RESPONSE, function(_, ...) self:OnTakeAllComplete(...) end)
     control:RegisterForEvent(EVENT_MAIL_OPEN_MAILBOX, function()
         -- It's possible that the mail that's selected was selected after we closed the mail interaction (for example, deleting the current mail and
         -- rapidly closing the window). In that case we never sent a message to the server to get the mail contents so the details pane is empty.
@@ -198,6 +252,9 @@ function MailInbox:RegisterForEvents()
         self.navigationContainer:SetHidden(true)
         self.messageControl:SetHidden(true)
     end)
+
+    SHARED_INVENTORY:RegisterCallback("SingleSlotInventoryUpdate", function(bagId, slotIndex) self:RefreshInventory() end)
+    SHARED_INVENTORY:RegisterCallback("FullInventoryUpdate", function(bagId, slotIndex) self:RefreshInventory() end)
 end
 
 function MailInbox:InitializeKeybindDescriptors()
@@ -251,7 +308,7 @@ function MailInbox:InitializeKeybindDescriptors()
 
             visible = function()
                 if self.mailId then
-                    return not IsMailReturnable(self.mailId) and self:IsMailDeletable()
+                    return not IsMailReturnable(self.mailId)
                 end
                 return false
             end
@@ -268,13 +325,40 @@ function MailInbox:InitializeKeybindDescriptors()
 
             visible = function()
                 if self.mailId then
-                    local numAttachments, attachedMoney, codAmount = GetMailAttachmentInfo(self.mailId)
+                    local numAttachments, attachedMoney = GetMailAttachmentInfo(self.mailId)
                     if numAttachments > 0 or attachedMoney > 0 then
                         return true
                     end
                 end
                 return false
             end
+        },
+
+        --Take All
+        {
+            name = function()
+                if self.mailId then
+                    local mailData = self:GetMailData(self.mailId)
+                    return GetString("SI_MAILCATEGORY_TAKEALL", mailData.category)
+                end
+            end,
+            keybind = "UI_SHORTCUT_QUATERNARY",
+            callback = function()
+                if self.mailId then
+                    local mailData = self:GetMailData(self.mailId)
+                    ZO_Dialogs_ShowPlatformDialog("MAIL_CONFIRM_TAKE_ALL", { category = mailData.category })
+                end
+            end,
+            visible = function()
+                if self.mailId then
+                    local mailData = self:GetMailData(self.mailId)
+                    if mailData then
+                        local canTakeAttachments = CanTryTakeAllMailAttachmentsInCategory(mailData.category, MAIL_MANAGER:ShouldDeleteOnClaim())
+                        return canTakeAttachments
+                    end
+                end
+                return false
+            end,
         },
 
         --Report Player
@@ -349,150 +433,143 @@ function MailInbox:GetMailData(mailId)
     end
 end
 
-do
-    local function MailComparator(mailData1, mailData2)
-        return ZO_TableOrderingFunction(mailData1, mailData2, MAIL_ENTRY_FIRST_SORT_KEY, MAIL_ENTRY_SORT_KEYS, ZO_SORT_ORDER_UP)
+function MailInbox:GetCategoryNodeData(category)
+    return self.categoryNodeData[category]
+end
+
+function MailInbox:RefreshData()
+    if not SCENE_MANAGER:IsShowing("mailInbox") then
+        self.inboxDirty = true
+        return
     end
 
-    function MailInbox:RefreshData()
-        if not SCENE_MANAGER:IsShowing("mailInbox") then
-            self.inboxDirty = true
-            return
-        end
+    -- Initialize and clear
+    self.inboxDirty = false
+    self.loadingIcon:Hide()
+    self.unreadLabel:SetHidden(false)
+    local tree = self.navigationTree
+    tree:Reset()
+    self.nodeBGControlPool:ReleaseAllObjects()
 
-        -- Initialize and clear
-        self.inboxDirty = false
-        self.loadingIcon:Hide()
-        self.unreadLabel:SetHidden(false)
-        local tree = self.navigationTree
-        tree:Reset()
-        self.nodeBGControlPool:ReleaseAllObjects()
+    local masterList = self.masterList
+    ZO_ClearNumericallyIndexedTable(masterList)
 
-        local nodeTemplate = nil
+    local currentReadMailData = nil
+    local numTotalNodes = 0
+    local autoSelectNode = nil
+    local fullCategoryText
 
-        local masterList = self.masterList
-        ZO_ClearNumericallyIndexedTable(masterList)
-        local playerList = {}
-        local systemList = {}
+    for category = MAIL_CATEGORY_ITERATION_BEGIN, MAIL_CATEGORY_ITERATION_END do
+        local categoryNodeData = self:GetCategoryNodeData(category)
+        ZO_ClearTable(categoryNodeData.unreadData)
 
-        local playerMailNodeData = self.playerMailNodeData
-        local systemMailNodeData = self.systemMailNodeData
-        ZO_ClearTable(playerMailNodeData.unreadData)
-        ZO_ClearTable(systemMailNodeData.unreadData)
+        local hasExpiringChildren = false
+        local numMailItems = GetNumMailItemsByCategory(category)
+        local mailList = {}
 
-        local currentReadMailData = nil
-
-        -- Accumulate data
-        for mailId in ZO_GetNextMailIdIter do
+        for index = 1, numMailItems do
+            local mailId = GetMailIdByIndex(category, index)
             local mailData = {}
             ZO_MailInboxShared_PopulateMailData(mailData, mailId)
-            table.insert(masterList, mailData)
             if self.mailId and not currentReadMailData and AreId64sEqual(self.mailId, mailId) then
                 currentReadMailData = mailData
             end
 
-            if mailData.isFromPlayer then
-                table.insert(playerList, mailData)
-                if mailData.unread then
-                    playerMailNodeData.unreadData[mailData] = true
-                end
-            else
-                table.insert(systemList, mailData)
-                if mailData.unread then
-                    systemMailNodeData.unreadData[mailData] = true
+            table.insert(masterList, mailData)
+            table.insert(mailList, mailData)
+
+            if mailData.unread then
+                categoryNodeData.unreadData[mailData] = true
+            end
+
+            if mailData:IsExpirationImminent() then
+                if mailData.numAttachments > 0 or mailData.attachedMoney > 0 then
+                    hasExpiringChildren = true
                 end
             end
         end
 
-        table.sort(playerList, MailComparator)
-        table.sort(systemList, MailComparator)
+        -- Number of mails (or "empty" node if none), plus header node
+        local numNodes = zo_max(numMailItems, 1) + 1
+        numTotalNodes = numTotalNodes + numNodes
+        categoryNodeData.hasExpiringChildren = hasExpiringChildren
+        local isCategoryFull = IsLocalMailboxFull(category)
+        categoryNodeData.isFull = isCategoryFull
 
-        local numPlayerMails = #playerList
-        local numSystemMails = #systemList
-
-        -- Add BGs
-        -- Number of player mails (or "empty" node if none), plus header node
-        local numPlayerNodes = zo_max(numPlayerMails, 1) + 1
-        -- Number of system mails (or "empty" node if none), plus header node
-        local numSystemNodes = zo_max(numSystemMails, 1) + 1
-        local numTotalNodes = numPlayerNodes + numSystemNodes
-        -- Every other node gets a background
-        local numBGControlsToAdd = zo_max(zo_ceil(numTotalNodes / 2), self.minNumBackgroundControls)
-
-        local previousBGControl = nil
-        for i = 1, numBGControlsToAdd do
-            local bgControl = self.nodeBGControlPool:AcquireObject()
-            if previousBGControl then
-                bgControl:SetAnchor(TOPLEFT, previousBGControl, BOTTOMLEFT, 0, ZO_MAIL_INDBOX_KEYBOARD_NODE_HEIGHT)
-            else
-                bgControl:SetAnchor(TOPLEFT)
-            end
-            previousBGControl = bgControl
-        end
-
-        -- Add header nodes
-        playerMailNodeData.text = (numPlayerMails > 0) and zo_strformat(SI_MAIL_PLAYER_MAIL_HEADER, numPlayerMails) or GetString(SI_MAIL_NO_PLAYER_MAIL_HEADER)
-        local playerMailNode = tree:AddNode("ZO_MailInboxHeader", playerMailNodeData)
-        systemMailNodeData.text = (numSystemMails > 0) and zo_strformat(SI_MAIL_SYSTEM_MAIL_HEADER, numSystemMails) or GetString(SI_MAIL_NO_SYSTEM_MAIL_HEADER)
-        local systemMailNode = tree:AddNode("ZO_MailInboxHeader", systemMailNodeData)
-        
-        local autoSelectNode = nil
-
-        -- Add player nodes
-        if numPlayerMails > 0 then
-            for index, mailData in ipairs(playerList) do
-                mailData.node = tree:AddNode("ZO_MailInboxRow", mailData, playerMailNode)
-                if self.selectMailIdOnRefresh and not autoSelectNode and AreId64sEqual(mailData.mailId, self.selectMailIdOnRefresh) then
-                    autoSelectNode = mailData.node
-                end
-            end
+        if numMailItems > 0 then
+            categoryNodeData.text = zo_strformat(SI_MAIL_CATEGORY_COUNT_HEADER, GetString("SI_MAILCATEGORY", category), numMailItems)
         else
-            tree:AddNode("ZO_MailInboxEmptyRow", self.playerMailEmptyNodeData, playerMailNode)
+            categoryNodeData.text = GetString("SI_MAILCATEGORY", category)
         end
+        local categoryNode = tree:AddNode("ZO_MailInboxHeader", categoryNodeData)
 
-        -- Add system nodes
-        if numSystemMails > 0 then
-            for index, mailData in ipairs(systemList) do
-                mailData.node = tree:AddNode("ZO_MailInboxRow", mailData, systemMailNode)
+        if numMailItems > 0 then
+            for index, mailData in ipairs(mailList) do
+                mailData.node = tree:AddNode("ZO_MailInboxRow", mailData, categoryNode)
                 if not autoSelectNode then
                     if self.selectMailIdOnRefresh then
                         if AreId64sEqual(mailData.mailId, self.selectMailIdOnRefresh) then
                             autoSelectNode = mailData.node
                         end
-                    elseif self.isFirstTimeOpening then
+                    elseif category == self.selectCategoryOnRefresh then
+                        autoSelectNode = mailData.node
+                    elseif category == MAIL_CATEGORY_SYSTEM_MAIL and self.isFirstTimeOpening then
                         -- Select the first node of the system list if opening for the first time and nothing else is auto selecting
                         autoSelectNode = mailData.node
                     end
                 end
             end
         else
-            tree:AddNode("ZO_MailInboxEmptyRow", self.systemMailEmptyNodeData, systemMailNode)
+            tree:AddNode("ZO_MailInboxEmptyRow", { text = GetString("SI_MAILCATEGORY_EMPTYTEXT", category) }, categoryNode)
         end
 
-        self.isFirstTimeOpening = false
-        self.selectMailIdOnRefresh = nil
-
-        local DONT_BRING_PARENT_INTO_VIEW = false
-        tree:Commit(autoSelectNode, DONT_BRING_PARENT_INTO_VIEW)
-
-        -- ESO-714031: Edge case where the mail you had been reading when the menu closed may be gone due to expiration when you come back
-        -- But the system doesn't end and re-read mail you were already reading when continually opening and closing the menu, for effeciency
-        if self.mailId and not currentReadMailData then
-            self:EndRead()
-        end
-
-        self.navigationContainer:SetHidden(false)
-        self.messageControl:SetHidden(self.mailId == nil)
-        if IsLocalMailboxFull() then
-            self.fullLabel:SetText(GetString(SI_MAIL_INBOX_FULL))
-            self.fullLabel:SetHidden(false)
-        elseif HasUnreceivedMail() then
-            self.fullLabel:SetText(GetString(SI_MAIL_INBOX_UNDELIVERED))
-            self.fullLabel:SetHidden(false)
-        else
-            self.fullLabel:SetHidden(true)
+        if isCategoryFull then
+            --If fullCategoryText has already been set, that means multiple categories are full
+            if fullCategoryText ~= nil then
+                fullCategoryText = GetString(SI_MAIL_INBOX_CATEGORIES_FULL)
+            else
+                fullCategoryText = zo_strformat(SI_MAIL_INBOX_CATEGORY_FULL, GetString("SI_MAILCATEGORY", category))
+            end
         end
     end
+
+    local numBGControlsToAdd = zo_max(zo_ceil(numTotalNodes / 2), self.minNumBackgroundControls)
+    local previousBGControl = nil
+    for i = 1, numBGControlsToAdd do
+        local bgControl = self.nodeBGControlPool:AcquireObject()
+        if previousBGControl then
+            bgControl:SetAnchor(TOPLEFT, previousBGControl, BOTTOMLEFT, 0, ZO_MAIL_INBOX_KEYBOARD_NODE_HEIGHT)
+        else
+            bgControl:SetAnchor(TOPLEFT)
+        end
+        previousBGControl = bgControl
+    end
+
+    self.isFirstTimeOpening = false
+    self.selectMailIdOnRefresh = nil
+    self.selectCategoryOnRefresh = nil
+
+    local DONT_BRING_PARENT_INTO_VIEW = false
+    tree:Commit(autoSelectNode, DONT_BRING_PARENT_INTO_VIEW)
+
+    -- ESO-714031: Edge case where the mail you had been reading when the menu closed may be gone due to expiration when you come back
+    -- But the system doesn't end and re-read mail you were already reading when continually opening and closing the menu, for effeciency
+    if self.mailId and not currentReadMailData then
+        self:EndRead()
+    end
+
+    self.navigationContainer:SetHidden(false)
+    self.messageControl:SetHidden(self.mailId == nil)
+    if fullCategoryText ~= nil then
+        self.fullLabel:SetText(fullCategoryText)
+        self.fullLabel:SetHidden(false)
+    elseif HasUnreceivedMail() then
+        self.fullLabel:SetText(GetString(SI_MAIL_INBOX_UNDELIVERED))
+        self.fullLabel:SetHidden(false)
+    else
+        self.fullLabel:SetHidden(true)
+    end
+    self:RefreshInventory()
 end
 
 function MailInbox:EndRead()
@@ -545,18 +622,20 @@ end
 
 function MailInbox:Delete()
     if self.mailId then
-        if self:IsMailDeletable() then
-            local numAttachments, attachedMoney = GetMailAttachmentInfo(self.mailId)
-
-            if numAttachments > 0 and attachedMoney > 0 then
-                ZO_Dialogs_ShowDialog("DELETE_MAIL_ATTACHMENTS_AND_MONEY", self.mailId)
-            elseif numAttachments > 0 then
-                ZO_Dialogs_ShowDialog("DELETE_MAIL_ATTACHMENTS", self.mailId)
-            elseif attachedMoney > 0 then
-                ZO_Dialogs_ShowDialog("DELETE_MAIL_MONEY", self.mailId)
-            else
-                ZO_Dialogs_ShowDialog("DELETE_MAIL", {callback = function(...) self:ConfirmDelete(...) end, mailId = self.mailId})
-            end
+        local numAttachments, attachedMoney = GetMailAttachmentInfo(self.mailId)
+        if numAttachments > 0 or attachedMoney > 0 then
+            DeleteMail(self.mailId)
+        else
+            ZO_Dialogs_ShowPlatformDialog(
+                "DELETE_MAIL", 
+                {
+                    confirmationCallback = function(...) 
+                        DeleteMail(self.mailId) 
+                        PlaySound(SOUNDS.MAIL_ITEM_DELETED) 
+                    end, 
+                    mailId = self.mailId,
+                }
+            )
         end
     end
 end
@@ -564,7 +643,7 @@ end
 function MailInbox:TryTakeAll()
     if self.mailId then
         local mailId = self.mailId
-        local numAttachments, attachedMoney, codAmount = GetMailAttachmentInfo(mailId)
+        local _, attachedMoney, codAmount = GetMailAttachmentInfo(mailId)
         
         if codAmount > 0 then
             self:ShowTakeAttachmentsWithCODDialog(codAmount)
@@ -578,13 +657,6 @@ function MailInbox:TryTakeAll()
             end
             ZO_MailInboxShared_TakeAll(mailId)
         end
-    end
-end
-
-function MailInbox:IsMailDeletable()
-    local mailData = self:GetMailData(self.mailId)
-    if mailData then
-        return mailData.attachedMoney == 0 and mailData.numAttachments == 0
     end
 end
 
@@ -605,19 +677,13 @@ function MailInbox:ConfirmAcceptCOD()
     end
 end
 
-function MailInbox:ConfirmDelete(mailId)
-    if not IsMailReturnable(mailId) then
-        DeleteMail(mailId, true)
-        PlaySound(SOUNDS.MAIL_ITEM_DELETED)
-    end
-end
-
 --Events
 
 function MailInbox:OnInboxUpdate()
     if SCENE_MANAGER:IsShowing("mailInbox") then
         self:RefreshData()
         self:RefreshMailFrom()
+        self:RefreshInventory()
     else
         self.inboxDirty = true
     end
@@ -675,7 +741,7 @@ function MailInbox:RefreshAttachmentSlots()
     local numAttachments = mailData.numAttachments
     for i = 1, numAttachments do
         self.attachmentSlots[i]:SetHidden(false)
-        local icon, stack, creator = GetAttachedItemInfo(self.mailId, i)
+        local icon, stack = GetAttachedItemInfo(self.mailId, i)
         ZO_Inventory_SetupSlot(self.attachmentSlots[i], stack, icon)
     end
     
@@ -704,12 +770,25 @@ function MailInbox:RefreshAttachmentsHeaderShown()
     self.attachmentsDividerControl:SetHidden(noAttachments)
 end
 
+function MailInbox:RefreshInventory()
+    if SCENE_MANAGER:IsShowing("mailInbox") then
+        local numUsedSlots, numSlots = PLAYER_INVENTORY:GetNumSlots(INVENTORY_BACKPACK)
+        if numUsedSlots < numSlots then
+            self.inventoryUsage:SetText(zo_strformat(SI_INVENTORY_BACKPACK_REMAINING_SPACES, numUsedSlots, numSlots))
+        else
+            self.inventoryUsage:SetText(zo_strformat(SI_INVENTORY_BACKPACK_COMPLETELY_FULL, numUsedSlots, numSlots))
+        end
+    end
+end
+
 function MailInbox:OnTakeAttachedItemSuccess(mailId)
     if AreId64sEqual(self.mailId, mailId) then
         ZO_MailInboxShared_PopulateMailData(self:GetMailData(self.mailId), mailId)
         self:RefreshAttachmentSlots()
         self:RefreshAttachmentsHeaderShown()
         self:RefreshMoneyControls()
+        local NOT_USER_REQUESTED = false
+        self.navigationTree:RefreshVisible(NOT_USER_REQUESTED)
         KEYBIND_STRIP:UpdateKeybindButtonGroup(self.selectionKeybindStripDescriptor)
     end
 end
@@ -737,6 +816,28 @@ function MailInbox:OnMailRemoved(mailId)
         end
     end
     self:RefreshData()
+end
+
+function MailInbox:OnTakeAllComplete(result, category, headersRemoved)
+    if result == MAIL_TAKE_ATTACHMENT_RESULT_SUCCESS then
+        if headersRemoved then
+            --If headers were removed, we cannot guarantee that the current selection still exists, so select the top entry of the category
+            self.selectCategoryOnRefresh = category
+            self:RefreshData()
+        else
+            --If no headers were removed, maintain the current selection
+            self.selectMailIdOnRefresh = self.mailId
+            self:RefreshData()
+            if SCENE_MANAGER:IsShowing("mailInbox") then
+                self:RefreshAttachmentSlots()
+                self:RefreshAttachmentsHeaderShown()
+                self:RefreshMoneyControls()
+                KEYBIND_STRIP:UpdateKeybindButtonGroup(self.selectionKeybindStripDescriptor)
+            else
+                self.attachmentsDirty = true
+            end
+        end
+    end
 end
 
 function MailInbox:OnMailNumUnreadChanged(numUnread)

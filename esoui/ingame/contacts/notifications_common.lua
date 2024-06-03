@@ -595,17 +595,11 @@ end
 
 ZO_PointsResetProvider = ZO_NotificationProvider:Subclass()
 -- callback object so that keyboard and gamepad can be updated in tandum when the user accepts the notification
-ZO_PointsResetProvider_CallbackObject = ZO_CallbackObject:Subclass()
+ZO_PointsResetProvider_CallbackObject = ZO_InitializingCallbackObject:Subclass()
 
 do
     -- ZO_PointsResetProvider_CallbackObject functions --
     -----------------------------------------------------
-    function ZO_PointsResetProvider_CallbackObject:New()
-        local newObject = ZO_CallbackObject.New(self)
-        newObject:Initialize()
-        return newObject
-    end
-
     function ZO_PointsResetProvider_CallbackObject:Initialize()
         self.respecsShown = {}
 
@@ -675,6 +669,81 @@ do
         pointResetCallbackObject:Accept(data.respecType)
     end
 
+end
+
+--Crafted Ability Reset Provider
+--------------------------------
+
+ZO_CraftedAbilityResetProvider = ZO_NotificationProvider:Subclass()
+-- callback object so that keyboard and gamepad can be updated in tandum when the user accepts the notification
+ZO_CraftedAbilityResetProvider_CallbackObject = ZO_InitializingCallbackObject:Subclass()
+
+do
+    -- ZO_CraftedAbilityResetProvider_CallbackObject functions --
+    -------------------------------------------------------------
+
+    function ZO_CraftedAbilityResetProvider_CallbackObject:Initialize()
+        self.resetsShown = {}
+
+        local function OnCraftedAbilityReset(_, craftedAbilityId)
+            self.resetsShown[craftedAbilityId] = true
+            self:FireCallbacks("CraftedAbilityReset")
+        end
+        self.OnCraftedAbilityReset = OnCraftedAbilityReset
+        EVENT_MANAGER:RegisterForEvent("CraftedAbilityResetProvider", EVENT_CRAFTED_ABILITY_RESET, OnCraftedAbilityReset)
+    end
+
+    function ZO_CraftedAbilityResetProvider_CallbackObject:Decline(craftedAbilityId)
+        self.resetsShown[craftedAbilityId] = nil
+        self:FireCallbacks("CraftedAbilityResetDeclined")
+    end
+
+
+    craftedAbilityResetCallbackObject = ZO_CraftedAbilityResetProvider_CallbackObject:New()
+
+    -- ZO_CraftedAbilityResetProvider functions --
+    ----------------------------------------------
+    function ZO_CraftedAbilityResetProvider:New(notificationManager)
+        local provider = ZO_NotificationProvider.New(self, notificationManager)
+
+        local function ResetList()
+            provider:PushUpdateToNotificationManager()
+        end
+
+        craftedAbilityResetCallbackObject:RegisterCallback("CraftedAbilityReset", ResetList)
+        craftedAbilityResetCallbackObject:RegisterCallback("CraftedAbilityResetDeclined", ResetList)
+
+        return provider
+    end
+
+    function ZO_CraftedAbilityResetProvider:BuildNotificationList()
+        ZO_ClearNumericallyIndexedTable(self.list)
+
+        for craftedAbilityId, isShown in pairs(craftedAbilityResetCallbackObject.resetsShown) do
+            if isShown then
+                local craftedAbilityData = SCRIBING_DATA_MANAGER:GetCraftedAbilityData(craftedAbilityId)
+                if craftedAbilityData then
+                    local craftedAbilityName = craftedAbilityData:GetDisplayName()
+                    local data =
+                    {
+                        dataType = NOTIFICATIONS_ALERT_DATA,
+                        notificationType = NOTIFICATION_TYPE_CRAFTED_ABILITY_RESET,
+                        message = zo_strformat(SI_CRAFTED_ABILITY_RESET_NOTIFICATION_MESSAGE, craftedAbilityName),
+                        shortDisplayText = zo_strformat(SI_CRAFTED_ABILITY_RESET_NOTIFICATION_SHORT_TEXT, craftedAbilityName),
+                        note = GetString(SI_CRAFTED_ABILITY_RESET_NOTIFICATION_NOTE),
+                        icon = craftedAbilityData:GetIcon(),
+                        craftedAbilityId = craftedAbilityId,
+                        secsSinceRequest = ZO_NormalizeSecondsSince(0),
+                    }
+                    table.insert(self.list, data)
+                end
+            end
+        end
+    end
+
+    function ZO_CraftedAbilityResetProvider:Decline(data)
+        craftedAbilityResetCallbackObject:Decline(data.craftedAbilityId)
+    end
 end
 
 --Pledge of Mara Provider

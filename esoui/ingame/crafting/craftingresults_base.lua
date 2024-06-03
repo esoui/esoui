@@ -23,13 +23,7 @@ function ZO_CraftingResults_Base_PlayPulse(control)
     end
 end
 
-ZO_CraftingResults_Base = ZO_Object:Subclass()
-
-function ZO_CraftingResults_Base:New(...)
-    local craftingResults = ZO_Object.New(self)
-    craftingResults:Initialize(...)
-    return craftingResults
-end
+ZO_CraftingResults_Base = ZO_InitializingObject:Subclass()
 
 function ZO_CraftingResults_Base:Initialize(control, showInGamepadPreferredModeOnly)
     self.control = control
@@ -131,8 +125,12 @@ function ZO_CraftingResults_Base:AssociateAnimations(tooltip)
 
     local function OnStop(animation)
         tooltipGlow:SetAlpha(0)
-        tooltipBurst1:SetAlpha(0)
-        tooltipBurst2:SetAlpha(0)
+        if tooltipBurst1 then
+            tooltipBurst1:SetAlpha(0)
+        end
+        if tooltipBurst2 then
+            tooltipBurst2:SetAlpha(0)
+        end
 
         self:OnTooltipAnimationStopped(self.resultTooltipAnimation.craftingType)
     end
@@ -298,12 +296,20 @@ function ZO_CraftingResults_Base:PlayTooltipAnimation(isFailure, isExceptionalRe
         else
             self.resultTooltipAnimation:GetAnimation(3):SetDuration(500)
             self.resultTooltipAnimation:GetAnimation(3):SetAlphaValues(0, 1)
-            self.tooltipBurst1:SetTexture(burstTexture)
-            self.tooltipBurst2:SetTexture(burstTexture)
+            if self.tooltipBurst1 then
+                self.tooltipBurst1:SetTexture(burstTexture)
+            end
+            if self.tooltipBurst2 then
+                self.tooltipBurst2:SetTexture(burstTexture)
+            end
         end
 
-        self.tooltipBurst1:SetHidden(isFailure)
-        self.tooltipBurst2:SetHidden(isFailure)
+        if self.tooltipBurst1 then
+            self.tooltipBurst1:SetHidden(isFailure)
+        end
+        if self.tooltipBurst2 then
+            self.tooltipBurst2:SetHidden(isFailure)
+        end
 
         self.resultTooltipAnimation.craftingType = craftingType
         self.resultTooltipAnimation:PlayFromStart()
@@ -463,9 +469,26 @@ do
     end
 
     function ZO_CraftingResults_Base:CheckCraftProcessCompleted(craftingType)
-        if self:IsActive() and self.craftingProcessCompleted and self.tooltipAnimationCompleted and self.contextualAnimationCompleted then
+        if self:IsActive() and not self:IsCraftInProgress() then
             if GetNumLastCraftingResultLearnedTraits() > 0 then
                 self:DisplayDiscoveredTraits()
+            end
+
+            local abilityId = GetLastCraftingResultAbilityId()
+            local playerSkillProgressionData = SKILLS_DATA_MANAGER:GetProgressionDataByAbilityId(abilityId)
+            if playerSkillProgressionData then
+                local skillData = playerSkillProgressionData:GetSkillData()
+                local skillLineData = skillData:GetSkillLineData()
+                local skillTypeData = skillLineData:GetSkillTypeData()
+
+                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.SCRIBING_SCRIBE_COMPLETE_ANNOUNCE)
+                messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_CRAFTING_RESULTS)
+                local bodyText = zo_strformat(SI_CRAFTED_ABILITY_NAME_AND_SKILL_LINE_FORMATTER, GetAbilityName(abilityId), skillTypeData:GetName(), skillLineData:GetName())
+                messageParams:SetText(GetString(SI_SCRIBING_ABILITY_CRAFTED_ANNOUNCEMENT_TITLE), bodyText)
+                local abilityIcon = GetAbilityIcon(abilityId)
+                messageParams:SetIconData(abilityIcon)
+                messageParams:MarkSuppressIconFrame()
+                CENTER_SCREEN_ANNOUNCE:AddMessageWithParams(messageParams)
             end
 
             local numResultCurrencies = GetNumLastCraftingResultCurrencies()
@@ -586,7 +609,7 @@ do
 end
 
 function ZO_CraftingResults_Base:ForceCompleteCraftProcess()
-    if not (self.craftingProcessCompleted and self.tooltipAnimationCompleted and self.contextualAnimationCompleted) then
+    if self:IsCraftInProgress() then
         self.craftingProcessCompleted = true
         self.tooltipAnimationCompleted = true
         self.contextualAnimationCompleted = true
@@ -621,26 +644,14 @@ function ZO_CraftingResults_Base:AreCraftingResultsEqual(left, right)
     end
 end
 
-function ZO_CraftingResults_Base:DisplayCraftingResult()
-    assert(false, "You must override the DisplayCraftingResult function when inheriting from ZO_CraftingResults_Base")
-end
+ZO_CraftingResults_Base:MUST_IMPLEMENT("DisplayCraftingResult", resultData)
 
-function ZO_CraftingResults_Base:DisplayDiscoveredTraits()
-    assert(false, "You must override the DisplayDiscoveredTraits function when inheriting from ZO_CraftingResults_Base")
-end
+ZO_CraftingResults_Base:MUST_IMPLEMENT("DisplayDiscoveredTraits")
 
-function ZO_CraftingResults_Base:DisplayTranslatedRunes()
-    assert(false, "You must override the DisplayTranslatedRunes function when inheriting from ZO_CraftingResults_Base")
-end
+ZO_CraftingResults_Base:MUST_IMPLEMENT("DisplayTranslatedRunes")
 
-function ZO_CraftingResults_Base:FadeAll()
-    assert(false, "You must override the FadeAll function when inheriting from ZO_CraftingResults_Base")
-end
+ZO_CraftingResults_Base:MUST_IMPLEMENT("FadeAll")
 
-function ZO_CraftingResults_Base:IsActive()
-    assert(false, "You must override the IsActive function when inheriting from ZO_CraftingResults_Base")
-end
+ZO_CraftingResults_Base:MUST_IMPLEMENT("IsActive")
 
-function ZO_CraftingResults_Base:ShouldDisplayMessages()
-    assert(false, "You must override the ShouldDisplayMessages function when inheriting from ZO_CraftingResults_Base")
-end
+ZO_CraftingResults_Base:MUST_IMPLEMENT("ShouldDisplayMessages")

@@ -408,13 +408,8 @@ function ZO_GamepadStats:ActivateTitleDropdown()
 
         self.currentTitleDropdown:Activate()
 
-        local currentTitleIndex = GetCurrentTitleIndex()
-        if currentTitleIndex then
-            currentTitleIndex = currentTitleIndex + 1
-        else
-            currentTitleIndex = 1
-        end
-        self.currentTitleDropdown:SetHighlightedItem(currentTitleIndex)
+        local currentDropdownTitleIndex = self:GetDropdownTitleIndex(self.currentTitleDropdown)
+        self.currentTitleDropdown:SetHighlightedItem(currentDropdownTitleIndex)
     end
 end
 

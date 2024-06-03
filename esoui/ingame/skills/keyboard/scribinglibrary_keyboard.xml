@@ -1,0 +1,17 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_ScribingLibrary_Keyboard_TL" inherits="ZO_ScribingLayout_Keyboard_TL" mouseEnabled="true" hidden="true">
+            <OnInitialized>
+                ZO_ScribingLibrary_Keyboard.OnControlInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Label name="$(parent)InfoText" font="ZoFontGameLargeBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Dimensions x="225" />
+                    <Anchor point="TOPLEFT" relativeTo="ZO_SharedMediumLeftPanelBackground" offsetX="50" offsetY="50" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="ZO_SharedMediumLeftPanelBackground" offsetX="-20" offsetY="-15" />
+                </Label>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

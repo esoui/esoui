@@ -955,11 +955,9 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
                         local zoneIndex = GetUnitZoneIndex(groupLeaderUnitTag)
                         local collectibleId = GetCollectibleIdForZone(zoneIndex)
                         local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
-                        local collectibleName = collectibleData:GetName()
-                        local categoryName = collectibleData:GetCategoryData():GetName()
                         local message = zo_strformat(SI_COLLECTIBLE_LOCKED_FAILURE_CAUSED_BY_JUMP_TO_GROUP_LEADER, groupLeaderZoneName)
                         local marketOperation = MARKET_OPEN_OPERATION_DLC_FAILURE_TELEPORT_TO_GROUP
-                        ZO_Dialogs_ShowPlatformDialog("COLLECTIBLE_REQUIREMENT_FAILED", { collectibleData = collectibleData, marketOpenOperation = marketOperation }, { mainTextParams = { message, collectibleName, categoryName } })
+                        ZO_Dialogs_ShowCollectibleRequirementFailedPlatformDialog(collectibleData, message, marketOperation)
                     end
                 end
             end
@@ -2193,7 +2191,7 @@ local GAMEPAD_INTERACT_ICONS =
 }
 
 function ZO_PlayerToPlayer:AddShowGamerCard(targetDisplayName, targetCharacterName)
-    self:GetRadialMenu():AddEntry(GetString(GetGamerCardStringId()), "EsoUI/Art/HUD/Gamepad/gp_radialIcon_gamercard_down.dds", "EsoUI/Art/HUD/Gamepad/gp_radialIcon_gamercard_down.dds",
+    self:GetRadialMenu():AddEntry(GetString(ZO_GetGamerCardStringId()), "EsoUI/Art/HUD/Gamepad/gp_radialIcon_gamercard_down.dds", "EsoUI/Art/HUD/Gamepad/gp_radialIcon_gamercard_down.dds",
         function()
             ZO_ShowGamerCardFromDisplayNameOrFallback(targetDisplayName, ZO_ID_REQUEST_TYPE_CHARACTER_NAME, targetCharacterName)
         end)
@@ -2350,8 +2348,9 @@ do
 
         --Trade--
         local function TradeInviteOption() TRADE_WINDOW:InitiateTrade(primaryNameInternal) end
-        local tradeInviteFunction = ENABLED_IF_NOT_IGNORED and TradeInviteOption or AlertIgnored
-        self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_INVITE_TRADE), platformIcons[SI_PLAYER_TO_PLAYER_INVITE_TRADE], ENABLED_IF_NOT_IGNORED, tradeInviteFunction)
+        local isEnabled = ENABLED_IF_NOT_IGNORED and (IsConsoleUI() and not IsConsoleCommunicationRestricted() or true)
+        local tradeInviteFunction = isEnabled and TradeInviteOption or AlertIgnored
+        self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_INVITE_TRADE), platformIcons[SI_PLAYER_TO_PLAYER_INVITE_TRADE], isEnabled, tradeInviteFunction)
 
         --Cancel--
         self:AddMenuEntry(GetString(SI_RADIAL_MENU_CANCEL_BUTTON), platformIcons[SI_RADIAL_MENU_CANCEL_BUTTON], ENABLED)

@@ -229,12 +229,20 @@ function ZO_SlottablePlayerSkill:GetSlottableActionType()
 end
 
 function ZO_SlottablePlayerSkill:GetActionId()
-    local skillProgressionData = self.skillData:GetPointAllocatorProgressionData()
-    return skillProgressionData:GetAbilityId()
+    if self.skillData:IsCraftedAbility() then
+        return self.skillData:GetCraftedAbilityId()
+    else
+        local skillProgressionData = self.skillData:GetPointAllocatorProgressionData()
+        return skillProgressionData:GetAbilityId()
+    end
 end
 
 function ZO_SlottablePlayerSkill:GetActionType()
-    return ACTION_TYPE_ABILITY
+    if self.skillData:IsCraftedAbility() then
+        return ACTION_TYPE_CRAFTED_ABILITY
+    else
+        return ACTION_TYPE_ABILITY
+    end
 end
 
 function ZO_SlottablePlayerSkill:EqualsSlot(otherSlottableAction)
@@ -248,7 +256,7 @@ end
 function ZO_SlottablePlayerSkill:GetEffectiveAbilityId()
     local skillProgressionData = self.skillData:GetPointAllocatorProgressionData()
     local rootAbilityId = skillProgressionData:GetAbilityId()
-    if skillProgressionData:IsChainingAbility() then
+    if skillProgressionData.IsChainingAbility and skillProgressionData:IsChainingAbility() then
         return GetEffectiveAbilityIdForAbilityOnHotbar(rootAbilityId, self.hotbarCategory)
     else
         return rootAbilityId
@@ -505,6 +513,14 @@ function ZO_ActionBarAssignmentManager_Hotbar:ResetSlot(actionSlotIndex)
             self.slots[actionSlotIndex] = ZO_SlottableAbility:New(abilityId)
             return
         end
+    elseif actionType == ACTION_TYPE_CRAFTED_ABILITY then
+        local craftedAbilityId = GetSlotBoundId(actionSlotIndex, self.hotbarCategory)
+        local abilityId = GetAbilityIdForCraftedAbilityId(craftedAbilityId)
+        local playerSkillProgressionData = SKILLS_DATA_MANAGER:GetProgressionDataByAbilityId(abilityId)
+        if playerSkillProgressionData then
+            self.slots[actionSlotIndex] = ZO_SlottablePlayerSkill:New(playerSkillProgressionData:GetSkillData(), self.hotbarCategory)
+            return
+        end
     end
 end
 
@@ -536,8 +552,16 @@ function ZO_ActionBarAssignmentManager_Hotbar:DoesSlotHavePendingChanges(actionS
 
     local actionType = GetSlotType(actionSlotIndex, self.hotbarCategory)
     local actionId = GetSlotBoundId(actionSlotIndex, self.hotbarCategory)
+
     local pendingActionType = pendingAction:GetActionType()
-    local pendingActionId = pendingAction:GetActionId()
+    local slottableActionType = pendingAction:GetSlottableActionType()
+    local pendingActionId
+    if pendingActionType == ACTION_TYPE_ABILITY and (slottableActionType == ZO_SLOTTABLE_ACTION_TYPE_PLAYER_SKILL or slottableActionType == ZO_SLOTTABLE_ACTION_TYPE_COMPANION_SKILL) then
+        pendingActionId = pendingAction:GetEffectiveAbilityId()
+    else
+        pendingActionId = pendingAction:GetActionId()
+    end
+
     return pendingActionType ~= actionType or pendingActionId ~= actionId
 end
 

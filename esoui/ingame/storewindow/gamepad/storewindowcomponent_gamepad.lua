@@ -139,6 +139,8 @@ function ZO_GamepadStoreListComponent:CreateItemList(scene, storeMode, overrideT
     ZO_GamepadStoreList.SetMode(list, storeMode, setupFunction, overrideTemplate, overrideHeaderTemplateSetupFunction, templateControlPrefix, templateWithHeaderControlPrefix)
     list.AddItems = ZO_GamepadStoreList.AddItems
     list.UpdateList = ZO_GamepadStoreList.UpdateList
+    -- ZO_Gamepad_ParametricList_Search_Screen:PerformUpdate requires this function.
+    list.RefreshList = ZO_GamepadStoreList.UpdateList
     list.SetSearchContext = ZO_GamepadStoreList.SetSearchContext
     list:SetDirectionalInputEnabled(false)
 

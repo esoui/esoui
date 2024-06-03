@@ -63,7 +63,7 @@ LoadingScreen_Base = {}
 function LoadingScreen_Base:Log(text)
     local gamepadMode = IsInGamepadPreferredMode()
     if gamepadMode and self == GamepadLoadingScreen or
-    not gamepadMode and self == LoadingScreen then         
+    not gamepadMode and self == LoadingScreen then
         WriteToInterfaceLog(text)
     end
 end
@@ -170,20 +170,20 @@ end
 
 local BATTLEGROUND_TEAM_TEXTURES =
 {
-    [BATTLEGROUND_ALLIANCE_FIRE_DRAKES] = "EsoUI/Art/Battlegrounds/battlegrounds_teamIcon_orange.dds",
-    [BATTLEGROUND_ALLIANCE_STORM_LORDS] = "EsoUI/Art/Battlegrounds/battlegrounds_teamIcon_purple.dds",
-    [BATTLEGROUND_ALLIANCE_PIT_DAEMONS] = "EsoUI/Art/Battlegrounds/battlegrounds_teamIcon_green.dds",
+    [BATTLEGROUND_TEAM_FIRE_DRAKES] = "EsoUI/Art/Battlegrounds/battlegrounds_teamIcon_orange.dds",
+    [BATTLEGROUND_TEAM_STORM_LORDS] = "EsoUI/Art/Battlegrounds/battlegrounds_teamIcon_purple.dds",
+    [BATTLEGROUND_TEAM_PIT_DAEMONS] = "EsoUI/Art/Battlegrounds/battlegrounds_teamIcon_green.dds",
 }
 
 local GAMEPAD_BATTLEGROUND_TEAM_TEXTURES =
 {
-    [BATTLEGROUND_ALLIANCE_FIRE_DRAKES] = "EsoUI/Art/Battlegrounds/Gamepad/gp_battlegrounds_teamIcon_orange.dds",
-    [BATTLEGROUND_ALLIANCE_STORM_LORDS] = "EsoUI/Art/Battlegrounds/Gamepad/gp_battlegrounds_teamIcon_purple.dds",
-    [BATTLEGROUND_ALLIANCE_PIT_DAEMONS] = "EsoUI/Art/Battlegrounds/Gamepad/gp_battlegrounds_teamIcon_green.dds",
+    [BATTLEGROUND_TEAM_FIRE_DRAKES] = "EsoUI/Art/Battlegrounds/Gamepad/gp_battlegrounds_teamIcon_orange.dds",
+    [BATTLEGROUND_TEAM_STORM_LORDS] = "EsoUI/Art/Battlegrounds/Gamepad/gp_battlegrounds_teamIcon_purple.dds",
+    [BATTLEGROUND_TEAM_PIT_DAEMONS] = "EsoUI/Art/Battlegrounds/Gamepad/gp_battlegrounds_teamIcon_green.dds",
 }
 
 function LoadingScreen_Base:Show(zoneName, zoneDescription, loadingTexture, zoneDisplayType)
-    if self:IsPreferredScreen() then
+    if self:IsHidden() and self:IsPreferredScreen() then
         self:Log("Load Screen - Show")
         self.lastUpdate = GetFrameTimeMilliseconds()
         --Some of the logic in this file can cause use to briefly hide the load screen, so we set this to make sure we dont clear narration due to a hide while this function is running
@@ -233,9 +233,9 @@ function LoadingScreen_Base:Show(zoneName, zoneDescription, loadingTexture, zone
                 self:SetZoneDescription(LocalizeString("<<1>>", battlegroundDescription))
 
                 local activityAlliance = GetLatestActivityAlliance()
-                if activityAlliance ~= BATTLEGROUND_ALLIANCE_NONE then
-                    local r, g, b, a = GetInterfaceColor(INTERFACE_COLOR_TYPE_BATTLEGROUND_ALLIANCE, activityAlliance)
-                    local battlegroundTeamName = ZO_ColorizeString(r, g, b, GetString("SI_BATTLEGROUNDALLIANCE", activityAlliance))
+                if activityAlliance ~= BATTLEGROUND_TEAM_INVALID then
+                    local r, g, b, a = GetInterfaceColor(INTERFACE_COLOR_TYPE_BATTLEGROUND_TEAM, activityAlliance)
+                    local battlegroundTeamName = ZO_ColorizeString(r, g, b, GetString("SI_BATTLEGROUNDTEAM", activityAlliance))
 
                     local teamIcon
                     if IsInGamepadPreferredMode() then

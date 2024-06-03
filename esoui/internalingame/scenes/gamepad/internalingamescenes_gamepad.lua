@@ -60,7 +60,7 @@ ZO_GAMEPAD_MARKET:SetupSceneGroupCallback()
 -- Gamepad Mail Scene
 --
 
-local gamepadMailScene = ZO_RemoteScene:New("mailManagerGamepad", SCENE_MANAGER)
+local gamepadMailScene = ZO_RemoteScene:New("mailGamepad", SCENE_MANAGER)
 gamepadMailScene:AddFragment(KEYBIND_STRIP_GAMEPAD_FRAGMENT)
 
 ------------------------------------

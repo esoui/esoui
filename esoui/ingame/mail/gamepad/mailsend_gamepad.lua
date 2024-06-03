@@ -112,7 +112,7 @@ end
 function ZO_MailSend_Gamepad:OnHidden()
     self:Reset()
     self:DisconnectShownEvent()
-    MAIL_MANAGER_GAMEPAD:DeactivateTextSearch()
+    MAIL_GAMEPAD:DeactivateTextSearch()
 end
 
 function ZO_MailSend_Gamepad:PerformDeferredInitialization()
@@ -146,11 +146,11 @@ function ZO_MailSend_Gamepad:InitializeControls()
     self.goldSlider = ZO_CurrencySelector_Gamepad:New(self.goldSliderControl:GetNamedChild("Selector"))
     self.goldSlider:SetCurrencyType(CURT_MONEY)
     self.goldSlider:SetClampValues(true)
-    self.goldSlider:RegisterCallback("OnValueChanged", function() MAIL_MANAGER_GAMEPAD:RefreshKeybind() end)
+    self.goldSlider:RegisterCallback("OnValueChanged", function() MAIL_GAMEPAD:RefreshKeybind() end)
 end
 
 function ZO_MailSend_Gamepad:InitializeFragment()
-    GAMEPAD_MAIL_SEND_FRAGMENT = ZO_FadeSceneFragment:New(ZO_MailManager_GamepadSend)
+    GAMEPAD_MAIL_SEND_FRAGMENT = ZO_FadeSceneFragment:New(ZO_Mail_Gamepad_TopLevelSend)
     GAMEPAD_MAIL_SEND_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_FRAGMENT_SHOWING then
             self:OnShowing()
@@ -200,13 +200,13 @@ function ZO_MailSend_Gamepad:ComposeMailTo(address, subject)
     self.initialContact = address
     self.initialSubject = subject
     local PUSH_SCENE = true
-    MAIL_MANAGER_GAMEPAD:ShowTab(SEND_TAB_INDEX, PUSH_SCENE)
+    MAIL_GAMEPAD:ShowTab(ZO_MAIL_TAB_INDEX.SEND, PUSH_SCENE)
 end
 
 function ZO_MailSend_Gamepad:InsertBodyText(text)
     self.initialBodyInsertText = text
     local PUSH_SCENE = true
-    MAIL_MANAGER_GAMEPAD:ShowTab(SEND_TAB_INDEX, PUSH_SCENE)
+    MAIL_GAMEPAD:ShowTab(ZO_MAIL_TAB_INDEX.SEND, PUSH_SCENE)
 end
 
 function ZO_MailSend_Gamepad:IsMailValid()
@@ -443,7 +443,7 @@ function ZO_MailSend_Gamepad:InitializeHeader()
         data2Text = UpdatePostage,
         data2TextNarration = GetPostageNarration,
 
-        tabBarEntries = MAIL_MANAGER_GAMEPAD.tabBarEntries,
+        tabBarEntries = MAIL_GAMEPAD.tabBarEntries,
     }
 
     self.setFieldHeaderData =
@@ -473,20 +473,20 @@ local SETUP_LOCALLY = true
 function ZO_MailSend_Gamepad:InitializeInventoryList()
     local function OnRefreshList(list)
         if list:GetNumItems() == 0 then
-            MAIL_MANAGER_GAMEPAD:RequestEnterHeader()
+            MAIL_GAMEPAD:RequestEnterHeader()
         else
-            MAIL_MANAGER_GAMEPAD:RequestLeaveHeader()
+            MAIL_GAMEPAD:RequestLeaveHeader()
         end
     end
 
-    self.inventoryList = MAIL_MANAGER_GAMEPAD:AddList("Inventory", SETUP_LOCALLY, ZO_GamepadInventoryList, BAG_BACKPACK, SLOT_TYPE_ITEM, function(...) self:InventorySelectionChanged(...) end, InventorySetupFunction)
+    self.inventoryList = MAIL_GAMEPAD:AddList("Inventory", SETUP_LOCALLY, ZO_GamepadInventoryList, BAG_BACKPACK, SLOT_TYPE_ITEM, function(...) self:InventorySelectionChanged(...) end, InventorySetupFunction)
     self.inventoryList:SetOnRefreshListCallback(OnRefreshList)
     self.inventoryList:SetSearchContext("mailTextSearch")
     self.inventoryList:SetItemFilterFunction(ItemFilterFunction)
     self.inventoryList:SetNoItemText(GetString(SI_GAMEPAD_INVENTORY_EMPTY))
 
-    MAIL_MANAGER_GAMEPAD:SetOnBackButtonCallback(function() self:OnInventoryListBackButtonClicked() end)
-    MAIL_MANAGER_GAMEPAD:SetTextSearchEntryHidden(true)
+    MAIL_GAMEPAD:SetOnBackButtonCallback(function() self:OnInventoryListBackButtonClicked() end)
+    MAIL_GAMEPAD:SetTextSearchEntryHidden(true)
     self.inventoryListControl = self.inventoryList:GetControl()
 end
 
@@ -511,7 +511,7 @@ end
 
 function ZO_MailSend_Gamepad:PopulateMainList()
     local function RefreshKeybind()
-        MAIL_MANAGER_GAMEPAD:RefreshKeybind()
+        MAIL_GAMEPAD:RefreshKeybind()
     end
 
     self.mainList:Clear()
@@ -597,21 +597,21 @@ function ZO_MailSend_Gamepad:PopulateMainList()
         RefreshKeybind()
         ZO_GamepadEditBox_FocusLost(editBox)
         --Re-narrate the edit box when we are done typing in it
-        SCREEN_NARRATION_MANAGER:QueueParametricListEntry(MAIL_MANAGER_GAMEPAD:GetCurrentList())
+        SCREEN_NARRATION_MANAGER:QueueParametricListEntry(MAIL_GAMEPAD:GetCurrentList())
     end)
 
     self.mailView.addressEdit.edit:SetHandler("OnFocusLost", function(editBox)
         RefreshKeybind()
         ZO_GamepadEditBox_FocusLost(editBox)
         --Re-narrate the edit box when we are done typing in it
-        SCREEN_NARRATION_MANAGER:QueueParametricListEntry(MAIL_MANAGER_GAMEPAD:GetCurrentList())
+        SCREEN_NARRATION_MANAGER:QueueParametricListEntry(MAIL_GAMEPAD:GetCurrentList())
     end)
 
     self.mailView.bodyEdit.edit:SetHandler("OnFocusLost", function(editBox)
         RefreshKeybind()
         ZO_GamepadEditBox_FocusLost(editBox)
         --Re-narrate the edit box when we are done typing in it
-        SCREEN_NARRATION_MANAGER:QueueParametricListEntry(MAIL_MANAGER_GAMEPAD:GetCurrentList())
+        SCREEN_NARRATION_MANAGER:QueueParametricListEntry(MAIL_GAMEPAD:GetCurrentList())
     end)
 
     if not self.inventoryList:IsEmpty() then
@@ -666,7 +666,7 @@ function ZO_MailSend_Gamepad:PopulateMainList()
 end
 
 function ZO_MailSend_Gamepad:InitializeMainList()
-    self.mainList = MAIL_MANAGER_GAMEPAD:GetMainList()
+    self.mainList = MAIL_GAMEPAD:GetMainList()
     self.mainList:SetOnSelectedDataChangedCallback(function(...) self:OnListMovement(...) end)
     self:PopulateMainList()
 end
@@ -702,7 +702,7 @@ function ZO_MailSend_Gamepad:HighlightActiveTextField()
 end
 
 function ZO_MailSend_Gamepad:InitializeContactsList()
-    self.contactsList = MAIL_MANAGER_GAMEPAD:AddList("Contacts")
+    self.contactsList = MAIL_GAMEPAD:AddList("Contacts")
     self.contactsListControl = self.contactsList:GetControl()
 end
 
@@ -727,22 +727,23 @@ function ZO_MailSend_Gamepad:Reset()
     self.goldMode = nil
     self.inSendMode = false
 
-    MAIL_MANAGER_GAMEPAD:RequestLeaveHeader()
+    MAIL_GAMEPAD:RequestLeaveHeader()
 end
 
 function ZO_MailSend_Gamepad:SwitchToSendTab()
-    MAIL_MANAGER_GAMEPAD:SwitchToHeader(self.mainHeaderData, SEND_TAB_INDEX)
+    MAIL_GAMEPAD:SwitchToHeader(self.mainHeaderData, ZO_MAIL_TAB_INDEX.SEND)
 end
 
 function ZO_MailSend_Gamepad:EnterSending()
     self.inSendMode = true
     self:Reset()
 
-    MAIL_MANAGER_GAMEPAD:SwitchToKeybind(nil) -- Remove keybinds as they are invaild when sending.
+    MAIL_GAMEPAD:SwitchToKeybind(nil) -- Remove keybinds as they are invaild when sending.
     self.loadingLabel:SetText(GetString(SI_GAMEPAD_MAIL_SEND_SENDING))
     self.loadingBox:SetHidden(false)
-    MAIL_MANAGER_GAMEPAD:DeactivateTextSearch()
-    MAIL_MANAGER_GAMEPAD:SetCurrentList(nil)
+    MAIL_GAMEPAD:DeactivateTextSearch()
+    MAIL_GAMEPAD:SetCurrentList(nil)
+    self:EnableMailEditboxes(false)
 end
 
 function ZO_MailSend_Gamepad:EnterOutbox()
@@ -752,10 +753,17 @@ function ZO_MailSend_Gamepad:EnterOutbox()
         self:EnterSending()
     else
         self:SwitchToSendTab()
-        MAIL_MANAGER_GAMEPAD:DeactivateTextSearch()
-        MAIL_MANAGER_GAMEPAD:SetCurrentList(self.mainList)
-        MAIL_MANAGER_GAMEPAD:SwitchToKeybind(self.mainKeybindDescriptor)
+        MAIL_GAMEPAD:DeactivateTextSearch()
+        MAIL_GAMEPAD:SetCurrentList(self.mainList)
+        MAIL_GAMEPAD:SwitchToKeybind(self.mainKeybindDescriptor)
+        self:EnableMailEditboxes(true)
     end
+end
+
+function ZO_MailSend_Gamepad:EnableMailEditboxes(enabled)
+    self.mailView.addressEdit.edit:SetMouseEnabled(enabled)
+    self.mailView.subjectEdit.edit:SetMouseEnabled(enabled)
+    self.mailView.bodyEdit.edit:SetMouseEnabled(enabled)
 end
 
 function ZO_MailSend_Gamepad:AddContact(text, header, callback)
@@ -783,22 +791,23 @@ function ZO_MailSend_Gamepad:EnterContactsList()
     self.contactsList:Commit()
 
     self.setFieldHeaderData.titleText = RECIPIENT_HEADER_TEXT
-    MAIL_MANAGER_GAMEPAD:SwitchToHeader(self.setFieldHeaderData)
-    MAIL_MANAGER_GAMEPAD:SwitchToKeybind(self.contactsKeybindDescriptor)
-    MAIL_MANAGER_GAMEPAD:DeactivateTextSearch()
-    MAIL_MANAGER_GAMEPAD:SetCurrentList(self.contactsList)
+    MAIL_GAMEPAD:SwitchToHeader(self.setFieldHeaderData)
+    MAIL_GAMEPAD:SwitchToKeybind(self.contactsKeybindDescriptor)
+    MAIL_GAMEPAD:DeactivateTextSearch()
+    MAIL_GAMEPAD:SetCurrentList(self.contactsList)
+    self:EnableMailEditboxes(true)
 
     PlaySound(SOUNDS.GAMEPAD_MENU_FORWARD)
 end
 
 function ZO_MailSend_Gamepad:ShowSliderControl(mode, value, maxValue)
-    MAIL_MANAGER_GAMEPAD:DeactivateCurrentList()
+    MAIL_GAMEPAD:DeactivateCurrentList()
     self.mainList:WhenInactiveSetTargetControlHidden(true)
 
     self.goldSlider:SetMaxValue(maxValue)
     self.goldSlider:SetValue(value)
 
-    MAIL_MANAGER_GAMEPAD:SwitchToKeybind(self.sliderKeybindDescriptor)
+    MAIL_GAMEPAD:SwitchToKeybind(self.sliderKeybindDescriptor)
     self.goldSlider:Activate()
     self.goldMode = mode
     self.goldSliderControl:SetHidden(false)
@@ -812,25 +821,26 @@ function ZO_MailSend_Gamepad:EnterInventoryList()
     self:Reset()
 
     self.setFieldHeaderData.titleText = ATTACHMENT_HEADER_TEXT
-    MAIL_MANAGER_GAMEPAD:SwitchToHeader(self.setFieldHeaderData)
-    MAIL_MANAGER_GAMEPAD:SwitchToKeybind(self.inventoryKeybindDescriptor)
-    MAIL_MANAGER_GAMEPAD:SetCurrentList(self.inventoryList)
-    MAIL_MANAGER_GAMEPAD:ActivateTextSearch()
+    MAIL_GAMEPAD:SwitchToHeader(self.setFieldHeaderData)
+    MAIL_GAMEPAD:SwitchToKeybind(self.inventoryKeybindDescriptor)
+    MAIL_GAMEPAD:SetCurrentList(self.inventoryList)
+    MAIL_GAMEPAD:ActivateTextSearch()
+    self:EnableMailEditboxes(true)
 
     if self.inventoryList and self.inventoryList:GetNumItems() == 0 then
-        MAIL_MANAGER_GAMEPAD:RequestEnterHeader()
+        MAIL_GAMEPAD:RequestEnterHeader()
     end
 
     PlaySound(SOUNDS.GAMEPAD_MENU_FORWARD)
 end
 
 function ZO_MailSend_Gamepad:InventorySelectionChanged(list, selectedData)
-    if MAIL_MANAGER_GAMEPAD:GetCurrentList() == self.inventoryList then
+    if MAIL_GAMEPAD:GetCurrentList() == self.inventoryList then
         GAMEPAD_TOOLTIPS:ClearLines(GAMEPAD_LEFT_TOOLTIP)
         if selectedData then
             GAMEPAD_TOOLTIPS:LayoutBagItem(GAMEPAD_LEFT_TOOLTIP, selectedData.bagId, selectedData.slotIndex)
         end
-        MAIL_MANAGER_GAMEPAD:RefreshKeybind()
+        MAIL_GAMEPAD:RefreshKeybind()
     end
 end
 
@@ -855,21 +865,21 @@ function ZO_MailSend_Gamepad:IsAttachingItems()
 end
 
 function ZO_MailSend_Gamepad:UpdatePostageMoney()
-    MAIL_MANAGER_GAMEPAD:RefreshHeader()
+    MAIL_GAMEPAD:RefreshHeader()
 end
 
 function ZO_MailSend_Gamepad:OnMailAttachmentAdded(attachSlot)
     local _, _, icon, stack = GetQueuedItemAttachmentInfo(attachSlot)
     self.mailView:SetAttachment(attachSlot, stack, icon)
     self:UpdatePostageMoney()
-    MAIL_MANAGER_GAMEPAD:RefreshKeybind()
+    MAIL_GAMEPAD:RefreshKeybind()
     self.inventoryList:RefreshList()
 end
 
 function ZO_MailSend_Gamepad:OnMailAttachmentRemoved(attachSlot)
     self.mailView:ClearAttachment(attachSlot)
     self:UpdatePostageMoney()
-    MAIL_MANAGER_GAMEPAD:RefreshKeybind()
+    MAIL_GAMEPAD:RefreshKeybind()
     self.inventoryList:RefreshList()
 end
 

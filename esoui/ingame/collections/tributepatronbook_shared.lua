@@ -1,6 +1,8 @@
-ZO_TributePatronBook_Shared = ZO_InitializingObject:Subclass()
+ZO_TributePatronBook_Shared = ZO_TextSearchObject:Subclass()
 
 function ZO_TributePatronBook_Shared:Initialize(control, infoContainerControl, templateData)
+    ZO_TextSearchObject.Initialize(self, "tributePatronTextSearch", self.searchEditBox)
+
     self.control = control
     self.templateData = templateData
     self.infoContainerControl = infoContainerControl
@@ -11,6 +13,7 @@ function ZO_TributePatronBook_Shared:Initialize(control, infoContainerControl, t
     self.currentDockCards = {}
 
     self.categoryFilters = {}
+    self.patronFilters = {}
 
     self.scene = scene or ZO_Scene:New(self:GetSceneName(), SCENE_MANAGER)
     self.fragment = ZO_FadeSceneFragment:New(control)
@@ -18,6 +21,13 @@ function ZO_TributePatronBook_Shared:Initialize(control, infoContainerControl, t
         if newState == SCENE_FRAGMENT_SHOWING then
             self.categoriesRefreshGroup:TryClean()
             self:OnFragmentShowing()
+            if self:IsSearchSupported() then
+                self:ActivateTextSearch()
+            end
+        elseif newState == SCENE_FRAGMENT_HIDDEN then
+            if self:IsSearchSupported() then
+                self:DeactivateTextSearch()
+            end
         end
     end)
 
@@ -26,6 +36,30 @@ function ZO_TributePatronBook_Shared:Initialize(control, infoContainerControl, t
     self:InitializeGridList()
 
     self:RegisterForEvents()
+end
+
+function ZO_TributePatronBook_Shared:SetupContextTextSearch()
+    if self:IsSearchSupported() then
+        -- Shared search for tribute patrons
+        local filterTargetDescriptor =
+        {
+            [BACKGROUND_LIST_FILTER_TARGET_TRIBUTE_PATRON_ID] =
+            {
+                searchFilterList =
+                {
+                    BACKGROUND_LIST_FILTER_TYPE_NAME,
+                },
+                primaryKeys = function()
+                    local patronIdList = {}
+                    for _, patronData in TRIBUTE_DATA_MANAGER:TributePatronIterator() do
+                        table.insert(patronIdList, patronData:GetId())
+                    end
+                    return patronIdList
+                end,
+            },
+        }
+        TEXT_SEARCH_MANAGER:SetupContextTextSearch(self.searchContext, filterTargetDescriptor)
+    end
 end
 
 ZO_TributePatronBook_Shared.GetSceneName = ZO_TributePatronBook_Shared:MUST_IMPLEMENT()
@@ -135,7 +169,6 @@ function ZO_TributePatronBook_Shared:RegisterForEvents()
     TRIBUTE_DATA_MANAGER:RegisterCallback("PatronsUpdated", OnPatronsUpdated)
     TRIBUTE_DATA_MANAGER:RegisterCallback("PatronsDataDirty", OnPatronsDataDirty)
     TRIBUTE_DATA_MANAGER:RegisterCallback("ProgressionUpgradeStatusChanged", OnProgressionUpgradeStatusChanged)
-    TRIBUTE_DATA_MANAGER:RegisterCallback("UpdateSearchResults", function() self:OnUpdateSearchResults() end)
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleUpdated", OnCollectibleUpdated)
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", OnCollectionUpdated)
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleNewStatusCleared", OnCollectibleUpdated)
@@ -289,15 +322,18 @@ function ZO_TributePatronBook_Shared:OnFragmentShowing()
     -- Can be overridden
 end
 
+-- Overrides ZO_TextSearchObject
 function ZO_TributePatronBook_Shared:OnUpdateSearchResults()
     self:RefreshFilters()
 end
 
 function ZO_TributePatronBook_Shared:RefreshFilters()
     ZO_ClearNumericallyIndexedTable(self.categoryFilters)
+    ZO_ClearNumericallyIndexedTable(self.patronFilters)
 
-    if self:IsSearchSupported() and TRIBUTE_DATA_MANAGER:HasSearchFilter() then
-        table.insert(self.categoryFilters, ZO_TributePatronData.IsSearchResult)
+    if self:IsSearchSupported() and self:HasSearchFilter() then
+        table.insert(self.categoryFilters, ZO_TributePatronCategoryData.IsSearchResult)
+        table.insert(self.patronFilters, ZO_TributePatronData.IsSearchResult)
     end
 
     self.categoriesRefreshGroup:MarkDirty("List")

@@ -1,6 +1,8 @@
-ZO_ItemSetsBook_Shared = ZO_InitializingObject:Subclass()
+ZO_ItemSetsBook_Shared = ZO_TextSearchObject:Subclass()
 
 function ZO_ItemSetsBook_Shared:Initialize(control, scene)
+    ZO_TextSearchObject.Initialize(self, "itemSetTextSearch", self.searchEditBox)
+
     self.control = control
 
     self.scene = scene or ZO_Scene:New(self:GetSceneName(), SCENE_MANAGER)
@@ -8,6 +10,13 @@ function ZO_ItemSetsBook_Shared:Initialize(control, scene)
     self.fragment:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_FRAGMENT_SHOWING then
             self:OnFragmentShowing()
+            if self:IsSearchSupported() then
+                self:ActivateTextSearch()
+            end
+        elseif newState == SCENE_FRAGMENT_HIDDEN then
+            if self:IsSearchSupported() then
+                self:DeactivateTextSearch()
+            end
         end
     end)
 
@@ -24,6 +33,31 @@ function ZO_ItemSetsBook_Shared:Initialize(control, scene)
     self:InitializeGridList()
 
     self:RegisterForEvents()
+end
+
+function ZO_ItemSetsBook_Shared:SetupContextTextSearch()
+    if self:IsSearchSupported() then
+        -- Shared search for tribute patrons
+        local filterTargetDescriptor =
+        {
+            [BACKGROUND_LIST_FILTER_TARGET_ITEM_SET_ID] =
+            {
+                searchFilterList =
+                {
+                    BACKGROUND_LIST_FILTER_TYPE_NAME,
+                    BACKGROUND_LIST_FILTER_TYPE_SEARCH_KEYWORDS,
+                },
+                primaryKeys = function()
+                    local itemSetCollectionIdList = {}
+                    for _, itemSetCollectionData in ITEM_SET_COLLECTIONS_DATA_MANAGER:ItemSetCollectionIterator() do
+                        table.insert(itemSetCollectionIdList, itemSetCollectionData:GetId())
+                    end
+                    return itemSetCollectionIdList
+                end,
+            },
+        }
+        TEXT_SEARCH_MANAGER:SetupContextTextSearch(self.searchContext, filterTargetDescriptor)
+    end
 end
 
 function ZO_ItemSetsBook_Shared:GetSceneName()
@@ -110,7 +144,6 @@ function ZO_ItemSetsBook_Shared:RegisterForEvents()
     ITEM_SET_COLLECTIONS_DATA_MANAGER:RegisterCallback("PieceNewStatusCleared", function(...) self:OnPieceNewStatusCleared(...) end)
     ITEM_SET_COLLECTIONS_DATA_MANAGER:RegisterCallback("CollectionNewStatusCleared", function(...) self:OnCollectionNewStatusCleared(...) end)
     ITEM_SET_COLLECTIONS_DATA_MANAGER:RegisterCallback("CategoryNewStatusCleared", function(...) self:OnCategoryNewStatusCleared(...) end)
-    ITEM_SET_COLLECTIONS_DATA_MANAGER:RegisterCallback("UpdateSearchResults", function() self:OnUpdateSearchResults() end)
     ITEM_SET_COLLECTIONS_DATA_MANAGER:RegisterCallback("ShowLockedChanged", function(...) self:OnShowLockedOptionUpdated(...) end)
     ITEM_SET_COLLECTIONS_DATA_MANAGER:RegisterCallback("EquipmentFilterTypesChanged", function(...) self:OnEquipmentFilterTypesChanged(...) end)
 end
@@ -159,6 +192,7 @@ function ZO_ItemSetsBook_Shared:RefreshCategoryNewStatus(itemSetCollectionCatego
     end
 end
 
+-- Overrides ZO_TextSearchObject
 function ZO_ItemSetsBook_Shared:OnUpdateSearchResults()
     self:RefreshFilters()
 end
@@ -197,12 +231,12 @@ function ZO_ItemSetsBook_Shared:GetGridHeaderEntryDataObjectPool()
 end
 
 function ZO_ItemSetsBook_Shared:IsSetHeaderCollapsed(itemSetId)
-     -- Can be overriden
+     -- Can be overridden
     return false
 end
 
 function ZO_ItemSetsBook_Shared:IsSearchSupported()
-    -- Can be overriden
+    -- Can be overridden
     return false
 end
 
@@ -258,7 +292,7 @@ function ZO_ItemSetsBook_Shared:RefreshPieceFilters()
 
     ZO_ClearNumericallyIndexedTable(pieceFilters)
 
-    if self:IsSearchSupported() and ITEM_SET_COLLECTIONS_DATA_MANAGER:HasSearchFilter() then
+    if self:IsSearchSupported() and self:HasSearchFilter() then
         table.insert(pieceFilters, ZO_ItemSetCollectionPieceData.IsSearchResult)
     end
 

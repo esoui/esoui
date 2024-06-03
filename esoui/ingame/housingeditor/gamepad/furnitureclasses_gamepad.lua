@@ -180,47 +180,23 @@ function ZO_HousingFurnitureList_Gamepad:InitializeKeybindStripDescriptors()
         },
         -- Options
         {
-            name = function()
-                if optionsDialogName and not HOUSING_EDITOR_STATE:IsHousePreview() then
-                    return GetString(SI_GAMEPAD_HOUSING_FURNITURE_BROWSER_OPTIONS_KEYBIND)
-                else
-                    return GetString(SI_GAMEPAD_FURNITURE_TEXT_FILTER_KEYBIND_TEXT)
-                end
-            end,
+            name = GetString(SI_GAMEPAD_HOUSING_FURNITURE_BROWSER_OPTIONS_KEYBIND),
             keybind = "UI_SHORTCUT_TERTIARY",
             callback = function()
-                if optionsDialogName and not HOUSING_EDITOR_STATE:IsHousePreview() then
-                    ShowOptionsDialog()
-                else
-                    self.owner:SelectTextFilter()
-                end
+                ShowOptionsDialog()
             end,
-        },
-        -- Link House Invite in Chat
-        {
-            name = GetString(SI_HOUSING_LINK_IN_CHAT),
-            keybind = "UI_SHORTCUT_RIGHT_STICK",
-            callback = ZO_HousingBook_LinkCurrentHouseInChat,
-            alignment = KEYBIND_STRIP_ALIGN_RIGHT,
-            order = 100,
             visible = function()
-                return not HOUSING_EDITOR_STATE:IsHousePreview()
+                return optionsDialogName and not HOUSING_EDITOR_STATE:IsHousePreview()
             end,
         },
-        -- Link House Invite in Mail
+
+        -- Send Invite
         {
-            name = GetString(SI_HOUSING_LINK_IN_MAIL),
-            keybind = "UI_SHORTCUT_QUATERNARY",
+            name = GetString(SI_GAMEPAD_HOUSING_SEND_INVITE),
+            keybind = "UI_SHORTCUT_RIGHT_STICK",
             callback = function()
-                local houseId = GetCurrentZoneHouseId()
-                local ownerDisplayName = GetCurrentHouseOwner()
-                local link = ZO_HousingBook_GetHouseLink(houseId, ownerDisplayName)
-                if link then
-                    MAIL_MANAGER_GAMEPAD.inbox:InsertBodyText(link)
-                end
+                ZO_Dialogs_ShowGamepadDialog("GAMEPAD_HOUSING_EDITOR_LINK_INVITE")
             end,
-            alignment = KEYBIND_STRIP_ALIGN_RIGHT,
-            order = 110,
             visible = function()
                 return not HOUSING_EDITOR_STATE:IsHousePreview()
             end,
@@ -255,20 +231,13 @@ function ZO_HousingFurnitureList_Gamepad:InitializeKeybindStripDescriptors()
 
         -- Options
         {
-            name = function()
-                if optionsDialogName and not HOUSING_EDITOR_STATE:IsHousePreview() then
-                    return GetString(SI_GAMEPAD_HOUSING_FURNITURE_BROWSER_OPTIONS_KEYBIND)
-                else
-                    return GetString(SI_GAMEPAD_FURNITURE_TEXT_FILTER_KEYBIND_TEXT)
-                end
-            end,
+            name = GetString(SI_GAMEPAD_HOUSING_FURNITURE_BROWSER_OPTIONS_KEYBIND),
             keybind = "UI_SHORTCUT_TERTIARY",
             callback = function()
-                if optionsDialogName and not HOUSING_EDITOR_STATE:IsHousePreview() then
-                    ShowOptionsDialog()
-                else
-                    self.owner:SelectTextFilter()
-                end
+                ShowOptionsDialog()
+            end,
+            visible = function()
+                return optionsDialogName and not HOUSING_EDITOR_STATE:IsHousePreview()
             end,
         },
 
@@ -532,24 +501,7 @@ function ZO_HousingFurnitureList_Gamepad:InitializeOptionsDialog()
             dialog:setupFunc()
         end,
 
-        parametricList =
-        {
-            -- Text search
-            {
-                template = "ZO_GamepadFullWidthLeftLabelEntryTemplate",
-
-                templateData =
-                {
-                    text = GetString(SI_GAMEPAD_FURNITURE_TEXT_FILTER_KEYBIND_TEXT),
-                    setup = ZO_SharedGamepadEntry_OnSetup,
-
-                    callback = function(dialog)
-                        ZO_Dialogs_ReleaseDialogOnButtonPress(optionsDialogName)
-                        self.owner:SelectTextFilter()
-                    end,
-                },
-            },
-        },
+        parametricList = { },
 
         blockDialogReleaseOnPress = true,
 
@@ -571,7 +523,7 @@ function ZO_HousingFurnitureList_Gamepad:InitializeOptionsDialog()
             -- Back
             {
                 keybind = "DIALOG_NEGATIVE",
-                text = SI_DIALOG_CANCEL,
+                text = SI_DIALOG_CLOSE,
 
                 callback = function()
                     ZO_Dialogs_ReleaseDialogOnButtonPress(optionsDialogName)
@@ -667,29 +619,46 @@ function ZO_HousingFurnitureList_Gamepad:UpdateLists()
     self:BuildCategoryList()
 
     if self.currentList then
-        local success = self.currentList.buildListFunction()
-        --if the list was empty with the new data then switch back to the top level category list
-        if not success then
-            self:SwitchActiveList(self.categoryList)
-        end
-    end
+        self.currentList.buildListFunction()
 
-    self:UpdateCurrentKeybinds()
+        self:UpdateCurrentKeybinds()
+    end
 end
 
 function ZO_HousingFurnitureList_Gamepad:ViewCategory()
+    self.currentCategoryData = nil
+    self.currentCategoryId = nil
+    self.currentCategoryName = nil
     self:RefreshCurrentCategoryData()
     self:BuildFurnitureList()
     self:SwitchActiveList(self.furnitureList)
 end
 
 function ZO_HousingFurnitureList_Gamepad:RefreshCurrentCategoryData()
-    local entryData = self.categoryList.list:GetTargetData()
-    if entryData ~= nil then
-        local categoryTreeData = self:GetCategoryTreeDataRoot()
-        self.currentCategoryData = categoryTreeData:GetSubcategory(entryData.categoryId)
+    if self.currentCategoryId == nil then
+        -- Stepping into the new category.  Grab its data.
+        local entryData = self.categoryList.list:GetTargetData()
+        if entryData ~= nil then
+            local categoryTreeData = self:GetCategoryTreeDataRoot()
+            self.currentCategoryData = categoryTreeData:GetSubcategory(entryData.categoryId)
+            -- When searches return 0 results, I need to stay in that category and display some data.  Cache off the important bits.
+            self.currentCategoryId = entryData.categoryId
+            self.currentCategoryName = self.currentCategoryData:GetName()
+        else
+            self.currentCategoryData = nil
+            self.currentCategoryId = nil
+            self.currentCategoryName = nil
+        end
     else
-        self.currentCategoryData = nil
+        -- The data tree has been rebuilt.  Set our category to the new data.
+        local categoryTreeData = self:GetCategoryTreeDataRoot()
+        self.currentCategoryData = categoryTreeData:GetSubcategory(self.currentCategoryId)
+    end
+    
+    if self.currentCategoryName then
+        GAMEPAD_HOUSING_FURNITURE_BROWSER:SetTitleText(self.currentCategoryName)
+    else
+        GAMEPAD_HOUSING_FURNITURE_BROWSER:SetTitleText(nil)
     end
 end
 
@@ -747,8 +716,10 @@ function ZO_HousingFurnitureList_Gamepad:SwitchActiveList(list)
 
         if list == self.categoryList then
             self:SetFurnitureRightInfoState(RIGHT_INFO_STATE.HOUSE_INFO)
+            GAMEPAD_HOUSING_FURNITURE_BROWSER:SetTitleText(nil)
         elseif list == self.furnitureList then
             self:SetFurnitureRightInfoState(RIGHT_INFO_STATE.FURNITURE_INFO)
+            GAMEPAD_HOUSING_FURNITURE_BROWSER:SetTitleText(self.currentCategoryName)
         end
     else
         self.owner:SetCurrentList(nil)
@@ -942,16 +913,28 @@ function ZO_HousingFurnitureList_Gamepad:BuildFurnitureList()
 
     furnitureList:Clear()
 
-    if not self.currentCategoryData then
-        return false
-    end
-
-    self:BuildFurnitureEntriesInCategory(self.currentCategoryData)
-    for _, subCategory in ipairs(self.currentCategoryData:GetAllSubcategories()) do
-        self:BuildFurnitureEntriesInCategory(subCategory)
+    if self.currentCategoryData then
+        self:BuildFurnitureEntriesInCategory(self.currentCategoryData)
+        for _, subCategory in ipairs(self.currentCategoryData:GetAllSubcategories()) do
+            self:BuildFurnitureEntriesInCategory(subCategory)
+        end
     end
 
     if furnitureList:IsEmpty() then
+        if self.currentCategoryName == nil then
+            -- No category name.  We're at the root level.
+            furnitureList:SetNoItemText(self:GetNoItemText())
+        else
+            local categoryTreeData = self:GetCategoryTreeDataRoot()
+            if categoryTreeData and #categoryTreeData:GetAllSubcategories() > 0 then
+                -- No items in this category, but exist elsewhere.
+                furnitureList:SetNoItemText(zo_strformat(SI_HOUSING_FURNITURE_NO_SEARCH_RESULTS_IN_CATEGORY, self.currentCategoryName))
+            else
+                -- No items in any category.
+                furnitureList:SetNoItemText(GetString(SI_HOUSING_FURNITURE_NO_SEARCH_RESULTS))
+            end
+        end
+        
         furnitureList:Commit()
         return false
     end

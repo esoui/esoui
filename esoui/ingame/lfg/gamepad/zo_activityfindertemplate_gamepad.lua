@@ -665,7 +665,7 @@ function ZO_ActivityFinderTemplate_Gamepad:ShowTributeRank()
             end
         end
         ZO_GenericFooter_Gamepad:ClearAnchors()
-        ZO_GenericFooter_Gamepad:SetAnchor(RIGHT, ZO_ActivityTributeRankFooter_Gamepad_TL, LEFT)
+        ZO_GenericFooter_Gamepad:SetAnchor(RIGHT, ZO_ActivityTributeRankFooter_Gamepad_TL, LEFT, ZO_GAMEPAD_CONTENT_INSET_X)
     end
 end
 

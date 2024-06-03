@@ -16,17 +16,13 @@ local function InitializeDisplays(control, numDisplays)
 
     ZO_OptionsWindow_InitializeControl(control)
 
-    ZO_Options_SetOptionActiveOrInactive(control, GetSetting(SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_FULLSCREEN) == FULLSCREEN_MODE_FULLSCREEN_EXCLUSIVE)
+    ZO_Options_SetOptionActiveOrInactive(control, tonumber(GetSetting(SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_FULLSCREEN)) == FULLSCREEN_MODE_FULLSCREEN_EXCLUSIVE)
 end
 
 local function GetResolutionInfo(w, h)
     local optionValue = string.format("%dx%d", w, h)
     local optionText = zo_strformat(SI_GRAPHICS_OPTIONS_VIDEO_RESOLUTION_FORMAT, w, h)
     return optionValue, optionText
-end
-
-local function IsSystemNotUsingHDR()
-    return not IsSystemUsingHDR()
 end
 
 local function InitializeResolution(control, ...)
@@ -47,7 +43,34 @@ local function InitializeResolution(control, ...)
 
     ZO_OptionsWindow_InitializeControl(control)
 
-    ZO_Options_SetOptionActiveOrInactive(control, GetSetting(SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_FULLSCREEN) == FULLSCREEN_MODE_FULLSCREEN_EXCLUSIVE)
+    ZO_Options_SetOptionActiveOrInactive(control, tonumber(GetSetting(SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_FULLSCREEN)) == FULLSCREEN_MODE_FULLSCREEN_EXCLUSIVE)
+end
+
+local function DoesGammaSettingExist()
+    if ZO_IsPCUI() then 
+        -- On PC, need to be able to swap between Gamma settings and HDR settings.
+        return true
+    else
+        return not IsSystemUsingHDR()
+    end
+end
+
+local function OnHDRToggleUpdated(control)
+    if GetSetting_Bool(SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_HDR_ENABLED) then
+        ZO_Options_SetOptionActive(control)
+    else
+        ZO_Options_SetOptionInactive(control)
+    end
+    ZO_Options_UpdateOption(control)
+end
+
+local function OnGammaToggleUpdated(control)
+    if GetSetting_Bool(SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_HDR_ENABLED) then
+        ZO_Options_SetOptionInactive(control)
+    else
+        ZO_Options_SetOptionActive(control)
+    end
+    ZO_Options_UpdateOption(control)
 end
 
 function ZO_OptionsPanel_Video_InitializeDisplays(control)
@@ -55,13 +78,29 @@ function ZO_OptionsPanel_Video_InitializeDisplays(control)
 end
 
 function ZO_OptionsPanel_Video_OnActiveDisplayChanged(control)
-    ZO_OptionsWindow_InitializeControl(control)
+    ZO_OptionsPanel_Video_InitializeDisplays(control)
+    ZO_Options_UpdateOption(control)
+end
+
+function ZO_OptionsPanel_Video_OnHDREnabledChanged(control)
+    if CanSystemEnableHDR() then
+        ZO_Options_SetOptionActive(control)
+    else
+        ZO_Options_SetOptionInactive(control)
+    end
     ZO_Options_UpdateOption(control)
 end
 
 function ZO_OptionsPanel_Video_InitializeResolution(control)
     local DEFAULT_DISPLAY_INDEX = 1
     InitializeResolution(control, GetDisplayModes(DEFAULT_DISPLAY_INDEX))
+end
+
+function ZO_OptionsPanel_Video_OnDisplayResolutionChanged(control)
+    -- GetDisplayModes expects the index to start at 1
+    local displayIndex = 1 + tonumber(GetSetting(SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_ACTIVE_DISPLAY))
+    InitializeResolution(control, GetDisplayModes(displayIndex))
+    ZO_Options_UpdateOption(control)
 end
 
 function ZO_OptionsPanel_Video_SetCustomScale(self, formattedValueString)
@@ -311,6 +350,10 @@ local ZO_OptionsPanel_Video_ControlData =
             maxValue = 150,
             valueFormat = "%.2f",
             exists = IsSystemNotUsingHDR,
+            eventCallbacks =
+            {
+                ["OnHDRToggled"] = OnGammaToggleUpdated,
+            },
         },
         --Options_Video_Graphics_Quality
         [GRAPHICS_SETTING_PRESETS] =
@@ -573,8 +616,20 @@ local ZO_OptionsPanel_Video_ControlData =
             valid = IsMacUI()
                     and {DEPTH_OF_FIELD_MODE_OFF, DEPTH_OF_FIELD_MODE_SIMPLE, DEPTH_OF_FIELD_MODE_SMOOTH}
                     or {DEPTH_OF_FIELD_MODE_OFF, DEPTH_OF_FIELD_MODE_SIMPLE, DEPTH_OF_FIELD_MODE_SMOOTH, DEPTH_OF_FIELD_MODE_CIRCULAR},
-            
             valueStringPrefix = "SI_DEPTHOFFIELDMODE",
+            exists = ZO_IsPCUI,
+        },
+        -- Options_Video_Character_Resolution
+        [GRAPHICS_SETTING_CHARACTER_RESOLUTION] =
+        {
+            controlType = OPTIONS_FINITE_LIST,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_CHARACTER_RESOLUTION,
+            panel = SETTING_PANEL_VIDEO,
+            text = SI_GRAPHICS_OPTIONS_VIDEO_CHARACTER_RESOLUTION,
+            tooltipText = SI_GRAPHICS_OPTIONS_VIDEO_CHARACTER_RESOLUTION_TOOLTIP,
+            valid = { CHARACTER_RESOLUTION_LOW, CHARACTER_RESOLUTION_MEDIUM, CHARACTER_RESOLUTION_HIGH, CHARACTER_RESOLUTION_ULTRA },
+            valueStringPrefix = "SI_CHARACTERRESOLUTION",
             exists = ZO_IsPCUI,
         },
         --Options_Video_Bloom
@@ -738,7 +793,6 @@ local ZO_OptionsPanel_Video_ControlData =
             valid = { HDR_MODE_DEFAULT, HDR_MODE_VIBRANT },
             valueStringPrefix = "SI_HDRMODE",
             visible = IsSystemUsingHDR,
-            exists = IsConsoleUI,
         },
         [GRAPHICS_SETTING_SHOW_ADDITIONAL_ALLY_EFFECTS] =
         {
@@ -864,13 +918,17 @@ local ZO_OptionsPanel_Video_ControlData =
             settingId = OPTIONS_CUSTOM_SETTING_GAMMA_ADJUST,
             text = SI_VIDEO_OPTIONS_CALIBRATE_GAMMA,
             gamepadTextOverride = SI_GAMMA_MAIN_TEXT,
-            exists = IsSystemNotUsingHDR,
+            exists = DoesGammaSettingExist,
             callback = function()
                 SCENE_MANAGER:Push("gammaAdjust")
             end,
             customResetToDefaultsFunction = function()
                 ResetSettingToDefault(SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_GAMMA_ADJUSTMENT)
-            end
+            end,
+            eventCallbacks =
+            {
+                ["OnHDRToggled"] = OnGammaToggleUpdated,
+            },
         },
 
         [OPTIONS_CUSTOM_SETTING_SCREENSHOT_MODE] =

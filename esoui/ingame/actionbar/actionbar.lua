@@ -9,6 +9,12 @@ local g_activeHotbar = HOTBAR_CATEGORY_PRIMARY
 local g_backHotbar = HOTBAR_CATEGORY_BACKUP
 local MINIMUM_ACTION_BAR_TIMER_DISPLAYED_TIME_MS = 1000
 
+ZO_ABILITY_DROP_CALLOUT_VALIDITY_FUNCTION_BY_ACTION_TYPE =
+{
+    [ACTION_TYPE_ABILITY] = IsValidAbilityForSlot,
+    [ACTION_TYPE_CRAFTED_ABILITY] = IsValidCraftedAbilityForSlot,
+}
+
 function ZO_ActionBar_HasAnyActionSlotted()
     for physicalSlot in pairs(g_actionBarButtons) do
         if GetSlotType(physicalSlot, g_activeHotbar) ~= ACTION_TYPE_NOTHING then
@@ -202,17 +208,17 @@ local function HideAllAbilityActionButtonDropCallouts()
     end
 end
 
-local function ShowAppropriateAbilityActionButtonDropCallouts(abilityIndex)
+local function ShowAppropriateAbilityActionButtonDropCallouts(actionType, actionValue)
     HideAllAbilityActionButtonDropCallouts()
 
+    local validityFunction = ZO_ABILITY_DROP_CALLOUT_VALIDITY_FUNCTION_BY_ACTION_TYPE[actionType]
     for i = ACTION_BAR_FIRST_NORMAL_SLOT_INDEX + 1, ACTION_BAR_ULTIMATE_SLOT_INDEX + 1 do
-        local isValid = IsValidAbilityForSlot(abilityIndex, i)
         local callout = ZO_ActionBar_GetButton(i).slot:GetNamedChild("DropCallout")
 
-        if not isValid then
-            callout:SetColor(1, 0, 0, 1)
-        else
+        if validityFunction(actionValue, i) then
             callout:SetColor(1, 1, 1, 1)
+        else
+            callout:SetColor(1, 0, 0, 1)
         end
 
         callout:SetHidden(false)
@@ -452,7 +458,7 @@ function ZO_ActionBar_RegisterEvents()
         for _, physicalSlot in pairs(g_actionBarButtons) do
             if physicalSlot then
                 local slotType = GetSlotType(physicalSlot:GetSlot())
-                if slotType == ACTION_TYPE_ABILITY then
+                if slotType == ACTION_TYPE_ABILITY or slotType == ACTION_TYPE_CRAFTED_ABILITY then
                     physicalSlot:UpdateState()
                 end
             end
@@ -485,8 +491,8 @@ function ZO_ActionBar_RegisterEvents()
             ShowHiddenButtons()
         end
 
-        if cursorType == MOUSE_CONTENT_ACTION and param1 == ACTION_TYPE_ABILITY then
-            ShowAppropriateAbilityActionButtonDropCallouts(param3)
+        if cursorType == MOUSE_CONTENT_ACTION and ZO_ABILITY_DROP_CALLOUT_VALIDITY_FUNCTION_BY_ACTION_TYPE[param1] then
+            ShowAppropriateAbilityActionButtonDropCallouts(param1, param3)
         end
     end
     EVENT_MANAGER:RegisterForEvent("ZO_ActionBar", EVENT_CURSOR_PICKUP, OnCursorPickup)
@@ -656,6 +662,7 @@ function ZO_ActionBar_OnInitialized(control)
     ultimateButton:SetupTimerSwapAnimation()
 
     ultimateButton:UpdateUltimateMeter()
+    EVENT_MANAGER:RegisterForEvent("ZO_ActionBar", EVENT_ULTIMATE_ABILITY_COST_CHANGED, function() ultimateButton:UpdateUltimateMeter() end)
 
     local COMPANION_ULTIMATE_BUTTON_STYLE =
     {
@@ -674,6 +681,7 @@ function ZO_ActionBar_OnInitialized(control)
 
     companionUltimateButton:UpdateUltimateMeter()
     SetCompanionAnchors()
+    EVENT_MANAGER:RegisterForEvent("ZO_ActionBar", EVENT_ULTIMATE_ABILITY_COST_CHANGED, function() companionUltimateButton:UpdateUltimateMeter() end)
 
     local BACK_BAR_STYLE =
     {

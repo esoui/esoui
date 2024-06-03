@@ -647,6 +647,10 @@ function ZO_PlayerAttributeBars:ApplyStyle()
                 if anchorTemplates then
                     subBar:ClearAnchors()
                     ApplyTemplateToControl(subBar, ZO_GetPlatformTemplate(anchorTemplates[i]))
+                    -- Order matters.
+                    if #powerTypeTemplates.anchors == 2 and i == 2 then
+                        subBar:SetAnchor(LEFT, bar.barControls[1], RIGHT)
+                    end
                 else
                     ApplyTemplateToControl(subBar, ZO_GetPlatformTemplate(PAB_TEMPLATES.anchor))
                 end

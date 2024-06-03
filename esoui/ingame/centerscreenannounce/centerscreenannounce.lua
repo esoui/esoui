@@ -102,13 +102,7 @@ end
 -- Center Screen Message Params
 ---------------------------------------------
 
-ZO_CenterScreenMessageParams = ZO_Object:Subclass()
-
-function ZO_CenterScreenMessageParams:New()
-    local messageParams = ZO_Object.New(self)
-    messageParams:Initialize()
-    return messageParams
-end
+ZO_CenterScreenMessageParams = ZO_InitializingObject:Subclass()
 
 function ZO_CenterScreenMessageParams:Initialize()
     self:Reset()
@@ -148,6 +142,14 @@ end
 
 function ZO_CenterScreenMessageParams:GetIconData()
     return self.icon, self.iconBg
+end
+
+function ZO_CenterScreenMessageParams:SetLargeInformationIconData(icon)
+    self.LargeInformationIcon = icon
+end
+
+function ZO_CenterScreenMessageParams:GetLargeInformationIconData()
+    return self.LargeInformationIcon
 end
 
 function ZO_CenterScreenMessageParams:SetScryingProgressData(lastNumGoalsAchieved, numGoalsAchieved, numGoalsTotal)
@@ -435,13 +437,7 @@ end
 -- Center Screen Announcement Line
 ------------------------------------
 
-ZO_CenterScreenAnnouncementLine = ZO_CallbackObject:Subclass()
-
-function ZO_CenterScreenAnnouncementLine:New(...)
-    local announcementLine = ZO_CallbackObject.New(self)
-    announcementLine:Initialize(...)
-    return announcementLine
-end
+ZO_CenterScreenAnnouncementLine = ZO_InitializingCallbackObject:Subclass()
 
 function ZO_CenterScreenAnnouncementLine:Initialize(control)
     self.control = control
@@ -558,10 +554,6 @@ end
 
 ZO_CenterScreenAnnouncementSmallLine = ZO_CenterScreenAnnouncementLine:Subclass()
 
-function ZO_CenterScreenAnnouncementSmallLine:New(...)
-    return ZO_CenterScreenAnnouncementLine.New(self, ...)
-end
-
 function ZO_CenterScreenAnnouncementSmallLine:Reset()
     ZO_CenterScreenAnnouncementLine.Reset(self)
 
@@ -654,24 +646,21 @@ local function AnchorIconToLabelControl(iconControl, textControl)
     local centeringOffset = (lineWidth - textWidth) / 2
 
     iconControl:ClearAnchors()
-    iconControl:SetAnchor(RIGHT, textControl, LEFT, centeringOffset - 10, 0)            
+    iconControl:SetAnchor(RIGHT, textControl, LEFT, centeringOffset - 10, 0)
 end
-
 
 ZO_CenterScreenAnnouncementLargeLine = ZO_CenterScreenAnnouncementLine:Subclass()
-
-function ZO_CenterScreenAnnouncementLargeLine:New(...)
-    return ZO_CenterScreenAnnouncementLine.New(self, ...)
-end
 
 function ZO_CenterScreenAnnouncementLargeLine:Initialize(control)
     ZO_CenterScreenAnnouncementLine.Initialize(self, control)
 
-    self.largeText = self.control:GetNamedChild("Text")
+    self.largeText = control:GetNamedChild("Text")
     self.smallCombinedText = self.largeText:GetNamedChild("Combined")
     self.smallCombinedIcon = self.smallCombinedText:GetNamedChild("Icon")
     self.smallCombinedIconBG = self.smallCombinedText:GetNamedChild("IconBG")
     self.smallCombinedIconFrame = self.smallCombinedText:GetNamedChild("IconFrame")
+
+    self.largeInformationIcon = self.largeText:GetNamedChild("LargeInformationIcon")
 
     self.raidCompleteContainer = self.largeText:GetNamedChild("RaidCompleteText")
     self.raidTimeAmountLabel = self.raidCompleteContainer:GetNamedChild("TimeAmount")
@@ -681,6 +670,7 @@ function ZO_CenterScreenAnnouncementLargeLine:Initialize(control)
     self.raidVitalityIcon = self.raidCompleteContainer:GetNamedChild("VitalityIcon")
 
     self.smallCombinedIcon:SetHidden(true)
+    self.largeInformationIcon:SetHidden(true)
     self.raidCompleteContainer:SetHidden(true)
 end
 
@@ -689,6 +679,7 @@ function ZO_CenterScreenAnnouncementLargeLine:Reset()
     self.smallCombinedText:SetHandler("OnUpdate", nil)
 
     self.smallCombinedIcon:SetHidden(true)
+    self.largeInformationIcon:SetHidden(true)
     self.raidCompleteContainer:SetHidden(true)
     self.wipeAnimationTimeline:Stop()
     self.wipeFadeAnimationTimeline:Stop()
@@ -737,6 +728,14 @@ function ZO_CenterScreenAnnouncementLargeLine:SetIcon(icon, iconBg, suppressIcon
 
     if iconBg then
         self.smallCombinedIconBG:SetTexture(iconBg)
+    end
+end
+
+function ZO_CenterScreenAnnouncementLargeLine:SetLargeInformationIcon(icon)
+    self.largeInformationIcon:SetHidden(icon == nil)
+
+    if icon then
+        self.largeInformationIcon:SetTexture(icon)
     end
 end
 
@@ -926,10 +925,6 @@ end
 
 ZO_CenterScreenAnnouncementMajorLine = ZO_CenterScreenAnnouncementLine:Subclass()
 
-function ZO_CenterScreenAnnouncementMajorLine:New(...)
-    return ZO_CenterScreenAnnouncementLine.New(self, ...)
-end
-
 function ZO_CenterScreenAnnouncementMajorLine:Initialize(control)
     ZO_CenterScreenAnnouncementLine.Initialize(self, control)
 
@@ -995,10 +990,6 @@ end
 -----------------------------------------------
 
 ZO_CenterScreenAnnouncementCountdownLine = ZO_CenterScreenAnnouncementLine:Subclass()
-
-function ZO_CenterScreenAnnouncementCountdownLine:New(...)
-    return ZO_CenterScreenAnnouncementLine.New(self, ...)
-end
 
 function ZO_CenterScreenAnnouncementCountdownLine:Initialize(control)
     ZO_CenterScreenAnnouncementLine.Initialize(self, control)
@@ -1090,13 +1081,7 @@ end
 -- Center Screen Announce Manager
 -----------------------------------
 
-local CenterScreenAnnounce = ZO_Object:Subclass()
-
-function CenterScreenAnnounce:New(...)
-    local announce = ZO_Object.New(self)
-    announce:Initialize(...)
-    return announce
-end
+local CenterScreenAnnounce = ZO_InitializingObject:Subclass()
 
 do
     local eventHandlers = ZO_CenterScreenAnnounce_GetEventHandlers()
@@ -1790,7 +1775,11 @@ local setupFunctions =
                 backgroundControl:ClearAnchors()
                 backgroundControl:SetAnchor(TOP, largeMessageLine.largeText, TOP, 0, -70)
                 if messageParams:GetSecondaryText() then
-                    backgroundControl:SetAnchor(BOTTOM, largeMessageLine.smallCombinedText, BOTTOM, 0, 80)
+                    if messageParams:GetLargeInformationIconData() then
+                        backgroundControl:SetAnchor(BOTTOM, largeMessageLine.largeInformationIcon, BOTTOM, 0, 100)
+                    else
+                        backgroundControl:SetAnchor(BOTTOM, largeMessageLine.smallCombinedText, BOTTOM, 0, 80)
+                    end
                 else
                     backgroundControl:SetAnchor(BOTTOM, largeMessageLine.largeText, BOTTOM, 0, 70)
                 end
@@ -1799,11 +1788,15 @@ local setupFunctions =
             else
                 largeMessageLine:PlayWipeAnimation()
             end
-            self.isBeforeMessageExpiring = true 
+            self.isBeforeMessageExpiring = true
         end
 
         local icon, iconBg = messageParams:GetIconData()
         largeMessageLine:SetIcon(icon, iconBg, messageParams:GetSuppressIconFrame() == CSA_OPTION_SUPPRESS_ICON_FRAME)
+
+        local largeInformationIcon = messageParams:GetLargeInformationIconData()
+        largeMessageLine:SetLargeInformationIcon(largeInformationIcon)
+
         SCREEN_NARRATION_MANAGER:QueueCSA(messageParams)
 
         return largeMessageLine

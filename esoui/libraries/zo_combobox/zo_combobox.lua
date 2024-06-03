@@ -133,10 +133,15 @@ function ZO_ComboBox:AddMenuItems()
 end
 
 function ZO_ComboBox:ShowDropdownOnMouseUp()
-    self.m_dropdownObject:SetHidden(false)
-    self:AddMenuItems()
+    if self:IsEnabled() then
+        self.m_dropdownObject:SetHidden(false)
+        self:AddMenuItems()
 
-    self:SetVisible(true)
+        self:SetVisible(true)
+    else
+        --If we get here, that means the dropdown was disabled after the request to show it was made, so just cancel showing entirely
+        self.m_container:UnregisterForEvent(EVENT_GLOBAL_MOUSE_UP)
+    end
 end
 
 function ZO_ComboBox:SetSelected(index, ignoreCallback)
@@ -228,7 +233,7 @@ function ZO_ComboBox:ClearAllSelections()
 end
 
 function ZO_ComboBox:SetNoSelectionText(text)
-    self.noSelectionText = text or SI_COMBO_BOX_DEFAULT_NO_SELECTION_TEXT
+    self.noSelectionText = text or GetString(SI_COMBO_BOX_DEFAULT_NO_SELECTION_TEXT)
     self:RefreshSelectedItemText()
 end
 
@@ -295,6 +300,18 @@ function ZO_ComboBox:RefreshSelectedItemText()
     else
         self:SetSelectedItemText(self.noSelectionText)
     end
+end
+
+function ZO_ComboBox_Base:SetEnabled(enabled)
+    self.m_container:SetMouseEnabled(enabled)
+    self.m_openDropdown:SetEnabled(enabled)
+    self.m_selectedItemText:SetColor(self:GetSelectedTextColor(enabled))
+
+    self:HideDropdown()
+end
+
+function ZO_ComboBox_Base:IsEnabled()
+    return self.m_openDropdown:GetState() ~= BSTATE_DISABLED
 end
 
 -- Begin ZO_ComboBox_Base overrides
@@ -535,14 +552,15 @@ function ZO_ComboBoxDropdown_Keyboard:Show(comboBox, itemTable, minWidth, maxHei
 
     -- Allow the dropdown to automatically widen to fit the widest entry, but
     -- prevent it from getting any skinnier than the container's initial width
-    local totalDropDownWidth = largestEntryWidth + ZO_COMBO_BOX_ENTRY_TEMPLATE_LABEL_PADDING * 2 + ZO_SCROLL_BAR_WIDTH
+    local totalDropDownWidth = largestEntryWidth + (ZO_COMBO_BOX_ENTRY_TEMPLATE_LABEL_PADDING * 2) + ZO_SCROLL_BAR_WIDTH
     if totalDropDownWidth > minWidth then
         self.control:SetWidth(totalDropDownWidth)
     else
         self.control:SetWidth(minWidth)
     end
 
-    allItemsHeight = allItemsHeight + (ZO_SCROLLABLE_COMBO_BOX_LIST_PADDING_Y * 2)
+    -- Add padding one more time to account for potential pixel rounding issues that could cause the scroll bar to appear unnecessarily.
+    allItemsHeight = allItemsHeight + (ZO_SCROLLABLE_COMBO_BOX_LIST_PADDING_Y * 2) + ZO_SCROLLABLE_COMBO_BOX_LIST_PADDING_Y
 
     local desiredHeight = maxHeight
     if allItemsHeight < desiredHeight then
@@ -595,7 +613,7 @@ function ZO_ComboBoxDropdown_Keyboard:OnMouseExitEntry(control)
         self.owner:OnMouseExitEntryBase(control)
         local data = control.m_data
         self.owner:UnhighlightLabel(control.m_label, data)
-        if data.onEnter then
+        if data.onExit then
             data.onExit(control)
         end
     end
