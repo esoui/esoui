@@ -348,6 +348,8 @@ function ZO_Scribing_Gamepad:InitializeKeybindStripDescriptors()
             name = GetString(SI_SCRIBING_CLEAR_SCRIPT_SELECTIONS),
             callback = function()
                 self:ClearSelectedScripts()
+                --Re-narrate when scripts are cleared
+                SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.scriptsList)
             end,
             enabled = function()
                 return self:IsAnyScriptSlotted() and not ZO_CraftingUtils_IsPerformingCraftProcess()
@@ -616,6 +618,8 @@ function ZO_Scribing_Gamepad:SelectScript()
         if entryData and entryData.data then
             local scriptId = entryData.data:GetId()
             self:SelectScriptId(scriptId)
+            --Re-narrate when a script is selected/deselected
+            SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.scriptsList)
         end
     end
 end

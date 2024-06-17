@@ -46,24 +46,6 @@ local function InitializeResolution(control, ...)
     ZO_Options_SetOptionActiveOrInactive(control, tonumber(GetSetting(SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_FULLSCREEN)) == FULLSCREEN_MODE_FULLSCREEN_EXCLUSIVE)
 end
 
-local function DoesGammaSettingExist()
-    if ZO_IsPCUI() then 
-        -- On PC, need to be able to swap between Gamma settings and HDR settings.
-        return true
-    else
-        return not IsSystemUsingHDR()
-    end
-end
-
-local function OnHDRToggleUpdated(control)
-    if GetSetting_Bool(SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_HDR_ENABLED) then
-        ZO_Options_SetOptionActive(control)
-    else
-        ZO_Options_SetOptionInactive(control)
-    end
-    ZO_Options_UpdateOption(control)
-end
-
 local function OnGammaToggleUpdated(control)
     if GetSetting_Bool(SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_HDR_ENABLED) then
         ZO_Options_SetOptionInactive(control)
@@ -78,28 +60,13 @@ function ZO_OptionsPanel_Video_InitializeDisplays(control)
 end
 
 function ZO_OptionsPanel_Video_OnActiveDisplayChanged(control)
-    ZO_OptionsPanel_Video_InitializeDisplays(control)
-    ZO_Options_UpdateOption(control)
-end
-
-function ZO_OptionsPanel_Video_OnHDREnabledChanged(control)
-    if CanSystemEnableHDR() then
-        ZO_Options_SetOptionActive(control)
-    else
-        ZO_Options_SetOptionInactive(control)
-    end
+    ZO_OptionsWindow_InitializeControl(control)
     ZO_Options_UpdateOption(control)
 end
 
 function ZO_OptionsPanel_Video_InitializeResolution(control)
     local DEFAULT_DISPLAY_INDEX = 1
     InitializeResolution(control, GetDisplayModes(DEFAULT_DISPLAY_INDEX))
-end
-
-function ZO_OptionsPanel_Video_OnDisplayResolutionChanged(control)
-    -- GetDisplayModes expects the index to start at 1
-    local displayIndex = 1 + tonumber(GetSetting(SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_ACTIVE_DISPLAY))
-    InitializeResolution(control, GetDisplayModes(displayIndex))
     ZO_Options_UpdateOption(control)
 end
 
@@ -198,7 +165,11 @@ local ZO_OptionsPanel_Video_ControlData =
             valueStringPrefix = "SI_FULLSCREENMODE",
             exists = ZO_IsPCUI,
 
-            events = {[FULLSCREEN_MODE_WINDOWED] = "DisplayModeNonExclusive", [FULLSCREEN_MODE_FULLSCREEN_WINDOWED] = "DisplayModeNonExclusive", [FULLSCREEN_MODE_FULLSCREEN_EXCLUSIVE] = "DisplayModeExclusive",},
+            events = {
+                [FULLSCREEN_MODE_WINDOWED] = "DisplayModeNonExclusive", 
+                [FULLSCREEN_MODE_FULLSCREEN_WINDOWED] = "DisplayModeNonExclusive", 
+                [FULLSCREEN_MODE_FULLSCREEN_EXCLUSIVE] = "DisplayModeExclusive",
+            },
         },
         --Options_Video_ActiveDisplay
         [GRAPHICS_SETTING_ACTIVE_DISPLAY] =
@@ -918,7 +889,7 @@ local ZO_OptionsPanel_Video_ControlData =
             settingId = OPTIONS_CUSTOM_SETTING_GAMMA_ADJUST,
             text = SI_VIDEO_OPTIONS_CALIBRATE_GAMMA,
             gamepadTextOverride = SI_GAMMA_MAIN_TEXT,
-            exists = DoesGammaSettingExist,
+            exists = IsSystemNotUsingHDR,
             callback = function()
                 SCENE_MANAGER:Push("gammaAdjust")
             end,

@@ -34,12 +34,7 @@ panelBuilder:AddSetting({
     settingType = SETTING_TYPE_GRAPHICS,
     settingId = GRAPHICS_SETTING_RESOLUTION,
     header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_DISPLAY,
-    initializeControlFunction = function(control)
-        ZO_OptionsPanel_Video_InitializeResolution(control)
-        EVENT_MANAGER:RegisterForEvent("ZO_OptionsPanel_Video", EVENT_ACTIVE_MONITOR_CHANGED, function()
-            ZO_OptionsPanel_Video_OnDisplayResolutionChanged(control)
-        end)
-    end,
+    initializeControlFunction = ZO_OptionsPanel_Video_InitializeResolution,
 })
 
 panelBuilder:AddSetting({

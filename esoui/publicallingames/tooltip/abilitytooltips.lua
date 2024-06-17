@@ -311,15 +311,17 @@ function ZO_Tooltip:AddAbilityDescription(abilityId, overrideDescription, overri
         self:AddSection(descriptionSection)
     end
 
-    for slotType = SCRIBING_SLOT_ITERATION_BEGIN, SCRIBING_SLOT_ITERATION_END do
-        local scriptDescription = GenerateCraftedAbilityScriptSlotDescriptionForAbilityDescription(abilityId, slotType, overrideCasterUnitTag)
-        if scriptDescription ~= "" then
-            local descriptionSection = self:AcquireSection(self:GetStyle("bodySection"))
-            descriptionSection:AddLine(scriptDescription, bodyDescriptionStyle)
-            self:AddSection(descriptionSection)
+    local craftedAbilityId = GetAbilityCraftedAbilityId(abilityId)
+    if craftedAbilityId ~= 0 then
+        for slotType = SCRIBING_SLOT_ITERATION_BEGIN, SCRIBING_SLOT_ITERATION_END do
+            local scriptDescription = GenerateCraftedAbilityScriptSlotDescriptionForAbilityDescription(abilityId, slotType, overrideCasterUnitTag)
+            if scriptDescription ~= "" then
+                local descriptionSection = self:AcquireSection(self:GetStyle("bodySection"))
+                descriptionSection:AddLine(scriptDescription, bodyDescriptionStyle)
+                self:AddSection(descriptionSection)
+            end
         end
     end
-
 end
 
 function ZO_Tooltip:AddAbilityNewEffects(...)

@@ -1586,6 +1586,7 @@ do
                 defaultEntryData.collectibleId = 0
                 defaultEntryData.isCurrent = currentCollectibleId == 0
                 defaultEntryData:SetSelected(defaultEntryData.isCurrent)
+                defaultEntryData.narrationTooltip = GAMEPAD_LEFT_DIALOG_TOOLTIP
 
                 local defaultListItem =
                 {
@@ -1612,6 +1613,7 @@ do
                         entryData:InitializeCollectibleVisualData(collectibleData, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
                         entryData:SetEnabled(isSkillLinePurchased and collectibleData:IsUnlocked())
                         entryData:SetSelected(entryData.isCurrent())
+                        entryData.narrationTooltip = GAMEPAD_LEFT_DIALOG_TOOLTIP
 
                         local listItem =
                         {
