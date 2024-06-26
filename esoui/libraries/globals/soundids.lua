@@ -784,9 +784,8 @@ SOUNDS =
 
     DYEING_TOOL_DYE_USED                    = "Dyeing_Tool_Dye_Used",
     DYEING_TOOL_ERASE_USED                  = "Dyeing_Tool_Erase_Used",
-    DYEING_TOOL_FILL_USED                   = "Dyeing_Tool_Fill_Used",
-    DYEING_TOOL_SAMPLE_USED                 = "Dyeing_Tool_Sample_Used",
     DYEING_TOOL_FILL_USED                   = "Dyeing_Tool_Fill_All_Used",
+    DYEING_TOOL_SAMPLE_USED                 = "Dyeing_Tool_Sample_Used",
     DYEING_TOOL_SET_FILL_USED               = "Dyeing_Tool_Set_Fill_Used",
 
     DYEING_SWATCH_SELECTED                  = "Dyeing_Swatch_Selected",
