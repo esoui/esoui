@@ -56,6 +56,12 @@ function ZO_UniversalDeconstructionPanel_Keyboard:InitializeFilters()
     ZO_CraftingUtils_ConnectComboBoxToCraftingProcess(self.craftingTypeFiltersDropdown)
 end
 
+function ZO_UniversalDeconstructionPanel_Keyboard:AddInventoryAdditionalFilter(additionalFilterFunction)
+    if self.inventory then
+        self.inventory.additionalFilter = additionalFilterFunction
+    end
+end
+
 function ZO_UniversalDeconstructionPanel_Keyboard:RefreshAccessibleCraftingTypeFilters()
     local dropdown = self.craftingTypeFiltersDropdown
     local items = dropdown:GetItems()
@@ -76,12 +82,7 @@ function ZO_UniversalDeconstructionPanel_Keyboard:RefreshAccessibleCraftingTypeF
         else
             dropdown:SetItemEnabled(jewelryCraftingItem, false)
 
-            local tooltipText = nil
-            local jewelryCraftingCollectibleData = ZO_GetJewelryCraftingCollectibleData()
-            if jewelryCraftingCollectibleData then
-                local jewelryCraftingTradeskillName = GetString("SI_TRADESKILLTYPE", CRAFTING_TYPE_JEWELRYCRAFTING)
-                tooltipText = ZO_ERROR_COLOR:Colorize(zo_strformat(SI_SMITHING_CRAFTING_TYPE_LOCKED, jewelryCraftingCollectibleData:GetFormattedName(), jewelryCraftingTradeskillName))
-            end
+            local tooltipText = ZO_GetJewelryCraftingLockedMessage()
 
             local function OnCraftingTypeFilterDropdownEnter(control)
                 local offsetX = control:GetParent():GetLeft() - control:GetLeft() - 5
@@ -244,7 +245,20 @@ function ZO_UniversalDeconstructionInventory_Keyboard:Refresh(data)
 
     local DONT_USE_WORN_BAG = false
     local excludeBanked = not self.universalDeconstructionPanel:GetSavedIncludeBankedItemsFilter()
-    local validItems = self:GetIndividualInventorySlotsAndAddToScrollData(isDeconstructableFunction, ZO_UniversalDeconstructionPanel_Shared.DoesItemPassFilter, self.filterType, data, DONT_USE_WORN_BAG, excludeBanked)
+
+    local function ItemFilterFunction(bagId, slotIndex, filterType)
+        if not ZO_UniversalDeconstructionPanel_Shared.DoesItemPassFilter(bagId, slotIndex, filterType) then
+            return false
+        end
+
+        if self.additionalFilter and type(self.additionalFilter) == "function" then
+            return self.additionalFilter(bagId, slotIndex, filterType)
+        end
+
+        return true
+    end
+
+    local validItems = self:GetIndividualInventorySlotsAndAddToScrollData(isDeconstructableFunction, ItemFilterFunction, self.filterType, data, DONT_USE_WORN_BAG, excludeBanked)
     self.universalDeconstructionPanel:OnInventoryUpdate(validItems, self.filterType)
     self:SetNoItemLabelHidden(#data > 0)
 end

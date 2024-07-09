@@ -384,12 +384,19 @@ function ZO_Scribing_Gamepad:OnBackButtonClicked()
 end
 
 -- Also overridden from ZO_ScribingLayout_Gamepad 
+function ZO_Scribing_Gamepad:OnShowing()
+    ZO_Scribing_Shared.OnShowing(self)
+    ZO_ScribingLayout_Gamepad.OnShowing(self)
+end
+
+-- Also overridden from ZO_ScribingLayout_Gamepad 
 function ZO_Scribing_Gamepad:OnShow()
-    ZO_ScribingLayout_Gamepad.OnShow(self)
     ZO_Scribing_Shared.OnShow(self)
 
     local RESET_TO_TOP = true
     self:ShowCraftedAbilities(RESET_TO_TOP)
+    -- Moved to bottom so list is built before search box is auto-selected.
+    ZO_ScribingLayout_Gamepad.OnShow(self)
 
     GAMEPAD_CRAFTING_RESULTS:SetTooltipAnimationSounds(SOUNDS.SCRIBING_SCRIBE_TOOLTIP_GLOW)
 end
@@ -403,7 +410,16 @@ function ZO_Scribing_Gamepad:ShowCraftedAbilities(resetToTop)
     ZO_ScribingLayout_Gamepad.ShowCraftedAbilities(self, resetToTop)
     ZO_Scribing_Shared.ShowCraftedAbilities(self, resetToTop)
 
-    self.scribingSelectInkContainer:SetHidden(true)
+    if self:IsCurrentList(self.craftedAbilityList) then
+        local targetData = self.craftedAbilityList:GetTargetData()
+        if (targetData and targetData.isRecentCraftedAbilitiesEntry) or self:IsHeaderActive() then
+            self.slotsContainer:SetHidden(true)
+            self.scribingSelectInkContainer:SetHidden(true)
+        else
+            self.slotsContainer:SetHidden(false)
+            self.scribingSelectInkContainer:SetHidden(false)
+        end
+    end
 end
 
 -- Also overridden from ZO_ScribingLayout_Gamepad
@@ -444,7 +460,7 @@ function ZO_Scribing_Gamepad:UpdateInkDisplay()
 end
 
 function ZO_Scribing_Gamepad:UpdateResultTooltip()
-    if not self:IsCurrentList(self.recentCraftedAbilitiesList) then
+    if self:IsCurrentList(self.scriptsList) then
         GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
 
         if self:HasCraftedAbilitySlotted() then

@@ -76,9 +76,18 @@
                             </Controls>
                         </Control>
 
+                        <Control name="$(parent)HouseTourRecommendationCountRow" inherits="ZO_HousingFurnitureBrowser_Gamepad_Row">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)OverPopulation" relativePoint="BOTTOMLEFT" offsetY="15" />
+
+                            <Controls>
+                                <Label name="$(parent)Name" override="true">
+                                    <Dimensions x="315"/>
+                                </Label>
+                            </Controls>
+                        </Control>
 
                         <Control name="$(parent)IndividualPermissions" inherits="ZO_HousingFurnitureBrowser_Gamepad_Row" >
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)OverPopulation" relativePoint="BOTTOMLEFT" offsetY="40" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)HouseTourRecommendationCountRow" relativePoint="BOTTOMLEFT" offsetY="40" />
                         </Control>
 
                         <Control name="$(parent)GuildPermissions" inherits="ZO_HousingFurnitureBrowser_Gamepad_Row" >

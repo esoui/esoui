@@ -705,7 +705,20 @@ end
 
 function ZO_GamepadImprovementInventory:Refresh(data)
     local USE_WORN_BAG = true
-    local validItems = self:GetIndividualInventorySlotsAndAddToScrollData(ZO_SharedSmithingImprovement_CanItemBeImproved, ZO_SharedSmithingImprovement_DoesItemPassFilter, self.filterType, data, USE_WORN_BAG)
+
+    local function ItemFilterFunction(bagId, slotIndex, filterType)
+        if not ZO_SharedSmithingImprovement_DoesItemPassFilter(bagId, slotIndex, filterType) then
+            return false
+        end
+
+        if self.additionalFilter and type(self.additionalFilter) == "function" then
+            return self.additionalFilter(bagId, slotIndex, filterType)
+        end
+
+        return true
+    end
+
+    local validItems = self:GetIndividualInventorySlotsAndAddToScrollData(ZO_SharedSmithingImprovement_CanItemBeImproved, ItemFilterFunction, self.filterType, data, USE_WORN_BAG)
     self.owner:OnInventoryUpdate(validItems)
 
     self.owner.spinner:GetControl():SetHidden(#data < 1 or not self.owner:HasSelections())

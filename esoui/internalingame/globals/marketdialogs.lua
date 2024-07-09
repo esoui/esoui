@@ -386,6 +386,9 @@ local function MarketPurchaseConfirmationDialogSetupPricingControls(dialog, data
     end
 
     if hasCost then
+        local DEFAULT_OPTIONS = nil
+        local SHOW_ALL = true
+        local HAS_ENOUGH_CURRENCY = false
         local extraOptions = nil
         local currencyFormat
         local costAmountLabel = dialog.costContainer.currencyAmount
@@ -394,9 +397,7 @@ local function MarketPurchaseConfirmationDialogSetupPricingControls(dialog, data
 
         -- layout the previous cost
         if not hasEsoPlusCost and marketPurchaseData.discountPercent > 0 and marketPurchaseData.costAfterDiscount ~= 0 then
-            local formattedAmount = zo_strformat(SI_NUMBER_FORMAT, marketPurchaseData.cost)
-            local strikethroughAmountString = zo_strikethroughTextFormat(formattedAmount)
-            previousCostLabel:SetText(strikethroughAmountString)
+            ZO_CurrencyControl_SetSimpleCurrency(previousCostLabel, currencyType, marketPurchaseData.cost, DEFAULT_OPTIONS, SHOW_ALL, HAS_ENOUGH_CURRENCY, { strikethroughCurrencyAmount = true })
             previousCostLabel:SetHidden(false)
 
             local discountPercentText = zo_strformat(SI_MARKET_DISCOUNT_PRICE_PERCENT_FORMAT, marketPurchaseData.discountPercent)
@@ -420,8 +421,7 @@ local function MarketPurchaseConfirmationDialogSetupPricingControls(dialog, data
             costAmountLabel:SetColor(ZO_HIGHLIGHT_TEXT:UnpackRGB())
             currencyFormat = ZO_CURRENCY_FORMAT_AMOUNT_ICON
         end
-        local currencyString = ZO_Currency_FormatKeyboard(currencyType, marketPurchaseData.costAfterDiscount, currencyFormat, extraOptions)
-        costAmountLabel:SetText(currencyString)
+        ZO_CurrencyControl_SetSimpleCurrency(costAmountLabel, currencyType, marketPurchaseData.costAfterDiscount, DEFAULT_OPTIONS, SHOW_ALL, HAS_ENOUGH_CURRENCY, extraOptions)
 
         local labelString
         if hasEsoPlusCost then
@@ -440,10 +440,8 @@ local function MarketPurchaseConfirmationDialogSetupPricingControls(dialog, data
             color = ZO_MARKET_PRODUCT_ESO_PLUS_COLOR,
             iconInheritColor = marketPurchaseData.marketCurrencyType ~= MKCT_CROWN_GEMS,
         }
-        local currencyString = ZO_Currency_FormatKeyboard(currencyType, marketPurchaseData.esoPlusCost, ZO_CURRENCY_FORMAT_AMOUNT_ICON, extraOptions)
-
         local costAmountLabel = dialog.esoPlusCostContainer.currencyAmount
-        costAmountLabel:SetText(currencyString)
+        ZO_CurrencyControl_SetSimpleCurrency(costAmountLabel, currencyType, marketPurchaseData.esoPlusCost, DEFAULT_OPTIONS, SHOW_ALL, HAS_ENOUGH_CURRENCY, extraOptions)
 
         dialog.esoPlusCostContainer:ClearAnchors()
         local controlToAnchorCostContainerTo = hasCost and dialog.costContainer or dialog.balanceContainer
@@ -452,9 +450,8 @@ local function MarketPurchaseConfirmationDialogSetupPricingControls(dialog, data
     end
     dialog.esoPlusCostContainer:SetHidden(not hasEsoPlusCost)
 
-    local currencyString = ZO_Currency_FormatKeyboard(currencyType, GetPlayerMarketCurrency(marketPurchaseData.marketCurrencyType), ZO_CURRENCY_FORMAT_AMOUNT_ICON)
     local currentBalanceAmountLabel = dialog.balanceContainer.currencyAmount
-    currentBalanceAmountLabel:SetText(currencyString)
+    ZO_CurrencyControl_SetSimpleCurrency(currentBalanceAmountLabel, currencyType, GetPlayerMarketCurrency(marketPurchaseData.marketCurrencyType))
 end
 
 local function MarketPurchaseSelectTemplateDialogSetupHouseInfoControls(dialog, data)
@@ -926,9 +923,7 @@ local function MarketPurchaseHouseTemplateSelectDialogSetup(dialog, data)
             currencyType = GetCurrencyTypeFromMarketCurrencyType(key)
             marketCurrencyType = key
 
-            local currencyString = ZO_Currency_FormatKeyboard(currencyType, GetPlayerMarketCurrency(marketCurrencyType), ZO_CURRENCY_FORMAT_AMOUNT_ICON)
-            local currentBalanceAmountLabel = dialog.balanceContainer.currencyAmount
-            currentBalanceAmountLabel:SetText(currencyString)
+            ZO_CurrencyControl_SetSimpleCurrency(dialog.balanceContainer.currencyAmount, currencyType, GetPlayerMarketCurrency(marketCurrencyType))
 
             MarketPurchaseConfirmationDialogSetupPricingControls(dialog, comboBox:GetSelectedItemData().data)
             MarketPurchaseSelectTemplateDialogSetupHouseInfoControls(dialog, comboBox:GetSelectedItemData().data)

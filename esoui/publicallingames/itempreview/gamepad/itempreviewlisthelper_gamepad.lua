@@ -8,12 +8,6 @@ function ZO_ItemPreviewListHelper_Gamepad:Initialize(...)
     ZO_ItemPreviewListHelper_Shared.Initialize(self, ...)
 
     self:InitializeKeybinds()
-    self.directionalInputNarrationFunction = function()
-        if self:HasVariations() then
-            return ZO_GetHorizontalDirectionalInputNarrationData(GetString(SI_SCREEN_NARRATION_ITEM_PREVIEW_STATE_PREVIOUS), GetString(SI_SCREEN_NARRATION_ITEM_PREVIEW_STATE_NEXT))
-        end
-        return {}
-    end
 end
 
 function ZO_ItemPreviewListHelper_Gamepad:InitializeKeybinds()
@@ -54,7 +48,7 @@ function ZO_ItemPreviewListHelper_Gamepad:GetPreviewObject()
 end
 
 function ZO_ItemPreviewListHelper_Gamepad:GetPreviewNarrationText()
-    if self:HasVariations() then
+    if self:HasVariations() or self:HasActions() then
         return self:GetPreviewObject():GetPreviewSpinnerNarrationText()
     end
 end

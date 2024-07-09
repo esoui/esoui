@@ -130,6 +130,7 @@ function ZO_CampaignLeaderboardsManager_Keyboard:Initialize(control)
     end)
 
     SYSTEMS:RegisterKeyboardObject(ZO_CAMPAIGN_LEADERBOARD_SYSTEM_NAME, self)
+    LEADERBOARDS:RegisterLeaderboardSystemObject(self, LEADERBOARD_DATA_TYPE.CAMPAIGN)
     self.selector = ZO_LeaderboardCampaignSelector_Keyboard:New(control)
 end
 

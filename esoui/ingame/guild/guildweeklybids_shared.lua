@@ -72,7 +72,7 @@ function ZO_GuildWeeklyBids_Shared:SetupBidRow(control, data)
     control:GetNamedChild("Order"):SetText(data.order)
     control:GetNamedChild("Trader"):SetText(data.kioskName)
     control:GetNamedChild("PlacedBy"):SetText(ZO_FormatUserFacingDisplayName(data.displayName))
-    control:GetNamedChild("BidAmount"):SetText(ZO_Currency_FormatPlatform(CURT_MONEY, data.bidAmount, ZO_CURRENCY_FORMAT_WHITE_AMOUNT_ICON))
+    ZO_CurrencyControl_SetSimpleCurrency(control:GetNamedChild("BidAmountText"), CURT_MONEY, data.bidAmount)
 end
 
 function ZO_GuildWeeklyBids_Shared:TryQueryNewInformation()

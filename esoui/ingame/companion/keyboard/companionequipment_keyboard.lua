@@ -232,7 +232,7 @@ function ZO_CompanionEquipment_Keyboard:SetupItemRow(control, data)
     local displayColor = GetItemQualityColor(data.displayQuality)
     nameControl:SetText(displayColor:Colorize(data.name))
 
-    local sellPriceControl = control:GetNamedChild("SellPrice")
+    local sellPriceControl = control:GetNamedChild("SellPriceText")
     sellPriceControl:SetHidden(false)
     ZO_CurrencyControl_SetSimpleCurrency(sellPriceControl, CURT_MONEY, data.stackSellPrice, ITEM_SLOT_CURRENCY_OPTIONS)
 

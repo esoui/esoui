@@ -7,6 +7,8 @@ EsoUI\PublicAllIngames\Globals\AutoComplete.lua
 EsoUI\PublicAllIngames\Currency\Keyboard\CurrencyOptionsTable_Keyboard.lua
 EsoUI\PublicAllIngames\Currency\Gamepad\CurrencyOptionsTable_Gamepad.lua
 
+EsoUI\PublicAllIngames\Collections\CollectibleData_Base.lua
+
 EsoUI\PublicAllIngames\Character\Character_Utils.lua
 EsoUI\PublicAllIngames\Exploration\ExplorationUtils.lua
 

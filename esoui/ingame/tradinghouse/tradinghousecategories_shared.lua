@@ -1210,6 +1210,8 @@ do
         categoryParams:SetIsAllItemsCategory(true)
 
         categoryParams:SetApplyToSearchCallback(ApplyAllCompanionEquipmentToSearch)
+        categoryParams:AddFeatureKeys("CompanionAllTraits")
+
         AddAllSubcategory(categoryParams)
     end
 
@@ -1540,9 +1542,3 @@ AddMiscCategory(ITEMTYPE_TOOL)
 AddMiscCategory(ITEMTYPE_SIEGE)
 AddTrophyCategory()
 AddGuildTabardCategory()
-
--- TODO Scribing: Find the correct categories for scribing related items: 
--- ITEMTYPE_CRAFTED_ABILITY
--- SPECIALIZED_ITEMTYPE_CRAFTED_ABILITY_SCRIPT_PRIMARY
--- SPECIALIZED_ITEMTYPE_CRAFTED_ABILITY_SCRIPT_SECONDARY
--- SPECIALIZED_ITEMTYPE_CRAFTED_ABILITY_SCRIPT_TERTIARY

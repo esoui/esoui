@@ -118,8 +118,12 @@
                     <Anchor point="TOPLEFT" relativeTo="$(parent)PanelName" relativePoint="BOTTOMLEFT" offsetX="-55" offsetY="2" />
                 </Control>
 
-                <Label name="$(parent)Cost" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGameBold">
+                <Label name="$(parent)Cost" inherits="ZO_CurrencyTemplate">
                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)TopDivider" relativePoint="TOPRIGHT" offsetY="-2" />
+                </Label>
+
+                <Label name="$(parent)CostLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGameBold" text="SI_GUILD_HERALDRY_COST_LABEL">
+                    <Anchor point="RIGHT" relativeTo="$(parent)Cost" relativePoint="LEFT" />
                 </Label>
 
                 <Control name="$(parent)ColorPane" inherits="ZO_GridScrollList_Keyboard">

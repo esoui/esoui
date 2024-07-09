@@ -15,7 +15,7 @@ function ZO_RaidLeaderboardsManager_Gamepad:Initialize(control)
     end)
 
     SYSTEMS:RegisterGamepadObject(ZO_RAID_LEADERBOARD_SYSTEM_NAME, self)
-    GAMEPAD_LEADERBOARDS:RegisterLeaderboardSystemObject(self)
+    GAMEPAD_LEADERBOARDS:RegisterLeaderboardSystemObject(self, LEADERBOARD_DATA_TYPE.RAID)
 end
 
 function ZO_RaidLeaderboardsManager_Gamepad:PerformDeferredInitialization()

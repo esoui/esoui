@@ -232,13 +232,13 @@ function ZO_Reticle:TryHandlingInteraction(interactionPossible, currentFrameTime
                     local bankBag = context
                     local collectibleId = GetCollectibleForHouseBankBag(bankBag)
                     if collectibleId ~= 0 then
-					    local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
-					    if collectibleData then
-						    local nickname = collectibleData:GetNickname()
-						    if nickname ~= "" then
-							    interactContextString = zo_strformat(SI_RETICLE_HOUSE_BANK_WITH_NICKNAME_FORMAT, interactableName, nickname)
-						    end
-					    end
+                    local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+                        if collectibleData then
+                            local nickname = collectibleData:GetNickname()
+                            if nickname ~= "" then
+                                interactContextString = zo_strformat(SI_RETICLE_HOUSE_BANK_WITH_NICKNAME_FORMAT, interactableName, nickname)
+                            end
+                        end
                     end
                 end
             elseif additionalInteractInfo == ADDITIONAL_INTERACT_INFO_HOUSE_INSTANCE_DOOR then

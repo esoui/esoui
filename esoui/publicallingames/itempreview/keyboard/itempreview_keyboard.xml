@@ -36,6 +36,31 @@
                         mouseOver="EsoUI/Art/Buttons/large_rightArrow_over.dds"
                     />
                 </Button>
+
+                <Label name="$(parent)ActionLabel" font="ZoFontWinH1" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER" level="2" maxLineCount="2" wrapMode="ELLIPSIS" hidden="true">
+                    <DimensionConstraints maxX="350" minX="200"/>
+                    <Anchor point="BOTTOM" relativeTo="$(parent)VariationLabel" relativePoint="TOP" offsetY="-20"/>
+                </Label>
+
+                <Button name="$(parent)PreviewActionLeftArrow" inherits="ZO_DefaultButton" level="3" hidden="true">
+                    <Dimensions x="64" y="64"/>
+                    <Anchor point="RIGHT" relativeTo="$(parent)ActionLabel" relativePoint="LEFT" offsetX="-16" />
+                    <Textures
+                        normal="EsoUI/Art/Buttons/large_leftArrow_up.dds"
+                        pressed="EsoUI/Art/Buttons/large_leftArrow_down.dds"
+                        mouseOver="EsoUI/Art/Buttons/large_leftArrow_over.dds"
+                    />
+                </Button>
+
+                <Button name="$(parent)PreviewActionRightArrow" inherits="ZO_DefaultButton" level="3" hidden="true">
+                    <Dimensions x="64" y="64"/>
+                    <Anchor point="LEFT" relativeTo="$(parent)ActionLabel" relativePoint="RIGHT" offsetX="16" />
+                    <Textures
+                        normal="EsoUI/Art/Buttons/large_rightArrow_up.dds"
+                        pressed="EsoUI/Art/Buttons/large_rightArrow_down.dds"
+                        mouseOver="EsoUI/Art/Buttons/large_rightArrow_over.dds"
+                    />
+                </Button>
             </Controls>
         </TopLevelControl>
     </Controls>

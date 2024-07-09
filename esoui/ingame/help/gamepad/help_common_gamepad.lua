@@ -1,9 +1,12 @@
 --[[Basic screen]]--
-ZO_HelpTutorialsGamepad = ZO_Gamepad_ParametricList_Screen:Subclass()
+ZO_HelpTutorialsGamepad = ZO_Gamepad_ParametricList_Search_Screen:Subclass()
 
-function ZO_HelpTutorialsGamepad:Initialize(control, activateOnShow)
-    ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE, activateOnShow)
-    self.itemList = ZO_Gamepad_ParametricList_Screen.GetMainList(self)
+local HELP_TUTORIAL_SEARCH_CONTEXT = "helpSearchContext"
+
+function ZO_HelpTutorialsGamepad:Initialize(control, activateOnShow, scene)
+    ZO_Gamepad_ParametricList_Search_Screen.Initialize(self, BACKGROUND_LIST_FILTER_TARGET_HELP_ID, HELP_TUTORIAL_SEARCH_CONTEXT, control, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE, activateOnShow, scene)
+    self.itemList = ZO_Gamepad_ParametricList_Search_Screen.GetMainList(self)
+    self.itemList:SetNoItemText(GetString(SI_HELP_TUTORIALS_SEARCH_RESULTS_EMPTY_TEXT))
 
     self.headerData = 
     {
@@ -38,6 +41,11 @@ function ZO_HelpTutorialsGamepad:SetupList(list)
     local DEFAULT_EQUALITY_FUNCTION = nil
     list:AddDataTemplate("ZO_GamepadSubMenuEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
     list:AddDataTemplateWithHeader("ZO_GamepadSubMenuEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, DEFAULT_EQUALITY_FUNCTION, "ZO_GamepadMenuEntryHeaderTemplate")
+end
+
+function ZO_HelpTutorialsGamepad:OnShowing()
+    ZO_Gamepad_ParametricList_Search_Screen.OnShowing(self)
+    self:PerformUpdate()
 end
 
 --[[Tutorial Info Display]]--

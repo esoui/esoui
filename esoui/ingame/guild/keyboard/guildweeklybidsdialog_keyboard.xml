@@ -15,11 +15,16 @@
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Trader" relativePoint="TOPRIGHT" offsetX="15"/>
                     <Dimensions x="200" y="ZO_GUILD_WEEKLY_BIDS_DIALOG_ROW_KEYBOARD_HEIGHT" />
                 </Label>
-                <Label name="$(parent)BidAmount" font="ZoFontGame" horizontalAlignment="RIGHT">
+                <Control name="$(parent)BidAmount">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)PlacedBy" relativePoint="TOPRIGHT" offsetX="15"/>
                     <Anchor point="TOPRIGHT"/>
                     <Dimensions y="ZO_GUILD_WEEKLY_BIDS_DIALOG_ROW_KEYBOARD_HEIGHT" />
-                </Label>
+                    <Controls>
+                        <Label name="$(parent)Text" inherits="ZO_CurrencyTemplate" horizontalAlignment="RIGHT">
+                            <Anchor point="RIGHT" />
+                        </Label>
+                    </Controls>
+                </Control>
             </Controls>
         </Control>
         

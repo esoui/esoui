@@ -174,7 +174,7 @@ local function SetupInventoryItemRow(rowControl, slot, overrideOptions)
         itemValue = GetDefaultSlotSellValue(slot)
     end
 
-    local sellPriceControl = rowControl:GetNamedChild("SellPrice")
+    local sellPriceControl = rowControl:GetNamedChild("SellPriceText")
     sellPriceControl:SetHidden(false)
     ZO_CurrencyControl_SetSimpleCurrency(sellPriceControl, CURT_MONEY, itemValue, options)
 
@@ -216,7 +216,7 @@ local function SetupQuestRow(rowControl, questItem)
     nameControl:SetText(questItem.name) -- already formatted
     nameControl:SetColor(r, g, b, 1)
 
-    rowControl:GetNamedChild("SellPrice"):SetHidden(true)
+    rowControl:GetNamedChild("SellPriceText"):SetHidden(true)
 
     local inventorySlot = rowControl:GetNamedChild("Button")
     ZO_InventorySlot_SetType(inventorySlot, SLOT_TYPE_QUEST_ITEM)
@@ -937,8 +937,6 @@ function ZO_InventoryManager:SetContextForInventories(context, inventoryTypeList
         else
             TEXT_SEARCH_MANAGER:UnregisterCallback("UpdateSearchResults", self.onListTextFilterCompleteCallback)
         end
-    else
-        TEXT_SEARCH_MANAGER:UnregisterCallback("UpdateSearchResults", self.onListTextFilterCompleteCallback)
     end
 end
 
@@ -2446,6 +2444,15 @@ function ZO_BankGenericCurrencyDepositWithdrawDialog:Initialize(prefix, currency
 
         self.currenciesComboBox = comboBox
         currenciesComboBoxControl:SetHidden(false)
+
+        local function OnMouseEnter()
+            comboBox.m_selectedItemText.type = self.currencyType
+            ZO_CurrencyTemplate_OnMouseEnter(comboBox.m_selectedItemText)
+        end
+        local function OnMouseExit()
+            ZO_CurrencyTemplate_OnMouseExit(comboBox.m_selectedItemText)
+        end
+        comboBox:SetMouseOverCallbacks(OnMouseEnter, OnMouseExit)
     end
 
     self.withdrawDialogName = prefix.."_WITHDRAW_GOLD"
@@ -2541,10 +2548,8 @@ function ZO_BankGenericCurrencyDepositWithdrawDialog:UpdateMoneyInputAndDisplay(
     if self.singularCurrency then
         local bankedAmount = GetCurrencyAmount(currentCurrencyType, self.currencyBankLocation)
         local carriedAmount = GetCurrencyAmount(currentCurrencyType, GetCurrencyPlayerStoredLocation(self.currencyType))
-        local bankedText = ZO_Currency_FormatKeyboard(CURT_MONEY, bankedAmount, ZO_CURRENCY_FORMAT_AMOUNT_ICON)
-        local carriedText = ZO_Currency_FormatKeyboard(CURT_MONEY, carriedAmount, ZO_CURRENCY_FORMAT_AMOUNT_ICON)
-        self.bankedCurrencyLabel:SetText(bankedText)
-        self.carriedCurrencyLabel:SetText(carriedText)
+        ZO_CurrencyControl_SetSimpleCurrency(self.bankedCurrencyLabel, CURT_MONEY, bankedAmount)
+        ZO_CurrencyControl_SetSimpleCurrency(self.carriedCurrencyLabel, CURT_MONEY, carriedAmount)
     else
         local comboBox = self.currenciesComboBox
         comboBox:ClearItems()
@@ -2564,6 +2569,14 @@ function ZO_BankGenericCurrencyDepositWithdrawDialog:UpdateMoneyInputAndDisplay(
                 local combinedText = zo_strformat(SI_BANK_CURRENCY_TRANSFER_CURRENCY_PAIR_FORMAT, bankedText, carriedText)
                 local entry = comboBox:CreateItemEntry(combinedText, OnFilterChanged)
                 ZO_ComboBox.SetItemEntryCustomTemplate(entry, "ZO_DepositWithdrawComboBoxEntry")
+                local function onMouseEnter(comboBox, control)
+                    control.type = control.m_data.dataSource.currencyType
+                    ZO_CurrencyTemplate_OnMouseEnter(control)
+                end
+                local function onMouseExit(comboBox, control)
+                    ZO_CurrencyTemplate_OnMouseExit(control)
+                end
+                comboBox:SetEntryMouseOverCallbacks(onMouseEnter, onMouseExit)
                 entry.currencyType = currencyType
                 comboBox:AddItem(entry, ZO_COMBOBOX_SUPPRESS_UPDATE)
                 if currencyType == currentCurrencyType then
@@ -2990,7 +3003,7 @@ function ZO_InventoryManager:CreateGuildBankScene()
                                                         if newState == SCENE_SHOWING then
                                                             guildBankFragmentBar:SelectFragment(SI_BANK_WITHDRAW)
                                                             self:UpdateFreeSlots(INVENTORY_BACKPACK)
-                                                            ZO_SharedInventory_SelectAccessibleGuildBank(self.lastSuccessfulGuildBankId)
+                                                            ZO_SharedInventory_SelectAccessibleGuildBank(ZO_GUILD_SELECTOR_MANAGER:GetSelectedGuildBankId())
                                                         elseif newState == SCENE_HIDDEN then
                                                             ZO_InventorySlot_RemoveMouseOverKeybinds()
                                                             guildBankFragmentBar:Clear()
@@ -3308,7 +3321,10 @@ end
 ----------------------
 
 function ZO_SelectGuildBankDialog_OnInitialized(self)
-    local dialog = ZO_SelectGuildDialog:New(self, "SELECT_GUILD_BANK", SelectGuildBank)
+    local function SetSelectedGuildBank(guildBankId)
+        ZO_GUILD_SELECTOR_MANAGER:SetSelectedGuildBankId(guildBankId)
+    end
+    local dialog = ZO_SelectGuildDialog:New(self, "SELECT_GUILD_BANK", SetSelectedGuildBank)
     dialog:SetTitle(GetString(SI_PROMPT_TITLE_SELECT_GUILD_BANK))
     dialog:SetPrompt(GetString(SI_SELECT_GUILD_BANK_INSTRUCTIONS))
     dialog:SetCurrentStateSource(GetSelectedGuildBankId) 

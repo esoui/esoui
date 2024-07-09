@@ -1,11 +1,5 @@
 ZO_HousingFurnitureBrowser_Keyboard = ZO_HousingFurnitureBrowser_Base:Subclass()
 
-function ZO_HousingFurnitureBrowser_Keyboard:New(...)
-    local browser = ZO_Object.New(self)
-    browser:Initialize(...)
-    return browser
-end
-
 HOUSING_FURNITURE_KEYBOARD_SCENE_NAME = "keyboard_housing_furniture_scene"
 
 function ZO_HousingFurnitureBrowser_Keyboard:Initialize(control)
@@ -21,9 +15,9 @@ function ZO_HousingFurnitureBrowser_Keyboard:Initialize(control)
         end
     end
 
-    self.placeablePanel = ZO_HousingFurniturePlacement_Keyboard:New(ZO_HousingFurniturePlacementPanel_KeyboardTopLevel, self)
-    self.productsPanel = ZO_HousingFurnitureProducts_Keyboard:New(ZO_HousingFurnitureProductsPanel_KeyboardTopLevel, self)
-    self.retrievalPanel = ZO_HousingFurnitureRetrieval_Keyboard:New(ZO_HousingFurnitureRetrievalPanel_KeyboardTopLevel, self)
+    self.placeablePanel = ZO_HousingFurniturePlacement_Keyboard:New(ZO_HousingFurniturePlacementPanel_KeyboardTopLevel, self, "housePlaceableItemsTextSearch")
+    self.productsPanel = ZO_HousingFurnitureProducts_Keyboard:New(ZO_HousingFurnitureProductsPanel_KeyboardTopLevel, self, "houseProductsTextSearch")
+    self.retrievalPanel = ZO_HousingFurnitureRetrieval_Keyboard:New(ZO_HousingFurnitureRetrievalPanel_KeyboardTopLevel, self, "houseFurnitureTextSearch")
     self.settingsPanel = ZO_HousingFurnitureSettings_Keyboard:New(ZO_HousingFurnitureSettingsPanel_Keyboard_TL, self)
 
     self.placeablePanel:RegisterCallback("OnMostRecentlySelectedDataChanged", OnListMostRecentlySelectedDataChanged)

@@ -95,7 +95,7 @@
                     <Anchor point="TOPLEFT" offsetX="110" offsetY="20" />
                 </Label>
 
-                <Label name="$(parent)SellPrice" hidden="true" override="true" />
+                <Label name="$(parent)SellPriceText" hidden="true" override="true" />
 
                 <Label name="$(parent)Level" maxLineCount="1" font="ZoFontGameShadow">
                     <Dimensions x="350" />
@@ -127,7 +127,7 @@
                     <Anchor point="TOPLEFT" offsetX="110" offsetY="15" />
                 </Label>
                 
-                <Label name="$(parent)SellPrice" hidden="true" override="true" />
+                <Label name="$(parent)SellPriceText" hidden="true" override="true" />
 
                 <Label name="$(parent)Trait1" inherits="ZO_AlchemyIconTraitLabel" >
                     <Anchor point="TOPLEFT" offsetX="150" offsetY="43" />

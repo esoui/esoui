@@ -623,7 +623,7 @@ function Battleground_Scoreboard_Alliance_Panel:Initialize(control, battleground
     self.battlegroundAlliance = battlegroundAlliance
     self.score = 0
 
-    self.iconControl:SetTexture(ZO_GetLargeBattlegroundAllianceSymbolIcon(battlegroundAlliance))
+    self.iconControl:SetTexture(ZO_GetLargeBattlegroundTeamSymbolIcon(battlegroundAlliance))
     self.nameControl:SetText(zo_strformat(SI_ALLIANCE_NAME, GetString("SI_BATTLEGROUNDTEAM", battlegroundAlliance)))
 
     local function PlayerRowFactory(pool)
@@ -646,7 +646,7 @@ do
     function Battleground_Scoreboard_Alliance_Panel:ApplyPlatformStyle(style)
         ApplyTemplateToControl(self.control, style.alliancePanel)
         if IsInGamepadPreferredMode() then
-            self.bgControl:SetColor(GetBattlegroundAllianceColor(self.battlegroundAlliance):UnpackRGBA())
+            self.bgControl:SetColor(GetBattlegroundTeamColor(self.battlegroundAlliance):UnpackRGBA())
             self.bgControl:SetTexture("")
         else
             self.bgControl:SetTexture(BATTLEGROUND_TEAM_TO_BG_TEXTURE[self.battlegroundAlliance])
@@ -780,7 +780,7 @@ do
         self:ApplyPlatformStyle(ZO_GetPlatformTemplate("ZO_Battleground_Scoreboard_Player_Row"))
         local battlegroundAlliance = self.panel:GetBattlegroundAlliance()
         self.highlight.keyboardTexture:SetTexture(HIGHLIGHT_KEYBOARD_TEXTURES[battlegroundAlliance])
-        self.highlight.gamepadBackdrop:SetEdgeColor(GetBattlegroundAllianceColor(battlegroundAlliance):UnpackRGB())
+        self.highlight.gamepadBackdrop:SetEdgeColor(GetBattlegroundTeamColor(battlegroundAlliance):UnpackRGB())
         self.isMouseOver = false
         self.highlight:SetAlpha(0)
         data.rowObject = self

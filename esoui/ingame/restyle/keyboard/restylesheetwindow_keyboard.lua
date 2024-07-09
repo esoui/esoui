@@ -2,8 +2,30 @@ ZO_RestyleSheetWindow_Keyboard = ZO_InitializingCallbackObject:Subclass()
 
 function ZO_RestyleSheetWindow_Keyboard:Initialize(control)
     self.control = control
+
+    ZO_RESTYLE_SHEET_WINDOW_FRAGMENT = ZO_FadeSceneFragment:New(control)
+    ZO_RESTYLE_SHEET_WINDOW_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
+        if newState == SCENE_FRAGMENT_SHOWING then
+            self:PerformDeferredInitialize()
+            self:OnShowing()
+        elseif newState == SCENE_FRAGMENT_HIDING then
+            self:OnHiding()
+        elseif newState == SCENE_FRAGMENT_HIDDEN then
+            self:OnHidden()
+        end
+    end)
+end
+
+function ZO_RestyleSheetWindow_Keyboard:PerformDeferredInitialize()
+    if not self.initialized then
+        self.initialized = true
+        self:OnDeferredInitialize()
+    end
+end
+
+function ZO_RestyleSheetWindow_Keyboard:OnDeferredInitialize()
     self.isPreviewAvailable = true
-    self.sheetsContainer = control:GetNamedChild("Containers")
+    self.sheetsContainer = self.control:GetNamedChild("Containers")
     self.sheetsByMode = {}
 
     self:InitializeModeSelector()
@@ -20,14 +42,14 @@ function ZO_RestyleSheetWindow_Keyboard:Initialize(control)
 
     self.control:SetHandler("OnUpdate", function() self:OnUpdate() end)
 
-    local function OnRefreshOutfitName(actorCategory, outfitIndex)
+    self.onRefreshOutfitName = function(actorCategory, outfitIndex)
         local KEEP_CURRENT_SELECTION = true
         if self.currentSheet == self.equipmentSheet or self.currentSheet == self.outfitStylesSheet then
             self:PopulateEquipmentModeDropdown(KEEP_CURRENT_SELECTION)
         end
     end
 
-    local function UpdateEquippedOutfit()
+    self.onUpdateEquippedOutfit = function()
         if self.currentSheet ~= self.collectiblesSheet and self.currentSheet ~= self.companionCollectiblesSheet then
             if self.currentSheet == self.equipmentSheet or self.currentSheet == self.outfitStylesSheet then
                 self:PopulateEquipmentModeDropdown()
@@ -36,21 +58,6 @@ function ZO_RestyleSheetWindow_Keyboard:Initialize(control)
             end
         end
     end
-
-    ZO_RESTYLE_SHEET_WINDOW_FRAGMENT = ZO_FadeSceneFragment:New(control)
-    ZO_RESTYLE_SHEET_WINDOW_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
-        if newState == SCENE_FRAGMENT_SHOWING then
-            self:OnShowing()
-            ZO_OUTFIT_MANAGER:RegisterCallback("RefreshOutfitName", OnRefreshOutfitName)
-            ZO_OUTFIT_MANAGER:RegisterCallback("RefreshEquippedOutfitIndex", UpdateEquippedOutfit)
-        elseif newState == SCENE_FRAGMENT_HIDING then
-            ZO_OUTFIT_MANAGER:UnregisterCallback("RefreshOutfitName", OnRefreshOutfitName)
-            ZO_OUTFIT_MANAGER:UnregisterCallback("RefreshEquippedOutfitIndex", UpdateEquippedOutfit)
-            self:OnHiding()
-        elseif newState == SCENE_FRAGMENT_HIDDEN then
-            self:OnHidden()
-        end
-    end)
 end
 
 function ZO_RestyleSheetWindow_Keyboard:InitializeModeSelector()
@@ -266,14 +273,18 @@ end
 
 function ZO_RestyleSheetWindow_Keyboard:OnShowing()
     TUTORIAL_SYSTEM:RegisterTriggerLayoutInfo(TUTORIAL_TYPE_POINTER_BOX, TUTORIAL_TRIGGER_OUTFIT_SELECTOR_SHOWN_POINTER_BOX, self.control, ZO_RESTYLE_SHEET_WINDOW_FRAGMENT, self.outfitSelectorTutorialAnchor)
+    ZO_OUTFIT_MANAGER:RegisterCallback("RefreshOutfitName", self.onRefreshOutfitName)
+    ZO_OUTFIT_MANAGER:RegisterCallback("RefreshEquippedOutfitIndex", self.onUpdateEquippedOutfit)
 end
 
 function ZO_RestyleSheetWindow_Keyboard:BeginRestyling()
-    BeginRestyling(self.currentSheet:GetRestyleMode())
+    BeginRestyling(self:GetCurrentSheet():GetRestyleMode())
 end
 
 function ZO_RestyleSheetWindow_Keyboard:OnHiding()
-    local currentEquippedIndex = ZO_OUTFIT_MANAGER:GetEquippedOutfitIndex(ZO_OUTFIT_MANAGER.GetActorCategoryByRestyleMode(self.currentSheet:GetRestyleMode()))
+    ZO_OUTFIT_MANAGER:UnregisterCallback("RefreshOutfitName", self.onRefreshOutfitName)
+    ZO_OUTFIT_MANAGER:UnregisterCallback("RefreshEquippedOutfitIndex", self.onUpdateEquippedOutfit)
+    local currentEquippedIndex = ZO_OUTFIT_MANAGER:GetEquippedOutfitIndex(ZO_OUTFIT_MANAGER.GetActorCategoryByRestyleMode(self:GetCurrentSheet():GetRestyleMode()))
     if (not self.pendingEquipOutfitManipulator and currentEquippedIndex) or (self.pendingEquipOutfitManipulator and self.pendingEquipOutfitManipulator:GetOutfitIndex() ~= currentEquippedIndex) then
         self:EquipSelectedOutfit()
     end
@@ -287,7 +298,8 @@ do
     local IGNORE_CALLBACK = true
 
     function ZO_RestyleSheetWindow_Keyboard:PopulateEquipmentModeDropdown(keepCurrentSelection)
-        if self.currentSheet ~= self.equipmentSheet and self.currentSheet ~= self.outfitStylesSheet then
+        local currentSheet = self:GetCurrentSheet()
+        if currentSheet ~= self.equipmentSheet and currentSheet ~= self.outfitStylesSheet then
             self:EquipSelectedOutfit()
             ITEM_PREVIEW_KEYBOARD:ResetOutfitPreview()
         end
@@ -365,7 +377,8 @@ do
 end
 
 function ZO_RestyleSheetWindow_Keyboard:PopulateCollectiblesModeDropdown()
-    if self.currentSheet ~= self.collectiblesSheet or self.currentSheet ~= self.companionCollectiblesSheet then
+    local currentSheet = self:GetCurrentSheet()
+    if currentSheet ~= self.collectiblesSheet or currentSheet ~= self.companionCollectiblesSheet then
         self:EquipSelectedOutfit()
         ITEM_PREVIEW_KEYBOARD:ResetOutfitPreview()
     end
@@ -384,7 +397,8 @@ function ZO_RestyleSheetWindow_Keyboard:PopulateCollectiblesModeDropdown()
 end
 
 function ZO_RestyleSheetWindow_Keyboard:PopulateCompanionOutfitsModeDropdown()
-    if self.currentSheet ~= self.companionEquipmentSheet and self.currentSheet ~= self.companionOutfitStylesSheet then
+    local currentSheet = self:GetCurrentSheet()
+    if currentSheet ~= self.companionEquipmentSheet and currentSheet ~= self.companionOutfitStylesSheet then
         self:EquipSelectedOutfit()
         ITEM_PREVIEW_KEYBOARD:ResetOutfitPreview()
     end
@@ -456,7 +470,8 @@ function ZO_RestyleSheetWindow_Keyboard:PopulateCompanionOutfitsModeDropdown()
 end
 
 function ZO_RestyleSheetWindow_Keyboard:PopulateCompanionCollectiblesModeDropdown()
-    if self.currentSheet ~= self.collectiblesSheet or self.currentSheet ~= self.companionCollectiblesSheet then
+    local currentSheet = self:GetCurrentSheet()
+    if currentSheet ~= self.collectiblesSheet or currentSheet ~= self.companionCollectiblesSheet then
         self:EquipSelectedOutfit()
         ITEM_PREVIEW_KEYBOARD:ResetOutfitPreview()
     end
@@ -490,12 +505,13 @@ end
 
 function ZO_RestyleSheetWindow_Keyboard:DisplaySheet(newSheet)
     local isPreviewUpdated = false
-    if self.currentSheet ~= newSheet then
-        if self.currentSheet then
-            SCENE_MANAGER:RemoveFragment(self.currentSheet:GetFragment())
+    local currentSheet = self:GetCurrentSheet()
+    if currentSheet ~= newSheet then
+        if currentSheet then
+            SCENE_MANAGER:RemoveFragment(currentSheet:GetFragment())
         end
 
-        local oldSheet = self.currentSheet
+        local oldSheet = currentSheet
         self.currentSheet = newSheet
 
         if newSheet then
@@ -553,10 +569,12 @@ function ZO_RestyleSheetWindow_Keyboard:ShowRevertRestyleChangesDialog(dialogNam
 end
 
 function ZO_RestyleSheetWindow_Keyboard:GetCurrentSheet()
+    self:PerformDeferredInitialize()
     return self.currentSheet
 end
 
 function ZO_RestyleSheetWindow_Keyboard:GetSheetByMode(restyleMode)
+    self:PerformDeferredInitialize()
     return self.sheetsByMode[restyleMode]
 end
 
@@ -575,7 +593,7 @@ do
             local activeTool = ZO_DYEING_KEYBOARD:GetActiveTool()
             if activeTool then
                 local highlightSlot, highlightDyeChannel = activeTool:GetHighlightRules(restyleSlotData:GetRestyleSlotType(), dyeChannel)
-                self.currentSheet:ToggleDyeableSlotHightlight(highlightSlot, true, highlightDyeChannel)
+                self:GetCurrentSheet():ToggleDyeableSlotHightlight(highlightSlot, true, highlightDyeChannel)
                 WINDOW_MANAGER:SetMouseCursor(activeTool:GetCursorType())
             end
 
@@ -603,7 +621,7 @@ do
 
     function ZO_RestyleSheetWindow_Keyboard:OnDyeSlotExit(restyleSlotData, dyeChannel)
         if not self:FireCallbacks("DyeSlotExit", restyleSlotData, dyeChannel) then
-            self.currentSheet:ToggleDyeableSlotHightlight(NO_SLOT, false, NO_CHANNEL)
+            self:GetCurrentSheet():ToggleDyeableSlotHightlight(NO_SLOT, false, NO_CHANNEL)
             WINDOW_MANAGER:SetMouseCursor(MOUSE_CURSOR_DO_NOT_CARE)
             ZO_Dyeing_ClearTooltipOnMouseExit()
         end
@@ -614,7 +632,7 @@ function ZO_RestyleSheetWindow_Keyboard:EquipSelectedOutfit()
     if self.pendingEquipOutfitManipulator then
         ZO_OUTFIT_MANAGER:EquipOutfit(self.pendingEquipOutfitManipulator:GetActorCategory(), self.pendingEquipOutfitManipulator:GetOutfitIndex())
     else
-        local actorCategory = ZO_OUTFIT_MANAGER.GetActorCategoryByRestyleMode(self.currentSheet:GetRestyleMode())
+        local actorCategory = ZO_OUTFIT_MANAGER.GetActorCategoryByRestyleMode(self:GetCurrentSheet():GetRestyleMode())
         if actorCategory then
             ZO_OUTFIT_MANAGER:UnequipOutfit(actorCategory)
         end
@@ -622,19 +640,19 @@ function ZO_RestyleSheetWindow_Keyboard:EquipSelectedOutfit()
 end
 
 function ZO_RestyleSheetWindow_Keyboard:ShowUndoPendingChangesDialog()
-    ZO_Dialogs_ShowDialog("CONFIRM_REVERT_OUTFIT_CHANGES", { confirmCallback = function() self.currentSheet:UndoPendingChanges() end})
+    ZO_Dialogs_ShowDialog("CONFIRM_REVERT_OUTFIT_CHANGES", { confirmCallback = function() self:GetCurrentSheet():UndoPendingChanges() end})
 end
 
 function ZO_RestyleSheetWindow_Keyboard:UndoPendingChanges()
-    self.currentSheet:UndoPendingChanges()
+    self:GetCurrentSheet():UndoPendingChanges()
 end
 
 function ZO_RestyleSheetWindow_Keyboard:AreChangesPending()
-    return self.currentSheet:AreChangesPending()
+    return self:GetCurrentSheet():AreChangesPending()
 end
 
 function ZO_RestyleSheetWindow_Keyboard:CanApplyChanges()
-    return self.currentSheet:CanApplyChanges()
+    return self:GetCurrentSheet():CanApplyChanges()
 end
 
 function ZO_RestyleSheetWindow_Keyboard_OnInitialized(control)

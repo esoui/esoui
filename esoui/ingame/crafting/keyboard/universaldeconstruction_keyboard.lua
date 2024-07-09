@@ -138,6 +138,12 @@ function ZO_UniversalDeconstruction_Keyboard:InitializeKeybindStripDescriptors()
     ZO_CraftingUtils_ConnectKeybindButtonGroupToCraftingProcess(self.keybindStripDescriptor)
 end
 
+function ZO_UniversalDeconstruction_Keyboard:AddInventoryAdditionalFilter(additionalFilterFunction)
+    if self.deconstructionPanel then
+        self.deconstructionPanel:AddInventoryAdditionalFilter(additionalFilterFunction)
+    end
+end
+
 function ZO_UniversalDeconstruction_Keyboard:OnItemReceiveDrag(slotControl, bagId, slotIndex)
     if self.mode == SMITHING_MODE_DECONSTRUCTION then
         self.deconstructionPanel:OnItemReceiveDrag(slotControl, bagId, slotIndex)

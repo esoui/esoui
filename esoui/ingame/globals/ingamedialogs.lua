@@ -1,10 +1,10 @@
-ESO_Dialogs["CHAT_TAB_REMOVE"] = 
+ESO_Dialogs["CHAT_TAB_REMOVE"] =
 {
     title =
     {
         text = SI_PROMPT_TITLE_REMOVE_TAB,
     },
-    mainText = 
+    mainText =
     {
         text = SI_CHAT_DIALOG_REMOVE_TAB,
     },
@@ -13,27 +13,27 @@ ESO_Dialogs["CHAT_TAB_REMOVE"] =
     {
         [1] =
         {
-            text =      SI_DIALOG_ACCEPT,
-            callback =  function(dialog)
+            text = SI_DIALOG_ACCEPT,
+            callback = function(dialog)
                             dialog.data.container:RemoveWindow(dialog.data.index)
                         end,
         },
-        
+
         [2] =
         {
-            text =      SI_DIALOG_DECLINE,
+            text = SI_DIALOG_DECLINE,
         }
     }
 }
 
-ESO_Dialogs["CHAT_TAB_RESET"] = 
+ESO_Dialogs["CHAT_TAB_RESET"] =
 {
     canQueue = true,
     title =
     {
         text = SI_PROMPT_TITLE_RESET_TAB,
     },
-    mainText = 
+    mainText =
     {
         text = SI_CHAT_DIALOG_RESET_TAB,
     },
@@ -42,26 +42,26 @@ ESO_Dialogs["CHAT_TAB_RESET"] =
     {
         [1] =
         {
-            text =      SI_DIALOG_ACCEPT,
-            callback =  function(dialog)
+            text = SI_DIALOG_ACCEPT,
+            callback = function(dialog)
                             CHAT_OPTIONS:Reset()
                         end,
         },
-        
+
         [2] =
         {
-            text =      SI_DIALOG_DECLINE,
+            text = SI_DIALOG_DECLINE,
         }
     }
 }
 
-ESO_Dialogs["CHAT_RESET"] = 
+ESO_Dialogs["CHAT_RESET"] =
 {
     title =
     {
         text = SI_PROMPT_TITLE_RESET_CHAT,
     },
-    mainText = 
+    mainText =
     {
         text = SI_CHAT_DIALOG_RESET_CHAT,
     },
@@ -70,20 +70,20 @@ ESO_Dialogs["CHAT_RESET"] =
     {
         [1] =
         {
-            text =      SI_DIALOG_ACCEPT,
-            callback =  function()
+            text = SI_DIALOG_ACCEPT,
+            callback = function()
                             CHAT_SYSTEM:ResetChat()
                         end,
         },
-        
+
         [2] =
         {
-            text =      SI_DIALOG_DECLINE,
+            text = SI_DIALOG_DECLINE,
         }
     }
 }
 
-ESO_Dialogs["ABANDON_QUEST"] = 
+ESO_Dialogs["ABANDON_QUEST"] =
 {
     gamepadInfo =
     {
@@ -93,7 +93,7 @@ ESO_Dialogs["ABANDON_QUEST"] =
     {
         text = SI_PROMPT_TITLE_ABANDON_QUEST,
     },
-    mainText = 
+    mainText =
     {
         text = SI_CONFIRM_ABANDON_QUEST,
     },
@@ -101,15 +101,15 @@ ESO_Dialogs["ABANDON_QUEST"] =
     {
         [1] =
         {
-            text =      SI_ABANDON_QUEST_CONFIRM,
-            callback =  function(dialog)
+            text = SI_ABANDON_QUEST_CONFIRM,
+            callback = function(dialog)
                             AbandonQuest(dialog.data.questIndex)
                         end,
         },
-        
+
         [2] =
         {
-            text =      SI_DIALOG_CANCEL,
+            text = SI_DIALOG_CANCEL,
         }
     }
 }
@@ -124,11 +124,11 @@ ESO_Dialogs["RITUAL_OF_MARA_PROMPT"] =
     {
         text = SI_PROMPT_TITLE_RITUAL_OF_MARA_PROMPT,
     },
-    mainText = 
+    mainText =
     {
         text = SI_RITUAL_OF_MARA_PROMPT,
     },
-    noChoiceCallback =  function()
+    noChoiceCallback = function()
                             SendPledgeOfMaraResponse(PLEDGE_OF_MARA_RESPONSE_DECLINE)
                         end,
     hideSound = SOUNDS.DIALOG_DECLINE,
@@ -136,15 +136,15 @@ ESO_Dialogs["RITUAL_OF_MARA_PROMPT"] =
     {
         [1] =
         {
-            text =      SI_YES,
-            callback =  function(dialog)
+            text = SI_YES,
+            callback = function(dialog)
                             SendPledgeOfMaraResponse(PLEDGE_OF_MARA_RESPONSE_ACCEPT)
                         end,
         },
         [2] =
         {
-            text =      SI_NO,
-            callback =  function(dialog)
+            text = SI_NO,
+            callback = function(dialog)
                             SendPledgeOfMaraResponse(PLEDGE_OF_MARA_RESPONSE_DECLINE)
                         end,
         }
@@ -163,26 +163,26 @@ ESO_Dialogs["DESTROY_ITEM_PROMPT"] =
     {
         text = SI_PROMPT_TITLE_DESTROY_ITEM_PROMPT,
     },
-    mainText = 
+    mainText =
     {
         text = SI_DESTROY_ITEM_PROMPT,
     },
-    noChoiceCallback =  function()
+    noChoiceCallback = function()
                             RespondToDestroyRequest(false)
                         end,
     buttons =
     {
         [1] =
         {
-            text =      SI_YES,
-            callback =  function(dialog)
+            text = SI_YES,
+            callback = function(dialog)
                             RespondToDestroyRequest(true)
                         end,
         },
         [2] =
         {
-            text =      SI_NO,
-            callback =  function(dialog)
+            text = SI_NO,
+            callback = function(dialog)
                             RespondToDestroyRequest(false)
                         end,
         }
@@ -203,15 +203,15 @@ ESO_Dialogs["CONFIRM_DESTROY_ITEM_PROMPT"] =
     {
         matchingString = GetString(SI_DESTROY_ITEM_CONFIRMATION)
     },
-    noChoiceCallback =  function()
+    noChoiceCallback = function()
         RespondToDestroyRequest(false)
     end,
     buttons =
     {
         {
             requiresTextInput = true,
-            text =      SI_CHAT_DIALOG_CONFIRM_ITEM_DESTRUCTION,
-            callback =  function(dialog)
+            text = SI_CHAT_DIALOG_CONFIRM_ITEM_DESTRUCTION,
+            callback = function(dialog)
                 local confirmDelete = ZO_Dialogs_GetEditBoxText(dialog)
                 local compareString = GetString(SI_DESTROY_ITEM_CONFIRMATION)
                 if confirmDelete and confirmDelete ~= compareString then
@@ -244,7 +244,7 @@ ESO_Dialogs["CONFIRM_DESTROY_ARMORY_ITEM_PROMPT"] =
     {
         matchingString = GetString(SI_DESTROY_ITEM_CONFIRMATION)
     },
-    noChoiceCallback =  function()
+    noChoiceCallback = function()
         RespondToDestroyRequest(false)
     end,
     buttons =
@@ -271,7 +271,7 @@ ESO_Dialogs["CONFIRM_DESTROY_ARMORY_ITEM_PROMPT"] =
     }
 }
 
-ESO_Dialogs["CONFIRM_ENDLESS_DUNGEON_COMPANION_SUMMONING"] = 
+ESO_Dialogs["CONFIRM_ENDLESS_DUNGEON_COMPANION_SUMMONING"] =
 {
     gamepadInfo =
     {
@@ -281,7 +281,7 @@ ESO_Dialogs["CONFIRM_ENDLESS_DUNGEON_COMPANION_SUMMONING"] =
     {
         text = SI_ENDLESS_DUNGEON_CONFIRM_COMPANION_SUMMONING_DIALOG_TITLE,
     },
-    mainText = 
+    mainText =
     {
         text = SI_ENDLESS_DUNGEON_CONFIRM_COMPANION_SUMMONING_DIALOG_BODY,
     },
@@ -289,25 +289,25 @@ ESO_Dialogs["CONFIRM_ENDLESS_DUNGEON_COMPANION_SUMMONING"] =
     {
         [1] =
         {
-            text =      SI_DIALOG_CONFIRM,
-            callback =  function(dialog)
+            text = SI_DIALOG_CONFIRM,
+            callback = function(dialog)
                             -- Confirm Companion Summoning for this Endless Dungeon instance
                             -- and attempt to use the companion collectible again.
                             SetPlayerConfirmedEndlessDungeonCompanionSummoning(true)
                             UseCollectible(dialog.data.collectibleId)
                         end,
         },
-        
+
         [2] =
         {
-            text =      SI_DIALOG_CANCEL,
+            text = SI_DIALOG_CANCEL,
         }
     }
 }
 
-ESO_Dialogs["KEEP_CLAIM_WRONG_ALLIANCE"] = 
+ESO_Dialogs["KEEP_CLAIM_WRONG_ALLIANCE"] =
 {
-    mainText = 
+    mainText =
     {
         text = SI_KEEP_CLAIM_WRONG_ALLIANCE,
     },
@@ -320,9 +320,9 @@ ESO_Dialogs["KEEP_CLAIM_WRONG_ALLIANCE"] =
     }
 }
 
-ESO_Dialogs["KEEP_CLAIM_NOT_IN_GUILD"] = 
+ESO_Dialogs["KEEP_CLAIM_NOT_IN_GUILD"] =
 {
-    mainText = 
+    mainText =
     {
         text = SI_KEEP_CLAIM_NOT_IN_GUILD,
     },
@@ -345,16 +345,16 @@ ESO_Dialogs["PAY_FOR_CONVERSATION"] =
     {
         text = SI_PROMPT_TITLE_PAY_FOR_CONVERSATION,
     },
-    mainText = 
+    mainText =
     {
         text = SI_PAY_FOR_CONVERSATION_PROMPT,
     },
-    buttons = 
+    buttons =
     {
         [1] =
         {
             text = SI_YES,
-            callback =  function(dialog)
+            callback = function(dialog)
                             SelectChatterOption(dialog.data.chatterOptionIndex)
                         end,
         },
@@ -365,7 +365,7 @@ ESO_Dialogs["PAY_FOR_CONVERSATION"] =
     }
 }
 
-ESO_Dialogs["CONFIRM_PURCHASE"] = 
+ESO_Dialogs["CONFIRM_PURCHASE"] =
 {
     canQueue = true,
     gamepadInfo =
@@ -376,11 +376,11 @@ ESO_Dialogs["CONFIRM_PURCHASE"] =
     {
         text = SI_PROMPT_TITLE_CONFIRM_PURCHASE,
     },
-    mainText = 
+    mainText =
     {
         text = SI_CONFIRM_PURCHASE
     },
-    buttons = 
+    buttons =
     {
         [1] =
         {
@@ -389,7 +389,7 @@ ESO_Dialogs["CONFIRM_PURCHASE"] =
                 BuyStoreItem(dialog.data.buyIndex, dialog.data.quantity or 1)
             end,
         },
-        [2] = 
+        [2] =
         {
             text = SI_DIALOG_CANCEL,
         }
@@ -402,7 +402,7 @@ ESO_Dialogs["BUY_BANK_SPACE"] =
     {
         text = SI_PROMPT_TITLE_BUY_BANK_SPACE,
     },
-    mainText = 
+    mainText =
     {
         text = zo_strformat(SI_BUY_BANK_SPACE, NUM_BANK_SLOTS_PER_UPGRADE),
     },
@@ -410,14 +410,14 @@ ESO_Dialogs["BUY_BANK_SPACE"] =
     {
         [1] =
         {
-            text =      SI_DIALOG_ACCEPT,
-            callback =  function(dialog)
+            text = SI_DIALOG_ACCEPT,
+            callback = function(dialog)
                             BuyBankSpace()
                         end,
         },
         [2] =
         {
-            text =       SI_DIALOG_DECLINE,
+            text = SI_DIALOG_DECLINE,
         },
     },
     updateFn = function(dialog)
@@ -439,7 +439,7 @@ ESO_Dialogs["BUY_BAG_SPACE"] =
     {
         text = SI_PROMPT_TITLE_BUY_BAG_SPACE,
     },
-    mainText = 
+    mainText =
     {
         text = zo_strformat(SI_BUY_BAG_SPACE, NUM_BACKPACK_SLOTS_PER_UPGRADE),
     },
@@ -450,16 +450,16 @@ ESO_Dialogs["BUY_BAG_SPACE"] =
     {
         [1] =
         {
-            text =      SI_DIALOG_ACCEPT,
-            callback =  function(dialog)
+            text = SI_DIALOG_ACCEPT,
+            callback = function(dialog)
                             BuyBagSpace()
                             INTERACT_WINDOW:EndInteraction(BUY_BAG_SPACE_INTERACTION)
                         end,
         },
         [2] =
         {
-            text =       SI_DIALOG_DECLINE,
-            callback =   function(dialog)
+            text = SI_DIALOG_DECLINE,
+            callback = function(dialog)
                             INTERACT_WINDOW:EndInteraction(BUY_BAG_SPACE_INTERACTION)
                          end,
         },
@@ -487,7 +487,7 @@ ESO_Dialogs["REPAIR_ALL"] =
     {
         text = SI_PROMPT_TITLE_REPAIR_ALL,
     },
-    mainText = 
+    mainText =
     {
         text = SI_REPAIR_ALL,
     },
@@ -497,7 +497,7 @@ ESO_Dialogs["REPAIR_ALL"] =
             text = function(dialog)
                 if IsInGamepadPreferredMode() then
                     local costString = ZO_CurrencyControl_FormatCurrency(dialog.data.cost)
-                    return zo_strformat(SI_GAMEPAD_REPAIR_ALL_ACCEPT, costString, ZO_Currency_GetGamepadFormattedCurrencyIcon(CURT_MONEY)) 
+                    return zo_strformat(SI_GAMEPAD_REPAIR_ALL_ACCEPT, costString, ZO_Currency_GetGamepadFormattedCurrencyIcon(CURT_MONEY))
                 else
                     return GetString(SI_DIALOG_ACCEPT)
                 end
@@ -505,14 +505,14 @@ ESO_Dialogs["REPAIR_ALL"] =
             narrationOverrideText = function(dialog)
                 if IsInGamepadPreferredMode() then
                     local costString = ZO_Currency_FormatGamepad(CURT_MONEY, dialog.data.cost, ZO_CURRENCY_FORMAT_AMOUNT_NAME)
-                    return zo_strformat(SI_GAMEPAD_REPAIR_ALL_ACCEPT, costString) 
+                    return zo_strformat(SI_GAMEPAD_REPAIR_ALL_ACCEPT, costString)
                 end
             end,
-            callback =  function(dialog)
+            callback = function(dialog)
                             RepairAll()
                             PlaySound(SOUNDS.INVENTORY_ITEM_REPAIR)
                         end,
-            enabled =   function(dialogOrDescriptor)
+            enabled = function(dialogOrDescriptor)
                             local dialog = dialogOrDescriptor.dialog or dialogOrDescriptor  -- if .dialog is defined, we're running in Gamepad UI
                             local canAfford = dialog.data.cost <= GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)
 
@@ -524,8 +524,8 @@ ESO_Dialogs["REPAIR_ALL"] =
                         end,
         },
         {
-            text =      SI_DIALOG_DECLINE,
-            callback =  function(dialog)
+            text = SI_DIALOG_DECLINE,
+            callback = function(dialog)
                             if (dialog.data.declineCallback) then
                                dialog.data.declineCallback()
                             end
@@ -535,7 +535,7 @@ ESO_Dialogs["REPAIR_ALL"] =
     updateFn = function(dialog)
         local cost = dialog.data.cost
         local buttonState
-        
+
         if cost > GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER) then
             buttonState = BSTATE_DISABLED
             ZO_Dialogs_UpdateDialogMainText(dialog, { text = SI_REPAIR_ALL_CANNOT_AFFORD })
@@ -559,7 +559,7 @@ ESO_Dialogs["SELL_ALL_JUNK"] =
     {
         text = SI_PROMPT_TITLE_SELL_ITEMS,
     },
-    mainText = 
+    mainText =
     {
         text = SI_SELL_ALL_JUNK,
     },
@@ -567,12 +567,12 @@ ESO_Dialogs["SELL_ALL_JUNK"] =
     {
         [1] =
         {
-            text =      SI_SELL_ALL_JUNK_CONFIRM,
-            callback =  SellAllJunk,
+            text = SI_SELL_ALL_JUNK_CONFIRM,
+            callback = SellAllJunk,
         },
         [2] =
         {
-            text =       SI_DIALOG_DECLINE,
+            text = SI_DIALOG_DECLINE,
         },
     },
 }
@@ -583,7 +583,7 @@ ESO_Dialogs["DESTROY_ALL_JUNK"] =
     {
         text = SI_PROMPT_TITLE_DESTROY_ITEMS,
     },
-    mainText = 
+    mainText =
     {
         text = SI_DESTROY_ALL_JUNK,
     },
@@ -591,13 +591,13 @@ ESO_Dialogs["DESTROY_ALL_JUNK"] =
     {
         [1] =
         {
-            text =      SI_DESTROY_ALL_JUNK_CONFIRM,
-            callback =  DestroyAllJunk,
+            text = SI_DESTROY_ALL_JUNK_CONFIRM,
+            callback = DestroyAllJunk,
             clickSound = SOUNDS.INVENTORY_DESTROY_JUNK,
         },
         [2] =
         {
-            text =       SI_DIALOG_DECLINE,
+            text = SI_DIALOG_DECLINE,
         },
     },
 }
@@ -621,7 +621,7 @@ ESO_Dialogs["CONFIRM_SELL_ARMORY_ITEM_PROMPT"] =
     {
         {
             text = SI_ITEM_ACTION_SELL,
-            callback =  function(dialog)
+            callback = function(dialog)
                 local bagId = dialog.data.bag or dialog.data.bagId
                 local slotIndex = dialog.data.slot or dialog.data.slotIndex
                 SellInventoryItem(bagId, slotIndex, dialog.data.stackCount)
@@ -652,7 +652,7 @@ ESO_Dialogs["CANT_BUYBACK_FROM_FENCE"] =
     {
         {
             text = SI_ITEM_ACTION_SELL,
-            callback =  function(dialog)
+            callback = function(dialog)
                 SellInventoryItem(dialog.data.bag, dialog.data.slot, dialog.data.stackCount)
             end,
         },
@@ -683,11 +683,11 @@ ESO_Dialogs["SCRIPT_ACCESS_VIOLATION"] =
         [1] =
         {
             text = SI_OK,
-        }    
+        }
     },
 }
 
-ESO_Dialogs["DELETE_MAIL"] = 
+ESO_Dialogs["DELETE_MAIL"] =
 {
     gamepadInfo =
     {
@@ -697,7 +697,7 @@ ESO_Dialogs["DELETE_MAIL"] =
     {
         text = SI_PROMPT_TITLE_DELETE_MAIL,
     },
-    mainText = 
+    mainText =
     {
         text = SI_MAIL_CONFIRM_DELETE,
     },
@@ -717,7 +717,7 @@ ESO_Dialogs["DELETE_MAIL"] =
     }
 }
 
-ESO_Dialogs["GAMEPAD_MAIL_TAKE_ATTACHMENT_COD"] = 
+ESO_Dialogs["GAMEPAD_MAIL_TAKE_ATTACHMENT_COD"] =
 {
     gamepadInfo =
     {
@@ -727,7 +727,7 @@ ESO_Dialogs["GAMEPAD_MAIL_TAKE_ATTACHMENT_COD"] =
     {
         text = SI_PROMPT_TITLE_MAIL_TAKE_ATTACHMENT_COD,
     },
-    mainText = 
+    mainText =
     {
         text = SI_MAIL_CONFIRM_TAKE_ATTACHMENT_COD
     },
@@ -820,13 +820,13 @@ ESO_Dialogs["MAIL_CONFIRM_TAKE_ALL"] =
     },
 }
 
-ESO_Dialogs["TOO_FREQUENT_BUG_SCREENSHOT"] = 
+ESO_Dialogs["TOO_FREQUENT_BUG_SCREENSHOT"] =
 {
     gamepadInfo =
     {
         dialogType = GAMEPAD_DIALOGS.BASIC,
     },
-    mainText = 
+    mainText =
     {
         text = SI_TOO_FREQUENT_BUG_SCREENSHOT,
     },
@@ -839,7 +839,26 @@ ESO_Dialogs["TOO_FREQUENT_BUG_SCREENSHOT"] =
     }
 }
 
-ESO_Dialogs["FAST_TRAVEL_CONFIRM"] = 
+ESO_Dialogs["CUSTOMER_SERVICE_TICKET_SCREENSHOT_COOLDOWN"] =
+{
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    mainText =
+    {
+        text = SI_CUSTOMER_SERVICE_TICKET_SCREENSHOT_COOLDOWN,
+    },
+    buttons =
+    {
+        [1] =
+        {
+            text = SI_OK,
+        }
+    }
+}
+
+ESO_Dialogs["FAST_TRAVEL_CONFIRM"] =
 {
     gamepadInfo =
     {
@@ -887,7 +906,7 @@ ESO_Dialogs["FAST_TRAVEL_CONFIRM"] =
     end
 }
 
-ESO_Dialogs["RECALL_CONFIRM"] = 
+ESO_Dialogs["RECALL_CONFIRM"] =
 {
     gamepadInfo =
     {
@@ -898,7 +917,7 @@ ESO_Dialogs["RECALL_CONFIRM"] =
     {
         text = SI_PROMPT_TITLE_FAST_TRAVEL_CONFIRM,
     },
-    mainText = 
+    mainText =
     {
         text = function(dialog)
             local cooldown = GetRecallCooldown()
@@ -938,7 +957,7 @@ ESO_Dialogs["RECALL_CONFIRM"] =
                 local currency = GetRecallCurrency(destination)
                 return GetRecallCost(destination) <= GetCurrencyAmount(currency, CURRENCY_LOCATION_CHARACTER)
             end,
-        },        
+        },
         {
             text = SI_DIALOG_CANCEL,
         },
@@ -974,7 +993,7 @@ ESO_Dialogs["RECALL_CONFIRM"] =
     end,
 }
 
-ESO_Dialogs["TRAVEL_TO_HOUSE_CONFIRM"] = 
+ESO_Dialogs["TRAVEL_TO_HOUSE_CONFIRM"] =
 {
     gamepadInfo =
     {
@@ -985,7 +1004,7 @@ ESO_Dialogs["TRAVEL_TO_HOUSE_CONFIRM"] =
     {
         text = SI_PROMPT_TITLE_FAST_TRAVEL_CONFIRM,
     },
-    mainText = 
+    mainText =
     {
         text = function(dialog)
             if dialog.data.travelOutside then
@@ -1006,7 +1025,7 @@ ESO_Dialogs["TRAVEL_TO_HOUSE_CONFIRM"] =
                 RequestJumpToHouse(data.houseId, data.travelOutside)
                 SCENE_MANAGER:ShowBaseScene()
             end,
-        },        
+        },
         {
             text = SI_DIALOG_CANCEL,
         },
@@ -1019,18 +1038,18 @@ ESO_Dialogs["ADD_IGNORE"] =
     {
         text = SI_PROMPT_TITLE_ADD_IGNORE,
     },
-    mainText = 
+    mainText =
     {
         text = SI_REQUEST_NAME_INSTRUCTIONS,
     },
     editBox =
     {
         defaultText = SI_REQUEST_NAME_DEFAULT_TEXT,
-        autoComplete = 
+        autoComplete =
         {
             includeFlags = { AUTO_COMPLETE_FLAG_GUILD, AUTO_COMPLETE_FLAG_RECENT, AUTO_COMPLETE_FLAG_RECENT_TARGET, AUTO_COMPLETE_FLAG_RECENT_CHAT },
             excludeFlags = {AUTO_COMPLETE_FLAG_FRIEND },
-            onlineOnly = AUTO_COMPLETION_ONLINE_OR_OFFLINE, 
+            onlineOnly = AUTO_COMPLETION_ONLINE_OR_OFFLINE,
             maxResults = MAX_AUTO_COMPLETION_RESULTS,
         },
     },
@@ -1039,17 +1058,17 @@ ESO_Dialogs["ADD_IGNORE"] =
         [1] =
         {
             requiresTextInput = true,
-            text =      SI_DIALOG_ADD_IGNORE,
-            callback =  function (dialog)
+            text = SI_DIALOG_ADD_IGNORE,
+            callback = function (dialog)
                            local playerName = ZO_Dialogs_GetEditBoxText(dialog)
                            if(playerName and playerName ~= "") then
                                 AddIgnore(playerName)
                            end
                         end
-        },        
+        },
         [2] =
         {
-            text =       SI_DIALOG_CANCEL,
+            text = SI_DIALOG_CANCEL,
         }
     }
 }
@@ -1060,19 +1079,19 @@ ESO_Dialogs["GUILD_INVITE"] =
     {
         text = SI_PROMPT_TITLE_GUILD_INVITE,
     },
-    mainText = 
+    mainText =
     {
         text = SI_REQUEST_NAME_INSTRUCTIONS,
     },
     editBox =
     {
         defaultText = SI_REQUEST_NAME_DEFAULT_TEXT,
-        autoComplete = 
+        autoComplete =
         {
-            includeFlags = { AUTO_COMPLETE_FLAG_FRIEND, AUTO_COMPLETE_FLAG_RECENT, AUTO_COMPLETE_FLAG_RECENT_TARGET, AUTO_COMPLETE_FLAG_RECENT_CHAT }, 
+            includeFlags = { AUTO_COMPLETE_FLAG_FRIEND, AUTO_COMPLETE_FLAG_RECENT, AUTO_COMPLETE_FLAG_RECENT_TARGET, AUTO_COMPLETE_FLAG_RECENT_CHAT },
             -- don't exclude guild, might want to invite a guild member from one guild to another
-            onlineOnly = AUTO_COMPLETION_ONLINE_OR_OFFLINE, 
-            maxResults = MAX_AUTO_COMPLETION_RESULTS, 
+            onlineOnly = AUTO_COMPLETION_ONLINE_OR_OFFLINE,
+            maxResults = MAX_AUTO_COMPLETION_RESULTS,
         },
     },
     buttons =
@@ -1080,8 +1099,8 @@ ESO_Dialogs["GUILD_INVITE"] =
         [1] =
         {
             requiresTextInput = true,
-            text =      SI_OK,
-            callback =  function (dialog)
+            text = SI_OK,
+            callback = function (dialog)
                            local displayName = ZO_Dialogs_GetEditBoxText(dialog)
                            if(displayName and displayName ~= "") then
                                 local guildId = dialog.data
@@ -1091,8 +1110,8 @@ ESO_Dialogs["GUILD_INVITE"] =
         },
         [2] =
         {
-            text =       SI_DIALOG_CANCEL,
-        }  
+            text = SI_DIALOG_CANCEL,
+        }
     }
 }
 
@@ -1102,7 +1121,7 @@ ESO_Dialogs["GROUP_INVITE"] =
     {
         text = SI_GROUP_WINDOW_INVITE_PLAYER,
     },
-    mainText = 
+    mainText =
     {
         text = SI_REQUEST_NAME_INSTRUCTIONS,
     },
@@ -1122,8 +1141,8 @@ ESO_Dialogs["GROUP_INVITE"] =
         [1] =
         {
             requiresTextInput = true,
-            text =      SI_OK,
-            callback =  function (dialog)
+            text = SI_OK,
+            callback = function (dialog)
                            local displayName = ZO_Dialogs_GetEditBoxText(dialog)
                            if(displayName and displayName ~= "") then
                                 local NOT_SENT_FROM_CHAT = false
@@ -1134,8 +1153,8 @@ ESO_Dialogs["GROUP_INVITE"] =
         },
         [2] =
         {
-            text =       SI_DIALOG_CANCEL,
-        }  
+            text = SI_DIALOG_CANCEL,
+        }
     }
 }
 
@@ -1150,7 +1169,7 @@ ESO_Dialogs["LARGE_GROUP_INVITE_WARNING"] =
     {
         text = SI_PROMPT_TITLE_LARGE_GROUP_INVITE_WARNING,
     },
-    mainText = 
+    mainText =
     {
         text = SI_LARGE_GROUP_INVITE_WARNING,
     },
@@ -1158,18 +1177,18 @@ ESO_Dialogs["LARGE_GROUP_INVITE_WARNING"] =
     {
         [1] =
         {
-            text =      SI_YES,
-            callback =  function(dialog)
+            text = SI_YES,
+            callback = function(dialog)
                             local characterOrDisplayName = dialog.data
                             GroupInviteByName(characterOrDisplayName)
                             ZO_Menu_SetLastCommandWasFromMenu(true)
                             ZO_Alert(ALERT, nil, zo_strformat(GetString("SI_GROUPINVITERESPONSE", GROUP_INVITE_RESPONSE_INVITED), ZO_FormatUserFacingDisplayName(characterOrDisplayName)))
                         end,
         },
-        
+
         [2] =
         {
-            text =      SI_NO,
+            text = SI_NO,
         }
     }
 }
@@ -1193,17 +1212,17 @@ ESO_Dialogs["GUILD_LEAVE"] =
     {
         [1] =
         {
-            text =      SI_DIALOG_ACCEPT,
-            callback =  function(dialog)
+            text = SI_DIALOG_ACCEPT,
+            callback = function(dialog)
                              GuildLeave(dialog.data.guildId)
                              dialog.hideSceneOnClose = dialog.data.hideSceneOnLeave
                              dialog.data.leaveGuildSuccess = true
                         end,
         },
-        
+
         [2] =
         {
-            text =      SI_DIALOG_DECLINE,
+            text = SI_DIALOG_DECLINE,
         }
     },
     finishedCallback = function(dialog)
@@ -1232,17 +1251,17 @@ ESO_Dialogs["GUILD_LEAVE_LEADER"] =
     {
         [1] =
         {
-            text =      SI_DIALOG_ACCEPT,
-            callback =  function(dialog)
+            text = SI_DIALOG_ACCEPT,
+            callback = function(dialog)
                              GuildLeave(dialog.data.guildId)
                              dialog.hideSceneOnClose = dialog.data.hideSceneOnLeave
                              dialog.data.leaveGuildSuccess = true
                         end,
         },
-        
+
         [2] =
         {
-            text =      SI_DIALOG_DECLINE,
+            text = SI_DIALOG_DECLINE,
         }
     },
     finishedCallback = function(dialog)
@@ -1271,17 +1290,17 @@ ESO_Dialogs["GUILD_DISBAND"] =
     {
         [1] =
         {
-            text =      SI_DIALOG_ACCEPT,
-            callback =  function(dialog)
+            text = SI_DIALOG_ACCEPT,
+            callback = function(dialog)
                              GuildLeave(dialog.data.guildId)
                              dialog.hideSceneOnClose = dialog.data.hideSceneOnLeave
                              dialog.data.leaveGuildSuccess = true
                         end,
         },
-        
+
         [2] =
         {
-            text =      SI_DIALOG_DECLINE,
+            text = SI_DIALOG_DECLINE,
         }
     },
     finishedCallback = function(dialog)
@@ -1310,17 +1329,17 @@ ESO_Dialogs["PROMOTE_TO_GUILDMASTER"] =
     {
         [1] =
         {
-            text =      SI_DIALOG_ACCEPT,
-            callback =  function(dialog)
+            text = SI_DIALOG_ACCEPT,
+            callback = function(dialog)
                             local GUILD_MASTER_RANK = 1
                             GuildSetRank(dialog.data.guildId, dialog.data.displayName, GUILD_MASTER_RANK)
                         end,
             clickSound = SOUNDS.GUILD_ROSTER_PROMOTE,
         },
-        
+
         [2] =
         {
-            text =      SI_DIALOG_DECLINE,
+            text = SI_DIALOG_DECLINE,
         }
     }
 }
@@ -1403,7 +1422,7 @@ ESO_Dialogs["CAMPAIGN_ABOUT_TO_ALLIANCE_LOCK"] =
         [1] =
         {
             text = SI_DIALOG_ACCEPT,
-            callback =  function(dialog)
+            callback = function(dialog)
                 CAMPAIGN_BROWSER_MANAGER:ContinueQueueForCampaignFlow(dialog.data.campaignData, ZO_CAMPAIGN_QUEUE_STEP_ALLIANCE_LOCK_CHECK)
             end,
         },
@@ -1451,14 +1470,14 @@ ESO_Dialogs["CONFIRM_RELEASE_KEEP_OWNERSHIP"] =
             callback = function(dialog)
                 INTERACT_WINDOW:EndInteraction(GUILD_KEEP_RELEASE_INTERACTION)
             end,
-            
+
         },
     },
     updateFn = function(dialog)
         local keepId = dialog.data.keepId
         local keepName = GetKeepName(keepId)
         local time = GetSecondsUntilKeepClaimAvailable(keepId, BGQUERY_LOCAL)
-    
+
         if(time == 0) then
             ZO_Dialogs_UpdateButtonState(dialog, 1, BSTATE_NORMAL)
             ZO_Dialogs_UpdateDialogMainText(dialog, { text = SI_GUILD_RELEASE_KEEP_CONFIRM_PROMPT }, { keepName })
@@ -1851,7 +1870,7 @@ ESO_Dialogs["CONVERT_STYLE_MOVED"] =
     {
         text = SI_ITEM_ACTION_CONVERT_STYLE_MOVED_TITLE,
     },
-    mainText = 
+    mainText =
     {
         text = SI_ITEM_ACTION_CONVERT_STYLE_MOVED_DESCRIPTION,
     },
@@ -2000,7 +2019,7 @@ ESO_Dialogs["GAMEPAD_CONFIRM_BUY_MOUNT"] =
     {
         text = SI_GAMEPAD_STABLE_STABLES_BUY,
     },
-    mainText = 
+    mainText =
     {
         text = SI_GAMEPAD_STABLE_CONFIRM_BUY_MOUNT,
     },
@@ -2008,8 +2027,8 @@ ESO_Dialogs["GAMEPAD_CONFIRM_BUY_MOUNT"] =
     {
         [1] =
         {
-            text =      SI_TRADING_HOUSE_PURCHASE_ITEM_DIALOG_CONFIRM,
-            callback =  function(dialog)
+            text = SI_TRADING_HOUSE_PURCHASE_ITEM_DIALOG_CONFIRM,
+            callback = function(dialog)
                             PlaySound(SOUNDS.STABLE_BUY_MOUNT)
                             BuyStoreItem(dialog.data.storeIndex)
                         end
@@ -2017,14 +2036,14 @@ ESO_Dialogs["GAMEPAD_CONFIRM_BUY_MOUNT"] =
 
         [2] =
         {
-            text =       SI_DIALOG_CANCEL,
-        }  
+            text = SI_DIALOG_CANCEL,
+        }
     }
 }
 
 ESO_Dialogs["CONFIRM_REMOVE_FRIEND"] =
 {
-    gamepadInfo = 
+    gamepadInfo =
     {
         dialogType = GAMEPAD_DIALOGS.BASIC,
     },
@@ -2033,27 +2052,27 @@ ESO_Dialogs["CONFIRM_REMOVE_FRIEND"] =
     {
         text = SI_DIALOG_TITLE_REMOVE_FRIEND,
     },
-    mainText = 
+    mainText =
     {
         text = SI_DIALOG_TEXT_REMOVE_FRIEND,
     },
     buttons =
     {
         {
-            text =      SI_DIALOG_BUTTON_REMOVE_FRIEND,
-            callback =  function(dialog)
+            text = SI_DIALOG_BUTTON_REMOVE_FRIEND,
+            callback = function(dialog)
                             RemoveFriend(dialog.data.displayName)
                         end
         },
         {
-            text =       SI_DIALOG_CANCEL,
-        }  
+            text = SI_DIALOG_CANCEL,
+        }
     }
 }
 
 ESO_Dialogs["CONFIRM_IGNORE_FRIEND"] =
 {
-    gamepadInfo = 
+    gamepadInfo =
     {
         dialogType = GAMEPAD_DIALOGS.BASIC,
     },
@@ -2062,27 +2081,27 @@ ESO_Dialogs["CONFIRM_IGNORE_FRIEND"] =
     {
         text = SI_DIALOG_TITLE_IGNORE_FRIEND,
     },
-    mainText = 
+    mainText =
     {
         text = SI_DIALOG_TEXT_IGNORE_FRIEND,
     },
     buttons =
     {
         {
-            text =      SI_DIALOG_BUTTON_IGNORE_FRIEND,
-            callback =  function(dialog)
+            text = SI_DIALOG_BUTTON_IGNORE_FRIEND,
+            callback = function(dialog)
                             AddIgnore(dialog.data.displayName)
                         end
         },
         {
-            text =       SI_DIALOG_CANCEL,
-        }  
+            text = SI_DIALOG_CANCEL,
+        }
     }
 }
 
 ESO_Dialogs["CONFIRM_INTERACTION"] =
 {
-    gamepadInfo = 
+    gamepadInfo =
     {
         dialogType = GAMEPAD_DIALOGS.BASIC,
     },
@@ -2090,7 +2109,7 @@ ESO_Dialogs["CONFIRM_INTERACTION"] =
     {
         text = "<<1>>",
     },
-    mainText = 
+    mainText =
     {
         text = "<<1>>",
     },
@@ -2102,23 +2121,23 @@ ESO_Dialogs["CONFIRM_INTERACTION"] =
     {
         {
             text = SI_CONFIRM_MUNDUS_STONE_ACCEPT,
-            callback =  function(dialog)
+            callback = function(dialog)
                             ReplyToPendingInteraction(true)
                         end
         },
         {
             text = SI_CONFIRM_MUNDUS_STONE_DECLINE,
-            callback =  function(dialog)
+            callback = function(dialog)
                             ReplyToPendingInteraction(false)
                         end
-        }  
+        }
     },
     updateFn = function(dialog)
                     -- Kill dialog if it is no longer valid
                     if not IsPendingInteractionConfirmationValid() then
                         ZO_Dialogs_ReleaseDialog(dialog)
                     end
-                end, 
+                end,
 }
 
 ESO_Dialogs["FIXING_STUCK"] =
@@ -2149,7 +2168,7 @@ ESO_Dialogs["CONFIRM_APPLY_DYE"] =
     {
         text = SI_DYEING_APPLY_CHANGE_CONFIRM_TITLE
     },
-    mainText = 
+    mainText =
     {
         text = SI_DYEING_APPLY_CHANGE_CONFIRM_BODY,
     },
@@ -2166,7 +2185,7 @@ ESO_Dialogs["CONFIRM_APPLY_DYE"] =
         },
         {
             text = SI_DIALOG_DECLINE,
-        }  
+        }
     }
 }
 
@@ -2181,7 +2200,7 @@ ESO_Dialogs["EXIT_DYE_UI_DISCARD_GAMEPAD"] =
     {
         text = SI_GAMEPAD_DYEING_DISCARD_CHANGES_TITLE
     },
-    mainText = 
+    mainText =
     {
         text = zo_strformat(SI_GAMEPAD_DYEING_DISCARD_CHANGES_BODY),
     },
@@ -2218,7 +2237,7 @@ ESO_Dialogs["MAIL_ATTACHMENTS_CHANGED"] =
     {
         text = SI_MAIL_ATTACHMENTS_CHANGED_TITLE,
     },
-    mainText = 
+    mainText =
     {
         text = SI_MAIL_ATTACHMENTS_CHANGED_MESSAGE,
     },
@@ -2228,7 +2247,7 @@ ESO_Dialogs["MAIL_ATTACHMENTS_CHANGED"] =
         {
             text = SI_DIALOG_EXIT,
             keybind = "DIALOG_NEGATIVE",
-        }, 
+        },
     }
 }
 
@@ -2282,7 +2301,7 @@ ESO_Dialogs["GROUP_DISBAND_DIALOG"] =
         [1] =
         {
             text = SI_DIALOG_ACCEPT,
-            callback =  function(dialog)
+            callback = function(dialog)
                             GroupDisband()
                         end,
         },
@@ -2321,7 +2340,7 @@ ESO_Dialogs["GROUP_LEAVE_DIALOG"] =
         [1] =
         {
             text = SI_DIALOG_ACCEPT,
-            callback =  function(dialog)
+            callback = function(dialog)
                             GroupLeave()
                         end,
         },
@@ -2371,7 +2390,7 @@ ESO_Dialogs["LFG_LEAVE_QUEUE_CONFIRMATION"] =
     {
         text = SI_LFG_DIALOG_LEAVE_QUEUE_CONFIRMATION_TITLE,
     },
-    mainText = 
+    mainText =
     {
         text = SI_LFG_DIALOG_LEAVE_QUEUE_CONFIRMATION_BODY,
     },
@@ -2380,7 +2399,7 @@ ESO_Dialogs["LFG_LEAVE_QUEUE_CONFIRMATION"] =
         [1] =
         {
             text = SI_YES,
-            callback =  function(dialog)
+            callback = function(dialog)
                             CancelGroupSearches()
                         end,
         },
@@ -2394,6 +2413,7 @@ ESO_Dialogs["LFG_LEAVE_QUEUE_CONFIRMATION"] =
 ESO_Dialogs["LFG_DECLINE_READY_CHECK_CONFIRMATION"] =
 {
     canQueue = true,
+    onlyQueueOnce = true,
     gamepadInfo =
     {
         dialogType = GAMEPAD_DIALOGS.BASIC,
@@ -2405,8 +2425,7 @@ ESO_Dialogs["LFG_DECLINE_READY_CHECK_CONFIRMATION"] =
     mainText =
     {
         text = function(dialog)
-            local INTERACT_TYPE_GROUP_ELECTION = 11
-            if dialog.data and dialog.data.incomingType == INTERACT_TYPE_GROUP_ELECTION then
+            if dialog.data and dialog.data.incomingType == ZO_INTERACT_TYPE.GROUP_ELECTION then
                 return GetString(SI_LFG_DIALOG_DECLINE_GROUP_ELECTION_READY_CHECK_CONFIRMATION_BODY)
             else
                 return GetString(SI_LFG_DIALOG_DECLINE_READY_CHECK_CONFIRMATION_BODY)
@@ -2417,9 +2436,8 @@ ESO_Dialogs["LFG_DECLINE_READY_CHECK_CONFIRMATION"] =
     {
         {
             text = SI_YES,
-            callback =  function(dialog)
-                local INTERACT_TYPE_LFG_READY_CHECK = 13
-                local queueEntry = PLAYER_TO_PLAYER:GetFromIncomingQueue(INTERACT_TYPE_LFG_READY_CHECK)
+            callback = function(dialog)
+                local queueEntry = PLAYER_TO_PLAYER:GetFromIncomingQueue(ZO_INTERACT_TYPE.LFG_READY_CHECK)
 
                 if dialog.data then
                     if dialog.data.openedFromKeybind then
@@ -2440,17 +2458,17 @@ ESO_Dialogs["LFG_DECLINE_READY_CHECK_CONFIRMATION"] =
 
                 PLAYER_TO_PLAYER:Decline(dialog.data or queueEntry)
                 DeclineLFGReadyCheckNotification()
+                ZO_Dialogs_SetDialogQueuePaused(false)
             end,
         },
         {
             text = SI_NO,
-            callback =  function(dialog)
+            callback = function(dialog)
                 if dialog.data and dialog.data.openedFromKeybind then
                     -- We opened the dialog from notification, canceling will take us back to that screen.
                     return
                 else
-                    local INTERACT_TYPE_LFG_READY_CHECK = 13
-                    local queueEntry = PLAYER_TO_PLAYER:GetFromIncomingQueue(INTERACT_TYPE_LFG_READY_CHECK)
+                    local queueEntry = PLAYER_TO_PLAYER:GetFromIncomingQueue(ZO_INTERACT_TYPE.LFG_READY_CHECK)
                     if queueEntry then
                         queueEntry.seen = false
                         queueEntry.dontRemoveOnDecline = false
@@ -2472,7 +2490,7 @@ ESO_Dialogs["CHAMPION_CONFIRM_ENTER_RESPEC"] =
     {
         text = SI_CHAMPION_DIALOG_ENTER_RESPEC_TITLE,
     },
-    mainText = 
+    mainText =
     {
         text = SI_CHAMPION_DIALOG_ENTER_RESPEC_BODY,
     },
@@ -2481,7 +2499,7 @@ ESO_Dialogs["CHAMPION_CONFIRM_ENTER_RESPEC"] =
         [1] =
         {
             text = SI_DIALOG_CONFIRM,
-            callback =  function(dialog)
+            callback = function(dialog)
                             CHAMPION_PERKS:SetInRespecMode(true)
                         end,
         },
@@ -2502,7 +2520,7 @@ ESO_Dialogs["CHAMPION_CONFIRM_CANCEL_RESPEC"] =
     {
         text = SI_CHAMPION_DIALOG_CANCEL_RESPEC_TITLE,
     },
-    mainText = 
+    mainText =
     {
         text = zo_strformat(SI_CHAMPION_DIALOG_CANCEL_RESPEC_BODY),
     },
@@ -2532,7 +2550,7 @@ ESO_Dialogs["CHAMPION_CONFIRM_CHANGES"] =
     {
         text = SI_CHAMPION_DIALOG_CONFIRM_CHANGES_TITLE,
     },
-    mainText = 
+    mainText =
     {
         text = zo_strformat(SI_CHAMPION_DIALOG_CONFIRM_POINT_COST),
     },
@@ -2602,7 +2620,7 @@ ESO_Dialogs["GAMEPAD_TRAVEL_TO_HOUSE_OPTIONS_DIALOG"] =
     {
         {
             text = SI_GAMEPAD_SELECT_OPTION,
-            callback =  function(dialog)
+            callback = function(dialog)
                 local data = dialog.entryList:GetTargetData()
                 data.callback(dialog)
             end,
@@ -2624,7 +2642,7 @@ ESO_Dialogs["TRADE_CANCEL_TRADE"] =
     {
         text = SI_GAMEPAD_TRADE_DIALOG_CANCEL_TRADE_TITLE,
     },
-    mainText = 
+    mainText =
     {
         text = zo_strformat(SI_GAMEPAD_TRADE_DIALOG_CANCEL_TRADE_BODY),
     },
@@ -2632,14 +2650,14 @@ ESO_Dialogs["TRADE_CANCEL_TRADE"] =
     {
         [1] =
         {
-            text =      SI_YES,
-            callback =  function(dialog)
+            text = SI_YES,
+            callback = function(dialog)
                             SCENE_MANAGER:Hide("gamepadTrade")
                         end,
         },
         [2] =
         {
-            text =      SI_NO,
+            text = SI_NO,
         }
     }
 }
@@ -2669,7 +2687,7 @@ ESO_Dialogs["SPAM_WARNING"] =
     },
 }
 
-ESO_Dialogs["HELP_CUSTOMER_SERVICE_TICKET_FAILED_REASON"] = 
+ESO_Dialogs["HELP_CUSTOMER_SERVICE_TICKET_FAILED_REASON"] =
 {
     gamepadInfo =
     {
@@ -2679,7 +2697,7 @@ ESO_Dialogs["HELP_CUSTOMER_SERVICE_TICKET_FAILED_REASON"] =
     {
         text = SI_PROMPT_TITLE_ERROR,
     },
-    mainText = 
+    mainText =
     {
         text = SI_ERROR_REASON,
         align = TEXT_ALIGN_CENTER,
@@ -2728,7 +2746,7 @@ ESO_Dialogs["HELP_CUSTOMER_SERVICE_GAMEPAD_TICKET_SUBMITTED"] =
     {
         text = SI_GAMEPAD_HELP_TICKET_SUBMITTED_DIALOG_HEADER,
     },
-    mainText = 
+    mainText =
     {
         text = SI_GAMEPAD_HELP_TICKET_SUBMITTED_DIALOG_BODY,
     },
@@ -2737,7 +2755,7 @@ ESO_Dialogs["HELP_CUSTOMER_SERVICE_GAMEPAD_TICKET_SUBMITTED"] =
         [1] =
         {
             text = SI_GAMEPAD_HELP_CUSTOMER_SERVICE_CLOSE_KEYBIND_TEXT,
-            callback =  function()
+            callback = function()
                             SCENE_MANAGER:HideCurrentScene()
                         end,
         },
@@ -2758,7 +2776,7 @@ ESO_Dialogs["HELP_SUBMIT_FEEDBACK_SUBMIT_TICKET_SUCCESSFUL_DIALOG"] =
     },
     mainText =
     {
-        text = GetString(SI_CUSTOMER_SERVICE_SUBMIT_FEEDBACK_SUBMIT_CONFIRMATION), 
+        text = GetString(SI_CUSTOMER_SERVICE_SUBMIT_FEEDBACK_SUBMIT_CONFIRMATION),
     },
 
     buttons =
@@ -2804,7 +2822,7 @@ ESO_Dialogs["HELP_CUSTOMER_SERVICE_SUBMIT_TICKET_ERROR_DIALOG"] =
     },
 }
 
-ESO_Dialogs["GAMEPAD_CONFIRM_RESEARCH_ITEM"] = 
+ESO_Dialogs["GAMEPAD_CONFIRM_RESEARCH_ITEM"] =
 {
     gamepadInfo =
     {
@@ -2814,7 +2832,7 @@ ESO_Dialogs["GAMEPAD_CONFIRM_RESEARCH_ITEM"] =
     {
         text = SI_GAMEPAD_SMITHING_RESEARCH_CONFIRM_DIALOG_TITLE,
     },
-    mainText = 
+    mainText =
     {
         text = function(dialog)
             local researchText = GetString(SI_GAMEPAD_SMITHING_RESEARCH_CONFIRM_DIALOG_TEXT)
@@ -2844,7 +2862,7 @@ ESO_Dialogs["GAMEPAD_CONFIRM_RESEARCH_ITEM"] =
     }
 }
 
-ESO_Dialogs["WAIT_FOR_CONSOLE_CHARACTER_INFO"] = 
+ESO_Dialogs["WAIT_FOR_CONSOLE_CHARACTER_INFO"] =
 {
     gamepadInfo =
     {
@@ -2856,7 +2874,7 @@ ESO_Dialogs["WAIT_FOR_CONSOLE_CHARACTER_INFO"] =
     {
         text = SI_GAMEPAD_CONSOLE_WAIT_FOR_CONSOLE_CHARACTER_INFO_TITLE,
     },
-    mainText = 
+    mainText =
     {
         text = SI_GAMEPAD_CONSOLE_WAIT_FOR_CONSOLE_CHARACTER_INFO_TEXT,
     },
@@ -2865,7 +2883,7 @@ ESO_Dialogs["WAIT_FOR_CONSOLE_CHARACTER_INFO"] =
     }
 }
 
-ESO_Dialogs["GAMEPAD_GENERIC_WAIT"] = 
+ESO_Dialogs["GAMEPAD_GENERIC_WAIT"] =
 {
     setup = function(dialog)
         dialog:setupFunc()
@@ -2891,7 +2909,7 @@ ESO_Dialogs["GAMEPAD_GENERIC_WAIT"] =
     }
 }
 
-ESO_Dialogs["CONSOLE_COMMUNICATION_PERMISSION_ERROR"] = 
+ESO_Dialogs["CONSOLE_COMMUNICATION_PERMISSION_ERROR"] =
 {
     canQueue = true,
     gamepadInfo =
@@ -2902,7 +2920,7 @@ ESO_Dialogs["CONSOLE_COMMUNICATION_PERMISSION_ERROR"] =
     {
         text = SI_PROMPT_TITLE_ERROR,
     },
-    mainText = 
+    mainText =
     {
         text = SI_ERROR_REASON,
         align = TEXT_ALIGN_CENTER,
@@ -2918,7 +2936,7 @@ ESO_Dialogs["CONSOLE_COMMUNICATION_PERMISSION_ERROR"] =
     }
 }
 
-ESO_Dialogs["KEYBINDINGS_RESET_KEYBOARD_TO_DEFAULTS"] = 
+ESO_Dialogs["KEYBINDINGS_RESET_KEYBOARD_TO_DEFAULTS"] =
 {
     gamepadInfo =
     {
@@ -2946,7 +2964,7 @@ ESO_Dialogs["KEYBINDINGS_RESET_KEYBOARD_TO_DEFAULTS"] =
     }
 }
 
-ESO_Dialogs["KEYBINDINGS_RESET_GAMEPAD_TO_DEFAULTS"] = 
+ESO_Dialogs["KEYBINDINGS_RESET_GAMEPAD_TO_DEFAULTS"] =
 {
     gamepadInfo =
     {
@@ -3037,7 +3055,7 @@ function ZO_Dialogs_ShowCollectibleRequirementFailedPlatformDialog(collectibleDa
     ZO_Dialogs_ShowPlatformDialog("COLLECTIBLE_REQUIREMENT_FAILED", { collectibleData = relevantCollectibleData, marketOpenOperation = marketOpenOperation }, { mainTextParams = { message, collectibleName, categoryName } })
 end
 
-ESO_Dialogs["CONFIRM_RESET_TUTORIALS"] = 
+ESO_Dialogs["CONFIRM_RESET_TUTORIALS"] =
 {
     gamepadInfo =
     {
@@ -3047,7 +3065,7 @@ ESO_Dialogs["CONFIRM_RESET_TUTORIALS"] =
     {
         text = SI_TITLE_TUTORIALS_RESET,
     },
-    mainText = 
+    mainText =
     {
         text = SI_DESCRIPTION_TUTORIALS_RESET,
     },
@@ -3056,17 +3074,17 @@ ESO_Dialogs["CONFIRM_RESET_TUTORIALS"] =
         [1] =
         {
             text = SI_OPTIONS_RESET,
-            callback =  ResetAllTutorials
+            callback = ResetAllTutorials
         },
-        
+
         [2] =
         {
-            text =      SI_DIALOG_CANCEL,
+            text = SI_DIALOG_CANCEL,
         }
     }
 }
 
-ESO_Dialogs["CRAFT_CONFIRM_UNIVERSAL_STYLE_ITEM"] = 
+ESO_Dialogs["CRAFT_CONFIRM_UNIVERSAL_STYLE_ITEM"] =
 {
     gamepadInfo =
     {
@@ -3076,7 +3094,7 @@ ESO_Dialogs["CRAFT_CONFIRM_UNIVERSAL_STYLE_ITEM"] =
     {
         text = SI_CRAFTING_CONFIRM_USE_UNIVERSAL_STYLE_ITEM_TITLE,
     },
-    mainText = 
+    mainText =
     {
         text = SI_CRAFTING_CONFIRM_USE_UNIVERSAL_STYLE_ITEM_DESCRIPTION,
         align = TEXT_ALIGN_CENTER,
@@ -3092,7 +3110,7 @@ ESO_Dialogs["CRAFT_CONFIRM_UNIVERSAL_STYLE_ITEM"] =
         {
             keybind = "DIALOG_SECONDARY",
             text = SI_CRAFTING_PERFORM_FREE_CRAFT,
-            callback =  function(dialog)
+            callback = function(dialog)
                             CraftSmithingItem(unpack(dialog.data))
                         end
         },
@@ -3319,7 +3337,7 @@ do
             text = SI_GAMEPAD_INVENTORY_ACTION_LIST_KEYBIND,
         },
         parametricList = {}, --we'll generate the entries on setup
-        finishedCallback =  function(dialog)
+        finishedCallback = function(dialog)
                                 dialog.itemActions = nil
                                 if dialog.finishedCallback then
                                     dialog.finishedCallback()
@@ -3387,7 +3405,7 @@ ESO_Dialogs["GAMEPAD_CRAFTING_OPTIONS_DIALOG"] =
 
         {
             text = SI_GAMEPAD_BACK_OPTION,
-            callback =  function(dialog)
+            callback = function(dialog)
                 ZO_Dialogs_ReleaseDialogOnButtonPress("GAMEPAD_CRAFTING_OPTIONS_DIALOG")
             end
         },
@@ -3404,7 +3422,7 @@ ESO_Dialogs["EXTRACT_ALL_PROMPT"] =
     {
         text = SI_GEMIFICATION_EXTRACT_ALL_CONFIRM_TITLE,
     },
-    mainText = 
+    mainText =
     {
         text = SI_GEMIFICATION_EXTRACT_ALL_CONFIRM_TEXT,
     },
@@ -3412,14 +3430,14 @@ ESO_Dialogs["EXTRACT_ALL_PROMPT"] =
     {
         [1] =
         {
-            text =      SI_YES,
-            callback =  function(dialog)
+            text = SI_YES,
+            callback = function(dialog)
                             dialog.data.gemificationSlot:GemifyAll()
                         end,
         },
         [2] =
         {
-            text =      SI_NO,
+            text = SI_NO,
         }
     }
 }
@@ -3435,7 +3453,7 @@ ESO_Dialogs["CONFIRM_STOW_GEMIFIABLE"] =
     {
         text = SI_CONFIRM_STOW_GEMIFIABLE_TITLE,
     },
-    mainText = 
+    mainText =
     {
         text = SI_CONFIRM_STOW_GEMIFIABLE_TEXT,
     },
@@ -3443,15 +3461,15 @@ ESO_Dialogs["CONFIRM_STOW_GEMIFIABLE"] =
     {
         [1] =
         {
-            text =      SI_YES,
-            callback =  function(dialog)
+            text = SI_YES,
+            callback = function(dialog)
                             local transferDialog = SYSTEMS:GetObject("ItemTransferDialog")
                             transferDialog:StartTransfer(dialog.data.sourceBagId, dialog.data.sourceSlotIndex, BAG_VIRTUAL)
                         end,
         },
         [2] =
         {
-            text =      SI_NO,
+            text = SI_NO,
         }
     }
 }
@@ -3467,7 +3485,7 @@ ESO_Dialogs["CONFIRM_STOW_ALL_GEMIFIABLE"] =
     {
         text = SI_CONFIRM_STOW_ALL_GEMIFIABLE_TITLE,
     },
-    mainText = 
+    mainText =
     {
         text = SI_CONFIRM_STOW_ALL_GEMIFIABLE_TEXT,
     },
@@ -3475,14 +3493,14 @@ ESO_Dialogs["CONFIRM_STOW_ALL_GEMIFIABLE"] =
     {
         [1] =
         {
-            text =      SI_YES,
-            callback =  function(dialog)
+            text = SI_YES,
+            callback = function(dialog)
                             StowAllVirtualItems()
                         end,
         },
         [2] =
         {
-            text =      SI_NO,
+            text = SI_NO,
         }
     }
 }
@@ -3498,7 +3516,7 @@ ESO_Dialogs["CONFIRM_PRIMARY_RESIDENCE"] =
     {
         text = SI_HOUSING_PERMISSIONS_PRIMARY_RESIDENCE_DIALOG_TITLE,
     },
-    mainText = 
+    mainText =
     {
         text = SI_HOUSING_PERMISSIONS_PRIMARY_RESIDENCE_DIALOG_TEXT,
     },
@@ -3506,14 +3524,14 @@ ESO_Dialogs["CONFIRM_PRIMARY_RESIDENCE"] =
     {
         [1] =
         {
-            text =      SI_YES,
-            callback =  function(dialog)
+            text = SI_YES,
+            callback = function(dialog)
                             SetHousingPrimaryHouse(dialog.data.currentHouse)
                         end,
         },
         [2] =
         {
-            text =      SI_NO,
+            text = SI_NO,
         }
     }
 }
@@ -3535,7 +3553,7 @@ do
         {
             text = SI_HOUSING_PREVIEW_PURCHASE_FOR_GOLD_TITLE,
         },
-        mainText = 
+        mainText =
         {
             text = SI_HOUSING_PREVIEW_PURCHASE_FOR_GOLD_BODY,
         },
@@ -3544,7 +3562,7 @@ do
             [1] =
             {
                 text = SI_DIALOG_CONFIRM,
-                callback =  function(dialog)
+                callback = function(dialog)
                                 PlaySound(SOUNDS.HOUSING_BUY_FOR_GOLD)
                                 BuyStoreItem(dialog.data.goldStoreEntryIndex, 1)
                             end
@@ -3552,7 +3570,7 @@ do
 
             [2] =
             {
-                text =  SI_DIALOG_CANCEL,
+                text = SI_DIALOG_CANCEL,
             }
         },
         finishedCallback = OnBuyHouseForGoldReleased,
@@ -3571,7 +3589,7 @@ ESO_Dialogs["CONFIRM_LEAVE_BATTLEGROUND"] =
     {
         text = SI_BATTLEGROUND_CONFIRM_LEAVE_TITLE,
     },
-    mainText = 
+    mainText =
     {
         text = SI_BATTLEGROUND_CONFIRM_LEAVE_DESCRIPTION,
     },
@@ -3579,14 +3597,14 @@ ESO_Dialogs["CONFIRM_LEAVE_BATTLEGROUND"] =
     {
         [1] =
         {
-            text =      SI_YES,
-            callback =  function(dialog)
+            text = SI_YES,
+            callback = function(dialog)
                             LeaveBattleground()
                         end,
         },
         [2] =
         {
-            text =      SI_NO,
+            text = SI_NO,
         }
     }
 }
@@ -3602,7 +3620,7 @@ ESO_Dialogs["CONFIRM_CANCEL_RESEARCH"] =
     {
         text = SI_CRAFTING_CONFIRM_CANCEL_RESEARCH_TITLE,
     },
-    mainText = 
+    mainText =
     {
         text = SI_CRAFTING_CONFIRM_CANCEL_RESEARCH_DESCRIPTION,
     },
@@ -3610,7 +3628,7 @@ ESO_Dialogs["CONFIRM_CANCEL_RESEARCH"] =
     {
         matchingString = GetString(SI_PERFORM_ACTION_CONFIRMATION)
     },
-    warning = 
+    warning =
     {
         text = SI_CRAFTING_CONFIRM_CANCEL_RESEARCH_WARNING
     },
@@ -3619,15 +3637,15 @@ ESO_Dialogs["CONFIRM_CANCEL_RESEARCH"] =
         [1] =
         {
             requiresTextInput = true,
-            text =      SI_YES,
-            callback =  function(dialog)
+            text = SI_YES,
+            callback = function(dialog)
                             local data = dialog.data
                             CancelSmithingTraitResearch(data.craftingType, data.researchLineIndex, data.traitIndex)
                         end,
         },
         [2] =
         {
-            text =      SI_NO,
+            text = SI_NO,
         }
     }
 }
@@ -3645,7 +3663,7 @@ ESO_Dialogs["PTP_TIMED_RESPONSE_PROMPT"] =
             return dialog.data.dialogTitle
         end,
     },
-    mainText = 
+    mainText =
     {
         text = function(dialog)
             return ZO_PlayerToPlayer_GetIncomingEntryDisplayText(dialog.data)
@@ -3663,6 +3681,7 @@ ESO_Dialogs["PTP_TIMED_RESPONSE_PROMPT"] =
             end,
             callback = function(dialog)
                 PLAYER_TO_PLAYER:Accept(dialog.data)
+                ZO_Dialogs_SetDialogQueuePaused(false)
             end,
             visible = function(dialog)
                 return PLAYER_TO_PLAYER:ShouldShowAccept(dialog.data)
@@ -3677,7 +3696,7 @@ ESO_Dialogs["PTP_TIMED_RESPONSE_PROMPT"] =
                 return dialogData.declineText or GetString(SI_DIALOG_DECLINE)
             end,
             callback = function(dialog)
-                if not dialog.data.noDeclineConfirmation then
+                if dialog.data.incomingType == ZO_INTERACT_TYPE.LFG_READY_CHECK then
                     ZO_Dialogs_ShowPlatformDialog("LFG_DECLINE_READY_CHECK_CONFIRMATION", dialog.data)
                 elseif dialog.data.declineCallback then
                     dialog.data.declineCallback()
@@ -3690,9 +3709,19 @@ ESO_Dialogs["PTP_TIMED_RESPONSE_PROMPT"] =
     },
     updateFn = function(dialog)
         ZO_Dialogs_RefreshDialogText("PTP_TIMED_RESPONSE_PROMPT", dialog)
+
         local dialogData = dialog.data
+        if dialogData.incomingType == ZO_INTERACT_TYPE.LFG_READY_CHECK and not ZO_Dialogs_IsDialogQueuePaused() then
+            local EXEMPTION_LIST =
+            {
+                "LFG_DECLINE_READY_CHECK_CONFIRMATION",
+            }
+            ZO_Dialogs_SetDialogQueuePaused(true, EXEMPTION_LIST)
+        end
+
         if dialogData.expirationCallback and GetFrameTimeSeconds() > dialogData.expiresAtS then
             dialogData.expirationCallback()
+            ZO_Dialogs_SetDialogQueuePaused(false)
         end
     end,
 }
@@ -3775,7 +3804,7 @@ ESO_Dialogs["CONFIRM_RETRAIT_ITEM"] =
     },
     mainText =
     {
-        text =  function(dialog)
+        text = function(dialog)
                     local data = dialog.data
                     if IsItemBound(data.bagId, data.slotIndex) then
                         return SI_RETRAIT_STATION_PERFORM_RETRAIT_DIALOG_CONFIRM
@@ -3811,7 +3840,7 @@ ESO_Dialogs["CONFIRM_RETRAIT_LOCKED_ITEM"] =
     },
     mainText =
     {
-        text =  function(dialog)
+        text = function(dialog)
                     local data = dialog.data
                     if IsItemBound(data.bagId, data.slotIndex) then
                         return SI_RETRAIT_STATION_PERFORM_RETRAIT_DIALOG_LOCKED_ITEM_CONFIRM
@@ -3856,7 +3885,7 @@ ESO_Dialogs["GAMEPAD_CONFIRM_RETRAIT_LOCKED_ITEM"] =
     },
     mainText =
     {
-        text =  function(dialog)
+        text = function(dialog)
                     local data = dialog.data
                     if IsItemBound(data.bagId, data.slotIndex) then
                         return SI_GAMEPAD_RETRAIT_STATION_PERFORM_RETRAIT_DIALOG_LOCKED_ITEM_CONFIRM
@@ -3895,7 +3924,7 @@ ESO_Dialogs["CONFIRM_REVERT_CHANGES"] =
     {
         text = SI_REVERT_CHANGES_DIALOG_TITLE
     },
-    mainText = 
+    mainText =
     {
         text = SI_REVERT_CHANGES_DIALOG_DESCRIPTION
     },
@@ -3965,7 +3994,7 @@ ESO_Dialogs["CONFIRM_REVERT_OUTFIT_ON_CHANGE"] =
     {
         text = SI_OUTFIT_REVERT_ON_CHANGE_TITLE
     },
-    mainText = 
+    mainText =
     {
         text = SI_OUTFIT_REVERT_ON_CHANGE_DESCRIPTION
     },
@@ -4000,7 +4029,7 @@ ESO_Dialogs["CONFIRM_REVERT_OUTFIT_CHANGES"] =
     {
         text = SI_OUTFIT_REVERT_PENDING_CHANGES_TITLE
     },
-    mainText = 
+    mainText =
     {
         text = SI_OUTFIT_REVERT_PENDING_CHANGES_DESCRIPTION
     },
@@ -4030,7 +4059,7 @@ ESO_Dialogs["RENAME_OUFIT"] =
     {
         text = SI_OUTFIT_RENAME_TITLE,
     },
-    mainText = 
+    mainText =
     {
         text = SI_OUTFIT_RENAME_DESCRIPTION,
     },
@@ -4101,7 +4130,7 @@ ESO_Dialogs["UNABLE_TO_CLAIM_GIFT"] =
 
 ESO_Dialogs["WORLD_MAP_CHOICE_FAILED"] =
 {
-    gamepadInfo = 
+    gamepadInfo =
     {
         dialogType = GAMEPAD_DIALOGS.BASIC,
     },
@@ -4110,7 +4139,7 @@ ESO_Dialogs["WORLD_MAP_CHOICE_FAILED"] =
     {
         text = SI_WORLD_MAP_CHOICE_DIALOG_FAILED_TITLE,
     },
-    mainText = 
+    mainText =
     {
         text = SI_WORLD_MAP_CHOICE_DIALOG_FAILED_FORMATTER,
     },
@@ -4122,7 +4151,7 @@ ESO_Dialogs["WORLD_MAP_CHOICE_FAILED"] =
     }
 }
 
-ESO_Dialogs["SKILL_RESPEC_CONFIRM_FREE"] = 
+ESO_Dialogs["SKILL_RESPEC_CONFIRM_FREE"] =
 {
     gamepadInfo =
     {
@@ -4160,7 +4189,7 @@ ESO_Dialogs["SKILL_RESPEC_CONFIRM_FREE"] =
     },
 }
 
-ESO_Dialogs["SKILL_RESPEC_CONFIRM_SCROLL"] = 
+ESO_Dialogs["SKILL_RESPEC_CONFIRM_SCROLL"] =
 {
     gamepadInfo =
     {
@@ -4202,7 +4231,7 @@ ESO_Dialogs["SKILL_RESPEC_CONFIRM_SCROLL"] =
     },
 }
 
-ESO_Dialogs["STAT_ASSIGNMENT_CONFIRM"] = 
+ESO_Dialogs["STAT_ASSIGNMENT_CONFIRM"] =
 {
     gamepadInfo =
     {
@@ -4234,7 +4263,7 @@ ESO_Dialogs["STAT_ASSIGNMENT_CONFIRM"] =
     },
 }
 
-ESO_Dialogs["STAT_EDIT_CONFIRM"] = 
+ESO_Dialogs["STAT_EDIT_CONFIRM"] =
 {
     gamepadInfo =
     {
@@ -4298,14 +4327,14 @@ ESO_Dialogs["GUILD_ACCEPT_APPLICATION"] =
         [1] =
         {
             text = SI_DIALOG_CONFIRM,
-            callback =  function(dialog)
+            callback = function(dialog)
                             local acceptApplicationResult = AcceptGuildApplication(dialog.data.guildId, dialog.data.index)
                             if ZO_GuildFinder_Manager.IsFailedApplicationResult(acceptApplicationResult) then
                                 ZO_Dialogs_ShowPlatformDialog("GUILD_FINDER_PROCESS_APPLICATION_FAILED", nil, { mainTextParams = { acceptApplicationResult } })
                             end
                         end,
         },
-        
+
         [2] =
         {
             text = SI_DIALOG_CANCEL,
@@ -4492,7 +4521,7 @@ ESO_Dialogs["GUILD_FINDER_APPLICATION_DECLINED_FAILED"] =
     },
 }
 
-ESO_Dialogs["UNINVITE_GUILD_PLAYER"] = 
+ESO_Dialogs["UNINVITE_GUILD_PLAYER"] =
 {
     canQueue = true,
     gamepadInfo =
@@ -4817,7 +4846,7 @@ ESO_Dialogs["GAMEPAD_HOUSING_EDITOR_LINK_INVITE"] =
         {
             template = "ZO_GamepadMenuEntryTemplate",
 
-            templateData = 
+            templateData =
             {
                 callback = function(dialog)
                     ZO_HousingBook_LinkCurrentHouseInChat()
@@ -4834,7 +4863,7 @@ ESO_Dialogs["GAMEPAD_HOUSING_EDITOR_LINK_INVITE"] =
         {
             template = "ZO_GamepadMenuEntryTemplate",
 
-            templateData = 
+            templateData =
             {
                 callback = function(dialog)
                     ZO_HousingBook_LinkCurrentHouseInMail()
@@ -4856,4 +4885,101 @@ ESO_Dialogs["GAMEPAD_HOUSING_EDITOR_LINK_INVITE"] =
     {
         text = SI_GAMEPAD_HOUSING_SEND_INVITE,
     },
+}
+
+ESO_Dialogs["GROUP_PROMOTE_LEADER"] =
+{
+    canQueue = true,
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    title =
+    {
+        text = SI_GROUP_LIST_MENU_PROMOTE_TO_LEADER,
+    },
+    mainText =
+    {
+        text = SI_GROUP_LIST_MENU_PROMOTE_TO_LEADER_DIALOG_BODY,
+    },
+    buttons =
+    {
+        {
+            text = SI_DIALOG_ACCEPT,
+            callback = function(dialog)
+                GroupPromote(dialog.data.unitTag)
+            end,
+        },
+        {
+            text = SI_DIALOG_DECLINE,
+        }
+    }
+}
+
+ESO_Dialogs["CONFIRM_CHANGE_DEFAULT_HOUSING_PERMISSION"] =
+{
+    canQueue = true,
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    title =
+    {
+        text = SI_DIALOG_CHANGE_DEFAULT_HOUSING_PERMISSION_TITLE,
+    },
+    mainText =
+    {
+        text = function(dialog)
+            if dialog.data then
+                local housePermissionDefaultAccessSetting = dialog.data.housePermissionDefaultAccessSetting
+                local permissionName = GetString("SI_HOUSEPERMISSIONDEFAULTACCESSSETTING", housePermissionDefaultAccessSetting)
+                local permissionDescription = GetString("SI_HOUSEPERMISSIONDEFAULTACCESSSETTING_DESCRIPTION", housePermissionDefaultAccessSetting)
+                return zo_strformat(SI_DIALOG_CHANGE_DEFAULT_HOUSING_PERMISSION_TEXT, ZO_SELECTED_TEXT:Colorize(permissionName), ZO_SELECTED_TEXT:Colorize(permissionName), ZO_HIGHLIGHT_TEXT:Colorize(permissionDescription))
+            end
+        end,
+    },
+    warning =
+    {
+        text = function(dialog)
+            local data = dialog.data
+            if data and IsHouseListed(data.houseId) and not IsHouseDefaultAccessSettingValidForHouseToursListing(data.housePermissionDefaultAccessSetting) then
+                return GetString(SI_DIALOG_CHANGE_DEFAULT_HOUSING_PERMISSION_LISTED_HOUSE_WARNING)
+            end
+            return ""
+        end
+    },
+    buttons =
+    {
+        [1] =
+        {
+            text = SI_DIALOG_CHANGE_DEFAULT_HOUSING_PERMISSION_CONFIRM_BUTTON,
+            callback = function(dialog)
+                local data = dialog.data
+                if not (data and data.houseId and data.housePermissionDefaultAccessSetting) then
+                    internalassert(false, "Dialog data is missing 'houseId' and/or 'housePermissionDefaultAccessSetting'.")
+                    if data and data.failureCallback then
+                        data.failureCallback(data)
+                    end
+                    return
+                end
+
+                local canAccess, presetPermissionSetting = HOUSE_SETTINGS_MANAGER:GetHousingPermissionsFromDefaultAccess(data.housePermissionDefaultAccessSetting)
+                local DO_NOT_UPDATE_ALL_HOUSES = false
+                AddHousingPermission(data.houseId, HOUSE_PERMISSION_USER_GROUP_GENERAL, canAccess, presetPermissionSetting, DO_NOT_UPDATE_ALL_HOUSES)
+                if data.successCallback then
+                    data.successCallback(data)
+                end
+            end,
+        },
+        [2] =
+        {
+            text = SI_DIALOG_CANCEL,
+            callback = function(dialog)
+                local data = dialog.data
+                if data and data.failureCallback then
+                    data.failureCallback(data)
+                end
+            end,
+        }
+    }
 }

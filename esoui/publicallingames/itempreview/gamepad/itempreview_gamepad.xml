@@ -9,6 +9,11 @@
                     <DimensionConstraints maxX="330" minX="200" />
                     <Anchor point="BOTTOM" offsetY="-20"/>
                 </Label>
+
+                <Label name="$(parent)ActionLabel" font="ZoFontGamepadBold34" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER" maxLineCount="2" wrapMode="ELLIPSIS" hidden="true">
+                    <DimensionConstraints maxX="330" minX="200" />
+                    <Anchor point="BOTTOM" relativeTo="$(parent)VariationLabel" relativePoint="TOP" offsetY="-20"/>
+                </Label>
             </Controls>
         </TopLevelControl>
     </Controls>

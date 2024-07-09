@@ -81,7 +81,22 @@ function ZO_MarketPreview_Gamepad:InitializeNarrationInfo()
             end
         end,
         selectedNarrationFunction = function()
-            return ITEM_PREVIEW_LIST_HELPER_GAMEPAD:GetPreviewNarrationText()
+            local narrations = {}
+
+            if ITEM_PREVIEW_LIST_HELPER_GAMEPAD:HasVariations() or ITEM_PREVIEW_LIST_HELPER_GAMEPAD:HasActions() then
+                local previewType, previewObjectId = self:GetCurrentPreviewTypeAndData()
+                if previewObjectId then
+                    local name = GetMarketProductInfo(previewObjectId)
+                    if name then
+                        formattedName = zo_strformat(SI_MARKET_PRODUCT_NAME_FORMATTER, name)
+                    end
+
+                    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(formattedName))
+                end
+
+                ZO_AppendNarration(narrations, ITEM_PREVIEW_LIST_HELPER_GAMEPAD:GetPreviewNarrationText())
+            end
+            return narrations
         end,
         additionalInputNarrationFunction = function()
             local narrationFunction = ITEM_PREVIEW_LIST_HELPER_GAMEPAD:GetAdditionalInputNarrationFunction()

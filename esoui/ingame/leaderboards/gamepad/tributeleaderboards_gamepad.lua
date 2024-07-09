@@ -15,7 +15,7 @@ function ZO_TributeLeaderboardsManager_Gamepad:Initialize(control)
     end)
 
     SYSTEMS:RegisterGamepadObject(ZO_TRIBUTE_LEADERBOARD_SYSTEM_NAME, self)
-    GAMEPAD_LEADERBOARDS:RegisterLeaderboardSystemObject(self)
+    GAMEPAD_LEADERBOARDS:RegisterLeaderboardSystemObject(self, LEADERBOARD_DATA_TYPE.TRIBUTE)
 end
 
 function ZO_TributeLeaderboardsManager_Gamepad:RefreshHeaderPlayerInfo()

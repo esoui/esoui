@@ -26,6 +26,12 @@ function GroupMenu_Keyboard:Initialize(control)
             end
 
             self.categoriesRefreshGroup:TryClean()
+
+            --Order matters. Do this AFTER we clean the refresh group so that this isn't overwritten
+            if self.categoryDataToShow then
+                self:SetCurrentCategoryByData(self.categoryDataToShow)
+                self.categoryDataToShow = nil
+            end
         end
     end
 
@@ -46,6 +52,7 @@ function GroupMenu_Keyboard:Initialize(control)
     self.control:RegisterForEvent(EVENT_QUEST_COMPLETE, RefreshCategories)
     self.control:RegisterForEvent(EVENT_GROUP_FINDER_STATUS_UPDATED, RefreshCategories)
     self.control:RegisterForEvent(EVENT_GROUP_FINDER_APPLICATION_RECEIVED, RefreshCategories)
+    self.control:RegisterForEvent(EVENT_HOUSE_TOURS_STATUS_UPDATED, RefreshCategories)
 end
 
 function GroupMenu_Keyboard:InitializeCategories()
@@ -84,9 +91,11 @@ function GroupMenu_Keyboard:InitializeCategories()
         local disabled = false
         if categoryData then
             local statusResult = GetGroupFinderStatusReason()
+            local houseToursEnabled = ZO_IsHouseToursEnabled()
             disabled = categoryData.activityFinderObject and (categoryData.activityFinderObject:GetLevelLockInfo() or categoryData.activityFinderObject:GetNumLocations() == 0) or false
             disabled = disabled or (categoryData.isZoneStories and ZONE_STORIES_MANAGER:GetZoneData(ZONE_STORIES_MANAGER.GetDefaultZoneSelection()) == nil or false)
             disabled = disabled or (categoryData.isGroupFinder and (statusResult ~= GROUP_FINDER_ACTION_RESULT_SUCCESS and statusResult ~= GROUP_FINDER_ACTION_RESULT_FAILED_ACCOUNT_TYPE_BLOCKS_CREATION) or false)
+            disabled = disabled or (categoryData.isHouseTours and not houseToursEnabled)
         end
 
         if disabled and node:IsOpen() then
@@ -165,10 +174,23 @@ function GroupMenu_Keyboard:SetCategoryOnShow(categoryFragment)
     self.categoryFragmentToShow = categoryFragment
 end
 
+function GroupMenu_Keyboard:SetCategoryOnShowByData(categoryData)
+    self.categoryDataToShow = categoryData
+end
+
 function GroupMenu_Keyboard:SetCurrentCategory(categoryFragment)
     if KEYBOARD_GROUP_MENU_SCENE:IsShowing() then
         local node = self.categoryFragmentToNodeLookup[categoryFragment]
         self.navigationTree:SelectNode(node)
+    end
+end
+
+function GroupMenu_Keyboard:SetCurrentCategoryByData(categoryData)
+    if KEYBOARD_GROUP_MENU_SCENE:IsShowing() then
+        local node = self.navigationTree:GetTreeNodeByData(categoryData)
+        if node then
+            self.navigationTree:SelectNode(node)
+        end
     end
 end
 
@@ -177,6 +199,16 @@ function GroupMenu_Keyboard:ShowCategory(categoryFragment)
         self:SetCurrentCategory(categoryFragment)
     else
         self:SetCategoryOnShow(categoryFragment)
+        MAIN_MENU_KEYBOARD:RefreshCategoryBar()
+        MAIN_MENU_KEYBOARD:ShowScene("groupMenuKeyboard")
+    end
+end
+
+function GroupMenu_Keyboard:ShowCategoryByData(categoryData)
+    if KEYBOARD_GROUP_MENU_SCENE:IsShowing() then
+        self:SetCurrentCategoryByData(categoryData)
+    else
+        self:SetCategoryOnShowByData(categoryData)
         MAIN_MENU_KEYBOARD:RefreshCategoryBar()
         MAIN_MENU_KEYBOARD:ShowScene("groupMenuKeyboard")
     end
@@ -246,6 +278,18 @@ do
             end
         end
     end
+
+    function GroupMenu_Keyboard:OnHouseToursCategoryMouseEnter(control, data)
+        ZO_IconHeader_OnMouseEnter(control)
+        if not control.enabled then
+            local isEnabled, lockedText = ZO_IsHouseToursEnabled()
+
+            if lockedText then
+                InitializeTooltip(InformationTooltip, control, RIGHT, -10)
+                SetTooltipText(InformationTooltip, lockedText)
+            end
+        end
+    end
 end
 
 do
@@ -287,6 +331,8 @@ do
             node.control.OnMouseEnter = function(control) self:OnZoneStoriesCategoryMouseEnter(control, nodeData) end
         elseif nodeData.isGroupFinder then
             node.control.OnMouseEnter = function(control) self:OnGroupFinderCategoryMouseEnter(control, nodeData) end
+        elseif nodeData.isHouseTours then
+            node.control.OnMouseEnter = function(control) self:OnHouseToursCategoryMouseEnter(control, nodeData) end
         end
 
         return node

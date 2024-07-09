@@ -84,13 +84,13 @@ function ZO_SmithingExtraction:OnFilterChanged()
         self.extractionSlot:SetMultipleItemsTexture(ZO_CraftingUtils_GetMultipleItemsTextureFromSmithingDeconstructionType(deconstructionType))
     end
 
-	if not self:IsInRefineMode() then
-		local includeBankedItemsChecked = ZO_CheckButton_IsChecked(self.includeBankedItemsCheckbox)
-		if self.savedVars.includeBankedItemsChecked ~= includeBankedItemsChecked then
-			self.savedVars.includeBankedItemsChecked = includeBankedItemsChecked
-			self.inventory:PerformFullRefresh()
-		end
-	end
+    if not self:IsInRefineMode() then
+        local includeBankedItemsChecked = ZO_CheckButton_IsChecked(self.includeBankedItemsCheckbox)
+        if self.savedVars.includeBankedItemsChecked ~= includeBankedItemsChecked then
+            self.savedVars.includeBankedItemsChecked = includeBankedItemsChecked
+            self.inventory:PerformFullRefresh()
+        end
+    end
 end
 
 ZO_SmithingRefinement = ZO_SmithingExtraction:Subclass()
@@ -246,12 +246,25 @@ end
 
 function ZO_SmithingExtractionInventory:Refresh(data)
     local validItems
+
+    local function ItemFilterFunction(bagId, slotIndex, filterType)
+        if not ZO_SharedSmithingExtraction_DoesItemPassFilter(bagId, slotIndex, filterType) then
+            return false
+        end
+
+        if self.additionalFilter and type(self.additionalFilter) == "function" then
+            return self.additionalFilter(bagId, slotIndex, filterType)
+        end
+
+        return true
+    end
+
     if self.filterType == SMITHING_FILTER_TYPE_RAW_MATERIALS then
-        validItems = self:EnumerateInventorySlotsAndAddToScrollData(ZO_SharedSmithingExtraction_IsRefinableItem, ZO_SharedSmithingExtraction_DoesItemPassFilter, self.filterType, data)
+        validItems = self:EnumerateInventorySlotsAndAddToScrollData(ZO_SharedSmithingExtraction_IsRefinableItem, ItemFilterFunction, self.filterType, data)
     else
         local DONT_USE_WORN_BAG = false
         local excludeBanked = not self.owner.savedVars.includeBankedItemsChecked
-        validItems = self:GetIndividualInventorySlotsAndAddToScrollData(ZO_SharedSmithingExtraction_IsExtractableItem, ZO_SharedSmithingExtraction_DoesItemPassFilter, self.filterType, data, DONT_USE_WORN_BAG, excludeBanked)
+        validItems = self:GetIndividualInventorySlotsAndAddToScrollData(ZO_SharedSmithingExtraction_IsExtractableItem, ItemFilterFunction, self.filterType, data, DONT_USE_WORN_BAG, excludeBanked)
     end
     self.owner:OnInventoryUpdate(validItems, self.filterType)
 

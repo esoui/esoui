@@ -70,6 +70,7 @@ function ZO_GuildHeraldryManager_Keyboard:Initialize(control)
     ZO_GuildHeraldryManager_Shared.Initialize(self, control, CURRENCY_OPTIONS, templateData)
 
     self.costControl = self.control:GetNamedChild("Cost")
+    self.costLabel = self.control:GetNamedChild("CostLabel")
     self.categoryList = self.control:GetNamedChild("Categories")
     self.categoryListScrollChild = self.categoryList:GetNamedChild("ScrollChild")
     self.panelNameLabel = self.control:GetNamedChild("PanelName")
@@ -430,10 +431,11 @@ function ZO_GuildHeraldryManager_Keyboard:OnCategorySelected(data)
     if self.initialized then
         if data.cost then
             self.costControl:SetHidden(false)
-            local guildCostText = zo_strformat(SI_GUILD_HERALDRY_COST_LABEL, ZO_Currency_FormatPlatform(CURT_MONEY, data.cost, ZO_CURRENCY_FORMAT_WHITE_AMOUNT_ICON))
-            self.costControl:SetText(guildCostText)
+            self.costLabel:SetHidden(false)
+            ZO_CurrencyControl_SetSimpleCurrency(self.costControl, CURT_MONEY,  data.cost)
         else
             self.costControl:SetHidden(true)
+            self.costLabel:SetHidden(true)
         end
     end
 end

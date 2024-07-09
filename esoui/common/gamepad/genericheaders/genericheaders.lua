@@ -508,7 +508,9 @@ local function AdjustHeaderFocusControlAnchors(control, refreshResults)
         if previousTarget then
             anchorToControl = control.controls[previousTarget]
         elseif control.tabBar and control.tabBar.control then
-            anchorToControl = control.tabBar.control
+            -- TabBar control does not take the height of the pipped divider into account but is used
+            -- to determine if a pipped divider is showing, use the pipped divider for anchoring
+            anchorToControl = control.controls[DIVIDER_PIPPED]
         elseif control.controls[DIVIDER_SIMPLE] then
             anchorToControl = control.controls[DIVIDER_SIMPLE]
         end

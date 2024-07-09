@@ -27,6 +27,7 @@ function ZO_ComboBox_Gamepad:Initialize(control)
     self.m_normalColor = ZO_DISABLED_TEXT
     self.m_font = ZO_GAMEPAD_COMBO_BOX_FONT
     self.m_highlightFont = ZO_GAMEPAD_COMBO_BOX_HIGHLIGHTED_FONT
+    self.m_dropdownWidthOffset = 0
 
     -- Find the difference in font size to keep the width of text the same between them
     -- so line wrapping looks consistent between the two fonts.
@@ -87,6 +88,14 @@ function ZO_ComboBox_Gamepad:GetHeight()
     return self.m_container:GetHeight()
 end
 
+function ZO_ComboBox_Gamepad:SetDropdownWidthOffset(dropdownWidthOffset)
+    self.m_dropdownWidthOffset = dropdownWidthOffset
+end
+
+function ZO_ComboBox_Gamepad:GetDropdownWidthOffset()
+    return self.m_dropdownWidthOffset
+end
+
 function ZO_ComboBox_Gamepad:AddMenuItems()
     for i = 1, #self.m_sortedItems do
         -- The variable item must be defined locally here, otherwise it won't work as an upvalue to the selection helper
@@ -108,7 +117,7 @@ function ZO_ComboBox_Gamepad:AddMenuItems()
         self.m_focus:AddEntry(focusEntry)
     end
 
-    self.m_dropdown:AnchorToControl(self.m_container, 0)
+    self.m_dropdown:AnchorToControl(self.m_container, self.m_dropdownWidthOffset, 0)
 end
 
 function ZO_ComboBox_Gamepad:SetupMenuItemControl(control, item)
@@ -366,9 +375,9 @@ function ZO_ComboBox_Gamepad:UpdateAnchors(selectedControl)
     -- The control box will always be centered on the original dropdown location
     local topItem = self.m_focus:GetItem(1)
     local topControl = topItem.control
-    local offset = topControl:GetTop() - selectedControl:GetTop()
+    local offsetY = topControl:GetTop() - selectedControl:GetTop()
 
-    self.m_dropdown:AnchorToControl(self.m_container, offset)
+    self.m_dropdown:AnchorToControl(self.m_container, self.m_dropdownWidthOffset, offsetY)
 end
 
 function ZO_ComboBox_Gamepad:GetNarrationText()
@@ -440,7 +449,7 @@ function ZO_GamepadComboBoxDropdown:Hide()
     self.dropdownControl:SetHidden(true)
 end
 
-function ZO_GamepadComboBoxDropdown:AnchorToControl(control, offsetY)
+function ZO_GamepadComboBoxDropdown:AnchorToControl(control, offsetX, offsetY)
     local controlTop = control:GetTop()
     local dropDownTop = controlTop + offsetY - self.borderPadding 
     local dropDownBottom = controlTop + offsetY + self.height + self.borderPadding
@@ -456,7 +465,7 @@ function ZO_GamepadComboBoxDropdown:AnchorToControl(control, offsetY)
     end
 
     self.dropdownControl:SetAnchor(TOPLEFT, control, TOPLEFT, 0, offsetY)
-    self.dropdownControl:SetDimensions(control:GetWidth(), self.height)
+    self.dropdownControl:SetDimensions(control:GetWidth() + offsetX, self.height)
 
     local backgroundOffsetYTop = -self.borderPadding + topYDelta
     local backgroundOffsetBottomTop = self.borderPadding - bottomYDelta

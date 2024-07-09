@@ -441,13 +441,6 @@ function ZO_GamepadStoreList:AddItems(items, prePaddingOverride, postPaddingOver
                 end
                 return narrations
             end
-
-            entry.additionalInputNarrationFunction = function()
-                if ITEM_PREVIEW_GAMEPAD:IsPreviewEnabled() and ITEM_PREVIEW_GAMEPAD:HasVariations() then
-                    return ZO_GetHorizontalDirectionalInputNarrationData(GetString(SI_SCREEN_NARRATION_ITEM_PREVIEW_STATE_PREVIOUS), GetString(SI_SCREEN_NARRATION_ITEM_PREVIEW_STATE_NEXT))
-                end
-                return {}
-            end
         end
 
         if not itemData.ignoreStoreVisualInit then

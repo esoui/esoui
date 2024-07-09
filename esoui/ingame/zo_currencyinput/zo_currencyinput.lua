@@ -74,7 +74,7 @@ end
 
 local CURRENCY_INPUT_CURRENCY_OPTIONS =
 {
-    showTooltips = false,
+    showTooltips = true,
     font = "ZoFontWinT1",
 }
 

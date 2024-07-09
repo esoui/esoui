@@ -71,8 +71,8 @@ function ZO_PlayerEmote_Manager:RefreshEmoteSlashCommands()
         local lockedByCollectibleId = GetEmoteCollectibleId(emoteIndex)
         local slashName = GetEmoteSlashNameByIndex(emoteIndex)
         if lockedByCollectibleId then
-            local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(lockedByCollectibleId)
-            local add = collectibleData and collectibleData:IsUnlocked()
+             -- Since this function is called at load time, not accessing the collectible data manager here can facilitate loading the data manager via coroutine
+            local add = IsCollectibleUnlocked(lockedByCollectibleId)
             self:AddOrRemoveEmoteSlashCommand(emoteIndex, add, zo_strsplit(" ", slashName))
         else
             local ADD = true

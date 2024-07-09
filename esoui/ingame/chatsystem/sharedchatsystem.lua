@@ -1907,8 +1907,9 @@ function SharedChatSystem:ShouldTextEntryBeBlocked()
 end
 
 function SharedChatSystem:StartTextEntry(text, channel, target, dontShowHUDWindow)
-    --Don't allow text entry to start if the ingame gui is hidden. This fixes an issue where users could no longer enter text if "]" or "/" were pressed while the ingame gui was hidden.
-    if GetGuiHidden("ingame") then
+    -- Don't allow text entry to start if the ingame gui is hidden. This fixes an issue where users could no longer enter text if "]" or "/" were pressed while the ingame gui was hidden.
+    -- Also prevent text entry when the game doesn't have focus. This fixes an issue where the chat window gets into a bad state since edit controls can't be focused when the game isn't focused.
+    if GetGuiHidden("ingame") or not DoesGameHaveFocus() then
         return
     end
 

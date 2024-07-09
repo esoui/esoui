@@ -699,7 +699,7 @@ do
     end
 
 
-    craftedAbilityResetCallbackObject = ZO_CraftedAbilityResetProvider_CallbackObject:New()
+    local craftedAbilityResetCallbackObject = ZO_CraftedAbilityResetProvider_CallbackObject:New()
 
     -- ZO_CraftedAbilityResetProvider functions --
     ----------------------------------------------
@@ -984,6 +984,9 @@ function ZO_CollectionsUpdateProvider:New(notificationManager)
 end
 
 function ZO_CollectionsUpdateProvider:BuildNotificationList()
+    for _, entryData in ipairs(self.list) do
+        entryData.data:ReleaseObject()
+    end
     ZO_ClearNumericallyIndexedTable(self.list)
 
     for index = 1, GetNumCollectibleNotifications() do
@@ -991,35 +994,35 @@ function ZO_CollectionsUpdateProvider:BuildNotificationList()
         local data = self:CreateCollectibleNotificationData(notificationId, collectibleId)
         
         if data then
-            self:AddCollectibleNotification(data)
+            self:AddCollectibleNotification(data, notificationId)
         end
     end
 end
 
 function ZO_CollectionsUpdateProvider:CreateCollectibleNotificationData(notificationId, collectibleId)
-    return ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+    if collectibleId ~= 0 then
+        return ZO_CollectibleData_Base.Acquire(collectibleId)
+    end
+    return nil
 end
 
-function ZO_CollectionsUpdateProvider:AddCollectibleNotification(data)
-    local categoryData = data:GetCategoryData()
-
+function ZO_CollectionsUpdateProvider:AddCollectibleNotification(data, notificationId)
     --use a formatter for when there's more information?
     local hasMoreInfo = GetCollectibleHelpIndices(data:GetId()) ~= nil
-    local message = self:GetMessage(hasMoreInfo, ZO_SELECTED_TEXT:Colorize(categoryData:GetName()), ZO_SELECTED_TEXT:Colorize(data:GetName()))
-    self:AddNotification(message, data, hasMoreInfo)
+    local message = self:GetMessage(hasMoreInfo, ZO_SELECTED_TEXT:Colorize(data:GetCategoryName()), ZO_SELECTED_TEXT:Colorize(data:GetName()))
+    self:AddNotification(message, data, hasMoreInfo, notificationId)
 end
 
-function ZO_CollectionsUpdateProvider:AddNotification(message, data, hasMoreInfo)
-    local categoryData = data:GetCategoryData()
-
+function ZO_CollectionsUpdateProvider:AddNotification(message, data, hasMoreInfo, notificationId)
     local newListEntry = {
         dataType = NOTIFICATIONS_COLLECTIBLE_DATA,
         notificationType = NOTIFICATION_TYPE_COLLECTIONS,
-        shortDisplayText = categoryData:GetName(),
+        shortDisplayText = data:GetCategoryName(),
 
         message = message,
         data = data,
         moreInfo = hasMoreInfo,
+        notificationId = notificationId,
 
         --For sorting
         displayName = message,
@@ -1030,12 +1033,12 @@ function ZO_CollectionsUpdateProvider:AddNotification(message, data, hasMoreInfo
 end
 
 function ZO_CollectionsUpdateProvider:Accept(entryData)
-    RemoveCollectibleNotification(entryData.data:GetNotificationId())
+    RemoveCollectibleNotification(entryData.notificationId)
     --this function should be overriden to open the right scene
 end
 
 function ZO_CollectionsUpdateProvider:Decline(entryData)
-    RemoveCollectibleNotification(entryData.data:GetNotificationId())
+    RemoveCollectibleNotification(entryData.notificationId)
 end
 
 --LFG Update Provider

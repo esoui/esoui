@@ -340,8 +340,7 @@ end
 
 function ZO_ActivityFinderLocation_Specific:IsLockedByCollectible()
     if self.requiredCollectible ~= 0 then
-        local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(self.requiredCollectible)
-        return not collectibleData or collectibleData:IsLocked()
+        return not IsCollectibleUnlocked(self.requiredCollectible)
     end
     return false
 end
@@ -496,8 +495,7 @@ end
 
 function ZO_ActivityFinderLocation_Set:IsLockedByCollectible()
     for _, collectibleId in ipairs(self.requiredCollectibles) do
-        local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
-        if collectibleData and collectibleData:IsUnlocked() then
+        if IsCollectibleUnlocked(collectibleId) then
             -- Any unlocked collectible is enough to queue with a set
             return false
         end
@@ -507,8 +505,7 @@ end
 
 function ZO_ActivityFinderLocation_Set:GetFirstLockingCollectible()
     for _, collectibleId in ipairs(self.requiredCollectibles) do
-        local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
-        if not collectibleData or collectibleData:IsLocked() then
+        if not IsCollectibleUnlocked(collectibleId) then
             return collectibleId
         end
     end

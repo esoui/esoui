@@ -12,6 +12,11 @@
                             <Anchor point="TOPLEFT" relativeTo="$(parent)SubLabel" relativePoint="BOTTOMLEFT" />
                             <Anchor point="TOPRIGHT" relativeTo="$(parent)SubLabel" relativePoint="BOTTOMRIGHT" />
                         </Label>
+
+                        <Label name="$(parent)Tags" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Population" relativePoint="BOTTOMLEFT" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Population" relativePoint="BOTTOMRIGHT" />
+                        </Label>
                     </Controls>
                 </Control>
             </Controls>

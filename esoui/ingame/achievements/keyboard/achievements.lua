@@ -1041,51 +1041,43 @@ function IconAchievement:GetId()
 end
 
 --[[ Achievements ]]--
-Achievements = ZO_InitializingObject:Subclass()
+Achievements = ZO_DeferredInitializingObject:Subclass()
 
-do
-    local filterData =
+function Achievements:Initialize(control)
+    self.control = control
+
+    local scene = ZO_Scene:New("achievements", SCENE_MANAGER)
+    ZO_DeferredInitializingObject.Initialize(self, scene)
+    SYSTEMS:RegisterKeyboardRootScene("achievements", scene)
+    SYSTEMS:RegisterKeyboardObject("achievements", self)
+
+    local function OnLinkClicked(...)
+        if not IsInGamepadPreferredMode() then
+            return self:OnLinkClicked(...)
+        end
+    end
+
+    LINK_HANDLER:RegisterCallback(LINK_HANDLER.LINK_CLICKED_EVENT, OnLinkClicked)
+    LINK_HANDLER:RegisterCallback(LINK_HANDLER.LINK_MOUSE_UP_EVENT, OnLinkClicked)
+
+    -- Don't defer so the tooltips can work even if we never open the scene
+    self:InitializeAchievementList()
+end
+
+function Achievements:OnDeferredInitialize()
+    self:InitializeControls()
+    self:InitializeCategories()
+    self:InitializeSummary()
+    local FILTER_DATA =
     {
         SI_ACHIEVEMENT_FILTER_SHOW_ALL,
         SI_ACHIEVEMENT_FILTER_SHOW_EARNED,
         SI_ACHIEVEMENT_FILTER_SHOW_UNEARNED,
     }
+    self:InitializeFilters(FILTER_DATA)
+    self:InitializeEvents()
 
-    function Achievements:Initialize(control)
-        self.control = control
-
-        self:InitializeControls()
-        self:InitializeCategories()
-        self:InitializeSummary()
-        self:InitializeFilters(filterData)
-        self:InitializeAchievementList(control)
-
-        self.scene = ZO_Scene:New("achievements", SCENE_MANAGER)
-        SYSTEMS:RegisterKeyboardRootScene("achievements", self.scene)
-        self.scene:RegisterCallback("StateChange", function(oldState, newState)
-            if newState == SCENE_SHOWING then
-                self.refreshGroups:UpdateRefreshGroups()
-
-                self.queuedScrollToAchievement = nil
-                if self.queuedShowAchievement then
-                    if not self:ShowAchievement(self.queuedShowAchievement) then
-                        self.queuedScrollToAchievement = nil
-                    end
-                end
-                ACHIEVEMENTS_MANAGER:SetSearchString(self.contentSearchEditBox:GetText())
-            elseif newState == SCENE_SHOWN then
-                if self.achievementsById and self.achievementsById[self.queuedScrollToAchievement] then
-                    ZO_Scroll_ScrollControlIntoCentralView(self.contentList, self.achievementsById[self.queuedScrollToAchievement]:GetControl())
-                end
-            elseif newState == SCENE_HIDING then
-                ClearTooltip(InformationTooltip)
-            end
-        end)
-
-        self:InitializeEvents()
-
-        self:OnAchievementsUpdated()
-    end
+    self:OnAchievementsUpdated()
 end
 
 function Achievements:InitializeControls()
@@ -1219,14 +1211,6 @@ function Achievements:InitializeEvents()
         end,
     })
 
-    local function OnLinkClicked(...)
-        if not IsInGamepadPreferredMode() then
-            return self.OnLinkClicked(...)
-        end
-    end
-
-    LINK_HANDLER:RegisterCallback(LINK_HANDLER.LINK_CLICKED_EVENT, OnLinkClicked, self)
-    LINK_HANDLER:RegisterCallback(LINK_HANDLER.LINK_MOUSE_UP_EVENT, OnLinkClicked, self)
 
     local function OnUpdateSearchResults()
         if self.scene:IsShowing() then
@@ -1261,6 +1245,28 @@ end
 
 function Achievements:ResetFilters() 
     ZO_ComboBox_ObjectFromContainer(self.categoryFilter):SelectFirstItem()
+end
+
+function Achievements:OnShowing()
+    self.refreshGroups:UpdateRefreshGroups()
+
+    self.queuedScrollToAchievement = nil
+    if self.queuedShowAchievement then
+        if not self:ShowAchievement(self.queuedShowAchievement) then
+            self.queuedScrollToAchievement = nil
+        end
+    end
+    ACHIEVEMENTS_MANAGER:SetSearchString(self.contentSearchEditBox:GetText())
+end
+
+function Achievements:OnShown()
+    if self.achievementsById and self.achievementsById[self.queuedScrollToAchievement] then
+        ZO_Scroll_ScrollControlIntoCentralView(self.contentList, self.achievementsById[self.queuedScrollToAchievement]:GetControl())
+    end
+end
+
+function Achievements:OnHiding()
+    ClearTooltip(InformationTooltip)
 end
 
 function Achievements:RefreshVisibleCategoryFilter()
@@ -1413,16 +1419,16 @@ function Achievements:OpenCategory(categoryIndex, subCategoryIndex)
 end
 
 function Achievements:ShowAchievement(achievementId)
-    if self.contentSearchEditBox:GetText() ~= "" then
-        self.contentSearchEditBox:SetText("")
-        local REFRESH_IMMEDIATELY = true
-        ACHIEVEMENTS_MANAGER:ClearSearch(REFRESH_IMMEDIATELY)
-    end
-
     if not SCENE_MANAGER:IsShowing("achievements") then
         self.queuedShowAchievement = achievementId
         MAIN_MENU_KEYBOARD:ShowScene("achievements")
     else
+        if self.contentSearchEditBox:GetText() ~= "" then
+            self.contentSearchEditBox:SetText("")
+            local REFRESH_IMMEDIATELY = true
+            ACHIEVEMENTS_MANAGER:ClearSearch(REFRESH_IMMEDIATELY)
+        end
+
         self.queuedShowAchievement = nil
         local lastAchievementIdInLine = GetLastCompletedAchievementInLine(achievementId)
         local categoryIndex, subCategoryIndex, achievementIndex = GetCategoryInfoFromAchievementId(lastAchievementIdInLine)
@@ -1445,7 +1451,7 @@ function Achievements:ShowAchievement(achievementId)
     return false
 end
 
-function Achievements:InitializeAchievementList(control)
+function Achievements:InitializeAchievementList()
     self.achievementsById = {}
 
     local sharedCheckPool = ZO_ControlPool:New("ZO_AchievementCheckbox", self.contentListScrollChild)
@@ -1781,7 +1787,7 @@ function Achievements:HideAchievementDetailedTooltip()
 end
 
 function Achievements:GetAchievementDetailedTooltipControl()
-    return self.tooltip.parentControl
+    return ZO_AchievementTooltip
 end
 
 --[[ Categories ]]--
@@ -1977,7 +1983,6 @@ end
 
 function ZO_Achievements_OnInitialize(self)
     ACHIEVEMENTS = Achievements:New(self)
-    SYSTEMS:RegisterKeyboardObject("achievements", ACHIEVEMENTS)
 end
 
 function ZO_Achievements_OnSearchTextChanged(editBox)

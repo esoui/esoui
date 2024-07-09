@@ -48,7 +48,7 @@ function ZO_RzChroma_Effects:Initialize()
     ChromaDeleteAllCustomEffectIds()
 
     self.allianceEffects = self:CreateAllianceEffects(GetAllianceColor)
-    self.battlegroundAllianceEffects = self:CreateAllianceEffects(GetBattlegroundAllianceColor)
+    self.battlegroundAllianceEffects = self:CreateAllianceEffects(GetBattlegroundTeamColor)
 
     self.keybindActionVisualData = { }
     self.keybindActionEffects = { }

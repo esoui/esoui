@@ -74,6 +74,17 @@ function ZO_HousingFurnitureSettings_Keyboard:InitializeSettingsPanels()
     local restartPathsButtonLabel = self.restartPathsButton:GetLabelControl()
     restartPathsButtonLabel:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
 
+    local function OnHouseToursClicked()
+        GROUP_MENU_KEYBOARD:ShowCategoryByData(HOUSE_TOURS_MANAGE_LISTINGS_KEYBOARD:GetActivityFinderCategoryData())
+    end
+
+    self.houseToursSetting = self.generalOptionsPanel:GetNamedChild("HouseTours")
+    self.houseToursSetting:SetParent(generalOptionsScrollChild)
+    self.houseToursButton = self.houseToursSetting:GetNamedChild("Button")
+    self.houseToursButton:SetHandler("OnClicked", OnHouseToursClicked)
+    local houseToursButtonLabel = self.houseToursButton:GetLabelControl()
+    houseToursButtonLabel:SetWrapMode(TEXT_WRAP_MODE_ELLIPSIS)
+
     self.occupantsOptionsPanel = self.contents:GetNamedChild("Occupants")
     self.occupantsSocialList = ZO_HousingSettingsOccupantList_Keyboard:New(self.occupantsOptionsPanel, self, ZO_SETTINGS_OCCUPANT_DATA_TYPE, "ZO_HousingSettings_WhiteList_Row")
     self.occupantsOptionsPanel.list = self.occupantsSocialList
@@ -181,6 +192,9 @@ function ZO_HousingFurnitureSettings_Keyboard:UpdateGeneralSettings()
 
     local defaultAccess = HOUSE_SETTINGS_MANAGER:GetDefaultHousingPermission(currentHouseId)
     self.comboBox:SetSelectedItemText(GetString("SI_HOUSEPERMISSIONDEFAULTACCESSSETTING", defaultAccess))
+
+    self:UpdateButtonSettings(self.houseToursSetting)
+    self.houseToursButton:SetEnabled(ZO_IsHouseToursEnabled())
 end
 
 function ZO_HousingFurnitureSettings_Keyboard:UpdateOccupantSettings()
@@ -236,9 +250,24 @@ do
         comboBox:SetSortsItems(false)
 
         local function OnPresetSelected(_, entryText, entry)
-            comboBox:SetSelectedItemText(entry.name)
-            local canAccess, preset = HOUSE_SETTINGS_MANAGER:GetHousingPermissionsFromDefaultAccess(entry.defaultAccess)
-            AddHousingPermission(GetCurrentZoneHouseId(), HOUSE_PERMISSION_USER_GROUP_GENERAL, canAccess, preset, false)
+            if IsOwnerOfCurrentHouse() then
+                local currentHouseId = GetCurrentZoneHouseId()
+                local defaultAccess = HOUSE_SETTINGS_MANAGER:GetDefaultHousingPermission(currentHouseId)
+                if entry.defaultAccess ~= defaultAccess then
+                    local changePermissionData =
+                    {
+                        houseId = currentHouseId,
+                        housePermissionDefaultAccessSetting = entry.defaultAccess,
+                        failureCallback = function()
+                            self:UpdateGeneralSettings()
+                        end,
+                        successCallback = function()
+                            self:UpdateGeneralSettings()
+                        end,
+                    }
+                    ZO_Dialogs_ShowPlatformDialog("CONFIRM_CHANGE_DEFAULT_HOUSING_PERMISSION", changePermissionData)
+                end
+            end
         end
 
         local allDefaultAccessSettings = HOUSE_SETTINGS_MANAGER:GetAllDefaultAccessSettings()
@@ -297,6 +326,11 @@ end
 function ZO_HousingFurnitureSettings_Keyboard:ShowRestartPathsTooltip(control)
     InitializeTooltip(InformationTooltip, control, BOTTOMLEFT, 0, -2, TOPLEFT)
     SetTooltipText(InformationTooltip, GetString(SI_HOUSING_FURNITURE_SETTINGS_GENERAL_RESTART_PATHS_TOOLTIP_TEXT))
+end
+
+function ZO_HousingFurnitureSettings_Keyboard:ShowHouseToursTooltip(control)
+    InitializeTooltip(InformationTooltip, control, BOTTOMLEFT, 0, -2, TOPLEFT)
+    SetTooltipText(InformationTooltip, GetString(SI_HOUSING_FURNITURE_SETTINGS_GENERAL_HOUSE_TOURS_TOOLTIP_TEXT))
 end
 
 -- XML Functions

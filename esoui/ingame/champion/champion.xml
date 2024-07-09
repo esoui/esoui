@@ -117,7 +117,7 @@
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Text" relativePoint="BOTTOMLEFT" offsetY="16" />
                 </Label>
 
-                <Label name="$(parent)BalanceAmount" font="ZoFontGame">
+                <Label name="$(parent)BalanceAmount" inherits="ZO_CurrencyTemplate">
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)Text" relativePoint="BOTTOMRIGHT" offsetY="16" />
                 </Label>
 
@@ -125,7 +125,7 @@
                     <Anchor point="TOPLEFT" relativeTo="$(parent)BalanceDescription" relativePoint="BOTTOMLEFT" />
                 </Label>
 
-                <Label name="$(parent)RespecCost" font="ZoFontGame">
+                <Label name="$(parent)RespecCost" inherits="ZO_CurrencyTemplate">
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)BalanceAmount" relativePoint="BOTTOMRIGHT" />
                 </Label>
 

@@ -4,8 +4,18 @@ function ZO_GetJewelryCraftingCollectibleData()
 end
 
 function ZO_IsJewelryCraftingEnabled()
-    local jewelryCraftingCollectibleData = ZO_GetJewelryCraftingCollectibleData()
-    return not jewelryCraftingCollectibleData or jewelryCraftingCollectibleData:IsUnlocked()
+    -- Since this function is called at load time, not accessing the collectible data manager here can fascilitate loading the data manager via coroutine
+    local jewelryCraftingCollectibleId = GetJewelrycraftingCollectibleId()
+    return IsCollectibleUnlocked(jewelryCraftingCollectibleId)
+end
+
+function ZO_GetJewelryCraftingCollectibleName()
+    -- Since this function is called at load time, not accessing the collectible data manager here can fascilitate loading the data manager via coroutine
+    local jewelryCraftingCollectibleId = GetJewelrycraftingCollectibleId()
+    if jewelryCraftingCollectibleId ~= 0 then
+        return ZO_CachedStrFormat(SI_COLLECTIBLE_NAME_FORMATTER, GetCollectibleName(jewelryCraftingCollectibleId))
+    end
+    return nil
 end
 
 function ZO_GetJewelryCraftingLockedMessage(data)
@@ -13,7 +23,9 @@ function ZO_GetJewelryCraftingLockedMessage(data)
         return data and data.activeTabText or nil
     end
     local jewelryCraftingTradeskillName = GetString("SI_TRADESKILLTYPE", CRAFTING_TYPE_JEWELRYCRAFTING)
-    return ZO_ERROR_COLOR:Colorize(zo_strformat(SI_SMITHING_CRAFTING_TYPE_LOCKED, ZO_GetJewelryCraftingCollectibleData():GetFormattedName(), jewelryCraftingTradeskillName))
+    local jewelryCraftingCollectibleId = GetJewelrycraftingCollectibleId()
+    -- Since this function is called at load time, not accessing the collectible data manager here can fascilitate loading the data manager via coroutine
+    return ZO_ERROR_COLOR:Colorize(zo_strformat(SI_SMITHING_CRAFTING_TYPE_LOCKED, GetCollectibleName(jewelryCraftingCollectibleId), jewelryCraftingTradeskillName))
 end
 
 ZO_UNIVERSAL_DECONSTRUCTION_CRAFTING_TYPES =

@@ -121,7 +121,7 @@ function ZO_WorldSelect_Gamepad:InitKeybindingDescriptors()
         -- Back
         KEYBIND_STRIP:GenerateGamepadBackButtonDescriptor(function()
                 PlaySound(SOUNDS.DIALOG_DECLINE)
-                PregameStateManager_SetState("AccountLogin")
+                ZO_Disconnect()
             end)
     }
     ZO_Gamepad_AddListTriggerKeybindDescriptors(self.keybindStripDescriptor, self.optionsList)

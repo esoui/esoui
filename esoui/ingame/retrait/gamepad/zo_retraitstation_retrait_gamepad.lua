@@ -20,7 +20,7 @@ function ZO_RetraitStation_Retrait_Gamepad:Initialize(control, interactScene)
     self.resultTooltip = self.control:GetNamedChild("ResultTooltip")
 
     --Register the source tooltip for narration
-    local sourceTooltipNarrationInfo = 
+    local sourceTooltipNarrationInfo =
     {
         canNarrate = function()
             return not self.sourceTooltip:IsHidden()
@@ -37,7 +37,7 @@ function ZO_RetraitStation_Retrait_Gamepad:Initialize(control, interactScene)
     GAMEPAD_TOOLTIPS:RegisterCustomTooltipNarration(sourceTooltipNarrationInfo)
 
     --Register the result tooltip for narration
-    local resultTooltipNarrationInfo = 
+    local resultTooltipNarrationInfo =
     {
         canNarrate = function()
             return not self.resultTooltip:IsHidden()
@@ -50,7 +50,7 @@ function ZO_RetraitStation_Retrait_Gamepad:Initialize(control, interactScene)
 
     --Register the list of inventory items for narration
     --Order matters, do this before we initialize the header
-    local narrationInfo = 
+    local narrationInfo =
     {
         canNarrate = function()
             return self:IsShowing()
@@ -93,7 +93,7 @@ function ZO_RetraitStation_Retrait_Gamepad:InitializeTraitList()
     end)
 
     --Register the trait list for narration
-    local narrationInfo = 
+    local narrationInfo =
     {
         canNarrate = function()
             return self:IsShowing()
@@ -298,6 +298,12 @@ function ZO_RetraitStation_Retrait_Gamepad:InitializeHeader()
     }
 
     self:RefreshHeader()
+end
+
+function ZO_RetraitStation_Retrait_Gamepad:AddInventoryAdditionalFilter(additionalFilterFunction)
+    if self.inventory then
+        self.inventory.additionalFilter = additionalFilterFunction
+    end
 end
 
 function ZO_RetraitStation_Retrait_Gamepad:RefreshHeader()
@@ -627,7 +633,20 @@ end
 
 function ZO_Retrait_Inventory_Gamepad:Refresh(data)
     local USE_WORN_BAG = true
-    self:GetIndividualInventorySlotsAndAddToScrollData(ZO_RetraitStation_CanItemBeRetraited, ZO_RetraitStation_DoesItemPassFilter, self.filterType, data, USE_WORN_BAG)
+
+        local function ItemFilterFunction(bagId, slotIndex, filterType, isQuestFilterChecked, questInfo)
+        if not ZO_RetraitStation_DoesItemPassFilter(bagId, slotIndex, filterType) then
+            return false
+        end
+
+        if self.additionalFilter and type(self.additionalFilter) == "function" then
+            return self.additionalFilter(bagId, slotIndex, filterType)
+        end
+
+        return true
+    end
+
+    self:GetIndividualInventorySlotsAndAddToScrollData(ZO_RetraitStation_CanItemBeRetraited, ItemFilterFunction, self.filterType, data, USE_WORN_BAG)
 end
 
 function ZO_Retrait_Inventory_Gamepad:SetFilter(filterType)

@@ -122,13 +122,6 @@ function ZO_CreateAccount_Gamepad:CreateAccountSelected()
 end
 
 function ZO_CreateAccount_Gamepad:InitKeybindingDescriptors()
-    local function SwitchToMainList()
-        PlaySound(SOUNDS.NEGATIVE_CLICK)
-        self:SwitchToMainList()
-    end
-
-    local returnToMainListDescriptor = KEYBIND_STRIP:GenerateGamepadBackButtonDescriptor(SwitchToMainList)
-
     self.mainKeybindStripDescriptor = {
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
         -- Select Control
@@ -150,13 +143,6 @@ function ZO_CreateAccount_Gamepad:InitKeybindingDescriptors()
             end)
     }
     ZO_Gamepad_AddListTriggerKeybindDescriptors(self.mainKeybindStripDescriptor, self.optionsList)
-
-
-    self.errorKeybindStripDescriptor = {
-        alignment = KEYBIND_STRIP_ALIGN_LEFT,
-        -- Back
-        returnToMainListDescriptor,
-    }
 end
 
 function ZO_CreateAccount_Gamepad:SwitchToKeybind(keybindStripDescriptor)
@@ -183,6 +169,9 @@ function ZO_CreateAccount_Gamepad:SwitchToMainList()
 end
 
 function ZO_CreateAccount_Gamepad:SwitchToCountryList()
+    if self.countriesList:GetNumItems() == 0 then
+        return
+    end
     self:ResetScreen()
 
     self:SwitchToKeybind(self.countriesKeybindStripDescriptor)
@@ -338,11 +327,18 @@ end
 function ZO_CreateAccount_Gamepad:PopulateCountriesDropdownList()
     -- Checking for 0 to ensure we only setup the country list once
     if self.countriesList:GetNumItems() == 0 then
+        local numCountries = GetNumCountries()
+        if numCountries == 0 then
+            -- Def might not be ready yet, try again in a moment (ESO-856779)
+            self.defaultTextLabel:SetText(GetString(SI_CREATEACCOUNT_SELECT_REGIONS_LOADING))
+            zo_callLater(function() self:PopulateCountriesDropdownList() end, 250)
+            return
+        end
+        
+        self.defaultTextLabel:SetText(GetString(SI_CREATEACCOUNT_SELECT_REGION))
 
         -- Populate the combobox list.
         self.countriesList:ClearItems()
-
-        local numCountries = GetNumCountries()
 
         local function OnCountrySelected(comboBox, entryText, entry)
             self.selectedCountry = entryText 

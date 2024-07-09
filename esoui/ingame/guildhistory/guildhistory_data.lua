@@ -182,6 +182,8 @@ do
                 local param = select(i, ...)
                 if param and param ~= "" then
                     table.insert(colorizedParams, contrastColor:Colorize(param))
+                else
+                    table.insert(colorizedParams, "")
                 end
             end
 
@@ -414,6 +416,11 @@ function ZO_GuildHistoryEventCategoryData:GetOldestEventForUpToDateEventsWithout
     return nil
 end
 
+function ZO_GuildHistoryEventCategoryData:GetNewestAndOldestRedactedEventIds()
+    local newestRedactedEventId, oldestRedactedEventId = GetNewestAndOldestRedactedGuildHistoryEventIds(self.guildData:GetId(), self.eventCategory)
+    return newestRedactedEventId, oldestRedactedEventId
+end
+
 function ZO_GuildHistoryEventCategoryData:HasUpToDateEvents()
     return DoesGuildHistoryEventCategoryHaveUpToDateEvents(self.guildData:GetId(), self.eventCategory)
 end
@@ -426,19 +433,96 @@ function ZO_GuildHistoryEventCategoryData:GetEventsInTimeRange(newestTimeS, olde
     return {}
 end
 
-function ZO_GuildHistoryEventCategoryData:GetEventsInIndexRange(newestIndex, oldestIndex)
+function ZO_GuildHistoryEventCategoryData:GetEventsInIndexRange(newestIndex, oldestIndex, omitRedacted)
     local numEvents = self:GetNumEvents()
     assert((newestIndex <= oldestIndex) and (oldestIndex <= numEvents))
     local events = {}
     local redactedEvents = {}
     for eventIndex = newestIndex, oldestIndex do
         local event = self.events:AcquireObject(eventIndex)
-        table.insert(events, event)
-        if event:IsRedacted() then
-            table.insert(redactedEvents, event)
+        local isRedacted = event:IsRedacted()
+        if not (omitRedacted and isRedacted) then
+            table.insert(events, event)
+            if isRedacted then
+                table.insert(redactedEvents, event)
+            end
         end
     end
     return events, redactedEvents
+end
+
+function ZO_GuildHistoryEventCategoryData:GetXEventsFromStartingIndex(newestIndex, numEventsToGet, omitRedacted, filterBySubcategoryIndex)
+    local numEvents = self:GetNumEvents()
+    assert((newestIndex <= numEvents) and (numEventsToGet > 0))
+    local events = {}
+    for eventIndex = newestIndex, numEvents do
+        local event = self.events:AcquireObject(eventIndex)
+        local isRedacted = event:IsRedacted()
+        if not (omitRedacted and isRedacted) then
+            if not filterBySubcategoryIndex or (filterBySubcategoryIndex == event:GetUISubcategoryIndex()) then
+                table.insert(events, event)
+                if #events == numEventsToGet then
+                    break
+                end
+            end
+        end
+    end
+    return events
+end
+
+do
+    local REDACTING_CATEGORIES =
+    {
+        [GUILD_HISTORY_EVENT_CATEGORY_ROSTER] = true,
+        [GUILD_HISTORY_EVENT_CATEGORY_BANKED_CURRENCY] = true,
+    }
+
+    function ZO_GuildHistoryEventCategoryData:CanHaveRedactedEvents()
+        return REDACTING_CATEGORIES[self.eventCategory] == true
+    end
+end
+
+function ZO_GuildHistoryEventCategoryData:GetStartingIndexForPage(page, numEventsPerPage, uiSubcategory)
+    assert((page > 0) and (numEventsPerPage > 0))
+    local numEvents = self:GetNumEvents()
+    local numEventsToSkip = (page - 1) * numEventsPerPage
+    local numEventsSkipped = 0
+    local guildId = self.guildData:GetId()
+    local eventCategory = self:GetEventCategory()
+    for i = 1, numEvents do
+        local _, _, isRedacted, eventType = GetGuildHistoryEventBasicInfo(guildId, eventCategory, i)
+        -- Redacted events or events from other subcategories won't show up on any pages and don't count toward counts
+        if not isRedacted and ZO_GuildHistory_Manager.ComputeEventSubcategory(eventCategory, eventType) == uiSubcategory then
+            if numEventsSkipped == numEventsToSkip then
+                return i
+            end
+            numEventsSkipped = numEventsSkipped + 1
+        end
+    end
+    return nil -- No events on this page
+end
+
+function ZO_GuildHistoryEventCategoryData:GetStartingAndEndingIndexForPage(page, numEventsPerPage, uiSubcategory)
+    local startingIndex = self:GetStartingIndexForPage(page, numEventsPerPage, uiSubcategory)
+    if startingIndex then
+        local numEvents = self:GetNumEvents()
+        local countOnPage = 1
+        local eventCategory = self:GetEventCategory()
+        local lastGoodIndex = startingIndex
+        for i = startingIndex + 1, numEvents do
+            local _, _, isRedacted, eventType = GetGuildHistoryEventBasicInfo(eventCategory)
+            -- Redacted events or events from other subcategories won't show up on any pages and don't count toward counts
+            if not isRedacted and ZO_GuildHistory_Manager.ComputeEventSubcategory(eventCategory, eventType) == uiSubcategory then
+                countOnPage = countOnPage + 1
+                lastGoodIndex = i
+                if countOnPage == numEventsPerPage then
+                    break
+                end
+            end
+        end
+        return startingIndex, lastGoodIndex
+    end
+    return nil, nil -- No events on this page
 end
 
 ----------------

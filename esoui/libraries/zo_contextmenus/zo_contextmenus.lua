@@ -167,8 +167,7 @@ local function SetMenuOwner(owner)
     ZO_Menu.owner = owner
 end
 
-function GetMenuOwner(menu)
-    local menu = menu or ZO_Menu
+function GetMenuOwner()
     return ZO_Menu.owner
 end
 
@@ -201,11 +200,11 @@ function ShowMenu(owner, initialRefCount, menuType)
     end
     
     if ZO_Menu.menuType ~= menuType then
-        local menuInfo = menuInfo[menuType]
-        ZO_MenuBG:SetCenterTexture(menuInfo.backdropCenter)
-        ZO_MenuBG:SetEdgeTexture(menuInfo.backdropEdge, menuInfo.backdropEdgeWidth, menuInfo.backdropEdgeHeight)
-        ZO_MenuBG:SetInsets(unpack(menuInfo.backdropInsets))
-        ZO_MenuBGMungeOverlay:SetHidden(menuInfo.hideMunge)
+        local info = menuInfo[menuType]
+        ZO_MenuBG:SetCenterTexture(info.backdropCenter)
+        ZO_MenuBG:SetEdgeTexture(info.backdropEdge, info.backdropEdgeWidth, info.backdropEdgeHeight)
+        ZO_MenuBG:SetInsets(unpack(info.backdropInsets))
+        ZO_MenuBGMungeOverlay:SetHidden(info.hideMunge)
     end
 
     ZO_Menu.menuType = menuType

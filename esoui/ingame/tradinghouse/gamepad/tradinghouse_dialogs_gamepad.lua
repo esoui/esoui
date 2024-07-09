@@ -299,10 +299,10 @@ ESO_Dialogs["TRADING_HOUSE_CHANGE_ACTIVE_GUILD"] =
         {
             text = SI_GAMEPAD_SELECT_OPTION,
             callback = function(dialog)
-               local data = dialog.entryList:GetTargetData()
-               if data.guildId then
-                   SelectTradingHouseGuildId(data.guildId)
-               end
+                local data = dialog.entryList:GetTargetData()
+                if data.guildId then
+                    ZO_GUILD_SELECTOR_MANAGER:SetSelectedGuildStoreId(data.guildId)
+                end
             end
         },
 

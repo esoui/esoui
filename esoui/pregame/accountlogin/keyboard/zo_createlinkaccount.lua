@@ -3,6 +3,13 @@ local SETUP_MODE_NEW = 1
 local SETUP_MODE_LINK = 2
 local SETUP_MODE_ACTIVATE = 3
 
+local COUNTRY_DROPDOWN_STATE =
+{
+    SHOW = 1,
+    HIDE = 2,
+    LOADING = 3,
+}
+
 local CreateLinkAccount_Keyboard = ZO_LoginBase_Keyboard:Subclass()
 
 function CreateLinkAccount_Keyboard:New(...)
@@ -26,9 +33,11 @@ function CreateLinkAccount_Keyboard:Initialize(control)
     self.accountNameEntry = newAccountScrollChild:GetNamedChild("AccountNameEntry")
     self.accountNameEntryEdit = self.accountNameEntry:GetNamedChild("Edit")
     self.accountNameInstructionsControl = self.newAccountContainer:GetNamedChild("Instructions")
+    self.accountNameDescriptionLabel = newAccountScrollChild:GetNamedChild("AccountNameDescription")
     self.countryLabel = newAccountScrollChild:GetNamedChild("CountryLabel")
     self.countryDropdown = newAccountScrollChild:GetNamedChild("CountryDropdown")
     self.countryDropdownDefaultText = self.countryDropdown:GetNamedChild("DefaultText")
+    self.countryDropdownState = COUNTRY_DROPDOWN_STATE.SHOW
     self.emailLabel = newAccountScrollChild:GetNamedChild("EmailLabel")
     self.emailEntry = newAccountScrollChild:GetNamedChild("EmailEntry")
     self.emailEntryEdit = self.emailEntry:GetNamedChild("Edit")
@@ -113,6 +122,12 @@ end
 function CreateLinkAccount_Keyboard:PopulateCountryDropdown()
     if not self.hasPopulatedCountryDropdown then
         local numCountries = GetNumCountries()
+        if numCountries == 0 then
+            -- Def might not be ready yet, try again in a moment (ESO-856779)
+            self:SetCountryDropdownState(COUNTRY_DROPDOWN_STATE.LOADING)
+            zo_callLater(function() self:PopulateCountryDropdown() end, 250)
+            return
+        end
 
         for i = 1, numCountries do
             local countryName, countryCode, _, isAllowedInAccountCreation, autoEmailSubscribe = GetCountryDataForIndex(i)
@@ -129,7 +144,9 @@ function CreateLinkAccount_Keyboard:PopulateCountryDropdown()
         if numCountries == 1 then
             -- If there's only one choice, select that country immediately and disable the dropdown
             self.countryComboBox:SelectItemByIndex(1)
-            self:HideCountryDropdown()
+            self:SetCountryDropdownState(COUNTRY_DROPDOWN_STATE.HIDE)
+        else
+            self:SetCountryDropdownState(COUNTRY_DROPDOWN_STATE.SHOW)
         end
 
         self.countryComboBox:UpdateItems()
@@ -262,15 +279,29 @@ function CreateLinkAccount_Keyboard:HideEmailSubscriptionCheckbox()
     self.createAccountButton:SetAnchor(point, relTo, relPoint, offsetX, offsetY)
 end
 
-function CreateLinkAccount_Keyboard:HideCountryDropdown()
-    -- Hide the country dropdown and transfer its anchors to the email entry field
-    self.countryLabel:SetHidden(true)
-    self.countryDropdown:SetHidden(true)
+function CreateLinkAccount_Keyboard:SetCountryDropdownState(state)
+    if self.countryDropdownState ~= state then
+        self.countryDropdownState = state
+        local emailLabelRelativeControl
+        if self.countryDropdownState == COUNTRY_DROPDOWN_STATE.SHOW then
+            self.countryLabel:SetHidden(false)
+            self.countryLabel:SetText(GetString(SI_CREATEACCOUNT_REGION))
+            self.countryDropdown:SetHidden(false)
+            emailLabelRelativeControl = self.countryDropdown
+        elseif self.countryDropdownState == COUNTRY_DROPDOWN_STATE.HIDE then
+            self.countryLabel:SetHidden(true)
+            self.countryDropdown:SetHidden(true)
+            emailLabelRelativeControl = self.accountNameDescriptionLabel
+        else -- COUNTRY_DROPDOWN_STATE.LOADING
+            self.countryLabel:SetHidden(false)
+            self.countryLabel:SetText(GetString(SI_CREATEACCOUNT_SELECT_REGIONS_LOADING))
+            self.countryDropdown:SetHidden(true)
+            emailLabelRelativeControl = self.countryLabel
+        end
 
-    local isValid, point, relTo, relPoint, offsetX, offsetY = self.countryLabel:GetAnchor(0)
-
-    self.emailLabel:ClearAnchors()
-    self.emailLabel:SetAnchor(point, relTo, relPoint, offsetX, offsetY)
+        self.emailLabel:ClearAnchors()
+        self.emailLabel:SetAnchor(TOPLEFT, emailLabelRelativeControl, BOTTOMLEFT, 0, 15)
+    end
 end
 
 function CreateLinkAccount_Keyboard:SetupAccountNameInstructions()

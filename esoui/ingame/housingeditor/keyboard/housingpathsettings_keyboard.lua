@@ -387,7 +387,7 @@ function ZO_HousingPathChangeObject_Keyboard:UpdateChangeObjectPanel()
 end
 
 function ZO_HousingPathChangeObject_Keyboard:UpdateSearchText()
-    self.searchEditBox:SetText(SHARED_FURNITURE:GetPlaceableTextFilter())
+    self.searchEditBox:SetText(TEXT_SEARCH_MANAGER:GetSearchText("houseProductsTextSearch"))
 end
 
 function ZO_HousingPathChangeObject_Keyboard:GetCategoryTreeData()

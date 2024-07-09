@@ -528,6 +528,7 @@ function ZO_GamepadTradingHouse:InitializeEvents()
 
     TRADING_HOUSE_GAMEPAD_SCENE:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_SHOWING then
+            SelectTradingHouseGuildId(ZO_GUILD_SELECTOR_MANAGER:GetSelectedGuildStoreId())
             self:RefreshHeader()
             self:SelectCurrentListInHeader()
             self:RefreshGuildNameFooter()

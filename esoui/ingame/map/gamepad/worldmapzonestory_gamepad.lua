@@ -90,6 +90,10 @@ function ZO_WorldMapZoneStory_Gamepad:RefreshInfo()
                 previousControl = control
             end
         end
+
+        -- Label:SetWidth with pixel perfect widths has a tendency to clip or wrap when screen is slightly resized.
+        maxProgressLabelWidth = maxProgressLabelWidth + 5
+
         --Have all of the labels fill the same width so that bars all align
         for _, control in pairs(self.rowPool:GetActiveObjects()) do
             control.progressLabel:SetWidth(maxProgressLabelWidth)

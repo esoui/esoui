@@ -139,6 +139,13 @@ ESO_Dialogs["ARMORY_BUILD_RESTORE_CONFIRM_DIALOG"] =
         {
             text = SI_DIALOG_ACCEPT,
             callback = function(dialog)
+                local EXEMPTION_LIST =
+                {
+                    "ARMORY_BUILD_RESTORE_DIALOG",
+                    "ARMORY_BUILD_RESTORE_FAILED_DIALOG",
+                    "ARMORY_BUILD_RESTORE_SUCCESS_DIALOG",
+                }
+                ZO_Dialogs_SetDialogQueuePaused(true, EXEMPTION_LIST)
                 RestoreArmoryBuild(dialog.data.selectedBuildIndex)
             end,
         },
@@ -250,6 +257,13 @@ ESO_Dialogs["ARMORY_BUILD_SAVE_CONFIRM_DIALOG"] =
         {
             text = SI_DIALOG_ACCEPT,
             callback = function(dialog)
+                local EXEMPTION_LIST =
+                {
+                    "ARMORY_BUILD_SAVE_DIALOG",
+                    "ARMORY_BUILD_SAVE_SUCCESS_DIALOG",
+                    "ARMORY_BUILD_SAVE_FAILED_DIALOG",
+                }
+                ZO_Dialogs_SetDialogQueuePaused(true, EXEMPTION_LIST)
                 SaveArmoryBuild(dialog.data.selectedBuildIndex)
             end,
         },

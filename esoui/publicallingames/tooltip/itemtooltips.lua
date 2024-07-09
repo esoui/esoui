@@ -662,7 +662,11 @@ end
 function ZO_Tooltip:AddPrioritySellText(itemLink)
     if IsItemLinkPrioritySell(itemLink) then
         local prioritySellSection = self:AcquireSection(self:GetStyle("bodySection"))
-        prioritySellSection:AddLine(GetString(SI_ITEM_FORMAT_STR_PRIORITY_SELL), self:GetStyle("prioritySellText"))
+        if IsItemLinkStolen(itemLink) then
+            prioritySellSection:AddLine(GetString(SI_ITEM_FORMAT_STR_PRIORITY_FENCE), self:GetStyle("prioritySellText"))
+        else
+            prioritySellSection:AddLine(GetString(SI_ITEM_FORMAT_STR_PRIORITY_SELL), self:GetStyle("prioritySellText"))
+        end
         self:AddSection(prioritySellSection)
     end
 end

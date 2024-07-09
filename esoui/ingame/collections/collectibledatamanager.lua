@@ -236,7 +236,7 @@ end
 -- Collectible Data --
 ----------------------
 
-ZO_CollectibleData = ZO_InitializingObject:Subclass()
+ZO_CollectibleData = ZO_CollectibleData_Base:Subclass()
 
 function ZO_CollectibleData:Reset()
     self.cachedNameWithNickname = nil
@@ -339,46 +339,51 @@ function ZO_CollectibleData:GetIndex()
     return self.collectibleIndex
 end
 
-function ZO_CollectibleData:GetId()
-    return self.collectibleId
+function ZO_CollectibleData:GetNotificationId()
+    return self.notificationId
 end
+
+function ZO_CollectibleData:SetNotificationId(notificationId)
+    self.notificationId = notificationId
+end
+
+function ZO_CollectibleData:SetNew(isNew)
+    if isNew == false then
+        isNew = nil -- Memory optimization
+    end
+    if self.isNew ~= isNew then
+        self.isNew = isNew
+        local categoryData = self:GetCategoryData()
+        if categoryData then
+            categoryData:UpdateNewCache(self)
+        end
+    end
+end
+
+-- Begin ZO_CollectibleData_Base Overrides --
 
 function ZO_CollectibleData:GetName()
     return self.name
 end
 
-function ZO_CollectibleData:GetFormattedName()
-    return ZO_CachedStrFormat(SI_COLLECTIBLE_NAME_FORMATTER, self:GetName())
+function ZO_CollectibleData:GetCategoryIndices()
+    return self.categoryData:GetCategoryIndicies()
 end
 
-function ZO_CollectibleData:GetNameWithNickname()
-    if not self.cachedNameWithNickname then
-        local nickname = self:GetNickname()
-        if nickname and nickname ~= "" then
-            self.cachedNameWithNickname = zo_strformat(SI_COLLECTIBLE_NAME_WITH_NICKNAME_FORMATTER, self:GetName(), nickname)
-        else
-            self.cachedNameWithNickname = self:GetFormattedName()
-        end
-    end
-
-    return self.cachedNameWithNickname
+function ZO_CollectibleData:GetCategoryId()
+    return self.categoryData:GetId()
 end
 
-function ZO_CollectibleData:GetRawNameWithNickname()
-    local nickname = self:GetNickname()
-    if nickname and nickname ~= "" then
-        return zo_strformat(SI_COLLECTIBLE_NAME_WITH_NICKNAME_RAW, self:GetName(), nickname)
-    else
-        return self:GetName()
-    end
+function ZO_CollectibleData:GetCategoryName()
+    return self.categoryData:GetName()
 end
 
-function ZO_CollectibleData:GetDescription()
-    return GetCollectibleDescription(self.collectibleId)
+function ZO_CollectibleData:GetCategoryFormattedName()
+    return self.categoryData:GetFormattedName()
 end
 
-function ZO_CollectibleData:GetIcon()
-    return GetCollectibleIcon(self.collectibleId)
+function ZO_CollectibleData:GetCategorySpecialization()
+    return self.categoryData:GetCategorySpecialization()
 end
 
 function ZO_CollectibleData:GetUnlockState()
@@ -397,229 +402,28 @@ function ZO_CollectibleData:IsOwned()
     return self.unlockState == COLLECTIBLE_UNLOCK_STATE_UNLOCKED_OWNED
 end
 
-function ZO_CollectibleData:IsPurchasable()
-    -- Will only return true if this collectible is directly purchasable
-    return IsCollectiblePurchasable(self.collectibleId)
-end
-
-function ZO_CollectibleData:GetPurchasableCollectibleId()
-    -- Will either be an override collectible if this collectible can only be purchased by purchasing the other,
-    -- or will simply return the id passed if it can be purchased directly
-    -- or 0 if it cannot be purchased
-    return GetPurchasableCollectibleIdForCollectible(self.collectibleId)
-end
-
-function ZO_CollectibleData:CanAcquire()
-    return CanAcquireCollectibleByDefId(self.collectibleId)
-end
-
-function ZO_CollectibleData:IsActive(actorCategory)
-    actorCategory = actorCategory or GAMEPLAY_ACTOR_CATEGORY_PLAYER
-    return IsCollectibleActive(self.collectibleId, actorCategory)
-end
-
-function ZO_CollectibleData:IsBlacklisted()
-    return IsCollectibleBlacklisted(self.collectibleId)
-end
-
-function ZO_CollectibleData:IsFavorite()
-    return self:IsUserFlagSet(COLLECTIBLE_USER_FLAG_FAVORITE)
-end
-
-function ZO_CollectibleData:IsFavoritable()
-    return self:IsUnlocked() and IsCollectibleCategoryFavoritable(self:GetCategoryType())
-end
-
-function ZO_CollectibleData:IsUserFlagSet(userFlag)
-    return ZO_FlagHelpers.MaskHasFlag(self:GetUserFlags(), userFlag)
-end
-
 function ZO_CollectibleData:GetUserFlags()
     return self.userFlags or 0
-end
-
-function ZO_CollectibleData:GetCategoryType()
-    return GetCollectibleCategoryType(self.collectibleId)
-end
-
-function ZO_CollectibleData:GetSpecializedCategoryType()
-    return GetSpecializedCollectibleType(self.collectibleId)
-end
-
-function ZO_CollectibleData:GetCategoryTypeDisplayName()
-    local specializedCollectibleType = self:GetSpecializedCategoryType()
-    if specializedCollectibleType == SPECIALIZED_COLLECTIBLE_TYPE_NONE then
-        return GetString("SI_COLLECTIBLECATEGORYTYPE", self:GetCategoryType())
-    else
-        return GetString("SI_SPECIALIZEDCOLLECTIBLETYPE", specializedCollectibleType)
-    end
-end
-
-function ZO_CollectibleData:IsCategoryType(categoryType)
-    return self:GetCategoryType() == categoryType
-end
-
-function ZO_CollectibleData:GetCollectibleAssociatedQuestState()
-    return GetCollectibleAssociatedQuestState(self.collectibleId)
-end
-
-do
-    local DEFAULT_HOUSE_HINT = GetString(SI_HOUSING_BOOK_AVAILABLE_FOR_PURCHASE)
-
-    function ZO_CollectibleData:GetHint()
-        local hint = GetCollectibleHint(self.collectibleId)
-        if hint == "" and self:IsHouse() then
-            hint = DEFAULT_HOUSE_HINT
-        end
-        return hint
-    end
-end
-
-function ZO_CollectibleData:GetKeyboardBackgroundImage()
-    return GetCollectibleKeyboardBackgroundImage(self.collectibleId)
-end
-
-function ZO_CollectibleData:GetGamepadBackgroundImage()
-    return GetCollectibleGamepadBackgroundImage(self.collectibleId)
-end
-
-function ZO_CollectibleData:GetNickname()
-    return GetCollectibleNickname(self.collectibleId)
-end
-
-function ZO_CollectibleData:GetDefaultNickname()
-    return GetCollectibleDefaultNickname(self.collectibleId)
-end
-
-function ZO_CollectibleData:GetFormattedNickname()
-    local nickname = self:GetNickname()
-    if nickname ~= "" then
-        return ZO_CachedStrFormat(SI_TOOLTIP_COLLECTIBLE_NICKNAME, nickname)
-    else
-        return ""
-    end
-end
-
-function ZO_CollectibleData:IsRenameable()
-    return IsCollectibleRenameable(self.collectibleId)
-end
-
-function ZO_CollectibleData:IsSlottable()
-    return IsCollectibleSlottable(self.collectibleId)
 end
 
 function ZO_CollectibleData:IsNew()
     return self.isNew
 end
 
-function ZO_CollectibleData:SetNew(isNew)
-    if isNew == false then
-        isNew = nil -- Memory optimization
-    end
-    if self.isNew ~= isNew then
-        self.isNew = isNew
-        local categoryData = self:GetCategoryData()
-        if categoryData then
-            categoryData:UpdateNewCache(self)
-        end
-    end
-end
-
-function ZO_CollectibleData:GetReferenceId()
-    return self.referenceId
-end
-
 function ZO_CollectibleData:GetSortOrder()
     return self.sortOrder
-end
-
-function ZO_CollectibleData:IsStory()
-    local categoryType = self:GetCategoryType()
-    return categoryType == COLLECTIBLE_CATEGORY_TYPE_DLC or categoryType == COLLECTIBLE_CATEGORY_TYPE_CHAPTER
-end
-
-function ZO_CollectibleData:IsUnlockedViaSubscription()
-    return DoesESOPlusUnlockCollectible(self.collectibleId)
-end
-
-function ZO_CollectibleData:GetQuestName()
-    local questName = GetCollectibleQuestPreviewInfo(self.collectibleId)
-    return questName
-end
-
-function ZO_CollectibleData:GetQuestDescription()
-    local questDescription = select(2, GetCollectibleQuestPreviewInfo(self.collectibleId))
-    return questDescription
-end
-
-function ZO_CollectibleData:IsSkillStyle()
-    return self:GetCategoryType() == COLLECTIBLE_CATEGORY_TYPE_ABILITY_FX_OVERRIDE
-end
-
-function ZO_CollectibleData:GetSkillStyleProgressionId()
-    if self:IsSkillStyle() then
-        return GetAbilityFxOverrideProgressionId(self.referenceId)
-    end
-    return 0
-end
-
-function ZO_CollectibleData:IsHouse()
-    return self:GetCategoryType() == COLLECTIBLE_CATEGORY_TYPE_HOUSE
-end
-
-function ZO_CollectibleData:GetHouseLocation()
-    if self:IsHouse() then
-        local houseFoundInZoneId = GetHouseFoundInZoneId(self.referenceId)
-        return GetZoneNameById(houseFoundInZoneId)
-    end
-    return ""
-end
-
-function ZO_CollectibleData:GetFormattedHouseLocation()
-    return ZO_CachedStrFormat(SI_ZONE_NAME, self:GetHouseLocation())
-end
-
-function ZO_CollectibleData:GetHouseCategoryType()
-    if self:IsHouse() then
-        return GetHouseCategoryType(self.referenceId)
-    end
-    return 0
 end
 
 function ZO_CollectibleData:IsPrimaryResidence()
     return self.isPrimaryResidence or false -- Memory optimization
 end
 
-function ZO_CollectibleData:IsOutfitStyle()
-    return self:GetCategoryType() == COLLECTIBLE_CATEGORY_TYPE_OUTFIT_STYLE
-end
-
 function ZO_CollectibleData:IsArmorStyle()
     return self.isArmorStyle or false -- Memory/perf optimization, see ZO_CollectibleData:SetOutfitStyleData for details
 end
 
-function ZO_CollectibleData:IsWeaponStyle()
-    return IsOutfitStyleWeapon(self.referenceId)
-end
-
-function ZO_CollectibleData:GetVisualArmorType()
-    return self:IsArmorStyle() and GetOutfitStyleVisualArmorType(self.referenceId) or nil
-end
-
-function ZO_CollectibleData:GetWeaponModelType()
-    return self:IsWeaponStyle() and GetOutfitStyleWeaponModelType(self.referenceId) or nil
-end
-
-function ZO_CollectibleData:GetOutfitGearType()
-    return self:IsArmorStyle() and self:GetVisualArmorType() or self:GetWeaponModelType()
-end
-
 function ZO_CollectibleData:GetOutfitStyleItemStyleId()
     return self.outfitStyleItemStyleId
-end
-
-function ZO_CollectibleData:GetOutfitStyleItemStyleName()
-    return GetItemStyleName(self:GetOutfitStyleItemStyleId())
 end
 
 function ZO_CollectibleData:GetOutfitStyleCost()
@@ -639,226 +443,7 @@ function ZO_CollectibleData:GetOutfitStyleCost()
     return 0 -- No one should ever hit this code
 end
 
-function ZO_CollectibleData:GetOutfitStyleFreeConversionCollectible()
-    return GetOutfitStyleFreeConversionCollectibleId(self.referenceId)
-end
-
-function ZO_CollectibleData:IsBlocked(actorCategory)
-    return IsCollectibleBlocked(self.collectibleId, actorCategory)
-end
-
-function ZO_CollectibleData:IsCollectibleAvailableToActorCategory(aActorCategory)
-    return IsCollectibleAvailableToActorCategory(self.collectibleId, aActorCategory)
-end
-
-function ZO_CollectibleData:IsCollectibleAvailableToCompanion()
-    return self:IsCollectibleAvailableToActorCategory(GAMEPLAY_ACTOR_CATEGORY_COMPANION)
-end
-
-function ZO_CollectibleData:IsCollectibleCategoryUsable(actorCategory)
-    return IsCollectibleCategoryUsable(self:GetCategoryType(), actorCategory)
-end
-
-function ZO_CollectibleData:IsCollectibleCategoryCompanionUsable()
-    return self:IsCollectibleCategoryUsable(GAMEPLAY_ACTOR_CATEGORY_COMPANION)
-end
-
-function ZO_CollectibleData:IsUsable(actorCategory)
-    actorCategory = actorCategory or GAMEPLAY_ACTOR_CATEGORY_PLAYER
-    return self:IsActiveStateSuppressed(actorCategory) or IsCollectibleUsable(self.collectibleId, actorCategory)
-end
-
-function ZO_CollectibleData:Use(actorCategory)
-    if self:IsActiveStateSuppressed(actorCategory) and self:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_MOUNT) then
-        -- If the active mount is being suppressed, then using it should just clear the suppression (disable random mount)
-        SetRandomMountType(RANDOM_MOUNT_TYPE_NONE, actorCategory)
-        return
-    end
-
-    -- combination fragment collectibles can consume collectibles on use
-    -- so we want to show a confirmation dialog if it consumes a non-fragment collectible
-    if self:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_COMBINATION_FRAGMENT) then
-        if not CheckPlayerCanPerformCombinationAndWarn(self.referenceId) then
-            return
-        end
-        -- this combination might be acting as an "evolution" of a collectible into another collectible
-        -- like the nascent indrik evolving into another type of indrik
-        if GetCombinationNumNonFragmentCollectibleComponents(self.referenceId) > 0 then
-            local function AcceptCombinationCallback()
-                UseCollectible(self.collectibleId, actorCategory)
-            end
-
-            local function DeclineCombinationCallback()
-            end
-
-            ZO_CombinationPromptManager_ShowAppropriateCombinationPrompt(self.referenceId, AcceptCombinationCallback, DeclineCombinationCallback)
-            return
-        end
-    end
-
-    UseCollectible(self.collectibleId, actorCategory)
-end
-
-function ZO_CollectibleData:GetPrimaryInteractionStringId(actorCategory)
-    local categoryType = self:GetCategoryType()
-    if self:IsActive(actorCategory) and not self:ShouldSuppressActiveState(actorCategory) then
-        if categoryType == COLLECTIBLE_CATEGORY_TYPE_VANITY_PET or categoryType == COLLECTIBLE_CATEGORY_TYPE_ASSISTANT or categoryType == COLLECTIBLE_CATEGORY_TYPE_COMPANION then
-            return SI_COLLECTIBLE_ACTION_DISMISS
-        else
-            return SI_COLLECTIBLE_ACTION_PUT_AWAY
-        end
-    else
-        if categoryType == COLLECTIBLE_CATEGORY_TYPE_DLC or categoryType == COLLECTIBLE_CATEGORY_TYPE_CHAPTER then
-            return SI_COLLECTIBLE_ACTION_ACCEPT_QUEST
-        elseif categoryType == COLLECTIBLE_CATEGORY_TYPE_HOUSE then
-            return self:IsUnlocked() and SI_HOUSING_BOOK_ACTION_TRAVEL_TO_HOUSE or SI_HOUSING_BOOK_ACTION_PREVIEW_HOUSE
-        elseif categoryType == COLLECTIBLE_CATEGORY_TYPE_MEMENTO then
-            return SI_COLLECTIBLE_ACTION_USE
-        elseif categoryType == COLLECTIBLE_CATEGORY_TYPE_COMBINATION_FRAGMENT then
-            return SI_COLLECTIBLE_ACTION_COMBINE
-        elseif categoryType == COLLECTIBLE_CATEGORY_TYPE_COMPANION then
-            local activeState = self:GetCollectibleAssociatedQuestState()
-            if activeState == COLLECTIBLE_ASSOCIATED_QUEST_STATE_INACTIVE then
-                return SI_COLLECTIBLE_ACTION_ACCEPT_QUEST
-            elseif activeState == COLLECTIBLE_ASSOCIATED_QUEST_STATE_ACCEPTED then
-                return nil
-            else
-                return SI_COLLECTIBLE_ACTION_SET_ACTIVE
-            end
-        elseif categoryType == COLLECTIBLE_CATEGORY_TYPE_ABILITY_FX_OVERRIDE then
-            return nil
-        elseif categoryType == COLLECTIBLE_CATEGORY_TYPE_ACCOUNT_UPGRADE then
-            local hasQuestBestowal = self:GetReferenceId() ~= 0
-            return hasQuestBestowal and SI_COLLECTIBLE_ACTION_ACCEPT_QUEST or nil
-        else
-            return SI_COLLECTIBLE_ACTION_SET_ACTIVE
-        end
-    end
-end
-
-function ZO_CollectibleData:IsPlaceableFurniture()
-    return IsCollectibleCategoryPlaceableFurniture(self:GetCategoryType())
-end
-
-function ZO_CollectibleData:IsValidForPlayer()
-    return IsCollectibleValidForPlayer(self.collectibleId)
-end
-
-function ZO_CollectibleData:HasVisualAppearence()
-    return DoesCollectibleHaveVisibleAppearance(self.collectibleId)
-end
-
-function ZO_CollectibleData:WouldBeHidden(actorCategory)
-    return WouldCollectibleBeHidden(self.collectibleId, actorCategory)
-end
-
-function ZO_CollectibleData:IsVisualLayerHidden(actorCategory)
-    return self:HasVisualAppearence() and self:IsActive(actorCategory) and self:WouldBeHidden(actorCategory)
-end
-
-function ZO_CollectibleData:IsVisualLayerShowing(actorCategory)
-    return self:HasVisualAppearence() and self:IsActive(actorCategory) and not self:WouldBeHidden(actorCategory)
-end
-
-function ZO_CollectibleData:GetNotificationId()
-    return self.notificationId
-end
-
-function ZO_CollectibleData:SetNotificationId(notificationId)
-    self.notificationId = notificationId
-end
-
-do
-    local IS_HIDDEN_FROM_COLLECTION_MODE =
-    {
-        [COLLECTIBLE_HIDE_MODE_WHEN_LOCKED] = function(collectibleData) return collectibleData:IsLocked() end,
-        [COLLECTIBLE_HIDE_MODE_WHEN_LOCKED_REQUIREMENT] = function(collectibleData) return collectibleData:IsCollectibleDynamicallyHidden() end,
-    }
-
-    function ZO_CollectibleData:IsHiddenFromCollection()
-        local hideMode = GetCollectibleHideMode(self.collectibleId)
-        if hideMode == COLLECTIBLE_HIDE_MODE_NONE then
-            return false
-        elseif hideMode == COLLECTIBLE_HIDE_MODE_ALWAYS then
-            return true
-        else
-            local modeFunction = IS_HIDDEN_FROM_COLLECTION_MODE[hideMode]
-            return modeFunction(self)
-        end
-    end
-end
-
-function ZO_CollectibleData:IsCollectibleDynamicallyHidden()
-    return self:IsLocked() and IsCollectibleDynamicallyHidden(self.collectibleId)
-end
-
-function ZO_CollectibleData:IsShownInCollection()
-    return not self:IsHiddenFromCollection()
-end
-
-do
-    local ARMOR_VISUAL_TO_SOUND_ID =
-    {
-        [VISUAL_ARMORTYPE_LIGHT]        = SOUNDS.OUTFIT_ARMOR_TYPE_LIGHT,
-        [VISUAL_ARMORTYPE_MEDIUM]       = SOUNDS.OUTFIT_ARMOR_TYPE_MEDIUM,
-        [VISUAL_ARMORTYPE_HEAVY]        = SOUNDS.OUTFIT_ARMOR_TYPE_HEAVY,
-        [VISUAL_ARMORTYPE_UNDAUNTED]    = SOUNDS.OUTFIT_ARMOR_TYPE_UNDAUNTED,
-        [VISUAL_ARMORTYPE_CLOTHING]     = SOUNDS.OUTFIT_ARMOR_TYPE_CLOTHING,
-        [VISUAL_ARMORTYPE_SIGNATURE]    = SOUNDS.OUTFIT_ARMOR_TYPE_SIGNATURE,
-    }
-
-    local WEAPON_VISUAL_TO_SOUND_ID =
-    {
-        [WEAPON_MODEL_TYPE_AXE]     = SOUNDS.OUTFIT_WEAPON_TYPE_AXE,
-        [WEAPON_MODEL_TYPE_HAMMER]  = SOUNDS.OUTFIT_WEAPON_TYPE_MACE,
-        [WEAPON_MODEL_TYPE_SWORD]   = SOUNDS.OUTFIT_WEAPON_TYPE_SWORD,
-        [WEAPON_MODEL_TYPE_DAGGER]  = SOUNDS.OUTFIT_WEAPON_TYPE_DAGGER,
-        [WEAPON_MODEL_TYPE_BOW]     = SOUNDS.OUTFIT_WEAPON_TYPE_BOW,
-        [WEAPON_MODEL_TYPE_STAFF]   = SOUNDS.OUTFIT_WEAPON_TYPE_STAFF,
-        [WEAPON_MODEL_TYPE_SHIELD]  = SOUNDS.OUTFIT_WEAPON_TYPE_SHIELD,
-        [WEAPON_MODEL_TYPE_RUNE]    = SOUNDS.OUTFIT_WEAPON_TYPE_RUNE,
-    }
-
-    function ZO_CollectibleData:GetOutfitStyleEquipSound()
-        local visualArmorType = self:GetVisualArmorType()
-        if visualArmorType then
-            return ARMOR_VISUAL_TO_SOUND_ID[visualArmorType]
-        end
-
-        local weaponModelType = self:GetWeaponModelType()
-        if weaponModelType then
-            return WEAPON_VISUAL_TO_SOUND_ID[weaponModelType]
-        end
-    end
-end
-
-function ZO_CollectibleData:ShouldSuppressActiveState(actorCategory)
-    if self:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_MOUNT) and GetRandomMountType(actorCategory) ~= RANDOM_MOUNT_TYPE_NONE then
-        return true
-    elseif self:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_COMPANION) and HasSuppressedCompanion() then
-        return true
-    elseif self:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_ABILITY_FX_OVERRIDE) then
-        return true
-    end
-    return false
-end
-
-function ZO_CollectibleData:IsActiveStateSuppressed(actorCategory)
-    if not self:IsActive(actorCategory) then
-        return false
-    end
-
-    return self:ShouldSuppressActiveState(actorCategory)
-end
-
--- Determines whether the collectible is a placeable furnishing that can be placed in the current house.
-function ZO_CollectibleData:CanPlaceInCurrentHouse()
-    return self:IsPlaceableFurniture() and ZO_CanPlaceFurnitureInCurrentHouse() and HousingEditorCanPlaceCollectible(self.collectibleId)
-end
-
-function ZO_CollectibleData:GetLinkedAchievement()
-    return GetCollectibleLinkedAchievement(self.collectibleId)
-end
+-- Begin ZO_CollectibleData_Base Overrides --
 
 -----------------------------------
 -- Specialized Sorted Collectibles

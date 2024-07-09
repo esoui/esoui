@@ -1,9 +1,17 @@
-local SCREENSHOT_SUBMISSION_COOLDOWN = 30000
+local SCREENSHOT_SUBMISSION_COOLDOWN_MS = 30000
+local g_nextScreenshotSubmissionAllowedTimeMS = 0
+
+local function StartScreenshotSubmissionCooldown()
+    g_nextScreenshotSubmissionAllowedTimeMS = GetFrameTimeMilliseconds() + SCREENSHOT_SUBMISSION_COOLDOWN_MS
+end
+
+local function IsScreenshotSubmissionOnCooldown()
+    return GetFrameTimeMilliseconds() < g_nextScreenshotSubmissionAllowedTimeMS
+end
 
 local ZO_Help_GenericTicketSubmission_Manager = ZO_InitializingCallbackObject:Subclass()
 
 function ZO_Help_GenericTicketSubmission_Manager:Initialize()
-    self.lastSubmitWithScreenshotTime = 0
     self.ticketSubmittedFailedHeader = GetString(SI_GAMEPAD_HELP_TICKET_SUBMITTED_DIALOG_HEADER_FAILURE)
     self.ticketSubmittedSuccessHeader = GetString(SI_GAMEPAD_HELP_TICKET_SUBMITTED_DIALOG_HEADER_SUCCESS)
     self.ticketSubmittedFailedMessage = GetString(SI_GAMEPAD_HELP_CUSTOMER_SERVICE_FAILED_TICKET_SUBMISSION)
@@ -87,14 +95,14 @@ function ZO_Help_GenericTicketSubmission_Manager:OnCustomerServiceFeedbackSubmit
 end
 
 function ZO_Help_GenericTicketSubmission_Manager:AttemptToSendFeedback(impactId, categoryId, subcategoryId, detailsText, descriptionText, attachScreenshot)
-    if attachScreenshot and not self:CanSubmitFeedbackWithScreenshot() then
+    if attachScreenshot and IsScreenshotSubmissionOnCooldown() then
         ZO_Dialogs_ShowPlatformDialog("TOO_FREQUENT_BUG_SCREENSHOT")
     else
         SCENE_MANAGER:ShowBaseScene()
         ReportFeedback(impactId, categoryId, subcategoryId, detailsText, descriptionText, attachScreenshot)
 
         if attachScreenshot then
-            self.lastSubmitWithScreenshotTime = GetFrameTimeMilliseconds()
+            StartScreenshotSubmissionCooldown()
         end
 
         if IsInGamepadPreferredMode() then
@@ -106,58 +114,115 @@ function ZO_Help_GenericTicketSubmission_Manager:AttemptToSendFeedback(impactId,
 end
 
 function ZO_Help_GenericTicketSubmission_Manager:CanSubmitFeedbackWithScreenshot()
-    return GetFrameTimeMilliseconds() > (self.lastSubmitWithScreenshotTime + SCREENSHOT_SUBMISSION_COOLDOWN)
+    return not IsScreenshotSubmissionOnCooldown()
 end
 
-function ZO_Help_GenericTicketSubmission_Manager:OpenReportPlayerTicketScene(name, ticketSubmittedCallback)
-    if IsInGamepadPreferredMode() then
-        SCENE_MANAGER:Push("helpCustomerServiceGamepad")
-        HELP_CUSTOMER_SERVICE_GAMEPAD:SetupReportPlayerTicket(name)
-    else
-        local DEFAULT_CATEGORY = nil
-        local DEFAULT_SUBCATEGORY = nil
-        HELP_CUSTOMER_SERVICE_ASK_FOR_HELP_KEYBOARD:OpenAskForHelp(CUSTOMER_SERVICE_ASK_FOR_HELP_IMPACT_REPORT_PLAYER, DEFAULT_CATEGORY, DEFAULT_SUBCATEGORY, name)
+do
+    local DEFAULT_CATEGORY = nil
+    local DEFAULT_SUBCATEGORY = nil
+
+    function ZO_Help_GenericTicketSubmission_Manager:OpenReportPlayerTicketScene(name, ticketSubmittedCallback)
+        if IsInGamepadPreferredMode() then
+            SCENE_MANAGER:Push("helpCustomerServiceGamepad")
+            HELP_CUSTOMER_SERVICE_GAMEPAD:SetupTicket(CUSTOMER_SERVICE_ASK_FOR_HELP_IMPACT_REPORT_PLAYER, DEFAULT_CATEGORY, DEFAULT_SUBCATEGORY, ZO_FormatUserFacingDisplayName(name))
+        else
+            HELP_CUSTOMER_SERVICE_ASK_FOR_HELP_KEYBOARD:OpenAskForHelp(CUSTOMER_SERVICE_ASK_FOR_HELP_IMPACT_REPORT_PLAYER, DEFAULT_CATEGORY, DEFAULT_SUBCATEGORY, name)
+        end
+
+        self:SetReportPlayerTicketSubmittedCallback(ticketSubmittedCallback)
     end
 
-    self:SetReportPlayerTicketSubmittedCallback(ticketSubmittedCallback)
-end
+    function ZO_Help_GenericTicketSubmission_Manager:OpenReportGuildTicketScene(name, category, ticketSubmittedCallback)
+        category = category or CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_GUILD_CATEGORY_NONE
+        if IsInGamepadPreferredMode() then
+            SCENE_MANAGER:Push("helpCustomerServiceGamepad")
+            HELP_CUSTOMER_SERVICE_GAMEPAD:SetupTicket(CUSTOMER_SERVICE_ASK_FOR_HELP_IMPACT_REPORT_GUILD, category, DEFAULT_SUBCATEGORY, name)
+        else
+            HELP_CUSTOMER_SERVICE_ASK_FOR_HELP_KEYBOARD:OpenAskForHelp(CUSTOMER_SERVICE_ASK_FOR_HELP_IMPACT_REPORT_GUILD, category, DEFAULT_SUBCATEGORY, name)
+        end
 
-function ZO_Help_GenericTicketSubmission_Manager:OpenReportGuildTicketScene(name, category, ticketSubmittedCallback)
-    category = category or CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_GUILD_CATEGORY_NONE
-    if IsInGamepadPreferredMode() then
-        SCENE_MANAGER:Push("helpCustomerServiceGamepad")
-        HELP_CUSTOMER_SERVICE_GAMEPAD:SetupReportGuildTicket(name, category)
-    else
-        local DEFAULT_SUBCATEGORY = nil
-        HELP_CUSTOMER_SERVICE_ASK_FOR_HELP_KEYBOARD:OpenAskForHelp(CUSTOMER_SERVICE_ASK_FOR_HELP_IMPACT_REPORT_GUILD, category, DEFAULT_SUBCATEGORY, name)
+        self:SetReportGuildTicketSubmittedCallback(ticketSubmittedCallback)
     end
 
-    self:SetReportGuildTicketSubmittedCallback(ticketSubmittedCallback)
-end
+    function ZO_Help_GenericTicketSubmission_Manager:OpenReportGroupFinderListingTicketScene(listingData, ticketSubmittedCallback)
+        local cachedListingData = {}
+        if listingData:IsInstanceOf(ZO_GroupListingUserTypeData) then
+            cachedListingData.hasApplied = true
+        else
+            assert(listingData:IsInstanceOf(ZO_GroupListingSearchData))
+            cachedListingData.listingIndex = listingData:GetListingIndex()
+        end
+        cachedListingData.ownerDisplayName = listingData:GetOwnerDisplayName()
+        cachedListingData.ownerCharacterName = listingData:GetOwnerCharacterName()
+        cachedListingData.title = listingData:GetTitle()
+        cachedListingData.description = listingData:GetDescription()
 
-function ZO_Help_GenericTicketSubmission_Manager:OpenReportGroupFinderListingTicketScene(listingData, ticketSubmittedCallback)
-    local cachedListingData = {}
-    if listingData:IsInstanceOf(ZO_GroupListingUserTypeData) then
-        cachedListingData.hasApplied = true
-    else
-        assert(listingData:IsInstanceOf(ZO_GroupListingSearchData))
+        if IsInGamepadPreferredMode() then
+            SCENE_MANAGER:Push("helpCustomerServiceGamepad")
+            HELP_CUSTOMER_SERVICE_GAMEPAD:SetupTicket(CUSTOMER_SERVICE_ASK_FOR_HELP_IMPACT_REPORT_GROUP_FINDER_LISTING, DEFAULT_CATEGORY, DEFAULT_SUBCATEGORY, cachedListingData)
+        else
+            HELP_CUSTOMER_SERVICE_ASK_FOR_HELP_KEYBOARD:OpenAskForHelp(CUSTOMER_SERVICE_ASK_FOR_HELP_IMPACT_REPORT_GROUP_FINDER_LISTING, DEFAULT_CATEGORY, DEFAULT_SUBCATEGORY, cachedListingData)
+        end
+
+        self:SetReportPlayerTicketSubmittedCallback(ticketSubmittedCallback)
+    end
+
+    function ZO_Help_GenericTicketSubmission_Manager:OpenReportHouseTourListingTicketScene(listingData, ticketSubmittedCallback)
+        assert(listingData:IsInstanceOf(ZO_HouseToursListingSearchData))
+        local cachedListingData = {}
+        cachedListingData.listingType = listingData:GetListingType()
         cachedListingData.listingIndex = listingData:GetListingIndex()
-    end
-    cachedListingData.ownerDisplayName = listingData:GetOwnerDisplayName()
-    cachedListingData.ownerCharacterName = listingData:GetOwnerCharacterName()
-    cachedListingData.title = listingData:GetTitle()
-    cachedListingData.description = listingData:GetDescription()
+        cachedListingData.ownerDisplayName = listingData:GetFormattedOwnerDisplayName()
+        cachedListingData.collectibleId = listingData:GetCollectibleId()
+        cachedListingData.nickname = listingData:GetNickname()
+        if not cachedListingData.nickname or cachedListingData.nickname == "" then
+            local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(cachedListingData.collectibleId)
+            if collectibleData then
+                -- Use the collectible's default nickname if a custom nickname has not been set by the owner.
+                cachedListingData.nickname = collectibleData:GetDefaultNickname()
+            end
+        end
 
-    if IsInGamepadPreferredMode() then
-        SCENE_MANAGER:Push("helpCustomerServiceGamepad")
-        HELP_CUSTOMER_SERVICE_GAMEPAD:SetupReportGroupFinderListingTicket(cachedListingData)
-    else
-        local DEFAULT_CATEGORY = nil
-        local DEFAULT_SUBCATEGORY = nil
-        HELP_CUSTOMER_SERVICE_ASK_FOR_HELP_KEYBOARD:OpenAskForHelp(CUSTOMER_SERVICE_ASK_FOR_HELP_IMPACT_REPORT_GROUP_FINDER_LISTING, DEFAULT_CATEGORY, DEFAULT_SUBCATEGORY, cachedListingData)
+        if IsInGamepadPreferredMode() then
+            SCENE_MANAGER:Push("helpCustomerServiceGamepad")
+            HELP_CUSTOMER_SERVICE_GAMEPAD:SetupTicket(CUSTOMER_SERVICE_ASK_FOR_HELP_IMPACT_REPORT_HOUSE_TOUR_LISTING, DEFAULT_CATEGORY, DEFAULT_SUBCATEGORY, cachedListingData)
+        else
+            HELP_CUSTOMER_SERVICE_ASK_FOR_HELP_KEYBOARD:OpenAskForHelp(CUSTOMER_SERVICE_ASK_FOR_HELP_IMPACT_REPORT_HOUSE_TOUR_LISTING, DEFAULT_CATEGORY, DEFAULT_SUBCATEGORY, cachedListingData)
+        end
+
+        self:SetReportPlayerTicketSubmittedCallback(ticketSubmittedCallback)
     end
 
-    self:SetReportGuildTicketSubmittedCallback(ticketSubmittedCallback)
+    function ZO_Help_GenericTicketSubmission_Manager:OpenReportHouseTourListingCurrentHouseTicketScene(ticketSubmittedCallback)
+        assert(IsCurrentHouseListed())
+
+        local collectibleId = GetCurrentHouseTourListingCollectibleId()
+        local nickname = GetCurrentHouseTourListingNickname()
+        if not nickname or nickname == "" then
+            local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+            if collectibleData then
+                -- Use the collectible's default nickname if a custom nickname has not been set by the owner.
+                nickname = collectibleData:GetDefaultNickname()
+            end
+        end
+        local listingData =
+        {
+            collectibleId = collectibleId,
+            houseId = GetCurrentHouseTourListingHouseId(),
+            nickname = nickname,
+            ownerDisplayName = GetCurrentHouseTourListingOwnerDisplayName(),
+            isCurrentHouse = true,
+        }
+
+        if IsInGamepadPreferredMode() then
+            SCENE_MANAGER:Push("helpCustomerServiceGamepad")
+            HELP_CUSTOMER_SERVICE_GAMEPAD:SetupTicket(CUSTOMER_SERVICE_ASK_FOR_HELP_IMPACT_REPORT_HOUSE_TOUR_LISTING, DEFAULT_CATEGORY, DEFAULT_SUBCATEGORY, listingData)
+        else
+            HELP_CUSTOMER_SERVICE_ASK_FOR_HELP_KEYBOARD:OpenAskForHelp(CUSTOMER_SERVICE_ASK_FOR_HELP_IMPACT_REPORT_HOUSE_TOUR_LISTING, DEFAULT_CATEGORY, DEFAULT_SUBCATEGORY, listingData)
+        end
+
+        self:SetReportPlayerTicketSubmittedCallback(ticketSubmittedCallback)
+    end
 end
 
 function ZO_Help_GenericTicketSubmission_Manager:MarkAttemptingToSubmitReportPlayerTicket(reportPlayerName)
@@ -178,6 +243,17 @@ function ZO_Help_GenericTicketSubmission_Manager.SetCustomerServiceTicketGroupFi
         SetCustomerServiceTicketAppliedGroupListingTarget()
     else
         SetCustomerServiceTicketGroupListingTarget(listingData.listingIndex)
+    end
+end
+
+function ZO_Help_GenericTicketSubmission_Manager.SetCustomerServiceTicketHouseTourListingTarget(listingData)
+    assert(listingData)
+    if listingData.isCurrentHouse then
+        assert(IsCurrentHouseListed())
+        SetCustomerServiceTicketHouseListingCurrentHouseTarget()
+    else
+        assert(listingData.listingType and listingData.listingIndex)
+        SetCustomerServiceTicketHouseListingTarget(listingData.listingType, listingData.listingIndex)
     end
 end
 

@@ -15,7 +15,7 @@ function ZO_EndlessDungeonLeaderboardsManager_Gamepad:Initialize(control)
     end)
 
     SYSTEMS:RegisterGamepadObject("endlessDungeonLeaderboards", self)
-    GAMEPAD_LEADERBOARDS:RegisterLeaderboardSystemObject(self)
+    GAMEPAD_LEADERBOARDS:RegisterLeaderboardSystemObject(self, LEADERBOARD_DATA_TYPE.ENDLESS_DUNGEON)
 end
 
 function ZO_EndlessDungeonLeaderboardsManager_Gamepad:PerformDeferredInitialization()

@@ -95,7 +95,7 @@
             </OnInitialized>
             <Controls>
                 <Control name="$(parent)Label" override="true">
-                    <Dimensions x="175"/>
+                    <Dimensions x="160"/>
                 </Control>
                 <Control name="$(parent)Unselected" resizeToFitDescendents="true">
                     <OnInitialized>
@@ -148,7 +148,7 @@
                 ZO_GamepadAlchemy_OnInitialized(self)
             </OnInitialized>
 
-            <Controls>
+            <Controls> 
                 <Control name="$(parent)HeaderContainer" inherits="ZO_GamepadScreenHeaderContainer ZO_GamepadGrid_NavQuadrant_ContainerAnchors" />
 
                 <Scroll name="$(parent)Container" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">

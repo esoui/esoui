@@ -691,7 +691,7 @@ end
 
 local MAIL_COD_ATTACHED_MONEY_OPTIONS =
 {
-    showTooltips = false,
+    showTooltips = true,
     font = "ZoFontWinH4",
     iconSide = RIGHT,
 }

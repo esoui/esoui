@@ -15,7 +15,7 @@ function ZO_BattlegroundLeaderboardsManager_Gamepad:Initialize(control)
     end)
 
     SYSTEMS:RegisterGamepadObject(ZO_BATTLEGROUND_LEADERBOARD_SYSTEM_NAME, self)
-    GAMEPAD_LEADERBOARDS:RegisterLeaderboardSystemObject(self)
+    GAMEPAD_LEADERBOARDS:RegisterLeaderboardSystemObject(self, LEADERBOARD_DATA_TYPE.BATTLEGROUND)
 end
 
 function ZO_BattlegroundLeaderboardsManager_Gamepad:RefreshHeaderPlayerInfo()

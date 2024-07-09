@@ -314,32 +314,30 @@ function ZO_GamepadCollectionsUpdateProvider:New(notificationManager)
     return ZO_CollectionsUpdateProvider.New(self, notificationManager)
 end
 
-function ZO_GamepadCollectionsUpdateProvider:AddCollectibleNotification(data)
-    local categoryData = data:GetCategoryData()
-
+function ZO_GamepadCollectionsUpdateProvider:AddCollectibleNotification(data, notificationId)
     --use a formatter for when there's more information?
     local hasMoreInfo = GetCollectibleHelpIndices(data:GetId()) ~= nil
-    local message = self:GetMessage(hasMoreInfo, ZO_SELECTED_TEXT:Colorize(categoryData:GetName()), ZO_SELECTED_TEXT:Colorize(data:GetName()))
-    self:AddNotification(message, data, hasMoreInfo)
+    local message = self:GetMessage(hasMoreInfo, ZO_SELECTED_TEXT:Colorize(data:GetCategoryName()), ZO_SELECTED_TEXT:Colorize(data:GetName()))
+    self:AddNotification(message, data, hasMoreInfo, notificationId)
 end
 
-function ZO_GamepadCollectionsUpdateProvider:AddNotification(message, data, hasMoreInfo)
-    local categoryData = data:GetCategoryData()
+function ZO_GamepadCollectionsUpdateProvider:AddNotification(message, data, hasMoreInfo, notificationId)
     local customLayoutFunction = nil
     if hasMoreInfo then
         customLayoutFunction = function(tooltip, entryData)
-            GAMEPAD_TOOLTIPS:LayoutKeybindNotification(tooltip, categoryData, entryData)
+            GAMEPAD_TOOLTIPS:LayoutKeybindNotification(tooltip, entryData)
         end
     end
 
     local newListEntry = {
         dataType = NOTIFICATIONS_COLLECTIBLE_DATA,
         notificationType = NOTIFICATION_TYPE_COLLECTIONS,
-        shortDisplayText = categoryData:GetName(),
+        shortDisplayText = data:GetCategoryName(),
 
         message = message,
         data = data,
         moreInfo = hasMoreInfo,
+        notificationId = notificationId,
         customLayoutFunction = customLayoutFunction,
 
         --For sorting
@@ -354,7 +352,7 @@ function ZO_GamepadCollectionsUpdateProvider:Accept(entryData)
     ZO_CollectionsUpdateProvider.Accept(self, entryData)
 
     -- The Tribute Patron book is a different scene than the standard collections menu, so we need to handle it uniquely.
-    if entryData.data:GetCategoryData():IsTributePatronCategory() then
+    if entryData.data:GetCategorySpecialization() == COLLECTIBLE_CATEGORY_SPECIALIZATION_TRIBUTE_PATRONS then
         GAMEPAD_TRIBUTE_PATRON_BOOK:BrowseToPatron(entryData.data:GetReferenceId())
     else
         GAMEPAD_COLLECTIONS_BOOK:BrowseToCollectible(entryData.data:GetId())

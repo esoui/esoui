@@ -1,12 +1,13 @@
 ZO_LEADERBOARD_PLAYER_DATA = 1
 
-PENDING_LEADERBOARD_DATA_TYPE =
+LEADERBOARD_DATA_TYPE =
 {
-    BATTLEGROUND = 1,
-    CAMPAIGN = 2,
-    RAID = 3,
-    TRIBUTE = 4,
-    ENDLESS_DUNGEON = 5,
+    -- these values are sorted in the order these leaderboards appear in the UIs.
+    CAMPAIGN = 1,
+    RAID = 2,
+    ENDLESS_DUNGEON = 3,
+    BATTLEGROUND = 4,
+    TRIBUTE = 5,
 }
 
 -----------------
@@ -149,27 +150,27 @@ function ZO_LeaderboardsListManager_Shared:QueryLeaderboardData(leaderboardType,
     self.pendingRequestData = queryData
 
     local readyState = LEADERBOARD_DATA_RESPONSE_PENDING
-    if leaderboardType == PENDING_LEADERBOARD_DATA_TYPE.BATTLEGROUND then
+    if leaderboardType == LEADERBOARD_DATA_TYPE.BATTLEGROUND then
         readyState = QueryBattlegroundLeaderboardData(queryData.battlegroundType)
         if readyState == LEADERBOARD_DATA_READY then
             self:OnBattlegroundLeaderboardDataReceived(queryData.battlegroundType)
         end
-    elseif leaderboardType == PENDING_LEADERBOARD_DATA_TYPE.CAMPAIGN then
+    elseif leaderboardType == LEADERBOARD_DATA_TYPE.CAMPAIGN then
         readyState = QueryCampaignLeaderboardData(queryData.alliance)
         if readyState == LEADERBOARD_DATA_READY then
             self:OnCampaignLeaderboardDataReceived(queryData.campaignId, queryData.alliance)
         end
-    elseif leaderboardType == PENDING_LEADERBOARD_DATA_TYPE.RAID then
+    elseif leaderboardType == LEADERBOARD_DATA_TYPE.RAID then
         readyState = QueryRaidLeaderboardData(queryData.raidCategory, queryData.raidId, queryData.classId)
         if readyState == LEADERBOARD_DATA_READY then
             self:OnRaidLeaderboardDataReceived(queryData.raidCategory, queryData.raidId, queryData.classId)
         end
-    elseif leaderboardType == PENDING_LEADERBOARD_DATA_TYPE.TRIBUTE then
+    elseif leaderboardType == LEADERBOARD_DATA_TYPE.TRIBUTE then
         readyState = QueryTributeLeaderboardData(queryData.tributeType)
         if readyState == LEADERBOARD_DATA_READY then
             self:OnTributeLeaderboardDataReceived(queryData.tributeType)
         end
-    elseif leaderboardType == PENDING_LEADERBOARD_DATA_TYPE.ENDLESS_DUNGEON then
+    elseif leaderboardType == LEADERBOARD_DATA_TYPE.ENDLESS_DUNGEON then
         readyState = QueryEndlessDungeonLeaderboardData(queryData.endlessDungeonGroupType, queryData.endlessDungeonId, queryData.classId)
         if readyState == LEADERBOARD_DATA_READY then
             self:OnEndlessDungeonLeaderboardDataReceived(queryData.endlessDungeonGroupType, queryData.endlessDungeonId, queryData.classId)
@@ -182,7 +183,7 @@ function ZO_LeaderboardsListManager_Shared:QueryLeaderboardData(leaderboardType,
 end
 
 function ZO_LeaderboardsListManager_Shared:OnRaidLeaderboardDataReceived(raidCategory, raidId, classId)
-    if self.pendingRequestType ~= PENDING_LEADERBOARD_DATA_TYPE.RAID then
+    if self.pendingRequestType ~= LEADERBOARD_DATA_TYPE.RAID then
         return
     end
 
@@ -195,7 +196,7 @@ function ZO_LeaderboardsListManager_Shared:OnRaidLeaderboardDataReceived(raidCat
 end
 
 function ZO_LeaderboardsListManager_Shared:OnBattlegroundLeaderboardDataReceived(battlegroundType)
-    if self.pendingRequestType ~= PENDING_LEADERBOARD_DATA_TYPE.BATTLEGROUND then
+    if self.pendingRequestType ~= LEADERBOARD_DATA_TYPE.BATTLEGROUND then
         return
     end
 
@@ -205,7 +206,7 @@ function ZO_LeaderboardsListManager_Shared:OnBattlegroundLeaderboardDataReceived
 end
 
 function ZO_LeaderboardsListManager_Shared:OnCampaignLeaderboardDataReceived(campaignId, alliance)
-    if self.pendingRequestType ~= PENDING_LEADERBOARD_DATA_TYPE.CAMPAIGN then
+    if self.pendingRequestType ~= LEADERBOARD_DATA_TYPE.CAMPAIGN then
         return
     end
 
@@ -217,7 +218,7 @@ function ZO_LeaderboardsListManager_Shared:OnCampaignLeaderboardDataReceived(cam
 end
 
 function ZO_LeaderboardsListManager_Shared:OnTributeLeaderboardDataReceived(tributeType)
-    if self.pendingRequestType ~= PENDING_LEADERBOARD_DATA_TYPE.TRIBUTE then
+    if self.pendingRequestType ~= LEADERBOARD_DATA_TYPE.TRIBUTE then
         return
     end
 
@@ -227,7 +228,7 @@ function ZO_LeaderboardsListManager_Shared:OnTributeLeaderboardDataReceived(trib
 end
 
 function ZO_LeaderboardsListManager_Shared:OnEndlessDungeonLeaderboardDataReceived(groupType, endlessDungeonId, classId)
-    if self.pendingRequestType ~= PENDING_LEADERBOARD_DATA_TYPE.ENDLESS_DUNGEON then
+    if self.pendingRequestType ~= LEADERBOARD_DATA_TYPE.ENDLESS_DUNGEON then
         return
     end
 
@@ -279,6 +280,13 @@ function ZO_LeaderboardsManager_Shared:Initialize(control, leaderboardControl)
             self:OnLeaderboardDataChanged(self.leaderboardObject)
         end
     end)
+
+    self.leaderboardSystemObjects = {}
+end
+
+function ZO_LeaderboardsManager_Shared:RegisterLeaderboardSystemObject(systemObject, sortOrder)
+    internalassert(self.leaderboardSystemObjects[sortOrder] == nil)
+    self.leaderboardSystemObjects[sortOrder] = systemObject
 end
 
 function ZO_LeaderboardsManager_Shared:InitializeScenes(sceneName)

@@ -9,6 +9,8 @@ local BUTTON_SPACING = 20
 -- (i.e. ZO_Dialogs_FindDialog) but it's only to maintain that compatibility
 local g_displayedDialog = nil
 local g_dialogQueue = {}
+local g_isDialogQueuePaused = false
+local g_dialogPauseExemptions = {}
 local g_currencyPool = nil
 local g_curInstanceId = 0
 
@@ -28,8 +30,13 @@ local function ContainsName(testName, ...)
     return false
 end
 
-local function QueueDialog(name, data, params, isGamepad, dialogInfo)
+local function QueueDialog(name, data, params, isGamepad, dialogInfo, queueInFront)
     if name and dialogInfo and dialogInfo.onlyQueueOnce then
+        -- If dialog is the same as the currently shown dialog don't queue it.
+        if name == g_displayedDialog.name then
+            return
+        end
+
         -- If the dialog is already queued and can only be queued once, don't requeue it
         for _, dialog in ipairs(g_dialogQueue) do
             if dialog[QUEUED_DIALOG_INDEX_NAME] == name then
@@ -41,7 +48,11 @@ local function QueueDialog(name, data, params, isGamepad, dialogInfo)
     name = name or ""
     data = data or {}
     params = params or {}
-    table.insert(g_dialogQueue, {name, data, params, isGamepad})
+    if queueInFront then
+        table.insert(g_dialogQueue, 1, {name, data, params, isGamepad})
+    else
+        table.insert(g_dialogQueue, {name, data, params, isGamepad})
+    end
 end
 
 local function RemoveQueuedDialogs(name, filterFunction)
@@ -431,10 +442,20 @@ function ZO_Dialogs_ShowDialog(name, data, textParams, isGamepad)
     if type(dialogInfo) ~= "table" then
         return nil
     end
-    
-    if ZO_Dialogs_IsShowingDialog() then
+
+    local forceQueueDialog = false
+    local queueInFront = false
+    if g_isDialogQueuePaused then
+        forceQueueDialog = true
+        if ZO_IsElementInNumericallyIndexedTable(g_dialogPauseExemptions, name) then
+            forceQueueDialog = false
+            queueInFront = true
+        end
+    end
+
+    if ZO_Dialogs_IsShowingDialog() or forceQueueDialog then
         if dialogInfo.canQueue then
-            QueueDialog(name, data, textParams, isGamepad, dialogInfo)
+            QueueDialog(name, data, textParams, isGamepad, dialogInfo, queueInFront)
         end
         return nil
     end
@@ -858,7 +879,7 @@ function ZO_Dialogs_InitializeDialog(dialog, isGamepad)
     warningLabel:SetHidden(true)
     editControl:SetText("")
     editControl:LoseFocus()
-       
+
     if(not g_currencyPool) then
         g_currencyPool = ZO_ControlPool:New("ZO_CurrencyTemplate", dialog, "Currency")
     end
@@ -878,6 +899,8 @@ function ZO_Dialogs_ReleaseAllDialogsOfName(name, filterFunction)
     if dialog then
         ZO_Dialogs_ReleaseDialog(dialog)
     end
+
+    ZO_Dialogs_SetDialogQueuePaused(false)
 end
 
 function ZO_Dialogs_ReleaseAllDialogsExcept(...)
@@ -886,6 +909,8 @@ function ZO_Dialogs_ReleaseAllDialogsExcept(...)
     if g_displayedDialog and not ContainsName(g_displayedDialog.name, ...) then
         ZO_Dialogs_ReleaseDialog(g_displayedDialog.dialog)
     end
+
+    ZO_Dialogs_SetDialogQueuePaused(false)
 end
 
 function ZO_Dialogs_ReleaseDialogOnButtonPress(nameOrDialog)
@@ -918,13 +943,33 @@ function ZO_Dialogs_ReleaseDialog(nameOrDialog, releasedFromButton, filterFuncti
         end
         ZO_CompleteReleaseDialogOnDialogHidden(dialog, releasedFromButton)
     end
-    
-    return true  
+
+    return true
+end
+
+function ZO_Dialogs_IsDialogQueuePaused()
+    return g_isDialogQueuePaused
+end
+
+function ZO_Dialogs_SetDialogQueuePaused(isPaused, exemptionList)
+    if isPaused ~= g_isDialogQueuePaused then
+        g_isDialogQueuePaused = isPaused
+        if isPaused then
+            g_dialogPauseExemptions = exemptionList
+        else
+            -- Show next dialog in queue
+            local queuedDialog = table.remove(g_dialogQueue, 1)
+            if queuedDialog then
+                ZO_Dialogs_ShowDialog(unpack(queuedDialog))
+            end
+            ZO_ClearNumericallyIndexedTable(g_dialogPauseExemptions)
+        end
+    end
 end
 
 function ZO_CompleteReleaseDialogOnDialogHidden(dialog, releasedFromButton)
     dialog.hiding = false
-    
+
     local name = dialog.name
     local dialogInfo = dialog.info
 
@@ -933,21 +978,21 @@ function ZO_CompleteReleaseDialogOnDialogHidden(dialog, releasedFromButton)
 
         for i = 1, NUM_DIALOG_BUTTONS do
             local btn = dialog:GetNamedChild("Button"..i)
-            if(btn) then
+            if btn then
                 btn.m_callback = nil
                 btn.m_noReleaseOnClick = nil
             end
 
-            if(dialog.buttonCostKeys and dialog.buttonCostKeys[i]) then
+            if dialog.buttonCostKeys and dialog.buttonCostKeys[i] then
                 g_currencyPool:ReleaseObject(dialog.buttonCostKeys[i])
                 dialog.buttonCostKeys[i] = nil
             end
         end
-    
-        if(dialog.currencyKey) then
+
+        if dialog.currencyKey then
             g_currencyPool:ReleaseObject(dialog.currencyKey)
             dialog.currencyKey = nil
-        end        
+        end
     end
 
     dialog.name = nil
@@ -974,18 +1019,20 @@ function ZO_CompleteReleaseDialogOnDialogHidden(dialog, releasedFromButton)
         dialogInfo.finishedCallback(dialog)
     end
 
-    -- Show next dialog in queue
-    local queuedDialog = table.remove(g_dialogQueue, 1)
-
+    local _, queuedDialog = next(g_dialogQueue)
     if queuedDialog then
-        ZO_Dialogs_ShowDialog(unpack(queuedDialog))
-    else
-        if not ZO_Dialogs_IsShowingDialog() then
-            CALLBACK_MANAGER:FireCallbacks("AllDialogsHidden")
+        if not g_isDialogQueuePaused or ZO_IsElementInNumericallyIndexedTable(g_dialogPauseExemptions, queuedDialog[QUEUED_DIALOG_INDEX_NAME]) then
+            -- Show next dialog in queue
+            table.remove(g_dialogQueue, 1)
+            ZO_Dialogs_ShowDialog(unpack(queuedDialog))
+            return
         end
     end
-end
 
+    if not ZO_Dialogs_IsShowingDialog() then
+        CALLBACK_MANAGER:FireCallbacks("AllDialogsHidden")
+    end
+end
 
 function ZO_Dialogs_ReleaseAllDialogs(forceAll)
     for _, dialog in ipairs(g_dialogQueue) do
@@ -1001,6 +1048,8 @@ function ZO_Dialogs_ReleaseAllDialogs(forceAll)
     if dialog and (forceAll or not dialog.info.mustChoose) then
         ZO_Dialogs_ReleaseDialog(dialog)
     end
+
+    ZO_Dialogs_SetDialogQueuePaused(false)
 end
 
 -- If textTable is nil, the default mainText table (defined in the ESO_Dialogs table) is used
@@ -1061,11 +1110,11 @@ end
 function ZO_Dialogs_GetEditBoxText(dialog)
     if(dialog) then
         local editControl = dialog:GetNamedChild("EditBox")
-    
-        if(not editControl:IsHidden()) then
+
+        if not editControl:IsHidden() then
             return editControl:GetText()
-        end        
-    end   
+        end
+    end
     
     return nil
 end

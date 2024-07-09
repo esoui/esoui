@@ -203,7 +203,7 @@ function ZO_GuildHistory_Manager.HasPermissionsForCategoryAndSubcategory(eventCa
         else
             local permissionsFailedOnAllSubcategories = true
             for i, subcategoryInfo in ipairs(categoryInfo.subcategories) do
-                if not subcategoryInfo.gatingPermission or DoesPlayerHaveGuildPermission(guildId, subcategoryData.gatingPermission) then
+                if not subcategoryInfo.gatingPermission or DoesPlayerHaveGuildPermission(guildId, subcategoryInfo.gatingPermission) then
                     --Subcategory was not gated or permission was met
                     permissionsFailedOnAllSubcategories = false
                     break

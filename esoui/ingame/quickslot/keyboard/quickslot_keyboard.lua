@@ -10,10 +10,26 @@ local LIST_ENTRY_HEIGHT = 52
 --Keyboard Quickslot Screen
 -------------------
 
-ZO_Quickslot_Keyboard = ZO_InitializingObject:Subclass()
+ZO_Quickslot_Keyboard = ZO_DeferredInitializingObject:Subclass()
 
 function ZO_Quickslot_Keyboard:Initialize(control)
+    KEYBOARD_QUICKSLOT_FRAGMENT = ZO_FadeSceneFragment:New(control)
+    ZO_DeferredInitializingObject.Initialize(self, KEYBOARD_QUICKSLOT_FRAGMENT)
+
     self.control = control
+    self.wheelControl = self.control:GetNamedChild("QuickSlotCircle")
+
+    KEYBOARD_QUICKSLOT_CIRCLE_FRAGMENT = ZO_FadeSceneFragment:New(self.wheelControl)
+    KEYBOARD_QUICKSLOT_CIRCLE_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
+        if newState == SCENE_FRAGMENT_SHOWING then
+            self.wheel:Activate()
+        elseif newState == SCENE_FRAGMENT_HIDDEN then
+            self.wheel:Deactivate()
+        end
+    end)
+end
+
+function ZO_Quickslot_Keyboard:OnDeferredInitialize()
     self.money = self.control:GetNamedChild("InfoBarMoney")
 
     self.activeTab = self.control:GetNamedChild("TabsActive")
@@ -74,7 +90,7 @@ function ZO_Quickslot_Keyboard:Initialize(control)
 
     local SUPPRESS_TEXT_CHANGED_CALLBACK = true
     local function OnListTextFilterComplete()
-        if KEYBOARD_QUICKSLOT_FRAGMENT:IsShowing() then
+        if self:IsShowing() then
             self.searchBox:SetText(TEXT_SEARCH_MANAGER:GetSearchText("quickslotTextSearch"), SUPPRESS_TEXT_CHANGED_CALLBACK)
             self:UpdateList()
         end
@@ -85,7 +101,6 @@ function ZO_Quickslot_Keyboard:Initialize(control)
     self.sortHeadersControl = self.control:GetNamedChild("SortBy")
     self.sortHeaders = ZO_SortHeaderGroup:New(self.sortHeadersControl, true)
 
-    self.wheelControl = self.control:GetNamedChild("QuickSlotCircle")
     local wheelData =
     {
         hotbarCategories = { HOTBAR_CATEGORY_QUICKSLOT_WHEEL },
@@ -162,7 +177,7 @@ function ZO_Quickslot_Keyboard:Initialize(control)
     self:RefreshCurrency(GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER))
 
     local function HandleInventoryChanged()
-        if KEYBOARD_QUICKSLOT_FRAGMENT:IsShowing() then
+        if self:IsShowing() then
             RefreshQuickslotWindow()
         end
     end
@@ -204,26 +219,6 @@ function ZO_Quickslot_Keyboard:Initialize(control)
     self.control:RegisterForEvent(EVENT_INVENTORY_SLOT_LOCKED, HandleInventorySlotLocked)
     self.control:RegisterForEvent(EVENT_INVENTORY_SLOT_UNLOCKED, HandleInventorySlotUnlocked)
     self.control:RegisterForEvent(EVENT_ACTION_UPDATE_COOLDOWNS, HandleCooldownUpdates)
-
-    KEYBOARD_QUICKSLOT_FRAGMENT = ZO_FadeSceneFragment:New(self.control)
-    KEYBOARD_QUICKSLOT_FRAGMENT:RegisterCallback("StateChange",  function(oldState, newState)
-        if newState == SCENE_FRAGMENT_SHOWN then
-            TEXT_SEARCH_MANAGER:ActivateTextSearch("quickslotTextSearch")
-            self:UpdateList()
-            self:UpdateFreeSlots()
-        elseif newState == SCENE_FRAGMENT_HIDDEN then
-            TEXT_SEARCH_MANAGER:DeactivateTextSearch("quickslotTextSearch")
-        end
-    end)
-
-    KEYBOARD_QUICKSLOT_CIRCLE_FRAGMENT = ZO_FadeSceneFragment:New(self.wheelControl)
-    KEYBOARD_QUICKSLOT_CIRCLE_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
-        if newState == SCENE_FRAGMENT_SHOWING then
-            self.wheel:Activate()
-        elseif newState == SCENE_FRAGMENT_HIDDEN then
-            self.wheel:Deactivate()
-        end
-    end)
 
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", RefreshQuickslotWindow)
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleUpdated", RefreshQuickslotWindow)
@@ -278,6 +273,16 @@ end
 function ZO_Quickslot_Keyboard:ApplySort()
     self:SortData()
     ZO_ScrollList_Commit(self.list)
+end
+
+function ZO_Quickslot_Keyboard:OnShown()
+    TEXT_SEARCH_MANAGER:ActivateTextSearch("quickslotTextSearch")
+    self:UpdateList()
+    self:UpdateFreeSlots()
+end
+
+function ZO_Quickslot_Keyboard:OnHidden()
+    TEXT_SEARCH_MANAGER:DeactivateTextSearch("quickslotTextSearch")
 end
 
 function ZO_Quickslot_Keyboard:RefreshCurrency(value)
@@ -416,19 +421,19 @@ function ZO_Quickslot_Keyboard:SetUpQuickSlot(control, data)
     -- data.quality is deprecated, included here for addon backwards compatibility
     local displayQuality = data.displayQuality or data.quality
     local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, displayQuality)
-    local nameControl = GetControl(control, "Name")
+    local nameControl = control:GetNamedChild("Name")
     nameControl:SetText(data.name)
     nameControl:SetColor(r, g, b, 1)
 
-    local sellPriceControl = GetControl(control, "SellPrice")
+    local sellPriceControl = control:GetNamedChild("SellPriceText")
     sellPriceControl:SetHidden(false)
     ZO_CurrencyControl_SetSimpleCurrency(sellPriceControl, CURT_MONEY, data.stackSellPrice, ITEM_SLOT_CURRENCY_OPTIONS)
 
-    local inventorySlot = GetControl(control, "Button")
+    local inventorySlot = control:GetNamedChild("Button")
     ZO_Inventory_BindSlot(inventorySlot, data.slotType, data.slotIndex, data.bagId)
     ZO_PlayerInventorySlot_SetupSlot(control, data.stackCount, data.iconFile, data.meetsUsageRequirement, data.locked)
 
-    local statusControl = GetControl(control, "StatusTexture")
+    local statusControl = control:GetNamedChild("StatusTexture")
     statusControl:ClearIcons()
     if data.stolen then
         statusControl:AddIcon(STOLEN_ICON_TEXTURE)
@@ -462,9 +467,9 @@ function ZO_Quickslot_Keyboard:SetUpQuestItemSlot(rowControl, questItem)
     nameControl:SetText(questItem.name) -- already formatted
     nameControl:SetColor(r, g, b, 1)
 
-    GetControl(rowControl, "SellPrice"):SetHidden(true)
+    rowControl:GetNamedChild("SellPriceText"):SetHidden(true)
 
-    local inventorySlot = GetControl(rowControl, "Button")
+    local inventorySlot = rowControl:GetNamedChild("Button")
     ZO_InventorySlot_SetType(inventorySlot, SLOT_TYPE_QUEST_ITEM)
 
     questItem.slotControl = rowControl

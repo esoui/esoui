@@ -697,8 +697,11 @@ function ZO_SkillsManager:RegisterForEvents()
         end
     end
 
-    local function OnSkillLineNewStatusChanged()
+    local function OnSkillLineNewStatusChanged(skillLineData)
         self.skillLinesTreeRefreshGroup:MarkDirty("Visible")
+        if skillLineData == self:GetSelectedSkillLineData() then
+            self.skillListRefreshGroup:MarkDirty("Visible")
+        end
         MAIN_MENU_KEYBOARD:RefreshCategoryIndicators()
     end
 

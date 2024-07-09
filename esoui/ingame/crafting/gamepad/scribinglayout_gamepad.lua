@@ -35,14 +35,6 @@ function ZO_ScribingLayout_Gamepad:RefreshHeader()
     -- To be overridden
 end
 
-function ZO_ScribingLayout_Gamepad:OnShow()
-    ZO_Gamepad_ParametricList_Search_Screen.OnShow(self)
-end
-
-function ZO_ScribingLayout_Gamepad:OnHiding()
-    ZO_Gamepad_ParametricList_Search_Screen.OnHiding(self)
-end
-
 function ZO_ScribingLayout_Gamepad:OnHide()
     ZO_Gamepad_ParametricList_Search_Screen.OnHide(self)
 

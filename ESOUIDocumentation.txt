@@ -48,6 +48,10 @@ h5. ActionSlotType
 * ACTION_SLOT_TYPE_WEAPON_ATTACK
 
 
+h5. AdditionalContentType
+* ADDITIONAL_CONTENT_TYPE_VO
+
+
 h5. Alliance
 * ALLIANCE_ALDMERI_DOMINION
 * ALLIANCE_DAGGERFALL_COVENANT
@@ -112,6 +116,11 @@ h5. BookMedium
 * BOOK_MEDIUM_SCROLL
 * BOOK_MEDIUM_STONE_TABLET
 * BOOK_MEDIUM_YELLOWED_PAPER
+
+
+h5. BroadcastType
+* BROADCAST_TYPE_HOTFIX_WARNING
+* BROADCAST_TYPE_MAINTENANCE_WARNING
 
 
 h5. BuffEffectType
@@ -388,6 +397,8 @@ h5. InstanceType
 
 
 h5. JumpResult
+* JUMP_RESULT_JUMP_CONVERTED_TO_LOCAL
+* JUMP_RESULT_JUMP_CONVERTED_TO_REMOTE
 * JUMP_RESULT_JUMP_FAILED
 * JUMP_RESULT_JUMP_FAILED_ALREADY_JUMPING
 * JUMP_RESULT_JUMP_FAILED_BATTLEGROUND_ENTRY
@@ -581,6 +592,7 @@ h5. MouseDestroyItemFailedReason
 h5. NamingError
 * NAME_RULE_CANNOT_RENAME
 * NAME_RULE_CANNOT_START_WITH_SPACE
+* NAME_RULE_DISALLOWED_NAME
 * NAME_RULE_DUPLICATE_NAME
 * NAME_RULE_INVALID_CHARACTERS
 * NAME_RULE_INVALID_NAME
@@ -1002,6 +1014,7 @@ h5. SocialActionResult
 * SOCIAL_RESULT_DEPRECATED1
 * SOCIAL_RESULT_DESTINATION_FULL
 * SOCIAL_RESULT_DISABLED
+* SOCIAL_RESULT_DISALLOWED_NAME
 * SOCIAL_RESULT_EDIT_HERALDRY_GUILD_LEADER_ONLY
 * SOCIAL_RESULT_EDIT_PERMISSIONS_GUILD_LEADER_ONLY
 * SOCIAL_RESULT_GUILD_DOESNT_EXIST
@@ -1264,6 +1277,7 @@ h5. Globals
 * ACTION_BAR_ULTIMATE_SLOT_INDEX
 * ACTION_BAR_UTILITY_BAR_SIZE
 * CHARNAME_MIN_LENGTH
+* DECORATED_DISPLAY_NAME_MAX_LENGTH
 * MAX_DEVICE_ID_LENGTH
 * DISPLAY_NAME_PREFIX_BYTE
 * MAX_ACTION_BAR_ABILITY_SLOTS
@@ -1460,6 +1474,7 @@ h5. ActivityQueueResult
 * ACTIVITY_QUEUE_RESULT_INVALID_LEVEL
 * ACTIVITY_QUEUE_RESULT_IN_TRIBUTE_MATCH
 * ACTIVITY_QUEUE_RESULT_LOCATION_RESTRICTION
+* ACTIVITY_QUEUE_RESULT_LOCKED_QUEUE
 * ACTIVITY_QUEUE_RESULT_MEMBERS_OFFLINE
 * ACTIVITY_QUEUE_RESULT_MEMBER_LOCATION_NOT_VALID
 * ACTIVITY_QUEUE_RESULT_MEMEBER_CANCELED_READY_CHECK
@@ -1566,6 +1581,12 @@ h5. GroupFinderStatus
 * GROUP_FINDER_STATUS_AVAILABLE
 * GROUP_FINDER_STATUS_DISABLED
 * GROUP_FINDER_STATUS_DOWN
+
+
+h5. HouseToursStatus
+* HOUSE_TOURS_STATUS_DISABLED
+* HOUSE_TOURS_STATUS_READY
+* HOUSE_TOURS_STATUS_UNINITIALIZED
 
 
 h5. LFGActivity
@@ -1893,6 +1914,7 @@ h5. CampaignQueueEntryType
 
 
 h5. CampaignQueueRequestStateType
+* CAMPAIGN_QUEUE_REQUEST_STATE_CAMPAIGN_CLOSED
 * CAMPAIGN_QUEUE_REQUEST_STATE_CONFIRMING
 * CAMPAIGN_QUEUE_REQUEST_STATE_FINISHED
 * CAMPAIGN_QUEUE_REQUEST_STATE_PENDING_ACCEPT
@@ -3205,6 +3227,7 @@ h5. SCTEventType
 * SCT_EVENT_TYPE_SST_STATE
 * SCT_EVENT_TYPE_STAGGERED
 * SCT_EVENT_TYPE_STUNNED
+* SCT_EVENT_TYPE_TAUNTED
 * SCT_EVENT_TYPE_WEAPONSWAP
 * SCT_EVENT_TYPE_WRONG_WEAPON
 
@@ -3988,6 +4011,114 @@ h5. HousePermissionUserGroup
 * HOUSE_PERMISSION_USER_GROUP_INDIVIDUAL
 
 
+h5. HouseTourFavoriteOperationType
+* HOUSE_TOURS_FAVORITE_OPERATION_TYPE_CREATE
+* HOUSE_TOURS_FAVORITE_OPERATION_TYPE_DELETE
+
+
+h5. HouseTourListingResult
+* HOUSE_TOURS_LISTING_RESULT_BAD_NICKNAME
+* HOUSE_TOURS_LISTING_RESULT_COOLDOWN_NOT_READY
+* HOUSE_TOURS_LISTING_RESULT_CREATE_FAILED
+* HOUSE_TOURS_LISTING_RESULT_DELETE_FAILED
+* HOUSE_TOURS_LISTING_RESULT_DUPLICATE_TAGS
+* HOUSE_TOURS_LISTING_RESULT_HOUSE_ALREADY_LISTED
+* HOUSE_TOURS_LISTING_RESULT_HOUSE_NOT_LISTED
+* HOUSE_TOURS_LISTING_RESULT_HOUSE_NOT_OWNED
+* HOUSE_TOURS_LISTING_RESULT_INVALID_HOUSE
+* HOUSE_TOURS_LISTING_RESULT_INVALID_PERMISSIONS
+* HOUSE_TOURS_LISTING_RESULT_INVALID_TAG
+* HOUSE_TOURS_LISTING_RESULT_NO_CHANGES
+* HOUSE_TOURS_LISTING_RESULT_REQUEST_TIMEOUT
+* HOUSE_TOURS_LISTING_RESULT_SUCCESS
+* HOUSE_TOURS_LISTING_RESULT_TOO_MANY_TAGS
+* HOUSE_TOURS_LISTING_RESULT_UPDATE_FAILED
+
+
+h5. HouseTourListingTag
+* HOUSE_TOURS_LISTING_TAG_AQUATIC
+* HOUSE_TOURS_LISTING_TAG_ARENAS
+* HOUSE_TOURS_LISTING_TAG_ARTWORK
+* HOUSE_TOURS_LISTING_TAG_COLORFUL
+* HOUSE_TOURS_LISTING_TAG_CONVENTIONAL
+* HOUSE_TOURS_LISTING_TAG_COZY
+* HOUSE_TOURS_LISTING_TAG_CREATURES
+* HOUSE_TOURS_LISTING_TAG_DINING
+* HOUSE_TOURS_LISTING_TAG_ELEGANT
+* HOUSE_TOURS_LISTING_TAG_FESTIVE
+* HOUSE_TOURS_LISTING_TAG_FROM_SCRATCH
+* HOUSE_TOURS_LISTING_TAG_GAMES
+* HOUSE_TOURS_LISTING_TAG_GARDENS
+* HOUSE_TOURS_LISTING_TAG_HIDDEN_SECRETS
+* HOUSE_TOURS_LISTING_TAG_LABORATORIES
+* HOUSE_TOURS_LISTING_TAG_LIBRARIES
+* HOUSE_TOURS_LISTING_TAG_LORE_FRIENDLY
+* HOUSE_TOURS_LISTING_TAG_MAGIC
+* HOUSE_TOURS_LISTING_TAG_MARKETS
+* HOUSE_TOURS_LISTING_TAG_MECHANISMS
+* HOUSE_TOURS_LISTING_TAG_OTHER_WORLDS
+* HOUSE_TOURS_LISTING_TAG_PLAYFUL
+* HOUSE_TOURS_LISTING_TAG_ROLEPLAY
+* HOUSE_TOURS_LISTING_TAG_SACRED
+* HOUSE_TOURS_LISTING_TAG_SINISTER
+* HOUSE_TOURS_LISTING_TAG_STRONGHOLDS
+* HOUSE_TOURS_LISTING_TAG_TOWNS
+* HOUSE_TOURS_LISTING_TAG_UNDER_CONSTRUCTION
+
+
+h5. HouseTourListingType
+* HOUSE_TOURS_LISTING_TYPE_BROWSE
+* HOUSE_TOURS_LISTING_TYPE_FAVORITE
+* HOUSE_TOURS_LISTING_TYPE_RECOMMENDED
+
+
+h5. HouseTourRequestListingsResult
+* HOUSE_TOURS_REQUEST_LISTINGS_RESULT_DUPLICATE_CATEGORY_FILTERS
+* HOUSE_TOURS_REQUEST_LISTINGS_RESULT_DUPLICATE_HOUSE_ID_FILTERS
+* HOUSE_TOURS_REQUEST_LISTINGS_RESULT_DUPLICATE_TAG_FILTERS
+* HOUSE_TOURS_REQUEST_LISTINGS_RESULT_FILTERED_SEARCH_DISABLED
+* HOUSE_TOURS_REQUEST_LISTINGS_RESULT_INVALID_CATEGORY_FILTERS
+* HOUSE_TOURS_REQUEST_LISTINGS_RESULT_INVALID_HOUSE_ID_FILTERS
+* HOUSE_TOURS_REQUEST_LISTINGS_RESULT_INVALID_TAG_FILTERS
+* HOUSE_TOURS_REQUEST_LISTINGS_RESULT_REQUEST_LISTINGS_FAILED
+* HOUSE_TOURS_REQUEST_LISTINGS_RESULT_SUCCESS
+* HOUSE_TOURS_REQUEST_LISTINGS_RESULT_TOO_MANY_CATEGORY_FILTERS
+* HOUSE_TOURS_REQUEST_LISTINGS_RESULT_TOO_MANY_HOUSE_ID_FILTERS
+* HOUSE_TOURS_REQUEST_LISTINGS_RESULT_TOO_MANY_TAG_FILTERS
+
+
+h5. HouseTourSaveFavoriteResult
+* HOUSE_TOURS_SAVE_FAVORITE_RESULT_CREATE_FAILED
+* HOUSE_TOURS_SAVE_FAVORITE_RESULT_DELETE_FAILED
+* HOUSE_TOURS_SAVE_FAVORITE_RESULT_DUPLICATE_FAVORITE
+* HOUSE_TOURS_SAVE_FAVORITE_RESULT_HOUSE_OWNER
+* HOUSE_TOURS_SAVE_FAVORITE_RESULT_INVALID_HOUSE
+* HOUSE_TOURS_SAVE_FAVORITE_RESULT_SUCCESS
+* HOUSE_TOURS_SAVE_FAVORITE_RESULT_TOO_MANY_FAVORITES
+
+
+h5. HouseTourSaveRecommendationResult
+* HOUSE_TOURS_SAVE_RECOMMENDATION_RESULT_CREATE_FAILED
+* HOUSE_TOURS_SAVE_RECOMMENDATION_RESULT_DUPLICATE_RECOMMENDATION
+* HOUSE_TOURS_SAVE_RECOMMENDATION_RESULT_HIT_RECOMMENDATION_WEEKLY_LIMIT
+* HOUSE_TOURS_SAVE_RECOMMENDATION_RESULT_HOUSE_NOT_LISTED
+* HOUSE_TOURS_SAVE_RECOMMENDATION_RESULT_HOUSE_OWNER
+* HOUSE_TOURS_SAVE_RECOMMENDATION_RESULT_SUCCESS
+
+
+h5. HouseToursListingOperationType
+* HOUSE_TOURS_LISTING_OPERATION_TYPE_CREATE
+* HOUSE_TOURS_LISTING_OPERATION_TYPE_DELETE
+* HOUSE_TOURS_LISTING_OPERATION_TYPE_NONE
+* HOUSE_TOURS_LISTING_OPERATION_TYPE_UPDATE
+
+
+h5. HouseToursListingSortType
+* HOUSE_TOURS_LISTING_SORT_TYPE_FURNITURE_COUNT
+* HOUSE_TOURS_LISTING_SORT_TYPE_HOUSE_NAME
+* HOUSE_TOURS_LISTING_SORT_TYPE_NONE
+
+
 h5. HousingEditorCommandResult
 * HOUSING_EDITOR_COMMAND_RESULT_COLLECTIBLE_BLACKLISTED
 * HOUSING_EDITOR_COMMAND_RESULT_COLLECTIBLE_LOCKED
@@ -4181,6 +4312,11 @@ h5. Globals
 * HOUSING_MAX_PATH_NODE_WAIT_TIME
 * HOUSING_MAX_FURNITURE_PATH_NODES
 * HOUSING_MAX_GUILD_USER_GROUP_ENTRIES
+* MAX_HOUSE_TOURS_CATEGORY_TYPE_FILTERS
+* MAX_HOUSE_TOURS_HOUSE_FILTERS
+* MAX_HOUSE_TOURS_LISTING_FAVORITES
+* MAX_HOUSE_TOURS_LISTING_TAGS
+* MAX_HOUSE_TOURS_WEEKLY_RECOMMENDATIONS
 * MAX_HOUSES_FOR_PERMISSIONS
 * HOUSING_MAX_INDIVIDUAL_USER_GROUP_ENTRIES
 * HOUSING_MAX_PATHS
@@ -6359,13 +6495,6 @@ h5. Globals
 h5. Globals
 
 
-h5. MacroEditorNodeType
-* MACRO_EDITOR_NODE_TYPE_COMMAND_MACRO
-* MACRO_EDITOR_NODE_TYPE_FOLDER
-* MACRO_EDITOR_NODE_TYPE_INFO
-* MACRO_EDITOR_NODE_TYPE_LUA_MACRO
-
-
 h5. Globals
 
 
@@ -7386,6 +7515,7 @@ h5. GroupVoteChoice
 
 
 h5. Globals
+* BIG_TEAM_BATTLE_SIZE_THRESHOLD
 * LARGE_GROUP_SIZE_THRESHOLD
 * MAX_GROUP_SIZE_THRESHOLD
 * SMALL_GROUP_SIZE_THRESHOLD
@@ -7628,6 +7758,7 @@ h5. CustomerServiceAskForHelpImpact
 * CUSTOMER_SERVICE_ASK_FOR_HELP_IMPACT_NONE
 * CUSTOMER_SERVICE_ASK_FOR_HELP_IMPACT_REPORT_GROUP_FINDER_LISTING
 * CUSTOMER_SERVICE_ASK_FOR_HELP_IMPACT_REPORT_GUILD
+* CUSTOMER_SERVICE_ASK_FOR_HELP_IMPACT_REPORT_HOUSE_TOUR_LISTING
 * CUSTOMER_SERVICE_ASK_FOR_HELP_IMPACT_REPORT_PLAYER
 
 
@@ -7642,6 +7773,12 @@ h5. CustomerServiceAskForHelpReportGuildCategory
 * CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_GUILD_CATEGORY_INAPPROPRIATE_LISTING
 * CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_GUILD_CATEGORY_INAPPROPRIATE_NAME
 * CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_GUILD_CATEGORY_NONE
+
+
+h5. CustomerServiceAskForHelpReportHouseTourListingCategory
+* CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_HOUSE_TOUR_LISTING_CATEGORY_INAPPROPRIATE_NICKNAME
+* CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_HOUSE_TOUR_LISTING_CATEGORY_NONE
+* CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_HOUSE_TOUR_LISTING_CATEGORY_OFFENSIVE_ARRANGEMENT
 
 
 h5. CustomerServiceAskForHelpReportPlayerCategory
@@ -8860,6 +8997,7 @@ h5. ActionResult
 * ACTION_RESULT_TARGET_OUT_OF_RANGE
 * ACTION_RESULT_TARGET_PLAYING_TRIBUTE
 * ACTION_RESULT_TARGET_TOO_CLOSE
+* ACTION_RESULT_TAUNTED
 * ACTION_RESULT_UNEVEN_TERRAIN
 * ACTION_RESULT_WEAPONSWAP
 * ACTION_RESULT_WRECKING_DAMAGE
@@ -9307,6 +9445,7 @@ h5. TutorialTrigger
 * TUTORIAL_TRIGGER_GAINED_DISGUISE
 * TUTORIAL_TRIGGER_GAINED_EMPTY_SOUL_GEM
 * TUTORIAL_TRIGGER_GAINED_FORWARD_CAMP_ITEM
+* TUTORIAL_TRIGGER_GAINED_LOCKPICK
 * TUTORIAL_TRIGGER_GAINED_MYTHIC_ITEM
 * TUTORIAL_TRIGGER_GAINED_SIEGE_BALLISTA_ITEM
 * TUTORIAL_TRIGGER_GAINED_SIEGE_CATAPULT_ITEM
@@ -9331,6 +9470,9 @@ h5. TutorialTrigger
 * TUTORIAL_TRIGGER_HELP_CUSTOMER_SUPPORT_OPENED
 * TUTORIAL_TRIGGER_HELP_TUTORIALS_OPENED
 * TUTORIAL_TRIGGER_HOME_STORAGE_OPENED
+* TUTORIAL_TRIGGER_HOUSE_TOURS_MANAGE_LISTINGS_OPENED_POINTER_BOX
+* TUTORIAL_TRIGGER_HOUSE_TOURS_OPENED
+* TUTORIAL_TRIGGER_HOUSE_VISITED_AS_GUEST
 * TUTORIAL_TRIGGER_HOUSING_EDITOR_ENTERED_LINK_MODE
 * TUTORIAL_TRIGGER_HOUSING_EDITOR_ENTERED_PATH_MODE
 * TUTORIAL_TRIGGER_HOUSING_EDITOR_ENTERED_PRECISION_PLACEMENT_MODE
@@ -9353,6 +9495,7 @@ h5. TutorialTrigger
 * TUTORIAL_TRIGGER_LEVEL_UP
 * TUTORIAL_TRIGGER_LIVESTOCK_TARGETED
 * TUTORIAL_TRIGGER_LOCKPICKING_OPENED
+* TUTORIAL_TRIGGER_LOCKPICKING_PRACTICE_OPENED
 * TUTORIAL_TRIGGER_LORE_LIBRARY_OPENED
 * TUTORIAL_TRIGGER_MAELSTROM_ARENA_ZONE_ENTERED
 * TUTORIAL_TRIGGER_MAIL_OPENED
@@ -9434,6 +9577,7 @@ h5. TutorialTrigger
 * TUTORIAL_TRIGGER_ULTIMATE_AVAILABLE
 * TUTORIAL_TRIGGER_UNIVERSAL_DECONSTRUCTION_OPENED
 * TUTORIAL_TRIGGER_UNIVERSAL_STYLE_ITEM
+* TUTORIAL_TRIGGER_UNOWNED_LOCK_VIEWED
 * TUTORIAL_TRIGGER_VOICE_CHAT_OPEN_CHANNELS
 * TUTORIAL_TRIGGER_VOICE_CHAT_OPEN_HISTORY
 * TUTORIAL_TRIGGER_WEAPON_SWAPPING_UNLOCKED
@@ -10321,6 +10465,7 @@ h5. KeyCode
 * KEY_OEM_5_BACK_SLASH
 * KEY_OEM_6_RIGHT_SQUARE_BRACKET
 * KEY_OEM_7_SINGLE_QUOTE
+* KEY_OEM_8_BACK_TICK
 * KEY_OEM_COMMA
 * KEY_OEM_MINUS
 * KEY_OEM_PERIOD
@@ -10742,9 +10887,6 @@ h2. Game API
 * IsSystemUsingHDR()
 ** _Returns:_ *bool* _usesHDR_
 
-* CanSystemEnableHDR()
-** _Returns:_ *bool* _canEnableHDR_
-
 * ShouldShowAdvancedUIErrors()
 ** _Returns:_ *bool* _shouldShowAdvancedUIErrors_
 
@@ -10753,7 +10895,7 @@ h2. Game API
 * GetESOFullVersionString()
 ** _Returns:_ *string* _versionString_
 
-* IsInUI *private* (*string* _guiName_)
+* IsInUI(*string* _guiName_)
 ** _Returns:_ *bool* _isInUI_
 
 * GetStringWidthScaled(*object* _fontObject_, *string* _text_, *number* _scale_, *[Space|#Space]* _space_)
@@ -13071,7 +13213,7 @@ h2. Game API
 
 * JumpToHouse(*string* _displayName_)
 
-* JumpToSpecificHouse(*string* _displayName_, *integer* _houseId_)
+* JumpToSpecificHouse(*string* _displayName_, *integer* _houseId_, *bool* _fromHouseTours_)
 
 * GetNextLeaderboardScoreNotificationId(*integer:nilable* _lastId_)
 ** _Returns:_ *integer:nilable* _nextId_
@@ -14029,9 +14171,6 @@ h2. Game API
 * GenerateMasterWritRewardText(*string* _itemLink_)
 ** _Returns:_ *string* _description_
 
-* GenerateCraftedAbilityScriptSlotDescriptionForAbilityDescription(*integer* _abilityId_, *[ScribingSlot|#ScribingSlot]* _slotType_, *string* _casterUnitTag_)
-** _Returns:_ *string* _description_
-
 * GetNumPOIs(*luaindex* _zoneIndex_)
 ** _Returns:_ *integer* _numPOIs_
 
@@ -14370,9 +14509,6 @@ h2. Game API
 * GetScoreboardEntryNumEarnedMedalsById(*luaindex* _slotIndex_, *integer* _medalId_)
 ** _Returns:_ *integer* _count_
 
-* GetScoringTeam()
-** _Returns:_ *integer* _result_
-
 * GetCurrentBattlegroundScore(*[BattlegroundTeam|#BattlegroundTeam]* _team_)
 ** _Returns:_ *integer* _score_
 
@@ -14563,7 +14699,7 @@ h2. Game API
 ** _Returns:_ *integer* _duration_
 
 * DoesCurrentCampaignRulesetAllowChampionPoints()
-** _Returns:_ *bool* _isNoChampionPointsCampaign_
+** _Returns:_ *bool* _allowsChampionPoints_
 
 * RegisterForAssignedCampaignData()
 
@@ -15684,6 +15820,9 @@ h2. Game API
 * GetHelpInfo(*luaindex* _helpCategoryIndex_, *luaindex* _helpIndex_)
 ** _Returns:_ *string* _name_, *string* _description_, *string* _description2_, *textureName:nilable* _image_, *string* _descriptionGamepad_, *string* _descriptionGamepad2_, *[HelpShowOptions|#HelpShowOptions]* _showOptions_
 
+* GetHelpId(*luaindex* _helpCategoryIndex_, *luaindex* _helpIndex_)
+** _Returns:_ *integer:nilable* _helpId_
+
 * GetUISystemAssociatedWithHelpEntry(*luaindex* _helpCategoryIndex_, *luaindex* _helpIndex_)
 ** _Returns:_ *[UISystem|#UISystem]* _uiSystem_
 
@@ -15703,6 +15842,8 @@ h2. Game API
 
 * SetCustomerServiceTicketCategory(*integer* _category_)
 
+* SetCustomerServiceTicketIncludeScreenshot(*bool* _includeScreenshot_)
+
 * SetCustomerServiceTicketPlayerTarget(*string* _displayName_)
 
 * SetCustomerServiceTicketItemTargetByLink(*string* _itemLink_)
@@ -15714,6 +15855,10 @@ h2. Game API
 * SetCustomerServiceTicketGroupListingTarget(*luaindex* _groupListingIndex_)
 
 * SetCustomerServiceTicketAppliedGroupListingTarget()
+
+* SetCustomerServiceTicketHouseListingTarget(*[HouseTourListingType|#HouseTourListingType]* _listingType_, *luaindex* _listingIndex_)
+
+* SetCustomerServiceTicketHouseListingCurrentHouseTarget()
 
 * StartHelpSearch(*string* _searchString_)
 
@@ -17177,8 +17322,150 @@ h2. Game API
 * IsPrimaryHouse(*integer* _houseId_)
 ** _Returns:_ *bool* _isPrimaryHouse_
 
+* GetHouseFurnitureCount(*integer* _houseId_)
+** _Returns:_ *integer:nilable* _furnitureCount_
+
 * DoesFurnitureThemeShowInBrowser(*[FurnitureThemeType|#FurnitureThemeType]* _furnitureTheme_)
 ** _Returns:_ *bool* _showInBrowser_
+
+* AreHousingPermissionsChangesPending()
+** _Returns:_ *bool* _changesPending_
+
+* GetHousingStarterQuestId()
+** _Returns:_ *integer* _questId_
+
+* RequestBestowHousingStarterQuest()
+
+* GetHouseToursStatus()
+** _Returns:_ *[HouseToursStatus|#HouseToursStatus]* _status_
+
+* IsHouseToursListingOnCooldown()
+** _Returns:_ *bool* _isOnCooldown_
+
+* IsHouseToursSearchOnCooldown()
+** _Returns:_ *bool* _isOnCooldown_
+
+* RequestHouseToursSearch(*[HouseTourListingType|#HouseTourListingType]* _listingType_)
+** _Returns:_ *integer:nilable* _searchId_
+
+* SetHouseToursCategoryTypeFilter(*[HouseTourListingType|#HouseTourListingType]* _listingType_, *[HouseCategoryType|#HouseCategoryType]* _houseCategoryType_)
+** _Returns:_ *bool* _success_
+
+* SetHouseToursDisplayNameFilter(*[HouseTourListingType|#HouseTourListingType]* _listingType_, *string* _ownerDisplayName_)
+** _Returns:_ *bool* _success_
+
+* SetHouseToursHouseIdFilter(*[HouseTourListingType|#HouseTourListingType]* _listingType_, *integer* _houseId_)
+** _Returns:_ *bool* _success_
+
+* SetHouseToursTagFilter(*[HouseTourListingType|#HouseTourListingType]* _listingType_, *[HouseTourListingTag|#HouseTourListingTag]* _tag_)
+** _Returns:_ *bool* _success_
+
+* GetNumHouseToursSearchListings(*[HouseTourListingType|#HouseTourListingType]* _listingType_)
+** _Returns:_ *integer* _numSearchListings_
+
+* GetNumHouseToursUnfilteredListings(*[HouseTourListingType|#HouseTourListingType]* _listingType_)
+** _Returns:_ *integer* _numUnfilteredListings_
+
+* GetHouseToursListingCollectibleIdByIndex(*[HouseTourListingType|#HouseTourListingType]* _listingType_, *luaindex* _listingIndex_)
+** _Returns:_ *integer* _collectibleId_
+
+* GetHouseToursListingHouseIdByIndex(*[HouseTourListingType|#HouseTourListingType]* _listingType_, *luaindex* _listingIndex_)
+** _Returns:_ *integer* _houseId_
+
+* GetHouseToursListingNicknameByIndex(*[HouseTourListingType|#HouseTourListingType]* _listingType_, *luaindex* _listingIndex_)
+** _Returns:_ *string* _nickname_
+
+* GetHouseToursListingOwnerDisplayNameByIndex(*[HouseTourListingType|#HouseTourListingType]* _listingType_, *luaindex* _listingIndex_)
+** _Returns:_ *string* _displayName_
+
+* GetHouseToursListingFurnitureCountByIndex(*[HouseTourListingType|#HouseTourListingType]* _listingType_, *luaindex* _listingIndex_)
+** _Returns:_ *integer:nilable* _furnitureCount_
+
+* GetHouseToursListingTagsByIndex(*[HouseTourListingType|#HouseTourListingType]* _listingType_, *luaindex* _listingIndex_)
+** _Uses variable returns..._
+** _Returns:_ *[HouseTourListingTag|#HouseTourListingTag]* _tag_
+
+* IsHouseToursListingFavoriteByIndex(*[HouseTourListingType|#HouseTourListingType]* _listingType_, *luaindex* _listingIndex_)
+** _Returns:_ *bool* _isFavorite_
+
+* IsHouseToursListingListedByIndex(*[HouseTourListingType|#HouseTourListingType]* _listingType_, *luaindex* _listingIndex_)
+** _Returns:_ *bool* _isListed_
+
+* GetNumHouseToursTopRecommendedHouseNotifications()
+** _Returns:_ *integer* _numNotifications_
+
+* GetHouseToursTopRecommendedHouseNotification(*luaindex* _notificationIndex_)
+** _Returns:_ *integer* _houseId_
+
+* RemoveHouseToursTopRecommendedHouseNotificationByHouseId(*integer* _houseId_)
+
+* GetHouseToursRecommendationsTimeRemainingS()
+** _Returns:_ *integer* _timeRemainingS_
+
+* RequestCreateHouseToursListing(*integer* _houseId_, *[HouseTourListingTag|#HouseTourListingTag]* _tag_)
+
+* RequestUpdateHouseToursListing(*integer* _houseId_, *[HouseTourListingTag|#HouseTourListingTag]* _tag_)
+
+* RequestDeleteHouseToursListing(*integer* _houseId_)
+
+* IsHouseListed(*integer* _houseId_)
+** _Returns:_ *bool* _isListed_
+
+* GetNumHouseToursPlayerListingRecommendations(*integer* _houseId_)
+** _Returns:_ *integer* _recommendationCount_
+
+* GetHouseToursPlayerListingTagsByHouseId(*integer* _houseId_)
+** _Uses variable returns..._
+** _Returns:_ *[HouseTourListingTag|#HouseTourListingTag]* _tag_
+
+* CanFavoriteHouses()
+** _Returns:_ *bool* _canFavorite_
+
+* GetNumFavoriteHouses()
+** _Returns:_ *integer* _numFavorites_
+
+* RequestRecommendCurrentHouse()
+
+* RequestUpdateCurrentHouseFavoriteStatus(*[HouseTourFavoriteOperationType|#HouseTourFavoriteOperationType]* _operationType_)
+
+* RequestUpdateHouseToursListingFavoriteStatusByIndex(*[HouseTourListingType|#HouseTourListingType]* _listingType_, *luaindex* _listingIndex_, *[HouseTourFavoriteOperationType|#HouseTourFavoriteOperationType]* _operationType_)
+
+* IsCurrentHouseListed()
+** _Returns:_ *bool* _isListed_
+
+* IsCurrentHouseFavorite()
+** _Returns:_ *bool* _isFavorited_
+
+* IsCurrentHouseRecommended()
+** _Returns:_ *bool* _isRecommended_
+
+* GetCurrentHouseTourListingCollectibleId()
+** _Returns:_ *integer* _collectibleId_
+
+* GetCurrentHouseTourListingHouseId()
+** _Returns:_ *integer* _houseId_
+
+* GetCurrentHouseTourListingFurnitureCount()
+** _Returns:_ *integer:nilable* _numFurnishings_
+
+* GetCurrentHouseTourListingNickname()
+** _Returns:_ *string* _nickname_
+
+* GetCurrentHouseTourListingOwnerDisplayName()
+** _Returns:_ *string* _ownerDisplayName_
+
+* GetCurrentHouseTourListingTags()
+** _Uses variable returns..._
+** _Returns:_ *[HouseTourListingTag|#HouseTourListingTag]* _tag_
+
+* CanRecommendHouses()
+** _Returns:_ *bool* _canRecommendedHouses_
+
+* GetNumHousesRecommendedByLocalPlayer()
+** _Returns:_ *integer* _numRecommendations_
+
+* IsHouseDefaultAccessSettingValidForHouseToursListing(*[HousePermissionDefaultAccessSetting|#HousePermissionDefaultAccessSetting]* _housePermissionDefaultAccessSetting_)
+** _Returns:_ *bool* _isValid_
 
 * HousingEditorIsPreviewInspectionEnabled()
 ** _Returns:_ *bool* _enabled_
@@ -18124,6 +18411,9 @@ h2. Game API
 * GetOldestGuildHistoryEventIndexForUpToDateEventsWithoutGaps(*integer* _guildId_, *[GuildHistoryEventCategory|#GuildHistoryEventCategory]* _category_)
 ** _Returns:_ *luaindex:nilable* _oldestEventIndex_
 
+* GetNewestAndOldestRedactedGuildHistoryEventIds(*integer* _guildId_, *[GuildHistoryEventCategory|#GuildHistoryEventCategory]* _category_)
+** _Returns:_ *integer53:nilable* _newestRedactedEventId_, *integer53:nilable* _oldestRedactedEventId_
+
 * DoesGuildHistoryEventCategoryHaveUpToDateEvents(*integer* _guildId_, *[GuildHistoryEventCategory|#GuildHistoryEventCategory]* _category_)
 ** _Returns:_ *bool* _hasUpToDateEvents_
 
@@ -18152,7 +18442,7 @@ h2. Game API
 ** _Returns:_ *bool* _isRedacted_
 
 * GetGuildHistoryEventBasicInfo(*integer* _guildId_, *[GuildHistoryEventCategory|#GuildHistoryEventCategory]* _category_, *luaindex* _eventIndex_)
-** _Returns:_ *integer53* _eventId_, *integer53* _timestamp_, *bool* _isRedacted_
+** _Returns:_ *integer53* _eventId_, *integer53* _timestamp_, *bool* _isRedacted_, *integer* _eventType_
 
 * GetGuildHistoryRosterEventInfo(*integer* _guildId_, *luaindex* _eventIndex_)
 ** _Returns:_ *integer53* _eventId_, *integer53* _timestampS_, *bool* _isRedacted_, *[GuildHistoryRosterEvent|#GuildHistoryRosterEvent]* _eventType_, *string* _actingDisplayName_, *string* _targetDisplayName_, *integer:nilable* _rankId_
@@ -18174,6 +18464,9 @@ h2. Game API
 
 * GetGuildHistoryAvAActivityEventInfo(*integer* _guildId_, *luaindex* _eventIndex_)
 ** _Returns:_ *integer53* _eventId_, *integer53* _timestampS_, *bool* _isRedacted_, *[GuildHistoryAvAActivityEvent|#GuildHistoryAvAActivityEvent]* _eventType_, *string* _displayName_, *integer* _keepId_, *integer* _campaignId_
+
+* GetGuildHistoryCacheDefaultMaxNumDays(*[GuildHistoryEventCategory|#GuildHistoryEventCategory]* _category_)
+** _Returns:_ *integer* _numDays_
 
 * GetGuildHistoryRequestMinCooldownMs()
 ** _Returns:_ *integer* _minCooldownMs_
@@ -19899,10 +20192,16 @@ h2. Game API
 * GetCategoryInfoFromCollectibleCategoryId(*integer* _collectibleCategoryId_)
 ** _Returns:_ *luaindex:nilable* _topLevelIndex_, *luaindex:nilable* _categoryIndex_
 
+* GetNumNewCollectibles()
+** _Returns:_ *integer* _count_
+
 * GetTotalCollectiblesByCategoryType(*[CollectibleCategoryType|#CollectibleCategoryType]* _collectibleCategoryType_)
 ** _Returns:_ *integer* _count_
 
 * GetTotalUnlockedCollectiblesByCategoryType(*[CollectibleCategoryType|#CollectibleCategoryType]* _collectibleCategoryType_)
+** _Returns:_ *integer* _count_
+
+* GetNumNewCollectiblesByCategoryType(*[CollectibleCategoryType|#CollectibleCategoryType]* _collectibleCategoryType_)
 ** _Returns:_ *integer* _count_
 
 * HasAnyUnlockedCollectiblesByCategoryType(*[CollectibleCategoryType|#CollectibleCategoryType]* _collectibleCategoryType_)
@@ -19981,6 +20280,10 @@ h2. Game API
 ** _Returns:_ *luaindex* _categoryIndex_, *luaindex:nilable* _subcategoryIndex_, *luaindex* _collectibleIndex_
 
 * IsValidCollectibleName(*string* _collectibleName_)
+** _Uses variable returns..._
+** _Returns:_ *[NamingError|#NamingError]* _violationCode_
+
+* IsValidHouseName(*string* _houseName_)
 ** _Uses variable returns..._
 ** _Returns:_ *[NamingError|#NamingError]* _violationCode_
 
@@ -20209,6 +20512,12 @@ h2. Game API
 ** _Returns:_ *integer* _numChildren_
 
 * GetMarketProductChildId *private* (*integer* _marketProductId_, *luaindex* _childIndex_)
+** _Returns:_ *integer* _childId_
+
+* GetMarketProductNumFacadeChildren *private* (*integer* _marketProductId_)
+** _Returns:_ *integer* _numChildren_
+
+* GetMarketProductFacadeChildId *private* (*integer* _marketProductId_, *luaindex* _childIndex_)
 ** _Returns:_ *integer* _childId_
 
 * GetMarketProductItemRewardListId *private* (*integer* _marketProductId_)
@@ -20641,6 +20950,8 @@ h2. Game API
 
 * PreviewCollectibleAsFurniture *private* (*integer* _collectibleDefId_, *luaindex* _variation_)
 
+* PreviewCollectibleAction *private* (*integer* _collectibleDefId_, *luaindex* _action_)
+
 * CanInventoryItemBePreviewed(*[Bag|#Bag]* _bagId_, *integer* _slotIndex_)
 ** _Returns:_ *bool* _canPreview_
 
@@ -20649,9 +20960,15 @@ h2. Game API
 
 * PreviewInventoryItem(*[Bag|#Bag]* _bagId_, *integer* _slotIndex_, *luaindex* _variation_)
 
+* PreviewInventoryItemCollectibleAction(*[Bag|#Bag]* _bagId_, *integer* _slotIndex_, *luaindex* _action_)
+
 * PreviewStoreEntry(*luaindex* _entryIndex_, *luaindex* _variation_, *integer* _dyeBrushId_)
 
+* PreviewStoreEntryCollectibleAction(*luaindex* _entryIndex_, *luaindex* _action_)
+
 * PreviewTradingHouseSearchResultItem(*luaindex* _index_, *luaindex* _variation_)
+
+* PreviewTradingHouseSearchResultItemCollectibleAction(*luaindex* _index_, *luaindex* _action_)
 
 * PreviewItemLink(*string* _itemLink_, *luaindex* _variation_)
 
@@ -20660,6 +20977,8 @@ h2. Game API
 * PreviewPlacedFurniture(*id64* _furnitureId_, *luaindex* _variation_)
 
 * PreviewReward(*integer* _rewardId_, *luaindex* _variation_)
+
+* PreviewRewardCollectibleAction(*integer* _rewardId_, *luaindex* _action_)
 
 * GetNumCollectiblePreviewVariations(*integer* _collectibleDefId_)
 ** _Returns:_ *integer* _numVariations_
@@ -20673,11 +20992,29 @@ h2. Game API
 * GetCollectibleAsFurniturePreviewVariationDisplayName(*integer* _collectibleDefId_, *luaindex* _variation_)
 ** _Returns:_ *string* _variationDisplayName_
 
+* GetNumCollectiblePreviewActions(*integer* _collectibleDefId_, *luaindex* _variation_)
+** _Returns:_ *integer* _numActions_
+
+* GetCollectiblePreviewActionDisplayName(*integer* _collectibleDefId_, *luaindex* _variation_, *luaindex* _action_)
+** _Returns:_ *string* _previewActionDisplayName_
+
+* GetNumCollectibleAsFurniturePreviewActions(*integer* _collectibleDefId_, *luaindex* _variation_)
+** _Returns:_ *integer* _numActions_
+
+* GetCollectibleAsFurniturePreviewActionDisplayName(*integer* _collectibleDefId_, *luaindex* _variation_, *luaindex* _action_)
+** _Returns:_ *string* _previewActionDisplayName_
+
 * GetNumInventoryItemPreviewVariations(*[Bag|#Bag]* _bagId_, *integer* _slotIndex_)
 ** _Returns:_ *integer* _numVariations_
 
 * GetInventoryItemPreviewVariationDisplayName(*[Bag|#Bag]* _bagId_, *integer* _slotIndex_, *luaindex* _variation_)
 ** _Returns:_ *string* _variationDisplayName_
+
+* GetNumInventoryItemPreviewCollectibleActions(*[Bag|#Bag]* _bagId_, *integer* _slotIndex_, *luaindex* _variation_)
+** _Returns:_ *integer* _numActions_
+
+* GetInventoryItemPreviewCollectibleActionDisplayName(*[Bag|#Bag]* _bagId_, *integer* _slotIndex_, *luaindex* _variation_, *luaindex* _action_)
+** _Returns:_ *string* _actionDisplayName_
 
 * GetNumItemLinkPreviewVariations(*string* _itemLink_)
 ** _Returns:_ *integer* _numVariations_
@@ -20691,11 +21028,23 @@ h2. Game API
 * GetStoreEntryPreviewVariationDisplayName(*luaindex* _entryIndex_, *luaindex* _variation_)
 ** _Returns:_ *string* _variationDisplayName_
 
+* GetNumStoreEntryPreviewCollectibleActions(*luaindex* _entryIndex_, *luaindex* _variation_)
+** _Returns:_ *integer* _numActions_
+
+* GetStoreEntryPreviewCollectibleActionDisplayName(*luaindex* _entryIndex_, *luaindex* _variation_, *luaindex* _action_)
+** _Returns:_ *string* _actionDisplayName_
+
 * GetNumTradingHouseSearchResultItemPreviewVariations(*luaindex* _index_)
 ** _Returns:_ *integer* _numVariations_
 
 * GetTradingHouseSearchResultItemPreviewVariationDisplayName(*luaindex* _index_, *luaindex* _variation_)
 ** _Returns:_ *string* _variationDisplayName_
+
+* GetNumTradingHouseSearchResultItemPreviewCollectibleActions(*luaindex* _index_, *luaindex* _variation_)
+** _Returns:_ *integer* _numActions_
+
+* GetTradingHouseSearchResultItemPreviewCollectibleActionDisplayName(*luaindex* _index_, *luaindex* _variation_, *luaindex* _action_)
+** _Returns:_ *string* _actionDisplayName_
 
 * GetNumProvisionerItemAsFurniturePreviewVariations(*luaindex* _recipeListIndex_, *luaindex* _recipeIndex_)
 ** _Returns:_ *integer* _numVariations_
@@ -20727,6 +21076,14 @@ h2. Game API
 
 * GetMarketProductChapterUpgradeId(*integer* _marketProductId_)
 ** _Returns:_ *integer* _chapterUpgradeId_
+
+* PreviewMarketProductCollectibleAction *private* (*integer* _marketProductId_, *luaindex* _action_)
+
+* GetNumMarketProductCollectiblePreviewActions(*integer* _marketProductId_, *luaindex* _variation_)
+** _Returns:_ *integer* _numActions_
+
+* GetMarketProductCollectiblePreviewActionDisplayName(*integer* _marketProductId_, *luaindex* _variation_, *luaindex* _action_)
+** _Returns:_ *string* _actionDisplayName_
 
 * RequestJumpToHouse(*integer* _houseId_, *bool* _jumpOutside_)
 
@@ -20890,6 +21247,12 @@ h2. Game API
 
 * GetRewardAnnouncementBackgroundFileIndex(*integer* _rewardId_)
 ** _Returns:_ *textureName* _fileIndex_
+
+* GetNumRewardPreviewCollectibleActions(*integer* _rewardId_, *luaindex* _variation_)
+** _Returns:_ *integer* _numActions_
+
+* GetRewardPreviewCollectibleActionDisplayName(*integer* _rewardId_, *luaindex* _variation_, *luaindex* _action_)
+** _Returns:_ *string* _actionDisplayName_
 
 * GetInstantUnlockRewardType(*integer* _instantUnlockId_)
 ** _Returns:_ *[InstantUnlockRewardType|#InstantUnlockRewardType]* _instantUnlockType_
@@ -21617,6 +21980,9 @@ h2. Game API
 
 * GetMailAttachmentInfo(*id64* _mailId_)
 ** _Returns:_ *integer* _numAttachments_, *integer* _attachedMoney_, *integer* _codAmount_
+
+* GenerateCraftedAbilityScriptSlotDescriptionForAbilityDescription(*integer* _abilityId_, *[ScribingSlot|#ScribingSlot]* _slotType_, *string* _casterUnitTag_)
+** _Returns:_ *string* _description_
 
 
 h2. Object API
@@ -23065,8 +23431,20 @@ h3. EditControl
 * GetEditEnabled()
 ** _Returns:_ *bool* _enabled_
 
+* GetFont()
+** _Returns:_ *string* _text_
+
+* GetFontFaceName()
+** _Returns:_ *string* _text_
+
 * GetFontHeight()
 ** _Returns:_ *number* _fontHeightUIUnits_
+
+* GetFontSize()
+** _Returns:_ *number* _fontSize_
+
+* GetFontStyle()
+** _Returns:_ *string* _text_
 
 * GetIMECompositionExclusionArea()
 ** _Returns:_ *number* _leftControlSpace_, *number* _topControlSpace_, *number* _rightControlSpace_, *number* _bottomControlSpace_
@@ -23184,11 +23562,20 @@ h3. LabelControl
 * GetColor()
 ** _Returns:_ *number* _r_, *number* _g_, *number* _b_, *number* _a_
 
+* GetFont()
+** _Returns:_ *string* _text_
+
 * GetFontFaceName()
 ** _Returns:_ *string* _text_
 
 * GetFontHeight()
 ** _Returns:_ *number* _fontHeightUIUnits_
+
+* GetFontSize()
+** _Returns:_ *number* _fontSize_
+
+* GetFontStyle()
+** _Returns:_ *string* _text_
 
 * GetHorizontalAlignment()
 ** _Returns:_ *[TextAlignment|#TextAlignment]* _align_
@@ -23782,6 +24169,8 @@ h3. TextureControl
 * SetTextureCoords(*number* _left_, *number* _right_, *number* _top_, *number* _bottom_)
 
 * SetTextureCoordsRotation(*number* _angleInRadians_)
+
+* SetTextureFileName(*string* _filename_)
 
 * SetTextureReleaseOption(*[ReleaseReferenceOptions|#ReleaseReferenceOptions]* _releaseOption_)
 
@@ -24465,6 +24854,7 @@ h2. Events
 * EVENT_FINESSE_RANK_CHANGED (*string* _unitTag_, *luaindex* _rankNum_, *string* _name_, *integer* _xpBonus_, *bool* _loot_)
 * EVENT_FISHING_LURE_CLEARED
 * EVENT_FISHING_LURE_SET (*luaindex* _fishingLure_)
+* EVENT_FIXED_BROADCAST (*[BroadcastType|#BroadcastType]* _broadcastType_, *integer* _arg1_)
 * EVENT_FORCE_RESPEC (*[RespecType|#RespecType]* _respecType_)
 * EVENT_FORWARD_CAMPS_UPDATED
 * EVENT_FORWARD_CAMP_RESPAWN_TIMER_BEGINS (*integer* _durationMS_)
@@ -24575,6 +24965,19 @@ h2. Events
 * EVENT_HOTBAR_SLOT_STATE_UPDATED (*luaindex* _actionSlotIndex_, *[HotBarCategory|#HotBarCategory]* _hotbarCategory_)
 * EVENT_HOTBAR_SLOT_UPDATED (*luaindex* _actionSlotIndex_, *[HotBarCategory|#HotBarCategory]* _hotbarCategory_, *bool* _justUnlocked_)
 * EVENT_HOT_BAR_RESULT (*[HotBarResult|#HotBarResult]* _reason_)
+* EVENT_HOUSE_FURNITURE_COUNT_UPDATED (*integer* _houseId_, *integer* _furnitureCount_)
+* EVENT_HOUSE_TOURS_CURRENT_HOUSE_LISTING_UPDATED
+* EVENT_HOUSE_TOURS_HOUSE_RECOMMENDATION_COUNT_UPDATED (*integer* _houseId_, *integer* _recommendationCount_)
+* EVENT_HOUSE_TOURS_LISTING_OPERATION_COOLDOWN_STATE_CHANGED (*bool* _isOnCooldown_)
+* EVENT_HOUSE_TOURS_LISTING_OPERATION_RESPONSE (*[HouseToursListingOperationType|#HouseToursListingOperationType]* _operationType_, *integer* _houseId_, *[HouseTourListingResult|#HouseTourListingResult]* _result_)
+* EVENT_HOUSE_TOURS_LISTING_OPERATION_STARTED (*[HouseToursListingOperationType|#HouseToursListingOperationType]* _operationType_, *integer* _houseId_)
+* EVENT_HOUSE_TOURS_LISTING_RECOMMENDED_NOTIFICATION_ADDED (*integer* _houseId_)
+* EVENT_HOUSE_TOURS_LISTING_RECOMMENDED_NOTIFICATION_REMOVED (*integer* _houseId_)
+* EVENT_HOUSE_TOURS_SAVE_FAVORITE_OPERATION_COMPLETE (*[HouseTourFavoriteOperationType|#HouseTourFavoriteOperationType]* _operationType_, *[HouseTourSaveFavoriteResult|#HouseTourSaveFavoriteResult]* _result_, *string* _ownerDisplayName_, *integer* _houseId_)
+* EVENT_HOUSE_TOURS_SAVE_RECOMMENDATION_OPERATION_COMPLETE (*[HouseTourSaveRecommendationResult|#HouseTourSaveRecommendationResult]* _result_)
+* EVENT_HOUSE_TOURS_SEARCH_COMPLETE (*[HouseTourListingType|#HouseTourListingType]* _listingType_, *[HouseTourRequestListingsResult|#HouseTourRequestListingsResult]* _result_, *integer* _searchId_)
+* EVENT_HOUSE_TOURS_SEARCH_COOLDOWN_COMPLETE
+* EVENT_HOUSE_TOURS_STATUS_UPDATED
 * EVENT_HOUSING_ADD_PERMISSIONS_CANT_ADD_SELF
 * EVENT_HOUSING_ADD_PERMISSIONS_FAILED (*[HousePermissionUserGroup|#HousePermissionUserGroup]* _userGroup_, *string* _attemptedName_)
 * EVENT_HOUSING_EDITOR_COMMAND_RESULT (*[HousingEditorCommandResult|#HousingEditorCommandResult]* _result_)
@@ -24596,6 +24999,8 @@ h2. Events
 * EVENT_HOUSING_OCCUPANT_DEPARTED (*string* _accountName_, *string* _characterName_)
 * EVENT_HOUSING_PATH_NODE_SELECTION_CHANGED
 * EVENT_HOUSING_PERMISSIONS_CHANGED (*[HousePermissionUserGroup|#HousePermissionUserGroup]* _userGroup_)
+* EVENT_HOUSING_PERMISSIONS_SAVE_COMPLETE
+* EVENT_HOUSING_PERMISSIONS_SAVE_PENDING
 * EVENT_HOUSING_PLAYER_INFO_CHANGED (*bool* _wasOwner_, *bool* _permissionsChanged_, *[HousingVisitorRole|#HousingVisitorRole]* _oldVisitorRole_)
 * EVENT_HOUSING_POPULATION_CHANGED (*integer* _newPopulation_, *integer* _previousPopulation_)
 * EVENT_HOUSING_PREVIEW_INSPECTION_STATE_CHANGED (*bool* _isPreviewInspectionEnabled_)
@@ -24757,6 +25162,7 @@ h2. Events
 * EVENT_POI_DISCOVERED (*luaindex* _zoneIndex_, *luaindex* _poiIndex_)
 * EVENT_POI_UPDATED (*luaindex* _zoneIndex_, *luaindex* _poiIndex_)
 * EVENT_POWER_UPDATE (*string* _unitTag_, *luaindex* _powerIndex_, *[CombatMechanicFlags|#CombatMechanicFlags]* _powerType_, *integer* _powerValue_, *integer* _powerMax_, *integer* _powerEffectiveMax_)
+* EVENT_PREVIEW_COLLECTIBLE_ACTION_RESET
 * EVENT_PVP_KILL_FEED_DEATH (*string* _killLocation_, *string* _killerPlayerDisplayName_, *string* _killerPlayerCharacterName_, *[Alliance|#Alliance]* _killerPlayerAlliance_, *integer* _killerPlayerRank_, *string* _victimPlayerDisplayName_, *string* _victimPlayerCharacterName_, *[Alliance|#Alliance]* _victimPlayerAlliance_, *integer* _victimPlayerRank_, *bool* _isKillLocation_)
 * EVENT_QUEST_ADDED (*luaindex* _journalIndex_, *string* _questName_, *string* _objectiveName_)
 * EVENT_QUEST_ADVANCED (*luaindex* _journalIndex_, *string* _questName_, *bool* _isPushed_, *bool* _isComplete_, *bool* _mainStepChanged_, *bool* _hideAnnouncement_)
@@ -25016,7 +25422,6 @@ h2. Events
 * EVENT_TRIBUTE_PATRON_PROGRESSION_DATA_CHANGED (*integer:nilable* _patronId_)
 * EVENT_TRIBUTE_PLAYER_TURN_STARTED (*bool* _isLocalPlayer_)
 
-* EVENT_ACTIVE_MONITOR_CHANGED
 * EVENT_APP_GUI_HIDDEN_STATE_CHANGED (*bool* _hidden_)
 * EVENT_AVAILABLE_DISPLAY_DEVICES_CHANGED
 * EVENT_BACKGROUND_LIST_FILTER_COMPLETE (*integer* _taskId_)

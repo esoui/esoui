@@ -1,4 +1,4 @@
-ZO_HousingFurnitureBrowser_Gamepad = ZO_Object.MultiSubclass(ZO_HousingFurnitureBrowser_Base, ZO_Gamepad_ParametricList_Screen)
+ZO_HousingFurnitureBrowser_Gamepad = ZO_Object.MultiSubclass(ZO_HousingFurnitureBrowser_Base, ZO_Gamepad_ParametricList_Search_Screen)
 
 function ZO_HousingFurnitureBrowser_Gamepad:New(...)
     return ZO_HousingFurnitureBrowser_Base.New(self, ...)
@@ -8,7 +8,7 @@ function ZO_HousingFurnitureBrowser_Gamepad:Initialize(control)
     GAMEPAD_HOUSING_FURNITURE_BROWSER_SCENE = ZO_Scene:New("gamepad_housing_furniture_scene", SCENE_MANAGER)
     ZO_HousingFurnitureBrowser_Base.Initialize(self, control, "gamepad_housing_furniture_scene")
     local ACTIVATE_ON_SHOW = true
-    ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_CREATE, ACTIVATE_ON_SHOW, GAMEPAD_HOUSING_FURNITURE_BROWSER_SCENE)
+    ZO_Gamepad_ParametricList_Search_Screen.Initialize(self, BACKGROUND_LIST_FILTER_TARGET_FURNITURE_ID, "housingEditorTextSearch", control, ZO_GAMEPAD_HEADER_TABBAR_CREATE, ACTIVATE_ON_SHOW, GAMEPAD_HOUSING_FURNITURE_BROWSER_SCENE)
     SYSTEMS:RegisterGamepadRootScene("housing_furniture_browser", GAMEPAD_HOUSING_FURNITURE_BROWSER_SCENE)
 
     self.occupantControl = control:GetNamedChild("Occupants")
@@ -29,59 +29,32 @@ function ZO_HousingFurnitureBrowser_Gamepad:Initialize(control)
     self.settingsPanel = ZO_HousingFurnitureSettings_Gamepad:New(self)
 
     self.currentPanel = self.placementPanel
-    
+
     self:InitializeHeader()
 
     self:SetListsUseTriggerKeybinds(true)
 end
 
 function ZO_HousingFurnitureBrowser_Gamepad:PerformUpdate()
-    --Do nothing. We manager the update state in a more nuanced way.
-end
-
---Overridden
-function ZO_HousingFurnitureBrowser_Gamepad:OnEnterHeader()
-    -- override function for implementation specific functionality
-
-    -- Swap keybinds to text search keybinds if there is a text search
-    if self.textSearchHeaderFocus and self.mode ~= HOUSING_BROWSER_MODE.SETTINGS then
-        if self.currentPanel.currentList and self.currentPanel.currentList.keybinds then
-            KEYBIND_STRIP:RemoveKeybindButtonGroup(self.currentPanel.currentList.keybinds)
-        end
-
-        if self.textSearchKeybindStripDescriptor then
-            KEYBIND_STRIP:AddKeybindButtonGroup(self.textSearchKeybindStripDescriptor)
-        end
-    end
-end
-
---Overridden
-function ZO_HousingFurnitureBrowser_Gamepad:OnLeaveHeader()
-    -- override function for implementation specific functionality
-
-    -- Swap keybinds from text search keybinds if there is a text search
-    if self.textSearchHeaderFocus and mode ~= HOUSING_BROWSER_MODE.SETTINGS then
-        self:SetTextSearchFocused(false)
-
-        if self.textSearchKeybindStripDescriptor then
-            KEYBIND_STRIP:RemoveKeybindButtonGroup(self.textSearchKeybindStripDescriptor)
-        end
-
-        if self.currentPanel.currentList and self.currentPanel.currentList.keybinds and self:IsShowing() then
-            KEYBIND_STRIP:AddKeybindButtonGroup(self.currentPanel.currentList.keybinds)
-        end
+    if self.mode == HOUSING_BROWSER_MODE.PLACEMENT then
+        SHARED_FURNITURE:OnPlacementFiltersChanged()
+        self:UpdatePlaceablePanel()
+    elseif self.mode == HOUSING_BROWSER_MODE.PRODUCTS then
+        SHARED_FURNITURE:OnPurchaseFiltersChanged()
+        self:UpdateProductsPanel()
+    elseif self.mode == HOUSING_BROWSER_MODE.RETRIEVAL then
+        SHARED_FURNITURE:OnRetrievableFiltersChanged()
+        self:UpdateRetrievablePanel()
     end
 end
 
 function ZO_HousingFurnitureBrowser_Gamepad:UpdatePlaceablePanel()
     self.placementPanel:UpdateLists()
-    self:RefreshCategoryHeaderData()
 end
 
 --Overridden
 function ZO_HousingFurnitureBrowser_Gamepad:UpdateRetrievablePanel()
     self.retrievalPanel:UpdateLists()
-    self:RefreshCategoryHeaderData()
 end
 
 --Overridden
@@ -111,7 +84,7 @@ function ZO_HousingFurnitureBrowser_Gamepad:InitializeHeader()
     local tabBarEntries =
     {
         {
-            text = function() 
+            text = function()
                 if self.titleText then
                     return self.titleText
                 else
@@ -166,40 +139,6 @@ function ZO_HousingFurnitureBrowser_Gamepad:InitializeHeader()
     }
 
     ZO_GamepadGenericHeader_Initialize(self.header, ZO_GAMEPAD_HEADER_TABBAR_CREATE)
-
-
-    self.textSearchKeybindStripDescriptor =
-    {
-        alignment = KEYBIND_STRIP_ALIGN_LEFT,
-        -- Select
-        {
-            keybind = "UI_SHORTCUT_PRIMARY",
-            name = GetString(SI_GAMEPAD_SELECT_OPTION),
-            visible = function()
-                return not ZO_CraftingUtils_IsPerformingCraftProcess()
-            end,
-            callback = function()
-                self:SetTextSearchFocused(true)
-            end,
-        },
-    }
-
-    local function OnTextChanged(editBox)
-        local text = editBox:GetText()
-        if self.mode == HOUSING_BROWSER_MODE.PLACEMENT then
-            SHARED_FURNITURE:SetPlaceableTextFilter(text)
-        elseif self.mode == HOUSING_BROWSER_MODE.RETRIEVAL then
-            SHARED_FURNITURE:SetRetrievableTextFilter(text)
-        elseif self.mode == HOUSING_BROWSER_MODE.PRODUCTS then
-            SHARED_FURNITURE:SetMarketProductTextFilter(text)
-        end
-    end
-
-    -- Order matters
-    self:AddSearch(self.textSearchKeybindStripDescriptor, OnTextChanged)
-
-    self.headerTextFilterControl = self.textSearchHeaderControl:GetNamedChild("Filter")
-    self.headerTextFilterEditBox = self.headerTextFilterControl:GetNamedChild("SearchEdit")
 end
 
 function ZO_HousingFurnitureBrowser_Gamepad:RequestNewList()
@@ -218,7 +157,7 @@ function ZO_HousingFurnitureBrowser_Gamepad:IsShowing()
 end
 
 function ZO_HousingFurnitureBrowser_Gamepad:OnShowing()
-    ZO_Gamepad_ParametricList_Screen.OnShowing(self)
+    ZO_Gamepad_ParametricList_Search_Screen.OnShowing(self)
     ZO_HousingFurnitureBrowser_Base.OnShowing(self)
 
     --Enter browsing mode if we aren't already
@@ -233,27 +172,26 @@ function ZO_HousingFurnitureBrowser_Gamepad:OnShowing()
     ITEM_PREVIEW_GAMEPAD:RegisterCallback("RefreshActions", self.OnRefreshActions)
 end
 
-function ZO_HousingFurnitureBrowser_Gamepad:OnShow()
-    ZO_Gamepad_ParametricList_Screen.OnShow(self)
-    
-    if self.currentPanel and self.currentPanel.UpdateCurrentKeybinds then
-        -- Only attempt to call UpdateCurrentKeybinds if the current panel
-        -- has such a function; the Settings panel manages its own keybinds
-        -- via different events internally.
-        self.currentPanel:UpdateCurrentKeybinds()
-    end
-end
-
 function ZO_HousingFurnitureBrowser_Gamepad:OnHiding()
-    ZO_Gamepad_ParametricList_Screen.OnHiding(self)
+    ZO_Gamepad_ParametricList_Search_Screen.OnHiding(self)
     ZO_HousingFurnitureBrowser_Base.OnHiding(self)
     ZO_GamepadGenericHeader_Deactivate(self.header)
 end
 
 function ZO_HousingFurnitureBrowser_Gamepad:OnHide()
-    ZO_Gamepad_ParametricList_Screen.OnHide(self)
+    ZO_Gamepad_ParametricList_Search_Screen.OnHide(self)
     self:SetMode(HOUSING_BROWSER_MODE.NONE)
     ITEM_PREVIEW_GAMEPAD:UnregisterCallback("RefreshActions", self.OnRefreshActions)
+end
+
+-- Default text search back button closes the screen, but we have multiple layers here.
+function ZO_HousingFurnitureBrowser_Gamepad:OnBackButtonClicked()
+    if self.currentPanel.currentList and self.currentPanel.currentList == self.currentPanel.furnitureList then
+        self.currentPanel:FurnitureKeybindBackCallback()
+    else
+        -- Call parent to close scene.
+        ZO_Gamepad_ParametricList_Search_Screen.OnBackButtonClicked(self)
+    end
 end
 
 function ZO_HousingFurnitureBrowser_Gamepad:SetMode(mode)
@@ -266,53 +204,33 @@ function ZO_HousingFurnitureBrowser_Gamepad:SetMode(mode)
 
         if mode == HOUSING_BROWSER_MODE.PLACEMENT then
             self.currentPanel = self.placementPanel
-            self.headerTextFilterControl:SetHidden(false)
-            self.headerTextFilterEditBox:SetText(SHARED_FURNITURE:GetPlaceableTextFilter())
+            self:SetTextSearchEntryHidden(false)
+            self:SetSearchCriteria({ BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT, BACKGROUND_LIST_FILTER_TARGET_COLLECTIBLE_ID }, "housePlaceableItemsTextSearch")
+            self:ActivateTextSearch()
         elseif mode == HOUSING_BROWSER_MODE.PRODUCTS then
             self.currentPanel = self.productsPanel
-            self.headerTextFilterControl:SetHidden(false)
-            self.headerTextFilterEditBox:SetText(SHARED_FURNITURE:GetMarketProductTextFilter())
+            self:SetTextSearchEntryHidden(false)
+            self:SetSearchCriteria(BACKGROUND_LIST_FILTER_TARGET_MARKET_PRODUCT_ID, "houseProductsTextSearch")
+            self:ActivateTextSearch()
         elseif mode == HOUSING_BROWSER_MODE.RETRIEVAL then
             self.currentPanel = self.retrievalPanel
-            self.headerTextFilterControl:SetHidden(false)
-            self.headerTextFilterEditBox:SetText(SHARED_FURNITURE:GetRetrievableTextFilter())
+            self:SetTextSearchEntryHidden(false)
+            self:SetSearchCriteria(BACKGROUND_LIST_FILTER_TARGET_FURNITURE_ID, "houseFurnitureTextSearch")
+            self:ActivateTextSearch()
         elseif mode == HOUSING_BROWSER_MODE.SETTINGS then
             self.currentPanel = self.settingsPanel
-            self.headerTextFilterControl:SetHidden(true)
+            self:SetTextSearchEntryHidden(true)
         elseif mode == HOUSING_BROWSER_MODE.NONE then
             self.currentPanel = nil
-            self.headerTextFilterControl:SetHidden(true)
+            self:SetTextSearchEntryHidden(true)
         end
 
         if self.currentPanel then
-            self.currentPanel:OnShowing()
+            -- Order matters here
             self:RefreshCategoryHeaderData()
+            self.currentPanel:OnShowing()
         end
     end
-end
-
-function ZO_HousingFurnitureBrowser_Gamepad:IsTextFilterActive()
-    return self.headerTextFilterEditBox:HasFocus()
-end
-
-function ZO_HousingFurnitureBrowser_Gamepad:GetTextFilter()
-    local textFilter = ""
-    if self.mode == HOUSING_BROWSER_MODE.PLACEMENT then
-        textFilter = SHARED_FURNITURE:GetPlaceableTextFilter()
-    elseif self.mode == HOUSING_BROWSER_MODE.RETRIEVAL then
-        textFilter = SHARED_FURNITURE:GetRetrievableTextFilter()
-    elseif self.mode == HOUSING_BROWSER_MODE.PRODUCTS then
-        textFilter = SHARED_FURNITURE:GetMarketProductTextFilter()
-    end
-    return textFilter
-end
-
-function ZO_HousingFurnitureBrowser_Gamepad:ResetTextFilter()
-    self.headerTextFilterEditBox:SetText("")
-end
-
-function ZO_HousingFurnitureBrowser_Gamepad:SelectTextFilter()
-    self.headerTextFilterEditBox:TakeFocus()
 end
 
 do
@@ -330,8 +248,10 @@ do
 end
 
 function ZO_HousingFurnitureBrowser_Gamepad:SetTitleText(text)
-    self.titleText = text
-    self:RefreshCategoryHeaderData()
+    if self.titleText ~= text then
+        self.titleText = text
+        self:RefreshCategoryHeaderData()
+    end
 end
 
 --

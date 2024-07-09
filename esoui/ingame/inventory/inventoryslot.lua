@@ -215,13 +215,13 @@ end
 --Player Inventory Row
 
 function ZO_PlayerInventorySlot_SetupUsableAndLockedColor(slotControl, meetsUsageRequirement, locked)
-    ZO_ItemSlot_SetupTextUsableAndLockedColor(GetControl(slotControl, "Name"), meetsUsageRequirement, locked)
-    ZO_ItemSlot_SetupTextUsableAndLockedColor(GetControl(slotControl, "SellPrice"), meetsUsageRequirement, locked)
-    ZO_ItemSlot_SetupUsableAndLockedColor(GetControl(slotControl, "Button"), meetsUsageRequirement, locked)
+    ZO_ItemSlot_SetupTextUsableAndLockedColor(slotControl:GetNamedChild("Name"), meetsUsageRequirement, locked)
+    ZO_ItemSlot_SetupTextUsableAndLockedColor(slotControl:GetNamedChild("SellPriceText"), meetsUsageRequirement, locked)
+    ZO_ItemSlot_SetupUsableAndLockedColor(slotControl:GetNamedChild("Button"), meetsUsageRequirement, locked)
 end
 
 function ZO_PlayerInventorySlot_SetupSlot(slotControl, stackCount, iconFile, meetsUsageRequirement, locked)
-    ZO_Inventory_SetupSlot(GetControl(slotControl, "Button"), stackCount, iconFile, meetsUsageRequirement, locked)
+    ZO_Inventory_SetupSlot(slotControl:GetNamedChild("Button"), stackCount, iconFile, meetsUsageRequirement, locked)
     ZO_PlayerInventorySlot_SetupUsableAndLockedColor(slotControl, meetsUsageRequirement, locked)
 end
 
@@ -2580,6 +2580,24 @@ local NO_COMPARISON_TOOLTIPS_FOR_SLOT_TYPE =
     [SLOT_TYPE_TRADING_HOUSE_ITEM_LISTING] = true,
 }
 
+function ZO_InventorySlot_OnUpdate(control)
+    if not control:IsHidden() and control.currencyControl then
+        local currencyControls = { control.currencyControl }
+        if type(control.currencyControl) == "table" then
+            currencyControls = control.currencyControl
+        end
+
+        local cursorPositionX, cursorPositionY = GetUIMousePosition()
+        for _, currencyControl in ipairs(currencyControls) do
+            if currencyControl:IsPointInside(cursorPositionX, cursorPositionY) then
+                ZO_CurrencyTemplate_OnMouseEnter(currencyControl)
+            else
+                ZO_CurrencyTemplate_OnMouseExit(currencyControl)
+            end
+        end
+    end
+end
+
 function ZO_InventorySlot_OnMouseEnter(inventorySlot)
     local buttonPart, listPart, multiIconPart = ZO_InventorySlot_GetInventorySlotComponents(inventorySlot)
 
@@ -2594,6 +2612,10 @@ function ZO_InventorySlot_OnMouseEnter(inventorySlot)
     InitializeTooltip(InformationTooltip)
 
     ZO_InventorySlot_SetHighlightHidden(listPart, false)
+
+    if inventorySlot.currencyControl then
+        inventorySlot:SetHandler("OnUpdate", function() ZO_InventorySlot_OnUpdate(inventorySlot) end)
+    end
 
     -- ESO-747254: This function will be called recursively in RunHandlers. Since
     -- we only want the tooltip build once, we only call RunHandlers on the initial
@@ -2724,6 +2746,10 @@ function ZO_InventorySlot_OnMouseExit(inventorySlot)
     --Perform any additional MouseExit actions
     if ZO_Enchanting_IsSceneShowing() then
         ZO_Enchanting_GetVisibleEnchanting():OnMouseExitCraftingComponent()
+    end
+
+    if inventorySlot.currencyControl then
+        inventorySlot:SetHandler("OnUpdate", nil)
     end
 end
 

@@ -83,6 +83,8 @@
                 <Control name="$(parent)ContentContainer" resizeToFitDescendents="true">
                     <Anchor point="TOP" relativeTo="$(parent)Title" relativePoint="BOTTOM" offsetY="30" />
                     <Controls>
+                        <Control name="$(parent)NameInstructions" inherits="ZO_TextInstructionsTemplate" tier="HIGH" excludeFromResizeToFitExtents="true"/>
+
                         <Label name="$(parent)NameHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame" text="SI_COLLECTIONS_INVENTORY_DIALOG_RENAME_COLLECTIBLE_MAIN">
                             <Anchor point="TOPLEFT" offsetX="-12" />
                         </Label>
@@ -92,9 +94,18 @@
                             <Dimensions x="340" />
                             <Controls>
                                 <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop">
+                                    <OnTextChanged>
+                                        ZO_CollectibleRenameDialog_UpdateViolations(self)
+                                    </OnTextChanged>
                                     <OnEffectivelyShown>
                                         self:TakeFocus()
                                     </OnEffectivelyShown>
+                                    <OnFocusGained>
+                                        ZO_CollectibleRenameDialog_UpdateViolations(self)
+                                    </OnFocusGained>
+                                    <OnFocusLost>
+                                        ZO_CollectibleRenameDialog_HideViolations(self)
+                                    </OnFocusLost>
                                 </EditBox>
                             </Controls>
                         </Backdrop>

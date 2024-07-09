@@ -85,9 +85,9 @@ function ZO_CraftingInventory:GetDefaultTemplateSetupFunction()
             end
         end
 
-        local sellPrice = rowControl:GetNamedChild("SellPrice")
+        local sellPrice = rowControl:GetNamedChild("SellPriceText")
         if sellPrice then
-            ZO_CurrencyControl_SetSimpleCurrency(rowControl:GetNamedChild("SellPrice"), CURT_MONEY, data.sellPrice * data.stackCount, ITEM_SLOT_CURRENCY_OPTIONS)
+            ZO_CurrencyControl_SetSimpleCurrency(rowControl:GetNamedChild("SellPriceText"), CURT_MONEY, data.sellPrice * data.stackCount, ITEM_SLOT_CURRENCY_OPTIONS)
         end
 
         ZO_PlayerInventorySlot_SetupSlot(rowControl, data.stackCount, data.icon, data.meetsUsageRequirements, self:IsLocked(data.bagId, data.slotIndex))

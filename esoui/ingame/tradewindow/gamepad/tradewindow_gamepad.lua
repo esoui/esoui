@@ -876,6 +876,10 @@ function ZO_GamepadTradeWindow:OnShowing()
     self:BeginTrade()
 end
 
+function ZO_GamepadTradeWindow:OnShow()
+    -- Do nothing, activation of search is handled in OnShowing
+end
+
 function ZO_GamepadTradeWindow:OnHide()
     ZO_Gamepad_ParametricList_BagsSearch_Screen.OnHide(self)
 

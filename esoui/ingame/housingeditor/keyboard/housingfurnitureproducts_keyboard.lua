@@ -86,10 +86,6 @@ end
 function ZO_HousingFurnitureProducts_Keyboard:RefreshFilters()
     -- Get the current filter state.
     local themeFilter = SHARED_FURNITURE:GetPurchaseFurnitureTheme()
-    local textFilter = SHARED_FURNITURE:GetPlaceableTextFilter()
-
-    -- Update the Text Search filter to reflect the filter state.
-    self.searchEditBox:SetText(textFilter)
 
     -- Update the Theme filter to reflect the filter state.
     do
@@ -117,8 +113,8 @@ function ZO_HousingFurnitureProducts_Keyboard:CompareFurnitureEntries(a, b)
     return ZO_HousingFurnitureList.CompareFurnitureEntries(self, a, b)
 end
 
-function ZO_HousingFurnitureProducts_Keyboard:OnSearchTextChanged(editBox)
-    SHARED_FURNITURE:SetMarketProductTextFilter(editBox:GetText())
+function ZO_HousingFurnitureProducts_Keyboard:OnUpdateSearchResults()
+    SHARED_FURNITURE:OnPurchaseFiltersChanged()
 end
 
 function ZO_HousingFurnitureProducts_Keyboard:AddListDataTypes()
@@ -149,6 +145,9 @@ do
     local INHERIT_ICON_COLOR = true
 
     function ZO_HousingFurnitureProducts_Keyboard:SetupMarketProductFurnitureRow(rowControl, marketProductFurnitureObject)
+        local DEFAULT_OPTIONS = nil
+        local SHOW_ALL = true
+        local HAS_ENOUGH_CURRENCY = false
         local canBePurchased = marketProductFurnitureObject:CanBePurchased()
         local nameColorR, nameColorG, nameColorB
         local currencyColorR, currencyColorG, currencyColorB
@@ -177,9 +176,11 @@ do
         rowControl.textCallout:ClearAnchors()
 
         if onSale then
-            local formattedAmount = zo_strformat(SI_NUMBER_FORMAT, cost)
-            local strikethroughAmountString = zo_strikethroughTextFormat(formattedAmount)
-            rowControl.previousCost:SetText(strikethroughAmountString)
+            local currencyDisplayOptions =
+            {
+                strikethroughCurrencyAmount = true,
+            }
+            ZO_CurrencyControl_SetSimpleCurrency(rowControl.previousCost, GetCurrencyTypeFromMarketCurrencyType(currencyType), cost, DEFAULT_OPTIONS, SHOW_ALL, HAS_ENOUGH_CURRENCY, currencyDisplayOptions)
 
             rowControl.textCallout:SetAnchor(RIGHT, rowControl.previousCost, LEFT, -10)
         else
@@ -188,13 +189,11 @@ do
 
         rowControl.previousCost:SetHidden(not onSale)
 
-        -- format the price with the currency icon
-        -- done this way so we can easily change the color of the string
-        local currencyIcon = ZO_Currency_GetKeyboardFormattedCurrencyIcon(GetCurrencyTypeFromMarketCurrencyType(currencyType), CURRENCY_ICON_SIZE, INHERIT_ICON_COLOR)
-        local currencyString = string.format("%s %s", zo_strformat(SI_NUMBER_FORMAT, costAfterDiscount), currencyIcon)
-
-        rowControl.cost:SetText(currencyString)
-        rowControl.cost:SetColor(currencyColorR, currencyColorG, currencyColorB, 1)
+        local currencyOptions =
+        {
+            color = canBePurchased and ZO_SELECTED_TEXT or ZO_DISABLED_TEXT
+        }
+        ZO_CurrencyControl_SetSimpleCurrency(rowControl.cost, GetCurrencyTypeFromMarketCurrencyType(currencyType), costAfterDiscount, currencyOptions, SHOW_ALL, not canBePurchased)
 
         local textCalloutBackgroundColor
         local textCalloutTextColor

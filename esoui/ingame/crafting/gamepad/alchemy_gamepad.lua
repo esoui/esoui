@@ -107,9 +107,10 @@ function ZO_GamepadAlchemy:InitializeSlots()
 end
 
 function ZO_GamepadAlchemy:UpdateThirdAlchemySlot()
-
     self.craftingBar:Clear()
-    local newData = 
+    self.slotAnimation:Clear()
+
+    local newData =
     {
         icon = "EsoUI/Art/Crafting/Gamepad/gp_alchemy_emptySlot_solvent.dds",
         placedSound = SOUNDS.ALCHEMY_SOLVENT_PLACED, 
@@ -126,6 +127,8 @@ function ZO_GamepadAlchemy:UpdateThirdAlchemySlot()
         self:OnSolventSlotted(bagId, slotIndex)
     end)
     self.solventSlot = newData.slot
+
+    self.slotAnimation:AddSlot(self.solventSlot)
 
     local reagents = ZO_Alchemy_IsThirdAlchemySlotUnlocked() and 3 or 2
     self.reagentSlots = {}
@@ -145,6 +148,7 @@ function ZO_GamepadAlchemy:UpdateThirdAlchemySlot()
             self:UpdateReagentTraits()
         end)
         self.reagentSlots[i] = newReagentData.slot
+        self.slotAnimation:AddSlot(self.reagentSlots[i])
     end
 
     self.craftingBar:Commit()
@@ -336,6 +340,12 @@ function ZO_GamepadAlchemy:InitializeKeybindStripDescriptors()
     ZO_GamepadCraftingUtils_AddGenericCraftingBackKeybindsToDescriptor(self.mainKeybindStripDescriptor)
     ZO_CraftingUtils_ConnectKeybindButtonGroupToCraftingProcess(self.mainKeybindStripDescriptor)
     ZO_Gamepad_AddListTriggerKeybindDescriptors(self.mainKeybindStripDescriptor, self.inventory:GetList())
+end
+
+function ZO_GamepadAlchemy:AddInventoryAdditionalFilter(additionalFilterFunction)
+    if self.inventory then
+        self.inventory.additionalFilter = additionalFilterFunction
+    end
 end
 
 function ZO_GamepadAlchemy:SelectMode()
@@ -762,7 +772,19 @@ function ZO_GamepadAlchemyInventory:GetListEntryTemplate(data)
 end
 
 function ZO_GamepadAlchemyInventory:Refresh(data)
-    local validItemIds = self:EnumerateInventorySlotsAndAddToScrollData(ZO_Alchemy_IsAlchemyItem, ZO_Alchemy_DoesAlchemyItemPassFilter, self.filterType, data)
+    local function ItemFilterFunction(bagId, slotIndex, filterType, isQuestFilterChecked, questInfo)
+        if not ZO_Alchemy_DoesAlchemyItemPassFilter(bagId, slotIndex, filterType, isQuestFilterChecked, questInfo) then
+            return false
+        end
+
+        if self.additionalFilter and type(self.additionalFilter) == "function" then
+            return self.additionalFilter(bagId, slotIndex, filterType, isQuestFilterChecked, questInfo)
+        end
+
+        return true
+    end
+
+    local validItemIds = self:EnumerateInventorySlotsAndAddToScrollData(ZO_Alchemy_IsAlchemyItem, ItemFilterFunction, self.filterType, data)
     self.owner:OnInventoryUpdate(validItemIds)
 
     if self.savedVars.shouldFilterQuests and not self.alchemyQuestInfo.hasDesiredPotion then

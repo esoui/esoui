@@ -2,15 +2,11 @@
 --[[ ZO_HousingBrowserList ]]--
 --
 
-ZO_HousingBrowserList = ZO_Object:Subclass()
+ZO_HousingBrowserList = ZO_TextSearchObject:Subclass()
 
-function ZO_HousingBrowserList:New(...)
-    local browserList = ZO_Object.New(self)
-    browserList:Initialize(...)
-    return browserList
-end
+function ZO_HousingBrowserList:Initialize(control, owner, searchContext, searchEditBox)
+    ZO_TextSearchObject.Initialize(self, searchContext, searchEditBox)
 
-function ZO_HousingBrowserList:Initialize(control, owner)
     self.control = control
     self.owner = owner
 
@@ -48,6 +44,8 @@ function ZO_HousingBrowserList:OnShowing()
     if self.keybindStripDescriptor then
         KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
     end
+
+    self:ActivateTextSearch()
 end
 
 function ZO_HousingBrowserList:OnShown()
@@ -55,6 +53,8 @@ function ZO_HousingBrowserList:OnShown()
 end
 
 function ZO_HousingBrowserList:OnHiding()
+    self:DeactivateTextSearch()
+
     if self.keybindStripDescriptor then
         KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
     end
@@ -110,7 +110,7 @@ do
 
     function ZO_HousingBrowserList:AddCategory(tree, nodeTemplate, parent, categoryId, categoryObject)
         local name, normalIcon, pressedIcon, mouseoverIcon, isFakedSubcategory = self:GetCategoryInfo(categoryId, categoryObject)
-        local entryData = 
+        local entryData =
         {
             isFakedSubcategory = isFakedSubcategory,
             categoryId = categoryId,
@@ -324,8 +324,7 @@ function ZO_HousingFurnitureList:Initialize(...)
             self:OnSearchTextChanged(editBox)
         end)
     end
-    
-    self.searchEditBox = searchEditBox
+    self:SetSearchEditBox(searchEditBox)
 
     self.freeSlotsLabel = self.contents:GetNamedChild("InfoBarFreeSlots")
 

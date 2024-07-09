@@ -39,6 +39,8 @@ function PregameInitialScreen_Gamepad:Initialize(control)
         if newState == SCENE_SHOWING then
             ZO_ControllerDisconnect_DismissPopup()
             self:PerformDeferredInitialization()
+            --TODO XAR: If we ever support narration during pre-login, remove this line as unnecessary.
+            ClearNarrationQueue(NARRATION_TYPE_UI_SCREEN)
 
             -- Reset fade in animations
             self.fadeMode = nil

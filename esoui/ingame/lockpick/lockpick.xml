@@ -11,7 +11,7 @@
 
         <Texture name="ZO_PinHighlightTemplate" virtual="true" textureFile="EsoUI/Art/Lockpicking/pins_over.dds" layer="OVERLAY" blendMode="ADD" alpha="0" />
         
-        <TopLevelControl name="ZO_LockpickPanel" tier="HIGH" hidden="true" mouseEnabled="true">
+        <TopLevelControl name="ZO_LockpickPanel" tier="MEDIUM" hidden="true" mouseEnabled="true">
             <AnchorFill/>
             
             <OnInitialized>

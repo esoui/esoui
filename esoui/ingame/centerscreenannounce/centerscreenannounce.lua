@@ -1399,6 +1399,11 @@ do
         [CENTER_SCREEN_ANNOUNCE_TYPE_ENDLESS_DUNGEON_ATTEMPTS_REMAINING_CHANGED] = true,
     }
 
+    -- Per Design, Announcement screen trumps all CSAs... but that could change.
+    local ALLOWED_TYPES_DURING_MARKET_ANNOUNCEMENT =
+    {
+    }
+
     function CenterScreenAnnounce:CanDisplayMessage(category, csaType)
         -- Early out if category is not of scrying category while showing scrying or map mode dig sites
         if WORLD_MAP_MANAGER:IsInMode(MAP_MODE_DIG_SITES) and category ~= CSA_CATEGORY_SCRYING_PROGRESS_TEXT then
@@ -1421,6 +1426,10 @@ do
 
         -- Early out if the message type can't be shown during tribute
         if TRIBUTE_FRAGMENT:IsShowing() and not ALLOWED_TYPES_DURING_TRIBUTE[csaType] then
+            return false
+        end
+
+        if SCENE_MANAGER:IsShowing("marketAnnouncement") and not ALLOWED_TYPES_DURING_MARKET_ANNOUNCEMENT[csaType] then
             return false
         end
 
@@ -2075,7 +2084,14 @@ do
         [CENTER_SCREEN_ANNOUNCE_TYPE_TIMED_ACTIVITY_COMPLETED] = true,
         [CENTER_SCREEN_ANNOUNCE_TYPE_TRIBUTE_CLUB_RANK_CHANGED] = true,
     }
-
+    
+    -- Per Design, MarketAnnouncment defaults to queuing everything.
+    -- Types that if they were to happen while showing Announcements
+    -- will be discarded and not queued.
+    local BLOCKED_QUEUE_TYPES_WHILE_IN_MARKET_ANNOUNCEMENT =
+    {
+    }
+    
     function CenterScreenAnnounce:AddMessageWithParams(messageParams)
         if not messageParams then
             return
@@ -2120,6 +2136,14 @@ do
             if TRIBUTE_FRAGMENT:IsShowing() and not ALLOWED_QUEUE_TYPES_WHILE_IN_TRIBUTE[csaType] then
                 self.messageParamsPool:ReleaseObject(messageParams.key)
                 return
+            end
+
+            if SCENE_MANAGER:IsShowing("marketAnnouncement") then
+                -- Market announcement defaults to queueing everything and blocking only named items.
+                if BLOCKED_QUEUE_TYPES_WHILE_IN_MARKET_ANNOUNCEMENT[csaType] then
+                    self.messageParamsPool:ReleaseObject(messageParams.key)
+                    return
+                end
             end
 
             -- prevent unwanted announcements that have been specified as supressed

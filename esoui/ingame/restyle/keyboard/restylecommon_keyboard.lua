@@ -60,23 +60,17 @@ end
 
 -- Panel --
 
-ZO_RestyleCommon_Keyboard = ZO_InitializingObject:Subclass()
+ZO_RestyleCommon_Keyboard = ZO_DeferredInitializingObject:Subclass()
 
 function ZO_RestyleCommon_Keyboard:Initialize(control)
     self.control = control
 
-    self.fragment = ZO_FadeSceneFragment:New(control)
-    self.fragment:RegisterCallback("StateChange", function(oldState, newState)
-        if newState == SCENE_FRAGMENT_SHOWING then
-            self:OnShowing()
-        elseif newState == SCENE_FRAGMENT_SHOWN then
-            self:OnShown()
-        elseif newState == SCENE_FRAGMENT_HIDDEN then
-            self:OnHidden()
-        end
-    end)
+    local fragment = ZO_FadeSceneFragment:New(control)
+    ZO_DeferredInitializingObject.Initialize(self, fragment)
+end
 
-    self.contentSearchEditBox = control:GetNamedChild("SearchBox")
+function ZO_RestyleCommon_Keyboard:OnDeferredInitialize()
+    self.contentSearchEditBox = self.control:GetNamedChild("SearchBox")
 
     self.collectibleCategoryNodeLookup = {}
     self.restyleSlotTypeNodeLookup = {}
@@ -612,10 +606,6 @@ end
 
 function ZO_RestyleCommon_Keyboard:GetRestyleCategoryData()
     assert(false) -- Must be overridden
-end
-
-function ZO_RestyleCommon_Keyboard:GetFragment()
-    return self.fragment
 end
 
 do

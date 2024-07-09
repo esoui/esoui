@@ -17,6 +17,13 @@ function ZO_ItemPreview_Keyboard:Initialize(control)
     self:InitializeArrowButton(self.previewVariationLeftArrow, ITEM_PREVIEW_DIRECTION_PREVIOUS)
     self:InitializeArrowButton(self.previewVariationRightArrow, ITEM_PREVIEW_DIRECTION_NEXT)
 
+    self.actionLabel = control:GetNamedChild("ActionLabel")
+
+    self.previewActionLeftArrow = control:GetNamedChild("PreviewActionLeftArrow")
+    self.previewActionRightArrow = control:GetNamedChild("PreviewActionRightArrow")
+    self:InitializeActionArrowButton(self.previewActionLeftArrow, ITEM_PREVIEW_DIRECTION_PREVIOUS)
+    self:InitializeActionArrowButton(self.previewActionRightArrow, ITEM_PREVIEW_DIRECTION_NEXT)
+
     self:InitializeRotationControl()
 end
 
@@ -78,6 +85,10 @@ function ZO_ItemPreview_Keyboard:InitializeArrowButton(control, direction)
     control:SetHandler("OnClicked", function(control) self:CyclePreviewVariations(direction) end)
 end
 
+function ZO_ItemPreview_Keyboard:InitializeActionArrowButton(control, direction)
+    control:SetHandler("OnClicked", function(control) self:CyclePreviewActions(direction) end)
+end
+
 function ZO_ItemPreview_Keyboard:SetVariationControlsHidden(hidden)
     self.previewVariationLeftArrow:SetHidden(hidden)
     self.previewVariationRightArrow:SetHidden(hidden)
@@ -86,6 +97,16 @@ end
 
 function ZO_ItemPreview_Keyboard:SetVariationLabel(variationName)
     self.variationLabel:SetText(zo_strformat(SI_COLLECTIBLE_NAME_FORMATTER, variationName))
+end
+
+function ZO_ItemPreview_Keyboard:SetActionControlsHidden(hidden)
+    self.previewActionLeftArrow:SetHidden(hidden)
+    self.previewActionRightArrow:SetHidden(hidden)
+    self.actionLabel:SetHidden(hidden)
+end
+
+function ZO_ItemPreview_Keyboard:SetActionLabel(actionName)
+    self.actionLabel:SetText(zo_strformat(SI_COLLECTIBLE_NAME_FORMATTER, actionName))
 end
 
 function ZO_ItemPreview_Keyboard:SetCanChangePreview(canChangePreview)
@@ -108,14 +129,25 @@ function ZO_ItemPreview_Keyboard:CyclePreviewVariations(direction)
     end
 end
 
+function ZO_ItemPreview_Keyboard:CyclePreviewActions(direction)
+    if self:CanChangePreview() then
+        if direction == ITEM_PREVIEW_DIRECTION_PREVIOUS then
+            self:PreviewPreviousAction()
+        else
+            self:PreviewNextAction()
+        end
+    end
+end
+
 function ZO_ItemPreview_Keyboard:SetEnabled(isEnabled)
     local hideControls = not isEnabled
     self.rotationControl:SetHidden(hideControls)
-    
-    --SetEnabled can't cause the variation controls to be shown. This is to protect against showing the variation
-    --controls if the target doesn't have variations.
+
+    --SetEnabled can't cause the variation and action controls to be shown. This is to protect against
+    --showing the variation and action controls if the target doesn't have variations and actions.
     if hideControls then
         self:SetVariationControlsHidden(hideControls)
+        self:SetActionControlsHidden(hideControls)
     end
 end
 

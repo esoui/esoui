@@ -31,9 +31,16 @@ function ZO_HousingFurnitureSettings_Base:Initialize(control, owner)
         end
     end
 
+    local function OnHouseToursStatusUpdated()
+        if self.owner:IsShowing() and self.owner:GetMode() == HOUSING_BROWSER_MODE.SETTINGS then
+            self:UpdateGeneralSettings()
+        end
+    end
+
     self.control:RegisterForEvent(EVENT_HOUSING_PERMISSIONS_CHANGED, OnPermissionsChanged)
     self.control:RegisterForEvent(EVENT_HOUSING_PRIMARY_RESIDENCE_SET, OnPrimaryResidenceSet)
     self.control:RegisterForEvent(EVENT_HOUSING_POPULATION_CHANGED, OnOccupantsChanged)
+    self.control:RegisterForEvent(EVENT_HOUSE_TOURS_STATUS_UPDATED, OnHouseToursStatusUpdated)
 end
 
 function ZO_HousingFurnitureSettings_Base:OnPermissionsChanged(eventId, userGroup)
@@ -74,7 +81,7 @@ function ZO_HousingFurnitureSettings_Base:UpdateLists()
 end
 
 function ZO_HousingFurnitureSettings_Base:CanShowCopyDialog()
-    return GetTotalUnlockedCollectiblesByCategoryType(COLLECTIBLE_CATEGORY_TYPE_HOUSE) > 1
+    return HOUSING_EDITOR_STATE:IsLocalPlayerHouseOwner() and GetTotalUnlockedCollectiblesByCategoryType(COLLECTIBLE_CATEGORY_TYPE_HOUSE) > 1
 end
 
 function ZO_HousingFurnitureSettings_Base:TryShowCopyDialog()

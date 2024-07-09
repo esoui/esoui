@@ -252,6 +252,15 @@ function ZO_TextSearchManager:ExecuteSearch(context)
                 elseif filterTarget == BACKGROUND_LIST_FILTER_TARGET_COLLECTIBLE_ID then
                     -- Filter Target is a Collections Filter, primary key is a collectibleId
                     AddBackgroundListFilterEntry(searchTaskId, primaryKey)
+                elseif filterTarget == BACKGROUND_LIST_FILTER_TARGET_MARKET_PRODUCT_ID then
+                    -- Filter Target is a Market Product Filter, primary key is a marketProductId
+                    AddBackgroundListFilterEntry(searchTaskId, primaryKey)
+                elseif filterTarget == BACKGROUND_LIST_FILTER_TARGET_FURNITURE_ID then
+                    -- Filter Target is a Furniture Filter, primary key is a furnitureId
+                    AddBackgroundListFilterEntry64(searchTaskId, primaryKey)
+                elseif filterTarget == BACKGROUND_LIST_FILTER_TARGET_HELP_ID then
+                    -- Filter Target is a Help Filter, primary key is a HelpId
+                    AddBackgroundListFilterEntry(searchTaskId, primaryKey)
                 elseif filterTarget == BACKGROUND_LIST_FILTER_TARGET_TRIBUTE_PATRON_ID then
                     -- Filter Target is a Collections Filter, primary key is a tributePatronId
                     AddBackgroundListFilterEntry(searchTaskId, primaryKey)
@@ -304,6 +313,7 @@ function ZO_TextSearchManager:OnBackgroundListFilterComplete(taskId)
 
         for filterResultIndex = 1, GetNumBackgroundListFilterResults(taskId) do
             local primaryKey, secondaryKey, tertiaryKey, quaternaryKey = GetBackgroundListFilterResult(taskId, filterResultIndex)
+            local primaryKey64 = GetBackgroundListFilterResult64(taskId, filterResultIndex)
 
             if filterTarget == BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT then
                 if not searchResults[primaryKey] then
@@ -315,6 +325,13 @@ function ZO_TextSearchManager:OnBackgroundListFilterComplete(taskId)
             elseif filterTarget == BACKGROUND_LIST_FILTER_TARGET_QUEST_ITEM_ID then
                 searchResults[primaryKey] = true
             elseif filterTarget == BACKGROUND_LIST_FILTER_TARGET_COLLECTIBLE_ID then
+                searchResults[primaryKey] = true
+            elseif filterTarget == BACKGROUND_LIST_FILTER_TARGET_MARKET_PRODUCT_ID then
+                searchResults[primaryKey] = true
+            elseif filterTarget == BACKGROUND_LIST_FILTER_TARGET_FURNITURE_ID then
+                local furnitureIdKey = zo_getSafeId64Key(primaryKey64)
+                searchResults[furnitureIdKey] = true
+            elseif filterTarget == BACKGROUND_LIST_FILTER_TARGET_HELP_ID then
                 searchResults[primaryKey] = true
             elseif filterTarget == BACKGROUND_LIST_FILTER_TARGET_TRIBUTE_PATRON_ID then
                 searchResults[primaryKey] = true

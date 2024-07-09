@@ -12,10 +12,10 @@ function ZO_Tooltip:LayoutNotification(note, messageText)
     self:AddSection(bodySection)
 end
 
-function ZO_Tooltip:LayoutKeybindNotification(categoryData, entryData)
+function ZO_Tooltip:LayoutKeybindNotification(entryData)
     local bodySection = self:AcquireSection(self:GetStyle("bodySection"))
     local params = {
-        ZO_SELECTED_TEXT:Colorize(categoryData:GetName()),
+        ZO_SELECTED_TEXT:Colorize(entryData.data:GetCategoryName()),
         ZO_SELECTED_TEXT:Colorize(entryData.data:GetName()),
         "UI_SHORTCUT_RIGHT_STICK",
     }

@@ -37,7 +37,7 @@
                 </Label>
                 <Control name="$(parent)SkillsAdvisor_Divider" inherits="ZO_GamepadHeaderHorizontalDividerSimple" >
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Label" relativePoint="BOTTOMLEFT"/>
-                    <Anchor point="TOPRIGHT" offsetX="-20" offsetY="100" />
+                    <Anchor point="TOPRIGHT" offsetX="-20" offsetY="103" />
                 </Control>
                 <Control name="$(parent)List" inherits="ZO_ScrollList_Gamepad">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)SkillsAdvisor_Divider" relativePoint="BOTTOMLEFT" />

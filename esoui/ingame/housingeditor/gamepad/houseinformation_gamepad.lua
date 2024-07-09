@@ -49,6 +49,9 @@ function ZO_HouseInformation_Gamepad:GetNarrationText()
         ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_HOUSING_CURRENT_RESIDENTS_OVER_POPULATION_TEXT)))
     end
 
+    --Get the narration for the house tours recommendation count
+    ZO_AppendNarration(narrations, self:GetNarrationForRow(self.houseTourRecommendationCountRow))
+
     --Get the narration for the permissions rows
     ZO_AppendNarration(narrations, self:GetNarrationForRow(self.individualPermissionsRow))
     ZO_AppendNarration(narrations, self:GetNarrationForRow(self.guildPermissionsRow))

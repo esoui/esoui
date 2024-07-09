@@ -16,6 +16,7 @@ function ZO_BattlegroundLeaderboardsManager_Keyboard:Initialize(control)
     end)
 
     SYSTEMS:RegisterKeyboardObject(ZO_BATTLEGROUND_LEADERBOARD_SYSTEM_NAME, self)
+    LEADERBOARDS:RegisterLeaderboardSystemObject(self, LEADERBOARD_DATA_TYPE.BATTLEGROUND)
 end
 
 function ZO_BattlegroundLeaderboardsManager_Keyboard:RefreshHeaderPlayerInfo(isWeekly)

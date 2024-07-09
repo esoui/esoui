@@ -94,6 +94,10 @@
                     </Controls>
                 </Control>
 
+                <Label name="$(parent)AdditionalInstructions" inherits="ZO_HelpCustomerService_Keyboard_Details" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_CONTRAST" hidden="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)ExternalInfo" relativePoint="BOTTOMLEFT" offsetY="20" />
+                </Label>
+
                 <Button name="$(parent)SubmitButton" inherits="ZO_DefaultButton" text="SI_CUSTOMER_SERVICE_SUBMIT">
                     <Dimensions x="200" />
                     <Anchor point="BOTTOM" offsetY="-20" />

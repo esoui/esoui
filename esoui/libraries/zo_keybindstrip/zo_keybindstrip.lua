@@ -1242,5 +1242,57 @@ do
         local centerSubsequentAnchor = ZO_Anchor:New(LEFT, nil, RIGHT)
 
         self:UpdateAnchorsInternal(buttonsByAlignment[KEYBIND_STRIP_ALIGN_CENTER], self.centerParent, centerInitialConstrainXAnchor, centerInitialConstrainYAnchor, centerSubsequentAnchor)
+
+        -- Clear alignment bumping, then determine if the center section needs to bump.
+        self.centerParent:SetAnchor(CENTER)
+        local leftGroupLeftEdge, leftGroupRightEdge = self:GetButtonsLeftAndRight(buttonsByAlignment[KEYBIND_STRIP_ALIGN_LEFT])
+        local centerGroupLeftEdge, centerGroupRightEdge = self:GetButtonsLeftAndRight(buttonsByAlignment[KEYBIND_STRIP_ALIGN_CENTER])
+        local rightGroupLeftEdge, rightGroupRightEdge = self:GetButtonsLeftAndRight(buttonsByAlignment[KEYBIND_STRIP_ALIGN_RIGHT])
+
+        local centerOffsetFix = self:CalculateCenterButtonsOffset(leftGroupLeftEdge, leftGroupRightEdge, centerGroupLeftEdge, centerGroupRightEdge, rightGroupLeftEdge, rightGroupRightEdge)
+        self.centerParent:SetAnchor(CENTER, nil, CENTER, centerOffsetFix)
+    end
+
+    -- Determine if the center buttons group is overlapping with either side and offset it to avoid overlap.
+    function ZO_KeybindStrip:CalculateCenterButtonsOffset(leftGroupLeftEdge, leftGroupRightEdge, centerGroupLeftEdge, centerGroupRightEdge, rightGroupLeftEdge, rightGroupRightEdge)
+        if centerGroupRightEdge ~= nil then
+            -- As calculated, if either value is > 0, that pair of strips are overlapping.
+            local rightSideOverlap = rightGroupLeftEdge ~= nil and centerGroupRightEdge - rightGroupLeftEdge or nil
+            local leftSideOverlap = leftGroupRightEdge ~= nil and leftGroupRightEdge - centerGroupLeftEdge or nil
+            if rightSideOverlap ~= nil and rightSideOverlap > 0 then
+                -- If the right side is overlapping and there's space on the left to accomodate it
+                if leftSideOverlap == nil or leftSideOverlap < -rightSideOverlap then
+                    return -rightSideOverlap
+                end
+            elseif leftSideOverlap ~= nil and leftSideOverlap > 0 then
+                -- If the left side is overlapping and there's space on the right to accomodate it
+                if rightSideOverlap == nil or rightSideOverlap < -leftSideOverlap then
+                    return leftSideOverlap
+                end
+            end
+        end
+
+        return 0
+    end
+
+    -- Determine the bounding edges of a keybinding button list (left/right/center) by accumulating button edges.
+    function ZO_KeybindStrip:GetButtonsLeftAndRight(buttons)
+        -- Initialize to ridiculous defaults.
+        local min = math.huge
+        local max = 0
+
+        for i, button in ipairs(buttons) do
+            if not button:IsHidden() then
+                min = zo_min(min, button:GetLeft())
+                max = zo_max(max, button:GetRight())
+            end
+        end
+
+        if min < max then
+            return min, max
+        else
+            -- Either there were no items in the list, no visible items, or button positions are messed up.
+            return nil, nil
+        end
     end
 end

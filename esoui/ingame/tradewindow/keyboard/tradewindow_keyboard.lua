@@ -118,8 +118,8 @@ function ZO_TradeWindow:PrepareWindowForNewTrade()
     self:HideAllSlots(TRADE_THEM)
 
     ZO_TradeTheirControlsName:SetText(zo_strformat(SI_TRADE_THEIR_OFFER, TRADE_WINDOW.target))
-    
-    ZO_CurrencyControl_SetSimpleCurrency(ZO_TradeTheirControlsMoney, CURT_MONEY, 0)
+
+    ZO_CurrencyControl_SetSimpleCurrency(ZO_TradeTheirControlsMoneyText, CURT_MONEY, 0)
     ZO_CurrencyControl_SetSimpleCurrency(ZO_TradeMyControlsMoney, CURT_MONEY, 0)
     ZO_CurrencyControl_SetClickHandler(ZO_TradeMyControlsMoney, ZO_Trade_BeginChangeMoney)
 end
@@ -306,7 +306,7 @@ end
 --region promotion of money change event
 function ZO_TradeWindow:OnTradeWindowMoneyChanged(eventCode, who, money)
     if who == TRADE_THEM then
-        ZO_CurrencyControl_SetSimpleCurrency(ZO_TradeTheirControlsMoney, CURT_MONEY, money)
+        ZO_CurrencyControl_SetSimpleCurrency(ZO_TradeTheirControlsMoneyText, CURT_MONEY, money)
     else
         self.myOfferedMoney = money
         ZO_CurrencyControl_SetSimpleCurrency(ZO_TradeMyControlsMoney, CURT_MONEY, money)

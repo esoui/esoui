@@ -34,7 +34,7 @@
                     <Anchor point="RIGHT" relativePoint="CENTER" offsetX="60" constrains="X" />
                 </StatusBar>
 
-                <Label name="$(parent)Cost">
+                <Label name="$(parent)Cost" inherits="ZO_CurrencyTemplate">
                     <Anchor point="RIGHT" relativeTo="$(parent)Name" relativePoint="RIGHT" constrains="X" />
                     <Anchor point="LEFT" relativeTo="$(parent)Progress" relativePoint="RIGHT" constrains="Y" />
                 </Label>

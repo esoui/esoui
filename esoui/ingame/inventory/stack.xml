@@ -8,7 +8,7 @@
             <Controls>
                 <Label name="$(parent)Prompt" inherits="ZO_DialogContentAnchors" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame"/>
 
-                <Button name="$(parent)Source" inherits="ZO_ItemSlot">
+                <Button name="$(parent)Source" inherits="ZO_ItemSlot_Shared">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Prompt" relativePoint="BOTTOMLEFT" offsetX="20" offsetY="25" />
                     <Dimensions x="48" y="48" />
                 </Button>
@@ -17,12 +17,12 @@
                     <Anchor point="LEFT" relativeTo="$(parent)Source" relativePoint="RIGHT" offsetX="20"/>
                 </Texture>
 
-                <Button name="$(parent)Destination1" inherits="ZO_ItemSlot">
+                <Button name="$(parent)Destination1" inherits="ZO_ItemSlot_Shared">
                     <Anchor point="LEFT" relativeTo="$(parent)Arrow" relativePoint="RIGHT" offsetX="20" />
                     <Dimensions x="48" y="48" />
                 </Button>
 
-                <Button name="$(parent)Destination2" inherits="ZO_ItemSlot">
+                <Button name="$(parent)Destination2" inherits="ZO_ItemSlot_Shared">
                     <Anchor point="LEFT" relativeTo="$(parent)Destination1" relativePoint="RIGHT" offsetX="25" />
                     <Dimensions x="48" y="48" />
                 </Button>

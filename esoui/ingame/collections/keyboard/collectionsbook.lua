@@ -10,17 +10,20 @@ end
 --------------------
 --[[ Initialization ]]--
 ------------------------
-ZO_CollectionsBook = ZO_Object:Subclass()
-
-function ZO_CollectionsBook:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
+ZO_CollectionsBook = ZO_DeferredInitializingObject:Subclass()
 
 function ZO_CollectionsBook:Initialize(control)
     self.control = control
 
+    COLLECTIONS_BOOK_SCENE = ZO_Scene:New("collectionsBook", SCENE_MANAGER)
+    ZO_DeferredInitializingObject.Initialize(self, COLLECTIONS_BOOK_SCENE)
+
+    SYSTEMS:RegisterKeyboardObject(ZO_COLLECTIONS_SYSTEM_NAME, self)
+
+    RefreshMainMenu()
+end
+
+function ZO_CollectionsBook:OnDeferredInitialize()
     self.categoryNodeLookupData = {}
 
     self:InitializeControls()
@@ -31,50 +34,19 @@ function ZO_CollectionsBook:Initialize(control)
     self:InitializeGridListPanel()
     self:InitializeKeybindStripDescriptors()
 
-    local function OnRefreshActionsCallback()
-        local categoryData = self.categoryTree:GetSelectedData()
-        if categoryData then
-            self:UpdateUtilityWheel(categoryData)
-        end
-        self:UpdateKeybinds()
-    end
+    self.wasPreviewing = IsCurrentlyPreviewing()
 
-    self.control:SetHandler("OnUpdate", function() self.refreshGroups:UpdateRefreshGroups() end)
+    self.control:SetHandler("OnUpdate", function() 
+        self.refreshGroups:UpdateRefreshGroups()
 
-    self.scene = ZO_Scene:New("collectionsBook", SCENE_MANAGER)
-    self.scene:RegisterCallback("StateChange", function(oldState, newState)
-        if newState == SCENE_SHOWING then
-            self.refreshGroups:UpdateRefreshGroups() --In case we need to rebuild the categories
-            ITEM_PREVIEW_KEYBOARD:RegisterCallback("RefreshActions", OnRefreshActionsCallback)
-            self:UpdateCollectionVisualLayer()
-            if self.hotbarCategory and not IsCurrentlyPreviewing() then
-                self.wheelContainer:SetHidden(false)
-                self.wheel:Activate()
-            else
-                self.wheelContainer:SetHidden(true)
-            end
-            COLLECTIONS_BOOK_SINGLETON:SetSearchString(self.contentSearchEditBox:GetText())
-            COLLECTIONS_BOOK_SINGLETON:SetSearchCategorySpecializationFilters(COLLECTIBLE_CATEGORY_SPECIALIZATION_NONE)
-            COLLECTIONS_BOOK_SINGLETON:SetSearchChecksHidden(true)
-            self:AddKeybinds()
-        elseif newState == SCENE_HIDING then
-            if IsCurrentlyPreviewing() then
-                ITEM_PREVIEW_KEYBOARD:EndCurrentPreview()
-            end
-        elseif newState == SCENE_HIDDEN then
-            ITEM_PREVIEW_KEYBOARD:UnregisterCallback("RefreshActions", OnRefreshActionsCallback)
-            self.gridListPanelList:ResetToTop()
-            self.wheelContainer:SetHidden(true)
-            if self.hotbarCategory then
-                self.wheel:Deactivate()
-            end
-            self:RemoveKeybinds()
+        local isPreviewing = IsCurrentlyPreviewing()
+        if(isPreviewing ~= self.wasPreviewing) then
+            self:UpdateKeybinds()
+            self.wasPreviewing = isPreviewing
         end
     end)
 
     self:UpdateCollectionLater()
-
-    SYSTEMS:RegisterKeyboardObject(ZO_COLLECTIONS_SYSTEM_NAME, self)
 end
 
 function ZO_CollectionsBook:InitializeControls()
@@ -112,6 +84,14 @@ function ZO_CollectionsBook:InitializeEvents()
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", function(...) self:OnCollectionUpdated(...) end)
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleNewStatusCleared", function(...) self:OnCollectibleNewStatusCleared(...) end)
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleUserFlagsUpdated", function(...) self:OnCollectibleUserFlagsUpdated(...) end)
+
+    self.onRefreshActionsCallback = function()
+        local categoryData = self.categoryTree:GetSelectedData()
+        if categoryData then
+            self:UpdateUtilityWheel(categoryData)
+        end
+        self:UpdateKeybinds()
+    end
 
     self.refreshGroups = ZO_Refresh:New()
     self.refreshGroups:AddRefreshGroup("FullUpdate",
@@ -287,6 +267,39 @@ function ZO_CollectionsBook:UpdateKeybinds()
     if self.keybindStripDescriptor and self.scene:IsShowing() then
         KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
     end
+end
+
+function ZO_CollectionsBook:OnShowing()
+    self.refreshGroups:UpdateRefreshGroups() --In case we need to rebuild the categories
+
+    ITEM_PREVIEW_KEYBOARD:RegisterCallback("RefreshActions", self.onRefreshActionsCallback)
+    self:UpdateCollectionVisualLayer()
+    if self.hotbarCategory and not IsCurrentlyPreviewing() then
+        self.wheelContainer:SetHidden(false)
+        self.wheel:Activate()
+    else
+        self.wheelContainer:SetHidden(true)
+    end
+    COLLECTIONS_BOOK_SINGLETON:SetSearchString(self.contentSearchEditBox:GetText())
+    COLLECTIONS_BOOK_SINGLETON:SetSearchCategorySpecializationFilters(COLLECTIBLE_CATEGORY_SPECIALIZATION_NONE)
+    COLLECTIONS_BOOK_SINGLETON:SetSearchChecksHidden(true)
+    self:AddKeybinds()
+end
+
+function ZO_CollectionsBook:OnHiding()
+    if IsCurrentlyPreviewing() then
+        ITEM_PREVIEW_KEYBOARD:EndCurrentPreview()
+    end
+end
+
+function ZO_CollectionsBook:OnHidden()
+    ITEM_PREVIEW_KEYBOARD:UnregisterCallback("RefreshActions", self.onRefreshActionsCallback)
+    self.gridListPanelList:ResetToTop()
+    self.wheelContainer:SetHidden(true)
+    if self.hotbarCategory then
+        self.wheel:Deactivate()
+    end
+    self:RemoveKeybinds()
 end
 
 --[[ Refresh ]]--
@@ -604,6 +617,7 @@ function ZO_CollectionsBook:OnCollectibleUserFlagsUpdated(collectibleId)
 end
 
 function ZO_CollectionsBook:BrowseToCollectible(collectibleId)
+    self:PerformDeferredInitialize()
     self.refreshGroups:UpdateRefreshGroups() --In case we need to rebuild the categories before we select a category
 
     local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
@@ -657,7 +671,7 @@ function ZO_CollectionsBook.GetShowRenameDialogClosure(collectibleId)
     return function() ZO_CollectionsBook.ShowRenameDialog(collectibleId) end
 end
 
-function ZO_CollectionsBook.ShowRenameDialog(collectibleId)
+function ZO_CollectionsBook.ShowRenameDialog(collectibleId, finishedCallback)
     if collectibleId ~= 0 then
         local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
         if collectibleData then
@@ -668,7 +682,7 @@ function ZO_CollectionsBook.ShowRenameDialog(collectibleId)
             if nickname ~= defaultNickname then
                 initialEditText = nickname
             end
-            ZO_Dialogs_ShowDialog("COLLECTIONS_INVENTORY_RENAME_COLLECTIBLE", { collectibleId = collectibleId }, { initialEditText = initialEditText, initialDefaultText = defaultNickname})
+            ZO_Dialogs_ShowDialog("COLLECTIONS_INVENTORY_RENAME_COLLECTIBLE", { collectibleId = collectibleId, finishedCallback = finishedCallback }, { initialEditText = initialEditText, initialDefaultText = defaultNickname})
         end
     end
 end
@@ -721,7 +735,12 @@ function ZO_CollectibleRenameDialog_OnInitialized(control)
                     local editControl = dialog:GetNamedChild("ContentContainerEditBox")
                     local inputText = editControl:GetText()
                     if inputText then
-                        local violations = { IsValidCollectibleName(inputText) }
+                        local violations
+                        if GetCollectibleCategoryType(dialog.data.collectibleId) == COLLECTIBLE_CATEGORY_TYPE_HOUSE then
+                            violations = { IsValidHouseName(inputText) }
+                        else
+                            violations = { IsValidCollectibleName(inputText) }
+                        end
                         if #violations == 0 then
                             local collectibleId = dialog.data.collectibleId
                             RenameCollectible(collectibleId, inputText)
@@ -746,6 +765,40 @@ function ZO_CollectibleRenameDialog_OnInitialized(control)
                     end
                 end
             }
-        }
+        },
+        finishedCallback = function(dialog)
+            if dialog.data and dialog.data.finishedCallback then
+                dialog.data.finishedCallback(dialog)
+            end
+        end,
     })
+
+    control.editBox = control:GetNamedChild("ContentContainerEditBox")
+    SetupEditControlForNameValidation(control.editBox)
+
+    local VALIDATOR_RULES =
+    {
+        NAME_RULE_CANNOT_START_WITH_SPACE,
+        NAME_RULE_INVALID_CHARACTERS,
+    }
+    local DEFAULT_TEMPLATE = nil
+    control.nameInstructions = ZO_ValidNameInstructions:New(control:GetNamedChild("ContentContainerNameInstructions"), DEFAULT_TEMPLATE, VALIDATOR_RULES)
+end
+
+function ZO_CollectibleRenameDialog_UpdateViolations(control)
+    local dialog = control:GetAncestor(3)
+    if GetCollectibleCategoryType(dialog.data.collectibleId) == COLLECTIBLE_CATEGORY_TYPE_HOUSE then
+        local violations = { IsValidHouseName(control:GetText()) }
+        local noViolations = #violations == 0
+
+        dialog.nameInstructions:SetPreferredAnchor(TOPRIGHT, dialog, TOPLEFT, -15, 0)
+        dialog.nameInstructions:Show(dialog, violations)
+    end
+end
+
+function ZO_CollectibleRenameDialog_HideViolations(control)
+    local dialog = control:GetAncestor(3)
+    if GetCollectibleCategoryType(dialog.data.collectibleId) == COLLECTIBLE_CATEGORY_TYPE_HOUSE then
+        dialog.nameInstructions:Hide()
+    end
 end

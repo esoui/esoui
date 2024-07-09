@@ -277,6 +277,13 @@ CENTER_SCREEN_EVENT_HANDLERS[EVENT_BROADCAST] = function(message)
     return messageParams
 end
 
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_FIXED_BROADCAST] = function(broadcastType, arg1)
+    local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT, SOUNDS.MESSAGE_BROADCAST)
+    messageParams:SetText(string.format("|cffff00%s|r", zo_strformat(GetString("SI_BROADCASTTYPE", broadcastType), arg1)))
+    messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_SYSTEM_BROADCAST)
+    return messageParams
+end
+
 CENTER_SCREEN_EVENT_HANDLERS[EVENT_DISCOVERY_EXPERIENCE] = function(subzoneName, level, previousExperience, currentExperience, championPoints)
     if not INTERACT_WINDOW:IsShowingInteraction() then
         local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.OBJECTIVE_DISCOVERED)
@@ -775,10 +782,10 @@ CENTER_SCREEN_EVENT_HANDLERS[EVENT_BATTLEGROUND_KILL] = function(killedPlayerCha
         if gameType == BATTLEGROUND_GAME_TYPE_DEATHMATCH then
             local format = GetString("SI_BATTLEGROUNDKILLTYPE", battlegroundKillType)
             local killedPlayerName = ZO_GetPrimaryPlayerName(killedPlayerDisplayName, killedPlayerCharacterName)
-            local coloredKilledPlayerName = GetBattlegroundAllianceColor(killedPlayerBattlegroundAlliance):Colorize(killedPlayerName)
+            local coloredKilledPlayerName = GetBattlegroundTeamColor(killedPlayerBattlegroundAlliance):Colorize(killedPlayerName)
     
             if battlegroundKillType == BATTLEGROUND_KILL_TYPE_KILLING_BLOW or battlegroundKillType == BATTLEGROUND_KILL_TYPE_ASSIST then
-                local you = GetBattlegroundAllianceColor(killingPlayerBattlegroundAlliance):Colorize(GetString(SI_BATTLEGROUND_YOU))
+                local you = GetBattlegroundTeamColor(killingPlayerBattlegroundAlliance):Colorize(GetString(SI_BATTLEGROUND_YOU))
                 local sound
                 if battlegroundKillType == BATTLEGROUND_KILL_TYPE_KILLING_BLOW then
                     sound = SOUNDS.BATTLEGROUND_KILL_KILLING_BLOW

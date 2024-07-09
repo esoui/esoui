@@ -41,6 +41,7 @@ function ZO_Armory_Gamepad:Initialize(control)
             end
         else
             ARMORY_ROOT_GAMEPAD_SCENE:AcceptHideScene()
+            ZO_Dialogs_SetDialogQueuePaused(false)
         end
     end)
 

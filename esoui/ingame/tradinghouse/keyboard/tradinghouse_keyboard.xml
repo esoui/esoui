@@ -3,6 +3,10 @@
         <Control name="ZO_TradingHouseSearchResult" inherits="ZO_ListEntry_BackdropAndHighlight_Template ZO_ListInventorySlotBehavior" virtual="true">
             <Dimensions y="52" />
 
+            <OnInitialized name="TradingHouseSearchResult">
+                self.currencyControl = { self:GetNamedChild("SellPricePerUnitText"), self:GetNamedChild("SellPriceText") }
+            </OnInitialized>
+            
             <OnMouseUp>
                 if upInside then
                     ZO_TradingHouse_OnSearchResultClicked(self, button)
@@ -44,20 +48,36 @@
                     <Anchor point="LEFT" relativeTo="$(parent)Name" relativePoint="left" offsetX="ZO_TRADING_HOUSE_SEARCH_RESULT_ITEM_NAME_WIDTH" />
                 </Label>
 
-                <Label name="$(parent)SellPricePerUnit" inherits="ZO_CurrencyTemplate" maxLineCount="1">
+                <Control name="$(parent)SellPricePerUnit">
                     <Dimensions x="ZO_TRADING_HOUSE_SEARCH_RESULT_UNIT_PRICE_WIDTH" />
                     <Anchor point="LEFT" relativeTo="$(parent)TimeRemaining" relativePoint="RIGHT" />
-                </Label>
 
-                <Label name="$(parent)SellPrice" inherits="ZO_CurrencyTemplate" maxLineCount="1">
+                    <Controls>
+                        <Label name="$(parent)Text" inherits="ZO_CurrencyTemplate" maxLineCount="1">
+                            <Anchor point="RIGHT" />
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)SellPrice">
                     <Dimensions x="ZO_TRADING_HOUSE_SEARCH_RESULT_PRICE_WIDTH" />
                     <Anchor point="LEFT" relativeTo="$(parent)SellPricePerUnit" relativePoint="RIGHT" />
-                </Label>
+
+                    <Controls>
+                        <Label name="$(parent)Text" inherits="ZO_CurrencyTemplate" maxLineCount="1">
+                            <Anchor point="RIGHT" />
+                        </Label>
+                    </Controls>
+                </Control>
             </Controls>
         </Control>
 
         <Control name="ZO_TradingHouseItemListing" inherits="ZO_ListEntry_BackdropAndHighlight_Template ZO_ListInventorySlotBehavior" virtual="true">
             <Dimensions x="509" y="48" />
+
+            <OnInitialized name="InventorySlot_Base">
+                self.currencyControl = self:GetNamedChild("SellPrice")
+            </OnInitialized>
 
             <Controls>
                 <Button name="$(parent)Button" inherits="ZO_InventorySlotNoMouseover">
@@ -223,12 +243,20 @@
                                             </Controls>
                                         </Backdrop>
 
-                                        <Texture name="$(parent)MinPriceIcon">
+                                        <Texture name="$(parent)MinPriceIcon" mouseEnabled="true">
                                             <Dimensions x="20" y="20" />
                                             <Anchor point="LEFT" relativeTo="$(parent)MinPrice" relativePoint="RIGHT" offsetX="2" />
                                             <OnInitialized>
                                                 self:SetTexture(ZO_Currency_GetKeyboardCurrencyIcon(CURT_MONEY))
+                                                self.type = CURT_MONEY
                                             </OnInitialized>
+
+                                            <OnMouseEnter>
+                                                ZO_CurrencyTemplate_OnMouseEnter(self)
+                                            </OnMouseEnter>
+                                            <OnMouseExit>
+                                                ZO_CurrencyTemplate_OnMouseExit(self)
+                                            </OnMouseExit>
                                         </Texture>
 
                                         <Texture name="$(parent)PriceRangeDivider" color="FFFFFF">
@@ -245,12 +273,20 @@
                                             </Controls>
                                         </Backdrop>
 
-                                        <Texture name="$(parent)MaxPriceIcon">
+                                        <Texture name="$(parent)MaxPriceIcon" mouseEnabled="true">
                                             <Dimensions x="20" y="20" />
                                             <Anchor point="LEFT" relativeTo="$(parent)MaxPrice" relativePoint="RIGHT" offsetX="2" />
                                             <OnInitialized>
                                                 self:SetTexture(ZO_Currency_GetKeyboardCurrencyIcon(CURT_MONEY))
+                                                self.type = CURT_MONEY
                                             </OnInitialized>
+
+                                            <OnMouseEnter>
+                                                ZO_CurrencyTemplate_OnMouseEnter(self)
+                                            </OnMouseEnter>
+                                            <OnMouseExit>
+                                                ZO_CurrencyTemplate_OnMouseExit(self)
+                                            </OnMouseExit>
                                         </Texture>
                                     </Controls>
                                 </Control>
@@ -406,7 +442,7 @@
 
                 <!-- Sell Tab. The inventory is actually the player inventory fragment, so this is only the left pane. -->
                 <Control name="$(parent)PostItemPane">
-                    <Dimensions x="200" />
+                    <Dimensions x="300" />
                     <Anchor point="TOPLEFT" offsetY="60" />
                     <Anchor point="BOTTOMLEFT" offsetY="-10" />
 

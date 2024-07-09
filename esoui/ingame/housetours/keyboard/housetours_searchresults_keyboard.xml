@@ -1,0 +1,208 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_HouseToursSearchResultsTile_Keyboard_HighlightAnimation">
+            <Animations>
+                <AlphaAnimation duration="255" startAlpha="0" endAlpha=".7">
+                    <EasingFunction>
+                        return ZO_EaseOutQuadratic(progress)
+                    </EasingFunction>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    
+    <Controls>
+        <Control name="ZO_HouseToursSearchResultsTile_Keyboard_Control" inherits="ZO_ContextualActionsTile_Control" mouseEnabled="true" virtual="true">
+            <Dimensions x="302" y="200" />
+            <OnInitialized>
+                ZO_HouseToursSearchResultsTile_Keyboard.OnControlInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Texture name="$(parent)Background" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
+                    <AnchorFill />
+                    <TextureCoords left="0" right="0.58984375" top="0" bottom="0.78125"/>
+                </Texture>
+
+                <!-- The Overlay should appear over top of the background -->
+                <Texture name="$(parent)OverlayGradient" textureFile="EsoUI/Art/Market/market_ItemGradient_256.dds" alpha="0.6" level="9">
+                    <AnchorFill />
+                </Texture>
+
+                <!-- The tier and layer need to be manually set back to their normal defaults here in order to undo the values set by ZO_ContextualActionsTile_Control-->
+                <Backdrop name="$(parent)OverlayBorder" override="true" tier="PARENT" layer="BACKGROUND" level="10">
+                    <AnchorFill />
+                    <Edge file="EsoUI/Art/Miscellaneous/dark_edgeFrame_8_thin.dds" edgeFileWidth="64" edgeFileHeight="8" />
+                </Backdrop>
+
+                <Backdrop name="$(parent)Highlight" centerColor="00000000" alpha="0" level="20" blendMode="ADD">
+                    <AnchorFill/>
+                    <Edge file="EsoUI/Art/Market/market_highlightEdge16.dds" edgeFileWidth="128" edgeFileHeight="16" />
+                </Backdrop>
+
+                <Texture name="$(parent)FavoriteIcon" textureFile="EsoUI/Art/HouseTours/houseTours_favorite.dds" hidden="true" level="11">
+                    <Anchor point="TOPRIGHT" offsetX="-10" offsetY="10" />
+                    <Dimensions x="34" y="32" />
+                    <TextureCoords left="0.0625" right="0.9531" top="0.0625" bottom="0.8906" />
+                </Texture>
+
+                <Label name="$(parent)Nickname" font="ZoFontWinH2" maxLineCount="2" wrapMode="ELLIPSIS" level="11">
+                    <Anchor point="TOPLEFT" offsetX="10" offsetY="10" />
+                    <Dimensions x="209" />
+                </Label>
+                
+                <Label name="$(parent)HouseName" font="ZoFontWinH3" maxLineCount="2" wrapMode="ELLIPSIS" level="11">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Nickname" relativePoint="BOTTOMLEFT" offsetY="5" />
+                    <Dimensions x="209" />
+                </Label>
+
+                <Label name="$(parent)FurnitureCount" font="ZoFontWinH4" level="11">
+                    <Anchor point="BOTTOMRIGHT" offsetX="-10" offsetY="-10" />
+                </Label>
+
+                <Label name="$(parent)DisplayName" font="ZoFontWinH3" maxLineCount="1" wrapMode="ELLIPSIS" level="11">
+                    <Anchor point="BOTTOMLEFT" offsetX="10" offsetY="-10" />
+                    <Anchor point="RIGHT" relativeTo="$(parent)FurnitureCount" relativePoint="LEFT" constrains="X" />
+                </Label>
+            </Controls>
+        </Control>
+        
+        <TopLevelControl name="ZO_HouseTours_SearchResults_Keyboard" inherits="ZO_GroupMenuKeyboard_ContentAnchors" hidden="true">
+            <OnInitialized>
+                ZO_HouseToursSearchResults_Keyboard.OnControlInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)Container">
+                    <AnchorFill />
+                    <Controls>
+                        <Backdrop name="$(parent)DisplayNameSearch" tier="HIGH" inherits="ZO_SingleLineEditBackdrop_Keyboard">
+                            <Dimensions x="160" />
+                            <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" offsetX="2" offsetY="-10" />
+                            <Controls>
+                                <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop" maxInputCharacters="DECORATED_DISPLAY_NAME_MAX_LENGTH">
+                                    <OnInitialized>
+                                        self.autoComplete = ZO_AutoComplete:New(self, { AUTO_COMPLETE_FLAG_HOME_TOURS }, nil, AUTO_COMPLETION_ONLINE_OR_OFFLINE, MAX_AUTO_COMPLETION_RESULTS)
+                                        self.autoComplete:SetWidthOffsets(0, 80)
+                                    </OnInitialized>
+                                </EditBox>
+                            </Controls>
+                        </Backdrop>
+
+                        <Control name="$(parent)TagsFilter" inherits="ZO_ComboBox">
+                            <Dimensions x="190" y="33" />
+                            <Anchor point="LEFT" relativeTo="$(parent)DisplayNameSearch" relativePoint="RIGHT" offsetX="10" />
+                        </Control>
+
+                        <Control name="$(parent)HouseFilter" inherits="ZO_ComboBox">
+                            <Dimensions x="190" y="33" />
+                            <Anchor point="LEFT" relativeTo="$(parent)TagsFilter" relativePoint="RIGHT" offsetX="10" />
+                        </Control>
+
+                        <Button name="$(parent)AllFilters" inherits="ZO_MouseTooltipBehavior">
+                            <Dimensions x="48" y="48" />
+                            <Anchor point="LEFT" relativeTo="$(parent)HouseFilter" relativePoint="RIGHT" offsext="10" />
+
+                            <OnInitialized>
+                                self:SetTooltipString(SI_HOUSE_TOURS_ALL_FILTERS)
+                            </OnInitialized>
+                            
+                            <Textures
+                                normal="EsoUI/Art/HouseTours/houseTours_allFilters_up.dds"
+                                pressed="EsoUI/Art/HouseTours/houseTours_allFilters_down.dds"
+                                mouseOver="EsoUI/Art/HouseTours/houseTours_allFilters_over.dds"
+                            />
+                        </Button>
+                        
+                        <Control name="$(parent)GridList" inherits="ZO_GridScrollList_Keyboard">
+                            <AnchorFill />
+                        </Control>
+
+                        <Label name="$(parent)EmptyText" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER" hidden="true">
+                            <Anchor point="TOPLEFT" offsetY="60"/>
+                            <Anchor point="TOPRIGHT" offsetX="-30" offsetY="60"/>
+                        </Label>
+                        
+                        <Control name="$(parent)LoadingIcon" inherits="ZO_Loading">
+                            <Anchor point="TOP" relativeTo="$(parent)EmptyText" relativePoint="BOTTOM" />
+                            <OnInitialized>
+                                ZO_Loading_Initialize(self)
+                            </OnInitialized>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+        
+        <TopLevelControl name="ZO_HouseTours_SearchResultsFiltersDialog" inherits="ZO_CustomDialogBase">
+            <DimensionConstraints minX="550" />
+            <OnInitialized>
+                ZO_HouseToursSearchFiltersDialog_Keyboard.OnControlInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Label name="$(parent)SearchHeader" font="ZoFontGameBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="LEFT" offsetX="25" offsetY="45" constrains="X"/>
+                    <Anchor point="TOP" relativeTo="$(parent)Divider" relativePoint="BOTTOM" offsetY="5" constrains="Y" />
+                    <Dimensions x="250" />
+                </Label>
+
+                <Backdrop name="$(parent)Search" inherits="ZO_SingleLineEditBackdrop_Keyboard">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)SearchHeader" relativePoint="BOTTOMLEFT" offsetY="5"/>
+                    <Dimensions x="250" />
+                    <Controls>
+                        <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop" maxInputCharacters="DECORATED_DISPLAY_NAME_MAX_LENGTH">
+                            <!-- TODO House Tours: Find out from design if this is behavior we want -->
+                            <OnInitialized>
+                                ZO_AutoComplete:New(self, { AUTO_COMPLETE_FLAG_HOME_TOURS }, nil, AUTO_COMPLETION_ONLINE_OR_OFFLINE, MAX_AUTO_COMPLETION_RESULTS)
+                            </OnInitialized>
+                            <OnEffectivelyShown>
+                                self:TakeFocus()
+                            </OnEffectivelyShown>
+                        </EditBox>
+                    </Controls>
+                </Backdrop>
+
+                <Label name="$(parent)TagsHeader" font="ZoFontGameBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_HOUSE_TOURS_LISTING_TAGS_HEADER">
+                    <Dimensions x="250" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)SearchHeader" relativePoint="TOPRIGHT" offsetX="10" />
+                </Label>
+
+                <Control name="$(parent)TagsSelector" inherits="ZO_ComboBox">
+                    <Dimensions x="250" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)TagsHeader" relativePoint="BOTTOMLEFT" offsetY="4" />
+                </Control>
+
+                <Label name="$(parent)HouseNameHeader" font="ZoFontGameBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_HOUSE_TOURS_FILTERS_HOUSE_DROPDOWN_HEADER">
+                    <Dimensions x="250" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Search" relativePoint="BOTTOMLEFT" offsetY="10" />
+                </Label>
+
+                <Control name="$(parent)HouseNameSelector" inherits="ZO_ComboBox">
+                    <Dimensions x="250" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)HouseNameHeader" relativePoint="BOTTOMLEFT" offsetY="4" />
+                </Control>
+
+                <Label name="$(parent)HouseCategoryHeader" font="ZoFontGameBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_HOUSE_TOURS_FILTERS_HOUSE_CATEGORY_DROPDOWN_HEADER">
+                    <Dimensions x="250" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)HouseNameHeader" relativePoint="TOPRIGHT" offsetX="10" />
+                </Label>
+
+                <!-- The house category dropdown is inside a container control in order to be able to have a mouseover tooltip when the dropdown is disabled (since disabling the dropdown will set mouseEnabled to false) -->
+                <Control name="$(parent)HouseCategorySelector" mouseEnabled="true">
+                    <Dimensions x="250" y="31"/>
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)HouseCategoryHeader" relativePoint="BOTTOMLEFT" offsetY="4" />
+                    <Controls>
+                        <Control name="$(parent)Dropdown" inherits="ZO_ComboBox">
+                            <AnchorFill />
+                        </Control>
+                    </Controls>
+                </Control>
+                
+                <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton"/>
+                <Control name="$(parent)Confirm" inherits="ZO_CustomDialogButton"/>
+                <Control name="$(parent)Reset" inherits="ZO_CustomDialogButton"/>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

@@ -3,6 +3,7 @@ ZO_HouseInformationTracker = ZO_HUDTracker_Base:Subclass()
 function ZO_HouseInformationTracker:Initialize(control, ...)
     -- Order matters
     self.populationLabel = control:GetNamedChild("ContainerPopulation")
+    self.tagsLabel = control:GetNamedChild("ContainerTags")
     ZO_HUDTracker_Base.Initialize(self, control, ...)
 end
 
@@ -32,6 +33,7 @@ function ZO_HouseInformationTracker:InitializeStyles()
             FONT_HEADER = "ZoFontGameShadow",
             FONT_POPULATION = "ZoFontGameShadow",
             FONT_SUBLABEL = "ZoFontGameShadow",
+            FONT_TAGS = "ZoFontGameShadow",
 
             HEADER_PRIMARY_ANCHOR = ZO_Anchor:New(TOPLEFT, self.container),
             HEADER_SECONDARY_ANCHOR = ZO_Anchor:New(TOPRIGHT, self.container),
@@ -44,6 +46,9 @@ function ZO_HouseInformationTracker:InitializeStyles()
 
             SUBLABEL_PRIMARY_ANCHOR = ZO_Anchor:New(TOPLEFT, self.headerLabel, BOTTOMLEFT, 10, 2),
             SUBLABEL_SECONDARY_ANCHOR = ZO_Anchor:New(TOPRIGHT, self.headerLabel, BOTTOMRIGHT, 0, 2),
+
+            TAGS_LABEL_PRIMARY_ANCHOR = ZO_Anchor:New(TOPLEFT, self.populationLabel, BOTTOMLEFT, 0, 0),
+            TAGS_LABEL_SECONDARY_ANCHOR = ZO_Anchor:New(TOPRIGHT, self.populationLabel, BOTTOMRIGHT, 0, 0),
 
             TEXT_HORIZONTAL_ALIGNMENT = TEXT_ALIGN_LEFT,
             TEXT_TYPE_HEADER = MODIFY_TEXT_TYPE_NONE,
@@ -59,6 +64,7 @@ function ZO_HouseInformationTracker:InitializeStyles()
             FONT_HEADER = "ZoFontGamepadBold27",
             FONT_POPULATION = "ZoFontGamepad34",
             FONT_SUBLABEL = "ZoFontGamepad34",
+            FONT_TAGS = "ZoFontGamepad34",
 
             HEADER_PRIMARY_ANCHOR = ZO_Anchor:New(TOPRIGHT, self.container),
 
@@ -67,7 +73,9 @@ function ZO_HouseInformationTracker:InitializeStyles()
             POPULATION_SUBLABEL_PRIMARY_ANCHOR = ZO_Anchor:New(TOPRIGHT, self.subLabel, BOTTOMRIGHT, 0, 0),
 
             SUBLABEL_PRIMARY_ANCHOR = ZO_Anchor:New(TOPRIGHT, self.headerLabel, BOTTOMRIGHT, 0, 10),
-            
+
+            TAGS_LABEL_PRIMARY_ANCHOR = ZO_Anchor:New(TOPRIGHT, self.populationLabel, BOTTOMRIGHT, 0, 0),
+
             TEXT_HORIZONTAL_ALIGNMENT = TEXT_ALIGN_RIGHT,
             TEXT_TYPE_HEADER = MODIFY_TEXT_TYPE_UPPERCASE,
 
@@ -90,6 +98,8 @@ function ZO_HouseInformationTracker:ApplyPlatformStyle(style)
     self.populationLabel:SetFont(style.FONT_POPULATION)
     self.populationLabel:SetHorizontalAlignment(style.TEXT_HORIZONTAL_ALIGNMENT)
     self.subLabel:SetHorizontalAlignment(style.TEXT_HORIZONTAL_ALIGNMENT)
+    self.tagsLabel:SetFont(style.FONT_TAGS)
+    self.tagsLabel:SetHorizontalAlignment(style.TEXT_HORIZONTAL_ALIGNMENT)
 end
 
 function ZO_HouseInformationTracker:GetPrimaryAnchor()
@@ -103,7 +113,17 @@ end
 function ZO_HouseInformationTracker:RegisterEvents()
     ZO_HUDTracker_Base.RegisterEvents(self)
     self:InitializeSetting()
+
+    EVENT_MANAGER:RegisterForEvent("HouseInformationTracker", EVENT_PLAYER_ACTIVATED, ZO_GetEventForwardingFunction(self, self.Refresh))
+    EVENT_MANAGER:RegisterForEvent("HouseInformationTracker", EVENT_HOUSE_TOURS_CURRENT_HOUSE_LISTING_UPDATED, ZO_GetEventForwardingFunction(self, self.Refresh))
     HOUSING_EDITOR_STATE:RegisterCallback("HouseSettingsChanged", self.Refresh, self)
+    HOUSING_EDITOR_STATE:RegisterCallback("HouseChanged", self.Refresh, self)
+    HOUSE_TOURS_PLAYER_LISTINGS_MANAGER:RegisterCallback("ListingOperationCompleted", function(operationType, houseId, result)
+        if result == HOUSE_TOURS_LISTING_RESULT_SUCCESS and houseId == HOUSING_EDITOR_STATE:GetHouseId() and HOUSING_EDITOR_STATE:IsLocalPlayerHouseOwner() then
+            -- The listing for the current house was updated.
+            self:RefreshListingTags()
+        end
+    end)
 end
 
 function ZO_HouseInformationTracker:Refresh()
@@ -128,12 +148,29 @@ function ZO_HouseInformationTracker:Refresh()
         self.subLabel:SetHidden(true)
     end
 
+    local SUPPRESS_ANCHOR_REFRESH = true
+    self:RefreshListingTags(SUPPRESS_ANCHOR_REFRESH)
+
     local population = housingEditorState:GetPopulation()
     local maxPopulation = housingEditorState:GetMaxPopulation()
     local populationText = zo_strformat(SI_HOUSING_INFORMATION_TRACKER_POPULATION, population, maxPopulation)
     self.populationLabel:SetText(populationText)
 
     self:RefreshAnchors()
+end
+
+function ZO_HouseInformationTracker:RefreshListingTags(suppressAnchorRefresh)
+    local tagValues = {GetCurrentHouseTourListingTags()}
+    if #tagValues == 0 then
+        self.tagsLabel:SetText("")
+    else
+        local tags = ZO_FormatHouseToursTagsText({GetCurrentHouseTourListingTags()})
+        self.tagsLabel:SetText(tags)
+    end
+
+    if not suppressAnchorRefresh then
+        self:RefreshAnchors()
+    end
 end
 
 function ZO_HouseInformationTracker:RefreshAnchors()
@@ -146,6 +183,7 @@ function ZO_HouseInformationTracker:RefreshAnchors()
     else
         self:RefreshAnchorSetOnControl(self.populationLabel, style.POPULATION_SUBLABEL_PRIMARY_ANCHOR, style.POPULATION_SUBLABEL_SECONDARY_ANCHOR)
     end
+    self:RefreshAnchorSetOnControl(self.tagsLabel, style.TAGS_LABEL_PRIMARY_ANCHOR, style.TAGS_LABEL_SECONDARY_ANCHOR)
 end
 
 function ZO_HouseInformationTracker:Update()

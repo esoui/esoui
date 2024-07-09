@@ -43,6 +43,7 @@ function ZO_Armory_Keyboard:Initialize(control)
             end
         else
             ARMORY_KEYBOARD_SCENE:AcceptHideScene()
+            ZO_Dialogs_SetDialogQueuePaused(false)
         end
     end)
 

@@ -271,6 +271,26 @@
         </Category>
     </Layer>
 
+    <Layer name="PreviewStateNavigation">
+        <Category>
+            <Action name="PREVIEW_NEXT_VARIATION" inheritsBindFrom="UI_SHORTCUT_INPUT_RIGHT">
+                <Down>return ITEM_PREVIEW_GAMEPAD:TryPreviewNextVariation()</Down>
+            </Action>
+
+            <Action name="PREVIEW_PREVIOUS_VARIATION" inheritsBindFrom="UI_SHORTCUT_INPUT_LEFT">
+                <Down>return ITEM_PREVIEW_GAMEPAD:TryPreviewPreviousVariation()</Down>
+            </Action>
+
+            <Action name="PREVIEW_NEXT_ACTION">
+                <Down>return ITEM_PREVIEW_GAMEPAD:TryPreviewNextAction()</Down>
+            </Action>
+
+            <Action name="PREVIEW_PREVIOUS_ACTION">
+                <Down>return ITEM_PREVIEW_GAMEPAD:TryPreviewPreviousAction()</Down>
+            </Action>
+        </Category>
+    </Layer>
+
     <Layer name="MarketAnnouncement" allowFallthrough="false">
         <Category>
             <Action name="MARKET_ANNOUNCEMENT_CLOSE" hideAction="true">

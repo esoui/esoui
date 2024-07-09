@@ -95,11 +95,11 @@
             </OnInitialized>
 
             <Controls>
-                <Label name="$(parent)Cost" font="ZoFontWinH4">
+                <Label name="$(parent)Cost" inherits="ZO_CurrencyTemplate" font="ZoFontWinH4">
                     <Anchor point="RIGHT" offsetX="-10" />
                 </Label>
 
-                <Label name="$(parent)PreviousCost" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DEFAULT_TEXT" font="ZoFontWinH4" hidden="true">
+                <Label name="$(parent)PreviousCost" inherits="ZO_CurrencyTemplate" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DEFAULT_TEXT" font="ZoFontWinH4" hidden="true">
                     <Anchor point="RIGHT" relativeTo="$(parent)Cost" relativePoint="LEFT" offsetX="-10" />
                 </Label>
 

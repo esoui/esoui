@@ -242,11 +242,11 @@
                             <Anchor point="TOPLEFT" relativeTo="$(parent)Headers" relativePoint="TOPRIGHT" offsetX="10" />
 
                             <Controls>
-                                <Label name="$(parent)Banked" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" hidden="true">
+                                <Label name="$(parent)Banked" inherits="ZO_CurrencyTemplate" hidden="true">
                                     <Anchor point="TOPRIGHT" offsetX="-22" offsetY="7" />
                                 </Label>
 
-                                <Label name="$(parent)Carried" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" hidden="true">
+                                <Label name="$(parent)Carried" inherits="ZO_CurrencyTemplate" hidden="true">
                                     <Anchor point="TOPRIGHT" relativeTo="$(parent)Banked" relativePoint="BOTTOMRIGHT" offsetY="5" />
                                 </Label>
 

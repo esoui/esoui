@@ -1,0 +1,125 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_HouseTours_ListingPanelContents_Gamepad" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors" virtual="true">
+            <Controls>
+                <Label name="$(parent)Nickname" inherits="ZO_GamepadHeaderDataTextTemplate" />
+                <Label name="$(parent)Name" inherits="ZO_GamepadHeaderDataTextTemplate" />
+                <Label name="$(parent)FurnitureCount" inherits="ZO_GamepadHeaderDataTextTemplate" />
+            </Controls>
+        </Control>
+        
+        <TopLevelControl name="ZO_HouseTours_Gamepad_TopLevel" inherits="ZO_Gamepad_ParametricList_Screen" hidden="true">
+            <OnInitialized>
+                ZO_HouseTours_Gamepad.OnControlInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Scroll name="$(parent)Mask" override="true">
+                    <Controls>
+                        <Control name="$(parent)Container" override="true">
+                            <Controls>
+                                <Control name="$(parent)HeaderContainer" override="true">
+                                    <Controls>
+                                        <Control name="$(parent)Header" override="true">
+                                            <Controls>
+                                                <Control name="$(parent)TagsSelector">
+                                                    <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" y="75" />
+                                                    <Anchor point="TOP" relativeTo="$(parent)Message" relativePoint="BOTTOM" offsetY="25" />
+                                                    <Controls>
+                                                        <Label name="$(parent)Title" text="SI_HOUSE_TOURS_LISTING_TAGS_HEADER" font="ZoFontGamepad27" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER">
+                                                            <Anchor point="TOPLEFT" />
+                                                            <Anchor point="TOPRIGHT" />
+                                                        </Label>
+
+                                                        <Control name="$(parent)Dropdown" inherits="ZO_MultiSelection_ComboBox_Gamepad">
+                                                            <Anchor point="CENTER" relativeTo="$(parent)Title" relativePoint="BOTTOM" offsetY="25" />
+                                                        </Control>
+                                                    </Controls>
+                                                </Control>
+                                            </Controls>
+                                        </Control>
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Scroll>
+                
+                <Control name="$(parent)ListingPanel" inherits="ZO_GamepadGrid_NavQuadrant_2_3_Anchors" hidden="true">
+                    <Controls>
+                        <Texture name="$(parent)Background" alpha="0.64" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
+                            <TextureCoords right="ZO_GAMEPAD_HOUSE_TOURS_LISTING_PANEL_TEXTURE_COORD_RIGHT" />
+                            <Dimensions y="ZO_GAMEPAD_HOUSE_TOURS_LISTING_PANEL_TEXTURE_SQUARE_DIMENSION" />
+                            <Anchor point="TOPLEFT" offsetX="ZO_GAMEPAD_QUADRANT_VERT_DIVIDER_PADDING" offsetY="-ZO_GAMEPAD_SAFE_ZONE_INSET_Y" />
+                            <Anchor point="TOPRIGHT" offsetX="-ZO_GAMEPAD_QUADRANT_VERT_DIVIDER_PADDING" offsetY="-ZO_GAMEPAD_SAFE_ZONE_INSET_Y" />
+                        </Texture>
+
+                        <Control name="$(parent)SearchInfo" inherits="ZO_HouseTours_ListingPanelContents_Gamepad" hidden="true">
+                            <Controls>
+                                <Label name="$(parent)Nickname" override="true">
+                                    <Anchor point="TOPLEFT" offsetY="ZO_GAMEPAD_CONTENT_HEADER_INFO_OFFSET_Y" />
+                                </Label>
+
+                                <Label name="$(parent)Name" override="true">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Nickname" relativePoint="BOTTOMLEFT" offsetY="5" />
+                                </Label>
+
+                                <Label name="$(parent)FurnitureCount" override="true">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT" offsetY="125" />
+                                </Label>
+
+                                <Label name="$(parent)TagsHeader" inherits="ZO_GamepadHeaderLabelTextTemplate" text="SI_HOUSE_TOURS_LISTING_TAGS_HEADER">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)FurnitureCount" relativePoint="BOTTOMLEFT" offsetY="20" />
+                                </Label>
+
+                                <Label name="$(parent)TagsValue" inherits="ZO_GamepadHeaderDataTextTemplate">
+                                    <AnchorToBaseline relativeToLabel="$(parent)TagsHeader" side="RIGHT" offsetX="5"/>
+                                </Label>
+
+                                <Label name="$(parent)OwnerHeader" inherits="ZO_GamepadHeaderLabelTextTemplate" text="SI_HOUSE_TOURS_LISTING_OWNER_HEADER">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)TagsHeader" relativePoint="BOTTOMLEFT" offsetY="20" />
+                                </Label>
+                                
+                                <Label name="$(parent)OwnerValue" inherits="ZO_GamepadHeaderDataTextTemplate">
+                                    <AnchorToBaseline relativeToLabel="$(parent)OwnerHeader" side="RIGHT" offsetX="5"/>
+                                </Label>
+                            </Controls>
+                        </Control>
+
+                        <Control name="$(parent)ListingManagementInfo" inherits="ZO_HouseTours_ListingPanelContents_Gamepad" hidden="true">
+                            <Controls>
+                                <Label name="$(parent)Name" override="true">
+                                    <Anchor point="TOPLEFT" offsetY="ZO_GAMEPAD_CONTENT_HEADER_INFO_OFFSET_Y" />
+                                </Label>
+
+                                <Label name="$(parent)Nickname" override="true">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT" offsetY="5" />
+                                </Label>
+
+                                <Label name="$(parent)FurnitureCount" override="true">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Nickname" relativePoint="BOTTOMLEFT" offsetY="125" />
+                                </Label>
+
+                                <Label name="$(parent)StatusHeader" inherits="ZO_GamepadHeaderLabelTextTemplate" text="SI_HOUSE_TOURS_MANAGE_LISTING_STATUS_HEADER">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)FurnitureCount" relativePoint="BOTTOMLEFT" offsetY="5" />
+                                </Label>
+
+                                <Label name="$(parent)StatusValue" inherits="ZO_GamepadHeaderDataTextTemplate">
+                                    <AnchorToBaseline relativeToLabel="$(parent)StatusHeader" side="RIGHT" offsetX="10" />
+                                </Label>
+
+                                <Label name="$(parent)RecommendationsHeader" inherits="ZO_GamepadHeaderLabelTextTemplate" text="SI_HOUSE_TOURS_MANAGE_LISTING_RECOMMENDATIONS_HEADER">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)StatusHeader" relativePoint="BOTTOMLEFT" offsetY="5" />
+                                </Label>
+
+                                <Label name="$(parent)RecommendationsValue" inherits="ZO_GamepadHeaderDataTextTemplate">
+                                    <AnchorToBaseline relativeToLabel="$(parent)RecommendationsHeader" side="RIGHT" offsetX="10" />
+                                </Label>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

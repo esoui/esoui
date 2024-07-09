@@ -26,6 +26,7 @@ function ActivityFinderRoot_Gamepad:Initialize(control)
 
     self.control:RegisterForEvent(EVENT_PLAYER_ACTIVATED, RefreshCategories)
     self.control:RegisterForEvent(EVENT_GROUP_FINDER_STATUS_UPDATED, function(_, ...) self:RefreshList(...) end)
+    self.control:RegisterForEvent(EVENT_HOUSE_TOURS_STATUS_UPDATED, function() self:RefreshList() end)
 end
 
 function ActivityFinderRoot_Gamepad:InitializeKeybindStripDescriptors()
@@ -213,6 +214,13 @@ do
                 end
             end
 
+            if data.isHouseTours then
+                local isEnabled, houseToursLockedText = ZO_IsHouseToursEnabled()
+                if not isEnabled then
+                    lockedText = houseToursLockedText
+                end
+            end
+
             GAMEPAD_TOOLTIPS:LayoutTitleAndMultiSectionDescriptionTooltip(GAMEPAD_LEFT_TOOLTIP, data.name, data.tooltipDescription, lockedText)
         end
     end
@@ -295,6 +303,9 @@ function ActivityFinderRoot_Gamepad:IsCategoryLocked(gamepadCategoryData)
     elseif gamepadCategoryData.isGroupFinder then
         local statusResult = GetGroupFinderStatusReason()
         return statusResult ~= GROUP_FINDER_ACTION_RESULT_SUCCESS and statusResult ~= GROUP_FINDER_ACTION_RESULT_FAILED_ACCOUNT_TYPE_BLOCKS_CREATION
+    elseif gamepadCategoryData.isHouseTours then
+        local houseToursEnabled = ZO_IsHouseToursEnabled()
+        return not houseToursEnabled
     end
     return false
 end

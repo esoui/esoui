@@ -186,10 +186,10 @@ local ITEM_BUY_CURRENCY_OPTIONS =
 }
 
 function BuyBack:SetupBuyBackSlot(control, data)
-    local statusControl = GetControl(control, "Status")
-    local slotControl = GetControl(control, "Button")
-    local nameControl = GetControl(control, "Name")
-    local priceControl = GetControl(control, "SellPrice")
+    local statusControl = control:GetNamedChild("Status")
+    local slotControl = control:GetNamedChild("Button")
+    local nameControl = control:GetNamedChild("Name")
+    local priceControl = control:GetNamedChild("SellPriceText")
 
     statusControl:SetHidden(true)
 

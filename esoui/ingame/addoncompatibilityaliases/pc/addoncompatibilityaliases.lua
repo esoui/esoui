@@ -1200,8 +1200,10 @@ end
 --Renaming functions in SharedTexture.lua to fit standards
 GetAllianceTexture = ZO_GetAllianceTexture
 GetAllianceSymbolIcon = ZO_GetAllianceSymbolIcon
-GetLargeBattlegroundAllianceSymbolIcon = ZO_GetLargeBattlegroundAllianceSymbolIcon
-GetCountdownBattlegroundAllianceSymbolIcon = ZO_GetCountdownBattlegroundAllianceSymbolIcon
+ZO_GetLargeBattlegroundAllianceSymbolIcon = ZO_GetLargeBattlegroundTeamSymbolIcon
+GetLargeBattlegroundAllianceSymbolIcon = ZO_GetLargeBattlegroundTeamSymbolIcon
+ZO_GetCountdownBattlegroundAllianceSymbolIcon = ZO_GetCountdownBattlegroundTeamSymbolIcon
+GetCountdownBattlegroundAllianceSymbolIcon = ZO_GetCountdownBattlegroundTeamSymbolIcon
 GetLargeAllianceSymbolIcon = ZO_GetLargeAllianceSymbolIcon
 GetPlatformAllianceSymbolIcon = ZO_GetPlatformAllianceSymbolIcon
 GetAllianceKeepRewardIcon = ZO_GetAllianceKeepRewardIcon
@@ -1348,6 +1350,8 @@ GetUnitBattlegroundAlliance = GetUnitBattlegroundTeam
 GetBattlegroundAllianceName = GetBattlegroundTeamName
 GetScoreboardEntryBattlegroundAlliance = GetScoreboardEntryBattlegroundTeam
 GetKillingAttackerBattlegroundAlliance = GetKillingAttackerBattlegroundTeam
+GetBattlegroundAllianceColor = GetBattlegroundTeamColor
+GetColoredBattlegroundAllianceName = GetColoredBattlegroundTeamName
 
 --[[
     multiselect combo box ui widget for keyboard screens.
@@ -1545,3 +1549,8 @@ MAX_LOCAL_MAILS = MAX_MAILS_PER_CATEGORY
 
 -- Removed MAX_BOSSES in favor of BOSS_RANK_ITERATION_END
 MAX_BOSSES = BOSS_RANK_ITERATION_END
+
+-- Using in more places now, not just pending data.
+PENDING_LEADERBOARD_DATA_TYPE  = LEADERBOARD_DATA_TYPE
+
+COLLECTIONS_BOOK_SINGLETON.GetOwnedHouses = COLLECTIONS_BOOK_SINGLETON.GetUnlockedHouses

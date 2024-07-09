@@ -1,16 +1,10 @@
-local PARTIAL_PIN_ALPHA = .2
+local PARTIAL_PIN_ALPHA = 0.2
 local FULL_PIN_ALPHA = 1
 
 local NORMAL_TEXTURE = "EsoUI/Art/Lockpicking/pins.dds"
 local SET_TEXTURE = "EsoUI/Art/Lockpicking/pins_set.dds"
 
-ZO_Lockpick = ZO_Object:Subclass()
-
-function ZO_Lockpick:New(...)
-    local lockPick = ZO_Object.New(self)
-    lockPick:Initialize(...)
-    return lockPick
-end
+ZO_Lockpick = ZO_InitializingObject:Subclass()
 
 function ZO_Lockpick:Initialize(control)
     self.control = control
@@ -72,11 +66,16 @@ function ZO_Lockpick:Initialize(control)
 
             self:ResetChambers()
 
+            -- make sure to reset the mouse position to the starting state, it may not be updated if a dialog is showing
+            self:UpdateVirtualMousePosition()
+
+            local lockQuality = GetLockQuality()
+
             local now = GetFrameTimeMilliseconds()
             local timerStartS = now / 1000
             local timerEndS = (now + GetLockpickingTimeLeft()) / 1000
             if SCENE_MANAGER:IsShowing("lockpickKeyboard") then
-                self.lockLevelLabel:SetText(zo_strformat(SI_LOCKPICK_LEVEL, GetString("SI_LOCKQUALITY", GetLockQuality())))
+                self.lockLevelLabel:SetText(zo_strformat(SI_LOCKPICK_LEVEL, GetString("SI_LOCKQUALITY", lockQuality)))
                 self.lockpicksLeftLabel:SetText(zo_strformat(SI_LOCKPICK_PICKS_REMAINING, GetNumLockpicksLeft()))
 
                 self.infoBar:SetHidden(false)
@@ -85,7 +84,7 @@ function ZO_Lockpick:Initialize(control)
                 self.timer:Start(timerStartS, timerEndS)
                 self.gamepadTimer:Stop()
             elseif SCENE_MANAGER:IsShowing("lockpickGamepad") then
-                self.gamepadLockLevelLabel:SetText(GetString("SI_LOCKQUALITY", GetLockQuality()))
+                self.gamepadLockLevelLabel:SetText(GetString("SI_LOCKQUALITY", lockQuality))
                 self.gamepadLockpicksLeftLabel:SetText(GetNumLockpicksLeft())
 
                 self.infoBar:SetHidden(true)
@@ -100,6 +99,13 @@ function ZO_Lockpick:Initialize(control)
             KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
             HideMouse()
             self.inactivityStart = nil
+
+            -- prioritize the practice tutorial over the general open tutorial
+            if lockQuality == LOCK_QUALITY_PRACTICE then
+                TriggerTutorial(TUTORIAL_TRIGGER_LOCKPICKING_PRACTICE_OPENED)
+            end
+
+            TriggerTutorial(TUTORIAL_TRIGGER_LOCKPICKING_OPENED)
         elseif newState == SCENE_HIDDEN then
             if self:IsPickBroken() then
                 self:EndLockpickBreak()
@@ -111,10 +117,14 @@ function ZO_Lockpick:Initialize(control)
         end
     end
 
+    LOCKPICK_FRAGMENT = ZO_FadeSceneFragment:New(control)
+
     LOCK_PICK_SCENE = ZO_InteractScene:New("lockpickKeyboard", SCENE_MANAGER, LOCKPICK_WINDOW_INTERACTION)
+    LOCK_PICK_SCENE:AddFragment(LOCKPICK_FRAGMENT)
     LOCK_PICK_SCENE:RegisterCallback("StateChange", OnSceneStateChange)
 
     LOCK_PICK_GAMEPAD_SCENE = ZO_InteractScene:New("lockpickGamepad", SCENE_MANAGER, LOCKPICK_WINDOW_INTERACTION)
+    LOCK_PICK_GAMEPAD_SCENE:AddFragment(LOCKPICK_FRAGMENT)
     LOCK_PICK_GAMEPAD_SCENE:RegisterCallback("StateChange", OnSceneStateChange)
 
     self:RegisterForEvents()
@@ -367,7 +377,7 @@ do
     local LEFT_ROTATION_FACTOR_AFTER_HIT = ZO_TWO_PI
     local RIGHT_ROTATION_FACTOR = ZO_PI / 3
 
-    function ZO_Lockpick:UpdateBrokenLockpick(progressThroughDuration)        
+    function ZO_Lockpick:UpdateBrokenLockpick(progressThroughDuration)
         local clampedXOffset, normalizedX = self:GetLockpickXValues(self.breakingChamberIndex)
 
         self.lockpickBreakLeft:ClearAnchors()
@@ -416,7 +426,8 @@ function ZO_Lockpick:OnUpdate(ending)
     if self.settingChamberIndex then
         self:UpdateSettingChamber(ending)
     else
-        if not self.inactivityStart then
+        -- don't update the mouse position if we're showing a dialog
+        if not self.inactivityStart and not ZO_Dialogs_IsShowingDialog() then
             self:UpdateVirtualMousePosition()
         end
 
@@ -469,7 +480,7 @@ function ZO_Lockpick:IsPickBroken()
     return self.inactivityStart ~= nil
 end
 
-local STARTING_NORMALIZED_LOCKPICK_X = .53
+local STARTING_NORMALIZED_LOCKPICK_X = 0.53
 local GAMEPAD_SPEED_FACTOR = 3.5
 function ZO_Lockpick:UpdateVirtualMousePosition()
     if not self.virtualMouseX then

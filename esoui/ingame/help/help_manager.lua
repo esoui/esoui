@@ -2,11 +2,7 @@ local ZO_Help_Manager = ZO_InitializingCallbackObject:Subclass()
 
 function ZO_Help_Manager:Initialize(...)
     self.overlayScenes = {}
-    self.searchString = ""
-    self.searchResults = {}
-
-    EVENT_MANAGER:RegisterForEvent("Help_Manager", EVENT_HELP_SEARCH_RESULTS_READY, function() self:OnSearchResultsReady() end)
-
+    
     EVENT_MANAGER:RegisterForEvent("Help_Manager", EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function() self:OnGamepadPreferredModeChanged() end)
 
     EVENT_MANAGER:RegisterForEvent("Help_Manager", EVENT_TOGGLE_HELP, function() self:ToggleHelp() end)
@@ -49,29 +45,41 @@ function ZO_Help_Manager:Initialize(...)
             self.overlaySyncObject:Hide()
         end
     end)
-end
 
-function ZO_Help_Manager:OnSearchResultsReady()
-    ZO_ClearNumericallyIndexedTable(self.searchResults)
-    local searchData = { GetHelpSearchResults() }
-    local SEARCH_DATA_STRIDE = 2
-    for i = 1, #searchData, SEARCH_DATA_STRIDE do
-        local helpCategoryIndex, helpIndex = searchData[i], searchData[i + 1]
-        table.insert(self.searchResults, { helpCategoryIndex = helpCategoryIndex, helpIndex = helpIndex })
+    self.searchCache = nil
+    -- Generates a list of helpIds across all categories.
+    local function CreateFilterPrimaryKeys()
+        local helpIdList = {}
+        for categoryIndex = 1, GetNumHelpCategories() do
+            for helpIndex = 1, GetNumHelpEntriesWithinCategory(categoryIndex) do
+                local helpId = GetHelpId(categoryIndex, helpIndex)
+                table.insert(helpIdList, helpId)
+            end
+        end
+        return helpIdList
     end
-    self:FireCallbacks("UpdateSearchResults")
-end
 
-function ZO_Help_Manager:GetSearchResults()
-    if zo_strlen(self.searchString) > 1 then
-        return self.searchResults
-    end
-    return nil
-end
-
-function ZO_Help_Manager:SetSearchString(searchString)
-    self.searchString = searchString or ""
-    StartHelpSearch(self.searchString)
+    -- Shared search for help tutorials
+    local helpFilterTargetDescriptor =
+    {
+        [BACKGROUND_LIST_FILTER_TARGET_HELP_ID] =
+        {
+            searchFilterList =
+            {
+                BACKGROUND_LIST_FILTER_TYPE_NAME,
+                BACKGROUND_LIST_FILTER_TYPE_DESCRIPTION,
+                BACKGROUND_LIST_FILTER_TYPE_SEARCH_KEYWORDS,
+            },
+            primaryKeys = function()
+                -- Cache the list of search keys.
+                if self.searchCache == nil then
+                    self.searchCache = CreateFilterPrimaryKeys()
+                end
+                return self.searchCache
+            end,
+        },
+    }
+    TEXT_SEARCH_MANAGER:SetupContextTextSearch("helpSearchContext", helpFilterTargetDescriptor)
 end
 
 function ZO_Help_Manager:OnGamepadPreferredModeChanged()

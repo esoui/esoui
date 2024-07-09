@@ -6,14 +6,14 @@
     and just call FadeIn, FadeOut on this object...internally the ZO_AlphaAnimation object
     tracks its own state so it knows which animations to stop or reuse, and knows the current
     alpha of the control being managed.
-    
+
     Here are some usage notes:
-    
+
     - Simple utility to play a one-shot animation on a control.    
     - The control is force-shown before the animation starts, and its alpha can be forced to 1.
     - The control is NOT hidden when the fade out completes...we can add that if necessary    
     - ...and along those lines: after the animation has completed the control REMAINS SHOWN and the animation is released.
-    
+
     NOTE: The alpha animations can be told to use the Control's current alpha, rather than forcing it to 1 or 0 before 
     beginning the animation.  This will also scale the duration of the animation appropriately.  For example, let's say
     the Control has alpha .25 and we want to play a fade out with a duration of 2 seconds.  Setting the fade option to
@@ -26,10 +26,10 @@ local ALPHA_TRANSPARENT = 0
 local function OnAnimationStopped(animation, control)
     -- The callback is called after releasing the animation and resetting the control so that it can actually spawn another
     -- animation if necessary.  The animation is not passed in because it has already been released.
-    if(animation.callback) then
+    if animation.callback then
         animation.callback(control)
         animation.callback = nil
-    end    
+    end
 end
 
 ZO_ALPHA_ANIMATION_OPTION_USE_CURRENT_ALPHA = 1
@@ -46,15 +46,13 @@ local function InitializeAnimationParams(control, delay, duration, fadeOption, s
     duration = zo_abs(duration)
     
     local currentAlpha = control:GetAlpha()
-    
-    if(fadeOption == ZO_ALPHA_ANIMATION_OPTION_FORCE_ALPHA)
-    then
+
+    if fadeOption == ZO_ALPHA_ANIMATION_OPTION_FORCE_ALPHA then
         control:SetAlpha(forcedAlpha)
         currentAlpha = forcedAlpha
     end
-    
-    if shownOption == ZO_ALPHA_ANIMATION_OPTION_FORCE_SHOWN
-    then
+
+    if shownOption == ZO_ALPHA_ANIMATION_OPTION_FORCE_SHOWN then
         control:SetHidden(false)
     end
 
@@ -68,24 +66,19 @@ function ZO_AlphaAnimation_GetAnimation(control)
     return control.m_fadeAnimation
 end
 
-ZO_AlphaAnimation = ZO_Object:Subclass()
+ZO_AlphaAnimation = ZO_InitializingObject:Subclass()
 
-function ZO_AlphaAnimation:New(animatedControl)
-    local a = ZO_Object.New(self)
-    
-    if(animatedControl)
-    then    
-        a.m_animatedControl = animatedControl
-        a.m_fadeTimeline = nil 
+function ZO_AlphaAnimation:Initialize(animatedControl)
+    if animatedControl then
+        self.m_animatedControl = animatedControl
+        self.m_fadeTimeline = nil
 
-        a.minAlpha = ALPHA_TRANSPARENT
-        a.maxAlpha = ALPHA_OPAQUE
-        
+        self.minAlpha = ALPHA_TRANSPARENT
+        self.maxAlpha = ALPHA_OPAQUE
+
         -- Link the control to this animation object
-        animatedControl.m_fadeAnimation = a
+        animatedControl.m_fadeAnimation = self
     end
-    
-    return a
 end
 
 function ZO_AlphaAnimation:GetControl()
@@ -100,10 +93,8 @@ end
 ZO_ALPHA_ANIMATION_OPTION_PREVENT_CALLBACK = 1
 
 function ZO_AlphaAnimation:Stop(stopOption)
-    if(self.m_fadeTimeline)
-    then
-        if(stopOption == ZO_ALPHA_ANIMATION_OPTION_PREVENT_CALLBACK)
-        then
+    if self.m_fadeTimeline then
+        if stopOption == ZO_ALPHA_ANIMATION_OPTION_PREVENT_CALLBACK then
             self.m_fadeTimeline.callback = nil
         end
 
@@ -112,8 +103,7 @@ function ZO_AlphaAnimation:Stop(stopOption)
 end
 
 function ZO_AlphaAnimation:IsPlaying()
-    if(self.m_fadeTimeline)
-    then
+    if self.m_fadeTimeline then
         return self.m_fadeTimeline:IsPlaying()
     end
 
@@ -154,11 +144,11 @@ end
 
 function ZO_AlphaAnimation:FadeOut(delay, duration, fadeOption, callback, shownOption)
     self:Stop()
-    
+
     fadeOption = fadeOption or ZO_ALPHA_ANIMATION_OPTION_USE_CURRENT_ALPHA
     shownOption = shownOption or ZO_ALPHA_ANIMATION_OPTION_FORCE_SHOWN
     local control = self.m_animatedControl
-    
+
     local currentAlpha
     delay, duration, currentAlpha = InitializeAnimationParams(control, delay, duration, fadeOption, shownOption, self.maxAlpha)
 
@@ -176,7 +166,7 @@ end
 
 function ZO_AlphaAnimation:PingPong(initial, final, duration, loopCount, callback)
     self:Stop()
-    
+
     local control = self.m_animatedControl
     local fade = GetOrCreateFadeAnimation(self, control)
     fade:SetDuration(duration)

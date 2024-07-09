@@ -261,7 +261,9 @@ function ZO_CollectibleTile_Keyboard:AddMenuOptions()
     end
 
     -- Preview
-    if IsCharacterPreviewingAvailable() and self:CanPreview() and not ITEM_PREVIEW_KEYBOARD:IsCurrentlyPreviewing(ZO_ITEM_PREVIEW_COLLECTIBLE, collectibleId) then
+    if ITEM_PREVIEW_KEYBOARD:IsCurrentlyPreviewing(ZO_ITEM_PREVIEW_COLLECTIBLE, collectibleId) then
+        AddMenuItem(GetString(SI_COLLECTIBLE_ACTION_END_PREVIEW), function() ITEM_PREVIEW_KEYBOARD:EndCurrentPreview() end)
+    elseif IsCharacterPreviewingAvailable() and self:CanPreview() then
         AddMenuItem(GetString(SI_COLLECTIBLE_ACTION_PREVIEW), function() self:StartPreview(collectibleId) end)
     end
 
@@ -507,18 +509,13 @@ function ZO_CollectibleTile_Keyboard:CanPreview()
         -- TODO: Temporarily disable mementos until time can be scheduled to audit mementos that don't preview correctly
         if self.collectibleData:GetCategoryType() == COLLECTIBLE_CATEGORY_TYPE_MEMENTO then
             return false
+        elseif self:GetActorCategory() == GAMEPLAY_ACTOR_CATEGORY_COMPANION then
+            -- TODO: Temporarily disable previewing on companion collectibles until time can be taken to get the previewing to work properly
+            return false
         end
         return CanCollectibleBePreviewed(self.collectibleData:GetId())
     end
     return false
-end
-
-function ZO_CollectibleTile_Keyboard:OnMouseEnter()
-    ZO_ContextualActionsTile_Keyboard.OnMouseEnter(self)
-
-    if IsCharacterPreviewingAvailable() and self:CanPreview() and not ITEM_PREVIEW_KEYBOARD:IsCurrentlyPreviewing(ZO_ITEM_PREVIEW_COLLECTIBLE, self.collectibleData:GetId()) then
-        WINDOW_MANAGER:SetMouseCursor(MOUSE_CURSOR_PREVIEW)
-    end
 end
 
 function ZO_CollectibleTile_Keyboard:OnMouseExit()
@@ -531,13 +528,6 @@ function ZO_CollectibleTile_Keyboard:OnMouseUp(button, upInside)
     if upInside then
         if button == MOUSE_BUTTON_INDEX_RIGHT then
             self:ShowMenu()
-        elseif button == MOUSE_BUTTON_INDEX_LEFT then
-            if self.collectibleData ~= nil then
-                local collectibleId = self.collectibleData:GetId()
-                if IsCharacterPreviewingAvailable() and self:CanPreview() and not ITEM_PREVIEW_KEYBOARD:IsCurrentlyPreviewing(ZO_ITEM_PREVIEW_COLLECTIBLE, collectibleId) then
-                    self:StartPreview(collectibleId)
-                end
-            end
         end
     end
 end

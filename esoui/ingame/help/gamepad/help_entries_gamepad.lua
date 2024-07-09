@@ -1,10 +1,12 @@
 ZO_HelpTutorialsEntries_Gamepad = ZO_HelpTutorialsGamepad:Subclass()
 
 function ZO_HelpTutorialsEntries_Gamepad:Initialize(control)
-    ZO_HelpTutorialsGamepad.Initialize(self, control)
+    HELP_TUTORIALS_ENTRIES_GAMEPAD_SCENE = ZO_Scene:New("helpTutorialsEntriesGamepad", SCENE_MANAGER)
+
+    local ACTIVATE_ON_SHOW = true
+    ZO_HelpTutorialsGamepad.Initialize(self, control, ACTIVATE_ON_SHOW, HELP_TUTORIALS_ENTRIES_GAMEPAD_SCENE)
 
     local helpEntriesFragment = ZO_FadeSceneFragment:New(control)
-    HELP_TUTORIALS_ENTRIES_GAMEPAD_SCENE = ZO_Scene:New("helpTutorialsEntriesGamepad", SCENE_MANAGER)
     HELP_TUTORIALS_ENTRIES_GAMEPAD_SCENE:AddFragment(helpEntriesFragment)
 
     self:SetScene(HELP_TUTORIALS_ENTRIES_GAMEPAD_SCENE)
@@ -41,6 +43,8 @@ function ZO_HelpTutorialsEntries_Gamepad:Show(categoryIndex, helpIndex)
 end
 
 function ZO_HelpTutorialsEntries_Gamepad:InitializeKeybindStripDescriptors()
+    ZO_HelpTutorialsGamepad.InitializeKeybindStripDescriptors(self)
+
     self.keybindStripDescriptor =
     {
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
@@ -91,15 +95,9 @@ function ZO_HelpTutorialsEntries_Gamepad:PerformUpdate()
     -- Add the entries.
     self.itemList:Clear()
 
-    if self.searchString and self.searchString ~= "" then
-        for i = 1, #self.searchResults do
-            local searchResult = self.searchResults[i]
-            if searchResult and searchResult.helpCategoryIndex == self.categoryIndex then
-                self:AddHelpEntry(self.categoryIndex, searchResult.helpIndex)
-            end
-        end
-    else
-        for helpIndex = 1, GetNumHelpEntriesWithinCategory(self.categoryIndex) do
+    for helpIndex = 1, GetNumHelpEntriesWithinCategory(self.categoryIndex) do
+        local helpId = GetHelpId(self.categoryIndex, helpIndex)
+        if TEXT_SEARCH_MANAGER:IsDataInSearchTextResults(self.searchContext, BACKGROUND_LIST_FILTER_TARGET_HELP_ID, helpId) then
             self:AddHelpEntry(self.categoryIndex, helpIndex)
         end
     end

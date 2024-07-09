@@ -216,6 +216,12 @@ function ZO_Alchemy:InitializeSlots()
     self:UpdateThirdAlchemySlot()
 end
 
+function ZO_Alchemy:AddInventoryAdditionalFilter(additionalFilterFunction)
+    if self.inventory then
+        self.inventory.additionalFilter = additionalFilterFunction
+    end
+end
+
 function ZO_Alchemy:UpdateTooltip()
     -- if we are in recipe mode then we shouldn't show the alchemy tooltip
     if self:IsCraftable() and self.mode ~= ZO_ALCHEMY_MODE_RECIPES then
@@ -556,7 +562,19 @@ function ZO_AlchemyInventory:ChangeFilter(filterData)
 end
 
 function ZO_AlchemyInventory:Refresh(data)
-    local validItemIds = self:EnumerateInventorySlotsAndAddToScrollData(ZO_Alchemy_IsAlchemyItem, ZO_Alchemy_DoesAlchemyItemPassFilter, self.filterType, data)
+    local function ItemFilterFunction(bagId, slotIndex, filterType, isQuestFilterChecked, questInfo)
+        if not ZO_Alchemy_DoesAlchemyItemPassFilter(bagId, slotIndex, filterType, isQuestFilterChecked, questInfo) then
+            return false
+        end
+
+        if self.additionalFilter and type(self.additionalFilter) == "function" then
+            return self.additionalFilter(bagId, slotIndex, filterType, isQuestFilterChecked, questInfo)
+        end
+
+        return true
+    end
+
+    local validItemIds = self:EnumerateInventorySlotsAndAddToScrollData(ZO_Alchemy_IsAlchemyItem, ItemFilterFunction, self.filterType, data)
     self.owner:OnInventoryUpdate(validItemIds)
 
     self:SetNoItemLabelHidden(#data > 0)

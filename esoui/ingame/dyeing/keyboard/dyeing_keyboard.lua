@@ -1,26 +1,14 @@
-local BECAUSE_OF_REBUILD = true
-
-ZO_Dyeing_Keyboard = ZO_Object:Subclass()
-
-local SWATCHES_LAYOUT_OPTIONS = 
-{
-    padding = 6,
-    leftMargin = 27,
-    topMargin = 18,
-    rightMargin = 0,
-    bottomMargin = 0,
-    selectionScale = ZO_DYEING_SWATCH_SELECTION_SCALE,
-}
-
-function ZO_Dyeing_Keyboard:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
+ZO_Dyeing_Keyboard = ZO_DeferredInitializingObject:Subclass()
 
 function ZO_Dyeing_Keyboard:Initialize(control)
     self.control = control
-    self.pane = control:GetNamedChild("Pane")
+
+    KEYBOARD_DYEING_FRAGMENT = ZO_FadeSceneFragment:New(control)
+    ZO_DeferredInitializingObject.Initialize(self, KEYBOARD_DYEING_FRAGMENT)
+end
+
+function ZO_Dyeing_Keyboard:OnDeferredInitialize()
+    self.pane = self.control:GetNamedChild("Pane")
     self.noDyesLabel = self.pane:GetNamedChild("NoDyesLabel")
     self.paneScrollChild = self.pane:GetNamedChild("ScrollChild")
     self.dyeIdToSwatch = {} -- Create it now so the APIs have a table to index even if we never view the fragment
@@ -32,36 +20,6 @@ function ZO_Dyeing_Keyboard:Initialize(control)
     self:InitializeSavedSets()
     self:InitializeSwatchPool()
     self:InitializeHeaderPool()
-    
-    KEYBOARD_DYEING_FRAGMENT = ZO_FadeSceneFragment:New(control)
-    KEYBOARD_DYEING_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
-        if newState == SCENE_FRAGMENT_SHOWING then
-            TriggerTutorial(TUTORIAL_TRIGGER_DYEING_OPENED)
-            if IsESOPlusSubscriber() then
-                TriggerTutorial(TUTORIAL_TRIGGER_DYEING_OPENED_AS_SUBSCRIBER)
-            end
-
-            self:UpdateOptionControls()
-
-            if self.dyeLayoutDirty then
-                self:LayoutDyes()
-            end
-            self:RefreshSavedSets()
-
-            if not ZO_MenuBar_GetSelectedDescriptor(self.toolsTabs) then
-                self.suppressSounds = true
-                ZO_MenuBar_SelectDescriptor(self.toolsTabs, self.dyeTool)
-                self.suppressSounds = false
-            end
-        elseif newState == SCENE_FRAGMENT_HIDING then
-            if ZO_MenuBar_GetSelectedDescriptor(self.toolsTabs) then
-                self.suppressSounds = true
-                ZO_MenuBar_SelectDescriptor(self.toolsTabs, self.dyeTool)
-                self.suppressSounds = false
-            end
-        end
-    end)
-    self.fragment = KEYBOARD_DYEING_FRAGMENT
 
     local function UpdateDyeLayout()
         self:DirtyDyeLayout()
@@ -73,6 +31,34 @@ function ZO_Dyeing_Keyboard:Initialize(control)
     ZO_DYEING_MANAGER:RegisterCallback("OptionsInfoAvailable", function() self:UpdateOptionControls() end)
 
     self:DirtyDyeLayout()
+end
+
+function ZO_Dyeing_Keyboard:OnShowing()
+    TriggerTutorial(TUTORIAL_TRIGGER_DYEING_OPENED)
+    if IsESOPlusSubscriber() then
+        TriggerTutorial(TUTORIAL_TRIGGER_DYEING_OPENED_AS_SUBSCRIBER)
+    end
+
+    self:UpdateOptionControls()
+
+    if self.dyeLayoutDirty then
+        self:LayoutDyes()
+    end
+    self:RefreshSavedSets()
+
+    if not ZO_MenuBar_GetSelectedDescriptor(self.toolsTabs) then
+        self.suppressSounds = true
+        ZO_MenuBar_SelectDescriptor(self.toolsTabs, self.dyeTool)
+        self.suppressSounds = false
+    end
+end
+
+function ZO_Dyeing_Keyboard:OnHiding()
+    if ZO_MenuBar_GetSelectedDescriptor(self.toolsTabs) then
+        self.suppressSounds = true
+        ZO_MenuBar_SelectDescriptor(self.toolsTabs, self.dyeTool)
+        self.suppressSounds = false
+    end
 end
 
 function ZO_Dyeing_Keyboard:OnToolChanged(tool)
@@ -441,6 +427,17 @@ end
 
 do
     local USE_SEARCH_RESULTS = true
+    local BECAUSE_OF_REBUILD = true
+
+    local SWATCHES_LAYOUT_OPTIONS = 
+    {
+        padding = 6,
+        leftMargin = 27,
+        topMargin = 18,
+        rightMargin = 0,
+        bottomMargin = 0,
+        selectionScale = ZO_DYEING_SWATCH_SELECTION_SCALE,
+    }
 
     function ZO_Dyeing_Keyboard:LayoutDyes()
         self.dyeLayoutDirty = false

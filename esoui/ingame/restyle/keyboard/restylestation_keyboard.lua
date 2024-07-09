@@ -20,16 +20,16 @@ local RESTYLE_MODE_CATEGORY_DATA =
 
 ZO_RestyleStation_Keyboard = ZO_RestyleCommon_Keyboard:Subclass()
 
-function ZO_RestyleStation_Keyboard:New(...)
-    return ZO_RestyleCommon_Keyboard.New(self, ...)
-end
-
 function ZO_RestyleStation_Keyboard:Initialize(control)
     ZO_RestyleCommon_Keyboard.Initialize(self, control)
 
     ZO_RESTYLE_SCENE = ZO_InteractScene:New("restyle_station_keyboard", SCENE_MANAGER, ZO_DYEING_STATION_INTERACTION)
     SYSTEMS:RegisterKeyboardRootScene("restyle", ZO_RESTYLE_SCENE)
     RESTYLE_FRAGMENT = self:GetFragment()
+end
+
+function ZO_RestyleStation_Keyboard:OnDeferredInitialize()
+    ZO_RestyleCommon_Keyboard.OnDeferredInitialize(self)
 
     self.noContentLabel = self.control:GetNamedChild("NoStylesLabel")
 
@@ -674,9 +674,13 @@ function OutfitConfirmCostDialog_Keyboard:RefreshValues()
     local slotsCost, flatCost = self.outfitManipulator:GetAllCostsForPendingChanges()
     displayedCost = clickedButton == self.perSlotRadioButton and slotsCost or flatCost
     self.notEnoughCurrency = displayedCost > balance
-    local currencyFormat = self.notEnoughCurrency and ZO_CURRENCY_FORMAT_ERROR_AMOUNT_ICON or ZO_CURRENCY_FORMAT_WHITE_AMOUNT_ICON
-    self.costValueLabel:SetText(ZO_Currency_FormatKeyboard(currencyType, displayedCost, currencyFormat))
-    self.balanceValueLabel:SetText(ZO_Currency_FormatKeyboard(currencyType, balance, ZO_CURRENCY_FORMAT_WHITE_AMOUNT_ICON))
+    local currencyOptions =
+    {
+        color = ZO_WHITE,
+    }
+    local SHOW_ALL = true
+    ZO_CurrencyControl_SetSimpleCurrency(self.costValueLabel, currencyType, displayedCost, currencyOptions, SHOW_ALL, self.notEnoughCurrency)
+    ZO_CurrencyControl_SetSimpleCurrency(self.balanceValueLabel, currencyType, balance, currencyOptions)
     self.confirmButton:SetText(self:GetConfirmButtonText())
     self.confirmButton:SetEnabled(clickedButton == self.flatRadioButton or not self.notEnoughCurrency)
 end

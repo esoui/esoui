@@ -210,7 +210,7 @@ local function SortAttacks(left, right)
 end
 
 function DeathRecap:SetupAttacks()
-    local startAlpha = self.animateOnShow and 0 or 1
+    local startAlpha = self:GetStartAlpha()
     self.attackPool:ReleaseAllObjects()
     self.killingBlowIcon:SetAlpha(startAlpha)
 
@@ -386,11 +386,15 @@ function DeathRecap:AddHint(text, prevHintControl)
     return hintControl
 end
 
+function DeathRecap:GetStartAlpha()
+    return (self.animateOnShow and not DEATH_RECAP_FRAGMENT:IsShowing()) and 0 or 1
+end
+
 function DeathRecap:SetupHints()
     self.hintPool:ReleaseAllObjects()
     self.hintTimeline:Stop()
 
-    local startAlpha = self.animateOnShow and 0 or 1
+    local startAlpha = self:GetStartAlpha()
     self.scrollControl:GetNamedChild("HintsContainerHints"):SetAlpha(startAlpha)
 
     local numHints = GetNumDeathRecapHints()
@@ -441,7 +445,7 @@ function DeathRecap:SetupTelvarStoneLoss()
 
     if telvarStonesLost > 0 then
         self.telvarStoneLossValueControl:SetText(zo_strformat(SI_DEATH_RECAP_TELVAR_STONE_LOSS_VALUE, telvarStonesLost))
-        self.telvarStoneLossControl:SetAlpha(self.animateOnShow and 0 or 1)
+        self.telvarStoneLossControl:SetAlpha(self:GetStartAlpha())
     else
         self.telvarStoneLossControl:SetAlpha(0)
     end

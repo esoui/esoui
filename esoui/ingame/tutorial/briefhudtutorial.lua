@@ -99,7 +99,12 @@ function ZO_BriefHudTutorial:RemoveTutorial(tutorialIndex)
 end
 
 function ZO_BriefHudTutorial:OnUpdate()
-    if self.displayedTutorialIsActionRequired then return end
+    if self.displayedTutorialIsActionRequired then
+        return
+    end
+
+    --Don't show while the wheels are up
+    self:SetHidden(INTERACTIVE_WHEEL_MANAGER:IsInteracting())
 
     local now = GetFrameTimeMilliseconds()
     local delta = now - (self.lastUpdate or now)

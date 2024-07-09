@@ -195,7 +195,7 @@ function ZO_CrownGemification_Keyboard:SetupGemifiable(control, data)
     local nameControl = GetControl(control, "Name")
     nameControl:SetText(data.name) -- already formatted
 
-    local sellPriceControl = GetControl(control, "SellPrice")
+    local sellPriceControl = control:GetNamedChild("SellPriceText")
     sellPriceControl:SetHidden(false)
     ZO_CurrencyControl_SetSimpleCurrency(sellPriceControl, CURT_CROWN_GEMS, data.gemTotal)
 
@@ -220,14 +220,14 @@ function ZO_CrownGemification_Keyboard:Row_OnMouseEnter(control)
     self.mouseOverRow = control
     self:UpdateKeybinds()
     local data = ZO_ScrollList_GetData(self.mouseOverRow)
-    InitializeTooltip(InformationTooltip, control, TOPRIGHT, 0, 0, TOPLEFT)
+    InitializeTooltip(ItemTooltip, control, TOPRIGHT, 0, 0, TOPLEFT)
     data:LayoutKeyboardTooltip()
 end
 
 function ZO_CrownGemification_Keyboard:Row_OnMouseExit(control)
     self.mouseOverRow = nil
     self:UpdateKeybinds()
-    ClearTooltip(InformationTooltip)
+    ClearTooltip(ItemTooltip)
 end
 
 function ZO_CrownGemification_Keyboard:Row_OnMouseUp(control, button, upInside)

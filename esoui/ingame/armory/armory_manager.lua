@@ -93,6 +93,7 @@ function ZO_Armory_Manager:OnBuildSaveResponseReceived(_, result, buildIndex)
     else
         ZO_Dialogs_ShowPlatformDialog("ARMORY_BUILD_SAVE_FAILED_DIALOG", nil, { mainTextParams = { GetString("SI_ARMORYBUILDSAVERESULT", result) } })
     end
+    ZO_Dialogs_SetDialogQueuePaused(false)
 end
 
 function ZO_Armory_Manager:OnBuildRestoreResponseReceived(_, result, buildIndex)
@@ -116,6 +117,7 @@ function ZO_Armory_Manager:OnBuildRestoreResponseReceived(_, result, buildIndex)
     else
         ZO_Dialogs_ShowPlatformDialog("ARMORY_BUILD_RESTORE_FAILED_DIALOG", nil, { mainTextParams = { GetString("SI_ARMORYBUILDRESTORERESULT", result) } })
     end
+    ZO_Dialogs_SetDialogQueuePaused(false)
 end
 
 function ZO_Armory_Manager:IsBuildOperationInProgress()
@@ -129,6 +131,7 @@ end
 function ZO_Armory_Manager:OnBuildOperationResultClosed()
     if self.hideOnBuildOperationComplete then
         self.hideOnBuildOperationComplete = false
+        ZO_Dialogs_SetDialogQueuePaused(false)
         SCENE_MANAGER:ShowBaseScene()
     else
         if IsInGamepadPreferredMode() then

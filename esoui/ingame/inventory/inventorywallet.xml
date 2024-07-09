@@ -3,13 +3,17 @@
         <Control name="ZO_InventoryWalletSlot" inherits="ZO_ListEntry_BackdropAndHighlight_Template ZO_ListInventorySlotBehavior" virtual="true">
             <Dimensions x="509" y="52" />
 
+            <OnInitialized name="InventoryWalletSlot">
+                self.currencyControl = self:GetNamedChild("Amount")
+            </OnInitialized>
+
             <Controls>
                 <Label name="$(parent)Name" font="ZoFontGameShadow" wrapMode="ELLIPSIS">
                     <Dimensions x="291" />
                     <Anchor point="LEFT" offsetX="53" />
                 </Label>
 
-                <Label name="$(parent)Amount" font="ZoFontGame">
+                <Label name="$(parent)Amount" inherits="ZO_CurrencyTemplate" tier="HIGH">
                     <Anchor point="RIGHT" offsetX="-5" />
                 </Label>
 

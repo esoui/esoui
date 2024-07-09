@@ -305,9 +305,16 @@ function ZO_Keybindings_UnregisterLabelForBindingUpdate(label)
 end
 
 function ZO_Keybinding_GetGamepadActionName(actionName)
+    local localizedConsoleActionName = ""
+    if IsConsoleUI() then
+        localizedConsoleActionName = GetString(_G["SI_BINDING_NAME_CONSOLE_"..actionName])
+    end
+
     local localizedGamepadActionName = GetString(_G["SI_BINDING_NAME_GAMEPAD_"..actionName])
-    
-    if localizedGamepadActionName ~= "" then
+
+    if localizedConsoleActionName ~= "" then
+        return localizedConsoleActionName
+    elseif localizedGamepadActionName ~= "" then
         return localizedGamepadActionName
     else
         local localizedActionName = GetString(_G["SI_BINDING_NAME_"..actionName])

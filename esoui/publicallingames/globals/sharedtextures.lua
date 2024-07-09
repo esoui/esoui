@@ -26,28 +26,28 @@ do
 end
 
 do
-    local LARGE_BATTLEGROUND_ALLIANCE_ICONS =
+    local LARGE_BATTLEGROUND_TEAM_ICONS =
     {
         [BATTLEGROUND_TEAM_FIRE_DRAKES] = "EsoUI/Art/Stats/battleground_alliance_badge_Fire_Drakes.dds",
         [BATTLEGROUND_TEAM_PIT_DAEMONS] = "EsoUI/Art/Stats/battleground_alliance_badge_Pit_Daemons.dds",
         [BATTLEGROUND_TEAM_STORM_LORDS] = "EsoUI/Art/Stats/battleground_alliance_badge_Storm_Lords.dds",
     }
 
-    function ZO_GetLargeBattlegroundAllianceSymbolIcon(bgAlliance)
-        return LARGE_BATTLEGROUND_ALLIANCE_ICONS[bgAlliance]
+    function ZO_GetLargeBattlegroundTeamSymbolIcon(bgTeam)
+        return LARGE_BATTLEGROUND_TEAM_ICONS[bgTeam]
     end
 end
 
 do
-    local COUNTDOWN_BATTLEGROUND_ALLIANCE_ICONS =
+    local COUNTDOWN_BATTLEGROUND_TEAM_ICONS =
     {
         [BATTLEGROUND_TEAM_FIRE_DRAKES] = "EsoUI/Art/HUD/HUD_Countdown_Badge_BG_orange.dds",
         [BATTLEGROUND_TEAM_PIT_DAEMONS] = "EsoUI/Art/HUD/HUD_Countdown_Badge_BG_green.dds",
         [BATTLEGROUND_TEAM_STORM_LORDS] = "EsoUI/Art/HUD/HUD_Countdown_Badge_BG_purple.dds",
     }
 
-    function ZO_GetCountdownBattlegroundAllianceSymbolIcon(bgAlliance)
-        return COUNTDOWN_BATTLEGROUND_ALLIANCE_ICONS[bgAlliance]
+    function ZO_GetCountdownBattlegroundTeamSymbolIcon(bgTeam)
+        return COUNTDOWN_BATTLEGROUND_TEAM_ICONS[bgTeam]
     end
 end
 
@@ -471,7 +471,7 @@ do
 end
 
 do
-    local ITEM_SELL_INFORMATION_ICON_PATHS =
+    local ITEM_SELL_INFORMATION_KEYBOARD_ICON_PATHS =
     {
         [ITEM_SELL_INFORMATION_PRIORITY_SELL] = "EsoUI/Art/Inventory/inventory_trait_ornate_icon.dds",
         [ITEM_SELL_INFORMATION_INTRICATE] = "EsoUI/Art/Inventory/inventory_trait_intricate_icon.dds",
@@ -480,9 +480,23 @@ do
         [ITEM_SELL_INFORMATION_RECONSTRUCTED] = "EsoUI/Art/Inventory/inventory_trait_reconstruct_icon.dds",
     }
 
+    local ITEM_SELL_INFORMATION_GAMEPAD_ICON_PATHS =
+    {
+        [ITEM_SELL_INFORMATION_PRIORITY_SELL] = "EsoUI/Art/Inventory/Gamepad/gp_inventory_trait_ornate_icon.dds",
+        [ITEM_SELL_INFORMATION_INTRICATE] = "EsoUI/Art/Inventory/Gamepad/gp_inventory_trait_intricate_icon.dds",
+        [ITEM_SELL_INFORMATION_CAN_BE_RESEARCHED] = "EsoUI/Art/Inventory/Gamepad/gp_inventory_trait_not_researched_icon.dds",
+        [ITEM_SELL_INFORMATION_CANNOT_SELL] = "EsoUI/Art/Inventory/inventory_sell_forbidden_icon.dds",
+        [ITEM_SELL_INFORMATION_RECONSTRUCTED] = "EsoUI/Art/Inventory/Gamepad/gp_inventory_trait_reconstruct_icon.dds",
+    }
+
+
     function ZO_GetItemSellInformationIcon(itemSellInformation)
         if itemSellInformation then
-            return ITEM_SELL_INFORMATION_ICON_PATHS[itemSellInformation]
+            if IsInGamepadPreferredMode() then
+                return ITEM_SELL_INFORMATION_GAMEPAD_ICON_PATHS[itemSellInformation]
+            else
+                return ITEM_SELL_INFORMATION_KEYBOARD_ICON_PATHS[itemSellInformation]
+            end
         end
     end
 end

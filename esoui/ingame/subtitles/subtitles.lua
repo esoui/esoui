@@ -15,7 +15,11 @@ do
     local CHARACTERS_PER_SECOND_OVERRIDE =
     {
         ["jp"] = 5,
+        ["zh"] = 5,
     }
+    -- Check if any new language needs a custom characters per second value
+    internalassert(OFFICIAL_LANGUAGE_MAX_VALUE == 6)
+
     local MIN_DISPLAY_LENGTH_SECONDS = 3
     local MAX_DISPLAY_LENGTH_SECONDS = 12
     function ZO_Subtitle:Initialize(messageType, speaker, message)
