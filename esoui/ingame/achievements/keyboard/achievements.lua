@@ -1061,11 +1061,11 @@ function Achievements:Initialize(control)
     LINK_HANDLER:RegisterCallback(LINK_HANDLER.LINK_MOUSE_UP_EVENT, OnLinkClicked)
 
     -- Don't defer so the tooltips can work even if we never open the scene
+    self:InitializeControls()
     self:InitializeAchievementList()
 end
 
 function Achievements:OnDeferredInitialize()
-    self:InitializeControls()
     self:InitializeCategories()
     self:InitializeSummary()
     local FILTER_DATA =

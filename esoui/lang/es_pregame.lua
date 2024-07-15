@@ -2411,7 +2411,7 @@ SafeAddString(SI_HOUSETOURLISTINGRESULT10, "Espera un momento e inténtalo otra 
 SafeAddString(SI_HOUSETOURLISTINGRESULT11, "La casa ya está anunciada.", 0)
 SafeAddString(SI_HOUSETOURLISTINGRESULT12, "La solicitud está tardando más de lo esperado. Vuelve a intentarlo más tarde.", 0)
 SafeAddString(SI_HOUSETOURLISTINGRESULT13, "No se han realizado cambios.", 0)
-SafeAddString(SI_HOUSETOURLISTINGRESULT14, "Apodo inapropiado.", 0)
+SafeAddString(SI_HOUSETOURLISTINGRESULT14, "Apodo inapropiado.", 1)
 SafeAddString(SI_HOUSETOURLISTINGRESULT15, "Permisos no válidos.", 0)
 SafeAddString(SI_HOUSETOURLISTINGRESULT2, "Fallo al actualizar el anuncio.", 0)
 SafeAddString(SI_HOUSETOURLISTINGRESULT3, "Fallo al eliminar el anuncio.", 0)

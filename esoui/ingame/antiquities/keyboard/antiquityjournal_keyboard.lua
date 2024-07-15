@@ -1353,6 +1353,8 @@ function ZO_AntiquityJournal_Keyboard:OnAntiquitiesUpdated()
 end
 
 function ZO_AntiquityJournal_Keyboard:ShowCategory(categoryId, filterText)
+    -- We can call this function before and without showing the scene so we have to make sure we do the deferred initialize.
+    self:PerformDeferredInitialize()
 
     --Order matters, resetting the filters will trigger a refresh of the categories, and we don't want this call to inadvertantly clear the queuedCategoryId
     self:ResetFilters()

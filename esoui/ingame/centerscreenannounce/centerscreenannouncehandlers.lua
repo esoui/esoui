@@ -1841,8 +1841,8 @@ local CENTER_SCREEN_CALLBACK_HANDLERS =
     {
         callbackManager = SCRIBING_DATA_MANAGER,
         callbackRegistration = "CraftedAbilityLockStateChanged",
-        callbackFunction = function(craftedAbilityData, isUnlocked)
-            if isUnlocked then
+        callbackFunction = function(craftedAbilityData, isUnlocked, isFromInit)
+            if isUnlocked and not isFromInit then
                 local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.CRAFTED_ABILITY_UNLOCKED)
                 -- Treat these the same way we treat collectibles
                 messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_SINGLE_COLLECTIBLE_UPDATED)

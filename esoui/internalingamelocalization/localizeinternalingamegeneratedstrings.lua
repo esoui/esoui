@@ -1721,7 +1721,7 @@ EsoStrings =
     "House is already listed.", -- SI_HOUSETOURLISTINGRESULT11
     "Request is taking longer than expected. Please check back later.", -- SI_HOUSETOURLISTINGRESULT12
     "No changes have been made.", -- SI_HOUSETOURLISTINGRESULT13
-    "Bad nickname.", -- SI_HOUSETOURLISTINGRESULT14
+    "Nickname is invalid or contains profanity.", -- SI_HOUSETOURLISTINGRESULT14
     "Invalid permissions.", -- SI_HOUSETOURLISTINGRESULT15
     "Favorite houses list has been updated.", -- SI_HOUSETOURSAVEFAVORITERESULT0
     "Failed to add house to your favorite houses list.", -- SI_HOUSETOURSAVEFAVORITERESULT1
@@ -11288,6 +11288,7 @@ SafeAddVersion(SI_HOUSETOURLISTINGTAG24, 1)
 SafeAddVersion(SI_HOUSETOURSLISTINGOPERATIONTYPE_LOADINGDIALOGMESSAGE2, 1)
 SafeAddVersion(SI_HOUSETOURSLISTINGOPERATIONTYPE_SUCCESSDIALOGTITLE2, 1)
 SafeAddVersion(SI_HOUSETOURSLISTINGOPERATIONTYPE_SUCCESSDIALOGMESSAGE2, 2)
+SafeAddVersion(SI_HOUSETOURLISTINGRESULT14, 1)
 SafeAddVersion(SI_EQUIPTYPE5, 1)
 SafeAddVersion(SI_EQUIPTYPE6, 1)
 SafeAddVersion(SI_EQUIPTYPE11, 2)

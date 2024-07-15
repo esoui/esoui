@@ -103,9 +103,6 @@ function ZO_BriefHudTutorial:OnUpdate()
         return
     end
 
-    --Don't show while the wheels are up
-    self:SetHidden(INTERACTIVE_WHEEL_MANAGER:IsInteracting())
-
     local now = GetFrameTimeMilliseconds()
     local delta = now - (self.lastUpdate or now)
 

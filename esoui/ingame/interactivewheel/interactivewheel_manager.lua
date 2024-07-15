@@ -44,6 +44,7 @@ function ZO_InteractiveWheel_Manager:StartInteraction(interactiveWheelType)
         self.currentWheelType = interactiveWheelType
     end
 
+    SHARED_INFORMATION_AREA:SetCategoriesSuppressed(true, ZO_SHARED_INFORMATION_AREA_SUPPRESSION_CATEGORIES.HIDDEN_BY_INTERACTIVE_WHEEL, "InteractiveWheel")
     return interactionStarted
 end
 
@@ -51,6 +52,8 @@ function ZO_InteractiveWheel_Manager:StopInteraction(interactiveWheelType, clear
     self.currentWheelType = nil
     ZO_ClearTable(self.beginHotkeyHolds)
     local wheel = self:GetPreferredWheel(interactiveWheelType)
+
+    SHARED_INFORMATION_AREA:SetCategoriesSuppressed(false, ZO_SHARED_INFORMATION_AREA_SUPPRESSION_CATEGORIES.HIDDEN_BY_INTERACTIVE_WHEEL, "InteractiveWheel")
     return wheel:StopInteraction(clearSelection)
 end
 
