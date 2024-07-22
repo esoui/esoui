@@ -1227,21 +1227,24 @@ function ZO_HouseTours_Gamepad:OnShowing()
     local sortedListingData = HOUSE_TOURS_PLAYER_LISTINGS_MANAGER:GetSortedListingData()
     self.hasHouses = #sortedListingData > 0
 
-    --If we have houses but haven't set the selected player listing for the management screen, do that now
-    if self.hasHouses and not self.selectedPlayerListingCollectibleId then
-        --Default to the house the player is in, fall back to first thing in the list
-        if IsOwnerOfCurrentHouse() then
-            self.selectedPlayerListingCollectibleId = GetCollectibleIdForHouse(GetCurrentZoneHouseId())
-        else
-            self.selectedPlayerListingCollectibleId = sortedListingData[1]:GetCollectibleId()
-        end
-    elseif self.hasHouses and IsOwnerOfCurrentHouse() then
-        self.selectedPlayerListingCollectibleId = GetCollectibleIdForHouse(GetCurrentZoneHouseId())
-    end
-
-    if self.pendingBrowseHouseId then
+    if self.manageSpecificHouseId then
+        -- Queued house id for the Manage Listings UI.
+        self.selectedPlayerListingCollectibleId = GetCollectibleIdForHouse(self.manageSpecificHouseId)
+        self.manageSpecificHouseId = nil
+        self:SetMode(HOUSE_TOURS_MODES.MANAGE_LISTINGS)
+    elseif self.pendingBrowseHouseId then
+        -- Queued house id for the Browse UI.
         self:BrowseSpecificHouse(self.pendingBrowseHouseId)
         self.pendingBrowseHouseId = nil
+    elseif self.hasHouses then
+        if IsOwnerOfCurrentHouse() then
+            -- Automatically select the current house if the player is in one of their own homes.
+            self.selectedPlayerListingCollectibleId = GetCollectibleIdForHouse(GetCurrentZoneHouseId())
+        elseif not self.selectedPlayerListingCollectibleId then
+            --If we have houses but haven't set the selected player listing for the management screen, do that now
+            --Default to the house the player is in, fall back to first thing in the list
+            self.selectedPlayerListingCollectibleId = sortedListingData[1]:GetCollectibleId()
+        end
     end
 end
 
@@ -1338,6 +1341,20 @@ function ZO_HouseTours_Gamepad:BrowseSpecificHouse(houseId)
         end
     else
         self.pendingBrowseHouseId = houseId
+    end
+end
+
+function ZO_HouseTours_Gamepad:ManageSpecificHouse(houseId)
+    if self:IsShowing() then
+        -- Order matters:
+        local collectibleId = GetCollectibleIdForHouse(houseId)
+        self.selectedPlayerListingCollectibleId = collectibleId
+        self:SetMode(HOUSE_TOURS_MODES.MANAGE_LISTINGS)
+        self:RefreshListingsManagementList(PRESERVE_SELECTIONS)
+    else
+        -- Order matters:
+        self.manageSpecificHouseId = houseId
+        ZO_ACTIVITY_FINDER_ROOT_GAMEPAD:ShowCategory(self:GetCategoryData())
     end
 end
 

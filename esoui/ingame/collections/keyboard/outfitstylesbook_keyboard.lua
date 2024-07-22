@@ -8,6 +8,10 @@ function ZO_OutfitStylesBook_Keyboard:Initialize(control)
 end
 
 function ZO_OutfitStylesBook_Keyboard:OnDeferredInitialize()
+    -- If we haven't run this function yet, and the last restyle sheet we opened was
+    -- a costume sheet, we will UI error; InitializeModeData ensures our sheet is set
+    -- correctly before we initialize everything else to prevent this.
+    self:InitializeModeData()
     ZO_RestyleCommon_Keyboard.OnDeferredInitialize(self)
 
     self.onModeDropdownChangedCallback = function()

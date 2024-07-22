@@ -33,6 +33,7 @@ ZO_GAMEPAD_NOTIFICATION_ICONS =
     [NOTIFICATION_TYPE_OUT_OF_DATE_ADDONS] = "EsoUI/Art/Miscellaneous/Gamepad/gp_icon_new_64.dds",
     [NOTIFICATION_TYPE_DISABLED_ADDON] = "EsoUI/Art/Miscellaneous/Gamepad/gp_icon_new_64.dds",
     [NOTIFICATION_TYPE_TRIBUTE_INVITE] = "EsoUI/Art/Notifications/Gamepad/gp_notificationIcon_tribute.dds",
+    [NOTIFICATION_TYPE_HOUSE_TOURS_HOUSE_RECOMMENDED] = "EsoUI/Art/Notifications/Gamepad/gp_notificationIcon_houseToursHouseRecommended.dds",
 }
 
 ZO_NOTIFICATION_TYPE_TO_GAMEPAD_TEMPLATE = 
@@ -53,6 +54,7 @@ ZO_NOTIFICATION_TYPE_TO_GAMEPAD_TEMPLATE =
     [NOTIFICATIONS_GUILD_NEW_APPLICATIONS] = "ZO_GamepadNotificationsGuildNewApplicationsRow",
     [NOTIFICATIONS_MARKET_PRODUCT_UNLOCKED_DATA] = "ZO_GamepadNotificationsMarketProductUnlockedRow",
     [NOTIFICATIONS_POINTS_RESET_DATA] = "ZO_GamepadNotificationsPointsResetRow",
+    [NOTIFICATIONS_HOUSE_TOURS_HOUSE_RECOMMENDED_DATA] = "ZO_GamepadNotificationsHouseRecommendedRow",
 }
 
 -- Provider Overrides
@@ -542,6 +544,7 @@ function ZO_GamepadNotificationManager:SetupList(list)
         ["ZO_GamepadNotificationsGuildNewApplicationsRow"] = SetupRequest,
         ["ZO_GamepadNotificationsMarketProductUnlockedRow"] = SetupRequest,
         ["ZO_GamepadNotificationsPointsResetRow"] = SetupRequest,
+        ["ZO_GamepadNotificationsHouseRecommendedRow"] = SetupRequest,
     }
 
     for template, setupCallback in pairs(TEMPLATE_TO_SETUP) do
@@ -589,6 +592,7 @@ function ZO_GamepadNotificationManager:InitializeNotificationList(control)
         ZO_OutOfDateAddonsProvider:New(self),
         ZO_DisabledAddonsProvider:New(self),
         ZO_GamepadTributeInviteProvider:New(self),
+        ZO_HouseToursHouseRecommendedProvider:New(self),
     }
 end
 

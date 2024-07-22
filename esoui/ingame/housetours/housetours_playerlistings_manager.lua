@@ -29,6 +29,14 @@ function ZO_HouseToursPlayerListings_Manager:RegisterForEvents()
     EVENT_MANAGER:RegisterForEvent("HouseTours_PlayerListings_Manager", EVENT_HOUSE_TOURS_LISTING_OPERATION_RESPONSE, ZO_GetEventForwardingFunction(self, self.OnListingOperationResponse))
     EVENT_MANAGER:RegisterForEvent("HouseTours_PlayerListings_Manager", EVENT_HOUSE_TOURS_LISTING_OPERATION_STARTED, ZO_GetEventForwardingFunction(self, self.OnListingOperationStarted))
     EVENT_MANAGER:RegisterForEvent("HouseTours_PlayerListings_Manager", EVENT_PLAYER_ACTIVATED, ZO_GetEventForwardingFunction(self, self.OnPlayerActivated))
+
+    local function OnAddOnLoaded(_, addOnName)
+        if addOnName == "ZO_Ingame" then
+            self:InitializeSavedVars()
+            EVENT_MANAGER:UnregisterForEvent("HouseTours_PlayerListings_Manager", EVENT_ADD_ON_LOADED)
+        end
+    end
+    EVENT_MANAGER:RegisterForEvent("HouseTours_PlayerListings_Manager", EVENT_ADD_ON_LOADED, OnAddOnLoaded)
 end
 
 function ZO_HouseToursPlayerListings_Manager:RegisterDialogs()
@@ -82,10 +90,73 @@ function ZO_HouseToursPlayerListings_Manager:RegisterDialogs()
                 clickSound = SOUNDS.DIALOG_ACCEPT,
             }
         },
-        finishedCallback = function()
-            --TODO House Tours: Do we need this?
-        end,
     })
+end
+
+function ZO_HouseToursPlayerListings_Manager:InitializeSavedVars()
+    if self.savedVars then
+        return
+    end
+
+    local defaults = {}
+    self.savedVars = ZO_SavedVars:NewAccountWide("ZO_Ingame_SavedVariables", 1, "HouseToursPlayerListingsManager", defaults)
+    self:FireCallbacks("Initialized")
+end
+
+function ZO_HouseToursPlayerListings_Manager:AreSavedVarsInitialized()
+    return self.savedVars ~= nil
+end
+
+function ZO_HouseToursPlayerListings_Manager:GetSavedVar(key)
+    local savedVars = self.savedVars
+    if savedVars then
+        return savedVars[key]
+    end
+    return nil
+end
+
+function ZO_HouseToursPlayerListings_Manager:SetSavedVar(key, value)
+    local savedVars = self.savedVars
+    if savedVars then
+        savedVars[key] = value
+        return true
+    end
+    return false
+end
+
+function ZO_HouseToursPlayerListings_Manager:GetOrCreateSavedTable(key)
+    local savedTable = self:GetSavedVar(key)
+    if savedTable == nil then
+        savedTable = {}
+        if not self:SetSavedVar(key, savedTable) then
+            return nil
+        end
+    end
+    return savedTable
+end
+
+function ZO_HouseToursPlayerListings_Manager:GetSuppressedNotificationHouseIds()
+    local houseIds = self:GetSavedVar("suppressedNotificationHouseIds")
+    return houseIds
+end
+
+function ZO_HouseToursPlayerListings_Manager:GetOrCreateSuppressedNotificationHouseIds()
+    local houseIds = self:GetOrCreateSavedTable("suppressedNotificationHouseIds")
+    return houseIds
+end
+
+function ZO_HouseToursPlayerListings_Manager:SetNotificationHouseIdSuppressed(houseId, isSuppressed)
+    local houseIds = self:GetOrCreateSuppressedNotificationHouseIds()
+    if houseIds then
+        if isSuppressed then
+            houseIds[houseId] = true
+        else
+            houseIds[houseId] = nil
+        end
+        self:FireCallbacks("SuppressHouseNotificationStateChanged", houseId, isSuppressed)
+        return true
+    end
+    return false
 end
 
 function ZO_HouseToursPlayerListings_Manager:MarkDirty()

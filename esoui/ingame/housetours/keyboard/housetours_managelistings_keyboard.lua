@@ -272,7 +272,10 @@ function ZO_HouseToursManageListings_Keyboard:OnShowing()
     --Order matters: Determine if we have houses before refreshing the visuals
     local sortedListingData = HOUSE_TOURS_PLAYER_LISTINGS_MANAGER:GetSortedListingData()
     self.hasHouses = #sortedListingData > 0
-    if IsOwnerOfCurrentHouse() then
+    if self.queuedSelectedCollectibleId then
+        self:SetSelectedHouse(self.queuedSelectedCollectibleId)
+        self.queuedSelectedCollectibleId = nil
+    elseif IsOwnerOfCurrentHouse() then
         self:SetSelectedHouse(GetCollectibleIdForHouse(GetCurrentZoneHouseId()))
     end
     self:RefreshHouseDropdown()
@@ -514,6 +517,19 @@ end
 
 function ZO_HouseToursManageListings_Keyboard:RenameSelectedHouse()
     ZO_CollectionsBook.ShowRenameDialog(self.selectedCollectibleId)
+end
+
+function ZO_HouseToursManageListings_Keyboard:ManageSpecificHouse(houseId)
+    local collectibleId = GetCollectibleIdForHouse(houseId)
+
+    if self:IsShowing() then
+        -- Switch to the specified house.
+        self:SetSelectedHouse(collectibleId)
+    else
+        -- Queue the specified house for selection and show the UI.
+        self.queuedSelectedCollectibleId = collectibleId
+        GROUP_MENU_KEYBOARD:ShowCategoryByData(self:GetActivityFinderCategoryData())
+    end
 end
 
 function ZO_HouseToursManageListings_Keyboard.OnControlInitialized(control)
