@@ -5319,7 +5319,7 @@ SafeAddString(SI_HOUSETOURSLISTINGOPERATIONTYPE_LOADINGDIALOGTITLE1, "Création"
 SafeAddString(SI_HOUSETOURSLISTINGOPERATIONTYPE_LOADINGDIALOGTITLE2, "Modification", 0)
 SafeAddString(SI_HOUSETOURSLISTINGOPERATIONTYPE_LOADINGDIALOGTITLE3, "Retrait", 0)
 SafeAddString(SI_HOUSETOURSLISTINGOPERATIONTYPE_SUCCESSDIALOGMESSAGE1, "Votre maison est désormais répertoriée sur « Visite de maison ». Vous pouvez à tout moment modifier ou supprimer cette annonce.", 0)
-SafeAddString(SI_HOUSETOURSLISTINGOPERATIONTYPE_SUCCESSDIALOGMESSAGE2, "L'annonce de votre maison a été modifiée avec succès.", 0)
+SafeAddString(SI_HOUSETOURSLISTINGOPERATIONTYPE_SUCCESSDIALOGMESSAGE2, "Votre annonce de visite a été modifiée avec succès.", 0)
 SafeAddString(SI_HOUSETOURSLISTINGOPERATIONTYPE_SUCCESSDIALOGMESSAGE3, "Votre maison a été retirée de « Visite de maison ».", 0)
 SafeAddString(SI_HOUSETOURSLISTINGOPERATIONTYPE_SUCCESSDIALOGTITLE1, "Maison inscrite", 0)
 SafeAddString(SI_HOUSETOURSLISTINGOPERATIONTYPE_SUCCESSDIALOGTITLE2, "Annonce modifiée", 0)

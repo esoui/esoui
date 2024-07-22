@@ -15,7 +15,7 @@ function ZO_ScribingDataManager:Initialize()
     self.sortedCraftedAbilityTable = {}
     self.sortedUnlockedCraftedAbilityTable = {}
 
-    self:RebuildData()
+    self:MarkDataDirty()
 
     local function OnCraftedAbilityLockStateChanged(eventId, ...)
         self:OnCraftedAbilityLockStateChanged(...)
@@ -66,8 +66,10 @@ do
         self.isDataDirty = false
 
         local numCraftedAbilities = GetNumCraftedAbilities()
+        internalassert(numCraftedAbilities > 0, "GetNumCraftedAbilities returned 0")
         for i = 1, numCraftedAbilities do
             local craftedAbilityId = GetCraftedAbilityIdAtIndex(i)
+            internalassert(craftedAbilityId > 0, "GetCraftedAbilityIdAtIndex returned 0")
             self:InternalGetOrCreateCraftedAbilityData(craftedAbilityId)
         end
 
@@ -77,6 +79,11 @@ do
 
         table.sort(self.sortedCraftedAbilityTable, SortBySkillType)
         self:RefreshSortedUnlockedCraftedAbilityTable()
+
+        -- It shouldn't be possible at this point to not have data, but it is happening for some players,
+        -- so we're adding some extra checks and asserts to try to catch it
+        self.isDataDirty = #self.sortedCraftedAbilityTable == 0
+        internalassert(not self.isDataDirty, "Failed to load crafted ability data")
     end
 
     function ZO_ScribingDataManager:RefreshSortedUnlockedCraftedAbilityTable()
@@ -100,7 +107,7 @@ end
 
 function ZO_ScribingDataManager:GetScribedCraftedAbilitySkillsData()
     local scribedCraftedAbilitySkillsData = {}
-    for i, craftedAbilityData in ipairs(self.sortedUnlockedCraftedAbilityTable) do
+    for _, craftedAbilityData in ipairs(self:GetSortedBySkillTypeUnlockedCraftedAbilityData()) do
         local skillData = craftedAbilityData:GetSkillData()
         if skillData and skillData.isPurchased then
             table.insert(scribedCraftedAbilitySkillsData, skillData)
@@ -110,8 +117,13 @@ function ZO_ScribingDataManager:GetScribedCraftedAbilitySkillsData()
 end
 
 function ZO_ScribingDataManager:HasScribedCraftedAbilitySkillsData()
-    local scribedCraftedAbilities = self:GetScribedCraftedAbilitySkillsData()
-    return #scribedCraftedAbilities > 0
+    for _, craftedAbilityData in ipairs(self:GetSortedBySkillTypeUnlockedCraftedAbilityData()) do
+        local skillData = craftedAbilityData:GetSkillData()
+        if skillData and skillData.isPurchased then
+            return true
+        end
+    end
+    return false
 end
 
 do
@@ -212,7 +224,7 @@ end
 
 function ZO_ScribingDataManager:IsScribingContentAccessible()
     local scribingCollectibleData = self:GetScribingUnlockCollectibleData()
-    local scribingQuestId = scribingCollectibleData:GetCollectibleAssociatedQuestState()
+    local questState = scribingCollectibleData:GetCollectibleAssociatedQuestState()
     return questState == COLLECTIBLE_ASSOCIATED_QUEST_STATE_COMPLETED
 end
 
@@ -266,7 +278,13 @@ function ZO_ScribingDataManager:InternalGetOrCreateCraftedAbilityData(craftedAbi
     end
 end
 
-function ZO_ScribingDataManager:OnCraftedAbilityLockStateChanged(craftedAbilityId, isUnlocked)
+function ZO_ScribingDataManager:OnCraftedAbilityLockStateChanged(craftedAbilityId, isUnlocked, isFromInit)
+    if isFromInit and self.isDataDirty then
+        -- We'll init the lock state tracking when we actually build the data mapping, so just abort for now
+        -- See also comment at the end of ZO_ScribingDataManager:RebuildData
+        return
+    end
+
     local craftedAbilityData = self:GetCraftedAbilityData(craftedAbilityId)
     if craftedAbilityData then
         if isUnlocked then
@@ -275,7 +293,7 @@ function ZO_ScribingDataManager:OnCraftedAbilityLockStateChanged(craftedAbilityI
             self.unlockedCraftedAbilityObjects[craftedAbilityId] = nil
         end
         self:RefreshSortedUnlockedCraftedAbilityTable()
-        self:FireCallbacks("CraftedAbilityLockStateChanged", craftedAbilityData, isUnlocked)
+        self:FireCallbacks("CraftedAbilityLockStateChanged", craftedAbilityData, isUnlocked, isFromInit)
     end
 end
 
