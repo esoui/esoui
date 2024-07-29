@@ -1243,7 +1243,11 @@ local AlertHandlers =
             alertType = ALERT
             soundId = operationType == HOUSE_TOURS_FAVORITE_OPERATION_TYPE_CREATE and SOUNDS.HOUSE_TOURS_ADDED_FAVORITE_HOUSE or SOUNDS.HOUSE_TOURS_REMOVED_FAVORITE_HOUSE
         end
-        return alertType, GetString("SI_HOUSETOURSAVEFAVORITERESULT", result), soundId
+
+        -- Play the audio cue immediately rather than waiting for a
+        -- potentially queued alert to give audio feedback.
+        PlaySound(soundId)
+        return alertType, GetString("SI_HOUSETOURSAVEFAVORITERESULT", result)
     end,
 
     [EVENT_HOUSE_TOURS_SAVE_RECOMMENDATION_OPERATION_COMPLETE] = function(result)
@@ -1253,7 +1257,11 @@ local AlertHandlers =
             alertType = ALERT
             soundId = SOUNDS.HOUSE_TOURS_RECOMMENDED_HOUSE
         end
-        return alertType, GetString("SI_HOUSETOURSAVERECOMMENDATIONRESULT", result), soundId
+
+        -- Play the audio cue immediately rather than waiting for a
+        -- potentially queued alert to give audio feedback.
+        PlaySound(soundId)
+        return alertType, GetString("SI_HOUSETOURSAVERECOMMENDATIONRESULT", result)
     end,
 }
 

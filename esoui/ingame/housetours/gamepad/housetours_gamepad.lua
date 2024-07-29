@@ -425,8 +425,12 @@ function ZO_HouseTours_Gamepad:InitializeLists()
         list:AddDataTemplate("ZO_GamepadItemEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
     end
 
+    local function SetupSearchResultsList(list)
+        list:AddDataTemplate("ZO_GamepadItemEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, ZO_HouseToursListingSearchData.Equals)
+    end
+
     self.categoryList = self:GetMainList()
-    self.searchResultsList = self:AddList("SearchResults", SetupHomeList)
+    self.searchResultsList = self:AddList("SearchResults", SetupSearchResultsList)
     self.listingsManagementList = self:AddList("ManageListings", function(list) self:SetupManageListingsList(list) end)
     self.homeList = self:AddList("Homes", SetupHomeList)
 end
@@ -1263,8 +1267,12 @@ function ZO_HouseTours_Gamepad:OnHiding()
 end
 
 --Overridden from base
-function ZO_HouseTours_Gamepad:OnTargetChanged(list, selectedData)
+function ZO_HouseTours_Gamepad:OnTargetChanged(list, selectedData, oldSelectedData, hasReachedTarget, targetIndex, reselectingDuringRebuild)
     if self.mode ~= HOUSE_TOURS_MODES.MANAGE_LISTINGS then
+        if not reselectingDuringRebuild then
+            self:UpdateLastSelectedIndexForCurrentMode(targetIndex)
+        end
+
         self:RefreshListingPanel(list, selectedData)
     end
 end
@@ -1629,7 +1637,6 @@ do
                 end
             end
 
-            -- TODO House Tours: Finish hooking this up
             local tagsEntryData = ZO_GamepadEntryData:New("")
             tagsEntryData.header = GetString(SI_HOUSE_TOURS_LISTING_TAGS_HEADER)
             tagsEntryData.selectCallback = self.onDropdownEntrySelected
@@ -1676,12 +1683,49 @@ do
     end
 end
 
+function ZO_HouseTours_Gamepad:ReselectLastSelectedIndexForCurrentMode()
+    local modeData = self:GetDataForMode(self.mode)
+    if not (modeData and modeData.list == self.searchResultsList) then
+        -- Only reselect the last selected index for search results.
+        return
+    end
+
+    local lastSelectedIndex = modeData.lastSelectedIndex
+    if not lastSelectedIndex then
+        -- There is no last selected index yet.
+        return
+    end
+
+    local numEntries = modeData.list:GetNumEntries()
+    if numEntries < 1 then
+        -- There is nothing to reselect.
+        return
+    end
+
+    -- Attempt to reselect the last selected index.
+    local ALLOW_EVEN_IF_DISABLED = true
+    lastSelectedIndex = zo_clamp(lastSelectedIndex, 1, numEntries)
+    modeData.list:SetSelectedIndexWithoutAnimation(lastSelectedIndex, ALLOW_EVEN_IF_DISABLED)
+end
+
+function ZO_HouseTours_Gamepad:UpdateLastSelectedIndexForCurrentMode(selectedIndex)
+    local modeData = self:GetDataForMode(self.mode)
+    if not (modeData and modeData.list == self.searchResultsList) then
+        -- Only track the last selected data for search results.
+        return
+    end
+
+    -- Store the last selected index, if any.
+    modeData.lastSelectedIndex = selectedIndex
+end
+
 function ZO_HouseTours_Gamepad:RefreshList()
     local modeData = self:GetDataForMode(self.mode)
     if modeData then
         modeData.refreshFunction()
     end
 
+    self:ReselectLastSelectedIndexForCurrentMode()
     self:RefreshHeader()
 end
 

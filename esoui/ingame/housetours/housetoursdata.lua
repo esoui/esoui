@@ -77,6 +77,7 @@ function ZO_HouseToursListingData_Base:GetHouseLink()
     return ZO_HousingBook_GetHouseLink(self:GetHouseId(), self:GetOwnerDisplayName())
 end
 
+ZO_HouseToursListingData_Base.Equals = ZO_HouseToursListingData_Base:MUST_IMPLEMENT()
 ZO_HouseToursListingData_Base.GetCollectibleId = ZO_HouseToursListingData_Base:MUST_IMPLEMENT()
 ZO_HouseToursListingData_Base.GetFurnitureCount = ZO_HouseToursListingData_Base:MUST_IMPLEMENT()
 ZO_HouseToursListingData_Base.GetTags = ZO_HouseToursListingData_Base:MUST_IMPLEMENT()
@@ -85,11 +86,17 @@ ZO_HouseToursListingData_Base.GetOwnerDisplayName = ZO_HouseToursListingData_Bas
 ZO_HouseToursListingData_Base.IsListed = ZO_HouseToursListingData_Base:MUST_IMPLEMENT()
 
 -- House Listing Search Data
+
 ZO_HouseToursListingSearchData = ZO_HouseToursListingData_Base:Subclass()
 
 function ZO_HouseToursListingSearchData:Initialize(listingType, listingIndex)
     self.listingType = listingType
     self.listingIndex = listingIndex
+end
+
+function ZO_HouseToursListingSearchData:Equals(otherListingSearchData)
+    return self:GetHouseId() == otherListingSearchData:GetHouseId()
+       and self:GetOwnerDisplayName() == otherListingSearchData:GetOwnerDisplayName()
 end
 
 function ZO_HouseToursListingSearchData:GetListingType()

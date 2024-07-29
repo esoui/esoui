@@ -8,6 +8,7 @@ function ZO_HouseToursSearchResults_Keyboard:Initialize(control)
     self.control = control
     self.containerControl = self.control:GetNamedChild("Container")
     self.dirty = true
+    self.listingScrollValues = {}
     local fragment = ZO_FadeSceneFragment:New(self.control)
     ZO_DeferredInitializingObject.Initialize(self, fragment)
 
@@ -19,7 +20,6 @@ function ZO_HouseToursSearchResults_Keyboard:OnDeferredInitialize()
     self:InitializeFilters()
     self:RegisterForEvents()
     self:InitializeKeybindStripDescriptor()
-    --TODO House Tours: Implement
 end
 
 function ZO_HouseToursSearchResults_Keyboard:RegisterForEvents()
@@ -28,11 +28,6 @@ function ZO_HouseToursSearchResults_Keyboard:RegisterForEvents()
             if self:IsShowing() then
                 self:RefreshGridList()
                 self:RefreshFilters()
-
-                if newState == ZO_HOUSE_TOURS_SEARCH_STATES.COMPLETE then
-                    -- Clear any preserved scroll offset now that it has been reapplied.
-                    self.autoScrollValue = nil
-                end
             else
                 self.dirty = true
             end
@@ -41,7 +36,6 @@ function ZO_HouseToursSearchResults_Keyboard:RegisterForEvents()
 
     HOUSE_TOURS_SEARCH_MANAGER:RegisterCallback("OnFavoritesChanged", function()
         if self:IsShowing() then
-            self.autoScrollValue = self.gridList:GetScrollValue()
             HOUSE_TOURS_SEARCH_MANAGER:ExecuteSearch(self.listingType)
         else
             self.dirty = true
@@ -55,7 +49,6 @@ end
 
 function ZO_HouseToursSearchResults_Keyboard:InitializeFilters()
     self.nameSearchBox = self.containerControl:GetNamedChild("DisplayNameSearchBox")
-    --TODO House Tours: Is this the right text to use? How will this search work on consoles?
     self.nameSearchBox:SetDefaultText(ZO_GetPlatformAccountLabel())
     self.nameSearchBox:SetHandler("OnFocusLost", function(editControl)
         local filters = HOUSE_TOURS_SEARCH_MANAGER:GetSearchFilters(self.listingType)
@@ -153,7 +146,6 @@ function ZO_HouseToursSearchResults_Keyboard:InitializeFilters()
     self.houseDropdown:SetHideDropdownCallback(OnHouseIdsDropdownHidden)
 
     local function OnConfirmFilters()
-        --TODO House Tours: Is there any other logic we want to run here?
         HOUSE_TOURS_SEARCH_MANAGER:ExecuteSearch(self.listingType)
     end
 
@@ -211,6 +203,8 @@ function ZO_HouseToursSearchResults_Keyboard:GetActivityFinderCategoryData(listi
 end
 
 function ZO_HouseToursSearchResults_Keyboard:OnCategorySelected(listingType)
+    -- Order matters:
+    self:SaveGridScrollValue()
     self.listingType = listingType
     HOUSE_TOURS_SEARCH_MANAGER:ExecuteSearch(listingType)
 end
@@ -225,13 +219,7 @@ function ZO_HouseToursSearchResults_Keyboard:RefreshGridList(resetToTop)
         end
         self.gridList:CommitGridList()
 
-        if self.autoScrollValue then
-            -- Scroll back to the preserved scroll offset instantly.
-            local NO_CALLBACK = nil
-            local SCROLL_INSTANTLY = true
-            self.gridList:ScrollToValue(self.autoScrollValue, NO_CALLBACK, SCROLL_INSTANTLY)
-        end
-
+        self:RestoreGridScrollValue()
         self:RefreshSearchState()
     end
 end
@@ -294,6 +282,30 @@ function ZO_HouseToursSearchResults_Keyboard:BrowseToSpecificHouse(houseId)
     else
         self.pendingBrowseHouseId = houseId
     end
+end
+
+function ZO_HouseToursSearchResults_Keyboard:RestoreGridScrollValue(listingType)
+    listingType = listingType or self.listingType
+    if not listingType then
+        return
+    end
+
+    local savedScrollValue = self.listingScrollValues[listingType]
+    if savedScrollValue then
+        -- Scroll back to the saved scroll offset instantly.
+        local NO_CALLBACK = nil
+        local SCROLL_INSTANTLY = true
+        self.gridList:ScrollToAbsoluteValue(savedScrollValue, NO_CALLBACK, SCROLL_INSTANTLY)
+    end
+end
+
+function ZO_HouseToursSearchResults_Keyboard:SaveGridScrollValue(listingType)
+    listingType = listingType or self.listingType
+    if not listingType then
+        return
+    end
+
+    self.listingScrollValues[listingType] = self.gridList:GetScrollValue()
 end
 
 function ZO_HouseToursSearchResults_Keyboard:OnShowing()
@@ -461,8 +473,6 @@ do
         end
         self.furnitureCountLabel:SetText(furnitureCountText)
 
-        --TODO House Tours: Finish hooking up tile visuals
-
         self:RefreshMouseoverVisuals()
     end
 end
@@ -520,6 +530,8 @@ end
 function ZO_HouseToursSearchResultsTile_Keyboard:AddRemoveFavoriteHome()
     local listingData = self.listingData
     if listingData then
+        -- Order matters:
+        HOUSE_TOURS_SEARCH_RESULTS_KEYBOARD:SaveGridScrollValue()
         if listingData:IsFavorite() then
             listingData:RequestRemoveFavorite()
         else
@@ -579,7 +591,6 @@ function ZO_HouseToursSearchFiltersDialog_Keyboard:OnDeferredInitialize()
     self.searchBoxHeader = control:GetNamedChild("SearchHeader")
     self.searchBox = control:GetNamedChild("SearchBox")
 
-    --TODO House Tours: Is this the right text to use? How will this search work on consoles?
     local platformAccountLabel = ZO_GetPlatformAccountLabel()
     self.searchBoxHeader:SetText(platformAccountLabel)
     self.searchBox:SetDefaultText(platformAccountLabel)

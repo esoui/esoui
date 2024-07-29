@@ -121,7 +121,13 @@ function ZO_HouseInformationTracker:RegisterEvents()
     HOUSE_TOURS_PLAYER_LISTINGS_MANAGER:RegisterCallback("ListingOperationCompleted", function(operationType, houseId, result)
         if result == HOUSE_TOURS_LISTING_RESULT_SUCCESS and houseId == HOUSING_EDITOR_STATE:GetHouseId() and HOUSING_EDITOR_STATE:IsLocalPlayerHouseOwner() then
             -- The listing for the current house was updated.
-            self:RefreshListingTags()
+            self:Update()
+        end
+    end)
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleUpdated", function(collectibleId)
+        if collectibleId == HOUSING_EDITOR_STATE:GetHouseCollectibleId() and HOUSING_EDITOR_STATE:IsLocalPlayerHouseOwner() then
+            -- The nickname for the current house may have been updated.
+            self:Update()
         end
     end)
 end
@@ -138,15 +144,36 @@ function ZO_HouseInformationTracker:Refresh()
     local headerText = zo_strformat(SI_HOUSING_INFORMATION_TRACKER_HOUSE_NAME, houseName)
     self:SetHeaderText(headerText)
 
-    local ownerName = housingEditorState:GetOwnerName()
-    if ownerName and not housingEditorState:IsLocalPlayerHouseOwner() then
-        local sublabelText = zo_strformat(SI_HOUSING_INFORMATION_TRACKER_OWNER_NAME, ownerName)
-        self:SetSubLabelText(sublabelText)
-        self.subLabel:SetHidden(false)
-    else
-        self:SetSubLabelText("")
-        self.subLabel:SetHidden(true)
+    local sublabelText = ""
+    if IsCurrentHouseListed() then
+        -- This house is listed in House Tours; look up the nickname given to this house by its owner.
+        local houseNickname = GetCurrentHouseTourListingNickname()
+        if not (houseNickname and houseNickname ~= "") then
+            -- No custom nickname was given to this house; look up the default nickname.
+            local houseCollectibleId = GetCurrentHouseTourListingCollectibleId()
+            local houseCollectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(houseCollectibleId)
+            houseNickname = houseCollectibleData and houseCollectibleData:GetDefaultNickname() or nil
+        end
+
+        if houseNickname then
+            -- Set the house nickname as the sublabel text.
+            sublabelText = string.format("%q", houseNickname)
+        end
     end
+    if not housingEditorState:IsLocalPlayerHouseOwner() then
+        -- This house is owned by someone other than the local player; look up the name of the owner.
+        local ownerName = housingEditorState:GetOwnerName()
+        if ownerName and ownerName ~= "" then
+            -- Append the name of the owner to the sublabel text.
+            local ownerText = zo_strformat(SI_HOUSING_INFORMATION_TRACKER_OWNER_NAME, ownerName)
+            local formatString = sublabelText == "" and "%s%s" or "%s\n%s"
+            sublabelText = string.format(formatString, sublabelText, ownerText)
+        end
+    end
+    -- Populate the sublabel and/or hide it.
+    self:SetSubLabelText(sublabelText)
+    local hideSublabel = sublabelText == ""
+    self.subLabel:SetHidden(hideSublabel)
 
     local SUPPRESS_ANCHOR_REFRESH = true
     self:RefreshListingTags(SUPPRESS_ANCHOR_REFRESH)
