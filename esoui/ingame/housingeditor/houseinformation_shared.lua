@@ -12,6 +12,7 @@ function ZO_HouseInformation_Shared:Initialize(control, fragment, rowTemplate, c
         if newState == SCENE_SHOWING then
             self:UpdateHouseInformation()
             self:UpdateHousePopulation()
+            self:UpdateHouseTourInformation()
             self:UpdatePermissions()
             self:UpdateLimits()
         end
@@ -69,6 +70,7 @@ do
         self.infoSection = SetupRow(self.control, "InfoSection")
         self.primaryResidenceRow = SetupRow(self.control, "PrimaryResidenceRow", GetString(SI_HOUSING_PRIMARY_RESIDENCE_HEADER))
         self.currentVisitorsRow = SetupRow(self.control, "CurrentVisitorsRow", GetString(SI_HOUSING_CURRENT_RESIDENTS_HEADER))
+        self.houseTourRecommendationCountRow = SetupRow(self.control, "HouseTourRecommendationCountRow", GetString(SI_HOUSING_HOUSE_TOUR_RECOMMENDATION_COUNT_HEADER))
         self.individualPermissionsRow = SetupRow(self.control, "IndividualPermissions", GetString(SI_PERMISSION_USER_GROUP_INDIVIDUAL_TOTAL_HEADER))
         self.guildPermissionsRow = SetupRow(self.control, "GuildPermissions", GetString(SI_PERMISSION_USER_GROUP_GUILD_TOTAL_HEADER))
         self.overPopulationWarningIcon = self.currentVisitorsRow:GetNamedChild("Help")
@@ -102,21 +104,20 @@ function ZO_HouseInformation_Shared:UpdateHouseInformation()
     self.locationRow.valueText = houseCollectibleData:GetFormattedHouseLocation()
     self.locationRow.valueLabel:SetText(self.locationRow.valueText)
 
-    self.currentVisitorsRow:ClearAnchors()
     local isHouseOwner = HOUSING_EDITOR_STATE:IsLocalPlayerHouseOwner()
     if isHouseOwner then
         local isPrimaryHouse = IsPrimaryHouse(currentHouseId)
         self.primaryResidenceRow.valueText = isPrimaryHouse and GetString(SI_YES) or GetString(SI_NO)
-        self.primaryResidenceRow.valueLabel:SetText(self.primaryResidenceRow.valueText)
-        self.currentVisitorsRow:SetAnchor(TOPLEFT, self.primaryResidenceRow, BOTTOMLEFT, 0, 20)
     else
-        self.currentVisitorsRow:SetAnchor(TOPLEFT, self.infoSection, BOTTOMLEFT, 0, 20)
+        self.primaryResidenceRow.valueText = ""
     end
+    self.primaryResidenceRow.valueLabel:SetText(self.primaryResidenceRow.valueText)
 
     local hideOwnerRows = not isHouseOwner
     self.guildPermissionsRow:SetHidden(hideOwnerRows)
     self.individualPermissionsRow:SetHidden(hideOwnerRows)
     self.primaryResidenceRow:SetHidden(hideOwnerRows)
+    self.houseTourRecommendationCountRow:SetHidden(hideOwnerRows)
 
     local ownerDisplayName = HOUSING_EDITOR_STATE:GetOwnerName()
     if ownerDisplayName ~= "" then
@@ -160,6 +161,24 @@ function ZO_HouseInformation_Shared:UpdatePermissions(userGroup)
         self.guildPermissionsRow.valueText = zo_strformat(SI_HOUSING_NUM_PERMISSIONS_FORMAT, numGuildPermissions, HOUSING_MAX_GUILD_USER_GROUP_ENTRIES)
         self.guildPermissionsRow.valueLabel:SetText(textColor:Colorize(self.guildPermissionsRow.valueText))
     end
+end
+
+function ZO_HouseInformation_Shared:UpdateHouseTourInformation()
+    local recommendationCount = nil
+    if HOUSING_EDITOR_STATE:IsLocalPlayerHouseOwner() then
+        local currentHouseId = HOUSING_EDITOR_STATE:GetHouseId()
+        if IsHouseListed(currentHouseId) then
+            -- The local player owns this house and it is listed in House Tours;
+            -- fetch the lifetime recommendation count.
+            recommendationCount = ZO_AbbreviateAndLocalizeNumber(GetNumHouseToursPlayerListingRecommendations(currentHouseId), NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES)
+        end
+    end
+
+    local rowControl = self.houseTourRecommendationCountRow
+    local nameText = recommendationCount and rowControl.nameText or ""
+    rowControl.nameLabel:SetText(nameText)
+    rowControl.valueText = recommendationCount
+    rowControl.valueLabel:SetText(recommendationCount or "")
 end
 
 do

@@ -2,15 +2,15 @@
 -- Tribute Patron Book --
 -------------------------
 
-ZO_TributePatronBook_Gamepad = ZO_Object.MultiSubclass(ZO_TributePatronBook_Shared, ZO_Gamepad_ParametricList_Screen)
+ZO_TributePatronBook_Gamepad = ZO_Object.MultiSubclass(ZO_TributePatronBook_Shared, ZO_Gamepad_ParametricList_Search_Screen)
 
 function ZO_TributePatronBook_Gamepad:New(...)
-    return ZO_Gamepad_ParametricList_Screen.New(self, ...)
+    return ZO_Gamepad_ParametricList_Search_Screen.New(self, ...)
 end
 
 function ZO_TributePatronBook_Gamepad:Initialize(control, ...)
     local ACTIVATE_ON_SHOW = true
-    ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE, ACTIVATE_ON_SHOW)
+    ZO_Gamepad_ParametricList_Search_Screen.Initialize(self, BACKGROUND_LIST_FILTER_TARGET_TRIBUTE_PATRON_ID, "tributePatronTextSearch", control, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE, ACTIVATE_ON_SHOW)
 
     local TEMPLATE_DATA =
     {
@@ -48,7 +48,7 @@ function ZO_TributePatronBook_Gamepad:Initialize(control, ...)
     local rightPane = control:GetNamedChild("RightPane")
     local infoContainerControl = rightPane:GetNamedChild("InfoContainer")
     ZO_TributePatronBook_Shared.Initialize(self, control, infoContainerControl, TEMPLATE_DATA)
-    ZO_Gamepad_ParametricList_Screen.SetScene(self, self:GetScene())
+    ZO_Gamepad_ParametricList_Search_Screen.SetScene(self, self:GetScene())
 
     self.headerLabel = infoContainerControl:GetNamedChild("Header")
 
@@ -78,19 +78,24 @@ function ZO_TributePatronBook_Gamepad:ViewCategory(tributePatronCategoryData)
     local patronList = self.patronListDescriptor.list
     patronList:Clear()
 
-    self.patronListDescriptor.titleText = tributePatronCategoryData:GetFormattedName()
+    -- Search calls this function to update without setting a new category.
+    if tributePatronCategoryData then
+        self.patronListDescriptor.titleText = tributePatronCategoryData:GetFormattedName()
+        self.patronListDescriptor.lastParentCategoryData = tributePatronCategoryData
+    end
 
     -- Add the patron entries
-    for _, patronData in tributePatronCategoryData:PatronIterator() do
-        local entryData = ZO_GamepadEntryData:New(patronData:GetFormattedName())
-        entryData:SetDataSource(patronData)
-        entryData:SetIconTintOnSelection(true)
+    for _, patronData in self.patronListDescriptor.lastParentCategoryData:PatronIterator() do
+        if TEXT_SEARCH_MANAGER:IsDataInSearchTextResults(self.searchContext, BACKGROUND_LIST_FILTER_TARGET_TRIBUTE_PATRON_ID, patronData:GetId()) then
+            local entryData = ZO_GamepadEntryData:New(patronData:GetFormattedName())
+            entryData:SetDataSource(patronData)
+            entryData:SetIconTintOnSelection(true)
 
-        patronList:AddEntry("ZO_GamepadSubMenuEntryTemplateWithStatus", entryData)
+            patronList:AddEntry("ZO_GamepadSubMenuEntryTemplateWithStatus", entryData)
+        end
     end
 
     patronList:Commit()
-    self.patronListDescriptor.lastParentCategoryData = tributePatronCategoryData
 
     self:ShowListDescriptor(self.patronListDescriptor)
 end
@@ -118,6 +123,10 @@ function ZO_TributePatronBook_Gamepad:InitializeCategories()
         keybindDescriptor = self.patronKeybindStripDescriptor,
         -- The title text will be updated to the name of the patron category
     }
+
+    self.categoryListDescriptor.list:SetNoItemText(GetString(SI_TRIBUTE_PATRONS_SEARCH_RESULTS_EMPTY_TEXT))
+    self.patronListDescriptor.list:SetNoItemText(GetString(SI_TRIBUTE_PATRONS_SEARCH_RESULTS_EMPTY_TEXT))
+
 
     -- Grid Keybind
     self.gridKeybindStripDescriptor =
@@ -185,15 +194,23 @@ function ZO_TributePatronBook_Gamepad:RefreshCategories()
         table.insert(entryList, entryData)
     end
 
+    local isSearchInactive = not TEXT_SEARCH_MANAGER:IsActiveTextSearch(self.searchContext)
     for _, entryData in ipairs(entryList) do
-        categoryList:AddEntry("ZO_GamepadNewMenuEntryTemplate", entryData)
+        if isSearchInactive or self:IsAnyEntryInCategoryActiveInSearch(entryData) then
+            categoryList:AddEntry("ZO_GamepadNewMenuEntryTemplate", entryData)
 
-        if selectedData and selectedData:GetId() == entryData:GetId() then
-            selectedData = entryData
+            if selectedData and selectedData:GetId() == entryData:GetId() then
+                selectedData = entryData
+            end
         end
     end
 
     categoryList:Commit()
+    if categoryList:GetNumEntries() == 0 then
+        -- If the current list is empty, select the search header.
+        -- Otherwise the user won't be able to navigate into the search box.
+        self:RequestEnterHeader()
+    end
 
     if self.currentListDescriptor then
         KEYBIND_STRIP:UpdateKeybindButtonGroup(self.currentListDescriptor.keybindDescriptor)
@@ -202,6 +219,15 @@ function ZO_TributePatronBook_Gamepad:RefreshCategories()
             self:ViewCategory(self.patronListDescriptor.lastParentCategoryData)
         end
     end
+end
+
+function ZO_TributePatronBook_Gamepad:IsAnyEntryInCategoryActiveInSearch(tributePatronCategoryData) 
+    for _, patronData in tributePatronCategoryData:PatronIterator() do
+        if TEXT_SEARCH_MANAGER:IsDataInSearchTextResults(self.searchContext, BACKGROUND_LIST_FILTER_TARGET_TRIBUTE_PATRON_ID, patronData:GetId()) then
+            return true
+        end
+    end
+    return false
 end
 
 -- Do not call this directly, instead call self.categoriesRefreshGroup:MarkDirty("Visible")
@@ -252,9 +278,11 @@ function ZO_TributePatronBook_Gamepad:AddPatronHeader()
     self.headerLabel:SetText(patronData:GetFormattedColorizedName())
 end
 
--- Begin ZO_Gamepad_ParametricList_Screen Overrides --
+-- Begin ZO_Gamepad_ParametricList_Search_Screen Overrides --
 
 function ZO_TributePatronBook_Gamepad:InitializeKeybindStripDescriptors()
+    ZO_Gamepad_ParametricList_Search_Screen.InitializeKeybindStripDescriptors(self)
+
     self.categoryKeybindStripDescriptor =
     {
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
@@ -291,15 +319,29 @@ function ZO_TributePatronBook_Gamepad:InitializeKeybindStripDescriptors()
     self:SetListsUseTriggerKeybinds(true)
 end
 
+-- Default text search back button closes the screen, but we have multiple layers here.
+function ZO_TributePatronBook_Gamepad:OnBackButtonClicked()
+    if self.currentListDescriptor and not self.currentListDescriptor.isCategoriesDescriptor then
+        self:GetScene():RemoveFragment(GAMEPAD_NAV_QUADRANT_2_3_BACKGROUND_FRAGMENT)
+        self:OnLeaveHeader()
+        self:ShowListDescriptor(self.categoryListDescriptor)
+    else
+        -- Call parent to close scene.
+        ZO_Gamepad_ParametricList_Search_Screen.OnBackButtonClicked(self)
+    end
+end
+
 function ZO_TributePatronBook_Gamepad:EnterGridList()
     self:DeactivateCurrentListDescriptor()
     self.gridList:Activate()
+    self.keybindStripDescriptor = self.gridKeybindStripDescriptor
     KEYBIND_STRIP:AddKeybindButtonGroup(self.gridKeybindStripDescriptor)
 end
 
 function ZO_TributePatronBook_Gamepad:ExitGridList()
     self.gridList:Deactivate()
     KEYBIND_STRIP:RemoveKeybindButtonGroup(self.gridKeybindStripDescriptor)
+    self.keybindStripDescriptor = nil
     self:ActivateCurrentListDescriptor()
 end
 
@@ -308,8 +350,12 @@ function ZO_TributePatronBook_Gamepad:PerformUpdate()
     self.dirty = false
 end
 
+function ZO_TributePatronBook_Gamepad:OnUpdateSearchResults()
+    self.categoriesRefreshGroup:MarkDirty("Visible")
+end
+
 function ZO_TributePatronBook_Gamepad:OnShowing()
-    ZO_Gamepad_ParametricList_Screen.OnShowing(self)
+    ZO_Gamepad_ParametricList_Search_Screen.OnShowing(self)
 
     if self.browseToCollectibleInfo then
         local patronId = self.browseToCollectibleInfo.patronId
@@ -318,27 +364,56 @@ function ZO_TributePatronBook_Gamepad:OnShowing()
         local patronList = self.patronListDescriptor.list
         self:ViewCategory(tributePatronCategoryData)
         
-        local patronIndex = patronList:GetIndexForData("ZO_GamepadSubMenuEntryLabelTemplate", patronData)
+        local patronIndex = patronList:GetIndexForData("ZO_GamepadSubMenuEntryTemplateWithStatus", patronData)
         patronList:SetSelectedIndexWithoutAnimation(patronIndex)
         self.browseToCollectibleInfo = nil
 
         self:GetScene():AddFragment(GAMEPAD_NAV_QUADRANT_2_3_BACKGROUND_FRAGMENT)
         self.categoriesRefreshGroup:MarkDirty("List")
     else
+        self:ActivateTextSearch()
         self:ShowListDescriptor(self.categoryListDescriptor)
     end
 end
 
 function ZO_TributePatronBook_Gamepad:OnHide()
-    ZO_Gamepad_ParametricList_Screen.OnHide(self)
+    ZO_Gamepad_ParametricList_Search_Screen.OnHide(self)
 
     if self.gridList:IsActive() then
         self:ExitGridList()
     end
     self:HideCurrentListDescriptor()
     self:GetScene():RemoveFragment(GAMEPAD_NAV_QUADRANT_2_3_BACKGROUND_FRAGMENT)
+    self:DeactivateTextSearch()
 end
 
+function ZO_TributePatronBook_Gamepad:ActivateTextSearch()
+    if not TEXT_SEARCH_MANAGER:IsActiveTextSearch(self.searchContext) then
+        TEXT_SEARCH_MANAGER:ActivateTextSearch(self.searchContext)
+
+        local function OnListTextFilterComplete()
+            if self.currentListDescriptor then
+                if self.currentListDescriptor.isCategoriesDescriptor then
+                    self:RefreshCategories()
+                else
+                    self:ViewCategory()
+                end
+            end
+        end
+        self.onListTextFilterCompleteCallback = OnListTextFilterComplete
+
+        TEXT_SEARCH_MANAGER:RegisterCallback("UpdateSearchResults", self.onListTextFilterCompleteCallback)
+    end
+end
+
+function ZO_TributePatronBook_Gamepad:DeactivateTextSearch()
+    if TEXT_SEARCH_MANAGER:IsActiveTextSearch(self.searchContext) then
+        TEXT_SEARCH_MANAGER:DeactivateTextSearch(self.searchContext)
+
+        TEXT_SEARCH_MANAGER:UnregisterCallback("UpdateSearchResults", self.onListTextFilterCompleteCallback)
+        self.onListTextFilterCompleteCallback = nil
+    end
+end
 
 function ZO_TributePatronBook_Gamepad:SetupList(list)
     local function TributePatronCategoryEntrySetup(control, data, selected, reselectingDuringRebuild, enabled, active)
@@ -370,6 +445,7 @@ function ZO_TributePatronBook_Gamepad:ShowListDescriptor(listDescriptor)
     self.currentListDescriptor = listDescriptor
     if listDescriptor then
         self:SetCurrentList(listDescriptor.list)
+        self.keybindStripDescriptor = listDescriptor.keybindDescriptor
         KEYBIND_STRIP:AddKeybindButtonGroup(listDescriptor.keybindDescriptor)
         self:RefreshHeader()
         self.infoContainerControl:SetHidden(listDescriptor ~= self.patronListDescriptor)
@@ -389,6 +465,7 @@ function ZO_TributePatronBook_Gamepad:HideCurrentListDescriptor()
         end
 
         KEYBIND_STRIP:RemoveKeybindButtonGroup(self.currentListDescriptor.keybindDescriptor)
+        self.keybindStripDescriptor = nil
         self:DisableCurrentList()
         self.currentListDescriptor = nil
     end
@@ -397,6 +474,7 @@ end
 function ZO_TributePatronBook_Gamepad:ActivateCurrentListDescriptor()
     if self.currentListDescriptor then
         self:ActivateCurrentList()
+        self.keybindStripDescriptor = self.currentListDescriptor.keybindDescriptor
         KEYBIND_STRIP:AddKeybindButtonGroup(self.currentListDescriptor.keybindDescriptor)
     end
 end
@@ -405,6 +483,7 @@ function ZO_TributePatronBook_Gamepad:DeactivateCurrentListDescriptor()
     if self.currentListDescriptor then
         self:DeactivateCurrentList()
         KEYBIND_STRIP:RemoveKeybindButtonGroup(self.currentListDescriptor.keybindDescriptor)
+        self.keybindStripDescriptor = nil
     end
 end
 

@@ -122,7 +122,7 @@ ESO_Dialogs["REQUESTING_WORLD_LIST"] =
             text =      SI_DIALOG_CANCEL,
             keybind =   false,
             callback =  function(dialog)
-                            PregameStateManager_SetState("AccountLogin")
+                            ZO_Disconnect()
                         end
         }
     }

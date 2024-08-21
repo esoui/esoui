@@ -157,19 +157,6 @@ function ZO_Scribing_Manager:GetUnlockedScriptsForCraftedAbilityAndScribingSlot(
     return availableScripts
 end
 
-function ZO_Scribing_Manager:GetUnlockedCraftedAbilities()
-    local function GetNextUnlockedCraftedAbilityIdIter(_, previousSetId)
-        return GetNextUnlockedCraftedAbilityId(previousSetId)
-    end
-
-    local unlockedCraftedAbilityIds = {}
-    for craftedAbilityId in GetNextUnlockedCraftedAbilityIdIter do
-        table.insert(unlockedCraftedAbilityIds, craftedAbilityId)
-    end
-
-    return unlockedCraftedAbilityIds
-end
-
 do
     local g_inkItemLink
     local function GetInkItemLink()

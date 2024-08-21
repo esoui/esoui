@@ -34,7 +34,7 @@ panelBuilder:AddSetting({
     settingType = SETTING_TYPE_GRAPHICS,
     settingId = GRAPHICS_SETTING_RESOLUTION,
     header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_DISPLAY,
-    initializeControlFunction = ZO_OptionsPanel_Video_InitializeResolution,
+    initializeControlFunction = ZO_OptionsPanel_Video_InitializeResolution
 })
 
 panelBuilder:AddSetting({
@@ -114,13 +114,6 @@ panelBuilder:AddSetting({
     controlName = "Options_Video_HDR_UI_Contrast",
     settingType = SETTING_TYPE_GRAPHICS,
     settingId = GRAPHICS_SETTING_HDR_UI_CONTRAST,
-    header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_DISPLAY,
-})
-
-panelBuilder:AddSetting({
-    controlName = "Options_Video_HDR_Mode",
-    settingType = SETTING_TYPE_GRAPHICS,
-    settingId = GRAPHICS_SETTING_HDR_MODE,
     header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_DISPLAY,
 })
 

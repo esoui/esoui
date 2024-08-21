@@ -33,6 +33,7 @@ ZO_GAMEPAD_NOTIFICATION_ICONS =
     [NOTIFICATION_TYPE_OUT_OF_DATE_ADDONS] = "EsoUI/Art/Miscellaneous/Gamepad/gp_icon_new_64.dds",
     [NOTIFICATION_TYPE_DISABLED_ADDON] = "EsoUI/Art/Miscellaneous/Gamepad/gp_icon_new_64.dds",
     [NOTIFICATION_TYPE_TRIBUTE_INVITE] = "EsoUI/Art/Notifications/Gamepad/gp_notificationIcon_tribute.dds",
+    [NOTIFICATION_TYPE_HOUSE_TOURS_HOUSE_RECOMMENDED] = "EsoUI/Art/Notifications/Gamepad/gp_notificationIcon_houseToursHouseRecommended.dds",
 }
 
 ZO_NOTIFICATION_TYPE_TO_GAMEPAD_TEMPLATE = 
@@ -53,6 +54,7 @@ ZO_NOTIFICATION_TYPE_TO_GAMEPAD_TEMPLATE =
     [NOTIFICATIONS_GUILD_NEW_APPLICATIONS] = "ZO_GamepadNotificationsGuildNewApplicationsRow",
     [NOTIFICATIONS_MARKET_PRODUCT_UNLOCKED_DATA] = "ZO_GamepadNotificationsMarketProductUnlockedRow",
     [NOTIFICATIONS_POINTS_RESET_DATA] = "ZO_GamepadNotificationsPointsResetRow",
+    [NOTIFICATIONS_HOUSE_TOURS_HOUSE_RECOMMENDED_DATA] = "ZO_GamepadNotificationsHouseRecommendedRow",
 }
 
 -- Provider Overrides
@@ -314,32 +316,30 @@ function ZO_GamepadCollectionsUpdateProvider:New(notificationManager)
     return ZO_CollectionsUpdateProvider.New(self, notificationManager)
 end
 
-function ZO_GamepadCollectionsUpdateProvider:AddCollectibleNotification(data)
-    local categoryData = data:GetCategoryData()
-
+function ZO_GamepadCollectionsUpdateProvider:AddCollectibleNotification(data, notificationId)
     --use a formatter for when there's more information?
     local hasMoreInfo = GetCollectibleHelpIndices(data:GetId()) ~= nil
-    local message = self:GetMessage(hasMoreInfo, ZO_SELECTED_TEXT:Colorize(categoryData:GetName()), ZO_SELECTED_TEXT:Colorize(data:GetName()))
-    self:AddNotification(message, data, hasMoreInfo)
+    local message = self:GetMessage(hasMoreInfo, ZO_SELECTED_TEXT:Colorize(data:GetCategoryName()), ZO_SELECTED_TEXT:Colorize(data:GetName()))
+    self:AddNotification(message, data, hasMoreInfo, notificationId)
 end
 
-function ZO_GamepadCollectionsUpdateProvider:AddNotification(message, data, hasMoreInfo)
-    local categoryData = data:GetCategoryData()
+function ZO_GamepadCollectionsUpdateProvider:AddNotification(message, data, hasMoreInfo, notificationId)
     local customLayoutFunction = nil
     if hasMoreInfo then
         customLayoutFunction = function(tooltip, entryData)
-            GAMEPAD_TOOLTIPS:LayoutKeybindNotification(tooltip, categoryData, entryData)
+            GAMEPAD_TOOLTIPS:LayoutKeybindNotification(tooltip, entryData)
         end
     end
 
     local newListEntry = {
         dataType = NOTIFICATIONS_COLLECTIBLE_DATA,
         notificationType = NOTIFICATION_TYPE_COLLECTIONS,
-        shortDisplayText = categoryData:GetName(),
+        shortDisplayText = data:GetCategoryName(),
 
         message = message,
         data = data,
         moreInfo = hasMoreInfo,
+        notificationId = notificationId,
         customLayoutFunction = customLayoutFunction,
 
         --For sorting
@@ -354,7 +354,7 @@ function ZO_GamepadCollectionsUpdateProvider:Accept(entryData)
     ZO_CollectionsUpdateProvider.Accept(self, entryData)
 
     -- The Tribute Patron book is a different scene than the standard collections menu, so we need to handle it uniquely.
-    if entryData.data:GetCategoryData():IsTributePatronCategory() then
+    if entryData.data:GetCategorySpecialization() == COLLECTIBLE_CATEGORY_SPECIALIZATION_TRIBUTE_PATRONS then
         GAMEPAD_TRIBUTE_PATRON_BOOK:BrowseToPatron(entryData.data:GetReferenceId())
     else
         GAMEPAD_COLLECTIONS_BOOK:BrowseToCollectible(entryData.data:GetId())
@@ -544,6 +544,7 @@ function ZO_GamepadNotificationManager:SetupList(list)
         ["ZO_GamepadNotificationsGuildNewApplicationsRow"] = SetupRequest,
         ["ZO_GamepadNotificationsMarketProductUnlockedRow"] = SetupRequest,
         ["ZO_GamepadNotificationsPointsResetRow"] = SetupRequest,
+        ["ZO_GamepadNotificationsHouseRecommendedRow"] = SetupRequest,
     }
 
     for template, setupCallback in pairs(TEMPLATE_TO_SETUP) do
@@ -591,6 +592,7 @@ function ZO_GamepadNotificationManager:InitializeNotificationList(control)
         ZO_OutOfDateAddonsProvider:New(self),
         ZO_DisabledAddonsProvider:New(self),
         ZO_GamepadTributeInviteProvider:New(self),
+        ZO_HouseToursHouseRecommendedProvider:New(self),
     }
 end
 

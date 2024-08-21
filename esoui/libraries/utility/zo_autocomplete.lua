@@ -51,7 +51,7 @@ function ZO_AutoComplete:Initialize(editControl, includeFlags, excludeFlags, onl
     self:SetExcludeFlags(excludeFlags)
     self:SetOnlineOnly(onlineOnly)
     self:SetMaxResults(maxResults)
-    
+
     self.automaticMode = mode == nil or mode == AUTO_COMPLETION_AUTOMATIC_MODE
     self.anchorStyle = AUTO_COMPLETION_ANCHOR_TOP
     self.useArrows = allowArrows == nil or AUTO_COMPLETION_USE_ARROWS == allowArrows
@@ -59,9 +59,12 @@ function ZO_AutoComplete:Initialize(editControl, includeFlags, excludeFlags, onl
     if(self.dontCallHookedHandlers == nil) then
         self.dontCallHookedHandlers = true
     end
-     
+
     self.keepFocusOnCommit = true
-    
+
+    self.widthOffsetLeft = 0
+    self.widthOffsetRight = 0
+
     self:SetEditControl(editControl)
     self:SetOwner(editControl)
 end
@@ -156,6 +159,11 @@ end
 
 function ZO_AutoComplete:SetAnchorStyle(style)
     self.anchorStyle = style
+end
+
+function ZO_AutoComplete:SetWidthOffsets(left, right)
+    self.widthOffsetLeft = left or 0
+    self.widthOffsetRight = right or 0
 end
 
 do
@@ -282,12 +290,12 @@ function ZO_AutoComplete:ApplyAutoCompletionResults(...)
 
         if self.anchorStyle == AUTO_COMPLETION_ANCHOR_BOTTOM then
             ZO_Menu:ClearAnchors()
-            ZO_Menu:SetAnchor(BOTTOMLEFT, self.editControl, TOPLEFT, -8, -2)
-            ZO_Menu:SetAnchor(BOTTOMRIGHT, self.editControl, TOPRIGHT, 8, -2)
+            ZO_Menu:SetAnchor(BOTTOMLEFT, self.editControl, TOPLEFT, -8 + self.widthOffsetLeft, -2)
+            ZO_Menu:SetAnchor(BOTTOMRIGHT, self.editControl, TOPRIGHT, 8 + self.widthOffsetRight, -2)
         else
             ZO_Menu:ClearAnchors()
-            ZO_Menu:SetAnchor(TOPLEFT, self.editControl, BOTTOMLEFT, -8, 2)
-            ZO_Menu:SetAnchor(TOPRIGHT, self.editControl, BOTTOMRIGHT, 8, 2)
+            ZO_Menu:SetAnchor(TOPLEFT, self.editControl, BOTTOMLEFT, -8 + self.widthOffsetLeft, 2)
+            ZO_Menu:SetAnchor(TOPRIGHT, self.editControl, BOTTOMRIGHT, 8 + self.widthOffsetRight, 2)
         end
         
         return true

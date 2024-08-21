@@ -209,6 +209,10 @@ function ZO_ItemPreviewListHelper_Shared:HasVariations()
     return self:GetPreviewObject():HasVariations()
 end
 
+function ZO_ItemPreviewListHelper_Shared:HasActions()
+    return self:GetPreviewObject():HasActions()
+end
+
 function ZO_ItemPreviewListHelper_Shared:RefreshActions()
     self:FireCallbacks("RefreshActions")
 end

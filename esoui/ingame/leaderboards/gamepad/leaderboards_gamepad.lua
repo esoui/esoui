@@ -12,7 +12,6 @@ function ZO_LeaderboardsManager_Gamepad:Initialize(control)
     ZO_LeaderboardsManager_Shared.Initialize(self, control)
     ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE, ACTIVATE_ON_SHOW, GAMEPAD_LEADERBOARDS_SCENE)
 
-    self.leaderboardSystemObjects = {}
     self:InitializeCategoryList(control)
 end
 
@@ -170,10 +169,6 @@ local CATEGORY_SORT_KEYS =
 
 local function SortFunc(item1, item2)
     return ZO_TableOrderingFunction(item1, item2, "group", CATEGORY_SORT_KEYS, ZO_SORT_ORDER_UP)
-end
-
-function ZO_LeaderboardsManager_Gamepad:RegisterLeaderboardSystemObject(systemObject)
-    table.insert(self.leaderboardSystemObjects, systemObject)
 end
 
 function ZO_LeaderboardsManager_Gamepad:UpdateCategories()

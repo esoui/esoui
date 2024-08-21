@@ -23,6 +23,7 @@ function ZO_GuildSelector_Gamepad:Initialize(...)
 
 
     self.m_container:SetHandler("OnEffectivelyShown", function()
+        self:SelectDefaultItem()
         EVENT_MANAGER:RegisterForEvent("GuildSelectorGamepad", EVENT_GUILD_DATA_LOADED, RefreshGuildList)
     end)
 
@@ -39,11 +40,12 @@ end
 
 function ZO_GuildSelector_Gamepad:SelectGuild(selectedEntry)
     if selectedEntry then
+        ZO_GUILD_SELECTOR_MANAGER:SetSelectedGuildStoreId(selectedEntry.guildId)
         self.guildId = selectedEntry.guildId
-        self.control:SetSelectedItemText(selectedEntry.selectedText)
+        self:SetSelectedItemText(selectedEntry.guildText)
 
-        if self.OnSelectionChanged then
-            self.OnSelectionChanged(selectedEntry)
+        if self.OnGuildSelectedCallback then
+            self.OnGuildSelectedCallback(selectedEntry)
         end
     end
 end
@@ -51,8 +53,8 @@ end
 function ZO_GuildSelector_Gamepad:RefreshGuildList()
     ZO_ClearTable(self.entries)
     self:ClearItems()
-    for i = 1, GetNumGuilds() do
-        local guildId = GetGuildId(i)
+    for index = 1, GetNumGuilds() do
+        local guildId = GetGuildId(index)
         if not self.filterFunction or self.filterFunction(guildId) then
             local guildName = GetGuildName(guildId)
             local guildAlliance = GetGuildAlliance(guildId)
@@ -65,7 +67,7 @@ function ZO_GuildSelector_Gamepad:RefreshGuildList()
                 self.OnGuildsRefreshed(entry)
             end
 
-            self.entries[guildId] = entry
+            self.entries[index] = entry
             self:AddItem(entry)
         end
     end
@@ -74,9 +76,22 @@ function ZO_GuildSelector_Gamepad:RefreshGuildList()
         return false
     end
 
-    self.highlightedIndex = 1
-    self:SelectFirstItem()
+    self:SelectDefaultItem()
     return true
+end
+
+function ZO_GuildSelector_Gamepad:SelectDefaultItem()
+    local selectedGuildId = ZO_GUILD_SELECTOR_MANAGER:GetSelectedGuildStoreId()
+    for index, entry in ipairs(self.entries) do
+        if entry.guildId == selectedGuildId then
+            self.m_highlightedIndex = index
+            self:SelectGuild(entry)
+            return
+        end
+    end
+
+    self.m_highlightedIndex = 1
+    self:SelectFirstItem()
 end
 
 function ZO_GuildSelector_Gamepad:SetOnGuildsRefreshed(OnGuildsRefreshed)
@@ -84,6 +99,7 @@ function ZO_GuildSelector_Gamepad:SetOnGuildsRefreshed(OnGuildsRefreshed)
 end
 
 function ZO_GuildSelector_Gamepad:OnGuildSelected(itemName, item)
+    ZO_GUILD_SELECTOR_MANAGER:SetSelectedGuildStoreId(item.guildId)
     if self.OnGuildSelectedCallback then
         self.OnGuildSelectedCallback(item)
     end

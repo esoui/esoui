@@ -41,6 +41,12 @@ function ZO_UniversalDeconstruction_Gamepad:Initialize(control)
     ZO_Smithing_AddScene("universalDeconstructionSceneGamepad", self)
 end
 
+function ZO_UniversalDeconstruction_Gamepad:AddInventoryAdditionalFilter(additionalFilterFunction)
+    if self.deconstructionPanel then
+        self.deconstructionPanel:AddInventoryAdditionalFilter(additionalFilterFunction)
+    end
+end
+
 function ZO_UniversalDeconstruction_Gamepad:SetEnableSkillBar(enable)
     if enable then
         ZO_MultipleCraftingSkillsXpBar_TieSkillInfoHeaderToCraftingTypes(self.skillInfoBar, self.craftingTypes)

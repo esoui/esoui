@@ -179,11 +179,11 @@ local REPAIR_COST_CURRENCY_OPTIONS =
 }
 
 function ZO_Repair:SetupRepairItem(control, data)
-    local statusControl = GetControl(control, "Status")
-    local slotControl = GetControl(control, "Button")
-    local nameControl = GetControl(control, "Name")
-    local repairCostControl = GetControl(control, "SellPrice")
-    local itemConditionControl = GetControl(control, "ItemCondition")
+    local statusControl = control:GetNamedChild("Status")
+    local slotControl = control:GetNamedChild("Button")
+    local nameControl = control:GetNamedChild("Name")
+    local repairCostControl = control:GetNamedChild("SellPriceText")
+    local itemConditionControl = control:GetNamedChild("ItemCondition")
 
     statusControl:SetHidden(true)
 

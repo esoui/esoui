@@ -82,6 +82,7 @@ function ZO_HousingPathSettings_Gamepad:InitializeKeybindStripDescriptors()
             SCENE_MANAGER:HideCurrentScene()
         else
             self:ShowMainList()
+            self:ShowChangeCollectibleTooltip()
         end
     end
 
@@ -130,7 +131,6 @@ function ZO_HousingPathSettings_Gamepad:InitializeLists()
         end
     end
 
-    
     local function SetupCheckboxControl(control, data, selected, reselectingDuringRebuild, enabled, active)
         if data.index == ZO_HOUSING_PATH_SETTINGS_CONTROL_DATA_PATHING_STATE then
             SetupPathStateControl(control, data, selected, reselectingDuringRebuild, enabled, active)
@@ -199,6 +199,7 @@ function ZO_HousingPathSettings_Gamepad:InitializeLists()
     local USE_DEFAULT_COMPARISON = nil
     self.changeObjectList:AddDataTemplateWithHeader("ZO_GamepadItemEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, USE_DEFAULT_COMPARISON, "ZO_GamepadMenuEntryHeaderTemplate")
     self.changeObjectList:SetNoItemText(GetString(SI_ANTIQUITY_EMPTY_LIST))
+    self.changeObjectList:SetOnTargetDataChangedCallback(function(...) self:OnChangeObjectTargetChanged(...) end)
 
     local function OnHouseChanged()
         -- Refresh the Option List to show/hide the Change Object entry as appropriate.
@@ -208,10 +209,47 @@ function ZO_HousingPathSettings_Gamepad:InitializeLists()
     HOUSING_EDITOR_STATE:RegisterCallback("HouseChanged", OnHouseChanged)
 end
 
+function ZO_HousingPathSettings_Gamepad:RefreshFragments()
+    if self:IsMainListActive() then
+        SCENE_MANAGER:RemoveFragmentGroup(FRAGMENT_GROUP.FRAME_TARGET_CENTERED)
+        SCENE_MANAGER:AddFragmentGroup(FRAGMENT_GROUP.FRAME_TARGET_GAMEPAD_QUADRANT_3_4)
+    else
+        SCENE_MANAGER:RemoveFragmentGroup(FRAGMENT_GROUP.FRAME_TARGET_GAMEPAD_QUADRANT_3_4)
+        SCENE_MANAGER:AddFragmentGroup(FRAGMENT_GROUP.FRAME_TARGET_CENTERED)
+    end
+end
+
 function ZO_HousingPathSettings_Gamepad:OnSettingsTargetChanged(list, targetData, oldTargetData)
     GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
     if targetData and targetData.generalInfo then
         targetData.generalInfo.tooltipFunction()
+    end
+end
+
+do
+    local HIDE_VISUAL_LAYER_INFO = false
+    local NO_COOLDOWN = nil
+    local HIDE_BLOCK_REASON = false
+
+    function ZO_HousingPathSettings_Gamepad:RefreshFurnitureTooltip(targetData)
+        GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
+        if targetData then
+            local furnitureData = targetData.furnitureData
+            if furnitureData and furnitureData.collectibleId then
+                local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(furnitureData.collectibleId)
+                GAMEPAD_TOOLTIPS:LayoutCollectibleFromData(GAMEPAD_RIGHT_TOOLTIP, collectibleData, HIDE_VISUAL_LAYER_INFO, NO_COOLDOWN, HIDE_BLOCK_REASON)
+            end
+        end
+    end
+end
+
+function ZO_HousingPathSettings_Gamepad:OnChangeObjectTargetChanged(list, targetData, oldTargetData)
+    GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
+    if targetData then
+        if IsCharacterPreviewingAvailable() then
+            targetData.furnitureData:Preview()
+            self:RefreshFurnitureTooltip(targetData)
+        end
     end
 end
 
@@ -239,8 +277,7 @@ function ZO_HousingPathSettings_Gamepad:RefreshChangeObjectList()
             for subcategoryIndex, subcategoryData in ipairs(categoryData:GetAllSubcategories()) do
                 for furnitureIndex, furnitureData in ipairs(subcategoryData:GetAllEntries()) do
                     local furnitureEntry = ZO_GamepadEntryData:New(furnitureData:GetFormattedName(), furnitureData:GetIcon())
-                    furnitureEntry.furnitureId = furnitureData.furnitureId
-                    furnitureEntry.collectibleId = furnitureData.collectibleId
+                    furnitureEntry.furnitureData = furnitureData
 
                     if furnitureIndex == 1 then
                         local formattedCategoryName = string.format("%s - %s (%d)", categoryData:GetName(), subcategoryData:GetName(), subcategoryData:GetNumEntryItemsRecursive())
@@ -257,11 +294,12 @@ function ZO_HousingPathSettings_Gamepad:RefreshChangeObjectList()
     objectList:SetNoItemText(GetString(SI_HOUSING_FURNITURE_NO_PATHABLE_FURNITURE))
     objectList:Commit()
     return objectList:IsEmpty()
-end    
+end
 
 function ZO_HousingPathSettings_Gamepad:PerformUpdate()
     self:RefreshHeader()
     self:RefreshOptionList()
+    self:RefreshFragments()
     self.dirty = false
 end
 
@@ -287,7 +325,7 @@ function ZO_HousingPathSettings_Gamepad:RefreshHeader()
         end
         self.headerData.titleText = GetString(SI_HOUSING_EDITOR_PATH_SETTINGS)
     else
-        self.headerData.titleText = GetString(SI_HOUSING_PATH_SETTINGS_CHANGE_COLLECTIBLE_TEXT)
+        self.headerData.titleText = GetString(SI_HOUSING_PATH_SETTINGS_CHANGE_COLLECTIBLE_BUTTON_TEXT)
     end
 
     ZO_GamepadGenericHeader_RefreshData(self.header, self.headerData)
@@ -299,7 +337,7 @@ function ZO_HousingPathSettings_Gamepad:OnSelectTargetObject()
         local data = list:GetTargetData()
         if data then
             local currentFurnitureId = HousingEditorGetSelectedFurnitureId()
-            local newCollectibleId = data.collectibleId
+            local newCollectibleId = data.furnitureData.collectibleId
 
             SCENE_MANAGER:HideCurrentScene()
             HousingEditorRequestModeChange(HOUSING_EDITOR_MODE_SELECTION)
@@ -315,14 +353,18 @@ function ZO_HousingPathSettings_Gamepad:IsMainListActive()
 end
 
 function ZO_HousingPathSettings_Gamepad:ShowMainList()
+    ITEM_PREVIEW_KEYBOARD:EndCurrentPreview()
+    GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
     self:SetCurrentList(self:GetMainList())
     self:RefreshHeader()
+    self:RefreshFragments()
 end
 
 function ZO_HousingPathSettings_Gamepad:ShowChangeObjectList()
     self:RefreshChangeObjectList()
     self:SetCurrentList("changeObject")
     self:RefreshHeader()
+    self:RefreshFragments()
 end
 
 function ZO_HousingPathSettings_Gamepad:GetPathableFurnitureCategoryTreeData()

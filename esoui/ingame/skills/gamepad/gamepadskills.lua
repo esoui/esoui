@@ -225,11 +225,15 @@ end
 function ZO_GamepadSkills.OnConfirmHideScene(scene, nextSceneName, bypassHideSceneConfirmationReason)
     if bypassHideSceneConfirmationReason == nil and 
         SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeBatchSave() and
-        not GAMEPAD_SKILLS_SCENE_GROUP:HasScene(nextSceneName) then
+        (nextSceneName == "gamepad_skills_scribing_library_root" or 
+            not GAMEPAD_SKILLS_SCENE_GROUP:HasScene(nextSceneName)) then
         
         ZO_Dialogs_ShowGamepadDialog("CONFIRM_REVERT_CHANGES",
         {
-            confirmCallback = function() scene:AcceptHideScene() end,
+            confirmCallback = function() 
+                scene:AcceptHideScene()
+                SKILLS_DATA_MANAGER:RebuildSkillsData()
+            end,
             declineCallback = function() scene:RejectHideScene() end,
         })        
     else
@@ -396,7 +400,6 @@ function ZO_GamepadSkills:InitializeCategoryKeybindStrip()
                 end
             elseif targetData and targetData.isScribeLibrary then
                 if SCRIBING_DATA_MANAGER:IsScribingUnlocked() then
-                    self:DeactivateCurrentList()
                     SCENE_MANAGER:Push("gamepad_skills_scribing_library_root")
                 else
                     local collectibleData = SCRIBING_DATA_MANAGER:GetScribingPurchasableCollectibleData()

@@ -1228,7 +1228,41 @@ local AlertHandlers =
         if result ~= MAIL_TAKE_ATTACHMENT_RESULT_SUCCESS then
             return ERROR, GetString("SI_MAILTAKEATTACHMENTRESULT", result), SOUNDS.GENERAL_ALERT_ERROR
         end
-   end,
+    end,
+
+    [EVENT_HOUSE_TOURS_SEARCH_COMPLETE] = function(listingType, result, searchId)
+        if result ~= HOUSE_TOURS_REQUEST_LISTINGS_RESULT_SUCCESS then
+            return ERROR, GetString("SI_HOUSETOURSREQUESTLISTINGSRESULT", result), SOUNDS.GENERAL_ALERT_ERROR
+        end
+    end,
+
+    [EVENT_HOUSE_TOURS_SAVE_FAVORITE_OPERATION_COMPLETE] = function(operationType, result)
+        local alertType = ERROR
+        local soundId = SOUNDS.GENERAL_ALERT_ERROR
+        if result == HOUSE_TOURS_SAVE_FAVORITE_RESULT_SUCCESS then
+            alertType = ALERT
+            soundId = operationType == HOUSE_TOURS_FAVORITE_OPERATION_TYPE_CREATE and SOUNDS.HOUSE_TOURS_ADDED_FAVORITE_HOUSE or SOUNDS.HOUSE_TOURS_REMOVED_FAVORITE_HOUSE
+        end
+
+        -- Play the audio cue immediately rather than waiting for a
+        -- potentially queued alert to give audio feedback.
+        PlaySound(soundId)
+        return alertType, GetString("SI_HOUSETOURSAVEFAVORITERESULT", result)
+    end,
+
+    [EVENT_HOUSE_TOURS_SAVE_RECOMMENDATION_OPERATION_COMPLETE] = function(result)
+        local alertType = ERROR
+        local soundId = SOUNDS.GENERAL_ALERT_ERROR
+        if result == HOUSE_TOURS_SAVE_RECOMMENDATION_RESULT_SUCCESS then
+            alertType = ALERT
+            soundId = SOUNDS.HOUSE_TOURS_RECOMMENDED_HOUSE
+        end
+
+        -- Play the audio cue immediately rather than waiting for a
+        -- potentially queued alert to give audio feedback.
+        PlaySound(soundId)
+        return alertType, GetString("SI_HOUSETOURSAVERECOMMENDATIONRESULT", result)
+    end,
 }
 
 ZO_AntiquityScryingResultsToAlert =

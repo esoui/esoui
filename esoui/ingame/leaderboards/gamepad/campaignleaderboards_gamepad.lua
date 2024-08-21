@@ -92,7 +92,7 @@ function ZO_CampaignLeaderboardsManager_Gamepad:Initialize(control)
     end)
 
     SYSTEMS:RegisterGamepadObject(ZO_CAMPAIGN_LEADERBOARD_SYSTEM_NAME, self)
-    GAMEPAD_LEADERBOARDS:RegisterLeaderboardSystemObject(self)
+    GAMEPAD_LEADERBOARDS:RegisterLeaderboardSystemObject(self, LEADERBOARD_DATA_TYPE.CAMPAIGN)
     self.selector = ZO_LeaderboardCampaignSelector_Gamepad:New(control)
 end
 

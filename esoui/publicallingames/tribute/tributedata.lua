@@ -441,6 +441,10 @@ function ZO_TributePatronData:GetDockCards()
     return self.currentCards, self.availableUpgradeCards
 end
 
+function ZO_TributePatronData:Equals(otherTributePatronData)
+    return self:GetId() == otherTributePatronData:GetId()
+end
+
 ----------------------------------
 -- Tribute Patron Category Data --
 ----------------------------------

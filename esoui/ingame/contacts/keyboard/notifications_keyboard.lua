@@ -34,6 +34,7 @@ ZO_KEYBOARD_NOTIFICATION_ICONS =
     [NOTIFICATION_TYPE_OUT_OF_DATE_ADDONS] = "EsoUI/Art/Miscellaneous/ESO_Icon_Warning.dds",
     [NOTIFICATION_TYPE_DISABLED_ADDON] = "EsoUI/Art/Miscellaneous/ESO_Icon_Warning.dds",
     [NOTIFICATION_TYPE_TRIBUTE_INVITE] = "EsoUI/Art/Notifications/notificationIcon_tribute.dds",
+    [NOTIFICATION_TYPE_HOUSE_TOURS_HOUSE_RECOMMENDED] = "EsoUI/Art/Notifications/notificationIcon_houseToursHouseRecommended.dds",
 }
 
 -- Provider Overrides
@@ -325,6 +326,7 @@ function ZO_KeyboardNotificationManager:InitializeNotificationList(control)
     ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_GUILD_NEW_APPLICATIONS, "ZO_NotificationsGuildNewApplicationsRow", ZO_NOTIFICATIONS_KEYBOARD_BASE_ROW_HEIGHT, SetupRequest)
     ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_MARKET_PRODUCT_UNLOCKED_DATA, "ZO_NotificationsMarketProductUnlockedRow", ZO_NOTIFICATIONS_KEYBOARD_BASE_ROW_HEIGHT, SetupRequestWithMoreInfoRow)
     ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_POINTS_RESET_DATA, "ZO_NotificationsPointsResetRow", ZO_NOTIFICATIONS_KEYBOARD_BASE_ROW_HEIGHT, SetupRequest)
+    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_HOUSE_TOURS_HOUSE_RECOMMENDED_DATA, "ZO_NotificationsHouseToursHouseRecommendedRow", ZO_NOTIFICATIONS_KEYBOARD_BASE_ROW_HEIGHT, SetupRequest)
     ZO_ScrollList_EnableHighlight(self.sortFilterList.list, "ZO_ThinListHighlight")
 
     self.totalNumNotifications = 0
@@ -361,6 +363,7 @@ function ZO_KeyboardNotificationManager:InitializeNotificationList(control)
         ZO_OutOfDateAddonsProvider:New(self),
         ZO_DisabledAddonsProvider:New(self),
         ZO_TributeInviteProvider:New(self),
+        ZO_HouseToursHouseRecommendedProvider:New(self),
     }
 
     self.sortFilterList:SetEmptyText(GetString(SI_NO_NOTIFICATIONS_MESSAGE))

@@ -22,7 +22,7 @@ function ZO_ScribingLayout_Keyboard:Initialize(control)
     self.searchContainer = control:GetNamedChild("LibrarySearch")
     self.scribingSearchEditBox = self.searchContainer:GetNamedChild("Box")
 
-    ZO_TextSearchObject.Initialize(self, "craftedAbilityTextSearch", self.searchEditBox)
+    ZO_TextSearchObject.Initialize(self, "craftedAbilityTextSearch", self.scribingSearchEditBox)
     self:SetSearchFilterType(BACKGROUND_LIST_FILTER_TARGET_CRAFTED_ABILITY_ID)
 
     self.collapsedSlots = {}

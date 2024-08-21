@@ -2,13 +2,7 @@
 -- Category Layout Base --
 --------------------------
 
-ZO_SpecializedCollectionsBook_Keyboard_CategoryLayout_Base = ZO_Object:Subclass()
-
-function ZO_SpecializedCollectionsBook_Keyboard_CategoryLayout_Base:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
+ZO_SpecializedCollectionsBook_Keyboard_CategoryLayout_Base = ZO_InitializingObject:Subclass()
 
 function ZO_SpecializedCollectionsBook_Keyboard_CategoryLayout_Base:Initialize(owner)
     self.categorizedLists = {}
@@ -33,10 +27,6 @@ end
 ----------------------------------
 
 ZO_SpecializedCollectionsBook_Keyboard_CategoryLayout_UnlockState = ZO_SpecializedCollectionsBook_Keyboard_CategoryLayout_Base:Subclass()
-
-function ZO_SpecializedCollectionsBook_Keyboard_CategoryLayout_UnlockState:New(...)
-    return ZO_SpecializedCollectionsBook_Keyboard_CategoryLayout_Base.New(self, ...)
-end
 
 function ZO_SpecializedCollectionsBook_Keyboard_CategoryLayout_UnlockState:Initialize(owner)
     ZO_SpecializedCollectionsBook_Keyboard_CategoryLayout_Base.Initialize(self, owner)
@@ -104,10 +94,6 @@ end
 
 ZO_SpecializedCollectionsBook_Keyboard_CategoryLayout_Subcategories = ZO_SpecializedCollectionsBook_Keyboard_CategoryLayout_Base:Subclass()
 
-function ZO_SpecializedCollectionsBook_Keyboard_CategoryLayout_Subcategories:New(...)
-    return ZO_SpecializedCollectionsBook_Keyboard_CategoryLayout_Base.New(self, ...)
-end
-
 function ZO_SpecializedCollectionsBook_Keyboard_CategoryLayout_Subcategories:RefreshCategorizedLists()
     ZO_ClearNumericallyIndexedTable(self.categorizedLists)
 
@@ -141,40 +127,23 @@ end
 -- Scene Base Class --
 ----------------------
 
-ZO_SpecializedCollectionsBook_Keyboard = ZO_Object:Subclass()
-
-function ZO_SpecializedCollectionsBook_Keyboard:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
+ZO_SpecializedCollectionsBook_Keyboard = ZO_DeferredInitializingObject:Subclass()
 
 function ZO_SpecializedCollectionsBook_Keyboard:Initialize(control, sceneName, categoryLayoutClass)
     control.owner = self
     self.control = control
-
     self.sceneName = sceneName
     self.categoryLayoutClass = categoryLayoutClass
-    
+
+    local scene = ZO_Scene:New(sceneName, SCENE_MANAGER)
+    ZO_DeferredInitializingObject.Initialize(self, scene)
+end
+
+function ZO_SpecializedCollectionsBook_Keyboard:OnDeferredInitialize()
     self:InitializeControls()
     self:InitializeNavigationList()
     self:InitializeEvents()
     self:InitializeKeybindStripDescriptors()
-
-    local specializedBookScene = ZO_Scene:New(self.sceneName, SCENE_MANAGER)
-    specializedBookScene:RegisterCallback("StateChange", function(oldState, newState)
-        if newState == SCENE_SHOWING then
-            if self.keybindStripDescriptor then
-                KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
-            end
-        elseif newState == SCENE_SHOWN then
-            self:OnSceneShown()
-        elseif newState == SCENE_HIDDEN then
-            if self.keybindStripDescriptor then
-                KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
-            end
-        end
-    end)
 
     self.refreshGroups = ZO_Refresh:New()
     self.refreshGroups:AddRefreshGroup("RefreshList",
@@ -204,7 +173,23 @@ function ZO_SpecializedCollectionsBook_Keyboard:Initialize(control, sceneName, c
         end,
     })
 
-    control:SetHandler("OnUpdate", function() self.refreshGroups:UpdateRefreshGroups() end)
+    self.control:SetHandler("OnUpdate", function() self.refreshGroups:UpdateRefreshGroups() end)
+end
+
+function ZO_SpecializedCollectionsBook_Keyboard:OnShowing()
+    if self.keybindStripDescriptor then
+        KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
+    end
+end
+
+function ZO_SpecializedCollectionsBook_Keyboard:OnShown()
+    self.refreshGroups:UpdateRefreshGroups()
+end
+
+function ZO_SpecializedCollectionsBook_Keyboard:OnHidden()
+    if self.keybindStripDescriptor then
+        KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
+    end
 end
 
 function ZO_SpecializedCollectionsBook_Keyboard:InitializeControls()
@@ -378,6 +363,7 @@ function ZO_SpecializedCollectionsBook_Keyboard:RefreshDetails()
 end
 
 function ZO_SpecializedCollectionsBook_Keyboard:BrowseToCollectible(collectibleId)
+    self:PerformDeferredInitialize()
     self:FocusCollectibleId(collectibleId)
     MAIN_MENU_KEYBOARD:ToggleSceneGroup("collectionsSceneGroup", self.sceneName)
 end
@@ -420,10 +406,6 @@ function ZO_SpecializedCollectionsBook_Keyboard:OnCollectionUpdated(collectionUp
         self.categoryLayoutObject:OnCollectibleLockStateChanged()
         self:RefreshList()
     end
-end
-
-function ZO_SpecializedCollectionsBook_Keyboard:OnSceneShown()
-    self.refreshGroups:UpdateRefreshGroups()
 end
 
 function ZO_SpecializedCollectionsBook_Keyboard:RefreshList()

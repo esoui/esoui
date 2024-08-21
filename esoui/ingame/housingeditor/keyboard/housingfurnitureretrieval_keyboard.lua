@@ -166,8 +166,8 @@ function ZO_HousingFurnitureRetrieval_Keyboard:InitializeFiltersSelector()
     ZO_HousingSettingsFilters_SetupDropdown(self.retrievalFiltersDropdown, EXCLUDE_LOCATION_FILTERS, OnFiltersChanged)
 end
 
-function ZO_HousingFurnitureRetrieval_Keyboard:OnSearchTextChanged(editBox)
-    SHARED_FURNITURE:SetRetrievableTextFilter(editBox:GetText())
+function ZO_HousingFurnitureRetrieval_Keyboard:OnUpdateSearchResults()
+    SHARED_FURNITURE:OnRetrievableFiltersChanged()
 end
 
 function ZO_HousingFurnitureRetrieval_Keyboard:AddListDataTypes()
@@ -192,10 +192,9 @@ function ZO_HousingFurnitureRetrieval_Keyboard:RefreshFilters()
     -- Get the current filter state.
     local boundFilters = SHARED_FURNITURE:GetRetrievableFurnitureBoundFilters()
     local limitFilters = SHARED_FURNITURE:GetRetrievableFurnitureLimitFilters()
-    local textFilter = SHARED_FURNITURE:GetRetrievableTextFilter()
 
-    -- Update the Text Search filter to reflect the filter state.
-    self.searchEditBox:SetText(textFilter)
+    SHARED_FURNITURE.refreshGroups:RefreshAll("UpdateRetrievableFurniture")
+    SHARED_FURNITURE:FireCallbacks("RetrievableFurnitureChanged")
 
     if HOUSING_EDITOR_STATE:IsHousePreview() then
         self.retrievalFiltersDropdown:SetHidden(true)

@@ -1,10 +1,4 @@
-ZO_SelectGuildDialog = ZO_Object:Subclass()
-
-function ZO_SelectGuildDialog:New(...)
-    local dialog = ZO_Object.New(self)
-    dialog:Initialize(...)
-    return dialog
-end
+ZO_SelectGuildDialog = ZO_InitializingObject:Subclass()
 
 function ZO_SelectGuildDialog:Initialize(control, dialogName, acceptFunction, declineFunction)
     self.control = control

@@ -7,19 +7,14 @@ HOUSING_BROWSER_MODE =
     SETTINGS = 4,
 }
 
-ZO_HousingFurnitureBrowser_Base = ZO_Object:Subclass()
-
-function ZO_HousingFurnitureBrowser_Base:New(...)
-    local browserBase = ZO_Object.New(self)
-    browserBase:Initialize(...)
-    return browserBase
-end
+ZO_HousingFurnitureBrowser_Base = ZO_InitializingObject:Subclass()
 
 function ZO_HousingFurnitureBrowser_Base:Initialize(control, sceneName)
     self.control = control
 
     self.placeableListDirty = true
     self.productListDirty = true
+    self.retrievableListDirty = true
     self.retrievableListDistancesDirty = true
     self.retrievableListHeadingsDirty = true
 
@@ -92,7 +87,7 @@ function ZO_HousingFurnitureBrowser_Base:IsShowing()
 end
 
 function ZO_HousingFurnitureBrowser_Base:OnShowing()
-    PlaySound(SOUNDS.HOUSING_EDITOR_OPEN_BROWSER) 
+    PlaySound(SOUNDS.HOUSING_EDITOR_OPEN_BROWSER)
     if self.placeableListDirty then
         self:UpdatePlaceablePanel()
         self.placeableListDirty = false
@@ -120,7 +115,7 @@ function ZO_HousingFurnitureBrowser_Base:OnShowing()
 end
 
 function ZO_HousingFurnitureBrowser_Base:OnHiding()
-    PlaySound(SOUNDS.HOUSING_EDITOR_CLOSE_BROWSER) 
+    PlaySound(SOUNDS.HOUSING_EDITOR_CLOSE_BROWSER)
 end
 
 function ZO_HousingFurnitureBrowser_Base.PreviewFurniture(placeableData)
@@ -132,7 +127,7 @@ end
 function ZO_HousingFurnitureBrowser_Base.SelectFurnitureForPlacement(placeableData)
     if placeableData then
         placeableData:SelectForPlacement()
-        PlaySound(SOUNDS.DEFAULT_CLICK) 
+        PlaySound(SOUNDS.DEFAULT_CLICK)
     end
 end
 

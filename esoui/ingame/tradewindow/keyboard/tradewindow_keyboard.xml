@@ -52,12 +52,12 @@
         </Control>
 
         <Label name="ZO_TradeReadyText" font="ZoFontWinH4" modifyTextType="UPPERCASE" text="SI_TRADE_READY" virtual="true" />
-		
+
         <!-- Trade Window -->
         <TopLevelControl name="ZO_Trade" inherits="ZO_RightPanelFootPrint" hidden="true">
             <OnInitialized>
-				ZO_Trade_OnInitialize(self)
-			</OnInitialized>
+                ZO_Trade_OnInitialize(self)
+            </OnInitialized>
 
             <Controls>
                 <!--My Controls-->
@@ -72,7 +72,7 @@
                     </OnMouseDown>
                     <Controls>
                         <Texture name="$(parent)AcceptOverlay" inherits="ZO_TradeAcceptOverlay" hidden="true" />
-                        
+
                         <Label name="$(parent)Name" font="ZoFontWinH3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" text="SI_TRADE_YOUR_OFFER">
                             <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" offsetY="-8" />
                             <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" offsetY="-8" />
@@ -88,7 +88,7 @@
                             <Dimensions x="260" y="20" />
 
                             <OnMouseUp>
-                                if(button == MOUSE_BUTTON_INDEX_LEFT and upInside) then
+                                if button == MOUSE_BUTTON_INDEX_LEFT and upInside then
                                     ZO_Trade_BeginChangeMoney(self)
                                 end
                             </OnMouseUp>
@@ -129,11 +129,17 @@
                                 </Texture>
                             </Controls>
                         </Texture>
-                                
-                        <Label name="$(parent)Money" inherits="ZO_CurrencyTemplate">
+
+                        <Control name="$(parent)Money">
                             <Anchor point="LEFT" relativeTo="$(parent)BG" offsetX="4" />
                             <Anchor point="RIGHT" relativeTo="$(parent)BGRight" offsetX="-64" offsetY="-2" />
-                        </Label>
+
+                            <Controls>
+                                <Label name="$(parent)Text" inherits="ZO_CurrencyTemplate">
+                                    <Anchor point="RIGHT" />
+                                </Label>
+                            </Controls>
+                        </Control>
                     </Controls>
                 </Control>
             </Controls>

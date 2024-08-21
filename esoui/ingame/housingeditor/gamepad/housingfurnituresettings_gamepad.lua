@@ -12,11 +12,11 @@ function ZO_HousingFurnitureSettings_Gamepad:Initialize(owner)
 
     SYSTEMS:RegisterGamepadObject("furniture_settings", self)
 
+    -- Order matters:
     self:InitializeSectionLists()
     self:InitializeKeybindStripDescriptors()
-
+    self:InitializeDefaultAccessCallbacks()
     self:BuildMainList()
-
     self:InitializeConfirmKickOccupantDialog()
     self:InitializeAddIndividualDialog()
     self:InitializeAddGuildDialog()
@@ -68,7 +68,11 @@ function ZO_HousingFurnitureSettings_Gamepad:InitializeKeybindStripDescriptors()
             name =  function()
                         local targetData = self.mainList:GetTargetData()
                         if targetData.permissionOption == HOUSE_PERMISSION_OPTIONS_CATEGORIES_GENERAL then
-                            return GetStringFromData(targetData.generalInfo.buttonText)
+                            if targetData.generalInfo == ZO_HOUSING_SETTINGS_CONTROL_DATA[ZO_HOUSING_SETTINGS_CONTROL_DATA_DEFAULT_ACCESS] then
+                                return GetString(SI_GAMEPAD_HOUSING_PERMISSIONS_SELECT)
+                            else
+                                return GetStringFromData(targetData.generalInfo.buttonText)
+                            end
                         else
                             return GetString(SI_GAMEPAD_HOUSING_PERMISSIONS_SELECT)
                         end
@@ -82,6 +86,10 @@ function ZO_HousingFurnitureSettings_Gamepad:InitializeKeybindStripDescriptors()
                                     COLLECTIONS_BOOK_SINGLETON:SetPrimaryResidence(currentHouseId)
                                 elseif targetData.generalInfo == ZO_HOUSING_SETTINGS_CONTROL_DATA[ZO_HOUSING_SETTINGS_CONTROL_DATA_RESTART_PATHS] then
                                     self:RestartPaths()
+                                elseif targetData.generalInfo == ZO_HOUSING_SETTINGS_CONTROL_DATA[ZO_HOUSING_SETTINGS_CONTROL_DATA_DEFAULT_ACCESS] then
+                                    self.defaultAccessList:Activate()
+                                elseif targetData.generalInfo == ZO_HOUSING_SETTINGS_CONTROL_DATA[ZO_HOUSING_SETTINGS_CONTROL_DATA_HOUSE_TOURS] then
+                                    ZO_ACTIVITY_FINDER_ROOT_GAMEPAD:ShowCategory(HOUSE_TOURS_GAMEPAD:GetCategoryData())
                                 end
                             elseif self.activePanel then
                                 self.owner:DeactivateCurrentList()
@@ -97,19 +105,19 @@ function ZO_HousingFurnitureSettings_Gamepad:InitializeKeybindStripDescriptors()
                                     return primaryResidenceId ~= GetCurrentZoneHouseId()
                                 elseif targetData.generalInfo == ZO_HOUSING_SETTINGS_CONTROL_DATA[ZO_HOUSING_SETTINGS_CONTROL_DATA_RESTART_PATHS] then
                                     return SHARED_FURNITURE:HasAnyPathNodes()
+                                elseif targetData.generalInfo == ZO_HOUSING_SETTINGS_CONTROL_DATA[ZO_HOUSING_SETTINGS_CONTROL_DATA_DEFAULT_ACCESS] then
+                                    return IsOwnerOfCurrentHouse()
+                                elseif targetData.generalInfo == ZO_HOUSING_SETTINGS_CONTROL_DATA[ZO_HOUSING_SETTINGS_CONTROL_DATA_HOUSE_TOURS] then
+                                    return ZO_IsHouseToursEnabled()
                                 end
                             elseif self.activePanel then
                                 return self.activePanel:GetNumPossibleEntries() > 0
                             end
-
                             return true
                       end,
             visible = function()
                             local targetData = self.mainList:GetTargetData()
-                            if targetData.permissionOption == HOUSE_PERMISSION_OPTIONS_CATEGORIES_GENERAL then
-                                return targetData.generalInfo ~= ZO_HOUSING_SETTINGS_CONTROL_DATA[ZO_HOUSING_SETTINGS_CONTROL_DATA_DEFAULT_ACCESS]
-                            end
-                            return true
+                            return targetData ~= nil
                       end,
         },
 
@@ -184,6 +192,20 @@ function ZO_HousingFurnitureSettings_Gamepad:InitializeKeybindStripDescriptors()
     ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.keybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON, OnMainListBack)
 end
 
+function ZO_HousingFurnitureSettings_Gamepad:InitializeDefaultAccessCallbacks()
+    self.OnHideDefaultAccessTooltip = function(control, data)
+        GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
+    end
+
+    self.OnShowDefaultAccessTooltip = function()
+        self:ShowDefaultAccessTooltip()
+    end
+
+    self.OnTryApplyDefaultAccessPermission = function()
+        self:TryApplyDefaultAccessPermission()
+    end
+end
+
 function ZO_HousingFurnitureSettings_Gamepad:ShowCopyDialog(data)
     ZO_Dialogs_ShowGamepadDialog("GAMEPAD_COPY_HOUSE_PERMISSIONS", data)
 end
@@ -192,12 +214,39 @@ do
     local ALLOW_EVEN_IF_DISABLED = true
     local NO_ANIMATION = true
 
-    local function HorizontalScrollListSelectionChanged(selectedData, oldData, reselectingDuringRebuild)
-        if oldData ~= nil and reselectingDuringRebuild ~= true then
-            local canAccess, preset = HOUSE_SETTINGS_MANAGER:GetHousingPermissionsFromDefaultAccess(selectedData.defaultAccess)
-            AddHousingPermission(selectedData.currentHouse, HOUSE_PERMISSION_USER_GROUP_GENERAL, canAccess, preset, false)
-            selectedData.updateToolTipFunction()
+    function ZO_HousingFurnitureSettings_Gamepad:TryApplyDefaultAccessPermission()
+        if not IsOwnerOfCurrentHouse() then
+            return
         end
+
+        local dropdown = self.defaultAccessList
+        if not dropdown then
+            return
+        end
+
+        local selectedData = dropdown:GetSelectedItemData()
+        if not (selectedData and selectedData.defaultAccess) then
+            return
+        end
+
+        local currentHouseId = GetCurrentZoneHouseId()
+        local defaultAccess = HOUSE_SETTINGS_MANAGER:GetDefaultHousingPermission(currentHouseId)
+        if selectedData.defaultAccess == defaultAccess then
+            return
+        end
+
+        local changePermissionData =
+        {
+            houseId = currentHouseId,
+            housePermissionDefaultAccessSetting = selectedData.defaultAccess,
+            failureCallback = function()
+                self:UpdateGeneralSettings()
+            end,
+            successCallback = function()
+                self:UpdateGeneralSettings()
+            end,
+        }
+        ZO_Dialogs_ShowPlatformDialog("CONFIRM_CHANGE_DEFAULT_HOUSING_PERMISSION", changePermissionData)
     end
 
     function ZO_HousingFurnitureSettings_Gamepad:BuildMainList()
@@ -214,57 +263,43 @@ do
         end
 
         local function SetupDefaultAccessControl(control, data, selected, reselectingDuringRebuild, enabled, active)
-            GetControl(control, "Name"):SetText(GetString(data.generalInfo.text))
+            ZO_SharedGamepadEntry_OnSetup(control, data, selected, selectedDuringRebuild, enabled, active)
 
-            control.horizontalListObject:Clear()
-            local horizontalList = control.horizontalListObject
-            self.defaultAccessList = horizontalList
+            local dropdown = control.dropdown
+            self.defaultAccessList = dropdown
+            dropdown:ClearItems()
+            dropdown:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
+            dropdown:SetSortsItems(false)
+            dropdown:RegisterCallback("OnItemSelected", self.OnShowDefaultAccessTooltip)
+            dropdown:RegisterCallback("OnItemDeselected", self.OnHideDefaultAccessTooltip)
+            dropdown:SetDeactivatedCallback(self.OnTryApplyDefaultAccessPermission)
+            dropdown:SetNarrationTooltipType(GAMEPAD_LEFT_TOOLTIP)
+            dropdown.m_focus:SetFocusChangedCallback(self.OnShowDefaultAccessTooltip)
 
             local currentHouse = GetCurrentZoneHouseId()
-            if not currentHouse then
+            if currentHouse == 0 then
                 return
             end
 
-            self.horizontalListCurrentHouse = currentHouse
-
-            local updateTooltipFunction = function()
-                                                local targetData = self.mainList:GetTargetData()
-                                                if targetData.index == ZO_HOUSING_SETTINGS_CONTROL_DATA_DEFAULT_ACCESS then
-                                                    self:ShowDefaultAccessTooltip() 
-                                                end
-                                            end
-
             local allDefaultAccessSettings = HOUSE_SETTINGS_MANAGER:GetAllDefaultAccessSettings()
-            for i = HOUSE_PERMISSION_DEFAULT_ACCESS_SETTING_ITERATION_BEGIN, HOUSE_PERMISSION_DEFAULT_ACCESS_SETTING_ITERATION_END do
-                local entryData = 
-                {
-                    text = allDefaultAccessSettings[i],
-                    defaultAccess = i,
-                    currentHouse = currentHouse,
-                    updateToolTipFunction = updateTooltipFunction,
-                    parentControl = control
-                }
-                horizontalList:AddEntry(entryData)
+            for permissionIndex = HOUSE_PERMISSION_DEFAULT_ACCESS_SETTING_ITERATION_BEGIN, HOUSE_PERMISSION_DEFAULT_ACCESS_SETTING_ITERATION_END do
+                local entryText = allDefaultAccessSettings[permissionIndex]
+                local entryData = dropdown:CreateItemEntry(entryText)
+                entryData.defaultAccess = permissionIndex
+                entryData.currentHouse = currentHouse
+                entryData.updateToolTipFunction = self.OnShowDefaultAccessTooltip
+                entryData.parentControl = control
+                dropdown:AddItem(entryData, ZO_COMBOBOX_SUPPRESS_UPDATE)
             end
-        
-            local color = selected and ZO_SELECTED_TEXT or ZO_DISABLED_TEXT
-            local r,g,b,a = color:UnpackRGBA()
-            local label = GetControl(control, "Name")
-            label:SetColor(r, g, b, 1)
+            dropdown:UpdateItems()
 
-            horizontalList:SetOnSelectedDataChangedCallback(nil) -- don't set the callback til after we update the menu's selected index 
-            horizontalList:SetSelectedFromParent(selected)
-            horizontalList:Commit()
-            horizontalList:SetActive(selected)
-
+            self.defaultAccessListSelected = selected
             local defaultAccess = HOUSE_SETTINGS_MANAGER:GetDefaultHousingPermission(currentHouse)
-
-            horizontalList:SetSelectedDataIndex(defaultAccess + 1, ALLOW_EVEN_IF_DISABLED, NO_ANIMATION) -- plus 1 is for lua index offset
-            horizontalList:SetOnSelectedDataChangedCallback(HorizontalScrollListSelectionChanged)
+            dropdown:SelectItemByIndex(defaultAccess + 1)
         end
 
         self.mainList:AddDataTemplate("ZO_HousingPermissionsSettingsRow_Gamepad", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
-        self.mainList:AddDataTemplate("ZO_GamepadHorizontalListRow", SetupDefaultAccessControl, ZO_GamepadMenuEntryTemplateParametricListFunction)    
+        self.mainList:AddDataTemplate("ZO_Gamepad_Dropdown_Item_FullWidth", SetupDefaultAccessControl, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "DefaultAccess")
 
         local isOwner = IsOwnerOfCurrentHouse()
         for name, toplevelSetting in pairs(ZO_FURNITURE_SETTINGS) do
@@ -361,7 +396,9 @@ end
 function ZO_HousingFurnitureSettings_Gamepad:OnHiding()
     KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
     GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
-    self:DeactivateSelectedControl()
+    if self.defaultAccessList then
+        self.defaultAccessList:Deactivate()
+    end
     self:HideActivePanel()
     self.owner:DisableCurrentList()
 end
@@ -370,13 +407,6 @@ function ZO_HousingFurnitureSettings_Gamepad:HideActivePanel()
     if self.activePanel then
         self.activePanel:HideList()
         self.activePanel = nil
-    end
-end
-
-function ZO_HousingFurnitureSettings_Gamepad:DeactivateSelectedControl()
-    local selectedControl = self.mainList:GetSelectedControl()
-    if selectedControl and selectedControl.horizontalListObject then
-        selectedControl.horizontalListObject:Deactivate()
     end
 end
 
@@ -407,17 +437,12 @@ function ZO_HousingFurnitureSettings_Gamepad:UpdateGeneralSettings()
     local currentHouseId = GetCurrentZoneHouseId()
     local defaultAccess = HOUSE_SETTINGS_MANAGER:GetDefaultHousingPermission(currentHouseId)
 
-    -- if the horizontal list was not built with the current house Id
-    -- we need to rebuild it so that when we select the current entry it doesn't
-    -- cause us to set the permissions on an old house
-    if self.horizontalListCurrentHouse ~= currentHouseId then
-        self.mainList:RefreshVisible()
-    end
-
     if self.defaultAccessList then
-        local ALLOW_EVEN_IF_DISABLED = true
-        local NO_ANIMATION = true
-        self.defaultAccessList:SetSelectedDataIndex(defaultAccess + 1, ALLOW_EVEN_IF_DISABLED, NO_ANIMATION) -- plus 1 is for lua index offset
+        self.defaultAccessList:SelectItemByIndex(defaultAccess + 1)
+
+        if self.defaultAccessListSelected then
+            self:ShowDefaultAccessTooltip()
+        end
     end
 
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
@@ -428,8 +453,23 @@ function ZO_HousingFurnitureSettings_Gamepad:BuildCategories()
 end
 
 function ZO_HousingFurnitureSettings_Gamepad:ShowDefaultAccessTooltip()
-    local defaultAccess = HOUSE_SETTINGS_MANAGER:GetDefaultHousingPermission(GetCurrentZoneHouseId())
-    GAMEPAD_TOOLTIPS:LayoutDefaultAccessTooltip(GAMEPAD_LEFT_TOOLTIP, defaultAccess)
+    local dropdown = self.defaultAccessList
+    if not dropdown then
+        return
+    end
+
+    local selectedData = nil
+    if dropdown:IsActive() then
+        local highlightedIndex = self.defaultAccessList:GetHighlightedIndex()
+        local items = self.defaultAccessList:GetItems()
+        selectedData = items[highlightedIndex]
+    else
+        selectedData = self.defaultAccessList:GetSelectedItemData()
+    end
+
+    if selectedData then
+        GAMEPAD_TOOLTIPS:LayoutDefaultAccessTooltip(GAMEPAD_LEFT_TOOLTIP, selectedData.defaultAccess)
+    end
 end
 
 function ZO_HousingFurnitureSettings_Gamepad:ShowPrimaryResidenceTooltip()
@@ -441,6 +481,12 @@ end
 function ZO_HousingFurnitureSettings_Gamepad:ShowRestartPathsTooltip()
     local title = GetString(SI_HOUSING_FURNITURE_SETTINGS_GENERAL_RESTART_PATHS_TEXT)
     local body = GetString(SI_HOUSING_FURNITURE_SETTINGS_GENERAL_RESTART_PATHS_TOOLTIP_TEXT)
+    GAMEPAD_TOOLTIPS:LayoutTitleAndDescriptionTooltip(GAMEPAD_LEFT_TOOLTIP, title, body)
+end
+
+function ZO_HousingFurnitureSettings_Gamepad:ShowHouseToursTooltip()
+    local title = GetString(SI_HOUSING_FURNITURE_SETTINGS_GENERAL_HOUSE_TOURS_TEXT)
+    local body = GetString(SI_HOUSING_FURNITURE_SETTINGS_GENERAL_HOUSE_TOURS_TOOLTIP_TEXT)
     GAMEPAD_TOOLTIPS:LayoutTitleAndDescriptionTooltip(GAMEPAD_LEFT_TOOLTIP, title, body)
 end
 

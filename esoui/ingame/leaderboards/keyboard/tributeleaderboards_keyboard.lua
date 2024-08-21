@@ -16,6 +16,7 @@ function ZO_TributeLeaderboardsManager_Keyboard:Initialize(control)
     end)
 
     SYSTEMS:RegisterKeyboardObject(ZO_TRIBUTE_LEADERBOARD_SYSTEM_NAME, self)
+    LEADERBOARDS:RegisterLeaderboardSystemObject(self, LEADERBOARD_DATA_TYPE.TRIBUTE)
 end
 
 function ZO_TributeLeaderboardsManager_Keyboard:RefreshHeaderPlayerInfo(isWeekly)

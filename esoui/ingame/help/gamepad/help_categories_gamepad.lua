@@ -1,15 +1,19 @@
 ZO_HelpTutorialsCategories_Gamepad = ZO_HelpTutorialsGamepad:Subclass()
 
 function ZO_HelpTutorialsCategories_Gamepad:Initialize(control)
-    ZO_HelpTutorialsGamepad.Initialize(self, control)
+    HELP_TUTORIAL_CATEGORIES_SCENE_GAMEPAD = ZO_Scene:New("helpTutorialsCategoriesGamepad", SCENE_MANAGER)
+
+    local ACTIVATE_ON_SHOW = true
+    ZO_HelpTutorialsGamepad.Initialize(self, control, ACTIVATE_ON_SHOW, HELP_TUTORIAL_CATEGORIES_SCENE_GAMEPAD)
 
     local helpTutorialsFragment = ZO_FadeSceneFragment:New(control)
-    HELP_TUTORIAL_CATEGORIES_SCENE_GAMEPAD = ZO_Scene:New("helpTutorialsCategoriesGamepad", SCENE_MANAGER)
     HELP_TUTORIAL_CATEGORIES_SCENE_GAMEPAD:AddFragment(helpTutorialsFragment)
     self:SetScene(HELP_TUTORIAL_CATEGORIES_SCENE_GAMEPAD)
 end
 
 function ZO_HelpTutorialsCategories_Gamepad:InitializeKeybindStripDescriptors()
+    ZO_HelpTutorialsGamepad.InitializeKeybindStripDescriptors(self)
+
     self.keybindStripDescriptor =
     {
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
@@ -52,6 +56,17 @@ function ZO_HelpTutorialsCategories_Gamepad:IsCategoryEmpty(categoryIndex)
     return true
 end
 
+function ZO_HelpTutorialsCategories_Gamepad:IsCategoryVisibleInSearch(categoryIndex) 
+    for helpIndex = 1, GetNumHelpEntriesWithinCategory(categoryIndex) do
+        local helpId = GetHelpId(categoryIndex, helpIndex)
+        if TEXT_SEARCH_MANAGER:IsDataInSearchTextResults(self.searchContext, BACKGROUND_LIST_FILTER_TARGET_HELP_ID, helpId) then
+            return true
+        end
+    end
+
+    return false
+end
+
 function ZO_HelpTutorialsCategories_Gamepad:PerformUpdate()
     self.dirty = false
 
@@ -59,7 +74,7 @@ function ZO_HelpTutorialsCategories_Gamepad:PerformUpdate()
 
     -- Get the list of categoires we need to show.
     for categoryIndex = 1, GetNumHelpCategories() do
-        if not self:IsCategoryEmpty(categoryIndex) then
+        if not self:IsCategoryEmpty(categoryIndex) and self:IsCategoryVisibleInSearch(categoryIndex) then
             self:AddListEntry(categoryIndex)
         end
     end

@@ -76,6 +76,14 @@ function ZO_MarketProductData:GetChildMarketProductId(childIndex)
     return GetMarketProductChildId(self.marketProductId, childIndex)
 end
 
+function ZO_MarketProductData:GetNumFacadeChildren()
+    return GetMarketProductNumFacadeChildren(self.marketProductId)
+end
+
+function ZO_MarketProductData:GetFacadeChildMarketProductId(childIndex)
+    return GetMarketProductFacadeChildId(self.marketProductId, childIndex)
+end
+
 function ZO_MarketProductData:GetNumBundledProducts()
     return GetMarketProductNumBundledProducts(self.marketProductId)
 end

@@ -67,7 +67,7 @@ end
 
 local NO_ALLIANCE_COLOR = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_ALLIANCE, ALLIANCE_NONE))
 local COLORED_ALLIANCE_NAMES = {} -- will be filled out as these names are asked for
-local COLORED_BATTLEGROUND_ALLIANCE_NAMES = {} -- will be filled out as these names are asked for
+local COLORED_BATTLEGROUND_TEAM_NAMES = {} -- will be filled out as these names are asked for
 local COLORED_BATTLEGROUND_YOUR_TEAM_TEXT = {}
 local COLORED_BATTLEGROUND_ENEMY_TEAM_TEXT = {}
 
@@ -78,7 +78,7 @@ local ALLIANCE_COLORS =
     [ALLIANCE_DAGGERFALL_COVENANT] = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_ALLIANCE, ALLIANCE_DAGGERFALL_COVENANT)),
 }
 
-local BATTLEGROUND_ALLIANCE_COLORS =
+local BATTLEGROUND_TEAM_COLORS =
 {
     [BATTLEGROUND_TEAM_FIRE_DRAKES] = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_BATTLEGROUND_TEAM, BATTLEGROUND_TEAM_FIRE_DRAKES)),
     [BATTLEGROUND_TEAM_PIT_DAEMONS] = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_BATTLEGROUND_TEAM, BATTLEGROUND_TEAM_PIT_DAEMONS)),
@@ -89,8 +89,8 @@ function GetAllianceColor(alliance)
     return ALLIANCE_COLORS[alliance] or NO_ALLIANCE_COLOR
 end
 
-function GetBattlegroundAllianceColor(battlegroundAlliance)
-    return BATTLEGROUND_ALLIANCE_COLORS[battlegroundAlliance] or NO_ALLIANCE_COLOR
+function GetBattlegroundTeamColor(battlegroundTeam)
+    return BATTLEGROUND_TEAM_COLORS[battlegroundTeam] or NO_ALLIANCE_COLOR
 end
 
 function GetColoredAllianceName(alliance)
@@ -104,34 +104,34 @@ function GetColoredAllianceName(alliance)
     return coloredName
 end
 
-function GetColoredBattlegroundAllianceName(battlegroundAlliance)
-    local coloredName = COLORED_BATTLEGROUND_ALLIANCE_NAMES[battlegroundAlliance]
+function GetColoredBattlegroundTeamName(battlegroundTeam)
+    local coloredName = COLORED_BATTLEGROUND_TEAM_NAMES[battlegroundTeam]
     if coloredName == nil then
-        local color = GetBattlegroundAllianceColor(battlegroundAlliance)
-        COLORED_BATTLEGROUND_ALLIANCE_NAMES[battlegroundAlliance] = color:Colorize(GetBattlegroundTeamName(battlegroundAlliance))
-        return COLORED_BATTLEGROUND_ALLIANCE_NAMES[battlegroundAlliance]
+        local color = GetBattlegroundTeamColor(battlegroundTeam)
+        COLORED_BATTLEGROUND_TEAM_NAMES[battlegroundTeam] = color:Colorize(GetBattlegroundTeamName(battlegroundTeam))
+        return COLORED_BATTLEGROUND_TEAM_NAMES[battlegroundTeam]
     end
 
     return coloredName
 end
 
-function GetColoredBattlegroundYourTeamText(battlegroundAlliance)
-    local coloredName = COLORED_BATTLEGROUND_YOUR_TEAM_TEXT[battlegroundAlliance]
+function GetColoredBattlegroundYourTeamText(battlegroundTeam)
+    local coloredName = COLORED_BATTLEGROUND_YOUR_TEAM_TEXT[battlegroundTeam]
     if coloredName == nil then
-        local color = GetBattlegroundAllianceColor(battlegroundAlliance)
-        COLORED_BATTLEGROUND_YOUR_TEAM_TEXT[battlegroundAlliance] = color:Colorize(GetString(SI_BATTLEGROUND_YOUR_TEAM))
-        return COLORED_BATTLEGROUND_YOUR_TEAM_TEXT[battlegroundAlliance]
+        local color = GetBattlegroundTeamColor(battlegroundTeam)
+        COLORED_BATTLEGROUND_YOUR_TEAM_TEXT[battlegroundTeam] = color:Colorize(GetString(SI_BATTLEGROUND_YOUR_TEAM))
+        return COLORED_BATTLEGROUND_YOUR_TEAM_TEXT[battlegroundTeam]
     end
 
     return coloredName
 end
 
-function GetColoredBattlegroundEnemyTeamText(battlegroundAlliance)
-    local coloredName = COLORED_BATTLEGROUND_ENEMY_TEAM_TEXT[battlegroundAlliance]
+function GetColoredBattlegroundEnemyTeamText(battlegroundTeam)
+    local coloredName = COLORED_BATTLEGROUND_ENEMY_TEAM_TEXT[battlegroundTeam]
     if coloredName == nil then
-        local color = GetBattlegroundAllianceColor(battlegroundAlliance)
-        COLORED_BATTLEGROUND_ENEMY_TEAM_TEXT[battlegroundAlliance] = color:Colorize(GetString(SI_BATTLEGROUND_ENEMY_TEAM))
-        return COLORED_BATTLEGROUND_ENEMY_TEAM_TEXT[battlegroundAlliance]
+        local color = GetBattlegroundTeamColor(battlegroundTeam)
+        COLORED_BATTLEGROUND_ENEMY_TEAM_TEXT[battlegroundTeam] = color:Colorize(GetString(SI_BATTLEGROUND_ENEMY_TEAM))
+        return COLORED_BATTLEGROUND_ENEMY_TEAM_TEXT[battlegroundTeam]
     end
 
     return coloredName
@@ -313,6 +313,7 @@ PURCHASED_COLOR = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_PROGRES
 PURCHASED_UNSELECTED_COLOR = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_PROGRESSION, PROGRESSION_COLOR_PURCHASED_UNSELECTED)) --Gamepad only dimmer white
 UNPURCHASED_COLOR = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_PROGRESSION, PROGRESSION_COLOR_UNPURCHASED))
 LOCKED_COLOR = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_PROGRESSION, PROGRESSION_COLOR_LOCKED))
+UNLOCKED_COLOR = ZO_ColorDef:New("2ADC22")
 
 ZO_CURRENCY_HIGHLIGHT_TEXT = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_CURRENCY_HIGHLIGHT))
 ZO_PERSONALITY_EMOTES_COLOR = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_PERSONALITY_EMOTES))

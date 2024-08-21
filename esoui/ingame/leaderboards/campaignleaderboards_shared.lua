@@ -194,7 +194,7 @@ function ZO_CampaignLeaderboardsManager_Shared:SendLeaderboardQuery()
     end
 
     self.requestedAlliance = self.selectedSubType
-    LEADERBOARD_LIST_MANAGER:QueryLeaderboardData(PENDING_LEADERBOARD_DATA_TYPE.CAMPAIGN, self:GenerateRequestData())
+    LEADERBOARD_LIST_MANAGER:QueryLeaderboardData(LEADERBOARD_DATA_TYPE.CAMPAIGN, self:GenerateRequestData())
 end
 
 function ZO_CampaignLeaderboardsManager_Shared:GenerateRequestData()

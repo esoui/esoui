@@ -35,7 +35,7 @@ function ZO_GamepadEnchanting:Initialize(control)
     SYSTEMS:RegisterGamepadObject(ZO_ENCHANTING_SYSTEM_NAME, self)
 
     --Narrates the mode list
-    local narrationInfo = 
+    local narrationInfo =
     {
         canNarrate = function()
             return GAMEPAD_ENCHANTING_MODE_SCENE_ROOT:IsShowing()
@@ -549,6 +549,12 @@ function ZO_GamepadEnchanting:InitializeKeybindStripDescriptors()
     ZO_GamepadCraftingUtils_AddListTriggerKeybindDescriptors(self.keybindEnchantingStripDescriptor, self.inventory.list)
 end
 
+function ZO_GamepadEnchanting:AddInventoryAdditionalFilter(additionalFilterFunction)
+    if self.inventory then
+        self.inventory.additionalFilter = additionalFilterFunction
+    end
+end
+
 function ZO_GamepadEnchanting:UpdateExtractionSlotTexture()
     if self.enchantingMode == ENCHANTING_MODE_EXTRACTION and not self.extractionSlot:HasItems() then
         local bagId, slotIndex = self.inventory:CurrentSelectionBagAndSlot()
@@ -817,7 +823,20 @@ function ZO_GamepadEnchantingInventory:Refresh(data)
         filterType = ENCHANTING_EXTRACTION_FILTER
         titleString = GetString(SI_ENCHANTING_EXTRACTION)
     end
-    local validItemIds = self:EnumerateInventorySlotsAndAddToScrollData(ZO_Enchanting_IsEnchantingItem, ZO_Enchanting_DoesEnchantingItemPassFilter, filterType, data)
+
+    local function ItemFilterFunction(bagId, slotIndex, filterType, questFilterChecked, questRunes)
+        if not ZO_Enchanting_DoesEnchantingItemPassFilter(bagId, slotIndex, filterType, questFilterChecked, questRunes) then
+            return false
+        end
+
+        if self.additionalFilter and type(self.additionalFilter) == "function" then
+            return self.additionalFilter(bagId, slotIndex, filterType, questFilterChecked, questRunes)
+        end
+
+        return true
+    end
+
+    local validItemIds = self:EnumerateInventorySlotsAndAddToScrollData(ZO_Enchanting_IsEnchantingItem, ItemFilterFunction, filterType, data)
     self.owner:OnInventoryUpdate(validItemIds)
 
     if titleString then

@@ -217,10 +217,18 @@
                                 </Control>
 
                                 <Control name="$(parent)ResetPaths" inherits="ZO_HousingSettings_Button">
-                                    <Anchor point="TOPLEFT" relativeTo="$(parent)DefaultAccess"  relativePoint="BOTTOMLEFT" offsetY="25" />
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)DefaultAccess" relativePoint="BOTTOMLEFT" offsetY="25" />
 
                                     <OnInitialized>
                                         self.data = ZO_HOUSING_SETTINGS_CONTROL_DATA[ZO_HOUSING_SETTINGS_CONTROL_DATA_RESTART_PATHS]
+                                    </OnInitialized>
+                                </Control>
+
+                                <Control name="$(parent)HouseTours" inherits="ZO_HousingSettings_Button">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)ResetPaths" relativePoint="BOTTOMLEFT" offsetY="25" />
+
+                                    <OnInitialized>
+                                        self.data = ZO_HOUSING_SETTINGS_CONTROL_DATA[ZO_HOUSING_SETTINGS_CONTROL_DATA_HOUSE_TOURS]
                                     </OnInitialized>
                                 </Control>
                             </Controls>

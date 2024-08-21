@@ -293,12 +293,16 @@ function ZO_DeferredInitializingObject:Initialize(sceneStateObject)
     end
 end
 
+function ZO_DeferredInitializingObject:PerformDeferredInitialize()
+    if not self.initialized then
+        self.initialized = true
+        self:OnDeferredInitialize()
+    end
+end
+
 function ZO_DeferredInitializingObject:OnStateChanged(_, newState)
     if newState == ZO_STATE.SHOWING then
-        if not self.initialized then
-            self.initialized = true
-            self:OnDeferredInitialize()
-        end
+        self:PerformDeferredInitialize()
         self:OnShowing()
     elseif newState == ZO_STATE.SHOWN then
         self:OnShown()

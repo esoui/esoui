@@ -140,6 +140,10 @@
         <Control name="ZO_PlayerInventorySlot_Base" inherits="ZO_ListEntry_BackdropAndHighlight_Template ZO_ListInventorySlotBehavior" virtual="true">
             <Dimensions x="509" y="52" />
 
+            <OnInitialized name="InventorySlot_Base">
+                self.currencyControl = self:GetNamedChild("SellPriceText")
+            </OnInitialized>
+
             <Controls>
                 <Control name="$(parent)Status" inherits="ZO_InventoryStatusIcon" />
 
@@ -153,10 +157,16 @@
                     <Anchor point="LEFT" offsetX="110" />
                 </Label>
 
-                <Label name="$(parent)SellPrice" inherits="ZO_CurrencyTemplate">
+                <Control name="$(parent)SellPrice">
                     <Dimensions x="87" />
                     <Anchor point="RIGHT" offsetX="-5" />
-                </Label>
+
+                    <Controls>
+                        <Label name="$(parent)Text" inherits="ZO_CurrencyTemplate">
+                            <Anchor point="RIGHT" />
+                        </Label>
+                    </Controls>
+                </Control>
             </Controls>
         </Control>
 
@@ -194,9 +204,9 @@
         <Control name="ZO_CraftBagSlot" inherits="ZO_PlayerInventorySlot" virtual="true">
             <Controls>
                 <!-- Craft Bags can have large sell prices due to massive stacks, so we need more room here -->
-                <Label name="$(parent)SellPrice" override="true">
+                <Control name="$(parent)SellPrice" override="true">
                     <Dimensions x="120" />
-                </Label>
+                </Control>
 
                 <!-- We hide the TraitInformation for Craft bag anyways, but just some insurance -->
                 <Texture name="$(parent)TraitInfo" hidden="true" override="true">

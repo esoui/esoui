@@ -1,0 +1,60 @@
+<GuiXml>
+    <Controls>
+
+        <TopLevelControl name="ZO_HouseTours_FavoriteRecommendDialog" inherits="ZO_CustomDialogBase">
+            <DimensionConstraints minX="550" />
+
+            <OnInitialized>
+                ZO_HouseTours_FavoriteRecommendHouseDialog_Keyboard.OnControlInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)Recommend" resizeToFitDescendents="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Divider" relativePoint="BOTTOMLEFT" offsetX="20" offsetY="5" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Divider" relativePoint="BOTTOMRIGHT" offsetX="-20" offsetY="5" />
+
+                    <Controls>
+                        <Label name="$(parent)Text" font="ZoFontGameBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER">
+                            <Anchor point="TOP" />
+                        </Label>
+
+                        <Control name="$(parent)Container" resizeToFitDescendents="true">
+                            <Anchor point="TOP" relativeTo="$(parent)Text" relativePoint="BOTTOM" offsetY="20" />
+
+                            <Controls>
+                                <Button name="$(parent)Checkbox" inherits="ZO_CheckButton">
+                                    <Anchor point="TOPLEFT" />
+                                </Button>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)Favorite" resizeToFitDescendents="true">
+                    <Anchor point="TOP" relativeTo="$(parent)Recommend" relativePoint="BOTTOM" offsetY="10" />
+
+                    <Controls>
+                        <Label name="$(parent)Text" font="ZoFontGameBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER">
+                            <Anchor point="TOP" />
+                        </Label>
+
+                        <Control name="$(parent)Container" resizeToFitDescendents="true">
+                            <Anchor point="TOP" relativeTo="$(parent)Text" relativePoint="BOTTOM" offsetY="20" />
+
+                            <Controls>
+                                <Button name="$(parent)Checkbox" inherits="ZO_CheckButton">
+                                    <Anchor point="TOPLEFT" />
+                                </Button>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton"/>
+
+                <Control name="$(parent)Confirm" inherits="ZO_CustomDialogButton"/>
+            </Controls>
+        </TopLevelControl>
+
+    </Controls>
+</GuiXml>

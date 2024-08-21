@@ -5,7 +5,7 @@ local REWARD_PADDING_X = 10
 local REWARD_PADDING_Y = 10
 local REWARD_ROOT_OFFSET_X = 0
 local REWARD_ROOT_OFFSET_Y = 10
-ZO_REWARD_SIZE_X = 290
+ZO_REWARD_SIZE_X = 275
 ZO_REWARD_SIZE_Y = 56
 
 local ENABLED_PLAYER_OPTION_COLOR = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_CHATTER_PLAYER_OPTION))
@@ -333,7 +333,7 @@ function ZO_Interaction:ShowQuestRewards(journalQuestIndex)
     return confirmError, currenciesWithMaxWarning, amountsAcquiredWithMaxWarning
 end
 
-function ZO_SharedInteraction:UpdateClemencyOnTimeComplete(control, data)
+function ZO_Interaction:UpdateClemencyOnTimeComplete(control, data)
     control:SetText(control.optionText)
     control.enabled = true
     data.optionUsable = true
@@ -341,7 +341,7 @@ function ZO_SharedInteraction:UpdateClemencyOnTimeComplete(control, data)
     control:SetColor(ENABLED_PLAYER_OPTION_COLOR:UnpackRGBA())
 end
 
-function ZO_SharedInteraction:UpdateShadowyConnectionsOnTimeComplete(control, data)
+function ZO_Interaction:UpdateShadowyConnectionsOnTimeComplete(control, data)
     control:SetText(control.optionText)
     control.enabled = true
     data.optionUsable = true

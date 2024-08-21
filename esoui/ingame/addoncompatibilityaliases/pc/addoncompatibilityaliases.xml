@@ -54,7 +54,7 @@
             </OnInitialized>
 
             <OnMouseUp>
-                ZO_ComboBoxDropdown_Keyboard.OnClicked(self:GetParent(), button, upInside)
+                ZO_ComboBoxDropdown_Keyboard.OnClicked(self, button, upInside)
             </OnMouseUp>
 
             <Controls>

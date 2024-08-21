@@ -57,18 +57,49 @@ local GAMEPAD_PLATFORM_STYLE =
 --Champion Perks
 ----------------------
 
-local ChampionPerks = ZO_InitializingObject:Subclass()
+local ChampionPerks = ZO_DeferredInitializingObject:Subclass()
 
 function ChampionPerks:Initialize(control)
     self.control = control
+
+    CHAMPION_PERKS_SCENE = ZO_Scene:New("championPerks", SCENE_MANAGER)
+    CHAMPION_PERKS_SCENE:RegisterCallback("StateChange", function(oldState, newState)
+        if newState == SCENE_HIDDEN then
+            WINDOW_MANAGER:SetMouseCursor(MOUSE_CURSOR_DO_NOT_CARE)
+        end
+    end)
+
+    GAMEPAD_CHAMPION_PERKS_SCENE = ZO_Scene:New("gamepad_championPerks_root", SCENE_MANAGER)
+    GAMEPAD_CHAMPION_PERKS_SCENE:RegisterCallback("StateChange", function(oldState, newState)
+        if newState == SCENE_SHOWING then
+            DIRECTIONAL_INPUT:Activate(self, control)
+        elseif newState == SCENE_SHOWN then
+            CALLBACK_MANAGER:RegisterCallback("OnGamepadDialogShowing", self.OnGamepadDialogShowing)
+        elseif newState == SCENE_HIDING then
+            DIRECTIONAL_INPUT:Deactivate(self)
+            self.gamepadStarTooltip.scrollTooltip:ClearLines()
+            self.gamepadCursor:UpdateVisibility()
+            CALLBACK_MANAGER:UnregisterCallback("OnGamepadDialogShowing", self.OnGamepadDialogShowing)
+        end
+    end)
+
+    local championPerksSceneGroup = ZO_SceneGroup:New("championPerks", "gamepad_championPerks_root")
+
+    ZO_DeferredInitializingObject.Initialize(self, championPerksSceneGroup)
+
+    SYSTEMS:RegisterKeyboardRootScene("champion", CHAMPION_PERKS_SCENE)
+    SYSTEMS:RegisterGamepadRootScene("champion", GAMEPAD_CHAMPION_PERKS_SCENE)
+
+    self:RefreshMenus()
+end
+
+function ChampionPerks:OnDeferredInitialize()
     self.canvasControl = self.control:GetNamedChild("Canvas")
     self.championBar = ZO_ChampionAssignableActionBar:New(self.control:GetNamedChild("ActionBar"))
     self.gamepadCursor = ZO_ChampionConstellationCursor_Gamepad:New(self.control:GetNamedChild("GamepadCursor"))
 
-    self.initialized = false
     self.isChampionSystemNew = false
     self.keybindState = KEYBIND_STATES.NONE
-    SetShouldRenderWorld(true)
     self:SetupCustomConfirmDialog()
 
     --for menu indicators / conditional button showing
@@ -109,78 +140,12 @@ function ChampionPerks:Initialize(control)
     self.gamepadConstellationViewFragment = ZO_FadeSceneFragment:New(self.gamepadConstellationViewControl, ALWAYS_ANIMATE)
     self.gamepadChosenConstellationFragment = ZO_FadeSceneFragment:New(self.gamepadChosenConstellationControl, ALWAYS_ANIMATE)
 
-    local function SharedStateChangeCallback(oldState, newState)
-        if newState == SCENE_SHOWING then
-            self:PerformDeferredInitializationShared()
-
-            --Hacky solution to get around the fact that we can potentially get here before the style gets set in ZO_GamepadKeybindStripFragment:Show
-            --We need to make sure the style is properly set so PushKeybindGroupState can store the intended values 
-            if IsInGamepadPreferredMode() then
-                KEYBIND_STRIP:SetStyle(KEYBIND_STRIP_GAMEPAD_STYLE)
-            end
-
-            self.keybindStripId = KEYBIND_STRIP:PushKeybindGroupState()
-            KEYBIND_STRIP:RemoveDefaultExit(self.keybindStripId)
-            self:RefreshKeybinds()
-
-            self.stateMachine:FireCallbacks("ON_SHOWING")
-            SetShouldRenderWorld(false)
-            self:SetChampionSystemNew(false)
-
-            self.lastHealthValue = GetUnitPower("player", COMBAT_MECHANIC_FLAGS_HEALTH)
-            self.control:RegisterForEvent(EVENT_POWER_UPDATE, function(...) self:OnPowerUpdate(...) end)
-            self.refreshGroup:TryClean()
-        elseif newState == SCENE_SHOWN then
-            TriggerTutorial(TUTORIAL_TRIGGER_CHAMPION_UI_SHOWN)
-        elseif newState == SCENE_HIDING then
-            SetShouldRenderWorld(true)
-
-            self:ResetToInactive()
-            KEYBIND_STRIP:PopKeybindGroupState()
-            self.keybindState = KEYBIND_STATES.NONE
-            self.keybindStripId = nil
-
-            self.control:UnregisterForEvent(EVENT_POWER_UPDATE)
-            self.lastHealthValue = nil  
-        elseif newState == SCENE_HIDDEN then
-            if self:HasUnsavedChanges() and GetChampionPurchaseAvailability() == CHAMPION_PURCHASE_SUCCESS then
-                ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NEGATIVE_CLICK, GetString(SI_CHAMPION_UNSAVED_CHANGES_EXIT_ALERT))
-            end        
-        end
-    end
-
-    CHAMPION_PERKS_SCENE = ZO_Scene:New("championPerks", SCENE_MANAGER)
-    CHAMPION_PERKS_SCENE:RegisterCallback("StateChange", function(oldState, newState)
-        SharedStateChangeCallback(oldState, newState)
-        if newState == SCENE_HIDDEN then
-            WINDOW_MANAGER:SetMouseCursor(MOUSE_CURSOR_DO_NOT_CARE)
-        end
-    end)
-
-    GAMEPAD_CHAMPION_PERKS_SCENE = ZO_Scene:New("gamepad_championPerks_root", SCENE_MANAGER)
-    GAMEPAD_CHAMPION_PERKS_SCENE:RegisterCallback("StateChange", function(oldState, newState)
-        SharedStateChangeCallback(oldState, newState)
-        if newState == SCENE_SHOWING then
-            DIRECTIONAL_INPUT:Activate(self, control)
-        elseif newState == SCENE_SHOWN then
-            CALLBACK_MANAGER:RegisterCallback("OnGamepadDialogShowing", self.OnGamepadDialogShowing)
-        elseif newState == SCENE_HIDING then
-            DIRECTIONAL_INPUT:Deactivate(self)
-            self.gamepadStarTooltip.scrollTooltip:ClearLines()
-            self.gamepadCursor:UpdateVisibility()
-            CALLBACK_MANAGER:UnregisterCallback("OnGamepadDialogShowing", self.OnGamepadDialogShowing)
-        end
-    end)
-
     self.OnGamepadDialogShowing = function()
         local editor = self:GetSelectedStarEditor()
         if editor then
             editor:StopChangingPoints()
         end
     end
-
-    SYSTEMS:RegisterKeyboardRootScene("champion", CHAMPION_PERKS_SCENE)
-    SYSTEMS:RegisterGamepadRootScene("champion", GAMEPAD_CHAMPION_PERKS_SCENE)
 
     CHAMPION_DATA_MANAGER:RegisterCallback("DataChanged", function()
         self.constellationsInitialized = false
@@ -227,6 +192,117 @@ function ChampionPerks:Initialize(control)
     self.refreshGroup:AddDirtyState("KeybindStrip", function()
         self:RefreshKeybinds()
     end)
+
+    self.cloudsTexture = self.canvasControl:GetNamedChild("Clouds")
+    self.smokeTexture = self.canvasControl:GetNamedChild("Smoke")
+    self.closeClouds1Texture = self.canvasControl:GetNamedChild("CloseClouds1")
+    self.closeClouds2Texture = self.canvasControl:GetNamedChild("CloseClouds2")
+    self.starClustersSmallTexture = self.canvasControl:GetNamedChild("StarClustersSmall")
+    self.starClustersMediumTexture = self.canvasControl:GetNamedChild("StarClustersMedium")
+    self.starClustersLargeTexture = self.canvasControl:GetNamedChild("StarClustersLarge")
+    self.darknessRingTexture = self.canvasControl:GetNamedChild("DarknessRing")
+    self.radialSelectorTexture = self.canvasControl:GetNamedChild("RadialSelector")
+    self.centerInfoBGTexture = self.canvasControl:GetNamedChild("CenterInfoBG")
+
+    self.centerInfoControl = self.control:GetNamedChild("CenterInfo")
+    self.centerInfoNameLabel = self.centerInfoControl:GetNamedChild("Name")
+    self.centerInfoPointPoolLabel = self.centerInfoControl:GetNamedChild("PointPool")
+    self.centerInfoAlphaInterpolator = ZO_LerpInterpolator:New(0)
+
+    self.keyboardStatusControl = self.control:GetNamedChild("KeyboardStatus")
+    self.keyboardStatusNameLabel = self.keyboardStatusControl:GetNamedChild("ConstellationName")
+    self.keyboardStatusPointValueLabel = self.keyboardStatusControl:GetNamedChild("PointValue")
+    self.keyboardStatusAlphaInterpolator = ZO_LerpInterpolator:New(0)
+    self.keyboardStatusAlphaInterpolator:SetApproachFactor(0.2)
+
+    self.selectedStarIndicatorTexture = self.control:GetNamedChild("SelectedStarIndicator")
+    self.selectedStarIndicatorTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_SelectedStarIndicatorAnimation", self.selectedStarIndicatorTexture)
+    self.selectedStarIndicatorTimeline:PlayForward()
+    self.selectedStarIndicatorAppearTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_SelectedStarIndicatorAppearAnimation", self.selectedStarIndicatorTexture)
+
+    self:CreateCloseCloudsAnimation()
+
+    self.cameraRootX = 0
+    self.cameraRootY = 0
+    self.cameraRootZ = 0
+    self.cameraAnimationOffsetX = 0
+    self.cameraAnimationOffsetY = 0
+    self.cameraAnimationOffsetZ = 0
+    self.cameraPanX = 0
+    self.cameraPanY = 0
+    self.cameraPanZ = 0
+
+    self.constellationInnerRadius = ZO_CHAMPION_CONSTELLATION_INNER_RADIUS
+    self.constellationHeight = ZO_CHAMPION_CONSTELLATION_HEIGHT
+    self.constellationOuterRadius = self.constellationInnerRadius + self.constellationHeight
+
+    self.oneShotAnimationTexturePool = ZO_ControlPool:New("ZO_ChampionOneShotAnimationTexture", self.canvasControl)
+    self.oneShotAnimationOnStopCallback = function(timeline)
+        local texture = timeline:GetFirstAnimation():GetAnimatedControl()
+        timeline.onReleaseCallback(texture)
+        self.oneShotAnimationTexturePool:ReleaseObject(texture.key)
+        timeline.pool:ReleaseObject(timeline.key)
+    end
+
+    self:InitializeKeybindStrips()
+    self:BuildSceneGraph()
+    self:RefreshStatusInfo()
+
+    self.platformStyle = ZO_PlatformStyle:New(function(style) self:ApplyPlatformStyle(style) end, KEYBOARD_PLATFORM_STYLE, GAMEPAD_PLATFORM_STYLE)
+
+    -- constellations use their own initialization flag
+    self:PerformDeferredInitializationConstellations()
+end
+
+function ChampionPerks:OnShowing()
+    -- constellations use their own initialization flag
+    self:PerformDeferredInitializationConstellations()
+
+    --Hacky solution to get around the fact that we can potentially get here before the style gets set in ZO_GamepadKeybindStripFragment:Show
+    --We need to make sure the style is properly set so PushKeybindGroupState can store the intended values 
+    if IsInGamepadPreferredMode() then
+        KEYBIND_STRIP:SetStyle(KEYBIND_STRIP_GAMEPAD_STYLE)
+    end
+
+    self.keybindStripId = KEYBIND_STRIP:PushKeybindGroupState()
+    KEYBIND_STRIP:RemoveDefaultExit(self.keybindStripId)
+    self:RefreshKeybinds()
+
+    self.stateMachine:FireCallbacks("ON_SHOWING")
+    SetShouldRenderWorld(false)
+    self.control:RegisterForEvent(EVENT_GUI_UNLOADING, function()
+        -- Failsafe
+        SetShouldRenderWorld(true)
+    end)
+    self:SetChampionSystemNew(false)
+
+    self.lastHealthValue = GetUnitPower("player", COMBAT_MECHANIC_FLAGS_HEALTH)
+    self.control:RegisterForEvent(EVENT_POWER_UPDATE, function(...) self:OnPowerUpdate(...) end)
+    self.refreshGroup:TryClean()
+
+end
+
+function ChampionPerks:OnShown()
+    TriggerTutorial(TUTORIAL_TRIGGER_CHAMPION_UI_SHOWN)
+end
+
+function ChampionPerks:OnHiding()
+    SetShouldRenderWorld(true)
+    self.control:UnregisterForEvent(EVENT_GUI_UNLOADING)
+
+    self:ResetToInactive()
+    KEYBIND_STRIP:PopKeybindGroupState()
+    self.keybindState = KEYBIND_STATES.NONE
+    self.keybindStripId = nil
+
+    self.control:UnregisterForEvent(EVENT_POWER_UPDATE)
+    self.lastHealthValue = nil  
+end
+
+function ChampionPerks:OnHidden()
+    if self:HasUnsavedChanges() and GetChampionPurchaseAvailability() == CHAMPION_PURCHASE_SUCCESS then
+        ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NEGATIVE_CLICK, GetString(SI_CHAMPION_UNSAVED_CHANGES_EXIT_ALERT))
+    end
 end
 
 function ChampionPerks:IsChampionSystemNew()
@@ -277,8 +353,8 @@ function ChampionPerks:SetupCustomConfirmDialog()
                 gamepadData.data2.value = zo_strformat(SI_CHAMPION_RESPEC_CURRENCY_FORMAT, ZO_CommaDelimitNumber(GetChampionRespecCost()), gamepadGoldIconMarkup)
                 dialog.setupFunc(dialog, gamepadData)
             else
-                ZO_CurrencyControl_SetSimpleCurrency(customControl:GetNamedChild("BalanceAmount"), CURT_MONEY,  GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER))
-                ZO_CurrencyControl_SetSimpleCurrency(customControl:GetNamedChild("RespecCost"), CURT_MONEY,  GetChampionRespecCost())
+                ZO_CurrencyControl_SetSimpleCurrency(customControl:GetNamedChild("BalanceAmount"), CURT_MONEY, GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER))
+                ZO_CurrencyControl_SetSimpleCurrency(customControl:GetNamedChild("RespecCost"), CURT_MONEY, GetChampionRespecCost())
             end
         end,
         buttons =
@@ -310,71 +386,6 @@ function ChampionPerks:ShowDialog(name, data, textParams)
         end
     end
     ZO_Dialogs_ShowPlatformDialog(name, data, textParams)
-end
-
-function ChampionPerks:PerformDeferredInitializationShared()
-    if not self.initialized then
-        self.initialized = true
-
-        self.cloudsTexture = self.canvasControl:GetNamedChild("Clouds")
-        self.smokeTexture = self.canvasControl:GetNamedChild("Smoke")
-        self.closeClouds1Texture = self.canvasControl:GetNamedChild("CloseClouds1")
-        self.closeClouds2Texture = self.canvasControl:GetNamedChild("CloseClouds2")
-        self.starClustersSmallTexture = self.canvasControl:GetNamedChild("StarClustersSmall")
-        self.starClustersMediumTexture = self.canvasControl:GetNamedChild("StarClustersMedium")
-        self.starClustersLargeTexture = self.canvasControl:GetNamedChild("StarClustersLarge")
-        self.darknessRingTexture = self.canvasControl:GetNamedChild("DarknessRing")
-        self.radialSelectorTexture = self.canvasControl:GetNamedChild("RadialSelector")
-        self.centerInfoBGTexture = self.canvasControl:GetNamedChild("CenterInfoBG")
-
-        self.centerInfoControl = self.control:GetNamedChild("CenterInfo")
-        self.centerInfoNameLabel = self.centerInfoControl:GetNamedChild("Name")
-        self.centerInfoPointPoolLabel = self.centerInfoControl:GetNamedChild("PointPool")
-        self.centerInfoAlphaInterpolator = ZO_LerpInterpolator:New(0)
-
-        self.keyboardStatusControl = self.control:GetNamedChild("KeyboardStatus")
-        self.keyboardStatusNameLabel = self.keyboardStatusControl:GetNamedChild("ConstellationName")
-        self.keyboardStatusPointValueLabel = self.keyboardStatusControl:GetNamedChild("PointValue")
-        self.keyboardStatusAlphaInterpolator = ZO_LerpInterpolator:New(0)
-        self.keyboardStatusAlphaInterpolator:SetApproachFactor(0.2)
-
-        self.selectedStarIndicatorTexture = self.control:GetNamedChild("SelectedStarIndicator")
-        self.selectedStarIndicatorTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_SelectedStarIndicatorAnimation", self.selectedStarIndicatorTexture)
-        self.selectedStarIndicatorTimeline:PlayForward()
-        self.selectedStarIndicatorAppearTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_SelectedStarIndicatorAppearAnimation", self.selectedStarIndicatorTexture)
-
-        self:CreateCloseCloudsAnimation()
-
-        self.cameraRootX = 0
-        self.cameraRootY = 0
-        self.cameraRootZ = 0
-        self.cameraAnimationOffsetX = 0
-        self.cameraAnimationOffsetY = 0
-        self.cameraAnimationOffsetZ = 0
-        self.cameraPanX = 0
-        self.cameraPanY = 0
-        self.cameraPanZ = 0
-
-        self.constellationInnerRadius = ZO_CHAMPION_CONSTELLATION_INNER_RADIUS
-        self.constellationHeight = ZO_CHAMPION_CONSTELLATION_HEIGHT
-        self.constellationOuterRadius = self.constellationInnerRadius + self.constellationHeight
-
-        self.oneShotAnimationTexturePool = ZO_ControlPool:New("ZO_ChampionOneShotAnimationTexture", self.canvasControl)
-        self.oneShotAnimationOnStopCallback = function(timeline)
-            local texture = timeline:GetFirstAnimation():GetAnimatedControl()
-            timeline.onReleaseCallback(texture)
-            self.oneShotAnimationTexturePool:ReleaseObject(texture.key)
-            timeline.pool:ReleaseObject(timeline.key)
-        end
-
-        self:InitializeKeybindStrips()
-        self:BuildSceneGraph()
-        self:RefreshStatusInfo()
-
-        self.platformStyle = ZO_PlatformStyle:New(function(style) self:ApplyPlatformStyle(style) end, KEYBOARD_PLATFORM_STYLE, GAMEPAD_PLATFORM_STYLE)
-    end
-    -- constellations use their own initialization flag
-    self:PerformDeferredInitializationConstellations()
 end
 
 function ChampionPerks:CreateCloseCloudsAnimation()
@@ -1036,6 +1047,7 @@ function ChampionPerks:InitializeStateMachine()
             zoomOutAnimation.targetNode = targetNode
             self:AttachConstellationsAroundNode(targetNode)
             ZO_ClearTable(zoomOutAnimation.nodePadding)
+            ClearCursor()
             for _, node in self.ring:NodeIterator() do
                 zoomOutAnimation.nodePadding[node] = 0
             end
@@ -1068,6 +1080,7 @@ function ChampionPerks:InitializeStateMachine()
             self.nextTargetNode.constellation:PlayOnCycledToSound()
             self:SetAnimation(zoomedInCycleAnimation)
             self.nextTargetNode = nil
+            ClearCursor()
 
            if self.currentChangingEditor then
                 -- release
@@ -2590,7 +2603,6 @@ end
 
 function ZO_ChampionPerks_OnInitialized(self)
     CHAMPION_PERKS = ChampionPerks:New(self)
-    CHAMPION_PERKS:RefreshMenus()
 end
 
 function ZO_ChampionPerks_StarTooltip_Gamepad_Initialize(tooltipControl)

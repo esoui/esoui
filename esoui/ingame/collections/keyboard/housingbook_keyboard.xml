@@ -29,6 +29,10 @@
                                             <Anchor point="TOPLEFT" relativeTo="$(parent)LocationLabel" relativePoint="BOTTOMLEFT" offsetY="5" />
                                         </Label>
 
+                                        <Label name="$(parent)RecommendCountLabel" inherits="ZO_SpecializedCollection_Book_DefaultLabel_Keyboard ZO_SpecializedCollection_Book_DefaultLabel_Dimensions_Keyboard" hidden="true">
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)HouseTypeLabel" relativePoint="BOTTOMLEFT" offsetY="5" />
+                                        </Label>
+
                                         <Label name="$(parent)PrimaryResidenceLabel" inherits="ZO_SpecializedCollection_Book_DefaultLabel_Keyboard ZO_SpecializedCollection_Book_DefaultLabel_Dimensions_Keyboard" hidden="true">
                                             <Anchor point="TOPLEFT" relativeTo="$(parent)HouseTypeLabel" relativePoint="BOTTOMLEFT" offsetY="5" />
                                         </Label>

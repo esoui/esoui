@@ -85,11 +85,24 @@ function ZO_ItemPreviewType:Apply(variationIndex)
     assert(false)
 end
 
+
+function ZO_ItemPreviewType:ApplyAction(actionIndex)
+    --Can be overridden
+end
+
 function ZO_ItemPreviewType:GetNumVariations()
     return 0
 end
 
 function ZO_ItemPreviewType:GetVariationName(variationIndex)
+    return ""
+end
+
+function ZO_ItemPreviewType:GetNumActions(variationIndex)
+    return 0
+end
+
+function ZO_ItemPreviewType:GetActionName(variationIndex, actionIndex)
     return ""
 end
 
@@ -113,6 +126,10 @@ function ZO_ItemPreviewType_MarketProduct:Apply(variationIndex)
     PreviewMarketProduct(self.marketProductId, variationIndex)
 end
 
+function ZO_ItemPreviewType_MarketProduct:ApplyAction(actionIndex)
+    PreviewMarketProductCollectibleAction(self.marketProductId, actionIndex)
+end
+
 function ZO_ItemPreviewType_MarketProduct:GetNumVariations()
     return GetNumMarketProductPreviewVariations(self.marketProductId)
 end
@@ -123,6 +140,19 @@ function ZO_ItemPreviewType_MarketProduct:GetVariationName(variationIndex)
         return tostring(variationIndex)
     else
         return previewVariationDisplayName
+    end
+end
+
+function ZO_ItemPreviewType_MarketProduct:GetNumActions(variationIndex)
+    return GetNumMarketProductCollectiblePreviewActions(self.marketProductId, variationIndex)
+end
+
+function ZO_ItemPreviewType_MarketProduct:GetActionName(variationIndex, actionIndex)
+    local previewActionDisplayName = GetMarketProductCollectiblePreviewActionDisplayName(self.marketProductId, variationIndex, actionIndex)
+    if previewActionDisplayName == "" then
+        return tostring(actionIndex)
+    else
+        return previewActionDisplayName
     end
 end
 
@@ -239,12 +269,29 @@ function ZO_ItemPreviewType_TradingHouseSearchResult:Apply(variationIndex)
     PreviewTradingHouseSearchResultItem(self.tradingHouseIndex, variationIndex)
 end
 
+function ZO_ItemPreviewType_TradingHouseSearchResult:ApplyAction(actionIndex)
+    PreviewTradingHouseSearchResultItemCollectibleAction(self.tradingHouseIndex, actionIndex)
+end
+
 function ZO_ItemPreviewType_TradingHouseSearchResult:GetNumVariations()
     return GetNumTradingHouseSearchResultItemPreviewVariations(self.tradingHouseIndex)
 end
 
 function ZO_ItemPreviewType_TradingHouseSearchResult:GetVariationName(variationIndex)
     return GetTradingHouseSearchResultItemPreviewVariationDisplayName(self.tradingHouseIndex, variationIndex)
+end
+
+function ZO_ItemPreviewType_TradingHouseSearchResult:GetNumActions(variationIndex)
+    return GetNumTradingHouseSearchResultItemPreviewCollectibleActions(self.tradingHouseIndex, variationIndex)
+end
+
+function ZO_ItemPreviewType_TradingHouseSearchResult:GetActionName(variationIndex, actionIndex)
+    local previewActionDisplayName = GetTradingHouseSearchResultItemPreviewCollectibleActionDisplayName(self.tradingHouseIndex, variationIndex, actionIndex)
+    if previewActionDisplayName == "" then
+        return tostring(actionIndex)
+    else
+        return previewActionDisplayName
+    end
 end
 
 -- Store
@@ -267,12 +314,29 @@ function ZO_ItemPreviewType_StoreEntry:Apply(variationIndex)
     PreviewStoreEntry(self.storeEntryIndex, variationIndex)
 end
 
+function ZO_ItemPreviewType_StoreEntry:ApplyAction(actionIndex)
+    PreviewStoreEntryCollectibleAction(self.storeEntryIndex, actionIndex)
+end
+
 function ZO_ItemPreviewType_StoreEntry:GetNumVariations()
     return GetNumStoreEntryPreviewVariations(self.storeEntryIndex)
 end
 
 function ZO_ItemPreviewType_StoreEntry:GetVariationName(variationIndex)
     return GetStoreEntryPreviewVariationDisplayName(self.storeEntryIndex, variationIndex)
+end
+
+function ZO_ItemPreviewType_StoreEntry:GetNumActions(variationIndex)
+    return GetNumStoreEntryPreviewCollectibleActions(self.storeEntryIndex, variationIndex)
+end
+
+function ZO_ItemPreviewType_StoreEntry:GetActionName(variationIndex, actionIndex)
+    local previewActionDisplayName = GetStoreEntryPreviewCollectibleActionDisplayName(self.storeEntryIndex, variationIndex, actionIndex)
+    if previewActionDisplayName == "" then
+        return tostring(actionIndex)
+    else
+        return previewActionDisplayName
+    end
 end
 
 -- Outfit
@@ -317,6 +381,14 @@ function ZO_ItemPreviewType_Reward:HasStaticParameters(rewardId)
     return self.rewardId == rewardId
 end
 
+function ZO_ItemPreviewType_Reward:Apply(variationIndex)
+    PreviewReward(self.rewardId, variationIndex)
+end
+
+function ZO_ItemPreviewType_Reward:ApplyAction(actionIndex)
+    PreviewRewardCollectibleAction(self.rewardId, actionIndex)
+end
+
 function ZO_ItemPreviewType_Reward:GetNumVariations()
     return GetNumRewardPreviewVariations(self.rewardId)
 end
@@ -325,8 +397,12 @@ function ZO_ItemPreviewType_Reward:GetVariationName(variationIndex)
     return GetRewardPreviewVariationDisplayName(self.rewardId, variationIndex)
 end
 
-function ZO_ItemPreviewType_Reward:Apply(variationIndex)
-    PreviewReward(self.rewardId, variationIndex)
+function ZO_ItemPreviewType_Reward:GetNumActions(variationIndex)
+    return GetNumRewardPreviewCollectibleActions(self.rewardId, variationIndex)
+end
+
+function ZO_ItemPreviewType_Reward:GetActionName(variationIndex, actionIndex)
+    return GetRewardPreviewCollectibleActionDisplayName(self.rewardId, variationIndex, actionIndex)
 end
 
 -- Inventory Item
@@ -350,12 +426,24 @@ function ZO_ItemPreviewType_InventoryItem:Apply(variationIndex)
     PreviewInventoryItem(self.bag, self.slot, variationIndex)
 end
 
+function ZO_ItemPreviewType_InventoryItem:ApplyAction(actionIndex)
+    PreviewInventoryItemCollectibleAction(self.bag, self.slot, actionIndex)
+end
+
 function ZO_ItemPreviewType_InventoryItem:GetNumVariations()
     return GetNumInventoryItemPreviewVariations(self.bag, self.slot)
 end
 
 function ZO_ItemPreviewType_InventoryItem:GetVariationName(variationIndex)
     return GetInventoryItemPreviewVariationDisplayName(self.bag, self.slot, variationIndex)
+end
+
+function ZO_ItemPreviewType_InventoryItem:GetNumActions(variationIndex)
+    return GetNumInventoryItemPreviewCollectibleActions(self.bag, self.slot, variationIndex)
+end
+
+function ZO_ItemPreviewType_InventoryItem:GetActionName(variationIndex, actionIndex)
+    return GetInventoryItemPreviewCollectibleActionDisplayName(self.bag, self.slot, variationIndex, actionIndex)
 end
 
 -- Collectible
@@ -378,12 +466,24 @@ function ZO_ItemPreviewType_Collectible:Apply(variationIndex)
     PreviewCollectible(self.collectibleId, variationIndex)
 end
 
+function ZO_ItemPreviewType_Collectible:ApplyAction(actionIndex)
+    PreviewCollectibleAction(self.collectibleId, actionIndex)
+end
+
 function ZO_ItemPreviewType_Collectible:GetNumVariations()
     return GetNumCollectiblePreviewVariations(self.collectibleId)
 end
 
 function ZO_ItemPreviewType_Collectible:GetVariationName(variationIndex)
     return GetCollectiblePreviewVariationDisplayName(self.collectibleId, variationIndex)
+end
+
+function ZO_ItemPreviewType_Collectible:GetNumActions(variationIndex)
+    return GetNumCollectiblePreviewActions(self.collectibleId)
+end
+
+function ZO_ItemPreviewType_Collectible:GetActionName(variationIndex, actionIndex)
+    return GetCollectiblePreviewActionDisplayName(self.collectibleId, variationIndex, actionIndex)
 end
 
 --
@@ -464,31 +564,28 @@ function ZO_ItemPreview_Shared:OnStateChanged(oldState, newState)
     end
 end
 
-do
-    local PREVIEW_UPDATE_INTERVAL_MS = 100
-    function ZO_ItemPreview_Shared:OnPreviewShowing()
-        -- We should always EnablePreview followed by a DisablePreview, but if we show a fragment
-        -- before it has become hidden, we will need to make sure we don't reinitialize things
-        -- below. It is especially bad to call EnablePreviewMode multiple times because that
-        -- increments a counter, but we will only decrement once.
-        if self.enabledPreview then
-            return
-        end
-        self.enabledPreview = true
-
-        -- for the first preview we won't put a restriction on when we can preview the next one
-        -- previewing a product automatically sets this to false so manually set it to true
-        self:SetCanChangePreview(true)
-
-        EnablePreviewMode(self.forcePreparePreview)
-
-        if not GetPreviewModeEnabled() then
-            self.waitingForPreviewBegin = true
-            return
-        end
-
-        self:SetupPreview()
+function ZO_ItemPreview_Shared:OnPreviewShowing()
+    -- We should always EnablePreview followed by a DisablePreview, but if we show a fragment
+    -- before it has become hidden, we will need to make sure we don't reinitialize things
+    -- below. It is especially bad to call EnablePreviewMode multiple times because that
+    -- increments a counter, but we will only decrement once.
+    if self.enabledPreview then
+        return
     end
+    self.enabledPreview = true
+
+    -- for the first preview we won't put a restriction on when we can preview the next one
+    -- previewing a product automatically sets this to false so manually set it to true
+    self:SetCanChangePreview(true)
+
+    EnablePreviewMode(self.forcePreparePreview)
+
+    if not GetPreviewModeEnabled() then
+        self.waitingForPreviewBegin = true
+        return
+    end
+
+    self:SetupPreview()
 end
 
 function ZO_ItemPreview_Shared:IsPreviewEnabled()
@@ -498,6 +595,7 @@ end
 function ZO_ItemPreview_Shared:SetupPreview()
     self:RefreshDynamicFramingOpening()
     self:RefreshPreviewInEmptyWorld()
+    local PREVIEW_UPDATE_INTERVAL_MS = 100
     EVENT_MANAGER:RegisterForUpdate("ZO_ItemPreview_Shared", PREVIEW_UPDATE_INTERVAL_MS, function(...) self:OnUpdate(...) end)
     EVENT_MANAGER:RegisterForEvent("ZO_ItemPreview_Shared", EVENT_SCREEN_RESIZED, self.OnScreenResized)
     self.waitingForPreviewBegin = false
@@ -551,7 +649,10 @@ function ZO_ItemPreview_Shared:ResetCurrentPreviewObject()
     self.currentPreviewType = 0
     self.numPreviewVariations = 0
     self.previewVariationIndex = 0
+    self.numPreviewActions = 0
+    self.previewActionIndex = 0
     self:SetVariationControlsHidden(true)
+    self:SetActionControlsHidden(true)
 end
 
 function ZO_ItemPreview_Shared:EndCurrentPreview()
@@ -623,6 +724,7 @@ function ZO_ItemPreview_Shared:SharedPreviewSetup(previewType, ...)
     self.currentPreviewTypeObject:SetStaticParameters(unpack(data))
 
     self.previewVariationIndex = 1
+    self.previewActionIndex = 1
 
     if IsCharacterPreviewingAvailable() then
         self:ApplyOrBuffer()
@@ -637,6 +739,15 @@ function ZO_ItemPreview_Shared:SharedPreviewSetup(previewType, ...)
         self:SetVariationControlsHidden(true)
     end
 
+    self.numPreviewActions = self.currentPreviewTypeObject:GetNumActions(self.previewVariationIndex)
+
+    if self.numPreviewActions > 1 then
+        self:SetActionControlsHidden(false)
+        self.actionLabel:SetText(self.currentPreviewTypeObject:GetActionName(self.previewVariationIndex, self.previewActionIndex))
+    else
+        self:SetActionControlsHidden(true)
+    end
+
     self:SetCanChangePreview(false)
 end
 
@@ -647,7 +758,6 @@ function ZO_ItemPreview_Shared:IsCurrentlyPreviewing(previewType, ...)
     return previewType == self.currentPreviewType
            and self.currentPreviewTypeObject
            and self.currentPreviewTypeObject:HasStaticParameters(unpack(data))
-           and self.previewVariationIndex == 1
 end
 
 function ZO_ItemPreview_Shared:PreviewMarketProduct(marketProductId)
@@ -724,10 +834,12 @@ end
 function ZO_ItemPreview_Shared:Apply()
     self.previewAtMS = nil
     self.currentPreviewTypeObject:Apply(self.previewVariationIndex)
+    self.currentPreviewTypeObject:ApplyAction(self.previewActionIndex)
     self.lastSetChangeTime = GetFrameTimeMilliseconds()
     ApplyChangesToPreviewCollectionShown()
     PlaySound(SOUNDS.MARKET_PREVIEW_SELECTED)
     self.oldPreviewVariationIndex = nil
+    self.oldPreviewActionIndex = nil
 end
 
 function ZO_ItemPreview_Shared:SetCanChangePreview(canChangePreview)
@@ -748,6 +860,9 @@ function ZO_ItemPreview_Shared:PreviewNextVariation()
             self.previewVariationIndex = 1
         end
 
+        self.previewActionIndex = 1
+        self:SetActionLabel(self.currentPreviewTypeObject:GetActionName(self.previewVariationIndex, self.previewActionIndex))
+
         self:ApplyOrBuffer()
     end
 
@@ -763,6 +878,9 @@ function ZO_ItemPreview_Shared:PreviewPreviousVariation()
             self.previewVariationIndex = self.numPreviewVariations
         end
 
+        self.previewActionIndex = 1
+        self:SetActionLabel(self.currentPreviewTypeObject:GetActionName(self.previewVariationIndex, self.previewActionIndex))
+
         self:ApplyOrBuffer()
     end
 
@@ -771,6 +889,40 @@ end
 
 function ZO_ItemPreview_Shared:HasVariations()
     return self.numPreviewVariations > 0
+end
+
+function ZO_ItemPreview_Shared:PreviewNextAction()
+    if self.numPreviewActions > 0 then
+        self.oldPreviewActionIndex = self.previewActionIndex
+        self.previewActionIndex = self.previewActionIndex + 1
+
+        if self.previewActionIndex > self.numPreviewActions then
+            self.previewActionIndex = 1
+        end
+
+        self:ApplyOrBuffer()
+    end
+
+    self:SetActionLabel(self.currentPreviewTypeObject:GetActionName(self.previewVariationIndex, self.previewActionIndex))
+end
+
+function ZO_ItemPreview_Shared:PreviewPreviousAction()
+    if self.numPreviewActions > 0 then
+        self.oldPreviewActionIndex = self.previewActionIndex
+        self.previewActionIndex = self.previewActionIndex - 1
+
+        if self.previewActionIndex < 1 then
+            self.previewActionIndex = self.numPreviewActions
+        end
+
+        self:ApplyOrBuffer()
+    end
+
+    self:SetActionLabel(self.currentPreviewTypeObject:GetActionName(self.previewVariationIndex, self.previewActionIndex))
+end
+
+function ZO_ItemPreview_Shared:HasActions()
+    return self.numPreviewActions > 0
 end
 
 function ZO_ItemPreview_Shared:SetForcePreparePreview(forcePreparePreview)
@@ -847,6 +999,14 @@ function ZO_ItemPreview_Shared:SetVariationControlsHidden(shouldHide)
 end
 
 function ZO_ItemPreview_Shared:SetVariationLabel(variationName)
+    -- optional override
+end
+
+function ZO_ItemPreview_Shared:SetActionControlsHidden(shouldHide)
+    -- optional override
+end
+
+function ZO_ItemPreview_Shared:SetActionLabel(actionName)
     -- optional override
 end
 

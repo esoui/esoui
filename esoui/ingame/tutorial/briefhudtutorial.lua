@@ -99,7 +99,9 @@ function ZO_BriefHudTutorial:RemoveTutorial(tutorialIndex)
 end
 
 function ZO_BriefHudTutorial:OnUpdate()
-    if self.displayedTutorialIsActionRequired then return end
+    if self.displayedTutorialIsActionRequired then
+        return
+    end
 
     local now = GetFrameTimeMilliseconds()
     local delta = now - (self.lastUpdate or now)

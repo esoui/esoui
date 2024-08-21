@@ -333,6 +333,23 @@
                 self.declineText = GetString(SI_NOTIFICATIONS_DELETE)
             </OnInitialized>
         </Control>
+        
+        <Control name="ZO_NotificationsHouseToursHouseRecommendedRow" inherits="ZO_NotificationsTwoButtonRow" virtual="true">
+            <OnInitialized>
+                self.acceptText = GetString(SI_HOUSE_TOURS_MANAGE_LISTING)
+                self.declineText = GetString(SI_NOTIFICATIONS_REQUEST_DECLINE)
+            </OnInitialized>
+
+            <Controls>
+                <Button name="$(parent)Accept" override="true">
+                    <Textures
+                        normal="EsoUI/Art/Notifications/notificationIcon_houseToursViewRecommendedHouse.dds"
+                        pressed="EsoUI/Art/Notifications/notificationIcon_houseToursViewRecommendedHouse.dds"
+                        mouseOver="EsoUI/Art/Notifications/notificationIcon_houseToursViewRecommendedHouse.dds"
+                    />
+                </Button>
+            </Controls>
+        </Control>
 
         <TopLevelControl name="ZO_Notifications" inherits="ZO_RightPanelFootPrint" hidden="true">
             <OnInitialized>

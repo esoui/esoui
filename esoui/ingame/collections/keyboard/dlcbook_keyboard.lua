@@ -4,10 +4,6 @@
 
 local DLCBook_Keyboard = ZO_SpecializedCollectionsBook_Keyboard:Subclass()
 
-function DLCBook_Keyboard:New(...)
-    return ZO_SpecializedCollectionsBook_Keyboard.New(self, ...)
-end
-
 function DLCBook_Keyboard:InitializeControls()
     ZO_SpecializedCollectionsBook_Keyboard.InitializeControls(self)
     local contents = self.control:GetNamedChild("Contents")
@@ -100,8 +96,8 @@ function DLCBook_Keyboard:SearchSelectedDLCInStore()
     ShowMarketAndSearch(searchTerm, MARKET_OPEN_OPERATION_COLLECTIONS_DLC)
 end
 
-function DLCBook_Keyboard:OnSceneShown()
-    ZO_SpecializedCollectionsBook_Keyboard.OnSceneShown(self)
+function DLCBook_Keyboard:OnShown()
+    ZO_SpecializedCollectionsBook_Keyboard.OnShown(self)
     if IsESOPlusSubscriber() then
         TriggerTutorial(TUTORIAL_TRIGGER_COLLECTIONS_DLC_OPENED_AS_SUBSCRIBER)
     end

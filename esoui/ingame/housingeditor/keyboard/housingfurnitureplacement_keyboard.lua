@@ -89,8 +89,8 @@ function ZO_HousingFurniturePlacement_Keyboard:InitializeThemeSelector()
     ZO_HousingSettingsTheme_SetupDropdown(self.placementThemeDropdown, OnThemeChanged)
 end
 
-function ZO_HousingFurniturePlacement_Keyboard:OnSearchTextChanged(editBox)
-    SHARED_FURNITURE:SetPlaceableTextFilter(editBox:GetText())
+function ZO_HousingFurniturePlacement_Keyboard:OnUpdateSearchResults()
+    SHARED_FURNITURE:OnPlacementFiltersChanged()
 end
 
 function ZO_HousingFurniturePlacement_Keyboard:AddListDataTypes()
@@ -131,11 +131,7 @@ function ZO_HousingFurniturePlacement_Keyboard:RefreshFilters()
     local boundFilters = SHARED_FURNITURE:GetPlacementFurnitureBoundFilters()
     local limitFilters = SHARED_FURNITURE:GetPlacementFurnitureLimitFilters()
     local locationFilters = SHARED_FURNITURE:GetPlacementFurnitureLocationFilters()
-    local textFilter = SHARED_FURNITURE:GetPlaceableTextFilter()
     local themeFilter = SHARED_FURNITURE:GetPlacementFurnitureTheme()
-
-    -- Update the Text Search filter to reflect the filter state.
-    self.searchEditBox:SetText(textFilter)
 
     -- Update the Theme filter to reflect the filter state.
     do

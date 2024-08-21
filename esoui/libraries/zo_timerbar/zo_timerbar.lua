@@ -134,7 +134,7 @@ do
             return
         end
 
-        local control = self.control	
+        local control = self.control
         control:SetHandler("OnUpdate", nil)
 
         if self.fades then
@@ -175,6 +175,9 @@ function ZO_TimerBar:Update(time)
 
         if labelReady then
             timeString, remainingUntilUpdate = ZO_FormatTime(totalElapsed, self.timeFormatStyle, self.timePrecision, TIME_FORMAT_DIRECTION_ASCENDING)
+            if self.timeStringDecoratorFunction then
+                timeString = self.timeStringDecoratorFunction(timeString)
+            end
             self.time:SetText(timeString)
         end
     else
@@ -186,6 +189,9 @@ function ZO_TimerBar:Update(time)
 
         if labelReady then
             timeString, remainingUntilUpdate = ZO_FormatTime(totalRemaining, self.timeFormatStyle, self.timePrecision, TIME_FORMAT_DIRECTION_DESCENDING)
+            if self.timeStringDecoratorFunction then
+                timeString = self.timeStringDecoratorFunction(timeString)
+            end
             self.time:SetText(timeString)
         end
     end
@@ -201,6 +207,12 @@ function ZO_TimerBar:Update(time)
     end
 end
 
+-- This function should accept a time string as its argument and return a decorated time string, for timer bars where we want to
+-- add some special accoutrements to the time display on the timer bar.
+function ZO_TimerBar:SetTimeStringDecoratorFunction(timeStringDecoratorFunction)
+    self.timeStringDecoratorFunction = timeStringDecoratorFunction
+end
+
 function ZO_TimerBar:GetNarrationText()
     if self.direction == TIMER_BAR_COUNTS_DOWN then
         return SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_SCREEN_NARRATION_TIMER_BAR_DESCENDING_FORMATTER, self.timeString))
@@ -208,4 +220,204 @@ function ZO_TimerBar:GetNarrationText()
         --TODO XAR: Do we want to use a special formatter for when the timer is counting up as well?
         return SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.timeString)
     end
+end
+
+--[[ Timer Bar Segment ]]--
+ZO_TimerBarSegment = ZO_InitializingObject:Subclass()
+
+-- Color is expected to be a ZO_ColorDef
+function ZO_TimerBarSegment:Initialize(duration, startColor, endColor)
+    self.duration = duration
+    self.startColor = startColor
+    self.endColor = endColor
+end
+
+function ZO_TimerBarSegment:GetDuration()
+    return self.duration
+end
+
+function ZO_TimerBarSegment:GetStartColor()
+    return self.startColor
+end
+
+function ZO_TimerBarSegment:GetEndColor()
+    return self.endColor
+end
+
+--[[ Multi Segment Timer Bar ]]--
+
+ZO_MultiSegmentTimerBar = ZO_TimerBar:Subclass()
+
+-- Currently, this only supports bar templates with children but no grandchildren;
+-- Ensure that any template used only has one layer of inheritance.
+function ZO_MultiSegmentTimerBar:Initialize(control, barTemplate)
+    control:SetHidden(true)
+
+    self.updateFunction = function(barControl, time)
+        self:Update(time)
+    end
+    self.control = control
+
+    barTemplate = barTemplate or "TimerBarStatus"
+    self.barPool = ZO_ControlPool:New(barTemplate, control)
+    self.segments = { }
+    self.barData = { }
+    self.time = control:GetNamedChild("Time")
+    self.running = false
+
+    --defaults
+    self.direction = TIMER_BAR_COUNTS_UP
+    self.fades = false
+
+    self.timeFormatStyle = TIME_FORMAT_STYLE_COLONS
+    self.timePrecision = TIME_FORMAT_PRECISION_SECONDS
+end
+
+function ZO_MultiSegmentTimerBar:Start(startTimeS)
+    if self.fades then
+        self.animation:Stop()
+    end
+
+    local control = self.control
+    control:SetHandler("OnUpdate", self.updateFunction)
+    control:SetHidden(false)
+
+    self.barPool:ReleaseAllObjects()
+    ZO_ClearNumericallyIndexedTable(self.barData)
+
+    local totalDurationS = self:GetTotalDuration()
+    for index, segment in ipairs(self.segments) do
+        local bar = self.barPool:AcquireObject()
+        bar:SetParent(control)
+        bar:SetMinMax(0, totalDurationS)
+        local startR, startG, startB, startA = segment:GetStartColor():UnpackRGBA()
+        local endR, endG, endB, endA = segment:GetEndColor():UnpackRGBA()
+        bar:SetGradientColors(startR, startG, startB, startA, endR, endG, endB, endA)
+        bar:SetAnchorFill()
+        bar:SetDrawLevel(index)
+        for childIndex = 1, bar:GetNumChildren() do
+            bar:GetChild(childIndex):SetDrawLevel(index)
+        end
+
+        local previousSumDuration = index == 1 and 0 or self.barData[index - 1].sumDuration
+        self.barData[index] =
+        {
+            bar = bar,
+            sumDuration = segment:GetDuration() + previousSumDuration,
+        }
+    end
+
+    self.starts = startTimeS
+    self.ends = startTimeS + totalDurationS
+    self.running = true
+    self.paused = false
+    self.nextBarUpdate = 0
+    self.nextLabelUpdate = 0
+    self.pauseElapsed = 0
+
+    --Find out how much time it takes for the bar to move one UI unit. This isn't anything super precise, it just gives a servicable estimate of how often we should update
+    local width = self.control:GetWidth()
+    if width > 0 then
+        self.barUpdateInterval = (totalDurationS) / width
+    else
+        self.barUpdateInterval = TIMER_BAR_DEFAULT_UPDATE_INTERVAL
+    end
+
+    if self.customOnStartBehavior and type(customOnStartBehavior) == "function" then
+        self.customOnStartBehavior(self.barData)
+    end
+
+    self:Update(GetFrameTimeSeconds())
+end
+
+function ZO_MultiSegmentTimerBar:Update(timeS)
+    if timeS > self.ends then
+        self:Stop()
+        return
+    end
+
+    local barReady = timeS > self.nextBarUpdate
+    local labelReady = self.time and timeS > self.nextLabelUpdate
+
+    if not (barReady or labelReady) then
+        return
+    end
+
+    local timeString = ""
+    local remainingUntilUpdate
+    if self.direction == TIMER_BAR_COUNTS_UP then
+        local totalElapsed = timeS - self.starts - self.pauseElapsed
+        if barReady then
+            for i, barData in ipairs(self.barData) do
+                local currentValue = zo_min(totalElapsed, self:GetSumDurationForSegment(i))
+                self.barData[i].bar:SetValue(currentValue)
+            end
+        end
+
+        if labelReady then
+            timeString, remainingUntilUpdate = ZO_FormatTime(totalElapsed, self.timeFormatStyle, self.timePrecision, TIME_FORMAT_DIRECTION_ASCENDING)
+            if self.timeStringDecoratorFunction then
+                timeString = self.timeStringDecoratorFunction(timeString)
+            end
+            self.time:SetText(timeString)
+        end
+    else
+        local totalRemaining = self.ends - timeS
+
+        if barReady then
+            for i, barData in ipairs(self.barData) do
+                local currentValue = zo_min(totalRemaining, self:GetSumDurationForSegment(i))
+                self.barData[i].bar:SetValue(currentValue)
+            end
+        end
+
+        if labelReady then
+            timeString, remainingUntilUpdate = ZO_FormatTime(totalRemaining, self.timeFormatStyle, self.timePrecision, TIME_FORMAT_DIRECTION_DESCENDING)
+            if self.timeStringDecoratorFunction then
+                timeString = self.timeStringDecoratorFunction(timeString)
+            end
+            self.time:SetText(timeString)
+        end
+    end
+
+    self.timeString = timeString
+
+    if barReady then
+        self.nextBarUpdate = timeS + self.barUpdateInterval
+    end
+
+    if labelReady then
+        self.nextLabelUpdate = timeS + remainingUntilUpdate
+    end
+end
+
+function ZO_MultiSegmentTimerBar:AddSegment(duration, startColor, endColor)
+    internalassert(not self.running, "TimerBars do not support adding segments while the timer is running")
+
+    local segmentData = ZO_TimerBarSegment:New(duration, startColor, endColor)
+    table.insert(self.segments, segmentData)
+end
+
+function ZO_MultiSegmentTimerBar:ClearSegments()
+    ZO_ClearNumericallyIndexedTable(self.segments)
+end
+
+function ZO_MultiSegmentTimerBar:GetSumDurationForSegment(segmentIndex)
+    local sumDuration = 0
+    local numSegments = #self.segments
+    for index = segmentIndex, numSegments do
+        sumDuration = sumDuration + self.segments[index]:GetDuration()
+    end
+
+    return sumDuration
+end
+
+function ZO_MultiSegmentTimerBar:GetTotalDuration()
+    return self:GetSumDurationForSegment(1)
+end
+
+-- If a specific MultiSegmentTimerBar implementation has anything that requires special handling,
+-- that should be accounted for here.
+function ZO_MultiSegmentTimerBar:SetCustomOnStartBehavior(customOnStartBehavior)
+    self.customOnStartBehavior = customOnStartBehavior
 end

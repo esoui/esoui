@@ -272,6 +272,22 @@ function ZO_Smithing_Gamepad:CreateModeEntry(name, mode, icon, shouldShowQuestPi
     return data
 end
 
+function ZO_Smithing_Gamepad:AddInventoryAdditionalFilterByMode(smithingMode, additionalFilterFunction)
+    if smithingMode == SMITHING_MODE_REFINEMENT then
+        if self.refinementPanel.inventory then
+            self.refinementPanel.inventory.additionalFilter = additionalFilterFunction
+        end
+    elseif smithingMode == SMITHING_MODE_DECONSTRUCTION then
+        if self.deconstructionPanel.inventory then
+            self.deconstructionPanel.inventory.additionalFilter = additionalFilterFunction
+        end
+    elseif smithingMode == SMITHING_MODE_IMPROVEMENT then
+        if self.improvementPanel.inventory then
+            self.improvementPanel.inventory.additionalFilter = additionalFilterFunction
+        end
+    end
+end
+
 function ZO_Smithing_Gamepad:AddModeEntry(entry)
     self.modeList:AddEntry("ZO_GamepadItemEntryTemplate", entry)
 end

@@ -197,6 +197,7 @@ function ZO_CreateGuildDialogName_UpdateViolations(self)
     local dialog = self:GetParent():GetParent()
     local violations = { IsValidGuildName(self:GetText()) }
     local noViolations = #violations == 0
+    dialog.nameInstructions:SetPreferredAnchor(TOPRIGHT, dialog, TOPLEFT, -15, 0)
     dialog.nameInstructions:Show(dialog.nameEdit, violations)
     dialog.createGuildFields:SetBoolean("ValidName", noViolations)
 end

@@ -28,6 +28,7 @@ function ZO_Help_Customer_Service_Gamepad:GenerateSelectKeybindStripDescriptor()
             elseif targetData.isDropdown then
                 self:ActivateCurrentDropdown(targetData.fieldType)
             elseif targetData.isSubmit then
+                GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
                 self:TrySubmitTicket()
                 PlaySound(SOUNDS.DIALOG_ACCEPT)
             end
@@ -58,21 +59,26 @@ function ZO_Help_Customer_Service_Gamepad:GetFieldEntryMessage()
     return GetString(SI_GAMEPAD_HELP_CUSTOMER_SERVICE_FIELD_ENTRY_MESSAGE)
 end
 
-function ZO_Help_Customer_Service_Gamepad:GetTicketCategoryForSubmission()
+function ZO_Help_Customer_Service_Gamepad:GetTicketCategoryData()
     local subcategoryData = self:GetSavedField(ZO_HELP_TICKET_FIELD_TYPE.SUBCATEGORY)
     if subcategoryData and subcategoryData.ticketCategory then
-        return subcategoryData.ticketCategory
+        return subcategoryData
     end
 
     local categoryData = self:GetSavedField(ZO_HELP_TICKET_FIELD_TYPE.CATEGORY)
     if categoryData and categoryData.ticketCategory then
-        return categoryData.ticketCategory
+        return categoryData
     end
     
     local impactData = self:GetSavedField(ZO_HELP_TICKET_FIELD_TYPE.IMPACT)
     if impactData and impactData.ticketCategory then
-        return impactData.ticketCategory
+        return impactData
     end
+end
+
+function ZO_Help_Customer_Service_Gamepad:GetTicketCategoryForSubmission()
+    local categoryData = self:GetTicketCategoryData()
+    return categoryData and categoryData.ticketCategory or nil
 end
 
 function ZO_Help_Customer_Service_Gamepad:ValidateTicketFields()
@@ -103,11 +109,19 @@ function ZO_Help_Customer_Service_Gamepad:ValidateTicketFields()
 end
 
 function ZO_Help_Customer_Service_Gamepad:SubmitTicket()
+    local ticketCategoryData = self:GetTicketCategoryData()
+    local includeScreenshot = ticketCategoryData and ticketCategoryData.includeScreenshot or false
+    if includeScreenshot and not ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:CanSubmitFeedbackWithScreenshot() then
+        ZO_Dialogs_ShowGamepadDialog("CUSTOMER_SERVICE_TICKET_SCREENSHOT_COOLDOWN")
+        return
+    end
+
     local impactData = self:GetSavedField(ZO_HELP_TICKET_FIELD_TYPE.IMPACT)
     local retainTargetInfo = impactData.externalInfoRegistrationFunction ~= nil
     ResetCustomerServiceTicket(retainTargetInfo)
     SetCustomerServiceTicketCategory(self:GetTicketCategoryForSubmission())
     SetCustomerServiceTicketBody(self:GetSavedField(ZO_HELP_TICKET_FIELD_TYPE.DESCRIPTION))
+    SetCustomerServiceTicketIncludeScreenshot(includeScreenshot)
 
     if impactData.detailsRegistrationFunction then
         local text = self:GetSavedField(ZO_HELP_TICKET_FIELD_TYPE.DETAILS)
@@ -124,6 +138,7 @@ function ZO_Help_Customer_Service_Gamepad:SubmitTicket()
         local externalInfo = self:GetSavedField(ZO_HELP_TICKET_FIELD_TYPE.EXTERNAL_INFO)
         ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:MarkAttemptingToSubmitReportPlayerTicket(externalInfo.ownerDisplayName)
     end
+
     SubmitCustomerServiceTicket()
 end
 
@@ -166,18 +181,31 @@ end
 
 function ZO_Help_Customer_Service_Gamepad:RefreshExternalInfoTooltip()
     if self:IsShowing() then
+        local ticketCategoryData = self:GetTicketCategoryData()
+        local additionalInstructions = ticketCategoryData and ticketCategoryData.additionalInstructions or nil
+        if additionalInstructions == "" then
+            additionalInstructions = nil
+        end
         local impactData = self:GetSavedField(ZO_HELP_TICKET_FIELD_TYPE.IMPACT)
         if impactData then
             if self:MeetsExternalInfoRequirements() then
                 local externalInfo = self:GetSavedField(ZO_HELP_TICKET_FIELD_TYPE.EXTERNAL_INFO)
                 if externalInfo and impactData.externalInfoGamepadTooltipFunction then
-                    impactData.externalInfoGamepadTooltipFunction()
+                    impactData.externalInfoGamepadTooltipFunction(additionalInstructions)
                     return
                 end
             elseif impactData.externalInfoInstructions then
-                GAMEPAD_TOOLTIPS:LayoutTextBlockTooltip(GAMEPAD_LEFT_TOOLTIP, impactData.externalInfoInstructions)
+                local instructions = impactData.externalInfoInstructions
+                if additionalInstructions then
+                    instructions = string.format("%s\n\n%s", instructions, additionalInstructions)
+                end
+                GAMEPAD_TOOLTIPS:LayoutTextBlockTooltip(GAMEPAD_LEFT_TOOLTIP, instructions)
                 return
             end
+        end
+        if additionalInstructions then
+            GAMEPAD_TOOLTIPS:LayoutTextBlockTooltip(GAMEPAD_LEFT_TOOLTIP, additionalInstructions)
+            return
         end
         GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
         self.externalInfoTooltipDirty = false
@@ -189,6 +217,11 @@ end
 function ZO_Help_Customer_Service_Gamepad:ShowGroupFinderListingTooltip()
     local externalInfo = self:GetSavedField(ZO_HELP_TICKET_FIELD_TYPE.EXTERNAL_INFO)
     GAMEPAD_TOOLTIPS:LayoutReportGroupFinderListingInfo(GAMEPAD_LEFT_TOOLTIP, externalInfo.title, externalInfo.description, externalInfo.ownerDisplayName, externalInfo.ownerCharacterName)
+end
+
+function ZO_Help_Customer_Service_Gamepad:ShowHouseTourListingTooltip(additionalInstructions)
+    local externalInfo = self:GetSavedField(ZO_HELP_TICKET_FIELD_TYPE.EXTERNAL_INFO)
+    GAMEPAD_TOOLTIPS:LayoutReportHouseTourListingInfo(GAMEPAD_LEFT_TOOLTIP, externalInfo.nickname, externalInfo.collectibleId, externalInfo.ownerDisplayName, additionalInstructions)
 end
 
 function ZO_Help_Customer_Service_Gamepad:MeetsExternalInfoRequirements()
@@ -495,23 +528,6 @@ function ZO_Help_Customer_Service_Gamepad:SetupTicket(impact, category, subcateg
     self:SetRequiredInfoProvidedInternally(true)
     self:ChangeTicketState(ZO_HELP_TICKET_STATE.FIELD_ENTRY)
     self:BuildList()
-end
-
-do
-    local DEFAULT_CATEGORY = nil
-    local DEFAULT_SUBCATEGORY = nil
-
-    function ZO_Help_Customer_Service_Gamepad:SetupReportPlayerTicket(displayName)
-        self:SetupTicket(CUSTOMER_SERVICE_ASK_FOR_HELP_IMPACT_REPORT_PLAYER, DEFAULT_CATEGORY, DEFAULT_SUBCATEGORY, ZO_FormatUserFacingDisplayName(displayName))
-    end
-
-    function ZO_Help_Customer_Service_Gamepad:SetupReportGuildTicket(guildName, category)
-        self:SetupTicket(CUSTOMER_SERVICE_ASK_FOR_HELP_IMPACT_REPORT_GUILD, category, DEFAULT_SUBCATEGORY, guildName)
-    end
-
-    function ZO_Help_Customer_Service_Gamepad:SetupReportGroupFinderListingTicket(listingData)
-        self:SetupTicket(CUSTOMER_SERVICE_ASK_FOR_HELP_IMPACT_REPORT_GROUP_FINDER_LISTING, DEFAULT_CATEGORY, DEFAULT_SUBCATEGORY, listingData)
-    end
 end
 
 function ZO_Help_Customer_Service_Gamepad:OnSelectionChanged()

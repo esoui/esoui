@@ -336,7 +336,13 @@ local function AddEnumChoices(params, enumStringPrefix, allChoicesName, enumValu
     params:AddChoice(allChoicesName, NO_VALUE)
 
     for _, enumValue in ipairs(enumValues) do
-        params:AddChoice(GetString(enumStringPrefix, enumValue), enumValue)
+        local choiceText = ""
+        if type(enumValue) == "table" then
+            choiceText = GetString(enumStringPrefix, enumValue[1])
+        else
+            choiceText = GetString(enumStringPrefix, enumValue)
+        end
+        params:AddChoice(choiceText, enumValue)
     end
 end
 
@@ -444,6 +450,22 @@ do
         ITEM_TRAIT_TYPE_JEWELRY_AUGMENTED,
         ITEM_TRAIT_TYPE_JEWELRY_BOLSTERED,
         ITEM_TRAIT_TYPE_JEWELRY_VIGOROUS,
+        ITEM_TRAIT_TYPE_NONE,
+    })
+
+    local companionAllTraitParams = CreateDropDownFeatureParams("CompanionAllTraits")
+    companionAllTraitParams:SetDisplayName(GetString("SI_TRADINGHOUSEFEATURECATEGORY", TRADING_HOUSE_FEATURE_CATEGORY_TRAIT))
+    AddEnumSearcher(companionAllTraitParams, TRADING_HOUSE_FILTER_TYPE_TRAIT, GetItemLinkTraitType)
+    AddEnumChoices(companionAllTraitParams, "SI_ITEMTRAITTYPE", allTraitsString, {
+        { ITEM_TRAIT_TYPE_WEAPON_QUICKENED, ITEM_TRAIT_TYPE_ARMOR_QUICKENED, ITEM_TRAIT_TYPE_JEWELRY_QUICKENED },
+        { ITEM_TRAIT_TYPE_WEAPON_PROLIFIC, ITEM_TRAIT_TYPE_ARMOR_PROLIFIC, ITEM_TRAIT_TYPE_JEWELRY_PROLIFIC },
+        { ITEM_TRAIT_TYPE_WEAPON_FOCUSED, ITEM_TRAIT_TYPE_ARMOR_FOCUSED, ITEM_TRAIT_TYPE_JEWELRY_FOCUSED },
+        { ITEM_TRAIT_TYPE_WEAPON_SHATTERING, ITEM_TRAIT_TYPE_ARMOR_SHATTERING, ITEM_TRAIT_TYPE_JEWELRY_SHATTERING },
+        { ITEM_TRAIT_TYPE_WEAPON_AGGRESSIVE, ITEM_TRAIT_TYPE_ARMOR_AGGRESSIVE, ITEM_TRAIT_TYPE_JEWELRY_AGGRESSIVE },
+        { ITEM_TRAIT_TYPE_WEAPON_SOOTHING, ITEM_TRAIT_TYPE_ARMOR_SOOTHING, ITEM_TRAIT_TYPE_JEWELRY_SOOTHING },
+        { ITEM_TRAIT_TYPE_WEAPON_AUGMENTED, ITEM_TRAIT_TYPE_ARMOR_AUGMENTED, ITEM_TRAIT_TYPE_JEWELRY_AUGMENTED },
+        { ITEM_TRAIT_TYPE_WEAPON_BOLSTERED, ITEM_TRAIT_TYPE_ARMOR_BOLSTERED, ITEM_TRAIT_TYPE_JEWELRY_BOLSTERED },
+        { ITEM_TRAIT_TYPE_WEAPON_VIGOROUS, ITEM_TRAIT_TYPE_ARMOR_VIGOROUS, ITEM_TRAIT_TYPE_JEWELRY_VIGOROUS },
         ITEM_TRAIT_TYPE_NONE,
     })
 end

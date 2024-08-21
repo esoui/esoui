@@ -47,6 +47,7 @@ function GuildSelector:Initialize(control)
     end
 
     EVENT_MANAGER:RegisterForEvent("GuildsSelector", EVENT_GUILD_DATA_LOADED, function() self:InitializeGuilds() end)
+    ZO_GUILD_SELECTOR_MANAGER:RegisterCallback("OnReady", function() self:InitializeGuilds() end)
 
     local function OnSceneGroupBarLabelTextChanged(labelControl)
         local menuLeft = labelControl:GetLeft()
@@ -97,15 +98,15 @@ function GuildSelector:IsGuildRelatedSceneShowing()
 end
 
 function GuildSelector:InitializeGuilds()
-    if not self.scenesCreated then
+    if not self.scenesCreated or not ZO_GUILD_SELECTOR_MANAGER:IsReady() then
         return
     end
 
     local selectedEntry
-    local lastGuildId = self.guildId
+    local lastGuildId = ZO_GUILD_SELECTOR_MANAGER:GetSelectedGuildMenuId()
     local lastTradingHouseGuildId = GetSelectedTradingHouseGuildId()
     local isLastTradingHouseGuildFound = false
-    
+
     self.guildId = nil
     self.comboBox:ClearItems()
 
@@ -166,6 +167,7 @@ end
 
 function GuildSelector:SelectGuild(selectedEntry)
     if selectedEntry then
+        ZO_GUILD_SELECTOR_MANAGER:SetSelectedGuildMenuId(selectedEntry.guildId)
         self.currentGuildText = selectedEntry.selectedText
         self.guildId = selectedEntry.guildId
         self.comboBox:SetSelectedItemText(selectedEntry.selectedText)
@@ -207,6 +209,16 @@ function GuildSelector:SelectGuildByIndex(index)
     end
 end
 
+function GuildSelector:SelectGuildById(guildId)
+    local entries = self.comboBox:GetItems()
+    for _, entry in ipairs(entries) do
+        if entry.guildId == guildId then
+            self:SelectGuild(entry)
+            return
+        end
+    end
+end
+
 function GuildSelector:SelectGuildFinder()
     local guildFinderIndex = GetNumGuilds() + 1 -- first entry after all guilds in the dropdown
     local entries = self.comboBox:GetItems()
@@ -216,6 +228,11 @@ end
 function GuildSelector:OnScenesCreated()
     self.scenesCreated = true
     self:InitializeGuilds()
+    GUILD_SELECTOR_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
+        if newState == SCENE_FRAGMENT_SHOWING then
+            self:SelectGuildById(ZO_GUILD_SELECTOR_MANAGER:GetSelectedGuildMenuId())
+        end
+    end)
 end
 
 --Global XML

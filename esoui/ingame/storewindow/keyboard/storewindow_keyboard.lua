@@ -583,7 +583,7 @@ function ZO_StoreManager:SetUpBuySlot(control, data)
     local newStatusControl = control:GetNamedChild("Status")
     local slotControl = control:GetNamedChild("Button")
     local nameControl = control:GetNamedChild("Name")
-    local priceControl = control:GetNamedChild("SellPrice")
+    local priceControl = control:GetNamedChild("SellPriceText")
 
     newStatusControl:SetHidden(true)
 

@@ -625,16 +625,18 @@ end
 
 -- Antiquity Journal
 
-ZO_AntiquityJournal_Keyboard = ZO_Object:Subclass()
-
-function ZO_AntiquityJournal_Keyboard:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
+ZO_AntiquityJournal_Keyboard = ZO_DeferredInitializingObject:Subclass()
 
 function ZO_AntiquityJournal_Keyboard:Initialize(control)
     self.control = control
+    ANTIQUITY_JOURNAL_KEYBOARD_SCENE = ZO_Scene:New("antiquityJournalKeyboard", SCENE_MANAGER)
+
+    ZO_DeferredInitializingObject.Initialize(self, ANTIQUITY_JOURNAL_KEYBOARD_SCENE)
+
+    SYSTEMS:RegisterKeyboardRootScene("antiquityJournalKeyboard", self.scene)
+end
+
+function ZO_AntiquityJournal_Keyboard:OnDeferredInitialize()
     self.antiquityTilesByAntiquityId = {}
     self.antiquitySetTilesByAntiquitySetId = {}
     self.categoryNodeLookupData = {}
@@ -642,7 +644,6 @@ function ZO_AntiquityJournal_Keyboard:Initialize(control)
     self:InitializeKeybindDescriptors()
     self:InitializeControls()
     self:InitializeCategories()
-    self:InitializeScene()
     self:InitializeEvents()
     self:InitializeFilters()
 end
@@ -821,23 +822,6 @@ function ZO_AntiquityJournal_Keyboard:InitializeCategories()
     self.categoryTree:SetOpenAnimation("ZO_TreeOpenAnimation")
 end
 
-function ZO_AntiquityJournal_Keyboard:InitializeScene()
-    self.scene = ZO_Scene:New("antiquityJournalKeyboard", SCENE_MANAGER)
-    SYSTEMS:RegisterKeyboardRootScene("antiquityJournalKeyboard", self.scene)
-    ANTIQUITY_JOURNAL_KEYBOARD_SCENE = self.scene
-
-    self.scene:RegisterCallback("StateChange", function(oldState, newState)
-        if newState == SCENE_SHOWING then
-            ANTIQUITY_DATA_MANAGER:SetSearch(self.contentSearchEditBox:GetText())
-            KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
-            TriggerTutorial(TUTORIAL_TRIGGER_ANTIQUITY_JOURNAL_OPENED)
-            self.refreshGroups:RefreshAll("AntiquitiesUpdated")
-        elseif newState == SCENE_HIDING then
-            KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
-        end
-    end)
-end
-
 function ZO_AntiquityJournal_Keyboard:InitializeEvents()
     -- Define refresh groups.
     self.refreshGroups = ZO_Refresh:New()
@@ -900,6 +884,17 @@ function ZO_AntiquityJournal_Keyboard:InitializeFilters()
     end
 
     comboBox:SelectFirstItem()
+end
+
+function ZO_AntiquityJournal_Keyboard:OnShowing()
+    ANTIQUITY_DATA_MANAGER:SetSearch(self.contentSearchEditBox:GetText())
+    KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
+    TriggerTutorial(TUTORIAL_TRIGGER_ANTIQUITY_JOURNAL_OPENED)
+    self.refreshGroups:RefreshAll("AntiquitiesUpdated")
+end
+
+function ZO_AntiquityJournal_Keyboard:OnHiding()
+    KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
 end
 
 function ZO_AntiquityJournal_Keyboard:ShowLockedContentPanel()
@@ -1358,6 +1353,8 @@ function ZO_AntiquityJournal_Keyboard:OnAntiquitiesUpdated()
 end
 
 function ZO_AntiquityJournal_Keyboard:ShowCategory(categoryId, filterText)
+    -- We can call this function before and without showing the scene so we have to make sure we do the deferred initialize.
+    self:PerformDeferredInitialize()
 
     --Order matters, resetting the filters will trigger a refresh of the categories, and we don't want this call to inadvertantly clear the queuedCategoryId
     self:ResetFilters()

@@ -1,6 +1,9 @@
+-- These are flags for a bitmask.
 ZO_SHARED_INFORMATION_AREA_SUPPRESSION_CATEGORIES =
 {
     HAS_KEYBINDS = 1,
+    HIDDEN_BY_INTERACTIVE_WHEEL = 2,
+    -- Next value: 4
 }
 
 local LOOT_PRIORITY = 1
@@ -26,7 +29,7 @@ function SharedInformationArea:AddLoot(lootWindow)
 end
 
 function SharedInformationArea:AddTutorial(tutorial)
-    self.prioritizedVisibility:Add(tutorial, TUTORIAL_PRIORITY, NO_CATEGORIES, "Tutorial")
+    self.prioritizedVisibility:Add(tutorial, TUTORIAL_PRIORITY, ZO_SHARED_INFORMATION_AREA_SUPPRESSION_CATEGORIES.HIDDEN_BY_INTERACTIVE_WHEEL, "Tutorial")
 end
 
 function SharedInformationArea:AddSynergy(synergy)

@@ -107,6 +107,8 @@ EsoUI\Ingame\EndlessDungeon\EndlessDungeonHUD.xml
 EsoUI\Ingame\EndlessDungeon\EndlessDungeonSummary.lua
 EsoUI\Ingame\EndlessDungeon\EndlessDungeonSummary.xml
 
+EsoUI\Ingame\ZO_GuildSelectorManager\ZO_GuildSelectorManager.lua
+
 EsoUI\Ingame\CenterScreenAnnounce\CenterScreenAnnounceHandlers.lua
 EsoUI\Ingame\CenterScreenAnnounce\CenterScreenAnnounce.lua
 EsoUI\Ingame\CenterScreenAnnounce\CenterScreenAnnounce.xml
@@ -144,6 +146,8 @@ EsoUI\Ingame\Contacts\Gamepad\SocialDialogs_Gamepad.lua
 EsoUI\Ingame\Contacts\SocialManager.lua
 
 EsoUI\Ingame\Group\ZO_GroupList_Manager.lua
+
+EsoUI\Ingame\HouseTours\HouseToursData.lua
 
 EsoUI\Ingame\LFG\ZO_ActivityFinderRoot_Classes.lua
 EsoUI\Ingame\LFG\ZO_ActivityFinderRoot_Manager.lua
@@ -194,6 +198,18 @@ EsoUI\Ingame\LFG\Gamepad\TributeRewards_Gamepad.lua
 EsoUI\Ingame\LFG\Gamepad\TributeRewards_Gamepad.xml
 EsoUI\Ingame\LFG\Gamepad\ZO_ActivityTributeRankFooter_Gamepad.lua
 EsoUI\Ingame\LFG\Gamepad\ZO_ActivityTributeRankFooter_Gamepad.xml
+
+EsoUI\Ingame\HouseTours\HouseTours_Search_Manager.lua
+EsoUI\Ingame\HouseTours\HouseTours_PlayerListings_Manager.lua
+
+EsoUI\Ingame\HouseTours\Keyboard\HouseTours_SearchResults_Keyboard.lua
+EsoUI\Ingame\HouseTours\Keyboard\HouseTours_SearchResults_Keyboard.xml
+EsoUI\Ingame\HouseTours\Keyboard\HouseTours_ManageListings_Keyboard.lua
+EsoUI\Ingame\HouseTours\Keyboard\HouseTours_ManageListings_Keyboard.xml
+EsoUI\Ingame\HouseTours\Keyboard\HouseTours_Keyboard.lua
+
+EsoUI\Ingame\HouseTours\Gamepad\HouseTours_Gamepad.lua
+EsoUI\Ingame\HouseTours\Gamepad\HouseTours_Gamepad.xml
 
 EsoUI\Ingame\LFG\SearchingForGroup.lua
 EsoUI\Ingame\LFG\SearchingForGroup.xml
@@ -1669,6 +1685,11 @@ EsoUI\Ingame\Armory\Gamepad\ArmoryBuildSkills_Gamepad.lua
 EsoUI\Ingame\Armory\Gamepad\ArmoryBuildSkills_Gamepad.xml
 EsoUI\Ingame\Armory\Gamepad\ArmoryBuildChampion_Gamepad.lua
 EsoUI\Ingame\Armory\Gamepad\ArmoryBuildChampion_Gamepad.xml
+
+EsoUI\Ingame\HouseTours\HouseTours_Dialogs_Shared.lua
+EsoUI\Ingame\HouseTours\Gamepad\HouseTours_Dialogs_Gamepad.lua
+EsoUI\Ingame\HouseTours\Keyboard\HouseTours_Dialogs_Keyboard.lua
+EsoUI\Ingame\HouseTours\Keyboard\HouseTours_Dialogs_Keyboard.xml
 
 ; Subtitles needs to be loaded after PlayerToPlayer so it can anchor off of it
 EsoUI\Ingame\Subtitles\Subtitles.lua

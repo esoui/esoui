@@ -456,6 +456,14 @@ function ZO_Provisioner:InitializeDetails()
     end
 end
 
+function ZO_Provisioner:AddInventoryAdditionalFilterBySpecialIngredientType(specialIngredientType, additionalFilterFunction)
+    if specialIngredientType == PROVISIONER_SPECIAL_INGREDIENT_TYPE_FILLET then
+        if self.filletPanel.inventory then
+            self.filletPanel.inventory.additionalFilter = additionalFilterFunction
+        end
+    end
+end
+
 function ZO_Provisioner:ResetSelectedTab()
     self.settings = nil
 end

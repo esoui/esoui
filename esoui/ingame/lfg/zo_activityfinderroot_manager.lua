@@ -7,6 +7,7 @@ ZO_ACTIVITY_FINDER_SORT_PRIORITY =
     DUNGEONS = 400,
     BATTLEGROUNDS = 500,
     TRIBUTE = 600,
+    HOUSE_TOURS = 700,
 }
 
 local function LFGSort(entry1, entry2)
@@ -378,7 +379,7 @@ function ActivityFinderRoot_Manager:UpdateLocationData()
                     location:SetLockReasonText(tributeLockText)
                 elseif location:IsLockedByCollectible() then
                     local collectibleId = location:GetFirstLockingCollectible()
-                    local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+                    local collectibleData = ZO_CollectibleData_Base.Acquire(collectibleId)
                     local lockReasonStringId = nil
                     if collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_CHAPTER) then
                         lockReasonStringId = SI_LFG_LOCK_REASON_COLLECTIBLE_NOT_UNLOCKED_UPGRADE
@@ -387,9 +388,10 @@ function ActivityFinderRoot_Manager:UpdateLocationData()
                     else
                         lockReasonStringId = SI_LFG_LOCK_REASON_COLLECTIBLE_NOT_UNLOCKED
                     end
-                    local lockReasonText = zo_strformat(lockReasonStringId, collectibleData:GetName(), collectibleData:GetCategoryData():GetName())
+                    local lockReasonText = zo_strformat(lockReasonStringId, collectibleData:GetName(), collectibleData:GetCategoryName())
                     location:SetLockReasonText(lockReasonText)
                     location:SetCountsForAverageRoleTime(false)
+                    collectibleData:ReleaseObject()
                 else
                     local groupTooLarge = isGroupRelevant and self.groupSize > location:GetMaxGroupSize()
                     if groupTooLarge then

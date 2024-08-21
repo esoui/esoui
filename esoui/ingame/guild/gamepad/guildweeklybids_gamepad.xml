@@ -14,7 +14,7 @@
                     <Anchor point="LEFT" relativeTo="$(parent)Trader" relativePoint="RIGHT" offsetX="15"/>
                     <Dimensions x="315"/>
                 </Label>
-                <Label name="$(parent)BidAmount" inherits="ZO_GamepadInteractiveSortFilterListRowLabel" horizontalAlignment="RIGHT">
+                <Label name="$(parent)BidAmountText" inherits="ZO_GamepadInteractiveSortFilterListRowLabel" horizontalAlignment="RIGHT">
                     <Anchor point="LEFT" relativeTo="$(parent)PlacedBy" relativePoint="RIGHT" offsetX="15"/>
                     <Anchor point="RIGHT" offsetX="-ZO_GAMEPAD_INTERACTIVE_FILTER_HIGHLIGHT_PADDING"/>
                 </Label>

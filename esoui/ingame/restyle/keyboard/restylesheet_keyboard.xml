@@ -106,9 +106,26 @@
                     </Controls>
                 </Control>
 
-                <Label name="$(parent)Cost" font="ZoFontHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                <Control name="$(parent)CostContainer">
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)Secondary" relativePoint="BOTTOMRIGHT" />
-                </Label>
+                    <Controls>
+                        <Label name="$(parent)Currency2" inherits="ZO_CurrencyTemplate">
+                            <Anchor point="TOPRIGHT" />
+                        </Label>
+
+                        <Label name="$(parent)Or" font="ZoFontHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_RESTYLE_SHEET_APPLY_COST_OR">
+                            <Anchor point="RIGHT" relativeTo="$(parent)Currency2" relativePoint="LEFT" offsetX="-4" />
+                        </Label>
+
+                        <Label name="$(parent)Currency1" inherits="ZO_CurrencyTemplate">
+                            <Anchor point="RIGHT" relativeTo="$(parent)Or" relativePoint="LEFT" />
+                        </Label>
+
+                        <Label name="$(parent)CostLabel" font="ZoFontHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_RESTYLE_SHEET_APPLY_COST_LABEL">
+                            <Anchor point="RIGHT" relativeTo="$(parent)Currency1" relativePoint="LEFT" offsetX="-4" />
+                        </Label>
+                    </Controls>
+                </Control>
             </Controls>
         </Control>
     </Controls>

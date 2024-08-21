@@ -14,6 +14,7 @@ NOTIFICATIONS_NEW_DAILY_LOGIN_REWARD_DATA = 13
 NOTIFICATIONS_GUILD_NEW_APPLICATIONS = 14
 NOTIFICATIONS_MARKET_PRODUCT_UNLOCKED_DATA = 15
 NOTIFICATIONS_POINTS_RESET_DATA = 16
+NOTIFICATIONS_HOUSE_TOURS_HOUSE_RECOMMENDED_DATA = 17
 
 NOTIFICATIONS_MENU_OPENED_FROM_KEYBIND = 1
 NOTIFICATIONS_MENU_OPENED_FROM_MOUSE = 2
@@ -699,7 +700,7 @@ do
     end
 
 
-    craftedAbilityResetCallbackObject = ZO_CraftedAbilityResetProvider_CallbackObject:New()
+    local craftedAbilityResetCallbackObject = ZO_CraftedAbilityResetProvider_CallbackObject:New()
 
     -- ZO_CraftedAbilityResetProvider functions --
     ----------------------------------------------
@@ -984,6 +985,9 @@ function ZO_CollectionsUpdateProvider:New(notificationManager)
 end
 
 function ZO_CollectionsUpdateProvider:BuildNotificationList()
+    for _, entryData in ipairs(self.list) do
+        entryData.data:ReleaseObject()
+    end
     ZO_ClearNumericallyIndexedTable(self.list)
 
     for index = 1, GetNumCollectibleNotifications() do
@@ -991,35 +995,35 @@ function ZO_CollectionsUpdateProvider:BuildNotificationList()
         local data = self:CreateCollectibleNotificationData(notificationId, collectibleId)
         
         if data then
-            self:AddCollectibleNotification(data)
+            self:AddCollectibleNotification(data, notificationId)
         end
     end
 end
 
 function ZO_CollectionsUpdateProvider:CreateCollectibleNotificationData(notificationId, collectibleId)
-    return ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+    if collectibleId ~= 0 then
+        return ZO_CollectibleData_Base.Acquire(collectibleId)
+    end
+    return nil
 end
 
-function ZO_CollectionsUpdateProvider:AddCollectibleNotification(data)
-    local categoryData = data:GetCategoryData()
-
+function ZO_CollectionsUpdateProvider:AddCollectibleNotification(data, notificationId)
     --use a formatter for when there's more information?
     local hasMoreInfo = GetCollectibleHelpIndices(data:GetId()) ~= nil
-    local message = self:GetMessage(hasMoreInfo, ZO_SELECTED_TEXT:Colorize(categoryData:GetName()), ZO_SELECTED_TEXT:Colorize(data:GetName()))
-    self:AddNotification(message, data, hasMoreInfo)
+    local message = self:GetMessage(hasMoreInfo, ZO_SELECTED_TEXT:Colorize(data:GetCategoryName()), ZO_SELECTED_TEXT:Colorize(data:GetName()))
+    self:AddNotification(message, data, hasMoreInfo, notificationId)
 end
 
-function ZO_CollectionsUpdateProvider:AddNotification(message, data, hasMoreInfo)
-    local categoryData = data:GetCategoryData()
-
+function ZO_CollectionsUpdateProvider:AddNotification(message, data, hasMoreInfo, notificationId)
     local newListEntry = {
         dataType = NOTIFICATIONS_COLLECTIBLE_DATA,
         notificationType = NOTIFICATION_TYPE_COLLECTIONS,
-        shortDisplayText = categoryData:GetName(),
+        shortDisplayText = data:GetCategoryName(),
 
         message = message,
         data = data,
         moreInfo = hasMoreInfo,
+        notificationId = notificationId,
 
         --For sorting
         displayName = message,
@@ -1030,12 +1034,12 @@ function ZO_CollectionsUpdateProvider:AddNotification(message, data, hasMoreInfo
 end
 
 function ZO_CollectionsUpdateProvider:Accept(entryData)
-    RemoveCollectibleNotification(entryData.data:GetNotificationId())
+    RemoveCollectibleNotification(entryData.notificationId)
     --this function should be overriden to open the right scene
 end
 
 function ZO_CollectionsUpdateProvider:Decline(entryData)
-    RemoveCollectibleNotification(entryData.data:GetNotificationId())
+    RemoveCollectibleNotification(entryData.notificationId)
 end
 
 --LFG Update Provider
@@ -1756,6 +1760,132 @@ end
 
 function ZO_TributeInviteProvider:CreateMessage(inviterName)
     return zo_strformat(SI_TRIBUTE_INVITE_MESSAGE, inviterName)
+end
+
+-- House Tours House Recommended Provider
+-----------------------------------------
+
+ZO_HouseToursHouseRecommendedProvider = ZO_NotificationProvider:Subclass()
+
+function ZO_HouseToursHouseRecommendedProvider:New(notificationManager)
+    local provider = ZO_NotificationProvider.New(self, notificationManager)
+    provider:RegisterUpdateEvent(EVENT_HOUSE_TOURS_LISTING_RECOMMENDED_NOTIFICATIONS_UPDATED)
+
+    local playerListingsManager = HOUSE_TOURS_PLAYER_LISTINGS_MANAGER
+    playerListingsManager:RegisterCallback("Initialized", ZO_GetCallbackForwardingFunction(provider, provider.OnPlayerListingsManagerInitialized))
+    playerListingsManager:RegisterCallback("Initialized", ZO_GetCallbackForwardingFunction(provider, provider.PushUpdateToNotificationManager))
+
+    return provider
+end
+
+function ZO_HouseToursHouseRecommendedProvider:BuildNotificationList()
+    ZO_ClearNumericallyIndexedTable(self.list)
+
+    local playerListingsManager = HOUSE_TOURS_PLAYER_LISTINGS_MANAGER
+    if not playerListingsManager:AreSavedVarsInitialized() then
+        -- The Player Listings Manager is not ready yet.
+        -- Notifications will be populated via the "Initialized" callback handler registered in the constructor.
+        return
+    end
+
+    -- Identify the houses that are currently on the Recommended list.
+    local recommendedHouseIds = {}
+    local numNotifications = GetNumHouseToursTopRecommendedHouseNotifications()
+    for notificationIndex = 1, numNotifications do
+        local houseId = GetHouseToursTopRecommendedHouseNotification(notificationIndex)
+        recommendedHouseIds[houseId] = true
+    end
+
+    -- Unsuppress notifications for any houses that are no longer on the list.
+    local suppressedHouseIds = playerListingsManager:GetSuppressedNotificationHouseIds()
+    if suppressedHouseIds then
+        for suppressedHouseId in pairs(suppressedHouseIds) do
+            if not recommendedHouseIds[suppressedHouseId] then
+                -- This house is no longer on the Recommended list;
+                -- unsuppress this house to allow future notifications.
+                suppressedHouseIds[suppressedHouseId] = nil
+            end
+        end
+    end
+
+    -- Create notifications for houses on the Recommended list that have not yet been
+    -- suppressed via the Player Listings Manager.
+    for recommendedHouseId in pairs(recommendedHouseIds) do
+        if not (suppressedHouseIds and suppressedHouseIds[recommendedHouseId]) then
+            -- The notification for this house is either new or has not yet been dismissed.
+            local collectibleId = GetCollectibleIdForHouse(recommendedHouseId)
+            local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+            if internalassert(collectibleData ~= nil) then
+                local houseNickname = collectibleData:GetNickname() or ""
+                if houseNickname == "" then
+                    houseNickname = collectibleData:GetDefaultNickname()
+                end
+                local houseName = collectibleData:GetName()
+                local message = self:CreateMessage(houseNickname, houseName)
+                table.insert(self.list,
+                {
+                    dataType = NOTIFICATIONS_HOUSE_TOURS_HOUSE_RECOMMENDED_DATA,
+                    notificationType = NOTIFICATION_TYPE_HOUSE_TOURS_HOUSE_RECOMMENDED,
+                    collectibleId = collectibleId,
+                    houseId = recommendedHouseId,
+                    houseName = houseName,
+                    houseNickname = houseNickname,
+                    message = message,
+                    secsSinceRequest = ZO_NormalizeSecondsSince(0),
+                    shortDisplayText = houseName,
+                })
+            end
+        end
+    end
+end
+
+function ZO_HouseToursHouseRecommendedProvider:Dismiss(houseId)
+    -- Suppress the notification for this house and update the notifications list.
+    -- Houses that fall off of the Recommended list will be unsuppressed via BuildNotificationList.
+    HOUSE_TOURS_PLAYER_LISTINGS_MANAGER:SetNotificationHouseIdSuppressed(houseId, true)
+    self:RefreshNotifications()
+end
+
+function ZO_HouseToursHouseRecommendedProvider:Accept(data)
+    -- Dismiss the notification first to allow for dismissal even if House Tours is temporarily disabled.
+    self:Dismiss(data.houseId)
+
+    -- Verify that House Tours is enabled.
+    local isHouseToursEnabled, lockedMessage = ZO_IsHouseToursEnabled()
+    if not isHouseToursEnabled then
+        if lockedMessage then
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, SOUNDS.NEGATIVE_CLICK, lockedMessage)
+        end
+        return
+    end
+
+    -- Show the My Listings view for this house.
+    if IsInGamepadPreferredMode() then
+        HOUSE_TOURS_GAMEPAD:ManageSpecificHouse(data.houseId)
+    else
+        HOUSE_TOURS_MANAGE_LISTINGS_KEYBOARD:ManageSpecificHouse(data.houseId)
+    end
+end
+
+function ZO_HouseToursHouseRecommendedProvider:Decline(data)
+    -- Dismiss the notification.
+    self:Dismiss(data.houseId)
+end
+
+function ZO_HouseToursHouseRecommendedProvider:CreateMessage(houseNickname, houseName)
+    return zo_strformat(SI_HOUSE_TOURS_RECOMMENDED_HOUSE_NOTIFICATION, houseNickname, houseName)
+end
+
+function ZO_HouseToursHouseRecommendedProvider:RefreshNotifications()
+    if NOTIFICATIONS then
+        NOTIFICATIONS:RefreshNotificationList()
+    end
+    GAMEPAD_NOTIFICATIONS:RefreshNotificationList()
+end
+
+function ZO_HouseToursHouseRecommendedProvider:OnPlayerListingsManagerInitialized()
+    -- The Player Listings Manager is ready; process queued notifications.
+    self:RefreshNotifications()
 end
 
 -- Sort List

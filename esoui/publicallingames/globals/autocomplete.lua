@@ -50,6 +50,27 @@ AUTO_COMPLETE_FLAG_GUILD = ZO_AutoComplete.AddFlag(function(results, input, onli
     end
 end)
 
+AUTO_COMPLETE_FLAG_HOME_TOURS = ZO_AutoComplete.AddFlag(function(results, input, onlineOnly, include)
+    --Home Tours auto-completion includes both friends and guildmates but only by account name; no character names
+    for i = 1, GetNumFriends() do
+        local displayName, _, playerStatus = GetFriendInfo(i)
+        if not onlineOnly or playerStatus ~= PLAYER_STATUS_OFFLINE then
+            ZO_AutoComplete.IncludeOrExcludeResult(results, ZO_FormatUserFacingDisplayName(displayName), include)
+        end
+    end
+
+    for i = 1, GetNumGuilds() do
+        local guildId = GetGuildId(i)
+        local numMembers = GetNumGuildMembers(guildId)
+        for memberIndex = 1, numMembers do
+            local displayName, _, _, playerStatus = GetGuildMemberInfo(guildId, memberIndex)
+            if not onlineOnly or playerStatus ~= PLAYER_STATUS_OFFLINE then
+                ZO_AutoComplete.IncludeOrExcludeResult(results, ZO_FormatUserFacingDisplayName(displayName), include)
+            end
+        end
+    end
+end)
+
 local function OnPlayerActivated()
     g_currentPlayerName = GetUnitName("player")
     g_currentPlayerUserId = GetDisplayName()

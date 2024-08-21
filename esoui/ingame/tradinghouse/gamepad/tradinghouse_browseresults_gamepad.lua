@@ -514,7 +514,13 @@ function ZO_GamepadTradingHouse_BrowseResults:InitializePreviewNarrationInfo()
             end
         end,
         selectedNarrationFunction = function()
-            return ITEM_PREVIEW_LIST_HELPER_GAMEPAD:GetPreviewNarrationText()
+            local narrations = {}
+            local itemData = self:GetItemDataBeingPreviewed()
+            if itemData and (ITEM_PREVIEW_LIST_HELPER_GAMEPAD:HasVariations() or ITEM_PREVIEW_LIST_HELPER_GAMEPAD:HasActions()) then
+                ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(ZO_TradingHouse_GetItemDataFormattedName(itemData)))
+                ZO_AppendNarration(narrations, ITEM_PREVIEW_LIST_HELPER_GAMEPAD:GetPreviewNarrationText())
+            end
+            return narrations
         end,
         additionalInputNarrationFunction = function()
             local narrationFunction = ITEM_PREVIEW_LIST_HELPER_GAMEPAD:GetAdditionalInputNarrationFunction()

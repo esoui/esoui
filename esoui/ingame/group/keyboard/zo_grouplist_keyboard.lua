@@ -221,7 +221,10 @@ function ZO_GroupList_Keyboard:GroupListRow_OnMouseUp(control, button, upInside)
 
             --Per design, promoting doesn't expressly fall under the mantle of "group modification"
             if self.playerIsLeader and not data.isPlayer and data.online then
-                AddMenuItem(GetString(SI_GROUP_LIST_MENU_PROMOTE_TO_LEADER), function() GroupPromote(data.unitTag) end)
+                AddMenuItem(GetString(SI_GROUP_LIST_MENU_PROMOTE_TO_LEADER), 
+                    function() 
+                        ZO_Dialogs_ShowDialog("GROUP_PROMOTE_LEADER", data, { mainTextParams = { data.characterName, data.displayName, }, } )
+                    end)
             end
 
             self:ShowMenu(control)

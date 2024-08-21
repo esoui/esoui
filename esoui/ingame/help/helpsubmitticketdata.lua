@@ -301,6 +301,32 @@ ZO_HELP_ASK_FOR_HELP_CATEGORY_INFO =
                 },
             },
         },
+        {
+            id = CUSTOMER_SERVICE_ASK_FOR_HELP_IMPACT_REPORT_HOUSE_TOUR_LISTING,
+            externalInfoTitle = GetString(SI_CUSTOMER_SERVICE_ASK_FOR_HELP_HOUSE_TOUR_LISTING_DETAILS),
+            externalInfoInstructions = GetString(SI_CUSTOMER_SERVICE_ASK_FOR_HELP_HOUSE_TOUR_LISTING_INSTRUCTIONS),
+            externalInfoRegistrationFunction = ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER.SetCustomerServiceTicketHouseTourListingTarget,
+            externalInfoKeyboardTooltipFunction = function(...) HELP_CUSTOMER_SERVICE_ASK_FOR_HELP_KEYBOARD:ShowHouseTourListingTooltip(...) end,
+            externalInfoGamepadTooltipFunction = function(...) HELP_CUSTOMER_SERVICE_GAMEPAD:ShowHouseTourListingTooltip(...) end,
+            categoryStringName = "SI_CUSTOMERSERVICEASKFORHELPREPORTHOUSETOURLISTINGCATEGORY",
+            categoryDescriptionStringName = "SI_CUSTOMERSERVICEASKFORHELPREPORTHOUSETOURLISTINGCATEGORY_DESCRIPTION",
+            categories =
+            {
+                {
+                    id = CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_HOUSE_TOUR_LISTING_CATEGORY_NONE,
+                },
+                {
+                    id = CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_HOUSE_TOUR_LISTING_CATEGORY_INAPPROPRIATE_NICKNAME,
+                    ticketCategory = 1319,
+                },
+                {
+                    id = CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_HOUSE_TOUR_LISTING_CATEGORY_OFFENSIVE_ARRANGEMENT,
+                    ticketCategory = 1320,
+                    additionalInstructions = GetString(SI_CUSTOMER_SERVICE_ASK_FOR_HELP_SCREENSHOT_INCLUDED),
+                    includeScreenshot = true,
+                },
+            },
+        },
     },
 }
 

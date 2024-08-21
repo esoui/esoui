@@ -1,6 +1,10 @@
 ZO_Gamepad_ParametricList_Search_Screen = ZO_Object.MultiSubclass(ZO_Gamepad_ParametricList_Screen, ZO_TextSearchObject)
 
 function ZO_Gamepad_ParametricList_Search_Screen:Initialize(searchFilterType, searchContext, ...)
+    -- Call signature of :Initialize() is slightly different between ParametricList_Screen and ParametricList_Search_Screen.  Check that upgrade was done correctly.
+    internalassert(type(searchFilterType) == "number")
+    internalassert(type(searchContext) == "string")
+
     ZO_Gamepad_ParametricList_Screen.Initialize(self, ...)
 
     self.searchFilterType = searchFilterType
@@ -87,8 +91,18 @@ function ZO_Gamepad_ParametricList_Search_Screen:UpdateSearchText()
     end
 end
 
-function ZO_Gamepad_ParametricList_Search_Screen:OnShow()
+function ZO_Gamepad_ParametricList_Search_Screen:OnShowing()
     self:ActivateTextSearch()
+end
+
+function ZO_Gamepad_ParametricList_Search_Screen:OnShow()
+    local list = self:GetCurrentList()
+    local getNumFunction = list.GetNumEntries or list.GetNumItems
+    if getNumFunction ~= nil and getNumFunction(list) == 0 then
+        -- If the current list is empty, select the search header.
+        -- Otherwise the user won't be able to navigate into the search box.
+        self:RequestEnterHeader()
+    end
 end
 
 function ZO_Gamepad_ParametricList_Search_Screen:OnHiding()

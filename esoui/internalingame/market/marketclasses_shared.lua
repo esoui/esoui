@@ -147,6 +147,14 @@ function ZO_MarketProductBase:GetChildMarketProductId(childIndex)
     return self.productData:GetChildMarketProductId(childIndex)
 end
 
+function ZO_MarketProductBase:GetNumFacadeChildren()
+    return self.productData:GetNumFacadeChildren()
+end
+
+function ZO_MarketProductBase:GetFacadeChildMarketProductId(childIndex)
+    return self.productData:GetFacadeChildMarketProductId(childIndex)
+end
+
 function ZO_MarketProductBase:GetStackCount()
     return self.productData:GetStackCount()
 end

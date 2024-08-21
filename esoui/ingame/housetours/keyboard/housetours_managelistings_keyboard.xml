@@ -1,0 +1,233 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_HouseTours_ManageListings_Keyboard_DropdownRow" mouseEnabled="true" virtual="true">
+            <Dimensions y="35" />
+            <Controls>
+                <Control name="$(parent)Dropdown" inherits="ZO_ComboBox">
+                    <Dimensions x="230" y="35" />
+                    <Anchor point="RIGHT" />
+                </Control>
+
+                <Label name="$(parent)Name" font="ZoFontWinH4" wrapMode="ELLIPSIS">
+                    <Anchor point="LEFT" />
+                    <Anchor point="RIGHT" relativeTo="$(parent)Dropdown" relativePoint="LEFT" constrains="X" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_HouseTours_ManageListings_Keyboard" inherits="ZO_GroupMenuKeyboard_ContentAnchors" hidden="true">
+            <OnInitialized>
+                ZO_HouseToursManageListings_Keyboard.OnControlInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)ListingContainer">
+                    <AnchorFill />
+                    <Controls>
+                        <Control name="$(parent)HouseSelector" inherits="ZO_ComboBox">
+                            <Dimensions x="300" y="33" />
+                            <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" offsetX="2" offsetY="-7" />
+                        </Control>
+
+                        <Label name="$(parent)HouseSelectorLabel" font="ZoFontWinH4" text="SI_HOUSE_TOURS_MANAGE_LISTING_HOUSE_SELECT_HOME">
+                            <Anchor point="RIGHT" relativeTo="$(parent)HouseSelector" relativePoint="LEFT" offsetX="-5" />
+                        </Label>
+
+                        <Control name="$(parent)HouseTile">
+                            <Dimensions y="ZO_HOUSE_TOURS_MANAGE_LISTINGS_PANEL_KEYBOARD_TILE_HEIGHT" />
+                            <Anchor point="TOPLEFT" />
+                            <Anchor point="TOPRIGHT" />
+                            <Controls>
+                                <Texture name="$(parent)Background" level="2" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
+                                    <AnchorFill />
+                                    <TextureCoords left="0" right="ZO_HOUSE_TOURS_MANAGE_LISTINGS_PANEL_KEYBOARD_TEXTURE_COORD_RIGHT" top="0" bottom="ZO_HOUSE_TOURS_MANAGE_LISTINGS_PANEL_KEYBOARD_TEXTURE_COORD_BOTTOM"/>
+                                    <Controls>
+                                        <Backdrop name="$(parent)Border" inherits="ZO_DarkThinFrame" />
+                                    </Controls>
+                                </Texture>
+
+                                <Label name="$(parent)Name" font="ZoFontWinH2" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Background" offsetX="10" offsetY="10" />
+                                </Label>
+
+                                <Label name="$(parent)Nickname" font="ZoFontWinH2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT" offsetY="5" />
+                                </Label>
+
+                                <Label name="$(parent)StatusHeader" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE" text="SI_HOUSE_TOURS_MANAGE_LISTING_STATUS_HEADER">
+                                    <Anchor point="BOTTOMLEFT" offsetX="10" offsetY="-5"/>
+                                </Label>
+
+                                <Label name="$(parent)StatusValue" font="ZoFontHeader3">
+                                    <AnchorToBaseline relativeToLabel="$(parent)StatusHeader" side="RIGHT" offsetX="5"/>
+                                </Label>
+
+                                <Label name="$(parent)FurnitureCount" font="ZoFontHeader3">
+                                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)StatusHeader" relativePoint="TOPLEFT" offsetY="-10" />
+                                </Label>
+
+                                <Control name="$(parent)Recommendations" resizeToFitDescendents="true">
+                                    <Anchor point="BOTTOMRIGHT" offsetX="-10" offsetY="-5" />
+
+                                    <Controls>
+                                        <Label name="$(parent)Header" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE" text="SI_HOUSE_TOURS_MANAGE_LISTING_RECOMMENDATIONS_HEADER">
+                                            <Anchor point="BOTTOMLEFT" />
+                                        </Label>
+
+                                        <Label name="$(parent)Value" font="ZoFontHeader3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                                            <AnchorToBaseline relativeToLabel="$(parent)Header" side="RIGHT" offsetX="5" />
+                                        </Label>
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Control>
+
+                        <Control name="$(parent)VisitorAccessRow" inherits="ZO_HouseTours_ManageListings_Keyboard_DropdownRow">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)HouseTile" relativePoint="BOTTOMLEFT" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)HouseTile" relativePoint="BOTTOMRIGHT" offsetY="15" />
+                            <Controls>
+                                <Label name="$(parent)Name" override="true" text="SI_HOUSING_FURNITURE_SETTINGS_GENERAL_DEFAULT_ACCESS_TEXT" />
+
+                                <Control name="$(parent)LoadingIcon" inherits="ZO_Loading">
+                                    <Anchor point="RIGHT" relativeTo="$(parent)Dropdown" relativePoint="LEFT" offsetY="-5" />
+                                    <OnInitialized>
+                                        ZO_Loading_Initialize(self)
+                                    </OnInitialized>
+                                </Control>
+                            </Controls>
+                        </Control>
+
+                        <Control name="$(parent)TagsRow" inherits="ZO_HouseTours_ManageListings_Keyboard_DropdownRow">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)VisitorAccessRow" relativePoint="BOTTOMLEFT" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)VisitorAccessRow" relativePoint="BOTTOMRIGHT" offsetY="10" />
+                            <Controls>
+                                <Label name="$(parent)Name" override="true" text="SI_HOUSE_TOURS_LISTING_TAGS_HEADER" />
+                            </Controls>
+                        </Control>
+
+                        <Button name="$(parent)EditTagsButton" inherits="ZO_DefaultButton" text="SI_HOUSE_TOURS_EDIT_LISTING">
+                            <Dimensions x="240" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)TagsRow" relativePoint="BOTTOMRIGHT" offsetY="10" />
+                        </Button>
+
+                        <Control name="$(parent)NicknameRow" mouseEnabled="true">
+                            <Dimensions y="35" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)TagsRow" relativePoint="BOTTOMLEFT" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)TagsRow" relativePoint="BOTTOMRIGHT" offsetY="10" />
+                            <Controls>
+                                <Label name="$(parent)Value" font="ZoFontWinH4" horizontalAlignment="CENTER">
+                                    <DimensionConstraints minX="240" />
+                                    <Anchor point="RIGHT" />
+                                </Label>
+
+                                <Label name="$(parent)Name" font="ZoFontWinH4" wrapMode="ELLIPSIS" text="SI_HOUSE_TOURS_MANAGE_LISTING_CURRENT_NICKNAME_HEADER">
+                                    <Anchor point="LEFT" />
+                                    <Anchor point="RIGHT" relativeTo="$(parent)Value" relativePoint="LEFT" constrains="X" />
+                                </Label>
+                            </Controls>
+                        </Control>
+
+                        <Button name="$(parent)RenameButton" inherits="ZO_DefaultButton" text="SI_COLLECTIBLE_ACTION_RENAME">
+                            <Dimensions x="240" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)NicknameRow" relativePoint="BOTTOMRIGHT" offsetY="10" />
+                            <!-- TODO House Tours: Implement OnClicked behavior-->
+                            <OnClicked>
+                                HOUSE_TOURS_MANAGE_LISTINGS_KEYBOARD:RenameSelectedHouse()
+                            </OnClicked>
+                        </Button>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)QuestContainer">
+                    <AnchorFill />
+                    <Controls>
+                        <Label name="$(parent)Description" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER">
+                            <Anchor point="TOPLEFT" offsetX="30" offsetY="60" />
+                            <Anchor point="TOPRIGHT" offsetX="-30" offsetY="60" />
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)ActionButtonContainer" resizeToFitDescendents="true">
+                    <Anchor point="BOTTOM" />
+                    <Controls>
+                        <Button name="$(parent)SubmitButton" inherits="ZO_DefaultButton" text="SI_HOUSE_TOURS_SUBMIT_HOME">
+                            <Dimensions x="200" />
+                            <Anchor point="TOPLEFT" />
+                        </Button>
+
+                        <Button name="$(parent)AcceptQuestButton" inherits="ZO_DefaultButton">
+                            <Dimensions x="200" />
+                            <Anchor point="TOPLEFT" />
+                            <OnClicked>
+                                RequestBestowHousingStarterQuest()
+                            </OnClicked>
+                        </Button>
+
+                        <Button name="$(parent)RemoveListingButton" inherits="ZO_DefaultButton" text="SI_HOUSE_TOURS_REMOVE_LISTING">
+                            <Dimensions x="200" />
+                            <Anchor point="TOPLEFT" />
+                        </Button>
+                    </Controls>
+                </Control>
+
+                <Label name="$(parent)LockReason" font="ZoFontWinH3" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" maxLineCount="2" wrapMode="ELLIPSIS">
+                    <Dimensions x="600" />
+                    <Anchor point="BOTTOM" relativeTo="$(parent)ActionButtonContainer" relativePoint="TOP" offsetY="-10" />
+                </Label>
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_HouseTours_SubmitListingDialog" inherits="ZO_CustomDialogBase">
+            <OnInitialized>
+                ZO_HouseToursManageListings_Keyboard.OnSubmitDialogInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Label name="$(parent)Text" inherits="ZO_DialogContentAnchors" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame" />
+
+                <Control name="$(parent)HouseTile" mouseEnabled="true">
+                    <Dimensions x="302" y="200" />
+                    <Anchor point="TOP" relativeTo="$(parent)Text" relativePoint="BOTTOM" offsetY="5" />
+                    <Controls>
+                        <Texture name="$(parent)Background" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
+                            <AnchorFill />
+                            <TextureCoords left="0" right="0.58984375" top="0" bottom="0.78125"/>
+                        </Texture>
+
+                        <!-- The Overlay should appear over top of the background -->
+                        <Texture name="$(parent)OverlayGradient" textureFile="EsoUI/Art/Market/market_ItemGradient_256.dds" alpha="0.6" level="9">
+                            <AnchorFill />
+                        </Texture>
+
+                        <Backdrop name="$(parent)OverlayBorder" centerColor="00000000" level="10">
+                            <AnchorFill />
+                            <Edge file="EsoUI/Art/Miscellaneous/dark_edgeFrame_8_thin.dds" edgeFileWidth="64" edgeFileHeight="8" />
+                        </Backdrop>
+
+                        <Label name="$(parent)Nickname" font="ZoFontWinH2" maxLineCount="2" wrapMode="ELLIPSIS" level="11">
+                            <Anchor point="TOPLEFT" offsetX="10" offsetY="10" />
+                            <Dimensions x="209" />
+                        </Label>
+
+                        <Label name="$(parent)HouseName" font="ZoFontWinH3" maxLineCount="2" wrapMode="ELLIPSIS" level="11">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Nickname" relativePoint="BOTTOMLEFT" offsetY="5" />
+                            <Dimensions x="209" />
+                        </Label>
+
+                        <Label name="$(parent)FurnitureCount" font="ZoFontWinH4" level="11">
+                            <Anchor point="BOTTOMRIGHT" offsetX="-10" offsetY="-10" />
+                        </Label>
+
+                        <Label name="$(parent)DisplayName" font="ZoFontWinH3" maxLineCount="1" wrapMode="ELLIPSIS" level="11">
+                            <Anchor point="BOTTOMLEFT" offsetX="10" offsetY="-10" />
+                            <Anchor point="RIGHT" relativeTo="$(parent)FurnitureCount" relativePoint="LEFT" constrains="X" />
+                        </Label>
+                    </Controls>
+                </Control>
+                <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton"/>
+                <Control name="$(parent)Confirm" inherits="ZO_CustomDialogButton"/>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

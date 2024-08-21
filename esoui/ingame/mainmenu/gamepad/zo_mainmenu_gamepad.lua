@@ -234,7 +234,9 @@ local MENU_ENTRY_DATA =
                 icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_collections.dds",
                 header = GetString(SI_MAIN_MENU_COLLECTIONS),
                 isNewCallback = function()
-                    return ZO_COLLECTIBLE_DATA_MANAGER:HasAnyNewNonTributePatronCollectibles()
+                    local newCollectibles = GetNumNewCollectibles()
+                    local newPatronCollectibles = GetNumNewCollectiblesByCategoryType(COLLECTIBLE_CATEGORY_TYPE_TRIBUTE_PATRON)
+                    return newCollectibles > newPatronCollectibles
                 end,
             },
             [MENU_COLLECTIONS_ENTRIES.ITEM_SETS] =
@@ -252,7 +254,8 @@ local MENU_ENTRY_DATA =
                 name = GetString(SI_TRIBUTE_PATRON_BOOK_TITLE),
                 icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_tributePatrons.dds",
                 isNewCallback = function()
-                    return ZO_COLLECTIBLE_DATA_MANAGER:HasAnyNewTributePatronCollectibles()
+                    local newPatronCollectibles = GetNumNewCollectiblesByCategoryType(COLLECTIBLE_CATEGORY_TYPE_TRIBUTE_PATRON)
+                    return newPatronCollectibles > 0
                 end,
             },
         }
@@ -891,7 +894,6 @@ do
 
             self.mainList:SetDefaultSelectedIndex(defaultEntryIndex)
         end
-
         self.mainList:Commit()
     end
 

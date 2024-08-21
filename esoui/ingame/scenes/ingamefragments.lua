@@ -298,6 +298,7 @@ do
         return x, y
     end
     FRAME_INTERACTION_QUADRANT_3_4_GAMEPAD_FRAGMENT = ZO_InteractionFramingFragment:New(CalculateGamepadQuadrant34FramingTarget)
+    FRAME_TARGET_QUADRANT_3_4_GAMEPAD_FRAGMENT = ZO_NormalizedPointFragment:New(CalculateGamepadQuadrant34FramingTarget, SetFrameLocalPlayerTarget)
     FRAME_TARGET_BLUR_QUADRANT_3_4_GAMEPAD_FRAGMENT = ZO_CharacterFramingBlur:New(CalculateGamepadQuadrant34FramingTarget)
 end
 
@@ -855,6 +856,32 @@ end
 
 SHOW_QUEUED_UI_SYSTEM_FRAGMENT = ShowQueuedUISystemFragment:New()
 
+-----------------------------------------------------
+-- Ignore Energy Sustainability Frame Cap Fragment
+-----------------------------------------------------
+
+local IgnoreEnergySustainabilityFrameCapFragment = ZO_SceneFragment:Subclass()
+
+function IgnoreEnergySustainabilityFrameCapFragment:New(...)
+    return ZO_SceneFragment.New(self, ...)
+end
+
+function IgnoreEnergySustainabilityFrameCapFragment:Show()
+    if IsConsoleUI() then
+        PreventEnergySustainabilityFrameCap(true)
+    end
+    self:OnShown()
+end
+
+function IgnoreEnergySustainabilityFrameCapFragment:Hide()
+    if IsConsoleUI() then
+        PreventEnergySustainabilityFrameCap(false)
+    end
+    self:OnHidden()
+end
+
+IGNORE_ENERGY_SUSTAINABILITY_FRAME_CAP_FRAGMENT = IgnoreEnergySustainabilityFrameCapFragment:New()
+
 --------------------------------------
 --General Fragment Declarations
 --------------------------------------
@@ -914,7 +941,6 @@ MAIL_SEND_FRAGMENT = ZO_FadeSceneFragment:New(ZO_MailSend)
 MAIL_TITLE_FRAGMENT = ZO_SetTitleFragment:New(SI_WINDOW_TITLE_MAIL)
 
 GAMEPAD_TRADE_FRAGMENT = ZO_FadeSceneFragment:New(ZO_Trade_Gamepad)
-LOCKPICK_FRAGMENT = ZO_FadeSceneFragment:New(ZO_LockpickPanel)
 CHARACTER_WINDOW_STATS_FRAGMENT = ZO_FadeSceneFragment:New(ZO_CharacterWindowStats)
 CHARACTER_WINDOW_FRAGMENT = ZO_CharacterWindowFragment:New(ZO_Character, false)
 READ_ONLY_CHARACTER_WINDOW_FRAGMENT = ZO_CharacterWindowFragment:New(ZO_Character, true)
@@ -1088,9 +1114,6 @@ function ZO_CloseActionsInterceptLayerFragment:InterceptCloseAction(keybind)
 end
 
 CLOSE_ACTIONS_INTERCEPT_LAYER_FRAGMENT = ZO_CloseActionsInterceptLayerFragment:New("CloseActionsInterceptLayer")
-
---Shared Tutorials
-LOCKPICK_TUTORIAL_FRAGMENT = ZO_TutorialTriggerFragment:New(TUTORIAL_TRIGGER_LOCKPICKING_OPENED)
 
 HOUSING_EDITOR_HUD_FRAGMENT = ZO_HousingEditorHUDFragment:New()
 HOUSING_EDITOR_ACTION_BAR_FRAGMENT = ZO_FadeSceneFragment:New(ZO_HousingEditorActionBarTopLevel)

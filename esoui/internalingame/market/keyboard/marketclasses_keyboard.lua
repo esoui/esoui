@@ -461,11 +461,11 @@ end
 local MAX_VISIBLE_ICONS = 8
 function ZO_MarketProductBundle:CreateChildIconControlTable(purchased)
     local iconControls = {}
-    local numChildren = self:GetNumChildren()
+    local numChildren = self:GetNumFacadeChildren()
 
     if not self:GetHidesChildProducts() and numChildren <= MAX_VISIBLE_ICONS then
         for childIndex = 1, numChildren do
-            local childMarketProductId = self:GetChildMarketProductId(childIndex)
+            local childMarketProductId = self:GetFacadeChildMarketProductId(childIndex)
             local marketProductIcon = self:InitializeMarketProductIcon(childMarketProductId, purchased)
             marketProductIcon:SetFrameHidden(false)
 

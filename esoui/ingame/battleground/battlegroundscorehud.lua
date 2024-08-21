@@ -118,7 +118,7 @@ function ZO_BattlegroundTeamSection:UpdateScore()
                 if self.battlegroundAlliance == GetUnitBattlegroundTeam("player") then
                     text = zo_strformat(SI_BATTLEGROUND_NEARING_VICTORY_OWN_TEAM, GetColoredBattlegroundYourTeamText(self.battlegroundAlliance))
                 else
-                    text = zo_strformat(SI_BATTLEGROUND_NEARING_VICTORY_OTHER_TEAM, GetColoredBattlegroundAllianceName(self.battlegroundAlliance))
+                    text = zo_strformat(SI_BATTLEGROUND_NEARING_VICTORY_OTHER_TEAM, GetColoredBattlegroundTeamName(self.battlegroundAlliance))
                 end
                 messageParams:SetText(text)
                 messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_BATTLEGROUND_NEARING_VICTORY)

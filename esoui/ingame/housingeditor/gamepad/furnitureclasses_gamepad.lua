@@ -712,7 +712,15 @@ function ZO_HousingFurnitureList_Gamepad:SwitchActiveList(list)
 
     if list then
         self.owner:SetCurrentList(list.list)
-        KEYBIND_STRIP:AddKeybindButtonGroup(list.keybinds)
+        self.owner.keybindStripDescriptor = list.keybinds
+        if self.owner:IsHeaderActive() then
+            self.owner:RequestLeaveHeader()
+            KEYBIND_STRIP:AddKeybindButtonGroup(list.keybinds)
+        elseif list.list:IsEmpty() and not self.owner:IsTextSearchEntryHidden() then
+            self.owner:RequestEnterHeader()
+        else
+            KEYBIND_STRIP:AddKeybindButtonGroup(list.keybinds)
+        end
 
         if list == self.categoryList then
             self:SetFurnitureRightInfoState(RIGHT_INFO_STATE.HOUSE_INFO)
@@ -722,6 +730,7 @@ function ZO_HousingFurnitureList_Gamepad:SwitchActiveList(list)
             GAMEPAD_HOUSING_FURNITURE_BROWSER:SetTitleText(self.currentCategoryName)
         end
     else
+        self.owner.keybindStripDescriptor = nil
         self.owner:SetCurrentList(nil)
     end
 end
@@ -852,14 +861,14 @@ function ZO_HousingFurnitureList_Gamepad:BuildFurnitureEntry(furnitureObject)
         local narrations = {}
         ZO_AppendNarration(narrations, ZO_GetSharedGamepadEntryDefaultNarrationText(entryData, entryControl))
         ZO_AppendNarration(narrations, entryData:GetPriceNarration())
-        if ITEM_PREVIEW_GAMEPAD:IsPreviewEnabled() then
+        if IsCurrentlyPreviewing() then
             ZO_AppendNarration(narrations, ITEM_PREVIEW_GAMEPAD:GetPreviewSpinnerNarrationText())
         end
         return narrations
     end
 
     entry.additionalInputNarrationFunction = function()
-        if ITEM_PREVIEW_GAMEPAD:IsPreviewEnabled() and ITEM_PREVIEW_GAMEPAD:HasVariations() then
+        if IsCurrentlyPreviewing() and ITEM_PREVIEW_GAMEPAD:HasVariations() then
             return ZO_GetHorizontalDirectionalInputNarrationData(GetString(SI_SCREEN_NARRATION_ITEM_PREVIEW_STATE_PREVIOUS), GetString(SI_SCREEN_NARRATION_ITEM_PREVIEW_STATE_NEXT))
         end
         return {}

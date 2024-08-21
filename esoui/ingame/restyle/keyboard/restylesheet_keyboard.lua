@@ -763,7 +763,9 @@ do
         end
 
         self.noWeaponsLabel = self.control:GetNamedChild("SecondaryNoWeaponsLabel")
-        self.costLabel = self.control:GetNamedChild("Cost")
+        self.costContainer = self.control:GetNamedChild("CostContainer")
+        self.currency1Label = self.costContainer:GetNamedChild("Currency1")
+        self.currency2Label = self.costContainer:GetNamedChild("Currency2")
 
         self.refreshCostFunction = function()
             self:RefreshCost()
@@ -774,7 +776,7 @@ end
 function ZO_RestyleOutfitSlotsSheet:OnShowing()
     ZO_RestyleSlotsSheet.OnShowing(self)
 
-    self.costLabel:SetHidden(not ZO_RestyleCanApplyChanges())
+    self.costContainer:SetHidden(not ZO_RestyleCanApplyChanges())
     self:RefreshCost()
 end
 
@@ -824,7 +826,7 @@ function ZO_RestyleOutfitSlotsSheet:SetOutfitManipulator(newManipulator)
         end
 
         self.currentOutfitManipulator = newManipulator
-        
+
         self:SetRestyleSetIndex(newManipulator:GetOutfitIndex())
     end
 end
@@ -893,22 +895,21 @@ function ZO_RestyleOutfitSlotsSheet:OnSheetSlotRefreshed()
 end
 
 do
-    local function GetCostText(currencyType, cost)
+    local OPTIONS = { font = "ZoFontHeader" }
+    local SHOW_ALL = true
+    local function SetCostText(control, currencyType, cost)
         local currentBalance = GetCurrencyAmount(currencyType, GetCurrencyPlayerStoredLocation(currencyType))
-        local currencyFormat = (cost > currentBalance) and ZO_CURRENCY_FORMAT_ERROR_AMOUNT_ICON or ZO_CURRENCY_FORMAT_WHITE_AMOUNT_ICON
-       return ZO_Currency_FormatKeyboard(currencyType, cost, currencyFormat)
+        ZO_CurrencyControl_SetSimpleCurrency(control, currencyType, cost, OPTIONS, SHOW_ALL, cost > currentBalance)
     end
 
     function ZO_RestyleOutfitSlotsSheet:RefreshCost()
         local slotsCost, flatCost = self.currentOutfitManipulator:GetAllCostsForPendingChanges()
 
         -- Slot based cost
-        local slotsCostText = GetCostText(CURT_MONEY, slotsCost)
+        SetCostText(self.currency1Label, CURT_MONEY, slotsCost)
 
         --Flat cost
-        local flatCostText = GetCostText(CURT_STYLE_STONES, flatCost)
-
-        self.costLabel:SetText(zo_strformat(SI_RESTYLE_SHEET_APPLY_COST_FORMAT, slotsCostText, flatCostText))
+        SetCostText(self.currency2Label, CURT_STYLE_STONES, flatCost)
     end
 end
 

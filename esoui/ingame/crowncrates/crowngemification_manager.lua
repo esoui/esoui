@@ -127,7 +127,7 @@ function ZO_GemifiableItem:Gemify(amount)
 end
 
 function ZO_GemifiableItem:LayoutKeyboardTooltip()
-    InformationTooltip:SetBagItem(self.bagId, self.slotIndex)
+    ItemTooltip:SetBagItem(self.bagId, self.slotIndex)
 end
 
 function ZO_GemifiableItem:LayoutGamepadTooltip()

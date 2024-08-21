@@ -23,6 +23,7 @@ function ZO_EndlessDungeonLeaderboardsManager_Keyboard:Initialize(control)
     end)
 
     SYSTEMS:RegisterKeyboardObject("endlessDungeonLeaderboards", self)
+    LEADERBOARDS:RegisterLeaderboardSystemObject(self, LEADERBOARD_DATA_TYPE.ENDLESS_DUNGEON)
 end
 
 function ZO_EndlessDungeonLeaderboardsManager_Keyboard:RefreshHeaderPlayerInfo(isWeekly)

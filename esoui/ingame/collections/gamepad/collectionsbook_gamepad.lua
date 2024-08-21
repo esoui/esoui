@@ -65,14 +65,18 @@ function ZO_GamepadCollectionsBook:Initialize(control)
     self:InitializeUtilityWheel()
 
     self.control:RegisterForEvent(EVENT_VISUAL_LAYER_CHANGED, function()
-                                                                    if GAMEPAD_COLLECTIONS_BOOK_SCENE:IsShowing() then
-                                                                        if self:IsViewingCollectionsList() then
-                                                                            self:UpdateCollectionListVisualLayer()
-                                                                        end
-                                                                    end
-                                                                end)
+        if GAMEPAD_COLLECTIONS_BOOK_SCENE:IsShowing() then
+            if self:IsViewingCollectionsList() then
+                self:UpdateCollectionListVisualLayer()
+            end
+        end
+    end)
 
     SYSTEMS:RegisterGamepadObject(ZO_COLLECTIONS_SYSTEM_NAME, self)
+
+    self.onRefreshActionsCallback = function()
+        SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.currentList.list)
+    end
 
     self.OnGamepadDialogShowing = function()
         if ZO_Dialogs_IsShowingDialogThatShouldShowTooltip() then
@@ -143,6 +147,8 @@ function ZO_GamepadCollectionsBook:InitializeHousingPanel()
     housingPanel.nicknameLabel = container:GetNamedChild("Nickname")
     housingPanel.locationLabel = container:GetNamedChild("LocationValue")
     housingPanel.houseTypeLabel = container:GetNamedChild("HouseTypeValue")
+    housingPanel.recommendCountHeader = container:GetNamedChild("RecommendCountHeader")
+    housingPanel.recommendCountValue = container:GetNamedChild("RecommendCountValue")
 
     local scrollContainer = container:GetNamedChild("ScrollSection"):GetNamedChild("ScrollChild")
     housingPanel.descriptionLabel = scrollContainer:GetNamedChild("Description")
@@ -279,6 +285,18 @@ function ZO_GamepadCollectionsBook:OnShowing()
     self:ShowList(self.categoryList)
     GAMEPAD_TOOLTIPS:SetTooltipResetScrollOnClear(GAMEPAD_LEFT_TOOLTIP, false)
 
+    ITEM_PREVIEW_GAMEPAD:RegisterCallback("RefreshActions", self.onRefreshActionsCallback)
+
+    -- There may be other scenes which need to return to the same place within CollectionsBook. Add them here.
+    -- Initializing here also prevents external screens from requesting CollectionsBook to open to a specific spot.
+    if SCENE_MANAGER:GetPreviousSceneName() ~= GAMEPAD_PLAYER_EMOTE_SCENE_NAME then
+        -- If we were returning to this screen from a child scene, we would want to return selection to the same item.
+        -- We're opening this screen a new time, so clear possible cached indices.
+        self.browseToCollectibleInfo = nil
+        self.savedOutfitStyleIndex = nil
+        self.savedCollectibleData = nil
+    end
+
     local browseInfo = self.browseToCollectibleInfo
     if browseInfo ~= nil then
         local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(browseInfo.collectibleId)
@@ -321,6 +339,8 @@ end
 
 function ZO_GamepadCollectionsBook:OnHiding()
     self:HideAssignableUtilityWheel()
+
+    ITEM_PREVIEW_GAMEPAD:UnregisterCallback("RefreshActions", self.onRefreshActionsCallback)
 
     CALLBACK_MANAGER:UnregisterCallback("OnGamepadDialogShowing", self.OnGamepadDialogShowing)
     CALLBACK_MANAGER:UnregisterCallback("OnGamepadDialogHidden", self.OnGamepadDialogHidden)
@@ -693,6 +713,8 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
                 local collectibleData = self:GetCurrentTargetData()
                 ITEM_PREVIEW_GAMEPAD:PreviewCollectible(collectibleData:GetId())
                 KEYBIND_STRIP:UpdateKeybindButtonGroup(self.collectionKeybindStripDescriptor)
+                --Re-narrate when the keybinds change
+                SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.currentList.list)
             end,
             visible = function()
                 local collectibleData = self:GetCurrentTargetData()
@@ -714,6 +736,8 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
             callback = function()
                 ITEM_PREVIEW_GAMEPAD:EndCurrentPreview()
                 KEYBIND_STRIP:UpdateKeybindButtonGroup(self.collectionKeybindStripDescriptor)
+                --Re-narrate when the keybinds change
+                SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.currentList.list)
             end,
             visible = function()
                 return IsCurrentlyPreviewing()
@@ -1238,6 +1262,14 @@ function ZO_GamepadCollectionsBook:BuildCollectibleData(collectibleData)
         ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_HOUSING_HOUSE_TYPE_HEADER)))
         ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(houseType))
 
+        --Home Tour Recommendations narration
+        local houseId = entryData:GetReferenceId()
+        local recommendCount = GetNumHouseToursPlayerListingRecommendations(houseId)
+        if recommendCount > 0 then
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_HOUSING_HOUSE_TOUR_RECOMMENDATION_COUNT_HEADER)))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(recommendCount))
+        end
+
         -- House description narration
         ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(entryData:GetDescription()))
 
@@ -1262,6 +1294,19 @@ function ZO_GamepadCollectionsBook:BuildCollectibleData(collectibleData)
         return narrations
     end
 
+    local function GetCollectibleNarrationText(entryData, entryControl)
+        local narrations = {}
+
+        -- Generate the standard parametric list entry narration
+        ZO_AppendNarration(narrations, ZO_GetSharedGamepadEntryDefaultNarrationText(entryData, entryControl))
+
+        if IsCurrentlyPreviewing() then
+            ZO_AppendNarration(narrations, ITEM_PREVIEW_GAMEPAD:GetPreviewSpinnerNarrationText())
+        end
+
+        return narrations
+    end
+
     local collectibleId = collectibleData:GetId()
 
     local entryData = ZO_GamepadEntryData:New(collectibleData:GetFormattedName(), collectibleData:GetIcon())
@@ -1277,6 +1322,7 @@ function ZO_GamepadCollectionsBook:BuildCollectibleData(collectibleData)
         entryData.narrationText = GetHouseNarrationText
     else
         entryData.isEquippedInCurrentCategory = collectibleData:IsActive(GAMEPLAY_ACTOR_CATEGORY_PLAYER) and not collectibleData:ShouldSuppressActiveState(GAMEPLAY_ACTOR_CATEGORY_PLAYER)
+        entryData.narrationText = GetCollectibleNarrationText
     end
 
     entryData:SetIsHiddenByWardrobe(collectibleData:IsVisualLayerHidden(GAMEPLAY_ACTOR_CATEGORY_PLAYER))
@@ -1438,6 +1484,18 @@ function ZO_GamepadCollectionsBook:RefreshHousingTooltip(collectibleData)
     housingPanel.nameLabel:SetText(collectibleData:GetFormattedName())
     housingPanel.locationLabel:SetText(collectibleData:GetFormattedHouseLocation())
     housingPanel.houseTypeLabel:SetText(zo_strformat(SI_HOUSE_TYPE_FORMATTER, GetString("SI_HOUSECATEGORYTYPE", collectibleData:GetHouseCategoryType())))
+
+    local houseId = collectibleData:GetReferenceId()
+    local recommendCount = GetNumHouseToursPlayerListingRecommendations(houseId)
+    if recommendCount > 0 then
+        housingPanel.recommendCountValue:SetText(ZO_CommaDelimitNumber(recommendCount))
+        housingPanel.recommendCountHeader:SetHidden(false)
+        housingPanel.recommendCountValue:SetHidden(false)
+    else
+        housingPanel.recommendCountHeader:SetHidden(true)
+        housingPanel.recommendCountValue:SetHidden(true)
+    end
+
     housingPanel.descriptionLabel:SetText(collectibleData:GetDescription())
     housingPanel.collectedStatusLabel:SetText(GetString("SI_COLLECTIBLEUNLOCKSTATE", collectibleData:GetUnlockState()))
     housingPanel.nicknameLabel:SetText(collectibleData:GetFormattedNickname())
@@ -1529,6 +1587,7 @@ function ZO_GamepadCollectionsBook:TogglePreviewSelectedOutfitStyle()
         local preferredOutfitSlot = ZO_OUTFIT_MANAGER:GetPreferredOutfitSlotForStyle(currentlySelectedCollectibleData)
         if self:IsPreviewingOutfitStyle(currentlySelectedCollectibleData, itemMaterialIndex, preferredOutfitSlot) then
             ClearOutfitSlotPreviewElementFromPreviewCollection(preferredOutfitSlot)
+            ApplyChangesToPreviewCollectionShown()
             self.currentSlotPreviews[preferredOutfitSlot] = nil
         else
             local primaryDye, secondaryDye, accentDye = 0, 0, 0
@@ -1954,6 +2013,23 @@ function ZO_GamepadCollectionsBook:InitializeActionsDialog()
                     end
                 },
             },
+            -- Tour Home
+            {
+                template = "ZO_GamepadMenuEntryTemplate",
+                text = GetString(SI_COLLECTIBLE_ACTION_TOUR_THIS_HOME),
+                templateData = 
+                {
+                    setup = ZO_SharedGamepadEntry_OnSetup,
+                    callback = function(dialog)
+                        --Order matters. Attempt to browse to the house before showing it in the activity finder
+                        HOUSE_TOURS_GAMEPAD:BrowseSpecificHouse(dialog.data:GetReferenceId())
+                        ZO_ACTIVITY_FINDER_ROOT_GAMEPAD:ShowCategory(HOUSE_TOURS_GAMEPAD:GetCategoryData())
+                    end,
+                    visible = function(dialog)
+                        return dialog.data:IsHouse() and ZO_IsHouseToursEnabled()
+                    end
+                },
+            },
         },
         buttons =
         {
@@ -1988,10 +2064,15 @@ function ZO_GamepadCollectionsBook:InitializeRenameCollectibleDialog()
         ZO_Dialogs_ReleaseDialogOnButtonPress(dialogName)
     end
 
-    local function UpdateSelectedName(name)
+    local function UpdateSelectedName(name, isHouse)
         if(self.selectedName ~= name or not self.noViolations) then
             self.selectedName = name
-            self.nameViolations = { IsValidCollectibleName(self.selectedName) }
+
+            if isHouse then
+                self.nameViolations = { IsValidHouseName(self.selectedName) }
+            else
+                self.nameViolations = { IsValidCollectibleName(self.selectedName) }
+            end
             self.noViolations = #self.nameViolations == 0
             
             if(not self.noViolations) then
@@ -2014,9 +2095,9 @@ function ZO_GamepadCollectionsBook:InitializeRenameCollectibleDialog()
         KEYBIND_STRIP:UpdateCurrentKeybindButtonGroups()
     end
 
-    local function SetActiveEdit(edit)
+    local function SetActiveEdit(edit, isHouse)
         edit:TakeFocus()
-        UpdateSelectedName(inputText)
+        UpdateSelectedName(inputText, isHouse)
     end
 
     ZO_Dialogs_RegisterCustomDialog(dialogName,
@@ -2049,10 +2130,12 @@ function ZO_GamepadCollectionsBook:InitializeRenameCollectibleDialog()
                     nameField = true,
                     textChangedCallback = function(control) 
                         inputText = control:GetText()
-                        UpdateSelectedName(inputText)
+                        local isHouse
                         if parametricDialog.data then
                             parametricDialog.data.name = inputText
+                            isHouse = GetCollectibleCategoryType(parametricDialog.data.collectibleId) == COLLECTIBLE_CATEGORY_TYPE_HOUSE
                         end
+                        UpdateSelectedName(inputText, isHouse)
                     end,
                     setup = function(control, data, selected, reselectingDuringRebuild, enabled, active)
                         control.editBoxControl.textChangedCallback = data.textChangedCallback
@@ -2078,7 +2161,11 @@ function ZO_GamepadCollectionsBook:InitializeRenameCollectibleDialog()
                 text = SI_GAMEPAD_SELECT_OPTION,
                 callback = function(dialog)
                     local data = dialog.entryList:GetTargetData()
-                    SetActiveEdit(data.control.editBoxControl)
+                    local isHouse
+                    if dialog.data then
+                        isHouse = GetCollectibleCategoryType(dialog.data.collectibleId) == COLLECTIBLE_CATEGORY_TYPE_HOUSE
+                    end
+                    SetActiveEdit(data.control.editBoxControl, isHouse)
                 end,
             },
             {

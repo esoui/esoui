@@ -152,8 +152,16 @@
                                     <AnchorToBaseline relativeToLabel="$(parent)HouseTypeHeader" side="RIGHT" offsetX="10"/>
                                 </Label>
 
+                                <Label name="$(parent)RecommendCountHeader" inherits="ZO_GamepadHeaderLabelTextTemplate" text="SI_HOUSING_HOUSE_TOUR_RECOMMENDATION_COUNT_HEADER" hidden="true">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)HouseTypeHeader" relativePoint="BOTTOMLEFT" offsetY="5" />
+                                </Label>
+
+                                <Label name="$(parent)RecommendCountValue" inherits="ZO_GamepadHeaderDataTextTemplate" hidden="true">
+                                    <AnchorToBaseline relativeToLabel="$(parent)RecommendCountHeader" side="RIGHT" offsetX="10"/>
+                                </Label>
+
                                 <Control name="$(parent)ScrollSection" override="true" >
-                                    <Anchor point="TOPLEFT" relativeTo="$(parent)HouseTypeHeader" relativePoint="BOTTOMLEFT" offsetY="30" />
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)RecommendCountHeader" relativePoint="BOTTOMLEFT" offsetY="30" />
                                     <Anchor point="BOTTOMRIGHT" />
                                     <Controls>
                                         <Control name="$(parent)ScrollChild" override="true">

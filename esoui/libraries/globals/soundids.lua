@@ -1080,6 +1080,11 @@ SOUNDS =
     GROUP_FINDER_APPLICATION_NOTIFICATION = "GroupFinder_ApplicationNotification",
     GROUP_FINDER_GROUP_LISTING_CREATE_EDIT = "GroupFinder_GroupListing_CreateEdit",
 
+    -- House Tours
+    HOUSE_TOURS_ADDED_FAVORITE_HOUSE = "HouseTours_FavoriteHouseAdded",
+    HOUSE_TOURS_REMOVED_FAVORITE_HOUSE = "HouseTours_FavoriteHouseRemoved",
+    HOUSE_TOURS_RECOMMENDED_HOUSE = "HouseTours_HouseRecommended",
+
     -- Instances
     INSTANCE_SHUTDOWN = "Instance_Shutdown",
 }

@@ -147,7 +147,7 @@ function ZO_BattlegroundLeaderboardsManager_Shared:SendLeaderboardQuery()
     end
 
     self.requestedBattlegroundType = self.selectedSubType
-    LEADERBOARD_LIST_MANAGER:QueryLeaderboardData(PENDING_LEADERBOARD_DATA_TYPE.BATTLEGROUND, self:GenerateRequestData())
+    LEADERBOARD_LIST_MANAGER:QueryLeaderboardData(LEADERBOARD_DATA_TYPE.BATTLEGROUND, self:GenerateRequestData())
 end
 
 function ZO_BattlegroundLeaderboardsManager_Shared:GenerateRequestData()

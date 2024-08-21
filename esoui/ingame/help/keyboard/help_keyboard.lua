@@ -65,6 +65,8 @@ function ZO_Help_Keyboard:Initialize(control)
     HELP_TUTORIALS_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_FRAGMENT_SHOWING then
             self:OnShowing()
+        elseif newState == SCENE_FRAGMENT_SHOWN then
+            self:OnShown()
         elseif newState == SCENE_FRAGMENT_HIDDEN then
             self:OnHidden()
         end
@@ -118,16 +120,21 @@ function ZO_Help_Keyboard:OnShowing()
         self.dirty = true
     end
 
+    self:ActivateInventorySearch()
+
     if self.dirty then
         self:Refresh()
     end
+
+    KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
+end
+
+function ZO_Help_Keyboard:OnShown()
     if self.showHelpCategoryIndex then
         self:SelectHelp(self.showHelpCategoryIndex, self.showHelpIndex)
         self.showHelpCategoryIndex = nil
         self.showHelpIndex = nil
     end
-
-    KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
 end
 
 function ZO_Help_Keyboard:OnHidden()
@@ -135,7 +142,32 @@ function ZO_Help_Keyboard:OnHidden()
         self.searchBox:SetText("")
     end
 
+    self:DeactivateInventorySearch()
+
     KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
+end
+
+local HELP_SEARCH_CONTEXT = "helpSearchContext"
+function ZO_Help_Keyboard:ActivateInventorySearch()
+    if not TEXT_SEARCH_MANAGER:IsActiveTextSearch(HELP_SEARCH_CONTEXT) then
+        TEXT_SEARCH_MANAGER:ActivateTextSearch(HELP_SEARCH_CONTEXT)
+
+        local function OnListTextFilterComplete()
+            self:Refresh()
+        end
+        self.onListTextFilterCompleteCallback = OnListTextFilterComplete
+
+        TEXT_SEARCH_MANAGER:RegisterCallback("UpdateSearchResults", self.onListTextFilterCompleteCallback)
+    end
+end
+
+function ZO_Help_Keyboard:DeactivateInventorySearch()
+    if TEXT_SEARCH_MANAGER:IsActiveTextSearch(HELP_SEARCH_CONTEXT) then
+        TEXT_SEARCH_MANAGER:DeactivateTextSearch(HELP_SEARCH_CONTEXT)
+
+        TEXT_SEARCH_MANAGER:UnregisterCallback("UpdateSearchResults", self.onListTextFilterCompleteCallback)
+        self.onListTextFilterCompleteCallback = nil
+    end
 end
 
 function ZO_Help_Keyboard:InitializeTree()
@@ -275,15 +307,12 @@ function ZO_Help_Keyboard:RefreshList()
     self.activeHelpCount = 0
     self.trialIndex = nil
     self.trialDescription = nil
-    local searchResults = HELP_MANAGER:GetSearchResults()
-    if searchResults then
-        for _, result in ipairs(searchResults) do
-            self:AddHelpEntry(result.helpCategoryIndex, result.helpIndex)
-        end
-    else
-        self:AddTrialEntry()
-        for helpCategoryIndex = 1, GetNumHelpCategories() do
-            for helpIndex = 1, GetNumHelpEntriesWithinCategory(helpCategoryIndex) do
+
+    local isSearchInactive = not TEXT_SEARCH_MANAGER:IsActiveTextSearch(HELP_SEARCH_CONTEXT)
+    self:AddTrialEntry()
+    for helpCategoryIndex = 1, GetNumHelpCategories() do
+        for helpIndex = 1, GetNumHelpEntriesWithinCategory(helpCategoryIndex) do
+            if isSearchInactive or TEXT_SEARCH_MANAGER:IsDataInSearchTextResults(HELP_SEARCH_CONTEXT, BACKGROUND_LIST_FILTER_TARGET_HELP_ID, GetHelpId(helpCategoryIndex, helpIndex)) then
                 self:AddHelpEntry(helpCategoryIndex, helpIndex)
             end
         end
@@ -355,11 +384,11 @@ end
 -- Global XML functions
 
 function ZO_Help_OnSearchTextChanged(editBox)
-    HELP_MANAGER:SetSearchString(editBox:GetText())
+    TEXT_SEARCH_MANAGER:SetSearchText(HELP_SEARCH_CONTEXT, editBox:GetText())
 end
 
 function ZO_Help_OnSearchEnterKeyPressed(editBox)
-    HELP_MANAGER:SetSearchString(editBox:GetText())
+    TEXT_SEARCH_MANAGER:SetSearchText(HELP_SEARCH_CONTEXT, editBox:GetText())
     editBox:LoseFocus()
 end
 

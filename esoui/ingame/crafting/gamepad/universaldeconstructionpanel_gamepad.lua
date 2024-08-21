@@ -218,6 +218,12 @@ function ZO_UniversalDeconstructionPanel_Gamepad:InitializeFilters()
     }
 end
 
+function ZO_UniversalDeconstructionPanel_Gamepad:AddInventoryAdditionalFilter(additionalFilterFunction)
+    if self.inventory then
+        self.inventory.additionalFilter = additionalFilterFunction
+    end
+end
+
 function ZO_UniversalDeconstructionPanel_Gamepad:RefreshAccessibleCraftingTypeFilters()
     local craftingTypeItems = self.craftingTypeFilterEntries:GetAllItems()
     for _, craftingTypeItem in ipairs(craftingTypeItems) do
@@ -593,7 +599,20 @@ function ZO_UniversalDeconstructionInventory_Gamepad:Refresh(data)
 
     local DONT_USE_WORN_BAG = false
     local excludeBanked = not self.universalDeconstructionPanel:GetIncludeBankedItems()
-    local validItems = self:GetIndividualInventorySlotsAndAddToScrollData(isDeconstructableFunction, ZO_UniversalDeconstructionPanel_Shared.DoesItemPassFilter, self.filterType, data, DONT_USE_WORN_BAG, excludeBanked)
+
+    local function ItemFilterFunction(bagId, slotIndex, filterType)
+        if not ZO_UniversalDeconstructionPanel_Shared.DoesItemPassFilter(bagId, slotIndex, filterType) then
+            return false
+        end
+
+        if self.additionalFilter and type(self.additionalFilter) == "function" then
+            return self.additionalFilter(bagId, slotIndex, filterType)
+        end
+
+        return true
+    end
+
+    local validItems = self:GetIndividualInventorySlotsAndAddToScrollData(isDeconstructableFunction, ItemFilterFunction, self.filterType, data, DONT_USE_WORN_BAG, excludeBanked)
     self.universalDeconstructionPanel:OnInventoryUpdate(validItems, self.filterType)
 end
 

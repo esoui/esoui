@@ -26,7 +26,7 @@ function ZO_GamepadSmithingExtraction:Initialize(panelControl, floatingControl, 
     ZO_SharedSmithingExtraction.Initialize(self, slotContainer:GetNamedChild("ExtractionSlot"), nil, owner, isRefinementOnly)
 
     self.tooltip = floatingControl:GetNamedChild("Tooltip")
-    local tooltipNarrationInfo = 
+    local tooltipNarrationInfo =
     {
         canNarrate = function()
             return not self.tooltip:IsHidden()
@@ -543,12 +543,25 @@ end
 
 function ZO_GamepadExtractionInventory:Refresh(data)
     local validItems
+
+    local function ItemFilterFunction(bagId, slotIndex, filterType)
+        if not ZO_SharedSmithingExtraction_DoesItemPassFilter(bagId, slotIndex, filterType) then
+            return false
+        end
+
+        if self.additionalFilter and type(self.additionalFilter) == "function" then
+            return self.additionalFilter(bagId, slotIndex, filterType)
+        end
+
+        return true
+    end
+
     if self.filterType == SMITHING_FILTER_TYPE_RAW_MATERIALS then
-        validItems = self:EnumerateInventorySlotsAndAddToScrollData(ZO_SharedSmithingExtraction_IsRefinableItem, ZO_SharedSmithingExtraction_DoesItemPassFilter, self.filterType, data)
+        validItems = self:EnumerateInventorySlotsAndAddToScrollData(ZO_SharedSmithingExtraction_IsRefinableItem, ItemFilterFunction, self.filterType, data)
     else
         local DONT_USE_WORN_BAG = false
         local excludeBanked = not self.owner.savedVars.includeBankedItemsChecked
-        validItems = self:GetIndividualInventorySlotsAndAddToScrollData(ZO_SharedSmithingExtraction_IsExtractableItem, ZO_SharedSmithingExtraction_DoesItemPassFilter, self.filterType, data, DONT_USE_WORN_BAG, excludeBanked)
+        validItems = self:GetIndividualInventorySlotsAndAddToScrollData(ZO_SharedSmithingExtraction_IsExtractableItem, ItemFilterFunction, self.filterType, data, DONT_USE_WORN_BAG, excludeBanked)
     end
     self.owner:OnInventoryUpdate(validItems, self.filterType)
 

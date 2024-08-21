@@ -529,7 +529,23 @@ function ZO_Smithing:AddTabsToMenuBar(craftingType, isCraftingTypeDifferent)
         end
     else
         ZO_MenuBar_SelectDescriptor(self.modeBar, oldMode)
-    end   
+    end
+end
+
+function ZO_Smithing:AddInventoryAdditionalFilterByMode(smithingMode, additionalFilterFunction)
+    if smithingMode == SMITHING_MODE_REFINEMENT then
+        if self.refinementPanel.inventory then
+            self.refinementPanel.inventory.additionalFilter = additionalFilterFunction
+        end
+    elseif smithingMode == SMITHING_MODE_DECONSTRUCTION then
+        if self.deconstructionPanel.inventory then
+            self.deconstructionPanel.inventory.additionalFilter = additionalFilterFunction
+        end
+    elseif smithingMode == SMITHING_MODE_IMPROVEMENT then
+        if self.improvementPanel.inventory then
+            self.improvementPanel.inventory.additionalFilter = additionalFilterFunction
+        end
+    end
 end
 
 function ZO_Smithing:SetupSavedVars()

@@ -12,10 +12,6 @@ ZO_HOUSING_BOOK_IMAGE_HEIGHT = (INFO_PANEL_WIDTH / BACKGROUND_IMAGE_CONTENT_WIDT
 
 local HousingBook_Keyboard = ZO_SpecializedCollectionsBook_Keyboard:Subclass()
 
-function HousingBook_Keyboard:New(...)
-    return ZO_SpecializedCollectionsBook_Keyboard.New(self, ...)
-end
-
 function HousingBook_Keyboard:InitializeControls()
     ZO_SpecializedCollectionsBook_Keyboard.InitializeControls(self)
     
@@ -26,6 +22,7 @@ function HousingBook_Keyboard:InitializeControls()
     self.locationLabel = scrollSection:GetNamedChild("LocationLabel")
     self.houseTypeLabel = scrollSection:GetNamedChild("HouseTypeLabel")
     self.primaryResidenceLabel = scrollSection:GetNamedChild("PrimaryResidenceLabel")
+    self.recommendCountLabel = scrollSection:GetNamedChild("RecommendCountLabel")
     self.hintLabel = scrollSection:GetNamedChild("HintLabel")
 
     local buttons = contents:GetNamedChild("HousingInteractButtons")
@@ -52,6 +49,13 @@ function HousingBook_Keyboard:InitializeEvents()
     end
     self.control:RegisterForEvent(EVENT_PLAYER_ACTIVATED, OnZoneChanged)
     self.control:RegisterForEvent(EVENT_ZONE_CHANGED, OnZoneChanged)
+
+    local function OnHouseToursStatusUpdated()
+        if self.keybindStripDescriptor then
+            KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+        end
+    end
+    self.control:RegisterForEvent(EVENT_HOUSE_TOURS_STATUS_UPDATED, OnHouseToursStatusUpdated)
 end
 
 function HousingBook_Keyboard:InitializeKeybindStripDescriptors()
@@ -88,6 +92,19 @@ function HousingBook_Keyboard:InitializeKeybindStripDescriptors()
                 return data:IsUnlocked() and not data:IsPrimaryResidence()
             end,
         },
+        -- Tour Home
+        {
+            name = GetString(SI_COLLECTIBLE_ACTION_TOUR_THIS_HOME),
+            keybind = "UI_SHORTCUT_QUATERNARY",
+            callback = function()
+                local data = self:GetSelectedData()
+                local houseId = data:GetReferenceId()
+                --Order matters. Attempt to browse to the house before trying to show the category in the activity finder.
+                HOUSE_TOURS_SEARCH_RESULTS_KEYBOARD:BrowseToSpecificHouse(houseId)
+                GROUP_MENU_KEYBOARD:ShowCategoryByData(HOUSE_TOURS_SEARCH_RESULTS_KEYBOARD:GetActivityFinderCategoryData(HOUSE_TOURS_LISTING_TYPE_BROWSE))
+            end,
+            visible = ZO_IsHouseToursEnabled,
+        }
     }
 end
 
@@ -102,6 +119,21 @@ function HousingBook_Keyboard:RefreshDetails()
             self.nicknameLabel:SetText(nickname)
         end
         self.nicknameLabel:SetHidden(not hasNickname)
+
+        local houseId = collectibleData:GetReferenceId()
+        local recommendCount = GetNumHouseToursPlayerListingRecommendations(houseId)
+
+        --We need to re-anchor the primaryResidenceLabel depending on whether or not we will be showing the recommendation count
+        self.primaryResidenceLabel:ClearAnchors()
+
+        if recommendCount > 0 then
+            self.primaryResidenceLabel:SetAnchor(TOPLEFT, self.recommendCountLabel, BOTTOMLEFT, 0, 5)
+            self.recommendCountLabel:SetText(zo_strformat(SI_HOUSING_BOOK_HOUSE_TOURS_RECOMMEND_COUNT_FORMATTER, ZO_CommaDelimitNumber(recommendCount)))
+            self.recommendCountLabel:SetHidden(false)
+        else
+            self.primaryResidenceLabel:SetAnchor(TOPLEFT, self.houseTypeLabel, BOTTOMLEFT, 0, 5)
+            self.recommendCountLabel:SetHidden(true)
+        end
 
         local isUnlocked = collectibleData:IsUnlocked()
         local canJumpToHouse = CanJumpToHouseFromCurrentLocation()

@@ -134,7 +134,11 @@ function ZO_ItemSetsBook_Shared:SetupGridHeaderEntry(control, data, selected)
         obfuscateAmount = true
         reconstructionCurrencyCost = 0
     end
-    control.costLabel:SetText(ZO_Currency_FormatPlatform(reconstructionCurrencyType, reconstructionCurrencyCost, ZO_CURRENCY_FORMAT_WHITE_AMOUNT_ICON, { obfuscateAmount = obfuscateAmount }))
+
+    local DEFAULT_OPTIONS = nil
+    local SHOW_ALL = true
+    local HAS_ENOUGH_CURRENCY = false
+    ZO_CurrencyControl_SetSimpleCurrency(control.costLabel, reconstructionCurrencyType, reconstructionCurrencyCost, DEFAULT_OPTIONS, SHOW_ALL, HAS_ENOUGH_CURRENCY, { obfuscateAmount = obfuscateAmount })
     control.progressBar:SetValue(itemSetHeaderData:GetNumUnlockedPieces() / itemSetHeaderData:GetNumPieces())
 end
 

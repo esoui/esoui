@@ -19,6 +19,8 @@ local CRAFTING_QUEST_PIN_TEXTURE = "EsoUI/Art/WritAdvisor/Gamepad/gp_advisor_tra
 local CRAFTING_QUEST_DISABLED_PIN_TEXTURE = "EsoUI/Art/WritAdvisor/Gamepad/gp_advisor_trackedPin_icon_disabled.dds"
 local FAVORITED_TEXTURE = "EsoUI/Art/Collections/Favorite_StarOnly.dds"
 local PRIMARY_RESIDENCE_TEXTURE = "EsoUI/Art/Collections/PrimaryHouse.dds"
+local LISTED_RESIDENCE_TEXTURE = "EsoUI/Art/HouseTours/houseTours_listed.dds"
+local HOUSE_TOURS_FAVORITED_TEXTURE = "EsoUI/Art/HouseTours/houseTours_favorite.dds"
 
 local NORMAL_FONT_SELECTED = "ZoFontGamepad42"
 local NORMAL_FONT_UNSELECTED = "ZoFontGamepad34"
@@ -381,10 +383,6 @@ local function ZO_SharedGamepadEntryStatusIndicatorSetup(statusIndicator, data)
             statusIndicator:AddIcon(STOLEN_ICON_TEXTURE, NO_TINT, GetString(SI_SCREEN_NARRATION_STOLEN_ICON_NARRATION))
         end
 
-        if data.sellInformation == ITEM_SELL_INFORMATION_CANNOT_SELL and ZO_StoreManager_IsInventoryStoreMode(STORE_WINDOW_GAMEPAD:GetCurrentMode()) then
-            statusIndicator:AddIcon(ZO_GetItemSellInformationIcon(data.sellInformation), NO_TINT, GetString(SI_SCREEN_NARRATION_CANNOT_SELL_ICON_NARRATION))
-        end
-
         if data.isGemmable then
             statusIndicator:AddIcon(ZO_Currency_GetPlatformCurrencyIcon(CURT_CROWN_GEMS), NO_TINT, GetString(SI_SCREEN_NARRATION_GEMMABLE_ICON_NARRATION))
         end
@@ -425,8 +423,14 @@ local function ZO_SharedGamepadEntryStatusIndicatorSetup(statusIndicator, data)
             statusIndicator:AddIcon(ZO_GAMEPAD_LOCKED_ICON_32, NO_TINT, GetString(SI_SCREEN_NARRATION_LOCKED_ICON_NARRATION))
         end
 
+        local addedTraitIcon = false
         if data.traitInformation ~= ITEM_TRAIT_INFORMATION_NONE and not data.ignoreTraitInformation then
             statusIndicator:AddIcon(ZO_GetPlatformTraitInformationIcon(data.traitInformation), NO_TINT, GetString("SI_ITEMTRAITINFORMATION", data.traitInformation))
+            addedTraitIcon = true
+        end
+
+        if data.sellInformation and (not addedTraitIcon or ZO_GetPlatformTraitInformationIcon(data.traitInformation) ~= ZO_GetItemSellInformationIcon(data.sellInformation)) and ZO_StoreManager_IsInventoryStoreMode(STORE_WINDOW_GAMEPAD:GetCurrentMode()) then
+            statusIndicator:AddIcon(ZO_GetItemSellInformationIcon(data.sellInformation), NO_TINT, GetString("SI_ITEMSELLINFORMATION", data.sellInformation))
         end
 
         if data.isTrackedAntiquity then
@@ -454,6 +458,14 @@ local function ZO_SharedGamepadEntryStatusIndicatorSetup(statusIndicator, data)
 
         if data.isPrimaryResidence then
             statusIndicator:AddIcon(PRIMARY_RESIDENCE_TEXTURE, NO_TINT, GetString(SI_SCREEN_NARRATION_PRIMARY_RESIDENCE_ICON_NARRATION))
+        end
+
+        if data.isListedResidence then
+            statusIndicator:AddIcon(LISTED_RESIDENCE_TEXTURE, NO_TINT, GetString(SI_SCREEN_NARRATION_LISTED_RESIDENCE_ICON_NARRATION))
+        end
+
+        if data.isHouseToursFavorite then
+            statusIndicator:AddIcon(HOUSE_TOURS_FAVORITED_TEXTURE, NO_TINT, GetString(SI_SCREEN_NARRATION_FAVORITE_ICON_NARRATION))
         end
 
         statusIndicator:Show()

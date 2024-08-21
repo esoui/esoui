@@ -374,7 +374,20 @@ end
 function ZO_FilletInventory_Gamepad:Refresh(data)
     local validItems
     local NO_FILTER_FUNCTION = nil
-    validItems = self:EnumerateInventorySlotsAndAddToScrollData(ZO_FishFillet_Shared_IsFilletableItem, NO_FILTER_FUNCTION, self.filterType, data)
+
+    local function ItemFilterFunction(bagId, slotIndex)
+        if not ZO_FishFillet_Shared_IsFilletableItem(bagId, slotIndex) then
+            return false
+        end
+
+        if self.additionalFilter and type(self.additionalFilter) == "function" then
+            return self.additionalFilter(bagId, slotIndex)
+        end
+
+        return true
+    end
+
+    validItems = self:EnumerateInventorySlotsAndAddToScrollData(ItemFilterFunction, NO_FILTER_FUNCTION, self.filterType, data)
 
     self.owner:OnInventoryUpdate(validItems, self.filterType)
 

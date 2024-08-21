@@ -41,6 +41,7 @@
                 
                 <Label name="$(parent)Name" inherits="ZO_ComboBox_Item_Gamepad_Text_Template">
                     <Anchor point="LEFT" relativeTo="$(parent)CheckBox" relativePoint="RIGHT" />
+                    <Anchor point="RIGHT" relativeTo="$(grandparent)" relativePoint="RIGHT" constrains="X" />
                 </Label>
             </Controls>
         </Control>

@@ -171,14 +171,7 @@ function ZO_GuildHistory_Shared:BuildMasterList()
         -- Even if we made the initial requests, we might have some info already from pushes, so show those right away
         local guildData = GUILD_HISTORY_MANAGER:GetGuildData(self.guildId)
         local eventCategoryData = guildData:GetEventCategoryData(self.selectedEventCategory)
-        local oldestEventIndex = eventCategoryData:GetNumEvents()
-        --Pull all known events and redacted events
-        if oldestEventIndex > 0 then
-            self.masterList, self.redactedEvents = eventCategoryData:GetEventsInIndexRange(1, oldestEventIndex)
-        else
-            self.masterList = {}
-            self.redactedEvents = {}
-        end
+        self.totalNumEvents = eventCategoryData:GetNumEvents()
         ZO_ClearTable(self.cachedEventIndicesByPage) -- Always reset the cache when resetting the master list
     end
 end
@@ -189,11 +182,12 @@ function ZO_GuildHistory_Shared:FilterScrollList()
     self.entryDataPool:ReleaseAllObjects()
     self.hasNextPage = false
 
-    if #self.masterList > 0 then
-        local startIndex = 1
-        local numEventsToSkip = 0
-        local numEventsSkipped = 0
+    if self.totalNumEvents > 0 then
+        local startIndex = nil
         local cachedPageEventIndices = self.cachedEventIndicesByPage[self.currentPage]
+        local guildData = GUILD_HISTORY_MANAGER:GetGuildData(self.guildId)
+        local eventCategoryData = guildData:GetEventCategoryData(self.selectedEventCategory)
+
         if cachedPageEventIndices then
             -- We've already processed this page, so we know exactly what eventIndex to start with
             startIndex = cachedPageEventIndices.startIndex
@@ -204,27 +198,37 @@ function ZO_GuildHistory_Shared:FilterScrollList()
                 -- so we know we can at least start after the last event from that page to save loops
                 startIndex = previousCachedPageEventIndices.endIndex + 1
             else
-                -- We don't have enough cached information to start ahead, so instead we need to skip events based on what page we're on.
+                -- We don't have enough cached information to start ahead, so instead we need to calculate the start index for the page we're on.
                 -- This is because the page indices cache will get cleared if new events come in, but that doesn't mean we reset our current page
-                numEventsToSkip = (self.currentPage - 1) * ENTRIES_PER_PAGE
+                local canHaveRedactedEvents = eventCategoryData:CanHaveRedactedEvents()
+                local eventCategoryInfo = ZO_GuildHistory_Manager.GetEventCategoryInfo(self.selectedEventCategory)
+                local hasMultipleSubcategories = #eventCategoryInfo.subcategories > 1
+                if not (canHaveRedactedEvents or hasMultipleSubcategories) then
+                    -- If no events could be hidden, the math is simple
+                    startIndex = ((self.currentPage - 1) * ENTRIES_PER_PAGE) + 1
+                end
             end
         end
 
-        for i = startIndex, #self.masterList do
-            local data = self.masterList[i]
-            if not data:IsRedacted() and self.selectedSubcategoryIndex == data:GetUISubcategoryIndex() then
-                if numEventsSkipped == numEventsToSkip then
-                    if #scrollData == ENTRIES_PER_PAGE then
-                        self.hasNextPage = true
-                        break
-                    end
-                    local entryData = self.entryDataPool:AcquireObject()
-                    entryData:SetDataSource(data)
-                    entryData:SetupAsScrollListDataEntry(GUILD_EVENT_DATA)
-                    table.insert(scrollData, entryData)
-                else
-                    numEventsSkipped = numEventsSkipped + 1
+        if not startIndex then
+            -- There's no cached page data, and either we're on page 1 or redaction/filters mean some events can be hidden,
+            -- so we need to check them all to get an accurate calculation
+            startIndex = eventCategoryData:GetStartingIndexForPage(self.currentPage, ENTRIES_PER_PAGE, self.selectedSubcategoryIndex)
+        end
+
+        if startIndex then
+            -- Attempt to only get as many events as we need to get this page done, not all possible events
+            local OMIT_REDACTED = true
+            local events = eventCategoryData:GetXEventsFromStartingIndex(startIndex, ENTRIES_PER_PAGE + 1, OMIT_REDACTED, self.selectedSubcategoryIndex)
+            for i, data in ipairs(events) do
+                if i > ENTRIES_PER_PAGE then
+                    self.hasNextPage = true
+                    break
                 end
+                local entryData = self.entryDataPool:AcquireObject()
+                entryData:SetDataSource(data)
+                entryData:SetupAsScrollListDataEntry(GUILD_EVENT_DATA)
+                table.insert(scrollData, entryData)
             end
         end
 
@@ -250,21 +254,17 @@ function ZO_GuildHistory_Shared:FilterScrollList()
             newestEventId = oldestUpToDateEvent:GetEventId()
         end
 
-        local oldestRedactedEvent
-        if #self.redactedEvents > 0 then
-            local newestRedactedEvent = self.redactedEvents[1]
-            oldestRedactedEvent = self.redactedEvents[#self.redactedEvents]
-            if newestEventId == nil or newestRedactedEvent:GetEventId() > newestEventId then
-                newestEventId = newestRedactedEvent:GetEventId()
-            end
+        local newestRedactedEventId, oldestRedactedEventId = eventCategoryData:GetNewestAndOldestRedactedEventIds()
+        if newestRedactedEventId and (newestEventId == nil or newestRedactedEventId > newestEventId) then
+            newestEventId = newestRedactedEventId
         end
 
         --The oldest event id will either be the last event on the page or the oldest redacted event
         local oldestEventId
         if #scrollData > 0 then
             oldestEventId = scrollData[#scrollData]:GetEventId()
-        elseif oldestRedactedEvent then
-            oldestEventId = oldestRedactedEvent:GetEventId()
+        elseif oldestRedactedEventId then
+            oldestEventId = oldestRedactedEventId
         end
 
         local request = self:GetRequestForSelection()
@@ -278,7 +278,7 @@ function ZO_GuildHistory_Shared:FilterScrollList()
             -- which will come back into FilterScrollList when the response comes.
             local QUEUE_IF_ON_COOLDOWN = true
             local readyState = request:RequestMoreEvents(QUEUE_IF_ON_COOLDOWN, newestEventId, oldestEventId)
-        elseif #self.masterList < ENTRIES_PER_PAGE and not request:IsComplete() then
+        elseif self.totalNumEvents < ENTRIES_PER_PAGE and not request:IsComplete() then
             -- Need to make a request to fill up the page if we are on the first page,
             -- which will come back into FilterScrollList when the response comes.
             local QUEUE_IF_ON_COOLDOWN = true

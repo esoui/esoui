@@ -114,7 +114,7 @@ function ZO_TributeLeaderboardsManager_Shared:SendLeaderboardQuery()
     end
 
     self.requestedTributeType = self.selectedSubType
-    LEADERBOARD_LIST_MANAGER:QueryLeaderboardData(PENDING_LEADERBOARD_DATA_TYPE.TRIBUTE, self:GenerateRequestData())
+    LEADERBOARD_LIST_MANAGER:QueryLeaderboardData(LEADERBOARD_DATA_TYPE.TRIBUTE, self:GenerateRequestData())
 end
 
 function ZO_TributeLeaderboardsManager_Shared:GenerateRequestData()

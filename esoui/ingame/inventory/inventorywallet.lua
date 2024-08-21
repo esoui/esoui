@@ -46,7 +46,7 @@ function InventoryWalletManager:Initialize(container)
                                                             if newState == SCENE_FRAGMENT_SHOWING then
                                                                 self:UpdateList()
                                                                 self:UpdateFreeSlots()
-																self:RefreshCurrency()
+                                                                self:RefreshCurrency()
                                                             end
                                                         end)
 
@@ -123,6 +123,7 @@ do
         local amountControl = GetControl(control, "Amount")
         FORMAT_EXTRA_OPTIONS.currencyLocation = GetCurrencyPlayerStoredLocation(data.currencyType)
         amountControl:SetText(ZO_Currency_FormatKeyboard(data.currencyType, data.amount, ZO_CURRENCY_FORMAT_AMOUNT_ICON, FORMAT_EXTRA_OPTIONS))
+        amountControl.type = data.currencyType
     end
 end
 
@@ -191,4 +192,26 @@ end
 
 function ZO_InventoryWallet_OnInitialize(control)
     INVENTORY_WALLET = InventoryWalletManager:New(control)
+end
+
+function ZO_InventoryWalletSlot_OnUpdate(control)
+    if not control:IsHidden() then
+        local amountControl = control:GetNamedChild("Amount")
+        local cursorPositionX, cursorPositionY = GetUIMousePosition()
+        if amountControl:IsPointInside(cursorPositionX, cursorPositionY) then
+            ZO_CurrencyTemplate_OnMouseEnter(amountControl)
+        else
+            ZO_CurrencyTemplate_OnMouseExit(amountControl)
+        end
+    end
+end
+
+function ZO_InventoryWalletSlot_OnMouseEnter(control)
+    ZO_InventorySlot_OnMouseEnter(control)
+    control:SetHandler("OnUpdate", function() ZO_InventoryWalletSlot_OnUpdate(control) end)
+end
+
+function ZO_InventoryWalletSlot_OnMouseExit(control)
+    ZO_InventorySlot_OnMouseExit(control)
+    control:SetHandler("OnUpdate", nil)
 end

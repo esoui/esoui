@@ -23,6 +23,7 @@ function ZO_RaidLeaderboardsManager_Keyboard:Initialize(control)
     end)
 
     SYSTEMS:RegisterKeyboardObject(ZO_RAID_LEADERBOARD_SYSTEM_NAME, self)
+    LEADERBOARDS:RegisterLeaderboardSystemObject(self, LEADERBOARD_DATA_TYPE.RAID)
 end
 
 function ZO_RaidLeaderboardsManager_Keyboard:RefreshHeaderPlayerInfo(isWeekly)

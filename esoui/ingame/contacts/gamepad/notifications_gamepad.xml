@@ -1,7 +1,7 @@
 <GuiXml>
     <Controls>
-        <Control name="ZO_GamepadNotificationsBaseRow" virtual="true" inherits="ZO_GamepadMenuEntryTemplate">
-        </Control>
+        <Control name="ZO_GamepadNotificationsBaseRow" virtual="true" inherits="ZO_GamepadMenuEntryTemplate" />
+
         <Control name="ZO_GamepadNotificationsRequestRow" inherits="ZO_GamepadNotificationsBaseRow" virtual="true">
             <OnInitialized>
                 ZO_SharedGamepadEntry_OnInitialized(self)
@@ -19,7 +19,7 @@
                 self.declineText = GetString(SI_NO)
             </OnInitialized>
         </Control>
-        
+
         <Control name="ZO_GamepadNotificationsLeaderboardRow" inherits="ZO_GamepadNotificationsBaseRow" virtual="true">
             <OnInitialized>
                 ZO_SharedGamepadEntry_OnInitialized(self)
@@ -149,6 +149,15 @@
             <OnInitialized>
                 ZO_SharedGamepadEntry_OnInitialized(self)
                 ZO_SharedGamepadEntry_SetHeightFromLabels(self)
+                self.declineText = GetString(SI_GAMEPAD_NOTIFICATIONS_DELETE_OPTION)
+            </OnInitialized>
+        </Control>
+
+        <Control name="ZO_GamepadNotificationsHouseRecommendedRow" inherits="ZO_GamepadNotificationsBaseRow" virtual="true">
+            <OnInitialized>
+                ZO_SharedGamepadEntry_OnInitialized(self)
+                ZO_SharedGamepadEntry_SetHeightFromLabels(self)
+                self.acceptText = GetString(SI_HOUSE_TOURS_MANAGE_LISTING)
                 self.declineText = GetString(SI_GAMEPAD_NOTIFICATIONS_DELETE_OPTION)
             </OnInitialized>
         </Control>

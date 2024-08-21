@@ -1,7 +1,9 @@
 ZO_TributePatronBook_Shared = ZO_TextSearchObject:Subclass()
 
+local PATRON_SEARCH_CONTEXT = "tributePatronTextSearch"
+
 function ZO_TributePatronBook_Shared:Initialize(control, infoContainerControl, templateData)
-    ZO_TextSearchObject.Initialize(self, "tributePatronTextSearch", self.searchEditBox)
+    ZO_TextSearchObject.Initialize(self, PATRON_SEARCH_CONTEXT, self.searchEditBox)
 
     self.control = control
     self.templateData = templateData
@@ -15,7 +17,7 @@ function ZO_TributePatronBook_Shared:Initialize(control, infoContainerControl, t
     self.categoryFilters = {}
     self.patronFilters = {}
 
-    self.scene = scene or ZO_Scene:New(self:GetSceneName(), SCENE_MANAGER)
+    self.scene = ZO_Scene:New(self:GetSceneName(), SCENE_MANAGER)
     self.fragment = ZO_FadeSceneFragment:New(control)
     self.fragment:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_FRAGMENT_SHOWING then
@@ -48,6 +50,8 @@ function ZO_TributePatronBook_Shared:SetupContextTextSearch()
                 searchFilterList =
                 {
                     BACKGROUND_LIST_FILTER_TYPE_NAME,
+                    BACKGROUND_LIST_FILTER_TYPE_DESCRIPTION,
+                    BACKGROUND_LIST_FILTER_TYPE_SEARCH_KEYWORDS,
                 },
                 primaryKeys = function()
                     local patronIdList = {}

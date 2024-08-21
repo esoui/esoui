@@ -131,6 +131,10 @@ function ZO_GamepadInventory:OnDeferredInitialize()
     SHARED_INVENTORY:RegisterCallback("FullQuestUpdate", OnInventoryUpdated)
     SHARED_INVENTORY:RegisterCallback("SingleQuestUpdate", OnInventoryUpdated)
 
+    self.onRefreshActionsCallback = function()
+        SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.itemList)
+    end
+
     local SELECT_DEFAULT_ENTRY = true
     self:SwitchActiveList(INVENTORY_CATEGORY_LIST, SELECT_DEFAULT_ENTRY)
     ZO_GamepadGenericHeader_SetActiveTabIndex(self.header, INVENTORY_TAB_INDEX)
@@ -142,6 +146,8 @@ function ZO_GamepadInventory:OnStateChanged(oldState, newState)
         self:PerformDeferredInitialize()
 
         self:ActivateTextSearch()
+
+        ITEM_PREVIEW_GAMEPAD:RegisterCallback("RefreshActions", self.onRefreshActionsCallback)
 
         --figure out which list to land on
         local listToActivate = self.previousListType or INVENTORY_CATEGORY_LIST
@@ -171,6 +177,8 @@ function ZO_GamepadInventory:OnStateChanged(oldState, newState)
     elseif newState == SCENE_HIDDEN then
         self.listWaitingOnDestroyRequest = nil
         self:TryClearNewStatusOnHidden()
+
+        ITEM_PREVIEW_GAMEPAD:UnregisterCallback("RefreshActions", self.onRefreshActionsCallback)
 
         ZO_SavePlayerConsoleProfile()
     end
@@ -303,6 +311,7 @@ function ZO_GamepadInventory:SwitchActiveList(listDescriptor, selectDefaultEntry
             self:SetSelectedItemUniqueId(self.itemList:GetTargetData())
             self.actionMode = ITEM_LIST_ACTION_MODE
             self:RefreshItemActions()
+            self:UpdateItemLeftTooltip(self.itemList:GetTargetData())
             self:UpdateRightTooltip()
             self:RefreshHeader(BLOCK_TABBAR_CALLBACK)
             self:DeactivateHeader()
@@ -706,34 +715,35 @@ function ZO_GamepadInventory:InitializeKeybindStrip()
         },
         {
             name =  function()
-                        if IsCurrentlyPreviewing() then
-                            return GetString(SI_PREVIEW_CLEAR_INVENTORY_PREVIEW)
-                        else
-                            return GetString(SI_CRAFTING_ENTER_PREVIEW_MODE)
-                        end
-                    end,
+                if IsCurrentlyPreviewing() then
+                    return GetString(SI_PREVIEW_CLEAR_INVENTORY_PREVIEW)
+                else
+                    return GetString(SI_CRAFTING_ENTER_PREVIEW_MODE)
+                end
+            end,
             keybind = "UI_SHORTCUT_QUATERNARY",
             order = 2500,
             disabledDuringSceneHiding = true,
             visible =   function()
-                            if not IsCurrentlyPreviewing() then
-                                local targetData = self.itemList:GetTargetData()
-                                return self:CanEntryDataBePreviewed(targetData) and IsCharacterPreviewingAvailable()
-                            end
+                if not IsCurrentlyPreviewing() then
+                    local targetData = self.itemList:GetTargetData()
+                    return self:CanEntryDataBePreviewed(targetData) and IsCharacterPreviewingAvailable()
+                end
 
-                            return true
-                        end,
+                return true
+            end,
             callback =  function()
-                            if IsCurrentlyPreviewing() then
-                                self:EndPreview()
-                            else
-                                local targetData = self.itemList:GetTargetData()
-                                if targetData ~= nil then
-                                    self:PreviewInventoryItem(targetData.bagId, targetData.slotIndex)
-                                end
-                            end
-                            self:RefreshKeybinds()
-                        end,
+                if IsCurrentlyPreviewing() then
+                    self:EndPreview()
+                else
+                    local targetData = self.itemList:GetTargetData()
+                    if targetData ~= nil then
+                        self:PreviewInventoryItem(targetData.bagId, targetData.slotIndex)
+                    end
+                end
+                self:RefreshKeybinds()
+                SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.itemList)
+            end,
         },
     }
 
@@ -997,8 +1007,8 @@ function ZO_GamepadInventory:GetQuestItemDataFilterComparator(questItemId)
     return self:IsDataInSearchTextResults(ZO_QUEST_ITEMS_FILTER_BAG, questItemId)
 end
 
-function ZO_GamepadInventory:RefreshCategoryList(selectDefaultEntry)
-    if self.currentListType == INVENTORY_CATEGORY_LIST or self.categoryList:IsActive() then
+function ZO_GamepadInventory:RefreshCategoryList(selectDefaultEntry, forceUpdate)
+    if self.currentListType == INVENTORY_CATEGORY_LIST or self.categoryList:IsActive() or forceUpdate then
         self.categoryList:Clear()
 
         -- Currencies
@@ -1126,8 +1136,24 @@ end
 -- Item List --
 ---------------
 
+function ZO_GamepadInventory:OnEnterHeader()
+    ZO_Gamepad_ParametricList_BagsSearch_Screen.OnEnterHeader(self)
+
+    self:UpdateItemLeftTooltip(nil)
+end
+
+function ZO_GamepadInventory:OnLeaveHeader()
+    ZO_Gamepad_ParametricList_BagsSearch_Screen.OnLeaveHeader(self)
+
+    if self.currentlySelectedData.isCurrencyEntry then
+        self:UpdateCategoryLeftTooltip(self.currentlySelectedData)
+    else
+        self:UpdateItemLeftTooltip(self.currentlySelectedData)
+    end
+end
+
 function ZO_GamepadInventory:UpdateItemLeftTooltip(selectedData)
-    if selectedData then
+    if selectedData and not self:IsHeaderActive() then
         GAMEPAD_TOOLTIPS:ResetScrollTooltipToTop(GAMEPAD_RIGHT_TOOLTIP)
         if selectedData.filterData then
             if ZO_InventoryUtils_DoesNewItemMatchFilterType(selectedData, ITEMFILTERTYPE_QUEST) then
@@ -1149,6 +1175,8 @@ function ZO_GamepadInventory:UpdateItemLeftTooltip(selectedData)
         else
             GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
         end
+    else
+        GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
     end
 end
 
@@ -1274,92 +1302,123 @@ function ZO_GamepadInventory:GetNumSlots(bag)
     return GetNumBagUsedSlots(bag), GetBagSize(bag)
 end
 
-function ZO_GamepadInventory:RefreshItemList(selectDefaultEntry)
-    if self.currentListType == INVENTORY_ITEM_LIST or self.itemList:IsActive() then
-        self.itemList:Clear()
+do
+    local function GetItemNarrationText(entryData, entryControl)
+        local narrations = {}
 
-        if self.categoryList:IsEmpty() then
-            return
+        ZO_AppendNarration(narrations, ZO_GetSharedGamepadEntryDefaultNarrationText(entryData, entryControl))
+
+        if IsCurrentlyPreviewing() then
+            -- Generate the standard parametric list entry narration
+            if ITEM_PREVIEW_GAMEPAD.currentPreviewTypeObject then
+                local bagId = ITEM_PREVIEW_GAMEPAD.currentPreviewTypeObject.bag
+                local slotIndex = ITEM_PREVIEW_GAMEPAD.currentPreviewTypeObject.slot
+                ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetItemName(bagId, slotIndex)))
+                ZO_AppendNarration(narrations, ITEM_PREVIEW_GAMEPAD:GetPreviewSpinnerNarrationText())
+            end
         end
 
-        local targetCategoryData = self.categoryList:GetTargetData()
-        local filteredEquipSlot = targetCategoryData.equipSlot
-        local nonEquipableFilterType = targetCategoryData.filterType
-        local filteredDataTable
+        return narrations
+    end
 
-        local isQuestItemFilter = nonEquipableFilterType == ITEMFILTERTYPE_QUEST
-        --special case for quest items
-        if isQuestItemFilter then
-            filteredDataTable = {}
-            local questCache = SHARED_INVENTORY:GenerateFullQuestCache()
-            for _, questItems in pairs(questCache) do
-                for _, questItem in pairs(questItems) do
-                    if self:GetQuestItemDataFilterComparator(questItem.questItemId) then
-                        table.insert(filteredDataTable, questItem)
-                        questItem.bestItemCategoryName = zo_strformat(SI_INVENTORY_HEADER, GetBestQuestItemCategoryDescription(questItem))
+    function ZO_GamepadInventory:RefreshItemList(selectDefaultEntry)
+        if self.currentListType == INVENTORY_ITEM_LIST or self.itemList:IsActive() then
+            self.itemList:Clear()
+
+            if self.categoryList:IsEmpty() then
+                return
+            end
+
+            local targetCategoryData = self.categoryList:GetTargetData()
+            local filteredEquipSlot = targetCategoryData.equipSlot
+            local nonEquipableFilterType = targetCategoryData.filterType
+            local filteredDataTable
+
+            local isQuestItemFilter = nonEquipableFilterType == ITEMFILTERTYPE_QUEST
+            --special case for quest items
+            if isQuestItemFilter then
+                filteredDataTable = {}
+                local questCache = SHARED_INVENTORY:GenerateFullQuestCache()
+                for _, questItems in pairs(questCache) do
+                    for _, questItem in pairs(questItems) do
+                        if self:GetQuestItemDataFilterComparator(questItem.questItemId) then
+                            table.insert(filteredDataTable, questItem)
+                            questItem.bestItemCategoryName = zo_strformat(SI_INVENTORY_HEADER, GetBestQuestItemCategoryDescription(questItem))
+                        end
                     end
                 end
-            end
-            table.sort(filteredDataTable, ZO_GamepadInventory_QuestItemSortComparator)
-        else
-            local comparator = self:GetItemDataFilterComparator(filteredEquipSlot, nonEquipableFilterType)
-
-            filteredDataTable = SHARED_INVENTORY:GenerateFullSlotData(comparator, BAG_BACKPACK, BAG_WORN)
-            for _, itemData in pairs(filteredDataTable) do
-                itemData.bestItemCategoryName = zo_strformat(SI_INVENTORY_HEADER, GetBestItemCategoryDescription(itemData))
-            end
-            table.sort(filteredDataTable, ZO_GamepadInventory_DefaultItemSortComparator)
-        end
-
-        local lastBestItemCategoryName
-        for _, itemData in ipairs(filteredDataTable) do
-            local entryData = ZO_GamepadEntryData:New(itemData.name, itemData.iconFile)
-            entryData:InitializeInventoryVisualData(itemData)
-
-            if itemData.bagId == BAG_WORN then
-                entryData.isEquippedInCurrentCategory = itemData.slotIndex == filteredEquipSlot
-                entryData.isEquippedInAnotherCategory = itemData.slotIndex ~= filteredEquipSlot
-
-                entryData.isHiddenByWardrobe = WouldEquipmentBeHidden(itemData.slotIndex or EQUIP_SLOT_NONE, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
-            elseif isQuestItemFilter then
-                local slotIndex = FindActionSlotMatchingSimpleAction(ACTION_TYPE_QUEST_ITEM, itemData.questItemId, HOTBAR_CATEGORY_QUICKSLOT_WHEEL)
-                entryData.isEquippedInCurrentCategory = slotIndex ~= nil
+                table.sort(filteredDataTable, ZO_GamepadInventory_QuestItemSortComparator)
             else
-                local slotIndex = FindActionSlotMatchingItem(itemData.bagId, itemData.slotIndex, HOTBAR_CATEGORY_QUICKSLOT_WHEEL)
-                entryData.isEquippedInCurrentCategory = slotIndex ~= nil
+                local comparator = self:GetItemDataFilterComparator(filteredEquipSlot, nonEquipableFilterType)
+
+                filteredDataTable = SHARED_INVENTORY:GenerateFullSlotData(comparator, BAG_BACKPACK, BAG_WORN)
+                for _, itemData in pairs(filteredDataTable) do
+                    itemData.bestItemCategoryName = zo_strformat(SI_INVENTORY_HEADER, GetBestItemCategoryDescription(itemData))
+                end
+                table.sort(filteredDataTable, ZO_GamepadInventory_DefaultItemSortComparator)
             end
 
-            local remaining, duration
-            if isQuestItemFilter then
-                if itemData.toolIndex then
-                    remaining, duration = GetQuestToolCooldownInfo(itemData.questIndex, itemData.toolIndex)
-                elseif itemData.stepIndex and itemData.conditionIndex then
-                    remaining, duration = GetQuestItemCooldownInfo(itemData.questIndex, itemData.stepIndex, itemData.conditionIndex)
+            local lastBestItemCategoryName
+            for _, itemData in ipairs(filteredDataTable) do
+                local entryData = ZO_GamepadEntryData:New(itemData.name, itemData.iconFile)
+                entryData:InitializeInventoryVisualData(itemData)
+
+                if itemData.bagId == BAG_WORN then
+                    entryData.isEquippedInCurrentCategory = itemData.slotIndex == filteredEquipSlot
+                    entryData.isEquippedInAnotherCategory = itemData.slotIndex ~= filteredEquipSlot
+
+                    entryData.isHiddenByWardrobe = WouldEquipmentBeHidden(itemData.slotIndex or EQUIP_SLOT_NONE, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
+                elseif isQuestItemFilter then
+                    local slotIndex = FindActionSlotMatchingSimpleAction(ACTION_TYPE_QUEST_ITEM, itemData.questItemId, HOTBAR_CATEGORY_QUICKSLOT_WHEEL)
+                    entryData.isEquippedInCurrentCategory = slotIndex ~= nil
+                else
+                    local slotIndex = FindActionSlotMatchingItem(itemData.bagId, itemData.slotIndex, HOTBAR_CATEGORY_QUICKSLOT_WHEEL)
+                    entryData.isEquippedInCurrentCategory = slotIndex ~= nil
                 end
 
-                ZO_InventorySlot_SetType(entryData, SLOT_TYPE_QUEST_ITEM)
-            else
-                remaining, duration = GetItemCooldownInfo(itemData.bagId, itemData.slotIndex)
+                local remaining, duration
+                if isQuestItemFilter then
+                    if itemData.toolIndex then
+                        remaining, duration = GetQuestToolCooldownInfo(itemData.questIndex, itemData.toolIndex)
+                    elseif itemData.stepIndex and itemData.conditionIndex then
+                        remaining, duration = GetQuestItemCooldownInfo(itemData.questIndex, itemData.stepIndex, itemData.conditionIndex)
+                    end
 
-                ZO_InventorySlot_SetType(entryData, SLOT_TYPE_GAMEPAD_INVENTORY_ITEM)
+                    ZO_InventorySlot_SetType(entryData, SLOT_TYPE_QUEST_ITEM)
+                else
+                    remaining, duration = GetItemCooldownInfo(itemData.bagId, itemData.slotIndex)
+
+                    ZO_InventorySlot_SetType(entryData, SLOT_TYPE_GAMEPAD_INVENTORY_ITEM)
+                end
+                if remaining > 0 and duration > 0 then
+                    entryData:SetCooldown(remaining, duration)
+                end
+
+                entryData:SetIgnoreTraitInformation(true)
+
+                if itemData.bestItemCategoryName ~= lastBestItemCategoryName then
+                    lastBestItemCategoryName = itemData.bestItemCategoryName
+
+                    entryData:SetHeader(lastBestItemCategoryName)
+                    self.itemList:AddEntry("ZO_GamepadItemSubEntryTemplateWithHeader", entryData)
+                else
+                    self.itemList:AddEntry("ZO_GamepadItemSubEntryTemplate", entryData)
+                end
+
+                entryData.narrationText = GetItemNarrationText
             end
-            if remaining > 0 and duration > 0 then
-                entryData:SetCooldown(remaining, duration)
-            end
 
-            entryData:SetIgnoreTraitInformation(true)
+            -- ESO-785986: ItemList keybinds depend on self.selectedItemFilterType
+            -- which is set by CategoryList being updated when the ItemList is refreshed
+            local DONT_SELECT_DEFAULT = nil
+            local FORCE_UPDATE = true
+            self:RefreshCategoryList(DONT_SELECT_DEFAULT, FORCE_UPDATE)
 
-            if itemData.bestItemCategoryName ~= lastBestItemCategoryName then
-                lastBestItemCategoryName = itemData.bestItemCategoryName
-
-                entryData:SetHeader(lastBestItemCategoryName)
-                self.itemList:AddEntry("ZO_GamepadItemSubEntryTemplateWithHeader", entryData)
-            else
-                self.itemList:AddEntry("ZO_GamepadItemSubEntryTemplate", entryData)
-            end
+            -- ESO-871103: Must refresh the category list first so that self.currentlySelectData
+            -- remains data in itemList rather than being set to the selected data in category list
+            self.itemList:Commit()
+            self:UpdateItemLeftTooltip(self.currentlySelectedData)
         end
-
-        self.itemList:Commit()
     end
 end
 

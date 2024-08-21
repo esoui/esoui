@@ -14,7 +14,9 @@ function CollectionsBook_Singleton:New(...)
 end
 
 function CollectionsBook_Singleton:Initialize()
-    self.ownedHouses = {}
+    self.unlockedHouses = {}
+    self.ownedHouses = self.unlockedHouses -- Deprecated, keeping for backwards compatibility
+    self.unlockedHousesNeedsInit = true
     self.primaryResidenceId = GetHousingPrimaryHouse()
     self.searchString = ""
     self.searchResults = {}
@@ -28,7 +30,7 @@ function CollectionsBook_Singleton:Initialize()
 
     local function OnCollectionUpdated(collectionUpdateType, collectiblesByNewUnlockState)
         if collectionUpdateType == ZO_COLLECTION_UPDATE_TYPE.REBUILD then
-            self:RefreshOwnedHouses()
+            self:RefreshUnlockedHouses()
 
             -- When the data is getting rebuilt, the indices can change so our old search results are no longer any good
             if self:GetSearchResults() then
@@ -38,20 +40,20 @@ function CollectionsBook_Singleton:Initialize()
                 self:SetSearchString(currentSearch)
             end
         else
-            --TODO: Refactor naming, ownedHouses is a misnomer.  It should really be unlocked houses.  It just so happens that we don't (yet) allow you to unlock a house other than by owning it.
+            local unlockedHouses = self:GetUnlockedHouses()
             for _, unlockStateTable in pairs(collectiblesByNewUnlockState) do
                 for _, collectibleData in ipairs(unlockStateTable) do
                     if collectibleData:IsHouse() then
                         local nowUnlocked = collectibleData:IsUnlocked()
                         local collectibleId = collectibleData:GetId()
-                        if nowUnlocked and not self.ownedHouses[collectibleId] then
-                            self.ownedHouses[collectibleId] = 
+                        if nowUnlocked and not unlockedHouses[collectibleId] then
+                            unlockedHouses[collectibleId] = 
                             {
                                 houseId = collectibleData:GetReferenceId(),
                                 showPermissionsDialogOnEnter = true,
                             }
-                        elseif not nowUnlocked and self.ownedHouses[collectibleId] then
-                            self.ownedHouses[collectibleId] = nil
+                        elseif not nowUnlocked and unlockedHouses[collectibleId] then
+                            unlockedHouses[collectibleId] = nil
                         end
                     end
                 end
@@ -60,8 +62,6 @@ function CollectionsBook_Singleton:Initialize()
     end
 
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", OnCollectionUpdated)
-
-    self:RefreshOwnedHouses()
 end
 
 function CollectionsBook_Singleton:SetSearchString(searchString)
@@ -147,30 +147,36 @@ local function IsHouseCollectible(categoryType)
     return categoryType == COLLECTIBLE_CATEGORY_TYPE_HOUSE
 end
 
-function CollectionsBook_Singleton:RefreshOwnedHouses()
-    ZO_ClearTable(self.ownedHouses)
-    local ownedHouses = ZO_COLLECTIBLE_DATA_MANAGER:GetAllCollectibleDataObjects({ ZO_CollectibleCategoryData.IsHousingCategory }, { ZO_CollectibleData.IsUnlocked })
-    for _, collectibleData in ipairs(ownedHouses) do
-        self.ownedHouses[collectibleData:GetId()] = { houseId = collectibleData:GetReferenceId() }
+function CollectionsBook_Singleton:RefreshUnlockedHouses()
+    ZO_ClearTable(self.unlockedHouses)
+    local unlockedHouses = ZO_COLLECTIBLE_DATA_MANAGER:GetAllCollectibleDataObjects({ ZO_CollectibleCategoryData.IsHousingCategory }, { ZO_CollectibleData.IsUnlocked })
+    for _, collectibleData in ipairs(unlockedHouses) do
+        self.unlockedHouses[collectibleData:GetId()] = { houseId = collectibleData:GetReferenceId() }
     end
-    internalassert(#ownedHouses <= MAX_HOUSES_FOR_PERMISSIONS, "There are too many houses for permissions messaging to handle. Have an engineer update cMaxHousesPerAccount.")
+    internalassert(#unlockedHouses <= MAX_HOUSES_FOR_PERMISSIONS, "There are too many houses for permissions messaging to handle. Have an engineer update cMaxHousesPerAccount.")
 end
 
 function CollectionsBook_Singleton:OnUpdateCooldowns(...)
     self:FireCallbacks("OnUpdateCooldowns", ...)
 end
 
-function CollectionsBook_Singleton:GetOwnedHouses()
-    return self.ownedHouses
+function CollectionsBook_Singleton:GetUnlockedHouses()
+    if self.unlockedHousesNeedsInit then
+        self:RefreshUnlockedHouses()
+        self.unlockedHousesNeedsInit = false
+    end
+    return self.unlockedHouses
 end
 
 function CollectionsBook_Singleton:DoesHousePermissionsDialogNeedToBeShownForCollectible(collectibleId)
-    return self.ownedHouses[collectibleId] and self.ownedHouses[collectibleId].showPermissionsDialogOnEnter
+    local unlockedHouses = self:GetUnlockedHouses()
+    return unlockedHouses[collectibleId] and unlockedHouses[collectibleId].showPermissionsDialogOnEnter
 end
 
 function CollectionsBook_Singleton:MarkHouseCollectiblePermissionLoadDialogShown(collectibleId)
-    if self.ownedHouses[collectibleId] then
-        self.ownedHouses[collectibleId].showPermissionsDialogOnEnter = false
+    local unlockedHouses = self:GetUnlockedHouses()
+    if unlockedHouses[collectibleId] then
+        unlockedHouses[collectibleId].showPermissionsDialogOnEnter = false
     end
 end
 

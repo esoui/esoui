@@ -49,8 +49,10 @@ function ZO_TextSearchObject:SetTextSearchContext(context)
 end
 
 function ZO_TextSearchObject:SetSearchEditBox(searchEditBox)
-    self.searchEditBox = searchEditBox
-    self:SetupOnTextChangedHandler()
+    if searchEditBox ~= self.searchEditBox then
+        self.searchEditBox = searchEditBox
+        self:SetupOnTextChangedHandler()
+    end
 end
 
 function ZO_TextSearchObject:GetSearchEditBox()
@@ -134,7 +136,16 @@ end
 
 function ZO_TextSearchObject:IsDataInSearchTextResults(dataId)
     if self.searchContext and self.searchFilterType then
-        return TEXT_SEARCH_MANAGER:IsDataInSearchTextResults(self.searchContext, self.searchFilterType, dataId)
+        if type(self.searchFilterType) == "table" then
+            for i, searchFilterType in ipairs(self.searchFilterType) do
+                if TEXT_SEARCH_MANAGER:IsDataInSearchTextResults(self.searchContext, searchFilterType, dataId) then
+                    return true
+                end
+            end
+            return false
+        else
+            return TEXT_SEARCH_MANAGER:IsDataInSearchTextResults(self.searchContext, self.searchFilterType, dataId)
+        end
     end
     -- Return true for every result if we don't have a context search
     return true

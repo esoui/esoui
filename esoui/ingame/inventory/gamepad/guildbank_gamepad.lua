@@ -202,7 +202,7 @@ function ZO_GuildBank_Gamepad:ActivateTextSearch()
 end
 
 function ZO_GuildBank_Gamepad:OnSceneShowing()
-    ZO_SharedInventory_SelectAccessibleGuildBank(self.lastSelectedGuildBankId)
+    ZO_SharedInventory_SelectAccessibleGuildBank(ZO_GUILD_SELECTOR_MANAGER:GetSelectedGuildBankId())
     self:RefreshGuildBank()
     TriggerTutorial(TUTORIAL_TRIGGER_GUILD_BANK_OPENED)
 end
@@ -800,8 +800,7 @@ end
 function ZO_GuildBank_Gamepad:ChangeGuildBank(guildBankId)
     if guildBankId ~= GetSelectedGuildBankId() then
         self.loadingGuildBank = true
-        SelectGuildBank(guildBankId)
-        self.lastSelectedGuildBankId = guildBankId
+        ZO_GUILD_SELECTOR_MANAGER:SetSelectedGuildBankId(guildBankId)
     end
 end
 

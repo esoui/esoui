@@ -172,11 +172,8 @@ ZO_CATEGORY_LAYOUT_INFO =
         indicators = function()
             if CHAMPION_PERKS then
                 local indicators = {}
-                if CHAMPION_PERKS:IsChampionSystemNew() then
+                if CHAMPION_PERKS:IsChampionSystemNew() or CHAMPION_DATA_MANAGER:HasAnySavedUnspentPoints() then
                     table.insert(indicators, ZO_KEYBOARD_NEW_ICON)
-                end
-                if CHAMPION_DATA_MANAGER:HasAnySavedUnspentPoints() then
-                    table.insert(indicators, "EsoUI/Art/MainMenu/menuBar_pointsToSpend.dds")
                 end
                 return indicators
             end
@@ -214,7 +211,7 @@ ZO_CATEGORY_LAYOUT_INFO =
         highlight = "EsoUI/Art/MainMenu/menuBar_collections_over.dds",
 
         indicators = function()
-            if (ZO_COLLECTIBLE_DATA_MANAGER and ZO_COLLECTIBLE_DATA_MANAGER:HasAnyNewCollectibles()) or
+            if GetNumNewCollectibles() > 0 or
                 (ITEM_SET_COLLECTIONS_DATA_MANAGER and ITEM_SET_COLLECTIONS_DATA_MANAGER:HasAnyNewPieces()) then
                 return { ZO_KEYBOARD_NEW_ICON }
             end

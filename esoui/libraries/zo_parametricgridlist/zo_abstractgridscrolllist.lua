@@ -263,8 +263,21 @@ function ZO_AbstractGridScrollList:GetScrollValue()
     return ZO_ScrollList_GetScrollValue(self.list)
 end
 
+-- Deprecated: See ScrollToRelativeValue.
 function ZO_AbstractGridScrollList:ScrollToValue(value, onScrollCompleteCallback, animateInstantly)
+    self:ScrollToRelativeValue(value, onScrollCompleteCallback, animateInstantly)
+end
+
+-- Scrolls by a relative offset.
+function ZO_AbstractGridScrollList:ScrollToRelativeValue(value, onScrollCompleteCallback, animateInstantly)
     ZO_ScrollList_ScrollRelative(self.list, value, onScrollCompleteCallback, animateInstantly)
+end
+
+-- Scrolls to an absolute position.
+function ZO_AbstractGridScrollList:ScrollToAbsoluteValue(absoluteScrollValue, onScrollCompleteCallback, animateInstantly)
+    local currentScrollValue = self:GetScrollValue()
+    local scrollValueOffset = absoluteScrollValue - currentScrollValue
+    self:ScrollToRelativeValue(scrollValueOffset, onScrollCompleteCallback, animateInstantly)
 end
 
 function ZO_AbstractGridScrollList:ResetToTop()

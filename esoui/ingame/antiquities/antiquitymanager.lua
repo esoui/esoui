@@ -45,13 +45,7 @@ ZO_SCRYABLE_ANTIQUITY_ALL_LEADS_SUBCATEGORY_DATA = g_allLeadsAntiquityCategoryDa
 -- ZO_AntiquityManager
 --
 
-local ZO_AntiquityManager = ZO_CallbackObject:Subclass()
-
-function ZO_AntiquityManager:New(...)
-    local object = ZO_CallbackObject.New(self)
-    object:Initialize(...)
-    return object
-end
+local ZO_AntiquityManager = ZO_InitializingCallbackObject:Subclass()
 
 function ZO_AntiquityManager:Initialize(...)
     local function OnContentLockChanged()
@@ -71,10 +65,9 @@ function ZO_AntiquityManager:Initialize(...)
     SKILLS_DATA_MANAGER:RegisterCallback("SkillLineAdded", OnSkillLineUpdated)
     SKILLS_DATA_MANAGER:RegisterCallback("SkillLineRankUpdated", OnSkillLineUpdated)
 
-    local antiquarianGuildZoneCollectibleId = self:GetAntiquarianGuildZoneCollectibleData():GetId()
-    local scryingToolCollectibleId = self:GetScryingToolCollectibleData():GetId()
-
     local function OnCollectibleUpdated(collectibleId)
+        local antiquarianGuildZoneCollectibleId = self:GetAntiquarianGuildZoneCollectibleId()
+        local scryingToolCollectibleId = GetAntiquityScryingToolCollectibleId()
         if collectibleId == antiquarianGuildZoneCollectibleId or collectibleId == scryingToolCollectibleId then
             OnContentLockChanged()
         end
@@ -82,6 +75,8 @@ function ZO_AntiquityManager:Initialize(...)
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleUpdated", OnCollectibleUpdated)
 
     local function OnCollectionUpdated(updateType, updatedCollectiblesByState)
+        local antiquarianGuildZoneCollectibleId = self:GetAntiquarianGuildZoneCollectibleId()
+        local scryingToolCollectibleId = GetAntiquityScryingToolCollectibleId()
         for collectibleState, collectibles in pairs(updatedCollectiblesByState) do
             for _, collectible in ipairs(collectibles) do
                 if collectible:GetId() == antiquarianGuildZoneCollectibleId or collectible:GetId() == scryingToolCollectibleId then
@@ -99,9 +94,13 @@ function ZO_AntiquityManager:GetAntiquarianGuildZoneName()
     return GetZoneNameByIndex(antiquarianGuildZoneIndex)
 end
 
-function ZO_AntiquityManager:GetAntiquarianGuildZoneCollectibleData()
+function ZO_AntiquityManager:GetAntiquarianGuildZoneCollectibleId()
     local antiquarianGuildZoneIndex = GetZoneIndex(WESTERN_SKYRIM_ZONE_ID)
-    local antiquarianGuildZoneCollectibleId = GetCollectibleIdForZone(antiquarianGuildZoneIndex)
+    return GetCollectibleIdForZone(antiquarianGuildZoneIndex)
+end
+
+function ZO_AntiquityManager:GetAntiquarianGuildZoneCollectibleData()
+    local antiquarianGuildZoneCollectibleId = self:GetAntiquarianGuildZoneCollectibleId()
     return ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(antiquarianGuildZoneCollectibleId)
 end
 

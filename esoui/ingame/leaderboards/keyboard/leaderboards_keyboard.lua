@@ -150,29 +150,10 @@ function ZO_LeaderboardsManager_Keyboard:UpdateCategories()
     self.nodeToReselect = nil
     self.navigationTree:Reset()
 
-    local campaignLeaderboards = SYSTEMS:GetKeyboardObject(ZO_CAMPAIGN_LEADERBOARD_SYSTEM_NAME)
-    if campaignLeaderboards then
-        campaignLeaderboards:AddCategoriesToParentSystem()
-    end
-
-    local raidLeaderboards = SYSTEMS:GetKeyboardObject(ZO_RAID_LEADERBOARD_SYSTEM_NAME)
-    if raidLeaderboards then
-        raidLeaderboards:AddCategoriesToParentSystem()
-    end
-
-    local endlessDungeonLeaderboards = SYSTEMS:GetKeyboardObject("endlessDungeonLeaderboards")
-    if endlessDungeonLeaderboards then
-        endlessDungeonLeaderboards:AddCategoriesToParentSystem()
-    end
-
-    local battlegroundLeaderboards = SYSTEMS:GetKeyboardObject(ZO_BATTLEGROUND_LEADERBOARD_SYSTEM_NAME)
-    if battlegroundLeaderboards then
-        battlegroundLeaderboards:AddCategoriesToParentSystem()
-    end
-
-    local tributeLeaderboards = SYSTEMS:GetKeyboardObject(ZO_TRIBUTE_LEADERBOARD_SYSTEM_NAME)
-    if tributeLeaderboards then
-        tributeLeaderboards:AddCategoriesToParentSystem()
+    for _, systemObject in ipairs(self.leaderboardSystemObjects) do
+        if systemObject.AddCategoriesToParentSystem then
+            systemObject:AddCategoriesToParentSystem()
+        end
     end
 
     self.navigationTree:Commit(self.nodeToReselect)

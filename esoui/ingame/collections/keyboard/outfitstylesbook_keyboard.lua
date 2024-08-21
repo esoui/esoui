@@ -1,21 +1,25 @@
 ZO_OutfitStylesBook_Keyboard = ZO_RestyleCommon_Keyboard:Subclass()
 
-function ZO_OutfitStylesBook_Keyboard:New(...)
-    return ZO_RestyleCommon_Keyboard.New(self, ...)
-end
-
 function ZO_OutfitStylesBook_Keyboard:Initialize(control)
     ZO_RestyleCommon_Keyboard.Initialize(self, control)
 
     ZO_OUTFIT_STYLES_BOOK_SCENE = ZO_Scene:New("outfitStylesBook", SCENE_MANAGER)
     ZO_OUTFIT_STYLES_BOOK_FRAGMENT = self:GetFragment()
+end
+
+function ZO_OutfitStylesBook_Keyboard:OnDeferredInitialize()
+    -- If we haven't run this function yet, and the last restyle sheet we opened was
+    -- a costume sheet, we will UI error; InitializeModeData ensures our sheet is set
+    -- correctly before we initialize everything else to prevent this.
+    self:InitializeModeData()
+    ZO_RestyleCommon_Keyboard.OnDeferredInitialize(self)
 
     self.onModeDropdownChangedCallback = function()
         ZO_OUTFIT_STYLES_PANEL_KEYBOARD:ClearAllCurrentSlotPreviews()
     end
 
     self.previewAvailable = true
-    control:SetHandler("OnUpdate", function() self:OnUpdate() end)
+    self.control:SetHandler("OnUpdate", function() self:OnUpdate() end)
 end
 
 function ZO_OutfitStylesBook_Keyboard:InitializeKeybindStripDescriptors()

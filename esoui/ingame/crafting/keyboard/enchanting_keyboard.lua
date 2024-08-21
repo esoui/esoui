@@ -288,6 +288,12 @@ function ZO_Enchanting:InitializeKeybindStripDescriptors()
     ZO_CraftingUtils_ConnectKeybindButtonGroupToCraftingProcess(self.keybindStripDescriptor)
 end
 
+function ZO_Enchanting:AddInventoryAdditionalFilter(additionalFilterFunction)
+    if self.inventory then
+        self.inventory.additionalFilter = additionalFilterFunction
+    end
+end
+
 function ZO_Enchanting:ResetSelectedTab()
     ZO_MenuBar_SelectDescriptor(self.modeBar, ENCHANTING_MODE_CREATION)
     self:ClearSelections()
@@ -571,13 +577,26 @@ end
 
 function ZO_EnchantingInventory:Refresh(data)
     local filterType
+
+    local function ItemFilterFunction(bagId, slotIndex, filterType, questFilterChecked, questRunes)
+        if not ZO_Enchanting_DoesEnchantingItemPassFilter(bagId, slotIndex, filterType, questFilterChecked, questRunes) then
+            return false
+        end
+
+        if self.additionalFilter and type(self.additionalFilter) == "function" then
+            return self.additionalFilter(bagId, slotIndex, filterType, questFilterChecked, questRunes)
+        end
+
+        return true
+    end
+
     local enchantingMode = self.owner:GetEnchantingMode()
     if enchantingMode == ENCHANTING_MODE_CREATION then
         filterType = self.filterType
     elseif enchantingMode == ENCHANTING_MODE_EXTRACTION then
         filterType = ENCHANTING_EXTRACTION_FILTER
     end
-    local validItemIds = self:EnumerateInventorySlotsAndAddToScrollData(ZO_Enchanting_IsEnchantingItem, ZO_Enchanting_DoesEnchantingItemPassFilter, filterType, data)
+    local validItemIds = self:EnumerateInventorySlotsAndAddToScrollData(ZO_Enchanting_IsEnchantingItem, ItemFilterFunction, filterType, data)
     self.owner:OnInventoryUpdate(validItemIds)
     self.owner:UpdateQuestPins(self.questRunes, self.hasRecipesForQuest)
     self:SetNoItemLabelHidden(#data > 0)

@@ -173,6 +173,10 @@ function ZO_PlaceableFurnitureItem:Initialize(bagId, slotIndex)
     self:RefreshInfo(bagId, slotIndex)
 end
 
+function ZO_PlaceableFurnitureItem:GetPassesTextFilter()
+    return TEXT_SEARCH_MANAGER:IsDataInSearchTextResults("housePlaceableItemsTextSearch", BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT, self.bagId, self.slotIndex)
+end
+
 function ZO_PlaceableFurnitureItem:RefreshInfo(bagId, slotIndex)
     self.bagId = bagId
     self.slotIndex = slotIndex
@@ -335,6 +339,10 @@ function ZO_PlaceableFurnitureCollectible:Initialize(collectibleId)
     self:RefreshInfo(collectibleId)
 end
 
+function ZO_PlaceableFurnitureCollectible:GetPassesTextFilter()
+    return TEXT_SEARCH_MANAGER:IsDataInSearchTextResults("housePlaceableItemsTextSearch", BACKGROUND_LIST_FILTER_TARGET_COLLECTIBLE_ID, self.collectibleId)
+end
+
 function ZO_PlaceableFurnitureCollectible:RefreshInfo(collectibleId)
     self.collectibleId = collectibleId
 
@@ -412,6 +420,11 @@ end
 function ZO_RetrievableFurniture:Initialize(...)
     ZO_FurnitureDataBase.Initialize(self)
     self:RefreshInfo(...)
+end
+
+function ZO_RetrievableFurniture:GetPassesTextFilter()
+    local furnitureIdKey = zo_getSafeId64Key(self.retrievableFurnitureId)
+    return TEXT_SEARCH_MANAGER:IsDataInSearchTextResults("houseFurnitureTextSearch", BACKGROUND_LIST_FILTER_TARGET_FURNITURE_ID, furnitureIdKey)
 end
 
 function ZO_RetrievableFurniture:RefreshInfo(retrievableFurnitureId)
@@ -574,6 +587,10 @@ function ZO_HousingMarketProduct:Initialize(marketProductId, presentationIndex)
     ZO_FurnitureDataBase.Initialize(self)
     self.marketProductId = marketProductId
     self.presentationIndex = presentationIndex
+end
+
+function ZO_HousingMarketProduct:GetPassesTextFilter()
+    return TEXT_SEARCH_MANAGER:IsDataInSearchTextResults("houseProductsTextSearch", BACKGROUND_LIST_FILTER_TARGET_MARKET_PRODUCT_ID, self.marketProductId)
 end
 
 function ZO_HousingMarketProduct:RefreshInfo(marketProductId, presentationIndex)

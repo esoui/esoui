@@ -4,11 +4,19 @@ local VISIBLE_ICON = "EsoUI/Art/Inventory/inventory_icon_visible.dds"
 -----------------------------
 -- Companion Collection Book
 -----------------------------
-ZO_CompanionCollectionBook_Keyboard = ZO_InitializingObject:Subclass()
+ZO_CompanionCollectionBook_Keyboard = ZO_DeferredInitializingObject:Subclass()
 
 function ZO_CompanionCollectionBook_Keyboard:Initialize(control)
     self.control = control
 
+    COMPANION_COLLECTION_BOOK_KEYBOARD_SCENE = ZO_InteractScene:New("companionCollectionBookKeyboard", SCENE_MANAGER, ZO_COMPANION_MANAGER:GetInteraction())
+
+    ZO_DeferredInitializingObject.Initialize(self, COMPANION_COLLECTION_BOOK_KEYBOARD_SCENE)
+
+    COMPANION_COLLECTION_BOOK_KEYBOARD_FRAGMENT = ZO_FadeSceneFragment:New(self.control)
+end
+
+function ZO_CompanionCollectionBook_Keyboard:OnDeferredInitialize()
     self.categoryNodeLookupData = {}
 
     self:InitializeControls()
@@ -16,24 +24,6 @@ function ZO_CompanionCollectionBook_Keyboard:Initialize(control)
     self:InitializeCategories()
     self:InitializeFilters()
     self:InitializeGridListPanel()
-
-    self.scene = ZO_InteractScene:New("companionCollectionBookKeyboard", SCENE_MANAGER, ZO_COMPANION_MANAGER:GetInteraction())
-    self.scene:RegisterCallback("StateChange", function(oldState, newState)
-        if newState == SCENE_SHOWING then
-            self.refreshGroups:UpdateRefreshGroups() --In case we need to rebuild the categories
-            self:UpdateCollectionVisualLayer()
-            COLLECTIONS_BOOK_SINGLETON:SetSearchString(self.contentSearchEditBox:GetText())
-            COLLECTIONS_BOOK_SINGLETON:SetSearchCategorySpecializationFilters(COLLECTIBLE_CATEGORY_SPECIALIZATION_NONE)
-            COLLECTIONS_BOOK_SINGLETON:SetSearchChecksHidden(true)
-        elseif newState == SCENE_HIDDEN then
-            self.gridListPanelList:ResetToTop()
-        end
-    end)
-
-    COMPANION_COLLECTION_BOOK_KEYBOARD_SCENE = self.scene
-    COMPANION_COLLECTION_BOOK_KEYBOARD_FRAGMENT = ZO_FadeSceneFragment:New(self.control)
-
-    self.control:SetHandler("OnUpdate", function() self.refreshGroups:UpdateRefreshGroups() end)
 
     self:UpdateCollection()
 end
@@ -72,6 +62,7 @@ function ZO_CompanionCollectionBook_Keyboard:InitializeEvents()
             self:UpdateCollectible(collectibleId)
         end,
     })
+    self.control:SetHandler("OnUpdate", function() self.refreshGroups:UpdateRefreshGroups() end)
 end
 
 do
@@ -190,6 +181,18 @@ function ZO_CompanionCollectionBook_Keyboard:InitializeGridListPanel()
     self.gridListPanelList:SetAutoFillEntryTemplate("ZO_CollectibleTile_Keyboard_Control")
     self.gridListPanelList:AddHeaderTemplate(ZO_GRID_SCROLL_LIST_DEFAULT_HEADER_TEMPLATE_KEYBOARD, HEADER_HEIGHT, ZO_DefaultGridHeaderSetup)
     self.gridListPanelList:SetHeaderPrePadding(COLLECTIBLE_TILE_GRID_PADDING * 3)
+end
+
+function ZO_CompanionCollectionBook_Keyboard:OnShowing()
+    self.refreshGroups:UpdateRefreshGroups() --In case we need to rebuild the categories
+    self:UpdateCollectionVisualLayer()
+    COLLECTIONS_BOOK_SINGLETON:SetSearchString(self.contentSearchEditBox:GetText())
+    COLLECTIONS_BOOK_SINGLETON:SetSearchCategorySpecializationFilters(COLLECTIBLE_CATEGORY_SPECIALIZATION_NONE)
+    COLLECTIONS_BOOK_SINGLETON:SetSearchChecksHidden(true)
+end
+
+function ZO_CompanionCollectionBook_Keyboard:OnHidden()
+    self.gridListPanelList:ResetToTop()
 end
 
 --[[ Refresh ]]--

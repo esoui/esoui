@@ -181,7 +181,7 @@ end
 
 function GroupList_Gamepad:BuildPromoteToLeaderOption()
     local callback = function()
-        GroupPromote(self.socialData.unitTag)
+        ZO_Dialogs_ShowPlatformDialog("GROUP_PROMOTE_LEADER", self.socialData, { mainTextParams = { self.socialData.characterName, self.socialData.displayName, }, } )
     end
     return self:BuildOptionEntry(nil, SI_GROUP_LIST_MENU_PROMOTE_TO_LEADER, callback)
 end

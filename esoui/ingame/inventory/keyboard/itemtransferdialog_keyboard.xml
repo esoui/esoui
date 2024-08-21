@@ -6,7 +6,7 @@
             </OnInitialized>
             
             <Controls>
-                <Button name="$(parent)Slot" inherits="ZO_ItemSlot">
+                <Button name="$(parent)Slot" inherits="ZO_ItemSlot_Shared">
                     <Dimensions x="48" y="48" />
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetX="30" offsetY="20" />
                 </Button>

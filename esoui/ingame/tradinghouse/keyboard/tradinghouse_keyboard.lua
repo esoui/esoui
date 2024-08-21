@@ -17,6 +17,7 @@ do
     function ZO_TradingHouseManager:InitializeScene()
         local function SceneStateChange(oldState, newState)
             if newState == SCENE_SHOWING then
+                SelectTradingHouseGuildId(ZO_GUILD_SELECTOR_MANAGER:GetSelectedGuildStoreId())
                 PLAYER_INVENTORY:SetContextForInventories("guildTraderTextSearch", INVENTORY_TYPE_LIST)
                 TEXT_SEARCH_MANAGER:ActivateTextSearch("guildTraderTextSearch")
                 self:UpdateFragments()
@@ -529,10 +530,10 @@ function ZO_TradingHouseManager:InitializeSearchResults(control)
             end
         end
 
-        local sellPricePerUnitControl = rowControl:GetNamedChild("SellPricePerUnit")
+        local sellPricePerUnitControl = rowControl:GetNamedChild("SellPricePerUnitText")
         ZO_CurrencyControl_SetSimpleCurrency(sellPricePerUnitControl, result.currencyType, result.purchasePricePerUnit, ITEM_RESULT_CURRENCY_OPTIONS, nil, false)
 
-        local sellPriceControl = rowControl:GetNamedChild("SellPrice")
+        local sellPriceControl = rowControl:GetNamedChild("SellPriceText")
         ZO_CurrencyControl_SetSimpleCurrency(sellPriceControl, result.currencyType, result.purchasePrice, ITEM_RESULT_CURRENCY_OPTIONS, nil, self.playerMoney[result.currencyType] < result.purchasePrice)
 
         local resultControl = rowControl:GetNamedChild("Button")
@@ -657,7 +658,7 @@ end
 
 local INVOICE_CURRENCY_OPTIONS =
 {
-    showTooltips = false,
+    showTooltips = true,
     font = "ZoFontWinT1",
 }
 
@@ -972,7 +973,7 @@ end
 local function SelectTradingHouseGuildDialogInitialize(dialogControl, tradingHouseManager)
     local function SelectTradingHouseGuild(selectedGuildId)
         if selectedGuildId then
-            SelectTradingHouseGuildId(selectedGuildId)
+             ZO_GUILD_SELECTOR_MANAGER:SetSelectedGuildStoreId(selectedGuildId)
         end
     end
 
@@ -1154,7 +1155,7 @@ function ZO_TradingHouseManager:HandleGuildSpecificPurchase(guildSpecificItemInd
         local purchasePrice = self.searchResultsInfoList[i].purchasePrice
         local currencyType = self.searchResultsInfoList[i].currencyType
 
-        local sellPriceControl = GetControl(self.searchResultsControlsList[i], "SellPrice")
+        local sellPriceControl = self.searchResultsControlsList[i]:GetNamedChild("SellPriceText")
         ZO_CurrencyControl_SetSimpleCurrency(sellPriceControl, currencyType, purchasePrice, ITEM_RESULT_CURRENCY_OPTIONS, nil, self.playerMoney[currencyType] - purchasedItemValue < purchasePrice)
     end
 end

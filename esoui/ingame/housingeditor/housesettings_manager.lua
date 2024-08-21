@@ -22,6 +22,7 @@ ZO_PATH_SETTINGS =
 ZO_HOUSING_SETTINGS_CONTROL_DATA_PRIMARY_RESIDENCE = 1
 ZO_HOUSING_SETTINGS_CONTROL_DATA_DEFAULT_ACCESS = 2
 ZO_HOUSING_SETTINGS_CONTROL_DATA_RESTART_PATHS = 3
+ZO_HOUSING_SETTINGS_CONTROL_DATA_HOUSE_TOURS = 4
 ZO_HOUSING_SETTINGS_CONTROL_DATA =
 {
     -- Primary Residence
@@ -37,7 +38,7 @@ ZO_HOUSING_SETTINGS_CONTROL_DATA =
     {
         text = SI_HOUSING_FURNITURE_SETTINGS_GENERAL_DEFAULT_ACCESS_TEXT,
         tooltipFunction = function(...) return SYSTEMS:GetObject("furniture_settings"):ShowDefaultAccessTooltip(...) end,
-        gamepadTemplate = "ZO_GamepadHorizontalListRow",
+        gamepadTemplate = "ZO_Gamepad_Dropdown_Item_FullWidth",
     },
     -- Restart All Paths
     [ZO_HOUSING_SETTINGS_CONTROL_DATA_RESTART_PATHS] =
@@ -45,6 +46,14 @@ ZO_HOUSING_SETTINGS_CONTROL_DATA =
         text = SI_HOUSING_FURNITURE_SETTINGS_GENERAL_RESTART_PATHS_TEXT,
         buttonText = SI_HOUSING_FURNITURE_SETTINGS_GENERAL_RESTART_PATHS_BUTTON_TEXT,
         tooltipFunction = function(...) return SYSTEMS:GetObject("furniture_settings"):ShowRestartPathsTooltip(...) end,
+        gamepadTemplate = "ZO_HousingPermissionsSettingsRow_Gamepad",
+    },
+    -- Navigate to House Tours
+    [ZO_HOUSING_SETTINGS_CONTROL_DATA_HOUSE_TOURS] =
+    {
+        text = SI_HOUSING_FURNITURE_SETTINGS_GENERAL_HOUSE_TOURS_TEXT,
+        buttonText = SI_HOUSING_FURNITURE_SETTINGS_GENERAL_HOUSE_TOURS_BUTTON_TEXT,
+        tooltipFunction = function(...) return SYSTEMS:GetObject("furniture_settings"):ShowHouseToursTooltip(...) end,
         gamepadTemplate = "ZO_HousingPermissionsSettingsRow_Gamepad",
     },
 }
@@ -173,10 +182,10 @@ end
 function ZO_HouseSettings_Manager:SetupCopyPermissionsCombobox(dropdown, currentHouse, callback)
     dropdown:SetSelectedItemText(GetString(SI_DIALOG_COPY_HOUSING_PERMISSION_DEFAULT_CHOICE))
 
-    local allHouses = COLLECTIONS_BOOK_SINGLETON:GetOwnedHouses()
+    local unlockedHouses = COLLECTIONS_BOOK_SINGLETON:GetUnlockedHouses()
     local houseEntries = {}
 
-    for collectibleId, houseData in pairs(allHouses) do
+    for collectibleId, houseData in pairs(unlockedHouses) do
         if houseData.houseId ~= currentHouse then
             local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
             local newEntry = dropdown:CreateItemEntry(zo_strformat(SI_COLLECTIONS_HOUSING_DISPLAY_NAME_FORMAT, collectibleData:GetName(), collectibleData:GetNickname()), callback)

@@ -354,6 +354,21 @@ function zo_tokenize(sourceString, pattern)
     return splitArgs;
 end
 
+do
+    -- Converts one or more enum values, of the same enum type, to strings.
+    -- Example: local tagNames = { zo_getEnumStrings("SI_HOUSETOURLISTINGTAG", 2, 5, 6, 7, 10) }
+    local enumStrings = {}
+    function zo_getEnumStrings(siEnumString, ...)
+        ZO_ClearNumericallyIndexedTable(enumStrings)
+        local numArgs = select("#", ...)
+        for argIndex = 1, numArgs do
+            local enumValue = select(argIndex, ...)
+            enumStrings[argIndex] = GetString(siEnumString, enumValue)
+        end
+        return unpack(enumStrings)
+    end
+end
+
 -- Rotate 2D coordinates about the origin by the specified angle.
 function ZO_Rotate2D(angle, x, y)
     local cosine = zo_cos(angle)

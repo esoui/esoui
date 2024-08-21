@@ -292,6 +292,14 @@ function ZO_GamepadProvisioner:InitializeModeList()
     SCREEN_NARRATION_MANAGER:RegisterParametricList(self.modeList, narrationInfo)
 end
 
+function ZO_GamepadProvisioner:AddInventoryAdditionalFilterBySpecialIngredientType(specialIngredientType, additionalFilterFunction)
+    if specialIngredientType == PROVISIONER_SPECIAL_INGREDIENT_TYPE_FILLET then
+        if self.filletPanel.inventory then
+            self.filletPanel.inventory.additionalFilter = additionalFilterFunction
+        end
+    end
+end
+
 function ZO_GamepadProvisioner:CreateModeEntry(name, mode, icon)
     local data = ZO_GamepadEntryData:New(GetString(name), icon)
     data:SetIconTintOnSelection(true)

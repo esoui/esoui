@@ -363,7 +363,7 @@ function ZO_EndlessDungeonLeaderboardsManager_Shared:SendLeaderboardQuery()
     else
         self.requestedClassId = nil
     end
-    LEADERBOARD_LIST_MANAGER:QueryLeaderboardData(PENDING_LEADERBOARD_DATA_TYPE.ENDLESS_DUNGEON, self:GenerateRequestData())
+    LEADERBOARD_LIST_MANAGER:QueryLeaderboardData(LEADERBOARD_DATA_TYPE.ENDLESS_DUNGEON, self:GenerateRequestData())
 end
 
 function ZO_EndlessDungeonLeaderboardsManager_Shared:GenerateRequestData()

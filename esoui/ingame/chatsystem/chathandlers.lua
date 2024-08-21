@@ -109,6 +109,10 @@ local BUILTIN_MESSAGE_FORMATTERS = {
         return string.format(GetString(SI_CHAT_MESSAGE_SYSTEM), GetString("SI_CHATCHANNELCATEGORIES", CHAT_CATEGORY_SYSTEM), message)
     end,
 
+    [EVENT_FIXED_BROADCAST] = function(broadcastType, arg1)
+        return string.format(GetString(SI_CHAT_MESSAGE_SYSTEM), GetString("SI_CHATCHANNELCATEGORIES", CHAT_CATEGORY_SYSTEM), zo_strformat(GetString("SI_BROADCASTTYPE", broadcastType), arg1))
+    end,
+
     [EVENT_FRIEND_PLAYER_STATUS_CHANGED] = function(displayName, characterName, oldStatus, newStatus)
         local wasOnline = oldStatus ~= PLAYER_STATUS_OFFLINE
         local isOnline = newStatus ~= PLAYER_STATUS_OFFLINE
@@ -245,8 +249,8 @@ local BUILTIN_MESSAGE_FORMATTERS = {
         local killerAllianceColor
         local victimAllianceColor
         if isBattleground then
-            killerAllianceColor = GetBattlegroundAllianceColor(killerAlliance):GetBright()
-            victimAllianceColor = GetBattlegroundAllianceColor(victimAlliance):GetBright()
+            killerAllianceColor = GetBattlegroundTeamColor(killerAlliance):GetBright()
+            victimAllianceColor = GetBattlegroundTeamColor(victimAlliance):GetBright()
         else
             killerAllianceColor = GetAllianceColor(killerAlliance):GetBright()
             victimAllianceColor = GetAllianceColor(victimAlliance):GetBright()
@@ -329,13 +333,16 @@ function ZO_ChatRouter:Initialize()
         self:RegisterMessageFormatter(eventCode, messageFormatter)
     end
 
-    local function SetTranscriptForwardingEnabled()
-        local enableTranscriptForwarding = GetSetting_Bool(SETTING_TYPE_ACCESSIBILITY, ACCESSIBILITY_SETTING_SEND_TRANSCRIPT_TO_TEXT_CHAT)
-        self:SetTranscriptForwardingEnabled(enableTranscriptForwarding)
-    end
+    if IsConsoleUI() then
+        -- VOICE_CHAT_MANAGER is console only
+        local function SetTranscriptForwardingEnabled()
+            local enableTranscriptForwarding = GetSetting_Bool(SETTING_TYPE_ACCESSIBILITY, ACCESSIBILITY_SETTING_SEND_TRANSCRIPT_TO_TEXT_CHAT)
+            self:SetTranscriptForwardingEnabled(enableTranscriptForwarding)
+        end
 
-    EVENT_MANAGER:RegisterForEvent("ChatRouter", EVENT_VOICE_CHAT_ACCESSIBILITY_SETTING_CHANGED, SetTranscriptForwardingEnabled)
-    EVENT_MANAGER:RegisterForEvent("ChatRouter", EVENT_FORWARD_TRANSCRIPT_TO_TEXT_CHAT_ACCESSIBILITY_SETTING_CHANGED, SetTranscriptForwardingEnabled)
+        EVENT_MANAGER:RegisterForEvent("ChatRouter", EVENT_VOICE_CHAT_ACCESSIBILITY_SETTING_CHANGED, SetTranscriptForwardingEnabled)
+        EVENT_MANAGER:RegisterForEvent("ChatRouter", EVENT_FORWARD_TRANSCRIPT_TO_TEXT_CHAT_ACCESSIBILITY_SETTING_CHANGED, SetTranscriptForwardingEnabled)
+    end
 
     local function OnTryInsertLink(...)
         return ZO_GetChatSystem():HandleTryInsertLink(...)
@@ -428,11 +435,14 @@ local function AddTranscriptMessage(...)
     CHAT_ROUTER:AddTranscriptMessage(...) 
 end
 
-function ZO_ChatRouter:SetTranscriptForwardingEnabled(enabled)
-    if enabled then
-        VOICE_CHAT_MANAGER:RegisterCallback("VoiceChatTranscript", AddTranscriptMessage)
-    else
-        VOICE_CHAT_MANAGER:UnregisterCallback("VoiceChatTranscript", AddTranscriptMessage)
+if IsConsoleUI() then
+    -- VOICE_CHAT_MANAGER is console only
+    function ZO_ChatRouter:SetTranscriptForwardingEnabled(enabled)
+        if enabled then
+            VOICE_CHAT_MANAGER:RegisterCallback("VoiceChatTranscript", AddTranscriptMessage)
+        else
+            VOICE_CHAT_MANAGER:UnregisterCallback("VoiceChatTranscript", AddTranscriptMessage)
+        end
     end
 end
 

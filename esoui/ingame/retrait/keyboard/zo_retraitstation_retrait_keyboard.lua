@@ -101,6 +101,12 @@ function ZO_RetraitStation_Retrait_Keyboard:InitializeKeybindStripDescriptors()
     }
 end
 
+function ZO_RetraitStation_Retrait_Keyboard:AddInventoryAdditionalFilter(additionalFilterFunction)
+    if self.inventory then
+        self.inventory.additionalFilter = additionalFilterFunction
+    end
+end
+
 function ZO_RetraitStation_Retrait_Keyboard:IsShowing()
     return self.fragment:IsShowing()
 end
@@ -485,7 +491,20 @@ end
 
 function ZO_Retrait_Inventory_Keyboard:Refresh(data)
     local USE_WORN_BAG = true
-    local validItemIds = self:GetIndividualInventorySlotsAndAddToScrollData(ZO_RetraitStation_CanItemBeRetraited, ZO_RetraitStation_DoesItemPassFilter, self.filterType, data, USE_WORN_BAG)
+
+    local function ItemFilterFunction(bagId, slotIndex, filterType, isQuestFilterChecked, questInfo)
+        if not ZO_RetraitStation_DoesItemPassFilter(bagId, slotIndex, filterType) then
+            return false
+        end
+
+        if self.additionalFilter and type(self.additionalFilter) == "function" then
+            return self.additionalFilter(bagId, slotIndex, filterType)
+        end
+
+        return true
+    end
+
+    local validItemIds = self:GetIndividualInventorySlotsAndAddToScrollData(ZO_RetraitStation_CanItemBeRetraited, ItemFilterFunction, self.filterType, data, USE_WORN_BAG)
     self.owner:OnInventoryUpdate(validItemIds)
 
     self:SetNoItemLabelHidden(#data > 0)

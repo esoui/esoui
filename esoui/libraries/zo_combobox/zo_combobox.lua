@@ -176,6 +176,11 @@ function ZO_ComboBox:SetHideDropdownCallback(callback)
     self.onHideDropdownCallback = callback
 end
 
+function ZO_ComboBox:SetMouseOverCallbacks(onMouseEnterCallback, onMouseExitCallback)
+    self.m_container:SetHandler("OnMouseEnter", onMouseEnterCallback)
+    self.m_container:SetHandler("OnMouseExit", onMouseExitCallback)
+end
+
 function ZO_ComboBox:SetEntryMouseOverCallbacks(onMouseEnterCallback, onMouseExitCallback)
     self.onMouseEnterCallback = onMouseEnterCallback
     self.onMouseExitCallback = onMouseExitCallback
@@ -302,7 +307,7 @@ function ZO_ComboBox:RefreshSelectedItemText()
     end
 end
 
-function ZO_ComboBox_Base:SetEnabled(enabled)
+function ZO_ComboBox:SetEnabled(enabled)
     self.m_container:SetMouseEnabled(enabled)
     self.m_openDropdown:SetEnabled(enabled)
     self.m_selectedItemText:SetColor(self:GetSelectedTextColor(enabled))
@@ -310,7 +315,7 @@ function ZO_ComboBox_Base:SetEnabled(enabled)
     self:HideDropdown()
 end
 
-function ZO_ComboBox_Base:IsEnabled()
+function ZO_ComboBox:IsEnabled()
     return self.m_openDropdown:GetState() ~= BSTATE_DISABLED
 end
 

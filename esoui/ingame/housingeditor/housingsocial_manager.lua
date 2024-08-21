@@ -92,7 +92,7 @@ function ZO_HousingSocial_Manager:GetHouseName(houseId)
     return houseName
 end
 
-function ZO_HousingSocial_Manager:VisitHouse(houseId, accountName)
+function ZO_HousingSocial_Manager:VisitHouse(houseId, accountName, fromHouseTours)
     houseId = zo_parseUnsignedInteger(houseId)
     if not houseId then
         -- Invalid houseId.
@@ -105,7 +105,8 @@ function ZO_HousingSocial_Manager:VisitHouse(houseId, accountName)
         RequestJumpToHouse(houseId)
     else
         -- This house is owned by a remote player.
-        JumpToSpecificHouse(accountName, houseId)
+        fromHouseTours = fromHouseTours and fromHouseTours or false
+        JumpToSpecificHouse(accountName, houseId, fromHouseTours)
     end
 
     SCENE_MANAGER:ShowBaseScene()

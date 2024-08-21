@@ -65,7 +65,7 @@ function ZO_Tooltip:LayoutGroupFinderGroupListingTooltip(data)
     local displayName = data:GetOwnerDisplayName()
     local characterName = data:GetOwnerCharacterName()
     ownerSection:AddLine(GetString(SI_GROUP_FINDER_TOOLTIP_LISTING_OWNER_LABEL), self:GetStyle("bodyHeader"))
-    ownerSection:AddLine(ZO_GetPrimaryPlayerNameWithSecondary(displayName, characterName), self:GetStyle("bodyDescription"))
+    ownerSection:AddLine(ZO_FormatUserFacingDisplayName(displayName, characterName), self:GetStyle("bodyDescription"))
     self:AddSection(ownerSection)
 
     -- Category/location
@@ -201,7 +201,6 @@ function ZO_Tooltip:LayoutGroupFinderApplicationDetails(applicationData)
     self:AddSection(bodySection)
 end
 
-
 function ZO_Tooltip:LayoutReportGroupFinderListingInfo(title, description, ownerDisplayName, ownerCharacterName)
     self:AddLine(GetString(SI_CUSTOMER_SERVICE_ASK_FOR_HELP_GROUP_FINDER_LISTING_DETAILS), self:GetStyle("title"))
 
@@ -219,4 +218,25 @@ function ZO_Tooltip:LayoutReportGroupFinderListingInfo(title, description, owner
     descriptionSection:AddLine(GetString(SI_GROUP_FINDER_TOOLTIP_DESCRIPTION_HEADER), self:GetStyle("bodyHeader"))
     descriptionSection:AddLine(EscapeMarkup(description, ALLOW_MARKUP_TYPE_COLOR_ONLY), self:GetStyle("bodyDescription"))
     self:AddSection(descriptionSection)
+end
+
+function ZO_Tooltip:LayoutReportHouseTourListingInfo(nickname, collectibleId, ownerDisplayName, additionalInstructions)
+    self:AddLine(GetString(SI_CUSTOMER_SERVICE_ASK_FOR_HELP_HOUSE_TOUR_LISTING_DETAILS), self:GetStyle("title"))
+
+    local ownerSection = self:AcquireSection(self:GetStyle("bodySection"))
+    ownerSection:AddLine(GetString(SI_HOUSE_TOURS_REPORT_LISTING_TOOLTIP_OWNER_HEADER), self:GetStyle("bodyHeader"))
+    ownerSection:AddLine(ownerDisplayName, self:GetStyle("bodyDescription"))
+    self:AddSection(ownerSection)
+
+    local nicknameSection = self:AcquireSection(self:GetStyle("bodySection"))
+    nicknameSection:AddLine(GetString(SI_HOUSE_TOURS_REPORT_LISTING_TOOLTIP_NICKNAME_HEADER), self:GetStyle("bodyHeader"))
+    nicknameSection:AddLine(EscapeMarkup(nickname, ALLOW_MARKUP_TYPE_COLOR_ONLY), self:GetStyle("bodyDescription"))
+    self:AddSection(nicknameSection)
+
+    if additionalInstructions and additionalInstructions ~= "" then
+        local additionalInstructionsSection = self:AcquireSection(self:GetStyle("bodySection"))
+        additionalInstructionsSection:AddLine(GetString(SI_GAMEPAD_HELP_CUSTOMER_SERVICE_TICKET_ADDITIONAL_INSTRUCTIONS_HEADER), self:GetStyle("bodyHeader"))
+        additionalInstructionsSection:AddLine(EscapeMarkup(additionalInstructions, ALLOW_MARKUP_TYPE_COLOR_ONLY), self:GetStyle("bodyDescription"))
+        self:AddSection(additionalInstructionsSection)
+    end
 end

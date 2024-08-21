@@ -47,7 +47,7 @@ local MULTI_CURRENCY_PADDING = 8 -- the amount of space between each currency ty
 
 local DEFAULT_CURRENCY_OPTIONS =
 {
-    showTooltips = false,
+    showTooltips = true,
     useShortFormat = false,
     font = "ZoFontGame",
     iconSide = RIGHT,
@@ -387,7 +387,7 @@ end
 
 local function OnMouseUpWrapper(self, button, upInside, ctrl, alt, shift)
     if button == MOUSE_BUTTON_INDEX_LEFT and upInside then
-        self.currencyClickHandler()
+        self.currencyClickHandler(self)
     end
 end
 

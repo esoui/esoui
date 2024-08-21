@@ -7,7 +7,9 @@ function HelpAskForHelp_Keyboard:New(...)
 end
 
 function HelpAskForHelp_Keyboard:Initialize(control)
-    HELP_CUSTOMER_SERVICE_ASK_FOR_HELP_KEYBOARD_FRAGMENT = ZO_FadeSceneFragment:New(control)
+    local sceneFragment = ZO_FadeSceneFragment:New(control)
+    self.sceneFragment = sceneFragment
+    HELP_CUSTOMER_SERVICE_ASK_FOR_HELP_KEYBOARD_FRAGMENT = sceneFragment
 
     local iconData =
     {
@@ -38,11 +40,10 @@ function HelpAskForHelp_Keyboard:Initialize(control)
     self.externalInfoTitle = self.externalInfoContainer:GetNamedChild("Title")
     self.instructionsText = control:GetNamedChild("Instructions")
     self.helpSubmitButton = control:GetNamedChild("SubmitButton")
+    self.additionalInstructionsText = control:GetNamedChild("AdditionalInstructions")
 
     ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:RegisterCallback("CustomerServiceTicketSubmitted", function (...)
-        if HELP_CUSTOMER_SERVICE_ASK_FOR_HELP_KEYBOARD_FRAGMENT:IsShowing() then
-            self:OnCustomerServiceTicketSubmitted(...)
-        end
+        self:OnCustomerServiceTicketSubmitted(...)
     end)
 
     self:InitializeTextBoxes()
@@ -93,6 +94,7 @@ function HelpAskForHelp_Keyboard:InitializeComboBoxes()
     end
 
     self.helpImpactComboBox:SelectItemByIndex(1)
+    self:OnSelectedCategoriesChanged()
 end
 
 function HelpAskForHelp_Keyboard:InitializeTextBoxes()
@@ -165,6 +167,7 @@ function HelpAskForHelp_Keyboard:UpdateCategories()
         local function OnCategoryChanged()
             self:UpdateSubcategories()
             self:UpdateSubmitButton()
+            self:OnSelectedCategoriesChanged()
         end
 
         self:SetCategoryContentHidden(false)
@@ -181,8 +184,9 @@ function HelpAskForHelp_Keyboard:UpdateCategories()
     else
         self:SetCategoryContentHidden(true)
     end
-    
+
     self:UpdateSubcategories()
+    self:OnSelectedCategoriesChanged()
 end
 
 function HelpAskForHelp_Keyboard:UpdateSubcategories()
@@ -194,6 +198,7 @@ function HelpAskForHelp_Keyboard:UpdateSubcategories()
     if subcategories then
         local function OnCategoryChanged()
             self:UpdateSubmitButton()
+            self:OnSelectedCategoriesChanged()
         end
 
         self:SetSubcategoryContentHidden(false)
@@ -270,6 +275,8 @@ function HelpAskForHelp_Keyboard:SetCategoryContentHidden(shouldHide)
         offsetY = 20
     end
     self.helpCategoryContainer:SetAnchor(TOPLEFT, self.helpImpactComboBoxControl, BOTTOMLEFT, 0, offsetY)
+
+    self:OnSelectedCategoriesChanged()
 end
 
 function HelpAskForHelp_Keyboard:SetSubcategoryContentHidden(shouldHide)
@@ -312,6 +319,7 @@ end
 function HelpAskForHelp_Keyboard:ClearFields()
     self.helpImpactComboBox:SelectItemByIndex(1)
     self.description:SetText("")
+    self:SetAdditionalInstructions(nil)
     ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:SetReportPlayerTicketSubmittedCallback(nil)
 
     ResetCustomerServiceTicket()
@@ -339,6 +347,8 @@ function HelpAskForHelp_Keyboard:SelectCategory(categoryId)
             break
         end
     end
+
+    self:OnSelectedCategoriesChanged()
 end
 
 function HelpAskForHelp_Keyboard:SelectSubcategory(subcategoryId)
@@ -355,6 +365,15 @@ end
 
 function HelpAskForHelp_Keyboard:SetDetailsText(text)
     self.details:SetText(text)
+end
+
+function HelpAskForHelp_Keyboard:SetAdditionalInstructions(additionalInstructions)
+    if additionalInstructions ~= nil and additionalInstructions ~= "" then
+        self.additionalInstructionsText:SetText(additionalInstructions)
+        self.additionalInstructionsText:SetHidden(false)
+    else
+        self.additionalInstructionsText:SetHidden(true)
+    end
 end
 
 function HelpAskForHelp_Keyboard:OpenAskForHelp(impactId, categoryId, subcategoryId, externalInfo)
@@ -389,26 +408,31 @@ function HelpAskForHelp_Keyboard:OpenAskForHelp(impactId, categoryId, subcategor
     end
 end
 
-function HelpAskForHelp_Keyboard:GetSelectedTicketCategory()
+function HelpAskForHelp_Keyboard:GetSelectedTicketCategoryData()
     local impactData = self:GetImpactData()
     if impactData then
         if impactData.ticketCategory then
-            return impactData.ticketCategory
+            return impactData
         else
             local categoryData = self:GetCategoryData()
             if categoryData then
                 if categoryData.ticketCategory then
-                    return categoryData.ticketCategory
+                    return categoryData
                 else
                     local subcategoryData = self:GetSubcategoryData()
                     if subcategoryData then
-                        return subcategoryData.ticketCategory
+                        return subcategoryData
                     end
                 end
             end
         end
     end
     return nil
+end
+
+function HelpAskForHelp_Keyboard:GetSelectedTicketCategory()
+    local ticketCategoryData = self:GetSelectedTicketCategoryData()
+    return ticketCategoryData and ticketCategoryData.ticketCategory or nil
 end
 
 function HelpAskForHelp_Keyboard:OnExternalInfoMouseEnter()
@@ -432,7 +456,23 @@ function HelpAskForHelp_Keyboard:ShowGroupFinderListingTooltip()
     SetTooltipText(InformationTooltip, EscapeMarkup(text, ALLOW_MARKUP_TYPE_COLOR_ONLY))
 end
 
+function HelpAskForHelp_Keyboard:ShowHouseTourListingTooltip()
+    InitializeTooltip(InformationTooltip, self.externalInfoContainer, RIGHT, -5, 0)
+    local externalInfo = self.externalInfo
+    local owner = ZO_WHITE:Colorize(externalInfo.ownerDisplayName)
+    local nickname = ZO_WHITE:Colorize(externalInfo.nickname)
+    local text = zo_strformat(SI_HOUSE_TOURS_LISTING_ASK_FOR_HELP_KEYBOARD_TOOLTIP_FORMATTER, owner, nickname)
+    SetTooltipText(InformationTooltip, EscapeMarkup(text, ALLOW_MARKUP_TYPE_COLOR_ONLY))
+end
+
 function HelpAskForHelp_Keyboard:AttemptToSendTicket()
+    local ticketCategoryData = self:GetSelectedTicketCategoryData()
+    local includeScreenshot = ticketCategoryData and ticketCategoryData.includeScreenshot or false
+    if includeScreenshot and not ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:CanSubmitFeedbackWithScreenshot() then
+        ZO_Dialogs_ShowDialog("CUSTOMER_SERVICE_TICKET_SCREENSHOT_COOLDOWN")
+        return
+    end
+
     --Populate the ticket fields. Impact data must be selected in order to get here.
     local impactData = self:GetImpactData()
     local retainTargetInfo = impactData.externalInfoRegistrationFunction ~= nil
@@ -450,8 +490,7 @@ function HelpAskForHelp_Keyboard:AttemptToSendTicket()
     end
 
     SetCustomerServiceTicketBody(self.description:GetText())
-
-    ZO_Dialogs_ShowDialog("HELP_CUSTOMER_SERVICE_SUBMITTING_TICKET_DIALOG")
+    SetCustomerServiceTicketIncludeScreenshot(includeScreenshot)
 
     if impactData.id == CUSTOMER_SERVICE_ASK_FOR_HELP_IMPACT_REPORT_PLAYER then
         -- details should always be a string in this case
@@ -462,6 +501,7 @@ function HelpAskForHelp_Keyboard:AttemptToSendTicket()
 
     ZO_DefaultEdit_SetEnabled(self.detailsEditBox, true)
 
+    ZO_Dialogs_ShowDialog("HELP_CUSTOMER_SERVICE_SUBMITTING_TICKET_DIALOG")
     SubmitCustomerServiceTicket()
 end
 
@@ -469,6 +509,15 @@ function HelpAskForHelp_Keyboard:OnCustomerServiceTicketSubmitted(response, succ
     if success then
         self:ClearFields()
     end
+end
+
+function HelpAskForHelp_Keyboard:OnSelectedCategoriesChanged()
+    local additionalInstructions = ""
+    local categoryData = self:GetSelectedTicketCategoryData()
+    if categoryData then
+        additionalInstructions = categoryData.additionalInstructions or additionalInstructions
+    end
+    self:SetAdditionalInstructions(additionalInstructions)
 end
 
 --Global XML
