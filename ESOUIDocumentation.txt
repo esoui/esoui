@@ -1,5 +1,5 @@
 {TOC:maxLevel=3}
-h1. ESO UI Documentation for API Version 101042
+h1. ESO UI Documentation for API Version 101043
 h2. VM Functions
 * ScriptBuildInfo()
 ** _Returns:_ *table* _buildInfo_
@@ -722,6 +722,7 @@ h5. NotificationType
 * NOTIFICATION_TYPE_GUILD
 * NOTIFICATION_TYPE_GUILD_MOTD
 * NOTIFICATION_TYPE_GUILD_NEW_APPLICATIONS
+* NOTIFICATION_TYPE_HOUSE_TOURS_HOUSE_RECOMMENDED
 * NOTIFICATION_TYPE_LEADERBOARD
 * NOTIFICATION_TYPE_LFG
 * NOTIFICATION_TYPE_MARKET_PRODUCT_AVAILABLE
@@ -4039,29 +4040,34 @@ h5. HouseTourListingTag
 * HOUSE_TOURS_LISTING_TAG_AQUATIC
 * HOUSE_TOURS_LISTING_TAG_ARENAS
 * HOUSE_TOURS_LISTING_TAG_ARTWORK
+* HOUSE_TOURS_LISTING_TAG_CELESTIAL
 * HOUSE_TOURS_LISTING_TAG_COLORFUL
-* HOUSE_TOURS_LISTING_TAG_CONVENTIONAL
 * HOUSE_TOURS_LISTING_TAG_COZY
 * HOUSE_TOURS_LISTING_TAG_CREATURES
 * HOUSE_TOURS_LISTING_TAG_DINING
 * HOUSE_TOURS_LISTING_TAG_ELEGANT
+* HOUSE_TOURS_LISTING_TAG_EXHIBITS
 * HOUSE_TOURS_LISTING_TAG_FESTIVE
 * HOUSE_TOURS_LISTING_TAG_FROM_SCRATCH
 * HOUSE_TOURS_LISTING_TAG_GAMES
 * HOUSE_TOURS_LISTING_TAG_GARDENS
 * HOUSE_TOURS_LISTING_TAG_HIDDEN_SECRETS
+* HOUSE_TOURS_LISTING_TAG_HORROR
 * HOUSE_TOURS_LISTING_TAG_LABORATORIES
 * HOUSE_TOURS_LISTING_TAG_LIBRARIES
 * HOUSE_TOURS_LISTING_TAG_LORE_FRIENDLY
 * HOUSE_TOURS_LISTING_TAG_MAGIC
 * HOUSE_TOURS_LISTING_TAG_MARKETS
+* HOUSE_TOURS_LISTING_TAG_MAZES
 * HOUSE_TOURS_LISTING_TAG_MECHANISMS
 * HOUSE_TOURS_LISTING_TAG_OTHER_WORLDS
 * HOUSE_TOURS_LISTING_TAG_PLAYFUL
+* HOUSE_TOURS_LISTING_TAG_RESIDENCES
 * HOUSE_TOURS_LISTING_TAG_ROLEPLAY
+* HOUSE_TOURS_LISTING_TAG_RUINS
 * HOUSE_TOURS_LISTING_TAG_SACRED
-* HOUSE_TOURS_LISTING_TAG_SINISTER
 * HOUSE_TOURS_LISTING_TAG_STRONGHOLDS
+* HOUSE_TOURS_LISTING_TAG_TAVERNS
 * HOUSE_TOURS_LISTING_TAG_TOWNS
 * HOUSE_TOURS_LISTING_TAG_UNDER_CONSTRUCTION
 
@@ -17397,8 +17403,6 @@ h2. Game API
 * GetHouseToursTopRecommendedHouseNotification(*luaindex* _notificationIndex_)
 ** _Returns:_ *integer* _houseId_
 
-* RemoveHouseToursTopRecommendedHouseNotificationByHouseId(*integer* _houseId_)
-
 * GetHouseToursRecommendationsTimeRemainingS()
 ** _Returns:_ *integer* _timeRemainingS_
 
@@ -24761,7 +24765,7 @@ h2. Events
 * EVENT_CONVERSATION_FAILED_UNIQUE_ITEM
 * EVENT_CONVERSATION_UPDATED (*string* _conversationBodyText_, *integer* _conversationOptionCount_)
 * EVENT_CORONATE_EMPEROR_NOTIFICATION (*integer* _campaignId_, *string* _emperorCharacterName_, *[Alliance|#Alliance]* _emperorAlliance_, *string* _emperorDisplayName_)
-* EVENT_CRAFTED_ABILITY_LOCK_STATE_CHANGED (*integer* _craftedAbilityDefId_, *bool* _isUnlocked_)
+* EVENT_CRAFTED_ABILITY_LOCK_STATE_CHANGED (*integer* _craftedAbilityDefId_, *bool* _isUnlocked_, *bool* _isFromInit_)
 * EVENT_CRAFTED_ABILITY_RESET (*integer* _craftedAbilityDefId_, *integer* _totalNumReset_, *bool* _isLastReset_)
 * EVENT_CRAFTED_ABILITY_SCRIPT_LOCK_STATE_CHANGED (*integer* _craftedAbilityScriptDefId_, *bool* _isUnlocked_)
 * EVENT_CRAFTED_ABILITY_SEARCH_RESULTS_READY
@@ -24971,8 +24975,7 @@ h2. Events
 * EVENT_HOUSE_TOURS_LISTING_OPERATION_COOLDOWN_STATE_CHANGED (*bool* _isOnCooldown_)
 * EVENT_HOUSE_TOURS_LISTING_OPERATION_RESPONSE (*[HouseToursListingOperationType|#HouseToursListingOperationType]* _operationType_, *integer* _houseId_, *[HouseTourListingResult|#HouseTourListingResult]* _result_)
 * EVENT_HOUSE_TOURS_LISTING_OPERATION_STARTED (*[HouseToursListingOperationType|#HouseToursListingOperationType]* _operationType_, *integer* _houseId_)
-* EVENT_HOUSE_TOURS_LISTING_RECOMMENDED_NOTIFICATION_ADDED (*integer* _houseId_)
-* EVENT_HOUSE_TOURS_LISTING_RECOMMENDED_NOTIFICATION_REMOVED (*integer* _houseId_)
+* EVENT_HOUSE_TOURS_LISTING_RECOMMENDED_NOTIFICATIONS_UPDATED
 * EVENT_HOUSE_TOURS_SAVE_FAVORITE_OPERATION_COMPLETE (*[HouseTourFavoriteOperationType|#HouseTourFavoriteOperationType]* _operationType_, *[HouseTourSaveFavoriteResult|#HouseTourSaveFavoriteResult]* _result_, *string* _ownerDisplayName_, *integer* _houseId_)
 * EVENT_HOUSE_TOURS_SAVE_RECOMMENDATION_OPERATION_COMPLETE (*[HouseTourSaveRecommendationResult|#HouseTourSaveRecommendationResult]* _result_)
 * EVENT_HOUSE_TOURS_SEARCH_COMPLETE (*[HouseTourListingType|#HouseTourListingType]* _listingType_, *[HouseTourRequestListingsResult|#HouseTourRequestListingsResult]* _result_, *integer* _searchId_)
