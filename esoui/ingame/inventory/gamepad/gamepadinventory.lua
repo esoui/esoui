@@ -1145,7 +1145,7 @@ end
 function ZO_GamepadInventory:OnLeaveHeader()
     ZO_Gamepad_ParametricList_BagsSearch_Screen.OnLeaveHeader(self)
 
-    if self.currentlySelectedData.isCurrencyEntry then
+    if self.currentlySelectedData and self.currentlySelectedData.isCurrencyEntry then
         self:UpdateCategoryLeftTooltip(self.currentlySelectedData)
     else
         self:UpdateItemLeftTooltip(self.currentlySelectedData)

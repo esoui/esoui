@@ -2454,13 +2454,16 @@ do
             cycleTargetDescriptor,
         }
 
+        self.selectionModeGamepadKeybindStripDescriptor = {}
+        ZO_DeepTableCopy(self.selectionModeKeybindStripDescriptor, self.selectionModeGamepadKeybindStripDescriptor)
+
         self.selectionModeNoTargetKeybindStripDescriptor = {}
         ZO_DeepTableCopy(self.selectionModeKeybindStripDescriptor, self.selectionModeNoTargetKeybindStripDescriptor)
 
         self.selectionModeNoTargetGamepadKeybindStripDescriptor = {}
         ZO_DeepTableCopy(self.selectionModeNoTargetKeybindStripDescriptor, self.selectionModeNoTargetGamepadKeybindStripDescriptor)
 
-        table.insert(self.selectionModeKeybindStripDescriptor,
+        local reportHouseKeyboardKeybind =
         {
             alignment = KEYBIND_STRIP_ALIGN_RIGHT,
             name = GetString(SI_HOUSING_EDITOR_REPORT_HOUSE),
@@ -2470,21 +2473,12 @@ do
             end,
             visible = IsCurrentHouseListedByAnotherPlayer,
             order = 100,
-        })
+        }
 
-        table.insert(self.selectionModeNoTargetKeybindStripDescriptor,
-        {
-            alignment = KEYBIND_STRIP_ALIGN_RIGHT,
-            name = GetString(SI_HOUSING_EDITOR_REPORT_HOUSE),
-            keybind = "HOUSING_EDITOR_REPORT_HOUSE",
-            callback = function()
-                ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:OpenReportHouseTourListingCurrentHouseTicketScene()
-            end,
-            visible = IsCurrentHouseListedByAnotherPlayer,
-            order = 100,
-        })
+        table.insert(self.selectionModeKeybindStripDescriptor, reportHouseKeyboardKeybind)
+        table.insert(self.selectionModeNoTargetKeybindStripDescriptor, reportHouseKeyboardKeybind)
 
-        table.insert(self.selectionModeNoTargetGamepadKeybindStripDescriptor,
+        local reportHouseGamepadKeybind =
         {
             alignment = KEYBIND_STRIP_ALIGN_RIGHT,
             name = GetString(SI_HOUSING_EDITOR_REPORT_HOUSE),
@@ -2494,7 +2488,9 @@ do
             end,
             visible = IsCurrentHouseListedByAnotherPlayer,
             order = 100,
-        })
+        }
+
+        table.insert(self.selectionModeNoTargetGamepadKeybindStripDescriptor, reportHouseGamepadKeybind)
 
         self.placementModeKeybindPaletteDescriptor =
         {
@@ -3704,8 +3700,8 @@ do
     function ZO_HousingEditorHud:GetKeybindStripDescriptorForMode(mode, hasValidTarget)
         if mode == HOUSING_EDITOR_MODE_SELECTION then
             if IsInGamepadPreferredMode() then
-                if hasValidTarget then
-                    return self.selectionModeKeybindStripDescriptor, self.selectionModeKeybindPaletteGamepadDescriptor
+                if hasValidTarget and HOUSING_EDITOR_STATE:CanLocalPlayerEditHouse() then
+                    return self.selectionModeGamepadKeybindStripDescriptor, self.selectionModeKeybindPaletteGamepadDescriptor
                 else
                     return self.selectionModeNoTargetGamepadKeybindStripDescriptor, nil
                 end
