@@ -2475,7 +2475,7 @@ SafeAddString(SI_HOUSETOURSAVEFAVORITERESULT6, "Vous ne pouvez pas placer votre 
 SafeAddString(SI_HOUSETOURSAVERECOMMENDATIONRESULT0, "Votre conseil a été indiqué.", 0)
 SafeAddString(SI_HOUSETOURSAVERECOMMENDATIONRESULT1, "Vous n'avez pas indiqué votre conseil.", 0)
 SafeAddString(SI_HOUSETOURSAVERECOMMENDATIONRESULT4, "Vous avez déjà indiqué le nombre maximal de conseils ", 0)
-SafeAddString(SI_HOUSETOURSAVERECOMMENDATIONRESULT5, "Vous avez déjà conseillé cette maison pour la semaine?.", 0)
+SafeAddString(SI_HOUSETOURSAVERECOMMENDATIONRESULT5, "Vous avez déjà conseillé cette maison pour la semaine.", 0)
 SafeAddString(SI_HOUSETOURSAVERECOMMENDATIONRESULT6, "Cette maison n'est pas proposée pour des Visites.", 0)
 SafeAddString(SI_HOUSETOURSAVERECOMMENDATIONRESULT7, "Vous ne pouvez pas conseiller votre propre maison.", 0)
 SafeAddString(SI_HOUSETOURSLISTINGOPERATIONTYPE_FAILDIALOGTITLE1, "Échec de la création", 0)
