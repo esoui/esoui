@@ -127,6 +127,13 @@ function ZO_Stats:OnShowing()
 
         ZO_LEVEL_UP_REWARDS_MANAGER:RegisterCallback("OnLevelUpRewardsUpdated", UpdateLevelUpRewards)
 
+        local function OnTitleClearedNew(titleInfo)
+            if STATS_SCENE:IsShowing() and self.titleDropdownRow then
+                self.SetDropdownRowIsNew(self.titleDropdownRow, TITLE_MANAGER:HasNewTitle())
+            end
+        end
+        TITLE_MANAGER:RegisterCallback("TitleClearedNew", OnTitleClearedNew)
+
         self.control:SetHandler("OnUpdate", function() self:OnUpdate() end)
 
         STATS_SCENE:AddFragment(STATS_BG_FRAGMENT)
@@ -136,6 +143,8 @@ function ZO_Stats:OnShowing()
     self:RefreshEquipmentBonus()
 
     self:UpdateLevelUpRewards()
+
+    self:UpdateTitles()
 
     TriggerTutorial(TUTORIAL_TRIGGER_STATS_OPENED)
     if GetAttributeUnspentPoints() > 0 then
@@ -359,18 +368,35 @@ function ZO_Stats:CreateBackgroundSection()
     self:AddHeader(SI_STATS_BACKGROUND)
 
     -- Titles --
-
     local titleDropdownRow = self:AddDropdownRow(GetString(SI_STATS_TITLE))
-    titleDropdownRow.dropdown:SetSortsItems(false)
+    self.titleDropdownRow = titleDropdownRow
+    local titleDropdown = titleDropdownRow.dropdown
+    titleDropdown:SetSortsItems(false)
+
+    local function SetupTitleEntry(control, data, ...)
+        data.m_dropdownObject:SetupEntry(control, data, ...)
+        control:GetNamedChild("NewContainerIcon"):SetHidden(not data.titleInfo.isNew)
+    end
+    titleDropdown:AddCustomEntryTemplate("ZO_StatsTitleComboBoxEntry", ZO_COMBO_BOX_ENTRY_TEMPLATE_HEIGHT, SetupTitleEntry)
+    
+    local NO_MOUSE_OVER = nil
+    local function OnMouseExit(comboBox, control)
+        if control.m_data.titleInfo then
+            --Clear new indicator
+            TITLE_MANAGER:ClearTitleNew(control.m_data.titleInfo.name)
+            comboBox.m_dropdownObject:Refresh()
+        end
+    end
+    titleDropdown:SetEntryMouseOverCallbacks(NO_MOUSE_OVER, OnMouseExit)
 
     local function UpdateSelectedTitle()
-        self:UpdateTitleDropdownSelection(titleDropdownRow.dropdown)
+        self:UpdateTitleDropdownSelection(titleDropdown)
     end
 
-    local function UpdateTitles()
-        self:UpdateTitleDropdownTitles(titleDropdownRow.dropdown)
+     local function UpdateTitles()
+        self:UpdateTitles()
     end
-
+ 
     UpdateTitles()
 
     -- Outfits --
@@ -421,9 +447,32 @@ function ZO_Stats:CreateBackgroundSection()
 
     self.control:RegisterForEvent(EVENT_TITLE_UPDATE, UpdateSelectedTitle)
     self.control:AddFilterForEvent(EVENT_TITLE_UPDATE, REGISTER_FILTER_UNIT_TAG, "player")
-    self.control:RegisterForEvent(EVENT_PLAYER_TITLES_UPDATE, UpdateTitles)
+    TITLE_MANAGER:RegisterCallback("UpdateTitlesData", UpdateTitles)
     self.control:RegisterForEvent(EVENT_RANK_POINT_UPDATE, UpdateRank)
     self.control:AddFilterForEvent(EVENT_RANK_POINT_UPDATE, REGISTER_FILTER_UNIT_TAG, "player")
+end
+
+function ZO_Stats:UpdateTitles()
+    self.SetDropdownRowIsNew(self.titleDropdownRow, false)
+    local dropdown = self.titleDropdownRow.dropdown
+    dropdown:ClearItems()
+    -- First add the none item into the start of the dropdown list 
+    dropdown:AddItem(dropdown:CreateItemEntry(GetString(SI_STATS_NO_TITLE), function() SelectTitle(nil) end), ZO_COMBOBOX_SUPPRESS_UPDATE)
+    -- Sort the valid items...
+    local sortedTitles = TITLE_MANAGER:GetSortedTitles(dropdown.m_sortType, dropdown.m_sortOrder)
+    for _, titleInfo in ipairs(sortedTitles) do
+        local titleListItem = dropdown:CreateItemEntry(zo_strformat(titleInfo.name, GetRawUnitName("player")), function() SelectTitle(titleInfo.index) end)
+        if titleInfo.isNew then
+            self.SetDropdownRowIsNew(self.titleDropdownRow, true)
+        end
+        ZO_ComboBox.SetItemEntryCustomTemplate(titleListItem, "ZO_StatsTitleComboBoxEntry")
+        titleListItem.titleInfo = titleInfo
+        dropdown:AddItem(titleListItem, ZO_COMBOBOX_SUPPRESS_UPDATE)
+    end
+
+    dropdown:UpdateItems()
+
+    self:UpdateTitleDropdownSelection(dropdown)
 end
 
 function ZO_Stats:CreateAttributesSection()
@@ -786,6 +835,11 @@ function ZO_Stats:AddDropdownRow(rowName)
     return dropdownRow
 end
 
+function ZO_Stats.SetDropdownRowIsNew(dropdownRow, isNew)
+	local iconControl = dropdownRow:GetNamedChild("Icon")
+	iconControl:SetHidden(not isNew)
+end
+
 function ZO_Stats:AddIconRow(rowName)
     local iconRow = self:CreateControlFromVirtual("IconRow", "ZO_StatsIconRow")
     iconRow.name:SetText(rowName)
@@ -879,6 +933,10 @@ function ZO_Stats:AddLongTermEffects(container, effectsRowPool)
                     local effectsRow = effectsRowPool:AcquireObject()
                     effectsRow.name:SetText(zo_strformat(SI_ABILITY_TOOLTIP_NAME, buffName))
                     effectsRow.icon:SetTexture(iconFile)
+
+                    --[[if stackCount > 1 then
+                        effectsRow.stackCount:SetText(stackCount)
+                    end--]]
 
                     local duration = startTime - endTime
                     effectsRow.time:SetHidden(duration == 0)

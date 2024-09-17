@@ -479,7 +479,7 @@ function ZO_ItemPreviewType_Collectible:GetVariationName(variationIndex)
 end
 
 function ZO_ItemPreviewType_Collectible:GetNumActions(variationIndex)
-    return GetNumCollectiblePreviewActions(self.collectibleId)
+    return GetNumCollectiblePreviewActions(self.collectibleId, variationIndex)
 end
 
 function ZO_ItemPreviewType_Collectible:GetActionName(variationIndex, actionIndex)
@@ -739,14 +739,7 @@ function ZO_ItemPreview_Shared:SharedPreviewSetup(previewType, ...)
         self:SetVariationControlsHidden(true)
     end
 
-    self.numPreviewActions = self.currentPreviewTypeObject:GetNumActions(self.previewVariationIndex)
-
-    if self.numPreviewActions > 1 then
-        self:SetActionControlsHidden(false)
-        self.actionLabel:SetText(self.currentPreviewTypeObject:GetActionName(self.previewVariationIndex, self.previewActionIndex))
-    else
-        self:SetActionControlsHidden(true)
-    end
+    self:SetupActionCarousel()
 
     self:SetCanChangePreview(false)
 end
@@ -861,7 +854,8 @@ function ZO_ItemPreview_Shared:PreviewNextVariation()
         end
 
         self.previewActionIndex = 1
-        self:SetActionLabel(self.currentPreviewTypeObject:GetActionName(self.previewVariationIndex, self.previewActionIndex))
+
+        self:SetupActionCarousel()
 
         self:ApplyOrBuffer()
     end
@@ -879,7 +873,8 @@ function ZO_ItemPreview_Shared:PreviewPreviousVariation()
         end
 
         self.previewActionIndex = 1
-        self:SetActionLabel(self.currentPreviewTypeObject:GetActionName(self.previewVariationIndex, self.previewActionIndex))
+
+        self:SetupActionCarousel()
 
         self:ApplyOrBuffer()
     end
@@ -923,6 +918,17 @@ end
 
 function ZO_ItemPreview_Shared:HasActions()
     return self.numPreviewActions > 0
+end
+
+function ZO_ItemPreview_Shared:SetupActionCarousel()
+    self.numPreviewActions = self.currentPreviewTypeObject:GetNumActions(self.previewVariationIndex)
+
+    if self.numPreviewActions > 1 then
+        self:SetActionControlsHidden(false)
+        self.actionLabel:SetText(self.currentPreviewTypeObject:GetActionName(self.previewVariationIndex, self.previewActionIndex))
+    else
+        self:SetActionControlsHidden(true)
+    end
 end
 
 function ZO_ItemPreview_Shared:SetForcePreparePreview(forcePreparePreview)

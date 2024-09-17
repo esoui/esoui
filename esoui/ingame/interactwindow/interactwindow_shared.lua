@@ -565,6 +565,7 @@ local function SetupTribureClubReward(control, name, icon)
     control:SetHidden(false)
 end
 
+internalassert(REWARD_TYPE_MAX_VALUE == 15, "Check if new RewardType needs REWARD_CREATORS")
 local REWARD_CREATORS =
 {
     [REWARD_TYPE_AUTO_ITEM] =
@@ -622,12 +623,17 @@ local REWARD_CREATORS =
         function(control, name, amount, currencyOptions)
             SetupCurrencyReward(control, CURT_UNDAUNTED_KEYS, amount, currencyOptions)
         end,
+    [REWARD_TYPE_IMPERIAL_FRAGMENTS] =
+        function(control, name, amount, currencyOptions)
+            SetupCurrencyReward(control, CURT_IMPERIAL_FRAGMENTS, amount, currencyOptions)
+        end,
     [REWARD_TYPE_TRIBUTE_CLUB_EXPERIENCE] =
         function(control, name, amount, icon)
             SetupTribureClubReward(control, name, icon)
         end,
 }
 
+internalassert(REWARD_TYPE_MAX_VALUE == 15, "Check if new RewardType is a currencyRewards")
 local currencyRewards =
 {
     [REWARD_TYPE_MONEY] = true,
@@ -638,12 +644,14 @@ local currencyRewards =
     [REWARD_TYPE_STYLE_STONES] = true,
     [REWARD_TYPE_EVENT_TICKETS] = true,
     [REWARD_TYPE_UNDAUNTED_KEYS] = true,
+    [REWARD_TYPE_IMPERIAL_FRAGMENTS] = true,
 }
 
 function ZO_SharedInteraction:IsCurrencyReward(rewardType)
     return currencyRewards[rewardType]
 end
 
+internalassert(REWARD_TYPE_MAX_VALUE == 15, "Check if new RewardType maps to a currencyRewardToCurrencyType")
 local currencyRewardToCurrencyType =
 {
     [REWARD_TYPE_MONEY] = CURT_MONEY,
@@ -654,6 +662,7 @@ local currencyRewardToCurrencyType =
     [REWARD_TYPE_STYLE_STONES] = CURT_STYLE_STONES,
     [REWARD_TYPE_EVENT_TICKETS] = CURT_EVENT_TICKETS,
     [REWARD_TYPE_UNDAUNTED_KEYS] = CURT_UNDAUNTED_KEYS,
+    [REWARD_TYPE_IMPERIAL_FRAGMENTS] = CURT_IMPERIAL_FRAGMENTS,
 }
 
 function ZO_SharedInteraction:GetCurrencyTypeFromReward(rewardType)

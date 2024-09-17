@@ -97,6 +97,13 @@ EsoUI\InternalIngame\ZoneStories\Gamepad\ZoneStoriesTile_Gamepad.xml
 EsoUI\InternalIngame\ZoneStories\Keyboard\ZoneStoriesTile_Keyboard.lua
 EsoUI\InternalIngame\ZoneStories\Keyboard\ZoneStoriesTile_Keyboard.xml
 
+EsoUI\InternalIngame\PromotionalEvent\PromotionalEventTile.lua
+EsoUI\InternalIngame\PromotionalEvent\PromotionalEventTile.xml
+EsoUI\InternalIngame\PromotionalEvent\Gamepad\PromotionalEventTile_Gamepad.lua
+EsoUI\InternalIngame\PromotionalEvent\Gamepad\PromotionalEventTile_Gamepad.xml
+EsoUI\InternalIngame\PromotionalEvent\Keyboard\PromotionalEventTile_Keyboard.lua
+EsoUI\InternalIngame\PromotionalEvent\Keyboard\PromotionalEventTile_Keyboard.xml
+
 EsoUI\InternalIngame\Mail\ConfirmMail.lua
 EsoUI\InternalIngame\URL\ConfirmURL.lua
 EsoUI\InternalIngame\Gifting\ConfirmSendGift_Shared.lua

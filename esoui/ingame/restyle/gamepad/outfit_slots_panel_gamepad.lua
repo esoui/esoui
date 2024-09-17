@@ -16,7 +16,7 @@ function ZO_Outfit_Slots_Panel_Gamepad:Initialize(control)
     
     ZO_Restyle_Station_Helper_Panel_Gamepad.Initialize(self)
 
-    self.pendingLoopAnimationPool = ZO_MetaPool:New(ZO_Pending_Outfit_LoopAnimation_Pool)
+    self.pendingLoopAnimationPool = ZO_MetaPool:New(ZO_Pending_LoopAnimation_Pool)
 
     self.onUpdateCollectionsSearchResultsCallback = function()
         if self:HasActiveFocus() then
@@ -198,7 +198,7 @@ function ZO_Outfit_Slots_Panel_Gamepad:InitializeGridListPanel()
 
     local function OutfitStyleGridEntryReset(control)
         ZO_ObjectPool_DefaultResetControl(control)
-        ZO_RestyleStation_Gamepad_CleanupAnimationOnControl(control, self.pendingLoopAnimationPool)
+        ZO_RestyleStation_Gamepad_CleanupAnimationOnControl(control)
     end
 
     local HIDE_CALLBACK = nil
@@ -586,8 +586,8 @@ do
         else
             isCurrent, isPending = slotManipulator:GetCollectibleDataAssociations(data)
             if isPending then
-                if not control.icon.pendingLoopAnimationKey then
-                    ZO_Restyle_ApplyPendingLoopAnimationToControl(control.icon, pendingPool, PENDING_ANIMATION_INSET, data:IsLocked())
+                if not control.icon.pendingLoop then
+                    ZO_PendingLoop.ApplyToControl(control.icon, pendingPool, PENDING_ANIMATION_INSET, data:IsLocked())
                 end
                 edgeTexture = "EsoUI/Art/Restyle/Gamepad/gp_outfits_edge_bluePending_16.dds"
             elseif isCurrent then
@@ -598,16 +598,16 @@ do
         end
 
         if not isPending then
-            ZO_RestyleStation_Gamepad_CleanupAnimationOnControl(control, pendingPool)
+            ZO_RestyleStation_Gamepad_CleanupAnimationOnControl(control)
         end
 
         control.borderBackground:SetEdgeTexture(edgeTexture, ZO_GAMEPAD_OUTFIT_GRID_ENTRY_BORDER_EDGE_WIDTH, ZO_GAMEPAD_OUTFIT_GRID_ENTRY_BORDER_EDGE_HEIGHT)
     end
 end
 
-function ZO_RestyleStation_Gamepad_CleanupAnimationOnControl(control, pendingPool)
-    if control.icon.pendingLoopAnimationKey then
-        pendingPool:ReleaseObject(control.icon.pendingLoopAnimationKey)
+function ZO_RestyleStation_Gamepad_CleanupAnimationOnControl(control)
+    if control.icon.pendingLoop then
+        control.icon.pendingLoop:ReleaseObject()
     end
 end
 

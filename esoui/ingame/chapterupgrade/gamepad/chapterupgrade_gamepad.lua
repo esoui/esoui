@@ -25,6 +25,9 @@ function ZO_ChapterUpgradePane_Gamepad:InitializeSortFilterList(...)
 
     local function SetupRewardsHeader(control, data)
         control.descriptor:SetText(data.text)
+        if control.collectorsLabel and data.collectorsLabelText then
+            control.collectorsLabel:SetText(data.collectorsLabelText)
+        end
     end
 
     local function SetupReward(control, data)
@@ -87,6 +90,9 @@ do
         local editionRewards = self.chapterUpgradeData:GetEditionRewards()
         if #editionRewards > 0 then
             local headerData = ZO_GamepadEntryData:New(GetString(SI_CHAPTER_UPGRADE_CHOOSE_EDITION_HEADER))
+            local isContentPass = self.chapterUpgradeData:IsContentPass()
+            local collectorsLabelText = isContentPass and GetString(SI_CHAPTER_UPGRADE_CONTENT_PASS_COLLECTORS_REWARDS_HEADER) or GetString(SI_CHAPTER_UPGRADE_COLLECTORS_REWARDS_HEADER)
+            headerData.collectorsLabelText = collectorsLabelText
             table.insert(scrollData, ZO_ScrollList_CreateDataEntry(CHAPTER_UPGRADE_REWARD_EDITION_HEADER_DATA, headerData))
             AddRewards(scrollData, editionRewards)
         end
@@ -114,7 +120,9 @@ function ZO_ChapterUpgradePane_Gamepad:GetNarrationText()
         end
 
         if selectedData.isCollectorsReward then
-            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_CHAPTER_UPGRADE_COLLECTORS_REWARDS_HEADER)))
+            local isContentPass = self.chapterUpgradeData:IsContentPass()
+            local collectorsHeaderText = isContentPass and GetString(SI_CHAPTER_UPGRADE_CONTENT_PASS_COLLECTORS_REWARDS_HEADER) or GetString(SI_CHAPTER_UPGRADE_COLLECTORS_REWARDS_HEADER)
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(collectorsHeaderText))
         end
     end
     return narrations
@@ -459,7 +467,13 @@ function ZO_ChapterUpgrade_Gamepad:InitializeSelectEditionDialog()
                 template = "ZO_GamepadMenuEntryTemplate",
                 templateData =
                 {
-                    text = GetString(SI_CHAPTER_UPGRADE_GAMEPAD_SELECT_EDITION_DIALOG_COLLECTORS_ENTRY),
+                    text = function(dialog)
+                        if dialog.data.chapterUpgradeData:IsContentPass() then
+                            return GetString(SI_CHAPTER_UPGRADE_CONTENT_PASS_GAMEPAD_SELECT_EDITION_DIALOG_COLLECTORS_ENTRY)
+                        else
+                            return GetString(SI_CHAPTER_UPGRADE_GAMEPAD_SELECT_EDITION_DIALOG_COLLECTORS_ENTRY)
+                        end
+                    end,
                     setup = ZO_SharedGamepadEntry_OnSetup,
                     isCollectorsEdition = true,
                 },

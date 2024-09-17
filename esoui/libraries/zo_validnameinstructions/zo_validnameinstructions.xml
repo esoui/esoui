@@ -4,7 +4,7 @@
             <Dimensions x="200" />
         </Label>
 
-        <Control name="ZO_TextInstructionsTemplate" resizeToFitDescendents="true" clampedToScreen="true" tier="HIGH" hidden="true" virtual="true">
+        <Control name="ZO_TextInstructionsTemplate" resizeToFitDescendents="true" clampedToScreen="true" hidden="true" virtual="true">
             <ResizeToFitPadding width="20" height="20" />
             <Controls>
                 <Backdrop name="$(parent)BG" inherits="ZO_DefaultBackdrop" excludeFromResizeToFitExtents="true">

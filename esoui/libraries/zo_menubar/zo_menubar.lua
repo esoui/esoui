@@ -109,6 +109,9 @@ function MenuBarButton:UpdateTexturesFromState()
     elseif(state == BSTATE_DISABLED) then
         texture = buttonData.disabled
     end
+    if type(texture) == "function" then
+        texture = texture(buttonData)
+    end
 
     self.m_image:SetTexture(texture)
     self.m_highlight:SetHidden(self.m_highlightHidden)
@@ -211,7 +214,11 @@ end
 function MenuBarButton:SetData(owner, buttonData)
     self.m_buttonData = buttonData
     self.m_menuBar = owner
-    self.m_highlight:SetTexture(buttonData.highlight)
+    local highlight = buttonData.highlight
+    if type(highlight) == "function" then
+        highlight = highlight(buttonData)
+    end
+    self.m_highlight:SetTexture(highlight)
     self:SetState(BSTATE_NORMAL, ADJUST_SIZE_INSTANT)
     self:RefreshStatus()
 end
@@ -454,6 +461,8 @@ function MenuBar:UpdateButtons(forceSelection)
             lastDivider = nil
             lastDividerPadding = nil
         end
+
+        buttonControl.m_object:UpdateTexturesFromState()
     end
 
     if self.m_clickedButton and not IsVisible(self.m_clickedButton.m_buttonData) then

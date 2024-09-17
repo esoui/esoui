@@ -57,8 +57,8 @@
             </OnInitialized>
 
             <Controls>
-                <Label name="$(parent)TargetName" tier="HIGH" verticalAlignment="TOP">
-                    <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" maxLineCount="2" />
+                <Label name="$(parent)TargetName" tier="HIGH" verticalAlignment="TOP" maxLineCount="2">
+                    <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" />
                     <Dimensions x="400" />
                 </Label>
 

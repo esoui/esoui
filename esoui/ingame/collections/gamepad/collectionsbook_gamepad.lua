@@ -289,10 +289,9 @@ function ZO_GamepadCollectionsBook:OnShowing()
 
     -- There may be other scenes which need to return to the same place within CollectionsBook. Add them here.
     -- Initializing here also prevents external screens from requesting CollectionsBook to open to a specific spot.
-    if SCENE_MANAGER:GetPreviousSceneName() ~= GAMEPAD_PLAYER_EMOTE_SCENE_NAME then
+    if SCENE_MANAGER:GetPreviousSceneName() ~= "gamepad_player_emote" then
         -- If we were returning to this screen from a child scene, we would want to return selection to the same item.
         -- We're opening this screen a new time, so clear possible cached indices.
-        self.browseToCollectibleInfo = nil
         self.savedOutfitStyleIndex = nil
         self.savedCollectibleData = nil
     end

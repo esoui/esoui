@@ -1,0 +1,213 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_PromotionalEventReward_Template_Gamepad" inherits="ZO_PromotionalEventReward_Template_Shared" mouseEnabled="true" virtual="true">
+            <Dimensions x="90" y="90" />
+
+            <OnInitialized>
+                ZO_PromotionalEventReward_Gamepad.OnControlInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Texture name="$(parent)Icon" override="true">
+                    <Dimensions x="64" y="64" />
+                </Texture>
+                    
+                <Backdrop name="$(parent)Backdrop" override="true" centerColor="FFFFFF" inheritScale="false">
+                    <AnchorFill />
+                    <Center file="EsoUI/Art/Tooltips/Gamepad/gp_toolTip_center_16.dds" />
+                    <Edge file="EsoUI/Art/Tooltips/Gamepad/gp_toolTip_edge_16.dds" edgeFileWidth="128" edgeFileHeight="16" />
+                    <Insets left="16" top="16" right="-16" bottom="-16" />
+                </Backdrop>
+                
+                <Backdrop name="$(parent)Highlight" inherits="ZO_GamepadWhiteOutlineHighlight" level="1" inheritScale="false" hidden="true" excludeFromResizeToFitExtents="true">
+                    <Anchor point="TOPLEFT" offsetX="-6" offsetY="-6" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="6" offsetY="6" />
+                </Backdrop>
+
+                <Label name="$(parent)Quantity" override="true" inherits="ZO_GamepadMenuEntryStackCountTemplate">
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icon" offsetX="4" offsetY="4"/>
+                    <Anchor point="LEFT" offsetX="4" constrains="X" />
+                </Label>
+
+                <Texture name="$(parent)CompleteMark" override="true" textureFile="EsoUI/Art/Miscellaneous/check_icon_64.dds" />
+
+                <Control name="$(parent)FxAnchorControl" override="true">
+                    <Anchor point="TOPLEFT" offsetX="2" offsetY="2" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-2" offsetY="-2" />
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_PromotionalEventMilestone_Template_Gamepad" inherits="ZO_PromotionalEventMilestone_Template_Shared" virtual="true">
+            <Dimensions x="68" />
+            <Controls>
+                <Control name="$(parent)Reward" override="true" inherits="ZO_PromotionalEventReward_Template_Gamepad" />
+                <Label name="$(parent)Threshold" override="true" font="ZoFontGamepadBold27" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_PromotionalEventActivity_EntryTemplate_Gamepad" inherits="ZO_PromotionalEventActivity_EntryTemplate_Shared" virtual="true">
+            <Dimensions y="ZO_PROMOTIONAL_EVENT_GAMEPAD_ACTIVITY_ENTRY_HEIGHT" />
+
+            <OnInitialized>
+                ZO_PromotionalEventActivity_Entry_Gamepad.OnControlInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)Reward" override="true" inherits="ZO_PromotionalEventReward_Template_Gamepad">
+                    <Anchor point="RIGHT" offsetX="-15" />
+                </Control>
+
+                <StatusBar name="$(parent)Progress" override="true" inherits="ZO_GamepadArrowProgressBarWithBGMedium">
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Reward" relativePoint="LEFT" offsetX="-5" />
+                    <Anchor point="LEFT" offsetX="16" constrains="X" />
+                </StatusBar>
+
+                <Texture name="$(parent)CompleteIcon" override="true">
+                    <Dimensions x="48" y="48" />
+                </Texture>
+
+                <Label name="$(parent)Name" override="true" font="ZoFontGamepad42">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Progress" relativePoint="TOPLEFT" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Progress" relativePoint="TOPRIGHT" />
+                </Label>
+            </Controls>
+        </Control>
+        
+        <TopLevelControl name="ZO_PromotionalEvents_GamepadTL" inherits="ZO_PromotionalEvents_Shared ZO_GamepadGrid_NavQuadrant_2_3_Anchors" hidden="true">
+            <OnInitialized>
+                ZO_PromotionalEvents_Gamepad.OnControlInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)Contents" override="true" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
+                    <Controls>
+                        <Control name="$(parent)CampaignPanel" override="true">
+                            <Anchor point="TOPLEFT" />
+                            <Dimensions x="772" y="260" />
+                            <Controls>
+                                <Texture name="$(parent)BG" override="true">
+                                    <Dimensions y="256" />
+                                    <Anchor point="TOPLEFT" />
+                                    <Anchor point="TOPRIGHT" />
+                                    <!-- 1024x256 image cropped to 768x256-->
+                                    <TextureCoords left="0" right="0.75" top="0" bottom="1.0"/>
+                                    <Controls>
+                                        <Backdrop name="$(parent)Border" override="true" inherits="ZO_GamepadGreyOutlineThin">
+                                            <Anchor point="TOPLEFT" offsetX="-2" offsetY="-2" />
+                                            <Anchor point="BOTTOMRIGHT" offsetX="2" offsetY="2" />
+                                        </Backdrop>
+                                    </Controls>
+                                </Texture>
+
+                                <Backdrop name="$(parent)Highlight" inherits="ZO_GamepadWhiteOutlineHighlight" level="1" hidden="true">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)BGBorder" />
+                                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)BGBorder" />
+                                </Backdrop>
+
+                                <Label name="$(parent)Duration" override="true" font="ZoFontGamepadBold22">
+                                    <Anchor point="TOPLEFT" offsetX="7" offsetY="7" />
+                                </Label>
+
+                                <Label name="$(parent)Name" override="true" font="ZoFontGamepad42">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Duration" relativePoint="BOTTOMLEFT" />
+                                </Label>
+
+                                <StatusBar name="$(parent)Progress" override="true" inherits="ZO_GamepadArrowProgressBarWithBGMedium">
+                                    <Anchor point="BOTTOMLEFT" offsetX="10" offsetY="-20" />
+                                    <Dimensions x="650" />
+                                </StatusBar>
+
+                                <Control name="$(parent)CapstoneReward" override="true" inherits="ZO_PromotionalEventReward_Template_Gamepad">
+                                    <Anchor point="LEFT" relativeTo="$(parent)Progress" relativePoint="RIGHT" offsetX="7" offsetY="-20" />
+                                </Control>
+                            </Controls>
+                        </Control>
+
+                        <Control name="$(parent)ActivityList" override="true" inherits="ZO_ScrollList_Gamepad">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)CampaignPanel" relativePoint="BOTTOMLEFT" offsetX="-10" offsetY="20" />
+                            <Anchor point="BOTTOMRIGHT" />
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_PromotionalEvents_CapstoneDialog_Gamepad_TL" inherits="ZO_CustomCenteredGamepadDialogTemplate ZO_PromotionalEvents_CapstoneDialog_Shared_TL" resizeToFitDescendents="true" tier="MEDIUM">
+            <ResizeToFitPadding width="40" height="20" />
+            
+            <OnInitialized name="Capstone">
+                ZO_PromotionalEvents_CapstoneDialog_Gamepad:New(self)
+            </OnInitialized>
+
+            <Controls>
+                <Texture name="$(parent)ModalUnderlay" color="000000" mouseEnabled="true" alpha=".55" excludeFromResizeToFitExtents="true">
+                    <Anchor point="TOPLEFT" relativeTo="GuiRoot" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" />
+
+                    <OnMouseWheel />
+                </Texture>
+                
+                <Texture name="$(parent)OverlayGlow" layer="OVERLAY" tier="HIGH" excludeFromResizeToFitExtents="true">
+                    <Anchor point="CENTER" />
+                </Texture>
+                
+                <Control name="$(parent)TopDivider" override="true" inherits="ZO_GamepadHeaderHorizontalDividerWithAccent">
+                    <Dimensions x="560" />
+                    <Anchor point="TOP" offsetY="20" />
+
+                    <Controls>
+                        <Texture name="$(parent)Accent" override="true" textureFile="EsoUI/Art/LFG/Gamepad/LFG_menuIcon_PromotionalEvents.dds" tier="HIGH">
+                            <Dimensions x="64" y="64" />
+                        </Texture>
+                    </Controls>
+                </Control>
+
+                <Label name="$(parent)Title" font="ZoFontGamepad42" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE" horizontalAlignment="CENTER">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)TopDivider" relativePoint="BOTTOMLEFT" offsetY="25" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)TopDivider" relativePoint="BOTTOMRIGHT" offsetY="25" />
+                </Label>
+
+                <Control name="$(parent)RewardContainer" override="true" resizeToFitDescendents="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetY="75" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Title" relativePoint="BOTTOMRIGHT" offsetY="75" />
+
+                    <Controls>
+                        <Label name="$(parent)Name" override="true" font="ZoFontGamepad36" horizontalAlignment="CENTER">
+                            <Anchor point="BOTTOMLEFT" offsetX="30" />
+                            <Anchor point="BOTTOMRIGHT" offsetX="-30" />
+                        </Label>
+
+                        <Texture name="$(parent)Icon" override="true">
+                            <Dimensions x="64" y="64" />
+                            <Anchor point="BOTTOM" relativeTo="$(parent)Name" relativePoint="TOP" offsetY="-10" />
+                        </Texture>
+
+                        <Label name="$(parent)StackCount" font="ZoFontGamepad27">
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icon"/>
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)BottomDivider" override="true" inherits="ZO_GamepadHeaderHorizontalDividerSimple">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)RewardContainer" relativePoint="BOTTOMLEFT" offsetY="10" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)RewardContainer" relativePoint="BOTTOMRIGHT" offsetY="10" />
+                </Control>
+
+                <Control name="$(parent)Buttons" resizeToFitDescendents="true">
+                    <Anchor point="TOP" relativeTo="$(parent)BottomDivider" relativePoint="BOTTOM" offsetY="10" />
+                    
+                    <Controls>
+                        <Control name="$(parent)Close" inherits="ZO_KeybindButton_Gamepad">
+                            <Anchor point="LEFT" />
+                        </Control>
+                        
+                        <Control name="$(parent)ViewInCollections" inherits="ZO_KeybindButton_Gamepad">
+                            <Anchor point="LEFT" relativeTo="$(parent)Close" relativePoint="RIGHT" offsetX="10" />
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

@@ -74,6 +74,14 @@ function ZO_ParticleSystem:SetOnParticleStopCallback(callback)
     self.onParticleStopCallback = callback
 end
 
+function ZO_ParticleSystem:SetOnStartCallback(callback)
+   self.onStartCallback = callback 
+end
+
+function ZO_ParticleSystem:SetOnStopCallback(callback)
+    self.onStopCallback = callback
+end
+
 --This function takes N parameter names and one value generator. The result of the value generator will be applied to the
 --named parameters when the particle is created. A simple example is, SetParticleParameter("alpha", ZO_UniformRangeGenerator:New(0, 1)).
 --This would set the parameter "alpha" to a random value between 0 and 1 on creation. For a more complex example,
@@ -130,6 +138,9 @@ function ZO_ParticleSystem:Start()
         self.finishing = false
         if not self:IsBurstMode() then
             PlaySound(self.sound)
+        end
+        if self.onStartCallback then
+            self:onStartCallback()
         end
     else
         self.finishing = false
@@ -302,6 +313,9 @@ function ZO_ParticleSystem:Stop()
         self.particlePool:ReleaseAllObjects()
         self.running = false
         self.finishing = false
+        if self.onStopCallback then
+            self:onStopCallback()
+        end
     end
 end
 

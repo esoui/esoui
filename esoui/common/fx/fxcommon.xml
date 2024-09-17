@@ -1,0 +1,15 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_PendingLoop_Timeline" playbackType="LOOP" loopCount="LOOP_INDEFINITELY">
+            <Animations>
+                <TextureAnimation cellsWide="64" cellsHigh="1" framerate="32" />
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+
+    <Controls>
+        <Texture name="ZO_PendingLoop_Glow" textureFile="EsoUI/Art/ActionBar/abilityHighlight_mage_med.dds" blendMode="ADD" level="4" alpha="0.66" virtual="true">
+            <AnchorFill />
+        </Texture>
+    </Controls>
+</GuiXml>

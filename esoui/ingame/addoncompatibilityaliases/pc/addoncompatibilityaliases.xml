@@ -5,6 +5,8 @@
         <AnimationTimeline name="MoneyInputBadInput" inherits="CurrencyInputBadInput" />
         <!-- Companion skills refactor -->
         <AnimationTimeline name="GamepadSkillsSingleAssignActionBarAnimation" inherits="ZO_GamepadSkillsActionBarFocusAnimation" />
+        <!-- Pending loop refactor -->
+        <AnimationTimeline name="ZO_Restyle_PendingLoop" inherits="ZO_PendingLoop_Timeline" />
     </Animations>
     
     <Controls>
@@ -77,5 +79,13 @@
                 </Button>
             </Controls>
         </Control>
+
+        <!-- Battleground refactor -->
+        <Control name="ZO_Battleground_Scoreboard_Alliance_Panel" inherits="ZO_Battleground_Scoreboard_Team_Panel" virtual="true" />
+        <Control name="ZO_Battleground_Scoreboard_Alliance_Panel_Keyboard_Template" inherits="ZO_Battleground_Scoreboard_Team_Panel_Keyboard_Template" virtual="true" />
+        <Control name="ZO_Battleground_Scoreboard_Alliance_Panel_Gamepad_Template" inherits="ZO_Battleground_Scoreboard_Team_Panel_Gamepad_Template" virtual="true" />
+
+        <!-- Pending loop refactor -->
+        <Texture name="ZO_Restyle_PendingGlow" inherits="ZO_PendingLoop_Glow" virtual="true" />
     </Controls>
 </GuiXml>

@@ -86,7 +86,7 @@ function ZO_TimedActivities_Gamepad:InitializeControls()
             callback = function()
                 SCENE_MANAGER:HideCurrentScene()
             end,
-            sound = SOUNDS.GAMEPAD_MENU_BACKWARD,
+            sound = SOUNDS.GAMEPAD_MENU_BACK,
         },
         -- Seals of Endeavor Store
         {
@@ -273,7 +273,7 @@ function ZO_TimedActivitiesList_Gamepad:Initialize(control)
             callback = function()
                 TIMED_ACTIVITIES_GAMEPAD:DeactivateActivitiesList()
             end,
-            sound = SOUNDS.GAMEPAD_MENU_BACKWARD,
+            sound = SOUNDS.GAMEPAD_MENU_BACK,
         },
     }
 end

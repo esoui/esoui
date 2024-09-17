@@ -13,7 +13,9 @@
             <Surface />
             <!-- Lock Texture -->
             <Surface texCoordLeft="0.03125" texCoordRight="0.21875" texCoordTop="0.28125" texCoordBottom="0.46875"/>
-
+			<!-- New Texture -->
+			<Surface texCoordLeft="0.28125" texCoordRight="0.46875" texCoordTop="0.03125" texCoordBottom="0.21875"/>
+			
             <OnInitialized>
                 ZO_DyeingUtils_DyeingSwatchVisuals_OnInitialized(self)
             </OnInitialized>

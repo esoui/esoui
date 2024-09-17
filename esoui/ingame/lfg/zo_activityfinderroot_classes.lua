@@ -71,8 +71,6 @@ do
         if self.activityType ~= LFG_ACTIVITY_TRIBUTE_COMPETITIVE and self.activityType ~= LFG_ACTIVITY_TRIBUTE_CASUAL then
             local minGroupSize, maxGroupSize = self:GetGroupSizeRange()
             if TEAM_BASED_ACTIVITY_TYPES[self.activityType] then
-                -- HARD CODING TO four to make it clear the player will be put on a four person team even when entering solo
-                maxGroupSize = 4
                 labelControl:SetText(zo_strformat(SI_ACTIVITY_FINDER_GROUP_SIZE_TEAM_FORMAT, maxGroupSize, groupIconFormat))
             elseif minGroupSize ~= maxGroupSize then
                 labelControl:SetText(zo_strformat(SI_ACTIVITY_FINDER_GROUP_SIZE_RANGE_FORMAT, minGroupSize, maxGroupSize, groupIconFormat))
@@ -94,7 +92,7 @@ do
 
     local BATTLEGROUND_COOLDOWNS =
     {
-        queueCooldownType = LFG_COOLDOWN_BATTLEGROUND_DESERTED,
+        queueCooldownType = LFG_COOLDOWN_BATTLEGROUND_DESERTED_QUEUE,
         dailyRewardCooldownType = LFG_COOLDOWN_BATTLEGROUND_REWARD_GRANTED,
     }
 
@@ -365,6 +363,10 @@ function ZO_ActivityFinderLocation_Specific:HasRewardData()
     return false -- Presently, specifics can't grant rewards
 end
 
+function ZO_ActivityFinderLocation_Specific:HasMMR()
+    return false
+end
+
 function ZO_ActivityFinderLocation_Specific:GetEntryType()
     return ZO_ACTIVITY_FINDER_LOCATION_ENTRY_TYPE.SPECIFIC
 end
@@ -545,6 +547,14 @@ function ZO_ActivityFinderLocation_Set:GetRewardData()
     return GetActivitySetRewardData(self:GetId())
 end
 
+function ZO_ActivityFinderLocation_Set:HasMMR()
+    return DoesActivitySetHaveMMR(self:GetId())
+end
+
+function ZO_ActivityFinderLocation_Set:GetMMR()
+    return GetPlayerMMRByType(self:GetActivityType())
+end
+
 function ZO_ActivityFinderLocation_Set:IsEligibleForDailyReward()
     if self.hasRewardData then
         return IsActivityEligibleForDailyReward(self.activityType)
@@ -566,13 +576,11 @@ do
         ZO_ClearNumericallyIndexedTable(g_battlegroundTypeNames)
         for _, activityId in ipairs(activities) do
             local battlegroundId = GetActivityBattlegroundId(activityId)
-            if battlegroundId ~= 0 then
-                local battlegroundGameType = GetBattlegroundGameType(battlegroundId)
-                if battlegroundGameType ~= BATTLEGROUND_GAME_TYPE_NONE then
-                    if not g_battlegroundTypes[battlegroundGameType] then
-                        g_battlegroundTypes[battlegroundGameType] = true
-                        table.insert(g_battlegroundTypeNames, GetString("SI_BATTLEGROUNDGAMETYPE", battlegroundGameType))
-                    end
+            local battlegroundGameType = GetBattlegroundGameType(battlegroundId)
+            if battlegroundGameType ~= BATTLEGROUND_GAME_TYPE_NONE then
+                if not g_battlegroundTypes[battlegroundGameType] then
+                    g_battlegroundTypes[battlegroundGameType] = true
+                    table.insert(g_battlegroundTypeNames, GetString("SI_BATTLEGROUNDGAMETYPE", battlegroundGameType))
                 end
             end
         end

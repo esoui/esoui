@@ -1561,6 +1561,11 @@ local function AreDataEqualSelections(self, data1, data2)
 
     local dataEntry1 = data1.dataEntry
     local dataEntry2 = data2.dataEntry
+
+    if dataEntry1 == nil or dataEntry2 == nil then
+        return false
+    end
+
     if dataEntry1.typeId == dataEntry2.typeId then
         local dataTypeInfo = GetDataTypeInfo(self, dataEntry1.typeId)
         local equalityFunction = dataTypeInfo.equalityFunction
@@ -1616,6 +1621,19 @@ function ZO_ScrollList_FindDataIndexByDataEntry(self, dataEntry, optionalTypeId)
                 local equalityFunction = dataTypeInfo.equalityFunction
                 if equalityFunction and equalityFunction(data.data, dataEntry) then
                     return i
+                end
+            end
+        end
+    end
+    return nil
+end
+
+function ZO_ScrollList_FindDataByQuery(self, query, optionalTypeId)
+    if query then
+        for _, data in ipairs(self.data) do
+            if not optionalTypeId or data.typeId == optionalTypeId then
+                if query(data.data) then
+                    return data
                 end
             end
         end
@@ -2269,19 +2287,71 @@ function ZO_ScrollList_Commit(self)
     CheckRunHandler(self, "OnMouseEnter")
 end
 
---updates the layout of visible controls
---data: optionally allows you to only update the control backed by the specified data table
---overrideSetupCallback: optionally allows you to call this function instead of the normal setup function if you only need to do a very specific update
-function ZO_ScrollList_RefreshVisible(self, data, overrideSetupCallback)
-    for i = 1, #self.activeControls do
-        local control = self.activeControls[i]
+do
+    local function RefreshScrollListControl(self, control, overrideSetupCallback)
         local dataEntry = control.dataEntry
-        if not data or data == dataEntry.data then
+        local dataEntryData = dataEntry.data
+        if overrideSetupCallback then
+            overrideSetupCallback(control, dataEntryData, self)
+        else
             local dataTypeInfo = GetDataTypeInfo(self, dataEntry.typeId)
-            if overrideSetupCallback then
-                overrideSetupCallback(control, dataEntry.data, self)
-            elseif dataTypeInfo.setupCallback then
-                dataTypeInfo.setupCallback(control, dataEntry.data, self)
+            if dataTypeInfo.setupCallback then
+                dataTypeInfo.setupCallback(control, dataEntryData, self)
+            end
+        end
+    end
+
+    --updates the layout of visible controls
+    --optionalFilterData: optionally allows you to only update the control backed by a single specified data table
+    --overrideSetupCallback: optionally allows you to call this function instead of the normal setup function if you only need to do a very specific update
+    function ZO_ScrollList_RefreshVisible(self, optionalFilterData, overrideSetupCallback)
+        if optionalFilterData then
+            for _, control in ipairs(self.activeControls) do
+                if AreDataEqualSelections(self, control.dataEntry.data, optionalFilterData) then
+                    RefreshScrollListControl(self, control, overrideSetupCallback)
+                    return
+                end
+            end
+        else
+            for _, control in ipairs(self.activeControls) do
+                RefreshScrollListControl(self, control, overrideSetupCallback)
+            end
+        end
+    end
+
+    --updates the layout of visible controls at the specified indices
+    --indices: only update the control at the specified table of indices (can also just pass a single index if desired)
+    --overrideSetupCallback: optionally allows you to call this function instead of the normal setup function if you only need to do a very specific update
+    function ZO_ScrollList_RefreshVisibleByIndices(self, indices, overrideSetupCallback)
+        local typeOfIndices = type(indices)
+        assert(typeOfIndices == "number" or typeOfIndices == "table", "indices must be either a number or an array of numbers")
+        if type(indices) == "number" then
+            indices = { indices }
+        end
+
+        for _, index in ipairs(indices) do
+            local control = self.activeControls[index]
+            if control then
+                RefreshScrollListControl(self, control, overrideSetupCallback)
+            end
+        end
+    end
+
+    --updates the layout of visible controls at the specified data
+    --filterDataList: only update the control if backed by data that matches one of the data tables in the provided list of data (should be key value lookup with data as the key)
+    --overrideSetupCallback: optionally allows you to call this function instead of the normal setup function if you only need to do a very specific update
+    function ZO_ScrollList_RefreshVisibleByDataList(self, filterDataList, overrideSetupCallback)
+        local filterDataListCopy = ZO_ShallowNumericallyIndexedTableCopy(filterDataList)
+        for _, control in ipairs(self.activeControls) do
+            for i, filterData in ipairs(filterDataListCopy) do
+                if AreDataEqualSelections(self, control.dataEntry.data, filterData) then
+                    RefreshScrollListControl(self, control, overrideSetupCallback)
+                    table.remove(filterDataListCopy, i)
+                    break
+                end
+            end
+            if #filterDataListCopy == 0 then
+                return
             end
         end
     end

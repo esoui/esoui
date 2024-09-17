@@ -90,6 +90,44 @@ function ChampionPerks:Initialize(control)
     SYSTEMS:RegisterKeyboardRootScene("champion", CHAMPION_PERKS_SCENE)
     SYSTEMS:RegisterGamepadRootScene("champion", GAMEPAD_CHAMPION_PERKS_SCENE)
 
+    self.refreshGroup = ZO_OrderedRefreshGroup:New(ZO_ORDERED_REFRESH_GROUP_AUTO_CLEAN_PER_FRAME)
+    self.refreshGroup:SetActive(function() return SYSTEMS:IsShowing("champion") end)
+    self.refreshGroup:AddDirtyState("AllData", function()
+        self:RefreshConstellationStates()
+        self:RefreshStarEditors()
+        self:RefreshStatusInfo()
+        self:RefreshSelectedConstellationInfo()
+        self:RefreshSelectedStarTooltip()
+        self:RefreshKeybinds()
+    end)
+
+    self.refreshGroup:AddDirtyState("ChosenConstellationData", function()
+        self:RefreshChosenConstellationState()
+        self:RefreshStarEditors()
+        self:RefreshStatusInfo()
+        self:RefreshSelectedConstellationInfo()
+        self:RefreshSelectedStarTooltip()
+        self:RefreshKeybinds()
+    end)
+
+    self.refreshGroup:AddDirtyState("Points", function()
+        self:RefreshStatusInfo()
+        self:RefreshSelectedConstellationInfo()
+        self:RefreshSelectedStarTooltip()
+        self:RefreshKeybinds()
+    end)
+
+    self.refreshGroup:AddDirtyState("SelectedStarData", function()
+        self:RefreshSelectedStarTooltip()
+        self:RefreshKeybinds()
+    end)
+
+    self.refreshGroup:AddDirtyState("KeybindStrip", function()
+        self:RefreshKeybinds()
+    end)
+
+    self:RegisterForEvents()
+
     self:RefreshMenus()
 end
 
@@ -104,7 +142,7 @@ function ChampionPerks:OnDeferredInitialize()
 
     --for menu indicators / conditional button showing
     self:InitializeStateMachine()
-    self:RegisterEvents()
+    self:DeferredRegisterForEvents()
 
     self.starTextureControlPool = ZO_ControlPool:New("ZO_ChampionStar", self.canvasControl, "Star")
     for i = 1, GetNumChampionNodesToPreallocate() do
@@ -155,42 +193,6 @@ function ChampionPerks:OnDeferredInitialize()
             self:PerformDeferredInitializationConstellations()
             self.stateMachine:FireCallbacks("ON_DATA_RELOADED")
         end
-    end)
-
-    self.refreshGroup = ZO_OrderedRefreshGroup:New(ZO_ORDERED_REFRESH_GROUP_AUTO_CLEAN_PER_FRAME)
-    self.refreshGroup:SetActive(function() return SYSTEMS:IsShowing("champion") end)
-    self.refreshGroup:AddDirtyState("AllData", function()
-        self:RefreshConstellationStates()
-        self:RefreshStarEditors()
-        self:RefreshStatusInfo()
-        self:RefreshSelectedConstellationInfo()
-        self:RefreshSelectedStarTooltip()
-        self:RefreshKeybinds()
-    end)
-
-    self.refreshGroup:AddDirtyState("ChosenConstellationData", function()
-        self:RefreshChosenConstellationState()
-        self:RefreshStarEditors()
-        self:RefreshStatusInfo()
-        self:RefreshSelectedConstellationInfo()
-        self:RefreshSelectedStarTooltip()
-        self:RefreshKeybinds()
-    end)
-
-    self.refreshGroup:AddDirtyState("Points", function()
-        self:RefreshStatusInfo()
-        self:RefreshSelectedConstellationInfo()
-        self:RefreshSelectedStarTooltip()
-        self:RefreshKeybinds()
-    end)
-
-    self.refreshGroup:AddDirtyState("SelectedStarData", function()
-        self:RefreshSelectedStarTooltip()
-        self:RefreshKeybinds()
-    end)
-
-    self.refreshGroup:AddDirtyState("KeybindStrip", function()
-        self:RefreshKeybinds()
     end)
 
     self.cloudsTexture = self.canvasControl:GetNamedChild("Clouds")
@@ -1222,13 +1224,10 @@ function ChampionPerks:GetNumConstellations()
     return #self.constellations
 end
 
-function ChampionPerks:RegisterEvents()
-    self.control:SetHandler("OnUpdate", function(_, timeSecs) self:OnUpdate(timeSecs) end)
+function ChampionPerks:RegisterForEvents()
     self.control:RegisterForEvent(EVENT_CHAMPION_POINT_GAINED, function() self:OnChampionPointGained() end)
     self.control:RegisterForEvent(EVENT_CHAMPION_SYSTEM_UNLOCKED, function() self:OnChampionSystemUnlocked() end)
     self.control:RegisterForEvent(EVENT_UNSPENT_CHAMPION_POINTS_CHANGED, function() self:OnUnspentChampionPointsChanged() end)
-    self.control:RegisterForEvent(EVENT_CHAMPION_PURCHASE_RESULT, function(_, result) self:OnChampionPurchaseResult(result) end)
-    self.control:RegisterForEvent(EVENT_MONEY_UPDATE, function() self:OnMoneyChanged() end)
     self.control:RegisterForEvent(EVENT_PLAYER_ACTIVATED, function() self:OnPlayerActivated() end)
 
     --Refresh and clear unsaved changes if we successfully finished equipping an armory build
@@ -1239,6 +1238,12 @@ function ChampionPerks:RegisterEvents()
             self.refreshGroup:MarkDirty("AllData")
         end
     end)
+end
+
+function ChampionPerks:DeferredRegisterForEvents()
+    self.control:SetHandler("OnUpdate", function(_, timeSecs) self:OnUpdate(timeSecs) end)
+    self.control:RegisterForEvent(EVENT_CHAMPION_PURCHASE_RESULT, function(_, result) self:OnChampionPurchaseResult(result) end)
+    self.control:RegisterForEvent(EVENT_MONEY_UPDATE, function() self:OnMoneyChanged() end)
 
     -- Refresh Champion purchase availability
     self.control:RegisterForEvent(EVENT_PLAYER_COMBAT_STATE, function()
@@ -1527,7 +1532,9 @@ end
 
 function ChampionPerks:ClearUnsavedChanges()
     CHAMPION_DATA_MANAGER:ClearChanges()
-    self.championBar:ResetAllSlots()
+    if self.championBar then
+        self.championBar:ResetAllSlots()
+    end
 end
 
 function ChampionPerks:SpendPendingPoints()

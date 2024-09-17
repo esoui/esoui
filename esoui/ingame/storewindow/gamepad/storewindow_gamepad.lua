@@ -641,7 +641,7 @@ function ZO_GamepadStoreManager:FailedRepairMessageBox(reason)
 end
 
 do
-    internalassert(CURT_MAX_VALUE == 12, "Check if new currency has a store failure")
+    internalassert(CURT_MAX_VALUE == 13, "Check if new currency has a store failure")
     local STORE_FAILURE_FOR_CURRENCY_TYPE =
     {
         [CURT_ALLIANCE_POINTS] = STORE_FAILURE_NOT_ENOUGH_ALLIANCE_POINTS,
@@ -650,6 +650,7 @@ do
         [CURT_EVENT_TICKETS] = STORE_FAILURE_NOT_ENOUGH_EVENT_TICKETS,
         [CURT_UNDAUNTED_KEYS] = STORE_FAILURE_NOT_ENOUGH_UNDAUNTED_KEYS,
         [CURT_ARCHIVAL_FORTUNES] = STORE_FAILURE_NOT_ENOUGH_ARCHIVAL_FORTUNES,
+        [CURT_IMPERIAL_FRAGMENTS] = STORE_FAILURE_NOT_ENOUGH_IMPERIAL_FRAGMENTS,
     }
     function ZO_GamepadStoreManager:CanAfford(selectedData)
         local currencyType = selectedData.currencyType1

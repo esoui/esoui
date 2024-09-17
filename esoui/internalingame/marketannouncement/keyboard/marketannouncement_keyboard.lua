@@ -15,6 +15,7 @@ function ZO_MarketAnnouncement_Keyboard:Initialize(control)
         [ZO_ACTION_TILE_TYPE.EVENT_ANNOUNCEMENT] = "ZO_EventAnnouncementTile_Keyboard_Control",
         [ZO_ACTION_TILE_TYPE.DAILY_REWARDS] = "ZO_DailyRewardsTile_Keyboard_Control",
         [ZO_ACTION_TILE_TYPE.ZONE_STORIES] = "ZO_ZoneStoriesTile_Keyboard_Control",
+        [ZO_ACTION_TILE_TYPE.PROMOTIONAL_EVENT] = "ZO_PromotionalEventTile_KB",
     }
 
     local conditionFunction = function() return not IsInGamepadPreferredMode() end

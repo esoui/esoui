@@ -106,7 +106,7 @@ end
 function ZO_SkillStyleIconSelector_Keyboard:CreateSkillStyleSelectorIconDataObject(index)
     local collectibleId = GetProgressionSkillAbilityFxOverrideCollectibleIdByIndex(self.skillData.progressionId, index)
     local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
-    if collectibleData then
+    if collectibleData and not collectibleData:IsHiddenFromCollection() then
         local data =
         {
             iconIndex = index,

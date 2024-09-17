@@ -1081,7 +1081,7 @@ function ZO_HousingSettingsList_Gamepad:BuildOptionsList()
     end
 
     local function ShouldShowGamerCardOption()
-        return IsConsoleUI() and (self.rowDataType == ZO_SETTINGS_VISITOR_DATA_TYPE or self.rowDataType == ZO_SETTINGS_BANLIST_DATA_TYPE)
+        return IsConsoleUI() and (self.rowDataType == ZO_SETTINGS_VISITOR_DATA_TYPE or self.rowDataType == ZO_SETTINGS_BANLIST_DATA_TYPE or self.rowDataType == ZO_SETTINGS_OCCUPANT_DATA_TYPE)
     end
 
     self:AddOptionTemplate(groupingId, BuildChangeUserGroupPermissionsOption, ZO_HousingSettingsList_Gamepad.SelectedDataHasPreset)
@@ -1245,11 +1245,12 @@ function ZO_HousingSettingsList_Gamepad:DoesEntryPassFilter(data)
     return self:IsMatch(self:GetCurrentSearch(), data)
 end
 
-function ZO_HousingSettingsList_Gamepad_CreateOccupantScrollData(displayName, currentHouse, index)
+function ZO_HousingSettingsList_Gamepad_CreateOccupantScrollData(displayName, currentHouse, index, accountName)
     return
     { 
-        displayName = displayName, 
-        currentHouse = currentHouse, 
+        displayName = displayName,
+        gamerCardDisplayName = accountName,
+        currentHouse = currentHouse,
         index = index,
         type = ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_SEARCH_TYPE_NAMES,
     }

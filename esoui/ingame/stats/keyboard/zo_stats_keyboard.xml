@@ -46,6 +46,26 @@
             </Controls>
         </Control>
 
+		<Control name="ZO_StatsTitleComboBoxEntry" inherits="ZO_ComboBoxEntry" virtual="true">
+			<Controls>
+				<Control name="$(parent)NewContainer" resizeToFitConstrains="X">
+					<Anchor point="LEFT" />
+					<Dimensions y="32" />
+					<Controls>
+						<Texture name="$(parent)Icon" textureFile="EsoUI/Art/Inventory/newItem_icon.dds" hidden="true">
+							<Anchor point="LEFT" />
+							<Dimensions x="32" y="32" />
+						</Texture>
+					</Controls>
+				</Control>
+
+				<Label name="$(parent)Label" override="true">
+					<Anchor point="LEFT" relativeTo="$(parent)NewContainer" relativePoint="RIGHT" offsetX="ZO_COMBO_BOX_ENTRY_TEMPLATE_LABEL_PADDING" />
+					<Anchor point="RIGHT" offsetX="-ZO_COMBO_BOX_ENTRY_TEMPLATE_LABEL_PADDING" />
+				</Label>
+			</Controls>
+		</Control>
+		
         <Control name="ZO_StatsDropdownRow" virtual="true">
             <Dimensions x="607" y="30" />
             <OnInitialized>
@@ -54,13 +74,18 @@
             </OnInitialized>
             <Controls>
                 <Label name="$(parent)Name" inherits="ZO_StatsRowName"/>
-                <Control name="$(parent)Dropdown" inherits="ZO_ComboBox">
-                    <Dimensions x="300"/>
-                    <Anchor point="RIGHT"/>
-                </Control>
-            </Controls>
+				<Control name="$(parent)Dropdown" inherits="ZO_ComboBox">
+					<Dimensions x="300"/>
+					<Anchor point="RIGHT"/>
+				</Control>
+				
+				<Texture name="$(parent)Icon" textureFile="EsoUI/Art/Inventory/newItem_icon.dds" hidden="true">
+					<Dimensions x="32" y="32" />
+					<Anchor point="CENTER" relativeTo="$(parent)Dropdown" relativePoint="TOPLEFT" />
+				</Texture>
+			</Controls>
         </Control>
-
+		
         <Control name="ZO_StatsRow" virtual="true">
             <Dimensions x="607" y="24"/>
             <Controls>

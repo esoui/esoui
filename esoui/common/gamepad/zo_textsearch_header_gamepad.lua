@@ -64,6 +64,10 @@ function ZO_TextSearch_Header_Gamepad:UpdateTextForContext(context, suppressCall
     self.headerTextFilterEditBox:SetText(TEXT_SEARCH_MANAGER:GetSearchText(context), suppressCallback)
 end
 
+function ZO_TextSearch_Header_Gamepad:ClearText()
+    return self.headerTextFilterEditBox:SetText("")
+end
+
 function ZO_TextSearch_Header_Gamepad:GetText()
     return self.headerTextFilterEditBox:GetText()
 end

@@ -42,6 +42,13 @@
 
                 <Label name="$(parent)Description" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" />
 
+                <Control name="$(parent)RatingSection" inherits="ZO_ActivityFinderTemplateSetTypesSection_Shared">
+                    <Controls>
+                        <Label name="$(parent)Header" override="true" />
+                        <Label name="$(parent)List" override="true" />
+                    </Controls>
+                </Control>
+
                 <Control name="$(parent)SetTypesSection" inherits="ZO_ActivityFinderTemplateSetTypesSection_Shared">
                     <Controls>
                         <Label name="$(parent)Header" override="true" />

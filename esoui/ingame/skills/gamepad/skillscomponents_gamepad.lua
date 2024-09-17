@@ -172,7 +172,7 @@ do
         local isActive = skillData:IsActive()
         local isNonCraftedActive = isActive and not skillData:IsCraftedAbility()
         local isMorph = isNonCraftedActive and skillProgressionData.IsMorph and skillProgressionData:IsMorph()
-        local showSkillStyle = not showDecrease and isActive and skillProgressionData.GetNumSkillStyles and skillProgressionData:GetNumSkillStyles() ~= 0
+        local showSkillStyle = not showDecrease and isActive and skillProgressionData.HasAnyNonHiddenSkillStyles and skillProgressionData:HasAnyNonHiddenSkillStyles()
 
         local increaseMultiIcon
         local decreaseMultiIcon

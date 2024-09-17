@@ -15,14 +15,14 @@ function ZO_Lockpick:Initialize(control)
     self.infoBar = control:GetNamedChild("InfoBar")
     self.lockLevelLabel = self.infoBar:GetNamedChild("LockLevel")
     self.lockpicksLeftLabel = self.infoBar:GetNamedChild("LockpicksLeft")
-    self.timer = ZO_TimerBar:New(control:GetNamedChild("TimerBar"))
+    self.timer = ZO_MultiSegmentTimerBar:New(control:GetNamedChild("TimerBar"), "ZO_LockpickTimerBarStatus")
     self.timer:SetDirection(TIMER_BAR_COUNTS_DOWN)
 
     -- Gamepad specific controls
     self.gamepadInfoBar = control:GetNamedChild("GamepadInfoBar")
     self.gamepadLockLevelLabel = self.gamepadInfoBar:GetNamedChild("Difficulty")
     self.gamepadLockpicksLeftLabel = self.gamepadInfoBar:GetNamedChild("LockpicksRemaining")
-    self.gamepadTimer = ZO_TimerBar:New(control:GetNamedChild("GamepadTimerBar"))
+    self.gamepadTimer = ZO_MultiSegmentTimerBar:New(control:GetNamedChild("GamepadTimerBar"), "ZO_LockpickTimerBarStatusGamepad")
     self.gamepadTimer:SetDirection(TIMER_BAR_COUNTS_DOWN)
 
     self.lockpick = control:GetNamedChild("Lockpick")
@@ -71,17 +71,50 @@ function ZO_Lockpick:Initialize(control)
 
             local lockQuality = GetLockQuality()
 
-            local now = GetFrameTimeMilliseconds()
-            local timerStartS = now / 1000
-            local timerEndS = (now + GetLockpickingTimeLeft()) / 1000
+            local nowMs = GetFrameTimeMilliseconds()
+            local timerStartS = nowMs / 1000
+            local bonusS = 0
+            if DoesPlayerHaveLockpickingCompanionBonus() then
+                bonusS = GetLockpickingCompanionBonusTimeMS() / 1000
+            end
+            local durationS = GetLockpickingTimeLeft() / 1000 - bonusS
+            local blueStart = ZO_ColorDef:New(ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_GENERAL, INTERFACE_GENERAL_COLOR_STATUS_BAR_START)))
+            local blueEnd = ZO_ColorDef:New(ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_GENERAL, INTERFACE_GENERAL_COLOR_STATUS_BAR_END)))
+            local function OnTimerStart(barData)
+                local width = self.timer.control:GetWidth()
+                local rightOffsetX = ((1 - (self.timer:GetSumDurationForSegment(2) / (durationS + bonusS))) * width - 4) * -1
+                local bgControl = barData[2].bar:GetNamedChild("BG")
+                bgControl:ClearAnchors()
+                bgControl:SetAnchor(TOPLEFT, nil, nil, -3, -3)
+                bgControl:SetAnchor(BOTTOMRIGHT, nil, nil, rightOffsetX, 4)
+                bgControl:SetDrawLayer(DL_CONTROLS)
+                barData[2].bar:SetDrawLevel(3)
+                barData[2].bar:GetNamedChild("Gloss"):SetDrawLevel(3)
+            end
+            local function DecorateTimeString(timeString)
+                local INHERIT_COLOR = true
+                return ZO_SUCCEEDED_TEXT:Colorize(zo_iconTextFormatNoSpace("EsoUI/Art/TreeIcons/gamepad/GP_collection_indexIcon_Companions.dds", "100%", "100%", timeString, INHERIT_COLOR))
+            end
+
             if SCENE_MANAGER:IsShowing("lockpickKeyboard") then
                 self.lockLevelLabel:SetText(zo_strformat(SI_LOCKPICK_LEVEL, GetString("SI_LOCKQUALITY", lockQuality)))
                 self.lockpicksLeftLabel:SetText(zo_strformat(SI_LOCKPICK_PICKS_REMAINING, GetNumLockpicksLeft()))
 
                 self.infoBar:SetHidden(false)
                 self.gamepadInfoBar:SetHidden(true)
+                self.timer:Stop()
+                self.timer:ClearSegments()
+                self.timer:AddSegment(durationS, blueStart, blueEnd)
+                if DoesPlayerHaveLockpickingCompanionBonus() then
+                    self.timer:AddSegment(bonusS, ZO_SUCCEEDED_TEXT, ZO_SUCCEEDED_TEXT)
+                    self.timer:SetCustomOnStartBehavior(OnTimerStart)
+                    self.timer:SetTimeStringDecoratorFunction(DecorateTimeString)
+                else
+                    local NO_FUNCTION = nil
+                    self.timer:SetTimeStringDecoratorFunction(NO_FUNCTION)
+                end
 
-                self.timer:Start(timerStartS, timerEndS)
+                self.timer:Start(timerStartS)
                 self.gamepadTimer:Stop()
             elseif SCENE_MANAGER:IsShowing("lockpickGamepad") then
                 self.gamepadLockLevelLabel:SetText(GetString("SI_LOCKQUALITY", lockQuality))
@@ -89,8 +122,15 @@ function ZO_Lockpick:Initialize(control)
 
                 self.infoBar:SetHidden(true)
                 self.gamepadInfoBar:SetHidden(false)
+                self.gamepadTimer:Stop()
+                self.gamepadTimer:ClearSegments()
+                self.gamepadTimer:AddSegment(durationS, blueStart, blueEnd)
+                if DoesPlayerHaveLockpickingCompanionBonus() then
+                    self.gamepadTimer:AddSegment(bonusS, ZO_SUCCEEDED_TEXT, ZO_SUCCEEDED_TEXT)
+                    self.gamepadTimer:SetTimeStringDecoratorFunction(DecorateTimeString)
+                end
 
-                self.gamepadTimer:Start(timerStartS, timerEndS)
+                self.gamepadTimer:Start(timerStartS)
                 self.timer:Stop()
             end
 
@@ -636,7 +676,18 @@ function ZO_Lockpick:CreateKeybindStripDescriptor()
             end,
         },
         {
-            name = function() return zo_strformat(SI_LOCKPICK_FORCE, GetChanceToForceLock()) end,
+            name = function() 
+                    local chanceText
+                    if DoesPlayerHaveLockpickingCompanionBonus() then
+                        local INHERIT_COLOR = true
+                        local iconSize = IsInGamepadPreferredMode() and 48 or 32
+                        local iconString = zo_iconTextFormatNoSpace("EsoUI/Art/TreeIcons/gamepad/GP_collection_indexIcon_Companions.dds", iconSize, iconSize, GetChanceToForceLock(), INHERIT_COLOR)
+                        chanceText = ZO_SUCCEEDED_TEXT:Colorize(zo_strformat(SI_LOCKPICK_FORCE_CHANCE, iconString))
+                    else
+                        chanceText = GetChanceToForceLock()
+                    end
+                    return zo_strformat(SI_LOCKPICK_FORCE, chanceText)
+                end,
             keybind = "UI_SHORTCUT_SECONDARY",
             callback = function() 
                 AttemptForceLock()

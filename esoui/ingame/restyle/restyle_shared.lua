@@ -162,49 +162,6 @@ function ZO_Restyle_GetOppositeOffHandEquipSlotType()
     return EQUIP_SLOT_OFF_HAND
 end
 
-do
-    local function PendingLoopAnimationFactory(objectPool)
-        local control = ZO_ObjectPool_CreateNamedControl("PendingLoop", "ZO_Restyle_PendingGlow", objectPool, GuiRoot) -- controls get re-parented when used, so it doesn't matter what the parent is here as long as it exists
-        local animation = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_Restyle_PendingLoop", control)
-        animation.control = control
-        return animation
-    end
-
-    local function ResetPendingLoopAnimation(animation)
-        animation:Stop()
-        animation.control:SetHidden(true)
-        animation.owner.pendingLoopAnimationKey = nil
-        animation.owner = nil
-    end
-
-    ZO_Pending_Outfit_LoopAnimation_Pool = ZO_ObjectPool:New(PendingLoopAnimationFactory, ResetPendingLoopAnimation)
-end
-
-do
-    local DEFAULT_INSET = 0
-
-    function ZO_Restyle_ApplyPendingLoopAnimationToControl(control, pool, inset, isLocked)
-        pool = pool or ZO_Pending_Outfit_LoopAnimation_Pool
-        inset = inset or DEFAULT_INSET
-        local pendingLoopAnimation, key = pool:AcquireObject()
-        local loopControl = pendingLoopAnimation.control
-        loopControl:SetAnchor(TOPLEFT, control, TOPLEFT, inset, inset)
-        loopControl:SetAnchor(BOTTOMRIGHT, control, BOTTOMRIGHT, -inset, -inset)
-        loopControl:SetParent(control)
-        loopControl:SetHidden(false)
-        if isLocked == true then
-            loopControl:SetColor(.5, .5, .5)
-            loopControl:SetDesaturation(1)
-        else
-            loopControl:SetColor(1, 1, 1)
-            loopControl:SetDesaturation(0)
-        end
-        pendingLoopAnimation:PlayFromStart()
-        pendingLoopAnimation.owner = control
-        control.pendingLoopAnimationKey = key
-    end
-end
-
 function ZO_RestyleCanApplyChanges()
     return GetInteractionType() == INTERACTION_DYE_STATION
 end

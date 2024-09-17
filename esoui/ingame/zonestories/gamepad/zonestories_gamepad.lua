@@ -218,7 +218,7 @@ function ZO_ZoneStories_Gamepad:InitializeKeybindStripDescriptors()
             GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_QUAD1_TOOLTIP)
             self:UpdateInfoTooltip(GAMEPAD_RIGHT_TOOLTIP)
             self:ActivateCurrentList()
-        end),
+        end, "UI_SHORTCUT_NEGATIVE", SOUNDS.GAMEPAD_MENU_BACK),
 
         -- Cycle tooltip forward
         {

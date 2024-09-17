@@ -87,7 +87,9 @@ function ZO_MarketProductCarousel_Gamepad:Initialize(...)
 
     local function OnSelectedDataChanged(newData, oldData)
         SetCenterControlActive(self, self.active)
-        self:UpdateKeybinds(newData)
+        if self.active then
+            self:UpdateKeybinds(newData)
+        end
     end
 
     self:SetOnActivatedChangedFunction(SetCenterControlActive)

@@ -156,6 +156,9 @@ INSTANCE_DISPLAY_TYPE_ZONE_STORY = ZONE_DISPLAY_TYPE_ZONE_STORY
 INSTANCE_DISPLAY_TYPE_COMPANION = ZONE_DISPLAY_TYPE_COMPANION
 ZO_ANY_INSTANCE_DISPLAY_TYPE = ZO_ANY_ZONE_DISPLAY_TYPE
 
+-- Renamed lfg cooldown for BGs to allow for MMR cooldown
+LFG_COOLDOWN_BATTLEGROUND_DESERTED = LFG_COOLDOWN_BATTLEGROUND_DESERTED_QUEUE
+
 --Recipes can now have multiple tradeskill requirements
 GetItemLinkRecipeRankRequirement = function(itemLink)
     for i = 1, GetItemLinkRecipeNumTradeskillRequirements(itemLink) do
@@ -1353,6 +1356,19 @@ GetKillingAttackerBattlegroundAlliance = GetKillingAttackerBattlegroundTeam
 GetBattlegroundAllianceColor = GetBattlegroundTeamColor
 GetColoredBattlegroundAllianceName = GetColoredBattlegroundTeamName
 
+Battleground_Scoreboard_Alliance_Panel = ZO_Battleground_Scoreboard_Team_Panel_Object
+Battleground_Scoreboard_Player_Row = ZO_Battleground_Scoreboard_Player_Row_Object
+
+ZO_Battleground_Scoreboard_Team_Panel_Object.GetBattlegroundAlliance = ZO_Battleground_Scoreboard_Team_Panel_Object.GetBattlegroundTeam
+
+-- Battleground API changes for rounds
+GetScoreToWinBattleground = GetScoreToWinBattlegroundRound
+GetBattlegroundNearingVictoryPercent = GetBattlegroundRoundNearingVictoryPercent
+GetBattlegroundMaxActiveSequencedObjectives = GetBattlegroundRoundMaxActiveSequencedObjectives
+
+-- Tribute Campaign Id -> Campaign Key refactor
+GetActiveTributeCampaignId = GetActiveTributeCampaignKey
+
 --[[
     multiselect combo box ui widget for keyboard screens.
     Uses a custom control definition with the box border, selected item label, and a dropdown button.
@@ -1554,3 +1570,10 @@ MAX_BOSSES = BOSS_RANK_ITERATION_END
 PENDING_LEADERBOARD_DATA_TYPE  = LEADERBOARD_DATA_TYPE
 
 COLLECTIONS_BOOK_SINGLETON.GetOwnedHouses = COLLECTIONS_BOOK_SINGLETON.GetUnlockedHouses
+
+-- Fixed typo
+ZO_ComboBox_Gamepad_Dropdowm_Initialize = ZO_ComboBox_Gamepad_Dropdown_Initialize
+
+-- Pending loop refactor (not perfectly one to one, but close as we can get)
+ZO_Pending_Outfit_LoopAnimation_Pool = ZO_Pending_LoopAnimation_Pool
+ZO_Restyle_ApplyPendingLoopAnimationToControl = ZO_PendingLoop.ApplyToControl

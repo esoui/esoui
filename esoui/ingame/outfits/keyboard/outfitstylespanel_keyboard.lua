@@ -22,7 +22,7 @@ function ZO_OutfitStylesPanel_Keyboard:Initialize(control)
     
     self.entryDataObjectPool = ZO_EntryDataPool:New(ZO_GridSquareEntryData_Shared)
 
-    self.pendingLoopAnimationPool = ZO_MetaPool:New(ZO_Pending_Outfit_LoopAnimation_Pool)
+    self.pendingLoopAnimationPool = ZO_MetaPool:New(ZO_Pending_LoopAnimation_Pool)
 
     ZO_OUTFIT_MANAGER:RegisterCallback("OptionsInfoAvailable", function() ZO_CheckButton_SetCheckState(self.showLockedCheckBox, ZO_OUTFIT_MANAGER:GetShowLocked()) end)
 
@@ -119,7 +119,7 @@ function ZO_OutfitStylesPanel_Keyboard:InitializeGridListPanel()
             control.equippedGlow:SetHidden(hideEquippedGlow)
             if isPending then
                 local isLocked = not data.clearAction and data:IsLocked()
-                ZO_Restyle_ApplyPendingLoopAnimationToControl(control, self.pendingLoopAnimationPool, PENDING_ANIMATION_INSET, isLocked)
+                ZO_PendingLoop.ApplyToControl(control, self.pendingLoopAnimationPool, PENDING_ANIMATION_INSET, isLocked)
             end
         end
     end
@@ -127,8 +127,8 @@ function ZO_OutfitStylesPanel_Keyboard:InitializeGridListPanel()
     local function OutfitStyleGridEntryReset(control)
         ZO_ObjectPool_DefaultResetControl(control)
         control.equippedGlow:SetHidden(true)
-        if control.pendingLoopAnimationKey then
-            self.pendingLoopAnimationPool:ReleaseObject(control.pendingLoopAnimationKey)
+        if control.pendingLoop then
+            control.pendingLoop:ReleaseObject()
         end
 
         if control.highlightAnimation then

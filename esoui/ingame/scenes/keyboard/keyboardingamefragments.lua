@@ -94,3 +94,11 @@ COLLECTIBLE_PREVIEW_OPTIONS_FRAGMENT = ZO_ItemPreviewOptionsFragment:New({
     dynamicFramingConsumedHeight = 300,
     forcePreparePreview = false,
 })
+
+PROMOTIONAL_EVENTS_PREVIEW_OPTIONS_FRAGMENT = ZO_ItemPreviewOptionsFragment:New({
+    paddingLeft = 0,
+    paddingRight = 950,
+    dynamicFramingConsumedWidth = 1050,
+    dynamicFramingConsumedHeight = 300,
+    forcePreparePreview = false,
+})

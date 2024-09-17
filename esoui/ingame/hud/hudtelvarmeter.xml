@@ -71,7 +71,7 @@
                         <Label name="$(parent)FractionalPart" font="ZoFontHeaderNoShadow"/>
                     </Controls>
                 </Control>
-                <Label name="$(parent)TelvarDisplay">.
+                <Label name="$(parent)TelvarDisplay">
                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Frame" relativePoint="BOTTOMRIGHT" offsetX="-100" offsetY="-10" />
                 </Label>
             </Controls>

@@ -1,3 +1,5 @@
+local IGNORE_CALLBACK = true
+
 ZO_RestyleSheetWindow_Keyboard = ZO_InitializingCallbackObject:Subclass()
 
 function ZO_RestyleSheetWindow_Keyboard:Initialize(control)
@@ -88,8 +90,6 @@ function ZO_RestyleSheetWindow_Keyboard:InitializeModeSelector()
         ITEM_PREVIEW_KEYBOARD:PreviewUnequipOutfit(GAMEPLAY_ACTOR_CATEGORY_COMPANION)
         self:FireCallbacks("ModeSelectorDropdownChanged")
     end
-
-    local IGNORE_CALLBACK = true
 
     local function TrySetEquipmentGearSelected(_, _, entry, selectionChanged, oldEntry)
         if selectionChanged then
@@ -294,86 +294,82 @@ function ZO_RestyleSheetWindow_Keyboard:OnHidden()
     EndRestyling()
 end
 
-do
-    local IGNORE_CALLBACK = true
+function ZO_RestyleSheetWindow_Keyboard:PopulateEquipmentModeDropdown(keepCurrentSelection)
+    local currentSheet = self:GetCurrentSheet()
+    if currentSheet ~= self.equipmentSheet and currentSheet ~= self.outfitStylesSheet then
+        self:EquipSelectedOutfit()
+        ITEM_PREVIEW_KEYBOARD:ResetOutfitPreview()
+    end
 
-    function ZO_RestyleSheetWindow_Keyboard:PopulateEquipmentModeDropdown(keepCurrentSelection)
-        local currentSheet = self:GetCurrentSheet()
-        if currentSheet ~= self.equipmentSheet and currentSheet ~= self.outfitStylesSheet then
-            self:EquipSelectedOutfit()
-            ITEM_PREVIEW_KEYBOARD:ResetOutfitPreview()
+    self.modeSelectorHeader:SetText(GetString(SI_RESTYLE_SHEET_SELECT_OUTFIT_HEADER))
+
+    local actorCategory = GAMEPLAY_ACTOR_CATEGORY_PLAYER
+    local reselectOutfitIndex = nil
+    if keepCurrentSelection then
+        local selectedData = self.modeSelectorDropdown:GetSelectedItemData()
+        if selectedData and selectedData.outfitManipulator then
+            reselectOutfitIndex = selectedData.outfitManipulator:GetOutfitIndex()
+            actorCategory = selectedData.outfitManipulator:GetActorCategory()
         end
+    end
 
-        self.modeSelectorHeader:SetText(GetString(SI_RESTYLE_SHEET_SELECT_OUTFIT_HEADER))
+    self.modeSelectorDropdown:ClearItems()
 
-        local actorCategory = GAMEPLAY_ACTOR_CATEGORY_PLAYER
-        local reselectOutfitIndex = nil
-        if keepCurrentSelection then
-            local selectedData = self.modeSelectorDropdown:GetSelectedItemData()
-            if selectedData and selectedData.outfitManipulator then
-                reselectOutfitIndex = selectedData.outfitManipulator:GetOutfitIndex()
-                actorCategory = selectedData.outfitManipulator:GetActorCategory()
-            end
-        end
+    self.modeSelectorDropdown:AddItem(self.equipmentGearModeEntry, ZO_COMBOBOX_SUPPRESS_UPDATE)
 
-        self.modeSelectorDropdown:ClearItems()
+    local function SetSelectedOutfit(entry)
+        local outfitManipulator = entry.outfitManipulator
+        self.outfitStylesSheet:SetOutfitManipulator(outfitManipulator)
+        ZO_OUTFIT_STYLES_PANEL_KEYBOARD:SetCurrentOutfitManipulator(outfitManipulator)
+        self.pendingEquipOutfitManipulator = outfitManipulator
+        self:DisplaySheet(self.outfitStylesSheet)
+        ITEM_PREVIEW_KEYBOARD:PreviewOutfit(outfitManipulator:GetActorCategory(), outfitManipulator:GetOutfitIndex())
+        self:FireCallbacks("ModeSelectorDropdownChanged")
+    end
 
-        self.modeSelectorDropdown:AddItem(self.equipmentGearModeEntry, ZO_COMBOBOX_SUPPRESS_UPDATE)
-
-        local function SetSelectedOutfit(entry)
-            local outfitManipulator = entry.outfitManipulator
-            self.outfitStylesSheet:SetOutfitManipulator(outfitManipulator)
-            ZO_OUTFIT_STYLES_PANEL_KEYBOARD:SetCurrentOutfitManipulator(outfitManipulator)
-            self.pendingEquipOutfitManipulator = outfitManipulator
-            self:DisplaySheet(self.outfitStylesSheet)
-            ITEM_PREVIEW_KEYBOARD:PreviewOutfit(outfitManipulator:GetActorCategory(), outfitManipulator:GetOutfitIndex())
-            self:FireCallbacks("ModeSelectorDropdownChanged")
-        end
-
-        local function TrySetSelectedOutfit(_, _, entry, selectionChanged, oldEntry)
-            if selectionChanged then
-                if self:AreChangesPending() then
-                    local function Confirm()
-                        SetSelectedOutfit(entry)
-                    end
-
-                    local function Decline()
-                        self.modeSelectorDropdown:SelectItem(oldEntry, IGNORE_CALLBACK)
-                    end
-
-                    self:ShowRevertRestyleChangesDialog("CONFIRM_REVERT_OUTFIT_ON_CHANGE", Confirm, Decline)
-                else
+    local function TrySetSelectedOutfit(_, _, entry, selectionChanged, oldEntry)
+        if selectionChanged then
+            if self:AreChangesPending() then
+                local function Confirm()
                     SetSelectedOutfit(entry)
                 end
+
+                local function Decline()
+                    self.modeSelectorDropdown:SelectItem(oldEntry, IGNORE_CALLBACK)
+                end
+
+                self:ShowRevertRestyleChangesDialog("CONFIRM_REVERT_OUTFIT_ON_CHANGE", Confirm, Decline)
+            else
+                SetSelectedOutfit(entry)
             end
         end
-
-        local equippedOutfitIndex = ZO_OUTFIT_MANAGER:GetEquippedOutfitIndex(actorCategory)
-        local defaultEntry = self.equipmentGearModeEntry
-
-        local autoSelectIndex = keepCurrentSelection and reselectOutfitIndex or equippedOutfitIndex
-        local numOutfits = ZO_OUTFIT_MANAGER:GetNumOutfits(actorCategory)
-        for outfitIndex = 1, numOutfits do
-            local outfitManipulator = ZO_OUTFIT_MANAGER:GetOutfitManipulator(actorCategory, outfitIndex)
-            local entry = self.modeSelectorDropdown:CreateItemEntry(outfitManipulator:GetOutfitName(), TrySetSelectedOutfit)
-            entry.outfitManipulator = outfitManipulator
-            entry.selectFunction = SetSelectedOutfit
-            self.modeSelectorDropdown:AddItem(entry, ZO_COMBOBOX_SUPPRESS_UPDATE)
-            if autoSelectIndex == outfitIndex then
-                defaultEntry = entry
-            end
-        end
-
-        if numOutfits < MAX_OUTFIT_UNLOCKS then
-            self.modeSelectorDropdown:AddItem(self.purchaseAdditionalOutfitsEntry, ZO_COMBOBOX_SUPPRESS_UPDATE)
-        end
-
-        self.modeSelectorDropdown:UpdateItems()
-        self.modeSelectorDropdown:SelectItem(defaultEntry, true)
-        defaultEntry.selectFunction(defaultEntry)
-
-        self:OnUpdateModeSelectorDropdown()
     end
+
+    local equippedOutfitIndex = ZO_OUTFIT_MANAGER:GetEquippedOutfitIndex(actorCategory)
+    local defaultEntry = self.equipmentGearModeEntry
+
+    local autoSelectIndex = keepCurrentSelection and reselectOutfitIndex or equippedOutfitIndex
+    local numOutfits = ZO_OUTFIT_MANAGER:GetNumOutfits(actorCategory)
+    for outfitIndex = 1, numOutfits do
+        local outfitManipulator = ZO_OUTFIT_MANAGER:GetOutfitManipulator(actorCategory, outfitIndex)
+        local entry = self.modeSelectorDropdown:CreateItemEntry(outfitManipulator:GetOutfitName(), TrySetSelectedOutfit)
+        entry.outfitManipulator = outfitManipulator
+        entry.selectFunction = SetSelectedOutfit
+        self.modeSelectorDropdown:AddItem(entry, ZO_COMBOBOX_SUPPRESS_UPDATE)
+        if autoSelectIndex == outfitIndex then
+            defaultEntry = entry
+        end
+    end
+
+    if numOutfits < MAX_OUTFIT_UNLOCKS then
+        self.modeSelectorDropdown:AddItem(self.purchaseAdditionalOutfitsEntry, ZO_COMBOBOX_SUPPRESS_UPDATE)
+    end
+
+    self.modeSelectorDropdown:UpdateItems()
+    self.modeSelectorDropdown:SelectItem(defaultEntry, true)
+    defaultEntry.selectFunction(defaultEntry)
+
+    self:OnUpdateModeSelectorDropdown()
 end
 
 function ZO_RestyleSheetWindow_Keyboard:PopulateCollectiblesModeDropdown()
@@ -396,7 +392,7 @@ function ZO_RestyleSheetWindow_Keyboard:PopulateCollectiblesModeDropdown()
     self:OnUpdateModeSelectorDropdown()
 end
 
-function ZO_RestyleSheetWindow_Keyboard:PopulateCompanionOutfitsModeDropdown()
+function ZO_RestyleSheetWindow_Keyboard:PopulateCompanionOutfitsModeDropdown(keepCurrentSelection)
     local currentSheet = self:GetCurrentSheet()
     if currentSheet ~= self.companionEquipmentSheet and currentSheet ~= self.companionOutfitStylesSheet then
         self:EquipSelectedOutfit()

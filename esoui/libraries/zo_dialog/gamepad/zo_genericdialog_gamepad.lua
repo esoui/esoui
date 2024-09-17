@@ -798,7 +798,7 @@ do
                 if visible then
                     local entryData = entryInfoTable.entryData
                     if entryData == nil then
-                        local entryDataText = entryInfoTable.text
+                        local entryDataText = entryInfoTable.text or entryDataOverrides.text
                         if entryDataText ~= nil then
                             if type(entryDataText) == "number" then
                                 entryDataText = GetString(entryDataText)
@@ -814,7 +814,9 @@ do
                         -- TODO: This loop is pretty awful (and we should just pass in entryData see Achievements_Gamepad.lua)
                         if entryDataOverrides then
                             for dataKey, dataValue in pairs(entryDataOverrides) do
-                                entryData[dataKey] = dataValue
+                                if dataKey ~= "text" then
+                                    entryData[dataKey] = dataValue
+                                end
                             end
                         end
                     end

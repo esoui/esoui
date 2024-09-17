@@ -158,7 +158,7 @@ function ZO_KeybindButtonMixin:GetKeybindButtonNarrationData()
         {
             name = self.nameTextNarration or self.nameText,
             keybindName = ZO_Keybindings_GetHighestPriorityNarrationStringFromAction(self:GetKeybind()) or GetString(SI_ACTION_IS_NOT_BOUND),
-            enabled = self.enabled,
+            enabled = self.enabled, 
         }
         return narrationData
     end

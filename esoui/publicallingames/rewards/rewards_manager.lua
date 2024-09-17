@@ -336,6 +336,7 @@ function ZO_RewardsManager:GetCurrencyEntryInfo(rewardId, quantity, parentChoice
     local formattedName = zo_strformat(SI_CURRENCY_NAME_FORMAT, rawName)
     local formattedNameWithStackKeyboard = zo_strformat(SI_CURRENCY_NAME_FORMAT, ZO_Currency_FormatKeyboard(currencyType, quantity, ZO_CURRENCY_FORMAT_AMOUNT_NAME))
     local formattedNameWithStackGamepad = zo_strformat(SI_CURRENCY_NAME_FORMAT, ZO_Currency_FormatGamepad(currencyType, quantity, ZO_CURRENCY_FORMAT_AMOUNT_NAME))
+    local abbreviatedQuantity = ZO_AbbreviateAndLocalizeNumber(quantity, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES)
 
     local rewardData = ZO_RewardData:New(rewardId, parentChoice)
     rewardData:SetRawName(rawName)
@@ -344,6 +345,7 @@ function ZO_RewardsManager:GetCurrencyEntryInfo(rewardId, quantity, parentChoice
     rewardData:SetLootIcon(GetCurrencyLootKeyboardIcon(currencyType), GetCurrencyLootGamepadIcon(currencyType))
     rewardData:SetFormattedNameWithStack(formattedNameWithStackKeyboard, formattedNameWithStackGamepad)
     rewardData:SetQuantity(quantity)
+    rewardData:SetAbbreviatedQuantity(abbreviatedQuantity)
     rewardData:SetCurrencyInfo(currencyType)
     rewardData:SetAnnouncementBackground(GetRewardAnnouncementBackgroundFileIndex(rewardId))
 

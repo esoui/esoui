@@ -188,6 +188,7 @@ function ZO_Dyeing_Slots_Panel_Gamepad:InitializeDyesGrid()
     local function DyeSwatchGridEntrySetup(control, data, list)
         control:SetColor(ZO_DYEING_SWATCH_INDEX, data.r, data.g, data.b)
         control:SetSurfaceHidden(ZO_DYEING_LOCK_INDEX, data.known)
+        control:SetSurfaceHidden(ZO_DYEING_NEW_INDEX, not data:IsNew())
         data:SetControl(control)
     end
 
@@ -241,6 +242,9 @@ end
 
 function ZO_Dyeing_Slots_Panel_Gamepad:OnDyesGridSelectedDataChanged(previousData, newData)
     if previousData and previousData.control then
+        if previousData:IsNew() then 
+            previousData:SetNew(false)
+        end
         previousData.mousedOver = false
         previousData:UpdateSelectedState()
     end

@@ -151,7 +151,16 @@
             <Edge file="EsoUI/Art/Miscellaneous/dark_edgeFrame_8_thin.dds" edgeFileWidth="64" edgeFileHeight="8" />
             <Center file="EsoUI/Art/Miscellaneous/Gamepad/gp_edgeFill.dds" />
         </Backdrop>
-        
+
+        <Backdrop name="ZO_DarkThinFrameCenterless" virtual="true" tier="LOW">
+            <Anchor point="TOPLEFT" offsetX="-4" offsetY="-4"/>
+            <Anchor point="BOTTOMRIGHT" offsetX="4" offsetY="4"/>
+            <Edge file="EsoUI/Art/Miscellaneous/dark_edgeFrame_8_thin.dds" edgeFileWidth="64" edgeFileHeight="8" />
+            <OnInitialized>
+                self:SetCenterColor(0, 0, 0, 0)
+            </OnInitialized>
+        </Backdrop>
+
         <Backdrop name="ZO_SliderBackdrop" centerColor="00000000" virtual="true">
             <Anchor point="TOPLEFT" offsetX="0" offsetY="4" />
             <Anchor point="BOTTOMRIGHT" offsetX="0" offsetY="-4" />

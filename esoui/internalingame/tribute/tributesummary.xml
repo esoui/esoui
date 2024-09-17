@@ -54,7 +54,6 @@
         <AnimationTimeline name ="ZO_TributeRankChangeFadeOut">
             <Animations>
                 <AlphaAnimation delay="500" duration="500" startAlpha="1" endAlpha="0">
-                    return ZO_EaseOutQuadratic(progress)
                 </AlphaAnimation>
             </Animations>
         </AnimationTimeline>
@@ -221,7 +220,7 @@
         <!-- MultiSegmentProgressBar Templates-->
         <StatusBar name="ZO_TributeSummary_ArrowStatusBar_Keyboard_Template" inherits="ZO_ArrowStatusBarWithBG" textureFile="EsoUI/Art/Miscellaneous/progressbar_large_genericFill.dds" layer="CONTROLS" level="0" virtual="true">
             <Dimensions x="550" y="53" />
-            <LeadingEdge override="true" textureFile="EsoUI/Art/Miscellaneous/progressbar_large_genericFill_leadingEdge.dds" width="25" height="53" />
+            <LeadingEdge textureFile="EsoUI/Art/Miscellaneous/progressbar_large_genericFill_leadingEdge.dds" width="25" height="53" />
             <TextureCoords left="0" right="1" top="0" bottom="0.78125" />
             <LeadingEdgeTextureCoords left="0" right="0.78125" top="0" bottom="0.78125" />
 

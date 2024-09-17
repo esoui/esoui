@@ -39,7 +39,7 @@ function ZO_ScribingLibrary_CraftedAbilitySkills_Keyboard:SetupAbilityEntry(cont
     local progressionData = skillData and skillData:GetCurrentProgressionData()
     if progressionData then
         control.slotIcon:SetTexture(progressionData:GetIcon())
-        control.nameLabel:SetText(progressionData:GetName())
+        control.nameLabel:SetText(progressionData:GetFormattedName())
         control.nameLabel:SetColor(PURCHASED_COLOR:UnpackRGBA())
     end
 end

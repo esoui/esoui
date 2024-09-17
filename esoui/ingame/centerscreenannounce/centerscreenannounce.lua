@@ -135,13 +135,14 @@ function ZO_CenterScreenMessageParams:GetSecondaryText()
     return self.secondaryText
 end
 
-function ZO_CenterScreenMessageParams:SetIconData(icon, iconBg)
+function ZO_CenterScreenMessageParams:SetIconData(icon, iconBg, iconColor)
     self.icon = icon
     self.iconBg = iconBg
+    self.iconColor = iconColor
 end
 
 function ZO_CenterScreenMessageParams:GetIconData()
-    return self.icon, self.iconBg
+    return self.icon, self.iconBg, self.iconColor
 end
 
 function ZO_CenterScreenMessageParams:SetLargeInformationIconData(icon)
@@ -716,7 +717,7 @@ function ZO_CenterScreenAnnouncementLargeLine:SetSmallCombinedText(text)
     self:TrySettingDynamicText(self.smallCombinedText, text)
 end
 
-function ZO_CenterScreenAnnouncementLargeLine:SetIcon(icon, iconBg, suppressIconFrame)
+function ZO_CenterScreenAnnouncementLargeLine:SetIcon(icon, iconBg, suppressIconFrame, iconColor)
     self.smallCombinedIcon:SetHidden(icon == nil)
     self.smallCombinedIconBG:SetHidden(iconBg == nil)
     self.smallCombinedIconFrame:SetHidden(suppressIconFrame)
@@ -728,6 +729,10 @@ function ZO_CenterScreenAnnouncementLargeLine:SetIcon(icon, iconBg, suppressIcon
 
     if iconBg then
         self.smallCombinedIconBG:SetTexture(iconBg)
+    end
+
+    if iconColor then 
+        self.smallCombinedIcon:SetColor(iconColor.r, iconColor.g, iconColor.b, iconColor.a)
     end
 end
 
@@ -1800,8 +1805,8 @@ local setupFunctions =
             self.isBeforeMessageExpiring = true
         end
 
-        local icon, iconBg = messageParams:GetIconData()
-        largeMessageLine:SetIcon(icon, iconBg, messageParams:GetSuppressIconFrame() == CSA_OPTION_SUPPRESS_ICON_FRAME)
+        local icon, iconBg, iconColor = messageParams:GetIconData()
+        largeMessageLine:SetIcon(icon, iconBg, messageParams:GetSuppressIconFrame() == CSA_OPTION_SUPPRESS_ICON_FRAME, iconColor)
 
         local largeInformationIcon = messageParams:GetLargeInformationIconData()
         largeMessageLine:SetLargeInformationIcon(largeInformationIcon)

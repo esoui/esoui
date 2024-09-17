@@ -75,6 +75,8 @@ EsoUI\Libraries\ZO_Templates\ScrollTemplates_Shared.xml
 EsoUI\Libraries\ZO_Templates\ScrollTemplates.xml
 EsoUI\Libraries\ZO_Templates\Gamepad\ScrollTemplates_Gamepad.lua
 EsoUI\Libraries\ZO_Templates\Gamepad\ScrollTemplates_Gamepad.xml
+EsoUI\Libraries\ZO_Templates\ScrollContainer_Shared.lua
+EsoUI\Libraries\ZO_Templates\ScrollContainer_Shared.xml
 EsoUI\Libraries\ZO_Templates\StatusBarTemplates.lua
 EsoUI\Libraries\ZO_Templates\StatusBarTemplates.xml
 EsoUI\Libraries\ZO_Templates\Gamepad\StatusBarTemplates_Gamepad.xml

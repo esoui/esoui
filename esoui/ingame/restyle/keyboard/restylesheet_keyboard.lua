@@ -359,7 +359,7 @@ function ZO_RestyleSlotsSheet:Initialize(parentContainer, slotGridData)
     self.slots = {}
     self.slotSetupFunction = ZO_Restyle_SetupSlotControl
     self:SetupSlotGrid(slotGridData)
-    self.pendingLoopAnimationPool = ZO_MetaPool:New(ZO_Pending_Outfit_LoopAnimation_Pool)
+    self.pendingLoopAnimationPool = ZO_MetaPool:New(ZO_Pending_LoopAnimation_Pool)
 
     self.control = control
 
@@ -485,8 +485,8 @@ function ZO_RestyleSlotsSheet:RefreshSlot(restyleSlotData, suppressCallbacks)
         local restyleSlotType = restyleSlotData:GetRestyleSlotType()
         local slotObject = self.slots[restyleSlotType]
         local slotControl = slotObject:GetItemSlotControl()
-        if slotControl.pendingLoopAnimationKey then
-            self.pendingLoopAnimationPool:ReleaseObject(slotControl.pendingLoopAnimationKey)
+        if slotControl.pendingLoop then
+            slotControl.pendingLoop:ReleaseObject()
         end
 
         self.slotSetupFunction(slotControl, restyleSlotData)
@@ -758,7 +758,7 @@ do
             if slotManipulator and slotManipulator:IsSlotDataChangePending() then
                 local pendingCollectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(pendingCollectibleId)
                 local isLocked = pendingCollectibleData and pendingCollectibleData:IsLocked()
-                ZO_Restyle_ApplyPendingLoopAnimationToControl(control, self:GetPendingLoopAnimationPool(), PENDING_ANIMATION_INSET, isLocked)
+                ZO_PendingLoop.ApplyToControl(control, self:GetPendingLoopAnimationPool(), PENDING_ANIMATION_INSET, isLocked)
             end
         end
 

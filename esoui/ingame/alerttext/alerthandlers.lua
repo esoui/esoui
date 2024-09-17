@@ -977,6 +977,10 @@ local AlertHandlers =
         return ALERT, GetString(SI_ALERT_LOCKPICK_FAILED)
     end,
 
+    [EVENT_LOCKPICK_BREAK_PREVENTED] = function()
+        return ALERT, GetString(SI_ALERT_LOCKPICK_BREAK_PREVENTED), SOUNDS.LOCKPICKING_BREAK_PREVENTED
+    end,
+
     [EVENT_OUTFIT_RENAME_RESPONSE] = function(result, actorCategory, outfitIndex)
         if not (result == SET_OUTFIT_NAME_RESULT_SUCCESS or result == SET_OUTFIT_NAME_RESULT_NO_CHANGE) then
             return UI_ALERT_CATEGORY_ERROR, GetString("SI_SETOUTFITNAMERESULT", result), SOUNDS.GENERAL_ALERT_ERROR
@@ -1220,6 +1224,10 @@ local AlertHandlers =
         if hasExpiringAttachments then
             return ALERT, GetString(SI_MAIL_ALERT_ATTACHMENTS_EXPIRING)
         elseif hasAttachments then
+            if IsNewCharacterNotificationSuppressionActive() then
+                -- Suppress this alert if the brief New Character Notification Suppression interval is active during their initial login.
+                return nil
+            end
             return ALERT, GetString(SI_MAIL_ALERT_ATTACHMENTS_AVAILABLE)
         end
     end,

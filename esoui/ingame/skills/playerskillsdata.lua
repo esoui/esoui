@@ -27,6 +27,10 @@ function ZO_PlayerSkillProgressionData:GetNumSkillStyles()
     return 0
 end
 
+function ZO_PlayerSkillProgressionData:HasAnyNonHiddenSkillStyles()
+    return false
+end
+
 ------------------------------
 -- Active Skill Progression --
 ------------------------------
@@ -126,6 +130,17 @@ end
 
 function ZO_ActiveSkillProgressionData:GetNumSkillStyles()
     return self.numSkillStyles
+end
+
+function ZO_ActiveSkillProgressionData:HasAnyNonHiddenSkillStyles()
+    for index = 1, self.numSkillStyles do
+        local collectibleId = GetProgressionSkillAbilityFxOverrideCollectibleIdByIndex(self:GetProgressionId(), index)
+        local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+        if collectibleData and not collectibleData:IsHiddenFromCollection() then
+            return true
+        end
+    end
+    return false
 end
 
 -- End overriding methods in ZO_PlayerSkillProgressionData --

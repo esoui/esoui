@@ -1,7 +1,6 @@
 ZO_EMOTE_COLUMN_WIDTH = 400
 ZO_EMOTE_ROW_HEIGHT = 70
 
-local GAMEPAD_PLAYER_EMOTE_SCENE_NAME = "gamepad_player_emote"
 local GAMEPAD_PLAYER_EMOTE_MENU_ENTRY_TEMPLATE = "ZO_GamepadItemSubEntryTemplate"
 
 local MODE_CATEGORY_INACTIVE = 0
@@ -281,7 +280,7 @@ function ZO_GamepadPlayerEmote:Initialize(control)
     self.assignLabel = quickslotControl:GetNamedChild("Assign")
     self.selectedEmoteNameLabel = quickslotControl:GetNamedChild("SelectedEmoteName")
 
-    GAMEPAD_PLAYER_EMOTE_SCENE = ZO_Scene:New(GAMEPAD_PLAYER_EMOTE_SCENE_NAME, SCENE_MANAGER)
+    GAMEPAD_PLAYER_EMOTE_SCENE = ZO_Scene:New("gamepad_player_emote", SCENE_MANAGER)
     local ACTIVATE_ON_SHOW = true
     ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE, ACTIVATE_ON_SHOW, GAMEPAD_PLAYER_EMOTE_SCENE)
 end

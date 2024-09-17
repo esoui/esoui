@@ -177,7 +177,7 @@ do
         local hasSlotStatusUpdated = skillData:HasUpdatedStatusByType(ZO_SKILL_DATA_NEW_STATE.MORPHABLE) or skillData:HasUpdatedStatusByType(ZO_SKILL_DATA_NEW_STATE.CRAFTED_ABILITY)
         control.slot.statusIcon:SetHidden(not hasSlotStatusUpdated)
 
-        if skillProgressionData:IsActive() and skillProgressionData:GetNumSkillStyles() > 0 then
+        if skillProgressionData:IsActive() and skillProgressionData:HasAnyNonHiddenSkillStyles() then
             local collectibleData = skillProgressionData:GetSelectedSkillStyleCollectibleData()
             if collectibleData then
                 control.skillStyleControl.selectedStyleButton.icon:SetTexture(collectibleData:GetIcon())
@@ -290,7 +290,7 @@ do
                 skillStyleControl:SetAnchor(RIGHT, increaseButton, LEFT)
             end
 
-            if isActive and skillProgressionData:GetNumSkillStyles() ~= 0 then
+            if isActive and skillProgressionData:HasAnyNonHiddenSkillStyles() then
                 skillStyleControl:SetHidden(false)
                 if skillProgressionData:IsSkillStyleSelected() then
                     skillStyleControl.defaultStyleButton:SetHidden(true)

@@ -807,10 +807,10 @@ function ZO_SkillsManager:RegisterForEvents()
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleUpdated", OnCollectibleUpdated)
 
     local function OnCollectionUpdated(collectionUpdateType, collectiblesByNewUnlockState)
-        local scribingCollectibleData = SCRIBING_DATA_MANAGER:GetScribingUnlockCollectibleData()
+        local scribingCollectibleId = GetScribingCollectibleId()
         for _, unlockStateTable in pairs(collectiblesByNewUnlockState) do
             for _, collectibleData in ipairs(unlockStateTable) do
-                if collectibleData == scribingCollectibleData then
+                if collectibleData:GetId() == scribingCollectibleId then
                     MAIN_MENU_KEYBOARD:UpdateSceneGroupButtons("skillsSceneGroup")
                 end
             end

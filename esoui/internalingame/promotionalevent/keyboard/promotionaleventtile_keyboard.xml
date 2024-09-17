@@ -1,0 +1,24 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_PromotionalEventTile_KB" inherits="ZO_PromotionalEventTile_Control ZO_ActionTile_Keyboard_Control" mouseEnabled="true" virtual="true">
+            <Dimensions x="ZO_MARKET_ANNOUNCEMENT_TILE_DIMENSIONS_X" y="ZO_MARKET_ANNOUNCEMENT_TILE_DIMENSIONS_Y" />
+            <OnInitialized>
+                ZO_PromotionalEventTile_Keyboard.OnControlInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)Container" override="true">
+                    <Controls>
+                        <Backdrop name="$(parent)Highlight" inherits="ZO_AnnouncementTileHighlight_Keyboard" />
+
+                        <Label name="$(parent)TextCallout" override="true" font="ZoFontWinT1">
+                            <Anchor point="BOTTOMLEFT" offsetX="20" offsetY="-30" />
+                        </Label>
+
+                        <Button name="$(parent)ActionButton" override="true" mouseOverBlendMode="ALPHA" level="5" />
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

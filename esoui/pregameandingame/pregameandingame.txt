@@ -25,6 +25,7 @@ EsoUI\PregameAndIngame\OptionsPanels\OptionsPanel_Account_Shared.lua
 EsoUI\PregameAndIngame\OptionsPanels\OptionsPanel_Audio_Shared.lua
 EsoUI\PregameAndIngame\OptionsPanels\OptionsPanel_Camera_Shared.lua
 EsoUI\PregameAndIngame\OptionsPanels\OptionsPanel_Gameplay_Shared.lua
+EsoUI\PregameAndIngame\OptionsPanels\OptionsPanel_Interface_Shared.lua
 EsoUI\PregameAndIngame\OptionsPanels\OptionsPanel_Video_Shared.lua
 
 EsoUI\PregameAndIngame\OptionsPanels\Keyboard\OptionsPanelBuilder_Keyboard.lua

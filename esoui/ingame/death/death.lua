@@ -5,7 +5,7 @@ local DeathType = ZO_Object:Subclass()
 
 function DeathType:New(...)
     local deathType = ZO_Object.New(self)
-    deathType:Initialize(...)    
+    deathType:Initialize(...)
     return deathType
 end
 
@@ -15,7 +15,7 @@ do
     function DeathType:Initialize(control)
         self.control = control
 
-        self.buttons = { GetControl(control, "Button1"), GetControl(control, "Button2"), GetControl(control, "Button3") }
+        self.buttons = { control:GetNamedChild("Button1"), control:GetNamedChild("Button2"), control:GetNamedChild("Button3") }
         for i, button in ipairs(self.buttons) do
             self:MixinDeathKeybindButton(button)
             button:SetKeybind(BUTTON_KEYBINDS[i])
@@ -60,9 +60,9 @@ function DeathType:ToggleDeathRecap()
 end
 
 function DeathType:GetButtonByKeybind(keybind)
-    if(keybind == "DEATH_PRIMARY") then
+    if keybind == "DEATH_PRIMARY" then
         return self.buttons[1]
-    elseif(keybind == "DEATH_SECONDARY") then
+    elseif keybind == "DEATH_SECONDARY" then
         return self.buttons[2]
     else
         return self.buttons[3]
@@ -74,7 +74,7 @@ function DeathType:GetButton(index)
 end
 
 function DeathType:SetHidden(hidden)
-    if(self.control) then
+    if self.control then
         self.control:SetHidden(hidden)
     end
 end
@@ -85,7 +85,7 @@ end
 
 function DeathType:SelectOption(keybind)
     local button = self:GetButtonByKeybind(keybind)
-    if(button) then
+    if button then
         button:OnClicked()
     end
 end
@@ -103,17 +103,17 @@ local SOUL_GEM_ICON_MARKUP = "|t32:32:%s|t"
 local SOUL_GEM_ICON_MARKUP_INHERIT_COLOR = "|t32:32:%s:inheritColor|t"
 
 function ZO_Death_GetResurrectSoulGemText(level)
-    local name, soulGemIcon, soulGemStackCount, soulGemQuality = GetSoulGemInfo(SOUL_GEM_TYPE_FILLED, level)
+    local _, soulGemIcon, soulGemStackCount, soulGemQuality = GetSoulGemInfo(SOUL_GEM_TYPE_FILLED, level)
     local coloredFilledText
     local coloredSoulGemIconMarkup
     local success
-    if(soulGemStackCount > 0) then
+    if soulGemStackCount > 0 then
         local qualityColor = GetItemQualityColor(soulGemQuality)
         coloredFilledText = qualityColor:Colorize(SOUL_GEM_FILLED_TEXT)
         coloredSoulGemIconMarkup = string.format(SOUL_GEM_ICON_MARKUP, soulGemIcon)
         success = true
     else
-        local _, soulGemIcon = GetSoulGemInfo(SOUL_GEM_TYPE_FILLED, level, false)
+        soulGemIcon = select(2, GetSoulGemInfo(SOUL_GEM_TYPE_FILLED, level, false))
         coloredFilledText = ZO_ERROR_COLOR:Colorize(SOUL_GEM_FILLED_TEXT)
         coloredSoulGemIconMarkup = ZO_ERROR_COLOR:Colorize(string.format(SOUL_GEM_ICON_MARKUP_INHERIT_COLOR, soulGemIcon))
         success = false
@@ -135,17 +135,17 @@ function DeathType:LayoutHereButton(hereButton)
 
     local inReviveCounterRaid = IsPlayerInReviveCounterRaid()
 
-    if(freeRevive and not inReviveCounterRaid) then
+    if freeRevive and not inReviveCounterRaid then
         hereButton:SetEnabled(true)
         hereButton:SetText(GetString(SI_DEATH_PROMPT_HERE))
         return
     end
-    
+
     local level = GetUnitEffectiveLevel("player")
     local name, soulGemIcon, soulGemStackCount, soulGemQuality = GetSoulGemInfo(SOUL_GEM_TYPE_FILLED, level)
     local enabled = (soulGemStackCount > 0 or freeRevive) and not self:AreButtonsDisabledDueToCyclicRespawn()
     hereButton:SetEnabled(enabled)
-    
+
     local soulGemSuccess, coloredFilledText, coloredSoulGemIconMarkup = ZO_Death_GetResurrectSoulGemText(level)
     hereButton:SetText(zo_strformat(soulGemSuccess and SI_DEATH_PROMPT_HERE_GEM or SI_DEATH_PROMPT_HERE_GEM_FAILED, coloredFilledText, coloredSoulGemIconMarkup))
 end
@@ -191,7 +191,7 @@ local AvADeath = DeathType:Subclass()
 
 function AvADeath:New(control)
     local ava = DeathType.New(self, control)
-    
+
     local button1 = ava:GetButton(1)
     button1:SetText(GetString(SI_DEATH_PROMPT_CHOOSE_REVIVE_LOCATION))
     button1:SetCallback(function()
@@ -199,11 +199,11 @@ function AvADeath:New(control)
         ZO_WorldMap_ShowWorldMap()
     end)
 
-    ava.messageLabel = GetControl(control, "Message")
+    ava.messageLabel = control:GetNamedChild("Message")
     ava.messageLabel:SetText(GetString(SI_DEATH_PROMPT_AVA))
     ava.messageLabel:SetHidden(true)
 
-    ava.timerCooldown = GetControl(control, "Timer")
+    ava.timerCooldown = control:GetNamedChild("Timer")
     ava.timerCooldown:SetNumWarningSounds(5)
     ava.timerCooldown:SetHidden(true)
 
@@ -217,15 +217,15 @@ end
 
 function AvADeath:UpdateDisplay()
     local _, timeUntilAutoReleaseMs = GetDeathInfo()
-    if(timeUntilAutoReleaseMs > 0 and timeUntilAutoReleaseMs < 60000) then
-        if(self.messageHidden) then
+    if timeUntilAutoReleaseMs > 0 and timeUntilAutoReleaseMs < 60000 then
+        if self.messageHidden then
             self.messageHidden = false
             self.messageLabel:SetHidden(false)
             self.timerCooldown:Start(timeUntilAutoReleaseMs)
             self.timerCooldown:SetHidden(false)
         end
     else
-        if(not self.messageHidden) then
+        if not self.messageHidden then
             self.messageHidden = true
             self.messageLabel:SetHidden(true)
             self.timerCooldown:Stop()
@@ -252,11 +252,11 @@ function ImperialPvPDeath:New(control)
         ZO_WorldMap_ShowWorldMap()
     end)
 
-    imperialPvP.messageLabel = GetControl(control, "Message")
+    imperialPvP.messageLabel = control:GetNamedChild("Message")
     imperialPvP.messageLabel:SetText(GetString(SI_DEATH_PROMPT_AVA))
     imperialPvP.messageLabel:SetHidden(true)
 
-    imperialPvP.timerCooldown = GetControl(control, "Timer")
+    imperialPvP.timerCooldown = control:GetNamedChild("Timer")
     imperialPvP.timerCooldown:SetNumWarningSounds(5)
     imperialPvP.timerCooldown:SetHidden(true)
 
@@ -274,15 +274,15 @@ end
 
 function ImperialPvPDeath:UpdateDisplay()
     local _, timeUntilAutoReleaseMs = GetDeathInfo()
-    if(timeUntilAutoReleaseMs > 0 and timeUntilAutoReleaseMs < 60000) then
-        if(self.messageHidden) then
+    if timeUntilAutoReleaseMs > 0 and timeUntilAutoReleaseMs < 60000 then
+        if self.messageHidden then
             self.messageHidden = false
             self.messageLabel:SetHidden(false)
             self.timerCooldown:Start(timeUntilAutoReleaseMs)
             self.timerCooldown:SetHidden(false)
         end
     else
-        if(not self.messageHidden) then
+        if not self.messageHidden then
             self.messageHidden = true
             self.messageLabel:SetHidden(true)
             self.timerCooldown:Stop()
@@ -303,7 +303,7 @@ local CyclicRespawnDeath = DeathType:Subclass()
 function CyclicRespawnDeath:New(control)
     local cyclicRespawn = DeathType.New(self, control)
 
-    cyclicRespawn.cyclicRespawnLabel = GetControl(control, "RespawnTimerText")
+    cyclicRespawn.cyclicRespawnLabel = control:GetNamedChild("RespawnTimerText")
 
     return cyclicRespawn
 end
@@ -358,18 +358,105 @@ end
 
 local BGDeath = DeathType:Subclass()
 
-function BGDeath:New(control)
-    local bg = DeathType.New(self, control)
+function BGDeath:Initialize(control)
+    DeathType.Initialize(self, control)
 
-    local button1 = bg:GetButton(1)
+    local button1 = self:GetButton(1)
     button1:SetText(GetString(SI_DEATH_PROMPT_RELEASE))
     button1:SetCallback(JoinRespawnQueue)
-
-    return bg
 end
 
 function BGDeath:UpdateDisplay()
     self:GetButton(1):SetEnabled(not self:AreButtonsDisabledDueToCyclicRespawn())
+end
+
+--BG Spectator Death Type
+-----------------
+
+local BGSpectatorDeath = DeathType:Subclass()
+
+function BGSpectatorDeath:Initialize(control)
+    DeathType.Initialize(self, control)
+
+    local button1 = self:GetButton(1)
+    button1:SetText(GetString(SI_BATTLEGROUND_DEATH_START_SPECTATING_PROMPT))
+    button1:SetCallback(function()
+        local isSpectatorCameraActive = IsSpectatorCameraActive()
+        --Close the death recap if we are activating the spectator camera
+        if not isSpectatorCameraActive and DEATH_RECAP:IsWindowOpen() then
+            self:ToggleDeathRecap()
+        end
+
+        local buttonSound = isSpectatorCameraActive and SOUNDS.BATTLEGROUND_SPECTATOR_CAMERA_CLOSE or SOUNDS.BATTLEGROUND_SPECTATOR_CAMERA_OPEN
+        PlaySound(buttonSound)
+        SetSpectatorCameraEnabled(not isSpectatorCameraActive)
+
+        self:UpdateDisplay();
+    end)
+    
+    local button2 = self:GetButton(2)
+    button2:SetText(GetString(SI_BATTLEGROUND_DEATH_PREVIOUS_SPECTATOR_PROMPT))
+    button2:SetCallback(function() 
+        SpectatorCameraTargetPrev()
+        PlaySound(SOUNDS.BATTLEGROUND_SPECTATOR_CAMERA_PREVIOUS)
+
+        self:UpdateDisplay()
+    end)
+
+    local button3 = self:GetButton(3)
+    button3:SetText(GetString(SI_BATTLEGROUND_DEATH_NEXT_SPECTATOR_PROMPT))
+    button3:SetCallback(function() 
+        SpectatorCameraTargetNext()
+        PlaySound(SOUNDS.BATTLEGROUND_SPECTATOR_CAMERA_NEXT)
+
+        self:UpdateDisplay()
+    end)
+end
+
+function BGSpectatorDeath:UpdateDisplay()
+    local isSpectatorActive = IsSpectatorCameraActive()
+    local button1 = self:GetButton(1)
+    button1:SetEnabled(not self:AreButtonsDisabledDueToCyclicRespawn())
+    if isSpectatorActive then
+        button1:SetText(GetString(SI_BATTLEGROUND_DEATH_STOP_SPECTATING_PROMPT))
+    else
+        button1:SetText(GetString(SI_BATTLEGROUND_DEATH_START_SPECTATING_PROMPT))
+    end
+    
+    local button2 = self:GetButton(2)
+    button2:SetEnabled(isSpectatorActive)
+    button2:SetHidden(not isSpectatorActive)
+
+    local button3 = self:GetButton(3)
+    button3:SetEnabled(isSpectatorActive)
+    button3:SetHidden(not isSpectatorActive)
+
+    --Re-anchor the toggle recap button depending on whether or not the previous/next spectator buttons are visible
+    if self.deathRecapToggleButton then
+        self.deathRecapToggleButton:ClearAnchors()
+        if isSpectatorActive then
+            self.deathRecapToggleButton:SetAnchor(LEFT, button3, RIGHT, 20, 0)
+        else
+            self.deathRecapToggleButton:SetAnchor(LEFT, button1, RIGHT, 20, 0)
+        end
+    end
+
+    self.control:GetNamedChild("Spectator"):SetHidden(not isSpectatorActive)
+
+    local currentSpectatorIndex = GetSpectatorCameraTargetIndex()
+    local spectatedPlayerName = self.control:GetNamedChild("SpectatorPlayerName")
+    spectatedPlayerName:SetText(GetSpectatableUnitName(currentSpectatorIndex))
+
+    local bg = self.control:GetNamedChild("SpectatorBackground")
+
+    local SPECTATOR_BACKGROUNDS = {
+        "EsoUI/Art/Battlegrounds/battleground_spectate_orange.dds",
+        "EsoUI/Art/Battlegrounds/battleground_spectate_purple.dds",
+        "EsoUI/Art/Battlegrounds/battleground_spectate_green.dds",
+    }
+    local SPECTATOR_BG_UNKNOWN = "EsoUI/Art/Battlegrounds/battleground_spectate_grey.dds"
+
+    bg:SetTexture(SPECTATOR_BACKGROUNDS[GetUnitBattlegroundTeam("player")] or SPECTATOR_BG_UNKNOWN)
 end
 
 --Release Only Death
@@ -434,8 +521,8 @@ local ResurrectPending = DeathType:Subclass()
 
 function ResurrectPending:New(control)
     local resurrect = DeathType.New(self, control)
-    resurrect.messageLabel = GetControl(control, "Message")
-    resurrect.timerCooldown = GetControl(control, "Timer")
+    resurrect.messageLabel = control:GetNamedChild("Message")
+    resurrect.timerCooldown = control:GetNamedChild("Timer")
     resurrect.timerCooldown:SetNumWarningSounds(5)
     control:SetHandler("OnHide", function()
         resurrect.timerCooldown:Stop()
@@ -466,7 +553,7 @@ local InEncounter = DeathType:Subclass()
 
 function InEncounter:New(control)
     local inEncounter = DeathType.New(self, control)
-    inEncounter.message = GetControl(control, "Message")
+    inEncounter.message = control:GetNamedChild("Message")
     return inEncounter
 end
 
@@ -482,7 +569,8 @@ local DEATH_TYPE_RELEASE_ONLY = "ReleaseOnly"
 local DEATH_TYPE_AVA = "AvA"
 local DEATH_TYPE_IMPERIAL_PVP = "ImperialPvP"
 local DEATH_TYPE_IMPERIAL_PVE = "ImperialPvE"
-local DEATH_TYPE_BATTLE_GROUND = "BG"
+local DEATH_TYPE_BATTLEGROUND = "BG"
+local DEATH_TYPE_BATTLEGROUND_SPECTATOR = "BGSpectator"
 local DEATH_TYPE_RESURRECT_PENDING = "Resurrect"
 local DEATH_TYPE_IN_ENCOUNTER = "InEncounter"
 local DEATH_TYPE_CYCLIC_RESPAWN = "CyclicRespawn"
@@ -498,19 +586,20 @@ function Death:New(control)
     death.waitingToShowPrompt = false
     death.isPlayerDead = IsUnitDead("player")
 
-    death.cyclicRespawnTimer = GetControl(control, "CyclicRespawnTimer")
+    death.cyclicRespawnTimer = control:GetNamedChild("CyclicRespawnTimer")
     death:InitializeCyclicRespawnTimer()
 
     death.types = {}
-    death.types[DEATH_TYPE_AVA] = AvADeath:New(GetControl(control, "AvA"))
-    death.types[DEATH_TYPE_IMPERIAL_PVP] = ImperialPvPDeath:New(GetControl(control, "ImperialPvP"))
-    death.types[DEATH_TYPE_IMPERIAL_PVE] = ImperialPvEDeath:New(GetControl(control, "ImperialPvE"))
-    death.types[DEATH_TYPE_BATTLE_GROUND] = BGDeath:New(GetControl(control, "BG"))
-    death.types[DEATH_TYPE_RELEASE_ONLY] = ReleaseOnlyDeath:New(GetControl(control, "ReleaseOnly"))
-    death.types[DEATH_TYPE_TWO_OPTION] = TwoOptionDeath:New(GetControl(control, "TwoOption"))
-    death.types[DEATH_TYPE_RESURRECT_PENDING] = ResurrectPending:New(GetControl(control, "Resurrect"))
-    death.types[DEATH_TYPE_IN_ENCOUNTER] = InEncounter:New(GetControl(control, "InEncounter"))
-    death.types[DEATH_TYPE_CYCLIC_RESPAWN] = CyclicRespawnDeath:New(GetControl(control, "CyclicRespawn"))
+    death.types[DEATH_TYPE_AVA] = AvADeath:New(control:GetNamedChild("AvA"))
+    death.types[DEATH_TYPE_IMPERIAL_PVP] = ImperialPvPDeath:New(control:GetNamedChild("ImperialPvP"))
+    death.types[DEATH_TYPE_IMPERIAL_PVE] = ImperialPvEDeath:New(control:GetNamedChild("ImperialPvE"))
+    death.types[DEATH_TYPE_BATTLEGROUND] = BGDeath:New(control:GetNamedChild("BG"))
+    death.types[DEATH_TYPE_BATTLEGROUND_SPECTATOR] = BGSpectatorDeath:New(control:GetNamedChild("BGSpectator"))
+    death.types[DEATH_TYPE_RELEASE_ONLY] = ReleaseOnlyDeath:New(control:GetNamedChild("ReleaseOnly"))
+    death.types[DEATH_TYPE_TWO_OPTION] = TwoOptionDeath:New(control:GetNamedChild("TwoOption"))
+    death.types[DEATH_TYPE_RESURRECT_PENDING] = ResurrectPending:New(control:GetNamedChild("Resurrect"))
+    death.types[DEATH_TYPE_IN_ENCOUNTER] = InEncounter:New(control:GetNamedChild("InEncounter"))
+    death.types[DEATH_TYPE_CYCLIC_RESPAWN] = CyclicRespawnDeath:New(control:GetNamedChild("CyclicRespawn"))
 
     local function UpdateDisplay()
         death:UpdateDisplay()
@@ -527,7 +616,7 @@ function Death:New(control)
     EVENT_MANAGER:RegisterForEvent("Death", EVENT_PLAYER_DEATH_INFO_UPDATE, UpdateDisplay)
     EVENT_MANAGER:RegisterForEvent("Death", EVENT_PLAYER_QUEUED_FOR_CYCLIC_RESPAWN, UpdateDisplay)
     EVENT_MANAGER:RegisterForEvent("Death", EVENT_RAID_REVIVE_COUNTER_UPDATE, function() 
-        if(self.currentType) then
+        if self.currentType then
             self.types[self.currentType]:UpdateDisplay()
         end
     end)
@@ -557,7 +646,7 @@ function Death:New(control)
 end
 
 function Death:GetDeathType()
-    if(IsResurrectPending()) then
+    if IsResurrectPending() then
         return DEATH_TYPE_RESURRECT_PENDING
     else
         local isEncounterInProgress, isAVADeath, isBattleGroundDeath, isReleaseOnly, _, _, isRaidDeath, _, respawnQueueDuration = select(5, GetDeathInfo())
@@ -572,7 +661,11 @@ function Death:GetDeathType()
                 deathType = isAVADeath and DEATH_TYPE_IMPERIAL_PVP or DEATH_TYPE_IMPERIAL_PVE
             end
         elseif isBattleGroundDeath then
-            deathType = DEATH_TYPE_BATTLE_GROUND
+            if DoesBattlegroundHaveLimitedPlayerLives(GetCurrentBattlegroundId()) and GetLocalPlayerBattlegroundLivesRemaining() == 0 then
+                deathType = DEATH_TYPE_BATTLEGROUND_SPECTATOR
+            else
+                deathType = DEATH_TYPE_BATTLEGROUND
+            end
         elseif isAVADeath then 
             deathType = DEATH_TYPE_AVA
         elseif isEncounterInProgress then
@@ -599,7 +692,7 @@ function Death:SetDeathRecapToggleButtonsEnabled(enabled)
 end
 
 function Death:UpdateDisplay()
-    if(self.waitingToShowPrompt) then
+    if self.waitingToShowPrompt then
         return
     end
 
@@ -609,17 +702,17 @@ function Death:UpdateDisplay()
     DEATH_FRAGMENT:SetHiddenForReason("NotShowingAsDead", not self.isPlayerDead)
     
     local nextType, useCyclicRespawn
-    if(self.isPlayerDead) then
+    if self.isPlayerDead then
         nextType, useCyclicRespawn = self:GetDeathType()
     end
 
     local deathTypeChanged = false
-    if(self.currentType ~= nextType) then
-        if(self.currentType) then
+    if self.currentType ~= nextType then
+        if self.currentType then
             self.types[self.currentType]:SetHidden(true)
         end
 
-        if(nextType) then
+        if nextType then
             self.types[nextType]:SetHidden(false)
         end
 
@@ -631,7 +724,7 @@ function Death:UpdateDisplay()
         self:StartCyclicRespawnTimer()
     end
 
-    if(self.currentType) then
+    if self.currentType then
         self.types[self.currentType]:UpdateDisplay()
         INSTANCE_KICK_WARNING_DEAD:SetHiddenForReason("deathHidden", false)
     else
@@ -640,13 +733,13 @@ function Death:UpdateDisplay()
 
     self:UpdateBindingLayer()
 
-    if(deathTypeChanged) then
+    if deathTypeChanged then
         self:FireCallbacks("OnDeathTypeChanged", nextType)
     end
 end
 
 function Death:UpdateBindingLayer()
-    if(not self.control:IsHidden() and self.currentType ~= nil) then
+    if not self.control:IsHidden() and self.currentType ~= nil then
         InsertNamedActionLayerAbove("Death", GetString(SI_KEYBINDINGS_LAYER_GENERAL))
     else
         RemoveActionLayerByName("Death")
@@ -666,7 +759,7 @@ end
 
 function Death:InitializeCyclicRespawnTimer()
     self.cyclicRespawnTimer.isRunning = false
-    self.cyclicRespawnTimer.loadBar = GetControl(self.cyclicRespawnTimer, "LoadBar")
+    self.cyclicRespawnTimer.loadBar = self.cyclicRespawnTimer:GetNamedChild("LoadBar")
 end
 
 function Death:StartCyclicRespawnTimer()
@@ -703,13 +796,13 @@ end
 --bindings
 
 function Death:SelectOption(keybind)
-    if(self.currentType) then
+    if self.currentType then
         self.types[self.currentType]:SelectOption(keybind)
     end
 end
 
 function Death:ToggleDeathRecap()
-    if(self.currentType) then
+    if self.currentType then
         self.types[self.currentType]:ToggleDeathRecap()
     end
 end
@@ -721,11 +814,16 @@ function Death:OnPlayerAlive()
     self.waitingToShowPrompt = false
     EVENT_MANAGER:UnregisterForUpdate("WaitToShowDeath")
     self:UpdateDisplay()
+
+    --Make sure we take the player out of the spectator camera if they respawn while it's active
+    if IsSpectatorCameraActive() then
+        SetSpectatorCameraEnabled(false)
+    end
 end
 
 function Death:OnPlayerDead()
     self.isPlayerDead = true
-    if(not self.waitingToShowPrompt) then
+    if not self.waitingToShowPrompt then
         self.waitingToShowPrompt = true
         EVENT_MANAGER:RegisterForUpdate("WaitToShowDeath", DEATH_PROMPT_DELAY_MS, function()
             self.waitingToShowPrompt = false
@@ -746,13 +844,13 @@ function ZO_Death_OnInitialized(self)
 end
 
 function ZO_Death_OnEffectivelyHidden(self)
-    if (DEATH) then
+    if DEATH then
         DEATH:UpdateBindingLayer()
     end
 end
 
 function ZO_Death_OnEffectivelyShown(self)
-    if (DEATH) then
+    if DEATH then
         DEATH:UpdateBindingLayer()
     end
 end

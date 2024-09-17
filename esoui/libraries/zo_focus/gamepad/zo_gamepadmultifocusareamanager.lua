@@ -203,6 +203,10 @@ function ZO_GamepadMultiFocusArea_Manager:OnFocusChanged()
     -- override in derived classes for desired behaviour
 end
 
+function ZO_GamepadMultiFocusArea_Manager:GetCurrentFocus()
+    return self.currentFocalArea
+end
+
 function ZO_GamepadMultiFocusArea_Manager:IsCurrentFocusArea(focusArea)
     return self.currentFocalArea == focusArea
 end

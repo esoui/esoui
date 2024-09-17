@@ -541,7 +541,7 @@ function GamepadMarket:InitializeKeybindDescriptors()
                 local selectedEntry = self.selectedGridEntry
                 if selectedEntry:GetEntryType() == ZO_GAMEPAD_MARKET_ENTRY_MARKET_PRODUCT then
                     local previewType = self.selectedGridEntry:GetMarketProductPreviewType()
-                    if previewType == ZO_MARKET_PREVIEW_TYPE_BUNDLE or previewType == ZO_MARKET_PREVIEW_TYPE_BUNDLE_HIDES_CHILDREN then
+                    if previewType == ZO_MARKET_PREVIEW_TYPE_BUNDLE or previewType == ZO_MARKET_PREVIEW_TYPE_BUNDLE_AS_LIST then
                         return GetString(SI_MARKET_BUNDLE_DETAILS_KEYBIND_TEXT)
                     else
                         return GetString(SI_MARKET_PREVIEW_KEYBIND_TEXT)
@@ -579,7 +579,7 @@ function GamepadMarket:InitializeKeybindDescriptors()
                     local previewType = selectedEntry:GetMarketProductPreviewType()
                     if previewType == ZO_MARKET_PREVIEW_TYPE_BUNDLE then
                         self:ShowBundleContents(selectedEntry)
-                    elseif previewType == ZO_MARKET_PREVIEW_TYPE_CROWN_CRATE or previewType == ZO_MARKET_PREVIEW_TYPE_BUNDLE_HIDES_CHILDREN then
+                    elseif previewType == ZO_MARKET_PREVIEW_TYPE_CROWN_CRATE or previewType == ZO_MARKET_PREVIEW_TYPE_BUNDLE_AS_LIST then
                         self:ShowMarketProductContentsAsList(selectedEntry, previewType)
                     elseif previewType == ZO_MARKET_PREVIEW_TYPE_HOUSE then
                         self:ShowHousePreviewDialog(selectedEntry)

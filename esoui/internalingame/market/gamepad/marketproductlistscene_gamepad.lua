@@ -91,7 +91,7 @@ end
 function GamepadMarketProductListScene:ShowMarketProduct(marketProductId, previewType)
     if previewType == ZO_MARKET_PREVIEW_TYPE_CROWN_CRATE then
         self:ShowCrownCrateContents(marketProductId)
-    elseif previewType == ZO_MARKET_PREVIEW_TYPE_BUNDLE or previewType == ZO_MARKET_PREVIEW_TYPE_BUNDLE_HIDES_CHILDREN then
+    elseif previewType == ZO_MARKET_PREVIEW_TYPE_BUNDLE or previewType == ZO_MARKET_PREVIEW_TYPE_BUNDLE_AS_LIST then
         self:ShowMarketProductBundleContents(marketProductId)
     end
 end

@@ -10,33 +10,13 @@ end
 function ZO_DailyLoginRewards_Base:Initialize(control)
     self.control = control
     self.hasMultipleRewardPreviews = false
-    self.currentRewardAnimationPool = ZO_MetaPool:New(ZO_Pending_Outfit_LoopAnimation_Pool)
+    self.currentRewardAnimationPool = ZO_MetaPool:New(ZO_Pending_LoopAnimation_Pool)
     self.isDirty = true
 
     self.highlightPool = ZO_ControlPool:New("ZO_DailyLoginRewards_Highlight", control, "NextLoginRewardHighlight")
 
-    local particleR, particleG, particleB = ZO_OFF_WHITE:UnpackRGB()
-    local FULL_CIRCLE_RADIANS = math.rad(360)
-
-    local blastParticleSystem = ZO_ControlParticleSystem:New(ZO_NumericalPhysicsParticle_Control)
-    blastParticleSystem:SetParticlesPerSecond(600)
-    blastParticleSystem:SetDuration(.1)
-    blastParticleSystem:SetParticleParameter("Texture", "EsoUI/Art/PregameAnimatedBackground/ember.dds")
-    blastParticleSystem:SetParticleParameter("BlendMode", TEX_BLEND_MODE_ADD)
-    blastParticleSystem:SetParticleParameter("StartAlpha", 1)
-    blastParticleSystem:SetParticleParameter("EndAlpha", 0)
-    blastParticleSystem:SetParticleParameter("DurationS", ZO_UniformRangeGenerator:New(0.7, 1))
-    blastParticleSystem:SetParticleParameter("PhysicsInitialVelocityElevationRadians", ZO_UniformRangeGenerator:New(0, FULL_CIRCLE_RADIANS))
-    blastParticleSystem:SetParticleParameter("PhysicsAccelerationElevationRadians1", math.rad(270)) --Down; Right is 0
-    blastParticleSystem:SetParticleParameter("PhysicsAccelerationMagnitude1", 250)
-    blastParticleSystem:SetParticleParameter("StartColorR", particleR)
-    blastParticleSystem:SetParticleParameter("StartColorG", particleG)
-    blastParticleSystem:SetParticleParameter("StartColorB", particleB)
-    blastParticleSystem:SetParticleParameter("PhysicsInitialVelocityMagnitude", ZO_UniformRangeGenerator:New(400, 600))
-    blastParticleSystem:SetParticleParameter("Size", ZO_UniformRangeGenerator:New(6, 12))
-    blastParticleSystem:SetParticleParameter("PhysicsDragMultiplier", 4)
-    blastParticleSystem:SetSound(SOUNDS.DAILY_LOGIN_REWARDS_CLAIM_FANFARE)
-    self.blastParticleSystem = blastParticleSystem
+    self.blastParticleSystem = ZO_BlastParticleSystem:New()
+    self.blastParticleSystem:SetSound(SOUNDS.DAILY_LOGIN_REWARDS_CLAIM_FANFARE)
 
     local USE_LOWERCASE_NUMBER_SUFFIXES = false
     self.dailyLoginRewardsGridEntrySetup = function(control, data, selected)

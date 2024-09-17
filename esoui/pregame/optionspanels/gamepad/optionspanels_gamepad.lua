@@ -35,6 +35,15 @@ GAMEPAD_SETTINGS_DATA =
             settingId = GAMEPAD_SETTING_VIBRATION,
         },
     },
+    [SETTING_PANEL_INTERFACE] =
+    {
+        {
+            panel = SETTING_PANEL_INTERFACE,
+            system = SETTING_TYPE_UI,
+            settingId = UI_SETTING_TEXT_LANGUAGE,
+            header = SI_INTERFACE_OPTIONS_LANGUAGE,
+        },
+    },
     [SETTING_PANEL_VIDEO] =
     {
         {

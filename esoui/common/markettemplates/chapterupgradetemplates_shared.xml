@@ -94,7 +94,7 @@
 
         <Control name="ZO_ChapterUpgrade_Shared_RewardsEditionEntryHeader" inherits="ZO_ChapterUpgrade_Shared_RewardsEntryHeader" virtual="true">
             <Controls>
-                <Label name="$(parent)CollectorsLabel" color="INTERFACE_COLOR_TYPE_MARKET_COLORS:MARKET_COLORS_COLLECTORS_EDITION" wrapMode="ELLIPSIS" maxLineCount="2" horizontalAlignment="CENTER" modifyTextType="UPPERCASE" text="SI_CHAPTER_UPGRADE_COLLECTORS_REWARDS_HEADER">
+                <Label name="$(parent)CollectorsLabel" color="INTERFACE_COLOR_TYPE_MARKET_COLORS:MARKET_COLORS_COLLECTORS_EDITION" wrapMode="ELLIPSIS" maxLineCount="2" horizontalAlignment="CENTER" modifyTextType="UPPERCASE">
                     <Anchor point="BOTTOMRIGHT" offsetX="-5" />
                 </Label>
 

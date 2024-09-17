@@ -84,9 +84,9 @@ function ZO_DailyLoginRewards_Keyboard:InitializeKeybindStripDescriptors()
     }
 end
 
-local function ZO_Daily_Login_Rewards_Keyboard_CleanupAnimationOnControl(control, pendingPool)
-    if control.pendingLoopAnimationKey then
-        pendingPool:ReleaseObject(control.pendingLoopAnimationKey)
+local function ZO_Daily_Login_Rewards_Keyboard_CleanupAnimationOnControl(control)
+    if control.pendingLoop then
+        control.pendingLoop:ReleaseObject()
     end
 end
 
@@ -96,7 +96,7 @@ function ZO_DailyLoginRewards_Keyboard:InitializeGridListPanel()
     self.gridListPanelList = ZO_SingleTemplateGridScrollList_Keyboard:New(gridListPanel, ZO_GRID_SCROLL_LIST_AUTOFILL)
 
     local function DailyLoginRewardsGridEntryReset(control)
-        ZO_Daily_Login_Rewards_Keyboard_CleanupAnimationOnControl(control, self.currentRewardAnimationPool)
+        ZO_Daily_Login_Rewards_Keyboard_CleanupAnimationOnControl(control.backdrop)
         self:GridEntryCleanup(control)
         ZO_GridEntry_SetIconScaledUpInstantly(control, false)
     end
@@ -117,12 +117,11 @@ do
             control.isMilestoneTag:SetHidden(not data.isMilestone)
 
             if GetDailyLoginClaimableRewardIndex() == data.day then
-                if not control.backdrop.pendingLoopAnimationKey then
-                    -- TODO: refactor function to not be in restyle
-                    ZO_Restyle_ApplyPendingLoopAnimationToControl(control.backdrop, controlPool, PENDING_ANIMATION_INSET)
+                if not control.backdrop.pendingLoop then
+                    ZO_PendingLoop.ApplyToControl(control.backdrop, controlPool, PENDING_ANIMATION_INSET)
                 end
             else
-                ZO_Daily_Login_Rewards_Keyboard_CleanupAnimationOnControl(control.backdrop, controlPool)
+                ZO_Daily_Login_Rewards_Keyboard_CleanupAnimationOnControl(control.backdrop)
             end
         end
     end

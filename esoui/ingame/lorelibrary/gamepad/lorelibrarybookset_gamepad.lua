@@ -199,9 +199,10 @@ function ZO_LoreLibraryBookSet_Gamepad:LayoutHirelingCollection()
     local hirelingType = self.hirelingType
     local currentUnlocked = GetNumUnlockedHirelingCorrespondence(hirelingType)
 
-    local currentSender = ""
+    local currentSenderLower = ""
     for index = 1, currentUnlocked do
         local sender, subject, _, icon = GetHirelingCorrespondenceInfoByIndex(hirelingType, index)
+        local senderLower = zo_strlower(sender)
         local entryData = ZO_GamepadEntryData:New(zo_strformat(SI_LORE_LIBRARY_HIRELING_CORRESPONDENCE_ENTRY_FORMATTER, subject, index), icon)
         entryData.bookIndex = index
         entryData.bookListIndex = index
@@ -213,10 +214,14 @@ function ZO_LoreLibraryBookSet_Gamepad:LayoutHirelingCollection()
 
         local templateName
         --Any time the sender changes, make a new header
-        if zo_strlower(sender) ~= zo_strlower(currentSender) then
-            entryData:SetHeader(sender)
+        -- ESO-862381: Compare with lower because sometimes senders scream their name
+        if senderLower ~= currentSenderLower then
+            -- ESO-862381, ESO-888526: If the sender is all caps, lower it before formatting it.
+            -- Otherwise, leave it alone so <<C:1>> works right in non-English languages
+            local senderClean = zo_strIsUpper(sender) and senderLower or sender
+            entryData:SetHeader(zo_strformat(SI_LORE_LIBRARY_HIRELING_CORRESPONDENCE_SENDER_FORMATTER, senderClean))
             templateName = "ZO_GamepadSubMenuEntryTemplateWithHeader"
-            currentSender = sender
+            currentSenderLower = senderLower
         else
             templateName = "ZO_GamepadSubMenuEntryTemplate"
         end

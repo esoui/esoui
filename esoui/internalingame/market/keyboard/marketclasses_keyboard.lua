@@ -291,7 +291,7 @@ function MarketProduct_Keyboard:OnClicked(button)
         else
             local previewType = self:GetMarketProductPreviewType()
             local function PreviewFunction() self:Preview() end
-            if previewType == ZO_MARKET_PREVIEW_TYPE_BUNDLE or previewType == ZO_MARKET_PREVIEW_TYPE_BUNDLE_HIDES_CHILDREN then
+            if previewType == ZO_MARKET_PREVIEW_TYPE_BUNDLE or previewType == ZO_MARKET_PREVIEW_TYPE_BUNDLE_AS_LIST then
                 AddMenuItem(GetString(SI_MARKET_BUNDLE_DETAILS_KEYBIND_TEXT), PreviewFunction)
             elseif previewType == ZO_MARKET_PREVIEW_TYPE_CROWN_CRATE then
                 AddMenuItem(GetString(SI_MARKET_ACTION_PREVIEW), PreviewFunction)
@@ -376,9 +376,9 @@ function MarketProduct_Keyboard:LayoutIcons(iconControls)
         local numTopRow = zo_ceil(#iconControls / NUM_ROWS)
         for index, control in ipairs(iconControls) do
             if index <= numTopRow then
-                table.insert(topRowControls, control)
+                table.insert(topRowControls, 1, control)
             else
-                table.insert(bottomRowControls, control)
+                table.insert(bottomRowControls, 1, control)
             end
         end
     end
@@ -463,7 +463,7 @@ function ZO_MarketProductBundle:CreateChildIconControlTable(purchased)
     local iconControls = {}
     local numChildren = self:GetNumFacadeChildren()
 
-    if not self:GetHidesChildProducts() and numChildren <= MAX_VISIBLE_ICONS then
+    if numChildren <= MAX_VISIBLE_ICONS then
         for childIndex = 1, numChildren do
             local childMarketProductId = self:GetFacadeChildMarketProductId(childIndex)
             local marketProductIcon = self:InitializeMarketProductIcon(childMarketProductId, purchased)
@@ -471,11 +471,6 @@ function ZO_MarketProductBundle:CreateChildIconControlTable(purchased)
 
             table.insert(iconControls, marketProductIcon:GetControl())
         end
-
-        -- Sort the child tiles alphabetically
-        table.sort(iconControls, function(a,b)
-                                        return a.marketProductIcon:GetDisplayName() < b.marketProductIcon:GetDisplayName()
-                                    end)
     end
 
     return iconControls
@@ -504,7 +499,7 @@ function ZO_MarketProductBundle:Preview(icon)
             self.owner:PreviewMarketProduct(attachmentId)
         end
     else
-        if self:GetHidesChildProducts() then
+        if self:GetInspectChildProductsAsList() then
             self.owner:ShowBundleContentsAsList(self:GetMarketProductData())
         else
             self.owner:ShowBundleContents(self:GetMarketProductData())

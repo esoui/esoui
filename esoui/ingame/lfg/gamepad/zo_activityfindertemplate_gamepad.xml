@@ -46,9 +46,23 @@
                             <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetY="10" />
                         </Label>
 
-                        <Control name="$(parent)SetTypesSection" override="true">
+                        <Control name="$(parent)RatingSection" override="true">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)Description" relativePoint="BOTTOMLEFT" offsetY="30"/>
                             <Anchor point="TOPRIGHT" relativeTo="$(parent)Description" relativePoint="BOTTOMRIGHT" offsetY="30"/>
+
+                            <Controls>
+                                <Label name="$(parent)Header" override="true" font="ZoFontGamepad27"/>
+
+                                <Label name="$(parent)List" override="true" font="ZoFontGamepadHeaderDataValue">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" offsetY="10" />
+                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Header" relativePoint="BOTTOMRIGHT" offsetY="10" />
+                                </Label>
+                            </Controls>
+                        </Control>
+
+                        <Control name="$(parent)SetTypesSection" override="true">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)RatingSection" relativePoint="BOTTOMLEFT" offsetY="10" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)RatingSection" relativePoint="BOTTOMRIGHT" offsetY="10" />
 
                             <Controls>
                                 <Label name="$(parent)Header" override="true" font="ZoFontGamepad27"/>

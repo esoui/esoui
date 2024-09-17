@@ -44,15 +44,22 @@ function GroupMenu_Keyboard:Initialize(control)
         self.categoriesRefreshGroup:MarkDirty("List")
     end
 
-    ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnLevelUpdate", RefreshCategories)
+    local function RebuildCategories()
+        self:RebuildCategories()
+    end
 
+    ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnLevelUpdate", RefreshCategories)
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", RefreshCategories)
+    PROMOTIONAL_EVENT_MANAGER:RegisterCallback("CampaignSeenStateChanged", RefreshCategories)
+    PROMOTIONAL_EVENT_MANAGER:RegisterCallback("CampaignsUpdated", RebuildCategories)
+    PROMOTIONAL_EVENT_MANAGER:RegisterCallback("RewardsClaimed", RefreshCategories)
 
     self.control:RegisterForEvent(EVENT_PLAYER_ACTIVATED, RefreshCategories)
     self.control:RegisterForEvent(EVENT_QUEST_COMPLETE, RefreshCategories)
     self.control:RegisterForEvent(EVENT_GROUP_FINDER_STATUS_UPDATED, RefreshCategories)
     self.control:RegisterForEvent(EVENT_GROUP_FINDER_APPLICATION_RECEIVED, RefreshCategories)
     self.control:RegisterForEvent(EVENT_HOUSE_TOURS_STATUS_UPDATED, RefreshCategories)
+    self.control:RegisterForEvent(EVENT_PROMOTIONAL_EVENTS_ACTIVITY_PROGRESS_UPDATED, RefreshCategories)
 end
 
 function GroupMenu_Keyboard:InitializeCategories()
@@ -73,12 +80,38 @@ function GroupMenu_Keyboard:InitializeCategories()
     categoriesRefreshGroup:MarkDirty("List")
     self.categoriesRefreshGroup = categoriesRefreshGroup
 
+    local function GetPromotionalEventTextColor(control)
+        if not control.enabled then
+            return ZO_DISABLED_TEXT:UnpackRGBA()
+        elseif control.mouseover and not control.selected then
+            return ZO_PROMOTIONAL_EVENT_HIGHLIGHT_COLOR:UnpackRGBA()
+        else
+            return ZO_PROMOTIONAL_EVENT_SELECTED_COLOR:UnpackRGBA()
+        end
+    end
+
     local function RefreshNode(control, categoryData, open, enabled)
         if control.icon then
             local iconTexture = open and categoryData.pressedIcon or categoryData.normalIcon
             iconTexture = not enabled and categoryData.disabledIcon or iconTexture
             control.icon:SetTexture(iconTexture)
             control.iconHighlight:SetTexture(categoryData.mouseoverIcon)
+            control.statusIcon = control:GetNamedChild("StatusIcon")
+
+            if categoryData.isPromotionalEvent then
+                control.text.GetTextColor = GetPromotionalEventTextColor
+
+                local campaignData = PROMOTIONAL_EVENT_MANAGER:GetCurrentCampaignData()
+                if campaignData and not IsPromotionalEventSystemLocked() and (not campaignData:HasBeenSeen() or campaignData:IsAnyRewardClaimable()) then
+                    control.statusIcon:AddIcon(ZO_KEYBOARD_NEW_ICON)
+                    control.statusIcon:Show()
+                else
+                    control.statusIcon:ClearIcons()
+                end
+            else
+                ZO_SelectableLabel_ResetColorFunctionToDefault(control.text)
+                control.statusIcon:ClearIcons()
+            end
 
             ZO_IconHeader_Setup(control, open, enabled)
         end
@@ -96,6 +129,7 @@ function GroupMenu_Keyboard:InitializeCategories()
             disabled = disabled or (categoryData.isZoneStories and ZONE_STORIES_MANAGER:GetZoneData(ZONE_STORIES_MANAGER.GetDefaultZoneSelection()) == nil or false)
             disabled = disabled or (categoryData.isGroupFinder and (statusResult ~= GROUP_FINDER_ACTION_RESULT_SUCCESS and statusResult ~= GROUP_FINDER_ACTION_RESULT_FAILED_ACCOUNT_TYPE_BLOCKS_CREATION) or false)
             disabled = disabled or (categoryData.isHouseTours and not houseToursEnabled)
+            disabled = disabled or (categoryData.isPromotionalEvent and IsPromotionalEventSystemLocked())
         end
 
         if disabled and node:IsOpen() then
@@ -290,6 +324,17 @@ do
             end
         end
     end
+
+    function GroupMenu_Keyboard:OnPromotionalEventCategoryMouseEnter(control, data)
+        ZO_IconHeader_OnMouseEnter(control)
+        if not control.enabled then
+            local lockedText = GetString(SI_ACTIVITY_FINDER_TOOLTIP_PROMOTIONAL_EVENT_LOCK)
+            if lockedText then
+                InitializeTooltip(InformationTooltip, control, RIGHT, -10)
+                SetTooltipText(InformationTooltip, lockedText)
+            end
+        end
+    end
 end
 
 do
@@ -333,6 +378,8 @@ do
             node.control.OnMouseEnter = function(control) self:OnGroupFinderCategoryMouseEnter(control, nodeData) end
         elseif nodeData.isHouseTours then
             node.control.OnMouseEnter = function(control) self:OnHouseToursCategoryMouseEnter(control, nodeData) end
+        elseif nodeData.isPromotionalEvent then
+            node.control.OnMouseEnter = function(control) self:OnPromotionalEventCategoryMouseEnter(control, nodeData) end
         end
 
         return node
@@ -342,15 +389,25 @@ do
         table.sort(nodeDataList, PrioritySort)
 
         for index, nodeData in ipairs(nodeDataList) do
-            local node = self:AddCategoryTreeNode(nodeData, parentNode)
-
-            local children = nodeData.children
-            if nodeData.getChildrenFunction then
-                children = nodeData.getChildrenFunction()
+            local isVisible = true
+            if nodeData.visible ~= nil then
+                isVisible = nodeData.visible
+                if type(isVisible) == "function" then
+                    isVisible = isVisible()
+                end
             end
 
-            if children then
-                self:AddCategoryTreeNodes(children, node)
+            if isVisible then
+                local node = self:AddCategoryTreeNode(nodeData, parentNode)
+
+                local children = nodeData.children
+                if nodeData.getChildrenFunction then
+                    children = nodeData.getChildrenFunction()
+                end
+
+                if children then
+                    self:AddCategoryTreeNodes(children, node)
+                end
             end
         end
     end

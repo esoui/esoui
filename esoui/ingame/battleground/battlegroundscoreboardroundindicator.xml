@@ -1,0 +1,111 @@
+﻿<GuiXml>
+    <Controls>
+        <Control name="ZO_BattlegroundScoreboardRoundIndicatorRound" mouseEnabled="true" virtual="true" >
+            <Dimensions x="32" y="72" />
+
+            <OnMouseUp>
+                ZO_BattlegroundScoreboard_RoundNumber_OnMouseClicked(self, upInside)
+            </OnMouseUp>
+
+            <Controls>
+                <Texture name="$(parent)Icon" alpha="1" textureFile="EsoUI/Art/Battlegrounds/battleground_roundselector.dds" layer="2" >
+                    <Anchor point="TOP" />
+                    <Dimensions x="32" y="32" />
+                </Texture>
+
+                <Label name="$(parent)Number" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" horizontalAlignment="CENTER" font="ZoFontCallout" text="3">
+                    <Anchor point="TOP" relativeTo="$(parent)Icon" relativePoint="BOTTOM" offsetY="5" />
+                    <Dimensions x="40" y="40" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_BattlegroundScoreboardRoundIndicator" virtual="true" resizeToFitDescendents="true">
+            <Controls>
+                <Backdrop name="$(parent)BG_Gamepad" inherits="ZO_DefaultBackdrop_Gamepad" hidden="true" excludeFromResizeToFitExtents="true">
+                    <Anchor point="TOPLEFT" offsetX="-20" offsetY="10" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="20" offsetY="20" />
+                </Backdrop>
+                <Texture name="$(parent)BG_Keyboard" alpha="1" textureFile="EsoUI/Art/Battlegrounds/battlegrounds_scoreboardBG_roundsLarge.dds" excludeFromResizeToFitExtents="true">
+                    <Anchor point="TOPLEFT" offsetX="-130" offsetY="-64" />
+                    <Anchor point="TOPRIGHT" offsetX="130" offsetY="-64" />
+                    <Dimensions y="256" />
+                </Texture>
+
+                <Texture name="$(parent)CurrentIndicator" alpha="1" textureFile="EsoUI/Art/Battlegrounds/battleground_roundselector.dds" layer="2">
+                    <Anchor relativeTo="$(parent)" point="TOP" relativePoint="TOP" offsetY="35" />
+                    <Dimensions x="32" y="32" />
+                </Texture>
+
+                <Button name="$(parent)Aggregate" mouseOverBlendMode="ADD" >
+                    <Dimensions x="64" y="64" />
+                    <Anchor point="LEFT" relativeTo="$(parent)" offsetX="20" />
+                    <OnMouseEnter>
+                        ZO_BattlegroundScoreboard_Aggregate_OnMouseEnter(self)
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ZO_BattlegroundScoreboard_Aggregate_OnMouseExit(self)
+                    </OnMouseExit>
+                    <OnClicked>
+                        ZO_BattlegroundScoreboard_Aggregate_OnMouseClicked(self)
+                    </OnClicked>
+                </Button>
+
+                <Button name="$(parent)PreviousRound" mouseOverBlendMode="ADD" excludeFromResizeToFitExtents="true">
+                    <Dimensions x="64" y="64" />
+                    <Anchor point="RIGHT" relativeTo="$(parent)" relativePoint="LEFT" offsetX="5" offsetY="23"/>
+
+                    <Textures normal="EsoUI/Art/Buttons/large_leftArrow_up.dds"
+                              pressed="EsoUI/Art/Buttons/large_leftArrow_down.dds"
+                              mouseOver="EsoUI/Art/Buttons/large_leftArrow_over.dds"
+                              disabled="EsoUI/Art/Buttons/large_leftArrow_disabled.dds" />
+
+                    <OnMouseEnter>
+                        ZO_BattlegroundScoreboard_PreviousPage_OnMouseEnter(self)
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ZO_BattlegroundScoreboard_PreviousPage_OnMouseExit(self)
+                    </OnMouseExit>
+
+                    <OnClicked>
+                        ZO_BattlegroundScoreboard_PreviousPage_OnMouseClicked(self)
+                    </OnClicked>
+                </Button>
+
+                <Button name="$(parent)NextRound" mouseOverBlendMode="ADD" excludeFromResizeToFitExtents="true">
+                    <Dimensions x="64" y="64" />
+                    <Anchor point="LEFT" relativeTo="$(parent)" relativePoint="RIGHT" offsetX="5" offsetY="23"/>
+
+                    <Textures normal="EsoUI/Art/Buttons/large_rightArrow_up.dds"
+                              pressed="EsoUI/Art/Buttons/large_rightArrow_down.dds"
+                              mouseOver="EsoUI/Art/Buttons/large_rightArrow_over.dds"
+                              disabled="EsoUI/Art/Buttons/large_rightArrow_disabled.dds" />
+
+                    <OnMouseEnter>
+                        ZO_BattlegroundScoreboard_NextPage_OnMouseEnter(self)
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ZO_BattlegroundScoreboard_NextPage_OnMouseExit(self)
+                    </OnMouseExit>
+
+                    <OnClicked>
+                        ZO_BattlegroundScoreboard_NextPage_OnMouseClicked(self)
+                    </OnClicked>
+                </Button>
+                <Label name="$(parent)PreviousButton" inherits="ZO_ClickableKeybindLabel_Gamepad" excludeFromResizeToFitExtents="true">
+                    <Anchor point="RIGHT" relativeTo="$(parent)" relativePoint="LEFT" offsetX="-30" offsetY="27"/>
+                    <OnInitialized name="BattlegroundScoreboardRoundIndicator">
+                        self:SetKeybind("UI_SHORTCUT_LEFT_TRIGGER")
+                    </OnInitialized>
+                </Label>
+
+                <Label name="$(parent)NextButton" inherits="ZO_ClickableKeybindLabel_Gamepad" excludeFromResizeToFitExtents="true">
+                    <Anchor point="LEFT" relativeTo="$(parent)" relativePoint="RIGHT" offsetX="30" offsetY="27"/>
+                    <OnInitialized  name="BattlegroundScoreboardRoundIndicator">
+                        self:SetKeybind("UI_SHORTCUT_RIGHT_TRIGGER")
+                    </OnInitialized>
+                </Label>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

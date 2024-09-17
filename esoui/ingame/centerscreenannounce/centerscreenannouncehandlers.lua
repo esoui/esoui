@@ -776,28 +776,25 @@ CENTER_SCREEN_EVENT_HANDLERS[EVENT_MURDERBALL_STATE_CHANGED] = function(objectiv
 end
 
 CENTER_SCREEN_EVENT_HANDLERS[EVENT_BATTLEGROUND_KILL] = function(killedPlayerCharacterName, killedPlayerDisplayName, killedPlayerBattlegroundAlliance, killingPlayerCharacterName, killingPlayerDisplayName, killingPlayerBattlegroundAlliance,  battlegroundKillType)
-    local battlegroundId = GetCurrentBattlegroundId()
-    if battlegroundId ~= 0 then
-        local gameType = GetBattlegroundGameType(battlegroundId)
-        if gameType == BATTLEGROUND_GAME_TYPE_DEATHMATCH then
-            local format = GetString("SI_BATTLEGROUNDKILLTYPE", battlegroundKillType)
-            local killedPlayerName = ZO_GetPrimaryPlayerName(killedPlayerDisplayName, killedPlayerCharacterName)
-            local coloredKilledPlayerName = GetBattlegroundTeamColor(killedPlayerBattlegroundAlliance):Colorize(killedPlayerName)
+    local gameType = GetCurrentBattlegroundGameType()
+    if gameType == BATTLEGROUND_GAME_TYPE_DEATHMATCH then
+        local format = GetString("SI_BATTLEGROUNDKILLTYPE", battlegroundKillType)
+        local killedPlayerName = ZO_GetPrimaryPlayerName(killedPlayerDisplayName, killedPlayerCharacterName)
+        local coloredKilledPlayerName = GetBattlegroundTeamColor(killedPlayerBattlegroundAlliance):Colorize(killedPlayerName)
     
-            if battlegroundKillType == BATTLEGROUND_KILL_TYPE_KILLING_BLOW or battlegroundKillType == BATTLEGROUND_KILL_TYPE_ASSIST then
-                local you = GetBattlegroundTeamColor(killingPlayerBattlegroundAlliance):Colorize(GetString(SI_BATTLEGROUND_YOU))
-                local sound
-                if battlegroundKillType == BATTLEGROUND_KILL_TYPE_KILLING_BLOW then
-                    sound = SOUNDS.BATTLEGROUND_KILL_KILLING_BLOW
-                else
-                    sound = SOUNDS.BATTLEGROUND_KILL_ASSIST
-                end
-                return CreatePvPMessageParams(sound, zo_strformat(format, you, coloredKilledPlayerName), CENTER_SCREEN_ANNOUNCE_TYPE_BATTLEGROUND_OBJECTIVE)
-            elseif battlegroundKillType == BATTLEGROUND_KILL_TYPE_KILLED_BY_MY_TEAM then
-                return CreatePvPMessageParams(SOUNDS.BATTLEGROUND_KILL_KILLED_BY_MY_TEAM, zo_strformat(format, GetColoredBattlegroundYourTeamText(killingPlayerBattlegroundAlliance), coloredKilledPlayerName), CENTER_SCREEN_ANNOUNCE_TYPE_BATTLEGROUND_OBJECTIVE)
-            elseif battlegroundKillType == BATTLEGROUND_KILL_TYPE_STOLEN_BY_ENEMY_TEAM then
-                return CreatePvPMessageParams(SOUNDS.BATTLEGROUND_KILL_STOLEN_BY_ENEMY_TEAM, zo_strformat(format, GetColoredBattlegroundEnemyTeamText(killingPlayerBattlegroundAlliance), coloredKilledPlayerName), CENTER_SCREEN_ANNOUNCE_TYPE_BATTLEGROUND_OBJECTIVE)
+        if battlegroundKillType == BATTLEGROUND_KILL_TYPE_KILLING_BLOW or battlegroundKillType == BATTLEGROUND_KILL_TYPE_ASSIST then
+            local you = GetBattlegroundTeamColor(killingPlayerBattlegroundAlliance):Colorize(GetString(SI_BATTLEGROUND_YOU))
+            local sound
+            if battlegroundKillType == BATTLEGROUND_KILL_TYPE_KILLING_BLOW then
+                sound = SOUNDS.BATTLEGROUND_KILL_KILLING_BLOW
+            else
+                sound = SOUNDS.BATTLEGROUND_KILL_ASSIST
             end
+            return CreatePvPMessageParams(sound, zo_strformat(format, you, coloredKilledPlayerName), CENTER_SCREEN_ANNOUNCE_TYPE_BATTLEGROUND_OBJECTIVE)
+        elseif battlegroundKillType == BATTLEGROUND_KILL_TYPE_KILLED_BY_MY_TEAM then
+            return CreatePvPMessageParams(SOUNDS.BATTLEGROUND_KILL_KILLED_BY_MY_TEAM, zo_strformat(format, GetColoredBattlegroundYourTeamText(killingPlayerBattlegroundAlliance), coloredKilledPlayerName), CENTER_SCREEN_ANNOUNCE_TYPE_BATTLEGROUND_OBJECTIVE)
+        elseif battlegroundKillType == BATTLEGROUND_KILL_TYPE_STOLEN_BY_ENEMY_TEAM then
+            return CreatePvPMessageParams(SOUNDS.BATTLEGROUND_KILL_STOLEN_BY_ENEMY_TEAM, zo_strformat(format, GetColoredBattlegroundEnemyTeamText(killingPlayerBattlegroundAlliance), coloredKilledPlayerName), CENTER_SCREEN_ANNOUNCE_TYPE_BATTLEGROUND_OBJECTIVE)
         end
     end
 end
@@ -1481,6 +1478,7 @@ function ZO_CenterScreenAnnounce_InitializePriorities()
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_BATTLEGROUND_OBJECTIVE)
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_BATTLEGROUND_NEARING_VICTORY)
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_BATTLEGROUND_MINUTE_WARNING)
+    ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_BATTLEGROUND_ROUND_STARTING)
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_SYSTEM_BROADCAST)
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_LEVEL_GAIN)
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_TIMED_ACTIVITY_COMPLETED)
@@ -1622,6 +1620,7 @@ end
 -- Usage: When we want to register with a callback object instead of an event
 
 local COLLECTIBLE_EMERGENCY_BACKGROUND = "EsoUI/Art/Guild/guildRanks_iconFrame_selected.dds"
+local MAX_INDIVIDUAL_CSAS = 4
 
 local CENTER_SCREEN_CALLBACK_HANDLERS = 
 {
@@ -1632,6 +1631,11 @@ local CENTER_SCREEN_CALLBACK_HANDLERS =
             if collectionUpdateType == ZO_COLLECTION_UPDATE_TYPE.UNLOCK_STATE_CHANGED then
                 local nowOwnedCollectibles = collectiblesByUnlockState[COLLECTIBLE_UNLOCK_STATE_UNLOCKED_OWNED]
                 if nowOwnedCollectibles then
+                    if IsNewCharacterNotificationSuppressionActive() then
+                        -- The player has just created a new character; suppress these updates.
+                        return
+                    end
+
                     if #nowOwnedCollectibles > MAX_INDIVIDUAL_COLLECTIBLE_UPDATES then
                         local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.COLLECTIBLE_UNLOCKED)
                         messageParams:SetText(GetString(SI_COLLECTIONS_UPDATED_ANNOUNCEMENT_TITLE), zo_strformat(SI_COLLECTIBLES_UPDATED_ANNOUNCEMENT_BODY, #nowOwnedCollectibles))
@@ -1725,7 +1729,7 @@ local CENTER_SCREEN_CALLBACK_HANDLERS =
         callbackManager = ITEM_SET_COLLECTIONS_DATA_MANAGER,
         callbackRegistration = "SlotsJustUnlocked",
         callbackFunction = function(slotsJustUnlocked)
-            if #slotsJustUnlocked > 4 then
+            if #slotsJustUnlocked > MAX_INDIVIDUAL_CSAS then
                 local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.COLLECTIBLE_UNLOCKED)
                 messageParams:SetText(GetString(SI_ITEM_SET_COLLECTIONS_UPDATED_ANNOUNCEMENT_TITLE), zo_strformat(SI_ITEM_SET_COLLECTIONS_UPDATED_ANNOUNCEMENT_BODY, #slotsJustUnlocked))
                 messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_COLLECTIBLES_UPDATED)
@@ -1868,6 +1872,96 @@ local CENTER_SCREEN_CALLBACK_HANDLERS =
                 return messageParams
             end
         end,
+    },
+
+    {
+        callbackManager = ZO_DYEING_MANAGER, 
+        callbackRegistration = "UpdateDyeData", 
+        callbackFunction = function(newUnlockedDyes)
+             if #newUnlockedDyes > MAX_INDIVIDUAL_CSAS then
+                --Handles mutiple unlocked dyes
+                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
+                -- Treat these the same way we treat achievement
+                messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_ACHIEVEMENT_AWARDED)
+                messageParams:SetText(zo_strformat(SI_DYE_UNLOCKED_ANNOUNCE_TITLE, #newUnlockedDyes))
+                return messageParams
+            else
+                local messageParamsObjects = {}
+                for _, newUnlockedDye in ipairs(newUnlockedDyes) do
+                    local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
+                    -- Treat these the same way we treat achievement
+                    messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_ACHIEVEMENT_AWARDED)
+                    local NUM_UNLOCKED_DYES = 1
+                    messageParams:SetText(zo_strformat(SI_DYE_UNLOCKED_ANNOUNCE_TITLE, NUM_UNLOCKED_DYES), newUnlockedDye.dyeName)
+                    local iconColor = 
+                    {
+                        r = newUnlockedDye.r,
+                        g = newUnlockedDye.g,
+                        b = newUnlockedDye.b, 
+                        a = 1,
+                    }
+                    local NO_ICON_BG = nil
+                    messageParams:SetIconData("EsoUI/Art/Miscellaneous/centerscreen_floating_center.dds", NO_ICON_BG, iconColor)
+                    table.insert(messageParamsObjects, messageParams)
+                end
+                return unpack(messageParamsObjects)  
+            end
+        end
+    },
+
+    {
+        callbackManager = TITLE_MANAGER, 
+        callbackRegistration = "UpdateTitlesData", 
+        callbackFunction = function(newUnlockedTitles)
+            if newUnlockedTitles then
+                if #newUnlockedTitles > MAX_INDIVIDUAL_CSAS then
+                    -- Handles mutiple unlocked titles
+                    local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
+                    -- Treat these the same way we treat achievement
+                    messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_ACHIEVEMENT_AWARDED)
+                    messageParams:SetText(zo_strformat(SI_TITLE_UNLOCKED_ANNOUNCE_TITLE, #newUnlockedTitles))
+                    return messageParams
+                else
+                    local messageParamsObjects = {}
+                    for _, newUnlockedTitle in ipairs(newUnlockedTitles) do
+                        local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
+                        -- Treat these the same way we treat achievement
+                        messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_ACHIEVEMENT_AWARDED)
+                        local NUM_UNLOCKED_TITLES = 1
+                        messageParams:SetText(zo_strformat(SI_TITLE_UNLOCKED_ANNOUNCE_TITLE, NUM_UNLOCKED_TITLES), newUnlockedTitle.name)
+                        table.insert(messageParamsObjects, messageParams)
+                    end
+                    return unpack(messageParamsObjects)  
+                end
+            end
+        end
+    },
+
+    {
+        callbackManager = PROMOTIONAL_EVENT_MANAGER, 
+        callbackRegistration = "RewardsClaimed", 
+        callbackFunction = function(campaignData, rewards)
+            local campaignName = campaignData:GetDisplayName()
+            if #rewards > MAX_INDIVIDUAL_CSAS then
+                -- Handles mutiple claimed rewards
+                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
+                messageParams:SetText(zo_strformat(SI_PROMOTIONAL_EVENT_REWARDS_CLAIMED_ANNOUNCEMENT, #rewards))
+                messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_PROMOTIONAL_EVENT_REWARD_CLAIMED)
+                return messageParams
+            else
+                local messageParamsObjects = {}
+                for _, reward in ipairs(rewards) do
+                    local claimedReward = reward.rewardableEventData:GetRewardData()
+                    local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
+                    local secondaryText = claimedReward:GetQuantity() > 1 and claimedReward:GetFormattedNameWithStack() or claimedReward:GetFormattedName()
+                    messageParams:SetText(GetString(SI_PROMOTIONAL_EVENT_REWARD_CLAIMED_ANNOUNCEMENT), secondaryText)
+                    messageParams:SetIconData(claimedReward:GetPlatformLootIcon())
+                    messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_PROMOTIONAL_EVENT_REWARD_CLAIMED)
+                    table.insert(messageParamsObjects, messageParams)
+                end
+                return unpack(messageParamsObjects) 
+            end
+        end
     },
 }
 

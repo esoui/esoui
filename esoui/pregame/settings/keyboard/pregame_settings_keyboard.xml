@@ -22,7 +22,7 @@
                 <Texture name="$(parent)Background" textureFile="EsoUI/Art/Options/Keyboard/pregame_Settings_MungeBG.dds">
                     <Anchor point="TOPLEFT" />
                     <Anchor point="BOTTOMLEFT" />
-                    <Dimensions x="768" />
+                    <Dimensions x="1000" />
                     <TextureCoords left="0" right="0.9375" top="0" bottom="1"/>
                 </Texture>
 

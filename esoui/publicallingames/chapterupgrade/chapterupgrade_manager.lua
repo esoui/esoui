@@ -2,6 +2,8 @@
 -- Data Object --
 -----------------
 
+IsChapterOwned = function() return false end
+
 ZO_CHAPTER_UPGRADE_REWARD_TYPE =
 {
     PRE_PURCHASE = 1,
@@ -20,6 +22,7 @@ function ZO_ChapterUpgrade_Data:Initialize(chapterUpgradeId)
     self.summary = GetChapterSummary(chapterUpgradeId)
     self:RefreshChapterUpgradeState()
     self.marketBackgroundImage = GetChapterMarketBackgroundFileImage(chapterUpgradeId)
+    self.isContentPass = IsChapterContentPass(chapterUpgradeId)
     self.isNew = false
     self.discountPercent = 0
     self:PopulateRewardsData()
@@ -37,26 +40,12 @@ end
 
 do
     local function RewardEntryComparator(leftData, rightData)
-        if leftData.isStandardReward == rightData.isStandardReward and leftData.isCollectorsReward == rightData.isCollectorsReward then
-            if leftData.rewardType == rightData.rewardType then
-                --Fall back to def order
-                return leftData.index < rightData.index
-            else
-                --Secondary ordering is reward type, basic comes before preorder
-                return leftData.rewardType < rightData.rewardType
-            end
+        if leftData.rewardType == rightData.rewardType then
+            --Fall back to def order
+            return leftData.index < rightData.index
         else
-            -- Primary ordering is what edition the reward can be found in
-            if (leftData.isStandardReward and leftData.isCollectorsReward) or not (rightData.isStandardReward or rightData.isCollectorsReward) then
-                --If both editions are checked: first; If neither edition is checked: last
-                return true
-            elseif rightData.isStandardReward and rightData.isCollectorsReward then
-                --If both editions are checked: first
-                return false
-            else
-                --One has standard, the other has collector's, and collector's comes first
-                return leftData.isCollectorsReward
-            end
+            --Secondary ordering is reward type, basic comes before preorder
+            return leftData.rewardType < rightData.rewardType
         end
     end
 
@@ -135,6 +124,10 @@ end
 
 function ZO_ChapterUpgrade_Data:GetReleaseDateText()
     return self.releaseDateString
+end
+
+function ZO_ChapterUpgrade_Data:IsContentPass()
+    return self.isContentPass
 end
 
 function ZO_ChapterUpgrade_Data:GetMarketBackgroundImage()

@@ -1,15 +1,8 @@
-
 ------------------
 -- Medal Object --
 ------------------
 
-ZO_BattlegroundMatchInfo_MedalObject = ZO_Object:Subclass()
-
-function ZO_BattlegroundMatchInfo_MedalObject:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
+ZO_BattlegroundMatchInfo_MedalObject = ZO_InitializingObject:Subclass()
 
 function ZO_BattlegroundMatchInfo_MedalObject:Initialize(control)
     self.control = control
@@ -44,19 +37,14 @@ end
 
 local MAX_NUM_MEDALS_DISPLAYED = 5
 
-ZO_BattlegroundMatchInfo_Shared = ZO_Object:Subclass()
-
-function ZO_BattlegroundMatchInfo_Shared:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
+ZO_BattlegroundMatchInfo_Shared = ZO_InitializingObject:Subclass()
 
 function ZO_BattlegroundMatchInfo_Shared:Initialize(control, medalControlTemplate, medalControlPadding)
     self.control = control
     local container = control:GetNamedChild("Container")
     self.playerNameLabel = container:GetNamedChild("PlayerName")
     self.playerClassTexture = container:GetNamedChild("PlayerClass")
+    self.titleLabel = container:GetNamedChild("Title")
 
     local statsControl = container:GetNamedChild("Stats")
     local damageControl = statsControl:GetNamedChild("DamageDealt")
@@ -115,30 +103,57 @@ do
         return leftTotalValue > rightTotalValue
     end
 
-    function ZO_BattlegroundMatchInfo_Shared:SetupScoreTypeRow(entryIndex, scoreType, rowValueLabel)
-        local score = GetScoreboardEntryScoreByType(entryIndex, scoreType)
+    function ZO_BattlegroundMatchInfo_Shared:SetupScoreTypeRow(roundIndex, entryIndex, scoreType, rowValueLabel, showAggregateScores)
+        local score
+        if showAggregateScores then
+            score = GetBattlegroundCumulativeScoreForScoreboardEntryByType(entryIndex, scoreType, roundIndex)
+        else
+            score = GetScoreboardEntryScoreByType(entryIndex, scoreType, roundIndex)
+        end
         local USE_LOWERCASE_NUMBER_SUFFIXES = false
         self.scoreRowValueTable[scoreType] = ZO_AbbreviateAndLocalizeNumber(score, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES)
         rowValueLabel:SetText(self.scoreRowValueTable[scoreType])
     end
 
-    function ZO_BattlegroundMatchInfo_Shared:SetupForScoreboardEntry(entryIndex)
+    function ZO_BattlegroundMatchInfo_Shared:SetupForScoreboardEntry(roundIndex, entryIndex, showAggregateScores)
         self.scoreRowValueTable = {}
-        self:SetupScoreTypeRow(entryIndex, SCORE_TRACKER_TYPE_DAMAGE_DONE, self.damageDealtValueLabel)
-        self:SetupScoreTypeRow(entryIndex, SCORE_TRACKER_TYPE_HEALING_DONE, self.healingDoneValueLabel)
+        self:SetupScoreTypeRow(roundIndex, entryIndex, SCORE_TRACKER_TYPE_DAMAGE_DONE, self.damageDealtValueLabel, showAggregateScores)
+        self:SetupScoreTypeRow(roundIndex, entryIndex, SCORE_TRACKER_TYPE_HEALING_DONE, self.healingDoneValueLabel, showAggregateScores)
 
-        local classId = GetScoreboardEntryClassId(entryIndex)
+        local classId = GetScoreboardEntryClassId(entryIndex, roundIndex)
         self.playerClassTexture:SetTexture(ZO_GetPlatformClassIcon(classId))
 
-        local characterName, displayName = GetScoreboardEntryInfo(entryIndex)
+        local characterName, displayName = GetScoreboardEntryInfo(entryIndex, roundIndex)
         local primaryName = ZO_GetPrimaryPlayerName(ZO_FormatUserFacingDisplayName(displayName), characterName)
         local formattedName = zo_strformat(SI_PLAYER_NAME, primaryName)
         self.playerNameLabel:SetText(formattedName)
 
+        if showAggregateScores or not DoesBattlegroundHaveRounds(GetCurrentBattlegroundId()) then
+            self.titleLabel:SetText(GetString(SI_BATTLEGROUND_MATCH_INFO_PANEL_TITLE))
+        else
+            self.titleLabel:SetText(zo_strformat(SI_BATTLEGROUND_MATCH_INFO_ROUND_PANEL_TITLE, roundIndex))
+        end
+
         ZO_ClearNumericallyIndexedTable(self.scoreboardEntryRawMedalData)
 
-        local function GetNextScoreboardEntryMedalIdIter(state, lastMedalId)
-            return GetNextScoreboardEntryMedalId(entryIndex, lastMedalId)
+        local GetNextScoreboardEntryMedalIdIter
+        local GetNumEarnedMedalsById
+
+        if showAggregateScores then
+            GenerateCumulativeMedalInfoForScoreboardEntry(entryIndex, roundIndex)
+            GetNextScoreboardEntryMedalIdIter = function(state, lastMedalId)
+                return GetNextBattlegroundCumulativeMedalId(lastMedalId)
+            end
+            GetNumEarnedMedalsById = function(medalId)
+                return GetBattlegroundCumulativeNumEarnedMedalsById(medalId)
+            end
+        else
+            GetNextScoreboardEntryMedalIdIter = function(state, lastMedalId)
+                return GetNextScoreboardEntryMedalId(entryIndex, roundIndex, lastMedalId)
+            end
+            GetNumEarnedMedalsById = function(medalId)
+                return GetScoreboardEntryNumEarnedMedalsById(entryIndex, medalId, roundIndex)
+            end
         end
 
         for medalId in GetNextScoreboardEntryMedalIdIter do
@@ -148,7 +163,7 @@ do
                 medalId = medalId,
                 name = name,
                 scoreReward = scoreReward,
-                count = GetScoreboardEntryNumEarnedMedalsById(entryIndex, medalId),
+                count = GetNumEarnedMedalsById(medalId),
             }
             table.insert(self.scoreboardEntryRawMedalData, rawMedalInfo)
         end

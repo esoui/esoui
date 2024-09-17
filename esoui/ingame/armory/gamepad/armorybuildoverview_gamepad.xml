@@ -39,7 +39,7 @@
                 </Label>
 
                 <Label name="$(parent)Value" inherits="ZO_GamepadMenuEntryLabelTemplateLowercase42" maxLineCount="1" horizontalAlignment="RIGHT" hidden="true">
-                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Stat" relativePoint="BOTTOMRIGHT" offsetX="-15" offsetY="4" constrain="Y" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Stat" relativePoint="BOTTOMRIGHT" offsetX="-15" offsetY="4" />
                 </Label>
             </Controls>
         </Control>

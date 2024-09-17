@@ -166,11 +166,80 @@
             </Controls>
         </Control>
 
+        <Control name="ZO_DeathBGSpectator" hidden="true" virtual="true">
+            <AnchorFill/>
+            <Controls>
+                <Control name="$(parent)Spectator" resizeToFitDescendents="true">
+                    <Anchor point="TOP" offsetY="-55"/>
+                    <Controls>
+                        <Label name="$(parent)Title" text="SI_BATTLEGROUND_DEATH_SPECTATING_TITLE" horizontalAlignment="CENTER" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontKeybindStripDescription" >
+                            <Anchor point="TOP" />
+                            <Dimensions x="200" y="30" />
+                        </Label>
+
+                        <Label name="$(parent)PlayerName" font="ZoFontWinH2" text="PlayerName" horizontalAlignment="CENTER">
+                            <Anchor point="TOP" relativeTo="$(parent)Title" relativePoint="BOTTOM" offsetY="5"/>
+                        </Label>
+
+                        <Texture name="$(parent)Background" textureFile="EsoUI/Art/Battlegrounds/battleground_spectate_purple.dds" excludeFromResizeToFitExtents="true">
+                            <Anchor point="TOP" />
+                            <Dimensions x="256" y="128" />
+                            <TextureCoords left="0" right="1" top="0" bottom="1"/>
+                        </Texture>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)Buttons" resizeToFitDescendents="true">
+                    <Anchor point="TOP" relativeTo="$(parent)Spectator" relativePoint="BOTTOM" offsetY="10" />
+                    <Controls>
+                        <Control name="$(grandparent)Button1" inherits="ZO_KeybindButtonChroma" >
+                            <Anchor point="LEFT" />
+                        </Control>
+
+                        <Control name="$(grandparent)Button2" inherits="ZO_KeybindButtonChroma" >
+                            <Anchor point="LEFT" relativeTo="$(grandparent)Button1" relativePoint="RIGHT" offsetX="20"/>
+                        </Control>
+
+                        <Control name="$(grandparent)Button3" inherits="ZO_KeybindButtonChroma" >
+                            <Anchor point="LEFT" relativeTo="$(grandparent)Button2" relativePoint="RIGHT" offsetX="20"/>
+                        </Control>
+
+                        <Control name="$(grandparent)DeathRecapToggleButton" inherits="ZO_KeybindButtonChroma">
+                            <Anchor point="LEFT" relativeTo="$(grandparent)Button3" relativePoint="RIGHT" offsetX="20"/>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_DeathBGSpectator_Keyboard_Template" virtual="true">
+            <Controls>
+                <Control name="$(parent)Spectator">
+                    <Controls>
+                        <Label name="$(parent)PlayerName" font="ZoFontWinH2">
+                        </Label>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_DeathBGSpectator_Gamepad_Template" virtual="true">
+            <Controls>
+                <Control name="$(parent)Spectator">
+                    <Controls>
+                        <Label name="$(parent)PlayerName" font="ZoFontGamepad34">
+                        </Label>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+        
         <Control name="ZO_Death_Keyboard_Template" virtual="true">
             <Controls>
                 <Control name="$(parent)CyclicRespawnTimer" inherits="ZO_DeathCountdownBar_Keyboard_Template"/>
                 <Control name="$(parent)AvA" inherits="ZO_DeathOneButtonTimer_Keyboard_Template"/>
- 
+                 <Control name="$(parent)BGSpectator" inherits="ZO_DeathBGSpectator_Keyboard_Template"/>
+
                 <Control name="$(parent)Resurrect">
                     <Controls>
                         <Label name="$(parent)Message" font="ZoFontWinH2">
@@ -213,6 +282,7 @@
             <Controls>
                 <Control name="$(parent)CyclicRespawnTimer" inherits="ZO_DeathCountdownBar_Gamepad_Template"/>
                 <Control name="$(parent)AvA" inherits="ZO_DeathOneButtonTimer_Gamepad_Template"/>
+                <Control name="$(parent)BGSpectator" inherits="ZO_DeathBGSpectator_Gamepad_Template"/>
 
                 <Control name="$(parent)Resurrect">
                     <Controls>
@@ -267,7 +337,8 @@
             <Controls>
                 <Control name="$(parent)CyclicRespawnTimer" inherits="ZO_DeathCountdownBar" hidden="true"/>
                 <Control name="$(parent)AvA" inherits="ZO_DeathOneButtonTimer" hidden="true"/>
-                <Control name="$(parent)BG" inherits="ZO_DeathOneButton" hidden="true" />
+                <Control name="$(parent)BG" inherits="ZO_DeathOneButton" hidden="true"/>
+                <Control name="$(parent)BGSpectator" inherits="ZO_DeathBGSpectator" hidden="true" />
                 <Control name="$(parent)ReleaseOnly" inherits="ZO_DeathOneButton" hidden="true"/>
                 <Control name="$(parent)TwoOption" inherits="ZO_DeathTwoButton" />
 

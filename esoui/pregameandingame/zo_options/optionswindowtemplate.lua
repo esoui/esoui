@@ -296,6 +296,12 @@ end
 
 local function GetHorizontalScrollListOptionText(control, index)
     local data = control.data
+
+    local validValues = data.valid
+    if type(validValues) == "function" then
+        validValues = data.valid()
+    end
+
     --gamepadValidStringOverrides exists in case the enum used here has PC specific localization. If so, we create the strings in ClientGamepadStrings.xml and add them
     --to the data table's gamepadValidStringOverrides in the same order.
     local hasGamepadStrings = control.optionsManager:IsGamepadOptions() and (data.gamepadValidStringOverrides ~= nil)
@@ -304,11 +310,15 @@ local function GetHorizontalScrollListOptionText(control, index)
     elseif data.itemText then
         return data.itemText[index]
     elseif data.valueStringPrefix then
-        return GetString(data.valueStringPrefix, data.valid[index])
+        return GetString(data.valueStringPrefix, validValues[index])
     elseif data.valueStrings then
-        return GetValueString(data.valueStrings[index])
+        local valueStrings = data.valueStrings
+        if type(valueStrings) == "function" then
+            valueStrings = data.valueStrings()
+        end
+        return GetValueString(valueStrings[index])
     else
-        return data.valid[index]
+        return validValues[index]
     end
 end
 
@@ -321,14 +331,25 @@ local updateControlFromSettings =
                                 local currentChoice = tonumber(currentSetting) or currentSetting
                                 local isValidNumber = type(currentChoice) == "number"
 
+                               local validValues = data.valid
+                                if type(validValues) == "function" then
+                                    validValues = data.valid()
+                                    -- When valid is a function it can change the number of items in the dropdown so setup the dropdown again.
+                                    ZO_Options_SetupDropdown(control)
+                                end
+
                                 local dropdownControl = control:GetNamedChild("Dropdown")
                                 local dropdown = ZO_ComboBox_ObjectFromContainer(dropdownControl)
                                 if data.itemText then
-                                    dropdown:SetSelectedItemText(data.itemText[GetValidIndexFromCurrentChoice(data.valid, currentChoice)])
+                                    dropdown:SetSelectedItemText(data.itemText[GetValidIndexFromCurrentChoice(validValues, currentChoice)])
                                 elseif data.valueStringPrefix and isValidNumber then
                                     dropdown:SetSelectedItemText(GetString(data.valueStringPrefix, currentChoice))
                                 elseif data.valueStrings then
-                                    dropdown:SetSelectedItemText(GetValueString(data.valueStrings[GetValidIndexFromCurrentChoice(data.valid, currentChoice)]))
+                                    local valueStrings = data.valueStrings
+                                    if type(valueStrings) == "function" then
+                                        valueStrings = data.valueStrings()
+                                    end
+                                    dropdown:SetSelectedItemText(GetValueString(valueStrings[GetValidIndexFromCurrentChoice(validValues, currentChoice)]))
                                 else
                                     dropdown:SetSelectedItemText(tostring(currentChoice))
                                 end
@@ -340,9 +361,14 @@ local updateControlFromSettings =
                             local currentSetting = ZO_Options_GetSettingFromControl(control)
                             local currentChoice = tonumber(currentSetting) or currentSetting
 
+                            local validValues = data.valid
+                            if type(validValues) == "function" then
+                                validValues = data.valid()
+                            end
+
                             local index = 0
-                            for i = 1, #data.valid do 
-                                if currentChoice == data.valid[i] then
+                            for i = 1, #validValues do
+                                if currentChoice == validValues[i] then
                                     index = i
                                     break
                                 end
@@ -525,8 +551,13 @@ end
 local function OptionsDropdown_SelectChoice(control, index)
     local data = control.data
     local oldValueString = ZO_Options_GetSettingFromControl(control)
-    
-    local value = data.valid[index]
+
+    local validValues = data.valid
+    if type(validValues) == "function" then
+        validValues = data.valid()
+    end
+
+    local value = validValues[index]
     local valueString = tostring(value)
     SetSettingFromControl(control, valueString)
     if data.mustPushApply then
@@ -538,7 +569,11 @@ local function OptionsDropdown_SelectChoice(control, index)
         elseif data.valueStringPrefix then
             dropdown:SetSelectedItemText(GetString(data.valueStringPrefix, value))
         elseif data.valueStrings then
-            dropdown:SetSelectedItemText(GetValueString(data.valueStrings[index]))
+            local valueStrings = data.valueStrings
+            if type(valueStrings) == "function" then
+                valueStrings = data.valueStrings()
+            end
+            dropdown:SetSelectedItemText(GetValueString(valueStrings[index]))
         else
             dropdown:SetSelectedItemText(valueString)
         end
@@ -551,7 +586,7 @@ local function OptionsDropdown_SelectChoice(control, index)
     else
         ZO_Options_UpdateOption(control)
     end
-    
+
     if data.mustReloadSettings then
         KEYBOARD_OPTIONS:UpdateCurrentPanelOptions(DONT_SAVE_CURRENT_VALUES)
     end
@@ -691,16 +726,25 @@ function ZO_Options_SetupDropdown(control)
     dropdown:ClearItems()
     dropdown.m_sortOrder = false        -- Add the valid items in the order they are added in the xml file (don't sort them)
 
+    local validValues = data.valid
+    if type(validValues) == "function" then
+        validValues = data.valid()
+    end
+
     local optionString, optionLine
-    for index = 1, #data.valid do
+    for index = 1, #validValues do
         if data.itemText then
             optionString = data.itemText[index]
         elseif data.valueStringPrefix then
-            optionString = GetString(data.valueStringPrefix, data.valid[index])
+            optionString = GetString(data.valueStringPrefix, validValues[index])
         elseif data.valueStrings then
-            optionString = GetValueString(data.valueStrings[index])
+            local valueStrings = data.valueStrings
+            if type(valueStrings) == "function" then
+                valueStrings = data.valueStrings()
+            end
+            optionString = GetValueString(valueStrings[index])
         else
-            optionString = tostring(data.valid[index])
+            optionString = tostring(validValues[index])
         end
         optionLine = dropdown:CreateItemEntry(optionString, function() OptionsDropdown_SelectChoice(control, index) end)
         dropdown:AddItem(optionLine)
@@ -717,7 +761,12 @@ end
 function ZO_Options_SetupScrollList(control, selected)
     control.horizontalListObject:Clear()
 
-    for i, validOption in ipairs(control.data.valid) do
+    local validValues = control.data.valid
+    if type(validValues) == "function" then
+        validValues = control.data.valid()
+    end
+
+    for i, validOption in ipairs(validValues) do
         local entryText = GetHorizontalScrollListOptionText(control, i)
 
         local entryData =

@@ -228,6 +228,7 @@ function ZO_ActivityFinderTemplate_Gamepad:InitializeKeybindStripDescriptors()
                     self:SetNavigationMode(NAVIGATION_MODES.CATEGORIES)
                 end
             end,
+            sound = SOUNDS.GAMEPAD_MENU_BACK,
         },
 
         -- View Rewards
@@ -441,8 +442,6 @@ function ZO_ActivityFinderTemplate_Gamepad:RefreshView()
             if activityType ~= LFG_ACTIVITY_TRIBUTE_COMPETITIVE and activityType ~= LFG_ACTIVITY_TRIBUTE_CASUAL then
                 local minGroupSize, maxGroupSize = location:GetGroupSizeRange()
                 if TEAM_BASED_ACTIVITY_TYPES[activityType] then
-                    -- HARD CODING TO four to make it clear the player will be put on a four person team even when entering solo
-                    maxGroupSize = 4
                     ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_ACTIVITY_FINDER_GROUP_SIZE_TEAM_FORMAT, maxGroupSize)))
                 elseif minGroupSize ~= maxGroupSize then
                     ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_GAMEPAD_ACTIVITY_FINDER_GROUP_SIZE_RANGE_NARRATION, minGroupSize, maxGroupSize)))
@@ -453,8 +452,14 @@ function ZO_ActivityFinderTemplate_Gamepad:RefreshView()
 
             ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(location:GetDescription()))
 
-            -- Game type list for Battlegrounds
             if location:IsSetEntryType() then
+                --MMR for Battlegrounds
+                if location:HasMMR() then
+                    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_BATTLEGROUND_FINDER_MMR_HEADER)))
+                    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(location:GetMMR()))
+                end
+
+                -- Game type list for Battlegrounds
                 local setTypesHeaderText = location:GetSetTypesHeaderText()
                 local setTypesListText = location:GetSetTypesListText()
                 if setTypesHeaderText ~= "" and setTypesListText ~= "" then
@@ -771,6 +776,18 @@ do
                         end
 
                         ZO_ActivityFinderTemplate_Shared.AppendSetDataToControl(self.setTypesSectionControl, entryData)
+
+                        local showMMR = entryData:IsSetEntryType() and entryData:HasMMR()
+                        local mmrHeader = self.ratingSectionControl:GetNamedChild("Header")
+                        local mmrList = self.ratingSectionControl:GetNamedChild("List")
+
+                        if showMMR then
+                            mmrHeader:SetText(GetString(SI_BATTLEGROUND_FINDER_MMR_HEADER))
+                            mmrList:SetText(entryData:GetMMR())
+                        end
+                        mmrHeader:SetHidden(not showMMR)
+                        mmrList:SetHidden(not showMMR)
+
                         return
                     end
                 end

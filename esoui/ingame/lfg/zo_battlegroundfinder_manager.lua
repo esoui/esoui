@@ -32,7 +32,7 @@ function BattlegroundFinder_Manager:Initialize()
     filterModeData:SetVisibleEntryTypes(ZO_ACTIVITY_FINDER_LOCATION_ENTRY_TYPE.SET)
     ZO_ActivityFinderTemplate_Manager.Initialize(self, "ZO_BattlegroundFinder", categoryData, filterModeData)
 
-    self:SetLockingCooldownTypes(LFG_COOLDOWN_BATTLEGROUND_DESERTED)
+    self:SetLockingCooldownTypes(LFG_COOLDOWN_BATTLEGROUND_DESERTED_QUEUE)
 
     BATTLEGROUND_FINDER_KEYBOARD = self:GetKeyboardObject()
     BATTLEGROUND_FINDER_GAMEPAD = self:GetGamepadObject()

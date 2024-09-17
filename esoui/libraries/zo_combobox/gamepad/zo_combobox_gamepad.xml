@@ -54,7 +54,7 @@
 
         <TopLevelControl name="ZO_ComboBox_Gamepad_Dropdown" tier="HIGH" level="ZO_HIGH_TIER_GAMEPAD_COMBO_BOX_DROPDOWN" hidden="true">
             <OnInitialized>
-                ZO_ComboBox_Gamepad_Dropdowm_Initialize(self)
+                ZO_ComboBox_Gamepad_Dropdown_Initialize(self)
             </OnInitialized>
             <OnEffectivelyHidden>
                 if self.comboBoxObject then

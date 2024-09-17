@@ -222,10 +222,10 @@ function ZO_SharedInventoryManager:Initialize()
     end
 
     local function OnEventTicketUpdated(eventCode, newEventTickets, difference, changeReason)
-            if changeReason == CURRENCY_CHANGE_REASON_LOOT and difference > 0 then
-                PlaySound(SOUNDS.EVENT_TICKET_ACQUIRE)
-            end
+        if changeReason == CURRENCY_CHANGE_REASON_LOOT and difference > 0 then
+            PlaySound(SOUNDS.EVENT_TICKET_ACQUIRE)
         end
+    end
 
     local function OnEndlessDungeonCurrencyUpdated(newAmount, oldAmount, changeReason)
         if changeReason == CURRENCY_CHANGE_REASON_LOOT and newAmount > oldAmount then
@@ -233,11 +233,19 @@ function ZO_SharedInventoryManager:Initialize()
         end
     end
 
+    local function OnImperialFragmentCurrencyUpdated(newAmount, oldAmount, changeReason)
+        if changeReason == CURRENCY_CHANGE_REASON_LOOT and newAmount > oldAmount then
+            PlaySound(SOUNDS.IMPERIAL_FRAGMENT_ACQUIRE)
+        end
+    end
+
     local function OnCurrencyUpdated(_, currencyType, currencyLocation, newAmount, oldAmount, changeReason)
         if currencyType == CURT_ARCHIVAL_FORTUNES then
             OnEndlessDungeonCurrencyUpdated(newAmount, oldAmount, changeReason)
+        elseif currencyType == CURT_IMPERIAL_FRAGMENT then
+            OnImperialFragmentCurrencyUpdated(newAmount, oldAmount, changeReason)
         end
-        internalassert(CURT_MAX_VALUE == 12, "Check if new currency requires unique acquire sound hook or other behavior")
+        internalassert(CURT_MAX_VALUE == 13, "Check if new currency requires unique acquire sound hook or other behavior")
         -- TODO: Consider moving other above function calls here to register for less functions, investigate if any issues would arise
     end
 

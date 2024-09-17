@@ -86,8 +86,10 @@ ZO_DYEING_SWATCH_INDEX = 1
 ZO_DYEING_FRAME_INDEX = 2
 ZO_DYEING_MUNGE_INDEX = 3
 ZO_DYEING_LOCK_INDEX = 4
+ZO_DYEING_NEW_INDEX = 5
 
 -- Interaction Mode Setup
+
 ZO_DYEING_STATION_INTERACTION =
 {
     type = "Dyeing Station",
@@ -161,7 +163,8 @@ function ZO_Dyeing_InitializeSwatchPool(owner, parentControl, template, canSelec
 
     local function Reset(swatchObject)
         swatchObject:SetSelected(false, SKIP_ANIM)
-        swatchObject:SetLocked(false, SKIP_ANIM)
+        swatchObject:SetLocked(false)
+        swatchObject:SetNew(false)
         ZO_ObjectPool_DefaultResetControl(swatchObject.control)
     end
 
@@ -442,6 +445,7 @@ function ZO_Dyeing_LayoutSwatches(includeLocked, sortStyle, swatchPool, headerPo
         local swatchIndex = 0
         for _, dyeInfo in ipairs(dyes) do
             local known = dyeInfo.known
+            local isNew = dyeInfo.isNew
             local passesSearch = not searchResults or searchResults[dyeInfo.dyeIndex]
             local passesFilter = known or includeLocked
             if passesSearch and passesFilter then
@@ -460,6 +464,7 @@ function ZO_Dyeing_LayoutSwatches(includeLocked, sortStyle, swatchPool, headerPo
 
                 swatchObject:SetDataSource(dyeInfo)
                 swatchObject:SetLocked(not known)
+                swatchObject:SetNew(isNew)
                 swatchControl:SetColor(ZO_DYEING_SWATCH_INDEX, dyeInfo.r, dyeInfo.g, dyeInfo.b)
 
                 swatchByDyeId[dyeId] = swatchObject
@@ -512,7 +517,11 @@ function ZO_DyeingSwatch_OnMouseExit(swatchControl)
     if swatchObject then
         swatchObject.mousedOver = false
         swatchObject:UpdateSelectedState()
-     
+
+        if swatchObject:IsNew() then
+            swatchObject:SetNew(false)
+        end
+
         ZO_Dyeing_ClearTooltipOnMouseExit(swatchControl)
     end
 end
@@ -620,10 +629,20 @@ do
         self.control:SetSurfaceHidden(ZO_DYEING_LOCK_INDEX, not locked)
         self:UpdateSelectedState(SKIP_ANIM)
     end
+
+    function ZO_DyeingSwatch_Shared:SetNew(isNew) 
+        self.isNew = isNew
+        self.control:SetSurfaceHidden(ZO_DYEING_NEW_INDEX, not isNew)
+        self:UpdateSelectedState(SKIP_ANIM)
+    end
 end
 
 function ZO_DyeingSwatch_Shared:IsLocked()
     return self.locked
+end
+
+function ZO_DyeingSwatch_Shared:IsNew()
+    return self.isNew
 end
 
 --
@@ -678,8 +697,9 @@ function Dyeing_Manager:Initialize()
 end
 
 function Dyeing_Manager:UpdateDyeData()
-    ZO_ClearTable(self.dyesById)
     ZO_ClearNumericallyIndexedTable(self.unlockedDyes)
+    local dyesById = {}
+    local newUnlockedDyes = {}
     for hueCategory = DYE_HUE_CATEGORY_ITERATION_BEGIN, DYE_HUE_CATEGORY_ITERATION_END do
         ZO_ClearNumericallyIndexedTable(self.dyesByHueCategory[hueCategory])
     end
@@ -694,6 +714,7 @@ function Dyeing_Manager:UpdateDyeData()
             dyeId = dyeId,
             dyeName = dyeName,
             known = known,
+            isNew = false,
             rarity = rarity,
             hueCategory = hueCategory,
             achievementId = achievementId,
@@ -708,22 +729,35 @@ function Dyeing_Manager:UpdateDyeData()
             end,
         }
         
-        self.dyesById[dyeId] = dyeInfo
+        dyesById[dyeId] = dyeInfo
         if known then
             table.insert(self.unlockedDyes, dyeInfo)
+            local previousDyeInfo = self.dyesById[dyeId]
+            if previousDyeInfo then
+                if not previousDyeInfo.known then
+                    table.insert(newUnlockedDyes, dyeInfo)
+                    dyeInfo.isNew = true
+                end
+                if previousDyeInfo.isNew then 
+                    dyeInfo.isNew = true
+                end
+            end
         end
         table.insert(self.dyesByHueCategory[hueCategory], dyeInfo)
         table.insert(self.dyesByRarity[rarity], dyeInfo)
     end
 
+    self.dyesById = dyesById
+
     for hueCategory = DYE_HUE_CATEGORY_ITERATION_BEGIN, DYE_HUE_CATEGORY_ITERATION_END do
         table.sort(self.dyesByHueCategory[hueCategory], ZO_Dyeing_DyeSortComparator)
     end
+
     for rarity = DYE_RARITY_ITERATION_BEGIN, DYE_RARITY_ITERATION_END do
         table.sort(self.dyesByRarity[rarity], ZO_Dyeing_DyeSortComparator)
     end
 
-    self:FireCallbacks("UpdateDyeData")
+    self:FireCallbacks("UpdateDyeData", newUnlockedDyes)
 end
 
 function Dyeing_Manager:GetPlayerDyesById()

@@ -82,7 +82,7 @@ function ZO_Market_Keyboard:Initialize(control, sceneName)
 end
 
 function ZO_Market_Keyboard:IsPreviewForMarketProductPreviewTypeVisible(previewType)
-    if previewType == ZO_MARKET_PREVIEW_TYPE_BUNDLE or previewType == ZO_MARKET_PREVIEW_TYPE_BUNDLE_HIDES_CHILDREN then
+    if previewType == ZO_MARKET_PREVIEW_TYPE_BUNDLE or previewType == ZO_MARKET_PREVIEW_TYPE_BUNDLE_AS_LIST then
         return not (self.bundleContentFragment:IsShowing() or self.productListFragment:IsShowing())
     elseif previewType == ZO_MARKET_PREVIEW_TYPE_CROWN_CRATE then
         return not self.productListFragment:IsShowing()
@@ -200,7 +200,7 @@ function ZO_Market_Keyboard:InitializeKeybindDescriptors()
                                 return GetString(SI_MARKET_PREVIEW_KEYBIND_TEXT)
                             else
                                 local previewType = self.selectedMarketProduct:GetMarketProductPreviewType()
-                                if previewType == ZO_MARKET_PREVIEW_TYPE_BUNDLE or previewType == ZO_MARKET_PREVIEW_TYPE_BUNDLE_HIDES_CHILDREN then
+                                if previewType == ZO_MARKET_PREVIEW_TYPE_BUNDLE or previewType == ZO_MARKET_PREVIEW_TYPE_BUNDLE_AS_LIST then
                                     return GetString(SI_MARKET_BUNDLE_DETAILS_KEYBIND_TEXT)
                                 else
                                     return GetString(SI_MARKET_PREVIEW_KEYBIND_TEXT)
@@ -1381,7 +1381,7 @@ function ZO_Market_Keyboard:PerformPreview(previewData)
                 self:ShowBundleContents(marketProductData)
             elseif previewType == ZO_MARKET_PREVIEW_TYPE_CROWN_CRATE then
                 self:ShowCrownCrateContents(marketProductData)
-            elseif previewType == ZO_MARKET_PREVIEW_TYPE_BUNDLE_HIDES_CHILDREN then
+            elseif previewType == ZO_MARKET_PREVIEW_TYPE_BUNDLE_AS_LIST then
                 self:ShowBundleContentsAsList(marketProductData)
             elseif previewType == ZO_MARKET_PREVIEW_TYPE_HOUSE then
                 self:ShowHousePreviewDialog(marketProductData)

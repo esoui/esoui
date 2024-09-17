@@ -396,7 +396,7 @@ function ZO_GamepadTradingHouse:ActivateBrowseResults()
 end
 
 function ZO_GamepadTradingHouse:LeaveBrowseResults()
-    PlaySound(SOUNDS.GAMEPAD_MENU_BACKWARD)
+    PlaySound(SOUNDS.GAMEPAD_MENU_BACK)
     self:DeactivateBrowseResults()
 end
 
@@ -411,7 +411,7 @@ function ZO_GamepadTradingHouse:EnterSearchHistory()
 end
 
 function ZO_GamepadTradingHouse:LeaveSearchHistory()
-    PlaySound(SOUNDS.GAMEPAD_MENU_BACKWARD)
+    PlaySound(SOUNDS.GAMEPAD_MENU_BACK)
     self:SetCurrentListObject(GAMEPAD_TRADING_HOUSE_BROWSE)
 end
 
@@ -421,7 +421,7 @@ function ZO_GamepadTradingHouse:EnterNameSearchAutoComplete()
 end
 
 function ZO_GamepadTradingHouse:LeaveNameSearchAutoComplete()
-    PlaySound(SOUNDS.GAMEPAD_MENU_BACKWARD)
+    PlaySound(SOUNDS.GAMEPAD_MENU_BACK)
     self:SetCurrentListObject(GAMEPAD_TRADING_HOUSE_BROWSE)
 end
 

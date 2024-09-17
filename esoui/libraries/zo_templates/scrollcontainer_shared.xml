@@ -1,0 +1,54 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_ScrollContainer_Shared" mouseEnabled="true" virtual="true">
+            <OnInitialized>
+                ZO_ScrollContainer_Shared.InitializeFromControl(self)
+            </OnInitialized>
+            <Controls>
+                <Scroll name="$(parent)Scroll" inherits="ZO_Scroll">
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-ZO_SCROLL_BAR_WIDTH" />
+                    <Controls>
+                        <Control name="$(parent)Child" resizeToFitDescendents="true">
+                            <Anchor point="TOPLEFT" />
+                        </Control>
+                    </Controls>
+                </Scroll>
+
+                <Slider name="$(parent)ScrollBar" inherits="ZO_VerticalScrollbarBase" hidden="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Scroll" relativePoint="TOPRIGHT" offsetY="16" />
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Scroll" relativePoint="BOTTOMRIGHT" offsetY="-16" />
+                </Slider>
+
+                <Texture name="$(parent)ScrollIndicator" tier="HIGH" hidden="true">
+                    <Dimensions x="64" y="64"/>
+                    <Anchor point="CENTER" relativePoint="RIGHT" />
+                    <OnInitialized>
+                        ZO_GamepadTypeBasedControl_OnInitialized(self)
+                        self:SetTextureSource(GetGamepadRightStickScrollIcon)
+                    </OnInitialized>
+                </Texture>
+
+                <Label name="$(parent)ScrollKeyUp" inherits="ZO_LargeKeyMarkupLabel_Gamepad" tier="HIGH" hidden="true">
+                    <Anchor point="CENTER" relativeTo="$(parent)ScrollIndicator" relativePoint="TOP" offsetY="10" />
+                    <Controls>
+                        <Texture name="$(parent)Arrow" textureFile="EsoUI\Art\Buttons\Gamepad\gp_upArrow.dds" layer="TEXT" >
+                            <Dimensions x="24" y="24" />
+                            <Anchor point="BOTTOM" relativePoint="TOP" />
+                        </Texture>
+                    </Controls>
+                </Label>
+
+                <Label name="$(parent)ScrollKeyDown" inherits="ZO_LargeKeyMarkupLabel_Gamepad" tier="HIGH" hidden="true">
+                    <Anchor point="CENTER" relativeTo="$(parent)ScrollIndicator" relativePoint="BOTTOM" offsetY="-10" />
+                    <Controls>
+                        <Texture name="$(parent)Arrow" textureFile="EsoUI\Art\Buttons\Gamepad\gp_downArrow.dds" layer="TEXT" >
+                            <Dimensions x="24" y="24" />
+                            <Anchor point="TOP" relativePoint="BOTTOM" />
+                        </Texture>
+                    </Controls>
+                </Label>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

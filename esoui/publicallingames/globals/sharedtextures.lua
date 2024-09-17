@@ -303,8 +303,8 @@ do
         [BATTLEGROUND_TEAM_STORM_LORDS] = "EsoUI/Art/Battlegrounds/battlegrounds_teamIcon_purple.dds",
     }
 
-    function ZO_GetKeyboardBattlegroundTeamIcon(battlegroundAlliance)
-        return KEYBOARD_BATTLEGROUND_TEAM_ICONS[battlegroundAlliance]
+    function ZO_GetKeyboardBattlegroundTeamIcon(battlegroundTeam)
+        return KEYBOARD_BATTLEGROUND_TEAM_ICONS[battlegroundTeam]
     end
 end
 
@@ -316,21 +316,21 @@ do
         [BATTLEGROUND_TEAM_STORM_LORDS] = "EsoUI/Art/Battlegrounds/Gamepad/gp_battlegrounds_teamIcon_purple.dds",
     }
 
-    function ZO_GetGamepadBattlegroundTeamIcon(battlegroundAlliance)
-        return GAMEPAD_BATTLEGROUND_TEAM_ICONS[battlegroundAlliance]
+    function ZO_GetGamepadBattlegroundTeamIcon(battlegroundTeam)
+        return GAMEPAD_BATTLEGROUND_TEAM_ICONS[battlegroundTeam]
     end
 end
 
-function ZO_GetBattlegroundTeamIcon(battlegroundAlliance)
+function ZO_GetBattlegroundTeamIcon(battlegroundTeam)
     if IsInGamepadPreferredMode() then
-        return ZO_GetGamepadBattlegroundTeamIcon(battlegroundAlliance)
+        return ZO_GetGamepadBattlegroundTeamIcon(battlegroundTeam)
     else
-        return ZO_GetKeyboardBattlegroundTeamIcon(battlegroundAlliance)
+        return ZO_GetKeyboardBattlegroundTeamIcon(battlegroundTeam)
     end
 end
 
-function ZO_GetBattlegroundIconMarkup(battlegroundAlliance, size)
-    return zo_iconFormatInheritColor(ZO_GetBattlegroundTeamIcon(battlegroundAlliance), size, size)
+function ZO_GetBattlegroundIconMarkup(battlegroundTeam, size)
+    return zo_iconFormatInheritColor(ZO_GetBattlegroundTeamIcon(battlegroundTeam), size, size)
 end
 
 -- Difficulty --
@@ -556,3 +556,4 @@ ZO_GAMEPAD_LOCKED_ICON_32 = "EsoUI/Art/Miscellaneous/Gamepad/gp_icon_locked32.dd
 ZO_KEYBOARD_IS_EQUIPPED_ICON = "EsoUI/Art/Inventory/inventory_icon_equipped.dds"
 ZO_GAMEPAD_IS_EQUIPPED_ICON = "EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_equipped.dds"
 ZO_CHECK_ICON = "EsoUI/Art/Miscellaneous/check_icon_32.dds"
+ZO_CHECK_ICON_64 = "EsoUI/Art/Miscellaneous/check_icon_64.dds"

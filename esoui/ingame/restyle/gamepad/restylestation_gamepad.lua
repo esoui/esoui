@@ -23,7 +23,7 @@ function ZO_RestyleStation_Gamepad:New(...)
 end
 
 function ZO_RestyleStation_Gamepad:Initialize(control)
-    self.pendingLoopAnimationPool = ZO_MetaPool:New(ZO_Pending_Outfit_LoopAnimation_Pool)
+    self.pendingLoopAnimationPool = ZO_MetaPool:New(ZO_Pending_LoopAnimation_Pool)
     self.actionMode = ACTION_NONE
 
     GAMEPAD_RESTYLE_STATION_SCENE = ZO_InteractScene:New("gamepad_restyle_station", SCENE_MANAGER, ZO_DYEING_STATION_INTERACTION)
@@ -678,7 +678,7 @@ function ZO_RestyleStation_Gamepad:SetupList(list)
             ZO_RestyleStation_Gamepad_SetOutfitEntryBorder(control, collectibleData, slotManipulator, self.pendingLoopAnimationPool)
             control.borderBackground:SetHidden(false)
         else
-            ZO_RestyleStation_Gamepad_CleanupAnimationOnControl(control, self.pendingLoopAnimationPool)
+            ZO_RestyleStation_Gamepad_CleanupAnimationOnControl(control)
             control.borderBackground:SetHidden(true)
         end
     end
@@ -690,7 +690,7 @@ function ZO_RestyleStation_Gamepad:SetupList(list)
 
     local function ResetOutfitSlotEntry(control)
         ResetSlotEntry(control)
-        ZO_RestyleStation_Gamepad_CleanupAnimationOnControl(control, self.pendingLoopAnimationPool)
+        ZO_RestyleStation_Gamepad_CleanupAnimationOnControl(control)
     end
 
     list:SetAlignToScreenCenter(true)

@@ -524,7 +524,7 @@ function ZO_GamepadComboBoxDropdown:GetControlPoolFromTemplate(template)
 end
 
 -- This is a control used by all gamepad combo boxes to display the dropdown
-function ZO_ComboBox_Gamepad_Dropdowm_Initialize(control)
+function ZO_ComboBox_Gamepad_Dropdown_Initialize(control)
     GAMEPAD_COMBO_BOX_DROPDOWN = ZO_GamepadComboBoxDropdown:New(control)
 end
 

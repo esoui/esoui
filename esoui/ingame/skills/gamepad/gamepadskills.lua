@@ -233,6 +233,8 @@ function ZO_GamepadSkills.OnConfirmHideScene(scene, nextSceneName, bypassHideSce
             confirmCallback = function() 
                 scene:AcceptHideScene()
                 SKILLS_DATA_MANAGER:RebuildSkillsData()
+                ACTION_BAR_ASSIGNMENT_MANAGER:ResetPlayerHotbars()
+                SKILLS_AND_ACTION_BAR_MANAGER:ResetInterface()
             end,
             declineCallback = function() scene:RejectHideScene() end,
         })        
@@ -525,7 +527,7 @@ function ZO_GamepadSkills:InitializeLineFilterKeybindStrip()
                 local skillData = skillEntry.skillData
                 local skillPointAllocator = skillData:GetPointAllocator()
                 local skillProgressionData = skillPointAllocator:GetProgressionData()
-                return skillData:IsActive() and skillProgressionData:GetNumSkillStyles() ~= 0
+                return skillData:IsActive() and skillProgressionData:HasAnyNonHiddenSkillStyles()
             end
         end,
 
@@ -1602,7 +1604,7 @@ do
                 for index = 1, GetNumProgressionSkillAbilityFxOverrides(progressionId) do
                     local collectibleId = GetProgressionSkillAbilityFxOverrideCollectibleIdByIndex(progressionId, index)
                     local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
-                    if collectibleData then
+                    if collectibleData and not collectibleData:IsHiddenFromCollection() then
                         local entryData = ZO_GamepadEntryData:New(collectibleData:GetFormattedName())
                         entryData.setup = ZO_SharedGamepadEntry_OnSetup
                         entryData:AddIcon(collectibleData:GetIcon())

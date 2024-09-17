@@ -1,0 +1,107 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="BattlegroundRoundRecap" >
+            <Animations>
+                <!-- Initialize anim values. -->
+                <AlphaAnimation applyToChildControlName="TitleHeader" delay="0" duration="1" startAlpha="0" endAlpha="0" />
+                <AlphaAnimation applyToChildControlName="WinTitle" delay="0" duration="1" startAlpha="0" endAlpha="0" />
+                <AlphaAnimation applyToChildControlName="WinSubtitle" delay="0" duration="1" startAlpha="0" endAlpha="0" />
+                <AlphaAnimation applyToChildControlName="Flag1" delay="0" duration="1" startAlpha="0" endAlpha="0" />
+                <AlphaAnimation applyToChildControlName="Flag2" delay="0" duration="1" startAlpha="0" endAlpha="0" />
+                <AlphaAnimation applyToChildControlName="Flag3" delay="0" duration="1" startAlpha="0" endAlpha="0" />
+
+                <CustomAnimation delay="0" duration="15000">
+                    <OnPlay>
+                        ZO_BattlegroundRoundRecap.OnPlay(...)
+                    </OnPlay>
+
+                    <OnStop>
+                        ZO_BattlegroundRoundRecap.OnStop(...)
+                    </OnStop>
+                </CustomAnimation>
+
+                <!-- Fade in Header components. -->
+                <AlphaAnimation applyToChildControlName="TitleHeader" delay="750" duration="500" startAlpha="0" endAlpha="1" />
+                <AlphaAnimation applyToChildControlName="WinTitle" delay="1250" duration="500" startAlpha="0" endAlpha="1" />
+                <AlphaAnimation applyToChildControlName="WinSubtitle" delay="1750" duration="500" startAlpha="0" endAlpha="1" />
+                <AlphaAnimation applyToChildControlName="Flag1" delay="750" duration="500" startAlpha="0" endAlpha="1" />
+                <AlphaAnimation applyToChildControlName="Flag2" delay="750" duration="500" startAlpha="0" endAlpha="1" />
+                <AlphaAnimation applyToChildControlName="Flag3" delay="750" duration="500" startAlpha="0" endAlpha="1" />
+
+                <CustomAnimation delay="3000" duration="10">
+                    <OnPlay>
+                        ZO_BattlegroundRoundRecap.OnFlipScores(...)
+                    </OnPlay>
+                </CustomAnimation>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+
+    <Controls>
+        <TopLevelControl name="ZO_BattlegroundRoundRecapTopLevel_Keyboard" virtual="true">
+            <AnchorFill />
+            <Controls>
+                <Label name="$(parent)WinTitle" font="ZoFontCallout3" modifyTextType="NONE" />
+
+                <Label name="$(parent)WinSubtitle" font="ZoFontCallout" />
+
+                <Label name="$(parent)Countdown" horizontalAlignment="CENTER" font="ZoFontCallout" />
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_BattlegroundRoundRecapTopLevel_Gamepad" virtual="true">
+            <AnchorFill />
+            <Controls>
+                <Label name="$(parent)WinTitle" font="ZoFontGamepadBold54" modifyTextType="UPPERCASE" />
+
+                <Label name="$(parent)WinSubtitle" font="ZoFontGamepad42" />
+
+                <Label name="$(parent)Countdown" horizontalAlignment="CENTER" font="ZoFontGamepad42" />
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_BattlegroundRoundRecapSceneTopLevel" hidden="true">
+            <AnchorFill />
+            <OnInitialized>
+                ZO_BattlegroundRoundRecap.InitializeFromControl(self)
+            </OnInitialized>
+            <Controls>
+                <Texture name="$(parent)TitleHeader" alpha="1" textureFile="EsoUI/Art/Battlegrounds/BattlegroundRoundRecapHeader.dds" >
+                    <Anchor point="TOP" relativePoint="TOP" offsetY="80" />
+                    <Dimensions x="768" y="320" />
+                </Texture>
+
+                <Label name="$(parent)WinTitle" horizontalAlignment="CENTER" alpha="0" >
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)TitleHeader" offsetY="45" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)TitleHeader" offsetY="45" />
+                </Label>
+
+                <Label name="$(parent)WinSubtitle" horizontalAlignment="CENTER" alpha="0">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)TitleHeader" relativePoint="TOPLEFT" offsetY="140" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)TitleHeader" relativePoint="TOPRIGHT" offsetY="140" />
+                </Label>
+
+                <Label name="$(parent)Countdown" horizontalAlignment="CENTER">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)" relativePoint="BOTTOMLEFT" offsetY="-100" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)" relativePoint="BOTTOMRIGHT" offsetY="-100" />
+                </Label>
+
+                <Control name="$(parent)Flag1" inherits="ZO_BattlegroundRoundRecapFlag" hidden="true">
+                    <Anchor point="CENTER" />
+                </Control>
+
+                <Control name="$(parent)Flag2" inherits="ZO_BattlegroundRoundRecapFlag" hidden="true">
+                    <Anchor point="CENTER" />
+                </Control>
+
+                <Control name="$(parent)Flag3" inherits="ZO_BattlegroundRoundRecapFlag" hidden="true">
+                    <Anchor point="CENTER" />
+                </Control>
+
+                <Control name="$(parent)KeybindContainer" resizeToFitDescendents="true">
+                    <Anchor point="BOTTOM" relativeTo="$(parent)" relativePoint="BOTTOM" offsetY="-50" />
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

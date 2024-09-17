@@ -21,6 +21,7 @@ function ZO_MarketAnnouncement_Gamepad:Initialize(control)
         [ZO_ACTION_TILE_TYPE.EVENT_ANNOUNCEMENT] = "ZO_EventAnnouncementTile_Gamepad_Control",
         [ZO_ACTION_TILE_TYPE.DAILY_REWARDS] = "ZO_DailyRewardsTile_Gamepad_Control",
         [ZO_ACTION_TILE_TYPE.ZONE_STORIES] = "ZO_ZoneStoriesTile_Gamepad_Control",
+        [ZO_ACTION_TILE_TYPE.PROMOTIONAL_EVENT] = "ZO_PromotionalEventTile_GP",
     }
 
     ZO_MarketAnnouncement_Shared.Initialize(self, control, IsInGamepadPreferredMode)

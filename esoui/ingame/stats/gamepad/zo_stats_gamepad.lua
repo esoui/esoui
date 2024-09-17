@@ -332,7 +332,7 @@ do
         self.control:RegisterForEvent(EVENT_ATTRIBUTE_UPGRADE_UPDATED, OnUpdate)
         self.control:RegisterForEvent(EVENT_TITLE_UPDATE, OnUpdate)
         self.control:AddFilterForEvent(EVENT_TITLE_UPDATE, REGISTER_FILTER_UNIT_TAG, "player")
-        self.control:RegisterForEvent(EVENT_PLAYER_TITLES_UPDATE, OnUpdate)
+        TITLE_MANAGER:RegisterCallback("UpdateTitlesData", OnUpdate)
         self.control:RegisterForEvent(EVENT_CHAMPION_POINT_GAINED, OnUpdate)
         self.control:RegisterForEvent(EVENT_CHAMPION_SYSTEM_UNLOCKED, OnUpdate)
         self.control:RegisterForEvent(EVENT_ARTIFICIAL_EFFECT_ADDED, OnUpdate)
@@ -360,7 +360,7 @@ do
         self.control:UnregisterForEvent(EVENT_EFFECTS_FULL_UPDATE)
         self.control:UnregisterForEvent(EVENT_ATTRIBUTE_UPGRADE_UPDATED)
         self.control:UnregisterForEvent(EVENT_TITLE_UPDATE)
-        self.control:UnregisterForEvent(EVENT_PLAYER_TITLES_UPDATE)
+        TITLE_MANAGER:UnregisterCallback("UpdateTitlesData", OnUpdate)
         self.control:UnregisterForEvent(EVENT_CHAMPION_POINT_GAINED)
         self.control:UnregisterForEvent(EVENT_CHAMPION_SYSTEM_UNLOCKED)
         self.control:UnregisterForEvent(EVENT_ARTIFICIAL_EFFECT_ADDED)
@@ -843,6 +843,15 @@ function ZO_GamepadStats:InitializeHeader()
         titleText = GetString(SI_STAT_GAMEPAD_CHARACTER_SHEET_TITLE),
 
         data1HeaderText = GetString(SI_STATS_GAMEPAD_AVAILABLE_POINTS),
+
+        messageTextNarration = function()
+            local outfit = ZO_OUTFIT_MANAGER:GetOutfitManipulator(GAMEPLAY_ACTOR_CATEGORY_PLAYER, ZO_OUTFIT_MANAGER:GetEquippedOutfitIndex(GAMEPLAY_ACTOR_CATEGORY_PLAYER))
+            if outfit then
+                return zo_strformat(SI_SCREEN_NARRATION_DROPDOWN_NAMED, GetString(SI_OUTFIT_SELECTOR_TITLE), outfit:GetOutfitName())
+            else
+                return zo_strformat(SI_SCREEN_NARRATION_DROPDOWN_NAMED, GetString(SI_OUTFIT_SELECTOR_TITLE), GetString(SI_NO_OUTFIT_EQUIP_ENTRY))
+            end
+        end,
     }
 
     local rightPane = self.control:GetNamedChild("RightPane")
@@ -920,6 +929,7 @@ do
         --Title Entry
         self.titleEntry = ZO_GamepadEntryData:New("")
         self.titleEntry.displayMode = GAMEPAD_STATS_DISPLAY_MODE.TITLE
+        self.titleEntry:SetNew(function() return TITLE_MANAGER:HasNewTitle() end)
         self.titleEntry.statsObject = self
         self.titleEntry:SetHeader(GetString(SI_STATS_TITLE))
         self.titleEntry.narrationText = function(entryData, entryControl)
@@ -1073,14 +1083,21 @@ do
             table.insert(self.attributeEntries, data)
         end
     end
+
+    function ZO_GamepadStats:GetFooterNarration()
+        return GAMEPAD_PLAYER_PROGRESS_BAR_NAME_LOCATION:GetNarration()
+    end
+
 end
 
 do
     local function SetupEffectAttributeRow(control, data, ...)
         ZO_SharedGamepadEntry_OnSetup(control, data, ...)
         local frameControl = control:GetNamedChild("Frame")
+        --local stackCount = frameControl:GetNamedChild("StackCount")
         local hasIcon = data:GetNumIcons() > 0
         frameControl:SetHidden(not hasIcon)
+        --stackCount:SetText(data.stackCount)
     end
 
     function ZO_GamepadStats:SetupList(list)
@@ -1223,6 +1240,7 @@ do
                     data.buffSlot = buffSlot
                     data.canClickOff = canClickOff
                     data.isArtificial = false
+                    --data.stackCount = stackCount
 
                     local duration = endTime - startTime
                     if duration > 0 then
@@ -1868,11 +1886,22 @@ function ZO_GamepadStatTitleRow_Setup(control, data, selected, selectedDuringReb
 
     data.statsObject:SetCurrentTitleDropdown(control.dropdown)
     data.statsObject:UpdateTitleDropdownTitles(control.dropdown)
+    local statsObject = data.statsObject
+    statsObject:SetCurrentTitleDropdown(control.dropdown)
+    statsObject:UpdateTitleDropdownTitles(control.dropdown)
+    
+    local function OnDropdownItemDeselected(control, data)
+        if data.titleInfo and data.titleInfo.isNew then
+            TITLE_MANAGER:ClearTitleNew(data.titleInfo.name)
+            data.name = data.titleInfo.name
+            control.nameControl:SetText(data.name)
+        end
+    end
 
+    control.dropdown:RegisterCallback("OnItemDeselected", OnDropdownItemDeselected)
     control.dropdown:SetDeactivatedCallback(data.statsObject.OnTitleDropdownDeactivated, data.statsObject)
     control.dropdown:SetSelectedItemTextColor(selected)
 end
-
 ------------------------
 -- Stat Attribute Row --
 ------------------------

@@ -101,7 +101,7 @@
 
                         <Button name="$(parent)AllFilters" inherits="ZO_MouseTooltipBehavior">
                             <Dimensions x="48" y="48" />
-                            <Anchor point="LEFT" relativeTo="$(parent)HouseFilter" relativePoint="RIGHT" offsext="10" />
+                            <Anchor point="LEFT" relativeTo="$(parent)HouseFilter" relativePoint="RIGHT" offsetX="10" />
 
                             <OnInitialized>
                                 self:SetTooltipString(SI_HOUSE_TOURS_ALL_FILTERS)

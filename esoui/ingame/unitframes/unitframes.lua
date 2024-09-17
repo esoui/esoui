@@ -112,6 +112,7 @@ local KEYBOARD_CONSTANTS =
     RAID_BAR_FONT = "ZoFontGameOutline",
 
     SHOW_GROUP_LABELS = true,
+    SHOW_BATTLEGROUND_TEAM = false,
 }
 
 ZO_GAMEPAD_GROUP_FRAME_WIDTH = 160
@@ -157,6 +158,7 @@ local GAMEPAD_CONSTANTS =
     RAID_BAR_FONT = "ZoFontGamepad18",
 
     SHOW_GROUP_LABELS = false,
+    SHOW_BATTLEGROUND_TEAM = true,
 }
 
 local function GetPlatformConstants()
@@ -1139,13 +1141,13 @@ local function DoUnitFrameLayout(unitFrame, style)
         unitFrame.neverHideStatusBar = layoutData.neverHideStatusBar
 
         if layoutData.highPriorityBuffHighlight then
-            SetUnitFrameTexture(GetControl(unitFrame.frame, "HighPriorityBuffHighlight"), layoutData.highPriorityBuffHighlight.left, PREVENT_SHOW)
-            SetUnitFrameTexture(GetControl(unitFrame.frame, "HighPriorityBuffHighlightRight"), layoutData.highPriorityBuffHighlight.right, PREVENT_SHOW)
-            SetUnitFrameTexture(GetControl(unitFrame.frame, "HighPriorityBuffHighlightIcon"), layoutData.highPriorityBuffHighlight.icon, PREVENT_SHOW)
+            SetUnitFrameTexture(unitFrame.frame:GetNamedChild("HighPriorityBuffHighlight"), layoutData.highPriorityBuffHighlight.left, PREVENT_SHOW)
+            SetUnitFrameTexture(unitFrame.frame:GetNamedChild("HighPriorityBuffHighlightRight"), layoutData.highPriorityBuffHighlight.right, PREVENT_SHOW)
+            SetUnitFrameTexture(unitFrame.frame:GetNamedChild("HighPriorityBuffHighlightIcon"), layoutData.highPriorityBuffHighlight.icon, PREVENT_SHOW)
 
             -- These can't be created in XML because the OnInitialized handler doesn't run until the next frame, just initialize the animations here.
-            ZO_AlphaAnimation:New(GetControl(unitFrame.frame, "HighPriorityBuffHighlight"))
-            ZO_AlphaAnimation:New(GetControl(unitFrame.frame, "HighPriorityBuffHighlightIcon"))
+            ZO_AlphaAnimation:New(unitFrame.frame:GetNamedChild("HighPriorityBuffHighlight"))
+            ZO_AlphaAnimation:New(unitFrame.frame:GetNamedChild("HighPriorityBuffHighlightIcon"))
         end
 
         LayoutUnitFrameName(unitFrame.nameLabel, layoutData)
@@ -1198,11 +1200,11 @@ function ZO_UnitFrameObject:Initialize(unitTag, anchors, barTextMode, style, tem
     self.assignmentIcon = self:AddFadeComponent("AssignmentIcon", DONT_COLOR_RANK_ICON)
     self.championIcon = self:AddFadeComponent("ChampionIcon")
     self.leftBracket = self:AddFadeComponent("LeftBracket")
-    self.leftBracketGlow = GetControl(self.frame, "LeftBracketGlow")
-    self.leftBracketUnderlay = GetControl(self.frame, "LeftBracketUnderlay")
+    self.leftBracketGlow = self.frame:GetNamedChild("LeftBracketGlow")
+    self.leftBracketUnderlay = self.frame:GetNamedChild("LeftBracketUnderlay")
     self.rightBracket = self:AddFadeComponent("RightBracket")
-    self.rightBracketGlow = GetControl(self.frame, "RightBracketGlow")
-    self.rightBracketUnderlay = GetControl(self.frame, "RightBracketUnderlay")
+    self.rightBracketGlow = self.frame:GetNamedChild("RightBracketGlow")
+    self.rightBracketUnderlay = self.frame:GetNamedChild("RightBracketUnderlay")
 
     self.barTextMode = barTextMode
 
@@ -1258,7 +1260,7 @@ function ZO_UnitFrameObject:ApplyVisualStyle()
             end
         end
     end
-    local statusBackground = GetControl(self.frame, "Background1")
+    local statusBackground = self.frame:GetNamedChild("Background1")
     if statusBackground then
         statusBackground:SetHidden(not isOnline and barData.hideBgIfOffline)
     end
@@ -1283,7 +1285,7 @@ function ZO_UnitFrameObject:SetAnimateShowHide(animate)
 end
 
 function ZO_UnitFrameObject:AddFadeComponent(name, setColor)
-    local control = GetControl(self.frame, name)
+    local control = self.frame:GetNamedChild(name)
     if control then
         control.setColor = setColor ~= false
         table.insert(self.fadeComponents, control)
@@ -1811,7 +1813,7 @@ function ZO_UnitFrameObject:UpdateStatus(isDead, isOnline, isPending)
         local layoutData = GetPlatformLayoutData(self.style)
         statusLabel:SetHidden(not hideBars or not layoutData.statusData)
 
-        local statusBackground = GetControl(self.frame, "Background1")
+        local statusBackground = self.frame:GetNamedChild("Background1")
         if statusBackground then
             statusBackground:SetHidden(not isOnline and layoutData.hideHealthBgIfOffline)
         end
@@ -1915,12 +1917,27 @@ local function CreateGroupAnchorFrames()
     smallFrame:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, constants.GROUP_FRAME_BASE_OFFSET_X, constants.GROUP_FRAME_BASE_OFFSET_Y)
 
     -- Create raid group anchor frames, these are positioned at the default locations
-    for i = 1, NUM_SUBGROUPS
-    do
+    for i = 1, NUM_SUBGROUPS do
         local raidFrame = CreateControlFromVirtual("ZO_LargeGroupAnchorFrame"..i, ZO_UnitFramesGroups, "ZO_RaidFrameAnchor")
         raidFrame:SetDimensions(constants.RAID_FRAME_ANCHOR_CONTAINER_WIDTH, constants.RAID_FRAME_ANCHOR_CONTAINER_HEIGHT)
 
-        GetControl(raidFrame, "GroupName"):SetText(zo_strformat(SI_GROUP_SUBGROUP_LABEL, i))
+        local groupNameLabel = raidFrame:GetNamedChild("GroupName")
+        local battlegroundIconTexture = raidFrame:GetNamedChild("BattlegroundTeam")
+        local groupName = zo_strformat(SI_GROUP_SUBGROUP_LABEL, i)
+        local assignmentTexture = nil
+        if IsActiveWorldBattleground() then
+            local battlegroundTeam = GetUnitBattlegroundTeam("player")
+            if battlegroundTeam ~= BATTLEGROUND_TEAM_INVALID then
+                assignmentTexture = ZO_GetBattlegroundTeamIcon(battlegroundTeam)
+            end
+        end
+
+        if assignmentTexture then
+            groupNameLabel:SetText(zo_iconTextFormat(assignmentTexture, "100%", "100%", groupName))
+            battlegroundIconTexture:SetTexture(assignmentTexture)
+        else
+            groupNameLabel:SetText(groupName)
+        end
 
         local x, y = GetGroupAnchorFrameOffsets(i, constants.GROUP_STRIDE, constants)
         raidFrame:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, x, y)
@@ -1958,9 +1975,76 @@ local function UpdateLeaderIndicator()
     end
 end
 
+local function SetAnchorOffsets(control, offsetX, offsetY)
+    local isValid, point, target, relPoint = control:GetAnchor(0)
+    if isValid then
+        control:SetAnchor(point, target, relPoint, offsetX, offsetY)
+    end
+end
+
+local function UpdateAnchorFrameVisuals()
+    local constants = GetPlatformConstants()
+
+    -- Note: Small group anchor frame is currently the same for all platforms.
+    local groupFrame = ZO_SmallGroupAnchorFrame
+    groupFrame:SetDimensions(constants.GROUP_FRAME_SIZE_X, (constants.GROUP_FRAME_SIZE_Y + constants.GROUP_FRAME_PAD_Y) * STANDARD_GROUP_SIZE_THRESHOLD)
+    SetAnchorOffsets(groupFrame, constants.GROUP_FRAME_BASE_OFFSET_X, constants.GROUP_FRAME_BASE_OFFSET_Y)
+
+    -- Raid group anchor frames.
+    local raidTemplate = ZO_GetPlatformTemplate("ZO_RaidFrameAnchor")
+    for i = 1, NUM_SUBGROUPS do
+        local raidFrame = GetControl("ZO_LargeGroupAnchorFrame"..i)
+        ApplyTemplateToControl(raidFrame, raidTemplate)
+
+        -- For some reason, the ModifyTextType attribute on the template isn't being applied to the existing text on the label.
+        -- Clearing and setting the text again seems to reapply the ModifyTextType attribute.
+        local groupNameControl = raidFrame:GetNamedChild("GroupName")
+        groupNameControl:SetText("")
+
+        --Update the group text if it is supposed to be showing
+        if constants.SHOW_GROUP_LABELS then
+            local groupName = zo_strformat(SI_GROUP_SUBGROUP_LABEL, i)
+            local assignmentTexture = nil
+            if IsActiveWorldBattleground() then
+                local battlegroundTeam = GetUnitBattlegroundTeam("player")
+                if battlegroundTeam ~= BATTLEGROUND_TEAM_INVALID then
+                    assignmentTexture = ZO_GetBattlegroundTeamIcon(battlegroundTeam)
+                end
+            end
+
+            if assignmentTexture then
+                groupNameControl:SetText(zo_iconTextFormat(assignmentTexture, "100%", "100%", groupName))
+            else
+                groupNameControl:SetText(groupName)
+            end
+        end
+
+        --Update the battleground team icon if it is supposed to be showing
+        local battlegroundTeamIcon = raidFrame:GetNamedChild("BattlegroundTeam")
+        battlegroundTeamIcon:SetHidden(true)
+        if constants.SHOW_BATTLEGROUND_TEAM then
+            if i == 1 and IsActiveWorldBattleground() then
+                local battlegroundTeam = GetUnitBattlegroundTeam("player")
+                if battlegroundTeam ~= BATTLEGROUND_TEAM_INVALID then
+                    local assignmentTexture = ZO_GetBattlegroundTeamIcon(battlegroundTeam)
+                    if assignmentTexture then
+                        battlegroundTeamIcon:SetTexture(assignmentTexture)
+                        battlegroundTeamIcon:SetHidden(false)
+                    end
+                end
+            end
+        end
+
+        raidFrame:SetDimensions(constants.RAID_FRAME_ANCHOR_CONTAINER_WIDTH, constants.RAID_FRAME_ANCHOR_CONTAINER_HEIGHT)
+        local offsetX, offsetY = GetGroupAnchorFrameOffsets(i, constants.GROUP_STRIDE, constants)
+        SetAnchorOffsets(raidFrame, offsetX, offsetY)
+    end
+end
+
 local function DoGroupUpdate()
     UpdateLeaderIndicator()
     UnitFrames:UpdateGroupAnchorFrames()
+    UpdateAnchorFrameVisuals()
 end
 
 local TARGET_ATTRIBUTE_VISUALIZER_SOUNDS =
@@ -2287,40 +2371,10 @@ local function ReportUnitChanged(unitTag)
     UnitFrames:SetGroupIndexDirty(groupIndex)
 end
 
-local function SetAnchorOffsets(control, offsetX, offsetY)
-    local isValid, point, target, relPoint = control:GetAnchor(0)
-    if isValid then
-        control:SetAnchor(point, target, relPoint, offsetX, offsetY)
-    end
-end
-
 local function UpdateGroupFramesVisualStyle()
     local constants = GetPlatformConstants()
 
-    -- Note: Small group anchor frame is currently the same for all platforms.
-    local groupFrame = ZO_SmallGroupAnchorFrame
-    groupFrame:SetDimensions(constants.GROUP_FRAME_SIZE_X, (constants.GROUP_FRAME_SIZE_Y + constants.GROUP_FRAME_PAD_Y) * STANDARD_GROUP_SIZE_THRESHOLD)
-    SetAnchorOffsets(groupFrame, constants.GROUP_FRAME_BASE_OFFSET_X, constants.GROUP_FRAME_BASE_OFFSET_Y)
-
-    -- Raid group anchor frames.
-    local raidTemplate = ZO_GetPlatformTemplate("ZO_RaidFrameAnchor")
-    for i = 1, NUM_SUBGROUPS do
-        local raidFrame = GetControl("ZO_LargeGroupAnchorFrame"..i)
-        ApplyTemplateToControl(raidFrame, raidTemplate)
-
-        -- For some reason, the ModifyTextType attribute on the template isn't being applied to the existing text on the label.
-        -- Clearing and setting the text again seems to reapply the ModifyTextType attribute.
-        local groupNameControl = GetControl(raidFrame, "GroupName")
-        groupNameControl:SetText("")
-
-        if constants.SHOW_GROUP_LABELS then
-            groupNameControl:SetText(zo_strformat(SI_GROUP_SUBGROUP_LABEL, i))
-        end
-
-        raidFrame:SetDimensions(constants.RAID_FRAME_ANCHOR_CONTAINER_WIDTH, constants.RAID_FRAME_ANCHOR_CONTAINER_HEIGHT)
-        local x, y = GetGroupAnchorFrameOffsets(i, constants.GROUP_STRIDE, constants)
-        SetAnchorOffsets(raidFrame, x, y)
-    end
+    UpdateAnchorFrameVisuals()
 
     -- Update all UnitFrame anchors.
     local groupSize = GetGroupSize()

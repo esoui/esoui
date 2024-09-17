@@ -457,7 +457,16 @@ local MENU_ENTRY_DATA =
         scene = ZO_GAMEPAD_ACTIVITY_FINDER_ROOT_SCENE_NAME,
         name = GetString(SI_MAIN_MENU_ACTIVITY_FINDER),
         icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_activityFinder.dds",
-        isNewCallback = function() return ZO_HasGroupFinderNewApplication() end,
+        isActivityFinder = true,
+        isNewCallback =  function()
+            if ZO_HasGroupFinderNewApplication() then
+                return true
+            elseif not IsPromotionalEventSystemLocked() then
+                local currentCampaignData = PROMOTIONAL_EVENT_MANAGER:GetCurrentCampaignData()
+                return currentCampaignData and (not currentCampaignData:HasBeenSeen() or currentCampaignData:IsAnyRewardClaimable())
+            end
+            return false
+        end,
     },
     [MENU_MAIN_ENTRIES.HELP] =
     {
@@ -569,9 +578,17 @@ function ZO_MainMenuManager_Gamepad:Initialize(control)
 
     self:SetListsUseTriggerKeybinds(true)
 
-    control:RegisterForEvent(EVENT_LEVEL_UPDATE, function() self:RefreshLists() end)
+    local function RefreshLists()
+        self:RefreshLists()
+    end
+
+    control:RegisterForEvent(EVENT_LEVEL_UPDATE, RefreshLists)
     control:AddFilterForEvent(EVENT_LEVEL_UPDATE, REGISTER_FILTER_UNIT_TAG, "player")
-    control:RegisterForEvent(EVENT_CADWELL_PROGRESSION_LEVEL_CHANGED, function() self:RefreshLists() end)
+    control:RegisterForEvent(EVENT_CADWELL_PROGRESSION_LEVEL_CHANGED, RefreshLists)
+    control:RegisterForEvent(EVENT_PROMOTIONAL_EVENTS_ACTIVITY_PROGRESS_UPDATED, RefreshLists)
+    PROMOTIONAL_EVENT_MANAGER:RegisterCallback("RewardsClaimed", RefreshLists)
+    PROMOTIONAL_EVENT_MANAGER:RegisterCallback("CampaignSeenStateChanged", RefreshLists)
+    PROMOTIONAL_EVENT_MANAGER:RegisterCallback("CampaignsUpdated", RefreshLists)
 
     PLAYER_SUBMENU_SCENE:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_SHOWING then
@@ -634,6 +651,18 @@ do
 end
 
 do
+    local function NewMenuEntrySetup(control, data, selected, reselectingDuringRebuild, enabled, active)
+        if data.data.isActivityFinder and PROMOTIONAL_EVENT_MANAGER:IsCampaignActive() and not IsPromotionalEventSystemLocked() then
+            data:SetNameColors(ZO_PROMOTIONAL_EVENT_SELECTED_COLOR, ZO_PROMOTIONAL_EVENT_UNSELECTED_COLOR)
+            data:SetIconTint(ZO_PROMOTIONAL_EVENT_SELECTED_COLOR, ZO_PROMOTIONAL_EVENT_UNSELECTED_COLOR)
+        else
+            data:SetNameColors(ZO_GAMEPAD_SELECTED_COLOR, ZO_GAMEPAD_UNSELECTED_COLOR)
+            data:SetIconTint(ZO_GAMEPAD_SELECTED_COLOR, ZO_GAMEPAD_UNSELECTED_COLOR)
+        end
+
+        ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
+    end
+
     local function AnimatingLabelEntrySetup(control, data, selected, reselectingDuringRebuild, enabled, active)
         ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
         local totalSpendablePoints = GetAttributeUnspentPoints()
@@ -684,7 +713,7 @@ do
     end
 
     function ZO_MainMenuManager_Gamepad:SetupList(list)
-        list:AddDataTemplate("ZO_GamepadNewMenuEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
+        list:AddDataTemplate("ZO_GamepadNewMenuEntryTemplate", NewMenuEntrySetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
         list:AddDataTemplateWithHeader("ZO_GamepadNewMenuEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
 
         list:AddDataTemplate("ZO_GamepadMenuEntryTemplateWithArrow", EntryWithSubMenuSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
@@ -1099,6 +1128,10 @@ function ZO_MainMenuManager_Gamepad:ShowZoneStoriesEntry(createFullStack)
     else
         SCENE_MANAGER:Push(zoneStoriesSceneName)
     end
+end
+
+function ZO_MainMenuManager_Gamepad:GetFooterNarration()
+    return GAMEPAD_PLAYER_PROGRESS_BAR_NAME_LOCATION:GetNarration()
 end
 
 function ZO_MainMenu_Gamepad_OnInitialized(self)

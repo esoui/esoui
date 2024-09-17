@@ -11,13 +11,14 @@ ZO_ACTION_TILE_TYPE =
     EVENT_ANNOUNCEMENT = 1,
     DAILY_REWARDS = 2,
     ZONE_STORIES = 3,
+    PROMOTIONAL_EVENT = 4,
 }
 
 ZO_ACTION_SORTED_TILE_TYPE =
 {
     ZO_ACTION_TILE_TYPE.EVENT_ANNOUNCEMENT,
     ZO_ACTION_TILE_TYPE.DAILY_REWARDS,
-    ZO_ACTION_TILE_TYPE.ZONE_STORIES,
+    ZO_ACTION_TILE_TYPE.PROMOTIONAL_EVENT,
 }
 
 ZO_MarketAnnouncement_Shared = ZO_Object:Subclass()
@@ -74,6 +75,7 @@ function ZO_MarketAnnouncement_Shared:Initialize(control, fragmentConditionFunct
 
     ZO_MARKET_ANNOUNCEMENT_MANAGER:RegisterCallback("OnMarketAnnouncementDataUpdated", function() self:UpdateMarketCarousel() end)
     ZO_MARKET_ANNOUNCEMENT_MANAGER:RegisterCallback("EventAnnouncementExpired", function() self:LayoutActionTiles() end)
+    PROMOTIONAL_EVENT_MANAGER:RegisterCallback("CampaignsUpdated", function() self:LayoutActionTiles() end)
     control:RegisterForEvent(EVENT_DAILY_LOGIN_REWARDS_UPDATED, OnDailyLoginRewardsUpdated)
 end
 
@@ -120,6 +122,10 @@ function ZO_MarketAnnouncement_Shared:OnShowing()
     PlaySound(SOUNDS.DEFAULT_WINDOW_OPEN)
     RequestEventAnnouncements()
     self:LayoutActionTiles()
+
+    if not IsPromotionalEventSystemLocked() and PROMOTIONAL_EVENT_MANAGER:IsCampaignActive() then
+        PlaySound(SOUNDS.PROMOTIONAL_EVENTS_ANNOUNCE)
+    end
 
     if ZO_MARKET_ANNOUNCEMENT_MANAGER:ShouldHideMarketProductAnnouncements() then
         if GetMarketAnnouncementCrownStoreLocked() then
@@ -277,11 +283,28 @@ function ZO_MarketAnnouncement_Shared.GetZoneStoriesTilesData(tileInfoList)
     end
 end
 
+function ZO_MarketAnnouncement_Shared.GetPromotionalEventTilesData(tileInfoList)
+    if not IsPromotionalEventSystemLocked() then
+        local promotionalEventTileInfo =
+        {
+            type = ZO_ACTION_TILE_TYPE.PROMOTIONAL_EVENT,
+            data =
+            {
+            },
+            visible = function()
+                return PROMOTIONAL_EVENT_MANAGER:IsCampaignActive()
+            end,
+        }
+        table.insert(tileInfoList, promotionalEventTileInfo)
+    end
+end
+
 do
     ZO_TILE_TYPE_TO_GET_TILE_INFO_FUNCTION =
     {
         [ZO_ACTION_TILE_TYPE.EVENT_ANNOUNCEMENT] = ZO_MarketAnnouncement_Shared.GetEventAnnouncementTilesData,
         [ZO_ACTION_TILE_TYPE.DAILY_REWARDS] = ZO_MarketAnnouncement_Shared.GetDailyRewardsTilesData,
+        [ZO_ACTION_TILE_TYPE.PROMOTIONAL_EVENT] = ZO_MarketAnnouncement_Shared.GetPromotionalEventTilesData,
         [ZO_ACTION_TILE_TYPE.ZONE_STORIES] = ZO_MarketAnnouncement_Shared.GetZoneStoriesTilesData,
     }
     function ZO_MarketAnnouncement_Shared:LayoutActionTiles()

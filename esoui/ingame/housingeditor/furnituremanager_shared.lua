@@ -122,7 +122,7 @@ function ZO_SharedFurnitureManager:Initialize()
             },
             primaryKeys = function()
                 local placebleCollectibles = {}
-                for id, data in pairs(self.placeableFurniture[ZO_PLACEABLE_TYPE_COLLECTIBLE]) do
+                for id, data in pairs(self:GetPlaceableFurnitureCache(ZO_PLACEABLE_TYPE_COLLECTIBLE)) do
                     table.insert(placebleCollectibles, id)
                 end
                 return placebleCollectibles
@@ -409,7 +409,7 @@ end
 
 function ZO_SharedFurnitureManager:RebuildFurnitureCaches()
     --setup just the placeable collections, SharedInventory will tell us when its ready to query placeable items
-    self:CreateOrUpdateCollectibleCache()
+    self:MarkCollectibleCacheDirty()
     self:BuildMarketProductCache()
 
     ZO_ClearTable(self.retrievableFurniture)
@@ -430,11 +430,12 @@ end
 
 function ZO_SharedFurnitureManager:OnFurniturePlacedInHouse(furnitureId, collectibleId)
     if collectibleId ~= 0 then
-        local furnitureCollectible = self.placeableFurniture[ZO_PLACEABLE_TYPE_COLLECTIBLE][collectibleId]
+        local cache = self:GetPlaceableFurnitureCache(ZO_PLACEABLE_TYPE_COLLECTIBLE)
+        local furnitureCollectible = cache[collectibleId]
         if self:CanAddFurnitureDataToRefresh(self.placeableFurnitureCategoryTreeData, furnitureCollectible) then
             self.refreshGroups:RefreshSingle("UpdatePlacementFurniture", { target=furnitureCollectible, command=FURNITURE_COMMAND_REMOVE })
         end
-        self.placeableFurniture[ZO_PLACEABLE_TYPE_COLLECTIBLE][collectibleId] = nil
+        cache[collectibleId] = nil
         --No need to run the text filter since this is just a remove. We can notify others immediately.
         self:FireCallbacks("PlaceableFurnitureChanged")
     end
@@ -449,7 +450,7 @@ end
 function ZO_SharedFurnitureManager:OnFurnitureRemovedFromHouse(furnitureId, collectibleId)
     local furnitureIdKey = zo_getSafeId64Key(furnitureId)
     if collectibleId ~= 0 then
-        self.placeableFurniture[ZO_PLACEABLE_TYPE_COLLECTIBLE][collectibleId] = ZO_PlaceableFurnitureCollectible:New(collectibleId)
+        self:GetPlaceableFurnitureCache(ZO_PLACEABLE_TYPE_COLLECTIBLE)[collectibleId] = ZO_PlaceableFurnitureCollectible:New(collectibleId)
         self.refreshGroups:RefreshAll("UpdatePlacementFurniture")
         self:FireCallbacks("PlaceableFurnitureChanged")
 
@@ -555,8 +556,9 @@ end
 
 function ZO_SharedFurnitureManager:OnCollectionUpdated(collectionUpdateType, collectiblesByNewUnlockState)
     if collectionUpdateType == ZO_COLLECTION_UPDATE_TYPE.REBUILD then
-        self:CreateOrUpdateCollectibleCache()
+        self:MarkCollectibleCacheDirty()
     else
+        self:CleanCollectibleCache()
         local requestApplyPlaceableTextFilterToData = false
         local fireRetrievableFurnitureChanged = false
         for _, unlockStateTable in pairs(collectiblesByNewUnlockState) do
@@ -769,6 +771,9 @@ do
 end
 
 function ZO_SharedFurnitureManager:GetPlaceableFurnitureCache(type)
+    if type == ZO_PLACEABLE_TYPE_COLLECTIBLE then
+        self:CleanCollectibleCache()
+    end
     return self.placeableFurniture[type]
 end
 
@@ -817,8 +822,19 @@ function ZO_SharedFurnitureManager:CreateOrUpdateItemCache(bagId)
     end
 end
 
+function ZO_SharedFurnitureManager:MarkCollectibleCacheDirty()
+    self.placeableCollectibleCacheDirty = true
+end
+
+function ZO_SharedFurnitureManager:CleanCollectibleCache()
+    if self.placeableCollectibleCacheDirty then
+        self.placeableCollectibleCacheDirty = false
+        self:CreateOrUpdateCollectibleCache()
+    end
+end
+
 function ZO_SharedFurnitureManager:CreateOrUpdateCollectibleCache()
-    local collectibleCache = self.placeableFurniture[ZO_PLACEABLE_TYPE_COLLECTIBLE]
+    local collectibleCache = self:GetPlaceableFurnitureCache(ZO_PLACEABLE_TYPE_COLLECTIBLE)
     ZO_ClearTable(collectibleCache)
 
     local SORTED = true
@@ -882,20 +898,21 @@ function ZO_SharedFurnitureManager:CreateOrUpdateItemDataEntry(bagId, slotIndex)
 end
 
 function ZO_SharedFurnitureManager:CreateOrUpdateCollectibleDataEntry(collectibleId)
-    local existingCollectible = self.placeableFurniture[ZO_PLACEABLE_TYPE_COLLECTIBLE][collectibleId]
+    local cache = self:GetPlaceableFurnitureCache(ZO_PLACEABLE_TYPE_COLLECTIBLE)
+    local existingCollectible = cache[collectibleId]
     if HousingEditorCanPlaceCollectible(collectibleId) then
         if existingCollectible then
             existingCollectible:RefreshInfo(collectibleId)
         else
             local newCollectible = ZO_PlaceableFurnitureCollectible:New(collectibleId)
-            self.placeableFurniture[ZO_PLACEABLE_TYPE_COLLECTIBLE][collectibleId] = newCollectible
+            cache[collectibleId] = newCollectible
         end
         return true
     else
         if existingCollectible and self:CanAddFurnitureDataToRefresh(self.placeableFurnitureCategoryTreeData, existingCollectible) then
             self.refreshGroups:RefreshSingle("UpdatePlacementFurniture", { target = existingCollectible, command = FURNITURE_COMMAND_REMOVE })
         end
-        self.placeableFurniture[ZO_PLACEABLE_TYPE_COLLECTIBLE][collectibleId] = nil
+        cache[collectibleId] = nil
         --No need to run the text filter since this is just a remove. We can notify others immediately.
         self:FireCallbacks("PlaceableFurnitureChanged")
         return false
@@ -910,12 +927,12 @@ function ZO_SharedFurnitureManager:CreateMarketProductEntry(marketProductId, pre
 end
 
 function ZO_SharedFurnitureManager:DoesPlayerHavePlaceableFurniture()
-    return next(self.placeableFurniture[ZO_PLACEABLE_TYPE_COLLECTIBLE]) ~= nil
-        or next(self.placeableFurniture[ZO_PLACEABLE_TYPE_ITEM]) ~= nil
+    return next(self:GetPlaceableFurnitureCache(ZO_PLACEABLE_TYPE_COLLECTIBLE)) ~= nil
+        or next(self:GetPlaceableFurnitureCache(ZO_PLACEABLE_TYPE_ITEM)) ~= nil
 end
 
 function ZO_SharedFurnitureManager:DoesPlayerHavePathableFurniture()
-    return next(self.placeableFurniture[ZO_PLACEABLE_TYPE_COLLECTIBLE]) ~= nil
+    return next(self:GetPlaceableFurnitureCache(ZO_PLACEABLE_TYPE_COLLECTIBLE)) ~= nil
 end
 
 function ZO_SharedFurnitureManager:DoesPlayerHaveRetrievableFurniture()

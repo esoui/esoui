@@ -1,0 +1,119 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_PromotionalEvents_CapstoneDialog_OverlayGlowFadeAnimation">
+            <Animations>
+                <ScaleAnimation duration="80" startScale="1.08" endScale="1.0" />
+                <AlphaAnimation duration="230" startAlpha="0.9" endAlpha="0.0" />
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    
+    <Controls>
+        <Control name="ZO_PromotionalEventReward_Template_Shared" virtual="true">
+            <Controls>
+                <Backdrop name="$(parent)Backdrop"/>
+
+                <Texture name="$(parent)Icon">
+                    <Anchor point="CENTER" />
+                </Texture>
+
+                <Label name="$(parent)Quantity">
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icon" offsetX="4" offsetY="4"/>
+                    <Anchor point="LEFT" offsetX="4" constrains="X" />
+                </Label>
+
+                <Texture name="$(parent)CompleteMark" textureFile="EsoUI/Art/Miscellaneous/check_icon_32.dds" inheritAlpha="false" level="1" hidden="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Icon" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icon" />
+                </Texture>
+
+                <Control name="$(parent)FxAnchorControl">
+                    <AnchorFill />
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_PromotionalEventMilestone_Template_Shared" resizeToFitConstrains="Y" virtual="true">
+            <Controls>
+                <Control name="$(parent)Reward">
+                    <Anchor point="TOPLEFT" />
+                </Control>
+                <Label name="$(parent)Threshold">
+                    <Anchor point="TOP" relativeTo="$(parent)Reward" relativePoint="BOTTOM" offsetY="3" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_PromotionalEventActivity_EntryTemplate_Shared" virtual="true">
+            <Controls>
+                <Control name="$(parent)Reward">
+                    <Anchor point="RIGHT" />
+                </Control>
+
+                <StatusBar name="$(parent)Progress" />
+
+                <Texture name="$(parent)CompleteIcon" hidden="true" inheritAlpha="false" layer="OVERLAY" textureFile="EsoUI/Art/Miscellaneous/check_icon_32.dds" tier="HIGH">
+                    <Anchor point="CENTER" relativeTo="$(parent)Progress" />
+                </Texture>
+
+                <Label name="$(parent)Name" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" maxLineCount="1" wrapMode="ELLIPSIS" />
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_PromotionalEvents_Shared" virtual="true">
+            <Controls>
+                <Control name="$(parent)Contents">
+                    <Controls>
+                        <Control name="$(parent)ActivityList" />
+                        <Control name="$(parent)CampaignPanel">
+                            <Controls>
+                                <!-- Color: .7, .7, .7 -->
+                                <Texture name="$(parent)BG" textureFile="EsoUI\Art\PromotionalEvent\promotionalEvents_generic_bg.dds" color="B3B3B3">
+                                    <Controls>
+                                        <Backdrop name="$(parent)Border" />
+
+                                        <Texture name="$(parent)OverlayGradient" textureFile="EsoUI/Art/Market/market_ItemGradient_256.dds" alpha="0.6">
+                                            <AnchorFill />
+                                        </Texture>
+                                    </Controls>
+                                </Texture>
+                                <Label name="$(parent)Duration" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE" />
+                                <Label name="$(parent)Name" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_PROMOTIONAL_EVENTS" />
+                                <StatusBar name="$(parent)Progress" />
+                                <Control name="$(parent)CapstoneReward" />
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_PromotionalEvents_CapstoneDialog_Shared_TL" virtual="true">
+            <OnEffectivelyShown name="CapstoneDialog">
+                self.object:OnShown()
+            </OnEffectivelyShown>
+
+            <OnEffectivelyHidden name="CapstoneDialog">
+                -- OnEffectivelyHidden is called once during load before OnInitialize
+                if self.object then
+                    self.object:OnHidden()
+                end
+            </OnEffectivelyHidden>
+            
+            <Controls>
+                <Control name="$(parent)TopDivider" />
+                <Control name="$(parent)RewardContainer" tier="MEDIUM">
+                    <Controls>
+                        <Texture name="$(parent)Icon" />
+
+                        <Label name="$(parent)Name" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" maxLineCount="3"/>
+                    </Controls>
+                </Control>
+                <Control name="$(parent)BottomDivider" />
+                <Control name="$(parent)BlastParticlesOrigin">
+                    <Anchor point="CENTER" offsetY="-50" />
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

@@ -5,6 +5,8 @@ function ZO_HouseInformationTracker:Initialize(control, ...)
     self.populationLabel = control:GetNamedChild("ContainerPopulation")
     self.tagsLabel = control:GetNamedChild("ContainerTags")
     ZO_HUDTracker_Base.Initialize(self, control, ...)
+
+    HOUSE_INFORMATION_TRACKER_FRAGMENT = self:GetFragment()
 end
 
 function ZO_HouseInformationTracker:InitializeSetting()
@@ -53,7 +55,7 @@ function ZO_HouseInformationTracker:InitializeStyles()
             TEXT_HORIZONTAL_ALIGNMENT = TEXT_ALIGN_LEFT,
             TEXT_TYPE_HEADER = MODIFY_TEXT_TYPE_NONE,
 
-            TOP_LEVEL_PRIMARY_ANCHOR = ZO_Anchor:New(TOPLEFT, ZO_ZoneStoryTracker, BOTTOMLEFT, 0, 10),
+            TOP_LEVEL_PRIMARY_ANCHOR = ZO_Anchor:New(TOPLEFT, ZO_PromotionalEventTracker_TL, BOTTOMLEFT, 0, 10),
             TOP_LEVEL_SECONDARY_ANCHOR = ZO_Anchor:New(RIGHT, GuiRoot, RIGHT, -15, 10, ANCHOR_CONSTRAINS_X),
         },
         gamepad =
@@ -79,7 +81,7 @@ function ZO_HouseInformationTracker:InitializeStyles()
             TEXT_HORIZONTAL_ALIGNMENT = TEXT_ALIGN_RIGHT,
             TEXT_TYPE_HEADER = MODIFY_TEXT_TYPE_UPPERCASE,
 
-            TOP_LEVEL_PRIMARY_ANCHOR = ZO_Anchor:New(TOPLEFT, ZO_ZoneStoryTracker, BOTTOMLEFT, 0, 20),
+            TOP_LEVEL_PRIMARY_ANCHOR = ZO_Anchor:New(TOPLEFT, ZO_PromotionalEventTracker_TL, BOTTOMLEFT, 0, 20),
             TOP_LEVEL_SECONDARY_ANCHOR = ZO_Anchor:New(RIGHT, GuiRoot, RIGHT, -15, 10, ANCHOR_CONSTRAINS_X),
         },
     }
@@ -225,7 +227,5 @@ function ZO_HouseInformationTracker:UpdateVisibility()
 end
 
 function ZO_HouseInformationTracker_OnInitialized(control)
-    local tracker = ZO_HouseInformationTracker:New(control)
-    HOUSE_INFORMATION_TRACKER = tracker
-    HOUSE_INFORMATION_TRACKER_FRAGMENT = tracker:GetFragment()
+    HOUSE_INFORMATION_TRACKER = ZO_HouseInformationTracker:New(control)
 end

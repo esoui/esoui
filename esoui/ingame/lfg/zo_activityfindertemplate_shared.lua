@@ -74,6 +74,7 @@ function ZO_ActivityFinderTemplate_Shared:InitializeSingularPanelControls(reward
     self.titleLabel = panel:GetNamedChild("Title")
     self.descriptionLabel = panel:GetNamedChild("Description")
     self.setTypesSectionControl = panel:GetNamedChild("SetTypesSection")
+    self.ratingSectionControl = panel:GetNamedChild("RatingSection")
     self.groupSizeRangeLabel = panel:GetNamedChild("GroupSizeLabel")
 
     local rewardsSection = panel:GetNamedChild("RewardsSection")

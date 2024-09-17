@@ -358,6 +358,7 @@ function ZO_TributePatronBook_Gamepad:OnShowing()
     ZO_Gamepad_ParametricList_Search_Screen.OnShowing(self)
 
     if self.browseToCollectibleInfo then
+        self:ClearSearchText()
         local patronId = self.browseToCollectibleInfo.patronId
         local patronData = TRIBUTE_DATA_MANAGER:GetTributePatronData(patronId)
         local tributePatronCategoryData = patronData:GetCategoryData()
@@ -371,7 +372,6 @@ function ZO_TributePatronBook_Gamepad:OnShowing()
         self:GetScene():AddFragment(GAMEPAD_NAV_QUADRANT_2_3_BACKGROUND_FRAGMENT)
         self.categoriesRefreshGroup:MarkDirty("List")
     else
-        self:ActivateTextSearch()
         self:ShowListDescriptor(self.categoryListDescriptor)
     end
 end

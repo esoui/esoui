@@ -271,6 +271,10 @@ function ZO_SocialOptionsDialogGamepad:BuildGamerCardOption()
         local callback = function()
             local data = self.socialData
             local displayName = data.displayName
+            if data.gamerCardDisplayName then
+                displayName = data.gamerCardDisplayName
+            end
+
             if data.consoleId then
                 local undecoratedName = UndecorateDisplayName(displayName)
                 ShowGamerCard(undecoratedName, data.consoleId)

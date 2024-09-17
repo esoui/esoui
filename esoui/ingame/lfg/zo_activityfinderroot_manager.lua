@@ -1,13 +1,14 @@
 ZO_ACTIVITY_FINDER_SORT_PRIORITY =
 {
     GROUP = 0,
-    GROUP_FINDER = 100,
-    TIMED_ACTIVITIES = 200,
-    ZONE_STORIES = 300,
-    DUNGEONS = 400,
-    BATTLEGROUNDS = 500,
-    TRIBUTE = 600,
-    HOUSE_TOURS = 700,
+    PROMOTIONAL_EVENTS = 100,
+    GROUP_FINDER = 200,
+    TIMED_ACTIVITIES = 300,
+    ZONE_STORIES = 400,
+    DUNGEONS = 500,
+    BATTLEGROUNDS = 600,
+    TRIBUTE = 700,
+    HOUSE_TOURS = 800,
 }
 
 local function LFGSort(entry1, entry2)
@@ -90,7 +91,7 @@ function ActivityFinderRoot_Manager:Initialize()
             conciseFormatter = SI_LFG_LOCK_REASON_QUEUE_COOLDOWN_CONCISE,
             verboseFormatter = SI_LFG_LOCK_REASON_QUEUE_COOLDOWN_VERBOSE,
         },
-        [LFG_COOLDOWN_BATTLEGROUND_DESERTED] =
+        [LFG_COOLDOWN_BATTLEGROUND_DESERTED_QUEUE] =
         {
             isOnCooldown = false,
             expiresAtS = 0,

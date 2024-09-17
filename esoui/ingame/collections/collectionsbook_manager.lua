@@ -40,19 +40,20 @@ function CollectionsBook_Singleton:Initialize()
                 self:SetSearchString(currentSearch)
             end
         else
-            local unlockedHouses = self:GetUnlockedHouses()
             for _, unlockStateTable in pairs(collectiblesByNewUnlockState) do
                 for _, collectibleData in ipairs(unlockStateTable) do
                     if collectibleData:IsHouse() then
+                        local unlockedHouses = self:GetUnlockedHouses()
                         local nowUnlocked = collectibleData:IsUnlocked()
                         local collectibleId = collectibleData:GetId()
-                        if nowUnlocked and not unlockedHouses[collectibleId] then
-                            unlockedHouses[collectibleId] = 
-                            {
-                                houseId = collectibleData:GetReferenceId(),
-                                showPermissionsDialogOnEnter = true,
-                            }
-                        elseif not nowUnlocked and unlockedHouses[collectibleId] then
+                        local existingUnlockedHouseData = unlockedHouses[collectibleId]
+                        if nowUnlocked then
+                            if not existingUnlockedHouseData then
+                                existingUnlockedHouseData = { houseId = collectibleData:GetReferenceId(), }
+                                unlockedHouses[collectibleId] = existingUnlockedHouseData
+                            end
+                            existingUnlockedHouseData.showPermissionsDialogOnEnter = true
+                        elseif not nowUnlocked and existingUnlockedHouseData then
                             unlockedHouses[collectibleId] = nil
                         end
                     end

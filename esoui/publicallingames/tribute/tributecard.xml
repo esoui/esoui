@@ -289,12 +289,12 @@
         <Texture name="ZO_TributeCard_TargetableUnderlay_Template" inherits="ZO_TributeCard_StateEffectUnderlayWave_Template" textureFile="EsoUI/Art/Tribute/Overlays/tributeCardOverlay_targetable.dds" virtual="true" />
 
         <Texture name="ZO_TributeCard_TargetedOverlay_Template" inherits="ZO_TributeCard_StateEffectOverlay_Template" shaderEffectType="WAVE" textureFile="EsoUI/Art/Tribute/Overlays/tributeCardOverlay_targeted.dds" virtual="true">
-            <Wave angle="0.0" frequency="1.0" offset="0.0" speed="3.0" />
+            <Wave angleRadians="0.0" frequency="1.0" offset="0.0" speed="3.0" />
             <WaveBounds minX="0.01" maxX="0.01" minY="0.05" maxY="0.05" />
         </Texture>
 
         <Texture name="ZO_TributeCard_TargetedUnderlay_Template" inherits="ZO_TributeCard_StateEffectUnderlay_Template" shaderEffectType="WAVE" textureFile="EsoUI/Art/Tribute/Overlays/tributeCardOverlay_targeted.dds" virtual="true">
-            <Wave angle="0.0" frequency="1.0" offset="0.0" speed="3.0" />
+            <Wave angleRadians="0.0" frequency="1.0" offset="0.0" speed="3.0" />
             <WaveBounds minX="0.01" maxX="0.01" minY="0.065" maxY="0.065" />
         </Texture>
 
@@ -319,12 +319,12 @@
         </Texture>
 
         <Texture name="ZO_TributeCard_TriggerAnimationOverlayWave_Template" inherits="ZO_TributeCard_TriggerAnimation_Template" shaderEffectType="WAVE" blendMode="ADD" color="222222" level="120" scale="1.2" virtual="true">
-            <Wave angle="0.0" frequency="5.0" offset="0.0" speed="5.0" />
+            <Wave angleRadians="0.0" frequency="5.0" offset="0.0" speed="5.0" />
             <WaveBounds minX="0.0" maxX="0.0" minY="0.02" maxY="0.02" />
         </Texture>
 
         <Texture name="ZO_TributeCard_TriggerAnimationUnderlayWave_Template" inherits="ZO_TributeCard_TriggerAnimation_Template" shaderEffectType="WAVE" blendMode="ALPHA" color="ffffff" level="100" scale="1.2" virtual="true">
-            <Wave angle="0.0" frequency="7.0" offset="0.0" speed="5.0" />
+            <Wave angleRadians="0.0" frequency="7.0" offset="0.0" speed="5.0" />
             <WaveBounds minX="0.0" maxX="0.0" minY="0.02" maxY="0.02" />
         </Texture>
 

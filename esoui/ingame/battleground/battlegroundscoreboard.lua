@@ -3,62 +3,66 @@ ZO_BATTLEGROUND_SCOREBOARD_PADDING_HEIGHT = 30
 ZO_BATTLEGROUND_SCOREBOARD_PADDING_WIDTH_KEYBOARD = ZO_BATTLEGROUND_SCOREBOARD_PADDING_WIDTH + 59
 ZO_BATTLEGROUND_SCOREBOARD_PADDING_HEIGHT_KEYBOARD = ZO_BATTLEGROUND_SCOREBOARD_PADDING_HEIGHT + 63
 
-ZO_BATTLEGROUND_SCOREBOARD_OFFSET_Y_KEYBOARD = 40
-
 ZO_BATTLEGROUND_SCOREBOARD_HEADER_WIDTH = 902
-ZO_BATTLEGROUND_SCOREBOARD_HEADER_HEIGHT = 40
+ZO_BATTLEGROUND_SCOREBOARD_HEADER_HEIGHT = 90
 ZO_BATTLEGROUND_SCOREBOARD_HEADER_PADDING = 5
 ZO_BATTLEGROUND_SCOREBOARD_HEADER_DOUBLE_PADDING = ZO_BATTLEGROUND_SCOREBOARD_HEADER_PADDING * 2
+
+ZO_BATTLEGROUND_SCOREBOARD_PANEL_WIDTH = ZO_BATTLEGROUND_SCOREBOARD_HEADER_WIDTH + ZO_BATTLEGROUND_SCOREBOARD_PADDING_WIDTH * 2
+ZO_BATTLEGROUND_SCOREBOARD_PANEL_HEIGHT = 220
+ZO_BATTLEGROUND_SCOREBOARD_LARGE_PANEL_HEIGHT_KEYBOARD = 330
+ZO_BATTLEGROUND_SCOREBOARD_LARGE_PANEL_HEIGHT_GAMEPAD = 350
+
+ZO_BATTLEGROUND_SCOREBOARD_BACKGROUND_WIDTH = ZO_BATTLEGROUND_SCOREBOARD_PANEL_WIDTH
+ZO_BATTLEGROUND_SCOREBOARD_BACKGROUND_HEIGHT = ZO_BATTLEGROUND_SCOREBOARD_PANEL_HEIGHT * 3 + ZO_BATTLEGROUND_SCOREBOARD_HEADER_HEIGHT + ZO_BATTLEGROUND_SCOREBOARD_PADDING_HEIGHT * 2
 
 ZO_BATTLEGROUND_SCOREBOARD_PANEL_ALLIANCE_ICON_WIDTH = 48
 ZO_BATTLEGROUND_SCOREBOARD_PANEL_ALLIANCE_ICON_HEIGHT = ZO_BATTLEGROUND_SCOREBOARD_PANEL_ALLIANCE_ICON_WIDTH
 
 ZO_BATTLEGROUND_SCOREBOARD_HEADER_TEAM_SCORE_OFFSET_X = 28
-ZO_BATTLEGROUND_SCOREBOARD_HEADER_TEAM_SCORE_WIDTH = 240 - ZO_BATTLEGROUND_SCOREBOARD_HEADER_TEAM_SCORE_OFFSET_X
+ZO_BATTLEGROUND_SCOREBOARD_HEADER_TEAM_SCORE_WIDTH = 188 - ZO_BATTLEGROUND_SCOREBOARD_HEADER_TEAM_SCORE_OFFSET_X
 ZO_BATTLEGROUND_SCOREBOARD_HEADER_USER_ID_WIDTH = 280
 ZO_BATTLEGROUND_SCOREBOARD_HEADER_MEDALS_WIDTH = 180
 ZO_BATTLEGROUND_SCOREBOARD_HEADER_KILLS_WIDTH = 50
 ZO_BATTLEGROUND_SCOREBOARD_HEADER_ASSISTS_WIDTH = ZO_BATTLEGROUND_SCOREBOARD_HEADER_KILLS_WIDTH
 ZO_BATTLEGROUND_SCOREBOARD_HEADER_DEATHS_WIDTH = ZO_BATTLEGROUND_SCOREBOARD_HEADER_KILLS_WIDTH
 
-ZO_BATTLEGROUND_SCOREBOARD_PANEL_WIDTH = ZO_BATTLEGROUND_SCOREBOARD_HEADER_WIDTH
-ZO_BATTLEGROUND_SCOREBOARD_PANEL_HEIGHT = 234
-
-
-ZO_BATTLEGROUND_SCOREBOARD_PANEL_NAME_OFFSET_X = -20
 ZO_BATTLEGROUND_SCOREBOARD_PANEL_NAME_OFFSET_Y = 15
-ZO_BATTLEGROUND_SCOREBOARD_PANEL_NAME_WIDTH = ZO_BATTLEGROUND_SCOREBOARD_HEADER_TEAM_SCORE_WIDTH - ZO_BATTLEGROUND_SCOREBOARD_HEADER_DOUBLE_PADDING - ZO_BATTLEGROUND_SCOREBOARD_PANEL_ALLIANCE_ICON_WIDTH - ZO_BATTLEGROUND_SCOREBOARD_PANEL_NAME_OFFSET_X + ZO_BATTLEGROUND_SCOREBOARD_HEADER_TEAM_SCORE_OFFSET_X
+ZO_BATTLEGROUND_SCOREBOARD_PANEL_NAME_WIDTH = ZO_BATTLEGROUND_SCOREBOARD_HEADER_TEAM_SCORE_WIDTH - ZO_BATTLEGROUND_SCOREBOARD_HEADER_DOUBLE_PADDING - ZO_BATTLEGROUND_SCOREBOARD_PANEL_ALLIANCE_ICON_WIDTH + ZO_BATTLEGROUND_SCOREBOARD_HEADER_TEAM_SCORE_OFFSET_X
 ZO_BATTLEGROUND_SCOREBOARD_PANEL_SCORE_OFFSET_Y = 0
 
 ZO_BATTLEGROUND_SCOREBOARD_PANEL_OFFSET_Y = 10
 
-ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_INITIAL_OFFSET_X = ZO_BATTLEGROUND_SCOREBOARD_HEADER_TEAM_SCORE_WIDTH + ZO_BATTLEGROUND_SCOREBOARD_PANEL_ALLIANCE_ICON_WIDTH - ZO_BATTLEGROUND_SCOREBOARD_HEADER_DOUBLE_PADDING
 ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_INITIAL_OFFSET_Y = 20
 ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_OFFSET_Y = 10
 ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_MEDAL_USER_ID_DIFFERENCE = 100
 ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_MEDALS_WIDTH = ZO_BATTLEGROUND_SCOREBOARD_HEADER_MEDALS_WIDTH - ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_MEDAL_USER_ID_DIFFERENCE
-ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_MEDALS_OFFSET_X = ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_MEDAL_USER_ID_DIFFERENCE/2 + ZO_BATTLEGROUND_SCOREBOARD_HEADER_DOUBLE_PADDING
-ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_USER_ID_WIDTH = ZO_BATTLEGROUND_SCOREBOARD_HEADER_USER_ID_WIDTH + ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_MEDAL_USER_ID_DIFFERENCE/2
+ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_MEDALS_OFFSET_X = ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_MEDAL_USER_ID_DIFFERENCE / 2 + ZO_BATTLEGROUND_SCOREBOARD_HEADER_DOUBLE_PADDING
+ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_USER_ID_WIDTH = ZO_BATTLEGROUND_SCOREBOARD_HEADER_USER_ID_WIDTH + ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_MEDAL_USER_ID_DIFFERENCE / 2
 ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_HIGHLIGHT_ALPHA_MIN = 0
 ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_HIGHLIGHT_ALPHA_MAX = 1
-ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_HIGHLIGHT_ALPHA_MOUSE_OVER_MAX = .5
-local TIME_FOR_FULL_HIGHLIGHT_ALPHA_S = .255
+ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_HIGHLIGHT_ALPHA_MOUSE_OVER_MAX = 0.5
+local TIME_FOR_FULL_HIGHLIGHT_ALPHA_S = 0.255
 ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_HIGHLIGHT_ALPHA_PER_SECOND = 1 / TIME_FOR_FULL_HIGHLIGHT_ALPHA_S
 ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_NAVIGATION_THROTTLE_MS = 25
 
-ZO_BATTLEGROUND_SCOREBOARD_BACKGROUND_WIDTH = ZO_BATTLEGROUND_SCOREBOARD_HEADER_WIDTH + ZO_BATTLEGROUND_SCOREBOARD_PADDING_WIDTH * 2
-ZO_BATTLEGROUND_SCOREBOARD_BACKGROUND_HEIGHT = ZO_BATTLEGROUND_SCOREBOARD_PANEL_HEIGHT * 3 + ZO_BATTLEGROUND_SCOREBOARD_HEADER_HEIGHT + ZO_BATTLEGROUND_SCOREBOARD_PADDING_HEIGHT * 2
+ZO_BATTLEGROUND_SCOREBOARD_PANEL_CONTAINER_WIDTH = ZO_BATTLEGROUND_SCOREBOARD_PANEL_WIDTH + ZO_SCROLL_BAR_WIDTH
+ZO_BATTLEGROUND_SCOREBOARD_PANEL_CONTAINER_MAX_HEIGHT = ZO_BATTLEGROUND_SCOREBOARD_PANEL_HEIGHT * 3 + ZO_BATTLEGROUND_SCOREBOARD_PANEL_OFFSET_Y * 2
+ZO_BATTLEGROUND_SCOREBOARD_PANEL_CONTAINER_OFFSET_X = -2
 
 ZO_BATTLEGROUND_SCOREBOARD_PANEL_BG_PADDING = 20
 ZO_BATTLEGROUND_SCOREBOARD_PANEL_BG_OFFSET_X = -ZO_BATTLEGROUND_SCOREBOARD_PADDING_WIDTH + ZO_BATTLEGROUND_SCOREBOARD_PANEL_BG_PADDING
 ZO_BATTLEGROUND_SCOREBOARD_PANEL_BG_WIDTH = ZO_BATTLEGROUND_SCOREBOARD_BACKGROUND_WIDTH - ZO_BATTLEGROUND_SCOREBOARD_PANEL_BG_PADDING * 2
+
+local BACKGROUND_DEFAULT_OFFSET_Y = -20
+local BACKGROUND_ROUNDS_OFFSET_Y = -117
 
 local ANIMATE_PLAYER_ROW_HIGHLIGHT = true
 local DONT_ANIMATE_PLAYER_ROW_HIGHLIGHT = false
 local FORCE_REFRESH_PLAYER_SELECTION = true
 
 -----------------------------------
---Battleground Scoreboard_Manager
+--Battleground Scoreboard Fragment
 -----------------------------------
 
 local Battleground_Scoreboard_Fragment = ZO_HUDFadeSceneFragment:Subclass()
@@ -69,23 +73,37 @@ end
 
 function Battleground_Scoreboard_Fragment:Initialize(control)
     ZO_HUDFadeSceneFragment.Initialize(self, control)
-    self.gamepadBackground = control:GetNamedChild("BackgroundsGamepad")
-    self.keyboardBackground = control:GetNamedChild("BackgroundsKeyboard")
+    self.backgroundsContainer = control:GetNamedChild("Backgrounds")
+    self.gamepadBackground = self.backgroundsContainer:GetNamedChild("Gamepad")
+    self.keyboardBackground = self.backgroundsContainer:GetNamedChild("Keyboard")
     self.headers = control:GetNamedChild("Headers")
+    self.headerMainTitleLabel = self.headers:GetNamedChild("MainTitle")
+    self.headerExtraTitleLabel = self.headers:GetNamedChild("ExtraTitle")
+    self.headerAdditionalInfoLabel = self.headers:GetNamedChild("AdditionalInfo")
+    self.livesHeaderControl = self.headers:GetNamedChild("Lives")
     self.userIdHeaderLabel = self.headers:GetNamedChild("UserId")
 
+    self.panelContainer = control:GetNamedChild("PanelContainer")
+    self.panelContainerScrollChild = self.panelContainer:GetNamedChild("ScrollChild")
+
+    local anchorRelativeTo = RIGHT
+    local offsetX = -3
+    local offsetY = 0
+    ZO_ScrollContainer_Shared.SetScrollIndicatorAnchor(self.panelContainer, self.gamepadBackground, anchorRelativeTo, offsetX, offsetY)
+
+    self.roundsControl = control:GetNamedChild("Rounds")
+    self.roundSummary = ZO_BattlegroundScoreboardRoundIndicator:New(self.roundsControl, self)
+
     self.currentBattlegroundId = 0
-    self.currentBattlegroundScoreThreshold = 0
     self.playMatchResultSound = false
 
-    self.alliancePanels = {}
+    self.teamPanels = {}
     self.playerEntryData = {}
 
     for i = BATTLEGROUND_TEAM_ITERATION_BEGIN, BATTLEGROUND_TEAM_ITERATION_END do
-        local alliancePanelControl = CreateControlFromVirtual("$(parent)AlliancePanel", control, "ZO_Battleground_Scoreboard_Alliance_Panel", i)
-        local alliancePanel = Battleground_Scoreboard_Alliance_Panel:New(alliancePanelControl, i)
-        self.alliancePanels[i] = alliancePanel
-        alliancePanel.scoreboard = self
+        local teamPanelControl = CreateControlFromVirtual("$(parent)TeamPanel", self.panelContainerScrollChild, "ZO_Battleground_Scoreboard_Team_Panel", i)
+        local teamPanel = ZO_Battleground_Scoreboard_Team_Panel_Object:New(teamPanelControl, i)
+        self.teamPanels[i] = teamPanel
     end
 
     self:InitializePlatformStyle()
@@ -93,6 +111,7 @@ function Battleground_Scoreboard_Fragment:Initialize(control)
 
     control:RegisterForEvent(EVENT_PLAYER_ACTIVATED, function() self:UpdateBattlegroundStatus() end)
     control:RegisterForEvent(EVENT_GROUPING_TOOLS_LFG_JOINED, function() self:UpdateBattlegroundStatus() end)
+    control:RegisterForEvent(EVENT_BATTLEGROUND_RULESET_CHANGED, function() self:UpdateBattlegroundStatus() end)
     control:RegisterForEvent(EVENT_ZONE_SCORING_CHANGED, function() self:UpdateAll() end)
     control:RegisterForEvent(EVENT_BATTLEGROUND_STATE_CHANGED, function(_, ...) self:OnBattlegroundStateChanged(...) end)
     control:RegisterForEvent(EVENT_BATTLEGROUND_SCOREBOARD_UPDATED, function() self:UpdateAll() end)
@@ -103,10 +122,17 @@ function Battleground_Scoreboard_Fragment:Initialize(control)
 
     self:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_FRAGMENT_SHOWING then
+            self.viewedRound = GetCurrentBattlegroundRoundIndex()
+            self.showAggregateScores = false
+            self.dirty = true
+
             if self.dirty then
                 self:UpdateAll()
             end
-            SCREEN_NARRATION_MANAGER:QueueCustomEntry(self.customNarrationObjectName)
+            local NARRATE_HEADER = true
+            SCREEN_NARRATION_MANAGER:QueueCustomEntry(self.customNarrationObjectName, NARRATE_HEADER)
+        elseif newState == SCENE_FRAGMENT_HIDDEN then
+            ClearNarrationQueue(NARRATION_TYPE_HUD)
         end
     end)
 
@@ -119,8 +145,10 @@ do
         useKeyboardBackground = true,
         topLevel = "ZO_BattlegroundScoreboardTopLevel_Keyboard_Template",
         headers = "ZO_Battleground_Scoreboard_Headers_Keyboard_Template",
-        alliancePanel = "ZO_Battleground_Scoreboard_Alliance_Panel_Keyboard_Template",
+        teamPanel = "ZO_Battleground_Scoreboard_Team_Panel_Keyboard_Template",
         playerRow = "ZO_Battleground_Scoreboard_Player_Row_Keyboard_Template",
+        initialPlayerRowOffsetX = 250,
+        roundsControlOffsetY = -65,
         teamNameFonts =
         {
             {
@@ -137,8 +165,10 @@ do
         useGamepadBackground = true,
         topLevel = "ZO_BattlegroundScoreboardTopLevel_Gamepad_Template",
         headers = "ZO_Battleground_Scoreboard_Headers_Gamepad_Template",
-        alliancePanel = "ZO_Battleground_Scoreboard_Alliance_Panel_Gamepad_Template",
+        teamPanel = "ZO_Battleground_Scoreboard_Team_Panel_Gamepad_Template",
         playerRow = "ZO_Battleground_Scoreboard_Player_Row_Gamepad_Template",
+        initialPlayerRowOffsetX = 246,
+        roundsControlOffsetY = -5,
         teamNameFonts =
         {
             {
@@ -159,11 +189,18 @@ end
 function Battleground_Scoreboard_Fragment:ApplyPlatformStyle(style)
     ApplyTemplateToControl(self.control, style.topLevel)
     ApplyTemplateToControl(self.headers, style.headers)
+
+    self.panelContainer:SetScrollIndicatorEnabled(IsInGamepadPreferredMode())
+
     self.gamepadBackground:SetHidden(not style.useGamepadBackground)
     self.keyboardBackground:SetHidden(not style.useKeyboardBackground)
-    for i = BATTLEGROUND_TEAM_ITERATION_BEGIN, BATTLEGROUND_TEAM_ITERATION_END do
-        self.alliancePanels[i]:ApplyPlatformStyle(style)
+    for battlegroundTeam, teamPanel in pairs(self.teamPanels) do
+        teamPanel:ApplyPlatformStyle(style)
     end
+
+    self.roundsControl:ClearAnchors()
+    self.roundsControl:SetAnchor(TOP, self.backgroundsContainer, BOTTOM, 0, style.roundsControlOffsetY)
+
     self:UpdateAll()
 end
 
@@ -172,24 +209,81 @@ function Battleground_Scoreboard_Fragment:InitializeNarrationInfo()
 
     local narrationInfo =
     {
+        narrationType = NARRATION_TYPE_HUD,
         canNarrate = function()
             return self:IsShowing()
+        end,
+        headerNarrationFunction = function()
+            local narrations = {}
+
+            local gameType = GetBattlegroundGameType(self.currentBattlegroundId, self.viewedRound)
+            local gameTypeString = GetString("SI_BATTLEGROUNDGAMETYPE", gameType)
+            local hasRounds = DoesBattlegroundHaveRounds(self.currentBattlegroundId)
+            if self:ShouldShowAggregateScores() then
+                ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_BATTLEGROUND_SCOREBOARD_HEADER_MATCH_RESULTS_NARRATION)))
+                local resultString = SI_BATTLEGROUND_SCOREBOARD_HEADER_DEFEAT_TITLE
+                local playerTeam = GetUnitBattlegroundTeam("player")
+                local playerTeamWon = DidCurrentBattlegroundTeamWinOrTieRound(playerTeam, self.viewedRound)
+                if playerTeamWon then
+                    resultString = SI_BATTLEGROUND_SCOREBOARD_HEADER_VICTORY_TITLE
+                end
+                ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(resultString)))
+            elseif hasRounds then
+                ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_BATTLEGROUND_SCOREBOARD_HEADER_ROUND_TITLE, self.viewedRound)))
+            end
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(gameTypeString))
+
+            local additionalInfoLabelNarrationText = nil
+            if self:IsViewingCurrentRound() or self:ShouldShowAggregateScores() then
+                if IsCurrentBattlegroundStateTimed() then
+                    local currentBattlegroundTimeMS = GetCurrentBattlegroundStateTimeRemaining()
+                    local formattedTime = ZO_FormatTime(zo_ceil(currentBattlegroundTimeMS / 1000), TIME_FORMAT_STYLE_DESCRIPTIVE, TIME_FORMAT_PRECISION_SECONDS, TIME_FORMAT_DIRECTION_DESCENDING)
+                    formattedTime = ZO_SELECTED_TEXT:Colorize(formattedTime)
+
+                    local battlegroundState = GetCurrentBattlegroundState()
+                    if battlegroundState == BATTLEGROUND_STATE_PREROUND then
+                        additionalInfoLabelNarrationText = zo_strformat(SI_BATTLEGROUND_SCOREBOARD_WAITING_FOR_PLAYERS_TIMER_NARRATION_FORMAT, formattedTime)
+                    elseif battlegroundState == BATTLEGROUND_STATE_STARTING then
+                        additionalInfoLabelNarrationText = zo_strformat(SI_BATTLEGROUND_SCOREBOARD_STARTING_TIMER_NARRATION_FORMAT, formattedTime)
+                    elseif battlegroundState == BATTLEGROUND_STATE_RUNNING then
+                        additionalInfoLabelNarrationText = zo_strformat(SI_BATTLEGROUND_SCOREBOARD_IN_PROGRESS_TIMER_NARRATION_FORMAT, formattedTime)
+                    elseif battlegroundState == BATTLEGROUND_STATE_POSTROUND then
+                        additionalInfoLabelNarrationText = zo_strformat(SI_BATTLEGROUND_SCOREBOARD_ROUND_ENDING_TIMER_NARRATION_FORMAT, formattedTime)
+                    elseif battlegroundState == BATTLEGROUND_STATE_FINISHED then
+                        additionalInfoLabelNarrationText = zo_strformat(SI_BATTLEGROUND_SCOREBOARD_MATCH_ENDING_TIMER_NARRATION_FORMAT, formattedTime)
+                    else
+                        additionalInfoLabelNarrationText = formattedTime
+                    end
+                end
+            else
+                local roundResult = GetCurrentBattlegroundRoundResult(self.viewedRound)
+                additionalInfoLabelNarrationText = GetString("SI_BATTLEGROUNDROUNDRESULT", roundResult)
+            end
+
+            if additionalInfoLabelNarrationText then
+                ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(additionalInfoLabelNarrationText))
+            end
+
+            return narrations
         end,
         selectedNarrationFunction = function()
             local narrations = {}
             local selectedData = self.selectedPlayerData
 
             -- Team Info for Selected Row
-            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString("SI_BATTLEGROUNDTEAM", selectedData.battlegroundAlliance)))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString("SI_BATTLEGROUNDTEAM", selectedData.battlegroundTeam)))
             ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_BATTLEGROUND_SCOREBOARD_HEADER_TEAM_SCORE)))
-            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.alliancePanels[selectedData.battlegroundAlliance]:GetScore()))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.teamPanels[selectedData.battlegroundTeam]:GetScore()))
 
             -- Selected Row
             ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(ZO_GetPrimaryPlayerNameHeader()))
             ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(selectedData.displayName))
+            if selectedData.showLives then
+                ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_BATTLEGROUND_SCOREBOARD_HEADER_REMAINING_LIVES_NARRATION)))
+                ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(selectedData.lives))
+            end
             ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString("SI_SCORETRACKERENTRYTYPE", SCORE_TRACKER_TYPE_SCORE)))
             ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(selectedData.medalScore))
-
             ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_BATTLEGROUND_SCOREBOARD_HEADER_KILLS_NARRATION)))
             ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(selectedData.kills))
             ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_BATTLEGROUND_SCOREBOARD_HEADER_DEATHS_NARRATION)))
@@ -201,10 +295,14 @@ function Battleground_Scoreboard_Fragment:InitializeNarrationInfo()
             local matchInfo = SYSTEMS:GetObject("matchInfo")
 
             -- Header
-            local classId = GetScoreboardEntryClassId(selectedData.entryIndex)
+            local classId = GetScoreboardEntryClassId(selectedData.entryIndex, selectedData.roundIndex)
             ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_CLASS_NAME, GetClassName(GENDER_MALE, classId))))
             ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(selectedData.displayName))
-            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_BATTLEGROUND_MATCH_INFO_PANEL_TITLE)))
+            if self:ShouldShowAggregateScores() or not DoesBattlegroundHaveRounds(self.currentBattlegroundId) then
+                ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_BATTLEGROUND_MATCH_INFO_PANEL_TITLE)))
+            else
+                ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_BATTLEGROUND_MATCH_INFO_ROUND_PANEL_TITLE)))
+            end
 
             -- Stats
             ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(matchInfo.damageDealtLabelText))
@@ -231,28 +329,26 @@ function Battleground_Scoreboard_Fragment:InitializeNarrationInfo()
             return narrations
         end,
         additionalInputNarrationFunction = function()
-            if BATTLEGROUND_SCOREBOARD_END_OF_GAME.scene:IsShowing() then
-                return BATTLEGROUND_SCOREBOARD_END_OF_GAME:GetKeybindsNarrationData()
-            end
-        end,
-        footerNarrationFunction = function()
             local narrations = {}
             if BATTLEGROUND_SCOREBOARD_END_OF_GAME.scene:IsShowing() then
-                ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(BATTLEGROUND_SCOREBOARD_END_OF_GAME.closingTimerLabelText))
-            else
-                ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(BATTLEGROUND_HUD_FRAGMENT:GetStateText()))
+                ZO_CombineNumericallyIndexedTables(narrations, BATTLEGROUND_SCOREBOARD_END_OF_GAME:GetKeybindsNarrationData())
             end
+            if self.roundSummary:IsVisible() then
+                ZO_CombineNumericallyIndexedTables(narrations, self.roundSummary:GetKeybindsNarrationData())
+            end
+
             return narrations
-        end
+        end,
     }
     SCREEN_NARRATION_MANAGER:RegisterCustomObject(self.customNarrationObjectName, narrationInfo)
 end
 
 function Battleground_Scoreboard_Fragment:OnUpdate(control, timeS)
     if self.lastUpdateS then
+        self:UpdateHeaderAdditionalInfo()
         local deltaS = timeS - self.lastUpdateS
-        for battlegroundAlliance, alliancePanel in pairs(self.alliancePanels) do
-            alliancePanel:OnUpdate(deltaS)
+        for _, teamPanel in pairs(self.teamPanels) do
+            teamPanel:OnUpdate(deltaS)
         end
     end
     self.lastUpdateS = timeS
@@ -267,14 +363,14 @@ do
     }
 
     local KEYED_BATTLEGROUND_TEAM_SORT_ORDER = {}
-    for index, alliance in ipairs(BATTLEGROUND_TEAM_SORT_ORDER) do
-        KEYED_BATTLEGROUND_TEAM_SORT_ORDER[alliance] = index
+    for index, team in ipairs(BATTLEGROUND_TEAM_SORT_ORDER) do
+        KEYED_BATTLEGROUND_TEAM_SORT_ORDER[team] = index
     end
 
     local function SortPlayerData(leftData, rightData)
-        local leftAllianceSortOrder = KEYED_BATTLEGROUND_TEAM_SORT_ORDER[leftData.battlegroundAlliance]
-        local rightAllianceSortOrder = KEYED_BATTLEGROUND_TEAM_SORT_ORDER[rightData.battlegroundAlliance]
-        if leftAllianceSortOrder == rightAllianceSortOrder then
+        local leftTeamSortOrder = KEYED_BATTLEGROUND_TEAM_SORT_ORDER[leftData.battlegroundTeam]
+        local rightTeamSortOrder = KEYED_BATTLEGROUND_TEAM_SORT_ORDER[rightData.battlegroundTeam]
+        if leftTeamSortOrder == rightTeamSortOrder then
             if leftData.medalScore == rightData.medalScore then
                 if leftData.deaths == rightData.deaths then
                     return leftData.kills > rightData.kills
@@ -285,15 +381,97 @@ do
                 return leftData.medalScore > rightData.medalScore
             end
         else
-            return leftAllianceSortOrder < rightAllianceSortOrder
+            return leftTeamSortOrder < rightTeamSortOrder
+        end
+    end
+
+    function Battleground_Scoreboard_Fragment:UpdateHeaderAdditionalInfo()
+        if self:IsViewingCurrentRound() or self:ShouldShowAggregateScores() then
+            if IsCurrentBattlegroundStateTimed() then
+                local currentBattlegroundTimeMS = GetCurrentBattlegroundStateTimeRemaining()
+                local formattedTime = ZO_FormatTime(zo_ceil(currentBattlegroundTimeMS / 1000), TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_SECONDS, TIME_FORMAT_DIRECTION_DESCENDING)
+                formattedTime = ZO_SELECTED_TEXT:Colorize(formattedTime)
+
+                local headerText = formattedTime
+                local battlegroundState = GetCurrentBattlegroundState()
+                if battlegroundState == BATTLEGROUND_STATE_PREROUND then
+                    headerText = zo_strformat(SI_BATTLEGROUND_SCOREBOARD_WAITING_FOR_PLAYERS_TIMER_FORMAT, formattedTime)
+                elseif battlegroundState == BATTLEGROUND_STATE_STARTING then
+                    headerText = zo_strformat(SI_BATTLEGROUND_SCOREBOARD_STARTING_TIMER_FORMAT, formattedTime)
+                elseif battlegroundState == BATTLEGROUND_STATE_RUNNING then
+                    -- No additional text/formatting, just timer
+                elseif battlegroundState == BATTLEGROUND_STATE_POSTROUND then
+                    headerText = zo_strformat(SI_BATTLEGROUND_SCOREBOARD_ROUND_ENDING_TIMER_FORMAT, formattedTime)
+                elseif battlegroundState == BATTLEGROUND_STATE_FINISHED then
+                    headerText = zo_strformat(SI_BATTLEGROUND_SCOREBOARD_MATCH_ENDING_TIMER_FORMAT, formattedTime)
+                end
+
+                self.headerAdditionalInfoLabel:SetHidden(false)
+                self.headerAdditionalInfoLabel:SetText(headerText)
+                self.headerAdditionalInfoLabel:SetColor(ZO_NORMAL_TEXT:UnpackRGBA())
+            else
+                self.headerAdditionalInfoLabel:SetHidden(true)
+            end
+        else
+            local roundResult = GetCurrentBattlegroundRoundResult(self.viewedRound)
+            local roundResultText = GetString("SI_BATTLEGROUNDROUNDRESULT", roundResult)
+            self.headerAdditionalInfoLabel:SetHidden(false)
+            self.headerAdditionalInfoLabel:SetText(roundResultText)
+            self.headerAdditionalInfoLabel:SetColor(ZO_BATTLEGROUND_WINNER_TEXT:UnpackRGBA())
         end
     end
 
     function Battleground_Scoreboard_Fragment:UpdateAll()
         if not self:IsShowing() then
             self.dirty = true
-            return 
+            return
         end
+
+        local gameType = GetBattlegroundGameType(self.currentBattlegroundId, self.viewedRound)
+        local gameTypeString = GetString("SI_BATTLEGROUNDGAMETYPE", gameType)
+        local hasRounds = DoesBattlegroundHaveRounds(self.currentBattlegroundId)
+
+        self.headerExtraTitleLabel:SetHidden(not hasRounds)
+        if hasRounds then
+            self.headerExtraTitleLabel:SetText(zo_strformat(SI_BATTLEGROUND_SCOREBOARD_HEADER_EXTRA_TITLE_FORMATTER, gameTypeString))
+        end
+
+        local playerTeam = GetUnitBattlegroundTeam("player")
+        local playerTeamWon = DidCurrentBattlegroundTeamWinOrTieRound(playerTeam, self.viewedRound)
+
+        if self:ShouldShowAggregateScores() then
+            local resultString = SI_BATTLEGROUND_SCOREBOARD_HEADER_DEFEAT_TITLE
+            if playerTeamWon then
+                resultString = SI_BATTLEGROUND_SCOREBOARD_HEADER_VICTORY_TITLE
+            end
+            self.headerMainTitleLabel:SetText(GetString(resultString))
+        elseif hasRounds then
+            self.headerMainTitleLabel:SetText(zo_strformat(SI_BATTLEGROUND_SCOREBOARD_HEADER_ROUND_TITLE, self.viewedRound))
+        else
+            self.headerMainTitleLabel:SetText(gameTypeString)
+        end
+        self:UpdateHeaderAdditionalInfo()
+
+        local numBattlegroundTeams = GetBattlegroundNumTeams(self.currentBattlegroundId)
+        local teamSize = GetBattlegroundTeamSize(self.currentBattlegroundId)
+        local teamPanelHeight = ZO_Battleground_Scoreboard_Team_Panel_Object.GetPanelHeight(teamSize)
+        local totalTeamPanelsHeight = teamPanelHeight * numBattlegroundTeams + ZO_BATTLEGROUND_SCOREBOARD_PANEL_OFFSET_Y * (numBattlegroundTeams - 1)
+        -- add some padding so we're not right against the scroll limits
+        totalTeamPanelsHeight = totalTeamPanelsHeight + 5
+        local containerHeight = zo_min(totalTeamPanelsHeight, ZO_BATTLEGROUND_SCOREBOARD_PANEL_CONTAINER_MAX_HEIGHT)
+        self.panelContainer:SetHeight(containerHeight)
+
+        local backgroundsHeight = containerHeight + ZO_BATTLEGROUND_SCOREBOARD_HEADER_HEIGHT + ZO_BATTLEGROUND_SCOREBOARD_PADDING_HEIGHT * 2
+        self.backgroundsContainer:SetHeight(backgroundsHeight)
+        self.backgroundsContainer:ClearAnchors()
+        local backgroundsContainerOffsetY = BACKGROUND_DEFAULT_OFFSET_Y
+        if hasRounds and containerHeight >= ZO_BATTLEGROUND_SCOREBOARD_PANEL_CONTAINER_MAX_HEIGHT then
+            backgroundsContainerOffsetY = BACKGROUND_ROUNDS_OFFSET_Y
+        end
+        self.backgroundsContainer:SetAnchor(CENTER, nil, CENTER, 0, backgroundsContainerOffsetY)
+
+        local hasLimitedLives = DoesBattlegroundHaveLimitedPlayerLives(self.currentBattlegroundId)
+        self.livesHeaderControl:SetHidden(not hasLimitedLives)
 
         self.userIdHeaderLabel:SetText(ZO_GetPrimaryPlayerNameHeader())
 
@@ -303,11 +481,9 @@ do
         self:PostUpdatePanels()
         self:UpdateAnchors()
 
-        if self.playMatchResultSound then
-            local playerAlliance = GetUnitBattlegroundTeam("player")
+        self.roundSummary:SetDetails(GetBattlegroundNumRounds(self.currentBattlegroundId), self.viewedRound, self:ShouldShowAggregateScores())
 
-            alliancePanel = self.alliancePanels[playerAlliance]
-            local playerTeamWon = alliancePanel:GetScore() == self.highestPanelScore
+        if self.playMatchResultSound then
             if playerTeamWon then
                 PlaySound(SOUNDS.BATTLEGROUND_MATCH_WON)
             else
@@ -322,30 +498,64 @@ do
 
     function Battleground_Scoreboard_Fragment:PreUpdatePanels()
         self.highestPanelScore = 0
+        local teamSize = GetBattlegroundTeamSize(self.currentBattlegroundId)
+        local useSmallEntries = self:ShouldScoreboardUseSmallPlayerEntries()
 
-        for battlegroundAlliance, alliancePanel in pairs(self.alliancePanels) do
-            alliancePanel:PreUpdatePanel()
-            local panelScore = alliancePanel:GetScore()
-            if panelScore > self.highestPanelScore then
-                self.highestPanelScore = panelScore
+        for battlegroundTeam, teamPanel in pairs(self.teamPanels) do
+            teamPanel:RemoveAllPlayers()
+            if DoesBattlegroundHaveTeam(self.currentBattlegroundId, battlegroundTeam) then
+                teamPanel:UpdateScore()
+                teamPanel:SetTeamSize(teamSize)
+                teamPanel:UseSmallPlayerEntries(useSmallEntries)
+                local panelScore = teamPanel:GetScore()
+                if panelScore > self.highestPanelScore then
+                    self.highestPanelScore = panelScore
+                end
             end
         end
     end
 
     function Battleground_Scoreboard_Fragment:RebuildPlayerData()
         ZO_ClearNumericallyIndexedTable(self.playerEntryData)
-
-        local numScoreboardEntries = GetNumScoreboardEntries()
+        local showAggregate = self:ShouldShowAggregateScores()
+        local roundIndex = showAggregate and GetCurrentBattlegroundRoundIndex() or self.viewedRound
+        local hasLimitedLives = DoesBattlegroundHaveLimitedPlayerLives(self.currentBattlegroundId)
+        local numScoreboardEntries = GetNumScoreboardEntries(roundIndex)
         for entryIndex = 1, numScoreboardEntries do
-            local characterName, displayName, battlegroundAlliance, isLocalPlayer = GetScoreboardEntryInfo(entryIndex)
+            local characterName, displayName, battlegroundTeam, isLocalPlayer = GetScoreboardEntryInfo(entryIndex, roundIndex)
+
+            local showLives = hasLimitedLives
+            local lives
+            local medalScore
+            local kills
+            local deaths
+            local assists
+            if not showAggregate then
+                lives = GetScoreboardEntryNumLivesRemaining(entryIndex, roundIndex)
+                medalScore = GetScoreboardEntryScoreByType(entryIndex, SCORE_TRACKER_TYPE_SCORE, roundIndex)
+                kills = GetScoreboardEntryScoreByType(entryIndex, SCORE_TRACKER_TYPE_KILL, roundIndex)
+                deaths = GetScoreboardEntryScoreByType(entryIndex, SCORE_TRACKER_TYPE_DEATH, roundIndex)
+                assists = GetScoreboardEntryScoreByType(entryIndex, SCORE_TRACKER_TYPE_ASSISTS, roundIndex)
+            else
+                showLives = false
+                lives = 0
+                medalScore = GetBattlegroundCumulativeScoreForScoreboardEntryByType(entryIndex, SCORE_TRACKER_TYPE_SCORE, roundIndex)
+                kills = GetBattlegroundCumulativeScoreForScoreboardEntryByType(entryIndex, SCORE_TRACKER_TYPE_KILL, roundIndex)
+                deaths = GetBattlegroundCumulativeScoreForScoreboardEntryByType(entryIndex, SCORE_TRACKER_TYPE_DEATH, roundIndex)
+                assists = GetBattlegroundCumulativeScoreForScoreboardEntryByType(entryIndex, SCORE_TRACKER_TYPE_ASSISTS, roundIndex)
+            end
+
             local playerEntry =
             {
+                roundIndex = roundIndex,
                 entryIndex = entryIndex,
-                battlegroundAlliance = battlegroundAlliance,
-                medalScore = GetScoreboardEntryScoreByType(entryIndex, SCORE_TRACKER_TYPE_SCORE),
-                kills = GetScoreboardEntryScoreByType(entryIndex, SCORE_TRACKER_TYPE_KILL),
-                deaths = GetScoreboardEntryScoreByType(entryIndex, SCORE_TRACKER_TYPE_DEATH),
-                assists = GetScoreboardEntryScoreByType(entryIndex, SCORE_TRACKER_TYPE_ASSISTS),
+                battlegroundTeam = battlegroundTeam,
+                showLives = showLives,
+                lives = lives,
+                medalScore = medalScore,
+                kills = kills,
+                deaths = deaths,
+                assists = assists,
                 characterName = characterName,
                 displayName = displayName,
                 isLocalPlayer = isLocalPlayer,
@@ -369,12 +579,17 @@ do
         end
     end
 
+    function Battleground_Scoreboard_Fragment:ShouldTryToAddPlaceholderRows()
+        local battlegroundState = GetCurrentBattlegroundState()
+        return self:IsViewingCurrentRound() and battlegroundState ~= BATTLEGROUND_STATE_FINISHED and not HasTeamWonBattlegroundEarly()
+    end
+
     function Battleground_Scoreboard_Fragment:AddPlayerRows()
         local wasPlayerRowReselected = false
 
         for i, data in ipairs(self.playerEntryData) do
-            self.alliancePanels[data.battlegroundAlliance]:AddPlayer(data)
-            
+            self.teamPanels[data.battlegroundTeam]:AddPlayer(data)
+
             local selectedPlayerData = self.selectedPlayerData
             if selectedPlayerData and selectedPlayerData.characterName == data.characterName then
                 data.currentHighlightAlpha = selectedPlayerData.currentHighlightAlpha
@@ -385,36 +600,59 @@ do
             end
         end
 
+        -- Add entries to inidicate we're looking for replacements if necessary
+        if self:ShouldTryToAddPlaceholderRows() then
+            for battlegroundTeam, teamPanel in pairs(self.teamPanels) do
+                if teamPanel:GetNumPlayers() < teamPanel:GetTeamSize() then
+                    local placeholderEntry =
+                    {
+                        isPlaceholderEntry = true,
+                    }
+                    self.teamPanels[battlegroundTeam]:AddPlayer(placeholderEntry)
+                end
+            end
+        end
+
         if not wasPlayerRowReselected then
             self:SelectDefaultPlayerRow(DONT_ANIMATE_PLAYER_ROW_HIGHLIGHT, FORCE_REFRESH_PLAYER_SELECTION)
         end
     end
 
     function Battleground_Scoreboard_Fragment:PostUpdatePanels()
-        for battlegroundAlliance, alliancePanel in pairs(self.alliancePanels) do
-            alliancePanel:PostUpdatePanel(self.highestPanelScore)
+        for battlegroundTeam, teamPanel in pairs(self.teamPanels) do
+            if DoesBattlegroundHaveTeam(self.currentBattlegroundId, battlegroundTeam) then
+                teamPanel:PostUpdatePanel(self.highestPanelScore)
+            end
         end
     end
 
     function Battleground_Scoreboard_Fragment:UpdateAnchors()
-        local previousControl = self.headers
-        for _, bgOrder in ipairs(BATTLEGROUND_TEAM_SORT_ORDER) do
-            local currentPanel = self.alliancePanels[bgOrder]
-            local control = currentPanel.control
-            control:ClearAnchors()
-            control:SetAnchor(TOPLEFT, previousControl, BOTTOMLEFT, 0, ZO_BATTLEGROUND_SCOREBOARD_PANEL_OFFSET_Y)
+        local previousControl = nil -- default to the parent
+        for _, battlegroundTeam in ipairs(BATTLEGROUND_TEAM_SORT_ORDER) do
+            local teamPanel = self.teamPanels[battlegroundTeam]
+            local control = teamPanel.control
+            local battlegroundHasTeam = DoesBattlegroundHaveTeam(self.currentBattlegroundId, battlegroundTeam)
+            control:SetHidden(not battlegroundHasTeam)
+            if battlegroundHasTeam then
+                control:ClearAnchors()
+                if previousControl then
+                    control:SetAnchor(TOPLEFT, previousControl, BOTTOMLEFT, 0, ZO_BATTLEGROUND_SCOREBOARD_PANEL_OFFSET_Y)
+                else
+                    control:SetAnchor(TOPLEFT, previousControl, TOPLEFT, 0, 0)
+                end
 
-            previousControl = control
+                previousControl = control
+            end
         end
     end
 end
 
 function Battleground_Scoreboard_Fragment:OnBattlegroundStateChanged(previousState, currentState)
-    if currentState == BATTLEGROUND_STATE_POSTGAME then
+    if currentState == BATTLEGROUND_STATE_FINISHED then
         SCENE_MANAGER:SetHUDScene("battleground_scoreboard_end_of_game")
         SCENE_MANAGER:SetHUDUIScene("battleground_scoreboard_end_of_game", true)
         self.playMatchResultSound = true
-    elseif previousState == BATTLEGROUND_STATE_POSTGAME then
+    elseif previousState == BATTLEGROUND_STATE_FINISHED then
         SCENE_MANAGER:RestoreHUDScene()
         SCENE_MANAGER:RestoreHUDUIScene()
         self.playMatchResultSound = false
@@ -430,26 +668,26 @@ end
 function Battleground_Scoreboard_Fragment:UpdateBattlegroundStatus()
     if IsActiveWorldBattleground() then
         if GetCurrentBattlegroundState() == BATTLEGROUND_STATE_POSTGAME and GetCurrentBattlegroundStateTimeRemaining() > 0 then
-            -- in case someone reloads their UI while in postgame, 
+            -- in case someone reloads their UI while in postgame,
             -- we want to continue showing the postgame scoreboard when they load back in
             SCENE_MANAGER:SetHUDScene("battleground_scoreboard_end_of_game")
-            SCENE_MANAGER:SetHUDUIScene("battleground_scoreboard_end_of_game", true)
+            local HIDES_AUTOMATICALLY = true
+            SCENE_MANAGER:SetHUDUIScene("battleground_scoreboard_end_of_game", HIDES_AUTOMATICALLY)
         end
         self.currentBattlegroundId = GetCurrentBattlegroundId()
-        self.currentBattlegroundScoreThreshold = GetScoreToWinBattleground(self.currentBattlegroundId)
 
         self:UpdateAll()
     else
         self.currentBattlegroundId = 0
-        self.currentBattlegroundScoreThreshold = 0
     end
 end
 
 function Battleground_Scoreboard_Fragment:OnHUDButtonPressedDown()
-    if GetCurrentBattlegroundState() ~= BATTLEGROUND_STATE_POSTGAME then
+    if GetCurrentBattlegroundState() ~= BATTLEGROUND_STATE_FINISHED then
         SCENE_MANAGER:SetHUDScene("battleground_scoreboard_in_game")
         local HIDES_AUTOMATICALLY = true
         SCENE_MANAGER:SetHUDUIScene("battleground_scoreboard_in_game_ui", HIDES_AUTOMATICALLY)
+        PlaySound(SOUNDS.BATTLEGROUND_SCOREBOARD_OPEN)
     end
 end
 
@@ -460,10 +698,6 @@ end
 
 function Battleground_Scoreboard_Fragment:GetCurrentBattlegroundId()
     return self.currentBattlegroundId
-end
-
-function Battleground_Scoreboard_Fragment:GetCurrentBattlegroundScoreThreshold()
-    return self.currentBattlegroundScoreThreshold
 end
 
 function Battleground_Scoreboard_Fragment:GetPlayerDataByEntryIndex(entryIndex)
@@ -494,6 +728,10 @@ function Battleground_Scoreboard_Fragment:SetSelectedPlayerData(newPlayerData, a
 
         self.selectedPlayerData = newPlayerData
 
+        if self.selectedPlayerData then
+            self.panelContainer:ScrollControlIntoCentralView(self.selectedPlayerData.rowObject:GetControl())
+        end
+
         self:RefreshMatchInfoDisplay()
     end
 end
@@ -505,9 +743,9 @@ function Battleground_Scoreboard_Fragment:SelectDefaultPlayerRow(animate, forceR
 end
 
 function Battleground_Scoreboard_Fragment:CanCyclePlayerSelection()
-    local now = GetFrameTimeMilliseconds()
-    if not self.playerNavigationThrottleNextUpdateMs or self.playerNavigationThrottleNextUpdateMs < now then
-        self.playerNavigationThrottleNextUpdateMs = now + ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_NAVIGATION_THROTTLE_MS
+    local nowMs = GetFrameTimeMilliseconds()
+    if not self.playerNavigationThrottleNextUpdateMs or self.playerNavigationThrottleNextUpdateMs < nowMs then
+        self.playerNavigationThrottleNextUpdateMs = nowMs + ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_NAVIGATION_THROTTLE_MS
         return true
     end
     return false
@@ -525,6 +763,26 @@ function Battleground_Scoreboard_Fragment:SelectNextPlayerData()
         self:SetSelectedPlayerData(self.selectedPlayerData.nextData, ANIMATE_PLAYER_ROW_HIGHLIGHT)
         SCREEN_NARRATION_MANAGER:QueueCustomEntry(self.customNarrationObjectName)
     end
+end
+
+function Battleground_Scoreboard_Fragment:OnPlayerRowMouseDown(control, button)
+    local data = control.owner:GetData()
+    if data.isPlaceholderEntry then
+        return
+    end
+
+    self:SetSelectedPlayerData(data, ANIMATE_PLAYER_ROW_HIGHLIGHT)
+    if button == MOUSE_BUTTON_INDEX_RIGHT then
+        self:ShowKeyboardPlayerMenu(control)
+    end
+end
+
+function Battleground_Scoreboard_Fragment:ShouldScoreboardUseSmallPlayerEntries()
+    local teamSize = GetBattlegroundTeamSize(self.currentBattlegroundId)
+    local numTeams = GetBattlegroundNumTeams(self.currentBattlegroundId)
+    local maxPlayerCount = teamSize * numTeams
+    local DEFAULT_ENTRY_SIZE_PLAYER_THRESHOLD = 12
+    return maxPlayerCount > DEFAULT_ENTRY_SIZE_PLAYER_THRESHOLD
 end
 
 do
@@ -589,7 +847,7 @@ end
 
 function Battleground_Scoreboard_Fragment:RefreshMatchInfoDisplay()
     if self:IsShowing() and self.selectedPlayerData then
-        SYSTEMS:GetObject("matchInfo"):SetupForScoreboardEntry(self.selectedPlayerData.entryIndex)
+        SYSTEMS:GetObject("matchInfo"):SetupForScoreboardEntry(self.selectedPlayerData.roundIndex, self.selectedPlayerData.entryIndex, self:ShouldShowAggregateScores())
     end
 end
 
@@ -601,40 +859,89 @@ function Battleground_Scoreboard_Fragment:Show(...)
     self:RefreshMatchInfoDisplay()
 end
 
-------------------------------
--- Scoreboard Alliance Panel
-------------------------------
+function Battleground_Scoreboard_Fragment:SetViewedRound(roundIndex, clampRound)
+    self.showAggregateScores = false
 
-Battleground_Scoreboard_Alliance_Panel = ZO_Object:Subclass()
+    local currentRoundIndex = GetCurrentBattlegroundRoundIndex()
 
-function Battleground_Scoreboard_Alliance_Panel:New(...)
-    local alliancePanel = ZO_Object.New(self)
-    alliancePanel:Initialize(...)
-    return alliancePanel
+    local clampedRoundIndex
+    if clampRound then
+        clampedRoundIndex = zo_clamp(roundIndex, 1, currentRoundIndex)
+    else
+        clampedRoundIndex = roundIndex
+    end
+    
+    if clampedRoundIndex ~= self.viewedRound and clampedRoundIndex <= currentRoundIndex then
+        if clampedRoundIndex < self.viewedRound then
+            PlaySound(SOUNDS.BATTLEGROUND_SCOREBOARD_PREVIOUS_ROUND)
+        else
+            PlaySound(SOUNDS.BATTLEGROUND_SCOREBOARD_NEXT_ROUND)
+        end
+        self.viewedRound = clampedRoundIndex
+        self.roundSummary:SetDetails(GetBattlegroundNumRounds(), self.viewedRound, self:ShouldShowAggregateScores())
+
+        self:UpdateAll()
+        local NARRATE_HEADER = true
+        SCREEN_NARRATION_MANAGER:QueueCustomEntry(self.customNarrationObjectName, NARRATE_HEADER)
+    end
 end
 
+function Battleground_Scoreboard_Fragment:GetViewedRound()
+    return self.viewedRound
+end
 
-function Battleground_Scoreboard_Alliance_Panel:Initialize(control, battlegroundAlliance)
+function Battleground_Scoreboard_Fragment:IsViewingCurrentRound()
+    return self.viewedRound == GetCurrentBattlegroundRoundIndex()
+end
+
+function Battleground_Scoreboard_Fragment:ShowAggregateScores()
+    self.showAggregateScores = true
+
+    self:UpdateAll()
+    local NARRATE_HEADER = true
+    SCREEN_NARRATION_MANAGER:QueueCustomEntry(self.customNarrationObjectName, NARRATE_HEADER)
+end
+
+function Battleground_Scoreboard_Fragment:ShouldShowAggregateScores()
+    return self.showAggregateScores == true
+end
+
+function Battleground_Scoreboard_Fragment:OnKeybindDown(keybind)
+    if self:IsShowing() then
+        self.roundSummary:OnKeybindDown(keybind)
+    end
+end
+
+------------------------------
+-- Scoreboard Team Panel
+------------------------------
+
+ZO_Battleground_Scoreboard_Team_Panel_Object = ZO_InitializingObject:Subclass()
+
+function ZO_Battleground_Scoreboard_Team_Panel_Object:Initialize(control, battlegroundTeam)
     self.control = control
     self.bgControl = control:GetNamedChild("Bg")
     self.nameControl = control:GetNamedChild("Name")
     self.iconControl = control:GetNamedChild("NameIcon")
     self.scoreControl = control:GetNamedChild("Score")
-    self.battlegroundAlliance = battlegroundAlliance
+    self.battlegroundTeam = battlegroundTeam
+    self.teamSize = 0
     self.score = 0
 
-    self.iconControl:SetTexture(ZO_GetLargeBattlegroundTeamSymbolIcon(battlegroundAlliance))
-    self.nameControl:SetText(zo_strformat(SI_ALLIANCE_NAME, GetString("SI_BATTLEGROUNDTEAM", battlegroundAlliance)))
+    self.iconControl:SetTexture(ZO_GetLargeBattlegroundTeamSymbolIcon(battlegroundTeam))
+    self.nameControl:SetText(zo_strformat(SI_ALLIANCE_NAME, GetString("SI_BATTLEGROUNDTEAM", battlegroundTeam)))
 
     local function PlayerRowFactory(pool)
         local playerRowControl = ZO_ObjectPool_CreateNamedControl("$(parent)PlayerRow", "ZO_Battleground_Scoreboard_Player_Row", pool, self.control)
-        return Battleground_Scoreboard_Player_Row:New(playerRowControl)
+        return ZO_Battleground_Scoreboard_Player_Row_Object:New(playerRowControl)
     end
 
     self.playerRowPool = ZO_ObjectPool:New(PlayerRowFactory, ZO_ObjectPool_DefaultResetObject)
     self.sortedPlayerRows = {}
+
+    self.initialPlayerRowOffsetX = 0
 end
-    
+
 do
     local BATTLEGROUND_TEAM_TO_BG_TEXTURE =
     {
@@ -643,30 +950,34 @@ do
         [BATTLEGROUND_TEAM_STORM_LORDS] = "EsoUI/Art/Battlegrounds/battlegrounds_scoreboardBG_purple.dds",
     }
 
-    function Battleground_Scoreboard_Alliance_Panel:ApplyPlatformStyle(style)
-        ApplyTemplateToControl(self.control, style.alliancePanel)
+    function ZO_Battleground_Scoreboard_Team_Panel_Object:ApplyPlatformStyle(style)
+        ApplyTemplateToControl(self.control, style.teamPanel)
         if IsInGamepadPreferredMode() then
-            self.bgControl:SetColor(GetBattlegroundTeamColor(self.battlegroundAlliance):UnpackRGBA())
+            self.bgControl:SetColor(GetBattlegroundTeamColor(self.battlegroundTeam):UnpackRGBA())
             self.bgControl:SetTexture("")
         else
-            self.bgControl:SetTexture(BATTLEGROUND_TEAM_TO_BG_TEXTURE[self.battlegroundAlliance])
+            self.bgControl:SetTexture(BATTLEGROUND_TEAM_TO_BG_TEXTURE[self.battlegroundTeam])
         end
+
+        self:UpdatePanelHeight()
 
         for _, playerRow in ipairs(self.sortedPlayerRows) do
             playerRow:ApplyPlatformStyle(style.playerRow)
         end
 
         ZO_FontAdjustingWrapLabel_OnInitialized(self.nameControl, style.teamNameFonts, TEXT_WRAP_MODE_ELLIPSIS)
+
+        self.initialPlayerRowOffsetX = style.initialPlayerRowOffsetX
     end
 end
 
-function Battleground_Scoreboard_Alliance_Panel:OnUpdate(deltaS)
+function ZO_Battleground_Scoreboard_Team_Panel_Object:OnUpdate(deltaS)
     for _, playerRow in ipairs(self.sortedPlayerRows) do
         playerRow:OnUpdate(deltaS)
     end
 end
 
-function Battleground_Scoreboard_Alliance_Panel:UpdateAnchors()
+function ZO_Battleground_Scoreboard_Team_Panel_Object:UpdateAnchors()
     local previousControl
     for _, playerRow in ipairs(self.sortedPlayerRows) do
         local control = playerRow.control
@@ -674,21 +985,14 @@ function Battleground_Scoreboard_Alliance_Panel:UpdateAnchors()
         if previousControl then
             control:SetAnchor(TOPLEFT, previousControl, BOTTOMLEFT, 0, ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_OFFSET_Y)
         else
-            control:SetAnchor(TOPLEFT, self.control, TOPLEFT, ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_INITIAL_OFFSET_X, ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_INITIAL_OFFSET_Y)
+            control:SetAnchor(TOPLEFT, self.control, TOPLEFT, self.initialPlayerRowOffsetX, ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_INITIAL_OFFSET_Y)
         end
 
         previousControl = control
     end
 end
 
-function Battleground_Scoreboard_Alliance_Panel:PreUpdatePanel()
-    self:UpdateScore()
-
-    -- prep for new entries after panel update
-    self:RemoveAllPlayers()
-end
-
-function Battleground_Scoreboard_Alliance_Panel:PostUpdatePanel(highestScore)
+function ZO_Battleground_Scoreboard_Team_Panel_Object:PostUpdatePanel(highestScore)
     self:UpdateScoreColor(highestScore)
     self:UpdateAnchors()
 
@@ -697,63 +1001,103 @@ function Battleground_Scoreboard_Alliance_Panel:PostUpdatePanel(highestScore)
     end
 end
 
-function Battleground_Scoreboard_Alliance_Panel:UpdateScore()
-    self.score = GetCurrentBattlegroundScore(self.battlegroundAlliance)
-    
+function ZO_Battleground_Scoreboard_Team_Panel_Object:UpdateScore()
+    if BATTLEGROUND_SCOREBOARD_FRAGMENT:ShouldShowAggregateScores() then
+        self.score = GetCurrentBattlegroundRoundsWonByTeam(self.battlegroundTeam)
+    else
+        local roundIndex = BATTLEGROUND_SCOREBOARD_FRAGMENT:GetViewedRound()
+        self.score = GetCurrentBattlegroundScore(roundIndex, self.battlegroundTeam)
+    end
+
     self.scoreControl:SetText(self.score)
 end
 
-function Battleground_Scoreboard_Alliance_Panel:UpdateScoreColor(highestScore)
-    if GetCurrentBattlegroundState() == BATTLEGROUND_STATE_POSTGAME and self.score ~= 0 and self.score >= highestScore then
+function ZO_Battleground_Scoreboard_Team_Panel_Object:UpdateScoreColor(highestScore)
+    local showingCurrentRoundScores = BATTLEGROUND_SCOREBOARD_FRAGMENT:IsViewingCurrentRound() and not BATTLEGROUND_SCOREBOARD_FRAGMENT:ShouldShowAggregateScores()
+    if (not showingCurrentRoundScores or GetCurrentBattlegroundState() == BATTLEGROUND_STATE_FINISHED) and self.score ~= 0 and self.score >= highestScore then
         self.scoreControl:SetColor(ZO_BATTLEGROUND_WINNER_TEXT:UnpackRGB())
     else
         self.scoreControl:SetColor(ZO_WHITE:UnpackRGB())
     end
 end
 
-function Battleground_Scoreboard_Alliance_Panel:AddPlayer(data)
+function ZO_Battleground_Scoreboard_Team_Panel_Object:AddPlayer(data)
     local playerRow, key = self.playerRowPool:AcquireObject()
     playerRow:SetupOnAcquire(self, key, data)
     table.insert(self.sortedPlayerRows, playerRow)
     return playerRow
 end
 
-function Battleground_Scoreboard_Alliance_Panel:RemoveAllPlayers()
+function ZO_Battleground_Scoreboard_Team_Panel_Object:RemoveAllPlayers()
     self.playerRowPool:ReleaseAllObjects()
     ZO_ClearNumericallyIndexedTable(self.sortedPlayerRows)
 end
 
-function Battleground_Scoreboard_Alliance_Panel:GetScore()
+function ZO_Battleground_Scoreboard_Team_Panel_Object:GetScore()
     return self.score
 end
 
-function Battleground_Scoreboard_Alliance_Panel:GetBattlegroundAlliance()
-    return self.battlegroundAlliance
+function ZO_Battleground_Scoreboard_Team_Panel_Object:GetBattlegroundTeam()
+    return self.battlegroundTeam
 end
 
-function Battleground_Scoreboard_Alliance_Panel:GetTopPlayerRow()
+function ZO_Battleground_Scoreboard_Team_Panel_Object:SetTeamSize(teamSize)
+    self.teamSize = teamSize
+    self:UpdatePanelHeight()
+end
+
+function ZO_Battleground_Scoreboard_Team_Panel_Object:UseSmallPlayerEntries(useSmallEntries)
+    self.useSmallPlayerEntries = useSmallEntries
+end
+
+function ZO_Battleground_Scoreboard_Team_Panel_Object:ShouldUseSmallPlayerEntries()
+    return self.useSmallPlayerEntries
+end
+
+function ZO_Battleground_Scoreboard_Team_Panel_Object:UpdatePanelHeight()
+    local panelHeight = self.GetPanelHeight(self.teamSize)
+    self.control:SetHeight(panelHeight)
+end
+
+function ZO_Battleground_Scoreboard_Team_Panel_Object:GetTeamSize()
+    return self.teamSize
+end
+
+function ZO_Battleground_Scoreboard_Team_Panel_Object:GetNumPlayers()
+    return #self.sortedPlayerRows
+end
+
+function ZO_Battleground_Scoreboard_Team_Panel_Object:GetTopPlayerRow()
     return self.sortedPlayerRows[1]
 end
 
-function Battleground_Scoreboard_Alliance_Panel:GetBottomPlayerRow()
+function ZO_Battleground_Scoreboard_Team_Panel_Object:GetBottomPlayerRow()
     return self.sortedPlayerRows[#self.sortedPlayerRows]
+end
+
+function ZO_Battleground_Scoreboard_Team_Panel_Object.GetPanelHeight(teamSize)
+    local DEFAULT_TEAM_SIZE = 4
+    if teamSize <= DEFAULT_TEAM_SIZE then
+        return ZO_BATTLEGROUND_SCOREBOARD_PANEL_HEIGHT
+    else
+        if IsInGamepadPreferredMode() then
+            return ZO_BATTLEGROUND_SCOREBOARD_LARGE_PANEL_HEIGHT_GAMEPAD
+        else
+            return ZO_BATTLEGROUND_SCOREBOARD_LARGE_PANEL_HEIGHT_KEYBOARD
+        end
+    end
 end
 
 ------------------------------
 -- Scoreboard Player Row
 ------------------------------
 
-Battleground_Scoreboard_Player_Row = ZO_Object:Subclass()
+ZO_Battleground_Scoreboard_Player_Row_Object = ZO_InitializingObject:Subclass()
 
-function Battleground_Scoreboard_Player_Row:New(...)
-    local playerRow = ZO_Object.New(self)
-    playerRow:Initialize(...)
-    return playerRow
-end
-
-function Battleground_Scoreboard_Player_Row:Initialize(control)
+function ZO_Battleground_Scoreboard_Player_Row_Object:Initialize(control)
     self.control = control
     self.control.owner = self
+    self.livesLabel = control:GetNamedChild("Lives")
     self.nameLabel = control:GetNamedChild("Name")
     self.medalScoreLabel = control:GetNamedChild("MedalScore")
     self.killsLabel = control:GetNamedChild("Kills")
@@ -772,42 +1116,56 @@ do
         [BATTLEGROUND_TEAM_PIT_DAEMONS] = "EsoUI/Art/Battlegrounds/battlegrounds_scoreboard_highlightStrip_green.dds",
     }
 
-    function Battleground_Scoreboard_Player_Row:SetupOnAcquire(panel, poolKey, data)
+    function ZO_Battleground_Scoreboard_Player_Row_Object:SetupOnAcquire(panel, poolKey, data)
         self.control:SetHidden(false)
         self.key = poolKey
         self.panel = panel
         self.data = data
-        self:ApplyPlatformStyle(ZO_GetPlatformTemplate("ZO_Battleground_Scoreboard_Player_Row"))
-        local battlegroundAlliance = self.panel:GetBattlegroundAlliance()
-        self.highlight.keyboardTexture:SetTexture(HIGHLIGHT_KEYBOARD_TEXTURES[battlegroundAlliance])
-        self.highlight.gamepadBackdrop:SetEdgeColor(GetBattlegroundTeamColor(battlegroundAlliance):UnpackRGB())
+
+        if panel:ShouldUseSmallPlayerEntries() then
+            self:ApplyPlatformStyle(ZO_GetPlatformTemplate("ZO_Battleground_Scoreboard_Small_Player_Row"))
+        else
+            self:ApplyPlatformStyle(ZO_GetPlatformTemplate("ZO_Battleground_Scoreboard_Player_Row"))
+        end
+
+        local battlegroundTeam = panel:GetBattlegroundTeam()
+        self.highlight.keyboardTexture:SetTexture(HIGHLIGHT_KEYBOARD_TEXTURES[battlegroundTeam])
+        self.highlight.gamepadBackdrop:SetEdgeColor(GetBattlegroundTeamColor(battlegroundTeam):UnpackRGB())
         self.isMouseOver = false
         self.highlight:SetAlpha(0)
         data.rowObject = self
     end
 end
 
-function Battleground_Scoreboard_Player_Row:Reset()
+function ZO_Battleground_Scoreboard_Player_Row_Object:Reset()
     local playerRowControl = self.control
     playerRowControl:ClearAnchors()
     playerRowControl:SetHidden(true)
 end
 
-function Battleground_Scoreboard_Player_Row:GetData()
+function ZO_Battleground_Scoreboard_Player_Row_Object:GetData()
     return self.data
 end
 
-function Battleground_Scoreboard_Player_Row:GetPanel()
+function ZO_Battleground_Scoreboard_Player_Row_Object:GetPanel()
     return self.panel
 end
 
-function Battleground_Scoreboard_Player_Row:ApplyPlatformStyle(style)
+function ZO_Battleground_Scoreboard_Player_Row_Object:GetControl()
+    return self.control
+end
+
+function ZO_Battleground_Scoreboard_Player_Row_Object:ApplyPlatformStyle(style)
     ApplyTemplateToControl(self.control, style)
 end
 
-function Battleground_Scoreboard_Player_Row:OnUpdate(deltaS)
-    -- Update the highlight alpha
+function ZO_Battleground_Scoreboard_Player_Row_Object:OnUpdate(deltaS)
     local data = self.data
+    if data.isPlaceholderEntry then
+        return
+    end
+
+    -- Update the highlight alpha
     local targetHighlightAlpha = data.targetHighlightAlpha
     local currentHighlightAlpha = data.currentHighlightAlpha
     local mustFinishHighlightAnimation = data.mustFinishHighlightAnimation
@@ -849,56 +1207,82 @@ function Battleground_Scoreboard_Player_Row:OnUpdate(deltaS)
     data.mustFinishHighlightAnimation = mustFinishHighlightAnimation
 end
 
-function Battleground_Scoreboard_Player_Row:UpdateRow()
+function ZO_Battleground_Scoreboard_Player_Row_Object:UpdateRow()
     local data = self.data
 
-    local primaryName = ZO_GetPrimaryPlayerName(data.displayName, data.characterName)
-    local formattedName = zo_strformat(SI_PLAYER_NAME, primaryName)
-    self.nameLabel:SetText(formattedName)
-    self.medalScoreLabel:SetText(data.medalScore)
-    self.killsLabel:SetText(data.kills)
-    self.deathsLabel:SetText(data.deaths)
-    self.assistsLabel:SetText(data.assists)
+    local showLives = data.showLives
+    self.livesLabel:SetHidden(not showLives)
+    if showLives then
+        self.livesLabel:SetText(data.lives)
+    end
+
+    local isPlaceholderEntry = data.isPlaceholderEntry
+    self.medalScoreLabel:SetHidden(isPlaceholderEntry)
+    self.killsLabel:SetHidden(isPlaceholderEntry)
+    self.deathsLabel:SetHidden(isPlaceholderEntry)
+    self.assistsLabel:SetHidden(isPlaceholderEntry)
 
     local r, g, b
-    if data.isLocalPlayer then
-        r, g, b = ZO_SELECTED_TEXT:UnpackRGB()
-    else
+    if isPlaceholderEntry then
         r, g, b = ZO_NORMAL_TEXT:UnpackRGB()
+    elseif showLives and data.lives == 0 then
+        if data.isLocalPlayer then
+            r, g, b = ZO_DEFAULT_TEXT:UnpackRGB()
+        else
+            r, g, b = ZO_DISABLED_TEXT:UnpackRGB()
+        end
+    else
+        if data.isLocalPlayer then
+            r, g, b = ZO_SELECTED_TEXT:UnpackRGB()
+        else
+            r, g, b = ZO_NORMAL_TEXT:UnpackRGB()
+        end
     end
+
     self.nameLabel:SetColor(r, g, b)
-    self.medalScoreLabel:SetColor(r, g, b)
-    self.killsLabel:SetColor(r, g, b)
-    self.deathsLabel:SetColor(r, g, b)
-    self.assistsLabel:SetColor(r, g, b)
+
+    if not isPlaceholderEntry then
+        local primaryName = ZO_GetPrimaryPlayerName(data.displayName, data.characterName)
+        local formattedName = zo_strformat(SI_PLAYER_NAME, primaryName)
+        self.nameLabel:SetText(formattedName)
+        self.medalScoreLabel:SetText(data.medalScore)
+        self.killsLabel:SetText(data.kills)
+        self.deathsLabel:SetText(data.deaths)
+        self.assistsLabel:SetText(data.assists)
+
+        self.livesLabel:SetColor(r, g, b)
+        self.medalScoreLabel:SetColor(r, g, b)
+        self.killsLabel:SetColor(r, g, b)
+        self.deathsLabel:SetColor(r, g, b)
+        self.assistsLabel:SetColor(r, g, b)
+    else
+        self.nameLabel:SetText(GetString(SI_BATTLEGROUND_SCOREBOARD_LOOKING_FOR_PLAYER))
+    end
 end
 
-function Battleground_Scoreboard_Player_Row:GetCharacterName()
+function ZO_Battleground_Scoreboard_Player_Row_Object:GetCharacterName()
     return self.characterName
 end
 
-function Battleground_Scoreboard_Player_Row:GetHighlight()
+function ZO_Battleground_Scoreboard_Player_Row_Object:GetHighlight()
     return self.highlight
 end
 
-function Battleground_Scoreboard_Player_Row:ForceHighlightAlpha(alpha)
+function ZO_Battleground_Scoreboard_Player_Row_Object:ForceHighlightAlpha(alpha)
     self.highlight:SetAlpha(alpha)
     self.data.currentHighlightAlpha = alpha
     self.data.targetHighlightAlpha = alpha
 end
 
-function Battleground_Scoreboard_Player_Row:SetMouseOver(isMouseOver)
+function ZO_Battleground_Scoreboard_Player_Row_Object:SetMouseOver(isMouseOver)
     self.isMouseOver = isMouseOver
 end
 
-function ZO_Battleground_Scoreboard_Player_Row_OnMouseDown(control, button)
-    BATTLEGROUND_SCOREBOARD_FRAGMENT:SetSelectedPlayerData(control.owner:GetData(), ANIMATE_PLAYER_ROW_HIGHLIGHT)
-    if button == MOUSE_BUTTON_INDEX_RIGHT then
-        BATTLEGROUND_SCOREBOARD_FRAGMENT:ShowKeyboardPlayerMenu(control)
-    end
-end
-
 --[[ xml functions ]]--
+
+function ZO_Battleground_Scoreboard_Player_Row_OnMouseDown(control, button)
+    BATTLEGROUND_SCOREBOARD_FRAGMENT:OnPlayerRowMouseDown(control, button)
+end
 
 function ZO_BattlegroundScoreboardTopLevel_Initialize(control)
     BATTLEGROUND_SCOREBOARD_FRAGMENT = Battleground_Scoreboard_Fragment:New(control)

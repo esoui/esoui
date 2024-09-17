@@ -150,11 +150,22 @@ function ZO_SharedOptions:GetSettingsData(panel, system, settingId)
 end
 
 function ZO_SharedOptions.AddTableToPanel(panel, table)
-    for key, entry in pairs(table) do
+    for settingType, entry in pairs(table) do
         if ZO_SharedOptions_SettingsData[panel] == nil then
             ZO_SharedOptions_SettingsData[panel] = {}
         end
-        ZO_SharedOptions_SettingsData[panel][key] = entry
+        local existingEntry = ZO_SharedOptions_SettingsData[panel][settingType]
+        if existingEntry then
+            for settingId, settingData in pairs(entry) do
+                if existingEntry[settingId] then
+                    assert(false, string.format("Settings option %d shared between pregame and ingame is being duplicated in one of those guis!", GetString(settingData.text)))
+                else
+                    existingEntry[settingId] = settingData
+                end
+            end
+        else
+            ZO_SharedOptions_SettingsData[panel][settingType] = entry
+        end
     end
 end
 

@@ -150,6 +150,14 @@ function zo_strjoin(separator, ...)
     return table.concat({...}, separator)
 end
 
+function zo_strIsUpper(str)
+    return str == zo_strupper(str)
+end
+
+function zo_strIsLower(str)
+    return str == zo_strlower(str)
+end
+
 -- Expected range for amount: [0, 1]
 function zo_lerp(from, to, amount)
     return from + amount * (to - from)

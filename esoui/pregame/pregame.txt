@@ -142,8 +142,8 @@ EsoUI\Pregame\Gamepad\CreateAccount\CreateAccount_Gamepad.xml
 EsoUI\Pregame\Gamepad\CreateAccount\CreateAccount_Gamepad_Final.lua
 EsoUI\Pregame\Gamepad\CreateAccount\CreateAccount_Gamepad_Final.xml
 
-EsoUI\Pregame\Console\DownloadBar\DownloadBar.lua
-EsoUI\Pregame\Console\DownloadBar\DownloadBar.xml
+EsoUI\Pregame\Gamepad\DownloadBar\DownloadBar.lua
+EsoUI\Pregame\Gamepad\DownloadBar\DownloadBar.xml
 
 EsoUI\Pregame\Gamepad\LinkAccountScreen\LinkAccountScreen_Gamepad.lua
 EsoUI\Pregame\Gamepad\LinkAccountScreen\LinkAccountScreen_Gamepad.xml
@@ -183,6 +183,7 @@ EsoUI\Pregame\OptionsPanels\Gamepad\OptionsPanels_Gamepad.lua
 EsoUI\Pregame\OptionsPanels\Keyboard\PregameOptionsPanels_Keyboard.lua
 EsoUI\Pregame\OptionsPanels\Keyboard\OptionsPanel_Account_Keyboard.lua
 EsoUI\Pregame\OptionsPanels\Keyboard\OptionsPanel_Account_Keyboard.xml
+EsoUI\Pregame\OptionsPanels\Keyboard\OptionsPanel_Interface_Keyboard.lua
 
 EsoUI\Pregame\Settings\Keyboard\Pregame_Settings_Keyboard.lua
 EsoUI\Pregame\Settings\Keyboard\Pregame_Settings_Keyboard.xml

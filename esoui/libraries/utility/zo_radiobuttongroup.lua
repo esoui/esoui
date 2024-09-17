@@ -1,8 +1,9 @@
 ZO_RadioButtonGroup = ZO_InitializingObject:Subclass()
 
-function ZO_RadioButtonGroup:Initialize()
+function ZO_RadioButtonGroup:Initialize(allowUnclick)
     self.m_buttons = {}
     self.m_enabled = true
+    self.allowUnclick = allowUnclick
 
     self:SetLabelColors(ZO_SELECTED_TEXT, ZO_DISABLED_TEXT)
 end
@@ -13,8 +14,8 @@ function ZO_RadioButtonGroup:SetLabelColors(enabledColor, disabledColor)
 end
 
 function ZO_RadioButtonGroup:SetButtonState(button, clickedButton, enabled)
-    if(enabled) then
-        if(button == clickedButton) then
+    if enabled then
+        if button == clickedButton then
             button:SetState(BSTATE_PRESSED, true)
         else
             button:SetState(BSTATE_NORMAL, false)
@@ -24,7 +25,7 @@ function ZO_RadioButtonGroup:SetButtonState(button, clickedButton, enabled)
             button.label:SetColor(self.labelColorEnabled:UnpackRGB())
         end
     else
-        if(button == clickedButton) then
+        if button == clickedButton then
             button:SetState(BSTATE_DISABLED_PRESSED, true)
         else
             button:SetState(BSTATE_DISABLED, true)
@@ -37,13 +38,18 @@ function ZO_RadioButtonGroup:SetButtonState(button, clickedButton, enabled)
 end
 
 function ZO_RadioButtonGroup:HandleClick(control, buttonId, ignoreCallback)
-    if not self.m_enabled or self.m_clickedButton == control then
+    if not self.m_enabled then
         return
     end
 
-    -- Can't click disabled buttons
-    local controlData = self.m_buttons[control]
-    if controlData and not controlData.isValidOption then
+    -- Can't click if already clicked, unless that's explicitly allowed
+    if (self.m_clickedButton == control) and not self.allowUnclick then
+        return
+    end
+
+    -- Can't click disabled/invalid buttons
+    local buttonData = self.m_buttons[control]
+    if not buttonData or not buttonData.isValidOption then
         return
     end
 
@@ -60,22 +66,26 @@ function ZO_RadioButtonGroup:HandleClick(control, buttonId, ignoreCallback)
             self:SetButtonState(k, nil, v.isValidOption)
         end
 
-        -- Set the clicked button to pressed and lock it down (so that it stays pressed.)
-        control:SetState(BSTATE_PRESSED, true)
         local previousControl = self.m_clickedButton
-        self.m_clickedButton = control
+        if self.m_clickedButton == control then
+            self.m_clickedButton = nil
+        else
+            self.m_clickedButton = control
+            -- Set the clicked button to pressed and lock it down (so that it stays pressed.)
+            control:SetState(BSTATE_PRESSED, true)
+        end
 
         if self.onSelectionChangedCallback and not ignoreCallback then
-            self:onSelectionChangedCallback(control, previousControl)
+            self:onSelectionChangedCallback(self.m_clickedButton, previousControl)
         end
     end
 
-    if controlData.originalHandler then
-        controlData.originalHandler(control, buttonId)
+    if buttonData.originalHandler then
+        buttonData.originalHandler(control, buttonId)
     end
 end
 
-function ZO_RadioButtonGroup:Add(button, onClickHandler)
+function ZO_RadioButtonGroup:Add(button)
     if button then
         if self.m_buttons[button] == nil then
             -- Remember the original handler so that its call can be forced.
@@ -96,16 +106,31 @@ function ZO_RadioButtonGroup:Add(button, onClickHandler)
     end
 end
 
+function ZO_RadioButtonGroup:Remove(button)
+    local buttonData = button and self.m_buttons[button]
+    if buttonData then
+        button:SetHandler("OnClicked", buttonData.originalHandler)
+
+        -- Restore the button to its correct state, as if it hadn't been added to the radio group
+        -- Since "valid option" is set externally, just use that to figure out the current enabled state.
+        self:SetButtonState(button, nil, buttonData.isValidOption)
+
+        self.m_buttons[button] = nil
+        if button == self.m_clickedButton then
+            self.m_clickedButton = nil
+        end
+    end
+end
+
 -- This changes the enabled state of the entire radio group, but must still take into account 
 -- whether each button is a valid option...for example, enabling a radio group that has certain
 -- invalid options must remember to keep those options disabled.
 function ZO_RadioButtonGroup:SetEnabled(enabled)
-    if(enabled ~= self.m_enabled) then
+    if enabled ~= self.m_enabled then
         self.m_enabled = enabled
         local clickedButton = self:GetClickedButton()
 
-        for k, v in pairs(self.m_buttons)
-        do
+        for k, v in pairs(self.m_buttons) do
             local buttonEnabled = enabled and v.isValidOption
             self:SetButtonState(k, clickedButton, buttonEnabled)
         end
@@ -116,7 +141,7 @@ end
 -- within the group.  Invalid options will force those buttons to appear disabled.
 function ZO_RadioButtonGroup:SetButtonIsValidOption(button, isValidOption)
     local buttonData = self.m_buttons[button]
-    if(buttonData and (isValidOption ~= buttonData.isValidOption)) then
+    if buttonData and (isValidOption ~= buttonData.isValidOption) then
         buttonData.isValidOption = isValidOption
         
         -- NOTE: This doesn't update the state of the clicked button, because that could
@@ -128,8 +153,7 @@ function ZO_RadioButtonGroup:SetButtonIsValidOption(button, isValidOption)
 end
 
 function ZO_RadioButtonGroup:Clear()
-    for k, v in pairs(self.m_buttons)
-    do
+    for k, v in pairs(self.m_buttons) do
         -- Restore the button to its correct state, as if it hadn't been added to the radio group
         -- Since "valid option" is set externally, just use that to figure out the current enabled state.
         self:SetButtonState(k, nil, v.isValidOption)
@@ -144,10 +168,13 @@ function ZO_RadioButtonGroup:Clear()
 end
 
 function ZO_RadioButtonGroup:SetClickedButton(button, ignoreCallback)
-    local buttonData = self.m_buttons[button]
-    if(buttonData and buttonData.isValidOption)
-    then
-       self:HandleClick(button, MOUSE_BUTTON_INDEX_LEFT, ignoreCallback)
+    self:HandleClick(button, MOUSE_BUTTON_INDEX_LEFT, ignoreCallback)
+end
+
+function ZO_RadioButtonGroup:SetButtonClickState(button, isClicked, ignoreCallback)
+    local wasButtonClicked = self.m_clickedButton == button
+    if wasButtonClicked ~= isClicked then
+        self:HandleClick(button, MOUSE_BUTTON_INDEX_LEFT, ignoreCallback)
     end
 end
 
@@ -160,9 +187,8 @@ end
 function ZO_RadioButtonGroup:UpdateFromData(isPressedQueryFn)
     -- Find the button that's actually the clicked button from backing data
     self.m_clickedButton = nil
-    for button, buttonData in pairs(self.m_buttons)
-    do
-        if(isPressedQueryFn(button)) then
+    for button, buttonData in pairs(self.m_buttons) do
+        if isPressedQueryFn(button) then
             self.m_clickedButton = button
             break
         end
@@ -171,8 +197,7 @@ function ZO_RadioButtonGroup:UpdateFromData(isPressedQueryFn)
     -- Update the state of all the buttons and reassign the currently clicked button
     local clickedButton = self.m_clickedButton
     local enabled = self.m_enabled
-    for button, buttonData in pairs(self.m_buttons)
-    do
+    for button, buttonData in pairs(self.m_buttons) do
         local buttonEnabled = enabled and buttonData.isValidOption
         self:SetButtonState(button, clickedButton, buttonEnabled)
     end

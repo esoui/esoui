@@ -48,7 +48,7 @@
 
                         <Texture name="$(parent)PlayerClass" />
 
-                        <Label name="$(parent)Title" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE" text="SI_BATTLEGROUND_MATCH_INFO_PANEL_TITLE" />
+                        <Label name="$(parent)Title" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE" />
 
                         <Control name="$(parent)Stats" resizeToFitDescendents="true">
                             <Controls>

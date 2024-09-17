@@ -10,7 +10,26 @@
         <Texture name="ZO_PinTemplate" virtual="true" pixelRoundingEnabled="false" textureFile="EsoUI/Art/Lockpicking/pins.dds" tier="MEDIUM" layer="CONTROLS" />
 
         <Texture name="ZO_PinHighlightTemplate" virtual="true" textureFile="EsoUI/Art/Lockpicking/pins_over.dds" layer="OVERLAY" blendMode="ADD" alpha="0" />
-        
+
+        <StatusBar name="ZO_LockpickTimerBarStatus" inherits="ZO_DefaultStatusBar" virtual="true">
+            <AnchorFill/>
+            <Controls>
+                <Backdrop name="$(parent)BG" inherits="ZO_DefaultBackdrop">
+                    <Anchor point="TOPLEFT" offsetX="-3" offsetY="-3" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="3" offsetY="4" />
+                </Backdrop>
+                <StatusBar name="$(parent)Gloss" override="true" />
+            </Controls>
+        </StatusBar>
+
+        <StatusBar name="ZO_LockpickTimerBarStatusGamepad" inherits="ZO_GamepadArrowStatusBarWithBGLarge" tier="MEDIUM" virtual="true">
+            <AnchorFill/>
+            <OnInitialized>
+                ZO_StatusBar_InitializeDefaultColors(self)
+                self.gloss = self:GetNamedChild("Gloss")
+            </OnInitialized>
+        </StatusBar>
+
         <TopLevelControl name="ZO_LockpickPanel" tier="MEDIUM" hidden="true" mouseEnabled="true">
             <AnchorFill/>
             
@@ -199,9 +218,6 @@
                     <Anchor point="TOP" relativeTo="$(parent)Body" relativePoint="BOTTOM" offsetY="45" />
 
                     <Controls>
-                        <StatusBar name="$(parent)Status" inherits="ZO_DefaultStatusBarBG">
-                            <AnchorFill/>
-                        </StatusBar>
                         <Label name="$(parent)Time" font="ZoFontWinH3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
                             <Anchor point="CENTER" />
                         </Label>
@@ -213,14 +229,6 @@
                     <Anchor point="TOP" relativeTo="$(parent)Body" relativePoint="BOTTOM" offsetY="45" />
 
                     <Controls>
-                        <StatusBar name="$(parent)Status" inherits="ZO_GamepadArrowStatusBarWithBGLarge" tier="MEDIUM">
-                            <AnchorFill/>
-
-                            <OnInitialized>
-                                ZO_StatusBar_InitializeDefaultColors(self)
-                                self.gloss = self:GetNamedChild("Gloss")
-                            </OnInitialized>
-                        </StatusBar>
                         <Label name="$(parent)Time" font="ZoFontGamepad34" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" tier="HIGH">
                             <Anchor point="CENTER" />
                         </Label>

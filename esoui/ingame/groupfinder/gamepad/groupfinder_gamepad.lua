@@ -102,7 +102,7 @@ function ZO_GroupFinder_Gamepad:InitializeControls()
                     self:SetMode(ZO_GROUP_FINDER_MODES.OVERVIEW)
                 end
             end,
-            sound = SOUNDS.GAMEPAD_MENU_BACKWARD,
+            sound = SOUNDS.GAMEPAD_MENU_BACK,
         },
     }
     self:SetListsUseTriggerKeybinds(true)

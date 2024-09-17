@@ -101,3 +101,6 @@ EsoUI\Common\MarketTemplates\MarketTemplates_Shared.xml
 EsoUI\Common\MarketTemplates\ChapterUpgradeTemplates_Shared.lua
 EsoUI\Common\MarketTemplates\ChapterUpgradeTemplates_Shared.xml
 EsoUI\Common\MarketTemplates\Gamepad\MarketTemplates_Gamepad.xml
+
+EsoUI\Common\Fx\FxCommon.lua
+EsoUI\Common\Fx\FxCommon.xml

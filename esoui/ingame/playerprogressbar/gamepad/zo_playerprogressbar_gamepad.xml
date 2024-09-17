@@ -73,7 +73,7 @@
                     <TextureCoords left="0.40625" right="0.0625" top="0.15625" bottom="0.84375" />
                     <!-- Taking the part of the texture that just contains the arrow part of the bar -->
                     <LeadingEdgeTextureCoords left="0" right="0.5" top="0.15625" bottom="0.84375" />
-                    <LeadingEdge alpha="0.3" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_medium_leadingEdge.dds" width="11" height="22" />
+                    <LeadingEdge textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_medium_leadingEdge.dds" width="11" height="22" />
                     <AnchorFill />
                 </StatusBar>
                 

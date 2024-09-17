@@ -37,7 +37,7 @@
                         </Texture>
 
                         <Control name="$(parent)RootSpacer">
-                            <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" y="3" hidden="true" />
+                            <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" y="3" />
                             <Anchor point="TOP" offsetY="130" />
                         </Control>
                     </Controls>

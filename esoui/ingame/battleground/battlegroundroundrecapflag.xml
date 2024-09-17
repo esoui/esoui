@@ -1,0 +1,95 @@
+﻿<GuiXml>
+    <Animations>
+        <AnimationTimeline name="BattlegroundsFlagReveal">
+            <Animations>
+                <TranslateAnimation applyToChildControlName="ClipRegion" delay="0" duration="2000" deltaX="0" startY="-ZO_BATTLEGROUND_FLAG_HEIGHT" endY="-ZO_BATTLEGROUND_FLAG_HEIGHT" anchorIndex="0" />
+
+                <TranslateAnimation applyToChildControlName="ClipRegion" delay="2000" duration="500" deltaX="0" startY="-ZO_BATTLEGROUND_FLAG_HEIGHT" endY ="0" anchorIndex="0">
+                    <EasingFunction>
+                        return ZO_LinearEase(progress)
+                    </EasingFunction>
+                </TranslateAnimation>
+
+                <CustomAnimation delay="2000" duration="500">
+                    <UpdateFunction>
+                        ZO_BattlegroundsRoundRecapFlag.OnUpdate(...)
+                    </UpdateFunction>
+                </CustomAnimation>
+            </Animations>
+        </AnimationTimeline>
+
+        <AnimationTimeline name="BattlegroundsFlagFlipScore">
+            <Animations>
+                <AlphaAnimation applyToChildControlName="ClipRegionScore" delay="500" duration="250" startAlpha="1" endAlpha="0">
+                    <OnStop>
+                        ZO_BattlegroundsRoundRecapFlag.OnFlipScoreFadedOut(...)
+                    </OnStop>
+                </AlphaAnimation>
+                <AlphaAnimation applyToChildControlName="ClipRegionScore" delay="1000" duration="100" startAlpha="0" endAlpha="1" />
+                <AlphaAnimation applyToChildControlName="ClipRegionScore" delay="2000" duration="10" startAlpha="1" endAlpha="1">
+                    <OnStop>
+                        ZO_BattlegroundsRoundRecapFlag.OnFlipScoreFadedIn(...)
+                    </OnStop>
+                </AlphaAnimation>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+
+    <Controls>
+        <Control name="ZO_BattlegroundRoundRecapFlag" virtual="true">
+            <Controls>
+                <Control name="$(parent)ClipRegion" autoRectClipChildren="true">
+                    <Anchor point="TOP" />
+                    <Dimensions x="ZO_BATTLEGROUND_FLAG_WIDTH" y="ZO_BATTLEGROUND_FLAG_HEIGHT" />
+                    <Controls>
+                        <Texture name="$(parent)Flag" alpha="1" textureFile="EsoUI/Art/Battlegrounds/battleground_banner_purple_win.dds">
+                            <Anchor relativeTo="$(grandparent)" point="TOP" offsetY="0" />
+                            <Dimensions x="ZO_BATTLEGROUND_FLAG_WIDTH" y="ZO_BATTLEGROUND_FLAG_HEIGHT" />
+                            <WaveBounds minX="0.001" maxX="0" minY="0.005" maxY="0.005" />
+                            <Wave angleRadians="0.5" frequency="100.0" speed="3" offset="0" />
+                        </Texture>
+
+                        <Label name="$(parent)Title" horizontalAlignment="CENTER" alpha="1">
+                            <Anchor point="LEFT" relativeTo="$(parent)Flag" relativePoint="TOPLEFT" offsetX="55" offsetY="65" />
+                            <Anchor point="RIGHT" relativeTo="$(parent)Flag" relativePoint="TOPRIGHT" offsetX="-55" offsetY="65" />
+                        </Label>
+
+                        <Control name="$(parent)Score" inherits="ZO_RollingMeterLabel" >
+                            <Anchor point="LEFT" relativeTo="$(parent)Flag" offsetY="50" />
+                            <Anchor point="RIGHT" relativeTo="$(parent)Flag" offsetY="50" />
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Texture name="$(parent)Bar" alpha="1" textureFile="EsoUI/Art/Battlegrounds/battleground_banner_header.dds" layer="CONTROLS" level="1">
+                    <Anchor offsetX="0" point="TOP" offsetY="-45" />
+                    <Dimensions x="ZO_BATTLEGROUND_FLAG_WIDTH" y="ZO_BATTLEGROUND_BAR_HEIGHT" />
+                </Texture>
+            </Controls>
+        </Control>
+    </Controls>
+
+    <Controls>
+        <Control name="ZO_BattlegroundRoundRecapFlag_Keyboard_Template" virtual="true">
+            <Controls>
+                <Control name="$(parent)ClipRegion">
+                    <Controls>
+                        <Label name="$(parent)Title" font="ZoFontWinH1" />
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+
+    <Controls>
+        <Control name="ZO_BattlegroundRoundRecapFlag_Gamepad_Template" virtual="true">
+            <Controls>
+                <Control name="$(parent)ClipRegion">
+                    <Controls>
+                        <Label name="$(parent)Title" font="ZoFontGamepad54" />
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

@@ -72,7 +72,7 @@
                             <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOM" offsetX="-25" />
                         </Button>
 
-                        <Button name="$(parent)Collectors" inherits="ZO_DefaultButton" text="SI_CHAPTER_UPGRADE_COLLECTORS_BUTTON">
+                        <Button name="$(parent)Collectors" inherits="ZO_DefaultButton">
                             <Dimensions x="200" />
                             <Anchor point="BOTTOMLEFT" relativePoint="BOTTOM" offsetX="25" />
 

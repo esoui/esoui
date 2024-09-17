@@ -163,8 +163,8 @@ do
     local function AddEntry(scrollData, skillData)
         local progressionData = skillData and skillData:GetCurrentProgressionData()
         if progressionData then
-            local name = progressionData:GetName()
-            local entryData = ZO_GamepadEntryData:New(progressionData:GetName(), progressionData:GetIcon())
+            local name = progressionData:GetFormattedName()
+            local entryData = ZO_GamepadEntryData:New(name, progressionData:GetIcon())
             entryData.skillData = skillData
             entryData.narrationText = function()
                 local narrations = {}

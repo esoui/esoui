@@ -38,6 +38,7 @@ function ZO_GuildHeraldryManager_Keyboard:Initialize(control)
         control:SetHandler("OnMouseUp", OnClicked)
         control:SetColor(ZO_DYEING_SWATCH_INDEX, data.r, data.g, data.b)
         control:SetSurfaceHidden(ZO_DYEING_LOCK_INDEX, data.known)
+        control:SetSurfaceHidden(ZO_DYEING_NEW_INDEX, not data:IsNew())
         data:SetControl(control)
 
         data.selected = data.checked

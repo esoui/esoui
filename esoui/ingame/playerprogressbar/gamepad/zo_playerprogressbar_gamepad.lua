@@ -49,6 +49,28 @@ function ZO_GamepadPlayerProgressBarNameLocation:Refresh()
     self.location:SetText(zoneName)
 end
 
+function ZO_GamepadPlayerProgressBarNameLocation:GetNarration()
+    local narrations = {}
+    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject( zo_strformat(SI_GAMEPAD_CHARACTER_FOOTER_NARRATION_NAME_FORMATTER, self.username:GetText())))
+    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject( zo_strformat(SI_GAMEPAD_CHARACTER_FOOTER_NARRATION_LOCATION_FORMATTER, self.location:GetText())))
+
+    local levelTitleText = PLAYER_PROGRESS_BAR.levelTypeLabel:GetText() or PLAYER_PROGRESS_BAR.championPointsLabel:GetText()
+    local level, current, levelSize = PLAYER_PROGRESS_BAR:GetMostRecentlyShownInfo()
+
+    local showLevel = level
+    -- We are showing the reward for the next level, so advance by one.
+    if GetNumChampionXPInChampionPoint(showLevel) ~= nil then
+        showLevel = showLevel + 1
+    end
+    local nextPointPoolType = GetChampionPointPoolForRank(showLevel)
+    local swappedSkillLines = GetChampionDisciplineId(nextPointPoolType + 1)
+    local discipline = GetChampionDisciplineName(swappedSkillLines)
+
+    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_GAMEPAD_CHARACTER_FOOTER_NARRATION_PROGRESSION_FORMATTER, levelTitleText, level, discipline, math.floor(current / levelSize * 100))))
+
+    return narrations
+end
+
 function ZO_GamepadPlayerProgressBarNameLocation_OnInitialized(control)
     GAMEPAD_PLAYER_PROGRESS_BAR_NAME_LOCATION = ZO_GamepadPlayerProgressBarNameLocation:New(control)
 end

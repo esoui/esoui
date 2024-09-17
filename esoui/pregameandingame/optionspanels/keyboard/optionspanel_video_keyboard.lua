@@ -34,7 +34,12 @@ panelBuilder:AddSetting({
     settingType = SETTING_TYPE_GRAPHICS,
     settingId = GRAPHICS_SETTING_RESOLUTION,
     header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_DISPLAY,
-    initializeControlFunction = ZO_OptionsPanel_Video_InitializeResolution
+    initializeControlFunction = function(control)
+        ZO_OptionsPanel_Video_InitializeResolution(control)
+        EVENT_MANAGER:RegisterForEvent("ZO_OptionsPanel_Video", EVENT_ACTIVE_DISPLAY_CHANGED, function()
+            ZO_OptionsPanel_Video_OnDisplayResolutionChanged(control)
+        end)
+    end,
 })
 
 panelBuilder:AddSetting({
@@ -83,6 +88,14 @@ panelBuilder:AddSetting({
 })
 
 panelBuilder:AddSetting({
+    controlName = "Options_Video_HDR_Enabled",
+    settingType = SETTING_TYPE_GRAPHICS,
+    settingId = GRAPHICS_SETTING_HDR_ENABLED,
+    header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_DISPLAY,
+    template = "ZO_Options_Video_Checkbox_IncludeRestartWarning",
+})
+
+panelBuilder:AddSetting({
     controlName = "Options_Video_HDR_Peak_Brightness",
     settingType = SETTING_TYPE_GRAPHICS,
     settingId = GRAPHICS_SETTING_HDR_PEAK_BRIGHTNESS,
@@ -114,6 +127,13 @@ panelBuilder:AddSetting({
     controlName = "Options_Video_HDR_UI_Contrast",
     settingType = SETTING_TYPE_GRAPHICS,
     settingId = GRAPHICS_SETTING_HDR_UI_CONTRAST,
+    header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_DISPLAY,
+})
+
+panelBuilder:AddSetting({
+    controlName = "Options_Video_HDR_Mode",
+    settingType = SETTING_TYPE_GRAPHICS,
+    settingId = GRAPHICS_SETTING_HDR_MODE,
     header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_DISPLAY,
 })
 

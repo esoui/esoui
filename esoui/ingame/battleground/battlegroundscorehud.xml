@@ -6,17 +6,54 @@
                 ZO_BattlegroundScoreHud_OnInitialized(self)
             </OnInitialized>
             <Controls>
+                <Control name="$(parent)Lives" resizeToFitDescendents="true">
+                    <Anchor point="TOPLEFT"  offsetX="-17" offsetY="5"/>
+                </Control>
                 <Control name="$(parent)ObjectiveStateDisplay" resizeToFitDescendents="true">
-                    <Anchor point="TOPLEFT"/>
-                    <Anchor point="TOPRIGHT"/>
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Lives" relativePoint="BOTTOMLEFT" offsetX="15" offsetY="8" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Lives" relativePoint="BOTTOMRIGHT" offsetY="8" />
                 </Control>
                 <Control name="$(parent)Teams">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)ObjectiveStateDisplay" relativePoint="BOTTOMLEFT" offsetY="8"/>
-                    <Anchor point="TOPRIGHT"  relativeTo="$(parent)ObjectiveStateDisplay" relativePoint="BOTTOMRIGHT" offsetY="8"/>
+                    <Anchor point="RIGHT"  relativeTo="$(parent)" relativePoint="RIGHT" constrains="X"/>
                 </Control>
                 <Texture name="$(parent)PlayerTeamIndicator" textureFile="EsoUI/Art/Battlegrounds/battlegrounds_scoreTracker_playerTeamIndicator.dds" alpha="0.7">
                     <Dimensions x="16" y="16"/>
                 </Texture>
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_BattlegroundScoreHud_Keyboard_Template" virtual="true">
+            <Controls>
+                <Control name="$(parent)Lives">
+                    <ClearAnchors />
+                    <Anchor point="TOPLEFT"  offsetX="10" offsetY="5"/>
+                </Control>
+                <Control name="$(parent)ObjectiveStateDisplay">
+                    <ClearAnchors />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Lives" relativePoint="BOTTOMLEFT" offsetX="-10" offsetY="8" />
+                </Control>
+                <Control name="$(parent)Teams">
+                    <ClearAnchors />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)ObjectiveStateDisplay" relativePoint="BOTTOMLEFT" offsetX="15" offsetY="8"/>
+                    <Anchor point="RIGHT"  relativeTo="$(parent)" relativePoint="RIGHT" constrains="X"/>
+                </Control>
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_BattlegroundScoreHud_Gamepad_Template" virtual="true">
+            <Controls>
+                <Control name="$(parent)Lives">
+                    <Anchor point="TOPRIGHT"  offsetX="0" offsetY="5"/>
+                </Control>
+                <Control name="$(parent)ObjectiveStateDisplay">
+                    <ClearAnchors />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Lives" relativePoint="BOTTOMRIGHT" offsetY="8" />
+                </Control>
+                <Control name="$(parent)Teams">
+                    <ClearAnchors />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)ObjectiveStateDisplay" relativePoint="BOTTOMRIGHT" offsetY="8"/>
+                </Control>
             </Controls>
         </Control>
 
@@ -28,7 +65,7 @@
         </Label>
 
         <Control name="ZO_BattlegroundTeamSection_Keyboard_Template" virtual="true">
-            <Dimensions x="220" y="24"/>
+            <Dimensions x="220" y="54"/>
             <Controls>
                 <Control name="$(parent)ScoreDisplay" override="true">
                     <Controls>
@@ -37,6 +74,9 @@
                         </Label>
                     </Controls>
                 </Control>
+                <Control name="$(parent)Rounds">
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)ScoreDisplay" />
+                </Control>
                 <Texture name="$(parent)Icon" override="true">
                     <Anchor point="RIGHT" relativeTo="$(parent)ScoreDisplayValue" relativePoint="LEFT" offsetX="-3" offsetY="1"/>
                 </Texture>
@@ -44,7 +84,7 @@
         </Control>
 
         <Control name="ZO_BattlegroundTeamSection_Gamepad_Template" virtual="true">
-            <Dimensions x="220" y="26"/>
+            <Dimensions x="220" y="54"/>
             <Controls>
                 <Control name="$(parent)ScoreDisplay" override="true">
                     <Controls>
@@ -52,6 +92,9 @@
                             <Anchor point="RIGHT" relativePoint="LEFT" offsetX="-3" offsetY="2"/>
                         </Label>
                     </Controls>
+                </Control>
+                <Control name="$(parent)Rounds">
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)ScoreDisplay" offsetY="4" />
                 </Control>
                 <Texture name="$(parent)Icon" override="true">
                     <Anchor point="RIGHT" relativeTo="$(parent)ScoreDisplayValue" relativePoint="LEFT" offsetX="-3"/>
@@ -74,10 +117,22 @@
                         </Label>
                     </Controls>
                 </Control>
+                <Control name="$(parent)Rounds">
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)ScoreDisplay" />
+                </Control>
 
                 <Texture name="$(parent)Icon">
                     <Anchor point="RIGHT" relativeTo="$(parent)ScoreDisplayValue" relativePoint="LEFT" offsetX="-3"/>
                     <Dimensions x="32" y="32"/>
+                </Texture>
+            </Controls>
+        </Control>
+
+        <Control name="BattlegroundScoreHudWinCounter" virtual="true">
+            <Dimensions x="16" y="16" />
+            <Controls>
+                <Texture name="$(parent)Icon" >
+                    <AnchorFill />
                 </Texture>
             </Controls>
         </Control>

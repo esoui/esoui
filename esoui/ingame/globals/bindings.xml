@@ -1012,6 +1012,69 @@
         </Category>
     </Layer>
 
+
+    <!-- This layer should not be player facing, it "magically" makes the mouse buttons work differently when the spectator camera is in use-->
+    <Layer name="SpectatorCameraMouse">
+        <Category>
+            <Action name="SPECTATOR_LEFT_MOUSE_IN_WORLD" hideAction="true" inheritsBindFrom="LEFT_MOUSE_IN_WORLD">
+                <Down>
+                    if IsSpectatorCameraActive() then
+                        LeftMouseDownInWorld()
+                        return true
+                    else
+                        return false
+                    end
+                </Down>
+                <Up>
+                    if IsSpectatorCameraActive() then
+                        LeftMouseUpInWorld()
+                        return true
+                    else
+                        return false
+                    end
+                </Up>
+            </Action>
+
+            <Action name="SPECTATOR_LEFT_AND_RIGHT_MOUSE_IN_WORLD" hideAction="true" inheritsBindFrom="LEFT_AND_RIGHT_MOUSE_IN_WORLD">
+                <Down>
+                    if IsSpectatorCameraActive() then
+                        LeftAndRightMouseDownInWorld()
+                        return true
+                    else
+                        return false
+                    end
+                </Down>
+                <Up>
+                    if IsSpectatorCameraActive() then
+                        LeftAndRightMouseUpInWorld()
+                        return true
+                    else
+                        return false
+                    end
+                </Up>
+            </Action>
+
+            <Action name="SPECTATOR_RIGHT_MOUSE_IN_WORLD" hideAction="true" inheritsBindFrom="RIGHT_MOUSE_IN_WORLD">
+                <Down>
+                    if IsSpectatorCameraActive() then
+                        RightMouseDownInWorld()
+                        return true
+                    else
+                        return false
+                    end
+                </Down>
+                <Up>
+                    if IsSpectatorCameraActive() then
+                        RightMouseUpInWorld()
+                        return true
+                    else
+                        return false
+                    end
+                </Up>
+            </Action>
+        </Category>
+    </Layer>
+
     <!-- Not player facing -->
     <Layer name="UIError">
         <Category>
@@ -1423,6 +1486,12 @@
             <Action name="BATTLEGROUND_SCOREBOARD_NEXT_DUMMY">
                 <Down>return false</Down>
             </Action>
+            <Action name="BATTLEGROUND_SCOREBOARD_PREVIOUS_ROUND_DUMMY">
+                <Down>return false</Down>
+            </Action>
+            <Action name="BATTLEGROUND_SCOREBOARD_NEXT_ROUND_DUMMY">
+                <Down>return false</Down>
+            </Action>
             <Action name="BATTLEGROUND_SCOREBOARD_PLAYER_OPTIONS_DUMMY">
                 <Down>return false</Down>
             </Action>
@@ -1463,6 +1532,18 @@
                 </Down>
                 <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
             </Action>
+            <Action name="BATTLEGROUND_SCOREBOARD_PREVIOUS_ROUND" inheritsBindFrom="BATTLEGROUND_SCOREBOARD_PREVIOUS_ROUND_DUMMY" hideAction="true">
+                <Down>
+                    return BATTLEGROUND_SCOREBOARD_FRAGMENT:OnKeybindDown(keybind) or ZO_KeybindStrip_HandleKeybindDown(keybind)
+                </Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
+            <Action name="BATTLEGROUND_SCOREBOARD_NEXT_ROUND" inheritsBindFrom="BATTLEGROUND_SCOREBOARD_NEXT_ROUND_DUMMY" hideAction="true">
+                <Down>
+                    return BATTLEGROUND_SCOREBOARD_FRAGMENT:OnKeybindDown(keybind) or ZO_KeybindStrip_HandleKeybindDown(keybind)
+                </Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
             <Action name="BATTLEGROUND_SCOREBOARD_PLAYER_OPTIONS" inheritsBindFrom="BATTLEGROUND_SCOREBOARD_PLAYER_OPTIONS_DUMMY" hideAction="true">
                 <Down>
                     return BATTLEGROUND_SCOREBOARD_END_OF_GAME:OnKeybindDown(keybind) or ZO_KeybindStrip_HandleKeybindDown(keybind)
@@ -1472,6 +1553,37 @@
         </Category>
     </Layer>
 
+        <!-- The actions in this layer must inherit from an action in SI_KEYBINDINGS_LAYER_BATTLEGROUNDS. This layer is not shown in the keybind window.-->
+    <Layer name="BattlegroundRoundRecap" allowFallthrough="false">
+        <Category>
+            <!-- Chat -->
+            <AllowAction name="START_CHAT_ENTER" />
+            <AllowAction name="START_CHAT_SLASH" />
+            <AllowAction name="CHAT_REPLY_TO_LAST_WHISPER" />
+            <AllowAction name="CLEAR_ACTIVE_NARRATION"/>
+
+            <!-- Utility -->
+            <AllowAction name="TOGGLE_GAMEPAD_MODE" />
+            <AllowAction name="TOGGLE_FULLSCREEN"/>
+            <AllowAction name="TOGGLE_HUD_UI"/>
+            <AllowAction name="TAKE_SCREENSHOT" />
+            <AllowAction name="CAMERA_ZOOM_OUT"/>
+            <AllowAction name="CAMERA_ZOOM_IN"/>
+            <AllowAction name="GAME_CAMERA_GAMEPAD_ZOOM"/>
+            
+            <Action name="BATTLEGROUND_RECAP_LEAVE" inheritsBindFrom="LEAVE_BATTLEGROUND_DUMMY">
+                <Down>
+                    return BATTLEGROUND_ROUND_RECAP:OnKeybindDown(keybind) or ZO_KeybindStrip_HandleKeybindDown(keybind)
+                </Down>
+                <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
+            </Action>
+            
+            <Action name="BATTLEGROUND_RECAP_SHOW_SCOREBOARD" inheritsBindFrom="TOGGLE_BATTLEGROUND_SCOREBOARD_DUMMY" hideAction="true">
+                <Down>BATTLEGROUND_SCOREBOARD_FRAGMENT:OnHUDButtonPressedDown()</Down>
+            </Action>
+        </Category>
+    </Layer>
+    
     <Layer name="ScreenshotMode" allowFallthrough="false">
         <Category>
             <AllowAction name="GAMEPAD_JUMP_OR_INTERACT" />

@@ -192,7 +192,7 @@
 
                         <Label name="$(parent)Description" override="true" wrapMode="ELLIPSIS" font="ZoFontWinH4">
                             <Anchor point="TOPRIGHT" relativeTo="$(parent)GroupSizeLabel" relativePoint="BOTTOMRIGHT" offsetX="-10" offsetY="10" />
-                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)SetTypesSection" relativePoint="TOPLEFT" offsetY="-20" />
+                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)RatingSection" relativePoint="TOPLEFT" offsetY="-20" />
                         </Label>
 
                         <Control name="$(parent)RewardsSection" override="true">
@@ -210,6 +210,20 @@
                         <Control name="$(parent)SetTypesSection" override="true">
                             <Anchor point="BOTTOMLEFT" relativeTo="$(parent)RewardsSection" relativePoint="TOPLEFT" />
                             <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)RewardsSection" relativePoint="TOPRIGHT" offsetY="-24" />
+
+                            <Controls>
+                                <Label name="$(parent)Header" override="true" font="ZoFontGamepad42" hidden="true" />
+
+                                <Label name="$(parent)List" override="true" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                                    <Anchor point="TOPLEFT" />
+                                    <Anchor point="TOPRIGHT" />
+                                </Label>
+                            </Controls>
+                        </Control>
+
+                        <Control name="$(parent)RatingSection" override="true">
+                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)SetTypesSection" relativePoint="TOPLEFT" />
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)SetTypesSection" relativePoint="TOPRIGHT" />
 
                             <Controls>
                                 <Label name="$(parent)Header" override="true" font="ZoFontGamepad42" hidden="true" />

@@ -847,6 +847,12 @@ GAMEPAD_SETTINGS_DATA =
         {
             panel = SETTING_PANEL_INTERFACE,
             system = SETTING_TYPE_UI,
+            settingId = UI_SETTING_TEXT_LANGUAGE,
+            header = SI_INTERFACE_OPTIONS_LANGUAGE,
+        },
+        {
+            panel = SETTING_PANEL_INTERFACE,
+            system = SETTING_TYPE_UI,
             settingId = UI_SETTING_PRIMARY_PLAYER_NAME_GAMEPAD,
             header = SI_INTERFACE_OPTIONS_HEADS_UP_DISPLAY,
         },

@@ -4,7 +4,7 @@ ZO_INVALID_PRESENTATION_INDEX = -1
 ZO_MARKET_PREVIEW_TYPE_PREVIEWABLE = 0
 ZO_MARKET_PREVIEW_TYPE_BUNDLE = 1
 ZO_MARKET_PREVIEW_TYPE_CROWN_CRATE = 2
-ZO_MARKET_PREVIEW_TYPE_BUNDLE_HIDES_CHILDREN = 3
+ZO_MARKET_PREVIEW_TYPE_BUNDLE_AS_LIST = 3
 ZO_MARKET_PREVIEW_TYPE_HOUSE = 4
 
 --
@@ -143,9 +143,9 @@ function ZO_MarketProductData:IsPurchaseQuantityValid(purchaseQuantity)
     return true, MARKET_PURCHASE_RESULT_SUCCESS
 end
 
-function ZO_MarketProductData:GetHidesChildProducts()
+function ZO_MarketProductData:GetInspectChildProductsAsList()
     if self:IsBundle() then
-        return GetMarketProductBundleHidesChildProducts(self.marketProductId)
+        return GetMarketProductBundleInspectChildProductsAsList(self.marketProductId)
     end
 
     return false
@@ -304,8 +304,8 @@ end
 
 function ZO_MarketProductData:GetMarketProductPreviewType()
     if self:IsBundle() then
-        if self:GetHidesChildProducts() then
-            return ZO_MARKET_PREVIEW_TYPE_BUNDLE_HIDES_CHILDREN
+        if self:GetInspectChildProductsAsList() then
+            return ZO_MARKET_PREVIEW_TYPE_BUNDLE_AS_LIST
         else
             return ZO_MARKET_PREVIEW_TYPE_BUNDLE
         end

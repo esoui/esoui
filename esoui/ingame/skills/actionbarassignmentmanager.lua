@@ -796,7 +796,11 @@ function ZO_ActionBarAssignmentManager:RegisterForEvents()
     local function OnHotbarSlotUpdated(_, actionSlotIndex, hotbarCategory, justUnlocked)
         if VIEWABLE_HOTBAR_CATEGORY_SET[hotbarCategory] then
             local hotbar = self:GetHotbar(hotbarCategory)
-            hotbar:ResetSlot(actionSlotIndex)
+            if not SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeBatchSave() then
+                -- Only refresh from data when not respeccing.
+                hotbar:ResetSlot(actionSlotIndex)
+            end
+
             if justUnlocked then
                 hotbar:MarkSlotNewInternal(actionSlotIndex)
                 self:FireCallbacks("SlotNewStatusChanged", hotbarCategory, actionSlotIndex)

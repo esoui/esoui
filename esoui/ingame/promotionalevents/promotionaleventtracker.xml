@@ -1,0 +1,25 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_PromotionalEventTracker_TL" inherits="ZO_HUDTracker_Base_Template">
+            <OnInitialized>
+                ZO_PromotionalEventTracker.OnControlInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)Container" override="true">
+                    <Controls>
+                        <Label name="$(parent)Header" override="true" color="INTERFACE_COLOR_TYPE_CON_COLORS:CON_APPROPRIATE" text="SI_PROMOTIONAL_EVENT_TRACKER_HEADER">
+                            <Controls>
+                                <Texture name="$(parent)Icon" textureFile="EsoUI/Art/LFG/Gamepad/LFG_menuIcon_PromotionalEvents.dds" excludeFromResizeToFitExtents="true">
+                                    <Dimensions x="32" y="32" />
+                                    <Anchor point="RIGHT" relativePoint="LEFT" offsetX="-5" />
+                                </Texture>
+                            </Controls>
+                        </Label>
+                        <Label name="$(parent)ProgressLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" />
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

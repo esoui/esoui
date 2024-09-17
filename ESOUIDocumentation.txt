@@ -1,5 +1,5 @@
 {TOC:maxLevel=3}
-h1. ESO UI Documentation for API Version 101043
+h1. ESO UI Documentation for API Version 101044
 h2. VM Functions
 * ScriptBuildInfo()
 ** _Returns:_ *table* _buildInfo_
@@ -121,6 +121,7 @@ h5. BookMedium
 h5. BroadcastType
 * BROADCAST_TYPE_HOTFIX_WARNING
 * BROADCAST_TYPE_MAINTENANCE_WARNING
+* BROADCAST_TYPE_NONE
 
 
 h5. BuffEffectType
@@ -151,6 +152,7 @@ h5. CenterScreenAnnounceType
 * CENTER_SCREEN_ANNOUNCE_TYPE_BATTLEGROUND_MINUTE_WARNING
 * CENTER_SCREEN_ANNOUNCE_TYPE_BATTLEGROUND_NEARING_VICTORY
 * CENTER_SCREEN_ANNOUNCE_TYPE_BATTLEGROUND_OBJECTIVE
+* CENTER_SCREEN_ANNOUNCE_TYPE_BATTLEGROUND_ROUND_STARTING
 * CENTER_SCREEN_ANNOUNCE_TYPE_CHAMPION_LEVEL_ACHIEVED
 * CENTER_SCREEN_ANNOUNCE_TYPE_CHAMPION_POINT_GAINED
 * CENTER_SCREEN_ANNOUNCE_TYPE_COLLECTIBLES_UPDATED
@@ -190,6 +192,7 @@ h5. CenterScreenAnnounceType
 * CENTER_SCREEN_ANNOUNCE_TYPE_OUTFIT_CHANGES_APPLIED
 * CENTER_SCREEN_ANNOUNCE_TYPE_PLEDGE_OF_MARA_RESULT
 * CENTER_SCREEN_ANNOUNCE_TYPE_POI_DISCOVERED
+* CENTER_SCREEN_ANNOUNCE_TYPE_PROMOTIONAL_EVENT_REWARD_CLAIMED
 * CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_ADDED
 * CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_COMPLETED
 * CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_CONDITION_COMPLETED
@@ -490,6 +493,7 @@ h5. LootItemType
 * LOOT_TYPE_CHAOTIC_CREATIA
 * LOOT_TYPE_COLLECTIBLE
 * LOOT_TYPE_EVENT_TICKET
+* LOOT_TYPE_IMPERIAL_FRAGMENTS
 * LOOT_TYPE_ITEM
 * LOOT_TYPE_MONEY
 * LOOT_TYPE_QUEST_ITEM
@@ -762,6 +766,13 @@ h5. PlatformAccountLabel
 * ACCOUNT_LABEL_PS5
 * ACCOUNT_LABEL_REUSE_ME
 * ACCOUNT_LABEL_XBOX
+
+
+h5. PlatformStoreDialogResult
+* PLATFORM_STORE_DIALOG_RESULT_CLOSED_FROM_CODE
+* PLATFORM_STORE_DIALOG_RESULT_ERROR
+* PLATFORM_STORE_DIALOG_RESULT_PURCHASED
+* PLATFORM_STORE_DIALOG_RESULT_USER_CANCELED
 
 
 h5. PlatformStoreLabel
@@ -1609,7 +1620,8 @@ h5. LFGActivity
 
 h5. LFGCooldownType
 * LFG_COOLDOWN_ACTIVITY_STARTED
-* LFG_COOLDOWN_BATTLEGROUND_DESERTED
+* LFG_COOLDOWN_BATTLEGROUND_DESERTED_MMR
+* LFG_COOLDOWN_BATTLEGROUND_DESERTED_QUEUE
 * LFG_COOLDOWN_BATTLEGROUND_REWARD_GRANTED
 * LFG_COOLDOWN_DUNGEON_LEFT
 * LFG_COOLDOWN_DUNGEON_REWARD_GRANTED
@@ -1621,6 +1633,7 @@ h5. LFGCooldownType
 
 
 h5. LFGGroupType
+* LFG_GROUP_TYPE_BIG_TEAM_BATTLE
 * LFG_GROUP_TYPE_LARGE
 * LFG_GROUP_TYPE_MEDIUM
 * LFG_GROUP_TYPE_NONE
@@ -1662,6 +1675,12 @@ h5. LFGRole
 * LFG_ROLE_HEAL
 * LFG_ROLE_INVALID
 * LFG_ROLE_TANK
+
+
+h5. PromotionalEventCampaignComponentType
+* PROMOTIONAL_EVENTS_COMPONENT_TYPE_ACTIVITY
+* PROMOTIONAL_EVENTS_COMPONENT_TYPE_MILESTONE_REWARD
+* PROMOTIONAL_EVENTS_COMPONENT_TYPE_SCHEDULE
 
 
 h5. RemoveGroupListingReason
@@ -1846,10 +1865,17 @@ h5. BattlegroundKillType
 
 
 h5. BattlegroundLeaderboardType
+* BATTLEGROUND_LEADERBOARD_TYPE_COMPETITIVE
 * BATTLEGROUND_LEADERBOARD_TYPE_DEATHMATCH
 * BATTLEGROUND_LEADERBOARD_TYPE_FLAG_GAMES
 * BATTLEGROUND_LEADERBOARD_TYPE_LAND_GRAB
 * BATTLEGROUND_LEADERBOARD_TYPE_NONE
+
+
+h5. BattlegroundMMRBonusType
+* BG_MMR_BONUS_ALL
+* BG_MMR_BONUS_JOIN_IN_PROGRESS
+* BG_MMR_BONUS_LFM_REQUESTED
 
 
 h5. BattlegroundQueryContextType
@@ -1862,8 +1888,8 @@ h5. BattlegroundQueryContextType
 h5. BattlegroundState
 * BATTLEGROUND_STATE_FINISHED
 * BATTLEGROUND_STATE_NONE
-* BATTLEGROUND_STATE_POSTGAME
-* BATTLEGROUND_STATE_PREGAME
+* BATTLEGROUND_STATE_POSTROUND
+* BATTLEGROUND_STATE_PREROUND
 * BATTLEGROUND_STATE_RUNNING
 * BATTLEGROUND_STATE_STARTING
 
@@ -2628,7 +2654,6 @@ h5. CollectibleCategorySpecialization
 
 h5. CollectibleCategoryType
 * COLLECTIBLE_CATEGORY_TYPE_ABILITY_FX_OVERRIDE
-* COLLECTIBLE_CATEGORY_TYPE_ABILITY_SKIN
 * COLLECTIBLE_CATEGORY_TYPE_ACCOUNT_SERVICE
 * COLLECTIBLE_CATEGORY_TYPE_ACCOUNT_UPGRADE
 * COLLECTIBLE_CATEGORY_TYPE_ASSISTANT
@@ -2655,6 +2680,7 @@ h5. CollectibleCategoryType
 * COLLECTIBLE_CATEGORY_TYPE_PIERCING_JEWELRY
 * COLLECTIBLE_CATEGORY_TYPE_PLAYER_FX_OVERRIDE
 * COLLECTIBLE_CATEGORY_TYPE_POLYMORPH
+* COLLECTIBLE_CATEGORY_TYPE_REUSE_ME_0
 * COLLECTIBLE_CATEGORY_TYPE_SKIN
 * COLLECTIBLE_CATEGORY_TYPE_TRIBUTE_PATRON
 * COLLECTIBLE_CATEGORY_TYPE_VANITY_PET
@@ -2690,6 +2716,7 @@ h5. CollectibleUsageBlockReason
 * COLLECTIBLE_USAGE_BLOCK_REASON_CATEGORY_REQUIREMENT_FAILED
 * COLLECTIBLE_USAGE_BLOCK_REASON_COLLECTIBLE_ALREADY_QUEUED
 * COLLECTIBLE_USAGE_BLOCK_REASON_COMPANION_INTRO_QUEST
+* COLLECTIBLE_USAGE_BLOCK_REASON_COMPANION_INTRO_QUEST_BLOCKED_BY_ZONE
 * COLLECTIBLE_USAGE_BLOCK_REASON_COMPANION_MENU_REQUIRED
 * COLLECTIBLE_USAGE_BLOCK_REASON_DEAD
 * COLLECTIBLE_USAGE_BLOCK_REASON_DEFAULT_ALREADY_ACTIVE
@@ -2767,6 +2794,7 @@ h5. AdvancedStatDisplayFormat
 
 
 h5. AdvancedStatDisplayType
+* ADVANCED_STAT_DISPLAY_TYPE_ALLIANCE_POINTS_BONUS
 * ADVANCED_STAT_DISPLAY_TYPE_ALL_XP
 * ADVANCED_STAT_DISPLAY_TYPE_ARMOR
 * ADVANCED_STAT_DISPLAY_TYPE_BASH_COST
@@ -2777,6 +2805,7 @@ h5. AdvancedStatDisplayType
 * ADVANCED_STAT_DISPLAY_TYPE_BLOCK_MITIGATION
 * ADVANCED_STAT_DISPLAY_TYPE_BLOCK_SPEED
 * ADVANCED_STAT_DISPLAY_TYPE_CC_BREAK_COST
+* ADVANCED_STAT_DISPLAY_TYPE_COIN_BONUS
 * ADVANCED_STAT_DISPLAY_TYPE_COLD_DAMAGE
 * ADVANCED_STAT_DISPLAY_TYPE_COLD_RESIST
 * ADVANCED_STAT_DISPLAY_TYPE_CRITICAL_CHANCE
@@ -2798,6 +2827,7 @@ h5. AdvancedStatDisplayType
 * ADVANCED_STAT_DISPLAY_TYPE_HEALING_DONE_BONUSES
 * ADVANCED_STAT_DISPLAY_TYPE_HEALING_TAKEN
 * ADVANCED_STAT_DISPLAY_TYPE_HEALING_TAKEN_BONUSES
+* ADVANCED_STAT_DISPLAY_TYPE_INSPIRATION_BONUS
 * ADVANCED_STAT_DISPLAY_TYPE_MAGIC_DAMAGE
 * ADVANCED_STAT_DISPLAY_TYPE_MAGIC_RESIST
 * ADVANCED_STAT_DISPLAY_TYPE_MONSTER_KILL_XP
@@ -2818,6 +2848,12 @@ h5. AdvancedStatDisplayType
 * ADVANCED_STAT_DISPLAY_TYPE_SPELL_RESIST
 * ADVANCED_STAT_DISPLAY_TYPE_SPRINT_COST
 * ADVANCED_STAT_DISPLAY_TYPE_SPRINT_SPEED
+* ADVANCED_STAT_DISPLAY_TYPE_SUBSCRIBER_ALLIANCE_POINTS_BONUS
+* ADVANCED_STAT_DISPLAY_TYPE_SUBSCRIBER_ALL_XP
+* ADVANCED_STAT_DISPLAY_TYPE_SUBSCRIBER_COIN_BONUS
+* ADVANCED_STAT_DISPLAY_TYPE_SUBSCRIBER_INSPIRATION_BONUS
+* ADVANCED_STAT_DISPLAY_TYPE_SUBSCRIBER_TELVAR_BONUS
+* ADVANCED_STAT_DISPLAY_TYPE_TELVAR_BONUS
 * ADVANCED_STAT_DISPLAY_TYPE_ULTIMATE_REGEN_COMBAT
 
 
@@ -3491,6 +3527,7 @@ h5. CurrencyType
 * CURT_CROWN_GEMS
 * CURT_ENDEAVOR_SEALS
 * CURT_EVENT_TICKETS
+* CURT_IMPERIAL_FRAGMENTS
 * CURT_MONEY
 * CURT_NONE
 * CURT_STYLE_STONES
@@ -4241,7 +4278,6 @@ h5. HousingRequestResult
 * HOUSING_REQUEST_RESULT_FURNITURE_ALREADY_SELECTED
 * HOUSING_REQUEST_RESULT_HIGH_IMPACT_COLLECTIBLE_PLACE_LIMIT
 * HOUSING_REQUEST_RESULT_HIGH_IMPACT_ITEM_PLACE_LIMIT
-* HOUSING_REQUEST_RESULT_HOME_SHOW_NOT_ENOUGH_PLACED
 * HOUSING_REQUEST_RESULT_INCORRECT_MODE
 * HOUSING_REQUEST_RESULT_INVALID_FURNITURE_POSITION
 * HOUSING_REQUEST_RESULT_INVALID_TEMPLATE
@@ -4263,12 +4299,10 @@ h5. HousingRequestResult
 * HOUSING_REQUEST_RESULT_LINK_INFINITE_PARENT_LOOP
 * HOUSING_REQUEST_RESULT_LINK_NO_BAD_LINKAGE
 * HOUSING_REQUEST_RESULT_LINK_SAME_FURNITURE
-* HOUSING_REQUEST_RESULT_LISTED
 * HOUSING_REQUEST_RESULT_LOW_IMPACT_COLLECTIBLE_PLACE_LIMIT
 * HOUSING_REQUEST_RESULT_LOW_IMPACT_ITEM_PLACE_LIMIT
 * HOUSING_REQUEST_RESULT_METRICS_LIMIT_HIT
 * HOUSING_REQUEST_RESULT_MOVE_FAILED
-* HOUSING_REQUEST_RESULT_NOT_HOME_SHOW
 * HOUSING_REQUEST_RESULT_NOT_IN_HOUSE
 * HOUSING_REQUEST_RESULT_NO_CHANGES
 * HOUSING_REQUEST_RESULT_NO_DUPLICATES
@@ -4295,6 +4329,9 @@ h5. HousingRequestResult
 * HOUSING_REQUEST_RESULT_PLACE_FAILED
 * HOUSING_REQUEST_RESULT_REMOVE_FAILED
 * HOUSING_REQUEST_RESULT_REQUEST_IN_PROGRESS
+* HOUSING_REQUEST_RESULT_REUSE_ME1
+* HOUSING_REQUEST_RESULT_REUSE_ME2
+* HOUSING_REQUEST_RESULT_REUSE_ME3
 * HOUSING_REQUEST_RESULT_SET_STATE_FAILED
 * HOUSING_REQUEST_RESULT_SUCCESS
 * HOUSING_REQUEST_RESULT_TOTAL_TEMP_ITEM_PLACE_LIMIT
@@ -4490,6 +4527,9 @@ h5. InterfaceTextColor
 * INTERFACE_TEXT_COLOR_HINT
 * INTERFACE_TEXT_COLOR_NORMAL
 * INTERFACE_TEXT_COLOR_PERSONALITY_EMOTES
+* INTERFACE_TEXT_COLOR_PROMOTIONAL_EVENTS
+* INTERFACE_TEXT_COLOR_PROMOTIONAL_EVENTS_DIMMED
+* INTERFACE_TEXT_COLOR_PROMOTIONAL_EVENTS_HIGHLIGHT
 * INTERFACE_TEXT_COLOR_SECOND_CONTRAST
 * INTERFACE_TEXT_COLOR_SECOND_NORMAL
 * INTERFACE_TEXT_COLOR_SECOND_SELECTED
@@ -4614,6 +4654,8 @@ h5. ProgressionColors
 * PROGRESSION_COLOR_CP_STAMINA_START
 * PROGRESSION_COLOR_EARNED
 * PROGRESSION_COLOR_LOCKED
+* PROGRESSION_COLOR_PROMOTIONAL_EVENT_END
+* PROGRESSION_COLOR_PROMOTIONAL_EVENT_START
 * PROGRESSION_COLOR_PURCHASED
 * PROGRESSION_COLOR_PURCHASED_UNSELECTED
 * PROGRESSION_COLOR_SKILL_XP_END
@@ -6373,6 +6415,7 @@ h5. UISetting
 * UI_SETTING_SHOW_RESOURCE_BARS
 * UI_SETTING_SHOW_WEAPON_INDICATOR
 * UI_SETTING_SOCIAL_LIST_HIDE_OFFLINE
+* UI_SETTING_TEXT_LANGUAGE
 * UI_SETTING_ULTIMATE_NUMBER
 * UI_SETTING_USE_CUSTOM_SCALE
 * UI_SETTING_USE_GAMEPAD_CUSTOM_SCALE
@@ -6598,6 +6641,7 @@ h5. RewardType
 * REWARD_TYPE_AUTO_ITEM
 * REWARD_TYPE_CHAOTIC_CREATIA
 * REWARD_TYPE_EVENT_TICKETS
+* REWARD_TYPE_IMPERIAL_FRAGMENTS
 * REWARD_TYPE_INSPIRATION
 * REWARD_TYPE_MONEY
 * REWARD_TYPE_NONE
@@ -6893,6 +6937,7 @@ h5. MarketOpenOperation
 * MARKET_OPEN_OPERATION_GROUP_FINDER
 * MARKET_OPEN_OPERATION_NOTIFICATION
 * MARKET_OPEN_OPERATION_OUTFIT_CURRENCY
+* MARKET_OPEN_OPERATION_PROMOTIONAL_EVENTS
 * MARKET_OPEN_OPERATION_RESEARCH_SCROLLS
 * MARKET_OPEN_OPERATION_UNIVERSAL_STYLE_ITEM
 * MARKET_OPEN_OPERATION_UNLOCK_ARMORY_BUILD_SLOT
@@ -7329,6 +7374,7 @@ h5. StoreFailure
 * STORE_FAILURE_NOT_ENOUGH_ARCHIVAL_FORTUNES
 * STORE_FAILURE_NOT_ENOUGH_CHAOS_CREATIA
 * STORE_FAILURE_NOT_ENOUGH_EVENT_TICKETS
+* STORE_FAILURE_NOT_ENOUGH_IMPERIAL_FRAGMENTS
 * STORE_FAILURE_NOT_ENOUGH_ITEM
 * STORE_FAILURE_NOT_ENOUGH_STABLE_SPACE
 * STORE_FAILURE_NOT_ENOUGH_STYLE_STONES
@@ -7521,6 +7567,7 @@ h5. GroupVoteChoice
 
 
 h5. Globals
+* BIG_TEAM_BATTLE_QUEUE_SIZE_THRESHOLD
 * BIG_TEAM_BATTLE_SIZE_THRESHOLD
 * LARGE_GROUP_SIZE_THRESHOLD
 * MAX_GROUP_SIZE_THRESHOLD
@@ -9010,6 +9057,18 @@ h5. ActionResult
 * ACTION_RESULT_WRONG_WEAPON
 
 
+h5. BattlegroundRoundResult
+* BATTLEGROUND_ROUND_RESULT_ENEMY_LEFT
+* BATTLEGROUND_ROUND_RESULT_HIGHEST_SCORE_WIN
+* BATTLEGROUND_ROUND_RESULT_INVALID
+* BATTLEGROUND_ROUND_RESULT_LAST_TEAM_STANDING
+* BATTLEGROUND_ROUND_RESULT_SCORE_LIMIT_REACHED
+* BATTLEGROUND_ROUND_RESULT_STALEMATE
+* BATTLEGROUND_ROUND_RESULT_TIEBREAKER_LIVES_REMAINING
+* BATTLEGROUND_ROUND_RESULT_TIEBREAKER_MEDAL_SCORE
+* BATTLEGROUND_ROUND_RESULT_TIEBREAKER_PLAYERS_ALIVE
+
+
 h5. EndlessDungeonBuffBucketType
 * ENDLESS_DUNGEON_BUFF_BUCKET_TYPE_DEFENSE
 * ENDLESS_DUNGEON_BUFF_BUCKET_TYPE_OFFENSE
@@ -9405,6 +9464,7 @@ h5. TutorialTrigger
 * TUTORIAL_TRIGGER_CURRENCY_GAINED_CROWN_GEMS
 * TUTORIAL_TRIGGER_CURRENCY_GAINED_ENDEAVOR_SEALS
 * TUTORIAL_TRIGGER_CURRENCY_GAINED_EVENT_TICKETS
+* TUTORIAL_TRIGGER_CURRENCY_GAINED_IMPERIAL_FRAGMENTS
 * TUTORIAL_TRIGGER_CURRENCY_GAINED_STYLE_STONES
 * TUTORIAL_TRIGGER_CURRENCY_GAINED_UNDAUNTED_KEYS
 * TUTORIAL_TRIGGER_DAILY_LOGIN_REWARDS_OPENED
@@ -9525,6 +9585,9 @@ h5. TutorialTrigger
 * TUTORIAL_TRIGGER_OWNED_LOCK_VIEWED
 * TUTORIAL_TRIGGER_PICKPOCKET_PROMPT_VIEWED
 * TUTORIAL_TRIGGER_POISON_EQUIPPED
+* TUTORIAL_TRIGGER_PROMOTIONAL_EVENTS_HUD_REWARD_TO_CLAIM
+* TUTORIAL_TRIGGER_PROMOTIONAL_EVENTS_HUD_TRACKER_SHOWN
+* TUTORIAL_TRIGGER_PROMOTIONAL_EVENTS_OPENED
 * TUTORIAL_TRIGGER_PROVISIONING_OPENED
 * TUTORIAL_TRIGGER_PURCHASED_ABILITY
 * TUTORIAL_TRIGGER_PURCHASED_CRIMINAL_ABILITY
@@ -9636,7 +9699,6 @@ h5. AnchorPosition
 * BOTTOMRIGHT
 * CENTER
 * LEFT
-* NONE
 * RIGHT
 * TOP
 * TOPLEFT
@@ -10536,6 +10598,7 @@ h5. OfficialLanguage
 
 
 h5. Globals
+* ZO_DEFAULT_LANGUAGE_SETTING_VALUE
 
 
 h5. ScriptProfilerGarbageCollectionType
@@ -10913,6 +10976,15 @@ h2. Game API
 * DoesPlatformSupportGraphicSetting(*integer* _settingId_)
 ** _Returns:_ *bool* _isSettingSupported_
 
+* ZoGetOfficialGameLanguage()
+** _Returns:_ *[OfficialLanguage|#OfficialLanguage]* _language_
+
+* ZoIsOfficialLanguageSupported(*[OfficialLanguage|#OfficialLanguage]* _language_)
+** _Returns:_ *bool* _isSupported_
+
+* ZoIsIgnoringPatcherLanguage()
+** _Returns:_ *bool* _isIgnoringPatcherLanguage_
+
 * SetSetting(*[SettingSystemType|#SettingSystemType]* _system_, *integer* _settingId_, *string* _value_, *[SetOptions|#SetOptions]* _setOptions_)
 
 * ApplySettings()
@@ -10975,6 +11047,8 @@ h2. Game API
 * ShowPlatformESOPlusSubscriptionUI *private* ()
 
 * ShowPlatformESOChapterUpgradeUI *private* (*integer* _chapterId_, *bool* _isCollectorsEdition_, *[ChapterUpgradeSource|#ChapterUpgradeSource]* _source_)
+
+* ShowPlatformESOVOAdditionalContentUI *private* ()
 
 * DisableShareFeatures *private* ()
 
@@ -12583,6 +12657,9 @@ h2. Game API
 * IsInteractionCameraActive()
 ** _Returns:_ *bool* _isActive_
 
+* IsSpectatorCameraActive()
+** _Returns:_ *bool* _isActive_
+
 * GameCameraInteractStart *private* ()
 
 * IsReticleHidden()
@@ -12614,6 +12691,23 @@ h2. Game API
 ** _Returns:_ *bool* _valid_
 
 * ReleaseGameCameraSiegeControlled *private* ()
+
+* SetSpectatorCameraEnabled *private* (*bool* _enable_)
+
+* GetSpectatableUnitName(*luaindex* _index_)
+** _Returns:_ *string* _name_
+
+* GetNumSpectatableUnits()
+** _Returns:_ *integer* _numUnits_
+
+* SetSpectatorCameraTargetIndex(*luaindex* _index_)
+
+* GetSpectatorCameraTargetIndex()
+** _Returns:_ *luaindex* _index_
+
+* SpectatorCameraTargetNext()
+
+* SpectatorCameraTargetPrev()
 
 * GetNumPendingFeedback()
 ** _Returns:_ *integer* _pendingFeedback_
@@ -12649,6 +12743,9 @@ h2. Game API
 
 * IsSettingTemplate()
 ** _Returns:_ *bool* _isSettingTemplate_
+
+* IsNewCharacterNotificationSuppressionActive()
+** _Returns:_ *bool* _isSuppressionActive_
 
 * GetTrialChatRestriction(*[ChannelType|#ChannelType]* _channel_, *string* _target_)
 ** _Returns:_ *[TrialAccountRestrictionType|#TrialAccountRestrictionType]* _restrictionType_
@@ -14276,6 +14373,9 @@ h2. Game API
 * IsActiveWorldGroupOwnable()
 ** _Returns:_ *bool* _isWorldGroupOwnable_
 
+* IsActiveWorldStarterWorld()
+** _Returns:_ *bool* _isStarterWorld_
+
 * GuiRender3DPositionToWorldPosition(*number* _renderX_, *number* _renderY_, *number* _renderZ_)
 ** _Returns:_ *integer* _worldX_, *integer* _worldY_, *integer* _worldZ_
 
@@ -14432,8 +14532,61 @@ h2. Game API
 * DoesObjectivePassCompassVisibilitySubzoneCheck(*integer* _keepId_, *integer* _objectiveId_, *[BattlegroundQueryContextType|#BattlegroundQueryContextType]* _battlegroundContext_)
 ** _Returns:_ *bool* _doesPassVisiblityCheck_
 
-* GetBattlegroundGameType(*integer* _battlegroundId_)
+* GetBattlegroundGameType(*integer* _battlegroundId_, *luaindex:nilable* _roundIndex_)
 ** _Returns:_ *[BattlegroundGameType|#BattlegroundGameType]* _gameType_
+
+* GetCurrentBattlegroundGameType(*luaindex:nilable* _roundIndex_)
+** _Returns:_ *[BattlegroundGameType|#BattlegroundGameType]* _gameType_
+
+* GetScoreToWinBattlegroundRound(*integer* _battlegroundId_, *luaindex:nilable* _roundIndex_)
+** _Returns:_ *integer* _result_
+
+* GetScoreToWinCurrentBattlegroundRound(*luaindex:nilable* _roundIndex_)
+** _Returns:_ *integer* _result_
+
+* GetBattlegroundRoundNearingVictoryPercent(*integer* _battlegroundId_, *luaindex:nilable* _roundIndex_)
+** _Returns:_ *number* _nearingVictoryPercent_
+
+* GetCurrentBattlegroundRoundNearingVictoryPercent(*luaindex:nilable* _roundIndex_)
+** _Returns:_ *number* _nearingVictoryPercent_
+
+* GetBattlegroundRoundMaxActiveSequencedObjectives(*integer* _battlegroundId_, *luaindex:nilable* _roundIndex_)
+** _Returns:_ *integer* _maxActiveSequencedObjectives_
+
+* GetCurrentBattlegroundRoundMaxActiveSequencedObjectives(*luaindex:nilable* _roundIndex_)
+** _Returns:_ *integer* _maxActiveSequencedObjectives_
+
+* GetCurrentBattlegroundId()
+** _Returns:_ *integer* _battlegroundId_
+
+* LeaveBattleground()
+
+* GetCurrentBattlegroundShutdownTimer()
+** _Returns:_ *integer:nilable* _timeLeftMS_
+
+* GetCurrentBattlegroundRoundIndex()
+** _Returns:_ *luaindex:nilable* _currentRound_
+
+* GetLocalPlayerBattlegroundLivesRemaining()
+** _Returns:_ *integer* _numLives_
+
+* HasTeamWonBattlegroundEarly()
+** _Returns:_ *bool* _isWonEarly_
+
+* DidLocalPlayerJoinBattlegroundInProgress()
+** _Returns:_ *bool* _joinedInProgress_
+
+* DidCurrentBattlegroundRequestLFM()
+** _Returns:_ *bool* _lfmRequested_
+
+* DoesCurrentBattlegroundImpactMMR()
+** _Returns:_ *bool* _impactsMMR_
+
+* GetCurrentBattlegroundMMRReductionBonusTypes()
+** _Returns:_ *[BattlegroundMMRBonusType|#BattlegroundMMRBonusType]* _bonusTypes_
+
+* GetCurrentBattlegroundMMRLossReductionBonus()
+** _Returns:_ *number* _bonusReductionPercent_
 
 * GetBattlegroundName(*integer* _battlegroundId_)
 ** _Returns:_ *string* _name_
@@ -14441,20 +14594,32 @@ h2. Game API
 * GetBattlegroundDescription(*integer* _battlegroundId_)
 ** _Returns:_ *string* _description_
 
+* GetBattlegroundNumRounds(*integer* _battlegroundId_)
+** _Returns:_ *integer* _numRounds_
+
+* DoesBattlegroundHaveRounds(*integer* _battlegroundId_)
+** _Returns:_ *bool* _hasRounds_
+
+* GetBattlegroundNumTeams(*integer* _battlegroundId_)
+** _Returns:_ *integer* _numTeams_
+
+* GetBattlegroundTeamByIndex(*integer* _battlegroundId_, *luaindex* _teamIndex_)
+** _Returns:_ *[BattlegroundTeam|#BattlegroundTeam]:nilable* _battlegroundTeam_
+
+* DoesBattlegroundHaveTeam(*integer* _battlegroundId_, *[BattlegroundTeam|#BattlegroundTeam]* _battlegroundTeam_)
+** _Returns:_ *bool* _hasTeam_
+
+* DoesBattlegroundHaveLimitedPlayerLives(*integer* _battlegroundId_)
+** _Returns:_ *bool* _hasLimitedLives_
+
+* GetBattlegroundMaxPlayerLives(*integer* _battlegroundId_)
+** _Returns:_ *integer* _maxPlayerLives_
+
+* GetBattlegroundTeamSize(*integer* _battlegroundId_)
+** _Returns:_ *integer* _teamSize_
+
 * GetBattlegroundInfoTexture(*integer* _battlegroundId_)
 ** _Returns:_ *textureName* _path_
-
-* GetScoreToWinBattleground(*integer* _battlegroundId_)
-** _Returns:_ *integer* _result_
-
-* GetBattlegroundNearingVictoryPercent(*integer* _battlegroundId_)
-** _Returns:_ *number* _nearingVictoryPercent_
-
-* GetBattlegroundMaxActiveSequencedObjectives(*integer* _battlegroundId_)
-** _Returns:_ *integer* _maxActiveSequencedObjectives_
-
-* GetCurrentBattlegroundId()
-** _Returns:_ *integer* _battlegroundId_
 
 * GetBattlegroundNumUsedMedals(*integer* _battlegroundId_)
 ** _Returns:_ *integer* _numMedals_
@@ -14471,11 +14636,6 @@ h2. Game API
 * GetMedalScoreReward(*integer* _medalId_)
 ** _Returns:_ *integer* _scoreReward_
 
-* LeaveBattleground()
-
-* GetCurrentBattlegroundShutdownTimer()
-** _Returns:_ *integer:nilable* _timeLeftMS_
-
 * QueryBattlegroundLeaderboardData(*[BattlegroundLeaderboardType|#BattlegroundLeaderboardType]* _battlegroundType_)
 ** _Returns:_ *[LeaderboardDataReadyState|#LeaderboardDataReadyState]* _readyState_
 
@@ -14491,32 +14651,55 @@ h2. Game API
 * GetBattlegroundLeaderboardLocalPlayerInfo(*[BattlegroundLeaderboardType|#BattlegroundLeaderboardType]* _lastBattlegroundLeaderboardType_)
 ** _Returns:_ *integer* _currentRank_, *integer* _currentScore_
 
-* GetBattlegroundLeaderboardsSchedule()
+* GetBattlegroundLeaderboardsSchedule(*[BattlegroundLeaderboardType|#BattlegroundLeaderboardType]* _leaderboardType_)
 ** _Returns:_ *integer* _secondsUntilEnd_, *integer* _secondsUntilNextStart_
 
-* GetNumScoreboardEntries()
+* GetNumScoreboardEntries(*luaindex:nilable* _roundIndex_)
 ** _Returns:_ *integer* _numItems_
 
-* GetScoreboardEntryInfo(*luaindex* _slotIndex_)
+* GetScoreboardEntryInfo(*luaindex* _entryIndex_, *luaindex:nilable* _roundIndex_)
 ** _Returns:_ *string* _characterName_, *string* _displayName_, *[BattlegroundTeam|#BattlegroundTeam]* _team_, *bool* _isLocalPlayer_
 
-* GetScoreboardEntryBattlegroundTeam(*luaindex* _slotIndex_)
+* GetScoreboardEntryBattlegroundTeam(*luaindex* _entryIndex_, *luaindex:nilable* _roundIndex_)
 ** _Returns:_ *[BattlegroundTeam|#BattlegroundTeam]* _team_
 
-* GetScoreboardEntryClassId(*luaindex* _slotIndex_)
+* GetScoreboardEntryClassId(*luaindex* _entryIndex_, *luaindex:nilable* _roundIndex_)
 ** _Returns:_ *integer* _classId_
 
-* GetScoreboardEntryScoreByType(*luaindex* _slotIndex_, *[ScoreTrackerEntryType|#ScoreTrackerEntryType]* _scoreType_)
+* GetScoreboardEntryScoreByType(*luaindex* _entryIndex_, *[ScoreTrackerEntryType|#ScoreTrackerEntryType]* _scoreType_, *luaindex:nilable* _roundIndex_)
 ** _Returns:_ *integer* _score_
 
-* GetNextScoreboardEntryMedalId(*luaindex* _slotIndex_, *integer:nilable* _lastMedalId_)
+* GetNextScoreboardEntryMedalId(*luaindex* _entryIndex_, *luaindex:nilable* _roundIndex_, *integer:nilable* _lastMedalId_)
 ** _Returns:_ *integer:nilable* _nextMedalId_
 
-* GetScoreboardEntryNumEarnedMedalsById(*luaindex* _slotIndex_, *integer* _medalId_)
+* GetScoreboardEntryNumEarnedMedalsById(*luaindex* _entryIndex_, *integer* _medalId_, *luaindex:nilable* _roundIndex_)
 ** _Returns:_ *integer* _count_
 
-* GetCurrentBattlegroundScore(*[BattlegroundTeam|#BattlegroundTeam]* _team_)
+* GetScoreboardEntryNumLivesRemaining(*luaindex* _entryIndex_, *luaindex:nilable* _roundIndex_)
+** _Returns:_ *integer* _numLivesRemaining_
+
+* GetBattlegroundCumulativeScoreForScoreboardEntryByType(*luaindex* _entryIndex_, *[ScoreTrackerEntryType|#ScoreTrackerEntryType]* _scoreType_, *luaindex:nilable* _roundIndex_)
 ** _Returns:_ *integer* _score_
+
+* GenerateCumulativeMedalInfoForScoreboardEntry(*luaindex* _entryIndex_, *luaindex:nilable* _roundIndex_)
+
+* GetNextBattlegroundCumulativeMedalId(*integer:nilable* _lastMedalId_)
+** _Returns:_ *integer:nilable* _nextMedalId_
+
+* GetBattlegroundCumulativeNumEarnedMedalsById(*integer* _medalId_)
+** _Returns:_ *integer* _count_
+
+* GetCurrentBattlegroundRoundResult(*luaindex:nilable* _roundIndex_)
+** _Returns:_ *[BattlegroundRoundResult|#BattlegroundRoundResult]:nilable* _roundResult_
+
+* GetCurrentBattlegroundScore(*luaindex* _roundIndex_, *[BattlegroundTeam|#BattlegroundTeam]* _team_)
+** _Returns:_ *integer* _score_
+
+* GetCurrentBattlegroundRoundsWonByTeam(*[BattlegroundTeam|#BattlegroundTeam]* _battlegroundTeam_)
+** _Returns:_ *integer* _numWins_
+
+* DidCurrentBattlegroundTeamWinOrTieRound(*[BattlegroundTeam|#BattlegroundTeam]* _battlegroundTeam_, *luaindex:nilable* _roundIndex_)
+** _Returns:_ *bool* _wonOrTied_
 
 * GetCurrentBattlegroundState()
 ** _Returns:_ *[BattlegroundState|#BattlegroundState]* _result_
@@ -14527,7 +14710,7 @@ h2. Game API
 * GetCurrentBattlegroundStateTimeRemaining()
 ** _Returns:_ *integer* _timeRemaining_
 
-* GetScoreboardPlayerEntryIndex()
+* GetScoreboardPlayerEntryIndex(*luaindex* _roundIndex_)
 ** _Returns:_ *luaindex* _playerIndex_
 
 * GetCampaignAllianceScore(*integer* _campaignId_, *[Alliance|#Alliance]* _alliance_)
@@ -15923,6 +16106,15 @@ h2. Game API
 * GetLockpickingDefaultGamepadVibration()
 ** _Returns:_ *number* _defaultVibration_
 
+* DoesPlayerHaveLockpickingCompanionBonus()
+** _Returns:_ *bool* _playerHasCompanionBonus_
+
+* GetLockpickingCompanionBonusName()
+** _Returns:_ *string* _lockpickingCompanionBonusName_
+
+* GetLockpickingCompanionBonusTimeMS()
+** _Returns:_ *integer* _lockpickingCompanionBonusTime_
+
 * GetCraftingInteractionMode()
 ** _Returns:_ *[CraftingInteractionMode|#CraftingInteractionMode]* _currentCraftingInteractionMode_
 
@@ -16515,6 +16707,9 @@ h2. Game API
 * DoesActivitySetHaveRewardData(*integer* _activitySetId_)
 ** _Returns:_ *bool* _hasRewardData_
 
+* DoesActivitySetHaveMMR(*integer* _activitySetId_)
+** _Returns:_ *bool* _hasMMR_
+
 * GetActivityZoneId(*integer* _activityId_)
 ** _Returns:_ *integer* _zoneId_
 
@@ -16602,6 +16797,9 @@ h2. Game API
 
 * GetGroupSizeFromLFGGroupType(*[LFGGroupType|#LFGGroupType]* _groupType_)
 ** _Returns:_ *integer* _size_
+
+* GetPlayerMMRByType(*[LFGActivity|#LFGActivity]* _activity_)
+** _Returns:_ *integer* _mmrRating_
 
 * GetNumActivitySetsByType(*[LFGActivity|#LFGActivity]* _activity_)
 ** _Returns:_ *integer* _count_
@@ -18812,6 +19010,9 @@ h2. Game API
 * GetTimedActivityTimeRemainingSeconds(*luaindex* _index_)
 ** _Returns:_ *integer* _timeRemainingSeconds_
 
+* GetTimedActivityRequiredCollectible(*integer* _timedActivityId_)
+** _Returns:_ *integer* _requiredCollectible_
+
 * GetLocalTimeOfDay()
 ** _Returns:_ *integer* _hours_, *integer* _minutes_, *integer* _seconds_
 
@@ -19225,6 +19426,52 @@ h2. Game API
 
 * IsGroupFinderRoleChangeRequested()
 ** _Returns:_ *bool* _isRoleChangeRequested_
+
+* GetNumPromotionalEventCampaignActivities(*id64* _campaignKey_)
+** _Returns:_ *integer* _numActivities_
+
+* GetNumPromotionalEventCampaignMilestoneRewards(*id64* _campaignKey_)
+** _Returns:_ *integer* _numMilestoneRewards_
+
+* GetPromotionalEventCampaignProgress(*id64* _campaignKey_)
+** _Returns:_ *integer* _numActivitiesCompleted_, *bool* _isCapstoneRewardClaimed_
+
+* TryClaimPromotionalEventCapstoneReward(*id64* _campaignKey_)
+
+* GetPromotionalEventCampaignActivityInfo(*id64* _campaignKey_, *luaindex* _activityIndex_)
+** _Returns:_ *integer* _activityId_, *string* _displayName_, *string* _description_, *integer* _completionThreshold_, *integer* _rewardId_, *integer* _rewardQuantity_
+
+* GetPromotionalEventCampaignActivityProgress(*id64* _campaignKey_, *luaindex* _activityIndex_)
+** _Returns:_ *integer* _progress_, *bool* _isRewardClaimed_
+
+* TryClaimPromotionalEventActivityReward(*id64* _campaignKey_, *luaindex* _activityIndex_)
+
+* GetPromotionalEventCampaignMilestoneInfo(*id64* _campaignKey_, *luaindex* _milestoneIndex_)
+** _Returns:_ *integer* _completionThreshold_, *integer* _rewardId_, *integer* _rewardQuantity_
+
+* IsPromotionalEventCampaignMilestoneRewardClaimed(*id64* _campaignKey_, *luaindex* _milestoneIndex_)
+** _Returns:_ *bool* _isRewardClaimed_
+
+* TryClaimPromotionalEventMilestoneReward(*id64* _campaignKey_, *luaindex* _milestoneIndex_)
+
+* IsAnyPromotionalEventCampaignRewardClaimable(*id64* _campaignKey_)
+** _Returns:_ *bool* _isAnyClaimable_
+
+* TryClaimAllAvailablePromotionalEventCampaignRewards(*id64* _campaignKey_)
+
+* GetRecentlyClaimedPromotionalEventRewards(*id64* _campaignKey_)
+** _Uses variable returns..._
+** _Returns:_ *[PromotionalEventCampaignComponentType|#PromotionalEventCampaignComponentType]* _type_, *luaindex* _index_
+
+* TryAutoTrackNextPromotionalEventCampaign()
+** _Returns:_ *id64* _campaignKeyAutoTracked_
+
+* GetTrackedPromotionalEventActivityInfo()
+** _Returns:_ *id64* _campaignKey_, *luaindex* _activityIndex_
+
+* TrackPromotionalEventActivity(*id64* _campaignKey_, *luaindex* _activityIndex_)
+
+* ClearTrackedPromotionalEventActivity()
 
 
 * IsGameCameraActive()
@@ -20575,8 +20822,8 @@ h2. Game API
 * GetMarketProductCollectibleId *private* (*integer* _marketProductId_)
 ** _Returns:_ *integer* _collectibleId_
 
-* GetMarketProductBundleHidesChildProducts *private* (*integer* _marketProductId_)
-** _Returns:_ *bool* _hidesChildProducts_
+* GetMarketProductBundleInspectChildProductsAsList *private* (*integer* _marketProductId_)
+** _Returns:_ *bool* _inspectAsList_
 
 * GetMarketProductCrownCrateId *private* (*integer* _marketProductId_)
 ** _Returns:_ *integer* _crateId_
@@ -21324,6 +21571,9 @@ h2. Game API
 * GetChapterEnumFromUpgradeId(*integer* _chapterUpgradeId_)
 ** _Returns:_ *[Chapter|#Chapter]* _chapterEnum_
 
+* IsChapterContentPass(*integer* _chapterUpgradeId_)
+** _Returns:_ *bool* _isContentPass_
+
 * GetGiftMarketProductId(*id64* _giftId_)
 ** _Returns:_ *integer* _marketProductId_
 
@@ -21645,8 +21895,8 @@ h2. Game API
 * GetTributeMatchStatistics()
 ** _Returns:_ *integer* _matchDurationMS_, *integer* _goldAccumulated_, *integer* _cardsAcquired_
 
-* GetTributeMatchCampaignId()
-** _Returns:_ *integer* _tributeMatchCampaignId_
+* GetTributeMatchCampaignKey()
+** _Returns:_ *id64* _tributeMatchCampaignKey_
 
 * GetNumTributeClubRankRewardLists()
 ** _Returns:_ *integer* _numTributeClubRankRewardLists_
@@ -21913,38 +22163,38 @@ h2. Game API
 * GetCurrentClubMatchStreak()
 ** _Returns:_ *integer* _currentStreak_
 
-* GetTributePlayerCampaignRank(*integer:nilable* _campaignId_)
+* GetTributePlayerCampaignRank(*id64:nilable* _campaignKey_)
 ** _Returns:_ *[TributeTier|#TributeTier]* _tributeCampaignRank_
 
-* GetTributePlayerCampaignTotalExperience(*integer:nilable* _campaignId_)
+* GetTributePlayerCampaignTotalExperience(*id64:nilable* _campaignKey_)
 ** _Returns:_ *integer* _totalTributeCampaignExperience_
 
-* GetTributeCampaignRankExperienceRequirement(*[TributeTier|#TributeTier]* _tributeCampaignRank_, *integer:nilable* _campaignId_)
+* GetTributeCampaignRankExperienceRequirement(*[TributeTier|#TributeTier]* _tributeCampaignRank_, *id64:nilable* _campaignKey_)
 ** _Returns:_ *integer* _experienceRequirement_
 
-* GetTributePlayerExperienceInCurrentCampaignRank(*integer:nilable* _campaignId_)
+* GetTributePlayerExperienceInCurrentCampaignRank(*id64:nilable* _campaignKey_)
 ** _Returns:_ *integer* _experience_, *integer* _rankExperienceRequirement_
 
-* GetCampaignMatchResultFromHistoryByMatchIndex(*luaindex* _matchIndex_, *integer:nilable* _campaignId_)
+* GetCampaignMatchResultFromHistoryByMatchIndex(*luaindex* _matchIndex_, *id64:nilable* _campaignKey_)
 ** _Returns:_ *bool* _hasRecord_, *bool* _wasAWin_
 
-* GetTotalCampaignMatchesPlayed(*integer:nilable* _campaignId_)
+* GetTotalCampaignMatchesPlayed(*id64:nilable* _campaignKey_)
 ** _Returns:_ *integer* _totalMatchesPlayed_
 
-* GetCurrentCampaignMatchStreak(*integer:nilable* _campaignId_)
+* GetCurrentCampaignMatchStreak(*id64:nilable* _campaignKey_)
 ** _Returns:_ *integer* _currentStreak_
 
-* IsPlacedInCampaign(*integer:nilable* _campaignId_)
+* IsPlacedInCampaign(*id64:nilable* _campaignKey_)
 ** _Returns:_ *bool* _isPlaced_
 
-* GetCampaignPlacementRank(*integer:nilable* _campaignId_)
+* GetCampaignPlacementRank(*id64:nilable* _campaignKey_)
 ** _Returns:_ *[TributeTier|#TributeTier]* _tributeCampaignRank_
 
-* GetNumRequiredPlacementMatches(*integer:nilable* _campaignId_)
+* GetNumRequiredPlacementMatches(*id64:nilable* _campaignKey_)
 ** _Returns:_ *integer* _requiredMatches_
 
-* GetActiveTributeCampaignId()
-** _Returns:_ *integer* _tributeCampaignDefId_
+* GetActiveTributeCampaignKey()
+** _Returns:_ *id64* _tributeCampaignKey_
 
 * GetActiveTributeCampaignTierRewardListId(*[TributeTier|#TributeTier]* _tributeCampaignRank_)
 ** _Returns:_ *integer* _rewardListId_
@@ -21958,7 +22208,7 @@ h2. Game API
 * RequestActiveTributeCampaignData()
 ** _Returns:_ *[TributePlayerInitializationState|#TributePlayerInitializationState]* _state_
 
-* RequestTributeCampaignData(*integer:nilable* _campaignId_)
+* RequestTributeCampaignData(*id64:nilable* _campaignKey_)
 ** _Returns:_ *[TributePlayerInitializationState|#TributePlayerInitializationState]* _state_
 
 * GetActiveTributeCampaignTimeRemainingS()
@@ -21987,6 +22237,36 @@ h2. Game API
 
 * GenerateCraftedAbilityScriptSlotDescriptionForAbilityDescription(*integer* _abilityId_, *[ScribingSlot|#ScribingSlot]* _slotType_, *string* _casterUnitTag_)
 ** _Returns:_ *string* _description_
+
+* IsPromotionalEventSystemLocked()
+** _Returns:_ *bool* _isLocked_
+
+* GetNumActivePromotionalEventCampaigns()
+** _Returns:_ *integer* _numActiveCampaigns_
+
+* GetActivePromotionalEventCampaignKey(*luaindex* _campaignIndex_)
+** _Returns:_ *id64* _campaignKey_
+
+* GetSecondsRemainingInPromotionalEventCampaign(*id64* _campaignKey_)
+** _Returns:_ *integer* _secondsRemaining_
+
+* GetPromotionalEventCampaignInfo(*id64* _campaignKey_)
+** _Returns:_ *integer* _campaignId_, *integer* _numActivities_, *integer* _numMilestones_, *integer* _capstoneCompletionThreshold_, *integer* _capstoneRewardId_, *integer* _capstoneRewardQuantity_
+
+* GetPromotionalEventCampaignAnnouncementBannerText(*id64* _campaignKey_)
+** _Returns:_ *string* _bannerText_
+
+* GetPromotionalEventCampaignDisplayName(*integer* _campaignId_)
+** _Returns:_ *string* _displayName_
+
+* GetPromotionalEventCampaignDescription(*integer* _campaignId_)
+** _Returns:_ *string* _description_
+
+* GetPromotionalEventCampaignLargeBackgroundFileIndex(*integer* _campaignId_)
+** _Returns:_ *textureName* _backgroundFile_
+
+* GetPromotionalEventCampaignAnnouncementBackgroundFileIndex(*integer* _campaignId_)
+** _Returns:_ *textureName* _backgroundFile_
 
 
 h2. Object API
@@ -23101,6 +23381,9 @@ Objects that inherit behavior from *Control*
 * GetWaveBounds()
 ** _Returns:_ *number* _minX_, *number* _maxX_, *number* _minY_, *number* _maxY_
 
+* GetWaveDampingCoefficients()
+** _Returns:_ *number* _minX_, *number* _maxX_, *number* _minY_, *number* _maxY_
+
 * GetWaveFrequency()
 ** _Returns:_ *number* _frequency_
 
@@ -23338,6 +23621,8 @@ Objects that inherit behavior from *Control*
 * SetWaveAngle(*number* _angleRadians_)
 
 * SetWaveBounds(*number* _minX_, *number* _maxX_, *number* _minY_, *number* _maxY_)
+
+* SetWaveDampingCoefficients(*number* _minX_, *number* _maxX_, *number* _minY_, *number* _maxY_)
 
 * SetWaveFrequency(*number* _frequency_)
 
@@ -25070,6 +25355,7 @@ h2. Events
 * EVENT_LEVEL_UP_REWARD_UPDATED
 * EVENT_LINKED_WORLD_POSITION_CHANGED
 * EVENT_LOCAL_PLAYER_MODEL_REBUILT
+* EVENT_LOCKPICK_BREAK_PREVENTED
 * EVENT_LOCKPICK_BROKE (*integer* _inactivityLengthMs_)
 * EVENT_LOCKPICK_FAILED
 * EVENT_LOCKPICK_SUCCESS
@@ -25166,6 +25452,9 @@ h2. Events
 * EVENT_POI_UPDATED (*luaindex* _zoneIndex_, *luaindex* _poiIndex_)
 * EVENT_POWER_UPDATE (*string* _unitTag_, *luaindex* _powerIndex_, *[CombatMechanicFlags|#CombatMechanicFlags]* _powerType_, *integer* _powerValue_, *integer* _powerMax_, *integer* _powerEffectiveMax_)
 * EVENT_PREVIEW_COLLECTIBLE_ACTION_RESET
+* EVENT_PROMOTIONAL_EVENTS_ACTIVITY_PROGRESS_UPDATED (*id64* _campaignKey_, *luaindex* _activityIndex_, *integer* _previousProgress_, *integer* _newProgress_, *bool* _isRewardClaimed_)
+* EVENT_PROMOTIONAL_EVENTS_ACTIVITY_TRACKING_UPDATED (*id64* _trackedCampaignKey_, *luaindex* _trackedActivityIndex_)
+* EVENT_PROMOTIONAL_EVENTS_REWARDS_CLAIMED (*id64* _campaignKey_)
 * EVENT_PVP_KILL_FEED_DEATH (*string* _killLocation_, *string* _killerPlayerDisplayName_, *string* _killerPlayerCharacterName_, *[Alliance|#Alliance]* _killerPlayerAlliance_, *integer* _killerPlayerRank_, *string* _victimPlayerDisplayName_, *string* _victimPlayerCharacterName_, *[Alliance|#Alliance]* _victimPlayerAlliance_, *integer* _victimPlayerRank_, *bool* _isKillLocation_)
 * EVENT_QUEST_ADDED (*luaindex* _journalIndex_, *string* _questName_, *string* _objectiveName_)
 * EVENT_QUEST_ADVANCED (*luaindex* _journalIndex_, *string* _questName_, *bool* _isPushed_, *bool* _isComplete_, *bool* _mainStepChanged_, *bool* _hideAnnouncement_)
@@ -25240,6 +25529,7 @@ h2. Events
 * EVENT_SELL_RECEIPT (*string* _itemName_, *integer* _itemQuantity_, *integer* _money_)
 * EVENT_SHOW_BOOK (*string* _bookTitle_, *string* _body_, *[BookMedium|#BookMedium]* _medium_, *bool* _showTitle_, *integer* _bookId_)
 * EVENT_SHOW_DAILY_LOGIN_REWARDS_SCENE
+* EVENT_SHOW_PROMOTIONAL_EVENT_SCENE
 * EVENT_SHOW_SPECIFIC_HELP_PAGE (*luaindex* _helpCategoryIndex_, *luaindex* _helpIndex_)
 * EVENT_SHOW_SUBTITLE (*[ChannelType|#ChannelType]* _channelType_, *string* _speakerName_, *string* _text_)
 * EVENT_SHOW_TREASURE_MAP (*luaindex* _treasureMapIndex_)
@@ -25334,7 +25624,7 @@ h2. Events
 * EVENT_TRADING_HOUSE_STATUS_RECEIVED
 * EVENT_TRAIT_LEARNED (*string* _itemName_, *string* _itemTrait_)
 * EVENT_TRIAL_FEATURE_RESTRICTED (*[TrialAccountRestrictionType|#TrialAccountRestrictionType]* _restrictionType_)
-* EVENT_TRIBUTE_CAMPAIGN_CHANGE (*integer* _campaignId_)
+* EVENT_TRIBUTE_CAMPAIGN_CHANGE (*id64* _campaignKey_)
 * EVENT_TRIBUTE_CLUB_EXPERIENCE_GAINED (*integer* _currentXP_, *integer* _deltaXP_)
 * EVENT_TRIBUTE_CLUB_INIT (*bool* _success_)
 * EVENT_TRIBUTE_CLUB_RANK_CHANGED (*[TributeClubRank|#TributeClubRank]* _newClubRank_)
@@ -25349,7 +25639,7 @@ h2. Events
 * EVENT_TRIBUTE_LEADERBOARD_DATA_RECEIVED (*[TributeLeaderboardType|#TributeLeaderboardType]* _leaderboardType_)
 * EVENT_TRIBUTE_LEADERBOARD_RANK_RECEIVED (*[TributeLeaderboardType|#TributeLeaderboardType]* _leaderboardType_)
 * EVENT_TRIBUTE_PATRONS_SEARCH_RESULTS_READY
-* EVENT_TRIBUTE_PLAYER_CAMPAIGN_INIT (*integer* _campaignId_, *bool* _success_, *bool* _isActive_)
+* EVENT_TRIBUTE_PLAYER_CAMPAIGN_INIT (*id64* _campaignKey_, *bool* _success_, *bool* _isActive_)
 * EVENT_TUTORIALS_RESET
 * EVENT_TUTORIAL_SYSTEM_ENABLED_STATE_CHANGED (*bool* _enabled_)
 * EVENT_TUTORIAL_TRIGGER_COMPLETED (*[TutorialTrigger|#TutorialTrigger]* _tutorialTrigger_)
@@ -25418,6 +25708,7 @@ h2. Events
 * EVENT_NEW_DAILY_LOGIN_REWARD_AVAILABLE
 * EVENT_PLAYER_ACTIVATED (*bool* _initial_)
 * EVENT_PLAYER_DEACTIVATED
+* EVENT_PROMOTIONAL_EVENTS_CAMPAIGNS_UPDATED
 * EVENT_REQUEST_CROWN_GEM_TUTORIAL
 * EVENT_REQUEST_SHOW_GAMEPAD_CHAPTER_UPGRADE (*integer* _chapterUpgradeId_)
 * EVENT_SCRYING_ACTIVE_SKILL_USE_RESULT (*[ScryingActiveSkillUseResult|#ScryingActiveSkillUseResult]* _result_)
@@ -25425,6 +25716,7 @@ h2. Events
 * EVENT_TRIBUTE_PATRON_PROGRESSION_DATA_CHANGED (*integer:nilable* _patronId_)
 * EVENT_TRIBUTE_PLAYER_TURN_STARTED (*bool* _isLocalPlayer_)
 
+* EVENT_ACTIVE_DISPLAY_CHANGED
 * EVENT_APP_GUI_HIDDEN_STATE_CHANGED (*bool* _hidden_)
 * EVENT_AVAILABLE_DISPLAY_DEVICES_CHANGED
 * EVENT_BACKGROUND_LIST_FILTER_COMPLETE (*integer* _taskId_)
@@ -25997,6 +26289,7 @@ h5. Control
 * [Child: TransformSkew|#TransformSkew]
 * [Child: Wave|#Wave]
 * [Child: WaveBounds|#WaveBounds]
+* [Child: WaveDampingCoefficients|#WaveDampingCoefficients]
 * [Child: alpha|#Attributes]
 * [Child: autoRectClipChildren|#Attributes]
 * [Child: childLayout|#Attributes]
@@ -26880,6 +27173,12 @@ h5. Wave
 * _attribute:_ *number* _offset_
 
 h5. WaveBounds
+* _attribute:_ *number* _minX_
+* _attribute:_ *number* _maxX_
+* _attribute:_ *number* _minY_
+* _attribute:_ *number* _maxY_
+
+h5. WaveDampingCoefficients
 * _attribute:_ *number* _minX_
 * _attribute:_ *number* _maxX_
 * _attribute:_ *number* _minY_

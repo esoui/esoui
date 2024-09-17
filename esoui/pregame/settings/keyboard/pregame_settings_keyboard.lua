@@ -15,7 +15,7 @@ function ZO_Pregame_Settings_Keyboard:Initialize(control)
 
     local subcategoriesMenuControl = control:GetNamedChild("Subcategory")
     self.subcategoriesMenu = ZO_Horizontal_Menu:New(subcategoriesMenuControl, ZO_HORIZONAL_MENU_ALIGN_CENTER)
-    subcategoriesMenuControl:SetAnchor(BOTTOM, ZO_OptionsWindow:GetNamedChild("Divider"), TOP, -125)
+    subcategoriesMenuControl:SetAnchor(BOTTOM, ZO_OptionsWindow:GetNamedChild("Divider"), TOP, -75)
 
     SETTINGS_FRAGMENT = ZO_FadeSceneFragment:New(control)
     SETTINGS_FRAGMENT:RegisterCallback("StateChange",   function(oldState, newState)

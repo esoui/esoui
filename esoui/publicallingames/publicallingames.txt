@@ -90,3 +90,6 @@ EsoUI\PublicAllIngames\Tribute\Gamepad\TributeCardTile_Gamepad.lua
 EsoUI\PublicAllIngames\Tribute\Gamepad\TributeCardTile_Gamepad.xml
 EsoUI\PublicAllIngames\Tribute\Gamepad\TributePatronTile_Gamepad.lua
 EsoUI\PublicAllIngames\Tribute\Gamepad\TributePatronTile_Gamepad.xml
+
+EsoUI\PublicAllIngames\PromotionalEvent\PromotionalEventData.lua
+EsoUI\PublicAllIngames\PromotionalEvent\PromotionalEvent_Manager.lua

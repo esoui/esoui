@@ -159,8 +159,8 @@ function ZO_MarketProductBase:GetStackCount()
     return self.productData:GetStackCount()
 end
 
-function ZO_MarketProductBase:GetHidesChildProducts()
-    return self.productData:GetHidesChildProducts()
+function ZO_MarketProductBase:GetInspectChildProductsAsList()
+    return self.productData:GetInspectChildProductsAsList()
 end
 
 function ZO_MarketProductBase:IsGiftable()

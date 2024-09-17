@@ -403,18 +403,23 @@ function LoreLibraryScrollList:FilterScrollList()
 
     local categoryData = self.owner.navigationTree:GetSelectedData()
     if categoryData.hirelingType ~= nil then
-        local currentHirelingSender = ""
+        local currentHirelingSenderLower = ""
 
         -- Fill out hireling message into the list
         local messages = GetHirelingMessages(categoryData.hirelingType)
         for index, messageData in ipairs(messages) do
-            local nextSender = string.lower(messageData.sender)
-            if currentHirelingSender ~= nextSender then
-                currentHirelingSender = nextSender
-                table.insert(scrollData, ZO_ScrollList_CreateDataEntry(HIRELING_MESSAGE_HEADER_TYPE, 
+            local nextSender = messageData.sender
+            local nextSenderLower = zo_strlower(nextSender)
+            -- ESO-862381: Compare with lower because sometimes senders scream their name
+            if currentHirelingSenderLower ~= nextSenderLower then
+                currentHirelingSenderLower = nextSenderLower
+                -- ESO-862381, ESO-888526: If the sender is all caps, lower it before formatting it.
+                -- Otherwise, leave it alone so <<C:1>> works right in non-English languages
+                local senderClean = zo_strIsUpper(nextSender) and nextSenderLower or nextSender
+                table.insert(scrollData, ZO_ScrollList_CreateDataEntry(HIRELING_MESSAGE_HEADER_TYPE,
                 {
                     hirelingType = messageData.hirelingType, 
-                    name = zo_strformat(SI_LORE_LIBRARY_HIRELING_CORRESPONDENCE_SENDER_FORMATTER, currentHirelingSender), 
+                    name = zo_strformat(SI_LORE_LIBRARY_HIRELING_CORRESPONDENCE_SENDER_FORMATTER, senderClean), 
                     sortOrder = index, 
                 }))
             end

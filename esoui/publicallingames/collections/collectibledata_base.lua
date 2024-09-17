@@ -536,6 +536,20 @@ function ZO_CollectibleData_Base:GetLinkedAchievement()
     return GetCollectibleLinkedAchievement(self.collectibleId)
 end
 
+function ZO_CollectibleData_Base:GetContentRequiresCollectibleText()
+    if self:IsLocked() then
+        local categoryType = self:GetCategoryType()
+        if categoryType == COLLECTIBLE_CATEGORY_TYPE_CHAPTER then
+            return zo_strformat(SI_CONTENT_REQUIRES_CHAPTER_FORMATTER, self:GetName())
+        elseif categoryType == COLLECTIBLE_CATEGORY_TYPE_DLC then
+            return zo_strformat(SI_CONTENT_REQUIRES_DLC_FORMATTER, self:GetName(), self:GetCategoryName())
+        else
+            return zo_strformat(SI_CONTENT_REQUIRES_NON_ESO_PLUS_COLLECTIBLE_FORMATTER, self:GetName(), self:GetCategoryName())
+        end
+    end
+    return nil
+end
+
 -- Pool --
 
 do

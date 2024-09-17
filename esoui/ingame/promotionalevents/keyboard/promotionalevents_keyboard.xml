@@ -1,0 +1,248 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_PromotionalEventReward_Template_Keyboard" inherits="ZO_PromotionalEventReward_Template_Shared" mouseEnabled="true" virtual="true">
+            <Dimensions x="64" y="64" />
+            
+            <OnInitialized>
+                ZO_PromotionalEventReward_Keyboard.OnControlInitialized(self)
+            </OnInitialized>
+
+            <OnMouseEnter>
+                self.object:OnMouseEnter()
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                self.object:OnMouseExit()
+            </OnMouseExit>
+
+            <OnMouseUp>
+                self.object:OnMouseUp(button, upInside)
+            </OnMouseUp>
+
+            <Controls>
+                <Backdrop name="$(parent)Backdrop" override="true" inherits="ZO_CenterlessBackdrop" />
+
+                <Texture name="$(parent)Icon" override="true">
+                    <Dimensions x="40" y="40"/>
+                </Texture>
+                
+                <Label name="$(parent)Quantity" override="true" font="ZoFontGameOutline" horizontalAlignment="RIGHT" verticalAlignment="BOTTOM" inheritScale="false" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_PromotionalEventReward_CampaignPanel_Template_Keyboard" inherits="ZO_PromotionalEventReward_Template_Keyboard" virtual="true">
+            <Controls>
+                <Backdrop name="$(parent)Backdrop" override="true">
+                    <AnchorFill/>
+                    <Edge file="EsoUI/Art/Miscellaneous/inset_edgeFile_8.dds" edgeFileWidth="128" edgeFileHeight="16" />
+                    <OnInitialized>
+                        self:SetCenterColor(0, 0, 0, 0.8)
+                    </OnInitialized>
+                </Backdrop>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_PromotionalEventMilestone_Template_Keyboard" inherits="ZO_PromotionalEventMilestone_Template_Shared" virtual="true">
+            <Dimensions x="48" />
+            <Controls>
+                <Control name="$(parent)Reward" override="true" inherits="ZO_PromotionalEventReward_CampaignPanel_Template_Keyboard" />
+                <Label name="$(parent)Threshold" override="true" font="ZoFontWinH5" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_PromotionalEventActivity_EntryTemplate_Keyboard" inherits="ZO_PromotionalEventActivity_EntryTemplate_Shared" mouseEnabled="true" virtual="true">
+            <Dimensions y="ZO_PROMOTIONAL_EVENT_KEYBOARD_ACTIVITY_ENTRY_HEIGHT" />
+            
+            <OnInitialized>
+                ZO_PromotionalEventActivity_Entry_Keyboard.OnControlInitialized(self)
+            </OnInitialized>
+
+            <OnMouseEnter>
+                self.object:OnMouseEnter()
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                self.object:OnMouseExit()
+            </OnMouseExit>
+            
+            <Controls>
+                <Button name="$(parent)TrackButton">
+                    <Dimensions x="32" y="32" />
+                    <Anchor point="LEFT" />
+                    
+                    <Textures
+                        normal="EsoUI/Art/Buttons/radioButton_pin_up.dds"
+                        pressed="EsoUI/Art/Buttons/radioButton_pin_down.dds"
+                        mouseOver="EsoUI/Art/Buttons/radioButton_pin_highlight.dds"
+                        disabled="EsoUI/Art/Buttons/radioButton_pin_up_disabled.dds"
+                        disabledPressed="EsoUI/Art/Buttons/radioButton_pin_down_disabled.dds"
+                    />
+                </Button>
+                
+                <Control name="$(parent)Reward" override="true" inherits="ZO_PromotionalEventReward_Template_Keyboard" />
+
+                <StatusBar name="$(parent)Progress" override="true" inherits="ZO_ArrowProgressBarWithBG">
+                    <Anchor point="LEFT" relativeTo="$(parent)TrackButton" relativePoint="RIGHT" offsetX="5" constrains="X" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Reward" relativePoint="LEFT" offsetX="-5" />
+                </StatusBar>
+
+                <Texture name="$(parent)CompleteIcon" override="true">
+                    <Dimensions x="32" y="32" />
+                </Texture>
+
+                <Label name="$(parent)Name" override="true" font="ZoFontWinH3">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Progress" relativePoint="TOPLEFT" offsetY="-10" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Progress" relativePoint="TOPRIGHT" offsetY="-10" />
+                </Label>
+            </Controls>
+        </Control>
+        
+        <TopLevelControl name="ZO_PromotionalEvents_KeyboardTL" inherits="ZO_PromotionalEvents_Shared ZO_GroupMenuKeyboard_ContentAnchors" hidden="true">
+            <OnInitialized>
+                ZO_PromotionalEvents_Keyboard.OnControlInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)Contents" override="true">
+                    <AnchorFill />
+                    <Controls>
+                        <Control name="$(parent)CampaignPanel" override="true">
+                            <Anchor point="TOPRIGHT" />
+                            <Anchor point="BOTTOMLEFT" offsetY="-420"/>
+                            <Controls>
+                                <Texture name="$(parent)BG" override="true">
+                                    <Dimensions y="200" />
+                                    <Anchor point="TOPLEFT" />
+                                    <Anchor point="TOPRIGHT" />
+                                    <!-- 1024x256 image cropped to 614x200-->
+                                    <TextureCoords left="0" right="0.599609375" top="0" bottom="0.78125"/>
+                                    <Controls>
+                                        <Backdrop name="$(parent)Border" override="true" inherits="ZO_DarkThinFrameCenterless" />
+                                    </Controls>
+                                </Texture>
+
+                                <Label name="$(parent)Duration" override="true" font="ZoFontWinH4">
+                                    <Anchor point="TOPLEFT" offsetX="7" offsetY="7" />
+                                </Label>
+
+                                <Label name="$(parent)Name" override="true" font="ZoFontWinH2">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Duration" relativePoint="BOTTOMLEFT" />
+                                </Label>
+
+                                <StatusBar name="$(parent)Progress" override="true" inherits="ZO_ArrowProgressBarWithBG">
+                                    <Anchor point="BOTTOMLEFT" offsetX="10" offsetY="-20" />
+                                    <Dimensions x="535" />
+                                </StatusBar>
+
+                                <Control name="$(parent)CapstoneReward" override="true" inherits="ZO_PromotionalEventReward_CampaignPanel_Template_Keyboard">
+                                    <Anchor point="LEFT" relativeTo="$(parent)Progress" relativePoint="RIGHT" offsetX="5" offsetY="-10" />
+                                </Control>
+
+                                <Texture name="$(parent)Help" textureFile="EsoUI/Art/Miscellaneous/help_icon.dds" mouseEnabled="true" layer="OVERLAY">
+                                    <Anchor point="TOPRIGHT" offsetX="-5" offsetY="5" />
+                                    <Dimensions x="32" y="32" />
+                                    <OnMouseEnter>
+                                        PROMOTIONAL_EVENTS_KEYBOARD:OnHelpButtonMouseEnter()
+                                    </OnMouseEnter>
+
+                                    <OnMouseExit>
+                                        PROMOTIONAL_EVENTS_KEYBOARD:OnHelpButtonMouseExit()
+                                    </OnMouseExit>
+                                </Texture>
+                            </Controls>
+                        </Control>
+
+                        <Control name="$(parent)ActivityList" override="true" inherits="ZO_ScrollList">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)CampaignPanel" relativePoint="BOTTOMLEFT" offsetX="-27" offsetY="20" />
+                            <Anchor point="BOTTOMRIGHT" />
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_PromotionalEvents_CapstoneDialog_Keyboard_TL" inherits="ZO_PromotionalEvents_CapstoneDialog_Shared_TL ZO_CustomDialogFrame">
+            <OnInitialized>
+                ZO_PromotionalEvents_CapstoneDialog_Keyboard:New(self)
+            </OnInitialized>
+            
+            <Controls>
+                <Backdrop name="$(parent)BG" override="true" inherits="ZO_MinorMungeBackdrop_SemiTransparentBlack">
+                    <Controls>
+                        <Texture name="$(parent)MungeOverlay" override="true" textureFile="EsoUI/Art/Miscellaneous/centerscreen_floating_backing.dds" addressMode="CLAMP">
+                            <Anchor point="TOPLEFT" offsetX="20" offsetY="20"/>
+                            <Anchor point="BOTTOMRIGHT" offsetX="-20" offsetY="-20"/>
+                        </Texture>
+                    </Controls>
+                </Backdrop>
+                
+                <Control name="$(parent)TopDivider" override="true" inherits="ZO_DynamicHorizontalDoubleDivider">
+                    <Dimensions x="580" />
+                    <Anchor point="TOP" offsetY="30" />
+                </Control>
+
+                <Backdrop name="$(parent)OverlayGlow" inherits="ZO_MinorMungeBackdrop_SolidWhite" layer="OVERLAY" tier="HIGH" excludeFromResizeToFitExtents="true">
+                    <Anchor point="CENTER" />
+                </Backdrop>
+
+                <Texture name="$(parent)HeaderFade" textureFile="EsoUI/Art/Market/Keyboard/giftClaimHeaderFade.dds" layer="OVERLAY" excludeFromResizeToFitExtents="true">
+                    <Dimensions x="128" y="128" />
+                    <Anchor point="CENTER" relativeTo="$(parent)TopDivider" />
+                </Texture>
+
+                <Texture name="$(parent)HeaderIcon" textureFile="EsoUI/Art/LFG/LFG_indexIcon_PromotionalEvents_up.dds" tier="HIGH" mouseEnabled="true">
+                    <Dimensions x="70" y="70" />
+                    <Anchor point="CENTER" relativeTo="$(parent)TopDivider" />
+                </Texture>
+
+                <Label name="$(parent)Title" inherits="ZO_DialogTitle" font="ZoFontWinH3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOP" relativeTo="$(parent)TopDivider" relativePoint="BOTTOM" offsetY="40" />
+                    <Dimensions x="500" />
+                </Label>
+
+                <Control name="$(parent)RewardContainer" override="true">
+                    <Dimensions y="210" />
+                    <Anchor point="TOP" relativeTo="$(parent)Title" relativePoint="BOTTOM" offsetY="40" />
+
+                    <Controls>
+                        <Backdrop name="$(parent)Frame" inherits="ZO_CenterlessBackdrop" level="0" mouseEnabled="true">
+                            <Dimensions x="250" y="180" />
+                            <Anchor point="CENTER" />
+
+                            <OnMouseEnter>
+                                ZO_PromotionalEvents_CapstoneDialog_Keyboard.OnRewardMouseEnter(self)
+                            </OnMouseEnter>
+
+                            <OnMouseExit>
+                                ZO_PromotionalEvents_CapstoneDialog_Keyboard.OnRewardMouseExit(self)
+                            </OnMouseExit>
+                        </Backdrop>
+
+                        <Texture name="$(parent)Icon" override="true">
+                            <Dimensions x="64" y="64" />
+                            <Anchor point="CENTER" offsetY="-35" />
+                        </Texture>
+
+                        <Label name="$(parent)StackCount" font="ZoFontGameOutline">
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icon"/>
+                        </Label>
+
+                        <Label name="$(parent)Name" override="true" font="ZoFontWinH3" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                            <Dimensions x="220" />
+                            <Anchor point="CENTER" relativeTo="$(parent)Icon" relativePoint="BOTTOM" offsetY="35" />
+                        </Label>
+                    </Controls>
+                </Control>
+                
+                <Control name="$(parent)BottomDivider" override="true" inherits="ZO_DynamicHorizontalDoubleDivider">
+                    <Dimensions x="580" />
+                    <Anchor point="TOP" relativeTo="$(parent)TopDivider" relativePoint="BOTTOM" offsetY="350" />
+                </Control>
+
+                <!-- Order matters for these buttons -->
+                <Control name="$(parent)CloseButton" inherits="ZO_CustomDialogButton" />
+                <Control name="$(parent)ViewInCollectionsButton" inherits="ZO_CustomDialogButton" />
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

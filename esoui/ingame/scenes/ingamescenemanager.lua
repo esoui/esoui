@@ -78,6 +78,7 @@ function ZO_IngameSceneManager:SetInUIMode(inUIMode, bypassHideSceneConfirmation
                             self.manuallyEnteredHUDUIMode = nil
                             EndLooting()
                             SetGameCameraUIMode(false)
+                            ZO_ChatSystem_ExitChat()
                             self:HideTopLevels()
                             DIRECTIONAL_INPUT:Deactivate(self)
                             MAIN_MENU_MANAGER:ForceClearBlockingScenes()
@@ -421,6 +422,9 @@ function ZO_IngameSceneManager:GetHUDSceneName()
    return self.hudSceneName
 end
 
+-- These functions must be called before calling :HideScene() on the HUD. The original HUD 
+-- won't be restored properly if :Restore is called from OnHiding or OnHidden of the 
+-- temporary HUD scene.
 function ZO_IngameSceneManager:RestoreHUDScene()
     self:SetHUDScene("hud")
 end
@@ -435,6 +439,9 @@ function ZO_IngameSceneManager:SetHUDUIScene(hudUISceneName, hidesAutomatically)
     end
 end
 
+-- These functions must be called before calling :HideScene() on the HUD. The original HUD 
+-- won't be restored properly if :Restore is called from OnHiding or OnHidden of the 
+-- temporary HUD scene.
 function ZO_IngameSceneManager:RestoreHUDUIScene()
     self:SetHUDUIScene("hudui", true)
 end

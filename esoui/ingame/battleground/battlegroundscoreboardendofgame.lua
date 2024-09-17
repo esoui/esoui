@@ -7,13 +7,7 @@ local LEAVE_BATTLEGROUND_KEYBIND_COOLDOWN_MS = 2000
 
 local KEYBIND_BUTTON_SPACING_X = 10
 
-ZO_Battleground_Scoreboard_End_Of_Game = ZO_Object:Subclass()
-
-function ZO_Battleground_Scoreboard_End_Of_Game:New(...)
-    local scoreboard = ZO_Object.New(self)
-    scoreboard:Initialize(...)
-    return scoreboard
-end
+ZO_Battleground_Scoreboard_End_Of_Game = ZO_InitializingObject:Subclass()
 
 function ZO_Battleground_Scoreboard_End_Of_Game:Initialize(control)
     self.control = control
@@ -23,13 +17,11 @@ function ZO_Battleground_Scoreboard_End_Of_Game:Initialize(control)
     self:InitializePlatformStyle()
 
     BATTLEGROUND_SCOREBOARD_END_OF_GAME_OPTIONS = ZO_HUDFadeSceneFragment:New(control)
-    
+
     BATTLEGROUND_SCOREBOARD_END_OF_GAME_SCENE = ZO_Scene:New("battleground_scoreboard_end_of_game", SCENE_MANAGER)
     BATTLEGROUND_SCOREBOARD_END_OF_GAME_SCENE:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_SHOWING then
             self:OnShowing()
-        elseif newState == SCENE_HIDING then
-            self:OnHiding()
         end
     end)
 
@@ -43,14 +35,14 @@ function ZO_Battleground_Scoreboard_End_Of_Game:Initialize(control)
 
     local function OnGamepadModeChanged()
         self:RefreshMatchInfoFragments()
-        -- End game doesn't close the UI when gamepad mode switches, but it shares the same fragment is in game, 
+        -- End game doesn't close the UI when gamepad mode switches, but it shares the same fragment as in game,
         -- so only in end game do we want to make sure that the match info gets refreshed on switching fragments
         BATTLEGROUND_SCOREBOARD_FRAGMENT:RefreshMatchInfoDisplay()
     end
 
     local function OnBattlegroundStateChanged(eventId, previousState, currentState)
         -- prevent people from accidentally leaving the BG because they are fighting to the bitter end
-        if currentState == BATTLEGROUND_STATE_POSTGAME and IsInGamepadPreferredMode() then
+        if currentState == BATTLEGROUND_STATE_FINISHED and IsInGamepadPreferredMode() then
             self.leaveBattlegroundKeybind:SetCooldown(LEAVE_BATTLEGROUND_KEYBIND_COOLDOWN_MS)
         end
     end
@@ -62,8 +54,6 @@ function ZO_Battleground_Scoreboard_End_Of_Game:Initialize(control)
     SYSTEMS:RegisterGamepadRootScene("battleground_scoreboard_end_of_game", BATTLEGROUND_SCOREBOARD_END_OF_GAME_SCENE)
     self.scene = BATTLEGROUND_SCOREBOARD_END_OF_GAME_SCENE
     SCENE_MANAGER:SetSceneRestoresBaseSceneOnGameMenuToggle("battleground_scoreboard_end_of_game", true)
-
-    self:UpdateAll()
 end
 
 function ZO_Battleground_Scoreboard_End_Of_Game:InitializeKeybinds()
@@ -109,7 +99,7 @@ function ZO_Battleground_Scoreboard_End_Of_Game:GetKeybindsNarrationData()
         table.insert(narrationData, playerOptionsNarrationData)
     end
 
-    local leaveBattlegroundNarrationData = self.leaveBattlegroundKeybind:GetKeybindButtonNarrationData()
+    local leaveBattlegroundNarrationData = self.leaveBattlegroundKeybind:GetKeybindButtonNarrationData() 
     if leaveBattlegroundNarrationData then
         table.insert(narrationData, leaveBattlegroundNarrationData)
     end
@@ -167,19 +157,7 @@ function ZO_Battleground_Scoreboard_End_Of_Game:ApplyPlatformStyle(style)
 end
 
 function ZO_Battleground_Scoreboard_End_Of_Game:OnShowing()
-    self.control:SetHandler("OnUpdate", function() self:UpdateAll() end)
     self:RefreshMatchInfoFragments()
-end
-
-function ZO_Battleground_Scoreboard_End_Of_Game:OnHiding()
-    self.control:SetHandler("OnUpdate", nil)
-end
-
-function ZO_Battleground_Scoreboard_End_Of_Game:UpdateAll()
-    local timeLeft = ZO_FormatTimeAsDecimalWhenBelowThreshold(GetCurrentBattlegroundStateTimeRemaining() / 1000)
-    -- Store time text for narration
-    self.closingTimerLabelText = zo_strformat(SI_BATTLEGROUND_SCOREBOARD_END_OF_GAME_CLOSING_TIME, timeLeft)
-    self.closingTimerLabel:SetText(self.closingTimerLabelText)
 end
 
 function ZO_Battleground_Scoreboard_End_Of_Game:RefreshMatchInfoFragments()

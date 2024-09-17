@@ -1,12 +1,6 @@
 --Layout
 
-ZO_BattlegroundObjectiveStateLayout = ZO_Object:Subclass()
-
-function ZO_BattlegroundObjectiveStateLayout:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
+ZO_BattlegroundObjectiveStateLayout = ZO_InitializingObject:Subclass()
 
 do
     local KEYBOARD_STYLE =
@@ -59,7 +53,7 @@ function ZO_BattlegroundObjectiveStateLayout:UpdateAnchors()
         objectiveControl:ClearAnchors()
         if previousObjectiveControl then
             if self.anchorPoint == TOPLEFT then
-                objectiveControl:SetAnchor(TOPLEFT, previousObjectiveControl, TOPRIGHT, 0, 0)
+                objectiveControl:SetAnchor(TOPLEFT, previousObjectiveControl, TOPRIGHT, -20, 0)
             elseif self.anchorPoint == TOPRIGHT then
                 objectiveControl:SetAnchor(TOPRIGHT, previousObjectiveControl, TOPLEFT, 0, 0)
             end
@@ -84,13 +78,7 @@ end
 
 --Indicator
 
-ZO_BattlegroundObjectiveStateIndicator = ZO_Object:Subclass()
-
-function ZO_BattlegroundObjectiveStateIndicator:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
+ZO_BattlegroundObjectiveStateIndicator = ZO_InitializingObject:Subclass()
 
 function ZO_BattlegroundObjectiveStateIndicator:Initialize(control, manager)   
     self.control = control
@@ -188,10 +176,6 @@ end
 
 ZO_FakeBattlegroundObjectiveIndicator = ZO_BattlegroundObjectiveStateIndicator:Subclass()
 
-function ZO_FakeBattlegroundObjectiveIndicator:New(...)
-    return ZO_BattlegroundObjectiveStateIndicator.New(self, ...)
-end
-
 function ZO_FakeBattlegroundObjectiveIndicator:Initialize(id, manager)
     local parent = manager:GetIndicatorControlContainer()
     local control = CreateControlFromVirtual("$(parent)FakeIndicator", parent, "ZO_BattlegroundObjectiveStatePin", id)
@@ -240,10 +224,6 @@ end
 
 ZO_CaptureAreaObjectiveStateIndicator = ZO_BattlegroundObjectiveStateIndicator:Subclass()
 
-function ZO_CaptureAreaObjectiveStateIndicator:New(...)
-    return ZO_BattlegroundObjectiveStateIndicator.New(self, ...)
-end
-
 function ZO_CaptureAreaObjectiveStateIndicator:Setup(keepId, objectiveId, battlegroundContext)
     ZO_BattlegroundObjectiveStateIndicator.Setup(self, keepId, objectiveId, battlegroundContext)
     self:GetControl():RegisterForEvent(EVENT_CAPTURE_AREA_STATE_CHANGED, function(_, ...) self:OnCaptureAreaStateChanged(...) end)
@@ -273,10 +253,6 @@ end
 
 ZO_KotHObjectiveStateIndicator = ZO_CaptureAreaObjectiveStateIndicator:Subclass()
 
-function ZO_KotHObjectiveStateIndicator:New(...)
-    return ZO_CaptureAreaObjectiveStateIndicator.New(self, ...)
-end
-
 function ZO_KotHObjectiveStateIndicator:Initialize(id, manager)
     local parent = manager:GetIndicatorControlContainer()
     local control = CreateControlFromVirtual("$(parent)KotH", parent, "ZO_BattlegroundObjectiveStatePin", id)
@@ -287,10 +263,6 @@ end
 --Crazy King Indicator
 
 ZO_CrazyKingObjectiveStateIndicator = ZO_CaptureAreaObjectiveStateIndicator:Subclass()
-
-function ZO_CrazyKingObjectiveStateIndicator:New(...)
-    return ZO_CaptureAreaObjectiveStateIndicator.New(self, ...)
-end
 
 function ZO_CrazyKingObjectiveStateIndicator:Initialize(id, manager)
     local parent = manager:GetIndicatorControlContainer()
@@ -311,10 +283,6 @@ end
 
 ZO_DominationObjectiveStateIndicator = ZO_CaptureAreaObjectiveStateIndicator:Subclass()
 
-function ZO_DominationObjectiveStateIndicator:New(...)
-    return ZO_CaptureAreaObjectiveStateIndicator.New(self, ...)
-end
-
 function ZO_DominationObjectiveStateIndicator:GetSortOrder()
     return self.designation
 end
@@ -334,10 +302,6 @@ end
 --CTF Indicator
 
 ZO_CTFObjectiveStateIndicator = ZO_BattlegroundObjectiveStateIndicator:Subclass()
-
-function ZO_CTFObjectiveStateIndicator:New(...)
-    return ZO_BattlegroundObjectiveStateIndicator.New(self, ...)
-end
 
 function ZO_CTFObjectiveStateIndicator:GetSortOrder()
     return self.pinType
@@ -380,10 +344,6 @@ end
 
 ZO_MurderballObjectiveStateIndicator = ZO_BattlegroundObjectiveStateIndicator:Subclass()
 
-function ZO_MurderballObjectiveStateIndicator:New(...)
-    return ZO_BattlegroundObjectiveStateIndicator.New(self, ...)
-end
-
 function ZO_MurderballObjectiveStateIndicator:Initialize(id, manager)
     local parent = manager:GetIndicatorControlContainer()
     local control = CreateControlFromVirtual("$(parent)Murderball", parent, "ZO_BattlegroundObjectiveStatePin", id)
@@ -418,13 +378,7 @@ end
 
 --Manager
 
-ZO_BattlegroundObjectiveStateIndicatorManager = ZO_Object:Subclass()
-
-function ZO_BattlegroundObjectiveStateIndicatorManager:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
+ZO_BattlegroundObjectiveStateIndicatorManager = ZO_InitializingObject:Subclass()
 
 function ZO_BattlegroundObjectiveStateIndicatorManager:Initialize(scoreHud)
     self.gameType = BATTLEGROUND_GAME_TYPE_NONE
@@ -570,7 +524,7 @@ function ZO_BattlegroundObjectiveStateIndicatorManager:UpdateFakeIndicators()
                 end 
             end
 
-            local maxSequencedObjectives = GetBattlegroundMaxActiveSequencedObjectives(GetCurrentBattlegroundId())
+            local maxSequencedObjectives = GetCurrentBattlegroundRoundMaxActiveSequencedObjectives()
             if maxSequencedObjectives > 0 and numShown < maxSequencedObjectives then
                 EVENT_MANAGER:RegisterForEvent("battlegroundObjectiveStateDisplay", self:GetFakeIndicatorEventForGameType(self.gameType), function(eventId, ...) self:UpdateFakeIndicators(...) end)
                 local missingObjectives = maxSequencedObjectives - numShown

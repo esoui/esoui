@@ -1047,7 +1047,7 @@ function ZO_HousingSettings_BuildMasterList_Occupant(currentHouse, masterList, c
     local occupantList = HOUSING_EDITOR_STATE:GetOccupants()
     for occupantIndex, occupantData in ipairs(occupantList) do
         local displayName = occupantData[occupantNameKey]
-        local nextData = createScrollDataFunction(displayName, currentHouse, occupantIndex)
+        local nextData = createScrollDataFunction(displayName, currentHouse, occupantIndex, occupantData["accountName"])
         table.insert(masterList, nextData)
     end
 end

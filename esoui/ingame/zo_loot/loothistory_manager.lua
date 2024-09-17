@@ -56,7 +56,7 @@ function LootHistory_Manager:Initialize()
 
     local function OnBattlegroundStateChanged(oldState, newState)
         if CanAddLootEntry() then
-            if newState == BATTLEGROUND_STATE_POSTGAME then
+            if newState == BATTLEGROUND_STATE_FINISHED then
                 SYSTEMS:GetObject(ZO_LOOT_HISTORY_NAME):OnBattlegroundEnteredPostGame()
             end
         end

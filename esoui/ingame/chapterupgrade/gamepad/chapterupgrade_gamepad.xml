@@ -10,6 +10,10 @@
 
         <Control name="ZO_ChapterUpgrade_Gamepad_RewardsEditionEntryHeader" inherits="ZO_ChapterUpgrade_Shared_RewardsEditionEntryHeader" virtual="true">
             <Dimensions y="ZO_CHAPTER_UPGRADE_GAMEPAD_REWARD_ENTRY_HEADER_HEIGHT" />
+
+            <OnInitialized name="Gamepad">
+                self.collectorsLabel = self:GetNamedChild("CollectorsLabel")
+            </OnInitialized>
             
             <Controls>
                 <Label name="$(parent)Descriptor" override="true" font="ZoFontGamepadBold22" />

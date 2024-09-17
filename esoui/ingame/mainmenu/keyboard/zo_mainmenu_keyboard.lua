@@ -234,10 +234,36 @@ ZO_CATEGORY_LAYOUT_INFO =
         categoryName = SI_MAIN_MENU_GROUP,
 
         descriptor = MENU_CATEGORY_GROUP,
-        normal = "EsoUI/Art/MainMenu/menuBar_group_up.dds",
-        pressed = "EsoUI/Art/MainMenu/menuBar_group_down.dds",
+        normal = function(button)
+            if PROMOTIONAL_EVENT_MANAGER:IsCampaignActive() and not IsPromotionalEventSystemLocked() then
+                return "EsoUI/Art/MainMenu/menuBar_group_gold_up.dds"
+            else
+                return "EsoUI/Art/MainMenu/menuBar_group_up.dds"
+            end
+        end,
+        pressed = function(button)
+            if PROMOTIONAL_EVENT_MANAGER:IsCampaignActive() and not IsPromotionalEventSystemLocked() then
+                return "EsoUI/Art/MainMenu/menuBar_group_gold_down.dds"
+            else
+                return "EsoUI/Art/MainMenu/menuBar_group_down.dds"
+            end
+        end,
         disabled = "EsoUI/Art/MainMenu/menuBar_group_disabled.dds",
-        highlight = "EsoUI/Art/MainMenu/menuBar_group_over.dds",
+        highlight = function(button)
+            if PROMOTIONAL_EVENT_MANAGER:IsCampaignActive() and not IsPromotionalEventSystemLocked() then
+                return "EsoUI/Art/MainMenu/menuBar_group_gold_over.dds"
+            else
+                return "EsoUI/Art/MainMenu/menuBar_group_over.dds"
+            end
+        end,
+        indicators = function()
+            if not IsPromotionalEventSystemLocked() then
+                local campaignData = PROMOTIONAL_EVENT_MANAGER:GetCurrentCampaignData()
+                if campaignData and (not campaignData:HasBeenSeen() or campaignData:IsAnyRewardClaimable()) then
+                    return { ZO_KEYBOARD_NEW_ICON }
+                end
+            end
+        end,
     },
     [MENU_CATEGORY_CONTACTS] =
     {
@@ -441,6 +467,10 @@ function MainMenu_Keyboard:Initialize(control)
     control:RegisterForEvent(EVENT_ATTRIBUTE_UPGRADE_UPDATED, UpdateCategoryBar)
     control:RegisterForEvent(EVENT_LEVEL_UPDATE, UpdateCategoryBar)
     control:AddFilterForEvent(EVENT_LEVEL_UPDATE, REGISTER_FILTER_UNIT_TAG, "player")
+    control:RegisterForEvent(EVENT_PROMOTIONAL_EVENTS_ACTIVITY_PROGRESS_UPDATED, UpdateCategoryBar)
+    PROMOTIONAL_EVENT_MANAGER:RegisterCallback("RewardsClaimed", UpdateCategoryBar)
+    PROMOTIONAL_EVENT_MANAGER:RegisterCallback("CampaignSeenStateChanged", UpdateCategoryBar)
+    PROMOTIONAL_EVENT_MANAGER:RegisterCallback("CampaignsUpdated", UpdateCategoryBar)
 
     self:UpdateCategories()
 end

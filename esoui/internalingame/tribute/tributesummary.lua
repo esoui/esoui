@@ -697,8 +697,8 @@ function ZO_TributeSummary:InitializeStateMachine()
                 local newNextRankData = ZO_TributeRewardsData:New(TRIBUTE_REWARDS_DATA_MANAGER:GetTributeRewardsTypeData(ZO_TRIBUTE_REWARD_TYPES.SEASON_REWARDS), self.playerRankNew + 1)
                 self.progressionNextRankIcon:SetTexture(newNextRankData:GetTierIcon())
                 self.progressionNextRankLabel:SetText(newNextRankData:GetTierName())
-                local playerXP = self.playerCampaignXP + GetTributeCampaignRankExperienceRequirement(self.playerRankCurrent, self.campaignId) - GetTributeCampaignRankExperienceRequirement(self.playerRankNew, self.campaignId)
-                local requiredXP = zo_max(1, GetTributeCampaignRankExperienceRequirement(self.playerRankNew + 1, self.campaignId) - GetTributeCampaignRankExperienceRequirement(self.playerRankNew, self.campaignId))
+                local playerXP = self.playerCampaignXP + GetTributeCampaignRankExperienceRequirement(self.playerRankCurrent, self.campaignKey) - GetTributeCampaignRankExperienceRequirement(self.playerRankNew, self.campaignKey)
+                local requiredXP = zo_max(1, GetTributeCampaignRankExperienceRequirement(self.playerRankNew + 1, self.campaignKey) - GetTributeCampaignRankExperienceRequirement(self.playerRankNew, self.campaignKey))
                 self.progressionProgressNumber:SetText(string.format("%d / %d", playerXP, self.playerRankNextRequiredXP))
                 self.progressionProgressNumberTranslateAnimation:SetStartOffsetX(0)
                 self.progressionProgressNumberTranslateAnimation:SetEndOffsetX(playerXP / requiredXP * self.progressionProgressBarControl:GetWidth())
@@ -1170,7 +1170,7 @@ function ZO_TributeSummary:ApplyPlatformStyle()
 
     -- We have to rebuild the placement match bars from scratch if we change style templates.
     if self.progressionPlacementBar and not self.progressionPlacementBarControl:IsHidden() then
-        local numRequiredPlacementMatches = GetNumRequiredPlacementMatches(self.campaignId)
+        local numRequiredPlacementMatches = GetNumRequiredPlacementMatches(self.campaignKey)
         self.progressionPlacementBar:SetSegmentTemplate(ZO_GetPlatformTemplate("ZO_TributeSummary_ArrowStatusBar"))
         self.progressionPlacementBar:SetMaxSegments(numRequiredPlacementMatches)
         self.progressionPlacementBarNew:SetSegmentTemplate(ZO_GetPlatformTemplate("ZO_TributeSummary_ArrowStatusBar"))
@@ -1223,7 +1223,7 @@ end
 function ZO_TributeSummary:BeginEndOfGameFanfare()
     SCENE_MANAGER:AddFragment(TRIBUTE_SUMMARY_FRAGMENT)
 
-    self.campaignId = GetTributeMatchCampaignId()
+    self.campaignKey = GetTributeMatchCampaignKey()
     local matchType = GetTributeMatchType()
     local victor, victoryType = GetTributeResultsWinnerInfo()
     self.victory = victor == TRIBUTE_PLAYER_PERSPECTIVE_SELF
@@ -1255,7 +1255,7 @@ function ZO_TributeSummary:BeginEndOfGameFanfare()
         local rightControl = overlayControl:GetNamedChild("Right")
         local middleControl = overlayControl:GetNamedChild("Middle")
 
-        local numRequiredMatches = GetNumRequiredPlacementMatches(self.campaignId)
+        local numRequiredMatches = GetNumRequiredPlacementMatches(self.campaignKey)
         local drawLevel = numRequiredMatches + 2 - segmentIndex
         leftControl:SetDrawLevel(drawLevel)
         rightControl:SetDrawLevel(drawLevel)
@@ -1294,11 +1294,11 @@ function ZO_TributeSummary:BeginEndOfGameFanfare()
         self.matchResults = {}
         self.matchResultsNew = {}
         local hasUpdatedCurrentMatch = false
-        local numRequiredPlacementMatches = GetNumRequiredPlacementMatches(self.campaignId)
+        local numRequiredPlacementMatches = GetNumRequiredPlacementMatches(self.campaignKey)
         local winCount = 0
         local lossCount = 0
         for i = 1, numRequiredPlacementMatches do
-            local hasRecord, wasAWin = GetCampaignMatchResultFromHistoryByMatchIndex(i, self.campaignId)
+            local hasRecord, wasAWin = GetCampaignMatchResultFromHistoryByMatchIndex(i, self.campaignKey)
             if hasRecord then
                 if wasAWin then
                     table.insert(self.matchResults, ZO_TRIBUTE_FINDER_MATCH_WON)
@@ -1366,10 +1366,10 @@ function ZO_TributeSummary:BeginEndOfGameFanfare()
 
     self.progressionProgressBar:Reset()
     self.playerClubXP = GetPendingTributeClubExperience()
-    self.playerRankNextRequiredXP = GetTributeCampaignRankExperienceRequirement(self.playerRankNext, self.campaignId) - GetTributeCampaignRankExperienceRequirement(self.playerRankCurrent, self.campaignId)
-    local currentXPForRank = GetTributePlayerExperienceInCurrentCampaignRank(self.campaignId)
+    self.playerRankNextRequiredXP = GetTributeCampaignRankExperienceRequirement(self.playerRankNext, self.campaignKey) - GetTributeCampaignRankExperienceRequirement(self.playerRankCurrent, self.campaignKey)
+    local currentXPForRank = GetTributePlayerExperienceInCurrentCampaignRank(self.campaignKey)
     self.playerCampaignXP = zo_max(0, currentXPForRank)
-    self.playerCampaignXPDelta = GetPendingTributeCampaignExperience(self.campaignId)
+    self.playerCampaignXPDelta = GetPendingTributeCampaignExperience(self.campaignKey)
     self.progressionRankChange:SetText(string.format("%+d", self.playerCampaignXPDelta))
     self.rankUp = self.playerRankNew > self.playerRankCurrent
     self.progressionProgressBar:SetValue(self.playerRankCurrent, self.playerCampaignXP, self.playerRankNextRequiredXP, WRAP, ANIMATE_INSTANTLY)

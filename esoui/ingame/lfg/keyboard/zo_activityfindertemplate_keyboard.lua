@@ -146,7 +146,6 @@ function ZO_ActivityFinderTemplate_Keyboard:InitializeFragment()
 
             self.clubRankControl:SetHidden(not isTribute)
 
-            local selectedData = self.filterComboBox:GetSelectedItemData()
             if selectedData then
                 local filterData = selectedData.data
                 self.singularSection:SetHidden(not filterData.singular)
@@ -159,6 +158,7 @@ function ZO_ActivityFinderTemplate_Keyboard:InitializeFragment()
                 self:HidePrimaryControls()
             end
 
+            self:RefreshMMR()
             self:RefreshView()
         end
     end
@@ -447,23 +447,45 @@ function ZO_ActivityFinderTemplate_Keyboard:OnFilterChanged(comboBox, entryText,
             data:SetGroupSizeRangeText(self.groupSizeRangeLabel, GROUP_SIZE_ICON_FORMAT)
 
             -- Add game mode text into battlegrounds info
-            local hideControls = true
+            local hideSetControls = true
             local setTypeListControl = self.setTypesSectionControl:GetNamedChild("List")
+
             if data:IsSetEntryType() then
                 local setTypesHeaderText = data:GetSetTypesHeaderText()
                 local setTypesListText = data:GetSetTypesListText()
                 if setTypesHeaderText ~= "" and setTypesListText ~= "" then
                     setTypeListControl:SetText(zo_strformat(SI_BATTLEGROUND_GAME_MODE_FORMATTER_KEYBOARD, setTypesHeaderText, setTypesListText))
-                    hideControls = false
+                    hideSetControls = false
                 end
             end
-            setTypeListControl:SetHidden(hideControls)
+
+            setTypeListControl:SetHidden(hideSetControls)
         end
 
         self:RefreshRewards(data)
     end
 
+    self:RefreshMMR()
     self:RefreshView()
+end
+
+function ZO_ActivityFinderTemplate_Keyboard:RefreshMMR()
+    local selectedData = self.filterComboBox:GetSelectedItemData()
+    if selectedData then
+        local filterData = selectedData.data
+        if filterData.singular and not filterData.isTribute then
+            local hideMMRControls = true
+            local mmrListControl = self.ratingSectionControl:GetNamedChild("List")
+
+            if filterData:IsSetEntryType() and filterData:HasMMR() then
+                local rating = filterData:GetMMR()
+                mmrListControl:SetText(zo_strformat(SI_BATTLEGROUND_MMR_FORMATTER_KEYBOARD, ZO_SELECTED_TEXT:Colorize(rating)))
+                hideMMRControls = false
+            end
+
+            mmrListControl:SetHidden(hideMMRControls)
+        end
+    end
 end
 
 function ZO_ActivityFinderTemplate_Keyboard:OnActivityFinderStatusUpdate()

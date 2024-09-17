@@ -57,8 +57,8 @@ function ZO_CrownStore_Keyboard:InitializeChapterUpgrade()
     self.chapterUpgradePaneObject = ZO_ChapterUpgradePane_Keyboard:New(chapterUpgradePage:GetNamedChild("ScrollScrollChildPane"), self)
     self.chapterUpgradeButtonContainer = chapterUpgradePage:GetNamedChild("UpgradeButtons")
     self.chapterUpgradePurchasedButton = chapterUpgradePage:GetNamedChild("PurchasedButton")
-    local standardButton = self.chapterUpgradeButtonContainer:GetNamedChild("Standard")
-    local collectorsButton = self.chapterUpgradeButtonContainer:GetNamedChild("Collectors")
+    self.chapterUpgradeButtonContainer.standardButton = self.chapterUpgradeButtonContainer:GetNamedChild("Standard")
+    self.chapterUpgradeButtonContainer.collectorsButton = self.chapterUpgradeButtonContainer:GetNamedChild("Collectors")
 
     local function OnUpgradeButtonClicked(isCollectorsEdition)
         local chapterUpgradeData = self.chapterUpgradePaneObject:GetChapterUpgradeData()
@@ -71,12 +71,12 @@ function ZO_CrownStore_Keyboard:InitializeChapterUpgrade()
         end
     end
 
-    standardButton:SetHandler("OnClicked", function()
+    self.chapterUpgradeButtonContainer.standardButton:SetHandler("OnClicked", function()
         local IS_STANDARD_EDITION = false
         OnUpgradeButtonClicked(IS_STANDARD_EDITION)
     end)
 
-    collectorsButton:SetHandler("OnClicked", function()
+    self.chapterUpgradeButtonContainer.collectorsButton:SetHandler("OnClicked", function()
         local IS_COLLECTORS_EDITION = true
         OnUpgradeButtonClicked(IS_COLLECTORS_EDITION)
     end)
@@ -177,6 +177,11 @@ function ZO_CrownStore_Keyboard:DisplayChapterUpgrade(data)
     local isOwned = chapterUpgradeData:IsOwned()
     self.chapterUpgradeButtonContainer:SetHidden(isOwned)
     self.chapterUpgradePurchasedButton:SetHidden(not isOwned)
+    if not isOwned then
+        local isContentPass = chapterUpgradeData:IsContentPass()
+        local collectorsButtonText = isContentPass and GetString(SI_CHAPTER_UPGRADE_CONTENT_PASS_COLLECTORS_BUTTON) or GetString(SI_CHAPTER_UPGRADE_COLLECTORS_BUTTON)
+        self.chapterUpgradeButtonContainer.collectorsButton:SetText(collectorsButtonText)
+    end
 end
 
 function ZO_CrownStore_Keyboard:HideCustomTopLevelCategories()

@@ -2589,7 +2589,7 @@ function ZO_InventorySlot_OnUpdate(control)
 
         local cursorPositionX, cursorPositionY = GetUIMousePosition()
         for _, currencyControl in ipairs(currencyControls) do
-            if currencyControl:IsPointInside(cursorPositionX, cursorPositionY) then
+            if not currencyControl:IsHidden() and currencyControl:IsPointInside(cursorPositionX, cursorPositionY) then
                 ZO_CurrencyTemplate_OnMouseEnter(currencyControl)
             else
                 ZO_CurrencyTemplate_OnMouseExit(currencyControl)

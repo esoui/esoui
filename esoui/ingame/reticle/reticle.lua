@@ -149,6 +149,13 @@ function ZO_Reticle:TryHandlingInteraction(interactionPossible, currentFrameTime
                 self.interactKeybindButton:HideKeyIcon()
             elseif additionalInteractInfo == ADDITIONAL_INTERACT_INFO_LOCKED then
                 self.interactKeybindButton:SetText(zo_strformat(SI_GAME_CAMERA_TARGET_ADDITIONAL_INFO, action, GetString("SI_LOCKQUALITY", context)))
+                if DoesPlayerHaveLockpickingCompanionBonus() then
+                    additionalInfoLabelColor = ZO_SUCCEEDED_TEXT
+                    self.additionalInfo:SetHidden(false)
+                    local INHERIT_COLOR = true
+                    local iconSize = IsInGamepadPreferredMode() and 48 or 32
+                    self.additionalInfo:SetText(zo_iconTextFormat("EsoUI/Art/TreeIcons/gamepad/GP_collection_indexIcon_Companions.dds", iconSize, iconSize, GetLockpickingCompanionBonusName(), INHERIT_COLOR))
+                end
             elseif additionalInteractInfo == ADDITIONAL_INTERACT_INFO_FISHING_NODE then
                 self.additionalInfo:SetHidden(false)
                 self.additionalInfo:SetText(GetString(SI_HOLD_TO_SELECT_BAIT))

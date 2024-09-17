@@ -18,7 +18,7 @@ function ZO_ChapterUpgradePane_Keyboard:Initialize(control, owner)
     self.prepurchaseRewardsHeader = self.prepurchaseRewardsSection:GetNamedChild("Header")
     self.editionRewardsSection = control:GetNamedChild("EditionRewards")
     self.editionRewardsHeader = self.editionRewardsSection:GetNamedChild("Header")
-
+    self.editionRewardsHeaderCollectorsLabel = self.editionRewardsHeader:GetNamedChild("CollectorsLabel")
     self.prepurchaseRewardPool = ZO_ControlPool:New("ZO_ChapterUpgrade_Keyboard_RewardsEntry", self.prepurchaseRewardsSection, "Reward")
     self.editionRewardPool = ZO_ControlPool:New("ZO_ChapterUpgrade_Keyboard_RewardsEntry", self.editionRewardsSection, "Reward")
 
@@ -148,6 +148,11 @@ do
 
         self.prepurchaseRewardsHeader:SetHidden(hidePrePurchaseRewardsHeader)
         self.editionRewardsHeader:SetHidden(hideEditionRewardsHeader)
+        if not hideEditionRewardsHeader then
+            local isContentPass = chapterUpgradeData:IsContentPass()
+            local collectorsHeaderLabelText = isContentPass and GetString(SI_CHAPTER_UPGRADE_CONTENT_PASS_COLLECTORS_REWARDS_HEADER) or GetString(SI_CHAPTER_UPGRADE_COLLECTORS_REWARDS_HEADER)
+            self.editionRewardsHeaderCollectorsLabel:SetText(collectorsHeaderLabelText)
+        end
     end
 end
 

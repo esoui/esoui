@@ -154,11 +154,11 @@ end
 
 function ZO_Stats_Common:GetDropdownTitleIndex(dropdown)
     local currentTitleIndex = GetCurrentTitleIndex()
-    local function IsItemCurrentTitle(item)
-        return item.titleIndex == currentTitleIndex
-    end
     if currentTitleIndex == nil then
         return 1
+    end
+    local function IsItemCurrentTitle(item)
+        return item.titleInfo and item.titleInfo.index == currentTitleIndex
     end
     return dropdown:GetIndexByEval(IsItemCurrentTitle)
 end
@@ -174,26 +174,21 @@ end
 
 function ZO_Stats_Common:UpdateTitleDropdownTitles(dropdown)
     dropdown:ClearItems()
-
-    -- Sort the valid items...
-    local sortedTitles = {}
-    for i = 1, GetNumTitles() do
-        local titleListItem = dropdown:CreateItemEntry(zo_strformat(GetTitle(i), GetRawUnitName("player")), function() SelectTitle(i) end)
-        titleListItem.titleIndex = i
-        table.insert(sortedTitles, titleListItem)
-    end
-    local function CompareTitleItems(item1, item2) 
-        return ZO_TableOrderingFunction(item1, item2, "name", dropdown.m_sortType, dropdown.m_sortOrder) 
-    end
-    table.sort(sortedTitles, CompareTitleItems)
-
-    -- First add the none item into the start of the dropdown list 
+     -- First add the none item into the start of the dropdown list 
     dropdown:AddItem(dropdown:CreateItemEntry(GetString(SI_STATS_NO_TITLE), function() SelectTitle(nil) end), ZO_COMBOBOX_SUPPRESS_UPDATE)
-    
-    -- Then append the sorted items below that.
-    for index, titleListItem in ipairs(sortedTitles) do
+
+    local sortedTitles = TITLE_MANAGER:GetSortedTitles(dropdown.m_sortType, dropdown.m_sortOrder)
+    for _, titleInfo in ipairs(sortedTitles) do
+        local titleName = titleInfo.name
+
+        if titleInfo.isNew then
+            titleName = zo_iconTextFormat("EsoUI/Art/Inventory/newItem_icon.dds", "100%", "100%", titleName)
+        end
+
+        local titleListItem = dropdown:CreateItemEntry(zo_strformat(titleName, GetRawUnitName("player")), function() SelectTitle(titleInfo.index) end)
+        titleListItem.titleInfo = titleInfo
         dropdown:AddItem(titleListItem, ZO_COMBOBOX_SUPPRESS_UPDATE)
-    end
+    end 
 
     dropdown:UpdateItems()
 

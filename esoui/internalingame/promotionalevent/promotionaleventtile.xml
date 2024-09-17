@@ -1,0 +1,43 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_PromotionalEventTile_Control" inherits="ZO_ActionTile_Control" virtual="true">
+            <Controls>
+                <Control name="$(parent)Container" override="true">
+                    <Controls>
+                        <Texture name="$(parent)Background" override="true" textureFile="EsoUI/Art/PromotionalEvent/promotionalEvents_announcement_bg.dds" level="3">
+                            <TextureCoords left="0" right="ZO_PROMOTIONAL_EVENT_TILE_TEXTURE_COORDS_RIGHT" top="0" bottom="ZO_PROMOTIONAL_EVENT_TILE_TEXTURE_COORDS_BOTTOM" />
+                        </Texture>
+
+                        <Label name="$(parent)Title" override="true" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_PROMOTIONAL_EVENTS" />
+
+                        <Label name="$(parent)TextCallout" override="true" inherits="ZO_MarketTextCallout_Gamepad">
+                            <Controls>
+                                <Control name="$(parent)Background" override="true">
+                                    <Controls>
+                                        <Texture name="$(parent)Center" override="true" color="INTERFACE_COLOR_TYPE_MARKET_COLORS:MARKET_COLORS_NEW" />
+                                        <Texture name="$(parent)Left" override="true" color="INTERFACE_COLOR_TYPE_MARKET_COLORS:MARKET_COLORS_NEW" />
+                                        <Texture name="$(parent)Right" override="true" color="INTERFACE_COLOR_TYPE_MARKET_COLORS:MARKET_COLORS_NEW" />
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Label>
+
+                        <Texture name="$(parent)GlowUnderlay" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_PROMOTIONAL_EVENTS" level="1" scale="1.025" shaderEffectType="WAVE" excludeFromResizeToFitExtents="true" textureFile="EsoUI/Art/PromotionalEvent/promotionalEvents_glow.dds">
+                            <Anchor point="CENTER" />
+                            <Dimensions x="512" y="512" />
+                            <Wave angleRadians="0.4" frequency="5.0" offset="0.0" speed="2.0" />
+                            <WaveBounds minX="0.02" maxX="0.02" minY="0.03" maxY="0.03" />
+                        </Texture>
+
+                        <Texture name="$(parent)GlowOverlay" blendMode="ADD" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_PROMOTIONAL_EVENTS_HIGHLIGHT" level="2" scale="1.0" shaderEffectType="WAVE" excludeFromResizeToFitExtents="true" textureFile="EsoUI/Art/PromotionalEvent/promotionalEvents_glow.dds">
+                            <Anchor point="CENTER" />
+                            <Dimensions x="512" y="512" />
+                            <Wave angleRadians="0.4" frequency="7.0" offset="0.0" speed="3" />
+                            <WaveBounds minX="0.015" maxX="0.015" minY="0.0175" maxY="0.0175" />
+                        </Texture>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

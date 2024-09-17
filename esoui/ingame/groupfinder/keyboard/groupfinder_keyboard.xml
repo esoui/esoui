@@ -1,6 +1,7 @@
 <GuiXml>
     <Controls>
-        <TopLevelControl name="ZO_GroupFinder_Keyboard_TopLevel" inherits="ZO_GroupMenuKeyboard_ContentAnchors" hidden="true">
+        <!-- Set at level 5 to render overtop of ZO_SearchingForGroup -->
+        <TopLevelControl name="ZO_GroupFinder_Keyboard_TopLevel" inherits="ZO_GroupMenuKeyboard_ContentAnchors" level="5" hidden="true">
             <OnInitialized>
                 ZO_GroupFinder_Keyboard_OnInitialized(self)
             </OnInitialized>

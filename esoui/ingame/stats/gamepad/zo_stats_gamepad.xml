@@ -45,8 +45,14 @@
 
         <Label name="ZO_GamepadStatsDescTemplate" font="ZoFontGamepad34" verticalAlignment="TOP" horizontalAlignment="LEFT" virtual="true" />
 
-        <Control name="ZO_GamepadStatTitleRow" inherits="ZO_Gamepad_Dropdown_Item_Indented" virtual="true"/>
-
+		<Control name="ZO_GamepadStatTitleRow" inherits="ZO_Gamepad_Dropdown_Item_Indented" virtual="true">
+			<Controls>
+				<Texture name="$(parent)StatusIndicator" inherits="ZO_GamepadMenuEntryStatusIndicationTemplate" hidden="true">
+					<Anchor point="CENTER" relativeTo="$(parent)Dropdown" relativePoint="LEFT" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_ICON_X_OFFSET" />
+				</Texture>
+			</Controls>
+		</Control>
+		
         <Control name="ZO_GamepadStatAttributeRow" inherits="ZO_GamepadMenuEntryDimensionsTemplate ZO_GamepadMenuEntryLabelSizedTemplate" virtual="true">
             <Controls>
                 <Control name="$(parent)Spinner" mouseEnabled="true" excludeFromResizeToFitExtents="true">
@@ -82,7 +88,7 @@
                 <Texture name="$(parent)StatusIndicator" inherits="ZO_GamepadMenuEntryStatusIndicationTemplate" />
             </Controls>
         </Control>
-        
+		
         <Control name="ZO_GamepadAttributeRowTemplate" inherits="ZO_GamepadMenuEntryDimensionsTemplate ZO_GamepadMenuEntryLabelSizedTemplate" virtual="true">
             <Controls>
                 <Label name="$(parent)Label" inherits="ZO_GamepadMenuEntryLabelTemplate" modifyTextType="NONE" />

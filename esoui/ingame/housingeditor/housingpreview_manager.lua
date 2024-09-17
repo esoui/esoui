@@ -20,7 +20,7 @@ function ZO_HousingPreview_Manager:RegisterForEvents()
         local zoneHouseId = GetCurrentZoneHouseId()
         if zoneHouseId > 0 then
             local collectibleId = GetCollectibleIdForHouse(zoneHouseId)
-            local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+            local collectibleData = ZO_CollectibleData_Base.Acquire(collectibleId)
             local displayInfo = self.displayInfo
             displayInfo.houseName = collectibleData:GetFormattedName()
             local foundInZoneId = GetHouseFoundInZoneId(zoneHouseId)
@@ -28,6 +28,7 @@ function ZO_HousingPreview_Manager:RegisterForEvents()
             local houseCategory = GetHouseCategoryType(zoneHouseId)
             displayInfo.houseCategory = GetString("SI_HOUSECATEGORYTYPE", houseCategory)
             displayInfo.backgroundImage = GetHousePreviewBackgroundImage(zoneHouseId)
+            collectibleData:ReleaseObject()
             self:FireCallbacks("OnPlayerActivated")
         else
             ZO_ClearTable(self.displayInfo)

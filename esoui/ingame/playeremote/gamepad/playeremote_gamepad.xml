@@ -8,7 +8,7 @@
             </OnInitialized>
             <Controls>
                 <Label name="$(parent)Label" font="ZoFontGamepad54" horizontalAlignment="CENTER">
-                    <Anchor point="TOP" relativeto="$(parent)Icon" relativePoint="BOTTOM" offsetY="5"/>
+                    <Anchor point="TOP" relativePoint="BOTTOM" offsetY="5"/>
                 </Label>
             </Controls>
         </Control>

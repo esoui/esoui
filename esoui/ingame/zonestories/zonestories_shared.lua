@@ -92,9 +92,9 @@ function ZO_ZoneStories_Shared.GetZoneCollectibleUnlockText(zoneId)
         local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(lockedZoneCollectibleId)
         local categoryType = collectibleData:GetCategoryType()
         if categoryType == COLLECTIBLE_CATEGORY_TYPE_CHAPTER then
-            return zo_strformat(SI_ZONE_STORY_UPGRADE_ACTION)
+            return GetString(SI_ZONE_STORY_UPGRADE_ACTION)
         elseif categoryType == COLLECTIBLE_CATEGORY_TYPE_DLC then
-            return zo_strformat(SI_ZONE_STORY_UNLOCK_ACTION)
+            return GetString(SI_ZONE_STORY_UNLOCK_ACTION)
         end
     end
     return ""

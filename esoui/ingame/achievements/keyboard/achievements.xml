@@ -203,6 +203,7 @@
                 self.label = self:GetNamedChild("Label")
                 self.icon = self:GetNamedChild("Icon")
                 self.icon:SetSurfaceHidden(4, true)
+                self.icon:SetSurfaceHidden(5, true)
             </OnInitialized>
             <Controls>
                 <TextureComposite name="$(parent)Icon" inherits="ZO_DyeingSwatchVisuals" level="2">

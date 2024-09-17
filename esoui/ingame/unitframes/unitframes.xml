@@ -90,12 +90,14 @@
         <Control name="ZO_RaidFrameAnchor_Keyboard_Template" virtual="true">
             <Controls>
                 <Label name="$(parent)GroupName" font="ZoFontGameOutline" modifyTextType="NONE" />
+                <Texture name="$(parent)BattlegroundTeam" hidden="true" />
             </Controls>
         </Control>
 
         <Control name="ZO_RaidFrameAnchor_Gamepad_Template" virtual="true">
             <Controls>
                 <Label name="$(parent)GroupName" font="ZoFontGamepad20" modifyTextType="UPPERCASE" />
+                <Texture name="$(parent)BattlegroundTeam" hidden="true" />
             </Controls>
         </Control>
 
@@ -105,6 +107,11 @@
                     <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" />
                     <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT"/>
                 </Label>
+
+                <Texture name="$(parent)BattlegroundTeam" hidden="true">
+                    <Dimensions x="64" y="64" />
+                    <Anchor point="TOPRIGHT" relativePoint="TOPLEFT" offsetX="-10" />
+                </Texture>
             </Controls>
         </Control>
 

@@ -495,3 +495,19 @@ function ZO_AreEqualSets(s1, s2)
     end
     return true
 end
+
+function ZO_CreateSortableTableFromKeys(source)
+    local t = {}
+    for k in pairs(source) do
+        table.insert(t, k)
+    end
+    return t
+end
+
+function ZO_CreateSortableTableFromValues(source)
+    local t = {}
+    for _, v in pairs(source) do
+        table.insert(t, v)
+    end
+    return t
+end

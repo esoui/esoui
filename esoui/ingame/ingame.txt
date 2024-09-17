@@ -109,10 +109,6 @@ EsoUI\Ingame\EndlessDungeon\EndlessDungeonSummary.xml
 
 EsoUI\Ingame\ZO_GuildSelectorManager\ZO_GuildSelectorManager.lua
 
-EsoUI\Ingame\CenterScreenAnnounce\CenterScreenAnnounceHandlers.lua
-EsoUI\Ingame\CenterScreenAnnounce\CenterScreenAnnounce.lua
-EsoUI\Ingame\CenterScreenAnnounce\CenterScreenAnnounce.xml
-
 EsoUI\Ingame\SpamWarning\SpamWarning.lua
 
 EsoUI\Ingame\Sounds\SoundEvents.lua
@@ -487,6 +483,8 @@ EsoUI\Ingame\HealthWarning\ZO_HealthWarning.lua
 EsoUI\Ingame\Stats\Keyboard\ZO_StatEntry_Keyboard.lua
 EsoUI\Ingame\Stats\Keyboard\ZO_StatEntry_Keyboard.xml
 
+EsoUI\Ingame\Stats\Title_Manager.lua
+
 EsoUI\Ingame\Inventory\SharedInventory.lua
 
 EsoUI\Ingame\CharacterWindow\Keyboard\CharacterWindow_Keyboard.lua
@@ -619,7 +617,6 @@ EsoUI\Ingame\Companion\Companion_Manager.lua
 
 EsoUI\Ingame\Restyle\Restyle_Manager.lua
 EsoUI\Ingame\Restyle\Restyle_Shared.lua
-EsoUI\Ingame\Restyle\Restyle_Shared.xml
 
 EsoUI\Ingame\Outfits\Outfit_Manager.lua
 
@@ -662,6 +659,9 @@ EsoUI\Ingame\Dyeing\Gamepad\Dyeing_Gamepad.xml
 EsoUI\Ingame\Restyle\Gamepad\RestyleStation_Gamepad.lua
 EsoUI\Ingame\Restyle\Gamepad\Restyle_Gamepad.xml
 
+EsoUI\Ingame\CenterScreenAnnounce\CenterScreenAnnounceHandlers.lua
+EsoUI\Ingame\CenterScreenAnnounce\CenterScreenAnnounce.lua
+EsoUI\Ingame\CenterScreenAnnounce\CenterScreenAnnounce.xml
 
 EsoUI\Ingame\Collections\Gamepad\CollectionsBook_Gamepad.lua
 EsoUI\Ingame\Collections\Gamepad\CollectionsBook_Gamepad.xml
@@ -1446,6 +1446,8 @@ EsoUI\Ingame\Battleground\BattlegroundScoreHud.lua
 EsoUI\Ingame\Battleground\BattlegroundScoreHud.xml
 EsoUI\Ingame\Battleground\BattlegroundHud.lua
 EsoUI\Ingame\Battleground\BattlegroundHud.xml
+EsoUI\Ingame\Battleground\BattlegroundScoreboardRoundIndicator.lua
+EsoUI\Ingame\Battleground\BattlegroundScoreboardRoundIndicator.xml
 EsoUI\Ingame\Battleground\BattlegroundScoreboard.lua
 EsoUI\Ingame\Battleground\BattlegroundScoreboardInGame.lua
 EsoUI\Ingame\Battleground\BattlegroundScoreboard.xml
@@ -1453,6 +1455,10 @@ EsoUI\Ingame\Battleground\BattlegroundScoreboardEndOfGame.lua
 EsoUI\Ingame\Battleground\BattlegroundScoreboardEndOfGame.xml
 EsoUI\Ingame\Battleground\BattlegroundMedalInfo_Shared.lua
 EsoUI\Ingame\Battleground\BattlegroundMedalInfo_Shared.xml
+EsoUI\Ingame\Battleground\BattlegroundRoundRecapFlag.lua
+EsoUI\Ingame\Battleground\BattlegroundRoundRecapFlag.xml
+EsoUI\Ingame\Battleground\BattlegroundRoundRecap.lua
+EsoUI\Ingame\Battleground\BattlegroundRoundRecap.xml
 EsoUI\Ingame\Battleground\Keyboard\BattlegroundMedalInfo_Keyboard.lua
 EsoUI\Ingame\Battleground\Keyboard\BattlegroundMedalInfo_Keyboard.xml
 EsoUI\Ingame\Battleground\Gamepad\BattlegroundMedalInfo_Gamepad.lua
@@ -1690,6 +1696,15 @@ EsoUI\Ingame\HouseTours\HouseTours_Dialogs_Shared.lua
 EsoUI\Ingame\HouseTours\Gamepad\HouseTours_Dialogs_Gamepad.lua
 EsoUI\Ingame\HouseTours\Keyboard\HouseTours_Dialogs_Keyboard.lua
 EsoUI\Ingame\HouseTours\Keyboard\HouseTours_Dialogs_Keyboard.xml
+
+EsoUI\Ingame\PromotionalEvents\PromotionalEvents_Shared.lua
+EsoUI\Ingame\PromotionalEvents\PromotionalEvents_Shared.xml
+EsoUI\Ingame\PromotionalEvents\Keyboard\PromotionalEvents_Keyboard.lua
+EsoUI\Ingame\PromotionalEvents\Keyboard\PromotionalEvents_Keyboard.xml
+EsoUI\Ingame\PromotionalEvents\Gamepad\PromotionalEvents_Gamepad.lua
+EsoUI\Ingame\PromotionalEvents\Gamepad\PromotionalEvents_Gamepad.xml
+EsoUI\Ingame\PromotionalEvents\PromotionalEventTracker.lua
+EsoUI\Ingame\PromotionalEvents\PromotionalEventTracker.xml
 
 ; Subtitles needs to be loaded after PlayerToPlayer so it can anchor off of it
 EsoUI\Ingame\Subtitles\Subtitles.lua

@@ -71,6 +71,10 @@ do
     function ZO_SelectableLabel_SetMouseOverEnabled(label, enabled)
         label.mouseoverEnabled = enabled
     end
+
+    function ZO_SelectableLabel_ResetColorFunctionToDefault(label)
+        label.GetTextColor = GetTextColor
+    end
 end
 
 ------------------

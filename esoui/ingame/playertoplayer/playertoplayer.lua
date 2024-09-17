@@ -2,7 +2,7 @@ local P2P_UNIT_TAG = "reticleoverplayer"
 local P2C_UNIT_TAG = "reticleovercompanion"
 
 -- For use inside this file, to aleviate the need for global table lookups
-local INTERACT_TYPE = 
+local INTERACT_TYPE =
 {
     AGENT_CHAT_REQUEST = 1,
     RITUAL_OF_MARA = 2,
@@ -25,6 +25,7 @@ local INTERACT_TYPE =
     TRAVEL_TO_LEADER = 19,
     TRIBUTE_INVITE = 20,
     GROUP_FINDER_APPLICATION = 21,
+    PROMOTIONAL_EVENT_REWARD = 22,
 }
 
 -- For use outside of this file (e.g. InGameDialogs)
@@ -765,6 +766,27 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
         end
     end
 
+    local function OnPromotionalEventRewardsUpdated()
+        local campaignData = PROMOTIONAL_EVENT_MANAGER:GetCurrentCampaignData()
+        if campaignData and campaignData:IsAnyRewardClaimable() and not IsPromotionalEventSystemLocked() then
+            if not self:ExistsInQueue(INTERACT_TYPE.PROMOTIONAL_EVENT_REWARD) then
+                PlaySound(SOUNDS.PROMOTIONAL_EVENT_REWARD_TO_CLAIM_PROMPT)
+
+                local claimRewardDescriptionText = GetString(SI_PLAYER_TO_PLAYER_PROMOTIONAL_EVENT_CLAIMABLE_REWARD)
+
+                local function AcceptClaimReward()
+                    PROMOTIONAL_EVENT_MANAGER:ShowPromotionalEventScene()
+                end
+                local data = self:AddPromptToIncomingQueue(INTERACT_TYPE.PROMOTIONAL_EVENT_REWARD, nil, nil, claimRewardDescriptionText, AcceptClaimReward)
+                data.dontRemoveOnAccept = true
+                data.acceptText = GetString(SI_PLAYER_TO_PLAYER_PROMOTIONAL_EVENT_CLAIM_PROMPT)
+                TriggerTutorial(TUTORIAL_TRIGGER_PROMOTIONAL_EVENTS_HUD_REWARD_TO_CLAIM)
+            end
+        else
+            self:RemoveFromIncomingQueue(INTERACT_TYPE.PROMOTIONAL_EVENT_REWARD)
+        end
+    end
+
     self.control:RegisterForEvent(EVENT_DUEL_INVITE_RECEIVED, OnDuelInviteReceived)
     self.control:RegisterForEvent(EVENT_DUEL_INVITE_REMOVED, OnDuelInviteRemoved)
     self.control:RegisterForEvent(EVENT_TRIBUTE_INVITE_RECEIVED, OnTributeInviteReceived)
@@ -795,10 +817,12 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
     self.control:RegisterForEvent(EVENT_GROUPING_TOOLS_READY_CHECK_UPDATED, function(event, ...) self:OnGroupingToolsReadyCheckUpdated(...) end)
     self.control:RegisterForEvent(EVENT_GROUPING_TOOLS_READY_CHECK_CANCELLED, function(event, ...) self:OnGroupingToolsReadyCheckCancelled(...) end)
     self.control:RegisterForEvent(EVENT_LEVEL_UP_REWARD_UPDATED, OnLevelUpRewardUpdated)
-
+    self.control:RegisterForEvent(EVENT_PROMOTIONAL_EVENTS_ACTIVITY_PROGRESS_UPDATED, OnPromotionalEventRewardsUpdated)
 
     GIFT_INVENTORY_MANAGER:RegisterCallback("GiftListsChanged", OnGiftsUpdated)
     GROUP_FINDER_APPLICATIONS_LIST_MANAGER:RegisterCallback("ApplicationsListUpdated", OnGroupFinderApplicationsUpdated)
+    PROMOTIONAL_EVENT_MANAGER:RegisterCallback("RewardsClaimed", OnPromotionalEventRewardsUpdated)
+    PROMOTIONAL_EVENT_MANAGER:RegisterCallback("CampaignsUpdated", OnPromotionalEventRewardsUpdated)
 
     --Find member replacement prompt on a member leaving
     local function OnGroupingToolsFindReplacementNotificationNew()
@@ -1072,6 +1096,7 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
 
         OnGiftsUpdated()
         OnPlayerActivateOrLeaderUpdate()
+        OnPromotionalEventRewardsUpdated()
     end
 
     local function OnPlayerDeactivated()
@@ -1086,6 +1111,7 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
         self:RemoveFromIncomingQueue(INTERACT_TYPE.LFG_FIND_REPLACEMENT)
         self:RemoveFromIncomingQueue(INTERACT_TYPE.QUEST_SHARE)
         self:RemoveFromIncomingQueue(INTERACT_TYPE.TRAVEL_TO_LEADER)
+        self:RemoveFromIncomingQueue(INTERACT_TYPE.PROMOTIONAL_EVENT_REWARD)
     end
 
     self.control:RegisterForEvent(EVENT_PLAYER_ACTIVATED, OnPlayerActivated)

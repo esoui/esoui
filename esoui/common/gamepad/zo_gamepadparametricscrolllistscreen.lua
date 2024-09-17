@@ -387,6 +387,12 @@ function ZO_Gamepad_ParametricList_Screen:SetTextSearchFocused(isFocused)
     end
 end
 
+function ZO_Gamepad_ParametricList_Screen:ClearSearchText()
+    if self.textSearchHeaderFocus then
+        self.textSearchHeaderFocus:ClearText()
+    end
+end
+
 function ZO_Gamepad_ParametricList_Screen:SetupHeaderFocus(headerFocus)
     if self.headerFocus then
         assert(false) -- only support one headerFocus ever
@@ -455,9 +461,7 @@ function ZO_Gamepad_ParametricList_Screen:OnEnterHeader()
 
     -- Swap keybinds to text search keybinds if there is a text search
     if self.textSearchHeaderFocus then
-        if self.keybindStripDescriptor then
-            KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
-        end
+        self:RemoveKeybinds()
 
         if self.textSearchKeybindStripDescriptor then
             KEYBIND_STRIP:AddKeybindButtonGroup(self.textSearchKeybindStripDescriptor)
@@ -476,9 +480,7 @@ function ZO_Gamepad_ParametricList_Screen:OnLeaveHeader()
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.textSearchKeybindStripDescriptor)
         end
 
-        if self.keybindStripDescriptor and self:IsShowing() then
-            KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
-        end
+        self:AddKeybinds()
     end
 end
 
@@ -503,9 +505,7 @@ end
 function ZO_Gamepad_ParametricList_Screen:OnStateChanged(_, newState)
     if newState == ZO_STATE.SHOWING then
         self:PerformDeferredInitialize()
-        if self.keybindStripDescriptor then
-            KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
-        end
+        self:AddKeybinds()
 
         if self.activateOnShow then
             self:SetCurrentList(self:GetMainList())
@@ -516,9 +516,7 @@ function ZO_Gamepad_ParametricList_Screen:OnStateChanged(_, newState)
     elseif newState == ZO_STATE.SHOWN then
         self:OnShow()
     elseif newState == ZO_STATE.HIDING then
-        if self.keybindStripDescriptor then
-            KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
-        end
+        self:RemoveKeybinds()
         self:HideFragmentsIfNeeded()
         self:OnHiding()
     elseif newState == ZO_STATE.HIDDEN then
@@ -536,6 +534,18 @@ end
 
 function ZO_Gamepad_ParametricList_Screen:Deactivate()
     self:DisableCurrentList()
+end
+
+function ZO_Gamepad_ParametricList_Screen:AddKeybinds()
+    if self.keybindStripDescriptor and self:IsShowing() then
+        KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
+    end
+end
+
+function ZO_Gamepad_ParametricList_Screen:RemoveKeybinds()
+    if self.keybindStripDescriptor then
+        KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
+    end
 end
 
 function ZO_Gamepad_ParametricList_Screen:RefreshKeybinds()
