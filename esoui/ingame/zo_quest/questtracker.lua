@@ -480,7 +480,10 @@ function ZO_Tracker:AssistNext(ignoreSceneRestriction)
                
                 -- if the zone story was visible and we just closed it, don't reopen it.
                 if not wasZoneStoryAssisted and IsZoneStoryTracked() then
-                    ZO_ZoneStories_Manager.SetTrackedZoneStoryAssisted(true)    
+                    ZO_ZoneStories_Manager.SetTrackedZoneStoryAssisted(true)
+                    if not self.disableAudio then
+                        PlaySound(SOUNDS.QUEST_FOCUSED)
+                    end
                     return -- Don't advance the quest now, wait for the zone tracker to be hidden.
                 end
             end

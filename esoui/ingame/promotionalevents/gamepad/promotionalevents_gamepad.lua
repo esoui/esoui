@@ -126,6 +126,9 @@ function ZO_PromotionalEvents_Gamepad:Initialize(control)
     PROMOTIONAL_EVENT_MANAGER:RegisterCallback("CampaignsUpdated", function()
         self.lastSelectedData = nil
         self.lastSelectedMilestoneIndex = nil
+        if self.activityList then
+            ZO_ScrollList_ResetToTop(self.activityList)
+        end
     end)
     self:InitializePreview()
 end
@@ -196,6 +199,20 @@ function ZO_PromotionalEvents_Gamepad:InitializeFoci()
         -- TODO Promotional Events: Add check for if there's more than one campaign to control drill in
     end
 
+    local CLAIM_ALL_DESCRIPTOR =
+    {
+        name = GetString(SI_PROMOTIONAL_EVENT_CLAIM_ALL_REWARDS_ACTION),
+        keybind = "UI_SHORTCUT_QUINARY",
+
+        visible = function()
+            return self.currentCampaignData:IsAnyRewardClaimable()
+        end,
+
+        callback = function()
+            self.currentCampaignData:TryClaimAllAvailableRewards()
+        end,
+    }
+
     -- Overview
     local function ActivateOverviewCallback()
         self.campaignPanelHighlight:SetHidden(false)
@@ -213,24 +230,18 @@ function ZO_PromotionalEvents_Gamepad:InitializeFoci()
     local overviewKeybindStripDescriptor =
     {
         alignment = KEYBIND_STRIP_ALIGN_CENTER,
-        {
-            name = GetString(SI_PROMOTIONAL_EVENT_CLAIM_ALL_REWARDS_ACTION),
-            keybind = "UI_SHORTCUT_SECONDARY",
-
-            visible = function()
-                return self.currentCampaignData:IsAnyRewardClaimable()
-            end,
-
-            callback = function()
-                self.currentCampaignData:TryClaimAllAvailableRewards()
-            end,
-        },
+        CLAIM_ALL_DESCRIPTOR,
     }
     ZO_Gamepad_AddBackNavigationKeybindDescriptors(overviewKeybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON, BackKeybindCallback)
     self.overviewFocalArea:SetKeybindDescriptor(overviewKeybindStripDescriptor)
 
     -- Milestones
     local function ActivateMilestonesCallback()
+        if self.lastSelectedMilestoneIndex then
+            self:SelectMilestone(self.lastSelectedMilestoneIndex)
+            self.lastSelectedMilestoneIndex = nil
+        end
+
         if self.selectedMilestone then
             self.focusedRewardData = self.selectedMilestone.rewardObject.rewardData
             GAMEPAD_TOOLTIPS:LayoutRewardData(GAMEPAD_RIGHT_TOOLTIP, self.focusedRewardData)
@@ -263,6 +274,8 @@ function ZO_PromotionalEvents_Gamepad:InitializeFoci()
                 SCREEN_NARRATION_MANAGER:QueueCustomEntry("promotionalEventsMilestone")
             end,
         },
+        -- Claim all
+        CLAIM_ALL_DESCRIPTOR,
          -- Preview
         {
             name = GetString(SI_PROMOTIONAL_EVENT_REWARD_PREVIEW_ACTION),
@@ -313,6 +326,8 @@ function ZO_PromotionalEvents_Gamepad:InitializeFoci()
                 SCREEN_NARRATION_MANAGER:QueueCustomEntry("promotionalEventsCapstone")
             end,
         },
+        -- Claim all
+        CLAIM_ALL_DESCRIPTOR,
         -- Preview
         {
             name = GetString(SI_PROMOTIONAL_EVENT_REWARD_PREVIEW_ACTION),
@@ -338,7 +353,12 @@ function ZO_PromotionalEvents_Gamepad:InitializeFoci()
         GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
         self.focusedRewardData = nil
         local ANIMATE_INSTANTLY = true
-        ZO_ScrollList_AutoSelectData(self.activityList, ANIMATE_INSTANTLY)
+        if self.lastSelectedData then
+            ZO_ScrollList_SelectData(self.activityList, self.lastSelectedData)
+            self.lastSelectedData = nil
+        else
+            ZO_ScrollList_AutoSelectData(self.activityList, ANIMATE_INSTANTLY)
+        end
     end
 
     local function DeactivateActivitiesCallback()
@@ -366,6 +386,8 @@ function ZO_PromotionalEvents_Gamepad:InitializeFoci()
                 SCREEN_NARRATION_MANAGER:QueueSortFilterListEntry(self)
             end,
         },
+        -- Claim all
+        CLAIM_ALL_DESCRIPTOR,
         -- Preview
         {
             name = GetString(SI_PROMOTIONAL_EVENT_REWARD_PREVIEW_ACTION),
@@ -509,6 +531,16 @@ function ZO_PromotionalEvents_Gamepad:InitializeNarrationInfo()
         end,
     }
     SCREEN_NARRATION_MANAGER:RegisterCustomObject("promotionalEventsCapstone", capstoneNarrationData)
+    local previewNarrationData =
+    {
+        canNarrate = function()
+            return IsCurrentlyPreviewing()
+        end,
+        selectedNarrationFunction = function()
+            return ITEM_PREVIEW_GAMEPAD:GetPreviewSpinnerNarrationText()
+        end,
+    }
+    SCREEN_NARRATION_MANAGER:RegisterCustomObject("promotionalEventsPreview", previewNarrationData)
 end
 
 function ZO_PromotionalEvents_Gamepad:InitializePreview()
@@ -678,13 +710,6 @@ function ZO_PromotionalEvents_Gamepad:Activate()
     if not self:GetCurrentFocus() then
         self:SelectFocusArea(self.overviewFocalArea)
     end
-    if self.lastSelectedMilestoneIndex then
-        self:SelectMilestone(self.lastSelectedMilestoneIndex)
-        self.lastSelectedMilestoneIndex = nil
-    elseif self.lastSelectedData then
-        ZO_ScrollList_SelectData(self.activityList, self.lastSelectedData)
-        self.lastSelectedData = nil
-    end
     self:ActivateCurrentFocus()
     PlaySound(SOUNDS.PROMOTIONAL_EVENTS_WINDOW_OPEN)
     self.isActive = true
@@ -778,17 +803,22 @@ end
 function ZO_PromotionalEvents_Gamepad:OnPreviewShown()
     local selectedRewardData = self.previewRewardData
     self:UpdatePreview(selectedRewardData)
+    ITEM_PREVIEW_GAMEPAD:RegisterCallback("RefreshActions", function()
+        SCREEN_NARRATION_MANAGER:QueueCustomEntry("promotionalEventsPreview")
+    end)
 end
 
 function ZO_PromotionalEvents_Gamepad:UpdatePreview(rewardData)
     SYSTEMS:GetObject("itemPreview"):ClearPreviewCollection()
     SYSTEMS:GetObject("itemPreview"):PreviewReward(rewardData:GetRewardId())
     GAMEPAD_TOOLTIPS:LayoutRewardData(GAMEPAD_RIGHT_TOOLTIP, rewardData)
+    SCREEN_NARRATION_MANAGER:QueueCustomEntry("promotionalEventsPreview")
 end
 
 function ZO_PromotionalEvents_Gamepad:OnPreviewHiding()
     KEYBIND_STRIP:RemoveKeybindButtonGroup(self.previewKeybindStripDesciptor)
     GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
+    ITEM_PREVIEW_GAMEPAD:UnregisterCallback("RefreshActions")
     self.previewRewardData = nil
 end
 
@@ -796,16 +826,26 @@ function ZO_PromotionalEvents_Gamepad:ShowCapstoneDialog()
     ZO_Dialogs_ShowGamepadDialog("PROMOTIONAL_EVENT_CAPSTONE_GAMEPAD", { campaignData = self.currentCampaignData })
 end
 
-function ZO_PromotionalEvents_Gamepad.GetMilestoneScale()
-    return 0.75
-end
+function ZO_PromotionalEvents_Gamepad:ScrollToFirstClaimableReward()
+    local claimableMilestoneData, claimableCapstoneData, claimableActivityData = ZO_PromotionalEvents_Shared.ScrollToFirstClaimableReward(self)
 
-function ZO_PromotionalEvents_Gamepad.GetMilestonePadding()
-    return 4
-end
+    if claimableMilestoneData then
+        self:SelectFocusArea(self.milestonesFocalArea)
+    elseif claimableCapstoneData then
+        self:SelectFocusArea(self.capstoneFocalArea)
+    elseif claimableActivityData then
+        self:SelectFocusArea(self.activitiesFocalArea)
+    end
 
-function ZO_PromotionalEvents_Gamepad.OnControlInitialized(control)
-    PROMOTIONAL_EVENTS_GAMEPAD = ZO_PromotionalEvents_Gamepad:New(control)
+    if claimableMilestoneData then
+        self.lastSelectedMilestoneIndex = claimableMilestoneData:GetDisplayIndex()
+    end
+
+    if claimableActivityData then
+        self.lastSelectedData = claimableActivityData
+    end
+
+    self:Activate()
 end
 
 -- Overridden from ZO_SortFilterList_Gamepad
@@ -822,6 +862,18 @@ function ZO_PromotionalEvents_Gamepad:GetNarrationText()
         end
     end
     return narrations
+end
+
+function ZO_PromotionalEvents_Gamepad.GetMilestoneScale()
+    return 0.75
+end
+
+function ZO_PromotionalEvents_Gamepad.GetMilestonePadding()
+    return 4
+end
+
+function ZO_PromotionalEvents_Gamepad.OnControlInitialized(control)
+    PROMOTIONAL_EVENTS_GAMEPAD = ZO_PromotionalEvents_Gamepad:New(control)
 end
 
 -- Capstone Dialog --
@@ -842,6 +894,36 @@ function ZO_PromotionalEvents_CapstoneDialog_Gamepad:Initialize(control)
         canQueue = true,
         setup = function(dialog, data)
             self:SetCampaignData(data.campaignData)
+        end,
+        narrationText = function()
+            local narrations = {}
+            local titleText = GetString(SI_PROMOTIONAL_EVENT_CAPSTONE_DIALOG_TITLE_FORMATTER)
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(titleText))
+            local rewardName = self.rewardData:GetFormattedName()
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(rewardName))
+            local stackCount = self.rewardData:GetQuantity()
+            if stackCount > 1 then
+                ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(stackCount))
+            end
+            return narrations
+        end,
+        additionalInputNarrationFunction = function()
+            local narrationData = {}
+            local closeNarrationData =
+            {
+                name = GetString(SI_DIALOG_CLOSE),
+                keybindName = ZO_Keybindings_GetHighestPriorityNarrationStringFromAction("DIALOG_NEGATIVE") or GetString(SI_ACTION_IS_NOT_BOUND),
+                enabled = true
+            }
+            table.insert(narrationData, closeNarrationData)
+            local viewInCollectionsNarrationData =
+            {
+                name = GetString(SI_PROMOTIONAL_EVENT_CAPSTONE_DIALOG_VIEW_IN_COLLECTIONS_KEYBIND_LABEL),
+                keybindName = ZO_Keybindings_GetHighestPriorityNarrationStringFromAction("DIALOG_SECONDARY") or GetString(SI_ACTION_IS_NOT_BOUND),
+                enabled = true
+            }
+            table.insert(narrationData, viewInCollectionsNarrationData)
+            return narrationData
         end,
         buttons =
         {

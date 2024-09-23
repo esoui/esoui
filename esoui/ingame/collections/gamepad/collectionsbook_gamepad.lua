@@ -566,6 +566,9 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
                         ZO_Dialogs_ShowGamepadDialog("GAMEPAD_TRAVEL_TO_HOUSE_OPTIONS_DIALOG", collectibleData)
                     end
                 elseif collectibleData:IsUsable(GAMEPLAY_ACTOR_CATEGORY_PLAYER) then
+                    if IsCurrentlyPreviewing() then
+                        ITEM_PREVIEW_GAMEPAD:EndCurrentPreview()
+                    end
                     collectibleData:Use(GAMEPLAY_ACTOR_CATEGORY_PLAYER)
                     --Re-narrate after using the collectible
                     SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.currentList.list)

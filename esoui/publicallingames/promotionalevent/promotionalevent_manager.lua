@@ -71,12 +71,18 @@ function ZO_PromotionalEvent_Manager:CleanupSeenCampaigns()
     end
 end
 
-function ZO_PromotionalEvent_Manager:ShowPromotionalEventScene()
+function ZO_PromotionalEvent_Manager:ShowPromotionalEventScene(scrollToFirstClaimableReward)
     if ZO_IsIngameUI() then
+        local systemObject
         if IsInGamepadPreferredMode() then
             ZO_ACTIVITY_FINDER_ROOT_GAMEPAD:ShowCategory(PROMOTIONAL_EVENTS_GAMEPAD:GetCategoryData())
+            systemObject = PROMOTIONAL_EVENTS_GAMEPAD
         else
             GROUP_MENU_KEYBOARD:ShowCategory(PROMOTIONAL_EVENTS_KEYBOARD.fragment)
+            systemObject = PROMOTIONAL_EVENTS_KEYBOARD
+        end
+        if scrollToFirstClaimableReward then
+            systemObject:ScrollToFirstClaimableReward()
         end
     else
         ShowPromotionalEventScene()

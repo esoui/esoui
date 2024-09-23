@@ -1630,10 +1630,10 @@ end
 
 function ZO_ScrollList_FindDataByQuery(self, query, optionalTypeId)
     if query then
-        for _, data in ipairs(self.data) do
+        for i, data in ipairs(self.data) do
             if not optionalTypeId or data.typeId == optionalTypeId then
                 if query(data.data) then
-                    return data
+                    return data, i
                 end
             end
         end

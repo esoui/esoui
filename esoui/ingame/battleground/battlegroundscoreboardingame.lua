@@ -100,6 +100,7 @@ function ZO_Battleground_Scoreboard_In_Game:CloseScoreboard()
 end
 
 function ZO_Battleground_Scoreboard_In_Game:OnLeaveBattlegroundPressed()
+    PlaySound(SOUNDS.BATTLEGROUND_LEAVE_MATCH)
     ZO_Dialogs_ShowPlatformDialog("CONFIRM_LEAVE_BATTLEGROUND")
 end
 

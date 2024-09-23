@@ -2,10 +2,11 @@
     <Controls>
         <Label name="ZO_Battleground_Scoreboard_Score_Template" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" virtual="true"/>
 
-        <Control name="ZO_Battleground_Scoreboard_Player_Row" resizeToFitDescendents="true" virtual="true">
+        <Control name="ZO_Battleground_Scoreboard_Player_Row" resizeToFitConstrains="Y" virtual="true">
+            <Dimensions x="ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_WIDTH" />
             <Controls>
                 <Label name="$(parent)Lives" hidden="true">
-                    <Dimensions x="30" />
+                    <Dimensions x="ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_LIVES_WIDTH" />
                     <Anchor point="TOPLEFT" />
                 </Label>
                 <Label name="$(parent)Name" maxLineCount="1" wrapMode="ELLIPSIS">

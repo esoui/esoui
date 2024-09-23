@@ -475,6 +475,35 @@ function ZO_PromotionalEvents_Shared:OnHidden()
     self.blastParticleSystemPool:ReleaseAllObjects()
 end
 
+function ZO_PromotionalEvents_Shared:ScrollToFirstClaimableReward()
+    local claimableMilestoneData = nil
+    for _, milestoneControl in pairs(self.milestonePool:GetActiveObjects()) do
+        local milestoneData = milestoneControl.milestoneData
+        if milestoneData:CanClaimReward() then
+            claimableMilestoneData = milestoneData
+            break
+        end
+    end
+
+    local claimableCapstoneData  = nil
+    if self.capstoneRewardObject.rewardableEventData:CanClaimReward() then
+        claimableCapstoneData = self.capstoneRewardObject.rewardableEventData
+    end
+
+    local function ActivityQuery(activityData)
+        return activityData:CanClaimReward()
+    end
+
+    local claimableActivityData = nil
+    local activityData, activityDataIndex = ZO_ScrollList_FindDataByQuery(self.activityList, ActivityQuery)
+    if activityData then
+        claimableActivityData = activityData.data
+        ZO_ScrollList_ScrollDataIntoView(self.activityList, activityDataIndex)
+    end
+
+    return claimableMilestoneData, claimableCapstoneData, claimableActivityData -- For override behavior
+end
+
 ZO_PromotionalEvents_Shared:MUST_IMPLEMENT("InitializeActivityFinderCategory")
 ZO_PromotionalEvents_Shared:MUST_IMPLEMENT("ShowCapstoneDialog")
 ZO_PromotionalEvents_Shared:MUST_IMPLEMENT("GetMilestoneScale")

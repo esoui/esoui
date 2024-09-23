@@ -20,13 +20,14 @@ function ZoneStoryTracker:InitializeStyles()
             FONT_HEADER = "ZoFontGameShadow",
             FONT_SUBLABEL = "ZoFontGameShadow",
             TEXT_TYPE_HEADER = MODIFY_TEXT_TYPE_NONE,
+            RESIZE_TO_FIT_PADDING_HEIGHT = 10,
 
-            TOP_LEVEL_PRIMARY_ANCHOR_TO_QUEST_TRACKER = ZO_Anchor:New(TOPLEFT, ZO_FocusedQuestTrackerPanelContainerQuestContainer, BOTTOMLEFT, 0, 10),
-            -- The quest timer anchors are very old and bizarre and they screw everything up
-            -- So these anchors match what the quest tracker normally does.  If we get the time to redo quest timer/tracker in a not insane way, we should fix this
-            -- Everything else should anchor to the bottom of the activity tracker, cause it got all the hard stuff out of the way and made it intuitive from here on
-            TOP_LEVEL_PRIMARY_ANCHOR_TO_QUEST_TIMER = ZO_Anchor:New(TOPLEFT, ZO_FocusedQuestTrackerPanelTimerAnchor, BOTTOMLEFT, 35, 10),
-            TOP_LEVEL_SECONDARY_ANCHOR = ZO_Anchor:New(RIGHT, GuiRoot, RIGHT, 0, 10, ANCHOR_CONSTRAINS_X),
+            -- Quest Tracker anchors are old and complicated and there's not an easy way to set up a consitent scheme
+            -- If we can one day refactor quest tracker to be more sensible this could be simplified
+            -- In the mean time, anything anchored after this should be simple
+            TOP_LEVEL_PRIMARY_ANCHOR_QUEST_TRACKER = ZO_Anchor:New(TOPLEFT, ZO_FocusedQuestTrackerPanelContainerQuestContainer, BOTTOMLEFT, 0, 10),
+            TOP_LEVEL_PRIMARY_ANCHOR_NO_QUEST_TRACKER = ZO_Anchor:New(TOPLEFT, ZO_FocusedQuestTrackerPanelContainerQuestContainer, TOPLEFT, 0, 10),
+            TOP_LEVEL_SECONDARY_ANCHOR = ZO_Anchor:New(RIGHT, GuiRoot, RIGHT, 0, 0, ANCHOR_CONSTRAINS_X),
 
             CONTAINER_PRIMARY_ANCHOR = ZO_Anchor:New(TOPLEFT),
             CONTAINER_SECONDARY_ANCHOR = ZO_Anchor:New(TOPRIGHT),
@@ -38,9 +39,10 @@ function ZoneStoryTracker:InitializeStyles()
             FONT_HEADER = "ZoFontGamepadBold27",
             FONT_SUBLABEL = "ZoFontGamepad34",
             TEXT_TYPE_HEADER = MODIFY_TEXT_TYPE_UPPERCASE,
+            RESIZE_TO_FIT_PADDING_HEIGHT = 20,
 
-            TOP_LEVEL_PRIMARY_ANCHOR_TO_QUEST_TRACKER = ZO_Anchor:New(TOPRIGHT, ZO_FocusedQuestTrackerPanelContainerQuestContainer, BOTTOMRIGHT, 0, 20),
-            TOP_LEVEL_PRIMARY_ANCHOR_TO_QUEST_TIMER = ZO_Anchor:New(TOPRIGHT, ZO_FocusedQuestTrackerPanelTimerAnchor, BOTTOMRIGHT, -44, 20),
+            TOP_LEVEL_PRIMARY_ANCHOR_QUEST_TRACKER = ZO_Anchor:New(TOPRIGHT, ZO_FocusedQuestTrackerPanelContainerQuestContainer, BOTTOMRIGHT, 0, 20),
+            TOP_LEVEL_PRIMARY_ANCHOR_NO_QUEST_TRACKER = ZO_Anchor:New(TOPRIGHT, ZO_FocusedQuestTrackerPanelContainerQuestContainer, TOPRIGHT, 0, 20),
 
             CONTAINER_PRIMARY_ANCHOR = ZO_Anchor:New(TOPRIGHT),
 
@@ -76,9 +78,9 @@ end
 function ZoneStoryTracker:GetPrimaryAnchor()
     local style = self.currentStyle
     if FOCUSED_QUEST_TRACKER_FRAGMENT:IsShowing() then
-        return style.TOP_LEVEL_PRIMARY_ANCHOR_TO_QUEST_TRACKER
+        return style.TOP_LEVEL_PRIMARY_ANCHOR_QUEST_TRACKER
     else
-        return style.TOP_LEVEL_PRIMARY_ANCHOR_TO_QUEST_TIMER
+        return style.TOP_LEVEL_PRIMARY_ANCHOR_NO_QUEST_TRACKER
     end
 end
 

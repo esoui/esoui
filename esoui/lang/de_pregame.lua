@@ -409,6 +409,7 @@ SafeAddString(SI_BATTLEGROUNDROUNDRESULT4, "Entscheidung durch verbleibende Spie
 SafeAddString(SI_BATTLEGROUNDROUNDRESULT5, "Entscheidung durch verbleibende Leben", 0)
 SafeAddString(SI_BATTLEGROUNDROUNDRESULT6, "Unentschieden: Patt", 1)
 SafeAddString(SI_BATTLEGROUNDROUNDRESULT7, "Letztes überlebendes Team", 0)
+SafeAddString(SI_BATTLEGROUNDROUNDRESULT8, "Verlassen des Gegners", 0)
 SafeAddString(SI_BATTLEGROUNDTEAM0, "Ungültig", 0)
 SafeAddString(SI_BATTLEGROUNDTEAM1, "Feuerdrachen^p", 0)
 SafeAddString(SI_BATTLEGROUNDTEAM2, "Grubendämonen^p", 0)

@@ -113,7 +113,8 @@ function ZO_HUDTracker_Base:ApplyPlatformStyle(style)
     self.headerLabel:SetModifyTextType(style.TEXT_TYPE_HEADER)
     self.headerLabel:SetFont(style.FONT_HEADER)
     self.subLabel:SetFont(style.FONT_SUBLABEL)
-    
+    self.control:SetResizeToFitPadding(0, style.RESIZE_TO_FIT_PADDING_HEIGHT)
+
     self:RefreshAnchors()
 
     self:Update()

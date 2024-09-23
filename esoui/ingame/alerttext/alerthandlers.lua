@@ -946,6 +946,19 @@ local AlertHandlers =
         return ALERT, GetString(SI_BATTLEGROUND_INACTIVITY_WARNING), SOUNDS.BATTLEGROUND_INACTIVITY_WARNING
     end,
 
+    [EVENT_BATTLEGROUND_MMR_LOSS_REDUCED] = function(blockingReason)
+        local message
+        if ZO_FlagHelpers.MaskHasFlag(blockingReason, BG_MMR_BONUS_JOIN_IN_PROGRESS) then
+            message = GetString(SI_BATTLEGROUND_NOTICE_MMR_REDUCED_FOR_LATE_JOIN)
+        elseif ZO_FlagHelpers.MaskHasFlag(blockingReason, BG_MMR_BONUS_LFM_REQUESTED) then
+            message = GetString(SI_BATTLEGROUND_NOTICE_MMR_REDUCED_FOR_PLAYER_DROP)
+        else
+            message = GetString(SI_BATTLEGROUND_NOTICE_MMR_REDUCED)
+        end
+
+        return ALERT, message, SOUNDS.BATTLEGROUND_INACTIVITY_WARNING
+    end,
+
     [EVENT_CRAFT_FAILED] = function(result)
         return ALERT, GetString("SI_TRADESKILLRESULT", result)
     end,

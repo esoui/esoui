@@ -53,6 +53,7 @@ end
 function ZO_GuildSelector_Gamepad:RefreshGuildList()
     ZO_ClearTable(self.entries)
     self:ClearItems()
+    local filteredIndex = 1
     for index = 1, GetNumGuilds() do
         local guildId = GetGuildId(index)
         if not self.filterFunction or self.filterFunction(guildId) then
@@ -67,8 +68,9 @@ function ZO_GuildSelector_Gamepad:RefreshGuildList()
                 self.OnGuildsRefreshed(entry)
             end
 
-            self.entries[index] = entry
+            self.entries[filteredIndex] = entry
             self:AddItem(entry)
+            filteredIndex = filteredIndex + 1
         end
     end
 

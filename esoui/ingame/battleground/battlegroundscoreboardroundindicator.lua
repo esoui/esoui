@@ -27,6 +27,7 @@ function ZO_BattlegroundScoreboardRoundIndicatorRound:Initialize(control, parent
     self.title = self.control:GetNamedChild("Number")
 
     self.winnerIcon = self.control:GetNamedChild("Icon")
+    self:InitializePlatformStyle()
 end
 
 function ZO_BattlegroundScoreboardRoundIndicatorRound:SetDetails(roundNumber, color, winnerIcon, tintIcon)
@@ -43,6 +44,26 @@ function ZO_BattlegroundScoreboardRoundIndicatorRound:SetDetails(roundNumber, co
     else
         self.winnerIcon:SetHidden(true)
     end
+end
+
+do
+    local KEYBOARD_STYLE = 
+    {
+        indicatorTemplate = "ZO_BattlegroundScoreboardRoundIndicatorRound_Keyboard_Template",
+    }
+
+    local GAMEPAD_STYLE = 
+    {
+        indicatorTemplate = "ZO_BattlegroundScoreboardRoundIndicatorRound_Gamepad_Template",
+    }
+
+    function ZO_BattlegroundScoreboardRoundIndicatorRound:InitializePlatformStyle()
+        self.platformStyle = ZO_PlatformStyle:New(function(style) self:ApplyPlatformStyle(style) end, KEYBOARD_STYLE, GAMEPAD_STYLE)
+    end
+end
+
+function ZO_BattlegroundScoreboardRoundIndicatorRound:ApplyPlatformStyle(style)
+    ApplyTemplateToControl(self.control, style.indicatorTemplate)
 end
 
 -- Round winners summary widget for Battleground Scoreboard.
@@ -66,18 +87,18 @@ function ZO_BattlegroundScoreboardRoundIndicator:Initialize(control, parent)
     self.buttonAggregate = self.control:GetNamedChild("Aggregate")
     self.buttonAggregate.parent = self
 
-    self.rounds = {}
-
     local KEYBOARD_STYLE =
     {
         roundMarker = "EsoUI/Art/Battlegrounds/battleground_roundselector.dds",
         isKeyboard = true,
     }
+
     local GAMEPAD_STYLE =
     {
         roundMarker = "EsoUI/Art/Battlegrounds/battleground_roundselector_gp.dds",
         isKeyboard = false,
     }
+
     local function UpdatePlatformStyle(style)
         self.currentIndicator:SetTexture(style.roundMarker)
         self.keyboardBackground:SetHidden(not style.isKeyboard)
@@ -107,16 +128,17 @@ function ZO_BattlegroundScoreboardRoundIndicator:SetDetails(numRounds, viewedRou
         self.control:SetHidden(false)
     end
 
-    local currentRound = GetCurrentBattlegroundRoundIndex()
-    local canMoveNext = not showAggregatedScores -- Moving next from the last valid round will enter the Aggregate.
+    self.currentRound = GetCurrentBattlegroundRoundIndex()
+    self.showAggregateButton = DoesBattlegroundHaveRounds(GetCurrentBattlegroundId()) and (GetCurrentBattlegroundRoundIndex() == GetBattlegroundNumRounds(GetCurrentBattlegroundId()) or HasTeamWonBattlegroundEarly()) and GetCurrentBattlegroundState() > BATTLEGROUND_STATE_RUNNING
+    local canMoveNext = viewedRound < self.currentRound or (not showAggregatedScores and self.showAggregateButton)  -- Moving next from the last valid round will enter the Aggregate.
     local canMovePrevious = viewedRound > 1
+    local currentRound = self.currentRound
+
     self.buttonNextRound:SetEnabled(canMoveNext)
     self.buttonNextRoundGP:SetEnabled(canMoveNext)
     self.buttonPreviousRound:SetEnabled(canMovePrevious)
     self.buttonPreviousRoundGP:SetEnabled(canMovePrevious)
 
-    self.currentRound = currentRound
-    self.showAggregateButton = DoesBattlegroundHaveRounds(GetCurrentBattlegroundId()) and (GetCurrentBattlegroundRoundIndex() == GetBattlegroundNumRounds(GetCurrentBattlegroundId()) or HasTeamWonBattlegroundEarly())
 
     local currentBattlegroundId = GetCurrentBattlegroundId()
     -- From various team scores, calculate the single winner of each round.
@@ -124,13 +146,9 @@ function ZO_BattlegroundScoreboardRoundIndicator:SetDetails(numRounds, viewedRou
     for roundIndex = 1, numRounds do
         local bestScore = 0
         local bestTeams = {} -- Maybe tied
-        for teamId = BATTLEGROUND_TEAM_ITERATION_BEGIN, BATTLEGROUND_TEAM_ITERATION_END do
-            if DoesBattlegroundHaveTeam(currentBattlegroundId, teamId) then
-                local score = GetCurrentBattlegroundScore(roundIndex, teamId) or 0
-                if score > bestScore then
-                    bestScore = score
-                    bestTeams = { teamId }
-                elseif score == bestScore then
+        if roundIndex <= currentRound then
+            for teamId = BATTLEGROUND_TEAM_ITERATION_BEGIN, BATTLEGROUND_TEAM_ITERATION_END do
+                if DoesBattlegroundHaveTeam(currentBattlegroundId, teamId) and DidCurrentBattlegroundTeamWinOrTieRound(teamId, roundIndex) then
                     table.insert(bestTeams, teamId)
                 end
             end
@@ -251,7 +269,7 @@ function ZO_BattlegroundScoreboardRoundIndicator:MoveViewedRound(deltaIndex)
     local CLAMP_ROUND = true
     if self.showAggregateButton then
         if not self.parent:ShouldShowAggregateScores() and self.parent:GetViewedRound() == self.currentRound and deltaIndex > 0 then
-            self:ShowAggregateScores()
+            self:ShowAggregateScores(true)
             return
         elseif self.parent:ShouldShowAggregateScores() and deltaIndex < 0 then
             self.parent:SetViewedRound(self.currentRound, CLAMP_ROUND)
@@ -264,7 +282,7 @@ end
 
 function ZO_BattlegroundScoreboardRoundIndicator:ShowAggregateScores()
     if self.showAggregateButton then
-        self.parent:ShowAggregateScores()
+        self.parent:ShowAggregateScores(true)
     end
 end
 

@@ -319,8 +319,9 @@ end
 function ZO_PromotionalEvents_Keyboard:OnShowing()
     ZO_PromotionalEvents_Shared.OnShowing(self)
 
-    SCENE_MANAGER:AddFragment(ITEM_PREVIEW_KEYBOARD:GetFragment())
+    -- The preview options fragment needs to be added before the ITEM_PREVIEW_KEYBOARD fragment
     SCENE_MANAGER:AddFragment(PROMOTIONAL_EVENTS_PREVIEW_OPTIONS_FRAGMENT)
+    SCENE_MANAGER:AddFragment(ITEM_PREVIEW_KEYBOARD:GetFragment())
     KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
     PlaySound(SOUNDS.PROMOTIONAL_EVENTS_WINDOW_OPEN)
 end

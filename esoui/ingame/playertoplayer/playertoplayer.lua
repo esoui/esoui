@@ -775,7 +775,8 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
                 local claimRewardDescriptionText = GetString(SI_PLAYER_TO_PLAYER_PROMOTIONAL_EVENT_CLAIMABLE_REWARD)
 
                 local function AcceptClaimReward()
-                    PROMOTIONAL_EVENT_MANAGER:ShowPromotionalEventScene()
+                    local SCROLL_TO_FIRST_CLAIMABLE_REWARD = true
+                    PROMOTIONAL_EVENT_MANAGER:ShowPromotionalEventScene(SCROLL_TO_FIRST_CLAIMABLE_REWARD)
                 end
                 local data = self:AddPromptToIncomingQueue(INTERACT_TYPE.PROMOTIONAL_EVENT_REWARD, nil, nil, claimRewardDescriptionText, AcceptClaimReward)
                 data.dontRemoveOnAccept = true

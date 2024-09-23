@@ -35,10 +35,23 @@ ZO_BATTLEGROUND_SCOREBOARD_PANEL_OFFSET_Y = 10
 
 ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_INITIAL_OFFSET_Y = 20
 ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_OFFSET_Y = 10
+ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_LIVES_WIDTH = 30
 ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_MEDAL_USER_ID_DIFFERENCE = 100
 ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_MEDALS_WIDTH = ZO_BATTLEGROUND_SCOREBOARD_HEADER_MEDALS_WIDTH - ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_MEDAL_USER_ID_DIFFERENCE
 ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_MEDALS_OFFSET_X = ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_MEDAL_USER_ID_DIFFERENCE / 2 + ZO_BATTLEGROUND_SCOREBOARD_HEADER_DOUBLE_PADDING
 ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_USER_ID_WIDTH = ZO_BATTLEGROUND_SCOREBOARD_HEADER_USER_ID_WIDTH + ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_MEDAL_USER_ID_DIFFERENCE / 2
+ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_WIDTH = ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_LIVES_WIDTH
+                                                + ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_USER_ID_WIDTH
+                                                + ZO_BATTLEGROUND_SCOREBOARD_HEADER_DOUBLE_PADDING
+                                                + ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_MEDALS_WIDTH
+                                                + ZO_BATTLEGROUND_SCOREBOARD_HEADER_DOUBLE_PADDING
+                                                + ZO_BATTLEGROUND_SCOREBOARD_HEADER_KILLS_WIDTH
+                                                + ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_MEDALS_OFFSET_X
+                                                + ZO_BATTLEGROUND_SCOREBOARD_HEADER_DEATHS_WIDTH
+                                                + ZO_BATTLEGROUND_SCOREBOARD_HEADER_DOUBLE_PADDING
+                                                + ZO_BATTLEGROUND_SCOREBOARD_HEADER_ASSISTS_WIDTH
+                                                + ZO_BATTLEGROUND_SCOREBOARD_HEADER_DOUBLE_PADDING
+
 ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_HIGHLIGHT_ALPHA_MIN = 0
 ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_HIGHLIGHT_ALPHA_MAX = 1
 ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_HIGHLIGHT_ALPHA_MOUSE_OVER_MAX = 0.5
@@ -223,7 +236,8 @@ function Battleground_Scoreboard_Fragment:InitializeNarrationInfo()
                 ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_BATTLEGROUND_SCOREBOARD_HEADER_MATCH_RESULTS_NARRATION)))
                 local resultString = SI_BATTLEGROUND_SCOREBOARD_HEADER_DEFEAT_TITLE
                 local playerTeam = GetUnitBattlegroundTeam("player")
-                local playerTeamWon = DidCurrentBattlegroundTeamWinOrTieRound(playerTeam, self.viewedRound)
+                local playerTeamBattlegroundResult = GetBattlegroundResultForTeam(playerTeam)
+                local playerTeamWon = playerTeamBattlegroundResult == BATTLEGROUND_RESULT_WIN or playerTeamBattlegroundResult == BATTLEGROUND_RESULT_TIE
                 if playerTeamWon then
                     resultString = SI_BATTLEGROUND_SCOREBOARD_HEADER_VICTORY_TITLE
                 end
@@ -437,7 +451,8 @@ do
         end
 
         local playerTeam = GetUnitBattlegroundTeam("player")
-        local playerTeamWon = DidCurrentBattlegroundTeamWinOrTieRound(playerTeam, self.viewedRound)
+        local playerTeamBattlegroundResult = GetBattlegroundResultForTeam(playerTeam)
+        local playerTeamWon = playerTeamBattlegroundResult == BATTLEGROUND_RESULT_WIN or playerTeamBattlegroundResult == BATTLEGROUND_RESULT_TIE
 
         if self:ShouldShowAggregateScores() then
             local resultString = SI_BATTLEGROUND_SCOREBOARD_HEADER_DEFEAT_TITLE
@@ -497,7 +512,6 @@ do
     end
 
     function Battleground_Scoreboard_Fragment:PreUpdatePanels()
-        self.highestPanelScore = 0
         local teamSize = GetBattlegroundTeamSize(self.currentBattlegroundId)
         local useSmallEntries = self:ShouldScoreboardUseSmallPlayerEntries()
 
@@ -507,10 +521,6 @@ do
                 teamPanel:UpdateScore()
                 teamPanel:SetTeamSize(teamSize)
                 teamPanel:UseSmallPlayerEntries(useSmallEntries)
-                local panelScore = teamPanel:GetScore()
-                if panelScore > self.highestPanelScore then
-                    self.highestPanelScore = panelScore
-                end
             end
         end
     end
@@ -621,7 +631,7 @@ do
     function Battleground_Scoreboard_Fragment:PostUpdatePanels()
         for battlegroundTeam, teamPanel in pairs(self.teamPanels) do
             if DoesBattlegroundHaveTeam(self.currentBattlegroundId, battlegroundTeam) then
-                teamPanel:PostUpdatePanel(self.highestPanelScore)
+                teamPanel:PostUpdatePanel()
             end
         end
     end
@@ -737,7 +747,7 @@ function Battleground_Scoreboard_Fragment:SetSelectedPlayerData(newPlayerData, a
 end
 
 function Battleground_Scoreboard_Fragment:SelectDefaultPlayerRow(animate, forceRefreshPlayerSelection)
-    local playerIndex = GetScoreboardPlayerEntryIndex()
+    local playerIndex = GetScoreboardLocalPlayerEntryIndex()
     local data = self:GetPlayerDataByEntryIndex(playerIndex)
     self:SetSelectedPlayerData(data, animate, forceRefreshPlayerSelection)
 end
@@ -860,8 +870,6 @@ function Battleground_Scoreboard_Fragment:Show(...)
 end
 
 function Battleground_Scoreboard_Fragment:SetViewedRound(roundIndex, clampRound)
-    self.showAggregateScores = false
-
     local currentRoundIndex = GetCurrentBattlegroundRoundIndex()
 
     local clampedRoundIndex
@@ -870,7 +878,13 @@ function Battleground_Scoreboard_Fragment:SetViewedRound(roundIndex, clampRound)
     else
         clampedRoundIndex = roundIndex
     end
-    
+
+    if self.showAggregateScores then
+        self.viewedRound = clampedRoundIndex
+        self:ShowAggregateScores(false)
+        return
+    end
+
     if clampedRoundIndex ~= self.viewedRound and clampedRoundIndex <= currentRoundIndex then
         if clampedRoundIndex < self.viewedRound then
             PlaySound(SOUNDS.BATTLEGROUND_SCOREBOARD_PREVIOUS_ROUND)
@@ -878,7 +892,6 @@ function Battleground_Scoreboard_Fragment:SetViewedRound(roundIndex, clampRound)
             PlaySound(SOUNDS.BATTLEGROUND_SCOREBOARD_NEXT_ROUND)
         end
         self.viewedRound = clampedRoundIndex
-        self.roundSummary:SetDetails(GetBattlegroundNumRounds(), self.viewedRound, self:ShouldShowAggregateScores())
 
         self:UpdateAll()
         local NARRATE_HEADER = true
@@ -894,12 +907,20 @@ function Battleground_Scoreboard_Fragment:IsViewingCurrentRound()
     return self.viewedRound == GetCurrentBattlegroundRoundIndex()
 end
 
-function Battleground_Scoreboard_Fragment:ShowAggregateScores()
-    self.showAggregateScores = true
+function Battleground_Scoreboard_Fragment:ShowAggregateScores(showAggregate)
+    if showAggregate ~= self.showAggregateScores then
+        self.showAggregateScores = showAggregate ~= false
 
-    self:UpdateAll()
-    local NARRATE_HEADER = true
-    SCREEN_NARRATION_MANAGER:QueueCustomEntry(self.customNarrationObjectName, NARRATE_HEADER)
+        if self.showAggregateScores then
+            PlaySound(SOUNDS.BATTLEGROUND_SCOREBOARD_NEXT_ROUND)
+        else
+            PlaySound(SOUNDS.BATTLEGROUND_SCOREBOARD_PREVIOUS_ROUND)
+        end
+
+        self:UpdateAll()
+        local NARRATE_HEADER = true
+        SCREEN_NARRATION_MANAGER:QueueCustomEntry(self.customNarrationObjectName, NARRATE_HEADER)
+    end
 end
 
 function Battleground_Scoreboard_Fragment:ShouldShowAggregateScores()
@@ -992,8 +1013,8 @@ function ZO_Battleground_Scoreboard_Team_Panel_Object:UpdateAnchors()
     end
 end
 
-function ZO_Battleground_Scoreboard_Team_Panel_Object:PostUpdatePanel(highestScore)
-    self:UpdateScoreColor(highestScore)
+function ZO_Battleground_Scoreboard_Team_Panel_Object:PostUpdatePanel()
+    self:UpdateScoreColor()
     self:UpdateAnchors()
 
     for _, playerRow in ipairs(self.sortedPlayerRows) do
@@ -1012,13 +1033,24 @@ function ZO_Battleground_Scoreboard_Team_Panel_Object:UpdateScore()
     self.scoreControl:SetText(self.score)
 end
 
-function ZO_Battleground_Scoreboard_Team_Panel_Object:UpdateScoreColor(highestScore)
-    local showingCurrentRoundScores = BATTLEGROUND_SCOREBOARD_FRAGMENT:IsViewingCurrentRound() and not BATTLEGROUND_SCOREBOARD_FRAGMENT:ShouldShowAggregateScores()
-    if (not showingCurrentRoundScores or GetCurrentBattlegroundState() == BATTLEGROUND_STATE_FINISHED) and self.score ~= 0 and self.score >= highestScore then
-        self.scoreControl:SetColor(ZO_BATTLEGROUND_WINNER_TEXT:UnpackRGB())
-    else
-        self.scoreControl:SetColor(ZO_WHITE:UnpackRGB())
+function ZO_Battleground_Scoreboard_Team_Panel_Object:UpdateScoreColor()
+    local scoreColor = ZO_WHITE
+
+    if BATTLEGROUND_SCOREBOARD_FRAGMENT:ShouldShowAggregateScores() then
+        local teamBattlegroundResult = GetBattlegroundResultForTeam(self.battlegroundTeam)
+        local teamWon = teamBattlegroundResult == BATTLEGROUND_RESULT_WIN or teamBattlegroundResult == BATTLEGROUND_RESULT_TIE
+        if teamWon then
+            scoreColor = ZO_BATTLEGROUND_WINNER_TEXT
+        end
+    elseif not BATTLEGROUND_SCOREBOARD_FRAGMENT:IsViewingCurrentRound() or GetCurrentBattlegroundState() >= BATTLEGROUND_STATE_POSTROUND then
+        local roundIndex = BATTLEGROUND_SCOREBOARD_FRAGMENT:GetViewedRound()
+        local teamWon = DidCurrentBattlegroundTeamWinOrTieRound(self.battlegroundTeam, roundIndex)
+        if teamWon then
+            scoreColor = ZO_BATTLEGROUND_WINNER_TEXT
+        end
     end
+
+    self.scoreControl:SetColor(scoreColor:UnpackRGB())
 end
 
 function ZO_Battleground_Scoreboard_Team_Panel_Object:AddPlayer(data)
@@ -1212,9 +1244,15 @@ function ZO_Battleground_Scoreboard_Player_Row_Object:UpdateRow()
 
     local showLives = data.showLives
     self.livesLabel:SetHidden(not showLives)
+
+    local anchorHighlightToControl = self.nameLabel
     if showLives then
         self.livesLabel:SetText(data.lives)
+        anchorHighlightToControl = self.livesLabel
     end
+
+    self.highlight.keyboardTexture:SetAnchor(TOPLEFT, anchorHighlightToControl, TOPLEFT, -30, 0)
+    self.highlight.gamepadBackdrop:SetAnchor(TOPLEFT, anchorHighlightToControl, TOPLEFT, -15, -4)
 
     local isPlaceholderEntry = data.isPlaceholderEntry
     self.medalScoreLabel:SetHidden(isPlaceholderEntry)

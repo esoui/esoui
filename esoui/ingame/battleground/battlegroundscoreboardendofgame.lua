@@ -176,6 +176,7 @@ end
 
 function ZO_Battleground_Scoreboard_End_Of_Game:OnLeaveBattlegroundPressed()
     if self.scene:IsShowing() then
+        PlaySound(SOUNDS.BATTLEGROUND_LEAVE_MATCH)
         LeaveBattleground()
     end
 end

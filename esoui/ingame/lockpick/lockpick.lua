@@ -684,7 +684,7 @@ function ZO_Lockpick:CreateKeybindStripDescriptor()
                         local iconString = zo_iconTextFormatNoSpace("EsoUI/Art/TreeIcons/gamepad/GP_collection_indexIcon_Companions.dds", iconSize, iconSize, GetChanceToForceLock(), INHERIT_COLOR)
                         chanceText = ZO_SUCCEEDED_TEXT:Colorize(zo_strformat(SI_LOCKPICK_FORCE_CHANCE, iconString))
                     else
-                        chanceText = GetChanceToForceLock()
+                        chanceText = zo_strformat(SI_LOCKPICK_FORCE_CHANCE, GetChanceToForceLock())
                     end
                     return zo_strformat(SI_LOCKPICK_FORCE, chanceText)
                 end,

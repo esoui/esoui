@@ -1383,7 +1383,8 @@ end
 function ZO_DailyLoginRewardsClaimProvider:BuildNotificationList()
     ZO_ClearNumericallyIndexedTable(self.list)
 
-    if GetDailyLoginClaimableRewardIndex() then
+    -- Suppress DLR notifications until the player leaves the tutorial
+    if GetDailyLoginClaimableRewardIndex() and not IsActiveWorldStarterWorld() then
         self:AddNotification()
     end
 end

@@ -353,7 +353,7 @@ function ZO_HousingPathSettings_Gamepad:IsMainListActive()
 end
 
 function ZO_HousingPathSettings_Gamepad:ShowMainList()
-    ITEM_PREVIEW_KEYBOARD:EndCurrentPreview()
+    ITEM_PREVIEW_GAMEPAD:EndCurrentPreview()
     GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
     self:SetCurrentList(self:GetMainList())
     self:RefreshHeader()

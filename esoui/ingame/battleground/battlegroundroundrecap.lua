@@ -112,10 +112,10 @@ function ZO_BattlegroundRoundRecap:InitializeKeybinds()
     end
 
     self.leaveBattlegroundButton = CreateKeybindButton("BATTLEGROUND_RECAP_LEAVE", 
-        function() 
-            if self.leaveBattlegroundButton:IsEnabled() then
+        function()
+            if self:IsBattlegroundFinished() then
                 PlaySound(SOUNDS.BATTLEGROUND_LEAVE_MATCH)
-                ZO_Dialogs_ShowPlatformDialog("CONFIRM_LEAVE_BATTLEGROUND")
+                LeaveBattleground()
             end
         end, 
         GetString(SI_BATTLEGROUND_SCOREBOARD_LEAVE_BATTLEGROUND))
@@ -269,14 +269,14 @@ function ZO_BattlegroundRoundRecap:SetDetails(roundResult, numTeams, playerTeam,
         local teamIndex = positionedTeams[positionedTeamIndex]
         local teamImages = TEAM_IMAGES[teamIndex] or TEAM_IMAGES[1]
         local teamScore = teamScores[teamIndex] or teamScores[1]
-        local isWinner = teamScore.score >= highestScore -- Multiple teams might tie for first.
+        local isWinner = DidCurrentBattlegroundTeamWinOrTieRound(teamIndex) -- Multiple teams might tie for first.
         local roundsWonByTeam = GetCurrentBattlegroundRoundsWonByTeam(teamIndex)
         local flagImage = GetFlagImage(teamImages, isWinner, isGamepad)
 
         self.flags[positionedTeamIndex]:SetDetails(teamIndex, flagImage, teamScore.score, PLAY_OFFSETS_PER_RANK[teamScore.rank], isWinner, roundsWonByTeam)
     end
 
-    local battlegroundFinished = not DoesBattlegroundHaveRounds(GetCurrentBattlegroundId()) or GetCurrentBattlegroundRoundIndex() == GetBattlegroundNumRounds(GetCurrentBattlegroundId()) or HasTeamWonBattlegroundEarly()
+    local battlegroundFinished = self:IsBattlegroundFinished()
     self.countdown:SetHidden(battlegroundFinished)
 
     self.leaveBattlegroundButton:SetHidden(not battlegroundFinished)
@@ -343,6 +343,10 @@ function ZO_BattlegroundRoundRecap:OnHiding()
     end
 
     self.sceneTimeLoopTimeline:Stop()
+end
+
+function ZO_BattlegroundRoundRecap:IsBattlegroundFinished()
+    return not DoesBattlegroundHaveRounds(GetCurrentBattlegroundId()) or GetCurrentBattlegroundRoundIndex() == GetBattlegroundNumRounds(GetCurrentBattlegroundId()) or HasTeamWonBattlegroundEarly()
 end
 
 do

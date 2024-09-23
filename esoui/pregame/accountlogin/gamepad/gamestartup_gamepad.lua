@@ -904,6 +904,9 @@ function ZO_GameStartup_Gamepad:InitializeDialogs()
                         else
                             SetCVar("Language.2", ZoOfficialLanguageDescriptorForZoOfficialLanguage(GetCurrentVOAdditionalContentLanguage()))
                         end
+                        -- This triggers a save of the modified Language.2 to the persistent cache.
+                        -- This means that even if we close the game right after language selection and then relaunch it, the correct language will be used right away
+                        SaveSettings()
                     end
                     ZO_Dialogs_ReleaseDialogOnButtonPress("TEXT_LANGUAGE_SELECTION_DIALOG")
                 end,

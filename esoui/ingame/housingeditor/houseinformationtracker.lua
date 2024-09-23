@@ -36,6 +36,7 @@ function ZO_HouseInformationTracker:InitializeStyles()
             FONT_POPULATION = "ZoFontGameShadow",
             FONT_SUBLABEL = "ZoFontGameShadow",
             FONT_TAGS = "ZoFontGameShadow",
+            RESIZE_TO_FIT_PADDING_HEIGHT = 10,
 
             HEADER_PRIMARY_ANCHOR = ZO_Anchor:New(TOPLEFT, self.container),
             HEADER_SECONDARY_ANCHOR = ZO_Anchor:New(TOPRIGHT, self.container),
@@ -55,8 +56,8 @@ function ZO_HouseInformationTracker:InitializeStyles()
             TEXT_HORIZONTAL_ALIGNMENT = TEXT_ALIGN_LEFT,
             TEXT_TYPE_HEADER = MODIFY_TEXT_TYPE_NONE,
 
-            TOP_LEVEL_PRIMARY_ANCHOR = ZO_Anchor:New(TOPLEFT, ZO_PromotionalEventTracker_TL, BOTTOMLEFT, 0, 10),
-            TOP_LEVEL_SECONDARY_ANCHOR = ZO_Anchor:New(RIGHT, GuiRoot, RIGHT, -15, 10, ANCHOR_CONSTRAINS_X),
+            TOP_LEVEL_PRIMARY_ANCHOR = ZO_Anchor:New(TOPLEFT, ZO_PromotionalEventTracker_TL, BOTTOMLEFT),
+            TOP_LEVEL_SECONDARY_ANCHOR = ZO_Anchor:New(RIGHT, GuiRoot, RIGHT, -15, 0, ANCHOR_CONSTRAINS_X),
         },
         gamepad =
         {
@@ -67,6 +68,7 @@ function ZO_HouseInformationTracker:InitializeStyles()
             FONT_POPULATION = "ZoFontGamepad34",
             FONT_SUBLABEL = "ZoFontGamepad34",
             FONT_TAGS = "ZoFontGamepad34",
+            RESIZE_TO_FIT_PADDING_HEIGHT = 20,
 
             HEADER_PRIMARY_ANCHOR = ZO_Anchor:New(TOPRIGHT, self.container),
 
@@ -81,8 +83,8 @@ function ZO_HouseInformationTracker:InitializeStyles()
             TEXT_HORIZONTAL_ALIGNMENT = TEXT_ALIGN_RIGHT,
             TEXT_TYPE_HEADER = MODIFY_TEXT_TYPE_UPPERCASE,
 
-            TOP_LEVEL_PRIMARY_ANCHOR = ZO_Anchor:New(TOPLEFT, ZO_PromotionalEventTracker_TL, BOTTOMLEFT, 0, 20),
-            TOP_LEVEL_SECONDARY_ANCHOR = ZO_Anchor:New(RIGHT, GuiRoot, RIGHT, -15, 10, ANCHOR_CONSTRAINS_X),
+            TOP_LEVEL_PRIMARY_ANCHOR = ZO_Anchor:New(TOPLEFT, ZO_PromotionalEventTracker_TL, BOTTOMLEFT),
+            TOP_LEVEL_SECONDARY_ANCHOR = ZO_Anchor:New(RIGHT, GuiRoot, RIGHT, -15, 0, ANCHOR_CONSTRAINS_X),
         },
     }
 

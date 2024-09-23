@@ -279,6 +279,8 @@ do
         ["tradinghouse"] = true,
         ["guildHeraldry"] = true,
         ["store"] = true,
+        ["groupMenuKeyboard"] = true,
+        ["promotionalEventsPreview_Gamepad"] = true,
     }
 
     function ZO_IngameSceneManager:DoesCurrentSceneOverrideMountStateChange()

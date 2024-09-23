@@ -13,10 +13,22 @@
                     <Dimensions x="32" y="32" />
                 </Texture>
 
-                <Label name="$(parent)Number" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" horizontalAlignment="CENTER" font="ZoFontCallout" text="3">
+                <Label name="$(parent)Number" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" horizontalAlignment="CENTER">
                     <Anchor point="TOP" relativeTo="$(parent)Icon" relativePoint="BOTTOM" offsetY="5" />
                     <Dimensions x="40" y="40" />
                 </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_BattlegroundScoreboardRoundIndicatorRound_Keyboard_Template" virtual="true" >
+            <Controls>
+                <Label name="$(parent)Number" font="ZoFontCallout" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_BattlegroundScoreboardRoundIndicatorRound_Gamepad_Template" virtual="true" >
+            <Controls>
+                <Label name="$(parent)Number" font="ZoFontGamepad42" />
             </Controls>
         </Control>
 
@@ -26,6 +38,7 @@
                     <Anchor point="TOPLEFT" offsetX="-20" offsetY="10" />
                     <Anchor point="BOTTOMRIGHT" offsetX="20" offsetY="20" />
                 </Backdrop>
+
                 <Texture name="$(parent)BG_Keyboard" alpha="1" textureFile="EsoUI/Art/Battlegrounds/battlegrounds_scoreboardBG_roundsLarge.dds" excludeFromResizeToFitExtents="true">
                     <Anchor point="TOPLEFT" offsetX="-130" offsetY="-64" />
                     <Anchor point="TOPRIGHT" offsetX="130" offsetY="-64" />
@@ -43,9 +56,11 @@
                     <OnMouseEnter>
                         ZO_BattlegroundScoreboard_Aggregate_OnMouseEnter(self)
                     </OnMouseEnter>
+
                     <OnMouseExit>
                         ZO_BattlegroundScoreboard_Aggregate_OnMouseExit(self)
                     </OnMouseExit>
+
                     <OnClicked>
                         ZO_BattlegroundScoreboard_Aggregate_OnMouseClicked(self)
                     </OnClicked>
@@ -63,6 +78,7 @@
                     <OnMouseEnter>
                         ZO_BattlegroundScoreboard_PreviousPage_OnMouseEnter(self)
                     </OnMouseEnter>
+
                     <OnMouseExit>
                         ZO_BattlegroundScoreboard_PreviousPage_OnMouseExit(self)
                     </OnMouseExit>
@@ -84,6 +100,7 @@
                     <OnMouseEnter>
                         ZO_BattlegroundScoreboard_NextPage_OnMouseEnter(self)
                     </OnMouseEnter>
+
                     <OnMouseExit>
                         ZO_BattlegroundScoreboard_NextPage_OnMouseExit(self)
                     </OnMouseExit>
@@ -92,6 +109,7 @@
                         ZO_BattlegroundScoreboard_NextPage_OnMouseClicked(self)
                     </OnClicked>
                 </Button>
+
                 <Label name="$(parent)PreviousButton" inherits="ZO_ClickableKeybindLabel_Gamepad" excludeFromResizeToFitExtents="true">
                     <Anchor point="RIGHT" relativeTo="$(parent)" relativePoint="LEFT" offsetX="-30" offsetY="27"/>
                     <OnInitialized name="BattlegroundScoreboardRoundIndicator">

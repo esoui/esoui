@@ -135,10 +135,16 @@ function ZO_ItemSetsBook_Shared:SetupGridHeaderEntry(control, data, selected)
         reconstructionCurrencyCost = 0
     end
 
-    local DEFAULT_OPTIONS = nil
+    local CURRENCY_OPTIONS =
+    {
+        showTooltips = not IsConsoleUI(),
+        useShortFormat = false,
+        iconSide = RIGHT,
+    }
+
     local SHOW_ALL = true
     local HAS_ENOUGH_CURRENCY = false
-    ZO_CurrencyControl_SetSimpleCurrency(control.costLabel, reconstructionCurrencyType, reconstructionCurrencyCost, DEFAULT_OPTIONS, SHOW_ALL, HAS_ENOUGH_CURRENCY, { obfuscateAmount = obfuscateAmount })
+    ZO_CurrencyControl_SetSimpleCurrency(control.costLabel, reconstructionCurrencyType, reconstructionCurrencyCost, CURRENCY_OPTIONS, SHOW_ALL, HAS_ENOUGH_CURRENCY, { obfuscateAmount = obfuscateAmount })
     control.progressBar:SetValue(itemSetHeaderData:GetNumUnlockedPieces() / itemSetHeaderData:GetNumPieces())
 end
 

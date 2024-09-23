@@ -23,6 +23,9 @@ function ZO_BattlegroundsRoundRecapFlag:Initialize(control)
 
     self.revealTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("BattlegroundsFlagReveal", control)
     self.scoreFlipTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("BattlegroundsFlagFlipScore", control)
+    
+    self.roundsWonByTeam = 0
+
 end
 
 function ZO_BattlegroundsRoundRecapFlag:ApplyPlatformStyle()
@@ -94,7 +97,7 @@ function ZO_BattlegroundsRoundRecapFlag:OnAnimationFlipScoreFadedOut()
     self.score:SetColor(ZO_WHITE:UnpackRGBA())
     if self.isWinner then
         -- The winner will be transitioned later to the correct value.
-        self.scoreTransitionManager:SetValueImmediately(self.roundsWonByTeam - 1)
+        self.scoreTransitionManager:SetValueImmediately(zo_max(0, self.roundsWonByTeam - 1))
     else
         self.scoreTransitionManager:SetValueImmediately(self.roundsWonByTeam)
     end

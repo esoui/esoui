@@ -1577,3 +1577,5 @@ ZO_ComboBox_Gamepad_Dropdowm_Initialize = ZO_ComboBox_Gamepad_Dropdown_Initializ
 -- Pending loop refactor (not perfectly one to one, but close as we can get)
 ZO_Pending_Outfit_LoopAnimation_Pool = ZO_Pending_LoopAnimation_Pool
 ZO_Restyle_ApplyPendingLoopAnimationToControl = ZO_PendingLoop.ApplyToControl
+
+GetScoreboardPlayerEntryIndex = GetScoreboardLocalPlayerEntryIndex

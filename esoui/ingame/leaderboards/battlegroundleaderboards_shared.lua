@@ -67,12 +67,14 @@ do
 
         local createHeader = true
         for battlegroundLeaderboardType in GetNextBattlegroundLeaderboardTypeIter do
-            if createHeader then
-                self.header = self.leaderboardSystem:AddCategory(GetString(SI_BATTLEGROUND_LEADERBOARDS_CATEGORIES_HEADER), BATTLEGROUND_SHOW_HEADER_ICONS.up, BATTLEGROUND_SHOW_HEADER_ICONS.down, BATTLEGROUND_SHOW_HEADER_ICONS.over)
-                createHeader = false
-            end
+            if ShouldShowLeaderboardForBattlegroundLeaderboardType(battlegroundLeaderboardType) then
+                if createHeader then
+                    self.header = self.leaderboardSystem:AddCategory(GetString(SI_BATTLEGROUND_LEADERBOARDS_CATEGORIES_HEADER), BATTLEGROUND_SHOW_HEADER_ICONS.up, BATTLEGROUND_SHOW_HEADER_ICONS.down, BATTLEGROUND_SHOW_HEADER_ICONS.over)
+                    createHeader = false
+                end
 
-            AddEntry(self.header, GetString("SI_BATTLEGROUNDLEADERBOARDTYPE", battlegroundLeaderboardType), battlegroundLeaderboardType)
+                AddEntry(self.header, GetString("SI_BATTLEGROUNDLEADERBOARDTYPE", battlegroundLeaderboardType), battlegroundLeaderboardType)
+            end
         end
     end
 end

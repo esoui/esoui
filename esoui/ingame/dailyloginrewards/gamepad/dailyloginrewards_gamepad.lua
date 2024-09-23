@@ -25,6 +25,17 @@ function ZO_DailyLoginRewards_Gamepad:Initialize(control)
 
     self.exitScreenByBackingOutOfPreviewIndex = 0
 
+    local previewNarrationData =
+    {
+        canNarrate = function()
+            return IsCurrentlyPreviewing()
+        end,
+        selectedNarrationFunction = function()
+            return ITEM_PREVIEW_GAMEPAD:GetPreviewSpinnerNarrationText()
+        end,
+    }
+    SCREEN_NARRATION_MANAGER:RegisterCustomObject("dailyLoginRewardsPreview", previewNarrationData)
+
     self:InitializeGridListPanel()
 
     GAMEPAD_DAILY_LOGIN_PREVIEW_SCENE = ZO_Scene:New("dailyLoginRewardsPreview_Gamepad", SCENE_MANAGER)
@@ -351,18 +362,23 @@ function ZO_DailyLoginRewards_Gamepad:OnPreviewShown()
     local scrollData = self.gridListPanelList:GetData()
     local selectedReward = scrollData[self.currentRewardPreviewIndex]
     self:UpdatePreview(selectedReward.data)
+    ITEM_PREVIEW_GAMEPAD:RegisterCallback("RefreshActions", function()
+        SCREEN_NARRATION_MANAGER:QueueCustomEntry("dailyLoginRewardsPreview")
+    end)
 end
 
 function ZO_DailyLoginRewards_Gamepad:UpdatePreview(rewardData)
     SYSTEMS:GetObject("itemPreview"):ClearPreviewCollection()
     SYSTEMS:GetObject("itemPreview"):PreviewReward(rewardData:GetRewardId())
     self:RefreshTooltip(rewardData)
+    SCREEN_NARRATION_MANAGER:QueueCustomEntry("dailyLoginRewardsPreview")
 end
 
 function ZO_DailyLoginRewards_Gamepad:OnPreviewHiding()
     KEYBIND_STRIP:RemoveKeybindButtonGroup(self.previewKeybindStripDesciptor)
     self.currentRewardPreviewIndex = 0
     GAMEPAD_TOOLTIPS:ClearLines(GAMEPAD_RIGHT_TOOLTIP)
+    ITEM_PREVIEW_GAMEPAD:UnregisterCallback("RefreshActions")
 end
 
 function ZO_DailyLoginRewards_Gamepad:OnPreviewHidden()

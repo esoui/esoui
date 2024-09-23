@@ -3,7 +3,7 @@
 -------------------
 
 local marketScene = SCENE_MANAGER:GetScene("market")
--- the preview options fragment needs to be added before the ITEM_PREVIEW_KEYBOARD fragment
+-- The preview options fragment needs to be added before the ITEM_PREVIEW_KEYBOARD fragment,
 -- which is part of ZO_ITEM_PREVIEW_LIST_HELPER_KEYBOARD_FRAGMENT_GROUP
 marketScene:AddFragment(MARKET_ITEM_PREVIEW_OPTIONS_FRAGMENT)
 marketScene:AddFragmentGroup(ZO_ITEM_PREVIEW_LIST_HELPER_KEYBOARD_FRAGMENT_GROUP)
@@ -17,7 +17,7 @@ marketScene:AddFragment(UI_SHORTCUTS_ACTION_LAYER_FRAGMENT)
 ----------------------------
 
 local endeavorSealStoreScene = SCENE_MANAGER:GetScene("endeavorSealStoreSceneKeyboard")
--- the preview options fragment needs to be added before the ITEM_PREVIEW_KEYBOARD fragment
+-- The preview options fragment needs to be added before the ITEM_PREVIEW_KEYBOARD fragment,
 -- which is part of ZO_ITEM_PREVIEW_LIST_HELPER_KEYBOARD_FRAGMENT_GROUP
 endeavorSealStoreScene:AddFragment(MARKET_ITEM_PREVIEW_OPTIONS_FRAGMENT)
 endeavorSealStoreScene:AddFragmentGroup(ZO_ITEM_PREVIEW_LIST_HELPER_KEYBOARD_FRAGMENT_GROUP)
@@ -31,7 +31,7 @@ endeavorSealStoreScene:AddFragment(UI_SHORTCUTS_ACTION_LAYER_FRAGMENT)
 -------------------
 
 local esoPlusOffersScene = SCENE_MANAGER:GetScene("esoPlusOffersSceneKeyboard")
--- the preview options fragment needs to be added before the ITEM_PREVIEW_KEYBOARD fragment
+-- The preview options fragment needs to be added before the ITEM_PREVIEW_KEYBOARD fragment,
 -- which is part of ZO_ITEM_PREVIEW_LIST_HELPER_KEYBOARD_FRAGMENT_GROUP
 esoPlusOffersScene:AddFragment(MARKET_ITEM_PREVIEW_OPTIONS_FRAGMENT)
 esoPlusOffersScene:AddFragmentGroup(ZO_ITEM_PREVIEW_LIST_HELPER_KEYBOARD_FRAGMENT_GROUP)
