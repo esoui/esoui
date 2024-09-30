@@ -149,7 +149,7 @@ function ZO_Reticle:TryHandlingInteraction(interactionPossible, currentFrameTime
                 self.interactKeybindButton:HideKeyIcon()
             elseif additionalInteractInfo == ADDITIONAL_INTERACT_INFO_LOCKED then
                 self.interactKeybindButton:SetText(zo_strformat(SI_GAME_CAMERA_TARGET_ADDITIONAL_INFO, action, GetString("SI_LOCKQUALITY", context)))
-                if DoesPlayerHaveLockpickingCompanionBonus() then
+                if DoesPlayerHaveLockpickingCompanionBonus() and context ~= LOCK_QUALITY_IMPOSSIBLE then
                     additionalInfoLabelColor = ZO_SUCCEEDED_TEXT
                     self.additionalInfo:SetHidden(false)
                     local INHERIT_COLOR = true

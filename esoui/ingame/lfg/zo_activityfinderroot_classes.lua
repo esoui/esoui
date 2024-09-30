@@ -220,6 +220,8 @@ ZO_ActivityFinderLocation_Base.GetEntryType = ZO_ActivityFinderLocation_Base:MUS
 
 ZO_ActivityFinderLocation_Base.GetZoneId = ZO_ActivityFinderLocation_Base:MUST_IMPLEMENT()
 
+ZO_ActivityFinderLocation_Base.IsDisabled = ZO_ActivityFinderLocation_Base:MUST_IMPLEMENT()
+
 function ZO_ActivityFinderLocation_Base:IsSpecificEntryType()
     return self:GetEntryType() == ZO_ACTIVITY_FINDER_LOCATION_ENTRY_TYPE.SPECIFIC
 end
@@ -373,6 +375,10 @@ end
 
 function ZO_ActivityFinderLocation_Specific:GetZoneId()
     return self.zoneId
+end
+
+function ZO_ActivityFinderLocation_Specific:IsDisabled()
+    return IsLFGActivityDisabled(self.id)
 end
 
 ------------------
@@ -614,4 +620,8 @@ end
 
 function ZO_ActivityFinderLocation_Set:GetZoneId()
     return 0
+end
+
+function ZO_ActivityFinderLocation_Set:IsDisabled()
+    return IsLFGActivitySetDisabled(self.id)
 end

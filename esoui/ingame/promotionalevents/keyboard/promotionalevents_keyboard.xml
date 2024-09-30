@@ -1,4 +1,12 @@
 <GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_PromotionalEvent_Keyboard_MouseOverTrackButtonAnimation">
+            <Animations>
+                <ScaleAnimation duration="125" startScale="1" endScale="1.23"/>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    
     <Controls>
         <Control name="ZO_PromotionalEventReward_Template_Keyboard" inherits="ZO_PromotionalEventReward_Template_Shared" mouseEnabled="true" virtual="true">
             <Dimensions x="64" y="64" />
@@ -68,7 +76,15 @@
             <Controls>
                 <Button name="$(parent)TrackButton">
                     <Dimensions x="32" y="32" />
-                    <Anchor point="LEFT" />
+                    <Anchor point="CENTER" relativePoint="LEFT" offsetX="16" />
+
+                    <OnMouseEnter>
+                        self:GetParent().object:OnTrackButtonMouseEnter()
+                    </OnMouseEnter>
+
+                    <OnMouseExit>
+                        self:GetParent().object:OnTrackButtonMouseExit()
+                    </OnMouseExit>
                     
                     <Textures
                         normal="EsoUI/Art/Buttons/radioButton_pin_up.dds"
@@ -82,7 +98,7 @@
                 <Control name="$(parent)Reward" override="true" inherits="ZO_PromotionalEventReward_Template_Keyboard" />
 
                 <StatusBar name="$(parent)Progress" override="true" inherits="ZO_ArrowProgressBarWithBG">
-                    <Anchor point="LEFT" relativeTo="$(parent)TrackButton" relativePoint="RIGHT" offsetX="5" constrains="X" />
+                    <Anchor point="LEFT" relativeTo="$(parent)TrackButton" relativePoint="CENTER" offsetX="21" constrains="X" />
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)Reward" relativePoint="LEFT" offsetX="-5" />
                 </StatusBar>
 

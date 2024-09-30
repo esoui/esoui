@@ -408,9 +408,9 @@ function ZO_PromotionalEvents_Gamepad:InitializeFoci()
         {
             name = function()
                 if self:GetSelectedActivity():IsTracked() then
-                    return GetString(SI_GAMEPAD_PROMOTIONAL_EVENT_UNPIN_TASK_ACTION)
+                    return GetString(SI_PROMOTIONAL_EVENT_UNPIN_TASK_ACTION)
                 else
-                    return GetString(SI_GAMEPAD_PROMOTIONAL_EVENT_PIN_TASK_ACTION)
+                    return GetString(SI_PROMOTIONAL_EVENT_PIN_TASK_ACTION)
                 end
             end,
 

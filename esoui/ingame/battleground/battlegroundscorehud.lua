@@ -164,7 +164,7 @@ function ZO_BattlegroundTeamSection:UpdateTeamUI()
         self.parentHud.hudIconsPool:ReleaseObject(control.objectKey)
     end
 
-    local maxRounds = GetBattlegroundNumRounds(GetCurrentBattlegroundId())
+    local maxRounds = zo_floor(GetBattlegroundNumRounds(GetCurrentBattlegroundId()) / 2 + 1)
     local roundsWonByTeam = GetCurrentBattlegroundRoundsWonByTeam(self.battlegroundAlliance)
     if maxRounds > 1 then
         self.points = {}

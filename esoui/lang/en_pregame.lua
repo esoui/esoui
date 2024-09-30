@@ -161,6 +161,8 @@ SafeAddString(SI_ACTIVITYQUEUERESULT31, "Your request to queue has failed. Acces
 SafeAddString(SI_ACTIVITYQUEUERESULT32, "Your request to queue has failed. LFG for casual Tales of Tribute is currently disabled.", 0)
 SafeAddString(SI_ACTIVITYQUEUERESULT33, "You can't enter a queue with an active Group Finder application or listing.", 0)
 SafeAddString(SI_ACTIVITYQUEUERESULT34, "You or a member of your team is locked out of queuing.", 0)
+SafeAddString(SI_ACTIVITYQUEUERESULT35, "Your request to queue has failed. One or more of the selected activities is currently disabled.", 0)
+SafeAddString(SI_ACTIVITYQUEUERESULT36, "You have been removed from the queue. One or more of the selected activities is currently disabled.", 0)
 SafeAddString(SI_ACTIVITYQUEUERESULT4, "You or members of your group are not within the correct level range.", 0)
 SafeAddString(SI_ACTIVITYQUEUERESULT5, "You or members of your group are not in the correct location to queue for that activity.", 0)
 SafeAddString(SI_ACTIVITYQUEUERESULT6, "You or members of your group do not have the DLC unlocked for that activity.", 1)

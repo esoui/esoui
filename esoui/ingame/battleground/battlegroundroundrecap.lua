@@ -54,7 +54,9 @@ function ZO_BattlegroundRoundRecap:Initialize(control)
     local actionFragment = ZO_ActionLayerFragment:New("BattlegroundRoundRecap")
     BATTLEGROUND_ROUND_RECAP_SCENE:AddFragment(actionFragment)
 
-    BATTLEGROUND_ROUND_RECAP_FRAGMENT = ZO_SimpleSceneFragment:New(self.control)
+    local ALWAYS_ANIMATE = true
+    local DURATION = 500
+    BATTLEGROUND_ROUND_RECAP_FRAGMENT = ZO_FadeSceneFragment:New(self.control, ALWAYS_ANIMATE, DURATION)
     BATTLEGROUND_ROUND_RECAP_FRAGMENT:SetHideOnSceneHidden(true)
     ZO_DeferredInitializingObject.Initialize(self, BATTLEGROUND_ROUND_RECAP_FRAGMENT)
     BATTLEGROUND_ROUND_RECAP_SCENE:AddFragment(BATTLEGROUND_ROUND_RECAP_FRAGMENT)

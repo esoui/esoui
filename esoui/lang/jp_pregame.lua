@@ -409,6 +409,7 @@ SafeAddString(SI_BATTLEGROUNDROUNDRESULT4, "タイブレーカー: 残ったプ�
 SafeAddString(SI_BATTLEGROUNDROUNDRESULT5, "タイブレーカー: 残ったライフ", 0)
 SafeAddString(SI_BATTLEGROUNDROUNDRESULT6, "引き分け: ステイルメイト", 1)
 SafeAddString(SI_BATTLEGROUNDROUNDRESULT7, "最後に生き残ったチーム", 0)
+SafeAddString(SI_BATTLEGROUNDROUNDRESULT8, "退出した敵", 0)
 SafeAddString(SI_BATTLEGROUNDTEAM0, "無効", 0)
 SafeAddString(SI_BATTLEGROUNDTEAM1, "ファイアドレイク", 0)
 SafeAddString(SI_BATTLEGROUNDTEAM2, "ピットデイモン", 0)

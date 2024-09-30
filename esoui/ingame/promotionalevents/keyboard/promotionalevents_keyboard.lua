@@ -1,4 +1,5 @@
 -- Reward --
+
 local g_PromotionalEventsKeyboard = nil
 
 ZO_PromotionalEventReward_Keyboard = ZO_PromotionalEventReward_Shared:Subclass()
@@ -74,6 +75,32 @@ end
 
 -- Activity --
 
+local g_activityTrackButtonAnimationPool = ZO_AnimationPool:New("ZO_PromotionalEvent_Keyboard_MouseOverTrackButtonAnimation")
+
+do
+    local function OnAnimationTimelineStopped(timeline)
+        if timeline:IsPlayingBackward() then
+            timeline.pool:ReleaseObject(timeline.key)
+        end
+    end
+
+    local function SetupTimeline(timeline, key, pool)
+        timeline.key = key
+        timeline.pool = pool
+        timeline:SetHandler("OnStop", OnAnimationTimelineStopped)
+    end
+
+    g_activityTrackButtonAnimationPool:SetCustomFactoryBehavior(SetupTimeline)
+
+    local function ResetTimeline(timeline)
+        timeline:ApplyAllAnimationsToControl(nil)
+        timeline.trackButton.mouseoverTimeline = nil
+        timeline.trackButton = nil
+    end
+
+    g_activityTrackButtonAnimationPool:SetCustomResetBehavior(ResetTimeline)
+end
+
 ZO_PromotionalEventActivity_Entry_Keyboard = ZO_PromotionalEventActivity_Entry_Shared:Subclass()
 
 function ZO_PromotionalEventActivity_Entry_Keyboard:Initialize(control)
@@ -109,10 +136,65 @@ function ZO_PromotionalEventActivity_Entry_Keyboard:OnMouseExit()
     g_PromotionalEventsKeyboard:SetMouseOverObject(nil)
 end
 
+function ZO_PromotionalEventActivity_Entry_Keyboard:GetOrCreateTrackButtonMouseoverTimeline()
+    local mouseoverTimeline = self.trackButton.mouseoverTimeline
+    if not mouseoverTimeline then
+        mouseoverTimeline = g_activityTrackButtonAnimationPool:AcquireObject()
+        mouseoverTimeline:ApplyAllAnimationsToControl(self.trackButton)
+        self.trackButton.mouseoverTimeline = mouseoverTimeline
+        mouseoverTimeline.trackButton = self.trackButton
+    end
+    return mouseoverTimeline
+end
+
+function ZO_PromotionalEventActivity_Entry_Keyboard:OnTrackButtonMouseEnter()
+    InitializeTooltip(InformationTooltip)
+    ZO_Tooltips_SetupDynamicTooltipAnchors(InformationTooltip, self.control)
+    if self.activityData:IsTracked() then
+        SetTooltipText(InformationTooltip, GetString(SI_PROMOTIONAL_EVENT_UNPIN_TASK_ACTION))
+    else
+        local mouseoverTimeline = self:GetOrCreateTrackButtonMouseoverTimeline()
+        mouseoverTimeline:PlayForward()
+        SetTooltipText(InformationTooltip, GetString(SI_PROMOTIONAL_EVENT_PIN_TASK_ACTION))
+    end
+    self.isMouseOver = true
+end
+
+function ZO_PromotionalEventActivity_Entry_Keyboard:OnTrackButtonMouseExit()
+    self.isMouseOver = false
+    ClearTooltip(InformationTooltip)
+    if not self.activityData:IsTracked() then
+        self.trackButton.mouseoverTimeline:PlayBackward()
+    end
+end
+
 function ZO_PromotionalEventActivity_Entry_Keyboard:SetActivityData(activityData)
     ZO_PromotionalEventActivity_Entry_Shared.SetActivityData(self, activityData)
 
-    self.trackButton:SetHidden(self.activityData:IsComplete() or self.activityData:IsLocked())
+    self:RefreshTrackingButton()
+end
+
+function ZO_PromotionalEventActivity_Entry_Keyboard:RefreshTrackingButton()
+    if self.activityData:IsComplete() or self.activityData:IsLocked() then
+        self.trackButton:SetHidden(true)
+    else
+        self.trackButton:SetHidden(false)
+        if self.activityData:IsTracked() then
+            local mouseoverTimeline = self:GetOrCreateTrackButtonMouseoverTimeline()
+            mouseoverTimeline:PlayInstantlyToEnd()
+            if self.isMouseOver then
+                InformationTooltip:ClearLines()
+                SetTooltipText(InformationTooltip, GetString(SI_PROMOTIONAL_EVENT_UNPIN_TASK_ACTION))
+            end
+        else
+            if self.isMouseOver then
+                InformationTooltip:ClearLines()
+                SetTooltipText(InformationTooltip, GetString(SI_PROMOTIONAL_EVENT_PIN_TASK_ACTION))
+            elseif self.trackButton.mouseoverTimeline then
+                self.trackButton.mouseoverTimeline:PlayBackward()
+            end
+        end
+    end
 end
 
 function ZO_PromotionalEventActivity_Entry_Keyboard:OnProgressUpdated(previousProgress, newProgress, isRewardClaimed)

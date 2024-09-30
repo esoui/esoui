@@ -13,7 +13,7 @@
 
                         <!-- The Large banner image is positioned at the top left of the image.
                              The image is expected to be 1248x624 inside an image that is 2048x1024 -->
-                        <Texture name="$(parent)EventImage" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES" textureFile="EsoUI/Art/Icons/icon_missing.dds">
+                        <Texture name="$(parent)EventImage" textureFile="EsoUI/Art/Icons/icon_missing.dds" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
                             <Anchor point="TOPLEFT" offsetX="672" />
                             <Anchor point="BOTTOMRIGHT" />
                             <TextureCoords left="0" right="0.609375" top="0" bottom="0.609375"/>

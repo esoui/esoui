@@ -143,7 +143,7 @@
             </OnMouseWheel>
         </Scroll>
 
-        <Control name="ZO_ScrollContainerBase" inherits="ZO_ScrollAreaBarBehavior" mouseEnabled="true" virtual="true">
+        <Control name="ZO_ScrollContainerBase" inherits="ZO_ScrollAreaBarBehavior" virtual="true">
             <OnInitialized>
                 ZO_Scroll_Initialize(self)
             </OnInitialized>

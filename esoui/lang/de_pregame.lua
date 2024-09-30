@@ -161,6 +161,8 @@ SafeAddString(SI_ACTIVITYQUEUERESULT31, "Eure Anfrage für die Warteschlange ist
 SafeAddString(SI_ACTIVITYQUEUERESULT32, "Eure Anfrage für die Warteschlange ist fehlgeschlagen. Die Gruppensuche für lockere Partien ist derzeit nicht vefügbar.", 0)
 SafeAddString(SI_ACTIVITYQUEUERESULT33, "Ihr könnt mit einem aktiven Gruppengesuch oder einer Bewerbung keiner Warteschlange beitreten.", 0)
 SafeAddString(SI_ACTIVITYQUEUERESULT34, "Ihr oder ein Mitglied Eurer Gruppe kann derzeit keiner Warteschlange beitreten.", 0)
+SafeAddString(SI_ACTIVITYQUEUERESULT35, "Eure Anfrage für die Warteschlage ist fehlgeschlagen. Eine oder mehrere ausgewählte Aktivitäten sind derzeit nicht verfügbar.", 0)
+SafeAddString(SI_ACTIVITYQUEUERESULT36, "Aus der Warteschlange entfernt. Eine oder mehrere ausgewählte Aktivitäten sind derzeit nicht verfügbar.", 0)
 SafeAddString(SI_ACTIVITYQUEUERESULT4, "Ein- oder mehrere Mitglieder Eurer Gruppe erfüllen nicht die Stufenanforderung für diese Aktivität.", 0)
 SafeAddString(SI_ACTIVITYQUEUERESULT5, "Ein- oder mehrere Mitglieder Eurer Gruppe sind nicht im passenden Gebiet, um die Warteschlange für diese Aktivität zu betreten.", 0)
 SafeAddString(SI_ACTIVITYQUEUERESULT6, "Ihr oder ein Gruppenmitglied besitzt nicht den benötigten DLC, um an dieser Aktivität teilzunehmen.", 1)

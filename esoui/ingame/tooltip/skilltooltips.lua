@@ -345,7 +345,7 @@ function ZO_Tooltip:GetSkillLineNarrationText(skillData)
     if actionSlotIndex then
         local hotbarCategory = overrideHotbar or ACTION_BAR_ASSIGNMENT_MANAGER:GetCurrentHotbarCategory()
         local keyboardActionName, gamepadActionName = ACTION_BAR_ASSIGNMENT_MANAGER:GetKeyboardAndGamepadActionNameForSlot(actionSlotIndex, hotbarCategory)
-        local inputBindingText = ZO_Keybindings_GetPreferredHighestPriorityNarrationStringFromActions(keyboardActionName, gamepadActionName, DEFAULT_SHOW_AS_HOLD) or NOT_BOUND_ACTION_STRING
+        local inputBindingText = ZO_Keybindings_GetPreferredHighestPriorityNarrationStringFromActions(keyboardActionName, gamepadActionName, DEFAULT_SHOW_AS_HOLD) or GetString(SI_ACTION_IS_NOT_BOUND)
         
         narration = zo_strformat(SI_TOOLTIP_SKILLS_SKILL_BOUND_TO_NARRATION, narration, inputBindingText)
     end

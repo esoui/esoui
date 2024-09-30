@@ -677,9 +677,9 @@ end
 
 function Battleground_Scoreboard_Fragment:UpdateBattlegroundStatus()
     if IsActiveWorldBattleground() then
-        if GetCurrentBattlegroundState() == BATTLEGROUND_STATE_POSTGAME and GetCurrentBattlegroundStateTimeRemaining() > 0 then
-            -- in case someone reloads their UI while in postgame,
-            -- we want to continue showing the postgame scoreboard when they load back in
+        if GetCurrentBattlegroundState() == BATTLEGROUND_STATE_FINISHED and GetCurrentBattlegroundStateTimeRemaining() > 0 then
+            -- in case someone reloads their UI while at the end of game,
+            -- we want to continue showing the end of game scoreboard when they load back in
             SCENE_MANAGER:SetHUDScene("battleground_scoreboard_end_of_game")
             local HIDES_AUTOMATICALLY = true
             SCENE_MANAGER:SetHUDUIScene("battleground_scoreboard_end_of_game", HIDES_AUTOMATICALLY)
