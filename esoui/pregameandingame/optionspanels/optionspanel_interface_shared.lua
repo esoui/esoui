@@ -13,9 +13,6 @@ local ZO_OptionsPanel_Interface_ControlData =
             tooltipText = SI_INTERFACE_OPTIONS_TEXT_LANGUAGE_TOOLTIP,
             valid = function()
                 local validValues = {}
-                if ZoIsIgnoringPatcherLanguage() then
-                    table.insert(validValues, ZO_DEFAULT_LANGUAGE_SETTING_VALUE)
-                end
                 for i = OFFICIAL_LANGUAGE_ITERATION_BEGIN, OFFICIAL_LANGUAGE_ITERATION_END do
                     if ZoIsOfficialLanguageSupported(i) then
                         table.insert(validValues, i)
@@ -25,9 +22,6 @@ local ZO_OptionsPanel_Interface_ControlData =
             end,
             valueStrings = function()
                 local valueStrings = {}
-                if ZoIsIgnoringPatcherLanguage() then
-                    table.insert(valueStrings, function() return GetString(SI_INTERFACE_OPTIONS_TEXT_LANGUAGE_DEFAULT) end)
-                end
                 for i = OFFICIAL_LANGUAGE_ITERATION_BEGIN, OFFICIAL_LANGUAGE_ITERATION_END do
                     if ZoIsOfficialLanguageSupported(i) then
                         table.insert(valueStrings, function() return GetString("SI_OFFICIALLANGUAGE", i) end)
@@ -35,7 +29,6 @@ local ZO_OptionsPanel_Interface_ControlData =
                 end
                 return valueStrings
             end,
-            GetSettingOverride = ZoGetOfficialGameLanguage,
             mustPushApply = true,
         },
     },

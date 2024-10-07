@@ -1821,7 +1821,7 @@ function ZO_HouseToursHouseRecommendedProvider:BuildNotificationList()
                 if houseNickname == "" then
                     houseNickname = collectibleData:GetDefaultNickname()
                 end
-                local houseName = collectibleData:GetName()
+                local houseName = collectibleData:GetFormattedName()
                 local message = self:CreateMessage(houseNickname, houseName)
                 table.insert(self.list,
                 {

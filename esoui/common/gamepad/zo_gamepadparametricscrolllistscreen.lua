@@ -461,7 +461,7 @@ function ZO_Gamepad_ParametricList_Screen:OnEnterHeader()
 
     -- Swap keybinds to text search keybinds if there is a text search
     if self.textSearchHeaderFocus then
-        self:RemoveKeybinds()
+        self:RemoveListKeybinds()
 
         if self.textSearchKeybindStripDescriptor then
             KEYBIND_STRIP:AddKeybindButtonGroup(self.textSearchKeybindStripDescriptor)
@@ -480,7 +480,7 @@ function ZO_Gamepad_ParametricList_Screen:OnLeaveHeader()
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.textSearchKeybindStripDescriptor)
         end
 
-        self:AddKeybinds()
+        self:AddListKeybinds()
     end
 end
 
@@ -505,18 +505,18 @@ end
 function ZO_Gamepad_ParametricList_Screen:OnStateChanged(_, newState)
     if newState == ZO_STATE.SHOWING then
         self:PerformDeferredInitialize()
-        self:AddKeybinds()
+        self:AddListKeybinds()
 
         if self.activateOnShow then
             self:SetCurrentList(self:GetMainList())
         end
-        
+
         SCENE_MANAGER:AddFragment(self.headerFragment)
         self:OnShowing()
     elseif newState == ZO_STATE.SHOWN then
         self:OnShow()
     elseif newState == ZO_STATE.HIDING then
-        self:RemoveKeybinds()
+        self:RemoveListKeybinds()
         self:HideFragmentsIfNeeded()
         self:OnHiding()
     elseif newState == ZO_STATE.HIDDEN then
@@ -536,13 +536,17 @@ function ZO_Gamepad_ParametricList_Screen:Deactivate()
     self:DisableCurrentList()
 end
 
-function ZO_Gamepad_ParametricList_Screen:AddKeybinds()
+-- This function must not be named AddKeybinds to avoid conflicting with
+-- previously implemented child functions
+function ZO_Gamepad_ParametricList_Screen:AddListKeybinds()
     if self.keybindStripDescriptor and self:IsShowing() then
         KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
     end
 end
 
-function ZO_Gamepad_ParametricList_Screen:RemoveKeybinds()
+-- This function must not be named RemoveKeybinds to avoid conflicting with
+-- previously implemented child functions
+function ZO_Gamepad_ParametricList_Screen:RemoveListKeybinds()
     if self.keybindStripDescriptor then
         KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
     end

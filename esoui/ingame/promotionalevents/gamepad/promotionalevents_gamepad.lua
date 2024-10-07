@@ -701,7 +701,7 @@ end
 function ZO_PromotionalEvents_Gamepad:Activate()
     if GAMEPAD_ACTIVITY_FINDER_ROOT_SCENE:IsShowing() then
         ZO_ACTIVITY_FINDER_ROOT_GAMEPAD:DeactivateCurrentList()
-        ZO_ACTIVITY_FINDER_ROOT_GAMEPAD:RemoveKeybinds()
+        ZO_ACTIVITY_FINDER_ROOT_GAMEPAD:RemoveListKeybinds()
         GAMEPAD_ACTIVITY_FINDER_ROOT_SCENE:RemoveFragmentGroup(FRAGMENT_GROUP.GAMEPAD_ACTIVITY_FINDER_QUEUE_DATA_DEPENDENCIES)
     end
     -- TODO Promotional Events: Add check for if there's more than one campaign to control drill in
@@ -730,7 +730,7 @@ function ZO_PromotionalEvents_Gamepad:Deactivate()
     self.isActive = false
     GAMEPAD_ACTIVITY_FINDER_ROOT_SCENE:AddFragmentGroup(FRAGMENT_GROUP.GAMEPAD_ACTIVITY_FINDER_QUEUE_DATA_DEPENDENCIES)
     if ZO_ACTIVITY_FINDER_ROOT_GAMEPAD:IsShowing() then
-        ZO_ACTIVITY_FINDER_ROOT_GAMEPAD:AddKeybinds()
+        ZO_ACTIVITY_FINDER_ROOT_GAMEPAD:AddListKeybinds()
         ZO_ACTIVITY_FINDER_ROOT_GAMEPAD:ActivateCurrentList()
     end
 end

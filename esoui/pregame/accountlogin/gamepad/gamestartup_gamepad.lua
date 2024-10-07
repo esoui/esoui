@@ -176,7 +176,9 @@ local ENTRY_TYPE =
     QUIT = "Quit",
 }
 
-local DEFAULT_VO_LANGUAGE_TEXT = zo_strupper(GetString("SI_OFFICIALLANGUAGE", OFFICIAL_LANGUAGE_ENGLISH))
+local ENGLISH_VO_LANGUAGE_TEXT = zo_strupper(GetString("SI_OFFICIALLANGUAGE", OFFICIAL_LANGUAGE_ENGLISH))
+
+local g_userOpenedStore = false
 
 local ZO_GameStartup_Gamepad = ZO_Gamepad_ParametricList_Screen:Subclass()
 
@@ -266,25 +268,71 @@ function ZO_GameStartup_Gamepad:Initialize(control)
     end
 
     local function OnStoreClosed()
-        ZO_Dialogs_ShowPlatformDialog("ADDITIONAL_CONTENT_ENTITLEMENT_WAIT")
+        -- If we already received the entitlement then no need to wait for it.
+        if not CanDownloadAdditionalContent(ADDITIONAL_CONTENT_TYPE_VO) then
+            if g_userOpenedStore then
+                SetCVar("SelectedEnglishVOLanguage", "1")
+                ZO_Dialogs_ShowPlatformDialog("ADDITIONAL_CONTENT_SELECTION_DIALOG", { isFromMenu = g_userOpenedStore })
+            else
+                ZO_Dialogs_ShowPlatformDialog("ADDITIONAL_CONTENT_ENTITLEMENT_WAIT")
+            end
+        end
+    end
+
+    local function OnStreamingInstallDialogResult(event, result)
+        if result == PLATFORM_DIALOG_RESULT_OK then
+            if not CanDownloadAdditionalContent(ADDITIONAL_CONTENT_TYPE_VO) then
+                if IsConsoleUI() then
+                    -- Open store to offer the "purchase" of the additional content entitlement
+                    ShowPlatformESOVOAdditionalContentUI()
+                else
+                    -- Create UI Dialog to fake console store on PC
+                    ZO_Dialogs_ShowPlatformDialog("ADDITIONAL_CONTENT_PURCHASE_CONFIRMATION")
+                end
+            end
+        else
+            if CanDownloadAdditionalContent(ADDITIONAL_CONTENT_TYPE_VO) then
+                if IsConsoleUI() then
+                    -- They canceled out of PlayGo and have the entitlement, ask them again.
+                    OpenStreamingInstallLanguageChunkPlatformDialog()
+                else
+                    -- Create UI Dialog to fake console flow that ask about PlayGo on PC
+                    ZO_Dialogs_ShowPlatformDialog("PLAYGO_ACCEPT_CONFIRMATION")
+                end
+            else
+                -- They canceled out of PlayGo and don't have the entitlement, return them to VO Language selection dialog.
+                if g_userOpenedStore then
+                    SetCVar("SelectedEnglishVOLanguage", "1")
+                end
+                ZO_Dialogs_ShowPlatformDialog("ADDITIONAL_CONTENT_SELECTION_DIALOG", { isFromMenu = g_userOpenedStore })
+            end
+        end
     end
 
     EVENT_MANAGER:RegisterForEvent("ZO_GameStartup_Gamepad", EVENT_PLATFORM_ENTITLEMENT_STATE_CHANGED, OnEntitlementUpdated)
     EVENT_MANAGER:RegisterForEvent("ZO_GameStartup_Gamepad", EVENT_PLATFORM_STORE_DIALOG_FINISHED, OnStoreClosed)
+    EVENT_MANAGER:RegisterForEvent("ZO_GameStartup_Gamepad", EVENT_STREAMING_INSTALL_DIALOG_FINISHED, OnStreamingInstallDialogResult)
 end
 
 function ZO_GameStartup_Gamepad:CheckForAdditionalContent()
-    if not IsAdditionalContentUpToDate(ADDITIONAL_CONTENT_TYPE_VO) then
+    local hasEntitlement = true
+    if not IsAdditionalContentUpToDate(ADDITIONAL_CONTENT_TYPE_VO) or GetCVar("SelectedEnglishVOLanguage") == "1" then
         if not IsAdditionalContentDownloading(ADDITIONAL_CONTENT_TYPE_VO) then
             if CanDownloadAdditionalContent(ADDITIONAL_CONTENT_TYPE_VO) then
                 DownloadAdditionalContent(ADDITIONAL_CONTENT_TYPE_VO)
                 self:ForceListRebuild()
             else
-                if GetCVar("SelectedDefaultVOLanguage") == "0" then
-                    ZO_Dialogs_ShowPlatformDialog("ADDITIONAL_CONTENT_SELECTION_DIALOG")
+                hasEntitlement = false
+                if GetCVar("SelectedEnglishVOLanguage") == "0" then
+                    ZO_Dialogs_ShowPlatformDialog("ADDITIONAL_CONTENT_SELECTION_DIALOG", { isFromMenu = g_userOpenedStore })
+                    g_userOpenedStore = false
                 end
             end
         end
+    end
+
+    if hasEntitlement then
+        OpenStreamingInstallLanguageChunkPlatformDialog()
     end
 end
 
@@ -428,7 +476,7 @@ function ZO_GameStartup_Gamepad:InitializeKeybindDescriptor()
             visible = function()
                 local data = self.mainList:GetTargetData()
                 if data.entryType == ENTRY_TYPE.PLAY_BUTTON then
-                    return IsGateInstalled("BaseGame") and not self.profileSaveInProgress
+                    return IsGateInstalled("BaseGame") and not IsAdditionalContentDownloading(ADDITIONAL_CONTENT_TYPE_VO) and not self.profileSaveInProgress
                 elseif data.entryType == ENTRY_TYPE.VO_LANGUAGE or data.entryType == ENTRY_TYPE.EDIT_BOX or data.entryType == ENTRY_TYPE.SETTINGS or data.entryType == ENTRY_TYPE.CREDITS or data.entryType == ENTRY_TYPE.QUIT then
                     return true
                 end
@@ -664,9 +712,9 @@ function ZO_GameStartup_Gamepad:BuildVODialogEntryList()
                     GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
                 end
 
-                local consoleLanguageText = zo_strupper(GetString("SI_OFFICIALLANGUAGE", GetCurrentVOAdditionalContentLanguage()))
+                local consoleLanguageText = zo_strupper(GetString("SI_OFFICIALLANGUAGE", GetDefaultPlatformOfficialLanguage()))
                 local consoleEntry = dialog.voLanguageDropdown:CreateItemEntry(consoleLanguageText, ConsoleEntryCallback)
-                local defaultEntry = dialog.voLanguageDropdown:CreateItemEntry(DEFAULT_VO_LANGUAGE_TEXT, DefaultEntryCallback)
+                local defaultEntry = dialog.voLanguageDropdown:CreateItemEntry(ENGLISH_VO_LANGUAGE_TEXT, DefaultEntryCallback)
                 dialog.voLanguageDropdown:AddItem(consoleEntry, ZO_COMBOBOX_SUPPRESS_UPDATE)
                 dialog.voLanguageDropdown:AddItem(defaultEntry, ZO_COMBOBOX_SUPPRESS_UPDATE)
 
@@ -714,9 +762,9 @@ function ZO_GameStartup_Gamepad:BuildTextLanguageDialogEntryList()
 
                 dialog.textLanguageDropdown:ClearItems()
 
-                local consoleLanguageText = zo_strupper(GetString("SI_OFFICIALLANGUAGE", GetCurrentVOAdditionalContentLanguage()))
+                local consoleLanguageText = zo_strupper(GetString("SI_OFFICIALLANGUAGE", GetDefaultPlatformOfficialLanguage()))
                 local consoleEntry = dialog.textLanguageDropdown:CreateItemEntry(consoleLanguageText)
-                local defaultEntry = dialog.textLanguageDropdown:CreateItemEntry(DEFAULT_VO_LANGUAGE_TEXT)
+                local defaultEntry = dialog.textLanguageDropdown:CreateItemEntry(ENGLISH_VO_LANGUAGE_TEXT)
                 dialog.textLanguageDropdown:AddItem(consoleEntry, ZO_COMBOBOX_SUPPRESS_UPDATE)
                 dialog.textLanguageDropdown:AddItem(defaultEntry, ZO_COMBOBOX_SUPPRESS_UPDATE)
 
@@ -808,7 +856,7 @@ function ZO_GameStartup_Gamepad:InitializeDialogs()
                 keybind = "DIALOG_SECONDARY",
                 text = function(dialog)
                     if dialog.voLanguageDropdown then
-                        if dialog.voLanguageDropdown:GetSelectedItem() == DEFAULT_VO_LANGUAGE_TEXT then
+                        if dialog.voLanguageDropdown:GetSelectedItem() == ENGLISH_VO_LANGUAGE_TEXT then
                             return GetString(SI_ADDITIONAL_CONTENT_CONTINUE)
                         else
                             return GetString(SI_ADDITIONAL_CONTENT_DOWNLOAD)
@@ -817,32 +865,44 @@ function ZO_GameStartup_Gamepad:InitializeDialogs()
                 end,
                 callback = function(dialog)
                     if dialog.voLanguageDropdown then
-                        if dialog.voLanguageDropdown:GetSelectedItem() == DEFAULT_VO_LANGUAGE_TEXT then
-                            SetCVar("SelectedDefaultVOLanguage", "1")
+                        if dialog.voLanguageDropdown:GetSelectedItem() == ENGLISH_VO_LANGUAGE_TEXT then
+                            SetCVar("SelectedEnglishVOLanguage", "1")
                             if not dialog.data or not dialog.data.isFromMenu then
                                 ZO_Dialogs_ShowPlatformDialog("TEXT_LANGUAGE_SELECTION_DIALOG")
                             end
                         else
-                            SetCVar("SelectedDefaultVOLanguage", "0")
+                            SetCVar("SelectedEnglishVOLanguage", "0")
+                            g_userOpenedStore = dialog and dialog.data and dialog.data.isFromMenu
                             if IsConsoleUI() then
-                                -- Open store to offer the "purchase" of the additional content entitlement
-                                ShowPlatformESOVOAdditionalContentUI()
+                                -- Do check for PlayGo before opening the store
+                                if not OpenStreamingInstallLanguageChunkPlatformDialog() then
+                                    -- Open store to offer the "purchase" of the additional content entitlement
+                                    ShowPlatformESOVOAdditionalContentUI()
+                                end
                             else
-                                -- Create UI Dialog to fake console store on PC
-                                ZO_Dialogs_ShowPlatformDialog("ADDITIONAL_CONTENT_PURCHASE_CONFIRMATION")
+                                -- Create UI Dialog to fake console flow that ask about PlayGo on PC
+                                ZO_Dialogs_ShowPlatformDialog("PLAYGO_ACCEPT_CONFIRMATION")
                             end
                         end
+                        SaveSettings()
                     end
                     ZO_Dialogs_ReleaseDialogOnButtonPress("ADDITIONAL_CONTENT_SELECTION_DIALOG")
+                    self:ForceListRebuild()
                 end,
             },
             {
                 text = SI_DIALOG_CANCEL,
                 keybind = "DIALOG_NEGATIVE",
                 callback = function(dialog)
+                    -- If the user opened the store and closed it again without getting the entitlement then
+                    -- SelectedEnglishVOLanguage needs to be set back to it's original state
+                    SetCVar("SelectedEnglishVOLanguage", "1")
+                    SaveSettings()
+                    self:ForceListRebuild()
                     ZO_Dialogs_ReleaseDialogOnButtonPress("ADDITIONAL_CONTENT_SELECTION_DIALOG")
                 end,
                 visible = function(dialog)
+                    -- Cancel button is only available if user selected English VO rather than downloading the approriate entitlement
                     return dialog.data and dialog.data.isFromMenu
                 end,
             },
@@ -899,14 +959,12 @@ function ZO_GameStartup_Gamepad:InitializeDialogs()
                 text = GetString(SI_ADDITIONAL_CONTENT_CONTINUE),
                 callback = function(dialog)
                     if dialog.textLanguageDropdown then
-                        if dialog.textLanguageDropdown:GetSelectedItem() == DEFAULT_VO_LANGUAGE_TEXT then
+                        if dialog.textLanguageDropdown:GetSelectedItem() == ENGLISH_VO_LANGUAGE_TEXT then
                             SetCVar("Language.2", ZoOfficialLanguageDescriptorForZoOfficialLanguage(OFFICIAL_LANGUAGE_ENGLISH))
                         else
-                            SetCVar("Language.2", ZoOfficialLanguageDescriptorForZoOfficialLanguage(GetCurrentVOAdditionalContentLanguage()))
+                            SetCVar("Language.2", ZoOfficialLanguageDescriptorForZoOfficialLanguage(GetDefaultPlatformOfficialLanguage()))
+                            self:ForceListRebuild()
                         end
-                        -- This triggers a save of the modified Language.2 to the persistent cache.
-                        -- This means that even if we close the game right after language selection and then relaunch it, the correct language will be used right away
-                        SaveSettings()
                     end
                     ZO_Dialogs_ReleaseDialogOnButtonPress("TEXT_LANGUAGE_SELECTION_DIALOG")
                 end,
@@ -960,13 +1018,10 @@ function ZO_GameStartup_Gamepad:PopulateMainList()
         playEntryData.entryType = ENTRY_TYPE.PLAY_BUTTON
         self.mainList:AddEntry("GameStartupLabelEntry", playEntryData)
 
-        -- Only show if additional content is not downloaded
-        if not IsAdditionalContentUpToDate(ADDITIONAL_CONTENT_TYPE_VO) and not CanDownloadAdditionalContent(ADDITIONAL_CONTENT_TYPE_VO) then
-            if GetCVar("SelectedDefaultVOLanguage") == "0" then
-                local additionalContentEntryData = ZO_GamepadEntryData:New(GetString(SI_GAME_STARTUP_VO_LANGUAGE_SELECT))
-                additionalContentEntryData.entryType = ENTRY_TYPE.VO_LANGUAGE
-                self.mainList:AddEntry("GameStartupLabelEntry", additionalContentEntryData)
-            end
+        if GetCVar("SelectedEnglishVOLanguage") == "1" then
+            local additionalContentEntryData = ZO_GamepadEntryData:New(GetString(SI_GAME_STARTUP_VO_LANGUAGE_SELECT))
+            additionalContentEntryData.entryType = ENTRY_TYPE.VO_LANGUAGE
+            self.mainList:AddEntry("GameStartupLabelEntry", additionalContentEntryData)
         end
 
         local serverSelectEntryData = ZO_GamepadEntryData:New(GetString(SI_GAME_STARTUP_SERVER_SELECT))

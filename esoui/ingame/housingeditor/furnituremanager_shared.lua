@@ -200,6 +200,7 @@ function ZO_SharedFurnitureManager:RegisterForEvents()
     self.refreshGroups:AddRefreshGroup("UpdatePlacementFurniture",
     {
         RefreshAll = function()
+            self.refreshingPlacementFurniture = true
             self.placeableFurnitureCategoryTreeData:Clear()
             self.pathableFurnitureCategoryTreeData:Clear()
 
@@ -216,6 +217,7 @@ function ZO_SharedFurnitureManager:RegisterForEvents()
             end
             self:BuildCategoryTreeData(self.pathableFurnitureCategoryTreeData, collectibleFurnitureCache, FURNITURE_THEME_TYPE_ALL, IsFurniturePathable)
             self.pathableFurnitureCategoryTreeData:SortCategoriesRecursive()
+            self.refreshingPlacementFurniture = false
         end,
         RefreshSingle = function(furnitureCommand)
             ApplyFurnitureCommand(self.placeableFurnitureCategoryTreeData, furnitureCommand)
@@ -842,8 +844,12 @@ function ZO_SharedFurnitureManager:CreateOrUpdateCollectibleCache()
     for _, collectibleData in pairs(filteredDataTable) do
         self:CreateOrUpdateCollectibleDataEntry(collectibleData:GetId())
     end
-    self.refreshGroups:RefreshAll("UpdatePlacementFurniture")
-    self:FireCallbacks("PlaceableFurnitureChanged")
+    -- CreateOrUpdateCollectibleCache could be called from the RefreshAll for "UpdatePlacementFurniture"
+    -- so if we are in the middle of a RefreshAll, don't attempt to refresh again, it can cause data duplication
+    if self.refreshingPlacementFurniture ~= true then
+        self.refreshGroups:RefreshAll("UpdatePlacementFurniture")
+        self:FireCallbacks("PlaceableFurnitureChanged")
+    end
 end
 
 function ZO_SharedFurnitureManager:BuildMarketProductCache()
@@ -908,15 +914,17 @@ function ZO_SharedFurnitureManager:CreateOrUpdateCollectibleDataEntry(collectibl
             cache[collectibleId] = newCollectible
         end
         return true
-    else
-        if existingCollectible and self:CanAddFurnitureDataToRefresh(self.placeableFurnitureCategoryTreeData, existingCollectible) then
+    end
+
+    if existingCollectible then
+        if self:CanAddFurnitureDataToRefresh(self.placeableFurnitureCategoryTreeData, existingCollectible) then
             self.refreshGroups:RefreshSingle("UpdatePlacementFurniture", { target = existingCollectible, command = FURNITURE_COMMAND_REMOVE })
         end
         cache[collectibleId] = nil
         --No need to run the text filter since this is just a remove. We can notify others immediately.
         self:FireCallbacks("PlaceableFurnitureChanged")
-        return false
     end
+    return false
 end
 
 function ZO_SharedFurnitureManager:CreateMarketProductEntry(marketProductId, presentationIndex)

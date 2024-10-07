@@ -1565,6 +1565,42 @@ ESO_Dialogs["ADDITIONAL_CONTENT_ENTITLEMENT_WAIT"] =
     buttons = {}
 }
 
+-- Mock PlayGo Dialog for PC Debugging
+ESO_Dialogs["PLAYGO_ACCEPT_CONFIRMATION"] =
+{
+    canQueue = true,
+    onlyQueueOnce = true,
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    title =
+    {
+        text = SI_ACCEPT_PLAYGO_TERMS_HEADER,
+    },
+    mainText =
+    {
+        text = SI_ACCEPT_PLAYGO_TERMS_PROMPT,
+    },
+    buttons =
+    {
+        {
+            text = SI_DIALOG_YES,
+            keybind = "DIALOG_PRIMARY",
+            callback = function(dialog)
+                MockOpenStreamingInstallLanguageChunkPlatformDialogResult(PLATFORM_DIALOG_RESULT_OK)
+            end,
+        },
+        {
+            text = SI_DIALOG_NO,
+            keybind = "DIALOG_NEGATIVE",
+            callback = function(dialog)
+                MockOpenStreamingInstallLanguageChunkPlatformDialogResult(PLATFORM_DIALOG_RESULT_USER_CANCELED)
+            end,
+        },
+    }
+}
+
 -- Mock Store Dialog for PC Debugging
 ESO_Dialogs["ADDITIONAL_CONTENT_PURCHASE_CONFIRMATION"] =
 {
