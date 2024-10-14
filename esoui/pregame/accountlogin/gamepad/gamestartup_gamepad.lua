@@ -336,6 +336,13 @@ function ZO_GameStartup_Gamepad:CheckForAdditionalContent()
     end
 end
 
+function ZO_GameStartup_Gamepad:IsDownloadInProgress()
+    -- A download is in progress if a Language Pack (Additional Content) is downloading or if the
+    -- Base Game is not yet fully installed (in which case a PlayGo download must be in progress)
+    local isDownloading = IsAdditionalContentDownloading(ADDITIONAL_CONTENT_TYPE_VO) or not IsGateInstalled("BaseGame")
+    return isDownloading
+end
+
 function ZO_GameStartup_Gamepad:SetUpdateDownloadProgressEnabled(enabled)
     if enabled then
         -- Start monitoring for changes to the download state and progress.
@@ -349,7 +356,7 @@ function ZO_GameStartup_Gamepad:SetUpdateDownloadProgressEnabled(enabled)
 end
 
 function ZO_GameStartup_Gamepad:UpdateDownloadState()
-    local isDownloading = IsAdditionalContentDownloading(ADDITIONAL_CONTENT_TYPE_VO)
+    local isDownloading = self:IsDownloadInProgress()
     if isDownloading ~= self.isDownloading then
         -- Update the download state and show/hide the download bar fragment.
         self.isDownloading = isDownloading
@@ -476,7 +483,7 @@ function ZO_GameStartup_Gamepad:InitializeKeybindDescriptor()
             visible = function()
                 local data = self.mainList:GetTargetData()
                 if data.entryType == ENTRY_TYPE.PLAY_BUTTON then
-                    return IsGateInstalled("BaseGame") and not IsAdditionalContentDownloading(ADDITIONAL_CONTENT_TYPE_VO) and not self.profileSaveInProgress
+                    return not (self.profileSaveInProgress or self:IsDownloadInProgress())
                 elseif data.entryType == ENTRY_TYPE.VO_LANGUAGE or data.entryType == ENTRY_TYPE.EDIT_BOX or data.entryType == ENTRY_TYPE.SETTINGS or data.entryType == ENTRY_TYPE.CREDITS or data.entryType == ENTRY_TYPE.QUIT then
                     return true
                 end
@@ -721,7 +728,7 @@ function ZO_GameStartup_Gamepad:BuildVODialogEntryList()
                 if not selectedEntry or selectedEntry == "" then
                     dialog.voLanguageDropdown:SelectFirstItem()
                 else
-                    dialog.voLanguageDropdown:SelectItem(selectedEntry)
+                    dialog.voLanguageDropdown:TrySelectItemByData(selectedEntry)
                 end
             end,
             callback = function(dialog)
@@ -771,7 +778,7 @@ function ZO_GameStartup_Gamepad:BuildTextLanguageDialogEntryList()
                 if not selectedEntry or selectedEntry == "" then
                     dialog.textLanguageDropdown:SelectFirstItem()
                 else
-                    dialog.textLanguageDropdown:SelectItem(selectedEntry)
+                    dialog.textLanguageDropdown:TrySelectItemByData(selectedEntry)
                 end
 
                 SCREEN_NARRATION_MANAGER:RegisterDialogDropdown(dialog, dialog.textLanguageDropdown)
@@ -1010,7 +1017,7 @@ function ZO_GameStartup_Gamepad:PopulateMainList()
         end
 
         local playEntryString = GetString(SI_GAME_STARTUP_PLAY)
-        if not IsGateInstalled("BaseGame") or IsAdditionalContentDownloading(ADDITIONAL_CONTENT_TYPE_VO) then
+        if self:IsDownloadInProgress() then
             playEntryString = GetString(SI_CONSOLE_GAME_DOWNLOAD_UPDATING)
         end
 
