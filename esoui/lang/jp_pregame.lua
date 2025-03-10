@@ -5558,7 +5558,7 @@ SafeAddString(SI_TRIBUTEMECHANIC_PLAYERPERSPECTIVE0, "|cffffff<<1>>|rの<<2>>を
 SafeAddString(SI_TRIBUTEMECHANIC_PLAYERPERSPECTIVE1, "タバーンから|cffffff<<X:1>>|r枚の<<1[カード/カード]>>を置き換える。", 1)
 SafeAddString(SI_TRIBUTEMECHANIC_PLAYERPERSPECTIVE10, "<<3>>更新 - 最大|cffffff<<X:1>>|r 枚の<<2>><<1[カード/カード]>>を自分のクールダウンパイルから<<3>>に戻す。", 6)
 SafeAddString(SI_TRIBUTEMECHANIC_PLAYERPERSPECTIVE11, "|cffffff<<X:1>>|r 枚の<<2>> <<1[カード/カード]>>を作り、 自分の<<3>>に<<1[それ/それら]>>を置く。", 0)
-SafeAddString(SI_TRIBUTEMECHANIC_PLAYERPERSPECTIVE12, "トス - 自分のドローパイルの次の<<2[カード/cffffff<<X:2>>|rカード]>>を見る。自分のクールダウンパイルに<<1[そのカードを動かす/最大|cffffff%d|r枚のカードを選んで動かす]>>。", 4)
+SafeAddString(SI_TRIBUTEMECHANIC_PLAYERPERSPECTIVE12, "トス - 自分のドローパイルの次の<<2[カード/<<X:2>>|rカード]>>を見る。自分のクールダウンパイルに<<1[そのカードを動かす/最大%d枚のカードを選んで動かす]>>。", 4)
 SafeAddString(SI_TRIBUTEMECHANIC_PLAYERPERSPECTIVE13, "エージェントに対し、 体力を|cffffff<<X:1>>|r回復する。", 1)
 SafeAddString(SI_TRIBUTEMECHANIC_PLAYERPERSPECTIVE14, "|cff1919失敗|r - 制限 - このカードがプレイから削除されるまで、|cffffff<<X:1>>|r 枚の<<1[カード/カード]>>を自身の<<2>>からこのカードの下に置く。", 4)
 SafeAddString(SI_TRIBUTEMECHANIC_PLAYERPERSPECTIVE15, "寄贈 - 手札から|cffffff<<X:1>>|r 枚の<<1[カード/カード]>>を捨て、その数のカードを引く。", 1)

@@ -9079,6 +9079,7 @@ h5. ActionResult
 * ACTION_RESULT_ABILITY_ON_COOLDOWN
 * ACTION_RESULT_ABSORBED
 * ACTION_RESULT_BAD_TARGET
+* ACTION_RESULT_BAD_TARGET_COMBAT_STATE
 * ACTION_RESULT_BLADETURN
 * ACTION_RESULT_BLOCKED
 * ACTION_RESULT_BLOCKED_DAMAGE
@@ -20897,6 +20898,9 @@ h2. Game API
 
 * DoesMarketProductPassPurchasableReqList *private* (*integer* _marketProductId_)
 ** _Returns:_ *bool* _passesPurchaseReq_, *integer* _errorStringId_
+
+* GetMarketProductAssociatedAchievementId(*integer* _marketProductId_)
+** _Returns:_ *integer* _associatedAchievementId_
 
 * DoesMarketProductContainDLC *private* (*integer* _marketProductId_)
 ** _Returns:_ *bool* _hasDLC_

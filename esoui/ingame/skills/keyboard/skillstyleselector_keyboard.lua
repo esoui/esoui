@@ -159,10 +159,9 @@ end
 
 function ZO_SkillStyleIconSelector_Keyboard:OnSkillStyleSelectorGridListEntryClicked(newIconIndex)
     if self.skillData.isPurchased then
-        local gridData = self.skillStyleSelectorGridList:GetData()
-        local selectedData = gridData[newIconIndex]
-        if selectedData then
-            local collectibleData = selectedData.data.collectibleData
+        local entryData = ZO_ScrollList_FindDataByQuery(self.skillStyleSelectorGridList.list, function(data) return data.iconIndex == newIconIndex end)
+        if entryData then
+            local collectibleData = entryData.data.collectibleData
             if collectibleData and not collectibleData:IsBlocked() and collectibleData:IsUnlocked() and not collectibleData:IsActive() then
                 collectibleData:Use()
             end

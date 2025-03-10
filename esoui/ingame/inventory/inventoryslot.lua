@@ -111,7 +111,7 @@ function ZO_ItemSlot_SetupTextUsableAndLockedColor(control, meetsUsageRequiremen
 end
 
 function ZO_ItemSlot_SetupUsableAndLockedColor(slotControl, meetsUsageRequirement, locked)
-    local iconControl = GetControl(slotControl, "Icon")
+    local iconControl = slotControl:GetNamedChild("Icon")
     ZO_ItemSlot_SetupIconUsableAndLockedColor(iconControl, meetsUsageRequirement, locked)
 end
 
@@ -127,7 +127,7 @@ function ZO_ItemSlot_SetupSlotBase(slotControl, stackCount, iconFile, meetsUsage
 
     slotControl:SetHidden(not showSlot)
 
-    local iconControl = GetControl(slotControl, "Icon")
+    local iconControl = slotControl:GetNamedChild("Icon")
     if iconControl then
         if iconFile == nil or iconFile == "" then
             iconControl:SetHidden(true)
@@ -138,7 +138,7 @@ function ZO_ItemSlot_SetupSlotBase(slotControl, stackCount, iconFile, meetsUsage
     end
 
     slotControl.stackCount = stackCount
-    local stackCountLabel = GetControl(slotControl, "StackCount")
+    local stackCountLabel = slotControl:GetNamedChild("StackCount")
     if stackCount > 1 or slotControl.alwaysShowStackCount then
         stackCountLabel:SetText(ZO_AbbreviateAndLocalizeNumber(stackCount, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES))
     else
@@ -152,7 +152,7 @@ function ZO_ItemSlot_SetupSlot(slotControl, stackCount, iconFile, meetsUsageRequ
     -- Looks like this can be combined with the logic above, but certain animations (crafting) cannot
     -- call ZO_ItemSlot_SetupUsableAndLockedColor, so keep that in mind if refactoring.
     if stackCount > 1 or slotControl.alwaysShowStackCount then
-        local stackCountLabel = GetControl(slotControl, "StackCount")
+        local stackCountLabel = slotControl:GetNamedChild("StackCount")
         if slotControl.minStackCount and stackCount < slotControl.minStackCount then
             stackCountLabel:SetColor(1, 0, 0)
         else
@@ -199,7 +199,7 @@ function ZO_Inventory_SetupSlot(slotControl, stackCount, iconFile, meetsUsageReq
     ZO_ItemSlot_SetupSlot(slotControl, stackCount, iconFile, meetsUsageRequirement, locked)
 
     slotControl.inCooldown = false
-    slotControl.cooldown = GetControl(slotControl, "Cooldown")
+    slotControl.cooldown = slotControl:GetNamedChild("Cooldown")
     slotControl.cooldown:SetTexture(iconFile)
 
     ZO_InventorySlot_UpdateCooldowns(slotControl)
@@ -2121,7 +2121,14 @@ local potentialActionsForSlotType =
 local blanketDisableActionsForSlotType =
 {
     [SLOT_TYPE_EQUIPMENT] = function(inventorySlot)
-        return ZO_Character_IsReadOnly()
+        local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
+        local isReadOnly
+        if bag == BAG_COMPANION_WORN then
+            isReadOnly = COMPANION_WINDOW_KEYBOARD:IsReadOnly()
+        else
+            isReadOnly = ZO_Character_IsReadOnly()
+        end
+        return isReadOnly
     end,
 }
 
@@ -2129,7 +2136,7 @@ function ZO_InventorySlot_DiscoverSlotActionsFromActionList(inventorySlot, slotA
     local slotType = ZO_InventorySlot_GetType(inventorySlot)
     local potentialActions = potentialActionsForSlotType[slotType]
     if potentialActions then
-        if not blanketDisableActionsForSlotType[slotType] or not blanketDisableActionsForSlotType[slotType]() then
+        if not blanketDisableActionsForSlotType[slotType] or not blanketDisableActionsForSlotType[slotType](inventorySlot) then
             for _, action in ipairs(potentialActions) do
                 local actionHandler = actionHandlers[action]
                 actionHandler(inventorySlot, slotActions)
@@ -2786,8 +2793,16 @@ local InventoryDragStart =
     [SLOT_TYPE_EQUIPMENT] =
     {
         function(inventorySlot)
-            if not ZO_Character_IsReadOnly() then
-                local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
+            local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
+
+            local isReadOnly
+            if bag == BAG_COMPANION_WORN then
+                isReadOnly = COMPANION_WINDOW_KEYBOARD:IsReadOnly()
+            else
+                isReadOnly = ZO_Character_IsReadOnly()
+            end
+
+            if not isReadOnly then
                 PickupEquippedItem(index, bag)
                 return true
             end
@@ -2955,7 +2970,16 @@ local InventoryReceiveDrag =
     [SLOT_TYPE_EQUIPMENT] =
     {
         function(inventorySlot)
-            if not ZO_Character_IsReadOnly() then
+            local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
+
+            local isReadOnly
+            if bag == BAG_COMPANION_WORN then
+                isReadOnly = COMPANION_WINDOW_KEYBOARD:IsReadOnly()
+            else
+                isReadOnly = ZO_Character_IsReadOnly()
+            end
+
+            if not isReadOnly then
                 return PlaceInventoryItem(inventorySlot)
             end
         end

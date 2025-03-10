@@ -525,7 +525,7 @@ end
 function ZO_GamepadStats:PerformDeferredInitializationRoot()
     if self.deferredInitialized then return end
     self.deferredInitialized = true
-    
+
     self.outfitSelectorControl = self.header:GetNamedChild("OutfitSelector")
     self.outfitSelectorNameLabel = self.outfitSelectorControl:GetNamedChild("OutfitName")
     self.outfitSelectorHeaderFocus = ZO_Outfit_Selector_Header_Focus_Gamepad:New(self.outfitSelectorControl)
@@ -1276,6 +1276,7 @@ do
                     name = buffName,
                     description = GetAbilityEffectDescription(buffSlot),
                     buffIndex = activeMundusStoneBuffIndices[slotIndex],
+                    slotIndex = slotIndex,
                     statEffects = {},
                 }
                 local numStatsForAbility = GetAbilityNumDerivedStats(abilityId)
@@ -1714,7 +1715,7 @@ function ZO_GamepadStats:InitializeAdvancedAttributesPanel()
         end
 
         local targetData = self.mainList:GetTargetData()
-        local selectedMundusIndex = targetData and targetData.data and targetData.data.buffIndex
+        local selectedMundusIndex = targetData and targetData.data and targetData.data.slotIndex
         if selectedMundusIndex and #self.mundusAdvancedStats[selectedMundusIndex] > 0 then
             for i, mundusStat in ipairs(self.mundusAdvancedStats[selectedMundusIndex]) do
                 if mundusStat.statType == data.statType then
