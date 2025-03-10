@@ -91,46 +91,54 @@ function WorldMapFilterPanel:LoadInitialState()
     end
 end
 
+--Global (Cosmic and World) Filter Panel
+
+local GlobalWorldMapFilterPanel = ZO_Object.MultiSubclass(ZO_GlobalWorldMapFilterPanel_Shared, WorldMapFilterPanel)
+
+function GlobalWorldMapFilterPanel:Initialize(...)
+    ZO_GlobalWorldMapFilterPanel_Shared.Initialize(self, ...)
+    WorldMapFilterPanel.Initialize(self, ...)
+end
+
 --PvE Filter Panel
 
 local PvEWorldMapFilterPanel = ZO_Object.MultiSubclass(ZO_PvEWorldMapFilterPanel_Shared, WorldMapFilterPanel)
 
-function PvEWorldMapFilterPanel:New(...)
-    return WorldMapFilterPanel.New(self, ...)
+function PvEWorldMapFilterPanel:Initialize(...)
+    ZO_PvEWorldMapFilterPanel_Shared.Initialize(self, ...)
+    WorldMapFilterPanel.Initialize(self, ...)
 end
 
 --PvP Filter Panel
 
 local PvPWorldMapFilterPanel = ZO_Object.MultiSubclass(ZO_PvPWorldMapFilterPanel_Shared, WorldMapFilterPanel)
 
-function PvPWorldMapFilterPanel:New(...)
-    return WorldMapFilterPanel.New(self, ...)
+function PvPWorldMapFilterPanel:Initialize(...)
+    ZO_PvPWorldMapFilterPanel_Shared.Initialize(self, ...)
+    WorldMapFilterPanel.Initialize(self, ...)
 end
 
 --Imperial PvP Filter Panel
 
 local ImperialPvPWorldMapFilterPanel = ZO_Object.MultiSubclass(ZO_ImperialPvPWorldMapFilterPanel_Shared, WorldMapFilterPanel)
 
-function ImperialPvPWorldMapFilterPanel:New(...)
-    return WorldMapFilterPanel.New(self, ...)
+function ImperialPvPWorldMapFilterPanel:Initialize(...)
+    ZO_ImperialPvPWorldMapFilterPanel_Shared.Initialize(self, ...)
+    WorldMapFilterPanel.Initialize(self, ...)
 end
 
 --Battleground Filter Panel
 
 local BattlegroundWorldMapFilterPanel = ZO_Object.MultiSubclass(ZO_BattlegroundWorldMapFilterPanel_Shared, WorldMapFilterPanel)
 
-function BattlegroundWorldMapFilterPanel:New(...)
-    return WorldMapFilterPanel.New(self, ...)
+function BattlegroundWorldMapFilterPanel:Initialize(...)
+    ZO_BattlegroundWorldMapFilterPanel_Shared.Initialize(self, ...)
+    WorldMapFilterPanel.Initialize(self, ...)
 end
 
 --Filters
 
 local WorldMapFilters = ZO_WorldMapFilters_Shared:Subclass()
-
-function WorldMapFilters:New(...)
-    local object = ZO_WorldMapFilters_Shared.New(self, ...)
-    return object
-end
 
 function WorldMapFilters:Initialize(control)
     ZO_WorldMapFilters_Shared.Initialize(self, control)
@@ -146,6 +154,7 @@ function WorldMapFilters:Initialize(control)
         self.pvpPanel = PvPWorldMapFilterPanel:New(self.control:GetNamedChild("PvP"), MAP_FILTER_TYPE_AVA_CYRODIIL, savedVars)
         self.imperialPvPPanel = ImperialPvPWorldMapFilterPanel:New(self.control:GetNamedChild("ImperialPvP"), MAP_FILTER_TYPE_AVA_IMPERIAL, savedVars)
         self.battlegroundPanel = BattlegroundWorldMapFilterPanel:New(self.control:GetNamedChild("Battleground"), MAP_FILTER_TYPE_BATTLEGROUND, savedVars)
+        self.globalPanel = GlobalWorldMapFilterPanel:New(self.control:GetNamedChild("Global"), MAP_FILTER_TYPE_GLOBAL, savedVars)
     end)
 end
 

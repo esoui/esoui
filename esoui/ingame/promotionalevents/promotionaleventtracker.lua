@@ -7,6 +7,11 @@ function ZO_PromotionalEventTracker:Initialize(control)
     self.headerIcon = self.headerLabel:GetNamedChild("Icon")
 
     PROMOTIONAL_EVENT_TRACKER_FRAGMENT = self:GetFragment()
+    -- ESO-894612: This may not be necessary or the fix for the bug, but some players reported the tutorial firing when it shouldn't have
+    -- (see ZO_PromotionalEventTracker:OnShowing). Best guess is that it's not yet marked hidden via an Update call by the time the
+    -- fragment gets shown via the scene. Not sure how though, and we don't have a reliable repro.
+    local INSTANT = 0
+    PROMOTIONAL_EVENT_TRACKER_FRAGMENT:SetHiddenForReason("NoTrackedPromotionalEvent", true, INSTANT, INSTANT)
 end
 
 function ZO_PromotionalEventTracker:InitializeStyles()
@@ -75,19 +80,17 @@ function ZO_PromotionalEventTracker:Update()
     local hidden = true
     if not IsPromotionalEventSystemLocked() then
         local campaignKey, activityIndex = GetTrackedPromotionalEventActivityInfo()
-        if campaignKey ~= 0 then
-            local campaignData = PROMOTIONAL_EVENT_MANAGER:GetCampaignDataByKey(campaignKey)
-            if campaignData then
-                local activityData = campaignData:GetActivityData(activityIndex)
-                if activityData then
-                    self:SetSubLabelText(activityData:GetDisplayName())
+        local campaignData = PROMOTIONAL_EVENT_MANAGER:GetCampaignDataByKey(campaignKey)
+        if campaignData then
+            local activityData = campaignData:GetActivityData(activityIndex)
+            if activityData then
+                self:SetSubLabelText(activityData:GetDisplayName())
                 
-                    local progress = activityData:GetProgress()
-                    local completionThreshold = activityData:GetCompletionThreshold()
-                    local progressText = zo_strformat(SI_PROMOTIONAL_EVENT_TRACKER_PROGRESS_FORMATTER, ZO_CommaDelimitNumber(progress), ZO_CommaDelimitNumber(completionThreshold))
-                    self.progressLabel:SetText(progressText)
-                    hidden = false
-                end
+                local progress = activityData:GetProgress()
+                local completionThreshold = activityData:GetCompletionThreshold()
+                local progressText = zo_strformat(SI_PROMOTIONAL_EVENT_TRACKER_PROGRESS_FORMATTER, ZO_CommaDelimitNumber(progress), ZO_CommaDelimitNumber(completionThreshold))
+                self.progressLabel:SetText(progressText)
+                hidden = false
             end
         end
     end

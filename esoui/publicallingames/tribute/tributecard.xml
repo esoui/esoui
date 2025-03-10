@@ -225,7 +225,7 @@
             </Controls>
         </Texture>
 
-        <Label name="ZO_TributeCard_DefeatCost" font="ZoFontTributeAntique52" color="INTERFACE_COLOR_TYPE_GENERAL:INTERFACE_GENERAL_COLOR_WHITE" level="109" horizontalAlignment="CENTER" verticalAlignment="CENTER" virtual="true">
+        <Label name="ZO_TributeCard_DefeatCost" font="ZoFontTributeAntique52" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" level="109" horizontalAlignment="CENTER" verticalAlignment="CENTER" virtual="true">
             <Controls>
                 <Texture name="$(parent)Banner" level="108" pixelRoundingEnabled="false">
                     <Dimensions x="64" y="64" />
@@ -380,7 +380,7 @@
                             </Controls>
                         </Label>
                         
-                        <Label name="$(parent)Cost" font="ZoFontTributeAntique52" color="INTERFACE_COLOR_TYPE_GENERAL:INTERFACE_GENERAL_COLOR_WHITE" verticalAlignment="CENTER" horizontalAlignment="CENTER" level="109">
+                        <Label name="$(parent)Cost" font="ZoFontTributeAntique52" color="INTERFACE_COLOR_TYPE_GENERAL:INTERFACE_GENERAL_COLOR_ENABLED" verticalAlignment="CENTER" horizontalAlignment="CENTER" level="109">
                             <Anchor point="CENTER" relativePoint="TOP" offsetY="51" />
                             
                             <Controls>

@@ -1217,6 +1217,11 @@ end
 CENTER_SCREEN_EVENT_HANDLERS[EVENT_DAILY_LOGIN_REWARDS_CLAIMED] = function()
     local rewardId, quantity = GetDailyLoginRewardInfoForCurrentMonth(GetDailyLoginNumRewardsClaimedInMonth())
     local claimedDailyLoginReward = REWARDS_MANAGER:GetInfoForDailyLoginReward(rewardId, quantity)
+    -- From ZO_DailyLoginRewards_Base:ClaimTargetedData
+    if ZO_DAILY_LOGIN_REWARD_CLAIMING_FALLBACK then
+        claimedDailyLoginReward = claimedDailyLoginReward:GetFallbackRewardData()
+        ZO_DAILY_LOGIN_REWARD_CLAIMING_FALLBACK = nil
+    end
     local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.DAILY_LOGIN_REWARDS_CLAIM_ANNOUNCEMENT)
     local secondaryText = claimedDailyLoginReward:GetQuantity() > 1 and claimedDailyLoginReward:GetFormattedNameWithStack() or claimedDailyLoginReward:GetFormattedName()
     messageParams:SetText(GetString(SI_DAILY_LOGIN_REWARDS_CLAIMED_ANNOUNCEMENT), secondaryText)
@@ -1952,6 +1957,10 @@ local CENTER_SCREEN_CALLBACK_HANDLERS =
                 local messageParamsObjects = {}
                 for _, reward in ipairs(rewards) do
                     local claimedReward = reward.rewardableEventData:GetRewardData()
+                    local _, wasFallbackClaimed = reward.rewardableEventData:IsRewardClaimed()
+                    if wasFallbackClaimed then
+                        claimedReward = claimedReward:GetFallbackRewardData()
+                    end
                     local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
                     local secondaryText = claimedReward:GetQuantity() > 1 and claimedReward:GetFormattedNameWithStack() or claimedReward:GetFormattedName()
                     messageParams:SetText(GetString(SI_PROMOTIONAL_EVENT_REWARD_CLAIMED_ANNOUNCEMENT), secondaryText)

@@ -55,7 +55,7 @@ local pregameStates =
             end
             PregamePrepareForProfile()
             PregameLogout()
-            
+
             ZO_PREGAME_FIRED_CHARACTER_CONSTRUCTION_READY = false
             ZO_PREGAME_CHARACTER_LIST_RECEIVED = false
             ZO_PREGAME_CHARACTER_COUNT = 0
@@ -82,9 +82,13 @@ local pregameStates =
                     end
                 end)
 
-                PregameSelectProfile()
+                if ZO_IsConsolePlatform() then
+                    PregameSelectProfile()
+                else
+                    AttemptQuickLaunch()
+                    SCENE_MANAGER:Show("PregameInitialScreen_Gamepad")
+                end
             else
-
                 if IsConsoleUI() then
                     -- ESO-404970: reset overscan, gamma, and audio settings
                     -- to default to handle the situation where a player loads
@@ -187,7 +191,7 @@ local pregameStates =
                 SetCurrentVideoPlaybackVolume(0.0, 4.0)
             end
             
-            if ZO_IsPCUI() and not IsUsingLinkedLogin() then
+            if (ZO_IsPCUI() or ZO_IsForceConsoleFlow()) and not IsUsingLinkedLogin() then
                 -- login using the username/password the user provides
                 function Login()
                     local username = GAME_STARTUP_GAMEPAD:GetEnteredUserName()
@@ -196,9 +200,6 @@ local pregameStates =
                 end
 
                 CREATE_LINK_LOADING_SCREEN_GAMEPAD:Show("AccountLogin", Login, GetString(SI_GAMEPAD_PREGAME_LOADING))
-            elseif ZO_IsForceConsoleFlow() then
-                -- login using the username/password in user settings
-                CREATE_LINK_LOADING_SCREEN_GAMEPAD:Show("AccountLogin", ZO_FakeConsoleLogin, GetString(SI_GAMEPAD_PREGAME_LOADING))
             else
                 CREATE_LINK_LOADING_SCREEN_GAMEPAD:Show("AccountLogin", PregameBeginLinkedLogin, GetString(SI_GAMEPAD_PREGAME_LOADING))
             end

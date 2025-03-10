@@ -1,0 +1,83 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_AddonManager_AddonRow_Gamepad" inherits="ZO_GamepadInteractiveSortFilterListRow" virtual="true">
+            <OnInitialized>
+                ZO_AddOnManager_Gamepad.OnRowControlInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)Enabled" inherits="ZO_GamepadInteractiveSortFilterListIcon">
+                    <Dimensions x="ZO_GAMEPAD_ADDON_MANAGER_ENABLED_WIDTH" />
+                    <Anchor point="LEFT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_HIGHLIGHT_PADDING"/>
+                </Control>
+                
+                <Label name="$(parent)AddonName" inherits="ZO_GamepadInteractiveSortFilterListRowLabel">
+                    <Dimensions x="ZO_GAMEPAD_ADDON_MANAGER_ADDON_NAME_WIDTH" />
+                    <Anchor point="LEFT" relativeTo="$(parent)Enabled" relativePoint="RIGHT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X"/>
+                </Label>
+
+                <Label name="$(parent)AuthorName" inherits="ZO_GamepadInteractiveSortFilterListRowLabel">
+                    <Dimensions x="ZO_GAMEPAD_ADDON_MANAGER_AUTHOR_WIDTH" />
+                    <Anchor point="LEFT" relativeTo="$(parent)AddonName" relativePoint="RIGHT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X"/>
+                </Label>
+
+                <Control name="$(parent)Dependency" inherits="ZO_GamepadInteractiveSortFilterListIcon">
+                    <Dimensions x="ZO_GAMEPAD_ADDON_MANAGER_EXTRA_INFO_WIDTH" />
+                    <Anchor point="LEFT" relativeTo="$(parent)AuthorName" relativePoint="RIGHT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X"/>
+                    <Controls>
+                        <Texture name="$(parent)Icon" override="true" textureFile="EsoUI/Art/Addons/Gamepad/gp_addon_dependencies.dds"/>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
+
+        <Control name="ZO_AddonManager_HeaderRow_Gamepad" inherits="ZO_GamepadInteractiveSortFilterListRow" virtual="true">
+            <OnInitialized>
+                ZO_AddOnManager_Gamepad.OnHeaderRowControlInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Label name="$(parent)HeaderName" font="ZoFontGamepad27" verticalAlignment="CENTER" modifyTextType="UPPERCASE" maxLineCount="1" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" wrapMode="ELLIPSIS">
+                    <Dimensions x="ZO_GAMEPAD_ADDON_MANAGER_HEADER_WIDTH" />
+                    <Anchor point="LEFT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_HIGHLIGHT_PADDING"/>
+                </Label>
+            </Controls>
+        </Control>
+        
+        <TopLevelControl name="ZO_AddonManager_Gamepad_TopLevel" inherits="ZO_AnchoredToQuadrant_1_2_3_Background" hidden="true">
+            <OnInitialized>
+                ZO_AddOnManager_Gamepad.OnControlInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)TitleContainer" inherits="ZO_GamepadHeaderTitleAnchors">
+                    <Controls>
+                        <Label name="$(parent)Title" inherits="ZO_GamepadScreenHeaderTitleTextTemplate" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_WINDOW_TITLE_ADDON_MANAGER" excludeFromResizeToFitExtents="true" >
+                            <Anchor point="BOTTOMLEFT" />
+                            <Anchor point="BOTTOMRIGHT" />
+                        </Label>
+                        
+                        <Label name="$(parent)SubTitle" inherits="ZO_GamepadHeaderLabelTextTemplate" horizontalAlignment="CENTER" excludeFromResizeToFitExtents="true" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" hidden="true">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetY="-10" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Title" relativePoint="BOTTOMRIGHT" offsetY="-10" />
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)Divider" inherits="ZO_GamepadHeaderHorizontalDividerSimple">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)TitleContainer" relativePoint="BOTTOMLEFT" offsetX="20" offsetY="10" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)TitleContainer" relativePoint="BOTTOMRIGHT" offsetX="-20" offsetY="10" />
+                </Control>
+
+                <Label name="$(parent)EmptyLabel" font="ZoFontGamepadCondensed34" hidden="true" text="SI_GAMEPAD_ADDON_MANAGER_EMPTY_TEXT">
+                    <Anchor point="TOP" relativeTo="$(parent)Divider" relativePoint="BOTTOM" offsetY="5" />
+                </Label>
+
+                <Control name="$(parent)List" inherits="ZO_ScrollList_Gamepad">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Divider" relativePoint="BOTTOMLEFT" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-15" />
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

@@ -115,6 +115,7 @@ function ZO_MarketAnnouncementMarketProduct_Shared:SetupTextCalloutAnchors()
     control.esoPlusCost:ClearAnchors()
     control.descriptionControl:ClearAnchors()
 
+    local VERTICAL_SPACING = 5
     local hasNormalCost = self:HasCost()
     if hasNormalCost then
         if self:IsOnSale() and not self:IsFree() then
@@ -122,7 +123,6 @@ function ZO_MarketAnnouncementMarketProduct_Shared:SetupTextCalloutAnchors()
             control.cost:SetAnchor(LEFT, control.previousCost, RIGHT, 10)
             control.descriptionControl:SetAnchor(TOPLEFT, control.previousCost, BOTTOMLEFT)
         elseif control.textCallout:IsControlHidden() then
-            local VERTICAL_SPACING = 5
             if control.cost:IsControlHidden() then
                 control.descriptionControl:SetAnchor(TOPLEFT, control.title, BOTTOMLEFT, ZO_MARKET_PRODUCT_CALLOUT_X_OFFSET, VERTICAL_SPACING) 
             else
@@ -146,6 +146,16 @@ function ZO_MarketAnnouncementMarketProduct_Shared:SetupTextCalloutAnchors()
                 control.esoPlusCost:SetAnchor(TOPLEFT, control.textCallout, BOTTOMLEFT)
             end
             control.descriptionControl:SetAnchor(TOPLEFT, control.esoPlusCost, BOTTOMLEFT)
+        end
+    end
+
+    --Make sure the description has a valid anchor if there is no cost or eso plus cost
+    --This is technically not a valid setup, but we do this to handle things a bit more cleanly if it happens
+    if not hasNormalCost and not hasEsoPlusCost then
+        if control.textCallout:IsControlHidden() then
+            control.descriptionControl:SetAnchor(TOPLEFT, control.title, BOTTOMLEFT, ZO_MARKET_PRODUCT_CALLOUT_X_OFFSET, VERTICAL_SPACING)
+        else
+            control.descriptionControl:SetAnchor(TOPLEFT, control.textCallout, BOTTOMLEFT)
         end
     end
 end

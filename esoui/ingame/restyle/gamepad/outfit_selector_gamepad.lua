@@ -2,6 +2,7 @@ ZO_Outfit_Selector_Header_Focus_Gamepad = ZO_InitializingCallbackObject:Subclass
 
 function ZO_Outfit_Selector_Header_Focus_Gamepad:Initialize(control)
     self.control = control
+    self.title = control:GetNamedChild("Title")
     self.label = control:GetNamedChild("OutfitName")
     self.dropdownChevron = control:GetNamedChild("OpenDropdown")
     self.active = false
@@ -44,6 +45,19 @@ function ZO_Outfit_Selector_Header_Focus_Gamepad:Update()
             self.label:SetColor(ZO_GAMEPAD_DISABLED_UNSELECTED_COLOR:UnpackRGBA())
         end
     end
+end
+
+function ZO_Outfit_Selector_Header_Focus_Gamepad:GetNarrationText()
+    local narrations = {}
+    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.title:GetText()))
+    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.label:GetText()))
+    return narrations
+end
+
+function ZO_Outfit_Selector_Header_Focus_Gamepad:GetAdditionalInputNarrationFunction()
+end
+
+function ZO_Outfit_Selector_Header_Focus_Gamepad:GetFooterNarration()
 end
 
 function ZO_Outfit_Selector_Header_Focus_Gamepad:IsActive()

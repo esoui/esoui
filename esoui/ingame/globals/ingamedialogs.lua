@@ -4690,7 +4690,10 @@ ESO_Dialogs["CONFIRM_CLEAR_UNUSED_KEYBINDS"] =
             text = SI_DIALOG_ACCEPT,
             callback = function(dialog)
                 ClearBindsForUnknownActions()
-                ADD_ON_MANAGER:RefreshSavedKeybindsLabel()
+                if ADD_ON_MANAGER then
+                    ADD_ON_MANAGER:RefreshSavedKeybindsLabel()
+                end
+                ADDON_MANAGER_GAMEPAD:RefreshFooter()
             end,
         },
         {
@@ -4981,5 +4984,40 @@ ESO_Dialogs["CONFIRM_CHANGE_DEFAULT_HOUSING_PERMISSION"] =
                 end
             end,
         }
+    }
+}
+
+ESO_Dialogs["GAMEPAD_CONFIRM_LEAVE_ADDON_MANAGER"] =
+{
+    canQueue = true,
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    title =
+    {
+        text = SI_ADDON_MANAGER_RELOAD,
+    },
+    mainText =
+    {
+        text = SI_GAMEPAD_ADDON_MANAGER_CONFIRM_LEAVE_DIALOG_DESCRIPTION,
+    },
+    mustChoose = true,
+    buttons =
+    {
+        {
+            text = SI_ADDON_MANAGER_RELOAD,
+            callback = function(dialog)
+                dialog.data.confirmCallback()
+            end
+        },
+        {
+            text = SI_DIALOG_EXIT,
+            callback = function(dialog)
+                if dialog.data.declineCallback then
+                    dialog.data.declineCallback()
+                end
+            end
+        },
     }
 }

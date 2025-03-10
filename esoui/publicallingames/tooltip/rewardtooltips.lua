@@ -42,6 +42,10 @@ do
     local g_dailyLoginRewardtimerStatValuePair
     function ZO_Tooltip:LayoutDailyLoginReward(rewardIndex)
         local rewardId, quantity = GetDailyLoginRewardInfoForCurrentMonth(rewardIndex)
+        if ShouldUseFallbackReward(rewardId) then
+            rewardId, quantity = GetFallbackReward(rewardId)
+        end
+
         self:LayoutReward(rewardId, quantity, REWARD_DISPLAY_FLAGS_NONE)
 
         g_dailyLoginRewardtimerStatValuePair = nil

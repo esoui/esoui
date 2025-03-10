@@ -1401,27 +1401,31 @@ function ZO_HouseTours_Gamepad:RefreshHeader()
     end
 end
 
-function ZO_HouseTours_Gamepad:RefreshCategoryList()
-    local list = self.categoryList
-    list:Clear()
+do
+    local function CreateHouseToursEntryData(text, icon, mode)
+        local entryData = ZO_GamepadEntryData:New(text, icon)
+        entryData.mode = mode    
+    
+        entryData.selectedIconTint = ZO_WHITE
+        entryData.unselectedIconTint = ZO_GAMEPAD_UNSELECTED_COLOR
+    
+        return entryData
+    end
 
-    local recommendedEntryData = ZO_GamepadEntryData:New(GetString(SI_HOUSE_TOURS_RECOMMENDED), "EsoUI/Art/HouseTours/Gamepad/houseTours_recommended.dds")
-    recommendedEntryData.mode = HOUSE_TOURS_MODES.RECOMMENDED
-    list:AddEntry("ZO_GamepadMenuEntryTemplate", recommendedEntryData)
+    function ZO_HouseTours_Gamepad:RefreshCategoryList()
+        local list = self.categoryList
+        list:Clear()
 
-    local browseEntryData = ZO_GamepadEntryData:New(GetString(SI_HOUSE_TOURS_BROWSE_HOMES), "EsoUI/Art/HouseTours/Gamepad/houseTours_browse.dds")
-    browseEntryData.mode = HOUSE_TOURS_MODES.BROWSE
-    list:AddEntry("ZO_GamepadMenuEntryTemplate", browseEntryData)
+        list:AddEntry("ZO_GamepadMenuEntryTemplate", CreateHouseToursEntryData(GetString(SI_HOUSE_TOURS_RECOMMENDED), "EsoUI/Art/HouseTours/Gamepad/houseTours_recommended.dds", HOUSE_TOURS_MODES.RECOMMENDED))
 
-    local favoritesEntryData = ZO_GamepadEntryData:New(GetString(SI_HOUSE_TOURS_FAVORITE_HOMES), "EsoUI/Art/HouseTours/Gamepad/houseTours_favorites.dds")
-    favoritesEntryData.mode = HOUSE_TOURS_MODES.FAVORITES
-    list:AddEntry("ZO_GamepadMenuEntryTemplate", favoritesEntryData)
+        list:AddEntry("ZO_GamepadMenuEntryTemplate", CreateHouseToursEntryData(GetString(SI_HOUSE_TOURS_BROWSE_HOMES), "EsoUI/Art/HouseTours/Gamepad/houseTours_browse.dds", HOUSE_TOURS_MODES.BROWSE))
 
-    local manageListingsEntryData = ZO_GamepadEntryData:New(GetString(SI_HOUSE_TOURS_MANAGE_LISTINGS), "EsoUI/Art/HouseTours/Gamepad/houseTours_manageListings.dds")
-    manageListingsEntryData.mode = HOUSE_TOURS_MODES.MANAGE_LISTINGS
-    list:AddEntry("ZO_GamepadMenuEntryTemplate", manageListingsEntryData)
+        list:AddEntry("ZO_GamepadMenuEntryTemplate", CreateHouseToursEntryData(GetString(SI_HOUSE_TOURS_FAVORITE_HOMES), "EsoUI/Art/HouseTours/Gamepad/houseTours_favorites.dds", HOUSE_TOURS_MODES.FAVORITES))
 
-    list:Commit()
+        list:AddEntry("ZO_GamepadMenuEntryTemplate", CreateHouseToursEntryData(GetString(SI_HOUSE_TOURS_MANAGE_LISTINGS), "EsoUI/Art/HouseTours/Gamepad/houseTours_manageListings.dds", HOUSE_TOURS_MODES.MANAGE_LISTINGS))
+
+        list:Commit()
+    end
 end
 
 do

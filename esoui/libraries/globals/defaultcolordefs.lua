@@ -436,3 +436,23 @@ ZO_MAP_PIN_ASSISTED_COLOR = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TY
 ZO_MAP_PIN_DIG_SITE_COLOR = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_MAP_PIN, MAP_PIN_COLOR_DIG_SITE))
 ZO_MAP_PIN_TRACKED_DIG_SITE_COLOR = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_MAP_PIN, MAP_PIN_COLOR_TRACKED_DIG_SITE))
 ZO_MAP_PIN_DIG_SITE_BORDER_COLOR = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_MAP_PIN, MAP_PIN_COLOR_DIG_SITE_BORDER))
+
+------------------------------------
+-- Dialogue Tone Indicator Colors
+------------------------------------
+
+local DIALOGUE_TONE_COLORS =
+{
+    [DIALOGUE_TONE_TYPE_KIND] = ZO_ColorDef:New("38B17C"),
+    [DIALOGUE_TONE_TYPE_GRIM] = ZO_ColorDef:New("FF4545"),
+    [DIALOGUE_TONE_TYPE_JOKER] = ZO_ColorDef:New("BB85EA"),
+    [DIALOGUE_TONE_TYPE_FLIRTY] = ZO_ColorDef:New("DD6DFF"),
+    [DIALOGUE_TONE_TYPE_MERCIFUL] = ZO_ColorDef:New("7EFFFF"),
+    [DIALOGUE_TONE_TYPE_RUTHLESS] = ZO_ColorDef:New("FF4545"),
+}
+
+local defaultDialogueToneColor = ZO_ColorDef:New(1, 1, 1)
+
+function GetDialogueToneColor(dialogueTone)
+    return DIALOGUE_TONE_COLORS[dialogueTone] or defaultDialogueToneColor
+end

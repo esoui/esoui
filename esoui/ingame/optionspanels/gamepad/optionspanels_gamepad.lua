@@ -538,6 +538,11 @@ GAMEPAD_SETTINGS_DATA =
         {
             panel = SETTING_PANEL_ACCESSIBILITY,
             system = SETTING_TYPE_ACCESSIBILITY,
+            settingId = ACCESSIBILITY_SETTING_PLAYER_WAYPOINT_ICON_COLOR,
+        },
+        {
+            panel = SETTING_PANEL_ACCESSIBILITY,
+            system = SETTING_TYPE_ACCESSIBILITY,
             settingId = ACCESSIBILITY_SETTING_GAMEPAD_AIM_ASSIST_INTENSITY,
             header = SI_ACCESSIBILITY_OPTIONS_ARCANIST,
         },

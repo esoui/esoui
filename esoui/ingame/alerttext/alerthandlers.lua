@@ -1054,6 +1054,10 @@ local AlertHandlers =
         end
     end,
 
+    [EVENT_ARMORY_BUILD_CHAMPION_SLOTS_MODIFIED] = function()
+        return ALERT, GetString("SI_RESPECTYPE_NOTIFICATIONPOINTSRESET", RESPEC_TYPE_CHAMPION_SLOTS)
+    end,
+
     [EVENT_CHAMPION_PURCHASE_RESULT] = function(result)
         local message = GetString("SI_CHAMPIONPURCHASERESULT", result)
         if message and message ~= "" then

@@ -155,7 +155,7 @@ function ZO_PromotionalEvents_Gamepad:InitializeActivityFinderCategory()
                 self:Activate()
             end,
             visible = function()
-                return PROMOTIONAL_EVENT_MANAGER:IsCampaignActive()
+                return PROMOTIONAL_EVENT_MANAGER:HasActiveCampaign()
             end,
             isPromotionalEvent = true,
         },
@@ -243,7 +243,7 @@ function ZO_PromotionalEvents_Gamepad:InitializeFoci()
         end
 
         if self.selectedMilestone then
-            self.focusedRewardData = self.selectedMilestone.rewardObject.rewardData
+            self.focusedRewardData = self.selectedMilestone.rewardObject.displayRewardData
             GAMEPAD_TOOLTIPS:LayoutRewardData(GAMEPAD_RIGHT_TOOLTIP, self.focusedRewardData)
             SCREEN_NARRATION_MANAGER:QueueCustomEntry("promotionalEventsMilestone")
         else
@@ -282,13 +282,17 @@ function ZO_PromotionalEvents_Gamepad:InitializeFoci()
             keybind = "UI_SHORTCUT_SECONDARY",
 
             callback = function()
-                self.previewRewardData = self.selectedMilestone.rewardObject.rewardData
+                self.previewRewardData = self.selectedMilestone.rewardObject.displayRewardData
                 self.lastSelectedMilestoneIndex = self.selectedMilestone.displayIndex
                 SCENE_MANAGER:Push("promotionalEventsPreview_Gamepad")
             end,
 
+            enabled = function()
+                return IsCharacterPreviewingAvailable(), GetString(SI_PREVIEW_UNAVAILABLE_ERROR)
+            end,
+
             visible = function()
-                return CanPreviewReward(self.selectedMilestone.rewardObject.rewardData:GetRewardId())
+                return CanPreviewReward(self.selectedMilestone.rewardObject.displayRewardData:GetRewardId())
             end,
         },
     }
@@ -298,7 +302,7 @@ function ZO_PromotionalEvents_Gamepad:InitializeFoci()
     -- Capstone
     local function ActivateCapstoneCallback()
         self.capstoneRewardObject.highlight:SetHidden(false)
-        self.focusedRewardData = self.capstoneRewardObject.rewardData
+        self.focusedRewardData = self.capstoneRewardObject.displayRewardData
         GAMEPAD_TOOLTIPS:LayoutRewardData(GAMEPAD_RIGHT_TOOLTIP, self.focusedRewardData)
         SCREEN_NARRATION_MANAGER:QueueCustomEntry("promotionalEventsCapstone")
     end
@@ -334,12 +338,16 @@ function ZO_PromotionalEvents_Gamepad:InitializeFoci()
             keybind = "UI_SHORTCUT_SECONDARY",
 
             callback = function()
-                self.previewRewardData = self.capstoneRewardObject.rewardData
+                self.previewRewardData = self.capstoneRewardObject.displayRewardData
                 SCENE_MANAGER:Push("promotionalEventsPreview_Gamepad")
             end,
 
+            enabled = function()
+                return IsCharacterPreviewingAvailable(), GetString(SI_PREVIEW_UNAVAILABLE_ERROR)
+            end,
+
             visible = function()
-                return CanPreviewReward(self.capstoneRewardObject.rewardData:GetRewardId())
+                return CanPreviewReward(self.capstoneRewardObject.displayRewardData:GetRewardId())
             end,
         },
     }
@@ -394,14 +402,25 @@ function ZO_PromotionalEvents_Gamepad:InitializeFoci()
             keybind = "UI_SHORTCUT_SECONDARY",
 
             callback = function()
-                self.previewRewardData = self:GetSelectedActivity():GetRewardData()
-                self.lastSelectedData = self.selectedData
+                local selectedActivityEntry = self:GetSelectedActivity()
+                local rewardObject = self:GetActivityRewardObject(selectedActivityEntry)
+                self.previewRewardData = rewardObject.displayRewardData
+                self.lastSelectedData = selectedActivityEntry
                 SCENE_MANAGER:Push("promotionalEventsPreview_Gamepad")
+            end,
+
+            enabled = function()
+                return IsCharacterPreviewingAvailable(), GetString(SI_PREVIEW_UNAVAILABLE_ERROR)
             end,
 
             visible = function()
                 local selectedActivityEntry = self:GetSelectedActivity()
-                return selectedActivityEntry and selectedActivityEntry:GetRewardData() and CanPreviewReward(selectedActivityEntry:GetRewardData():GetRewardId())
+                if selectedActivityEntry then
+                    local rewardObject = self:GetActivityRewardObject(selectedActivityEntry)
+                    local displayRewardData = rewardObject and rewardObject.displayRewardData
+                    return displayRewardData and CanPreviewReward(displayRewardData:GetRewardId())
+                end
+                return false
             end,
         },
         -- Track
@@ -645,7 +664,7 @@ function ZO_PromotionalEvents_Gamepad:SelectMilestone(displayIndex)
 
             milestoneControl.rewardObject.highlight:SetHidden(false)
             self:UpdateMilestoneThresholdColor(milestoneControl)
-            self.focusedRewardData = milestoneControl.rewardObject.rewardData
+            self.focusedRewardData = milestoneControl.rewardObject.displayRewardData
             GAMEPAD_TOOLTIPS:LayoutRewardData(GAMEPAD_RIGHT_TOOLTIP, self.focusedRewardData)
 
             return true
@@ -755,9 +774,10 @@ function ZO_PromotionalEvents_Gamepad:UpdateActivityTooltip()
     self.focusedRewardData = nil
     local selectedActivityEntry = self.selectedData
     if selectedActivityEntry then
-        local rewardData = selectedActivityEntry:GetRewardData()
+        local rewardObject = self:GetActivityRewardObject(selectedActivityEntry)
+        local displayRewardData = rewardObject and rewardObject.displayRewardData
         local description = ""
-        if self.preferActivityDescriptionTooltip or not rewardData then
+        if self.preferActivityDescriptionTooltip or not displayRewardData then
             description = selectedActivityEntry:GetDescription()
             local requiredCollectibleText = ZO_PromotionalEvents_Shared.GetActivityRequiredCollectibleText(selectedActivityEntry)
             if requiredCollectibleText then
@@ -772,9 +792,9 @@ function ZO_PromotionalEvents_Gamepad:UpdateActivityTooltip()
         if description ~= "" then
             local NO_TITLE = nil
             GAMEPAD_TOOLTIPS:LayoutTitleAndDescriptionTooltip(GAMEPAD_RIGHT_TOOLTIP, NO_TITLE, description)
-        elseif rewardData then
-            self.focusedRewardData = rewardData
-            GAMEPAD_TOOLTIPS:LayoutRewardData(GAMEPAD_RIGHT_TOOLTIP, rewardData)
+        elseif displayRewardData then
+            self.focusedRewardData = displayRewardData
+            GAMEPAD_TOOLTIPS:LayoutRewardData(GAMEPAD_RIGHT_TOOLTIP, displayRewardData)
         else
             GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
         end
@@ -899,9 +919,9 @@ function ZO_PromotionalEvents_CapstoneDialog_Gamepad:Initialize(control)
             local narrations = {}
             local titleText = GetString(SI_PROMOTIONAL_EVENT_CAPSTONE_DIALOG_TITLE_FORMATTER)
             ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(titleText))
-            local rewardName = self.rewardData:GetFormattedName()
+            local rewardName = self.displayRewardData:GetFormattedName()
             ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(rewardName))
-            local stackCount = self.rewardData:GetQuantity()
+            local stackCount = self.displayRewardData:GetQuantity()
             if stackCount > 1 then
                 ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(stackCount))
             end
@@ -934,7 +954,12 @@ function ZO_PromotionalEvents_CapstoneDialog_Gamepad:Initialize(control)
                 alignment = KEYBIND_STRIP_ALIGN_CENTER,
                 callback = function() self:ViewInCollections() end,
                 visible = function(dialog)
-                    return dialog.data.campaignData:GetRewardData():GetRewardType() == REWARD_ENTRY_TYPE_COLLECTIBLE
+                    -- This code runs before setup
+                    local campaignData = dialog.data.campaignData
+                    local baseRewardData = campaignData:GetRewardData()
+                    local _, wasFallbackClaimed = campaignData:IsRewardClaimed()
+                    local displayRewardData = wasFallbackClaimed and baseRewardData:GetFallbackRewardData() or baseRewardData
+                    return displayRewardData:GetRewardType() == REWARD_ENTRY_TYPE_COLLECTIBLE
                 end,
                 ethereal = true,
             },
@@ -979,27 +1004,16 @@ function ZO_PromotionalEvents_CapstoneDialog_Gamepad:InitializeParticleSystems()
     ZO_PromotionalEvents_CapstoneDialog_Shared.InitializeParticleSystems(self)
     
     local blastParticleSystem = self.blastParticleSystem
-    blastParticleSystem:SetParticleParameter("PhysicsInitialVelocityMagnitude", ZO_UniformRangeGenerator:New(700, 1100))
-    blastParticleSystem:SetParticleParameter("Size", ZO_UniformRangeGenerator:New(6, 12))
-    blastParticleSystem:SetParticleParameter("PhysicsDragMultiplier", 1.5)
-    blastParticleSystem:SetParticleParameter("PrimeS", .5)
 
     local headerSparksParticleSystem = self.headerSparksParticleSystem
     headerSparksParticleSystem:SetParentControl(self.control:GetNamedChild("TopDivider"))
-    headerSparksParticleSystem:SetParticleParameter("PhysicsInitialVelocityMagnitude", ZO_UniformRangeGenerator:New(15, 60))
-    headerSparksParticleSystem:SetParticleParameter("Size", ZO_UniformRangeGenerator:New(5, 10))
-    headerSparksParticleSystem:SetParticleParameter("DrawLayer", DL_OVERLAY)
-    headerSparksParticleSystem:SetParticleParameter("DrawLevel", 2)
 
     local headerStarbustParticleSystem = self.headerStarbustParticleSystem
     headerStarbustParticleSystem:SetParentControl(self.control:GetNamedChild("TopDivider"))
-    headerStarbustParticleSystem:SetParticleParameter("Size", 256)
-    headerStarbustParticleSystem:SetParticleParameter("DrawLayer", DL_OVERLAY)
-    headerStarbustParticleSystem:SetParticleParameter("DrawLevel", 1)
 end
 
 function ZO_PromotionalEvents_CapstoneDialog_Gamepad:SetCampaignData(campaignData)
     ZO_PromotionalEvents_CapstoneDialog_Shared.SetCampaignData(self, campaignData)
 
-    self.viewInCollectionsButton:SetHidden(self.rewardData:GetRewardType() ~= REWARD_ENTRY_TYPE_COLLECTIBLE)
+    self.viewInCollectionsButton:SetHidden(self.displayRewardData:GetRewardType() ~= REWARD_ENTRY_TYPE_COLLECTIBLE)
 end

@@ -371,7 +371,7 @@ end
 --[[ Gamepad Market Grid Screen ]]--
 --
 
-ZO_GamepadMarket_GridScreen = ZO_Object:Subclass()
+ZO_GamepadMarket_GridScreen = ZO_InitializingObject:Subclass()
 
 function ZO_GamepadMarket_GridScreen:Initialize(control, initialTabBarEntries)
     control.owner = self
@@ -668,8 +668,7 @@ function ZO_GamepadMarket_GridScreen:OnSelectionChanged(selectedData)
 end
 
 function ZO_GamepadMarket_GridScreen:SetQueuedTutorial(queuedTutorial)
-    local tutorialId = GetTutorialId(queuedTutorial)
-
+    local tutorialId = TUTORIAL_MANAGER:GetTutorialId(queuedTutorial)
     if not HasSeenTutorial(tutorialId) then
         self.queuedTutorial = queuedTutorial
     end

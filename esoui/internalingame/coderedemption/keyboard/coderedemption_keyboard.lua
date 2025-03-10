@@ -51,7 +51,7 @@ ESO_Dialogs["KEYBOARD_CODE_REDEMPTION_REDEEM_CODE_DIALOG"] =
             text = SI_DIALOG_CONFIRM,
             requiresTextInput = true,
             callback = function(dialog)
-                local enteredCode = ZO_Dialogs_GetEditBoxText(dialog)
+                local enteredCode = zo_strgsub(ZO_Dialogs_GetEditBoxText(dialog), "%s+", "")
                 local dialogData =
                 {
                     enteredCode = enteredCode,

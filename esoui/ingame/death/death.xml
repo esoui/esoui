@@ -16,7 +16,7 @@
                     <Anchor point="TOPLEFT" offsetY="2"/>
                     <Dimensions x="0" y="12"/>
                 </Texture>
-                <Texture name="$(parent)LoadBarFill" textureFile="EsoUI/Art/Death/respawn_loadbar.dds" color="INTERFACE_COLOR_TYPE_DEATH_INTERFACE_COLORS:DEATH_INTERFACE_COLORS_RESPAWN_FILL_KEYBOARD">
+                <Texture name="$(parent)LoadBarFill" textureFile="EsoUI/Art/Death/respawn_loadbar.dds" color="INTERFACE_COLOR_TYPE_DEATH_INTERFACE_COLORS:DEATH_INTERFACE_COLORS_RESPAWN_COOLDOWN_FILL_KEYBOARD">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)LoadBar" relativePoint="TOPRIGHT" offsetY="2"/>
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)Background"  relativePoint="TOPRIGHT" offsetY="2"/>
                     <Dimensions y="12"/>

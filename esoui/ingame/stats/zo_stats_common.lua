@@ -9,7 +9,7 @@ STAT_TYPES =
     [ATTRIBUTE_STAMINA] = STAT_STAMINA_MAX,
 }
 
-ZO_STAT_TOOLTIP_DESCRIPTIONS = 
+ZO_STAT_TOOLTIP_DESCRIPTIONS =
 {
     [STAT_HEALTH_MAX] = SI_STAT_TOOLTIP_HEALTH_MAX,
     [STAT_HEALTH_REGEN_IDLE] = SI_STAT_TOOLTIP_HEALTH_REGENERATION_IDLE,
@@ -34,6 +34,25 @@ ZO_STAT_TOOLTIP_DESCRIPTIONS =
     [STAT_SPELL_MITIGATION] = SI_STAT_TOOLTIP_SPELL_MITIGATION,
     [STAT_ARMOR_RATING] = SI_STAT_TOOLTIP_ARMOR_RATING,
     [STAT_WEAPON_AND_SPELL_DAMAGE] = SI_STAT_TOOLTIP_WEAPON_POWER,
+}
+
+-- Numbers are the abilityId associated with each icon
+ZO_STAT_MUNDUS_ICONS =
+{
+    [MUNDUS_STONE_INVALID] = "EsoUI/Art/Icons/mapKey/mapKey_mundus.dds",
+    [MUNDUS_STONE_APPRENTICE] = "EsoUI/Art/Icons/constellation_apprentice.dds",
+    [MUNDUS_STONE_ATRONACH] = "EsoUI/Art/Icons/constellation_atronach.dds",
+    [MUNDUS_STONE_LADY] = "EsoUI/Art/Icons/constellation_lady.dds",
+    [MUNDUS_STONE_LORD] = "EsoUI/Art/Icons/constellation_lord.dds",
+    [MUNDUS_STONE_LOVER] = "EsoUI/Art/Icons/constellation_lovers.dds",
+    [MUNDUS_STONE_MAGE] = "EsoUI/Art/Icons/constellation_mage.dds",
+    [MUNDUS_STONE_RITUAL] = "EsoUI/Art/Icons/constellation_ritual.dds",
+    [MUNDUS_STONE_SERPENT] = "EsoUI/Art/Icons/constellation_serpent.dds",
+    [MUNDUS_STONE_SHADOW] = "EsoUI/Art/Icons/constellation_shadow.dds",
+    [MUNDUS_STONE_STEED] = "EsoUI/Art/Icons/constellation_stead.dds",
+    [MUNDUS_STONE_THIEF] = "EsoUI/Art/Icons/constellation_thief.dds",
+    [MUNDUS_STONE_TOWER] = "EsoUI/Art/Icons/constellation_tower.dds",
+    [MUNDUS_STONE_WARRIOR] = "EsoUI/Art/Icons/constellation_warrior.dds",
 }
 
 ZO_STATS_REFRESH_TIME_SECONDS = 2

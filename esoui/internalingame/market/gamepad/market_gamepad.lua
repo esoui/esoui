@@ -144,10 +144,6 @@ local g_activeMarketScreen = nil
 
 local GamepadMarket = ZO_Object.MultiSubclass(ZO_GamepadMarket_GridScreen, ZO_Market_Shared)
 
-function GamepadMarket:New(...)
-    return ZO_Market_Shared.New(self, ...)
-end
-
 function GamepadMarket:Initialize(control)
     self:SetDisplayGroup(MARKET_DISPLAY_GROUP_CROWN_STORE)
     self.shownCurrencyTypeBalances = nil
@@ -1784,7 +1780,7 @@ function GamepadMarketBundleContents:PerformDeferredInitialization()
             },
             -- Gift Keybind
             {
-                 name = GetString(SI_MARKET_GIFT_BUNDLE_KEYBIND_TEXT),
+                name = GetString(SI_MARKET_GIFT_BUNDLE_KEYBIND_TEXT),
                 keybind = "UI_SHORTCUT_RIGHT_STICK",
                 visible = function()
                                 return self.marketProductData:IsGiftable()

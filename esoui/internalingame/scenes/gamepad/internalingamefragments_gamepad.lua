@@ -66,6 +66,15 @@ GAMEPAD_MARKET_ITEM_PREVIEW_OPTIONS_FRAGMENT = ZO_ItemPreviewOptionsFragment:New
     dynamicFramingConsumedHeight = 400,
 })
 
+GAMEPAD_NAV_QUADRANT_2_3_4_ITEM_PREVIEW_OPTIONS_FRAGMENT = ZO_ItemPreviewOptionsFragment:New({
+    paddingLeft = ZO_GAMEPAD_PANEL_WIDTH + ZO_GAMEPAD_SAFE_ZONE_INSET_X,
+    paddingRight = 0,
+    dynamicFramingConsumedWidth = 1150,
+    dynamicFramingConsumedHeight = 400,
+    forcePreparePreview = false,
+    previewBufferMS = 300
+})
+
 
 -- END Quadrant System Gamepad Grid Backgrounds: DO NOT BLOAT! --
 

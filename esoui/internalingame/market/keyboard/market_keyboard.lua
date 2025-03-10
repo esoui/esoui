@@ -11,10 +11,6 @@ ZO_MARKET_SUBCATEGORY_LABEL_WIDTH = ZO_MARKET_CATEGORY_CONTAINER_WIDTH - ZO_MARK
 
 ZO_Market_Keyboard = ZO_Market_Shared:Subclass()
 
-function ZO_Market_Keyboard:New(...)
-    return ZO_Market_Shared.New(self, ...)
-end
-
 function ZO_Market_Keyboard:Initialize(control, sceneName)
     self.messageLabel = control:GetNamedChild("MessageLabel")
     self.messageLoadingIcon = control:GetNamedChild("MessageLoadingIcon")
@@ -111,11 +107,17 @@ function ZO_Market_Keyboard:InitializeKeybindDescriptors()
         -- End Preview Keybind
         {
             alignment = KEYBIND_STRIP_ALIGN_CENTER,
-            name =      GetString(SI_MARKET_END_PREVIEW_KEYBIND_TEXT),
+            name =      function()
+                            if self:HasAnyCurrentSlotPreviews() then
+                                return GetString(SI_MARKET_END_ALL_PREVIEWS_KEYBIND_TEXT)
+                            else
+                                return GetString(SI_MARKET_END_PREVIEW_KEYBIND_TEXT)
+                            end
+                        end,
             keybind =   "UI_SHORTCUT_NEGATIVE",
             visible =   function()
                                 local isPreviewing = self:GetPreviewState()
-                                return isPreviewing and self.selectedMarketProduct == nil
+                                return (isPreviewing and self.selectedMarketProduct == nil) or self:HasAnyCurrentSlotPreviews()
                         end,
             callback =  function()
                             local isPreviewing = self:GetPreviewState()
@@ -192,18 +194,28 @@ function ZO_Market_Keyboard:InitializeKeybindDescriptors()
                         end,
         },
 
-        -- "Preview" Keybind
+        -- "Preview" Keybind; will also end preview of individual outfit style pieces
         {
             order = 2,
             name =      function()
                             if self.productListFragment:IsShowing() or self:HasActiveCustomPreview() then
-                                return GetString(SI_MARKET_PREVIEW_KEYBIND_TEXT)
+                                local _, _, isActivePreview, isPreviewToggleable = self.productListFragment:GetPreviewState()
+                                if isActivePreview and isPreviewToggleable then
+                                    return GetString(SI_MARKET_END_PREVIEW_KEYBIND_TEXT)
+                                else
+                                    return GetString(SI_MARKET_PREVIEW_KEYBIND_TEXT)
+                                end
                             else
                                 local previewType = self.selectedMarketProduct:GetMarketProductPreviewType()
                                 if previewType == ZO_MARKET_PREVIEW_TYPE_BUNDLE or previewType == ZO_MARKET_PREVIEW_TYPE_BUNDLE_AS_LIST then
                                     return GetString(SI_MARKET_BUNDLE_DETAILS_KEYBIND_TEXT)
                                 else
-                                    return GetString(SI_MARKET_PREVIEW_KEYBIND_TEXT)
+                                    local _, _, isActivePreview, isPreviewToggleable = self:GetPreviewState()
+                                    if isActivePreview and isPreviewToggleable then
+                                        return GetString(SI_MARKET_END_PREVIEW_KEYBIND_TEXT)
+                                    else
+                                        return GetString(SI_MARKET_PREVIEW_KEYBIND_TEXT)
+                                    end
                                 end
                             end
                         end,
@@ -1362,7 +1374,21 @@ function ZO_Market_Keyboard:PreviewData(data)
 end
 
 function ZO_Market_Keyboard:PreviewMarketProduct(productId)
-    ZO_Market_Shared.PreviewMarketProduct(ITEM_PREVIEW_KEYBOARD, productId)
+    local collectibleId
+    local collectibleType
+    if GetMarketProductType(productId) == MARKET_PRODUCT_TYPE_COLLECTIBLE then
+        collectibleId, _, _, collectibleType = GetMarketProductCollectibleInfo(productId)
+    end
+    if collectibleType == COLLECTIBLE_CATEGORY_TYPE_OUTFIT_STYLE then
+        if not self:HasAnyCurrentSlotPreviews() then
+            ITEM_PREVIEW_KEYBOARD:EndCurrentPreview()
+        end
+        self:PreviewOutfitStyle(collectibleId)
+        self:RefreshActions()
+    else
+        self:ClearAllCurrentSlotPreviews()
+        ZO_Market_Shared.PreviewMarketProduct(ITEM_PREVIEW_KEYBOARD, productId)
+    end
 end
 
 function ZO_Market_Keyboard:PreviewReward(rewardId)

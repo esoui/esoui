@@ -206,6 +206,9 @@ ZO_HUDScene = ZO_Scene:Subclass()
 function ZO_HUDScene:New()
     local scene = ZO_Scene.New(self, "hud", SCENE_MANAGER)
     scene:AddFragment(RETICLE_MODE_FRAGMENT)
+    if ZO_IsForceConsoleFlow() then
+        scene:AddFragment(FORCE_CONSOLE_WARNING_FRAGMENT)
+    end
     scene:AddFragmentGroup(HUD_FRAGMENT_GROUP)
     return scene
 end
@@ -222,8 +225,10 @@ function ZO_HUDUIScene:New()
     local scene = ZO_Scene.New(self, "hudui", SCENE_MANAGER)
     SCENE_MANAGER:SetSceneRestoresBaseSceneOnGameMenuToggle("hudui", true)
     scene:AddFragment(MOUSE_UI_MODE_FRAGMENT)
+    if ZO_IsForceConsoleFlow() then
+        scene:AddFragment(FORCE_CONSOLE_WARNING_FRAGMENT)
+    end
     scene:AddFragmentGroup(HUD_FRAGMENT_GROUP)
-
     return scene
 end
 

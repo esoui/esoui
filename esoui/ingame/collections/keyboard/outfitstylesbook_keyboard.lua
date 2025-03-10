@@ -53,16 +53,22 @@ function ZO_OutfitStylesBook_Keyboard:InitializeKeybindStripDescriptors()
                     return GetString(SI_OUTFIT_STYLES_BOOK_PREVIEW_KEYBIND)
                 end
             end,
-            
+
             enabled = function()
                 local collectibleData = ZO_OUTFIT_STYLES_PANEL_KEYBOARD:GetMouseOverEntryData().data
-                return not collectibleData.IsBlocked or not collectibleData:IsBlocked(GAMEPLAY_ACTOR_CATEGORY_PLAYER)
+                local isPreviewAvailable = IsCharacterPreviewingAvailable()
+                if isPreviewAvailable and (not collectibleData.IsBlocked or not collectibleData:IsBlocked(GAMEPLAY_ACTOR_CATEGORY_PLAYER)) then
+                    return true
+                elseif not isPreviewAvailable then
+                    return false, GetString(SI_PREVIEW_UNAVAILABLE_ERROR)
+                end
+                return false
             end,
 
             keybind = "UI_SHORTCUT_PRIMARY",
 
             visible = function()
-                return self.previewAvailable and ZO_OUTFIT_STYLES_PANEL_KEYBOARD:GetMouseOverEntryData() ~= nil
+                return ZO_OUTFIT_STYLES_PANEL_KEYBOARD:GetMouseOverEntryData() ~= nil
             end,
 
             callback = function()

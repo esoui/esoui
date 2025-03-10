@@ -767,8 +767,7 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
     end
 
     local function OnPromotionalEventRewardsUpdated()
-        local campaignData = PROMOTIONAL_EVENT_MANAGER:GetCurrentCampaignData()
-        if campaignData and campaignData:IsAnyRewardClaimable() and not IsPromotionalEventSystemLocked() then
+        if PROMOTIONAL_EVENT_MANAGER:IsAnyRewardClaimable() then
             if not self:ExistsInQueue(INTERACT_TYPE.PROMOTIONAL_EVENT_REWARD) then
                 PlaySound(SOUNDS.PROMOTIONAL_EVENT_REWARD_TO_CLAIM_PROMPT)
 

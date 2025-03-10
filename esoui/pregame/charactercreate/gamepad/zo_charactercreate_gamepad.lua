@@ -72,7 +72,7 @@ function CharacterCreateSliderManager:Initialize(parent)
     end
 
     local CreateGenderSlider = function(pool)
-        local control = ZO_ObjectPool_CreateNamedControl("CharacterCreateGenderSlider_Gamepad", "ZO_CharacterCreateSlider_Gamepad", pool, parent)
+        local control = ZO_ObjectPool_CreateNamedControl("CharacterCreateGenderSlider_Gamepad", "ZO_CharacterCreateGenderSlider_Gamepad", pool, parent)
         return ZO_CharacterCreateGenderSlider_Gamepad:New(control)
     end
 

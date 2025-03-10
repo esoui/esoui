@@ -37,7 +37,7 @@ end
 
 function ZO_Tooltip:LayoutAchievement(achievementId)
     local achievementName, description, points, icon, completed, date, time = GetAchievementInfo(achievementId)
-    local achievementStatus = ACHIEVEMENTS_MANAGER:GetAchievementStatus(achievementId)
+    local achievementStatus = ZO_GetAchievementStatus(achievementId)
     local persistenceLevel = GetAchievementPersistenceLevel(achievementId)
     local isCharacterPersistent = persistenceLevel == ACHIEVEMENT_PERSISTENCE_CHARACTER
 

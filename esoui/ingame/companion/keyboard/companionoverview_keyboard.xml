@@ -113,7 +113,7 @@
                             </Controls>
                         </Control>
                         
-                        <Label name="$(parent)Description" font="ZoFontHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLOR:INTERFACE_TEXT_COLOR_SELECTED">
+                        <Label name="$(parent)Description" font="ZoFontHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)Status" relativePoint="BOTTOMLEFT" offsetY="10" />
                             <Anchor point="TOPRIGHT" relativeTo="$(parent)Status" relativePoint="BOTTOMRIGHT" offsetY="10" />
                         </Label>         

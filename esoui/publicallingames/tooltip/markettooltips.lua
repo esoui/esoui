@@ -141,6 +141,14 @@ function ZO_Tooltip:LayoutMarketProductListing(marketProductId, presentationInde
         bodySection:AddLine(esoPlusDealString, self:GetStyle("bodyDescription"), self:GetStyle("esoPlusColorStyle"))
         self:AddSection(bodySection)
     end
+
+    local associatedAchievementId = GetMarketProductAssociatedAchievementId(marketProductId)
+    if associatedAchievementId > 0 then
+        -- Add padding
+        local bodySection = self:AcquireSection(self:GetStyle("bodySection"))
+        self:AddSectionEvenIfEmpty(bodySection)
+        self:LayoutAchievement(associatedAchievementId)
+    end
 end
 
 function ZO_Tooltip:LayoutEsoPlusTrialNotification(marketProductId)

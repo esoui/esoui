@@ -1,0 +1,51 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_AddOnEulaDialog_Gamepad_TL" inherits="ZO_CustomCenteredGamepadDialogTemplate" hidden="true" tier="HIGH" level="ZO_HIGH_TIER_OVER_GAMEPAD_KEYBIND_STRIP">
+            <Anchor point="TOPLEFT" relativeTo="GuiRoot" offsetX="260" offsetY="ZO_GAMEPAD_SAFE_ZONE_INSET_Y"/>
+            <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" offsetX="-260" offsetY="-ZO_GAMEPAD_SAFE_ZONE_INSET_Y"/>
+            <OnInitialized>
+                ZO_AddOnEulaDialog_Gamepad.OnControlInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)HeaderContainer" inherits="ZO_GamepadScreenHeaderContainer" >
+                    <Anchor point="TOPLEFT" offsetX="50" offsetY="-8" />
+                    <Anchor point="TOPRIGHT" offsetX="-50" offsetY="-8" />
+                </Control>
+
+                <Control name="$(parent)Container" inherits="ZO_ScrollContainer_Gamepad" >
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)HeaderContainerHeader" relativePoint="BOTTOMLEFT" offsetY="12" />
+                    <Anchor point="BOTTOMRIGHT" offsetY="-78" offsetX="-50" />
+                    <Controls>
+                        <Texture name="$(parent)ScrollIndicator" override="true">
+                            <Anchor point="CENTER" relativeTo="$(grandparent)" relativePoint="RIGHT" offsetX="1"/>
+                        </Texture>
+
+                        <Control name="$(parent)ScrollChild" resizeToFitConstrains="Y" override="true">
+                            <Dimensions x="100%" />
+                            <Controls>
+                                <Label name="$(parent)MainText" font="ZoFontGamepad25" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                                    <Anchor point="TOPLEFT" offsetX="4" offsetY="4" />
+                                    <Anchor point="TOPRIGHT"/>
+                                </Label>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)Keybinds" resizeToFitDescendents="true">
+                    <Anchor point="TOP" relativeTo="$(parent)Container" relativePoint="BOTTOM" offsetY="10" />
+                    <Controls>
+                        <Control name="$(parent)AcceptKeybind" inherits="ZO_KeybindButton_Gamepad">
+                            <Anchor point="LEFT" />
+                        </Control>
+
+                        <Control name="$(parent)DeclineKeybind" inherits="ZO_KeybindButton_Gamepad">
+                            <Anchor point="LEFT" relativeTo="$(parent)AcceptKeybind" relativePoint="RIGHT" offsetX="20" />
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

@@ -1973,7 +1973,6 @@ function ZO_InventoryManager:RefreshAllInventorySlots(inventoryType)
         self:EmptyInventory(inventory)
 
         self.suppressItemAddedAlert = true
-        TEXT_SEARCH_MANAGER:ClearPendingContextSearches()
 
         for _, bagId in ipairs(inventory.backingBags) do
             for slotIndex in ZO_IterateBagSlots(bagId) do
@@ -3034,7 +3033,6 @@ function ZO_InventoryManager:RefreshAllGuildBankItems()
     self:EmptyInventory(inventory)
 
     self.suppressItemAddedAlert = true
-    TEXT_SEARCH_MANAGER:ClearPendingContextSearches()
 
     --Add items
     for _, bagId in ipairs(inventory.backingBags) do

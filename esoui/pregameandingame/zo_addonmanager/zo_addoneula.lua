@@ -107,12 +107,14 @@ do
     end
 
     local function DisplayAddOnEULAIfNecessary()
-        if(not HasAgreedToEULA(EULA_TYPE_ADDON_EULA)) then
-            if(not ZO_AddOnEula) then
-                CreateControlFromVirtual("ZO_AddOnEula", GuiRoot, "ZO_AddOnEulaTemplate")
-            end
+        if not IsInGamepadPreferredMode() then
+            if not HasAgreedToEULA(EULA_TYPE_ADDON_EULA) then
+                if not ZO_AddOnEula then
+                    CreateControlFromVirtual("ZO_AddOnEula", GuiRoot, "ZO_AddOnEulaTemplate")
+                end
 
-            SCENE_MANAGER:AddFragment(g_addOnEULAFragment)
+                SCENE_MANAGER:AddFragment(g_addOnEULAFragment)
+            end
         end
     end
 

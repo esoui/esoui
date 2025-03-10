@@ -12,6 +12,11 @@ function ZO_ExplorationUtils_GetZoneStoryZoneIdByZoneIndex(zoneIndex)
     return GetZoneStoryZoneIdForZoneId(zoneId)
 end
 
+function ZO_ExplorationUtils_GetParentZoneIdByZoneIndex(zoneIndex)
+    local zoneId = GetZoneId(zoneIndex)
+    return GetParentZoneId(zoneId)
+end
+
 function ZO_ExplorationUtils_GetZoneStoryZoneIdForCurrentMap()
     local currentZoneIndex = GetCurrentMapZoneIndex()
     return ZO_ExplorationUtils_GetZoneStoryZoneIdByZoneIndex(currentZoneIndex)

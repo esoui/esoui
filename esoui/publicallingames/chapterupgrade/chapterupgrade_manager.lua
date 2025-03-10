@@ -2,8 +2,6 @@
 -- Data Object --
 -----------------
 
-IsChapterOwned = function() return false end
-
 ZO_CHAPTER_UPGRADE_REWARD_TYPE =
 {
     PRE_PURCHASE = 1,
@@ -19,6 +17,10 @@ function ZO_ChapterUpgrade_Data:Initialize(chapterUpgradeId)
     self.marketProductId = 0
     self.collectibleId = GetChapterCollectibleId(chapterUpgradeId)
     self.name, _, self.collectibleIcon = GetCollectibleInfo(self.collectibleId)
+    local overrideName = GetChapterOverrideDisplayName(chapterUpgradeId)
+    if overrideName ~= "" then
+        self.name = overrideName
+    end
     self.summary = GetChapterSummary(chapterUpgradeId)
     self:RefreshChapterUpgradeState()
     self.marketBackgroundImage = GetChapterMarketBackgroundFileImage(chapterUpgradeId)

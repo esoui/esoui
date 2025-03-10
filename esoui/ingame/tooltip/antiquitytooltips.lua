@@ -40,6 +40,14 @@ function ZO_Tooltip:LayoutAntiquityLead(antiquityId)
         bodySection:AddLine(formattedDescription, descriptionStyle)
         self:AddSection(bodySection)
 
+        local antiquitySetData = antiquityData:GetAntiquitySetData()
+        if antiquitySetData then
+            local setSection = self:AcquireSection(self:GetStyle("antiquityInfoSection"))
+            local formattedSetDescription = zo_strformat(SI_ANTIQUITY_FRAGMENT_SET_DESCRIPTOR, ZO_SELECTED_TEXT:Colorize(antiquitySetData:GetNumAntiquities()), antiquitySetData:GetColorizedFormattedName())
+            setSection:AddLine(formattedSetDescription, self:GetStyle("bodyDescription"))
+            self:AddSection(setSection)
+        end
+
         self:AddAntiquityZone(antiquityId)
     end
 end
@@ -64,7 +72,7 @@ function ZO_Tooltip:LayoutAntiquitySetFragment(antiquityId)
             end
 
             local bodySection = self:AcquireSection(self:GetStyle("antiquityInfoSection"))
-            local formattedSetDescription = zo_strformat(SI_ANTIQUITY_FRAGMENT_SET_DESCRIPTOR, antiquitySetData:GetNumAntiquities(), antiquitySetData:GetName())
+            local formattedSetDescription = zo_strformat(SI_ANTIQUITY_FRAGMENT_SET_DESCRIPTOR, ZO_SELECTED_TEXT:Colorize(antiquitySetData:GetNumAntiquities()), antiquitySetData:GetColorizedFormattedName())
             bodySection:AddLine(formattedSetDescription, self:GetStyle("bodyDescription"))
             self:AddSection(bodySection)
 

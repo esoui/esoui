@@ -183,46 +183,54 @@ function WorldMapFilterPanel_Gamepad:PostBuildControls()
     self.list:Commit()
 end
 
+--Global (Cosmic and World) Filter Panel
+
+local GlobalWorldMapFilterPanel_Gamepad = ZO_Object.MultiSubclass(ZO_GlobalWorldMapFilterPanel_Shared, WorldMapFilterPanel_Gamepad)
+
+function GlobalWorldMapFilterPanel_Gamepad:Initialize(...)
+    ZO_GlobalWorldMapFilterPanel_Shared.Initialize(self, ...)
+    WorldMapFilterPanel_Gamepad.Initialize(self, ...)
+end
+
 --PvE Filter Panel
 
 local PvEWorldMapFilterPanel_Gamepad = ZO_Object.MultiSubclass(ZO_PvEWorldMapFilterPanel_Shared, WorldMapFilterPanel_Gamepad)
 
-function PvEWorldMapFilterPanel_Gamepad:New(...)
-    return WorldMapFilterPanel_Gamepad.New(self, ...)
+function PvEWorldMapFilterPanel_Gamepad:Initialize(...)
+    ZO_PvEWorldMapFilterPanel_Shared.Initialize(self, ...)
+    WorldMapFilterPanel_Gamepad.Initialize(self, ...)
 end
 
 --PvP Filter Panel
 
 local PvPWorldMapFilterPanel_Gamepad = ZO_Object.MultiSubclass(ZO_PvPWorldMapFilterPanel_Shared, WorldMapFilterPanel_Gamepad)
 
-function PvPWorldMapFilterPanel_Gamepad:New(...)
-    return WorldMapFilterPanel_Gamepad.New(self, ...)
+function PvPWorldMapFilterPanel_Gamepad:Initialize(...)
+    ZO_PvPWorldMapFilterPanel_Shared.Initialize(self, ...)
+    WorldMapFilterPanel_Gamepad.Initialize(self, ...)
 end
 
 --Imperial PvP Filter Panel
 
 local ImperialPvPWorldMapFilterPanel_Gamepad = ZO_Object.MultiSubclass(ZO_ImperialPvPWorldMapFilterPanel_Shared, WorldMapFilterPanel_Gamepad)
 
-function ImperialPvPWorldMapFilterPanel_Gamepad:New(...)
-    return WorldMapFilterPanel_Gamepad.New(self, ...)
+function ImperialPvPWorldMapFilterPanel_Gamepad:Initialize(...)
+    ZO_ImperialPvPWorldMapFilterPanel_Shared.Initialize(self, ...)
+    WorldMapFilterPanel_Gamepad.Initialize(self, ...)
 end
 
 --Battleground Filter Panel
 
 local BattlegroundWorldMapFilterPanel_Gamepad = ZO_Object.MultiSubclass(ZO_BattlegroundWorldMapFilterPanel_Shared, WorldMapFilterPanel_Gamepad)
 
-function BattlegroundWorldMapFilterPanel_Gamepad:New(...)
-    return WorldMapFilterPanel_Gamepad.New(self, ...)
+function BattlegroundWorldMapFilterPanel_Gamepad:Initialize(...)
+    ZO_BattlegroundWorldMapFilterPanel_Shared.Initialize(self, ...)
+    WorldMapFilterPanel_Gamepad.Initialize(self, ...)
 end
 
 --Filters
 
 local WorldMapFilters_Gamepad = ZO_WorldMapFilters_Shared:Subclass()
-
-function WorldMapFilters_Gamepad:New(...)
-    local object = ZO_WorldMapFilters_Shared.New(self, ...)
-    return object
-end
 
 function WorldMapFilters_Gamepad:Initialize(control)
     ZO_WorldMapFilters_Shared.Initialize(self, control)
@@ -247,6 +255,7 @@ function WorldMapFilters_Gamepad:Initialize(control)
         self.pvpPanel = PvPWorldMapFilterPanel_Gamepad:New(self.control:GetNamedChild("Main"):GetNamedChild("PvP"), MAP_FILTER_TYPE_AVA_CYRODIIL, savedVars)
         self.imperialPvPPanel = ImperialPvPWorldMapFilterPanel_Gamepad:New(self.control:GetNamedChild("Main"):GetNamedChild("ImperialPvP"), MAP_FILTER_TYPE_AVA_IMPERIAL, savedVars)
         self.battlegroundPanel = BattlegroundWorldMapFilterPanel_Gamepad:New(self.control:GetNamedChild("Main"):GetNamedChild("Battleground"), MAP_FILTER_TYPE_BATTLEGROUND, savedVars)
+        self.globalPanel = GlobalWorldMapFilterPanel_Gamepad:New(self.control:GetNamedChild("Main"):GetNamedChild("Global"), MAP_FILTER_TYPE_GLOBAL, savedVars)
     end)
 end
 

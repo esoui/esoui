@@ -38,6 +38,19 @@ function ZO_AttributeItem_Gamepad:SetAttributeInfo(statType)
     end
 end
 
+function ZO_AttributeItem_Gamepad:SetMundusEffect(hasEffect, effectName, effectValue, effectBuffIndex)
+    if hasEffect then
+        self.control.mundus =
+        {
+            name = effectName,
+            value = effectValue,
+            buffIndex = effectBuffIndex,
+        }
+    else
+        self.control.mundus = nil
+    end
+end
+
 function ZO_AttributeItem_Gamepad:RefreshHeaderText()
     local text = GetString("SI_DERIVEDSTATS", self.statType)
     self.header:SetText(text)
@@ -46,17 +59,37 @@ end
 
 function ZO_AttributeItem_Gamepad:RefreshDataText()
     local value = GetPlayerStat(self.statType, STAT_BONUS_OPTION_APPLY_BONUS)
+    local bonusValue = GAMEPAD_STATS:GetPendingStatBonuses(self.statType)
     local text
 
     if self.statType == STAT_CRITICAL_STRIKE or self.statType == STAT_SPELL_CRITICAL then
         value = GetCriticalStrikeChance(value)
         text = zo_strformat(SI_STAT_VALUE_PERCENT, value)
     else
-        if self.formatString ~= nil then
+         if self.formatString ~= nil then
             text = zo_strformat(self.formatString, value)
         else
             text = value
         end
+    end
+    if self.control.mundus then
+        local NO_GRAMMAR = true
+        if self.highlightedMundusBuffIndex
+            and self.highlightedMundusBuffIndex == self.control.mundus.buffIndex
+            and (not bonusValue or bonusValue == 0) then
+            local color
+            local icon
+            if self.control.mundus.value > 0 then
+                color = ZO_SUCCEEDED_TEXT
+                icon = "EsoUI/Art/Buttons/Gamepad/gp_upArrow.dds"
+            else
+                color = ZO_ERROR_COLOR
+                icon = "EsoUI/Art/Buttons/Gamepad/gp_downArrow.dds"
+            end
+            local INHERIT_COLOR = true
+            text = color:Colorize(zo_iconTextFormatNoSpaceAlignedRight(icon, 24, 24, text, INHERIT_COLOR, NO_GRAMMAR))
+        end
+        text = zo_iconTextFormatNoSpace(ZO_STAT_MUNDUS_ICONS[MUNDUS_STONE_INVALID], 24, 24, text, NO_GRAMMAR)
     end
 
     self.data:SetText(text)
@@ -81,7 +114,8 @@ function ZO_AttributeItem_Gamepad:RefreshBonusText()
     end
 end
 
-function ZO_AttributeItem_Gamepad:RefreshText()
+function ZO_AttributeItem_Gamepad:RefreshText(highlightedMundusBuffIndex)
+    self.highlightedMundusBuffIndex = highlightedMundusBuffIndex
     self:RefreshHeaderText()
     self:RefreshDataText()
     self:RefreshBonusText()
@@ -136,7 +170,11 @@ function ZO_AttributeTooltipsGrid_Gamepad:RefreshAttributeTooltip()
     local currentAttributeItem = self.attributeItems[self.currentItemRow][self.currentItemColumn]
     local currentStatType = currentAttributeItem.statType
     if currentStatType ~= STAT_NONE then
-        GAMEPAD_TOOLTIPS:LayoutAttributeTooltip(GAMEPAD_RIGHT_TOOLTIP, currentStatType)
+        local mundusName = nil
+        if currentAttributeItem.mundus then
+            mundusName = currentAttributeItem.mundus.name
+        end
+        GAMEPAD_TOOLTIPS:LayoutAttributeTooltip(GAMEPAD_RIGHT_TOOLTIP, currentStatType, mundusName)
     else
         GAMEPAD_TOOLTIPS:LayoutEquipmentBonusTooltip(GAMEPAD_RIGHT_TOOLTIP, GAMEPAD_STATS:GetEquipmentBonusInfo())
     end
@@ -215,6 +253,7 @@ local GAMEPAD_STATS_DISPLAY_MODE =
     LEVEL_UP_REWARDS = 6,
     UPCOMING_LEVEL_UP_REWARDS = 7,
     ADVANCED_ATTRIBUTES = 8,
+    MUNDUS = 9,
 }
 
 ZO_GamepadStats = ZO_InitializingObject.MultiSubclass(ZO_Stats_Common, ZO_Gamepad_ParametricList_Screen)
@@ -486,7 +525,7 @@ end
 function ZO_GamepadStats:PerformDeferredInitializationRoot()
     if self.deferredInitialized then return end
     self.deferredInitialized = true
-    
+
     self.outfitSelectorControl = self.header:GetNamedChild("OutfitSelector")
     self.outfitSelectorNameLabel = self.outfitSelectorControl:GetNamedChild("OutfitName")
     self.outfitSelectorHeaderFocus = ZO_Outfit_Selector_Header_Focus_Gamepad:New(self.outfitSelectorControl)
@@ -517,6 +556,8 @@ function ZO_GamepadStats:InitializeKeybindStripDescriptors()
                     or self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.TITLE
                     or self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.LEVEL_UP_REWARDS then
                     return GetString(SI_GAMEPAD_SELECT_OPTION)
+                elseif self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.MUNDUS then
+                    return GetString(SI_STATS_MUNDUS_INFO_BUTTON)
                 else
                     if self:DoesAttributePointAllocationModeBatchSave() then
                         return GetString(SI_STATS_CONFIRM_ATTRIBUTES_BUTTON)
@@ -538,6 +579,12 @@ function ZO_GamepadStats:InitializeKeybindStripDescriptors()
                     or self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.TITLE
                     or self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.LEVEL_UP_REWARDS then
                     return true
+                elseif self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.MUNDUS then
+                    local targetData = self.mainList:GetTargetData()
+                    if targetData and targetData.data then
+                        return not targetData.data.buffIndex
+                    end
+                    return false
                 else
                     return self:DoesAttributePointAllocationModeBatchSave() or self:GetNumPointsAdded() > 0
                 end
@@ -549,6 +596,9 @@ function ZO_GamepadStats:InitializeKeybindStripDescriptors()
                     self:ActivateTitleDropdown()
                 elseif self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.LEVEL_UP_REWARDS then
                     self:ShowLevelUpRewards()
+                elseif self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.MUNDUS then
+                    local helpCategoryIndex, helpIndex = GetMundusStoneHelpIndices()
+                    HELP_TUTORIALS_ENTRIES_GAMEPAD:Show(helpCategoryIndex, helpIndex)
                 else
                     if self:DoesAttributePointAllocationModeBatchSave() and self:DoesChangeIncurCost() then
                         if self:IsPaymentTypeScroll() then
@@ -579,7 +629,10 @@ function ZO_GamepadStats:InitializeKeybindStripDescriptors()
                         return targetData.canClickOff
                     end
                     return false
-                elseif self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.TITLE or self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.ATTRIBUTES or self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.ADVANCED_ATTRIBUTES then
+                elseif self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.TITLE
+                    or self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.ATTRIBUTES
+                    or self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.ADVANCED_ATTRIBUTES
+                    or self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.MUNDUS then
                     return true
                 end
                 return false
@@ -591,6 +644,17 @@ function ZO_GamepadStats:InitializeKeybindStripDescriptors()
                 elseif self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.ADVANCED_ATTRIBUTES then
                     self:DeactivateMainList()
                     self:EnterAdvancedGridList()
+                elseif self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.MUNDUS then
+                    local targetData = self.mainList:GetTargetData()
+                    if targetData
+                        and targetData.data
+                        and (not targetData.data.buffIndex
+                            or (targetData.data.statEffects and #targetData.data.statEffects > 0)) then
+                        self:ActivateViewAttributes()
+                    else
+                        self:DeactivateMainList()
+                        self:EnterAdvancedGridList()
+                    end
                 else
                     self:ActivateViewAttributes()
                 end
@@ -675,6 +739,7 @@ function ZO_GamepadStats:UpdateScreenVisibility()
     local showUpcomingRewards = false
     local isAdvancedAttributesHidden = true
 
+    GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
     if self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.CHARACTER then
         isCharacterHidden = false
         self:RefreshCharacterPanel()
@@ -693,6 +758,19 @@ function ZO_GamepadStats:UpdateScreenVisibility()
     elseif self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.ADVANCED_ATTRIBUTES then
         isAdvancedAttributesHidden = false
         self:RefreshAdvancedAttributesPanel()
+    elseif self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.MUNDUS then
+        local targetData = self.mainList:GetTargetData()
+        if targetData
+            and targetData.data
+            and targetData.data.buffIndex
+            and (not targetData.data.statEffects or #targetData.data.statEffects == 0) then
+            isAdvancedAttributesHidden = false
+            self:RefreshAdvancedAttributesPanel()
+        else
+            isAttributesHidden = false
+            self:RefreshAttributesPanel()
+        end
+        GAMEPAD_TOOLTIPS:LayoutMundusTooltip(GAMEPAD_RIGHT_TOOLTIP, targetData.data)
     end
 
     self.characterStatsPanel:SetHidden(isCharacterHidden)
@@ -1094,10 +1172,10 @@ do
     local function SetupEffectAttributeRow(control, data, ...)
         ZO_SharedGamepadEntry_OnSetup(control, data, ...)
         local frameControl = control:GetNamedChild("Frame")
-        --local stackCount = frameControl:GetNamedChild("StackCount")
+        local stackCount = control:GetNamedChild("Icon"):GetNamedChild("StackCount")
         local hasIcon = data:GetNumIcons() > 0
         frameControl:SetHidden(not hasIcon)
-        --stackCount:SetText(data.stackCount)
+        stackCount:SetText(data.stackCount)
     end
 
     function ZO_GamepadStats:SetupList(list)
@@ -1133,6 +1211,8 @@ function ZO_GamepadStats:OnEnterHeader()
     self.displayMode = GAMEPAD_STATS_DISPLAY_MODE.OUTFIT
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
     self:UpdateScreenVisibility()
+    
+    SCREEN_NARRATION_MANAGER:QueueFocus(self.outfitSelectorHeaderFocus)
 end
 
 function ZO_GamepadStats:OnLeaveHeader()
@@ -1171,6 +1251,85 @@ do
                 self.mainList:AddEntryWithHeader("ZO_GamepadStatAttributeRow", attributeEntry)
             else
                 self.mainList:AddEntry("ZO_GamepadStatAttributeRow", attributeEntry)
+            end
+        end
+
+        --Mundus Entries
+        for key, attribute in pairs(self.attributeItems) do
+            local NO_MUNDUS_EFFECT = false
+            attribute:SetMundusEffect(HAS_MUNDUS_EFFECT)
+        end
+        self.mundusEntries = {}
+        self.mundusAdvancedStats = {}
+        local activeMundusStoneBuffIndices = { GetUnitActiveMundusStoneBuffIndices("player") }
+        local numActiveMundusStoneBuffs = #activeMundusStoneBuffIndices
+        local numMundusSlots = GetNumAvailableMundusStoneSlots()
+        local isPlayerAtMundusWarningLevel = GetUnitLevel("player") >= GetMundusWarningLevel()
+        for slotIndex = 1, numMundusSlots do
+            local mundusEntry = nil
+            if numActiveMundusStoneBuffs >= slotIndex then
+                local buffName, _, _, buffSlot, _, _, _, _, _, _, abilityId = GetUnitBuffInfo("player", activeMundusStoneBuffIndices[slotIndex])
+                local mundusStoneIndex = GetAbilityMundusStoneType(abilityId)
+                mundusEntry = ZO_GamepadEntryData:New(zo_strformat(SI_STATS_MUNDUS_FORMATTER, buffName), ZO_STAT_MUNDUS_ICONS[mundusStoneIndex])
+                mundusEntry.data =
+                {
+                    name = buffName,
+                    description = GetAbilityEffectDescription(buffSlot),
+                    buffIndex = activeMundusStoneBuffIndices[slotIndex],
+                    slotIndex = slotIndex,
+                    statEffects = {},
+                }
+                local numStatsForAbility = GetAbilityNumDerivedStats(abilityId)
+                for statIndex = 1, numStatsForAbility do
+                    local statType, effectValue = GetAbilityDerivedStatAndEffectByIndex(abilityId, statIndex)
+                    local attributeItem = self:GetAttributeItem(statType)
+                    if attributeItem then
+                        local HAS_MUNDUS_EFFECT = true
+                        attributeItem:SetMundusEffect(HAS_MUNDUS_EFFECT, buffName, effectValue, mundusEntry.data.buffIndex)
+                    end
+                    local statEffect =
+                    {
+                        statType = statType,
+                        effect = effectValue,
+                    }
+                    table.insert(mundusEntry.data.statEffects, statEffect)
+                end
+                self.mundusAdvancedStats[slotIndex] = {}
+                local numAdvancedStatsForAbility = GetAbilityNumAdvancedStats(abilityId)
+                for advancedStatIndex = 1, numAdvancedStatsForAbility do
+                    local statType, statFormat, effectValue = GetAbilityAdvancedStatAndEffectByIndex(abilityId, advancedStatIndex)
+                    local statEffect =
+                    {
+                        statType = statType,
+                        format = statFormat,
+                        value = effectValue,
+                    }
+                    table.insert(self.mundusAdvancedStats[slotIndex], statEffect)
+                end
+            elseif numMundusSlots >= slotIndex then
+                mundusEntry =  ZO_GamepadEntryData:New(GetString("SI_MUNDUSSTONE", MUNDUS_STONE_INVALID), ZO_STAT_MUNDUS_ICONS[MUNDUS_STONE_INVALID])
+                mundusEntry.data =
+                {
+                    name = GetString(SI_STATS_MUNDUS_NONE_TOOLTIP_TITLE),
+                    description = GetString(SI_STATS_MUNDUS_NONE_TOOLTIP_DESCRIPTION),
+                }
+                if isPlayerAtMundusWarningLevel then
+                    mundusEntry:SetNameColors(ZO_ERROR_COLOR, ZO_ERROR_COLOR)
+                    mundusEntry:SetIconTint(ZO_ERROR_COLOR, ZO_ERROR_COLOR)
+                else
+                    local USE_DEFAULT_COLORS = nil
+                    mundusEntry:SetNameColors(USE_DEFAULT_COLORS, USE_DEFAULT_COLORS)
+                    mundusEntry:SetIconTint(USE_DEFAULT_COLORS, USE_DEFAULT_COLORS)
+                end
+            end
+            if mundusEntry then
+                mundusEntry.displayMode = GAMEPAD_STATS_DISPLAY_MODE.MUNDUS
+                if slotIndex == 1 then
+                    mundusEntry:SetHeader(GetString(SI_STATS_MUNDUS_TITLE))
+                    self.mainList:AddEntryWithHeader("ZO_GamepadMenuEntryTemplate", mundusEntry)
+                else
+                    self.mainList:AddEntry("ZO_GamepadMenuEntryTemplate", mundusEntry)
+                end
             end
         end
 
@@ -1240,7 +1399,10 @@ do
                     data.buffSlot = buffSlot
                     data.canClickOff = canClickOff
                     data.isArtificial = false
-                    --data.stackCount = stackCount
+
+                    if stackCount > 1 then
+                        data.stackCount = stackCount
+                    end
 
                     local duration = endTime - startTime
                     if duration > 0 then
@@ -1390,7 +1552,7 @@ function ZO_GamepadStats:InitializeCharacterPanel()
     local function OnCharacterUpdate(_, currentFrameTimeSeconds)
         if self.nextCharacterRefreshSeconds < currentFrameTimeSeconds then
             self:RefreshCharacterPanel()
-        end    
+        end
     end
 
     self.characterStatsPanel:SetHandler("OnUpdate", OnCharacterUpdate)
@@ -1402,26 +1564,26 @@ do
         --sections
         {
             --lines
-            {   
-                STAT_MAGICKA_MAX, 
+            {
+                STAT_MAGICKA_MAX,
                 STAT_MAGICKA_REGEN_COMBAT,
             },
-            {   
-                STAT_HEALTH_MAX, 
+            {
+                STAT_HEALTH_MAX,
                 STAT_HEALTH_REGEN_COMBAT,
             },
-            {   
-                STAT_STAMINA_MAX, 
+            {
+                STAT_STAMINA_MAX,
                 STAT_STAMINA_REGEN_COMBAT,
             },
         },
         {
-            {   
-                STAT_SPELL_POWER, 
+            {
+                STAT_SPELL_POWER,
                 STAT_POWER,
             },
-            {   
-                STAT_SPELL_CRITICAL, 
+            {
+                STAT_SPELL_CRITICAL,
                 STAT_CRITICAL_STRIKE,
             },
             {
@@ -1430,11 +1592,11 @@ do
             },
         },
         {
-            {   
-                STAT_SPELL_RESIST, 
+            {
+                STAT_SPELL_RESIST,
                 STAT_PHYSICAL_RESIST,
             },
-            {   
+            {
                 STAT_CRITICAL_RESISTANCE,
             },
         },
@@ -1473,7 +1635,11 @@ do
             local attributeControl = ZO_ObjectPool_CreateControl("ZO_GamepadStatsHeaderDataPairTemplate", objectPool, self.attributesPanel)
             return ZO_AttributeItem_Gamepad:New(attributeControl)
         end
-        self.attributeItemPool = ZO_ObjectPool:New(CreateAttribute)
+        local function ResetAttribute(attributeItem)
+            local NO_MUNDUS_EFFECT = false
+            attributeItem:SetMundusEffect(NO_MUNDUS_EFFECT)
+        end
+        self.attributeItemPool = ZO_ObjectPool:New(CreateAttribute, ResetAttribute)
 
         local yOffset = STARTING_Y_OFFSET
         for sectionNumber, section in ipairs(STATS_LAYOUT_DATA) do
@@ -1501,7 +1667,7 @@ do
         local function OnAttributesUpdate(_, currentFrameTimeSeconds)
             if self.nextAttributeRefreshSeconds < currentFrameTimeSeconds then
                 self:RefreshAttributesPanel()
-            end    
+            end
         end
         self.attributesPanel:SetHandler("OnUpdate", OnAttributesUpdate)
     end
@@ -1510,8 +1676,15 @@ end
 function ZO_GamepadStats:RefreshAttributesPanel()
     self.nextAttributeRefreshSeconds = GetFrameTimeSeconds() + ZO_STATS_REFRESH_TIME_SECONDS
 
+    local highlightedMundusBuffIndex = nil
+    if self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.MUNDUS then
+        local targetData = self.mainList:GetTargetData()
+        if targetData and targetData.data then
+            highlightedMundusBuffIndex = targetData.data.buffIndex
+        end
+    end
     for key, attribute in pairs(self.attributeItems) do
-        attribute:RefreshText()
+        attribute:RefreshText(highlightedMundusBuffIndex)
     end
 
     self:RefreshContentHeader(GetString(SI_STATS_ATTRIBUTES))
@@ -1526,34 +1699,104 @@ function ZO_GamepadStats:InitializeAdvancedAttributesPanel()
     self.advancedAttributesGridList = ZO_GridScrollList_Gamepad:New(self.advancedAttributesPanel)
 
     local function SetupStatEntry(control, data, list)
-         control.nameLabel:SetText(zo_strformat(SI_STAT_NAME_FORMAT, data.displayName))
-         local _, flatValue, percentValue = GetAdvancedStatValue(data.statType)
+        control.nameLabel:SetText(zo_strformat(SI_STAT_NAME_FORMAT, data.displayName))
+        local _, flatValue, percentValue = GetAdvancedStatValue(data.statType)
 
-         if data.formatType == ADVANCED_STAT_DISPLAY_FORMAT_FLAT then
+        if data.formatType == ADVANCED_STAT_DISPLAY_FORMAT_FLAT then
             data.formattedValue = tostring(flatValue)
-            control.valueLabel:SetText(flatValue)
-         elseif data.formatType == ADVANCED_STAT_DISPLAY_FORMAT_PERCENT or data.formatType == ADVANCED_STAT_DISPLAY_FORMAT_FLAT_OR_PERCENT then
+        elseif data.formatType == ADVANCED_STAT_DISPLAY_FORMAT_PERCENT or data.formatType == ADVANCED_STAT_DISPLAY_FORMAT_FLAT_OR_PERCENT then
             data.formattedValue = zo_strformat(SI_STAT_VALUE_PERCENT, percentValue)
-            control.valueLabel:SetText(data.formattedValue)
             if data.formatType == ADVANCED_STAT_DISPLAY_FORMAT_FLAT_OR_PERCENT then
                 data.flatValue = flatValue
             end
-         else
-            control.valueLabel:SetText("")
+        else
+            data.formattedValue = ""
             internalassert(false, "Invalid advanced stat format type.")
-         end
-         control.statData = data
+        end
+
+        local targetData = self.mainList:GetTargetData()
+        local selectedMundusIndex = targetData and targetData.data and targetData.data.slotIndex
+        if selectedMundusIndex and #self.mundusAdvancedStats[selectedMundusIndex] > 0 then
+            for i, mundusStat in ipairs(self.mundusAdvancedStats[selectedMundusIndex]) do
+                if mundusStat.statType == data.statType then
+                    if self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.MUNDUS then
+                        local icon
+                        local color
+                        if mundusStat.value > 0 then
+                            color = ZO_SUCCEEDED_TEXT
+                            icon = "EsoUI/Art/Buttons/Gamepad/gp_upArrow.dds"
+                        else
+                            color = ZO_ERROR_COLOR
+                            icon = "EsoUI/Art/Buttons/Gamepad/gp_downArrow.dds"
+                        end
+                        local INHERIT_COLOR = true
+                        data.formattedValue = color:Colorize(zo_iconTextFormatNoSpaceAlignedRight(icon, 24, 24, data.formattedValue, INHERIT_COLOR, NO_GRAMMAR))
+                    end
+                    data.formattedValue = zo_iconTextFormatNoSpace(ZO_STAT_MUNDUS_ICONS[MUNDUS_STONE_INVALID], 24, 24, data.formattedValue, NO_GRAMMAR)
+                end
+            end
+        end
+        control.valueLabel:SetText(data.formattedValue)
+        control.statData = data
     end
 
     local function SetupFlatValueEntry(control, data, list)
         local _, flatValue = GetAdvancedStatValue(data.statType)
         data.formattedValue = tostring(flatValue)
-        control.valueLabel:SetText(flatValue)
+
+        local targetData = self.mainList:GetTargetData()
+        local selectedMundusIndex = targetData and targetData.buffIndex
+        if selectedMundusIndex and #self.mundusAdvancedStats[selectedMundusIndex] > 0 then
+            for i, mundusStat in ipairs(self.mundusAdvancedStats[selectedMundusIndex]) do
+                if mundusStat.statType == data.statType and mundusStat.format == ADVANCED_STAT_DISPLAY_FORMAT_FLAT then
+                    if self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.MUNDUS then
+                        local icon
+                        local color
+                        if mundusStat.value > 0 then
+                            color = ZO_SUCCEEDED_TEXT
+                            icon = "EsoUI/Art/Buttons/Gamepad/gp_upArrow.dds"
+                        else
+                            color = ZO_ERROR_COLOR
+                            icon = "EsoUI/Art/Buttons/Gamepad/gp_downArrow.dds"
+                        end
+                        local INHERIT_COLOR = true
+                        data.formattedValue = color:Colorize(zo_iconTextFormatNoSpaceAlignedRight(icon, 24, 24, data.formattedValue, INHERIT_COLOR, NO_GRAMMAR))
+                    end
+                    data.formattedValue = zo_iconTextFormatNoSpace(ZO_STAT_MUNDUS_ICONS[MUNDUS_STONE_INVALID], 24, 24, data.formattedValue, NO_GRAMMAR)
+                end
+            end
+        end
+
+        control.valueLabel:SetText(data.formattedValue)
     end
 
     local function SetupPercentValueEntry(control, data, list)
         local _, _, percentValue = GetAdvancedStatValue(data.statType)
         data.formattedValue = zo_strformat(SI_STAT_VALUE_PERCENT, percentValue)
+
+        local targetData = self.mainList:GetTargetData()
+        local selectedMundusIndex = targetData and targetData.buffIndex
+        if selectedMundusIndex and #self.mundusAdvancedStats[selectedMundusIndex] > 0 then
+            for i, mundusStat in ipairs(self.mundusAdvancedStats[selectedMundusIndex]) do
+                if mundusStat.statType == data.statType and mundusStat.format == ADVANCED_STAT_DISPLAY_FORMAT_PERCENT then
+                    if self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.MUNDUS then
+                        local icon
+                        local color
+                        if mundusStat.value > 0 then
+                            color = ZO_SUCCEEDED_TEXT
+                            icon = "EsoUI/Art/Buttons/Gamepad/gp_upArrow.dds"
+                        else
+                            color = ZO_ERROR_COLOR
+                            icon = "EsoUI/Art/Buttons/Gamepad/gp_downArrow.dds"
+                        end
+                        local INHERIT_COLOR = true
+                        data.formattedValue = color:Colorize(zo_iconTextFormatNoSpaceAlignedRight(icon, 24, 24, data.formattedValue, INHERIT_COLOR, NO_GRAMMAR))
+                    end
+                    data.formattedValue = zo_iconTextFormatNoSpace(ZO_STAT_MUNDUS_ICONS[MUNDUS_STONE_INVALID], 24, 24, data.formattedValue, NO_GRAMMAR)
+                end
+            end
+        end
+
         control.valueLabel:SetText(data.formattedValue)
     end
 
@@ -1579,7 +1822,7 @@ function ZO_GamepadStats:InitializeAdvancedAttributesPanel()
     local function OnAdvancedAttributesUpdate(_, currentFrameTimeSeconds)
         if self.nextAdvancedAttributeRefreshSeconds < currentFrameTimeSeconds then
             self:RefreshAdvancedAttributesPanel()
-        end    
+        end
     end
     self.advancedAttributesPanel:SetHandler("OnUpdate", OnAdvancedAttributesUpdate)
 end

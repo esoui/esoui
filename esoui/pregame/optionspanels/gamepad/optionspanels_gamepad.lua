@@ -267,6 +267,11 @@ GAMEPAD_SETTINGS_DATA =
             system = SETTING_TYPE_ACCESSIBILITY,
             settingId = ACCESSIBILITY_SETTING_ACCESSIBLE_QUICKWHEELS,
         },
+        {
+            panel = SETTING_PANEL_ACCESSIBILITY,
+            system = SETTING_TYPE_ACCESSIBILITY,
+            settingId = ACCESSIBILITY_SETTING_PLAYER_WAYPOINT_ICON_COLOR,
+        },
     },
 }
 

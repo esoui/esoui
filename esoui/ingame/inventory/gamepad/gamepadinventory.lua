@@ -91,6 +91,7 @@ function ZO_GamepadInventory:OnDeferredInitialize()
             --Refresh the currency tooltip if it is open.
             if self.currentlySelectedData.isCurrencyEntry then
                 self:UpdateCategoryLeftTooltip(self.currentlySelectedData)
+                self:UpdateRightTooltip()
             end
         end
     end
@@ -132,7 +133,9 @@ function ZO_GamepadInventory:OnDeferredInitialize()
     SHARED_INVENTORY:RegisterCallback("SingleQuestUpdate", OnInventoryUpdated)
 
     self.onRefreshActionsCallback = function()
-        SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.itemList)
+        if self.itemList and self.itemList:IsActive() then
+            SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.itemList)
+        end
     end
 
     local SELECT_DEFAULT_ENTRY = true
@@ -207,6 +210,7 @@ function ZO_GamepadInventory:OnUpdate(currentFrameTimeSeconds)
             self:RefreshItemActions()
         else -- CATEGORY_ITEM_ACTION_MODE
             self:UpdateCategoryLeftTooltip(self.categoryList:GetTargetData())
+            self:UpdateRightTooltip()
         end
     end
 
@@ -286,7 +290,7 @@ function ZO_GamepadInventory:SwitchActiveList(listDescriptor, selectDefaultEntry
             self:RefreshCategoryList(selectDefaultEntry)
 
             -- For the case where the previous list didn't have any selectible items which would allow the header to be exited we need to attempt
-            -- to exit the header again if there are items in the new list (which their will be in this case as Category List has Currency)
+            -- to exit the header again if there are items in the new list (which there will be in this case as Category List has Currency)
             -- so that we can ensure that the header and main list will not be active at the same time, which would cause a keybind conflict
             if self:IsHeaderActive() then
                 self:RequestLeaveHeader()
@@ -567,18 +571,39 @@ function ZO_GamepadInventory:InitializeKeybindStrip()
                 self:Select()
             end,
             visible = function()
-                return not self.categoryList:IsEmpty() and self.currentlySelectedData and not self.currentlySelectedData.isCurrencyEntry
+                return (not self.categoryList:IsEmpty()) and self.currentlySelectedData and
+                       not (self.currentlySelectedData.isCurrencyEntry or self.currentlySelectedData.isMundusEntry)
             end,
         },
         {
-            name = GetString(SI_GAMEPAD_INVENTORY_EQUIPPED_MORE_ACTIONS),
+            name = function()
+                local targetCategoryData = self.categoryList:GetTargetData()
+                if targetCategoryData and targetCategoryData.isMundusEntry then
+                    return GetString(SI_STATS_MUNDUS_INFO_BUTTON)
+                else
+                    return GetString(SI_GAMEPAD_INVENTORY_EQUIPPED_MORE_ACTIONS)
+                end
+            end,
             keybind = "UI_SHORTCUT_TERTIARY",
             order = 1000,
             visible = function()
+                local targetCategoryData = self.categoryList:GetTargetData()
+                if targetCategoryData and targetCategoryData.isMundusEntry then
+                    if targetCategoryData.data and not targetCategoryData.data.buffIndex then
+                        return true
+                    end
+                    return false
+                end
                 return self.selectedItemUniqueId ~= nil
             end,
             callback = function()
-                self:ShowActions()
+                local targetCategoryData = self.categoryList:GetTargetData()
+                if targetCategoryData and targetCategoryData.isMundusEntry then
+                    local helpCategoryIndex, helpIndex = GetMundusStoneHelpIndices()
+                    HELP_TUTORIALS_ENTRIES_GAMEPAD:Show(helpCategoryIndex, helpIndex)
+                else
+                    self:ShowActions()
+                end
             end,
         },
         {
@@ -839,6 +864,8 @@ function ZO_GamepadInventory:RequestLeaveHeader()
         end
     else -- CATEGORY_ITEM_ACTION_MODE
         targetData = self:GenerateItemSlotData(self.categoryList:GetTargetData())
+        self:UpdateCategoryLeftTooltip(self.currentlySelectedData)
+        self:UpdateRightTooltip()
     end
 
     self:SetSelectedItemUniqueId(targetData)
@@ -929,15 +956,23 @@ function ZO_GamepadInventory:UpdateCategoryLeftTooltip(selectedData)
         local valueText = GetString(SI_INVENTORY_CURRENCIES)
         GAMEPAD_TOOLTIPS:SetStatusLabelText(GAMEPAD_LEFT_TOOLTIP, statText, valueText)
         GAMEPAD_TOOLTIPS:LayoutCurrencies(GAMEPAD_LEFT_TOOLTIP)
+    elseif selectedData.isMundusEntry then
+        GAMEPAD_TOOLTIPS:ClearStatusLabel(GAMEPAD_LEFT_TOOLTIP)
+        GAMEPAD_TOOLTIPS:LayoutMundusTooltip(GAMEPAD_LEFT_TOOLTIP, selectedData.data)
     else
         GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
     end
 end
 
+function ZO_GamepadInventory.AreCategoryListEntriesEqual(entry1, entry2)
+    return entry1 == entry2 or entry1.text == entry2.text
+end
+
 function ZO_GamepadInventory:InitializeCategoryList()
     local function SetupCategoryList(list)
-        list:AddDataTemplate("ZO_GamepadItemEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
-        list:AddDataTemplateWithHeader("ZO_GamepadItemEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
+        list:AddDataTemplate("ZO_GamepadItemEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, ZO_GamepadInventory.AreCategoryListEntriesEqual)
+        list:AddDataTemplateWithHeader("ZO_GamepadItemEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, ZO_GamepadInventory.AreCategoryListEntriesEqual, "ZO_GamepadMenuEntryHeaderTemplate")
+        list:SetReselectBehavior(ZO_PARAMETRIC_SCROLL_LIST_RESELECT_BEHAVIOR.MATCH_OR_RESET_TO_DEFAULT)
     end
 
     self.categoryList = self:AddList("Category", SetupCategoryList)
@@ -946,6 +981,7 @@ function ZO_GamepadInventory:InitializeCategoryList()
     --Match the tooltip to the selected data because it looks nicer
     local function OnSelectedCategoryChanged(list, selectedData)
         self:UpdateCategoryLeftTooltip(selectedData)
+        self:UpdateRightTooltip()
     end
 
     self.categoryList:SetOnSelectedDataChangedCallback(OnSelectedCategoryChanged)
@@ -1011,6 +1047,74 @@ function ZO_GamepadInventory:RefreshCategoryList(selectDefaultEntry, forceUpdate
     if self.currentListType == INVENTORY_CATEGORY_LIST or self.categoryList:IsActive() or forceUpdate then
         self.categoryList:Clear()
 
+        --Mundus Entries
+        self.mundusEntries = {}
+        local activeMundusStoneBuffIndices = { GetUnitActiveMundusStoneBuffIndices("player") }
+        local numActiveMundusStoneBuffs = #activeMundusStoneBuffIndices
+        local numMundusSlots = GetNumAvailableMundusStoneSlots()
+        local isPlayerAtMundusWarningLevel = GetUnitLevel("player") >= GetMundusWarningLevel()
+        for i = 1, numMundusSlots do
+            local mundusEntry = nil
+            if numActiveMundusStoneBuffs >= i then
+                local buffName, _, _, buffSlot, _, _, _, _, _, _, abilityId = GetUnitBuffInfo("player", activeMundusStoneBuffIndices[i])
+                local mundusStoneIndex = GetAbilityMundusStoneType(abilityId)
+                mundusEntry = ZO_GamepadEntryData:New(zo_strformat(SI_STATS_MUNDUS_FORMATTER, buffName), ZO_STAT_MUNDUS_ICONS[mundusStoneIndex])
+                mundusEntry.data =
+                {
+                    name = buffName,
+                    description = GetAbilityEffectDescription(buffSlot),
+                    buffIndex = activeMundusStoneBuffIndices[i],
+                    statEffects = {},
+                }
+                local numStatsForAbility = GetAbilityNumDerivedStats(abilityId)
+                for i = 1, numStatsForAbility do
+                    local statType, effectValue = GetAbilityDerivedStatAndEffectByIndex(abilityId, i)
+                    local statEffect =
+                    {
+                        statType = statType,
+                        effect = effectValue,
+                    }
+                    table.insert(mundusEntry.data.statEffects, statEffect)
+                end
+                self.mundusAdvancedStats = {}
+                local numAdvancedStatsForAbility = GetAbilityNumAdvancedStats(abilityId)
+                for i = 1, numAdvancedStatsForAbility do
+                    local statType, statFormat, effectValue = GetAbilityAdvancedStatAndEffectByIndex(abilityId, i)
+                    local statEffect =
+                    {
+                        statType = statType,
+                        format = statFormat,
+                        value = effectValue,
+                    }
+                    table.insert(self.mundusAdvancedStats, statEffect)
+                end
+            elseif numMundusSlots >= i then
+                mundusEntry =  ZO_GamepadEntryData:New(GetString("SI_MUNDUSSTONE", MUNDUS_STONE_INVALID), ZO_STAT_MUNDUS_ICONS[MUNDUS_STONE_INVALID])
+                mundusEntry.data =
+                {
+                    name = GetString(SI_STATS_MUNDUS_NONE_TOOLTIP_TITLE),
+                    description = GetString(SI_STATS_MUNDUS_NONE_TOOLTIP_DESCRIPTION),
+                }
+                if isPlayerAtMundusWarningLevel then
+                    mundusEntry:SetNameColors(ZO_ERROR_COLOR, ZO_ERROR_COLOR)
+                    mundusEntry:SetIconTint(ZO_ERROR_COLOR, ZO_ERROR_COLOR)
+                else
+                    local USE_DEFAULT_COLORS = nil
+                    mundusEntry:SetNameColors(USE_DEFAULT_COLORS, USE_DEFAULT_COLORS)
+                    mundusEntry:SetIconTint(USE_DEFAULT_COLORS, USE_DEFAULT_COLORS)
+                end
+            end
+            if mundusEntry then
+                mundusEntry.isMundusEntry = true
+                if i == 1 then
+                    mundusEntry:SetHeader(GetString(SI_STATS_MUNDUS_TITLE))
+                    self.categoryList:AddEntry("ZO_GamepadItemEntryTemplateWithHeader", mundusEntry)
+                else
+                    self.categoryList:AddEntry("ZO_GamepadItemEntryTemplate", mundusEntry)
+                end
+            end
+        end
+
         -- Currencies
         do
             local name = GetString(SI_INVENTORY_CURRENCIES)
@@ -1018,7 +1122,8 @@ function ZO_GamepadInventory:RefreshCategoryList(selectDefaultEntry, forceUpdate
             local data = ZO_GamepadEntryData:New(name, iconFile, nil, nil, false)
             data.isCurrencyEntry = true
             data:SetIconTintOnSelection(true)
-            self.categoryList:AddEntry("ZO_GamepadItemEntryTemplate", data)
+            self.categoryList:AddEntry("ZO_GamepadItemEntryTemplateWithHeader", data)
+            data:SetHeader(GetString(SI_GAMEPAD_INVENTORY_PACK_CATEGORY_HEADER))
         end
 
         -- Supplies
@@ -1128,6 +1233,8 @@ function ZO_GamepadInventory:RefreshCategoryList(selectDefaultEntry, forceUpdate
             end
         end
 
+        -- Order matters:
+        self.categoryList:SetDefaultSelectedIndex(numMundusSlots + 1)
         self.categoryList:Commit()
     end
 end
@@ -1147,6 +1254,7 @@ function ZO_GamepadInventory:OnLeaveHeader()
 
     if self.currentlySelectedData and self.currentlySelectedData.isCurrencyEntry then
         self:UpdateCategoryLeftTooltip(self.currentlySelectedData)
+        self:UpdateRightTooltip()
     else
         self:UpdateItemLeftTooltip(self.currentlySelectedData)
     end
@@ -1323,13 +1431,14 @@ do
 
     function ZO_GamepadInventory:RefreshItemList(selectDefaultEntry)
         if self.currentListType == INVENTORY_ITEM_LIST or self.itemList:IsActive() then
+            -- Order matters:
+            local targetCategoryData = self.categoryList:GetTargetData()
             self.itemList:Clear()
 
             if self.categoryList:IsEmpty() then
                 return
             end
 
-            local targetCategoryData = self.categoryList:GetTargetData()
             local filteredEquipSlot = targetCategoryData.equipSlot
             local nonEquipableFilterType = targetCategoryData.filterType
             local filteredDataTable
@@ -1418,6 +1527,13 @@ do
             -- remains data in itemList rather than being set to the selected data in category list
             self.itemList:Commit()
             self:UpdateItemLeftTooltip(self.currentlySelectedData)
+
+            if not ZO_GamepadInventory.AreCategoryListEntriesEqual(targetCategoryData, self.categoryList:GetTargetData()) then
+                -- The category has changed; clear the item list and switch to the category list.
+                self.itemList:Clear()
+                local DO_NOT_SELECT_DEFAULT_ENTRY = false
+                self:SwitchActiveList(INVENTORY_CATEGORY_LIST, DO_NOT_SELECT_DEFAULT_ENTRY)
+            end
         end
     end
 end
@@ -1674,6 +1790,9 @@ function ZO_GamepadInventory:UpdateRightTooltip()
             end
         elseif selectedItemData and targetCategoryData.filterType == ITEMFILTERTYPE_COMPANION then
             ZO_LayoutBagItemEquippedComparison(GAMEPAD_RIGHT_TOOLTIP, selectedItemData.bagId, selectedItemData.slotIndex)
+        elseif targetCategoryData.isMundusEntry then
+            GAMEPAD_TOOLTIPS:SetStatusLabelText(GAMEPAD_RIGHT_TOOLTIP, GetString(SI_GAMEPAD_INVENTORY_ITEM_COMPARE_TOOLTIP_TITLE))
+            GAMEPAD_TOOLTIPS:LayoutMundusStatComparison(GAMEPAD_RIGHT_TOOLTIP, targetCategoryData.data.statEffects)
         end
     end
 end

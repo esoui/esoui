@@ -147,6 +147,7 @@ function ZO_GamepadCollectionsBook:InitializeHousingPanel()
     housingPanel.nicknameLabel = container:GetNamedChild("Nickname")
     housingPanel.locationLabel = container:GetNamedChild("LocationValue")
     housingPanel.houseTypeLabel = container:GetNamedChild("HouseTypeValue")
+    housingPanel.supportsWeatherControlValueLabel = container:GetNamedChild("SupportsWeatherControlValue")
     housingPanel.recommendCountHeader = container:GetNamedChild("RecommendCountHeader")
     housingPanel.recommendCountValue = container:GetNamedChild("RecommendCountValue")
 
@@ -289,7 +290,8 @@ function ZO_GamepadCollectionsBook:OnShowing()
 
     -- There may be other scenes which need to return to the same place within CollectionsBook. Add them here.
     -- Initializing here also prevents external screens from requesting CollectionsBook to open to a specific spot.
-    if SCENE_MANAGER:GetPreviousSceneName() ~= "gamepad_player_emote" then
+    if SCENE_MANAGER:GetPreviousSceneName() ~= "gamepad_player_emote"
+        and SCENE_MANAGER:GetPreviousSceneName() ~= "gamepad_outfits_selection" then
         -- If we were returning to this screen from a child scene, we would want to return selection to the same item.
         -- We're opening this screen a new time, so clear possible cached indices.
         self.savedOutfitStyleIndex = nil
@@ -381,6 +383,17 @@ function ZO_GamepadCollectionsBook:RefreshHeader()
     end
 
     self.outfitSelectorHeaderFocus:Update()
+end
+
+function ZO_GamepadCollectionsBook:CanPreview(collectibleData)
+    if collectibleData and collectibleData:IsInstanceOf(ZO_CollectibleData) then
+        -- TODO: Temporarily disable mementos until time can be scheduled to audit mementos that don't preview correctly
+        if collectibleData:GetCategoryType() == COLLECTIBLE_CATEGORY_TYPE_MEMENTO then
+            return false
+        end
+        return CanCollectibleBePreviewed(collectibleData:GetId())
+    end
+    return false
 end
 
 function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
@@ -509,14 +522,19 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
             keybind = "UI_SHORTCUT_PRIMARY",
             enabled = function()
                 local collectibleData = self.gridListPanelList:GetSelectedData()
-                return not collectibleData.IsBlocked or not collectibleData:IsBlocked(GAMEPLAY_ACTOR_CATEGORY_PLAYER)
+                if self.isPreviewAvailable and (not collectibleData.IsBlocked or not collectibleData:IsBlocked(GAMEPLAY_ACTOR_CATEGORY_PLAYER)) then
+                    return true
+                elseif not self.isPreviewAvailable then
+                    return false, GetString(SI_PREVIEW_UNAVAILABLE_ERROR)
+                end
+                return false
             end,
             callback = function()
                 self:TogglePreviewSelectedOutfitStyle()
             end,
             visible = function()
                  local currentlySelectedCollectibleData = self.gridListPanelList:GetSelectedData()
-                 return self.isPreviewAvailable and currentlySelectedCollectibleData and not currentlySelectedCollectibleData.isEmptyCell
+                 return  currentlySelectedCollectibleData and not currentlySelectedCollectibleData.isEmptyCell
             end,
             sound = SOUNDS.GAMEPAD_MENU_FORWARD,
         },
@@ -718,17 +736,12 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
                 --Re-narrate when the keybinds change
                 SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.currentList.list)
             end,
+            enabled = function()
+                return IsCharacterPreviewingAvailable(), GetString(SI_PREVIEW_UNAVAILABLE_ERROR)
+            end,
             visible = function()
                 local collectibleData = self:GetCurrentTargetData()
-                if collectibleData and collectibleData:IsInstanceOf(ZO_CollectibleData) then
-                    -- TODO: Temporarily disable mementos until time can be scheduled to audit mementos that don't preview correctly
-                    if collectibleData:GetCategoryType() == COLLECTIBLE_CATEGORY_TYPE_MEMENTO then
-                        return false
-                    end
-                    local collectibleId = collectibleData:GetId()
-                    return CanCollectibleBePreviewed(collectibleId) and not ITEM_PREVIEW_GAMEPAD:IsCurrentlyPreviewing(ZO_ITEM_PREVIEW_COLLECTIBLE, collectibleId)
-                end
-                return false
+                return self:CanPreview(collectibleData) and not ITEM_PREVIEW_GAMEPAD:IsCurrentlyPreviewing(ZO_ITEM_PREVIEW_COLLECTIBLE, collectibleData:GetId())
             end,
         },
         -- End Preview
@@ -1264,6 +1277,13 @@ function ZO_GamepadCollectionsBook:BuildCollectibleData(collectibleData)
         ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_HOUSING_HOUSE_TYPE_HEADER)))
         ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(houseType))
 
+        -- House supports weather control narration
+        local houseFlags = entryData:GetHouseFlags()
+        local hasWeatherControlSupport = ZO_FlagHelpers.MaskHasFlag(houseFlags, HOUSE_FLAGS_SUPPORTS_WEATHER_CONTROL)
+        local hasWeatherControlSupportString = hasWeatherControlSupport and GetString(SI_YES) or GetString(SI_NO)
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_HOUSING_HOUSE_SUPPORTS_WEATHER_CONTROL_HEADER)))
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(hasWeatherControlSupportString))
+
         --Home Tour Recommendations narration
         local houseId = entryData:GetReferenceId()
         local recommendCount = GetNumHouseToursPlayerListingRecommendations(houseId)
@@ -1402,13 +1422,13 @@ function ZO_GamepadCollectionsBook:RefreshRightPanel(entryData)
     if self.pendingUtilityWheelCollectibleData then
         -- Don't cover the wheel if it's open.
         return
-    elseif entryData ~= nil and entryData.dataSource:IsInstanceOf(ZO_CollectibleCategoryData) then
-        self:UpdateGridPanelVisibility(entryData)
-        SCENE_MANAGER:RemoveFragment(GAMEPAD_COLLECTIONS_BOOK_DLC_PANEL_FRAGMENT)
-        SCENE_MANAGER:RemoveFragment(GAMEPAD_COLLECTIONS_BOOK_HOUSING_PANEL_FRAGMENT)
-        GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
     elseif entryData then
-        if entryData.dataSource:IsInstanceOf(ZO_RandomMountCollectibleData) then
+        if entryData.dataSource:IsInstanceOf(ZO_CollectibleCategoryData) then
+            self:UpdateGridPanelVisibility(entryData)
+            SCENE_MANAGER:RemoveFragment(GAMEPAD_COLLECTIONS_BOOK_DLC_PANEL_FRAGMENT)
+            SCENE_MANAGER:RemoveFragment(GAMEPAD_COLLECTIONS_BOOK_HOUSING_PANEL_FRAGMENT)
+            GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
+        elseif entryData.dataSource:IsInstanceOf(ZO_RandomMountCollectibleData) then
             self:RefreshRandomMountTooltip(entryData)
         elseif entryData:IsStory() then
             self:RefreshDLCTooltip(entryData)
@@ -1487,6 +1507,11 @@ function ZO_GamepadCollectionsBook:RefreshHousingTooltip(collectibleData)
     housingPanel.locationLabel:SetText(collectibleData:GetFormattedHouseLocation())
     housingPanel.houseTypeLabel:SetText(zo_strformat(SI_HOUSE_TYPE_FORMATTER, GetString("SI_HOUSECATEGORYTYPE", collectibleData:GetHouseCategoryType())))
 
+    local houseFlags = collectibleData:GetHouseFlags()
+    local hasWeatherControlSupport = ZO_FlagHelpers.MaskHasFlag(houseFlags, HOUSE_FLAGS_SUPPORTS_WEATHER_CONTROL)
+    local hasWeatherControlSupportString = hasWeatherControlSupport and GetString(SI_YES) or GetString(SI_NO)
+    housingPanel.supportsWeatherControlValueLabel:SetText(hasWeatherControlSupportString)
+
     local houseId = collectibleData:GetReferenceId()
     local recommendCount = GetNumHouseToursPlayerListingRecommendations(houseId)
     if recommendCount > 0 then
@@ -1549,11 +1574,11 @@ function ZO_GamepadCollectionsBook:UpdateGridPanelVisibility(categoryData)
     if shouldFrameRight ~= self.shouldFrameRight then
         self.shouldFrameRight = shouldFrameRight
         if shouldFrameRight then
-            SCENE_MANAGER:RemoveFragmentGroup(FRAGMENT_GROUP.FRAME_TARGET_GAMEPAD_OPTIONS)
+            SCENE_MANAGER:RemoveFragmentGroup(FRAGMENT_GROUP.FRAME_TARGET_GAMEPAD_COLLECTIONS)
             SCENE_MANAGER:AddFragmentGroup(FRAGMENT_GROUP.FRAME_TARGET_GAMEPAD_RIGHT_FURTHER_AWAY)
         else
             SCENE_MANAGER:RemoveFragmentGroup(FRAGMENT_GROUP.FRAME_TARGET_GAMEPAD_RIGHT_FURTHER_AWAY)
-            SCENE_MANAGER:AddFragmentGroup(FRAGMENT_GROUP.FRAME_TARGET_GAMEPAD_OPTIONS)
+            SCENE_MANAGER:AddFragmentGroup(FRAGMENT_GROUP.FRAME_TARGET_GAMEPAD_COLLECTIONS)
         end
     end
 end
@@ -2217,6 +2242,7 @@ end
 
 function ZO_GamepadCollectionsBook:OnEnterHeader()
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.currentList.keybind)
+    SCREEN_NARRATION_MANAGER:QueueFocus(self.outfitSelectorHeaderFocus)
 end
 
 function ZO_GamepadCollectionsBook:CanEnterHeader()

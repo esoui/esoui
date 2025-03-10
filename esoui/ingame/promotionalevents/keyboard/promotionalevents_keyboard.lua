@@ -9,9 +9,8 @@ function ZO_PromotionalEventReward_Keyboard:Initialize(control)
 
     control.icon = self.iconTexture -- For ZO_GridEntry_SetIconScaledUp
     control.GetRewardData = function()
-        return self.rewardData
+        return self.displayRewardData
     end
-    -- TODO Promotional Events: Implement
 end
 
 function ZO_PromotionalEventReward_Keyboard:OnMouseEnter()
@@ -19,7 +18,7 @@ function ZO_PromotionalEventReward_Keyboard:OnMouseEnter()
     if not self.rewardableEventData:IsRewardClaimed() then
         ZO_GridEntry_SetIconScaledUp(self.control, true)
     end
-    if CanPreviewReward(self.rewardData:GetRewardId()) and not self.rewardableEventData:CanClaimReward() then
+    if CanPreviewReward(self.displayRewardData:GetRewardId()) and not self.rewardableEventData:CanClaimReward() then
         WINDOW_MANAGER:SetMouseCursor(MOUSE_CURSOR_PREVIEW)
     end
     g_PromotionalEventsKeyboard:SetMouseOverObject(self)
@@ -37,9 +36,9 @@ function ZO_PromotionalEventReward_Keyboard:OnMouseUp(button, upInside)
         if button == MOUSE_BUTTON_INDEX_LEFT then
             if self.rewardableEventData:CanClaimReward() then
                 self.rewardableEventData:TryClaimReward()
-            elseif CanPreviewReward(self.rewardData:GetRewardId()) then
+            elseif CanPreviewReward(self.displayRewardData:GetRewardId()) then
                 SYSTEMS:GetObject("itemPreview"):ClearPreviewCollection()
-                SYSTEMS:GetObject("itemPreview"):PreviewReward(self.rewardData:GetRewardId())
+                SYSTEMS:GetObject("itemPreview"):PreviewReward(self.displayRewardData:GetRewardId())
                 KEYBIND_STRIP:UpdateKeybindButtonGroup(g_PromotionalEventsKeyboard.keybindStripDescriptor)
             end
         elseif button == MOUSE_BUTTON_INDEX_RIGHT then
@@ -53,10 +52,10 @@ function ZO_PromotionalEventReward_Keyboard:OnMouseUp(button, upInside)
                 showMenu = true
             end
 
-            if CanPreviewReward(self.rewardData:GetRewardId()) then
+            if CanPreviewReward(self.displayRewardData:GetRewardId()) then
                 AddMenuItem(GetString(SI_PROMOTIONAL_EVENT_REWARD_PREVIEW_ACTION), function()
                     SYSTEMS:GetObject("itemPreview"):ClearPreviewCollection()
-                    SYSTEMS:GetObject("itemPreview"):PreviewReward(self.rewardData:GetRewardId())
+                    SYSTEMS:GetObject("itemPreview"):PreviewReward(self.displayRewardData:GetRewardId())
                     KEYBIND_STRIP:UpdateKeybindButtonGroup(g_PromotionalEventsKeyboard.keybindStripDescriptor)
                 end)
                 showMenu = true
@@ -197,8 +196,8 @@ function ZO_PromotionalEventActivity_Entry_Keyboard:RefreshTrackingButton()
     end
 end
 
-function ZO_PromotionalEventActivity_Entry_Keyboard:OnProgressUpdated(previousProgress, newProgress, isRewardClaimed)
-    ZO_PromotionalEventActivity_Entry_Shared.OnProgressUpdated(self, previousProgress, newProgress, isRewardClaimed)
+function ZO_PromotionalEventActivity_Entry_Keyboard:OnProgressUpdated(previousProgress, newProgress, rewardFlags)
+    ZO_PromotionalEventActivity_Entry_Shared.OnProgressUpdated(self, previousProgress, newProgress, rewardFlags)
 
     local completionThreshold = self.activityData:GetCompletionThreshold()
     self.trackButton:SetHidden(newProgress == completionThreshold)
@@ -220,7 +219,26 @@ function ZO_PromotionalEvents_Keyboard:OnDeferredInitialize()
     self:InitializeKeybindStripDescriptors()
 end
 
+
+function ZO_PromotionalEvents_Keyboard:GetSelectedCampaignData()
+    local selectedNode = GROUP_MENU_KEYBOARD:GetTree():GetSelectedNode()
+    if selectedNode and selectedNode.data.campaignData then
+        return selectedNode.data.campaignData
+    else
+        return PROMOTIONAL_EVENT_MANAGER:GetCampaignDataByIndex(1)
+    end
+end
+
 function ZO_PromotionalEvents_Keyboard:InitializeActivityFinderCategory()
+    local NO_CHILDREN = {}
+    local children = {}
+
+    local function OnTreeEntrySelected()
+        if self:IsShowing() then
+            self:RefreshCampaignData()
+        end
+    end
+
     local PromotionalEventsCategoryData =
     {
         priority = ZO_ACTIVITY_FINDER_SORT_PRIORITY.PROMOTIONAL_EVENTS,
@@ -231,7 +249,28 @@ function ZO_PromotionalEvents_Keyboard:InitializeActivityFinderCategory()
         mouseoverIcon = "EsoUI/Art/LFG/LFG_indexIcon_PromotionalEvents_over.dds",
         disabledIcon = "EsoUI/Art/LFG/LFG_indexIcon_PromotionalEvents_disabled.dds",
         visible = function()
-            return PROMOTIONAL_EVENT_MANAGER:IsCampaignActive()
+            return PROMOTIONAL_EVENT_MANAGER:HasActiveCampaign()
+        end,
+        getChildrenFunction = function()
+            local numActiveCampaigns = PROMOTIONAL_EVENT_MANAGER:GetNumActiveCampaigns()
+            if PROMOTIONAL_EVENT_MANAGER:GetNumActiveCampaigns() > 1 then
+                ZO_ClearNumericallyIndexedTable(children)
+                for i = 1, numActiveCampaigns do
+                    local campaignData = PROMOTIONAL_EVENT_MANAGER:GetCampaignDataByIndex(i)
+                    local child =
+                    {
+                        priority = i, -- TODO Promotional Events: Priority?
+                        name = campaignData:GetDisplayName(),
+                        categoryFragment = self:GetFragment(),
+                        campaignData = campaignData,
+                        onTreeEntrySelected = OnTreeEntrySelected,
+                    }
+                    table.insert(children, child)
+                end
+                return children
+            else
+                return NO_CHILDREN
+            end
         end,
         isPromotionalEvent = true,
     }
@@ -302,13 +341,17 @@ function ZO_PromotionalEvents_Keyboard:InitializeKeybindStripDescriptors()
 
             callback = function()
                 SYSTEMS:GetObject("itemPreview"):ClearPreviewCollection()
-                SYSTEMS:GetObject("itemPreview"):PreviewReward(self.mouseOverObject.rewardData:GetRewardId())
+                SYSTEMS:GetObject("itemPreview"):PreviewReward(self.mouseOverObject.displayRewardData:GetRewardId())
                 KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+            end,
+
+            enabled = function()
+                return IsCharacterPreviewingAvailable(), GetString(SI_PREVIEW_UNAVAILABLE_ERROR)
             end,
 
             visible = function()
                 if self.mouseOverObject and self.mouseOverObject:IsInstanceOf(ZO_PromotionalEventReward_Keyboard) then
-                    return CanPreviewReward(self.mouseOverObject.rewardData:GetRewardId())
+                    return CanPreviewReward(self.mouseOverObject.displayRewardData:GetRewardId())
                 end
                 return false
             end,
@@ -455,7 +498,12 @@ function ZO_PromotionalEvents_CapstoneDialog_Keyboard:Initialize(control)
                 keybind =   "DIALOG_TERTIARY",
                 callback =  function() self:ViewInCollections() end,
                 visible =   function(dialog)
-                    return dialog.data.campaignData:GetRewardData():GetRewardType() == REWARD_ENTRY_TYPE_COLLECTIBLE
+                    -- This code runs before setup
+                    local campaignData = dialog.data.campaignData
+                    local baseRewardData = campaignData:GetRewardData()
+                    local _, wasFallbackClaimed = campaignData:IsRewardClaimed()
+                    local displayRewardData = wasFallbackClaimed and baseRewardData:GetFallbackRewardData() or baseRewardData
+                    return displayRewardData:GetRewardType() == REWARD_ENTRY_TYPE_COLLECTIBLE
                 end,
             },
             {
@@ -488,31 +536,18 @@ function ZO_PromotionalEvents_CapstoneDialog_Keyboard:InitializeControls()
     -- For ZO_PromotionalEvents_CapstoneDialog_Keyboard.OnRewardMouseEnter
     self.rewardFrameControl = self.control:GetNamedChild("RewardContainerFrame")
     self.rewardFrameControl.GetRewardData = function()
-        return self.rewardData
+        return self.displayRewardData
     end
 end
 
 function ZO_PromotionalEvents_CapstoneDialog_Keyboard:InitializeParticleSystems()
     ZO_PromotionalEvents_CapstoneDialog_Shared.InitializeParticleSystems(self)
-    
-    local blastParticleSystem = self.blastParticleSystem
-    blastParticleSystem:SetParticleParameter("PhysicsInitialVelocityMagnitude", ZO_UniformRangeGenerator:New(700, 1100))
-    blastParticleSystem:SetParticleParameter("Size", ZO_UniformRangeGenerator:New(6, 12))
-    blastParticleSystem:SetParticleParameter("PhysicsDragMultiplier", 1.5)
-    blastParticleSystem:SetParticleParameter("PrimeS", .5)
 
     local headerSparksParticleSystem = self.headerSparksParticleSystem
     headerSparksParticleSystem:SetParentControl(self.control:GetNamedChild("HeaderFade"))
-    headerSparksParticleSystem:SetParticleParameter("PhysicsInitialVelocityMagnitude", ZO_UniformRangeGenerator:New(15, 60))
-    headerSparksParticleSystem:SetParticleParameter("Size", ZO_UniformRangeGenerator:New(5, 10))
-    headerSparksParticleSystem:SetParticleParameter("DrawLayer", DL_OVERLAY)
-    headerSparksParticleSystem:SetParticleParameter("DrawLevel", 2)
 
     local headerStarbustParticleSystem = self.headerStarbustParticleSystem
     headerStarbustParticleSystem:SetParentControl(self.control:GetNamedChild("HeaderFade"))
-    headerStarbustParticleSystem:SetParticleParameter("Size", 256)
-    headerStarbustParticleSystem:SetParticleParameter("DrawLayer", DL_OVERLAY)
-    headerStarbustParticleSystem:SetParticleParameter("DrawLevel", 1)
 end
 
 function ZO_PromotionalEvents_CapstoneDialog_Keyboard.OnRewardMouseEnter(rewardFrameControl)

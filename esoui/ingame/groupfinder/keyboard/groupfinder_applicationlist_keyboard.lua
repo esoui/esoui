@@ -165,7 +165,7 @@ function ZO_GroupFinder_ApplicationsList_Keyboard:OnStateChange(oldState, newSta
         KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
     elseif newState == SCENE_FRAGMENT_SHOWN then
         self:RefreshData()
-        ZO_SetGroupFinderIsNewApplication(false)
+        GROUP_FINDER_APPLICATIONS_LIST_MANAGER:SetHasNewApplication(false)
     elseif newState == SCENE_FRAGMENT_HIDDEN then
         KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
     end

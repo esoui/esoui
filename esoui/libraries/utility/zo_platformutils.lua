@@ -113,6 +113,13 @@ do
         local platform = GetUIPlatform()
         return ZO_IsPlaystationPlatform() or platform == UI_PLATFORM_XBOX
     end
+
+    function ZO_IsForceConsoleFlow()
+        if IsConsoleUI() then
+            return GetUIPlatform() == UI_PLATFORM_PC
+        end
+        return false
+    end
 end
 
 function ZO_IsIngameUI()

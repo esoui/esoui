@@ -21,6 +21,7 @@ EsoUI\Ingame\Globals\Gamepad\ZO_GamepadSocialLayoutConstants.lua
 EsoUI\Ingame\Globals\ZO_ChampionRankUtils.lua
 
 EsoUI\Ingame\Globals\Console\IngameDialogs_Console.lua
+EsoUI\Ingame\Globals\Console\Presence.lua
 
 EsoUI\Ingame\Particles\Particles.lua
 
@@ -1710,11 +1711,16 @@ EsoUI\Ingame\PromotionalEvents\PromotionalEventTracker.xml
 EsoUI\Ingame\Subtitles\Subtitles.lua
 EsoUI\Ingame\Subtitles\Subtitles.xml
 
+EsoUI\Ingame\HUD\HUDWarnings.lua
+EsoUI\Ingame\HUD\HUDWarnings.xml
+
 EsoUI\Ingame\Profiler\ProfilerUtils.lua
 
 ; These should remain at the bottom, but above fragment/scene files to help mitigate breaking addons with API changes
-EsoUI\Ingame\AddonCompatibilityAliases\PC\AddonCompatibilityAliases.lua
-EsoUI\Ingame\AddonCompatibilityAliases\PC\AddonCompatibilityAliases.xml
+EsoUI\Ingame\AddonCompatibilityAliases\AddonCompatibilityAliases_Shared.lua
+EsoUI\Ingame\AddonCompatibilityAliases\AddonCompatibilityAliases_Shared.xml
+EsoUI\Ingame\AddonCompatibilityAliases\PC\AddonCompatibilityAliases_PC.lua
+EsoUI\Ingame\AddonCompatibilityAliases\PC\AddonCompatibilityAliases_PC.xml
 EsoUI\Ingame\AddonCompatibilityAliases\PC\ZO_DeprecatedEditBox.lua
 
 ; These should remain at the bottom of the file, to ensure functionality of fragments

@@ -23,6 +23,7 @@ function ZO_GroupFinder_ApplicationsList_Manager:RegisterForEvents()
     EVENT_MANAGER:RegisterForEvent("GroupFinder_ApplicationsList_Manager", EVENT_GROUP_FINDER_CREATE_GROUP_LISTING_RESULT, function() self:RefreshApplicationsData() end)
     EVENT_MANAGER:RegisterForEvent("GroupFinder_ApplicationsList_Manager", EVENT_GROUP_FINDER_REMOVE_GROUP_LISTING_RESULT, function() self:RefreshApplicationsData() end)
     EVENT_MANAGER:RegisterForEvent("GroupFinder_ApplicationsList_Manager", EVENT_GROUP_FINDER_UPDATE_APPLICATIONS, function() self:RefreshApplicationsData() end)
+    EVENT_MANAGER:RegisterForEvent("GroupFinder_ApplicationsList_Manager", EVENT_GROUP_FINDER_APPLICATION_RECEIVED, function() self:SetHasNewApplication(true) end)
     EVENT_MANAGER:RegisterForEvent("GroupFinder_ApplicationsList_Manager", EVENT_PLAYER_ACTIVATED, function() self:RefreshApplicationsData() end)
 end
 
@@ -51,6 +52,14 @@ function ZO_GroupFinder_ApplicationsList_Manager:GetApplicationsData(optionalSor
     else
         return self.applicationsData
     end
+end
+
+function ZO_GroupFinder_ApplicationsList_Manager:SetHasNewApplication(hasNew)
+    self.hasNewApplication = hasNew
+end
+
+function ZO_GroupFinder_ApplicationsList_Manager:HasNewApplication()
+    return HasGroupListingForUserType(GROUP_FINDER_GROUP_LISTING_USER_TYPE_CREATED_GROUP_LISTING) and self.hasNewApplication
 end
 
 GROUP_FINDER_APPLICATIONS_LIST_MANAGER = ZO_GroupFinder_ApplicationsList_Manager:New()

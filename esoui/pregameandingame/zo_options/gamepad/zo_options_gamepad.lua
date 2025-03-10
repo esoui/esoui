@@ -755,7 +755,14 @@ function ZO_GamepadOptions:RefreshCategoryList()
     end
 
     for _, customCategoryEntryData in ipairs(self.customCategories) do
-        self.categoryList:AddEntry("ZO_GamepadMenuEntryTemplate", customCategoryEntryData)
+        local visible = true
+        if customCategoryEntryData.visible ~= nil then
+            visible = customCategoryEntryData.visible()
+        end
+
+        if visible then
+            self.categoryList:AddEntry("ZO_GamepadMenuEntryTemplate", customCategoryEntryData)
+        end
     end
 
     self.categoryList:Commit()

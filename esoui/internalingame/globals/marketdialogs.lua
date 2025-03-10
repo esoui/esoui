@@ -461,6 +461,9 @@ local function MarketPurchaseSelectTemplateDialogSetupHouseInfoControls(dialog, 
         local houseZoneName = GetZoneNameById(houseZoneId)
         local houseCategory = GetHouseCategoryType(templateData.houseId)
         local houseCategoryName = GetString("SI_HOUSECATEGORYTYPE", houseCategory)
+        local houseFlags = GetHouseFlags(templateData.houseId)
+        local hasWeatherControlSupport = ZO_FlagHelpers.MaskHasFlag(houseFlags, HOUSE_FLAGS_SUPPORTS_WEATHER_CONTROL)
+        local hasWeatherControlSupportString = hasWeatherControlSupport and GetString(SI_YES) or GetString(SI_NO)
 
         local hasEsoPlusCost
         if data.isGift then
@@ -485,6 +488,9 @@ local function MarketPurchaseSelectTemplateDialogSetupHouseInfoControls(dialog, 
 
         local houseTypeValueLabel = dialog.houseTypeContainer.valueControl
         houseTypeValueLabel:SetText(zo_strformat(SI_HOUSE_TYPE_FORMATTER, houseCategoryName))
+
+        local weatherValueLabel = dialog.weatherContainer.valueControl
+        weatherValueLabel:SetText(zo_strformat(SI_HOUSE_SUPPORTS_WEATHER_CONTROL_FORMATTER, hasWeatherControlSupportString))
 
         for furnishingLimitType = HOUSING_FURNISHING_LIMIT_TYPE_ITERATION_BEGIN, HOUSING_FURNISHING_LIMIT_TYPE_ITERATION_END do
             local initialFurnishingCount, furnishingLimit = GetHouseTemplateBaseFurnishingCountInfo(templateData.houseTemplateId, furnishingLimitType)
@@ -973,6 +979,7 @@ function ZO_MarketPurchaseHouseTemplateSelectDialog_OnInitialized(control)
 
     control.locationContainer = control:GetNamedChild("LocationContainer")
     control.houseTypeContainer = control:GetNamedChild("HouseTypeContainer")
+    control.weatherContainer = control:GetNamedChild("WeatherContainer")
 
     local locationLabel = control.locationContainer:GetNamedChild("Label")
     locationLabel:SetText(zo_strformat(SI_MARKET_SELECT_HOUSE_TEMPLATE_INFO_FORMATTER, GetString(SI_MARKET_PRODUCT_HOUSING_LOCATION_LABEL)))
@@ -980,7 +987,10 @@ function ZO_MarketPurchaseHouseTemplateSelectDialog_OnInitialized(control)
     local houseTypeLabel = control.houseTypeContainer:GetNamedChild("Label")
     houseTypeLabel:SetText(zo_strformat(SI_MARKET_SELECT_HOUSE_TEMPLATE_INFO_FORMATTER, GetString(SI_MARKET_PRODUCT_HOUSING_HOUSE_TYPE_LABEL)))
 
-    local anchorControl = control.houseTypeContainer
+    local weatherLabel = control.weatherContainer:GetNamedChild("Label")
+    weatherLabel:SetText(zo_strformat(SI_MARKET_SELECT_HOUSE_TEMPLATE_INFO_FORMATTER, GetString(SI_MARKET_PRODUCT_HOUSING_HOUSE_SUPPORTS_WEATHER_CONTROL_LABEL)))
+
+    local anchorControl = control.weatherContainer
     local offsetY = 50
     for furnishingLimitType = HOUSING_FURNISHING_LIMIT_TYPE_ITERATION_BEGIN, HOUSING_FURNISHING_LIMIT_TYPE_ITERATION_END do
         local infoControl = CreateControlFromVirtual("$(parent)HouseInfo", control, "ZO_DialogLabelValueContainer_Keyboard", furnishingLimitType)
@@ -1037,7 +1047,7 @@ function ZO_MarketPurchaseHouseTemplateSelectDialog_OnInitialized(control)
     )
 end
 
-local function OnMarketPurchaseResult(data, result, tutorialTrigger, wasGift)
+local function OnMarketPurchaseResult(data, result, tutorialProductId, wasGift)
     EVENT_MANAGER:UnregisterForEvent("MARKET_PURCHASING", EVENT_MARKET_PURCHASE_RESULT)
     data.result = result
     data.wasGift = wasGift
@@ -1053,8 +1063,12 @@ local function OnMarketPurchaseResult(data, result, tutorialTrigger, wasGift)
     end
 
     if not wasGift then
-        if tutorialTrigger ~= TUTORIAL_TRIGGER_NONE then
-            data.tutorialTrigger = tutorialTrigger
+        if tutorialProductId ~= 0 then
+            data.tutorialTrigger =
+            { 
+                trigger = TUTORIAL_TRIGGER_CROWN_STORE_PRODUCT_PURCHASED,
+                param = tutorialProductId
+            }
         end
     end
 end

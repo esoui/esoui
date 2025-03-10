@@ -171,7 +171,7 @@
             <Controls>
                 <Control name="$(parent)Scroll" override="true">
                     <Controls>
-                        <Control name="$(parent)Child" resizeToFitDescendents="true">
+                        <Control name="$(parent)Child" resizeToFitDescendents="true" layer="BACKGROUND">
                             <Anchor point="TOPLEFT"/>
                         </Control>
                     </Controls>

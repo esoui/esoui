@@ -36,9 +36,13 @@
                                         <Label name="$(parent)PrimaryResidenceLabel" inherits="ZO_SpecializedCollection_Book_DefaultLabel_Keyboard ZO_SpecializedCollection_Book_DefaultLabel_Dimensions_Keyboard" hidden="true">
                                             <Anchor point="TOPLEFT" relativeTo="$(parent)HouseTypeLabel" relativePoint="BOTTOMLEFT" offsetY="5" />
                                         </Label>
-                                        
+
+                                        <Label name="$(parent)SupportsWeatherControlLabel" inherits="ZO_SpecializedCollection_Book_DefaultLabel_Keyboard ZO_SpecializedCollection_Book_DefaultLabel_Dimensions_Keyboard">
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)PrimaryResidenceLabel" relativePoint="BOTTOMLEFT" offsetY="5" />
+                                        </Label>
+
                                         <Label name="$(parent)HintLabel" inherits="ZO_SpecializedCollection_Book_DefaultLabel_Dimensions_Keyboard" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" hidden="true">
-                                            <Anchor point="TOPLEFT" relativeTo="$(parent)PrimaryResidenceLabel" />
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)SupportsWeatherControlLabel" relativePoint="BOTTOMLEFT" offsetY="5" />
                                         </Label>
                                     </Controls>
                                 </Control>

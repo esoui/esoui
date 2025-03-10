@@ -158,11 +158,11 @@ local function EnableChatterOption(option)
     option.enabled = true
 end
 
-function ZO_Interaction:PopulateChatterOption(controlID, optionIndex, optionText, optionType, optionalArg, isImportant, chosenBefore, importantOptions, teleportNPCId, teleportWaypointIdTable)
+function ZO_Interaction:PopulateChatterOption(controlID, optionIndex, optionText, optionType, optionalArg, isImportant, chosenBefore, importantOptions, teleportNPCId, teleportWaypointIdTable, dialogueTone)
     local optionControl = self.optionControls[controlID]
     optionControl:SetHidden(false)
 
-    local chatterData = self:GetChatterOptionData(optionIndex, optionText, optionType, optionalArg, isImportant, chosenBefore, teleportNPCId, teleportWaypointIdTable)
+    local chatterData = self:GetChatterOptionData(optionIndex, optionText, optionType, optionalArg, isImportant, chosenBefore, teleportNPCId, teleportWaypointIdTable, dialogueTone)
 
     optionControl.optionIndex = chatterData.optionIndex
     optionControl.optionType = chatterData.optionType

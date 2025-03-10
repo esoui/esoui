@@ -42,10 +42,24 @@ function LootHistory_Manager:Initialize()
         end
     end
 
+    local function OnPendingCurrencyRewardCached(currencyType, currencyLocation, delta, reason, reasonInfo)
+        local newAmount = delta
+        local oldAmount = 0
+        OnCurrencyUpdate(currencyType, currencyLocation, newAmount, oldAmount, reason, reasonInfo)
+    end
+
+    -- reason, level (unused), previousExperience, currentExperience
     local function OnExperienceGainUpdate(...)
         if CanAddLootEntry() then
             SYSTEMS:GetObject(ZO_LOOT_HISTORY_NAME):OnExperienceGainUpdate(...)
         end
+    end
+
+    local function OnPendingExperienceRewardCached(reason, amount)
+        local UNUSED_LEVEL = nil
+        local previousExperience = 0
+        local currentExperience = amount
+        OnExperienceGainUpdate(reason, UNUSED_LEVEL, previousExperience, currentExperience)
     end
 
     local function OnMedalAwarded(...)
@@ -127,7 +141,9 @@ function LootHistory_Manager:Initialize()
 
     EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, function(eventId, ...) OnInventorySlotUpdate(...) end)
     EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_CURRENCY_UPDATE, function(eventId, ...) OnCurrencyUpdate(...) end)
+    EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_PENDING_CURRENCY_REWARD_CACHED, function(eventId, ...) OnPendingCurrencyRewardCached(...) end)
     EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_EXPERIENCE_GAIN, function(eventId, ...) OnExperienceGainUpdate(...) end)
+    EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_PENDING_EXPERIENCE_REWARD_CACHED, function(eventId, ...) OnPendingExperienceRewardCached(...) end)
     EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_QUEST_TOOL_UPDATED, function(eventId, ...) OnQuestToolUpdate(...) end)
     EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_MEDAL_AWARDED, function(eventId, ...) OnMedalAwarded(...) end)
     EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_BATTLEGROUND_STATE_CHANGED, function(eventId, ...) OnBattlegroundStateChanged(...) end)

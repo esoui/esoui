@@ -42,16 +42,6 @@ local GROUP_ROLES_TO_ICONS =
     },
 }
 
-local groupFinderIsNewApplication = false
-
-function ZO_SetGroupFinderIsNewApplication(isNew)
-    groupFinderIsNewApplication = isNew
-end
-
-function ZO_HasGroupFinderNewApplication()
-    return HasGroupListingForUserType(GROUP_FINDER_GROUP_LISTING_USER_TYPE_CREATED_GROUP_LISTING) and groupFinderIsNewApplication
-end
-
 --------------------------
 -- ZO_GroupFinder_Shared
 --------------------------
@@ -74,7 +64,6 @@ function ZO_GroupFinder_Shared:Initialize(control)
     EVENT_MANAGER:RegisterForEvent(self:GetSystemName(), EVENT_GROUP_FINDER_UPDATE_GROUP_LISTING_RESULT, function(_, ...) self:OnGroupListingRequestEditResult(...) end)
     EVENT_MANAGER:RegisterForEvent(self:GetSystemName(), EVENT_GROUP_FINDER_GROUP_LISTING_ATTAINED_ROLES_CHANGED, function(_, ...) self:OnGroupListingAttainedRolesChanged(...) end)
     EVENT_MANAGER:RegisterForEvent(self:GetSystemName(), EVENT_GROUP_FINDER_REMOVE_GROUP_LISTING_RESULT, function(_, ...) self:OnGroupListingRemoved(...) end)
-    EVENT_MANAGER:RegisterForEvent(self:GetSystemName(), EVENT_GROUP_FINDER_APPLICATION_RECEIVED, function() ZO_SetGroupFinderIsNewApplication(true) end)
     EVENT_MANAGER:RegisterForEvent(self:GetSystemName(), EVENT_VETERAN_DIFFICULTY_CHANGED, OnGroupVeteranDifficultyChanged)
     EVENT_MANAGER:RegisterForEvent(self:GetSystemName(), EVENT_GROUP_VETERAN_DIFFICULTY_CHANGED, OnGroupVeteranDifficultyChanged)
 end
@@ -276,6 +265,14 @@ end
 function ZO_GroupFinder_CreateEditGroupListing_Shared:OnCategorySelection(comboBox, selectedDataName, selectedData, selectionChanged, oldData)
     -- This function should not be able to be called when editing so the userTypeData should be fine here
     self.userTypeData:SetCategory(selectedData.value)
+
+    -- Reset the roles to the default when setting the category. This will ensure that the number of roles expected matches the category selected,
+    -- however the roles will not retain their user set values when switching between categories like other entries will.
+    for i, roleType in pairs(ZO_GROUP_FINDER_ROLES) do
+        self.userTypeData:UpdateDesiredRoleCountAtEdit(roleType)
+        self.userTypeData:UpdateAttainedRoleCountAtEdit(roleType)
+    end
+
     self:Refresh()
 end
 

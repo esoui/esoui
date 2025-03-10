@@ -345,15 +345,15 @@ function ZO_CharacterSelect_Initialize(self)
         self.carousel:Commit()
 
         -- update visibility of events/chapter upgrade as appropriate
-        local chapterUpgradeId = GetCurrentChapterUpgradeId()
 
         if numEvents > 0 then
             ZO_CharacterSelectEventMinimized:SetHidden(false)
             ZO_CharacterSelectChapterUpgrade:SetHidden(true)
-        elseif chapterUpgradeId == 0 or IsChapterOwned(chapterUpgradeId) then
+        elseif not CHAPTER_UPGRADE_MANAGER:CanRegister() then
             ZO_CharacterSelectChapterUpgrade:SetHidden(true)
             ZO_CharacterSelectEventMinimized:SetHidden(true)
         else
+            local chapterUpgradeId = GetCurrentChapterUpgradeId()
             local chapterCollectibleId = GetChapterCollectibleId(chapterUpgradeId)
             ZO_CharacterSelectChapterUpgradeTitle:SetText(zo_strformat(SI_CHARACTER_SELECT_CHAPTER_LOCKED_FORMAT, GetCollectibleName(chapterCollectibleId)))
             ZO_CharacterSelectChapterUpgradeImage:SetTexture(GetCurrentChapterMediumLogoFileIndex())

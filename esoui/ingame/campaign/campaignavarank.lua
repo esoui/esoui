@@ -46,6 +46,21 @@ function CampaignAvARank:Refresh()
     end
 end
 
+function CampaignAvARank:GetNarration()
+    local narrations = {}
+    
+    local alliance = GetUnitAlliance("player")
+    local rank = GetUnitAvARank("player")
+    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_AVA_ALLIANCE_AND_RANK_NAME, GetAllianceName(alliance), GetAvARankName(GetUnitGender("player"), rank))))
+
+    local current, max = GetCurrentRankProgress()
+    if max > 0 then
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(GetString(SI_GAMEPAD_CAMPAIGN_AVA_RANK_FORMATTER), rank, 100 * (current / max))))
+    end
+
+    return narrations
+end
+
 --Global XML
 
 function ZO_CampaignAvARankStatusBar_OnMouseEnter(control)

@@ -1,0 +1,68 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_OneTamrielBackgroundFadeAnimation">
+            <Animations>
+                <!-- Map Elements -->
+                <AlphaAnimation duration="ZO_ONE_TAMRIEL_BACKGROUND_MAP_FADE_DURATION_MS" startAlpha="0" endAlpha="1"/>
+                <AlphaAnimation duration="ZO_ONE_TAMRIEL_BACKGROUND_LINES_FADE_DURATION_MS" delay="ZO_ONE_TAMRIEL_BACKGROUND_LINES_FADE_DELAY_MS" startAlpha="0" endAlpha="1"/>
+                <AlphaAnimation duration="ZO_ONE_TAMRIEL_BACKGROUND_RINGS_FADE_DURATION_MS" delay="ZO_ONE_TAMRIEL_BACKGROUND_RINGS_FADE_DELAY_MS" startAlpha="0" endAlpha="1"/>
+                <AlphaAnimation duration="ZO_ONE_TAMRIEL_BACKGROUND_RINGS_FADE_DURATION_MS" delay="ZO_ONE_TAMRIEL_BACKGROUND_RINGS_FADE_DELAY_MS" startAlpha="0" endAlpha="1"/>
+                <AlphaAnimation duration="ZO_ONE_TAMRIEL_BACKGROUND_CONSTELLATIONS_FADE_DURATION_MS" delay="ZO_ONE_TAMRIEL_BACKGROUND_CONSTELLATIONS_FADE_DELAY_MS" startAlpha="0" endAlpha="1"/>
+                <AlphaAnimation duration="ZO_ONE_TAMRIEL_BACKGROUND_DAEDRIC_TEXT_FADE_DURATION_MS" delay="ZO_ONE_TAMRIEL_BACKGROUND_DAEDRIC_TEXT_FADE_DELAY_MS" startAlpha="0" endAlpha="1"/>
+
+                <!-- Realm "Islands" -->
+                <AlphaAnimation duration="ZO_ONE_TAMRIEL_BACKGROUND_REALM_FADE_DURATION_MS" delay="ZO_ONE_TAMRIEL_BACKGROUND_REALM_FADE_DELAY_MS" startAlpha="0" endAlpha="1"/>
+                <AlphaAnimation duration="ZO_ONE_TAMRIEL_BACKGROUND_REALM_FADE_DURATION_MS" delay="ZO_ONE_TAMRIEL_BACKGROUND_REALM_FADE_DELAY_MS" startAlpha="0" endAlpha="1"/>
+                <AlphaAnimation duration="ZO_ONE_TAMRIEL_BACKGROUND_REALM_FADE_DURATION_MS" delay="ZO_ONE_TAMRIEL_BACKGROUND_REALM_FADE_DELAY_MS" startAlpha="0" endAlpha="1"/>
+                <AlphaAnimation duration="ZO_ONE_TAMRIEL_BACKGROUND_REALM_FADE_DURATION_MS" delay="ZO_ONE_TAMRIEL_BACKGROUND_REALM_FADE_DELAY_MS" startAlpha="0" endAlpha="1"/>
+                <AlphaAnimation duration="ZO_ONE_TAMRIEL_BACKGROUND_REALM_FADE_DURATION_MS" delay="ZO_ONE_TAMRIEL_BACKGROUND_REALM_FADE_DELAY_MS" startAlpha="0" endAlpha="1"/>
+                <AlphaAnimation duration="ZO_ONE_TAMRIEL_BACKGROUND_REALM_FADE_DURATION_MS" delay="ZO_ONE_TAMRIEL_BACKGROUND_REALM_FADE_DELAY_MS" startAlpha="0" endAlpha="1"/>
+                <AlphaAnimation duration="ZO_ONE_TAMRIEL_BACKGROUND_REALM_FADE_DURATION_MS" delay="ZO_ONE_TAMRIEL_BACKGROUND_REALM_FADE_DELAY_MS" startAlpha="0" endAlpha="1"/>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+
+    <Controls>
+        <TopLevelControl name="ZO_OneTamrielBackground" mouseEnabled="true" tier="LOW" layer="BACKGROUND" level="1" hidden="true">
+            <AnchorFill/>
+
+            <OnInitialized>
+                ZO_OneTamrielBackground_OnInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)Canvas">
+                    <AnchorFill/>
+
+                    <Controls>
+                        <Texture name="$(parent)Map" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES" textureFile="EsoUI/Art/PregameAnimatedBackground/OneTamriel/Map.dds" pixelRoundingEnabled="false" tier="LOW" />
+
+                        <Texture name="$(parent)Lines" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES" textureFile="EsoUI/Art/PregameAnimatedBackground/OneTamriel/Lines.dds" pixelRoundingEnabled="false" tier="LOW" />
+
+                        <Texture name="$(parent)Rings1" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES" textureFile="EsoUI/Art/PregameAnimatedBackground/OneTamriel/Rings1.dds" pixelRoundingEnabled="false" tier="LOW" />
+
+                        <Texture name="$(parent)Rings2" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES" textureFile="EsoUI/Art/PregameAnimatedBackground/OneTamriel/Rings2.dds" pixelRoundingEnabled="false" tier="LOW" />
+
+                        <Texture name="$(parent)DaedricText" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES" textureFile="EsoUI/Art/PregameAnimatedBackground/OneTamriel/DaedricText.dds" pixelRoundingEnabled="false" tier="LOW" />
+
+                        <Texture name="$(parent)Constellations" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES" textureFile="EsoUI/Art/PregameAnimatedBackground/OneTamriel/Constellations.dds" pixelRoundingEnabled="false" tier="LOW" />
+
+                        <Texture name="$(parent)Apocrypha" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES" textureFile="EsoUI/Art/PregameAnimatedBackground/OneTamriel/apocrypha.dds" pixelRoundingEnabled="false" tier="LOW" />
+
+                        <Texture name="$(parent)Artaeum" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES" textureFile="EsoUI/Art/PregameAnimatedBackground/OneTamriel/artaeum.dds" pixelRoundingEnabled="false" tier="LOW" />
+
+                        <Texture name="$(parent)ClockworkCity" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES" textureFile="EsoUI/Art/PregameAnimatedBackground/OneTamriel/clockworkCity.dds" pixelRoundingEnabled="false" tier="LOW" />
+
+                        <Texture name="$(parent)Coldharbour" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES" textureFile="EsoUI/Art/PregameAnimatedBackground/OneTamriel/coldharbour.dds" pixelRoundingEnabled="false" tier="LOW" />
+
+                        <Texture name="$(parent)Deadlands" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES" textureFile="EsoUI/Art/PregameAnimatedBackground/OneTamriel/deadlands.dds" pixelRoundingEnabled="false" tier="LOW" />
+
+                        <Texture name="$(parent)Eyevea" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES" textureFile="EsoUI/Art/PregameAnimatedBackground/OneTamriel/eyevea.dds" pixelRoundingEnabled="false" tier="LOW" />
+
+                        <Texture name="$(parent)Fargrave" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES" textureFile="EsoUI/Art/PregameAnimatedBackground/OneTamriel/fargrave.dds" pixelRoundingEnabled="false" tier="LOW" />
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

@@ -13,15 +13,19 @@ function ZO_ClickableKeybindLabelMixin:GetGamepadKeybind()
 end
 
 function ZO_ClickableKeybindLabelMixin:UpdateEnabledState()
-    local keybindEnabled = self.keybindEnabled and self.enabled
-    local keybindColor = keybindEnabled and ZO_SELECTED_TEXT or ZO_DISABLED_TEXT
-    self:SetColor(keybindColor:UnpackRGBA())
-    self:SetAlpha((self:GetKeybind() or self.customKeyText) and 1 or 0)
+    if self:IsHidden() then
+        self.enableStateDirty = true
+    else
+        local keybindEnabled = self.keybindEnabled and self.enabled
+        local keybindColor = keybindEnabled and ZO_SELECTED_TEXT or ZO_DISABLED_TEXT
+        self:SetColor(keybindColor:UnpackRGBA())
+        self:SetAlpha((self:GetKeybind() or self.customKeyText) and 1 or 0)
 
-    ZO_KeyMarkupLabel_SetEdgeFileColor(self, keybindColor)
+        ZO_KeyMarkupLabel_SetEdgeFileColor(self, keybindColor)
 
-    if self.updateRegisteredKeybindCallback then
-        self.updateRegisteredKeybindCallback()
+        if self.updateRegisteredKeybindCallback then
+            self.updateRegisteredKeybindCallback()
+        end
     end
 end
 
@@ -195,6 +199,13 @@ function ZO_ClickableKeybindLabelTemplate_OnInitialized(self)
     self.keybindEnabled = true
 
     zo_mixin(self, ZO_ClickableKeybindLabelMixin)
+
+    self:SetHandler("OnEffectivelyShown", function()
+        if self.enableStateDirty then
+            self.enableStateDirty = nil
+            self:UpdateEnabledState()
+        end
+    end)
 
     ZO_KeyMarkupLabel_SetCustomOffsets(self, -5, 5, -2, 3)
 

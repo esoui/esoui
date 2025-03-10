@@ -1,10 +1,4 @@
-ZO_StatEntry_Keyboard = ZO_Object:Subclass()
-
-function ZO_StatEntry_Keyboard:New(...)
-    local statEntry = ZO_Object.New(self)
-    statEntry:Initialize(...)
-    return statEntry
-end
+ZO_StatEntry_Keyboard = ZO_InitializingObject:Subclass()
 
 function ZO_StatEntry_Keyboard:Initialize(control, statType, statObject)
     self.control = control
@@ -22,12 +16,12 @@ function ZO_StatEntry_Keyboard:Initialize(control, statType, statObject)
     self.control:RegisterForEvent(EVENT_STATS_UPDATED, UpdateStatValue)
     self.control:AddFilterForEvent(EVENT_STATS_UPDATED, REGISTER_FILTER_UNIT_TAG, "player")
     self.control:SetHandler("OnEffectivelyShown", UpdateStatValue)
-    
+
     self.nextStatsRefreshSeconds = 0
     local function OnUpdate(_, currentFrameTimeSeconds)
         if self.nextStatsRefreshSeconds < currentFrameTimeSeconds then
             self:UpdateStatValue()
-        end    
+        end
     end
 
     self.control:SetHandler("OnUpdate", OnUpdate)
@@ -54,6 +48,26 @@ function ZO_StatEntry_Keyboard:GetDisplayValue(targetValue)
     end
 end
 
+function ZO_StatEntry_Keyboard:SetHasMundusEffect(hasMundusEffect)
+    self.hasMundusEffect = hasMundusEffect
+end
+
+function ZO_StatEntry_Keyboard:UpdateMundusIcon()
+    if self.hasMundusEffect then
+        if not self.mundusIcon then
+            local prefix = ""
+            if self.statObject and self.statObject.virtualControlPrefix then
+                prefix = self.statObject.virtualControlPrefix
+            end
+            self.mundusIcon = CreateControlFromVirtual(prefix .. "MundusIcon" .. self.statType, self.control, "ZO_StatMundusIcon")
+            self.mundusIcon:SetAnchor(RIGHT)
+        end
+        self.mundusIcon:SetHidden(false)
+    elseif self.mundusIcon then
+        self.mundusIcon:SetHidden(true)
+    end
+end
+
 function ZO_StatEntry_Keyboard:UpdateStatValue()
     if not self.control:IsHidden() then
         self.nextStatsRefreshSeconds = GetFrameTimeSeconds() + ZO_STATS_REFRESH_TIME_SECONDS
@@ -76,13 +90,17 @@ function ZO_StatEntry_Keyboard:UpdateStatValue()
         end
         self.control.name:SetColor(ZO_NORMAL_TEXT:UnpackRGBA())
 
+        self:UpdateMundusIcon()
         self:UpdateStatComparisonValue()
     end
 end
 
 function ZO_StatEntry_Keyboard:UpdateStatComparisonValue()
     if not self.control:IsHidden() and not self.control.comparisonValue:IsHidden() and self.currentStatDelta and self.currentStatDelta ~= 0 then
-        local comparisonStatValue = self:GetValue() + self.currentStatDelta
+        local comparisonStatValue = self:GetValue()
+        if not self.currentStatExcludeDelta then
+            comparisonStatValue = comparisonStatValue + self.currentStatDelta
+        end
         local color
         local icon
         if self.currentStatDelta > 0 then
@@ -92,16 +110,17 @@ function ZO_StatEntry_Keyboard:UpdateStatComparisonValue()
             color = ZO_ERROR_COLOR
             icon = "EsoUI/Art/Buttons/Gamepad/gp_downArrow.dds"
         end
-
-        local comparisonValueString = zo_iconFormatInheritColor(icon, 24, 24) .. self:GetDisplayValue(comparisonStatValue)
+        local INHERIT_COLOR = true
+        local comparisonValueString = zo_iconTextFormatNoSpace(icon, 24, 24, self:GetDisplayValue(comparisonStatValue), INHERIT_COLOR)
         comparisonValueString = color:Colorize(comparisonValueString)
-        self.control.comparisonValue:SetText(comparisonValueString)  
+        self.control.comparisonValue:SetText(comparisonValueString)
     end
 end
 
-function ZO_StatEntry_Keyboard:ShowComparisonValue(statDelta)
+function ZO_StatEntry_Keyboard:ShowComparisonValue(statDelta, excludeDelta)
     if statDelta and statDelta ~= 0 then
         self.currentStatDelta = statDelta
+        self.currentStatExcludeDelta = excludeDelta
         self.control.value:SetHidden(true)
         self.control.comparisonValue:SetHidden(false)
         self:UpdateStatComparisonValue()
@@ -109,12 +128,10 @@ function ZO_StatEntry_Keyboard:ShowComparisonValue(statDelta)
 end
 
 function ZO_StatEntry_Keyboard:HideComparisonValue()
-    if not self.control.comparisonValue:IsHidden() then
-        self.currentStatDelta = 0
-        self.control.comparisonValue:SetText("")
-        self.control.comparisonValue:SetHidden(true)
-        self.control.value:SetHidden(false)
-    end
+    self.currentStatDelta = 0
+    self.control.comparisonValue:SetText("")
+    self.control.comparisonValue:SetHidden(true)
+    self.control.value:SetHidden(false)
 end
 
 function ZO_StatsEntry_OnMouseEnter(control)
@@ -155,4 +172,111 @@ end
 
 function ZO_AdvancedStatsEntry_OnMouseExit(control)
     ClearTooltip(InformationTooltip)
+end
+
+-- Mundus stats
+
+ZO_StatsMundus_ShouldShowHelpKeybind = false
+
+function ZO_StatsMundusEntry_OnMouseEnter(control)
+    InitializeTooltip(GameTooltip, control, control.mouseOverAnchor, control.mouseOverOffsetX)
+    local buffSlot = control.buffSlot
+    if buffSlot then
+        GameTooltip:SetBuff(buffSlot, "player")
+        ZO_StatsMundus_ShouldShowHelpKeybind = false
+    else
+        GameTooltip:AddLine(GetString(SI_STATS_MUNDUS_NONE_TOOLTIP_TITLE), "", ZO_NORMAL_TEXT:UnpackRGBA())
+        GameTooltip:AddLine(GetString(SI_STATS_MUNDUS_NONE_TOOLTIP_DESCRIPTION), "", ZO_NORMAL_TEXT:UnpackRGBA())
+        ZO_StatsMundus_ShouldShowHelpKeybind = true
+    end
+    local statEffects = control.statEffects
+    if statEffects then
+        for i, data in ipairs(statEffects) do
+            local EXCLUDE_DELTA = true
+            STATS:ShowComparisonForDerivedStat(data.statType, data.effect, EXCLUDE_DELTA)
+        end
+        ZO_CharacterWindowStats_ShowMundusComparisonValues(statEffects)
+    end
+    KEYBIND_STRIP:UpdateKeybindButtonGroup(STATS.keybindButtons)
+    ZO_CharacterWindowStats_RefreshKeybinds()
+    ZO_ADVANCED_STATS_WINDOW:SetMundusMouseAbility(control.abilityId)
+    ZO_ADVANCED_STATS_WINDOW:UpdateAdvancedStats()
+end
+
+function ZO_StatsMundusEntry_OnMouseExit(control)
+    ZO_StatsMundus_ShouldShowHelpKeybind = false
+    local statEffects = control.statEffects
+    if statEffects then
+        for i, data in ipairs(statEffects) do
+            STATS:HideComparisonForDerivedStat(data.statType)
+        end
+    end
+    KEYBIND_STRIP:UpdateKeybindButtonGroup(STATS.keybindButtons)
+    ZO_CharacterWindowStats_RefreshKeybinds()
+    ClearTooltip(GameTooltip)
+    ZO_ADVANCED_STATS_WINDOW:SetMundusMouseAbility()
+    ZO_ADVANCED_STATS_WINDOW:UpdateAdvancedStats()
+    ZO_CharacterWindowStats_HideComparisonValues()
+end
+
+-- Shared logic functions
+
+-- Populates mundusIconControls passed in and returns table of shown mundus names
+function ZO_SharedStats_SetupMundusIconControls(mundusIconControls, mouseOverAnchor, mouseOverOffsetX, GetDerivedStatByTypeFunction)
+    local mundusStoneNameList = {}
+    local activeMundusStoneBuffIndices = { GetUnitActiveMundusStoneBuffIndices("player") }
+    local numActiveMundusStoneBuffs = #activeMundusStoneBuffIndices
+    local numMundusSlots = GetNumAvailableMundusStoneSlots()
+    local isPlayerAtMundusWarningLevel = GetUnitLevel("player") >= GetMundusWarningLevel()
+    local mundusStoneNameListContainsBuff = false
+    for i, control in ipairs(mundusIconControls) do
+        control.statEffects = {}
+        control.mouseOverAnchor = mouseOverAnchor
+        control.mouseOverOffsetX = mouseOverOffsetX
+        if i <= numMundusSlots - numActiveMundusStoneBuffs then
+            local nameText = GetString("SI_MUNDUSSTONE", MUNDUS_STONE_INVALID)
+            control.buffSlot = nil
+            control.icon:SetTexture(ZO_STAT_MUNDUS_ICONS[MUNDUS_STONE_INVALID])
+            if isPlayerAtMundusWarningLevel then
+                control.icon:SetColor(ZO_ERROR_COLOR:UnpackRGBA())
+                nameText = ZO_ERROR_COLOR:Colorize(nameText)
+            else
+                control.icon:SetColor(ZO_DISABLED_TEXT:UnpackRGBA())
+            end
+            control:SetHidden(false)
+            if mundusStoneNameListContainsBuff or #mundusStoneNameList == 0 then
+                table.insert(mundusStoneNameList, 1, zo_strformat(SI_STATS_MUNDUS_FORMATTER, nameText))
+            end
+        elseif i <= numMundusSlots then
+            local buffName, _, _, buffSlot, _, _, _, _, _, _, abilityId = GetUnitBuffInfo("player", activeMundusStoneBuffIndices[i - (numMundusSlots - numActiveMundusStoneBuffs)])
+            local mundusStoneIndex = GetAbilityMundusStoneType(abilityId)
+            control.buffSlot = buffSlot
+            control.abilityId = abilityId
+            control.icon:SetTexture(ZO_STAT_MUNDUS_ICONS[mundusStoneIndex])
+            control.icon:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
+            control:SetHidden(false)
+            table.insert(mundusStoneNameList, 1, zo_strformat(SI_STATS_MUNDUS_FORMATTER, buffName))
+            mundusStoneNameListContainsBuff = true
+
+            local numStatsForAbility = GetAbilityNumDerivedStats(abilityId)
+            for i = 1, numStatsForAbility do
+                local statType, effectValue = GetAbilityDerivedStatAndEffectByIndex(abilityId, i)
+                local statControl = GetDerivedStatByTypeFunction(statType)
+                if statControl then
+                    statControl.statEntry:SetHasMundusEffect(true)
+                    statControl.statEntry:UpdateStatValue()
+                end
+                local statEffect =
+                {
+                    statType = statType,
+                    effect = effectValue,
+                }
+                table.insert(control.statEffects, statEffect)
+            end
+        else
+            control.buffSlot = nil
+            control:SetHidden(true)
+        end
+    end
+    return mundusStoneNameList
 end

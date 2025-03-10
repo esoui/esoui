@@ -140,9 +140,14 @@ function ZO_Tooltip:LayoutCraftedAbility(craftedAbilityData, primaryScriptData, 
     end
 
     if ZO_FlagHelpers.MaskHasFlag(displayFlags, SCRIBING_TOOLTIP_DISPLAY_FLAGS_SHOW_SELECTED_SCRIPTS) then
+        local craftedAbilityId = craftedAbilityData:GetId()
+        local primaryScriptId = primaryScriptData and primaryScriptData:GetId() or nil
+        local secondaryScriptId = secondaryScriptData and secondaryScriptData:GetId() or nil
+        local tertiaryScriptId = tertiaryScriptData and tertiaryScriptData:GetId() or nil
+
         for slot = SCRIBING_SLOT_ITERATION_BEGIN, SCRIBING_SLOT_ITERATION_END do
             local scriptData = selectedScripts[slot]
-            local compatible = scriptData and scriptData:IsCompatibleWithSelections(craftedAbilityData, primaryScriptData, secondaryScriptData, tertiaryScriptData)
+            local compatible = scriptData and scriptData:IsCompatibleWithSelections(craftedAbilityId, primaryScriptId, secondaryScriptId, tertiaryScriptId)
             local displayFlags = compatible and displayFlags or ZO_FlagHelpers.SetMaskFlag(displayFlags, SCRIBING_TOOLTIP_DISPLAY_FLAGS_SCRIPT_COMPATIBILITY_ERROR)
             local scriptOptions = { displayFlags = displayFlags }
             self:AppendCraftedAbilityScriptDescription(craftedAbilityData, scriptData, scriptOptions, descriptionStyle)

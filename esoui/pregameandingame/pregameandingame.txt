@@ -13,6 +13,7 @@ EsoUI\PregameAndIngame\ZO_Options\Gamepad\ZO_Options_Gamepad.lua
 EsoUI\PregameAndIngame\ZO_Options\Gamepad\ZO_Options_Gamepad.xml
 
 EsoUI\PregameAndIngame\Tooltip\SettingsTooltips.lua
+EsoUI\PregameAndIngame\Tooltip\AddonTooltips.lua
 
 EsoUI\PregameAndIngame\Gamepad\ControllerDisconnect\ControllerDisconnect.lua
 EsoUI\PregameAndIngame\Gamepad\ControllerDisconnect\ControllerDisconnect.xml
@@ -40,7 +41,10 @@ EsoUI\PregameAndIngame\ZO_AddOnManager\ZO_AddOnEula.xml
 EsoUI\PregameAndIngame\ZO_AddOnManager\ZO_AddOnManager.lua
 EsoUI\PregameAndIngame\ZO_AddOnManager\ZO_AddOnManager.xml
 
-EsoUI\PregameAndIngame\Globals\Presence.lua
+EsoUI\PregameAndIngame\ZO_AddOnManager\Gamepad\ZO_AddOnEula_Gamepad.lua
+EsoUI\PregameAndIngame\ZO_AddOnManager\Gamepad\ZO_AddOnEula_Gamepad.xml
+EsoUI\PregameAndIngame\ZO_AddOnManager\Gamepad\ZO_AddOnManager_Gamepad.lua
+EsoUI\PregameAndIngame\ZO_AddOnManager\Gamepad\ZO_AddOnManager_Gamepad.xml
 
 EsoUI\PregameAndIngame\Globals\Console\Dialogs_Console.lua
 EsoUI\PregameAndIngame\Globals\Gamepad\GamepadEventHandlers.lua

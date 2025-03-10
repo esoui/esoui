@@ -22,5 +22,16 @@
                 </Button>
             </Controls>
         </Control>
+
+        <Control name="ZO_CharacterCreateGenderSlider_Gamepad" virtual="true" inherits="ZO_CharacterCreateSlider_Gamepad">
+            <Controls>
+                <Label name="$(parent)Value" inherits="CCLabel_Gamepad" font="ZoFontGamepad27" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED">
+                    <Anchor point="TOP" relativeTo="$(parent)Name" relativePoint="TOP" offsetX="0" offsetY="55" />
+                </Label>
+                <Slider name="$(parent)Slider" override="true">
+                    <Anchor point="TOP" relativeTo="$(parent)Value" relativePoint="TOP" offsetX="0" offsetY="55" />
+                </Slider>
+            </Controls>
+        </Control>
     </Controls>
 </GuiXml>

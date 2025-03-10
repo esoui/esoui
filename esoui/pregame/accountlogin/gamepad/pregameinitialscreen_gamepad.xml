@@ -25,6 +25,23 @@
             </OnInitialized>
 
             <Controls>
+                <Control name="$(parent)Logo" resizeToFitDescendents="true">
+                    <Anchor point="TOP" />
+                    <Controls>
+                        <Texture name="$(parent)TitleBackdrop" resizeToFitFile="true" textureFile="EsoUI/Art/Login/Gamepad/console-Logo-backdrop.dds">
+                            <Anchor point="TOP" offsetY="64" />
+                        </Texture>
+
+                        <Texture name="$(parent)Title" resizeToFitFile="true" textureFile="EsoUI/Art/Login/Gamepad/console-Logo.dds">
+                            <Anchor point="TOP" offsetY="64" />
+                        </Texture>
+
+                        <Texture name="$(parent)Ouroboros" resizeToFitFile="true" textureFile="EsoUI/Art/Login/Gamepad/console-Ouroboros.dds">
+                            <Anchor point="CENTER" relativeTo="GuiRoot"/>
+                        </Texture>
+                    </Controls>
+                </Control>
+
                 <Label name="$(parent)PressText" inherits="ZO_LargeKeyMarkupLabel_Gamepad" alpha="0" modifyTextType="UPPERCASE" font="ZoFontGamepad34" horizontalAlignment="CENTER">
                     <Anchor point="BOTTOM" relativeTo="GuiRoot" offsetY="-45" />
                 </Label>

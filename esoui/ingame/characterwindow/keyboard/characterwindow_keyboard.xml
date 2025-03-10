@@ -1,5 +1,35 @@
 <GuiXml>
     <Controls>
+        <Control name="ZO_MundusStonesStatsEntry" mouseEnabled="true" virtual="true">
+            <Dimensions x="295" y="24" />
+
+            <OnInitialized>
+                self.mundus1 = self:GetNamedChild("MundusIcon1")
+                self.mundus2 = self:GetNamedChild("MundusIcon2")
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)Divider" inherits="ZO_DynamicHorizontalDivider">
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="TOPRIGHT" />
+                </Control>
+
+                <Control name="$(parent)MundusIcon1" inherits="ZO_StatsMundusIcon" hidden="true">
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Divider" relativePoint="BOTTOMRIGHT" offsetX="-20" />
+                </Control>
+
+                <Control name="$(parent)MundusIcon2" inherits="ZO_StatsMundusIcon" hidden="true">
+                    <Anchor point="RIGHT" relativeTo="$(parent)MundusIcon1" relativePoint="LEFT" offsetX="-10"/>
+                </Control>
+
+                <Label name="$(parent)Header" inherits="ZO_StatsHeader" text="SI_STATS_MUNDUS_TITLE">
+                    <Dimensions x="160" />
+                    <Anchor point="LEFT" constrains="X" />
+                    <Anchor point="RIGHT" relativeTo="$(parent)MundusIcon1" relativePoint="LEFT" constrains="Y" />
+                </Label>
+            </Controls>
+        </Control>
+
         <Button name="ZO_InventoryEquippedSlot" inherits="ZO_InventorySlot" virtual="true">
             <Dimensions x="44" y="44" />
             <OnInitialized>
@@ -163,15 +193,25 @@
             <Anchor point="TOPLEFT" relativeTo="ZO_CharacterHeaderSectionDivider" relativePoint="TOPRIGHT" />
             <Anchor point="BOTTOMLEFT" relativeTo="ZO_Character" relativePoint="BOTTOMRIGHT" offsetX="20"/>
             <Dimensions x="303" />
+
             <OnInitialized>
                 ZO_CharacterWindowStats_Initialize(self)
             </OnInitialized>
+
+            <OnEffectivelyShown>
+                ZO_Character_UpdateEffects()
+            </OnEffectivelyShown>
+
+            <OnEffectivelyHidden>
+                ZO_CharacterWindowStats_RefreshKeybinds()
+            </OnEffectivelyHidden>
+
             <Controls>
                 <Control name="$(parent)Scroll" inherits="ZO_ScrollContainer">
-                    <AnchorFill/>
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="24" offsetY="15" />
                 </Control>
             </Controls>
         </TopLevelControl>
-        
     </Controls>
 </GuiXml>

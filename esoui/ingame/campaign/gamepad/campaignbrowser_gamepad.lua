@@ -215,29 +215,31 @@ local function SetupPopulationIcon(control, data)
     end
 end
 
-function ZO_CampaignBrowser_Gamepad:SetupStateMessage(stateMessageLabel, campaignData)
-    local shouldHideStateMessage = false
-
+function ZO_CampaignBrowser_Gamepad:GetStateMessageText(campaignData)
     local queueData = campaignData.queue
     if queueData.isQueued and queueData.state ~= CAMPAIGN_QUEUE_REQUEST_STATE_FINISHED then
         local isLoading, message, messageIcon = CAMPAIGN_BROWSER_MANAGER:GetQueueMessage(queueData.id, queueData.isGroup, queueData.state)
         if not isLoading then
             message = message .. zo_iconFormat(messageIcon, 32, 32)
         end
-        stateMessageLabel:SetText(ZO_SUCCEEDED_TEXT:Colorize(message))
+        return ZO_SUCCEEDED_TEXT:Colorize(message)
     elseif not ZO_CampaignBrowser_DoesPlayerMatchAllianceLock(campaignData) then
-        stateMessageLabel:SetText(CAMPAIGN_BROWSER_MANAGER:GenerateAllianceLockStatusMessage(campaignData))
+        return CAMPAIGN_BROWSER_MANAGER:GenerateAllianceLockStatusMessage(campaignData)
     else
-        shouldHideStateMessage = true
+        return ""
     end
+end
 
+function ZO_CampaignBrowser_Gamepad:SetupStateMessage(stateMessageLabel, campaignData)
+    local stateMessageText = self:GetStateMessageText(campaignData)
 
-    if shouldHideStateMessage then
+    if stateMessageText == "" then
         stateMessageLabel:SetHidden(true)
         self.campaignInfoRules:ClearAnchors()
         self.campaignInfoRules:SetAnchor(TOPLEFT, self.campaignInfoRulesContainer, TOPLEFT, 0, 0)
         self.campaignInfoRules:SetAnchor(TOPRIGHT, self.campaignInfoRulesContainer, TOPRIGHT, 0, 0)
     else
+        stateMessageLabel:SetText(stateMessageText)
         stateMessageLabel:SetHidden(false)
         self.campaignInfoRules:ClearAnchors()
         self.campaignInfoRules:SetAnchor(TOPLEFT, stateMessageLabel, BOTTOMLEFT, 0, ZO_GAMEPAD_CONTENT_VERT_OFFSET_PADDING)
@@ -384,6 +386,7 @@ function ZO_CampaignBrowser_Gamepad:RefreshContentHeader()
 
         headerData.data1HeaderText = nil
         headerData.data1Text = nil
+        headerData.data1TextNarration = nil
         headerData.data2HeaderText = nil
         headerData.data2Text = nil
         headerData.data3HeaderText = nil
@@ -395,8 +398,12 @@ function ZO_CampaignBrowser_Gamepad:RefreshContentHeader()
             -- Data 1
             headerData.data1HeaderText = GetString(SI_GAMEPAD_CAMPAIGN_NEXT_SCORING_EVALUATION)
             headerData.data1Text = function(control)
-                                    ZO_CampaignScoring_TimeUpdate(control, GetSecondsUntilCampaignScoreReevaluation)
-                                    return true
+                ZO_CampaignScoring_TimeUpdate(control, GetSecondsUntilCampaignScoreReevaluation)
+                return true
+            end
+            headerData.data1TextNarration = function()
+                local secondsRemaining = GetSecondsUntilCampaignScoreReevaluation(targetData.id)
+                return ZO_FormatTime(secondsRemaining, TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_TWELVE_HOUR)
             end
 
             -- Data 2
@@ -793,6 +800,16 @@ do
                 campaignEntry.headerText = campaignRulesetName
             end
 
+            campaignEntry.narrationText = function(listEntryData, listEntryControl)
+                local narrations = {}
+                -- Generate the standard parametric list entry narration
+                ZO_AppendNarration(narrations, ZO_GetSharedGamepadEntryDefaultNarrationText(listEntryData, listEntryControl))
+
+                --Generate the narration for the selected campaign screen
+                ZO_AppendNarration(narrations, self:GetCampaignScreenNarration(listEntryData))
+                return narrations
+            end
+
             campaignEntry.queue = CAMPAIGN_BROWSER_MANAGER:CreateCampaignQueueData(campaignEntry, CAMPAIGN_QUEUE_INDIVIDUAL)
 
             campaignEntry:SetLocked(not ZO_CampaignBrowser_DoesPlayerMatchAllianceLock(campaignEntry))
@@ -802,6 +819,65 @@ do
 
         table.sort(self.campaignEntries, function(left, right) return ZO_TableOrderingFunction(left, right, "campaignSort", DEFAULT_GAMEPAD_CAMPAIGN_ITEM_SORT, ZO_SORT_ORDER_UP) end)
     end
+end
+
+do
+
+    local function GetVerboseCampaignPopulationNarration(narrations, alliance, alliancePopulation)
+        if alliancePopulation == nil then
+            return
+        end
+
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetAllianceName(alliance)))
+
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString("SI_CAMPAIGNPOPULATIONTYPE", alliancePopulation)))
+
+        if alliancePopulation == CAMPAIGN_POP_FULL then
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_SCREEN_NARRATION_LOCKED_ICON_NARRATION)))
+        end
+    end
+
+    function ZO_CampaignBrowser_Gamepad:GetCampaignScreenNarration(listEntryData)
+        local narrations = {}
+
+        ZO_AppendNarration(narrations, ZO_GamepadGenericHeader_GetNarrationText(self.contentHeader, self.contentHeaderData))
+
+        local targetData = self:GetTargetData()
+        local displayContentType = targetData.displayContentType
+
+        if displayContentType == CONTENT_TYPES.CAMPAIGN then
+            local stateMessageText = self:GetStateMessageText(targetData)
+            if stateMessageText ~= "" then
+                ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(stateMessageText))
+            end
+
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetCampaignRulesetDescription(targetData.rulesetId)))
+
+            if targetData.dataSource ~= nil then
+                ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_CAMPAIGN_BROWSER_SERVER_POPULATION)))
+
+                GetVerboseCampaignPopulationNarration(narrations, ALLIANCE_ALDMERI_DOMINION, targetData.dataSource.alliancePopulation1)
+                GetVerboseCampaignPopulationNarration(narrations, ALLIANCE_EBONHEART_PACT, targetData.dataSource.alliancePopulation2)
+                GetVerboseCampaignPopulationNarration(narrations, ALLIANCE_DAGGERFALL_COVENANT, targetData.dataSource.alliancePopulation3)
+            end
+
+            local selectedData = self:GetCurrentList():GetSelectedData()
+            local queueWaitMinutes = GetSelectionCampaignQueueWaitTime(selectedData.selectionIndex) / 60
+            if queueWaitMinutes > 0  then
+                queueWaitMinutes = zo_max(queueWaitMinutes, 1)
+        
+                local timeText = zo_strformat(GetString(SI_TIME_FORMAT_MINUTES_DESC), zo_ceil(queueWaitMinutes))
+                ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(GetString(SI_GAMEPAD_CAMPAIGN_DETAIL_INFO_FORMATTER), GetString(SI_GAMEPAD_CAMPAIGN_BROWSER_ESTIMATED_WAIT), timeText)))
+            end
+        end
+
+        return narrations
+    end
+
+end
+
+function ZO_CampaignBrowser_Gamepad:GetFooterNarration()
+    return CAMPAIGN_AVA_RANK_GAMEPAD:GetNarration()
 end
 
 function ZO_CampaignBrowser_Gamepad:CreateAndSortCampaignRulesetTypes()

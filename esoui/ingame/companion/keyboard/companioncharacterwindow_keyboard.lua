@@ -23,14 +23,20 @@ function ZO_CompanionCharacterWindow_Keyboard:RegisterForEvents()
     local control = self.control
 
     local paperDollTexture = control:GetNamedChild("PaperDoll")
-    local function OnUnitCreated()
-        paperDollTexture:SetTexture(GetUnitSilhouetteTexture("player"))
+    local function OnActiveCompanionStateChanged()
+
+            local companionId = GetActiveCompanionDefId()
+
+            local companionGender = GetCompanionGender(companionId)
+            local companionRaceId = GetCompanionRace(companionId)
+            local paperDollTexture = self.control:GetNamedChild("PaperDoll")
+            paperDollTexture:SetTexture(GetRaceAndGenderSilhouetteTexture(companionRaceId, companionGender))
+        
         self:RefreshWornInventory()
     end
 
-    control:RegisterForEvent(EVENT_UNIT_CREATED, OnUnitCreated)
-    control:AddFilterForEvent(EVENT_UNIT_CREATED, REGISTER_FILTER_UNIT_TAG, "player")
-    OnUnitCreated()
+    control:RegisterForEvent(EVENT_ACTIVE_COMPANION_STATE_CHANGED, OnActiveCompanionStateChanged)
+    OnActiveCompanionStateChanged()
 
     local function FullInventoryUpdated()
         self:RefreshWornInventory()

@@ -50,10 +50,10 @@ end
 function  CodeRedemption_Gamepad:RequestRedeemCode()
     self:DeactivateCurrentList()
     KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
-
+    local codeToRedeem = zo_strgsub(self.codeToRedeem, "%s+", "")
     local dialogData =
     {
-        code = self.codeToRedeem,
+        code = codeToRedeem,
     }
     ZO_Dialogs_ShowGamepadDialog("GAMEPAD_CODE_REDEMPTION_PENDING_DIALOG", dialogData)
 end

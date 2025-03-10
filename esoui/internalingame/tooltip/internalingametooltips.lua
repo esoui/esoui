@@ -20,6 +20,9 @@ function ZO_Tooltip:LayoutHouseTemplateTooltip(houseId, houseTemplateId)
     local houseZoneName = GetZoneNameById(houseZoneId)
     local houseCategory = GetHouseCategoryType(houseId)
     local houseCategoryName = GetString("SI_HOUSECATEGORYTYPE", houseCategory)
+    local houseFlags = GetHouseFlags(houseId)
+    local hasWeatherControlSupport = ZO_FlagHelpers.MaskHasFlag(houseFlags, HOUSE_FLAGS_SUPPORTS_WEATHER_CONTROL)
+    local hasWeatherControlSupportString = hasWeatherControlSupport and GetString(SI_YES) or GetString(SI_NO)
 
     local statsSection = self:AcquireSection(self:GetStyle("houseTemplateMainSection"))
 
@@ -31,6 +34,11 @@ function ZO_Tooltip:LayoutHouseTemplateTooltip(houseId, houseTemplateId)
     local categoryValuePair = statsSection:AcquireStatValuePair(self:GetStyle("houseTemplateStatValuePair"))
     categoryValuePair:SetStat(GetString(SI_MARKET_PRODUCT_HOUSING_HOUSE_TYPE_LABEL), self:GetStyle("houseTemplateStatValuePairStat"))
     categoryValuePair:SetValue(zo_strformat(SI_HOUSE_TYPE_FORMATTER, houseCategoryName), self:GetStyle("houseTemplateStatValuePairValue"))
+    statsSection:AddStatValuePair(categoryValuePair)
+
+    local categoryValuePair = statsSection:AcquireStatValuePair(self:GetStyle("houseTemplateStatValuePair"))
+    categoryValuePair:SetStat(GetString(SI_MARKET_PRODUCT_HOUSING_HOUSE_SUPPORTS_WEATHER_CONTROL_LABEL), self:GetStyle("houseTemplateStatValuePairStat"))
+    categoryValuePair:SetValue(zo_strformat(SI_HOUSE_SUPPORTS_WEATHER_CONTROL_FORMATTER, hasWeatherControlSupportString), self:GetStyle("houseTemplateStatValuePairValue"))
     statsSection:AddStatValuePair(categoryValuePair)
 
     self:AddSection(statsSection)

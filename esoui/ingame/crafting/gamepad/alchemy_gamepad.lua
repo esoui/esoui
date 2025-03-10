@@ -39,6 +39,7 @@ function ZO_GamepadAlchemy:InitializeScenes()
             ZO_GamepadCraftingUtils_SetupGenericHeader(self, titleString)
             ZO_GamepadCraftingUtils_RefreshGenericHeader(self)
             self.mode = ZO_ALCHEMY_MODE_NONE
+            self.tooltip:SetHidden(true)
         elseif newState == SCENE_HIDDEN then
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.modeKeybindStripDescriptor)
             self.modeList:Deactivate()
@@ -72,7 +73,7 @@ function ZO_GamepadAlchemy:InitializeScenes()
     end)
 
     self.control:RegisterForEvent(EVENT_TRAIT_LEARNED, function()
-        if SYSTEMS:IsShowing(ZO_ALCHEMY_SYSTEM_NAME) then
+        if GAMEPAD_ALCHEMY_CREATION_SCENE:IsShowing() then
             self:OnSlotChanged()
         end
     end)

@@ -126,20 +126,20 @@
 
                 <!-- AddOn List -->
                 <Control name="$(parent)List" inherits="ZO_ScrollList">
-                    <Dimensions x="885" y="660" />
+                    <Dimensions x="885" y="ZO_ADDON_LIST_HEIGHT" />
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Divider" relativePoint="BOTTOMLEFT" offsetY="40" />
                 </Control>
 
                 <Control name="$(parent)PrimaryButton" inherits="ZO_DialogButton">
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)List" relativePoint="BOTTOMRIGHT" offsetY="5" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)List" relativePoint="BOTTOMRIGHT" offsetY="35" />
                 </Control>
 
                 <Control name="$(parent)SecondaryButton" inherits="ZO_DialogButton">
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)PrimaryButton" relativePoint="TOPLEFT" offsetX="-20" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)List" relativePoint="BOTTOMLEFT" offsetY="35" />
                 </Control>
 
                 <Label name="$(parent)CurrentBindingsSaved" font="ZoFontDialogKeybindDescription" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)List" relativePoint="BOTTOMLEFT" offsetY="5" />
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)SecondaryButton" relativePoint="TOPLEFT" offsetY="-5" />
                 </Label>
             </Controls>
         </TopLevelControl>

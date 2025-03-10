@@ -629,7 +629,7 @@ function ZO_IngameSceneManager:OnToggleGameMenuBinding()
     end
 
     --System Menu Toggle
-    if not (topLevelHidden or baseSceneShown) then
+    if not (topLevelHidden or baseSceneShown) and ZO_IsPCUI() then
         SCENE_MANAGER:Toggle("gameMenuInGame")
     end
 end

@@ -130,15 +130,9 @@ function ActivityFinderRoot_Gamepad:SetupList(list)
                 data:AddIcon(data.data.disabledMenuIcon)
             end
 
-            if categoryData.isGroupFinder and ZO_HasGroupFinderNewApplication() then
+            if (categoryData.isGroupFinder and GROUP_FINDER_APPLICATIONS_LIST_MANAGER:HasNewApplication()) or
+               (categoryData.isPromotionalEvent and PROMOTIONAL_EVENT_MANAGER:DoesAnyCampaignHaveCallout()) then
                 data:AddIcon(ZO_GAMEPAD_NEW_ICON_64)
-            end
-
-            if categoryData.isPromotionalEvent and not IsPromotionalEventSystemLocked() then
-                local currentCampaignData = PROMOTIONAL_EVENT_MANAGER:GetCurrentCampaignData()
-                if currentCampaignData and (not currentCampaignData:HasBeenSeen() or currentCampaignData:IsAnyRewardClaimable()) then
-                    data:AddIcon(ZO_GAMEPAD_NEW_ICON_64)
-                end
             end
         end
 

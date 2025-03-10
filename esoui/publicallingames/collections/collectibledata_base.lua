@@ -277,6 +277,13 @@ function ZO_CollectibleData_Base:IsPrimaryResidence()
     return false
 end
 
+function ZO_CollectibleData_Base:GetHouseFlags()
+    if self:IsHouse() then
+        return GetHouseFlags(self.referenceId)
+    end
+    return 0
+end
+
 function ZO_CollectibleData_Base:IsOutfitStyle()
     return self:GetCategoryType() == COLLECTIBLE_CATEGORY_TYPE_OUTFIT_STYLE
 end

@@ -72,7 +72,7 @@ end
 
 local function ShowLogoutDialog()
     if IsInGamepadPreferredMode() then
-        ZO_Dialogs_ShowGamepadDialog("GAMEPAD_LOG_OUT")
+        ZO_Dialogs_ShowGamepadDialog("GAMEPAD_LOG_OUT", { quit = false })
     else
         ZO_Dialogs_ShowDialog("LOG_OUT")
     end

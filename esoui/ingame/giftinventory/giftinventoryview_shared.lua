@@ -149,11 +149,7 @@ function ZO_GiftInventoryView_Shared:InitializeKeybinds(claimKeybind, previewKey
             keybind = previewKeybind,
 
             callback = function()
-                if IsCurrentlyPreviewing() then
-                    self:EndCurrentPreview()
-                else
-                    self:PreviewGift()
-                end
+                self:TogglePreview()
             end,
 
             visible = function()
@@ -179,7 +175,15 @@ function ZO_GiftInventoryView_Shared:InitializeKeybinds(claimKeybind, previewKey
         },
     }
 
-    self.updateKeybindsCallback = function() KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor) end
+    self.refreshActionsCallback = function() self:OnRefreshActions() end
+end
+
+function ZO_GiftInventoryView_Shared:TogglePreview()
+    if IsCurrentlyPreviewing() then
+        self:EndCurrentPreview()
+    else
+        self:PreviewGift()
+    end
 end
 
 internalassert(MARKET_PURCHASE_RESULT_MAX_VALUE == 42, "Update gift claim dialog to handle new purchase result")
@@ -268,7 +272,7 @@ function ZO_GiftInventoryView_Shared:OnShowing()
     KEYBIND_STRIP:RemoveDefaultExit()
     KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
     
-    self:GetItemPreviewListHelper():RegisterCallback("RefreshActions", self.updateKeybindsCallback)
+    self:GetItemPreviewListHelper():RegisterCallback("RefreshActions", self.refreshActionsCallback)
     self.overlayGlowFadeAnimation:PlayFromStart()
     self.blastParticleSystem:Start()
     self.headerSparksParticleSystem:Start()
@@ -282,7 +286,7 @@ function ZO_GiftInventoryView_Shared:OnShowing()
 end
 
 function ZO_GiftInventoryView_Shared:OnHidden()
-    self:GetItemPreviewListHelper():UnregisterCallback("RefreshActions", self.updateKeybindsCallback)
+    self:GetItemPreviewListHelper():UnregisterCallback("RefreshActions", self.refreshActionsCallback)
     KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
     KEYBIND_STRIP:RestoreDefaultExit()
     self.blastParticleSystem:Stop()
@@ -297,6 +301,10 @@ function ZO_GiftInventoryView_Shared:OnGiftActionResult(giftAction, result, gift
     if isDisplayedGift and isRelevantAction and isSuccess then
         SCENE_MANAGER:Hide(self.sceneName)
     end
+end
+
+function ZO_GiftInventoryView_Shared:OnRefreshActions()
+    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
 end
 
 function ZO_GiftInventoryView_Shared:GetScene()

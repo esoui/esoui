@@ -32,13 +32,13 @@
                             <Dimensions x="128" y="128"/>
                             <Anchor point="CENTER" />
                         </Texture>
-
-                        <Texture name="$(parent)Lock" textureFile="EsoUI/Art/Progression/styleIcon64_styleLocked.dds" tier="HIGH" hidden="true">
-                            <Dimensions x="64" y="64"/>
-                            <Anchor point="CENTER" relativeTo="$(parent)Icon" />
-                        </Texture>
                     </Controls>
                 </Control>
+
+                <Texture name="$(parent)Lock" textureFile="EsoUI/Art/Progression/styleIcon64_styleLocked.dds" tier="HIGH" hidden="true" alpha="1">
+                    <Dimensions x="64" y="64"/>
+                    <Anchor point="CENTER" relativeTo="$(parent)IconContainerIcon" />
+                </Texture>
             </Controls>
         </Control>
     </Controls>

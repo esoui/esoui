@@ -105,7 +105,7 @@ function ZO_Fence_Manager:HasBonusToSellingStolenItems()
 end
 
 function ZO_Fence_Manager:GetHagglingBonus()
-    return GetNonCombatBonus(NON_COMBAT_BONUS_FENCE_HAGGLING)
+    return GetTotalFenceHagglingBonus()
 end
 
 --[[

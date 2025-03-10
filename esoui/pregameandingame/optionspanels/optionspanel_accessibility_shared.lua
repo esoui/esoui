@@ -230,6 +230,16 @@ local ZO_Panel_Accessibility_ControlData =
             text = SI_ACCESSIBILITY_OPTIONS_ACCESSIBLE_QUICKWHEELS,
             tooltipText = SI_ACCESSIBILITY_OPTIONS_ACCESSIBLE_QUICKWHEELS_TOOLTIP,
         },
+        -- Options_Accessibility_Waypoint_Color
+        [ACCESSIBILITY_SETTING_PLAYER_WAYPOINT_ICON_COLOR] =
+        {
+            controlType = OPTIONS_COLOR,
+            system = SETTING_TYPE_ACCESSIBILITY,
+            settingId = ACCESSIBILITY_SETTING_PLAYER_WAYPOINT_ICON_COLOR,
+            panel = SETTING_PANEL_ACCESSIBILITY,
+            text = SI_ACCESSIBILITY_OPTIONS_PLAYER_WAYPOINT_COLOR,
+            tooltipText = SI_ACCESSIBILITY_OPTIONS_PLAYER_WAYPOINT_COLOR_TOOLTIP
+        },
         --Options_Accessibility_GamepadAimAssistIntensity
         [ACCESSIBILITY_SETTING_GAMEPAD_AIM_ASSIST_INTENSITY] =
         {

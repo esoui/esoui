@@ -20,6 +20,7 @@ ZO_MENU_MAIN_ENTRIES =
     HELP            = 13,
     OPTIONS         = 14,
     LOG_OUT         = 15,
+    QUIT            = 16,
 }
 
 local MENU_MAIN_ENTRIES = ZO_MENU_MAIN_ENTRIES
@@ -458,12 +459,10 @@ local MENU_ENTRY_DATA =
         name = GetString(SI_MAIN_MENU_ACTIVITY_FINDER),
         icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_activityFinder.dds",
         isActivityFinder = true,
-        isNewCallback =  function()
-            if ZO_HasGroupFinderNewApplication() then
+        isNewCallback = function()
+            if GROUP_FINDER_APPLICATIONS_LIST_MANAGER:HasNewApplication() or
+               PROMOTIONAL_EVENT_MANAGER:DoesAnyCampaignHaveCallout() then
                 return true
-            elseif not IsPromotionalEventSystemLocked() then
-                local currentCampaignData = PROMOTIONAL_EVENT_MANAGER:GetCurrentCampaignData()
-                return currentCampaignData and (not currentCampaignData:HasBeenSeen() or currentCampaignData:IsAnyRewardClaimable())
             end
             return false
         end,
@@ -485,9 +484,20 @@ local MENU_ENTRY_DATA =
         name = GetString(SI_GAME_MENU_LOGOUT),
         icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_logout.dds",
         activatedCallback = function()
-            ZO_Dialogs_ShowGamepadDialog("GAMEPAD_LOG_OUT")
+            ZO_Dialogs_ShowGamepadDialog("GAMEPAD_LOG_OUT", { quit = false })
         end,
     },
+    [MENU_MAIN_ENTRIES.QUIT] =
+    {
+        name = GetString(SI_GAME_MENU_QUIT),
+        icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_quit.dds",
+        isVisibleCallback = function()
+            return ZO_IsPCUI() or ZO_IsForceConsoleFlow()
+        end,
+        activatedCallback = function()
+            ZO_Dialogs_ShowGamepadDialog("GAMEPAD_LOG_OUT", { quit = true })
+        end,
+    }
 }
 
 CATEGORY_TO_ENTRY_DATA =
@@ -585,9 +595,6 @@ function ZO_MainMenuManager_Gamepad:Initialize(control)
     control:RegisterForEvent(EVENT_LEVEL_UPDATE, RefreshLists)
     control:AddFilterForEvent(EVENT_LEVEL_UPDATE, REGISTER_FILTER_UNIT_TAG, "player")
     control:RegisterForEvent(EVENT_CADWELL_PROGRESSION_LEVEL_CHANGED, RefreshLists)
-    control:RegisterForEvent(EVENT_PROMOTIONAL_EVENTS_ACTIVITY_PROGRESS_UPDATED, RefreshLists)
-    PROMOTIONAL_EVENT_MANAGER:RegisterCallback("RewardsClaimed", RefreshLists)
-    PROMOTIONAL_EVENT_MANAGER:RegisterCallback("CampaignSeenStateChanged", RefreshLists)
     PROMOTIONAL_EVENT_MANAGER:RegisterCallback("CampaignsUpdated", RefreshLists)
 
     PLAYER_SUBMENU_SCENE:RegisterCallback("StateChange", function(oldState, newState)
@@ -652,7 +659,7 @@ end
 
 do
     local function NewMenuEntrySetup(control, data, selected, reselectingDuringRebuild, enabled, active)
-        if data.data.isActivityFinder and PROMOTIONAL_EVENT_MANAGER:IsCampaignActive() and not IsPromotionalEventSystemLocked() then
+        if data.data.isActivityFinder and PROMOTIONAL_EVENT_MANAGER:HasActiveCampaign() and not IsPromotionalEventSystemLocked() then
             data:SetNameColors(ZO_PROMOTIONAL_EVENT_SELECTED_COLOR, ZO_PROMOTIONAL_EVENT_UNSELECTED_COLOR)
             data:SetIconTint(ZO_PROMOTIONAL_EVENT_SELECTED_COLOR, ZO_PROMOTIONAL_EVENT_UNSELECTED_COLOR)
         else
@@ -790,6 +797,7 @@ function ZO_MainMenuManager_Gamepad:OnDeferredInitialize()
         self:DeactivateHelperPanel()
     end
 
+    -- TODO: Cleanup these registrations along with the ones in Initialize (consolidate)
     SHARED_INVENTORY:RegisterCallback("FullInventoryUpdate", MarkNewnessDirty)
     SHARED_INVENTORY:RegisterCallback("SingleSlotInventoryUpdate", MarkNewnessDirty)
     EVENT_MANAGER:RegisterForEvent("mainMenuGamepad", EVENT_LEVEL_UPDATE, MarkNewnessDirty)
@@ -797,6 +805,9 @@ function ZO_MainMenuManager_Gamepad:OnDeferredInitialize()
     GIFT_INVENTORY_MANAGER:RegisterCallback("GiftListsChanged", MarkNewnessDirty)
     EVENT_MANAGER:RegisterForEvent("mainMenuGamepad", EVENT_NEW_DAILY_LOGIN_REWARD_AVAILABLE, MarkNewnessDirty)
     EVENT_MANAGER:RegisterForEvent("mainMenuGamepad", EVENT_DAILY_LOGIN_REWARDS_CLAIMED, MarkNewnessDirty)
+    EVENT_MANAGER:RegisterForEvent("mainMenuGamepad", EVENT_PROMOTIONAL_EVENTS_ACTIVITY_PROGRESS_UPDATED, MarkNewnessDirty)
+    PROMOTIONAL_EVENT_MANAGER:RegisterCallback("RewardsClaimed", MarkNewnessDirty)
+    PROMOTIONAL_EVENT_MANAGER:RegisterCallback("CampaignSeenStateChanged", MarkNewnessDirty)
 
     self:UpdateEntryEnabledStates()
 end

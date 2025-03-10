@@ -44,13 +44,6 @@ function ZO_Disconnect()
     PregameStateManager_SetState("Disconnect")
 end
 
-function ZO_IsForceConsoleFlow()
-    if IsConsoleUI() then
-        return GetUIPlatform() == UI_PLATFORM_PC
-    end
-    return false
-end
-
 do
     internalassert(MEGASERVER_MAX_VALUE == 2, "update platform names")
     local LIVE_NA_PLATFORM_NAME = "Live"

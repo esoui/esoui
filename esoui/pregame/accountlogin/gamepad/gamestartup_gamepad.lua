@@ -1046,7 +1046,7 @@ function ZO_GameStartup_Gamepad:PopulateMainList()
         creditsEntryData.entryType = ENTRY_TYPE.CREDITS
         self.mainList:AddEntry("GameStartupLabelEntry", creditsEntryData)
 
-        if ZO_IsPCUI() then
+        if ZO_IsPCUI() or ZO_IsForceConsoleFlow() then
             local quitEntryData = ZO_GamepadEntryData:New(GetString(SI_GAME_MENU_QUIT))
             quitEntryData.entryType = ENTRY_TYPE.QUIT
             self.mainList:AddEntry("GameStartupLabelEntry", quitEntryData)

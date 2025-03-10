@@ -9,7 +9,7 @@ end
 
 function ZO_DailyLoginRewards_Base:Initialize(control)
     self.control = control
-    self.hasMultipleRewardPreviews = false
+    self.previewableRewards = {}
     self.currentRewardAnimationPool = ZO_MetaPool:New(ZO_Pending_LoopAnimation_Pool)
     self.isDirty = true
 
@@ -21,6 +21,8 @@ function ZO_DailyLoginRewards_Base:Initialize(control)
     local USE_LOWERCASE_NUMBER_SUFFIXES = false
     self.dailyLoginRewardsGridEntrySetup = function(control, data, selected)
         control.data = data
+        data.displayRewardData = nil
+        self.previewableRewards[data] = nil
 
         if control.highlightKey then
             self.highlightPool:ReleaseObject(control.highlightKey)
@@ -30,9 +32,13 @@ function ZO_DailyLoginRewards_Base:Initialize(control)
         local isMilestone = false
         if not data.isEmptyCell then
             local isRewardClaimed = IsDailyLoginRewardInCurrentMonthClaimed(data.day)
+            local baseRewardData = data
+            local fallbackRewardData = baseRewardData:GetFallbackRewardData()
+            local displayRewardData = baseRewardData:ShouldUseFallback() and fallbackRewardData or baseRewardData
+            data.displayRewardData = displayRewardData
 
-            if data.quantity > 1 then
-                control.quantityLabel:SetText(zo_strformat(SI_NUMBER_FORMAT, data.quantity))
+            if displayRewardData:GetQuantity() > 1 then
+                control.quantityLabel:SetText(zo_strformat(SI_NUMBER_FORMAT, displayRewardData:GetQuantity()))
                 control.quantityLabel:SetHidden(isRewardClaimed)
             else
                 control.quantityLabel:SetHidden(true)
@@ -45,7 +51,7 @@ function ZO_DailyLoginRewards_Base:Initialize(control)
 
             local currentRewardIndex = ZO_DAILYLOGINREWARDS_MANAGER:GetDailyLoginRewardIndex()
 
-            local iconFile = data.iconFile or data:GetPlatformLootIcon()
+            local iconFile = data.iconFile or displayRewardData:GetPlatformLootIcon()
             if iconFile then
                 iconTexture:SetTexture(iconFile)
                 if data.day > GetNumClaimableDailyLoginRewardsInCurrentMonth() then
@@ -63,9 +69,19 @@ function ZO_DailyLoginRewards_Base:Initialize(control)
             if isRewardClaimed then
                 completeMarkControl:SetHidden(false)
                 iconTexture:SetHidden(true)
+                if fallbackRewardData then
+                    -- We don't know if the reward was claimed as base or fallback, so show no info instead of potentially lying
+                    data.obscureReward = true
+                elseif CanPreviewReward(displayRewardData:GetRewardId()) then
+                    self.previewableRewards[data] = true
+                end
             else
                 statusIconTexture:SetTexture("EsoUI/Art/Miscellaneous/status_locked.dds")
                 statusIconTexture:SetHidden(data.day <= GetNumClaimableDailyLoginRewardsInCurrentMonth())
+                data.obscureReward = false
+                if CanPreviewReward(displayRewardData:GetRewardId()) then
+                    self.previewableRewards[data] = true
+                end
             end
 
             control.timerLabel:SetHidden(true)
@@ -126,6 +142,7 @@ function ZO_DailyLoginRewards_Base:Initialize(control)
     control:RegisterForEvent(EVENT_NEW_DAILY_LOGIN_REWARD_AVAILABLE, MarkViewDirty)
     control:RegisterForEvent(EVENT_DAILY_LOGIN_REWARDS_CLAIMED, function(...) self:OnRewardClaimed(...) end)
     control:RegisterForEvent(EVENT_DAILY_LOGIN_MONTH_CHANGED, OnMonthChanged)
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", function(...) self:OnCollectionUpdated(...) end)
 end
 
 function ZO_DailyLoginRewards_Base:GridEntryCleanup(control)
@@ -162,7 +179,7 @@ do
         gridListPanelList:ClearGridList()
         self.defaultSelectionData = nil
 
-        local numPreviewableRewards = 0
+        ZO_ClearTable(self.previewableRewards)
     
         if ZO_DAILYLOGINREWARDS_MANAGER:IsDailyRewardsLocked() then
             self.lockedLabelText = GetString(SI_DAILY_LOGIN_REWARDS_LOCKED)
@@ -177,12 +194,7 @@ do
                     local dailyLoginRewardData = ZO_GridSquareEntryData_Shared:New(rewardData)
                     dailyLoginRewardData.day = i
                     dailyLoginRewardData.isMilestone = isMilestone
-                    dailyLoginRewardData.quantity = quantity
                     dailyLoginRewardData.narrationText = GetDailyLoginRewardEntryNarrationText
-
-                    if CanPreviewReward(dailyLoginRewardData:GetRewardId()) then
-                        numPreviewableRewards = numPreviewableRewards + 1
-                    end
 
                     self.gridListPanelList:AddEntry(dailyLoginRewardData)
                 end
@@ -193,8 +205,6 @@ do
             self.lockedLabel:SetHidden(false)
             -- text for the lock label will be set in UpdateTimeToNextMonthText
         end
-
-        self.hasMultipleRewardPreviews = numPreviewableRewards > 1
 
         gridListPanelList:CommitGridList()
     end
@@ -241,7 +251,7 @@ function ZO_DailyLoginRewards_Base:OnHiding()
 end 
 
 function ZO_DailyLoginRewards_Base:HasMultiplePreviews()
-    return self.hasMultipleRewardPreviews
+    return NonContiguousCount(self.previewableRewards) > 1
 end
 
 function ZO_DailyLoginRewards_Base:OnRewardClaimed()
@@ -256,6 +266,10 @@ function ZO_DailyLoginRewards_Base:OnRewardClaimed()
     else
         self:MarkDirty()
     end
+end
+
+function ZO_DailyLoginRewards_Base:OnCollectionUpdated()
+    self.gridListPanelList:RefreshGridList()
 end
 
 function ZO_DailyLoginRewards_Base:ShowClaimedRewardFlair()
@@ -289,6 +303,19 @@ end
 
 function ZO_DailyLoginRewards_Base:SetTargetedClaimData(claimData)
     self.targetedClaimData = claimData
+end
+
+function ZO_DailyLoginRewards_Base:ClaimTargetedData()
+    if self.targetedClaimData then
+        PlaySound(SOUNDS.DAILY_LOGIN_REWARDS_ACTION_CLAIM)
+        if self.targetedClaimData:ShouldUseFallback() then
+            -- For CSAs
+            ZO_DAILY_LOGIN_REWARD_CLAIMING_FALLBACK = true
+        else
+            ZO_DAILY_LOGIN_REWARD_CLAIMING_FALLBACK = nil
+        end
+        ClaimCurrentDailyLoginReward()
+    end
 end
 
 function ZO_DailyLoginRewards_Base:UpdateTimeToNextMonthText(formattedTime)

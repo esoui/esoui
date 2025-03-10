@@ -578,7 +578,7 @@ end
 function HousingHUDFragment:OnHouseSettingsChanged(currentState, previousState)
     self:UpdateKeybind()
 
-    if currentState.houseId ~= 0 and not currentState.isOwner and (currentState.hasEditPermission ~= previousState.hasEditPermission or currentState.hasInteractPermission ~= previousState.hasInteractPermission)  then
+    if currentState.houseId ~= 0 and (currentState.houseId == previousState.houseId) and not currentState.isOwner and (currentState.hasEditPermission ~= previousState.hasEditPermission or currentState.hasInteractPermission ~= previousState.hasInteractPermission)  then
         ZO_Alert(UI_ALERT_CATEGORY_ERROR, nil, GetString(SI_HOUSING_PLAYER_PERMISSIONS_CHANGED))
     end
 end

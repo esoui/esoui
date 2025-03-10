@@ -1,7 +1,7 @@
 <!-- Tooltip Templates -->
 <GuiXml>
     <Controls>
-        <Label name="ZO_Tooltip_StatusLabelTemplate" verticalAlignment="BOTTOM" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_CONTEXT_HIGHLIGHT" hidden="true" virtual="true">                            
+        <Label name="ZO_Tooltip_StatusLabelTemplate" verticalAlignment="BOTTOM" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_CONTEXT_HIGHLIGHT" hidden="true" virtual="true">                            
             <OnInitialized>
                 local fonts =
                 {
@@ -32,7 +32,7 @@
                             <Anchor point="BOTTOMRIGHT" offsetX="30" offsetY="-5" />
                         </Backdrop>
 
-                        <Label name="$(parent)StatusLabelVisualLayer" font="ZoFontGamepad27" verticalAlignment="BOTTOM" modifyTextType="UPPERCASE" maxLineCount="1" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_CONTEXT_HIGHLIGHT" hidden="true">
+                        <Label name="$(parent)StatusLabelVisualLayer" font="ZoFontGamepad27" verticalAlignment="BOTTOM" modifyTextType="UPPERCASE" maxLineCount="1" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_CONTEXT_HIGHLIGHT" hidden="true">
                             <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" offsetY="ZO_GAMEPAD_CONTENT_TITLE_HEIGHT" />
                         </Label>
                         

@@ -240,11 +240,16 @@ function ZO_TributePatronBook_Keyboard:RefreshCategories()
     end
 
     local selectedCategory = self:GetSelectedCategory()
-    if #categoryList == 0 and not self:HasSearchFilter() then
-        -- Add all categories, regardless of current filters, if no categories are visible and a search is not in progress.
-        categoryFilters = nil
-        for _, tributePatronCategoryData in TRIBUTE_DATA_MANAGER:TributePatronCategoryIterator() do
-            table.insert(categoryList, tributePatronCategoryData)
+    if #categoryList == 0 then
+        if not self:HasSearchFilter() then
+            -- Add all categories, regardless of current filters, if no categories are visible and a search is not in progress.
+            categoryFilters = nil
+            for _, tributePatronCategoryData in TRIBUTE_DATA_MANAGER:TributePatronCategoryIterator() do
+                table.insert(categoryList, tributePatronCategoryData)
+            end
+        else
+            self.patronId = nil
+            self:BuildGridList()
         end
     end
 
@@ -315,27 +320,29 @@ end
 function ZO_TributePatronBook_Keyboard:BuildGridList()
     if self.gridList then
         self.gridList:ClearGridList()
+        
+        if self.patronId then
+            -- Pre-process starter cards
+            self:SetupStarterCards()
 
-        -- Pre-process starter cards
-        self:SetupStarterCards()
+            -- Pre-process dock cards
+            self:SetupDockCards()
 
-        -- Pre-process dock cards
-        self:SetupDockCards()
+            -- Build Patron
+            self:AddPatronEntry()
 
-        -- Build Patron
-        self:AddPatronEntry()
+            -- Build starter card entries
+            self:AddStarterCardEntries()
 
-        -- Build starter card entries
-        self:AddStarterCardEntries()
+            -- Build description entry
+            self:AddDescriptionEntry()
 
-        -- Build description entry
-        self:AddDescriptionEntry()
+            -- Build card entries
+            self:AddDockCardEntries()
 
-        -- Build card entries
-        self:AddDockCardEntries()
-
-        -- Build card upgrade entries
-        self:AddCardUpgradeEntries()
+            -- Build card upgrade entries
+            self:AddCardUpgradeEntries()
+        end
 
         self.gridList:CommitGridList()
 

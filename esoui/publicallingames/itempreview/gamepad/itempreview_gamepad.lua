@@ -1,9 +1,5 @@
 ZO_ItemPreview_Gamepad = ZO_ItemPreview_Shared:Subclass()
 
-function ZO_ItemPreview_Gamepad:New(...)
-    return ZO_ItemPreview_Shared.New(self, ...)
-end
-
 function ZO_ItemPreview_Gamepad:Initialize(control)
     ZO_ItemPreview_Shared.Initialize(self, control)
 
@@ -86,33 +82,45 @@ function ZO_ItemPreview_Gamepad:OnPreviewHidden()
     SCENE_MANAGER:RemoveFragment(PREVIEW_KEYBIND_ACTION_LAYER_FRAGMENT)
 end
 
-function ZO_ItemPreview_Shared:TryPreviewNextVariation()
+function ZO_ItemPreview_Gamepad:TryPreviewNextVariation(playClickSound)
     if self.currentPreviewTypeObject and self.numPreviewVariations > 1 and self.canChangePreview then
         self:PreviewNextVariation()
+        if playClickSound then
+            PlaySound(SOUNDS.DEFAULT_CLICK)
+        end
         return true
     end
     return false
 end
 
-function ZO_ItemPreview_Shared:TryPreviewPreviousVariation()
+function ZO_ItemPreview_Gamepad:TryPreviewPreviousVariation(playClickSound)
     if self.currentPreviewTypeObject and self.numPreviewVariations > 1 and self.canChangePreview then
         self:PreviewPreviousVariation()
+        if playClickSound then
+            PlaySound(SOUNDS.DEFAULT_CLICK)
+        end
         return true
     end
     return false
 end
 
-function ZO_ItemPreview_Shared:TryPreviewNextAction()
+function ZO_ItemPreview_Gamepad:TryPreviewNextAction(playClickSound)
     if self.currentPreviewTypeObject and self.numPreviewActions > 1 and self.canChangePreview then
         self:PreviewNextAction()
+        if playClickSound then
+            PlaySound(SOUNDS.DEFAULT_CLICK)
+        end
         return true
     end
     return false
 end
 
-function ZO_ItemPreview_Shared:TryPreviewPreviousAction()
+function ZO_ItemPreview_Gamepad:TryPreviewPreviousAction(playClickSound)
     if self.currentPreviewTypeObject and self.numPreviewActions > 1 and self.canChangePreview then
         self:PreviewPreviousAction()
+        if playClickSound then
+            PlaySound(SOUNDS.DEFAULT_CLICK)
+        end
         return true
     end
     return false

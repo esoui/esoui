@@ -214,12 +214,13 @@ function zo_iconFormatInheritColor(path, width, height)
     return string.format("|t%s:%s:%s:inheritcolor|t", tostring(width), tostring(height), path)
 end
 
-function zo_iconTextFormat(path, width, height, text, inheritColor)
+function zo_iconTextFormat(path, width, height, text, inheritColor, noGrammar)
     local iconFormatter = zo_iconFormat
     if inheritColor then
         iconFormatter = zo_iconFormatInheritColor
     end
-    return string.format("%s %s", iconFormatter(path, width, height), zo_strformat("<<1>>", text))
+    text = noGrammar and text or zo_strformat("<<1>>", text)
+    return string.format("%s %s", iconFormatter(path, width, height), text)
 end
 
 function zo_iconTextFormatNoSpace(path, width, height, text, inheritColor)
@@ -230,12 +231,13 @@ function zo_iconTextFormatNoSpace(path, width, height, text, inheritColor)
     return string.format("%s%s", iconFormatter(path, width, height), zo_strformat("<<1>>", text))
 end
 
-function zo_iconTextFormatNoSpaceAlignedRight(path, width, height, text, inheritColor)
+function zo_iconTextFormatNoSpaceAlignedRight(path, width, height, text, inheritColor, noGrammar)
     local iconFormatter = zo_iconFormat
     if inheritColor then
         iconFormatter = zo_iconFormatInheritColor
     end
-    return string.format("%s%s", zo_strformat("<<1>>", text), iconFormatter(path, width, height))
+    text = noGrammar and text or zo_strformat("<<1>>", text)
+    return string.format("%s%s", text, iconFormatter(path, width, height))
 end
 
 function zo_bulletFormat(label, text)

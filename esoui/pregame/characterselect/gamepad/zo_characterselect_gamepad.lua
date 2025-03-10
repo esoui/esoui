@@ -403,8 +403,9 @@ local function CreateList(self, scrollToBest)
             slot = slot + 1
         end
 
-        local chapterUpgradeId = GetCurrentChapterUpgradeId()
-        if chapterUpgradeId ~= 0 and not IsChapterOwned(chapterUpgradeId) then
+        
+        if CHAPTER_UPGRADE_MANAGER:CanRegister() then
+            local chapterUpgradeId = GetCurrentChapterUpgradeId()
             local chapterCollectibleId = GetChapterCollectibleId(chapterUpgradeId)
             local data =
             {

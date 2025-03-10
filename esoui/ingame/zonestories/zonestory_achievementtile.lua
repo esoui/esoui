@@ -55,7 +55,7 @@ end
 
 function ZO_ZoneStory_AchievementTile:SetStatus(date)
     local control = self.statusControl
-    local achievementStatus = ACHIEVEMENTS_MANAGER:GetAchievementStatus(self.achievementId)
+    local achievementStatus = ZO_GetAchievementStatus(self.achievementId)
     if achievementStatus == ZO_ACHIEVEMENTS_COMPLETION_STATUS.COMPLETE then
         control:SetText(date)
         control:SetColor(ZO_NORMAL_TEXT:UnpackRGB())

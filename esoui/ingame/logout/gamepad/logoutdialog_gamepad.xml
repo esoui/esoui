@@ -1,23 +1,23 @@
 <GuiXml>
     <Controls>
-		<TopLevelControl name="ZO_LogoutDialog_Gamepad" inherits="ZO_GenericGamepadDialogBase" hidden="true">
+        <TopLevelControl name="ZO_LogoutDialog_Gamepad" inherits="ZO_GenericGamepadDialogBase" hidden="true">
             <OnInitialized>
                 ZO_LogoutDialog_Gamepad_OnInitialized(self)
             </OnInitialized>
             <Controls>
-				<Label name="$(parent)LogoutText" text="SI_LOG_OUT_DIALOG" font="ZoFontGamepadCondensed42" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" >	
-					<Anchor point="TOPLEFT" relativeTo="$(parent)HeaderContainerHeader" relativePoint="BOTTOMLEFT" offsetY="20" />
-					<Anchor point="TOPRIGHT" relativeTo="$(parent)HeaderContainerHeader" relativePoint="BOTTOMRIGHT" offsetY="20" />
-				</Label>
-				
-				<Control name="$(parent)TileDivider" inherits="ZO_GamepadHeaderHorizontalDividerSimple">
+                <Label name="$(parent)LogoutText" font="ZoFontGamepadCondensed42" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" >	
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)HeaderContainerHeader" relativePoint="BOTTOMLEFT" offsetY="20" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)HeaderContainerHeader" relativePoint="BOTTOMRIGHT" offsetY="20" />
+                </Label>
+
+                <Control name="$(parent)TileDivider" inherits="ZO_GamepadHeaderHorizontalDividerSimple">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)LogoutText" relativePoint="BOTTOMLEFT" offsetY="20" />
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)LogoutText" relativePoint="BOTTOMRIGHT" offsetX="-20" offsetY="20" />
                 </Control>
-				
+
                 <Control name="$(parent)DailyRewardTile" inherits="ZO_DailyRewardsTile_Gamepad_Control">
-					<Anchor point="TOP" relativeTo="$(parent)TileDivider" relativePoint="BOTTOM" offsetY="10" />
-				</Control>
+                    <Anchor point="TOP" relativeTo="$(parent)TileDivider" relativePoint="BOTTOM" offsetY="10" />
+                </Control>
             </Controls>
         </TopLevelControl>
 	</Controls>

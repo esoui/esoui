@@ -35,6 +35,7 @@ ZO_KEYBOARD_NOTIFICATION_ICONS =
     [NOTIFICATION_TYPE_DISABLED_ADDON] = "EsoUI/Art/Miscellaneous/ESO_Icon_Warning.dds",
     [NOTIFICATION_TYPE_TRIBUTE_INVITE] = "EsoUI/Art/Notifications/notificationIcon_tribute.dds",
     [NOTIFICATION_TYPE_HOUSE_TOURS_HOUSE_RECOMMENDED] = "EsoUI/Art/Notifications/notificationIcon_houseToursHouseRecommended.dds",
+    [NOTIFICATION_TYPE_SLOTS_RESET] = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_character.dds",
 }
 
 -- Provider Overrides
@@ -286,7 +287,7 @@ function ZO_KeyboardPointsResetProvider:Accept(data)
         MAIN_MENU_KEYBOARD:ShowScene("stats")
     elseif data.respecType == RESPEC_TYPE_SKILLS then
         MAIN_MENU_KEYBOARD:ShowScene("skills")
-    elseif data.respecType == RESPEC_TYPE_CHAMPION then
+    elseif data.respecType == RESPEC_TYPE_CHAMPION or data.respecType == RESPEC_TYPE_CHAMPION_SLOTS then
         MAIN_MENU_KEYBOARD:ShowScene("championPerks")
     end
 end

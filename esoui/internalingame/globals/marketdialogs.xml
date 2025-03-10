@@ -244,13 +244,16 @@
             <OnInitialized>
                 ZO_MarketPurchaseHouseTemplateSelectDialog_OnInitialized(self)
             </OnInitialized>
+
             <Controls>
                 <Control name="$(parent)ItemContainer" inherits="ZO_DialogContentAnchors">
                     <Dimensions y="64" />
+
                     <Controls>
                         <Texture name="$(parent)Icon" level="3">
                             <Anchor point="TOPLEFT" />
                             <Dimensions x="64" y="64" />
+
                             <Controls>
                                 <Label name="$(parent)StackCount" horizontalAlignment="RIGHT" verticalAlignment="BOTTOM" font="ZoFontGameOutline" inheritScale="false" hidden="true">
                                     <Anchor point="TOPLEFT" offsetX="1" offsetY="1" />
@@ -286,6 +289,7 @@
                 <Control name="$(parent)BalanceContainer" inherits="ZO_DialogCurrencyLabelValueContainer_Keyboard">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)ComboBox" relativePoint="BOTTOMLEFT" offsetY="20" />
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)ComboBox" relativePoint="BOTTOMRIGHT" offsetY="20" />
+
                     <Controls>
                         <Label name="$(parent)CurrencyLabel" override="true" text="SI_MARKET_CONFIRM_PURCHASE_CURRENT_BALANCE_LABEL">
                             <Anchor point="TOPLEFT" />
@@ -296,6 +300,7 @@
                 <Control name="$(parent)CostContainer" inherits="ZO_DialogCurrencyLabelValueContainer_Keyboard">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)BalanceContainer" relativePoint="BOTTOMLEFT" offsetY="30" />
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)BalanceContainer" relativePoint="BOTTOMRIGHT" offsetY="30" />
+
                     <Controls>
                         <Label name="$(parent)PreviousCost" inherits="ZO_CurrencyTemplate" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DEFAULT_TEXT">
                             <Anchor point="RIGHT" relativeTo="$(parent)CurrencyAmount" relativePoint="LEFT" offsetX="-10" />
@@ -303,12 +308,16 @@
 
                         <Label name="$(parent)TextCallout" override="true" inherits="ZO_MarketTextCallout_Keyboard" color="INTERFACE_COLOR_TYPE_MARKET_COLORS:MARKET_COLORS_PRODUCT_BACKGROUND_BRIGHTNESS">
                             <Anchor point="RIGHT" relativeTo="$(parent)PreviousCost" relativePoint="LEFT" offsetX="-20" />
+
                             <Controls>
                                 <Control name="$(parent)Background" override="true">
                                     <Dimensions y="32" />
+
                                     <Controls>
                                         <Texture name="$(parent)Center" override="true" color="INTERFACE_COLOR_TYPE_MARKET_COLORS:MARKET_COLORS_ON_SALE" />
+
                                         <Texture name="$(parent)Left" override="true" color="INTERFACE_COLOR_TYPE_MARKET_COLORS:MARKET_COLORS_ON_SALE" />
+
                                         <Texture name="$(parent)Right" override="true" color="INTERFACE_COLOR_TYPE_MARKET_COLORS:MARKET_COLORS_ON_SALE" />
                                     </Controls>
                                 </Control>
@@ -326,11 +335,13 @@
                 </Control>
 
                 <!-- House Details -->
+
                 <Control name="$(parent)LocationContainer" inherits="ZO_DialogLabelValueContainer_Keyboard">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)CostContainer" relativePoint="BOTTOMLEFT" offsetY="50" />
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)CostContainer" relativePoint="BOTTOMRIGHT" offsetY="50" />
+
                     <Controls>
-                        <Label name="$(parent)Label" override="true" text="SI_MARKET_PRODUCT_HOUSING_LOCATION_LABEL">
+                        <Label name="$(parent)Label" override="true">
                             <Anchor point="TOPLEFT" />
                         </Label>
                     </Controls>
@@ -339,8 +350,20 @@
                 <Control name="$(parent)HouseTypeContainer" inherits="ZO_DialogLabelValueContainer_Keyboard">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)LocationContainer" relativePoint="BOTTOMLEFT" offsetY="30" />
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)LocationContainer" relativePoint="BOTTOMRIGHT" offsetY="30" />
+
                     <Controls>
-                        <Label name="$(parent)Label" override="true" text="SI_MARKET_PRODUCT_HOUSING_HOUSE_TYPE_LABEL">
+                        <Label name="$(parent)Label" override="true">
+                            <Anchor point="TOPLEFT" />
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)WeatherContainer" inherits="ZO_DialogLabelValueContainer_Keyboard">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)HouseTypeContainer" relativePoint="BOTTOMLEFT" offsetY="30" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)HouseTypeContainer" relativePoint="BOTTOMRIGHT" offsetY="30" />
+
+                    <Controls>
+                        <Label name="$(parent)Label" override="true">
                             <Anchor point="TOPLEFT" />
                         </Label>
                     </Controls>
@@ -349,7 +372,9 @@
                 <Label name="$(parent)EsoPlusNote" font="ZoFontGame" text="SI_MARKET_HOUSE_INFO_ESO_PLUS_TEXT" />
 
                 <!-- have to make buttons for a custom dialog -->
+
                 <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton" />
+
                 <Control name="$(parent)Confirm" inherits="ZO_CustomDialogButton" />
             </Controls>
         </TopLevelControl>

@@ -485,7 +485,6 @@ function ZO_SkillData:HasUpdatedStatusByType(statusType)
 end
 
 function ZO_SkillData:SetUpdatedStatusByType(statusType, hasUpdatedStatus)
-    local isStatusChanged = false
     if hasUpdatedStatus and not ZO_FlagHelpers.MaskHasFlag(self.updateStatusFlags, statusType) then
         self.updateStatusFlags = ZO_FlagHelpers.SetMaskFlag(self.updateStatusFlags, statusType)
         self.skillLineData:OnSkillDataUpdateStatusChanged(self)
@@ -501,10 +500,12 @@ function ZO_SkillData:SetHasUpdatedStatus(hasUpdatedStatus)
     self:SetUpdatedStatusByType(ZO_SKILL_DATA_NEW_STATE.SKILL_LINE, hasUpdatedStatus)
 end
 
-function ZO_SkillData:ClearUpdate()
+function ZO_SkillData:ClearUpdate(suppressCallback)
     if self.updateStatusFlags ~= ZO_SKILL_DATA_NEW_STATE.NONE then
         self.updateStatusFlags = ZO_SKILL_DATA_NEW_STATE.NONE
-        self.skillLineData:OnSkillDataUpdateStatusChanged(self)
+        if not suppressCallback then
+            self.skillLineData:OnSkillDataUpdateStatusChanged(self)
+        end
     end
 end
 

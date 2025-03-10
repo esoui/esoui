@@ -234,7 +234,7 @@
             </OnUpdate>
 
             <Controls>
-                <Label name="$(parent)Heading" alpha="0" color="INTERFACE_COLOR_TYPE_GENERAL:INTERFACE_GENERAL_COLOR_WHITE" horizontalAlignment="CENTER" modifyTextType="UPPERCASE" text="SI_TRIBUTE_COMBO_HISTORY_HEADING">
+                <Label name="$(parent)Heading" alpha="0" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" horizontalAlignment="CENTER" modifyTextType="UPPERCASE" text="SI_TRIBUTE_COMBO_HISTORY_HEADING">
                     <Anchor point="BOTTOM" relativePoint="TOP" offsetX="-6" />
                     <Dimensions x="ZO_TRIBUTE_MECHANIC_HISTORY_HEADING_UI_WIDTH" />
                 </Label>

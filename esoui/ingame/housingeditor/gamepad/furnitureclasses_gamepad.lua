@@ -815,6 +815,9 @@ do
         local itemsData = ZO_GamepadEntryData:New(formattedName, gamepadIcon)
         itemsData.categoryId = categoryId
         itemsData.categoryData = categoryData
+        itemsData.selectedIconTint = ZO_WHITE
+        itemsData.unselectedIconTint = ZO_GAMEPAD_UNSELECTED_COLOR
+
         return itemsData
     end
 

@@ -1,10 +1,4 @@
-ZO_ChapterUpgrade_Manager = ZO_CallbackObject:Subclass()
-
-function ZO_ChapterUpgrade_Manager:New(...)
-    local manager = ZO_CallbackObject.New(self)
-    manager:Initialize(...)
-    return manager
-end
+ZO_ChapterUpgrade_Manager = ZO_InitializingCallbackObject:Subclass()
 
 function ZO_ChapterUpgrade_Manager:Initialize()
     local defaults = { chapterUpgradeSeenVersion = 0, }
@@ -16,9 +10,19 @@ function ZO_ChapterUpgrade_Manager:OnSavedVarsReady(savedVars)
     self.savedVars = savedVars
 end
 
+function ZO_ChapterUpgrade_Manager:CanRegister()
+    if DoesCurrentChapterShowRegistration() then
+        local currentChapterId = GetCurrentChapterUpgradeId()
+        if currentChapterId == 0 or IsChapterOwned(currentChapterId) then
+            return false
+        end
+        return true
+    end
+    return false
+end
+
 function ZO_ChapterUpgrade_Manager:ShouldShow()
-    local currentChapterId = GetCurrentChapterUpgradeId()
-    if currentChapterId == 0 or IsChapterOwned(currentChapterId) then
+    if not self:CanRegister() then
         return false
     end
 

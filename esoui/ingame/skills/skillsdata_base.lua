@@ -318,6 +318,20 @@ function ZO_SkillLineData_Base:AnySkillHasUpdatedStatus()
     return not ZO_IsTableEmpty(self.skillsWithUpdatesCache)
 end
 
+function ZO_SkillLineData_Base:ClearAllStatuses()
+    if self:AnySkillHasUpdatedStatus() or self.isNew then
+        ZO_ClearTable(self.skillsWithUpdatesCache)
+        self.isNew = false
+
+        local SUPPRESS_CALLBACK = true
+        for _, skillData in self:SkillIterator() do
+            skillData:ClearUpdate(SUPPRESS_CALLBACK)
+        end
+
+        self.dataManager:OnSkillLineNewStatusChanged(self)
+    end
+end
+
 -- helpers
 
 function ZO_SkillLineData_Base:GetId()

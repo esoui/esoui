@@ -46,6 +46,7 @@ function ZO_SkillsDataManager:RegisterForEvents()
     EVENT_MANAGER:RegisterForEvent("ZO_SkillsDataManager", EVENT_SKILL_LINE_ADDED, GenerateGatedEventCallbackFunction(ZO_SkillsDataManager.OnSkillLineAdded))
     EVENT_MANAGER:RegisterForEvent("ZO_SkillsDataManager", EVENT_SKILL_RANK_UPDATE, GenerateGatedEventCallbackFunction(ZO_SkillsDataManager.OnSkillLineRankUpdated))
     EVENT_MANAGER:RegisterForEvent("ZO_SkillsDataManager", EVENT_SKILL_XP_UPDATE, GenerateGatedEventCallbackFunction(ZO_SkillsDataManager.OnSkillLineXPUpdated))
+    EVENT_MANAGER:RegisterForEvent("ZO_SkillsDataManager", EVENT_CLEAR_NEW_ON_ALL_SKILL_LINES, GenerateGatedEventCallbackFunction(ZO_SkillsDataManager.OnClearNewOnAllSkillLines))
     EVENT_MANAGER:RegisterForEvent("ZO_SkillsDataManager", EVENT_ABILITY_PROGRESSION_RANK_UPDATE, GenerateGatedEventCallbackFunction(ZO_SkillsDataManager.OnSkillProgressionUpdated))
     EVENT_MANAGER:RegisterForEvent("ZO_SkillsDataManager", EVENT_ABILITY_PROGRESSION_XP_UPDATE, GenerateGatedEventCallbackFunction(ZO_SkillsDataManager.OnSkillProgressionUpdated))
 
@@ -187,6 +188,14 @@ do
         end
     end
 
+    function ZO_SkillsDataManager:OnClearNewOnAllSkillLines()
+        for _, skillTypeData in self:SkillTypeIterator() do
+            for _, skillLineData in skillTypeData:SkillLineIterator() do
+                skillLineData:ClearAllStatuses()
+            end
+        end
+    end
+
     function ZO_SkillsDataManager:OnSkillProgressionUpdated(progressionIndex)
         local skillType, skillLineIndex, skillIndex = GetSkillAbilityIndicesFromProgressionIndex(progressionIndex)
         local skillData = self:GetSkillDataByIndices(skillType, skillLineIndex, skillIndex)
@@ -297,6 +306,41 @@ end
 function ZO_SkillsDataManager:SkillTypeIterator(skillTypeFilterFunctions)
     -- This only works because we use the skillTypeObjectPool like a numerically indexed table
     return ZO_FilteredNumericallyIndexedTableIterator(self.skillTypeObjectPool:GetActiveObjects(), skillTypeFilterFunctions)
+end
+
+function ZO_SkillsDataManager:IsAnySkillStyleOwned(data)
+    local progressionId = data.skillData.progressionId
+    local anyLocked = false
+    for index = 1, GetNumProgressionSkillAbilityFxOverrides(progressionId) do
+        local collectibleId = GetProgressionSkillAbilityFxOverrideCollectibleIdByIndex(progressionId, index)
+        local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+        if collectibleData and not collectibleData:IsHiddenFromCollection() then
+            if collectibleData:IsOwned() then
+                return true
+            end
+            anyLocked = true
+        end
+    end
+
+    return not anyLocked
+end
+
+function ZO_SkillsDataManager:GetSkillStyleWarningText(data)
+    local isStyleOwned = self:IsAnySkillStyleOwned(data)
+
+    if not data.skillData.isPurchased then
+        if isStyleOwned then
+            return GetString(SI_SKILL_STYLING_SKILL_NOT_PURCHASED)
+        else
+            return GetString(SI_SKILL_STYLING_SKILL_AND_STYLE_NOT_PURCHASED)
+        end
+    else
+        if not isStyleOwned then
+            return GetString(SI_SKILL_STYLING_STYLE_NOT_PURCHASED)
+        else
+            return ""
+        end
+    end
 end
 
 ZO_SkillsDataManager:New()

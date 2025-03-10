@@ -152,8 +152,16 @@
                                     <AnchorToBaseline relativeToLabel="$(parent)HouseTypeHeader" side="RIGHT" offsetX="10"/>
                                 </Label>
 
-                                <Label name="$(parent)RecommendCountHeader" inherits="ZO_GamepadHeaderLabelTextTemplate" text="SI_HOUSING_HOUSE_TOUR_RECOMMENDATION_COUNT_HEADER" hidden="true">
+                                <Label name="$(parent)SupportsWeatherControlHeader" inherits="ZO_GamepadHeaderLabelTextTemplate" text="SI_HOUSING_HOUSE_SUPPORTS_WEATHER_CONTROL_HEADER" >
                                     <Anchor point="TOPLEFT" relativeTo="$(parent)HouseTypeHeader" relativePoint="BOTTOMLEFT" offsetY="5" />
+                                </Label>
+
+                                <Label name="$(parent)SupportsWeatherControlValue" inherits="ZO_GamepadHeaderDataTextTemplate">
+                                    <AnchorToBaseline relativeToLabel="$(parent)SupportsWeatherControlHeader" side="RIGHT" offsetX="10"/>
+                                </Label>
+
+                                <Label name="$(parent)RecommendCountHeader" inherits="ZO_GamepadHeaderLabelTextTemplate" text="SI_HOUSING_HOUSE_TOUR_RECOMMENDATION_COUNT_HEADER" hidden="true">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)SupportsWeatherControlHeader" relativePoint="BOTTOMLEFT" offsetY="5" />
                                 </Label>
 
                                 <Label name="$(parent)RecommendCountValue" inherits="ZO_GamepadHeaderDataTextTemplate" hidden="true">

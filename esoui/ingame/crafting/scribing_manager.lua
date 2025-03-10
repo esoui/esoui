@@ -85,7 +85,7 @@ function ZO_Scribing_Manager:RegisterEvents()
                 recentCraftedAbilities = {}
             }
             self.savedVars = ZO_SavedVars:New("ZO_Ingame_SavedVariables", 1, "CraftedAbilities", defaults)
-            EVENT_MANAGER:UnregisterForEvent(EVENT_ADD_ON_LOADED)
+            EVENT_MANAGER:UnregisterForEvent("ZO_Scribing_Manager", EVENT_ADD_ON_LOADED)
         end
     end
     EVENT_MANAGER:RegisterForEvent("ZO_Scribing_Manager", EVENT_ADD_ON_LOADED, OnAddOnLoaded)

@@ -70,6 +70,8 @@ function ZO_Stats:Initialize(control)
     ZO_Stats_Common.Initialize(self, control)
 
     self.previewAvailable = true
+    self.virtualControlPrefix = "stats"
+    self.statEntries = {}
 
     STATS_SCENE = ZO_InteractScene:New("stats", SCENE_MANAGER, ZO_ATTRIBUTE_RESPEC_INTERACT_INFO)
     STATS_FRAGMENT = ZO_FadeSceneFragment:New(control)
@@ -95,7 +97,6 @@ function ZO_Stats:OnShowing()
         self.scroll = self.control:GetNamedChild("Pane")
         self.scrollChild = self.scroll:GetNamedChild("ScrollChild")
         self.attributeControls = {}
-        self.statEntries = {}
         self.actorCategory = GAMEPLAY_ACTOR_CATEGORY_PLAYER
         self.pendingEquipOutfitIndex = ZO_OUTFIT_MANAGER:GetEquippedOutfitIndex(self.actorCategory)
 
@@ -207,11 +208,24 @@ function ZO_Stats:OnUpdate()
         end
     end
 
+    ZO_ADVANCED_STATS_WINDOW:UpdateMundusStats()
+
+    if ZO_ADVANCED_STATS_WINDOW:HasAdvancedMundusStats() then
+        local NO_GRAMMAR = true
+        local DONT_INHERIT_COLOR = false
+        local advancedStateButtonText = zo_iconTextFormatNoSpaceAlignedRight(ZO_STAT_MUNDUS_ICONS[MUNDUS_STONE_INVALID], 24, 24, GetString(SI_STATS_ADVANCED_ATTRIBUTES), DONT_INHERIT_COLOR, NO_GRAMMAR)
+        self.advancedStatsButton:SetText(advancedStateButtonText)
+    else
+        self.advancedStatsButton:SetText(GetString(SI_STATS_ADVANCED_ATTRIBUTES))
+    end
+
     local isPreviewingAvailable = IsCharacterPreviewingAvailable()
     if self.previewAvailable ~= isPreviewingAvailable then
         self.previewAvailable = isPreviewingAvailable
         self.outfitDropdown:SetEnabled(self.previewAvailable)
     end
+
+    self:UpdateMundusRow()
 end
 
 function ZO_Stats:InitializeKeybindButtons()
@@ -227,7 +241,9 @@ function ZO_Stats:InitializeKeybindButtons()
                 end
             end,
             name = function()
-                if self:DoesAttributePointAllocationModeBatchSave() then
+                if ZO_StatsMundus_ShouldShowHelpKeybind then
+                    return GetString(SI_STATS_MUNDUS_INFO_BUTTON)
+                elseif self:DoesAttributePointAllocationModeBatchSave() then
                     return GetString(SI_STATS_CONFIRM_ATTRIBUTES_BUTTON)
                 else
                     return GetString(SI_STATS_COMMIT_ATTRIBUTES_BUTTON)
@@ -235,10 +251,13 @@ function ZO_Stats:InitializeKeybindButtons()
             end,
             keybind = "UI_SHORTCUT_PRIMARY",
             visible = function()
-                return self:DoesAttributePointAllocationModeBatchSave() or self:GetTotalAddedPoints() > 0
+                return ZO_StatsMundus_ShouldShowHelpKeybind or self:DoesAttributePointAllocationModeBatchSave() or self:GetTotalAddedPoints() > 0
             end,
             callback = function()
-                if self:DoesAttributePointAllocationModeBatchSave() and self:DoesChangeIncurCost() then
+                if ZO_StatsMundus_ShouldShowHelpKeybind then
+                    local helpCategoryIndex, helpIndex = GetMundusStoneHelpIndices()
+                    HELP:ShowSpecificHelp(helpCategoryIndex, helpIndex)
+                elseif self:DoesAttributePointAllocationModeBatchSave() and self:DoesChangeIncurCost() then
                     if self:IsPaymentTypeScroll(self) then
                         ZO_Dialogs_ShowDialog("STAT_EDIT_CONFIRM")
                     else
@@ -494,7 +513,12 @@ function ZO_Stats:CreateAttributesSection()
     self:SetUpAttributeControl(attributesRow:GetNamedChild("Magicka"), STAT_MAGICKA_MAX, ATTRIBUTE_MAGICKA, COMBAT_MECHANIC_FLAGS_MAGICKA)
     self:SetUpAttributeControl(attributesRow:GetNamedChild("Stamina"), STAT_STAMINA_MAX, ATTRIBUTE_STAMINA, COMBAT_MECHANIC_FLAGS_STAMINA)
 
-    self:SetNextControlPadding(20)
+    self:AddDivider()
+    self:AddHeader(SI_STATS_MUNDUS_TITLE)
+    self:AddMundusRow()
+    self:AddDivider()
+
+    self:SetNextControlPadding(5)
 
     self:AddStatRow(STAT_MAGICKA_MAX, STAT_MAGICKA_REGEN_COMBAT)
     self:SetNextControlPadding(0)
@@ -511,9 +535,9 @@ function ZO_Stats:CreateAttributesSection()
     self:AddStatRow(STAT_SPELL_RESIST, STAT_PHYSICAL_RESIST)
     self:SetNextControlPadding(0)
     self:AddStatRow(STAT_CRITICAL_RESISTANCE)
-    self:SetNextControlPadding(20)
-    local advancedStatsButton = self:CreateControlFromVirtual("AdvancedStatsButton", "ZO_AdvancedStatsButton")
-    advancedStatsButton:SetHandler("OnClicked", function() 
+    self:SetNextControlPadding(10)
+    self.advancedStatsButton = self:CreateControlFromVirtual("AdvancedStatsButton", "ZO_AdvancedStatsButton")
+    self.advancedStatsButton:SetHandler("OnClicked", function()
         if ADVANCED_STATS_FRAGMENT:IsShowing() then
             STATS_SCENE:RemoveFragmentGroup(ADVANCED_STATS_FRAGMENT_GROUP)
             STATS_SCENE:AddFragment(STATS_BG_FRAGMENT)
@@ -699,6 +723,7 @@ end
 
 function ZO_Stats:RefreshAllAttributes()
     for _, statEntry in pairs(self.statEntries) do
+        statEntry:SetHasMundusEffect(false)
         statEntry:UpdateStatValue()
     end
 end
@@ -816,7 +841,7 @@ function ZO_Stats:AddDivider()
     if self.lastControl == nil then
         self:SetNextControlPadding(2)
     else
-        self:SetNextControlPadding(15)
+        self:SetNextControlPadding(8)
     end
     
     return self:CreateControlFromVirtual("Divider", "ZO_WideHorizontalDivider")
@@ -836,8 +861,8 @@ function ZO_Stats:AddDropdownRow(rowName)
 end
 
 function ZO_Stats.SetDropdownRowIsNew(dropdownRow, isNew)
-	local iconControl = dropdownRow:GetNamedChild("Icon")
-	iconControl:SetHidden(not isNew)
+    local iconControl = dropdownRow:GetNamedChild("Icon")
+    iconControl:SetHidden(not isNew)
 end
 
 function ZO_Stats:AddIconRow(rowName)
@@ -850,6 +875,52 @@ function ZO_Stats:AddBountyRow(rowName)
     local bountyRow = self:CreateControlFromVirtual("BountyRow", "ZO_StatsBountyRow")
     bountyRow.name:SetText(rowName)
     return bountyRow
+end
+
+function ZO_Stats:ShowComparisonForDerivedStat(statType, value, excludeDelta)
+    if self.statEntries[statType] then
+        self.statEntries[statType]:ShowComparisonValue(value, excludeDelta)
+    end
+end
+
+function ZO_Stats:HideComparisonForDerivedStat(statType)
+    if self.statEntries[statType] then
+        self.statEntries[statType]:HideComparisonValue(value)
+    end
+end
+
+function ZO_Stats:UpdateMundusRow()
+    local activeMundusStoneBuffIndices = { GetUnitActiveMundusStoneBuffIndices("player") }
+    local numActiveMundusStoneBuffs = #activeMundusStoneBuffIndices
+    local isPlayerAtMundusWarningLevel = GetUnitLevel("player") >= GetMundusWarningLevel()
+
+    local function GetDerivedStatByTypeFunction(statType)
+        if self.statEntries[statType] then
+            self.statEntries[statType]:SetHasMundusEffect(true)
+            self.statEntries[statType]:UpdateStatValue()
+        end
+    end
+
+    -- clear mundus values before reseting them
+    self:RefreshAllAttributes()
+
+    local mundusStoneNameList = ZO_SharedStats_SetupMundusIconControls(self.mundusIconControls, RIGHT, -5, GetDerivedStatByTypeFunction)
+    self.mundusRow.name:SetText(ZO_GenerateCommaSeparatedListWithoutAnd(mundusStoneNameList))
+end
+
+function ZO_Stats:AddMundusRow()
+    self.mundusRow = self:CreateControlFromVirtual("MundusRow", "ZO_StatsMundusRow")
+
+    self.mundusIconControls = {}
+    local MAX_MUNDUS_SLOTS = 2
+    for i = 1, MAX_MUNDUS_SLOTS do
+        local mundusIconControl = self.mundusRow:GetNamedChild("MundusIcon" .. i)
+        table.insert(self.mundusIconControls, mundusIconControl)
+    end
+
+    self:UpdateMundusRow()
+
+    return self.mundusRow
 end
 
 function ZO_Stats:SetNextControlPadding(padding)
@@ -934,9 +1005,9 @@ function ZO_Stats:AddLongTermEffects(container, effectsRowPool)
                     effectsRow.name:SetText(zo_strformat(SI_ABILITY_TOOLTIP_NAME, buffName))
                     effectsRow.icon:SetTexture(iconFile)
 
-                    --[[if stackCount > 1 then
+                    if stackCount > 1 then
                         effectsRow.stackCount:SetText(stackCount)
-                    end--]]
+                    end
 
                     local duration = startTime - endTime
                     effectsRow.time:SetHidden(duration == 0)
@@ -967,6 +1038,13 @@ function ZO_Stats:AddLongTermEffects(container, effectsRowPool)
 
     local function OnEffectChanged(eventCode, changeType, buffSlot, buffName, unitTag)
         UpdateEffects()
+        self:RefreshAllAttributes()
+    end
+
+    local function HideMundusTooltips()
+        for _, control in ipairs(self.mundusIconControls) do
+            ZO_StatsMundusEntry_OnMouseExit(control)
+        end
     end
 
     container:RegisterForEvent(EVENT_EFFECT_CHANGED, OnEffectChanged)
@@ -975,6 +1053,7 @@ function ZO_Stats:AddLongTermEffects(container, effectsRowPool)
     container:RegisterForEvent(EVENT_ARTIFICIAL_EFFECT_ADDED, UpdateEffects)
     container:RegisterForEvent(EVENT_ARTIFICIAL_EFFECT_REMOVED, UpdateEffects)
     container:SetHandler("OnEffectivelyShown", UpdateEffects)
+    container:SetHandler("OnEffectivelyHidden", HideMundusTooltips)
 end
 
 function ZO_Stats:UpdateLevelUpRewards()
@@ -1020,11 +1099,11 @@ function ZO_AdvancedStats_Keyboard:Initialize(control)
     self.closeKeybindButton:SetKeybindButtonDescriptor(closeButtonDescriptor)
 
     ADVANCED_STATS_FRAGMENT = ZO_FadeSceneFragment:New(control)
-    
+
     ADVANCED_STATS_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_FRAGMENT_SHOWING then
             if self.dirty then
-                ZO_ScrollList_RefreshVisible(self.list)
+                self:UpdateAdvancedStats()
                 self.dirty = false 
             end
         end
@@ -1033,13 +1112,56 @@ function ZO_AdvancedStats_Keyboard:Initialize(control)
     self:SetupAdvancedStats()
     EVENT_MANAGER:RegisterForEvent("ZO_AdvancedStats_Keyboard", EVENT_STATS_UPDATED, function() 
         if ADVANCED_STATS_FRAGMENT:IsShowing() then
-            ZO_ScrollList_RefreshVisible(self.list) 
+            self:UpdateAdvancedStats()
             self.dirty = false
         else
             self.dirty = true
         end
     end)
     EVENT_MANAGER:AddFilterForEvent("ZO_AdvancedStats_Keyboard", EVENT_STATS_UPDATED, REGISTER_FILTER_UNIT_TAG, "player")
+end
+
+function ZO_AdvancedStats_Keyboard:UpdateMundusStats(mouseOverAbilityId)
+    self.mundusStats = {}
+    local activeMundusStoneBuffIndices = { GetUnitActiveMundusStoneBuffIndices("player") }
+    for _, index in pairs(activeMundusStoneBuffIndices) do
+        local abilityId = select(11, GetUnitBuffInfo("player", index))
+
+        local numStatsForAbility = GetAbilityNumAdvancedStats(abilityId)
+        for i = 1, numStatsForAbility do
+            local statType, statFormat, effectValue = GetAbilityAdvancedStatAndEffectByIndex(abilityId, i)
+            self.mundusStats[statType] =
+            {
+                format = statFormat,
+                value = effectValue,
+            }
+            if abilityId == mouseOverAbilityId then
+                table.insert(self.mouseOverStateTypes, statType)
+            end
+        end
+    end
+end
+
+function ZO_AdvancedStats_Keyboard:UpdateAdvancedStats()
+    self:UpdateMundusStats()
+    ZO_ScrollList_RefreshVisible(self.list)
+end
+
+function ZO_AdvancedStats_Keyboard:HasAdvancedMundusStats()
+    local advanceStatsDataList = ZO_ScrollList_GetDataList(self.list)
+    for i, statEntry in ipairs(advanceStatsDataList) do
+        for statType, value in pairs(self.mundusStats) do
+            if statEntry.data.statType == statType then
+                return true
+            end
+        end
+    end
+    return false
+end
+
+function ZO_AdvancedStats_Keyboard:SetMundusMouseAbility(abilityId)
+    self.mouseOverStateTypes = {}
+    self:UpdateMundusStats(abilityId)
 end
 
 function ZO_AdvancedStats_Keyboard:InitializeList()
@@ -1049,17 +1171,43 @@ function ZO_AdvancedStats_Keyboard:InitializeList()
          control.nameLabel:SetText(zo_strformat(SI_STAT_NAME_FORMAT, data.displayName))
          local _, flatValue, percentValue = GetAdvancedStatValue(data.statType)
 
+         local valueText = ""
+         local mouseOverFormats = {}
          if data.formatType == ADVANCED_STAT_DISPLAY_FORMAT_FLAT then
-            control.valueLabel:SetText(flatValue)
+            valueText = flatValue
+            table.insert(mouseOverFormats, ADVANCED_STAT_DISPLAY_FORMAT_FLAT)
          elseif data.formatType == ADVANCED_STAT_DISPLAY_FORMAT_PERCENT or data.formatType == ADVANCED_STAT_DISPLAY_FORMAT_FLAT_OR_PERCENT then
-            control.valueLabel:SetText(zo_strformat(SI_STAT_VALUE_PERCENT, percentValue))
+            valueText = zo_strformat(SI_STAT_VALUE_PERCENT, percentValue)
+            table.insert(mouseOverFormats, ADVANCED_STAT_DISPLAY_FORMAT_PERCENT)
             if data.formatType == ADVANCED_STAT_DISPLAY_FORMAT_FLAT_OR_PERCENT then
                 data.flatValue = flatValue
+                table.insert(mouseOverFormats, ADVANCED_STAT_DISPLAY_FORMAT_FLAT)
+                table.insert(mouseOverFormats, ADVANCED_STAT_DISPLAY_FORMAT_FLAT_OR_PERCENT)
             end
          else
-            control.valueLabel:SetText("")
             internalassert(false, "Invalid advanced stat format type.")
          end
+         if self.mouseOverStateTypes then
+             for i, statType in ipairs(self.mouseOverStateTypes) do
+                if statType == data.statType and self.mundusStats[data.statType] then
+                    if ZO_IsElementInNumericallyIndexedTable(mouseOverFormats, self.mundusStats[data.statType].format) then
+                        local INHERIT_COLOR = true
+                        local icon
+                        local color
+                        if self.mundusStats[data.statType].value > 0 then
+                            color = ZO_SUCCEEDED_TEXT
+                            icon = "EsoUI/Art/Buttons/Gamepad/gp_upArrow.dds"
+                        else
+                            color = ZO_ERROR_COLOR
+                            icon = "EsoUI/Art/Buttons/Gamepad/gp_downArrow.dds"
+                        end
+                        valueText = color:Colorize(zo_iconTextFormatNoSpace(icon, 24, 24, valueText, INHERIT_COLOR))
+                    end
+                end
+             end
+         end
+         control.valueLabel:SetText(valueText)
+         control.iconTexture:SetHidden(not self.mundusStats[data.statType] or not ZO_IsElementInNumericallyIndexedTable(mouseOverFormats, self.mundusStats[data.statType].format))
          control.statData = data
     end
 
@@ -1079,8 +1227,46 @@ function ZO_AdvancedStats_Keyboard:InitializeList()
             description = data.percentDescription,
         }
 
-        control.statFlatControl.valueLabel:SetText(flatValue)
-        control.statPercentControl.valueLabel:SetText(zo_strformat(SI_STAT_VALUE_PERCENT, percentValue))
+        local flatText = flatValue
+        local percentText = zo_strformat(SI_STAT_VALUE_PERCENT, percentValue)
+        if self.mouseOverStateTypes then
+             for i, statType in ipairs(self.mouseOverStateTypes) do
+                if statType == data.statType and self.mundusStats[data.statType] then
+                    local INHERIT_COLOR = true
+                    local icon
+                    local color
+                    if self.mundusStats[data.statType].value > 0 then
+                        color = ZO_SUCCEEDED_TEXT
+                        icon = "EsoUI/Art/Buttons/Gamepad/gp_upArrow.dds"
+                    else
+                        color = ZO_ERROR_COLOR
+                        icon = "EsoUI/Art/Buttons/Gamepad/gp_downArrow.dds"
+                    end
+                    if self.mundusStats[data.statType].format == ADVANCED_STAT_DISPLAY_FORMAT_FLAT then
+                        flatText = color:Colorize(zo_iconTextFormatNoSpace(icon, 24, 24, flatText, INHERIT_COLOR))
+                    elseif self.mundusStats[data.statType].format == ADVANCED_STAT_DISPLAY_FORMAT_PERCENT then
+                        percentText = color:Colorize(zo_iconTextFormatNoSpace(icon, 24, 24, percentText, INHERIT_COLOR))
+                    elseif self.mundusStats[data.statType].format == ADVANCED_STAT_DISPLAY_FORMAT_FLAT_AND_PERCENT then
+                        flatText = color:Colorize(zo_iconTextFormatNoSpace(icon, 24, 24, flatText, INHERIT_COLOR))
+                        percentText = color:Colorize(zo_iconTextFormatNoSpace(icon, 24, 24, percentText, INHERIT_COLOR))
+                    end
+                end
+             end
+         end
+
+        local showFlatMundus = self.mundusStats[data.statType]
+            and (self.mundusStats[data.statType].format == ADVANCED_STAT_DISPLAY_FORMAT_FLAT
+                or self.mundusStats[data.statType].format == ADVANCED_STAT_DISPLAY_FORMAT_FLAT_AND_PERCENT)
+            and self.mundusStats[data.statType].value ~= 0
+        local showPercentMundus = self.mundusStats[data.statType]
+            and (self.mundusStats[data.statType].format == ADVANCED_STAT_DISPLAY_FORMAT_PERCENT
+                or self.mundusStats[data.statType].format == ADVANCED_STAT_DISPLAY_FORMAT_FLAT_AND_PERCENT)
+            and self.mundusStats[data.statType].value ~= 0
+
+        control.statFlatControl.valueLabel:SetText(flatText)
+        control.statFlatControl.iconTexture:SetHidden(not showFlatMundus)
+        control.statPercentControl.valueLabel:SetText(percentText)
+        control.statPercentControl.iconTexture:SetHidden(not showPercentMundus)
         control.statFlatControl.statData = flatData
         control.statPercentControl.statData = percentData
         control.statData = data
@@ -1097,8 +1283,11 @@ function ZO_AdvancedStats_Keyboard:InitializeList()
 end
 
 function ZO_AdvancedStats_Keyboard:SetupAdvancedStats()
+
     ZO_ScrollList_Clear(self.list)
     local scrollData = ZO_ScrollList_GetDataList(self.list)
+
+    self:UpdateMundusStats()
 
     --First, grab the stat data from the def
     local advancedStatData = {}
@@ -1109,7 +1298,7 @@ function ZO_AdvancedStats_Keyboard:SetupAdvancedStats()
 
         --ESO-819006: Only include categories with at least one stat in it
         if numStats > 0 then
-            local categoryData = 
+            local categoryData =
             {
                 header = displayName,
                 stats = {},
@@ -1151,7 +1340,7 @@ function ZO_AdvancedStats_Keyboard:SetupAdvancedStats()
 
         --Only add a header if one has been provided
         if statCategory.header and statCategory.header ~= "" then
-            local headerData = 
+            local headerData =
             {
                 name = statCategory.header
             }

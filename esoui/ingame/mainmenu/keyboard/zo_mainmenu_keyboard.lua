@@ -235,14 +235,14 @@ ZO_CATEGORY_LAYOUT_INFO =
 
         descriptor = MENU_CATEGORY_GROUP,
         normal = function(button)
-            if PROMOTIONAL_EVENT_MANAGER:IsCampaignActive() and not IsPromotionalEventSystemLocked() then
+            if PROMOTIONAL_EVENT_MANAGER:HasActiveCampaign() and not IsPromotionalEventSystemLocked() then
                 return "EsoUI/Art/MainMenu/menuBar_group_gold_up.dds"
             else
                 return "EsoUI/Art/MainMenu/menuBar_group_up.dds"
             end
         end,
         pressed = function(button)
-            if PROMOTIONAL_EVENT_MANAGER:IsCampaignActive() and not IsPromotionalEventSystemLocked() then
+            if PROMOTIONAL_EVENT_MANAGER:HasActiveCampaign() and not IsPromotionalEventSystemLocked() then
                 return "EsoUI/Art/MainMenu/menuBar_group_gold_down.dds"
             else
                 return "EsoUI/Art/MainMenu/menuBar_group_down.dds"
@@ -250,18 +250,16 @@ ZO_CATEGORY_LAYOUT_INFO =
         end,
         disabled = "EsoUI/Art/MainMenu/menuBar_group_disabled.dds",
         highlight = function(button)
-            if PROMOTIONAL_EVENT_MANAGER:IsCampaignActive() and not IsPromotionalEventSystemLocked() then
+            if PROMOTIONAL_EVENT_MANAGER:HasActiveCampaign() and not IsPromotionalEventSystemLocked() then
                 return "EsoUI/Art/MainMenu/menuBar_group_gold_over.dds"
             else
                 return "EsoUI/Art/MainMenu/menuBar_group_over.dds"
             end
         end,
         indicators = function()
-            if not IsPromotionalEventSystemLocked() then
-                local campaignData = PROMOTIONAL_EVENT_MANAGER:GetCurrentCampaignData()
-                if campaignData and (not campaignData:HasBeenSeen() or campaignData:IsAnyRewardClaimable()) then
-                    return { ZO_KEYBOARD_NEW_ICON }
-                end
+            if GROUP_FINDER_APPLICATIONS_LIST_MANAGER:HasNewApplication() or
+               PROMOTIONAL_EVENT_MANAGER:DoesAnyCampaignHaveCallout() then
+                return { ZO_KEYBOARD_NEW_ICON }
             end
         end,
     },

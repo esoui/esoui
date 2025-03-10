@@ -423,6 +423,8 @@ function ZO_ActivityFinderTemplate_Gamepad:RefreshView()
         locationEntryData.data:SetLockReasonTextOverride(lockReasonTextOverride)
         locationEntryData:SetEnabled(not location:IsLocked() and not isSearching)
         locationEntryData:SetSelected(location:IsSelected())
+        locationEntryData.selectedIconTint = ZO_WHITE
+        locationEntryData.unselectedIconTint = ZO_GAMEPAD_UNSELECTED_COLOR
 
         locationEntryData.narrationText = function(entryData, entryControl)
             local narrations = {}

@@ -6,17 +6,13 @@ ZO_GAMEPAD_MARKET_CONTENT_LIST_SCENE_NAME = "gamepad_market_content_list"
 
 local GamepadMarketProductListScene = ZO_Gamepad_ParametricList_Screen:Subclass()
 
-function GamepadMarketProductListScene:New(...)
-    return ZO_Gamepad_ParametricList_Screen.New(self, ...)
-end
-
 function GamepadMarketProductListScene:Initialize(control)
     ZO_GAMEPAD_MARKET_LIST_SCENE = ZO_RemoteScene:New(ZO_GAMEPAD_MARKET_CONTENT_LIST_SCENE_NAME, SCENE_MANAGER)
     local ACTIVATE_ON_SHOW = true
     ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE, ACTIVATE_ON_SHOW, ZO_GAMEPAD_MARKET_LIST_SCENE)
     self.list = self:GetMainList()
     self:InitializeHeader()
-    self.previewInfos = {}
+    self.shouldAutoPreview = false
 end
 
 function GamepadMarketProductListScene:OnDeferredInitialize()
@@ -29,7 +25,26 @@ function GamepadMarketProductListScene:InitializeKeybindStripDescriptors()
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
         -- "Preview" Keybind
         {
-            name = GetString(SI_MARKET_PREVIEW_KEYBIND_TEXT),
+            name =      function()
+                            local targetData = self.list:GetTargetData()
+                            if targetData then
+                                local collectibleId
+                                local collectibleType
+                                if GetMarketProductType(targetData.marketProductId) == MARKET_PRODUCT_TYPE_COLLECTIBLE then
+                                    collectibleId, _, _, collectibleType = GetMarketProductCollectibleInfo(targetData.marketProductId)
+                                end
+                                if collectibleType == COLLECTIBLE_CATEGORY_TYPE_OUTFIT_STYLE then
+                                    local collectibleData = ZO_CollectibleData_Base:New()
+                                    collectibleData:SetId(collectibleId)
+                                    if ZO_GAMEPAD_MARKET:IsPreviewingOutfitStyle(collectibleData) then
+                                        return GetString(SI_MARKET_END_PREVIEW_KEYBIND_TEXT)
+                                    end
+                                elseif self.shouldAutoPreview then
+                                    return GetString(SI_MARKET_END_PREVIEW_KEYBIND_TEXT)
+                                end
+                            end
+                            return GetString(SI_MARKET_PREVIEW_KEYBIND_TEXT)
+                        end,
             keybind = "UI_SHORTCUT_PRIMARY",
             visible =   function()
                             local targetData = self.list:GetTargetData()
@@ -46,9 +61,21 @@ function GamepadMarketProductListScene:InitializeKeybindStripDescriptors()
                             return false
                         end,
             callback =  function()
-                            self:BeginPreview()
+                            self:TogglePreview()
                         end,
         },
+        -- "End All Previews" Keybind
+        {
+            name = GetString(SI_MARKET_END_ALL_PREVIEWS_KEYBIND_TEXT),
+            keybind = "UI_SHORTCUT_SECONDARY",
+            visible =   function()
+                            return ZO_GAMEPAD_MARKET:HasAnyCurrentSlotPreviews()
+                        end,
+            callback =  function()
+                            ZO_GAMEPAD_MARKET:ClearAllCurrentSlotPreviews()
+                        end,
+        },
+
 
         -- Back
         KEYBIND_STRIP:GetDefaultGamepadBackButtonDescriptor(),
@@ -68,8 +95,6 @@ function GamepadMarketProductListScene:OnShowing()
         self:ShowMarketProduct(self.queuedMarketProductId, self.queuedPreviewType)
         self.queuedMarketProductId = nil
         self.queuedPreviewType = nil
-    else
-        self:TrySelectLastPreviewedProduct()
     end
 end
 
@@ -77,6 +102,7 @@ function GamepadMarketProductListScene:OnHiding()
     GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
     self.queuedMarketProductId = nil
     self.queuedPreviewType = nil
+    self:EndPreview()
 end
 
 function GamepadMarketProductListScene:SetMarketProduct(marketProductId, previewType)
@@ -127,8 +153,6 @@ end
 -- objectList is a table of MarketProduct and Reward objects
 function GamepadMarketProductListScene:ShowMarketProducts(objectList)
     self.list:Clear()
-
-    ZO_ClearNumericallyIndexedTable(self.previewInfos)
 
     local numObjects = #objectList
     local lastHeaderName = nil
@@ -205,14 +229,6 @@ function GamepadMarketProductListScene:ShowMarketProducts(objectList)
                 previewType = ZO_ITEM_PREVIEW_MARKET_PRODUCT
                 previewObjectId = productId
             end
-
-            local previewEntry =
-            {
-                previewType,
-                previewObjectId,
-            }
-            table.insert(self.previewInfos, previewEntry)
-            entryData.previewIndex = #self.previewInfos
         end
     end
 
@@ -229,29 +245,64 @@ function GamepadMarketProductListScene:OnTargetChanged(list, targetData, oldTarg
         else
             GAMEPAD_TOOLTIPS:LayoutMarketProduct(GAMEPAD_LEFT_TOOLTIP, targetData.marketProductId)
         end
+        self:UpdatePreview()
     end
 end
 
-function GamepadMarketProductListScene:OnPreviewChanged(previewData)
-    self.lastPreviewedMarketProductId = previewData
-end
-
-function GamepadMarketProductListScene:BeginPreview()
-    local targetData = self.list:GetTargetData()
-    if targetData then
-        local previewIndex = targetData.previewIndex
-        ZO_MARKET_PREVIEW_GAMEPAD:BeginPreview(self.previewInfos, previewIndex, function(...) self:OnPreviewChanged(...) end)
-    end
-end
-
-function GamepadMarketProductListScene:TrySelectLastPreviewedProduct()
-    local marketProductId = self.lastPreviewedMarketProductId
-    if marketProductId then
-        local index = self.list:FindFirstIndexByEval(function(data) return data.marketProductId == marketProductId end)
-        if index then
-            self.list:SetSelectedIndexWithoutAnimation(index)
+function GamepadMarketProductListScene:TogglePreview()
+    if self.shouldAutoPreview then
+        self:EndPreview()
+    else
+        local targetData = self.list:GetTargetData()
+        if targetData and targetData.hasPreview then
+            local collectibleId
+            local collectibleType
+            if GetMarketProductType(targetData.marketProductId) == MARKET_PRODUCT_TYPE_COLLECTIBLE then
+                collectibleId, _, _, collectibleType = GetMarketProductCollectibleInfo(targetData.marketProductId)
+            end
+            if targetData.rewardId then
+                ZO_GAMEPAD_MARKET:ClearAllCurrentSlotPreviews()
+                ZO_Market_Shared.PreviewReward(ITEM_PREVIEW_GAMEPAD, targetData.rewardId)
+                self.shouldAutoPreview = true
+            elseif collectibleType == COLLECTIBLE_CATEGORY_TYPE_OUTFIT_STYLE then
+                ZO_GAMEPAD_MARKET:PreviewOutfitStyle(collectibleId)
+            else
+                ZO_GAMEPAD_MARKET:ClearAllCurrentSlotPreviews()
+                ZO_Market_Shared.PreviewMarketProduct(ITEM_PREVIEW_GAMEPAD, targetData.marketProductId)
+                self.shouldAutoPreview = true
+            end
         end
     end
+    self:RefreshKeybinds()
+end
+
+function GamepadMarketProductListScene:UpdatePreview()
+    if self.shouldAutoPreview then
+        local targetData = self.list:GetTargetData()
+        if targetData and targetData.hasPreview then
+            local collectibleType
+            if GetMarketProductType(targetData.marketProductId) == MARKET_PRODUCT_TYPE_COLLECTIBLE then
+                collectibleType = select(4, GetMarketProductCollectibleInfo(targetData.marketProductId))
+            end
+            if targetData.rewardId then
+                ZO_Market_Shared.PreviewReward(ITEM_PREVIEW_GAMEPAD, targetData.rewardId)
+            elseif collectibleType == COLLECTIBLE_CATEGORY_TYPE_OUTFIT_STYLE then
+                self:EndPreview()
+            else
+                ZO_Market_Shared.PreviewMarketProduct(ITEM_PREVIEW_GAMEPAD, targetData.marketProductId)
+            end
+        else
+            self:EndPreview()
+        end
+    end
+    self:RefreshKeybinds()
+end
+
+function GamepadMarketProductListScene:EndPreview()
+    ZO_GAMEPAD_MARKET:ClearAllCurrentSlotPreviews()
+    ITEM_PREVIEW_GAMEPAD:EndCurrentPreview()
+    self.shouldAutoPreview = false
+    self:RefreshKeybinds()
 end
 
 function GamepadMarketProductListScene:PerformUpdate()

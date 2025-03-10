@@ -1847,6 +1847,37 @@ ZO_TOOLTIP_STYLES =
         fontSize = "$(GP_34)",
         widthPercent = 100,
     },
+
+    -- Addon Info
+    addOnName =
+    {
+        fontSize = "$(GP_42)",
+        customSpacing = 8,
+        fontColorField = GENERAL_COLOR_WHITE,
+        widthPercent = 100,
+    },
+    addOnAuthorSection =
+    {
+        fontFace = "$(GAMEPAD_MEDIUM_FONT)",
+        fontSize = "$(GP_27)",
+        uppercase = true,
+        fontColorField = GENERAL_COLOR_WHITE,
+        widthPercent = 100,
+    },
+    addOnTopSection =
+    {
+        layoutPrimaryDirection = "up",
+        layoutSecondaryDirection = "right",
+        widthPercent = 100,
+        childSpacing = 1,
+        fontSize = "$(GP_27)",
+        dimensionConstraints =
+        {
+            minHeight = 110,
+        },
+        uppercase = true,
+        fontColorField = GENERAL_COLOR_OFF_WHITE,
+    },
 }
 
 ZO_GAMEPAD_DYEING_TOOLTIP_STYLES =

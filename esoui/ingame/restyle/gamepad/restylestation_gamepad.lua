@@ -551,6 +551,39 @@ function GamepadMultiFocusArea_OutfitSelector:CanBeSelected()
     return RESTYLE_GAMEPAD:GetMode() ~= RESTYLE_MODE_COLLECTIBLE and RESTYLE_GAMEPAD:GetMode() ~= RESTYLE_MODE_COMPANION_COLLECTIBLE
 end
 
+-- These six functions are used by SCREEN_NARRATION_MANAGER to narrate a focus object.  
+-- Supplying them here so the Restyle Station's outfit picker can be narrated.
+function GamepadMultiFocusArea_OutfitSelector:IsActive()
+    return self.active == true
+end
+
+-- These six functions are used by SCREEN_NARRATION_MANAGER to narrate a focus object.  
+-- Supplying them here so the Restyle Station's outfit picker can be narrated.
+function GamepadMultiFocusArea_OutfitSelector:GetHeaderNarration()
+end
+
+-- These six functions are used by SCREEN_NARRATION_MANAGER to narrate a focus object.  
+-- Supplying them here so the Restyle Station's outfit picker can be narrated.
+function GamepadMultiFocusArea_OutfitSelector:GetSubHeaderNarration()
+end
+
+-- These six functions are used by SCREEN_NARRATION_MANAGER to narrate a focus object.  
+-- Supplying them here so the Restyle Station's outfit picker can be narrated.
+function GamepadMultiFocusArea_OutfitSelector:GetNarrationText()
+    return { SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_OUTFIT_SELECTOR_TITLE)),
+    SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.manager.outfitSelectorNameLabel:GetText()) }
+end
+
+-- These six functions are used by SCREEN_NARRATION_MANAGER to narrate a focus object.  
+-- Supplying them here so the Restyle Station's outfit picker can be narrated.
+function GamepadMultiFocusArea_OutfitSelector:GetAdditionalInputNarrationFunction()
+end
+
+-- These six functions are used by SCREEN_NARRATION_MANAGER to narrate a focus object.  
+-- Supplying them here so the Restyle Station's outfit picker can be narrated.
+function GamepadMultiFocusArea_OutfitSelector:GetFooterNarration()
+end
+
 function ZO_RestyleStation_Gamepad:InitializeFoci()
     local function SetActivateCallback()
         if self:ShouldShowAllDyeFoci() then
@@ -581,10 +614,14 @@ function ZO_RestyleStation_Gamepad:InitializeFoci()
     local function OutfitActivateCallback()
         GAMEPAD_TOOLTIPS:ClearLines(GAMEPAD_LEFT_TOOLTIP)
         self.outfitSelectorNameLabel:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
+    
+        SCREEN_NARRATION_MANAGER:QueueFocus(self.outfitSelectorHeaderFocus)
+        self.outfitSelectorHeaderFocus.active = true
     end
 
     local function OutfitDeactivateCallback()
         self.outfitSelectorNameLabel:SetColor(ZO_DISABLED_TEXT:UnpackRGBA())
+        self.outfitSelectorHeaderFocus.active = false
     end
 
     self.outfitSelectorHeaderFocus = GamepadMultiFocusArea_OutfitSelector:New(self, OutfitActivateCallback, OutfitDeactivateCallback)

@@ -1,0 +1,18 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_ForceConsoleWarning_TopLevel" hidden="true">
+            <Dimensions x="300" y="50" />
+            <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot" />
+
+            <OnInitialized>
+                ZO_ForceConsoleWarning.OnControlInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Label name="$(parent)ForceConsoleText" font="ZoFontGamepadBold18" horizontalAlignment="CENTER" text="SI_GAMEPAD_HUD_WARNING_FORCE_CONSOLE_FLOW_ENABLED" color="INTERFACE_COLOR_TYPE_GENERAL:INTERFACE_GENERAL_COLOR_ERROR">
+                    <Anchor point="CENTER"/>
+                </Label>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

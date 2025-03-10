@@ -185,11 +185,18 @@ do
 
         -- layout tooltip
         InitializeTooltip(ItemTooltip, self.control, RIGHT, -15, 0, LEFT)
+        local associatedAchievementId = 0
         if self:HasActiveIcon() then
             local marketProductId = self.activeMarketProductIcon:GetMarketProductId()
             ItemTooltip:SetMarketProduct(marketProductId)
+            associatedAchievementId = GetMarketProductAssociatedAchievementId(marketProductId)
         else
             ItemTooltip:SetMarketProductListing(self:GetId(), self:GetPresentationIndex())
+            associatedAchievementId = GetMarketProductAssociatedAchievementId(self:GetId())
+        end
+        if associatedAchievementId > 0 then
+            InitializeTooltip(AchievementTooltip, ItemTooltip, RIGHT, -15, 0, LEFT)
+            AchievementTooltip:SetAchievement(associatedAchievementId)
         end
 
         if self:IsGiftable() then
@@ -314,6 +321,7 @@ end
 
 function MarketProduct_Keyboard:ClearTooltip()
     ClearTooltip(ItemTooltip)
+    ClearTooltip(AchievementTooltip)
 end
 
 -- override of ZO_MarketProductBase:GetBackground()

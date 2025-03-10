@@ -5,10 +5,6 @@
 
 local InternalIngameRewardsManager = ZO_RewardsManager:Subclass()
 
-function InternalIngameRewardsManager:New(...)
-    return ZO_RewardsManager.New(self)
-end
-
 function InternalIngameRewardsManager:GetCollectibleEntryInfo(rewardId, parentChoice)
     local collectibleId = GetCollectibleRewardCollectibleId(rewardId)
     if collectibleId > 0 then

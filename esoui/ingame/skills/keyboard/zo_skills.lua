@@ -392,7 +392,9 @@ function ZO_SelectSkillStyleDialog_OnInitialized(control)
         control.skillStyleSelector:SetSkillData(data.skillData)
         control.skillStyleSelector:BuildSkillStyleSelectorIconGridList()
         control.defaultStyleBorder:SetHidden(dialog.skillStyleSelector:GetActiveData() ~= nil)
-        if data.skillData.isPurchased then
+        
+        local purchaseText = SKILLS_DATA_MANAGER:GetSkillStyleWarningText(data)
+        if purchaseText == "" then
             control.selectSkillStyleContainerControl:ClearAnchors()
             control.selectSkillStyleContainerControl:SetAnchor(TOP, control.skillStylesLabel, BOTTOM, 0, 5)
             control.notPurchasedLabel:SetHidden(true)
@@ -400,6 +402,7 @@ function ZO_SelectSkillStyleDialog_OnInitialized(control)
             control.selectSkillStyleContainerControl:ClearAnchors()
             control.selectSkillStyleContainerControl:SetAnchor(TOP, control.notPurchasedLabel, BOTTOM, 0, 5)
             control.notPurchasedLabel:SetHidden(false)
+            control.notPurchasedLabel:SetText(purchaseText)
         end
     end
 
@@ -1033,7 +1036,13 @@ function ZO_SkillsManager:ScrollToSkillData(skillData)
 end
 
 function ZO_SkillsManager:RefreshSkillLineInfo(forceInit)
-    ZO_SkillLineInfo_Keyboard_Refresh(self.skillInfo, self:GetSelectedSkillLineData(), forceInit)
+    local skillLineData = self:GetSelectedSkillLineData()
+    if skillLineData then
+        self.skillInfo:SetHidden(false)
+        ZO_SkillLineInfo_Keyboard_Refresh(self.skillInfo, skillLineData, forceInit)
+    else
+        self.skillInfo:SetHidden(true)
+    end
 end
 
 function ZO_SkillsManager:RefreshSkillPointInfo()

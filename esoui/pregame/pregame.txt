@@ -27,10 +27,8 @@ EsoUI\Pregame\Tooltip\CharacterSelectTooltips.lua
 EsoUI\Pregame\AccountLogin\Keyboard\CreateLinkAccountDialogs_Keyboard.lua
 EsoUI\Pregame\AccountLogin\Keyboard\CreateLinkAccountDialogs_Keyboard.xml
 
-EsoUI\Pregame\PregameAnimatedBackground\Gamepad\BaseBackground.lua
-EsoUI\Pregame\PregameAnimatedBackground\Gamepad\BaseBackground.xml
-EsoUI\Pregame\PregameAnimatedBackground\Gamepad\PeninsulaBackground.lua
-EsoUI\Pregame\PregameAnimatedBackground\Gamepad\PeninsulaBackground.xml
+EsoUI\Pregame\PregameAnimatedBackground\OneTamrielBackground.lua
+EsoUI\Pregame\PregameAnimatedBackground\OneTamrielBackground.xml
 
 EsoUI\Pregame\AccountLogin\Keyboard\ZO_LoginManager.lua
 EsoUI\Pregame\AccountLogin\Keyboard\ZO_LoginTemplates.xml

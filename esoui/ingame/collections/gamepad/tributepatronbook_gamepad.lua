@@ -62,6 +62,10 @@ function ZO_TributePatronBook_Gamepad:GetSceneName()
     return "gamepadTributePatronBook"
 end
 
+function ZO_TributePatronBook_Gamepad:IsSearchSupported()
+    return true
+end
+
 function ZO_TributePatronBook_Gamepad:InitializeHeader()
     self.headerData = {}
 end
@@ -96,6 +100,10 @@ function ZO_TributePatronBook_Gamepad:ViewCategory(tributePatronCategoryData)
     end
 
     patronList:Commit()
+    if patronList:GetNumEntries() == 0 then
+        self.patronId = nil
+        self:BuildGridList()
+    end
 
     self:ShowListDescriptor(self.patronListDescriptor)
 end
@@ -240,30 +248,32 @@ end
 function ZO_TributePatronBook_Gamepad:BuildGridList()
     if self.gridList then
         self.gridList:ClearGridList()
-
-        -- Pre-process starter cards
-        self:SetupStarterCards()
-
-        -- Pre-process dock cards
-        self:SetupDockCards()
-
+        
         -- Build Patron name header
         self:AddPatronHeader()
 
-        -- Build description entry
-        self:AddDescriptionEntry()
+        if self.patronId then
+            -- Pre-process starter cards
+            self:SetupStarterCards()
 
-        -- Build Patron
-        self:AddPatronEntry()
+            -- Pre-process dock cards
+            self:SetupDockCards()
 
-        -- Build starter card entries
-        self:AddStarterCardEntries()
+            -- Build description entry
+            self:AddDescriptionEntry()
 
-        -- Build card entries
-        self:AddDockCardEntries()
+            -- Build Patron
+            self:AddPatronEntry()
 
-        -- Build card upgrade entries
-        self:AddCardUpgradeEntries()
+            -- Build starter card entries
+            self:AddStarterCardEntries()
+
+            -- Build card entries
+            self:AddDockCardEntries()
+
+            -- Build card upgrade entries
+            self:AddCardUpgradeEntries()
+        end
 
         self.gridList:CommitGridList()
 
@@ -274,8 +284,13 @@ end
 -- End ZO_TributePatronBook_Shared Overrides --
 
 function ZO_TributePatronBook_Gamepad:AddPatronHeader()
+  
     local patronData = TRIBUTE_DATA_MANAGER:GetTributePatronData(self.patronId)
-    self.headerLabel:SetText(patronData:GetFormattedColorizedName())
+    if patronData ~= nil then
+        self.headerLabel:SetText(patronData:GetFormattedColorizedName())
+    else
+        self.headerLabel:SetText("")
+    end
 end
 
 -- Begin ZO_Gamepad_ParametricList_Search_Screen Overrides --

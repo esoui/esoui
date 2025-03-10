@@ -504,6 +504,8 @@ ZO_ITEM_PREVIEW_COLLECTIBLE = 11
 
 ZO_ITEM_PREVIEW_WAIT_TIME_MS = 500
 
+ZO_ITEM_PREVIEW_PLAY_CLICK_SOUND = true
+
 ZO_ItemPreview_Shared = ZO_InitializingCallbackObject:Subclass()
 
 function ZO_ItemPreview_Shared:Initialize(control)
@@ -728,6 +730,7 @@ function ZO_ItemPreview_Shared:SharedPreviewSetup(previewType, ...)
 
     if IsCharacterPreviewingAvailable() then
         self:ApplyOrBuffer()
+        PlaySound(SOUNDS.MARKET_PREVIEW_SELECTED)
     end
 
     self.numPreviewVariations = self.currentPreviewTypeObject:GetNumVariations()
@@ -830,7 +833,6 @@ function ZO_ItemPreview_Shared:Apply()
     self.currentPreviewTypeObject:ApplyAction(self.previewActionIndex)
     self.lastSetChangeTime = GetFrameTimeMilliseconds()
     ApplyChangesToPreviewCollectionShown()
-    PlaySound(SOUNDS.MARKET_PREVIEW_SELECTED)
     self.oldPreviewVariationIndex = nil
     self.oldPreviewActionIndex = nil
 end

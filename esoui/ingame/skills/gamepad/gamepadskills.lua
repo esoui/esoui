@@ -1618,6 +1618,7 @@ do
                         entryData:InitializeCollectibleVisualData(collectibleData, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
                         entryData:SetEnabled(isSkillLinePurchased and collectibleData:IsUnlocked())
                         entryData:SetSelected(entryData.isCurrent())
+                        entryData:SetLocked(not collectibleData:IsOwned() or not isSkillLinePurchased)
                         entryData.narrationTooltip = GAMEPAD_LEFT_DIALOG_TOOLTIP
 
                         local listItem =
@@ -1651,11 +1652,7 @@ do
             mainText =
             {
                 text = function(dialog)
-                    local data = dialog.data
-                    if not data.skillData.isPurchased then
-                        return GetString(SI_SKILL_STYLING_SKILL_NOT_PURCHASED)
-                    end
-                    return ""
+                    return SKILLS_DATA_MANAGER:GetSkillStyleWarningText(dialog.data)
                 end,
             },
 

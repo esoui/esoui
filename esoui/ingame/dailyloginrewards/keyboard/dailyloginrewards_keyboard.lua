@@ -58,12 +58,12 @@ function ZO_DailyLoginRewards_Keyboard:InitializeKeybindStripDescriptors()
             keybind = "UI_SHORTCUT_SECONDARY",
             callback = function()
                 SYSTEMS:GetObject("itemPreview"):ClearPreviewCollection()
-                SYSTEMS:GetObject("itemPreview"):PreviewReward(self.mouseOverData:GetRewardId())
+                SYSTEMS:GetObject("itemPreview"):PreviewReward(self.mouseOverData.displayRewardData:GetRewardId())
                 KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
             end,
             visible = function()
-                if self.mouseOverData then
-                    return CanPreviewReward(self.mouseOverData:GetRewardId()) and IsCharacterPreviewingAvailable()
+                if self.mouseOverData and self.previewableRewards[self.mouseOverData] then
+                    return IsCharacterPreviewingAvailable()
                 end
 
                 return false
@@ -142,7 +142,7 @@ function ZO_DailyLoginRewards_Keyboard:OnHidden()
 end
 
 function ZO_DailyLoginRewards_Keyboard:OnDailyLoginRewardEntryMouseEnter(control)
-    if not control.data.isEmptyCell then
+    if not (control.data.isEmptyCell or control.data.obscureReward) then
         self.mouseOverData = control.data
     end
 
@@ -157,6 +157,14 @@ function ZO_DailyLoginRewards_Keyboard:OnDailyLoginRewardEntryMouseExit(control)
     ZO_GridEntry_SetIconScaledUp(control, false)
 
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+end
+
+function ZO_DailyLoginRewards_Keyboard:RefreshMouseOver()
+    if self.mouseOverData then
+        local control = self.mouseOverData.dataEntry.control
+        ZO_DailyLoginRewards_GridEntry_Template_Keyboard_OnMouseExit(control)
+        ZO_DailyLoginRewards_GridEntry_Template_Keyboard_OnMouseEnter(control)
+    end
 end
 
 function ZO_DailyLoginRewards_Keyboard:ClaimCurrentDailyLoginReward(fromClick)
@@ -174,8 +182,7 @@ function ZO_DailyLoginRewards_Keyboard:ClaimCurrentDailyLoginReward(fromClick)
 
         local numSlotsNeeded = GetNumInventorySlotsNeededForDailyLoginRewardInCurrentMonth(claimableRewardIndex)
         if CheckInventorySpaceAndWarn(numSlotsNeeded) then
-            PlaySound(SOUNDS.DAILY_LOGIN_REWARDS_ACTION_CLAIM)
-            ClaimCurrentDailyLoginReward()
+            self:ClaimTargetedData()
         end
     end
 end
@@ -199,9 +206,15 @@ end
 
 function ZO_DailyLoginRewards_Keyboard:OnRewardClaimed(eventId, result)
     ZO_DailyLoginRewards_Base.OnRewardClaimed(self, eventId, result)
-    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+    self:RefreshMouseOver()
     MAIN_MENU_KEYBOARD:RefreshCategoryBar()
     MAIN_MENU_KEYBOARD:UpdateSceneGroupButtons("marketSceneGroup")
+end
+
+function ZO_DailyLoginRewards_Keyboard:OnCollectionUpdated()
+    ZO_DailyLoginRewards_Base.OnCollectionUpdated(self)
+
+    self:RefreshMouseOver()
 end
 
 function ZO_DailyLoginRewards_Keyboard:CleanDirty()
@@ -232,13 +245,14 @@ end
 -------------------
 
 function ZO_DailyLoginRewards_GridEntry_Template_Keyboard_OnMouseEnter(control)
-    local rewardData = control.data
-    if rewardData then
-        if not rewardData.isEmptyCell then
-            local rewardType = rewardData:GetRewardType()
+    local mouseOverData = control.data
+    if mouseOverData then
+        if not (mouseOverData.isEmptyCell or mouseOverData.obscureReward) then
+            local displayRewardData = mouseOverData.displayRewardData
+            local rewardType = displayRewardData:GetRewardType()
             if rewardType and rewardType ~= REWARD_ENTRY_TYPE_CHOICE then
                 InitializeTooltip(ItemTooltip, control, RIGHT, -15, 0, LEFT)
-                ItemTooltip:SetDailyLoginRewardEntry(rewardData.day)
+                ItemTooltip:SetDailyLoginRewardEntry(mouseOverData.day)
             end
         end
     end

@@ -33,6 +33,10 @@ function ZO_CharacterCreateSlider_Gamepad:EnableFocus(enabled)
     self.slider:GetNamedChild("Right"):SetColor(r,g,b)
     self.slider:GetNamedChild("Center"):SetColor(r,g,b)
     self.padlock:SetAlpha(alpha)
+
+    if self.valueLabel ~= nil then
+        self.valueLabel:SetColor(r,g,b)
+    end
 end
 
 function ZO_CharacterCreateSlider_Gamepad:Move(delta)
@@ -200,6 +204,12 @@ function ZO_CharacterCreateGenderSlider_Gamepad:New(control)
     return ZO_CharacterCreateSlider_Gamepad.New(self, control)
 end
 
+function ZO_CharacterCreateGenderSlider_Gamepad:Initialize(control)
+    ZO_CharacterCreateSlider_Gamepad.Initialize(self, control)
+    
+    self.valueLabel = control:GetNamedChild("Value")
+end
+
 function ZO_CharacterCreateGenderSlider_Gamepad:SetData()
     self:SetName(GetString(SI_CREATE_CHARACTER_GAMEPAD_GENDER_SLIDER_NAME))
 
@@ -254,6 +264,7 @@ function ZO_CharacterCreateGenderSlider_Gamepad:Update()
     local characterMode = ZO_CHARACTERCREATE_MANAGER:GetCharacterMode()
     local currentValue = CharacterCreateGetGender(characterMode)
     self.slider:SetValue(currentValue)
+    self.valueLabel:SetText(GetString("SI_GENDER", self:GetValue()))
     self.initializing = nil
 end
 

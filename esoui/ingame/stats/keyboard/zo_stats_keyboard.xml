@@ -22,10 +22,6 @@
             <Dimensions x="25" y="25"/>
             <Anchor point="BOTTOMLEFT"/>
         </Texture>
-        
-        <Label name="ZO_StatsHeader" font="ZoFontHeader2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" virtual="true">
-            <Dimensions x="607" />
-        </Label>
 
         <Label name="ZO_AdvancedStatsHeader" inherits="ZO_StatsHeader ZO_TooltipIfTruncatedLabel" wrapMode="ELLIPSIS" maxLineCount="1" virtual="true">
             <Dimensions x="295" />
@@ -46,26 +42,42 @@
             </Controls>
         </Control>
 
-		<Control name="ZO_StatsTitleComboBoxEntry" inherits="ZO_ComboBoxEntry" virtual="true">
-			<Controls>
-				<Control name="$(parent)NewContainer" resizeToFitConstrains="X">
-					<Anchor point="LEFT" />
-					<Dimensions y="32" />
-					<Controls>
-						<Texture name="$(parent)Icon" textureFile="EsoUI/Art/Inventory/newItem_icon.dds" hidden="true">
-							<Anchor point="LEFT" />
-							<Dimensions x="32" y="32" />
-						</Texture>
-					</Controls>
-				</Control>
+        <Control name="ZO_StatsMundusRow" virtual="true">
+            <Dimensions x="607" y="24" />
+            <OnInitialized>
+                self.name = self:GetNamedChild("Name")
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Name" inherits="ZO_StatsRowName"/>
+                <Control name="$(parent)MundusIcon1" inherits="ZO_StatsMundusIcon" hidden="true">
+                    <Anchor point="RIGHT" offsetY="-9"/>
+                </Control>
+                <Control name="$(parent)MundusIcon2" inherits="ZO_StatsMundusIcon" hidden="true">
+                    <Anchor point="RIGHT" relativeTo="$(parent)MundusIcon1" relativePoint="LEFT" offsetX="-10"/>
+                </Control>
+            </Controls>
+        </Control>
 
-				<Label name="$(parent)Label" override="true">
-					<Anchor point="LEFT" relativeTo="$(parent)NewContainer" relativePoint="RIGHT" offsetX="ZO_COMBO_BOX_ENTRY_TEMPLATE_LABEL_PADDING" />
-					<Anchor point="RIGHT" offsetX="-ZO_COMBO_BOX_ENTRY_TEMPLATE_LABEL_PADDING" />
-				</Label>
-			</Controls>
-		</Control>
-		
+        <Control name="ZO_StatsTitleComboBoxEntry" inherits="ZO_ComboBoxEntry" virtual="true">
+            <Controls>
+                <Control name="$(parent)NewContainer" resizeToFitConstrains="X">
+                    <Anchor point="LEFT" />
+                    <Dimensions y="32" />
+                    <Controls>
+                        <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Inventory/newItem_icon.dds" hidden="true">
+                            <Anchor point="LEFT" />
+                            <Dimensions x="32" y="32" />
+                        </Texture>
+                    </Controls>
+                </Control>
+
+                <Label name="$(parent)Label" override="true">
+                    <Anchor point="LEFT" relativeTo="$(parent)NewContainer" relativePoint="RIGHT" offsetX="ZO_COMBO_BOX_ENTRY_TEMPLATE_LABEL_PADDING" />
+                    <Anchor point="RIGHT" offsetX="-ZO_COMBO_BOX_ENTRY_TEMPLATE_LABEL_PADDING" />
+                </Label>
+            </Controls>
+        </Control>
+
         <Control name="ZO_StatsDropdownRow" virtual="true">
             <Dimensions x="607" y="30" />
             <OnInitialized>
@@ -74,18 +86,18 @@
             </OnInitialized>
             <Controls>
                 <Label name="$(parent)Name" inherits="ZO_StatsRowName"/>
-				<Control name="$(parent)Dropdown" inherits="ZO_ComboBox">
-					<Dimensions x="300"/>
-					<Anchor point="RIGHT"/>
-				</Control>
-				
-				<Texture name="$(parent)Icon" textureFile="EsoUI/Art/Inventory/newItem_icon.dds" hidden="true">
-					<Dimensions x="32" y="32" />
-					<Anchor point="CENTER" relativeTo="$(parent)Dropdown" relativePoint="TOPLEFT" />
-				</Texture>
-			</Controls>
+                <Control name="$(parent)Dropdown" inherits="ZO_ComboBox">
+                    <Dimensions x="300"/>
+                    <Anchor point="RIGHT"/>
+                </Control>
+
+                <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Inventory/newItem_icon.dds" hidden="true">
+                    <Dimensions x="32" y="32" />
+                    <Anchor point="CENTER" relativeTo="$(parent)Dropdown" relativePoint="TOPLEFT" />
+                </Texture>
+            </Controls>
         </Control>
-		
+
         <Control name="ZO_StatsRow" virtual="true">
             <Dimensions x="607" y="24"/>
             <Controls>
@@ -283,7 +295,7 @@
                     </OnInitialized>
                 </Control>
 
-                <Texture name="$(parent)Timer" textureFile="EsoUI/Art/Miscellaneous/timer_32.dds" mouseEnabled="true" hidden="true">
+                <Texture name="$(parent)Timer" textureFile="EsoUI/Art/Miscellaneous/timer_32.dds" mouseEnabled="true" layer="CONTROLS" hidden="true">
                     <Dimensions x="32" y="32" />
                     <Anchor point="RIGHT" offsetX="-20"/>
                     <OnMouseEnter>
@@ -301,7 +313,7 @@
                     </Controls>
                 </Texture>
                 
-                <Texture name="$(parent)ReadyForTrain" textureFile="EsoUI/Art/Mounts/ridingSkill_ready.dds" mouseEnabled="true" hidden="true">
+                <Texture name="$(parent)ReadyForTrain" textureFile="EsoUI/Art/Mounts/ridingSkill_ready.dds" mouseEnabled="true" layer="CONTROLS" hidden="true">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Timer" />
                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Timer" />
                     <OnMouseEnter>
@@ -321,6 +333,7 @@
                 self.name = self:GetNamedChild("Name")
                 self.icon = self:GetNamedChild("Icon")
                 self.time = self:GetNamedChild("Time")
+                self.stackCount = self:GetNamedChild("Icon"):GetNamedChild("StackCount")
             </OnInitialized>
 
             <OnMouseEnter>
@@ -336,7 +349,13 @@
                 <Texture name="$(parent)Icon">
                     <Dimensions x="40" y="40" />
                     <Anchor point="LEFT" />
+                    <Controls>
+                        <Label name="$(parent)StackCount" font="ZoFontGameOutline">
+                            <Anchor point="BOTTOMRIGHT" offsetX="-3" offsetY="1" />
+                        </Label>
+                    </Controls>
                 </Texture>
+                
                 <Label name="$(parent)Name" inherits="ZO_StatsRowName">
                     <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="5" />
                 </Label>

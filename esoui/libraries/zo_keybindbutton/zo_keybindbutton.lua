@@ -13,13 +13,19 @@ function ZO_KeybindButtonMixin:GetGamepadKeybind()
 end
 
 function ZO_KeybindButtonMixin:UpdateEnabledState()
-    self.nameLabel:SetEnabled(self.enabled)
-    local keybindEnabled = self.keybindEnabled and self.enabled
-    local keybindColor = keybindEnabled and ZO_SELECTED_TEXT or ZO_DISABLED_TEXT
-    self.keyLabel:SetColor(keybindColor:UnpackRGBA())
-    self.keyLabel:SetAlpha((self:GetKeybind() or self.customKeyText) and 1 or 0)
+    if self:IsHidden() then
+        self.enableStateDirty = true
+        return false
+    else
+        self.nameLabel:SetEnabled(self.enabled)
+        local keybindEnabled = self.keybindEnabled and self.enabled
+        local keybindColor = keybindEnabled and ZO_SELECTED_TEXT or ZO_DISABLED_TEXT
+        self.keyLabel:SetColor(keybindColor:UnpackRGBA())
+        self.keyLabel:SetAlpha((self:GetKeybind() or self.customKeyText) and 1 or 0)
 
-    ZO_KeyMarkupLabel_SetEdgeFileColor(self.keyLabel, keybindColor)
+        ZO_KeyMarkupLabel_SetEdgeFileColor(self.keyLabel, keybindColor)
+        return true
+    end
 end
 
 function ZO_KeybindButtonMixin:SetEnabled(enabled)
@@ -296,6 +302,13 @@ function ZO_KeybindButtonTemplate_OnInitialized(self)
 
     zo_mixin(self, ZO_KeybindButtonMixin)
 
+    self:SetHandler("OnEffectivelyShown", function()
+        if self.enableStateDirty then
+            self.enableStateDirty = nil
+            self:UpdateEnabledState()
+        end
+    end)
+
     ZO_KeyMarkupLabel_SetCustomOffsets(self.keyLabel, -5, 5, -2, 3)
 
     ZO_SelectableLabel_OnInitialized(self.nameLabel)
@@ -368,8 +381,9 @@ function ZO_ChromaKeybindButtonMixin:SetKeybind(keybind, showUnbound, gamepadPre
 end
 
 function ZO_ChromaKeybindButtonMixin:UpdateEnabledState()
-    ZO_KeybindButtonMixin.UpdateEnabledState(self)
-    self:UpdateChromaEffect()
+    if ZO_KeybindButtonMixin.UpdateEnabledState(self) then
+        self:UpdateChromaEffect()
+    end
 end
 
 function ZO_ChromaKeybindButtonMixin:AreChromaEffectsEnabled()

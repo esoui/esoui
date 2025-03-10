@@ -34,6 +34,7 @@ ZO_GAMEPAD_NOTIFICATION_ICONS =
     [NOTIFICATION_TYPE_DISABLED_ADDON] = "EsoUI/Art/Miscellaneous/Gamepad/gp_icon_new_64.dds",
     [NOTIFICATION_TYPE_TRIBUTE_INVITE] = "EsoUI/Art/Notifications/Gamepad/gp_notificationIcon_tribute.dds",
     [NOTIFICATION_TYPE_HOUSE_TOURS_HOUSE_RECOMMENDED] = "EsoUI/Art/Notifications/Gamepad/gp_notificationIcon_houseToursHouseRecommended.dds",
+    [NOTIFICATION_TYPE_SLOTS_RESET] = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_character.dds",
 }
 
 ZO_NOTIFICATION_TYPE_TO_GAMEPAD_TEMPLATE = 
@@ -463,7 +464,7 @@ function ZO_GamepadPointsResetProvider:Accept(data)
         MAIN_MENU_GAMEPAD:ShowScene("gamepad_stats_root")
     elseif data.respecType == RESPEC_TYPE_SKILLS then
         MAIN_MENU_GAMEPAD:ShowScene("gamepad_skills_root")
-    elseif data.respecType == RESPEC_TYPE_CHAMPION then
+    elseif data.respecType == RESPEC_TYPE_CHAMPION or data.respecType == RESPEC_TYPE_CHAMPION_SLOTS then
         MAIN_MENU_GAMEPAD:ShowScene("gamepad_championPerks_root")
     end
 end

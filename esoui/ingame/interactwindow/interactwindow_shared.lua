@@ -21,6 +21,17 @@ local CHATTER_OPTION_SHOWS_GOLD_COST =
     [CHATTER_TALK_CHOICE_ATTRIBUTE_RESPEC]   = true,
 }
 
+local DIALOGUE_TONE_ICONS =
+{
+    [DIALOGUE_TONE_TYPE_KIND] = "EsoUI/Art/Miscellaneous/dialogueTone_Kind.dds",
+    [DIALOGUE_TONE_TYPE_GRIM] = "EsoUI/Art/Miscellaneous/dialogueTone_Grim.dds",
+    [DIALOGUE_TONE_TYPE_JOKER] = "EsoUI/Art/Miscellaneous/dialogueTone_Joker.dds",
+    [DIALOGUE_TONE_TYPE_FLIRTY] = "EsoUI/Art/Miscellaneous/dialogueTone_Flirty.dds",
+    [DIALOGUE_TONE_TYPE_MERCIFUL] = "EsoUI/Art/Miscellaneous/dialogueTone_Merciful.dds",
+    [DIALOGUE_TONE_TYPE_RUTHLESS] = "EsoUI/Art/Miscellaneous/dialogueTone_Ruthless.dds",
+    [DIALOGUE_TONE_TYPE_NEUTRAL] = "EsoUI/Art/Miscellaneous/dialogueTone_Neutral.dds",
+}
+
 CHATTER_OPTION_ERROR =
 {
     [CHATTER_TALK_CHOICE_MONEY] = SI_ERROR_CANT_AFFORD_OPTION,
@@ -293,7 +304,7 @@ function ZO_SharedInteraction:UpdateShadowyConnectionsChatterOption(control, dat
     end
 end
 
-function ZO_SharedInteraction:GetChatterOptionData(optionIndex, optionText, optionType, optionalArg, isImportant, chosenBefore, teleportNPCId, waypointIdTable)
+function ZO_SharedInteraction:GetChatterOptionData(optionIndex, optionText, optionType, optionalArg, isImportant, chosenBefore, teleportNPCId, waypointIdTable, dialogueTone)
     optionType = optionType or CHATTER_START_TALK
     local chatterData =
     {
@@ -320,6 +331,15 @@ function ZO_SharedInteraction:GetChatterOptionData(optionIndex, optionText, opti
 
         if optionType == CHATTER_GOODBYE and IsUnderArrest() then
             chatterData.labelUpdateFunction = UpdateFleeChatterOption
+        end
+
+        if dialogueTone and dialogueTone ~= DIALOGUE_TONE_TYPE_NONE then
+            local toneIcon = DIALOGUE_TONE_ICONS[dialogueTone]
+            toneIcon = zo_iconFormatInheritColor(toneIcon, "125%", "125%")
+            toneIcon = GetDialogueToneColor(dialogueTone):Colorize(toneIcon)
+            local optionTextWithTone = string.format("%s %s", toneIcon, zo_strformat("<<1>>", chatterData.optionText))
+            chatterData.optionText = optionTextWithTone
+            TriggerTutorial(TUTORIAL_TRIGGER_DIALOGUE_TONE_SEEN)
         end
 
         if CHATTER_OPTION_SHOWS_GOLD_COST[optionType] then
@@ -445,10 +465,10 @@ function ZO_SharedInteraction:PopulateChatterOptions(optionCount, backToTOCOptio
     local importantOptions = {}
 
     for i = 1, optionCount do
-        local optionString, optionType, optionalArg, isImportant, chosenBefore, teleportNPCId = GetChatterOption(i)
+        local optionString, optionType, optionalArg, isImportant, chosenBefore, teleportNPCId, dialogueTone = GetChatterOption(i)
         local waypointIdTable = { GetChatterOptionWaypoints(i) }
         local controlID = i
-        self:PopulateChatterOption(controlID, i, optionString, optionType, optionalArg, isImportant, chosenBefore, importantOptions, teleportNPCId, waypointIdTable)
+        self:PopulateChatterOption(controlID, i, optionString, optionType, optionalArg, isImportant, chosenBefore, importantOptions, teleportNPCId, waypointIdTable, dialogueTone)
     end
 
     local backToTOC, farewell, isImportant = GetChatterFarewell()
@@ -459,7 +479,7 @@ function ZO_SharedInteraction:PopulateChatterOptions(optionCount, backToTOCOptio
 
     if(farewell == "") then farewell = GetString(SI_GOODBYE) end
     optionCount = optionCount + 1
-    self:PopulateChatterOption(optionCount, function() self:CloseChatter() end, farewell, CHATTER_GOODBYE, nil, isImportant, nil, importantOptions)
+    self:PopulateChatterOption(optionCount, function() self:CloseChatter() end, farewell, CHATTER_GOODBYE, nil, isImportant, nil, importantOptions, nil, nil, DIALOGUE_TONE_TYPE_NONE)
 
     if IsInteractingWithMyAssistant() then
         local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(GetActiveCollectibleByType(COLLECTIBLE_CATEGORY_TYPE_ASSISTANT, GAMEPLAY_ACTOR_CATEGORY_PLAYER))

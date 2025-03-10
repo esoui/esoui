@@ -1,0 +1,5 @@
+<GuiXml>
+    <Controls>
+        <!-- Put any XML aliases that we want to exist on both PC and Console here -->
+    </Controls>
+</GuiXml>

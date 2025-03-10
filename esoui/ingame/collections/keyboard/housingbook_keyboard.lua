@@ -22,6 +22,7 @@ function HousingBook_Keyboard:InitializeControls()
     self.locationLabel = scrollSection:GetNamedChild("LocationLabel")
     self.houseTypeLabel = scrollSection:GetNamedChild("HouseTypeLabel")
     self.primaryResidenceLabel = scrollSection:GetNamedChild("PrimaryResidenceLabel")
+    self.supportsWeatherControlLabel = scrollSection:GetNamedChild("SupportsWeatherControlLabel")
     self.recommendCountLabel = scrollSection:GetNamedChild("RecommendCountLabel")
     self.hintLabel = scrollSection:GetNamedChild("HintLabel")
 
@@ -120,6 +121,11 @@ function HousingBook_Keyboard:RefreshDetails()
         end
         self.nicknameLabel:SetHidden(not hasNickname)
 
+        local houseFlags = collectibleData:GetHouseFlags()
+        local hasWeatherControlSupport = ZO_FlagHelpers.MaskHasFlag(houseFlags, HOUSE_FLAGS_SUPPORTS_WEATHER_CONTROL)
+        local hasWeatherControlSupportString = hasWeatherControlSupport and GetString(SI_YES) or GetString(SI_NO)
+        self.supportsWeatherControlLabel:SetText(zo_strformat(SI_HOUSING_BOOK_SUPPORTS_WEATHER_CONTROL_FORMATTER, hasWeatherControlSupportString))
+
         local houseId = collectibleData:GetReferenceId()
         local recommendCount = GetNumHouseToursPlayerListingRecommendations(houseId)
 
@@ -139,23 +145,46 @@ function HousingBook_Keyboard:RefreshDetails()
         local canJumpToHouse = CanJumpToHouseFromCurrentLocation()
         self.locationLabel:SetText(zo_strformat(SI_HOUSING_BOOK_LOCATION_FORMATTER, collectibleData:GetHouseLocation()))
         self.houseTypeLabel:SetText(zo_strformat(SI_HOUSING_BOOK_HOUSE_TYPE_FORMATTER, GetString("SI_HOUSECATEGORYTYPE", collectibleData:GetHouseCategoryType())))
+
+        local hintText = nil
+        local primaryResidenceText = nil
         if not canJumpToHouse then
+            -- Show Inaccessible Hint.
             local disableReason = isUnlocked and GetString(SI_COLLECTIONS_CANNOT_JUMP_TO_HOUSE_FROM_LOCATION) or GetString(SI_COLLECTIONS_CANNOT_PREVIEW_HOUSE_FROM_LOCATION)
-            self.hintLabel:SetText(ZO_ERROR_COLOR:Colorize(disableReason))
-
-            self.hintLabel:SetHidden(false)
-            self.primaryResidenceLabel:SetHidden(true)
+            hintText = ZO_ERROR_COLOR:Colorize(disableReason)
         elseif isUnlocked then
+            -- Show Primary Residence.
             local isPrimaryResidence = collectibleData:IsPrimaryResidence() and GetString(SI_YES) or GetString(SI_NO)
-            self.primaryResidenceLabel:SetText(zo_strformat(SI_HOUSING_BOOK_PRIMARY_RESIDENCE_FORMATTER, isPrimaryResidence))
-
-            self.primaryResidenceLabel:SetHidden(false)
-            self.hintLabel:SetHidden(true)
+            primaryResidenceText = zo_strformat(SI_HOUSING_BOOK_PRIMARY_RESIDENCE_FORMATTER, isPrimaryResidence)
         else
-            self.hintLabel:SetText(zo_strformat(SI_COLLECTIBLE_ACQUIRE_HINT_FORMATTER, collectibleData:GetHint()))
+            -- Show Acquisition Hint.
+            hintText = zo_strformat(SI_COLLECTIBLE_ACQUIRE_HINT_FORMATTER, collectibleData:GetHint())
+        end
 
+        -- Update the Hint label.
+        if hintText then
+            self.hintLabel:SetText(hintText)
             self.hintLabel:SetHidden(false)
+        else
+            self.hintLabel:SetHidden(true)
+        end
+
+        -- Update the Primary Residence label.
+        if primaryResidenceText then
+            self.primaryResidenceLabel:SetText(primaryResidenceText)
+            self.primaryResidenceLabel:SetHidden(false)
+        else
             self.primaryResidenceLabel:SetHidden(true)
+        end
+
+        -- Reanchor the Supports Weather Control label to the bottommost label.
+        self.supportsWeatherControlLabel:ClearAnchors()
+        if primaryResidenceText then
+            self.supportsWeatherControlLabel:SetAnchor(TOPLEFT, self.primaryResidenceLabel, BOTTOMLEFT, 0, 5)
+        elseif recommendCount > 0 then
+            self.supportsWeatherControlLabel:SetAnchor(TOPLEFT, self.recommendCountLabel, BOTTOMLEFT, 0, 5)
+        else
+            self.supportsWeatherControlLabel:SetAnchor(TOPLEFT, self.houseTypeLabel, BOTTOMLEFT, 0, 5)
         end
 
         self.travelToHouseButton:SetHidden(not isUnlocked)

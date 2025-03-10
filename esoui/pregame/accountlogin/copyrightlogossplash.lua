@@ -18,7 +18,7 @@ do
 
     function ZO_CopyrightLogosSplashFragment:Show()
         self.copyrightInfoLabel = self.control:GetNamedChild("CopyrightInfo")
-        local COPYRIGHT_END_YEAR = 2024
+        local COPYRIGHT_END_YEAR = 2025
         self.copyrightInfoLabel:SetText(zo_strformat(SI_SPLASH_SCREEN_COPYRIGHT, COPYRIGHT_END_YEAR))
         ZO_PlatformStyle:New(function(style) self:ApplyPlatformStyle(style) end, KEYBOARD_STYLE, GAMEPAD_STYLE)
 

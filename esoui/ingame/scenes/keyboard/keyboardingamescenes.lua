@@ -864,7 +864,7 @@ local giftInventoryViewScene = SCENE_MANAGER:GetScene("giftInventoryViewKeyboard
 giftInventoryViewScene:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW)
 giftInventoryViewScene:AddFragmentGroup(FRAGMENT_GROUP.FRAME_TARGET_STANDARD_RIGHT_PANEL)
 
--- The preview options fragment needs to be added before the ITEM_PREVIEW_KEYBOARD fragment
+-- The preview options fragment needs to be added before the ITEM_PREVIEW_KEYBOARD fragment,
 -- which is part of ZO_ITEM_PREVIEW_LIST_HELPER_KEYBOARD_FRAGMENT_GROUP
 giftInventoryViewScene:AddFragment(RIGHT_BG_FORCE_PREPARE_ITEM_PREVIEW_OPTIONS_FRAGMENT)
 giftInventoryViewScene:AddFragmentGroup(ZO_ITEM_PREVIEW_LIST_HELPER_KEYBOARD_FRAGMENT_GROUP)

@@ -123,7 +123,7 @@ function ZO_MarketAnnouncement_Shared:OnShowing()
     RequestEventAnnouncements()
     self:LayoutActionTiles()
 
-    if not IsPromotionalEventSystemLocked() and PROMOTIONAL_EVENT_MANAGER:IsCampaignActive() then
+    if not IsPromotionalEventSystemLocked() and PROMOTIONAL_EVENT_MANAGER:HasActiveCampaign() then
         PlaySound(SOUNDS.PROMOTIONAL_EVENTS_ANNOUNCE)
     end
 
@@ -292,7 +292,7 @@ function ZO_MarketAnnouncement_Shared.GetPromotionalEventTilesData(tileInfoList)
             {
             },
             visible = function()
-                return PROMOTIONAL_EVENT_MANAGER:IsCampaignActive()
+                return PROMOTIONAL_EVENT_MANAGER:HasActiveCampaign()
             end,
         }
         table.insert(tileInfoList, promotionalEventTileInfo)

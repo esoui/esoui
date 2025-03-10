@@ -212,8 +212,8 @@ function ZO_GamepadInteraction:SelectLastChatterOption()
     self:SelectChatterOptionByIndex(#self.itemList.dataList)
 end
 
-function ZO_GamepadInteraction:PopulateChatterOption(controlID, optionIndex, optionText, optionType, optionalArg, isImportant, chosenBefore, importantOptions, teleportNPCId, waypointIdTable)
-    local chatterData = self:GetChatterOptionData(optionIndex, optionText, optionType, optionalArg, isImportant, chosenBefore, teleportNPCId, waypointIdTable)
+function ZO_GamepadInteraction:PopulateChatterOption(controlID, optionIndex, optionText, optionType, optionalArg, isImportant, chosenBefore, importantOptions, teleportNPCId, waypointIdTable, dialogueTone)
+    local chatterData = self:GetChatterOptionData(optionIndex, optionText, optionType, optionalArg, isImportant, chosenBefore, teleportNPCId, waypointIdTable, dialogueTone)
 
     if chatterData.isImportant then
         TriggerTutorial(TUTORIAL_TRIGGER_IMPORTANT_DIALOGUE)

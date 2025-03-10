@@ -1,5 +1,9 @@
 <GuiXml>
     <Controls>
+        <Label name="ZO_StatsHeader" font="ZoFontHeader2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" virtual="true">
+            <Dimensions x="607" />
+        </Label>
+
         <Label name="ZO_StatsRowName" font="ZoFontHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true">
             <Anchor point="LEFT"/>
         </Label>
@@ -41,6 +45,7 @@
             <OnInitialized>
                 self.nameLabel = self:GetNamedChild("Name")
                 self.valueLabel = self:GetNamedChild("Value")
+                self.iconTexture = self:GetNamedChild("Icon")
             </OnInitialized>
              <OnMouseEnter>
                 ZO_AdvancedStatsEntry_OnMouseEnter(self)
@@ -56,9 +61,13 @@
                     <Anchor point="LEFT" />
                     <Anchor point="RIGHT" relativeTo="$(parent)Value" relativePoint="LEFT" offsetX="-30" />
                 </Label>
+                <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Icons/mapKey/mapKey_mundus.dds" hidden="true">
+                    <Dimensions x="24" y="24" />
+                    <Anchor point="LEFT" relativeTo="$(parent)Value" relativePoint="RIGHT" />
+                </Texture>
             </Controls>
         </Control>
-    
+
         <Control name="ZO_AdvancedStatsMultiEntry" mouseEnabled="true" virtual="true">
             <Dimensions y="72" />
             <OnInitialized>
@@ -91,6 +100,28 @@
                         <Label name="$(parent)Name" override="true" text="SI_STATS_ADVANCED_VALUE_TYPE_PERCENT" />
                     </Controls>
                 </Control>
+            </Controls>
+        </Control>
+
+        <Texture name="ZO_StatMundusIcon" textureFile="EsoUI/Art/Icons/mapKey/mapKey_mundus.dds" virtual="true">
+            <Dimensions x="24" y="24"/>
+        </Texture>
+
+        <Control name="ZO_StatsMundusIcon" resizeToFitDescendents="true" mouseEnabled="true" virtual="true">
+            <OnInitialized>
+                self.icon = self:GetNamedChild("Icon")
+            </OnInitialized>
+            <OnMouseEnter>
+                ZO_StatsMundusEntry_OnMouseEnter(self)
+            </OnMouseEnter>
+            <OnMouseExit>
+                ZO_StatsMundusEntry_OnMouseExit(self)
+            </OnMouseExit>
+            <Controls>
+                <Texture name="$(parent)Icon">
+                    <Anchor point="TOPLEFT" />
+                    <Dimensions x="45" y="45" />
+                </Texture>
             </Controls>
         </Control>
     </Controls>

@@ -6,6 +6,11 @@
                 <AlphaAnimation duration="500" startAlpha="0" endAlpha="1" />
             </Animations>
         </AnimationTimeline>
+        <AnimationTimeline name="ZO_WorldMapBlobNameFadeIn">
+            <Animations>
+                <CustomAnimation duration="250" />
+            </Animations>
+        </AnimationTimeline>
     </Animations>
     
     <Controls>
@@ -16,7 +21,13 @@
 
         <Texture name="ZO_MapOverlay" virtual="true" level="1" />
         <Label name="ZO_MapLocation" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER" layer="BACKGROUND" level="3" virtual="true" />
-        <Texture name="ZO_MapBlob" virtual="true" level="2" blendMode="ADD" pixelRoundingEnabled="false"/>
+        <Label name="ZO_MapBlobName" font="$(HANDWRITTEN_FONT)|34" color="544426" pixelRoundingEnabled="false" horizontalAlignment="CENTER" verticalAlignment="CENTER" layer="BACKGROUND" level="4" virtual="true">
+            <Controls>
+                <Label name="$(parent)Shadow" font="$(HANDWRITTEN_FONT)|34" color="C9A04D" horizontalAlignment="CENTER" verticalAlignment="CENTER" layer="BACKGROUND" level="3">
+                    <Anchor point="CENTER" offsetX="1" offsetY="1" />
+                </Label>
+            </Controls>
+        </Label>
         <!-- High tier to show over top of the gamepad ragged edge border-->
         <Texture name="ZO_PinBlob" tier="HIGH" virtual="true" level="6" pixelRoundingEnabled="false" shaderEffectType="HALO"/>
 
@@ -251,6 +262,10 @@
                                 <Control name="$(parent)KeepLinks">
                                     <AnchorFill/>
                                 </Control>
+                                
+                                <Texture name="$(parent)MouseoverBlob" level="2" blendMode="ADD" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES" pixelRoundingEnabled="false" hidden="true">
+                                    <Anchor point="TOPLEFT" />
+                                </Texture>
                             </Controls>
                         </Control>
 

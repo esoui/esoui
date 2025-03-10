@@ -118,9 +118,10 @@ function PerformanceMeters:UpdateMovable()
 end
 
 function PerformanceMeters:UpdateVisibility()
+    local isPC = ZO_IsPCUI()
     local framerateOn = GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_SHOW_FRAMERATE)
     local latencyOn = GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_SHOW_LATENCY)
-    local anyOn = framerateOn or latencyOn
+    local anyOn = (framerateOn or latencyOn) and isPC
     if anyOn then
         self.framerateControl:ClearAnchors()
         self.latencyControl:ClearAnchors()

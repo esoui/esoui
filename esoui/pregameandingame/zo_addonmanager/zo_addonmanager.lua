@@ -1,4 +1,4 @@
-local LIST_HEIGHT = 660
+ZO_ADDON_LIST_HEIGHT = 630
 ZO_ADDON_ROW_HEIGHT = 30
 ZO_ADDON_SECTION_HEADER_ROW_HEIGHT = 50
 
@@ -36,7 +36,7 @@ function ZO_AddOnManager:Initialize(control, primaryKeybindDescriptor, secondary
         return ZO_TableOrderingFunction(entry1, entry2, self.currentSortKey, self.sortKeys, self.currentSortDirection)
     end
 
-    ZO_ScrollList_SetHeight(self.list, LIST_HEIGHT)
+    ZO_ScrollList_SetHeight(self.list, ZO_ADDON_LIST_HEIGHT)
     ZO_ScrollList_AddDataType(self.list, ADDON_DATA, "ZO_AddOnRow", ZO_ADDON_ROW_HEIGHT, self:GetRowSetupFunction())
     ZO_ScrollList_AddDataType(self.list, SECTION_HEADER_DATA, "ZO_AddOnSectionHeaderRow", ZO_ADDON_SECTION_HEADER_ROW_HEIGHT, function(...) self:SetupSectionHeaderRow(...) end)
 
@@ -224,7 +224,7 @@ function ZO_AddOnManager:GetRowSetupFunction()
 
         UpdateNameAndAuthor(control, isEnabled, data)
 
-        ZO_TriStateCheckButton_SetStateChangeFunction(enabledControl, function(control, checkState) self:OnEnabledButtonClicked(control, checkState) end)
+        ZO_TriStateCheckButton_SetStateChangeFunction(enabledControl, function(buttonControl, checkState) self:OnEnabledButtonClicked(buttonControl, checkState) end)
 
         SetupNotes(state, data)
     end
@@ -369,6 +369,9 @@ function ZO_AddOnManager:BuildCharacterDropdown()
 end
 
 function ZO_AddOnManager:LayoutAdvancedErrorCheck()
+    --Set this again in case the value changed while the screen was closed
+    ZO_CheckButton_SetCheckState(self.advancedErrorCheck, GetCVar("UIErrorAdvancedView") == "1")
+
     self.advancedErrorCheck:ClearAnchors()
     --Adjust the anchoring of the checkbox depending on if the character dropdown is showing
     if self.characterData then

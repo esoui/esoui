@@ -1,7 +1,7 @@
 --[[
 This file and its accompanying XML file exist for when we decide to rename/refactor 
 a system and want ensure backward compatibility for addons.  Just alias the old functions
-and inherit any controls you change in a newly commented section.
+and inherit any controls you change in a newly commented section. This file is for aliases that will only exist on PC.
 --]]
 
 -- Adds aliases to source object for the specified methods of target object.
@@ -264,6 +264,9 @@ DeclineLFGFindReplacementNotification = DeclineActivityFindReplacementNotificati
 function IsEligibleForDailyActivityReward()
     return IsActivityEligibleForDailyReward(LFG_ACTIVITY_DUNGEON)
 end
+
+-- No longer assume an alliance for activities because battleground activities use battleground teams
+GetLatestActivityAlliance = GetLatestActivityTeamId
 
 --Renamed the objective functions to indicate that they aren't specific to AvA anymore
 GetNumAvAObjectives = GetNumObjectives
@@ -1193,7 +1196,11 @@ function ZO_WorldMap_RefreshCustomPinsOfType(pinType)
 end
 
 function ZO_WorldMap_DoesMapHideQuestPins()
-    return ZO_WorldMapPins_Manager.DoesCurrentMapHideQuestPins()
+    return false
+end
+
+function ZO_WorldMap_IsCurrentMapGlobal()
+    return ZO_WorldMapPins_Manager.IsCurrentMapGlobal()
 end
 
 function ZO_WorldMap_SetMapByIndex(mapIndex)
@@ -1579,3 +1586,18 @@ ZO_Pending_Outfit_LoopAnimation_Pool = ZO_Pending_LoopAnimation_Pool
 ZO_Restyle_ApplyPendingLoopAnimationToControl = ZO_PendingLoop.ApplyToControl
 
 GetScoreboardPlayerEntryIndex = GetScoreboardLocalPlayerEntryIndex
+
+ZO_PromotionalEvent_Manager.IsCampaignActive = ZO_PromotionalEvent_Manager.HasActiveCampaign
+
+function ZO_PromotionalEvent_Manager:GetCurrentCampaignData()
+    if #self.activeCampaignDataList > 0 then
+        return self.activeCampaignDataList[1]
+    end
+    return nil
+end
+
+function ZO_SetGroupFinderIsNewApplication(isNew)
+    GROUP_FINDER_APPLICATIONS_LIST_MANAGER:SetHasNewApplication(isNew)
+end
+
+ZO_HasGroupFinderNewApplication = GROUP_FINDER_APPLICATIONS_LIST_MANAGER.HasNewApplication

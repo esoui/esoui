@@ -373,7 +373,9 @@
             <Action name="TOGGLE_FULLSCREEN">
                 <Down>
                     ToggleFullScreen()
-                    KEYBOARD_OPTIONS:UpdateAllPanelOptions(SAVE_CURRENT_VALUES)
+                    if KEYBOARD_OPTIONS then
+                        KEYBOARD_OPTIONS:UpdateAllPanelOptions(SAVE_CURRENT_VALUES)
+                    end
                 </Down>
             </Action>
 
@@ -1828,19 +1830,19 @@
     <Layer name="PreviewStateNavigation">
         <Category>
             <Action name="PREVIEW_NEXT_VARIATION" inheritsBindFrom="UI_SHORTCUT_INPUT_RIGHT">
-                <Down>return ITEM_PREVIEW_GAMEPAD:TryPreviewNextVariation()</Down>
+                <Down>return ITEM_PREVIEW_GAMEPAD:TryPreviewNextVariation(ZO_ITEM_PREVIEW_PLAY_CLICK_SOUND)</Down>
             </Action>
 
             <Action name="PREVIEW_PREVIOUS_VARIATION" inheritsBindFrom="UI_SHORTCUT_INPUT_LEFT">
-                <Down>return ITEM_PREVIEW_GAMEPAD:TryPreviewPreviousVariation()</Down>
+                <Down>return ITEM_PREVIEW_GAMEPAD:TryPreviewPreviousVariation(ZO_ITEM_PREVIEW_PLAY_CLICK_SOUND)</Down>
             </Action>
 
             <Action name="PREVIEW_NEXT_ACTION">
-                <Down>return ITEM_PREVIEW_GAMEPAD:TryPreviewNextAction()</Down>
+                <Down>return ITEM_PREVIEW_GAMEPAD:TryPreviewNextAction(ZO_ITEM_PREVIEW_PLAY_CLICK_SOUND)</Down>
             </Action>
 
             <Action name="PREVIEW_PREVIOUS_ACTION">
-                <Down>return ITEM_PREVIEW_GAMEPAD:TryPreviewPreviousAction()</Down>
+                <Down>return ITEM_PREVIEW_GAMEPAD:TryPreviewPreviousAction(ZO_ITEM_PREVIEW_PLAY_CLICK_SOUND)</Down>
             </Action>
         </Category>
     </Layer>

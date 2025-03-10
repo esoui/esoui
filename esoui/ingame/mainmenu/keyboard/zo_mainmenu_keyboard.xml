@@ -27,7 +27,7 @@
                 ZO_MainMenuCategoryBarButton_OnMouseExit(self)
             </OnMouseExit>
             <Controls>
-                <Label name="$(parent)RemainingCrowns" font="ZoFontHeader2" mouseEnabled="false" hidden="true" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_HIGHLIGHTED" horizontalAlignment="RIGHT" excludeFromResizeToFitExtents="true">
+                <Label name="$(parent)RemainingCrowns" font="ZoFontHeader2" mouseEnabled="false" hidden="true" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_HIGHLIGHT" horizontalAlignment="RIGHT" excludeFromResizeToFitExtents="true">
                     <Anchor point="RIGHT" relativePoint="LEFT" offsetX="-20" offsetY="0" />
                 </Label>
                 <Label name="$(parent)Membership" font="ZoFontGameSmall" mouseEnabled="false" hidden="true" color="INTERFACE_COLOR_TYPE_MARKET_COLORS:MARKET_COLORS_ESO_PLUS" horizontalAlignment="RIGHT" excludeFromResizeToFitExtents="true">

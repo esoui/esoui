@@ -300,6 +300,13 @@ do
     FRAME_INTERACTION_QUADRANT_3_4_GAMEPAD_FRAGMENT = ZO_InteractionFramingFragment:New(CalculateGamepadQuadrant34FramingTarget)
     FRAME_TARGET_QUADRANT_3_4_GAMEPAD_FRAGMENT = ZO_NormalizedPointFragment:New(CalculateGamepadQuadrant34FramingTarget, SetFrameLocalPlayerTarget)
     FRAME_TARGET_BLUR_QUADRANT_3_4_GAMEPAD_FRAGMENT = ZO_CharacterFramingBlur:New(CalculateGamepadQuadrant34FramingTarget)
+
+    local function CalculateCollectionsFramingTarget()
+        local screenWidth, screenHeight = GuiRoot:GetDimensions()
+        return screenWidth * 0.75, screenHeight * 0.55
+    end
+    FRAME_TARGET_GAMEPAD_COLLECTIONS_FRAGMENT = ZO_NormalizedPointFragment:New(CalculateCollectionsFramingTarget, SetFrameLocalPlayerTarget)
+    FRAME_TARGET_BLUR_GAMEPAD_COLLECTIONS_FRAGMENT = ZO_CharacterFramingBlur:New(CalculateCollectionsFramingTarget)
 end
 
 ------------------------

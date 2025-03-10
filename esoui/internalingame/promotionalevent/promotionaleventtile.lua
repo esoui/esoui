@@ -24,7 +24,7 @@ end
 function ZO_PromotionalEventTile:Layout(data)
     ZO_Tile.Layout(self, data)
 
-    local campaignData = PROMOTIONAL_EVENT_MANAGER:GetCurrentCampaignData()
+    local campaignData = PROMOTIONAL_EVENT_MANAGER:GetCampaignDataByIndex(1) -- TODO Promotional Events: Which should we show?
 
     local secondsRemaining = campaignData:GetSecondsRemaining()
     if secondsRemaining > 0 then

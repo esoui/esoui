@@ -182,6 +182,8 @@ local GAMEPAD_BATTLEGROUND_TEAM_TEXTURES =
     [BATTLEGROUND_TEAM_PIT_DAEMONS] = "EsoUI/Art/Battlegrounds/Gamepad/gp_battlegrounds_teamIcon_green.dds",
 }
 
+internalassert(BATTLEGROUND_TEAM_MAX_VALUE == 3, "Update load screen battleground team textures")
+
 function LoadingScreen_Base:Show(zoneName, zoneDescription, loadingTexture, zoneDisplayType)
     if self:IsHidden() and self:IsPreferredScreen() then
         self:Log("Load Screen - Show")
@@ -232,16 +234,16 @@ function LoadingScreen_Base:Show(zoneName, zoneDescription, loadingTexture, zone
                 self.zoneName:SetText(self.zoneNameText)
                 self:SetZoneDescription(LocalizeString("<<1>>", battlegroundDescription))
 
-                local activityAlliance = GetLatestActivityAlliance()
-                if activityAlliance ~= BATTLEGROUND_TEAM_INVALID then
-                    local r, g, b, a = GetInterfaceColor(INTERFACE_COLOR_TYPE_BATTLEGROUND_TEAM, activityAlliance)
-                    local battlegroundTeamName = ZO_ColorizeString(r, g, b, GetString("SI_BATTLEGROUNDTEAM", activityAlliance))
+                local activityTeam = GetLatestActivityTeamId()
+                if activityTeam ~= BATTLEGROUND_TEAM_INVALID then
+                    local r, g, b, a = GetInterfaceColor(INTERFACE_COLOR_TYPE_BATTLEGROUND_TEAM, activityTeam)
+                    local battlegroundTeamName = ZO_ColorizeString(r, g, b, GetString("SI_BATTLEGROUNDTEAM", activityTeam))
 
                     local teamIcon
                     if IsInGamepadPreferredMode() then
-                        teamIcon = GAMEPAD_BATTLEGROUND_TEAM_TEXTURES[activityAlliance]
+                        teamIcon = GAMEPAD_BATTLEGROUND_TEAM_TEXTURES[activityTeam]
                     else
-                        teamIcon = BATTLEGROUND_TEAM_TEXTURES[activityAlliance]
+                        teamIcon = BATTLEGROUND_TEAM_TEXTURES[activityTeam]
                     end
 
                     local instanceTypeText = LocalizeString("<<1>>", battlegroundTeamName)

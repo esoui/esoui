@@ -356,10 +356,16 @@ function ZO_GamepadStoreManager:RebuildHeaderTabs()
         })
     end
 
+    local function GetActiveComponentMessageTextNarration()
+        if self.activeComponent and self.activeComponent.HeaderMessageNarration then
+            return self.activeComponent:HeaderMessageNarration()
+        end
+    end
     self.headerData =
     {
         tabBarEntries = tabsTable,
         activatedCallback = function(...) OnActivatedChanged(...) end,
+        messageTextNarration = GetActiveComponentMessageTextNarration
     }
     ZO_GamepadGenericHeader_Refresh(self.header, self.headerData)
 end

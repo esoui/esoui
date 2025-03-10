@@ -1,6 +1,5 @@
 local g_mapPinManager
 local g_mapLocationManager
-local g_mouseoverMapBlobManager
 local g_keepNetworkManager
 local g_stickyPin
 
@@ -17,6 +16,7 @@ local g_keybindStrips = {}
 local g_mapRefresh
 local g_interactKeybindForceHidden = false
 local g_questPingData = nil
+local g_lastWayshrineParentZoneName = nil
 
 ZO_MAP_CONSTANTS =
 {
@@ -318,6 +318,22 @@ end
 function InformationTooltipMixin:AppendWayshrineTooltip(pin)
     local nodeIndex = pin:GetFastTravelNodeIndex()
     local informationTooltip = GetPlatformInformationTooltip()
+
+    if GetMapType() == MAPTYPE_WORLD then
+        local zoneIndex = GetFastTravelNodePOIIndicies(nodeIndex)
+        local parentZoneId = ZO_ExplorationUtils_GetParentZoneIdByZoneIndex(zoneIndex)
+        local zoneName = GetZoneNameById(parentZoneId)
+        if zoneName ~= "" then
+            zoneName = zo_strformat(SI_ZONE_NAME, zoneName)
+            if zoneName ~= g_lastWayshrineParentZoneName then
+                g_lastWayshrineParentZoneName = zoneName
+                informationTooltip:AddVerticalPadding(-5)
+                informationTooltip:AddLine(zoneName, "ZoFontWinT1", ZO_WHITE:UnpackRGB())
+                informationTooltip:AddVerticalPadding(-5)
+            end
+        end
+    end
+
     local _, name, _, _, _, _, poiType = GetFastTravelNodeInfo(nodeIndex)
     informationTooltip:AddLine(zo_strformat(SI_WORLD_MAP_LOCATION_NAME, name), "", ZO_TOOLTIP_DEFAULT_COLOR:UnpackRGB())
 
@@ -394,6 +410,7 @@ local function HideKeyboardTooltips()
     if g_ownsInformationTooltip then
         ClearTooltip(GetInformationTooltip(NOT_GAMEPAD_MODE))
         g_ownsInformationTooltip = false
+        g_lastWayshrineParentZoneName = nil
     end
 
     GetKeepTooltip(NOT_GAMEPAD_MODE):SetHidden(true)
@@ -517,115 +534,6 @@ local function OnGuildNameAvailable()
     if not keepTooltip:IsHidden() then
         keepTooltip:RefreshKeepInfo()
     end
-end
-
---Map texture overlay management
----------------------------------
-
-local function ShowMapTexture(textureControl, textureName, width, height, offsetX, offsetY)
-    textureControl:SetTexture(textureName)
-    textureControl:SetDimensions(width, height)
-    textureControl:SetSimpleAnchorParent(offsetX, offsetY)
-    textureControl:SetAlpha(1)
-    textureControl:SetHidden(false)
-end
-
---[[
-    Blob factory function
---]]
-local function MapOverlayControlFactory(pool, controlNamePrefix, templateName, parent)
-    local overlayControl = ZO_ObjectPool_CreateNamedControl(controlNamePrefix, templateName, pool, parent)
-    overlayControl:SetAlpha(0)              -- Because it's not shown yet and we want to fade in using current values
-    ZO_AlphaAnimation:New(overlayControl)   -- This control will always use this utility object to animate itself, this links the control to the anim, so we don't need the return.
-    return overlayControl
-end
-
---[[
-    Mouseover Map Blob manager.
-    Shows a highlight for the current mouseover map that the user is pointing at.
---]]
-
-ZO_MouseoverMapBlobManager = ZO_ObjectPool:Subclass()
-
-function ZO_MouseoverMapBlobManager:Initialize(blobContainer)
-    local function BlobFactory(pool) 
-        return MapOverlayControlFactory(pool, "MapMouseoverBlob", "ZO_MapBlob", blobContainer)
-    end
-    ZO_ObjectPool.Initialize(self, BlobFactory, ZO_ObjectPool_DefaultResetControl)
-    self.m_currentTexture = ""
-    self.m_currentLocation = ""
-end
-
-local function NormalizedBlobDataToUI(blobWidth, blobHeight, blobXOffset, blobYOffset)
-    return blobWidth * ZO_MAP_CONSTANTS.MAP_WIDTH, blobHeight * ZO_MAP_CONSTANTS.MAP_HEIGHT, blobXOffset * ZO_MAP_CONSTANTS.MAP_WIDTH, blobYOffset * ZO_MAP_CONSTANTS.MAP_HEIGHT
-end
-
-function ZO_MouseoverMapBlobManager:Update(normalizedMouseX, normalizedMouseY, forceShowBlob)
-    local locationName = ""
-    local textureFile = ""
-    local textureUIWidth, textureUIHeight, textureXOffset, textureYOffset
-
-    if forceShowBlob or IsMouseOverMap() then
-        local locXN, locYN, widthN, heightN
-        locationName, textureFile, widthN, heightN, locXN, locYN = GetMapMouseoverInfo(normalizedMouseX, normalizedMouseY)
-        textureUIWidth, textureUIHeight, textureXOffset, textureYOffset = NormalizedBlobDataToUI(widthN, heightN, locXN, locYN)
-    end
-
-    if locationName ~= self.m_currentLocation and ZO_WorldMapMouseoverName.owner ~= "poi" then
-        if locationName ~= ZO_WorldMap.zoneName then
-            ZO_WorldMapMouseoverName:SetText(zo_strformat(SI_WORLD_MAP_LOCATION_NAME, locationName))
-        else
-            ZO_WorldMapMouseoverName:SetText("")
-        end
-        self.m_currentLocation = locationName
-    end
-
-    local textureChanged = false
-    if textureFile ~= self.m_currentTexture then
-        self:HideCurrent()
-        self.m_currentTexture = textureFile
-        textureChanged = true
-    elseif self.m_zoom ~= g_mapPanAndZoom:GetCurrentCurvedZoom() then
-        self.m_zoom = g_mapPanAndZoom:GetCurrentCurvedZoom()
-        textureChanged = true
-    end
-
-    if textureChanged then
-        if textureFile ~= "" then
-            local blob = self:AcquireObject(textureFile)
-            if blob then
-                ShowMapTexture(blob, textureFile, textureUIWidth, textureUIHeight, textureXOffset, textureYOffset)
-            end
-        end
-    end
-end
-
-function ZO_MouseoverMapBlobManager:IsShowingMapRegionBlob()
-    return self.m_currentTexture ~= ""
-end
-
-function ZO_MouseoverMapBlobManager:HideBlob(textureName)
-    local blob = self:AcquireObject(textureName)
-
-    if blob then
-        blob:SetHidden(true)
-    end
-end
-
-function ZO_MouseoverMapBlobManager:HideCurrent()
-    if self.m_currentTexture ~= "" then
-        self:HideBlob(self.m_currentTexture)
-        self.m_currentTexture = ""
-    end
-end
-
-function ZO_MouseoverMapBlobManager:ClearLocation()
-    self.m_currentLocation = ""
-end
-
-local function PrepareBlobManagersForZoneUpdate()
-    g_mouseoverMapBlobManager:HideCurrent()
-    g_mouseoverMapBlobManager:ClearLocation()
 end
 
 --Keep Fast Travel Network
@@ -926,9 +834,9 @@ local function SetMapWindowSize(newWidth, newHeight)
     g_mapLocationManager:SetFontScale(g_mapScale)
 
     g_mapPinManager:UpdateMovingPins()
-    local normalizedX, normalizedY = NormalizePreferredMousePositionToMap()
-    g_mouseoverMapBlobManager:Update(normalizedX, normalizedY)
     g_mapPinManager:UpdatePinsForMapSizeChange()
+    WORLD_MAP_MANAGER:UpdateBlobs()
+
     if g_keepNetworkManager then
         g_keepNetworkManager:UpdateLinkPostionsForNewMapSize()
     end
@@ -937,34 +845,6 @@ local function SetMapWindowSize(newWidth, newHeight)
         local modeData = WORLD_MAP_MANAGER:GetModeData()
         modeData.width = newWidth
         modeData.height = newHeight
-    end
-end
-
-local function ResizeAndReanchorMap()
-    local uiWidth, uiHeight = GuiRoot:GetDimensions()
-    ZO_WorldMap:SetDimensionConstraints(CONSTANTS.MAP_MIN_SIZE, CONSTANTS.MAP_MIN_SIZE, uiWidth, uiHeight)
-
-    local modeData = WORLD_MAP_MANAGER:GetModeData()
-
-    local oldMapWidth, oldMapHeight = ZO_WorldMap:GetDimensions()
-    local newMapWidth, newMapHeight
-    if modeData.mapSize == CONSTANTS.WORLDMAP_SIZE_FULLSCREEN then
-        newMapWidth, newMapHeight = GetFullscreenMapWindowDimensions()
-    else
-        if modeData.keepSquare then
-            newMapWidth, newMapHeight = GetSquareMapWindowDimensions(oldMapWidth, CONSTANTS.WORLDMAP_RESIZE_WIDTH_DRIVEN)
-        else
-            newMapWidth, newMapHeight = zo_min(oldMapWidth, uiWidth), zo_min(oldMapHeight, uiHeight)
-        end
-    end
-    SetMapWindowSize(newMapWidth, newMapHeight)
-    if modeData.mapSize == CONSTANTS.WORLDMAP_SIZE_FULLSCREEN then
-        ZO_WorldMap:ClearAnchors()
-        if IsInGamepadPreferredMode() then
-            ZO_WorldMap:SetAnchor(CENTER, nil, CENTER, 0, CONSTANTS.GAMEPAD_CENTER_OFFSET_Y_PIXELS / GetUIGlobalScale())
-        else
-            ZO_WorldMap:SetAnchor(CENTER, nil, CENTER, 0, CONSTANTS.CENTER_OFFSET_Y_PIXELS / GetUIGlobalScale())
-        end
     end
 end
 
@@ -1125,7 +1005,7 @@ function ZO_MapPanAndZoom:Initialize(zoomControl)
         local modeData = WORLD_MAP_MANAGER:GetModeData()
         if ZO_WorldMap and modeData then
             --Refresh the amount of border scrolling space since it depends if we're using gamepad or not
-            ResizeAndReanchorMap()
+            WORLD_MAP_MANAGER:ResizeAndReanchorMap()
         end
     end)
     self:SetAllowPanPastMapEdge(IsInGamepadPreferredMode())
@@ -1273,6 +1153,10 @@ function ZO_MapPanAndZoom:SetZoomMinMax(minZoom, maxZoom)
     self.zoomPlusControl:SetHidden(hideZoomBar)
     self.zoomMinusControl:SetHidden(hideZoomBar)
     self:RefreshZoomButtonsEnabled()
+end
+
+function ZO_MapPanAndZoom:GetZoomMinMax()
+    return self.minZoom, self.maxZoom
 end
 
 function ZO_MapPanAndZoom:GetCurrentNormalizedZoom()
@@ -1710,7 +1594,7 @@ function GamepadMap:TryZoom(zoomDelta, normalizedFrameDelta, deltaX, deltaY, nav
                 g_mapPanAndZoom:AddZoomDeltaGamepad(zoomDelta, normalizedFrameDelta)
                 return true
             else
-                local canNavigateIn = g_mouseoverMapBlobManager:IsShowingMapRegionBlob() and WORLD_MAP_MANAGER:IsMapChangingAllowed(CONSTANTS.ZOOM_DIRECTION_IN)
+                local canNavigateIn = WORLD_MAP_MANAGER:IsShowingMouseoverBlob() and WORLD_MAP_MANAGER:IsMapChangingAllowed(CONSTANTS.ZOOM_DIRECTION_IN)
                 if navigateInAt == nil then
                     if canNavigateIn then
                         PlaySound(SOUNDS.GAMEPAD_MAP_START_MAP_CHANGE)
@@ -1876,17 +1760,6 @@ do
             nextMouseOverUpdateS = currentTimeS + 0.3
         end
 
-        if WORLD_MAP_MANAGER:IsAutoNavigating() then
-            if WORLD_MAP_MANAGER:ShouldShowAutoNavigateHighlightBlob() then
-                local FORCE_SHOW_BLOB = true
-                local normalizedX, normalizedY = GetAutoMapNavigationNormalizedPositionForCurrentMap()
-                g_mouseoverMapBlobManager:Update(normalizedX, normalizedY, FORCE_SHOW_BLOB)
-            end
-        else
-            local normalizedX, normalizedY = NormalizePreferredMousePositionToMap()
-            g_mouseoverMapBlobManager:Update(normalizedX, normalizedY)
-        end
-
         mouseIsOverWorldMapScroll = IsMouseOverMap()
         if mouseIsOverWorldMapScroll ~= mouseWasOverWorldMapScroll then
             g_keybindStrips.mouseover:MarkDirty()
@@ -1920,6 +1793,9 @@ end
 local hiddenPinGroupsOnDungeonMaps =
 {
     [MAP_FILTER_WAYSHRINES] = true,
+    [MAP_FILTER_DUNGEONS] = true,
+    [MAP_FILTER_TRIALS] = true,
+    [MAP_FILTER_HOUSES] = true,
 }
 
 function ZO_WorldMap_IsPinGroupShown(pinGroup)
@@ -2027,54 +1903,6 @@ local function RefreshKeeps()
     end
 end
 
-local function RefreshMapPings()
-    g_mapPinManager:RemovePins("pings")
-
-    if not IsShowingCosmicMap() then
-        -- We don't want these manual player pings showing up on the Aurbis
-        for i = 1, MAX_GROUP_SIZE_THRESHOLD do
-            local unitTag = ZO_Group_GetUnitTagForGroupIndex(i)
-            local x, y = GetMapPing(unitTag)
-
-            if x ~= 0 and y ~= 0 then
-                g_mapPinManager:CreatePin(MAP_PIN_TYPE_PING, unitTag, x, y)
-            end
-        end
-
-        -- Add rally point
-        local x, y = GetMapRallyPoint()
-
-        if x ~= 0 and y ~= 0 then
-            g_mapPinManager:CreatePin(MAP_PIN_TYPE_RALLY_POINT, "rally", x, y)
-        end
-
-        -- Add Player Waypoint
-        x, y = GetMapPlayerWaypoint()
-        if x ~= 0 and y ~= 0 then
-            g_mapPinManager:CreatePin(MAP_PIN_TYPE_PLAYER_WAYPOINT , "waypoint", x, y)
-        end
-
-        -- Add Quest Ping
-        if g_questPingData then
-            local pins = {}
-            g_mapPinManager:AddPinsToArray(pins, "quest", g_questPingData.questIndex)
-            for _, pin in ipairs(pins) do
-                if pin:DoesQuestDataMatchQuestPingData() then
-                    local tag = ZO_MapPin.CreateQuestPinTag(g_questPingData.questIndex, g_questPingData.stepIndex, g_questPingData.conditionIndex)
-                    local xLoc, yLoc = pin:GetNormalizedPosition()
-                    g_mapPinManager:CreatePin(MAP_PIN_TYPE_QUEST_PING, tag, xLoc, yLoc)
-                end
-            end
-        end
-    end
-
-    -- Add auto navigation target, and we do want this on the Aurbis
-    if HasAutoMapNavigationTarget() then
-        local normalizedX, normalizedY = GetAutoMapNavigationNormalizedPositionForCurrentMap()
-        g_mapPinManager:CreatePin(MAP_PIN_TYPE_AUTO_MAP_NAVIGATION_PING, "pings", normalizedX, normalizedY)
-    end
-end
-
 do
     local IS_OBJECTIVE_TYPE_SHOWN_IN_AVA =
     {
@@ -2166,8 +1994,11 @@ do
                 local unitTag = GetWorldEventInstanceUnitTag(worldEventInstanceId, i)
                 local pinType = GetWorldEventInstanceUnitPinType(worldEventInstanceId, unitTag)
                 if pinType ~= MAP_PIN_TYPE_INVALID then
-                    local xLoc, yLoc, _, isInCurrentMap = GetMapPlayerPosition(unitTag)
-                    if isInCurrentMap then
+                    -- There shouldn't be any reason for this type of unit to ever be symbolic, right now it's only
+                    -- for dragons, but if we have another unit like this in the future we probably will not want it
+                    -- to show up as a symbolic pin by default.
+                    local xLoc, yLoc, _, isInCurrentMap, isSymbolicLocation = GetMapPlayerPosition(unitTag)
+                    if isInCurrentMap and not isSymbolicLocation then
                         local tag = ZO_MapPin.CreateWorldEventUnitPinTag(worldEventInstanceId, unitTag)
                         g_mapPinManager:CreatePin(pinType, tag, xLoc, yLoc)
                     end
@@ -2314,9 +2145,17 @@ local function CreateSinglePOIPin(zoneIndex, poiIndex)
             local poiType = GetPOIType(zoneIndex, poiIndex)
 
             if poiPinType ~= MAP_PIN_TYPE_POI_SEEN then
-                -- Seen Wayshines are POIs, discovered Wayshrines are handled by AddWayshrines()
-                -- Request was made by design to have houses and dungeons behave like wayshrines.
+                -- Seen Wayshines/Houses are POIs, discovered Wayshrines are handled by AddWayshrines()
+                -- Request was made by design to have houses behave like wayshrines.
                 if poiType == POI_TYPE_WAYSHRINE or poiType == POI_TYPE_HOUSE or poiType == POI_TYPE_GROUP_DUNGEON then
+                    return
+                end
+            end
+
+            if isDiscovered then
+                local instanceType = GetPOIInstanceType(zoneIndex, poiIndex)
+                if instanceType == INSTANCE_TYPE_RAID or instanceType == INSTANCE_TYPE_GROUP then
+                    -- Discovered dungeons/trials are handled by AddWayshrines()
                     return
                 end
             end
@@ -2388,8 +2227,6 @@ function ZO_WorldMap_GetMapDungeonDifficulty()
 end
 
 function ZO_WorldMap_UpdateMap()
-    PrepareBlobManagersForZoneUpdate()
-
     -- Set up base map
     WORLD_MAP_TILES_MANAGER:UpdateTextures()
 
@@ -2406,14 +2243,13 @@ function ZO_WorldMap_UpdateMap()
     WORLD_MAP_MANAGER:UpdateFloorAndLevelNavigation()
     ZO_WorldMap_RefreshObjectives()
     ZO_WorldMap_RefreshKeeps()
-    RefreshMapPings()
+    WORLD_MAP_MANAGER:RefreshMapPings()
     ZO_WorldMap_RefreshKillLocations()
     ZO_WorldMap_RefreshWayshrines()
     ZO_WorldMap_RefreshForwardCamps()
     g_mapRefresh:RefreshAll("worldEvent")
 
     g_mapPinManager:RefreshCustomPins()
-    ResizeAndReanchorMap()
 
     WORLD_MAP_MANAGER:RefreshAll()
 end
@@ -2482,29 +2318,102 @@ end
 
 local OnFastTravelBegin, OnFastTravelEnd
 do
-    local function AddWayshrines()
-        -- Dungeons no longer show wayshrines of any kind (possibly pending some system rework)
+    local function AddWayshrines() -- This refers to all 4 kinds of fast travel
         -- Design rule, don't show wayshrine pins on cosmic, even if they're in the map
-        if IsShowingCosmicMap() or not ZO_WorldMap_IsPinGroupShown(MAP_FILTER_WAYSHRINES) then
+        if IsShowingCosmicMap() then
             return
         end
+        
+        -- Dungeon maps no longer show wayshrines of any kind (possibly pending some system rework)
+        -- Filters are split, with the "Wayshrines" filter being explicitly lore Wayshrines
+        local isShowingWayshrines = ZO_WorldMap_IsPinGroupShown(MAP_FILTER_WAYSHRINES)
+        local isShowingDungeons = ZO_WorldMap_IsPinGroupShown(MAP_FILTER_DUNGEONS)
+        local isShowingTrials = ZO_WorldMap_IsPinGroupShown(MAP_FILTER_TRIALS)
+        local isShowingHouses = ZO_WorldMap_IsPinGroupShown(MAP_FILTER_HOUSES)
+        if not (isShowingWayshrines or isShowingDungeons or isShowingTrials or isShowingHouses) then
+            return
+        end
+
+        local showPriorityFastTravelOnly = ShouldMapShowPriorityFastTravelOnly() -- This refers to all 4 kinds of fast travel
+        local priorityWayshrinesByZone = showPriorityFastTravelOnly and {}
 
         local numFastTravelNodes = GetNumFastTravelNodes()
         for nodeIndex = 1, numFastTravelNodes do
             local known, name, normalizedX, normalizedY, icon, glowIcon, poiType, isLocatedInCurrentMap, linkedCollectibleIsLocked = GetFastTravelNodeInfo(nodeIndex)
+            local zoneIndex, poiIndex = GetFastTravelNodePOIIndicies(nodeIndex)
+            local instanceType = GetPOIInstanceType(zoneIndex, poiIndex)
 
-            if known and isLocatedInCurrentMap and ZO_WorldMap_IsNormalizedPointInsideMapBounds(normalizedX, normalizedY) then
-                local isCurrentLoc = g_fastTravelNodeIndex == nodeIndex
+            local passesFilter = false
+            if poiType == POI_TYPE_HOUSE then
+                passesFilter = isShowingHouses
+            elseif poiType == POI_TYPE_WAYSHRINE then
+                passesFilter = isShowingWayshrines
+            elseif instanceType == INSTANCE_TYPE_RAID then
+                passesFilter = isShowingTrials
+            else
+                passesFilter = isShowingDungeons
+            end
 
-                if isCurrentLoc then
-                    glowIcon = nil
+            if passesFilter and known and isLocatedInCurrentMap and ZO_WorldMap_IsNormalizedPointInsideMapBounds(normalizedX, normalizedY) then
+                local suppressPin = false
+                if showPriorityFastTravelOnly then
+                    if poiType == POI_TYPE_HOUSE then
+                        -- Only favorite/primary houses are priority
+                        local houseId = GetFastTravelNodeHouseId(nodeIndex)
+                        if not IsPrimaryHouse(houseId) then
+                            local collectibleId = GetCollectibleIdForHouse(houseId)
+                            local userFlags = GetCollectibleUserFlags(collectibleId)
+                            if not ZO_FlagHelpers.MaskHasFlag(userFlags, COLLECTIBLE_USER_FLAG_FAVORITE) then
+                                suppressPin = true
+                            end
+                        end
+                    end
                 end
 
-                local tag = ZO_MapPin.CreateTravelNetworkPinTag(nodeIndex, icon, glowIcon, linkedCollectibleIsLocked)
+                if not suppressPin then
+                    local isCurrentLoc = g_fastTravelNodeIndex == nodeIndex
 
-                local pinType = isCurrentLoc and MAP_PIN_TYPE_FAST_TRAVEL_WAYSHRINE_CURRENT_LOC or MAP_PIN_TYPE_FAST_TRAVEL_WAYSHRINE
+                    if isCurrentLoc then
+                        glowIcon = nil
+                    end
 
-                g_mapPinManager:CreatePin(pinType, tag, normalizedX, normalizedY)
+                    local tag = ZO_MapPin.CreateTravelNetworkPinTag(nodeIndex, icon, glowIcon, linkedCollectibleIsLocked, poiType)
+                    local pinType = isCurrentLoc and MAP_PIN_TYPE_FAST_TRAVEL_WAYSHRINE_CURRENT_LOC or MAP_PIN_TYPE_FAST_TRAVEL_WAYSHRINE
+                    local mapPriority = nil
+                    if showPriorityFastTravelOnly and poiType == POI_TYPE_WAYSHRINE then
+                        -- Can return nil, which means ignore prioritization rules and always show (designer controlled)
+                        mapPriority = GetFastTravelNodeMapPriority(nodeIndex)
+                    end
+
+                    if mapPriority then
+                        if IsFastTravelNodeAutoDiscovered(nodeIndex) then
+                            -- Prefer auto discovered when priorities are the same
+                            mapPriority = mapPriority + 0.5
+                        end
+
+                        local priorityWayshrineInfo = priorityWayshrinesByZone[zoneIndex]
+
+                        if not priorityWayshrineInfo or priorityWayshrineInfo.mapPriority < mapPriority then
+                            if not priorityWayshrineInfo then
+                                priorityWayshrineInfo = {}
+                                priorityWayshrinesByZone[zoneIndex] = priorityWayshrineInfo
+                            end
+                            priorityWayshrineInfo.mapPriority = mapPriority
+                            priorityWayshrineInfo.pinType = pinType
+                            priorityWayshrineInfo.tag = tag
+                            priorityWayshrineInfo.normalizedX = normalizedX
+                            priorityWayshrineInfo.normalizedY = normalizedY
+                        end
+                    else
+                        g_mapPinManager:CreatePin(pinType, tag, normalizedX, normalizedY)
+                    end
+                end
+            end
+        end
+
+        if showPriorityFastTravelOnly then
+            for _, info in pairs(priorityWayshrinesByZone) do
+                g_mapPinManager:CreatePin(info.pinType, info.tag, info.normalizedX, info.normalizedY)
             end
         end
     end
@@ -2596,7 +2505,7 @@ function ZO_WorldMap_OnHide()
     ZO_WorldMapMouseoverName.owner = ""
     ZO_WorldMapMouseOverDescription:SetText("")
 
-    PrepareBlobManagersForZoneUpdate()
+    WORLD_MAP_MANAGER:ResetBlobs()
     ResetMouseIsOverWorldMap()
 
     -- Reset this...the next time the map opens it will be forced to the player's current location
@@ -2940,7 +2849,7 @@ function ZO_WorldMap_ShowQuestOnMap(questIndex)
         CALLBACK_MANAGER:FireCallbacks("OnWorldMapChanged")
     elseif g_questPingData then
         -- Make sure the pings get refreshed since the map didn't change
-        RefreshMapPings()
+        WORLD_MAP_MANAGER:RefreshMapPings()
     end
 
     if not ZO_WorldMap_IsWorldMapShowing() then
@@ -3015,10 +2924,6 @@ function ZO_WorldMap_GetStickyPin()
     return g_stickyPin
 end
 
-function ZO_WorldMap_GetMouseOverMapBlobManager()
-    return g_mouseoverMapBlobManager
-end
-
 function ZO_WorldMap_GetQuestPingData()
     return g_questPingData
 end
@@ -3086,7 +2991,6 @@ do
     function ZO_WorldMap_Initialize(control)
         local worldMapContainer = control:GetNamedChild("Container")
         g_mapLocationManager = ZO_MapLocationPins_Manager:New(worldMapContainer)
-        g_mouseoverMapBlobManager = ZO_MouseoverMapBlobManager:New(worldMapContainer)
         WORLD_MAP_TILES_MANAGER = ZO_WorldMapTiles_Manager:New(worldMapContainer)
         g_mapPinManager = ZO_WorldMapPins_Manager:New(worldMapContainer)
         InitializeRefreshGroups()
@@ -3423,6 +3327,11 @@ local function GetSavedVarDefaults()
                     [MAP_FILTER_ACQUIRED_SKYSHARDS] = false,
                 },
                 [MAP_FILTER_TYPE_BATTLEGROUND] = {},
+                [MAP_FILTER_TYPE_GLOBAL] =
+                {
+                    [MAP_FILTER_DUNGEONS] = false,
+                    [MAP_FILTER_TRIALS] = false,
+                },
             }
         },
         [MAP_MODE_LARGE_CUSTOM] =
@@ -3446,6 +3355,11 @@ local function GetSavedVarDefaults()
                     [MAP_FILTER_ACQUIRED_SKYSHARDS] = false,
                 },
                 [MAP_FILTER_TYPE_BATTLEGROUND] = {},
+                [MAP_FILTER_TYPE_GLOBAL] =
+                {
+                    [MAP_FILTER_DUNGEONS] = false,
+                    [MAP_FILTER_TRIALS] = false,
+                },
             }
         },
         [MAP_MODE_KEEP_TRAVEL] =
@@ -3462,6 +3376,8 @@ local function GetSavedVarDefaults()
                     [MAP_FILTER_RESOURCE_KEEPS] = false,
                     [MAP_FILTER_AVA_GRAVEYARDS] = false,
                     [MAP_FILTER_WAYSHRINES] = false,
+                    [MAP_FILTER_DUNGEONS] = false,
+                    [MAP_FILTER_TRIALS] = false,
                     [MAP_FILTER_ACQUIRED_SKYSHARDS] = false,
                     [MAP_FILTER_TRANSIT_LINES_ALLIANCE] = MAP_TRANSIT_LINE_ALLIANCE_ALL,
                 }
@@ -3496,6 +3412,11 @@ local function GetSavedVarDefaults()
                     [MAP_FILTER_ACQUIRED_SKYSHARDS] = false,
                 },
                 [MAP_FILTER_TYPE_BATTLEGROUND] = {},
+                [MAP_FILTER_TYPE_GLOBAL] =
+                {
+                    [MAP_FILTER_DUNGEONS] = false,
+                    [MAP_FILTER_TRIALS] = false,
+                },
             }
         },
         [MAP_MODE_AVA_RESPAWN] =
@@ -3508,6 +3429,8 @@ local function GetSavedVarDefaults()
                 {
                     [MAP_FILTER_KILL_LOCATIONS] = false,
                     [MAP_FILTER_WAYSHRINES] = false,
+                    [MAP_FILTER_DUNGEONS] = false,
+                    [MAP_FILTER_TRIALS] = false,
                     [MAP_FILTER_OBJECTIVES] = false,
                     [MAP_FILTER_RESOURCE_KEEPS] = false,
                     [MAP_FILTER_ACQUIRED_SKYSHARDS] = false,
@@ -3541,6 +3464,8 @@ local function GetSavedVarDefaults()
                     [MAP_FILTER_RESOURCE_KEEPS] = false,
                     [MAP_FILTER_AVA_GRAVEYARDS] = false,
                     [MAP_FILTER_WAYSHRINES] = false,
+                    [MAP_FILTER_DUNGEONS] = false,
+                    [MAP_FILTER_TRIALS] = false,
                     [MAP_FILTER_TRANSIT_LINES] = false,
                     [MAP_FILTER_ACQUIRED_SKYSHARDS] = false,
                 }
@@ -3576,6 +3501,11 @@ local function GetSavedVarDefaults()
                 },
                 [MAP_FILTER_TYPE_AVA_IMPERIAL] = {},
                 [MAP_FILTER_TYPE_BATTLEGROUND] = {},
+                [MAP_FILTER_TYPE_GLOBAL] =
+                {
+                    [MAP_FILTER_DUNGEONS] = false,
+                    [MAP_FILTER_TRIALS] = false,
+                },
             }
         },
         userMode = MAP_MODE_LARGE_CUSTOM,
@@ -3635,6 +3565,8 @@ function ZO_WorldMapManager:Initialize(control)
     self.keyboardFloorsControl = buttonsContainer:GetNamedChild("Floors_Keyboard")
     self.gamepadLevelsControl = buttonsContainer:GetNamedChild("Levels_Gamepad")
     self.gamepadFloorsControl = buttonsContainer:GetNamedChild("Floors_Gamepad")
+
+    self:InitializeBlobManagement()
 
     WORLD_MAP_RESPAWN_TIMER_FRAGMENT_KEYBOARD = ZO_FadeSceneFragment:New(ZO_WorldMapRespawnTimer)
     ZO_MixinHideableSceneFragment(WORLD_MAP_RESPAWN_TIMER_FRAGMENT_KEYBOARD)
@@ -3721,8 +3653,9 @@ do
         end,
 
         [EVENT_SCREEN_RESIZED] = function()
-            ResizeAndReanchorMap()
+            WORLD_MAP_MANAGER:ResizeAndReanchorMap()
         end,
+
         [EVENT_POIS_INITIALIZED] = function()
             CALLBACK_MANAGER:FireCallbacks("OnWorldMapChanged")
         end,
@@ -3951,6 +3884,10 @@ do
             self:OnAutoNavigationTargetSet()
         end)
 
+        self.control:RegisterForEvent(EVENT_INTERFACE_SETTING_CHANGED, function(_, ...) 
+            self:OnInterfaceSettingChanged(...)
+        end)
+
         local function RefreshSuggestionPins()
             self:RefreshSuggestionPins()
             self:RefreshSkyshardPins()
@@ -4064,6 +4001,61 @@ end
 function ZO_WorldMapManager:Update(currentFrameTimeS)
     self:RefreshAutoNavigation(currentFrameTimeS)
     self:RefreshAntiquityDigSitePings(currentFrameTimeS)
+    self:UpdateBlobs(currentFrameTimeS)
+end
+
+function ZO_WorldMapManager:RefreshMapPings()
+   g_mapPinManager:RemovePins("pings")
+
+    if not IsShowingCosmicMap() then
+        -- We don't want these manual player pings showing up on the Aurbis
+        for i = 1, MAX_GROUP_SIZE_THRESHOLD do
+            local unitTag = ZO_Group_GetUnitTagForGroupIndex(i)
+            local x, y = GetMapPing(unitTag)
+
+            if x ~= 0 and y ~= 0 then
+                g_mapPinManager:CreatePin(MAP_PIN_TYPE_PING, unitTag, x, y)
+            end
+        end
+
+        -- Add rally point
+        local x, y = GetMapRallyPoint()
+
+        if x ~= 0 and y ~= 0 then
+            g_mapPinManager:CreatePin(MAP_PIN_TYPE_RALLY_POINT, "rally", x, y)
+        end
+
+        -- Add Player Waypoint
+        x, y = GetMapPlayerWaypoint()
+        if x ~= 0 and y ~= 0 then
+            g_mapPinManager:CreatePin(MAP_PIN_TYPE_PLAYER_WAYPOINT , "waypoint", x, y)
+        end
+
+        -- Add Quest Ping
+        if g_questPingData then
+            local pins = {}
+            g_mapPinManager:AddPinsToArray(pins, "quest", g_questPingData.questIndex)
+            for _, pin in ipairs(pins) do
+                if pin:DoesQuestDataMatchQuestPingData() then
+                    local tag = ZO_MapPin.CreateQuestPinTag(g_questPingData.questIndex, g_questPingData.stepIndex, g_questPingData.conditionIndex)
+                    local xLoc, yLoc = pin:GetNormalizedPosition()
+                    g_mapPinManager:CreatePin(MAP_PIN_TYPE_QUEST_PING, tag, xLoc, yLoc)
+                end
+            end
+        end
+    end
+
+    -- Add auto navigation target, and we do want this on the Aurbis
+    if HasAutoMapNavigationTarget() then
+        local normalizedX, normalizedY = GetAutoMapNavigationNormalizedPositionForCurrentMap()
+        g_mapPinManager:CreatePin(MAP_PIN_TYPE_AUTO_MAP_NAVIGATION_PING, "pings", normalizedX, normalizedY)
+    end
+end
+
+function ZO_WorldMapManager:OnInterfaceSettingChanged(settingSystemType, settingId)
+    if settingSystemType == SETTING_TYPE_ACCESSIBILITY and settingId == ACCESSIBILITY_SETTING_PLAYER_WAYPOINT_ICON_COLOR then
+        self:RefreshMapPings()
+    end
 end
 
 function ZO_WorldMapManager:CreateKeyboardWorldMapScene()
@@ -4462,6 +4454,214 @@ function ZO_WorldMapManager:InitializeKeybinds()
     g_keybindStrips.mouseover = ZO_MapMouseoverKeybindStrip:New(self.control, mouseoverDescriptor)
 end
 
+function ZO_WorldMapManager:InitializeBlobManagement()
+    local worldMapContainer = self.control:GetNamedChild("Container")
+    self.mouseoverBlobTexture = worldMapContainer:GetNamedChild("MouseoverBlob")
+    self.mouseoverBlobCurrentTexture = ""
+    self.mouseoverCurrentLocation = ""
+    self.blobNameLabelControlPool = ZO_ControlPool:New("ZO_MapBlobName", worldMapContainer, "BlobName")
+    local LANGUAGE_TO_FONT_OVERRIDE =
+    {
+        [OFFICIAL_LANGUAGE_JAPANESE] = "$(CHAT_FONT)|34"
+    }
+    self.blobNameLabelControlPool:SetCustomFactoryBehavior(function(labelControl)
+        labelControl.shadowLabel = labelControl:GetNamedChild("Shadow")
+        local officialLanguage = ZoGetOfficialGameLanguage()
+        local overrideFont = LANGUAGE_TO_FONT_OVERRIDE[officialLanguage]
+        if overrideFont then
+            labelControl:SetFont(overrideFont)
+            labelControl.shadowLabel:SetFont(overrideFont)
+        end
+    end)
+    self.blobNameLabelFadeTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_WorldMapBlobNameFadeIn")
+    local fadeAnimation = self.blobNameLabelFadeTimeline:GetFirstAnimation()
+    fadeAnimation:SetUpdateFunction(function(_, progress)
+        self.blobNameLabelFadeProgress = progress
+        self.blobNamesDirty = true
+    end)
+    self.blobNameLabelFadeTimeline:SetHandler("OnStop", function(timeline, completedPlayback) 
+        if completedPlayback then
+            if timeline:IsPlayingBackward() then
+                for _, label in self.blobNameLabelControlPool:ActiveObjectIterator() do
+                    label:SetHidden(true)
+                end
+                self.blobNamesVisible = false
+            else
+                self.blobNameLabelFadeProgress = 1
+                self.blobNamesDirty = true
+            end
+        end
+    end)
+    self.blobNamesVisible = true
+end
+
+function ZO_WorldMapManager:UpdateBlobs(currentFrameTimeS)
+    local zoomChanged = false
+    if self.lastBlobZoom ~= g_mapPanAndZoom:GetCurrentCurvedZoom() then
+        self.lastBlobZoom = g_mapPanAndZoom:GetCurrentCurvedZoom()
+        zoomChanged = true
+    end
+
+    -- Mouseover
+    local normalizedMouseX, normalizedMouseY = nil, nil
+    local forceShowMouseoverBlob = false
+    if self:IsAutoNavigating() then
+        if self:ShouldShowAutoNavigateHighlightBlob() then
+            forceShowMouseoverBlob = true
+            normalizedMouseX, normalizedMouseY = GetAutoMapNavigationNormalizedPositionForCurrentMap()
+        end
+    elseif IsMouseOverMap() then
+        normalizedMouseX, normalizedMouseY = NormalizePreferredMousePositionToMap()
+    end
+
+    local mouseoverLocationName = ""
+    local mouseoverTextureFile = ""
+    local mouseoverTextureUIWidth, mouseoverTextureUIHeight, mouseoverTextureXOffset, mouseoverTextureYOffset
+
+    if normalizedMouseX and normalizedMouseY then
+        local normalizedLocX, normalizedLocY, normalizedWidth, normalizedHeight
+        mouseoverLocationName, mouseoverTextureFile, normalizedWidth, normalizedHeight, normalizedLocX, normalizedLocY = GetMapMouseoverInfo(normalizedMouseX, normalizedMouseY)
+        mouseoverTextureUIWidth = normalizedWidth * ZO_MAP_CONSTANTS.MAP_WIDTH
+        mouseoverTextureUIHeight = normalizedHeight * ZO_MAP_CONSTANTS.MAP_HEIGHT
+        mouseoverTextureXOffset = normalizedLocX * ZO_MAP_CONSTANTS.MAP_WIDTH
+        mouseoverTextureYOffset = normalizedLocY * ZO_MAP_CONSTANTS.MAP_HEIGHT
+    end
+
+    if mouseoverLocationName ~= self.mouseoverCurrentLocation and ZO_WorldMapMouseoverName.owner ~= "poi" then
+        if mouseoverLocationName ~= ZO_WorldMap.zoneName then
+            ZO_WorldMapMouseoverName:SetText(zo_strformat(SI_WORLD_MAP_LOCATION_NAME, mouseoverLocationName))
+        else
+            ZO_WorldMapMouseoverName:SetText("")
+        end
+        self.mouseoverCurrentLocation = mouseoverLocationName
+    end
+
+    local textureChanged = false
+    if mouseoverTextureFile ~= self.mouseoverBlobCurrentTexture then
+        self:HideCurrentMouseoverBlob()
+        self.mouseoverBlobCurrentTexture = mouseoverTextureFile
+        textureChanged = true
+    end
+
+    if zoomChanged then
+        textureChanged = true
+        self.blobNamesDirty = true
+    end
+
+    if textureChanged then
+        if mouseoverTextureFile ~= "" then
+            local mouseoverBlobTexture = self.mouseoverBlobTexture
+            mouseoverBlobTexture:SetTexture(mouseoverTextureFile)
+            mouseoverBlobTexture:SetDimensions(mouseoverTextureUIWidth, mouseoverTextureUIHeight)
+            mouseoverBlobTexture:SetSimpleAnchorParent(mouseoverTextureXOffset, mouseoverTextureYOffset)
+            mouseoverBlobTexture:SetHidden(false)
+        end
+    end
+
+    -- Blob Names
+    if self.blobNamesDirty then
+        self.blobNamesDirty = false
+        local VISIBILITY_THRESHOLD = 0.15
+        local MAX_ALPHA_THRESHOLD = 0.50
+        local MIN_ALPHA = 0.2
+        local zoomMin, zoomMax = g_mapPanAndZoom:GetZoomMinMax()
+        local scale = self.lastBlobZoom / zoomMax
+        local zoomLerp = zo_percentBetween(zoomMin, zoomMax, self.lastBlobZoom)
+        if zoomLerp > VISIBILITY_THRESHOLD then
+            if not self.blobNamesVisible then
+                self.blobNamesVisible = true
+                if self.blobNamesReset then
+                    -- Don't fade in if we zoomed out from another map straight into visibility
+                    self.blobNameLabelFadeProgress = 1
+                else
+                    self.blobNameLabelFadeProgress = 0
+                    self.blobNameLabelFadeTimeline:PlayFromStart()
+                end
+            end
+        else
+            if self.blobNamesVisible then
+                self.blobNameLabelFadeTimeline:PlayBackward()
+            end
+        end
+
+        self.blobNamesReset = false
+
+        if self.blobNamesVisible then
+            local alpha = zo_percentBetween(VISIBILITY_THRESHOLD, MAX_ALPHA_THRESHOLD, zoomLerp) + MIN_ALPHA
+            alpha = alpha * self.blobNameLabelFadeProgress
+            for blobIndex = 1, GetNumMapBlobs() do
+                local locationName, normalizedLocX, normalizedLocY, normalizedWidth, nameScale = GetMapBlobNameInfo(blobIndex)
+                if locationName ~= "" then
+                    local finalScale = scale * nameScale
+                    locationName = zo_strformat(SI_ZONE_NAME, locationName)
+                    local nameUIWidth = (normalizedWidth * ZO_MAP_CONSTANTS.MAP_WIDTH) / finalScale
+                    local nameOffsetX = normalizedLocX * ZO_MAP_CONSTANTS.MAP_WIDTH
+                    local nameOffsetY = normalizedLocY * ZO_MAP_CONSTANTS.MAP_HEIGHT
+                    local label = self.blobNameLabelControlPool:AcquireObject(blobIndex)
+                    label:SetWidth(nameUIWidth)
+                    label:SetText(locationName)
+                    label:SetAnchor(CENTER, nil, TOPLEFT, nameOffsetX, nameOffsetY)
+                    label:SetScale(finalScale)
+                    label:SetAlpha(alpha)
+                    label.shadowLabel:SetText(locationName)
+                    label.shadowLabel:SetWidth(nameUIWidth)
+                end
+            end
+        end
+    end
+end
+
+function ZO_WorldMapManager:HideCurrentMouseoverBlob()
+    if self.mouseoverBlobCurrentTexture ~= "" then
+        self.mouseoverBlobTexture:SetHidden(true)
+        self.mouseoverBlobCurrentTexture = ""
+    end
+end
+
+function ZO_WorldMapManager:ResetBlobs()
+    self:HideCurrentMouseoverBlob()
+    self.mouseoverCurrentLocation = ""
+    self.blobNameLabelControlPool:ReleaseAllObjects()
+    self.blobNamesReset = true
+    self.blobNamesDirty = true
+    self.blobNamesVisible = false
+end
+
+function ZO_WorldMapManager:IsShowingMouseoverBlob()
+    return self.mouseoverBlobCurrentTexture ~= ""
+end
+
+function ZO_WorldMapManager:ResizeAndReanchorMap()
+    local control = self.control
+    local uiWidth, uiHeight = GuiRoot:GetDimensions()
+    control:SetDimensionConstraints(CONSTANTS.MAP_MIN_SIZE, CONSTANTS.MAP_MIN_SIZE, uiWidth, uiHeight)
+
+    local modeData = self:GetModeData()
+
+    local oldMapWidth, oldMapHeight = control:GetDimensions()
+    local newMapWidth, newMapHeight
+    if modeData.mapSize == CONSTANTS.WORLDMAP_SIZE_FULLSCREEN then
+        newMapWidth, newMapHeight = GetFullscreenMapWindowDimensions()
+    else
+        if modeData.keepSquare then
+            newMapWidth, newMapHeight = GetSquareMapWindowDimensions(oldMapWidth, CONSTANTS.WORLDMAP_RESIZE_WIDTH_DRIVEN)
+        else
+            newMapWidth, newMapHeight = zo_min(oldMapWidth, uiWidth), zo_min(oldMapHeight, uiHeight)
+        end
+    end
+    SetMapWindowSize(newMapWidth, newMapHeight)
+    if modeData.mapSize == CONSTANTS.WORLDMAP_SIZE_FULLSCREEN then
+        control:ClearAnchors()
+        if IsInGamepadPreferredMode() then
+            control:SetAnchor(CENTER, nil, CENTER, 0, CONSTANTS.GAMEPAD_CENTER_OFFSET_Y_PIXELS / GetUIGlobalScale())
+        else
+            control:SetAnchor(CENTER, nil, CENTER, 0, CONSTANTS.CENTER_OFFSET_Y_PIXELS / GetUIGlobalScale())
+        end
+    end
+
+    self.blobNamesDirty = true
+end
+
 function ZO_WorldMapManager:SetMapByIndex(mapIndex)
     if self:IsMapChangingAllowed() then
         if SetMapToMapListIndex(mapIndex) == SET_MAP_RESULT_MAP_CHANGED then
@@ -4549,7 +4749,7 @@ function ZO_WorldMapManager:OnAutoNavigationTargetSet()
             if hasMapChanged then
                 CALLBACK_MANAGER:FireCallbacks("OnWorldMapChanged")
             else
-                RefreshMapPings()
+                self:RefreshMapPings()
             end
 
             g_mapPanAndZoom:SetNormalizedZoomAndOffsetInNewMap(AUTO_NAVIGATION_CONSTANTS.START_ZOOM)
@@ -4676,13 +4876,14 @@ do
 
     function ZO_WorldMapManager:RefreshSuggestionPins()
         g_mapPinManager:RemovePins("suggestion")
+
         if IsZoneStoryTracked() then
             local zoneId, zoneCompletionType, activityId = GetTrackedZoneStoryActivityInfo()
             if not ZONE_COMPLETION_TYPE_WITHOUT_PIN[zoneCompletionType] then
                 local normalizedX, normalizedY, normalizedRadius, isShownInCurrentMap = GetNormalizedPositionForZoneStoryActivityId(zoneId, zoneCompletionType, activityId)
                 if isShownInCurrentMap then
                     if zoneCompletionType == ZONE_COMPLETION_TYPE_PRIORITY_QUESTS then
-                        if not ZO_WorldMapPins_Manager.DoesCurrentMapHideQuestPins() then
+                        if not ZO_WorldMap_GetPinManager().IsCurrentMapGlobal() or IsZoneStoryAssisted() then
                             local questOfferTag = ZO_MapPin.CreateZoneStoryTag(zoneId, zoneCompletionType, activityId)
                             questOfferTag.isBreadcrumb = false -- TODO: Zone Stories: Hook up quest offer breadcrumbing
                             g_mapPinManager:CreatePin(MAP_PIN_TYPE_TRACKED_QUEST_OFFER_ZONE_STORY, questOfferTag, normalizedX, normalizedY, normalizedRadius)
@@ -4895,7 +5096,7 @@ function ZO_WorldMapManager:RefreshAllAntiquityDigSites()
     g_mapPinManager:RemovePins("antiquityDigSite")
     self:ClearDigSitePings()
 
-    if ZO_WorldMapPins_Manager.DoesCurrentMapHideQuestPins() or not ZO_WorldMap_IsPinGroupShown(MAP_FILTER_DIG_SITES) then
+    if ZO_WorldMapPins_Manager.IsCurrentMapGlobal() or not ZO_WorldMap_IsPinGroupShown(MAP_FILTER_DIG_SITES) then
         return false
     end
 
@@ -4990,8 +5191,8 @@ end
 function ZO_WorldMapManager:RefreshCompanionPins()
     g_mapPinManager:RemovePins("companion")
     if ZO_WorldMap_IsPinGroupShown(MAP_FILTER_COMPANIONS) and HasActiveCompanion() and not ZO_WorldMap_DoesMapHideCompanionPins() then
-        local x, y, _, isInCurrentMap = GetMapPlayerPosition("companion")
-        if isInCurrentMap then
+        local x, y, _, isInCurrentMap, isSymbolicLocation = GetMapPlayerPosition("companion")
+        if isInCurrentMap and not isSymbolicLocation then
             local companionPin = g_mapPinManager:CreatePin(MAP_PIN_TYPE_ACTIVE_COMPANION, "companion")
             if companionPin then
                 companionPin:SetLocation(x, y)
@@ -5041,10 +5242,12 @@ function ZO_WorldMapManager:HandleMouseDown(button, ctrl, alt, shift)
 end
 
 function ZO_WorldMapManager:RefreshAll()
+    self:ResizeAndReanchorMap()
     self:RefreshSuggestionPins()
     self:RefreshAllAntiquityDigSites()
     self:RefreshCompanionPins()
     self:RefreshSkyshardPins()
+    self:ResetBlobs()
 end
 
 function ZO_WorldMapManager:IsPreventingMapNavigation()

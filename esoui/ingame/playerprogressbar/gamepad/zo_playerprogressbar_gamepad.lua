@@ -54,19 +54,22 @@ function ZO_GamepadPlayerProgressBarNameLocation:GetNarration()
     ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject( zo_strformat(SI_GAMEPAD_CHARACTER_FOOTER_NARRATION_NAME_FORMATTER, self.username:GetText())))
     ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject( zo_strformat(SI_GAMEPAD_CHARACTER_FOOTER_NARRATION_LOCATION_FORMATTER, self.location:GetText())))
 
-    local levelTitleText = PLAYER_PROGRESS_BAR.levelTypeLabel:GetText() or PLAYER_PROGRESS_BAR.championPointsLabel:GetText()
     local level, current, levelSize = PLAYER_PROGRESS_BAR:GetMostRecentlyShownInfo()
 
-    local showLevel = level
-    -- We are showing the reward for the next level, so advance by one.
-    if GetNumChampionXPInChampionPoint(showLevel) ~= nil then
-        showLevel = showLevel + 1
+    local useChampionPoints = CanUnitGainChampionPoints("player")
+    if not useChampionPoints then
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_GAMEPAD_CHARACTER_FOOTER_NARRATION_PROGRESSION_FORMATTER, level, math.floor(current / levelSize * 100))))
+    else
+        local showLevel = level
+        -- We are showing the reward for the next level, so advance by one.
+        if GetNumChampionXPInChampionPoint(showLevel) ~= nil then
+            showLevel = showLevel + 1
+        end
+        local nextPointPoolType = GetChampionPointPoolForRank(showLevel)
+        local swappedSkillLines = GetChampionDisciplineId(nextPointPoolType + 1)
+        local discipline = GetChampionDisciplineName(swappedSkillLines)
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_GAMEPAD_CHARACTER_FOOTER_NARRATION_PROGRESSION_CHAMPION_FORMATTER, level, discipline, math.floor(current / levelSize * 100))))
     end
-    local nextPointPoolType = GetChampionPointPoolForRank(showLevel)
-    local swappedSkillLines = GetChampionDisciplineId(nextPointPoolType + 1)
-    local discipline = GetChampionDisciplineName(swappedSkillLines)
-
-    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_GAMEPAD_CHARACTER_FOOTER_NARRATION_PROGRESSION_FORMATTER, levelTitleText, level, discipline, math.floor(current / levelSize * 100))))
 
     return narrations
 end

@@ -246,7 +246,6 @@ function ZO_CreateLinkLoading_Gamepad:RegisterEvents()
     self:RegisterForEvent(EVENT_WORLD_SELECTED,  function(...) self:OnWorldSelected(...) end)
     self:RegisterForEvent(EVENT_WORLD_LIST_RECEIVED, OnWorldListReceived)
     self:RegisterForEvent(EVENT_ACCOUNT_LINK_SUCCESSFUL, OnSuccess)
-    self:RegisterForEvent(EVENT_ACCOUNT_CREATE_SUCCESSFUL, OnSuccess)
 
     self:RegisterForEvent(EVENT_PROFILE_NOT_LINKED, OnNoLink)
 

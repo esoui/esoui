@@ -63,6 +63,10 @@ do
         end
     end
 
+    local function GetPlayerWaypointPinColor()
+        return ZO_ColorDef:New(GetSetting(SETTING_TYPE_ACCESSIBILITY, ACCESSIBILITY_SETTING_PLAYER_WAYPOINT_ICON_COLOR))
+    end
+
     local function GetLocationPinTexture(pin)
         return pin:GetLocationIcon()
     end
@@ -104,7 +108,7 @@ do
         [MAP_PIN_TYPE_PLAYER]                                       = { level = 170, texture = "EsoUI/Art/MapPins/UI-WorldMapPlayerPip.dds", size = CONSTANTS.PLAYER_PIN_SIZE, mouseLevel = 0 },
         [MAP_PIN_TYPE_PING]                                         = { level = 162, minSize = 32, texture = "EsoUI/Art/MapPins/MapPing.dds", isAnimated = true, framesWide = 32, framesHigh = 1, framesPerSecond = 32 },
         [MAP_PIN_TYPE_RALLY_POINT]                                  = { level = 161, minSize = 100, texture = "EsoUI/Art/MapPins/MapRallyPoint.dds", isAnimated = true, framesWide = 32, framesHigh = 1, framesPerSecond = 32 },
-        [MAP_PIN_TYPE_PLAYER_WAYPOINT]                              = { level = 160, minSize = 32, texture = "EsoUI/Art/MapPins/UI_Worldmap_pin_customDestination.dds" },
+        [MAP_PIN_TYPE_PLAYER_WAYPOINT]                              = { level = 160, minSize = 32, texture = "EsoUI/Art/MapPins/UI_Worldmap_pin_customDestination_white.dds", tint = GetPlayerWaypointPinColor },
         [MAP_PIN_TYPE_GROUP_LEADER]                                 = { level = 151, size = 32, texture = GetGroupPinTexture },
         [MAP_PIN_TYPE_GROUP]                                        = { level = 150, size = 32, texture = GetGroupPinTexture },
         [MAP_PIN_TYPE_ACTIVE_COMPANION]                             = { level = 150, size = 32, texture = "EsoUI/Art/MapPins/activeCompanion_pin.dds" },
@@ -654,6 +658,8 @@ ZO_MapPin.PIN_TYPE_TO_PIN_GROUP =
     [MAP_PIN_TYPE_TRACKED_QUEST_ZONE_STORY_OPTIONAL_CONDITION] = MAP_FILTER_QUESTS,
     [MAP_PIN_TYPE_TRACKED_QUEST_ZONE_STORY_ENDING] = MAP_FILTER_QUESTS,
 
+    -- Although there are now 4 MapFilters for fast travel, what we call a "pin group" can suffice with just using MAP_FILTER_WAYSHRINES for all of them
+    -- Pin Group should have gotten its own enum, but it opted to just use MapFilter for convenience
     [MAP_PIN_TYPE_FAST_TRAVEL_WAYSHRINE] = MAP_FILTER_WAYSHRINES,
     [MAP_PIN_TYPE_FAST_TRAVEL_WAYSHRINE_CURRENT_LOC] = MAP_FILTER_WAYSHRINES,
 
@@ -1835,6 +1841,7 @@ do
         self.backgroundControl = control:GetNamedChild("Background")
         self.labelControl = control:GetNamedChild("Label")
         self.scaleModifier = 1
+        self.pinId = nextPinId
 
         ZO_AlphaAnimation:New(self.highlightControl)
         self:ResetAnimation(ZO_MapPin.ANIM_CONSTANTS.RESET_ANIM_HIDE_CONTROL)
@@ -1997,6 +2004,10 @@ function ZO_MapPin:FadeInMapPin()
     fadeInAnimation:PlayFromStart()
 end
 
+function ZO_MapPin:GetPinId()
+    return self.pinId
+end
+
 function ZO_MapPin:GetPinType()
     return self.m_PinType
 end
@@ -2142,9 +2153,7 @@ function ZO_MapPin:IsAreaPin()
 end
 
 function ZO_MapPin:IsPublicDungeonPin()
-    local poiIndex = self:GetPOIIndex()
-    local zoneIndex = self:GetPOIZoneIndex()
-    local poiType = GetPOIType(zoneIndex, poiIndex)
+    local poiType = self:GetPOIType()
     
     return poiType == POI_TYPE_PUBLIC_DUNGEON
 end
@@ -2576,6 +2585,18 @@ function ZO_MapPin:GetFastTravelNodeIndex()
     end
 end
 
+function ZO_MapPin:GetPOIType()
+    local zoneIndex, poiIndex
+    if self:IsFastTravelWayShrine() then
+        local poiType = select(7, GetFastTravelNodeInfo(self:GetFastTravelNodeIndex()))
+        return poiType
+    else
+        local zoneIndex = self:GetPOIZoneIndex()
+        local poiIndex = self:GetPOIIndex()
+        return GetPOIType(zoneIndex, poiIndex)
+    end
+end
+
 function ZO_MapPin:GetForwardCampIndex()
     if self:IsForwardCamp() then
         return self.m_PinTag[1]
@@ -2887,8 +2908,25 @@ function ZO_MapPin:UpdateLocation()
     local myControl = self:GetControl()
     if self.normalizedX and self.normalizedY then
         local mapWidth, mapHeight = ZO_WorldMap_GetMapDimensions()
-        local offsetX = self.normalizedX * mapWidth
-        local offsetY = self.normalizedY * mapHeight
+        local offsetX = self.originalNormalizedX * mapWidth
+        local offsetY = self.originalNormalizedY * mapHeight
+
+        -- The overlap offset spaces out the symbolic pin that are otherwise
+        -- all stacked together in the center of the symbolic blob.
+        if self:IsSymbolicPosition() then
+            if self.overlapOffsetX and self.overlapOffsetX ~= 0 then
+                offsetX = offsetX + self.overlapOffsetX
+            end
+            if self.overlapOffsetY and self.overlapOffsetY ~= 0 then
+                offsetY = offsetY + self.overlapOffsetY
+            end
+        end
+        -- Map navigation, particularly for gamepad, does all it's positional
+        -- math based on the normalized position of the pin so the normalized
+        -- position must be adjusted to be consistent with the symbolic offset
+        -- it was given.
+        self.normalizedX = offsetX / mapWidth
+        self.normalizedY = offsetY / mapHeight
 
         myControl:ClearAnchors()
         myControl:SetAnchor(CENTER, nil, TOPLEFT, offsetX, offsetY)
@@ -2946,16 +2984,26 @@ function ZO_MapPin:UpdateAreaPinTexture()
     end
 end
 
+function ZO_MapPin:IsLocationValid()
+    return self.validLocation
+end
+
 function ZO_MapPin:SetLocation(xLoc, yLoc, radius, borderInformation)
     local valid = xLoc and yLoc and ZO_WorldMap_IsNormalizedPointInsideMapBounds(xLoc, yLoc)
 
     local myControl = self:GetControl()
     myControl:SetHidden(not valid)
 
+    -- Original normalize position is used for determining the proper offset
+    -- and subsequent symbolic offset from which the normalize position will
+    -- need to be adjusted.
+    self.originalNormalizedX = xLoc
+    self.originalNormalizedY = yLoc
     self.normalizedX = xLoc
     self.normalizedY = yLoc
     self.radius = radius
     self.borderInformation = borderInformation
+    self.validLocation = valid
 
     if valid then
         if radius and radius > 0 then
@@ -2984,9 +3032,31 @@ function ZO_MapPin:SetLocation(xLoc, yLoc, radius, borderInformation)
 
         self.backgroundControl:SetHidden(not self:ShouldShowPin())
 
-        self:UpdateLocation()
         self:UpdateSize()
+        self:UpdateLocation()
     end
+end
+
+function ZO_MapPin:IsSymbolicPosition()
+    return self.symbolicPosition
+end
+
+function ZO_MapPin:SetIsSymbolicPosition(isSymbolicPosition)
+    self.symbolicPosition = isSymbolicPosition
+end
+
+function ZO_MapPin:GetOriginalPosition()
+    return self.originalX, self.originalY
+end
+
+function ZO_MapPin:SetOriginalPosition(xLoc, yLoc)
+    self.originalX = xLoc
+    self.originalY = yLoc
+end
+
+function ZO_MapPin:SetOverlapOffsets(xOffset, yOffset)
+    self.overlapOffsetX = xOffset
+    self.overlapOffsetY = yOffset
 end
 
 function ZO_MapPin:SetRotation(angle)
@@ -3096,6 +3166,7 @@ function ZO_MapPin:Reset()
     self:ResetAnimation(ZO_MapPin.ANIM_CONSTANTS.RESET_ANIM_HIDE_CONTROL)
     self:ResetScale()
     self:SetRotation(0)
+    self:SetOverlapOffsets()
 
     local control = self:GetControl()
     control:SetAlpha(1)

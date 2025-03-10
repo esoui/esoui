@@ -868,7 +868,7 @@
                     </Controls>
                 </StatusBar>
 
-                <Label name="$(parent)RankType" font="ZoFontGamepad27" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:ZO_NORMAL_TEXT">
+                <Label name="$(parent)RankType" font="ZoFontGamepad27" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
                     <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Bar" relativePoint="TOPLEFT" offsetX="1" offsetY="7" />
                 </Label>
             </Controls>
@@ -956,8 +956,9 @@
                     <OnMouseWheel />
                 </Texture>
 
-                <Control name="$(parent)Keybind" inherits="ZO_KeybindButton">
+                <Control name="$(parent)Keybind" inherits="ZO_KeybindButton" clampedToScreen="true">
                     <Anchor point="CENTER" offsetY="500" />
+                    <ClampedToScreenInsets bottom="50" />
                 </Control>
 
                 <Control name="$(parent)Statistics" inherits="ZO_TributeSummary_Statistics" />

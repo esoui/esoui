@@ -81,6 +81,12 @@ panelBuilder:AddSetting({
     header = SI_ACCESSIBILITY_OPTIONS_GENERAL,
 })
 
+panelBuilder:AddSetting({
+    controlName = "Options_Accessibility_Waypoint_Color",
+    settingType = SETTING_TYPE_ACCESSIBILITY,
+    settingId = ACCESSIBILITY_SETTING_PLAYER_WAYPOINT_ICON_COLOR,
+    header = SI_ACCESSIBILITY_OPTIONS_GENERAL,
+})
 ------------------------------------------
 -- Accessibility -> Arcanist Aim Assist --
 ------------------------------------------

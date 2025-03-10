@@ -44,6 +44,9 @@ gamepadMarketContentListScene:AddFragment(GAMEPAD_NAV_QUADRANT_1_BACKGROUND_FRAG
 gamepadMarketContentListScene:AddFragment(GAMEPAD_MARKET_LIST_FRAGMENT)
 gamepadMarketContentListScene:AddFragment(KEYBIND_STRIP_GAMEPAD_FRAGMENT)
 gamepadMarketContentListScene:AddFragment(UI_SHORTCUTS_ACTION_LAYER_FRAGMENT)
+-- The preview options fragment needs to be added before the ITEM_PREVIEW_GAMEPAD fragment
+gamepadMarketContentListScene:AddFragment(GAMEPAD_NAV_QUADRANT_2_3_4_ITEM_PREVIEW_OPTIONS_FRAGMENT)
+gamepadMarketContentListScene:AddFragment(ITEM_PREVIEW_GAMEPAD:GetFragment())
 
 GAMEPAD_MARKET_SCENE_GROUP = ZO_SceneGroup:New(
                                         ZO_GAMEPAD_MARKET_SCENE_NAME,

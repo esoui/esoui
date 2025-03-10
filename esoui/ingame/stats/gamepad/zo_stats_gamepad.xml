@@ -92,8 +92,13 @@
         <Control name="ZO_GamepadAttributeRowTemplate" inherits="ZO_GamepadMenuEntryDimensionsTemplate ZO_GamepadMenuEntryLabelSizedTemplate" virtual="true">
             <Controls>
                 <Label name="$(parent)Label" inherits="ZO_GamepadMenuEntryLabelTemplate" modifyTextType="NONE" />
-                <Texture name="$(parent)Icon" inherits="ZO_GamepadMenuEntryIconTemplate"/>
-
+                <Texture name="$(parent)Icon" inherits="ZO_GamepadMenuEntryIconTemplate">
+                    <Controls>
+                        <Label name="$(parent)StackCount" inherits="ZO_GamepadMenuEntryStackCountTemplate">
+                            <Anchor point="BOTTOMRIGHT" offsetX="-4" offsetY="1" />
+                        </Label>
+                    </Controls>
+                </Texture> 
                 <Cooldown name="$(parent)Cooldown" textureFile="EsoUI/Art/Miscellaneous/timer_overlay_32.dds" excludeFromResizeToFitExtents="true" hidden="true">
                     <Dimensions x="32" y="32"/>
                     <Anchor point="CENTER" relativeTo="$(parent)Label" relativePoint="LEFT" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_SECOND_ICON_X_OFFSET" />

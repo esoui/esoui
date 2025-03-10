@@ -1,7 +1,20 @@
+local function GetSystemDisplayList(numDisplays)
+     local valid = {}
+     local events = {}
+     local itemText = {}
+ 
+     for i = 1, numDisplays do
+         local optionText = zo_strformat(SI_GRAPHICS_OPTIONS_VIDEO_ACTIVE_DISPLAY_FORMAT, i) 
+         valid[i] = i - 1 -- Identifying indices start at 0
+         events[i] = "ActiveDisplayChanged"
+         itemText[i] = optionText
+     end
+ 
+    return valid, events, itemText
+end
+ 
 local function InitializeDisplays(control, numDisplays)
-    local valid = {}
-    local events = {}
-    local itemText = {}
+    local valid, events, itemText = GetSystemDisplayList(numDisplays)
 
     for i = 1, numDisplays do
         local optionText = zo_strformat(SI_GRAPHICS_OPTIONS_VIDEO_ACTIVE_DISPLAY_FORMAT, i) 
@@ -192,6 +205,7 @@ local ZO_OptionsPanel_Video_ControlData =
             text = SI_GRAPHICS_OPTIONS_VIDEO_ACTIVE_DISPLAY,
             tooltipText = SI_GRAPHICS_OPTIONS_VIDEO_ACTIVE_DISPLAY_TOOLTIP,
             exists = IsActiveDisplayEnabledOnPlatform,
+            valid = {}, -- Filled in below.
 
             gamepadIsEnabledCallback = function()
                 return tonumber(GetSetting(SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_FULLSCREEN)) == FULLSCREEN_MODE_FULLSCREEN_EXCLUSIVE or 
@@ -971,6 +985,14 @@ for settingValue = CONSOLE_ENHANCED_RENDER_QUALITY_ITERATION_BEGIN, CONSOLE_ENHA
     if DoesSystemSupportConsoleEnhancedRenderQuality(settingValue) then
         table.insert(renderQualitySetting.valid, settingValue)
     end
+end
+
+--Dynamically determine which active displays are available.
+do
+    local availableDisplaysSetting = ZO_OptionsPanel_Video_ControlData[SETTING_TYPE_GRAPHICS][GRAPHICS_SETTING_ACTIVE_DISPLAY]
+    local valid, events, itemText = GetSystemDisplayList(GetNumDisplays())
+    availableDisplaysSetting.valid = valid
+    availableDisplaysSetting.itemText = itemText
 end
 
 ZO_SharedOptions.AddTableToPanel(SETTING_PANEL_VIDEO, ZO_OptionsPanel_Video_ControlData)

@@ -25,7 +25,7 @@ local ZO_OptionsPanel_Camera_ControlData =
             system = SETTING_TYPE_GAMEPAD,
             settingId = GAMEPAD_SETTING_INVERT_Y,
             panel = SETTING_PANEL_CAMERA,
-            text = SI_GAMEPAD_OPTIONS_INVERT_Y,
+            text =  ZO_IsConsolePlatform() and SI_GAMEPAD_OPTIONS_INVERT_Y or SI_GAMEPAD_OPTIONS_INVERT_Y_PC,
         },
     },
 }

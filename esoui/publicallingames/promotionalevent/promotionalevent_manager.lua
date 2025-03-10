@@ -30,25 +30,29 @@ function ZO_PromotionalEvent_Manager:Initialize()
             }
             self.savedVars = ZO_SavedVars:NewAccountWide("ZO_Ingame_SavedVariables", 1, "PromotionalEvents", defaults)
 
-            if #self.currentCampaignDataList > 0 then
+            if #self.activeCampaignDataList > 0 then
                 self:CleanupSeenCampaigns()
             end
-            EVENT_MANAGER:UnregisterForEvent(EVENT_ADD_ON_LOADED)
+            EVENT_MANAGER:UnregisterForEvent("PromotionalEventManager", EVENT_ADD_ON_LOADED)
         end
     end
     EVENT_MANAGER:RegisterForEvent("PromotionalEventManager", EVENT_ADD_ON_LOADED, OnAddOnLoaded)
 end
 
 function ZO_PromotionalEvent_Manager:RefreshCampaignData(forceCleanSeen)
-    self.currentCampaignDataList = {}
-
-    if GetNumActivePromotionalEventCampaigns() > 0 then
-        local campaignKey = GetActivePromotionalEventCampaignKey(1)
-        local campaignData = ZO_PromotionalEventCampaignData:New(campaignKey)
-        table.insert(self.currentCampaignDataList, campaignData)
+    if self.activeCampaignDataList then
+        ZO_ClearNumericallyIndexedTable(self.activeCampaignDataList)
+    else
+        self.activeCampaignDataList = {}
     end
 
-    if forceCleanSeen or #self.currentCampaignDataList > 0 then
+    for i = 1, GetNumActivePromotionalEventCampaigns() do
+        local campaignKey = GetActivePromotionalEventCampaignKey(i)
+        local campaignData = ZO_PromotionalEventCampaignData:New(campaignKey)
+        table.insert(self.activeCampaignDataList, campaignData)
+    end
+
+    if forceCleanSeen or #self.activeCampaignDataList > 0 then
         -- If there are no campaigns, we might not have received the info from the server yet
         -- so we can't be sure we have accurate data yet. So only clean up if we know there are campaigns
         -- Or we're receiving an event about the campaigns
@@ -61,7 +65,7 @@ end
 function ZO_PromotionalEvent_Manager:CleanupSeenCampaigns()
     if self.savedVars then
         local seenCampaignKeys = {}
-        for _, campaignData in ipairs(self.currentCampaignDataList) do
+        for _, campaignData in ipairs(self.activeCampaignDataList) do
             local key = campaignData:GetKeyString()
             if self.savedVars.seenCampaignKeys[key] then
                 seenCampaignKeys[key] = true
@@ -78,7 +82,7 @@ function ZO_PromotionalEvent_Manager:ShowPromotionalEventScene(scrollToFirstClai
             ZO_ACTIVITY_FINDER_ROOT_GAMEPAD:ShowCategory(PROMOTIONAL_EVENTS_GAMEPAD:GetCategoryData())
             systemObject = PROMOTIONAL_EVENTS_GAMEPAD
         else
-            GROUP_MENU_KEYBOARD:ShowCategory(PROMOTIONAL_EVENTS_KEYBOARD.fragment)
+            GROUP_MENU_KEYBOARD:ShowCategory(PROMOTIONAL_EVENTS_KEYBOARD.fragment) -- TODO Promotional Events: Add a way to specifically open a particular subcategory
             systemObject = PROMOTIONAL_EVENTS_KEYBOARD
         end
         if scrollToFirstClaimableReward then
@@ -115,22 +119,22 @@ function ZO_PromotionalEvent_Manager:OnRewardsClaimed(campaignKey)
     end
 end
 
-function ZO_PromotionalEvent_Manager:IsCampaignActive()
-    return self:GetCurrentCampaignData() ~= nil
+function ZO_PromotionalEvent_Manager:HasActiveCampaign()
+    return #self.activeCampaignDataList > 0
 end
 
-function ZO_PromotionalEvent_Manager:GetCurrentCampaignData()
-    -- TODO Promotional Events: Handle more than one campaign at once
-    if #self.currentCampaignDataList > 0 then
-        return self.currentCampaignDataList[1]
-    end
-    return nil
+function ZO_PromotionalEvent_Manager:GetNumActiveCampaigns()
+    return #self.activeCampaignDataList
+end
+
+function ZO_PromotionalEvent_Manager:GetCampaignDataByIndex(campaignIndex)
+    return self.activeCampaignDataList[campaignIndex]
 end
 
 function ZO_PromotionalEvent_Manager:GetCampaignDataByKey(campaignKey)
-    if campaignKey ~= 0 then
-        for _, campaignData in ipairs(self.currentCampaignDataList) do
-            if campaignKey == campaignData:GetKey() then
+    if CompareId64ToNumber(campaignKey, 0) ~= 0 then
+        for _, campaignData in ipairs(self.activeCampaignDataList) do
+            if AreId64sEqual(campaignKey, campaignData:GetKey()) then
                 return campaignData
             end
         end
@@ -155,6 +159,28 @@ function ZO_PromotionalEvent_Manager:SetCampaignSeen(campaignData, seen)
             self:FireCallbacks("CampaignSeenStateChanged", campaignData)
         end
     end
+end
+
+function ZO_PromotionalEvent_Manager:DoesAnyCampaignHaveCallout()
+    if not IsPromotionalEventSystemLocked() then
+        for _, campaignData in ipairs(self.activeCampaignDataList) do
+            if (not campaignData:HasBeenSeen() or campaignData:IsAnyRewardClaimable()) then
+                return true
+            end
+        end
+    end
+    return false
+end
+
+function ZO_PromotionalEvent_Manager:IsAnyRewardClaimable()
+    if not IsPromotionalEventSystemLocked() then
+        for _, campaignData in ipairs(self.activeCampaignDataList) do
+            if campaignData:IsAnyRewardClaimable() then
+                return true
+            end
+        end
+    end
+    return false
 end
 
 PROMOTIONAL_EVENT_MANAGER = ZO_PromotionalEvent_Manager:New()

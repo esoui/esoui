@@ -205,40 +205,52 @@ function ZO_WorldMapPins_Manager:PingQuest(questIndex, animation)
 end
 
 do
-    local MAPS_WITHOUT_QUEST_PINS =
+    local GLOBAL_MAPS =
     {
         [MAPTYPE_WORLD] = true,
         [MAPTYPE_COSMIC] = true,
     }
 
-    function ZO_WorldMapPins_Manager.DoesCurrentMapHideQuestPins()
-        return MAPS_WITHOUT_QUEST_PINS[GetMapType()]
+    function ZO_WorldMapPins_Manager.IsCurrentMapGlobal()
+        return GLOBAL_MAPS[GetMapType()]
     end
 end
 
 function ZO_WorldMapPins_Manager:AddQuestPin(questIndex)
-    if self.DoesCurrentMapHideQuestPins() then
-        return
-    end
-
     if not ZO_WorldMap_IsPinGroupShown(MAP_FILTER_QUESTS) then
         return
     end
 
     local questSteps = WORLD_MAP_QUEST_BREADCRUMBS:GetSteps(questIndex)
     if questSteps then
+        local NO_RADIUS = nil
+        local NO_BORDER_INFO = nil
+        local IS_SYMBOLIC_LOCATION = true
         for stepIndex, questConditions in pairs(questSteps) do
             for conditionIndex, conditionData in pairs(questConditions) do
                 local xLoc, yLoc = conditionData.xLoc, conditionData.yLoc
                 if conditionData.insideCurrentMapWorld and ZO_WorldMap_IsNormalizedPointInsideMapBounds(xLoc, yLoc) then
                     local tag = ZO_MapPin.CreateQuestPinTag(questIndex, stepIndex, conditionIndex)
+                    local areaRadius = self.IsCurrentMapGlobal() and 0 or conditionData.areaRadius
                     tag.isBreadcrumb = conditionData.isBreadcrumb
-                    local pin = self:CreatePin(conditionData.pinType, tag, xLoc, yLoc, conditionData.areaRadius)
+                    if not self.IsCurrentMapGlobal() or (FOCUSED_QUEST_TRACKER:IsOnTracker(TRACK_TYPE_QUEST, questIndex) and not IsZoneStoryAssisted()) then
+                        local pin = self:CreatePin(conditionData.pinType, tag, xLoc, yLoc, areaRadius, NO_BORDER_INFO, conditionData.symbolicState == QUEST_PIN_STATE_IS_SYMBOLIC_POSITION)
 
-                    if pin:DoesQuestDataMatchQuestPingData() then
-                        local questPinTag = ZO_MapPin.CreateQuestPinTag(questIndex, stepIndex, conditionIndex)
-                        self:CreatePin(MAP_PIN_TYPE_QUEST_PING, questPinTag, xLoc, yLoc)
+                        if conditionData.symbolicState == QUEST_PIN_STATE_HAS_ADDITIONAL_SYMBOLIC_POSITION then
+                            local additionalSymbolicLocX, additionalSymbolicLocY = conditionData.additionalSymbolicLocX, conditionData.additionalSymbolicLocY
+                            local questPinTag = ZO_MapPin.CreateQuestPinTag(questIndex, stepIndex, conditionIndex)
+                            self:CreatePin(conditionData.pinType, questPinTag, additionalSymbolicLocX, additionalSymbolicLocY, NO_RADIUS, NO_BORDER_INFO, IS_SYMBOLIC_LOCATION)
+                        end
+
+                        if pin:DoesQuestDataMatchQuestPingData() then
+                            local questPinTag = ZO_MapPin.CreateQuestPinTag(questIndex, stepIndex, conditionIndex)
+                            self:CreatePin(MAP_PIN_TYPE_QUEST_PING, questPinTag, xLoc, yLoc, NO_RADIUS, NO_BORDER_INFO, conditionData.symbolicState == QUEST_PIN_STATE_IS_SYMBOLIC_POSITION)
+                        end
                     end
+                elseif conditionData.symbolicState == QUEST_PIN_STATE_HAS_ADDITIONAL_SYMBOLIC_POSITION then
+                    local additionalSymbolicLocX, additionalSymbolicLocY = conditionData.additionalSymbolicLocX, conditionData.additionalSymbolicLocY
+                    local questPinTag = ZO_MapPin.CreateQuestPinTag(questIndex, stepIndex, conditionIndex)
+                    self:CreatePin(conditionData.pinType, questPinTag, additionalSymbolicLocX, additionalSymbolicLocY, NO_RADIUS, NO_BORDER_INFO, IS_SYMBOLIC_LOCATION)
                 end
             end
         end
@@ -263,7 +275,7 @@ function ZO_WorldMapPins_Manager:AddCustomPin(pinTypeString, pinTypeAddCallback,
 
     self.m_keyToPinMapping[pinTypeString] = {}
 
-    self.customPins[pinTypeId] = 
+    self.customPins[pinTypeId] =
     { 
         enabled = false,
         layoutCallback = pinTypeAddCallback,
@@ -312,69 +324,206 @@ function ZO_WorldMapPins_Manager:MapPinLookupToPinKey(lookupType, majorIndex, ke
     keys[keyIndex] = pinKey
 end
 
-function ZO_WorldMapPins_Manager:CreatePin(pinType, pinTag, xLoc, yLoc, radius, borderInformation)
-    local pin, pinKey = self:AcquireObject()
-    pin:SetData(pinType, pinTag)
-    pin:SetLocation(xLoc, yLoc, radius, borderInformation)
+do
+    local SYMBOLIC_PIN_SIZE = 28
 
-    if pinType == MAP_PIN_TYPE_PLAYER then
-        pin:PingMapPin(ZO_MapPin.PulseAnimation)
-        self.playerPin = pin
+    local function SortGroupPinsFunction(pinA, pinB)
+        local pinTypeA = pinA:GetPinType()
+        local pinTypeB = pinB:GetPinType()
+
+        if pinTypeA == pinTypeB then
+            return pinA:GetPinId() < pinB:GetPinId()
+        end
+
+        if pinA:IsQuest() and pinB:IsQuest() then
+            return pinTypeA < pinTypeB
+        elseif pinA:IsQuest() then
+            return true
+        elseif pinB:IsQuest() then
+            return false
+        end
+
+        if pinTypeA == MAP_PIN_TYPE_PLAYER then
+            return true
+        elseif pinTypeB == MAP_PIN_TYPE_PLAYER then
+            return false
+        end
+
+        if pinA:IsGroup() and pinB:IsGroup() then
+            return pinTypeA == MAP_PIN_TYPE_GROUP_LEADER
+        elseif pinA:IsGroup() then
+            return false
+        elseif pinB:IsGroup() then
+            return true
+        end
+
+        return pinTypeA < pinTypeB
     end
 
-    if not pin:ValidatePvPPinAllowed() then
-        self:ReleaseObject(pinKey)
-        return
+    local PIN_TYPE_QUEST = 1
+    local PIN_TYPE_PLAYER = 2
+    local PIN_TYPE_GROUP = 3
+
+    local function IsPlayerPin(pin)
+        return pin:GetPinType() == MAP_PIN_TYPE_PLAYER
     end
 
-    if pin:IsPOI() then
-        self:MapPinLookupToPinKey("poi", pin:GetPOIZoneIndex(), pin:GetPOIIndex(), pinKey)
-    elseif pin:IsLocation() then
-        self:MapPinLookupToPinKey("loc", pin:GetLocationIndex(), pin:GetLocationIndex(), pinKey)
-    elseif pin:IsQuest() then
-        self:MapPinLookupToPinKey("quest", pin:GetQuestIndex(), pinTag, pinKey)
-    elseif pin:IsObjective() then
-        self:MapPinLookupToPinKey("objective", pin:GetObjectiveKeepId(), pinTag, pinKey)
-    elseif pin:IsKeepOrDistrict() then
-        self:MapPinLookupToPinKey("keep", pin:GetKeepId(), pin:IsUnderAttackPin(), pinKey)
-    elseif pin:IsMapPing() then
-        self:MapPinLookupToPinKey("pings", pinType, pinTag, pinKey)
-    elseif pin:IsKillLocation() then
-        self:MapPinLookupToPinKey("killLocation", pinType, pinTag, pinKey)
-    elseif pin:IsFastTravelKeep() then
-        self:MapPinLookupToPinKey("fastTravelKeep", pin:GetFastTravelKeepId(), pin:GetFastTravelKeepId(), pinKey)
-    elseif pin:IsFastTravelWayShrine() then
-        self:MapPinLookupToPinKey("fastTravelWayshrine", pinType, pinTag, pinKey)
-    elseif pin:IsForwardCamp() then
-        self:MapPinLookupToPinKey("forwardCamp", pinType, pinTag, pinKey)
-    elseif pin:IsAvARespawn() then
-        self:MapPinLookupToPinKey("AvARespawn", pinType, pinTag, pinKey)
-    elseif pin:IsGroup() then
-        self:MapPinLookupToPinKey("group", pinType, pinTag, pinKey)
-    elseif pin:IsRestrictedLink() then
-        self:MapPinLookupToPinKey("restrictedLink", pinType, pinTag, pinKey)
-    elseif pin:IsSuggestion() then
-        self:MapPinLookupToPinKey("suggestion", pinType, pinTag, pinKey)
-    elseif pin:IsWorldEventUnitPin() then
-        self:MapPinLookupToPinKey("worldEventUnit", pin:GetWorldEventInstanceId(), pin:GetUnitTag(), pinKey)
-    elseif pin:IsWorldEventPOIPin() then
-        self:MapPinLookupToPinKey("worldEventPOI", pin:GetWorldEventInstanceId(), pinTag, pinKey)
-    elseif pin:IsAntiquityDigSitePin() then
-        self:MapPinLookupToPinKey("antiquityDigSite", pinType, pinTag, pinKey)
-    elseif pin:IsCompanion() then
-        self:MapPinLookupToPinKey("companion", pinType, pinTag, pinKey)
-    elseif pin:IsSkyshard() then
-        self:MapPinLookupToPinKey("skyshard", pinType, pinTag, pinKey)
-    else
-        local customPinData = self.customPins[pinType]
-        if customPinData then
-            self:MapPinLookupToPinKey(customPinData.pinTypeString, pinType, pinTag, pinKey)
+    local function IsQuestPin(pin)
+        return pin:IsQuest() or pin:GetPinType() == MAP_PIN_TYPE_QUEST_PING
+    end
+
+   local function IsGroupPin(pin)
+        return pin:IsGroup()
+    end
+
+    local PIN_TYPE_FUNCTION =
+    {
+        [PIN_TYPE_QUEST] = IsQuestPin,
+        [PIN_TYPE_PLAYER] = IsPlayerPin,
+        [PIN_TYPE_GROUP] = IsGroupPin,
+    }
+
+    local function GetPinOverlapMultiplierX(pinIndex, totalPins)
+        return ((totalPins - 1) * -0.5) + (pinIndex - 1)
+    end
+
+    local function GetPinOverlapMultiplierY(pinIndex, totalPins)
+        return 0.5
+    end
+
+    function ZO_WorldMapPins_Manager:UpdateSymbolicPins()
+        local symbolicPinsByLocation = {}
+        for _, activePin in self:ActiveObjectIterator() do
+            if activePin:IsSymbolicPosition() then
+                local locationFound = false
+                local originalX, originalY = activePin:GetOriginalPosition()
+                for _, locationPins in ipairs(symbolicPinsByLocation) do
+                    if locationPins.x == originalX and locationPins.y == originalY then
+                        table.insert(locationPins.activePins, activePin)
+                        locationFound = true
+                    end
+                end
+
+                if not locationFound then
+                    local locationData =
+                    {
+                        x = originalX,
+                        y = originalY,
+                        activePins = { activePin },
+                    }
+                    table.insert(symbolicPinsByLocation, locationData)
+                end
+            end
+        end
+
+        for _, locationData in pairs(symbolicPinsByLocation) do
+            table.sort(locationData.activePins, SortGroupPinsFunction)
+
+            local totalPinTypes = 0
+            local pinsByType = {}
+            for locationIndex, activePin in ipairs(locationData.activePins) do
+                for pinTypeIndex = PIN_TYPE_QUEST, PIN_TYPE_GROUP do
+                    if PIN_TYPE_FUNCTION[pinTypeIndex](activePin) then
+                        if not pinsByType[pinTypeIndex] then
+                            pinsByType[pinTypeIndex] = {}
+                            totalPinTypes = totalPinTypes + 1
+                        end
+                        table.insert(pinsByType[pinTypeIndex], activePin)
+                    end
+                end
+            end
+
+            local index = 1
+            for pinType, typePins in pairs(pinsByType) do
+                local offsetMultiplierX = GetPinOverlapMultiplierX(index, totalPinTypes)
+                local offsetMultiplierY = GetPinOverlapMultiplierY(index, totalPinTypes)
+                local isFirstOfTypeShown = false
+                for i, pin in ipairs(typePins) do
+                    pin:SetOverlapOffsets(offsetMultiplierX * SYMBOLIC_PIN_SIZE, offsetMultiplierY * SYMBOLIC_PIN_SIZE)
+                    pin:UpdateLocation()
+
+                    if not isFirstOfTypeShown then
+                        pin:GetControl():SetAlpha(1)
+                        isFirstOfTypeShown = true
+                    elseif pinType == PIN_TYPE_GROUP then
+                        pin:GetControl():SetAlpha(0)
+                    else
+                        pin:GetControl():SetAlpha(1)
+                    end
+                end
+                index = index + 1
+            end
         end
     end
 
-    ZO_WorldMap_GetPanAndZoom():OnPinCreated()
+    function ZO_WorldMapPins_Manager:CreatePin(pinType, pinTag, xLoc, yLoc, radius, borderInformation, isSymbolicLoc)
+        local pin, pinKey = self:AcquireObject()
+        pin:SetData(pinType, pinTag)
+        pin:SetOriginalPosition(xLoc, yLoc)
+        pin:SetIsSymbolicPosition(isSymbolicLoc)
+        pin:SetLocation(xLoc, yLoc, radius, borderInformation)
 
-    return pin
+        self:UpdateSymbolicPins()
+
+        if pinType == MAP_PIN_TYPE_PLAYER then
+            pin:PingMapPin(ZO_MapPin.PulseAnimation)
+            self.playerPin = pin
+        end
+
+        if not pin:ValidatePvPPinAllowed() then
+            self:ReleaseObject(pinKey)
+            return
+        end
+
+        if pin:IsPOI() then
+            self:MapPinLookupToPinKey("poi", pin:GetPOIZoneIndex(), pin:GetPOIIndex(), pinKey)
+        elseif pin:IsLocation() then
+            self:MapPinLookupToPinKey("loc", pin:GetLocationIndex(), pin:GetLocationIndex(), pinKey)
+        elseif pin:IsQuest() then
+            self:MapPinLookupToPinKey("quest", pin:GetQuestIndex(), pinTag, pinKey)
+        elseif pin:IsObjective() then
+            self:MapPinLookupToPinKey("objective", pin:GetObjectiveKeepId(), pinTag, pinKey)
+        elseif pin:IsKeepOrDistrict() then
+            self:MapPinLookupToPinKey("keep", pin:GetKeepId(), pin:IsUnderAttackPin(), pinKey)
+        elseif pin:IsMapPing() then
+            self:MapPinLookupToPinKey("pings", pinType, pinTag, pinKey)
+        elseif pin:IsKillLocation() then
+            self:MapPinLookupToPinKey("killLocation", pinType, pinTag, pinKey)
+        elseif pin:IsFastTravelKeep() then
+            self:MapPinLookupToPinKey("fastTravelKeep", pin:GetFastTravelKeepId(), pin:GetFastTravelKeepId(), pinKey)
+        elseif pin:IsFastTravelWayShrine() then
+            self:MapPinLookupToPinKey("fastTravelWayshrine", pinType, pinTag, pinKey)
+        elseif pin:IsForwardCamp() then
+            self:MapPinLookupToPinKey("forwardCamp", pinType, pinTag, pinKey)
+        elseif pin:IsAvARespawn() then
+            self:MapPinLookupToPinKey("AvARespawn", pinType, pinTag, pinKey)
+        elseif pin:IsGroup() then
+            self:MapPinLookupToPinKey("group", pinType, pinTag, pinKey)
+        elseif pin:IsRestrictedLink() then
+            self:MapPinLookupToPinKey("restrictedLink", pinType, pinTag, pinKey)
+        elseif pin:IsSuggestion() then
+            self:MapPinLookupToPinKey("suggestion", pinType, pinTag, pinKey)
+        elseif pin:IsWorldEventUnitPin() then
+            self:MapPinLookupToPinKey("worldEventUnit", pin:GetWorldEventInstanceId(), pin:GetUnitTag(), pinKey)
+        elseif pin:IsWorldEventPOIPin() then
+            self:MapPinLookupToPinKey("worldEventPOI", pin:GetWorldEventInstanceId(), pinTag, pinKey)
+        elseif pin:IsAntiquityDigSitePin() then
+            self:MapPinLookupToPinKey("antiquityDigSite", pinType, pinTag, pinKey)
+        elseif pin:IsCompanion() then
+            self:MapPinLookupToPinKey("companion", pinType, pinTag, pinKey)
+        elseif pin:IsSkyshard() then
+            self:MapPinLookupToPinKey("skyshard", pinType, pinTag, pinKey)
+        else
+            local customPinData = self.customPins[pinType]
+            if customPinData then
+                self:MapPinLookupToPinKey(customPinData.pinTypeString, pinType, pinTag, pinKey)
+            end
+        end
+
+        ZO_WorldMap_GetPanAndZoom():OnPinCreated()
+
+        return pin
+    end
 end
 
 function ZO_WorldMapPins_Manager:FindPin(lookupType, majorIndex, keyIndex)
@@ -585,7 +734,7 @@ end
 function ZO_WorldMapPins_Manager:RefreshGroupPins()
     self:RemovePins("group")
 
-    if ZO_WorldMap_IsPinGroupShown(MAP_FILTER_GROUP_MEMBERS) and GetMapType() ~= MAPTYPE_COSMIC then
+    if ZO_WorldMap_IsPinGroupShown(MAP_FILTER_GROUP_MEMBERS) then
         local isInDungeon = GetMapContentType() == MAP_CONTENT_DUNGEON
         local isInHouse = GetCurrentZoneHouseId() ~= 0
         for i = 1, MAX_GROUP_SIZE_THRESHOLD do
@@ -606,7 +755,7 @@ function ZO_WorldMapPins_Manager:RefreshGroupPins()
                 end
 
                 if not isGroupMemberHiddenByInstance then
-                    local x, y, _, isInCurrentMap = GetMapPlayerPosition(groupTag)
+                    local x, y, _, isInCurrentMap, isSymbolicLocation = GetMapPlayerPosition(groupTag)
                     if isInCurrentMap then
                         local isLeader = IsUnitGroupLeader(groupTag)
                         local tagData = groupTag
@@ -618,10 +767,9 @@ function ZO_WorldMapPins_Manager:RefreshGroupPins()
                             }
                         end
 
-                        local groupPin = self:CreatePin(isLeader and MAP_PIN_TYPE_GROUP_LEADER or MAP_PIN_TYPE_GROUP, tagData)
-                        if groupPin then
-                            groupPin:SetLocation(x, y)
-                        end
+                        local NO_RADIUS = nil
+                        local NO_BORDER_INFO = nil
+                        self:CreatePin(isLeader and MAP_PIN_TYPE_GROUP_LEADER or MAP_PIN_TYPE_GROUP, tagData, x, y, NO_RADIUS, NO_BORDER_INFO, isSymbolicLocation)
                     end
                 end
             end
@@ -632,12 +780,14 @@ end
 function ZO_WorldMapPins_Manager:UpdateMovingPins()
     do
         local playerPin = self:GetPlayerPin()
-        local xLoc, yLoc, _, isShownInCurrentMap = GetMapPlayerPosition("player")
+        local xLoc, yLoc, _, isShownInCurrentMap, isSymbolicLocation = GetMapPlayerPosition("player")
+        playerPin:SetOriginalPosition(xLoc, yLoc)
+        playerPin:SetIsSymbolicPosition(isSymbolicLocation)
         playerPin:SetLocation(xLoc, yLoc)
-        -- Design rule, don't show player pin on cosmic, even if they're in the map
-        if isShownInCurrentMap and GetMapType() ~= MAPTYPE_COSMIC then
+        if isShownInCurrentMap then
             playerPin:SetHidden(false)
-            playerPin:SetRotation(GetPlayerCameraHeading())
+            local rotation = isSymbolicLocation and 0 or GetPlayerCameraHeading()
+            playerPin:SetRotation(rotation)
         else
             playerPin:SetHidden(true)
         end
@@ -656,7 +806,7 @@ function ZO_WorldMapPins_Manager:UpdateMovingPins()
         local xLoc, yLoc = GetMapPlayerPosition(companionPin:GetUnitTag())
         companionPin:SetLocation(xLoc, yLoc)
     end
-    
+
     for _, objectivePin in ipairs(self.objectiveMovingPins) do
         local _, currentX, currentY = GetObjectivePinInfo(objectivePin:GetObjectiveKeepId(), objectivePin:GetObjectiveObjectiveId(), objectivePin:GetBattlegroundContext())
         objectivePin:SetLocation(currentX, currentY)
@@ -668,6 +818,8 @@ function ZO_WorldMapPins_Manager:UpdateMovingPins()
         worldEventPin:SetLocation(xLoc, yLoc)
     end
     ZO_ClearNumericallyIndexedTable(movingPins)
+
+    self:UpdateSymbolicPins()
 end
 
 --[[
@@ -725,7 +877,7 @@ end
 function ZO_WorldMapPins_Manager:DoMouseExitForPin(pin)
     if pin:IsPOI() or pin:IsFastTravelWayShrine() then
         --reset the status to show what part of the map we're over (except if it's the name of this zone)
-        local currentLocation = ZO_WorldMap_GetMouseOverMapBlobManager().m_currentLocation
+        local currentLocation = WORLD_MAP_MANAGER.mouseoverCurrentLocation
         if currentLocation ~= ZO_WorldMap.zoneName then
             ZO_WorldMapMouseoverName:SetText(zo_strformat(SI_WORLD_MAP_LOCATION_NAME, currentLocation))
             ZO_WorldMapMouseoverName.owner = "map"

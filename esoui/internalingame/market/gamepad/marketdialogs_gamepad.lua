@@ -624,7 +624,7 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
     })
 
     local LOADING_DELAY_MS = 500 -- delay is in milliseconds
-    local function OnMarketPurchaseResult(dialog, result, tutorialTrigger, wasGift)
+    local function OnMarketPurchaseResult(dialog, result, tutorialProductId, wasGift)
         EVENT_MANAGER:UnregisterForEvent("GAMEPAD_MARKET_PURCHASING", EVENT_MARKET_PURCHASE_RESULT)
 
         internalassert(wasGift == self.isGift)
@@ -632,8 +632,12 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
         self.useProductInfo = nil
         local purchaseSucceeded = result == MARKET_PURCHASE_RESULT_SUCCESS
         if not wasGift then
-            if tutorialTrigger ~= TUTORIAL_TRIGGER_NONE then
-                self.triggerTutorialOnPurchase = tutorialTrigger
+            if tutorialProductId ~= 0 then
+                self.triggerTutorialOnPurchase = 
+                { 
+                    trigger = TUTORIAL_TRIGGER_CROWN_STORE_PRODUCT_PURCHASED, 
+                    param = tutorialProductId
+                }
             end
 
             if purchaseSucceeded then

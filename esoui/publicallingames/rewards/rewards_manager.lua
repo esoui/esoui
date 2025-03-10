@@ -99,6 +99,10 @@ function ZO_RewardData:SetAnnouncementBackground(announcementBackground)
     self.announcementBackground = announcementBackground
 end
 
+function ZO_RewardData:SetFallbackRewardData(fallbackRewardData)
+    self.fallbackRewardData = fallbackRewardData
+end
+
 function ZO_RewardData:GetEquipSlot()
     return self.equipSlot
 end
@@ -221,29 +225,25 @@ function ZO_RewardData:GetDisplayFlags()
     return self.displayFlags
 end
 
+function ZO_RewardData:GetFallbackRewardData()
+    return self.fallbackRewardData
+end
+
+function ZO_RewardData:ShouldUseFallback()
+    if self.fallbackRewardData then
+        return ShouldUseFallbackReward(self.rewardId)
+    end
+    return false
+end
+
 ---------------------
 -- Rewards Manager
 ---------------------
 
-ZO_RewardsManager = ZO_CallbackObject:Subclass()
+ZO_RewardsManager = ZO_InitializingCallbackObject:Subclass()
 
-function ZO_RewardsManager:New(...)
-    local rewards = ZO_CallbackObject.New(self)
-    rewards:Initialize(...)
-    return rewards
-end
-
-function ZO_RewardsManager:Initialize()
-    
-end
-
-do
-    local PARENT_CHOICE = nil
-    local VALIDATION_FUNCTION = nil
-    local SELECTED_CHOICE_FUNCTION = nil
-    function ZO_RewardsManager:GetInfoForDailyLoginReward(rewardId, quantity)
-        return self:GetInfoForReward(rewardId, quantity, PARENT_CHOICE, VALIDATION_FUNCTION, SELECTED_CHOICE_FUNCTION)
-    end
+function ZO_RewardsManager:GetInfoForDailyLoginReward(rewardId, quantity)
+    return self:GetInfoForReward(rewardId, quantity)
 end
 
 function ZO_RewardsManager:GetAllRewardInfoForRewardList(rewardListId, parentChoice, validationFunction, isSelectedChoiceFunction)
@@ -274,7 +274,7 @@ function ZO_RewardsManager:DoesRewardListContainMailItems(rewardListId)
     return false
 end
 
-function ZO_RewardsManager:GetInfoForReward(rewardId, quantity, parentChoice, validationFunction, isSelectedChoiceFunction)
+function ZO_RewardsManager:InternalCreateRewardData(rewardId, quantity, parentChoice, validationFunction, isSelectedChoiceFunction, visitedFallbackRewards)
     local entryType = GetRewardType(rewardId)
     local rewardData
     if entryType == REWARD_ENTRY_TYPE_ADD_CURRENCY then
@@ -306,8 +306,30 @@ function ZO_RewardsManager:GetInfoForReward(rewardId, quantity, parentChoice, va
         if parentChoice then
             rewardData:SetIsSelectedChoice(isSelectedChoiceFunction and isSelectedChoiceFunction(parentChoice.rewardId, rewardData.rewardId))
         end
+
+        local fallbackRewardId, fallbackRewardQuantity = GetFallbackReward(rewardId)
+        if fallbackRewardId ~= 0 then
+            -- Protect against self-reference and chained reference loops.
+            -- Technically we don't support fallback chaining, but this code is meant to be future proof.
+            visitedFallbackRewards = visitedFallbackRewards or {}
+            visitedFallbackRewards[rewardId] = rewardData
+
+            local fallbackRewardData = visitedFallbackRewards[fallbackRewardId]
+            if not fallbackRewardData then
+                fallbackRewardData = self:InternalCreateRewardData(fallbackRewardId, fallbackRewardQuantity, visitedFallbackRewards)
+            end
+
+            if fallbackRewardData then
+                rewardData:SetFallbackRewardData(fallbackRewardData)
+            end
+        end
     end
     return rewardData
+end
+
+function ZO_RewardsManager:GetInfoForReward(rewardId, quantity, parentChoice, validationFunction, isSelectedChoiceFunction)
+    local NO_VISITED_FALLBACK_REWARDS = nil
+    return self:InternalCreateRewardData(rewardId, quantity, parentChoice, validationFunction, isSelectedChoiceFunction, NO_VISITED_FALLBACK_REWARDS)
 end
 
 function ZO_RewardsManager:GetChoiceEntryInfo(rewardId, parentChoice, validationFunction, isSelectedChoiceFunction)

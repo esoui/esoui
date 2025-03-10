@@ -51,7 +51,7 @@
                             </Controls>
                         </StatusBar>
 
-                        <Label name="$(parent)LevelType" font="ZoFontGamepad27" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:ZO_NORMAL_TEXT" modifyTextType="UPPERCASE" text="SI_COMPANION_LEVEL_LABEL">
+                        <Label name="$(parent)LevelType" font="ZoFontGamepad27" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE" text="SI_COMPANION_LEVEL_LABEL">
                             <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Bar" relativePoint="TOPLEFT" offsetX="1" offsetY="7"/>
                         </Label>
                     </Controls>

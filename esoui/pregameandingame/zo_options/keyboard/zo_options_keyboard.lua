@@ -210,6 +210,9 @@ function ZO_KeyboardOptions:ShowPanel(panelId)
     -- Show the new panel
     local cameraPreviewMode = panelId == SETTING_PANEL_CAMERA
     SetCameraOptionsPreviewModeEnabled(cameraPreviewMode, CAMERA_OPTIONS_PREVIEW_NONE)
+    if SetFrameLocalPlayerInGameCamera then
+        SetFrameLocalPlayerInGameCamera(not cameraPreviewMode)
+    end
     self:UpdateCurrentPanelOptions(DONT_SAVE_CURRENT_VALUES)
     self:UpdatePanelVisibility(panelId)
 

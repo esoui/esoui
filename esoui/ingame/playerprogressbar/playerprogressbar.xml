@@ -108,7 +108,7 @@
                     <!-- The width is handled in the actual control's OnShow/OnHide handlers, and hidden must be "true" so the width is set properly when the template is changed-->
                     <Dimensions x="0" y="24"/>
                 </Texture>
-                <Label name="$(parent)LevelType" font="ZoFontHeader2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:ZO_DEFAULT_ENABLED_COLOR" modifyTextType="UPPERCASE">
+                <Label name="$(parent)LevelType" font="ZoFontHeader2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE">
                     <Anchor point="BOTTOMLEFT" relativeTo="$(parent)LevelTypeIcon" relativePoint="BOTTOMRIGHT" offsetX="2" offsetY="3"/>
                 </Label>
                 <Label name="$(parent)ChampionPoints" font="ZoFontWinH1">
@@ -133,7 +133,7 @@
                     <!-- The width is handled in the actual control's OnShow/OnHide handlers, and hidden must be "true" so the width is set properly when the template is changed-->
                     <Dimensions x="0" y="24"/>
                 </Texture>
-                <Label name="$(parent)LevelType" font="ZoFontHeader2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:ZO_DEFAULT_ENABLED_COLOR" modifyTextType="UPPERCASE">
+                <Label name="$(parent)LevelType" font="ZoFontHeader2" color="INTERFACE_COLOR_TYPE_GENERAL:INTERFACE_GENERAL_COLOR_ENABLED" modifyTextType="UPPERCASE">
                     <Anchor point="BOTTOMLEFT" relativeTo="$(parent)LevelTypeIcon" relativePoint="BOTTOMRIGHT" offsetX="2" offsetY="3"/>
                 </Label>
                 <Label name="$(parent)ChampionPoints" font="ZoFontWinH1">

@@ -2,6 +2,9 @@ local g_isReadOnly = false
 local isDeadReadOnly = false
 local isShowingReadOnlyFragment = false
 
+local g_areEffectsDirty = true
+local g_mundusStonesStatEntry = nil
+
 local MOUSE_OVER_TEXTURE = "EsoUI/Art/ActionBar/actionBar_mouseOver.dds"
 
 local function RestoreMouseOverTexture(slotControl)
@@ -71,6 +74,9 @@ end
 
 local PLAY_ANIMATION = true
 local NO_ANIMATION = false
+
+local CHARACTER_WINDOW_TOOLTIP_ANCHOR_SIDE = LEFT
+local CHARACTER_STAT_CONTROLS = {}
 
 local function UpdateSlotAppearance(slotId, slotControl, animationOption, copyFromLinkedFn)
     local iconControl = slotControl:GetNamedChild("Icon")
@@ -180,6 +186,7 @@ end
 
 local function FullInventoryUpdated()
     RefreshWornInventory()
+    ZO_Character_UpdateEffects()
 end
 
 local function DoWornSlotUpdate(bagId, slotId, animationOption, updateReason)
@@ -190,6 +197,7 @@ end
 
 local function InventorySlotUpdated(eventCode, bagId, slotId, isNewItem, itemSoundCategory, updateReason)
     DoWornSlotUpdate(bagId, slotId, PLAY_ANIMATION, updateReason)
+    ZO_Character_UpdateEffects()
 end
 
 local function InventoryEquipMythicFailed(eventCode, bagId, slotId)
@@ -298,6 +306,31 @@ function ZO_Character_SetIsShowingReadOnlyFragment(isReadOnly)
     ZO_Character_UpdateReadOnly()
 end
 
+function ZO_Character_UpdateEffects()
+    if not (g_mundusStonesStatEntry and not CHARACTER_WINDOW_HEADER_FRAGMENT:IsHidden()) then
+        g_areEffectsDirty = true
+        return
+    end
+    g_areEffectsDirty = false
+
+    local mundusIconControls =
+    {
+        g_mundusStonesStatEntry.mundus1,
+        g_mundusStonesStatEntry.mundus2,
+    }
+    local function GetDerivedStatByTypeFunction(statType)
+        return CHARACTER_STAT_CONTROLS[statType]
+    end
+
+    -- Reset all stats to have no mundus icons
+    for _, control in pairs(CHARACTER_STAT_CONTROLS) do
+        control.statEntry:SetHasMundusEffect(false)
+        control.statEntry:UpdateStatValue()
+    end
+
+    ZO_SharedStats_SetupMundusIconControls(mundusIconControls, CHARACTER_WINDOW_TOOLTIP_ANCHOR_SIDE, 5, GetDerivedStatByTypeFunction)
+end
+
 local function OnPlayerDead()
     isDeadReadOnly = true
     ZO_Character_UpdateReadOnly()
@@ -326,6 +359,8 @@ function ZO_Character_Initialize(control)
     ZO_Character:RegisterForEvent(EVENT_PLAYER_DEAD, OnPlayerDead)
     ZO_Character:RegisterForEvent(EVENT_PLAYER_ALIVE, OnPlayerAlive)
     ZO_Character:RegisterForEvent(EVENT_PLAYER_ACTIVATED, OnPlayerActivated)
+    ZO_Character:RegisterForEvent(EVENT_EFFECT_CHANGED, ZO_Character_UpdateEffects)
+    ZO_Character:RegisterForEvent(EVENT_ATTRIBUTE_UPGRADE_UPDATED, ZO_Character_UpdateEffects)
 
     local function OnActiveWeaponPairChanged(event, activeWeaponPair)
         local unlockLevel = GetWeaponSwapUnlockedLevel()
@@ -367,8 +402,6 @@ local DEFAULT_STAT_SPACING = 0
 local STAT_GROUP_SPACING = 20
 local STAT_GROUP_OFFSET_X = 10
 
-local CHARACTER_STAT_CONTROLS = {}
-
 function ZO_CharacterWindowStats_Initialize(control)
     local parentControl = control:GetNamedChild("ScrollScrollChild")
     local lastControl = nil
@@ -385,11 +418,46 @@ function ZO_CharacterWindowStats_Initialize(control)
             end
 
             local statEntry = ZO_StatEntry_Keyboard:New(statControl, stat)
-            statEntry.tooltipAnchorSide = LEFT
+            statEntry.tooltipAnchorSide = CHARACTER_WINDOW_TOOLTIP_ANCHOR_SIDE
             lastControl = statControl
             nextPaddingY = DEFAULT_STAT_SPACING
         end
         nextPaddingY = STAT_GROUP_SPACING
+    end
+
+    do
+        -- Add Mundus Stones stat entry.
+        local MUNDUS_PADDING = 10
+        local statControl = CreateControlFromVirtual("$(parent)ZO_MundusStonesStatsEntry", parentControl, "ZO_MundusStonesStatsEntry")
+        g_mundusStonesStatEntry = statControl
+        statControl:SetAnchor(TOP, lastControl, BOTTOM, 0, MUNDUS_PADDING)
+    end
+end
+
+do
+    local keybindButtons =
+    {
+        {
+            alignment = KEYBIND_STRIP_ALIGN_RIGHT,
+            name = GetString(SI_STATS_MUNDUS_INFO_BUTTON),
+            keybind = "UI_SHORTCUT_PRIMARY",
+            callback = function()
+                local helpCategoryIndex, helpIndex = GetMundusStoneHelpIndices()
+                HELP:ShowSpecificHelp(helpCategoryIndex, helpIndex)
+            end,
+        },
+    }
+
+    function ZO_CharacterWindowStats_RefreshKeybinds()
+        if g_mundusStonesStatEntry and not CHARACTER_WINDOW_HEADER_FRAGMENT:IsHidden() and ZO_StatsMundus_ShouldShowHelpKeybind then
+            if KEYBIND_STRIP:HasKeybindButtonGroup(keybindButtons) then
+                KEYBIND_STRIP:UpdateKeybindButtonGroup(keybindButtons)
+            else
+                KEYBIND_STRIP:AddKeybindButtonGroup(keybindButtons)
+            end
+        else
+            KEYBIND_STRIP:RemoveKeybindButtonGroup(keybindButtons)
+        end
     end
 end
 
@@ -411,6 +479,20 @@ function ZO_CharacterWindowStats_HideComparisonValues()
         for _, stat in ipairs(statGroup) do
             local statControl = CHARACTER_STAT_CONTROLS[stat]
             statControl.statEntry:HideComparisonValue()
+        end
+    end
+end
+
+function ZO_CharacterWindowStats_ShowMundusComparisonValues(statEffects)
+    for _, statGroup in ipairs(ZO_INVENTORY_STAT_GROUPS) do
+        for _, stat in ipairs(statGroup) do
+            for _, data in ipairs(statEffects) do
+                if stat == data.statType then
+                    local EXCLUDE_DELTA = true
+                    local statControl = CHARACTER_STAT_CONTROLS[stat]
+                    statControl.statEntry:ShowComparisonValue(data.effect, EXCLUDE_DELTA)
+                end
+            end
         end
     end
 end

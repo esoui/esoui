@@ -47,8 +47,8 @@ function ZO_PromotionalEventActivityData:GetCompletionThreshold()
 end
 
 function ZO_PromotionalEventActivityData:GetProgress()
-    local progress, isRewardClaimed = GetPromotionalEventCampaignActivityProgress(self:GetCampaignKey(), self.activityIndex)
-    return progress, isRewardClaimed
+    local progress, rewardFlags = GetPromotionalEventCampaignActivityProgress(self:GetCampaignKey(), self.activityIndex)
+    return progress, rewardFlags
 end
 
 function ZO_PromotionalEventActivityData:IsComplete()
@@ -57,12 +57,18 @@ function ZO_PromotionalEventActivityData:IsComplete()
 end
 
 function ZO_PromotionalEventActivityData:IsRewardClaimed()
-    local _, isRewardClaimed = self:GetProgress()
-    return isRewardClaimed
+    local _, rewardFlags = self:GetProgress()
+    local isRewardClaimed = ZO_FlagHelpers.MaskHasFlag(rewardFlags, PROMOTIONAL_EVENTS_REWARD_FLAG_CLAIMED)
+    if isRewardClaimed then
+        local wasFallbackClaimed = ZO_FlagHelpers.MaskHasFlag(rewardFlags, PROMOTIONAL_EVENTS_REWARD_FLAG_FALLBACK)
+        return true, wasFallbackClaimed
+    end
+    return false
 end
 
 function ZO_PromotionalEventActivityData:CanClaimReward()
-    local progress, isRewardClaimed = GetPromotionalEventCampaignActivityProgress(self:GetCampaignKey(), self.activityIndex)
+    local progress, rewardFlags = self:GetProgress()
+    local isRewardClaimed = ZO_FlagHelpers.MaskHasFlag(rewardFlags, PROMOTIONAL_EVENTS_REWARD_FLAG_CLAIMED)
     return not isRewardClaimed and progress == self.completionThreshold
 end
 
@@ -83,7 +89,7 @@ end
 
 function ZO_PromotionalEventActivityData:IsTracked()
     local campaignKey, activityIndex = GetTrackedPromotionalEventActivityInfo()
-    return campaignKey == self:GetCampaignKey() and activityIndex == self.activityIndex
+    return AreId64sEqual(campaignKey, self:GetCampaignKey()) and activityIndex == self.activityIndex
 end
 
 function ZO_PromotionalEventActivityData:ToggleTracking(suppressSound)
@@ -156,8 +162,13 @@ function ZO_PromotionalEventMilestoneData:HasReachedMilestone()
 end
 
 function ZO_PromotionalEventMilestoneData:IsRewardClaimed()
-    local isRewardClaimed = IsPromotionalEventCampaignMilestoneRewardClaimed(self:GetCampaignKey(), self.milestoneIndex)
-    return isRewardClaimed
+    local rewardFlags = GetPromotionalEventCampaignMilestoneRewardFlags(self:GetCampaignKey(), self.milestoneIndex)
+    local isRewardClaimed = ZO_FlagHelpers.MaskHasFlag(rewardFlags, PROMOTIONAL_EVENTS_REWARD_FLAG_CLAIMED)
+    if isRewardClaimed then
+        local wasFallbackClaimed = ZO_FlagHelpers.MaskHasFlag(rewardFlags, PROMOTIONAL_EVENTS_REWARD_FLAG_FALLBACK)
+        return true, wasFallbackClaimed
+    end
+    return false
 end
 
 function ZO_PromotionalEventMilestoneData:CanClaimReward()
@@ -301,8 +312,8 @@ function ZO_PromotionalEventCampaignData:GetSecondsRemaining()
 end
 
 function ZO_PromotionalEventCampaignData:GetProgress()
-    local numActivitiesCompleted, isCapstoneRewardClaimed = GetPromotionalEventCampaignProgress(self.campaignKey)
-    return numActivitiesCompleted, isCapstoneRewardClaimed
+    local numActivitiesCompleted, capstoneRewardFlags = GetPromotionalEventCampaignProgress(self.campaignKey)
+    return numActivitiesCompleted, capstoneRewardFlags
 end
 
 function ZO_PromotionalEventCampaignData:GetNumActivitiesCompleted()
@@ -315,13 +326,19 @@ function ZO_PromotionalEventCampaignData:GetCapstoneRewardThreshold()
 end
 
 function ZO_PromotionalEventCampaignData:IsRewardClaimed()
-    local _, isCapstoneRewardClaimed = self:GetProgress()
-    return isCapstoneRewardClaimed
+    local _, rewardFlags = self:GetProgress()
+    local isRewardClaimed = ZO_FlagHelpers.MaskHasFlag(rewardFlags, PROMOTIONAL_EVENTS_REWARD_FLAG_CLAIMED)
+    if isRewardClaimed then
+        local wasFallbackClaimed = ZO_FlagHelpers.MaskHasFlag(rewardFlags, PROMOTIONAL_EVENTS_REWARD_FLAG_FALLBACK)
+        return true, wasFallbackClaimed
+    end
+    return false
 end
 
 function ZO_PromotionalEventCampaignData:CanClaimReward()
-    local numActivitiesCompleted, isCapstoneRewardClaimed = GetPromotionalEventCampaignProgress(self.campaignKey)
-    return not isCapstoneRewardClaimed and numActivitiesCompleted >= self.capstoneCompletionThreshold
+    local numActivitiesCompleted, rewardFlags = self:GetProgress()
+    local isRewardClaimed = ZO_FlagHelpers.MaskHasFlag(rewardFlags, PROMOTIONAL_EVENTS_REWARD_FLAG_CLAIMED)
+    return not isRewardClaimed and numActivitiesCompleted >= self.capstoneCompletionThreshold
 end
 
 function ZO_PromotionalEventCampaignData:TryClaimReward()

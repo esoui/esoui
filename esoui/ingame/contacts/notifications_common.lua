@@ -642,22 +642,30 @@ do
         return provider
     end
 
-    function ZO_PointsResetProvider:BuildNotificationList()
-        ZO_ClearNumericallyIndexedTable(self.list)
+    do
+        local SLOT_RESPEC_TYPES =
+        {
+            [RESPEC_TYPE_CHAMPION_SLOTS] = true
+        }
 
-        for respecType, isShown in pairs(pointResetCallbackObject.respecsShown) do
-            if isShown then
-                table.insert(self.list,
-                    {
-                        dataType = NOTIFICATIONS_POINTS_RESET_DATA,
-                        notificationType = NOTIFICATION_TYPE_POINTS_RESET,
-                        message = GetString("SI_RESPECTYPE_NOTIFICATIONPOINTSRESET", respecType),
-                        shortDisplayText = GetString("SI_RESPECTYPE_POINTSRESETTITLE", respecType),
-                        respecType = respecType,
-                        secsSinceRequest = ZO_NormalizeSecondsSince(0),
-                        acceptText = GetString("SI_RESPECTYPE_NOTIFICATIONOPENBUTTON", respecType),
-                    }
-                )
+        function ZO_PointsResetProvider:BuildNotificationList()
+            ZO_ClearNumericallyIndexedTable(self.list)
+
+            for respecType, isShown in pairs(pointResetCallbackObject.respecsShown) do
+                if isShown then
+                    local notificationType = SLOT_RESPEC_TYPES[respecType] and NOTIFICATION_TYPE_SLOTS_RESET or NOTIFICATION_TYPE_POINTS_RESET
+                    table.insert(self.list,
+                        {
+                            dataType = NOTIFICATIONS_POINTS_RESET_DATA,
+                            notificationType = notificationType,
+                            message = GetString("SI_RESPECTYPE_NOTIFICATIONPOINTSRESET", respecType),
+                            shortDisplayText = GetString("SI_RESPECTYPE_POINTSRESETTITLE", respecType),
+                            respecType = respecType,
+                            secsSinceRequest = ZO_NormalizeSecondsSince(0),
+                            acceptText = GetString("SI_RESPECTYPE_NOTIFICATIONOPENBUTTON", respecType),
+                        }
+                    )
+                end
             end
         end
     end
@@ -886,7 +894,7 @@ function ZO_LeaderboardScoreProvider:BuildNotificationList()
             local hasGuildMember = false
             local hasPlayer = false
             for memberIndex = 1, numMembers do
-                local displayName, characterName, isFriend, isGuildMember, isPlayer = GetLeaderboardScoreNotificationMemberInfo(notificationId, memberIndex)
+                local _, _, isFriend, isGuildMember, isPlayer = GetLeaderboardScoreNotificationMemberInfo(notificationId, memberIndex)
 
                 hasFriend = hasFriend or isFriend
                 hasGuildMember = hasGuildMember or isGuildMember
@@ -1110,7 +1118,6 @@ function ZO_LFGUpdateProvider:AddReadyCheckNotification(data)
         data = data,
 
         expiresAt = GetFrameTimeSeconds() + data.timeRemainingSeconds,
-        expirationCallback = ClearLFGReadyCheckNotification,
         messageFormat = messageFormat,
         messageParams = messageParams,
 
@@ -1565,7 +1572,7 @@ end
 function ZO_MarketProductUnlockedProvider:AddNotification(firstMarketProductId, multipleProductsUnlocked)
     local message
     -- in the case of multiple market products getting unlocked, we will use the help info off the first one in the list for simplicity
-    local achievementId, completedAchievement, helpCategoryIndex, helpIndex = GetMarketProductUnlockedByAchievementInfo(firstMarketProductId)
+    local _, _, helpCategoryIndex, helpIndex = GetMarketProductUnlockedByAchievementInfo(firstMarketProductId)
     if multipleProductsUnlocked then
         message = GetString(SI_NOTIFICATIONS_MULTIPLE_MARKET_PRODUCTS_UNLOCKED_MESSAGE)
     else
@@ -1595,7 +1602,7 @@ end
 
 function ZO_MarketProductUnlockedProvider:Accept(entryData)
     if IsInGamepadPreferredMode() then
-        ZO_Dialogs_ShowGamepadDialog("GAMEPAD_LOG_OUT")
+        ZO_Dialogs_ShowGamepadDialog("GAMEPAD_LOG_OUT", { quit = false })
     else
         ZO_Dialogs_ShowDialog("LOG_OUT")
     end
@@ -1735,7 +1742,7 @@ end
 function ZO_TributeInviteProvider:BuildNotificationList()
     ZO_ClearNumericallyIndexedTable(self.list)
 
-    local inviteState, inviterCharacterName, inviterDisplayName, targetType = GetTributeInviteInfo()
+    local inviteState, inviterCharacterName, inviterDisplayName = GetTributeInviteInfo()
     if inviterCharacterName ~= "" and inviteState == TRIBUTE_INVITE_STATE_INVITE_CONSIDERING then
         local nameToUse = ZO_GetPrimaryPlayerName(inviterDisplayName, inviterCharacterName)
         local formattedPlayerNames = ZO_GetPrimaryPlayerNameWithSecondary(inviterDisplayName, inviterCharacterName)

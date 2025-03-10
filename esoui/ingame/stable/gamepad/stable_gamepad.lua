@@ -53,6 +53,14 @@ function ZO_Stable_Gamepad:InitializeKeybindStrip()
     ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.keybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON)
 end
 
+function ZO_Stable_Gamepad:HeaderMessageNarration()
+    if not HasMountSkin() then
+        return GetString(SI_STABLE_NO_ACTIVE_MOUNT_WARNING)
+    else
+        return ""
+    end
+end
+
 -----------------
 --Class Functions
 -----------------

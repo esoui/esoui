@@ -323,7 +323,10 @@ function ZO_GroupFinder_Gamepad:RefreshCategoryList(resetToTop)
             local entryData = ZO_GamepadEntryData:New(GetString(SI_GROUP_FINDER_MY_GROUP_LISTING))
             entryData.mode = ZO_GROUP_FINDER_MODES.MANAGE
             entryData:AddIcon("EsoUI/Art/LFG/Gamepad/gp_LFG_groupFinder_myGroup.dds")
-            if ZO_HasGroupFinderNewApplication() then
+            entryData.selectedIconTint = ZO_WHITE
+            entryData.unselectedIconTint = ZO_GAMEPAD_UNSELECTED_COLOR
+
+            if GROUP_FINDER_APPLICATIONS_LIST_MANAGER:HasNewApplication() then
                 entryData:AddIcon(ZO_GAMEPAD_NEW_ICON_64)
             end
             list:AddEntry("ZO_GamepadItemEntryTemplate", entryData)
@@ -333,6 +336,9 @@ function ZO_GroupFinder_Gamepad:RefreshCategoryList(resetToTop)
             local entryData = ZO_GamepadEntryData:New(GetString(SI_GAMEPAD_GROUP_FINDER_FIND_GROUP))
             entryData.mode = ZO_GROUP_FINDER_MODES.SEARCH
             entryData:AddIcon("EsoUI/Art/LFG/Gamepad/gp_LFG_groupFinder_findGroup.dds")
+            entryData.selectedIconTint = ZO_WHITE
+            entryData.unselectedIconTint = ZO_GAMEPAD_UNSELECTED_COLOR
+
             list:AddEntry("ZO_GamepadItemEntryTemplate", entryData)
         end
 
@@ -340,6 +346,9 @@ function ZO_GroupFinder_Gamepad:RefreshCategoryList(resetToTop)
             local entryData = ZO_GamepadEntryData:New(GetString(SI_GAMEPAD_GROUP_FINDER_CREATE_GROUP))
             entryData.mode = ZO_GROUP_FINDER_MODES.CREATE_EDIT
             entryData:AddIcon("EsoUI/Art/LFG/Gamepad/gp_LFG_groupFinder_createGroup.dds")
+            entryData.selectedIconTint = ZO_WHITE
+            entryData.unselectedIconTint = ZO_GAMEPAD_UNSELECTED_COLOR
+
             local canDoCreateEdit, disabledString = ZO_GroupFinder_CanDoCreateEdit()
             entryData:SetEnabled(canDoCreateEdit)
             entryData.disabledTooltipText = disabledString
@@ -388,7 +397,7 @@ function ZO_GroupFinder_Gamepad:RefreshSubcategoryList(resetToTop)
             list:AddEntry("ZO_GamepadItemEntryTemplate", entryData)
 
             if self.mode == ZO_GROUP_FINDER_MODES.MANAGE then
-                ZO_SetGroupFinderIsNewApplication(false)
+                GROUP_FINDER_APPLICATIONS_LIST_MANAGER:SetHasNewApplication(false)
             end
         end
     end

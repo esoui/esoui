@@ -31,7 +31,7 @@ function ZO_Tooltip:LayoutEquipmentBonusTooltip(equipmentBonus, lowestEquipSlot)
     end
 end
 
-function ZO_Tooltip:LayoutAttributeTooltip(statType)
+function ZO_Tooltip:LayoutAttributeTooltip(statType, mundusEffectName)
     local statDescription = ZO_STAT_TOOLTIP_DESCRIPTIONS[statType]
     if statDescription then
         local headerSection = self:AcquireSection(self:GetStyle("title"))
@@ -41,6 +41,11 @@ function ZO_Tooltip:LayoutAttributeTooltip(statType)
         local bodySection = self:AcquireSection(self:GetStyle("attributeBody"))
         bodySection:AddLine(zo_strformat(statDescription, GetPlayerStat(statType)))
         self:AddSection(bodySection)
+    end
+    if mundusEffectName then
+        local mundusSection = self:AcquireSection(self:GetStyle("attributeBody"))
+        mundusSection:AddLine(zo_strformat(SI_STAT_GAMEPAD_MUNDUS_TOOLTIP_FORMATTER, ZO_SELECTED_TEXT:Colorize(mundusEffectName)))
+        self:AddSection(mundusSection)
     end
 end
 
@@ -62,6 +67,33 @@ function ZO_Tooltip:LayoutAdvancedAttributeTooltip(statData)
         local bodySection = self:AcquireSection(self:GetStyle("attributeBody"))
         local flatValueText = ZO_WHITE:Colorize(statData.flatValue)
         bodySection:AddLine(zo_strformat(SI_STAT_RATING_TOOLTIP_FORMAT, statData.displayName, flatValueText))
+        self:AddSection(bodySection)
+    end
+end
+
+function ZO_Tooltip:LayoutMundusTooltip(mundusData)
+    local equipStatusText
+    if mundusData.buffIndex then
+        equipStatusText = GetString(SI_ITEM_FORMAT_STR_EQUIPPED)
+    else
+        equipStatusText = GetString(SI_ITEM_FORMAT_STR_NOT_EQUIPPED)
+        if GetUnitLevel("player") >= GetMundusWarningLevel() then
+            equipStatusText = ZO_ERROR_COLOR:Colorize(equipStatusText)
+        end
+    end
+    local topSection = self:AcquireSection(self:GetStyle("topSection"))
+    topSection:AddLine(equipStatusText, self:GetStyle("bind"))
+    self:AddSection(topSection)
+
+    if mundusData.name then
+        local headerSection = self:AcquireSection(self:GetStyle("title"))
+        headerSection:AddLine(zo_strformat(SI_STATS_MUNDUS_FORMATTER, mundusData.name))
+        self:AddSection(headerSection)
+    end
+
+    if mundusData.description then
+        local bodySection = self:AcquireSection(self:GetStyle("attributeBody"))
+        bodySection:AddLine(zo_strformat(mundusData.description))
         self:AddSection(bodySection)
     end
 end

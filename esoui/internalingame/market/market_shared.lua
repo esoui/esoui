@@ -18,13 +18,7 @@ ZO_NO_MARKET_SUBCATEGORY = nil
 --[[ Market Shared ]]--
 --
 
-ZO_Market_Shared = ZO_Object:Subclass()
-
-function ZO_Market_Shared:New(...)
-    local market = ZO_Object.New(self)
-    market:Initialize(...)
-    return market
-end
+ZO_Market_Shared = ZO_InitializingObject:Subclass()
 
 function ZO_Market_Shared:Initialize(control, sceneName)
     self.control = control
@@ -39,6 +33,8 @@ function ZO_Market_Shared:Initialize(control, sceneName)
     self.searchResults = {}
     self.searchString = ""
     self.isSearching = false
+
+    self.currentSlotPreviews = {}
 
     self:CreateMarketScene()
     self:RegisterSceneStateChangeCallback()
@@ -298,6 +294,7 @@ end
 
 function ZO_Market_Shared:EndCurrentPreview()
     EndCurrentMarketPreview()
+    self:ClearAllCurrentSlotPreviews()
     self:RefreshActions()
 end
 
@@ -676,6 +673,7 @@ function ZO_Market_Shared:GetPreviewState()
     local isPreviewing = IsCurrentlyPreviewing()
     local canPreview = false
     local isActivePreview = false
+    local isPreviewToggleable = false
 
     local marketProduct = self.selectedMarketProduct
     if marketProduct ~= nil then -- User is hovering over a MarketProduct
@@ -684,14 +682,17 @@ function ZO_Market_Shared:GetPreviewState()
         if isPreviewing and marketProduct:IsActivelyPreviewing() then
             isActivePreview = true
         end
+
+        local collectibleType = select(4, GetMarketProductCollectibleInfo(marketProduct.productData:GetId()))
+        isPreviewToggleable = collectibleType == COLLECTIBLE_CATEGORY_TYPE_OUTFIT_STYLE
     end
 
-    return isPreviewing, canPreview, isActivePreview
+    return isPreviewing, canPreview, isActivePreview, isPreviewToggleable
 end
 
 function ZO_Market_Shared:IsReadyToPreview()
-    local _, canPreview, isActivePreview = self:GetPreviewState()
-    return canPreview and not isActivePreview
+    local _, canPreview, isActivePreview, isPreviewToggleable = self:GetPreviewState()
+    return canPreview and (not isActivePreview or isPreviewToggleable)
 end
 
 function ZO_Market_Shared:TriggerCrownGemTutorial()
@@ -825,6 +826,104 @@ function ZO_Market_Shared.PreviewMarketProduct(previewObject, marketProductId)
 
     previewObject:SetPreviewInEmptyWorld(previewInEmptyWorld)
     previewObject:PreviewMarketProduct(marketProductId)
+end
+
+do
+    local MAIN_WEAPONS =
+    {
+        [OUTFIT_SLOT_WEAPON_MAIN_HAND] = true,
+        [OUTFIT_SLOT_WEAPON_OFF_HAND] = true,
+        [OUTFIT_SLOT_WEAPON_TWO_HANDED] = true,
+        [OUTFIT_SLOT_WEAPON_STAFF] = true,
+        [OUTFIT_SLOT_WEAPON_BOW] = true,
+        [OUTFIT_SLOT_SHIELD] = true,
+    }
+
+    local BACKUP_WEAPONS =
+    {
+        [OUTFIT_SLOT_WEAPON_MAIN_HAND_BACKUP] = true,
+        [OUTFIT_SLOT_WEAPON_OFF_HAND_BACKUP] = true,
+        [OUTFIT_SLOT_WEAPON_TWO_HANDED_BACKUP] = true,
+        [OUTFIT_SLOT_WEAPON_STAFF_BACKUP] = true,
+        [OUTFIT_SLOT_WEAPON_BOW_BACKUP] = true,
+        [OUTFIT_SLOT_SHIELD_BACKUP] = true,
+    }
+
+    local function IsWeaponOutfitSlotActive(outfitSlot)
+        local activeWeaponPair = GetActiveWeaponPairInfo()
+        if activeWeaponPair == ACTIVE_WEAPON_PAIR_MAIN then
+            return MAIN_WEAPONS[outfitSlot]
+        else
+            return BACKUP_WEAPONS[outfitSlot]
+        end
+    end
+
+    local function GetPreferredOutfitSlotForStyle(collectibleData)
+        if collectibleData.clearAction then
+            return collectibleData.preferredOutfitSlot
+        else
+            local eligibleSlots = { GetEligibleOutfitSlotsForCollectible(collectibleData:GetId()) }
+            if collectibleData:IsArmorStyle() then
+                return eligibleSlots[1]
+            else
+                for _, outfitSlot in ipairs(eligibleSlots) do
+                    if IsWeaponOutfitSlotActive(outfitSlot) then
+                        return outfitSlot
+                    end
+                end
+            end
+        end
+        return nil
+    end
+
+    function ZO_Market_Shared:IsPreviewingOutfitStyle(collectibleData)
+        local preferredOutfitSlot = GetPreferredOutfitSlotForStyle(collectibleData)
+
+        if preferredOutfitSlot then
+            local currentPreviewDataForSlot = self.currentSlotPreviews[preferredOutfitSlot]
+            local collectibleId = collectibleData.clearAction and 0 or collectibleData:GetId()
+            if currentPreviewDataForSlot and currentPreviewDataForSlot.collectibleId == collectibleId then
+                return true
+            end
+        end
+        return false
+    end
+
+    function ZO_Market_Shared:PreviewOutfitStyle(collectibleId)
+        local collectibleData = ZO_CollectibleData_Base:New()
+        collectibleData:SetId(collectibleId)
+        local preferredOutfitSlot = GetPreferredOutfitSlotForStyle(collectibleData)
+
+        if preferredOutfitSlot and IsCharacterPreviewingAvailable() then
+            if self:IsPreviewingOutfitStyle(collectibleData) then
+                ClearOutfitSlotPreviewElementFromPreviewCollection(preferredOutfitSlot)
+                ApplyChangesToPreviewCollectionShown()
+                self.currentSlotPreviews[preferredOutfitSlot] = nil
+                return
+            end
+
+            local DEFAULT_ITEM_MATERIAL_INDEX = 1
+            AddOutfitSlotPreviewElementToPreviewCollection(preferredOutfitSlot, collectibleId, DEFAULT_ITEM_MATERIAL_INDEX)
+            ApplyChangesToPreviewCollectionShown()
+            self.currentSlotPreviews[preferredOutfitSlot] =
+            {
+                collectibleId = collectibleId,
+            }
+        end
+    end
+
+    function ZO_Market_Shared:HasAnyCurrentSlotPreviews()
+        return NonContiguousCount(self.currentSlotPreviews) > 0
+    end
+
+
+    function ZO_Market_Shared:ClearAllCurrentSlotPreviews()
+        for outfitSlot, _ in pairs(self.currentSlotPreviews) do
+            ClearOutfitSlotPreviewElementFromPreviewCollection(outfitSlot)
+        end
+        ApplyChangesToPreviewCollectionShown()
+        ZO_ClearTable(self.currentSlotPreviews)
+    end
 end
 
 function ZO_Market_Shared.PreviewReward(previewObject, rewardId)

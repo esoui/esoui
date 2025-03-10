@@ -134,8 +134,12 @@ function ZO_CollectibleTile_Keyboard:PostInitializePlatform()
             self:StartPreview(self.collectibleData:GetId())
         end,
 
+        enabled = function()
+            return IsCharacterPreviewingAvailable(), GetString(SI_PREVIEW_UNAVAILABLE_ERROR)
+        end,
+
         visible = function()
-            return IsCharacterPreviewingAvailable() and self:CanPreview() and not ITEM_PREVIEW_KEYBOARD:IsCurrentlyPreviewing(ZO_ITEM_PREVIEW_COLLECTIBLE, self.collectibleData:GetId())
+            return self:CanPreview() and not ITEM_PREVIEW_KEYBOARD:IsCurrentlyPreviewing(ZO_ITEM_PREVIEW_COLLECTIBLE, self.collectibleData:GetId())
         end,
     })
 

@@ -107,8 +107,7 @@ function ZO_DailyLoginRewards_Gamepad:InitializeKeybinds()
                         local numSlotsNeeded = GetNumInventorySlotsNeededForDailyLoginRewardInCurrentMonth(GetDailyLoginClaimableRewardIndex())
                         if CheckInventorySpaceAndWarn(numSlotsNeeded) then
                             self:SetTargetedClaimData(self.gridListPanelList:GetSelectedData())
-                            PlaySound(SOUNDS.DAILY_LOGIN_REWARDS_ACTION_CLAIM)
-                            ClaimCurrentDailyLoginReward()
+                            self:ClaimTargetedData()
                         end
                     end,
         enabled = function()
@@ -132,10 +131,10 @@ function ZO_DailyLoginRewards_Gamepad:InitializeKeybinds()
             SCENE_MANAGER:Push("dailyLoginRewardsPreview_Gamepad")
         end,
         visible = function()
-            local selectedReward = self.gridListPanelList:GetSelectedData()
+            local selectedData = self.gridListPanelList:GetSelectedData()
 
-            if selectedReward and selectedReward.day then
-                return CanPreviewReward(selectedReward:GetRewardId()) and IsCharacterPreviewingAvailable()
+            if selectedData and selectedData.day and self.previewableRewards[selectedData] then
+                return IsCharacterPreviewingAvailable()
             end
 
             return false
@@ -228,10 +227,33 @@ function ZO_DailyLoginRewards_Gamepad:CleanDirty()
     end
 end
 
-function ZO_DailyLoginRewards_Gamepad:OnGridListSelectedDataChanged(previousData, newData)
-    self:RefreshTooltip(newData)
-    if newData then
-        KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+function ZO_DailyLoginRewards_Gamepad:OnGridListSelectedDataChanged()
+    self:RefreshSelection()
+end
+
+function ZO_DailyLoginRewards_Gamepad:OnRewardClaimed()
+    ZO_DailyLoginRewards_Base.OnRewardClaimed(self)
+
+    if self:IsShowing() then
+        self:RefreshSelection()
+    end
+end
+
+function ZO_DailyLoginRewards_Gamepad:OnCollectionUpdated()
+    ZO_DailyLoginRewards_Base.OnCollectionUpdated(self)
+
+    if self:IsShowing() then
+        self:RefreshSelection()
+    end
+end
+
+function ZO_DailyLoginRewards_Gamepad:RefreshSelection()
+    if self.gridListPanelList:IsActive() then
+        local selectedData = self.gridListPanelList:GetSelectedData()
+        self:RefreshTooltip(selectedData)
+        if selectedData then
+            KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+        end
     end
 end
 
@@ -239,7 +261,7 @@ function ZO_DailyLoginRewards_Gamepad:RefreshTooltip(selectedData)
     GAMEPAD_TOOLTIPS:ClearLines(GAMEPAD_RIGHT_TOOLTIP)
 
     if selectedData then
-        if not selectedData.isEmptyCell then
+        if not (selectedData.isEmptyCell or selectedData.obscureReward) then
             GAMEPAD_TOOLTIPS:LayoutDailyLoginReward(GAMEPAD_RIGHT_TOOLTIP, selectedData.day)
         end
     end
@@ -321,13 +343,11 @@ do
         local nextIndex = GetNextIndex(self.currentRewardPreviewIndex, numScrollEntries, PREVIOUS_INDEX)
         while nextIndex ~= self.currentRewardPreviewIndex do
             local selectedRewardEntry = scrollData[nextIndex]
-            local rewardData = selectedRewardEntry.data
-            if rewardData.day then
-                if CanPreviewReward(rewardData:GetRewardId()) then
-                    self:UpdatePreview(rewardData)
-                    self.currentRewardPreviewIndex = nextIndex
-                    return
-                end
+            local selectedData = selectedRewardEntry.data
+            if selectedData.day and self.previewableRewards[selectedData] then
+                self:UpdatePreview(selectedData)
+                self.currentRewardPreviewIndex = nextIndex
+                return
             end
 
             nextIndex = GetNextIndex(nextIndex, numScrollEntries, PREVIOUS_INDEX)
@@ -340,13 +360,11 @@ do
         local nextIndex = GetNextIndex(self.currentRewardPreviewIndex, numScrollEntries, NEXT_INDEX)
         while nextIndex ~= self.currentRewardPreviewIndex do
             local selectedRewardEntry = scrollData[nextIndex]
-            local rewardData = selectedRewardEntry.data
-            if rewardData.day then
-                if CanPreviewReward(rewardData:GetRewardId()) then
-                    self:UpdatePreview(rewardData)
-                    self.currentRewardPreviewIndex = nextIndex
-                    return
-                end
+            local selectedData = selectedRewardEntry.data
+            if selectedData.day and self.previewableRewards[selectedData] then
+                self:UpdatePreview(selectedData)
+                self.currentRewardPreviewIndex = nextIndex
+                return
             end
 
             nextIndex = GetNextIndex(nextIndex, numScrollEntries, NEXT_INDEX)
@@ -367,10 +385,10 @@ function ZO_DailyLoginRewards_Gamepad:OnPreviewShown()
     end)
 end
 
-function ZO_DailyLoginRewards_Gamepad:UpdatePreview(rewardData)
+function ZO_DailyLoginRewards_Gamepad:UpdatePreview(previewData)
     SYSTEMS:GetObject("itemPreview"):ClearPreviewCollection()
-    SYSTEMS:GetObject("itemPreview"):PreviewReward(rewardData:GetRewardId())
-    self:RefreshTooltip(rewardData)
+    SYSTEMS:GetObject("itemPreview"):PreviewReward(previewData.displayRewardData:GetRewardId())
+    self:RefreshTooltip(previewData)
     SCREEN_NARRATION_MANAGER:QueueCustomEntry("dailyLoginRewardsPreview")
 end
 

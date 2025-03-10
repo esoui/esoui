@@ -288,6 +288,7 @@ function ZO_MarketListFragment_Keyboard:GetPreviewState()
     local isPreviewing = IsCurrentlyPreviewing()
     local canPreview = false
     local isActivePreview = false
+    local isPreviewToggleable = false
     local data = self:GetSelectedData()
 
     if data then
@@ -296,14 +297,17 @@ function ZO_MarketListFragment_Keyboard:GetPreviewState()
         if isPreviewing and self:IsActivelyPreviewing() then
             isActivePreview = true
         end
+
+        local collectibleType = select(4, GetMarketProductCollectibleInfo(data.productId))
+        isPreviewToggleable = collectibleType == COLLECTIBLE_CATEGORY_TYPE_OUTFIT_STYLE
     end
 
-    return isPreviewing, canPreview, isActivePreview
+    return isPreviewing, canPreview, isActivePreview, isPreviewToggleable
 end
 
 function ZO_MarketListFragment_Keyboard:IsReadyToPreview()
-    local _, canPreview, isActivePreview = self:GetPreviewState()
-    return canPreview and not isActivePreview
+    local _, canPreview, isActivePreview, isPreviewToggleable = self:GetPreviewState()
+    return canPreview and (not isActivePreview or isPreviewToggleable)
 end
 
 function ZO_MarketListFragment_Keyboard:GetSelectedData()

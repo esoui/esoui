@@ -115,10 +115,6 @@ do
     local SOCKET_TEXTURES = {
         --Using blue slot for enchantment currently
         [SOCKET_TYPE_ENCHANTMENT] = "EsoUI/Art/ItemToolTip/ESO_itemToolTip_blueSlot.dds",
-        [SOCKET_TYPE_PRECISION] = "EsoUI/Art/AvA/AvA_itemHighlight_precision.dds",
-        [SOCKET_TYPE_AMMO] = "EsoUI/Art/AvA/AvA_itemHighlight_ammo.dds",
-        [SOCKET_TYPE_LAUNCH_VELOCITY] = "EsoUI/Art/AvA/AvA_itemHighlight_range.dds",
-        [SOCKET_TYPE_TOUGHNESS] = "EsoUI/Art/AvA/AvA_itemHighlight_toughness.dds",
     }
 
     function ZO_GetSocketTexture(socketType)

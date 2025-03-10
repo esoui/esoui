@@ -65,7 +65,7 @@
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Ability" relativePoint="BOTTOMLEFT" offsetX="-30" offsetY="20" />
                 </Label>
 
-                <Label name="$(parent)Advisement" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_GREEN">
+                <Label name="$(parent)Advisement" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SUCCEEDED">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Warning" relativePoint="BOTTOMLEFT" offsetY="10" />
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)Warning" relativePoint="BOTTOMLEFT" offsetY="10" />
                 </Label>
@@ -127,7 +127,7 @@
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Description" offsetY="145" />
                 </Label>
 
-                <Label name="$(parent)Advisement" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_GREEN">
+                <Label name="$(parent)Advisement" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SUCCEEDED">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Warning" relativePoint="BOTTOMLEFT" offsetY="10" />
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)Warning" relativePoint="BOTTOMLEFT" offsetY="10" />
                 </Label>
@@ -250,7 +250,9 @@
             </Controls>
         </TopLevelControl>
 
-        <Label name="ZO_SkillsNavigationEntry" virtual="true" font="ZoFontHeader" inherits="ZO_SelectableLabel">
+        <Label name="ZO_SkillsNavigationEntry" virtual="true" font="ZoFontHeader" inherits="ZO_SelectableTooltipIfTruncatedLabel" maxLineCount="2">
+            <Dimensions x="226" />
+            
             <OnInitialized>
                 ZO_SkillsNavigationEntry_OnInitialized(self)
             </OnInitialized>
