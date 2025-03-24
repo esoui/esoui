@@ -201,18 +201,6 @@ local AlertHandlers =
         return ERROR, GetString(SI_NOT_ENOUGH_MONEY), SOUNDS.PLAYER_ACTION_INSUFFICIENT_GOLD
     end,
 
-    [EVENT_TRADE_FAILED] = function(reason)
-        return ERROR, GetString("SI_TRADEACTIONRESULT", reason), SOUNDS.GENERAL_ALERT_ERROR
-    end,
-
-    [EVENT_TRADE_ITEM_ADD_FAILED] = function(reason, itemName)
-        return ERROR, zo_strformat(GetString("SI_TRADEACTIONRESULT", reason), itemName), SOUNDS.GENERAL_ALERT_ERROR
-    end,
-
-    [EVENT_TRADE_ELEVATION_FAILED] = function(reason, itemName)
-        return ERROR, zo_strformat(GetString("SI_TRADEACTIONRESULT", reason), itemName), SOUNDS.GENERAL_ALERT_ERROR
-    end,
-
     [EVENT_SLOT_IS_LOCKED_FAILURE] = function()
         return ERROR, GetString(SI_ERROR_ITEM_LOCKED), SOUNDS.GENERAL_ALERT_ERROR
     end,
@@ -466,8 +454,16 @@ local AlertHandlers =
         return ALERT, GetString(SI_TRADE_CANCELED), SOUNDS.GENERAL_ALERT_ERROR
     end,
 
-    [EVENT_TRADE_FAILED] = function()
-        return ALERT, GetString(SI_TRADE_FAILED), SOUNDS.GENERAL_ALERT_ERROR
+    [EVENT_TRADE_FAILED] = function(reason)
+        return ERROR, GetString("SI_TRADEACTIONRESULT", reason), SOUNDS.GENERAL_ALERT_ERROR
+    end,
+
+    [EVENT_TRADE_ITEM_ADD_FAILED] = function(reason, itemName)
+        return ERROR, zo_strformat(GetString("SI_TRADEACTIONRESULT", reason), itemName), SOUNDS.GENERAL_ALERT_ERROR
+    end,
+
+    [EVENT_TRADE_ELEVATION_FAILED] = function(reason, itemName)
+        return ERROR, zo_strformat(GetString("SI_TRADEACTIONRESULT", reason), itemName), SOUNDS.GENERAL_ALERT_ERROR
     end,
 
     [EVENT_TRADE_SUCCEEDED] = function()

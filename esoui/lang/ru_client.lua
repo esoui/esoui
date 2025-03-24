@@ -2764,7 +2764,7 @@ SafeAddString(SI_ENCHANTMENTSEARCHCATEGORYTYPE30, "Сокращение пром
 SafeAddString(SI_ENCHANTMENTSEARCHCATEGORYTYPE31, "Увеличение физического урона", 1)
 SafeAddString(SI_ENCHANTMENTSEARCHCATEGORYTYPE32, "Увеличение силы заклинаний", 1)
 SafeAddString(SI_ENCHANTMENTSEARCHCATEGORYTYPE33, "Снижение физического урона", 1)
-SafeAddString(SI_ENCHANTMENTSEARCHCATEGORYTYPE34, "Снижение силы заклинаний", 1)
+SafeAddString(SI_ENCHANTMENTSEARCHCATEGORYTYPE34, "Снижение магического урона", 1)
 SafeAddString(SI_ENCHANTMENTSEARCHCATEGORYTYPE35, "Призматический натиск", 1)
 SafeAddString(SI_ENCHANTMENTSEARCHCATEGORYTYPE36, "Призматическая оборона", 0)
 SafeAddString(SI_ENCHANTMENTSEARCHCATEGORYTYPE37, "Призматическое восстановление", 0)

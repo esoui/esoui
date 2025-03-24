@@ -740,6 +740,15 @@ do
             end
 
             local cardObject = self.cardInstanceIdToCardObject[cardInstanceId]
+            if not cardObject then
+                local cardId, patronId = GetTributeCardInstanceDefIds(cardInstanceId)
+                local boardLocation = GetTributeCardInstanceBoardLocation(cardInstanceId)
+                local owner = GetTributeCardInstanceOwner(cardInstanceId)
+                local errorString = string.format("EVENT_TRIBUTE_CARD_MECHANIC_RESOLUTION_STATE_CHANGED expected cardObject but was nil. Card ID: %u. Patron Id: %u. Board Location %u. Owner %u.", cardId, patronId, boardLocation, owner)
+                internalassert(false, errorString)
+                return
+            end
+
             if not cardObject:IsWorldCard() then
                 return
             end

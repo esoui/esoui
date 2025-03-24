@@ -16,14 +16,16 @@ function ZO_TributeDataManager:Initialize()
     self.patronCategories = {}
 
     self:RegisterForEvents()
-    self:RebuildData()
+    self.isDataDirty = true
 end
 
 function ZO_TributeDataManager:RegisterForEvents()
     local function OnAddOnLoaded(_, name)
-        if name == "ZO_Ingame" then
+        if name == "ZO_Ingame" or name == "ZO_InternalIngame" then
             --TODO Tribute: Add filters like ZO_ItemSetCollectionsDataManager
             EVENT_MANAGER:UnregisterForEvent("ZO_TributeDataManager", EVENT_ADD_ON_LOADED)
+
+            self:CleanData()
         end
     end
 

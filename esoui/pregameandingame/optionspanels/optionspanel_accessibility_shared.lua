@@ -238,7 +238,10 @@ local ZO_Panel_Accessibility_ControlData =
             settingId = ACCESSIBILITY_SETTING_PLAYER_WAYPOINT_ICON_COLOR,
             panel = SETTING_PANEL_ACCESSIBILITY,
             text = SI_ACCESSIBILITY_OPTIONS_PLAYER_WAYPOINT_COLOR,
-            tooltipText = SI_ACCESSIBILITY_OPTIONS_PLAYER_WAYPOINT_COLOR_TOOLTIP
+            tooltipText = SI_ACCESSIBILITY_OPTIONS_PLAYER_WAYPOINT_COLOR_TOOLTIP,
+            exists = function()
+                return ZO_IsIngameUI()
+            end,
         },
         --Options_Accessibility_GamepadAimAssistIntensity
         [ACCESSIBILITY_SETTING_GAMEPAD_AIM_ASSIST_INTENSITY] =

@@ -19,8 +19,8 @@ ZO_MENU_MAIN_ENTRIES =
     ACTIVITY_FINDER = 12,
     HELP            = 13,
     OPTIONS         = 14,
-    LOG_OUT         = 15,
-    QUIT            = 16,
+    QUIT            = 15,
+    LOG_OUT         = 16,
 }
 
 local MENU_MAIN_ENTRIES = ZO_MENU_MAIN_ENTRIES
@@ -479,14 +479,6 @@ local MENU_ENTRY_DATA =
         name = GetString(SI_GAMEPAD_OPTIONS_MENU),
         icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_settings.dds",
     },
-    [MENU_MAIN_ENTRIES.LOG_OUT] =
-    {
-        name = GetString(SI_GAME_MENU_LOGOUT),
-        icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_logout.dds",
-        activatedCallback = function()
-            ZO_Dialogs_ShowGamepadDialog("GAMEPAD_LOG_OUT", { quit = false })
-        end,
-    },
     [MENU_MAIN_ENTRIES.QUIT] =
     {
         name = GetString(SI_GAME_MENU_QUIT),
@@ -497,7 +489,15 @@ local MENU_ENTRY_DATA =
         activatedCallback = function()
             ZO_Dialogs_ShowGamepadDialog("GAMEPAD_LOG_OUT", { quit = true })
         end,
-    }
+    },
+    [MENU_MAIN_ENTRIES.LOG_OUT] =
+    {
+        name = GetString(SI_GAME_MENU_LOGOUT),
+        icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_logout.dds",
+        activatedCallback = function()
+            ZO_Dialogs_ShowGamepadDialog("GAMEPAD_LOG_OUT", { quit = false })
+        end,
+    },
 }
 
 CATEGORY_TO_ENTRY_DATA =
