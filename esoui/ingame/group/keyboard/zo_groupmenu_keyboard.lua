@@ -267,7 +267,17 @@ function GroupMenu_Keyboard:SetCurrentCategoryByData(categoryData)
         -- Look up the tree node associated with the queued category data and select it.
         local node = self:GetTreeNodeByCategoryData(categoryData)
         if node then
-            self.navigationTree:SelectNode(node)
+            local nodeIsSelected = node == self.navigationTree:GetSelectedNode()
+            if nodeIsSelected then
+                if not self.currentCategoryFragment or self.currentCategoryFragment ~= categoryData.categoryFragment then
+                    -- In this case the node was auto-selected while hidden or on selection
+                    -- was not called before the screen was hidden we need to force the node's
+                    -- selection function to run again so it runs it's on showing code.
+                    node:OnSelected()
+                end
+            else
+                self.navigationTree:SelectNode(node)
+            end
         end
     else
         -- Queue the category data to show.

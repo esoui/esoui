@@ -73,7 +73,7 @@ end
 
 function ZO_Tooltip:LayoutMundusTooltip(mundusData)
     local equipStatusText
-    if mundusData.buffIndex then
+    if mundusData.mundusBuffIndex then
         equipStatusText = GetString(SI_ITEM_FORMAT_STR_EQUIPPED)
     else
         equipStatusText = GetString(SI_ITEM_FORMAT_STR_NOT_EQUIPPED)

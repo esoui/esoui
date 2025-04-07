@@ -44,7 +44,7 @@ function ZO_AttributeItem_Gamepad:SetMundusEffect(hasEffect, effectName, effectV
         {
             name = effectName,
             value = effectValue,
-            buffIndex = effectBuffIndex,
+            mundusBuffIndex = effectBuffIndex,
         }
     else
         self.control.mundus = nil
@@ -75,7 +75,7 @@ function ZO_AttributeItem_Gamepad:RefreshDataText()
     if self.control.mundus then
         local NO_GRAMMAR = true
         if self.highlightedMundusBuffIndex
-            and self.highlightedMundusBuffIndex == self.control.mundus.buffIndex
+            and self.highlightedMundusBuffIndex == self.control.mundus.mundusBuffIndex
             and (not bonusValue or bonusValue == 0) then
             local color
             local icon
@@ -582,7 +582,7 @@ function ZO_GamepadStats:InitializeKeybindStripDescriptors()
                 elseif self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.MUNDUS then
                     local targetData = self.mainList:GetTargetData()
                     if targetData and targetData.data then
-                        return not targetData.data.buffIndex
+                        return not targetData.data.mundusBuffIndex
                     end
                     return false
                 else
@@ -648,7 +648,7 @@ function ZO_GamepadStats:InitializeKeybindStripDescriptors()
                     local targetData = self.mainList:GetTargetData()
                     if targetData
                         and targetData.data
-                        and (not targetData.data.buffIndex
+                        and (not targetData.data.mundusBuffIndex
                             or (targetData.data.statEffects and #targetData.data.statEffects > 0)) then
                         self:ActivateViewAttributes()
                     else
@@ -762,7 +762,7 @@ function ZO_GamepadStats:UpdateScreenVisibility()
         local targetData = self.mainList:GetTargetData()
         if targetData
             and targetData.data
-            and targetData.data.buffIndex
+            and targetData.data.mundusBuffIndex
             and (not targetData.data.statEffects or #targetData.data.statEffects == 0) then
             isAdvancedAttributesHidden = false
             self:RefreshAdvancedAttributesPanel()
@@ -1275,7 +1275,7 @@ do
                 {
                     name = buffName,
                     description = GetAbilityEffectDescription(buffSlot),
-                    buffIndex = activeMundusStoneBuffIndices[slotIndex],
+                    mundusBuffIndex = activeMundusStoneBuffIndices[slotIndex],
                     slotIndex = slotIndex,
                     statEffects = {},
                 }
@@ -1285,7 +1285,7 @@ do
                     local attributeItem = self:GetAttributeItem(statType)
                     if attributeItem then
                         local HAS_MUNDUS_EFFECT = true
-                        attributeItem:SetMundusEffect(HAS_MUNDUS_EFFECT, buffName, effectValue, mundusEntry.data.buffIndex)
+                        attributeItem:SetMundusEffect(HAS_MUNDUS_EFFECT, buffName, effectValue, mundusEntry.data.mundusBuffIndex)
                     end
                     local statEffect =
                     {
@@ -1680,7 +1680,7 @@ function ZO_GamepadStats:RefreshAttributesPanel()
     if self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.MUNDUS then
         local targetData = self.mainList:GetTargetData()
         if targetData and targetData.data then
-            highlightedMundusBuffIndex = targetData.data.buffIndex
+            highlightedMundusBuffIndex = targetData.data.mundusBuffIndex
         end
     end
     for key, attribute in pairs(self.attributeItems) do
@@ -1745,7 +1745,7 @@ function ZO_GamepadStats:InitializeAdvancedAttributesPanel()
         data.formattedValue = tostring(flatValue)
 
         local targetData = self.mainList:GetTargetData()
-        local selectedMundusIndex = targetData and targetData.buffIndex
+        local selectedMundusIndex = targetData and targetData.mundusBuffIndex
         if selectedMundusIndex and #self.mundusAdvancedStats[selectedMundusIndex] > 0 then
             for i, mundusStat in ipairs(self.mundusAdvancedStats[selectedMundusIndex]) do
                 if mundusStat.statType == data.statType and mundusStat.format == ADVANCED_STAT_DISPLAY_FORMAT_FLAT then
@@ -1775,7 +1775,7 @@ function ZO_GamepadStats:InitializeAdvancedAttributesPanel()
         data.formattedValue = zo_strformat(SI_STAT_VALUE_PERCENT, percentValue)
 
         local targetData = self.mainList:GetTargetData()
-        local selectedMundusIndex = targetData and targetData.buffIndex
+        local selectedMundusIndex = targetData and targetData.mundusBuffIndex
         if selectedMundusIndex and #self.mundusAdvancedStats[selectedMundusIndex] > 0 then
             for i, mundusStat in ipairs(self.mundusAdvancedStats[selectedMundusIndex]) do
                 if mundusStat.statType == data.statType and mundusStat.format == ADVANCED_STAT_DISPLAY_FORMAT_PERCENT then

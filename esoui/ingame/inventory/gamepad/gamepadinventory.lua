@@ -589,7 +589,7 @@ function ZO_GamepadInventory:InitializeKeybindStrip()
             visible = function()
                 local targetCategoryData = self.categoryList:GetTargetData()
                 if targetCategoryData and targetCategoryData.isMundusEntry then
-                    if targetCategoryData.data and not targetCategoryData.data.buffIndex then
+                    if targetCategoryData.data and not targetCategoryData.data.mundusBuffIndex then
                         return true
                     end
                     return false
@@ -1063,7 +1063,7 @@ function ZO_GamepadInventory:RefreshCategoryList(selectDefaultEntry, forceUpdate
                 {
                     name = buffName,
                     description = GetAbilityEffectDescription(buffSlot),
-                    buffIndex = activeMundusStoneBuffIndices[i],
+                    mundusBuffIndex = activeMundusStoneBuffIndices[i],
                     statEffects = {},
                 }
                 local numStatsForAbility = GetAbilityNumDerivedStats(abilityId)

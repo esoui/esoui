@@ -733,6 +733,8 @@ function ZO_CenterScreenAnnouncementLargeLine:SetIcon(icon, iconBg, suppressIcon
 
     if iconColor then 
         self.smallCombinedIcon:SetColor(iconColor.r, iconColor.g, iconColor.b, iconColor.a)
+    else
+        self.smallCombinedIcon:SetColor(ZO_WHITE:UnpackRGBA())
     end
 end
 
