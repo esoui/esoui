@@ -56,16 +56,33 @@ local function AddAddonsEntry(entryTable)
     table.insert(entryTable, data)
 end
 
--- Login Announcements
+-- Announcements
 
-local function ShowLoginAnnouncements()
+local function ShowMarketAnnouncements()
     SCENE_MANAGER:Show("marketAnnouncement")
     RequestMarketAnnouncement()
 end
 
-local function AddLoginAnnouncementsEntry(entryTable)
-    local data = {name = GetString(SI_MAIN_MENU_ANNOUNCEMENTS), callback = ShowLoginAnnouncements}
-    table.insert(entryTable, data)
+local function ShowReturningPlayerAnnouncements()
+    RETURNING_PLAYER_MANAGER:ShowReturningPlayerAnnouncementScreen()
+end
+
+local function AddAnnouncementsEntry(entryTable)
+    if IsReturningPlayer() then
+        local campaignDisplayName = RETURNING_PLAYER_MANAGER:GetIntroCampaignDisplayName()
+        local data =
+        {
+            name = zo_strformat(SI_RETURNING_PLAYER_CAMPAIGN_NAME_FORMATTER, campaignDisplayName),
+            normalColor = ZO_PROMOTIONAL_EVENT_SELECTED_COLOR,
+            selectedColor = ZO_PROMOTIONAL_EVENT_SELECTED_COLOR,
+            mouseOverColor = ZO_PROMOTIONAL_EVENT_HIGHLIGHT_COLOR,
+            callback = ShowReturningPlayerAnnouncements
+        }
+        table.insert(entryTable, data)
+    else
+        local data = { name = GetString(SI_MAIN_MENU_ANNOUNCEMENTS), callback = ShowMarketAnnouncements }
+        table.insert(entryTable, data)
+    end
 end
 
 -- Logout
@@ -102,7 +119,7 @@ local function RebuildTree(gameMenu)
     AddSettingsEntries(gameEntries)
     AddControlsEntries(gameEntries)
     AddAddonsEntry(gameEntries)
-    AddLoginAnnouncementsEntry(gameEntries)
+    AddAnnouncementsEntry(gameEntries)
     AddLogoutEntry(gameEntries)
     AddQuitEntry(gameEntries)
     gameMenu:SubmitLists(gameEntries)

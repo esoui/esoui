@@ -415,7 +415,6 @@ ZO_TOOLTIP_STYLES =
         widthPercent = 100,
         childSpacing = 15,
         fontSize = "$(GP_27)",
-        height = 32,
         fontColorField = GENERAL_COLOR_WHITE,
     },
     flavorText =
@@ -488,6 +487,10 @@ ZO_TOOLTIP_STYLES =
         fontColorField = ITEM_DISPLAY_QUALITY_MYTHIC_OVERRIDE,
     },
     bind = 
+    {
+        fontColorField = GENERAL_COLOR_OFF_WHITE,
+    },
+    timeRemaining =
     {
         fontColorField = GENERAL_COLOR_OFF_WHITE,
     },
@@ -609,7 +612,7 @@ ZO_TOOLTIP_STYLES =
         childSpacing = 10,
         widthPercent = 100,
         fontFace = "$(GAMEPAD_MEDIUM_FONT)",
-        height = 96,
+        height = 120,
         layoutPrimaryDirection = "right",
         layoutSecondaryDirection = "up",
     },
@@ -1848,6 +1851,13 @@ ZO_TOOLTIP_STYLES =
         widthPercent = 100,
     },
 
+    -- Promotional Events
+    promotionalEventsColor =
+    {
+        fontColorType = INTERFACE_COLOR_TYPE_TEXT_COLORS,
+        fontColorField = INTERFACE_TEXT_COLOR_PROMOTIONAL_EVENTS,
+    },
+
     -- Addon Info
     addOnName =
     {
@@ -1877,6 +1887,30 @@ ZO_TOOLTIP_STYLES =
         },
         uppercase = true,
         fontColorField = GENERAL_COLOR_OFF_WHITE,
+    },
+
+    -- Mod Browser Info
+    modBrowserListingImage =
+    {
+        controlTemplate = "ZO_ModBrowser_TooltipGalleryImage",
+        controlTemplateOverrideName = "galleryImage",
+        widthPercent = 100,
+        height = 400,
+    },
+    modBrowserListingLoadingIcon =
+    {
+        controlTemplate = "ZO_ModBrowser_TooltipLoadingSpinner",
+        controlTemplateOverrideName = "loadingIcon",
+        widthPercent = 100,
+        height = 128,
+    },
+    modBrowserListingSelectionIndicator =
+    {
+        controlTemplate = "ZO_ModBrowser_TooltipSelectionIndicator",
+        --The override name is intentionally short here to avoid "control name too long" errors
+        controlTemplateOverrideName = "pips",
+        widthPercent = 100,
+        height = 32,
     },
 }
 

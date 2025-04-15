@@ -789,6 +789,10 @@ function ZO_MenuBarTooltipButton_OnMouseExit(self)
     local buttonData = ZO_MenuBarButtonTemplate_GetData(self)
     if ZO_MenuBarButtonTemplate_OnMouseExit(self) or buttonData.alwaysShowTooltip  then
         ClearTooltip(InformationTooltip)
+
+        if buttonData.CustomTooltipExitFunction then
+            buttonData.CustomTooltipExitFunction(InformationTooltip)
+        end
     end
 end
 

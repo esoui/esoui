@@ -38,8 +38,58 @@ local pregameStates =
         end,
 
         GetStateTransitionData = function()
-            return "AccountLogin"
+            return "WaitForPreloginWorld"
         end
+    },
+
+    ["WaitForPreloginWorld"] =
+    {
+        ShouldAdvance = function()
+            -- Notify the Pregame World Manager that we are ready to show
+            -- the Prelogin World.
+            WriteToInterfaceLog("GUI is ready for Prelogin World.")
+            SetGuiReadyForWorld()
+            return false
+        end,
+
+        OnEnter = function()
+            -- Hide any currently showing scene such as Keyboard UI Settings.
+            SCENE_MANAGER:HideCurrentScene()
+
+            if not IsPreloginWorldReady() then
+                -- Show the Prelogin Overlay loading scene.
+                WriteToInterfaceLog("Waiting for Prelogin World to load...")
+                PRELOGIN_OVERLAY:SetHidden(false)
+
+                -- Monitor for Prelogin World load completion.
+                EVENT_MANAGER:RegisterForUpdate("WaitForPreloginWorld", 1, function()
+                    if IsPreloginWorldReady() then
+                        PregameStateManager_AdvanceState()
+                    end
+                end)
+            else
+                PregameStateManager_AdvanceState()
+            end
+        end,
+
+        OnExit = function()
+            WriteToInterfaceLog("Prelogin World loaded.")
+
+            -- Stop monitoring for Prelogin World load completion.
+            EVENT_MANAGER:UnregisterForUpdate("WaitForPreloginWorld")
+
+            -- Hide the Prelogin Overlay loading scene.
+            PRELOGIN_OVERLAY:SetHidden(true)
+
+            -- Restart the animation on startup for developers.
+            if ZO_PRELOGIN_WORLD_SAVED_VARS and IsPreloginWorldEnabled() then
+                ZO_PregameAnimatedBackgroundDevTools_ApplyCameraWaypointsAndRestartAnimation()
+            end
+        end,
+
+        GetStateTransitionData = function()
+            return "AccountLogin"
+        end,
     },
 
     ["AccountLogin"] =
@@ -78,6 +128,7 @@ local pregameStates =
 
                         SetCVar("IsServerSelected", "true")
                         SetCVar("SelectedServer", CONSOLE_SERVER_NORTH_AMERICA)
+                        WriteToInterfaceLog("Quick Launch was successful.")
                         PregameStateManager_AdvanceState()
                     end
                 end)
@@ -199,9 +250,9 @@ local pregameStates =
                     PregameLogin(username, password)
                 end
 
-                CREATE_LINK_LOADING_SCREEN_GAMEPAD:Show("AccountLogin", Login, GetString(SI_GAMEPAD_PREGAME_LOADING))
+                CREATE_LINK_LOADING_SCREEN_GAMEPAD:Show("WaitForPreloginWorld", Login, GetString(SI_GAMEPAD_PREGAME_LOADING))
             else
-                CREATE_LINK_LOADING_SCREEN_GAMEPAD:Show("AccountLogin", PregameBeginLinkedLogin, GetString(SI_GAMEPAD_PREGAME_LOADING))
+                CREATE_LINK_LOADING_SCREEN_GAMEPAD:Show("WaitForPreloginWorld", PregameBeginLinkedLogin, GetString(SI_GAMEPAD_PREGAME_LOADING))
             end
         end,
 
@@ -214,7 +265,6 @@ local pregameStates =
         end,
     },
 
-    
     ["CreateLinkAccount"] =
     {
         ShouldAdvance = function()
@@ -267,7 +317,7 @@ local pregameStates =
                 PregameCreateAccount()
             end
 
-            CREATE_LINK_LOADING_SCREEN_GAMEPAD:Show("AccountLogin", CreateAccount, GetString(SI_CREATEACCOUNT_CREATING_ACCOUNT))
+            CREATE_LINK_LOADING_SCREEN_GAMEPAD:Show("WaitForPreloginWorld", CreateAccount, GetString(SI_CREATEACCOUNT_CREATING_ACCOUNT))
         end,
 
         OnExit = function()
@@ -366,7 +416,7 @@ local pregameStates =
                 end
             end
 
-            CREATE_LINK_LOADING_SCREEN_GAMEPAD:Show("AccountLogin", LinkAccount, GetString(SI_LINKACCOUNT_LINKING_ACCOUNT))
+            CREATE_LINK_LOADING_SCREEN_GAMEPAD:Show("WaitForPreloginWorld", LinkAccount, GetString(SI_LINKACCOUNT_LINKING_ACCOUNT))
         end,
 
         OnExit = function()
@@ -426,7 +476,7 @@ local pregameStates =
                 SelectWorld(worldIndex)
             end
 
-            CREATE_LINK_LOADING_SCREEN_GAMEPAD:Show("AccountLogin", LocalSelectWorld, zo_strformat(SI_CONNECTING_TO_REALM, worldName))
+            CREATE_LINK_LOADING_SCREEN_GAMEPAD:Show("WaitForPreloginWorld", LocalSelectWorld, zo_strformat(SI_CONNECTING_TO_REALM, worldName))
         end,
 
         OnExit = function()
@@ -458,7 +508,7 @@ local pregameStates =
 
         OnExit = function()
             TrySaveCharacterListOrder()
-        end
+        end,
     },
 
 }

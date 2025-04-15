@@ -105,6 +105,11 @@ function ZO_GamepadSkills:Initialize(control)
                     ZO_GAMEPAD_SKILLS_ADVISOR_SUGGESTIONS_WINDOW:Activate()
                 end
                 self.returnToAdvisor = false
+            elseif self.selectSubclassing then
+                -- Subclassing follows scribing, skills advisor and three class skill lines
+                local SUBCLASSING_INDEX = 6
+                self.categoryList:SetSelectedIndexWithoutAnimation(SUBCLASSING_INDEX)
+                self.selectSubclassing = false
             elseif self.selectSkillData then
                 if previousSceneName == "gamepad_skills_scribing_library_root" then
                     -- first entry is always scribing
@@ -136,6 +141,7 @@ function ZO_GamepadSkills:Initialize(control)
                     self:ActivateAssignableActionBarFromList()
                 end
             end
+            HandleReturningPlayerUISystemShown(UI_SYSTEM_SKILLS)
         elseif newState == SCENE_HIDING then
             --Disable now so it's not possible to change the selected skill live/skills advisor entry as the scene is hiding since the line filter list depends on it being a skill line
             self:DisableCurrentList()
@@ -225,19 +231,19 @@ end
 function ZO_GamepadSkills.OnConfirmHideScene(scene, nextSceneName, bypassHideSceneConfirmationReason)
     if bypassHideSceneConfirmationReason == nil and 
         SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeBatchSave() and
-        (nextSceneName == "gamepad_skills_scribing_library_root" or 
+        (nextSceneName == "gamepad_skills_scribing_library_root" or
             not GAMEPAD_SKILLS_SCENE_GROUP:HasScene(nextSceneName)) then
-        
+
         ZO_Dialogs_ShowGamepadDialog("CONFIRM_REVERT_CHANGES",
         {
-            confirmCallback = function() 
+            confirmCallback = function()
                 scene:AcceptHideScene()
                 SKILLS_DATA_MANAGER:RebuildSkillsData()
                 ACTION_BAR_ASSIGNMENT_MANAGER:ResetPlayerHotbars()
                 SKILLS_AND_ACTION_BAR_MANAGER:ResetInterface()
             end,
             declineCallback = function() scene:RejectHideScene() end,
-        })        
+        })
     else
         scene:AcceptHideScene()
     end
@@ -292,8 +298,8 @@ function ZO_GamepadSkills:InitializeHeader()
     {
         titleText = GetString(SI_MAIN_MENU_SKILLS),
         subtitleText = selectedSkillBuild and zo_strformat(SI_SKILLS_ADVISOR_GAMEPAD_SELECTED_BUILD_SUBTITLE, selectedSkillBuild.name) or "",
-        data1HeaderText = GetString(SI_GAMEPAD_SKILLS_AVAILABLE_POINTS),       
-        data2HeaderText = GetString(SI_GAMEPAD_SKILLS_SKY_SHARDS),               
+        data1HeaderText = GetString(SI_GAMEPAD_SKILLS_AVAILABLE_POINTS),
+        data2HeaderText = GetString(SI_GAMEPAD_SKILLS_SKY_SHARDS),
     }
     ZO_GamepadGenericHeader_SetDataLayout(self.header, ZO_GAMEPAD_HEADER_LAYOUTS.DATA_PAIRS_TOGETHER)
 end
@@ -318,7 +324,7 @@ end
 function ZO_GamepadSkills:GetSkillLineEntryIndex(skillLineData)
     for i = 1, self.categoryList:GetNumEntries() do
         local categoryEntry = self.categoryList:GetDataForDataIndex(i)
-        if not (categoryEntry.isSkillsAdvisor or categoryEntry.isScribeLibrary) then
+        if not (categoryEntry.isSkillsAdvisor or categoryEntry.isScribeLibrary or categoryEntry.isSubclassing) then
             if categoryEntry.skillLineData == skillLineData then
                 return i
             end
@@ -364,6 +370,13 @@ function ZO_GamepadSkills:SelectSkillLineBySkillData(skillData, returnToSkillsAd
     end
 end
 
+function ZO_GamepadSkills:SelectEntryByAllocationMode()
+    local allocationMode = SKILLS_AND_ACTION_BAR_MANAGER:GetSkillPointAllocationMode()
+    if allocationMode == SKILL_POINT_ALLOCATION_MODE_SUBCLASS_ONLY then
+        self.selectSubclassing = true
+    end
+end
+
 function ZO_GamepadSkills:InitializeCategoryKeybindStrip()
     table.insert(self.categoryKeybindStripDescriptor,
     {
@@ -381,9 +394,7 @@ function ZO_GamepadSkills:InitializeCategoryKeybindStrip()
             end
             return GetString(SI_GAMEPAD_SELECT_OPTION)
         end,
-
         keybind = "UI_SHORTCUT_PRIMARY",
-
         callback =  function()
             --Here we determine what fragment to load, but we're going to wait until it loads to decide how to populate it
             --So we'll prevent any further movement and proceed based on what we expect the selected data to be by the time we need it.
@@ -406,48 +417,96 @@ function ZO_GamepadSkills:InitializeCategoryKeybindStrip()
                 else
                     local collectibleData = SCRIBING_DATA_MANAGER:GetScribingPurchasableCollectibleData()
                     if collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_CHAPTER) then
-                        ZO_ShowChapterUpgradePlatformScreen(MARKET_OPEN_OPERATION_COLLECTIONS_DLC)
+                        ZO_ShowChapterUpgradePlatformScreen(MARKET_OPEN_OPERATION_SKILLS_SCRIBING_LIBRARY)
                     else
                         local searchTerm = zo_strformat(SI_CROWN_STORE_SEARCH_FORMAT_STRING, collectibleData:GetName())
-                        ShowMarketAndSearch(searchTerm, MARKET_OPEN_OPERATION_COLLECTIONS_DLC)
+                        ShowMarketAndSearch(searchTerm, MARKET_OPEN_OPERATION_SKILLS_SCRIBING_LIBRARY)
                     end
                 end
+            elseif targetData and targetData.isSubclassing then
+                SCENE_MANAGER:Push("gamepad_skills_subclassing_root")
             elseif targetData and not targetData.advised then
                 self:DeactivateCurrentList()
                 SCENE_MANAGER:Push("gamepad_skills_line_filter")
             end
         end,
+        enabled = function()
+            local targetData = self.categoryList:GetTargetData()
+            if targetData then
+                if targetData.isSubclassing then
+                    return SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeAllowAccessToSubclassing()
+                end
+                return true
+            end
+            return false
+        end,
     })
 
-    --Confirm Bind
+    -- Confirm Bind
     table.insert(self.categoryKeybindStripDescriptor,
     {
         name = GetString(SI_SKILL_RESPEC_CONFIRM_KEYBIND),
         keybind = "UI_SHORTCUT_SECONDARY",
-        visible = function()
-            return SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeBatchSave()
-        end,
         callback = function()
             self:ShowConfirmRespecDialog()
         end,
+        visible = function()
+            return SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeBatchSave()
+        end,
     })
 
-    --Clear All Bind
+    -- Subclassing Grant Quest Bind
+    table.insert(self.categoryKeybindStripDescriptor,
+    {
+        name = GetString(SI_SKILLS_SUBCLASSING_QUEST_GRANT_TEXT),
+        keybind = "UI_SHORTCUT_QUATERNARY",
+        callback = function()
+            BestowSubclassingQuest()
+        end,
+        visible = function()
+            local targetData = self.categoryList:GetTargetData()
+            if targetData and targetData.isSubclassing and not HasAccessToSubclassing() then
+                local achievementId = GetSubclassingAchievementId()
+                if IsAchievementComplete(achievementId) then
+                    local questId = GetSubclassingQuestId()
+                    return not HasQuest(questId)
+                end
+            end
+            return false
+        end,
+    })
+
+    --Clear All Bind and Subclassing Help
     table.insert(self.categoryKeybindStripDescriptor,
     {
         name = function()
+            local targetData = self.categoryList:GetTargetData()
+            if targetData.isSubclassing then
+                return GetString(SI_SKILLS_SUBCLASSING_MORE_INFO_KEYBIND)
+            end
             return GetString("SI_SKILLPOINTALLOCATIONMODE_CLEARKEYBIND", SKILLS_AND_ACTION_BAR_MANAGER:GetSkillPointAllocationMode())
         end,
         keybind = "UI_SHORTCUT_RIGHT_STICK",
-        visible = function()
-            if SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeAllowDecrease() and not self.assignableActionBar:IsActive() then
-                 local targetData = self.categoryList:GetTargetData()
-                 return not targetData.isSkillsAdvisor
+        callback = function()
+            local targetData = self.categoryList:GetTargetData()
+            if targetData.isSubclassing then
+                local helpCategoryIndex, helpIndex = GetSubclassingHelpIndices()
+                HELP_TUTORIALS_ENTRIES_GAMEPAD:Push(helpCategoryIndex, helpIndex)
+            else
+                self:ShowConfirmClearAllDialog(targetData.skillLineData)
             end
         end,
-        callback = function()
-            local skillLineEntry = self.categoryList:GetTargetData()
-            self:ShowConfirmClearAllDialog(skillLineEntry.skillLineData)
+        visible = function()
+            local targetData = self.categoryList:GetTargetData()
+            if targetData then
+                if targetData.isSubclassing then
+                    local helpCategoryIndex, helpIndex = GetSubclassingHelpIndices()
+                    return helpCategoryIndex ~= nil
+                elseif SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeAllowClear() and not self.assignableActionBar:IsActive() then
+                    return not targetData.isSkillsAdvisor
+                end
+            end
+            return false
         end,
     })
 
@@ -589,7 +648,7 @@ function ZO_GamepadSkills:InitializeLineFilterKeybindStrip()
 
         if actionType == ZO_SKILL_POINT_ACTION.PURCHASE then
             if SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeConfirmOnPurchase() then
-                local labelData = { titleParams = { availablePoints }, mainTextParams = { name } }
+                local labelData = { titleParams = { availablePoints }, mainTextParams = { name, skillData:GetSkillPointCostMultiplier() } }
                 local dialogData = { purchaseSkillProgressionData = skillProgressionData, }
 
                 ZO_Dialogs_ShowGamepadDialog("GAMEPAD_SKILLS_PURCHASE_CONFIRMATION", dialogData, labelData)
@@ -598,7 +657,7 @@ function ZO_GamepadSkills:InitializeLineFilterKeybindStrip()
             end
         elseif actionType == ZO_SKILL_POINT_ACTION.INCREASE_RANK then
             if SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeConfirmOnIncreaseRank() then
-                local labelData = { titleParams = { availablePoints }, mainTextParams = { name } }
+                local labelData = { titleParams = { availablePoints }, mainTextParams = { name, skillData:GetSkillPointCostMultiplier() } }
                 local dialogData = { currentSkillProgressionData = skillProgressionData }
 
                 ZO_Dialogs_ShowGamepadDialog("GAMEPAD_SKILLS_UPGRADE_CONFIRMATION", dialogData, labelData)
@@ -623,7 +682,7 @@ function ZO_GamepadSkills:InitializeLineFilterKeybindStrip()
             local actionType = skillPointAllocator:GetDecreaseSkillAction()
             if actionType ~= ZO_SKILL_POINT_ACTION.NONE then
                 return true
-            elseif SKILLS_AND_ACTION_BAR_MANAGER:GetSkillPointAllocationMode() == SKILL_POINT_ALLOCATION_MODE_MORPHS_ONLY and skillData:IsActive() then
+            elseif SKILLS_AND_ACTION_BAR_MANAGER:GetSkillPointAllocationMode() == SKILL_POINT_ALLOCATION_MODE_MORPHS_ONLY and not skillData:IsCraftedAbility() and skillData:IsActive() then
                 if skillPointAllocator:IsPurchased() and skillPointAllocator:GetMorphSlot() == MORPH_SLOT_BASE and not skillPointAllocator:CanSell() then
                     return false, GetString(SI_SKILL_RESPEC_MORPHS_ONLY_CANNOT_SELL_BASE_ABILITY)
                 end
@@ -886,6 +945,9 @@ function ZO_GamepadSkills:InitializeCategoryList()
     end
 
     local function MenuEntryTemplateSetup(control, data, selected, reselectingDuringRebuild, enabled, activated)
+        if data.isSubclassing then
+            data.enabled = SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeAllowAccessToSubclassing()
+        end
         ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDuringRebuild, enabled, activated)
         if selected then
             GAMEPAD_SKILLS_ROOT_SCENE:RemoveFragment(self.skillLineXPBarFragment)
@@ -1124,7 +1186,14 @@ function ZO_GamepadSkills:InitializeEvents()
         end
     end
 
+    local function OnQuestsChanged()
+        self.categoryListRefreshGroup:MarkDirty("List")
+        self.selectedTooltipRefreshGroup:MarkDirty("Full")
+    end
+
     self.control:RegisterForEvent(EVENT_PLAYER_ACTIVATED, FullRebuild)
+    self.control:RegisterForEvent(EVENT_QUEST_ADDED, OnQuestsChanged)
+    self.control:RegisterForEvent(EVENT_QUEST_REMOVED, OnQuestsChanged)
     SKILLS_DATA_MANAGER:RegisterCallback("FullSystemUpdated", FullRebuild)
     SKILLS_DATA_MANAGER:RegisterCallback("SkillLineUpdated", OnSkillLineUpdated)
     SKILLS_DATA_MANAGER:RegisterCallback("SkillLineAdded", OnSkillLineAdded)
@@ -1253,13 +1322,18 @@ do
                 data.narrationText = skillLineNarrationText
 
                 if isHeader then
-                    data:SetHeader(skillTypeData:GetName())  
+                    data:SetHeader(skillTypeData:GetName())
                     self.categoryList:AddEntry("ZO_GamepadSkillLineEntryTemplateWithHeader", data)
                 else
                     self.categoryList:AddEntry("ZO_GamepadSkillLineEntryTemplate", data)
                 end
 
                 isHeader = false
+            end
+            if skillTypeData.skillType == SKILL_TYPE_CLASS then
+                local data = ZO_GamepadEntryData:New(zo_strformat(SI_SKILLS_ENTRY_NAME_FORMAT, GetString(SI_SKILLS_SUBCLASSING_ENTRY_NAME)))
+                data.isSubclassing = true
+                self.categoryList:AddEntry("ZO_GamepadMenuEntryTemplate", data)
             end
         end
         self.categoryList:Commit()
@@ -1287,7 +1361,7 @@ do
         ZO_ClearTable(g_ShownHeaderTexts)
 
         local skillLineEntry = self.categoryList:GetTargetData()
-        if skillLineEntry.isSkillsAdvisor or skillLineEntry.isScribeLibrary then
+        if skillLineEntry.isSkillsAdvisor or skillLineEntry.isScribeLibrary or skillLineEntry.isSubclassing then
             return
         end
 
@@ -1455,14 +1529,9 @@ do
         data:SetText(specificMorphSkillProgressionData:GetFormattedName())
         data:ClearIcons()
         data:AddIcon(specificMorphSkillProgressionData:GetIcon())
+        data.skillProgressionData = specificMorphSkillProgressionData
         ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
-
-        local skillEntry =
-        {
-            skillProgressionData = specificMorphSkillProgressionData,
-            isMorphDialog = true,
-        }
-        ZO_GamepadSkillEntryTemplate_Setup(control, skillEntry, selected, active, ZO_SKILL_ABILITY_DISPLAY_VIEW)
+        ZO_GamepadSkillEntryTemplate_Setup(control, data, selected, active, ZO_SKILL_ABILITY_DISPLAY_VIEW)
     end
 
     local function MorphConfirmCallback(dialog)
@@ -1480,7 +1549,6 @@ do
         data2 =
         {
             header = GetString(SI_GAMEPAD_SKILLS_MORPH_COST_HEADER),
-            value = 1,
         },
     }
 
@@ -1495,13 +1563,14 @@ do
 
             setup = function(dialog)
                 local availablePoints = GetAvailableSkillPoints()
+                local morphSkillData = dialog.data.morphSkillData
 
                 g_morphHeaderData.data1.value = availablePoints
+                g_morphHeaderData.data2.value = morphSkillData:GetSkillPointCostMultiplier()
                 ZO_GenericGamepadDialog_ShowTooltip(dialog)
                 dialog:setupFunc(nil, g_morphHeaderData)
 
                 --Select the currently chosen morph if a morph is chosen, or pick the first one
-                local morphSkillData = dialog.data.morphSkillData
                 local selectedMorphSkillProgressionData = morphSkillData:GetPointAllocatorProgressionData()
                 if selectedMorphSkillProgressionData:GetMorphSlot() == MORPH_SLOT_MORPH_2 then
                     dialog.entryList:SetSelectedIndexWithoutAnimation(2)
@@ -1635,8 +1704,8 @@ do
             end,
 
             finishedCallback = function()
-                self.lineFilterListRefreshGroup:MarkDirty("Visible")
-                self.lineFilterListRefreshGroup:TryClean()
+                self.lineFilterListRefreshGroup:MarkDirty("List")
+                SKILLS_SUBCLASSING_GAMEPAD.skillsListRefreshGroup:MarkDirty("List")
             end,
 
             title =
@@ -1749,7 +1818,10 @@ function ZO_GamepadSkills:InitializeRespecConfirmationGoldDialog()
         },
         mainText = 
         {
-            text = SI_SKILL_RESPEC_CONFIRM_DIALOG_BODY_INTRO,
+            text = function(dialog)
+                local mainTextEntryTable = ZO_Dialogs_GetSkillsRespecMainTextEntryTable()
+                return ZO_GenerateParagraphSeparatedList(mainTextEntryTable)
+            end,
         },
         setup = function(dialog)
             local balance = GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)
@@ -1777,7 +1849,7 @@ function ZO_GamepadSkills:InitializeRespecConfirmationGoldDialog()
 end
 
 function ZO_GamepadSkills:ShowConfirmRespecDialog()
-    if SKILL_POINT_ALLOCATION_MANAGER:DoPendingChangesIncurCost() then
+    if SKILLS_AND_ACTION_BAR_MANAGER:DoPendingChangesIncurCost() then
         if SKILLS_AND_ACTION_BAR_MANAGER:GetSkillRespecPaymentType() == RESPEC_PAYMENT_TYPE_GOLD then
             ZO_Dialogs_ShowGamepadDialog("SKILL_RESPEC_CONFIRM_GOLD_GAMEPAD")
         else
@@ -2113,6 +2185,25 @@ function ZO_GamepadSkills:RefreshSelectedTooltip()
             else
                 local lockedText = ZO_Tooltip:GetRequiredScribingCollectibleText()
                 GAMEPAD_TOOLTIPS:LayoutTitleAndMultiSectionDescriptionTooltip(GAMEPAD_LEFT_TOOLTIP, scribingTitle, scribingDescription, lockedText)
+            end
+        elseif selectedData and selectedData.isSubclassing then
+            local subclassingTitle = GetString(SI_SKILLS_SUBCLASSING_ENTRY_NAME)
+            local subclassingDescription = GetString(SI_SKILLS_SUBCLASSING_DESCRIPTION)
+            GAMEPAD_TOOLTIPS:LayoutTitleAndDescriptionTooltip(GAMEPAD_LEFT_TOOLTIP, subclassingTitle, subclassingDescription)
+            if not SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeAllowAccessToSubclassing() then
+                local lockedTextTable = {}
+                local achievementId = GetSubclassingAchievementId()
+                local achievementTextColor = ZO_ERROR_COLOR
+                local questId = GetSubclassingQuestId()
+                local questNameText = zo_strformat(SI_SKILLS_SUBCLASSING_UNLOCK_QUEST_TEXT, GetQuestName(questId))
+                table.insert(lockedTextTable, GetString(SI_SKILLS_SUBCLASSING_UNLOCK_TOOLTIP_HEADER))
+                if IsAchievementComplete(achievementId) then
+                    achievementTextColor = ZO_NORMAL_TEXT
+                end
+                table.insert(lockedTextTable, achievementTextColor:Colorize(GetString(SI_SKILLS_SUBCLASSING_UNLOCK_ACHIEVEMENT_TEXT)))
+                table.insert(lockedTextTable, ZO_ERROR_COLOR:Colorize(questNameText))
+                local lockedText = ZO_GenerateParagraphSeparatedList(lockedTextTable)
+                GAMEPAD_TOOLTIPS:LayoutTitleAndMultiSectionDescriptionTooltip(GAMEPAD_LEFT_TOOLTIP, subclassingTitle, subclassingDescription, lockedText)
             end
         elseif selectedData then
             local skillLineData = selectedData.skillLineData

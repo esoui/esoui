@@ -91,6 +91,7 @@ EsoUI\Ingame\Skills\CompanionSkillsData.lua
 EsoUI\Ingame\Skills\SkillsDataManager.lua
 EsoUI\Ingame\Skills\CompanionSkillsDataManager.lua
 EsoUI\Ingame\Skills\SkillsAndActionBarManager.lua
+EsoUI\Ingame\Skills\SkillLineAssignmentManager.lua
 EsoUI\Ingame\Skills\SkillPointAllocationManager.lua
 EsoUI\Ingame\Skills\ActionBarAssignmentManager.lua
 
@@ -743,6 +744,8 @@ EsoUI\Ingame\Skills\Keyboard\SkillsComponents_Keyboard.lua
 EsoUI\Ingame\Skills\Keyboard\SkillsComponents_Keyboard.xml
 EsoUI\Ingame\Skills\Keyboard\KeyboardAssignableActionBar.lua
 EsoUI\Ingame\Skills\Keyboard\KeyboardAssignableActionBar.xml
+EsoUI\Ingame\Skills\Keyboard\SkillsSubclassing_Keyboard.lua
+EsoUI\Ingame\Skills\Keyboard\SkillsSubclassing_Keyboard.xml
 EsoUI\Ingame\Skills\Keyboard\ZO_Skills.lua
 EsoUI\Ingame\Skills\Keyboard\ZO_Skills.xml
 EsoUI\Ingame\Skills\Gamepad\SkillsComponents_Gamepad.lua
@@ -751,6 +754,8 @@ EsoUI\Ingame\Skills\Gamepad\GamepadAssignableActionBar.lua
 EsoUI\Ingame\Skills\Gamepad\GamepadAssignableActionBar.xml
 EsoUI\Ingame\Skills\Gamepad\GamepadSkills.lua
 EsoUI\Ingame\Skills\Gamepad\GamepadSkills.xml
+EsoUI\Ingame\Skills\Gamepad\SkillsSubclassing_Gamepad.lua
+EsoUI\Ingame\Skills\Gamepad\SkillsSubclassing_Gamepad.xml
 
 EsoUI\Ingame\Skills\Keyboard\ScribingLibrary_CraftedAbilitySkills_Keyboard.lua
 EsoUI\Ingame\Skills\Keyboard\ScribingLibrary_CraftedAbilitySkills_Keyboard.xml
@@ -1339,6 +1344,21 @@ EsoUI\Ingame\Inventory\Gamepad\GuildBank_Dialogs_Gamepad.lua
 EsoUI\Ingame\Inventory\Gamepad\GuildBank_Gamepad.lua
 EsoUI\Ingame\Inventory\Gamepad\GuildBank_Gamepad.xml
 
+; Loading before Champion.lua to avoid issues refreshing the gamepad main menu
+EsoUI\Ingame\ReturningPlayer\ReturningPlayer_Manager.lua
+EsoUI\Ingame\ReturningPlayer\ReturningPlayerIntroScreen_Shared.lua
+EsoUI\Ingame\ReturningPlayer\ReturningPlayerIntroScreen_Shared.xml
+EsoUI\Ingame\ReturningPlayer\Keyboard\ReturningPlayerIntroScreen_Keyboard.lua
+EsoUI\Ingame\ReturningPlayer\Keyboard\ReturningPlayerIntroScreen_Keyboard.xml
+EsoUI\Ingame\ReturningPlayer\Gamepad\ReturningPlayerIntroScreen_Gamepad.lua
+EsoUI\Ingame\ReturningPlayer\Gamepad\ReturningPlayerIntroScreen_Gamepad.xml
+EsoUI\Ingame\ReturningPlayer\ReturningPlayerRewardScreen_Shared.lua
+EsoUI\Ingame\ReturningPlayer\ReturningPlayerRewardScreen_Shared.xml
+EsoUI\Ingame\ReturningPlayer\Keyboard\ReturningPlayerRewardScreen_Keyboard.lua
+EsoUI\Ingame\ReturningPlayer\Keyboard\ReturningPlayerRewardScreen_Keyboard.xml
+EsoUI\Ingame\ReturningPlayer\Gamepad\ReturningPlayerRewardScreen_Gamepad.lua
+EsoUI\Ingame\ReturningPlayer\Gamepad\ReturningPlayerRewardScreen_Gamepad.xml
+
 EsoUI\Ingame\DeathRecap\DeathRecap.lua
 EsoUI\Ingame\DeathRecap\DeathRecap.xml
 
@@ -1373,6 +1393,7 @@ EsoUI\Ingame\HousingEditor\HousingEditorHud.xml
 EsoUI\Ingame\HousingEditor\FurnitureClasses_Shared.lua
 EsoUI\Ingame\HousingEditor\FurnitureManager_Shared.lua
 EsoUI\Ingame\HousingEditor\HouseSettings_Manager.lua
+EsoUI\Ingame\HousingEditor\HousingFurnitureRetrieveTo_Shared.lua
 EsoUI\Ingame\HousingEditor\HousingFurnitureSettings_Base.lua
 EsoUI\Ingame\HousingEditor\HousingFurnitureBrowser_Base.lua
 EsoUI\Ingame\HousingEditor\HouseInformation_Shared.lua
@@ -1389,6 +1410,8 @@ EsoUI\Ingame\HousingEditor\Keyboard\HousingFurnitureProducts_Keyboard.lua
 EsoUI\Ingame\HousingEditor\Keyboard\HousingFurnitureProducts_Keyboard.xml
 EsoUI\Ingame\HousingEditor\Keyboard\HousingFurnitureRetrieval_Keyboard.lua
 EsoUI\Ingame\HousingEditor\Keyboard\HousingFurnitureRetrieval_Keyboard.xml
+EsoUI\Ingame\HousingEditor\Keyboard\HousingFurnitureRetrieveTo_Keyboard.lua
+EsoUI\Ingame\HousingEditor\Keyboard\HousingFurnitureRetrieveTo_Keyboard.xml
 EsoUI\Ingame\HousingEditor\Keyboard\HousingFurnitureSettings_Keyboard.lua
 EsoUI\Ingame\HousingEditor\Keyboard\HousingFurnitureSettings_Keyboard.xml
 EsoUI\Ingame\HousingEditor\Keyboard\HousingFurnitureBrowser_Keyboard.lua
@@ -1400,6 +1423,7 @@ EsoUI\Ingame\HousingEditor\Keyboard\HouseInformation_keyboard.xml
 EsoUI\Ingame\HousingEditor\Gamepad\HousingFurniturePlacement_Gamepad.lua
 EsoUI\Ingame\HousingEditor\Gamepad\HousingFurnitureProducts_Gamepad.lua
 EsoUI\Ingame\HousingEditor\Gamepad\HousingFurnitureRetrieval_Gamepad.lua
+EsoUI\Ingame\HousingEditor\Gamepad\HousingFurnitureRetrieveTo_Gamepad.xml
 EsoUI\Ingame\HousingEditor\Gamepad\HousingFurnitureSettings_Gamepad.lua
 EsoUI\Ingame\HousingEditor\Gamepad\HousingFurnitureSettings_Gamepad.xml
 EsoUI\Ingame\HousingEditor\Gamepad\HousingFurnitureBrowser_Gamepad.lua
@@ -1702,6 +1726,8 @@ EsoUI\Ingame\PromotionalEvents\PromotionalEvents_Shared.lua
 EsoUI\Ingame\PromotionalEvents\PromotionalEvents_Shared.xml
 EsoUI\Ingame\PromotionalEvents\Keyboard\PromotionalEvents_Keyboard.lua
 EsoUI\Ingame\PromotionalEvents\Keyboard\PromotionalEvents_Keyboard.xml
+EsoUI\Ingame\PromotionalEvents\Gamepad\PromotionalEventsList_Gamepad.lua
+EsoUI\Ingame\PromotionalEvents\Gamepad\PromotionalEventsList_Gamepad.xml
 EsoUI\Ingame\PromotionalEvents\Gamepad\PromotionalEvents_Gamepad.lua
 EsoUI\Ingame\PromotionalEvents\Gamepad\PromotionalEvents_Gamepad.xml
 EsoUI\Ingame\PromotionalEvents\PromotionalEventTracker.lua

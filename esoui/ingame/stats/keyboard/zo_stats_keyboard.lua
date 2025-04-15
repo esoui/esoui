@@ -80,6 +80,8 @@ function ZO_Stats:Initialize(control)
     STATS_SCENE:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_SHOWING then
             self:OnShowing()
+        elseif newState == SCENE_SHOWN then
+            self:OnShown()
         elseif newState == SCENE_HIDING then
             self:OnHiding()
         elseif newState == SCENE_HIDDEN then
@@ -153,6 +155,10 @@ function ZO_Stats:OnShowing()
     end
 
     ZO_ScrollList_ResetToTop(self.scroll)
+end
+
+function ZO_Stats:OnShown()
+    HandleReturningPlayerUISystemShown(UI_SYSTEM_CHARACTER_STATS)
 end
 
 function ZO_Stats:OnHiding()

@@ -1377,6 +1377,10 @@ function SharedChatSystem:InitializeSharedEvents(eventKey)
             self:OnChatCategoryColorChanged(categoryId, r, g, b)
         end
 
+        local function OnInterfaceSettingChanged()
+            self:SetChannel(self:GetDefaultChatChannel())
+        end
+
         EVENT_MANAGER:RegisterForEvent(eventKey, EVENT_ZONE_CHANNEL_CHANGED, OnZoneChannelChanged)
         EVENT_MANAGER:RegisterForEvent(eventKey, EVENT_GUILD_DATA_LOADED, function() self:ValidateChatChannel() end)
         EVENT_MANAGER:RegisterForEvent(eventKey, EVENT_GUILD_RANK_CHANGED, function() self:ValidateChatChannel() end)
@@ -1388,6 +1392,7 @@ function SharedChatSystem:InitializeSharedEvents(eventKey)
         EVENT_MANAGER:RegisterForEvent(eventKey, EVENT_AGENT_CHAT_TERMINATED, OnAgentChatUpdated)
         EVENT_MANAGER:RegisterForEvent(eventKey, EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, OnGamepadPreferredModeChanged)
         EVENT_MANAGER:RegisterForEvent(eventKey, EVENT_CHAT_CATEGORY_COLOR_CHANGED, OnChatCategoryColorChanged)
+        EVENT_MANAGER:RegisterForEvent(eventKey, EVENT_INTERFACE_SETTING_CHANGED, OnInterfaceSettingChanged)
 
         local function OnGamepadUseKeyboardChatChanged()
             self:CloseTextEntry()
@@ -1403,6 +1408,17 @@ function SharedChatSystem:TryNotificationAndMailBursts()
     -- Overridden if applicable
 end
 
+function SharedChatSystem:GetDefaultChatChannel()
+    if IsCommunicationRestricted() then
+        if IsUnitGrouped("player") then
+            return CHAT_CHANNEL_PARTY
+        elseif GetNumGuilds() > 0 then
+            return CHAT_CHANNEL_GUILD_1
+        end
+    end
+    return CHAT_CHANNEL_SAY
+end
+
 function SharedChatSystem:LoadChatFromSettings(newContainerFn, defaults)
     self.suppressSave = true
 
@@ -1411,13 +1427,13 @@ function SharedChatSystem:LoadChatFromSettings(newContainerFn, defaults)
     self.primaryContainer = self:CreateChatContainer(newContainerFn(self, self.control, self.windowPool, self.tabPool))
     self.primaryContainer:SetAsPrimary()
 
-    for i=2, GetNumChatContainers() do
+    for i = 2, GetNumChatContainers() do
         self:CreateChatContainer()
     end
 
     self.suppressSave = false
 
-    self:SetChannel(CHAT_CHANNEL_SAY)
+    self:SetChannel(self:GetDefaultChatChannel())
     self.loaded = true
 end
 
@@ -1426,16 +1442,15 @@ function SharedChatSystem:SetupSavedVars(defaults)
 end
 
 function SharedChatSystem:RedockContainersToPrimary()
-    for i=2, #self.containers do
+    for i = 2, #self.containers do
         -- Grab the second container, the first is always the primary
         local container = self.containers[2]
         -- move all tabs to the primary container
-        for j=1, #container.windows do
+        for j = 1, #container.windows do
             container:TransferWindow(1, self.primaryContainer)
         end
     end
 end
-
 
 function SharedChatSystem:CanSaveSettings()
     return not self.suppressSave
@@ -1643,9 +1658,10 @@ function SharedChatSystem:ValidateChatChannel()
         if not lastChannelData.requires or lastChannelData.requires(lastChannelData.id) then
             self:SetChannel(self.lastValidChannel, self.lastValidTarget)
         else
-            --if that doesn't work, just revert to say
-            self:SetChannel(CHAT_CHANNEL_SAY)
-            self.lastValidChannel = CHAT_CHANNEL_SAY
+            --if that doesn't work, just revert to default chat channel
+            local defaultChatChannel = self:GetDefaultChatChannel()
+            self:SetChannel(defaultChatChannel)
+            self.lastValidChannel = defaultChatChannel
             self.lastValidTarget = nil
         end
 
@@ -1919,7 +1935,7 @@ function SharedChatSystem:StartTextEntry(text, channel, target, dontShowHUDWindo
         end
 
         if not self.currentChannel or channel then
-            self:SetChannel(channel or CHAT_CHANNEL_SAY, target)
+            self:SetChannel(channel or self:GetDefaultChatChannel(), target)
         end
 
         self.textEntry:Open(text)
@@ -1974,7 +1990,7 @@ function SharedChatSystem:SetChannel(newChannel, channelTarget)
         end
     end
 
-    newChannel = newChannel or CHAT_CHANNEL_SAY
+    newChannel = newChannel or self:GetDefaultChatChannel()
     local channelData = self.channelData[newChannel]
     CHAT_ROUTER:SetCurrentChannelData(channelData, channelTarget)
 
@@ -1984,7 +2000,7 @@ end
 
 function SharedChatSystem:GetCurrentChannelData()
     if not self.currentChannel then
-        self:SetChannel(CHAT_CHANNEL_SAY)
+        self:SetChannel(self:GetDefaultChatChannel())
     end
     local channelData = self.channelData[self.currentChannel]
     return channelData, self.currentTarget
@@ -2168,10 +2184,13 @@ function SharedChatSystem:ShowTextEntryMenu()
     table.sort(switches)
 
     --Display sorted switches
-    for i=1, #switches do
+    local isCommunicationRestricted = IsCommunicationRestrictedAccount() and GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_RESTRICTED_COMMUNICATION)
+    for i = 1, #switches do
         local switch = switches[i]
         local data = self.switchLookup[switch]
-        if data and (not data.requires or data.requires(data.id)) then
+        if data
+            and (not data.requires or data.requires(data.id))
+            and not IsChannelCategoryCommunicationRestricted(GetChannelCategoryFromChannel(data.id)) then
             local r, g, b = ZO_ChatSystem_GetCategoryColorFromChannel(data.id)
             local itemColor = ZO_ColorDef:New(r, g, b)
 
@@ -2288,7 +2307,11 @@ function SharedChatSystem:ResetChat()
 end
 
 function StartChatInput(text, channel, target)
-    if IsChatSystemAvailableForCurrentPlatform() then
+    local isRestrictedCommunicationPermitted = true
+    if target ~= nil and IsCommunicationRestricted() then
+        isRestrictedCommunicationPermitted = CanCommunicateWith(target)
+    end
+    if IsChatSystemAvailableForCurrentPlatform() and isRestrictedCommunicationPermitted then
         ZO_GetChatSystem():StartTextEntry(text, channel, target)
     end
 end

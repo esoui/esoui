@@ -301,7 +301,7 @@ function PregameInitialScreen_Gamepad:ShowError(errorTitle, errorMessage)
     self:RefreshScreen()
 
     self:SetupError(errorTitle, errorMessage)
-    PregameStateManager_SetState("AccountLogin")
+    PregameStateManager_SetState("WaitForPreloginWorld")
 end
 
 function PregameInitialScreen_Gamepad:SetupError(errorTitle, errorMessage)

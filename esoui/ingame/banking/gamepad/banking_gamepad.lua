@@ -36,7 +36,17 @@ function ZO_GamepadBankInventoryList:RefreshCurrencyTransferEntryInList()
 end
 
 do
-    local function IsInFilteredCategories(filterCategories, itemData)
+    local function IsInFilteredCategories(bagId, filterCategories, itemData)
+        if IsFurnitureVault(bagId) then
+            -- Only furnishings can be shown in the Furniture Vault.
+            for _, filterData in ipairs(itemData.filterData) do
+                if filterData == ITEMFILTERTYPE_FURNISHING then
+                    return true
+                end
+            end
+            return false
+        end
+
         -- No category selected, don't filter out anything.
         if ZO_IsTableEmpty(filterCategories) then
             return true
@@ -62,12 +72,14 @@ do
                 self.isDirty = true
                 return
             end
+
+            local currentBagId = GetBankingBag()
             self.isDirty = false
             self.isRebuildingList = true
 
             self.list:Clear()
 
-            if DoesBankHoldCurrency(GetBankingBag()) then
+            if DoesBankHoldCurrency(currentBagId) then
                 self.list:AddEntry("ZO_GamepadMenuEntryTemplate", self.currenciesTransferEntry)
             end
 
@@ -75,29 +87,32 @@ do
                 self.dataByBagAndSlotIndex[bagId] = {}
             end
 
-            local slots = self:GenerateSlotTable()
+            local suppressList = self:IsInDepositMode() and IsFurnitureVault(currentBagId) and not HOUSING_EDITOR_STATE:CanDepositIntoFurnitureVault()
+            if not suppressList then
+                local slots = self:GenerateSlotTable()
 
-            -- Sort slots accordingly before constructing list, necessary to prevent duplicate headers
-            if self.list.sortFunction then
-                table.sort(slots, self.list.sortFunction)
-            end
+                -- Sort slots accordingly before constructing list, necessary to prevent duplicate headers
+                if self.list.sortFunction then
+                    table.sort(slots, self.list.sortFunction)
+                end
 
-            local currentBestCategoryName = nil
-            for _, itemData in ipairs(slots) do
-                local passesTextFilter = TEXT_SEARCH_MANAGER:IsDataInSearchTextResults(self.searchContext, BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT, itemData.bagId, itemData.slotIndex)
-                local passesCategoryFilter = IsInFilteredCategories(self.filterCategories, itemData)
-                if passesTextFilter and passesCategoryFilter then
-                    local entry = ZO_GamepadEntryData:New(itemData.name, itemData.iconFile)
-                    self:SetupItemEntry(entry, itemData)
+                local currentBestCategoryName = nil
+                for _, itemData in ipairs(slots) do
+                    local passesTextFilter = TEXT_SEARCH_MANAGER:IsDataInSearchTextResults(self.searchContext, BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT, itemData.bagId, itemData.slotIndex)
+                    local passesCategoryFilter = IsInFilteredCategories(currentBagId, self.filterCategories, itemData)
+                    if passesTextFilter and passesCategoryFilter then
+                        local entry = ZO_GamepadEntryData:New(itemData.name, itemData.iconFile)
+                        self:SetupItemEntry(entry, itemData)
 
-                    if self.currentSortType == ITEM_LIST_SORT_TYPE_CATEGORY and itemData.bestGamepadItemCategoryName ~= currentBestCategoryName then
-                        currentBestCategoryName = itemData.bestGamepadItemCategoryName
-                        entry:SetHeader(currentBestCategoryName)
-                        self.list:AddEntryWithHeader(self.template, entry)
-                    else
-                        self.list:AddEntry(self.template, entry)
+                        if self.currentSortType == ITEM_LIST_SORT_TYPE_CATEGORY and itemData.bestGamepadItemCategoryName ~= currentBestCategoryName then
+                            currentBestCategoryName = itemData.bestGamepadItemCategoryName
+                            entry:SetHeader(currentBestCategoryName)
+                            self.list:AddEntryWithHeader(self.template, entry)
+                        else
+                            self.list:AddEntry(self.template, entry)
+                        end
+                        self.dataByBagAndSlotIndex[itemData.bagId][itemData.slotIndex] = entry
                     end
-                    self.dataByBagAndSlotIndex[itemData.bagId][itemData.slotIndex] = entry
                 end
             end
 
@@ -138,6 +153,9 @@ function ZO_GamepadBanking:OnOpenBank(bankBag)
             self:AddBankedBag(BAG_BANK)
             self:AddBankedBag(BAG_SUBSCRIBER_BANK)
             self:SetTextSearchContext("playerBankTextSearch")
+        elseif IsFurnitureVault(bankBag) then
+            self:AddBankedBag(bankBag)
+            self:SetTextSearchContext("furnitureVaultTextSearch")
         else
             self:AddBankedBag(bankBag)
             self:SetTextSearchContext("houseBankTextSearch")
@@ -235,7 +253,7 @@ function ZO_GamepadBanking:RefreshWithdrawNoItemText()
         self.withdrawList:SetNoItemText(GetString(SI_BANK_EMPTY))
     else
         local interactName = GetUnitName("interact")
-        local collectibleId = GetCollectibleForHouseBankBag(bankingBag)
+        local collectibleId = GetCollectibleForBag(bankingBag)
         local nickname
         if collectibleId ~= 0 then
             local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
@@ -254,7 +272,9 @@ end
 
 function ZO_GamepadBanking:InitializeLists()
     local function OnWithdrawEntryDataCreatedCallback(data)
-        ZO_Inventory_BindSlot(data, SLOT_TYPE_BANK_ITEM, data.itemData.slotIndex, data.itemData.bagId)
+        -- Determine the correct Slot Type for the Bag.
+        local slotType = IsFurnitureVault(data.itemData.bagId) and SLOT_TYPE_FURNITURE_VAULT or SLOT_TYPE_BANK_ITEM
+        ZO_Inventory_BindSlot(data, slotType, data.itemData.slotIndex, data.itemData.bagId)
     end
 
     local function OnDepositEntryDataCreatedCallback(data)
@@ -282,7 +302,7 @@ function ZO_GamepadBanking:InitializeLists()
     local withdrawListFragment = self:GetListFragment("withdraw")
     withdrawListFragment:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_FRAGMENT_SHOWING then
-            -- Context changes on show depending on if it's the player bank or a house bank
+            -- Context changes on show depending on if it's the player bank, furniture vault or a house bank
             withdrawList:SetSearchContext(self.searchContext)
         elseif newState == SCENE_FRAGMENT_SHOWN then
             local list = self:GetCurrentList()
@@ -303,15 +323,29 @@ function ZO_GamepadBanking:InitializeLists()
     local depositListFragment = self:GetListFragment("deposit")
     depositListFragment:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_FRAGMENT_SHOWING then
-            -- Context changes on show depending on if it's the player bank or a house bank
+            -- Context changes on show depending on if it's the player bank, furniture vault or a house bank
             depositList:SetSearchContext(self.searchContext)
+
+            if IsFurnitureVault(GetBankingBag()) and not HOUSING_EDITOR_STATE:CanDepositIntoFurnitureVault() then
+                self:SetTextSearchEntryHidden(true)
+            else
+                self:SetTextSearchEntryHidden(false)
+            end
         elseif newState == SCENE_FRAGMENT_SHOWN then
+            if IsFurnitureVault(GetBankingBag()) and not HOUSING_EDITOR_STATE:CanDepositIntoFurnitureVault() then
+                depositList:SetNoItemText(GetString(SI_FURNITURE_VAULT_ERROR_NEED_ESO_PLUS))
+            else
+                depositList:SetNoItemText(GetString(SI_GAMEPAD_INVENTORY_EMPTY))
+            end
+
             local list = self:GetCurrentList()
             list:RefreshList()
 
             --The parametric list screen does not call OnTargetChanged when changing the current list which means anything that updates off of the current
             --selection is out of date. So we run OnTargetChanged when a list shows to remedy this.
             self:OnTargetChanged(self:GetCurrentList(), self:GetTargetData())
+        elseif newState == SCENE_FRAGMENT_HIDING then
+            self:SetTextSearchEntryHidden(false)
         end
     end)
 
@@ -492,7 +526,7 @@ function ZO_GamepadBanking:InitializeKeybindStripDescriptors()
                 return IsHouseBankBag(GetBankingBag())
             end,
             callback = function()
-                local collectibleId = GetCollectibleForHouseBankBag(GetBankingBag())
+                local collectibleId = GetCollectibleForBag(GetBankingBag())
                 if collectibleId ~= 0 then
                     local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
                     if collectibleData then
@@ -509,13 +543,22 @@ function ZO_GamepadBanking:InitializeKeybindStripDescriptors()
             end
         },
         {
+            name = GetString(SI_ITEM_ACTION_STOW_ALL_FURNITURE),
+            keybind = "UI_SHORTCUT_QUATERNARY",
+            visible = function()
+                return self:IsInDepositMode() and IsFurnitureVault(GetBankingBag()) and HOUSING_EDITOR_STATE:CanDepositIntoFurnitureVault()
+            end,
+            callback = function()
+                StowAllFurnitureItems()
+            end
+        },
+        {
             name = GetString(SI_GAMEPAD_INVENTORY_ACTION_LIST_KEYBIND),
             keybind = "UI_SHORTCUT_TERTIARY",
             visible = function()
                 local data = self:GetTargetData()
                 return data and not ZO_GamepadBanking.IsEntryDataCurrencyRelated(data)
             end,
-
             callback = function()
                 self:ShowActions()
             end,

@@ -33,12 +33,16 @@ end
 
 function ZO_PromotionalEventReward_Keyboard:OnMouseUp(button, upInside)
     if upInside then
+        local rewardId = self.displayRewardData:GetRewardId()
         if button == MOUSE_BUTTON_INDEX_LEFT then
             if self.rewardableEventData:CanClaimReward() then
-                self.rewardableEventData:TryClaimReward()
-            elseif CanPreviewReward(self.displayRewardData:GetRewardId()) then
-                SYSTEMS:GetObject("itemPreview"):ClearPreviewCollection()
-                SYSTEMS:GetObject("itemPreview"):PreviewReward(self.displayRewardData:GetRewardId())
+                if GetRewardType(rewardId) == REWARD_ENTRY_TYPE_CHOICE then
+                    g_PromotionalEventsKeyboard:ShowClaimChoiceDialog(self.rewardableEventData)
+                else
+                    self.rewardableEventData:TryClaimReward()
+                end
+            elseif CanPreviewReward(rewardId) or GetRewardType(rewardId) == REWARD_ENTRY_TYPE_REWARD_LIST then
+                g_PromotionalEventsKeyboard:BeginPreview(rewardId)
                 KEYBIND_STRIP:UpdateKeybindButtonGroup(g_PromotionalEventsKeyboard.keybindStripDescriptor)
             end
         elseif button == MOUSE_BUTTON_INDEX_RIGHT then
@@ -47,15 +51,18 @@ function ZO_PromotionalEventReward_Keyboard:OnMouseUp(button, upInside)
 
             if self.rewardableEventData:CanClaimReward() then
                 AddMenuItem(GetString(SI_PROMOTIONAL_EVENT_CLAIM_REWARD_ACTION), function()
-                    self.rewardableEventData:TryClaimReward()
+                    if GetRewardType(rewardId) == REWARD_ENTRY_TYPE_CHOICE then
+                        g_PromotionalEventsKeyboard:ShowClaimChoiceDialog(self.rewardableEventData)
+                    else
+                        self.rewardableEventData:TryClaimReward()
+                    end
                 end)
                 showMenu = true
             end
 
-            if CanPreviewReward(self.displayRewardData:GetRewardId()) then
+            if CanPreviewReward(rewardId) or GetRewardType(rewardId) == REWARD_ENTRY_TYPE_REWARD_LIST then
                 AddMenuItem(GetString(SI_PROMOTIONAL_EVENT_REWARD_PREVIEW_ACTION), function()
-                    SYSTEMS:GetObject("itemPreview"):ClearPreviewCollection()
-                    SYSTEMS:GetObject("itemPreview"):PreviewReward(self.displayRewardData:GetRewardId())
+                    g_PromotionalEventsKeyboard:BeginPreview(rewardId)
                     KEYBIND_STRIP:UpdateKeybindButtonGroup(g_PromotionalEventsKeyboard.keybindStripDescriptor)
                 end)
                 showMenu = true
@@ -210,6 +217,9 @@ end
 -- Screen --
 
 ZO_PROMOTIONAL_EVENT_KEYBOARD_ACTIVITY_ENTRY_HEIGHT = 75
+ZO_PROMOTIONAL_EVENT_RETURNING_PLAYER_REWARD_WIDTH_KEYBOARD = 180
+ZO_PROMOTIONAL_EVENT_RETURNING_PLAYER_REWARD_HEIGHT_KEYBOARD = 150
+ZO_PROMOTIONAL_EVENT_RETURNING_PLAYER_REWARD_SPACING_KEYBOARD = 30
 
 ZO_PromotionalEvents_Keyboard = ZO_PromotionalEvents_Shared:Subclass()
 
@@ -219,24 +229,38 @@ function ZO_PromotionalEvents_Keyboard:OnDeferredInitialize()
     self:InitializeKeybindStripDescriptors()
 end
 
-
-function ZO_PromotionalEvents_Keyboard:GetSelectedCampaignData()
-    local selectedNode = GROUP_MENU_KEYBOARD:GetTree():GetSelectedNode()
-    if selectedNode and selectedNode.data.campaignData then
-        return selectedNode.data.campaignData
-    else
-        return PROMOTIONAL_EVENT_MANAGER:GetCampaignDataByIndex(1)
-    end
-end
-
 function ZO_PromotionalEvents_Keyboard:InitializeActivityFinderCategory()
     local NO_CHILDREN = {}
     local children = {}
 
-    local function OnTreeEntrySelected()
-        if self:IsShowing() then
-            self:RefreshCampaignData()
+    local function OnSetupChildNode(node, control, categoryData, open)
+        if not control.statusIcon then
+            control.statusIcon = control:GetNamedChild("StatusIcon")
         end
+
+        control.statusIcon:ClearIcons()
+        if categoryData and categoryData.campaignData and categoryData.campaignData:IsAnyRewardClaimable() then
+            control.statusIcon:AddIcon(ZO_KEYBOARD_NEW_ICON)
+            control.statusIcon:Show()
+        end
+    end
+
+    local function OnTreeEntrySelected(node, control, categoryData, open)
+        if self:IsShowing() then
+            self:RefreshDisplay()
+        end
+    end
+
+    local function EqualityFunction(left, right)
+        local leftCampaignData = left.campaignData or left
+        local rightCampaignData = right.campaignData or right
+        if leftCampaignData.isReturningPlayerRewardsEntry ~= nil or rightCampaignData.isReturningPlayerRewardsEntry ~= nil then
+            return leftCampaignData.isReturningPlayerRewardsEntry == rightCampaignData.isReturningPlayerRewardsEntry
+        end
+        if leftCampaignData.IsInstanceOf and leftCampaignData:IsInstanceOf(ZO_PromotionalEventCampaignData) and rightCampaignData.IsInstanceOf and rightCampaignData:IsInstanceOf(ZO_PromotionalEventCampaignData) then
+            return leftCampaignData:MatchesKeyWithCampaign(rightCampaignData)
+        end
+        return false
     end
 
     local PromotionalEventsCategoryData =
@@ -244,28 +268,66 @@ function ZO_PromotionalEvents_Keyboard:InitializeActivityFinderCategory()
         priority = ZO_ACTIVITY_FINDER_SORT_PRIORITY.PROMOTIONAL_EVENTS,
         name = GetString(SI_ACTIVITY_FINDER_CATEGORY_PROMOTIONAL_EVENTS),
         categoryFragment = self:GetFragment(),
-        normalIcon = "EsoUI/Art/LFG/LFG_indexIcon_PromotionalEvents_up.dds",
-        pressedIcon = "EsoUI/Art/LFG/LFG_indexIcon_PromotionalEvents_down.dds",
-        mouseoverIcon = "EsoUI/Art/LFG/LFG_indexIcon_PromotionalEvents_over.dds",
+        normalIcon = function()
+            if PROMOTIONAL_EVENT_MANAGER:HasAnyUnclaimedRewards() then
+                return "EsoUI/Art/LFG/LFG_indexIcon_PromotionalEvents_up.dds"
+            else
+                return "EsoUI/Art/LFG/LFG_indexIcon_PromotionalEvents_up_complete.dds"
+            end
+        end,
+        pressedIcon = function()
+            if PROMOTIONAL_EVENT_MANAGER:HasAnyUnclaimedRewards() then
+                return "EsoUI/Art/LFG/LFG_indexIcon_PromotionalEvents_down.dds"
+            else
+                return "EsoUI/Art/LFG/LFG_indexIcon_PromotionalEvents_down_complete.dds"
+            end
+        end,
+        mouseoverIcon = function()
+            if PROMOTIONAL_EVENT_MANAGER:HasAnyUnclaimedRewards() then
+                return "EsoUI/Art/LFG/LFG_indexIcon_PromotionalEvents_over.dds"
+            else
+                return "EsoUI/Art/LFG/LFG_indexIcon_PromotionalEvents_over_complete.dds"
+            end
+        end,
         disabledIcon = "EsoUI/Art/LFG/LFG_indexIcon_PromotionalEvents_disabled.dds",
         visible = function()
             return PROMOTIONAL_EVENT_MANAGER:HasActiveCampaign()
         end,
         getChildrenFunction = function()
             local numActiveCampaigns = PROMOTIONAL_EVENT_MANAGER:GetNumActiveCampaigns()
-            if PROMOTIONAL_EVENT_MANAGER:GetNumActiveCampaigns() > 1 then
+            if numActiveCampaigns > 1 then
                 ZO_ClearNumericallyIndexedTable(children)
-                for i = 1, numActiveCampaigns do
-                    local campaignData = PROMOTIONAL_EVENT_MANAGER:GetCampaignDataByIndex(i)
+                local isReturningPlayer = IsReturningPlayer()
+                if isReturningPlayer then
+                    local campaignData = ZO_PromotionalEventCampaignData:New()
+                    campaignData.isReturningPlayerRewardsEntry = true
                     local child =
                     {
-                        priority = i, -- TODO Promotional Events: Priority?
-                        name = campaignData:GetDisplayName(),
+                        priority = 1,
+                        name = GetString(SI_PROMOTIONAL_EVENT_RETURNING_PLAYER_REWARD_ENTRY_TITLE),
                         categoryFragment = self:GetFragment(),
                         campaignData = campaignData,
                         onTreeEntrySelected = OnTreeEntrySelected,
+                        equalityFunction = EqualityFunction,
                     }
                     table.insert(children, child)
+                end
+                local returningPlayerOffset = isReturningPlayer and 1 or 0
+                for i = 1, numActiveCampaigns do
+                    local campaignData = PROMOTIONAL_EVENT_MANAGER:GetCampaignDataByIndex(i)
+                    if campaignData:ShouldCampaignBeVisible() then
+                        local child =
+                        {
+                            priority = i + returningPlayerOffset,
+                            name = campaignData:GetDisplayName(),
+                            categoryFragment = self:GetFragment(),
+                            campaignData = campaignData,
+                            onSetup = OnSetupChildNode,
+                            onTreeEntrySelected = OnTreeEntrySelected,
+                            equalityFunction = EqualityFunction,
+                        }
+                        table.insert(children, child)
+                    end
                 end
                 return children
             else
@@ -298,25 +360,103 @@ function ZO_PromotionalEvents_Keyboard:InitializeActivityList()
     end)
 end
 
+function ZO_PromotionalEvents_Keyboard:InitializeGridList()
+    ZO_PromotionalEvents_Shared.InitializeGridList(self)
+
+    self.rewardsGridList = ZO_SingleTemplateGridScrollList_Keyboard:New(self.gridListControl, ZO_GRID_SCROLL_LIST_DONT_AUTOFILL)
+
+    local function RewardGridEntryReset(control)
+        ZO_ObjectPool_DefaultResetControl(control)
+    end
+
+    local DEFAULT_HIDE_CALLBACK = nil
+    local HEADER_HEIGHT = 30
+    self.rewardsGridList:SetGridEntryTemplate("ZO_PromotionalEventReturningPlayerReward_Keyboard", ZO_PROMOTIONAL_EVENT_RETURNING_PLAYER_REWARD_WIDTH_KEYBOARD, ZO_PROMOTIONAL_EVENT_RETURNING_PLAYER_REWARD_HEIGHT_KEYBOARD, self.RewardGridEntrySetup, DEFAULT_HIDE_CALLBACK, RewardGridEntryReset, ZO_PROMOTIONAL_EVENT_RETURNING_PLAYER_REWARD_SPACING_KEYBOARD, ZO_PROMOTIONAL_EVENT_RETURNING_PLAYER_REWARD_SPACING_KEYBOARD)
+    self.rewardsGridList:SetHeaderTemplate(ZO_GRID_SCROLL_LIST_DEFAULT_HEADER_TEMPLATE_KEYBOARD, HEADER_HEIGHT, ZO_DefaultGridHeaderSetup)
+    self.rewardsGridList:SetHeaderPrePadding(ZO_PROMOTIONAL_EVENT_RETURNING_PLAYER_REWARD_SPACING_KEYBOARD)
+end
+
+local function GetClaimKeybindLabel(mouseOverObject)
+    if not mouseOverObject then
+        return
+    end
+    if  mouseOverObject:IsInstanceOf(ZO_PromotionalEventReward_Keyboard)
+        and mouseOverObject.rewardableEventData:CanClaimReward() then
+        return GetString(SI_PROMOTIONAL_EVENT_CLAIM_REWARD_ACTION)
+    elseif mouseOverObject:IsInstanceOf(ZO_PromotionalEventActivity_Entry_Keyboard) then
+        local campaignKey, componentType, index = GetReturningPlayerIntroGameplayData()
+        if componentType == PROMOTIONAL_EVENTS_COMPONENT_TYPE_ACTIVITY then
+            local activityData = mouseOverObject.activityData
+            return zo_strformat(SI_PROMOTIONAL_EVENT_RETURNING_PLAYER_GO_TO_ACTION, RETURNING_PLAYER_MANAGER:GetColorizedIntroGameplayDisplayName())
+        end
+    elseif  mouseOverObject:IsInstanceOf(ZO_PromotionalEventReward_Keyboard) then
+        local campaignKey, componentType, index = GetReturningPlayerIntroGameplayData()
+        if componentType == PROMOTIONAL_EVENTS_COMPONENT_TYPE_ACTIVITY then
+            local activityData = mouseOverObject.rewardableEventData
+            if activityData:IsInstanceOf(ZO_PromotionalEventActivityData) then
+                return zo_strformat(SI_PROMOTIONAL_EVENT_RETURNING_PLAYER_GO_TO_ACTION, RETURNING_PLAYER_MANAGER:GetColorizedIntroGameplayDisplayName())
+            end
+        end
+    end
+end
+
+local function ShouldClaimKeybindBeVisible(mouseOverObject)
+    if not mouseOverObject then
+        return false
+    end
+    if mouseOverObject:IsInstanceOf(ZO_PromotionalEventReward_Keyboard) then
+        if mouseOverObject.rewardableEventData:CanClaimReward() then
+            return true
+        else
+            local campaignKey, componentType, index = GetReturningPlayerIntroGameplayData()
+            if componentType == PROMOTIONAL_EVENTS_COMPONENT_TYPE_ACTIVITY then
+                local activityData = mouseOverObject.rewardableEventData
+                if activityData:IsInstanceOf(ZO_PromotionalEventActivityData) then
+                    return activityData:MatchesCampaignKey(campaignKey) and activityData:GetActivityIndex() == index and not activityData:IsRewardClaimed()
+                end
+            end
+        end
+    elseif mouseOverObject:IsInstanceOf(ZO_PromotionalEventActivity_Entry_Keyboard) then
+        local campaignKey, componentType, index = GetReturningPlayerIntroGameplayData()
+        if componentType == PROMOTIONAL_EVENTS_COMPONENT_TYPE_ACTIVITY then
+            local activityData = mouseOverObject.activityData
+            if not (activityData:CanClaimReward() or activityData:IsRewardClaimed()) then
+                return activityData:MatchesCampaignKey(campaignKey) and activityData:GetActivityIndex() == index
+            end
+        end
+    end
+    return false
+end
+
 function ZO_PromotionalEvents_Keyboard:InitializeKeybindStripDescriptors()
     self.keybindStripDescriptor =
     {
         alignment = KEYBIND_STRIP_ALIGN_RIGHT,
 
-        -- Claim
+        -- Claim / Go To Hero's Return
         {
-            name = GetString(SI_PROMOTIONAL_EVENT_CLAIM_REWARD_ACTION),
+            name = function()
+                return GetClaimKeybindLabel(self.mouseOverObject)
+            end,
+
             keybind = "UI_SHORTCUT_PRIMARY",
 
             callback = function()
-                self.mouseOverObject.rewardableEventData:TryClaimReward()
+                local rewardableEventData = self.mouseOverObject.rewardableEventData
+                if rewardableEventData and rewardableEventData:CanClaimReward() then
+                    local rewardData = rewardableEventData:GetRewardData()
+                    if rewardData:GetRewardType() == REWARD_ENTRY_TYPE_CHOICE then
+                        self:ShowClaimChoiceDialog(rewardableEventData)
+                    else
+                        rewardableEventData:TryClaimReward()
+                    end
+                else
+                    SYSTEMS:ShowScene("returningPlayerIntro")
+                end
             end,
 
             visible = function()
-                if self.mouseOverObject and self.mouseOverObject:IsInstanceOf(ZO_PromotionalEventReward_Keyboard) then
-                    return self.mouseOverObject.rewardableEventData:CanClaimReward()
-                end
-                return false
+                return ShouldClaimKeybindBeVisible(self.mouseOverObject)
             end,
         },
 
@@ -326,11 +466,16 @@ function ZO_PromotionalEvents_Keyboard:InitializeKeybindStripDescriptors()
             keybind = "UI_SHORTCUT_QUATERNARY",
 
             visible = function()
-                return self.currentCampaignData:IsAnyRewardClaimable()
+                if not self:IsReturningPlayerRewardsEntrySelected() then
+                    return self.currentCampaignData:IsAnyRewardClaimable()
+                end
+                return false
             end,
 
             callback = function()
                 self.currentCampaignData:TryClaimAllAvailableRewards()
+                self:CollectRemainingChoiceRewards()
+                self:TryClaimNextChoiceReward()
             end,
         },
 
@@ -340,8 +485,11 @@ function ZO_PromotionalEvents_Keyboard:InitializeKeybindStripDescriptors()
             keybind = "UI_SHORTCUT_SECONDARY",
 
             callback = function()
-                SYSTEMS:GetObject("itemPreview"):ClearPreviewCollection()
-                SYSTEMS:GetObject("itemPreview"):PreviewReward(self.mouseOverObject.displayRewardData:GetRewardId())
+                if self.mouseOverObject:IsInstanceOf(ZO_PromotionalEventReward_Keyboard) then
+                    g_PromotionalEventsKeyboard:BeginPreview(self.mouseOverObject.displayRewardData:GetRewardId())
+                elseif self.mouseOverObject:IsInstanceOf(ZO_RewardData) then
+                    g_PromotionalEventsKeyboard:BeginPreview(self.mouseOverObject:GetRewardId())
+                end
                 KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
             end,
 
@@ -351,7 +499,11 @@ function ZO_PromotionalEvents_Keyboard:InitializeKeybindStripDescriptors()
 
             visible = function()
                 if self.mouseOverObject and self.mouseOverObject:IsInstanceOf(ZO_PromotionalEventReward_Keyboard) then
-                    return CanPreviewReward(self.mouseOverObject.displayRewardData:GetRewardId())
+                    local rewardId = self.mouseOverObject.displayRewardData:GetRewardId()
+                    return CanPreviewReward(rewardId) or GetRewardType(rewardId) == REWARD_ENTRY_TYPE_REWARD_LIST
+                elseif self.mouseOverObject and self.mouseOverObject:IsInstanceOf(ZO_RewardData) then
+                    local rewardId = self.mouseOverObject:GetRewardId()
+                    return CanPreviewReward(rewardId)
                 end
                 return false
             end,
@@ -395,12 +547,70 @@ function ZO_PromotionalEvents_Keyboard:InitializeKeybindStripDescriptors()
     }
 end
 
+function ZO_PromotionalEvents_Keyboard:IsReturningPlayerRewardsEntrySelected()
+    local selectedNode = GROUP_MENU_KEYBOARD:GetTree():GetSelectedNode()
+    if selectedNode and selectedNode.data.campaignData then
+        return selectedNode.data.campaignData.isReturningPlayerRewardsEntry or false
+    end
+    return false
+end
+
+function ZO_PromotionalEvents_Keyboard:GetSelectedCampaignData()
+    local selectedNode = GROUP_MENU_KEYBOARD:GetTree():GetSelectedNode()
+    if selectedNode and selectedNode.data.campaignData then
+        return selectedNode.data.campaignData
+    else
+        return PROMOTIONAL_EVENT_MANAGER:GetCampaignDataByIndex(1)
+    end
+end
+
 function ZO_PromotionalEvents_Keyboard:RefreshActivityList(rebuild)
     ZO_PromotionalEvents_Shared.RefreshActivityList(self, rebuild)
 
     if self.currentCampaignData then
         KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
     end
+end
+
+function ZO_PromotionalEvents_Keyboard:BeginPreview(rewardId)
+    SYSTEMS:GetObject("itemPreview"):ClearPreviewCollection()
+    if GetRewardType(rewardId) == REWARD_ENTRY_TYPE_REWARD_LIST then
+        self:PreviewRewardList(rewardId)
+    else
+        SYSTEMS:GetObject("itemPreview"):PreviewReward(rewardId)
+    end
+end
+
+local g_highlightAnimationProvider = ZO_ReversibleAnimationProvider:New("ShowOnMouseOverLabelAnimation")
+
+function ZO_PromotionalEvents_Keyboard:PreviewRewardList(rewardId)
+    local rewardListId = GetRewardListIdFromReward(rewardId)
+    local rewards = REWARDS_MANAGER:GetAllRewardInfoForRewardList(rewardListId)
+    POPUP_LIST:ClearList()
+    for _, reward in ipairs(rewards) do
+        POPUP_LIST:AddItem(ZO_POPUP_LIST_DATA_TYPE_ITEM, reward)
+    end
+    POPUP_LIST:UpdateList()
+    POPUP_LIST:SetOnMouseEnterCallback(function(control)
+        ZO_GridEntry_SetIconScaledUp(control, true)
+        local highlight = control:GetNamedChild("Highlight")
+        if highlight and highlight:GetType() == CT_TEXTURE then
+            g_highlightAnimationProvider:PlayForward(highlight)
+        end
+        ZO_Rewards_Shared_OnMouseEnter(control, RIGHT, LEFT, -5)
+        g_PromotionalEventsKeyboard:SetMouseOverObject(control.dataEntry.data)
+    end)
+    POPUP_LIST:SetOnMouseExitCallback(function(control)
+        ZO_GridEntry_SetIconScaledUp(control, false)
+        local highlight = control:GetNamedChild("Highlight")
+        if highlight and highlight:GetType() == CT_TEXTURE then
+            g_highlightAnimationProvider:PlayBackward(highlight)
+        end
+        ZO_Rewards_Shared_OnMouseExit(control)
+        g_PromotionalEventsKeyboard:SetMouseOverObject(nil)
+    end)
+    POPUP_LIST.control:SetAnchor(BOTTOMRIGHT, self.mouseOverObject.control, BOTTOMLEFT)
+    POPUP_LIST.control:SetHidden(false)
 end
 
 function ZO_PromotionalEvents_Keyboard:OnActivityControlSetup(control, data)
@@ -421,8 +631,8 @@ function ZO_PromotionalEvents_Keyboard:SetMouseOverObject(mouseOverObject)
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
 end
 
-function ZO_PromotionalEvents_Keyboard:OnRewardsClaimed(campaignData, rewards)
-    ZO_PromotionalEvents_Shared.OnRewardsClaimed(self, campaignData, rewards)
+function ZO_PromotionalEvents_Keyboard:OnRewardsClaimed(...)
+    ZO_PromotionalEvents_Shared.OnRewardsClaimed(self, ...)
 
     if self:IsShowing() and self.currentCampaignData == campaignData then
         KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
@@ -444,6 +654,10 @@ end
 function ZO_PromotionalEvents_Keyboard:OnShowing()
     ZO_PromotionalEvents_Shared.OnShowing(self)
 
+    if self.lastSelectedCampaignData then
+        GROUP_MENU_KEYBOARD:ShowCategoryByData(self.lastSelectedCampaignData)
+    end
+
     -- The preview options fragment needs to be added before the ITEM_PREVIEW_KEYBOARD fragment
     SCENE_MANAGER:AddFragment(PROMOTIONAL_EVENTS_PREVIEW_OPTIONS_FRAGMENT)
     SCENE_MANAGER:AddFragment(ITEM_PREVIEW_KEYBOARD:GetFragment())
@@ -454,14 +668,21 @@ end
 function ZO_PromotionalEvents_Keyboard:OnHiding()
     ZO_PromotionalEvents_Shared.OnHiding(self)
 
+    self.lastSelectedCampaignData = self.currentCampaignData
+
     KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
     SCENE_MANAGER:RemoveFragmentImmediately(ITEM_PREVIEW_KEYBOARD:GetFragment())
     SCENE_MANAGER:RemoveFragment(PROMOTIONAL_EVENTS_PREVIEW_OPTIONS_FRAGMENT)
     ITEM_PREVIEW_KEYBOARD:OnPreviewHidden()
+    POPUP_LIST:Hide()
 end
 
 function ZO_PromotionalEvents_Keyboard:ShowCapstoneDialog()
     ZO_Dialogs_ShowDialog("PROMOTIONAL_EVENT_CAPSTONE_KEYBOARD", { campaignData = self.currentCampaignData })
+end
+
+function ZO_PromotionalEvents_Keyboard:ShowClaimChoiceDialog(rewardData)
+    ZO_Dialogs_ShowDialog("PROMOTIONAL_EVENT_CLAIM_CHOICE_KEYBOARD", { rewardData = rewardData })
 end
 
 function ZO_PromotionalEvents_Keyboard.GetMilestoneScale()
@@ -477,6 +698,14 @@ function ZO_PromotionalEvents_Keyboard.OnControlInitialized(control)
     PROMOTIONAL_EVENTS_KEYBOARD = g_PromotionalEventsKeyboard
 end
 
+function ZO_PromotionalEvents_Keyboard.ReturningPlayerReward_OnMouseEnter(control)
+    ZO_Rewards_Shared_OnMouseEnter(control, RIGHT, LEFT, -5)
+end
+
+function ZO_PromotionalEvents_Keyboard.ReturningPlayerReward_OnMouseExit(control)
+    ZO_Rewards_Shared_OnMouseExit(control)
+end
+
 -- Capstone Dialog --
 
 ZO_PromotionalEvents_CapstoneDialog_Keyboard = ZO_PromotionalEvents_CapstoneDialog_Shared:Subclass()
@@ -490,14 +719,30 @@ function ZO_PromotionalEvents_CapstoneDialog_Keyboard:Initialize(control)
         setup = function(dialog, data)
             self:SetCampaignData(data.campaignData)
         end,
+        canQueue = true,
         buttons =
         {
             {
-                control =   self.viewInCollectionsButton,
-                text =      SI_PROMOTIONAL_EVENT_CAPSTONE_DIALOG_VIEW_IN_COLLECTIONS_KEYBIND_LABEL,
-                keybind =   "DIALOG_TERTIARY",
-                callback =  function() self:ViewInCollections() end,
-                visible =   function(dialog)
+                control = self.nextCampaignButton,
+                text = SI_PROMOTIONAL_EVENT_CAPSTONE_DIALOG_NEXT_CAMPAIGN_KEYBIND_LABEL,
+                keybind = "DIALOG_PRIMARY",
+                callback = function(dialog)
+                    local campaignData = dialog.data.campaignData
+                    self:ShowNextCampaign(campaignData)
+                end,
+                visible = function(dialog)
+                    local campaignData = dialog.data.campaignData
+                    return campaignData:IsReturningPlayerCampaign() and GetCampaignKeyForNextReturningPlayerCampaign(campaignData:GetId()) ~= 0
+                end,
+            },
+            {
+                control = self.viewInCollectionsButton,
+                text = SI_PROMOTIONAL_EVENT_CAPSTONE_DIALOG_VIEW_IN_COLLECTIONS_KEYBIND_LABEL,
+                keybind = "DIALOG_TERTIARY",
+                callback = function()
+                    self:ViewInCollections()
+                end,
+                visible = function(dialog)
                     -- This code runs before setup
                     local campaignData = dialog.data.campaignData
                     local baseRewardData = campaignData:GetRewardData()
@@ -507,9 +752,18 @@ function ZO_PromotionalEvents_CapstoneDialog_Keyboard:Initialize(control)
                 end,
             },
             {
-                control =   self.closeButton,
-                text =      SI_DIALOG_CLOSE,
-                keybind =   "DIALOG_NEGATIVE",
+                control = self.closeButton,
+                text = SI_DIALOG_CLOSE,
+                keybind = "DIALOG_NEGATIVE",
+                callback = function(dialog)
+                    local campaignData = dialog.data.campaignData
+                    if campaignData:AreAllRewardsClaimed() then
+                        self:ShowNextCampaign(campaignData)
+                    else
+                        self:RefreshCampaignList()
+                        GROUP_MENU_KEYBOARD:ShowCategoryByData(campaignData)
+                    end
+                end,
             },
         }
     })
@@ -518,6 +772,7 @@ end
 function ZO_PromotionalEvents_CapstoneDialog_Keyboard:InitializeControls()
     ZO_PromotionalEvents_CapstoneDialog_Shared.InitializeControls(self)
 
+    self.nextCampaignButton = self.control:GetNamedChild("NextCampaignButton")
     self.viewInCollectionsButton = self.control:GetNamedChild("ViewInCollectionsButton")
     self.closeButton = self.control:GetNamedChild("CloseButton")
 
@@ -550,10 +805,189 @@ function ZO_PromotionalEvents_CapstoneDialog_Keyboard:InitializeParticleSystems(
     headerStarbustParticleSystem:SetParentControl(self.control:GetNamedChild("HeaderFade"))
 end
 
+function ZO_PromotionalEvents_CapstoneDialog_Shared:RefreshCampaignList()
+    GROUP_MENU_KEYBOARD:RebuildCategories()
+end
+
 function ZO_PromotionalEvents_CapstoneDialog_Keyboard.OnRewardMouseEnter(rewardFrameControl)
     ZO_Rewards_Shared_OnMouseEnter(rewardFrameControl, RIGHT, LEFT, -5)
 end
 
 function ZO_PromotionalEvents_CapstoneDialog_Keyboard.OnRewardMouseExit(rewardFrameControl)
     ZO_Rewards_Shared_OnMouseExit(rewardFrameControl)
+end
+
+-- Choice Reward Claim Dialog --
+
+ZO_PROMOTIONAL_EVENTS_CLAIM_CHOICE_KEYBOARD_ROW_WIDTH = 250
+ZO_PROMOTIONAL_EVENTS_CLAIM_CHOICE_KEYBOARD_ROW_HEIGHT = 52
+
+ZO_PROMOTIONAL_EVENTS_CLAIM_CHOICE_LIST_DATA_TYPE_ITEM = 1
+
+ZO_PromotionalEvents_ClaimChoiceDialog_Keyboard = ZO_InitializingObject:Subclass()
+
+function ZO_PromotionalEvents_ClaimChoiceDialog_Keyboard:Initialize(control)
+    self.control = control
+    control.object = self
+    self.parentRewardableEventData = nil
+    self.currentSelectedChoice = nil
+
+    -- Order matters for these two function calls.
+    self:InitializeControls()
+    self:InitializeList()
+
+    ZO_Dialogs_RegisterCustomDialog("PROMOTIONAL_EVENT_CLAIM_CHOICE_KEYBOARD",
+    {
+        customControl = control,
+        setup = function(dialog, data)
+            self:SetRewardData(data.rewardData)
+        end,
+        canQueue = true,
+        buttons =
+        {
+            {
+                control =   self.confirmButton,
+                text =      SI_DIALOG_CONFIRM,
+                keybind =   "DIALOG_PRIMARY",
+                callback =  function()
+                    self.parentRewardableEventData:TryClaimReward(self.currentSelectedChoice.rewardId)
+                    local remainingChoiceRewards = PROMOTIONAL_EVENTS_KEYBOARD:GetRemainingChoiceRewards()
+                    table.remove(remainingChoiceRewards, 1)
+                    if next(remainingChoiceRewards) ~= nil then
+                        self.shouldTryClaimNextChoiceReward = true
+                    end
+                end,
+                enabled = function()
+                    return self.parentRewardableEventData ~= nil and self.currentSelectedChoice ~= nil
+                end
+            },
+            {
+                control =   self.closeButton,
+                text =      SI_DIALOG_CLOSE,
+                keybind =   "DIALOG_NEGATIVE",
+            },
+        },
+        finishedCallback = function()
+            if self.shouldTryClaimNextChoiceReward then
+                self.shouldTryClaimNextChoiceReward = nil
+                PROMOTIONAL_EVENTS_KEYBOARD:TryClaimNextChoiceReward()
+            end
+        end,
+    })
+end
+
+function ZO_PromotionalEvents_ClaimChoiceDialog_Keyboard:InitializeControls()
+    local control = self.control
+    self.list = control:GetNamedChild("List")
+    self.confirmButton = control:GetNamedChild("ConfirmButton")
+    self.closeButton = control:GetNamedChild("CloseButton")
+end
+
+function ZO_PromotionalEvents_ClaimChoiceDialog_Keyboard:InitializeList()
+    ZO_ScrollList_AddDataType(self.list, ZO_PROMOTIONAL_EVENTS_CLAIM_CHOICE_LIST_DATA_TYPE_ITEM, "ZO_PromotionalEventClaimChoice_RewardRow", ZO_PROMOTIONAL_EVENTS_CLAIM_CHOICE_KEYBOARD_ROW_HEIGHT, function(control, data) self:SetUpListItem(control, data) end)
+end
+
+function ZO_PromotionalEvents_ClaimChoiceDialog_Keyboard:SetUpListItem(control, data)
+    control.data = data
+
+    local nameControl = control:GetNamedChild("Name")
+    nameControl:SetText(data.formattedName)
+
+    if data.currencyType and data.currencyType ~= CURT_NONE then
+        nameControl:SetColor(ZO_NORMAL_TEXT:UnpackRGBA())
+    else
+        if data.rewardType == REWARD_ENTRY_TYPE_COLLECTIBLE then
+            nameControl:SetColor(ZO_WHITE:UnpackRGBA())
+        elseif data.displayQuality then
+            nameControl:SetColor(GetItemQualityColor(data.displayQuality):UnpackRGBA())
+        end
+    end
+
+    control.icon = control:GetNamedChild("Icon")
+    local iconControl = control.icon
+    if data.icon then
+        iconControl:SetTexture(data.icon)
+        iconControl:SetHidden(false)
+    else
+        iconControl:SetHidden(true)
+    end
+
+    local stackCount = data.quantity
+    local stackCountLabel = iconControl:GetNamedChild("StackCount")
+    if stackCount and stackCount > 1 then
+        stackCountLabel:SetText(ZO_AbbreviateAndLocalizeNumber(stackCount, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES))
+    else
+        stackCountLabel:SetText("")
+    end
+
+    local selectedHighlightControl = control:GetNamedChild("SelectedHighlight")
+    if data == self.currentSelectedChoice then
+        selectedHighlightControl:SetAlpha(1)
+    else
+        selectedHighlightControl:SetAlpha(0)
+    end
+
+    control:SetHidden(false)
+end
+
+function ZO_PromotionalEvents_ClaimChoiceDialog_Keyboard:SetRewardData(rewardableEventData)
+    self.parentRewardableEventData = rewardableEventData
+    local rewardData = self.parentRewardableEventData:GetRewardData()
+
+    ZO_ScrollList_Clear(self.list)
+
+    for _, reward in ipairs(rewardData:GetChoices()) do
+        local scrollData = ZO_ScrollList_GetDataList(self.list)
+        local scrollEntryData = ZO_ScrollList_CreateDataEntry(ZO_PROMOTIONAL_EVENTS_CLAIM_CHOICE_LIST_DATA_TYPE_ITEM, reward)
+        table.insert(scrollData, scrollEntryData)
+    end
+
+    ZO_ScrollList_Commit(self.list)
+end
+
+function ZO_PromotionalEvents_ClaimChoiceDialog_Keyboard:RefreshSelectedChoice()
+    local scrollData = ZO_ScrollList_GetDataList(self.list)
+
+    for _, entry in ipairs(scrollData) do
+        if entry.control then
+            local selectedHighlightControl = entry.control:GetNamedChild("SelectedHighlight")
+            if entry.data == self.currentSelectedChoice then
+                selectedHighlightControl:SetAlpha(1)
+            else
+                selectedHighlightControl:SetAlpha(0)
+            end
+        end
+    end
+
+    ZO_Dialogs_UpdateButtonVisibilityAndEnabledState(self.control)
+end
+
+function ZO_PromotionalEvents_ClaimChoiceDialog_Keyboard.OnListMouseEnter(control)
+    local rewardData = control.data
+    if rewardData then
+        local rewardType = rewardData:GetRewardType()
+        if rewardType then
+            ZO_Rewards_Shared_OnMouseEnter(control)
+        end
+    end
+    ZO_InventorySlot_SetHighlightHidden(control, false)
+end
+
+function ZO_PromotionalEvents_ClaimChoiceDialog_Keyboard.OnListMouseExit(control)
+    ZO_Rewards_Shared_OnMouseExit(control)
+    ZO_InventorySlot_SetHighlightHidden(control, true)
+end
+
+function ZO_PromotionalEvents_ClaimChoiceDialog_Keyboard:OnListRowClicked(control, button, upInside)
+    if button == MOUSE_BUTTON_INDEX_LEFT and upInside then
+        local rewardData = control.data
+        if rewardData then
+            local parentChoice = rewardData:GetParentChoice()
+            if parentChoice then
+                self.currentSelectedChoice = rewardData
+                PlaySound(SOUNDS.DEFAULT_CLICK)
+                self:RefreshSelectedChoice()
+            end
+        end
+    end
 end

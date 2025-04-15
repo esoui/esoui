@@ -767,15 +767,17 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
     end
 
     local function OnPromotionalEventRewardsUpdated()
-        if PROMOTIONAL_EVENT_MANAGER:IsAnyRewardClaimable() then
+        local isAnyRewardClaimable = PROMOTIONAL_EVENT_MANAGER:IsAnyRewardClaimable()
+        if isAnyRewardClaimable and not IsActiveWorldStarterWorld() then
             if not self:ExistsInQueue(INTERACT_TYPE.PROMOTIONAL_EVENT_REWARD) then
                 PlaySound(SOUNDS.PROMOTIONAL_EVENT_REWARD_TO_CLAIM_PROMPT)
 
                 local claimRewardDescriptionText = GetString(SI_PLAYER_TO_PLAYER_PROMOTIONAL_EVENT_CLAIMABLE_REWARD)
 
                 local function AcceptClaimReward()
+                    local _, firstCampaignWithClaimableReward = PROMOTIONAL_EVENT_MANAGER:IsAnyRewardClaimable()
                     local SCROLL_TO_FIRST_CLAIMABLE_REWARD = true
-                    PROMOTIONAL_EVENT_MANAGER:ShowPromotionalEventScene(SCROLL_TO_FIRST_CLAIMABLE_REWARD)
+                    PROMOTIONAL_EVENT_MANAGER:ShowPromotionalEventScene(SCROLL_TO_FIRST_CLAIMABLE_REWARD, firstCampaignWithClaimableReward)
                 end
                 local data = self:AddPromptToIncomingQueue(INTERACT_TYPE.PROMOTIONAL_EVENT_REWARD, nil, nil, claimRewardDescriptionText, AcceptClaimReward)
                 data.dontRemoveOnAccept = true
@@ -817,12 +819,12 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
     self.control:RegisterForEvent(EVENT_GROUPING_TOOLS_READY_CHECK_UPDATED, function(event, ...) self:OnGroupingToolsReadyCheckUpdated(...) end)
     self.control:RegisterForEvent(EVENT_GROUPING_TOOLS_READY_CHECK_CANCELLED, function(event, ...) self:OnGroupingToolsReadyCheckCancelled(...) end)
     self.control:RegisterForEvent(EVENT_LEVEL_UP_REWARD_UPDATED, OnLevelUpRewardUpdated)
-    self.control:RegisterForEvent(EVENT_PROMOTIONAL_EVENTS_ACTIVITY_PROGRESS_UPDATED, OnPromotionalEventRewardsUpdated)
 
     GIFT_INVENTORY_MANAGER:RegisterCallback("GiftListsChanged", OnGiftsUpdated)
     GROUP_FINDER_APPLICATIONS_LIST_MANAGER:RegisterCallback("ApplicationsListUpdated", OnGroupFinderApplicationsUpdated)
     PROMOTIONAL_EVENT_MANAGER:RegisterCallback("RewardsClaimed", OnPromotionalEventRewardsUpdated)
     PROMOTIONAL_EVENT_MANAGER:RegisterCallback("CampaignsUpdated", OnPromotionalEventRewardsUpdated)
+    PROMOTIONAL_EVENT_MANAGER:RegisterCallback("ActivityProgressUpdated", OnPromotionalEventRewardsUpdated)
 
     --Find member replacement prompt on a member leaving
     local function OnGroupingToolsFindReplacementNotificationNew()
@@ -2245,6 +2247,10 @@ do
         ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, ALERT_IGNORED_STRING)
     end
 
+    local function AlertRestrictedCommunication()
+        ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, SI_PLAYER_TO_PLAYER_RESTRICTED_COMMUNICATION)
+    end
+
     function ZO_PlayerToPlayer:ShowPlayerInteractMenu(isIgnored)
         local currentTargetCharacterName = self.currentTargetCharacterName
         local currentTargetCharacterNameRaw = self.currentTargetCharacterNameRaw
@@ -2255,6 +2261,9 @@ do
         local ENABLED = true
         local DISABLED = false
         local ENABLED_IF_NOT_IGNORED = not isIgnored
+        local isInGroup = IsPlayerInGroup(currentTargetCharacterNameRaw)
+        local disabledOption = ENABLED_IF_NOT_IGNORED and AlertRestrictedCommunication or AlertIgnored
+        local isRestrictedCommunicationPermitted = CanCommunicateWith(currentTargetCharacterNameRaw)
 
         self:GetRadialMenu():Clear()
         --Gamecard--
@@ -2266,8 +2275,9 @@ do
         if IsChatSystemAvailableForCurrentPlatform() then
             local nameToUse = IsConsoleUI() and currentTargetDisplayName or primaryNameInternal
             local function WhisperOption() StartChatInput(nil, CHAT_CHANNEL_WHISPER, nameToUse) end
-            local whisperFunction = ENABLED_IF_NOT_IGNORED and WhisperOption or AlertIgnored
-            self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_WHISPER), platformIcons[SI_PLAYER_TO_PLAYER_WHISPER], ENABLED_IF_NOT_IGNORED, whisperFunction)
+            local isEnabled = ENABLED_IF_NOT_IGNORED and isRestrictedCommunicationPermitted
+            local whisperFunction = isEnabled and WhisperOption or disabledOption
+            self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_WHISPER), platformIcons[SI_PLAYER_TO_PLAYER_WHISPER], isEnabled, whisperFunction)
         end
 
         --Group--
@@ -2278,8 +2288,6 @@ do
         local function AlertGroupDisabled()
             ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, GetString(SI_PLAYER_TO_PLAYER_GROUP_DISABLED))
         end
-
-        local isInGroup = IsPlayerInGroup(currentTargetCharacterNameRaw)
 
         if isInGroup then
             local groupKickEnabled = isGroupModificationAvailable and isSoloOrLeader and not groupModicationRequiresVoting
@@ -2358,8 +2366,8 @@ do
             local function DuelInviteOption()
                 ChallengeTargetToDuel(currentTargetCharacterName)
             end
-            local isEnabled = ENABLED_IF_NOT_IGNORED and (not IsConsoleUI() or not IsConsoleCommunicationRestricted())
-            self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_INVITE_DUEL), platformIcons[SI_PLAYER_TO_PLAYER_INVITE_DUEL], isEnabled, isEnabled and DuelInviteOption or AlertIgnored)
+            local isEnabled = ENABLED_IF_NOT_IGNORED and (not IsConsoleUI() or not IsConsoleCommunicationRestricted()) and isRestrictedCommunicationPermitted
+            self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_INVITE_DUEL), platformIcons[SI_PLAYER_TO_PLAYER_INVITE_DUEL], isEnabled, isEnabled and DuelInviteOption or disabledOption)
         end
 
        -- Play Tribute --
@@ -2381,22 +2389,22 @@ do
             local function TributeLockedAlert()
                 ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, SI_PLAYER_TO_PLAYER_TRIBUTE_LOCKED)
             end
-            local isEnabled = ENABLED_IF_NOT_IGNORED and not ZO_IsTributeLocked() and (not IsConsoleUI() or not IsConsoleCommunicationRestricted())
+            local isEnabled = ENABLED_IF_NOT_IGNORED and not ZO_IsTributeLocked() and (not IsConsoleUI() or not IsConsoleCommunicationRestricted()) and isRestrictedCommunicationPermitted
             local entryFunction
             if isEnabled then
                 entryFunction = TributeInviteOption
             elseif ZO_IsTributeLocked() then
                 entryFunction = TributeLockedAlert
             else
-                entryFunction = AlertIgnored
+                entryFunction = disabledOption
             end
             self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_INVITE_TRIBUTE), platformIcons[SI_PLAYER_TO_PLAYER_INVITE_TRIBUTE], isEnabled, entryFunction)
         end
 
         --Trade--
         local function TradeInviteOption() TRADE_WINDOW:InitiateTrade(primaryNameInternal) end
-        local isEnabled = ENABLED_IF_NOT_IGNORED and (not IsConsoleUI() or not IsConsoleCommunicationRestricted())
-        local tradeInviteFunction = isEnabled and TradeInviteOption or AlertIgnored
+        local isEnabled = ENABLED_IF_NOT_IGNORED and (not IsConsoleUI() or not IsConsoleCommunicationRestricted()) and isRestrictedCommunicationPermitted
+        local tradeInviteFunction = isEnabled and TradeInviteOption or disabledOption
         self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_INVITE_TRADE), platformIcons[SI_PLAYER_TO_PLAYER_INVITE_TRADE], isEnabled, tradeInviteFunction)
 
         --Cancel--

@@ -79,7 +79,7 @@ function CreateLinkAccount_Console:InitKeybindingDescriptor()
         -- Back
         KEYBIND_STRIP:GenerateGamepadBackButtonDescriptor(function()
                 PlaySound(SOUNDS.NEGATIVE_CLICK)
-                PregameStateManager_SetState("AccountLogin")
+                PregameStateManager_SetState("WaitForPreloginWorld")
             end)
     }
 end

@@ -53,13 +53,13 @@ function GroupMenu_Keyboard:Initialize(control)
     PROMOTIONAL_EVENT_MANAGER:RegisterCallback("CampaignSeenStateChanged", RefreshCategories)
     PROMOTIONAL_EVENT_MANAGER:RegisterCallback("CampaignsUpdated", RebuildCategories)
     PROMOTIONAL_EVENT_MANAGER:RegisterCallback("RewardsClaimed", RefreshCategories)
+    PROMOTIONAL_EVENT_MANAGER:RegisterCallback("ActivityProgressUpdated", RefreshCategories)
 
     self.control:RegisterForEvent(EVENT_PLAYER_ACTIVATED, RefreshCategories)
     self.control:RegisterForEvent(EVENT_QUEST_COMPLETE, RefreshCategories)
     self.control:RegisterForEvent(EVENT_GROUP_FINDER_STATUS_UPDATED, RefreshCategories)
     self.control:RegisterForEvent(EVENT_GROUP_FINDER_APPLICATION_RECEIVED, RefreshCategories)
     self.control:RegisterForEvent(EVENT_HOUSE_TOURS_STATUS_UPDATED, RefreshCategories)
-    self.control:RegisterForEvent(EVENT_PROMOTIONAL_EVENTS_ACTIVITY_PROGRESS_UPDATED, RefreshCategories)
 end
 
 function GroupMenu_Keyboard:InitializeCategories()
@@ -94,13 +94,20 @@ function GroupMenu_Keyboard:InitializeCategories()
         if control.icon then
             local iconTexture = open and categoryData.pressedIcon or categoryData.normalIcon
             iconTexture = not enabled and categoryData.disabledIcon or iconTexture
+            if type(iconTexture) == "function" then
+                iconTexture = iconTexture()
+            end
             control.icon:SetTexture(iconTexture)
-            control.iconHighlight:SetTexture(categoryData.mouseoverIcon)
+            local mouseoverIcon = categoryData.mouseoverIcon
+            if type(mouseoverIcon) == "function" then
+                mouseoverIcon = mouseoverIcon()
+            end
+            control.iconHighlight:SetTexture(mouseoverIcon)
             local statusIcon = control.statusIcon or control:GetNamedChild("StatusIcon")
             control.statusIcon = statusIcon
             statusIcon:ClearIcons()
 
-            if categoryData.isPromotionalEvent then
+            if categoryData.isPromotionalEvent and PROMOTIONAL_EVENT_MANAGER:HasAnyUnclaimedRewards() then
                 control.text.GetTextColor = GetPromotionalEventTextColor
 
                 if PROMOTIONAL_EVENT_MANAGER:DoesAnyCampaignHaveCallout() then
@@ -149,7 +156,17 @@ function GroupMenu_Keyboard:InitializeCategories()
         if node.enabled and open and userRequested then
             local selectedNode = self.navigationTree:GetSelectedNode()
             if not selectedNode or selectedNode.parentNode ~= node then
-                self.navigationTree:SelectFirstChild(node)
+                if categoryData.isPromotionalEvent and IsReturningPlayer() then
+                    local children = node:GetChildren()
+                    if children then
+                        local firstCampaign = children[2]
+                        if firstCampaign then
+                            self.navigationTree:SelectNode(firstCampaign)
+                        end
+                    end
+                else
+                    self.navigationTree:SelectFirstChild(node)
+                end
             end
         end
 
@@ -168,6 +185,9 @@ function GroupMenu_Keyboard:InitializeCategories()
         local selected = node:IsSelected()
         control:SetSelected(selected)
         control:SetText(categoryData.name)
+        if categoryData.onSetup then
+            categoryData.onSetup(node, control, categoryData, open)
+        end
     end
 
     local function OnNodeSelected(control, categoryData, selected, reselectingDuringRebuild)
@@ -206,9 +226,17 @@ function GroupMenu_Keyboard:InitializeCategories()
     local CHILD_SPACING = 0
     local NO_SELECTION_FUNCTION = nil
     local NO_EQUALITY_FUNCTION = nil
+    local function EqualityFunction(left, right)
+        if left.equalityFunction then
+            return left:equalityFunction(right)
+        elseif right.equalityFunction then
+            return right:equalityFunction(left)
+        end
+        return left == right
+    end
     self.navigationTree:AddTemplate("ZO_GroupMenuKeyboard_StatusIconHeader", SetupParentNode, NO_SELECTION_FUNCTION, NO_EQUALITY_FUNCTION, ZO_GROUP_MENU_KEYBOARD_TREE_SUBCATEGORY_INDENT, CHILD_SPACING)
-    self.navigationTree:AddTemplate("ZO_GroupMenuKeyboard_StatusIconChildlessHeader", SetupNode, OnNodeSelected)
-    self.navigationTree:AddTemplate("ZO_GroupMenuKeyboard_Subcategory", SetupChildNode, OnNodeSelected)
+    self.navigationTree:AddTemplate("ZO_GroupMenuKeyboard_StatusIconChildlessHeader", SetupNode, OnNodeSelected, EqualityFunction)
+    self.navigationTree:AddTemplate("ZO_GroupMenuKeyboard_Subcategory", SetupChildNode, OnNodeSelected, EqualityFunction)
     self.navigationTree:SetExclusive(true)
     self.navigationTree:SetOpenAnimation("ZO_TreeOpenAnimation")
 end

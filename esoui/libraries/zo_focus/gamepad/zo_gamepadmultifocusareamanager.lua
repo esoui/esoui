@@ -2,13 +2,7 @@
 -- MultiFocusArea Base --
 ------------------------
 
-ZO_GamepadMultiFocusArea_Base = ZO_Object:Subclass()
-
-function ZO_GamepadMultiFocusArea_Base:New(...)
-    local focus = ZO_Object.New(self)
-    focus:Initialize(...)
-    return focus
-end
+ZO_GamepadMultiFocusArea_Base = ZO_InitializingObject:Subclass()
 
 function ZO_GamepadMultiFocusArea_Base:Initialize(manager, activateCallback, deactivateCallback)
     self.manager = manager
@@ -100,7 +94,7 @@ function ZO_GamepadMultiFocusArea_Base:HandleMovementInternal(horizontalResult, 
 end
 
 function ZO_GamepadMultiFocusArea_Base:HandleMovePrevious()
-	local consumed = false
+    local consumed = false
     local selectableFocus = self.manager:GetPreviousSelectableFocusArea(self)
     if selectableFocus then
         self.manager:SelectFocusArea(selectableFocus)
@@ -110,7 +104,7 @@ function ZO_GamepadMultiFocusArea_Base:HandleMovePrevious()
 end
 
 function ZO_GamepadMultiFocusArea_Base:HandleMoveNext()
-	local consumed = false
+    local consumed = false
     local selectableFocus = self.manager:GetNextSelectableFocusArea(self)
     if selectableFocus then
         self.manager:SelectFocusArea(selectableFocus)
@@ -134,7 +128,7 @@ end
 ZO_GamepadMultiFocusArea_Manager = ZO_InitializingObject:Subclass()
 
 function ZO_GamepadMultiFocusArea_Manager:Initialize()
-	self.focusAreas = {}
+    self.focusAreas = {}
     self.horizontalFocusAreaMovementController = ZO_MovementController:New(MOVEMENT_CONTROLLER_DIRECTION_HORIZONTAL)
     self.verticalFocusAreaMovementController = ZO_MovementController:New(MOVEMENT_CONTROLLER_DIRECTION_VERTICAL)
 end
@@ -246,23 +240,23 @@ function ZO_GamepadMultiFocusArea_Manager:HandleMoveCurrentFocus(horizontalResul
 end
 
 function ZO_GamepadMultiFocusArea_Manager:AddNextFocusArea(focusArea)
-	local previousFocus
-	if #self.focusAreas > 0 then
-		previousFocus = self.focusAreas[#self.focusAreas]
-		previousFocus:SetNextSibling(focusArea)
-	end
-	focusArea:SetPreviousSibling(previousFocus)
-	table.insert(self.focusAreas, focusArea)
+    local previousFocus
+    if #self.focusAreas > 0 then
+        previousFocus = self.focusAreas[#self.focusAreas]
+        previousFocus:SetNextSibling(focusArea)
+    end
+    focusArea:SetPreviousSibling(previousFocus)
+    table.insert(self.focusAreas, focusArea)
 end
 
 function ZO_GamepadMultiFocusArea_Manager:AddPreviousFocusArea(focusArea)
-	local previousFocus
-	if #self.focusAreas > 0 then
-		previousFocus = self.focusAreas[1]
-		previousFocus:SetPreviousSibling(focusArea)
-	end
-	focusArea:SetNextSibling(previousFocus)
-	table.insert(self.focusAreas, 1, focusArea)
+    local previousFocus
+    if #self.focusAreas > 0 then
+        previousFocus = self.focusAreas[1]
+        previousFocus:SetPreviousSibling(focusArea)
+    end
+    focusArea:SetNextSibling(previousFocus)
+    table.insert(self.focusAreas, 1, focusArea)
 end
 
 function ZO_GamepadMultiFocusArea_Manager:UpdateDirectionalInput()

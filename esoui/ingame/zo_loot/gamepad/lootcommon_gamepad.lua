@@ -121,53 +121,51 @@ function ZO_Loot_Gamepad_Base:HasLootItems()
     return unownedMoney > 0 or ownedMoney > 0 or telvarStones > 0 or writVouchers > 0 or GetNumLootItems() > 0 
 end
 
-do
-    local STOLEN_ICON_TEXTURE = "EsoUI/Art/Inventory/inventory_stolenItem_icon.dds"
+function ZO_Loot_Gamepad_Base:UpdateList()
+    self.itemList:Clear()
 
-    function ZO_Loot_Gamepad_Base:UpdateList()
-        self.itemList:Clear()
+    self.itemCount = 0
+    -- Assume there are no non-stolen items present until proven otherwise.
+    self.nonStolenItemsPresent = false
 
-        self.itemCount = 0
-        -- Assume there are no non-stolen items present until proven otherwise.
-        self.nonStolenItemsPresent = false
+    local lootData = LOOT_SHARED:GetSortedLootData()
 
-        local lootData = LOOT_SHARED:GetSortedLootData()
-
-        for _, data in ipairs(lootData) do
-            local entryData
-            if data.currencyType then
-                local currencyIcon = GetCurrencyLootGamepadIcon(data.currencyType)
-                entryData = ZO_GamepadEntryData:New(data.name, currencyIcon)
-                entryData.currencyType = data.currencyType
-                entryData.currencyAmount = data.currencyAmount
-                local NO_LOOT_ID = nil
-                local NO_DISPLAY_QUALITY = nil
-                local NO_VALUE = nil
-                local NOT_QUEST_ITEM = nil
-                entryData:InitializeLootVisualData(NO_LOOT_ID, data.currencyAmount, NO_DISPLAY_QUALITY, NO_VALUE, NOT_QUEST_ITEM, data.isStolen)
-            else
-                entryData = ZO_GamepadEntryData:New(data.name, data.icon)
-                entryData:InitializeLootVisualData(data.lootId, data.count, data.displayQuality, data.value, data.isQuest, data.isStolen, data.itemType)
-            end
-
-            if data.isStolen then
-                entryData:AddIcon(STOLEN_ICON_TEXTURE)
-            else
-                self.nonStolenItemsPresent = true
-            end
-            self.itemList:AddEntry("ZO_GamepadItemSubEntryTemplate", entryData)
-        end
-        self.itemCount = self.itemList:GetNumEntries()
-
-        if self.intialLootUpdate then
-            self.itemList:CommitWithoutReselect()
+    for _, data in ipairs(lootData) do
+        local entryData
+        if data.currencyType then
+            local currencyIcon = GetCurrencyLootGamepadIcon(data.currencyType)
+            entryData = ZO_GamepadEntryData:New(data.name, currencyIcon)
+            entryData.currencyType = data.currencyType
+            entryData.currencyAmount = data.currencyAmount
+            local NO_LOOT_ID = nil
+            local NO_DISPLAY_QUALITY = nil
+            local NO_VALUE = nil
+            local NOT_QUEST_ITEM = nil
+            entryData:InitializeLootVisualData(NO_LOOT_ID, data.currencyAmount, NO_DISPLAY_QUALITY, NO_VALUE, NOT_QUEST_ITEM, data.isStolen)
         else
-            self.itemList:Commit()
+            entryData = ZO_GamepadEntryData:New(data.name, data.icon)
+            entryData:InitializeLootVisualData(data.lootId, data.count, data.displayQuality, data.value, data.isQuest, data.isStolen, data.itemType)
         end
-    
-        -- this text depends on the list itself
-        self:UpdateAllControlText()
+
+        entryData.stolen = data.isStolen
+        entryData.isLockedSetPiece = data.isLockedSetPiece
+        entryData.canBeUsedToLearn = data.canBeUsedToLearn
+
+        if not data.isStolen then
+            self.nonStolenItemsPresent = true
+        end
+        self.itemList:AddEntry("ZO_GamepadItemSubEntryTemplate", entryData)
     end
+    self.itemCount = self.itemList:GetNumEntries()
+
+    if self.intialLootUpdate then
+        self.itemList:CommitWithoutReselect()
+    else
+        self.itemList:Commit()
+    end
+    
+    -- this text depends on the list itself
+    self:UpdateAllControlText()
 end
 
 function ZO_Loot_Gamepad_Base:UpdateLootWindow(name, actionName, isOwned)

@@ -60,45 +60,27 @@ function ZO_GamepadStoreManager:Initialize(control)
         end
     end
 
-    local OnCurrencyChanged = function()
+    local function OnCurrencyChanged()
         if not self.control:IsControlHidden() then
             self:RefreshHeaderData()
         end
         UpdateActiveComponentKeybindButtonGroup()
     end
 
-    local OnFailedRepair = function(eventId, reason)
+    local function OnFailedRepair(eventId, reason)
         self:FailedRepairMessageBox(reason)
-    end
-
-    local OnBuySuccess = function(...)
-        if not self.control:IsControlHidden() then
-            ZO_StoreManager_OnPurchased(...)
-        end
-    end
-
-    local OnSellSuccess = function(eventId, itemName, quantity, money)
-        if not self.control:IsControlHidden() then
-            PlaySound(SOUNDS.ITEM_MONEY_CHANGED)
-        end
     end
 
     local function OnBuyBackSuccess(eventId, itemName, itemQuantity, money, itemSoundCategory)
         if not self.control:IsControlHidden() then
-            -- ESO-713597: Don't play sound if item has no monetary value.
-            if money > 0 then
-                if itemSoundCategory == ITEM_SOUND_CATEGORY_NONE then
-                    -- Fall back sound if there was no other sound to play
-                    PlaySound(SOUNDS.ITEM_MONEY_CHANGED)
-                else
-                    PlayItemSound(itemSoundCategory, ITEM_SOUND_ACTION_ACQUIRE)
-                end
+            if itemSoundCategory ~= ITEM_SOUND_CATEGORY_NONE then
+                PlayItemSound(itemSoundCategory, ITEM_SOUND_ACTION_ACQUIRE)
             end
             UpdateActiveComponentKeybindButtonGroup()
         end
     end
 
-    local OnInventoryUpdated = function()
+    local function OnInventoryUpdated()
         if not self.control:IsControlHidden() then
             self:RefreshHeaderData()
         end
@@ -112,8 +94,6 @@ function ZO_GamepadStoreManager:Initialize(control)
     end
 
     self.control:RegisterForEvent(EVENT_CURRENCY_UPDATE, OnCurrencyChanged)
-    self.control:RegisterForEvent(EVENT_BUY_RECEIPT, OnBuySuccess)
-    self.control:RegisterForEvent(EVENT_SELL_RECEIPT, OnSellSuccess)
     self.control:RegisterForEvent(EVENT_BUYBACK_RECEIPT, OnBuyBackSuccess)
     self.control:RegisterForEvent(EVENT_ITEM_REPAIR_FAILURE, OnFailedRepair)
     self.control:RegisterForEvent(EVENT_INVENTORY_FULL_UPDATE, OnInventoryUpdated)
@@ -646,41 +626,29 @@ function ZO_GamepadStoreManager:FailedRepairMessageBox(reason)
     end
 end
 
-do
-    internalassert(CURT_MAX_VALUE == 13, "Check if new currency has a store failure")
-    local STORE_FAILURE_FOR_CURRENCY_TYPE =
-    {
-        [CURT_ALLIANCE_POINTS] = STORE_FAILURE_NOT_ENOUGH_ALLIANCE_POINTS,
-        [CURT_TELVAR_STONES] = STORE_FAILURE_NOT_ENOUGH_TELVAR_STONES,
-        [CURT_WRIT_VOUCHERS] = STORE_FAILURE_NOT_ENOUGH_WRIT_VOUCHERS,
-        [CURT_EVENT_TICKETS] = STORE_FAILURE_NOT_ENOUGH_EVENT_TICKETS,
-        [CURT_UNDAUNTED_KEYS] = STORE_FAILURE_NOT_ENOUGH_UNDAUNTED_KEYS,
-        [CURT_ARCHIVAL_FORTUNES] = STORE_FAILURE_NOT_ENOUGH_ARCHIVAL_FORTUNES,
-        [CURT_IMPERIAL_FRAGMENTS] = STORE_FAILURE_NOT_ENOUGH_IMPERIAL_FRAGMENTS,
-    }
-    function ZO_GamepadStoreManager:CanAfford(selectedData)
-        local currencyType = selectedData.currencyType1
-        local currencyQuantity1 = selectedData.currencyQuantity1
-        local playerCurrencyAmount = GetCurrencyAmount(currencyType, GetCurrencyPlayerStoredLocation(currencyType))
+function ZO_GamepadStoreManager:CanAfford(selectedData)
+    local currencyType = selectedData.currencyType1
+    local currencyQuantity1 = selectedData.currencyQuantity1
+    local playerCurrencyAmount = GetCurrencyAmount(currencyType, GetCurrencyPlayerStoredLocation(currencyType))
 
-        if currencyType and currencyType ~= CURT_NONE and currencyQuantity1 and currencyQuantity1 > 0 and currencyQuantity1 > playerCurrencyAmount then
-            if currencyType == CURT_MONEY then
-                return false, GetString(SI_NOT_ENOUGH_MONEY)
-            end
-            return false, GetString("SI_STOREFAILURE", STORE_FAILURE_FOR_CURRENCY_TYPE[currencyType])
-        elseif selectedData.price > 0 and selectedData.price > GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER) then
+    if currencyType and currencyType ~= CURT_NONE and currencyQuantity1 and currencyQuantity1 > 0 and currencyQuantity1 > playerCurrencyAmount then
+        if currencyType == CURT_MONEY then
             return false, GetString(SI_NOT_ENOUGH_MONEY)
-        else
-            return true
         end
+        local NO_ERROR_STRING = 0
+        return false, ZO_StoreManager_GetRequiredToBuyErrorText(STORE_FAILURE_NOT_ENOUGH_CURRENCY, NO_ERROR_STRING, currencyType)
+    elseif selectedData.price > 0 and selectedData.price > GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER) then
+        return false, GetString(SI_NOT_ENOUGH_MONEY)
+    else
+        return true
     end
+end
 
-    function ZO_GamepadStoreManager:CanCarry(selectedData)
-        if not (CanItemLinkBeVirtual(selectedData.itemLink) and HasCraftBagAccess()) and not DoesBagHaveSpaceForItemLink(BAG_BACKPACK, selectedData.itemLink) then
-            return false, GetString(SI_INVENTORY_ERROR_INVENTORY_FULL)
-        else
-            return true
-        end
+function ZO_GamepadStoreManager:CanCarry(selectedData)
+    if not (CanItemLinkBeVirtual(selectedData.itemLink) and HasCraftBagAccess()) and not DoesBagHaveSpaceForItemLink(BAG_BACKPACK, selectedData.itemLink) then
+        return false, GetString(SI_INVENTORY_ERROR_INVENTORY_FULL)
+    else
+        return true
     end
 end
 

@@ -7,13 +7,7 @@ ZO_SELECTION_INDICATOR_GROWTH_DIRECTION =
     DOWN = 4
 }
 
-ZO_SelectionIndicator = ZO_Object:Subclass()
-
-function ZO_SelectionIndicator:New(...)
-    local indicator = ZO_Object.New(self)
-    indicator:Initialize(...)
-    return indicator
-end
+ZO_SelectionIndicator = ZO_InitializingObject:Subclass()
 
 function ZO_SelectionIndicator:Initialize(control)
     self.control = control
@@ -26,8 +20,9 @@ function ZO_SelectionIndicator:Initialize(control)
     self.indicatorList = {}
     self:SetButtonVirtualControl("ZO_SelectionIndicator_Button_Control")
 
-    self.controlPool = ZO_ControlPool:New(self.virtualControlTemplate, self.control, "SelectionIndicatorPip")
+    self.controlPool = ZO_ControlPool:New(self.virtualControlTemplate, self.control, "IndicatorPip")
 
+    self.buttonClickEnabled = true
     self.selectedImage = "EsoUI/Art/Buttons/featureDot_active.dds"
     self.unselectedImage = "EsoUI/Art/Buttons/featureDot_inactive.dds"
     self.mouseOverImage = nil
@@ -36,30 +31,36 @@ function ZO_SelectionIndicator:Initialize(control)
 end
 
 function ZO_SelectionIndicator:OnButtonClicked(button)
-    local index = self:GetButtonIndex(button)
-    self:SetSelectionByIndex(index)
+    if self.buttonClickEnabled then
+        local index = self:GetButtonIndex(button)
+        self:SetSelectionByIndex(index)
 
-    if self.buttonClickedCallback then
-        self.buttonClickedCallback()
+        if self.buttonClickedCallback then
+            self.buttonClickedCallback()
+        end
     end
 end
 
 function ZO_SelectionIndicator:OnMouseEnter(button)
     if self.mouseOverImage then
-        button:GetNamedChild("IndicatorButtonTexture"):SetTexture(self.mouseOverImage)
+        button:GetNamedChild("ButtonTexture"):SetTexture(self.mouseOverImage)
     end
 end
 
 function ZO_SelectionIndicator:OnMouseExit(button)
     if button == self.currentSelection then
-        button:GetNamedChild("IndicatorButtonTexture"):SetTexture(self.selectedImage)
+        button:GetNamedChild("ButtonTexture"):SetTexture(self.selectedImage)
     else
-        button:GetNamedChild("IndicatorButtonTexture"):SetTexture(self.unselectedImage)
+        button:GetNamedChild("ButtonTexture"):SetTexture(self.unselectedImage)
     end
 end
 
 function ZO_SelectionIndicator:SetButtonClickedCallback(buttonClickedCallback)
     self.buttonClickedCallback = buttonClickedCallback
+end
+
+function ZO_SelectionIndicator:SetButtonClickedEnabled(buttonClickEnabled)
+    self.buttonClickEnabled = buttonClickEnabled
 end
 
 function ZO_SelectionIndicator:SetButtonControlName(controlName)
@@ -139,7 +140,7 @@ end
 function ZO_SelectionIndicator:AddButton()
     if self.controlPool then
         local button = self.controlPool:AcquireObject()
-        button:GetNamedChild("IndicatorButtonTexture"):SetTexture(self.unselectedImage)
+        button:GetNamedChild("ButtonTexture"):SetTexture(self.unselectedImage)
         button:SetHidden(false)
         button:SetWidth(self.buttonWidth)
         button:SetHeight(self.buttonHeight)
@@ -168,10 +169,10 @@ end
 function ZO_SelectionIndicator:SetSelectionByIndex(index)
     local button = self.indicatorList[index]
     if self.currentSelection then
-        self.currentSelection:GetNamedChild("IndicatorButtonTexture"):SetTexture(self.unselectedImage)
+        self.currentSelection:GetNamedChild("ButtonTexture"):SetTexture(self.unselectedImage)
     end
     self.currentSelection = button
-    self.currentSelection:GetNamedChild("IndicatorButtonTexture"):SetTexture(self.selectedImage)
+    self.currentSelection:GetNamedChild("ButtonTexture"):SetTexture(self.selectedImage)
 end
 
 -----

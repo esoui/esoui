@@ -183,11 +183,12 @@ do
     end
 end
 
-function ZO_ArmoryBuildChampion_Gamepad:GamepadSingleLineAbilityEntryTemplateSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
-    ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
+function ZO_ArmoryBuildChampion_Gamepad:GamepadSingleLineAbilityEntryTemplateSetup(control, data, parentControl)
+    local SELECTED = true
+    ZO_SharedGamepadEntry_OnSetup(control, data, SELECTED)
 end
 
-function ZO_ArmoryBuildChampion_Gamepad:ArmoryBuildChampionTextDisplayTemplateSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
+function ZO_ArmoryBuildChampion_Gamepad:ArmoryBuildChampionTextDisplayTemplateSetup(control, data, parentControl)
     control.label:SetText(data.text)
 end
 

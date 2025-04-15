@@ -242,8 +242,8 @@ local AlertHandlers =
         return ERROR, zo_strformat(GetString("SI_COMPANIONULTIMATEFAILUREREASON", reason), companionName), SOUNDS.GENERAL_ALERT_ERROR
     end,
 
-    [EVENT_STORE_FAILURE] = function(reason, errorStringId)
-        return ERROR, ZO_StoreManager_GetRequiredToBuyErrorText(reason, errorStringId), SOUNDS.GENERAL_ALERT_ERROR
+    [EVENT_STORE_FAILURE] = function(reason, errorStringId, reasonParam1)
+        return ERROR, ZO_StoreManager_GetRequiredToBuyErrorText(reason, errorStringId, reasonParam1), SOUNDS.GENERAL_ALERT_ERROR
     end,
 
     [EVENT_HOT_BAR_RESULT] = function(reason)
@@ -653,6 +653,22 @@ local AlertHandlers =
         else
             return ERROR, GetString(SI_INVENTORY_ERROR_BANK_DEPOSIT_NOT_ALLOWED), SOUNDS.GENERAL_ALERT_ERROR
         end
+    end,
+
+    [EVENT_FURNITURE_ITEMS_TRANSFERRED_TO_FURNITURE_VAULT] = function(numEligibleSlotsTransferred, numEligibleSlots)
+        if numEligibleSlots > 0 then
+            if numEligibleSlotsTransferred == 0 then
+                -- There is no more room to stow furnishings.
+                return ERROR, GetString(SI_FURNITURE_VAULT_ERROR_NO_SPACE)
+            end
+            if numEligibleSlotsTransferred < numEligibleSlots then
+                -- Some eligible furnishings were stowed.
+                return ALERT, zo_strformat(SI_FURNITURE_VAULT_STOWED_ITEMS, numEligibleSlotsTransferred, numEligibleSlots)
+            end
+            -- All eligible furnishings were stowed.
+            return ALERT, zo_strformat(SI_FURNITURE_VAULT_STOWED_ALL_ITEMS, numEligibleSlotsTransferred)
+        end
+        return ALERT, GetString(SI_FURNITURE_VAULT_NO_ITEMS_TO_STOW)
     end,
 
     [EVENT_QUEST_LOG_IS_FULL] = function()
@@ -1284,6 +1300,13 @@ local AlertHandlers =
         PlaySound(soundId)
         return alertType, GetString("SI_HOUSETOURSAVERECOMMENDATIONRESULT", result)
     end,
+
+    [EVENT_RETURNING_PLAYER_INSTANCE_JUMP_RESULT] = function(result)
+        if result ~= RETURNING_PLAYER_INSTANCE_JUMP_RESULT_SUCCESS then
+            local activityName = GetReturningPlayerIntroGameplayDisplayName()
+            return ALERT, zo_strformat(GetString("SI_RETURNINGPLAYERINSTANCEJUMPRESULT", result), activityName)
+        end
+    end,
 }
 
 ZO_AntiquityScryingResultsToAlert =
@@ -1342,7 +1365,7 @@ if not playerName then
 end
 
 function ShouldShowSocialErrorInAlert(error)
-    return ZO_Menu_WasLastCommandFromMenu() or (error ~= SOCIAL_RESULT_ACCOUNT_NOT_FOUND and error ~= SOCIAL_RESULT_CHARACTER_NOT_FOUND)
+    return ZO_Menu_WasLastCommandFromMenu() or (error ~= SOCIAL_RESULT_ACCOUNT_NOT_FOUND and error ~= SOCIAL_RESULT_CHARACTER_NOT_FOUND and error ~= SOCIAL_RESULT_RESTRICTED_COMMUNICATION)
 end
 
 function IsSocialErrorIgnoreResponse(error)

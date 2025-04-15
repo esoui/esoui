@@ -150,6 +150,7 @@ EsoUI\Libraries\ZO_Scene\ZO_SceneFragmentTemplates.lua
 EsoUI\Libraries\ZO_Focus\Gamepad\ZO_GamepadFocus.lua
 EsoUI\Libraries\ZO_Focus\Gamepad\ZO_GamepadFocus.xml
 EsoUI\Libraries\ZO_Focus\Gamepad\ZO_GamepadMultiFocusAreaManager.lua
+EsoUI\Libraries\ZO_Focus\Gamepad\ZO_GridScrollList_Gamepad_FocusArea.lua
 
 EsoUI\Libraries\ZO_RadialMenu\ZO_RadialMenu.lua
 EsoUI\Libraries\ZO_RadialMenu\ZO_RadialMenuController.lua

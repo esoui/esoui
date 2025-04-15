@@ -81,6 +81,7 @@ function ZO_ScribingLibrary_Keyboard:InitializeKeybindStripDescriptors()
                 local entryData = self:GetMouseOverCraftedAbilityEntry().dataEntry.data
                 local craftedAbilityId = entryData:GetId()
                 self:SelectCraftedAbilityId(craftedAbilityId)
+                PlaySound(SOUNDS.SKILLS_SUBCLASSING_SKILL_LINE_SELECT)
             end,
             visible = function()
                 return self:HasMouseOverCraftedAbilityEntry()
@@ -101,6 +102,7 @@ function ZO_ScribingLibrary_Keyboard:InitializeKeybindStripDescriptors()
             callback = function()
                 if self:AreScriptsShowing() then
                     self:ShowCraftedAbilities()
+                    PlaySound(SOUNDS.SKILLS_SUBCLASSING_SKILL_LINE_BACK)
                 else
                     SCENE_MANAGER:HideCurrentScene()
                 end
@@ -149,6 +151,16 @@ function ZO_ScribingLibrary_Keyboard:GetIconsForScriptData(scriptData)
     end
 
     return icons
+end
+
+function ZO_ScribingLibrary_Keyboard:OnBackHeaderControlMouseClick()
+    ZO_ScribingLayout_Keyboard.OnBackHeaderControlMouseClick(self)
+    PlaySound(SOUNDS.SKILLS_SUBCLASSING_SKILL_LINE_BACK)
+end
+
+function ZO_ScribingLibrary_Keyboard:OnCraftedAbilityEntryMouseClick(control)
+    ZO_ScribingLayout_Keyboard.OnCraftedAbilityEntryMouseClick(self, control)
+    PlaySound(SOUNDS.SKILLS_SUBCLASSING_SKILL_LINE_SELECT)
 end
 
 -- End Overridden from ZO_ScribingLayout_Keyboard

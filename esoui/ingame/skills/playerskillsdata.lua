@@ -81,6 +81,13 @@ function ZO_ActiveSkillProgressionData:RefreshDynamicData(...)
     self.currentRank = GetAbilityProgressionRankFromAbilityId(self:GetAbilityId())
 end
 
+function ZO_ActiveSkillProgressionData:GetEffectiveAbilityId(hotbarCategory)
+    if self:IsChainingAbility() then
+        return GetEffectiveAbilityIdForAbilityOnHotbar(self.abilityId, hotbarCategory)
+    end
+    return self.abilityId
+end
+
 function ZO_ActiveSkillProgressionData:GetDetailedName()
     return self:GetFormattedNameWithRank()
 end
@@ -107,7 +114,7 @@ function ZO_ActiveSkillProgressionData:TryPickup()
     end
 
     if isPurchased then
-        PickupAbilityBySkillLine(self:GetIndices())
+        PickupAbilityById(self:GetEffectiveAbilityId())
         return true
     end
     return false
@@ -256,7 +263,7 @@ end
 
 function ZO_CraftedActiveSkillProgressionData:TryPickup()
     if self.skillData:IsPurchased() then
-        PickupAbilityBySkillLine(self:GetIndices())
+        PickupAbilityById(self:GetEffectiveAbilityId())
     end
 end
 
@@ -297,10 +304,11 @@ function ZO_PassiveSkillProgressionData:BuildStaticData(skillData, rank)
 
     local skillType, skillLineIndex, skillIndex = skillData:GetIndices()
     local UNUSED_MORPH_CHOICE = MORPH_SLOT_BASE
-    local abilityId, lineRankNeededToUnlock = GetSpecificSkillAbilityInfo(skillType, skillLineIndex, skillIndex, UNUSED_MORPH_CHOICE, rank)
+    local abilityId, lineRankNeededToUnlock, characterLevelNeededToUnlock = GetSpecificSkillAbilityInfo(skillType, skillLineIndex, skillIndex, UNUSED_MORPH_CHOICE, rank)
 
     self:SetAbilityId(abilityId)
     self.lineRankNeededToUnlock = lineRankNeededToUnlock
+    self.characterLevelNeededToUnlock = characterLevelNeededToUnlock
 end
 
 function ZO_PassiveSkillProgressionData:GetDetailedName()
@@ -321,7 +329,7 @@ end
 
 function ZO_PassiveSkillProgressionData:IsUnlocked()
     if ZO_PlayerSkillProgressionData.IsUnlocked(self) then
-        return self:MeetsLineRankUnlockRequirement()
+        return self:MeetsUnlockRequirement()
     end
     return false
 end
@@ -360,9 +368,21 @@ function ZO_PassiveSkillProgressionData:GetLineRankNeededToUnlock()
     return self.lineRankNeededToUnlock
 end
 
+function ZO_PassiveSkillProgressionData:GetCharacterLevelNeededToUnlock()
+    return self.characterLevelNeededToUnlock
+end
+
 function ZO_PassiveSkillProgressionData:MeetsLineRankUnlockRequirement()
     local skillLineData = self:GetSkillData():GetSkillLineData()
     return self:GetLineRankNeededToUnlock() <= skillLineData:GetCurrentRank()
+end
+
+function ZO_PassiveSkillProgressionData:MeetsCharacterLevelUnlockRequirement()
+    return self:GetCharacterLevelNeededToUnlock() <= GetUnitLevel("player")
+end
+
+function ZO_PassiveSkillProgressionData:MeetsUnlockRequirement()
+    return self:MeetsLineRankUnlockRequirement() and self:MeetsCharacterLevelUnlockRequirement()
 end
 
 function ZO_PassiveSkillProgressionData:GetNextRankData()
@@ -416,6 +436,7 @@ function ZO_SkillData:BuildStaticData(skillLineData, skillIndex)
     local skillType, skillLineIndex = self.skillLineData:GetIndices()
 
     self.lineRankNeededToPurchase = GetSkillAbilityLineRankNeededToUnlock(skillType, skillLineIndex, skillIndex)
+    self.characterLevelNeededToPurchase = GetSkillAbilityCharacterLevelNeededToUnlock(skillType, skillLineIndex, skillIndex)
     self.isAutoGrant = IsSkillAbilityAutoGrant(skillType, skillLineIndex, skillIndex)
 end
 
@@ -441,9 +462,22 @@ function ZO_SkillData:GetLineRankNeededToPurchase()
     return self.lineRankNeededToPurchase
 end
 
+function ZO_SkillData:GetCharacterLevelNeededToPurchase()
+    return self.characterLevelNeededToPurchase
+end
+
+function ZO_SkillData:MeetsLineRankPurchaseRequirement()
+    local skillLineData = self:GetSkillLineData()
+    return self:GetLineRankNeededToPurchase() <= skillLineData:GetCurrentRank()
+end
+
+function ZO_SkillData:MeetsCharacterLevelPurchaseRequirement()
+    return self:GetCharacterLevelNeededToPurchase() <= GetUnitLevel("player")
+end
+
 function ZO_SkillData:MeetsLinePurchaseRequirement()
     local skillLineData = self:GetSkillLineData()
-    return skillLineData:IsAvailable() and self:GetLineRankNeededToPurchase() <= skillLineData:GetCurrentRank()
+    return skillLineData:IsAvailable() and self:MeetsLineRankPurchaseRequirement() and self:MeetsCharacterLevelPurchaseRequirement()
 end
 
 function ZO_SkillData:IsAutoGrant()
@@ -509,7 +543,7 @@ function ZO_SkillData:ClearUpdate(suppressCallback)
     end
 end
 
-function ZO_SkillData:CanPointAllocationsBeAltered(isFullRespec)
+function ZO_SkillData:CanPointAllocationsBeAltered(skillPointAllocationMode)
     return self:MeetsLinePurchaseRequirement()
 end
 
@@ -581,10 +615,22 @@ function ZO_ActiveSkillData:RefreshDynamicData(...)
     self.canBeMarkedAsUpdated = true
 end
 
-function ZO_ActiveSkillData:CanPointAllocationsBeAltered(isFullRespec)
-    if ZO_SkillData.CanPointAllocationsBeAltered(self, isFullRespec) then
-        if self:IsPurchased() and not self:IsAtMorph() then
-            return isFullRespec and not self:IsAutoGrant()
+function ZO_ActiveSkillData:CanPointAllocationsBeAltered(skillPointAllocationMode)
+    if ZO_SkillData.CanPointAllocationsBeAltered(self, skillPointAllocationMode) then
+        if self:IsPurchased() then
+            if skillPointAllocationMode == SKILL_POINT_ALLOCATION_MODE_FULL then
+                if self:IsAutoGrant() and not self:IsAtMorph() then
+                    return false
+                end
+            elseif skillPointAllocationMode == SKILL_POINT_ALLOCATION_MODE_MORPHS_ONLY then
+                if not self:IsAtMorph() then
+                    return false
+                end
+            elseif skillPointAllocationMode == SKILL_POINT_ALLOCATION_MODE_SUBCLASS_ONLY then
+                if not self:IsAtMorph() or self:IsMorphed() then
+                    return false
+                end
+            end
         end
         return true
     end
@@ -615,11 +661,11 @@ function ZO_ActiveSkillData:GetNumPointsAllocated()
             pointsAllocated = pointsAllocated + 1
         end
 
-        if self:GetCurrentMorphSlot() ~= MORPH_SLOT_BASE then
+        if self:IsMorphed() then
             pointsAllocated = pointsAllocated + 1
         end
     end
-    return pointsAllocated
+    return pointsAllocated * self:GetSkillPointCostMultiplier()
 end
 
 function ZO_ActiveSkillData:GetHeaderText()
@@ -634,7 +680,7 @@ function ZO_ActiveSkillData:HasPointsToClear(clearMorphsOnly)
     if self:GetNumPointsAllocated() > 0 then
         if clearMorphsOnly then
             -- make sure there are points allocated to a morph
-            return self:GetCurrentMorphSlot() ~= MORPH_SLOT_BASE
+            return self:IsMorphed()
         end
         return true
     end
@@ -649,6 +695,10 @@ end
 
 function ZO_ActiveSkillData:GetCurrentMorphSlot()
     return self.currentMorphSlot
+end
+
+function ZO_ActiveSkillData:IsMorphed()
+    return self.currentMorphSlot ~= MORPH_SLOT_BASE
 end
 
 function ZO_ActiveSkillData:GetMorphData(morphSlot)
@@ -733,7 +783,7 @@ function ZO_CraftedActiveSkillData:GetPointAllocator()
     return self.noActionsPointAllocator
 end
 
-function ZO_CraftedActiveSkillData:CanPointAllocationsBeAltered(isFullRespec)
+function ZO_CraftedActiveSkillData:CanPointAllocationsBeAltered(skillPointAllocationMode)
     return false
 end
 
@@ -811,14 +861,15 @@ function ZO_PassiveSkillData:RefreshDynamicData(...)
     end
 end
 
-function ZO_PassiveSkillData:CanPointAllocationsBeAltered(isFullRespec)
-    if ZO_SkillData.CanPointAllocationsBeAltered(self, isFullRespec) then
+function ZO_PassiveSkillData:CanPointAllocationsBeAltered(skillPointAllocationMode)
+    if ZO_SkillData.CanPointAllocationsBeAltered(self, skillPointAllocationMode) then
         if self:IsPurchased() then
             local currentRank = self:GetCurrentRank()
             local nextRankData = self:GetRankData(currentRank + 1)
-            if nextRankData and nextRankData:MeetsLineRankUnlockRequirement() then
+            if nextRankData and nextRankData:MeetsUnlockRequirement() then
                 return true
             end
+            local isFullRespec = skillPointAllocationMode == SKILL_POINT_ALLOCATION_MODE_FULL
             return isFullRespec and (currentRank > 1 or not self:IsAutoGrant())
         end
         return true
@@ -844,14 +895,15 @@ function ZO_PassiveSkillData:GetCurrentSkillProgressionKey()
 end
 
 function ZO_PassiveSkillData:GetNumPointsAllocated()
+    local pointsAllocated = 0
     if self:IsPurchased() then
         if self:IsAutoGrant() then
-            return self:GetCurrentRank() - 1
+            pointsAllocated = self:GetCurrentRank() - 1
         else
-            return self:GetCurrentRank()
+            pointsAllocated = self:GetCurrentRank()
         end
     end
-    return 0
+    return pointsAllocated * self:GetSkillPointCostMultiplier()
 end
 
 function ZO_PassiveSkillData:GetHeaderText()
@@ -918,6 +970,14 @@ function ZO_SkillLineData:IsPlayerSkillLine()
     return true
 end
 
+function ZO_SkillLineData:IsProgressionAccountWide()
+    return self.isProgressionAccountWide
+end
+
+function ZO_SkillLineData:IsInTraining()
+    return self.isInTraining
+end
+
 function ZO_SkillLineData:IsAdvised()
     return self.isAdvised
 end
@@ -964,7 +1024,7 @@ function ZO_SkillLineData:RefreshDynamicData(refreshChildren)
 
     local wasAvailable = self:IsAvailable()
 
-    self.currentRank, self.isAdvised, self.isActive, self.isDiscovered = GetSkillLineDynamicInfo(skillType, skillLineIndex)
+    self.currentRank, self.isAdvised, self.isActive, self.isDiscovered, self.isProgressionAccountWide, self.isInTraining = GetSkillLineDynamicInfo(skillType, skillLineIndex)
     self.lastRankXP, self.nextRankXP, self.currentXP = GetSkillLineXPInfo(skillType, skillLineIndex)
 
     local isAvailable = self:IsAvailable()
@@ -984,10 +1044,6 @@ end
 
 function ZO_SkillLineData:GetName()
     return self.name
-end
-
-function ZO_SkillLineData:GetFormattedName()
-    return zo_strformat(SI_SKILL_LINE_TOOLTIP_NAME, self.name)
 end
 
 function ZO_SkillLineData:GetUnlockText()
@@ -1046,6 +1102,15 @@ function ZO_SkillLineData:GetIndices()
     return self.skillTypeData:GetSkillType(), self.skillLineIndex
 end
 
+function ZO_SkillLineData:GetNumPointsAllocated()
+    -- Only counts really allocated points, not pending respec allocations
+    local pointsAllocated = 0
+    for _, skillData in self:SkillIterator() do
+        pointsAllocated = pointsAllocated + skillData:GetNumPointsAllocated()
+    end
+    return pointsAllocated
+end
+
 -- End implementing methods in ZO_SkillLineData_Base --
 
 function ZO_SkillLineData:IsWerewolf()
@@ -1059,7 +1124,7 @@ end
 function ZO_SkillLineData:GetFormattedNameWithNumPointsAllocated()
     local numPointsAllocated = SKILL_POINT_ALLOCATION_MANAGER:GetNumPointsAllocatedInSkillLine(self)
     if numPointsAllocated > 0 then
-        return zo_strformat(SI_SKILLS_ENTRY_LINE_NAME_FORMAT_WITH_ALLOCATED_POINTS, self.name, numPointsAllocated)
+        return zo_strformat(SI_SKILLS_ENTRY_LINE_NAME_FORMAT_WITH_ALLOCATED_POINTS, self:GetName(), numPointsAllocated)
     else
         return self:GetFormattedName()
     end
@@ -1068,4 +1133,224 @@ end
 function ZO_SkillLineData:SetAdvised(advised)
     local skillType, skillLineIndex = self:GetIndices()
     SetAdviseSkillLine(skillType, skillLineIndex, advised)
+end
+
+--[[
+    A ZO_ClassSkillLineData is an entry in ZO_SkillTypeData. A class skill line has multiple skills to purchase and upgrade, denoted by ZO_SkillData objects.
+    It also has special logic unique to subclassing
+--]]
+
+----------------
+-- Skill Line --
+----------------
+
+ZO_ClassSkillLineData = ZO_SkillLineData:Subclass()
+
+-- Begin implementing methods in ZO_SkillLineData/ZO_SkillLineData_Base --
+
+function ZO_ClassSkillLineData:BuildStaticData(skillTypeData, skillLineIndex)
+    ZO_SkillLineData.BuildStaticData(self, skillTypeData, skillLineIndex)
+
+    local skillType = skillTypeData:GetSkillType()
+    self.classId = GetSkillLineClassId(skillType, skillLineIndex)
+    self.classAccessCollectibleId = GetClassAccessCollectibleId(self.classId)
+    self.masteryCollectible = GetSkillLineMasteryCollectibleId(self.id)
+    self.isPlayerClassSkillLine = IsPlayerClassSkillLineById(self.id)
+end
+
+function ZO_ClassSkillLineData:RefreshDynamicData(refreshChildren)
+    ZO_SkillLineData.RefreshDynamicData(self, refreshChildren)
+
+    local skillType, skillLineIndex = self:GetIndices()
+    self.skillPointCostMultiplier = GetSkillLinePointCostMultiplier(skillType, skillLineIndex)
+end
+
+function ZO_ClassSkillLineData:IsDiscovered()
+    if self:IsPendingActivation() then
+        return true
+    end
+
+    return self.isDiscovered
+end
+
+function ZO_ClassSkillLineData:IsActive()
+    if self:IsPendingDeactivation() then
+        return false
+    end
+
+    if self:IsPendingActivation() then
+        return true
+    end
+
+    return self.isActive
+end
+
+function ZO_ClassSkillLineData:GetFormattedName(withTraining)
+    if withTraining and self:IsInTraining() then
+        return ZO_CachedStrFormat(SI_SKILLS_ENTRY_LINE_NAME_CLASS_TRAIN_FORMAT, self:GetName(), zo_iconFormat(self:GetPlatformClassIcon(), "100%", "100%"), zo_iconFormat("EsoUI/Art/Progression/training_32.dds", "100%", "100%"))
+    else
+        return ZO_CachedStrFormat(SI_SKILLS_ENTRY_LINE_NAME_CLASS_FORMAT, self:GetName(), zo_iconFormat(self:GetPlatformClassIcon(), "100%", "100%"))
+    end
+end
+
+function ZO_ClassSkillLineData:GetFormattedNameWithNumPointsAllocated()
+    local numPointsAllocated = SKILL_POINT_ALLOCATION_MANAGER:GetNumPointsAllocatedInSkillLine(self)
+    if numPointsAllocated > 0 then
+        return zo_strformat(SI_SKILLS_ENTRY_LINE_NAME_CLASS_FORMAT_WITH_ALLOCATED_POINTS, self:GetName(), zo_iconFormat(self:GetPlatformClassIcon(), "100%", "100%"), numPointsAllocated)
+    else
+        return self:GetFormattedName()
+    end
+end
+
+function ZO_ClassSkillLineData:GetClassId()
+    return self.classId
+end
+
+function ZO_ClassSkillLineData:GetClassName()
+    return GetClassName(GetUnitGender("player"), self:GetClassId())
+end
+
+function ZO_ClassSkillLineData:GetKeyboardClassIcon()
+    local classIndex = GetClassIndexById(self:GetClassId())
+    return select(7, GetClassInfo(classIndex))
+end
+
+function ZO_ClassSkillLineData:GetGamepadClassIcon()
+    local classIndex = GetClassIndexById(self:GetClassId())
+    return select(8, GetClassInfo(classIndex))
+end
+
+function ZO_ClassSkillLineData:GetPlatformClassIcon()
+    if IsInGamepadPreferredMode() then
+        return self:GetGamepadClassIcon()
+    else
+        return self:GetKeyboardClassIcon()
+    end
+end
+
+function ZO_ClassSkillLineData:IsClassSkillLine()
+    return true
+end
+
+function ZO_ClassSkillLineData:IsPlayerClassSkillLine()
+    return self.isPlayerClassSkillLine
+end
+
+function ZO_ClassSkillLineData:IsInTraining()
+    return self.isInTraining or self:IsPendingTrain()
+end
+
+function ZO_ClassSkillLineData:GetMasteryCollectibleId()
+    return self.masteryCollectible
+end
+
+function ZO_ClassSkillLineData:HasMastery()
+    local collectibleId = self:GetMasteryCollectibleId()
+    local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+    if collectibleData then
+        return collectibleData:IsUnlocked()
+    end
+    return false
+end
+
+function ZO_ClassSkillLineData:GetSkillPointCostMultiplier()
+    return self.skillPointCostMultiplier
+end
+
+-- End implementing methods in ZO_SkillLineData/ZO_SkillLineData_Base --
+
+function ZO_ClassSkillLineData:GetClassAccessCollectibleId()
+    return self.classAccessCollectibleId
+end
+
+function ZO_ClassSkillLineData:IsContentLocked()
+    -- The player can only have a locked class on internal builds using dev commands
+    if self:IsPlayerClassSkillLine() then
+        return false
+    end
+
+    local collectibleId = self:GetClassAccessCollectibleId()
+    if collectibleId ~= 0 then
+        local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+        if collectibleData then
+            return collectibleData:IsLocked()
+        end
+        return true
+    end
+    return false
+end
+
+function ZO_ClassSkillLineData:IsPendingActivation()
+    return SKILL_LINE_ASSIGNMENT_MANAGER and SKILL_LINE_ASSIGNMENT_MANAGER:IsSkillLinePendingActivation(self)
+end
+
+function ZO_ClassSkillLineData:CanActivateForRespec()
+    return SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeAllowSkillLineRespec() and not self:IsAvailable() and not self:IsContentLocked() and
+        (self:HasMastery() or self:IsInTraining() or self:IsPlayerClassSkillLine())
+end
+
+function ZO_ClassSkillLineData:IsDisabled()
+    return self:IsContentLocked() or not (self:HasMastery() or self:IsInTraining() or self:IsPlayerClassSkillLine())
+end
+
+function ZO_ClassSkillLineData:GetSwappingForRespecSkillPointsDeficit(swapOutSkillLineData)
+    if not self:IsActive() and swapOutSkillLineData:IsActive() then
+        local numAvailableSkillPoints = SKILL_POINT_ALLOCATION_MANAGER:GetAvailableSkillPoints()
+        local IGNORE_ACTIVE_STATE = true
+        local numSkillPointsAllocatedInSkillLine = SKILL_POINT_ALLOCATION_MANAGER:GetNumPointsAllocatedInSkillLine(self, IGNORE_ACTIVE_STATE)
+        local numSkillPointsAllocatedInSwapOutSkillLine = SKILL_POINT_ALLOCATION_MANAGER:GetNumPointsAllocatedInSkillLine(swapOutSkillLineData, IGNORE_ACTIVE_STATE)
+        local pointDeltaFromSwap = numSkillPointsAllocatedInSkillLine - numSkillPointsAllocatedInSwapOutSkillLine
+        if pointDeltaFromSwap > numAvailableSkillPoints then
+            return pointDeltaFromSwap - numAvailableSkillPoints
+        end
+    end
+    return 0
+end
+
+function ZO_ClassSkillLineData:ActivateForRespec(suppressCallback)
+    if self:CanActivateForRespec() then
+        SKILL_LINE_ASSIGNMENT_MANAGER:ActivateSkillLine(self, suppressCallback)
+    end
+end
+
+function ZO_ClassSkillLineData:IsPendingDeactivation()
+    return SKILL_LINE_ASSIGNMENT_MANAGER and SKILL_LINE_ASSIGNMENT_MANAGER:IsSkillLinePendingDeactivation(self)
+end
+
+function ZO_ClassSkillLineData:CanDeactivateForRespec()
+    return SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeAllowSkillLineRespec() and self:IsAvailable()
+end
+
+function ZO_ClassSkillLineData:DeactivateForRespec(suppressCallback)
+    if self:CanDeactivateForRespec() then
+        local IGNORE_CALLBACKS = true
+        SKILL_POINT_ALLOCATION_MANAGER:ClearPointsOnSkillLine(self, IGNORE_CALLBACKS)
+        SKILL_LINE_ASSIGNMENT_MANAGER:DeactivateSkillLine(self, suppressCallback)
+    end
+end
+
+function ZO_ClassSkillLineData:IsPendingTrain()
+    return SKILL_LINE_ASSIGNMENT_MANAGER and SKILL_LINE_ASSIGNMENT_MANAGER:IsSkillLinePendingTrain(self)
+end
+
+function ZO_ClassSkillLineData:CanTrain()
+    local needsTrainingToActivate = not (self:HasMastery() or self:IsInTraining() or self:IsPlayerClassSkillLine())
+    return needsTrainingToActivate and SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeAllowSkillLineTraining() and not self:IsContentLocked() and
+        self:IsProgressionAccountWide() and SKILLS_DATA_MANAGER:GetNumSkillLinesInTraining() < MAX_SKILL_LINES_IN_TRAINING
+end
+
+function ZO_ClassSkillLineData:Train()
+    if self:CanTrain() then
+        SKILL_LINE_ASSIGNMENT_MANAGER:TrainSkillLine(self)
+    end
+end
+
+function ZO_ClassSkillLineData:CanUntrain()
+    return SKILL_LINE_ASSIGNMENT_MANAGER:IsSkillLinePendingTrain(self) and not self:IsPendingActivation()
+end
+
+function ZO_ClassSkillLineData:Untrain()
+    if self:CanUntrain() then
+        SKILL_LINE_ASSIGNMENT_MANAGER:UntrainSkillLine(self)
+    end
 end

@@ -1,3 +1,5 @@
+local isSubclassingMousedOver = false
+
 -- Point Allocation Dialogs --
 
 local function InitializeKeyboardMorphDialog()
@@ -22,6 +24,7 @@ local function InitializeKeyboardMorphDialog()
     morphAbility2.advised = false
     dialogControl.morphAbility2 = morphAbility2
 
+    dialogControl.warning = dialogControl:GetNamedChild("Warning")
     dialogControl.trackArrows = dialogControl:GetNamedChild("Track")
     dialogControl.confirmButton = dialogControl:GetNamedChild("Confirm")
 
@@ -41,7 +44,7 @@ local function InitializeKeyboardMorphDialog()
 
         morphSlot.selectedCallout:SetHidden(false)
         otherMorphSlot.selectedCallout:SetHidden(true)
-        
+
         ZO_ActionSlot_SetUnusable(morphSlot.icon, false)
         ZO_ActionSlot_SetUnusable(otherMorphSlot.icon, true)
 
@@ -107,6 +110,8 @@ local function InitializeKeyboardMorphDialog()
                 morphAbility1.showAdvice = false
                 morphAbility2.showAdvice = false
             end
+
+            dialog.warning:SetText(zo_strformat(SI_SKILLS_IMPROVEMENT_COST, skillData:GetSkillPointCostMultiplier()))
         end
     end
 
@@ -120,22 +125,19 @@ local function InitializeKeyboardMorphDialog()
         },
         buttons =
         {
-            [1] =
             {
                 control = dialogControl:GetNamedChild("Confirm"),
                 text =  SI_SKILLS_MORPH_CONFIRM,
-                callback =  function(dialog)
-                                if dialog.chosenMorphProgressionData then
-                                    local skillPointAllocator = dialog.chosenMorphProgressionData:GetSkillData():GetPointAllocator()
-                                    skillPointAllocator:Morph(dialog.chosenMorphProgressionData:GetMorphSlot())
-                                end
-                            end,
+                callback = function(dialog)
+                    if dialog.chosenMorphProgressionData then
+                        local skillPointAllocator = dialog.chosenMorphProgressionData:GetSkillData():GetPointAllocator()
+                        skillPointAllocator:Morph(dialog.chosenMorphProgressionData:GetMorphSlot())
+                    end
+                end,
             },
-        
-            [2] =
             {
-                control =   dialogControl:GetNamedChild("Cancel"),
-                text =      SI_CANCEL,
+                control = dialogControl:GetNamedChild("Cancel"),
+                text = SI_CANCEL,
             }
         }
     })
@@ -146,19 +148,23 @@ local function InitializeKeyboardConfirmDialog()
     confirmDialogControl.abilityName = confirmDialogControl:GetNamedChild("AbilityName")
     confirmDialogControl.ability = confirmDialogControl:GetNamedChild("Ability")
     confirmDialogControl.ability.icon = confirmDialogControl.ability:GetNamedChild("Icon")
+    confirmDialogControl.warning = confirmDialogControl:GetNamedChild("Warning")
     local advisementLabel = confirmDialogControl:GetNamedChild("Advisement")
     advisementLabel:SetText(GetString(SI_SKILLS_ADVISOR_PURCHASE_ADVISED))
     advisementLabel:SetColor(ZO_SKILLS_ADVISOR_ADVISED_COLOR:UnpackRGBA())
     confirmDialogControl.advisementLabel = advisementLabel
 
     local function SetupPurchaseAbilityConfirmDialog(dialog, skillProgressionData)
-        if skillProgressionData:GetSkillData():GetPointAllocator():CanPurchase() then
+        local skillData = skillProgressionData:GetSkillData()
+        if skillData:GetPointAllocator():CanPurchase() then
             local dialogAbility = dialog.ability
             dialog.abilityName:SetText(skillProgressionData:GetFormattedName())
 
             dialogAbility.skillProgressionData = skillProgressionData
             dialogAbility.icon:SetTexture(skillProgressionData:GetIcon())
             ZO_Skills_SetKeyboardAbilityButtonTextures(dialogAbility)
+
+            dialog.warning:SetText(zo_strformat(SI_SKILLS_IMPROVEMENT_COST, skillData:GetSkillPointCostMultiplier()))
 
             local hideAdvisement = ZO_SKILLS_ADVISOR_SINGLETON:IsAdvancedModeSelected() or not skillProgressionData:IsAdvised()
             dialog.advisementLabel:SetHidden(hideAdvisement)
@@ -175,21 +181,18 @@ local function InitializeKeyboardConfirmDialog()
         },
         buttons =
         {
-            [1] =
             {
-                control =   confirmDialogControl:GetNamedChild("Confirm"),
-                text =      SI_SKILLS_UNLOCK_CONFIRM,
-                callback =  function(dialog)
-                                local skillProgressionData = dialog.data
-                                local skillPointAllocator = skillProgressionData:GetSkillData():GetPointAllocator()
-                                skillPointAllocator:Purchase()
-                            end,
+                control = confirmDialogControl:GetNamedChild("Confirm"),
+                text = SI_SKILLS_UNLOCK_CONFIRM,
+                callback = function(dialog)
+                    local skillProgressionData = dialog.data
+                    local skillPointAllocator = skillProgressionData:GetSkillData():GetPointAllocator()
+                    skillPointAllocator:Purchase()
+                end,
             },
-        
-            [2] =
             {
-                control =   confirmDialogControl:GetNamedChild("Cancel"),
-                text =      SI_CANCEL,
+                control = confirmDialogControl:GetNamedChild("Cancel"),
+                text = SI_CANCEL,
             }
         }
     })
@@ -204,6 +207,8 @@ local function InitializeKeyboardUpgradeDialog()
 
     upgradeDialogControl.upgradeAbility = upgradeDialogControl:GetNamedChild("UpgradeAbility")
     upgradeDialogControl.upgradeAbility.icon = upgradeDialogControl.upgradeAbility:GetNamedChild("Icon")
+
+    upgradeDialogControl.warning = upgradeDialogControl:GetNamedChild("Warning")
 
     local advisementLabel = upgradeDialogControl:GetNamedChild("Advisement")
     advisementLabel:SetText(GetString(SI_SKILLS_ADVISOR_PURCHASE_ADVISED))
@@ -225,11 +230,13 @@ local function InitializeKeyboardUpgradeDialog()
             baseAbility.skillProgressionData = skillProgressionData
             baseAbility.icon:SetTexture(skillProgressionData:GetIcon())
             ZO_Skills_SetKeyboardAbilityButtonTextures(baseAbility)
-        
+
             local upgradeAbility = dialog.upgradeAbility
             upgradeAbility.skillProgressionData = nextSkillProgressionData
             upgradeAbility.icon:SetTexture(nextSkillProgressionData:GetIcon())
             ZO_Skills_SetKeyboardAbilityButtonTextures(upgradeAbility)
+
+            dialog.warning:SetText(zo_strformat(SI_SKILLS_IMPROVEMENT_COST, skillData:GetSkillPointCostMultiplier()))
 
             local hideAdvisement = ZO_SKILLS_ADVISOR_SINGLETON:IsAdvancedModeSelected() or not skillData:IsAdvised()
             advisementLabel:SetHidden(hideAdvisement)
@@ -246,20 +253,18 @@ local function InitializeKeyboardUpgradeDialog()
         },
         buttons =
         {
-            [1] =
             {
                 control = upgradeDialogControl:GetNamedChild("Confirm"),
-                text =  SI_SKILLS_UPGRADE_CONFIRM,
-                callback =  function(dialog)
-                                local skillData = dialog.data
-                                local skillPointAllocator = skillData:GetPointAllocator()
-                                skillPointAllocator:IncreaseRank()
-                            end,
+                text = SI_SKILLS_UPGRADE_CONFIRM,
+                callback = function(dialog)
+                    local skillData = dialog.data
+                    local skillPointAllocator = skillData:GetPointAllocator()
+                    skillPointAllocator:IncreaseRank()
+                end,
             },
-            [2] =
             {
-                control =   upgradeDialogControl:GetNamedChild("Cancel"),
-                text =      SI_CANCEL,
+                control = upgradeDialogControl:GetNamedChild("Cancel"),
+                text = SI_CANCEL,
             }
         }
     })
@@ -287,7 +292,10 @@ function ZO_InitializeKeyboardRespecConfirmationGoldDialog(control)
         },
         mainText =
         {
-            text = SI_SKILL_RESPEC_CONFIRM_DIALOG_BODY_INTRO,
+            text = function(dialog)
+                local mainTextEntryTable = ZO_Dialogs_GetSkillsRespecMainTextEntryTable()
+                return ZO_GenerateParagraphSeparatedList(mainTextEntryTable)
+            end,
         },
         buttons =
         {
@@ -346,22 +354,22 @@ local function InitializeKeyboardSkillRespecConfirmClearDialog()
         buttons =
         {
             {
-                keybind =   "DIALOG_PRIMARY",
-                control =   control:GetNamedChild("Confirm"),
-                text =      SI_DIALOG_CONFIRM,
-                callback =  function()
-                                local selectedButton = radioButtonGroup:GetClickedButton()
-                                if selectedButton.skillLineData then
-                                    SKILL_POINT_ALLOCATION_MANAGER:ClearPointsOnSkillLine(selectedButton.skillLineData)
-                                else
-                                    SKILL_POINT_ALLOCATION_MANAGER:ClearPointsOnAllSkillLines()
-                                end
-                            end,
+                keybind = "DIALOG_PRIMARY",
+                control = control:GetNamedChild("Confirm"),
+                text = SI_DIALOG_CONFIRM,
+                callback = function()
+                    local selectedButton = radioButtonGroup:GetClickedButton()
+                    if selectedButton.skillLineData then
+                        SKILL_POINT_ALLOCATION_MANAGER:ClearPointsOnSkillLine(selectedButton.skillLineData)
+                    else
+                        SKILL_POINT_ALLOCATION_MANAGER:ClearPointsOnAllSkillLines()
+                    end
+                end,
             },
             {
-                keybind =   "DIALOG_NEGATIVE",
-                control =   control:GetNamedChild("Cancel"),
-                text =      SI_DIALOG_CANCEL,
+                keybind = "DIALOG_NEGATIVE",
+                control = control:GetNamedChild("Cancel"),
+                text = SI_DIALOG_CANCEL,
             },
         },
     })
@@ -392,7 +400,7 @@ function ZO_SelectSkillStyleDialog_OnInitialized(control)
         control.skillStyleSelector:SetSkillData(data.skillData)
         control.skillStyleSelector:BuildSkillStyleSelectorIconGridList()
         control.defaultStyleBorder:SetHidden(dialog.skillStyleSelector:GetActiveData() ~= nil)
-        
+
         local purchaseText = SKILLS_DATA_MANAGER:GetSkillStyleWarningText(data)
         if purchaseText == "" then
             control.selectSkillStyleContainerControl:ClearAnchors()
@@ -457,6 +465,7 @@ function ZO_SkillsManager:Initialize(control)
     self:InitializeControls()
     self:InitializeSkillLineList()
     self:InitializeSkillList()
+    self:InitializeSubclassing()
     self:InitializeKeybindDescriptors()
 
     InitializeKeyboardMorphDialog()
@@ -478,8 +487,8 @@ function ZO_SkillsManager:InitializeControls()
 end
 
 function ZO_SkillsManager:InitializeSkillLineList()
-    local container = self.control:GetNamedChild("SkillLinesContainer")
-    local skillLinesTree = ZO_Tree:New(container:GetNamedChild("ScrollChild"), 74, -10, 300)
+    self.skillLinesContainer = self.control:GetNamedChild("SkillLinesContainer")
+    local skillLinesTree = ZO_Tree:New(self.skillLinesContainer:GetNamedChild("ScrollChild"), 74, -10, 300)
     self.skillLineIdToNode = {}
 
     local function TreeHeaderSetup(node, control, skillTypeData, open)
@@ -505,33 +514,109 @@ function ZO_SkillsManager:InitializeSkillLineList()
     skillLinesTree:AddTemplate("ZO_SkillIconHeader", TreeHeaderSetup, nil, nil, nil, 0)
 
     local function TreeEntrySetup(node, control, skillLineData, open)
-        if SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeBatchSave() then
-            control:SetText(skillLineData:GetFormattedNameWithNumPointsAllocated())
+        -- ESO-910632 Addresses an issue where a node gets removed when closing the screen but never fires the unselect callback
+        -- so the control still appears selected when it gets recycled
+        control:SetSelected(node.selected)
+
+        if skillLineData.isSubclassingNode == true then
+            control:SetText(GetString(SI_SKILLS_SUBCLASSING_ENTRY_NAME))
+            control.statusIcon:ClearIcons()
+            if SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeAllowAccessToSubclassing() then
+                node:SetEnabled(true)
+                node.control:SetEnabled(true)
+            else
+                node:SetEnabled(false)
+                node.control:SetEnabled(false)
+            end
+
+            local OnMouseEnter = function(control)
+                ZO_SelectableLabel_OnMouseEnter(control)
+
+                InitializeTooltip(InformationTooltip, control, RIGHT, -10)
+
+                local SET_TO_FULL_SIZE = true
+                local normalR, normalG, normalB = ZO_NORMAL_TEXT:UnpackRGB()
+                InformationTooltip:AddLine(GetString(SI_SKILLS_SUBCLASSING_DESCRIPTION), "", normalR, normalG, normalB, LEFT, MODIFY_TEXT_TYPE_NONE, TEXT_ALIGN_LEFT, SET_TO_FULL_SIZE)
+
+                if not SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeAllowAccessToSubclassing() then
+                    local achievementTextColor = ZO_ERROR_COLOR
+                    local questTextColor = ZO_ERROR_COLOR
+                    local achievementId = GetSubclassingAchievementId()
+                    local questId = GetSubclassingQuestId()
+                    local questNameText = zo_strformat(SI_SKILLS_SUBCLASSING_UNLOCK_QUEST_TEXT, GetQuestName(questId))
+                    if IsAchievementComplete(achievementId) then
+                        achievementTextColor = ZO_NORMAL_TEXT
+                    end
+                    local achievementR, achievementG, achievementB = achievementTextColor:UnpackRGB()
+                    local questR, questG, questB = questTextColor:UnpackRGB()
+                    InformationTooltip:AddLine(GetString(SI_SKILLS_SUBCLASSING_UNLOCK_TOOLTIP_HEADER), "", normalR, normalG, normalB, LEFT, MODIFY_TEXT_TYPE_NONE, TEXT_ALIGN_LEFT, SET_TO_FULL_SIZE)
+                    InformationTooltip:AddLine(GetString(SI_SKILLS_SUBCLASSING_UNLOCK_ACHIEVEMENT_TEXT), "", achievementR, achievementG, achievementB, LEFT, MODIFY_TEXT_TYPE_NONE, TEXT_ALIGN_LEFT, SET_TO_FULL_SIZE)
+                    InformationTooltip:AddLine(questNameText, "", questR, questG, questB, LEFT, MODIFY_TEXT_TYPE_NONE, TEXT_ALIGN_LEFT, SET_TO_FULL_SIZE)
+                    isSubclassingMousedOver = true
+                    SKILLS_WINDOW:UpdateKeybinds()
+                end
+            end
+
+            local OnMouseExit = function(control)
+                ZO_SelectableLabel_OnMouseExit(control)
+                ClearTooltip(InformationTooltip)
+                isSubclassingMousedOver = false
+                SKILLS_WINDOW:UpdateKeybinds()
+            end
+
+            node.control:SetHandler("OnMouseEnter", OnMouseEnter)
+            node.control:SetHandler("OnMouseExit", OnMouseExit)
         else
-            control:SetText(skillLineData:GetFormattedName())
+            if SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeBatchSave() then
+                control:SetText(skillLineData:GetFormattedNameWithNumPointsAllocated())
+            else
+                control:SetText(skillLineData:GetFormattedName())
+            end
+
+            control.statusIcon:ClearIcons()
+
+            if skillLineData:IsSkillLineOrAbilitiesNew() or skillLineData:IsAdvised() then
+                control.statusIcon:AddIcon(ZO_KEYBOARD_NEW_ICON)
+            end
+
+            if skillLineData:IsInTraining() then
+                local TRAINING_ICON = "EsoUI/Art/Progression/training_32.dds"
+                control.statusIcon:AddIcon(TRAINING_ICON)
+            end
+
+            control.statusIcon:Show()
         end
-
-        control.statusIcon:ClearIcons()
-
-        if skillLineData:IsSkillLineOrAbilitiesNew() or skillLineData:IsAdvised() then
-            control.statusIcon:AddIcon(ZO_KEYBOARD_NEW_ICON)
-        end
-
-        control.statusIcon:Show()
     end
 
     local function TreeEntryOnSelected(control, skillLineData, selected, reselectingDuringRebuild)
         control:SetSelected(selected)
         if selected and not reselectingDuringRebuild then
             self:RefreshSkillLineInfo()
-            self:RefreshActionbarState()
-            skillLineData:ClearNew()
-            self.skillListRefreshGroup:MarkDirty("List")
-            self.skillListRefreshGroup:TryClean()
+            if skillLineData.isSubclassingNode == true then
+                TriggerTutorial(TUTORIAL_TRIGGER_SUBCLASSING_SYSTEM)
+                self.skillListRefreshGroup:MarkDirty("Visible")
+                self.subclassingPanel:Show()
+            else
+                self.subclassingPanel:Hide()
+                self:RefreshActionbarState()
+                skillLineData:ClearNew()
+                self.skillListRefreshGroup:MarkDirty("List")
+                self.skillListRefreshGroup:TryClean()
+            end
+            SKILLS_WINDOW:UpdateKeybinds()
         end
     end
 
-    skillLinesTree:AddTemplate("ZO_SkillsNavigationEntry", TreeEntrySetup, TreeEntryOnSelected)
+    local function TreeEqualityFunction(left, right)
+        if left.isSubclassingNode and right.isSubclassingNode then
+            return true
+        elseif left.GetId and right.GetId then
+            return left:GetId() == right:GetId()
+        end
+        return false
+    end
+
+    skillLinesTree:AddTemplate("ZO_SkillsNavigationEntry", TreeEntrySetup, TreeEntryOnSelected, TreeEqualityFunction)
 
     skillLinesTree:SetExclusive(true)
     skillLinesTree:SetOpenAnimation("ZO_TreeOpenAnimation")
@@ -539,6 +624,14 @@ function ZO_SkillsManager:InitializeSkillLineList()
     local skillLinesTreeRefreshGroup = ZO_OrderedRefreshGroup:New(ZO_ORDERED_REFRESH_GROUP_AUTO_CLEAN_PER_FRAME)
     skillLinesTreeRefreshGroup:AddDirtyState("List", function()
         self:RebuildSkillLineList()
+
+        local skillLineData = self:GetSelectedSkillLineData()
+        if skillLineData and skillLineData.isSubclassingNode then
+            local skillLineToSelect = self.subclassingPanel:GetAndClearSkillLineToSelect()
+            if skillLineToSelect then
+                self:BrowseToSkillLine(skillLineToSelect)
+            end
+        end
     end)
     skillLinesTreeRefreshGroup:AddDirtyState("Visible", function()
         skillLinesTree:RefreshVisible()
@@ -585,18 +678,53 @@ function ZO_SkillsManager:InitializeSkillList()
     self.skillList = skillList
 end
 
+function ZO_SkillsManager:InitializeSubclassing()
+    self.subclassingPanel = ZO_SkillsSubclassing_Keyboard:New(self.control:GetNamedChild("SubclassingPanel"), self)
+end
+
 function ZO_SkillsManager:InitializeKeybindDescriptors()
     self.keybindStripDescriptor =
     {
         alignment = KEYBIND_STRIP_ALIGN_CENTER,
-
+        {
+            name = function()
+                if isSubclassingMousedOver then
+                    return GetString(SI_SKILLS_SUBCLASSING_QUEST_GRANT_TEXT)
+                else
+                    return GetString(SI_SKILLS_SUBCLASSING_PREVIEW_ACTION)
+                end
+            end,
+            keybind = "UI_SHORTCUT_PRIMARY",
+            callback = function()
+                if isSubclassingMousedOver then
+                    BestowSubclassingQuest()
+                    self:UpdateKeybinds()
+                    ClearTooltip(InformationTooltip)
+                else
+                    self.subclassingPanel:ShowSkillsListView(self.subclassingPanel:GetMousedOverSkillLine())
+                    PlaySound(SOUNDS.SKILLS_SUBCLASSING_SKILL_LINE_SELECT)
+                end
+            end,
+            visible = function()
+                if isSubclassingMousedOver then
+                    if not HasAccessToSubclassing() then
+                        local achievementId = GetSubclassingAchievementId()
+                        if IsAchievementComplete(achievementId) then
+                            local questId = GetSubclassingQuestId()
+                            return not HasQuest(questId)
+                        end
+                    end
+                    return false
+                else
+                    return self.subclassingPanel:IsSkillLineMousedOver()
+                end
+            end
+        },
         {
             name = GetString(SI_SKILL_RESPEC_CONFIRM_KEYBIND),
-
             keybind = "UI_SHORTCUT_SECONDARY",
-
             callback = function()
-                if SKILL_POINT_ALLOCATION_MANAGER:DoPendingChangesIncurCost() then
+                if SKILLS_AND_ACTION_BAR_MANAGER:DoPendingChangesIncurCost() then
                     if SKILLS_AND_ACTION_BAR_MANAGER:GetSkillRespecPaymentType() == RESPEC_PAYMENT_TYPE_GOLD then
                         ZO_Dialogs_ShowDialog("SKILL_RESPEC_CONFIRM_GOLD_KEYBOARD")
                     else
@@ -606,28 +734,23 @@ function ZO_SkillsManager:InitializeKeybindDescriptors()
                     ZO_Dialogs_ShowDialog("SKILL_RESPEC_CONFIRM_FREE")
                 end
             end,
-
             visible = function()
                 return SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeBatchSave()
             end
         },
-
         {
             name = function()
                 return GetString("SI_SKILLPOINTALLOCATIONMODE_CLEARKEYBIND", SKILLS_AND_ACTION_BAR_MANAGER:GetSkillPointAllocationMode())
             end,
-
             keybind = "UI_SHORTCUT_NEGATIVE",
-
             callback = function()
                 ZO_Dialogs_ShowDialog("SKILL_RESPEC_CONFIRM_CLEAR_ALL_KEYBOARD", self.skillLinesTree:GetSelectedData())
             end,
-
             visible = function()
-                return SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeAllowDecrease()
+                local selectedData = self.skillLinesTree:GetSelectedData()
+                return not selectedData.isSubclassingNode and SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeAllowClear()
             end
         },
-
         {
             name = function()
                 local collectibleData = SCRIBING_DATA_MANAGER:GetScribingPurchasableCollectibleData()
@@ -637,27 +760,22 @@ function ZO_SkillsManager:InitializeKeybindDescriptors()
                     return GetString(SI_GAMEPAD_DLC_BOOK_ACTION_OPEN_CROWN_STORE)
                 end
             end,
-
             keybind = "UI_SHORTCUT_TERTIARY",
-
             callback = function()
                 local collectibleData = SCRIBING_DATA_MANAGER:GetScribingPurchasableCollectibleData()
                 if collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_CHAPTER) then
-                    ZO_ShowChapterUpgradePlatformScreen(MARKET_OPEN_OPERATION_COLLECTIONS_DLC)
+                    ZO_ShowChapterUpgradePlatformScreen(MARKET_OPEN_OPERATION_SKILLS_SCRIBING_LIBRARY)
                 else
                     local searchTerm = zo_strformat(SI_CROWN_STORE_SEARCH_FORMAT_STRING, collectibleData:GetName())
-                    ShowMarketAndSearch(searchTerm, MARKET_OPEN_OPERATION_COLLECTIONS_DLC)
+                    ShowMarketAndSearch(searchTerm, MARKET_OPEN_OPERATION_SKILLS_SCRIBING_LIBRARY)
                 end
             end,
-
             visible = function()
-                return not SCRIBING_DATA_MANAGER:IsScribingUnlocked()
+                return not SCRIBING_DATA_MANAGER:IsScribingUnlocked() and self.scribingLibraryTab_isMousedOver
             end
         },
-
         {
             alignment = KEYBIND_STRIP_ALIGN_LEFT,
-
             name = function()
                 if self.showAdvisorInAdvancedMode then
                     return GetString(SI_CLOSE_SKILLS_ADVISOR_KEYBIND)
@@ -665,17 +783,51 @@ function ZO_SkillsManager:InitializeKeybindDescriptors()
                     return GetString(SI_OPEN_SKILLS_ADVISOR_KEYBIND)
                 end
             end,
-
             keybind = "UI_SHORTCUT_QUATERNARY",
-
             callback = function()
                 self.showAdvisorInAdvancedMode = not self.showAdvisorInAdvancedMode
                 self:UpdateSkillsAdvisorVisibility()
             end,
-
             visible = function()
                 return ZO_SKILLS_ADVISOR_SINGLETON:IsAdvancedModeSelected()
             end
+        },
+        {
+            name = GetString(SI_SKILLS_SUBCLASSING_MORE_INFO_KEYBIND),
+            -- TODO Subclassing: Make new keybind shortcut UI_SHORTCUT_MORE_INFO
+            keybind = "UI_SHORTCUT_REPORT_PLAYER",
+            callback = function()
+                local helpCategoryIndex, helpIndex = GetSubclassingHelpIndices()
+                HELP:ShowSpecificHelp(helpCategoryIndex, helpIndex)
+            end,
+            visible = function()
+                if isSubclassingMousedOver then
+                    local helpCategoryIndex, helpIndex = GetSubclassingHelpIndices()
+                    return helpCategoryIndex ~= nil
+                end
+            end,
+        },
+        -- Exit/Back
+        {
+            name = function()
+                local selectedData = self.skillLinesTree:GetSelectedData()
+                if selectedData.isSubclassingNode and self.skillLinesContainer:IsHidden() then
+                    return GetString(SI_SKILLS_SUBCLASSING_EXIT_PREVIEW_ACTION)
+                else
+                    return GetString(SI_EXIT_BUTTON)
+                end
+            end,
+            keybind = "UI_SHORTCUT_EXIT",
+            alignment = KEYBIND_STRIP_ALIGN_RIGHT,
+            callback = function()
+                local selectedData = self.skillLinesTree:GetSelectedData()
+                if selectedData.isSubclassingNode and self.skillLinesContainer:IsHidden() then
+                    self.subclassingPanel:MarkRefreshGroupDirty("ResetToClassSkillLines")
+                    PlaySound(SOUNDS.SKILLS_SUBCLASSING_SKILL_LINE_BACK)
+                else
+                    SCENE_MANAGER:HideCurrentScene()
+                end
+            end,
         },
     }
 end
@@ -739,7 +891,7 @@ function ZO_SkillsManager:RegisterForEvents()
 
     local function OnSelectedSkillBuildUpdated()
         self.showAdvisorInAdvancedMode = false
-        self:UpdateSkillsAdvisorVisibility() 
+        self:UpdateSkillsAdvisorVisibility()
         self.skillListRefreshGroup:MarkDirty("Visible")
     end
 
@@ -821,6 +973,33 @@ function ZO_SkillsManager:RegisterForEvents()
     end
 
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", OnCollectionUpdated)
+
+    local function OnSkillLineRespecUpdate()
+        self.skillLinesTreeRefreshGroup:MarkDirty("List")
+    end
+
+    SKILL_LINE_ASSIGNMENT_MANAGER:RegisterCallback("SkillLineRespecUpdate", OnSkillLineRespecUpdate)
+
+    local function OnQuestsChanged()
+        self.skillLinesTreeRefreshGroup:MarkDirty("Visible")
+    end
+
+    control:RegisterForEvent(EVENT_QUEST_ADDED, OnQuestsChanged)
+    control:RegisterForEvent(EVENT_QUEST_REMOVED, OnQuestsChanged)
+end
+
+function ZO_SkillsManager:OnScribingLibraryTabMouseEnter()
+    self.scribingLibraryTab_isMousedOver = true
+    SKILLS_WINDOW:UpdateKeybinds()
+end
+
+function ZO_SkillsManager:OnScribingLibraryTabMouseExit()
+    self.scribingLibraryTab_isMousedOver = false
+    SKILLS_WINDOW:UpdateKeybinds()
+end
+
+function ZO_SkillsManager:SetSkillLinesHidden(isHidden)
+    self.skillLinesContainer:SetHidden(isHidden)
 end
 
 function ZO_SkillsManager:GetSelectedSkillLineData()
@@ -854,7 +1033,7 @@ end
 
 function ZO_SkillsManager:IsSkillsAdvisorShown()
     return not ZO_SKILLS_ADVISOR_SINGLETON:IsAdvancedModeSelected() or self.showAdvisorInAdvancedMode
-end 
+end
 
 function ZO_SkillsManager:StopSelectedSkillBuildSkillAnimations()
     if self.selectedSkillBuildIconTimeline and self.selectedSkillBuildIconTimeline:IsPlaying() then
@@ -963,7 +1142,7 @@ function ZO_SkillsManager:PlaySelectedSkillBuildSkillAnimations(abilityControl)
             end
             increaseAnimationObject:SetAnimatedControl(abilityIncreaseAnimTexture)
             increaseAnimationLoopObject:SetAnimatedControl(abilityIncreaseAnimTexture)
-                
+
             local function OnStopIncrease(_, completedPlaying)
                 abilityIncreaseAnimTexture:SetTexture(increaseTextureLoop)
                 if completedPlaying then
@@ -988,6 +1167,15 @@ end
 
 function ZO_SkillsManager:BrowseToSkill(scrollToSkillData)
     local skillLineData = scrollToSkillData:GetSkillLineData()
+    self:BrowseToSkillLineAndSkill(skillLineData, scrollToSkillData)
+end
+
+function ZO_SkillsManager:BrowseToSkillLine(skillLineData)
+    self:BrowseToSkillLineAndSkill(skillLineData, nil)
+end
+
+function ZO_SkillsManager:BrowseToSkillLineAndSkill(skillLineData, scrollToSkillData)
+    self:SetSkillLinesHidden(false)
     -- Set skillLinesTree to category containing skill and refresh skillList
     local selectedData = self:GetSelectedSkillLineData()
     if selectedData ~= skillLineData then
@@ -1037,7 +1225,7 @@ end
 
 function ZO_SkillsManager:RefreshSkillLineInfo(forceInit)
     local skillLineData = self:GetSelectedSkillLineData()
-    if skillLineData then
+    if skillLineData and not skillLineData.isSubclassingNode then
         self.skillInfo:SetHidden(false)
         ZO_SkillLineInfo_Keyboard_Refresh(self.skillInfo, skillLineData, forceInit)
     else
@@ -1085,18 +1273,30 @@ do
 end
 
 function ZO_SkillsManager:RefreshSkillLineDisplay(skillLineData)
-    if not skillLineData:IsAvailable() and skillLineData:IsAdvised() then
-        self:StopSelectedSkillBuildSkillAnimations()
-        self.advisedOverlay:Show(skillLineData)
-        self.skillList:SetAlpha(0.1)
+    if skillLineData.isSubclassingNode then
+        self.skillList:SetHidden(true)
     else
-        self.advisedOverlay:Hide()
-        self.skillList:SetAlpha(1)
-    end 
+        self.skillList:SetHidden(false)
+        if not skillLineData:IsAvailable() and skillLineData:IsAdvised() then
+            self:StopSelectedSkillBuildSkillAnimations()
+            self.advisedOverlay:Show(skillLineData)
+            self.skillList:SetAlpha(0.1)
+        else
+            self.advisedOverlay:Hide()
+            self.skillList:SetAlpha(1)
+        end
+    end
 end
 
 function ZO_SkillsManager:RefreshActionbarState()
     ACTION_BAR_ASSIGNMENT_MANAGER:UpdateWerewolfBarStateInCycle(self:GetSelectedSkillLineData())
+end
+
+function ZO_SkillsManager:SelectEntryByAllocationMode()
+    local allocationMode = SKILLS_AND_ACTION_BAR_MANAGER:GetSkillPointAllocationMode()
+    if allocationMode == SKILL_POINT_ALLOCATION_MODE_SUBCLASS_ONLY then
+        self.selectSubclassing = true
+    end
 end
 
 do
@@ -1107,6 +1307,7 @@ do
     function ZO_SkillsManager:RebuildSkillLineList()
         self.skillLinesTree:Reset()
         ZO_ClearTable(self.skillLineIdToNode)
+        local nodeToSelect = nil
         for _, skillTypeData in SKILLS_DATA_MANAGER:SkillTypeIterator() do
             local parent
             for _, skillLineData in skillTypeData:SkillLineIterator(SKILL_LINE_FILTERS) do
@@ -1116,14 +1317,30 @@ do
                 local node = self.skillLinesTree:AddNode("ZO_SkillsNavigationEntry", skillLineData, parent)
                 self.skillLineIdToNode[skillLineData:GetId()] = node
             end
+            if skillTypeData.skillType == SKILL_TYPE_CLASS then
+                local subclassingData =
+                {
+                    isSubclassingNode = true
+                }
+                local node = self.skillLinesTree:AddNode("ZO_SkillsNavigationEntry", subclassingData, parent)
+                if self.selectSubclassing then
+                    nodeToSelect = node
+                    self.selectSubclassing = false
+                end
+            end
         end
 
-        self.skillLinesTree:Commit()
+        self.skillLinesTree:Commit(nodeToSelect)
 
+        local selectedData = self.skillLinesTree:GetSelectedData()
         local FORCE_INIT = true
         self:RefreshSkillLineInfo(FORCE_INIT)
         self:RefreshSkillPointInfo()
-        self.skillListRefreshGroup:MarkDirty("List")
+        if selectedData.isSubclassingNode then
+            self.skillListRefreshGroup:MarkDirty("Visible")
+        else
+            self.skillListRefreshGroup:MarkDirty("List")
+        end
         self.skillListRefreshGroup:TryClean()
 
         if self.selectSkillDataOnRefresh ~= nil then
@@ -1139,6 +1356,7 @@ function ZO_SkillsManager:OnShown()
     self.skillLinesTreeRefreshGroup:TryClean()
     self.skillListRefreshGroup:TryClean()
 
+    KEYBIND_STRIP:RemoveDefaultExit()
     KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
 
     self:UpdateSkillsAdvisorVisibility()
@@ -1149,11 +1367,14 @@ function ZO_SkillsManager:OnShown()
     if level >= GetWeaponSwapUnlockedLevel() then
         TriggerTutorial(TUTORIAL_TRIGGER_WEAPON_SWAP_SHOWN_IN_SKILLS_AFTER_UNLOCK_POINTER_BOX)
     end
+
+    HandleReturningPlayerUISystemShown(UI_SYSTEM_SKILLS)
 end
 
 function ZO_SkillsManager:OnHidden()
     self:StopSelectedSkillBuildSkillAnimations()
     KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
+    KEYBIND_STRIP:RestoreDefaultExit()
     SKILLS_AND_ACTION_BAR_MANAGER:ResetInterface()
     ACTION_BAR_ASSIGNMENT_MANAGER:CancelPendingWeaponSwap()
 end

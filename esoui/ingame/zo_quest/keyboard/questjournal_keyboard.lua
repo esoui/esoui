@@ -26,9 +26,10 @@ function ZO_QuestJournal_Keyboard:Initialize(control)
     self.optionalStepTextLabel = control:GetNamedChild("OptionalStepTextLabel")
     self.questInfoContainer = control:GetNamedChild("QuestInfoContainer")
     self.questStepContainer = control:GetNamedChild("QuestStepContainer")
+    self.showOnMapKeybindButton = control:GetNamedChild("ShowOnMap")
 
     ZO_QuestJournal_Shared.Initialize(self, control)
-            
+
     --Quest tracker depends on this data for finding the next quest to focus.
     self:RefreshQuestList()
 end
@@ -150,6 +151,27 @@ function ZO_QuestJournal_Keyboard:InitializeQuestList()
 end
 
 function ZO_QuestJournal_Keyboard:InitializeKeybindStripDescriptors()
+    self.showOnMapDescriptor =
+    {
+        name = GetString(SI_QUEST_JOURNAL_SHOW_ON_MAP),
+        keybind = "UI_SHORTCUT_SHOW_QUEST_ON_MAP",
+        ethereal = true,
+        callback = function()
+            local selectedQuestIndex = self:GetSelectedQuestIndex()
+            self:ShowOnMap(selectedQuestIndex)
+        end,
+        visible = function()
+            local selectedQuestIndex = self:GetSelectedQuestIndex()
+            if selectedQuestIndex then
+                return true
+            end
+            return false
+        end
+    }
+
+    ApplyTemplateToControl(self.showOnMapKeybindButton, "ZO_KeybindButton_Keyboard_Template")
+    self.showOnMapKeybindButton:SetKeybindButtonDescriptor(self.showOnMapDescriptor)
+
     self.keybindStripDescriptor =
     {
         alignment = KEYBIND_STRIP_ALIGN_CENTER,
@@ -158,36 +180,13 @@ function ZO_QuestJournal_Keyboard:InitializeKeybindStripDescriptors()
         {
             name = GetString(SI_QUEST_JOURNAL_CYCLE_FOCUSED_QUEST),
             keybind = "UI_SHORTCUT_QUATERNARY",
-
             callback = function()
                 local IGNORE_SCENE_RESTRICTION = true
                 FOCUSED_QUEST_TRACKER:AssistNext(IGNORE_SCENE_RESTRICTION)
                 self:FocusQuestWithIndex(QUEST_JOURNAL_MANAGER:GetFocusedQuestIndex())
             end,
-
             visible = function()
                 return GetNumJournalQuests() >= 2
-            end
-        },
-
-        -- Show On Map
-        {
-            name = GetString(SI_QUEST_JOURNAL_SHOW_ON_MAP),
-            keybind = "UI_SHORTCUT_SHOW_QUEST_ON_MAP",
-
-            callback = function()
-                local selectedQuestIndex = self:GetSelectedQuestIndex()
-                if(selectedQuestIndex) then
-                    self:ShowOnMap(selectedQuestIndex)
-                end
-            end,
-
-            visible = function()
-                local selectedQuestIndex = self:GetSelectedQuestIndex()
-                if(selectedQuestIndex) then
-                    return true
-                end
-                return false
             end
         },
 
@@ -195,14 +194,12 @@ function ZO_QuestJournal_Keyboard:InitializeKeybindStripDescriptors()
         {
             name = GetString(SI_QUEST_JOURNAL_SHARE),
             keybind = "UI_SHORTCUT_TERTIARY",
-
             callback = function()
                 local selectedQuestIndex = self:GetSelectedQuestIndex()
-                if(selectedQuestIndex) then
+                if selectedQuestIndex then
                     QUEST_JOURNAL_MANAGER:ShareQuest(selectedQuestIndex)
                 end
             end,
-
             visible = function()
                 return self:CanShareQuest()
             end
@@ -212,18 +209,18 @@ function ZO_QuestJournal_Keyboard:InitializeKeybindStripDescriptors()
         {
             name = GetString(SI_QUEST_JOURNAL_ABANDON),
             keybind = "UI_SHORTCUT_NEGATIVE",
-
             callback = function()
                 local selectedData = self.navigationTree:GetSelectedData()
-                if(selectedData and selectedData.questIndex) then
+                if selectedData and selectedData.questIndex then
                     QUEST_JOURNAL_MANAGER:ConfirmAbandonQuest(selectedData.questIndex)
                 end
             end,
-
             visible = function()
                 return self:CanAbandonQuest()
             end
         },
+
+        self.showOnMapDescriptor,
     }
 end
 
@@ -329,6 +326,7 @@ local NON_EMPTY_LIST_Y_OFFSET = 10
 
 function ZO_QuestJournal_Keyboard:RefreshDetails()
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+    self.showOnMapKeybindButton:UpdateVisibility()
 
     local questData = self:GetSelectedQuestData()
     if not questData then
@@ -453,7 +451,7 @@ function ZO_QuestJournalNavigationEntry_OnMouseUp(label, button, upInside)
                 AddMenuItem(GetString(SI_QUEST_JOURNAL_SHARE), function() QUEST_JOURNAL_MANAGER:ShareQuest(questIndex) end)
             end
 
-            if(node.data.questType ~= QUEST_TYPE_MAIN_STORY) then
+            if(node.data.canAbandon) then
                 AddMenuItem(GetString(SI_QUEST_JOURNAL_ABANDON), function() QUEST_JOURNAL_MANAGER:ConfirmAbandonQuest(questIndex) end)
             end
 

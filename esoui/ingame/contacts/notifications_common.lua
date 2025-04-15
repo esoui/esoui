@@ -1725,6 +1725,73 @@ function ZO_DisabledAddonsProvider:Decline(data)
     self.notificationManager:RefreshNotificationList()
 end
 
+-- Console Addons Memory Limit Provider
+---------------------------------------
+
+ZO_ConsoleAddonsMemoryLimitProvider = ZO_NotificationProvider:Subclass()
+
+function ZO_ConsoleAddonsMemoryLimitProvider:New(notificationManager)
+    local provider = ZO_NotificationProvider.New(self, notificationManager)
+
+    provider:RegisterUpdateEvent(EVENT_CONSOLE_ADD_ONS_MEMORY_LIMIT_REACHED)
+
+    return provider
+end
+
+function ZO_ConsoleAddonsMemoryLimitProvider:BuildNotificationList()
+    ZO_ClearNumericallyIndexedTable(self.list)
+
+    if ShouldWarnConsoleAddOnMemoryLimit() then
+        local addonMemoryLimitMB = GetTotalUserAddOnMemoryPoolCapacityMB()
+        table.insert(self.list,
+        {
+            dataType = NOTIFICATIONS_ALERT_DATA,
+            notificationType = NOTIFICATION_TYPE_CONSOLE_ADDON_MEMORY_LIMIT_REACHED,
+            shortDisplayText = GetString("SI_NOTIFICATIONTYPE", NOTIFICATION_TYPE_CONSOLE_ADDON_MEMORY_LIMIT_REACHED),
+            message = zo_strformat(SI_NOTIFICATIONS_CONSOLE_ADDONS_MEMORY_LIMIT_REACHED_MESSAGE, addonMemoryLimitMB),
+            secsSinceRequest = ZO_NormalizeSecondsSince(0),
+        })
+    end
+end
+
+function ZO_ConsoleAddonsMemoryLimitProvider:Decline(data)
+    ClearWarnConsoleAddOnMemoryLimit()
+    self.notificationManager:RefreshNotificationList()
+end
+
+-- Console Addons Saved Variable Limit Provider
+-----------------------------------------------
+
+ZO_ConsoleAddonsSavedVariableLimitProvider = ZO_NotificationProvider:Subclass()
+
+function ZO_ConsoleAddonsSavedVariableLimitProvider:New(notificationManager)
+    local provider = ZO_NotificationProvider.New(self, notificationManager)
+
+    provider:RegisterUpdateEvent(EVENT_CONSOLE_ADD_ONS_SAVED_VARIABLES_LIMIT_REACHED)
+
+    return provider
+end
+
+function ZO_ConsoleAddonsSavedVariableLimitProvider:BuildNotificationList()
+    ZO_ClearNumericallyIndexedTable(self.list)
+
+    if ShouldWarnConsoleAddOnSavedVariableLimit() then
+        table.insert(self.list,
+        {
+            dataType = NOTIFICATIONS_ALERT_DATA,
+            notificationType = NOTIFICATION_TYPE_CONSOLE_ADDON_SAVED_VARIABLES_LIMIT_REACHED,
+            shortDisplayText = GetString("SI_NOTIFICATIONTYPE", NOTIFICATION_TYPE_CONSOLE_ADDON_SAVED_VARIABLES_LIMIT_REACHED),
+            message = GetString(SI_NOTIFICATIONS_CONSOLE_ADDONS_SAVED_VARIABLES_LIMIT_REACHED_MESSAGE),
+            secsSinceRequest = ZO_NormalizeSecondsSince(0),
+        })
+    end
+end
+
+function ZO_ConsoleAddonsSavedVariableLimitProvider:Decline(data)
+    ClearWarnConsoleAddOnSavedVariableLimit()
+    self.notificationManager:RefreshNotificationList()
+end
+
 -- Tribute Invite Provider
 ------------------------------
 

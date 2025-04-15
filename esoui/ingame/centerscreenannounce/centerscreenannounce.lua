@@ -1407,7 +1407,7 @@ do
     }
 
     -- Per Design, Announcement screen trumps all CSAs... but that could change.
-    local ALLOWED_TYPES_DURING_MARKET_ANNOUNCEMENT =
+    local ALLOWED_TYPES_WHILE_SHOWING_ANNOUNCEMENT =
     {
     }
 
@@ -1436,7 +1436,8 @@ do
             return false
         end
 
-        if SCENE_MANAGER:IsShowing("marketAnnouncement") and not ALLOWED_TYPES_DURING_MARKET_ANNOUNCEMENT[csaType] then
+        if ZO_UI_SYSTEM_MANAGER:IsShowingAnnouncement()
+                and not ALLOWED_TYPES_WHILE_SHOWING_ANNOUNCEMENT[csaType] then
             return false
         end
 
@@ -2091,11 +2092,10 @@ do
         [CENTER_SCREEN_ANNOUNCE_TYPE_TIMED_ACTIVITY_COMPLETED] = true,
         [CENTER_SCREEN_ANNOUNCE_TYPE_TRIBUTE_CLUB_RANK_CHANGED] = true,
     }
-    
-    -- Per Design, MarketAnnouncment defaults to queuing everything.
-    -- Types that if they were to happen while showing Announcements
-    -- will be discarded and not queued.
-    local BLOCKED_QUEUE_TYPES_WHILE_IN_MARKET_ANNOUNCEMENT =
+
+    -- Announcements currently default to queuing everything.
+    -- Types that will be discarded while showing announcements and not queued.
+    local BLOCKED_QUEUE_TYPES_WHILE_SHOWING_ANNOUNCEMENT =
     {
     }
     
@@ -2145,9 +2145,9 @@ do
                 return
             end
 
-            if SCENE_MANAGER:IsShowing("marketAnnouncement") then
-                -- Market announcement defaults to queueing everything and blocking only named items.
-                if BLOCKED_QUEUE_TYPES_WHILE_IN_MARKET_ANNOUNCEMENT[csaType] then
+            -- prevent unwanted announcements from queuing while we're showing an announcement screen
+            if ZO_UI_SYSTEM_MANAGER:IsShowingAnnouncement() then
+                if BLOCKED_QUEUE_TYPES_WHILE_SHOWING_ANNOUNCEMENT[csaType] then
                     self.messageParamsPool:ReleaseObject(messageParams.key)
                     return
                 end

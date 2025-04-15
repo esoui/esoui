@@ -97,11 +97,7 @@ function ZO_HUDTelvarMeter:SetHiddenForReason(reason, hidden)
 end
 
 function ZO_HUDTelvarMeter:OnTelvarStonesUpdated(event, newTelvarStones, oldTelvarStones, reason)
-    if reason == CURRENCY_CHANGE_REASON_LOOT or reason == CURRENCY_CHANGE_REASON_PVP_KILL_TRANSFER and newTelvarStones > oldTelvarStones then
-        PlaySound(SOUNDS.TELVAR_GAINED)
-    end
-
-    if(DoesCurrentZoneHaveTelvarStoneBehavior()) then
+    if DoesCurrentZoneHaveTelvarStoneBehavior() then
         ZO_CurrencyControl_SetSimpleCurrency(self.telvarDisplayControl, CURT_TELVAR_STONES, GetCurrencyAmount(CURT_TELVAR_STONES, CURRENCY_LOCATION_CHARACTER), IsInGamepadPreferredMode() and self.gamepadStyle.currencyOptions or self.keyboardStyle.currencyOptions, CURRENCY_SHOW_ALL) 
 
         self:UpdateMeterBar()

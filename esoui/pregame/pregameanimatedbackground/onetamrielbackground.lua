@@ -79,6 +79,9 @@ function OneTamrielBackground:Initialize(control)
             self:Stop()
         end
     end)
+    PREGAME_ANIMATED_BACKGROUND_FRAGMENT:SetConditional(function()
+        return not IsPreloginWorldEnabled()
+    end)
 
     control:SetHandler("OnUpdate", function(_, timeS) self:OnUpdate(timeS) end)
     control:RegisterForEvent(EVENT_SCREEN_RESIZED, function() self:OnScreenResized() end)

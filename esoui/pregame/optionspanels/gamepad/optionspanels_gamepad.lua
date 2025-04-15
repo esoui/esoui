@@ -24,6 +24,11 @@ GAMEPAD_SETTINGS_DATA =
         {
             panel = SETTING_PANEL_CAMERA,
             system = SETTING_TYPE_GAMEPAD,
+            settingId = GAMEPAD_SETTING_INVERT_X,
+        },
+        {
+            panel = SETTING_PANEL_CAMERA,
+            system = SETTING_TYPE_GAMEPAD,
             settingId = GAMEPAD_SETTING_CAMERA_SENSITIVITY,
         },
     },
@@ -33,6 +38,31 @@ GAMEPAD_SETTINGS_DATA =
             panel = SETTING_PANEL_GAMEPLAY,
             system = SETTING_TYPE_GAMEPAD,
             settingId = GAMEPAD_SETTING_VIBRATION,
+        },
+        {
+            panel = SETTING_PANEL_GAMEPLAY,
+            system = SETTING_TYPE_GAMEPAD,
+            settingId = GAMEPAD_SETTING_DEADZONE_INNER_RIGHT_STICK,
+        },
+        {
+            panel = SETTING_PANEL_GAMEPLAY,
+            system = SETTING_TYPE_GAMEPAD,
+            settingId = GAMEPAD_SETTING_DEADZONE_OUTER_RIGHT_STICK,
+        },
+        {
+            panel = SETTING_PANEL_GAMEPLAY,
+            system = SETTING_TYPE_GAMEPAD,
+            settingId = GAMEPAD_SETTING_DEADZONE_INNER_LEFT_STICK,
+        },
+        {
+            panel = SETTING_PANEL_GAMEPLAY,
+            system = SETTING_TYPE_GAMEPAD,
+            settingId = GAMEPAD_SETTING_DEADZONE_OUTER_LEFT_STICK,
+        },
+        {
+            panel = SETTING_PANEL_GAMEPLAY,
+            system = SETTING_TYPE_GAMEPAD,
+            settingId = GAMEPAD_SETTING_DEADZONE_TRIGGERS,
         },
     },
     [SETTING_PANEL_INTERFACE] =

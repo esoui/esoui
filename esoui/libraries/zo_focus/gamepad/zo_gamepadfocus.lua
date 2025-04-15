@@ -31,13 +31,7 @@ local function GamepadListPlaySound(movementType)
     end
 end
 
-ZO_GamepadFocus = ZO_Object:Subclass()
-
-function ZO_GamepadFocus:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
+ZO_GamepadFocus = ZO_InitializingCallbackObject:Subclass()
 
 --[[
     Initializes a GamepadFocus with an optional movementController or direction.

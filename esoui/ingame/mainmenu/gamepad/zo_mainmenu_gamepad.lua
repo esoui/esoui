@@ -5,22 +5,23 @@ ZO_MENU_ENTRIES = {}
 
 ZO_MENU_MAIN_ENTRIES =
 {
-    CROWN_STORE     = 1,
-    ANNOUNCEMENTS   = 2,
-    NOTIFICATIONS   = 3,
-    COLLECTIONS     = 4,
-    INVENTORY       = 5,
-    CHARACTER       = 6,
-    SKILLS          = 7,
-    CHAMPION        = 8,
-    CAMPAIGN        = 9,
-    JOURNAL         = 10,
-    SOCIAL          = 11,
-    ACTIVITY_FINDER = 12,
-    HELP            = 13,
-    OPTIONS         = 14,
-    QUIT            = 15,
-    LOG_OUT         = 16,
+    CROWN_STORE                     = 1,
+    ANNOUNCEMENTS                   = 2,
+    RETURNING_PLAYER_ANNOUNCEMENTS  = 3,
+    NOTIFICATIONS                   = 4,
+    COLLECTIONS                     = 5,
+    INVENTORY                       = 6,
+    CHARACTER                       = 7,
+    SKILLS                          = 8,
+    CHAMPION                        = 9,
+    CAMPAIGN                        = 10,
+    JOURNAL                         = 11,
+    SOCIAL                          = 12,
+    ACTIVITY_FINDER                 = 13,
+    HELP                            = 14,
+    OPTIONS                         = 15,
+    QUIT                            = 16,
+    LOG_OUT                         = 17,
 }
 
 local MENU_MAIN_ENTRIES = ZO_MENU_MAIN_ENTRIES
@@ -31,10 +32,11 @@ local MENU_CROWN_STORE_ENTRIES =
     EXPIRING_MARKET_CURRENCY    = 2,
     ENDEAVOR_SEAL_STORE         = 3,
     DAILY_LOGIN_REWARDS         = 4,
-    CROWN_CRATES                = 5,
-    CHAPTERS                    = 6,
-    GIFT_INVENTORY              = 7,
-    REDEEM_CODE                 = 8,
+    RETURNING_PLAYER_REWARDS    = 5,
+    CROWN_CRATES                = 6,
+    CHAPTERS                    = 7,
+    GIFT_INVENTORY              = 8,
+    REDEEM_CODE                 = 9,
 }
 
 ZO_MENU_CROWN_STORE_ENTRIES = MENU_CROWN_STORE_ENTRIES
@@ -145,6 +147,36 @@ local MENU_ENTRY_DATA =
                     return GetDailyLoginClaimableRewardIndex() ~= nil
                 end,
             },
+            [MENU_CROWN_STORE_ENTRIES.RETURNING_PLAYER_REWARDS] =
+            {
+                name = function()
+                    local campaignDisplayName = RETURNING_PLAYER_MANAGER:GetIntroCampaignDisplayName()
+                    return zo_strformat(SI_RETURNING_PLAYER_CAMPAIGN_NAME_FORMATTER, campaignDisplayName)
+                end,
+                overrideNameColors = function()
+                    return ZO_PROMOTIONAL_EVENT_SELECTED_COLOR, ZO_PROMOTIONAL_EVENT_UNSELECTED_COLOR
+                end,
+                icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_returningPlayerRewards.dds",
+                overrideIconTintColors = function()
+                    return ZO_PROMOTIONAL_EVENT_SELECTED_COLOR, ZO_PROMOTIONAL_EVENT_UNSELECTED_COLOR
+                end,
+                isVisibleCallback = IsReturningPlayer,
+                isNewCallback = function()
+                    return true  -- TODO Welcome Back: hide new when you've seen it once in a sessions
+                end,
+                onSelectedCallback = function()
+                    local campaignDisplayName = RETURNING_PLAYER_MANAGER:GetColorizedIntroCampaignDisplayName()
+                    local descriptionText = zo_strformat(SI_RETURNING_PLAYER_DAILY_LOGIN_REWARD_DESCRIPTION, campaignDisplayName)
+
+                    GAMEPAD_TOOLTIPS:LayoutTitleAndDescriptionTooltip(GAMEPAD_LEFT_TOOLTIP, campaignDisplayName, descriptionText)
+                end,
+                onUnselectedCallback = function()
+                    GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
+                end,
+                activatedCallback = function()
+                    SCENE_MANAGER:Show(RETURNING_PLAYER_REWARD_SCENE_GAMEPAD:GetName())
+                end,
+            },
             [MENU_CROWN_STORE_ENTRIES.CROWN_CRATES] =
             {
                 scene = "crownCrateGamepad",
@@ -200,6 +232,27 @@ local MENU_ENTRY_DATA =
             SCENE_MANAGER:Show("marketAnnouncement")
             RequestMarketAnnouncement()
         end,
+        isVisibleCallback = function()
+            return not IsReturningPlayer()
+        end,
+    },
+    [MENU_MAIN_ENTRIES.RETURNING_PLAYER_ANNOUNCEMENTS] =
+    {
+        name = function()
+            local campaignDisplayName = RETURNING_PLAYER_MANAGER:GetIntroCampaignDisplayName()
+            return zo_strformat(SI_RETURNING_PLAYER_CAMPAIGN_NAME_FORMATTER, campaignDisplayName)
+        end,
+        overrideNameColors = function()
+            return ZO_PROMOTIONAL_EVENT_SELECTED_COLOR, ZO_PROMOTIONAL_EVENT_UNSELECTED_COLOR
+        end,
+        icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_returningPlayerRewards.dds",
+        overrideIconTintColors = function()
+            return ZO_PROMOTIONAL_EVENT_SELECTED_COLOR, ZO_PROMOTIONAL_EVENT_UNSELECTED_COLOR
+        end,
+        activatedCallback = function()
+            RETURNING_PLAYER_MANAGER:ShowReturningPlayerAnnouncementScreen()
+        end,
+        isVisibleCallback = IsReturningPlayer,
     },
     [MENU_MAIN_ENTRIES.NOTIFICATIONS] =
     {
@@ -457,8 +510,17 @@ local MENU_ENTRY_DATA =
     {
         scene = ZO_GAMEPAD_ACTIVITY_FINDER_ROOT_SCENE_NAME,
         name = GetString(SI_MAIN_MENU_ACTIVITY_FINDER),
+        overrideNameColors = function()
+            if PROMOTIONAL_EVENT_MANAGER:HasAnyUnclaimedRewards() then
+                return ZO_PROMOTIONAL_EVENT_SELECTED_COLOR, ZO_PROMOTIONAL_EVENT_UNSELECTED_COLOR
+            end
+        end,
         icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_activityFinder.dds",
-        isActivityFinder = true,
+        overrideIconTintColors = function()
+            if PROMOTIONAL_EVENT_MANAGER:HasAnyUnclaimedRewards() then
+                return ZO_PROMOTIONAL_EVENT_SELECTED_COLOR, ZO_PROMOTIONAL_EVENT_UNSELECTED_COLOR
+            end
+        end,
         isNewCallback = function()
             if GROUP_FINDER_APPLICATIONS_LIST_MANAGER:HasNewApplication() or
                PROMOTIONAL_EVENT_MANAGER:DoesAnyCampaignHaveCallout() then
@@ -659,13 +721,26 @@ end
 
 do
     local function NewMenuEntrySetup(control, data, selected, reselectingDuringRebuild, enabled, active)
-        if data.data.isActivityFinder and PROMOTIONAL_EVENT_MANAGER:HasActiveCampaign() and not IsPromotionalEventSystemLocked() then
-            data:SetNameColors(ZO_PROMOTIONAL_EVENT_SELECTED_COLOR, ZO_PROMOTIONAL_EVENT_UNSELECTED_COLOR)
-            data:SetIconTint(ZO_PROMOTIONAL_EVENT_SELECTED_COLOR, ZO_PROMOTIONAL_EVENT_UNSELECTED_COLOR)
-        else
-            data:SetNameColors(ZO_GAMEPAD_SELECTED_COLOR, ZO_GAMEPAD_UNSELECTED_COLOR)
-            data:SetIconTint(ZO_GAMEPAD_SELECTED_COLOR, ZO_GAMEPAD_UNSELECTED_COLOR)
+        local menuEntryData = data.data
+
+        local nameSelectedColor
+        local nameUnselectedColor
+        if menuEntryData.overrideNameColors then
+            nameSelectedColor, nameUnselectedColor = menuEntryData.overrideNameColors()
         end
+        nameSelectedColor = nameSelectedColor or ZO_GAMEPAD_SELECTED_COLOR
+        nameUnselectedColor = nameUnselectedColor or ZO_GAMEPAD_UNSELECTED_COLOR
+
+        local iconTintSelectedColor
+        local iconTintUnselectedColor
+        if menuEntryData.overrideIconTintColors then
+            iconTintSelectedColor, iconTintUnselectedColor = menuEntryData.overrideIconTintColors()
+        end
+        iconTintSelectedColor = iconTintSelectedColor or ZO_GAMEPAD_SELECTED_COLOR
+        iconTintUnselectedColor = iconTintUnselectedColor or ZO_GAMEPAD_UNSELECTED_COLOR
+
+        data:SetNameColors(nameSelectedColor, nameUnselectedColor)
+        data:SetIconTint(iconTintSelectedColor, iconTintUnselectedColor)
 
         ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
     end
@@ -679,9 +754,9 @@ do
             local animatingControl = control.label
             local animatingControlTimeline = animatingControl.animationTimeline
             local isAnimating = animatingControlTimeline:IsPlaying()
-            if(shouldAnimate ~= isAnimating) then
+            if shouldAnimate ~= isAnimating then
                 animatingControl:SetText(animatingControl.text[1])
-                if(shouldAnimate) then
+                if shouldAnimate then
                     animatingControl.textIndex = 1
                     animatingControlTimeline:PlayFromStart()
                 else
@@ -778,7 +853,6 @@ function ZO_MainMenuManager_Gamepad:UpdateEntryEnabledStates()
     self:RefreshLists()
 end
 
-
 function ZO_MainMenuManager_Gamepad:RefreshLists()
     if self.mode == MODE_MAIN_LIST then
         self:RefreshMainList()
@@ -805,9 +879,9 @@ function ZO_MainMenuManager_Gamepad:OnDeferredInitialize()
     GIFT_INVENTORY_MANAGER:RegisterCallback("GiftListsChanged", MarkNewnessDirty)
     EVENT_MANAGER:RegisterForEvent("mainMenuGamepad", EVENT_NEW_DAILY_LOGIN_REWARD_AVAILABLE, MarkNewnessDirty)
     EVENT_MANAGER:RegisterForEvent("mainMenuGamepad", EVENT_DAILY_LOGIN_REWARDS_CLAIMED, MarkNewnessDirty)
-    EVENT_MANAGER:RegisterForEvent("mainMenuGamepad", EVENT_PROMOTIONAL_EVENTS_ACTIVITY_PROGRESS_UPDATED, MarkNewnessDirty)
     PROMOTIONAL_EVENT_MANAGER:RegisterCallback("RewardsClaimed", MarkNewnessDirty)
     PROMOTIONAL_EVENT_MANAGER:RegisterCallback("CampaignSeenStateChanged", MarkNewnessDirty)
+    PROMOTIONAL_EVENT_MANAGER:RegisterCallback("ActivityProgressUpdated", MarkNewnessDirty)
 
     self:UpdateEntryEnabledStates()
 end
@@ -952,15 +1026,29 @@ do
 end
 
 function ZO_MainMenuManager_Gamepad:OnSelectionChanged(list, selectedData, oldSelectedData)
-    if list == self.subList then
-        if oldSelectedData and oldSelectedData.data.fragmentGroupCallback then
-            local fragmentGroup = oldSelectedData.data.fragmentGroupCallback()
+    local isSublist = list == self.subList
+
+    if oldSelectedData then
+        local data = oldSelectedData.data
+        if isSublist and data.fragmentGroupCallback then
+            local fragmentGroup = data.fragmentGroupCallback()
             SCENE_MANAGER:RemoveFragmentGroup(fragmentGroup)
         end
 
-        if selectedData and selectedData.data.fragmentGroupCallback then
-            local fragmentGroup = selectedData.data.fragmentGroupCallback()
+        if data.onUnselectedCallback then
+            data.onUnselectedCallback()
+        end
+    end
+
+    if selectedData then
+        local data = selectedData.data
+        if isSublist and data.fragmentGroupCallback then
+            local fragmentGroup = data.fragmentGroupCallback()
             SCENE_MANAGER:AddFragmentGroup(fragmentGroup)
+        end
+
+        if data.onSelectedCallback then
+            data.onSelectedCallback()
         end
     end
 end
@@ -994,9 +1082,11 @@ function ZO_MainMenuManager_Gamepad:ShowLastCategory()
 end
 
 function ZO_MainMenuManager_Gamepad:MarkNewnessDirty()
-    if self:IsShowing() then
-        self:RefreshLists()
+    if not self:IsShowing() then
+        return
     end
+
+    self:RefreshLists()
 end
 
 function ZO_MainMenuManager_Gamepad:OnNumNotificationsChanged(numNotifications)
@@ -1108,7 +1198,7 @@ function ZO_MainMenuManager_Gamepad:SelectMenuEntryAndSubEntry(menuEntry, menuSu
     local entry = self.mainList:GetTargetData()
     self:RefreshSubList(entry)
 
-    -- the given subeEntry may not be currently visible and not exist in subMenuEntryToListIndex
+    -- the given subEntry may not be currently visible and not exist in subMenuEntryToListIndex
     local subListIndex = self.subMenuEntryToListIndex[menuSubEntry]
     if subListIndex then
         self.subList:SetSelectedIndexWithoutAnimation(subListIndex)

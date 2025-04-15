@@ -157,7 +157,7 @@ end
 
 function ZO_QuestJournal_Shared:CanAbandonQuest()
     local selectedData = self:GetSelectedQuestData()
-    if selectedData and selectedData.questIndex and selectedData.questType ~= QUEST_TYPE_MAIN_STORY then
+    if selectedData and selectedData.canAbandon then
         return true
     end
     return false

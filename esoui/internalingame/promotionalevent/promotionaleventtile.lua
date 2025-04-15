@@ -19,12 +19,24 @@ function ZO_PromotionalEventTile:Initialize(control)
     ZO_ActionTile.Initialize(self, control)
 
     self.bannerTextLabel = self.container:GetNamedChild("TextCallout")
+    self.glowUnderlay = self.container:GetNamedChild("GlowUnderlay")
+    self.glowOverlay = self.container:GetNamedChild("GlowOverlay")
 end
 
 function ZO_PromotionalEventTile:Layout(data)
     ZO_Tile.Layout(self, data)
 
-    local campaignData = PROMOTIONAL_EVENT_MANAGER:GetCampaignDataByIndex(1) -- TODO Promotional Events: Which should we show?
+    local campaignData
+    for _, iterCampaignData in PROMOTIONAL_EVENT_MANAGER:CampaignIterator({ ZO_PromotionalEventCampaignData.HasAnyUnclaimedRewards }) do
+        -- The first campaign that has rewards left
+        campaignData = iterCampaignData
+        break
+    end
+
+    if not campaignData then
+        -- If all rewards are claimed, just go back to the first campaign
+        campaignData = PROMOTIONAL_EVENT_MANAGER:GetCampaignDataByIndex(1)
+    end
 
     local secondsRemaining = campaignData:GetSecondsRemaining()
     if secondsRemaining > 0 then
@@ -43,7 +55,17 @@ function ZO_PromotionalEventTile:Layout(data)
         self:SetBackground("EsoUI/Art/PromotionalEvent/promotionalEvents_announcement_bg.dds")
     end
 
-    local bannerText = campaignData:GetAnnouncementBannerText()
+    local bannerText
+    if PROMOTIONAL_EVENT_MANAGER:HasAnyUnclaimedRewards() then
+        bannerText = campaignData:GetAnnouncementBannerText()
+        self.glowUnderlay:SetHidden(false)
+        self.glowOverlay:SetHidden(false)
+    else
+        bannerText = zo_iconTextFormatNoSpace(ZO_CHECK_ICON, "100%", "100%", GetString(SI_MARKET_ANNOUNCEMENT_PROMOTIONAL_EVENT_COMPLETE))
+        self.glowUnderlay:SetHidden(true)
+        self.glowOverlay:SetHidden(true)
+    end
+
     if bannerText == "" then
         self.bannerTextLabel:SetHidden(true)
     else
@@ -52,6 +74,6 @@ function ZO_PromotionalEventTile:Layout(data)
     end
 
     self:SetActionCallback(function()
-        PROMOTIONAL_EVENT_MANAGER:ShowPromotionalEventScene()
+        PROMOTIONAL_EVENT_MANAGER:ShowPromotionalEventScene(campaignData)
     end)
 end

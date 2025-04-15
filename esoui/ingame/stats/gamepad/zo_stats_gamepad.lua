@@ -243,7 +243,7 @@ end
 local GAMEPAD_STATS_COMMIT_POINTS_DIALOG_NAME = "GAMEPAD_STATS_COMMIT_POINTS"
 local GAMEPAD_STATS_RESPEC_ATTRIBUTES_DIALOG_NAME = "GAMEPAD_STATS_RESPEC_ATTRIBUTES"
 
-local GAMEPAD_STATS_DISPLAY_MODE = 
+local GAMEPAD_STATS_DISPLAY_MODE =
 {
     CHARACTER = 1,
     ATTRIBUTES = 2,
@@ -323,6 +323,8 @@ function ZO_GamepadStats:OnStateChanged(oldState, newState)
         end
 
         ZO_OUTFITS_SELECTOR_GAMEPAD:SetCurrentActorCategory(GAMEPLAY_ACTOR_CATEGORY_PLAYER)
+    elseif newState == SCENE_SHOWN then
+        HandleReturningPlayerUISystemShown(UI_SYSTEM_CHARACTER_STATS)
     elseif newState == SCENE_HIDDEN then
         self:DeactivateMainList()
 

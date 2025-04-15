@@ -201,8 +201,9 @@ function ZO_ArmoryBuildSkills_Gamepad:AddSkillsCategoryHeader(scrollData, hotbar
     table.insert(scrollData, ZO_ScrollList_CreateDataEntry(ARMORY_BUILD_SKILLS_HEADER_DATA, headerData))
 end
 
-function ZO_ArmoryBuildSkills_Gamepad:GamepadSingleLineAbilityEntryTemplateSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
-    ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
+function ZO_ArmoryBuildSkills_Gamepad:GamepadSingleLineAbilityEntryTemplateSetup(control, data, parentControl)
+    local SELECTED = true
+    ZO_SharedGamepadEntry_OnSetup(control, data, SELECTED)
     if not data.isEntryEmpty and not data.showLock then
         ZO_GamepadArmorySkillEntryTemplate_Setup(control, data.skillProgressionData, data.slotIndex, data.hotbarCategory)
     elseif not data.showLock then
@@ -220,7 +221,7 @@ function ZO_ArmoryBuildSkills_Gamepad:GamepadSingleLineAbilityEntryTemplateSetup
     end
 end
 
-function ZO_ArmoryBuildSkills_Gamepad:ArmoryBuildSkillsTextDisplayTemplateSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
+function ZO_ArmoryBuildSkills_Gamepad:ArmoryBuildSkillsTextDisplayTemplateSetup(control, data, parentControl)
     control.label:SetText(data.text)
 end
 

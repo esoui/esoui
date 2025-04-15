@@ -1244,9 +1244,19 @@ function ZO_Tooltip:LayoutTitleAndMultiSectionDescriptionTooltip(title, ...)
     end
 
     --Body
+    self:LayoutMultiSectionDescriptionTooltip(...)
+end
+
+function ZO_Tooltip:LayoutMultiSectionDescriptionTooltip(...)
+    --Body
     for i = 1, select("#", ...) do
+        local text = select(i, ...)
+        local style = self:GetStyle("bodyDescription")
+        if type(text) == "table" then
+            text, style = text.text, self:GetStyle(text.style)
+        end
         local bodySection = self:AcquireSection(self:GetStyle("bodySection"))
-        bodySection:AddLine(select(i, ...), self:GetStyle("bodyDescription"))
+        bodySection:AddLine(text, style)
         self:AddSection(bodySection)
     end
 end

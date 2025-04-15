@@ -10,11 +10,6 @@ local SYMBOL_PARAMS = {
 
 local WorldMapKey = ZO_WorldMapKey_Shared:Subclass()
 
-function WorldMapKey:New(...)
-    local object = ZO_WorldMapKey_Shared.New(self, ...)
-    return object
-end
-
 function WorldMapKey:Initialize(control)
     ZO_WorldMapKey_Shared.Initialize(self, control)
 
@@ -28,7 +23,7 @@ function WorldMapKey:Initialize(control)
 
     WORLD_MAP_KEY_FRAGMENT = ZO_FadeSceneFragment:New(control)
     WORLD_MAP_KEY_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
-        if(newState == SCENE_FRAGMENT_SHOWING) then
+        if newState == SCENE_FRAGMENT_SHOWING then
             self:RefreshKey()
         end
     end)
@@ -41,7 +36,7 @@ end
 function WorldMapKey:Symbol_OnMouseEnter(symbol)
     InitializeTooltip(InformationTooltip, symbol, BOTTOM, 0, -10)
     InformationTooltip:AddLine(symbol.name, "ZoFontHeader")
-    if(symbol.tooltip ~= "") then
+    if symbol.tooltip ~= "" then
         InformationTooltip:AddLine(symbol.tooltip, "", ZO_TOOLTIP_DEFAULT_COLOR:UnpackRGB())
     end
 end

@@ -2,11 +2,6 @@ local WorldMapQuests_Gamepad = ZO_WorldMapQuests_Shared:Subclass()
 
 local ASSISTED_TEXTURE = "EsoUI/Art/Journal/Gamepad/gp_trackedQuestIcon.dds"
 
-function WorldMapQuests_Gamepad:New(...)
-    local object = ZO_WorldMapQuests_Shared.New(self, ...)
-    return object
-end
-
 function WorldMapQuests_Gamepad:Initialize(control)
     ZO_WorldMapQuests_Shared.Initialize(self, control)
     self.control = control
@@ -25,7 +20,7 @@ function WorldMapQuests_Gamepad:Initialize(control)
     self.questList:AddDataTemplate("ZO_GamepadSubMenuEntryTemplateWithStatusLowercase42", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, equalityFunction)
     self.questList:SetOnSelectedDataChangedCallback(function() self:SetupQuestDetails() end)
 
-    local narrationInfo = 
+    local narrationInfo =
     {
         canNarrate = function()
             return GAMEPAD_WORLD_MAP_QUESTS_FRAGMENT:IsShowing()
@@ -88,6 +83,22 @@ function WorldMapQuests_Gamepad:LayoutList()
     end
 
     self.questList:Commit()
+
+    if self.pendingQuestIndex ~= nil and self.pendingNumQuests == self.questList:GetNumEntries() then
+        ZO_WorldMap_PanToQuest(self.pendingQuestIndex)
+        local selectedIndex = nil
+        for i = 1, self.questList:GetNumEntries() do
+            local entryData = self.questList:GetEntryData(i)
+            if entryData.questInfo.questIndex == self.pendingQuestIndex then
+                selectedIndex = i
+            end
+        end
+        if selectedIndex ~= nil then
+            self.questList:SetSelectedIndex(selectedIndex)
+        end
+        self.pendingQuestIndex = nil
+        self.pendingNumQuests = nil
+    end
 end
 
 function WorldMapQuests_Gamepad:RefreshHeaders()
@@ -98,13 +109,12 @@ function WorldMapQuests_Gamepad:SetupQuestDetails()
     if self.control:IsHidden() then return end
 
     self.scrollTooltip:ClearLines()
-    
-    
+
     local targetData = self.questList:GetTargetData()
 
-    if not targetData then 
+    if not targetData then
         self:RefreshKeybind()
-        return 
+        return
     end
 
     local tooltipControl = self.scrollTooltip
@@ -158,19 +168,28 @@ function WorldMapQuests_Gamepad:InitializeKeybindDescriptor()
         {
             keybind = "UI_SHORTCUT_PRIMARY",
 
-            name = GetString(SI_GAMEPAD_WORLD_MAP_INTERACT_SET_ACTIVE_QUEST),
+            name = function()
+                local targetData = self.questList:GetTargetData()
+                if not targetData.isAssisted or IsZoneStoryAssisted() then
+                    return GetString(SI_GAMEPAD_WORLD_MAP_INTERACT_SET_ACTIVE_QUEST)
+                else
+                    return GetString(SI_GAMEPAD_WORLD_MAP_INTERACT_SHOW_ACTIVE_QUEST)
+                end
+            end,
 
             callback = function()
                 local targetData = self.questList:GetTargetData()
                 local questIndex = targetData.questInfo.questIndex
 
-                if self.assistedEntryData then
-                    self.assistedEntryData.isAssisted = false
-                end
-                local newEntry = self.entriesByIndex[questIndex]
-                self.assistedEntryData = newEntry
-                if newEntry then
-                    newEntry.isAssisted = true
+                if not targetData.isAssisted or IsZoneStoryAssisted() then
+                    if self.assistedEntryData then
+                        self.assistedEntryData.isAssisted = false
+                    end
+                    local newEntry = self.entriesByIndex[questIndex]
+                    self.assistedEntryData = newEntry
+                    if newEntry then
+                        newEntry.isAssisted = true
+                    end
                 end
 
                 ZO_WorldMap_PanToQuest(questIndex)
@@ -178,12 +197,24 @@ function WorldMapQuests_Gamepad:InitializeKeybindDescriptor()
                 FOCUSED_QUEST_TRACKER:ForceAssist(questIndex)
                 self.questList:RefreshVisible()
                 self:SetupQuestDetails()
+
+                if ZO_WorldMapPins_Manager.IsCurrentMapGlobal() then
+                    self.pendingQuestIndex = questIndex
+                    self.pendingNumQuests = self.questList:GetNumEntries()
+                    WORLD_MAP_QUEST_BREADCRUMBS:OnWorldMapChanged()
+                end
+
                 PlaySound(SOUNDS.MAP_LOCATION_CLICKED)
+            end,
+
+            visible = function()
+                local targetData = self.questList:GetTargetData()
+                return targetData ~= nil
             end,
 
             enabled = function()
                 local targetData = self.questList:GetTargetData()
-                return targetData ~= nil and targetData.questInfo ~= nil and targetData.questInfo.questIndex ~= nil and (not targetData.isAssisted or IsZoneStoryAssisted())
+                return targetData.questInfo ~= nil and targetData.questInfo.questIndex ~= nil
             end
         },
     }

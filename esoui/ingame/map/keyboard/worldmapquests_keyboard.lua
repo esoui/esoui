@@ -2,11 +2,6 @@ local WorldMapQuests = ZO_WorldMapQuests_Shared:Subclass()
 
 local QUEST_DATA = 1
 
-function WorldMapQuests:New(...)
-    local object = ZO_WorldMapQuests_Shared.New(self, ...)
-    return object
-end
-
 function WorldMapQuests:Initialize(control)
     ZO_WorldMapQuests_Shared.Initialize(self, control)
     self.control = control
@@ -20,12 +15,12 @@ end
 
 function WorldMapQuests:LayoutList()
     self:RefreshNoQuestsLabel()
-    
+
     local prevHeader
     self.headerPool:ReleaseAllObjects()
     for i, data in ipairs(self.data.masterList) do
         local header = self.headerPool:AcquireObject(i)
-        if(prevHeader) then
+        if prevHeader then
             header:SetAnchor(TOPLEFT, prevHeader, BOTTOMLEFT, 0, 4)
         else
             header:SetAnchor(TOPLEFT, nil, TOPLEFT, 0, 0)
@@ -34,6 +29,11 @@ function WorldMapQuests:LayoutList()
     end
 
     self:RefreshHeaders()
+
+    if #self.data.masterList == self.pendingNumQuests then
+        self.pendingQuestIndex = nil
+        self.pendingNumQuests = nil
+    end
 end
 
 function WorldMapQuests:RefreshHeaders()
@@ -43,13 +43,15 @@ function WorldMapQuests:RefreshHeaders()
 end
 
 function WorldMapQuests:SetupQuestHeader(control, data)
-    if (data == nil) then return end
+    if data == nil then
+        return
+    end
 
     --Quest Name
     local nameControl = GetControl(control, "Name")
     nameControl:SetText(data.name)
     ZO_SelectableLabel_SetNormalColor(nameControl, ZO_ColorDef:New(GetColorForCon(GetCon(data.level))))
-        
+
     --Assisted State
     local isAssisted = FOCUSED_QUEST_TRACKER:IsTrackTypeAssisted(TRACK_TYPE_QUEST, data.questIndex)
     local assistedTexture = GetControl(control, "AssistedIcon")
@@ -64,9 +66,14 @@ end
 function WorldMapQuests:QuestHeader_OnClicked(header, button)
     if button == MOUSE_BUTTON_INDEX_LEFT then
         local data = header.data
+        if ZO_WorldMapPins_Manager.IsCurrentMapGlobal() then
+            WORLD_MAP_QUEST_BREADCRUMBS:OnWorldMapChanged()
+        end
         ZO_WorldMap_PanToQuest(data.questIndex)
         ZO_ZoneStories_Manager.SetTrackedZoneStoryAssisted(false)
         FOCUSED_QUEST_TRACKER:ForceAssist(data.questIndex)
+        self.pendingQuestIndex = data.questIndex
+        self.pendingNumQuests = #self.data.masterList
     end
 end
 

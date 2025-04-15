@@ -117,6 +117,9 @@ end
 -- Screen --
 
 ZO_PROMOTIONAL_EVENT_GAMEPAD_ACTIVITY_ENTRY_HEIGHT = 120
+ZO_PROMOTIONAL_EVENT_RETURNING_PLAYER_REWARD_WIDTH_GAMEPAD = 180
+ZO_PROMOTIONAL_EVENT_RETURNING_PLAYER_REWARD_HEIGHT_GAMEPAD = 170
+ZO_PROMOTIONAL_EVENT_RETURNING_PLAYER_REWARD_SPACING_GAMEPAD = 30
 
 ZO_PromotionalEvents_Gamepad = ZO_Object.MultiSubclass(ZO_PromotionalEvents_Shared, ZO_GamepadMultiFocusArea_Manager, ZO_SortFilterList_Gamepad)
 
@@ -148,14 +151,38 @@ function ZO_PromotionalEvents_Gamepad:InitializeActivityFinderCategory()
         {
             priority = ZO_ACTIVITY_FINDER_SORT_PRIORITY.PROMOTIONAL_EVENTS,
             name = GetString(SI_ACTIVITY_FINDER_CATEGORY_PROMOTIONAL_EVENTS),
-            menuIcon = "EsoUI/Art/LFG/Gamepad/LFG_menuIcon_PromotionalEvents.dds",
+            menuIcon = function()
+                if PROMOTIONAL_EVENT_MANAGER:HasAnyUnclaimedRewards() then
+                    return "EsoUI/Art/LFG/Gamepad/LFG_menuIcon_PromotionalEvents.dds"
+                else
+                    return "EsoUI/Art/LFG/Gamepad/LFG_menuIcon_PromotionalEvents_complete.dds"
+                end
+            end,
             disabledMenuIcon = "EsoUI/Art/LFG/Gamepad/LFG_menuIcon_PromotionalEvents_disabled.dds",
-            categoryFragment = self:GetFragment(),
+            categoryFragment = function()
+                if PROMOTIONAL_EVENT_MANAGER:GetNumActiveCampaigns() == 1 then
+                    return self:GetFragment()
+                end
+                return nil
+            end,
+            sceneName = function()
+                if PROMOTIONAL_EVENT_MANAGER:GetNumActiveCampaigns() > 1 then
+                    return "PromotionalEventsListGamepad"
+                end
+                return nil
+            end,
             activateCategory = function()
                 self:Activate()
             end,
             visible = function()
                 return PROMOTIONAL_EVENT_MANAGER:HasActiveCampaign()
+            end,
+            tooltipFunction = function(data, lockedText)
+                if not lockedText and PROMOTIONAL_EVENT_MANAGER:GetNumActiveCampaigns() > 1 then
+                    GAMEPAD_TOOLTIPS:LayoutPromotionalEventCampaigns(GAMEPAD_LEFT_TOOLTIP)
+                    return true
+                end
+                return false
             end,
             isPromotionalEvent = true,
         },
@@ -181,6 +208,36 @@ function ZO_PromotionalEvents_Gamepad:InitializeActivityList()
     ZO_SortFilterList_Gamepad.Initialize(self, self.control)
 end
 
+function ZO_PromotionalEvents_Gamepad:InitializeGridList()
+    ZO_PromotionalEvents_Shared.InitializeGridList(self)
+
+    self.rewardsGridList = ZO_SingleTemplateGridScrollList_Gamepad:New(self.gridListControl, ZO_GRID_SCROLL_LIST_DONT_AUTOFILL)
+
+    local function RewardGridEntryReset(control)
+        ZO_ObjectPool_DefaultResetControl(control)
+    end
+
+    local DEFAULT_HIDE_CALLBACK = nil
+    local HEADER_HEIGHT = 30
+    self.rewardsGridList:SetGridEntryTemplate("ZO_PromotionalEventReturningPlayerReward_Gamepad", ZO_PROMOTIONAL_EVENT_RETURNING_PLAYER_REWARD_WIDTH_GAMEPAD, ZO_PROMOTIONAL_EVENT_RETURNING_PLAYER_REWARD_HEIGHT_GAMEPAD, self.RewardGridEntrySetup, DEFAULT_HIDE_CALLBACK, RewardGridEntryReset, ZO_PROMOTIONAL_EVENT_RETURNING_PLAYER_REWARD_SPACING_GAMEPAD, ZO_PROMOTIONAL_EVENT_RETURNING_PLAYER_REWARD_SPACING_GAMEPAD)
+    self.rewardsGridList:SetHeaderTemplate(ZO_GRID_SCROLL_LIST_DEFAULT_HEADER_TEMPLATE_GAMEPAD, HEADER_HEIGHT, ZO_DefaultGridHeaderSetup)
+    self.rewardsGridList:SetHeaderPrePadding(ZO_PROMOTIONAL_EVENT_RETURNING_PLAYER_REWARD_SPACING_GAMEPAD)
+    self.rewardsGridList:SetOnSelectedDataChangedCallback(function(...) self:OnGridListSelectedDataChanged(...) end)
+
+    local function GetRewardsGridListBackButtonDescriptor()
+        return KEYBIND_STRIP:GenerateGamepadBackButtonDescriptor(function()
+            if ZO_ACTIVITY_FINDER_ROOT_GAMEPAD:IsShowing() or PROMOTIONAL_EVENTS_LIST_GAMEPAD:IsShowing() then
+                self:Deactivate()
+            end
+        end)
+    end
+    self.rewardsGridListKeybindStripDesciptor =
+    {
+        alignment = KEYBIND_STRIP_ALIGN_LEFT,
+        GetRewardsGridListBackButtonDescriptor()
+    }
+end
+
 -- Overriding from ZO_SortFilterList_Gamepad and ZO_SortFilterList because it makes some assumptions about the control layout
 -- that are inconsistent with this screen
 function ZO_PromotionalEvents_Gamepad:InitializeSortFilterList(control, highlightTemplate)
@@ -193,10 +250,9 @@ end
 
 function ZO_PromotionalEvents_Gamepad:InitializeFoci()
     local function BackKeybindCallback()
-        if GAMEPAD_ACTIVITY_FINDER_ROOT_SCENE:IsShowing() then
+        if ZO_ACTIVITY_FINDER_ROOT_GAMEPAD:IsShowing() or PROMOTIONAL_EVENTS_LIST_GAMEPAD:IsShowing() then
             self:Deactivate()
         end
-        -- TODO Promotional Events: Add check for if there's more than one campaign to control drill in
     end
 
     local CLAIM_ALL_DESCRIPTOR =
@@ -205,18 +261,24 @@ function ZO_PromotionalEvents_Gamepad:InitializeFoci()
         keybind = "UI_SHORTCUT_QUINARY",
 
         visible = function()
-            return self.currentCampaignData:IsAnyRewardClaimable()
+            if not self:IsReturningPlayerRewardsEntrySelected() then
+                return self.currentCampaignData:IsAnyRewardClaimable()
+            end
+            return false
         end,
 
         callback = function()
             self.currentCampaignData:TryClaimAllAvailableRewards()
+            self:CollectRemainingChoiceRewards()
+            self:TryClaimNextChoiceReward()
         end,
     }
 
     -- Overview
     local function ActivateOverviewCallback()
         self.campaignPanelHighlight:SetHidden(false)
-        GAMEPAD_TOOLTIPS:LayoutTitleAndDescriptionTooltip(GAMEPAD_RIGHT_TOOLTIP, self.currentCampaignData:GetDisplayName(), self.currentCampaignData:GetDescription())
+        local campaignName = ZO_PROMOTIONAL_EVENT_SELECTED_COLOR:Colorize(self.currentCampaignData:GetDisplayName())
+        GAMEPAD_TOOLTIPS:LayoutTitleAndDescriptionTooltip(GAMEPAD_RIGHT_TOOLTIP, campaignName, self.currentCampaignData:GetDescription())
         self.focusedRewardData = nil
         SCREEN_NARRATION_MANAGER:QueueCustomEntry("promotionalEventsOverview")
     end
@@ -270,8 +332,15 @@ function ZO_PromotionalEvents_Gamepad:InitializeFoci()
             end,
 
             callback = function()
-                self.selectedMilestone.rewardObject.rewardableEventData:TryClaimReward()
-                SCREEN_NARRATION_MANAGER:QueueCustomEntry("promotionalEventsMilestone")
+                local rewardableEventData = self.selectedMilestone.rewardObject.rewardableEventData
+                if rewardableEventData.rewardId ~= 0 then
+                    if GetRewardType(rewardableEventData.rewardId) == REWARD_ENTRY_TYPE_CHOICE then
+                        self:ShowClaimChoiceDialog(rewardableEventData)
+                    else
+                        rewardableEventData:TryClaimReward()
+                        SCREEN_NARRATION_MANAGER:QueueCustomEntry("promotionalEventsMilestone")
+                    end
+                end
             end,
         },
         -- Claim all
@@ -284,7 +353,7 @@ function ZO_PromotionalEvents_Gamepad:InitializeFoci()
             callback = function()
                 self.previewRewardData = self.selectedMilestone.rewardObject.displayRewardData
                 self.lastSelectedMilestoneIndex = self.selectedMilestone.displayIndex
-                SCENE_MANAGER:Push("promotionalEventsPreview_Gamepad")
+                self:BeginPreview()
             end,
 
             enabled = function()
@@ -292,7 +361,9 @@ function ZO_PromotionalEvents_Gamepad:InitializeFoci()
             end,
 
             visible = function()
-                return CanPreviewReward(self.selectedMilestone.rewardObject.displayRewardData:GetRewardId())
+                local rewardId = self.selectedMilestone.rewardObject.displayRewardData:GetRewardId()
+                local isRewardList = GetRewardType(rewardId) == REWARD_ENTRY_TYPE_REWARD_LIST
+                return CanPreviewReward(rewardId) or isRewardList
             end,
         },
     }
@@ -326,8 +397,15 @@ function ZO_PromotionalEvents_Gamepad:InitializeFoci()
             end,
 
             callback = function()
-                self.capstoneRewardObject.rewardableEventData:TryClaimReward()
-                SCREEN_NARRATION_MANAGER:QueueCustomEntry("promotionalEventsCapstone")
+                local rewardableEventData = self.capstoneRewardObject.rewardableEventData
+                if rewardableEventData.capstoneRewardId ~= 0 then
+                    if GetRewardType(rewardableEventData.capstoneRewardId) == REWARD_ENTRY_TYPE_CHOICE then
+                        self:ShowClaimChoiceDialog(rewardableEventData)
+                    else
+                        rewardableEventData:TryClaimReward()
+                        SCREEN_NARRATION_MANAGER:QueueCustomEntry("promotionalEventsCapstone")
+                    end
+                end
             end,
         },
         -- Claim all
@@ -339,7 +417,7 @@ function ZO_PromotionalEvents_Gamepad:InitializeFoci()
 
             callback = function()
                 self.previewRewardData = self.capstoneRewardObject.displayRewardData
-                SCENE_MANAGER:Push("promotionalEventsPreview_Gamepad")
+                self:BeginPreview()
             end,
 
             enabled = function()
@@ -347,7 +425,9 @@ function ZO_PromotionalEvents_Gamepad:InitializeFoci()
             end,
 
             visible = function()
-                return CanPreviewReward(self.capstoneRewardObject.displayRewardData:GetRewardId())
+                local rewardId = self.capstoneRewardObject.displayRewardData:GetRewardId()
+                local isRewardList = GetRewardType(rewardId) == REWARD_ENTRY_TYPE_REWARD_LIST
+                return CanPreviewReward(rewardId) or isRewardList
             end,
         },
     }
@@ -378,20 +458,51 @@ function ZO_PromotionalEvents_Gamepad:InitializeFoci()
 
     local activitiesKeybindStripDescriptor =
     {
-        -- Claim
+        -- Claim / Go To Hero's Return
         alignment = KEYBIND_STRIP_ALIGN_CENTER,
         {
-            name = GetString(SI_PROMOTIONAL_EVENT_CLAIM_REWARD_ACTION),
+            name = function()
+                local selectedActivityEntry = self:GetSelectedActivity()
+                if selectedActivityEntry:CanClaimReward() then
+                    return GetString(SI_PROMOTIONAL_EVENT_CLAIM_REWARD_ACTION)
+                else
+                    local campaignKey, componentType, index = GetReturningPlayerIntroGameplayData()
+                    if componentType == PROMOTIONAL_EVENTS_COMPONENT_TYPE_ACTIVITY then
+                        if selectedActivityEntry:MatchesCampaignKey(campaignKey) and selectedActivityEntry:GetActivityIndex() == index then
+                            return zo_strformat(SI_PROMOTIONAL_EVENT_RETURNING_PLAYER_GO_TO_ACTION, RETURNING_PLAYER_MANAGER:GetColorizedIntroGameplayDisplayName())
+                        end
+                    end
+                end
+            end,
+
             keybind = "UI_SHORTCUT_PRIMARY",
 
             visible = function()
                 local selectedActivityEntry = self:GetSelectedActivity()
-                return selectedActivityEntry and selectedActivityEntry:CanClaimReward() or false
+                if selectedActivityEntry:CanClaimReward() then
+                    return true
+                elseif not selectedActivityEntry:IsRewardClaimed() then
+                    local campaignKey, componentType, index = GetReturningPlayerIntroGameplayData()
+                    if componentType == PROMOTIONAL_EVENTS_COMPONENT_TYPE_ACTIVITY then
+                        return selectedActivityEntry:MatchesCampaignKey(campaignKey) and selectedActivityEntry:GetActivityIndex() == index
+                    end
+                end
             end,
 
             callback = function()
-                self:GetSelectedActivity():TryClaimReward()
-                SCREEN_NARRATION_MANAGER:QueueSortFilterListEntry(self)
+                local selectedActivityEntry = self:GetSelectedActivity()
+                if selectedActivityEntry:CanClaimReward() then
+                    if selectedActivityEntry.rewardId ~= 0 then
+                        if GetRewardType(selectedActivityEntry.rewardId) == REWARD_ENTRY_TYPE_CHOICE then
+                            self:ShowClaimChoiceDialog(selectedActivityEntry)
+                        else
+                            selectedActivityEntry:TryClaimReward()
+                            SCREEN_NARRATION_MANAGER:QueueSortFilterListEntry(self)
+                        end
+                    end
+                else
+                    SYSTEMS:ShowScene("returningPlayerIntro")
+                end
             end,
         },
         -- Claim all
@@ -406,7 +517,7 @@ function ZO_PromotionalEvents_Gamepad:InitializeFoci()
                 local rewardObject = self:GetActivityRewardObject(selectedActivityEntry)
                 self.previewRewardData = rewardObject.displayRewardData
                 self.lastSelectedData = selectedActivityEntry
-                SCENE_MANAGER:Push("promotionalEventsPreview_Gamepad")
+                self:BeginPreview()
             end,
 
             enabled = function()
@@ -418,7 +529,12 @@ function ZO_PromotionalEvents_Gamepad:InitializeFoci()
                 if selectedActivityEntry then
                     local rewardObject = self:GetActivityRewardObject(selectedActivityEntry)
                     local displayRewardData = rewardObject and rewardObject.displayRewardData
-                    return displayRewardData and CanPreviewReward(displayRewardData:GetRewardId())
+                    if displayRewardData then
+                        local rewardId = displayRewardData:GetRewardId()
+                        local isRewardList = GetRewardType(rewardId) == REWARD_ENTRY_TYPE_REWARD_LIST
+                        return (CanPreviewReward(rewardId) or isRewardList)
+                    end
+                    return false
                 end
                 return false
             end,
@@ -587,18 +703,75 @@ function ZO_PromotionalEvents_Gamepad:InitializePreview()
     end)
 end
 
+function ZO_PromotionalEvents_Gamepad:BeginPreview()
+    local rewardId = self.previewRewardData.rewardId
+    if GetRewardType(rewardId) == REWARD_ENTRY_TYPE_REWARD_LIST then
+        local rewardListId = GetRewardListIdFromReward(rewardId)
+        PROMOTIONAL_EVENTS_REWARD_LIST_SCREEN_GAMEPAD:SetRewardList(rewardListId)
+        SCENE_MANAGER:Push("promotionalEventsRewardList_Gamepad")
+    else
+        SCENE_MANAGER:Push("promotionalEventsPreview_Gamepad")
+    end
+end
+
+function ZO_PromotionalEvents_Gamepad:IsReturningPlayerRewardsEntrySelected()
+    local selectedCampaignData = self:GetSelectedCampaignData()
+    if selectedCampaignData.isReturningPlayerRewardsEntry then
+        return true
+    end
+    return false
+end
+
+function ZO_PromotionalEvents_Gamepad:GetSelectedCampaignData()
+    if PROMOTIONAL_EVENTS_LIST_GAMEPAD:GetScene():IsShowing() then
+        return PROMOTIONAL_EVENTS_LIST_GAMEPAD.list:GetTargetData()
+    else
+        return PROMOTIONAL_EVENT_MANAGER:GetCampaignDataByIndex(1)
+    end
+end
+
+function ZO_PromotionalEvents_Gamepad:TryClaimNextChoiceReward()
+    if self.remainingChoiceRewards then
+        local _, rewardableEventData = next(self.remainingChoiceRewards)
+        if rewardableEventData then
+            if PROMOTIONAL_EVENTS_CLAIM_CHOICE_DIALOG_GAMEPAD:IsShowing() then
+                PROMOTIONAL_EVENTS_CLAIM_CHOICE_DIALOG_GAMEPAD:SetRewardData(rewardableEventData)
+            else
+                self:ShowClaimChoiceDialog(rewardableEventData)
+            end
+        end
+    end
+end
+
 function ZO_PromotionalEvents_Gamepad:RefreshActivityList(rebuild)
     ZO_PromotionalEvents_Shared.RefreshActivityList(self, rebuild)
 
     if self.currentCampaignData then
+        if rebuild then
+            self.lastSelectedData = nil
+            ZO_ScrollList_ResetToTop(self.activityList)
+        end
+
         if self:IsCurrentFocusArea(self.activitiesFocalArea) then
             self.activitiesFocalArea:UpdateKeybinds()
         end
     end
 end
 
-function ZO_PromotionalEvents_Gamepad:OnRewardsClaimed(campaignData, rewards)
-    ZO_PromotionalEvents_Shared.OnRewardsClaimed(self, campaignData, rewards)
+function ZO_PromotionalEvents_Gamepad:OnGridListSelectedDataChanged(previousData, newData)
+    if not self:IsReturningPlayerRewardsEntrySelected() then
+        return
+    end
+
+    if newData then
+        GAMEPAD_TOOLTIPS:LayoutRewardData(GAMEPAD_RIGHT_TOOLTIP, newData)
+    else
+        GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
+    end
+end
+
+function ZO_PromotionalEvents_Gamepad:OnRewardsClaimed(campaignData, rewards, hasCapstoneReward)
+    ZO_PromotionalEvents_Shared.OnRewardsClaimed(self, campaignData, rewards, hasCapstoneReward)
 
     if self:IsShowing() and self.currentCampaignData == campaignData then
         self:UpdateActiveFocusKeybinds()
@@ -638,6 +811,10 @@ end
 
 function ZO_PromotionalEvents_Gamepad:RefreshCampaignPanel(rebuild)
     ZO_PromotionalEvents_Shared.RefreshCampaignPanel(self, rebuild)
+
+    if rebuild then
+        self.lastSelectedMilestoneIndex = nil
+    end
 
     for _, milestoneControl in pairs(self.milestonePool:GetActiveObjects()) do
         self:UpdateMilestoneThresholdColor(milestoneControl)
@@ -718,18 +895,25 @@ function ZO_PromotionalEvents_Gamepad:TrySelectLastMilestone()
 end
 
 function ZO_PromotionalEvents_Gamepad:Activate()
-    if GAMEPAD_ACTIVITY_FINDER_ROOT_SCENE:IsShowing() then
+    if ZO_ACTIVITY_FINDER_ROOT_GAMEPAD:IsShowing() then
         ZO_ACTIVITY_FINDER_ROOT_GAMEPAD:DeactivateCurrentList()
         ZO_ACTIVITY_FINDER_ROOT_GAMEPAD:RemoveListKeybinds()
         GAMEPAD_ACTIVITY_FINDER_ROOT_SCENE:RemoveFragmentGroup(FRAGMENT_GROUP.GAMEPAD_ACTIVITY_FINDER_QUEUE_DATA_DEPENDENCIES)
+    elseif PROMOTIONAL_EVENTS_LIST_GAMEPAD:IsShowing() then
+        PROMOTIONAL_EVENTS_LIST_GAMEPAD:DeactivateCurrentList()
+        PROMOTIONAL_EVENTS_LIST_GAMEPAD:RemoveListKeybinds()
     end
-    -- TODO Promotional Events: Add check for if there's more than one campaign to control drill in
-    
+
     self:SetDirectionalInputEnabled(true)
-    if not self:GetCurrentFocus() then
-        self:SelectFocusArea(self.overviewFocalArea)
+    if self:IsReturningPlayerRewardsEntrySelected() then
+        KEYBIND_STRIP:AddKeybindButtonGroup(self.rewardsGridListKeybindStripDesciptor)
+        self.rewardsGridList:Activate()
+    else
+        if not self:GetCurrentFocus() then
+            self:SelectFocusArea(self.overviewFocalArea)
+        end
+        self:ActivateCurrentFocus()
     end
-    self:ActivateCurrentFocus()
     PlaySound(SOUNDS.PROMOTIONAL_EVENTS_WINDOW_OPEN)
     self.isActive = true
 end
@@ -743,6 +927,10 @@ function ZO_PromotionalEvents_Gamepad:Deactivate()
     end
     self:SetDirectionalInputEnabled(false)
     self:DeactivateCurrentFocus()
+    if self.rewardsGridList:IsActive() then
+        self.rewardsGridList:Deactivate()
+        KEYBIND_STRIP:RemoveKeybindButtonGroup(self.rewardsGridListKeybindStripDesciptor)
+    end
     GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
     self.focusedRewardData = nil
     self.preferActivityDescriptionTooltip = false
@@ -751,6 +939,9 @@ function ZO_PromotionalEvents_Gamepad:Deactivate()
     if ZO_ACTIVITY_FINDER_ROOT_GAMEPAD:IsShowing() then
         ZO_ACTIVITY_FINDER_ROOT_GAMEPAD:AddListKeybinds()
         ZO_ACTIVITY_FINDER_ROOT_GAMEPAD:ActivateCurrentList()
+    elseif PROMOTIONAL_EVENTS_LIST_GAMEPAD:IsShowing() then
+        PROMOTIONAL_EVENTS_LIST_GAMEPAD:AddListKeybinds()
+        PROMOTIONAL_EVENTS_LIST_GAMEPAD:ActivateCurrentList()
     end
 end
 
@@ -844,6 +1035,10 @@ end
 
 function ZO_PromotionalEvents_Gamepad:ShowCapstoneDialog()
     ZO_Dialogs_ShowGamepadDialog("PROMOTIONAL_EVENT_CAPSTONE_GAMEPAD", { campaignData = self.currentCampaignData })
+end
+
+function ZO_PromotionalEvents_Gamepad:ShowClaimChoiceDialog(rewardData)
+    PROMOTIONAL_EVENTS_CLAIM_CHOICE_DIALOG_GAMEPAD:Show(rewardData)
 end
 
 function ZO_PromotionalEvents_Gamepad:ScrollToFirstClaimableReward()
@@ -943,33 +1138,20 @@ function ZO_PromotionalEvents_CapstoneDialog_Gamepad:Initialize(control)
                 enabled = true
             }
             table.insert(narrationData, viewInCollectionsNarrationData)
+            local nextCampaignNarrationData =
+            {
+                name = GetString(SI_PROMOTIONAL_EVENT_CAPSTONE_DIALOG_NEXT_CAMPAIGN_KEYBIND_LABEL),
+                keybindName = ZO_Keybindings_GetHighestPriorityNarrationStringFromAction("DIALOG_PRIMARY") or GetString(SI_ACTION_IS_NOT_BOUND),
+                enabled = true
+            }
+            table.insert(narrationData, nextCampaignNarrationData)
             return narrationData
         end,
         buttons =
         {
-            {
-                keybind = "DIALOG_SECONDARY",
-                text = SI_PROMOTIONAL_EVENT_CAPSTONE_DIALOG_VIEW_IN_COLLECTIONS_KEYBIND_LABEL,
-                clickSound = SOUNDS.DIALOG_ACCEPT,
-                alignment = KEYBIND_STRIP_ALIGN_CENTER,
-                callback = function() self:ViewInCollections() end,
-                visible = function(dialog)
-                    -- This code runs before setup
-                    local campaignData = dialog.data.campaignData
-                    local baseRewardData = campaignData:GetRewardData()
-                    local _, wasFallbackClaimed = campaignData:IsRewardClaimed()
-                    local displayRewardData = wasFallbackClaimed and baseRewardData:GetFallbackRewardData() or baseRewardData
-                    return displayRewardData:GetRewardType() == REWARD_ENTRY_TYPE_COLLECTIBLE
-                end,
-                ethereal = true,
-            },
-            {
-                keybind = "DIALOG_NEGATIVE",
-                text = SI_DIALOG_CLOSE,
-                clickSound = SOUNDS.DIALOG_DECLINE,
-                alignment = KEYBIND_STRIP_ALIGN_CENTER,
-                ethereal = true,
-            },
+            self.nextCampaignDescriptor,
+            self.viewInCollectionsDescriptor,
+            self.closeDescriptor,
         },
     })
 end
@@ -979,30 +1161,74 @@ function ZO_PromotionalEvents_CapstoneDialog_Gamepad:InitializeControls(control)
 
     local buttonsContainer = self.control:GetNamedChild("Buttons")
 
-    local viewInCollectionsDescriptor = 
+    self.nextCampaignDescriptor =
     {
-        name = GetString(SI_PROMOTIONAL_EVENT_CAPSTONE_DIALOG_VIEW_IN_COLLECTIONS_KEYBIND_LABEL),
+        keybind = "DIALOG_PRIMARY",
+        name = GetString(SI_PROMOTIONAL_EVENT_CAPSTONE_DIALOG_NEXT_CAMPAIGN_KEYBIND_LABEL),
+        clickSound = SOUNDS.DIALOG_ACCEPT,
+        alignment = KEYBIND_STRIP_ALIGN_CENTER,
+        callback = function(button)
+            local campaignData = self.campaignData
+            self:ShowNextCampaign(campaignData)
+        end,
+        visible = function()
+            local campaignData = self.campaignData
+            return campaignData:IsReturningPlayerCampaign() and GetCampaignKeyForNextReturningPlayerCampaign(campaignData:GetId()) ~= 0
+        end,
+        ethereal = true,
+    }
+    self.nextCampaignButton = buttonsContainer:GetNamedChild("NextCampaign")
+    self.nextCampaignButton:SetKeybindButtonDescriptor(self.nextCampaignDescriptor)
+
+    self.viewInCollectionsDescriptor =
+    {
         keybind = "DIALOG_SECONDARY",
-        callback = function() self:ViewInCollections() end,
+        name = GetString(SI_PROMOTIONAL_EVENT_CAPSTONE_DIALOG_VIEW_IN_COLLECTIONS_KEYBIND_LABEL),
+        clickSound = SOUNDS.DIALOG_ACCEPT,
+        alignment = KEYBIND_STRIP_ALIGN_CENTER,
+        callback = function()
+            self:ViewInCollections()
+        end,
+        visible = function()
+            -- This code runs before setup
+            local campaignData = self.campaignData
+            local baseRewardData = campaignData:GetRewardData()
+            local _, wasFallbackClaimed = campaignData:IsRewardClaimed()
+            local displayRewardData = wasFallbackClaimed and baseRewardData:GetFallbackRewardData() or baseRewardData
+            return displayRewardData:GetRewardType() == REWARD_ENTRY_TYPE_COLLECTIBLE
+        end,
+        ethereal = true,
     }
     self.viewInCollectionsButton = buttonsContainer:GetNamedChild("ViewInCollections")
-    self.viewInCollectionsButton:SetKeybindButtonDescriptor(viewInCollectionsDescriptor)
+    self.viewInCollectionsButton:SetKeybindButtonDescriptor(self.viewInCollectionsDescriptor)
 
-    local closeDescriptor = 
+    self.closeDescriptor =
     {
-        name = GetString(SI_DIALOG_CLOSE),
         keybind = "DIALOG_NEGATIVE",
-        callback = function() ZO_Dialogs_ReleaseDialog("PROMOTIONAL_EVENT_CAPSTONE_GAMEPAD") end
+        name = GetString(SI_DIALOG_CLOSE),
+        clickSound = SOUNDS.DIALOG_DECLINE,
+        alignment = KEYBIND_STRIP_ALIGN_CENTER,
+        callback = function()
+            ZO_Dialogs_ReleaseDialog("PROMOTIONAL_EVENT_CAPSTONE_GAMEPAD")
+            local campaignData = self.campaignData
+            if campaignData:AreAllRewardsClaimed() then
+                self:ShowNextCampaign(campaignData)
+            else
+                self:RefreshCampaignList()
+                PROMOTIONAL_EVENTS_LIST_GAMEPAD:SelectCampaign(campaignData)
+            end
+        end,
+        ethereal = true,
     }
     self.closeButton = buttonsContainer:GetNamedChild("Close")
-    self.closeButton:SetKeybindButtonDescriptor(closeDescriptor)
+    self.closeButton:SetKeybindButtonDescriptor(self.closeDescriptor)
 
     self.overlayGlowControl:SetColor(ZO_OFF_WHITE:UnpackRGB())
 end
 
 function ZO_PromotionalEvents_CapstoneDialog_Gamepad:InitializeParticleSystems()
     ZO_PromotionalEvents_CapstoneDialog_Shared.InitializeParticleSystems(self)
-    
+
     local blastParticleSystem = self.blastParticleSystem
 
     local headerSparksParticleSystem = self.headerSparksParticleSystem
@@ -1015,5 +1241,345 @@ end
 function ZO_PromotionalEvents_CapstoneDialog_Gamepad:SetCampaignData(campaignData)
     ZO_PromotionalEvents_CapstoneDialog_Shared.SetCampaignData(self, campaignData)
 
-    self.viewInCollectionsButton:SetHidden(self.displayRewardData:GetRewardType() ~= REWARD_ENTRY_TYPE_COLLECTIBLE)
+    self.nextCampaignButton:UpdateVisibility()
+    self.viewInCollectionsButton:UpdateVisibility()
+end
+
+function ZO_PromotionalEvents_CapstoneDialog_Gamepad:RefreshCampaignList()
+    PROMOTIONAL_EVENTS_LIST_GAMEPAD:RefreshList()
+end
+
+-- Choice Reward Claim Dialog --
+
+ZO_PromotionalEvents_ClaimChoiceDialog_Gamepad = ZO_Gamepad_ParametricList_Screen:Subclass()
+
+function ZO_PromotionalEvents_ClaimChoiceDialog_Gamepad:Initialize(control)
+    PROMOTIONAL_EVENTS_CLAIM_CHOICE_SCENE = ZO_Scene:New("promotionalEventsClaimChoice_Gamepad", SCENE_MANAGER)
+    local ACTIVATE_ON_SHOW = true
+    ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE, ACTIVATE_ON_SHOW, PROMOTIONAL_EVENTS_CLAIM_CHOICE_SCENE)
+    self.list = self:GetMainList()
+    local DEFAULT_EQUALITY_FUNCTION = nil
+    self.list:AddDataTemplate("ZO_PromotionalEvent_ChoiceRewardEntry_Template_GP", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, DEFAULT_EQUALITY_FUNCTION, "ChoiceRewardGP")
+
+    self.parentRewardableEventData = nil
+    self.currentSelectedChoice = nil
+
+    self:InitializeHeader()
+
+    self.fragment = ZO_SimpleSceneFragment:New(control)
+    PROMOTIONAL_EVENTS_CLAIM_CHOICE_FRAGMENT = self.fragment
+    self.fragment:SetHideOnSceneHidden(true)
+    self.scene:AddFragment(PROMOTIONAL_EVENTS_CLAIM_CHOICE_FRAGMENT)
+end
+
+function ZO_PromotionalEvents_ClaimChoiceDialog_Gamepad:InitializeHeader()
+    self.headerData =
+    {
+        titleText = GetString(SI_PROMOTIONAL_EVENT_CHOICE_REWARD_CLAIM_HEADER),
+    }
+    ZO_GamepadGenericHeader_Refresh(self.header, self.headerData)
+end
+
+function ZO_PromotionalEvents_ClaimChoiceDialog_Gamepad:InitializeKeybindStripDescriptors()
+    self.keybindStripDescriptor =
+    {
+        alignment = KEYBIND_STRIP_ALIGN_LEFT,
+        -- "Select" Keybind
+        {
+            name = GetString(SI_GAMEPAD_PROMOTIONAL_EVENT_SELECT_CHOICE),
+            keybind = "UI_SHORTCUT_PRIMARY",
+            callback = function()
+                local targetData = self.list:GetTargetData()
+                if targetData then
+                    self.currentSelectedChoice = targetData
+                    self:RefreshSelectedChoice()
+                end
+            end,
+        },
+         -- "Confirm" Keybind
+        {
+            name = GetString(SI_DIALOG_CONFIRM),
+            keybind = "UI_SHORTCUT_SECONDARY",
+            callback = function()
+                self.parentRewardableEventData:TryClaimReward(self.currentSelectedChoice.rewardId)
+                local remainingChoiceRewards = PROMOTIONAL_EVENTS_GAMEPAD:GetRemainingChoiceRewards()
+                table.remove(remainingChoiceRewards, 1)
+                if next(remainingChoiceRewards) ~= nil then
+                    PROMOTIONAL_EVENTS_GAMEPAD:TryClaimNextChoiceReward()
+                else
+                    self:Hide()
+                end
+            end,
+
+            enabled = function()
+                return self.parentRewardableEventData ~= nil and self.currentSelectedChoice ~= nil
+            end,
+        },
+
+        -- Back
+        KEYBIND_STRIP:GetDefaultGamepadBackButtonDescriptor(),
+    }
+end
+
+function ZO_PromotionalEvents_ClaimChoiceDialog_Gamepad:PerformUpdate()
+    self.dirty = false
+end
+
+function ZO_PromotionalEvents_ClaimChoiceDialog_Gamepad:Show(rewardableEventData)
+    self:SetRewardData(rewardableEventData)
+    SCENE_MANAGER:Push(self.scene:GetName())
+end
+
+function ZO_PromotionalEvents_ClaimChoiceDialog_Gamepad:Hide()
+    if self:IsShowing() then
+        SCENE_MANAGER:HideCurrentScene()
+    end
+end
+
+function ZO_PromotionalEvents_ClaimChoiceDialog_Gamepad:IsShowing()
+    return self.scene:IsShowing()
+end
+
+function ZO_PromotionalEvents_ClaimChoiceDialog_Gamepad:OnShow()
+    ZO_Gamepad_ParametricList_Screen.OnShow(self)
+    local selectedData = self.list:GetSelectedData()
+    self:RefreshTooltips(selectedData)
+end
+
+function ZO_PromotionalEvents_ClaimChoiceDialog_Gamepad:OnHide()
+    ZO_Gamepad_ParametricList_Screen.OnHide(self)
+
+    GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
+end
+
+-- Overridden from base
+function ZO_PromotionalEvents_ClaimChoiceDialog_Gamepad:OnSelectionChanged(list, selectedData, oldSelectedData)
+    self:RefreshTooltips(selectedData)
+end
+
+function ZO_PromotionalEvents_ClaimChoiceDialog_Gamepad:CreateRewardEntry(rewardEntryData)
+    local name = rewardEntryData:GetFormattedName()
+    local icon = rewardEntryData:GetGamepadLootIcon()
+    local entryData = ZO_GamepadEntryData:New(name, icon)
+    entryData:SetStackCount(rewardEntryData:GetQuantity())
+    entryData:SetNameColors(entryData:GetColorsBasedOnQuality(rewardEntryData:GetItemDisplayQuality()))
+    entryData:SetDataSource(rewardEntryData)
+
+    return entryData
+end
+
+function ZO_PromotionalEvents_ClaimChoiceDialog_Gamepad:RefreshSelectedChoice()
+    local numRewardEntries = self.list:GetNumEntries()
+    for listIndex = 1, numRewardEntries do
+        local entryData = self.list:GetEntryData(listIndex)
+        entryData:SetSelected(entryData == self.currentSelectedChoice)
+    end
+
+    self.list:RefreshVisible()
+    self:RefreshKeybinds()
+end
+
+function ZO_PromotionalEvents_ClaimChoiceDialog_Gamepad:RefreshTooltips(selectedData)
+    GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
+    GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
+    if selectedData then
+        local rewardType = selectedData:GetRewardType()
+        if rewardType then
+            GAMEPAD_TOOLTIPS:LayoutRewardData(GAMEPAD_LEFT_TOOLTIP, selectedData)
+            if rewardType == REWARD_ENTRY_TYPE_ITEM then
+                local itemLink = selectedData:GetItemLink()
+                if itemLink then
+                    ZO_LayoutItemLinkEquippedComparison(GAMEPAD_RIGHT_TOOLTIP, itemLink)
+                end
+            end
+        end
+    end
+end
+
+function ZO_PromotionalEvents_ClaimChoiceDialog_Gamepad:SetRewardData(rewardableEventData)
+    self.parentRewardableEventData = rewardableEventData
+    local rewardData = self.parentRewardableEventData:GetRewardData()
+
+    self.list:Clear()
+
+    for _, reward in ipairs(rewardData:GetChoices()) do
+        local entryData = self:CreateRewardEntry(reward)
+        entryData:SetSelected(self.currentSelectedChoice == reward)
+        self.list:AddEntry("ZO_PromotionalEvent_ChoiceRewardEntry_Template_GP", entryData)
+    end
+
+    self.list:CommitWithoutReselect()
+end
+
+function ZO_PromotionalEvents_ClaimChoiceDialog_Gamepad.OnControlInitialized(control)
+    PROMOTIONAL_EVENTS_CLAIM_CHOICE_DIALOG_GAMEPAD = ZO_PromotionalEvents_ClaimChoiceDialog_Gamepad:New(control)
+end
+
+-- Reward List Scene --
+
+ZO_PromotionalEvents_RewardList_Screen_Gamepad = ZO_Gamepad_ParametricList_Screen:Subclass()
+
+function ZO_PromotionalEvents_RewardList_Screen_Gamepad:Initialize(control)
+    PROMOTIONAL_EVENTS_REWARD_LIST_SCENE = ZO_Scene:New("promotionalEventsRewardList_Gamepad", SCENE_MANAGER)
+    local ACTIVATE_ON_SHOW = true
+    ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE, ACTIVATE_ON_SHOW, PROMOTIONAL_EVENTS_REWARD_LIST_SCENE)
+    self.list = self:GetMainList()
+    self:InitializeHeader()
+
+    self.fragment = ZO_SimpleSceneFragment:New(control)
+    PROMOTIONAL_EVENTS_REWARD_LIST_FRAGMENT = self.fragment
+    self.fragment:SetHideOnSceneHidden(true)
+    self.scene:AddFragment(PROMOTIONAL_EVENTS_REWARD_LIST_FRAGMENT)
+end
+
+function ZO_PromotionalEvents_RewardList_Screen_Gamepad:InitializeKeybindStripDescriptors()
+    self.keybindStripDescriptor =
+    {
+        alignment = KEYBIND_STRIP_ALIGN_LEFT,
+        -- "Preview" Keybind
+        {
+            name =  function()
+                        if IsCurrentlyPreviewing() then
+                            return GetString(SI_PROMOTIONAL_EVENT_REWARD_END_PREVIEW_ACTION)
+                        else
+                            return GetString(SI_PROMOTIONAL_EVENT_REWARD_PREVIEW_ACTION)
+                        end
+                    end,
+            keybind = "UI_SHORTCUT_SECONDARY",
+            callback = function()
+                self:TogglePreview()
+            end,
+
+            enabled = function()
+                return IsCharacterPreviewingAvailable(), GetString(SI_PREVIEW_UNAVAILABLE_ERROR)
+            end,
+
+            visible = function()
+                local targetData = self.list:GetTargetData()
+                if targetData then
+                    return CanPreviewReward(targetData:GetRewardId())
+                end
+                return false
+            end,
+        },
+
+        -- Back
+        KEYBIND_STRIP:GetDefaultGamepadBackButtonDescriptor(),
+    }
+end
+
+function ZO_PromotionalEvents_RewardList_Screen_Gamepad:InitializeHeader()
+    self.headerData =
+    {
+        titleText = GetString(SI_GAMEPAD_TOOLTIPS_REWARD_LIST_HEADER),
+    }
+    ZO_GamepadGenericHeader_Refresh(self.header, self.headerData)
+end
+
+function ZO_PromotionalEvents_RewardList_Screen_Gamepad:OnShowing()
+    ZO_Gamepad_ParametricList_Screen.OnShowing(self)
+    if self.queuedRewardListId ~= nil then
+        self:ShowRewardList(self.queuedRewardListId)
+        self.queuedRewardListId = nil
+    end
+end
+
+function ZO_PromotionalEvents_RewardList_Screen_Gamepad:OnHiding()
+    GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
+    self:EndPreview()
+end
+
+function ZO_PromotionalEvents_RewardList_Screen_Gamepad:SetRewardList(rewardListId)
+    if SCENE_MANAGER:IsShowing(self.scene.name) then
+        self:ShowRewardList(rewardListId)
+    else
+        self.queuedRewardListId = rewardListId
+    end
+end
+
+function ZO_PromotionalEvents_RewardList_Screen_Gamepad:ShowRewardList(rewardListId)
+    self.list:Clear()
+
+    local rewards = REWARDS_MANAGER:GetAllRewardInfoForRewardList(rewardListId)
+
+    for index, reward in ipairs(rewards) do
+        local name = reward:GetFormattedName()
+        local iconTextureFile = reward:GetGamepadIcon()
+        local entryData = ZO_GamepadEntryData:New(name, iconTextureFile)
+
+        entryData:SetDataSource(reward)
+        entryData:SetStackCount(reward:GetQuantity())
+
+        local displayQuality = reward:GetItemDisplayQuality()
+        entryData.displayQuality = displayQuality or ITEM_DISPLAY_QUALITY_NORMAL
+        entryData:SetNameColors(entryData:GetColorsBasedOnQuality(displayQuality))
+
+        entryData.hasPreview = CanPreviewReward(reward:GetRewardId())
+
+        self.list:AddEntry("ZO_GamepadMenuEntryTemplate", entryData)
+    end
+
+    self.list:Commit()
+    self.list:SetSelectedIndexWithoutAnimation(1)
+end
+
+function ZO_PromotionalEvents_RewardList_Screen_Gamepad:OnTargetChanged(list, targetData, oldTargetData)
+    GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
+
+    if targetData then
+        local rewardId = targetData:GetRewardId()
+        if rewardId and rewardId ~= 0 then
+            GAMEPAD_TOOLTIPS:LayoutReward(GAMEPAD_LEFT_TOOLTIP, rewardId, targetData:GetQuantity(), REWARD_DISPLAY_FLAGS_FROM_CROWN_STORE_CONTAINER)
+        end
+        self:UpdatePreview()
+    end
+end
+
+function ZO_PromotionalEvents_RewardList_Screen_Gamepad:TogglePreview()
+    if IsCurrentlyPreviewing() then
+        self:EndPreview()
+    else
+        local targetData = self.list:GetTargetData()
+        if targetData and targetData.hasPreview then
+            local rewardId = targetData:GetRewardId()
+            if rewardId then
+                local previewInEmptyWorld = targetData:GetRewardType() == REWARD_TYPE_ITEM
+                ITEM_PREVIEW_GAMEPAD:SetPreviewInEmptyWorld(previewInEmptyWorld)
+                ITEM_PREVIEW_GAMEPAD:PreviewReward(rewardId)
+            end
+        end
+    end
+    self:RefreshKeybinds()
+    SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.list)
+end
+
+function ZO_PromotionalEvents_RewardList_Screen_Gamepad:UpdatePreview()
+    if IsCurrentlyPreviewing() then
+        local targetData = self.list:GetTargetData()
+        if targetData and targetData.hasPreview then
+            local rewardId = targetData:GetRewardId()
+            if rewardId then
+                local previewInEmptyWorld = targetData:GetRewardType() == REWARD_TYPE_ITEM
+                ITEM_PREVIEW_GAMEPAD:SetPreviewInEmptyWorld(previewInEmptyWorld)
+                ITEM_PREVIEW_GAMEPAD:PreviewReward(rewardId)
+            end
+        else
+            self:EndPreview()
+        end
+    end
+    self:RefreshKeybinds()
+end
+
+function ZO_PromotionalEvents_RewardList_Screen_Gamepad:EndPreview()
+    ITEM_PREVIEW_GAMEPAD:EndCurrentPreview()
+    self:RefreshKeybinds()
+end
+
+function ZO_PromotionalEvents_RewardList_Screen_Gamepad:PerformUpdate()
+    -- This function is required but unused
+    self.dirty = false
+end
+
+function ZO_PromotionalEvents_RewardList_Screen_Gamepad.OnControlInitialized(control)
+    PROMOTIONAL_EVENTS_REWARD_LIST_SCREEN_GAMEPAD = ZO_PromotionalEvents_RewardList_Screen_Gamepad:New(control)
 end

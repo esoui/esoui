@@ -482,7 +482,7 @@ function ZO_CompanionEquipment_Gamepad:SetSelectedInventoryData(inventoryData)
     -- this also prevents issues where we get 2 single slot updates while showing but only refresh for the first one
     if ZO_Dialogs_IsShowing(ZO_GAMEPAD_INVENTORY_ACTION_DIALOG) then
         if inventoryData then
-            if self.selectedItemUniqueId and CompareId64s(inventoryData.uniqueId, self.selectedItemUniqueId) ~= 0 then
+            if self.selectedItemUniqueId and not AreId64sEqual(inventoryData.uniqueId, self.selectedItemUniqueId) then
                 ZO_Dialogs_ReleaseDialog(ZO_GAMEPAD_INVENTORY_ACTION_DIALOG) -- The previously selected item no longer exists, back out of the command list
             end
         elseif self.currentListType == INVENTORY_CATEGORY_LIST then

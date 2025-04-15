@@ -18,6 +18,13 @@ panelBuilder:AddSetting({
 })
 
 panelBuilder:AddSetting({
+    controlName = "Options_Camera_InvertX",
+    settingType = SETTING_TYPE_CAMERA,
+    settingId = CAMERA_SETTING_INVERT_X,
+    header = SI_CAMERA_OPTIONS_GLOBAL,
+})
+
+panelBuilder:AddSetting({
     controlName = "Options_Camera_FOVChangesAllowed",
     settingType = SETTING_TYPE_CAMERA,
     settingId = CAMERA_SETTING_FOV_CHANGES_ALLOWED,

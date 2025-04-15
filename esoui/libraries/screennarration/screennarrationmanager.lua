@@ -995,21 +995,12 @@ do
     function ZO_ScreenNarrationManager:GetKeybindNarrationFromData(name, keybind, enabled)
         local keybindNarration = self:CreateNarratableObject(nil, KEYBIND_PAUSE_TIME_MS)
         local keybindName = ZO_Keybindings_GetHighestPriorityNarrationStringFromAction(keybind) or GetString(SI_ACTION_IS_NOT_BOUND)
+        local narrationText
         if name then
-            local formatter
-            if i == 1 then
-                formatter = enabled and SI_SCREEN_NARRATION_FIRST_KEYBIND_FORMATTER or SI_SCREEN_NARRATION_DISABLED_FIRST_KEYBIND_FORMATTER
-            else
-                formatter = enabled and SI_SCREEN_NARRATION_KEYBIND_FORMATTER or SI_SCREEN_NARRATION_DISABLED_KEYBIND_FORMATTER
-            end
+            local formatter = enabled and SI_SCREEN_NARRATION_KEYBIND_FORMATTER or SI_SCREEN_NARRATION_DISABLED_KEYBIND_FORMATTER
             narrationText = zo_strformat(formatter, keybindName, name)
         else
-            local formatter
-            if i == 1 then
-                formatter = enabled and SI_SCREEN_NARRATION_FIRST_KEYBIND_FORMATTER_NO_LABEL or SI_SCREEN_NARRATION_DISABLED_FIRST_KEYBIND_FORMATTER_NO_LABEL
-            else
-                formatter = enabled and SI_SCREEN_NARRATION_KEYBIND_FORMATTER_NO_LABEL or SI_SCREEN_NARRATION_DISABLED_KEYBIND_FORMATTER_NO_LABEL
-            end
+            local formatter = enabled and SI_SCREEN_NARRATION_KEYBIND_FORMATTER_NO_LABEL or SI_SCREEN_NARRATION_DISABLED_KEYBIND_FORMATTER_NO_LABEL
             narrationText = zo_strformat(formatter, keybindName)
         end
         keybindNarration:AddNarrationText(narrationText)

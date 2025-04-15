@@ -44,6 +44,16 @@ local function IsSystemNotUsingHDR()
     return not IsSystemUsingHDR()
 end
 
+--This is used to disable the Resolution drop down when using HDR or when in windowed mode, since in that situation we use the Desktop resolution to avoid any issue with DXGI
+local function ZO_OptionsPanel_Video_UpdateResolutionDropdown(control)
+    if IsSystemUsingHDR() or IsGameInWindowedMode() then
+        ZO_Options_SetOptionInactive(control)
+    else
+        ZO_Options_SetOptionActive(control)
+    end
+    ZO_Options_UpdateOption(control)
+end
+
 local function InitializeResolution(control, ...)
     local valid = {}
     local itemText = {}
@@ -61,8 +71,7 @@ local function InitializeResolution(control, ...)
     control.data.itemText = itemText
 
     ZO_OptionsWindow_InitializeControl(control)
-
-    ZO_Options_SetOptionActiveOrInactive(control, tonumber(GetSetting(SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_FULLSCREEN)) == FULLSCREEN_MODE_FULLSCREEN_EXCLUSIVE)
+    ZO_OptionsPanel_Video_UpdateResolutionDropdown(control)
 end
 
 function ZO_OptionsPanel_Video_InitializeDisplays(control)
@@ -75,7 +84,7 @@ function ZO_OptionsPanel_Video_OnActiveDisplayChanged(control)
 end
 
 function ZO_OptionsPanel_Video_InitializeResolution(control)
-    local DEFAULT_DISPLAY_INDEX = 1
+    local displayIndex = 1 + tonumber(GetSetting(SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_ACTIVE_DISPLAY))
     InitializeResolution(control, GetDisplayModes(DEFAULT_DISPLAY_INDEX))
 end
 
@@ -164,7 +173,7 @@ function ZO_OptionsPanel_Video_HasConsoleRenderQualitySetting()
 end
 
 local function OnHDRToggleUpdated(control)
-    if GetSetting_Bool(SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_HDR_ENABLED) then
+    if IsSystemUsingHDR() then
         ZO_Options_SetOptionActive(control)
     else
         ZO_Options_SetOptionInactive(control)
@@ -236,10 +245,11 @@ local ZO_OptionsPanel_Video_ControlData =
 
             eventCallbacks =
             {
-                ["DisplayModeWindowed"] = ZO_Options_SetOptionInactive,
-                ["DisplayModeFullscreenWindowed"] = ZO_Options_SetOptionInactive,
-                ["DisplayModeFullscreenExclusive"] = ZO_Options_SetOptionActive,
+                ["DisplayModeWindowed"] = ZO_OptionsPanel_Video_OnDisplayResolutionChanged,
+                ["DisplayModeFullscreenExclusive"] = ZO_OptionsPanel_Video_OnDisplayResolutionChanged,
                 ["ActiveDisplayChanged"] = ZO_OptionsPanel_Video_OnDisplayResolutionChanged,
+				["OnHDRToggled"] = ZO_OptionsPanel_Video_OnDisplayResolutionChanged,
+				["DisplayModeFullscreenWindowed"] = ZO_OptionsPanel_Video_OnDisplayResolutionChanged,
             },
         },
         --Options_Video_VSync
@@ -684,7 +694,7 @@ local ZO_OptionsPanel_Video_ControlData =
             valid = { GRAPHICS_MODE_FIDELITY, GRAPHICS_MODE_PERFORMANCE },
             valueStringPrefix = "SI_GRAPHICSMODE",
             mustPushApply = false,
-            exists = GetUIPlatform() == UI_PLATFORM_PS5
+            exists =  DoesPlatformSupportGraphicSetting(GRAPHICS_SETTING_GRAPHICS_MODE_PS5)
         },
         [GRAPHICS_SETTING_GRAPHICS_MODE_XBSS] =
         {

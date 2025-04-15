@@ -167,7 +167,7 @@ local ChannelInfo =
         playerLinkable = true,
         channelLinkable = false,
         supportCSIcon = true,
-        switches = GetString(SI_CHANNEL_SWITCH_YELL)
+        switches = GetString(SI_CHANNEL_SWITCH_YELL),
     },
     [CHAT_CHANNEL_ZONE] =
     {
@@ -176,7 +176,7 @@ local ChannelInfo =
         playerLinkable = true,
         channelLinkable = false,
         supportCSIcon = true,
-        switches = GetString(SI_CHANNEL_SWITCH_ZONE)
+        switches = GetString(SI_CHANNEL_SWITCH_ZONE),
     },
     [CHAT_CHANNEL_PARTY] =
     {
@@ -190,7 +190,7 @@ local ChannelInfo =
             return IsUnitGrouped("player")
         end,
         deferRequirement = true,
-        requirementErrorMessage = GetString(SI_GROUP_NOTIFICATION_YOU_ARE_NOT_IN_A_GROUP)
+        requirementErrorMessage = GetString("SI_GROUPNOTIFICATIONMESSAGE", GROUP_MSG_YOU_ARE_NOT_IN_A_GROUP),
     },
     [CHAT_CHANNEL_WHISPER] =
     {
@@ -382,7 +382,7 @@ if not IsConsoleUI() then
             playerLinkable = true,
             channelLinkable = false,
             supportCSIcon = true,
-            switches = GetString("SI_OFFICIALLANGUAGE_ZONECHATCHANNELSWITCH", language)
+            switches = GetString("SI_OFFICIALLANGUAGE_ZONECHATCHANNELSWITCH", language),
         }
     end
 end

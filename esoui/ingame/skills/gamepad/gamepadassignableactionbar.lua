@@ -4,13 +4,13 @@
     without changing the real action bar.
 ]]--
 
-ZO_AssignableActionBar = ZO_InitializingCallbackObject:Subclass()
+ZO_AssignableActionBar = ZO_GamepadFocus:Subclass()
 
 function ZO_AssignableActionBar:Initialize(control)
-    self.control = control
+    local CREATE_NEW_MOVMENT_CONTROLLER = nil
+    ZO_GamepadFocus.Initialize(self, control, CREATE_NEW_MOVMENT_CONTROLLER, MOVEMENT_CONTROLLER_DIRECTION_HORIZONTAL)
     self.interpolator = ZO_SimpleControlScaleInterpolator:New(1.0, 1.28)
     self.headerLabel = control:GetNamedChild("Header")
-    self.movementController = ZO_MovementController:New(MOVEMENT_CONTROLLER_DIRECTION_HORIZONTAL)
     self.selectedButtonIndex = nil
     self.mostRecentlySelectedActionSlotIndex = nil
 

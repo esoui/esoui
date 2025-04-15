@@ -1,10 +1,28 @@
-ZO_SkillsAndActionBarManager = ZO_CallbackObject:Subclass()
+-----------------------------
+-- Base Assignment Manager --
+-----------------------------
 
-function ZO_SkillsAndActionBarManager:New(...)
-    local manager = ZO_CallbackObject.New(self)
-    manager:Initialize(...)
-    return manager
+ZO_SkillsAssignmentManager_Base = ZO_InitializingCallbackObject:Subclass()
+
+function ZO_SkillsAssignmentManager_Base:Initialize(readyFunction)
+    self:RegisterForEvents()
+
+    readyFunction(SKILLS_AND_ACTION_BAR_MANAGER, self)
 end
+
+function ZO_SkillsAssignmentManager_Base:RegisterForEvents()
+    -- Can be overridden
+end
+
+ZO_SkillsAssignmentManager_Base:MUST_IMPLEMENT("IsAnyChangePending")
+ZO_SkillsAssignmentManager_Base:MUST_IMPLEMENT("AddChangesToMessage")
+ZO_SkillsAssignmentManager_Base:MUST_IMPLEMENT("DoPendingChangesIncurCost")
+
+--------------------
+-- Global Manager --
+--------------------
+
+ZO_SkillsAndActionBarManager = ZO_InitializingCallbackObject:Subclass()
 
 function ZO_SkillsAndActionBarManager:Initialize()
     self.skillPointAllocationMode = SKILL_POINT_ALLOCATION_MODE_PURCHASE_ONLY
@@ -25,6 +43,9 @@ function ZO_SkillsAndActionBarManager:SetSkillPointAllocationMode(skillPointAllo
     if skillPointAllocationMode ~= self.skillPointAllocationMode then
         local oldSkillPointAllocationMode = self.skillPointAllocationMode
         self.skillPointAllocationMode = skillPointAllocationMode
+        if self:DoesSkillPointAllocationModeBatchSave() then
+            PlaySound(SOUNDS.SKILLS_ENTER_RESPEC_MODE)
+        end
         self:FireCallbacks("SkillPointAllocationModeChanged", skillPointAllocationMode, oldSkillPointAllocationMode)
     end
 
@@ -59,6 +80,10 @@ function ZO_SkillsAndActionBarManager:DoesSkillPointAllocationModeAllowDecrease(
     return self.skillPointAllocationMode ~= SKILL_POINT_ALLOCATION_MODE_PURCHASE_ONLY
 end
 
+function ZO_SkillsAndActionBarManager:DoesSkillPointAllocationModeAllowClear()
+    return self.skillPointAllocationMode ~= SKILL_POINT_ALLOCATION_MODE_PURCHASE_ONLY and self.skillPointAllocationMode ~= SKILL_POINT_ALLOCATION_MODE_SUBCLASS_ONLY
+end
+
 function ZO_SkillsAndActionBarManager:DoesSkillPointAllocationModeBatchSave()
     return self.skillPointAllocationMode ~= SKILL_POINT_ALLOCATION_MODE_PURCHASE_ONLY
 end
@@ -69,6 +94,27 @@ end
 
 function ZO_SkillsAndActionBarManager:DoesSkillPointAllocationModeConfirmOnIncreaseRank()
     return self.skillPointAllocationMode == SKILL_POINT_ALLOCATION_MODE_PURCHASE_ONLY
+end
+
+function ZO_SkillsAndActionBarManager:DoesSkillPointAllocationModeAllowAccessToSubclassing()
+    -- SUBCLASSING_ACCESS_LEVEL_CONDITIONAL is a special state when you're on the specific intro quest step to engage with the system.
+    -- Technically while on this state you have access, but only SKILL_POINT_ALLOCATION_MODE_SUBCLASS_ONLY will work.
+    -- So to make the UX make sense, we'll only let you into the system if you're in that mode.
+    local subclassingAccessLevel = GetSubclassingAccessLevel()
+    if subclassingAccessLevel == SUBCLASSING_ACCESS_LEVEL_FULL then
+        return true
+    elseif subclassingAccessLevel == SUBCLASSING_ACCESS_LEVEL_CONDITIONAL then
+        return self.skillPointAllocationMode == SKILL_POINT_ALLOCATION_MODE_SUBCLASS_ONLY
+    end
+    return false
+end
+
+function ZO_SkillsAndActionBarManager:DoesSkillPointAllocationModeAllowSkillLineRespec()
+    return self.skillPointAllocationMode == SKILL_POINT_ALLOCATION_MODE_FULL or self.skillPointAllocationMode == SKILL_POINT_ALLOCATION_MODE_SUBCLASS_ONLY
+end
+
+function ZO_SkillsAndActionBarManager:DoesSkillPointAllocationModeAllowSkillLineTraining()
+    return self.skillPointAllocationMode == SKILL_POINT_ALLOCATION_MODE_FULL or self.skillPointAllocationMode == SKILL_POINT_ALLOCATION_MODE_SUBCLASS_ONLY
 end
 
 function ZO_SkillsAndActionBarManager:OnUpdate()
@@ -82,14 +128,16 @@ function ZO_SkillsAndActionBarManager:OnStartRespec(allocationMode, paymentType)
     self:SetSkillRespecPaymentType(paymentType)
     self:SetSkillPointAllocationMode(allocationMode)
     if IsInGamepadPreferredMode() then
+        GAMEPAD_SKILLS:SelectEntryByAllocationMode()
         SCENE_MANAGER:Push("gamepad_skills_root")
     else
+        SKILLS_WINDOW:SelectEntryByAllocationMode()
         SCENE_MANAGER:Push("skills")
     end
 end
 
 do
-    internalassert(RESPEC_RESULT_MAX_VALUE == 46, "Update EXPECTED_RESPEC_FAILURES")
+    internalassert(RESPEC_RESULT_MAX_VALUE == 72, "Update EXPECTED_RESPEC_FAILURES")
     local EXPECTED_RESPEC_FAILURES =
     {
         [RESPEC_RESULT_IS_IN_COMBAT] = true,
@@ -97,6 +145,11 @@ do
         [RESPEC_RESULT_ABILITY_DISABLED] = true,
         [RESPEC_RESULT_SCRIBING_DISABLED] = true,
         [RESPEC_RESULT_CRAFTED_ABILITY_SCRIPT_DISABLED] = true,
+        [RESPEC_RESULT_SUBCLASSING_ABILITY_PURCHASE_DISABLED] = true,
+        [RESPEC_RESULT_SUBCLASSING_SKILL_SWAPPING_DISABLED] = true,
+        [RESPEC_RESULT_SKILL_SWAPPING_DISABLED] = true,
+        [RESPEC_RESULT_SUBCLASSING_TRAINING_DISABLED] = true,
+        [RESPEC_RESULT_SUBCLASSING_DISABLED] = true
     }
     function ZO_SkillsAndActionBarManager:OnSkillRespecResult(result)
         if result == RESPEC_RESULT_SUCCESS then
@@ -135,6 +188,15 @@ function ZO_SkillsAndActionBarManager:HasAnyPendingChanges()
     return false
 end
 
+function ZO_SkillsAndActionBarManager:DoPendingChangesIncurCost()
+    for _, manager in ipairs(self.managers) do
+        if manager:DoPendingChangesIncurCost() then
+            return true
+        end
+    end
+    return false
+end
+
 function ZO_SkillsAndActionBarManager:OnSkillPointAllocationManagerReady(manager)
     table.insert(self.managers, manager)
 
@@ -159,6 +221,17 @@ function ZO_SkillsAndActionBarManager:OnActionBarAssignmentManagerReady(manager)
     end
 
     manager:RegisterCallback("SlotUpdated", OnSlotUpdated)
+end
+
+function ZO_SkillsAndActionBarManager:OnSkillLineAssignmentManagerReady(manager)
+    table.insert(self.managers, manager)
+
+    local function MarkDirty()
+        self:MarkDirty()
+    end
+
+    manager:RegisterCallback("TrainingChanged", MarkDirty)
+    manager:RegisterCallback("LineSwapped", MarkDirty)
 end
 
 function ZO_SkillsAndActionBarManager:MarkDirty()

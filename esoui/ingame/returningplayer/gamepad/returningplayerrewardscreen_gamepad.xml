@@ -1,0 +1,126 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_ReturningPlayerRewardsReward_Gamepad" inherits="ZO_ReturningPlayerRewardsReward_Shared" virtual="true">
+            <Dimensions x="ZO_RETURNING_PLAYER_REWARDS_REWARD_DIMENSIONS_GAMEPAD" y="ZO_RETURNING_PLAYER_REWARDS_REWARD_DIMENSIONS_GAMEPAD" />
+
+            <Controls>
+                <Control name="$(parent)Container" override="true">
+                    <Controls>
+                        <Backdrop name="$(parent)Backdrop" override="true" inherits="ZO_CenterlessBackdrop" />
+
+                        <Label name="$(parent)Quantity" override="true" font="ZoFontGamepad25" inheritScale="false" />
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_ReturningPlayerDailyReward_Gamepad" inherits="ZO_ReturningPlayerRewardsDailyReward_Shared" virtual="true">
+            <Dimensions x="ZO_RETURNING_PLAYER_REWARDS_REWARD_DIMENSIONS_GAMEPAD" y="ZO_RETURNING_PLAYER_REWARDS_DAILY_REWARD_HEIGHT_GAMEPAD" />
+
+            <Controls>
+                <Control name="$(parent)Container" override="true">
+                    <Dimensions x="ZO_RETURNING_PLAYER_REWARDS_REWARD_DIMENSIONS_GAMEPAD" y="ZO_RETURNING_PLAYER_REWARDS_REWARD_DIMENSIONS_GAMEPAD" />
+                    <Anchor point="TOPLEFT" />
+                    
+                    <Controls>
+                        <Backdrop name="$(parent)Backdrop" override="true" inherits="ZO_CenterlessBackdrop" />
+
+                        <Label name="$(parent)Quantity" override="true" font="ZoFontGamepad25" inheritScale="false" />
+                    </Controls>
+                </Control>
+
+                <Label name="$(parent)Day" override="true" font="ZoFontGamepadCondensed27" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_ReturningPlayerRewardsRewardInfoContainer_Gamepad" inherits="ZO_ReturningPlayerRewardsRewardInfoContainer_Shared" virtual="true">
+            <Controls>
+                <Backdrop name="$(parent)EdgeFrame" inherits="ZO_GamepadNormalOutlineHighlight" tier="HIGH" excludeFromResizeToFitExtents="true">
+                    <Anchor point="TOPLEFT" offsetX="-4" offsetY="-4"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="4" offsetY="4"/>
+                    <Center file="EsoUI/Art/Miscellaneous/Gamepad/gp_edgeFill.dds" />
+                </Backdrop>
+                
+                <Label name="$(parent)Title" override="true" font="ZoFontGamepad34" />
+
+                <Control name="$(parent)Rewards" override="true" inherits="ZO_GridScrollList_NotAnchored_Gamepad">
+                    <Dimensions x="ZO_RETURNING_PLAYER_REWARDS_GRID_WIDTH_GAMEPAD" y="ZO_RETURNING_PLAYER_REWARDS_GRID_HEIGHT_GAMEPAD" />
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_ReturningPlayerRewardsDailyRewardInfoContainer_Gamepad" inherits="ZO_ReturningPlayerRewardsDailyRewardInfoContainer_Shared" virtual="true">
+            <Controls>
+                <Backdrop name="$(parent)EdgeFrame" inherits="ZO_GamepadNormalOutlineHighlight" tier="HIGH" excludeFromResizeToFitExtents="true">
+                    <Anchor point="TOPLEFT" offsetX="-4" offsetY="-4"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="4" offsetY="4"/>
+                    <Center file="EsoUI/Art/Miscellaneous/Gamepad/gp_edgeFill.dds" />
+                </Backdrop>
+
+                <Label name="$(parent)Title" override="true" font="ZoFontGamepad34" />
+
+                <Label name="$(parent)ClaimHeader" override="true" font="ZoFontGamepadCondensed27" />
+
+                <Control name="$(parent)Rewards" override="true" inherits="ZO_GridScrollList_NotAnchored_Gamepad">
+                    <Dimensions x="ZO_RETURNING_PLAYER_REWARDS_GRID_WIDTH_GAMEPAD" y="ZO_RETURNING_PLAYER_REWARDS_DAILY_LOGIN_GRID_HEIGHT_GAMEPAD" />
+                </Control>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_ReturningPlayerReward_GamepadTL" inherits="ZO_ReturningPlayerReward_SharedTL">
+            <Dimensions x="1000" y="735"/>
+            <Anchor point="RIGHT" relativeTo="GuiRoot" offsetX="ZO_RETURNING_PLAYER_REWARDS_PANEL_RIGHT_OFFSET_GAMEPAD" />
+
+            <OnInitialized>
+                ZO_ReturningPlayerRewardScreen_Gamepad.OnControlInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)BG">
+                    <AnchorFill/>
+                    <Controls>
+                        <Texture name="$(parent)Fill" color="000000" alpha="0.8">
+                            <AnchorFill/>
+                        </Texture>
+                        
+                        <Backdrop name="$(parent)EdgeFrame" inherits="ZO_GamepadNormalOutlineHighlight" tier="HIGH" excludeFromResizeToFitExtents="true">
+                            <Anchor point="TOPLEFT" offsetX="-4" offsetY="-4"/>
+                            <Anchor point="BOTTOMRIGHT" offsetX="4" offsetY="4"/>
+                        </Backdrop>
+                    </Controls>
+                </Control>
+                
+                <Control name="$(parent)Header" override="true">
+                    <Controls>
+                        <Control name="$(parent)TopDivider" override="true" inherits="ZO_PlatformStyleDynamicHorizontalDivider_Gamepad_Template" />
+                        <Label name="$(parent)Text" override="true" font="ZoFontGamepad34">
+                            <Dimensions y="40"/>
+                        </Label>
+                        <Control name="$(parent)BottomDivider" override="true" inherits="ZO_PlatformStyleDynamicHorizontalDivider_Gamepad_Template" />
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)SubHeader" override="true">
+                    <Controls>
+                        <Label name="$(parent)Title" override="true" font="ZoFontGamepad34" />
+                        <Label name="$(parent)TimeRemaining" override="true" font="ZoFontGamepadCondensed27" />
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)LoginBonus" override="true" inherits="ZO_ReturningPlayerRewardsDailyRewardInfoContainer_Gamepad" />
+
+                <Control name="$(parent)CampaignInfo" override="true" inherits="ZO_ReturningPlayerRewardsRewardInfoContainer_Gamepad" />
+
+                <Label name="$(parent)BodyText" override="true" font="ZoFontGamepad27" />
+
+                <Control name="$(parent)GoToPromotionalEvent" inherits="ZO_KeybindButton">
+                    <Anchor point="RIGHT" relativeTo="$(parent)Close" relativePoint="LEFT" offsetX="-15" />
+                </Control>
+
+                <Control name="$(parent)Primary" override="true">
+                    <Anchor point="RIGHT" relativeTo="$(parent)GoToPromotionalEvent" relativePoint="LEFT" offsetX="-15" />
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

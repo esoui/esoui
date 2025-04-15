@@ -147,7 +147,7 @@ end
 
 function ZO_WorldSelect_Cancel()
     SetCVar("QuickLaunch", "0")
-    PregameStateManager_SetState("AccountLogin")
+    PregameStateManager_SetState("WaitForPreloginWorld")
 end
 
 function ZO_WorldSelect_Initialize(control)

@@ -237,7 +237,7 @@ function ZO_Reticle:TryHandlingInteraction(interactionPossible, currentFrameTime
                 --Don't attempt to add the collectible nickname to the prompt if it isn't our house bank
                 if IsOwnerOfCurrentHouse() then
                     local bankBag = context
-                    local collectibleId = GetCollectibleForHouseBankBag(bankBag)
+                    local collectibleId = GetCollectibleForBag(bankBag)
                     if collectibleId ~= 0 then
                     local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
                         if collectibleData then

@@ -323,9 +323,9 @@ function ZO_SceneManager_Base:OnPreSceneStateChange(scene, currentState, nextSta
     -- optional override
 end
 
-function ZO_SceneManager_Base:HideCurrentScene()
+function ZO_SceneManager_Base:HideCurrentScene(bypassHideSceneConfirmationReason)
     if self.currentScene then
-        self:Hide(self.currentScene:GetName())
+        self:Hide(self.currentScene:GetName(), bypassHideSceneConfirmationReason)
     end
 end
 

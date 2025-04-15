@@ -245,7 +245,7 @@ function ZO_MarketAnnouncement_Gamepad:UpdateActionTileNavigation()
     end
 end
 
-function ZO_MarketAnnouncement_Gamepad:OnDailyLoginRewardsUpdated()
+function ZO_MarketAnnouncement_Gamepad:OnTileDataUpdated()
     if self.fragment:IsShowing() then
         self:LayoutActionTiles()
         self.verticalFocus:Deactivate()

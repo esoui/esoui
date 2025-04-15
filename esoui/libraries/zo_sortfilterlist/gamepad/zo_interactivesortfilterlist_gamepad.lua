@@ -182,7 +182,7 @@ function ZO_GamepadInteractiveSortFilterList:InitializeHeader(headerData)
     end
     self.contentHeaderData = headerData
 
-    ZO_GamepadGenericHeader_RefreshData(self.contentHeader, self.contentHeaderData)
+    ZO_GamepadGenericHeader_Refresh(self.contentHeader, self.contentHeaderData)
 
     local titleFonts =
     {
@@ -212,7 +212,7 @@ function ZO_GamepadInteractiveSortFilterList:InitializeFilters()
 end
 
 function ZO_GamepadInteractiveSortFilterList:InitializeDropdownFilter()
-    self.filterControl = self.contentHeader:GetNamedChild("DropdownFilter")
+    self.filterControl = self:GetDropdownFilterControl()
     local filterDropdownControl = self.filterControl:GetNamedChild("Dropdown")
 
     self.filterDropdown = ZO_ComboBox_ObjectFromContainer(filterDropdownControl)
@@ -263,7 +263,7 @@ function ZO_GamepadInteractiveSortFilterList:InitializeSearchFilter()
     local function SearchEditFocusLost()
         ZO_GamepadEditBox_FocusLost(searchEdit)
         SCREEN_NARRATION_MANAGER:QueueFocus(self.filterSwitcher)
-        self:RefreshFilters()
+        self:OnSearchEditFocusLost()
     end
     searchEdit:SetHandler("OnFocusLost", SearchEditFocusLost)
 
@@ -390,6 +390,11 @@ function ZO_GamepadInteractiveSortFilterList:GetBackKeybindCallback()
     -- this function can be overridden in a subclass
 end
 
+--This can be overridden if we want to use a different control for the dropdown filter
+function ZO_GamepadInteractiveSortFilterList:GetDropdownFilterControl()
+    return self.contentHeader:GetNamedChild("DropdownFilter")
+end
+
 function ZO_GamepadInteractiveSortFilterList:SetupSort(sortKeys, initialKey, initialDirection)
     self.sortKeys = sortKeys
     local DONT_SUPPRESS_CALLBACKS = nil
@@ -406,7 +411,7 @@ function ZO_GamepadInteractiveSortFilterList:OnAllDialogsHidden()
 end
 
 function ZO_GamepadInteractiveSortFilterList:NarrateSelection(narrateHeader)
-    if self:IsActivated() then
+    if self:IsActivated() and not ZO_Dialogs_IsShowingDialog() then
         --Determine if we need to narrate the filter switcher, sort header group, or list entry
         if self:IsCurrentFocusArea(self.filtersFocalArea) then
             SCREEN_NARRATION_MANAGER:QueueFocus(self.filterSwitcher, narrateHeader)
@@ -510,6 +515,10 @@ function ZO_GamepadInteractiveSortFilterList:OnFilterDeactivated()
     self:RefreshFilters()
 end
 
+function ZO_GamepadInteractiveSortFilterList:OnSearchEditFocusLost()
+    self:RefreshFilters()
+end
+
 function ZO_GamepadInteractiveSortFilterList:OnLeftTrigger()
     ZO_ScrollList_TrySelectFirstData(self.list)
 end
@@ -521,11 +530,11 @@ end
 --Get / Set --
 function ZO_GamepadInteractiveSortFilterList:SetTitle(titleName)
     self.contentHeaderData.titleText = titleName
-    ZO_GamepadGenericHeader_RefreshData(self.contentHeader, self.contentHeaderData)
+    ZO_GamepadGenericHeader_Refresh(self.contentHeader, self.contentHeaderData)
 end
 
 function ZO_GamepadInteractiveSortFilterList:RefreshHeader()
-    ZO_GamepadGenericHeader_RefreshData(self.contentHeader, self.contentHeaderData)
+    ZO_GamepadGenericHeader_Refresh(self.contentHeader, self.contentHeaderData)
 end
 
 --This class uses :SetEmptyText(), not :SetNoItemText()

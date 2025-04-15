@@ -17,8 +17,7 @@ function ZO_AbstractGridScrollList_Gamepad:New(...)
     return grid
 end
 
-function ZO_AbstractGridScrollList_Gamepad:Initialize(control, selectionTemplate)
-
+function ZO_AbstractGridScrollList_Gamepad:Initialize(control, selectionTemplate, dontRegisterForNarration)
     self.dimOnDeactivate = false
 
     local function SelectionCallback(previousData, newData, selectedDuringRebuild)
@@ -33,7 +32,9 @@ function ZO_AbstractGridScrollList_Gamepad:Initialize(control, selectionTemplate
     self.horizontalMovementController = ZO_MovementController:New(MOVEMENT_CONTROLLER_DIRECTION_HORIZONTAL)
     self.verticalMovementController = ZO_MovementController:New(MOVEMENT_CONTROLLER_DIRECTION_VERTICAL)
 
-    SCREEN_NARRATION_MANAGER:RegisterGridList(self)
+    if not dontRegisterForNarration then
+        SCREEN_NARRATION_MANAGER:RegisterGridList(self)
+    end
 end
 
 function ZO_AbstractGridScrollList_Gamepad:InitializeTriggerKeybinds()

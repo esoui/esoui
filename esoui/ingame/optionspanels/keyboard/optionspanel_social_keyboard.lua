@@ -33,6 +33,16 @@ panelBuilder:AddSetting({
     header = SI_SOCIAL_OPTIONS_CHAT_SETTINGS,
 })
 
+-- TODO AgeGate: Implement check for account age group
+if IsCommunicationRestrictedAccount() then
+    panelBuilder:AddSetting({
+        controlName = "Options_Social_RestrictCommunication",
+        settingType = SETTING_TYPE_UI,
+        settingId = UI_SETTING_RESTRICTED_COMMUNICATION,
+        header = SI_SOCIAL_OPTIONS_CHAT_SETTINGS,
+    })
+end
+
 -----------------------------
 -- Social -> Notifications --
 -----------------------------

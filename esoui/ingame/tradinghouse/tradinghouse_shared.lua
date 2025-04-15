@@ -21,8 +21,9 @@ function ZO_TradingHouse_GetItemDataFormattedName(itemData)
     return itemData.formattedName
 end
 
-function ZO_TradingHouse_GetItemDataFormattedTime(itemData)
-    local timeString = ZO_FormatTime(itemData.timeRemaining, TIME_FORMAT_STYLE_SHOW_LARGEST_UNIT, TIME_FORMAT_PRECISION_TWELVE_HOUR_NO_SECONDS, TIME_FORMAT_DIRECTION_DESCENDING)
+function ZO_TradingHouse_GetItemDataFormattedTime(itemData, overrideTimeFormat)
+    local timeFormat = overrideTimeFormat or TIME_FORMAT_STYLE_SHOW_LARGEST_UNIT
+    local timeString = ZO_FormatTime(itemData.timeRemaining, timeFormat, TIME_FORMAT_PRECISION_TWELVE_HOUR_NO_SECONDS, TIME_FORMAT_DIRECTION_DESCENDING)
     return ZO_CachedStrFormat(SI_TRADING_HOUSE_BROWSE_ITEM_REMAINING_TIME, timeString)
 end
 

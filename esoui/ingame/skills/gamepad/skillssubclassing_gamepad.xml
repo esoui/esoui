@@ -1,0 +1,70 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_SwapSkillLineParametricListGamepadDialog" inherits="ZO_GenericParametricListGamepadDialogTemplate">
+            <OnInitialized>
+                ZO_SkillsSubclassing_Gamepad.OnDialogInitialized(self)
+            </OnInitialized>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_SkillsSubclassing_Gamepad_TL" inherits="ZO_Gamepad_ParametricList_Screen ZO_AnchoredToQuadrant1Background" hidden="true">
+            <OnInitialized>
+                ZO_SkillsSubclassing_Gamepad.OnControlInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <!-- parented outside of mask so it can extend to the edges of the list, this will be anchored to the assignable action bar -->
+                <Backdrop name="$(parent)Bg" inherits="ZO_DefaultBackdrop_Gamepad" />
+
+                <Scroll name="$(parent)Mask" override="true">
+                    <Controls>
+                        <Control name="$(parent)Container" override="true">
+                            <Controls>
+                                <Control name="$(parent)HeaderContainer" override="true">
+                                    <Controls>
+                                        <Control name="$(parent)Header" override="true">
+                                            <Controls>
+                                                <Control name="$(parent)AssignableActionBar" inherits="ZO_GamepadSkillsPlayerActionBar">
+                                                    <Anchor point="TOP" relativeTo="$(parent)Message" relativePoint="BOTTOM" offsetY="30" />
+                                                </Control>
+
+                                                <Control name="$(parent)Training">
+                                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Message" />
+                                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Message" offsetY="130" />
+                                                    <Dimensions y="60" />
+                                                    <Controls>
+                                                        <Control name="$(parent)Content" resizeToFitDescendents="true">
+                                                            <Anchor point="TOP" />
+                                                            <Controls>
+                                                                <Label name="$(parent)Header" inherits="ZO_GamepadHeaderLabelTextTemplate" text="SI_GAMEPAD_SKILLS_SUBCLASSING_TRAINING_HEADER">
+                                                                    <Anchor point="BOTTOMLEFT" offsetX="5"/>
+                                                                </Label>
+
+                                                                <Label name="$(parent)Ratio" inherits="ZO_GamepadHeaderDataTextTemplate">
+                                                                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMRIGHT" offsetX="5" offsetY="4" />
+                                                                </Label>
+
+                                                                <Texture name="$(parent)InfoIcon" textureFile="EsoUI/Art/Progression/Gamepad/gp_training.dds">
+                                                                    <Anchor point="LEFT" relativeTo="$(parent)Ratio" relativePoint="RIGHT" />
+                                                                    <Dimensions x="32" y="32" />
+                                                                </Texture>
+                                                            </Controls>
+                                                        </Control>
+
+                                                        <Backdrop name="$(parent)Highlight" inherits="ZO_GamepadInteractiveFilterHighlight" hidden="true">
+                                                            <Anchor point="TOPLEFT" />
+                                                            <Anchor point="BOTTOMRIGHT" />
+                                                        </Backdrop>
+                                                    </Controls>
+                                                </Control>
+                                            </Controls>
+                                        </Control>
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Scroll>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

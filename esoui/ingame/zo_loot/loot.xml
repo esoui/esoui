@@ -53,25 +53,30 @@
             </OnMouseDoubleClick>
 
             <Controls>
+                <Texture name="$(parent)StatusIcon" inherits="ZO_MultiIcon" mouseEnabled="false">
+                    <Dimensions x="32" y="32" />
+                    <Anchor point="CENTER" relativePoint="TOPLEFT" offsetX="27" offsetY="26" />
+                </Texture>
+                
                 <Texture name="$(parent)MultiIcon" inherits="ZO_MultiIcon" mouseEnabled="false">
                     <Dimensions x="40" y="40" />
-                    <Anchor point="CENTER" relativePoint="TOPLEFT" offsetX="47" offsetY="26" />
+                    <Anchor point="CENTER" relativePoint="TOPLEFT" offsetX="67" offsetY="26" />
                 </Texture>
 
                 <Button name="$(parent)Button" inherits="ZO_InventorySlotNoMouseover">
                     <Dimensions x="40" y="40" />
-                    <Anchor point="CENTER" relativePoint="TOPLEFT" offsetX="47" offsetY="26" />
+                    <Anchor point="CENTER" relativePoint="TOPLEFT" offsetX="67" offsetY="26" />
                 </Button>
 
                 <Label name="$(parent)Name" font="ZoFontGameShadow" maxLineCount="2" wrapMode="ELLIPSIS">
                     <Dimensions x="250" />
-                    <Anchor point="LEFT" offsetX="85" />
+                    <Anchor point="LEFT" offsetX="105" />
                 </Label>
             </Controls>
         </Control>
 
         <Control name="ZO_LootBlankItemSlot" virtual="true">
-            <Dimensions x="250" y="52" />
+            <Dimensions x="270" y="52" />
 
             <Controls>
                 <Texture name="$(parent)Bg" textureFile="EsoUI/Art/Miscellaneous/listItem_backdrop.dds">
@@ -82,7 +87,7 @@
         </Control>
 
         <TopLevelControl name="ZO_Loot" hidden="true">
-            <Dimensions x="385" y="350" />
+            <Dimensions x="405" y="350" />
             <Anchor point="TOPLEFT" relativeTo="ZO_ReticleContainerInteractContext" relativePoint="BOTTOMLEFT" offsetX="-60" offsetY="-37" />
 
             <OnInitialized>

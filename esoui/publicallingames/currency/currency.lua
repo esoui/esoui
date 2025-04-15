@@ -608,3 +608,17 @@ function ZO_Currency_TryShowThresholdDialog(storeItemIndex, quantity, itemData)
     end
     return false
 end
+
+function ZO_PlayCurrencyTransactSound(currencyType)
+    local soundId = GetCurrencyTransactUISound(currencyType)
+    if soundId and soundId ~= "" then
+        PlaySound(soundId)
+    end
+end
+
+function ZO_PlayCurrencyAcquiredSound(currencyType)
+    local soundId = GetCurrencyAcquiredUISound(currencyType)
+    if soundId and soundId ~= "" then
+        PlaySound(soundId)
+    end
+end

@@ -5,6 +5,8 @@ ZO_REWARD_CUSTOM_ENTRY_TYPE =
     LFG_ACTIVITY = { 1 },
 }
 
+ZO_CHOICE_REWARD_ICON = "EsoUI/Art/PromotionalEvent/chooseReward_up.dds"
+ZO_CHOICE_REWARD_ICON_GAMEPAD = "EsoUI/Art/PromotionalEvent/gamepad/gp_chooseReward.dds"
 ZO_RewardData = ZO_InitializingObject:Subclass()
 
 function ZO_RewardData:Initialize(rewardId, parentChoice)
@@ -73,6 +75,14 @@ function ZO_RewardData:SetSkillLineId(skillLineId)
     self.skillLineId = skillLineId
 end
 
+function ZO_RewardData:SetMailSender(mailSender)
+    self.mailSender = mailSender
+end
+
+function ZO_RewardData:SetMailBody(mailBody)
+    self.mailBody = mailBody
+end
+
 function ZO_RewardData:SetChoices(rewardChoices)
     self.choices = rewardChoices
 end
@@ -97,6 +107,10 @@ end
 
 function ZO_RewardData:SetAnnouncementBackground(announcementBackground)
     self.announcementBackground = announcementBackground
+end
+
+function ZO_RewardData:SetAnnouncementBannerText(announcementBannerText)
+    self.announcementBannerText = announcementBannerText
 end
 
 function ZO_RewardData:SetFallbackRewardData(fallbackRewardData)
@@ -127,6 +141,19 @@ end
 
 function ZO_RewardData:GetSkillLineId()
     return self.skillLineId
+end
+
+function ZO_RewardData:GetMailSender()
+    return self.mailSender
+end
+
+function ZO_RewardData:GetMailSubject()
+    -- We're using the subject as the display name, this is just a helper alias
+    return self:GetFormattedName()
+end
+
+function ZO_RewardData:GetMailBody()
+    return self.mailBody
 end
 
 function ZO_RewardData:GetKeyboardIcon()
@@ -217,6 +244,10 @@ function ZO_RewardData:GetAnnouncementBackground()
     return self.announcementBackground
 end
 
+function ZO_RewardData:GetAnnouncementBannerText()
+    return self.announcementBannerText
+end
+
 function ZO_RewardData:SetDisplayFlags(displayFlags)
     self.displayFlags = displayFlags
 end
@@ -289,12 +320,16 @@ function ZO_RewardsManager:InternalCreateRewardData(rewardId, quantity, parentCh
         rewardData = self:GetChoiceEntryInfo(rewardId, parentChoice, validationFunction, isSelectedChoiceFunction)
     elseif entryType == REWARD_ENTRY_TYPE_INSTANT_UNLOCK then
         rewardData = self:GetInstantUnlockEntryInfo(rewardId, parentChoice)
+    elseif entryType == REWARD_ENTRY_TYPE_REWARD_LIST then
+        rewardData = self:GetRewardListEntryInfo(rewardId, parentChoice)
     elseif entryType == REWARD_ENTRY_TYPE_EXPERIENCE then
         rewardData = self:GetExperienceEntryInfo(rewardId, quantity, parentChoice)
     elseif entryType == REWARD_ENTRY_TYPE_SKILL_LINE_EXPERIENCE then
         rewardData = self:GetSkillLineExperienceEntryInfo(rewardId, quantity, parentChoice)
     elseif entryType == REWARD_ENTRY_TYPE_TRIBUTE_CARD_UPGRADE then
         rewardData = self:GetTributeCardUpgradeEntryInfo(rewardId, parentChoice)
+    elseif entryType == REWARD_ENTRY_TYPE_MAIL_ITEM then
+        rewardData = self:GetMailItemEntryInfo(rewardId, parentChoice)
     end
 
     if rewardData then
@@ -340,7 +375,7 @@ function ZO_RewardsManager:GetChoiceEntryInfo(rewardId, parentChoice, validation
     -- There doesn't seem to be any special formatting done for "Choice rewards," so the raw name and formatted name are the same in this instance.
     rewardData:SetRawName(rawName)
     rewardData:SetFormattedName(rawName)
-    rewardData:SetIcon(GetChoiceRewardIcon(rewardId))
+    rewardData:SetIcon(ZO_CHOICE_REWARD_ICON, ZO_CHOICE_REWARD_ICON_GAMEPAD)
     rewardData:SetAnnouncementBackground(GetRewardAnnouncementBackgroundFileIndex(rewardId))
 
     local choices = self:GetAllRewardInfoForRewardList(choiceListId, rewardData, validationFunction, isSelectedChoiceFunction)
@@ -370,6 +405,7 @@ function ZO_RewardsManager:GetCurrencyEntryInfo(rewardId, quantity, parentChoice
     rewardData:SetAbbreviatedQuantity(abbreviatedQuantity)
     rewardData:SetCurrencyInfo(currencyType)
     rewardData:SetAnnouncementBackground(GetRewardAnnouncementBackgroundFileIndex(rewardId))
+    rewardData:SetAnnouncementBannerText(zo_strformat(SI_ACCOUNCEMENT_REWARD_BANNER_TEXT_FREE_FORMATTER, rawName))
 
     return rewardData
 end
@@ -413,6 +449,7 @@ function ZO_RewardsManager:GetCrownCrateEntryInfo(rewardId, quantity, parentChoi
     rewardData:SetIcon(icon)
     rewardData:SetQuantity(quantity)
     rewardData:SetAnnouncementBackground(GetRewardAnnouncementBackgroundFileIndex(rewardId))
+    rewardData:SetAnnouncementBannerText(GetString("SI_ANNOUNCEMENTBANNEROVERRIDETYPE", ANNOUNCEMENT_BANNER_OVERRIDE_TYPE_CRATE))
 
     return rewardData
 end
@@ -488,6 +525,21 @@ function ZO_RewardsManager:GetTributeCardUpgradeEntryInfo(rewardId, parentChoice
     return rewardData
 end
 
+function ZO_RewardsManager:GetMailItemEntryInfo(rewardId, parentChoice)
+    local sender, subject, body = GetMailItemRewardMailInfo(rewardId)
+
+    local rewardData = ZO_RewardData:New(rewardId, parentChoice)
+    rewardData:SetRawName(subject)
+    rewardData:SetFormattedName(subject)
+    -- We don't have an icon to pull, so we use something generic.
+    -- We might make this something we can pull from the def at some point.
+    rewardData:SetIcon("EsoUI/Art/Icons/Quest_Container_001.dds")
+    rewardData:SetMailSender(sender)
+    rewardData:SetMailBody(body)
+
+    return rewardData
+end
+
 -- Helper function to make LFGActivityRewardUIData play nice with other rewards
 function ZO_RewardsManager:GetAllRewardInfoForLFGActivityRewardUIData(lfgRewardUIDataId)
     local rewardListInfo = {}
@@ -522,6 +574,63 @@ function ZO_RewardsManager:GetCollectibleEntryInfo(rewardId, parentChoice)
     assert(false) -- must be implemented on specific gui version of this manager
 end
 
+function ZO_RewardsManager:GetRewardListEntryInfo(rewardId, quantity, parentChoice)
+    local rewardData = ZO_RewardData:New(rewardId, parentChoice)
+    local rewardListId = GetRewardListIdFromReward(rewardId)
+    local firstRewardListRewardId, firstRewardListRewardType = GetRewardListEntryInfo(rewardListId, 1)
+    local icon = nil
+    local gamepadIcon = nil
+    local rawName = nil
+    local formattedName = nil
+
+    if firstRewardListRewardType == REWARD_ENTRY_TYPE_COLLECTIBLE then
+        local collectibleId = GetCollectibleRewardCollectibleId(firstRewardListRewardId)
+        local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+        if collectibleData then
+            rawName = collectibleData:GetName()
+            formattedName = collectibleData:GetFormattedName()
+            icon = collectibleData:GetIcon()
+        end
+    elseif firstRewardListRewardType == REWARD_ENTRY_TYPE_ITEM then
+        local stackCount = amount
+        local itemLink = GetItemRewardItemLink(firstRewardListRewardId, amount, displayFlags)
+        rawName = GetItemLinkName(itemLink)
+        formattedName = zo_strformat(SI_TOOLTIP_ITEM_NAME, rawName)
+        local formattedNameWithStack = zo_strformat(SI_REWARDS_FORMAT_REWARD_WITH_AMOUNT, rawName, ZO_SELECTED_TEXT:Colorize(quantity))
+        rewardData:SetFormattedNameWithStack(formattedNameWithStack)
+        local itemDisplayQuality = GetItemLinkDisplayQuality(itemLink)
+        rewardData:SetItemDisplayQuality(itemDisplayQuality)
+        icon = GetItemLinkIcon(itemLink)
+    elseif firstRewardListRewardType == REWARD_ENTRY_TYPE_LOOT_CRATE then
+        local crateId = GetCrownCrateRewardCrateId(firstRewardListRewardId)
+        rawName = GetCrownCrateName(crateId)
+        formattedName = zo_strformat(SI_TOOLTIP_ITEM_NAME, rawName)
+        icon = GetCrownCrateIcon(crateId)
+    elseif firstRewardListRewardType == REWARD_ENTRY_TYPE_ADD_CURRENCY then
+        local currencyType = GetAddCurrencyRewardInfo(firstRewardListRewardId)
+        rawName = GetCurrencyName(currencyType, IS_PLURAL, IS_UPPER)
+        formattedName = zo_strformat(SI_CURRENCY_NAME_FORMAT, rawName)
+        icon = GetCurrencyKeyboardIcon(currencyType)
+        gamepadIcon = GetCurrencyGamepadIcon(currencyType)
+    elseif firstRewardListRewardType == REWARD_ENTRY_TYPE_INSTANT_UNLOCK then
+        local instantUnlockId = GetInstantUnlockRewardInstantUnlockId(firstRewardListRewardId)
+        rawName = GetInstantUnlockRewardDisplayName(instantUnlockId)
+        formattedDisplayName = zo_strformat(SI_TOOLTIP_ITEM_NAME, rawName)
+        icon = GetInstantUnlockRewardIcon(instantUnlockId)
+    elseif firstRewardListRewardType == REWARD_ENTRY_TYPE_SKILL_LINE_EXPERIENCE then
+        local skillLineId = GetSkillLineExperienceRewardSkillLineId(firstRewardListRewardId)
+        rawName = GetSkillLineNameById(skillLineId)
+        formattedName = zo_strformat(SI_REWARDS_FORMAT_SKILL_LINE_EXPERIENCE, rawName)
+        icon = GetSkillLineDetailedIconById(skillLineId)
+    end
+
+    rewardData:SetRawName(rawName)
+    rewardData:SetFormattedName(formattedName)
+    rewardData:SetIcon(icon, gamepadIcon)
+
+    return rewardData
+end
+
 function ZO_RewardsManager:GetRewardContextualTypeString(rewardId, parentChoice)
     local entryType = GetRewardType(rewardId)
     -- COLLECTIBLE is implemented on specific gui version of this manager
@@ -551,11 +660,11 @@ end
 -- XML Functions
 ------------------
 
-function ZO_Rewards_Shared_OnMouseEnter(control, anchorPoint, anchorPointRelativeTo, anchorOffsetX, anchorOffsetY)
+function ZO_Rewards_Shared_OnMouseEnter(control, anchorPoint, anchorPointRelativeTo, anchorOffsetX, anchorOffsetY, useRelativeAnchors)
     local rewardData = control.GetRewardData and control.GetRewardData() or control.data
     if rewardData then
         local rewardType = rewardData:GetRewardType()
-        if rewardType and rewardType ~= REWARD_ENTRY_TYPE_CHOICE then
+        if rewardType then
             anchorPoint = anchorPoint or LEFT
             anchorPointRelativeTo = anchorPointRelativeTo or RIGHT
             anchorOffsetX = anchorOffsetX or 0
@@ -563,18 +672,26 @@ function ZO_Rewards_Shared_OnMouseEnter(control, anchorPoint, anchorPointRelativ
             local rewardId = rewardData:GetRewardId()
             local quantity = rewardData:GetQuantity()
             local displayFlags = rewardData:GetDisplayFlags()
-            InitializeTooltip(ItemTooltip, control, anchorPoint, anchorOffsetX, anchorOffsetY, anchorPointRelativeTo)
-            ItemTooltip:SetReward(rewardId, quantity, displayFlags)
-            ItemTooltip:HideComparativeTooltips()
-            if rewardType == REWARD_ENTRY_TYPE_ITEM then
-                local USE_RELATIVE_ANCHORS = true
-                ItemTooltip:ShowComparativeTooltips()
-                if ZO_PlayShowAnimationOnComparisonTooltip then
-                    -- These tooltip animations are not available for internal ingame.
-                    ZO_PlayShowAnimationOnComparisonTooltip(ComparativeTooltip1)
-                    ZO_PlayShowAnimationOnComparisonTooltip(ComparativeTooltip2)
+
+            if rewardType == REWARD_ENTRY_TYPE_REWARD_LIST or rewardType == REWARD_ENTRY_TYPE_CHOICE then
+                InitializeTooltip(InformationTooltip, control, anchorPoint, anchorOffsetX, anchorOffsetY, anchorPointRelativeTo)
+                InformationTooltip:SetReward(rewardId, quantity, displayFlags)
+            else
+                InitializeTooltip(ItemTooltip, control, anchorPoint, anchorOffsetX, anchorOffsetY, anchorPointRelativeTo)
+                ItemTooltip:SetReward(rewardId, quantity, displayFlags)
+                ItemTooltip:HideComparativeTooltips()
+                if rewardType == REWARD_ENTRY_TYPE_ITEM then
+                    ItemTooltip:ShowComparativeTooltips()
+                    if ZO_PlayShowAnimationOnComparisonTooltip then
+                        -- These tooltip animations are not available for internal ingame.
+                        ZO_PlayShowAnimationOnComparisonTooltip(ComparativeTooltip1)
+                        ZO_PlayShowAnimationOnComparisonTooltip(ComparativeTooltip2)
+                    end
+                    if useRelativeAnchors == nil then
+                        useRelativeAnchors = true
+                    end
+                    ZO_Tooltips_SetupDynamicTooltipAnchors(ItemTooltip, control, ComparativeTooltip1, ComparativeTooltip2, useRelativeAnchors)
                 end
-                ZO_Tooltips_SetupDynamicTooltipAnchors(ItemTooltip, control, ComparativeTooltip1, ComparativeTooltip2, USE_RELATIVE_ANCHORS)
             end
         end
     end
@@ -582,5 +699,6 @@ end
 
 function ZO_Rewards_Shared_OnMouseExit(control)
     ClearTooltip(ItemTooltip)
+    ClearTooltip(InformationTooltip)
     ItemTooltip:HideComparativeTooltips()
 end

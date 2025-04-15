@@ -9,7 +9,7 @@ function ZO_CreateLinkLoading_Gamepad:Initialize(control)
     CREATE_LINK_LOADING_SCREEN_GAMEPAD_SCENE = ZO_Scene:New("CreateLinkLoadingScreen_Gamepad", SCENE_MANAGER)
     CREATE_LINK_LOADING_SCREEN_GAMEPAD_SCENE:AddFragment(createLinkLoadingScreen_Gamepad_Fragment)
 
-    self.previousState = "AccountLogin"
+    self.previousState = "WaitForPreloginWorld"
 
     local function StateChanged(oldState, newState)
         if newState == SCENE_SHOWING then

@@ -97,6 +97,9 @@ function ZO_HousingEditorState:Initialize()
     self:RegisterForEvent(EVENT_HOUSING_PLAYER_INFO_CHANGED, function(_, ...) self:OnPlayerInfoChanged(...) end)
     self:RegisterForEvent(EVENT_HOUSING_POPULATION_CHANGED, function(_, ...) self:OnPopulationChanged(...) end)
     self:RegisterForEvent(EVENT_PLAYER_ACTIVATED, function(_, ...) self:OnPlayerActivated(...) end)
+
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleUpdated", self.OnCollectiblesUpdated, self)
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", self.OnCollectiblesUpdated, self)
 end
 
 function ZO_HousingEditorState:CanCycleTarget()
@@ -116,6 +119,27 @@ end
 function ZO_HousingEditorState:CanLocalPlayerViewSettings()
     -- All players can view the Settings menu while in any house instance.
     return self:IsHouseInstance()
+end
+
+function ZO_HousingEditorState:HasUnlockedFurnitureVault()
+    -- Indicates whether the Furniture Vault collectible is unlocked.
+    local isUnlocked = self.isFurnitureVaultUnlocked
+    if isUnlocked == nil then
+        local collectibleId = GetFurnitureVaultCollectibleId()
+        local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+        if internalassert(collectibleData, "Furniture Vault collectible not found.") then
+            isUnlocked = collectibleData:IsUnlocked()
+        else
+            isUnlocked = false
+        end
+        self.isFurnitureVaultUnlocked = isUnlocked
+    end
+    return isUnlocked
+end
+
+function ZO_HousingEditorState:CanDepositIntoFurnitureVault()
+    -- Indicates whether the Furniture Vault can be accept deposits.
+    return self:HasUnlockedFurnitureVault() and IsESOPlusSubscriber()
 end
 
 function ZO_HousingEditorState:GetEditorMode()
@@ -177,6 +201,12 @@ end
 
 function ZO_HousingEditorState:IsLocalPlayerHouseOwner()
     return self.isOwner == true
+end
+
+function ZO_HousingEditorState:OnCollectiblesUpdated()
+    -- Caching this value again once is cheap so we simply void the cache whenever any
+    -- collectible changes to minimize our performance impact on collection updates.
+    self.isFurnitureVaultUnlocked = nil
 end
 
 function ZO_HousingEditorState:OnEditorModeChanged(previousEditorMode, editorMode)
@@ -281,7 +311,7 @@ do
         local previousHasEditPermission = self.hasEditPermission
         self.hasEditPermission = currentHasEditPermission
 
-        local currentHasInteractPermission = HasPermissionSettingForCurrentHouse(HPOC_GENERAL)
+        local currentHasInteractPermission = HasPermissionSettingForCurrentHouse(HOUSE_PERMISSION_SETTING_USE_INTERACTABLE_FIXTURES)
         local previousHasInteractPermission = self.hasInteractPermission
         self.hasInteractPermission = currentHasInteractPermission
         
@@ -578,8 +608,13 @@ end
 function HousingHUDFragment:OnHouseSettingsChanged(currentState, previousState)
     self:UpdateKeybind()
 
-    if currentState.houseId ~= 0 and (currentState.houseId == previousState.houseId) and not currentState.isOwner and (currentState.hasEditPermission ~= previousState.hasEditPermission or currentState.hasInteractPermission ~= previousState.hasInteractPermission)  then
-        ZO_Alert(UI_ALERT_CATEGORY_ERROR, nil, GetString(SI_HOUSING_PLAYER_PERMISSIONS_CHANGED))
+    if currentState.houseId ~= 0 and currentState.houseId == previousState.houseId and currentState.ownerName == previousState.ownerName then
+        -- The player is in the same house since the last settings change.
+        if currentState.hasEditPermission ~= previousState.hasEditPermission or currentState.hasInteractPermission ~= previousState.hasInteractPermission then
+            -- Show an alert indicating that the player's permissions
+            -- for this house have changed since they first arrived.
+            ZO_Alert(UI_ALERT_CATEGORY_ERROR, nil, GetString(SI_HOUSING_PLAYER_PERMISSIONS_CHANGED))
+        end
     end
 end
 
@@ -770,6 +805,16 @@ function ZO_HousingEditorHud:Initialize(control)
     EVENT_MANAGER:RegisterForEvent("HousingEditor", EVENT_HOUSING_FURNITURE_PATH_NODES_RESTORED, OnFurnitureChanged)
     EVENT_MANAGER:RegisterForEvent("HousingEditor", EVENT_HOUSING_FURNITURE_STATE_CHANGED, OnFurnitureStateChanged)
 
+    local function OnFurniturePlaced()
+        if HOUSING_EDITOR_STATE:IsLocalPlayerHouseOwner() and IsESOPlusSubscriber() and not HOUSING_EDITOR_STATE:HasUnlockedFurnitureVault() then
+            -- Furniture Vault reminder triggered by an ESO+ subscriber placing a furnishing in
+            -- one of their own homes without having had unlocked the Furniture Vault collectible.
+            TriggerTutorial(TUTORIAL_TRIGGER_FURNITURE_VAULT_REMIND_ON_PLACE)
+        end
+    end
+
+    EVENT_MANAGER:RegisterForEvent("HousingEditorTutorials", EVENT_HOUSING_FURNITURE_PLACED, OnFurniturePlaced)
+
     do
         local EPSILON_CM = 1
         local EPSILON_RAD = math.rad(1)
@@ -841,9 +886,23 @@ function ZO_HousingEditorHud:SetCurrentPreviewMarketProduct(marketProductData)
 end
 
 function ZO_HousingEditorHud:InitializePlacementSettings()
+    if not self.savedOptions.retrieveToBag then
+        self.savedOptions.retrieveToBag = HOUSING_EDITOR_STATE:CanDepositIntoFurnitureVault() and BAG_FURNITURE_VAULT or BAG_BACKPACK
+    end
+
+    HousingEditorSetRetrieveToBag(self.savedOptions.retrieveToBag)
     HousingEditorSetPlacementType(HOUSING_EDITOR_PLACEMENT_TYPE_PICKUP)
     HousingEditorSetPrecisionMoveUnits(self.savedOptions.moveUnitsCentimeters)
     HousingEditorSetPrecisionRotateUnits(self.savedOptions.rotateUnitsRadians)
+end
+
+function ZO_HousingEditorHud:GetRetrieveToBag()
+    return HousingEditorGetRetrieveToBag()
+end
+
+function ZO_HousingEditorHud:SetRetrieveToBag(bagId)
+    self.savedOptions.retrieveToBag = bagId
+    HousingEditorSetRetrieveToBag(bagId)
 end
 
 function ZO_HousingEditorHud:InitializeMovementControllers()
@@ -2209,7 +2268,7 @@ do
                     return true
                 else
                     local furnitureId = HousingEditorGetTargetInfo()
-                    if CompareId64ToNumber(furnitureId, 0) > 0 then
+                    if not IsId64EqualToNumber(furnitureId, 0) then
                         return HousingEditorCanFurnitureBePathed(furnitureId)
                     end
                 end
@@ -2222,7 +2281,7 @@ do
             name = function()
                 local targetingPathableFurniture = false
                 local furnitureId = HousingEditorGetTargetInfo()
-                if CompareId64ToNumber(furnitureId, 0) > 0 then
+                if not IsId64EqualToNumber(furnitureId, 0) then
                     targetingPathableFurniture = HousingEditorCanFurnitureBePathed(furnitureId)
                 end
 
@@ -2307,7 +2366,7 @@ do
                 return false
             end
             local furnitureId, nodeIndex = HousingEditorGetTargetInfo()
-            local hasFurnitureId = CompareId64ToNumber(furnitureId, 0) > 0
+            local hasFurnitureId = not IsId64EqualToNumber(furnitureId, 0)
             return hasFurnitureId and nodeIndex == nil and HousingEditorGetNumPathNodesForFurniture(furnitureId) == 0
         end
 

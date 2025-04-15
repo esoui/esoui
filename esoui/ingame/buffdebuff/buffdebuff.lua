@@ -284,13 +284,11 @@ function ZO_BuffDebuff:RegisterForEvents()
         end
     end
 
-    local function OnAddOnLoaded(event, name)
-        if name == "ZO_Ingame" then
-            for i = BUFFS_SETTING_ITERATION_BEGIN, BUFFS_SETTING_ITERATION_END do
-                OnInterfaceSettingChanged(i)
-            end
-            self.control:UnregisterForEvent(EVENT_ADD_ON_LOADED)
+    local function OnAddOnsLoaded()
+        for i = BUFFS_SETTING_ITERATION_BEGIN, BUFFS_SETTING_ITERATION_END do
+            OnInterfaceSettingChanged(i)
         end
+        self.control:UnregisterForEvent(EVENT_ADD_ONS_LOADED)
     end
 
     local function OnTargetFrameCreated(targetFrame)
@@ -303,7 +301,7 @@ function ZO_BuffDebuff:RegisterForEvents()
 
     self.control:RegisterForEvent(EVENT_INTERFACE_SETTING_CHANGED, function(_, _, settingId) OnInterfaceSettingChanged(settingId) end)
     self.control:AddFilterForEvent(EVENT_INTERFACE_SETTING_CHANGED, REGISTER_FILTER_SETTING_SYSTEM_TYPE, SETTING_TYPE_BUFFS)
-    self.control:RegisterForEvent(EVENT_ADD_ON_LOADED, OnAddOnLoaded)
+    self.control:RegisterForEvent(EVENT_ADD_ONS_LOADED, OnAddOnsLoaded)
     CALLBACK_MANAGER:RegisterCallback("TargetFrameCreated", OnTargetFrameCreated)
 end
 

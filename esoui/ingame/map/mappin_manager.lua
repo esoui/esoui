@@ -943,6 +943,23 @@ do
 
         local compareResult = DefaultCompareNilable(firstCategoryId, secondCategoryId)
         if compareResult ~= nil then
+            -- Sort quest conditions from the same quest together
+            if firstCategoryId == secondCategoryId and firstPin:IsQuest() then
+                local firstQuestIndex = firstPin:GetQuestIndex()
+                local secondQuestIndex = secondPin:GetQuestIndex()
+                local firstPinlevel = GetJournalQuestLevel(firstQuestIndex)
+                local secondPinlevel = GetJournalQuestLevel(secondQuestIndex)
+                local firstQuestCon = GetCon(firstPinlevel)
+                local secondQuestCon = GetCon(secondPinlevel)
+                if firstQuestCon == secondQuestCon then
+                    local firstPinName = GetJournalQuestName(firstQuestIndex)
+                    local secondPinName = GetJournalQuestName(secondQuestIndex)
+                    return firstPinName < secondPinName
+                else
+                    return firstQuestCon < secondQuestCon
+                end
+            end
+
             return compareResult
         end
 
@@ -976,6 +993,22 @@ do
 
         local compareResult = DefaultCompareNilable(firstCategoryId, secondCategoryId)
         if compareResult ~= nil then
+            -- Sort quest conditions from the same quest together
+            if firstCategoryId == secondCategoryId and firstPin:IsQuest() then
+                local firstQuestIndex = firstPin:GetQuestIndex()
+                local secondQuestIndex = secondPin:GetQuestIndex()
+                local firstPinlevel = GetJournalQuestLevel(firstQuestIndex)
+                local secondPinlevel = GetJournalQuestLevel(secondQuestIndex)
+                local firstQuestCon = GetCon(firstPinlevel)
+                local secondQuestCon = GetCon(secondPinlevel)
+                if firstQuestCon == secondQuestCon then
+                    local firstPinName = GetJournalQuestName(firstQuestIndex)
+                    local secondPinName = GetJournalQuestName(secondQuestIndex)
+                    return firstPinName < secondPinName
+                else
+                    return firstQuestCon < secondQuestCon
+                end
+            end
             return compareResult
         end
 
@@ -1029,7 +1062,7 @@ do
                 if self.mouseExitPins[pin] then
                     self:DoMouseExitForPin(pin)
                 end
-            
+
                 -- Verify that control is still moused over due to OnUpdate/OnShow handler issues (prevents tooltip popping)
                 if isMousedOver and pin:MouseIsOver(cursorPositionX, cursorPositionY) then
                     table.insert(foundTooltipMouseOverPins, pin)
@@ -1057,6 +1090,7 @@ do
         local lastGamepadCategory = nil
         local informationTooltip = isInGamepadPreferredMode and ZO_MapLocationTooltip_Gamepad or InformationTooltip
         local tooltipOrder = ZO_WORLD_MAP_TOOLTIP_ORDER
+        local currentQuestHeaderIndex = nil
 
         for index, pin in ipairs(foundTooltipMouseOverPins) do
             local pinType = pin:GetPinType()
@@ -1146,6 +1180,19 @@ do
                             end
 
                             lastGamepadCategory = nextCategory
+                        else
+                            if pin:IsQuest() then
+                                if not currentQuestHeaderIndex or currentQuestHeaderIndex ~= pin:GetQuestIndex() then
+                                    currentQuestHeaderIndex = pin:GetQuestIndex()
+                                    pinTooltipInfo.headerCreator(pin)
+                                    informationTooltip:AddVerticalPadding(-8)
+                                elseif currentQuestHeaderIndex == pin:GetQuestIndex() then
+                                    informationTooltip:AddVerticalPadding(-16)
+                                end
+                            elseif currentQuestHeaderIndex ~= nil then
+                                informationTooltip:AddLine(GetString(SI_TOOLTIP_MAP_QUEST_SELECT_FOCUS), "", ZO_HIGHLIGHT_TEXT:UnpackRGB())
+                                currentQuestHeaderIndex = nil
+                            end
                         end
 
                         pinTooltipInfo.creator(pin)
@@ -1160,7 +1207,7 @@ do
                     end
                 end
             end
-        
+
             -- For POIs, add name to the top of the map
             if pinType == MAP_PIN_TYPE_POI_COMPLETE or pinType == MAP_PIN_TYPE_POI_SEEN then
                 local poiIndex = pin:GetPOIIndex()
@@ -1177,6 +1224,10 @@ do
                     ZO_WorldMapMouseOverDescription:SetText(poiStartDesc)
                 end
             end
+        end
+
+        if not isCurrentSceneGamepad and currentQuestHeaderIndex ~= nil then
+            informationTooltip:AddLine(GetString(SI_TOOLTIP_MAP_QUEST_SELECT_FOCUS), "", ZO_HIGHLIGHT_TEXT:UnpackRGB())
         end
 
         if missedQuestPins > 0 then
@@ -1498,7 +1549,7 @@ function ZO_WorldMapStickyPin:ClearNearestCandidate()
 end
 
 function ZO_WorldMapStickyPin:ConsiderPin(pin, x, y)
-    if self.enabled then
+    if self.enabled and not pin:IsHidden() then
         local pinGroup = pin:GetPinGroup()
         if pinGroup == nil or WORLD_MAP_MANAGER:AreStickyPinsEnabledForPinGroup(pinGroup) then
             local distanceSq = pin:DistanceToSq(x, y)

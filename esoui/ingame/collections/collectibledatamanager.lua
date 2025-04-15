@@ -934,7 +934,7 @@ function ZO_CollectibleCategoryData:GetSubcategoryData(subcategoryIndex)
     return nil
 end
 
-function ZO_CollectibleCategoryData:SubcategoryIterator(subcategoryFilterFunctions) -- ... Are filter functions that take categoryData as a param
+function ZO_CollectibleCategoryData:SubcategoryIterator(subcategoryFilterFunctions)
     return ZO_FilteredNumericallyIndexedTableIterator(self.orderedSubcategories, subcategoryFilterFunctions)
 end
 

@@ -227,3 +227,8 @@ function ZO_FormatTimeLongDurationExpirationNarration(seconds)
 
     return ZO_FormatTimeLargestTwo(seconds, TIME_FORMAT_STYLE_DESCRIPTIVE)
 end
+
+function ZO_FormatGregorianDate(year, month, day)
+    local monthName = GetString("SI_GREGORIANCALENDARMONTHS", month)
+    return zo_strformat(SI_DATE_FORMAT_FULL_DATE, monthName, day, year)
+end

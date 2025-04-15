@@ -34,7 +34,7 @@ function ZO_RestyleStation_Gamepad:Initialize(control)
     self:InitializeOptionsDialog()
     self:InitializeConfirmationDialog()
 
-    activeWeaponPair, self.weaponSwapDisabled = GetActiveWeaponPairInfo()
+    self.weaponSwapDisabled = select(2, GetActiveWeaponPairInfo())
 
     GAMEPAD_RESTYLE_STATION_FRAGMENT = ZO_FadeSceneFragment:New(control)
     GAMEPAD_RESTYLE_STATION_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)

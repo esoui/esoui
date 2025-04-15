@@ -1943,10 +1943,22 @@ local CENTER_SCREEN_CALLBACK_HANDLERS =
     },
 
     {
-        callbackManager = PROMOTIONAL_EVENT_MANAGER, 
-        callbackRegistration = "RewardsClaimed", 
-        callbackFunction = function(campaignData, rewards)
-            local campaignName = campaignData:GetDisplayName()
+        callbackManager = PROMOTIONAL_EVENT_MANAGER,
+        callbackRegistration = "RewardsClaimed",
+        callbackFunction = function(campaignData, rewards, hasCapstoneReward)
+            -- The Promotional Events UI will show a dialog with capstone reward info when we have a capstone
+            -- reward, so drop the CSAs since we don't want them to overlap.
+            if hasCapstoneReward then
+                return
+            end
+
+            -- If we're doing a claim all with a choice reward, then we'll show the choice reward first, and queue up the
+            -- capstone dialog after. To prevent the choice reward claim CSA from appearing over top the capstone dialog,
+            -- drop the CSAs if we're showing the dialog.
+            if PROMOTIONAL_EVENT_MANAGER:IsShowingCapstoneDialog() then
+                return
+            end
+
             if #rewards > MAX_INDIVIDUAL_CSAS then
                 -- Handles mutiple claimed rewards
                 local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)

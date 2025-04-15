@@ -8,6 +8,7 @@ INVENTORY_BANK = 3
 INVENTORY_HOUSE_BANK = 4
 INVENTORY_GUILD_BANK = 5
 INVENTORY_CRAFT_BAG = 6
+INVENTORY_FURNITURE_VAULT = 7
 
 local DONT_USE_SHORT_FORMAT = false
 local PREVENT_LAYOUT = false
@@ -15,6 +16,8 @@ local NOT_IS_GAMEPAD = false
 
 local NEW_ICON_TEXTURE = "EsoUI/Art/Inventory/newItem_icon.dds"
 local STOLEN_ICON_TEXTURE = "EsoUI/Art/Inventory/inventory_stolenItem_icon.dds"
+local LOCKED_SET_PIECE_ICON_TEXTURE = "EsoUI/Art/Inventory/inventory_locked_set_piece_icon.dds"
+local CAN_LEARN_ICON_TEXTURE = "EsoUI/Art/Inventory/inventory_can_learn_icon.dds"
 
 BANKING_INTERACTION =
 {
@@ -91,6 +94,14 @@ function ZO_UpdateStatusControlIcons(inventorySlot, slotData)
 
     if slotData.isPlayerLocked then
         statusControl:AddIcon(ZO_KEYBOARD_LOCKED_ICON)
+    end
+
+    if slotData.isLockedSetPiece then
+        statusControl:AddIcon(LOCKED_SET_PIECE_ICON_TEXTURE, ZO_SUCCEEDED_TEXT)
+    end
+
+    if slotData.canBeUsedToLearn then
+        statusControl:AddIcon(CAN_LEARN_ICON_TEXTURE, ZO_SUCCEEDED_TEXT)
     end
 
     if slotData.isBoPTradeable then
@@ -318,6 +329,13 @@ function ZO_InventoryManager:Initialize(control)
 
     local HOUSE_BANK_FILTERS = GetFiltersForKeys(BANK_FILTER_KEYS, INVENTORY_HOUSE_BANK)
 
+    local FURNITURE_VAULT_FILTER_KEYS =
+    {
+        ITEM_TYPE_DISPLAY_CATEGORY_FURNISHING,
+    }
+
+    local FURNITURE_VAULT_FILTERS = GetFiltersForKeys(FURNITURE_VAULT_FILTER_KEYS, INVENTORY_FURNITURE_VAULT)
+
     local GUILD_BANK_FILTER_KEYS =
     {
         ITEM_TYPE_DISPLAY_CATEGORY_MISCELLANEOUS,
@@ -352,16 +370,25 @@ function ZO_InventoryManager:Initialize(control)
 
     local IS_SUB_FILTER = true
     local function GetSearchFilters(searchFilterKeys, inventoryType)
+        -- Construct the search filter data.
         local searchFilters = {}
         for filterId, subFilters in pairs(searchFilterKeys) do
-            searchFilters[filterId] = {}
+            -- Add a new search filter for this filter id.
+            local searchFilter = {}
+            searchFilters[filterId] = searchFilter
 
-            local currentInventoryType = inventoryType
-            local searchFilterAtId = searchFilters[filterId]
+            -- Add the subfilters for this search filter.
             for _, subfilterKey in ipairs(subFilters) do
                 local filterData = ZO_ItemFilterUtils.GetSearchFilterData(filterId, subfilterKey)
-                local filter = CreateNewTabFilterData(filterData.filterType, currentInventoryType, filterData.filterString, filterData.icons.up, filterData.icons.down, filterData.icons.over, filterData.hideColumnTable, filterData.hideTabFunction, IS_SUB_FILTER)
-                table.insert(searchFilterAtId, filter)
+                if filterData then
+                    -- Create and append the data for this subfilter.
+                    local filter = CreateNewTabFilterData(filterData.filterType, inventoryType, filterData.filterString,
+                        filterData.icons.up, filterData.icons.down, filterData.icons.over, filterData.hideColumnTable, filterData.hideTabFunction, IS_SUB_FILTER)
+                    table.insert(searchFilter, filter)
+                else
+                    internalassert(false, string.format("Inventory: No subfilters defined for inventory type %s, filter id %s, subfilter key %s.",
+                        tostring(inventoryType) or "nil", tostring(filterId) or "nil", tostring(subfilterKey) or "nil"))
+                end
             end
         end
 
@@ -493,6 +520,13 @@ function ZO_InventoryManager:Initialize(control)
 
     local BANK_SEARCH_FILTERS = GetSearchFilters(BANK_SEARCH_FILTER_KEYS, INVENTORY_BANK)
     local HOUSE_BANK_SEARCH_FILTERS = GetSearchFilters(BANK_SEARCH_FILTER_KEYS, INVENTORY_HOUSE_BANK)
+
+    local FURNITURE_VAULT_SEARCH_FILTER_KEYS =
+    {
+        [ITEM_TYPE_DISPLAY_CATEGORY_FURNISHING] = BACKPACK_SEARCH_FILTER_KEYS[ITEM_TYPE_DISPLAY_CATEGORY_FURNISHING],
+    }
+
+    local FURNITURE_VAULT_SEARCH_FILTERS = GetSearchFilters(FURNITURE_VAULT_SEARCH_FILTER_KEYS, INVENTORY_FURNITURE_VAULT)
 
     local GUILD_BANK_SEARCH_FILTER_KEYS =
     {
@@ -765,6 +799,32 @@ function ZO_InventoryManager:Initialize(control)
             activeTab = ZO_CraftBagTabsActive,
             inventoryEmptyStringId = SI_INVENTORY_ERROR_CRAFT_BAG_EMPTY,
         },
+        [INVENTORY_FURNITURE_VAULT] =
+        {
+            searchBox = ZO_FurnitureVaultSearchFiltersTextSearchBox,
+            slotType = SLOT_TYPE_FURNITURE_VAULT,
+            backingBags = { BAG_FURNITURE_VAULT },
+            slots = { [BAG_FURNITURE_VAULT] = {} },
+            listView = ZO_FurnitureVaultList,
+            listDataType = INVENTORY_DATA_TYPE_BACKPACK,
+            listSetupCallback = SetupBackpackInventoryItemRow,
+            listHiddenCallback = OnInventoryItemRowHidden,
+            freeSlotsLabel = ZO_FurnitureVaultInfoBarFreeSlots,
+            altFreeSlotsLabel = ZO_FurnitureVaultInfoBarAltFreeSlots,
+            freeSlotType = INVENTORY_BACKPACK,
+            altFreeSlotType = INVENTORY_FURNITURE_VAULT,
+            freeSlotsStringId = SI_INVENTORY_FURNITURE_VAULT_REMAINING_SPACES,
+            freeSlotsFullStringId = SI_INVENTORY_FURNITURE_VAULT_COMPLETELY_FULL,
+            currentSortKey = "name",
+            currentSortOrder = ZO_SORT_ORDER_UP,
+            currentFilter = ITEM_TYPE_DISPLAY_CATEGORY_FURNISHING,
+            tabFilters = FURNITURE_VAULT_FILTERS,
+            subFilters = FURNITURE_VAULT_SEARCH_FILTERS,
+            filterBar = ZO_FurnitureVaultTabs,
+            subFilterBar = ZO_FurnitureVaultSearchFiltersSubTabs,
+            rowTemplate = "ZO_PlayerInventorySlot",
+            activeTab = ZO_FurnitureVaultTabsActive,
+        },
     }
 
     self.isListDirty = {}
@@ -775,6 +835,7 @@ function ZO_InventoryManager:Initialize(control)
     self:InitializeHeaderSort(INVENTORY_GUILD_BANK, inventories[INVENTORY_GUILD_BANK], ZO_GuildBankSortBy)
     self:InitializeHeaderSort(INVENTORY_CRAFT_BAG, inventories[INVENTORY_CRAFT_BAG], ZO_CraftBagSortBy)
     self:InitializeHeaderSort(INVENTORY_QUEST_ITEM, inventories[INVENTORY_QUEST_ITEM], ZO_QuestItemsSortBy)
+    self:InitializeHeaderSort(INVENTORY_FURNITURE_VAULT, inventories[INVENTORY_FURNITURE_VAULT], ZO_FurnitureVaultSortBy)
 
     self.inventories = inventories
     self.searchToInventoryType = {}
@@ -785,6 +846,7 @@ function ZO_InventoryManager:Initialize(control)
         [BAG_SUBSCRIBER_BANK] = INVENTORY_BANK,
         [BAG_GUILDBANK] = INVENTORY_GUILD_BANK,
         [BAG_VIRTUAL] = INVENTORY_CRAFT_BAG,
+        [BAG_FURNITURE_VAULT] = INVENTORY_FURNITURE_VAULT,
     }
     for i = BAG_HOUSE_BANK_ONE, BAG_HOUSE_BANK_TEN do
         self.bagToInventoryType[i] = INVENTORY_HOUSE_BANK
@@ -856,6 +918,7 @@ function ZO_InventoryManager:Initialize(control)
     self:RefreshAllInventorySlots(INVENTORY_BACKPACK)
     self:RefreshAllInventorySlots(INVENTORY_CRAFT_BAG)
     self:RefreshAllInventorySlots(INVENTORY_BANK)
+    self:RefreshAllInventorySlots(INVENTORY_FURNITURE_VAULT)
     self:RefreshAllQuests()
     self:RefreshMoney()
 
@@ -864,6 +927,7 @@ function ZO_InventoryManager:Initialize(control)
     self:CreateGuildBankScene()
     self:CreateCraftBagFragment()
     self:CreateQuestItemsFragment()
+    self:CreateFurnitureVaultScene()
 
     self:RegisterForEvents(control)
 end
@@ -1011,6 +1075,23 @@ function ZO_InventoryManager:DeactivateGuildBankSearch()
     end
 end
 
+function ZO_InventoryManager:ActivateFurnitureVaultSearch()
+    self:SetContextForInventories("furnitureVaultTextSearch", { INVENTORY_BACKPACK, INVENTORY_FURNITURE_VAULT })
+
+    local furnitureVaultSearchText = TEXT_SEARCH_MANAGER:GetSearchText("furnitureVaultTextSearch")
+    self.inventories[INVENTORY_BACKPACK].searchBox:SetText(furnitureVaultSearchText)
+    self.inventories[INVENTORY_FURNITURE_VAULT].searchBox:SetText(furnitureVaultSearchText)
+end
+
+function ZO_InventoryManager:DeactivateFurnitureVaultSearch()
+    if TEXT_SEARCH_MANAGER:IsActiveTextSearch("furnitureVaultTextSearch") then
+        TEXT_SEARCH_MANAGER:DeactivateTextSearch("furnitureVaultTextSearch")
+
+        local REMOVE_CONTEXT = nil
+        self:SetContextForInventories(REMOVE_CONTEXT, { INVENTORY_BACKPACK, INVENTORY_FURNITURE_VAULT })
+    end
+end
+
 do
     local function OnRequestDestroyItem(eventCode, bag, slot, itemCount, name, needsConfirm)
         local _, actualItemCount = GetItemInfo(bag, slot)
@@ -1127,6 +1208,7 @@ do
         local function OnPlayerActivated()
             self:RefreshAllInventorySlots(INVENTORY_BACKPACK)
             self:RefreshAllInventorySlots(INVENTORY_CRAFT_BAG)
+            self:RefreshAllInventorySlots(INVENTORY_FURNITURE_VAULT)
         end
     
         local function RefreshMoney()
@@ -1177,6 +1259,9 @@ do
                 if inventoryType == INVENTORY_BANK then
                     self:ActivateBankSearch()
                     SCENE_MANAGER:Show("bank")
+                elseif inventoryType == INVENTORY_FURNITURE_VAULT then
+                    self:ActivateFurnitureVaultSearch()
+                    SCENE_MANAGER:Show("furnitureVault")
                 elseif inventoryType == INVENTORY_HOUSE_BANK then
                     self:ActivateHouseBankSearch()
                     SCENE_MANAGER:Show("houseBank")
@@ -1188,8 +1273,10 @@ do
             if not IsInGamepadPreferredMode() then
                 --The banking bag has already been cleared by this point so just close both of the possible scenes instead of trying to figure out which one was open
                 self:DeactivateBankSearch()
+                self:DeactivateFurnitureVaultSearch()
                 self:DeactivateHouseBankSearch()
                 SCENE_MANAGER:Hide("bank")
+                SCENE_MANAGER:Hide("furnitureVault")
                 SCENE_MANAGER:Hide("houseBank")
                 if ZO_Dialogs_IsShowingDialog() then
                     ZO_Dialogs_ReleaseAllDialogs()
@@ -1357,6 +1444,8 @@ function ZO_InventoryManager:ApplySort(inventoryType)
         inventory = self.inventories[INVENTORY_CRAFT_BAG]
     elseif inventoryType == INVENTORY_QUEST_ITEM then
         inventory = self.inventories[INVENTORY_QUEST_ITEM]
+    elseif inventoryType == INVENTORY_FURNITURE_VAULT then
+        inventory = self.inventories[INVENTORY_FURNITURE_VAULT]
     else
         -- Use normal inventory by default (instead of the quest item inventory for example)
         inventory = self.inventories[self.selectedTabType]
@@ -1631,6 +1720,7 @@ function ZO_InventoryManager:SetupInitialFilter()
     ZO_MenuBar_SelectDescriptor(self.inventories[INVENTORY_HOUSE_BANK].filterBar, ITEM_TYPE_DISPLAY_CATEGORY_ALL)
     ZO_MenuBar_SelectDescriptor(self.inventories[INVENTORY_GUILD_BANK].filterBar, ITEM_TYPE_DISPLAY_CATEGORY_ALL)
     ZO_MenuBar_SelectDescriptor(self.inventories[INVENTORY_CRAFT_BAG].filterBar, ITEM_TYPE_DISPLAY_CATEGORY_ALL)
+    ZO_MenuBar_SelectDescriptor(self.inventories[INVENTORY_FURNITURE_VAULT].filterBar, ITEM_TYPE_DISPLAY_CATEGORY_FURNISHING)
 end
 
 function ZO_InventoryManager:SetupCategoryFlashAnimation()
@@ -2620,6 +2710,17 @@ function ZO_BankGenericCurrencyDepositWithdrawDialog:ChangeCurrencyType(currency
     end
 end
 
+local function CreateButtonData(normal, pressed, highlight, disabled, alwaysShowTooltip, tooltipFunction)
+    return {
+        normal = normal,
+        pressed = pressed,
+        highlight = highlight,
+        disabled = disabled,
+        alwaysShowTooltip = alwaysShowTooltip,
+        CustomTooltipFunction = tooltipFunction,
+    }
+end
+
 function ZO_InventoryManager:CreateBankScene()
     BANK_FRAGMENT = ZO_FadeSceneFragment:New(ZO_PlayerBank)
     BANK_FRAGMENT:RegisterCallback("StateChange",   function(oldState, newState)
@@ -2689,14 +2790,6 @@ function ZO_InventoryManager:CreateBankScene()
         }
     }
 
-    local function CreateButtonData(normal, pressed, highlight)
-        return {
-            normal = normal,
-            pressed = pressed,
-            highlight = highlight,
-        }
-    end
-
     local bankFragmentBar = ZO_SceneFragmentBar:New(ZO_PlayerBankMenuBar)
 
     --Withdraw Button
@@ -2734,8 +2827,11 @@ end
 
 function ZO_InventoryManager:GetBankInventoryType()
     local bankingBag = GetBankingBag()
+    -- Order matters for the 'If' branches:
     if bankingBag == BAG_BANK then
         return INVENTORY_BANK
+    elseif IsFurnitureVault(bankingBag) then
+        return INVENTORY_FURNITURE_VAULT
     elseif IsHouseBankBag(bankingBag) then
         return INVENTORY_HOUSE_BANK
     end
@@ -2775,6 +2871,145 @@ function ZO_InventoryManager:GetContextualMoneyControls()
     return moneyBar, altMoneyBar
 end
 
+--Furniture Bag
+---------------
+
+function ZO_InventoryManager:CreateFurnitureVaultScene()
+    FURNITURE_VAULT_FRAGMENT = ZO_FadeSceneFragment:New(ZO_FurnitureVault)
+    FURNITURE_VAULT_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
+        if newState == SCENE_FRAGMENT_SHOWING then
+            if self.inventories[INVENTORY_FURNITURE_VAULT].searchBox then
+                self.inventories[INVENTORY_FURNITURE_VAULT].searchBox:SetText(TEXT_SEARCH_MANAGER:GetSearchText(self.inventories[INVENTORY_FURNITURE_VAULT].currentContext))
+            end
+
+            self:UpdateFreeSlots(INVENTORY_FURNITURE_VAULT)
+
+            if self.isListDirty[INVENTORY_FURNITURE_VAULT] then
+                local UPDATE_EVEN_IF_HIDDEN = true
+                self:UpdateList(INVENTORY_FURNITURE_VAULT, UPDATE_EVEN_IF_HIDDEN)
+            end
+        end
+    end)
+
+    ZO_FurnitureVaultInfoBarAltMoney:SetHidden(true)
+    ZO_FurnitureVaultInfoBarAltFreeSlots:SetHidden(false)
+
+    local renameCollectibleKeybind =
+    {
+        name = GetString(SI_COLLECTIBLE_ACTION_RENAME),
+        keybind = "UI_SHORTCUT_SECONDARY",
+        callback = function()
+            local collectibleId = GetCollectibleForBag(BAG_FURNITURE_VAULT)
+            if collectibleId ~= 0 then
+                ZO_CollectionsBook.ShowRenameDialog(collectibleId)
+            end
+        end,
+    }
+
+    self.furnitureVaultWithdrawTabKeybindButtonGroup =
+    {
+        alignment = KEYBIND_STRIP_ALIGN_CENTER,
+        renameCollectibleKeybind,
+    }
+
+    self.furnitureVaultDepositTabKeybindButtonGroup =
+    {
+        alignment = KEYBIND_STRIP_ALIGN_CENTER,
+        {
+            name = GetString(SI_ITEM_ACTION_STACK_ALL),
+            keybind = "UI_SHORTCUT_QUINARY",
+            callback = function()
+                StackBag(BAG_BACKPACK)
+            end,
+        },
+        {
+            name = GetString(SI_ITEM_ACTION_STOW_ALL_FURNITURE),
+            keybind = "UI_SHORTCUT_QUATERNARY",
+            visible = function()
+                return HOUSING_EDITOR_STATE:CanDepositIntoFurnitureVault()
+            end,
+            callback = function()
+                StowAllFurnitureItems()
+            end,
+        },
+        renameCollectibleKeybind,
+    }
+
+    local furnitureVaultFragmentBar = ZO_SceneFragmentBar:New(ZO_FurnitureVaultMenuBar)
+
+    --Withdraw Button
+    local withdrawButtonData = CreateButtonData("EsoUI/Art/Bank/furnitureVault_tabIcon_withdraw_up.dds",
+                                                "EsoUI/Art/Bank/furnitureVault_tabIcon_withdraw_down.dds",
+                                                "EsoUI/Art/Bank/furnitureVault_tabIcon_withdraw_over.dds")
+    withdrawButtonData.callback = function()
+        local UPDATE_EVEN_IF_HIDDEN = true
+        self:UpdateList(INVENTORY_FURNITURE_VAULT, UPDATE_EVEN_IF_HIDDEN)
+        self:RefreshAllInventorySlots(INVENTORY_FURNITURE_VAULT)
+    end
+    furnitureVaultFragmentBar:Add(SI_BANK_WITHDRAW, { FURNITURE_VAULT_FRAGMENT, BACKPACK_FURNITURE_VAULT_LAYOUT_FRAGMENT }, withdrawButtonData, self.furnitureVaultWithdrawTabKeybindButtonGroup)
+
+    --Deposit Button
+    local ALWAYS_SHOW_TOOLTIP = true
+    local depositButtonData = CreateButtonData("EsoUI/Art/Bank/furnitureVault_tabIcon_deposit_up.dds",
+                                               "EsoUI/Art/Bank/furnitureVault_tabIcon_deposit_down.dds", 
+                                               "EsoUI/Art/Bank/furnitureVault_tabIcon_deposit_over.dds",
+                                               "EsoUI/Art/Bank/furnitureVault_tabIcon_deposit_disabled.dds",
+                                               ALWAYS_SHOW_TOOLTIP)
+
+    depositButtonData.callback = function()
+        local SKIP_ANIMATION = true
+        local RESELECT_IF_SELECTED = true
+        ZO_MenuBar_SelectDescriptor(self.inventories[INVENTORY_BACKPACK].filterBar, ITEM_TYPE_DISPLAY_CATEGORY_FURNISHING, SKIP_ANIMATION, RESELECT_IF_SELECTED)
+        ZO_MenuBar_SelectDescriptor(self.inventories[INVENTORY_BACKPACK].subFilterBar, ITEM_TYPE_DISPLAY_CATEGORY_ALL, SKIP_ANIMATION, RESELECT_IF_SELECTED)
+        self:SelectAndChangeSort(INVENTORY_BACKPACK, ITEMFILTERTYPE_FURNISHING, "name", ZO_SORT_ORDER_UP)
+        self.inventories[INVENTORY_BACKPACK].currentFilter = ITEM_TYPE_DISPLAY_CATEGORY_FURNISHING
+        self:RefreshAllInventorySlots(INVENTORY_BACKPACK)
+
+        local UPDATE_EVEN_IF_HIDDEN = true
+        self:UpdateList(INVENTORY_BACKPACK, UPDATE_EVEN_IF_HIDDEN)
+        self:RefreshAllInventorySlots(INVENTORY_BACKPACK)
+    end
+
+    depositButtonData.enabled = IsESOPlusSubscriber
+    depositButtonData.CustomTooltipFunction = function(tooltip)
+        if depositButtonData.enabled() then
+            SetTooltipText(InformationTooltip, zo_strformat(SI_MENU_BAR_TOOLTIP, GetString(depositButtonData.categoryName)))
+        else
+            SetTooltipText(InformationTooltip, zo_strformat(SI_MENU_BAR_TOOLTIP, GetString(SI_FURNITURE_VAULT_ERROR_NEED_ESO_PLUS)))
+        end
+    end
+
+    furnitureVaultFragmentBar:Add(SI_BANK_DEPOSIT, { INVENTORY_FRAGMENT, BACKPACK_FURNITURE_VAULT_LAYOUT_FRAGMENT }, depositButtonData, self.furnitureVaultDepositTabKeybindButtonGroup)
+
+    local furnitureVaultScene = ZO_InteractScene:New("furnitureVault", SCENE_MANAGER, BANKING_INTERACTION)
+    furnitureVaultScene:RegisterCallback("StateChange", function(oldState, newState)
+        if newState == SCENE_SHOWING then
+            -- Initialize the slots and furniture vault fresh here
+            local inventory = self.inventories[INVENTORY_FURNITURE_VAULT]
+            local bankingBag = BAG_FURNITURE_VAULT
+            inventory.slots = { [bankingBag] = {} }
+            inventory.backingBags = { bankingBag }
+            furnitureVaultFragmentBar:SelectFragment(SI_BANK_WITHDRAW)
+            furnitureVaultFragmentBar:UpdateButtons()
+            self:RefreshAllInventorySlots(INVENTORY_FURNITURE_VAULT)
+            self:UpdateFreeSlots(INVENTORY_FURNITURE_VAULT)
+            self:UpdateFreeSlots(INVENTORY_BACKPACK)
+            self:ActivateFurnitureVaultSearch()
+            TriggerTutorial(TUTORIAL_TRIGGER_HOME_STORAGE_OPENED)
+        elseif newState == SCENE_HIDING then
+            self:DeactivateFurnitureVaultSearch()
+        elseif newState == SCENE_HIDDEN then
+            ZO_InventorySlot_RemoveMouseOverKeybinds()
+            furnitureVaultFragmentBar:Clear()
+            -- Clear the inventory slot data and connection to a bag
+            local inventory = self.inventories[INVENTORY_FURNITURE_VAULT]
+            inventory.slots = nil
+            inventory.backingBags = nil
+            inventory.hasAnyQuickSlottableItems = nil
+        end
+    end)
+end
+
 --House Bank
 -------------
 
@@ -2803,7 +3038,7 @@ function ZO_InventoryManager:CreateHouseBankScene()
         name = GetString(SI_COLLECTIBLE_ACTION_RENAME),
         keybind = "UI_SHORTCUT_SECONDARY",
         callback = function()
-            local collectibleId = GetCollectibleForHouseBankBag(GetBankingBag())
+            local collectibleId = GetCollectibleForBag(GetBankingBag())
             if collectibleId ~= 0 then
                 ZO_CollectionsBook.ShowRenameDialog(collectibleId)
             end
@@ -2836,14 +3071,6 @@ function ZO_InventoryManager:CreateHouseBankScene()
         renameCollectibleKeybind,
     }
 
-    local function CreateButtonData(normal, pressed, highlight)
-        return {
-            normal = normal,
-            pressed = pressed,
-            highlight = highlight,
-        }
-    end
-
     local houseBankFragmentBar = ZO_SceneFragmentBar:New(ZO_HouseBankMenuBar)
 
     --Withdraw Button
@@ -2870,7 +3097,10 @@ function ZO_InventoryManager:CreateHouseBankScene()
                                                         self:RefreshAllInventorySlots(INVENTORY_HOUSE_BANK)
                                                         self:UpdateFreeSlots(INVENTORY_HOUSE_BANK)
                                                         self:UpdateFreeSlots(INVENTORY_BACKPACK)
+                                                        self:ActivateHouseBankSearch()
                                                         TriggerTutorial(TUTORIAL_TRIGGER_HOME_STORAGE_OPENED)
+                                                    elseif newState == SCENE_HIDING then
+                                                        self:DeactivateHouseBankSearch()
                                                     elseif newState == SCENE_HIDDEN then
                                                         ZO_InventorySlot_RemoveMouseOverKeybinds()
                                                         houseBankFragmentBar:Clear()
@@ -2974,14 +3204,6 @@ function ZO_InventoryManager:CreateGuildBankScene()
             end,
         }
     }
-
-    local function CreateButtonData(normal, pressed, highlight)
-        return {
-            normal = normal,
-            pressed = pressed,
-            highlight = highlight,
-        }
-    end
 
     local guildBankFragmentBar = ZO_SceneFragmentBar:New(ZO_GuildBankMenuBar)
 
@@ -3134,6 +3356,8 @@ function ZO_InventoryManager:UpdateEmptyBagLabel(inventoryType, isEmptyList)
             label = ZO_GuildBank:GetNamedChild("Empty")
         elseif inventoryType == INVENTORY_QUEST_ITEM then
             label = ZO_QuestItems:GetNamedChild("Empty")
+        elseif inventoryType == INVENTORY_FURNITURE_VAULT then
+            label = ZO_FurnitureVault:GetNamedChild("Empty")
         end
 
         if label then

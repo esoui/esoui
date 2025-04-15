@@ -19,6 +19,7 @@ ZO_PLACEABLE_FURNITURE_BAGS =
     [BAG_HOUSE_BANK_EIGHT] = true,
     [BAG_HOUSE_BANK_NINE] = true,
     [BAG_HOUSE_BANK_TEN] = true,
+    [BAG_FURNITURE_VAULT] = true,
 }
 
 ZO_HOUSING_FURNITURE_LOCATION_FILTER_BAGS =
@@ -47,11 +48,15 @@ ZO_HOUSING_FURNITURE_LOCATION_FILTER_BAGS =
         [BAG_HOUSE_BANK_NINE] = true,
         [BAG_HOUSE_BANK_TEN] = true,
     },
+    [HOUSING_FURNITURE_LOCATION_FILTER_FURNITURE_VAULT] =
+    {
+        [BAG_FURNITURE_VAULT] = true,
+    },
 }
 
 -- Make sure no new bags have been added since the last time we updated ZO_PLACEABLE_FURNITURE_BAGS
 -- If a new bag was added and it's possible to place furniture from it add it to the table
-internalassert(BAG_MAX_VALUE == 18, "Update ZO_SharedFurnitureManager to handle new bag")
+internalassert(BAG_MAX_VALUE == 19, "Update ZO_SharedFurnitureManager to handle new bag")
 
 local FURNITURE_COMMAND_REMOVE = 1
 local FURNITURE_COMMAND_REMOVE_PATH_NODE = 2
@@ -302,6 +307,9 @@ function ZO_SharedFurnitureManager:RegisterForEvents()
             for bagId = BAG_HOUSE_BANK_ONE, BAG_HOUSE_BANK_TEN do
                 SHARED_INVENTORY:GetOrCreateBagCache(bagId)
             end
+
+            -- do the same for furniture bag
+            SHARED_INVENTORY:GetOrCreateBagCache(BAG_FURNITURE_VAULT)
         else
             EVENT_MANAGER:UnregisterForUpdate("SharedFurniture")
         end
@@ -458,7 +466,7 @@ function ZO_SharedFurnitureManager:OnFurnitureRemovedFromHouse(furnitureId, coll
 
         --If we removed a house bank, tell the player that they need to re-place it to get those items
         local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
-        if collectibleData and collectibleData:GetCategoryType() == COLLECTIBLE_CATEGORY_TYPE_HOUSE_BANK then
+        if collectibleData and (collectibleData:IsHouseBank() and not collectibleData:IsFurnitureVault()) then
             local NO_SOUND = nil
             ZO_Alert(UI_ALERT_CATEGORY_ALERT, NO_SOUND, zo_strformat(SI_HOUSING_FURNITURE_PUT_AWAY_HOUSE_BANK_WARNING, collectibleData:GetName()))
         end

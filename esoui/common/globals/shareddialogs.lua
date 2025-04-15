@@ -36,24 +36,25 @@ ESO_Dialogs["GAMEPAD_OPTIONS_RESET_TO_DEFAULTS"] =
     {
         text = SI_OPTIONS_RESET_TITLE,
     },
-    mainText = 
+    mainText =
     {
-        text =  function() 
-                    if SCENE_MANAGER:IsShowing("gamepad_options_root") then
-                        return SI_OPTIONS_RESET_ALL_PROMPT
-                    else
-                        return SI_OPTIONS_RESET_PROMPT
-                    end
-                end,
+        text =  function()
+            if SCENE_MANAGER:IsShowing("gamepad_options_root") then
+                return SI_OPTIONS_RESET_ALL_PROMPT
+            else
+                return SI_OPTIONS_RESET_PROMPT
+            end
+        end,
     },
     buttons =
     {
         [1] =
         {
             text = SI_OPTIONS_RESET,
-            callback =  function(dialog)
-                            SYSTEMS:GetGamepadObject("options"):LoadAllDefaults()
-                        end
+            callback = function(dialog)
+                SYSTEMS:GetGamepadObject("options"):LoadAllDefaults()
+                ResetConsolePublicUserSettingsToDefault()
+            end
         },
         [2] =
         {
@@ -254,6 +255,82 @@ ESO_Dialogs["RADIO_BUTTON_GROUP_CHANGE_SELECTION_CONFIRMATION"] =
                 return ""
             end
         end,
+    },
+    buttons =
+    {
+        {
+            text = SI_DIALOG_CONFIRM,
+            callback =  function(dialog)
+                if dialog.data and dialog.data.onConfirmCallback then
+                    dialog.data.onConfirmCallback()
+                end
+            end,
+        },
+        {
+            text = SI_DIALOG_CANCEL,
+        }
+    }
+}
+
+ESO_Dialogs["ADDON_DELETE_SAVED_VARIABLES_CONFIRMATION"] =
+{
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+        allowRightStickPassThrough = true,
+    },
+    canQueue = true,
+    title =
+    {
+        text = SI_GAMEPAD_ADDON_MANAGER_DELETE_SAVED_VARIABLES,
+    },
+    mainText = 
+    {
+        text = function(dialog)
+            local confirmationText = {}
+            if dialog.data and dialog.data.addonName then
+                table.insert(confirmationText, zo_strformat(SI_GAMEPAD_ADDON_MANAGER_DELETE_SAVED_VARIABLES_CONFIRMATION_FORMATTER, ZO_SELECTED_TEXT:Colorize(dialog.data.addonName)))
+            end
+
+            --If this is called from ingame, include an extra warning that the UI will be reloaded as a result of this
+            if ZO_IsIngameUI() then
+                table.insert(confirmationText, GetString(SI_GAMEPAD_ADDON_MANAGER_DELETE_SAVED_VARIABLES_RELOAD_UI_WARNING))
+            end
+
+            return ZO_GenerateParagraphSeparatedList(confirmationText)
+        end,
+    },
+    buttons =
+    {
+        {
+            text = SI_DIALOG_CONFIRM,
+            callback =  function(dialog)
+                if dialog.data and dialog.data.onConfirmCallback then
+                    dialog.data.onConfirmCallback()
+                end
+            end,
+        },
+        {
+            text = SI_DIALOG_CANCEL,
+        }
+    }
+}
+
+ESO_Dialogs["ADDON_DELETE_UNUSED_SAVED_VARIABLES_CONFIRMATION"] =
+{
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+        allowRightStickPassThrough = true,
+    },
+    canQueue = true,
+    title =
+    {
+        text = SI_GAMEPAD_ADDON_MANAGER_DELETE_UNUSED_SAVED_VARIABLES,
+    },
+    mainText = 
+    {
+        text = SI_GAMEPAD_ADDON_MANAGER_DELETE_UNUSED_SAVED_VARIABLES_CONFIRMATION,
     },
     buttons =
     {

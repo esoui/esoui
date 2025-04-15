@@ -1,5 +1,7 @@
 <GuiXml>
     <Controls>
+        <Control name="ZO_AddonManagerDeleteSavedVariablesEntryTemplate" inherits="ZO_GamepadFullWidthLeftLabelEntryTemplate" virtual="true" />
+        
         <Control name="ZO_AddonManager_AddonRow_Gamepad" inherits="ZO_GamepadInteractiveSortFilterListRow" virtual="true">
             <OnInitialized>
                 ZO_AddOnManager_Gamepad.OnRowControlInitialized(self)
@@ -44,6 +46,12 @@
                 </Label>
             </Controls>
         </Control>
+
+        <TopLevelControl name="ZO_AddOnMenu_Console_TopLevel" inherits="ZO_Gamepad_ParametricList_Screen" hidden="true">
+            <OnInitialized>
+                ZO_AddOnMenu_Console.OnControlInitialized(self)
+            </OnInitialized>
+        </TopLevelControl>
         
         <TopLevelControl name="ZO_AddonManager_Gamepad_TopLevel" inherits="ZO_AnchoredToQuadrant_1_2_3_Background" hidden="true">
             <OnInitialized>

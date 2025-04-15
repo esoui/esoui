@@ -1,9 +1,13 @@
-function ZO_SkillInfoXPBar_OnMouseEnter(control)
+function ZO_SkillInfoXPBar_OnMouseEnter(control, offsetX, isSubclassing)
     -- Verify that the control has skillLineData and is truly visible for systems like Universal Deconstruction that do not show/hide the XP bar.
     if control.skillLineData and control:GetAlpha() > 0 then
         SKILLS_WINDOW:StopSelectedSkillBuildSkillAnimations() -- TODO: Companions, remove direct skills reference
-        InitializeTooltip(SkillTooltip, control, TOPLEFT, 15, 5, BOTTOMLEFT)
-        SkillTooltip:SetSkillLineById(control.skillLineData:GetId())
+        InitializeTooltip(SkillTooltip, control, TOPRIGHT, offsetX or -130, -25)
+        if isSubclassing then
+            SkillTooltip:SetSubclassingSkillLineById(control.skillLineData:GetId())
+        else
+            SkillTooltip:SetSkillLineById(control.skillLineData:GetId())
+        end
     end
 end
 
@@ -11,24 +15,34 @@ function ZO_SkillInfoXPBar_OnMouseExit()
     ClearTooltip(SkillTooltip)
 end
 
-function ZO_SkillLineInfo_Keyboard_Refresh(skillLineInfo, skillLineData, forceInit)
+function ZO_SkillLineInfo_Keyboard_Refresh(skillLineInfo, skillLineData, forceInit, animateInstantly, isDisabled, isSubclassing)
     local lastRankXP, nextRankXP, currentRankXP = skillLineData:GetRankXPValues()
 
-    skillLineInfo.name:SetText(skillLineData:GetFormattedName())
+    local withTraining = true
+    skillLineInfo.name:SetText(skillLineData:GetFormattedName(withTraining))
     local skillInfoXPBar = skillLineInfo.xpBar
     local skillInfoXPBarControl = skillInfoXPBar:GetControl()
     local dontWrap = skillInfoXPBarControl.skillLineData ~= skillLineData or forceInit
     skillInfoXPBarControl.skillLineData = skillLineData
-    if skillLineData:IsAvailable() then
-        ZO_SkillInfoXPBar_SetValue(skillInfoXPBar, skillLineData:GetCurrentRank(), lastRankXP, nextRankXP, currentRankXP, dontWrap)
+    if skillLineData:IsAvailable() or skillLineData:IsProgressionAccountWide() or skillLineData:IsClassSkillLine() then
+        ZO_SkillInfoXPBar_SetValue(skillInfoXPBar, skillLineData:GetCurrentRank(), lastRankXP, nextRankXP, currentRankXP, dontWrap, animateInstantly)
     elseif skillLineData:IsAdvised() then
         local RANK_NOT_SHOWN = 1
         local CURRENT_XP_NOT_SHOWN = 0
-        ZO_SkillInfoXPBar_SetValue(skillInfoXPBar, RANK_NOT_SHOWN, lastRankXP, nextRankXP, CURRENT_XP_NOT_SHOWN, dontWrap)
+        ZO_SkillInfoXPBar_SetValue(skillInfoXPBar, RANK_NOT_SHOWN, lastRankXP, nextRankXP, CURRENT_XP_NOT_SHOWN, dontWrap, animateInstantly)
     end
 
     if SkillTooltip:GetOwner() == skillInfoXPBarControl then
-        ZO_SkillInfoXPBar_OnMouseEnter(skillInfoXPBarControl)
+        local DEFAULT_OFFSET_X = nil
+        ZO_SkillInfoXPBar_OnMouseEnter(skillInfoXPBarControl, DEFAULT_OFFSET_X, isSubclassing)
+    end
+
+    if isDisabled then
+        skillLineInfo.name:SetColor(ZO_DISABLED_TEXT:UnpackRGBA())
+        skillLineInfo.rank:SetColor(ZO_DISABLED_TEXT:UnpackRGBA())
+    else
+        skillLineInfo.name:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
+        skillLineInfo.rank:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
     end
 end
 
@@ -248,8 +262,7 @@ do
                 hideIncreaseButton = false
             end
         else
-            local isFullRespec = skillPointAllocationMode == SKILL_POINT_ALLOCATION_MODE_FULL
-            if skillData:CanPointAllocationsBeAltered(isFullRespec) then
+            if skillData:CanPointAllocationsBeAltered(skillPointAllocationMode) then
                 hideIncreaseButton = false
                 hideDecreaseButton = false
 
@@ -289,6 +302,96 @@ do
             else
                 skillStyleControl:SetAnchor(RIGHT, increaseButton, LEFT)
             end
+
+            if isActive and skillProgressionData:HasAnyNonHiddenSkillStyles() then
+                skillStyleControl:SetHidden(false)
+                if skillProgressionData:IsSkillStyleSelected() then
+                    skillStyleControl.defaultStyleButton:SetHidden(true)
+                    skillStyleControl.selectedStyleButton:SetHidden(false)
+                else
+                    skillStyleControl.defaultStyleButton:SetHidden(false)
+                    skillStyleControl.selectedStyleButton:SetHidden(true)
+                end
+                skillStyleControl.statusIcon:SetHidden(not skillData:HasUpdatedStatusByType(ZO_SKILL_DATA_NEW_STATE.STYLE_COLLECTIBLE))
+            else
+                skillStyleControl:SetHidden(true)
+            end
+        else
+            skillStyleControl:SetHidden(true)
+        end
+    end
+
+    function ZO_Skills_ReadOnly_AbilityEntry_Setup(control, skillData)
+        local skillPointAllocator = skillData:GetPointAllocator()
+        local skillProgressionData = skillPointAllocator:GetProgressionData()
+
+        local isPassive = skillData:IsPassive()
+        local isActive = not isPassive
+        local isPurchased = skillPointAllocator:IsPurchased()
+        local isUnlocked = skillProgressionData:IsUnlocked()
+
+        local lastSkillProgressionData = control.skillProgressionData
+        control.skillProgressionData = skillProgressionData
+        control.slot.skillProgressionData = skillProgressionData
+        control.slot.skillData = skillData
+        control.slot.isReadOnly = true
+
+        -- slot
+        local UNUSABLE = true
+        local DISABLE = false
+        control.slotIcon:SetTexture(skillProgressionData:GetIcon())
+        ZO_Skills_SetKeyboardAbilityButtonTextures(control.slot)
+        ZO_ActionSlot_SetUnusable(control.slotIcon, UNUSABLE)
+        control.slot:SetEnabled(DISABLE)
+        control.slotLock:SetHidden(isUnlocked)
+
+        local hasSlotStatusUpdated = skillData:HasUpdatedStatusByType(ZO_SKILL_DATA_NEW_STATE.MORPHABLE) or skillData:HasUpdatedStatusByType(ZO_SKILL_DATA_NEW_STATE.CRAFTED_ABILITY)
+        control.slot.statusIcon:SetHidden(not hasSlotStatusUpdated)
+
+        if skillProgressionData:IsActive() and skillProgressionData:HasAnyNonHiddenSkillStyles() then
+            local collectibleData = skillProgressionData:GetSelectedSkillStyleCollectibleData()
+            if collectibleData then
+                control.skillStyleControl.selectedStyleButton.icon:SetTexture(collectibleData:GetIcon())
+            end
+        end
+
+        -- xp bar
+        local showXPBar = skillProgressionData:HasRankData()
+        if showXPBar then
+            local currentRank = skillProgressionData:GetCurrentRank()
+            local startXP, endXP = skillProgressionData:GetRankXPExtents(currentRank)
+            local currentXP = skillProgressionData:GetCurrentXP()
+            local dontWrap = lastSkillProgressionData ~= skillProgressionData
+
+            control.xpBar:SetHidden(false)
+            ZO_SkillInfoXPBar_SetValue(control.xpBar, currentRank, startXP, endXP, currentXP, dontWrap)
+        else
+            local NO_LEVEL = nil
+            local START_XP = 0
+            local END_XP = 1
+            local NO_XP = 0
+            local DONT_WRAP = true
+
+            control.xpBar:SetHidden(true)
+            ZO_SkillInfoXPBar_SetValue(control.xpBar, NO_LEVEL, START_XP, END_XP, NO_XP, DONT_WRAP)
+        end
+
+        -- name
+        local detailedName = skillProgressionData:GetDetailedName()
+        control.nameLabel:SetText(detailedName)
+        local offsetY = showXPBar and -10 or 0
+        control.nameLabel:SetAnchor(LEFT, control.slot, RIGHT, 10, offsetY)
+        control.nameLabel:SetColor(UNPURCHASED_COLOR:UnpackRGBA())
+
+        -- increase/decrease buttons
+        control.increaseButton:SetHidden(true)
+        control.decreaseButton:SetHidden(true)
+
+        -- Don't show skill style functionality if in respec mode
+        local skillStyleControl = control.skillStyleControl
+        if not SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeBatchSave() then
+            skillStyleControl:ClearAnchors()
+            skillStyleControl:SetAnchor(RIGHT, control.slot, LEFT, -12)
 
             if isActive and skillProgressionData:HasAnyNonHiddenSkillStyles() then
                 skillStyleControl:SetHidden(false)
@@ -354,14 +457,14 @@ end
 
 -- ability entry callbacks
 function ZO_Skills_AbilitySlot_OnDragStart(control)
-    if GetCursorContentType() == MOUSE_CONTENT_EMPTY then
+    if GetCursorContentType() == MOUSE_CONTENT_EMPTY and not control.isReadOnly then
         control.skillProgressionData:TryPickup()
     end
 end
 
 function ZO_Skills_AbilitySlot_OnDoubleClick(control)
     local skillData = control.skillProgressionData:GetSkillData()
-    if not skillData:IsPassive() and skillData:GetPointAllocator():IsPurchased() then
+    if not skillData:IsPassive() and skillData:GetPointAllocator():IsPurchased() and not control.isReadOnly then
         if ACTION_BAR_ASSIGNMENT_MANAGER:TryToSlotNewSkill(skillData) then
             PlaySound(SOUNDS.ABILITY_SLOTTED)
         end
@@ -385,7 +488,7 @@ function ZO_Skills_AbilitySlot_OnMouseUp(control)
         ShowMenu(control)
     else
         ClearMenu()
-        if skillData:GetPointAllocator():IsPurchased() and control.skillProgressionData == skillData:GetCurrentProgressionData() then
+        if skillData:GetPointAllocator():IsPurchased() and control.skillProgressionData == skillData:GetCurrentProgressionData() and not control.isReadOnly then
             if skillData:IsUltimate() then
                 local ultimateSlotIndex = ACTION_BAR_ULTIMATE_SLOT_INDEX + 1
                 if hotbar:GetExpectedSkillSlotResult(ultimateSlotIndex, skillData) == HOT_BAR_RESULT_SUCCESS then
@@ -458,6 +561,26 @@ function ZO_Skills_AbilityIncrease_OnMouseEnter(control)
             InitializeTooltip(InformationTooltip, control, RIGHT, -5, 0, LEFT)
             SetTooltipText(InformationTooltip, GetString("SI_RESPECRESULT", RESPEC_RESULT_ACTIVE_HOTBAR_NOT_RESPECCABLE))
         end
+    else
+        local skillProgressionData = control:GetParent().skillProgressionData
+        local skillData = skillProgressionData:GetSkillData()
+        local skillPointAllocator = skillData:GetPointAllocator()
+
+        if skillData:IsPassive() then
+            InitializeTooltip(InformationTooltip, control, RIGHT, -5, 0, LEFT)
+            SetTooltipText(InformationTooltip, GetString(SI_SKILLS_UPGRADE_CONFIRM))
+        elseif not skillPointAllocator:IsPurchased() or not skillData:IsAtMorph() then
+            InitializeTooltip(InformationTooltip, control, RIGHT, -5, 0, LEFT)
+            SetTooltipText(InformationTooltip, GetString(SI_SKILLS_PURCHASE_CONFIRM))
+        else
+            if skillProgressionData:IsMorph() then
+                InitializeTooltip(InformationTooltip, control, RIGHT, -5, 0, LEFT)
+                SetTooltipText(InformationTooltip, GetString(SI_SKILLS_REMORPH_CONFIRM))
+            else
+                InitializeTooltip(InformationTooltip, control, RIGHT, -5, 0, LEFT)
+                SetTooltipText(InformationTooltip, GetString(SI_SKILLS_MORPH_CONFIRM))
+            end
+        end
     end
 end
 
@@ -490,6 +613,17 @@ function ZO_Skills_AbilityDecrease_OnMouseEnter(control)
         if skillProgressionData:IsActive() and skillPointAllocator:IsPurchased() and skillPointAllocator:GetMorphSlot() == MORPH_SLOT_BASE and not skillPointAllocator:CanSell() then
             InitializeTooltip(InformationTooltip, control, RIGHT, -5, 0, LEFT)
             SetTooltipText(InformationTooltip, GetString(SI_SKILL_RESPEC_MORPHS_ONLY_CANNOT_SELL_BASE_ABILITY))
+        end
+    elseif SKILLS_AND_ACTION_BAR_MANAGER:GetSkillPointAllocationMode() ~= SKILL_POINT_ALLOCATION_MODE_PURCHASE_ONLY then
+        local skillProgressionData = control:GetParent().skillProgressionData
+        local skillPointAllocator = skillProgressionData:GetSkillData():GetPointAllocator()
+
+        if skillPointAllocator:CanSell() or skillPointAllocator:CanDecreaseRank() then
+            InitializeTooltip(InformationTooltip, control, RIGHT, -5, 0, LEFT)
+            SetTooltipText(InformationTooltip, GetString(SI_SKILLS_SELL_CONFIRM))
+        elseif skillPointAllocator:CanUnmorph() then
+            InitializeTooltip(InformationTooltip, control, RIGHT, -5, 0, LEFT)
+            SetTooltipText(InformationTooltip, GetString(SI_SKILLS_UNMORPH_CONFIRM))
         end
     end
 end

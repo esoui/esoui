@@ -1,9 +1,10 @@
 <GuiXml>
     <Controls>
         <Label name="ZO_GameMenu_LabelHeader" inherits="ZO_LabelHeader" virtual="true">
-            <Dimensions y="30" />
+            <Dimensions x="0" y="0" /> <!-- Clear any set dimensions we've inherited -->
+            <DimensionConstraints maxX="224" />
         </Label>
-      
+
         <Label name="ZO_GameMenu_ChildlessHeader" inherits="ZO_GameMenu_LabelHeader" virtual="true">
             <OnMouseUp>
                 ZO_GameMenu_ChildlessHeader_OnMouseUp(self, upInside)
@@ -16,7 +17,8 @@
             </OnMouseUp>
         </Label>
 
-        <Label name="ZO_GameMenu_Subcategory" virtual="true" inherits="ZO_SelectableLabel" font="ZoFontWinH3">
+        <Label name="ZO_GameMenu_Subcategory" inherits="ZO_SelectableLabel" font="ZoFontWinH3" virtual="true">
+            <DimensionConstraints maxX="194" />
             <OnMouseUp>
                 ZO_TreeEntry_OnMouseUp(self, upInside)
             </OnMouseUp>
@@ -27,7 +29,7 @@
         </Texture>
 
         <TopLevelControl name="ZO_GameMenu_Template" virtual="true">
-            <Dimensions x="210" />
+            <Dimensions x="275" />
             <Anchor point="TOPLEFT" relativeTo="GuiRoot" />
             <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot" />
             <OnShow>

@@ -10,17 +10,7 @@
 
                         <Label name="$(parent)Title" override="true" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_PROMOTIONAL_EVENTS" />
 
-                        <Label name="$(parent)TextCallout" override="true" inherits="ZO_MarketTextCallout_Gamepad">
-                            <Controls>
-                                <Control name="$(parent)Background" override="true">
-                                    <Controls>
-                                        <Texture name="$(parent)Center" override="true" color="INTERFACE_COLOR_TYPE_MARKET_COLORS:MARKET_COLORS_NEW" layer="CONTROLS" />
-                                        <Texture name="$(parent)Left" override="true" color="INTERFACE_COLOR_TYPE_MARKET_COLORS:MARKET_COLORS_NEW" layer="CONTROLS" />
-                                        <Texture name="$(parent)Right" override="true" color="INTERFACE_COLOR_TYPE_MARKET_COLORS:MARKET_COLORS_NEW" layer="CONTROLS" />
-                                    </Controls>
-                                </Control>
-                            </Controls>
-                        </Label>
+                        <Label name="$(parent)TextCallout" />
 
                         <Texture name="$(parent)GlowUnderlay" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_PROMOTIONAL_EVENTS" level="1" scale="1.025" shaderEffectType="WAVE" excludeFromResizeToFitExtents="true" textureFile="EsoUI/Art/PromotionalEvent/promotionalEvents_glow.dds">
                             <Anchor point="CENTER" />

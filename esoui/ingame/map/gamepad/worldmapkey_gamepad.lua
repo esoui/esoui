@@ -1,21 +1,17 @@
 GAMEPAD_WORLD_MAP_KEY_COLUMN_WIDTH = 420
 
-local SYMBOL_PARAMS = {
+local SYMBOL_PARAMS =
+{
     TARGET_SYMBOLS_PER_COLUMN = 6,
     MAX_SYMBOLS_PER_COLUMN = 7,
     TARGET_SECTIONS_PER_COLUMN = 2,
-    
+
     SYMBOL_OFFSET_Y = 25,
     HEADER_OFFSET_X = 69,
     HEADER_OFFSET_Y = 70,
 }
 
 local WorldMapKey_Gamepad = ZO_WorldMapKey_Shared:Subclass()
-
-function WorldMapKey_Gamepad:New(...)
-    local object = ZO_WorldMapKey_Shared.New(self, ...)
-    return object
-end
 
 local NUM_COLUMNS = 4
 
@@ -24,12 +20,16 @@ function WorldMapKey_Gamepad:Initialize(control)
 
     self.symbolParams = SYMBOL_PARAMS
 
-    local mainControl = control:GetNamedChild("Main")
+    self.mainControl = control:GetNamedChild("Main")
+    self.scrollControl = self.mainControl:GetNamedChild("Scroll")
+    self.scrollChildControl = self.mainControl:GetNamedChild("ScrollChild")
+    self.scrollIndicator = self.mainControl:GetNamedChild("ScrollIndicator")
+
     self.columns = {}
-    local anchorTo = mainControl
+    local anchorTo = self.scrollChildControl
     local relativePoint1, relativePoint2 = TOPLEFT, BOTTOMLEFT
     for i = 1, NUM_COLUMNS do
-        local newColumn = CreateControlFromVirtual("$(parent)Container", mainControl, "ZO_WorldMapKeySymbolContainer_Gamepad", i)
+        local newColumn = CreateControlFromVirtual("$(parent)Container", self.scrollChildControl, "ZO_WorldMapKeySymbolContainer_Gamepad", i)
         newColumn:SetAnchor(TOPLEFT, anchorTo, relativePoint1)
         newColumn:SetAnchor(BOTTOMLEFT, anchorTo, relativePoint2)
         table.insert(self.columns, newColumn)
@@ -38,7 +38,7 @@ function WorldMapKey_Gamepad:Initialize(control)
         relativePoint1, relativePoint2 = TOPRIGHT, BOTTOMRIGHT
     end
 
-    self.noKeyLabel = mainControl:GetNamedChild("NoKey")
+    self.noKeyLabel = self.mainControl:GetNamedChild("NoKey")
 
     local function Reset(control)
         control:SetParent(mainControl)
@@ -53,17 +53,20 @@ function WorldMapKey_Gamepad:Initialize(control)
 
     GAMEPAD_WORLD_MAP_KEY_FRAGMENT = ZO_FadeSceneFragment:New(control)
     GAMEPAD_WORLD_MAP_KEY_FRAGMENT:RegisterCallback("StateChange",  function(oldState, newState)
-        if(newState == SCENE_SHOWING) then
+        if newState == SCENE_SHOWING then
+            self.inputEnabled = true
             ZO_WorldMap_SetGamepadKeybindsShown(false)
             self:RefreshKey()
             self.m_keybindState = KEYBIND_STRIP:PushKeybindGroupState()
             KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor, self.m_keybindState)
             ZO_WorldMap_UpdateInteractKeybind_Gamepad()
-        elseif(newState == SCENE_HIDING) then
+        elseif newState == SCENE_HIDING then
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor, self.m_keybindState)
             KEYBIND_STRIP:PopKeybindGroupState()
             ZO_WorldMap_UpdateInteractKeybind_Gamepad()
             ZO_WorldMap_SetGamepadKeybindsShown(true)
+            self.inputEnabled = false
+            self:RefreshDirectionalInputActivation()
         end
     end)
     self.fragment = GAMEPAD_WORLD_MAP_KEY_FRAGMENT
@@ -76,7 +79,8 @@ local function ExitMapKey()
 end
 
 function WorldMapKey_Gamepad:InitializeKeybindStripDescriptor()
-    self.keybindStripDescriptor = {
+    self.keybindStripDescriptor =
+    {
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
         {
             name = GetString(SI_GAMEPAD_WORLD_MAP_LEGEND_CLOSE_KEYBIND),
@@ -91,16 +95,16 @@ function WorldMapKey_Gamepad:InitializeKeybindStripDescriptor()
             keybind = "UI_SHORTCUT_LEFT_STICK",
             callback = function() ExitMapKey() end,
             sound = SOUNDS.GAMEPAD_MENU_BACK,
-        }, 
+        },
     }
 end
 
 function WorldMapKey_Gamepad:RefreshKey()
-    if(not self.fragment:IsShowing()) then
+    if not self.fragment:IsShowing() then
         return
     end
 
-    if(self.dirty) then
+    if self.dirty then
         self.dirty = false
 
         self.symbolPool:ReleaseAllObjects()
@@ -113,39 +117,41 @@ function WorldMapKey_Gamepad:RefreshKey()
 
         local params = self.symbolParams
         local numSymbolsInColumn = 0
-        local numSectionsInColumn = 1
         local columnIndex = 1
         local column = self.columns[columnIndex]
         local previousAnchor = column
         local headerRelativePoint = TOPLEFT
         local allFilledOnce = false
-        local symbolList
+        local numSectionsPerColumn = {}
+
+        local totalNumSymbols = 0
+        local numSymbolsBySection = {}
+        for sectionIndex = 1, numKeySections do
+            numSymbolsBySection[sectionIndex] = GetNumMapKeySectionSymbols(sectionIndex)
+            totalNumSymbols = totalNumSymbols + numSymbolsBySection[sectionIndex]
+        end
+        local averageSymbolsPerColumn = totalNumSymbols / NUM_COLUMNS
 
         for sectionIndex = 1, numKeySections do
-            local numSectionSymbols = GetNumMapKeySectionSymbols(sectionIndex)
-
-            local newNumSymbolsInColumn = numSymbolsInColumn + numSectionSymbols
-            local moveToNextColumn = newNumSymbolsInColumn > params.MAX_SYMBOLS_PER_COLUMN or (newNumSymbolsInColumn > params.TARGET_SYMBOLS_PER_COLUMN and numSectionsInColumn > params.TARGET_SECTIONS_PER_COLUMN)
+            local newNumSymbolsInColumn = numSymbolsInColumn + numSymbolsBySection[sectionIndex]
+            local moveToNextColumn = newNumSymbolsInColumn > averageSymbolsPerColumn
             if moveToNextColumn then
                 if columnIndex == NUM_COLUMNS or allFilledOnce then
                     -- If all columns have symbols, add to the shortest column
-                    local minSymbols = #self.symbols[1]
-                    local columnIndex = 1
+                    columnIndex = 1
+                    local minSymbols = #self.symbols[columnIndex] + numSectionsPerColumn[columnIndex]
                     for i = 2, NUM_COLUMNS do
-                        local columnSymbols = #self.symbols[i]
+                        local columnSymbols = #self.symbols[i] + numSectionsPerColumn[i]
                         if columnSymbols < minSymbols then
                             minSymbols = columnSymbols
                             columnIndex = i
                         end
                     end
-                    
+
                     column = self.columns[columnIndex]
                     local symbolsInColumn = self.symbols[columnIndex]
                     numSymbolsInColumn = #symbolsInColumn
                     previousAnchor = symbolsInColumn[numSymbolsInColumn]
-
-                    -- There are at least two sections in the column and there will be more than the max number of symbols in the column so this count is not necessary
-                    numSectionsInColumn = 2
 
                     allFilledOnce = true
                 else
@@ -155,10 +161,15 @@ function WorldMapKey_Gamepad:RefreshKey()
                     headerRelativePoint = TOPLEFT
 
                     numSymbolsInColumn = 0
-                    numSectionsInColumn = 1
                 end
             end
-            
+
+            if numSectionsPerColumn[columnIndex] == nil then
+                numSectionsPerColumn[columnIndex] = 1
+            else
+                numSectionsPerColumn[columnIndex] = numSectionsPerColumn[columnIndex] + 1
+            end
+
             local sectionName = GetMapKeySectionName(sectionIndex)
             local header = self.headerPool:AcquireObject()
             header:SetText(sectionName)
@@ -172,7 +183,7 @@ function WorldMapKey_Gamepad:RefreshKey()
             local offsetX = -params.HEADER_OFFSET_X
             previousAnchor = header
 
-            for symbolIndex = 1, numSectionSymbols do
+            for symbolIndex = 1, numSymbolsBySection[sectionIndex] do
                 numSymbolsInColumn = numSymbolsInColumn + 1
                 local symbol = self.symbolPool:AcquireObject()
                 local name, icon, tooltip = GetMapKeySectionSymbolInfo(sectionIndex, symbolIndex)
@@ -184,17 +195,35 @@ function WorldMapKey_Gamepad:RefreshKey()
                 symbol:SetAnchor(TOPLEFT, previousAnchor, BOTTOMLEFT, offsetX, params.SYMBOL_OFFSET_Y)
                 offsetX = 0
 
-                if numSymbolsInColumn == 1 then
-                    symbolList = {}
-                    table.insert(self.symbols, symbolList)
+                if self.symbols[columnIndex] == nil then
+                    self.symbols[columnIndex] = {}
                 end
 
-                table.insert(symbolList, symbol)
+                table.insert(self.symbols[columnIndex], symbol)
                 previousAnchor = symbol
             end
-
-            numSectionsInColumn = numSectionsInColumn + 1
         end
+
+        local ANCHORS_TO_BACKGROUND = true
+        self:RefreshDirectionalInputActivation()
+    end
+end
+
+function WorldMapKey_Gamepad:RefreshDirectionalInputActivation()
+    local _, verticalExtents = self.scrollControl:GetScrollExtents()
+    local canScroll = verticalExtents > 0 and self.inputEnabled
+    if self.fragment:IsShowing() and canScroll then
+        if not self.directionalInputActivated then
+            self.directionalInputActivated = true
+            ZO_SCROLL_SHARED_INPUT:Activate(self.mainControl)
+        end
+        self.scrollIndicator:SetHidden(false)
+    else
+        if self.directionalInputActivated then
+            self.directionalInputActivated = false
+            ZO_SCROLL_SHARED_INPUT:Deactivate()
+        end
+        self.scrollIndicator:SetHidden(true)
     end
 end
 

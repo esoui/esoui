@@ -84,10 +84,11 @@ function ZO_ScribingLibrary_Gamepad:InitializeKeybindStripDescriptors()
 end
 
 function ZO_ScribingLibrary_Gamepad:OnShow()
-    ZO_ScribingLayout_Gamepad.OnShow(self)
-
+    -- Order matters here
     local RESET_TO_TOP = true
     self:ShowCraftedAbilities(RESET_TO_TOP)
+
+    ZO_ScribingLayout_Gamepad.OnShow(self)
 
     local list = self:GetCurrentList()
     if list then

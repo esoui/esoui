@@ -9,8 +9,19 @@
             <Controls>
                 <Control name="$(parent)Container" override="true">
                     <Controls>
-                        <Label name="$(parent)TextCallout" override="true" font="ZoFontGamepad34">
+                        <Label name="$(parent)TextCallout" override="true" inherits="ZO_MarketTextCallout_Gamepad" font="ZoFontGamepad34">
                             <Anchor point="BOTTOMLEFT" offsetX="17" offsetY="-15" />
+                            <DimensionConstraints maxX="281" />
+
+                            <Controls>
+                                <Control name="$(parent)Background" override="true">
+                                    <Controls>
+                                        <Texture name="$(parent)Center" override="true" color="INTERFACE_COLOR_TYPE_MARKET_COLORS:MARKET_COLORS_NEW" level="ZO_MARKET_TILE_TEXT_LEVEL" />
+                                        <Texture name="$(parent)Left" override="true" color="INTERFACE_COLOR_TYPE_MARKET_COLORS:MARKET_COLORS_NEW" level="ZO_MARKET_TILE_TEXT_LEVEL" />
+                                        <Texture name="$(parent)Right" override="true" color="INTERFACE_COLOR_TYPE_MARKET_COLORS:MARKET_COLORS_NEW" level="ZO_MARKET_TILE_TEXT_LEVEL" />
+                                    </Controls>
+                                </Control>
+                            </Controls>
                         </Label>
                     </Controls>
                 </Control>

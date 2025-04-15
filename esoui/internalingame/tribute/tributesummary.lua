@@ -1461,6 +1461,14 @@ function ZO_TributeSummary:BeginEndOfGameFanfare()
     local lfgRewardUiDataId = GetTributeGeneralMatchLFGRewardUIDataId()
     local matchStandardRewards = REWARDS_MANAGER:GetAllRewardInfoForRewardList(standardRewardListId)
     if REWARDS_MANAGER:DoesRewardListContainMailItems(standardRewardListId) then
+        -- TODO Rewards: This file does too many custom things with MAIL_ITEM rewards to refactor
+        -- now that the reward type is supported in the manager, so this is a workaround to keep the old behavior.
+        -- If we get time, it would be good to clean this up to just let mail be like any other reward
+        for i = #matchStandardRewards, 1, -1 do
+            if matchStandardRewards[i]:GetRewardType() == REWARD_ENTRY_TYPE_MAIL_ITEM then
+                table.remove(matchStandardRewards, i)
+            end
+        end
         table.insert(matchStandardRewards, 1, mailedReward)
     end
     if self.playerClubXP > 0 then
@@ -1495,7 +1503,10 @@ function ZO_TributeSummary:BeginEndOfGameFanfare()
             end
             if next(rankUpRewardList) then
                 for _, reward in ipairs(rankUpRewardList) do
-                    if not IsRewardAcquired(reward) then
+                    -- TODO Rewards: This file does too many custom things with MAIL_ITEM rewards to refactor
+                    -- now that the reward type is supported in the manager, so this is a workaround to keep the old behavior.
+                    -- If we get time, it would be good to clean this up to just let mail be like any other reward
+                    if not IsRewardAcquired(reward) and reward:GetRewardType() ~= REWARD_ENTRY_TYPE_MAIL_ITEM then
                         local stackableRewardAlreadyExists = false
                         for _, innerReward in ipairs(rankUpRewards) do
                             if AreRewardsEqual(reward, innerReward) then
@@ -1522,7 +1533,10 @@ function ZO_TributeSummary:BeginEndOfGameFanfare()
             end
             if next(clubRankRewardList) then
                 for _, reward in ipairs(clubRankRewardList) do
-                    if not IsRewardAcquired(reward) then
+                    -- TODO Rewards: This file does too many custom things with MAIL_ITEM rewards to refactor
+                    -- now that the reward type is supported in the manager, so this is a workaround to keep the old behavior.
+                    -- If we get time, it would be good to clean this up to just let mail be like any other reward
+                    if not IsRewardAcquired(reward) and reward:GetRewardType() ~= REWARD_ENTRY_TYPE_MAIL_ITEM then
                         local stackableRewardAlreadyExists = false
                         for _, innerReward in ipairs(rankUpRewards) do
                             if AreRewardsEqual(reward, innerReward) then

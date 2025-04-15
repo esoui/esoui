@@ -113,12 +113,8 @@ function BuyBack:InitializeEvents()
     self.control:RegisterForEvent(EVENT_MONEY_UPDATE, OnMoneyUpdate)
     self.control:RegisterForEvent(EVENT_UPDATE_BUYBACK, RefreshList)
     self.control:RegisterForEvent(EVENT_BUYBACK_RECEIPT, function(eventId, itemName, itemQuantity, money, itemSoundCategory)
-        -- ESO-713597: Don't play sound if item has not monetary value.
-        if money > 0 then
-            if itemSoundCategory == ITEM_SOUND_CATEGORY_NONE then
-                -- Fall back sound if there was no other sound to play
-                PlaySound(SOUNDS.ITEM_MONEY_CHANGED)
-            else
+        if not self.control:IsControlHidden() then
+            if itemSoundCategory ~= ITEM_SOUND_CATEGORY_NONE then
                 PlayItemSound(itemSoundCategory, ITEM_SOUND_ACTION_ACQUIRE)
             end
         end

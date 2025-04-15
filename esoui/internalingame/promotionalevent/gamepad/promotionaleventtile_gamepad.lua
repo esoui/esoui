@@ -21,6 +21,24 @@ function ZO_PromotionalEventTile_Gamepad:PostInitializePlatform()
     ZO_ActionTile_Gamepad.PostInitializePlatform(self)
 
     self:SetActionText(GetString(SI_MARKET_ANNOUNCEMENT_PROMOTIONAL_EVENT_ACTION))
+
+    local fonts =
+    {
+        {
+            font = "ZoFontGamepad34",
+            lineLimit = 1,
+        },
+        {
+            font = "ZoFontGamepad27",
+            lineLimit = 1,
+        },
+        {
+            font = "ZoFontGamepad22",
+            lineLimit = 1,
+            dontUseForAdjusting = true,
+        },
+    }
+    ZO_FontAdjustingWrapLabel_OnInitialized(self.bannerTextLabel, fonts, TEXT_WRAP_MODE_ELLIPSIS)
 end
 
 function ZO_PromotionalEventTile_Gamepad:SetSelected(isSelected)

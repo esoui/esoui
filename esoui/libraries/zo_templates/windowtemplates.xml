@@ -685,41 +685,41 @@
 
         <Control name="ZO_PlatformStyleDynamicHorizontalDivider_Gamepad_Template" virtual="true">
             <Controls>
-                <Texture name="$(parent)Left" textureFile="EsoUI/Art/Windows/Gamepad/gp_nav1_horDividerFlat.dds">
+                <Texture name="$(parent)Left" override="true" textureFile="EsoUI/Art/Windows/Gamepad/gp_nav1_horDividerFlat.dds">
                     <Dimensions x="4" y="8" />
                     <TextureCoords left="0" right="0.25" top=".25" bottom=".75" />
                 </Texture>
 
-                <Texture name="$(parent)Right" textureFile="EsoUI/Art/Windows/Gamepad/gp_nav1_horDividerFlat.dds">
+                <Texture name="$(parent)Right" override="true" textureFile="EsoUI/Art/Windows/Gamepad/gp_nav1_horDividerFlat.dds">
                     <Dimensions x="4" y="8" />
                     <TextureCoords left="0.75" right="1" top=".25" bottom=".75" />
                 </Texture>
 
-                <Texture name="$(parent)Center" textureFile="EsoUI/Art/Windows/Gamepad/gp_nav1_horDividerFlat.dds">
+                <Texture name="$(parent)Center" override="true" textureFile="EsoUI/Art/Windows/Gamepad/gp_nav1_horDividerFlat.dds">
                     <TextureCoords left="0.25" right="0.75" top=".25" bottom=".75" />
                 </Texture>
 
-                <Texture name="$(parent)MungeOverlay" hidden="true" />
+                <Texture name="$(parent)MungeOverlay" override="true" hidden="true" />
             </Controls>
         </Control>
 
         <Control name="ZO_PlatformStyleDynamicHorizontalDivider_Keyboard_Template" virtual="true">
             <Controls>
-                <Texture name="$(parent)Left" textureFile="EsoUI/Art/Miscellaneous/horizontalDivider_dynamic.dds">
+                <Texture name="$(parent)Left" override="true" textureFile="EsoUI/Art/Miscellaneous/horizontalDivider_dynamic.dds">
                     <Dimensions x="56" y="6" />
                     <TextureCoords left="0.015625" right="0.4375" top="0" bottom="1" />
                 </Texture>
 
-                <Texture name="$(parent)Right" textureFile="EsoUI/Art/Miscellaneous/horizontalDivider_dynamic.dds">
+                <Texture name="$(parent)Right" override="true" textureFile="EsoUI/Art/Miscellaneous/horizontalDivider_dynamic.dds">
                     <Dimensions x="56" y="6" />
                     <TextureCoords left="0.5625" right="0.9921875" top="0" bottom="1" />
                 </Texture>
 
-                <Texture name="$(parent)Center" textureFile="EsoUI/Art/Miscellaneous/horizontalDivider_dynamic.dds">
+                <Texture name="$(parent)Center" override="true" textureFile="EsoUI/Art/Miscellaneous/horizontalDivider_dynamic.dds">
                     <TextureCoords left="0.4375" right="0.5625" top="0" bottom="1" />
                 </Texture>
 
-                <Texture name="$(parent)MungeOverlay" textureFile="EsoUI/Art/Tooltips/munge_overlay.dds" hidden="false" />
+                <Texture name="$(parent)MungeOverlay" override="true" textureFile="EsoUI/Art/Tooltips/munge_overlay.dds" hidden="false" />
             </Controls>
         </Control>
 

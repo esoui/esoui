@@ -38,6 +38,34 @@
             </Controls>
         </Control>
 
+        <Control name="ZO_PromotionalEventReturningPlayerReward_Keyboard" inherits="ZO_PromotionalEventReturningPlayerReward_Shared" mouseEnabled="true" virtual="true">
+            <Dimensions x="ZO_PROMOTIONAL_EVENT_RETURNING_PLAYER_REWARD_WIDTH_KEYBOARD" y="ZO_PROMOTIONAL_EVENT_RETURNING_PLAYER_REWARD_HEIGHT_KEYBOARD" />
+
+            <OnMouseEnter>
+                ZO_PromotionalEvents_Keyboard.ReturningPlayerReward_OnMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_PromotionalEvents_Keyboard.ReturningPlayerReward_OnMouseExit(self)
+            </OnMouseExit>
+
+            <Controls>
+                <Control name="$(parent)Container" override="true">
+                    <Controls>
+                        <Backdrop name="$(parent)Backdrop" override="true" inherits="ZO_CenterlessBackdrop" />
+
+                        <Label name="$(parent)Quantity" override="true" font="ZoFontGameOutline" inheritScale="false" />
+
+                        <Label name="$(parent)Name" override="true" font="ZoFontHeader" inheritScale="false" />
+
+                        <Texture name="$(parent)ClaimedMark" override="true">
+                            <Dimensions x="32" y="32" />
+                        </Texture>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
         <Control name="ZO_PromotionalEventReward_CampaignPanel_Template_Keyboard" inherits="ZO_PromotionalEventReward_Template_Keyboard" virtual="true">
             <Controls>
                 <Backdrop name="$(parent)Backdrop" override="true">
@@ -72,7 +100,7 @@
             <OnMouseExit>
                 self.object:OnMouseExit()
             </OnMouseExit>
-            
+
             <Controls>
                 <Button name="$(parent)TrackButton">
                     <Dimensions x="32" y="32" />
@@ -112,7 +140,45 @@
                 </Label>
             </Controls>
         </Control>
-        
+
+        <Control name="ZO_PromotionalEventClaimChoice_RewardRow" inherits="ZO_ListEntry_BackdropAndHighlight_Template" mouseEnabled="true" virtual="true">
+            <Dimensions x="ZO_PROMOTIONAL_EVENTS_CLAIM_CHOICE_KEYBOARD_ROW_WIDTH" y="ZO_PROMOTIONAL_EVENTS_CLAIM_CHOICE_KEYBOARD_ROW_HEIGHT" />
+
+            <OnMouseEnter>
+                ZO_PromotionalEvents_ClaimChoiceDialog_Keyboard.OnListMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_PromotionalEvents_ClaimChoiceDialog_Keyboard.OnListMouseExit(self)
+            </OnMouseExit>
+
+            <OnMouseUp>
+                PROMOTIONAL_EVENTS_CLAIM_CHOICE_DIALOG_KEYBOARD:OnListRowClicked(self, button, upInside)
+            </OnMouseUp>
+
+            <Controls>
+                <Texture name="$(parent)Icon" level="2">
+                    <Dimensions x="40" y="40" />
+                    <Anchor point="CENTER" relativePoint="TOPLEFT" offsetX="47" offsetY="26" />
+
+                    <Controls>
+                        <Label name="$(parent)StackCount" horizontalAlignment="RIGHT" verticalAlignment="BOTTOM" font="ZoFontGameOutline" inheritScale="false">
+                            <Anchor point="TOPLEFT" offsetX="-10" offsetY="1" />
+                            <!-- Allow extra space for large stack counts like 898.8k -->
+                            <Anchor point="BOTTOMRIGHT" offsetX="2" offsetY="-1"/>
+                        </Label>
+                    </Controls>
+                </Texture>
+
+                <Label name="$(parent)Name" font="ZoFontGameShadow" maxLineCount="2" wrapMode="ELLIPSIS" level="2">
+                    <Dimensions x="ZO_PROMOTIONAL_EVENTS_CLAIM_CHOICE_KEYBOARD_ROW_WIDTH" />
+                    <Anchor point="LEFT" offsetX="85" />
+                </Label>
+
+                <Control name="$(parent)SelectedHighlight" inherits="ZO_ListEntryHighlight" level="1" />
+            </Controls>
+        </Control>
+
         <TopLevelControl name="ZO_PromotionalEvents_KeyboardTL" inherits="ZO_PromotionalEvents_Shared ZO_GroupMenuKeyboard_ContentAnchors" hidden="true">
             <OnInitialized>
                 ZO_PromotionalEvents_Keyboard.OnControlInitialized(self)
@@ -169,8 +235,21 @@
                         </Control>
 
                         <Control name="$(parent)ActivityList" override="true" inherits="ZO_ScrollList">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)CampaignPanel" relativePoint="BOTTOMLEFT" offsetX="-27" offsetY="20" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)CampaignPanel" relativePoint="BOTTOMLEFT" offsetX="-10" offsetY="20" />
                             <Anchor point="BOTTOMRIGHT" />
+                        </Control>
+
+                        <Control name="$(parent)ReturningUserRewards" override="true" hidden="true">
+                            <AnchorFill />
+                            <Controls>
+                                <Label name="$(parent)Title" font="ZoFontWinH2" modifyTextType="UPPERCASE" text="SI_PROMOTIONAL_EVENT_RETURNING_PLAYER_REWARD_ENTRY_HEADER">
+                                    <Anchor point="TOPELEFT" />
+                                </Label>
+                                <Control name="$(parent)GridList" override="true" inherits="ZO_GridScrollList_Keyboard">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetY="20" />
+                                    <Anchor point="BOTTOMRIGHT" />
+                                </Control>
+                            </Controls>
                         </Control>
                     </Controls>
                 </Control>
@@ -181,7 +260,7 @@
             <OnInitialized>
                 ZO_PromotionalEvents_CapstoneDialog_Keyboard:New(self)
             </OnInitialized>
-            
+
             <Controls>
                 <Backdrop name="$(parent)BG" override="true" inherits="ZO_MinorMungeBackdrop_SemiTransparentBlack">
                     <Controls>
@@ -191,7 +270,7 @@
                         </Texture>
                     </Controls>
                 </Backdrop>
-                
+
                 <Control name="$(parent)TopDivider" override="true" inherits="ZO_DynamicHorizontalDoubleDivider">
                     <Dimensions x="580" />
                     <Anchor point="TOP" offsetY="30" />
@@ -249,15 +328,57 @@
                         </Label>
                     </Controls>
                 </Control>
-                
+
+                <Label name="$(parent)AdditionalInformation" override="true" font="ZoFontGameMedium" horizontalAlignment="LEFT" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" hidden="true">
+                    <Dimensions x="580" />
+                    <Anchor point="TOP" relativeTo="$(parent)RewardContainerFrame" relativePoint="BOTTOM" offsetY="20" />
+                </Label>
+
                 <Control name="$(parent)BottomDivider" override="true" inherits="ZO_DynamicHorizontalDoubleDivider">
                     <Dimensions x="580" />
-                    <Anchor point="TOP" relativeTo="$(parent)TopDivider" relativePoint="BOTTOM" offsetY="350" />
+                    <Anchor point="TOP" relativeTo="$(parent)AdditionalInformation" relativePoint="BOTTOM" offsetY="10" />
                 </Control>
 
                 <!-- Order matters for these buttons -->
                 <Control name="$(parent)CloseButton" inherits="ZO_CustomDialogButton" />
                 <Control name="$(parent)ViewInCollectionsButton" inherits="ZO_CustomDialogButton" />
+                <Control name="$(parent)NextCampaignButton" inherits="ZO_CustomDialogButton" />
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_PromotionalEvents_ClaimChoiceDialog_Keyboard_TL" inherits="ZO_CustomDialogFrame">
+            <Dimensions x="366" y="466" />
+            <OnInitialized>
+                PROMOTIONAL_EVENTS_CLAIM_CHOICE_DIALOG_KEYBOARD = ZO_PromotionalEvents_ClaimChoiceDialog_Keyboard:New(self)
+            </OnInitialized>
+            <Controls>
+                <Backdrop name="$(parent)BG" override="true" inherits="ZO_MinorMungeBackdrop_SemiTransparentBlack">
+                    <Controls>
+                        <Texture name="$(parent)MungeOverlay" override="true" textureFile="EsoUI/Art/Miscellaneous/centerscreen_floating_backing.dds" addressMode="CLAMP">
+                            <Anchor point="TOPLEFT" offsetX="20" offsetY="20"/>
+                            <Anchor point="BOTTOMRIGHT" offsetX="-20" offsetY="-20"/>
+                        </Texture>
+                    </Controls>
+                </Backdrop>
+
+                <Label name="$(parent)Title" inherits="ZO_DialogTitle" font="ZoFontWinH3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_PROMOTIONAL_EVENT_CHOICE_REWARD_CLAIM_HEADER">
+                    <Anchor point="TOP" offsetY="25" />
+                    <Dimensions x="500" />
+                </Label>
+
+                <Control name="$(parent)TopDivider" override="true" inherits="ZO_DynamicHorizontalDivider">
+                    <Dimensions x="256" />
+                    <Anchor point="TOP" relativeTo="$(parent)Title" relativePoint="BOTTOM" offsetY="5" />
+                </Control>
+
+                <Control name="$(parent)List" inherits="ZO_ScrollList">
+                    <Anchor point="TOPLEFT" offsetY="80" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-10" offsetY="-60" />
+                </Control>
+
+                <!-- Order matters for these buttons -->
+                <Control name="$(parent)CloseButton" inherits="ZO_CustomDialogButton" />
+                <Control name="$(parent)ConfirmButton" inherits="ZO_CustomDialogButton" />
             </Controls>
         </TopLevelControl>
     </Controls>

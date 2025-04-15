@@ -356,7 +356,9 @@ do
         if rewardData then
             local rewardType = rewardData:GetRewardType()
             if rewardType then
-                ZO_Rewards_Shared_OnMouseEnter(control)
+                local DEFAULT_ANCHOR_POINT, DEFAULT_ANCHOR_OFFSET = nil, nil
+                local DONT_USE_RELATIVE_ANCHORS = false
+                ZO_Rewards_Shared_OnMouseEnter(control, DEFAULT_ANCHOR_POINT, DEFAULT_ANCHOR_POINT, DEFAULT_ANCHOR_OFFSET, DEFAULT_ANCHOR_OFFSET, DONT_USE_RELATIVE_ANCHORS)
             elseif rewardData:IsAdditionalUnlock() then
                 LayoutBasicTooltip(ItemTooltip, control, rewardData:GetFormattedName(), rewardData:GetDescription())
             elseif rewardData:IsSkillPoint() then

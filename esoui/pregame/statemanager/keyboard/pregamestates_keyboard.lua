@@ -51,6 +51,27 @@ local pregameStates =
         end,
 
         GetStateTransitionData = function()
+            return "WaitForPreloginWorld"
+        end,
+    },
+
+    ["WaitForPreloginWorld"] =
+    {
+        ShouldAdvance = function()
+            -- Always advance because the Keyboard UI does not use the Prelogin World.
+            WriteToInterfaceLog("Skipping Prelogin World load.")
+            return true
+        end,
+
+        OnEnter = function()
+            -- Nothing to do here.
+        end,
+
+        OnExit = function()
+            -- Nothing to do here.
+        end,
+
+        GetStateTransitionData = function()
             return "AccountLogin"
         end,
     },
@@ -58,6 +79,12 @@ local pregameStates =
     ["AccountLogin"] =
     {
         OnEnter = function(allowAnimation)
+            -- Stop monitoring for Prelogin World load completion.
+            EVENT_MANAGER:UnregisterForUpdate("WaitForPreloginWorld")
+
+            -- Hide the Prelogin Overlay loading scene.
+            PRELOGIN_OVERLAY:SetHidden(true)
+
             if DoesPlatformSupportDisablingShareFeatures() then
                 -- re-enabled when the character list is loaded
                 DisableShareFeatures()

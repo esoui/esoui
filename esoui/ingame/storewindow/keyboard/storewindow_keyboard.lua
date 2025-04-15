@@ -216,12 +216,6 @@ function ZO_StoreManager:Initialize(control)
         end
     end
 
-    local OnBuySuccess = function(...)
-        if not control:IsControlHidden() then
-            ZO_StoreManager_OnPurchased(...)
-        end
-    end
-
     local function HandleCursorPickup(eventCode, cursorType)
         if cursorType == MOUSE_CONTENT_INVENTORY_ITEM then
             ZO_InventoryLandingArea_SetHidden(self.landingArea, false)
@@ -261,7 +255,6 @@ function ZO_StoreManager:Initialize(control)
 
     control:RegisterForEvent(EVENT_OPEN_STORE, ShowStoreWindow)
     control:RegisterForEvent(EVENT_CLOSE_STORE, CloseStoreWindow)
-    control:RegisterForEvent(EVENT_BUY_RECEIPT, OnBuySuccess)
     control:RegisterForEvent(EVENT_CURRENCY_UPDATE, RefreshStoreWindow)
     control:RegisterForEvent(EVENT_INVENTORY_FULL_UPDATE, OnInventoryUpdated)
     control:RegisterForEvent(EVENT_INVENTORY_SINGLE_SLOT_UPDATE, OnInventoryUpdated)
@@ -397,24 +390,24 @@ do
                 name = GetString(SI_SELL_ALL_JUNK_KEYBIND_TEXT),
                 keybind = "UI_SHORTCUT_NEGATIVE",
 
-                visible =   function()
-                                return self.windowMode == ZO_STORE_WINDOW_MODE_NORMAL and HasAnyJunk(BAG_BACKPACK, DONT_COUNT_STOLEN_ITEMS)
-                            end,
-                callback =  function()
-                                ZO_Dialogs_ShowDialog("SELL_ALL_JUNK")
-                            end,
+                visible = function()
+                    return self.windowMode == ZO_STORE_WINDOW_MODE_NORMAL and HasAnyJunk(BAG_BACKPACK, DONT_COUNT_STOLEN_ITEMS)
+                end,
+                callback = function()
+                    ZO_Dialogs_ShowDialog("SELL_ALL_JUNK")
+                end,
             },
 
             --End Preview
             {
                 name = GetString(SI_CRAFTING_EXIT_PREVIEW_MODE),
                 keybind = "UI_SHORTCUT_QUATERNARY",
-                visible =   function()
-                                return ITEM_PREVIEW_KEYBOARD:IsInteractionCameraPreviewEnabled()
-                            end,
-                callback =  function()
-                                self:TogglePreviewMode()
-                            end,
+                visible = function()
+                    return ITEM_PREVIEW_KEYBOARD:IsInteractionCameraPreviewEnabled()
+                end,
+                callback = function()
+                    self:TogglePreviewMode()
+                end,
             },
         }
     end

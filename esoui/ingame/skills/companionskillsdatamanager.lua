@@ -41,6 +41,18 @@ function ZO_CompanionSkillsDataManager:GetSkillObjectPool()
     return self.skillObjectPool
 end
 
+function ZO_CompanionSkillsDataManager:TryForceClean()
+    if not self.isDataReady and not self.isForceCleaning then
+        if AreCompanionSkillsInitialized() then
+            self.isForceCleaning = true
+            self:RebuildSkillsData()
+            self.isForceCleaning = false
+        else
+            internalassert(false, "Attempting to access companion data when the companion skills have not been initiailized")
+        end
+    end
+end
+
 function ZO_CompanionSkillsDataManager:RebuildSkillsData()
     self.skillTypeObjectPool:ReleaseAllObjects()
     self.skillLineObjectPool:ReleaseAllObjects()
@@ -148,10 +160,12 @@ function ZO_CompanionSkillsDataManager:AreAnySkillLinesNew()
 end
 
 function ZO_CompanionSkillsDataManager:GetSkillTypeData(skillType)
+    self:TryForceClean()
     return self.skillTypeObjectPool:GetActiveObject(skillType)
 end
 
 function ZO_CompanionSkillsDataManager:GetSkillLineDataById(skillLineId)
+    self:TryForceClean()
     for _, skillLineData in self.skillLineObjectPool:ActiveObjectIterator() do
         if skillLineData:GetId() == skillLineId then
             return skillLineData
@@ -167,6 +181,7 @@ function ZO_CompanionSkillsDataManager:GetSkillLineDataByIndices(skillType, skil
 end
 
 function ZO_CompanionSkillsDataManager:SkillTypeIterator(skillTypeFilterFunctions)
+    self:TryForceClean()
     -- This only works because we use the skillTypeObjectPool like a numerically indexed table
     return ZO_FilteredNumericallyIndexedTableIterator(self.skillTypeObjectPool:GetActiveObjects(), skillTypeFilterFunctions)
 end
@@ -176,6 +191,7 @@ function ZO_CompanionSkillsDataManager:MapAbilityIdToSkill(abilityId, skillData)
 end
 
 function ZO_CompanionSkillsDataManager:GetSkillDataByAbilityId(abilityId)
+    self:TryForceClean()
     return self.skillsByAbilityId[abilityId]
 end
 

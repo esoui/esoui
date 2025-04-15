@@ -22,6 +22,8 @@ internalassert(RAPPORT_ADJUSTMENT_AMOUNT_ITERATION_END == 7, "New RAPPORT_ADJUST
 
 ZO_LOOT_HISTORY_DISPLAY_TYPE_CRAFT_BAG = "craftBag"
 ZO_LOOT_HISTORY_DISPLAY_TYPE_STOLEN = "stolen"
+ZO_LOOT_HISTORY_DISPLAY_TYPE_LOCKED_SET_PIECE = "lockedSetPiece"
+ZO_LOOT_HISTORY_DISPLAY_TYPE_CAN_LEARN = "canLearn"
 ZO_LOOT_HISTORY_DISPLAY_TYPE_COLLECTIONS = "collections"
 ZO_LOOT_HISTORY_DISPLAY_TYPE_ANTIQUITIES = "antiquities"
 ZO_LOOT_HISTORY_DISPLAY_TYPE_CROWN_CRATE = "crownCrate"
@@ -78,6 +80,11 @@ do
 
         if data.statusIcon then
             control.statusIcon:SetTexture(data.statusIcon)
+            if data.statusIconColor then
+                control.statusIcon:SetColor(data.statusIconColor:UnpackRGB())
+            else
+                control.statusIcon:SetColor(ZO_WHITE:UnpackRGB())
+            end
             control.statusIcon:SetHidden(false)
         else
             control.statusIcon:SetHidden(true)
@@ -465,7 +472,7 @@ function ZO_LootHistory_Shared:AddTributeCardUpgradeEntry(cardData)
     end
 end
 
-function ZO_LootHistory_Shared:OnNewItemReceived(itemLinkOrName, stackCount, itemSound, lootType, questItemIcon, itemId, isVirtual, isStolen, bonusDropSource)
+function ZO_LootHistory_Shared:OnNewItemReceived(itemLinkOrName, stackCount, itemSound, lootType, questItemIcon, itemId, isVirtual, isStolen, bonusDropSource, isLockedSetPiece, canBeUsedToLearn)
     if self:CanShowItemsInHistory() then
         local itemName
         local icon
@@ -492,11 +499,18 @@ function ZO_LootHistory_Shared:OnNewItemReceived(itemLinkOrName, stackCount, ite
         end
 
         local statusIcon = self:GetBonusDropSourceIcon(bonusDropSource)
+        local statusIconColor = nil
         if not statusIcon then
             if isVirtual then
                 statusIcon = self:GetCraftBagIcon()
             elseif isStolen then
                 statusIcon = self:GetStolenIcon()
+            elseif isLockedSetPiece then
+                statusIcon = self:GetLockedSetPieceIcon()
+                statusIconColor = ZO_SUCCEEDED_TEXT
+            elseif canBeUsedToLearn then
+                statusIcon = self:GetCanLearnIcon()
+                statusIconColor = ZO_SUCCEEDED_TEXT
             end
         end
 
@@ -505,6 +519,10 @@ function ZO_LootHistory_Shared:OnNewItemReceived(itemLinkOrName, stackCount, ite
             highlight = self:GetCraftBagHighlight()
         elseif isStolen then
             highlight = self:GetStolenHighlight()
+        elseif isLockedSetPiece then
+            highlight = self:GetLockedSetPieceHighlight()
+        elseif canBeUsedToLearn then
+            highlight = self:GetCanLearnHighlight()
         end
 
         local lootData =
@@ -520,6 +538,7 @@ function ZO_LootHistory_Shared:OnNewItemReceived(itemLinkOrName, stackCount, ite
             isCraftBagItem = isVirtual,
             isStolen = isStolen,
             statusIcon = statusIcon,
+            statusIconColor = statusIconColor,
             highlight = highlight,
             entryType = LOOT_ENTRY_TYPE_ITEM,
             iconOverlayText = ZO_LootHistory_Shared.GetStackCountStringFromData,
@@ -694,12 +713,28 @@ function ZO_LootHistory_Shared:GetStolenIcon()
     return self:GetStatusIcon(ZO_LOOT_HISTORY_DISPLAY_TYPE_STOLEN)
 end
 
+function ZO_LootHistory_Shared:GetLockedSetPieceIcon()
+    return self:GetStatusIcon(ZO_LOOT_HISTORY_DISPLAY_TYPE_LOCKED_SET_PIECE)
+end
+
+function ZO_LootHistory_Shared:GetCanLearnIcon()
+    return self:GetStatusIcon(ZO_LOOT_HISTORY_DISPLAY_TYPE_CAN_LEARN)
+end
+
 function ZO_LootHistory_Shared:GetCraftBagHighlight()
     return self:GetHighlight(ZO_LOOT_HISTORY_DISPLAY_TYPE_CRAFT_BAG)
 end
 
 function ZO_LootHistory_Shared:GetStolenHighlight()
     return self:GetHighlight(ZO_LOOT_HISTORY_DISPLAY_TYPE_STOLEN)
+end
+
+function ZO_LootHistory_Shared:GetLockedSetPieceHighlight()
+    return self:GetHighlight(ZO_LOOT_HISTORY_DISPLAY_TYPE_LOCKED_SET_PIECE)
+end
+
+function ZO_LootHistory_Shared:GetCanLearnHighlight()
+    return self:GetHighlight(ZO_LOOT_HISTORY_DISPLAY_TYPE_CAN_LEARN)
 end
 
 -- global functions

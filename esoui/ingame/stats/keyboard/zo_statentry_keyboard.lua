@@ -185,7 +185,7 @@ function ZO_StatsMundusEntry_OnMouseEnter(control)
         GameTooltip:SetBuff(buffSlot, "player")
         ZO_StatsMundus_ShouldShowHelpKeybind = false
     else
-        GameTooltip:AddLine(GetString(SI_STATS_MUNDUS_NONE_TOOLTIP_TITLE), "", ZO_NORMAL_TEXT:UnpackRGBA())
+        GameTooltip:AddLine(GetString(SI_STATS_MUNDUS_NONE_TOOLTIP_TITLE), "", ZO_SELECTED_TEXT:UnpackRGBA())
         GameTooltip:AddLine(GetString(SI_STATS_MUNDUS_NONE_TOOLTIP_DESCRIPTION), "", ZO_NORMAL_TEXT:UnpackRGBA())
         ZO_StatsMundus_ShouldShowHelpKeybind = true
     end

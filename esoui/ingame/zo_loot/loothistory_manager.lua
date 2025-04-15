@@ -88,8 +88,10 @@ function LootHistory_Manager:Initialize()
                 local itemId = GetItemInstanceId(bagId, slotId)
                 local isVirtual = bagId == BAG_VIRTUAL
                 local isStolen = IsItemStolen(bagId, slotId)
+                local isLockedSetPiece = IsItemLockedSetPiece(bagId, slotId)
+                local canBeUsedToLearn = CanItemBeUsedToLearn(bagId, slotId)
                 local NO_QUEST_ITEM_ICON = nil
-                OnNewItemReceived(itemLink, stackCountChange, itemSound, lootType, NO_QUEST_ITEM_ICON, itemId, isVirtual, isStolen, bonusDropSource)
+                OnNewItemReceived(itemLink, stackCountChange, itemSound, lootType, NO_QUEST_ITEM_ICON, itemId, isVirtual, isStolen, bonusDropSource, isLockedSetPiece, canBeUsedToLearn)
             end
         end
     end
@@ -99,7 +101,9 @@ function LootHistory_Manager:Initialize()
             local NO_ITEM_SOUND = nil
             local IS_NOT_VIRTUAL = false
             local IS_NOT_STOLEN = false
-            OnNewItemReceived(questItemName, countDelta, NO_ITEM_SOUND, LOOT_TYPE_QUEST_ITEM, questItemIcon, questItemId, IS_NOT_VIRTUAL, IS_NOT_STOLEN, BONUS_DROP_SOURCE_NONE)
+            local IS_LOCKED_SET_PIECE = false
+            local CAN_BE_USED_TO_LEARN = false
+            OnNewItemReceived(questItemName, countDelta, NO_ITEM_SOUND, LOOT_TYPE_QUEST_ITEM, questItemIcon, questItemId, IS_NOT_VIRTUAL, IS_NOT_STOLEN, BONUS_DROP_SOURCE_NONE, IS_LOCKED_SET_PIECE, CAN_BE_USED_TO_LEARN)
         end
     end
 
