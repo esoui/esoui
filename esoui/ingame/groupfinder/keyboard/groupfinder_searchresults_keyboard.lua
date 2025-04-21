@@ -497,6 +497,7 @@ end
 
 function ZO_GroupFinder_SearchPanel_Keyboard:SetSearchCategory(searchCategory)
     SetGroupFinderFilterCategory(searchCategory)
+    self:RefreshFilterOptions()
     GROUP_FINDER_SEARCH_MANAGER:ExecuteSearch()
 end
 

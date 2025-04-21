@@ -1955,7 +1955,9 @@ local CENTER_SCREEN_CALLBACK_HANDLERS =
             -- If we're doing a claim all with a choice reward, then we'll show the choice reward first, and queue up the
             -- capstone dialog after. To prevent the choice reward claim CSA from appearing over top the capstone dialog,
             -- drop the CSAs if we're showing the dialog.
-            if PROMOTIONAL_EVENT_MANAGER:IsShowingCapstoneDialog() then
+            -- Gamepad behaves somewhat differently since the choice dialog is actually a scene. So we need to check if
+            -- we will be showing the capstone dialog once the scene is hidden.
+            if PROMOTIONAL_EVENT_MANAGER:IsShowingCapstoneDialog() or PROMOTIONAL_EVENTS_CLAIM_CHOICE_DIALOG_GAMEPAD:ShouldShowCapstoneDialogOnClose() then
                 return
             end
 

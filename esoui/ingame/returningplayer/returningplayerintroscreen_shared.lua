@@ -8,6 +8,8 @@ function ZO_ReturningPlayerIntroScreen_Shared:Initialize(control, scene, rewardT
     self.fragment = ZO_FadeSceneFragment:New(control)
     scene:AddFragment(self.fragment)
 
+    scene:SetHideSceneConfirmationCallback(function(...) self:OnConfirmHideScene(...) end)
+
     self.rewardTemplate = rewardTemplate
 end
 
@@ -35,11 +37,7 @@ function ZO_ReturningPlayerIntroScreen_Shared:OnDeferredInitialize()
     self:InitializeGridList()
 
     local function CloseScreenCallback()
-        if ShouldShowReturningPlayerLeaveIntroPrompt() then
-            ZO_Dialogs_ShowPlatformDialog("CONFIRM_LEAVE_RETURNING_PLAYER_INTRO")
-        else
-            SYSTEMS:ShowScene("returningPlayerRewards")
-        end
+        SYSTEMS:ShowScene("returningPlayerRewards")
     end
 
     self.closeKeybindButton = self.control:GetNamedChild("Close")
@@ -118,6 +116,18 @@ function ZO_ReturningPlayerIntroScreen_Shared:OnHidden()
     KEYBIND_STRIP:RestoreDefaultExit()
 end
 
+function ZO_ReturningPlayerIntroScreen_Shared:OnConfirmHideScene(scene, nextSceneName, bypassHideSceneConfirmationReason)
+    if bypassHideSceneConfirmationReason == nil and ShouldShowReturningPlayerLeaveIntroPrompt() then
+        ZO_Dialogs_ShowPlatformDialog("CONFIRM_LEAVE_RETURNING_PLAYER_INTRO",
+        {
+            confirmCallback = function() scene:AcceptHideScene() end,
+            declineCallback = function() scene:RejectHideScene() end,
+        })
+    else
+        scene:AcceptHideScene()
+    end
+end
+
 function ZO_ReturningPlayerIntroScreen_Shared:GetIntroCampaignRewards()
     local rewardData = RETURNING_PLAYER_MANAGER:GetIntroCampaignRewardData()
     if rewardData then
@@ -152,7 +162,7 @@ end
 
 function ZO_ReturningPlayerIntroScreen_Shared.RewardGridEntrySetup(control, data, selected)
     control.data = data
-    control.icon:SetTexture(data:GetPlatformIcon())
+    control.icon:SetTexture(data:GetPlatformLootIcon())
     if data:GetQuantity() > 1 then
         local quantity = data:GetAbbreviatedQuantity()
         control.quantityLabel:SetText(quantity)

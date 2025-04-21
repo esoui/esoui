@@ -202,12 +202,15 @@ ESO_Dialogs["CONFIRM_LEAVE_RETURNING_PLAYER_INTRO"] =
             text = SI_RETURNING_PLAYER_CONFIRM_LEAVE_INTRO_DIALOG_CONFIRM_KEYBIND,
             callback = function(dialog)
                 MarkReturningPlayerLeaveIntroPromptShown()
-                SYSTEMS:ShowScene("returningPlayerRewards")
+                dialog.data.confirmCallback()
             end
         },
         {
             keybind = "DIALOG_NEGATIVE",
             text = SI_RETURNING_PLAYER_CONFIRM_LEAVE_INTRO_DIALOG_BACK_KEYBIND,
+            callback = function(dialog)
+                dialog.data.declineCallback()
+            end
         },
     }
 }

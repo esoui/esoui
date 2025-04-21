@@ -9,7 +9,9 @@ local function ShowCharacterSelect()
         SCENE_MANAGER:AddFragment(CHARACTER_SELECT_FRAGMENT)
     else
         local function OnPregameFullyLoaded()
-            SCENE_MANAGER:AddFragment(CHARACTER_SELECT_FRAGMENT)
+            if SCENE_MANAGER:IsShowing("gameMenuCharacterSelect") then
+                SCENE_MANAGER:AddFragment(CHARACTER_SELECT_FRAGMENT)
+            end
             -- Make sure we unregister the callback, so we don't unintentially add the character select fragment in subsequent loads
             CALLBACK_MANAGER:UnregisterCallback("PregameFullyLoaded", OnPregameFullyLoaded)
         end
@@ -117,12 +119,12 @@ function ZO_GameMenu_CharacterSelect_Initialize(control)
     local gameMenuCharacterSelectScene = ZO_Scene:New("gameMenuCharacterSelect", SCENE_MANAGER)
     gameMenuCharacterSelectScene:AddFragment(gameMenuCharacterSelectFragment)
 
-    gameMenuCharacterSelectScene:RegisterCallback("StateChange",    function(oldState, newState)
-                                                                        ZO_UpdatePaperDollManipulationForScene(ZO_CharacterSelectCharacterViewport, newState)
-                                                                        if newState == SCENE_SHOWING then
-                                                                            RebuildTree(GAME_MENU_CHARACTERSELECT)
-                                                                        end
-                                                                    end)
+    gameMenuCharacterSelectScene:RegisterCallback("StateChange", function(oldState, newState)
+        ZO_UpdatePaperDollManipulationForScene(ZO_CharacterSelectCharacterViewport, newState)
+        if newState == SCENE_SHOWING then
+            RebuildTree(GAME_MENU_CHARACTERSELECT)
+        end
+    end)
 
     local function UpdateNewStates()
         GAME_MENU_CHARACTERSELECT:RefreshNewStates()

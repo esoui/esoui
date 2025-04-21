@@ -546,8 +546,8 @@ function ZO_GameStartup_Gamepad:InitializeKeybindDescriptor()
             end)
     }
 
-    -- [[#$ internal:   Internal controller support for opening the Pregame Animated Background Dev Tools
-    if IsConsoleUI() then
+    --[[#$ internal:   Internal controller support for opening the Pregame Animated Background Dev Tools
+    if IsInternalBuild() and IsConsoleUI() then
         -- Pregame Dev Tool
         pregameDevToolKeybindDescriptor =
         {

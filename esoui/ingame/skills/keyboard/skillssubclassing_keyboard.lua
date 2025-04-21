@@ -20,22 +20,28 @@ function ZO_SkillsSubclassing_Keyboard:Initialize(control, owner)
 
     self.classIndexToIdList = {}
     self.collapsedClassIds = {}
+    self.isInitialized = false
+end
 
-    SKILLS_DATA_MANAGER:RefreshActiveClassSkillLines()
-    local numClasses = GetNumClasses()
-    for classIndex = 1, numClasses do
-        local classId = GetClassIdByIndex(classIndex)
-        table.insert(self.classIndexToIdList, classId)
-        if classId ~= self.playerClassId then
-            local firstClassSkillLine = SKILLS_DATA_MANAGER:GetFirstActiveSkillLineByClassId(classId)
-            self.collapsedClassIds[classId] = firstClassSkillLine == nil
+function ZO_SkillsSubclassing_Keyboard:OnDeferredInitialize()
+    if not self.isInitialized then
+        SKILLS_DATA_MANAGER:RefreshActiveClassSkillLines()
+        local numClasses = GetNumClasses()
+        for classIndex = 1, numClasses do
+            local classId = GetClassIdByIndex(classIndex)
+            table.insert(self.classIndexToIdList, classId)
+            if classId ~= self.playerClassId then
+                local firstClassSkillLine = SKILLS_DATA_MANAGER:GetFirstActiveSkillLineByClassId(classId)
+                self.collapsedClassIds[classId] = firstClassSkillLine == nil
+            end
         end
-    end
 
-    self:InitializeSkillLineSwapDialog()
-    self:InitializeClassSkillLines()
-    self:InitializeSkillsList()
-    self:RegisterForEvents()
+        self:InitializeSkillLineSwapDialog()
+        self:InitializeClassSkillLines()
+        self:InitializeSkillsList()
+        self:RegisterForEvents()
+        self.isInitialized = true
+    end
 end
 
 function ZO_SkillsSubclassing_Keyboard:InitializeClassSkillLines()
@@ -266,6 +272,7 @@ function ZO_SkillsSubclassing_Keyboard:IsShowing()
 end
 
 function ZO_SkillsSubclassing_Keyboard:Show()
+    self:OnDeferredInitialize()
     self.mouseOverSkillLineData = nil
     self.control:SetHidden(false)
 end

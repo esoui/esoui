@@ -564,46 +564,40 @@ function ZO_GamepadInventory:InitializeKeybindStrip()
     {
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
         {
-            name = GetString(SI_GAMEPAD_SELECT_OPTION),
+            name = function()
+                if self.currentlySelectedData.isMundusEntry then
+                    return GetString(SI_STATS_MUNDUS_INFO_BUTTON)
+                end
+
+                return GetString(SI_GAMEPAD_SELECT_OPTION)
+            end,
             keybind = "UI_SHORTCUT_PRIMARY",
             order = -500,
             callback = function()
-                self:Select()
-            end,
-            visible = function()
-                return (not self.categoryList:IsEmpty()) and self.currentlySelectedData and
-                       not (self.currentlySelectedData.isCurrencyEntry or self.currentlySelectedData.isMundusEntry)
-            end,
-        },
-        {
-            name = function()
-                local targetCategoryData = self.categoryList:GetTargetData()
-                if targetCategoryData and targetCategoryData.isMundusEntry then
-                    return GetString(SI_STATS_MUNDUS_INFO_BUTTON)
-                else
-                    return GetString(SI_GAMEPAD_INVENTORY_EQUIPPED_MORE_ACTIONS)
-                end
-            end,
-            keybind = "UI_SHORTCUT_TERTIARY",
-            order = 1000,
-            visible = function()
-                local targetCategoryData = self.categoryList:GetTargetData()
-                if targetCategoryData and targetCategoryData.isMundusEntry then
-                    if targetCategoryData.data and not targetCategoryData.data.mundusBuffIndex then
-                        return true
-                    end
-                    return false
-                end
-                return self.selectedItemUniqueId ~= nil
-            end,
-            callback = function()
-                local targetCategoryData = self.categoryList:GetTargetData()
-                if targetCategoryData and targetCategoryData.isMundusEntry then
+                if self.currentlySelectedData.isMundusEntry then
                     local helpCategoryIndex, helpIndex = GetMundusStoneHelpIndices()
                     HELP_TUTORIALS_ENTRIES_GAMEPAD:Show(helpCategoryIndex, helpIndex)
                 else
-                    self:ShowActions()
+                    self:Select()
                 end
+            end,
+            visible = function()
+                if self.categoryList:IsEmpty() or not self.currentlySelectedData or self.currentlySelectedData.isCurrencyEntry then
+                    return false
+                end
+
+                return true
+            end,
+        },
+        {
+            name = GetString(SI_GAMEPAD_INVENTORY_EQUIPPED_MORE_ACTIONS),
+            keybind = "UI_SHORTCUT_TERTIARY",
+            order = 1000,
+            visible = function()
+                return self.selectedItemUniqueId ~= nil
+            end,
+            callback = function()
+                self:ShowActions()
             end,
         },
         {

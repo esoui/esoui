@@ -57,7 +57,9 @@ function ZO_SkillLineAssignmentManager:DeactivateSkillLine(skillLineData, suppre
     if pendingActivationIndex then
         table.remove(self.pendingActivationLines, pendingActivationIndex)
         success = true
-    elseif #self.pendingDeactivationLines < MAX_LINE_SWAPS and not self:IsSkillLinePendingDeactivation(skillLineData) then
+    -- ESO-911673: When swapping out a player skill line for another player skill line pendingDeactivationLines can
+    -- equal MAX_LINE_SWAPS temporarily until the pending deactivation player skill line is removed upon activation
+    elseif #self.pendingDeactivationLines <= MAX_LINE_SWAPS and not self:IsSkillLinePendingDeactivation(skillLineData) then
         table.insert(self.pendingDeactivationLines, skillLineData:GetId())
         success = true
     end

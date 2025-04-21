@@ -66,6 +66,7 @@ function ZO_ReturningPlayerRewardScreen_Shared:OnDeferredInitialize()
         callback = function()
             self:OnPrimaryKeyPressed()
         end,
+        enabled = ShouldShowPrimaryKeybind,
         visible = ShouldShowPrimaryKeybind,
     }
     self.primaryKeybindButton:SetKeybindButtonDescriptor(self.primaryKeybindDescriptor)
@@ -235,7 +236,7 @@ function ZO_ReturningPlayerRewardScreen_Shared.RewardGridEntrySetup(control, dat
     else
         control.completeMark:SetHidden(true)
         control.icon:SetHidden(false)
-        control.icon:SetTexture(data:GetPlatformIcon())
+        control.icon:SetTexture(data:GetPlatformLootIcon())
         if data:GetQuantity() > 1 then
             local quantity = data:GetAbbreviatedQuantity()
             control.quantityLabel:SetText(quantity)

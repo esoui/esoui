@@ -62,7 +62,7 @@ function ZO_PromotionalEventReward_Keyboard:OnMouseUp(button, upInside)
 
             if CanPreviewReward(rewardId) or GetRewardType(rewardId) == REWARD_ENTRY_TYPE_REWARD_LIST then
                 AddMenuItem(GetString(SI_PROMOTIONAL_EVENT_REWARD_PREVIEW_ACTION), function()
-                    g_PromotionalEventsKeyboard:BeginPreview(rewardId)
+                    g_PromotionalEventsKeyboard:BeginPreview(rewardId, self.control)
                     KEYBIND_STRIP:UpdateKeybindButtonGroup(g_PromotionalEventsKeyboard.keybindStripDescriptor)
                 end)
                 showMenu = true
@@ -572,10 +572,10 @@ function ZO_PromotionalEvents_Keyboard:RefreshActivityList(rebuild)
     end
 end
 
-function ZO_PromotionalEvents_Keyboard:BeginPreview(rewardId)
+function ZO_PromotionalEvents_Keyboard:BeginPreview(rewardId, anchorControl)
     SYSTEMS:GetObject("itemPreview"):ClearPreviewCollection()
     if GetRewardType(rewardId) == REWARD_ENTRY_TYPE_REWARD_LIST then
-        self:PreviewRewardList(rewardId)
+        self:PreviewRewardList(rewardId, anchorControl)
     else
         SYSTEMS:GetObject("itemPreview"):PreviewReward(rewardId)
     end
@@ -583,7 +583,7 @@ end
 
 local g_highlightAnimationProvider = ZO_ReversibleAnimationProvider:New("ShowOnMouseOverLabelAnimation")
 
-function ZO_PromotionalEvents_Keyboard:PreviewRewardList(rewardId)
+function ZO_PromotionalEvents_Keyboard:PreviewRewardList(rewardId, anchorControl)
     local rewardListId = GetRewardListIdFromReward(rewardId)
     local rewards = REWARDS_MANAGER:GetAllRewardInfoForRewardList(rewardListId)
     POPUP_LIST:ClearList()
@@ -609,7 +609,9 @@ function ZO_PromotionalEvents_Keyboard:PreviewRewardList(rewardId)
         ZO_Rewards_Shared_OnMouseExit(control)
         g_PromotionalEventsKeyboard:SetMouseOverObject(nil)
     end)
-    POPUP_LIST.control:SetAnchor(BOTTOMRIGHT, self.mouseOverObject.control, BOTTOMLEFT)
+
+    local anchorControl = anchorControl or self.mouseOverObject.control
+    POPUP_LIST.control:SetAnchor(BOTTOMRIGHT, anchorControl, BOTTOMLEFT)
     POPUP_LIST.control:SetHidden(false)
 end
 
@@ -757,11 +759,13 @@ function ZO_PromotionalEvents_CapstoneDialog_Keyboard:Initialize(control)
                 keybind = "DIALOG_NEGATIVE",
                 callback = function(dialog)
                     local campaignData = dialog.data.campaignData
-                    if campaignData:AreAllRewardsClaimed() then
-                        self:ShowNextCampaign(campaignData)
-                    else
-                        self:RefreshCampaignList()
-                        GROUP_MENU_KEYBOARD:ShowCategoryByData(campaignData)
+                    if campaignData:IsReturningPlayerCampaign() then
+                        if campaignData:AreAllRewardsClaimed() then
+                            self:ShowNextCampaign(campaignData)
+                        else
+                            self:RefreshCampaignList()
+                            GROUP_MENU_KEYBOARD:ShowCategoryByData(campaignData)
+                        end
                     end
                 end,
             },

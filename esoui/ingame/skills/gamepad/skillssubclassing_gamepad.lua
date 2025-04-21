@@ -365,9 +365,14 @@ function ZO_SkillsSubclassing_Gamepad:InitializeKeybindStripDescriptors()
         -- Equip / Train / Open Crown Store / Navigation
         {
             name = function()
-                if self:GetCurrentList() == self.skillLinesList then
-                    local entryData = self:GetCurrentList():GetTargetData()
-                    local skillLineData = entryData.skillLineData
+                local entryData = self:GetCurrentList():GetTargetData()
+                local skillLineData = entryData and entryData.skillLineData
+
+                if self:GetCurrentList() == self.skillsList then
+                    skillLineData = self.selectedSkillLineData
+                end
+
+                if skillLineData then
                     if skillLineData:IsContentLocked() then
                         -- Open Crown Store
                         return GetString(SI_SKILLS_SUBCLASSING_OPEN_STORE_ACTION)
@@ -386,9 +391,13 @@ function ZO_SkillsSubclassing_Gamepad:InitializeKeybindStripDescriptors()
             end,
             keybind = "UI_SHORTCUT_PRIMARY",
             callback = function()
-                if self:GetCurrentList() == self.skillLinesList then
-                    local entryData = self:GetCurrentList():GetTargetData()
-                    local skillLineData = entryData.skillLineData
+                local entryData = self:GetCurrentList():GetTargetData()
+                local skillLineData = entryData and entryData.skillLineData
+                if self:GetCurrentList() == self.skillsList then
+                    skillLineData = self.selectedSkillLineData
+                end
+
+                if skillLineData then
                     if skillLineData:IsContentLocked() then
                         -- Open Crown Store
                         local collectibleId = skillLineData:GetClassAccessCollectibleId()
@@ -420,22 +429,22 @@ function ZO_SkillsSubclassing_Gamepad:InitializeKeybindStripDescriptors()
                     return false
                 end
 
-                if self:GetCurrentList() == self.skillLinesList then
-                    if entryData.skillLineData then
-                        if entryData.skillLineData:IsContentLocked() then
-                            -- Open Crown Store
-                            return true
-                        elseif SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeAllowAccessToSubclassing() then
-                            -- Equip / Train
-                            return entryData.skillLineData:CanActivateForRespec() or entryData.skillLineData:CanTrain()
-                        end
-                    end
-                else
-                    -- Menu Navigation
-                    return self:GetCurrentList() ~= self.skillsList
+                local skillLineData = entryData and entryData.skillLineData
+                if self:GetCurrentList() == self.skillsList then
+                    skillLineData = self.selectedSkillLineData
                 end
 
-                return false
+                if skillLineData then
+                    if skillLineData:IsContentLocked() then
+                        -- Open Crown Store
+                        return true
+                    elseif SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeAllowAccessToSubclassing() then
+                        -- Equip / Train
+                        return skillLineData:CanActivateForRespec() or skillLineData:CanTrain()
+                    end
+                end
+
+                return true
             end,
             sound = SOUNDS.GAMEPAD_MENU_FORWARD,
         },
@@ -515,13 +524,21 @@ function ZO_SkillsSubclassing_Gamepad:InitializeKeybindStripDescriptors()
             keybind = "UI_SHORTCUT_QUINARY",
             callback = function()
                 local entryData = self:GetCurrentList():GetTargetData()
-                entryData.skillLineData:Untrain()
+                local skillLineData = entryData and entryData.skillLineData
+                if self:GetCurrentList() == self.skillsList then
+                    skillLineData = self.selectedSkillLineData
+                end
+                skillLineData:Untrain()
                 PlaySound(SOUNDS.SKILLS_SUBCLASSING_UNTRAIN)
             end,
             visible = function()
-                if self:GetCurrentList() == self.skillLinesList and SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeAllowSkillLineTraining() then
-                    local entryData = self:GetCurrentList():GetTargetData()
-                    return entryData and entryData.skillLineData and entryData.skillLineData:CanUntrain()
+                local entryData = self:GetCurrentList():GetTargetData()
+                local skillLineData = entryData and entryData.skillLineData
+                if self:GetCurrentList() == self.skillsList then
+                    skillLineData = self.selectedSkillLineData
+                end
+                if skillLineData and SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeAllowSkillLineTraining() then
+                    return skillLineData:CanUntrain()
                 end
                 return false
             end,

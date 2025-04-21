@@ -211,7 +211,7 @@ end
 function ZO_PromotionalEvent_Manager:DoesAnyCampaignHaveCallout()
     if not IsPromotionalEventSystemLocked() then
         for _, campaignData in ipairs(self.activeCampaignDataList) do
-            if (not campaignData:HasBeenSeen() or campaignData:IsAnyRewardClaimable()) then
+            if campaignData:ShouldCampaignBeVisible() and (not campaignData:HasBeenSeen() or campaignData:IsAnyRewardClaimable()) then
                 return true
             end
         end

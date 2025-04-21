@@ -85,18 +85,40 @@ function ZO_UISystemManager:Initialize()
 
     EVENT_MANAGER:RegisterForEvent("UISystemManager", EVENT_PLAYER_ACTIVATED, OnPlayerActivated)
 
+    local function OnPromotionalEventCampaignsUpdated()
+        self:OnPromotionalEventCampaignsUpdated()
+    end
+
+    EVENT_MANAGER:RegisterForEvent("UISystemManager", EVENT_PROMOTIONAL_EVENTS_CAMPAIGNS_UPDATED, OnPromotionalEventCampaignsUpdated)
+
     local function OnMarketAnnouncementUpdated(eventId, ...)
         self:OnMarketAnnouncementUpdated(...)
     end
 
-    EVENT_MANAGER:RegisterForEvent("EVENT_MARKET_ANNOUNCEMENT_UPDATED", EVENT_MARKET_ANNOUNCEMENT_UPDATED, OnMarketAnnouncementUpdated)
+    EVENT_MANAGER:RegisterForEvent("UISystemManager", EVENT_MARKET_ANNOUNCEMENT_UPDATED, OnMarketAnnouncementUpdated)
 
     self.queuedUISystem = nil
     self.queuedParams = {}
     self.waitingForMarketAnnouncements = true
+    self.waitingForPromotionalEvents = true
 end
 
 function ZO_UISystemManager:OnPlayerActivated()
+    if not self.waitingForPromotionalEvents then
+        self:TryShowInitialScreen()
+    end
+end
+
+function ZO_UISystemManager:OnPromotionalEventCampaignsUpdated()
+    if self.waitingForPromotionalEvents and IsPlayerActivated() then
+        self.waitingForPromotionalEvents = false
+        self:TryShowInitialScreen()
+    end
+end
+
+-- This function should only be called once IsPlayerActivated() and self.waitingForPromotionalEvents
+-- are both true.
+function ZO_UISystemManager:TryShowInitialScreen()
     -- We only want to show one popup, check each one in priority order
     if TRIAL_ACCOUNT_SPLASH_DIALOG:ShouldShowSplash() then
         TRIAL_ACCOUNT_SPLASH_DIALOG:ShowSplash()

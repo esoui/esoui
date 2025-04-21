@@ -923,10 +923,17 @@ ESO_Dialogs["RECALL_CONFIRM"] =
             local cooldown = GetRecallCooldown()
             local destination = dialog.data.nodeIndex
             local cost = GetRecallCost(destination)
+            if cost == 0 then
+                if IsInGamepadPreferredMode() then
+                    return SI_GAMEPAD_FAST_TRAVEL_DIALOG_MAIN_TEXT
+                else
+                    return SI_FAST_TRAVEL_DIALOG_MAIN_TEXT
+                end
+            end
+
             local currency = GetRecallCurrency(destination)
             local canAffordRecall = cost <= GetCurrencyAmount(currency, CURRENCY_LOCATION_CHARACTER)
-
-            if cooldown == 0 or cost == 0 then
+            if cooldown == 0 then
                 if canAffordRecall then
                     if IsInGamepadPreferredMode() then
                         return SI_GAMEPAD_FAST_TRAVEL_DIALOG_RECALL_MAIN_TEXT

@@ -11,7 +11,7 @@ function ZO_CompanionSkillsDataManager:Initialize()
     self.skillLineObjectPool = ZO_ObjectPool:New(ZO_CompanionSkillLineData, ZO_ObjectPool_DefaultResetObject)
     self.skillObjectPool = ZO_ObjectPool:New(ZO_CompanionSkillData, ZO_ObjectPool_DefaultResetObject)
     self.skillsByAbilityId = {}
-    
+
     self.isDataReady = false
 
     self:RegisterForEvents()
@@ -42,11 +42,9 @@ function ZO_CompanionSkillsDataManager:GetSkillObjectPool()
 end
 
 function ZO_CompanionSkillsDataManager:TryForceClean()
-    if not self.isDataReady and not self.isForceCleaning then
+    if not self.isDataReady and not self.isBuildingData then
         if AreCompanionSkillsInitialized() then
-            self.isForceCleaning = true
             self:RebuildSkillsData()
-            self.isForceCleaning = false
         else
             internalassert(false, "Attempting to access companion data when the companion skills have not been initiailized")
         end
@@ -54,6 +52,7 @@ function ZO_CompanionSkillsDataManager:TryForceClean()
 end
 
 function ZO_CompanionSkillsDataManager:RebuildSkillsData()
+    self.isBuildingData = true
     self.skillTypeObjectPool:ReleaseAllObjects()
     self.skillLineObjectPool:ReleaseAllObjects()
     ZO_ClearTable(self.skillsByAbilityId)
@@ -71,6 +70,7 @@ function ZO_CompanionSkillsDataManager:RebuildSkillsData()
         end
     end
 
+    self.isBuildingData = false
     self.isDataReady = true
     local NOT_INIT = false
     self:OnFullSystemUpdated(NOT_INIT)

@@ -1105,10 +1105,17 @@ function ZO_PromotionalEvents_CapstoneDialog_Gamepad:Initialize(control)
         {
             dialogType = GAMEPAD_DIALOGS.CUSTOM,
             dontEndInWorldInteractions = true,
+            allowShowOnNextScene = true,
         },
         canQueue = true,
         setup = function(dialog, data)
             self:SetCampaignData(data.campaignData)
+
+            if self.nextCampaignButton:ShouldBeVisible() then
+                self.closeButton:SetAnchor(LEFT, self.nextCampaignButton, RIGHT, 10)
+            else
+                self.closeButton:SetAnchor(LEFT)
+            end
         end,
         narrationText = function()
             local narrations = {}
@@ -1161,6 +1168,15 @@ function ZO_PromotionalEvents_CapstoneDialog_Gamepad:InitializeControls(control)
 
     local buttonsContainer = self.control:GetNamedChild("Buttons")
 
+    local function ShouldShowNextCampaignKeybind()
+        local campaignData = self.campaignData
+        if campaignData:IsReturningPlayerCampaign() then
+            local nextCampaignKey = GetCampaignKeyForNextReturningPlayerCampaign(campaignData:GetId())
+            return nextCampaignKey ~= nil and nextCampaignKey ~= 0
+        end
+        return false
+    end
+
     self.nextCampaignDescriptor =
     {
         keybind = "DIALOG_PRIMARY",
@@ -1171,14 +1187,21 @@ function ZO_PromotionalEvents_CapstoneDialog_Gamepad:InitializeControls(control)
             local campaignData = self.campaignData
             self:ShowNextCampaign(campaignData)
         end,
-        visible = function()
-            local campaignData = self.campaignData
-            return campaignData:IsReturningPlayerCampaign() and GetCampaignKeyForNextReturningPlayerCampaign(campaignData:GetId()) ~= 0
-        end,
+        visible = ShouldShowNextCampaignKeybind,
+        enabled = ShouldShowNextCampaignKeybind,
         ethereal = true,
     }
     self.nextCampaignButton = buttonsContainer:GetNamedChild("NextCampaign")
     self.nextCampaignButton:SetKeybindButtonDescriptor(self.nextCampaignDescriptor)
+
+    local function ShouldShowViewInCollectionsKeybind()
+        -- This code runs before setup
+        local campaignData = self.campaignData
+        local baseRewardData = campaignData:GetRewardData()
+        local _, wasFallbackClaimed = campaignData:IsRewardClaimed()
+        local displayRewardData = wasFallbackClaimed and baseRewardData:GetFallbackRewardData() or baseRewardData
+        return displayRewardData:GetRewardType() == REWARD_ENTRY_TYPE_COLLECTIBLE
+    end
 
     self.viewInCollectionsDescriptor =
     {
@@ -1189,14 +1212,8 @@ function ZO_PromotionalEvents_CapstoneDialog_Gamepad:InitializeControls(control)
         callback = function()
             self:ViewInCollections()
         end,
-        visible = function()
-            -- This code runs before setup
-            local campaignData = self.campaignData
-            local baseRewardData = campaignData:GetRewardData()
-            local _, wasFallbackClaimed = campaignData:IsRewardClaimed()
-            local displayRewardData = wasFallbackClaimed and baseRewardData:GetFallbackRewardData() or baseRewardData
-            return displayRewardData:GetRewardType() == REWARD_ENTRY_TYPE_COLLECTIBLE
-        end,
+        visible = ShouldShowViewInCollectionsKeybind,
+        enabled = ShouldShowViewInCollectionsKeybind,
         ethereal = true,
     }
     self.viewInCollectionsButton = buttonsContainer:GetNamedChild("ViewInCollections")
@@ -1211,11 +1228,13 @@ function ZO_PromotionalEvents_CapstoneDialog_Gamepad:InitializeControls(control)
         callback = function()
             ZO_Dialogs_ReleaseDialog("PROMOTIONAL_EVENT_CAPSTONE_GAMEPAD")
             local campaignData = self.campaignData
-            if campaignData:AreAllRewardsClaimed() then
-                self:ShowNextCampaign(campaignData)
-            else
-                self:RefreshCampaignList()
-                PROMOTIONAL_EVENTS_LIST_GAMEPAD:SelectCampaign(campaignData)
+            if campaignData:IsReturningPlayerCampaign() then
+                if campaignData:AreAllRewardsClaimed() then
+                    self:ShowNextCampaign(campaignData)
+                else
+                    self:RefreshCampaignList()
+                    PROMOTIONAL_EVENTS_LIST_GAMEPAD:SelectCampaign(campaignData)
+                end
             end
         end,
         ethereal = true,
@@ -1228,8 +1247,6 @@ end
 
 function ZO_PromotionalEvents_CapstoneDialog_Gamepad:InitializeParticleSystems()
     ZO_PromotionalEvents_CapstoneDialog_Shared.InitializeParticleSystems(self)
-
-    local blastParticleSystem = self.blastParticleSystem
 
     local headerSparksParticleSystem = self.headerSparksParticleSystem
     headerSparksParticleSystem:SetParentControl(self.control:GetNamedChild("TopDivider"))
@@ -1263,6 +1280,7 @@ function ZO_PromotionalEvents_ClaimChoiceDialog_Gamepad:Initialize(control)
 
     self.parentRewardableEventData = nil
     self.currentSelectedChoice = nil
+    self.showCapstoneDialogOnClose = false
 
     self:InitializeHeader()
 
@@ -1270,6 +1288,8 @@ function ZO_PromotionalEvents_ClaimChoiceDialog_Gamepad:Initialize(control)
     PROMOTIONAL_EVENTS_CLAIM_CHOICE_FRAGMENT = self.fragment
     self.fragment:SetHideOnSceneHidden(true)
     self.scene:AddFragment(PROMOTIONAL_EVENTS_CLAIM_CHOICE_FRAGMENT)
+
+    PROMOTIONAL_EVENT_MANAGER:RegisterCallback("RewardsClaimed", ZO_GetCallbackForwardingFunction(self, self.OnRewardsClaimed))
 end
 
 function ZO_PromotionalEvents_ClaimChoiceDialog_Gamepad:InitializeHeader()
@@ -1350,6 +1370,11 @@ function ZO_PromotionalEvents_ClaimChoiceDialog_Gamepad:OnHide()
     ZO_Gamepad_ParametricList_Screen.OnHide(self)
 
     GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
+
+    if self.showCapstoneDialogOnClose then
+        PROMOTIONAL_EVENTS_GAMEPAD:ShowCapstoneDialog()
+        self.showCapstoneDialogOnClose = false
+    end
 end
 
 -- Overridden from base
@@ -1409,6 +1434,18 @@ function ZO_PromotionalEvents_ClaimChoiceDialog_Gamepad:SetRewardData(rewardable
     end
 
     self.list:CommitWithoutReselect()
+end
+
+function ZO_PromotionalEvents_ClaimChoiceDialog_Gamepad:OnRewardsClaimed(campaignData, rewards, hasCapstoneReward)
+    -- Since ZO_PromotionalEvents_ClaimChoiceDialog_Gamepad is a separate screen from ZO_PromotionalEvents_Gamepad,
+    -- we need to handle a capstone reward being claimed while we're in the process of showing or hiding this scene.
+    if hasCapstoneReward and (self.scene:GetState() ~= SCENE_HIDDEN or SCENE_MANAGER:IsShowingNext("promotionalEventsClaimChoice_Gamepad")) then
+        self.showCapstoneDialogOnClose = true
+    end
+end
+
+function ZO_PromotionalEvents_ClaimChoiceDialog_Gamepad:ShouldShowCapstoneDialogOnClose()
+    return self.showCapstoneDialogOnClose
 end
 
 function ZO_PromotionalEvents_ClaimChoiceDialog_Gamepad.OnControlInitialized(control)

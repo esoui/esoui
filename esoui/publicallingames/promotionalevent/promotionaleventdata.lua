@@ -338,7 +338,7 @@ end
 function ZO_PromotionalEventCampaignData:GetMilestoneData(milestoneIndex)
     if milestoneIndex <= self.numMilestones then
         local milestones = self:GetMilestones()
-        for _, milestoneData in ipairs(self.milestones) do
+        for _, milestoneData in ipairs(milestones) do
             if milestoneData:GetMilestoneIndex() == milestoneIndex then
                 return milestoneData
             end
@@ -348,7 +348,7 @@ function ZO_PromotionalEventCampaignData:GetMilestoneData(milestoneIndex)
 end
 
 function ZO_PromotionalEventCampaignData:GetMilestoneDataByDisplayIndex(displayIndex)
-    if milestoneIndex <= self.numMilestones then
+    if displayIndex <= self.numMilestones then
         local milestones = self:GetMilestones()
         return milestones[displayIndex]
     end

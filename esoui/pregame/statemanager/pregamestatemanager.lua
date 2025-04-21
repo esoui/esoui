@@ -5,8 +5,10 @@ function IsPreloginWorldEnabled()
         return false
     end
 
-    if g_preloginWorldSavedVars and g_preloginWorldSavedVars.PreloginWorldEnabled ~= nil then
-        return tonumber(g_preloginWorldSavedVars.PreloginWorldEnabled) == 1
+    if IsInternalBuild() then
+        if ZO_PRELOGIN_WORLD_SAVED_VARS and ZO_PRELOGIN_WORLD_SAVED_VARS.PreloginWorldEnabled ~= nil then
+            return tonumber(ZO_PRELOGIN_WORLD_SAVED_VARS.PreloginWorldEnabled) == 1
+        end
     end
 
     return false
@@ -971,29 +973,25 @@ EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_CHARACTER_SELECTED_F
 EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, ZO_Pregame_OnGamepadPreferredModeChanged)
 EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_DISCONNECTED_FROM_SERVER, OnDisconnectedFromServer)
 
--- [[#$ internal:   Support for overriding Pre-Login World settings via the Pregame Animated Background Dev Tools
-
-function OnPreloginWorldSavedVarsUpdated()
-    local enablePreloginWorld = IsPreloginWorldEnabled()
-    SetUsePreloginWorld(enablePreloginWorld)
-    PREGAME_ANIMATED_BACKGROUND_FRAGMENT:Refresh()
-
-    if enablePreloginWorld then
-        ZO_PregameAnimatedBackgroundDevTools_ApplyCameraWaypointsAndRestartAnimation()
+--[[#$ internal:   Support for overriding Pre-Login World settings via the Pregame Animated Background Dev Tools
+if IsInternalBuild() then
+    function OnPreloginWorldSavedVarsUpdated()
+        local enablePreloginWorld = IsPreloginWorldEnabled()
+        SetUsePreloginWorld(enablePreloginWorld)
+        PREGAME_ANIMATED_BACKGROUND_FRAGMENT:Refresh()
     end
+
+    EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_ADD_ON_LOADED, function(_, addOnName)
+        if addOnName == "ZO_Pregame" then
+            local defaultVars =
+            {
+                PreloginWorldEnabled = 1,
+            }
+            ZO_PRELOGIN_WORLD_SAVED_VARS = ZO_SavedVars:NewAccountWide("ZO_Pregame_SavedVariables", 2, "PreloginWorld", defaultVars)
+            OnPreloginWorldSavedVarsUpdated()
+
+            EVENT_MANAGER:UnregisterForEvent("PregameStateManager", EVENT_ADD_ON_LOADED)
+        end
+    end)
 end
-
-EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_ADD_ON_LOADED, function(_, addOnName)
-    if addOnName == "ZO_Pregame" then
-        local defaultVars =
-        {
-            PreloginWorldEnabled = 1,
-        }
-        ZO_PRELOGIN_WORLD_SAVED_VARS = ZO_SavedVars:NewAccountWide("ZO_Pregame_SavedVariables", 1, "PreloginWorld", defaultVars)
-        OnPreloginWorldSavedVarsUpdated()
-
-        EVENT_MANAGER:UnregisterForEvent("PregameStateManager", EVENT_ADD_ON_LOADED)
-    end
-end)
-
 -- internal:        Support for overriding Pre-Login World settings via the Pregame Animated Background Dev Tools  #$]]

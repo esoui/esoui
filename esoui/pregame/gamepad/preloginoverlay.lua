@@ -38,10 +38,7 @@ function ZO_PreloginOverlay:InitializeControls()
     local control = self.control
 
     self.spinnerControl = control:GetNamedChild("Spinner")
-    self.backdropTexture = self.spinnerControl:GetNamedChild("Backdrop")
     self.ouroborosTexture = self.spinnerControl:GetNamedChild("Ouroboros")
-    self.ouroborosBloomTexture = self.spinnerControl:GetNamedChild("OuroborosBloom")
-    self.ouroborosLightTexture = self.spinnerControl:GetNamedChild("OuroborosLight")
 end
 
 function ZO_PreloginOverlay:SetHidden(hidden)
@@ -112,17 +109,7 @@ end
 
 function ZO_PreloginOverlay:UpdateAnimation()
     local rotationAngle = -0.4 * GetFrameTimeSeconds() % ZO_TWO_PI
-    local ouroborosTexture = self.ouroborosTexture
-    local bloomTexture = self.ouroborosBloomTexture
-    local lightTexture = self.ouroborosLightTexture
-    ZO_ScaleAndRotateTextureCoords(ouroborosTexture, rotationAngle, 0.5, 0.5, 0.7, 0.7)
-    ZO_ScaleAndRotateTextureCoords(bloomTexture, rotationAngle, 0.5, 0.5, 0.7, 0.7)
-    ZO_ScaleAndRotateTextureCoords(lightTexture, rotationAngle, 0.5, 0.5, 0.7, 0.7)
-
-    local controlAlpha = self.spinnerControl:GetControlAlpha()
-    ouroborosTexture:SetVertexColors(VERTEX_POINTS_BOTTOMLEFT + VERTEX_POINTS_BOTTOMRIGHT, 0.35, 0.35, 0.35, 0.5 * controlAlpha)
-    bloomTexture:SetVertexColors(VERTEX_POINTS_BOTTOMLEFT + VERTEX_POINTS_BOTTOMRIGHT + VERTEX_POINTS_TOPLEFT, 0, 0, 0, 0.1 * controlAlpha)
-    lightTexture:SetVertexColors(VERTEX_POINTS_BOTTOMLEFT + VERTEX_POINTS_BOTTOMRIGHT + VERTEX_POINTS_TOPLEFT, 0, 0, 0, 0.1 * controlAlpha)
+    ZO_ScaleAndRotateTextureCoords(self.ouroborosTexture, rotationAngle, 0.5, 0.5, 1.0, 1.0)
 end
 
 function ZO_PreloginOverlay:UpdateLayout()

@@ -9437,14 +9437,14 @@ EsoStrings =
     "Your companion cannot equip poisons.", -- SI_INVENTORY_ERROR_COMPANION_CANNOT_EQUIP_POISON
     "Stolen companion equipment must be laundered before being equipped.", -- SI_INVENTORY_ERROR_COMPANION_ITEM_IS_STOLEN
     "Your items have been stacked.", -- SI_STACK_ALL_ITEMS_ALERT
-    "You can only interact with the furniture vault in a house you own.", -- SI_FURNITURE_VAULT_ERROR_NOT_IN_YOUR_HOUSE
-    "You cannot deposit that item into the furniture vault.", -- SI_FURNITURE_VAULT_ERROR_INVALID_FURNITURE
-    "You can only deposit into the furniture vault with an ESO Plus membership.", -- SI_FURNITURE_VAULT_ERROR_NEED_ESO_PLUS
-    "You can only deposit into the furniture vault with the furniture vault collectible unlocked.", -- SI_FURNITURE_VAULT_ERROR_NEED_COLLECTIBLE
-    "Your furniture vault does not have enough room.", -- SI_FURNITURE_VAULT_ERROR_NO_SPACE
-    "<<1>> out of <<2>> <<1[stack/stacks]>> of <<1[furniture/furnishings]>> stowed in your furniture vault.", -- SI_FURNITURE_VAULT_STOWED_ITEMS
-    "<<1>> <<1[stack/stacks]>> of <<1[furniture/furnishings]>> stowed in your furniture vault.", -- SI_FURNITURE_VAULT_STOWED_ALL_ITEMS
-    "You have no furnishings to stow in your furniture vault.", -- SI_FURNITURE_VAULT_NO_ITEMS_TO_STOW
+    "You can only interact with the furnishing vault in a house you own.", -- SI_FURNITURE_VAULT_ERROR_NOT_IN_YOUR_HOUSE
+    "You cannot deposit that item into the furnishing vault.", -- SI_FURNITURE_VAULT_ERROR_INVALID_FURNITURE
+    "You can only deposit into the furnishing vault with an ESO Plus membership.", -- SI_FURNITURE_VAULT_ERROR_NEED_ESO_PLUS
+    "You can only deposit into the furnishing vault with the furnishing vault collectible unlocked.", -- SI_FURNITURE_VAULT_ERROR_NEED_COLLECTIBLE
+    "Your furnishing vault does not have enough room.", -- SI_FURNITURE_VAULT_ERROR_NO_SPACE
+    "<<1>> out of <<2>> <<1[stack/stacks]>> of <<1[furniture/furnishings]>> stowed in your furnishing vault.", -- SI_FURNITURE_VAULT_STOWED_ITEMS
+    "<<1>> <<1[stack/stacks]>> of <<1[furniture/furnishings]>> stowed in your furnishing vault.", -- SI_FURNITURE_VAULT_STOWED_ALL_ITEMS
+    "You have no furnishings to stow in your furnishing vault.", -- SI_FURNITURE_VAULT_NO_ITEMS_TO_STOW
     "Currency", -- SI_CURRENCY_TYPE_NAME
     "Deposit", -- SI_BANK_DEPOSIT
     "Withdraw", -- SI_BANK_WITHDRAW
@@ -11231,7 +11231,7 @@ EsoStrings =
     "You have claimed the capstone reward!", -- SI_PROMOTIONAL_EVENT_CAPSTONE_DIALOG_TITLE
     "View in collections", -- SI_PROMOTIONAL_EVENT_CAPSTONE_DIALOG_VIEW_IN_COLLECTIONS_KEYBIND_LABEL
     "Next Campaign", -- SI_PROMOTIONAL_EVENT_CAPSTONE_DIALOG_NEXT_CAMPAIGN_KEYBIND_LABEL
-    "You have completed <<1>>. All unlocked rewards have been automatically claimed if possible.\n\nYou may go back to any previous link before the campaign closes to complete tasks and claim rewards.", -- SI_PROMOTIONAL_EVENT_CAPSTONE_DIALOG_ADDITIONAL_TEXT_FORMATTER
+    "You have completed <<1>>.\n\nYou may go back to any previous link before the campaign closes to complete tasks and claim rewards.", -- SI_PROMOTIONAL_EVENT_CAPSTONE_DIALOG_ADDITIONAL_TEXT_FORMATTER
     "|cEECA2AGolden Pursuit|r Reward Claimed", -- SI_PROMOTIONAL_EVENT_REWARD_CLAIMED_ANNOUNCEMENT
     "<<X:1>> |cEECA2AGolden Pursuit|r Rewards Claimed", -- SI_PROMOTIONAL_EVENT_REWARDS_CLAIMED_ANNOUNCEMENT
     "Pin Task", -- SI_PROMOTIONAL_EVENT_PIN_TASK_ACTION
@@ -25337,6 +25337,14 @@ SafeAddVersion(SI_INVENTORY_ERROR_BANK_WITHDRAW_UNIQUE, 1)
 SafeAddVersion(SI_INVENTORY_ERROR_BANK_DEPOSIT_UNIQUE, 1)
 SafeAddVersion(SI_INVENTORY_ERROR_TABARD_NOT_A_MEMBER, 1)
 SafeAddVersion(SI_INVENTORY_ERROR_UNIQUE_ITEM, 1)
+SafeAddVersion(SI_FURNITURE_VAULT_ERROR_NOT_IN_YOUR_HOUSE, 2)
+SafeAddVersion(SI_FURNITURE_VAULT_ERROR_INVALID_FURNITURE, 2)
+SafeAddVersion(SI_FURNITURE_VAULT_ERROR_NEED_ESO_PLUS, 2)
+SafeAddVersion(SI_FURNITURE_VAULT_ERROR_NEED_COLLECTIBLE, 2)
+SafeAddVersion(SI_FURNITURE_VAULT_ERROR_NO_SPACE, 2)
+SafeAddVersion(SI_FURNITURE_VAULT_STOWED_ITEMS, 2)
+SafeAddVersion(SI_FURNITURE_VAULT_STOWED_ALL_ITEMS, 2)
+SafeAddVersion(SI_FURNITURE_VAULT_NO_ITEMS_TO_STOW, 2)
 SafeAddVersion(SI_INVENTORY_ERROR_BANK_FULL, 2)
 SafeAddVersion(SI_BANK_HOME_STORAGE_FULL, 1)
 SafeAddVersion(SI_BANK_HOME_STORAGE_FULL_WITH_NICKNAME, 1)
@@ -25646,6 +25654,7 @@ SafeAddVersion(SI_SCRIBING_NO_RECENT_CRAFTED_ABILITIES, 1)
 SafeAddVersion(SI_CRAFTED_ABILITY_RESET_NOTIFICATION_MESSAGE, 1)
 SafeAddVersion(SI_CRAFTED_ABILITY_RESET_NOTIFICATION_SHORT_TEXT, 2)
 SafeAddVersion(SI_SKILL_STYLING_DIALOG_TITLE, 1)
+SafeAddVersion(SI_PROMOTIONAL_EVENT_CAPSTONE_DIALOG_ADDITIONAL_TEXT_FORMATTER, 1)
 SafeAddVersion(SI_PROMOTIONAL_EVENT_REWARD_CLAIMED_ANNOUNCEMENT, 1)
 SafeAddVersion(SI_PROMOTIONAL_EVENT_REWARDS_CLAIMED_ANNOUNCEMENT, 1)
 SafeAddVersion(SI_RETURNING_PLAYER_DAILY_LOGIN_REWARDS_CLAIMABLE_LABEL, 1)
