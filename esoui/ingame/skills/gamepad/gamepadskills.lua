@@ -623,7 +623,7 @@ function ZO_GamepadSkills:InitializeLineFilterKeybindStrip()
             local actionType = skillPointAllocator:GetDecreaseSkillAction()
             if actionType ~= ZO_SKILL_POINT_ACTION.NONE then
                 return true
-            elseif SKILLS_AND_ACTION_BAR_MANAGER:GetSkillPointAllocationMode() == SKILL_POINT_ALLOCATION_MODE_MORPHS_ONLY and skillData:IsActive() then
+            elseif SKILLS_AND_ACTION_BAR_MANAGER:GetSkillPointAllocationMode() == SKILL_POINT_ALLOCATION_MODE_MORPHS_ONLY and not skillData:IsCraftedAbility() and skillData:IsActive() then
                 if skillPointAllocator:IsPurchased() and skillPointAllocator:GetMorphSlot() == MORPH_SLOT_BASE and not skillPointAllocator:CanSell() then
                     return false, GetString(SI_SKILL_RESPEC_MORPHS_ONLY_CANNOT_SELL_BASE_ABILITY)
                 end
