@@ -734,7 +734,8 @@ function ZO_PromotionalEvents_CapstoneDialog_Keyboard:Initialize(control)
                 end,
                 visible = function(dialog)
                     local campaignData = dialog.data.campaignData
-                    return campaignData:IsReturningPlayerCampaign() and GetCampaignKeyForNextReturningPlayerCampaign(campaignData:GetId()) ~= 0
+                    local nextCampaignKey = GetCampaignKeyForNextReturningPlayerCampaign(campaignData:GetId())
+                    return campaignData:IsReturningPlayerCampaign() and nextCampaignKey and nextCampaignKey ~= 0
                 end,
             },
             {
@@ -760,11 +761,17 @@ function ZO_PromotionalEvents_CapstoneDialog_Keyboard:Initialize(control)
                 callback = function(dialog)
                     local campaignData = dialog.data.campaignData
                     if campaignData:IsReturningPlayerCampaign() then
+                        local nextCampaignKey = GetCampaignKeyForNextReturningPlayerCampaign(campaignData:GetId())
+                        local hasNextCampaign = nextCampaignKey and nextCampaignKey ~= 0
                         if campaignData:AreAllRewardsClaimed() then
-                            self:ShowNextCampaign(campaignData)
+                            if hasNextCampaign then
+                                self:ShowNextCampaign(campaignData)
+                            else
+                                self:RefreshCampaignList()
+                            end
                         else
                             self:RefreshCampaignList()
-                            GROUP_MENU_KEYBOARD:ShowCategoryByData(campaignData)
+                            PROMOTIONAL_EVENTS_LIST_GAMEPAD:SelectCampaign(campaignData)
                         end
                     end
                 end,

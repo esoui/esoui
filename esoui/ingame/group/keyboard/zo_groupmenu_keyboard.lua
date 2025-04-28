@@ -162,6 +162,8 @@ function GroupMenu_Keyboard:InitializeCategories()
                         local firstCampaign = children[2]
                         if firstCampaign then
                             self.navigationTree:SelectNode(firstCampaign)
+                        else
+                            self.navigationTree:SelectFirstChild(node)
                         end
                     end
                 else

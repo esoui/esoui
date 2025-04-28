@@ -33,7 +33,6 @@ function ZO_SkillsDataManager:Initialize()
 
     if AreSkillsInitialized() then
         self:RebuildSkillsData()
-        self:RefreshSkillLinesInTraining()
     end
 end
 
@@ -69,6 +68,12 @@ function ZO_SkillsDataManager:RegisterForEvents()
     end
 
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", OnCollectionUpdated)
+end
+
+function ZO_SkillsDataManager:OnSkillLineAssignmentManagerReady()
+    SKILL_LINE_ASSIGNMENT_MANAGER:RegisterCallback("SkillLineRespecUpdate", function()
+        self:RefreshSkillLineHelperCaches()
+    end)
 end
 
 function ZO_SkillsDataManager:IsGatingEventUpdates()
@@ -127,6 +132,8 @@ function ZO_SkillsDataManager:RebuildSkillsData()
         end
     end
 
+    self:RefreshSkillLineHelperCaches()
+
     self.isDataReady = true
     self:FireCallbacks("FullSystemUpdated")
 end
@@ -151,6 +158,9 @@ do
                 local skillTypeData = self:GetSkillTypeData(skillType)
                 skillTypeData:RefreshDynamicData(REFRESH_CHILDREN)
             end
+
+            self:RefreshSkillLineHelperCaches()
+
             self:FireCallbacks("FullSystemUpdated")
         else
             self:RebuildSkillsData()
@@ -407,6 +417,11 @@ function ZO_SkillsDataManager:GetFirstActiveSkillLineByClassId(classId)
         end
     end
     return nil
+end
+
+function ZO_SkillsDataManager:RefreshSkillLineHelperCaches()
+    self:RefreshSkillLinesInTraining()
+    self:RefreshActiveClassSkillLines()
 end
 
 ZO_SkillsDataManager:New()

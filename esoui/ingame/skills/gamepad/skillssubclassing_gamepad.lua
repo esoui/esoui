@@ -573,7 +573,6 @@ function ZO_SkillsSubclassing_Gamepad:PerformUpdate()
 end
 
 function ZO_SkillsSubclassing_Gamepad:RefreshHeader()
-    SKILLS_DATA_MANAGER:RefreshSkillLinesInTraining()
     ZO_GamepadGenericHeader_Refresh(self.header, self.headerData)
     self.trainingLabel:SetText(zo_strformat(SI_GAMEPAD_SKILLS_SUBCLASSING_TRAINING_FORMATTER, SKILLS_DATA_MANAGER:GetNumSkillLinesInTraining(), MAX_SKILL_LINES_IN_TRAINING))
 end
@@ -692,7 +691,6 @@ function ZO_SkillsSubclassing_Gamepad:ShowClassSkillLines(classId, resetToTop)
 end
 
 function ZO_SkillsSubclassing_Gamepad:RefreshClassSkillLinesList(resetToTop)
-    SKILLS_DATA_MANAGER:RefreshActiveClassSkillLines()
     self.skillLinesList:Clear()
 
     local numSkillLines = GetNumSkillLinesForClass(self.selectedClassId)

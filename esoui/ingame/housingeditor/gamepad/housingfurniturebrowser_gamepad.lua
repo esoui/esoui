@@ -35,6 +35,40 @@ function ZO_HousingFurnitureBrowser_Gamepad:Initialize(control)
     self:SetListsUseTriggerKeybinds(true)
 end
 
+function ZO_HousingFurnitureBrowser_Gamepad:InitializeKeybindStripDescriptors()
+    ZO_Gamepad_ParametricList_Search_Screen.InitializeKeybindStripDescriptors(self)
+
+    table.insert(self.textSearchKeybindStripDescriptor,
+    {
+        alignment = KEYBIND_STRIP_ALIGN_LEFT,
+        name = GetString(SI_GAMEPAD_HOUSING_FURNITURE_BROWSER_OPTIONS_KEYBIND),
+        keybind = "UI_SHORTCUT_TERTIARY",
+        callback = function()
+            self:ShowOptionsDialog()
+        end,
+        visible = function()
+            return self:IsOptionsKeybindVisible()
+        end,
+    })
+end
+
+function ZO_HousingFurnitureBrowser_Gamepad:IsOptionsKeybindVisible()
+    if self.mode == HOUSING_BROWSER_MODE.PLACEMENT then
+        return self.placementPanel:GetOptionsDialogName() and not HOUSING_EDITOR_STATE:IsHousePreview()
+    elseif self.mode == HOUSING_BROWSER_MODE.RETRIEVAL then
+        return self.retrievalPanel:GetOptionsDialogName() and not HOUSING_EDITOR_STATE:IsHousePreview()
+    end
+    return false
+end
+
+function ZO_HousingFurnitureBrowser_Gamepad:ShowOptionsDialog()
+    if self.mode == HOUSING_BROWSER_MODE.PLACEMENT then
+        self.placementPanel:ShowOptionsDialog()
+    elseif self.mode == HOUSING_BROWSER_MODE.RETRIEVAL then
+        self.retrievalPanel:ShowOptionsDialog()
+    end
+end
+
 function ZO_HousingFurnitureBrowser_Gamepad:PerformUpdate()
     if self.mode == HOUSING_BROWSER_MODE.PLACEMENT then
         SHARED_FURNITURE:OnPlacementFiltersChanged()
@@ -48,13 +82,25 @@ function ZO_HousingFurnitureBrowser_Gamepad:PerformUpdate()
     end
 end
 
+function ZO_HousingFurnitureBrowser_Gamepad:UpdateListNavigation(panel)
+    if panel:IsShowing() and not self:IsSearchFocused() then
+        if panel:GetCurrentList():GetNumItems() == 0 then
+            self:RequestEnterHeader()
+        else
+            self:RequestLeaveHeader()
+        end
+    end
+end
+
 function ZO_HousingFurnitureBrowser_Gamepad:UpdatePlaceablePanel()
     self.placementPanel:UpdateLists()
+    self:UpdateListNavigation(self.placementPanel)
 end
 
 --Overridden
 function ZO_HousingFurnitureBrowser_Gamepad:UpdateRetrievablePanel()
     self.retrievalPanel:UpdateLists()
+    self:UpdateListNavigation(self.retrievalPanel)
 end
 
 --Overridden

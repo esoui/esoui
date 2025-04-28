@@ -909,11 +909,13 @@ function ZO_PromotionalEvents_CapstoneDialog_Shared:ViewInCollections()
 end
 
 function ZO_PromotionalEvents_CapstoneDialog_Shared:ShowNextCampaign(campaignData)
-    local nextCampaignKey = GetCampaignKeyForNextReturningPlayerCampaign(campaignData:GetId())
-    local nextCampaignData = PROMOTIONAL_EVENT_MANAGER:GetCampaignDataByKey(nextCampaignKey)
     self:RefreshCampaignList()
-    local DONT_SCROLL_TO_REWARD = false
-    PROMOTIONAL_EVENT_MANAGER:ShowPromotionalEventScene(DONT_SCROLL_TO_REWARD, nextCampaignData)
+    local nextCampaignKey = GetCampaignKeyForNextReturningPlayerCampaign(campaignData:GetId())
+    if nextCampaignKey and nextCampaignKey ~= 0 then
+        local nextCampaignData = PROMOTIONAL_EVENT_MANAGER:GetCampaignDataByKey(nextCampaignKey)
+        local DONT_SCROLL_TO_REWARD = false
+        PROMOTIONAL_EVENT_MANAGER:ShowPromotionalEventScene(DONT_SCROLL_TO_REWARD, nextCampaignData)
+    end
 end
 
 function ZO_PromotionalEvents_CapstoneDialog_Shared:OnShown()

@@ -142,19 +142,23 @@ function ZO_HousingFurnitureList_Gamepad:Initialize(owner)
     self:InitializeOptionsDialog()
 end
 
-function ZO_HousingFurnitureList_Gamepad:InitializeKeybindStripDescriptors()
-    local optionsDialogName = self.optionsDialogLayoutInfo and self.optionsDialogLayoutInfo.dialogName or nil
+function ZO_HousingFurnitureList_Gamepad:GetOptionsDialogName()
+    return self.optionsDialogLayoutInfo and self.optionsDialogLayoutInfo.dialogName or nil
+end
 
-    local function ShowOptionsDialog()
-        local boundFilterValue, locatonFiltersValue, limitFiltersValue = self.optionsDialogLayoutInfo:getFiltersFunction()
-        local dialogData =
-        {
-            boundFilter = boundFilterValue,
-            locationFilters = locatonFiltersValue,
-            limitFilters = limitFiltersValue,
-        }
-        ZO_Dialogs_ShowGamepadDialog(optionsDialogName, dialogData)
-    end
+function ZO_HousingFurnitureList_Gamepad:ShowOptionsDialog()
+    local boundFilterValue, locatonFiltersValue, limitFiltersValue = self.optionsDialogLayoutInfo:getFiltersFunction()
+    local dialogData =
+    {
+        boundFilter = boundFilterValue,
+        locationFilters = locatonFiltersValue,
+        limitFilters = limitFiltersValue,
+    }
+    ZO_Dialogs_ShowGamepadDialog(self:GetOptionsDialogName(), dialogData)
+end
+
+function ZO_HousingFurnitureList_Gamepad:InitializeKeybindStripDescriptors()
+    local optionsDialogName = self:GetOptionsDialogName()
 
     --Category List Keybinds
 
@@ -183,7 +187,7 @@ function ZO_HousingFurnitureList_Gamepad:InitializeKeybindStripDescriptors()
             name = GetString(SI_GAMEPAD_HOUSING_FURNITURE_BROWSER_OPTIONS_KEYBIND),
             keybind = "UI_SHORTCUT_TERTIARY",
             callback = function()
-                ShowOptionsDialog()
+                self:ShowOptionsDialog()
             end,
             visible = function()
                 return optionsDialogName and not HOUSING_EDITOR_STATE:IsHousePreview()
@@ -234,7 +238,7 @@ function ZO_HousingFurnitureList_Gamepad:InitializeKeybindStripDescriptors()
             name = GetString(SI_GAMEPAD_HOUSING_FURNITURE_BROWSER_OPTIONS_KEYBIND),
             keybind = "UI_SHORTCUT_TERTIARY",
             callback = function()
-                ShowOptionsDialog()
+                self:ShowOptionsDialog()
             end,
             visible = function()
                 return optionsDialogName and not HOUSING_EDITOR_STATE:IsHousePreview()
@@ -603,6 +607,14 @@ end
 
 function ZO_HousingFurnitureList_Gamepad:FurnitureKeybindBackCallback()
     self:SwitchActiveList(self.categoryList)
+end
+
+function ZO_HousingFurnitureList_Gamepad:GetCurrentList()
+    return self.currentList.list
+end
+
+function ZO_HousingFurnitureList_Gamepad:IsShowing()
+    return self.currentList ~= nil
 end
 
 function ZO_HousingFurnitureList_Gamepad:OnShowing()

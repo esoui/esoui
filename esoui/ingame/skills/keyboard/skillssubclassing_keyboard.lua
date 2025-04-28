@@ -25,7 +25,6 @@ end
 
 function ZO_SkillsSubclassing_Keyboard:OnDeferredInitialize()
     if not self.isInitialized then
-        SKILLS_DATA_MANAGER:RefreshActiveClassSkillLines()
         local numClasses = GetNumClasses()
         for classIndex = 1, numClasses do
             local classId = GetClassIdByIndex(classIndex)
@@ -249,7 +248,6 @@ function ZO_SkillsSubclassing_Keyboard:GetMousedOverSkillLine()
 end
 
 function ZO_SkillsSubclassing_Keyboard:RefreshClassSkillLinesView()
-    SKILLS_DATA_MANAGER:RefreshActiveClassSkillLines()
     self:UpdateTrainingInfo()
 
     self.currentSkillLineData = nil
@@ -287,7 +285,6 @@ function ZO_SkillsSubclassing_Keyboard:Hide()
 end
 
 function ZO_SkillsSubclassing_Keyboard:UpdateTrainingInfo()
-    SKILLS_DATA_MANAGER:RefreshSkillLinesInTraining()
     self.trainingLabel:SetText(zo_strformat(SI_SKILLS_SUBCLASSING_TRAINING_FORMATTER, SKILLS_DATA_MANAGER:GetNumSkillLinesInTraining(), MAX_SKILL_LINES_IN_TRAINING))
 end
 

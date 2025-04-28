@@ -887,7 +887,7 @@ end
 
 function ZO_HousingEditorHud:InitializePlacementSettings()
     if not self.savedOptions.retrieveToBag then
-        self.savedOptions.retrieveToBag = HOUSING_EDITOR_STATE:CanDepositIntoFurnitureVault() and BAG_FURNITURE_VAULT or BAG_BACKPACK
+        self.savedOptions.retrieveToBag = BAG_BACKPACK
     end
 
     HousingEditorSetRetrieveToBag(self.savedOptions.retrieveToBag)

@@ -10,6 +10,8 @@ function ZO_SkillLineAssignmentManager:Initialize()
     self.pendingActivationLines = {}
 
     ZO_SkillsAssignmentManager_Base.Initialize(self, ZO_SkillsAndActionBarManager.OnSkillLineAssignmentManagerReady)
+
+    SKILLS_DATA_MANAGER:OnSkillLineAssignmentManagerReady()
 end
 
 function ZO_SkillLineAssignmentManager:RegisterForEvents()

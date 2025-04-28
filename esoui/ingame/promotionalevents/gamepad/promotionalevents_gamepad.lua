@@ -1168,7 +1168,7 @@ function ZO_PromotionalEvents_CapstoneDialog_Gamepad:InitializeControls(control)
 
     local buttonsContainer = self.control:GetNamedChild("Buttons")
 
-    local function ShouldShowNextCampaignKeybind()
+    local function HasNextCampaign()
         local campaignData = self.campaignData
         if campaignData:IsReturningPlayerCampaign() then
             local nextCampaignKey = GetCampaignKeyForNextReturningPlayerCampaign(campaignData:GetId())
@@ -1187,8 +1187,8 @@ function ZO_PromotionalEvents_CapstoneDialog_Gamepad:InitializeControls(control)
             local campaignData = self.campaignData
             self:ShowNextCampaign(campaignData)
         end,
-        visible = ShouldShowNextCampaignKeybind,
-        enabled = ShouldShowNextCampaignKeybind,
+        visible = HasNextCampaign,
+        enabled = HasNextCampaign,
         ethereal = true,
     }
     self.nextCampaignButton = buttonsContainer:GetNamedChild("NextCampaign")
@@ -1230,7 +1230,12 @@ function ZO_PromotionalEvents_CapstoneDialog_Gamepad:InitializeControls(control)
             local campaignData = self.campaignData
             if campaignData:IsReturningPlayerCampaign() then
                 if campaignData:AreAllRewardsClaimed() then
-                    self:ShowNextCampaign(campaignData)
+                    if HasNextCampaign() then
+                        self:ShowNextCampaign(campaignData)
+                    else
+                        self:RefreshCampaignList()
+                        PROMOTIONAL_EVENTS_GAMEPAD:Deactivate()
+                    end
                 else
                     self:RefreshCampaignList()
                     PROMOTIONAL_EVENTS_LIST_GAMEPAD:SelectCampaign(campaignData)

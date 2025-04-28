@@ -90,8 +90,10 @@ function ZO_Smithing:Initialize(control)
         end
     end)
 
-    self.control:RegisterForEvent(EVENT_CRAFTING_STATION_INTERACT, function(eventCode, craftingType, sameStation, craftingMode)
-        if ZO_Smithing_IsSmithingStation(craftingType, craftingMode) and not IsInGamepadPreferredMode() then
+    self.control:RegisterForEvent(EVENT_CRAFTING_STATION_INTERACT, function(eventCode, _, sameStation)
+        -- Fetch the crafting interaction type just in case the interaction was immediately canceled.
+        local craftingType = GetCraftingInteractionType()
+        if ZO_Smithing_IsSmithingStation(craftingType) and not IsInGamepadPreferredMode() then
             self.interactingWithSameStation = sameStation
             SCENE_MANAGER:Show(SMITHING_SCENE_NAME)
         end

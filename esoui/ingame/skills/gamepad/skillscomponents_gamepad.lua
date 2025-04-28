@@ -217,9 +217,9 @@ do
         elseif showSkillStyle then
             local collectibleData = skillProgressionData:GetSelectedSkillStyleCollectibleData()
             if collectibleData then
-                increaseMultiIcon:AddIcon(collectibleData:GetIcon())
+                leftIndicator:AddIcon(collectibleData:GetIcon())
             else
-                increaseMultiIcon:AddIcon("EsoUI/Art/Progression/Gamepad/gp_skillStyleEmpty.dds")
+                leftIndicator:AddIcon("EsoUI/Art/Progression/Gamepad/gp_skillStyleEmpty.dds")
             end
         end
 

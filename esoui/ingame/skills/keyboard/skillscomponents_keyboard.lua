@@ -389,23 +389,19 @@ do
 
         -- Don't show skill style functionality if in respec mode
         local skillStyleControl = control.skillStyleControl
-        if not SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeBatchSave() then
-            skillStyleControl:ClearAnchors()
-            skillStyleControl:SetAnchor(RIGHT, control.slot, LEFT, -12)
+        skillStyleControl:ClearAnchors()
+        skillStyleControl:SetAnchor(RIGHT, control.slot, LEFT, -12)
 
-            if isActive and skillProgressionData:HasAnyNonHiddenSkillStyles() then
-                skillStyleControl:SetHidden(false)
-                if skillProgressionData:IsSkillStyleSelected() then
-                    skillStyleControl.defaultStyleButton:SetHidden(true)
-                    skillStyleControl.selectedStyleButton:SetHidden(false)
-                else
-                    skillStyleControl.defaultStyleButton:SetHidden(false)
-                    skillStyleControl.selectedStyleButton:SetHidden(true)
-                end
-                skillStyleControl.statusIcon:SetHidden(not skillData:HasUpdatedStatusByType(ZO_SKILL_DATA_NEW_STATE.STYLE_COLLECTIBLE))
+        if isActive and skillProgressionData:HasAnyNonHiddenSkillStyles() then
+            skillStyleControl:SetHidden(false)
+            if skillProgressionData:IsSkillStyleSelected() then
+                skillStyleControl.defaultStyleButton:SetHidden(true)
+                skillStyleControl.selectedStyleButton:SetHidden(false)
             else
-                skillStyleControl:SetHidden(true)
+                skillStyleControl.defaultStyleButton:SetHidden(false)
+                skillStyleControl.selectedStyleButton:SetHidden(true)
             end
+            skillStyleControl.statusIcon:SetHidden(not skillData:HasUpdatedStatusByType(ZO_SKILL_DATA_NEW_STATE.STYLE_COLLECTIBLE))
         else
             skillStyleControl:SetHidden(true)
         end

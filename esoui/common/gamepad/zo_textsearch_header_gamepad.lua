@@ -17,10 +17,6 @@ function ZO_TextSearch_Header_Gamepad:Initialize(control, onTextChangedCallback)
     self.headerTextFilterEditBox:SetHandler("OnFocusLost", function() self:FireCallbacks("EditBoxFocusLost") end, "TextSearchHeader")
 end
 
-function ZO_TextSearch_Header_Gamepad:IsActive()
-    return self.active
-end
-
 function ZO_TextSearch_Header_Gamepad:Activate()
     self.active = true
     self:Update()
@@ -50,6 +46,10 @@ end
 
 function ZO_TextSearch_Header_Gamepad:IsActive()
     return self.active
+end
+
+function ZO_TextSearch_Header_Gamepad:HasFocus()
+    return self.headerTextFilterEditBox:HasFocus()
 end
 
 function ZO_TextSearch_Header_Gamepad:SetFocused(isFocused)
