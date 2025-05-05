@@ -95,7 +95,9 @@ end
 function ZO_PromotionalEventsList_Gamepad:RefreshList()
     self.list:Clear()
 
-    if IsReturningPlayer() then
+    local shouldShowRewardsSummary = IsReturningPlayer() and (PROMOTIONAL_EVENT_MANAGER:AreAnyReturningPlayerCampaignsIncomplete() or RETURNING_PLAYER_MANAGER:AreAnyDailyLoginRewardsUnclaimed())
+
+    if shouldShowRewardsSummary then
         local campaignData = ZO_PromotionalEventCampaignData:New()
         campaignData.isReturningPlayerRewardsEntry = true
         local entryData = ZO_GamepadEntryData:New(GetString(SI_PROMOTIONAL_EVENT_RETURNING_PLAYER_REWARD_ENTRY_TITLE))
@@ -113,7 +115,7 @@ function ZO_PromotionalEventsList_Gamepad:RefreshList()
         end
     end
 
-    self.list:SetDefaultSelectedIndex(IsReturningPlayer() and 2 or 1)
+    self.list:SetDefaultSelectedIndex(shouldShowRewardsSummary and 2 or 1)
     self.list:Commit()
 end
 

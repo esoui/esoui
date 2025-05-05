@@ -11,7 +11,7 @@ function IsPreloginWorldEnabled()
         end
     end
 
-    return false
+    return true
 end
 
 -- Establish whether we want to use the Prelogin World immediately

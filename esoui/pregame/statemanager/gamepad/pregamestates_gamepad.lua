@@ -80,11 +80,6 @@ local pregameStates =
 
             -- Hide the Prelogin Overlay loading scene.
             PRELOGIN_OVERLAY:SetHidden(true)
-
-            -- Restart the animation on startup for developers.
-            if ZO_PRELOGIN_WORLD_SAVED_VARS and IsPreloginWorldEnabled() then
-                ZO_PregameAnimatedBackgroundDevTools_ApplyCameraWaypointsAndRestartAnimation()
-            end
         end,
 
         GetStateTransitionData = function()

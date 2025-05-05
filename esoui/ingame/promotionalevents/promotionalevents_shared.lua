@@ -286,7 +286,9 @@ function ZO_PromotionalEvents_Shared:RegisterForEvents()
     self.control:RegisterForEvent(EVENT_PROMOTIONAL_EVENTS_ACTIVITY_TRACKING_UPDATED, ZO_GetEventForwardingFunction(self, self.OnActivityTrackingUpdated))
     PROMOTIONAL_EVENT_MANAGER:RegisterCallback("RewardsClaimed", ZO_GetCallbackForwardingFunction(self, self.OnRewardsClaimed))
     PROMOTIONAL_EVENT_MANAGER:RegisterCallback("ActivityProgressUpdated", ZO_GetCallbackForwardingFunction(self, self.OnActivityProgressUpdated))
+    PROMOTIONAL_EVENT_MANAGER:RegisterCallback("CapstoneDialogClosed", ZO_GetCallbackForwardingFunction(self, self.OnCapstoneDialogClosed))
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", ZO_GetCallbackForwardingFunction(self, self.OnCollectionUpdated))
+    RETURNING_PLAYER_MANAGER:RegisterCallback("DailyRewardClaimed", ZO_GetCallbackForwardingFunction(self, self.OnDailyRewardClaimed))
 end
 
 function ZO_PromotionalEvents_Shared:OnActivityControlSetup(control, data)
@@ -374,6 +376,17 @@ function ZO_PromotionalEvents_Shared:OnCollectionUpdated(collectionUpdateType, c
             end
             ZO_ScrollList_RefreshVisible(self.activityList, NO_FILTER, RefreshActivityReward)
         end
+    end
+end
+
+function ZO_PromotionalEvents_Shared:OnDailyRewardClaimed()
+    self:RefreshCampaignList()
+end
+
+function ZO_PromotionalEvents_Shared:OnCapstoneDialogClosed()
+    -- This synchronizes the keyboard and gamepad objects; we only need to handle the one that isn't currently showing.
+    if not self:IsShowing() and IsReturningPlayer() then
+        self:RefreshCampaignList()
     end
 end
 
@@ -770,6 +783,7 @@ ZO_PromotionalEvents_Shared:MUST_IMPLEMENT("IsReturningPlayerRewardsEntrySelecte
 ZO_PromotionalEvents_Shared:MUST_IMPLEMENT("ShowCapstoneDialog")
 ZO_PromotionalEvents_Shared:MUST_IMPLEMENT("GetMilestoneScale")
 ZO_PromotionalEvents_Shared:MUST_IMPLEMENT("GetMilestonePadding")
+ZO_PromotionalEvents_Shared:MUST_IMPLEMENT("RefreshCampaignList")
 
 -- Capstone Dialog --
 

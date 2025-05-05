@@ -68,7 +68,7 @@ local function ShowReturningPlayerAnnouncements()
 end
 
 local function AddAnnouncementsEntry(entryTable)
-    if IsReturningPlayer() then
+    if RETURNING_PLAYER_MANAGER:ShouldShowReturningPlayerAnnouncementEntry() then
         local campaignDisplayName = RETURNING_PLAYER_MANAGER:GetIntroCampaignDisplayName()
         local data =
         {

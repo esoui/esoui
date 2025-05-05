@@ -33,6 +33,7 @@ function ZO_SkillsAndActionBarManager:Initialize()
     EVENT_MANAGER:RegisterForEvent("ZO_SkillsAndActionBarManager", EVENT_START_SKILL_RESPEC, function(_, ...) self:OnStartRespec(...) end)
     EVENT_MANAGER:RegisterForEvent("ZO_SkillsAndActionBarManager", EVENT_SKILL_RESPEC_RESULT, function(_, ...) self:OnSkillRespecResult(...) end)
     EVENT_MANAGER:RegisterForUpdate("ZO_SkillsAndActionBarManager", 0, function() self:OnUpdate() end)
+    EVENT_MANAGER:RegisterForEvent("ZO_SkillsAndActionBarManager", EVENT_INTERACTION_ENDED, function(_, ...) self:OnInteractionEnded(...) end)
 end
 
 function ZO_SkillsAndActionBarManager:GetSkillPointAllocationMode()
@@ -46,11 +47,22 @@ function ZO_SkillsAndActionBarManager:SetSkillPointAllocationMode(skillPointAllo
         if self:DoesSkillPointAllocationModeBatchSave() then
             PlaySound(SOUNDS.SKILLS_ENTER_RESPEC_MODE)
         end
+
+        if self.skillPointAllocationMode == SKILL_POINT_ALLOCATION_MODE_SUBCLASS_ONLY and GetInteractionType() == INTERACTION_SKILL_RESPEC and GetSubclassingAccessLevel() == SUBCLASSING_ACCESS_LEVEL_CONDITIONAL then
+            self.hasConditionalAccessToSubclassing = true
+        end
         self:FireCallbacks("SkillPointAllocationModeChanged", skillPointAllocationMode, oldSkillPointAllocationMode)
     end
 
     -- Debug: Trying to track down data in a bad state
     internalassert(SKILL_POINT_ALLOCATION_MANAGER:HasValidChangesForMode(), "Skill point allocation manager has pending changes incompatible with current mode")
+end
+
+function ZO_SkillsAndActionBarManager:OnInteractionEnded(oldInteractionType)
+    if oldInteractionType == INTERACTION_SKILL_RESPEC and self.hasConditionalAccessToSubclassing then
+        self.hasConditionalAccessToSubclassing = false
+        self:FireCallbacks("LostConditionalAccessToSubclassing")
+    end
 end
 
 function ZO_SkillsAndActionBarManager:ResetInterface()
@@ -104,7 +116,7 @@ function ZO_SkillsAndActionBarManager:DoesSkillPointAllocationModeAllowAccessToS
     if subclassingAccessLevel == SUBCLASSING_ACCESS_LEVEL_FULL then
         return true
     elseif subclassingAccessLevel == SUBCLASSING_ACCESS_LEVEL_CONDITIONAL then
-        return self.skillPointAllocationMode == SKILL_POINT_ALLOCATION_MODE_SUBCLASS_ONLY
+        return self.skillPointAllocationMode == SKILL_POINT_ALLOCATION_MODE_SUBCLASS_ONLY or self.hasConditionalAccessToSubclassing
     end
     return false
 end

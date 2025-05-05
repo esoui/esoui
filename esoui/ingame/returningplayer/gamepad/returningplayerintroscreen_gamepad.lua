@@ -82,7 +82,7 @@ end
 
 function ZO_ReturningPlayerIntroScreen_Gamepad:OnPrimaryKeyPressed()
     PlaySound(SOUNDS.RETURNING_PLAYER_ENTER_INTRO_GAMEPLAY)
-    RequestJumpToReturningPlayerIntroGameplay()
+    self:RequestJumpToIntroGameplay()
 end
 
 function ZO_ReturningPlayerIntroScreen_Gamepad.OnControlInitialized(control)

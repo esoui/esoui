@@ -137,6 +137,8 @@ end
 
 function ZO_ReturningPlayerRewardScreen_Shared:OnShown()
     KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
+
+    RETURNING_PLAYER_MANAGER:MarkRewardsAsSeen()
 end
 
 function ZO_ReturningPlayerRewardScreen_Shared:OnHiding()

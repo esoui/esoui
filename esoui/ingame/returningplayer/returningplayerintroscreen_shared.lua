@@ -143,6 +143,11 @@ function ZO_ReturningPlayerIntroScreen_Shared:GetIntroCampaignRewards()
     return {}
 end
 
+function ZO_ReturningPlayerIntroScreen_Shared:RequestJumpToIntroGameplay()
+    MarkReturningPlayerLeaveIntroPromptShown()
+    RequestJumpToReturningPlayerIntroGameplay()
+end
+
 ZO_ReturningPlayerIntroScreen_Shared:MUST_IMPLEMENT("InitializeGridList")
 ZO_ReturningPlayerIntroScreen_Shared:MUST_IMPLEMENT("GetPrimaryKeybindName")
 ZO_ReturningPlayerIntroScreen_Shared:MUST_IMPLEMENT("OnPrimaryKeyPressed")

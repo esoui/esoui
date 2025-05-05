@@ -690,8 +690,10 @@ function ZO_SkillsManager:InitializeKeybindDescriptors()
             name = function()
                 if isSubclassingMousedOver then
                     return GetString(SI_SKILLS_SUBCLASSING_QUEST_GRANT_TEXT)
-                else
+                elseif self.subclassingPanel:IsSkillLineMousedOver() then
                     return GetString(SI_SKILLS_SUBCLASSING_PREVIEW_ACTION)
+                else
+                    return self.subclassingPanel:GetSkillsListViewActionText()
                 end
             end,
             keybind = "UI_SHORTCUT_PRIMARY",
@@ -700,9 +702,12 @@ function ZO_SkillsManager:InitializeKeybindDescriptors()
                     BestowSubclassingQuest()
                     self:UpdateKeybinds()
                     ClearTooltip(InformationTooltip)
-                else
+                elseif self.subclassingPanel:IsSkillLineMousedOver() then
                     self.subclassingPanel:ShowSkillsListView(self.subclassingPanel:GetMousedOverSkillLine())
                     PlaySound(SOUNDS.SKILLS_SUBCLASSING_SKILL_LINE_SELECT)
+                elseif self.subclassingPanel:IsSkillsListViewActionAvailable() then
+                    self.subclassingPanel:DoSkillsListViewAction()
+                    self:UpdateKeybinds()
                 end
             end,
             visible = function()
@@ -716,7 +721,7 @@ function ZO_SkillsManager:InitializeKeybindDescriptors()
                     end
                     return false
                 else
-                    return self.subclassingPanel:IsSkillLineMousedOver()
+                    return self.subclassingPanel:IsSkillLineMousedOver() or self.subclassingPanel:IsSkillsListViewActionAvailable()
                 end
             end
         },
@@ -740,15 +745,26 @@ function ZO_SkillsManager:InitializeKeybindDescriptors()
         },
         {
             name = function()
-                return GetString("SI_SKILLPOINTALLOCATIONMODE_CLEARKEYBIND", SKILLS_AND_ACTION_BAR_MANAGER:GetSkillPointAllocationMode())
+                local selectedData = self.skillLinesTree:GetSelectedData()
+                if selectedData.isSubclassingNode then
+                    return GetString(SI_SKILLS_SUBCLASSING_UNTRAIN_ACTION)
+                else
+                    return GetString("SI_SKILLPOINTALLOCATIONMODE_CLEARKEYBIND", SKILLS_AND_ACTION_BAR_MANAGER:GetSkillPointAllocationMode())
+                end
             end,
             keybind = "UI_SHORTCUT_NEGATIVE",
             callback = function()
-                ZO_Dialogs_ShowDialog("SKILL_RESPEC_CONFIRM_CLEAR_ALL_KEYBOARD", self.skillLinesTree:GetSelectedData())
+                local selectedData = self.skillLinesTree:GetSelectedData()
+                if selectedData.isSubclassingNode and self.subclassingPanel:CanUntrainInSkillsListView() then
+                    self.subclassingPanel:DoUntrainInSkillsListView()
+                    self:UpdateKeybinds()
+                else
+                    ZO_Dialogs_ShowDialog("SKILL_RESPEC_CONFIRM_CLEAR_ALL_KEYBOARD", self.skillLinesTree:GetSelectedData())
+                end
             end,
             visible = function()
                 local selectedData = self.skillLinesTree:GetSelectedData()
-                return not selectedData.isSubclassingNode and SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeAllowClear()
+                return (selectedData.isSubclassingNode and self.subclassingPanel:CanUntrainInSkillsListView()) or SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeAllowClear()
             end
         },
         {
@@ -925,6 +941,7 @@ function ZO_SkillsManager:RegisterForEvents()
         end
     end
     SKILLS_AND_ACTION_BAR_MANAGER:RegisterCallback("SkillPointAllocationModeChanged", OnSkillPointAllocationModeChanged)
+    SKILLS_AND_ACTION_BAR_MANAGER:RegisterCallback("LostConditionalAccessToSubclassing", OnFullSystemUpdated)
     SKILLS_AND_ACTION_BAR_MANAGER:RegisterCallback("RespecStateReset", OnFullSystemUpdated)
 
     -- make sure we've correctly set our hide confirmation callback to start with

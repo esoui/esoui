@@ -291,14 +291,14 @@ function ZO_PromotionalEvents_Keyboard:InitializeActivityFinderCategory()
         end,
         disabledIcon = "EsoUI/Art/LFG/LFG_indexIcon_PromotionalEvents_disabled.dds",
         visible = function()
-            return PROMOTIONAL_EVENT_MANAGER:HasActiveCampaign()
+            return PROMOTIONAL_EVENT_MANAGER:HasActiveCampaign() and (PROMOTIONAL_EVENT_MANAGER:AreAnyReturningPlayerCampaignsIncomplete() or RETURNING_PLAYER_MANAGER:AreAnyDailyLoginRewardsUnclaimed())
         end,
         getChildrenFunction = function()
             local numActiveCampaigns = PROMOTIONAL_EVENT_MANAGER:GetNumActiveCampaigns()
             if numActiveCampaigns > 1 then
                 ZO_ClearNumericallyIndexedTable(children)
-                local isReturningPlayer = IsReturningPlayer()
-                if isReturningPlayer then
+                local shouldShowRewardsSummary = IsReturningPlayer() and (PROMOTIONAL_EVENT_MANAGER:AreAnyReturningPlayerCampaignsIncomplete() or RETURNING_PLAYER_MANAGER:AreAnyDailyLoginRewardsUnclaimed())
+                if shouldShowRewardsSummary then
                     local campaignData = ZO_PromotionalEventCampaignData:New()
                     campaignData.isReturningPlayerRewardsEntry = true
                     local child =
@@ -312,7 +312,7 @@ function ZO_PromotionalEvents_Keyboard:InitializeActivityFinderCategory()
                     }
                     table.insert(children, child)
                 end
-                local returningPlayerOffset = isReturningPlayer and 1 or 0
+                local returningPlayerOffset = shouldShowRewardsSummary and 1 or 0
                 for i = 1, numActiveCampaigns do
                     local campaignData = PROMOTIONAL_EVENT_MANAGER:GetCampaignDataByIndex(i)
                     if campaignData:ShouldCampaignBeVisible() then
@@ -329,7 +329,8 @@ function ZO_PromotionalEvents_Keyboard:InitializeActivityFinderCategory()
                         table.insert(children, child)
                     end
                 end
-                return children
+                -- Account for the possibility of technically active but completed/hidden returning player campaigns.
+                return #children > 0 and children or NO_CHILDREN
             else
                 return NO_CHILDREN
             end
@@ -679,6 +680,10 @@ function ZO_PromotionalEvents_Keyboard:OnHiding()
     POPUP_LIST:Hide()
 end
 
+function ZO_PromotionalEvents_Keyboard:RefreshCampaignList()
+    GROUP_MENU_KEYBOARD:RebuildCategories()
+end
+
 function ZO_PromotionalEvents_Keyboard:ShowCapstoneDialog()
     ZO_Dialogs_ShowDialog("PROMOTIONAL_EVENT_CAPSTONE_KEYBOARD", { campaignData = self.currentCampaignData })
 end
@@ -776,7 +781,10 @@ function ZO_PromotionalEvents_CapstoneDialog_Keyboard:Initialize(control)
                     end
                 end,
             },
-        }
+        },
+        finishedCallback = function()
+            PROMOTIONAL_EVENT_MANAGER:OnCapstoneDialogClosed()
+        end,
     })
 end
 
@@ -817,7 +825,7 @@ function ZO_PromotionalEvents_CapstoneDialog_Keyboard:InitializeParticleSystems(
 end
 
 function ZO_PromotionalEvents_CapstoneDialog_Shared:RefreshCampaignList()
-    GROUP_MENU_KEYBOARD:RebuildCategories()
+    PROMOTIONAL_EVENTS_KEYBOARD:RefreshCampaignList()
 end
 
 function ZO_PromotionalEvents_CapstoneDialog_Keyboard.OnRewardMouseEnter(rewardFrameControl)

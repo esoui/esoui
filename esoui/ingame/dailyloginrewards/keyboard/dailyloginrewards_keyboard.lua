@@ -131,7 +131,7 @@ function ZO_DailyLoginRewards_Keyboard:OnShowing()
     ZO_DailyLoginRewards_Base.OnShowing(self)
     KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
 
-    local shouldShowReturningPlayerRewardsButton = IsReturningPlayer()
+    local shouldShowReturningPlayerRewardsButton = RETURNING_PLAYER_MANAGER:ShouldShowReturningPlayerAnnouncementEntry()
     self.control:GetNamedChild("ReturningPlayerRewardsButton"):SetHidden(not shouldShowReturningPlayerRewardsButton)
 end
 

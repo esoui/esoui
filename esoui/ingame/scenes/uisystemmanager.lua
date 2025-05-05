@@ -125,15 +125,8 @@ function ZO_UISystemManager:TryShowInitialScreen()
 
         FlagReturningPlayerAnnouncementSeen()
         FlagMarketAnnouncementSeen()
-    elseif IsReturningPlayer() and not HasShownReturningPlayerAnnouncement() then
-        if not IsActiveWorldStarterWorld() then
-            -- Make sure to update the promotional events manager: due to the timing
-            -- of the Lua events it may not have updated even though the data is ready
-            PROMOTIONAL_EVENT_MANAGER:RefreshCampaignData()
-            RETURNING_PLAYER_MANAGER:ShowReturningPlayerAnnouncementScreen()
-
-            FlagMarketAnnouncementSeen()
-        end
+    elseif self:TryShowReturningPlayerAnnouncement() then
+        -- TryShowReturningPlayerAnnouncement has handled showing the announcement
     elseif not HasShownMarketAnnouncement() then
         RequestMarketAnnouncement()
     end
@@ -141,6 +134,39 @@ function ZO_UISystemManager:TryShowInitialScreen()
     self.waitingForMarketAnnouncements = not HasShownMarketAnnouncement()
 
     self:TryOpenQueuedUISystem()
+end
+
+-- Returns whether the returning player flow is handling showing the announcement
+function ZO_UISystemManager:TryShowReturningPlayerAnnouncement()
+    local shouldShowAnnouncement = RETURNING_PLAYER_MANAGER:ShouldShowReturningPlayerAnnouncement()
+    if not shouldShowAnnouncement then
+        return false
+    end
+
+    -- Don't show the rewards announcement if we've already seen it recently
+    -- Also mark the announcement as seen so it doesn't pop up later
+    local REWARDS_ANNOUNCEMENT_SUPPRESSION_TIME_SECONDS = 2 * ZO_ONE_HOUR_IN_SECONDS
+    if RETURNING_PLAYER_MANAGER:IsIntroCampaignComplete()
+            and not RETURNING_PLAYER_MANAGER:HasClaimableDailyReward()
+            and GetTimeStamp() < RETURNING_PLAYER_MANAGER:GetLastTimeRewardsWereSeen() + REWARDS_ANNOUNCEMENT_SUPPRESSION_TIME_SECONDS then
+        FlagReturningPlayerAnnouncementSeen()
+        return false
+    end
+
+    -- If we're in a starter world, we don't want to show an announcement
+    -- We do want the announcement to show when we change areas, so don't flag as seen
+    if IsActiveWorldStarterWorld() then
+        return true
+    end
+
+    -- Make sure to update the promotional events manager: due to the timing
+    -- of the Lua events it may not have updated even though the data is ready
+    PROMOTIONAL_EVENT_MANAGER:RefreshCampaignData()
+    RETURNING_PLAYER_MANAGER:ShowReturningPlayerAnnouncementScreen()
+
+    FlagMarketAnnouncementSeen()
+
+    return true
 end
 
 function ZO_UISystemManager:OnMarketAnnouncementUpdated(shouldShow, isLocked)

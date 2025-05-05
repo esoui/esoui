@@ -231,6 +231,7 @@ function ZO_SkillsSubclassing_Keyboard:RegisterForEvents()
 
     SKILLS_AND_ACTION_BAR_MANAGER:RegisterCallback("SkillPointAllocationModeChanged", RefreshWithoutAnimation)
     SKILL_LINE_ASSIGNMENT_MANAGER:RegisterCallback("SkillLineRespecUpdate", RefreshWithoutAnimation)
+    SKILLS_AND_ACTION_BAR_MANAGER:RegisterCallback("LostConditionalAccessToSubclassing", function() self:RefreshClassSkillLinesView() end)
     SKILLS_DATA_MANAGER:RegisterCallback("FullSystemUpdated", RefreshWithAnimation)
     SKILLS_DATA_MANAGER:RegisterCallback("SkillLineUpdated", RefreshWithAnimation)
 
@@ -263,6 +264,42 @@ function ZO_SkillsSubclassing_Keyboard:ShowSkillsListView(skillLineData)
     SKILLS_WINDOW:SetSkillLinesHidden(true)
     self.currentSkillLineData = skillLineData
     self:RefreshSkillsList()
+end
+
+function ZO_SkillsSubclassing_Keyboard:IsSkillsListViewActionAvailable()
+    return self.currentSkillLineData ~= nil and (self.currentSkillLineData:IsContentLocked() or self.currentSkillLineData:CanActivateForRespec() or self.currentSkillLineData:CanTrain())
+end
+
+function ZO_SkillsSubclassing_Keyboard:GetSkillsListViewActionText()
+    return self:GetSkillsListViewActionTextBySkillLineData(self.currentSkillLineData)
+end
+
+function ZO_SkillsSubclassing_Keyboard:GetSkillsListViewActionTextBySkillLineData(skillLineData)
+    if skillLineData then
+        if skillLineData:IsContentLocked() then
+            return GetString(SI_SKILLS_SUBCLASSING_OPEN_STORE_ACTION)
+        elseif SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeBatchSave() then
+            if skillLineData:CanActivateForRespec() then
+                return GetString(SI_SKILLS_SUBCLASSING_EQUIP_ACTION)
+            elseif skillLineData:CanTrain() then
+                return GetString(SI_SKILLS_SUBCLASSING_TRAIN_ACTION)
+            end
+        end
+    end
+end
+
+function ZO_SkillsSubclassing_Keyboard:DoSkillsListViewAction()
+    if self:IsSkillsListViewActionAvailable() then
+        self:OnActionButtonBySkillLineData(self.currentSkillLineData)
+    end
+end
+
+function ZO_SkillsSubclassing_Keyboard:CanUntrainInSkillsListView()
+    return self.currentSkillLineData ~= nil and self.currentSkillLineData:CanUntrain()
+end
+
+function ZO_SkillsSubclassing_Keyboard:DoUntrainInSkillsListView()
+    return self.currentSkillLineData ~= nil and self.currentSkillLineData:Untrain()
 end
 
 function ZO_SkillsSubclassing_Keyboard:IsShowing()
@@ -610,6 +647,10 @@ end
 
 function ZO_SkillsSubclassing_Keyboard:OnActionButtonClicked(control)
     local skillLineData = control.skillLineData
+    self:OnActionButtonBySkillLineData(skillLineData)
+end
+
+function ZO_SkillsSubclassing_Keyboard:OnActionButtonBySkillLineData(skillLineData)
     if skillLineData then
         if skillLineData:IsContentLocked() then
             local collectibleId = skillLineData:GetClassAccessCollectibleId()
@@ -637,15 +678,7 @@ function ZO_SkillsSubclassing_Keyboard:OnActionButtonMouseEnter(actionControl)
     local tooltipText
     local skillLineData = control.skillLineData
     if skillLineData then
-        if skillLineData:IsContentLocked() then
-            tooltipText = GetString(SI_SKILLS_SUBCLASSING_OPEN_STORE_ACTION)
-        elseif SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeBatchSave() then
-            if skillLineData:CanActivateForRespec() then
-                tooltipText = GetString(SI_SKILLS_SUBCLASSING_EQUIP_ACTION)
-            elseif skillLineData:CanTrain() then
-                tooltipText = GetString(SI_SKILLS_SUBCLASSING_TRAIN_ACTION)
-            end
-        end
+        tooltipText = self:GetSkillsListViewActionTextBySkillLineData(skillLineData)
     end
 
     if tooltipText then

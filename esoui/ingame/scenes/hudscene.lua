@@ -186,12 +186,6 @@ local STARTER_WORLD_EXCLUDED_FRAGMENTS =
     PROMOTIONAL_EVENT_TRACKER_FRAGMENT,
 }
 
--- The returning player intro world is also considered a starter world
-local RETURNING_PLAYER_INTRO_EXCLUDED_FRAGMENTS =
-{
-    FOCUSED_QUEST_TRACKER_FRAGMENT,
-}
-
 local function UpdateLocationSpecificFragments()
     local isHousingZone = GetCurrentZoneHouseId() ~= 0
     for _, fragment in ipairs(HOUSING_ONLY_FRAGMENTS) do
@@ -210,11 +204,6 @@ local function UpdateLocationSpecificFragments()
     local isInStarterWorld = IsActiveWorldStarterWorld()
     for _, fragment in ipairs(STARTER_WORLD_EXCLUDED_FRAGMENTS) do
         fragment:SetHiddenForReason("StarterWorld", isInStarterWorld)
-    end
-
-    local isInReturningPlayerIntro = IsInReturningPlayerIntroWorld()
-    for _, fragment in ipairs(RETURNING_PLAYER_INTRO_EXCLUDED_FRAGMENTS) do
-        fragment:SetHiddenForReason("StarterWorld", isInReturningPlayerIntro)
     end
 end
 

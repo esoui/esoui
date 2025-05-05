@@ -208,6 +208,21 @@ function ZO_PromotionalEvent_Manager:SetCampaignSeen(campaignData, seen)
     end
 end
 
+function ZO_PromotionalEvent_Manager:OnCapstoneDialogClosed()
+    self:FireCallbacks("CapstoneDialogClosed")
+end
+
+function ZO_PromotionalEvent_Manager:AreAnyReturningPlayerCampaignsIncomplete()
+    if self:HasActiveCampaign() then
+        for _, campaign in ipairs(self.activeCampaignDataList) do
+            if campaign:IsReturningPlayerCampaign() and not campaign:AreAllRewardsClaimed() then
+                return true
+            end
+        end
+    end
+    return false
+end
+
 function ZO_PromotionalEvent_Manager:DoesAnyCampaignHaveCallout()
     if not IsPromotionalEventSystemLocked() then
         for _, campaignData in ipairs(self.activeCampaignDataList) do

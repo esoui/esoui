@@ -9,6 +9,22 @@ local ReturningPlayer_Manager = ZO_InitializingCallbackObject:Subclass()
 function ReturningPlayer_Manager:Initialize()
     PROMOTIONAL_EVENT_MANAGER:RegisterCallback("ActivityProgressUpdated", ZO_GetCallbackForwardingFunction(self, self.OnPromotionalActivityProgressUpdated))
     EVENT_MANAGER:RegisterForEvent("ReturningPlayer_Manager", EVENT_RETURNING_PLAYER_DAILY_LOGIN_REWARD_CLAIMED, ZO_GetEventForwardingFunction(self, self.OnReturningPlayerDailyRewardClaimed))
+
+    local function OnAddOnLoaded(_, name)
+        if name == "ZO_Ingame" then
+            self:SetupSavedVars()
+            EVENT_MANAGER:UnregisterForEvent("ReturningPlayer_Manager", EVENT_ADD_ON_LOADED)
+        end
+    end
+    EVENT_MANAGER:RegisterForEvent("ReturningPlayer_Manager", EVENT_ADD_ON_LOADED, OnAddOnLoaded)
+end
+
+function ReturningPlayer_Manager:SetupSavedVars()
+    local defaults =
+    {
+        lastSeenRewardsTimestamp = 0,
+    }
+    self.savedVars = ZO_SavedVars:NewAccountWide("ZO_Ingame_SavedVariables", 1, "ReturningPlayer_Manager", defaults)
 end
 
 function ReturningPlayer_Manager:OnPromotionalActivityProgressUpdated(activityData, ...)
@@ -149,6 +165,12 @@ function ReturningPlayer_Manager:GetDailyLoginRewards()
     return rewards
 end
 
+function ReturningPlayer_Manager:AreAnyDailyLoginRewardsUnclaimed()
+    local numDailyLoginRewards = GetNumReturningPlayerDailyLoginRewards()
+    local numClaimedRewards = GetNumReturningPlayerDailyLoginRewardsClaimed()
+    return numClaimedRewards < numDailyLoginRewards
+end
+
 function ReturningPlayer_Manager:GetPrimaryRewards()
     local numPrimaryRewards = GetNumReturningPlayerPrimaryRewards()
     local rewards = {}
@@ -171,6 +193,66 @@ end
 
 function ReturningPlayer_Manager:CanJumpToIntroGameplay()
     return GetExpectedJumpToReturningPlayerIntroGameplayResult() == RETURNING_PLAYER_INSTANCE_JUMP_RESULT_SUCCESS
+end
+
+function ReturningPlayer_Manager:HasClaimableDailyReward()
+    return GetReturningPlayerDailyLoginClaimableRewardIndex() ~= nil
+end
+
+function ReturningPlayer_Manager:HasClaimedAllPrimaryAndDailyRewards()
+    local numDailyLoginRewards = GetNumReturningPlayerDailyLoginRewards()
+    local numClaimedRewards = GetNumReturningPlayerDailyLoginRewardsClaimed()
+
+    if numClaimedRewards < numDailyLoginRewards then
+        return false
+    end
+
+    local numPrimaryRewards = GetNumReturningPlayerPrimaryRewards()
+    for rewardIndex = 1, numPrimaryRewards do
+        local campaignKey, componentType, index = GetReturningPlayerPrimaryRewardData(rewardIndex)
+        local campaignData = PROMOTIONAL_EVENT_MANAGER:GetCampaignDataByKey(campaignKey)
+        if campaignData then
+            local rewardableData = campaignData:GetPromotionalEventRewardableDataByTypeAndIndex(componentType, index)
+            if rewardableData then
+                local claimed = rewardableData:IsRewardClaimed()
+                if not claimed then
+                    return false
+                end
+            end
+        end
+    end
+
+    return true
+end
+
+function ReturningPlayer_Manager:ShouldShowReturningPlayerAnnouncement()
+    if not IsReturningPlayer() or HasShownReturningPlayerAnnouncement() then
+        return false
+    end
+
+    -- Always show if we haven't completed the intro
+    if not self:IsIntroCampaignComplete() then
+        return true
+    end
+
+    -- Don't show if there aren't any unclaimed rewards
+    if self:HasClaimedAllPrimaryAndDailyRewards() then
+        return false
+    end
+
+    return true
+end
+
+function ReturningPlayer_Manager:ShouldShowReturningPlayerAnnouncementEntry()
+    return IsReturningPlayer() and not RETURNING_PLAYER_MANAGER:HasClaimedAllPrimaryAndDailyRewards()
+end
+
+function ReturningPlayer_Manager:MarkRewardsAsSeen()
+    self.savedVars.lastSeenRewardsTimestamp = GetTimeStamp()
+end
+
+function ReturningPlayer_Manager:GetLastTimeRewardsWereSeen()
+    return self.savedVars.lastSeenRewardsTimestamp
 end
 
 RETURNING_PLAYER_MANAGER = ReturningPlayer_Manager:New()

@@ -23,7 +23,7 @@ function ZO_ReturningPlayerIntroScreen_Keyboard:OnDeferredInitialize()
     local infoContainer = self.control:GetNamedChild("GameplayInfo")
     self.enterGameplayButton = infoContainer:GetNamedChild("EnterButton")
     self.enterGameplayButton:SetClickSound(SOUNDS.RETURNING_PLAYER_ENTER_INTRO_GAMEPLAY)
-    self.enterGameplayButton:SetHandler("OnClicked", RequestJumpToReturningPlayerIntroGameplay)
+    self.enterGameplayButton:SetHandler("OnClicked", function() self:RequestJumpToIntroGameplay() end)
 
     local activityName = GetReturningPlayerIntroGameplayDisplayName()
     local buttonText = zo_strformat(SI_RETURNING_PLAYER_ENTER_GAMEPLAY_EXPERIENCE_ACTION, activityName)

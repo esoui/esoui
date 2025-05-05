@@ -160,7 +160,9 @@ local MENU_ENTRY_DATA =
                 overrideIconTintColors = function()
                     return ZO_PROMOTIONAL_EVENT_SELECTED_COLOR, ZO_PROMOTIONAL_EVENT_UNSELECTED_COLOR
                 end,
-                isVisibleCallback = IsReturningPlayer,
+                isVisibleCallback = function()
+                    return RETURNING_PLAYER_MANAGER:ShouldShowReturningPlayerAnnouncementEntry()
+                end,
                 isNewCallback = function()
                     return true  -- TODO Welcome Back: hide new when you've seen it once in a sessions
                 end,
@@ -233,7 +235,7 @@ local MENU_ENTRY_DATA =
             RequestMarketAnnouncement()
         end,
         isVisibleCallback = function()
-            return not IsReturningPlayer()
+            return not RETURNING_PLAYER_MANAGER:ShouldShowReturningPlayerAnnouncementEntry()
         end,
     },
     [MENU_MAIN_ENTRIES.RETURNING_PLAYER_ANNOUNCEMENTS] =
@@ -252,7 +254,9 @@ local MENU_ENTRY_DATA =
         activatedCallback = function()
             RETURNING_PLAYER_MANAGER:ShowReturningPlayerAnnouncementScreen()
         end,
-        isVisibleCallback = IsReturningPlayer,
+        isVisibleCallback = function()
+            return RETURNING_PLAYER_MANAGER:ShouldShowReturningPlayerAnnouncementEntry()
+        end,
     },
     [MENU_MAIN_ENTRIES.NOTIFICATIONS] =
     {

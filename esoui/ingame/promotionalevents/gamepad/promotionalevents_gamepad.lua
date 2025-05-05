@@ -175,7 +175,7 @@ function ZO_PromotionalEvents_Gamepad:InitializeActivityFinderCategory()
                 self:Activate()
             end,
             visible = function()
-                return PROMOTIONAL_EVENT_MANAGER:HasActiveCampaign()
+                return PROMOTIONAL_EVENT_MANAGER:HasActiveCampaign() and (PROMOTIONAL_EVENT_MANAGER:AreAnyReturningPlayerCampaignsIncomplete() or RETURNING_PLAYER_MANAGER:AreAnyDailyLoginRewardsUnclaimed())
             end,
             tooltipFunction = function(data, lockedText)
                 if not lockedText and PROMOTIONAL_EVENT_MANAGER:GetNumActiveCampaigns() > 1 then
@@ -1033,6 +1033,10 @@ function ZO_PromotionalEvents_Gamepad:OnPreviewHiding()
     self.previewRewardData = nil
 end
 
+function ZO_PromotionalEvents_Gamepad:RefreshCampaignList()
+    PROMOTIONAL_EVENTS_LIST_GAMEPAD:RefreshList()
+end
+
 function ZO_PromotionalEvents_Gamepad:ShowCapstoneDialog()
     ZO_Dialogs_ShowGamepadDialog("PROMOTIONAL_EVENT_CAPSTONE_GAMEPAD", { campaignData = self.currentCampaignData })
 end
@@ -1160,6 +1164,9 @@ function ZO_PromotionalEvents_CapstoneDialog_Gamepad:Initialize(control)
             self.viewInCollectionsDescriptor,
             self.closeDescriptor,
         },
+        finishedCallback = function()
+            PROMOTIONAL_EVENT_MANAGER:OnCapstoneDialogClosed()
+        end,
     })
 end
 
@@ -1268,7 +1275,7 @@ function ZO_PromotionalEvents_CapstoneDialog_Gamepad:SetCampaignData(campaignDat
 end
 
 function ZO_PromotionalEvents_CapstoneDialog_Gamepad:RefreshCampaignList()
-    PROMOTIONAL_EVENTS_LIST_GAMEPAD:RefreshList()
+    PROMOTIONAL_EVENTS_GAMEPAD:RefreshCampaignList()
 end
 
 -- Choice Reward Claim Dialog --
