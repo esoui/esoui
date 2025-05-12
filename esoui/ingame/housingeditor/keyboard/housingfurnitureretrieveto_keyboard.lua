@@ -1,20 +1,14 @@
 ZO_HousingFurnitureRetrieveTo_Keyboard = ZO_HousingFurnitureRetrieveTo_Shared:Subclass()
 
 function ZO_HousingFurnitureRetrieveTo_Keyboard:Initialize(control)
-    self.fragment = ZO_FadeSceneFragment:New(control)
-    HOUSING_FURNITURE_RETRIEVE_TO_FRAGMENT = self.fragment
-
-    self.fragment:RegisterCallback("StateChange", function(oldState, newState)
-        if newState == SCENE_FRAGMENT_SHOWING then
-            self:RefreshRetrieveToBags()
-        end
-    end)
-
-    ZO_HousingFurnitureRetrieveTo_Shared.Initialize(self, control)
+    local fragment = ZO_FadeSceneFragment:New(control)
+    HOUSING_FURNITURE_RETRIEVE_TO_FRAGMENT = fragment
+    ZO_HousingFurnitureRetrieveTo_Shared.Initialize(self, control, fragment)
 end
 
 function ZO_HousingFurnitureRetrieveTo_Keyboard:OnBagEntryMouseEnter(comboBox, entryControl)
-    local tooltipText = self:GetRetrieveToBagTooltipText(entryControl.m_data.bagInfo.bagId)
+    local bagInfo = entryControl.m_data.bagInfo
+    local tooltipText = bagInfo:GetTooltipText()
     if tooltipText then
         -- Show the retrieve to bag tooltip.
         InitializeTooltip(InformationTooltip, self.control, LEFT, 15, 0)
@@ -40,6 +34,11 @@ function ZO_HousingFurnitureRetrieveTo_Keyboard:InitializeControls()
     self.bagComboBox = ZO_ComboBox_ObjectFromContainer(self.bagDropdownControl)
     self.bagComboBox:SetSortsItems(false)
 
+    self.OnBagSelected = function(comboBox, _, item)
+        local bagId = item.bagInfo:GetBagId()
+        self:SetSelectedBag(bagId)
+    end
+
     local function OnBagEntryMouseEnter(...)
         self:OnBagEntryMouseEnter(...)
     end
@@ -51,37 +50,32 @@ function ZO_HousingFurnitureRetrieveTo_Keyboard:InitializeControls()
     self.bagComboBox:SetEntryMouseOverCallbacks(OnBagEntryMouseEnter, OnBagEntryMouseExit)
 end
 
-function ZO_HousingFurnitureRetrieveTo_Keyboard:RefreshRetrieveToBagList()
-    -- Refresh the retrieve to bag list items.
-    local function OnBagSelected(comboBox, _, item)
-        self:SetRetrieveToBag(item.bagInfo.bagId)
-    end
-
+function ZO_HousingFurnitureRetrieveTo_Keyboard:RefreshBagList()
+    -- Refresh the Retrieve To bag list items.
     local bagComboBox = self.bagComboBox
     bagComboBox:ClearItems()
-    for _, bagInfo in ipairs(self.bags) do
-        local item = bagComboBox:CreateItemEntry(bagInfo.displayName, OnBagSelected)
-        item.bagInfo = bagInfo
-        bagComboBox:AddItem(item)
-    end
-end
 
-function ZO_HousingFurnitureRetrieveTo_Keyboard:UpdateRetrieveToBagList()
-    -- Update the enabled state of each combo box bag item.
-    local bagComboBox = self.bagComboBox
-    for _, bagItem in ipairs(bagComboBox:GetItems()) do
-        local bagId = bagItem.bagInfo.bagId
-        local bagInfo = self:GetRetrieveToBagInfo(bagId)
-        if bagInfo then
-            bagComboBox:SetItemEnabled(bagItem, bagInfo.enabled)
+    local INCLUDE_BAG_SLOTS = true
+    for _, bagInfo in ipairs(self.bags) do
+        if bagInfo:IsVisible() then
+            local enabled = bagInfo:IsEnabled()
+            local bagName = bagInfo:GetFormattedDisplayName(INCLUDE_BAG_SLOTS)
+            if not enabled then
+                bagName = bagName .. " " .. zo_iconFormat("/EsoUI/Art/Miscellaneous/status_locked.dds", 16, 16)
+            end
+
+            local item = bagComboBox:CreateItemEntry(bagName, self.OnBagSelected)
+            item.bagInfo = bagInfo
+            bagComboBox:AddItem(item)
+            bagComboBox:SetItemEnabled(item, enabled)
         end
     end
 
     -- Update the currently selected bag.
-    local function IsSelectedBagItem(bagItem)
-        return bagItem.bagInfo.bagId == self.selectedBag
-    end
-    bagComboBox:SetSelectedItemByEval(IsSelectedBagItem)
+    local selectedBagId = self:GetSelectedBagId()
+    bagComboBox:SetSelectedItemByEval(function(item)
+        return item.bagInfo:GetBagId() == selectedBagId
+    end)
 end
 
 -- Global XML

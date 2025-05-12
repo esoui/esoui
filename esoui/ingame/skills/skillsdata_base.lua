@@ -308,6 +308,10 @@ function ZO_SkillLineData_Base:IsClassSkillLine()
     return false
 end
 
+function ZO_SkillLineData_Base:HasClassId()
+    return false
+end
+
 function ZO_SkillLineData_Base:IsPlayerClassSkillLine()
     return false
 end

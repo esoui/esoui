@@ -61,6 +61,8 @@ function PregameInitialScreen_Gamepad:Initialize(control)
             if IsErrorQueuedFromIngame() then
                 ZO_Pregame_DisplayServerDisconnectedError()
             end
+
+            StartPregameMusic()
         elseif newState == SCENE_HIDDEN then
             self:ClearError()
             PregameStateManager_ClearError()

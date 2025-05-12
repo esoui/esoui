@@ -15,31 +15,143 @@ ZO_HOUSING_FURNITURE_RETRIEVE_TO_BAGS =
 
 ZO_HousingFurnitureRetrieveToBag = ZO_InitializingObject:Subclass()
 
-function ZO_HousingFurnitureRetrieveToBag:Initialize(bagId, collectibleId, displayName, enabled)
+function ZO_HousingFurnitureRetrieveToBag:Initialize(bagId)
     self.bagId = bagId
-    self.collectibleId = collectibleId
-    self.displayName = displayName
-    self.enabled = enabled
+    self.collectibleId = GetCollectibleForBag(self.bagId)
+end
+
+function ZO_HousingFurnitureRetrieveToBag:GetBagId()
+    return self.bagId
+end
+
+function ZO_HousingFurnitureRetrieveToBag:GetCollectibleId()
+    return self.collectibleId
+end
+
+function ZO_HousingFurnitureRetrieveToBag:GetDisplayName()
+    local displayName
+
+    local collectibleId = self:GetCollectibleId()
+    if collectibleId ~= 0 then
+        -- Use the collectible nickname, if set; otherwise, use the collectible name.
+        displayName = GetCollectibleNickname(collectibleId)
+        if displayName == "" then
+            displayName = GetCollectibleName(collectibleId)
+        end
+    else
+        -- Use the bag name for non-collectible based bags.
+        displayName = GetString("SI_BAG", self:GetBagId())
+    end
+
+    return displayName
+end
+
+-- Returns the display name of this bag including the relevant color when disabled
+-- and the number of slots used/total number of slots.
+function ZO_HousingFurnitureRetrieveToBag:GetFormattedDisplayName(includeBagSlots)
+    if self:IsEnabled() then
+        if includeBagSlots then
+            local numUsedSlots = GetNumBagUsedSlots(self.bagId)
+            local numTotalSlots = GetBagSize(self.bagId)
+            return zo_strformat(SI_HOUSING_EDITOR_RETRIEVE_TO_BAG_FORMATTER, self:GetDisplayName(), numUsedSlots, numTotalSlots)
+        end
+
+        return self:GetDisplayName()
+    end
+
+    return ZO_DEFAULT_DISABLED_COLOR:Colorize(self:GetDisplayName())
+end
+
+-- Returns the "X/Y slots used" string for this bag.
+function ZO_HousingFurnitureRetrieveToBag:GetSlotUsageString()
+    local numUsedSlots = GetNumBagUsedSlots(self.bagId)
+    local numTotalSlots = GetBagSize(self.bagId)
+    return zo_strformat(SI_GAMEPAD_HOUSING_EDITOR_RETRIEVE_TO_BAG_FORMATTER, numUsedSlots, numTotalSlots)
+end
+
+-- Indicates whether this bag is enabled for use.
+function ZO_HousingFurnitureRetrieveToBag:IsEnabled()
+    local collectibleId = self:GetCollectibleId()
+    if self.bagId == BAG_FURNITURE_VAULT then
+        -- Must have ESO+ subscription and unlocked Furnishing Vault collectible.
+        return IsESOPlusSubscriber() and collectibleId ~= 0 and IsCollectibleUnlocked(collectibleId)
+    end
+
+    -- Must have unlocked the collectible for this bag or this bag has no associated collectible.
+    return collectibleId == 0 or IsCollectibleUnlocked(collectibleId)
+end
+
+-- Indicates whether this bag is the currently selected Retrieve To bag.
+function ZO_HousingFurnitureRetrieveToBag:IsSelected()
+    return HOUSING_EDITOR_SHARED:GetRetrieveToBag() == self.bagId
+end
+
+-- Indicates whether this bag should be shown in the list of bags.
+function ZO_HousingFurnitureRetrieveToBag:IsVisible()
+    return self.bagId == BAG_FURNITURE_VAULT or self:IsEnabled()
+end
+
+function ZO_HousingFurnitureRetrieveToBag:GetTooltipText()
+    local collectibleId = self:GetCollectibleId()
+    if self.bagId == BAG_FURNITURE_VAULT then
+        if not IsESOPlusSubscriber() then
+            return GetString(SI_FURNITURE_VAULT_ERROR_NEED_ESO_PLUS)
+        end
+
+        if collectibleId ~= 0 and not IsCollectibleUnlocked(collectibleId) then
+            return GetString(SI_FURNITURE_VAULT_ERROR_NEED_COLLECTIBLE)
+        end
+    else
+        if collectibleId ~= 0 and not IsCollectibleUnlocked(collectibleId) then
+            return zo_strformat(SI_HOUSING_EDITOR_RETRIEVE_TO_BAG_LOCKED, GetCollectibleName(collectibleId))
+        end
+    end
+
+    -- No tooltip is necessary.
+    return nil
 end
 
 ZO_HousingFurnitureRetrieveTo_Shared = ZO_InitializingObject:Subclass()
 
-function ZO_HousingFurnitureRetrieveTo_Shared:Initialize(control)
+function ZO_HousingFurnitureRetrieveTo_Shared:Initialize(control, fragment)
     self.control = control
-    self.dirty = true
+    self.fragment = fragment
     self.isESOPlusSubscriber = IsESOPlusSubscriber()
 
-    local function OnCollectionUpdated()
-        -- Dirty the retrieve to bag list as bag availability or nicknames may have changed.
-        self.dirty = true
+    -- Construct the bag info list.
+    self.bags = {}
+    for _, bagId in ipairs(ZO_HOUSING_FURNITURE_RETRIEVE_TO_BAGS) do
+        local bagInfo = ZO_HousingFurnitureRetrieveToBag:New(bagId)
+        table.insert(self.bags, bagInfo)
     end
 
-    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleUpdated", OnCollectionUpdated)
-    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", OnCollectionUpdated)
+    -- Immediately flag bag info as dirty to force the initial refresh when the fragment is shown for the first time.
+    self:SetDirty()
 
-    EVENT_MANAGER:RegisterForEvent(control:GetName() .. "Events", EVENT_HOUSING_FURNITURE_RETRIEVE_TO_BAG_CHANGED, function(_, bagId)
-        -- Refresh the currently selected retrieve to bag.
-        self:RefreshRetrieveToBag()
+    local function OnBagsUpdated()
+        -- Dirty the retrieve to bag list as bag availability, nicknames or capacity may have changed.
+        self:SetDirty()
+    end
+
+    -- Flag bag info as dirty when bag ownership changes.
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleUpdated", OnBagsUpdated)
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", OnBagsUpdated)
+
+    -- Flag bag info as dirty when bag capacity changes.
+    SHARED_INVENTORY:RegisterCallback("SingleSlotInventoryUpdate", OnBagsUpdated)
+    SHARED_INVENTORY:RegisterCallback("FullInventoryUpdate", OnBagsUpdated)
+    control:RegisterForEvent(EVENT_INVENTORY_BAG_CAPACITY_CHANGED, OnBagsUpdated)
+    control:RegisterForEvent(EVENT_INVENTORY_BANK_CAPACITY_CHANGED, OnBagsUpdated)
+    control:RegisterForEvent(EVENT_STACKED_ALL_ITEMS_IN_BAG, OnBagsUpdated)
+
+    -- Flag bag info as dirty when the selected Retrieve To bag changes.
+    control:RegisterForEvent(EVENT_HOUSING_FURNITURE_RETRIEVE_TO_BAG_CHANGED, OnBagsUpdated)
+
+    fragment:RegisterCallback("StateChange", function(oldState, newState)
+        if newState == SCENE_FRAGMENT_SHOWING then
+            -- Refreshes bag info if flagged as dirty.
+            self:RefreshBags()
+        end
     end)
 end
 
@@ -47,6 +159,16 @@ function ZO_HousingFurnitureRetrieveTo_Shared:ClearDirty()
     -- Resets the dirty state.
     self.dirty = false
     self.isESOPlusSubscriber = IsESOPlusSubscriber()
+end
+
+function ZO_HousingFurnitureRetrieveTo_Shared:SetDirty()
+    -- Sets the dirty state to ensure that the bag list is updated the next time that this fragment is shown.
+    self.dirty = true
+
+    -- Refresh immediately if the fragment is already showing.
+    if self.fragment:IsShowing() then
+        self:RefreshBags()
+    end
 end
 
 function ZO_HousingFurnitureRetrieveTo_Shared:DeferredInitializeControls()
@@ -62,16 +184,12 @@ function ZO_HousingFurnitureRetrieveTo_Shared:IsDirty()
     return self.dirty or IsESOPlusSubscriber() ~= self.isESOPlusSubscriber
 end
 
-function ZO_HousingFurnitureRetrieveTo_Shared:GetRetrieveToBags()
-    -- Returns the retrieve bag info table.
+function ZO_HousingFurnitureRetrieveTo_Shared:GetBags()
+    -- Returns the bag info table.
     return self.bags
 end
 
-function ZO_HousingFurnitureRetrieveTo_Shared:GetRetrieveToBagInfo(bagId)
-    if self:IsDirty() or not self.bags then
-        self:RefreshRetrieveToBags()
-    end
-
+function ZO_HousingFurnitureRetrieveTo_Shared:GetBagInfo(bagId)
     -- Returns the bag info for the specified bagId.
     for _, bagInfo in ipairs(self.bags) do
         if bagId == bagInfo.bagId then
@@ -81,88 +199,44 @@ function ZO_HousingFurnitureRetrieveTo_Shared:GetRetrieveToBagInfo(bagId)
     return nil
 end
 
-function ZO_HousingFurnitureRetrieveTo_Shared:GetRetrieveToBagTooltipText(bagId)
+function ZO_HousingFurnitureRetrieveTo_Shared:GetBagTooltipText(bagId)
     -- Returns the tooltip text that should be displayed for the specified bagId.
     -- Returns nil if no tooltip should be displayed.
-    local bagInfo = self:GetRetrieveToBagInfo(bagId)
-    if not bagInfo then
-        return nil
-    end
-
-    local collectibleId = bagInfo.collectibleId
-    if bagInfo.bagId == BAG_FURNITURE_VAULT then
-        if not IsESOPlusSubscriber() then
-            return GetString(SI_FURNITURE_VAULT_ERROR_NEED_ESO_PLUS)
-        end
-
-        if collectibleId ~= 0 and not IsCollectibleUnlocked(collectibleId) then
-            return GetString(SI_FURNITURE_VAULT_ERROR_NEED_COLLECTIBLE)
-        end
-    else
-        if collectibleId ~= 0 and not IsCollectibleUnlocked(collectibleId) then
-            return zo_strformat(SI_HOUSING_EDITOR_RETRIEVE_TO_BAG_LOCKED, GetCollectibleName(collectibleId))
-        end
+    local bagInfo = self:GetBagInfo(bagId)
+    if bagInfo then
+        return bagInfo:GetTooltipText()
     end
     return nil
 end
 
-function ZO_HousingFurnitureRetrieveTo_Shared:GetSelectedRetrieveToBagInfo()
+function ZO_HousingFurnitureRetrieveTo_Shared:GetSelectedBagId()
+    return HOUSING_EDITOR_SHARED:GetRetrieveToBag()
+end
+
+function ZO_HousingFurnitureRetrieveTo_Shared:GetSelectedBagInfo()
     -- Returns the bag info for the currently selected retrieve to bag.
-    return self:GetRetrieveToBagInfo(self.selectedBag)
+    return self:GetBagInfo(self:GetSelectedBagId())
 end
 
-function ZO_HousingFurnitureRetrieveTo_Shared:RefreshRetrieveToBag()
-    -- Refresh the currently selected bag and the selection UI.
-    self.selectedBag = HOUSING_EDITOR_SHARED:GetRetrieveToBag()
+function ZO_HousingFurnitureRetrieveTo_Shared:RefreshBags()
     self:DeferredInitializeControls()
-    self:UpdateRetrieveToBagList()
-end
 
-function ZO_HousingFurnitureRetrieveTo_Shared:RefreshRetrieveToBags()
-    -- Initialize or refresh the retrieve to bag table.
     if self:IsDirty() then
         self:ClearDirty()
-        if self.bags then
-            ZO_ClearNumericallyIndexedTable(self.bags)
-        else
-            self.bags = {}
-        end
 
-        for _, bagId in ipairs(ZO_HOUSING_FURNITURE_RETRIEVE_TO_BAGS) do
-            local collectibleId = GetCollectibleForBag(bagId)
-            local displayName
-            if collectibleId ~= 0 then
-                -- Use the collectible nickname, if set; otherwise, fallback to the collectible name.
-                displayName = GetCollectibleNickname(collectibleId)
-                if displayName == "" then
-                    displayName = GetCollectibleName(collectibleId)
-                end
-            else
-                -- Use the bag name for non-collectible based bags.
-                displayName = GetString("SI_BAG", bagId)
-            end
-            local enabled = collectibleId == 0 or IsCollectibleUnlocked(collectibleId)
-            local bagInfo = ZO_HousingFurnitureRetrieveToBag:New(bagId, collectibleId, displayName, enabled)
-            table.insert(self.bags, bagInfo)
-        end
+        -- Refresh the Retrieve To bag list.
+        self:RefreshBagList()
     end
-
-    self:DeferredInitializeControls()
-
-    -- Refresh the retrieve to bag UI list items.
-    self:RefreshRetrieveToBagList()
-
-    -- Refresh the currently selected bag and the selection UI.
-    self:RefreshRetrieveToBag()
 end
 
-function ZO_HousingFurnitureRetrieveTo_Shared:SetRetrieveToBag(bagId)
-    -- Set the currently selected bag and refresh the selection UI.
-    HOUSING_EDITOR_SHARED:SetRetrieveToBag(bagId)
+function ZO_HousingFurnitureRetrieveTo_Shared:SetSelectedBag(bagId)
+    -- Set the currently selected bag and refresh the Retrieve To bag list.
+    if self:GetSelectedBagId() ~= bagId then
+        HOUSING_EDITOR_SHARED:SetRetrieveToBag(bagId)
+    end
 end
 
 -- Abstract Methods
 
 ZO_HousingFurnitureRetrieveTo_Shared.InitializeControls = ZO_HousingFurnitureRetrieveTo_Shared:MUST_IMPLEMENT()
-ZO_HousingFurnitureRetrieveTo_Shared.RefreshRetrieveToBagList = ZO_HousingFurnitureRetrieveTo_Shared:MUST_IMPLEMENT()
-ZO_HousingFurnitureRetrieveTo_Shared.UpdateRetrieveToBagList = ZO_HousingFurnitureRetrieveTo_Shared:MUST_IMPLEMENT()
+ZO_HousingFurnitureRetrieveTo_Shared.RefreshBagList = ZO_HousingFurnitureRetrieveTo_Shared:MUST_IMPLEMENT()

@@ -1,16 +1,9 @@
 ZO_HousingFurnitureRetrieveTo_Gamepad = ZO_HousingFurnitureRetrieveTo_Shared:Subclass()
 
 function ZO_HousingFurnitureRetrieveTo_Gamepad:Initialize(control)
-    self.fragment = ZO_FadeSceneFragment:New(control)
-    HOUSING_FURNITURE_RETRIEVE_TO_GAMEPAD_FRAGMENT = self.fragment
-
-    self.fragment:RegisterCallback("StateChange", function(oldState, newState)
-        if newState == SCENE_FRAGMENT_SHOWING then
-            self:RefreshRetrieveToBags()
-        end
-    end)
-
-    ZO_HousingFurnitureRetrieveTo_Shared.Initialize(self, control)
+    local fragment = ZO_FadeSceneFragment:New(control)
+    HOUSING_FURNITURE_RETRIEVE_TO_GAMEPAD_FRAGMENT = fragment
+    ZO_HousingFurnitureRetrieveTo_Shared.Initialize(self, control, fragment)
 end
 
 function ZO_HousingFurnitureRetrieveTo_Gamepad:SetHidden(hidden)
@@ -25,16 +18,14 @@ end
 
 function ZO_HousingFurnitureRetrieveTo_Gamepad:InitializeControls()
     self.bagLabel = self.control:GetNamedChild("Bag")
+    self.slotsUsed = self.control:GetNamedChild("SlotsUsed")
 end
 
-function ZO_HousingFurnitureRetrieveTo_Gamepad:RefreshRetrieveToBagList()
-    -- Managed by the dialog.
-end
-
-function ZO_HousingFurnitureRetrieveTo_Gamepad:UpdateRetrieveToBagList()
-    local bagInfo = self:GetSelectedRetrieveToBagInfo()
+function ZO_HousingFurnitureRetrieveTo_Gamepad:RefreshBagList()
+    local bagInfo = self:GetSelectedBagInfo()
     if bagInfo then
-        self.bagLabel:SetText(bagInfo.displayName)
+        self.bagLabel:SetText(bagInfo:GetDisplayName())
+        self.slotsUsed:SetText(bagInfo:GetSlotUsageString())
     end
 end
 
@@ -239,7 +230,7 @@ end
 
 function ZO_HousingFurnitureRetrieval_Gamepad:InitializeRetrieveToDialog()
     local function OnRetrieveToBagSelected(bagId)
-        HOUSING_FURNITURE_RETRIEVE_TO_GAMEPAD:SetRetrieveToBag(bagId)
+        HOUSING_FURNITURE_RETRIEVE_TO_GAMEPAD:SetSelectedBag(bagId)
     end
 
     ZO_Dialogs_RegisterCustomDialog("GAMEPAD_FURNITURE_RETRIEVE_TO_BAG",
@@ -248,34 +239,74 @@ function ZO_HousingFurnitureRetrieval_Gamepad:InitializeRetrieveToDialog()
         {
             dialogType = GAMEPAD_DIALOGS.PARAMETRIC,
         },
+
         title =
         {
             text = SI_HOUSING_EDITOR_RETRIEVE_TO
         },
+
+        finishedCallback = function(dialog)
+            GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
+        end,
+
+        parametricListOnSelectionChangedCallback = function(dialog, list, newSelectedData, oldSelectedData)
+            if not (newSelectedData and newSelectedData.bagInfo) then
+                return
+            end
+
+            local bagInfo = newSelectedData.bagInfo
+            local tooltipText = bagInfo:GetTooltipText()
+            if tooltipText then
+                GAMEPAD_TOOLTIPS:LayoutHousingRetrieveToBag(GAMEPAD_LEFT_TOOLTIP, bagInfo)
+            else
+                GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
+            end
+        end,
+
         setup = function(dialog, allActions)
             local parametricList = dialog.info.parametricList
             ZO_ClearNumericallyIndexedTable(parametricList)
+            HOUSING_FURNITURE_RETRIEVE_TO_GAMEPAD:RefreshBags()
 
-            HOUSING_FURNITURE_RETRIEVE_TO_GAMEPAD:RefreshRetrieveToBags()
-            local bags = HOUSING_FURNITURE_RETRIEVE_TO_GAMEPAD:GetRetrieveToBags()
+            local bags = HOUSING_FURNITURE_RETRIEVE_TO_GAMEPAD:GetBags()
             for bagIndex, bagInfo in ipairs(bags) do
-                local entryData = ZO_GamepadEntryData:New(bagInfo.displayName)
-                entryData.bagId = bagInfo.bagId
-                entryData.enabled = bagInfo.enabled
-                entryData.setup = ZO_SharedGamepadEntry_OnSetup
-                entryData.text = bagInfo.displayName
+                if bagInfo:IsVisible() then
+                    local displayName = bagInfo:GetFormattedDisplayName()
+                    local enabled = bagInfo:IsEnabled()
+                    local icon = nil
+                    if not enabled then
+                        icon = "/EsoUI/Art/Miscellaneous/Gamepad/gp_icon_locked32.dds"
+                    elseif bagInfo:IsSelected() then
+                        icon = "/EsoUI/Art/Miscellaneous/check_icon_64.dds"
+                    end
 
-                local listItem =
-                {
-                    template = "ZO_GamepadItemEntryTemplate",
-                    templateData = entryData,
-                }
-                table.insert(parametricList, listItem)
+                    local entryData = ZO_GamepadEntryData:New(displayName, icon)
+                    entryData:AddSubLabel(bagInfo:GetSlotUsageString())
+                    entryData.bagInfo = bagInfo
+                    entryData.bagId = bagInfo:GetBagId()
+                    entryData.enabled = enabled
+                    entryData.setup = ZO_SharedGamepadEntry_OnSetup
+                    entryData.text = displayName
+                    entryData.onEnter = OnEnterEntry
+                    entryData.onExit = OnExitEntry
+
+                    local desaturation = entryData.enabled and 0 or 1
+                    entryData:SetIconDesaturation(desaturation)
+
+                    local listItem =
+                    {
+                        template = "ZO_GamepadHousingEditorRetrieveToBagEntry",
+                        templateData = entryData,
+                    }
+                    table.insert(parametricList, listItem)
+                end
             end
 
             dialog:setupFunc()
         end,
+
         parametricList = {}, -- Generated Dynamically
+
         buttons =
         {
             {
@@ -287,7 +318,12 @@ function ZO_HousingFurnitureRetrieval_Gamepad:InitializeRetrieveToDialog()
                         OnRetrieveToBagSelected(targetData.bagId)
                     end
                 end,
+                enabled = function(dialog)
+                    local targetData = dialog.entryList:GetTargetData()
+                    return targetData and targetData.enabled
+                end,
             },
+
             {
                 keybind = "DIALOG_NEGATIVE",
                 text = SI_GAMEPAD_BACK_OPTION,

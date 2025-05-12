@@ -35,3 +35,14 @@ function ZO_Tooltip:LayoutHousingLink(link, actionName)
     footerSection:AddKeybindLine(actionName or "UI_SHORTCUT_SECONDARY", SI_GAMEPAD_HOUSING_LINK_TOOLTIP_DESCRIPTION, self:GetStyle("flavorText"))
     self:AddSection(footerSection)
 end
+
+function ZO_Tooltip:LayoutHousingRetrieveToBag(retrieveToBagInfo)
+    local headerSection = self:AcquireSection(self:GetStyle("title"))
+    headerSection:AddLine(retrieveToBagInfo:GetDisplayName())
+    self:AddSection(headerSection)
+
+    local bodyStyle = self:GetStyle("bodyDescription")
+    local bodySection = self:AcquireSection(self:GetStyle("bodySection"))
+    bodySection:AddLine(retrieveToBagInfo:GetTooltipText(), bodyStyle)
+    self:AddSection(bodySection)
+end

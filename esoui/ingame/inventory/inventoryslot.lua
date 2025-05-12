@@ -812,7 +812,7 @@ local function TryBankItem(inventorySlot)
     if IsBankOpen() then
         local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
         if bag == BAG_BANK or bag == BAG_SUBSCRIBER_BANK or IsHouseBankBag(bag) then
-            --Withdraw
+            -- Withdraw
             if DoesBagHaveSpaceFor(BAG_BACKPACK, bag, index) then
                 PickupInventoryItem(bag, index)
                 PlaceInTransfer()
@@ -820,11 +820,19 @@ local function TryBankItem(inventorySlot)
                 ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, SI_INVENTORY_ERROR_INVENTORY_FULL)
             end
         else
-            --Deposit
+            -- Deposit
+            local bankingBag = GetBankingBag()
             if IsItemStolen(bag, index) then
-                ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, SI_STOLEN_ITEM_CANNOT_DEPOSIT_MESSAGE)
+                -- Stolen items cannot be banked regardless of the storage bag.
+                if bankingBag == BAG_FURNITURE_VAULT then
+                    ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, SI_FURNITURE_VAULT_ERROR_STOLEN_FURNITURE)
+                else
+                    ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, SI_STOLEN_ITEM_CANNOT_DEPOSIT_MESSAGE)
+                end
+            elseif bankingBag == BAG_FURNITURE_VAULT and CROWN_GEMIFICATION_MANAGER.IsItemGemmable(tonumber(bag), tonumber(index)) then
+                -- Gemmable items cannot be banked in the Furnishing Vault.
+                ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, SI_FURNITURE_VAULT_ERROR_GEMMABLE_FURNITURE)
             else
-                local bankingBag = GetBankingBag()
                 local canAlsoBePlacedInSubscriberBank = bankingBag == BAG_BANK
 
                 if DoesBagHaveSpaceFor(bankingBag, bag, index) or (canAlsoBePlacedInSubscriberBank and DoesBagHaveSpaceFor(BAG_SUBSCRIBER_BANK, bag, index)) then

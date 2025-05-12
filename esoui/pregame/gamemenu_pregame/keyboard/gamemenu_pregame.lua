@@ -14,6 +14,14 @@ function ZO_GameMenu_PreGame_Keyboard:Initialize(control)
     local loginFragment = LOGIN_MANAGER_KEYBOARD:GetRelevantLoginFragment()
     self.scene:AddFragment(loginFragment)
 
+    local function StateChanged(oldState, newState)
+        if newState == SCENE_SHOWN then
+            StartPregameMusic()
+        end
+    end
+
+    self.scene:RegisterCallback("StateChange", StateChanged)
+
     local function OnHorizontalMenuItemSetup(menuControl, data)
         local name = data.name
         if type(data.name) == "function" then

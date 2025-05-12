@@ -238,6 +238,28 @@ function ZO_SkillsSubclassing_Keyboard:RegisterForEvents()
     self.control:SetHandler("OnEffectivelyShown", function()
         self:OnShow()
     end)
+
+    local function OnCollectibleUpdated(collectibleId)
+        local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+        if collectibleData:IsSkillStyle() then
+            local entries = ZO_ScrollList_GetDataList(self.skillsList)
+            for index, entry in ipairs(entries) do
+                if entry.data.skillData and entry.control and entry.data.skillData.progressionId == collectibleData:GetSkillStyleProgressionId() then
+                    local entryCollectibleId = GetActiveProgressionSkillAbilityFxOverrideCollectibleId(entry.data.skillData.progressionId)
+                    if entryCollectibleId == 0 then
+                        entry.control.skillStyleControl.defaultStyleButton:SetHidden(false)
+                        entry.control.skillStyleControl.selectedStyleButton:SetHidden(true)
+                    else
+                        entry.control.skillStyleControl.defaultStyleButton:SetHidden(true)
+                        entry.control.skillStyleControl.selectedStyleButton:SetHidden(false)
+                        entry.control.skillStyleControl.selectedStyleButton.icon:SetTexture(collectibleData:GetIcon())
+                    end
+                end
+            end
+        end
+    end
+
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleUpdated", OnCollectibleUpdated)
 end
 
 function ZO_SkillsSubclassing_Keyboard:IsSkillLineMousedOver()
@@ -256,6 +278,7 @@ function ZO_SkillsSubclassing_Keyboard:RefreshClassSkillLinesView()
     self.skillsListContainer:SetHidden(true)
     SKILLS_WINDOW:SetSkillLinesHidden(false)
     self:RefreshClassSkillLines()
+    SKILLS_WINDOW:UpdateKeybinds()
 end
 
 function ZO_SkillsSubclassing_Keyboard:ShowSkillsListView(skillLineData)

@@ -1,9 +1,17 @@
 <GuiXml>
     <Controls>
-        <TopLevelControl name="ZO_HousingFurnitureRetrieveTo_GamepadTopLevel" hidden="true" resizeToFitDescendents="true" tier="HIGH">
+        <Control name="ZO_GamepadHousingEditorRetrieveToBagEntry" inherits="ZO_GamepadItemEntryTemplate" virtual="true">
+            <Controls>
+                <Label name="$(parent)SubLabel1" font="ZoFontGamepad34">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Label" relativePoint="BOTTOMLEFT" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_HousingFurnitureRetrieveTo_GamepadTopLevel" hidden="true" resizeToFitDescendents="true">
             <Anchor point="BOTTOM" relativeTo="GuiRoot" offsetY="-150" />
             <DimensionConstraints minX="300" />
-            <ResizeToFitPadding width="24" height="12" />
+            <ResizeToFitPadding width="32" height="24" />
 
             <OnInitialized>
                 ZO_HousingFurnitureRetrieveTo_Gamepad.OnControlInitialized(self)
@@ -39,12 +47,16 @@
                     <Anchor point="BOTTOMRIGHT" />
                 </Texture>
 
-                <Label name="$(parent)Title" font="ZoFontGamepad34" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE" text="SI_HOUSING_EDITOR_RETRIEVE_TO">
-                    <Anchor point="TOP" offsetY="6" />
+                <Label name="$(parent)Title" font="ZoFontGamepad36" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE" text="SI_HOUSING_EDITOR_RETRIEVE_TO">
+                    <Anchor point="TOP" offsetY="12" />
                 </Label>
 
-                <Label name="$(parent)Bag" font="ZoFontGamepad34" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                <Label name="$(parent)Bag" font="ZoFontGamepad42" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
                     <Anchor point="TOP" relativeTo="$(parent)Title" relativePoint="BOTTOM" />
+                </Label>
+
+                <Label name="$(parent)SlotsUsed" font="ZoFontGamepadCondensed36" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOP" relativeTo="$(parent)Bag" relativePoint="BOTTOM" />
                 </Label>
             </Controls>
         </TopLevelControl>

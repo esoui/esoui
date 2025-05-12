@@ -693,7 +693,7 @@ function ZO_AddOnManager_Gamepad:InitializeKeybinds()
                     end
                     AddOnManager:SetAddOnEnabled(selectedData.addOnIndex, not enabled)
                     self:MarkDirty()
-                    self:RefreshVisible()
+                    self:RefreshData()
                     self:UpdateTooltip()
                     self:UpdateKeybinds()
                     -- The enabled state has changed, so re-narrate

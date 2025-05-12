@@ -319,6 +319,24 @@ function ZO_ComboBox:IsEnabled()
     return self.m_openDropdown:GetState() ~= BSTATE_DISABLED
 end
 
+function ZO_ComboBox:ForwardDimensionConstraintsToSelectedItemText()
+    -- Get the current dimension constraints applied to the combo box.
+    local currentMinX, currentMinY, currentMaxX, currentMaxY = self.m_container:GetDimensionConstraints()
+
+    -- Reset the current dimension constraints to be unconstrained.
+    self.m_container:SetDimensionConstraints(0, 0, 0, 0)
+
+    -- Redirect dimension constraint changes to the SelectedItemText label.
+    local mt = getmetatable(self.m_container).__index
+    self.m_container._SetDimensionConstraints = mt.SetDimensionConstraints
+    mt.SetDimensionConstraints = function(control, minX, minY, maxX, maxY)
+        control:GetNamedChild("SelectedItemText"):SetDimensionConstraints(minX, minY, maxX, maxY)
+    end
+
+    -- Reapply the dimension constraints to the SelectedItemText label.
+    self.m_container:GetNamedChild("SelectedItemText"):SetDimensionConstraints(currentMinX, currentMinY, currentMaxX, currentMaxY)
+end
+
 -- Begin ZO_ComboBox_Base overrides
 
 function ZO_ComboBox:GetSelectedItemData()

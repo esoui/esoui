@@ -677,19 +677,22 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
     local function OnLevelUpRewardUpdated()
         self:RemoveFromIncomingQueue(INTERACT_TYPE.CLAIM_LEVEL_UP_REWARDS)
 
-        local pendingRewardLevel = GetPendingLevelUpRewardLevel()
-        if pendingRewardLevel then
-            local data = self:AddPromptToIncomingQueue(INTERACT_TYPE.CLAIM_LEVEL_UP_REWARDS, nil, nil, zo_strformat(SI_LEVEL_UP_REWARDS_AVAILABLE_NOTIFICATION, pendingRewardLevel),
-            function()
-                if IsInGamepadPreferredMode() then
-                    SCENE_MANAGER:Show("LevelUpRewardsClaimGamepad")
-                else
-                    SYSTEMS:GetObject("mainMenu"):ToggleCategory(MENU_CATEGORY_CHARACTER)
-                end
-            end)
-            data.dontRemoveOnAccept = true
-            data.acceptText = GetString(SI_LEVEL_UP_REWARDS_OPEN_CLAIM_SCREEN_TEXT)
-            data.declineText = GetString(SI_LEVEL_UP_REWARDS_DISMISS_NOTIFICATION)
+        -- Don't show level up in the intro world because it overrides your bars and spending skill points is disabled
+        if not IsInReturningPlayerIntroWorld() then
+            local pendingRewardLevel = GetPendingLevelUpRewardLevel()
+            if pendingRewardLevel then
+                local data = self:AddPromptToIncomingQueue(INTERACT_TYPE.CLAIM_LEVEL_UP_REWARDS, nil, nil, zo_strformat(SI_LEVEL_UP_REWARDS_AVAILABLE_NOTIFICATION, pendingRewardLevel),
+                function()
+                    if IsInGamepadPreferredMode() then
+                        SCENE_MANAGER:Show("LevelUpRewardsClaimGamepad")
+                    else
+                        SYSTEMS:GetObject("mainMenu"):ToggleCategory(MENU_CATEGORY_CHARACTER)
+                    end
+                end)
+                data.dontRemoveOnAccept = true
+                data.acceptText = GetString(SI_LEVEL_UP_REWARDS_OPEN_CLAIM_SCREEN_TEXT)
+                data.declineText = GetString(SI_LEVEL_UP_REWARDS_DISMISS_NOTIFICATION)
+            end
         end
     end
 

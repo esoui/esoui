@@ -175,7 +175,7 @@ function ZO_PromotionalEvents_Gamepad:InitializeActivityFinderCategory()
                 self:Activate()
             end,
             visible = function()
-                return PROMOTIONAL_EVENT_MANAGER:HasActiveCampaign() and (PROMOTIONAL_EVENT_MANAGER:AreAnyReturningPlayerCampaignsIncomplete() or RETURNING_PLAYER_MANAGER:AreAnyDailyLoginRewardsUnclaimed())
+                return PROMOTIONAL_EVENT_MANAGER:HasActiveCampaign() or (IsReturningPlayer() and (PROMOTIONAL_EVENT_MANAGER:AreAnyReturningPlayerCampaignsIncomplete() or RETURNING_PLAYER_MANAGER:AreAnyDailyLoginRewardsUnclaimed()))
             end,
             tooltipFunction = function(data, lockedText)
                 if not lockedText and PROMOTIONAL_EVENT_MANAGER:GetNumActiveCampaigns() > 1 then

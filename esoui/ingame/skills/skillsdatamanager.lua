@@ -124,8 +124,12 @@ function ZO_SkillsDataManager:RebuildSkillsData()
 
     for _, skillTypeData in self:SkillTypeIterator() do
         local skillType = skillTypeData:GetSkillType()
-        local objectPool = skillType == SKILL_TYPE_CLASS and self.classSkillLineObjectPool or self.skillLineObjectPool
         for skillLineIndex = 1, GetNumSkillLines(skillType) do
+            local objectPool = self.skillLineObjectPool
+            -- ESO-914646: It's possible to have lines in Class that don't have a dedicated classId
+            if skillType == SKILL_TYPE_CLASS and GetSkillLineClassId(skillType, skillLineIndex) > 0 then
+                objectPool = self.classSkillLineObjectPool
+            end
             local skillLineData, key = objectPool:AcquireObject()
             skillLineData:BuildData(skillTypeData, skillLineIndex)
             skillTypeData:AddOrderedSkillLineData(skillLineData)
@@ -370,7 +374,8 @@ function ZO_SkillsDataManager:RefreshSkillLinesInTraining()
     ZO_ClearNumericallyIndexedTable(self.skillLineDataInTrainingList)
 
     local skillTypeData = self:GetSkillTypeData(SKILL_TYPE_CLASS)
-    for _, skillLineData in skillTypeData:SkillLineIterator({ ZO_ClassSkillLineData.IsInTraining }) do
+    -- ESO-914646: It's possible to have lines in Class that don't have a dedicated classId
+    for _, skillLineData in skillTypeData:SkillLineIterator({ ZO_ClassSkillLineData.HasClassId, ZO_ClassSkillLineData.IsInTraining }) do
         table.insert(self.skillLineDataInTrainingList, skillLineData)
     end
 end
@@ -387,7 +392,8 @@ function ZO_SkillsDataManager:RefreshActiveClassSkillLines()
     ZO_ClearNumericallyIndexedTable(self.activeClassSkillLineDataList)
 
     local skillTypeData = self:GetSkillTypeData(SKILL_TYPE_CLASS)
-    for _, skillLineData in skillTypeData:SkillLineIterator({ ZO_ClassSkillLineData.IsActive }) do
+    -- ESO-914646: It's possible to have lines in Class that don't have a dedicated classId
+    for _, skillLineData in skillTypeData:SkillLineIterator({ ZO_ClassSkillLineData.HasClassId, ZO_ClassSkillLineData.IsActive }) do
         table.insert(self.activeClassSkillLineDataList, skillLineData)
     end
 end

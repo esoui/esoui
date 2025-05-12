@@ -755,7 +755,7 @@ function ZO_SkillsManager:InitializeKeybindDescriptors()
             keybind = "UI_SHORTCUT_NEGATIVE",
             callback = function()
                 local selectedData = self.skillLinesTree:GetSelectedData()
-                if selectedData.isSubclassingNode and self.subclassingPanel:CanUntrainInSkillsListView() then
+                if selectedData.isSubclassingNode then
                     self.subclassingPanel:DoUntrainInSkillsListView()
                     self:UpdateKeybinds()
                 else
@@ -764,7 +764,11 @@ function ZO_SkillsManager:InitializeKeybindDescriptors()
             end,
             visible = function()
                 local selectedData = self.skillLinesTree:GetSelectedData()
-                return (selectedData.isSubclassingNode and self.subclassingPanel:CanUntrainInSkillsListView()) or SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeAllowClear()
+                if selectedData.isSubclassingNode then
+                    return self.subclassingPanel:CanUntrainInSkillsListView()
+                else
+                    return SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeAllowClear()
+                end
             end
         },
         {

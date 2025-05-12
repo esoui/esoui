@@ -291,7 +291,7 @@ function ZO_PromotionalEvents_Keyboard:InitializeActivityFinderCategory()
         end,
         disabledIcon = "EsoUI/Art/LFG/LFG_indexIcon_PromotionalEvents_disabled.dds",
         visible = function()
-            return PROMOTIONAL_EVENT_MANAGER:HasActiveCampaign() and (PROMOTIONAL_EVENT_MANAGER:AreAnyReturningPlayerCampaignsIncomplete() or RETURNING_PLAYER_MANAGER:AreAnyDailyLoginRewardsUnclaimed())
+            return PROMOTIONAL_EVENT_MANAGER:HasActiveCampaign() or (IsReturningPlayer() and (PROMOTIONAL_EVENT_MANAGER:AreAnyReturningPlayerCampaignsIncomplete() or RETURNING_PLAYER_MANAGER:AreAnyDailyLoginRewardsUnclaimed()))
         end,
         getChildrenFunction = function()
             local numActiveCampaigns = PROMOTIONAL_EVENT_MANAGER:GetNumActiveCampaigns()

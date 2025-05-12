@@ -1206,6 +1206,10 @@ function ZO_ClassSkillLineData:GetClassId()
     return self.classId
 end
 
+function ZO_ClassSkillLineData:HasClassId()
+    return self.classId and self.classId > 0 or false
+end
+
 function ZO_ClassSkillLineData:GetClassName()
     return GetClassName(GetUnitGender("player"), self:GetClassId())
 end
