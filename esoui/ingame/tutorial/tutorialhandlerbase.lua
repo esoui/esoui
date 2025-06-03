@@ -79,9 +79,9 @@ function ZO_TutorialHandlerBase:OnDisplayTutorial(tutorialIndex, priority)
     end
 end
 
-function ZO_TutorialHandlerBase:OnRemoveTutorial(tutorialIndex)
+function ZO_TutorialHandlerBase:OnRemoveTutorial(tutorialIndex, skipAnimation)
     -- Can to be overriden for custom behavior, occurs when a tutorial matching GetTutorialType() is requested to be removed
-    self:RemoveTutorial(tutorialIndex)
+    self:RemoveTutorial(tutorialIndex, skipAnimation)
 end
 
 ZO_TutorialHandlerBase.RemoveTutorial = ZO_TutorialHandlerBase:MUST_IMPLEMENT()

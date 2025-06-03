@@ -3,7 +3,8 @@ local FILTERS_PER_ROW = 2
 local GUILDS_PER_ROW = 2
 
 --defines channels to be combined under one button
-local COMBINED_CHANNELS = {
+local COMBINED_CHANNELS =
+{
     [CHAT_CATEGORY_WHISPER_INCOMING] = {parentChannel = CHAT_CATEGORY_WHISPER_INCOMING, name = SI_CHAT_CHANNEL_NAME_WHISPER},
     [CHAT_CATEGORY_WHISPER_OUTGOING] = {parentChannel = CHAT_CATEGORY_WHISPER_INCOMING, name = SI_CHAT_CHANNEL_NAME_WHISPER},
 
@@ -14,7 +15,8 @@ local COMBINED_CHANNELS = {
 }
 
 -- defines channels to skip when building the filter (non guild) section
-local SKIP_CHANNELS = {
+local SKIP_CHANNELS =
+{
     [CHAT_CATEGORY_SYSTEM] = true,
     [CHAT_CATEGORY_GUILD_1] = true,
     [CHAT_CATEGORY_GUILD_2] = true,
@@ -29,7 +31,8 @@ local SKIP_CHANNELS = {
 }
 
 -- defines the ordering of the filter categories
-local CHANNEL_ORDERING_WEIGHT = {
+local CHANNEL_ORDERING_WEIGHT =
+{
     [CHAT_CATEGORY_SAY] = 10,
     [CHAT_CATEGORY_YELL] = 20,
 
@@ -52,12 +55,7 @@ local CHANNEL_ORDERING_WEIGHT = {
 internalassert(OFFICIAL_LANGUAGE_MAX_VALUE == 6)
 
 --[[ Chat Options Panel ]]--
-local ChatOptions = ZO_Object:Subclass()
-
-function ChatOptions:New(...)
-    local options = ZO_Object.New(self)   
-    return options
-end
+local ChatOptions = ZO_InitializingObject:Subclass()
 
 local function SetupChatOptionsDialog(control)
     ZO_Dialogs_RegisterCustomDialog("CHAT_OPTIONS_DIALOG",
@@ -71,68 +69,65 @@ local function SetupChatOptionsDialog(control)
         buttons =
         {
             {
-
-                control =   GetControl(control, "Commit"),
-                text =      SI_DIALOG_EXIT,
-                keybind =   "DIALOG_NEGATIVE",
-                callback =  function(dialog)
-                                ZO_ChatOptions_OnCommitClicked()
-                            end,
-            },  
-
+                control = control:GetNamedChild("Commit"),
+                text = SI_DIALOG_EXIT,
+                keybind = "DIALOG_NEGATIVE",
+                callback = function(dialog)
+                    ZO_ChatOptions_OnCommitClicked()
+                end,
+            },
             {
-                control =   GetControl(control, "Reset"),
-                text =      SI_OPTIONS_DEFAULTS,
-                keybind =   "DIALOG_RESET",
-                callback =  function(dialog)
-                                ZO_ChatOptions_OnResetClicked()
-                            end,
+                control = control:GetNamedChild("Reset"),
+                text = SI_OPTIONS_DEFAULTS,
+                keybind = "DIALOG_RESET",
+                callback = function(dialog)
+                    ZO_ChatOptions_OnResetClicked()
+                end,
             },
         }
     })
 end
 
 function ChatOptions:Initialize(control)
-    if(not self.initialized) then
-    	self.control = control
-	    control.owner = self
+    if not self.initialized then
+        self.control = control
+        control.owner = self
         self.filterSection = control:GetNamedChild("FilterSection")
         self.guildSection = control:GetNamedChild("GuildSection")
-            
-        local function FilterFactory(pool)
-            return ZO_ObjectPool_CreateControl("ZO_ChatOptionsFilterEntry", pool, self.filterSection)
-        end
 
-        local function GuildFactory(pool)
-            return ZO_ObjectPool_CreateControl("ZO_ChatOptionsGuildFilters", pool, self.guildSection)
-        end
-    
-        self.filterPool = ZO_ObjectPool:New(FilterFactory, ZO_ObjectPool_DefaultResetControl)
-        self.guildPool = ZO_ObjectPool:New(GuildFactory, ZO_ObjectPool_DefaultResetControl)
+        self.filterPool = ZO_ControlPool:New("ZO_ChatOptionsFilterEntry", self.filterSection)
+        self.guildPool = ZO_ControlPool:New("ZO_ChatOptionsGuildFilters", self.guildSection)
 
         self.filterButtons = {}
         self.guildNameLabels = {}
-	    self:InitializeNameControl(control)
-        self:InitializeFilterButtons(control)
+        self:InitializeNameControl(control)
+        self:BuildFilterButtons(control)
         self:InitializeGuildFilters(control)
         self.initialized = true
+
+        local function OnInterfaceSettingChanged()
+            self.filterPool:ReleaseAllObjects()
+            self:BuildFilterButtons(control)
+        end
+
+        EVENT_MANAGER:RegisterForEvent("ChatOptions", EVENT_INTERFACE_SETTING_CHANGED, OnInterfaceSettingChanged)
     end
 
     self:UpdateGuildNames()
 end
 
 function ChatOptions:InitializeNameControl(control)
-	self.tabName = control:GetNamedChild("NameEdit")
+    self.tabName = control:GetNamedChild("NameEdit")
 
-	local function UpdateTabName()
-		self:UpdateTabName()
-	end
+    local function UpdateTabName()
+        self:UpdateTabName()
+    end
 
-	self.tabName:SetHandler("OnTextChanged", UpdateTabName)
+    self.tabName:SetHandler("OnTextChanged", UpdateTabName)
 end
 
 function ChatOptions:UpdateTabName()
-	self.chatContainer:SetTabName(self.chatTabIndex, self.tabName:GetText())
+    self.chatContainer:SetTabName(self.chatTabIndex, self.tabName:GetText())
 end
 
 local function FilterComparator(left, right)
@@ -144,8 +139,6 @@ local function FilterComparator(left, right)
 
     if leftWeight and rightWeight then
         return leftWeight < rightWeight
-    elseif not leftWeight and not rightWeight then
-        return false
     elseif leftWeight then
         return true
     end
@@ -161,33 +154,34 @@ do
     local INITIAL_XOFFS = 0
     local INITIAL_YOFFS = 0
 
-    function ChatOptions:InitializeFilterButtons(dialogControl)
+    function ChatOptions:BuildFilterButtons(dialogControl)
         --generate a table of entry data from the chat category header information
         local entryData = {}
         local lastEntry = CHAT_CATEGORY_HEADER_COMBAT - 1
 
         for i = CHAT_CATEGORY_HEADER_CHANNELS, lastEntry do
-            if(SKIP_CHANNELS[i] == nil and GetString("SI_CHATCHANNELCATEGORIES", i) ~= "") then
-
-                if(COMBINED_CHANNELS[i] == nil) then
-                    entryData[i] = 
-                    {
-                        channels = { i },
-                        name = GetString("SI_CHATCHANNELCATEGORIES", i),
-                    }                
-                else
-                    --create the entry for those with combined channels just once
-                    local parentChannel = COMBINED_CHANNELS[i].parentChannel
-
-                    if(not entryData[parentChannel]) then
-                        entryData[parentChannel] = 
+            if not IsChannelCategoryCommunicationRestricted(i) then
+                if SKIP_CHANNELS[i] == nil and GetString("SI_CHATCHANNELCATEGORIES", i) ~= "" then
+                    if COMBINED_CHANNELS[i] == nil then
+                        entryData[i] =
                         {
-                            channels = { },
-                            name = GetString(COMBINED_CHANNELS[i].name),
+                            channels = { i },
+                            name = GetString("SI_CHATCHANNELCATEGORIES", i),
                         }
-                    end
+                    else
+                        --create the entry for those with combined channels just once
+                        local parentChannel = COMBINED_CHANNELS[i].parentChannel
 
-                    table.insert(entryData[parentChannel].channels, i)
+                        if not entryData[parentChannel] then
+                            entryData[parentChannel] =
+                            {
+                                channels = {},
+                                name = GetString(COMBINED_CHANNELS[i].name),
+                            }
+                        end
+
+                        table.insert(entryData[parentChannel].channels, i)
+                    end
                 end
             end
         end
@@ -204,8 +198,7 @@ do
         table.sort(sortedEntries, FilterComparator)
 
         for _, entry in ipairs(sortedEntries) do
-            local filter, key = self.filterPool:AcquireObject()
-            filter.key = key
+            local filter = self.filterPool:AcquireObject()
 
             local button = filter:GetNamedChild("Check")
             ZO_CheckButton_SetLabelText(button, entry.name)
@@ -229,8 +222,7 @@ do
         -- setup and anchor the guild sections
         local maxGuild = CHAT_CATEGORY_HEADER_GUILDS + MAX_GUILDS - 1
         for k = CHAT_CATEGORY_HEADER_GUILDS, maxGuild do
-            local guild, key = self.guildPool:AcquireObject()
-            guild.key = key
+            local guild = self.guildPool:AcquireObject()
 
             local guildFilter = guild:GetNamedChild("Guild")
             local guildButton = guildFilter:GetNamedChild("Check")
@@ -260,7 +252,7 @@ function ChatOptions:UpdateGuildNames()
         local guildName = GetGuildName(guildID)
         local alliance = GetGuildAlliance(guildID)
 
-        if(guildName ~= "") then
+        if guildName ~= "" then
             local r,g,b = GetAllianceColor(alliance):UnpackRGB()
             label:SetText(guildName)
             label:SetColor(r, g, b, 1)
@@ -284,10 +276,10 @@ function ChatOptions:Show(chatContainer, chatTabIndex)
         
     ZO_Dialogs_ShowDialog("CHAT_OPTIONS_DIALOG")
 
-	self.chatContainer = chatContainer
-	self.chatTabIndex = chatTabIndex
+    self.chatContainer = chatContainer
+    self.chatTabIndex = chatTabIndex
 
-	chatContainer:SetAllowSaveSettings(false)
+    chatContainer:SetAllowSaveSettings(false)
 
     local tabName = chatContainer:GetTabName(chatTabIndex)
     self.tabName:SetText(tabName)
@@ -298,12 +290,12 @@ end
 function ChatOptions:SetCurrentChannelSelections(container, chatTabIndex) 
     -- Iterate each button's channel list and check just the first entry in each as they are all toggled together       
     for i, button in ipairs(self.filterButtons) do
-        if(IsChatContainerTabCategoryEnabled(container.id, chatTabIndex, button.channels[1])) then
+        if IsChatContainerTabCategoryEnabled(container.id, chatTabIndex, button.channels[1]) then
             ZO_CheckButton_SetCheckState(button, true)
         else
             ZO_CheckButton_SetCheckState(button, false)
         end
-    end   
+    end
 end
 
 function ChatOptions:ShowResetDialog()
@@ -312,20 +304,19 @@ function ChatOptions:ShowResetDialog()
 end
 
 function ChatOptions:Reset()
-	local system = self.chatContainer:GetChatSystem()
+    local system = self.chatContainer:GetChatSystem()
 
-	self.chatContainer:ResetToDefaults(self.chatTabIndex)
+    self.chatContainer:ResetToDefaults(self.chatTabIndex)
 
     local tabName = self.chatContainer:GetTabName(self.chatTabIndex)
     self.tabName:SetText(tabName)
 
-
     --set all channel buttons selected active
     for i, button in ipairs(self.filterButtons) do
         ZO_CheckButton_SetCheckState(button, true)
-    end  
- 
-	system:ResetContainerPositionAndSize(self.chatContainer)
+    end
+
+    system:ResetContainerPositionAndSize(self.chatContainer)
 end
 
 function ChatOptions:FadeOutCurrentContainer()
@@ -335,9 +326,9 @@ function ChatOptions:FadeOutCurrentContainer()
 end
 
 function ChatOptions:Commit()
-	self.chatContainer:SetAllowSaveSettings(true)
+    self.chatContainer:SetAllowSaveSettings(true)
     self.chatContainer:SaveWindowSettings(self.chatTabIndex)
-	self.chatContainer:SaveSettings()
+    self.chatContainer:SaveSettings()
     self:FadeOutCurrentContainer()
 
     ZO_Dialogs_ReleaseDialog("CHAT_OPTIONS_DIALOG")
@@ -346,15 +337,15 @@ end
 --[[ XML Handlers ]]--
 function ZO_ChatOptions_OnInitialized(dialogControl)
     SetupChatOptionsDialog(dialogControl)
-	CHAT_OPTIONS = ChatOptions:New(dialogControl)
+    CHAT_OPTIONS = ChatOptions:New(dialogControl)
 end
 
 function ZO_ChatOptions_OnCommitClicked()
-	CHAT_OPTIONS:Commit()
+    CHAT_OPTIONS:Commit()
 end
 
 function ZO_ChatOptions_OnResetClicked()
-	CHAT_OPTIONS:ShowResetDialog()
+    CHAT_OPTIONS:ShowResetDialog()
 end
 
 function ZO_ChatOptions_ToggleChannel(buttonControl, checked)

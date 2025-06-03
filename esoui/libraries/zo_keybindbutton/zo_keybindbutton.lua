@@ -151,23 +151,35 @@ function ZO_KeybindButtonMixin:GetKeybindButtonDescriptorReference()
     return self.keybindDescriptorReference
 end
 
+function ZO_KeybindButtonMixin:ShouldBeVisible()
+    local visible = self.keybindDescriptorReference and self.keybindDescriptorReference.visible or true
+    if type(visible) == "function" then
+        visible = visible(self)
+    end
+
+    return visible ~= false -- nil defaults to visible
+end
+
+function ZO_KeybindButtonMixin:UpdateVisibility()
+    local visible = self:ShouldBeVisible()
+    return self:SetHidden(not visible)
+end
+
 --Generate narration data for this keybind button
 --If the keybind is not visible, nothing will be returned
 function ZO_KeybindButtonMixin:GetKeybindButtonNarrationData()
-    local visible = self.keybindDescriptorReference and self.keybindDescriptorReference.visible or true
-    if type(visible) == "function" then
-        visible = visible()
+    local visible = self:ShouldBeVisible()
+    if not visible then
+        return nil
     end
 
-    if visible then
-        local narrationData =
-        {
-            name = self.nameTextNarration or self.nameText,
-            keybindName = ZO_Keybindings_GetHighestPriorityNarrationStringFromAction(self:GetKeybind()) or GetString(SI_ACTION_IS_NOT_BOUND),
-            enabled = self.enabled, 
-        }
-        return narrationData
-    end
+    local narrationData =
+    {
+        name = self.nameTextNarration or self.nameText,
+        keybindName = ZO_Keybindings_GetHighestPriorityNarrationStringFromAction(self:GetKeybind()) or GetString(SI_ACTION_IS_NOT_BOUND),
+        enabled = self.enabled, 
+    }
+    return narrationData
 end
 
 function ZO_KeybindButtonMixin:SetKeybindButtonDescriptor(keybindDescriptor)
@@ -203,26 +215,24 @@ function ZO_KeybindButtonMixin:SetKeybindButtonDescriptor(keybindDescriptor)
 end
 
 function ZO_KeybindButtonMixin:OnClicked()
-    local visible = self.keybindDescriptorReference and self.keybindDescriptorReference.visible or true
-    if type(visible) == "function" then
-        visible = visible()
+    local visible = self:ShouldBeVisible()
+    if not visible then
+        return
     end
 
-    if visible then
-        if self.enabled then
-            if self.clickSound then
-                if type(self.clickSound) == "function" then
-                    PlaySound(self.clickSound())
-                else
-                    PlaySound(self.clickSound)
-                end
+    if self.enabled then
+        if self.clickSound then
+            if type(self.clickSound) == "function" then
+                PlaySound(self.clickSound())
+            else
+                PlaySound(self.clickSound)
             end
-            if self.callback then
-                self.callback(self)
-            end
-        else
-            PlaySound(SOUNDS.KEYBIND_BUTTON_DISABLED)
         end
+        if self.callback then
+            self.callback(self)
+        end
+    else
+        PlaySound(SOUNDS.KEYBIND_BUTTON_DISABLED)
     end
 end
 
@@ -249,7 +259,7 @@ local g_areKeybindsEnabled
 local g_keybindButtons = {}
 local g_numDisabledReferences = 0
 local function OnUpdate()
-    local shouldKeybindsBeEnabled = WINDOW_MANAGER:GetFocusControl() == nil and g_numDisabledReferences == 0
+    local shouldKeybindsBeEnabled = not HasActiveEditControl() and g_numDisabledReferences == 0
     if shouldKeybindsBeEnabled ~= g_areKeybindsEnabled then
         g_areKeybindsEnabled = shouldKeybindsBeEnabled
         for i = 1, #g_keybindButtons do

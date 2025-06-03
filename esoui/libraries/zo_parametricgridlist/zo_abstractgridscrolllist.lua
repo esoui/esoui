@@ -232,6 +232,10 @@ function ZO_AbstractGridScrollList:AtTopOfGrid()
     return ZO_ScrollList_AtTopOfList(self.list)
 end
 
+function ZO_AbstractGridScrollList:AtBottomOfGrid()
+    return ZO_ScrollList_AtBottomOfList(self.list)
+end
+
 function ZO_AbstractGridScrollList:GetData()
     return ZO_ScrollList_GetDataList(self.list)
 end

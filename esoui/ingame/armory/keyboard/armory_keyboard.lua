@@ -497,7 +497,7 @@ function ZO_ArmoryEquipSlot_OnMouseEnter(control, buildData)
         if bagId == BAG_BANK then
             tooltipString = GetString(SI_ARMORY_BUILD_EQUIPMENT_IN_BANK_TOOLTIP)
         elseif IsHouseBankBag(bagId) then
-            local collectibleId = GetCollectibleForHouseBankBag(bagId)
+            local collectibleId = GetCollectibleForBag(bagId)
             local nameWithNickname
             if collectibleId ~= 0 then
                 local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)

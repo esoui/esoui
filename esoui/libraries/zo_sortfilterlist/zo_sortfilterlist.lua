@@ -326,6 +326,10 @@ function ZO_SortFilterList:GetSelectedData()
     return ZO_ScrollList_GetSelectedData(self.list)
 end
 
+function ZO_SortFilterList:GetSelectedControl()
+    return ZO_ScrollList_GetSelectedControl(self.list)
+end
+
 --This class uses :HasEntries(), not :IsEmpty()
 function ZO_SortFilterList:HasEntries()
     local dataList = ZO_ScrollList_GetDataList(self.list)

@@ -15,3 +15,6 @@ local function AddMethodAliases(sourceObject, targetObject, methodNameList)
         end
     end
 end
+
+GetCollectibleForHouseBankBag = GetCollectibleForBag
+GetCollectibleBankAccessBag = GetBagForCollectible

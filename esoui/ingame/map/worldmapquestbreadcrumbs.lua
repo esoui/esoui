@@ -134,6 +134,10 @@ function ZO_WorldMapQuestBreadcrumbs:IsQuestActive(questIndex)
     return self.activeQuests[questIndex] == true
 end
 
+function ZO_WorldMapQuestBreadcrumbs:GetNumActiveQuests()
+    return #self.activeQuests
+end
+
 function ZO_WorldMapQuestBreadcrumbs:AddQuestConditionPosition(conditionData, positionData)
     local questIndex, stepIndex, conditionIndex = conditionData.questIndex, conditionData.stepIndex, conditionData.conditionIndex
 

@@ -11,8 +11,21 @@
                     <Controls>
                         <Backdrop name="$(parent)Highlight" inherits="ZO_AnnouncementTileHighlight_Keyboard" />
 
-                        <Label name="$(parent)TextCallout" override="true" font="ZoFontWinT1">
+                        <Label name="$(parent)TextCallout" override="true" inherits="ZO_MarketTextCallout_Keyboard">
                             <Anchor point="BOTTOMLEFT" offsetX="20" offsetY="-30" />
+                            <DimensionConstraints maxX="275" />
+
+                            <Controls>
+                                <Control name="$(parent)Background" override="true">
+                                    <Dimensions y="32" />
+
+                                    <Controls>
+                                        <Texture name="$(parent)Center" override="true" color="INTERFACE_COLOR_TYPE_MARKET_COLORS:MARKET_COLORS_NEW" level="ZO_MARKET_TILE_TEXT_LEVEL" />
+                                        <Texture name="$(parent)Left" override="true" color="INTERFACE_COLOR_TYPE_MARKET_COLORS:MARKET_COLORS_NEW" level="ZO_MARKET_TILE_TEXT_LEVEL" />
+                                        <Texture name="$(parent)Right" override="true" color="INTERFACE_COLOR_TYPE_MARKET_COLORS:MARKET_COLORS_NEW" level="ZO_MARKET_TILE_TEXT_LEVEL" />
+                                    </Controls>
+                                </Control>
+                            </Controls>
                         </Label>
 
                         <Button name="$(parent)ActionButton" override="true" mouseOverBlendMode="ALPHA" level="5" />

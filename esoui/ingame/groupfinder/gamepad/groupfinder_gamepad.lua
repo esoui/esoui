@@ -445,6 +445,10 @@ function ZO_GroupFinder_Gamepad:OnShowing()
     TriggerTutorial(TUTORIAL_TRIGGER_GROUP_FINDER_OPENED)
 end
 
+function ZO_GroupFinder_Gamepad:OnShow()
+    HandleReturningPlayerUISystemShown(UI_SYSTEM_GROUP_FINDER)
+end
+
 function ZO_GroupFinder_Gamepad:OnHide()
     ZO_Gamepad_ParametricList_Screen.OnHide(self)
     --Calling self:SetMode at this point would set self.pendingMode instead, so we need to set self.mode manually here

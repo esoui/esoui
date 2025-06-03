@@ -7,11 +7,11 @@
                 <Texture name="$(parent)Center" inherits="ZO_PlayerAttributeWarnerCenter" textureFile="EsoUI/Art/Crafting/inspirationBar_glow.dds" />
             </Controls>
         </Control>
-      
+
         <StatusBar name="ZO_SkillsXPBar" mouseEnabled="true" inherits="ZO_ArrowStatusBarWithBG" virtual="true" />
 
         <Control name="ZO_Skills_SkillLineInfo_Keyboard" mouseEnabled="true" virtual="true">
-            <Dimensions x="370" y="65" />
+            <Dimensions x="400" y="65" />
             <OnInitialized>
                 ZO_Skills_SkillLineInfo_Shared_OnInitialized(self)
             </OnInitialized>
@@ -23,7 +23,8 @@
             </OnMouseExit>
 
             <Controls>
-                <Label name="$(parent)Rank" font="ZoFontCallout3">
+                <Label name="$(parent)Rank" font="ZoFontCallout3" horizontalAlignment="RIGHT">
+                    <Dimensions x="60" />
                     <Anchor point="LEFT" offsetX="5" />
                 </Label>
 
@@ -44,6 +45,12 @@
                         <Control name="$(parent)GlowContainer" inherits="ZO_Skills_HeaderGlowContainer" />
                     </Controls>
                 </StatusBar>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_Skills_ResponsiveSkillLineInfo_Keyboard" inherits="ZO_Skills_SkillLineInfo_Keyboard" virtual="true">
+            <Controls>
+                <StatusBar name="$(parent)XPBar" override="true" inherits="ZO_ResponsiveArrowBarBehavior" />
             </Controls>
         </Control>
 

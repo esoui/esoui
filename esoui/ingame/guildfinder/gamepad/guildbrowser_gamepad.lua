@@ -16,7 +16,7 @@ function ZO_GuildBrowser_Gamepad:Initialize(control)
 
     self.filterManager = ZO_GuildBrowser_ManageFilters_Shared:New()
 
-    self.headerData = 
+    self.headerData =
     {
         titleText = GetString(SI_GUILD_BROWSER_TITLE),
         data1HeaderText = GetString(SI_GAMEPAD_GUILD_FINDER_APPLICATIONS_HEADER),
@@ -402,6 +402,10 @@ function ZO_GuildBrowser_Gamepad:OnShowing()
     end
     self.showingGuildInfo = false
     self.returnWithAppliedGuild = false
+end
+
+function ZO_GuildBrowser_Gamepad:OnShow()
+    HandleReturningPlayerUISystemShown(UI_SYSTEM_GUILD_FINDER)
 end
 
 function ZO_GuildBrowser_Gamepad:OnHide()

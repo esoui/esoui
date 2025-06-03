@@ -1,0 +1,72 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_PopupListItemSlot" inherits="ZO_ListEntry_BackdropAndHighlight_Template" mouseEnabled="true" virtual="true">
+            <Dimensions y="ZO_POPUP_LIST_ENTRY_HEIGHT" />
+
+            <OnMouseEnter>
+                ZO_PopupList.OnMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_PopupList.OnMouseExit(self)
+            </OnMouseExit>
+
+            <Controls>
+                <Texture name="$(parent)Icon">
+                    <Dimensions x="40" y="40" />
+                    <Anchor point="CENTER" relativePoint="TOPLEFT" offsetX="47" offsetY="26" />
+
+                    <Controls>
+                        <Label name="$(parent)StackCount" horizontalAlignment="RIGHT" verticalAlignment="BOTTOM" font="ZoFontGameOutline" inheritScale="false">
+                            <Anchor point="TOPLEFT" offsetX="-10" offsetY="1" />
+                            <!-- Allow extra space for large stack counts like 898.8k -->
+                            <Anchor point="BOTTOMRIGHT" offsetX="2" offsetY="-1"/>
+                        </Label>
+                    </Controls>
+                </Texture>
+
+                <Label name="$(parent)Name" font="ZoFontGameShadow" maxLineCount="2" wrapMode="ELLIPSIS">
+                    <Dimensions x="250" />
+                    <Anchor point="LEFT" offsetX="85" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_PopupListBlankItemSlot" virtual="true">
+            <Dimensions x="250" y="ZO_POPUP_LIST_ENTRY_HEIGHT" />
+
+            <Controls>
+                <Texture name="$(parent)Bg" textureFile="EsoUI/Art/Miscellaneous/listItem_backdrop.dds">
+                    <AnchorFill />
+                    <TextureCoords left="0" right="1" top="0" bottom="0.8125" />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_PopupListTL" layer="OVERLAY" hidden="true">
+            <Dimensions x="385" y="320" />
+
+            <OnInitialized>
+                ZO_PopupList.OnControlInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Backdrop name="$(parent)BG" inherits="ZO_DefaultBackdrop">
+                    <AnchorFill/>
+                </Backdrop>
+
+                <Button name="$(parent)Close" inherits="ZO_CloseButton">
+                    <Anchor point="TOPRIGHT" offsetX="-6" offsetY="6" />
+                    <OnClicked>
+                        POPUP_LIST:OnCloseButtonClicked(self)
+                    </OnClicked>
+                </Button>
+
+                <Control name="$(parent)List" inherits="ZO_ScrollList">
+                    <Anchor point="TOPLEFT" offsetY="30" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-10" offsetY="-20" />
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

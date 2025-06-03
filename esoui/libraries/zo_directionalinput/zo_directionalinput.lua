@@ -266,7 +266,7 @@ local INPUT_DEVICE_QUERY_X =
         return GetGamepadOrKeyboardRightStickX(GAMEPAD_INCLUDE_DEADZONE)
     end,
     [ZO_DI_DPAD] = function(self)
-        local hasFocusControl = WINDOW_MANAGER:HasFocusControl()
+        local hasFocusControl = HasActiveEditControl()
         local negativeMagnitude = 0
         local positiveMagnitude = 0
 
@@ -295,7 +295,7 @@ local INPUT_DEVICE_QUERY_Y =
         return GetGamepadOrKeyboardRightStickY(GAMEPAD_INCLUDE_DEADZONE)
     end,
     [ZO_DI_DPAD] = function(self)
-        local hasFocusControl = WINDOW_MANAGER:HasFocusControl()
+        local hasFocusControl = HasActiveEditControl()
         local negativeMagnitude = 0
         local positiveMagnitude = 0
 

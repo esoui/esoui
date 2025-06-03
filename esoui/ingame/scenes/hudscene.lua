@@ -176,6 +176,16 @@ local BATTLEGROUND_EXCLUDED_FRAGMENTS =
     PROMOTIONAL_EVENT_TRACKER_FRAGMENT,
 }
 
+local STARTER_WORLD_EXCLUDED_FRAGMENTS =
+{
+    ENDLESS_DUNGEON_HUD_FRAGMENT,
+    ENDLESS_DUNGEON_HUD_TRACKER_FRAGMENT,
+    ACTIVITY_TRACKER_FRAGMENT,
+    READY_CHECK_TRACKER_FRAGMENT,
+    ZONE_STORY_TRACKER_FRAGMENT,
+    PROMOTIONAL_EVENT_TRACKER_FRAGMENT,
+}
+
 local function UpdateLocationSpecificFragments()
     local isHousingZone = GetCurrentZoneHouseId() ~= 0
     for _, fragment in ipairs(HOUSING_ONLY_FRAGMENTS) do
@@ -189,6 +199,11 @@ local function UpdateLocationSpecificFragments()
 
     for _, fragment in ipairs(BATTLEGROUND_EXCLUDED_FRAGMENTS) do
         fragment:SetHiddenForReason("Battleground", isBattlegroundZone)
+    end
+
+    local isInStarterWorld = IsActiveWorldStarterWorld()
+    for _, fragment in ipairs(STARTER_WORLD_EXCLUDED_FRAGMENTS) do
+        fragment:SetHiddenForReason("StarterWorld", isInStarterWorld)
     end
 end
 

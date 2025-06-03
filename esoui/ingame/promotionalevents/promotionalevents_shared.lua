@@ -50,12 +50,18 @@ function ZO_PromotionalEventReward_Shared:Refresh()
         self.displayRewardData = displayRewardData
 
         self.iconTexture:SetTexture(displayRewardData:GetPlatformLootIcon())
-        if displayRewardData:GetQuantity() > 1 then
+        local shouldHideQuantityLabel = true
+        if GetRewardType(displayRewardData:GetRewardId()) == REWARD_ENTRY_TYPE_REWARD_LIST then
+            local quantity = GetNumRewardListEntries(GetRewardListIdFromReward(displayRewardData:GetRewardId()))
+            shouldHideQuantityLabel = not (quantity > 1)
+            if not shouldHideQuantityLabel then
+                quantity = zo_strformat(SI_PROMOTIONAL_EVENT_REWARD_LIST_QUANTITY_FORMATTER, quantity - 1)
+                self.quantityLabel:SetText(quantity)
+            end
+        elseif displayRewardData:GetQuantity() > 1 then
             local quantity = displayRewardData:GetAbbreviatedQuantity()
             self.quantityLabel:SetText(quantity)
-            self.quantityLabel:SetHidden(false)
-        else
-            self.quantityLabel:SetHidden(true)
+            shouldHideQuantityLabel = false
         end
 
         local hasPendingLoop = self.fxAnchorControl.pendingLoop ~= nil
@@ -73,7 +79,7 @@ function ZO_PromotionalEventReward_Shared:Refresh()
             self.iconTexture:SetColor(0.7, 0.7, 0.7)
         else
             self.completeMarkTexture:SetHidden(true)
-            self.quantityLabel:SetHidden(displayRewardData:GetQuantity() <= 1)
+            self.quantityLabel:SetHidden(shouldHideQuantityLabel)
             self.iconTexture:SetColor(1, 1, 1)
         end
     else
@@ -179,6 +185,7 @@ function ZO_PromotionalEvents_Shared:OnDeferredInitialize()
     self.blastParticleSystemPool = ZO_BlastParticleSystem_MetaPool:New()
     self:InitializeCampaignPanel()
     self:InitializeActivityList()
+    self:InitializeGridList()
     self:RegisterForEvents()
 end
 
@@ -228,11 +235,60 @@ function ZO_PromotionalEvents_Shared:InitializeActivityList(template, height)
     ZO_ScrollList_AddDataType(self.activityList, self.entryTypeActivity, template, height, SetupActivity)
 end
 
+function ZO_PromotionalEvents_Shared.RewardGridEntrySetup(control, data, selected)
+    control.data = data
+    control.icon:SetTexture(data:GetPlatformLootIcon())
+    control.nameLabel:SetText(data:GetFormattedName())
+    if data.currencyType and data.currencyType ~= CURT_NONE then
+        control.nameLabel:SetColor(ZO_NORMAL_TEXT:UnpackRGBA())
+    else
+        if data.rewardType == REWARD_ENTRY_TYPE_CHOICE then
+            local displayQuality = ITEM_DISPLAY_QUALITY_NORMAL
+            for _, choice in ipairs(data.choices) do
+                if choice.displayQuality > displayQuality then
+                    displayQuality = choice.displayQuality
+                end
+            end
+            control.nameLabel:SetColor(GetItemQualityColor(displayQuality):UnpackRGBA())
+        elseif data.rewardType == REWARD_ENTRY_TYPE_COLLECTIBLE or not data.displayQuality then
+            control.nameLabel:SetColor(ZO_WHITE:UnpackRGBA())
+        else
+            control.nameLabel:SetColor(GetItemQualityColor(data.displayQuality):UnpackRGBA())
+        end
+    end
+    local shouldHideQuantityLabel = true
+    if GetRewardType(data:GetRewardId()) == REWARD_ENTRY_TYPE_REWARD_LIST then
+        local quantity = GetNumRewardListEntries(GetRewardListIdFromReward(data:GetRewardId()))
+        shouldHideQuantityLabel = not (quantity > 1)
+        if not shouldHideQuantityLabel then
+            quantity = zo_strformat(SI_PROMOTIONAL_EVENT_REWARD_LIST_QUANTITY_FORMATTER, quantity - 1)
+            control.quantityLabel:SetText(quantity)
+        end
+        local displayQualityColor = GetItemQualityColor(data.displayQuality) or ZO_WHITE
+        control.nameLabel:SetColor(displayQualityColor:UnpackRGBA())
+    elseif data:GetQuantity() > 1 then
+        local quantity = data:GetAbbreviatedQuantity()
+        control.quantityLabel:SetText(quantity)
+        shouldHideQuantityLabel = false
+    end
+    control.quantityLabel:SetHidden(shouldHideQuantityLabel)
+    local alpha = (data.isClaimed or data.isLocked) and 0.4 or 1
+    control:SetAlpha(alpha)
+    control.claimedMark:SetHidden(not data.isClaimed)
+end
+
+function ZO_PromotionalEvents_Shared:InitializeGridList()
+    self.rewardsContainer = self.contentsContainer:GetNamedChild("ReturningUserRewards")
+    self.gridListControl = self.rewardsContainer:GetNamedChild("GridList")
+end
+
 function ZO_PromotionalEvents_Shared:RegisterForEvents()
-    self.control:RegisterForEvent(EVENT_PROMOTIONAL_EVENTS_ACTIVITY_PROGRESS_UPDATED, ZO_GetEventForwardingFunction(self, self.OnActivityProgressUpdated))
     self.control:RegisterForEvent(EVENT_PROMOTIONAL_EVENTS_ACTIVITY_TRACKING_UPDATED, ZO_GetEventForwardingFunction(self, self.OnActivityTrackingUpdated))
     PROMOTIONAL_EVENT_MANAGER:RegisterCallback("RewardsClaimed", ZO_GetCallbackForwardingFunction(self, self.OnRewardsClaimed))
+    PROMOTIONAL_EVENT_MANAGER:RegisterCallback("ActivityProgressUpdated", ZO_GetCallbackForwardingFunction(self, self.OnActivityProgressUpdated))
+    PROMOTIONAL_EVENT_MANAGER:RegisterCallback("CapstoneDialogClosed", ZO_GetCallbackForwardingFunction(self, self.OnCapstoneDialogClosed))
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", ZO_GetCallbackForwardingFunction(self, self.OnCollectionUpdated))
+    RETURNING_PLAYER_MANAGER:RegisterCallback("DailyRewardClaimed", ZO_GetCallbackForwardingFunction(self, self.OnDailyRewardClaimed))
 end
 
 function ZO_PromotionalEvents_Shared:OnActivityControlSetup(control, data)
@@ -240,12 +296,11 @@ function ZO_PromotionalEvents_Shared:OnActivityControlSetup(control, data)
     control.object:SetActivityData(data)
 end
 
-function ZO_PromotionalEvents_Shared:OnActivityProgressUpdated(campaignKey, activityIndex, ...)
-    local entryData = self:GetActivityEntryByIndex(campaignKey, activityIndex)
+function ZO_PromotionalEvents_Shared:OnActivityProgressUpdated(activityData, ...)
+    local entryData = self:GetActivityEntryByActivityData(activityData)
     if entryData then
-        local activityData = entryData.data
         if self:IsShowing() and activityData:IsComplete() and activityData:IsTracked() then
-            ClearTrackedPromotionalEventActivity()
+            TryAutoTrackNextPromotionalEventActivity()
         end
         if entryData.control then
             local activityObject = entryData.control.object
@@ -259,6 +314,10 @@ function ZO_PromotionalEvents_Shared:OnActivityTrackingUpdated()
     self:RefreshActivityList()
 end
 
+function ZO_PromotionalEvents_Shared:GetActivityEntryByActivityData(lookupActivityData)
+    return self:GetActivityEntryByIndex(lookupActivityData:GetCampaignKey(), lookupActivityData:GetActivityIndex())
+end
+
 function ZO_PromotionalEvents_Shared:GetActivityEntryByIndex(campaignKey, activityIndex)
     if self.currentCampaignData and AreId64sEqual(self.currentCampaignData:GetKey(), campaignKey) then
         local function Query(activityData)
@@ -270,9 +329,8 @@ function ZO_PromotionalEvents_Shared:GetActivityEntryByIndex(campaignKey, activi
     return nil
 end
 
-function ZO_PromotionalEvents_Shared:OnRewardsClaimed(campaignData, rewards)
-    if self:IsShowing() and self.currentCampaignData == campaignData then
-        local sound = SOUNDS.PROMOTIONAL_EVENT_CLAIM_REWARD
+function ZO_PromotionalEvents_Shared:OnRewardsClaimed(campaignData, rewards, hasCapstoneReward)
+    if self:IsShowing() and self.currentCampaignData:MatchesKeyWithCampaign(campaignData) then
         for _, reward in ipairs(rewards) do
             local type = reward.type
             local index = reward.index
@@ -280,10 +338,7 @@ function ZO_PromotionalEvents_Shared:OnRewardsClaimed(campaignData, rewards)
             if rewardObject then
                 rewardObject:OnRewardClaimed()
             end
-            if type == PROMOTIONAL_EVENTS_COMPONENT_TYPE_SCHEDULE then
-                sound = SOUNDS.PROMOTIONAL_EVENT_CLAIM_CAPSTONE_REWARD
-                self:OnCapstoneRewardClaimed()
-            elseif type == PROMOTIONAL_EVENTS_COMPONENT_TYPE_MILESTONE_REWARD then
+            if type == PROMOTIONAL_EVENTS_COMPONENT_TYPE_MILESTONE_REWARD then
                 local milestoneData = reward.rewardableEventData
                 local milestoneControl = self.milestonePool:GetActiveObject(milestoneData:GetDisplayIndex())
                 if milestoneControl then
@@ -296,7 +351,13 @@ function ZO_PromotionalEvents_Shared:OnRewardsClaimed(campaignData, rewards)
                 end
             end
         end
-        PlaySound(sound)
+
+        if hasCapstoneReward then
+            PlaySound(SOUNDS.PROMOTIONAL_EVENT_CLAIM_CAPSTONE_REWARD)
+            self:OnCapstoneRewardClaimed()
+        else
+            PlaySound(SOUNDS.PROMOTIONAL_EVENT_CLAIM_REWARD)
+        end
     end
 end
 
@@ -315,6 +376,17 @@ function ZO_PromotionalEvents_Shared:OnCollectionUpdated(collectionUpdateType, c
             end
             ZO_ScrollList_RefreshVisible(self.activityList, NO_FILTER, RefreshActivityReward)
         end
+    end
+end
+
+function ZO_PromotionalEvents_Shared:OnDailyRewardClaimed()
+    self:RefreshCampaignList()
+end
+
+function ZO_PromotionalEvents_Shared:OnCapstoneDialogClosed()
+    -- This synchronizes the keyboard and gamepad objects; we only need to handle the one that isn't currently showing.
+    if not self:IsShowing() and IsReturningPlayer() then
+        self:RefreshCampaignList()
     end
 end
 
@@ -477,6 +549,69 @@ function ZO_PromotionalEvents_Shared:RefreshActivityList(rebuild)
     end
 end
 
+function ZO_PromotionalEvents_Shared:RefreshGridList(rebuild)
+    if rebuild then
+        self.rewardsGridList:ClearGridList()
+
+        local numActiveCampaigns = PROMOTIONAL_EVENT_MANAGER:GetNumActiveCampaigns()
+        for index = 1, numActiveCampaigns do
+            local campaignData = PROMOTIONAL_EVENT_MANAGER:GetCampaignDataByIndex(index)
+            if campaignData:IsReturningPlayerCampaign() then
+                local gridHeaderName
+                local statusIcon
+                local isCampaignUnlocked = campaignData:ShouldCampaignBeVisible()
+                local isCampaignComplete = campaignData:AreAllRewardsClaimed()
+                local campaignName = campaignData:GetDisplayName()
+                if IsInGamepadPreferredMode() then
+                    if isCampaignUnlocked then
+                        statusIcon = "EsoUI/Art/Miscellaneous/Gamepad/gp_icon_unlocked32.dds"
+                    else
+                        campaignName = ZO_DISABLED_TEXT:Colorize(campaignName)
+                        if isCampaignComplete then
+                            statusIcon = "EsoUI/Art/Miscellaneous/check_icon_64.dds"
+                        else
+                            statusIcon = "EsoUI/Art/Miscellaneous/Gamepad/gp_icon_locked32.dds"
+                        end
+                    end
+                else
+                    if isCampaignUnlocked then
+                        statusIcon = "EsoUI/Art/Miscellaneous/Gamepad/gp_icon_unlocked32.dds"
+                    else
+                        campaignName = ZO_DISABLED_TEXT:Colorize(campaignName)
+                        if isCampaignComplete then
+                            statusIcon = "EsoUI/Art/Miscellaneous/check_icon_32.dds"
+                        else
+                            statusIcon = "EsoUI/Art/Miscellaneous/status_locked.dds"
+                        end
+                    end
+                end
+                gridHeaderName = zo_iconTextFormatAlignedRight(statusIcon, "100%", "100%", campaignName)
+
+                local milestones = campaignData:GetMilestones()
+                for _, milestone in ipairs(milestones) do
+                    local reward = milestone:GetRewardData()
+                    local rewardEntry = ZO_GridSquareEntryData_Shared:New(reward)
+                    rewardEntry.gridHeaderName = gridHeaderName
+                    rewardEntry.isClaimed = milestone:IsRewardClaimed()
+                    rewardEntry.isLocked = not isCampaignUnlocked
+                    self.rewardsGridList:AddEntry(rewardEntry)
+                end
+
+                local capstoneReward = campaignData:GetRewardData()
+                local capstoneEntry =  ZO_GridSquareEntryData_Shared:New(capstoneReward)
+                capstoneEntry.gridHeaderName = gridHeaderName
+                capstoneEntry.isClaimed = campaignData:IsRewardClaimed()
+                capstoneEntry.isLocked = not isCampaignUnlocked
+                self.rewardsGridList:AddEntry(capstoneEntry)
+            end
+        end
+
+        self.rewardsGridList:CommitGridList()
+    else
+        self.rewardsGridList:RefreshGridList()
+    end
+end
+
 function ZO_PromotionalEvents_Shared:RefreshAll(rebuild)
     if rebuild then
         self.rewardPendingLoopPool:ReleaseAllObjects()
@@ -494,11 +629,40 @@ function ZO_PromotionalEvents_Shared.GetActivityRequiredCollectibleText(activity
     return nil
 end
 
+function ZO_PromotionalEvents_Shared:RefreshDisplay()
+    self:RefreshCampaignData()
+
+    local shouldShowReturningUserRewardEntry = self:IsReturningPlayerRewardsEntrySelected()
+    self.campaignPanel:SetHidden(shouldShowReturningUserRewardEntry)
+    self.activityList:SetHidden(shouldShowReturningUserRewardEntry)
+    self.rewardsContainer:SetHidden(not shouldShowReturningUserRewardEntry)
+
+    if shouldShowReturningUserRewardEntry then
+        local REBUILD = true
+        self:RefreshGridList(REBUILD)
+    end
+
+    if not self.currentCampaignData and IsReturningPlayer() then
+        local firstVisibleCampaignData
+        for _, iterCampaignData in PROMOTIONAL_EVENT_MANAGER:CampaignIterator({ ZO_PromotionalEventCampaignData.ShouldCampaignBeVisible }) do
+            firstVisibleCampaignData = iterCampaignData
+            break
+        end
+        if firstVisibleCampaignData then
+            if IsInGamepadPreferredMode() then
+                PROMOTIONAL_EVENTS_LIST_GAMEPAD:SelectCampaign(firstVisibleCampaignData)
+            else
+                GROUP_MENU_KEYBOARD:ShowCategoryByData(firstVisibleCampaignData)
+            end
+        end
+    end
+end
+
 function ZO_PromotionalEvents_Shared:RefreshCampaignData()
     local rebuild = false
 
     local selectedCampaignData = self:GetSelectedCampaignData()
-    if selectedCampaignData then
+    if selectedCampaignData and not selectedCampaignData.isReturningPlayerRewardsEntry then
         selectedCampaignData:SetSeen(true)
     end
     if selectedCampaignData ~= self.currentCampaignData then
@@ -510,7 +674,7 @@ function ZO_PromotionalEvents_Shared:RefreshCampaignData()
     local trackedCampaignKey, trackedActivityIndex = GetTrackedPromotionalEventActivityInfo()
     local trackedEntryData = self:GetActivityEntryByIndex(trackedCampaignKey, trackedActivityIndex)
     if trackedEntryData and trackedEntryData.data:IsComplete() then
-        ClearTrackedPromotionalEventActivity()
+        TryAutoTrackNextPromotionalEventActivity()
     end
 end
 
@@ -518,9 +682,61 @@ function ZO_PromotionalEvents_Shared:GetSelectedCampaignData()
     return PROMOTIONAL_EVENT_MANAGER:GetCampaignDataByIndex(1) -- TODO Promotional Event: Make this a MUST_IMPLEMENT function
 end
 
+function ZO_PromotionalEvents_Shared:CollectRemainingChoiceRewards()
+    local choiceRewards = {}
+
+    local selectedCampaignData = self:GetSelectedCampaignData()
+
+    for _, activity in ipairs(selectedCampaignData:GetActivities()) do
+        local activityRewardData = activity:GetRewardData()
+        if activityRewardData and activityRewardData:GetRewardType() == REWARD_ENTRY_TYPE_CHOICE and activity:CanClaimReward() then
+            table.insert(choiceRewards, activity)
+        end
+    end
+
+    for _, milestone in ipairs(selectedCampaignData:GetMilestones()) do
+        local milestoneRewardData = milestone:GetRewardData()
+        internalassert(milestoneRewardData ~= nil)
+        if milestoneRewardData and milestoneRewardData:GetRewardType() == REWARD_ENTRY_TYPE_CHOICE and milestone:CanClaimReward() then
+            table.insert(choiceRewards, milestone)
+        end
+    end
+
+    local capstoneRewardData = selectedCampaignData:GetRewardData()
+    internalassert(capstoneRewardData ~= nil)
+    if capstoneRewardData and capstoneRewardData:GetRewardType() == REWARD_ENTRY_TYPE_CHOICE and selectedCampaignData:CanClaimReward() then
+        table.insert(choiceRewards, selectedCampaignData)
+    end
+
+    self.remainingChoiceRewards = choiceRewards
+end
+
+function ZO_PromotionalEvents_Shared:GetRemainingChoiceRewards()
+    if not self.remainingChoiceRewards then
+        self:CollectRemainingChoiceRewards()
+    end
+    return self.remainingChoiceRewards
+end
+
+function ZO_PromotionalEvents_Shared:TryClaimNextChoiceReward(isClaimingAll)
+    if self.remainingChoiceRewards then
+        local _, rewardableEventData = next(self.remainingChoiceRewards)
+        if rewardableEventData then
+            self:ShowClaimChoiceDialog(rewardableEventData, isClaimingAll)
+        end
+    end
+end
+
 function ZO_PromotionalEvents_Shared:OnShowing()
-    self:RefreshCampaignData()
+    self:RefreshDisplay()
     TriggerTutorial(TUTORIAL_TRIGGER_PROMOTIONAL_EVENTS_OPENED)
+end
+
+function ZO_PromotionalEvents_Shared:OnShown()
+    if self.scrollToFirstClaimableRewardOnShow then
+        self:ScrollToFirstClaimableReward()
+        self.scrollToFirstClaimableRewardOnShow = false
+    end
 end
 
 function ZO_PromotionalEvents_Shared:OnHidden()
@@ -529,6 +745,11 @@ function ZO_PromotionalEvents_Shared:OnHidden()
 end
 
 function ZO_PromotionalEvents_Shared:ScrollToFirstClaimableReward()
+    if not self:IsShowing() then
+        self.scrollToFirstClaimableRewardOnShow = true
+        return
+    end
+
     local claimableMilestoneData = nil
     for _, milestoneControl in pairs(self.milestonePool:GetActiveObjects()) do
         local milestoneData = milestoneControl.milestoneData
@@ -558,13 +779,17 @@ function ZO_PromotionalEvents_Shared:ScrollToFirstClaimableReward()
 end
 
 ZO_PromotionalEvents_Shared:MUST_IMPLEMENT("InitializeActivityFinderCategory")
+ZO_PromotionalEvents_Shared:MUST_IMPLEMENT("IsReturningPlayerRewardsEntrySelected")
 ZO_PromotionalEvents_Shared:MUST_IMPLEMENT("ShowCapstoneDialog")
 ZO_PromotionalEvents_Shared:MUST_IMPLEMENT("GetMilestoneScale")
 ZO_PromotionalEvents_Shared:MUST_IMPLEMENT("GetMilestonePadding")
+ZO_PromotionalEvents_Shared:MUST_IMPLEMENT("RefreshCampaignList")
 
 -- Capstone Dialog --
 
 ZO_PromotionalEvents_CapstoneDialog_Shared = ZO_InitializingObject:Subclass()
+
+ZO_PromotionalEvents_CapstoneDialog_Shared:MUST_IMPLEMENT("RefreshCampaignList")
 
 function ZO_PromotionalEvents_CapstoneDialog_Shared:Initialize(control)
     self.control = control
@@ -580,6 +805,7 @@ function ZO_PromotionalEvents_CapstoneDialog_Shared:InitializeControls()
     self.rewardIcon = control:GetNamedChild("RewardContainerIcon")
     self.rewardNameLabel = control:GetNamedChild("RewardContainerName")
     self.rewardStackCountLabel = control:GetNamedChild("RewardContainerStackCount")
+    self.additionalInformationLabel = control:GetNamedChild("AdditionalInformation")
     assert(self.rewardStackCountLabel, "ZO_PromotionalEvents_CapstoneDialog_Shared derived top level must add label control called 'StackCount' to the RewardContainer")
     self.overlayGlowControl = self.control:GetNamedChild("OverlayGlow")
     internalassert(self.overlayGlowControl ~= nil)
@@ -670,7 +896,7 @@ function ZO_PromotionalEvents_CapstoneDialog_Shared:SetCampaignData(campaignData
     local displayRewardData = wasFallbackClaimed and baseRewardData:GetFallbackRewardData() or baseRewardData
     self.displayRewardData = displayRewardData
 
-    local titleText = zo_strformat(SI_PROMOTIONAL_EVENT_CAPSTONE_DIALOG_TITLE_FORMATTER, ZO_PROMOTIONAL_EVENT_SELECTED_COLOR:Colorize(campaignData:GetDisplayName()))
+    local titleText = GetString(SI_PROMOTIONAL_EVENT_CAPSTONE_DIALOG_TITLE)
     self.titleLabel:SetText(titleText)
     self.rewardIcon:SetTexture(displayRewardData:GetPlatformLootIcon())
     self.rewardNameLabel:SetText(displayRewardData:GetFormattedName())
@@ -681,11 +907,29 @@ function ZO_PromotionalEvents_CapstoneDialog_Shared:SetCampaignData(campaignData
     else
         self.rewardStackCountLabel:SetHidden(true)
     end
+
+    if self.campaignData:IsReturningPlayerCampaign() then
+        self.additionalInformationLabel:SetHidden(false)
+        local additionalText = zo_strformat(SI_PROMOTIONAL_EVENT_CAPSTONE_DIALOG_ADDITIONAL_TEXT_FORMATTER, campaignData:GetDisplayName())
+        self.additionalInformationLabel:SetText(additionalText)
+    else
+        self.additionalInformationLabel:SetHidden(true)
+    end
 end
 
 function ZO_PromotionalEvents_CapstoneDialog_Shared:ViewInCollections()
     local collectibleId = GetCollectibleRewardCollectibleId(self.displayRewardData:GetRewardId())
     COLLECTIONS_BOOK_SINGLETON:BrowseToCollectible(collectibleId)
+end
+
+function ZO_PromotionalEvents_CapstoneDialog_Shared:ShowNextCampaign(campaignData)
+    self:RefreshCampaignList()
+    local nextCampaignKey = GetCampaignKeyForNextReturningPlayerCampaign(campaignData:GetId())
+    if nextCampaignKey and nextCampaignKey ~= 0 then
+        local nextCampaignData = PROMOTIONAL_EVENT_MANAGER:GetCampaignDataByKey(nextCampaignKey)
+        local DONT_SCROLL_TO_REWARD = false
+        PROMOTIONAL_EVENT_MANAGER:ShowPromotionalEventScene(DONT_SCROLL_TO_REWARD, nextCampaignData)
+    end
 end
 
 function ZO_PromotionalEvents_CapstoneDialog_Shared:OnShown()

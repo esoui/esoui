@@ -75,3 +75,5 @@ PREGAME_GAMMA_ADJUST_INTRO_ADVANCE_FRAGMENT = ZO_PregameSceneStateAdvanceFromFra
 
 SCREEN_ADJUST_ACTION_LAYER_FRAGMENT = ZO_ActionLayerFragment:New("ScreenAdjustActions")
 PREGAME_SCREEN_ADJUST_INTRO_ADVANCE_FRAGMENT = ZO_PregameSceneStateAdvanceFromFragment:New("ScreenAdjustIntro")
+
+GAMEPAD_GENERIC_FOOTER_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GenericFooter_Gamepad)

@@ -106,6 +106,7 @@ function ZO_ChatMenu_Gamepad:RegisterForEvents()
     self.control:RegisterForEvent(EVENT_GUILD_MEMBER_RANK_CHANGED, OnGuildMemberRankChanged)
     self.control:RegisterForEvent(EVENT_PLAYER_ACTIVATED, DirtyChannelDropdown)
     self.control:RegisterForEvent(EVENT_CHAT_CATEGORY_COLOR_CHANGED, DirtyChannelDropdown)
+    self.control:RegisterForEvent(EVENT_INTERFACE_SETTING_CHANGED, DirtyChannelDropdown)
 end
 
 function ZO_ChatMenu_Gamepad:InitializeFocusKeybinds()
@@ -420,7 +421,10 @@ function ZO_ChatMenu_Gamepad:RefreshChannelDropdown(reselectDuringRebuild)
         --The switchLookup also includes a backward lookup to use any switch (not just defaults) to find the associated channel data
         local channelData = switchLookup[switch]
         -- exclude channels that require an explicit target (ie. /tell) and channels that we don't currently meet the requirements for
-        if channelData and not channelData.target and (not channelData.requires or channelData.requires(channelData.id)) then
+        if channelData
+            and not channelData.target
+            and (not channelData.requires or channelData.requires(channelData.id))
+            and not IsChannelCategoryCommunicationRestricted(GetChannelCategoryFromChannel(channelData.id)) then
             local r, g, b = ZO_ChatSystem_GetCategoryColorFromChannel(channelData.id)
             local itemColor = ZO_ColorDef:New(r, g, b)
             local coloredSwitchText = itemColor:Colorize(switch)

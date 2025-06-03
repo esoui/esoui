@@ -271,9 +271,17 @@ introMusicSetting.itemText = {}
 table.insert(introMusicSetting.valid, -1)
 table.insert(introMusicSetting.itemText, GetString(SI_AUDIO_OPTIONS_INTRO_MUSIC_DEFAULT))
 
+internalassert(CHAPTER_ITERATION_END == 9, "Does the new chapter have its own intro music?")
+local EXEMPT_CHAPTERS =
+{
+    [CHAPTER_CRAG] = true,
+}
+
 for settingValue = CHAPTER_ITERATION_BEGIN, CHAPTER_ITERATION_END do
-    table.insert(introMusicSetting.valid, settingValue)
-    table.insert(introMusicSetting.itemText, GetString("SI_CHAPTER", settingValue))
+    if not EXEMPT_CHAPTERS[settingValue] then
+        table.insert(introMusicSetting.valid, settingValue)
+        table.insert(introMusicSetting.itemText, GetString("SI_CHAPTER", settingValue))
+    end
 end
 
 ZO_SharedOptions.AddTableToPanel(SETTING_PANEL_AUDIO, ZO_OptionsPanel_Audio_ControlData)

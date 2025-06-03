@@ -2726,9 +2726,9 @@ function ZO_ScrollList_AtTopOfList(self)
 
             return true
         end
-    else
-        return false
     end
+
+    return false
 end
 
 function ZO_ScrollList_AtBottomOfList(self)
@@ -2749,9 +2749,9 @@ function ZO_ScrollList_AtBottomOfList(self)
 
             return true
         end
-    else
-        return false
     end
+
+    return false
 end
 
 function ZO_ScrollList_SelectDataAndScrollIntoView(self, data, onScrollCompleteCallback, shouldAnimateInstantly)

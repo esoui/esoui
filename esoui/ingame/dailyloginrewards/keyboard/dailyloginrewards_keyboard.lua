@@ -130,6 +130,9 @@ end
 function ZO_DailyLoginRewards_Keyboard:OnShowing()
     ZO_DailyLoginRewards_Base.OnShowing(self)
     KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
+
+    local shouldShowReturningPlayerRewardsButton = RETURNING_PLAYER_MANAGER:ShouldShowReturningPlayerAnnouncementEntry()
+    self.control:GetNamedChild("ReturningPlayerRewardsButton"):SetHidden(not shouldShowReturningPlayerRewardsButton)
 end
 
 function ZO_DailyLoginRewards_Keyboard:OnHiding()
@@ -273,4 +276,20 @@ end
 
 function ZO_DailyLoginRewards_Keyboard_OnInitialize(control)
     ZO_DAILYLOGINREWARDS_KEYBOARD = ZO_DailyLoginRewards_Keyboard:New(control)
+end
+
+function ZO_DailyLoginRewards_Keyboard.OnReturningPlayerRewardsButtonEnter(control)
+    InitializeTooltip(InformationTooltip, control, RIGHT, -10, 0, LEFT)
+
+    local campaignDisplayName = RETURNING_PLAYER_MANAGER:GetColorizedIntroCampaignDisplayName()
+    local descriptionText = zo_strformat(SI_RETURNING_PLAYER_DAILY_LOGIN_REWARD_DESCRIPTION, campaignDisplayName)
+    SetTooltipText(InformationTooltip, descriptionText)
+end
+
+function ZO_DailyLoginRewards_Keyboard.OnReturningPlayerRewardsButtonExit(control)
+    ClearTooltip(InformationTooltip)
+end
+
+function ZO_DailyLoginRewards_Keyboard.OnReturningPlayerRewardsButtonClick()
+    SCENE_MANAGER:Show(RETURNING_PLAYER_REWARD_SCENE_KEYBOARD:GetName())
 end

@@ -35,6 +35,10 @@ do
         return GetNextVirtualBagSlotId(slotIndex)
     end
 
+    local function GetNextSlotForFurnitureVault(_, slotIndex)
+        return GetNextFurnitureVaultSlotId(slotIndex)
+    end
+
     local function GetNextSlotForSizedBag(lastSlotIndex, slotIndex)
         if slotIndex < lastSlotIndex then
             return slotIndex + 1
@@ -49,6 +53,8 @@ do
             return GetNextSlotForGuildBank, nil, nil
         elseif bagId == BAG_VIRTUAL then
             return GetNextSlotForVirtualBag, nil, nil
+        elseif bagId == BAG_FURNITURE_VAULT then
+            return GetNextSlotForFurnitureVault, nil, nil
         else
             local lastSlotIndex
             if bagId == BAG_BUYBACK then

@@ -36,6 +36,8 @@ ZO_KEYBOARD_NOTIFICATION_ICONS =
     [NOTIFICATION_TYPE_TRIBUTE_INVITE] = "EsoUI/Art/Notifications/notificationIcon_tribute.dds",
     [NOTIFICATION_TYPE_HOUSE_TOURS_HOUSE_RECOMMENDED] = "EsoUI/Art/Notifications/notificationIcon_houseToursHouseRecommended.dds",
     [NOTIFICATION_TYPE_SLOTS_RESET] = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_character.dds",
+    [NOTIFICATION_TYPE_CONSOLE_ADDON_MEMORY_LIMIT_REACHED] = "EsoUI/Art/Miscellaneous/ESO_Icon_Warning.dds",
+    [NOTIFICATION_TYPE_CONSOLE_ADDON_SAVED_VARIABLES_LIMIT_REACHED] = "EsoUI/Art/Miscellaneous/ESO_Icon_Warning.dds",
 }
 
 -- Provider Overrides
@@ -285,7 +287,7 @@ function ZO_KeyboardPointsResetProvider:Accept(data)
     ZO_PointsResetProvider.Accept(self, data)
     if data.respecType == RESPEC_TYPE_ATTRIBUTES then
         MAIN_MENU_KEYBOARD:ShowScene("stats")
-    elseif data.respecType == RESPEC_TYPE_SKILLS then
+    elseif data.respecType == RESPEC_TYPE_SKILLS or data.respecType == RESPEC_TYPE_SUBCLASS then
         MAIN_MENU_KEYBOARD:ShowScene("skills")
     elseif data.respecType == RESPEC_TYPE_CHAMPION or data.respecType == RESPEC_TYPE_CHAMPION_SLOTS then
         MAIN_MENU_KEYBOARD:ShowScene("championPerks")
@@ -365,6 +367,8 @@ function ZO_KeyboardNotificationManager:InitializeNotificationList(control)
         ZO_DisabledAddonsProvider:New(self),
         ZO_TributeInviteProvider:New(self),
         ZO_HouseToursHouseRecommendedProvider:New(self),
+        ZO_ConsoleAddonsMemoryLimitProvider:New(self),
+        ZO_ConsoleAddonsSavedVariableLimitProvider:New(self),
     }
 
     self.sortFilterList:SetEmptyText(GetString(SI_NO_NOTIFICATIONS_MESSAGE))

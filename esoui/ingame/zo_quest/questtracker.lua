@@ -1189,7 +1189,7 @@ local function ShowTrackingMenu(header)
         if GetIsQuestSharable(header.m_Data:GetJournalIndex()) and IsUnitGrouped("player") then
             AddMenuItem(GetString(SI_QUEST_TRACKER_MENU_SHARE), function() ShareTrackedQuest(header) end)
         end
-        if GetJournalQuestType(header.m_Data:GetJournalIndex()) ~= QUEST_TYPE_MAIN_STORY then
+        if CanAbandonJournalQuest(header.m_Data:GetJournalIndex()) then
             AddMenuItem(GetString(SI_QUEST_TRACKER_MENU_ABANDON), function() AbandonTrackedQuest(header) end)
         end
     end

@@ -167,7 +167,7 @@ local g_areKeybindsEnabled
 local g_keybindLabels = {}
 local g_numDisabledReferences = 0
 local function OnUpdate()
-    local shouldKeybindsBeEnabled = WINDOW_MANAGER:GetFocusControl() == nil and g_numDisabledReferences == 0
+    local shouldKeybindsBeEnabled = not HasActiveEditControl() and g_numDisabledReferences == 0
     if shouldKeybindsBeEnabled ~= g_areKeybindsEnabled then
         g_areKeybindsEnabled = shouldKeybindsBeEnabled
         for i, keybindButton in ipairs(g_keybindLabels) do

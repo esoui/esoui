@@ -1,7 +1,7 @@
 <GuiXml>
     <Controls>
         <Slider name="ZO_VerticalScrollbarBase_Gamepad" inherits="ZO_VerticalScrollbarBase_Shared" virtual="true">
-            <Dimensions x="16" y="32" />
+            <Dimensions x="ZO_SCROLL_BAR_WIDTH" y="32" />
             <ThumbTexture
                 textureFile="EsoUI/Art/Windows/Gamepad/gp_nav1_horDividerFlat.dds"
                 disabledTextureFile="EsoUI/Art/Windows/Gamepad/gp_nav1_horDividerFlat.dds"

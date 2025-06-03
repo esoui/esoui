@@ -1074,7 +1074,7 @@ function ZO_MapPanAndZoom:SetNormalizedZoomAndOffsetInNewMap(normalizedZoom)
     self:SetCurrentNormalizedZoom(normalizedZoom)
     local pin = g_mapPinManager:GetPlayerPin()
 
-    if self:JumpToPin(pin, USE_CURRENT_ZOOM) then
+    if not pin:IsHidden() and self:JumpToPin(pin, USE_CURRENT_ZOOM) then
         return
     else
         self:SetCurrentOffset(0, 0)
@@ -1795,6 +1795,7 @@ local hiddenPinGroupsOnDungeonMaps =
     [MAP_FILTER_WAYSHRINES] = true,
     [MAP_FILTER_DUNGEONS] = true,
     [MAP_FILTER_TRIALS] = true,
+    [MAP_FILTER_ARENAS] = true,
     [MAP_FILTER_HOUSES] = true,
 }
 
@@ -2328,9 +2329,10 @@ do
         -- Filters are split, with the "Wayshrines" filter being explicitly lore Wayshrines
         local isShowingWayshrines = ZO_WorldMap_IsPinGroupShown(MAP_FILTER_WAYSHRINES)
         local isShowingDungeons = ZO_WorldMap_IsPinGroupShown(MAP_FILTER_DUNGEONS)
+        local isShowingArenas = ZO_WorldMap_IsPinGroupShown(MAP_FILTER_ARENAS)
         local isShowingTrials = ZO_WorldMap_IsPinGroupShown(MAP_FILTER_TRIALS)
         local isShowingHouses = ZO_WorldMap_IsPinGroupShown(MAP_FILTER_HOUSES)
-        if not (isShowingWayshrines or isShowingDungeons or isShowingTrials or isShowingHouses) then
+        if not (isShowingWayshrines or isShowingDungeons or isShowingArenas or isShowingTrials or isShowingHouses) then
             return
         end
 
@@ -2342,9 +2344,23 @@ do
             local known, name, normalizedX, normalizedY, icon, glowIcon, poiType, isLocatedInCurrentMap, linkedCollectibleIsLocked = GetFastTravelNodeInfo(nodeIndex)
             local zoneIndex, poiIndex = GetFastTravelNodePOIIndicies(nodeIndex)
             local instanceType = GetPOIInstanceType(zoneIndex, poiIndex)
+            -- TODO: Apply MapFilterOverride in other pin adding functions that require it.
+            local mapFilterOverride = GetPOIMapFilterOverride(zoneIndex, poiIndex)
 
             local passesFilter = false
-            if poiType == POI_TYPE_HOUSE then
+            if mapFilterOverride ~= MAP_FILTER_NONE then
+                if mapFilterOverride == MAP_FILTER_WAYSHRINES then
+                    passesFilter = isShowingWayshrines
+                elseif mapFilterOverride == MAP_FILTER_DUNGEONS then
+                    passesFilter = isShowingDungeons
+                elseif mapFilterOverride == MAP_FILTER_ARENAS then
+                    passesFilter = isShowingArenas
+                elseif mapFilterOverride == MAP_FILTER_TRIALS then
+                    passesFilter = isShowingTrials
+                elseif mapFilterOverride == MAP_FILTER_HOUSES then
+                    passesFilter = isShowingHouses
+                end
+            elseif poiType == POI_TYPE_HOUSE then
                 passesFilter = isShowingHouses
             elseif poiType == POI_TYPE_WAYSHRINE then
                 passesFilter = isShowingWayshrines
@@ -3330,6 +3346,7 @@ local function GetSavedVarDefaults()
                 [MAP_FILTER_TYPE_GLOBAL] =
                 {
                     [MAP_FILTER_DUNGEONS] = false,
+                    [MAP_FILTER_ARENAS] = false,
                     [MAP_FILTER_TRIALS] = false,
                 },
             }
@@ -3358,6 +3375,7 @@ local function GetSavedVarDefaults()
                 [MAP_FILTER_TYPE_GLOBAL] =
                 {
                     [MAP_FILTER_DUNGEONS] = false,
+                    [MAP_FILTER_ARENAS] = false,
                     [MAP_FILTER_TRIALS] = false,
                 },
             }
@@ -3377,6 +3395,7 @@ local function GetSavedVarDefaults()
                     [MAP_FILTER_AVA_GRAVEYARDS] = false,
                     [MAP_FILTER_WAYSHRINES] = false,
                     [MAP_FILTER_DUNGEONS] = false,
+                    [MAP_FILTER_ARENAS] = false,
                     [MAP_FILTER_TRIALS] = false,
                     [MAP_FILTER_ACQUIRED_SKYSHARDS] = false,
                     [MAP_FILTER_TRANSIT_LINES_ALLIANCE] = MAP_TRANSIT_LINE_ALLIANCE_ALL,
@@ -3415,6 +3434,7 @@ local function GetSavedVarDefaults()
                 [MAP_FILTER_TYPE_GLOBAL] =
                 {
                     [MAP_FILTER_DUNGEONS] = false,
+                    [MAP_FILTER_ARENAS] = false,
                     [MAP_FILTER_TRIALS] = false,
                 },
             }
@@ -3430,6 +3450,7 @@ local function GetSavedVarDefaults()
                     [MAP_FILTER_KILL_LOCATIONS] = false,
                     [MAP_FILTER_WAYSHRINES] = false,
                     [MAP_FILTER_DUNGEONS] = false,
+                    [MAP_FILTER_ARENAS] = false,
                     [MAP_FILTER_TRIALS] = false,
                     [MAP_FILTER_OBJECTIVES] = false,
                     [MAP_FILTER_RESOURCE_KEEPS] = false,
@@ -3465,6 +3486,7 @@ local function GetSavedVarDefaults()
                     [MAP_FILTER_AVA_GRAVEYARDS] = false,
                     [MAP_FILTER_WAYSHRINES] = false,
                     [MAP_FILTER_DUNGEONS] = false,
+                    [MAP_FILTER_ARENAS] = false,
                     [MAP_FILTER_TRIALS] = false,
                     [MAP_FILTER_TRANSIT_LINES] = false,
                     [MAP_FILTER_ACQUIRED_SKYSHARDS] = false,
@@ -3504,6 +3526,7 @@ local function GetSavedVarDefaults()
                 [MAP_FILTER_TYPE_GLOBAL] =
                 {
                     [MAP_FILTER_DUNGEONS] = false,
+                    [MAP_FILTER_ARENAS] = false,
                     [MAP_FILTER_TRIALS] = false,
                 },
             }

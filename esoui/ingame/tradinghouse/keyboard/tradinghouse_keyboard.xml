@@ -22,9 +22,14 @@
             </OnMouseExit>
 
             <Controls>
+                <Texture name="$(parent)StatusIcon" mouseEnabled="true" inherits="ZO_MultiIcon">
+                    <Dimensions x="28" y="28" />
+                    <Anchor point="CENTER" relativePoint="TOPLEFT" offsetX="15" offsetY="26" />
+                </Texture>
+
                 <Button name="$(parent)Button" inherits="ZO_InventorySlotNoMouseover">
                     <Dimensions x="40" y="40" />
-                    <Anchor point="CENTER" relativePoint="TOPLEFT" offsetX="26" offsetY="26" />
+                    <Anchor point="LEFT" relativePoint="LEFT" offsetX="31" />
                 </Button>
 
                 <Label name="$(parent)Name" font="ZoFontGameShadow" wrapMode="ELLIPSIS" maxLineCount="2">
@@ -80,19 +85,29 @@
             </OnInitialized>
 
             <Controls>
+                <Texture name="$(parent)StatusIcon" mouseEnabled="true" inherits="ZO_MultiIcon">
+                    <Dimensions x="28" y="28" />
+                    <Anchor point="CENTER" relativePoint="TOPLEFT" offsetX="15" offsetY="26" />
+                </Texture>                
+                
                 <Button name="$(parent)Button" inherits="ZO_InventorySlotNoMouseover">
                     <Dimensions x="40" y="40" />
-                    <Anchor point="CENTER" relativePoint="TOPLEFT" offsetX="26" offsetY="26" />
+                    <Anchor point="LEFT" relativePoint="LEFT" offsetX="31" />
                 </Button>
 
                 <Label name="$(parent)Name" font="ZoFontGameShadow" wrapMode="ELLIPSIS">
-                    <Dimensions x="342" y="20" />
-                    <Anchor point="LEFT" offsetX="57" />
+                    <Dimensions x="317" y="20" />
+                    <Anchor point="LEFT" offsetX="82" />
                 </Label>
 
+                <Texture name="$(parent)TraitInfo" mouseEnabled="true" inherits="ZO_MultiIcon">
+                    <Dimensions x="22" y="22" />
+                    <Anchor point="LEFT" relativeTo="$(parent)Name" relativePoint="RIGHT" />
+                </Texture>
+
                 <Label name="$(parent)TimeRemaining" font="ZoFontGameShadow">
-                    <Dimensions x="140" y="20" />
-                    <Anchor point="LEFT" relativeTo="$(parent)Name" relativePoint="RIGHT" offsetX="40" />
+                    <Dimensions x="98" y="20" />
+                    <Anchor point="LEFT" relativeTo="$(parent)TraitInfo" relativePoint="RIGHT" offsetX="40" />
                 </Label>
 
                 <Label name="$(parent)SellPrice" inherits="ZO_CurrencyTemplate">

@@ -267,14 +267,65 @@
                 <Control name="$(parent)DepositWithdraw" inherits="ZO_CustomDialogButton"/>
             </Controls>
         </TopLevelControl>
-        
+
+        <!-- Furniture Vault -->
+
+        <TopLevelControl name="ZO_FurnitureVaultMenu" inherits="ZO_SceneMenu" hidden="true">
+            <Anchor point="TOPRIGHT" relativeTo="ZO_SharedRightPanelBackground" offsetX="-40"/>
+            <Dimensions x="550"/>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_FurnitureVault" hidden="true" mouseEnabled="true">
+            <Dimensions x="565" />
+            <Anchor point="TOPLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="45" />
+            <Anchor point="BOTTOMLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="-30" />
+
+            <Controls>
+                <Control name="$(parent)Tabs" inherits="ZO_InventoryTabs" />
+
+                <Control name="$(parent)FilterDivider" inherits="ZO_InventoryFilterDivider"/>
+
+                <Control name="$(parent)SearchFilters" inherits="ZO_InventorySubFiltersWithSearch">
+                    <Anchor point="RIGHT" relativeTo="$(parent)Tabs" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)FilterDivider" relativePoint="BOTTOMLEFT" />
+                </Control>
+
+                <Control name="$(parent)SearchDivider" inherits="ZO_InventoryFilterDivider">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)SearchFilters" relativePoint="BOTTOMLEFT" offsetY="5" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)SearchFilters" relativePoint="BOTTOMRIGHT" offsetY="5" />
+                </Control>
+
+                <!-- Sort Headers -->
+                <Control name="$(parent)SortBy" inherits="ZO_InventorySortByHeaders">
+                    <Anchor point="TOPRIGHT" offsetY="103" />
+                </Control>
+
+                <!-- Item Lists -->
+                <Control name="$(parent)List" inherits="ZO_InventoryList">
+                    <Anchor point="TOPRIGHT" offsetY="136" />
+                    <Anchor point="BOTTOMRIGHT" />
+                    <Controls>
+                        <Control name="$(parent)LandingArea" inherits="InventoryLandingArea">
+                            <OnInitialized>
+                                ZO_InventoryLandingArea_Initialize(self, "inventory", BAG_FURNITURE)
+                            </OnInitialized>
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)InfoBar" inherits="ZO_InventoryInfoBarBackpack">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Backpack" relativePoint="BOTTOMLEFT" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Backpack" relativePoint="BOTTOMRIGHT" />
+                </Control>
+            </Controls>
+        </TopLevelControl>
+
         <!-- House Bank -->
 
         <TopLevelControl name="ZO_HouseBankMenu" inherits="ZO_SceneMenu" hidden="true">
             <Anchor point="TOPRIGHT" relativeTo="ZO_SharedRightPanelBackground" offsetX="-40"/>
             <Dimensions x="550"/>
         </TopLevelControl>
-
 
         <TopLevelControl name="ZO_HouseBank" hidden="true" mouseEnabled="true">
             <Dimensions x="565" />

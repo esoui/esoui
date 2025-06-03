@@ -13,6 +13,7 @@ end
 function ZO_SkillsDataManager:Initialize()
     self.skillTypeObjectPool = ZO_ObjectPool:New(ZO_SkillTypeData, ZO_ObjectPool_DefaultResetObject)
     self.skillLineObjectPool = ZO_ObjectPool:New(ZO_SkillLineData, ZO_ObjectPool_DefaultResetObject)
+    self.classSkillLineObjectPool = ZO_ObjectPool:New(ZO_ClassSkillLineData, ZO_ObjectPool_DefaultResetObject)
     self.activeSkillObjectPool = ZO_ObjectPool:New(ZO_ActiveSkillData, ZO_ObjectPool_DefaultResetObject)
     self.craftedActiveSkillObjectPool = ZO_ObjectPool:New(ZO_CraftedActiveSkillData, ZO_ObjectPool_DefaultResetObject)
     self.passiveSkillObjectPool = ZO_ObjectPool:New(ZO_PassiveSkillData, ZO_ObjectPool_DefaultResetObject)
@@ -25,6 +26,8 @@ function ZO_SkillsDataManager:Initialize()
     self.isGatingEventUpdates = false
 
     self.abilityIdToProgressionDataMap = {}
+    self.skillLineDataInTrainingList = {}
+    self.activeClassSkillLineDataList = {}
 
     self:RegisterForEvents()
 
@@ -56,7 +59,7 @@ function ZO_SkillsDataManager:RegisterForEvents()
                 for index, collectibleData in ipairs(unlockedCollectibles) do
                     if collectibleData:IsSkillStyle() then
                         local progressionId = collectibleData:GetSkillStyleProgressionId()
-                        local skillData = SKILLS_DATA_MANAGER:GetSkillDataByProgressionId(progressionId)
+                        local skillData = self:GetSkillDataByProgressionId(progressionId)
                         skillData:SetUpdatedStatusByType(ZO_SKILL_DATA_NEW_STATE.STYLE_COLLECTIBLE, collectibleData:IsUnlocked())
                     end
                 end
@@ -65,6 +68,12 @@ function ZO_SkillsDataManager:RegisterForEvents()
     end
 
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", OnCollectionUpdated)
+end
+
+function ZO_SkillsDataManager:OnSkillLineAssignmentManagerReady()
+    SKILL_LINE_ASSIGNMENT_MANAGER:RegisterCallback("SkillLineRespecUpdate", function()
+        self:RefreshSkillLineHelperCaches()
+    end)
 end
 
 function ZO_SkillsDataManager:IsGatingEventUpdates()
@@ -105,6 +114,7 @@ end
 function ZO_SkillsDataManager:RebuildSkillsData()
     self.skillTypeObjectPool:ReleaseAllObjects()
     self.skillLineObjectPool:ReleaseAllObjects()
+    self.classSkillLineObjectPool:ReleaseAllObjects()
     ZO_ClearTable(self.abilityIdToProgressionDataMap)
 
     for skillType = SKILL_TYPE_ITERATION_BEGIN, SKILL_TYPE_ITERATION_END do
@@ -113,12 +123,20 @@ function ZO_SkillsDataManager:RebuildSkillsData()
     end
 
     for _, skillTypeData in self:SkillTypeIterator() do
-        for skillLineIndex = 1, GetNumSkillLines(skillTypeData:GetSkillType()) do
-            local skillLineData, key = self.skillLineObjectPool:AcquireObject()
+        local skillType = skillTypeData:GetSkillType()
+        for skillLineIndex = 1, GetNumSkillLines(skillType) do
+            local objectPool = self.skillLineObjectPool
+            -- ESO-914646: It's possible to have lines in Class that don't have a dedicated classId
+            if skillType == SKILL_TYPE_CLASS and GetSkillLineClassId(skillType, skillLineIndex) > 0 then
+                objectPool = self.classSkillLineObjectPool
+            end
+            local skillLineData, key = objectPool:AcquireObject()
             skillLineData:BuildData(skillTypeData, skillLineIndex)
             skillTypeData:AddOrderedSkillLineData(skillLineData)
         end
     end
+
+    self:RefreshSkillLineHelperCaches()
 
     self.isDataReady = true
     self:FireCallbacks("FullSystemUpdated")
@@ -144,6 +162,9 @@ do
                 local skillTypeData = self:GetSkillTypeData(skillType)
                 skillTypeData:RefreshDynamicData(REFRESH_CHILDREN)
             end
+
+            self:RefreshSkillLineHelperCaches()
+
             self:FireCallbacks("FullSystemUpdated")
         else
             self:RebuildSkillsData()
@@ -239,6 +260,12 @@ end
 
 function ZO_SkillsDataManager:GetSkillLineDataById(skillLineId)
     for _, skillLineData in self.skillLineObjectPool:ActiveObjectIterator() do
+        if skillLineData:GetId() == skillLineId then
+            return skillLineData
+        end
+    end
+
+    for _, skillLineData in self.classSkillLineObjectPool:ActiveObjectIterator() do
         if skillLineData:GetId() == skillLineId then
             return skillLineData
         end
@@ -341,6 +368,66 @@ function ZO_SkillsDataManager:GetSkillStyleWarningText(data)
             return ""
         end
     end
+end
+
+function ZO_SkillsDataManager:RefreshSkillLinesInTraining()
+    ZO_ClearNumericallyIndexedTable(self.skillLineDataInTrainingList)
+
+    local skillTypeData = self:GetSkillTypeData(SKILL_TYPE_CLASS)
+    -- ESO-914646: It's possible to have lines in Class that don't have a dedicated classId
+    for _, skillLineData in skillTypeData:SkillLineIterator({ ZO_ClassSkillLineData.HasClassId, ZO_ClassSkillLineData.IsInTraining }) do
+        table.insert(self.skillLineDataInTrainingList, skillLineData)
+    end
+end
+
+function ZO_SkillsDataManager:GetNumSkillLinesInTraining()
+    return #self.skillLineDataInTrainingList
+end
+
+function ZO_SkillsDataManager:GetSkillLineInTrainingAtIndex(index)
+    return self.skillLineDataInTrainingList[index]
+end
+
+function ZO_SkillsDataManager:RefreshActiveClassSkillLines()
+    ZO_ClearNumericallyIndexedTable(self.activeClassSkillLineDataList)
+
+    local skillTypeData = self:GetSkillTypeData(SKILL_TYPE_CLASS)
+    -- ESO-914646: It's possible to have lines in Class that don't have a dedicated classId
+    for _, skillLineData in skillTypeData:SkillLineIterator({ ZO_ClassSkillLineData.HasClassId, ZO_ClassSkillLineData.IsActive }) do
+        table.insert(self.activeClassSkillLineDataList, skillLineData)
+    end
+end
+
+function ZO_SkillsDataManager:GetNumActiveClassSkillLines()
+    return #self.activeClassSkillLineDataList
+end
+
+function ZO_SkillsDataManager:GetActiveClassSkillLine(index)
+    return self.activeClassSkillLineDataList[index]
+end
+
+function ZO_SkillsDataManager:GetNumPlayerClassActiveSkillLines()
+    local numPlayerClassActiveSkillLines = 0
+    for i, skillLineData in ipairs(self.activeClassSkillLineDataList) do
+        if skillLineData:IsPlayerClassSkillLine() then
+            numPlayerClassActiveSkillLines = numPlayerClassActiveSkillLines + 1
+        end
+    end
+    return numPlayerClassActiveSkillLines
+end
+
+function ZO_SkillsDataManager:GetFirstActiveSkillLineByClassId(classId)
+    for _, skillLineData in ipairs(self.activeClassSkillLineDataList) do
+        if skillLineData:GetClassId() == classId then
+            return skillLineData
+        end
+    end
+    return nil
+end
+
+function ZO_SkillsDataManager:RefreshSkillLineHelperCaches()
+    self:RefreshSkillLinesInTraining()
+    self:RefreshActiveClassSkillLines()
 end
 
 ZO_SkillsDataManager:New()

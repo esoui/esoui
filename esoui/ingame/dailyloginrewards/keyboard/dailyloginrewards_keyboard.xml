@@ -74,6 +74,29 @@
             </OnInitialized>
 
             <Controls>
+                <Button name="$(parent)ReturningPlayerRewardsButton" mouseOverBlendMode="ADD" hidden="true" >
+                    <Dimensions x="40" y="40" />
+                    <Anchor point="TOPLEFT" offsetX="25" offsetY="15" />
+
+                    <Textures
+                        normal="EsoUI/Art/DailyLoginRewards/Keyboard/returningplayerrewards_up.dds"
+                        pressed="EsoUI/Art/DailyLoginRewards/Keyboard/returningplayerrewards_down.dds"
+                        mouseOver="EsoUI/Art/DailyLoginRewards/Keyboard/returningplayerrewards_over.dds"
+                    />
+
+                    <OnMouseEnter>
+                        ZO_DailyLoginRewards_Keyboard.OnReturningPlayerRewardsButtonEnter(self)
+                    </OnMouseEnter>
+
+                    <OnMouseExit>
+                        ZO_DailyLoginRewards_Keyboard.OnReturningPlayerRewardsButtonExit(self)
+                    </OnMouseExit>
+
+                    <OnClicked>
+                        ZO_DailyLoginRewards_Keyboard.OnReturningPlayerRewardsButtonClick()
+                    </OnClicked>
+                </Button>
+                
                 <Label name="$(parent)CurrentMonth" font="ZoFontWinH2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" horizontalAlignment="CENTER">
                     <Anchor point="TOP" offsetY="10" />
                 </Label>

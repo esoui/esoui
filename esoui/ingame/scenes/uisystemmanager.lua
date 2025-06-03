@@ -85,33 +85,92 @@ function ZO_UISystemManager:Initialize()
 
     EVENT_MANAGER:RegisterForEvent("UISystemManager", EVENT_PLAYER_ACTIVATED, OnPlayerActivated)
 
+    local function OnPromotionalEventCampaignsUpdated()
+        self:OnPromotionalEventCampaignsUpdated()
+    end
+
+    EVENT_MANAGER:RegisterForEvent("UISystemManager", EVENT_PROMOTIONAL_EVENTS_CAMPAIGNS_UPDATED, OnPromotionalEventCampaignsUpdated)
+
     local function OnMarketAnnouncementUpdated(eventId, ...)
         self:OnMarketAnnouncementUpdated(...)
     end
 
-    EVENT_MANAGER:RegisterForEvent("EVENT_MARKET_ANNOUNCEMENT_UPDATED", EVENT_MARKET_ANNOUNCEMENT_UPDATED, OnMarketAnnouncementUpdated)
+    EVENT_MANAGER:RegisterForEvent("UISystemManager", EVENT_MARKET_ANNOUNCEMENT_UPDATED, OnMarketAnnouncementUpdated)
 
     self.queuedUISystem = nil
     self.queuedParams = {}
-    self.waitingForAnnouncements = true
+    self.waitingForMarketAnnouncements = true
+    self.waitingForPromotionalEvents = true
 end
 
 function ZO_UISystemManager:OnPlayerActivated()
+    if not self.waitingForPromotionalEvents then
+        self:TryShowInitialScreen()
+    end
+end
+
+function ZO_UISystemManager:OnPromotionalEventCampaignsUpdated()
+    if self.waitingForPromotionalEvents and IsPlayerActivated() then
+        self.waitingForPromotionalEvents = false
+        self:TryShowInitialScreen()
+    end
+end
+
+-- This function should only be called once IsPlayerActivated() and self.waitingForPromotionalEvents
+-- are both true.
+function ZO_UISystemManager:TryShowInitialScreen()
+    -- We only want to show one popup, check each one in priority order
     if TRIAL_ACCOUNT_SPLASH_DIALOG:ShouldShowSplash() then
         TRIAL_ACCOUNT_SPLASH_DIALOG:ShowSplash()
-        -- We only want to show one popup and trial dialog takes priority
+
+        FlagReturningPlayerAnnouncementSeen()
         FlagMarketAnnouncementSeen()
+    elseif self:TryShowReturningPlayerAnnouncement() then
+        -- TryShowReturningPlayerAnnouncement has handled showing the announcement
     elseif not HasShownMarketAnnouncement() then
         RequestMarketAnnouncement()
     end
 
-    self.waitingForAnnouncements = not HasShownMarketAnnouncement()
+    self.waitingForMarketAnnouncements = not HasShownMarketAnnouncement()
 
     self:TryOpenQueuedUISystem()
 end
 
+-- Returns whether the returning player flow is handling showing the announcement
+function ZO_UISystemManager:TryShowReturningPlayerAnnouncement()
+    local shouldShowAnnouncement = RETURNING_PLAYER_MANAGER:ShouldShowReturningPlayerAnnouncement()
+    if not shouldShowAnnouncement then
+        return false
+    end
+
+    -- Don't show the rewards announcement if we've already seen it recently
+    -- Also mark the announcement as seen so it doesn't pop up later
+    local REWARDS_ANNOUNCEMENT_SUPPRESSION_TIME_SECONDS = 2 * ZO_ONE_HOUR_IN_SECONDS
+    if RETURNING_PLAYER_MANAGER:IsIntroCampaignComplete()
+            and not RETURNING_PLAYER_MANAGER:HasClaimableDailyReward()
+            and GetTimeStamp() < RETURNING_PLAYER_MANAGER:GetLastTimeRewardsWereSeen() + REWARDS_ANNOUNCEMENT_SUPPRESSION_TIME_SECONDS then
+        FlagReturningPlayerAnnouncementSeen()
+        return false
+    end
+
+    -- If we're in a starter world, we don't want to show an announcement
+    -- We do want the announcement to show when we change areas, so don't flag as seen
+    if IsActiveWorldStarterWorld() then
+        return true
+    end
+
+    -- Make sure to update the promotional events manager: due to the timing
+    -- of the Lua events it may not have updated even though the data is ready
+    PROMOTIONAL_EVENT_MANAGER:RefreshCampaignData()
+    RETURNING_PLAYER_MANAGER:ShowReturningPlayerAnnouncementScreen()
+
+    FlagMarketAnnouncementSeen()
+
+    return true
+end
+
 function ZO_UISystemManager:OnMarketAnnouncementUpdated(shouldShow, isLocked)
-    self.waitingForAnnouncements = false
+    self.waitingForMarketAnnouncements = false
 
     if shouldShow and not (HasShownMarketAnnouncement() or SCENE_MANAGER:IsShowing("marketAnnouncement")) then
         SCENE_MANAGER:Show("marketAnnouncement")
@@ -131,7 +190,9 @@ function ZO_UISystemManager:ClearQueuedUISystem()
 end
 
 function ZO_UISystemManager:CanOpenUISystem()
-    return IsPlayerActivated() and not (self.waitingForAnnouncements or SCENE_MANAGER:IsShowing("marketAnnouncement"))
+    return IsPlayerActivated()
+        and not self.waitingForMarketAnnouncements
+        and not self:IsShowingAnnouncement()
 end
 
 function ZO_UISystemManager:RequestOpenUISystem(system, ...)
@@ -168,6 +229,10 @@ function ZO_UISystemManager:OpenKeyboardUISystem(system, ...)
     if internalassert(self.systems[system], "That UI system cannot be opened in this manner.") then
         self.systems[system].keyboardOpen(...)
     end
+end
+
+function ZO_UISystemManager:IsShowingAnnouncement()
+    return SCENE_MANAGER:IsShowing("marketAnnouncement") or RETURNING_PLAYER_MANAGER:IsShowingReturningPlayerScene()
 end
 
 ZO_UI_SYSTEM_MANAGER = ZO_UISystemManager:New()

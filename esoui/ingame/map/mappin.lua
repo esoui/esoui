@@ -914,6 +914,9 @@ do
             creator = function(pin)
                 ZO_WorldMap_GetTooltipForMode(ZO_MAP_TOOLTIP_MODE.INFORMATION):AppendQuestCondition(pin:GetQuestData())
             end,
+            headerCreator = function(pin)
+                ZO_WorldMap_GetTooltipForMode(ZO_MAP_TOOLTIP_MODE.INFORMATION):AppendQuestName(pin:GetQuestData())
+            end,
             tooltip = ZO_MAP_TOOLTIP_MODE.INFORMATION,
             gamepadCategory = GetColoredQuestNameFromPin,
             categoryId = ZO_MapPin.PIN_ORDERS.QUESTS,
@@ -925,6 +928,9 @@ do
         {
             creator = function(pin)
                 ZO_WorldMap_GetTooltipForMode(ZO_MAP_TOOLTIP_MODE.INFORMATION):AppendQuestEnding(pin:GetQuestIndex())
+            end,
+            headerCreator = function(pin)
+                ZO_WorldMap_GetTooltipForMode(ZO_MAP_TOOLTIP_MODE.INFORMATION):AppendQuestName(pin:GetQuestData())
             end,
             tooltip = ZO_MAP_TOOLTIP_MODE.INFORMATION,
             gamepadCategory = GetColoredQuestNameFromPin,
@@ -2662,6 +2668,10 @@ end
 
 function ZO_MapPin:SetHidden(hidden)
     return self.m_Control:SetHidden(hidden)
+end
+
+function ZO_MapPin:IsHidden(hidden)
+    return self.m_Control:IsHidden(hidden)
 end
 
 function ZO_MapPin:GetLevel()

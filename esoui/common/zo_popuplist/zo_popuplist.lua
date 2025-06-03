@@ -1,0 +1,118 @@
+ZO_POPUP_LIST_ENTRY_HEIGHT = 52
+
+ZO_POPUP_LIST_DATA_TYPE_BLANK = 1
+ZO_POPUP_LIST_DATA_TYPE_ITEM = 2
+
+local NUM_VISIBLE_LIST_SLOTS = 5
+
+ZO_PopupList = ZO_InitializingObject:Subclass()
+
+function ZO_PopupList:Initialize(control)
+    self.control = control
+    control.object = self
+
+    self.list = control:GetNamedChild("List")
+    ZO_ScrollList_AddDataType(self.list, ZO_POPUP_LIST_DATA_TYPE_BLANK, "ZO_PopupListBlankItemSlot", ZO_POPUP_LIST_ENTRY_HEIGHT, function(control, data) self:SetUpListBlankItem(control, data) end)
+    ZO_ScrollList_AddDataType(self.list, ZO_POPUP_LIST_DATA_TYPE_ITEM, "ZO_PopupListItemSlot", ZO_POPUP_LIST_ENTRY_HEIGHT, function(control, data) self:SetUpListRewardItem(control, data) end)
+end
+
+function ZO_PopupList:SetUpListRewardItem(control, data)
+    control.data = data
+
+    local nameControl = control:GetNamedChild("Name")
+
+    if data.currencyType and data.currencyType ~= CURT_NONE then
+        nameControl:SetText(data.formattedName)
+        nameControl:SetColor(ZO_NORMAL_TEXT:UnpackRGBA())
+    else
+        if data.rewardType == REWARD_ENTRY_TYPE_COLLECTIBLE then
+            nameControl:SetColor(ZO_WHITE:UnpackRGBA())
+        else
+            if data.displayQuality then
+                nameControl:SetColor(GetItemQualityColor(data.displayQuality):UnpackRGBA())
+            end
+        end
+
+        nameControl:SetText(data.formattedName)
+    end
+
+    control.icon = control:GetNamedChild("Icon")
+    local iconControl = control.icon
+    if data.icon then
+        iconControl:SetTexture(data.icon)
+        iconControl:SetHidden(false)
+    else
+        iconControl:SetHidden(true)
+    end
+
+    local stackCount = data.quantity
+    local stackCountLabel = iconControl:GetNamedChild("StackCount")
+    if stackCount and stackCount > 1 then
+        stackCountLabel:SetText(ZO_AbbreviateAndLocalizeNumber(stackCount, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES))
+    else
+        stackCountLabel:SetText("")
+    end
+
+    control:SetHidden(false)
+end
+
+function ZO_PopupList:SetUpListBlankItem(control, data)
+    control:SetHidden(false)
+end
+
+function ZO_PopupList:AddItem(dataType, data)
+    local scrollData = ZO_ScrollList_GetDataList(self.list)
+    local scrollEntryData = ZO_ScrollList_CreateDataEntry(dataType, data)
+    table.insert(scrollData, scrollEntryData)
+end
+
+function ZO_PopupList:ClearList()
+    local scrollData = ZO_ScrollList_GetDataList(self.list)
+    ZO_ScrollList_Clear(self.list)
+end
+
+function ZO_PopupList:UpdateList(listData)
+    local scrollData = ZO_ScrollList_GetDataList(self.list)
+    self.itemCount = #scrollData
+
+    local BLANK_DATA = {}
+    for i = #scrollData + 1, NUM_VISIBLE_LIST_SLOTS do
+        scrollData[#scrollData + 1] = ZO_ScrollList_CreateDataEntry(ZO_POPUP_LIST_DATA_TYPE_BLANK, BLANK_DATA)
+    end
+
+    ZO_ScrollList_Commit(self.list)
+end
+
+function ZO_PopupList:Hide()
+    self.control:SetHidden(true)
+    self.onMouseEnterCallback = nil
+    self.onMouseExitCallback = nil
+end
+
+function ZO_PopupList:SetOnMouseEnterCallback(onMouseEnterCallback)
+    self.onMouseEnterCallback = onMouseEnterCallback
+end
+
+function ZO_PopupList:SetOnMouseExitCallback(onMouseExitCallback)
+    self.onMouseExitCallback = onMouseExitCallback
+end
+
+function ZO_PopupList.OnControlInitialized(control)
+    POPUP_LIST = ZO_PopupList:New(control)
+end
+
+function ZO_PopupList:OnCloseButtonClicked(control)
+    self:Hide()
+end
+
+function ZO_PopupList.OnMouseEnter(control)
+    if POPUP_LIST.onMouseEnterCallback then
+        POPUP_LIST.onMouseEnterCallback(control)
+    end
+end
+
+function ZO_PopupList.OnMouseExit(control)
+    if POPUP_LIST.onMouseExitCallback then
+        POPUP_LIST.onMouseExitCallback(control)
+    end
+end

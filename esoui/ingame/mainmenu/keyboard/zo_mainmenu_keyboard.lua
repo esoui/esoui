@@ -235,14 +235,14 @@ ZO_CATEGORY_LAYOUT_INFO =
 
         descriptor = MENU_CATEGORY_GROUP,
         normal = function(button)
-            if PROMOTIONAL_EVENT_MANAGER:HasActiveCampaign() and not IsPromotionalEventSystemLocked() then
+            if PROMOTIONAL_EVENT_MANAGER:HasAnyUnclaimedRewards() then
                 return "EsoUI/Art/MainMenu/menuBar_group_gold_up.dds"
             else
                 return "EsoUI/Art/MainMenu/menuBar_group_up.dds"
             end
         end,
         pressed = function(button)
-            if PROMOTIONAL_EVENT_MANAGER:HasActiveCampaign() and not IsPromotionalEventSystemLocked() then
+            if PROMOTIONAL_EVENT_MANAGER:HasAnyUnclaimedRewards() then
                 return "EsoUI/Art/MainMenu/menuBar_group_gold_down.dds"
             else
                 return "EsoUI/Art/MainMenu/menuBar_group_down.dds"
@@ -250,7 +250,7 @@ ZO_CATEGORY_LAYOUT_INFO =
         end,
         disabled = "EsoUI/Art/MainMenu/menuBar_group_disabled.dds",
         highlight = function(button)
-            if PROMOTIONAL_EVENT_MANAGER:HasActiveCampaign() and not IsPromotionalEventSystemLocked() then
+            if PROMOTIONAL_EVENT_MANAGER:HasAnyUnclaimedRewards() then
                 return "EsoUI/Art/MainMenu/menuBar_group_gold_over.dds"
             else
                 return "EsoUI/Art/MainMenu/menuBar_group_over.dds"
@@ -465,10 +465,10 @@ function MainMenu_Keyboard:Initialize(control)
     control:RegisterForEvent(EVENT_ATTRIBUTE_UPGRADE_UPDATED, UpdateCategoryBar)
     control:RegisterForEvent(EVENT_LEVEL_UPDATE, UpdateCategoryBar)
     control:AddFilterForEvent(EVENT_LEVEL_UPDATE, REGISTER_FILTER_UNIT_TAG, "player")
-    control:RegisterForEvent(EVENT_PROMOTIONAL_EVENTS_ACTIVITY_PROGRESS_UPDATED, UpdateCategoryBar)
     PROMOTIONAL_EVENT_MANAGER:RegisterCallback("RewardsClaimed", UpdateCategoryBar)
     PROMOTIONAL_EVENT_MANAGER:RegisterCallback("CampaignSeenStateChanged", UpdateCategoryBar)
     PROMOTIONAL_EVENT_MANAGER:RegisterCallback("CampaignsUpdated", UpdateCategoryBar)
+    PROMOTIONAL_EVENT_MANAGER:RegisterCallback("ActivityProgressUpdated", UpdateCategoryBar)
 
     self:UpdateCategories()
 end

@@ -1339,7 +1339,6 @@ COLLECTIBLE_USAGE_BLOCK_REASON_BLOCKED_BY_TIMED_EVENT = COLLECTIBLE_USAGE_BLOCK_
 CURT_ENDLESS_DUNGEON = CURT_ARCHIVAL_FORTUNES
 STORE_FAILURE_NOT_ENOUGH_ENDLESS_DUNGEON_CURRENCY = STORE_FAILURE_NOT_ENOUGH_ARCHIVAL_FORTUNES
 LOOT_TYPE_ENDLESS_DUNGEON_CURRENCY = LOOT_TYPE_ARCHIVAL_FORTUNES
-TUTORIAL_TRIGGER_CURRENCY_GAINED_ENDLESS_DUNGEON = TUTORIAL_TRIGGER_CURRENCY_GAINED_ARCHIVAL_FORTUNES
 
 --
 IsZoneStoryActivelyTracked = IsZoneStoryTracked
@@ -1601,3 +1600,12 @@ function ZO_SetGroupFinderIsNewApplication(isNew)
 end
 
 ZO_HasGroupFinderNewApplication = GROUP_FINDER_APPLICATIONS_LIST_MANAGER.HasNewApplication
+
+-- removed in favor of single unified location to trigger currency transaction sounds when currency amount changes
+function ZO_StoreManager_OnPurchased(eventId, entryName, entryType, entryQuantity, money, specialCurrencyType1, specialCurrencyInfo1, specialCurrencyQuantity1, specialCurrencyType2, specialCurrencyInfo2, specialCurrencyQuantity2, itemSoundCategory)
+    -- As of right now there are no stores that use both special currency types and it doesn't make sense
+    -- to play two currency transact sounds at once, so we're only only keying off type1 for now.
+    -- If there is no special currency, then it means we're using gold.
+    local currencyTypeForSound = specialCurrencyType1 == CURT_NONE and CURT_MONEY or specialCurrencyType1
+    ZO_PlayCurrencyTransactSound(currencyTypeForSound)
+end

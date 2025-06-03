@@ -9,10 +9,12 @@ function InternalIngameRewardsManager:GetCollectibleEntryInfo(rewardId, parentCh
     local collectibleId = GetCollectibleRewardCollectibleId(rewardId)
     if collectibleId > 0 then
         local rewardData = ZO_RewardData:New(rewardId, parentChoice)
-        local collectibleName, collectibleDescription, collectibleIcon = GetCollectibleInfo(collectibleId)
+        local collectibleName, collectibleDescription, collectibleIcon, _, _, _, _, categoryType = GetCollectibleInfo(collectibleId)
         rewardData:SetFormattedName(ZO_CachedStrFormat(SI_COLLECTIBLE_NAME_FORMATTER, collectibleName))
         rewardData:SetIcon(collectibleIcon)
         rewardData:SetAnnouncementBackground(GetRewardAnnouncementBackgroundFileIndex(rewardId))
+        local categoryTypeName = GetString("SI_COLLECTIBLECATEGORYTYPE", categoryType)
+        rewardData:SetAnnouncementBannerText(zo_strformat(SI_ACCOUNCEMENT_REWARD_BANNER_TEXT_FREE_FORMATTER, categoryTypeName))
 
         return rewardData
     end

@@ -331,7 +331,7 @@ function Battleground_Scoreboard_Fragment:InitializeNarrationInfo()
                 for i = 1, numMedals do
                     local medalData = matchInfo.scoreboardEntryRawMedalData[i]
                     if medalData then
-                        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(medalData.name))
+                        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_BATTLEGROUND_MATCH_INFO_MEDAL_NAME_FORMATTER, medalData.name)))
                         ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(medalData.count))
                         ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_BATTLEGROUND_SCOREBOARD_POINTS_FORMATTER_NARRATION, medalData.count * medalData.scoreReward)))
                     end

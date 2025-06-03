@@ -33,8 +33,8 @@ end
 function ZO_GamepadSkillLineXpBar_Setup(skillLineData, xpBar, nameControl, noWrap)
     local formattedName = skillLineData:GetFormattedName()
     local advised = skillLineData:IsAdvised()
-    local lastXP, nextXP, currentXP = skillLineData:GetRankXPValues() 
-    if skillLineData:IsAvailable() then
+    local lastXP, nextXP, currentXP = skillLineData:GetRankXPValues()
+    if skillLineData:IsAvailable() or skillLineData:IsProgressionAccountWide() or skillLineData:IsClassSkillLine() then
         local skillLineRank = skillLineData:GetCurrentRank()
         ZO_SkillInfoXPBar_SetValue(xpBar, skillLineRank, lastXP, nextXP, currentXP, noWrap)
     elseif skillLineData:IsAdvised() then
@@ -217,9 +217,9 @@ do
         elseif showSkillStyle then
             local collectibleData = skillProgressionData:GetSelectedSkillStyleCollectibleData()
             if collectibleData then
-                increaseMultiIcon:AddIcon(collectibleData:GetIcon())
+                leftIndicator:AddIcon(collectibleData:GetIcon())
             else
-                increaseMultiIcon:AddIcon("EsoUI/Art/Progression/Gamepad/gp_skillStyleEmpty.dds")
+                leftIndicator:AddIcon("EsoUI/Art/Progression/Gamepad/gp_skillStyleEmpty.dds")
             end
         end
 
@@ -260,6 +260,8 @@ do
             else
                 iconTexture:SetColor(ZO_DEFAULT_DISABLED_COLOR:UnpackRGBA())
             end
+        else
+            iconTexture:SetColor(ZO_DEFAULT_DISABLED_COLOR:UnpackRGBA())
         end
 
         SetupAbilityIconFrame(control, skillData:IsPassive(), isActive, isInSkillBuild)
@@ -267,11 +269,12 @@ do
         --Label Color
         if displayView == ZO_SKILL_ABILITY_DISPLAY_INTERACTIVE then
             if not skillEntry.isPreview and isPurchased then
-                control.label:SetColor((selected and PURCHASED_COLOR or PURCHASED_UNSELECTED_COLOR):UnpackRGBA())
+                skillEntry:SetNameColors(PURCHASED_COLOR, PURCHASED_UNSELECTED_COLOR)
             end
-        else
-            control.label:SetColor(PURCHASED_COLOR:UnpackRGBA())
+        elseif skillEntry.enabled then
+            skillEntry:SetNameColors(PURCHASED_COLOR, PURCHASED_COLOR)
         end
+        control.label:SetColor(skillEntry:GetNameColor(selected):UnpackRGBA())
 
         --Lock Icon
         if control.lock then
@@ -281,7 +284,7 @@ do
         local labelWidth = SKILL_ENTRY_LABEL_WIDTH
 
         local showIncrease = (displayView == ZO_SKILL_ABILITY_DISPLAY_INTERACTIVE)
-        local showDecrease = SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeAllowDecrease()
+        local showDecrease = SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeAllowDecrease() and displayView == ZO_SKILL_ABILITY_DISPLAY_INTERACTIVE
         local showNew = (displayView == ZO_SKILL_ABILITY_DISPLAY_INTERACTIVE)
         local indicatorWidth = SetupIndicatorsForSkill(control.leftIndicator, control.rightIndicator, skillData, showIncrease, showDecrease, showNew)
         labelWidth = labelWidth - indicatorWidth
@@ -374,7 +377,7 @@ do
         control.label:SetWidth(labelWidth)
     end
 
-    function ZO_GamepadSkillEntryPreviewRow_Setup(control, skillData, overrideSlotIndex, overrideHotbar)
+    function ZO_GamepadSkillEntryPreviewRow_Setup(control, skillData, overrideSlotIndex, overrideHotbar, isReadOnly)
         local skillProgressionData = skillData:GetPointAllocatorProgressionData()
         local skillPointAllocator = skillData:GetPointAllocator()
         local isUnlocked = skillProgressionData:IsUnlocked()
@@ -405,8 +408,8 @@ do
         -- indicator
         local labelWidth = SKILL_ENTRY_LABEL_WIDTH
         local NO_RIGHT_INDICATOR = nil
-        local SHOW_INCREASE = true
-        local showDecrease = SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeAllowDecrease()
+        local SHOW_INCREASE = not isReadOnly
+        local showDecrease = SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeAllowDecrease() and not isReadOnly
         local SHOW_NEW = true
         local indicatorWidth = SetupIndicatorsForSkill(control.leftIndicator, NO_RIGHT_INDICATOR, skillData, SHOW_INCREASE, showDecrease, SHOW_NEW)
         labelWidth = labelWidth - indicatorWidth

@@ -79,7 +79,7 @@ function ZO_Tooltip:AddTypeSlotUniqueLine(itemLink, itemType, section, text1, te
     section:AddLine(lineText)
 end
 
-function ZO_Tooltip:AddTopSection(itemLink, showPlayerLocked, tradeBoPData)
+function ZO_Tooltip:AddTopSection(itemLink, showPlayerLocked, tradeBoPData, extraData)
     local topSection = self:AcquireSection(self:GetStyle("topSection"))
 
     --Item Type Info
@@ -141,7 +141,28 @@ function ZO_Tooltip:AddTopSection(itemLink, showPlayerLocked, tradeBoPData)
 
     self:AddTopLinesToTopSection(topSection, itemLink, showPlayerLocked, tradeBoPData)
 
+    if extraData then
+        local extraDataTopSubsection = topSection:AcquireSection(self:GetStyle("topSubsectionItemDetails"))
+        local addedLines = false
+
+        if extraData.timeRemainingText then
+            extraDataTopSubsection:AddLine(extraData.timeRemainingText, self:GetStyle("timeRemaining"))
+            addedLines = true
+        end
+
+        if addedLines then
+            topSection:AddSection(extraDataTopSubsection)
+        end
+    end
+
     self:AddSectionEvenIfEmpty(topSection)
+end
+
+local function AddItemStackCountLine(section, quantity, iconTextureFile, narrationLabelStringId)
+    if quantity > 0 then
+        local narrationText = zo_strformat(SI_GAMEPAD_INVENTORY_STACK_COUNT_NARRATION_FORMATTER, GetString(narrationLabelStringId), quantity)
+        section:AddLineWithCustomNarration(zo_iconTextFormat(iconTextureFile, 24, 24, quantity), narrationText)
+    end
 end
 
 function ZO_Tooltip:AddTopLinesToTopSection(topSection, itemLink, showPlayerLocked, tradeBoPData)
@@ -194,23 +215,13 @@ function ZO_Tooltip:AddTopLinesToTopSection(topSection, itemLink, showPlayerLock
         topSubsection:AddLine(zo_iconTextFormat("EsoUI/Art/Inventory/inventory_stolenItem_icon.dds", 24, 24, GetString(SI_GAMEPAD_ITEM_STOLEN_LABEL)), self:GetStyle("stolen"))
     end
 
-    --Item counts
-    local bagCount, bankCount, craftBagCount, houseBanksCount = GetItemLinkStacks(itemLink)
-    if bagCount > 0 then
-        topSubsection:AddLine(zo_iconTextFormat("EsoUI/Art/Tooltips/icon_bag.dds", 24, 24, bagCount))
-    end
-
-    if bankCount > 0 then
-        topSubsection:AddLine(zo_iconTextFormat("EsoUI/Art/Tooltips/icon_bank.dds", 24, 24, bankCount))
-    end
-
-    if craftBagCount > 0 then
-        topSubsection:AddLine(zo_iconTextFormat("EsoUI/Art/Tooltips/icon_craft_bag.dds", 24, 24, craftBagCount))
-    end
-
-    if houseBanksCount > 0 then
-        topSubsection:AddLine(zo_iconTextFormat("EsoUI/Art/Tooltips/icon_house_bank.dds", 24, 24, houseBanksCount))
-    end
+    -- Item Counts
+    local bagCount, bankCount, craftBagCount, houseBanksCount, furnitureVaultCount = GetItemLinkStacks(itemLink)
+    AddItemStackCountLine(topSubsection, bagCount, "EsoUI/Art/Tooltips/icon_bag.dds", SI_GAMEPAD_INVENTORY_STACK_COUNT_BAG_BACKPACK)
+    AddItemStackCountLine(topSubsection, bankCount, "EsoUI/Art/Tooltips/icon_bank.dds", SI_GAMEPAD_INVENTORY_STACK_COUNT_BAG_BANK)
+    AddItemStackCountLine(topSubsection, craftBagCount, "EsoUI/Art/Tooltips/icon_craft_bag.dds", SI_GAMEPAD_INVENTORY_STACK_COUNT_BAG_CRAFT_BAG)
+    AddItemStackCountLine(topSubsection, houseBanksCount, "EsoUI/Art/Tooltips/icon_house_bank.dds", SI_GAMEPAD_INVENTORY_STACK_COUNT_BAG_HOUSE_BANK)
+    AddItemStackCountLine(topSubsection, furnitureVaultCount, "EsoUI/Art/Tooltips/icon_furniture_vault.dds", SI_GAMEPAD_INVENTORY_STACK_COUNT_BAG_FURNITURE_VAULT)
 
     topSection:AddSectionEvenIfEmpty(topSubsection)
 end
@@ -811,7 +822,7 @@ function ZO_Tooltip:UpdateGamepadBorderDisplay(itemLink)
 end
 
 function ZO_Tooltip:LayoutGenericItem(itemLink, equipped, creatorName, forceFullDurability, previewValueToAdd, itemName, equipSlot, showPlayerLocked, tradeBoPData, extraData)
-    self:AddTopSection(itemLink, showPlayerLocked, tradeBoPData)
+    self:AddTopSection(itemLink, showPlayerLocked, tradeBoPData, extraData)
     self:AddItemTitle(itemLink, itemName)
     self:AddBaseStats(itemLink)
     if DoesItemLinkHaveArmorDecay(itemLink) then
@@ -877,7 +888,7 @@ function ZO_Tooltip:LayoutVendorTrash(itemLink, itemName, extraData)
 end
 
 function ZO_Tooltip:LayoutBooster(itemLink, itemName, extraData)
-    self:AddTopSection(itemLink)
+    self:AddTopSection(itemLink, DONT_SHOW_PLAYER_LOCKED, NO_TRADE_BOP_DATA, extraData)
     self:AddItemTitle(itemLink, itemName)
 
     local boosterDescriptionSection = self:AcquireSection(self:GetStyle("bodySection"))
@@ -917,7 +928,7 @@ do
 end
 
 function ZO_Tooltip:LayoutGlyph(itemLink, creatorName, itemName, tradeBoPData, extraData)
-    self:AddTopSection(itemLink, DONT_SHOW_PLAYER_LOCKED, tradeBoPData)
+    self:AddTopSection(itemLink, DONT_SHOW_PLAYER_LOCKED, tradeBoPData, extraData)
     self:LayoutInlineGlyph(itemLink, itemName)
     self:AddCreator(itemLink, creatorName)
     self:AddPrioritySellText(itemLink)
@@ -926,7 +937,7 @@ function ZO_Tooltip:LayoutGlyph(itemLink, creatorName, itemName, tradeBoPData, e
 end
 
 function ZO_Tooltip:LayoutSiege(itemLink, itemName, tradeBoPData, extraData)
-    self:AddTopSection(itemLink, DONT_SHOW_PLAYER_LOCKED, tradeBoPData)
+    self:AddTopSection(itemLink, DONT_SHOW_PLAYER_LOCKED, tradeBoPData, extraData)
     self:AddItemTitle(itemLink, itemName)
     local maxHP = GetItemLinkSiegeMaxHP(itemLink)
     if maxHP > 0 then
@@ -944,7 +955,7 @@ function ZO_Tooltip:LayoutSiege(itemLink, itemName, tradeBoPData, extraData)
 end
 
 function ZO_Tooltip:LayoutTool(itemLink, itemName, tradeBoPData, extraData)
-    self:AddTopSection(itemLink, DONT_SHOW_PLAYER_LOCKED, tradeBoPData)
+    self:AddTopSection(itemLink, DONT_SHOW_PLAYER_LOCKED, tradeBoPData, extraData)
     self:AddItemTitle(itemLink, itemName)
     self:AddBaseStats(itemLink)
     self:AddFlavorText(itemLink)
@@ -955,7 +966,7 @@ function ZO_Tooltip:LayoutTool(itemLink, itemName, tradeBoPData, extraData)
 end
 
 function ZO_Tooltip:LayoutSoulGem(itemLink, itemName, extraData)
-    self:AddTopSection(itemLink)
+    self:AddTopSection(itemLink, DONT_SHOW_PLAYER_LOCKED, NO_TRADE_BOP_DATA, extraData)
     self:AddItemTitle(itemLink, itemName)
     self:AddBaseStats(itemLink)
     self:AddFlavorText(itemLink)
@@ -965,7 +976,7 @@ function ZO_Tooltip:LayoutSoulGem(itemLink, itemName, extraData)
 end
 
 function ZO_Tooltip:LayoutAvARepair(itemLink, itemName, extraData)
-    self:AddTopSection(itemLink)
+    self:AddTopSection(itemLink, DONT_SHOW_PLAYER_LOCKED, NO_TRADE_BOP_DATA, extraData)
     self:AddItemTitle(itemLink, itemName)
     self:AddFlavorText(itemLink)
     self:AddPrioritySellText(itemLink)
@@ -981,7 +992,7 @@ do
     end
 
     function ZO_Tooltip:LayoutDyeStamp(itemLink, itemName, extraData)
-        self:AddTopSection(itemLink)
+        self:AddTopSection(itemLink, DONT_SHOW_PLAYER_LOCKED, NO_TRADE_BOP_DATA, extraData)
         self:AddItemTitle(itemLink, itemName)
         local onUseType = GetItemLinkItemUseType(itemLink)
         local descriptionSection = self:AcquireSection(self:GetStyle("bodySection"))
@@ -1034,7 +1045,7 @@ do
 end
 
 function ZO_Tooltip:LayoutMasterWritItem(itemLink, tradeBoPData, extraData)
-    self:AddTopSection(itemLink)
+    self:AddTopSection(itemLink, DONT_SHOW_PLAYER_LOCKED, NO_TRADE_BOP_DATA, extraData)
     self:AddItemTitle(itemLink)
 
     local writDescription = self:AcquireSection(self:GetStyle("bodySection"))
@@ -1051,7 +1062,7 @@ function ZO_Tooltip:LayoutMasterWritItem(itemLink, tradeBoPData, extraData)
     self:LayoutTradeBoPInfo(tradeBoPData)
 end
 
-function ZO_Tooltip:LayoutCraftedAbilityItem(itemLink, itemName, tradeBoPData)
+function ZO_Tooltip:LayoutCraftedAbilityItem(itemLink, itemName, tradeBoPData, extraData)
     -- The functions that make this work are only available in ingame.
     -- If we need to support internalingame, we'll need to refactor
     assert(ZO_IsIngameUI(), "CRAFTED_ABILITY item tooltips are not supported in the Crown Store.")
@@ -1059,7 +1070,7 @@ function ZO_Tooltip:LayoutCraftedAbilityItem(itemLink, itemName, tradeBoPData)
     local craftedAbilityId = isItemUseTypeCraftedAbilityScript and GetItemLinkItemUseReferenceId(itemLink) or 0
     local craftedAbilityData = SCRIBING_DATA_MANAGER:GetCraftedAbilityData(craftedAbilityId)
     
-    self:AddTopSection(itemLink)
+    self:AddTopSection(itemLink, DONT_SHOW_PLAYER_LOCKED, NO_TRADE_BOP_DATA, extraData)
     self:AddItemTitle(itemLink, itemName)
 
     if internalassert(craftedAbilityData ~= nil, "Trying to layout tooltip for ItemType CRAFTED_ABILITY but could not get CraftedAbilityData from onUseValue") then
@@ -1094,7 +1105,7 @@ function ZO_Tooltip:LayoutCraftedAbilityItem(itemLink, itemName, tradeBoPData)
     self:AddItemValue(itemLink)
 end
 
-function ZO_Tooltip:LayoutCraftedAbilityScriptItem(itemLink, itemName, tradeBoPData)
+function ZO_Tooltip:LayoutCraftedAbilityScriptItem(itemLink, itemName, tradeBoPData, extraData)
     -- The functions that make this work are only available in ingame.
     -- If we need to support internalingame, we'll need to refactor
     assert(ZO_IsIngameUI(), "CRAFTED_ABILITY_SCRIPT item tooltips are not supported in the Crown Store.")
@@ -1102,7 +1113,7 @@ function ZO_Tooltip:LayoutCraftedAbilityScriptItem(itemLink, itemName, tradeBoPD
     local craftedAbilityScriptId = isItemUseTypeCraftedAbilityScript and GetItemLinkItemUseReferenceId(itemLink) or 0
     local craftedAbilityScriptData = SCRIBING_DATA_MANAGER:GetCraftedAbilityScriptData(craftedAbilityScriptId)
     internalassert(craftedAbilityScriptData ~= nil, "Trying to layout tooltip for ItemType CRAFTED_ABILITY_SCRIPT but could not get CraftedAbilityScriptData from onUseValue")
-    self:AddTopSection(itemLink)
+    self:AddTopSection(itemLink, DONT_SHOW_PLAYER_LOCKED, NO_TRADE_BOP_DATA, extraData)
     self:AddItemTitle(itemLink, itemName)
 
     if craftedAbilityScriptData then
@@ -1134,8 +1145,8 @@ function ZO_Tooltip:LayoutCraftedAbilityScriptItem(itemLink, itemName, tradeBoPD
     self:AddItemValue(itemLink)
 end
 
-function ZO_Tooltip:LayoutBook(itemLink, tradeBoPData)
-    self:AddTopSection(itemLink, DONT_SHOW_PLAYER_LOCKED, tradeBoPData)
+function ZO_Tooltip:LayoutBook(itemLink, tradeBoPData, extraData)
+    self:AddTopSection(itemLink, DONT_SHOW_PLAYER_LOCKED, tradeBoPData, extraData)
     self:AddItemTitle(itemLink)
     if IsItemLinkBookPartOfCollection(itemLink) then
         local knownSection = self:AcquireSection(self:GetStyle("bodySection"))
@@ -1153,7 +1164,7 @@ function ZO_Tooltip:LayoutBook(itemLink, tradeBoPData)
 end
 
 function ZO_Tooltip:LayoutLure(itemLink, itemName, extraData)
-    self:AddTopSection(itemLink)
+    self:AddTopSection(itemLink, DONT_SHOW_PLAYER_LOCKED, NO_TRADE_BOP_DATA, extraData)
     self:AddItemTitle(itemLink, itemName)
     self:AddFlavorText(itemLink)
     self:AddPrioritySellText(itemLink)
@@ -1161,7 +1172,7 @@ function ZO_Tooltip:LayoutLure(itemLink, itemName, extraData)
 end
 
 function ZO_Tooltip:LayoutQuestStartOrFinishItem(itemLink, itemName, extraData)
-    self:AddTopSection(itemLink)
+    self:AddTopSection(itemLink, DONT_SHOW_PLAYER_LOCKED, NO_TRADE_BOP_DATA, extraData)
     self:AddItemTitle(itemLink)
     self:AddFlavorText(itemLink)
     self:AddPrioritySellText(itemLink)
@@ -1169,7 +1180,7 @@ function ZO_Tooltip:LayoutQuestStartOrFinishItem(itemLink, itemName, extraData)
 end
 
 function ZO_Tooltip:LayoutProvisionerRecipe(itemLink, itemName, tradeBoPData, extraData)
-    self:AddTopSection(itemLink, DONT_SHOW_PLAYER_LOCKED, tradeBoPData)
+    self:AddTopSection(itemLink, DONT_SHOW_PLAYER_LOCKED, tradeBoPData, extraData)
     self:AddItemTitle(itemLink, itemName)
     local IGNORE_LEVEL = true
     self:AddBaseStats(itemLink, IGNORE_LEVEL)
@@ -1247,7 +1258,7 @@ function ZO_Tooltip:LayoutProvisionerRecipe(itemLink, itemName, tradeBoPData, ex
 end
 
 function ZO_Tooltip:LayoutReagent(itemLink, itemName, extraData)
-    self:AddTopSection(itemLink)
+    self:AddTopSection(itemLink, DONT_SHOW_PLAYER_LOCKED, NO_TRADE_BOP_DATA, extraData)
     self:AddItemTitle(itemLink, itemName)
 
     local traitSection
@@ -1282,7 +1293,7 @@ function ZO_Tooltip:LayoutReagent(itemLink, itemName, extraData)
 end
 
 function ZO_Tooltip:LayoutEnchantingRune(itemLink, itemName, extraData)
-    self:AddTopSection(itemLink)
+    self:AddTopSection(itemLink, DONT_SHOW_PLAYER_LOCKED, NO_TRADE_BOP_DATA, extraData)
     self:AddItemTitle(itemLink, itemName)
 
     local known, name = GetItemLinkEnchantingRuneName(itemLink)
@@ -1323,7 +1334,7 @@ function ZO_Tooltip:LayoutEnchantingRune(itemLink, itemName, extraData)
 end
 
 function ZO_Tooltip:LayoutAlchemyBase(itemLink, itemName, extraData)
-    self:AddTopSection(itemLink)
+    self:AddTopSection(itemLink, DONT_SHOW_PLAYER_LOCKED, NO_TRADE_BOP_DATA, extraData)
     self:AddItemTitle(itemLink, itemName)
 
     local requiredLevel = GetItemLinkRequiredLevel(itemLink)
@@ -1356,7 +1367,7 @@ function ZO_Tooltip:LayoutAlchemyBase(itemLink, itemName, extraData)
 end
 
 function ZO_Tooltip:LayoutIngredient(itemLink, itemName, extraData)
-    self:AddTopSection(itemLink)
+    self:AddTopSection(itemLink, DONT_SHOW_PLAYER_LOCKED, NO_TRADE_BOP_DATA, extraData)
     self:AddItemTitle(itemLink, itemName)
     self:AddFlavorText(itemLink)
     self:AddPrioritySellText(itemLink)
@@ -1364,7 +1375,7 @@ function ZO_Tooltip:LayoutIngredient(itemLink, itemName, extraData)
 end
 
 function ZO_Tooltip:LayoutStyleMaterial(itemLink, itemName, extraData)
-    self:AddTopSection(itemLink)
+    self:AddTopSection(itemLink, DONT_SHOW_PLAYER_LOCKED, NO_TRADE_BOP_DATA, extraData)
     self:AddItemTitle(itemLink, itemName)
 
     local styleSection = self:AcquireSection(self:GetStyle("bodySection"))
@@ -1392,7 +1403,7 @@ function ZO_Tooltip:LayoutRawBaseMaterial(itemLink, itemName, extraData)
         local minRawMats = GetSmithingRefinementMinRawMaterial()
         local maxRawMats = GetSmithingRefinementMaxRawMaterial()
 
-        self:AddTopSection(itemLink)
+        self:AddTopSection(itemLink, DONT_SHOW_PLAYER_LOCKED, NO_TRADE_BOP_DATA, extraData)
         self:AddItemTitle(itemLink, itemName)
 
         refinedSection:AddLine(zo_strformat(SI_TOOLTIP_ITEM_FORMAT_REFINES_TO, minRawMats, maxRawMats, qualityColor:Colorize(refinedItemName)), self:GetStyle("bodyDescription"))
@@ -1405,7 +1416,7 @@ function ZO_Tooltip:LayoutRawBaseMaterial(itemLink, itemName, extraData)
 end
 
 function ZO_Tooltip:LayoutRawBooster(itemLink, itemName, extraData)
-    self:AddTopSection(itemLink)
+    self:AddTopSection(itemLink, DONT_SHOW_PLAYER_LOCKED, NO_TRADE_BOP_DATA, extraData)
     self:AddItemTitle(itemLink, itemName)
     local refinedItemLink = GetItemLinkRefinedMaterialItemLink(itemLink)
 
@@ -1430,7 +1441,7 @@ function ZO_Tooltip:LayoutRawBooster(itemLink, itemName, extraData)
 end
 
 function ZO_Tooltip:LayoutRawMaterial(itemLink, itemName, extraData)
-    self:AddTopSection(itemLink)
+    self:AddTopSection(itemLink, DONT_SHOW_PLAYER_LOCKED, NO_TRADE_BOP_DATA, extraData)
     self:AddItemTitle(itemLink, itemName)
     self:AddFlavorText(itemLink)
     self:AddPrioritySellText(itemLink)
@@ -1438,7 +1449,7 @@ function ZO_Tooltip:LayoutRawMaterial(itemLink, itemName, extraData)
 end
 
 function ZO_Tooltip:LayoutMaterial(itemLink, itemName, extraData)
-    self:AddTopSection(itemLink)
+    self:AddTopSection(itemLink, DONT_SHOW_PLAYER_LOCKED, NO_TRADE_BOP_DATA, extraData)
     self:AddItemTitle(itemLink, itemName)
     self:AddMaterialLevels(itemLink)
     self:AddPrioritySellText(itemLink)
@@ -1451,7 +1462,7 @@ local ITEMTYPE_TRAIT_DESCRIPTIONS = {
     [ITEMTYPE_JEWELRY_TRAIT] = SI_ITEM_FORMAT_STR_JEWELRY_TRAIT,
 }
 function ZO_Tooltip:LayoutTrait(itemLink, itemName, itemType, extraData)
-    self:AddTopSection(itemLink)
+    self:AddTopSection(itemLink, DONT_SHOW_PLAYER_LOCKED, NO_TRADE_BOP_DATA, extraData)
     self:AddItemTitle(itemLink, itemName)
 
     local traitDescriptionSection = self:AcquireSection(self:GetStyle("bodySection"))
@@ -1690,8 +1701,8 @@ do
 
         [ITEMTYPE_DYE_STAMP] = function(self, itemLink, creatorName, itemName, tradeBoPData, extraData) self:LayoutDyeStamp(itemLink, itemName, extraData) end,
 
-        [ITEMTYPE_CRAFTED_ABILITY] = function(self, itemLink, creatorName, itemName, tradeBoPData, extraData) self:LayoutCraftedAbilityItem(itemLink, itemName, tradeBoPData) end,
-        [ITEMTYPE_CRAFTED_ABILITY_SCRIPT] = function(self, itemLink, creatorName, itemName, tradeBoPData, extraData) self:LayoutCraftedAbilityScriptItem(itemLink, itemName, tradeBoPData) end,
+        [ITEMTYPE_CRAFTED_ABILITY] = function(self, itemLink, creatorName, itemName, tradeBoPData, extraData) self:LayoutCraftedAbilityItem(itemLink, itemName, tradeBoPData, extraData) end,
+        [ITEMTYPE_CRAFTED_ABILITY_SCRIPT] = function(self, itemLink, creatorName, itemName, tradeBoPData, extraData) self:LayoutCraftedAbilityScriptItem(itemLink, itemName, tradeBoPData, extraData) end,
     }
 
     --TODO: Get creatorName from itemLink?
@@ -1725,7 +1736,7 @@ do
                         layoutFunction(self, itemLink, creatorName, itemName, tradeBoPData, extraData)
                     else
                         if IsItemLinkBook(itemLink) then
-                            self:LayoutBook(itemLink, tradeBoPData)
+                            self:LayoutBook(itemLink, tradeBoPData, extraData)
                         else -- fallback to our default layout
                             if equipped == NOT_EQUIPPED then
                                 equipSlot = EQUIP_SLOT_NONE
@@ -2031,7 +2042,7 @@ function ZO_Tooltip:LayoutItemStatComparison(bagId, slotId, comparisonSlot)
     local statEffects = {}
     local activeMundusStoneBuffIndices = { GetUnitActiveMundusStoneBuffIndices("player") }
     for _, buffIndex in ipairs(activeMundusStoneBuffIndices) do
-        local buffName, _, _, buffSlot, _, _, _, _, _, _, abilityId = GetUnitBuffInfo("player", buffIndex)
+        local _, _, _, _, _, _, _, _, _, _, abilityId = GetUnitBuffInfo("player", buffIndex)
         local numStatsForAbility = GetAbilityNumDerivedStats(abilityId)
         for i = 1, numStatsForAbility do
             local statType, effectValue = GetAbilityDerivedStatAndEffectByIndex(abilityId, i)
@@ -2226,12 +2237,21 @@ function ZO_Tooltip:LayoutBankCurrencies()
     self:AddSection(bankCurrencyMainSection)
 end
 
-function ZO_Tooltip:LayoutGuildStoreSearchResult(itemLink, customOrBagStackCount, sellerName)
-    self:LayoutItemWithStackCountSimple(itemLink, customOrBagStackCount)
+function ZO_Tooltip:LayoutGuildStoreSearchResult(itemLink, customOrBagStackCount, sellerName, timeRemainingText)
+    local extraData
+    if timeRemainingText then
+        extraData = 
+        {
+            timeRemainingText = zo_strformat(SI_GAMEPAD_TRADING_HOUSE_BROWSE_RESULT_TOOLTIP_TIME_REMAINING, ZO_SELECTED_TEXT:Colorize(timeRemainingText))
+        }
+    end
+
+    self:LayoutItemWithStackCount(itemLink, NOT_EQUIPPED, NO_CREATOR_NAME, DONT_FORCE_FULL_DURABILITY, NO_PREVIEW_VALUE, customOrBagStackCount, EQUIP_SLOT_NONE, DONT_SHOW_PLAYER_LOCKED, NO_TRADE_BOP_DATA, extraData)
 
     if sellerName then
         local sellerNameSection = self:AcquireSection(self:GetStyle("bodySection"))
-        local userFacingSellerName = ZO_FormatUserFacingCharacterOrDisplayName(sellerName)
+        local userFacingSellerName = ZO_SELECTED_TEXT:Colorize(ZO_FormatUserFacingCharacterOrDisplayName(sellerName))
+
         sellerNameSection:AddLine(zo_strformat(SI_TRADING_HOUSE_SEARCH_RESULT_SELLER_FORMATTER, userFacingSellerName), self:GetStyle("bodyDescription"))
         self:AddSection(sellerNameSection)
     end

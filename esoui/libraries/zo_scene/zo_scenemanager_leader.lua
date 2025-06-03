@@ -13,6 +13,7 @@ end
 
 ZO_SceneManager_Leader.AddBypassHideSceneConfirmationReason("ALREADY_SEEN")
 ZO_SceneManager_Leader.AddBypassHideSceneConfirmationReason("INTERACT_ENDED")
+ZO_SceneManager_Leader.AddBypassHideSceneConfirmationReason("ACCESS_FORBIDDEN")
 
 --class
 
@@ -153,7 +154,7 @@ end
 
 -- scene logic
 
-function ZO_SceneManager_Leader:PopScenes(numberOfScenes)
+function ZO_SceneManager_Leader:PopScenes(numberOfScenes, bypassHideSceneConfirmationReason)
     if self.currentScene and self.currentScene:GetState() ~= SCENE_HIDING then
         local topSceneName
         if #self.sceneStack >= numberOfScenes then
@@ -163,7 +164,7 @@ function ZO_SceneManager_Leader:PopScenes(numberOfScenes)
         end
 
         local KEEP_SCENE_STACK = false
-        self:Show(topSceneName, nil, KEEP_SCENE_STACK, numberOfScenes)
+        self:Show(topSceneName, nil, KEEP_SCENE_STACK, numberOfScenes, bypassHideSceneConfirmationReason)
     end
 end
 
@@ -278,9 +279,9 @@ function ZO_SceneManager_Leader:Show(sceneName, push, nextSceneClearsSceneStack,
     end
 end
 
-function ZO_SceneManager_Leader:Hide(sceneName)
+function ZO_SceneManager_Leader:Hide(sceneName, bypassHideSceneConfirmationReason)
     if self.currentScene and self.currentScene:GetName() == sceneName and self.currentScene:GetState() ~= SCENE_HIDING then
-        self:PopScenes(1)
+        self:PopScenes(1, bypassHideSceneConfirmationReason)
     end
 end
 

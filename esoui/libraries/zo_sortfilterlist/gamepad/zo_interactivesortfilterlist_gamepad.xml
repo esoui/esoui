@@ -12,6 +12,17 @@
                 </Texture>
             </Controls>
         </Control>
+
+        <Control name="ZO_GamepadInteractiveSortFilterListMultiIcon" layer="OVERLAY" virtual="true">
+            <Dimensions y="ZO_GAMEPAD_LIST_ICON_SIZE" />
+
+            <Controls>
+                <Texture name="$(parent)Icon" inherits="ZO_MultiIcon">
+                    <Dimensions x="ZO_GAMEPAD_LIST_ICON_SIZE" y="ZO_GAMEPAD_LIST_ICON_SIZE"/>
+                    <Anchor point="CENTER" />
+                </Texture>
+            </Controls>
+        </Control>
         
         <Backdrop name="ZO_GamepadInteractiveSortFilterDefaultHighlight" inherits="ZO_GamepadWhiteOutlineHighlight" tier="HIGH" layer="OVERLAY" blendMode="ADD" virtual="true">
             <AnchorFill />

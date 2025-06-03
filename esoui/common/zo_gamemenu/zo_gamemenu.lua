@@ -4,13 +4,7 @@
 -- Base Game Menu for structuring a keyboard tree menu like settings
 ---------------------------
 
-ZO_GameMenu_Base = ZO_Object:Subclass()
-
-function ZO_GameMenu_Base:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
+ZO_GameMenu_Base = ZO_InitializingObject:Subclass()
 
 function ZO_GameMenu_Base:Initialize(control)
     self.control = control
@@ -21,13 +15,38 @@ function ZO_GameMenu_Base:Initialize(control)
 end
 
 function ZO_GameMenu_Base:InitializeTree()
-    self.navigationTree = ZO_Tree:New(GetControl(self.control, "NavigationContainerScrollChild"), 30, 8, 285)
+    self.navigationTree = ZO_Tree:New(self.control:GetNamedChild("NavigationContainerScrollChild"), 30, 8, 224)
+
+    local function GetEntryTextColor(control, normalColor, selectedColor, mouseOverColor, disabledColor)
+        local color
+        if not control.enabled then
+            color = disabledColor or ZO_DISABLED_TEXT
+        elseif control.selected then
+            color = selectedColor or ZO_SELECTED_TEXT
+        elseif control.mouseover then
+            color = mouseOverColor or ZO_HIGHLIGHT_TEXT
+        else
+            color = normalColor or ZO_NORMAL_TEXT
+        end
+        return color:UnpackRGBA()
+    end
+
+    function TreeEntryColorSetup(control, data)
+        function GetTextColor(control)
+            return GetEntryTextColor(control, data.normalColor, data.selectedColor, data.mouseOverColor, data.disabledColor)
+        end
+
+        control.GetTextColor = GetTextColor
+        control:RefreshTextColor()
+    end
 
     local function BaseTreeHeaderSetup(node, control, data, open)
         control:SetModifyTextType(MODIFY_TEXT_TYPE_UPPERCASE)
         control:SetText(data.name)
 
         ZO_LabelHeader_Setup(control, open)
+
+        TreeEntryColorSetup(control, data)
     end
 
     local function TreeHeaderSetup_Child(node, control, data, open, userRequested)
@@ -50,6 +69,8 @@ function ZO_GameMenu_Base:InitializeTree()
     local function TreeEntrySetup(node, control, data, open)
         control:SetSelected(false)
         control:SetText(data.name)
+
+        TreeEntryColorSetup(control, data)
     end
 
     local function TreeEntryOnSelected(control, data, selected, reselectingDuringRebuild)

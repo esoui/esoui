@@ -1,10 +1,10 @@
 ZO_GAMEPAD_TRADING_HOUSE_SEARCH_RESULTS_ICON_SIZE = ZO_GAMEPAD_LIST_ICON_SIZE
 ZO_GAMEPAD_TRADING_HOUSE_SEARCH_RESULTS_NAME_WIDTH = 290
-ZO_GAMEPAD_TRADING_HOUSE_SEARCH_RESULTS_TIME_LEFT_WIDTH = 66
+ZO_GAMEPAD_TRADING_HOUSE_SEARCH_RESULTS_STATUS_WIDTH = 66
 ZO_GAMEPAD_TRADING_HOUSE_SEARCH_RESULTS_UNIT_PRICE_WIDTH = 122
 ZO_GAMEPAD_TRADING_HOUSE_SEARCH_RESULTS_PRICE_WIDTH = 122
 
-ZO_GAMEPAD_TRADING_HOUSE_SEARCH_RESULTS_HEADER_INITIAL_OFFSET = ZO_GAMEPAD_TRADING_HOUSE_SEARCH_RESULTS_ICON_SIZE + (ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X * 2)
+ZO_GAMEPAD_TRADING_HOUSE_SEARCH_RESULTS_HEADER_INITIAL_OFFSET = ZO_GAMEPAD_TRADING_HOUSE_SEARCH_RESULTS_ICON_SIZE + ZO_GAMEPAD_TRADING_HOUSE_SEARCH_RESULTS_STATUS_WIDTH + (ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X * 3)
 
 local ZO_GamepadTradingHouse_BrowseResults = ZO_GamepadInteractiveSortFilterList:Subclass()
 
@@ -106,23 +106,29 @@ function ZO_GamepadTradingHouse_BrowseResults:SetupResultItemRow(control, itemDa
     local displayQuality = itemData.displayQuality or itemData.quality
     control.nameLabel:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, displayQuality))
 
-    -- time
+    control.statusMultiIcon:ClearIcons()
     if not itemData.isGuildSpecificItem then
-        local timeRemainingString = ZO_TradingHouse_GetItemDataFormattedTime(itemData)
-        control.timeLeftLabel:SetHidden(false)
-        control.timeLeftLabel:SetText(timeRemainingString)
-    else
-        control.timeLeftLabel:SetHidden(true)
+        local isLockedSetPiece = IsItemLinkLockedSetPiece(itemData.itemLink)
+        local canBeUsedToLearn = CanItemLinkBeUsedToLearn(itemData.itemLink)
+
+        if isLockedSetPiece then
+            control.statusMultiIcon:AddIcon("EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_locked_set_piece.dds", ZO_SUCCEEDED_TEXT, GetString(SI_SCREEN_NARRATION_LOCKED_SET_PIECE_ICON_NARRATION))
+        end
+
+        if canBeUsedToLearn then
+            control.statusMultiIcon:AddIcon("EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_can_learn.dds", ZO_SUCCEEDED_TEXT, GetString(SI_SCREEN_NARRATION_NOT_LEARNED_ICON_NARRATION))
+        end
     end
+    control.statusMultiIcon:Show()
 
     -- unit price
-    local currencyOptions = ZO_CountDigitsInNumber(itemData.purchasePricePerUnit) <= PRICE_THRESHOLD_DIGITS and ZO_GAMEPAD_TRADING_HOUSE_BROWSE_RESULTS_CURRENCY_OPTIONS or ZO_GAMEPAD_TRADING_HOUSE_BROWSE_RESULTS_ABBREVIATED_CURRENCY_OPTIONS
-    ZO_CurrencyControl_SetSimpleCurrency(control.unitPriceLabel, CURT_MONEY, itemData.purchasePricePerUnit, currencyOptions, CURRENCY_SHOW_ALL)
+    local currencyOptionsUnitPrice = ZO_CountDigitsInNumber(itemData.purchasePricePerUnit) <= PRICE_THRESHOLD_DIGITS and ZO_GAMEPAD_TRADING_HOUSE_BROWSE_RESULTS_CURRENCY_OPTIONS or ZO_GAMEPAD_TRADING_HOUSE_BROWSE_RESULTS_ABBREVIATED_CURRENCY_OPTIONS
+    ZO_CurrencyControl_SetSimpleCurrency(control.unitPriceLabel, CURT_MONEY, itemData.purchasePricePerUnit, currencyOptionsUnitPrice, CURRENCY_SHOW_ALL)
 
     -- total price
     local notEnoughMoney = itemData.purchasePrice > GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)
-    local currencyOptions = itemData.purchasePrice < PRICE_THRESHOLD and ZO_GAMEPAD_TRADING_HOUSE_BROWSE_RESULTS_CURRENCY_OPTIONS or ZO_GAMEPAD_TRADING_HOUSE_BROWSE_RESULTS_ABBREVIATED_CURRENCY_OPTIONS
-    ZO_CurrencyControl_SetSimpleCurrency(control.priceLabel, CURT_MONEY, itemData.purchasePrice, currencyOptions, CURRENCY_SHOW_ALL, notEnoughMoney)
+    local currencyOptionsTotalPrice = itemData.purchasePrice < PRICE_THRESHOLD and ZO_GAMEPAD_TRADING_HOUSE_BROWSE_RESULTS_CURRENCY_OPTIONS or ZO_GAMEPAD_TRADING_HOUSE_BROWSE_RESULTS_ABBREVIATED_CURRENCY_OPTIONS
+    ZO_CurrencyControl_SetSimpleCurrency(control.priceLabel, CURT_MONEY, itemData.purchasePrice, currencyOptionsTotalPrice, CURRENCY_SHOW_ALL, notEnoughMoney)
 end
 
 function ZO_GamepadTradingHouse_BrowseResults:OnSelectionChanged(oldItemData, newItemData)
@@ -139,7 +145,11 @@ function ZO_GamepadTradingHouse_BrowseResults:UpdateItemSelectedTooltip(selected
             itemLink = selectedData.itemLink
         end
 
-        GAMEPAD_TOOLTIPS:LayoutGuildStoreSearchResult(GAMEPAD_RIGHT_TOOLTIP, itemLink, selectedData.stackCount, selectedData.sellerName)
+        local timeRemaining
+        if not selectedData.isGuildSpecificItem then
+            timeRemaining = ZO_TradingHouse_GetItemDataFormattedTime(selectedData, TIME_FORMAT_STYLE_SHOW_LARGEST_UNIT_DESCRIPTIVE)
+        end
+        GAMEPAD_TOOLTIPS:LayoutGuildStoreSearchResult(GAMEPAD_RIGHT_TOOLTIP, itemLink, selectedData.stackCount, selectedData.sellerName, timeRemaining)
     else
         GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
     end
@@ -559,21 +569,18 @@ function ZO_GamepadTradingHouse_BrowseResults:GetNarrationText()
     local entryData = self:GetSelectedData()
 
     if entryData then
+        local entryControl = self:GetSelectedControl()
+        --Generate the narration for the status column
+        if entryControl and entryControl.statusMultiIcon and entryControl.statusMultiIcon.GetNarrationText then
+            ZO_AppendNarration(narrations, entryControl.statusMultiIcon:GetNarrationText())
+        end
+
         --Generate the narration for the item column
         ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_TRADING_HOUSE_COLUMN_ITEM)))
         ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(ZO_TradingHouse_GetItemDataFormattedName(entryData)))
         --If the item has more than 1, include stack count in the narration
         if entryData.stackCount and entryData.stackCount > 1 then
             ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_SCREEN_NARRATION_STACK_COUNT_FORMATTER, entryData.stackCount)))
-        end
-
-        --Generate the narration for the time column
-        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString("SI_TRADINGHOUSESORTFIELD", TRADING_HOUSE_SORT_EXPIRY_TIME)))
-        --If the item is a guild specific item (meaning it's permanent), use a special narration for the time column
-        if entryData.isGuildSpecificItem then
-            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_TRADING_HOUSE_RESULTS_NO_TIME_NARRATION)))
-        else
-            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(ZO_TradingHouse_GetItemDataFormattedTime(entryData)))
         end
 
         --Generate the narration for the unit price column

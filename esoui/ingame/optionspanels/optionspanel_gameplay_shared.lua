@@ -463,20 +463,20 @@ local ZO_OptionsPanel_Gameplay_ControlData =
                             StartWorldEffectOnPlayer(UI_WORLD_EFFECT_ENEMY_TELEGRAPH)
                         end,
         },
-        --Options_Gamepad_Reset_Controls
-        [OPTIONS_CUSTOM_SETTING_RESET_GAMEPAD_CONTROLS] =
+        --Options_Gamepad_Reset_Deadzones
+        [OPTIONS_CUSTOM_SETTING_RESET_GAMEPAD_DEADZONES] =
         {
             controlType = OPTIONS_INVOKE_CALLBACK,
             system = SETTING_TYPE_CUSTOM,
-            settingId = OPTIONS_CUSTOM_SETTING_RESET_GAMEPAD_CONTROLS,
+            settingId = OPTIONS_CUSTOM_SETTING_RESET_GAMEPAD_DEADZONES,
             panel = SETTING_PANEL_GAMEPLAY,
-            text = SI_GAMEPAD_OPTIONS_RESET_CONTROLS,
-            customResetToDefaultsFunction = function() ResetGamepadBindsToDefault() end,
+            text = SI_GAMEPAD_OPTIONS_RESET_DEADZONES,
+            customResetToDefaultsFunction = function() ResetGamepadDeadzonesToDefault() end,
             exists = function()
-                return not IsConsoleUI()
+                return IsInGamepadPreferredMode()
             end,
             callback = function()
-                ZO_Dialogs_ShowPlatformDialog("KEYBINDINGS_RESET_GAMEPAD_TO_DEFAULTS")
+                ZO_Dialogs_ShowPlatformDialog("KEYBINDINGS_RESET_GAMEPAD_DEADZONES_TO_DEFAULTS")
             end,
         },
     }

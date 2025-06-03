@@ -236,12 +236,14 @@ do
     end
 end
 
-function SkillsAdvisorSuggestions_Gamepad:GamepadSingleLineAbilityEntryTemplateSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
-    ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
-    ZO_GamepadSkillEntryTemplate_Setup(control, data, selected, activated, ZO_SKILL_ABILITY_DISPLAY_VIEW)
+function SkillsAdvisorSuggestions_Gamepad:GamepadSingleLineAbilityEntryTemplateSetup(control, data, parentControl)
+    local SELECTED = true
+    local ACTIVATED = true
+    ZO_SharedGamepadEntry_OnSetup(control, data, SELECTED)
+    ZO_GamepadSkillEntryTemplate_Setup(control, data, SELECTED, ACTIVATED, ZO_SKILL_ABILITY_DISPLAY_VIEW)
 end
 
-function SkillsAdvisorSuggestions_Gamepad:SkillsAdvisorSuggestionsTextDisplayTemplateSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
+function SkillsAdvisorSuggestions_Gamepad:SkillsAdvisorSuggestionsTextDisplayTemplateSetup(control, data, parentControl)
     control.label:SetText(data.text)
 end
 

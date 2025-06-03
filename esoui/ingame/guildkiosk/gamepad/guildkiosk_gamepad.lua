@@ -145,9 +145,9 @@ function ZO_GuildKiosk_Purchase_Gamepad:PerformDeferredInitialize()
             {
                 keybind = "DIALOG_PRIMARY",
                 text = SI_GAMEPAD_GUILD_KIOSK_HIRE_KEYBIND,
-                callback =  function()
+                callback = function()
                     GuildKioskPurchase(self.guildId)
-                    PlaySound(SOUNDS.ITEM_MONEY_CHANGED)
+                    ZO_PlayCurrencyTransactSound(CURT_MONEY)
                     SCENE_MANAGER:PopScenes(NUMBER_OF_KIOSK_SCENES)
                 end
             }
@@ -507,7 +507,7 @@ function ZO_GuildKiosk_Bid_Gamepad:PerformDeferredInitialize()
         {
             text = SI_GAMEPAD_GUILD_KIOSK_BID_DIALOG_TITLE,
         },
-        mainText = 
+        mainText =
         {
             text = function()
                 return zo_strformat(SI_GAMEPAD_GUILD_KIOSK_BID_BODY, ZO_SELECTED_TEXT:Colorize(self.guildName))
@@ -524,9 +524,9 @@ function ZO_GuildKiosk_Bid_Gamepad:PerformDeferredInitialize()
                 text = function()
                     return ZO_GuildKiosk_Bid_Shared.GetBidActionText(self.hasBidOnThisTraderAlready)
                 end,
-                callback =  function()
+                callback = function()
                     GuildKioskBid(self.guildId, self.bidAmount)
-                    PlaySound(SOUNDS.ITEM_MONEY_CHANGED)
+                    ZO_PlayCurrencyTransactSound(CURT_MONEY)
                     ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, SI_GAMEPAD_GUILD_KIOSK_BID_ALERT)
                     self.shouldPopScenes = true
                 end

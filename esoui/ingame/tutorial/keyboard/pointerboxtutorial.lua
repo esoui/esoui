@@ -157,10 +157,10 @@ function ZO_PointerBoxTutorial:RemoveTutorialByTrigger(tutorialTrigger)
     end
 end
 
-function ZO_PointerBoxTutorial:RemoveTutorial(tutorialIndex)
+function ZO_PointerBoxTutorial:RemoveTutorial(tutorialIndex, skipAnimation)
     local pointerBox = self:GetActiveTutorialByIndex(tutorialIndex)
     if pointerBox then
-        pointerBox:Hide()
+        pointerBox:Hide(skipAnimation)
     end
 end
 

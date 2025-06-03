@@ -1,5 +1,5 @@
 do
-    local categoryToChannelMappings = 
+    local categoryToChannelMappings =
     {
         [CHAT_CATEGORY_SAY] = CHAT_CHANNEL_SAY,
         [CHAT_CATEGORY_YELL] = CHAT_CHANNEL_YELL,
@@ -188,6 +188,19 @@ local ZO_OptionsPanel_Social_ControlData =
     --UI Settings
     [SETTING_TYPE_UI] =
     {
+        --Options_Social_RestrictedCommunication
+        [UI_SETTING_RESTRICTED_COMMUNICATION] =
+        {
+            controlType = OPTIONS_CHECKBOX,
+            system = SETTING_TYPE_UI,
+            settingId = UI_SETTING_RESTRICTED_COMMUNICATION,
+            panel = SETTING_PANEL_SOCIAL,
+            text = SI_INTERFACE_OPTIONS_RESTRICTED_COMMUNICATION,
+            tooltipText = SI_INTERFACE_OPTIONS_RESTRICTED_COMMUNICATION_TOOLTIP,
+            visible = function()
+                return IsCommunicationRestrictedAccount()
+            end,
+        },
         --Options_Social_ReturnCursorOnChatFocus
         [UI_SETTING_RETURN_CURSOR_ON_CHAT_FOCUS] =
         {

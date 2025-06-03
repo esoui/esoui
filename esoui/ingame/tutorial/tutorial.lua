@@ -104,11 +104,11 @@ function ZO_Tutorials:OnTutorialEnabledStateChanged(enabled)
     end
 end
 
-function ZO_Tutorials:ForceRemoveAll()
+function ZO_Tutorials:ForceRemoveAll(skipAnimation)
     for type, handler in pairs(self.tutorialHandlers) do
         local tutorialIndex = handler:GetCurrentlyDisplayedTutorialIndex()
         if tutorialIndex then
-            handler:OnRemoveTutorial(tutorialIndex)
+            handler:OnRemoveTutorial(tutorialIndex, skipAnimation)
         end
     end
 end

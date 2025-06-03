@@ -9,6 +9,197 @@ local HEADER_DATA = 2
 
 local AddOnManager = GetAddOnManager()
 
+local SAVED_VARIABLE_DISK_USAGE_SMALL_THRESHOLD = 0.1
+
+-----------------------------
+--AddOn Menu Console
+-----------------------------
+ZO_AddOnMenu_Console = ZO_Gamepad_ParametricList_Screen:Subclass()
+
+function ZO_AddOnMenu_Console:Initialize(control)
+    local NO_TAB_BAR = false
+    local ACTIVATE_ON_SHOW = true
+    ZO_Gamepad_ParametricList_Screen.Initialize(self, control, NO_TAB_BAR, ACTIVATE_ON_SHOW)
+    self.headerData =
+    {
+        titleText = GetString(SI_GAME_MENU_ADDONS),
+    }
+    ZO_GamepadGenericHeader_Refresh(self.header, self.headerData)
+
+    --Use a parent fragment instead of a scene here since the SCENE_MANAGER doesn't exist yet
+    local ALWAYS_ANIMATE = true
+    local parentFragment = ZO_FadeSceneFragment:New(control, ALWAYS_ANIMATE)
+    self:SetParentFragment(parentFragment)
+    self.categoryList = self:GetMainList()
+
+    EVENT_MANAGER:RegisterForEvent("AddOnMenu_Console", EVENT_CONSOLE_ADDONS_DISABLED_STATE_CHANGED, function()
+        if self:IsShowing() then
+            self:RefreshList()
+        end
+    end)
+
+    EVENT_MANAGER:RegisterForEvent("AddOnMenu_Console", EVENT_MOD_INSTALL_STATE_CHANGED, function()
+        if self:IsShowing() then
+            self:RefreshFooter()
+        end
+    end)
+end
+
+--Overridden from base
+function ZO_AddOnMenu_Console:OnDeferredInitialize()
+    self:InitializeFooter()
+end
+
+function ZO_AddOnMenu_Console:InitializeKeybindStripDescriptors()
+    self.keybindStripDescriptor =
+    {
+        alignment = KEYBIND_STRIP_ALIGN_LEFT,
+        -- Select
+        {
+            keybind = "UI_SHORTCUT_PRIMARY",
+            name = GetString(SI_GAMEPAD_SELECT_OPTION),
+            visible = function()
+                local targetData = self.categoryList:GetTargetData()
+                if targetData then
+                    return true
+                end
+
+                return false
+            end,
+            enabled = function()
+                local targetData = self.categoryList:GetTargetData()
+                if targetData then
+                    return targetData:IsEnabled()
+                end
+                return false
+            end,
+            callback = function()
+                local targetData = self.categoryList:GetTargetData()
+                if targetData and targetData.callback then
+                    targetData.callback()
+                end
+            end,
+            sound = SOUNDS.GAMEPAD_MENU_FORWARD,
+        },
+    }
+    ZO_Gamepad_AddBackNavigationKeybindDescriptorsWithSound(self.keybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON, function() SCENE_MANAGER:HideCurrentScene() end)
+end
+
+function ZO_AddOnMenu_Console:InitializeFooter()
+    local DISK_USAGE_ALMOST_FULL_THRESHOLD = 0.9
+
+    if DoesPlatformSupportModBrowser() then
+        self.footerData =
+        {
+            data1Text = function()
+                local currentDiskUsage = GetTotalModDiskUsageMB()
+                local maxDiskUsage = GetTotalModDiskCapacityMB()
+
+                local formattedText = zo_strformat(SI_GAMEPAD_ADDON_MENU_DISK_USAGE_FORMATTER, currentDiskUsage, maxDiskUsage)
+
+                if currentDiskUsage / maxDiskUsage >= DISK_USAGE_ALMOST_FULL_THRESHOLD then
+                    formattedText = ZO_ERROR_COLOR:Colorize(formattedText)
+                end
+
+                return formattedText
+            end,
+            data1TextNarration = function()
+                local currentDiskUsage = GetTotalModDiskUsageMB()
+                local maxDiskUsage = GetTotalModDiskCapacityMB()
+
+                return zo_strformat(SI_SCREEN_NARRATION_ADDON_MENU_DISK_USAGE_FORMATTER, currentDiskUsage, maxDiskUsage)
+            end,
+        }
+    else
+        self.footerData = {}
+    end
+end
+
+function ZO_AddOnMenu_Console:RefreshList()
+    local list = self.categoryList
+    list:Clear()
+
+    --Add the option for the addon manager
+    local managerEntryData = ZO_GamepadEntryData:New(GetString(SI_GAMEPAD_ADDON_MENU_CATEGORY_ADDON_MANAGER), "EsoUI/Art/Addons/Gamepad/gp_addons_manage.dds")
+    managerEntryData:SetIconTintOnSelection(true)
+    managerEntryData:SetEnabled(true)
+    managerEntryData.callback = function() SCENE_MANAGER:Push("gamepad_addons") end
+
+    list:AddEntry("ZO_GamepadMenuEntryTemplate", managerEntryData)
+
+    --Add the option for the mod browser
+    local browseEntryData = ZO_GamepadEntryData:New(GetString(SI_GAMEPAD_ADDON_MENU_CATEGORY_MOD_BROWSER), "EsoUI/Art/Addons/Gamepad/gp_addons_browse.dds")
+    browseEntryData:SetIconTintOnSelection(true)
+    local enabled = DoesPlatformSupportModBrowser() and AreUserAddOnsSupported()
+    browseEntryData:SetEnabled(enabled)
+    browseEntryData.callback = function() SCENE_MANAGER:Push("modBrowserGamepad") end
+    browseEntryData.tooltipText = function()
+        if enabled then
+            return GetString(SI_GAMEPAD_ADDON_MENU_MOD_BROWSER_TOOLTIP) 
+        else
+            return GetString(SI_GAMEPAD_ADDON_MENU_MOD_BROWSER_UNAVAILABLE_TOOLTIP)
+        end
+    end
+
+    list:AddEntry("ZO_GamepadMenuEntryTemplate", browseEntryData)
+
+    list:Commit()
+end
+
+--Overridden from base
+function ZO_AddOnMenu_Console:OnShowing()
+    ZO_Gamepad_ParametricList_Screen.OnShowing(self)
+
+    self:RefreshList()
+    self:RefreshFooter()
+end
+
+--Overridden from base
+function ZO_AddOnMenu_Console:PerformUpdate()
+   self.dirty = false
+end
+
+--Overridden from base
+function ZO_AddOnMenu_Console:OnSelectionChanged(list, selectedData, oldSelectedData)
+    ZO_Gamepad_ParametricList_Screen.OnSelectionChanged(self, list, selectedData, oldSelectedData)
+
+    local tooltipText
+    if selectedData and selectedData.tooltipText then
+        tooltipText = selectedData.tooltipText()
+    end
+
+    GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
+
+    if tooltipText then
+        GAMEPAD_TOOLTIPS:LayoutTextBlockTooltip(GAMEPAD_LEFT_TOOLTIP, tooltipText)
+    end
+end
+
+function ZO_AddOnMenu_Console:GetParentFragment()
+    return self.parentFragment
+end
+
+function ZO_AddOnMenu_Console:RefreshFooter()
+    if self:IsShowing() then
+        GAMEPAD_GENERIC_FOOTER:Refresh(self.footerData)
+    end
+end
+
+--Overridden from base
+function ZO_AddOnMenu_Console:GetFooterNarration()
+    if GAMEPAD_GENERIC_FOOTER_FRAGMENT:IsShowing() then
+        return GAMEPAD_GENERIC_FOOTER:GetNarrationText(self.footerData)
+    end
+end
+
+function ZO_AddOnMenu_Console.OnControlInitialized(control)
+    ADDON_MENU_CONSOLE = ZO_AddOnMenu_Console:New(control)
+end
+
+-----------------------------
+--AddOn Manager Gamepad
+-----------------------------
+
 ZO_AddOnManager_Gamepad = ZO_DeferredInitializingObject:MultiSubclass(ZO_SortFilterList_Gamepad)
 
 function ZO_AddOnManager_Gamepad:Initialize(control)
@@ -23,24 +214,35 @@ function ZO_AddOnManager_Gamepad:Initialize(control)
 
     ZO_DeferredInitializingObject.Initialize(self, ADDON_MANAGER_GAMEPAD_FRAGMENT)
     self:SetAutomaticallyColorRows(false)
-
     --Only display in the options menu if user addons are supported
-    if AreUserAddOnsSupported() then
-        local optionsEntryData = ZO_GamepadEntryData:New(GetString(SI_GAME_MENU_ADDONS), "EsoUI/Art/Options/Gamepad/gp_options_addons.dds")
-        optionsEntryData.sortOrder = ZO_GAMEPAD_OPTIONS_CATEGORY_SORT_ORDER[SETTING_PANEL_ACCOUNT] + 1
-        optionsEntryData:SetIconTintOnSelection(true)
-        optionsEntryData.visible = function()
-            if ZO_IsPregameUI() then
-                return IsAccountLoggedIn()
-            else
-                return true
-            end
+    self.shouldShowInOptions = AreUserAddOnsSupported()
+
+    local optionsEntryData = ZO_GamepadEntryData:New(GetString(SI_GAME_MENU_ADDONS), "EsoUI/Art/Options/Gamepad/gp_options_addons.dds")
+    optionsEntryData.sortOrder = ZO_GAMEPAD_OPTIONS_CATEGORY_SORT_ORDER[SETTING_PANEL_ACCOUNT] + 1
+    optionsEntryData:SetIconTintOnSelection(true)
+    optionsEntryData.visible = function()
+        if ZO_IsPregameUI() then
+            return IsAccountLoggedIn() and AreUserAddOnsSupported()
+        else
+            return self.shouldShowInOptions
         end
-        optionsEntryData.callback = function()
+    end
+    optionsEntryData.callback = function()
+        if DoesPlatformSupportModBrowser() or ZO_IsForceConsoleFlow() then
+            SCENE_MANAGER:Push("console_addons")
+        else
             SCENE_MANAGER:Push("gamepad_addons")
         end
-        GAMEPAD_OPTIONS:RegisterCustomCategory(optionsEntryData)
     end
+    GAMEPAD_OPTIONS:RegisterCustomCategory(optionsEntryData)
+
+    --We need to register this function right away as the value is necessary before the deferred initialize gets run
+    local function OnConsoleAddOnsDisabledStateChanged(_, consoleAddOnsDisabled)
+        if not consoleAddOnsDisabled then
+            self.shouldShowInOptions = true
+        end
+    end
+    EVENT_MANAGER:RegisterForEvent("AddOnManager_Gamepad", EVENT_CONSOLE_ADDONS_DISABLED_STATE_CHANGED, OnConsoleAddOnsDisabledStateChanged)
 end
 
 function ZO_AddOnManager_Gamepad:OnDeferredInitialize()
@@ -88,7 +290,7 @@ function ZO_AddOnManager_Gamepad:RegisterDialogs()
         {
             text = SI_GAMEPAD_OPTIONS_MENU,
         },
-        setup = function(dialogControl)
+        setup = function(dialogControl, addOnData)
             local parametricListEntries = dialogControl.info.parametricList
             ZO_ClearNumericallyIndexedTable(parametricListEntries)
 
@@ -229,9 +431,104 @@ function ZO_AddOnManager_Gamepad:RegisterDialogs()
                 table.insert(parametricListEntries, resetCustomKeybindsEntry)
             end
 
+            --If there are unused addon saved variables, show an option to clear them
+            local unusedSavedVariableUsage = AddOnManager:GetTotalUnusedAddOnSavedVariablesDiskUsageMB()
+            if unusedSavedVariableUsage > 0 then
+                --Delete Unused Saved Variables
+                local deleteUnusedSavedVariablesEntry =
+                {
+                    template = "ZO_GamepadFullWidthLeftLabelEntryTemplate",
+                    templateData =
+                    {
+                        text = GetString(SI_GAMEPAD_ADDON_MANAGER_DELETE_UNUSED_SAVED_VARIABLES),
+                        setup = ZO_SharedGamepadEntry_OnSetup,
+                        callback = function(dialog)
+                            ZO_Dialogs_ReleaseDialogOnButtonPress("ADDON_MANAGER_OPTIONS_GAMEPAD")
+                            local dialogData =
+                            {
+                                onConfirmCallback = function()
+                                    AddOnManager:ClearUnusedAddOnSavedVariables()
+                                end,
+                            }
+                            ZO_Dialogs_ShowGamepadDialog("ADDON_DELETE_UNUSED_SAVED_VARIABLES_CONFIRMATION", dialogData)
+                        end,
+                        tooltipText = function(dialog)
+                            local savedVariableDiskUsage = AddOnManager:GetTotalUnusedAddOnSavedVariablesDiskUsageMB()
+                            local formattedUsageText
+                            if savedVariableDiskUsage > 0 and savedVariableDiskUsage < SAVED_VARIABLE_DISK_USAGE_SMALL_THRESHOLD then
+                                formattedUsageText = GetString(SI_GAMEPAD_ADDON_MANAGER_SAVED_VARIABLES_USAGE_SMALL)
+                            else
+                                formattedUsageText = zo_strformat(SI_GAMEPAD_ADDON_MANAGER_SAVED_VARIABLES_USAGE_FORMATTER, savedVariableDiskUsage)
+                            end
+                            return ZO_GenerateParagraphSeparatedList({ GetString(SI_GAMEPAD_ADDON_MANAGER_DELETE_UNUSED_SAVED_VARIABLES_TOOLTIP), formattedUsageText })
+                        end,
+                        narrationTooltip = GAMEPAD_LEFT_DIALOG_TOOLTIP,
+                    },
+                }
+                table.insert(parametricListEntries, deleteUnusedSavedVariablesEntry)
+            end
+
+            --If there is a selected addon, include an option to delete saved variables
+            if addOnData and addOnData.addOnIndex then
+                local savedVariableUsage = AddOnManager:GetUserAddOnSavedVariablesDiskUsageMB(addOnData.addOnIndex)
+                if savedVariableUsage > 0 then
+                    --Delete Saved Variables
+                    local deleteSavedVariablesEntry =
+                    {
+                        template = "ZO_AddonManagerDeleteSavedVariablesEntryTemplate",
+                        headerTemplate = "ZO_GamepadMenuEntryFullWidthHeaderTemplate",
+                        header = function(dialog)
+                            return dialog.data.strippedAddOnName
+                        end,
+                        templateData =
+                        {
+                            text = GetString(SI_GAMEPAD_ADDON_MANAGER_DELETE_SAVED_VARIABLES),
+                            setup = ZO_SharedGamepadEntry_OnSetup,
+                            callback = function(dialog)
+                                ZO_Dialogs_ReleaseDialogOnButtonPress("ADDON_MANAGER_OPTIONS_GAMEPAD")
+                                local dialogData =
+                                {
+                                    onConfirmCallback = function()
+                                        DeleteSavedVariablesForAddonIndex(dialog.data.addOnIndex)
+                                    end,
+                                    addonName = dialog.data.strippedAddOnName,
+                                }
+                                ZO_Dialogs_ShowGamepadDialog("ADDON_DELETE_SAVED_VARIABLES_CONFIRMATION", dialogData)
+                            end,
+                            tooltipText = function(dialog)
+                                local savedVariableDiskUsage = AddOnManager:GetUserAddOnSavedVariablesDiskUsageMB(dialog.data.addOnIndex)
+                                local formattedUsageText
+                                if savedVariableDiskUsage > 0 and savedVariableDiskUsage < SAVED_VARIABLE_DISK_USAGE_SMALL_THRESHOLD then
+                                    formattedUsageText = GetString(SI_GAMEPAD_ADDON_MANAGER_SAVED_VARIABLES_USAGE_SMALL)
+                                else
+                                    formattedUsageText = zo_strformat(SI_GAMEPAD_ADDON_MANAGER_SAVED_VARIABLES_USAGE_FORMATTER, savedVariableDiskUsage)
+                                end
+                                return ZO_GenerateParagraphSeparatedList({ GetString(SI_GAMEPAD_ADDON_MANAGER_DELETE_SAVED_VARIABLES_TOOLTIP), formattedUsageText })
+                            end,
+                            narrationTooltip = GAMEPAD_LEFT_DIALOG_TOOLTIP,
+                        },
+                    }
+                    table.insert(parametricListEntries, deleteSavedVariablesEntry)
+                end
+            end
+
             dialogControl:setupFunc()
         end,
         parametricList = {}, -- Generated Dynamically
+        parametricListOnSelectionChangedCallback = function(dialog, list, newSelectedData, oldSelectedData)
+            local tooltipText
+
+            if newSelectedData and newSelectedData.tooltipText then
+                tooltipText = newSelectedData.tooltipText(dialog)
+            end
+
+            if tooltipText then
+                GAMEPAD_TOOLTIPS:LayoutTextBlockTooltip(GAMEPAD_LEFT_DIALOG_TOOLTIP, tooltipText)
+                ZO_GenericGamepadDialog_ShowTooltip(dialog)
+            else
+                ZO_GenericGamepadDialog_HideTooltip(dialog)
+            end
+        end,
         buttons =
         {
             {
@@ -292,7 +589,7 @@ function ZO_AddOnManager_Gamepad:InitializeFooter()
 end
 
 function ZO_AddOnManager_Gamepad:OnConfirmHideScene(scene, nextSceneName, bypassHideSceneConfirmationReason)
-    if ZO_IsIngameUI() and self.isDirty and bypassHideSceneConfirmationReason == nil then
+    if ZO_IsIngameUI() and self:IsDirty() and bypassHideSceneConfirmationReason == nil then
         ZO_Dialogs_ShowGamepadDialog("GAMEPAD_CONFIRM_LEAVE_ADDON_MANAGER",
         {
             confirmCallback = function()
@@ -396,7 +693,7 @@ function ZO_AddOnManager_Gamepad:InitializeKeybinds()
                     end
                     AddOnManager:SetAddOnEnabled(selectedData.addOnIndex, not enabled)
                     self:MarkDirty()
-                    self:RefreshVisible()
+                    self:RefreshData()
                     self:UpdateTooltip()
                     self:UpdateKeybinds()
                     -- The enabled state has changed, so re-narrate
@@ -423,7 +720,7 @@ function ZO_AddOnManager_Gamepad:InitializeKeybinds()
             end,
             enabled = function()
                 if ZO_IsIngameUI() and HasAgreedToEULA(EULA_TYPE_ADDON_EULA) then
-                    return self.isDirty
+                    return self:IsDirty()
                 else
                     return true
                 end
@@ -445,7 +742,7 @@ function ZO_AddOnManager_Gamepad:InitializeKeybinds()
             name = GetString(SI_GAMEPAD_OPTIONS_MENU),
             keybind = "UI_SHORTCUT_TERTIARY",
             callback = function()
-                ZO_Dialogs_ShowPlatformDialog("ADDON_MANAGER_OPTIONS_GAMEPAD")
+                ZO_Dialogs_ShowPlatformDialog("ADDON_MANAGER_OPTIONS_GAMEPAD", self:GetSelectedData())
             end,
         },
     }
@@ -497,9 +794,11 @@ do
 
             if author ~= "" then
                 local strippedAuthor = StripText(author)
+                entryData.addOnAuthor = author
                 entryData.addOnAuthorByLine = zo_strformat(SI_ADD_ON_AUTHOR_LINE, author)
                 entryData.strippedAddOnAuthorByLine = zo_strformat(SI_ADD_ON_AUTHOR_LINE, strippedAuthor)
             else
+                entryData.addOnAuthor = ""
                 entryData.addOnAuthorByLine = ""
                 entryData.strippedAddOnAuthorByLine = ""
             end
@@ -666,13 +965,20 @@ function ZO_AddOnManager_Gamepad:ShowEula()
 end
 
 function ZO_AddOnManager_Gamepad:OnEulaHidden()
-    self:MarkDirty()
+    --There's no need to mark anything dirty if the user has no addons or didn't actually agree to the EULA
+    if HasAgreedToEULA(EULA_TYPE_ADDON_EULA) and AddOnManager:GetNumAddOns() > 0 then
+        self:MarkDirty()
+    end
     self:RefreshData()
     self:UpdateKeybinds()
 end
 
 function ZO_AddOnManager_Gamepad:MarkDirty()
     self.isDirty = true
+end
+
+function ZO_AddOnManager_Gamepad:IsDirty()
+    return self.isDirty
 end
 
 function ZO_AddOnManager_Gamepad:RefreshHeader()

@@ -216,6 +216,12 @@ function ZO_BankingCommon_Gamepad:InitializeFiltersDialog()
                 template = "ZO_GamepadMultiSelectionDropdownItem",
                 templateData =
                 {
+                    visible = function()
+                        -- Hide the filter dropdown for the Furniture Vault
+                        -- because the list is automatically filtered to only
+                        -- show furnishings.
+                        return not IsFurnitureVault(GetBankingBag())
+                    end,
                     setup = function(control, data, selected, reselectingDuringRebuild, enabled, active)
                         local dialog = data.dialog
                         local dialogData = dialog and dialog.data

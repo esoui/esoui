@@ -32,6 +32,10 @@ function ZO_SkillPointAllocator:GetSkillData()
     return self.skillData
 end
 
+function ZO_SkillPointAllocator:GetSkillLineData()
+    return self.skillData:GetSkillLineData()
+end
+
 function ZO_SkillPointAllocator:Revert()
     self.isPurchased = self.skillData:IsPurchased()
     self.skillProgressionKey = self.skillData:GetCurrentSkillProgressionKey()
@@ -127,16 +131,19 @@ function ZO_SkillPointAllocator:GetPendingPointAllocationDelta()
 end
 
 function ZO_SkillPointAllocator:GetNumPointsAllocated()
+    local pointsAllocated = 0
     if self:IsPurchased() then
         local autoGrantSubtraction = self.skillData:IsAutoGrant() and 1 or 0
         if self.skillData:IsPassive() then
-            return self:GetRank() - autoGrantSubtraction
+            pointsAllocated = self:GetRank() - autoGrantSubtraction
         else
             local rawPointsAllocated = self:GetMorphSlot() == MORPH_SLOT_BASE and 1 or 2
-            return rawPointsAllocated - autoGrantSubtraction
+            pointsAllocated = rawPointsAllocated - autoGrantSubtraction
         end
     end
-    return 0
+
+    local multiplier = self.skillData:GetSkillPointCostMultiplier()
+    return pointsAllocated * multiplier
 end
 
 function ZO_SkillPointAllocator:HasValidChangesForMode(allocationMode)
@@ -149,6 +156,10 @@ function ZO_SkillPointAllocator:HasValidChangesForMode(allocationMode)
             elseif self:IsSkillProgressionKeyDowngradePending() then
                 return self.skillData:IsActive()
             end
+        elseif allocationMode == SKILL_POINT_ALLOCATION_MODE_SUBCLASS_ONLY then
+            -- Any skill point change that would incur a cost is not valid in subclass only mode
+            -- as only skill line changes can incur a cost
+            return false
         end
     end
     return true
@@ -160,8 +171,13 @@ function ZO_SkillPointAllocator:HasAvailableSkillPoints()
     return self.manager:GetAvailableSkillPoints() > 0
 end
 
+function ZO_SkillPointAllocator:HasEnoughAvailableSkillPointsForSingleTransaction()
+    local costPerTransaction = self.skillData:GetSkillPointCostMultiplier()
+    return self.manager:GetAvailableSkillPoints() >= costPerTransaction
+end
+
 function ZO_SkillPointAllocator:CanPurchase()
-    return not self.isPurchased and self.skillData:MeetsLinePurchaseRequirement() and self:HasAvailableSkillPoints()
+    return not self.isPurchased and self.skillData:MeetsLinePurchaseRequirement() and self:HasEnoughAvailableSkillPointsForSingleTransaction()
 end
 
 function ZO_SkillPointAllocator:Purchase(ignoreCallbacks)
@@ -198,10 +214,10 @@ function ZO_SkillPointAllocator:Sell(ignoreCallbacks)
 end
 
 function ZO_SkillPointAllocator:CanIncreaseRank()
-    if self.skillData:IsPassive() and self.isPurchased and self:HasAvailableSkillPoints() then
+    if self.skillData:IsPassive() and self.isPurchased and self:HasEnoughAvailableSkillPointsForSingleTransaction() then
         local nextSkillProgressionData = self:GetProgressionData():GetNextRankData()
         if nextSkillProgressionData then
-            return nextSkillProgressionData:MeetsLineRankUnlockRequirement()
+            return nextSkillProgressionData:MeetsUnlockRequirement()
         end
     end
     return false
@@ -234,8 +250,12 @@ function ZO_SkillPointAllocator:DecreaseRank(ignoreCallbacks)
 end
 
 function ZO_SkillPointAllocator:CanMorph()
+    -- This default function assumes that morphs can be freely changed, and any mode that doesn't allow that will override
+    -- As such, we don't check what morph level it's currently at, just that it can morph
+    -- First question: Can it even be morphed?
     if not self.skillData:IsPassive() and self.isPurchased and self.skillData:IsAtMorph() then
-        return self:GetSkillProgressionKey() ~= MORPH_SLOT_BASE or self:HasAvailableSkillPoints()
+        -- Second question: can I afford it? If it's a remorph, it doesn't cost any points.
+        return self:GetSkillProgressionKey() ~= MORPH_SLOT_BASE or self:HasEnoughAvailableSkillPointsForSingleTransaction()
     end
     return false
 end
@@ -323,12 +343,14 @@ function ZO_SkillPointAllocator:Maxout(ignoreCallbacks)
 
             local IGNORE_CALLBACKS_UNTIL_LAST_STEP = true
 
+            local SUBTRACT_A_POINT_COST = -1
+            local pointCost = SUBTRACT_A_POINT_COST * self.skillData:GetSkillPointCostMultiplier()
             if self:Purchase(IGNORE_CALLBACKS_UNTIL_LAST_STEP) then
-                manager:ChangeAvailableSkillPoints(-1, DONT_BROADCAST)
+                manager:ChangeAvailableSkillPoints(pointCost, DONT_BROADCAST)
             end
 
             while self:IncreaseRank(IGNORE_CALLBACKS_UNTIL_LAST_STEP) do
-                manager:ChangeAvailableSkillPoints(-1, DONT_BROADCAST)
+                manager:ChangeAvailableSkillPoints(pointCost, DONT_BROADCAST)
             end
 
             -- Fire off the appropriate callback unless instructed not to
@@ -396,7 +418,13 @@ end
 function ZO_SkillPointAllocator:AddChangesToMessage()
     if self:IsAnyChangePending() then
         local skillData = self.skillData
-        local skillLineId = skillData:GetSkillLineData():GetId()
+        local skillLineData = self.skillData:GetSkillLineData()
+        if not skillLineData:IsActive() then
+            -- Don't bother trying to commit any individual skill changes if the line is going to be deactivated anyway
+            return false
+        end
+
+        local skillLineId = skillLineData:GetId()
         if skillData:IsPassive() then
             local relevantRankData = nil
             local isRemoval = not self:IsPurchased()
@@ -412,7 +440,10 @@ function ZO_SkillPointAllocator:AddChangesToMessage()
         else
             AddActiveChangeToAllocationRequest(skillLineId, skillData:GetProgressionId(), self.skillProgressionKey, self:IsPurchased())
         end
+
+        return true
     end
+    return false
 end
 
 function ZO_SkillPointAllocator.GetPurchaseSound()
@@ -498,6 +529,52 @@ function ZO_MorphsOnlySkillPointAllocator.GetIncreaseRankSound()
 end
 
 function ZO_MorphsOnlySkillPointAllocator.GetMorphChosenSound()
+    return SOUNDS.ACTIVE_SKILL_RESPEC_MORPH_CHOSEN
+end
+
+----------------------------------------
+--Subclass-Only Skill Point Allocator --
+----------------------------------------
+
+ZO_SubclassOnlySkillPointAllocator = ZO_SkillPointAllocator:Subclass()
+
+function ZO_SubclassOnlySkillPointAllocator:CanSell()
+    if ZO_SkillPointAllocator.CanSell(self) then
+        -- You can only sell this skill if it hasn't been purchased on the server yet
+        return not self:GetSkillData():IsPurchased()
+    end
+    return false
+end
+
+function ZO_SubclassOnlySkillPointAllocator:CanMorph()
+    if ZO_SkillPointAllocator.CanMorph(self) then
+        -- You can only swap morphs on this skill if it hasn't been morphed on the server yet
+        return not self:GetSkillData():IsMorphed()
+    end
+end
+
+function ZO_SubclassOnlySkillPointAllocator:CanUnmorph()
+    if ZO_SkillPointAllocator.CanUnmorph(self) then
+        -- You can only unmorph this skill if it hasn't been morphed on the server yet
+        return not self:GetSkillData():IsMorphed()
+    end
+    return false
+end
+
+function ZO_SubclassOnlySkillPointAllocator:GetLowestAllowedRank()
+    -- You can only decrease rank if it's not lower than the rank saved on the server
+    return self:GetSkillData():GetCurrentRank()
+end
+
+function ZO_SubclassOnlySkillPointAllocator.GetPurchaseSound()
+    return SOUNDS.SKILL_RESPEC_PURCHASED
+end
+
+function ZO_SubclassOnlySkillPointAllocator.GetIncreaseRankSound()
+    return SOUNDS.PASSIVE_SKILL_RESPEC_RANK_INCREASED
+end
+
+function ZO_SubclassOnlySkillPointAllocator.GetMorphChosenSound()
     return SOUNDS.ACTIVE_SKILL_RESPEC_MORPH_CHOSEN
 end
 
@@ -614,21 +691,21 @@ end
 --Skill Point Allocation Manager --
 -----------------------------------
 
-ZO_SkillPointAllocationManager = ZO_CallbackObject:Subclass()
-
-function ZO_SkillPointAllocationManager:New(...)
-    SKILL_POINT_ALLOCATION_MANAGER = ZO_CallbackObject.New(self)
-    SKILL_POINT_ALLOCATION_MANAGER:Initialize(...)
-    return SKILL_POINT_ALLOCATION_MANAGER
-end
+ZO_SkillPointAllocationManager = ZO_SkillsAssignmentManager_Base:Subclass()
 
 function ZO_SkillPointAllocationManager:Initialize()
+    SKILL_POINT_ALLOCATION_MANAGER = self
+
     local function PurchaseOnlyFactory()
         return ZO_PurchaseOnlySkillPointAllocator:New(self)
     end
 
     local function MorphsOnlyFactory()
         return ZO_MorphsOnlySkillPointAllocator:New(self)
+    end
+
+    local function SubclassOnlyFactory()
+        return ZO_SubclassOnlySkillPointAllocator:New(self)
     end
 
     local function FullFactory()
@@ -643,16 +720,21 @@ function ZO_SkillPointAllocationManager:Initialize()
     {
         [SKILL_POINT_ALLOCATION_MODE_PURCHASE_ONLY] = ZO_ObjectPool:New(PurchaseOnlyFactory, Reset),
         [SKILL_POINT_ALLOCATION_MODE_MORPHS_ONLY] = ZO_ObjectPool:New(MorphsOnlyFactory, Reset),
+        [SKILL_POINT_ALLOCATION_MODE_SUBCLASS_ONLY] = ZO_ObjectPool:New(SubclassOnlyFactory, Reset),
         [SKILL_POINT_ALLOCATION_MODE_FULL] = ZO_ObjectPool:New(FullFactory, Reset),
     }
 
     self:SetRawAvailableSkillPoints(GetAvailableSkillPoints())
 
+    ZO_SkillsAssignmentManager_Base.Initialize(self, ZO_SkillsAndActionBarManager.OnSkillPointAllocationManagerReady)
+end
+
+function ZO_SkillPointAllocationManager:RegisterForEvents()
     SKILLS_DATA_MANAGER:RegisterCallback("FullSystemUpdated", function() self:OnFullSystemUpdated() end)
     SKILLS_AND_ACTION_BAR_MANAGER:RegisterCallback("SkillPointAllocationModeChanged", function(...) self:OnSkillPointAllocationModeChanged(...) end)
     SKILLS_AND_ACTION_BAR_MANAGER:RegisterCallback("RespecStateReset", function(...) self:OnFullSystemUpdated(...) end)
+    SKILL_LINE_ASSIGNMENT_MANAGER:RegisterCallback("SkillLineRespecUpdate", function(...) self:OnSkillLineRespecUpdate(...) end)
     EVENT_MANAGER:RegisterForEvent("ZO_SkillPointAllocationManager", EVENT_SKILL_POINTS_CHANGED, function(eventId, ...) self:OnSkillPointsChanged(...) end)
-    SKILLS_AND_ACTION_BAR_MANAGER:OnSkillPointAllocationManagerReady(self)
 end
 
 function ZO_SkillPointAllocationManager:GetAllocatorPool()
@@ -707,6 +789,10 @@ function ZO_SkillPointAllocationManager:OnSkillPointsChanged(_, newPoints)
     self:BroadcastSkillPointsChanged()
 end
 
+function ZO_SkillPointAllocationManager:OnSkillLineRespecUpdate()
+    self:UpdateAvailableSkillPoints(BROADCAST)
+end
+
 function ZO_SkillPointAllocationManager:OnPurchasedChanged(skillPointAllocator)
     if skillPointAllocator:IsPurchased() then
         PlaySound(skillPointAllocator:GetPurchaseSound())
@@ -741,8 +827,19 @@ function ZO_SkillPointAllocationManager:UpdateAvailableSkillPoints(broadcast)
     local oldAvailableSkillPoints = self.availableSkillPoints
     local availableSkillPoints = self.rawAvailableSkillPoints
     for _, allocator in self:AllocatorIterator() do
-        availableSkillPoints = availableSkillPoints - allocator:GetPendingPointAllocationDelta()
+        -- If the skill line is inactive, we don't really care what any allocators are doing, leave them be and ignore them so we can bring back their state later if desired
+        -- The actual delta for lines being removed will be tallied below via the SKILL_LINE_ASSIGNMENT_MANAGER
+        if allocator:GetSkillLineData():IsActive() then
+            availableSkillPoints = availableSkillPoints - allocator:GetPendingPointAllocationDelta()
+        end
     end
+
+    -- Called during init, before the other manager exists
+    if SKILL_LINE_ASSIGNMENT_MANAGER then
+        -- Any skill line pending removal will give back all spent points, so treat it like we already have them to spend
+        availableSkillPoints = availableSkillPoints - SKILL_LINE_ASSIGNMENT_MANAGER:GetPendingPointAllocationDelta()
+    end
+
     self.availableSkillPoints = availableSkillPoints
 
     if broadcast and oldAvailableSkillPoints ~= availableSkillPoints then
@@ -794,8 +891,7 @@ function ZO_SkillPointAllocationManager:AddChangesToMessage()
     local allocationMode = SKILLS_AND_ACTION_BAR_MANAGER:GetSkillPointAllocationMode()
     for _, allocator in self:AllocatorIterator({ ZO_SkillPointAllocator.IsAnyChangePending }) do
         if allocator:HasValidChangesForMode(allocationMode) then
-            allocator:AddChangesToMessage()
-            anyChangesAdded = true
+            anyChangesAdded = allocator:AddChangesToMessage() or anyChangesAdded
         else
             allValidChanges = false
         end
@@ -817,17 +913,19 @@ function ZO_SkillPointAllocationManager:HasValidChangesForMode()
     return true
 end
 
-function ZO_SkillPointAllocationManager:GetNumPointsAllocatedInSkillLine(skillLineData)
+function ZO_SkillPointAllocationManager:GetNumPointsAllocatedInSkillLine(skillLineData, ignoreActiveState)
     local numPointsAllocated = 0
 
-    for _, skillData in skillLineData:SkillIterator() do
-        local allocatorPool = self:GetAllocatorPool()
-        local allocatorKey = skillData.allocatorKey
-        local allocator = allocatorKey and allocatorPool:GetActiveObject(allocatorKey)
-        if allocator then
-            numPointsAllocated = numPointsAllocated + allocator:GetNumPointsAllocated()
-        else
-            numPointsAllocated = numPointsAllocated + skillData:GetNumPointsAllocated()
+    if skillLineData:IsActive() or ignoreActiveState then
+        for _, skillData in skillLineData:SkillIterator() do
+            local allocatorPool = self:GetAllocatorPool()
+            local allocatorKey = skillData.allocatorKey
+            local allocator = allocatorKey and allocatorPool:GetActiveObject(allocatorKey)
+            if allocator then
+                numPointsAllocated = numPointsAllocated + allocator:GetNumPointsAllocated()
+            else
+                numPointsAllocated = numPointsAllocated + skillData:GetNumPointsAllocated()
+            end
         end
     end
 
@@ -837,9 +935,7 @@ end
 function ZO_SkillPointAllocationManager:ClearPointsOnSkillLine(skillLineData, ignoreCallbacks)
     local allocationMode = SKILLS_AND_ACTION_BAR_MANAGER:GetSkillPointAllocationMode()
     if allocationMode ~= SKILL_POINT_ALLOCATION_MODE_PURCHASE_ONLY and skillLineData:IsAvailable() then
-        
         local anyCleared = false
-        local IGNORE_CALLBACKS = true
 
         local function CanClearPoints(skillData)
             -- We don't want to make allocators if they don't already exist and we don't need them
@@ -847,15 +943,16 @@ function ZO_SkillPointAllocationManager:ClearPointsOnSkillLine(skillLineData, ig
             local allocator = allocatorKey and self:GetAllocatorPool():GetActiveObject(allocatorKey)
             if allocator then
                 return allocator:CanClear()
-            else
+            elseif SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeAllowClear() then
                 local clearMorphsOnly = allocationMode == SKILL_POINT_ALLOCATION_MODE_MORPHS_ONLY
                 return skillData:HasPointsToClear(clearMorphsOnly)
             end
         end
-
+        
+        local IGNORE_LOOPED_CALLBACKS = true
         for _, skillData in skillLineData:SkillIterator({ CanClearPoints }) do
             local allocator = self:GetSkillPointAllocatorForSkillData(skillData)
-            if allocator:Clear(IGNORE_CALLBACKS) then
+            if allocator:Clear(IGNORE_LOOPED_CALLBACKS) then
                 anyCleared = true
             end
         end

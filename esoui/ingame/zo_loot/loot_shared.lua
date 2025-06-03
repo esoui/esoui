@@ -165,7 +165,7 @@ do
 
         local numLootItems = GetNumLootItems()
         for i = 1, numLootItems do
-            local lootId, name, icon, count, displayQuality, value, isQuest, isStolen, lootType = GetLootItemInfo(i)
+            local lootId, name, icon, count, displayQuality, value, isQuest, isStolen, lootType, isLockedSetPiece, canBeUsedToLearn = GetLootItemInfo(i)
             local formattedName = zo_strformat(SI_TOOLTIP_ITEM_NAME, name)
             local sortOrder = lootType == LOOT_TYPE_COLLECTIBLE and LOOT_SORT_ORDER_COLLECTIBLE or LOOT_SORT_ORDER_ITEM
             local itemData =
@@ -181,6 +181,8 @@ do
                 value = value,
                 isQuest = isQuest,
                 isStolen = isStolen,
+                isLockedSetPiece = isLockedSetPiece,
+                canBeUsedToLearn = canBeUsedToLearn,
                 -- itemType has been lootType for a long time, but we'll keep the tradition alive for compatibility
                 itemType = lootType,
                 sortOrder = sortOrder,

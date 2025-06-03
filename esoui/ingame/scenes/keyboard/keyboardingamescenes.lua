@@ -783,6 +783,17 @@ bankScene:AddFragment(BANK_MENU_FRAGMENT)
 bankScene:AddFragment(BANK_WINDOW_SOUNDS)
 bankScene:AddFragment(PLAYER_PROGRESS_BAR_FRAGMENT)
 
+-----------------------
+--Furniture Vault Scene
+-----------------------
+
+local furnitureVaultScene = SCENE_MANAGER:GetScene("furnitureVault")
+furnitureVaultScene:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW)
+furnitureVaultScene:AddFragment(RIGHT_PANEL_BG_FRAGMENT)
+furnitureVaultScene:AddFragment(FURNITURE_VAULT_MENU_FRAGMENT)
+furnitureVaultScene:AddFragment(BANK_WINDOW_SOUNDS)
+furnitureVaultScene:AddFragment(PLAYER_PROGRESS_BAR_FRAGMENT)
+
 -------------------
 --House Bank Scene
 -------------------
@@ -1143,7 +1154,11 @@ do
                 else
                     tooltip:AddLine(GetString(SI_SCRIBING_LIBRARY_DESCRIPTION), "", ZO_NORMAL_TEXT:UnpackRGBA())
                     tooltip:AddLine(ZO_Tooltip:GetRequiredScribingCollectibleText(), "", ZO_NORMAL_TEXT:UnpackRGBA())
+                    SKILLS_WINDOW:OnScribingLibraryTabMouseEnter()
                 end
+            end,
+            CustomTooltipExitFunction = function(tooltip)
+                SKILLS_WINDOW:OnScribingLibraryTabMouseExit()
             end,
         },
     }
@@ -1489,3 +1504,19 @@ SCRIBING_SCENE_KEYBOARD:AddFragment(CRAFTING_RESULTS_FRAGMENT)
 SCRIBING_SCENE_KEYBOARD:AddFragment(RIGHT_PANEL_BG_FRAGMENT)
 SCRIBING_SCENE_KEYBOARD:AddFragment(SCRIBING_WINDOW_SOUNDS)
 SCRIBING_SCENE_KEYBOARD:AddFragment(PLAYER_PROGRESS_BAR_FRAGMENT)
+
+----------------------------
+--Returning Player Scenes
+----------------------------
+
+RETURNING_PLAYER_INTRO_SCENE_KEYBOARD:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW_NO_KEYBIND_BACKGROUND_WINDOW)
+RETURNING_PLAYER_INTRO_SCENE_KEYBOARD:AddFragment(UNIFORM_BLUR_FRAGMENT)
+RETURNING_PLAYER_INTRO_SCENE_KEYBOARD:AddFragment(MINIMIZE_CHAT_FRAGMENT)
+RETURNING_PLAYER_INTRO_SCENE_KEYBOARD:AddFragment(RETURNING_PLAYER_ANNOUNCEMENT_ACTION_LAYER_FRAGMENT)
+
+RETURNING_PLAYER_REWARD_SCENE_KEYBOARD:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW_NO_KEYBIND_BACKGROUND_WINDOW)
+RETURNING_PLAYER_REWARD_SCENE_KEYBOARD:AddFragment(UNIFORM_BLUR_FRAGMENT)
+RETURNING_PLAYER_REWARD_SCENE_KEYBOARD:AddFragment(MINIMIZE_CHAT_FRAGMENT)
+RETURNING_PLAYER_REWARD_SCENE_KEYBOARD:AddFragment(RETURNING_PLAYER_ANNOUNCEMENT_ACTION_LAYER_FRAGMENT)
+
+RETURNING_PLAYER_SCENE_GROUP_KEYBOARD = ZO_SceneGroup:New(RETURNING_PLAYER_INTRO_SCENE_KEYBOARD:GetName(), RETURNING_PLAYER_REWARD_SCENE_KEYBOARD:GetName())

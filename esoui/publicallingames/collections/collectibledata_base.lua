@@ -431,6 +431,26 @@ function ZO_CollectibleData_Base:IsPlaceableFurniture()
     return IsCollectibleCategoryPlaceableFurniture(self:GetCategoryType())
 end
 
+function ZO_CollectibleData_Base:GetInventoryBag()
+    return GetBagForCollectible(self.collectibleId)
+end
+
+function ZO_CollectibleData_Base:IsFurnitureVault()
+    local bagId = self:GetInventoryBag()
+    if bagId then
+        return IsFurnitureVault(bagId)
+    end
+    return false
+end
+
+function ZO_CollectibleData_Base:IsHouseBank()
+    local bagId = self:GetInventoryBag()
+    if bagId then
+        return IsHouseBankBag(bagId)
+    end
+    return false
+end
+
 function ZO_CollectibleData_Base:IsValidForPlayer()
     return IsCollectibleValidForPlayer(self.collectibleId)
 end

@@ -223,6 +223,15 @@ function zo_iconTextFormat(path, width, height, text, inheritColor, noGrammar)
     return string.format("%s %s", iconFormatter(path, width, height), text)
 end
 
+function zo_iconTextFormatAlignedRight(path, width, height, text, inheritColor, noGrammar)
+    local iconFormatter = zo_iconFormat
+    if inheritColor then
+        iconFormatter = zo_iconFormatInheritColor
+    end
+    text = noGrammar and text or zo_strformat("<<1>>", text)
+    return string.format("%s %s", text, iconFormatter(path, width, height))
+end
+
 function zo_iconTextFormatNoSpace(path, width, height, text, inheritColor)
     local iconFormatter = zo_iconFormat
     if inheritColor then

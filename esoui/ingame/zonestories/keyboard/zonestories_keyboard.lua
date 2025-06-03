@@ -15,7 +15,7 @@ function ZO_ZoneStories_Keyboard:Initialize(control)
     local templateData =
     {
         gridListClass = ZO_GridScrollList_Keyboard,
-        achievements = 
+        achievements =
         {
             entryTemplate = "ZO_ZoneStory_AchievementTile_Keyboard_Control",
             dimensionsX = ZO_ZONE_STORIES_ACHIEVEMENT_TILE_KEYBOARD_DIMENSIONS_X,
@@ -67,6 +67,8 @@ function ZO_ZoneStories_Keyboard:Initialize(control)
             self:UpdateZoneStory()
             TriggerTutorial(TUTORIAL_TRIGGER_ZONE_STORIES_SHOWN)
             KEYBIND_STRIP:AddKeybindButton(self.keybindStripDescriptor)
+        elseif newState == SCENE_FRAGMENT_SHOWN then
+            HandleReturningPlayerUISystemShown(UI_SYSTEM_ZONE_GUIDE)
         elseif newState == SCENE_FRAGMENT_HIDING then
             KEYBIND_STRIP:RemoveKeybindButton(self.keybindStripDescriptor)
         end

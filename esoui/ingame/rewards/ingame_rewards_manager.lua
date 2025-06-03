@@ -14,6 +14,7 @@ function IngameRewardsManager:GetCollectibleEntryInfo(rewardId, parentChoice)
         rewardData:SetFormattedName(collectibleData:GetFormattedName())
         rewardData:SetIcon(collectibleData:GetIcon())
         rewardData:SetAnnouncementBackground(GetRewardAnnouncementBackgroundFileIndex(rewardId))
+        rewardData:SetAnnouncementBannerText(zo_strformat(SI_ACCOUNCEMENT_REWARD_BANNER_TEXT_FREE_FORMATTER, collectibleData:GetCategoryTypeDisplayName()))
 
         return rewardData
     end

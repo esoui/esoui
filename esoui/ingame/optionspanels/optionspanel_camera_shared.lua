@@ -23,6 +23,16 @@ local ZO_OptionsPanel_Camera_ControlData =
             text = SI_INTERFACE_OPTIONS_CAMERA_INVERT_Y,
             tooltipText = SI_INTERFACE_OPTIONS_CAMERA_INVERT_Y_TOOLTIP,
         },
+        --Options_Camera_InvertX
+        [CAMERA_SETTING_INVERT_X] =
+        {
+            controlType = OPTIONS_CHECKBOX,
+            system = SETTING_TYPE_CAMERA,
+            settingId = CAMERA_SETTING_INVERT_X,
+            panel = SETTING_PANEL_CAMERA,
+            text = SI_INTERFACE_OPTIONS_CAMERA_INVERT_X,
+            tooltipText = SI_INTERFACE_OPTIONS_CAMERA_INVERT_X_TOOLTIP,
+        },
         --Options_Camera_FOVChangesAllowed
         [CAMERA_SETTING_FOV_CHANGES_ALLOWED] =
         {

@@ -10,7 +10,7 @@ end
 
 function SkillsAdvisorBuildSelectionRoot_Gamepad:Initialize(control)
     local ACTIVATE_LIST_ON_SHOW = true
-    GAMEPAD_SKILLS_ADVISOR_BUILD_SELECTION_ROOT_SCENE = ZO_Scene:New("gamepad_skills_advisor_build_selection_root", SCENE_MANAGER)
+    GAMEPAD_SKILLS_ADVISOR_BUILD_SELECTION_ROOT_SCENE = ZO_InteractScene:New("gamepad_skills_advisor_build_selection_root", SCENE_MANAGER, ZO_SKILL_RESPEC_INTERACT_INFO)
     GAMEPAD_SKILLS_SCENE_GROUP:AddScene("gamepad_skills_advisor_build_selection_root")
     GAMEPAD_SKILLS_ADVISOR_BUILD_SELECTION_ROOT_SCENE:SetHideSceneConfirmationCallback(ZO_GamepadSkills.OnConfirmHideScene)
     ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE, ACTIVATE_LIST_ON_SHOW, GAMEPAD_SKILLS_ADVISOR_BUILD_SELECTION_ROOT_SCENE)

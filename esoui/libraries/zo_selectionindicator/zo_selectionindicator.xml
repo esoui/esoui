@@ -14,7 +14,7 @@
             </OnMouseExit>
 
             <Controls>
-                <Texture name="$(parent)IndicatorButtonTexture" layer="CONTROLS" level="3">
+                <Texture name="$(parent)ButtonTexture" layer="CONTROLS" level="3">
                     <AnchorFill />
                 </Texture>
             </Controls>

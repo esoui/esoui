@@ -101,7 +101,7 @@ function ZO_Smithing_Gamepad:Initialize(control)
             self.creationPanel:PerformDeferredInitialization()
             self.researchPanel:PerformDeferredInitialization()
 
-            --The default index is different depending on whether or not we are at a consolidated station
+            --The default index is different depending on whether or not we are at a consolidated station.
             if ZO_Smithing_IsConsolidatedStationCraftingMode() then
                 if HOUSING_EDITOR_STATE:IsLocalPlayerHouseOwner() and CONSOLIDATED_SMITHING_SET_DATA_MANAGER:DoesPlayerHaveValidAttunableCraftingStationToConsume() then
                     TriggerTutorial(TUTORIAL_TRIGGER_ADD_CONSOLIDATED_ITEM_SETS_SHOWN_GAMEPAD)
@@ -163,7 +163,9 @@ function ZO_Smithing_Gamepad:Initialize(control)
         end
     end)
 
-    self.control:RegisterForEvent(EVENT_CRAFTING_STATION_INTERACT, function(eventCode, craftingType, sameStation)
+    self.control:RegisterForEvent(EVENT_CRAFTING_STATION_INTERACT, function(eventCode, _, sameStation)
+        -- Fetch the crafting interaction type just in case the interaction was immediately canceled.
+        local craftingType = GetCraftingInteractionType()
         if ZO_Smithing_IsSmithingStation(craftingType) and IsInGamepadPreferredMode() then
             self.resetUIs = not sameStation
             SCENE_MANAGER:Show(GAMEPAD_SMITHING_ROOT_SCENE_NAME)

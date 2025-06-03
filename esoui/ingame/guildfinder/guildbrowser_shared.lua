@@ -21,6 +21,10 @@ function ZO_GuildBrowser_Shared:OnShowing()
     -- should be overridden
 end
 
+function ZO_GuildBrowser_Shared:OnShow()
+    -- should be overridden
+end
+
 function ZO_GuildBrowser_Shared:OnHidden()
     -- should be overridden
 end

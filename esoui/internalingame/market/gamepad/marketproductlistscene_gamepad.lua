@@ -218,18 +218,6 @@ function GamepadMarketProductListScene:ShowMarketProducts(objectList)
         end
 
         entryData.hasPreview = hasPreview
-        if hasPreview then
-            local previewType = nil
-            local previewObjectId = nil
-
-            if isReward then
-                previewType = ZO_ITEM_PREVIEW_REWARD
-                previewObjectId = rewardId
-            else
-                previewType = ZO_ITEM_PREVIEW_MARKET_PRODUCT
-                previewObjectId = productId
-            end
-        end
     end
 
     self.list:Commit()

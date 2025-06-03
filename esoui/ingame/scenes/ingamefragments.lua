@@ -966,6 +966,7 @@ LORE_LIBRARY_FRAGMENT = ZO_FadeSceneFragment:New(ZO_LoreLibrary)
 LORE_READER_FRAGMENT = ZO_FadeSceneFragment:New(ZO_LoreReader)
 TREASURE_MAP_FRAGMENT = ZO_FadeSceneFragment:New(ZO_TreasureMap)
 BANK_MENU_FRAGMENT = ZO_FadeSceneFragment:New(ZO_PlayerBankMenu)
+FURNITURE_VAULT_MENU_FRAGMENT = ZO_FadeSceneFragment:New(ZO_FurnitureVaultMenu)
 HOUSE_BANK_MENU_FRAGMENT = ZO_FadeSceneFragment:New(ZO_HouseBankMenu)
 GUILD_BANK_MENU_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GuildBankMenu)
 INTERACT_FRAGMENT = ZO_FadeSceneFragment:New(ZO_InteractWindow)
@@ -1072,6 +1073,8 @@ HOUSING_HUD_ACTION_LAYER_FRAGMENT = ZO_ActionLayerFragment:New(GetString(SI_KEYB
 BATTLEGROUND_HUD_ACTION_LAYER_FRAGMENT = ZO_ActionLayerFragment:New("BattlegroundHud")
 BATTLEGROUND_SCOREBOARD_ACTION_LAYER_FRAGMENT = ZO_ActionLayerFragment:New("BattlegroundScoreboard")
 SPECIAL_TOGGLE_HELP_ACTION_LAYER_FRAGMENT = ZO_ActionLayerFragment:New("SpecialToggleHelp")
+SCREEN_ADJUST_ACTION_LAYER_FRAGMENT = ZO_ActionLayerFragment:New("ScreenAdjustActions")
+RETURNING_PLAYER_ANNOUNCEMENT_ACTION_LAYER_FRAGMENT = ZO_ActionLayerFragment:New("ReturningPlayerAnnouncementInterceptLayer")
 
 --Intercept Layer
 INTERACT_WINDOW_KEYBIND_INTERCEPT_LAYER_FRAGMENT = ZO_ActionLayerFragment:New("SceneChangeInterceptLayer")
@@ -1125,5 +1128,3 @@ CLOSE_ACTIONS_INTERCEPT_LAYER_FRAGMENT = ZO_CloseActionsInterceptLayerFragment:N
 
 HOUSING_EDITOR_HUD_FRAGMENT = ZO_HousingEditorHUDFragment:New()
 HOUSING_EDITOR_ACTION_BAR_FRAGMENT = ZO_FadeSceneFragment:New(ZO_HousingEditorActionBarTopLevel)
-
-SCREEN_ADJUST_ACTION_LAYER_FRAGMENT = ZO_ActionLayerFragment:New("ScreenAdjustActions")

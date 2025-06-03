@@ -312,7 +312,7 @@ function ZO_TradeWindow:OnTradeWindowMoneyChanged(eventCode, who, money)
         ZO_CurrencyControl_SetSimpleCurrency(ZO_TradeMyControlsMoney, CURT_MONEY, money)
     end
 
-    PlaySound(SOUNDS.ITEM_MONEY_CHANGED)
+    ZO_PlayCurrencyTransactSound(CURT_MONEY)
 
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
 end

@@ -304,7 +304,9 @@ function ZO_MailSend_Gamepad:InitializeKeybindDescriptors()
                     QueueMoneyAttachment(0)
                     QueueCOD(self.goldSlider:GetValue())
                 end
-                PlaySound(SOUNDS.ITEM_MONEY_CHANGED)
+
+                ZO_PlayCurrencyTransactSound(CURT_MONEY)
+
                 self:UpdatePostageMoney()
                 self:EnterOutbox()
                 local targetControl = self.mainList:GetTargetControl()

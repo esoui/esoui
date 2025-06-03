@@ -60,7 +60,7 @@ ESO_Dialogs["CONNECTING_TO_REALM"] =
             keybind =   false,
             callback =  function(dialog)
                             CancelLogin()
-                            PregameStateManager_SetState("AccountLogin")
+                            PregameStateManager_SetState("WaitForPreloginWorld")
                         end
         }
     }
@@ -440,7 +440,7 @@ ESO_Dialogs["LOGIN_QUEUED"] =
             keybind =   false,
             callback =  function(dialog)
                             CancelLogin()
-                            PregameStateManager_SetState("AccountLogin")
+                            PregameStateManager_SetState("WaitForPreloginWorld")
                         end,
         }
     },

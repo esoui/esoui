@@ -42,6 +42,7 @@ EsoUI\Common\Gamepad\ZO_GamepadEntryData.lua
 
 EsoUI\Common\Gamepad\ZO_GamepadGrid.lua
 
+EsoUI\Common\Gamepad\ZO_GamepadParametricScrollList_Header.lua
 EsoUI\Common\Gamepad\ZO_TextSearch_Header_Gamepad.lua
 EsoUI\Common\Gamepad\ZO_GamepadParametricScrollListScreen.lua
 EsoUI\Common\Gamepad\ZO_GamepadParametricScrollListScreen.xml
@@ -104,3 +105,6 @@ EsoUI\Common\MarketTemplates\Gamepad\MarketTemplates_Gamepad.xml
 
 EsoUI\Common\Fx\FxCommon.lua
 EsoUI\Common\Fx\FxCommon.xml
+
+EsoUI\Common\ZO_PopupList\ZO_PopupList.lua
+EsoUI\Common\ZO_PopupList\ZO_PopupList.xml

@@ -948,7 +948,7 @@ function ZO_GamepadTradeWindow:OnTradeWindowMoneyChanged(eventCode, who, money)
 
     self:RefreshOfferList(who)
 
-    PlaySound(SOUNDS.ITEM_MONEY_CHANGED)
+    ZO_PlayCurrencyTransactSound(CURT_MONEY)
 
     --Re-narrate and include the header if the gold change was for the currently active list
     if who == self.activeListType then

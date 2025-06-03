@@ -257,6 +257,11 @@ GAMEPAD_SETTINGS_DATA =
         },
         {
             panel = SETTING_PANEL_CAMERA,
+            system = SETTING_TYPE_GAMEPAD,
+            settingId = GAMEPAD_SETTING_INVERT_X,
+        },
+        {
+            panel = SETTING_PANEL_CAMERA,
             system = SETTING_TYPE_CAMERA,
             settingId = CAMERA_SETTING_ASSASSINATION_CAMERA,
         },
@@ -335,8 +340,33 @@ GAMEPAD_SETTINGS_DATA =
         },
         {
             panel = SETTING_PANEL_GAMEPLAY,
+            system = SETTING_TYPE_GAMEPAD,
+            settingId = GAMEPAD_SETTING_DEADZONE_INNER_RIGHT_STICK
+        },
+        {
+            panel = SETTING_PANEL_GAMEPLAY,
+            system = SETTING_TYPE_GAMEPAD,
+            settingId = GAMEPAD_SETTING_DEADZONE_OUTER_RIGHT_STICK
+        },
+        {
+            panel = SETTING_PANEL_GAMEPLAY,
+            system = SETTING_TYPE_GAMEPAD,
+            settingId = GAMEPAD_SETTING_DEADZONE_INNER_LEFT_STICK
+        },
+        {
+            panel = SETTING_PANEL_GAMEPLAY,
+            system = SETTING_TYPE_GAMEPAD,
+            settingId = GAMEPAD_SETTING_DEADZONE_OUTER_LEFT_STICK
+        },
+        {
+            panel = SETTING_PANEL_GAMEPLAY,
+            system = SETTING_TYPE_GAMEPAD,
+            settingId = GAMEPAD_SETTING_DEADZONE_TRIGGERS,
+        },
+        {
+            panel = SETTING_PANEL_GAMEPLAY,
             system = SETTING_TYPE_CUSTOM,
-            settingId = OPTIONS_CUSTOM_SETTING_RESET_GAMEPAD_CONTROLS,
+            settingId = OPTIONS_CUSTOM_SETTING_RESET_GAMEPAD_DEADZONES,
         },
         {
             panel = SETTING_PANEL_GAMEPLAY,
@@ -672,6 +702,12 @@ GAMEPAD_SETTINGS_DATA =
             panel = SETTING_PANEL_SOCIAL,
             system = SETTING_TYPE_LANGUAGE,
             settingId = LANGUAGE_SETTING_USE_PROFANITY_FILTER,
+            header = SI_SOCIAL_OPTIONS_CHAT_SETTINGS,
+        },
+        {
+            panel = SETTING_PANEL_SOCIAL,
+            system = SETTING_TYPE_UI,
+            settingId = UI_SETTING_RESTRICTED_COMMUNICATION,
             header = SI_SOCIAL_OPTIONS_CHAT_SETTINGS,
         },
         {

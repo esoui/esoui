@@ -311,7 +311,7 @@
 
         <TopLevelControl name="SkillTooltipTopLevel" inherits="TooltipTopLevel">
             <Controls>
-                <Tooltip name="SkillTooltip" inherits="ZO_BaseTooltip">
+                <Tooltip name="SkillTooltip" inherits="ZO_BaseTooltip" headerVerticalOffset="11">
                     <ResizeToFitPadding width="32" height="40"/>
                     <DimensionConstraints minX="384" maxX="384" />
                     <OnInitialized>

@@ -1,3 +1,27 @@
+ZO_PRELOGIN_WORLD_SAVED_VARS = nil
+
+function IsPreloginWorldEnabled()
+    if not IsInGamepadPreferredMode() then
+        return false
+    end
+
+    if IsInternalBuild() then
+        if ZO_PRELOGIN_WORLD_SAVED_VARS and ZO_PRELOGIN_WORLD_SAVED_VARS.PreloginWorldEnabled ~= nil then
+            return tonumber(ZO_PRELOGIN_WORLD_SAVED_VARS.PreloginWorldEnabled) == 1
+        end
+    end
+
+    return true
+end
+
+-- Establish whether we want to use the Prelogin World immediately
+-- as the World Manager needs to know ASAP.
+SetUsePreloginWorld(IsPreloginWorldEnabled())
+
+function IsPreloginWorldReady()
+    return IsPreloginWorldFullyLoaded() or not IsPreloginWorldEnabled() or not IsInGamepadPreferredMode()
+end
+
 function ZO_Pregame_CanSkipVideos()
     return GetCVar("HasPlayedPregameVideo") ~= "0" or ZO_IsConsoleUI()
 end
@@ -110,7 +134,7 @@ local g_sharedPregameStates =
 
         GetStateTransitionData = function()
             return "ChapterUpgradeInterstitial"
-        end
+        end,
     },
 
     ["CharacterCreateFadeIn"] =
@@ -527,17 +551,14 @@ function PregameStateManager_SetState(stateName, ...)
     end
 
     WriteToInterfaceLog(string.format("PregameStateManager_SetState - from: %s, to: %s", tostring(g_previousState), tostring(g_currentStateName)))
+
     g_currentStateData = newPregameState
     newPregameState.OnEnter(select(2, unpack(stateArgs)))
     CALLBACK_MANAGER:FireCallbacks("OnPregameEnterState", g_currentStateName)
 end
 
 function PregameStateManager_ReenterLoginState()
-    if PregameStateManager_GetCurrentState() == "AccountLogin" then
-        CALLBACK_MANAGER:FireCallbacks("OnPregameEnterState", "AccountLogin")
-    else
-        PregameStateManager_SetState("AccountLogin")
-    end
+    PregameStateManager_SetState("WaitForPreloginWorld")
 end
 
 function PregameStateManager_AdvanceState()
@@ -873,6 +894,10 @@ end
 local IS_WORLD_SELECT_STATE = ZO_CreateSetFromArguments("WorldSelect_Requested", "WorldSelect_ShowList", "WorldSelect")
 
 function ZO_Pregame_OnGamepadPreferredModeChanged()
+    -- Signal whether we need the Prelogin World.
+    local enablePreloginWorld = IsPreloginWorldEnabled()
+    SetUsePreloginWorld(enablePreloginWorld)
+
     local currentState = PregameStateManager_GetCurrentState()
     if currentState == nil then
         -- The initial state has not been set up yet, let's wait for that
@@ -947,3 +972,26 @@ EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_SHOW_PREGAME_GUI_IN_
 EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_CHARACTER_SELECTED_FOR_PLAY, OnCharacterSelected)
 EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, ZO_Pregame_OnGamepadPreferredModeChanged)
 EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_DISCONNECTED_FROM_SERVER, OnDisconnectedFromServer)
+
+--[[#$ internal:   Support for overriding Pre-Login World settings via the Pregame Animated Background Dev Tools
+if IsInternalBuild() then
+    function OnPreloginWorldSavedVarsUpdated()
+        local enablePreloginWorld = IsPreloginWorldEnabled()
+        SetUsePreloginWorld(enablePreloginWorld)
+        PREGAME_ANIMATED_BACKGROUND_FRAGMENT:Refresh()
+    end
+
+    EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_ADD_ON_LOADED, function(_, addOnName)
+        if addOnName == "ZO_Pregame" then
+            local defaultVars =
+            {
+                PreloginWorldEnabled = 1,
+            }
+            ZO_PRELOGIN_WORLD_SAVED_VARS = ZO_SavedVars:NewAccountWide("ZO_Pregame_SavedVariables", 2, "PreloginWorld", defaultVars)
+            OnPreloginWorldSavedVarsUpdated()
+
+            EVENT_MANAGER:UnregisterForEvent("PregameStateManager", EVENT_ADD_ON_LOADED)
+        end
+    end)
+end
+-- internal:        Support for overriding Pre-Login World settings via the Pregame Animated Background Dev Tools  #$]]

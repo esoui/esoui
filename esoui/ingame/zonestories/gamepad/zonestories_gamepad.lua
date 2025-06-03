@@ -89,12 +89,14 @@ function ZO_ZoneStories_Gamepad:Initialize(control)
     ZO_ACTIVITY_FINDER_ROOT_GAMEPAD:AddCategory(gamepadCategoryData, gamepadCategoryData.priority)
 
     GAMEPAD_ZONE_STORIES_SCENE:RegisterCallback("StateChange", function(oldState, newState)
-                                                            if newState == SCENE_SHOWING then
-                                                                self:UpdateZoneStory()
-                                                                self:SetFocusOnSelectedZone()
-                                                                TriggerTutorial(TUTORIAL_TRIGGER_ZONE_STORIES_SHOWN)
-                                                            end
-                                                        end)
+        if newState == SCENE_SHOWING then
+            self:UpdateZoneStory()
+            self:SetFocusOnSelectedZone()
+            TriggerTutorial(TUTORIAL_TRIGGER_ZONE_STORIES_SHOWN)
+        elseif newState == SCENE_SHOWN then
+            HandleReturningPlayerUISystemShown(UI_SYSTEM_ZONE_GUIDE)
+        end
+    end)
 end
 
 function ZO_ZoneStories_Gamepad:PerformUpdate()

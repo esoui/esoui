@@ -71,14 +71,24 @@ function ZO_SharedStoreManager:InitializeStore()
 end
 
 -- Shared global functions
-function ZO_StoreManager_GetRequiredToBuyErrorText(buyStoreFailure, buyErrorStringId)
+function ZO_StoreManager_GetRequiredToBuyErrorText(buyStoreFailure, buyErrorStringId, reasonParam1)
     if buyErrorStringId ~= 0 then
         local errorString = GetErrorString(buyErrorStringId)
         if errorString ~= "" then
             return errorString
         end
     end
-    return GetString("SI_STOREFAILURE", buyStoreFailure)
+
+    local storeFailureString = GetString("SI_STOREFAILURE", buyStoreFailure);
+
+    if buyStoreFailure == STORE_FAILURE_NOT_ENOUGH_CURRENCY then
+        local IS_PLURAL = false
+        local IS_UPPER = false
+        local currencyName = GetCurrencyName(reasonParam1, IS_PLURAL, IS_UPPER)
+        return zo_strformat(storeFailureString, currencyName)
+    end
+
+    return storeFailureString
 end
 
 function ZO_StoreManager_DoesBuyStoreFailureLockEntry(buyStoreFailure)
@@ -188,33 +198,6 @@ local DOES_STORE_MODE_REPRESENT_INVENTORY =
 
 function ZO_StoreManager_IsInventoryStoreMode(mode)
     return DOES_STORE_MODE_REPRESENT_INVENTORY[mode]
-end
-
-internalassert(CURT_MAX_VALUE == 13, "Check if new currency requires unique transaction sound hook")
-local CURRENCY_TYPE_TO_SOUND_ID =
-{
-    [CURT_TELVAR_STONES] = SOUNDS.TELVAR_TRANSACT,
-    [CURT_ALLIANCE_POINTS] = SOUNDS.ALLIANCE_POINT_TRANSACT,
-    [CURT_WRIT_VOUCHERS] = SOUNDS.WRIT_VOUCHER_TRANSACT,
-    [CURT_UNDAUNTED_KEYS] = SOUNDS.UNDAUNTED_KEY_TRANSACT,
-    [CURT_EVENT_TICKETS] = SOUNDS.EVENT_TICKET_TRANSACT,
-    [CURT_ARCHIVAL_FORTUNES] = SOUNDS.ARCHIVAL_FORTUNES_TRANSACT,
-    [CURT_IMPERIAL_FRAGMENTS] = SOUNDS.IMPERIAL_FRAGMENTS_TRANSACT,
-}
-
-local function PlayItemAcquisitionSound(eventId, itemSoundCategory, specialCurrencyType1, specialCurrencyType2)
-    --As of right now there are no stores that use both special currency types and it doesn't make sense
-    --to play two currency transact sounds at once, so we only only keying off type1 for now.
-    local soundId = CURRENCY_TYPE_TO_SOUND_ID[specialCurrencyType1]
-    if soundId then
-        PlaySound(soundId)
-    else
-        PlaySound(SOUNDS.ITEM_MONEY_CHANGED)
-    end
-end
-
-function ZO_StoreManager_OnPurchased(eventId, entryName, entryType, entryQuantity, money, specialCurrencyType1, specialCurrencyInfo1, specialCurrencyQuantity1, specialCurrencyType2, specialCurrencyInfo2, specialCurrencyQuantity2, itemSoundCategory)
-    PlayItemAcquisitionSound(eventId, itemSoundCategory, specialCurrencyType1, specialCurrencyType2)
 end
 
 ZO_STORE_MANAGER_PREVIEW_ACTION_VALIDATE = 1

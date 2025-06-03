@@ -177,7 +177,7 @@ function ZO_CompanionSkillData:ClearUpdate()
     self:SetHasUpdatedStatus(false)
 end
 
-function ZO_CompanionSkillData:CanPointAllocationsBeAltered(isFullRespec)
+function ZO_CompanionSkillData:CanPointAllocationsBeAltered(skillPointAllocationMode)
     return false
 end
 

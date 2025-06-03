@@ -330,7 +330,7 @@ function ZO_QuestJournal_Gamepad:InitializeKeybindStripDescriptors()
         {
             name = GetString(SI_QUEST_JOURNAL_SHOW_ON_MAP),
             keybind = "UI_SHORTCUT_SECONDARY",
-
+            alignment = KEYBIND_STRIP_ALIGN_CENTER,
             callback = function()
                 local selectedQuestIndex = self:GetSelectedQuestIndex()
                 if selectedQuestIndex then

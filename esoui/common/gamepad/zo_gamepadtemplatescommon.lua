@@ -3,6 +3,8 @@
 --
 
 local STOLEN_ICON_TEXTURE = "EsoUI/Art/Inventory/inventory_stolenItem_icon.dds"
+local LOCKED_SET_PIECE_ICON_TEXTURE = "EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_locked_set_piece.dds"
+local CAN_LEARN_ICON_TEXTURE = "EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_can_learn.dds"
 local EQUIPPED_THIS_SLOT_TEXTURE = "EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_equipped.dds"
 local EQUIPPED_OTHER_SLOT_TEXTURE = "EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_equipped.dds" --same as EQUIPPED_THIS_SLOT_TEXTURE for now
 local ITEM_IS_HIDDEN_TEXTURE = "EsoUI/Art/Inventory/inventory_icon_hiddenBy.dds" --should be red checkmark
@@ -21,6 +23,7 @@ local FAVORITED_TEXTURE = "EsoUI/Art/Collections/Favorite_StarOnly.dds"
 local PRIMARY_RESIDENCE_TEXTURE = "EsoUI/Art/Collections/PrimaryHouse.dds"
 local LISTED_RESIDENCE_TEXTURE = "EsoUI/Art/HouseTours/houseTours_listed.dds"
 local HOUSE_TOURS_FAVORITED_TEXTURE = "EsoUI/Art/HouseTours/houseTours_favorite.dds"
+local SKILLS_SUBCLASSING_TRAINING_TEXTURE = "EsoUI/Art/Progression/Gamepad/gp_training.dds"
 
 local NORMAL_FONT_SELECTED = "ZoFontGamepad42"
 local NORMAL_FONT_UNSELECTED = "ZoFontGamepad34"
@@ -383,6 +386,14 @@ local function ZO_SharedGamepadEntryStatusIndicatorSetup(statusIndicator, data)
             statusIndicator:AddIcon(STOLEN_ICON_TEXTURE, NO_TINT, GetString(SI_SCREEN_NARRATION_STOLEN_ICON_NARRATION))
         end
 
+        if data.isLockedSetPiece then
+            statusIndicator:AddIcon(LOCKED_SET_PIECE_ICON_TEXTURE, ZO_SUCCEEDED_TEXT, GetString(SI_SCREEN_NARRATION_LOCKED_SET_PIECE_ICON_NARRATION))
+        end
+
+        if data.canBeUsedToLearn then
+            statusIndicator:AddIcon(CAN_LEARN_ICON_TEXTURE, ZO_SUCCEEDED_TEXT, GetString(SI_SCREEN_NARRATION_NOT_LEARNED_ICON_NARRATION))
+        end
+
         if data.isGemmable then
             statusIndicator:AddIcon(ZO_Currency_GetPlatformCurrencyIcon(CURT_CROWN_GEMS), NO_TINT, GetString(SI_SCREEN_NARRATION_GEMMABLE_ICON_NARRATION))
         end
@@ -466,6 +477,10 @@ local function ZO_SharedGamepadEntryStatusIndicatorSetup(statusIndicator, data)
 
         if data.isHouseToursFavorite then
             statusIndicator:AddIcon(HOUSE_TOURS_FAVORITED_TEXTURE, NO_TINT, GetString(SI_SCREEN_NARRATION_FAVORITE_ICON_NARRATION))
+        end
+
+        if data.isSkillLineInTraining then
+            statusIndicator:AddIcon(SKILLS_SUBCLASSING_TRAINING_TEXTURE, NO_TINT, GetString(SI_SCREEN_NARRATION_TRAINING_ICON_NARRATION))
         end
 
         statusIndicator:Show()

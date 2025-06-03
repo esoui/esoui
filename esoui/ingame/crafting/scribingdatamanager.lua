@@ -217,6 +217,7 @@ end
 
 function ZO_ScribingDataManager:GetScribingPurchasableCollectibleData()
     local scribingCollectibleId = GetScribingCollectibleId()
+    internalassert(scribingCollectibleId ~= nil and scribingCollectibleId ~= 0, "Scribing Collectible Id not found! Please check the data setup in GlobalScribingDef.")
     local purchasableCollectibleId = GetPurchasableCollectibleIdForCollectible(scribingCollectibleId)
     local relevantCollectibleId = purchasableCollectibleId == 0 and scribingCollectibleId or purchasableCollectibleId
     return ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(relevantCollectibleId)

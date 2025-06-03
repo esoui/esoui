@@ -60,15 +60,16 @@ function CMapHandlers:InitializeEvents()
         -- Only refresh if the condition completed has changed but the quest is not complete since there is another event for a quest completing.
         -- This will reduce the number of times the pins are refreshed so that they are not refreshed unnecessarily.
         if not isQuestComplete and (isConditionCompleteStatusChanged or isConditionCompletableBySiblingStatusChanged) then 
-            RefreshSingleQuestPins(questIndex) 
-        end 
+            RefreshSingleQuestPins(questIndex)
+        end
     end
 
     EVENT_MANAGER:RegisterForEvent("CMapHandler", EVENT_QUEST_ADVANCED, function(_, questIndex) RefreshSingleQuestPins(questIndex) end)
-    EVENT_MANAGER:RegisterForEvent("CMapHandler", EVENT_QUEST_ADDED, RefreshAllQuestPins)   
+    EVENT_MANAGER:RegisterForEvent("CMapHandler", EVENT_QUEST_ADDED, RefreshAllQuestPins)
     EVENT_MANAGER:RegisterForEvent("CMapHandler", EVENT_QUEST_REMOVED, RefreshAllQuestPins)
     EVENT_MANAGER:RegisterForEvent("CMapHandler", EVENT_QUEST_LIST_UPDATED, RefreshAllQuestPins)
     EVENT_MANAGER:RegisterForEvent("CMapHandler", EVENT_QUEST_CONDITION_COUNTER_CHANGED, OnQuestConditionCounterChanged)
+    EVENT_MANAGER:RegisterForEvent("CMapHandler", EVENT_PLAYER_TELEPORTED_LOCALLY, RefreshAllQuestPins)
 
     local function OnQuestTrackerTrackingStateChanged(questTracker, tracked, trackType, arg1, arg2)
         if trackType == TRACK_TYPE_QUEST then

@@ -58,6 +58,39 @@
             </Controls>
         </Control>
 
+        <Control name="ZO_ComboBoxResizeToFit" mouseEnabled="true" resizeToFitDescendents="true" virtual="true">
+            <DimensionConstraints minX="32" />
+            <ResizeToFitPadding width="32" height="10" />
+
+            <OnInitialized>
+                local comboBox = ZO_ComboBox:New(self)
+                comboBox:ForwardDimensionConstraintsToSelectedItemText()
+            </OnInitialized>
+
+            <OnMouseUp>
+                ZO_ComboBoxDropdown_Keyboard.OnClicked(self, button, upInside)
+            </OnMouseUp>
+
+            <Controls>
+                <Backdrop name="$(parent)BG" inherits="ZO_DefaultBackdrop" excludeFromResizeToFitExtents="true">
+                    <AnchorFill />
+                </Backdrop>
+
+                <Label name="$(parent)SelectedItemText" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                    <Anchor point="TOPLEFT" offsetX="8" offsetY="5" />
+                </Label>
+
+                <Button name="$(parent)OpenDropdown" inherits="ZO_DropdownButton" excludeFromResizeToFitExtents="true">
+                    <Dimensions x="16" y="16" />
+                    <Anchor point="RIGHT" offsetX="-8" />
+
+                    <OnClicked>
+                        ZO_ComboBoxDropdown_Keyboard.OnClicked(self:GetParent(), button, true)
+                    </OnClicked>
+                </Button>
+            </Controls>
+        </Control>
+
         <TopLevelControl name="ZO_ComboBoxDropdown_Keyboard_Template" hidden="true" virtual="true" tier="HIGH" level="ZO_HIGH_TIER_KEYBOARD_COMBO_BOX_DROPDOWN" mouseEnabled="true" clampedToScreen="true">
             <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" />
             <!-- Width will be set programmatically -->

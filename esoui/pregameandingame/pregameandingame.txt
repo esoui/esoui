@@ -36,15 +36,20 @@ EsoUI\PregameAndIngame\OptionsPanels\Keyboard\OptionsPanel_Video_Keyboard.lua
 
 EsoUI\PregameAndIngame\OptionsPanels\Gamepad\OptionsPanel_Account_Gamepad.lua
 
-EsoUI\PregameAndIngame\ZO_AddOnManager\ZO_AddOnEula.lua
-EsoUI\PregameAndIngame\ZO_AddOnManager\ZO_AddOnEula.xml
-EsoUI\PregameAndIngame\ZO_AddOnManager\ZO_AddOnManager.lua
-EsoUI\PregameAndIngame\ZO_AddOnManager\ZO_AddOnManager.xml
+EsoUI\PregameAndIngame\AddOns\ZO_AddOnEula.lua
+EsoUI\PregameAndIngame\AddOns\ZO_AddOnEula.xml
+EsoUI\PregameAndIngame\AddOns\ZO_AddOnManager.lua
+EsoUI\PregameAndIngame\AddOns\ZO_AddOnManager.xml
 
-EsoUI\PregameAndIngame\ZO_AddOnManager\Gamepad\ZO_AddOnEula_Gamepad.lua
-EsoUI\PregameAndIngame\ZO_AddOnManager\Gamepad\ZO_AddOnEula_Gamepad.xml
-EsoUI\PregameAndIngame\ZO_AddOnManager\Gamepad\ZO_AddOnManager_Gamepad.lua
-EsoUI\PregameAndIngame\ZO_AddOnManager\Gamepad\ZO_AddOnManager_Gamepad.xml
+EsoUI\PregameAndIngame\AddOns\ModBrowserData.lua
+EsoUI\PregameAndIngame\AddOns\ModBrowser_Manager.lua
+EsoUI\PregameAndIngame\AddOns\Gamepad\ModBrowser_Gamepad.lua
+EsoUI\PregameAndIngame\AddOns\Gamepad\ModBrowser_Gamepad.xml
+
+EsoUI\PregameAndIngame\AddOns\Gamepad\ZO_AddOnEula_Gamepad.lua
+EsoUI\PregameAndIngame\AddOns\Gamepad\ZO_AddOnEula_Gamepad.xml
+EsoUI\PregameAndIngame\AddOns\Gamepad\ZO_AddOnManager_Gamepad.lua
+EsoUI\PregameAndIngame\AddOns\Gamepad\ZO_AddOnManager_Gamepad.xml
 
 EsoUI\PregameAndIngame\Globals\Console\Dialogs_Console.lua
 EsoUI\PregameAndIngame\Globals\Gamepad\GamepadEventHandlers.lua

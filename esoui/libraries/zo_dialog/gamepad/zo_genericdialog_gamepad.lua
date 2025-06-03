@@ -836,6 +836,8 @@ do
                     if headerText ~= nil then
                         if type(headerText) == "number" then
                             headerText = GetString(headerText)
+                        elseif type(headerText) == "function" then
+                            headerText = headerText(dialog)
                         end
                         entryData:SetHeader(headerText)
                         dialog.entryList:AddEntryWithHeader(entryTemplate, entryData)

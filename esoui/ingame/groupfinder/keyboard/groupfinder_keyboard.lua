@@ -75,6 +75,8 @@ function ZO_GroupFinder_Keyboard:InitializeFragments()
             self:RefreshAppliedToListing()
             self.createGroupListingButton:SetEnabled(ZO_GroupFinder_CanDoCreateEdit())
             TriggerTutorial(TUTORIAL_TRIGGER_GROUP_FINDER_OPENED)
+        elseif newState == SCENE_FRAGMENT_SHOWN then
+            HandleReturningPlayerUISystemShown(UI_SYSTEM_GROUP_FINDER)
         elseif newState == SCENE_FRAGMENT_HIDING then
             --Only allow the exiting of the CREATE_EDIT mode via ExitCreateEditState
             if self.mode ~= ZO_GROUP_FINDER_MODES.CREATE_EDIT then
@@ -293,6 +295,7 @@ function ZO_GroupFinder_Keyboard:OnGroupListingRemoved(result)
             self.dirty = true
         end
     end
+    PlaySound(SOUNDS.GROUP_FINDER_GROUP_LISTING_REMOVE)
 end
 
 function ZO_GroupFinder_Keyboard:SetSearchCategory(category)

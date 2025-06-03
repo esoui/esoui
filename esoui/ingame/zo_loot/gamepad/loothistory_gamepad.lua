@@ -69,6 +69,8 @@ do
     {
         [ZO_LOOT_HISTORY_DISPLAY_TYPE_CRAFT_BAG] = "EsoUI/Art/HUD/Gamepad/gp_lootHistory_icon_craftBag.dds",
         [ZO_LOOT_HISTORY_DISPLAY_TYPE_STOLEN] = "EsoUI/Art/Inventory/GamePad/gp_inventory_icon_stolenItem.dds",
+        [ZO_LOOT_HISTORY_DISPLAY_TYPE_LOCKED_SET_PIECE] = "EsoUI/Art/HUD/Gamepad/gp_lootHistory_icon_locked_set_piece.dds",
+        [ZO_LOOT_HISTORY_DISPLAY_TYPE_CAN_LEARN] = "EsoUI/Art/HUD/Gamepad/gp_lootHistory_icon_can_learn.dds",
         [ZO_LOOT_HISTORY_DISPLAY_TYPE_COLLECTIONS] = "EsoUI/Art/HUD/Gamepad/gp_lootHistory_icon_collections.dds",
         [ZO_LOOT_HISTORY_DISPLAY_TYPE_ANTIQUITIES] = "EsoUI/Art/HUD/Gamepad/gp_lootHistory_icon_antiquities.dds",
         [ZO_LOOT_HISTORY_DISPLAY_TYPE_CROWN_CRATE] = "EsoUI/Art/HUD/Gamepad/gp_lootHistory_icon_crownCrates.dds",
@@ -84,6 +86,8 @@ do
     {
         [ZO_LOOT_HISTORY_DISPLAY_TYPE_CRAFT_BAG] = "EsoUI/Art/HUD/Gamepad/gp_lootHistory_highlight.dds",
         [ZO_LOOT_HISTORY_DISPLAY_TYPE_STOLEN] = "EsoUI/Art/HUD/Gamepad/gp_lootHistory_highlight_stolen.dds",
+        [ZO_LOOT_HISTORY_DISPLAY_TYPE_LOCKED_SET_PIECE] = "EsoUI/Art/HUD/Gamepad/gp_lootHistory_highlight.dds",
+        [ZO_LOOT_HISTORY_DISPLAY_TYPE_CAN_LEARN] = "EsoUI/Art/HUD/Gamepad/gp_lootHistory_highlight.dds",
         [ZO_LOOT_HISTORY_DISPLAY_TYPE_COLLECTIONS] = "EsoUI/Art/HUD/Gamepad/gp_lootHistory_highlight.dds",
         [ZO_LOOT_HISTORY_DISPLAY_TYPE_ANTIQUITIES] = "EsoUI/Art/HUD/Gamepad/gp_lootHistory_highlight.dds",
         [ZO_LOOT_HISTORY_DISPLAY_TYPE_CROWN_CRATE] = "EsoUI/Art/HUD/Gamepad/gp_lootHistory_highlight.dds",

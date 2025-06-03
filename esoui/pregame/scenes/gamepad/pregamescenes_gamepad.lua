@@ -160,10 +160,30 @@ CONFIRM_LINK_ACCOUNT_SCREEN_GAMEPAD_SCENE:AddFragment(PREGAME_ANIMATED_BACKGROUN
 ------------------------------
 -- Addon Manager Gamepad Scene
 ------------------------------
-
 local addonManagerScene = ZO_Scene:New("gamepad_addons", SCENE_MANAGER)
 addonManagerScene:AddFragment(ADDON_MANAGER_GAMEPAD_FRAGMENT)
 addonManagerScene:AddFragment(KEYBIND_STRIP_GAMEPAD_FRAGMENT)
 addonManagerScene:AddFragment(KEYBIND_STRIP_GAMEPAD_BACKDROP_FRAGMENT)
 addonManagerScene:AddFragment(GAMEPAD_NAV_QUADRANT_1_2_3_BACKGROUND_FRAGMENT)
 addonManagerScene:AddFragment(GAMEPAD_MENU_SOUND_FRAGMENT)
+
+------------------------------
+-- Addon Menu Console Scene
+------------------------------
+local addonMenuScene = ZO_Scene:New("console_addons", SCENE_MANAGER)
+addonMenuScene:AddFragment(ADDON_MENU_CONSOLE:GetParentFragment())
+addonMenuScene:AddFragment(KEYBIND_STRIP_GAMEPAD_FRAGMENT)
+addonMenuScene:AddFragment(KEYBIND_STRIP_GAMEPAD_BACKDROP_FRAGMENT)
+addonMenuScene:AddFragment(GAMEPAD_NAV_QUADRANT_1_BACKGROUND_FRAGMENT)
+addonMenuScene:AddFragment(GAMEPAD_MENU_SOUND_FRAGMENT)
+addonMenuScene:AddFragment(GAMEPAD_GENERIC_FOOTER_FRAGMENT)
+
+------------------------------
+-- Mod Browser Gamepad Scene
+------------------------------
+MOD_BROWSER_SCENE_GAMEPAD = ZO_Scene:New("modBrowserGamepad", SCENE_MANAGER)
+MOD_BROWSER_SCENE_GAMEPAD:AddFragment(MOD_BROWSER_GAMEPAD:GetListFragment())
+MOD_BROWSER_SCENE_GAMEPAD:AddFragment(GAMEPAD_NAV_QUADRANT_1_2_3_BACKGROUND_FRAGMENT)
+MOD_BROWSER_SCENE_GAMEPAD:AddFragment(GAMEPAD_MENU_SOUND_FRAGMENT)
+MOD_BROWSER_SCENE_GAMEPAD:AddFragment(KEYBIND_STRIP_GAMEPAD_FRAGMENT)
+MOD_BROWSER_SCENE_GAMEPAD:AddFragment(KEYBIND_STRIP_GAMEPAD_BACKDROP_FRAGMENT)

@@ -72,7 +72,7 @@ function ZO_PromotionalEventTracker:RegisterEvents()
 
     PROMOTIONAL_EVENT_MANAGER:RegisterCallback("CampaignsUpdated", Update)
     PROMOTIONAL_EVENT_MANAGER:RegisterCallback("RewardsClaimed", Update)
-    self.control:RegisterForEvent(EVENT_PROMOTIONAL_EVENTS_ACTIVITY_PROGRESS_UPDATED, Update)
+    PROMOTIONAL_EVENT_MANAGER:RegisterCallback("ActivityProgressUpdated", Update)
     self.control:RegisterForEvent(EVENT_PROMOTIONAL_EVENTS_ACTIVITY_TRACKING_UPDATED, Update)
 end
 
@@ -81,7 +81,7 @@ function ZO_PromotionalEventTracker:Update()
     if not IsPromotionalEventSystemLocked() then
         local campaignKey, activityIndex = GetTrackedPromotionalEventActivityInfo()
         local campaignData = PROMOTIONAL_EVENT_MANAGER:GetCampaignDataByKey(campaignKey)
-        if campaignData then
+        if campaignData and campaignData:ShouldCampaignBeVisible() then
             local activityData = campaignData:GetActivityData(activityIndex)
             if activityData then
                 self:SetSubLabelText(activityData:GetDisplayName())

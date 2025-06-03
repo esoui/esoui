@@ -18,6 +18,20 @@ function ZO_PromotionalEventTile_Keyboard:PostInitializePlatform()
     self:SetActionText(GetString(SI_MARKET_ANNOUNCEMENT_PROMOTIONAL_EVENT_ACTION))
     self:SetHighlightAnimationProvider(ZO_PROMOTIONAL_EVENT_TILE_KEYBOARD_DEFAULT_HIGHLIGHT_ANIMATION_PROVIDER)
 
+    local fonts =
+    {
+        {
+            font = "ZoFontWinT1",
+            lineLimit = 1,
+        },
+        {
+            font = "ZoFontWinT2",
+            lineLimit = 1,
+            dontUseForAdjusting = true,
+        },
+    }
+    ZO_FontAdjustingWrapLabel_OnInitialized(self.bannerTextLabel, fonts, TEXT_WRAP_MODE_ELLIPSIS)
+
     local function OnActionButtonMouseEnter()
         self:OnMouseEnter()
     end

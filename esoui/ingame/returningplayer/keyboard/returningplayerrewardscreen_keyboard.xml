@@ -1,0 +1,127 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_ReturningPlayerRewardsReward_Keyboard" inherits="ZO_ReturningPlayerRewardsReward_Shared" mouseEnabled="true" virtual="true">
+            <Dimensions x="ZO_RETURNING_PLAYER_REWARDS_REWARD_DIMENSIONS_KEYBOARD" y="ZO_RETURNING_PLAYER_REWARDS_REWARD_DIMENSIONS_KEYBOARD" />
+
+            <OnMouseEnter>
+                ZO_ReturningPlayerRewardScreen_Keyboard.IntroReward_OnMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_ReturningPlayerRewardScreen_Keyboard.IntroReward_OnMouseExit(self)
+            </OnMouseExit>
+
+            <Controls>
+                <Control name="$(parent)Container" override="true">
+                    <Controls>
+                        <Backdrop name="$(parent)Backdrop" override="true" inherits="ZO_CenterlessBackdrop" />
+
+                        <Label name="$(parent)Quantity" override="true" font="ZoFontGameOutline" inheritScale="false" />
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_ReturningPlayerDailyReward_Keyboard" inherits="ZO_ReturningPlayerRewardsDailyReward_Shared" mouseEnabled="true" virtual="true">
+            <Dimensions x="ZO_RETURNING_PLAYER_REWARDS_REWARD_DIMENSIONS_KEYBOARD" y="ZO_RETURNING_PLAYER_REWARDS_DAILY_REWARD_HEIGHT_KEYBOARD" />
+
+            <OnMouseEnter>
+                ZO_ReturningPlayerRewardScreen_Keyboard.IntroReward_OnMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_ReturningPlayerRewardScreen_Keyboard.IntroReward_OnMouseExit(self)
+            </OnMouseExit>
+
+            <OnMouseUp>
+                ZO_ReturningPlayerRewardScreen_Keyboard.IntroReward_OnMouseUp(self, button, upInside)
+            </OnMouseUp>
+
+            <Controls>
+                <Control name="$(parent)Container" override="true">
+                    <Dimensions x="ZO_RETURNING_PLAYER_REWARDS_REWARD_DIMENSIONS_KEYBOARD" y="ZO_RETURNING_PLAYER_REWARDS_REWARD_DIMENSIONS_KEYBOARD" />
+                    <Anchor point="TOPLEFT" />
+
+                    <Controls>
+                        <Backdrop name="$(parent)Backdrop" override="true" inherits="ZO_CenterlessBackdrop" />
+
+                        <Label name="$(parent)Quantity" override="true" font="ZoFontGameOutline" inheritScale="false" />
+                    </Controls>
+                </Control>
+
+                <Label name="$(parent)Day" override="true" font="ZoFontWinH5" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_ReturningPlayerRewardsRewardInfoContainer_Keyboard" inherits="ZO_ReturningPlayerRewardsRewardInfoContainer_Shared" virtual="true">
+            <Controls>
+                <Backdrop name="$(parent)BG" inherits="ZO_DefaultBackdrop" />
+
+                <Label name="$(parent)Title" override="true" font="ZoFontKeyboard24ThickOutline" />
+
+                <Control name="$(parent)Rewards" override="true" inherits="ZO_GridScrollList_Keyboard">
+                    <Dimensions x="ZO_RETURNING_PLAYER_REWARDS_GRID_WIDTH_KEYBOARD" y="ZO_RETURNING_PLAYER_REWARDS_GRID_HEIGHT_KEYBOARD" />
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_ReturningPlayerRewardsDailyRewardInfoContainer_Keyboard" inherits="ZO_ReturningPlayerRewardsDailyRewardInfoContainer_Shared" virtual="true">
+            <Controls>
+                <Backdrop name="$(parent)BG" inherits="ZO_DefaultBackdrop" />
+
+                <Label name="$(parent)Title" override="true" font="ZoFontKeyboard24ThickOutline" />
+
+                <Label name="$(parent)ClaimHeader" override="true" font="ZoFontWinH5" />
+                
+                <Control name="$(parent)Rewards" override="true" inherits="ZO_GridScrollList_Keyboard">
+                    <Dimensions x="ZO_RETURNING_PLAYER_REWARDS_GRID_WIDTH_KEYBOARD" y="ZO_RETURNING_PLAYER_REWARDS_DAILY_LOGIN_GRID_HEIGHT_KEYBOARD" />
+                </Control>
+            </Controls>
+        </Control>
+        
+        <TopLevelControl name="ZO_ReturningPlayerReward_KeyboardTL" inherits="ZO_ReturningPlayerReward_SharedTL">
+            <Dimensions x="1000" y="785"/>
+
+            <OnInitialized>
+                ZO_ReturningPlayerRewardScreen_Keyboard.OnControlInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Backdrop name="$(parent)BG" inherits="ZO_DefaultBackdrop">
+                    <AnchorFill />
+                </Backdrop>
+
+                <Control name="$(parent)Header" override="true">
+                    <Controls>
+                        <Control name="$(parent)TopDivider" override="true" inherits="ZO_PlatformStyleDynamicHorizontalDivider_Keyboard_Template" />
+                        <Label name="$(parent)Text" override="true" font="ZoFontKeyboard24ThickOutline">
+                            <Dimensions y="24"/>
+                        </Label>
+                        <Control name="$(parent)BottomDivider" override="true" inherits="ZO_PlatformStyleDynamicHorizontalDivider_Keyboard_Template" />
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)SubHeader" override="true">
+                    <Controls>
+                        <Label name="$(parent)Title" override="true" font="ZoFontKeyboard24ThickOutline" />
+                        <Label name="$(parent)TimeRemaining" override="true" font="ZoFontWinH4" />
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)LoginBonus" override="true" inherits="ZO_ReturningPlayerRewardsDailyRewardInfoContainer_Keyboard" />
+
+                <Control name="$(parent)CampaignInfo" override="true" inherits="ZO_ReturningPlayerRewardsRewardInfoContainer_Keyboard" />
+
+                <Label name="$(parent)BodyText" override="true" font="ZoFontWinH4" />
+
+                <Button name="$(parent)GoToPromotionalEvent" inherits="ZO_ExtraLargeButton" font="ZoFontWinH2">
+                    <Anchor point="TOP" relativeTo="$(parent)BodyText" relativePoint="BOTTOM" offsetY="20" />
+
+                    <OnClicked>
+                        ZO_ReturningPlayerRewardScreen_Keyboard.GoToPromotionalEvent_OnClicked(self)
+                    </OnClicked>
+                </Button>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

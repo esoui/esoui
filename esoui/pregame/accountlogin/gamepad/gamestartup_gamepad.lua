@@ -65,7 +65,7 @@ function ZO_PCServerSelector:OnSelected(entryData)
         SetCVar("LastPlatform", entryData.platformName)
         SetSelectedPlatform(entryData.platformIndex)
         self.selectedPlatformName = entryData.platformName
-        CREATE_LINK_LOADING_SCREEN_GAMEPAD:Show("AccountLogin", RequestAnnouncements, GetString(SI_GAMEPAD_PREGAME_LOADING))
+        CREATE_LINK_LOADING_SCREEN_GAMEPAD:Show("WaitForPreloginWorld", RequestAnnouncements, GetString(SI_GAMEPAD_PREGAME_LOADING))
     end
 end
 
@@ -127,13 +127,13 @@ function ZO_ConsoleServerSelector:OnSelectedFromInitialList(entryData)
     SetCVar("IsServerSelected", "true")
     SetCVar("SelectedServer", self.selectedServerChoice)
     SavePlayerConsoleProfile()
-    CREATE_LINK_LOADING_SCREEN_GAMEPAD:Show("AccountLogin", function() LoadPlatformsList(self.selectedServerChoice) end, GetString(SI_GAMEPAD_PREGAME_LOADING))
+    CREATE_LINK_LOADING_SCREEN_GAMEPAD:Show("WaitForPreloginWorld", function() LoadPlatformsList(self.selectedServerChoice) end, GetString(SI_GAMEPAD_PREGAME_LOADING))
 end
 
 function ZO_ConsoleServerSelector:OnSelected(entryData)
     -- if user already backed out to IIS we don't have an active profile anymore, so don't kick off a platforms list load
     if self.owner.canCancelOrLoadPlatforms == true and self.selectedServerChoice ~= entryData.serverChoice then
-        CREATE_LINK_LOADING_SCREEN_GAMEPAD:Show("AccountLogin", function() LoadPlatformsList(entryData.serverChoice) end, GetString(SI_GAMEPAD_PREGAME_LOADING))
+        CREATE_LINK_LOADING_SCREEN_GAMEPAD:Show("WaitForPreloginWorld", function() LoadPlatformsList(entryData.serverChoice) end, GetString(SI_GAMEPAD_PREGAME_LOADING))
         self.owner.canCancelOrLoadPlatforms = false
         self.selectedServerChoice = entryData.serverChoice
     end
@@ -229,7 +229,7 @@ function ZO_GameStartup_Gamepad:Initialize(control)
 
                 --[[ if we don't have an MOTD, kick off RequestAnnouncements and show a loading animation. The loading animation is dismissed in OnAnnouncementsResult() below ]]--
                 if not self.gotMOTD then
-                    CREATE_LINK_LOADING_SCREEN_GAMEPAD:Show("AccountLogin", RequestAnnouncements, GetString(SI_GAMEPAD_PREGAME_LOADING))
+                    CREATE_LINK_LOADING_SCREEN_GAMEPAD:Show("WaitForPreloginWorld", RequestAnnouncements, GetString(SI_GAMEPAD_PREGAME_LOADING))
                 else
                     self.gotMOTD = false
                     self.canCancelOrLoadPlatforms = true
@@ -471,10 +471,14 @@ function ZO_GameStartup_Gamepad:InitializeKeybindDescriptor()
                     local editBox = data.control.editBox
                     editBox:TakeFocus()
                 elseif data.entryType == ENTRY_TYPE.SETTINGS then
-                    GAMEPAD_OPTIONS_ROOT_SCENE:AddTemporaryFragment(PREGAME_ANIMATED_BACKGROUND_FRAGMENT)
+                    if not IsPreloginWorldEnabled() then
+                        GAMEPAD_OPTIONS_ROOT_SCENE:AddTemporaryFragment(PREGAME_ANIMATED_BACKGROUND_FRAGMENT)
+                    end
                     SCENE_MANAGER:Push(GAMEPAD_OPTIONS_ROOT_SCENE:GetName())
                 elseif data.entryType == ENTRY_TYPE.CREDITS then
-                    GAMEPAD_CREDITS_ROOT_SCENE:AddTemporaryFragment(PREGAME_ANIMATED_BACKGROUND_FRAGMENT)
+                    if not IsPreloginWorldEnabled() then
+                        GAMEPAD_CREDITS_ROOT_SCENE:AddTemporaryFragment(PREGAME_ANIMATED_BACKGROUND_FRAGMENT)
+                    end
                     SCENE_MANAGER:Push(GAMEPAD_CREDITS_ROOT_SCENE:GetName())
                 elseif data.entryType == ENTRY_TYPE.QUIT then
                     PregameQuit()
@@ -530,16 +534,35 @@ function ZO_GameStartup_Gamepad:InitializeKeybindDescriptor()
                 return GetUIPlatform() == UI_PLATFORM_XBOX and not self.profileSaveInProgress
             end,
         },
+
          --Back
         KEYBIND_STRIP:GenerateGamepadBackButtonDescriptor(function()
                 -- if we just kicked off a platforms list load request, wait for that to finish before we let the player got back to IIS
                 if self.canCancelOrLoadPlatforms == true then
                     PlaySound(SOUNDS.DIALOG_DECLINE)
                     self.canCancelOrLoadPlatforms = false
-                    PregameStateManager_SetState("AccountLogin")
+                    PregameStateManager_SetState("WaitForPreloginWorld")
                 end
             end)
     }
+
+    --[[#$ internal:   Internal controller support for opening the Pregame Animated Background Dev Tools
+    if IsInternalBuild() and IsConsoleUI() then
+        -- Pregame Dev Tool
+        pregameDevToolKeybindDescriptor =
+        {
+            alignment = KEYBIND_STRIP_ALIGN_RIGHT,
+            name = "Pregame Dev Tool",
+            keybind = "UI_SHORTCUT_QUINARY",
+            disabledDuringSceneHiding = true,
+            sound = SOUNDS.DIALOG_ACCEPT,
+            callback = function()
+                ZO_TogglePregameAnimatedBackgroundTweakTool()
+            end,
+        }
+        table.insert(self.mainKeybindStripDescriptor, pregameDevToolKeybindDescriptor)
+    end
+    -- internal:        Internal controller support for opening the Pregame Animated Background Dev Tools  #$]]
 
     self.initialKeybindStripDescriptor = {
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
@@ -555,10 +578,11 @@ function ZO_GameStartup_Gamepad:InitializeKeybindDescriptor()
             end,
             sound = SOUNDS.DIALOG_ACCEPT,
         },
+
         --Back
         KEYBIND_STRIP:GenerateGamepadBackButtonDescriptor(function()
                 PlaySound(SOUNDS.DIALOG_DECLINE)
-                PregameStateManager_SetState("AccountLogin")
+                PregameStateManager_SetState("WaitForPreloginWorld")
             end)
     }
 
@@ -578,7 +602,7 @@ function ZO_GameStartup_Gamepad:InitializeKeybindDescriptor()
         -- Back
         KEYBIND_STRIP:GenerateGamepadBackButtonDescriptor(function()
             PlaySound(SOUNDS.DIALOG_DECLINE)
-            PregameStateManager_SetState("AccountLogin")
+            PregameStateManager_SetState("WaitForPreloginWorld")
         end),
     }
 end

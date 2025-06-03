@@ -60,6 +60,11 @@ function ZO_SkillProgressionData_Base:GetAbilityId()
     return self.abilityId
 end
 
+function ZO_SkillProgressionData_Base:GetEffectiveAbilityId(hotbarCategory)
+    -- For chained abilities, which is uncommon
+    return self.abilityId
+end
+
 function ZO_SkillProgressionData_Base:SetAbilityId(abilityId)
     self.abilityId = abilityId
     self.name = GetAbilityName(abilityId)
@@ -177,13 +182,20 @@ ZO_SkillData_Base:MUST_IMPLEMENT("SetHasUpdatedStatus", hasUpdatedStatus)
 
 ZO_SkillData_Base:MUST_IMPLEMENT("ClearUpdate")
 
-ZO_SkillData_Base:MUST_IMPLEMENT("CanPointAllocationsBeAltered", isFullRespec)
+ZO_SkillData_Base:MUST_IMPLEMENT("CanPointAllocationsBeAltered", skillPointAllocationMode)
 
 ZO_SkillData_Base:STUB("GetLineRankNeededToPurchase") -- Only used for purchaseable skills
+
+ZO_SkillData_Base:STUB("GetCharacterLevelNeededToPurchase") -- Only used for purchaseable skills
 
 ZO_SkillData_Base:STUB("IsAutoGrant") -- Only matters for point allocation checks, not always needed
 
 -- Optional overrides
+
+function ZO_SkillData_Base:GetSkillPointCostMultiplier()
+    return self:GetSkillLineData():GetSkillPointCostMultiplier()
+end
+
 function ZO_SkillData_Base:IsPlayerSkill()
     return false
 end
@@ -268,8 +280,52 @@ function ZO_SkillLineData_Base:IsCompanionSkillLine()
     return false
 end
 
+function ZO_SkillLineData_Base:IsProgressionAccountWide()
+    return false
+end
+
 function ZO_SkillLineData_Base:IsAdvised()
     return false
+end
+
+function ZO_SkillLineData_Base:IsInTraining()
+    return false
+end
+
+function ZO_SkillLineData_Base:GetMasteryCollectibleId()
+    return 0
+end
+
+function ZO_SkillLineData_Base:HasMastery()
+    return false
+end
+
+function ZO_SkillLineData_Base:GetSkillPointCostMultiplier()
+    return 1
+end
+
+function ZO_SkillLineData_Base:IsClassSkillLine()
+    return false
+end
+
+function ZO_SkillLineData_Base:HasClassId()
+    return false
+end
+
+function ZO_SkillLineData_Base:IsPlayerClassSkillLine()
+    return false
+end
+
+function ZO_SkillLineData_Base:GetKeyboardClassIcon()
+    return ""
+end
+
+function ZO_SkillLineData_Base:GetGamepadClassIcon()
+    return ""
+end
+
+function ZO_SkillLineData_Base:GetPlatformClassIcon()
+    return ""
 end
 
 -- additional state
@@ -347,6 +403,9 @@ function ZO_SkillLineData_Base:GetDetailedIcon()
 end
 
 function ZO_SkillLineData_Base:GetFormattedName()
+    if self:IsClassSkillLine() then
+       return ZO_CachedStrFormat(SI_SKILLS_ENTRY_LINE_NAME_CLASS_FORMAT, self:GetName(), zo_iconFormat(self:GetPlatformClassIcon(), "100%", "100%"))
+    end
     return ZO_CachedStrFormat(SI_SKILLS_ENTRY_LINE_NAME_FORMAT, self:GetName())
 end
 

@@ -27,8 +27,15 @@ function ZO_Tooltip:LayoutSkillProgression(skillProgressionData, showRankNeededL
             local isLocked = skillProgressionData:IsLocked()
             if isLocked then
                 local skillLineName = skillLineData:GetName()
-                local lineRankNeededToPurchase = skillData:GetLineRankNeededToPurchase()
-                headerSection:AddLine(zo_strformat(SI_ABILITY_UNLOCKED_AT, skillLineName, lineRankNeededToPurchase), self:GetStyle("failed"), self:GetStyle("abilityHeader"))
+
+                if not skillData:MeetsCharacterLevelPurchaseRequirement() then
+                    headerSection:AddLine(zo_strformat(SI_SKILL_ABILITY_TOOLTIP_LEVEL_UNLOCK_INFO, skillData:GetCharacterLevelNeededToPurchase()), self:GetStyle("failed"), self:GetStyle("abilityHeader"))
+                end
+
+                if not skillData:MeetsLineRankPurchaseRequirement() then
+                    headerSection:AddLine(zo_strformat(SI_ABILITY_UNLOCKED_AT, skillLineName, skillData:GetLineRankNeededToPurchase()), self:GetStyle("failed"), self:GetStyle("abilityHeader"))
+                end
+
                 hadRankNeededLineToShow = true
             end
         else
@@ -39,8 +46,15 @@ function ZO_Tooltip:LayoutSkillProgression(skillProgressionData, showRankNeededL
                     local isLocked = nextSkillProgressionData:IsLocked()
                     if isLocked then
                         local skillLineName = skillLineData:GetName()
-                        local lineRankNeededToUnlock = nextSkillProgressionData:GetLineRankNeededToUnlock()
-                        headerSection:AddLine(zo_strformat(SI_SKILL_ABILITY_TOOLTIP_UPGRADE_UNLOCK_INFO, skillLineName, lineRankNeededToUnlock), self:GetStyle("failed"), self:GetStyle("abilityHeader"))
+
+                        if not nextSkillProgressionData:MeetsCharacterLevelUnlockRequirement() then
+                            headerSection:AddLine(zo_strformat(SI_SKILL_ABILITY_TOOLTIP_UPGRADE_LEVEL_UNLOCK_INFO, nextSkillProgressionData:GetCharacterLevelNeededToUnlock()), self:GetStyle("failed"), self:GetStyle("abilityHeader"))
+                        end
+
+                        if not nextSkillProgressionData:MeetsLineRankUnlockRequirement() then
+                            headerSection:AddLine(zo_strformat(SI_SKILL_ABILITY_TOOLTIP_UPGRADE_RANK_UNLOCK_INFO, skillLineName, nextSkillProgressionData:GetLineRankNeededToUnlock()), self:GetStyle("failed"), self:GetStyle("abilityHeader"))
+                        end
+
                         hadRankNeededLineToShow = true
                     end
                 end
@@ -50,25 +64,22 @@ function ZO_Tooltip:LayoutSkillProgression(skillProgressionData, showRankNeededL
 
     --Skill Point Spending Line
     if showPointSpendLine and not hadRankNeededLineToShow and skillPointAllocator:GetProgressionData() == skillProgressionData then
-        local hasAvailableSkillPoint = SKILL_POINT_ALLOCATION_MANAGER:GetAvailableSkillPoints() > 0
+        local availableSkillPoints = SKILL_POINT_ALLOCATION_MANAGER:GetAvailableSkillPoints()
+        local skillPointCost = skillData:GetSkillPointCostMultiplier()
+        local hasEnoughSkillPoints = availableSkillPoints >= skillPointCost
+        local colorStyle = hasEnoughSkillPoints and self:GetStyle("succeeded") or self:GetStyle("failed")
         if not isPurchased then
             --Skill progression data is the skill progression data that would be isPurchased
             local isLocked = skillProgressionData:IsLocked()
             if not isLocked then
-                if hasAvailableSkillPoint then
-                    headerSection:AddLine(GetString(SI_ABILITY_PURCHASE), self:GetStyle("succeeded"), self:GetStyle("abilityHeader"))
-                else
-                    headerSection:AddLine(GetString(SI_ABILITY_PURCHASE), self:GetStyle("failed"), self:GetStyle("abilityHeader"))
-                end
+                local text = zo_strformat(SI_ABILITY_PURCHASE, skillPointCost)
+                headerSection:AddLine(text, colorStyle, self:GetStyle("abilityHeader"))
             end
         else
             if isNonCraftedActive then
-                if skillProgressionData:IsBase() and skillData:IsAtMorph()  then
-                    if hasAvailableSkillPoint then
-                        headerSection:AddLine(GetString(SI_ABILITY_AT_MORPH_POINT), self:GetStyle("succeeded"), self:GetStyle("abilityHeader"))
-                    else
-                        headerSection:AddLine(GetString(SI_ABILITY_AT_MORPH_POINT), self:GetStyle("failed"), self:GetStyle("abilityHeader"))
-                    end
+                if skillProgressionData:IsBase() and skillData:IsAtMorph() then
+                    local text = zo_strformat(SI_ABILITY_AT_MORPH_POINT, skillPointCost)
+                    headerSection:AddLine(text, colorStyle, self:GetStyle("abilityHeader"))
                 end
             elseif isPassive then
                 --Skill progression data is the skill progression data that is being upgrade from
@@ -76,11 +87,8 @@ function ZO_Tooltip:LayoutSkillProgression(skillProgressionData, showRankNeededL
                 if nextSkillProgressionData then
                     local isLocked = nextSkillProgressionData:IsLocked()
                     if not isLocked then
-                        if hasAvailableSkillPoint then
-                            headerSection:AddLine(GetString(SI_ABILITY_UPGRADE), self:GetStyle("succeeded"), self:GetStyle("abilityHeader"))
-                        else
-                            headerSection:AddLine(GetString(SI_ABILITY_UPGRADE), self:GetStyle("failed"), self:GetStyle("abilityHeader"))
-                        end
+                        local text = zo_strformat(SI_ABILITY_UPGRADE, skillPointCost)
+                        headerSection:AddLine(text, colorStyle, self:GetStyle("abilityHeader"))
                     end
                 end
             end
@@ -124,11 +132,20 @@ function ZO_Tooltip:LayoutSkillProgression(skillProgressionData, showRankNeededL
             addNewEffects = true
         end
     end
-
+    
     --Morphed From Header
     if isNonCraftedActive and skillProgressionData:IsMorph() then
         local baseMorphProgressionData = skillData:GetMorphData(MORPH_SLOT_BASE)
         headerSection:AddLine(zo_strformat(SI_ABILITY_TOOLTIP_MORPHS_FROM, baseMorphProgressionData:GetName()), self:GetStyle("abilityHeader"))
+    end
+    
+    --Class Header
+    if skillLineData:IsClassSkillLine() then
+        local className = skillLineData:GetClassName()
+        local classIcon = skillLineData:GetGamepadClassIcon()
+        local classIconText = zo_iconFormat(classIcon, "100%", "100%")
+        local headerText = zo_strformat(SI_SKILL_ABILITY_TOOLTIP_CLASS_INFO, className, classIconText)
+        headerSection:AddLine(headerText, self:GetStyle("abilityHeader"))
     end
 
     self:AddSectionEvenIfEmpty(headerSection)
@@ -202,13 +219,23 @@ function ZO_Tooltip:LayoutAbilityWithSkillProgressionData(abilityId, skillProgre
     local currentRank = skillProgressionData:HasRankData() and skillProgressionData:GetCurrentRank()
     if currentRank then
         local headerSection = self:AcquireSection(self:GetStyle("abilityHeaderSection"))
+        local skillData = skillProgressionData:GetSkillData()
+        local skillLineData = skillData:GetSkillLineData()
 
         --Morphed From Header
-        local skillData = skillProgressionData:GetSkillData()
         local isNonCraftedActive = not skillData:IsPassive() and not skillData:IsCraftedAbility()
         if isNonCraftedActive and skillProgressionData:IsMorph() then
             local baseMorphProgressionData = skillData:GetMorphData(MORPH_SLOT_BASE)
             headerSection:AddLine(zo_strformat(SI_ABILITY_TOOLTIP_MORPHS_FROM, baseMorphProgressionData:GetName()), self:GetStyle("abilityHeader"))
+        end
+        
+        --Class Header
+        if skillLineData:IsClassSkillLine() then
+            local className = skillLineData:GetClassName()
+            local classIcon = skillLineData:GetGamepadClassIcon()
+            local classIconText = zo_iconFormat(classIcon, "100%", "100%")
+            local headerText = zo_strformat(SI_SKILL_ABILITY_TOOLTIP_CLASS_INFO, className, classIconText)
+            headerSection:AddLine(headerText, self:GetStyle("abilityHeader"))
         end
 
         self:AddSectionEvenIfEmpty(headerSection)
@@ -286,8 +313,8 @@ function ZO_Tooltip:LayoutCompanionSkillProgression(skillProgressionData)
     self:AddAbilityDescription(abilityId, NO_OVERRIDE_DESCRIPTION, "companion")
 end
 
-function ZO_Tooltip:LayoutSkillLinePreview(skillLineData)
-    if skillLineData:IsAvailable() then
+function ZO_Tooltip:LayoutSkillLinePreview(skillLineData, isReadOnly)
+    if skillLineData:IsAvailable() or skillLineData:IsProgressionAccountWide() or skillLineData:IsClassSkillLine() then
         local skillsSection = self:AcquireSection(self:GetStyle("skillLinePreviewBodySection"))
         local lastHeader = nil
         local function IsSkillVisible(skillData)
@@ -302,8 +329,10 @@ function ZO_Tooltip:LayoutSkillLinePreview(skillLineData)
                 lastHeader = currentHeader
             end
 
+            local DONT_OVERRIDE_SLOT_INDEX = nil
+            local DONT_OVERRIDE_HOT_BAR = nil
             local rowControl = self:AcquireCustomControl(self:GetStyle("skillLineEntryRow"))
-            ZO_GamepadSkillEntryPreviewRow_Setup(rowControl, skillData)
+            ZO_GamepadSkillEntryPreviewRow_Setup(rowControl, skillData, DONT_OVERRIDE_SLOT_INDEX, DONT_OVERRIDE_HOT_BAR, isReadOnly)
             local narrations = self:GetSkillLineNarrationText(skillData)
             skillsSection:AddCustomControl(rowControl, narrations)
         end

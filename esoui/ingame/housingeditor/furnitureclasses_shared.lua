@@ -431,7 +431,7 @@ function ZO_RetrievableFurniture:RefreshInfo(retrievableFurnitureId)
     local rawName, icon, furnitureDataId = GetPlacedHousingFurnitureInfo(retrievableFurnitureId)
 
     --Only update these on id change.
-    if not self.retrievableFurnitureId or CompareId64s(retrievableFurnitureId, self.retrievableFurnitureId) ~= 0 then
+    if not (self.retrievableFurnitureId and AreId64sEqual(retrievableFurnitureId, self.retrievableFurnitureId)) then
         self.retrievableFurnitureId = retrievableFurnitureId
         self.icon = icon
         self.furnitureDataId = furnitureDataId
@@ -720,7 +720,7 @@ function ZO_FurniturePathNode:RefreshInfo(furnitureId, index)
     local rawName, icon = GetPlacedHousingFurnitureInfo(furnitureId)
 
     --Only update these on id or index change.
-    if CompareId64s(furnitureId, self.furnitureId) ~= 0 or index ~= self.pathIndex then
+    if not AreId64sEqual(furnitureId, self.furnitureId) or index ~= self.pathIndex then
         self.furnitureId = furnitureId
         self.pathIndex = index
         self.icon = icon

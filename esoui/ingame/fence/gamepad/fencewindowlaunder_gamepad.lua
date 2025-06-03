@@ -48,7 +48,6 @@ end
 
 function ZO_GamepadFenceLaunder:OnSuccess()
     if not self.control:IsControlHidden() then
-        PlaySound(SOUNDS.ITEM_MONEY_CHANGED)
         PlaySound(SOUNDS.FENCE_ITEM_LAUNDERED)
         STORE_WINDOW_GAMEPAD:RefreshHeaderData()
     end

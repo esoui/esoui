@@ -19,7 +19,7 @@ end
 
 function ZO_BattlegroundMatchInfo_MedalObject:SetupMedalInfo(medalId, count)
     local name, icon, _, scoreReward = GetMedalInfo(medalId)
-    self.nameLabel:SetText(name)
+    self.nameLabel:SetText(zo_strformat(SI_BATTLEGROUND_MATCH_INFO_MEDAL_NAME_FORMATTER, name))
     self.countLabel:SetText(count)
     self.iconTexture:SetTexture(icon)
     local points = count * scoreReward

@@ -54,6 +54,23 @@ function ZO_Banking_Shared:Initialize(control)
         },
     }
     TEXT_SEARCH_MANAGER:SetupContextTextSearch("guildBankTextSearch", guildBankFilterTargetDescriptor)
+
+    local furnitureVaultFilterTargetDescriptor =
+    {
+        [BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT] =
+        {
+            searchFilterList =
+            {
+                BACKGROUND_LIST_FILTER_TYPE_NAME,
+            },
+            primaryKeys =
+            {
+                BAG_BACKPACK,
+                BAG_FURNITURE_VAULT,
+            },
+        },
+    }
+    TEXT_SEARCH_MANAGER:SetupContextTextSearch("furnitureVaultTextSearch", furnitureVaultFilterTargetDescriptor)
 end
 
 ZO_BANKING_SHARED = ZO_Banking_Shared:New()

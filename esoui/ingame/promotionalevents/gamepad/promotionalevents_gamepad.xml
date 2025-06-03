@@ -38,6 +38,25 @@
             </Controls>
         </Control>
 
+        <Control name="ZO_PromotionalEventReturningPlayerReward_Gamepad" inherits="ZO_PromotionalEventReturningPlayerReward_Shared" virtual="true">
+            <Dimensions x="ZO_PROMOTIONAL_EVENT_RETURNING_PLAYER_REWARD_WIDTH_GAMEPAD" y="ZO_PROMOTIONAL_EVENT_RETURNING_PLAYER_REWARD_HEIGHT_GAMEPAD" />
+            <Controls>
+                <Control name="$(parent)Container" override="true">
+                    <Controls>
+                        <Backdrop name="$(parent)Backdrop" override="true" inherits="ZO_CenterlessBackdrop" />
+
+                        <Label name="$(parent)Quantity" override="true" font="ZoFontGamepad25" inheritScale="false" />
+
+                        <Label name="$(parent)Name" override="true" font="ZoFontGamepad27" inheritScale="false" />
+
+                        <Texture name="$(parent)ClaimedMark" override="true">
+                            <Dimensions x="48" y="48" />
+                        </Texture>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
         <Control name="ZO_PromotionalEventMilestone_Template_Gamepad" inherits="ZO_PromotionalEventMilestone_Template_Shared" virtual="true">
             <Dimensions x="68" />
             <Controls>
@@ -73,7 +92,21 @@
                 </Label>
             </Controls>
         </Control>
-        
+
+        <Control name="ZO_PromotionalEvent_ChoiceRewardEntry_Template_GP" inherits="ZO_GamepadMenuEntryDimensionsTemplate ZO_GamepadMenuEntryLabelSizedTemplate" virtual="true">
+            <Controls>
+                <Label name="$(parent)Label" inherits="ZO_GamepadSubMenuEntryLabelTemplate"/>
+
+                <Texture name="$(parent)Icon" inherits="ZO_GamepadMenuEntryIconTemplate">
+                    <Controls>
+                        <Label name="$(parent)StackCount" inherits="ZO_GamepadMenuEntryStackCountTemplate" />
+                    </Controls>
+                </Texture>
+
+                <Texture name="$(parent)StatusIndicator" inherits="ZO_GamepadMenuEntryStatusIndicationTemplate" />
+            </Controls>
+        </Control>
+
         <TopLevelControl name="ZO_PromotionalEvents_GamepadTL" inherits="ZO_PromotionalEvents_Shared ZO_GamepadGrid_NavQuadrant_2_3_Anchors" hidden="true">
             <OnInitialized>
                 ZO_PromotionalEvents_Gamepad.OnControlInitialized(self)
@@ -127,6 +160,15 @@
                         <Control name="$(parent)ActivityList" override="true" inherits="ZO_ScrollList_Gamepad">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)CampaignPanel" relativePoint="BOTTOMLEFT" offsetX="-10" offsetY="20" />
                             <Anchor point="BOTTOMRIGHT" />
+                        </Control>
+
+                        <Control name="$(parent)ReturningUserRewards" override="true" hidden="true">
+                            <AnchorFill />
+                            <Controls>
+                                <Control name="$(parent)GridList" override="true" inherits="ZO_GridScrollList_Gamepad">
+                                    <AnchorFill />
+                                </Control>
+                            </Controls>
                         </Control>
                     </Controls>
                 </Control>
@@ -189,25 +231,46 @@
                     </Controls>
                 </Control>
 
+                <Label name="$(parent)AdditionalInformation" override="true" font="ZoFontGamepad34" horizontalAlignment="LEFT" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" hidden="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)RewardContainer" relativePoint="BOTTOMLEFT" offsetY="30" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)RewardContainer" relativePoint="BOTTOMRIGHT" offsetY="30" />
+                </Label>
+
                 <Control name="$(parent)BottomDivider" override="true" inherits="ZO_GamepadHeaderHorizontalDividerSimple">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)RewardContainer" relativePoint="BOTTOMLEFT" offsetY="10" />
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)RewardContainer" relativePoint="BOTTOMRIGHT" offsetY="10" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)AdditionalInformation" relativePoint="BOTTOMLEFT" offsetY="10" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)AdditionalInformation" relativePoint="BOTTOMRIGHT" offsetY="10" />
                 </Control>
 
                 <Control name="$(parent)Buttons" resizeToFitDescendents="true">
                     <Anchor point="TOP" relativeTo="$(parent)BottomDivider" relativePoint="BOTTOM" offsetY="10" />
-                    
+
                     <Controls>
-                        <Control name="$(parent)Close" inherits="ZO_KeybindButton_Gamepad">
+                        <Control name="$(parent)NextCampaign" inherits="ZO_KeybindButton_Gamepad">
                             <Anchor point="LEFT" />
                         </Control>
-                        
+
+                        <Control name="$(parent)Close" inherits="ZO_KeybindButton_Gamepad">
+                            <Anchor point="LEFT" relativeTo="$(parent)NextCampaign" relativePoint="RIGHT" offsetX="10" />
+                        </Control>
+
                         <Control name="$(parent)ViewInCollections" inherits="ZO_KeybindButton_Gamepad">
                             <Anchor point="LEFT" relativeTo="$(parent)Close" relativePoint="RIGHT" offsetX="10" />
                         </Control>
                     </Controls>
                 </Control>
             </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_PromotionalEvents_ClaimChoice_Dialog_Gamepad_TL" inherits="ZO_Gamepad_ParametricList_Screen">
+            <OnInitialized>
+                ZO_PromotionalEvents_ClaimChoiceDialog_Gamepad.OnControlInitialized(self)
+            </OnInitialized>
+        </TopLevelControl>
+
+        <TopLevelControl name="ZO_PromotionalEvents_RewardList_Screen" inherits="ZO_Gamepad_ParametricList_Screen">
+            <OnInitialized>
+                ZO_PromotionalEvents_RewardList_Screen_Gamepad.OnControlInitialized(self)
+            </OnInitialized>
         </TopLevelControl>
     </Controls>
 </GuiXml>

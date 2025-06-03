@@ -161,3 +161,27 @@ BACKPACK_LAUNDER_LAYOUT_FRAGMENT = ZO_BackpackLayoutFragment:New(
         end,
         alwaysReapplyLayout = true,
     })
+
+BACKPACK_FURNITURE_VAULT_LAYOUT_FRAGMENT = ZO_BackpackLayoutFragment:New(
+    {
+        inventoryTopOffsetY = DEFAULT_INVENTORY_TOP_OFFSET_Y,
+        inventoryFilterDividerTopOffsetY = DEFAULT_INVENTORY_FILTER_DIVIDER_TOP_OFFSET_Y,
+        hiddenFilters =
+        {
+            [ITEM_TYPE_DISPLAY_CATEGORY_ALL] = true,
+            [ITEM_TYPE_DISPLAY_CATEGORY_WEAPONS] = true,
+            [ITEM_TYPE_DISPLAY_CATEGORY_ARMOR] = true,
+            [ITEM_TYPE_DISPLAY_CATEGORY_CONSUMABLE] = true,
+            [ITEM_TYPE_DISPLAY_CATEGORY_JEWELRY] = true,
+            [ITEM_TYPE_DISPLAY_CATEGORY_CRAFTING] = true,
+            [ITEM_TYPE_DISPLAY_CATEGORY_COMPANION] = true,
+            [ITEM_TYPE_DISPLAY_CATEGORY_MISCELLANEOUS] = true,
+            [ITEM_TYPE_DISPLAY_CATEGORY_JUNK] = true,
+            [ITEM_TYPE_DISPLAY_CATEGORY_QUEST] = true,
+        },
+        additionalFilter = function (slot)
+            return CanStowFurnitureItem(slot.bagId, slot.slotIndex)
+        end,
+        hideBankInfo = false,
+        hideCurrencyInfo = true,
+    })

@@ -5,9 +5,12 @@ local function OutputSystemMessage(messageOrFormatter, ...)
 end
 
 if AreUserAddOnsSupported() or IsInternalBuild() then
-    SLASH_COMMANDS[GetString(SI_SLASH_SCRIPT)] = function (txt)
-        local f = assert(zo_loadstring(txt))
-        f()
+    SLASH_COMMANDS[GetString(SI_SLASH_SCRIPT)] = function(txt)
+        --Perform this check again here as the value of AreUserAddOnsSupported can change at runtime
+        if AreUserAddOnsSupported() or IsInternalBuild() then
+            local f = assert(zo_loadstring(txt))
+            f()
+        end
     end
 
     SLASH_COMMANDS[GetString(SI_SLASH_CHATLOG)] = function(txt)
@@ -238,7 +241,7 @@ do
 
         OutputCommandHelpHint()
 
-        local result = nil
+        local result
         if string.find(args, "d") then
             -- Match any of the following patterns and disregard ancillary whitespace:
             --  #d

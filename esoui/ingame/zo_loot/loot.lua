@@ -2,6 +2,8 @@ local MOUSE_ENTER = 1
 local MOUSE_EXIT = 2
 
 local STOLEN_ICON_TEXTURE = "EsoUI/Art/Inventory/inventory_stolenItem_icon.dds"
+local LOCKED_SET_PIECE_ICON_TEXTURE = "EsoUI/Art/Inventory/inventory_locked_set_piece_icon.dds"
+local CAN_LEARN_ICON_TEXTURE = "EsoUI/Art/Inventory/inventory_can_learn_icon.dds"
 
 --Loot Scene Fragment
 ------------------------
@@ -191,15 +193,26 @@ function ZO_Loot:SetUpLootItem(control, data)
     end
 
     -- Set up everything but the icon using the old slot logic
-    local slot = GetControl(control, "Button")
+    local slot = control:GetNamedChild("Button")
     ZO_Inventory_SetupSlot(slot, data.count, nil, true)
 
-    -- Set up the icon
-    local multiIcon = GetControl(control, "MultiIcon")
-    multiIcon:ClearIcons()
+    -- Set up the status icon
+    local statusIcon = control:GetNamedChild("StatusIcon")
+    statusIcon:ClearIcons()
     if data.isStolen then
-        multiIcon:AddIcon(STOLEN_ICON_TEXTURE)
+        statusIcon:AddIcon(STOLEN_ICON_TEXTURE)
     end
+    if data.isLockedSetPiece then
+        statusIcon:AddIcon(LOCKED_SET_PIECE_ICON_TEXTURE, ZO_SUCCEEDED_TEXT)
+    end
+    if data.canBeUsedToLearn then
+        statusIcon:AddIcon(CAN_LEARN_ICON_TEXTURE, ZO_SUCCEEDED_TEXT)
+    end
+    statusIcon:Show()
+
+    -- Set up the icon
+    local multiIcon = control:GetNamedChild("MultiIcon")
+    multiIcon:ClearIcons()
     multiIcon:AddIcon(data.icon)
     multiIcon:Show()
 

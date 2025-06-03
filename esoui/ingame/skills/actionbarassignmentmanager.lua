@@ -255,12 +255,7 @@ end
 
 function ZO_SlottablePlayerSkill:GetEffectiveAbilityId()
     local skillProgressionData = self.skillData:GetPointAllocatorProgressionData()
-    local rootAbilityId = skillProgressionData:GetAbilityId()
-    if skillProgressionData.IsChainingAbility and skillProgressionData:IsChainingAbility() then
-        return GetEffectiveAbilityIdForAbilityOnHotbar(rootAbilityId, self.hotbarCategory)
-    else
-        return rootAbilityId
-    end
+    return skillProgressionData:GetEffectiveAbilityId(self.hotbarCategory)
 end
 
 function ZO_SlottablePlayerSkill:GetIcon()
@@ -273,7 +268,12 @@ end
 
 function ZO_SlottablePlayerSkill:IsStillValid()
     -- We should invalidate skills that have been refunded
-    return self.skillData:GetPointAllocator():IsPurchased()
+    if self.skillData:GetPointAllocator():IsPurchased() then
+        local skillLineData = self.skillData:GetSkillLineData()
+        -- Subclassing can deactivate a line without removing any of the skills directly
+        return skillLineData:IsActive()
+    end
+    return false
 end
 
 function ZO_SlottablePlayerSkill:LayoutGamepadTooltip(tooltipType)
@@ -770,10 +770,11 @@ end
 -- Action Bar Assignment Manager --
 -----------------------------------
 
-ZO_ActionBarAssignmentManager = ZO_InitializingCallbackObject:Subclass()
+ZO_ActionBarAssignmentManager = ZO_SkillsAssignmentManager_Base:Subclass()
 
 function ZO_ActionBarAssignmentManager:Initialize()
     ACTION_BAR_ASSIGNMENT_MANAGER = self
+
     self.hotbars = {}
     for hotbarCategory in pairs(VIEWABLE_HOTBAR_CATEGORY_SET) do
         self.hotbars[hotbarCategory] = ZO_ActionBarAssignmentManager_Hotbar:New(hotbarCategory)
@@ -786,9 +787,7 @@ function ZO_ActionBarAssignmentManager:Initialize()
     self:GetHotbar(HOTBAR_CATEGORY_PRIMARY):EnableInCycle()
     self:UpdateBackupBarStateInCycle()
 
-    self:RegisterForEvents()
-
-    SKILLS_AND_ACTION_BAR_MANAGER:OnActionBarAssignmentManagerReady(self)
+    ZO_SkillsAssignmentManager_Base.Initialize(self, ZO_SkillsAndActionBarManager.OnActionBarAssignmentManagerReady)
 end
 
 function ZO_ActionBarAssignmentManager:RegisterForEvents()
@@ -997,6 +996,10 @@ function ZO_ActionBarAssignmentManager:IsAnyChangePending()
     return false
 end
 
+function ZO_ActionBarAssignmentManager:DoPendingChangesIncurCost()
+    return false
+end
+
 function ZO_ActionBarAssignmentManager:AddChangesToMessage()
     local anyChangesAdded = false
     for hotbarCategory in pairs(ASSIGNABLE_HOTBAR_CATEGORY_SET) do
@@ -1096,7 +1099,7 @@ function ZO_ActionBarAssignmentManager:IsWerewolfUltimateSlottedOnAnyWeaponBar()
 end
 
 function ZO_ActionBarAssignmentManager:UpdateWerewolfBarStateInCycle(selectedSkillLineData)
-    if selectedSkillLineData and selectedSkillLineData:IsWerewolf() then
+    if selectedSkillLineData and not selectedSkillLineData.isSubclassingNode and selectedSkillLineData:IsWerewolf() then
         self:EnableHotbarInCycle(HOTBAR_CATEGORY_WEREWOLF)
         if ACTION_BAR_ASSIGNMENT_MANAGER:IsWerewolfUltimateSlottedOnAnyWeaponBar() then
             self:SetCurrentHotbar(HOTBAR_CATEGORY_WEREWOLF)

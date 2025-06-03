@@ -198,6 +198,7 @@ function ZO_QuestJournal_Manager:BuildQuestListData()
             local zoneDisplayType = GetJournalQuestZoneDisplayType(i)
             local repeatableType = GetJournalQuestRepeatType(i)
             local repeatable = repeatableType ~= QUEST_REPEAT_NOT_REPEATABLE
+            local canAbandon = CanAbandonJournalQuest(i)
 
             table.insert(self.quests,
                 {
@@ -210,6 +211,7 @@ function ZO_QuestJournal_Manager:BuildQuestListData()
                     displayType = zoneDisplayType,
                     repeatableType = repeatableType,
                     repeatable = repeatable,
+                    canAbandon = canAbandon,
                 }
             )
         end

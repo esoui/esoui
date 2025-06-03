@@ -5,29 +5,28 @@
         1. Have a relatively high construction cost
         2. Are not lightweight enough to create many of them at once
         3. Tend to be reused as dynamic elements of a larger container.
-        
+
     The pool should "rapidly" reach a high-water mark of contained objects
     which should flow between active and free states on a regular basis.
-    
+
     Ideal uses of the ZO_ObjectPool would be to contain objects such as:
         1. Scrolling combat text
         2. Tracked quests
         3. Buff icons
-        
+
     The pools are not intended to be used to track a dynamic set of 
     contained objects whose membership grows to a predetermined size.
     As such, do NOT use the pool to track:
-        1. Chat filters
-        2. Inventory slots
-        3. Action buttons (unless creating something like AutoBar)
-        
+        1. Inventory slots
+        2. Action buttons (unless creating something like AutoBar)
+
     A common usage pattern is instantiating templated controls.  To facilitate this
     without bloating your own code you should use ZO_ObjectPool_CreateControl which has
     been written here as a convenience.  It creates a control named "template"..id where
     id is an arbitrary value that will not conflict with other generated id's.
-    
+
     If your system depends on having well-known names for controls, you should not use the
-    convenience function.    
+    convenience function.
 --]]
 
 ZO_ObjectPool = ZO_InitializingObject:Subclass()

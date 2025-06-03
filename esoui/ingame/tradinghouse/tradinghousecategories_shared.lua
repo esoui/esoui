@@ -1461,7 +1461,7 @@ end
     Any item that could be sold on the trading house should be categorized.
 ]]--
 
-internalassert(ITEMTYPE_MAX_VALUE == 74, "Do you need to update the trading house with your new itemtype?")
+internalassert(ITEMTYPE_MAX_VALUE == 75, "Do you need to update the trading house with your new itemtype?")
 internalassert(SPECIALIZED_ITEMTYPE_MAX_VALUE == 3300, "Do you need to update the trading house with your new specialized itemtype?")
 internalassert(EQUIP_TYPE_MAX_VALUE == 15, "Do you need to update the trading house with your new equip type?")
 
@@ -1499,7 +1499,7 @@ AddRecipeCategory(PROVISIONER_SPECIAL_INGREDIENT_TYPE_FURNISHING)
 AddConsumableCategory(ITEMTYPE_MASTER_WRIT)
 AddConsumableCategory(ITEMTYPE_CONTAINER, ITEMTYPE_CONTAINER_CURRENCY)
 AddConsumableCategory(ITEMTYPE_AVA_REPAIR)
-AddMiscItemTypesCategory(TRADING_HOUSE_CATEGORY_HEADER_CONSUMABLES, ITEMTYPE_CRAFTED_ABILITY, ITEMTYPE_CRAFTED_ABILITY_SCRIPT)
+AddMiscItemTypesCategory(TRADING_HOUSE_CATEGORY_HEADER_CONSUMABLES, ITEMTYPE_CRAFTED_ABILITY, ITEMTYPE_CRAFTED_ABILITY_SCRIPT, ITEMTYPE_CONTAINER_STACKABLE)
 
 -- Materials
 AddAllMaterialsCategory()

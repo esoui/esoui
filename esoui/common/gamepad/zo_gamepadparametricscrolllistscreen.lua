@@ -406,6 +406,10 @@ function ZO_Gamepad_ParametricList_Screen:IsHeaderActive()
     return self.headerFocus and self.headerFocus:IsActive()
 end
 
+function ZO_Gamepad_ParametricList_Screen:IsSearchFocused()
+    return self.textSearchHeaderFocus and self.textSearchHeaderFocus:HasFocus()
+end
+
 function ZO_Gamepad_ParametricList_Screen:RequestEnterHeader()
     if not self.headerFocus or self.headerFocus:IsActive() then
         return

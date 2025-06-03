@@ -25,8 +25,13 @@
             </OnInitialized>
             <Controls>
                 <Control name="$(parent)Bg" inherits="ZO_SharedGamepadNavQuadrant_1_2_3_4_Background_Template"/>
-                
-                <Control name="$(parent)Main" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
+
+                <Control name="$(parent)Main" inherits="ZO_ScrollContainer_Gamepad ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
+                    <OnInitialized>
+                        ZO_Scroll_Initialize_Gamepad(self)
+                        ZO_Scroll_Gamepad_SetScrollIndicatorSide(self:GetNamedChild("ScrollIndicator"), ZO_SharedGamepadNavQuadrant_1_2_3_4_Background, RIGHT, nil, ZO_GAMEPAD_PANEL_BG_SCROLL_INDICATOR_OFFSET_FOR_ARROW)
+                    </OnInitialized>
+
                     <Controls>
                         <Label name="$(parent)NoKey" text="SI_WORLD_MAP_NO_KEY" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGamepadCondensed42">
                             <Anchor point="TOP" offsetY="180"/>

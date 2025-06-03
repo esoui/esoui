@@ -27,6 +27,15 @@ local ZO_OptionsPanel_Camera_ControlData =
             panel = SETTING_PANEL_CAMERA,
             text =  ZO_IsConsolePlatform() and SI_GAMEPAD_OPTIONS_INVERT_Y or SI_GAMEPAD_OPTIONS_INVERT_Y_PC,
         },
+        --Options_Gamepad_InvertX
+        [GAMEPAD_SETTING_INVERT_X] =
+        {
+            controlType = OPTIONS_CHECKBOX,
+            system = SETTING_TYPE_GAMEPAD,
+            settingId = GAMEPAD_SETTING_INVERT_X,
+            panel = SETTING_PANEL_CAMERA,
+            text =  ZO_IsConsolePlatform() and SI_GAMEPAD_OPTIONS_INVERT_X or SI_GAMEPAD_OPTIONS_INVERT_X_PC,
+        },
     },
 }
 

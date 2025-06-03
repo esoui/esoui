@@ -13,7 +13,8 @@ ZO_PromotionalEventActivityData = ZO_PromotionalEventRewardableData_Base:Subclas
 function ZO_PromotionalEventActivityData:Initialize(campaignData, activityIndex)
     self.campaignData = campaignData
     self.activityIndex = activityIndex
-    self.activityId, self.displayName, self.description, self.completionThreshold, self.rewardId, self.rewardQuantity = GetPromotionalEventCampaignActivityInfo(self:GetCampaignKey(), self.activityIndex)
+    local unusedDescription -- see ZO_PromotionalEventActivityData:GetDescription
+    self.activityId, self.displayName, unusedDescription, self.completionThreshold, self.rewardId, self.rewardQuantity = GetPromotionalEventCampaignActivityInfo(self:GetCampaignKey(), self.activityIndex)
     -- Allows us to use this object as an entry data in a list without issues with any lazy loading data
     self.dataContainer = {}
 end
@@ -24,6 +25,10 @@ end
 
 function ZO_PromotionalEventActivityData:GetCampaignKey()
     return self.campaignData:GetKey()
+end
+
+function ZO_PromotionalEventActivityData:MatchesCampaignKey(campaignKey)
+    return AreId64sEqual(campaignKey, self:GetCampaignKey())
 end
 
 function ZO_PromotionalEventActivityData:GetActivityIndex()
@@ -39,7 +44,9 @@ function ZO_PromotionalEventActivityData:GetDisplayName()
 end
 
 function ZO_PromotionalEventActivityData:GetDescription()
-    return self.description
+    -- The description cp string can change depending on a number of dynamic factors, so the text isn't always static
+    local description = GetPromotionalEventCampaignActivityDescription(self:GetCampaignKey(), self.activityIndex)
+    return description
 end
 
 function ZO_PromotionalEventActivityData:GetCompletionThreshold()
@@ -72,8 +79,8 @@ function ZO_PromotionalEventActivityData:CanClaimReward()
     return not isRewardClaimed and progress == self.completionThreshold
 end
 
-function ZO_PromotionalEventActivityData:TryClaimReward()
-    TryClaimPromotionalEventActivityReward(self:GetCampaignKey(), self.activityIndex)
+function ZO_PromotionalEventActivityData:TryClaimReward(rewardChoiceId)
+    TryClaimPromotionalEventActivityReward(self:GetCampaignKey(), self.activityIndex, rewardChoiceId)
 end
 
 function ZO_PromotionalEventActivityData:GetRewardData()
@@ -89,7 +96,7 @@ end
 
 function ZO_PromotionalEventActivityData:IsTracked()
     local campaignKey, activityIndex = GetTrackedPromotionalEventActivityInfo()
-    return AreId64sEqual(campaignKey, self:GetCampaignKey()) and activityIndex == self.activityIndex
+    return self:MatchesCampaignKey(campaignKey) and activityIndex == self.activityIndex
 end
 
 function ZO_PromotionalEventActivityData:ToggleTracking(suppressSound)
@@ -175,8 +182,8 @@ function ZO_PromotionalEventMilestoneData:CanClaimReward()
     return self:HasReachedMilestone() and not self:IsRewardClaimed()
 end
 
-function ZO_PromotionalEventMilestoneData:TryClaimReward()
-    TryClaimPromotionalEventMilestoneReward(self:GetCampaignKey(), self.milestoneIndex)
+function ZO_PromotionalEventMilestoneData:TryClaimReward(rewardChoiceId)
+    TryClaimPromotionalEventMilestoneReward(self:GetCampaignKey(), self.milestoneIndex, rewardChoiceId)
 end
 
 function ZO_PromotionalEventMilestoneData:GetRewardData()
@@ -212,6 +219,11 @@ function ZO_PromotionalEventCampaignData:GetKeyString()
     return Id64ToString(self.campaignKey)
 end
 
+function ZO_PromotionalEventCampaignData:MatchesKeyWithCampaign(otherCampaignData)
+    local otherKey = otherCampaignData:GetKey()
+    return AreId64sEqual(self.campaignKey, otherKey)
+end
+
 function ZO_PromotionalEventCampaignData:GetId()
     return self.campaignId
 end
@@ -236,9 +248,36 @@ function ZO_PromotionalEventCampaignData:GetAnnouncementBackgroundFileIndex()
     return announcementBackgroundFileIndex
 end
 
+function ZO_PromotionalEventCampaignData:GetAnnouncementBannerOverrideType()
+    local announcementBannerOverrideType = GetPromotionalEventCampaignAnnouncementBannerOverrideType(self.campaignKey)
+    return announcementBannerOverrideType
+end
+
 function ZO_PromotionalEventCampaignData:GetAnnouncementBannerText()
-    local announcementBannerText = GetPromotionalEventCampaignAnnouncementBannerText(self.campaignKey)
+    local announcementBannerText = ""
+    local announcementBannerOverrideType = self:GetAnnouncementBannerOverrideType()
+    if announcementBannerOverrideType == ANNOUNCEMENT_BANNER_OVERRIDE_TYPE_NONE then
+        local rewardData = self:GetRewardData()
+        return rewardData:GetAnnouncementBannerText() or ""
+    else
+        announcementBannerText = GetString("SI_ANNOUNCEMENTBANNEROVERRIDETYPE", announcementBannerOverrideType)
+    end
     return announcementBannerText
+end
+
+function ZO_PromotionalEventCampaignData:GetUIPriority()
+    local uiPriority = GetPromotionalEventCampaignUIPriority(self.campaignId)
+    return uiPriority
+end
+
+function ZO_PromotionalEventCampaignData:IsReturningPlayerCampaign()
+    local isReturningPlayerCampaign = IsReturningPlayerPromotionalEventsCampaign(self.campaignKey)
+    return isReturningPlayerCampaign
+end
+
+function ZO_PromotionalEventCampaignData:ShouldCampaignBeVisible()
+    local shouldBeVisible = ShouldPromotionalEventCampaignBeVisible(self.campaignKey)
+    return shouldBeVisible
 end
 
 function ZO_PromotionalEventCampaignData:GetNumActivities()
@@ -286,10 +325,20 @@ function ZO_PromotionalEventCampaignData:GetMilestones()
     return self.milestones
 end
 
+function ZO_PromotionalEventCampaignData:GetMilestoneRewards()
+    local rewards = {}
+    local milestones = self:GetMilestones()
+    for _, milestone in ipairs(milestones) do
+        local reward = milestone:GetRewardData()
+        table.insert(rewards, reward)
+    end
+    return rewards
+end
+
 function ZO_PromotionalEventCampaignData:GetMilestoneData(milestoneIndex)
     if milestoneIndex <= self.numMilestones then
         local milestones = self:GetMilestones()
-        for _, milestoneData in ipairs(self.milestones) do
+        for _, milestoneData in ipairs(milestones) do
             if milestoneData:GetMilestoneIndex() == milestoneIndex then
                 return milestoneData
             end
@@ -299,7 +348,7 @@ function ZO_PromotionalEventCampaignData:GetMilestoneData(milestoneIndex)
 end
 
 function ZO_PromotionalEventCampaignData:GetMilestoneDataByDisplayIndex(displayIndex)
-    if milestoneIndex <= self.numMilestones then
+    if displayIndex <= self.numMilestones then
         local milestones = self:GetMilestones()
         return milestones[displayIndex]
     end
@@ -336,13 +385,16 @@ function ZO_PromotionalEventCampaignData:IsRewardClaimed()
 end
 
 function ZO_PromotionalEventCampaignData:CanClaimReward()
+    if self.capstoneRewardId == 0 then
+        return false
+    end
     local numActivitiesCompleted, rewardFlags = self:GetProgress()
     local isRewardClaimed = ZO_FlagHelpers.MaskHasFlag(rewardFlags, PROMOTIONAL_EVENTS_REWARD_FLAG_CLAIMED)
     return not isRewardClaimed and numActivitiesCompleted >= self.capstoneCompletionThreshold
 end
 
-function ZO_PromotionalEventCampaignData:TryClaimReward()
-    TryClaimPromotionalEventCapstoneReward(self.campaignKey)
+function ZO_PromotionalEventCampaignData:TryClaimReward(rewardChoiceId)
+    TryClaimPromotionalEventCapstoneReward(self.campaignKey, rewardChoiceId)
 end
 
 function ZO_PromotionalEventCampaignData:GetRewardData()
@@ -356,13 +408,52 @@ function ZO_PromotionalEventCampaignData:GetRewardData()
     return capstoneRewardData
 end
 
+function ZO_PromotionalEventCampaignData:GetPromotionalEventRewardableDataByTypeAndIndex(type, index)
+    if type == PROMOTIONAL_EVENTS_COMPONENT_TYPE_SCHEDULE then
+        return self
+    elseif type == PROMOTIONAL_EVENTS_COMPONENT_TYPE_MILESTONE_REWARD then
+        return self:GetMilestoneData(index)
+    elseif type == PROMOTIONAL_EVENTS_COMPONENT_TYPE_ACTIVITY then
+        return self:GetActivityData(index)
+    end
+    return nil
+end
+
 function ZO_PromotionalEventCampaignData:IsAnyRewardClaimable()
-    local IsAnyRewardClaimable = IsAnyPromotionalEventCampaignRewardClaimable(self.campaignKey)
-    return IsAnyRewardClaimable
+    if not self:ShouldCampaignBeVisible() then
+        return false
+    end
+
+    if self.isAnyRewardClaimable == nil then
+        self.isAnyRewardClaimable = IsAnyPromotionalEventCampaignRewardClaimable(self.campaignKey)
+    end
+    return self.isAnyRewardClaimable
 end
 
 function ZO_PromotionalEventCampaignData:TryClaimAllAvailableRewards()
     TryClaimAllAvailablePromotionalEventCampaignRewards(self.campaignKey)
+end
+
+function ZO_PromotionalEventCampaignData:AreAllRewardsClaimed()
+    if self.areAllRewardsClaimed == nil then
+        self.areAllRewardsClaimed = AreAllPromotionalEventCampaignRewardsClaimed(self.campaignKey)
+    end
+    return self.areAllRewardsClaimed
+end
+
+function ZO_PromotionalEventCampaignData:HasAnyUnclaimedRewards()
+    return not self:AreAllRewardsClaimed()
+end
+
+function ZO_PromotionalEventCampaignData:OnActivityProgressUpdated()
+    -- An optimzation since we'll be calling IsAnyRewardClaimable a lot
+    self.isAnyRewardClaimable = nil
+end
+
+function ZO_PromotionalEventCampaignData:OnRewardsClaimed()
+    -- An optimzation since we'll be calling IsAnyRewardClaimable and AreAllRewardsClaimed a lot
+    self.areAllRewardsClaimed = nil
+    self.isAnyRewardClaimable = nil
 end
 
 function ZO_PromotionalEventCampaignData:HasBeenSeen()
@@ -371,4 +462,32 @@ end
 
 function ZO_PromotionalEventCampaignData:SetSeen(seen)
     return PROMOTIONAL_EVENT_MANAGER:SetCampaignSeen(self, seen)
+end
+
+function ZO_PromotionalEventCampaignData:CompareTo(otherCampaignData)
+    local isReturningPlayerCampaign = self:IsReturningPlayerCampaign()
+    local otherIsReturningPlayerCampaign = otherCampaignData:IsReturningPlayerCampaign()
+    if isReturningPlayerCampaign ~= otherIsReturningPlayerCampaign then
+        return isReturningPlayerCampaign
+    end
+
+    local uiPriority = self:GetUIPriority()
+    local otherUIPriority = otherCampaignData:GetUIPriority()
+    if uiPriority ~= otherUIPriority then
+        return uiPriority > otherUIPriority
+    end
+
+    local secondsRemaining = self:GetSecondsRemaining()
+    local otherSecondsRemaining = otherCampaignData:GetSecondsRemaining()
+    if secondsRemaining ~= otherSecondsRemaining then
+        return secondsRemaining < otherSecondsRemaining
+    end
+
+    local displayName = self:GetDisplayName()
+    local otherDisplayName = otherCampaignData:GetDisplayName()
+    if displayName ~= otherDisplayName then
+        return self:GetDisplayName() < otherCampaignData:GetDisplayName()
+    end
+
+    return self.campaignId < otherCampaignData:GetId()
 end

@@ -11,18 +11,18 @@ function GuildHomeManager:New(control)
     local manager = ZO_Object.New(self)
 
     manager.control = control
-    manager.scroll = GetControl(control, "PaneScroll")
-    manager.scrollChild = GetControl(manager.scroll, "Child")
+    manager.scroll = control:GetNamedChild("PaneScroll")
+    manager.scrollChild = manager.scroll:GetNamedChild("Child")
     manager.infoContainer = CreateControlFromVirtual("ZO_GuildHomeInfo", manager.scrollChild, "ZO_GuildHomeInfo")
-    manager.keepIcon = GetControl(control, "KeepIcon")
-    manager.keepName = GetControl(control, "KeepName")
-    manager.campaignName = GetControl(control, "KeepCampaignName")
-    manager.traderIcon = GetControl(control, "TraderIcon")
-    manager.traderName = GetControl(control, "TraderName")
+    manager.keepIcon = control:GetNamedChild("KeepIcon")
+    manager.keepName = control:GetNamedChild("KeepName")
+    manager.campaignName = control:GetNamedChild("KeepCampaignName")
+    manager.traderIcon = control:GetNamedChild("TraderIcon")
+    manager.traderName = control:GetNamedChild("TraderName")
 
     manager.savingEditBoxGroup = ZO_SavingEditBoxGroup:New()
 
-    manager.motd = ZO_ScrollingSavingEditBox:New(GetControl(manager.infoContainer, "MotD"))
+    manager.motd = ZO_ScrollingSavingEditBox:New(manager.infoContainer:GetNamedChild("MotD"))
     manager.motd:SetDefaultText(GetString(SI_GUILD_MOTD_DEFAULT_TEXT))
     manager.motd:SetEmptyText(GetString(SI_GUILD_MOTD_EMPTY_TEXT))
     manager.savingEditBoxGroup:Add(manager.motd)
@@ -31,7 +31,7 @@ function GuildHomeManager:New(control)
     motdEditControl:SetMaxInputChars(MAX_GUILD_MOTD_LENGTH)
     manager.motd:RegisterCallback("Save", function(text) SetGuildMotD(manager.guildId, text) end)
 
-    manager.description = ZO_ScrollingSavingEditBox:New(GetControl(manager.infoContainer, "Description"))
+    manager.description = ZO_ScrollingSavingEditBox:New(manager.infoContainer:GetNamedChild("Description"))
     manager.description:SetDefaultText(GetString(SI_GUILD_DESCRIPTION_DEFAULT_TEXT))
     manager.description:SetEmptyText(GetString(SI_GUILD_DESCRIPTION_EMPTY_TEXT))
     manager.savingEditBoxGroup:Add(manager.description)
@@ -57,13 +57,13 @@ function GuildHomeManager:New(control)
     CALLBACK_MANAGER:RegisterCallback("ProfanityFilter_On", function() manager:OnProfanityFilterChanged() end)
 
     GUILD_HOME_SCENE = ZO_Scene:New("guildHome", SCENE_MANAGER)
-    GUILD_HOME_SCENE:RegisterCallback("StateChange",     function(oldState, state)
-                                                                if(state == SCENE_SHOWING) then
-                                                                    KEYBIND_STRIP:AddKeybindButtonGroup(manager.keybindStripDescriptor)
-                                                                elseif(state == SCENE_HIDDEN) then
-                                                                    KEYBIND_STRIP:RemoveKeybindButtonGroup(manager.keybindStripDescriptor)
-                                                                end
-                                                            end)
+    GUILD_HOME_SCENE:RegisterCallback("StateChange", function(oldState, state)
+        if state == SCENE_SHOWING then
+            KEYBIND_STRIP:AddKeybindButtonGroup(manager.keybindStripDescriptor)
+        elseif state == SCENE_HIDING then
+            KEYBIND_STRIP:RemoveKeybindButtonGroup(manager.keybindStripDescriptor)
+        end
+    end)
 
     return manager
 end
@@ -71,33 +71,29 @@ end
 function GuildHomeManager:InitializeKeybindDescriptors()
     self.keybindStripDescriptor =
     {
-		alignment = KEYBIND_STRIP_ALIGN_CENTER,
+        alignment = KEYBIND_STRIP_ALIGN_CENTER,
 
-		-- Leave Guild
-		{
-			name = GetString(SI_GUILD_LEAVE),
-			keybind = "UI_SHORTCUT_NEGATIVE",
-
-			callback = function()
-				ZO_ShowLeaveGuildDialog(self.guildId)
-			end,
-
-			visible = function()
-				return true;
-			end
-		},
+        -- Leave Guild
+        {
+            name = GetString(SI_GUILD_LEAVE),
+            keybind = "UI_SHORTCUT_NEGATIVE",
+            callback = function()
+                ZO_ShowLeaveGuildDialog(self.guildId)
+            end,
+            visible = function()
+                return true
+            end
+        },
 
         -- Release Keep
         {
             name = GetString(SI_GUILD_RELEASE_KEEP),
             keybind = "UI_SHORTCUT_SECONDARY",
-
             visible = function()
                 return DoesGuildHaveClaimedKeep(self.guildId) and DoesPlayerHaveGuildPermission(self.guildId, GUILD_PERMISSION_RELEASE_AVA_RESOURCE)
             end,
-
             callback = function()
-                local keepId, campaignId = GetGuildClaimedKeep(self.guildId)
+                local keepId = GetGuildClaimedKeep(self.guildId)
                 ZO_Dialogs_ShowDialog("CONFIRM_RELEASE_KEEP_OWNERSHIP", { release = function() ReleaseKeepForGuild(self.guildId) end, keepId = keepId })
             end,
         },
@@ -110,7 +106,7 @@ function GuildHomeManager:SetGuildId(guildId)
 end
 
 function GuildHomeManager:RefreshGuildMaster()
-    local guildMasterLabel = GetControl(self.control, "GuildMaster")
+    local guildMasterLabel = self.control:GetNamedChild("GuildMaster")
     local _, _, guildLeader = GetGuildInfo(self.guildId)
     guildMasterLabel:SetText(guildLeader)
 end
@@ -146,16 +142,16 @@ function GuildHomeManager:RefreshPermissions()
 end
 
 function GuildHomeManager:RefreshFoundedDate()
-    GetControl(self.control, "Founded"):SetText(GetGuildFoundedDate(self.guildId))
+    self.control:GetNamedChild("Founded"):SetText(GetGuildFoundedDate(self.guildId))
 end
 
 function GuildHomeManager:RefreshKeepOwnership()
-    if(DoesGuildHaveClaimedKeep(self.guildId)) then    
+    if DoesGuildHaveClaimedKeep(self.guildId) then
         local keepId, campaignId = GetGuildClaimedKeep(self.guildId)
         local keepType = GetKeepType(keepId)
 
         local icon = "EsoUI/Art/Guild/ownership_icon_keep.dds"
-        if(keepType == KEEPTYPE_RESOURCE) then
+        if keepType == KEEPTYPE_RESOURCE then
             local resourceType = GetKeepResourceType(keepId)
             icon = ZO_GUILD_RESOURCE_ICONS[resourceType]
         end
@@ -178,7 +174,7 @@ end
 function GuildHomeManager:RefreshTraderOwnership()
     local traderName = GetGuildOwnedKioskInfo(self.guildId)
 
-    if(traderName) then
+    if traderName then
         self.traderIcon:SetAlpha(1)
         self.traderName:SetText(zo_strformat(SI_GUILD_HIRED_TRADER, traderName))
     else

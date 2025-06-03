@@ -61,6 +61,8 @@ function PregameInitialScreen_Gamepad:Initialize(control)
             if IsErrorQueuedFromIngame() then
                 ZO_Pregame_DisplayServerDisconnectedError()
             end
+
+            StartPregameMusic()
         elseif newState == SCENE_HIDDEN then
             self:ClearError()
             PregameStateManager_ClearError()
@@ -301,7 +303,7 @@ function PregameInitialScreen_Gamepad:ShowError(errorTitle, errorMessage)
     self:RefreshScreen()
 
     self:SetupError(errorTitle, errorMessage)
-    PregameStateManager_SetState("AccountLogin")
+    PregameStateManager_SetState("WaitForPreloginWorld")
 end
 
 function PregameInitialScreen_Gamepad:SetupError(errorTitle, errorMessage)

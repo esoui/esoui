@@ -1,10 +1,4 @@
-ZO_WorldMapKey_Shared = ZO_Object:Subclass()
-
-function ZO_WorldMapKey_Shared:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
+ZO_WorldMapKey_Shared = ZO_InitializingObject:Subclass()
 
 function ZO_WorldMapKey_Shared:Initialize(control)
     self.control = control
@@ -17,11 +11,11 @@ function ZO_WorldMapKey_Shared:Initialize(control)
 end
 
 function ZO_WorldMapKey_Shared:RefreshKey()
-    if(not self.fragment:IsShowing()) then
+    if not self.fragment:IsShowing() then
         return
     end
 
-    if(self.dirty) then
+    if self.dirty then
         self.dirty = false
 
         self.headerPool:ReleaseAllObjects()
@@ -37,7 +31,7 @@ function ZO_WorldMapKey_Shared:RefreshKey()
         for sectionIndex = 1, GetNumMapKeySections() do
             local header = self.headerPool:AcquireObject()
             header:SetText(GetMapKeySectionName(sectionIndex))
-            if(lastLeftMostSymbol) then
+            if lastLeftMostSymbol then
                 header:SetAnchor(TOPLEFT, lastLeftMostSymbol, BOTTOMLEFT, -params.SYMBOL_SECTION_OFFSET_X + params.HEADER_SECTION_OFFSET_X, params.BETWEEN_SECTION_PADDING_Y)
             else
                 header:SetAnchor(TOPLEFT, nil, TOPLEFT, params.HEADER_SECTION_OFFSET_X)
@@ -56,7 +50,7 @@ function ZO_WorldMapKey_Shared:RefreshKey()
                 local symbolRow = zo_floor((symbolIndex - 1) / params.NUM_SYMBOLS_PER_ROW) + 1
                 local symbolCol = (symbolIndex - 1) % params.NUM_SYMBOLS_PER_ROW + 1
 
-                if(symbolCol == 1) then
+                if symbolCol == 1 then
                     lastLeftMostSymbol = symbol
                     symbolList = {}
                     self.symbols[#self.symbols + 1] = symbolList

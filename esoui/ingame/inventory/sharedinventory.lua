@@ -56,6 +56,9 @@ function ZO_SharedInventoryManager:Initialize()
                 self:RefreshInventory(bag)
             end
             self:RefreshInventory(BAG_COMPANION_WORN)
+            self:RefreshInventory(BAG_FURNITURE_VAULT)
+            -- We should see if the new bag should be refreshed on refresh all
+            internalassert(BAG_MAX_VALUE == 19, "Update ZO_SharedInventory to handle new bag")
         end,
         RefreshSingle = function(...)
             self:RefreshSingleSlot(...)
@@ -199,60 +202,42 @@ function ZO_SharedInventoryManager:Initialize()
     EVENT_MANAGER:RegisterForEvent(namespace, EVENT_QUEST_ADVANCED, OnSingleQuestUpdated)
     EVENT_MANAGER:RegisterForEvent(namespace, EVENT_QUEST_REMOVED, OnQuestRemoved)
 
-    local function OnMoneyUpdated(eventCode, newMoney, oldMoney, reason)
-        local wasInitialize = reason == CURRENCY_CHANGE_REASON_PLAYER_INIT
-        local wasItemPurchased = reason == CURRENCY_CHANGE_REASON_VENDOR and newMoney < oldMoney
+    local PLAY_ACQUIRE_SOUND_REASONS =
+    {
+        [CURRENCY_CHANGE_REASON_LOOT] = true,
+        [CURRENCY_CHANGE_REASON_COMMAND] = true,
+        [CURRENCY_CHANGE_REASON_PVP_KILL_TRANSFER] = true,
+    }
 
-        if not (wasItemPurchased or wasInitialize) then
-            PlaySound(SOUNDS.ITEM_MONEY_CHANGED)
-        end
-    end
-
-    local function OnTelvarStonesUpdated(eventCode, newTelvarStones, oldTelvarStones, changeReason)
-        local isExcludedReason = changeReason == CURRENCY_CHANGE_REASON_PLAYER_INIT or
-                                 changeReason == CURRENCY_CHANGE_REASON_LOOT or
-                                 changeReason == CURRENCY_CHANGE_REASON_PVP_KILL_TRANSFER or
-                                 changeReason == CURRENCY_CHANGE_REASON_DEATH or
-                                 changeReason == CURRENCY_CHANGE_REASON_BANK_FEE or
-                                 (changeReason == CURRENCY_CHANGE_REASON_VENDOR and newTelvarStones < oldTelvarStones)
-
-        if not isExcludedReason then
-            PlaySound(SOUNDS.TELVAR_TRANSACT)
-        end
-    end
-
-    local function OnEventTicketUpdated(eventCode, newEventTickets, difference, changeReason)
-        if changeReason == CURRENCY_CHANGE_REASON_LOOT and difference > 0 then
-            PlaySound(SOUNDS.EVENT_TICKET_ACQUIRE)
-        end
-    end
-
-    local function OnEndlessDungeonCurrencyUpdated(newAmount, oldAmount, changeReason)
-        if changeReason == CURRENCY_CHANGE_REASON_LOOT and newAmount > oldAmount then
-            PlaySound(SOUNDS.ARCHIVAL_FORTUNES_ACQUIRE)
-        end
-    end
-
-    local function OnImperialFragmentCurrencyUpdated(newAmount, oldAmount, changeReason)
-        if changeReason == CURRENCY_CHANGE_REASON_LOOT and newAmount > oldAmount then
-            PlaySound(SOUNDS.IMPERIAL_FRAGMENT_ACQUIRE)
-        end
-    end
+    local EXCLUDED_PLAY_TRANSACT_SOUND_REASONS =
+    {
+        [CURRENCY_CHANGE_REASON_DEATH] = true,
+        [CURRENCY_CHANGE_REASON_BANK_FEE] = true,
+        [CURRENCY_CHANGE_REASON_PVP_KILL_TRANSFER] = true,
+    }
+    
+    internalassert(CURRENCY_CHANGE_REASON_MAX_VALUE == 83, "Check if new currency change reason should play acquire sounds or suppress transact sounds")
 
     local function OnCurrencyUpdated(_, currencyType, currencyLocation, newAmount, oldAmount, changeReason)
-        if currencyType == CURT_ARCHIVAL_FORTUNES then
-            OnEndlessDungeonCurrencyUpdated(newAmount, oldAmount, changeReason)
-        elseif currencyType == CURT_IMPERIAL_FRAGMENT then
-            OnImperialFragmentCurrencyUpdated(newAmount, oldAmount, changeReason)
+        if changeReason == CURRENCY_CHANGE_REASON_PLAYER_INIT then
+            -- Don't play sounds on player init
+            return
         end
-        internalassert(CURT_MAX_VALUE == 13, "Check if new currency requires unique acquire sound hook or other behavior")
-        -- TODO: Consider moving other above function calls here to register for less functions, investigate if any issues would arise
+
+        if currencyLocation ~= GetCurrencyPlayerStoredLocation(currencyType) then
+            -- Only play sounds if it's affecting the currency amount stored on the player, not banks.
+            -- This prevents issues like withdrawing/depositing from a bank triggering a sound
+            -- when the character gains currency and when the bank loses currency.
+            return
+        end
+
+        if newAmount > oldAmount and PLAY_ACQUIRE_SOUND_REASONS[changeReason] then
+            ZO_PlayCurrencyAcquiredSound(currencyType)
+        elseif not EXCLUDED_PLAY_TRANSACT_SOUND_REASONS[changeReason] then
+            ZO_PlayCurrencyTransactSound(currencyType)
+        end
     end
 
-
-    EVENT_MANAGER:RegisterForEvent(namespace, EVENT_MONEY_UPDATE, OnMoneyUpdated)
-    EVENT_MANAGER:RegisterForEvent(namespace, EVENT_TELVAR_STONE_UPDATE, OnTelvarStonesUpdated)
-    EVENT_MANAGER:RegisterForEvent(namespace, EVENT_EVENT_TICKET_UPDATE, OnEventTicketUpdated)
     EVENT_MANAGER:RegisterForEvent(namespace, EVENT_CURRENCY_UPDATE, OnCurrencyUpdated)
 
     local function OnSmithingTraitResearch()
@@ -299,6 +284,8 @@ function ZO_SharedInventoryManager:Initialize()
     self:RegisterForConfirmUseItemEvents(namespace)
 
     self:PerformFullUpdateOnQuestCache()
+
+    ITEM_SET_COLLECTIONS_DATA_MANAGER:RegisterCallback("CollectionsUpdated", function(...) self:HandleCollectionsUpdated(...) end)
 end
 
 function ZO_SharedInventoryManager:RegisterForConfirmUseItemEvents(namespace)
@@ -315,7 +302,7 @@ function ZO_SharedInventoryManager:RegisterForConfirmUseItemEvents(namespace)
         if onUseType == ITEM_USE_TYPE_COMBINATION then
             local combinationId = GetItemCombinationId(bag, slot)
             if GetCombinationNumNonFragmentCollectibleComponents(combinationId) > 0 then
-                ZO_CombinationPromptManager_ShowAppropriateCombinationPrompt(baseCollectibleId, combinationId, AcceptEvolutionCallback, DeclineEvolutionCallback)
+                ZO_CombinationPromptManager_ShowAppropriateCombinationPrompt(combinationId, AcceptEvolutionCallback, DeclineEvolutionCallback)
                 return
             end
         end
@@ -452,6 +439,37 @@ function ZO_SharedInventoryManager:RefreshBagTraitInformation(bagId)
     end
 end
 
+-- Can Learn Status Update
+function ZO_SharedInventoryManager:HandleCollectionsUpdated()
+    self:RefreshAllItemSetPieceStatuses()
+end
+
+function ZO_SharedInventoryManager:RefreshAllItemSetPieceStatuses()
+    -- Refresh all bags where unlearned item sets can reside
+    self:RefreshItemSetPieceStatuses(BAG_BACKPACK)
+    self:RefreshItemSetPieceStatuses(BAG_BANK)
+    self:RefreshItemSetPieceStatuses(BAG_SUBSCRIBER_BANK)
+end
+
+function ZO_SharedInventoryManager:RefreshItemSetPieceStatuses(bagId)
+    if self:HasBagCache(bagId) then
+        local bagCache = self:GetBagCache(bagId)
+
+        for slotIndex in ZO_IterateBagSlots(bagId) do
+            local existingData = bagCache[slotIndex]
+            if existingData then
+                local isLockedSetPiece = IsItemLockedSetPiece(bagId, slotIndex)
+                if existingData.isLockedSetPiece ~= isLockedSetPiece then
+                    local previousSlotData = self:GetPreviousSlotDataInternal(bagId, slotIndex)
+                    existingData.isLockedSetPiece = isLockedSetPiece
+                    self:RefreshStatusSortOrder(existingData)
+                    self:FireCallbacks("SingleSlotInventoryUpdate", bagId, slotIndex, previousSlotData)
+                end
+            end
+        end
+    end
+end
+
 -- Helper functions for new items
 function ZO_SharedInventoryManager:AreAnyItemsNew(optFilterFunction, currentFilter, ...)
     self.refresh:UpdateRefreshGroups()
@@ -496,7 +514,7 @@ end
 
 function ZO_SharedInventoryManager:GetHouseBankingBagName(bankingBag)
     local interactName = GetUnitName("interact")
-    local collectibleId = GetCollectibleForHouseBankBag(bankingBag)
+    local collectibleId = GetCollectibleForBag(bankingBag)
     local nickname
     if collectibleId ~= 0 then
         local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
@@ -550,10 +568,9 @@ end
 
 function ZO_SharedInventoryManager:PerformFullUpdateOnBagCache(bagId)
     local bagCache = self:GetBagCache(bagId)
-
+    local NOT_NEW_ITEM = false
+    local IS_LAST_UPDATE = true
     for slotIndex in ZO_IterateBagSlots(bagId) do
-        local NOT_NEW_ITEM = false
-        local IS_LAST_UPDATE = true
         self:HandleSlotCreationOrUpdate(bagCache, bagId, slotIndex, NOT_NEW_ITEM, IS_LAST_UPDATE)
     end
 
@@ -597,7 +614,7 @@ function ZO_SharedInventoryManager:ComputeDynamicStatusMask(...)
 end
 
 function ZO_SharedInventoryManager:RefreshStatusSortOrder(slotData)
-    slotData.statusSortOrder = self:ComputeDynamicStatusMask(slotData.isPlayerLocked, slotData.isGemmable, slotData.stolen, slotData.isBoPTradeable, slotData.isInArmory, slotData.brandNew, slotData.bagId == BAG_WORN)
+    slotData.statusSortOrder = self:ComputeDynamicStatusMask(slotData.isPlayerLocked, slotData.isGemmable, slotData.stolen, slotData.isLockedSetPiece, slotData.canBeUsedToLearn, slotData.isBoPTradeable, slotData.isInArmory, slotData.brandNew, slotData.bagId == BAG_WORN)
 end
 
 function ZO_SharedInventoryManager:CreateOrUpdateSlotData(existingSlotData, bagId, slotIndex, isNewItem)
@@ -659,6 +676,8 @@ function ZO_SharedInventoryManager:CreateOrUpdateSlotData(existingSlotData, bagI
     slot.quality = displayQuality
     slot.equipType = equipType
     slot.isPlayerLocked = IsItemPlayerLocked(bagId, slotIndex)
+    slot.isLockedSetPiece = IsItemLockedSetPiece(bagId, slotIndex)
+    slot.canBeUsedToLearn = CanItemBeUsedToLearn(bagId, slotIndex)
     slot.isBoPTradeable = IsItemBoPAndTradeable(bagId, slotIndex)
     slot.isJunk = IsItemJunk(bagId, slotIndex)
     slot.statValue = GetItemStatValue(bagId, slotIndex) or 0

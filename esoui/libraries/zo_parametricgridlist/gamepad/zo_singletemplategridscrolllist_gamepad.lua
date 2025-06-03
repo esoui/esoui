@@ -6,8 +6,8 @@ function ZO_AbstractSingleTemplateGridScrollList_Gamepad:New(...)
     return ZO_AbstractGridScrollList_Gamepad.New(self, ...)
 end
 
-function ZO_AbstractSingleTemplateGridScrollList_Gamepad:Initialize(control, selectionTemplate)
-    ZO_AbstractGridScrollList_Gamepad.Initialize(self, control, selectionTemplate)
+function ZO_AbstractSingleTemplateGridScrollList_Gamepad:Initialize(control, selectionTemplate, dontRegisterForNarration)
+    ZO_AbstractGridScrollList_Gamepad.Initialize(self, control, selectionTemplate, dontRegisterForNarration)
 end
 
 function ZO_AbstractSingleTemplateGridScrollList_Gamepad:CommitGridList()
@@ -26,7 +26,7 @@ function ZO_SingleTemplateGridScrollList_Gamepad:New(...)
     return ZO_AbstractSingleTemplateGridScrollList.New(self, ...)
 end
 
-function ZO_SingleTemplateGridScrollList_Gamepad:Initialize(control, autofillRows, selectionTemplate)
+function ZO_SingleTemplateGridScrollList_Gamepad:Initialize(control, autofillRows, selectionTemplate, dontRegisterForNarration)
     ZO_AbstractSingleTemplateGridScrollList.Initialize(self, control, autofillRows)
-    ZO_AbstractGridScrollList_Gamepad.Initialize(self, control, selectionTemplate)
+    ZO_AbstractGridScrollList_Gamepad.Initialize(self, control, selectionTemplate, dontRegisterForNarration)
 end

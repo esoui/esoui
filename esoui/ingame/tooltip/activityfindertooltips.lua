@@ -240,3 +240,36 @@ function ZO_Tooltip:LayoutReportHouseTourListingInfo(nickname, collectibleId, ow
         self:AddSection(additionalInstructionsSection)
     end
 end
+
+function ZO_Tooltip:LayoutPromotionalEventCampaigns()
+    --Title
+    local headerSection = self:AcquireSection(self:GetStyle("bodyHeader"))
+    if PROMOTIONAL_EVENT_MANAGER:HasAnyUnclaimedRewards() then
+        headerSection:AddLine(GetString(SI_ACTIVITY_FINDER_CATEGORY_PROMOTIONAL_EVENTS), self:GetStyle("promotionalEventsColor"), self:GetStyle("title"))
+    else
+        headerSection:AddLine(GetString(SI_ACTIVITY_FINDER_CATEGORY_PROMOTIONAL_EVENTS), self:GetStyle("title"))
+    end
+    self:AddSection(headerSection)
+
+    --Body
+    local numActiveCampaigns = PROMOTIONAL_EVENT_MANAGER:GetNumActiveCampaigns()
+    for i = 1, numActiveCampaigns do
+        local campaignData = PROMOTIONAL_EVENT_MANAGER:GetCampaignDataByIndex(i)
+
+        local secondsRemaining = campaignData:GetSecondsRemaining()
+        if secondsRemaining > 0 then
+            local durationText
+            if secondsRemaining > ZO_ONE_MINUTE_IN_SECONDS then
+                durationText = ZO_FormatTime(secondsRemaining, TIME_FORMAT_STYLE_SHOW_LARGEST_TWO_UNITS, TIME_FORMAT_PRECISION_TWENTY_FOUR_HOUR)
+            else
+                durationText = GetString(SI_STR_TIME_LESS_THAN_MINUTE)
+            end
+            local timeRemainingHeaderText = zo_strformat(SI_EVENT_ANNOUNCEMENT_TIME, durationText)
+
+            local bodySection = self:AcquireSection(self:GetStyle("bodySection"))
+            bodySection:AddLine(timeRemainingHeaderText, self:GetStyle("bodyHeader"))
+            bodySection:AddLine(campaignData:GetDisplayName(), self:GetStyle("bodyDescription"))
+            self:AddSection(bodySection)
+        end
+    end
+end

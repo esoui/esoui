@@ -923,20 +923,43 @@ ESO_Dialogs["RECALL_CONFIRM"] =
             local cooldown = GetRecallCooldown()
             local destination = dialog.data.nodeIndex
             local cost = GetRecallCost(destination)
+            if cost == 0 then
+                if IsInGamepadPreferredMode() then
+                    return SI_GAMEPAD_FAST_TRAVEL_DIALOG_MAIN_TEXT
+                else
+                    return SI_FAST_TRAVEL_DIALOG_MAIN_TEXT
+                end
+            end
+
             local currency = GetRecallCurrency(destination)
             local canAffordRecall = cost <= GetCurrencyAmount(currency, CURRENCY_LOCATION_CHARACTER)
-
-            if cooldown == 0 or cost == 0 then
+            if cooldown == 0 then
                 if canAffordRecall then
-                    return SI_FAST_TRAVEL_DIALOG_MAIN_TEXT
+                    if IsInGamepadPreferredMode() then
+                        return SI_GAMEPAD_FAST_TRAVEL_DIALOG_RECALL_MAIN_TEXT
+                    else
+                        return SI_FAST_TRAVEL_DIALOG_RECALL_MAIN_TEXT
+                    end
                 else
-                    return SI_FAST_TRAVEL_DIALOG_CANT_AFFORD
+                    if IsInGamepadPreferredMode() then
+                        return SI_GAMEPAD_FAST_TRAVEL_DIALOG_CANT_AFFORD
+                    else
+                        return SI_FAST_TRAVEL_DIALOG_CANT_AFFORD
+                    end
                 end
             else
                 if canAffordRecall then
-                    return SI_FAST_TRAVEL_DIALOG_PREMIUM
+                    if IsInGamepadPreferredMode() then
+                        return SI_GAMEPAD_FAST_TRAVEL_DIALOG_PREMIUM
+                    else
+                        return SI_FAST_TRAVEL_DIALOG_PREMIUM
+                    end
                 else
-                    return SI_FAST_TRAVEL_DIALOG_CANT_AFFORD_PREMIUM
+                    if IsInGamepadPreferredMode() then
+                        return SI_GAMEPAD_FAST_TRAVEL_DIALOG_CANT_AFFORD_PREMIUM
+                    else
+                        return SI_FAST_TRAVEL_DIALOG_CANT_AFFORD_PREMIUM
+                    end
                 end
             end
         end,
@@ -966,12 +989,13 @@ ESO_Dialogs["RECALL_CONFIRM"] =
         local destination = dialog.data.nodeIndex
         local wayshrineName = select(2, GetFastTravelNodeInfo(destination))
         local wayshrineNameChanged = not dialog.wayshrineName or dialog.wayshrineName ~= wayshrineName
-        local onCooldown = GetRecallCooldown() > 0
+        local remainingTime, premiumRemainingTime = GetRecallCooldown()
+        local onCooldown = remainingTime > 0
         local onCooldownChanged = dialog.onCooldown ~= onCooldown
 
-        if wayshrineNameChanged or onCooldownChanged then
+        if wayshrineNameChanged or onCooldown or onCooldownChanged then
             -- Name has changed, update it.
-            ZO_Dialogs_UpdateDialogMainText(dialog, nil, { wayshrineName })
+            ZO_Dialogs_UpdateDialogMainText(dialog, nil, { wayshrineName, ZO_FormatTimeMilliseconds(remainingTime, TIME_FORMAT_STYLE_SHOW_LARGEST_TWO_UNITS, TIME_FORMAT_PRECISION_SECONDS) })
             dialog.wayshrineName = wayshrineName
             dialog.onCooldown = onCooldown
         end
@@ -4151,38 +4175,59 @@ ESO_Dialogs["WORLD_MAP_CHOICE_FAILED"] =
     }
 }
 
+function ZO_Dialogs_GetSkillsRespecMainTextEntryTable()
+    local mainTextEntryTable = {}
+
+    local pendingTrainingLines = SKILL_LINE_ASSIGNMENT_MANAGER:GetPendingTrainingLines()
+    if #pendingTrainingLines > 0 then
+        local pendingTrainingLineNames = {}
+        for _, pendingTrainingLineId in ipairs(pendingTrainingLines) do
+            local skillLineData = SKILLS_DATA_MANAGER:GetSkillLineDataById(pendingTrainingLineId)
+            table.insert(pendingTrainingLineNames, skillLineData:GetName())
+        end
+        local pendingTrainingLineCommaSeparatedNames = ZO_GenerateCommaSeparatedListWithAnd(pendingTrainingLineNames)
+        table.insert(mainTextEntryTable, zo_strformat(SI_SKILLS_SUBCLASSING_COMMIT_TEXT_TRAIN_SKILL, pendingTrainingLineCommaSeparatedNames, #pendingTrainingLines))
+    end
+
+    if SKILL_LINE_ASSIGNMENT_MANAGER:IsActivationOrDeactivationPending() and SKILL_LINE_ASSIGNMENT_MANAGER:DoAnyChangesIncurPointRefunds() then
+        table.insert(mainTextEntryTable, GetString(SI_SKILLS_SUBCLASSING_COMMIT_TEXT_SWAP_SKILL_LINE))
+    end
+
+    if IsInGamepadPreferredMode() then
+        table.insert(mainTextEntryTable, 1, GetString(SI_SKILL_RESPEC_CONFIRM_DIALOG_BODY_INTRO))
+    else
+        table.insert(mainTextEntryTable, GetString(SI_SKILL_RESPEC_CONFIRM_DIALOG_BODY_INTRO))
+    end
+
+    return mainTextEntryTable
+end
+
 ESO_Dialogs["SKILL_RESPEC_CONFIRM_FREE"] =
 {
     gamepadInfo =
     {
         dialogType = GAMEPAD_DIALOGS.BASIC,
     },
-
     title =
     {
         text = SI_SKILL_RESPEC_CONFIRM_DIALOG_TITLE,
     },
-
     mainText =
     {
         text = function()
-            local introText = GetString(SI_SKILL_RESPEC_CONFIRM_DIALOG_BODY_INTRO)
-            local noCostText = GetString(SI_SKILL_RESPEC_CONFIRM_DIALOG_BODY_COST_FREE)
-            return ZO_GenerateParagraphSeparatedList({ introText, noCostText })
+            local mainTextEntryTable = ZO_Dialogs_GetSkillsRespecMainTextEntryTable()
+            table.insert(mainTextEntryTable, GetString(SI_SKILL_RESPEC_CONFIRM_DIALOG_BODY_COST_FREE))
+            return ZO_GenerateParagraphSeparatedList(mainTextEntryTable)
         end,
     },
-
     buttons =
     {
-        [1] =
         {
             text = SI_DIALOG_CONFIRM,
             callback = function()
                 SKILLS_AND_ACTION_BAR_MANAGER:ApplyChanges()
             end,
         },
-
-        [2] =
         {
             text = SI_DIALOG_CANCEL,
         },
@@ -4195,36 +4240,31 @@ ESO_Dialogs["SKILL_RESPEC_CONFIRM_SCROLL"] =
     {
         dialogType = GAMEPAD_DIALOGS.BASIC,
     },
-
     title =
     {
         text = SI_SKILL_RESPEC_CONFIRM_DIALOG_TITLE,
     },
-
     mainText =
     {
         text = function(dialog)
-            local introText = GetString(SI_SKILL_RESPEC_CONFIRM_DIALOG_BODY_INTRO)
+            local mainTextEntryTable = ZO_Dialogs_GetSkillsRespecMainTextEntryTable()
             local scrollItemLink = GetPendingSkillRespecScrollItemLink()
             local scrollName = GetItemLinkName(scrollItemLink)
             local scrollDisplayQuality = GetItemLinkDisplayQuality(scrollItemLink)
             local qualityColor = GetItemQualityColor(scrollDisplayQuality)
             local costText = zo_strformat(SI_SKILL_RESPEC_CONFIRM_DIALOG_BODY_COST_SCROLL, qualityColor:Colorize(scrollName))
-            return ZO_GenerateParagraphSeparatedList({ introText, costText })
+            table.insert(mainTextEntryTable, costText)
+            return ZO_GenerateParagraphSeparatedList(mainTextEntryTable)
         end,
     },
-
     buttons =
     {
-        [1] =
         {
             text = SI_DIALOG_CONFIRM,
             callback = function()
                 SKILLS_AND_ACTION_BAR_MANAGER:ApplyChanges()
             end,
         },
-
-        [2] =
         {
             text = SI_DIALOG_CANCEL,
         },
@@ -5018,6 +5058,37 @@ ESO_Dialogs["GAMEPAD_CONFIRM_LEAVE_ADDON_MANAGER"] =
                     dialog.data.declineCallback()
                 end
             end
+        },
+    }
+}
+
+ESO_Dialogs["KEYBINDINGS_RESET_GAMEPAD_DEADZONES_TO_DEFAULTS"] =
+{
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    title =
+    {
+        text = SI_KEYBINDINGS_GAMEPAD_RESET_DEADZONES_TITLE,
+    },
+    mainText =
+    {
+        text = SI_KEYBINDINGS_GAMEPAD_RESET_DEADZONES_PROMPT,
+    },
+    buttons =
+    {
+        {
+            text = SI_OPTIONS_RESET,
+            callback = function(dialog)
+                ResetGamepadDeadzonesToDefault()
+                if IsInGamepadPreferredMode() then
+                    GAMEPAD_OPTIONS:RefreshOptionsList()
+                end
+            end
+        },
+        {
+            text = SI_DIALOG_CANCEL,
         },
     }
 }

@@ -2,6 +2,9 @@
     Trading House Manager
 --]]
 
+local LOCKED_SET_PIECE_ICON_TEXTURE = "EsoUI/Art/Inventory/inventory_locked_set_piece_icon.dds"
+local CAN_LEARN_ICON_TEXTURE = "EsoUI/Art/Inventory/inventory_can_learn_icon.dds"
+
 local ZO_TradingHouseManager = ZO_TradingHouse_Shared:Subclass()
 
 function ZO_TradingHouseManager:Initialize(control)
@@ -511,6 +514,22 @@ function ZO_TradingHouseManager:InitializeSearchResults(control)
         self.searchResultsControlsList[#self.searchResultsControlsList + 1] = rowControl
         self.searchResultsInfoList[#self.searchResultsInfoList + 1] = result
 
+        local statusIconControl = rowControl:GetNamedChild("StatusIcon")
+        statusIconControl:ClearIcons()
+
+        if not result.isGuildSpecificItem then
+            local isLockedSetPiece = IsItemLinkLockedSetPiece(result.itemLink)
+            local canBeUsedToLearn = CanItemLinkBeUsedToLearn(result.itemLink)
+
+            if isLockedSetPiece then
+                statusIconControl:AddIcon(LOCKED_SET_PIECE_ICON_TEXTURE, ZO_SUCCEEDED_TEXT)
+            end
+            if canBeUsedToLearn then
+                statusIconControl:AddIcon(CAN_LEARN_ICON_TEXTURE, ZO_SUCCEEDED_TEXT)
+            end
+            statusIconControl:Show()
+        end
+
         local nameControl = rowControl:GetNamedChild("Name")
         nameControl:SetText(ZO_TradingHouse_GetItemDataFormattedName(result))
         -- result.quality is deprecated, included here for addon backwards compatibility
@@ -518,7 +537,7 @@ function ZO_TradingHouseManager:InitializeSearchResults(control)
         local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, displayQuality)
         nameControl:SetColor(r, g, b, 1)
 
-        local traitInformationControl = GetControl(rowControl, "TraitInfo")
+        local traitInformationControl = rowControl:GetNamedChild("TraitInfo")
         traitInformationControl:ClearIcons()
 
         if not result.isGuildSpecificItem then
@@ -585,12 +604,36 @@ function ZO_TradingHouseManager:InitializeListings(control)
     local function SetupPostedItemRow(rowControl, postedItem)
         local index = postedItem.slotIndex
 
+        local statusIconControl = rowControl:GetNamedChild("StatusIcon")
+        statusIconControl:ClearIcons()
+
+        local isLockedSetPiece = IsItemLinkLockedSetPiece(postedItem.itemLink)
+        local canBeUsedToLearn = CanItemLinkBeUsedToLearn(postedItem.itemLink)
+
+        if isLockedSetPiece then
+            statusIconControl:AddIcon(LOCKED_SET_PIECE_ICON_TEXTURE, ZO_SUCCEEDED_TEXT)
+        end
+        if canBeUsedToLearn then
+            statusIconControl:AddIcon(CAN_LEARN_ICON_TEXTURE, ZO_SUCCEEDED_TEXT)
+        end
+        statusIconControl:Show()
+
         local nameControl = rowControl:GetNamedChild("Name")
         nameControl:SetText(zo_strformat(SI_TOOLTIP_ITEM_NAME, postedItem.name))
         -- postedItem.quality is deprecated, included here for addon backwards compatibility
         local displayQuality = postedItem.displayQuality or postedItem.quality
         local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, displayQuality)
         nameControl:SetColor(r, g, b, 1)
+
+        local traitInformationControl = rowControl:GetNamedChild("TraitInfo")
+        traitInformationControl:ClearIcons()
+
+        local traitInformation = GetItemTraitInformationFromItemLink(postedItem.itemLink)
+
+        if traitInformation ~= ITEM_TRAIT_INFORMATION_NONE then
+            traitInformationControl:AddIcon(ZO_GetPlatformTraitInformationIcon(traitInformation))
+            traitInformationControl:Show()
+        end
 
         local timeRemainingControl = rowControl:GetNamedChild("TimeRemaining")
         timeRemainingControl:SetText(zo_strformat(SI_TRADING_HOUSE_BROWSE_ITEM_REMAINING_TIME, ZO_FormatTime(postedItem.timeRemaining, TIME_FORMAT_STYLE_SHOW_LARGEST_UNIT_DESCRIPTIVE, TIME_FORMAT_PRECISION_SECONDS, TIME_FORMAT_DIRECTION_DESCENDING)))
@@ -1264,11 +1307,12 @@ function ZO_TradingHouseManager:BeginSetPendingPostPrice(anchorTo)
 end
 
 --[[ Globals ]]--
-ZO_TRADING_HOUSE_SEARCH_RESULT_ITEM_ICON_MAX_WIDTH = 60 -- this is larger than the item icon to allow the icon to scale up
-ZO_TRADING_HOUSE_SEARCH_RESULT_ITEM_NAME_WIDTH = 240
-ZO_TRADING_HOUSE_SEARCH_RESULT_TRAIT_COLUMN_WIDTH = 42 -- this is larger than the trait icon to create a right margin
+ZO_TRADING_HOUSE_SEARCH_RESULT_STATUS_COLUMN_WIDTH = 25
+ZO_TRADING_HOUSE_SEARCH_RESULT_ITEM_ICON_MAX_WIDTH = 60 + ZO_TRADING_HOUSE_SEARCH_RESULT_STATUS_COLUMN_WIDTH -- this is larger than the item icon to allow the icon to scale up
+ZO_TRADING_HOUSE_SEARCH_RESULT_ITEM_NAME_WIDTH = 230
+ZO_TRADING_HOUSE_SEARCH_RESULT_TRAIT_COLUMN_WIDTH = 37 -- this is larger than the trait icon to create a right margin
 ZO_TRADING_HOUSE_SEARCH_RESULT_ITEM_NAME_WITHOUT_TRAIT_COLUMN_WIDTH = ZO_TRADING_HOUSE_SEARCH_RESULT_ITEM_NAME_WIDTH - ZO_TRADING_HOUSE_SEARCH_RESULT_TRAIT_COLUMN_WIDTH
-ZO_TRADING_HOUSE_SEARCH_RESULT_TIME_LEFT_WIDTH = 60
+ZO_TRADING_HOUSE_SEARCH_RESULT_TIME_LEFT_WIDTH = 50
 ZO_TRADING_HOUSE_SEARCH_RESULT_UNIT_PRICE_WIDTH = 120
 ZO_TRADING_HOUSE_SEARCH_RESULT_PRICE_WIDTH = 130
 

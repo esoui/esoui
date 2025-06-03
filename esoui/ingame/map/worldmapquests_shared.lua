@@ -1,11 +1,5 @@
 --Shared Trade Window Prototype
-ZO_WorldMapQuests_Shared = ZO_Object:Subclass()
-
-function ZO_WorldMapQuests_Shared:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
+ZO_WorldMapQuests_Shared = ZO_InitializingObject:Subclass()
 
 function ZO_WorldMapQuests_Shared:Initialize(control)
     self.control = control
@@ -13,7 +7,7 @@ function ZO_WorldMapQuests_Shared:Initialize(control)
     self.data = ZO_WorldMapQuestsData_Singleton_Initialize(control)
 
     control:RegisterForEvent(EVENT_LEVEL_UPDATE, function(eventCode, unitTag)
-        if(unitTag == "player") then
+        if unitTag == "player" then
             self:RefreshHeaders()
         end
     end)
@@ -29,8 +23,8 @@ function ZO_WorldMapQuests_Shared:Initialize(control)
 end
 
 function ZO_WorldMapQuests_Shared:RefreshNoQuestsLabel()
-    if #self.data.masterList > 0 then
-        self.noQuestsLabel:SetHidden(true)    
+    if #self.data.masterList > 0 or self.pendingQuestIndex ~= nil then
+        self.noQuestsLabel:SetHidden(true)
     else
         self.noQuestsLabel:SetHidden(false)
         if ZO_WorldMapQuestsData_Singleton.ShouldMapShowQuestsInList() then
@@ -75,11 +69,6 @@ function ZO_WorldMapQuestsData_Singleton:Initialize(control)
 end
 
 function ZO_WorldMapQuestsData_Singleton.ShouldMapShowQuestsInList()
-    local mapType = GetMapType()
-    --We don't want to track any quests when we are showing these high map levels
-    if mapType >= MAPTYPE_WORLD then
-        return false
-    end
     return true
 end
 

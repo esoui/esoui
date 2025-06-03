@@ -11,6 +11,12 @@ function TrialAccountSplashDialog:Initialize(control)
 
     local function CloseDialog()
         self:RemoveSplash()
+        if IsReturningPlayer() and not IsActiveWorldStarterWorld() then
+            -- Make sure to update the promotional events manager: due to the timing
+            -- of the Lua events it may not have updated even though the data is ready
+            PROMOTIONAL_EVENT_MANAGER:RefreshCampaignData()
+            RETURNING_PLAYER_MANAGER:ShowReturningPlayerAnnouncementScreen()
+        end
     end
 
     self.dialogInfo =

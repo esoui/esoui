@@ -42,6 +42,7 @@ CreateSlotType("SLOT_TYPE_GAMEPAD_INVENTORY_ITEM")
 CreateSlotType("SLOT_TYPE_COLLECTIONS_INVENTORY")
 CreateSlotType("SLOT_TYPE_CRAFT_BAG_ITEM")
 CreateSlotType("SLOT_TYPE_PENDING_RETRAIT_ITEM")
+CreateSlotType("SLOT_TYPE_FURNITURE_VAULT")
 
 local UpdateMouseoverCommand
 
@@ -703,13 +704,30 @@ local function TryGuildBankWithdrawItem(sourceSlotIndex)
 end
 
 function ZO_TryMoveToInventoryFromBagAndSlot(bag, slotIndex)
-    if DoesBagHaveSpaceFor(BAG_BACKPACK, bag, slotIndex) then
-        local transferDialog = SYSTEMS:GetObject("ItemTransferDialog")
-        transferDialog:StartTransfer(bag, slotIndex, BAG_BACKPACK)
-    else
+    if not DoesBagHaveSpaceFor(BAG_BACKPACK, bag, slotIndex) then
         ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, SI_INVENTORY_ERROR_INVENTORY_FULL)
+    else
+        -- Furniture Vault items can only be transferred to the Backpack.
+        -- When the stack count exceeds the maximum stack size, show the
+        -- Item Transfer dialog to allow the partial transfer of items.
+        -- Other source bags simply show the Item Transfer dialog.
+        local showTransferDialog = true
+        if IsFurnitureVault(bag) then
+            local stackSize, maxStackSize = GetSlotStackSize(bag, slotIndex)
+            if stackSize <= maxStackSize then
+                showTransferDialog = false
+                PickupInventoryItem(bag, slotIndex)
+                PlaceInTransfer()
+            end
+        end
+
+        if showTransferDialog then
+            local transferDialog = SYSTEMS:GetObject("ItemTransferDialog")
+            transferDialog:StartTransfer(bag, slotIndex, BAG_BACKPACK)
+        end
     end
-     ClearCursor()
+
+    ClearCursor()
 end
 
 local function TryMoveToInventory(inventorySlot)
@@ -743,6 +761,8 @@ local function PlaceInventoryItemInStorage(targetInventorySlot)
             end
         end
         return false
+    elseif sourceBag == BAG_FURNITURE_VAULT and targetBag == BAG_BACKPACK then
+        ZO_TryMoveToInventoryFromBagAndSlot(sourceBag, sourceSlotIndex)
     elseif targetType == SLOT_TYPE_ITEM or targetType == SLOT_TYPE_BANK_ITEM then
         if sourceType == MOUSE_CONTENT_EQUIPPED_ITEM then
             TryPlaceInventoryItemInEmptySlot(targetBag)
@@ -792,7 +812,7 @@ local function TryBankItem(inventorySlot)
     if IsBankOpen() then
         local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
         if bag == BAG_BANK or bag == BAG_SUBSCRIBER_BANK or IsHouseBankBag(bag) then
-            --Withdraw
+            -- Withdraw
             if DoesBagHaveSpaceFor(BAG_BACKPACK, bag, index) then
                 PickupInventoryItem(bag, index)
                 PlaceInTransfer()
@@ -800,11 +820,19 @@ local function TryBankItem(inventorySlot)
                 ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, SI_INVENTORY_ERROR_INVENTORY_FULL)
             end
         else
-            --Deposit
+            -- Deposit
+            local bankingBag = GetBankingBag()
             if IsItemStolen(bag, index) then
-                ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, SI_STOLEN_ITEM_CANNOT_DEPOSIT_MESSAGE)
+                -- Stolen items cannot be banked regardless of the storage bag.
+                if bankingBag == BAG_FURNITURE_VAULT then
+                    ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, SI_FURNITURE_VAULT_ERROR_STOLEN_FURNITURE)
+                else
+                    ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, SI_STOLEN_ITEM_CANNOT_DEPOSIT_MESSAGE)
+                end
+            elseif bankingBag == BAG_FURNITURE_VAULT and CROWN_GEMIFICATION_MANAGER.IsItemGemmable(tonumber(bag), tonumber(index)) then
+                -- Gemmable items cannot be banked in the Furnishing Vault.
+                ZO_Alert(UI_ALERT_CATEGORY_ERROR, SOUNDS.NEGATIVE_CLICK, SI_FURNITURE_VAULT_ERROR_GEMMABLE_FURNITURE)
             else
-                local bankingBag = GetBankingBag()
                 local canAlsoBePlacedInSubscriberBank = bankingBag == BAG_BANK
 
                 if DoesBagHaveSpaceFor(bankingBag, bag, index) or (canAlsoBePlacedInSubscriberBank and DoesBagHaveSpaceFor(BAG_SUBSCRIBER_BANK, bag, index)) then
@@ -1453,6 +1481,7 @@ local useActions =
     [SLOT_TYPE_ITEM] = DefaultUseItemFunction,
     [SLOT_TYPE_GAMEPAD_INVENTORY_ITEM] = DefaultUseItemFunction,
     [SLOT_TYPE_CRAFT_BAG_ITEM] = DefaultUseItemFunction,
+    [SLOT_TYPE_FURNITURE_VAULT] = DefaultUseItemFunction,
     [SLOT_TYPE_COLLECTIONS_INVENTORY] = function(inventorySlot, slotActions)
         local textEnum
         local category = inventorySlot.categoryType
@@ -1623,6 +1652,7 @@ local linkHelperActions =
     [SLOT_TYPE_COLLECTIONS_INVENTORY] =         function(inventorySlot, slotActions, actionName) LinkHelper(slotActions, actionName, ZO_LinkHandler_CreateChatLink(GetInventoryCollectibleLink, inventorySlot)) end,
     [SLOT_TYPE_CRAFT_BAG_ITEM] =                function(inventorySlot, slotActions, actionName) LinkHelper(slotActions, actionName, ZO_LinkHandler_CreateChatLink(GetBagItemLink, inventorySlot)) end,
     [SLOT_TYPE_PENDING_RETRAIT_ITEM] =          function(inventorySlot, slotActions, actionName) LinkHelper(slotActions, actionName, ZO_LinkHandler_CreateChatLink(GetBagItemLink, inventorySlot)) end,
+    [SLOT_TYPE_FURNITURE_VAULT] =               function(inventorySlot, slotActions, actionName) LinkHelper(slotActions, actionName, ZO_LinkHandler_CreateChatLink(GetBagItemLink, inventorySlot)) end,
 }
 
 ---- Quickslot Action Handlers ----
@@ -1889,14 +1919,16 @@ local actionHandlers =
     ["mark_as_junk"] = function(inventorySlot, slotActions)
         local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
         local actorCategory = GetItemActorCategory(bag, index)
-        if not IsInGamepadPreferredMode() and actorCategory ~= GAMEPLAY_ACTOR_CATEGORY_COMPANION and not IsSlotLocked(inventorySlot) and CanItemBeMarkedAsJunk(bag, index) and not IsItemJunk(bag, index) and not QUICKSLOT_KEYBOARD:AreQuickSlotsShowing() then
+        if not IsInGamepadPreferredMode() and actorCategory ~= GAMEPLAY_ACTOR_CATEGORY_COMPANION and not IsSlotLocked(inventorySlot) and CanItemBeMarkedAsJunk(bag, index) and
+           not IsItemJunk(bag, index) and not QUICKSLOT_KEYBOARD:AreQuickSlotsShowing() and not IsFurnitureVault(bag) then
             slotActions:AddSlotAction(SI_ITEM_ACTION_MARK_AS_JUNK, function() MarkAsJunkHelper(bag, index, true) end, "secondary")
         end
     end,
 
     ["unmark_as_junk"] = function(inventorySlot, slotActions)
         local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
-        if not IsInGamepadPreferredMode() and not IsSlotLocked(inventorySlot) and CanItemBeMarkedAsJunk(bag, index) and IsItemJunk(bag, index) and not QUICKSLOT_KEYBOARD:AreQuickSlotsShowing() then
+        if not IsInGamepadPreferredMode() and not IsSlotLocked(inventorySlot) and CanItemBeMarkedAsJunk(bag, index) and IsItemJunk(bag, index) and
+           not QUICKSLOT_KEYBOARD:AreQuickSlotsShowing() and not IsFurnitureVault(bag) then
             slotActions:AddSlotAction(SI_ITEM_ACTION_UNMARK_AS_JUNK, function() MarkAsJunkHelper(bag, index, false) end, "secondary")
         end
     end,
@@ -2115,6 +2147,7 @@ local potentialActionsForSlotType =
     [SLOT_TYPE_COLLECTIONS_INVENTORY] =                { "quickslot", "use", "rename", "link_to_chat" },
     [SLOT_TYPE_CRAFT_BAG_ITEM] =                       { "move_to_inventory", "use", "link_to_chat", "report_item" },
     [SLOT_TYPE_PENDING_RETRAIT_ITEM] =                 { "remove_from_craft", "link_to_chat", "report_item" },
+    [SLOT_TYPE_FURNITURE_VAULT] =                      { "move_to_inventory", "place_furniture", "link_to_chat" },
 }
 
 -- Checks to see if a certain slot type should completely disable all actions
@@ -2538,6 +2571,17 @@ local InventoryEnter =
             return false
         end
     },
+    [SLOT_TYPE_FURNITURE_VAULT] =
+    {
+        function(inventorySlot)
+            local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
+            if bag and index then
+                ItemTooltip:SetBagItem(bag, index)
+                return true, ItemTooltip
+            end
+            return false
+        end
+    },
 }
 
 local g_mouseoverCommand = ZO_ItemSlotActionsController:New(KEYBIND_STRIP_ALIGN_RIGHT, { "UI_SHORTCUT_SECONDARY", "UI_SHORTCUT_TERTIARY", "UI_SHORTCUT_QUATERNARY" })
@@ -2585,6 +2629,7 @@ local NO_COMPARISON_TOOLTIPS_FOR_SLOT_TYPE =
     [SLOT_TYPE_LIST_DIALOG_ITEM] = true,
     [SLOT_TYPE_PENDING_RETRAIT_ITEM] = true,
     [SLOT_TYPE_TRADING_HOUSE_ITEM_LISTING] = true,
+    [SLOT_TYPE_FURNITURE_VAULT] = true,
 }
 
 function ZO_InventorySlot_OnUpdate(control)
@@ -2937,6 +2982,14 @@ local InventoryDragStart =
             return true
         end
     },
+    [SLOT_TYPE_FURNITURE_VAULT] =
+    {
+        function(inventorySlot)
+            local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
+            PickupInventoryItem(bag, index)
+            return true
+        end
+    },
 }
 
 function ZO_InventorySlot_OnDragStart(inventorySlot)
@@ -3104,6 +3157,12 @@ local InventoryReceiveDrag =
             return false
         end
     },
+    [SLOT_TYPE_FURNITURE_VAULT] =
+    {
+        function(inventorySlot)
+            return PlaceInventoryItemInStorage(inventorySlot)
+        end
+    },
 }
 
 function ZO_InventorySlot_OnReceiveDrag(inventorySlot)
@@ -3184,6 +3243,12 @@ do
         end
         if slotData.stolen then
             table.insert(g_tooltipLines, GetString(SI_INVENTORY_STOLEN_ITEM_TOOLTIP))
+        end
+        if slotData.isLockedSetPiece then
+            table.insert(g_tooltipLines, GetString(SI_INVENTORY_LOCKED_SET_PIECE_ITEM_TOOLTIP))
+        end
+        if slotData.canBeUsedToLearn then
+            table.insert(g_tooltipLines, GetString(SI_INVENTORY_ITEM_NOT_LEARNED_ITEM_TOOLTIP))
         end
         if slotData.isBoPTradeable then
             table.insert(g_tooltipLines, GetString(SI_INVENTORY_TRADE_BOP_ITEM_TOOLTIP))

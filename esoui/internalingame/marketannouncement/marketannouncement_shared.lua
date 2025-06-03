@@ -69,14 +69,15 @@ function ZO_MarketAnnouncement_Shared:Initialize(control, fragmentConditionFunct
 
     self.marketProductSelectedCallback = function(...) self:UpdateLabels(...) end
 
-    local function OnDailyLoginRewardsUpdated()
-        self:OnDailyLoginRewardsUpdated()
+    local function OnTileDataUpdated()
+        self:OnTileDataUpdated()
     end
 
     ZO_MARKET_ANNOUNCEMENT_MANAGER:RegisterCallback("OnMarketAnnouncementDataUpdated", function() self:UpdateMarketCarousel() end)
-    ZO_MARKET_ANNOUNCEMENT_MANAGER:RegisterCallback("EventAnnouncementExpired", function() self:LayoutActionTiles() end)
-    PROMOTIONAL_EVENT_MANAGER:RegisterCallback("CampaignsUpdated", function() self:LayoutActionTiles() end)
-    control:RegisterForEvent(EVENT_DAILY_LOGIN_REWARDS_UPDATED, OnDailyLoginRewardsUpdated)
+    ZO_MARKET_ANNOUNCEMENT_MANAGER:RegisterCallback("EventAnnouncementExpired", OnTileDataUpdated)
+    PROMOTIONAL_EVENT_MANAGER:RegisterCallback("CampaignsUpdated", OnTileDataUpdated)
+    PROMOTIONAL_EVENT_MANAGER:RegisterCallback("RewardsClaimed", OnTileDataUpdated)
+    control:RegisterForEvent(EVENT_DAILY_LOGIN_REWARDS_UPDATED, OnTileDataUpdated)
 end
 
 function ZO_MarketAnnouncement_Shared:AddTileTypeObjectPoolToMap(tileType)
@@ -100,7 +101,7 @@ function ZO_MarketAnnouncement_Shared:OnStateChanged(oldState, newState)
     end
 end
 
-function ZO_MarketAnnouncement_Shared:OnDailyLoginRewardsUpdated()
+function ZO_MarketAnnouncement_Shared:OnTileDataUpdated()
     if self.fragment:IsShowing() then
         self:LayoutActionTiles()
     end

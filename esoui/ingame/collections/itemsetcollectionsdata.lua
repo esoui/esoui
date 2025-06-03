@@ -313,7 +313,7 @@ end
 
 function ZO_ItemSetCollectionData:GetPieceDataBySlot(itemSetCollectionSlot)
     for i, itemSetCollectionPieceData in self:PieceIterator() do
-        if CompareId64s(itemSetCollectionPieceData:GetItemSetCollectionSlot(), itemSetCollectionSlot) == 0 then
+        if AreId64sEqual(itemSetCollectionPieceData:GetItemSetCollectionSlot(), itemSetCollectionSlot) then
             return itemSetCollectionPieceData
         end
     end

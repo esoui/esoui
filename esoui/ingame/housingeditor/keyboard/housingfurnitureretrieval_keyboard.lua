@@ -253,6 +253,20 @@ function ZO_HousingFurnitureRetrieval_Keyboard:OnShowing()
 end
 
 --Overridden from ZO_HousingFurnitureList
+function ZO_HousingFurnitureRetrieval_Keyboard:OnShown()
+    ZO_HousingFurnitureList.OnShown(self)
+    if HOUSING_EDITOR_STATE:IsLocalPlayerHouseOwner() then
+        SCENE_MANAGER:AddFragment(HOUSING_FURNITURE_RETRIEVE_TO_FRAGMENT)
+    end
+end
+
+--Overridden from ZO_HousingFurnitureList
+function ZO_HousingFurnitureRetrieval_Keyboard:OnHiding()
+    SCENE_MANAGER:RemoveFragment(HOUSING_FURNITURE_RETRIEVE_TO_FRAGMENT)
+    ZO_HousingFurnitureList.OnHiding(self)
+end
+
+--Overridden from ZO_HousingFurnitureList
 function ZO_HousingFurnitureRetrieval_Keyboard:GetCategoryTreeData()
     return SHARED_FURNITURE:GetRetrievableFurnitureCategoryTreeData()
 end

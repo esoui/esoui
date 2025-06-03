@@ -21,7 +21,7 @@ local function OverflowDialogInitialize(dialogControl)
                 keybind = false,
                 callback =  function(dialog)
                                 CancelLogin()
-                                PregameStateManager_SetState("AccountLogin")
+                                PregameStateManager_SetState("WaitForPreloginWorld")
                             end,
             },
 

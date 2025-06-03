@@ -1,0 +1,156 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_ModBrowser_TooltipLoadingSpinner" virtual="true">
+            <Controls>
+                <Control name="$(parent)Icon" inherits="ZO_LoadingIcon_Gamepad">
+                    <Dimensions x="128" y="128"/>
+                    <Anchor point="CENTER" />
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_ModBrowser_TooltipGalleryImage" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Image" resizeToFitFile="true" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
+                    <Anchor point="CENTER" />
+                </Texture>
+
+                <Backdrop name="$(parent)EdgeFrame" inherits="ZO_GamepadNormalOutlineHighlight" tier="HIGH">
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="BOTTOMRIGHT" />
+                </Backdrop>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_ModBrowser_TooltipSelectionIndicator" virtual="true">
+            <Controls>
+                <Control name="$(parent)Indicator" inherits="ZO_SelectionIndicator_Control">
+                    <Anchor point="CENTER" />
+                </Control>
+            </Controls>
+        </Control>
+        
+        <Control name="ZO_ModBrowser_ModRow_Gamepad" inherits="ZO_GamepadInteractiveSortFilterListRow" virtual="true">
+            <OnInitialized>
+                ZO_ModBrowser_Gamepad.OnRowControlInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)Category" inherits="ZO_GamepadInteractiveSortFilterListIcon">
+                    <Dimensions x="ZO_GAMEPAD_MOD_BROWSER_CATEGORY_WIDTH" />
+                    <Anchor point="LEFT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_HIGHLIGHT_PADDING"/>
+                </Control>
+                
+                <Label name="$(parent)ModName" inherits="ZO_GamepadInteractiveSortFilterListRowLabel">
+                    <Dimensions x="ZO_GAMEPAD_MOD_BROWSER_MOD_NAME_WIDTH" />
+                    <Anchor point="LEFT" relativeTo="$(parent)Category" relativePoint="RIGHT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X"/>
+                </Label>
+
+                <Label name="$(parent)Users" inherits="ZO_GamepadInteractiveSortFilterListRowLabel">
+                    <Dimensions x="ZO_GAMEPAD_MOD_BROWSER_USERS_WIDTH" />
+                    <Anchor point="LEFT" relativeTo="$(parent)ModName" relativePoint="RIGHT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X"/>
+                </Label>
+
+                <!-- InstallStateLoading is mutually exclusive with InstallStateText. They will never both be showing. -->
+                <Control name="$(parent)InstallStateLoading" layer="OVERLAY">
+                    <Dimensions x="ZO_GAMEPAD_MOD_BROWSER_INSTALL_STATE_WIDTH" y="ZO_GAMEPAD_LIST_ICON_SIZE" />
+                    <Anchor point="LEFT" relativeTo="$(parent)Users" relativePoint="RIGHT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X"/>
+                    <Controls>
+                        <Control name="$(parent)Icon" inherits="ZO_LoadingIcon_Gamepad" hidden="true">
+                            <Dimensions x="ZO_GAMEPAD_LIST_ICON_SIZE" y="ZO_GAMEPAD_LIST_ICON_SIZE"/>
+                            <Anchor point="LEFT" />
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <!-- InstallStateText is mutually exclusive with InstallStateLoading. They will never both be showing. -->
+                <Label name="$(parent)InstallStateText" inherits="ZO_GamepadInteractiveSortFilterListRowLabel" hidden="true">
+                    <Dimensions x="ZO_GAMEPAD_MOD_BROWSER_INSTALL_STATE_WIDTH" />
+                    <Anchor point="LEFT" relativeTo="$(parent)Users" relativePoint="RIGHT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X"/>
+                </Label>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="ZO_ModBrowser_Gamepad_TopLevel" inherits="ZO_AnchoredToQuadrant_1_2_3_Background ZO_GamepadInteractiveSortFilterListControl" hidden="true">
+            <OnInitialized>
+                ZO_ModBrowser_Gamepad.OnControlInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)Container" override="true">
+                    <Controls>
+                        <Control name="$(parent)ContentHeader" override="true">
+                            <Controls>
+                                <Control name="$(parent)DropdownFilter" override="true" hidden="true" />
+
+                                <Control name="$(parent)SearchFilter" override="true">
+                                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)TitleContainer" />
+                                </Control>
+
+                                <Control name="$(parent)CategoryFilter">
+                                    <Dimensions x="350" y="48" />
+                                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)TitleContainer" />
+                                    <Controls>
+                                        <Backdrop name="$(parent)Highlight" inherits="ZO_GamepadInteractiveFilterHighlight" hidden="true" />
+
+                                        <Control name="$(parent)Dropdown" inherits="ZO_MultiSelection_ComboBox_Gamepad">
+                                            <AnchorFill />
+                                        </Control>
+                                    </Controls>
+                                </Control>
+                                
+                                <Control name="$(parent)TitleContainer" override="true" >
+                                    <Controls>
+                                        <Label name="$(parent)Title" override="true">
+                                            <Anchor point="BOTTOMLEFT" relativeTo="$(grandparent)SearchFilter" relativePoint="BOTTOMRIGHT" offsetX="10" />
+                                            <Anchor point="BOTTOMRIGHT" relativeTo="$(grandparent)CategoryFilter" relativePoint="BOTTOMLEFT" offsetX="-10" />
+                                        </Label>
+                                    </Controls>
+                                </Control>
+
+                                <Control name="$(parent)TabBar" inherits="ZO_TabBarScrollListTemplate ZO_GamepadHeaderTitleAnchors" hidden="true" />
+                                
+                                <Control name="$(parent)DividerPipped" inherits="ZO_GamepadHeaderHorizontalDividerWithTabs" hidden="true">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)TitleContainer" relativePoint="BOTTOMLEFT" />
+                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)TitleContainer" relativePoint="BOTTOMRIGHT" offsetY="20" />
+                                </Control>
+                            </Controls>
+                        </Control>
+
+                        <Control name="$(parent)Headers" override="true">
+                            <Controls>
+                                <Control name="$(parent)Category" inherits="ZO_GamepadInteractiveFilterHeader" mouseEnabled="false">
+                                    <Dimensions x="ZO_GAMEPAD_MOD_BROWSER_CATEGORY_WIDTH" />
+                                    <Anchor point="TOPLEFT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_HIGHLIGHT_PADDING"/>
+                                </Control>
+
+                                <Control name="$(parent)ModName" inherits="ZO_GamepadInteractiveFilterHeader">
+                                    <Dimensions x="ZO_GAMEPAD_MOD_BROWSER_MOD_NAME_WIDTH"/>
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Category" relativePoint="TOPRIGHT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X" />
+                                    <OnInitialized>
+                                        ZO_GamepadInteractiveSortFilterHeader_Initialize(self, GetString(SI_GAMEPAD_MOD_BROWSER_NAME_HEADER), "GetTitle", TEXT_ALIGN_LEFT)
+                                    </OnInitialized>
+                                </Control>
+
+                                <Control name="$(parent)Users" inherits="ZO_GamepadInteractiveFilterHeader">
+                                    <Dimensions x="ZO_GAMEPAD_MOD_BROWSER_USERS_WIDTH"/>
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)ModName" relativePoint="TOPRIGHT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X" />
+                                    <OnInitialized>
+                                        ZO_GamepadInteractiveSortFilterHeader_Initialize(self, GetString(SI_GAMEPAD_MOD_BROWSER_USERS_HEADER), "GetNumUsers", TEXT_ALIGN_LEFT)
+                                    </OnInitialized>
+                                </Control>
+
+                                <Control name="$(parent)InstallState" inherits="ZO_GamepadInteractiveFilterHeader">
+                                    <Dimensions x="ZO_GAMEPAD_MOD_BROWSER_INSTALL_STATE_WIDTH"/>
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Users" relativePoint="TOPRIGHT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X" />
+                                    <OnInitialized>
+                                        ZO_GamepadInteractiveSortFilterHeader_Initialize(self, GetString(SI_GAMEPAD_MOD_BROWSER_STATUS_HEADER), "GetInstallState", TEXT_ALIGN_LEFT)
+                                    </OnInitialized>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

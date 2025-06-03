@@ -564,46 +564,40 @@ function ZO_GamepadInventory:InitializeKeybindStrip()
     {
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
         {
-            name = GetString(SI_GAMEPAD_SELECT_OPTION),
+            name = function()
+                if self.currentlySelectedData.isMundusEntry then
+                    return GetString(SI_STATS_MUNDUS_INFO_BUTTON)
+                end
+
+                return GetString(SI_GAMEPAD_SELECT_OPTION)
+            end,
             keybind = "UI_SHORTCUT_PRIMARY",
             order = -500,
             callback = function()
-                self:Select()
-            end,
-            visible = function()
-                return (not self.categoryList:IsEmpty()) and self.currentlySelectedData and
-                       not (self.currentlySelectedData.isCurrencyEntry or self.currentlySelectedData.isMundusEntry)
-            end,
-        },
-        {
-            name = function()
-                local targetCategoryData = self.categoryList:GetTargetData()
-                if targetCategoryData and targetCategoryData.isMundusEntry then
-                    return GetString(SI_STATS_MUNDUS_INFO_BUTTON)
-                else
-                    return GetString(SI_GAMEPAD_INVENTORY_EQUIPPED_MORE_ACTIONS)
-                end
-            end,
-            keybind = "UI_SHORTCUT_TERTIARY",
-            order = 1000,
-            visible = function()
-                local targetCategoryData = self.categoryList:GetTargetData()
-                if targetCategoryData and targetCategoryData.isMundusEntry then
-                    if targetCategoryData.data and not targetCategoryData.data.mundusBuffIndex then
-                        return true
-                    end
-                    return false
-                end
-                return self.selectedItemUniqueId ~= nil
-            end,
-            callback = function()
-                local targetCategoryData = self.categoryList:GetTargetData()
-                if targetCategoryData and targetCategoryData.isMundusEntry then
+                if self.currentlySelectedData.isMundusEntry then
                     local helpCategoryIndex, helpIndex = GetMundusStoneHelpIndices()
                     HELP_TUTORIALS_ENTRIES_GAMEPAD:Show(helpCategoryIndex, helpIndex)
                 else
-                    self:ShowActions()
+                    self:Select()
                 end
+            end,
+            visible = function()
+                if self.categoryList:IsEmpty() or not self.currentlySelectedData or self.currentlySelectedData.isCurrencyEntry then
+                    return false
+                end
+
+                return true
+            end,
+        },
+        {
+            name = GetString(SI_GAMEPAD_INVENTORY_EQUIPPED_MORE_ACTIONS),
+            keybind = "UI_SHORTCUT_TERTIARY",
+            order = 1000,
+            visible = function()
+                return self.selectedItemUniqueId ~= nil
+            end,
+            callback = function()
+                self:ShowActions()
             end,
         },
         {
@@ -642,6 +636,8 @@ function ZO_GamepadInventory:InitializeKeybindStrip()
     self.itemFilterKeybindStripDescriptor =
     {
         {
+            keybind = "UI_SHORTCUT_SECONDARY",
+
             alignment = function()
                 if IsQuickSlotEnabled() then
                     return KEYBIND_STRIP_ALIGN_LEFT
@@ -649,6 +645,7 @@ function ZO_GamepadInventory:InitializeKeybindStrip()
                     return KEYBIND_STRIP_ALIGN_RIGHT
                 end
             end,
+
             name = function()
                 if IsQuickSlotEnabled() then
                     return GetString(SI_GAMEPAD_ITEM_ACTION_QUICKSLOT_ASSIGN)
@@ -656,12 +653,13 @@ function ZO_GamepadInventory:InitializeKeybindStrip()
                     return GetString(SI_GAMEPAD_INVENTORY_TOGGLE_ITEM_COMPARE_MODE)
                 end
             end,
-            keybind = "UI_SHORTCUT_SECONDARY",
+
             order = function()
                 if IsQuickSlotEnabled() then
                     return -500
                 end
             end,
+
             visible = function()
                 if IsQuickSlotEnabled() then
                     local targetData = self.itemList:GetTargetData()
@@ -676,6 +674,7 @@ function ZO_GamepadInventory:InitializeKeybindStrip()
                     end
                 end
             end,
+
             callback = function()
                 if IsQuickSlotEnabled() then
                     self:ShowQuickslot()
@@ -689,9 +688,10 @@ function ZO_GamepadInventory:InitializeKeybindStrip()
         },
         {
             alignment = KEYBIND_STRIP_ALIGN_LEFT,
-            name = GetString(SI_GAMEPAD_INVENTORY_ACTION_LIST_KEYBIND),
             keybind = "UI_SHORTCUT_TERTIARY",
             order = 1000,
+            name = GetString(SI_GAMEPAD_INVENTORY_ACTION_LIST_KEYBIND),
+
             visible = function()
                 if self.selectedItemUniqueId ~= nil then
                     return true
@@ -704,26 +704,28 @@ function ZO_GamepadInventory:InitializeKeybindStrip()
 
                 return false
             end,
+
             callback = function()
                 self:ShowActions()
             end,
         },
         {
             alignment = KEYBIND_STRIP_ALIGN_LEFT,
-            name = GetString(SI_ITEM_ACTION_STACK_ALL),
+            disabledDuringSceneHiding = true,
             keybind = "UI_SHORTCUT_LEFT_STICK",
             order = 1500,
-            disabledDuringSceneHiding = true,
+            name = GetString(SI_ITEM_ACTION_STACK_ALL),
+
             callback = function()
                 StackBag(BAG_BACKPACK)
             end,
         },
         {
             alignment = KEYBIND_STRIP_ALIGN_LEFT,
-            name = GetString(SI_ITEM_ACTION_DESTROY),
+            disabledDuringSceneHiding = true,
             keybind = "UI_SHORTCUT_RIGHT_STICK",
             order = 2000,
-            disabledDuringSceneHiding = true,
+            name = GetString(SI_ITEM_ACTION_DESTROY),
 
             visible = function()
                 local targetData = self.itemList:GetTargetData()
@@ -739,17 +741,20 @@ function ZO_GamepadInventory:InitializeKeybindStrip()
             end
         },
         {
-            name =  function()
+            alignment = KEYBIND_STRIP_ALIGN_CENTER,
+            disabledDuringSceneHiding = true,
+            keybind = "UI_SHORTCUT_QUATERNARY",
+            order = 2500,
+
+            name = function()
                 if IsCurrentlyPreviewing() then
                     return GetString(SI_PREVIEW_CLEAR_INVENTORY_PREVIEW)
                 else
                     return GetString(SI_CRAFTING_ENTER_PREVIEW_MODE)
                 end
             end,
-            keybind = "UI_SHORTCUT_QUATERNARY",
-            order = 2500,
-            disabledDuringSceneHiding = true,
-            visible =   function()
+
+            visible = function()
                 if not IsCurrentlyPreviewing() then
                     local targetData = self.itemList:GetTargetData()
                     return self:CanEntryDataBePreviewed(targetData) and IsCharacterPreviewingAvailable()
@@ -757,7 +762,8 @@ function ZO_GamepadInventory:InitializeKeybindStrip()
 
                 return true
             end,
-            callback =  function()
+
+            callback = function()
                 if IsCurrentlyPreviewing() then
                     self:EndPreview()
                 else
@@ -916,7 +922,7 @@ function ZO_GamepadInventory:SetSelectedInventoryData(inventoryData)
     -- this also prevents issues where we get 2 single slot updates while showing but only refresh for the first one
     if ZO_Dialogs_IsShowing(ZO_GAMEPAD_INVENTORY_ACTION_DIALOG) then
         if inventoryData then
-            if self.selectedItemUniqueId and CompareId64s(inventoryData.uniqueId, self.selectedItemUniqueId) ~= 0 then
+            if self.selectedItemUniqueId and not AreId64sEqual(inventoryData.uniqueId, self.selectedItemUniqueId) then
                 ZO_Dialogs_ReleaseDialog(ZO_GAMEPAD_INVENTORY_ACTION_DIALOG) -- The previously selected item no longer exists, back out of the command list
             end
         elseif self.currentListType == INVENTORY_CATEGORY_LIST then
@@ -941,7 +947,10 @@ end
 -------------------
 
 function ZO_GamepadInventory:UpdateCategoryLeftTooltip(selectedData)
-    if not selectedData then return end
+    if not selectedData or self:IsHeaderActive() then
+        GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
+        return
+    end
 
     if selectedData.equipSlot and GAMEPAD_TOOLTIPS:LayoutBagItem(GAMEPAD_LEFT_TOOLTIP, BAG_WORN, selectedData.equipSlot) then
         local isHidden, highestPriorityVisualLayerThatIsShowing = WouldEquipmentBeHidden(selectedData.equipSlot or EQUIP_SLOT_NONE, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
@@ -1247,6 +1256,9 @@ function ZO_GamepadInventory:OnEnterHeader()
     ZO_Gamepad_ParametricList_BagsSearch_Screen.OnEnterHeader(self)
 
     self:UpdateItemLeftTooltip(nil)
+    if self:IsCurrentList(self.categoryList) then
+        self:UpdateRightTooltip()
+    end
 end
 
 function ZO_GamepadInventory:OnLeaveHeader()
@@ -1254,9 +1266,12 @@ function ZO_GamepadInventory:OnLeaveHeader()
 
     if self.currentlySelectedData and self.currentlySelectedData.isCurrencyEntry then
         self:UpdateCategoryLeftTooltip(self.currentlySelectedData)
-        self:UpdateRightTooltip()
     else
         self:UpdateItemLeftTooltip(self.currentlySelectedData)
+    end
+
+    if self:IsCurrentList(self.categoryList) then
+        self:UpdateRightTooltip()
     end
 end
 
@@ -1777,6 +1792,10 @@ end
 
 function ZO_GamepadInventory:UpdateRightTooltip()
     GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
+    if self:IsHeaderActive() then
+        return
+    end
+
     local targetCategoryData = self.categoryList:GetTargetData()
     if targetCategoryData then
         local selectedItemData = self.currentlySelectedData

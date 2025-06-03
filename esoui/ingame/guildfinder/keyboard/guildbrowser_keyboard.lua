@@ -55,12 +55,14 @@ function ZO_GuildBrowser_Keyboard:Initialize(control)
 
     KEYBOARD_GUILD_BROWSER_SCENE = ZO_Scene:New("guildBrowserKeyboard", SCENE_MANAGER)
     KEYBOARD_GUILD_BROWSER_SCENE:RegisterCallback("StateChange", function(oldState, state)
-                                                                if state == SCENE_SHOWING then
-                                                                    self:OnShowing()
-                                                                elseif state == SCENE_HIDDEN then
-                                                                    self:OnHidden()
-                                                                end
-                                                            end)
+        if state == SCENE_SHOWING then
+            self:OnShowing()
+        elseif state == SCENE_SHOWN then
+            self:OnShow()
+        elseif state == SCENE_HIDDEN then
+            self:OnHidden()
+        end
+    end)
 
     KEYBOARD_GUILD_BROWSER_FRAGMENT = ZO_FadeSceneFragment:New(self.control)
 
@@ -103,6 +105,10 @@ function ZO_GuildBrowser_Keyboard:OnShowing()
     if self.selectedCategory.category == ZO_GUILD_BROWSER_CATEGORY_GUILD_LIST then
         GUILD_BROWSER_MANAGER:ExecuteSearch()
     end
+end
+
+function ZO_GuildBrowser_Keyboard:OnShow()
+    HandleReturningPlayerUISystemShown(UI_SYSTEM_GUILD_FINDER)
 end
 
 function ZO_GuildBrowser_Keyboard:OnHidden()

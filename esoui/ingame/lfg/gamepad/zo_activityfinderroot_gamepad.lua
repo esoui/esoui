@@ -4,6 +4,26 @@ ZO_GAMEPAD_ACTIVITY_FINDER_ROOT_SCENE_NAME = "gamepad_activity_finder_root"
 --Initialize--
 --------------
 
+local function GetCategoryDataSceneName(categoryData)
+    if categoryData.sceneName then
+        if type(categoryData.sceneName) == "function" then
+            return categoryData:sceneName()
+        end
+        return categoryData.sceneName
+    end
+    return nil
+end
+
+local function GetCategoryDataFragment(categoryData)
+    if categoryData.categoryFragment then
+        if type(categoryData.categoryFragment) == "function" then
+            return categoryData:categoryFragment()
+        end
+        return categoryData.categoryFragment
+    end
+    return nil
+end
+
 local ActivityFinderRoot_Gamepad = ZO_Gamepad_ParametricList_Screen:Subclass()
 
 function ActivityFinderRoot_Gamepad:New(...)
@@ -26,9 +46,9 @@ function ActivityFinderRoot_Gamepad:Initialize(control)
     ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnLevelUpdate", RefreshCategories)
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", RefreshCategories)
     self.control:RegisterForEvent(EVENT_PLAYER_ACTIVATED, RefreshCategories)
-    self.control:RegisterForEvent(EVENT_PROMOTIONAL_EVENTS_ACTIVITY_PROGRESS_UPDATED, RefreshCategories)
     PROMOTIONAL_EVENT_MANAGER:RegisterCallback("RewardsClaimed", RefreshCategories)
     PROMOTIONAL_EVENT_MANAGER:RegisterCallback("CampaignSeenStateChanged", RefreshCategories)
+    PROMOTIONAL_EVENT_MANAGER:RegisterCallback("ActivityProgressUpdated", RefreshCategories)
 
     local function RefreshList()
         self:RefreshList()
@@ -54,12 +74,13 @@ function ActivityFinderRoot_Gamepad:InitializeKeybindStripDescriptors()
                         if entryData.isRoleSelector then
                             GAMEPAD_GROUP_ROLES_BAR:ToggleSelected()
                         else
-                            if entryData.sceneName then
+                            local sceneName = GetCategoryDataSceneName(entryData)
+                            if sceneName then
                                 if entryData.onSceneShowingCallback then
                                     entryData:onSceneShowingCallback()
                                 end
-                                SCENE_MANAGER:Push(entryData.sceneName)
-                            elseif entryData.categoryFragment then
+                                SCENE_MANAGER:Push(sceneName)
+                            elseif GetCategoryDataFragment(entryData) then
                                 self:DeactivateCurrentList()
                                 entryData:activateCategory()
                             end
@@ -69,8 +90,9 @@ function ActivityFinderRoot_Gamepad:InitializeKeybindStripDescriptors()
             enabled = function()
                 local targetData = self:GetMainList():GetTargetData()
                 if targetData and targetData.enabled then
-                    if targetData.categoryFragment then
-                        return targetData.activateCategory ~= nil
+                    local entryData = targetData.data
+                    if GetCategoryDataFragment(entryData) then
+                        return entryData.activateCategory ~= nil
                     else
                         return true
                     end
@@ -124,11 +146,12 @@ function ActivityFinderRoot_Gamepad:SetupList(list)
         data.iconUpdateFn = function()
             local categoryData = data.data
             data:ClearIcons()
-            if data.enabled then
-                data:AddIcon(data.data.menuIcon)
-            else
-                data:AddIcon(data.data.disabledMenuIcon)
+
+            local menuIcon = data.enabled and data.data.menuIcon or data.data.disabledMenuIcon
+            if type(menuIcon) == "function" then
+                menuIcon = menuIcon()
             end
+            data:AddIcon(menuIcon)
 
             if (categoryData.isGroupFinder and GROUP_FINDER_APPLICATIONS_LIST_MANAGER:HasNewApplication()) or
                (categoryData.isPromotionalEvent and PROMOTIONAL_EVENT_MANAGER:DoesAnyCampaignHaveCallout()) then
@@ -136,9 +159,15 @@ function ActivityFinderRoot_Gamepad:SetupList(list)
             end
         end
 
-        if categoryData.isPromotionalEvent and enabled then
-            data:SetNameColors(ZO_PROMOTIONAL_EVENT_SELECTED_COLOR, ZO_PROMOTIONAL_EVENT_UNSELECTED_COLOR)
-            data:SetIconTint(ZO_PROMOTIONAL_EVENT_SELECTED_COLOR, ZO_PROMOTIONAL_EVENT_UNSELECTED_COLOR)
+        if categoryData.isPromotionalEvent then
+            if PROMOTIONAL_EVENT_MANAGER:HasAnyUnclaimedRewards() then
+                data:SetNameColors(ZO_PROMOTIONAL_EVENT_SELECTED_COLOR, ZO_PROMOTIONAL_EVENT_UNSELECTED_COLOR)
+                data:SetIconTint(ZO_PROMOTIONAL_EVENT_SELECTED_COLOR, ZO_PROMOTIONAL_EVENT_UNSELECTED_COLOR)
+            else
+                local DEFAULT = nil
+                data:SetNameColors(DEFAULT, DEFAULT)
+                data:SetIconTint(DEFAULT, DEFAULT)
+            end
         end
 
         ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
@@ -149,24 +178,25 @@ function ActivityFinderRoot_Gamepad:SetupList(list)
 
     local function OnSelectedMenuEntry(_, selectedData, oldSelectedData)
         if GAMEPAD_ACTIVITY_FINDER_ROOT_SCENE:GetState() ~= SCENE_HIDDEN then
-            if oldSelectedData and oldSelectedData.data and oldSelectedData.data.categoryFragment then
-                SCENE_MANAGER:RemoveFragment(oldSelectedData.data.categoryFragment)
+            if oldSelectedData and oldSelectedData.data then
+                local oldCategoryFragment = GetCategoryDataFragment(oldSelectedData.data)
+                if oldCategoryFragment then
+                    SCENE_MANAGER:RemoveFragment(oldCategoryFragment)
+                end
             end
 
             if selectedData.data.isRoleSelector then
                 GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
                 GAMEPAD_GROUP_ROLES_BAR:Activate()
-            elseif selectedData.data.categoryFragment then
-                GAMEPAD_GROUP_ROLES_BAR:Deactivate()
-                if self:IsCategoryLocked(selectedData.data) then
-                    self:RefreshTooltip(selectedData.data)
-                else
-                    GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
-                    SCENE_MANAGER:AddFragment(selectedData.data.categoryFragment)
-                end
             else
                 GAMEPAD_GROUP_ROLES_BAR:Deactivate()
-                self:RefreshTooltip(selectedData.data)
+                local selectedCategoryFragment = GetCategoryDataFragment(selectedData.data)
+                if selectedCategoryFragment and not self:IsCategoryLocked(selectedData.data) then
+                    GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
+                    SCENE_MANAGER:AddFragment(selectedCategoryFragment)
+                else
+                    self:RefreshTooltip(selectedData.data)
+                end
             end
 
             KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
@@ -200,9 +230,10 @@ function ActivityFinderRoot_Gamepad:RefreshList()
             local entryData = list:GetEntryData(i)
             local data = entryData and entryData.data
             if data then
-                if data.categoryFragment then
+                local categoryFragment = GetCategoryDataFragment(data)
+                if categoryFragment then
                     -- We'll re-add this below if it should stick around. Triggers a hide/show to mirror keyboard group menu behavior.
-                    SCENE_MANAGER:RemoveFragment(data.categoryFragment)
+                    SCENE_MANAGER:RemoveFragment(categoryFragment)
                 end
                 if data.visible and not data.visible() then
                     table.insert(self.hiddenEntries, entryData)
@@ -233,13 +264,14 @@ function ActivityFinderRoot_Gamepad:RefreshList()
             local ALLOW_EVEN_IF_DISABLED = true
             list:SetDefaultIndexSelected(DONT_ANIMATE, ALLOW_EVEN_IF_DISABLED)
             targetData = list:GetTargetData()
-        elseif targetData.data.categoryFragment then
-            if not self:IsCategoryLocked(targetData.data) then
-                SCENE_MANAGER:AddFragment(targetData.data.categoryFragment)
-            end
         else
             GAMEPAD_GROUP_ROLES_BAR:Deactivate()
+            local categoryFragment = GetCategoryDataFragment(targetData.data)
+            if categoryFragment and not self:IsCategoryLocked(targetData.data) then
+                SCENE_MANAGER:AddFragment(categoryFragment)
+            end
         end
+
         list:RefreshVisible()
         self:RefreshTooltip(targetData.data)
         KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
@@ -302,7 +334,11 @@ do
                 end
             end
 
-            if not data.categoryFragment or lockedText then
+            if data.tooltipFunction and data:tooltipFunction(lockedText) then
+                return
+            end
+
+            if not GetCategoryDataFragment(data) or lockedText then
                 GAMEPAD_TOOLTIPS:LayoutTitleAndMultiSectionDescriptionTooltip(GAMEPAD_LEFT_TOOLTIP, data.name, data.tooltipDescription, lockedText)
             end
         end
@@ -354,7 +390,11 @@ function ActivityFinderRoot_Gamepad:AddCategory(categoryData, categoryPriority)
         categoryData.onSceneShowingCallback = categoryData.onShowingCallback
     end
 
-    local entryData = ZO_GamepadEntryData:New(categoryData.name, categoryData.menuIcon)
+    local menuIcon = categoryData.menuIcon
+    if type(menuIcon) == "function" then
+        menuIcon = menuIcon()
+    end
+    local entryData = ZO_GamepadEntryData:New(categoryData.name, menuIcon)
     entryData.data = categoryData
     entryData.data.priority = categoryPriority
     entryData:SetIconTintOnSelection(true)
@@ -403,19 +443,21 @@ end
 
 function ActivityFinderRoot_Gamepad:ShowCategory(categoryData)
     local gamepadCategoryData = categoryData.gamepadData
-    assert(gamepadCategoryData.sceneName or gamepadCategoryData.categoryFragment, "A gamepad Activity Finder entry must have a scene or a fragment")
+    local sceneName = GetCategoryDataSceneName(gamepadCategoryData)
+    local categoryFragment = GetCategoryDataFragment(gamepadCategoryData)
+    assert(sceneName or categoryFragment, "A gamepad Activity Finder entry must have a scene or a fragment")
 
     local locked = self:IsCategoryLocked(gamepadCategoryData)
     -- TODO Promotional Events: Add check for if there's more than one campaign to control drill in
-    local canShowScene = gamepadCategoryData.sceneName and not locked
+    local canShowScene = sceneName and not locked
     if canShowScene then
-        if not SCENE_MANAGER:IsShowing(gamepadCategoryData.sceneName) then
+        if not SCENE_MANAGER:IsShowing(sceneName) then
             -- Order matters:
             if gamepadCategoryData.onSceneShowingCallback then
                 gamepadCategoryData:onSceneShowingCallback()
             end
             MAIN_MENU_GAMEPAD:SelectMenuEntry(ZO_MENU_MAIN_ENTRIES.ACTIVITY_FINDER)
-            SCENE_MANAGER:CreateStackFromScratch("mainMenuGamepad", ZO_GAMEPAD_ACTIVITY_FINDER_ROOT_SCENE_NAME, gamepadCategoryData.sceneName)
+            SCENE_MANAGER:CreateStackFromScratch("mainMenuGamepad", ZO_GAMEPAD_ACTIVITY_FINDER_ROOT_SCENE_NAME, sceneName)
         end
     else
         if not SCENE_MANAGER:IsShowing(ZO_GAMEPAD_ACTIVITY_FINDER_ROOT_SCENE_NAME) then
