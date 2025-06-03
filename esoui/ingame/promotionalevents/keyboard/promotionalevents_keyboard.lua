@@ -37,7 +37,8 @@ function ZO_PromotionalEventReward_Keyboard:OnMouseUp(button, upInside)
         if button == MOUSE_BUTTON_INDEX_LEFT then
             if self.rewardableEventData:CanClaimReward() then
                 if GetRewardType(rewardId) == REWARD_ENTRY_TYPE_CHOICE then
-                    g_PromotionalEventsKeyboard:ShowClaimChoiceDialog(self.rewardableEventData)
+                    local CLAIM_ONE = false
+                    g_PromotionalEventsKeyboard:ShowClaimChoiceDialog(self.rewardableEventData, CLAIM_ONE)
                 else
                     self.rewardableEventData:TryClaimReward()
                 end
@@ -52,7 +53,8 @@ function ZO_PromotionalEventReward_Keyboard:OnMouseUp(button, upInside)
             if self.rewardableEventData:CanClaimReward() then
                 AddMenuItem(GetString(SI_PROMOTIONAL_EVENT_CLAIM_REWARD_ACTION), function()
                     if GetRewardType(rewardId) == REWARD_ENTRY_TYPE_CHOICE then
-                        g_PromotionalEventsKeyboard:ShowClaimChoiceDialog(self.rewardableEventData)
+                        local CLAIM_ONE = false
+                        g_PromotionalEventsKeyboard:ShowClaimChoiceDialog(self.rewardableEventData, CLAIM_ONE)
                     else
                         self.rewardableEventData:TryClaimReward()
                     end
@@ -447,7 +449,8 @@ function ZO_PromotionalEvents_Keyboard:InitializeKeybindStripDescriptors()
                 if rewardableEventData and rewardableEventData:CanClaimReward() then
                     local rewardData = rewardableEventData:GetRewardData()
                     if rewardData:GetRewardType() == REWARD_ENTRY_TYPE_CHOICE then
-                        self:ShowClaimChoiceDialog(rewardableEventData)
+                        local CLAIM_ONE = false
+                        self:ShowClaimChoiceDialog(rewardableEventData, CLAIM_ONE)
                     else
                         rewardableEventData:TryClaimReward()
                     end
@@ -476,7 +479,8 @@ function ZO_PromotionalEvents_Keyboard:InitializeKeybindStripDescriptors()
             callback = function()
                 self.currentCampaignData:TryClaimAllAvailableRewards()
                 self:CollectRemainingChoiceRewards()
-                self:TryClaimNextChoiceReward()
+                local CLAIM_ALL = true
+                self:TryClaimNextChoiceReward(CLAIM_ALL)
             end,
         },
 
@@ -688,8 +692,8 @@ function ZO_PromotionalEvents_Keyboard:ShowCapstoneDialog()
     ZO_Dialogs_ShowDialog("PROMOTIONAL_EVENT_CAPSTONE_KEYBOARD", { campaignData = self.currentCampaignData })
 end
 
-function ZO_PromotionalEvents_Keyboard:ShowClaimChoiceDialog(rewardData)
-    ZO_Dialogs_ShowDialog("PROMOTIONAL_EVENT_CLAIM_CHOICE_KEYBOARD", { rewardData = rewardData })
+function ZO_PromotionalEvents_Keyboard:ShowClaimChoiceDialog(rewardData, isClaimingAll)
+    ZO_Dialogs_ShowDialog("PROMOTIONAL_EVENT_CLAIM_CHOICE_KEYBOARD", { rewardData = rewardData, isClaimingAll = isClaimingAll })
 end
 
 function ZO_PromotionalEvents_Keyboard.GetMilestoneScale()
@@ -868,12 +872,14 @@ function ZO_PromotionalEvents_ClaimChoiceDialog_Keyboard:Initialize(control)
                 control =   self.confirmButton,
                 text =      SI_DIALOG_CONFIRM,
                 keybind =   "DIALOG_PRIMARY",
-                callback =  function()
+                callback =  function(dialog)
                     self.parentRewardableEventData:TryClaimReward(self.currentSelectedChoice.rewardId)
-                    local remainingChoiceRewards = PROMOTIONAL_EVENTS_KEYBOARD:GetRemainingChoiceRewards()
-                    table.remove(remainingChoiceRewards, 1)
-                    if next(remainingChoiceRewards) ~= nil then
-                        self.shouldTryClaimNextChoiceReward = true
+                    if dialog.data.isClaimingAll then
+                        local remainingChoiceRewards = PROMOTIONAL_EVENTS_KEYBOARD:GetRemainingChoiceRewards()
+                        table.remove(remainingChoiceRewards, 1)
+                        if next(remainingChoiceRewards) ~= nil then
+                            self.shouldTryClaimNextChoiceReward = true
+                        end
                     end
                 end,
                 enabled = function()

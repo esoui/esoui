@@ -5975,4 +5975,3 @@ SafeAddString(SI_ZONEDISPLAYTYPE6, "Public Dungeon", 0)
 SafeAddString(SI_ZONEDISPLAYTYPE7, "Delve", 0)
 SafeAddString(SI_ZONEDISPLAYTYPE8, "Housing", 0)
 SafeAddString(SI_ZONEDISPLAYTYPE9, "Battleground", 0)
---This comment is load-bearing.

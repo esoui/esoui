@@ -270,7 +270,8 @@ function ZO_PromotionalEvents_Gamepad:InitializeFoci()
         callback = function()
             self.currentCampaignData:TryClaimAllAvailableRewards()
             self:CollectRemainingChoiceRewards()
-            self:TryClaimNextChoiceReward()
+            local CLAIM_ALL = true
+            self:TryClaimNextChoiceReward(CLAIM_ALL)
         end,
     }
 
@@ -335,7 +336,8 @@ function ZO_PromotionalEvents_Gamepad:InitializeFoci()
                 local rewardableEventData = self.selectedMilestone.rewardObject.rewardableEventData
                 if rewardableEventData.rewardId ~= 0 then
                     if GetRewardType(rewardableEventData.rewardId) == REWARD_ENTRY_TYPE_CHOICE then
-                        self:ShowClaimChoiceDialog(rewardableEventData)
+                        local CLAIM_ONE = false
+                        self:ShowClaimChoiceDialog(rewardableEventData, CLAIM_ONE)
                     else
                         rewardableEventData:TryClaimReward()
                         SCREEN_NARRATION_MANAGER:QueueCustomEntry("promotionalEventsMilestone")
@@ -400,7 +402,8 @@ function ZO_PromotionalEvents_Gamepad:InitializeFoci()
                 local rewardableEventData = self.capstoneRewardObject.rewardableEventData
                 if rewardableEventData.capstoneRewardId ~= 0 then
                     if GetRewardType(rewardableEventData.capstoneRewardId) == REWARD_ENTRY_TYPE_CHOICE then
-                        self:ShowClaimChoiceDialog(rewardableEventData)
+                        local CLAIM_ONE = false
+                        self:ShowClaimChoiceDialog(rewardableEventData, CLAIM_ONE)
                     else
                         rewardableEventData:TryClaimReward()
                         SCREEN_NARRATION_MANAGER:QueueCustomEntry("promotionalEventsCapstone")
@@ -494,7 +497,8 @@ function ZO_PromotionalEvents_Gamepad:InitializeFoci()
                 if selectedActivityEntry:CanClaimReward() then
                     if selectedActivityEntry.rewardId ~= 0 then
                         if GetRewardType(selectedActivityEntry.rewardId) == REWARD_ENTRY_TYPE_CHOICE then
-                            self:ShowClaimChoiceDialog(selectedActivityEntry)
+                            local CLAIM_ONE = false
+                            self:ShowClaimChoiceDialog(selectedActivityEntry, CLAIM_ONE)
                         else
                             selectedActivityEntry:TryClaimReward()
                             SCREEN_NARRATION_MANAGER:QueueSortFilterListEntry(self)
@@ -730,14 +734,14 @@ function ZO_PromotionalEvents_Gamepad:GetSelectedCampaignData()
     end
 end
 
-function ZO_PromotionalEvents_Gamepad:TryClaimNextChoiceReward()
+function ZO_PromotionalEvents_Gamepad:TryClaimNextChoiceReward(isClaimingAll)
     if self.remainingChoiceRewards then
         local _, rewardableEventData = next(self.remainingChoiceRewards)
         if rewardableEventData then
             if PROMOTIONAL_EVENTS_CLAIM_CHOICE_DIALOG_GAMEPAD:IsShowing() then
                 PROMOTIONAL_EVENTS_CLAIM_CHOICE_DIALOG_GAMEPAD:SetRewardData(rewardableEventData)
             else
-                self:ShowClaimChoiceDialog(rewardableEventData)
+                self:ShowClaimChoiceDialog(rewardableEventData, isClaimingAll)
             end
         end
     end
@@ -1041,8 +1045,8 @@ function ZO_PromotionalEvents_Gamepad:ShowCapstoneDialog()
     ZO_Dialogs_ShowGamepadDialog("PROMOTIONAL_EVENT_CAPSTONE_GAMEPAD", { campaignData = self.currentCampaignData })
 end
 
-function ZO_PromotionalEvents_Gamepad:ShowClaimChoiceDialog(rewardData)
-    PROMOTIONAL_EVENTS_CLAIM_CHOICE_DIALOG_GAMEPAD:Show(rewardData)
+function ZO_PromotionalEvents_Gamepad:ShowClaimChoiceDialog(rewardData, isClaimingAll)
+    PROMOTIONAL_EVENTS_CLAIM_CHOICE_DIALOG_GAMEPAD:Show(rewardData, isClaimingAll)
 end
 
 function ZO_PromotionalEvents_Gamepad:ScrollToFirstClaimableReward()
@@ -1293,6 +1297,7 @@ function ZO_PromotionalEvents_ClaimChoiceDialog_Gamepad:Initialize(control)
     self.parentRewardableEventData = nil
     self.currentSelectedChoice = nil
     self.showCapstoneDialogOnClose = false
+    self.isClaimingAll = false
 
     self:InitializeHeader()
 
@@ -1334,10 +1339,14 @@ function ZO_PromotionalEvents_ClaimChoiceDialog_Gamepad:InitializeKeybindStripDe
             keybind = "UI_SHORTCUT_SECONDARY",
             callback = function()
                 self.parentRewardableEventData:TryClaimReward(self.currentSelectedChoice.rewardId)
-                local remainingChoiceRewards = PROMOTIONAL_EVENTS_GAMEPAD:GetRemainingChoiceRewards()
-                table.remove(remainingChoiceRewards, 1)
-                if next(remainingChoiceRewards) ~= nil then
-                    PROMOTIONAL_EVENTS_GAMEPAD:TryClaimNextChoiceReward()
+                if self.isClaimingAll then
+                    local remainingChoiceRewards = PROMOTIONAL_EVENTS_GAMEPAD:GetRemainingChoiceRewards()
+                    table.remove(remainingChoiceRewards, 1)
+                    if next(remainingChoiceRewards) ~= nil then
+                        PROMOTIONAL_EVENTS_GAMEPAD:TryClaimNextChoiceReward()
+                    else
+                        self:Hide()
+                    end
                 else
                     self:Hide()
                 end
@@ -1357,7 +1366,8 @@ function ZO_PromotionalEvents_ClaimChoiceDialog_Gamepad:PerformUpdate()
     self.dirty = false
 end
 
-function ZO_PromotionalEvents_ClaimChoiceDialog_Gamepad:Show(rewardableEventData)
+function ZO_PromotionalEvents_ClaimChoiceDialog_Gamepad:Show(rewardableEventData, isClaimingAll)
+    self.isClaimingAll = isClaimingAll or false
     self:SetRewardData(rewardableEventData)
     SCENE_MANAGER:Push(self.scene:GetName())
 end
@@ -1387,6 +1397,8 @@ function ZO_PromotionalEvents_ClaimChoiceDialog_Gamepad:OnHide()
         PROMOTIONAL_EVENTS_GAMEPAD:ShowCapstoneDialog()
         self.showCapstoneDialogOnClose = false
     end
+
+    self.isClaimingAll = false
 end
 
 -- Overridden from base

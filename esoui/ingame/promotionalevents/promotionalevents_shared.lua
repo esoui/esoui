@@ -689,7 +689,7 @@ function ZO_PromotionalEvents_Shared:CollectRemainingChoiceRewards()
 
     for _, activity in ipairs(selectedCampaignData:GetActivities()) do
         local activityRewardData = activity:GetRewardData()
-        if activityRewardData and activityRewardData:GetRewardType() == REWARD_ENTRY_TYPE_CHOICE and not activity:IsRewardClaimed() then
+        if activityRewardData and activityRewardData:GetRewardType() == REWARD_ENTRY_TYPE_CHOICE and activity:CanClaimReward() then
             table.insert(choiceRewards, activity)
         end
     end
@@ -697,14 +697,14 @@ function ZO_PromotionalEvents_Shared:CollectRemainingChoiceRewards()
     for _, milestone in ipairs(selectedCampaignData:GetMilestones()) do
         local milestoneRewardData = milestone:GetRewardData()
         internalassert(milestoneRewardData ~= nil)
-        if milestoneRewardData and milestoneRewardData:GetRewardType() == REWARD_ENTRY_TYPE_CHOICE and not milestone:IsRewardClaimed() then
+        if milestoneRewardData and milestoneRewardData:GetRewardType() == REWARD_ENTRY_TYPE_CHOICE and milestone:CanClaimReward() then
             table.insert(choiceRewards, milestone)
         end
     end
 
     local capstoneRewardData = selectedCampaignData:GetRewardData()
     internalassert(capstoneRewardData ~= nil)
-    if capstoneRewardData and capstoneRewardData:GetRewardType() == REWARD_ENTRY_TYPE_CHOICE and not selectedCampaignData:IsRewardClaimed() then
+    if capstoneRewardData and capstoneRewardData:GetRewardType() == REWARD_ENTRY_TYPE_CHOICE and selectedCampaignData:CanClaimReward() then
         table.insert(choiceRewards, selectedCampaignData)
     end
 
@@ -718,11 +718,11 @@ function ZO_PromotionalEvents_Shared:GetRemainingChoiceRewards()
     return self.remainingChoiceRewards
 end
 
-function ZO_PromotionalEvents_Shared:TryClaimNextChoiceReward()
+function ZO_PromotionalEvents_Shared:TryClaimNextChoiceReward(isClaimingAll)
     if self.remainingChoiceRewards then
         local _, rewardableEventData = next(self.remainingChoiceRewards)
         if rewardableEventData then
-            self:ShowClaimChoiceDialog(rewardableEventData)
+            self:ShowClaimChoiceDialog(rewardableEventData, isClaimingAll)
         end
     end
 end

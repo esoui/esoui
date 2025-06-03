@@ -1,4 +1,9 @@
-local MAX_LINE_SWAPS = 2
+-- ESO-911673: When swapping out a player skill line for another player skill line pendingDeactivationLines can
+-- equal MAX_LINE_SWAPS temporarily until the pending deactivation player skill line is removed upon activation.
+-- ESO-915394: Bumping MAX_LINE_SWAPS from 2 to 3 to account for the fact that you actually can swap 3 things if you had
+-- already subclassed two lines, and then want to do it again and swap your player class with another player class.
+-- As a result of this change, it makes the fix for the prior bug (ESO-911673) moot.
+local MAX_LINE_SWAPS = 3
 
 ZO_SkillLineAssignmentManager = ZO_SkillsAssignmentManager_Base:Subclass()
 
@@ -59,9 +64,7 @@ function ZO_SkillLineAssignmentManager:DeactivateSkillLine(skillLineData, suppre
     if pendingActivationIndex then
         table.remove(self.pendingActivationLines, pendingActivationIndex)
         success = true
-    -- ESO-911673: When swapping out a player skill line for another player skill line pendingDeactivationLines can
-    -- equal MAX_LINE_SWAPS temporarily until the pending deactivation player skill line is removed upon activation
-    elseif #self.pendingDeactivationLines <= MAX_LINE_SWAPS and not self:IsSkillLinePendingDeactivation(skillLineData) then
+    elseif #self.pendingDeactivationLines < MAX_LINE_SWAPS and not self:IsSkillLinePendingDeactivation(skillLineData) then
         table.insert(self.pendingDeactivationLines, skillLineData:GetId())
         success = true
     end
