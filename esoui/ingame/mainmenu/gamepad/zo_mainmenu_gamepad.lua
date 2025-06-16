@@ -32,11 +32,10 @@ local MENU_CROWN_STORE_ENTRIES =
     EXPIRING_MARKET_CURRENCY    = 2,
     ENDEAVOR_SEAL_STORE         = 3,
     DAILY_LOGIN_REWARDS         = 4,
-    RETURNING_PLAYER_REWARDS    = 5,
-    CROWN_CRATES                = 6,
-    CHAPTERS                    = 7,
-    GIFT_INVENTORY              = 8,
-    REDEEM_CODE                 = 9,
+    CROWN_CRATES                = 5,
+    CHAPTERS                    = 6,
+    GIFT_INVENTORY              = 7,
+    REDEEM_CODE                 = 8,
 }
 
 ZO_MENU_CROWN_STORE_ENTRIES = MENU_CROWN_STORE_ENTRIES
@@ -70,8 +69,11 @@ local MENU_SOCIAL_ENTRIES =
 
 local function IsAnySubMenuNewCallback(entryData)
     for entryIndex, entry in ipairs(entryData.subMenu) do
-        if entry:IsNew() then
-            return true
+        local isVisibleCallback = entry.data.isVisibleCallback
+        if not isVisibleCallback or isVisibleCallback() then
+            if entry:IsNew() then
+                return true
+            end
         end
     end
     return false
@@ -147,38 +149,6 @@ local MENU_ENTRY_DATA =
                     return GetDailyLoginClaimableRewardIndex() ~= nil
                 end,
             },
-            [MENU_CROWN_STORE_ENTRIES.RETURNING_PLAYER_REWARDS] =
-            {
-                name = function()
-                    local campaignDisplayName = RETURNING_PLAYER_MANAGER:GetIntroCampaignDisplayName()
-                    return zo_strformat(SI_RETURNING_PLAYER_CAMPAIGN_NAME_FORMATTER, campaignDisplayName)
-                end,
-                overrideNameColors = function()
-                    return ZO_PROMOTIONAL_EVENT_SELECTED_COLOR, ZO_PROMOTIONAL_EVENT_UNSELECTED_COLOR
-                end,
-                icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_returningPlayerRewards.dds",
-                overrideIconTintColors = function()
-                    return ZO_PROMOTIONAL_EVENT_SELECTED_COLOR, ZO_PROMOTIONAL_EVENT_UNSELECTED_COLOR
-                end,
-                isVisibleCallback = function()
-                    return RETURNING_PLAYER_MANAGER:ShouldShowReturningPlayerAnnouncementEntry()
-                end,
-                isNewCallback = function()
-                    return true  -- TODO Welcome Back: hide new when you've seen it once in a sessions
-                end,
-                onSelectedCallback = function()
-                    local campaignDisplayName = RETURNING_PLAYER_MANAGER:GetColorizedIntroCampaignDisplayName()
-                    local descriptionText = zo_strformat(SI_RETURNING_PLAYER_DAILY_LOGIN_REWARD_DESCRIPTION, campaignDisplayName)
-
-                    GAMEPAD_TOOLTIPS:LayoutTitleAndDescriptionTooltip(GAMEPAD_LEFT_TOOLTIP, campaignDisplayName, descriptionText)
-                end,
-                onUnselectedCallback = function()
-                    GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
-                end,
-                activatedCallback = function()
-                    SCENE_MANAGER:Show(RETURNING_PLAYER_REWARD_SCENE_GAMEPAD:GetName())
-                end,
-            },
             [MENU_CROWN_STORE_ENTRIES.CROWN_CRATES] =
             {
                 scene = "crownCrateGamepad",
@@ -251,11 +221,23 @@ local MENU_ENTRY_DATA =
         overrideIconTintColors = function()
             return ZO_PROMOTIONAL_EVENT_SELECTED_COLOR, ZO_PROMOTIONAL_EVENT_UNSELECTED_COLOR
         end,
+        onSelectedCallback = function()
+            local campaignDisplayName = RETURNING_PLAYER_MANAGER:GetColorizedIntroCampaignDisplayName()
+            local descriptionText = zo_strformat(SI_RETURNING_PLAYER_DAILY_LOGIN_REWARD_DESCRIPTION, campaignDisplayName)
+
+            GAMEPAD_TOOLTIPS:LayoutTitleAndDescriptionTooltip(GAMEPAD_LEFT_TOOLTIP, campaignDisplayName, descriptionText)
+        end,
+        onUnselectedCallback = function()
+            GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
+        end,
         activatedCallback = function()
             RETURNING_PLAYER_MANAGER:ShowReturningPlayerAnnouncementScreen()
         end,
         isVisibleCallback = function()
             return RETURNING_PLAYER_MANAGER:ShouldShowReturningPlayerAnnouncementEntry()
+        end,
+        isNewCallback = function()
+            return RETURNING_PLAYER_MANAGER:HasClaimableDailyReward()
         end,
     },
     [MENU_MAIN_ENTRIES.NOTIFICATIONS] =

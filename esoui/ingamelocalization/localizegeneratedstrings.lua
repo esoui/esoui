@@ -4659,11 +4659,11 @@ EsoStrings =
     "You can't do that in this campaign.", -- SI_CLIENTINTERACTRESULT29
     "", -- Sync id for EsoGameDataEnums_Interact last entry
     "", -- Sync id for EsoGameDataEnums_Server first entry
-    "You must be logged into an account for PlayStationâ„¢Network to play ESO", -- SI_LOGOUTERROR2
+    "You must be logged into an account for PlayStation™Network to play ESO", -- SI_LOGOUTERROR2
     "You must be signed in to an Xbox profile to play ESO", -- SI_LOGOUTERROR3
     "Unable to connect to the Xbox network. Please make sure you have a valid internet connection.", -- SI_LOGOUTERROR4
     "ESO servers are down for maintenance. Please try again later or visit <<1>> for more information", -- SI_LOGOUTERROR5
-    "Unable to connect to PlayStationâ„¢Network. Please make sure you have a valid internet connection.", -- SI_LOGOUTERROR6
+    "Unable to connect to PlayStation™Network. Please make sure you have a valid internet connection.", -- SI_LOGOUTERROR6
     "Unable to connect to game server. Please make sure you have a valid internet connection.", -- SI_LOGOUTERROR7
     "Patch required. Please download and apply to access online features.", -- SI_LOGOUTERROR8
     "", -- Sync id for EsoGameDataEnums_Server last entry

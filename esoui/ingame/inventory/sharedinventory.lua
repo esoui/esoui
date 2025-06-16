@@ -231,10 +231,14 @@ function ZO_SharedInventoryManager:Initialize()
             return
         end
 
-        if newAmount > oldAmount and PLAY_ACQUIRE_SOUND_REASONS[changeReason] then
-            ZO_PlayCurrencyAcquiredSound(currencyType)
-        elseif not EXCLUDED_PLAY_TRANSACT_SOUND_REASONS[changeReason] then
-            ZO_PlayCurrencyTransactSound(currencyType)
+        if newAmount > oldAmount then
+            if PLAY_ACQUIRE_SOUND_REASONS[changeReason] then
+                ZO_PlayCurrencyAcquiredSound(currencyType)
+            end
+        else
+            if not EXCLUDED_PLAY_TRANSACT_SOUND_REASONS[changeReason] then
+                ZO_PlayCurrencyTransactSound(currencyType)
+            end
         end
     end
 
@@ -286,6 +290,11 @@ function ZO_SharedInventoryManager:Initialize()
     self:PerformFullUpdateOnQuestCache()
 
     ITEM_SET_COLLECTIONS_DATA_MANAGER:RegisterCallback("CollectionsUpdated", function(...) self:HandleCollectionsUpdated(...) end)
+    local function HandleLoreBooksUpdated()
+        self:HandleLoreBooksUpdated()
+    end
+    EVENT_MANAGER:RegisterForEvent(namespace, EVENT_LORE_LIBRARY_INITIALIZED, HandleLoreBooksUpdated)
+    EVENT_MANAGER:RegisterForEvent(namespace, EVENT_LORE_BOOK_LEARNED, HandleLoreBooksUpdated)
 end
 
 function ZO_SharedInventoryManager:RegisterForConfirmUseItemEvents(namespace)
@@ -462,6 +471,36 @@ function ZO_SharedInventoryManager:RefreshItemSetPieceStatuses(bagId)
                 if existingData.isLockedSetPiece ~= isLockedSetPiece then
                     local previousSlotData = self:GetPreviousSlotDataInternal(bagId, slotIndex)
                     existingData.isLockedSetPiece = isLockedSetPiece
+                    self:RefreshStatusSortOrder(existingData)
+                    self:FireCallbacks("SingleSlotInventoryUpdate", bagId, slotIndex, previousSlotData)
+                end
+            end
+        end
+    end
+end
+
+function ZO_SharedInventoryManager:HandleLoreBooksUpdated()
+    self:RefreshAllLoreBookStatuses()
+end
+
+function ZO_SharedInventoryManager:RefreshAllLoreBookStatuses()
+    -- Refresh all bags where unlearned lore books can reside
+    self:RefreshLoreBookStatuses(BAG_BACKPACK)
+    self:RefreshLoreBookStatuses(BAG_BANK)
+    self:RefreshLoreBookStatuses(BAG_SUBSCRIBER_BANK)
+end
+
+function ZO_SharedInventoryManager:RefreshLoreBookStatuses(bagId)
+    if self:HasBagCache(bagId) then
+        local bagCache = self:GetBagCache(bagId)
+
+        for slotIndex in ZO_IterateBagSlots(bagId) do
+            local existingData = bagCache[slotIndex]
+            if existingData then
+                local canBeUsedToLearn = CanItemBeUsedToLearn(bagId, slotIndex)
+                if existingData.canBeUsedToLearn ~= canBeUsedToLearn then
+                    local previousSlotData = self:GetPreviousSlotDataInternal(bagId, slotIndex)
+                    existingData.canBeUsedToLearn = canBeUsedToLearn
                     self:RefreshStatusSortOrder(existingData)
                     self:FireCallbacks("SingleSlotInventoryUpdate", bagId, slotIndex, previousSlotData)
                 end

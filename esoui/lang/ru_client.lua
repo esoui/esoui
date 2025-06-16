@@ -9797,6 +9797,7 @@ SafeAddString(SI_SKILLS_RESET_PROMPT, "Вы уверены, что хотите 
 SafeAddString(SI_SKILLS_SELECT_MORPH, "Выберите преобразование для способности |cffffff«<<1>>»|r.", 5)
 SafeAddString(SI_SKILLS_SELL_CONFIRM, "Продать", 0)
 SafeAddString(SI_SKILLS_SKY_SHARDS_COLLECTED, "Небесные осколки: |cffffff<<1>>/3|r", 0)
+SafeAddString(SI_SKILLS_SUBCLASSING_COMMIT_TEXT_SWAP_SKILL_LINE, "Если вы уберете какой-либо навык, вам вернутся все вложенные в него очки навыков. Прогресс развития его способностей сохранится, |cff1919однако, если вы снова выберете этот навык, вам необходимо будет распределить очки повторно.|r", 1)
 SafeAddString(SI_SKILLS_SUBCLASSING_COMMIT_TEXT_TRAIN_SKILL, "Начав изучение <<2[навыка/навыков]>> |cffffff«<<1>>»|r, |cff1919вы не сможете отменить выбор.|r Когда вы достигнете 50-го уровня навыка, он станет освоенным и больше не будет учитываться в ограничении на количество изучаемых навыков. Вы можете менять навыки основного класса, изучаемые и освоенные навыки в любое время, используя функцию сброса.", 1)
 SafeAddString(SI_SKILLS_SUBCLASSING_DESCRIPTION, "Система подклассов позволяет использовать навыки других классов, настраивая игровой процесс под себя.", 0)
 SafeAddString(SI_SKILLS_SUBCLASSING_ENTRY_NAME, "Подклассы", 0)

@@ -471,7 +471,7 @@ function ZO_PromotionalEvents_Keyboard:InitializeKeybindStripDescriptors()
 
             visible = function()
                 if not self:IsReturningPlayerRewardsEntrySelected() then
-                    return self.currentCampaignData:IsAnyRewardClaimable()
+                    return self.currentCampaignData and self.currentCampaignData:IsAnyRewardClaimable()
                 end
                 return false
             end,

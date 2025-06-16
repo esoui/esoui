@@ -3842,7 +3842,7 @@ SafeAddString(SI_LOGINAUTHERROR8010, "Das Konto wurde aufgrund von Verstößen g
 SafeAddString(SI_LOGINAUTHERROR8011, "Ihr müsst Euer Konto verifizieren, um weiterspielen zu können. Bitte prüft Euer E-Mail-Postfach, das Ihr für die Erstellung Eures ESO-Kontos verwendet habt, um weitere Anweisungen für den Verifikationsprozess zu erhalten. Falls Ihr keine E-Mail erhaltet, kontaktiert bitte unseren Kundendienst unter <<1>>.", 1)
 SafeAddString(SI_LOGINAUTHERROR8012, "Euer Konto hat eingeschränkte Authentifizierung. Bitte kontaktiert unseren Kundendienst unter <<1>>.", 0)
 SafeAddString(SI_LOGINAUTHERROR8013, "Auf den Servern werden im Moment Wartungsarbeiten durchgeführt. Bitte versucht es später erneut.", 0)
-SafeAddString(SI_LOGINAUTHERROR8016, "Wir haben ein Signal von Eurem Spieldienst erhalten, dass dieses Konto vom Spieldienst als Kinderkonto eingestuft wurde. Es ist Kinder nicht gestattet, dieses Spiel zu spielen. Hilfe ist unter <<1>> verfügbar.", 0)
+SafeAddString(SI_LOGINAUTHERROR8016, "Laut Eures Spieldienstes wurde dieses Konto als Kinderkonto eingestuft.", 0)
 SafeAddString(SI_LOGIN_ACCOUNT_REQUIRED, "Ihr benötigt ein aktives Konto, um spielen zu können. Bitte besucht |c76BCC3<<1>>|r für weitere Informationen.", 1)
 SafeAddString(SI_LOGIN_ACCOUNT_REQUIRED_ESO, "The Elder Scrolls Online", 1)
 SafeAddString(SI_LOGIN_ANNOUNCEMENTS_FAILURE, "Die Ankündigungen konnten nicht abgerufen werden.", 0)
