@@ -228,16 +228,6 @@ function ZO_GamepadChatSystem:InitializeEventManagement()
     self:InitializeSharedEvents("GamepadChatSystem")
 
     if IsChatSystemAvailableForCurrentPlatform() then
-        local function UpdateHUDEnabledFromSetting()
-            local settingValue = GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_GAMEPAD_CHAT_HUD_ENABLED)
-            self:SetHUDEnabled(settingValue)
-        end
-
-        local function OnInterfaceSettingChanged(eventCode, settingType, settingId)
-            if settingId == UI_SETTING_GAMEPAD_CHAT_HUD_ENABLED then
-                UpdateHUDEnabledFromSetting()
-            end
-        end
 
         local function OnChatMessageChannel()
             if GAMEPAD_CHAT_SYSTEM:IsMinimized() then
@@ -252,8 +242,6 @@ function ZO_GamepadChatSystem:InitializeEventManagement()
         end
 
         EVENT_MANAGER:RegisterForEvent("GamepadChatSystem", EVENT_CHAT_MESSAGE_CHANNEL, OnChatMessageChannel)
-        EVENT_MANAGER:RegisterForEvent("GamepadChatSystem", EVENT_INTERFACE_SETTING_CHANGED, OnInterfaceSettingChanged)
-        EVENT_MANAGER:AddFilterForEvent("GamepadChatSystem", EVENT_INTERFACE_SETTING_CHANGED, REGISTER_FILTER_SETTING_SYSTEM_TYPE, SETTING_TYPE_UI)
 
         CALLBACK_MANAGER:RegisterCallback("OnChatChannelUpdated", OnChatChannelUpdated)
     end
@@ -475,6 +463,16 @@ function ZO_GamepadChatSystem:IsHidden()
     -- refreshed. This is the Intended(tm) behavior, but it's not reflected explicitly in these rules anywhere
 
     return true
+end
+
+-- override
+function ZO_GamepadChatSystem:OnUiInterfaceSettingChanged(settingId)
+    SharedChatSystem.OnUiInterfaceSettingChanged(self, settingId)
+
+    if settingId == UI_SETTING_GAMEPAD_CHAT_HUD_ENABLED then
+        local settingValue = GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_GAMEPAD_CHAT_HUD_ENABLED)
+        self:SetHUDEnabled(settingValue)
+    end
 end
 
 --[[ XML Functions ]]--

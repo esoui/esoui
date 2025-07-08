@@ -6,25 +6,26 @@
                 self.slotIcon = self:GetNamedChild("SlotIcon")
                 self.slotStackCount = self:GetNamedChild("SlotStackCount")
                 self.nameLabel = self:GetNamedChild("Name")
+                self.timeLeftLabel = self:GetNamedChild("TimeLeft")
                 self.statusMultiIcon = self:GetNamedChild("StatusIcon")
                 self.unitPriceLabel = self:GetNamedChild("UnitPrice")
                 self.priceLabel = self:GetNamedChild("Price")
             </OnInitialized>
-            
+
             <Controls>
-                <Control name="$(parent)Status" inherits="ZO_GamepadInteractiveSortFilterListMultiIcon">
-                    <Dimensions x="ZO_GAMEPAD_TRADING_HOUSE_SEARCH_RESULTS_STATUS_WIDTH" />
-                    <Anchor point="LEFT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_HIGHLIGHT_PADDING"/>
+                <Control name="$(parent)Status" inherits="ZO_GamepadInteractiveSortFilterListMultiIcon" tier="MEDIUM">
+                    <Dimensions x="ZO_GAMEPAD_TRADING_HOUSE_SEARCH_RESULTS_STATUS_WIDTH" y="ZO_GAMEPAD_TRADING_HOUSE_SEARCH_RESULTS_STATUS_WIDTH" />
+                    <Anchor point="LEFT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X" />
                     <Controls>
                         <Texture name="$(parent)Icon" override="true">
-                            <Dimensions x="45" y="45"/>
+                            <Dimensions x="ZO_GAMEPAD_TRADING_HOUSE_SEARCH_RESULTS_STATUS_WIDTH" y="ZO_GAMEPAD_TRADING_HOUSE_SEARCH_RESULTS_STATUS_WIDTH"/>
                         </Texture>
                     </Controls>
                 </Control>
-                
+
                 <Button name="$(parent)Slot" inherits="ZO_ItemSlot_Gamepad">
                     <Dimensions x="ZO_GAMEPAD_TRADING_HOUSE_SEARCH_RESULTS_ICON_SIZE" y="ZO_GAMEPAD_TRADING_HOUSE_SEARCH_RESULTS_ICON_SIZE" />
-                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Status" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X" />
+                    <Anchor point="LEFT" relativeTo="$(parent)Status" relativePoint="RIGHT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X" />
                 </Button>
 
                 <Label name="$(parent)Name" inherits="ZO_GamepadInteractiveSortFilterListRowLabel" maxLineCount="2">
@@ -32,9 +33,14 @@
                     <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Slot" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X" />
                 </Label>
 
+                <Label name="$(parent)TimeLeft" inherits="ZO_GamepadInteractiveSortFilterListRowLabel">
+                    <Dimensions x="ZO_GAMEPAD_TRADING_HOUSE_SEARCH_RESULTS_TIME_LEFT_WIDTH" />
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Name" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X" />
+                </Label>
+
                 <Label name="$(parent)UnitPrice" inherits="ZO_GamepadInteractiveSortFilterListRowLabel" horizontalAlignment="RIGHT">
                     <Dimensions x="ZO_GAMEPAD_TRADING_HOUSE_SEARCH_RESULTS_UNIT_PRICE_WIDTH" />
-                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Name" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X" />
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)TimeLeft" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X" />
                 </Label>
 
                 <Label name="$(parent)Price" inherits="ZO_GamepadInteractiveSortFilterListRowLabel" horizontalAlignment="RIGHT">
@@ -51,6 +57,9 @@
 
             <Controls>
                 <Control name="$(parent)Container" override="true">
+                    <ClearAnchors />
+                    <Anchor point="TOPLEFT" offsetX="10" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-10" />
                     <Controls>
                         <Control name="$(parent)Headers" override="true">
                             <Controls>
@@ -64,9 +73,19 @@
                                     </OnInitialized>
                                 </Control>
 
+                                <Control name="$(parent)TimeLeft" inherits="ZO_GamepadInteractiveFilterHeader">
+                                    <Dimensions x="ZO_GAMEPAD_TRADING_HOUSE_SEARCH_RESULTS_TIME_LEFT_WIDTH" />
+                                    <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Name" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X" />
+                                    <OnInitialized>
+                                        local sortType = TRADING_HOUSE_SORT_EXPIRY_TIME
+                                        local sortString = GetString("SI_TRADINGHOUSESORTFIELD", sortType)
+                                        ZO_GamepadInteractiveSortFilterHeader_Initialize(self, sortString, sortType, TEXT_ALIGN_LEFT)
+                                    </OnInitialized>
+                                </Control>
+
                                 <Control name="$(parent)UnitPrice" inherits="ZO_GamepadInteractiveFilterHeader">
                                     <Dimensions x="ZO_GAMEPAD_TRADING_HOUSE_SEARCH_RESULTS_UNIT_PRICE_WIDTH" />
-                                    <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Name" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X" />
+                                    <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)TimeLeft" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X" />
                                     <OnInitialized>
                                         local sortType = TRADING_HOUSE_SORT_SALE_PRICE_PER_UNIT
                                         local sortString = GetString("SI_TRADINGHOUSESORTFIELD", sortType)

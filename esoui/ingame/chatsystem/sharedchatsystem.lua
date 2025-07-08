@@ -1377,8 +1377,8 @@ function SharedChatSystem:InitializeSharedEvents(eventKey)
             self:OnChatCategoryColorChanged(categoryId, r, g, b)
         end
 
-        local function OnInterfaceSettingChanged()
-            self:SetChannel(self:GetDefaultChatChannel())
+        local function OnInterfaceSettingChanged(eventCode, settingType, settingId)
+            self:OnUiInterfaceSettingChanged(settingId)
         end
 
         EVENT_MANAGER:RegisterForEvent(eventKey, EVENT_ZONE_CHANNEL_CHANGED, OnZoneChannelChanged)
@@ -1393,6 +1393,7 @@ function SharedChatSystem:InitializeSharedEvents(eventKey)
         EVENT_MANAGER:RegisterForEvent(eventKey, EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, OnGamepadPreferredModeChanged)
         EVENT_MANAGER:RegisterForEvent(eventKey, EVENT_CHAT_CATEGORY_COLOR_CHANGED, OnChatCategoryColorChanged)
         EVENT_MANAGER:RegisterForEvent(eventKey, EVENT_INTERFACE_SETTING_CHANGED, OnInterfaceSettingChanged)
+        EVENT_MANAGER:AddFilterForEvent(eventKey, EVENT_INTERFACE_SETTING_CHANGED, REGISTER_FILTER_SETTING_SYSTEM_TYPE, SETTING_TYPE_UI)
 
         local function OnGamepadUseKeyboardChatChanged()
             self:CloseTextEntry()
@@ -2295,6 +2296,10 @@ end
 function SharedChatSystem:IsHidden()
     -- Should be overridden
     return true
+end
+
+function SharedChatSystem:OnUiInterfaceSettingChanged(settingId)
+    self:SetChannel(self:GetDefaultChatChannel())
 end
 
 function SharedChatSystem:RefreshVisibility()
