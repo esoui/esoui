@@ -112,6 +112,21 @@ panelBuilder:AddSetting({
     indentLevel = 1,
 })
 
+panelBuilder:AddSetting({
+    controlName = "Options_Audio_SpatialSound",
+    settingType = SETTING_TYPE_AUDIO,
+    settingId = AUDIO_SETTING_SPATIAL_SOUND,
+    header = SI_AUDIO_OPTIONS_GENERAL,
+})
+
+panelBuilder:AddSetting({
+    controlName = "Options_Audio_SpatialSoundQuality",
+    settingType = SETTING_TYPE_AUDIO,
+    settingId = AUDIO_SETTING_SPATIAL_SOUND_QUALITY,
+    header = SI_AUDIO_OPTIONS_GENERAL,
+    indentLevel = 1,
+})
+
 ----------------------
 -- Audio -> Output  --
 ----------------------

@@ -111,7 +111,6 @@
 
                 <Control name="$(parent)SearchDivider" inherits="ZO_InventoryFilterDivider">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)SearchFilters" relativePoint="BOTTOMLEFT" offsetY="5" />
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)SearchFilters" relativePoint="BOTTOMRIGHT" offsetY="5" />
                 </Control>
 
                 <Label name="$(parent)Empty" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED" horizontalAlignment="CENTER" hidden="true">
@@ -168,7 +167,6 @@
 
                 <Control name="$(parent)SearchDivider" inherits="ZO_InventoryFilterDivider">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)SearchFilters" relativePoint="BOTTOMLEFT" offsetY="5" />
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)SearchFilters" relativePoint="BOTTOMRIGHT" offsetY="5" />
                 </Control>
 
                 <!-- Sort Headers -->
@@ -292,7 +290,6 @@
 
                 <Control name="$(parent)SearchDivider" inherits="ZO_InventoryFilterDivider">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)SearchFilters" relativePoint="BOTTOMLEFT" offsetY="5" />
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)SearchFilters" relativePoint="BOTTOMRIGHT" offsetY="5" />
                 </Control>
 
                 <!-- Sort Headers -->
@@ -344,7 +341,6 @@
 
                 <Control name="$(parent)SearchDivider" inherits="ZO_InventoryFilterDivider">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)SearchFilters" relativePoint="BOTTOMLEFT" offsetY="5" />
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)SearchFilters" relativePoint="BOTTOMRIGHT" offsetY="5" />
                 </Control>
 
                 <!-- Sort Headers -->
@@ -396,7 +392,6 @@
 
                 <Control name="$(parent)SearchDivider" inherits="ZO_InventoryFilterDivider">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)SearchFilters" relativePoint="BOTTOMLEFT" offsetY="5" />
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)SearchFilters" relativePoint="BOTTOMRIGHT" offsetY="5" />
                 </Control>
 
                 <!-- Sort Headers -->
@@ -461,7 +456,6 @@
 
                 <Control name="$(parent)SearchDivider" inherits="ZO_InventoryFilterDivider">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)SearchFilters" relativePoint="BOTTOMLEFT" offsetY="5" />
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)SearchFilters" relativePoint="BOTTOMRIGHT" offsetY="5" />
                 </Control>
 
                 <Label name="$(parent)Empty" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED" horizontalAlignment="CENTER" hidden="true">

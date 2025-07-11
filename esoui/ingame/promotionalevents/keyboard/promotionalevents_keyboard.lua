@@ -132,15 +132,24 @@ function ZO_PromotionalEventActivity_Entry_Keyboard:OnMouseEnter()
             description = string.format("%s\n\n%s", description, requiredCollectibleText)
         end
     end
-    InitializeTooltip(InformationTooltip)
-    ZO_Tooltips_SetupDynamicTooltipAnchors(InformationTooltip, self.control)
-    SetTooltipText(InformationTooltip, description)
+    if description ~= "" then
+        InitializeTooltip(SmallKeyMarkupInformationTooltip)
+        ZO_Tooltips_SetupDynamicTooltipAnchors(SmallKeyMarkupInformationTooltip, self.control)
+        local DEFAULT_COLOR = nil
+        local DEFAULT_LINE_ANCHOR = nil
+        local DEFAULT_MODIFY_TEXT_TYPE = nil
+        local DEFAULT_TEXT_ALIGNMENT = nil
+        local DEFAULT_SET_TO_FULL_SIZE = nil
+        local DEFAULT_MIN_WIDTH = nil
+        local LINE_SPACING = 5
+        SetTooltipText(SmallKeyMarkupInformationTooltip, description, DEFAULT_COLOR, DEFAULT_COLOR, DEFAULT_COLOR, DEFAULT_LINE_ANCHOR, DEFAULT_MODIFY_TEXT_TYPE, DEFAULT_TEXT_ALIGNMENT, DEFAULT_SET_TO_FULL_SIZE, DEFAULT_MIN_WIDTH, LINE_SPACING)
+    end
     g_PromotionalEventsKeyboard:SetMouseOverObject(self)
 end
 
 function ZO_PromotionalEventActivity_Entry_Keyboard:OnMouseExit()
     self.nameLabel:SetColor(ZO_NORMAL_TEXT:UnpackRGB())
-    ClearTooltip(InformationTooltip)
+    ClearTooltip(SmallKeyMarkupInformationTooltip)
     g_PromotionalEventsKeyboard:SetMouseOverObject(nil)
 end
 
@@ -336,6 +345,11 @@ function ZO_PromotionalEvents_Keyboard:InitializeActivityFinderCategory()
             else
                 return NO_CHILDREN
             end
+        end,
+        isLocked = IsPromotionalEventSystemLocked,
+        lockedText = GetString(SI_ACTIVITY_FINDER_TOOLTIP_PROMOTIONAL_EVENT_LOCK),
+        isNew = function()
+            return PROMOTIONAL_EVENT_MANAGER:DoesAnyCampaignHaveCallout()
         end,
         isPromotionalEvent = true,
     }
@@ -661,8 +675,19 @@ end
 function ZO_PromotionalEvents_Keyboard:OnShowing()
     ZO_PromotionalEvents_Shared.OnShowing(self)
 
-    if self.lastSelectedCampaignData then
-        GROUP_MENU_KEYBOARD:ShowCategoryByData(self.lastSelectedCampaignData)
+    if self.lastSelectedCampaignData and IsReturningPlayer() then
+        if self.lastSelectedCampaignData:ShouldCampaignBeVisible() then
+            GROUP_MENU_KEYBOARD:SetCategoryOnShowByData(self.lastSelectedCampaignData)
+        else
+            local firstVisibleCampaignData
+            for _, iterCampaignData in PROMOTIONAL_EVENT_MANAGER:CampaignIterator({ ZO_PromotionalEventCampaignData.ShouldCampaignBeVisible }) do
+                firstVisibleCampaignData = iterCampaignData
+                break
+            end
+            if firstVisibleCampaignData then
+                GROUP_MENU_KEYBOARD:SetCategoryOnShowByData(firstVisibleCampaignData)
+            end
+        end
     end
 
     -- The preview options fragment needs to be added before the ITEM_PREVIEW_KEYBOARD fragment
@@ -780,7 +805,7 @@ function ZO_PromotionalEvents_CapstoneDialog_Keyboard:Initialize(control)
                             end
                         else
                             self:RefreshCampaignList()
-                            PROMOTIONAL_EVENTS_LIST_GAMEPAD:SelectCampaign(campaignData)
+                            GROUP_MENU_KEYBOARD:ShowCategoryByData(campaignData)
                         end
                     end
                 end,

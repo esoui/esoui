@@ -18,3 +18,17 @@ end
 
 GetCollectibleForHouseBankBag = GetCollectibleForBag
 GetCollectibleBankAccessBag = GetBagForCollectible
+GetLinkLayoutHandlerName = ZO_GetLinkLayoutHandlerName
+
+function GetMarketProductUnlockedByAchievementInfo(marketProductId)
+    local achievementId = GetMarketProductUnlockedByAchievementId(marketProductId)
+    local isAchievementComplete = IsAchievementComplete(achievementId)
+    local helpCategoryIndex, helpIndex = GetMarketProductUnlockedHelpIndices(marketProductId)
+    return achievementId, isAchievementComplete, helpCategoryIndex, helpIndex
+end
+
+ITEM_SET_SUPPRESSION_TYPE_NONE = ITEM_BONUS_SUPPRESSION_TYPE_NONE
+ITEM_SET_SUPPRESSION_TYPE_CAMPAIGN = ITEM_BONUS_SUPPRESSION_TYPE_CAMPAIGN
+ITEM_SET_SUPPRESSION_TYPE_BATTLE_GROUND = ITEM_BONUS_SUPPRESSION_TYPE_BATTLE_GROUND
+ITEM_SET_SUPPRESSION_TYPE_ABILITY = ITEM_BONUS_SUPPRESSION_TYPE_ABILITY
+ITEM_SET_SUPPRESSION_TYPE_ITEMSET = ITEM_BONUS_SUPPRESSION_TYPE_ITEMSET

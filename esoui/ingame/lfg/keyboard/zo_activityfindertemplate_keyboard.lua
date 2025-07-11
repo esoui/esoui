@@ -1,4 +1,5 @@
 local GROUP_SIZE_ICON_FORMAT = zo_iconFormat("EsoUI/Art/LFG/LFG_icon_groupSize.dds", 32, 32)
+local INHERIT_COLOR = true
 
 ZO_TRIBUTE_REWARD_KEYBOARD_ROW_HEIGHT = 52
 
@@ -19,6 +20,7 @@ function ZO_ActivityFinderTemplate_Keyboard:Initialize(dataManager, categoryData
 
     self.rewardsOffsetYDefault = -250
     self.rewardsOffsetYTribute = -300
+    self.rewardsOffsetYBattlegroundSoloBonus = -150
 end
 
 function ZO_ActivityFinderTemplate_Keyboard:GetSystemName()
@@ -47,9 +49,9 @@ function ZO_ActivityFinderTemplate_Keyboard:InitializeControls()
         if self.lockReasonTextFunction then
             local lockReasonText = self.lockReasonTextFunction()
             if lockReasonText then
-                self.lockReasonLabel:SetText(zo_iconTextFormat("EsoUI/Art/Miscellaneous/locked_disabled.dds", 16, 16, lockReasonText))
+                self.lockReasonLabel:SetText(zo_iconTextFormat(ZO_KEYBOARD_LOCKED_ICON, 16, 16, lockReasonText, INHERIT_COLOR))
             else
-                self.lockReasonLabel:SetText(zo_iconFormat("EsoUI/Art/Miscellaneous/locked_disabled.dds", 16, 16))
+                self.lockReasonLabel:SetText(zo_iconFormatInheritColor(ZO_KEYBOARD_LOCKED_ICON, 16, 16))
             end
         end
     end
@@ -271,7 +273,7 @@ function ZO_ActivityFinderTemplate_Keyboard:RefreshView()
         if type(lockReasonText) == "function" then
             self.lockReasonTextFunction = lockReasonText
         else
-            self.lockReasonLabel:SetText(zo_iconTextFormat("EsoUI/Art/Miscellaneous/locked_disabled.dds", 16, 16, lockReasonText))
+            self.lockReasonLabel:SetText(zo_iconTextFormat(ZO_KEYBOARD_LOCKED_ICON, 16, 16, lockReasonText, INHERIT_COLOR))
             self.lockReasonTextFunction = nil
         end
     end
@@ -457,6 +459,17 @@ function ZO_ActivityFinderTemplate_Keyboard:OnFilterChanged(comboBox, entryText,
                     setTypeListControl:SetText(zo_strformat(SI_BATTLEGROUND_GAME_MODE_FORMATTER_KEYBOARD, setTypesHeaderText, setTypesListText))
                     hideSetControls = false
                 end
+
+                local hasSoloBonus = data:HasSoloBonus()
+                self.setTypesSectionControl:ClearAnchors()
+                if hasSoloBonus then
+                    self.setTypesSectionControl:SetAnchor(BOTTOMLEFT, self.soloBonusSection, TOPLEFT)
+                    self.setTypesSectionControl:SetAnchor(BOTTOMRIGHT, self.soloBonusSection, TOPRIGHT, 0, -24, ANCHOR_CONSTRAINS_Y)
+                else
+                    self.setTypesSectionControl:SetAnchor(BOTTOMLEFT, self.rewardsSection, TOPLEFT)
+                    self.setTypesSectionControl:SetAnchor(BOTTOMRIGHT, self.rewardsSection, TOPRIGHT, 0, -24)
+                end
+                self.soloBonusSection:SetHidden(not hasSoloBonus)
             end
 
             setTypeListControl:SetHidden(hideSetControls)
@@ -600,7 +613,7 @@ function ZO_ActivityFinderTemplate_Keyboard.ShowActivityTooltip(control)
     if data.isLocked then
         lockedInfoLabel:SetHidden(false)
         lockedInfoLabel:SetColor(ZO_ERROR_COLOR:UnpackRGBA())
-        lockedInfoLabel:SetText(zo_iconTextFormat("EsoUI/Art/Miscellaneous/locked_disabled.dds", 16, 16, data.lockReasonText))
+        lockedInfoLabel:SetText(zo_iconTextFormat(ZO_KEYBOARD_LOCKED_ICON, 16, 16, data.lockReasonText, INHERIT_COLOR))
     else
         lockedInfoLabel:SetHidden(true)
     end

@@ -44,5 +44,24 @@
                 </Label>
             </Controls>
         </Control>
+
+        <Control name="ZO_WrithingWallMapPinFX" virtual="true">
+            <Dimensions x="37" y="44" />
+
+            <Controls>
+                <Texture name="$(parent)Wall" pixelRoundingEnabled="false" shaderEffectType="WAVE"
+                    textureFile="$(MAP_PIN_PATH)writhing_wall.dds">
+                    <AnchorFill />
+                    <Wave angleRadians="-0.05" frequency="9.75" speed="3.8" />
+                    <WaveBounds minX="0" maxX="0" minY="0.18" maxY="0" />
+                </Texture>
+
+                <Texture name="$(parent)Caustics" blendMode="ADD" pixelRoundingEnabled="false" shaderEffectType="CAUSTIC"
+                    textureFile="$(MAP_PIN_PATH)writhing_wall_caustics.dds">
+                    <AnchorFill />
+                    <Caustic frequencyX="120" frequencyY="20" speed="1.75" />
+                </Texture>
+            </Controls>
+        </Control>
     </Controls>
 </GuiXml>

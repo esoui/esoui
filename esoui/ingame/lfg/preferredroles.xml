@@ -14,7 +14,7 @@
                     <Anchor point="TOP" relativeTo="$(parent)Label" relativePoint="BOTTOM" />
 
                     <Controls>
-                        <Button name="$(parent)Heal" inherits="ZO_PreferredRolesButton">
+                        <Button name="$(parent)Heal" inherits="ZO_PreferredRolesButton" clickSound="Group_Role_Heal_Click">
                             <Anchor point="TOP" />
 
                             <OnInitialized>
@@ -22,7 +22,7 @@
                             </OnInitialized>
                         </Button>
 
-                        <Button name="$(parent)Tank" inherits="ZO_PreferredRolesButton">
+                        <Button name="$(parent)Tank" inherits="ZO_PreferredRolesButton" clickSound="Group_Role_Tank_Click">
                             <Anchor point="RIGHT" relativeTo="$(parent)Heal" relativePoint="LEFT" offsetX="-5" />
 
                             <OnInitialized>
@@ -30,7 +30,7 @@
                             </OnInitialized>
                         </Button>
 
-                        <Button name="$(parent)DPS" inherits="ZO_PreferredRolesButton">
+                        <Button name="$(parent)DPS" inherits="ZO_PreferredRolesButton" clickSound="Group_Role_DPS_Click">
                             <Anchor point="LEFT" relativeTo="$(parent)Heal" relativePoint="RIGHT" offsetX="5" />
 
                             <OnInitialized>

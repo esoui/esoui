@@ -137,7 +137,7 @@ function ZO_GroupFinder_Keyboard:InitializeKeybindStripDescriptors()
         -- Report Listing
         {
             name = GetString(SI_GROUP_FINDER_REPORT_GROUP_LISTING_KEYBIND),
-            keybind = "UI_SHORTCUT_REPORT_PLAYER",
+            keybind = "UI_SHORTCUT_HELP",
             callback = function()
                 ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:OpenReportGroupFinderListingTicketScene(self.appliedToListingData)
             end,
@@ -224,7 +224,7 @@ function ZO_GroupFinder_Keyboard:InitializeGroupFinderCategories()
             }
         }
     end
-
+    
     local groupFinderCategoryData =
     {
         priority = CATEGORY_PRIORITY,
@@ -240,7 +240,11 @@ function ZO_GroupFinder_Keyboard:InitializeGroupFinderCategories()
                 return GetCategoryListData()
             end
         end,
-        isGroupFinder = true,
+        isLocked = ZO_GroupFinder_Shared.IsGroupFinderLocked,
+        lockedText = ZO_GroupFinder_Shared.GetGroupFinderLockText,
+        isNew = function()
+            return GROUP_FINDER_APPLICATIONS_LIST_MANAGER:HasNewApplication()
+        end,
     }
     GROUP_MENU_KEYBOARD:AddCategory(groupFinderCategoryData)
 end

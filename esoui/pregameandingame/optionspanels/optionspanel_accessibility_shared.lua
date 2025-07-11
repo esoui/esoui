@@ -239,9 +239,7 @@ local ZO_Panel_Accessibility_ControlData =
             panel = SETTING_PANEL_ACCESSIBILITY,
             text = SI_ACCESSIBILITY_OPTIONS_PLAYER_WAYPOINT_COLOR,
             tooltipText = SI_ACCESSIBILITY_OPTIONS_PLAYER_WAYPOINT_COLOR_TOOLTIP,
-            exists = function()
-                return ZO_IsIngameUI()
-            end,
+            exists = ZO_IsIngameUI,
         },
         --Options_Accessibility_GamepadAimAssistIntensity
         [ACCESSIBILITY_SETTING_GAMEPAD_AIM_ASSIST_INTENSITY] =
@@ -250,14 +248,12 @@ local ZO_Panel_Accessibility_ControlData =
             system = SETTING_TYPE_ACCESSIBILITY,
             settingId = ACCESSIBILITY_SETTING_GAMEPAD_AIM_ASSIST_INTENSITY,
             panel = SETTING_PANEL_ACCESSIBILITY,
-            text = SI_ACCESSIBILITY_OPTIONS_GAMEPAD_AIM_ASSIST_INTENSITY,
-            tooltipText = SI_ACCESSIBILITY_OPTIONS_GAMEPAD_AIM_ASSIST_INTENSITY_TOOLTIP,
+            text = IsConsoleUI() and GetString(SI_ACCESSIBILITY_OPTIONS_CONSOLE_GAMEPAD_AIM_ASSIST_INTENSITY) or GetString(SI_ACCESSIBILITY_OPTIONS_GAMEPAD_AIM_ASSIST_INTENSITY),
+            tooltipText = IsConsoleUI() and GetString(SI_ACCESSIBILITY_OPTIONS_CONSOLE_GAMEPAD_AIM_ASSIST_INTENSITY_TOOLTIP) or GetString(SI_ACCESSIBILITY_OPTIONS_GAMEPAD_AIM_ASSIST_INTENSITY_TOOLTIP),
             minValue = 0,
             maxValue = 100,
             showValue = true,
-            exists = function()
-                return ZO_IsIngameUI()
-            end,
+            exists = ZO_IsIngameUI,
         },
         --Options_Accessibility_MouseAimAssistIntensity
         [ACCESSIBILITY_SETTING_MOUSE_AIM_ASSIST_INTENSITY] =

@@ -2261,7 +2261,7 @@ local InventoryEnter =
             local data = ZO_Inventory_GetSlotDataForInventoryControl(inventorySlot)
             if data then
                 local bag, index = ZO_Inventory_GetBagAndIndex(inventorySlot)
-                ItemTooltip:SetBagItem(bag, index)
+                ItemTooltip:SetBagItem(bag, index, ITEM_TOOLTIP_DISPLAY_FLAGS_SHOW_SUPPRESSION)
                 return true, ItemTooltip
             else
                 return false, ItemTooltip

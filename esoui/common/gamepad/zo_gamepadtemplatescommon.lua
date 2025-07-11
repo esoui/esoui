@@ -387,11 +387,11 @@ local function ZO_SharedGamepadEntryStatusIndicatorSetup(statusIndicator, data)
         end
 
         if data.isLockedSetPiece then
-            statusIndicator:AddIcon(LOCKED_SET_PIECE_ICON_TEXTURE, ZO_SUCCEEDED_TEXT, GetString(SI_SCREEN_NARRATION_LOCKED_SET_PIECE_ICON_NARRATION))
+            statusIndicator:AddIcon(LOCKED_SET_PIECE_ICON_TEXTURE, NO_TINT, GetString(SI_SCREEN_NARRATION_LOCKED_SET_PIECE_ICON_NARRATION))
         end
 
         if data.canBeUsedToLearn then
-            statusIndicator:AddIcon(CAN_LEARN_ICON_TEXTURE, ZO_SUCCEEDED_TEXT, GetString(SI_SCREEN_NARRATION_NOT_LEARNED_ICON_NARRATION))
+            statusIndicator:AddIcon(CAN_LEARN_ICON_TEXTURE, NO_TINT, GetString(SI_SCREEN_NARRATION_NOT_LEARNED_ICON_NARRATION))
         end
 
         if data.isGemmable then

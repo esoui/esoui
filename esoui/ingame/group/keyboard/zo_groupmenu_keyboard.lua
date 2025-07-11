@@ -32,6 +32,8 @@ function GroupMenu_Keyboard:Initialize(control)
                 self:SetCurrentCategoryByData(self.categoryDataToShow)
                 self.categoryDataToShow = nil
             end
+        elseif newState == ZO_STATE.HIDDEN then
+            PROMOTIONAL_EVENTS_KEYBOARD:RefreshCampaignList()
         end
     end
 
@@ -60,6 +62,7 @@ function GroupMenu_Keyboard:Initialize(control)
     self.control:RegisterForEvent(EVENT_GROUP_FINDER_STATUS_UPDATED, RefreshCategories)
     self.control:RegisterForEvent(EVENT_GROUP_FINDER_APPLICATION_RECEIVED, RefreshCategories)
     self.control:RegisterForEvent(EVENT_HOUSE_TOURS_STATUS_UPDATED, RefreshCategories)
+    self.control:RegisterForEvent(EVENT_SPECTACLE_EVENT_UPDATED, RebuildCategories)
 end
 
 function GroupMenu_Keyboard:InitializeCategories()
@@ -103,18 +106,19 @@ function GroupMenu_Keyboard:InitializeCategories()
                 mouseoverIcon = mouseoverIcon()
             end
             control.iconHighlight:SetTexture(mouseoverIcon)
+
+            if categoryData.isPromotionalEvent and PROMOTIONAL_EVENT_MANAGER:HasAnyUnclaimedRewards() then
+                control.text.GetTextColor = GetPromotionalEventTextColor
+            else
+                ZO_SelectableLabel_ResetColorFunctionToDefault(control.text)
+            end
+
             local statusIcon = control.statusIcon or control:GetNamedChild("StatusIcon")
             control.statusIcon = statusIcon
             statusIcon:ClearIcons()
 
-            if categoryData.isPromotionalEvent and PROMOTIONAL_EVENT_MANAGER:HasAnyUnclaimedRewards() then
-                control.text.GetTextColor = GetPromotionalEventTextColor
-
-                if PROMOTIONAL_EVENT_MANAGER:DoesAnyCampaignHaveCallout() then
-                    statusIcon:AddIcon(ZO_KEYBOARD_NEW_ICON)
-                end
-            else
-                ZO_SelectableLabel_ResetColorFunctionToDefault(control.text)
+            if ZO_Eval(categoryData.isNew) then
+                statusIcon:AddIcon(ZO_KEYBOARD_NEW_ICON)
             end
 
             statusIcon:Show()
@@ -132,10 +136,8 @@ function GroupMenu_Keyboard:InitializeCategories()
             local statusResult = GetGroupFinderStatusReason()
             local houseToursEnabled = ZO_IsHouseToursEnabled()
             disabled = categoryData.activityFinderObject and (categoryData.activityFinderObject:GetLevelLockInfo() or categoryData.activityFinderObject:GetNumLocations() == 0) or false
-            disabled = disabled or (categoryData.isZoneStories and ZONE_STORIES_MANAGER:GetZoneData(ZONE_STORIES_MANAGER.GetDefaultZoneSelection()) == nil or false)
-            disabled = disabled or (categoryData.isGroupFinder and (statusResult ~= GROUP_FINDER_ACTION_RESULT_SUCCESS and statusResult ~= GROUP_FINDER_ACTION_RESULT_FAILED_ACCOUNT_TYPE_BLOCKS_CREATION) or false)
-            disabled = disabled or (categoryData.isHouseTours and not houseToursEnabled)
-            disabled = disabled or (categoryData.isPromotionalEvent and IsPromotionalEventSystemLocked())
+            disabled = disabled or ZO_Eval(categoryData.isLocked)
+            disabled = disabled or (categoryData.isAccountRestricted and categoryData.isAccountRestricted() or false)
         end
 
         if disabled and node:IsOpen() then
@@ -172,15 +174,15 @@ function GroupMenu_Keyboard:InitializeCategories()
             end
         end
 
-        if categoryData.isGroupFinder then
-            control.statusIcon = control:GetNamedChild("StatusIcon")
-            if GROUP_FINDER_APPLICATIONS_LIST_MANAGER:HasNewApplication() then
-                control.statusIcon:AddIcon(ZO_KEYBOARD_NEW_ICON)
-                control.statusIcon:Show()
-            else
-                control.statusIcon:ClearIcons()
-            end
+        local statusIcon = control.statusIcon or control:GetNamedChild("StatusIcon")
+        control.statusIcon = statusIcon
+        statusIcon:ClearIcons()
+
+        if ZO_Eval(categoryData.isNew) then
+            statusIcon:AddIcon(ZO_KEYBOARD_NEW_ICON)
         end
+
+        statusIcon:Show()
     end
 
     local function SetupChildNode(node, control, categoryData, open)
@@ -342,7 +344,6 @@ function GroupMenu_Keyboard:IsCategoriesRefreshGroupActive()
 end
 
 do
-    local LOCK_TEXTURE = zo_iconFormat("EsoUI/Art/Miscellaneous/locked_disabled.dds", "100%", "100%")
     local CHAMPION_ICON = zo_iconFormat(ZO_GetChampionPointsIcon(), "100%", "100%")
 
     function GroupMenu_Keyboard:OnActivityCategoryMouseEnter(control, data)
@@ -352,77 +353,44 @@ do
             local lockedText
             if isLevelLocked then
                 if lowestLevelLimit then
-                    lockedText = zo_strformat(SI_ACTIVITY_FINDER_TOOLTIP_LEVEL_LOCK, LOCK_TEXTURE, lowestLevelLimit)
+                    lockedText = zo_strformat(SI_ACTIVITY_FINDER_TOOLTIP_LEVEL_LOCK, lowestLevelLimit)
                 elseif lowestRankLimit then
-                    lockedText = zo_strformat(SI_ACTIVITY_FINDER_TOOLTIP_CHAMPION_LOCK, LOCK_TEXTURE, CHAMPION_ICON, lowestRankLimit)
+                    lockedText = zo_strformat(SI_ACTIVITY_FINDER_TOOLTIP_CHAMPION_LOCK, CHAMPION_ICON, lowestRankLimit)
                 end
             else
                 local numLocations = data.activityFinderObject:GetNumLocations()
                 if numLocations == 0 then
-                    lockedText = zo_strformat(SI_ACTIVITY_FINDER_TOOLTIP_NO_ACTIVITIES_LOCK, LOCK_TEXTURE)
+                    lockedText = GetString(SI_ACTIVITY_FINDER_TOOLTIP_NO_ACTIVITIES_LOCK)
+                elseif data.isAccountRestricted and data.isAccountRestricted() then
+                    lockedText = GetString(SI_ACTIVITY_FINDER_TOOLTIP_ACCOUNT_LOCK)
                 end
             end
 
             if lockedText then
-                InitializeTooltip(InformationTooltip, control, RIGHT, -10)
-                SetTooltipText(InformationTooltip, lockedText)
+                self:ShowLockedTooltip(control, lockedText)
             end
         end
     end
+end
 
-    function GroupMenu_Keyboard:OnZoneStoriesCategoryMouseEnter(control, data)
-        ZO_IconHeader_OnMouseEnter(control)
-        if not control.enabled then
-            local isLocked = ZONE_STORIES_MANAGER:GetZoneData(ZONE_STORIES_MANAGER.GetDefaultZoneSelection()) == nil
-            if isLocked then
-                local lockedText = zo_strformat(SI_ZONE_STORY_TOOLTIP_UNAVAILABLE_IN_ZONE, LOCK_TEXTURE)
-                InitializeTooltip(InformationTooltip, control, RIGHT, -10)
-                SetTooltipText(InformationTooltip, lockedText)
-            end
+function GroupMenu_Keyboard:OnLockableCategoryMouseEnter(control, data)
+    ZO_IconHeader_OnMouseEnter(control)
+    if not control.enabled then
+        local isLocked = data.isLocked()
+        if isLocked then
+            local lockedText = ZO_Eval(data.lockedText)
+            self:ShowLockedTooltip(control, lockedText)
         end
     end
+end
 
-    function GroupMenu_Keyboard:OnGroupFinderCategoryMouseEnter(control, data)
-        ZO_IconHeader_OnMouseEnter(control)
-        if not control.enabled then
-            local lockedText
-            local statusResult = GetGroupFinderStatusReason()
-            if statusResult ~= GROUP_FINDER_ACTION_RESULT_SUCCESS and statusResult ~= GROUP_FINDER_ACTION_RESULT_FAILED_ACCOUNT_TYPE_BLOCKS_CREATION then
-                if statusResult == GROUP_FINDER_ACTION_RESULT_FAILED_LEVEL_REQUIREMENT then
-                    local formatter = GetString("SI_GROUPFINDERACTIONRESULT", statusResult)
-                    lockedText = zo_strformat(formatter, LOCK_TEXTURE, GROUP_FINDER_UNLOCK_LEVEL)
-                else
-                    lockedText = GetString("SI_GROUPFINDERACTIONRESULT", statusResult)
-                end
-            end
-            if lockedText then
-                InitializeTooltip(InformationTooltip, control, RIGHT, -10)
-                SetTooltipText(InformationTooltip, lockedText)
-            end
-        end
-    end
+do
+    local LOCK_TEXTURE = zo_iconFormatInheritColor(ZO_KEYBOARD_LOCKED_ICON, "100%", "100%")
 
-    function GroupMenu_Keyboard:OnHouseToursCategoryMouseEnter(control, data)
-        ZO_IconHeader_OnMouseEnter(control)
-        if not control.enabled then
-            local isEnabled, lockedText = ZO_IsHouseToursEnabled()
-
-            if lockedText then
-                InitializeTooltip(InformationTooltip, control, RIGHT, -10)
-                SetTooltipText(InformationTooltip, lockedText)
-            end
-        end
-    end
-
-    function GroupMenu_Keyboard:OnPromotionalEventCategoryMouseEnter(control, data)
-        ZO_IconHeader_OnMouseEnter(control)
-        if not control.enabled then
-            local lockedText = GetString(SI_ACTIVITY_FINDER_TOOLTIP_PROMOTIONAL_EVENT_LOCK)
-            if lockedText then
-                InitializeTooltip(InformationTooltip, control, RIGHT, -10)
-                SetTooltipText(InformationTooltip, lockedText)
-            end
-        end
+    function GroupMenu_Keyboard:ShowLockedTooltip(control, lockedText)
+        lockedText = string.format("%s %s", LOCK_TEXTURE, lockedText)
+        InitializeTooltip(InformationTooltip, control, RIGHT, -10)
+        SetTooltipText(InformationTooltip, lockedText)
     end
 end
 
@@ -461,14 +429,8 @@ do
 
         if nodeData.activityFinderObject then
             node.control.OnMouseEnter = function(control) self:OnActivityCategoryMouseEnter(control, nodeData) end
-        elseif nodeData.isZoneStories then
-            node.control.OnMouseEnter = function(control) self:OnZoneStoriesCategoryMouseEnter(control, nodeData) end
-        elseif nodeData.isGroupFinder then
-            node.control.OnMouseEnter = function(control) self:OnGroupFinderCategoryMouseEnter(control, nodeData) end
-        elseif nodeData.isHouseTours then
-            node.control.OnMouseEnter = function(control) self:OnHouseToursCategoryMouseEnter(control, nodeData) end
-        elseif nodeData.isPromotionalEvent then
-            node.control.OnMouseEnter = function(control) self:OnPromotionalEventCategoryMouseEnter(control, nodeData) end
+        elseif nodeData.isLocked then
+            node.control.OnMouseEnter = function(control) self:OnLockableCategoryMouseEnter(control, nodeData) end
         end
 
         return node

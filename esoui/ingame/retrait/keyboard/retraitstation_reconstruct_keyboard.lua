@@ -504,9 +504,9 @@ function ZO_RetraitStation_Reconstruct_Keyboard:RefreshImprovementList(skipAnima
             end
 
             if disableReagent or tierData.isSelected or tierData.isMouseOver then
-                tierData.reagentTexture:SetTextureSampleProcessingWeight(TEX_SAMPLE_PROCESSING_WEIGHT_RGB, 1)
+                tierData.reagentTexture:SetTextureSampleProcessingWeight(TEX_SAMPLE_PROCESSING_RGB, 1)
             else
-                tierData.reagentTexture:SetTextureSampleProcessingWeight(TEX_SAMPLE_PROCESSING_WEIGHT_RGB, 0.65)
+                tierData.reagentTexture:SetTextureSampleProcessingWeight(TEX_SAMPLE_PROCESSING_RGB, 0.65)
             end
 
             local scaleAnimation = tierData.reagentTexture.scaleAnimation
@@ -530,7 +530,7 @@ function ZO_RetraitStation_Reconstruct_Keyboard:RefreshImprovementList(skipAnima
             tierData.quantityLabel:SetHidden(true)
             tierData.qualityLabel:SetColor(tierData.qualityLabelColors[1]:UnpackRGBA())
             tierData.qualityTexture:SetTexture(ZO_RECONSTRUCTION_DISABLED_IMPROVEMENT_BAR_TEXTURES[quality])
-            tierData.qualityTexture:SetTextureSampleProcessingWeight(TEX_SAMPLE_PROCESSING_WEIGHT_RGB, 1)
+            tierData.qualityTexture:SetTextureSampleProcessingWeight(TEX_SAMPLE_PROCESSING_RGB, 1)
             tierData.qualityTexture:SetDesaturation(1)
             tierData.mouseOverGlowTexture.alphaAnimation:PlayInstantlyToStart()
             tierData.selectionGlowTexture.alphaAnimation:PlayInstantlyToStart()
@@ -591,10 +591,10 @@ function ZO_RetraitStation_Reconstruct_Keyboard:RefreshImprovementList(skipAnima
 
             if tierData.isMouseOver or tierData.isSelected then
                 tierData.qualityLabel:SetColor(tierData.qualityLabelColors[3]:UnpackRGBA())
-                tierData.qualityTexture:SetTextureSampleProcessingWeight(TEX_SAMPLE_PROCESSING_WEIGHT_RGB, 1)
+                tierData.qualityTexture:SetTextureSampleProcessingWeight(TEX_SAMPLE_PROCESSING_RGB, 1)
             else
                 tierData.qualityLabel:SetColor(tierData.qualityLabelColors[2]:UnpackRGBA())
-                tierData.qualityTexture:SetTextureSampleProcessingWeight(TEX_SAMPLE_PROCESSING_WEIGHT_RGB, 0.5)
+                tierData.qualityTexture:SetTextureSampleProcessingWeight(TEX_SAMPLE_PROCESSING_RGB, 0.5)
             end
         end
     end

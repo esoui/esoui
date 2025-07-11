@@ -1,0 +1,92 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_SpectacleEvents_KeyboardTL" inherits="ZO_GroupMenuKeyboard_ContentAnchors" hidden="true">
+            <OnInitialized>
+                ZO_SpectacleEvents_Keyboard.OnControlInitialized(self)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)InfoContainer" inherits="ZO_SpectacleEvents_InfoContainerTemplate">
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="BOTTOMRIGHT" offsetY="-108" />
+
+                    <Controls>
+                        <Texture name="$(parent)Background" color="666666" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
+                            <Dimensions y="512" />
+                            <!-- 1024x512 image cropped to 620x512 -->
+                            <TextureCoords left="0" right="ZO_KEYBOARD_SPECTACLE_EVENTS_BACKGROUND_TEXTURE_COORD_RIGHT" top="0" bottom="1"/>
+                            <AnchorFill />
+
+                            <Controls>
+                                <Backdrop name="$(parent)Border" inherits="ZO_DarkThinFrameCenterless" />
+                            </Controls>
+                        </Texture>
+
+                        <Label name="$(parent)Title" override="true" font="ZoFontWinH2">
+                            <Anchor point="TOPLEFT" offsetX="10" offsetY="10" />
+                        </Label>
+
+                        <Label name="$(parent)Description" override="true" font="ZoFontWinH4">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" />
+                            <Anchor point="RIGHT" constrains="X" offsetX="-10" />
+                        </Label>
+
+                        <Control name="$(parent)GridList" override="true" inherits="ZO_GridScrollList_Keyboard">
+                            <Dimensions y="170" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Description" relativePoint="BOTTOMLEFT" offsetY="10" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Description" relativePoint="BOTTOMRIGHT" offsetY="10" />
+                        </Control>
+
+                        <Label name="$(parent)ProgressBarHeader" override="true" font="ZoFontWinH2">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)GridList" relativePoint="BOTTOMLEFT" offsetY="10" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)GridList" relativePoint="BOTTOMRIGHT" offsetY="10" />
+                        </Label>
+
+                        <StatusBar name="$(parent)ProgressBar" override="true" inherits="ZO_ArrowProgressBarWithBG">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)ProgressBarHeader" relativePoint="BOTTOMLEFT" offsetY="10" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)ProgressBarHeader" relativePoint="BOTTOMRIGHT" offsetY="10" />
+                            <Controls>
+                                <Control name="$(parent)BG" override="true">
+                                    <Controls>
+                                        <!--Make sure the progress bar's background is above the overall background-->
+                                        <Texture name="$(parent)Left" override="true" level="3" />
+                                        <Texture name="$(parent)Right" override="true" level="3" />
+                                        <Texture name="$(parent)Middle" override="true" level="3" />
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </StatusBar>
+
+                        <Label name="$(parent)PhaseCompleteLabel" override="true" font="ZoFontWinH2">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)GridList" relativePoint="BOTTOMLEFT" offsetY="10" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)GridList" relativePoint="BOTTOMRIGHT" offsetY="10" />
+                        </Label>
+
+                        <Label name="$(parent)NextPhaseBeginsLabel" override="true" font="ZoFontWinH2">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)PhaseCompleteLabel" relativePoint="BOTTOMLEFT" offsetY="5" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)PhaseCompleteLabel" relativePoint="BOTTOMRIGHT" offsetY="5" />
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Button name="$(parent)AcceptQuest" inherits="ZO_DefaultButton" hidden="true" text="SI_LFG_ACCEPT_QUEST">
+                    <Anchor point="BOTTOM" />
+                    <Dimensions x="200" />
+
+                    <OnClicked>
+                        self:GetParent().object:RequestBestowActiveSpectacleEventQuest()
+                    </OnClicked>
+                </Button>
+
+                <Button name="$(parent)ShowOnMap" inherits="ZO_DefaultButton" hidden="true" text="SI_QUEST_JOURNAL_SHOW_ON_MAP">
+                    <Anchor point="BOTTOM" />
+                    <Dimensions x="200" />
+
+                    <OnClicked>
+                        self:GetParent().object:ShowActiveSpectacleEventQuestOnMap()
+                    </OnClicked>
+                </Button>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

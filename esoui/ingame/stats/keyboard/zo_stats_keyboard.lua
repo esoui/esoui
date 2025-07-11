@@ -1013,6 +1013,8 @@ function ZO_Stats:AddLongTermEffects(container, effectsRowPool)
 
                     if stackCount > 1 then
                         effectsRow.stackCount:SetText(stackCount)
+                    else
+                        effectsRow.stackCount:SetText("")
                     end
 
                     local duration = startTime - endTime

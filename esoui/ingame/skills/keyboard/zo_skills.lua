@@ -814,8 +814,7 @@ function ZO_SkillsManager:InitializeKeybindDescriptors()
         },
         {
             name = GetString(SI_SKILLS_SUBCLASSING_MORE_INFO_KEYBIND),
-            -- TODO Subclassing: Make new keybind shortcut UI_SHORTCUT_MORE_INFO
-            keybind = "UI_SHORTCUT_REPORT_PLAYER",
+            keybind = "UI_SHORTCUT_HELP",
             callback = function()
                 local helpCategoryIndex, helpIndex = GetSubclassingHelpIndices()
                 HELP:ShowSpecificHelp(helpCategoryIndex, helpIndex)

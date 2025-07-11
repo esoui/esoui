@@ -12,6 +12,14 @@ function ZO_HousingFurnitureRetrieval_Keyboard:Initialize(...)
     end
 
     self:InitializeFiltersSelector()
+
+    local function OnRetrieveToBagChanged()
+        if not self.control:IsHidden() then
+            self:UpdateFreeSlots()
+        end
+    end
+
+    self.control:RegisterForEvent(EVENT_HOUSING_FURNITURE_RETRIEVE_TO_BAG_CHANGED, OnRetrieveToBagChanged)
 end
 
 function ZO_HousingFurnitureRetrieval_Keyboard:InitializeKeybindStrip()
@@ -244,6 +252,10 @@ function ZO_HousingFurnitureRetrieval_Keyboard:SetupRetrievableFurnitureRow(cont
 
     local directionTexture = control:GetNamedChild("Direction")
     directionTexture:SetTextureRotation(data:GetAngleFromPlayerHeadingRadians())
+end
+
+function ZO_HousingFurnitureRetrieval_Keyboard:UpdateFreeSlots()
+    self.freeSlotsLabel:SetText(HOUSING_FURNITURE_RETRIEVE_TO_KEYBOARD:GetFreeSpaceDescription())
 end
 
 --Overridden from ZO_HousingFurnitureList

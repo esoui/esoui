@@ -380,11 +380,15 @@ function ZO_ComboBox:SelectItem(item, ignoreCallback)
     else
         self:RemoveItemFromSelected(item)
     end
-    PlaySound(SOUNDS.COMBO_CLICK)
 
-    if item.callback and not ignoreCallback then
-        item.callback(self, item.name, item)
+    if not ignoreCallback then
+        PlaySound(SOUNDS.COMBO_CLICK)
+
+        if item.callback then
+            item.callback(self, item.name, item)
+        end
     end
+
     self:RefreshSelectedItemText()
     -- refresh the data that was just selected so the selection highlight properly shows/hides
     if self.m_dropdownObject:IsOwnedByComboBox(self) then

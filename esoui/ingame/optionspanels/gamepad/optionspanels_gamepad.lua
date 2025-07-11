@@ -11,6 +11,8 @@ local function Chat_Color_GetGuildText(data)
     end
 end
 
+local GAMEPAD_SECTION_HEADER_ID = ZO_IsPlaystationPlatform() and SI_CONTROLS_SECTION_HEADER or SI_GAMEPAD_SECTION_HEADER
+
 GAMEPAD_SETTINGS_DATA =
 {
     [SETTING_PANEL_VIDEO] =
@@ -42,6 +44,12 @@ GAMEPAD_SETTINGS_DATA =
         {
             panel = SETTING_PANEL_VIDEO,
             system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_CAP_CONSOLE_FRAMERATE_IN_MENUS,
+            header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_DISPLAY,
+        },
+        {
+            panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_GRAPHICS,
             settingId = GRAPHICS_SETTING_FULLSCREEN,
             header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_DISPLAY,
         },
@@ -65,6 +73,11 @@ GAMEPAD_SETTINGS_DATA =
             panel = SETTING_PANEL_VIDEO,
             system = SETTING_TYPE_GRAPHICS,
             settingId = GRAPHICS_SETTING_RENDERTHREAD,
+        },
+        {
+            panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_ENERGY_SUSTAINABILITY_SCREEN_DIM_AND_RESOLUTION,
         },
         {
             panel = SETTING_PANEL_VIDEO,
@@ -273,7 +286,12 @@ GAMEPAD_SETTINGS_DATA =
         {
             panel = SETTING_PANEL_CAMERA,
             system = SETTING_TYPE_GAMEPAD,
-            settingId = GAMEPAD_SETTING_CAMERA_SENSITIVITY,
+            settingId = GAMEPAD_SETTING_CAMERA_SENSITIVITY_X,
+        },
+        {
+            panel = SETTING_PANEL_CAMERA,
+            system = SETTING_TYPE_GAMEPAD,
+            settingId = GAMEPAD_SETTING_CAMERA_SENSITIVITY_Y,
         },
         {
             panel = SETTING_PANEL_CAMERA,
@@ -307,31 +325,31 @@ GAMEPAD_SETTINGS_DATA =
             panel = SETTING_PANEL_GAMEPLAY,
             system = SETTING_TYPE_GAMEPAD,
             settingId = GAMEPAD_SETTING_INPUT_PREFERRED_MODE,
-            header = SI_GAMEPAD_SECTION_HEADER,
+            header = GAMEPAD_SECTION_HEADER_ID,
         },
         {
             panel = SETTING_PANEL_GAMEPLAY,
             system = SETTING_TYPE_GAMEPAD,
             settingId = GAMEPAD_SETTING_KEYBIND_DISPLAY_MODE,
-            header = SI_GAMEPAD_SECTION_HEADER,
+            header = GAMEPAD_SECTION_HEADER_ID,
         },
         {
             panel = SETTING_PANEL_GAMEPLAY,
             system = SETTING_TYPE_GAMEPAD,
             settingId = GAMEPAD_SETTING_USE_KEYBOARD_CHAT,
-            header = SI_GAMEPAD_SECTION_HEADER,
+            header = GAMEPAD_SECTION_HEADER_ID,
         },
         {
             panel = SETTING_PANEL_GAMEPLAY,
             system = SETTING_TYPE_GAMEPAD,
             settingId = GAMEPAD_SETTING_USE_KEYBOARD_LOGIN,
-            header = SI_GAMEPAD_SECTION_HEADER,
+            header = GAMEPAD_SECTION_HEADER_ID,
         },
         {
             panel = SETTING_PANEL_GAMEPLAY,
             system = SETTING_TYPE_GAMEPAD,
             settingId = GAMEPAD_SETTING_GAMEPAD_TEMPLATE,
-            header = SI_GAMEPAD_SECTION_HEADER,
+            header = GAMEPAD_SECTION_HEADER_ID,
         },
         {
             panel = SETTING_PANEL_GAMEPLAY,
@@ -661,6 +679,16 @@ GAMEPAD_SETTINGS_DATA =
             panel = SETTING_PANEL_AUDIO,
             system = SETTING_TYPE_AUDIO,
             settingId = AUDIO_SETTING_COMBAT_MUSIC_MODE,
+        },
+        {
+            panel = SETTING_PANEL_AUDIO,
+            system = SETTING_TYPE_AUDIO,
+            settingId = AUDIO_SETTING_SPATIAL_SOUND,
+        },
+        {
+            panel = SETTING_PANEL_AUDIO,
+            system = SETTING_TYPE_AUDIO,
+            settingId = AUDIO_SETTING_SPATIAL_SOUND_QUALITY,
         },
         {
             panel = SETTING_PANEL_AUDIO,

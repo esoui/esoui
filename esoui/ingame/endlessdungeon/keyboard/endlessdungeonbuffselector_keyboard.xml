@@ -19,6 +19,26 @@
                 <Backdrop name="$(parent)BG" override="true" inherits="ZO_MinorMungeBackdrop_SemiTransparentBlack" />
 
                 <Label name="$(parent)Title" override="true" font="ZoFontWinH1" />
+
+                <Button name="$(parent)RerollButton" font="ZoFontGameBold" inherits="ZO_DefaultTextButton">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Container" relativePoint="BOTTOMLEFT" offsetY="30" />
+
+                    <OnClicked>
+                        ZO_EndlessDungeonBuffSelector_Keyboard.OnRerollButtonClicked(self)
+                    </OnClicked>
+
+                    <OnMouseEnter>
+                        ZO_EndlessDungeonBuffSelector_Keyboard.OnRerollButtonMouseEnter(self)
+                    </OnMouseEnter>
+
+                    <OnMouseExit>
+                        ZO_EndlessDungeonBuffSelector_Keyboard.OnRerollButtonMouseExit(self)
+                    </OnMouseExit>
+                </Button>
+
+                <Label name="$(parent)Currency" font="ZoFontGameBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Container" relativePoint="BOTTOMRIGHT" offsetY="30" />
+                </Label>
             </Controls>
         </TopLevelControl>
     </Controls>

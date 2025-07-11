@@ -405,45 +405,56 @@ function ZO_Tooltip:AcquireItemImprovementStatusBar(itemLink, value, maxValue, v
     return improvementBar
 end
 
-function ZO_Tooltip:AddEnchant(itemLink, enchantDiffMode, equipSlot)
-    enchantDiffMode = enchantDiffMode or ZO_ENCHANT_DIFF_NONE
-    local enchantSection = self:AcquireSection(self:GetStyle("bodySection"))
+-- Maintaining enchantDiffMode arg for backwards compatability
+function ZO_Tooltip:AddEnchant(itemLink, enchantDiffMode, equipSlot, extraData)
     local hasEnchant, enchantHeader, enchantDescription = GetItemLinkEnchantInfo(itemLink)
-    if hasEnchant then
-        enchantSection:AddLine(enchantHeader, self:GetStyle("bodyHeader"))
+    if not hasEnchant then
+        return ITEM_BONUS_SUPPRESSION_TYPE_NONE, 0
+    end
 
-        if enchantDiffMode == ZO_ENCHANT_DIFF_NONE then
-            if IsItemAffectedByPairedPoison(equipSlot) then
-                local suppressedStyle = self:GetStyle("suppressedAbility")
-                enchantSection:AddLine(GetString(SI_TOOLTIP_ENCHANT_SUPPRESSED_BY_POISON), suppressedStyle, self:GetStyle("bodyDescription"))
-            else
-                enchantSection:AddLine(enchantDescription, self:GetStyle("bodyDescription"))
-            end
+    local enchantSection = self:AcquireSection(self:GetStyle("bodySection"))
+    enchantDiffMode = enchantDiffMode or (extraData and extraData.enchantDiffMode) or ZO_ENCHANT_DIFF_NONE
+    local noEnchantDiff = enchantDiffMode == ZO_ENCHANT_DIFF_NONE
+    local itemBonusSuppressionType = ITEM_BONUS_SUPPRESSION_TYPE_NONE
+    local itemBonusSuppressionRefId = 0
+    
+    local headerStyle = "bodyHeader"
+    local descriptionStyle = "activeBonus"
+    if noEnchantDiff and extraData and extraData.showSuppression then
+        itemBonusSuppressionType, itemBonusSuppressionRefId = GetItemEnchantSuppressionInfo()
+        if itemBonusSuppressionType ~= ITEM_BONUS_SUPPRESSION_TYPE_NONE then
+            headerStyle = "itemBonusSuppressedSection"
+            descriptionStyle = "itemBonusSuppressedDescription"
         end
     end
-    self:AddSection(enchantSection)
 
-    if hasEnchant and enchantDiffMode ~= ZO_ENCHANT_DIFF_NONE then
-        local diffColorStyle, icon
+    enchantSection:AddLine(enchantHeader, self:GetStyle(headerStyle))
+
+    if noEnchantDiff then
+        if IsItemAffectedByPairedPoison(equipSlot) then
+            local suppressedStyle = self:GetStyle("suppressedAbility")
+            enchantSection:AddLine(GetString(SI_TOOLTIP_ENCHANT_SUPPRESSED_BY_POISON), suppressedStyle, self:GetStyle("bodyDescription"))
+        else
+            enchantSection:AddLine(enchantDescription, self:GetStyle(descriptionStyle), self:GetStyle("bodyDescription"))
+        end
+    else
+        local diffColorStyle
         if enchantDiffMode == ZO_ENCHANT_DIFF_ADD then
             diffColorStyle = self:GetStyle("enchantDiffAdd")
-            icon = "EsoUI/Art/Buttons/pointsPlus_up.dds"
         elseif enchantDiffMode == ZO_ENCHANT_DIFF_REMOVE then
             diffColorStyle = self:GetStyle("enchantDiffRemove")
-            icon = "EsoUI/Art/Buttons/pointsMinus_up.dds"
         else
             -- If this assert is hit, support needs to be added for the additional
             --  enchant diff modes, which do not exist at the time of writing.
             assert(false)
         end
 
-        local enchantmentDescriptionSection = self:AcquireSection(diffColorStyle, self:GetStyle("enchantDiff"))
-        local diffSection = self:AcquireSection(self:GetStyle("enchantDiffTextureContainer"))
-        diffSection:AddTexture(icon, self:GetStyle("enchantDiffTexture"))
-        enchantmentDescriptionSection:AddSection(diffSection)
-        enchantmentDescriptionSection:AddLine(enchantDescription, self:GetStyle("bodyDescription"))
-        self:AddSection(enchantmentDescriptionSection)
+        enchantSection:AddLine(enchantDescription, diffColorStyle, self:GetStyle("bodyDescription"))
     end
+
+    self:AddSection(enchantSection)
+
+    return itemBonusSuppressionType, itemBonusSuppressionRefId
 end
 
 function ZO_Tooltip:AddItemAbilityScalingRange(section, minLevel, maxLevel, isChampionPoints)
@@ -533,6 +544,8 @@ function ZO_Tooltip:AddOnUseAbility(itemLink)
 end
 
 function ZO_Tooltip:AddTrait(itemLink, extraData)
+    local itemBonusSuppressionType = ITEM_BONUS_SUPPRESSION_TYPE_NONE
+    local itemBonusSuppressionRefId = 0
     if not (extraData and extraData.hideTrait) then
         local traitType, traitDescription = GetItemLinkTraitInfo(itemLink)
         if traitType ~= ITEM_TRAIT_TYPE_NONE and traitDescription ~= "" then
@@ -549,17 +562,25 @@ function ZO_Tooltip:AddTrait(itemLink, extraData)
                     formattedTraitName = zo_strformat(SI_ITEM_FORMAT_STR_ITEM_TRAIT_HEADER, traitName)
                 end
 
-                local additionalTooltipStyle
+                local headerStyle = "bodyHeader"
+                local bodyStyle = "activeBonus"
                 if extraData and extraData.showTraitAsNew then
-                    additionalTooltipStyle = self:GetStyle("succeeded")
+                    bodyStyle = "succeeded"
+                elseif extraData and extraData.showSuppression then
+                    itemBonusSuppressionType, itemBonusSuppressionRefId = GetItemTraitSuppressionInfo(traitType)
+                    if itemBonusSuppressionType ~= ITEM_BONUS_SUPPRESSION_TYPE_NONE then
+                        headerStyle = "itemBonusSuppressedSection"
+                        bodyStyle = "itemBonusSuppressedDescription"
+                    end
                 end
 
-                traitSection:AddLine(formattedTraitName, self:GetStyle("bodyHeader"), additionalTooltipStyle)
-                traitSection:AddLine(traitDescription, self:GetStyle("bodyDescription"), additionalTooltipStyle)
+                traitSection:AddLine(formattedTraitName, self:GetStyle(headerStyle))
+                traitSection:AddLine(traitDescription, self:GetStyle(bodyStyle), self:GetStyle("bodyDescription"))
                 self:AddSection(traitSection)
             end
         end
     end
+    return itemBonusSuppressionType, itemBonusSuppressionRefId
 end
 
 function ZO_Tooltip:AddSetRestrictions(itemSetId)
@@ -582,41 +603,43 @@ function ZO_Tooltip:AddSetRestrictions(itemSetId)
     end
 end
 
-function ZO_Tooltip:AddSet(itemLink, equipped)
+function ZO_Tooltip:AddSet(itemLink, equipped, extraData)
+    local itemBonusSuppressionType = ITEM_BONUS_SUPPRESSION_TYPE_NONE
+    local itemBonusSuppressionRefId = 0
     local hasSet, setName, numBonuses, numNormalEquipped, maxEquipped, setId, numPerfectedEquipped = GetItemLinkSetInfo(itemLink)
     if hasSet then
         local totalEquipped = zo_min(numNormalEquipped + numPerfectedEquipped, maxEquipped)
         local isPerfectedSet = GetItemSetUnperfectedSetId(setId) > 0
         local setSection = self:AcquireSection(self:GetStyle("bodySection"))
-        local setSectionStyle = "bodyHeader"
-        local bonusSectionStyle = "activeBonus"
-        local itemSetSuppressionType, refId = GetItemSetSuppressionInfo(setId)
-        local suppressionName = GetItemSetSuppressionName(setId)
-        if setId ~= refId and itemSetSuppressionType ~= ITEM_SET_SUPPRESSION_TYPE_NONE then
-            setSectionStyle = "itemSetSuppressedSection"
-            bonusSectionStyle = "itemSetSuppressedDescription"
+        local headerStyle = "bodyHeader"
+        local bonusStyle = "activeBonus"
+
+        if extraData and extraData.showSuppression then
+            itemBonusSuppressionType, itemBonusSuppressionRefId = GetItemSetSuppressionInfo(setId)
+            if itemBonusSuppressionType ~= ITEM_BONUS_SUPPRESSION_TYPE_NONE then
+                headerStyle = "itemBonusSuppressedSection"
+                bonusStyle = "itemBonusSuppressedDescription"
+            end
         end
         if isPerfectedSet then
-            setSection:AddLine(zo_strformat(SI_ITEM_FORMAT_STR_PERFECTED_SET_NAME, setName, totalEquipped, maxEquipped, numPerfectedEquipped), self:GetStyle(setSectionStyle))
+            setSection:AddLine(zo_strformat(SI_ITEM_FORMAT_STR_PERFECTED_SET_NAME, setName, totalEquipped, maxEquipped, numPerfectedEquipped), self:GetStyle(headerStyle))
         else
-            setSection:AddLine(zo_strformat(SI_ITEM_FORMAT_STR_SET_NAME, setName, totalEquipped, maxEquipped), self:GetStyle(setSectionStyle))
+            setSection:AddLine(zo_strformat(SI_ITEM_FORMAT_STR_SET_NAME, setName, totalEquipped, maxEquipped), self:GetStyle(headerStyle))
         end
         for bonusIndex = 1, numBonuses do
             local numRequired, bonusDescription, isPerfectedBonus = GetItemLinkSetBonusInfo(itemLink, equipped, bonusIndex)
             local numRelevantEquipped = isPerfectedBonus and numPerfectedEquipped or totalEquipped
             if numRelevantEquipped >= numRequired then
-                setSection:AddLine(bonusDescription, self:GetStyle(bonusSectionStyle), self:GetStyle("bodyDescription"))
+                setSection:AddLine(bonusDescription, self:GetStyle(bonusStyle), self:GetStyle("bodyDescription"))
             else
                 setSection:AddLine(bonusDescription, self:GetStyle("inactiveBonus"), self:GetStyle("bodyDescription"))
             end
         end
 
-        if setId ~= refId and itemSetSuppressionType ~= ITEM_SET_SUPPRESSION_TYPE_NONE then
-            setSection:AddLine(zo_strformat(SI_ITEM_FORMAT_STR_DISABLED_BY, suppressionName), self:GetStyle(setSectionStyle))
-        end
         self:AddSection(setSection)
         self:AddSetRestrictions(setId)
     end
+    return itemBonusSuppressionType, itemBonusSuppressionRefId
 end
 
 function ZO_Tooltip:AddContainerSets(itemLink)
@@ -835,18 +858,37 @@ function ZO_Tooltip:LayoutGenericItem(itemLink, equipped, creatorName, forceFull
 
     self:UpdateGamepadBorderDisplay(itemLink)
 
-    local enchantDiffMode
-    if extraData then
-        enchantDiffMode = extraData.enchantDiffMode
-    end
-    self:AddEnchant(itemLink, enchantDiffMode, equipSlot)
+    local enchantDiffMode = extraData and extraData.enchantDiffMode or nil
+    local itemEnchantSuppressionType, itemEnchantSuppressionRefId = self:AddEnchant(itemLink, enchantDiffMode, equipSlot, extraData) -- Maintaining enchantDiffMode arg for backwards compatability
     self:AddOnUseAbility(itemLink)
-    self:AddTrait(itemLink, extraData)
+    local itemTraitSuppressionType, itemTraitSuppressionRefId = self:AddTrait(itemLink, extraData)
+
+    local itemSetSuppressionType = ITEM_BONUS_SUPPRESSION_TYPE_NONE
+    local itemSetSuppressionRefId = 0
     if IsItemLinkContainer(itemLink) then
         self:AddContainerSets(itemLink)
     else
-        self:AddSet(itemLink, equipped)
+        itemSetSuppressionType, itemSetSuppressionRefId = self:AddSet(itemLink, equipped, extraData)
     end
+
+    if extraData and extraData.showSuppression then
+        local itemBonusSuppressionType, itemBonusSuppressionRefId
+        if itemSetSuppressionType ~= ITEM_BONUS_SUPPRESSION_TYPE_NONE then
+            itemBonusSuppressionType, itemBonusSuppressionRefId = itemSetSuppressionType, itemSetSuppressionRefId
+        elseif itemTraitSuppressionType ~= ITEM_BONUS_SUPPRESSION_TYPE_NONE then
+            itemBonusSuppressionType, itemBonusSuppressionRefId = itemTraitSuppressionType, itemTraitSuppressionRefId
+        elseif itemEnchantSuppressionType ~= ITEM_BONUS_SUPPRESSION_TYPE_NONE then
+            itemBonusSuppressionType, itemBonusSuppressionRefId = itemEnchantSuppressionType, itemEnchantSuppressionRefId
+        end
+
+        if itemBonusSuppressionType then
+            local suppressionSection = self:AcquireSection(self:GetStyle("bodySection"))
+            local suppressionName = GetItemBonusSuppressionName(itemBonusSuppressionType, itemBonusSuppressionRefId)
+            suppressionSection:AddLine(zo_strformat(SI_ITEM_FORMAT_STR_DISABLED_BY, suppressionName), self:GetStyle("itemBonusSuppressedSection"))
+            self:AddSection(suppressionSection)
+        end
+    end
+
     if GetItemLinkItemType(itemLink) == ITEMTYPE_POISON then
         self:AddPoisonSystemDescription()
     end
@@ -1470,7 +1512,7 @@ function ZO_Tooltip:LayoutTrait(itemLink, itemName, itemType, extraData)
     traitDescriptionSection:AddLine(GetString(descriptionId), self:GetStyle("bodyDescription"))
     self:AddSection(traitDescriptionSection)
 
-    self:AddTrait(itemLink, extraData)
+    self:AddTrait(itemLink)
     self:AddPrioritySellText(itemLink)
     self:AddItemTags(itemLink)
 end
@@ -1711,6 +1753,7 @@ do
     --      enchantDiffMode - Controls the display of enchantment information as being added, removed, or default
     --      showTraitAsNew - Displays the trait information of an item as if it's being added to the item or otherwise new
     --      hideTrait - Show the item as if it had no trait, even if it does
+    --      showSuppression - If the trait/enchant/set bonuses are being suppressed, represent that
     function ZO_Tooltip:LayoutItem(itemLink, equipped, creatorName, forceFullDurability, previewValueToAdd, itemName, equipSlot, showPlayerLocked, tradeBoPData, extraData)
         local isValidItemLink = itemLink ~= ""
         if isValidItemLink then
@@ -1837,7 +1880,12 @@ function ZO_LayoutItemLinkEquippedComparison(tooltipType, itemLink, showSecondSl
     if showEquipSlot ~= EQUIP_SLOT_NONE then
         local actorCategory = GetItemLinkActorCategory(itemLink)
         local wornBag = GetWornBagForGameplayActorCategory(actorCategory)
-        if GAMEPAD_TOOLTIPS:LayoutBagItem(tooltipType, wornBag, showEquipSlot) then
+        local DEFAULT_SHOW_COMBINED_COUNT = nil
+        local EXTRA_DATA =
+        {
+            showSuppression = true
+        }
+        if GAMEPAD_TOOLTIPS:LayoutBagItem(tooltipType, wornBag, showEquipSlot, DEFAULT_SHOW_COMBINED_COUNT, EXTRA_DATA) then
             ZO_InventoryUtils_UpdateTooltipEquippedIndicatorText(tooltipType, showEquipSlot, actorCategory)
             return true
         end
@@ -1851,7 +1899,11 @@ function ZO_LayoutBagItemEquippedComparison(tooltipType, bagId, slotIndex, showS
     if showEquipSlot ~= EQUIP_SLOT_NONE then
         local actorCategory = GetItemActorCategory(bagId, slotIndex)
         local wornBag = GetWornBagForGameplayActorCategory(actorCategory)
-        if GAMEPAD_TOOLTIPS:LayoutBagItem(tooltipType, wornBag, showEquipSlot) then
+        local extraData =
+        {
+            showSuppression = true
+        }
+        if GAMEPAD_TOOLTIPS:LayoutBagItem(tooltipType, wornBag, showEquipSlot, extraData) then
             ZO_InventoryUtils_UpdateTooltipEquippedIndicatorText(tooltipType, showEquipSlot, actorCategory)
             return true
         end

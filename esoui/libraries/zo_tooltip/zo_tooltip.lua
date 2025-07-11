@@ -17,7 +17,7 @@ do
     -- TODO: Consider adding handlers for LINK_TYPE_QUEST_ITEM and LINK_TYPE_BOOK
     internalassert(LINK_TYPE_MAX_VALUE == 10)
 
-    function GetLinkLayoutHandlerName(linkType)
+    function ZO_GetLinkLayoutHandlerName(linkType)
         return LINK_LAYOUT_HANDLERS[linkType]
     end
 end
@@ -381,6 +381,7 @@ ZO_TooltipSection = {}
 
 function ZO_TooltipSection.InitializeStaticPools(class)
     class.labelPool = ZO_ControlPool:New("ZO_TooltipLabel", GuiRoot, "Label")
+    class.largeKeyMarkupLabelPool = ZO_ControlPool:New("ZO_LargeKeyMarkupLabel", GuiRoot, "LKMLabel")
     class.keyLabelPool = ZO_ControlPool:New("ZO_LargeKeyMarkupLabel", GuiRoot, "KeyLabel")
     class.keyLabelPool:SetCustomResetBehavior(ZO_Keybindings_UnregisterLabelForBindingUpdate)
     class.texturePool = ZO_ControlPool:New("ZO_TooltipTexture", GuiRoot, "Texture")
@@ -435,6 +436,7 @@ function ZO_TooltipSection:Initialize(parent)
 
     if not self.hasInitialized then
         self.labelPool = self:CreateMetaControlPool(ZO_TooltipSection.labelPool)
+        self.largeKeyMarkupLabelPool = self:CreateMetaControlPool(ZO_TooltipSection.largeKeyMarkupLabelPool)
         self.keyLabelPool = self:CreateMetaControlPool(ZO_TooltipSection.keyLabelPool)
         self.texturePool = self:CreateMetaControlPool(ZO_TooltipSection.texturePool)
         self.colorPool = self:CreateMetaControlPool(ZO_TooltipSection.colorPool)
@@ -556,6 +558,7 @@ function ZO_TooltipSection:Reset()
     self:SetupPrimaryDimension()
     self:SetupSecondaryDimension()
     self.labelPool:ReleaseAllObjects()
+    self.largeKeyMarkupLabelPool:ReleaseAllObjects()
     self.keyLabelPool:ReleaseAllObjects()
     self.texturePool:ReleaseAllObjects()
     self.colorPool:ReleaseAllObjects()
@@ -827,27 +830,35 @@ end
 
 --where ... is the list of styles
 function ZO_TooltipSection:AddLine(text, ...)
+    local function CustomFunction(label, ...)
+        self:FormatLabel(label, text, ...)
+        --This will get added to the narrationText table once we add the control
+        self.nextNarrationText = text
+    end
 
-    local customFunction =
-        function(label, ...)
-            self:FormatLabel(label, text, ...)
-            --This will get added to the narrationText table once we add the control
-            self.nextNarrationText = text
-        end
+    self:AddCustomLabel(CustomFunction, ...)
+end
 
-    self:AddCustomLabel(customFunction, ...)
+--where ... is the list of styles
+function ZO_TooltipSection:AddLargeKeyMarkupLine(text, ...)
+    local function CustomFunction(label, ...)
+        self:FormatLabel(label, text, ...)
+        --This will get added to the narrationText table once we add the control
+        self.nextNarrationText = text
+    end
+
+    self:AddCustomLargeKayMarkupLabel(CustomFunction, ...)
 end
 
 --where ... is the list of styles
 function ZO_TooltipSection:AddLineWithCustomNarration(text, narration, ...)
-    local customFunction =
-        function(label, ...)
-            self:FormatLabel(label, text, ...)
-            --This will get added to the narrationText table once we add the control
-            self.nextNarrationText = narration or text
-        end
+    local function CustomFunction(label, ...)
+        self:FormatLabel(label, text, ...)
+        --This will get added to the narrationText table once we add the control
+        self.nextNarrationText = narration or text
+    end
 
-    self:AddCustomLabel(customFunction, ...)
+    self:AddCustomLabel(CustomFunction, ...)
 end
 
 function ZO_TooltipSection:AddNarrationLine(text)
@@ -915,6 +926,11 @@ function ZO_TooltipSection:AddCustomLabel(customFunction, ...)
     self:AddCustomLabelInternal(label, customFunction, ...)
 end
 
+function ZO_TooltipSection:AddCustomLargeKayMarkupLabel(customFunction, ...)
+    local label = self.largeKeyMarkupLabelPool:AcquireObject()
+    self:AddCustomLabelInternal(label, customFunction, ...)
+end
+
 function ZO_TooltipSection:AddCustomLabelInternal(label, customFunction, ...)
     customFunction(label, ...)
 
@@ -946,20 +962,19 @@ function ZO_TooltipSection:AddCustomLabelInternal(label, customFunction, ...)
 end
 
 function ZO_TooltipSection:AddSimpleCurrency(currencyType, amount, options, showAll, notEnough, ...)
-    local customFunction =
-        function(label, ...)
-            self:FormatLabel(label, "", ...)        -- This is so it uses the correct styling
-            ZO_CurrencyControl_SetSimpleCurrency(label, currencyType, amount, options, showAll, notEnough)
-            -- ZO_CurrencyControl_SetSimpleCurrency will set the font in this case so the fontString attribute need to be updated to reflect
-            -- the new font so that the label will be reset correctly when added back into the label pool.
-            if options.font then
-                label.fontString = options.font
-            end
-            --This will get added to the narrationText table once we add the control
-            self.nextNarrationText = ZO_Currency_FormatGamepad(currencyType, amount, ZO_CURRENCY_FORMAT_AMOUNT_ICON)
+    local function CustomFunction(label, ...)
+        self:FormatLabel(label, "", ...)        -- This is so it uses the correct styling
+        ZO_CurrencyControl_SetSimpleCurrency(label, currencyType, amount, options, showAll, notEnough)
+        -- ZO_CurrencyControl_SetSimpleCurrency will set the font in this case so the fontString attribute need to be updated to reflect
+        -- the new font so that the label will be reset correctly when added back into the label pool.
+        if options.font then
+            label.fontString = options.font
         end
+        --This will get added to the narrationText table once we add the control
+        self.nextNarrationText = ZO_Currency_FormatGamepad(currencyType, amount, ZO_CURRENCY_FORMAT_AMOUNT_ICON)
+    end
 
-    self:AddCustomLabel(customFunction, ...)
+    self:AddCustomLabel(CustomFunction, ...)
 end
 
 function ZO_TooltipSection:BasicTextureSetup(texture, ...)
@@ -1263,7 +1278,7 @@ end
 
 function ZO_Tooltip:LayoutLink(link, ...)
     local linkType = GetLinkType(link)
-    local handlerKey = GetLinkLayoutHandlerName(linkType)
+    local handlerKey = ZO_GetLinkLayoutHandlerName(linkType)
     local handlerFunction = self[handlerKey]
     if handlerFunction then
         handlerFunction(self, link, ...)

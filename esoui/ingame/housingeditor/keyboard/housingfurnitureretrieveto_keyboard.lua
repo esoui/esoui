@@ -78,6 +78,27 @@ function ZO_HousingFurnitureRetrieveTo_Keyboard:RefreshBagList()
     end)
 end
 
+function ZO_HousingFurnitureRetrieveTo_Keyboard:GetFreeSpaceDescription()
+    local bagDisplayName, numUsedSlots, numSlots
+    local bagInfo = self:GetSelectedBagInfo()
+    if bagInfo then
+        bagDisplayName = bagInfo:GetDisplayName()
+        numUsedSlots, numSlots = bagInfo:GetNumUsedAndTotalSlots()
+    else
+        bagDisplayName = GetString("SI_BAG", BAG_BACKPACK)
+        numUsedSlots = GetNumBagUsedSlots(BAG_BACKPACK)
+        numSlots = GetBagUseableSize(BAG_BACKPACK)
+    end
+
+    local formatString
+    if numUsedSlots < numSlots then
+        formatString = SI_INVENTORY_BAG_REMAINING_SPACES
+    else
+        formatString = SI_INVENTORY_BAG_COMPLETELY_FULL
+    end
+    return zo_strformat(formatString, numUsedSlots, numSlots, bagDisplayName)
+end
+
 -- Global XML
 
 function ZO_HousingFurnitureRetrieveTo_Keyboard.OnControlInitialized(control)

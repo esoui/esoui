@@ -18,6 +18,12 @@ local INVENTORY_CRAFT_BAG_LIST = "craftBagList"
 
 local BLOCK_TABBAR_CALLBACK = true
 
+local LAYOUT_BAG_ITEM_DEFAULT_SHOW_COMBINED_COUNT = nil
+local LAYOUT_BAG_ITEM_EXTRA_DATA =
+{
+    showSuppression = true
+}
+
 --[[ Public  API ]]--
 ZO_GamepadInventory = ZO_Gamepad_ParametricList_BagsSearch_Screen:Subclass()
 
@@ -952,7 +958,7 @@ function ZO_GamepadInventory:UpdateCategoryLeftTooltip(selectedData)
         return
     end
 
-    if selectedData.equipSlot and GAMEPAD_TOOLTIPS:LayoutBagItem(GAMEPAD_LEFT_TOOLTIP, BAG_WORN, selectedData.equipSlot) then
+    if selectedData.equipSlot and GAMEPAD_TOOLTIPS:LayoutBagItem(GAMEPAD_LEFT_TOOLTIP, BAG_WORN, selectedData.equipSlot, LAYOUT_BAG_ITEM_DEFAULT_SHOW_COMBINED_COUNT, LAYOUT_BAG_ITEM_EXTRA_DATA) then
         local isHidden, highestPriorityVisualLayerThatIsShowing = WouldEquipmentBeHidden(selectedData.equipSlot or EQUIP_SLOT_NONE, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
 
         if isHidden then
@@ -1286,7 +1292,7 @@ function ZO_GamepadInventory:UpdateItemLeftTooltip(selectedData)
                     GAMEPAD_TOOLTIPS:LayoutQuestItem(GAMEPAD_LEFT_TOOLTIP, GetQuestConditionQuestItemId(selectedData.questIndex, selectedData.stepIndex, selectedData.conditionIndex))
                 end
             else
-                GAMEPAD_TOOLTIPS:LayoutBagItem(GAMEPAD_LEFT_TOOLTIP, selectedData.bagId, selectedData.slotIndex)
+                GAMEPAD_TOOLTIPS:LayoutBagItem(GAMEPAD_LEFT_TOOLTIP, selectedData.bagId, selectedData.slotIndex, LAYOUT_BAG_ITEM_DEFAULT_SHOW_COMBINED_COUNT, LAYOUT_BAG_ITEM_EXTRA_DATA)
             end
 
             if selectedData.isEquippedInCurrentCategory or selectedData.isEquippedInAnotherCategory or selectedData.equipSlot then
@@ -1804,7 +1810,7 @@ function ZO_GamepadInventory:UpdateRightTooltip()
             if selectedItemData and (not equipSlotHasItem or self.savedVars.useStatComparisonTooltip) then
                 GAMEPAD_TOOLTIPS:LayoutItemStatComparison(GAMEPAD_RIGHT_TOOLTIP, selectedItemData.bagId, selectedItemData.slotIndex, targetCategoryData.equipSlot)
                 GAMEPAD_TOOLTIPS:SetStatusLabelText(GAMEPAD_RIGHT_TOOLTIP, GetString(SI_GAMEPAD_INVENTORY_ITEM_COMPARE_TOOLTIP_TITLE))
-            elseif GAMEPAD_TOOLTIPS:LayoutBagItem(GAMEPAD_RIGHT_TOOLTIP, BAG_WORN, targetCategoryData.equipSlot) then
+            elseif GAMEPAD_TOOLTIPS:LayoutBagItem(GAMEPAD_RIGHT_TOOLTIP, BAG_WORN, targetCategoryData.equipSlot, LAYOUT_BAG_ITEM_DEFAULT_SHOW_COMBINED_COUNT, LAYOUT_BAG_ITEM_EXTRA_DATA) then
                 self:UpdateTooltipEquippedIndicatorText(GAMEPAD_RIGHT_TOOLTIP, targetCategoryData.equipSlot)
             end
         elseif selectedItemData and targetCategoryData.filterType == ITEMFILTERTYPE_COMPANION then

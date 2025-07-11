@@ -114,9 +114,11 @@ do
             pressedIcon = "EsoUI/Art/LFG/LFG_indexIcon_zoneStories_down.dds",
             mouseoverIcon = "EsoUI/Art/LFG/LFG_indexIcon_zoneStories_over.dds",
             disabledIcon = "EsoUI/Art/LFG/LFG_indexIcon_zoneStories_disabled.dds",
-            isZoneStories = true,
+            isLocked = function() 
+                return ZONE_STORIES_MANAGER:GetZoneData(ZONE_STORIES_MANAGER.GetDefaultZoneSelection()) == nil
+            end,
+            lockedText = GetString(SI_ZONE_STORY_TOOLTIP_UNAVAILABLE_IN_ZONE),
         },
-
         gamepadData =
         {
             priority = ZO_ACTIVITY_FINDER_SORT_PRIORITY.ZONE_STORIES,
@@ -125,7 +127,10 @@ do
             disabledMenuIcon = "EsoUI/Art/LFG/Gamepad/LFG_menuIcon_zoneStories_disabled.dds",
             sceneName = "zoneStoriesGamepad",
             tooltipDescription = GetString(SI_GAMEPAD_ACTIVITY_FINDER_TOOLTIP_ZONE_STORIES),
-            isZoneStories = true,
+            isLocked = function() 
+                return ZONE_STORIES_MANAGER:GetZoneData(ZONE_STORIES_MANAGER.GetDefaultZoneSelection()) == nil
+            end,
+            lockedText = GetString(SI_ZONE_STORY_TOOLTIP_UNAVAILABLE_IN_ZONE),
             GetHelpIndices = function()
                 return GetZoneStoriesHelpIndices()
             end,

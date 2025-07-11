@@ -283,11 +283,6 @@
         </Control>
 
         <Control name="ZO_NotificationsMarketProductUnlockedRow" inherits="ZO_NotificationsTwoButtonRow" virtual="true">
-            <OnInitialized>
-                self.acceptText = GetString(SI_NOTIFICATIONS_LOG_OUT)
-                self.declineText = GetString(SI_NOTIFICATIONS_DELETE)
-            </OnInitialized>
-
             <Controls>
                 <Label name="$(parent)Message" override="true" inherits="ZO_NotificationsRowMessageMouseOverBehavior" />
 
@@ -295,13 +290,7 @@
                     <Anchor point="RIGHT" relativePoint="LEFT" relativeTo="$(parent)Accept" offsetX="-10"/>
                 </Button>
 
-                <Button name="$(parent)Accept" override="true">
-                    <Textures
-                        normal="EsoUI/Art/Buttons/log_out_up.dds"
-                        pressed="EsoUI/Art/Buttons/log_out_down.dds"
-                        mouseOver="EsoUI/Art/Buttons/log_out_over.dds"
-                    />
-                </Button>
+                <!-- Accept button textures determined programmatically -->
             </Controls>
         </Control>
         
@@ -345,10 +334,17 @@
                     <Textures
                         normal="EsoUI/Art/Notifications/notificationIcon_houseToursViewRecommendedHouse.dds"
                         pressed="EsoUI/Art/Notifications/notificationIcon_houseToursViewRecommendedHouse.dds"
-                        mouseOver="EsoUI/Art/Notifications/notificationIcon_houseToursViewRecommendedHouse.dds"
+                        mouseOver="EsoUI/Art/Notifications/notificationIcon_houseToursViewRecommendedHouse_mouseOver.dds"
                     />
                 </Button>
             </Controls>
+        </Control>
+
+        <Control name="ZO_NotificationsSpectacleEventUpdateRow" inherits="ZO_NotificationsTwoButtonRow" virtual="true">
+            <OnInitialized>
+                self.acceptText = GetString(SI_SPECTACLE_EVENTS_NOTIFICATION_VIEW)
+                self.declineText = GetString(SI_SPECTACLE_EVENTS_NOTIFICATION_DISMISS)
+            </OnInitialized>
         </Control>
 
         <TopLevelControl name="ZO_Notifications" inherits="ZO_RightPanelFootPrint" hidden="true">

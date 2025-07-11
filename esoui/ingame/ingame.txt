@@ -1282,15 +1282,15 @@ EsoUI\Ingame\Campaign\CampaignAvARank.lua
 EsoUI\Ingame\Campaign\CampaignAvARank.xml
 EsoUI\Ingame\Campaign\CurrentCampaigns.lua
 EsoUI\Ingame\Campaign\CurrentCampaigns.xml
-EsoUI\Ingame\Campaign\CampaignOverview.lua
-EsoUI\Ingame\Campaign\CampaignOverview.xml
-EsoUI\Ingame\Campaign\CampaignScoring.lua
-EsoUI\Ingame\Campaign\CampaignScoring.xml
-EsoUI\Ingame\Campaign\CampaignBonuses.lua
-EsoUI\Ingame\Campaign\CampaignBonuses.xml
+EsoUI\Ingame\Campaign\Keyboard\CampaignOverview.lua
+EsoUI\Ingame\Campaign\Keyboard\CampaignOverview.xml
+EsoUI\Ingame\Campaign\Keyboard\CampaignScoring.lua
+EsoUI\Ingame\Campaign\Keyboard\CampaignScoring.xml
+EsoUI\Ingame\Campaign\Keyboard\CampaignBonuses.lua
+EsoUI\Ingame\Campaign\Keyboard\CampaignBonuses.xml
 EsoUI\Ingame\Campaign\CampaignEmperor_Shared.lua
-EsoUI\Ingame\Campaign\CampaignEmperor.lua
-EsoUI\Ingame\Campaign\CampaignEmperor.xml
+EsoUI\Ingame\Campaign\Keyboard\CampaignEmperor.lua
+EsoUI\Ingame\Campaign\Keyboard\CampaignEmperor.xml
 EsoUI\Ingame\Campaign\CampaignSelector_Shared.lua
 EsoUI\Ingame\Campaign\CampaignSelector.lua
 EsoUI\Ingame\Campaign\CampaignSelector.xml
@@ -1732,6 +1732,14 @@ EsoUI\Ingame\PromotionalEvents\Gamepad\PromotionalEvents_Gamepad.lua
 EsoUI\Ingame\PromotionalEvents\Gamepad\PromotionalEvents_Gamepad.xml
 EsoUI\Ingame\PromotionalEvents\PromotionalEventTracker.lua
 EsoUI\Ingame\PromotionalEvents\PromotionalEventTracker.xml
+
+EsoUI\Ingame\SpectacleEvents\SpectacleEvents_Manager.lua
+EsoUI\Ingame\SpectacleEvents\SpectacleEvents_Shared.lua
+EsoUI\Ingame\SpectacleEvents\SpectacleEvents_Shared.xml
+EsoUI\Ingame\SpectacleEvents\Keyboard\SpectacleEvents_Keyboard.lua
+EsoUI\Ingame\SpectacleEvents\Keyboard\SpectacleEvents_Keyboard.xml
+EsoUI\Ingame\SpectacleEvents\Gamepad\SpectacleEvents_Gamepad.lua
+EsoUI\Ingame\SpectacleEvents\Gamepad\SpectacleEvents_Gamepad.xml
 
 ; Subtitles needs to be loaded after PlayerToPlayer so it can anchor off of it
 EsoUI\Ingame\Subtitles\Subtitles.lua

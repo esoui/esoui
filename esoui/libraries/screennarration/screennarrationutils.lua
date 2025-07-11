@@ -189,12 +189,15 @@ function ZO_GetSharedGamepadEntryStatusIndicatorNarrationText(entryData, entryCo
     return narrations
 end
 
---Function for getting a narratable object for a progress bar, given a min, max and current value
-function ZO_GetProgressBarNarrationText(barMin, barMax, barValue)
+--Function for getting a narratable object for a progress bar, given a min, max, current value, and percentageFormat.
+--percentageFormat is an optional argument to specify how the progress percent should be formatted for narration.
+--If not defined, percentageFormat will default to "%.2f".
+function ZO_GetProgressBarNarrationText(barMin, barMax, barValue, percentageFormat)
     if barMax > barMin then
         local range = barMax - barMin
         local percentage = (barValue - barMin) / range
-        percentage = string.format("%.2f", percentage * 100)
+        percentageFormat = percentageFormat or "%.2f"
+        percentage = string.format(percentageFormat, percentage * 100)
         return SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_SCREEN_NARRATION_PROGRESS_BAR_PERCENT_FORMATTER, percentage))
     end
 end

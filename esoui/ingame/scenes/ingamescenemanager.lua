@@ -59,6 +59,10 @@ function ZO_IngameSceneManager:IsLockedInUIMode()
     return false
 end
 
+function ZO_IngameSceneManager:IsShowingHUDSceneNext()
+    return self:IsShowingNext(self.hudUISceneName) or self:IsShowingNext(self.hudSceneName)
+end
+
 function ZO_IngameSceneManager:SetInUIMode(inUIMode, bypassHideSceneConfirmationReason)
     if IsGameCameraActive() then
         if inUIMode ~= self:IsInUIMode() then
@@ -304,6 +308,9 @@ do
 end
 
 function ZO_IngameSceneManager:OnLoadingScreenDropped()
+    -- ESO-914407: Ensure we update hud scene's location specific fragment visibility rules before attempting to possibly show the HUD scene.
+    ZO_UpdateVisiblityOfHUDFragments()
+
     self.hudSceneName = "hud"
     self.hudUISceneName = "hudui"
     self.hudUISceneHidesAutomatically = true

@@ -416,7 +416,7 @@
         </Control>
 
         <Control name="ZO_MediumLeftPanelBG" inherits="ZO_ThinLeftPanelBG" virtual="true">
-            <Dimensions x="366" y="500" />
+            <Dimensions x="380" y="500" />
         </Control>
 
         <Control name="ZO_MediumShortRightPanelBG" virtual="true">

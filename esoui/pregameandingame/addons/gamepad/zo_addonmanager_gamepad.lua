@@ -38,6 +38,12 @@ function ZO_AddOnMenu_Console:Initialize(control)
         end
     end)
 
+    EVENT_MANAGER:RegisterForEvent("AddOnMenu_Console", EVENT_ADDONS_DISABLED_STATE_CHANGED, function()
+        if self:IsShowing() then
+            self:RefreshList()
+        end
+    end)
+
     EVENT_MANAGER:RegisterForEvent("AddOnMenu_Console", EVENT_MOD_INSTALL_STATE_CHANGED, function()
         if self:IsShowing() then
             self:RefreshFooter()
@@ -236,13 +242,20 @@ function ZO_AddOnManager_Gamepad:Initialize(control)
     end
     GAMEPAD_OPTIONS:RegisterCustomCategory(optionsEntryData)
 
-    --We need to register this function right away as the value is necessary before the deferred initialize gets run
+    --We need to register these functions right away as the value is necessary before the deferred initialize gets run
     local function OnConsoleAddOnsDisabledStateChanged(_, consoleAddOnsDisabled)
-        if not consoleAddOnsDisabled then
+        if AreUserAddOnsSupported() then
             self.shouldShowInOptions = true
         end
     end
     EVENT_MANAGER:RegisterForEvent("AddOnManager_Gamepad", EVENT_CONSOLE_ADDONS_DISABLED_STATE_CHANGED, OnConsoleAddOnsDisabledStateChanged)
+
+    local function OnAddOnsDisabledStateChanged(_, addOnsDisabled)
+        if AreUserAddOnsSupported() then
+            self.shouldShowInOptions = true
+        end
+    end
+    EVENT_MANAGER:RegisterForEvent("AddOnManager_Gamepad", EVENT_ADDONS_DISABLED_STATE_CHANGED, OnAddOnsDisabledStateChanged)
 end
 
 function ZO_AddOnManager_Gamepad:OnDeferredInitialize()

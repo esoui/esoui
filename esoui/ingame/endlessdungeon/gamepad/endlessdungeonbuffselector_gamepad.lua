@@ -10,7 +10,9 @@ end
 function ZO_EndlessDungeonBuffSelector_Gamepad:OnDeferredInitialize()
     ZO_EndlessDungeonBuffSelector_Shared.OnDeferredInitialize(self)
 
+    self:RegisterDialog()
     self:InitializeNarrationInfo()
+    self:InitializeFooter()
 end
 
 function ZO_EndlessDungeonBuffSelector_Gamepad:InitializeNarrationInfo()
@@ -24,6 +26,10 @@ function ZO_EndlessDungeonBuffSelector_Gamepad:InitializeNarrationInfo()
             return SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.titleText)
         end,
 
+        footerNarrationFunction = function()
+            return GAMEPAD_GENERIC_FOOTER:GetNarrationText(self.footerData)
+        end,
+
         -- Selection narrated via tooltip
     }
     SCREEN_NARRATION_MANAGER:RegisterCustomObject("EndlessDungeonBuffSelector", narrationInfo)
@@ -35,6 +41,113 @@ function ZO_EndlessDungeonBuffSelector_Gamepad:InitializeControls()
     self.focus:SetPlaySoundFunction(function() PlaySound(SOUNDS.HOR_LIST_ITEM_SELECTED) end)
 
     ZO_EndlessDungeonBuffSelector_Shared.InitializeControls(self)
+end
+
+function ZO_EndlessDungeonBuffSelector_Gamepad:InitializeKeybindStripDescriptor()
+    self.keybindStripDescriptor =
+    {
+        alignment = KEYBIND_STRIP_ALIGN_LEFT,
+        {
+            name = GetString(SI_GAMEPAD_SELECT_OPTION),
+            keybind = "UI_SHORTCUT_PRIMARY",
+            callback = function()
+                self:CommitChoice()
+            end,
+            visible = function()
+                return self.selectedBuffControl ~= nil
+            end,
+        },
+        {
+            name = function()
+                local IS_GAMEPAD = true
+                rerollCost = ZO_Currency_Format(GetEndlessDungeonBuffSelectorRerollCost(), CURT_ARCHIVAL_FORTUNES, ZO_CURRENCY_FORMAT_AMOUNT_ICON, IS_GAMEPAD)
+                return zo_strformat(SI_GAMEPAD_ENDLESS_DUNGEON_REROLL_BUFFS_LABEL, rerollCost)
+            end,
+            narrationOverrideName = function()
+                costNarration = ZO_Currency_FormatGamepad(CURT_ARCHIVAL_FORTUNES, GetEndlessDungeonBuffSelectorRerollCost(), ZO_CURRENCY_FORMAT_AMOUNT_ICON)
+                return zo_strformat(SI_GAMEPAD_ENDLESS_DUNGEON_REROLL_BUFFS_LABEL, costNarration)
+            end,
+            keybind = "UI_SHORTCUT_SECONDARY",
+            callback = function()
+                ZO_Dialogs_ShowGamepadDialog("GAMEPAD_ENDLESS_DUNGEON_CONFIRM_REROLL_DIALOG")
+            end,
+            visible = CanRerollCurrentBuffSelectorOptions,
+            enabled = function()
+                rerollCost = GetEndlessDungeonBuffSelectorRerollCost()
+                currencyAmount = GetCurrencyAmount(CURT_ARCHIVAL_FORTUNES, GetCurrencyPlayerStoredLocation(CURT_ARCHIVAL_FORTUNES))
+                return rerollCost <= currencyAmount
+            end,
+        },
+    }
+end
+
+function ZO_EndlessDungeonBuffSelector_Gamepad:InitializeFooter()
+    self.footerData =
+    {
+        data1Text = function()
+            if not CanRerollCurrentBuffSelectorOptions() then
+                return ""
+            end
+            local IS_GAMEPAD = true
+            currencyAmount = ZO_Currency_Format(GetCurrencyAmount(CURT_ARCHIVAL_FORTUNES, GetCurrencyPlayerStoredLocation(CURT_ARCHIVAL_FORTUNES)), CURT_ARCHIVAL_FORTUNES, ZO_CURRENCY_FORMAT_AMOUNT_ICON, IS_GAMEPAD)
+                
+            local IS_PLURAL = false
+            local IS_MIXED_CASE = false
+            local currencyName = GetCurrencyName(CURT_ARCHIVAL_FORTUNES, IS_PLURAL, IS_MIXED_CASE)
+
+            formattedText = zo_strformat(SI_ENDLESS_DUNGEON_BUFF_SELECTOR_CURRENCY_FORMAT, currencyName, currencyAmount)
+            return formattedText
+        end,
+        data1TextNarration = function()
+            if not CanRerollCurrentBuffSelectorOptions() then
+                return ""
+            end
+            currencyAmount = ZO_Currency_FormatGamepad(CURT_ARCHIVAL_FORTUNES, GetCurrencyAmount(CURT_ARCHIVAL_FORTUNES, GetCurrencyPlayerStoredLocation(CURT_ARCHIVAL_FORTUNES)), ZO_CURRENCY_FORMAT_AMOUNT_ICON)
+
+            local IS_PLURAL = false
+            local currencyName = GetCurrencyName(CURT_ARCHIVAL_FORTUNES, IS_PLURAL)
+
+            return zo_strformat(SI_ENDLESS_DUNGEON_BUFF_SELECTOR_CURRENCY_FORMAT, currencyName, currencyAmount)
+        end,
+    }
+end
+
+function ZO_EndlessDungeonBuffSelector_Gamepad:RegisterDialog()
+    ZO_Dialogs_RegisterCustomDialog("GAMEPAD_ENDLESS_DUNGEON_CONFIRM_REROLL_DIALOG",
+    {
+        canQueue = true,
+        gamepadInfo =
+        {
+            dialogType = GAMEPAD_DIALOGS.BASIC,
+        },
+        title =
+        {
+            text = GetString(SI_GAMEPAD_ENDLESS_DUNGEON_CONFIRM_REROLL),
+        },
+        mainText =
+        {
+            align = TEXT_ALIGN_CENTER,
+            text = SI_ENDLESS_DUNGEON_BUFF_SELECTOR_REROLL_INFORMATION,
+        },
+        buttons =
+        {
+            {
+                text = SI_DIALOG_CONFIRM,
+                keybind = "DIALOG_PRIMARY",
+                clickSound = SOUNDS.DIALOG_ACCEPT,
+                callback = function(dialog)
+                    RerollEndlessDungeonBuffSelection()
+                    ENDLESS_DUNGEON_BUFF_SELECTOR_GAMEPAD:SetIsRerolling(true)
+                end,
+            },
+            {
+                text = SI_GAMEPAD_BACK_OPTION,
+                callback = function(dialog)
+                    ZO_Dialogs_ReleaseDialogOnButtonPress("GAMEPAD_ENDLESS_DUNGEON_CONFIRM_REROLL_DIALOG")
+                end,
+            },
+        },
+    })
 end
 
 function ZO_EndlessDungeonBuffSelector_Gamepad:SetupBuffControl(buffControl, previousBuffControl)
@@ -79,6 +192,11 @@ function ZO_EndlessDungeonBuffSelector_Gamepad:OnHiding()
     self.focus:Deactivate()
 end
 
+function ZO_EndlessDungeonBuffSelector_Gamepad:RefreshBuffs()
+    ZO_EndlessDungeonBuffSelector_Shared.RefreshBuffs(self)
+    GAMEPAD_GENERIC_FOOTER:Refresh(self.footerData)
+end
+
 function ZO_EndlessDungeonBuffSelector_Gamepad:GetSceneName()
     return "endlessDungeonBuffSelectorGamepad"
 end
@@ -90,4 +208,3 @@ end
 function ZO_EndlessDungeonBuffSelector_Gamepad.OnControlInitialized(control)
     ENDLESS_DUNGEON_BUFF_SELECTOR_GAMEPAD = ZO_EndlessDungeonBuffSelector_Gamepad:New(control)
 end
-

@@ -362,11 +362,15 @@ function ZO_UnitVisualizer_PowerShieldModule:ApplyPlatformStyle()
     if IsPlayerActivated() then
         for attribute, bar in pairs(self.attributeBarControls) do
             local barInfo = self.attributeInfo and self.attributeInfo[attribute]
-            if barInfo and barInfo.overlayControls then
-                ApplyPlatformStyleToShield(barInfo.overlayControls[LEFT_BAR], barInfo.overlayControls[RIGHT_BAR], self.layoutData.barLeftOverlayTemplate, self.layoutData.barRightOverlayTemplate)
-            end
-            for visualType in pairs(barInfo.visualInfo) do
-                self:OnValueChanged(bar, barInfo, visualType)
+            if barInfo then
+                if barInfo.overlayControls then
+                    ApplyPlatformStyleToShield(barInfo.overlayControls[LEFT_BAR], barInfo.overlayControls[RIGHT_BAR], self.layoutData.barLeftOverlayTemplate, self.layoutData.barRightOverlayTemplate)
+                end
+                if barInfo.visualInfo then
+                    for visualType in pairs(barInfo.visualInfo) do
+                        self:OnValueChanged(bar, barInfo, visualType)
+                    end
+                end
             end
         end
     end

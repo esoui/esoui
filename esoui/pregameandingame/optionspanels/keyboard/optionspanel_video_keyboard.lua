@@ -58,6 +58,13 @@ panelBuilder:AddSetting({
 })
 
 panelBuilder:AddSetting({
+    controlName = "Options_Video_Energy_Sustainability_Screen_Dim_And_Resolution",
+    settingType = SETTING_TYPE_GRAPHICS,
+    settingId = GRAPHICS_SETTING_ENERGY_SUSTAINABILITY_SCREEN_DIM_AND_RESOLUTION,
+    header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_DISPLAY,
+})
+
+panelBuilder:AddSetting({
     controlName = "Options_Video_Use_Background_FPS_Limit",
     settingType = SETTING_TYPE_GRAPHICS,
     settingId = GRAPHICS_SETTING_USE_BACKGROUND_FPS_LIMIT,

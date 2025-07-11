@@ -97,11 +97,11 @@ function ZO_UpdateStatusControlIcons(inventorySlot, slotData)
     end
 
     if slotData.isLockedSetPiece then
-        statusControl:AddIcon(LOCKED_SET_PIECE_ICON_TEXTURE, ZO_SUCCEEDED_TEXT)
+        statusControl:AddIcon(LOCKED_SET_PIECE_ICON_TEXTURE)
     end
 
     if slotData.canBeUsedToLearn then
-        statusControl:AddIcon(CAN_LEARN_ICON_TEXTURE, ZO_SUCCEEDED_TEXT)
+        statusControl:AddIcon(CAN_LEARN_ICON_TEXTURE)
     end
 
     if slotData.isBoPTradeable then

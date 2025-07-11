@@ -121,7 +121,7 @@ function ZO_GuildBrowser_GuildInfo_Keyboard:InitializeKeybindStripDescriptor()
         -- Report
         {
             name = GetString(SI_GUILD_BROWSER_REPORT_GUILD_KEYBIND),
-            keybind = "UI_SHORTCUT_REPORT_PLAYER",
+            keybind = "UI_SHORTCUT_HELP",
             callback = function()
                 local function ReportCallback()
                     GUILD_BROWSER_MANAGER:AddReportedGuild(self.currentGuildId)

@@ -15,7 +15,7 @@
 
                 <Control name="$(parent)Divider" inherits="ZO_LeftPanel_HorizontalDivider" >
                     <Anchor point="TOPLEFT" offsetX="10" offsetY="35" />
-                    <Anchor point="RIGHT" relativeTo="ZO_SharedMediumLeftPanelBackground" relativePoint="RIGHT" constrains="X" />
+                    <Anchor point="RIGHT" relativeTo="ZO_SharedMediumLeftPanelBackground" relativePoint="RIGHT" offsetX="-40" constrains="X" />
                 </Control>
 
                 <Label name="$(parent)SelectedBuild" font="ZoFontGameLargeBold" wrapMode="ELLIPSIS" maxLineCount="2">

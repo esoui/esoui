@@ -12,13 +12,19 @@ function ZO_EventAnnouncementTile:Initialize(control)
     ZO_ActionTile.Initialize(self, control)
 
     self.control:SetHandler("OnUpdate", function()
-        local remainingTime = ZO_MARKET_ANNOUNCEMENT_MANAGER:GetEventAnnouncementRemainingTimeByIndex(self.data.index)
-        self:SetHeaderText(self:GetTimeRemainingText(remainingTime))
+        local remainingTimeS = ZO_MARKET_ANNOUNCEMENT_MANAGER:GetEventAnnouncementRemainingTimeByIndex(self.data.index)
+        if remainingTimeS > ZO_ONE_MONTH_IN_SECONDS then
+            self:SetHeaderText("")
+            self:SetHeaderHidden(true)
+        else
+            self:SetHeaderHidden(false)
+            self:SetHeaderText(self:GetTimeRemainingText(remainingTimeS))
+        end
     end)
 end
 
-function ZO_EventAnnouncementTile:GetTimeRemainingText(remainingTime)
-    local countDownText = ZO_FormatTime(remainingTime, TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_TWELVE_HOUR_NO_SECONDS)
+function ZO_EventAnnouncementTile:GetTimeRemainingText(remainingTimeS)
+    local countDownText = ZO_FormatTime(remainingTimeS, TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_TWELVE_HOUR_NO_SECONDS)
     return zo_strformat(SI_EVENT_ANNOUNCEMENT_TIME, countDownText)
 end
 

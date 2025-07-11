@@ -1,7 +1,6 @@
 ZO_HouseTours_Keyboard = ZO_InitializingObject:Subclass()
 
 function ZO_HouseTours_Keyboard:Initialize()
-    --TODO House Tours: Implement any additional setup
     self:InitializeActivityFinderCategory()
 end
 
@@ -22,7 +21,14 @@ function ZO_HouseTours_Keyboard:InitializeActivityFinderCategory()
             HOUSE_TOURS_SEARCH_RESULTS_KEYBOARD:GetActivityFinderCategoryData(HOUSE_TOURS_LISTING_TYPE_FAVORITE),
             HOUSE_TOURS_MANAGE_LISTINGS_KEYBOARD:GetActivityFinderCategoryData(),
         },
-        isHouseTours = true,
+        isLocked = function()
+            local isEnabled = ZO_IsHouseToursEnabled()
+            return not isEnabled
+        end,
+        lockedText = function()
+            local _, lockedText = ZO_IsHouseToursEnabled()
+            return lockedText
+        end,
     }
     GROUP_MENU_KEYBOARD:AddCategory(houseToursCategoryData)
 end

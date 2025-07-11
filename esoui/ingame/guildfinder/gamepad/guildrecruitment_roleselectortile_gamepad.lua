@@ -43,20 +43,29 @@ function ZO_GuildRecruitment_RoleSelectorTile_Gamepad:SetSelected(isSelected)
     self.roleControl.selectedFrame:SetHidden(not isSelected)
 end
 
-function ZO_GuildRecruitment_RoleSelectorTile_Gamepad:OnRoleToggle()
-    if not self:CanToggleRoleOff() then
-        ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, GetString(SI_GUILD_RECRUITMENT_MUST_SELECT_ROLE_ALERT))
-    else
-        PlaySound(SOUNDS.GAMEPAD_GUILD_FINDER_TOGGLE_ROLE)
+do
+    local SOUND_LOOKUP =
+    {
+        [LFG_ROLE_TANK] = SOUNDS.GROUP_ROLE_TANK_SELECTED,
+        [LFG_ROLE_HEAL] = SOUNDS.GROUP_ROLE_HEAL_SELECTED,
+        [LFG_ROLE_DPS] = SOUNDS.GROUP_ROLE_DPS_SELECTED,
+    }
 
-        self.isChecked = not self.isChecked
-        self.data.currentValues[self.data.role] = self.isChecked
+    function ZO_GuildRecruitment_RoleSelectorTile_Gamepad:OnRoleToggle()
+        if not self:CanToggleRoleOff() then
+            ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, GetString(SI_GUILD_RECRUITMENT_MUST_SELECT_ROLE_ALERT))
+        else
+            PlaySound(SOUND_LOOKUP[self.data.role])
 
-        if self.onSelectionCallback then
-            self.onSelectionCallback(self.data.role, self.isChecked)
+            self.isChecked = not self.isChecked
+            self.data.currentValues[self.data.role] = self.isChecked
+
+            if self.onSelectionCallback then
+                self.onSelectionCallback(self.data.role, self.isChecked)
+            end
+
+            self:UpdateCheckedState()
         end
-
-        self:UpdateCheckedState()
     end
 end
 

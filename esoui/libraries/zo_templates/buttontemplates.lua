@@ -257,9 +257,11 @@ function ZO_CheckButton_SetLabelWidth(button, labelWidth)
     end
 end
 
-function ZO_CheckButton_OnClicked(buttonControl)
+function ZO_CheckButton_OnClicked(buttonControl, button, noSound)
     if ZO_CheckButton_IsEnabled(buttonControl) then
-        PlaySound(SOUNDS.DEFAULT_CLICK)
+        if not noSound then
+            PlaySound(SOUNDS.DEFAULT_CLICK)
+        end
 
         local bState = buttonControl:GetState()
         local callToggleFunc = true

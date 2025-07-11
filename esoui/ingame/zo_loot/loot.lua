@@ -203,10 +203,10 @@ function ZO_Loot:SetUpLootItem(control, data)
         statusIcon:AddIcon(STOLEN_ICON_TEXTURE)
     end
     if data.isLockedSetPiece then
-        statusIcon:AddIcon(LOCKED_SET_PIECE_ICON_TEXTURE, ZO_SUCCEEDED_TEXT)
+        statusIcon:AddIcon(LOCKED_SET_PIECE_ICON_TEXTURE)
     end
     if data.canBeUsedToLearn then
-        statusIcon:AddIcon(CAN_LEARN_ICON_TEXTURE, ZO_SUCCEEDED_TEXT)
+        statusIcon:AddIcon(CAN_LEARN_ICON_TEXTURE)
     end
     statusIcon:Show()
 

@@ -46,6 +46,7 @@ function ZO_ModBrowser_Gamepad:RegisterForEvents()
     EVENT_MANAGER:RegisterForEvent("ModBrowser", EVENT_MOD_LISTING_DEPENDENCIES_LOAD_COMPLETE, function(_, ...) self:OnModListingDependenciesLoadComplete(...) end)
     EVENT_MANAGER:RegisterForEvent("ModBrowser", EVENT_MOD_LISTING_REPORT_SUBMITTED, function(_, ...) self:OnModListingReportSubmitted(...) end)
     EVENT_MANAGER:RegisterForEvent("ModBrowser", EVENT_CONSOLE_ADDONS_DISABLED_STATE_CHANGED, function(_, ...) self:OnConsoleAddOnsDisabledStateChanged(...) end)
+    EVENT_MANAGER:RegisterForEvent("ModBrowser", EVENT_ADDONS_DISABLED_STATE_CHANGED, function(_, ...) self:OnAddOnsDisabledStateChanged(...) end)
     EVENT_MANAGER:RegisterForEvent("ModBrowser", EVENT_MOD_LISTING_RELEASE_NOTE_LOAD_COMPLETE, function(_, ...) self:OnModListingReleaseNoteLoadComplete(...) end)
 end
 
@@ -1230,6 +1231,15 @@ end
 function ZO_ModBrowser_Gamepad:OnConsoleAddOnsDisabledStateChanged(consoleAddOnsDisabled)
     if self:IsShowing() and consoleAddOnsDisabled then
         --If console addons were disabled, close all open dialogs and kick the player out of the screen
+        local FORCE_CLOSE_DIALOGS = true
+        ZO_Dialogs_ReleaseAllDialogs(FORCE_CLOSE_DIALOGS)
+        SCENE_MANAGER:HideCurrentScene(ZO_BHSCR_ACCESS_FORBIDDEN)
+    end
+end
+
+function ZO_ModBrowser_Gamepad:OnAddOnsDisabledStateChanged(addOnsDisabled)
+    if self:IsShowing() and addOnsDisabled then
+        --If addons were disabled, close all open dialogs and kick the player out of the screen
         local FORCE_CLOSE_DIALOGS = true
         ZO_Dialogs_ReleaseAllDialogs(FORCE_CLOSE_DIALOGS)
         SCENE_MANAGER:HideCurrentScene(ZO_BHSCR_ACCESS_FORBIDDEN)

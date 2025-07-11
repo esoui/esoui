@@ -245,7 +245,8 @@ function ZO_GroupFinder_AdditionalFilters_Keyboard:Refresh()
                 local _, isSet = GetGroupFinderFilterPrimaryOptionByIndex(i)
                 self.difficultyRadioButtonGroup:SetButtonIsValidOption(self.difficultyButtons[i], true)
                 if isSet then
-                    self.difficultyRadioButtonGroup:SetClickedButton(self.difficultyButtons[i])
+                    local IGNORE_CALLBACK = true
+                    self.difficultyRadioButtonGroup:SetClickedButton(self.difficultyButtons[i], IGNORE_CALLBACK)
                 end
             else
                 self.difficultyRadioButtonGroup:SetButtonIsValidOption(self.difficultyButtons[i], false)

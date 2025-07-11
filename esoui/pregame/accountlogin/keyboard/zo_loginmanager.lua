@@ -27,7 +27,6 @@ function LoginManager_Keyboard:Initialize()
     EVENT_MANAGER:RegisterForEvent("LoginManager", EVENT_LOGIN_FAILED_INVALID_CREDENTIALS, FilterMethodCallback(self.OnBadLogin))
     EVENT_MANAGER:RegisterForEvent("LoginManager", EVENT_LOGIN_SUCCESSFUL, FilterMethodCallback(self.OnLoginSuccessful))
     EVENT_MANAGER:RegisterForEvent("LoginManager", EVENT_LOGIN_QUEUED, FilterMethodCallback(self.OnLoginQueued))
-    EVENT_MANAGER:RegisterForEvent("LoginManager", EVENT_LOGIN_OVERFLOW_MODE_PROMPT, FilterMethodCallback(self.OnOverflowModeWaiting))
     EVENT_MANAGER:RegisterForEvent("LoginManager", EVENT_LOGIN_REQUESTED, FilterMethodCallback(self.OnLoginRequested))
     EVENT_MANAGER:RegisterForEvent("LoginManager", EVENT_LOGIN_OTP_PENDING, FilterMethodCallback(self.OnOTPPending))
     EVENT_MANAGER:RegisterForEvent("LoginManager", EVENT_BAD_CLIENT_VERSION, FilterMethodCallback(self.OnBadClientVersion))
@@ -166,6 +165,11 @@ function LoginManager_Keyboard:OnCreateLinkLoadingError(loginError, linkingError
                 {
                     titleStringId = SI_LOGIN_DIALOG_TITLE_ACCOUNT_SUSPENDED,
                 }
+            elseif loginError == LOGIN_AUTH_ERROR_GAME_ACCOUNT_IS_CHILD_ACCOUNT then
+                dialogData =
+                {
+                    titleStringId = SI_LOGIN_DIALOG_TITLE_CHILD_ACCOUNT,
+                }
             end
 
             -- In any case, show the normal login fragment so that the user can attempt to manually login again if a
@@ -257,12 +261,6 @@ function LoginManager_Keyboard:OnLoginQueued(waitTime, queuePosition)
     end
 end
 
-function LoginManager_Keyboard:OnOverflowModeWaiting(mainServerETASeconds, queuePosition)
-    local waitTime = GetLoginQueueApproximateWaitTime(mainServerETASeconds, queuePosition)
-    ZO_Dialogs_ReleaseAllDialogs(true)
-    ZO_Dialogs_ShowDialog("PROVIDE_OVERFLOW_RESPONSE", {waitTime = waitTime})
-end
-
 function LoginManager_Keyboard:OnBadClientVersion()
     ZO_Dialogs_ReleaseAllDialogs(true)
     ZO_Dialogs_ShowDialog("BAD_CLIENT_VERSION")
@@ -281,6 +279,8 @@ function LoginManager_Keyboard:OnBadLogin(errorCode, accountPageURL)
         ZO_Dialogs_ShowDialog("BAD_LOGIN_ACCOUNT_BANNED")
     elseif errorCode == AUTHENTICATION_ERROR_ACCOUNT_SUSPENDED then
         ZO_Dialogs_ShowDialog("BAD_LOGIN_ACCOUNT_SUSPENDED")
+    elseif errorCode == AUTHENTICATION_ERROR_ACCOUNT_IS_CHILD then
+        ZO_Dialogs_ShowDialog("BAD_LOGIN_CHILD_ACCOUNT", { accountPageURL = accountPageURL })
     else
         ZO_Dialogs_ShowDialog("BAD_LOGIN", { accountPageURL = accountPageURL })
     end

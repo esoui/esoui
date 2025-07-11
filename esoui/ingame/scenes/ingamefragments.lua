@@ -387,8 +387,8 @@ function ZO_WindowSoundFragment:Show()
 end
 
 function ZO_WindowSoundFragment:Hide()
-    --only play the close sound if we're exiting the window UI
-    if(SCENE_MANAGER:IsShowingBaseSceneNext()) then
+    --only play the close sound if we're exiting the window UI to the hud
+    if SCENE_MANAGER:IsShowingHUDSceneNext() then
         PlaySound(self.hideSoundId)
     end
     self:OnHidden()
@@ -530,12 +530,23 @@ function ZO_MinimizeChatFragment:New(actionLayerName)
 end
 
 function ZO_MinimizeChatFragment:Show()
-    local chatSystem = ZO_GetChatSystem()
-    self.wasChatMaximized = not chatSystem:IsMinimized()
-    if self.wasChatMaximized then
-        chatSystem:Minimize()
+    local function MinimizeChat()
+        if self:IsShowing() then
+            local chatSystem = ZO_GetChatSystem()
+            self.wasChatMaximized = not chatSystem:IsMinimized()
+            if self.wasChatMaximized then
+                chatSystem:Minimize()
+            end
+            self:OnShown()
+        end
     end
-    self:OnShown()
+
+    if IsPlayerActivated() then
+        MinimizeChat()
+    else
+        local DO_ONCE = true
+        EVENT_MANAGER:RegisterForEvent("MinimizeChatFragment_PlayerActivated", EVENT_PLAYER_ACTIVATED, MinimizeChat, DO_ONCE)
+    end
 end
 
 function ZO_MinimizeChatFragment:Hide()

@@ -41,6 +41,10 @@ function ZO_ActionTile:SetHeaderColor(headerColor)
     self.headerLabel:SetColor(headerColor:UnpackRGB())
 end
 
+function ZO_ActionTile:SetHeaderHidden(hidden)
+    self.headerLabel:SetHidden(hidden)
+end
+
 function ZO_ActionTile:SetTitle(titleText)
     self.titleText = titleText
     self.titleLabel:SetText(self.titleText)

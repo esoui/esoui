@@ -45,14 +45,14 @@ local CONSTANTS =
 
     WORLDMAP_SIZE_FULLSCREEN = 1,
     WORLDMAP_SIZE_SMALL = 2,
-    
+
     GAMEPAD_TOOLTIP_ID = 1,
 
     HISTORY_SLIDER_RANGE = 100,
     DRAG_START_DIST_SQ = 10 * 10,
 
     -- times are in seconds
-    PIN_UPDATE_DELAY          = .04,   -- Delay for updating pin positions and rotations for player and group members.
+    PIN_UPDATE_DELAY          = 0.04,  -- Delay for updating pin positions and rotations for player and group members.
     MAP_REFRESH_UPDATE_DELAY  = 1,     -- Delay between checking to see if the map needs to change based on the player's current location
 
     ALLIANCE_TO_RESTRICTED_PIN_TYPE = {
@@ -129,9 +129,9 @@ function ZO_WorldMap_GetTooltipForMode(mode)
         return GetPlatformKeepTooltip()
     elseif mode == ZO_MAP_TOOLTIP_MODE.MAP_LOCATION then
         return GetPlatformMapLocationTooltip()
-    else
-        assert(false)
     end
+
+    internalassert(false, string.format("Invalid map tooltip mode: %s", mode))
 end
 
 local g_mapOverflowX = 0
@@ -278,11 +278,11 @@ function InformationTooltipMixin:AppendDelveInfo(pin)
     local poiIndex = pin:GetPOIIndex()
     local zoneIndex = pin:GetPOIZoneIndex()
 
-    local poiName, _, poiStartDesc, poiFinishedDesc = GetPOIInfo(zoneIndex, poiIndex)
+    local poiName = GetPOIInfo(zoneIndex, poiIndex)
 
     local informationTooltip = GetPlatformInformationTooltip()
     
-    if pin:IsDelvePin() then    
+    if pin:IsDelvePin() then
         informationTooltip:AddLine(zo_strformat(SI_WORLD_MAP_DELVE_NAME, poiName), "", ZO_TOOLTIP_DEFAULT_COLOR:UnpackRGB())
     elseif pin:IsPublicDungeonPin() then
         informationTooltip:AddLine(zo_strformat(SI_WORLD_MAP_PUBLIC_DUNGEON_NAME, poiName), "", ZO_TOOLTIP_DEFAULT_COLOR:UnpackRGB())
@@ -397,13 +397,15 @@ function InformationTooltipMixin:AppendSuggestionActivity(pin)
     end
 end
 
-local tooltipOrder =
+local g_tooltipOrder =
 {
-    ZO_MAP_TOOLTIP_MODE.KEEP, ZO_MAP_TOOLTIP_MODE.MAP_LOCATION, ZO_MAP_TOOLTIP_MODE.INFORMATION
+    ZO_MAP_TOOLTIP_MODE.KEEP,
+    ZO_MAP_TOOLTIP_MODE.MAP_LOCATION,
+    ZO_MAP_TOOLTIP_MODE.INFORMATION,
 }
-ZO_WORLD_MAP_TOOLTIP_ORDER = tooltipOrder
+ZO_WORLD_MAP_TOOLTIP_ORDER = g_tooltipOrder
 
-local usedTooltips = {}
+local g_usedTooltips = {}
 
 local function HideKeyboardTooltips()
     local NOT_GAMEPAD_MODE = false
@@ -430,8 +432,8 @@ function ZO_WorldMap_HideAllTooltipsLater()
         g_hideTooltipsAt = GetGameTimeMilliseconds() + 1000
     else
         HideKeyboardTooltips()
-        for i = 1, #tooltipOrder do
-            usedTooltips[i] = nil
+        for i = 1, #g_tooltipOrder do
+            g_usedTooltips[i] = nil
         end
     end
 end
@@ -443,8 +445,8 @@ local function HideAllTooltips()
         HideKeyboardTooltips()
     end
     g_hideTooltipsAt = nil
-    for i = 1, #tooltipOrder do
-        usedTooltips[i] = nil
+    for i = 1, #g_tooltipOrder do
+        g_usedTooltips[i] = nil
     end
 end
 
@@ -457,76 +459,14 @@ local function ShowGamepadTooltip(resetScroll)
         g_hideTooltipsAt = nil
     end
 
-    if not usedTooltips[CONSTANTS.GAMEPAD_TOOLTIP_ID] then
-        usedTooltips[CONSTANTS.GAMEPAD_TOOLTIP_ID] = true
+    if not g_usedTooltips[CONSTANTS.GAMEPAD_TOOLTIP_ID] then
+        g_usedTooltips[CONSTANTS.GAMEPAD_TOOLTIP_ID] = true
         SCENE_MANAGER:AddFragment(GAMEPAD_WORLD_MAP_TOOLTIP_FRAGMENT)
 
         ZO_MapLocationTooltip_Gamepad:ClearLines(resetScroll)
     end
 
     return ZO_MapLocationTooltip_Gamepad
-end
-
-local function UpdateMouseOverPins()
-    local wasShowingTooltip = ZO_WorldMap_IsTooltipShowing()
-
-    if g_mapPinManager:UpdateMouseOverPins(usedTooltips) then
-        -- Gamepad handles its own layout
-        if not IsInGamepadPreferredMode() then
-            local prevControl = nil
-            local placeAbove = GuiMouse:GetTop() > (GuiRoot:GetHeight() / 2)
-            local placeLeft = GuiMouse:GetLeft() > (GuiRoot:GetWidth() / 2)
-            for i = 1, #tooltipOrder do
-                if usedTooltips[i] then
-                    local tooltip = tooltipOrder[i]
-                    local tooltipControl = ZO_WorldMap_GetTooltipForMode(tooltip)
-
-                    if prevControl then
-                        if placeLeft then
-                            if placeAbove then
-                                tooltipControl:ClearAnchors()
-                                tooltipControl:SetAnchor(BOTTOMRIGHT, prevControl, TOPRIGHT, 0, -5)
-                            else
-                                tooltipControl:ClearAnchors()
-                                tooltipControl:SetAnchor(TOPRIGHT, prevControl, BOTTOMRIGHT, 0, 5)
-                            end
-                        else
-                            if placeAbove then
-                                tooltipControl:ClearAnchors()
-                                tooltipControl:SetAnchor(BOTTOMLEFT, prevControl, TOPLEFT, 0, -5)
-                            else
-                                tooltipControl:ClearAnchors()
-                                tooltipControl:SetAnchor(TOPLEFT, prevControl, BOTTOMLEFT, 0, 5)
-                            end
-                        end
-                    else
-                        if placeLeft then
-                            tooltipControl:ClearAnchors()
-                            tooltipControl:SetAnchor(RIGHT, GuiMouse, LEFT, -32, 0)
-                        else
-                            tooltipControl:ClearAnchors()
-                            tooltipControl:SetAnchor(LEFT, GuiMouse, RIGHT, 32, 0)
-                        end
-                    end
-
-                    prevControl = tooltipControl
-
-                    if tooltip == ZO_MAP_TOOLTIP_MODE.INFORMATION then
-                        g_ownsInformationTooltip = true
-                    end
-                end
-            end
-        end
-    end
-
-    local isShowingTooltip = ZO_WorldMap_IsTooltipShowing()
-    if wasShowingTooltip ~= isShowingTooltip then
-        if isShowingTooltip then
-            CALLBACK_MANAGER:FireCallbacks("OnShowWorldMapTooltip")
-        else
-            CALLBACK_MANAGER:FireCallbacks("OnHideWorldMapTooltip")
-        end
-    end
 end
 
 local function OnGuildNameAvailable()
@@ -805,11 +745,11 @@ local function SetMapWindowSize(newWidth, newHeight)
     local raggedEdgeScaledOffsetY = RAGGED_EDGE_OFFSET_Y * g_mapPanAndZoom:GetCurrentCurvedZoom()
 
     if IsInGamepadPreferredMode() then
-        g_mapOverflowX = mapSize * .5
-        g_mapOverflowY = mapSize * .5
+        g_mapOverflowX = mapSize * 0.5
+        g_mapOverflowY = mapSize * 0.5
     else
-        g_mapOverflowX = zo_floor(mapSize - containerWidth) * .5
-        g_mapOverflowY = zo_floor(mapSize - containerHeight) * .5
+        g_mapOverflowX = zo_floor(mapSize - containerWidth) * 0.5
+        g_mapOverflowY = zo_floor(mapSize - containerHeight) * 0.5
     end
 
     g_mapOverflowMaxX = g_mapOverflowX
@@ -873,13 +813,7 @@ function ZO_WorldMap_OnResizeStop(self)
 end
 
 -- Zoom Keybind Descriptor (for handling updates on various parts of the map and pins)
-local ZO_MapZoomKeybindStrip = ZO_Object:Subclass()
-
-function ZO_MapZoomKeybindStrip:New(...)
-    local zoomKeybindStrip = ZO_Object.New(self)
-    zoomKeybindStrip:Initialize(...)
-    return zoomKeybindStrip
-end
+local ZO_MapZoomKeybindStrip = ZO_InitializingObject:Subclass()
 
 function ZO_MapZoomKeybindStrip:Initialize(control, descriptor)
     self.control = control
@@ -904,13 +838,7 @@ function ZO_MapZoomKeybindStrip:CleanDirty()
 end
 
 -- Mouseover Keybind Descriptor (for handling updates on various parts of the map and pins)
-local ZO_MapMouseoverKeybindStrip = ZO_Object:Subclass()
-
-function ZO_MapMouseoverKeybindStrip:New(...)
-    local mouseoverKeybindStrip = ZO_Object.New(self)
-    mouseoverKeybindStrip:Initialize(...)
-    return mouseoverKeybindStrip
-end
+local ZO_MapMouseoverKeybindStrip = ZO_InitializingObject:Subclass()
 
 function ZO_MapMouseoverKeybindStrip:Initialize(control, descriptor)
     self.control = control
@@ -1419,7 +1347,7 @@ function ZO_MapPanAndZoom:Update(currentTime)
     if self:HasTargetZoom() then
         local oldNormalizedZoom = self.currentNormalizedZoom
 
-        if self.targetNormalizedZoom >= 0 and zo_abs(self.currentNormalizedZoom - self.targetNormalizedZoom) < .001 then
+        if self.targetNormalizedZoom >= 0 and zo_abs(self.currentNormalizedZoom - self.targetNormalizedZoom) < 0.001 then
             self:SetCurrentNormalizedZoomInternal(self.targetNormalizedZoom)
             self:ClearTargetNormalizedZoom()
             self:ClearLockPoint()
@@ -1756,7 +1684,7 @@ do
         g_mapPanAndZoom:Update(currentTimeS)
 
         if nextMouseOverUpdateS == nil or currentTimeS > nextMouseOverUpdateS then
-            UpdateMouseOverPins()
+            WORLD_MAP_MANAGER:UpdateMouseoverTooltips()
             nextMouseOverUpdateS = currentTimeS + 0.3
         end
 
@@ -2516,11 +2444,6 @@ function ZO_WorldMap_OnHide()
     local playerPin = g_mapPinManager:GetPlayerPin()
     playerPin:ResetAnimation(ZO_MapPin.ANIM_CONSTANTS.RESET_ANIM_HIDE_CONTROL)
 
-    -- Always needs to be cleared
-    ZO_WorldMapMouseoverName:SetText("")
-    ZO_WorldMapMouseoverName.owner = ""
-    ZO_WorldMapMouseOverDescription:SetText("")
-
     WORLD_MAP_MANAGER:ResetBlobs()
     ResetMouseIsOverWorldMap()
 
@@ -2689,12 +2612,12 @@ function ZO_WorldMap_HandlePinEnter()
     -- layout and anchoring...however the pin that the mouse was previously over has probably
     -- moved.  So the tooltip is created over the wrong pin, with the wrong data.
     -- Then the OnUpdate handler is called and realizes that the mouse is over a different pin and pops the tooltip.
-    UpdateMouseOverPins()
+    WORLD_MAP_MANAGER:UpdateMouseoverTooltips()
 end
 
 function ZO_WorldMap_HandlePinExit()
     -- ZO_WorldMap_HandlePinExit exists for the same reason that ZO_WorldMap_HandlePinEnter does, to avoid tooltip and zone text pop.
-    UpdateMouseOverPins()
+    WORLD_MAP_MANAGER:UpdateMouseoverTooltips()
 end
 
 function ZO_WorldMap_ChangeFloor(control)
@@ -3028,10 +2951,6 @@ do
             ZO_WorldMapInfo_Gamepad_Initialize()
         end
 
-        if GetKeepFastTravelInteraction() then
-            CloseChatter()
-        end
-
         local function OnGamepadPreferredModeChanged()
             if IsInGamepadPreferredMode() then
                 HideKeyboardTooltips()
@@ -3171,7 +3090,6 @@ function ZO_WorldMap_UpdateInteractKeybind_Gamepad()
 
                 if buttonText then
                     ZO_WorldMapGamepadInteractKeybind:SetHidden(g_interactKeybindForceHidden or GAMEPAD_WORLD_MAP_KEY_FRAGMENT:IsShowing())
-                    local KEYBIND_SCALE_PERCENT = 120
                     ZO_WorldMapGamepadInteractKeybind:SetText(zo_strformat(SI_GAMEPAD_WORLD_MAP_INTERACT, buttonText))
                 else
                     ZO_WorldMapGamepadInteractKeybind:SetHidden(true)
@@ -3234,16 +3152,16 @@ end
 
 function ZO_WorldMap_IsTooltipShowing()
     if IsInGamepadPreferredMode() then
-        return usedTooltips[CONSTANTS.GAMEPAD_TOOLTIP_ID]
-    else
-        for i = 1, #tooltipOrder do
-            if usedTooltips[i] then
-                return true
-            end
-        end
-
-        return false
+        return g_usedTooltips[CONSTANTS.GAMEPAD_TOOLTIP_ID]
     end
+
+    for i = 1, #g_tooltipOrder do
+        if g_usedTooltips[i] then
+            return true
+        end
+    end
+
+    return false
 end
 
 function ZO_WorldMap_IsWorldMapInfoShowing()
@@ -3623,7 +3541,16 @@ function ZO_WorldMapManager:Initialize(control)
         end
     end)
 
-    --Information tooltip mixin
+    -- Mouseover and Tooltips
+    self.mouseoverNameLabel = control:GetNamedChild("MouseoverName")
+    self.mouseoverDescriptionLabel = control:GetNamedChild("MouseOverDescription")
+    self.mouseoverProgressBar = control:GetNamedChild("MouseoverProgressBar")
+    ZO_StatusBar_SetGradientColor(self.mouseoverProgressBar, ZO_XP_BAR_GRADIENT_COLORS)
+    self.mouseoverProgressBarLabel = self.mouseoverProgressBar:GetNamedChild("Progress")
+
+    self.foundTooltipMouseOverPins = {}
+    self.pinTooltipIsDirty = false
+
     zo_mixin(InformationTooltip, InformationTooltipMixin)
 
     self:InitializeKeybinds()
@@ -3835,6 +3762,11 @@ do
         [EVENT_GROUP_MEMBER_SUBZONE_CHANGED] = function()
             g_mapPinManager:RefreshGroupPins()
         end,
+
+        [EVENT_SPECTACLE_EVENT_UPDATED] = function()
+            ZO_WorldMap_RefreshWayshrines()
+            ZO_WorldMap_RefreshAllPOIs()
+        end,
     }
 
     function ZO_WorldMapManager:RegisterForEvents()
@@ -3879,13 +3811,8 @@ do
                 ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", function(...) self:OnCollectionUpdated(...) end)
 
                 CALLBACK_MANAGER:RegisterCallback("OnWorldMapChanged", function(wasNavigateIn)
-                    local mouseoverNameControl = self.control:GetNamedChild("MouseoverName")
-                    mouseoverNameControl:SetText("")
-                    mouseoverNameControl.owner = ""
+                    self:ClearMapHeader()
 
-                    local mouseoverDescriptionControl = self.control:GetNamedChild("MouseOverDescription")
-                    mouseoverDescriptionControl:SetText("")
-                
                     g_mapPinManager:UpdateMovingPins()
                     UpdateMapCampaign()
                     ZO_WorldMap_UpdateMap()
@@ -3894,6 +3821,8 @@ do
                     ZO_WorldMap_MarkKeybindStripsDirty()
                     g_dataRegistration:Refresh()
                     self:TryTriggeringTutorials()
+
+                    self:TryShowSpectacleMapHeader()
                 end)
 
                 -- Delay initializing the platform style until after the saved variables are loaded
@@ -3907,7 +3836,7 @@ do
             self:OnAutoNavigationTargetSet()
         end)
 
-        self.control:RegisterForEvent(EVENT_INTERFACE_SETTING_CHANGED, function(_, ...) 
+        self.control:RegisterForEvent(EVENT_INTERFACE_SETTING_CHANGED, function(_, ...)
             self:OnInterfaceSettingChanged(...)
         end)
 
@@ -3953,11 +3882,12 @@ do
         headerStyle =
         {
             NAME_OFFSET_Y = 10,
-            NAME_FONT = "ZoFontAnnounceMessage",
+            NAME_FONT = "ZoFontHeader3",
             NAME_MODIFY_STYLE = MODIFY_TEXT_TYPE_NONE,
             DESCRIPTION_OFFSET_Y = 2,
-            DESCRIPTION_FONT = "ZoFontGameOutline",
+            DESCRIPTION_FONT = "ZoFontHeader2",
             DESCRIPTION_MODIFY_STYLE = MODIFY_TEXT_TYPE_NONE,
+            PROGRESS_BAR_OFFSET_Y = 10,
         },
         hideAutoNavigationContinueKeybindBackground = false,
     }
@@ -3972,6 +3902,7 @@ do
             DESCRIPTION_OFFSET_Y = 8,
             DESCRIPTION_FONT = "ZoFontGamepad34",
             DESCRIPTION_MODIFY_STYLE = MODIFY_TEXT_TYPE_NONE,
+            PROGRESS_BAR_OFFSET_Y = 15,
         },
         hideAutoNavigationContinueKeybindBackground = true,
     }
@@ -3991,22 +3922,27 @@ function ZO_WorldMapManager:ApplyPlatformStyle(style)
 
     local headerStyle = style.headerStyle
 
-    local mouseoverNameControl = self.control:GetNamedChild("MouseoverName")
+    local mouseoverNameControl = self.mouseoverNameLabel
     local scrollControl = self.control:GetNamedChild("Scroll")
 
     mouseoverNameControl:ClearAnchors()
-    mouseoverNameControl:SetAnchor(TOPLEFT, scrollControl, TOPLEFT, 0, headerStyle.NAME_OFFSET_Y)
-    mouseoverNameControl:SetAnchor(TOPRIGHT, scrollControl, TOPRIGHT, 0, headerStyle.NAME_OFFSET_Y)
+    mouseoverNameControl:SetAnchor(TOPLEFT, scrollControl, TOPLEFT, 20, headerStyle.NAME_OFFSET_Y)
+    mouseoverNameControl:SetAnchor(TOPRIGHT, scrollControl, TOPRIGHT, -20, headerStyle.NAME_OFFSET_Y)
     mouseoverNameControl:SetFont(headerStyle.NAME_FONT)
     mouseoverNameControl:SetModifyTextType(headerStyle.NAME_MODIFY_STYLE)
 
-    local mouseoverDescriptionControl = self.control:GetNamedChild("MouseOverDescription")
+    local mouseoverDescriptionControl = self.mouseoverDescriptionLabel
 
     mouseoverDescriptionControl:ClearAnchors()
     mouseoverDescriptionControl:SetAnchor(TOPLEFT, mouseoverNameControl, BOTTOMLEFT, 0, headerStyle.DESCRIPTION_OFFSET_Y)
     mouseoverDescriptionControl:SetAnchor(TOPRIGHT, mouseoverNameControl, BOTTOMRIGHT, 0, headerStyle.DESCRIPTION_OFFSET_Y)
     mouseoverDescriptionControl:SetFont(headerStyle.DESCRIPTION_FONT)
     mouseoverDescriptionControl:SetModifyTextType(headerStyle.DESCRIPTION_MODIFY_STYLE)
+
+    local mouseoverProgressBar = self.mouseoverProgressBar
+    ApplyTemplateToControl(mouseoverProgressBar, ZO_GetPlatformTemplate("ZO_WorldMap_ProgressBar"))
+    mouseoverProgressBar:ClearAnchors()
+    mouseoverProgressBar:SetAnchor(TOP, mouseoverDescriptionControl, BOTTOM, 0, headerStyle.PROGRESS_BAR_OFFSET_Y)
 
     -- Map Navigation Buttons/Keybind Icons
 
@@ -4140,6 +4076,7 @@ end
 function ZO_WorldMapManager:OnHidden()
     self:ClearAutoNavigation()
     self:ClearQuestPings()
+    self:ClearMapHeader()
 
     self:FireCallbacks("Hidden")
 end
@@ -4543,21 +4480,34 @@ function ZO_WorldMapManager:UpdateBlobs(currentFrameTimeS)
 
     if normalizedMouseX and normalizedMouseY then
         local normalizedLocX, normalizedLocY, normalizedWidth, normalizedHeight
-        mouseoverLocationName, mouseoverTextureFile, normalizedWidth, normalizedHeight, normalizedLocX, normalizedLocY = GetMapMouseoverInfo(normalizedMouseX, normalizedMouseY)
+        mouseoverLocationName, mouseoverTextureFile, normalizedWidth, normalizedHeight, normalizedLocX, normalizedLocY, self.mouseoverMapId = GetMapMouseoverInfo(normalizedMouseX, normalizedMouseY)
         mouseoverTextureUIWidth = normalizedWidth * ZO_MAP_CONSTANTS.MAP_WIDTH
         mouseoverTextureUIHeight = normalizedHeight * ZO_MAP_CONSTANTS.MAP_HEIGHT
         mouseoverTextureXOffset = normalizedLocX * ZO_MAP_CONSTANTS.MAP_WIDTH
         mouseoverTextureYOffset = normalizedLocY * ZO_MAP_CONSTANTS.MAP_HEIGHT
     end
 
-    if mouseoverLocationName ~= self.mouseoverCurrentLocation and ZO_WorldMapMouseoverName.owner ~= "poi" then
-        if mouseoverLocationName ~= ZO_WorldMap.zoneName then
-            ZO_WorldMapMouseoverName:SetText(zo_strformat(SI_WORLD_MAP_LOCATION_NAME, mouseoverLocationName))
-        else
-            ZO_WorldMapMouseoverName:SetText("")
+    if mouseoverLocationName ~= self.mouseoverCurrentLocation and self:GetMapHeaderOwner() ~= "poi" then
+        local nameText = ""
+        if mouseoverLocationName ~= self.control.zoneName then
+            nameText = zo_strformat(SI_WORLD_MAP_LOCATION_NAME, mouseoverLocationName)
         end
         self.mouseoverCurrentLocation = mouseoverLocationName
+
+        if nameText ~= "" then
+            local mapHeaderInfo =
+            {
+                nameText = nameText,
+                owner = "blob",
+            }
+
+            self:SetMapHeader(mapHeaderInfo)
+        else
+            self:ClearMapHeader()
+        end
     end
+
+    self:TryShowSpectacleMapHeader()
 
     local textureChanged = false
     if mouseoverTextureFile ~= self.mouseoverBlobCurrentTexture then
@@ -5475,6 +5425,101 @@ function ZO_WorldMapManager:AreStickyPinsEnabledForPinGroup(pinGroup)
     return true
 end
 
+--
+-- End Map Mode Functions
+--
+
+--
+-- Begin Mouseover and Tooltip Functions
+--
+
+-- headerInfo is a table with the following fields:
+--  nameText = The text to show in the name label, defaults to ""
+--  descriptionText = The text to show in the description label, defaults to ""
+--  owner = A string indicating what has set the header info and therefor what "owns" it
+--  showProgressBar = whether to show the status bar, defaults to false
+--  progressBarMinValue = The min value of the progress bar, defaults to 0.0
+--  progressBarMaxValue = The min value of the progress bar, defaults to 1.0
+--  progressBarValue = The value to set the progress bar to, defaults to 0.0
+--  progressBarText = The text to display on the progress bar, defaults to ""
+function ZO_WorldMapManager:SetMapHeader(headerInfo)
+    local nameText = headerInfo.nameText or ""
+    self.mouseoverNameLabel:SetText(nameText)
+    self.mouseoverNameLabel.owner = headerInfo.owner
+
+    local descriptionText = headerInfo.descriptionText or ""
+    self.mouseoverDescriptionLabel:SetText(descriptionText)
+
+    local showBar = headerInfo.showProgressBar or false
+    self.mouseoverProgressBar:SetHidden(not showBar)
+    if showBar then
+        local minValue = headerInfo.progressBarMinValue or 0.0
+        local maxValue = headerInfo.progressBarMaxValue or 1.0
+        self.mouseoverProgressBar:SetMinMax(minValue, maxValue)
+        local value = headerInfo.progressBarValue or 0.0
+        self.mouseoverProgressBar:SetValue(value)
+        local text = headerInfo.progressBarText or ""
+        self.mouseoverProgressBarLabel:SetText(text)
+    end
+end
+
+do
+    local EMPTY_HEADER_INFO =
+    {
+        nameText = "",
+        descriptionText = "",
+        owner = nil,
+        showProgressBar = false,
+    }
+
+    function ZO_WorldMapManager:ClearMapHeader()
+        self:SetMapHeader(EMPTY_HEADER_INFO)
+    end
+end
+
+function ZO_WorldMapManager:GetMapHeaderOwner()
+    return self.mouseoverNameLabel.owner
+end
+
+function ZO_WorldMapManager:TryShowSpectacleMapHeader()
+    local headerOwner = self:GetMapHeaderOwner()
+    if not (headerOwner == nil or headerOwner == "spectacle") then
+        return
+    end
+
+    local zoneIndex = GetCurrentMapZoneIndex()
+    -- This could return multiple spectacle ids, but we're just going to use the first
+    local spectacleId = GetActiveSpectacleEventIdsForZoneIndex(zoneIndex)
+    if spectacleId == nil then
+        return
+    end
+
+    local spectacleName = GetActiveSpectacleEventDisplayName(spectacleId)
+
+    local currentPhase, numPhases = GetActiveSpectacleEventPhaseInfo(spectacleId)
+    local phaseDisplayName = GetActiveSpectacleEventPhaseDisplayName(spectacleId)
+    local phaseHeader = zo_strformat(SI_SPECTACLE_EVENTS_PHASE_NUMBER_AND_NAME_FORMATTER, currentPhase, phaseDisplayName)
+
+    local progressPercentage = GetActiveSpectacleEventPhaseProgressPercentage(spectacleId)
+
+    local formattedPercentage = string.format("%.1f", (progressPercentage * 100))
+    local percentageString = zo_strformat(SI_SPECTACLE_EVENTS_PROGRESS_PERCENT, formattedPercentage)
+
+    local mapHeaderInfo =
+    {
+        nameText = spectacleName,
+        descriptionText = phaseHeader,
+        owner = "spectacle",
+        showProgressBar = true,
+        progressBarMinValue = 0.0,
+        progressBarMaxValue = 1.0,
+        progressBarValue = progressPercentage,
+        progressBarText = percentageString,
+    }
+
+    self:SetMapHeader(mapHeaderInfo)
+end
+
 function ZO_WorldMapManager:DoMouseEnterForPinType(pinType)
     g_keybindStrips.mouseover:DoMouseEnterForPinType(pinType)
     g_keybindStrips.gamepad:DoMouseEnterForPinType(pinType)
@@ -5485,8 +5530,482 @@ function ZO_WorldMapManager:DoMouseExitForPinType(pinType)
     g_keybindStrips.gamepad:DoMouseExitForPinType(pinType)
 end
 
+function ZO_WorldMapManager:DoMouseExitForPin(pin)
+    if pin:IsPOI() or pin:IsFastTravelWayShrine() then
+        --reset the status to show what part of the map we're over (except if it's the name of this zone)
+        local currentLocation = self.mouseoverCurrentLocation
+        if currentLocation ~= "" and currentLocation ~= self.control.zoneName then
+            local mapHeaderInfo =
+            {
+                nameText = zo_strformat(SI_WORLD_MAP_LOCATION_NAME, currentLocation),
+                descriptionText = "",
+                owner = "map",
+            }
+
+            self:SetMapHeader(mapHeaderInfo)
+        else
+            self:ClearMapHeader()
+        end
+    end
+
+    local pinType = pin:GetPinType()
+    self:DoMouseExitForPinType(pinType)
+
+    self:TryShowSpectacleMapHeader()
+end
+
+function ZO_WorldMapManager:GetFoundTooltipMouseOverPins()
+    return self.foundTooltipMouseOverPins
+end
+
+function ZO_WorldMapManager:MarkPinTooltipDirty()
+    self.pinTooltipIsDirty = true
+end
+
+function ZO_WorldMapManager:IsPinTooltipDirty()
+    return self.pinTooltipIsDirty
+end
+
+local function DefaultCompareNilable(first, second)
+    if first and second then
+        return first < second
+    elseif first then
+        return true
+    end
+
+    return false
+end
+
+function ZO_WorldMapManager.KeyboardTooltipPinSortFunction(firstPin, secondPin)
+    local firstPinType = firstPin:GetPinType()
+    local secondPinType = secondPin:GetPinType()
+
+    local firstTooltipInfo = ZO_MapPin.TOOLTIP_CREATORS[firstPinType]
+    local secondTooltipInfo = ZO_MapPin.TOOLTIP_CREATORS[secondPinType]
+
+    -- If either tooltip info is nil, that pin has no tooltip, and we just need
+    -- to make sure it sorts to a consistant place.
+    if not firstTooltipInfo then
+        return false
+    elseif not secondTooltipInfo then
+        return true
+    end
+
+    local firstCategoryId = ZO_Eval(firstTooltipInfo.categoryId, firstPin)
+    local secondCategoryId = ZO_Eval(secondTooltipInfo.categoryId, secondPin)
+
+    local compareResult = DefaultCompareNilable(firstCategoryId, secondCategoryId)
+    if compareResult ~= nil then
+        -- Sort quest conditions from the same quest together
+        if firstCategoryId == secondCategoryId and firstPin:IsQuest() then
+            local firstQuestIndex = firstPin:GetQuestIndex()
+            local secondQuestIndex = secondPin:GetQuestIndex()
+            local firstPinlevel = GetJournalQuestLevel(firstQuestIndex)
+            local secondPinlevel = GetJournalQuestLevel(secondQuestIndex)
+            local firstQuestDifficulty = GetCon(firstPinlevel)
+            local secondQuestDifficulty = GetCon(secondPinlevel)
+            if firstQuestDifficulty == secondQuestDifficulty then
+                local firstPinName = GetJournalQuestName(firstQuestIndex)
+                local secondPinName = GetJournalQuestName(secondQuestIndex)
+                return firstPinName < secondPinName
+            end
+
+            return firstQuestDifficulty < secondQuestDifficulty
+        end
+
+        return compareResult
+    end
+
+    local firstEntryName = ZO_Eval(firstTooltipInfo.entryName, firstPin)
+    local secondEntryName = ZO_Eval(secondTooltipInfo.entryName, secondPin)
+    compareResult = DefaultCompareNilable(firstEntryName, secondEntryName)
+    if compareResult ~= nil then
+        return compareResult
+    end
+
+    return false
+end
+
+function ZO_WorldMapManager.GamepadTooltipPinSortFunction(firstPin, secondPin)
+    local firstPinType = firstPin:GetPinType()
+    local secondPinType = secondPin:GetPinType()
+
+    local firstTooltipInfo = ZO_MapPin.TOOLTIP_CREATORS[firstPinType]
+    local secondTooltipInfo = ZO_MapPin.TOOLTIP_CREATORS[secondPinType]
+
+    -- If either tooltip info is nil, that pin has no tooltip, and we just need
+    -- to make sure it sorts to a consistant place.
+    if not firstTooltipInfo then
+        return false
+    elseif not secondTooltipInfo then
+        return true
+    end
+
+    local firstCategoryId = ZO_Eval(firstTooltipInfo.categoryId, firstPin) or ZO_Eval(firstTooltipInfo.gamepadCategory, firstPin)
+    local secondCategoryId = ZO_Eval(secondTooltipInfo.categoryId, secondPin) or ZO_Eval(secondTooltipInfo.gamepadCategory, secondPin)
+
+    local compareResult = DefaultCompareNilable(firstCategoryId, secondCategoryId)
+    if compareResult ~= nil then
+        -- Sort quest conditions from the same quest together
+        if firstCategoryId == secondCategoryId and firstPin:IsQuest() then
+            local firstQuestIndex = firstPin:GetQuestIndex()
+            local secondQuestIndex = secondPin:GetQuestIndex()
+            local firstPinlevel = GetJournalQuestLevel(firstQuestIndex)
+            local secondPinlevel = GetJournalQuestLevel(secondQuestIndex)
+            local firstQuestDifficulty = GetCon(firstPinlevel)
+            local secondQuestDifficulty = GetCon(secondPinlevel)
+            if firstQuestDifficulty == secondQuestDifficulty then
+                local firstPinName = GetJournalQuestName(firstQuestIndex)
+                local secondPinName = GetJournalQuestName(secondQuestIndex)
+                return firstPinName < secondPinName
+            end
+
+            return firstQuestDifficulty < secondQuestDifficulty
+        end
+        return compareResult
+    end
+
+    local firstCategory = ZO_Eval(firstTooltipInfo.gamepadCategory, firstPin)
+    local secondCategory = ZO_Eval(secondTooltipInfo.gamepadCategory, secondPin)
+    compareResult = DefaultCompareNilable(firstCategory, secondCategory)
+    if compareResult ~= nil then
+        return compareResult
+    end
+
+    local firstEntryName = ZO_Eval(firstTooltipInfo.entryName, firstPin)
+    local secondEntryName = ZO_Eval(secondTooltipInfo.entryName, secondPin)
+    compareResult = DefaultCompareNilable(firstEntryName, secondEntryName)
+    if compareResult ~= nil then
+        return compareResult
+    end
+
+    return false
+end
+
+function ZO_WorldMapManager:UpdatePinTooltips(resetScroll)
+    self.pinTooltipIsDirty = false
+
+    local isCurrentSceneGamepad = SCENE_MANAGER:IsCurrentSceneGamepad() -- TODO: can we just use isInGamepadPreferredMode?
+    local isInGamepadPreferredMode = IsInGamepadPreferredMode()
+
+    local cursorPositionX
+    local cursorPositionY
+    if isCurrentSceneGamepad then
+        cursorPositionX, cursorPositionY = ZO_WorldMapScroll:GetCenter()
+    else
+        cursorPositionX, cursorPositionY = GetUIMousePosition()
+    end
+
+    -- Iterate over the current pins, using the key as the actual pin to facilitate looking up whether or not it's appropriate to call mouseEnter/mouseExit
+    -- for the pins.
+    local foundTooltipMouseOverPins = self.foundTooltipMouseOverPins
+    ZO_ClearNumericallyIndexedTable(foundTooltipMouseOverPins)
+    local currentMouseoverPins = g_mapPinManager:GetCurrentMouseOverPins()
+    for pin, isMousedOver in pairs(currentMouseoverPins) do
+        if pin then
+            -- Do the exit pins first (so that the MouseoverName gets cleared then set in the correct order)
+            if g_mapPinManager:ShouldDoMouseExitForPin(pin) then
+                self:DoMouseExitForPin(pin)
+            end
+
+            -- Verify that control is still moused over due to OnUpdate/OnShow handler issues (prevents tooltip popping)
+            if isMousedOver and pin:MouseIsOver(cursorPositionX, cursorPositionY) then
+                table.insert(foundTooltipMouseOverPins, pin)
+            else
+                pin:SetTargetScale(1)
+            end
+        end
+    end
+
+    if isInGamepadPreferredMode then
+        table.sort(foundTooltipMouseOverPins, ZO_WorldMapManager.GamepadTooltipPinSortFunction)
+    else
+        table.sort(foundTooltipMouseOverPins, ZO_WorldMapManager.KeyboardTooltipPinSortFunction)
+
+        if #foundTooltipMouseOverPins > 0 then
+            self:HidePinPointerBox()
+        end
+    end
+
+    local MAX_QUEST_PINS = 10
+    local currentQuestPins = 0
+    local missedQuestPins = 0
+    local maxKeepTooltipPinLevel = 0
+    local informationTooltipAppendedTo = false
+    local lastGamepadCategory = nil
+    local informationTooltip = ZO_WorldMap_GetTooltipForMode(ZO_MAP_TOOLTIP_MODE.INFORMATION)
+    local currentQuestHeaderIndex = nil
+
+    for index, pin in ipairs(foundTooltipMouseOverPins) do
+        local pinType = pin:GetPinType()
+        local pinTooltipInfo = ZO_MapPin.TOOLTIP_CREATORS[pinType]
+
+        if pinTooltipInfo then
+            local layoutPinTooltip = true
+            --always allow assisted pins through
+            if pin:IsQuest() and not pin:IsAssisted() then
+                if currentQuestPins < MAX_QUEST_PINS then
+                    currentQuestPins = currentQuestPins + 1
+                else
+                    layoutPinTooltip = false
+                    missedQuestPins = missedQuestPins + 1
+                end
+            end
+
+            if layoutPinTooltip then
+                if not pin:IsAreaPin() or pin:ShowsPinAndArea() then
+                    pin:SetTargetScale(1.3)
+                end
+
+                local layoutTooltip = true
+                local usedTooltip = pinTooltipInfo.tooltip
+                if not isCurrentSceneGamepad and usedTooltip == ZO_MAP_TOOLTIP_MODE.KEEP then
+                    local pinLevel = pin:GetLevel()
+                    if pinLevel > maxKeepTooltipPinLevel then
+                        maxKeepTooltipPinLevel = pinLevel
+                    else
+                        layoutTooltip = false
+                    end
+                end
+
+                if layoutTooltip and pinTooltipInfo.hasTooltip then
+                    layoutTooltip = pinTooltipInfo.hasTooltip(pin)
+                end
+
+                if layoutTooltip then
+                    if usedTooltip then
+                        if not isCurrentSceneGamepad then
+                            for i, tooltip in ipairs(g_tooltipOrder) do
+                                if tooltip == usedTooltip then
+                                    if not g_usedTooltips[i] then
+                                        g_usedTooltips[i] = true
+                                        if usedTooltip == ZO_MAP_TOOLTIP_MODE.KEEP then
+                                            ZO_WorldMap_GetTooltipForMode(ZO_MAP_TOOLTIP_MODE.KEEP):SetHidden(false)
+                                        else
+                                            InitializeTooltip(ZO_WorldMap_GetTooltipForMode(usedTooltip), pin:GetControl())
+                                        end
+                                    end
+                                    break
+                                end
+                            end
+                        else
+                            if not ZO_WorldMap_IsWorldMapInfoShowing() and not ZO_WorldMap_IsKeepInfoShowing() then
+                                -- We'll fire the callback later
+                                local SUPPRESS_CALLBACK = true
+                                ZO_WorldMap_ShowGamepadTooltip(resetScroll, SUPPRESS_CALLBACK)
+                            end
+                        end
+                    end
+
+                    if isCurrentSceneGamepad then
+                        local nextCategoryText = ZO_Eval(pinTooltipInfo.gamepadCategory, pin)
+                        if type(nextCategoryText) == "number" then
+                            nextCategoryText = GetString(nextCategoryText)
+                        end
+
+                        local nextCategory = nextCategoryText
+                        if not nextCategory then
+                            nextCategory = pinTooltipInfo.categoryId
+                        end
+
+                        local isDifferentCategory = (lastGamepadCategory ~= nextCategory)
+
+                        if nextCategoryText and isDifferentCategory then
+                            local categoryIcon = ZO_Eval(pinTooltipInfo.gamepadCategoryIcon, pin)
+                            local titleStyleName = pinTooltipInfo.gamepadCategoryStyleName
+                            titleStyleName = titleStyleName and informationTooltip.tooltip:GetStyle(titleStyleName)
+
+                            local groupSection = informationTooltip.tooltip:AcquireSection(titleStyleName, informationTooltip.tooltip:GetStyle("mapKeepCategorySpacing"))
+                            local mapIconTitleStyle = categoryIcon and informationTooltip.tooltip:GetStyle("mapIconTitle") or nil
+                            informationTooltip:LayoutGroupHeader(groupSection, categoryIcon, nextCategoryText, titleStyleName, mapIconTitleStyle, informationTooltip.tooltip:GetStyle("mapTitle"))
+                            informationTooltip.tooltip:AddSection(groupSection)
+                        elseif pinTooltipInfo.gamepadSpacing or isDifferentCategory then
+                            local groupSection = informationTooltip.tooltip:AcquireSection(informationTooltip.tooltip:GetStyle("mapKeepCategorySpacing"))
+                            informationTooltip.tooltip:AddSectionEvenIfEmpty(groupSection)
+                        end
+
+                        lastGamepadCategory = nextCategory
+                    else
+                        if pin:IsQuest() then
+                            if not currentQuestHeaderIndex or currentQuestHeaderIndex ~= pin:GetQuestIndex() then
+                                currentQuestHeaderIndex = pin:GetQuestIndex()
+                                pinTooltipInfo.headerCreator(pin)
+                                informationTooltip:AddVerticalPadding(-8)
+                            elseif currentQuestHeaderIndex == pin:GetQuestIndex() then
+                                informationTooltip:AddVerticalPadding(-16)
+                            end
+                        elseif currentQuestHeaderIndex ~= nil then
+                            informationTooltip:AddLine(GetString(SI_TOOLTIP_MAP_QUEST_SELECT_FOCUS), "", ZO_HIGHLIGHT_TEXT:UnpackRGB())
+                            currentQuestHeaderIndex = nil
+                        end
+                    end
+
+                    -- Call the tooltip layout function
+                    pinTooltipInfo.creator(pin)
+
+                    self:DoMouseEnterForPinType(pinType)
+
+                    --space out the appended lines in the information tooltip
+                    if usedTooltip == ZO_MAP_TOOLTIP_MODE.INFORMATION and not isCurrentSceneGamepad then
+                        informationTooltipAppendedTo = true
+                        informationTooltip:AddVerticalPadding(5)
+                    end
+                end
+            end
+        end
+
+        -- For POIs, add name to the top of the map
+        if pinType == MAP_PIN_TYPE_POI_COMPLETE or pinType == MAP_PIN_TYPE_POI_SEEN then
+            local poiIndex = pin:GetPOIIndex()
+            local zoneIndex = pin:GetPOIZoneIndex()
+
+            local poiName, _, poiStartDesc, poiFinishedDesc = GetPOIInfo(zoneIndex, poiIndex)
+
+            local descriptionText
+            if pinType == MAP_PIN_TYPE_POI_COMPLETE then
+                descriptionText = poiFinishedDesc
+            else
+                descriptionText = poiStartDesc
+            end
+
+            local mapHeaderInfo =
+            {
+                nameText = zo_strformat(SI_WORLD_MAP_LOCATION_NAME, poiName),
+                descriptionText = descriptionText,
+                owner = "poi",
+            }
+
+            self:SetMapHeader(mapHeaderInfo)
+        end
+    end
+
+    if not isCurrentSceneGamepad and currentQuestHeaderIndex ~= nil then
+        informationTooltip:AddLine(GetString(SI_TOOLTIP_MAP_QUEST_SELECT_FOCUS), "", ZO_HIGHLIGHT_TEXT:UnpackRGB())
+    end
+
+    if missedQuestPins > 0 then
+        local text = string.format(zo_strformat(SI_TOOLTIP_MAP_MORE_QUESTS, missedQuestPins))
+        if isInGamepadPreferredMode then
+            local lineSection = informationTooltip.tooltip:AcquireSection(informationTooltip.tooltip:GetStyle("mapMoreQuestsContentSection"))
+            lineSection:AddLine(text, informationTooltip.tooltip:GetStyle("mapLocationTooltipContentLabel"), informationTooltip.tooltip:GetStyle("gamepadElderScrollTooltipContent"))
+            informationTooltip.tooltip:AddSection(lineSection)
+        else
+            informationTooltip:AddLine(text)
+        end
+    end
+
+    --Remove the last bit of extra padding on the end
+    if informationTooltipAppendedTo and not isCurrentSceneGamepad then
+        informationTooltip:AddVerticalPadding(-5)
+    end
+end
+
+function ZO_WorldMapManager:UpdateMouseoverTooltips()
+    local lastShownSpectacleId = self.tooltipSpectacleId
+
+    local mouseoverSpectacleId = nil
+    local mouseoverZoneIndex = GetZoneIndexByMapId(self.mouseoverMapId)
+    if mouseoverZoneIndex and mouseoverZoneIndex ~= GetCurrentMapZoneIndex() then
+        mouseoverSpectacleId = GetActiveSpectacleEventIdsForZoneIndex(mouseoverZoneIndex)
+    end
+
+    local updateSpectacleTooltip = mouseoverSpectacleId ~= lastShownSpectacleId
+
+    local mouseOverPinsChanged, needsContinuousTooltipUpdates = g_mapPinManager:UpdateMouseOverPins()
+    local updatePinTooltips = mouseOverPinsChanged or needsContinuousTooltipUpdates or self:IsPinTooltipDirty()
+
+    local resetTooltipScroll = not needsContinuousTooltipUpdates
+
+    local updateTooltips = updateSpectacleTooltip or updatePinTooltips
+    if not updateTooltips then
+        return
+    end
+
+    local wasShowingTooltip = ZO_WorldMap_IsTooltipShowing()
+
+    ZO_WorldMap_HideAllTooltipsLater()
+
+    self.tooltipSpectacleId = mouseoverSpectacleId
+
+    if mouseoverSpectacleId then
+        local informationTooltip = ZO_WorldMap_GetTooltipForMode(ZO_MAP_TOOLTIP_MODE.INFORMATION)
+        if IsInGamepadPreferredMode() then
+            if not ZO_WorldMap_IsWorldMapInfoShowing() and not ZO_WorldMap_IsKeepInfoShowing() then
+                -- We'll fire the callback later
+                local SUPPRESS_CALLBACK = true
+                ZO_WorldMap_ShowGamepadTooltip(resetTooltipScroll, SUPPRESS_CALLBACK)
+
+                informationTooltip:AppendZoneSpectacleTooltip(mouseoverSpectacleId)
+            end
+        else
+            for i, tooltip in ipairs(g_tooltipOrder) do
+                if tooltip == ZO_MAP_TOOLTIP_MODE.INFORMATION then
+                    if not g_usedTooltips[i] then
+                        g_usedTooltips[i] = true
+                        InitializeTooltip(informationTooltip, self.control)
+                    end
+                    break
+                end
+            end
+            informationTooltip:AppendZoneSpectacleTooltip(mouseoverSpectacleId)
+        end
+    end
+
+    self:UpdatePinTooltips(resetTooltipScroll)
+
+    -- anchor the keyboard tooltips
+    if not IsInGamepadPreferredMode() then
+        local prevControl = nil
+        local placeAbove = GuiMouse:GetTop() > (GuiRoot:GetHeight() / 2)
+        local placeLeft = GuiMouse:GetLeft() > (GuiRoot:GetWidth() / 2)
+        for i, tooltip in ipairs(g_tooltipOrder) do
+            if g_usedTooltips[i] then
+                local tooltipControl = ZO_WorldMap_GetTooltipForMode(tooltip)
+                tooltipControl:ClearAnchors()
+
+                if prevControl then
+                    if placeLeft then
+                        if placeAbove then
+                            tooltipControl:SetAnchor(BOTTOMRIGHT, prevControl, TOPRIGHT, 0, -5)
+                        else
+                            tooltipControl:SetAnchor(TOPRIGHT, prevControl, BOTTOMRIGHT, 0, 5)
+                        end
+                    else
+                        if placeAbove then
+                            tooltipControl:SetAnchor(BOTTOMLEFT, prevControl, TOPLEFT, 0, -5)
+                        else
+                            tooltipControl:SetAnchor(TOPLEFT, prevControl, BOTTOMLEFT, 0, 5)
+                        end
+                    end
+                else
+                    if placeLeft then
+                        tooltipControl:SetAnchor(RIGHT, GuiMouse, LEFT, -32, 0)
+                    else
+                        tooltipControl:SetAnchor(LEFT, GuiMouse, RIGHT, 32, 0)
+                    end
+                end
+
+                prevControl = tooltipControl
+
+                if tooltip == ZO_MAP_TOOLTIP_MODE.INFORMATION then
+                    g_ownsInformationTooltip = true
+                end
+            end
+        end
+    end
+
+    local isShowingTooltip = ZO_WorldMap_IsTooltipShowing()
+    if wasShowingTooltip ~= isShowingTooltip then
+        if isShowingTooltip then
+            CALLBACK_MANAGER:FireCallbacks("OnShowWorldMapTooltip")
+        else
+            CALLBACK_MANAGER:FireCallbacks("OnHideWorldMapTooltip")
+        end
+    end
+end
+
 --
--- End Map Mode Functions
+-- End Mouseover and Tooltip Functions
 --
 
 function ZO_WorldMapManager:TryTriggeringTutorials()
@@ -5518,9 +6037,5 @@ end
 -- XML functions
 function ZO_WorldMap_ZoomKeybindOnInitialized(control, keybind)
     local DEFAULT_PREFERRED_GAMEPAD_KEYBIND = nil
-    local OPTIONS =
-    {
-        scalePercent = 150,
-    }
-    control:SetKeybind(keybind, DEFAULT_PREFERRED_GAMEPAD_KEYBIND, options)
+    control:SetKeybind(keybind, DEFAULT_PREFERRED_GAMEPAD_KEYBIND)
 end

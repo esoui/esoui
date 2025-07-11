@@ -56,6 +56,14 @@
                     </Controls>
                 </Control>
 
+                <Control name="$(parent)SoloBonusSection" resizeToFitDescendents="true" hidden="true">
+                    <Controls>
+                        <Label name="$(parent)Header" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="SI_ACTIVITY_FINDER_BATTLEGROUND_SOLO_BONUS_HEADER" />
+                        <Texture name="$(parent)Icon" textureFile="EsoUI/Art/LFG/LFG_solo_bonus.dds" layer="CONTROLS" />
+                        <Label name="$(parent)Label" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="SI_ACTIVITY_FINDER_BATTLEGROUND_SOLO_BONUS"/>
+                    </Controls>
+                </Control>
+
                 <Control name="$(parent)RewardsSection" resizeToFitDescendents="true" hidden="true">
                     <Controls>
                         <Label name="$(parent)Header" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">

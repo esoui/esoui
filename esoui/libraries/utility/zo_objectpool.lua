@@ -31,12 +31,13 @@
 
 ZO_ObjectPool = ZO_InitializingObject:Subclass()
 
-function ZO_ObjectPool:Initialize(factoryFunctionOrObjectClass, resetFunction)
+function ZO_ObjectPool:Initialize(factoryFunctionOrObjectClass, resetFunction, usePooledObjectWrapper)
     assert(factoryFunctionOrObjectClass ~= nil)
 
     self.m_Active = {}
     self.m_Free = {}
 
+    self:SetUsePooledObjectWrapper(usePooledObjectWrapper)
     self:SetFactory(factoryFunctionOrObjectClass)
     self:SetResetFunction(resetFunction)
     
@@ -44,7 +45,18 @@ function ZO_ObjectPool:Initialize(factoryFunctionOrObjectClass, resetFunction)
     self.m_NextControlId = 0 -- Just in case the user would like the pool to generate id-based control suffixes
 end
 
--- Define the primary factory behavior
+-- Indicates whether pooled objects should have the ZO_PooledObject interface applied to them,
+-- allowing the use of object:ReleaseObject() to release them back to the object pool.
+function ZO_ObjectPool:GetUsePooledObjectWrapper()
+    return self.m_UsePooledObjectWrapper
+end
+
+-- Defines whether pooled objects should implement the ZO_PooledObject interface.
+function ZO_ObjectPool:SetUsePooledObjectWrapper(usePooledObjectWrapper)
+    self.m_UsePooledObjectWrapper = usePooledObjectWrapper
+end
+
+-- Defines the primary factory behavior
 function ZO_ObjectPool:SetFactory(factoryFunctionOrObjectClass)
     if type(factoryFunctionOrObjectClass) == "function" then
         self.m_Factory = factoryFunctionOrObjectClass -- Signature: function(ZO_ObjectPool, objectKey)
@@ -53,7 +65,7 @@ function ZO_ObjectPool:SetFactory(factoryFunctionOrObjectClass)
     end
 end
 
--- Define the primary reset behavior
+-- Defines the primary reset behavior
 function ZO_ObjectPool:SetResetFunction(resetFunction)
     self.m_Reset = resetFunction -- Signature: function(objectBeingReset, ZO_ObjectPool)
 end
@@ -164,6 +176,12 @@ end
 function ZO_ObjectPool:CreateObject(objectKey)
     local object = self:m_Factory(objectKey)
 
+    if self:GetUsePooledObjectWrapper() then
+        -- Apply the ZO_PooledObject interface to the new object instance
+        -- to allow the use of the :ReleaseObject() convenience method.
+        ZO_PooledObject.OnPooledObjectFactory(object, self, objectKey)
+    end
+
     if self.customFactoryBehavior then
         self.customFactoryBehavior(object, objectKey, self)
     end
@@ -229,4 +247,44 @@ end
 
 function ZO_ObjectPool_DefaultResetControl(control)
     control:SetHidden(true)
+end
+
+--[[
+
+  ZO_PooledObject Abstract Class
+
+  Helper class that allows pooled objects to be released more conveniently
+  through the use of an added :ReleaseObject() method.
+
+  To automatically apply this interface to objects in an object pool:
+
+    local USE_POOLED_OBJECT_WRAPPER = true
+    local myObjectPool = ZO_ObjectPool:New(myClass, ZO_ObjectPool_DefaultResetObject, USE_POOLED_OBJECT_WRAPPER)
+
+  or
+
+    local myControlPool = ZO_ControlPool:New("MyVirtualControl", myParentControl)
+    myControlPool:SetUsePooledObjectWrapper(true)
+
+--]]
+
+ZO_PooledObject_Mixin = {}
+
+function ZO_PooledObject_Mixin:SetPoolAndKey(pool, poolKey)
+    self.pool = pool
+    self.poolKey = poolKey
+end
+
+function ZO_PooledObject_Mixin:ReleaseObject()
+    self.pool:ReleaseObject(self.poolKey)
+end
+
+ZO_PooledObject = ZO_InitializingObject:Subclass()
+zo_mixin(ZO_PooledObject, ZO_PooledObject_Mixin)
+
+-- Static method
+-- Adds object pool support to an existing object.
+function ZO_PooledObject.OnPooledObjectFactory(object, pool, key)
+    zo_mixin(object, ZO_PooledObject_Mixin)
+    object:SetPoolAndKey(pool, key)
 end

@@ -313,3 +313,61 @@ function ZO_MapInformationTooltip_Gamepad_Mixin:AppendKillLocationInfo(pin)
     end
     tooltip:AddSection(statsSection)
 end
+
+function ZO_MapInformationTooltip_Gamepad_Mixin:AppendZoneSpectacleTooltip(spectacleId)
+    local tooltip = self.tooltip
+
+    -- Header
+    local topSection = tooltip:AcquireSection(tooltip:GetStyle("mapSpectacleHeaderSection"))
+    local spectacleName = GetActiveSpectacleEventDisplayName(spectacleId)
+    topSection:AddLine(spectacleName, tooltip:GetStyle("mapTitle"))
+    tooltip:AddSection(topSection)
+
+    local currentPhase, numPhases = GetActiveSpectacleEventPhaseInfo(spectacleId)
+
+    if IsCurrentActiveSpectacleEventPhaseComplete(spectacleId) then
+        -- Phase Complete
+        local bodySection = tooltip:AcquireSection(tooltip:GetStyle("bodySection"))
+        local phaseCompleteString = zo_strformat(SI_SPECTACLE_EVENTS_PHASE_COMPLETE_FORMATTER, currentPhase)
+        bodySection:AddLine(phaseCompleteString, tooltip:GetStyle("bodyDescription"), tooltip:GetStyle("whiteFontColor"))
+
+        -- Next Phase
+        local nextPhaseBeginsString = SPECTACLE_EVENTS_MANAGER:GetActiveSpectacleEventNextPhaseBeginsString(spectacleId)
+        if nextPhaseBeginsString then
+            bodySection:AddLine(nextPhaseBeginsString, tooltip:GetStyle("bodyDescription"))
+        end
+
+        tooltip:AddSection(bodySection)
+    else
+        -- Phase Header
+        local bodyHeaderSection = tooltip:AcquireSection(tooltip:GetStyle("bodyHeader"))
+        local phaseDisplayName = GetActiveSpectacleEventPhaseDisplayName(spectacleId)
+        local phaseHeader = zo_strformat(SI_SPECTACLE_EVENTS_PHASE_NUMBER_AND_NAME_FORMATTER, currentPhase, phaseDisplayName)
+        bodyHeaderSection:AddLine(phaseHeader)
+        tooltip:AddSection(bodyHeaderSection)
+
+        -- Phase Status Bar
+        local barSection = tooltip:AcquireSection(tooltip:GetStyle("conditionOrChargeBarSection"))
+        local progressBar = tooltip:AcquireStatusBar(tooltip:GetStyle("progressBar"))
+        local progressPercentage = GetActiveSpectacleEventPhaseProgressPercentage(spectacleId)
+        progressBar:SetMinMax(0, 1)
+        progressBar:SetValue(progressPercentage)
+
+        local formattedPercentage = string.format("%.1f", (progressPercentage * 100))
+        local percentageString = zo_strformat(SI_SPECTACLE_EVENTS_PROGRESS_PERCENT, formattedPercentage)
+        local progressLabel = progressBar:GetNamedChild("Progress")
+        progressLabel:SetText(percentageString)
+
+        local function ProgressBarNarration()
+            return zo_strformat(SI_SCREEN_NARRATION_PROGRESS_BAR_PERCENT_FORMATTER, formattedPercentage)
+        end
+        barSection:AddStatusBar(progressBar, ProgressBarNarration)
+        tooltip:AddSection(barSection)
+
+        -- Phase Description
+        local bodySection = tooltip:AcquireSection(tooltip:GetStyle("bodySection"))
+        local phaseDescription = GetActiveSpectacleEventPhaseDescription(spectacleId)
+        bodySection:AddLine(phaseDescription, tooltip:GetStyle("bodyDescription"))
+        tooltip:AddSection(bodySection)
+    end
+end

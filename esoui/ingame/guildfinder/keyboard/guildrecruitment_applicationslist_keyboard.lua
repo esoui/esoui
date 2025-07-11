@@ -41,7 +41,7 @@ function ZO_GuildRecruitment_ApplicationsList_Keyboard:InitializeKeybindDescript
         -- Report
         {
             name = GetString(SI_GUILD_FINDER_REPORT_ACTION),
-            keybind = "UI_SHORTCUT_REPORT_PLAYER",
+            keybind = "UI_SHORTCUT_HELP",
             visible = function()
                 return self.currentData ~= nil
             end,

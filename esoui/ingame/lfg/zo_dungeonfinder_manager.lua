@@ -1,4 +1,4 @@
-local categoryData = 
+local categoryData =
 {
     keyboardData =
     {
@@ -8,6 +8,7 @@ local categoryData =
         pressedIcon = "EsoUI/Art/LFG/LFG_indexIcon_dungeon_down.dds",
         mouseoverIcon = "EsoUI/Art/LFG/LFG_indexIcon_dungeon_over.dds",
         disabledIcon = "EsoUI/Art/LFG/LFG_indexIcon_dungeon_disabled.dds",
+        isAccountRestricted = IsLFGAccountDisabled,
     },
     gamepadData =
     {
@@ -17,6 +18,7 @@ local categoryData =
         disabledMenuIcon = "EsoUI/Art/LFG/Gamepad/gp_LFG_menuIcon_Dungeon_disabled.dds",
         sceneName = "gamepadDungeonFinder",
         tooltipDescription = GetString(SI_GAMEPAD_ACTIVITY_FINDER_TOOLTIP_DUNGEON_FINDER),
+        isAccountRestricted = IsLFGAccountDisabled,
     },
 }
 

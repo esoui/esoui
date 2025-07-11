@@ -184,6 +184,11 @@ function ZO_PromotionalEvents_Gamepad:InitializeActivityFinderCategory()
                 end
                 return false
             end,
+            isLocked = IsPromotionalEventSystemLocked,
+            lockedText = GetString(SI_ACTIVITY_FINDER_TOOLTIP_PROMOTIONAL_EVENT_LOCK),
+            isNew = function()
+                return PROMOTIONAL_EVENT_MANAGER:DoesAnyCampaignHaveCallout()
+            end,
             isPromotionalEvent = true,
         },
     }
@@ -971,27 +976,18 @@ function ZO_PromotionalEvents_Gamepad:UpdateActivityTooltip()
     if selectedActivityEntry then
         local rewardObject = self:GetActivityRewardObject(selectedActivityEntry)
         local displayRewardData = rewardObject and rewardObject.displayRewardData
-        local description = ""
+        local displayedDescription = false
         if self.preferActivityDescriptionTooltip or not displayRewardData then
-            description = selectedActivityEntry:GetDescription()
-            local requiredCollectibleText = ZO_PromotionalEvents_Shared.GetActivityRequiredCollectibleText(selectedActivityEntry)
-            if requiredCollectibleText then
-                if description == "" then
-                    description = requiredCollectibleText
-                else
-                    description = string.format("%s\n\n%s", description, requiredCollectibleText)
-                end
-            end
+            displayedDescription = GAMEPAD_TOOLTIPS:LayoutPromotionalEventActivityDescription(GAMEPAD_RIGHT_TOOLTIP, selectedActivityEntry)
         end
 
-        if description ~= "" then
-            local NO_TITLE = nil
-            GAMEPAD_TOOLTIPS:LayoutTitleAndDescriptionTooltip(GAMEPAD_RIGHT_TOOLTIP, NO_TITLE, description)
-        elseif displayRewardData then
-            self.focusedRewardData = displayRewardData
-            GAMEPAD_TOOLTIPS:LayoutRewardData(GAMEPAD_RIGHT_TOOLTIP, displayRewardData)
-        else
-            GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
+        if not displayedDescription then
+            if displayRewardData then
+                self.focusedRewardData = displayRewardData
+                GAMEPAD_TOOLTIPS:LayoutRewardData(GAMEPAD_RIGHT_TOOLTIP, displayRewardData)
+            else
+                GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
+            end
         end
     else
         GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
@@ -1009,6 +1005,12 @@ function ZO_PromotionalEvents_Gamepad:OnHiding()
 
     self:Deactivate()
     SCENE_MANAGER:RemoveFragment(GAMEPAD_NAV_QUADRANT_2_3_BACKGROUND_FRAGMENT)
+end
+
+function ZO_PromotionalEvents_Gamepad:OnHidden()
+    ZO_PromotionalEvents_Shared.OnHidden(self)
+
+    self:RefreshCampaignList()
 end
 
 function ZO_PromotionalEvents_Gamepad:OnPreviewShowing()

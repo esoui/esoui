@@ -164,6 +164,10 @@ function ZO_SharedInteraction:InitializeSharedEvents()
         self:OnScreenResized()
     end
 
+    local function OnVOPlayingStateUpdated()
+        self:RefreshReplay()
+    end
+
     self.eventCallbacks =
     {
         [EVENT_CHATTER_BEGIN] = OnChatterBegin,
@@ -177,6 +181,7 @@ function ZO_SharedInteraction:InitializeSharedEvents()
         [EVENT_PLAYER_DEAD] = OnPlayerDead,
         [EVENT_PLAYER_DEACTIVATED] = OnPlayerDeactivated,
         [EVENT_CONFIRM_INTERACT] = ShowInteractConfirmationPrompt,
+        [EVENT_INTERACT_VO_PLAYING_STATE_UPDATED] = OnVOPlayingStateUpdated,
 
         -- Handle the layout of the interaction window proportional to the available space
         [EVENT_SCREEN_RESIZED] = OnScreenResized,
@@ -216,6 +221,7 @@ end
 
 function ZO_SharedInteraction:InitializeInteractWindow(bodyText)
     self:ResetInteraction(bodyText)
+    self:RefreshReplay()
 
     INTERACT_WINDOW:ShowInteractWindow()
 end
@@ -282,6 +288,10 @@ local function UpdateFleeChatterOption(self)
     self:SetText(zo_strformat(SI_INTERACT_OPTION_FLEE_ARREST, GetSecondsUntilArrestTimeout()))
 end
 
+local function GetFleeChatterOptionNarration(entryData, entryControl)
+    return SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_INTERACT_OPTION_FLEE_ARREST, GetSecondsUntilArrestTimeout()))
+end
+
 function ZO_SharedInteraction:UpdateClemencyChatterOption(control, data)
     local clemencyTimeRemaningSeconds = GetTimeToClemencyResetInSeconds()
 
@@ -293,6 +303,16 @@ function ZO_SharedInteraction:UpdateClemencyChatterOption(control, data)
     end
 end
 
+function ZO_SharedInteraction:GetClemencyChatterOptionNarration(entryData, entryControl)
+    local clemencyTimeRemaningSeconds = GetTimeToClemencyResetInSeconds()
+    if clemencyTimeRemaningSeconds > 0 then
+        local formattedString = zo_strformat(SI_INTERACT_OPTION_USE_CLEMENCY_COOLDOWN, entryData.optionText, ZO_FormatTimeLargestTwo(clemencyTimeRemaningSeconds, TIME_FORMAT_STYLE_DESCRIPTIVE_MINIMAL))
+        return SCREEN_NARRATION_MANAGER:CreateNarratableObject(formattedString)
+    else
+        return SCREEN_NARRATION_MANAGER:CreateNarratableObject(entryData.optionText)
+    end
+end
+
 function ZO_SharedInteraction:UpdateShadowyConnectionsChatterOption(control, data)
     local timeRemaining = GetTimeToShadowyConnectionsResetInSeconds()
 
@@ -301,6 +321,16 @@ function ZO_SharedInteraction:UpdateShadowyConnectionsChatterOption(control, dat
     elseif timeRemaining > 0 then
         local formattedString = zo_strformat(SI_INTERACT_OPTION_USE_SHADOWY_CONNECTIONS_COOLDOWN, control.optionText, ZO_FormatTimeLargestTwo(timeRemaining, TIME_FORMAT_STYLE_DESCRIPTIVE_MINIMAL))
         control:SetText(formattedString)
+    end
+end
+
+function ZO_SharedInteraction:GetShadowyConnectionsChatterOptionNarration(entryData, entryControl)
+    local timeRemaining = GetTimeToShadowyConnectionsResetInSeconds()
+    if timeRemaining > 0 then
+        local formattedString = zo_strformat(SI_INTERACT_OPTION_USE_SHADOWY_CONNECTIONS_COOLDOWN, entryData.optionText, ZO_FormatTimeLargestTwo(timeRemaining, TIME_FORMAT_STYLE_DESCRIPTIVE_MINIMAL))
+        return SCREEN_NARRATION_MANAGER:CreateNarratableObject(formattedString)
+    else
+        return SCREEN_NARRATION_MANAGER:CreateNarratableObject(entryData.optionText)
     end
 end
 
@@ -322,6 +352,9 @@ function ZO_SharedInteraction:GetChatterOptionData(optionIndex, optionText, opti
         optionUsable = false,
         recolorIfUnusable = false,
         labelUpdateFunction = nil,
+        narrationText = function(entryData, entryControl)
+            return SCREEN_NARRATION_MANAGER:CreateNarratableObject(entryData.optionText)
+        end,
     }
 
     if optionText and optionType then
@@ -331,6 +364,7 @@ function ZO_SharedInteraction:GetChatterOptionData(optionIndex, optionText, opti
 
         if optionType == CHATTER_GOODBYE and IsUnderArrest() then
             chatterData.labelUpdateFunction = UpdateFleeChatterOption
+            chatterData.narrationText = GetFleeChatterOptionNarration
         end
 
         if dialogueTone and dialogueTone ~= DIALOGUE_TONE_TYPE_NONE then
@@ -377,8 +411,11 @@ function ZO_SharedInteraction:GetChatterOptionData(optionIndex, optionText, opti
                 chatterData.optionUsable = true
             else
                 chatterData.labelUpdateFunction = function(control)
-                                                    self:UpdateClemencyChatterOption(control, chatterData)
-                                                  end
+                    self:UpdateClemencyChatterOption(control, chatterData)
+                end
+                chatterData.narrationText = function(entryData, entryControl)
+                    return self:GetClemencyChatterOptionNarration(entryData, entryControl)
+                end
                 chatterData.optionUsable = false
             end
         elseif optionType == CHATTER_TALK_CHOICE_SHADOWY_CONNECTIONS_UNAVAILABLE then
@@ -390,6 +427,9 @@ function ZO_SharedInteraction:GetChatterOptionData(optionIndex, optionText, opti
             else
                 chatterData.labelUpdateFunction = function(control)
                     self:UpdateShadowyConnectionsChatterOption(control, chatterData)
+                end
+                chatterData.narrationText = function(entryData, entryControl)
+                    return self:GetShadowyConnectionsChatterOptionNarration(entryData, entryControl)
                 end
                 chatterData.optionUsable = false
             end
@@ -497,9 +537,9 @@ end
 
 local USE_LOWERCASE_NUMBER_SUFFIXES = false
 local function SetupBasicReward(control, name, stackSize, icon, meetsUsageRequirement, r, g, b)
-    local nameControl = GetControl(control, "Name")
-    local iconControl = GetControl(control, "Icon")
-    local stackControl = GetControl(control, "StackSize")
+    local nameControl = control:GetNamedChild("Name")
+    local iconControl = control:GetNamedChild("Icon")
+    local stackControl = control:GetNamedChild("StackSize")
 
     control:SetHidden(false)
 
@@ -572,7 +612,7 @@ function ZO_QuestReward_GetSkillLineEarnedText(skillLineName)
     return zo_strformat(SI_QUEST_REWARD_SKILL_LINE, skillLineName)
 end
 
-local function SetupTribureClubReward(control, name, icon)
+local function SetupTributeClubReward(control, name, icon)
     local nameControl = control:GetNamedChild("Name")
     local iconTexture = control:GetNamedChild("Icon")
     iconTexture:SetHidden(false)
@@ -585,7 +625,22 @@ local function SetupTribureClubReward(control, name, icon)
     control:SetHidden(false)
 end
 
-internalassert(REWARD_TYPE_MAX_VALUE == 15, "Check if new RewardType needs REWARD_CREATORS")
+local function SetupSpectacleProgressReward(control, name, icon)
+    local iconTexture = control:GetNamedChild("Icon")
+    iconTexture:SetHidden(false)
+    iconTexture:SetTexture(icon)
+
+    control:GetNamedChild("StackSize"):SetHidden(true)
+
+    local nameControl = control:GetNamedChild("Name")
+    nameControl:SetText(name)
+    nameControl:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_SELECTED))
+
+    control.allowTooltip = false
+    control:SetHidden(false)
+end
+
+internalassert(REWARD_TYPE_MAX_VALUE == 16, "Check if new RewardType needs REWARD_CREATORS")
 local REWARD_CREATORS =
 {
     [REWARD_TYPE_AUTO_ITEM] =
@@ -649,11 +704,15 @@ local REWARD_CREATORS =
         end,
     [REWARD_TYPE_TRIBUTE_CLUB_EXPERIENCE] =
         function(control, name, amount, icon)
-            SetupTribureClubReward(control, name, icon)
+            SetupTributeClubReward(control, name, icon)
+        end,
+    [REWARD_TYPE_SPECTACLE_PROGRESS] =
+        function(control, name, amount, icon)
+            SetupSpectacleProgressReward(control, name, icon)
         end,
 }
 
-internalassert(REWARD_TYPE_MAX_VALUE == 15, "Check if new RewardType is a currencyRewards")
+internalassert(REWARD_TYPE_MAX_VALUE == 16, "Check if new RewardType is a currencyRewards")
 local currencyRewards =
 {
     [REWARD_TYPE_MONEY] = true,
@@ -671,7 +730,7 @@ function ZO_SharedInteraction:IsCurrencyReward(rewardType)
     return currencyRewards[rewardType]
 end
 
-internalassert(REWARD_TYPE_MAX_VALUE == 15, "Check if new RewardType maps to a currencyRewardToCurrencyType")
+internalassert(REWARD_TYPE_MAX_VALUE == 16, "Check if new RewardType maps to a currencyRewardToCurrencyType")
 local currencyRewardToCurrencyType =
 {
     [REWARD_TYPE_MONEY] = CURT_MONEY,
@@ -697,12 +756,6 @@ function ZO_SharedInteraction:WouldCurrencyExceedMax(rewardType, rewardAmount)
 
     local playerStoredLocation = GetCurrencyPlayerStoredLocation(currencyType)
     return GetCurrencyAmount(currencyType, playerStoredLocation) + rewardAmount > GetMaxPossibleCurrency(currencyType, playerStoredLocation)
-end
-
-function ZO_SharedInteraction:TryGetMaxCurrencyWarningText(rewardType, rewardAmount)
-    if self:WouldCurrencyExceedMax(rewardType, rewardAmount) then
-        return zo_strformat(SI_QUEST_REWARD_MAX_CURRENCY_ERROR, GetCurrencyName(currencyType))
-    end
 end
 
 function ZO_SharedInteraction:GetRewardCreateFunc(rewardType)
@@ -745,6 +798,13 @@ function ZO_SharedInteraction:GetRewardData(journalQuestIndex, isGamepad)
                 end
             elseif rewardType == REWARD_TYPE_TRIBUTE_CLUB_EXPERIENCE then
                 rewardData.icon = "EsoUI/Art/Tribute/tributeRankPoints.dds"
+            elseif rewardType == REWARD_TYPE_SPECTACLE_PROGRESS then
+                local spectacleId = GetJournalQuestRewardActiveSpectacleEventId(journalQuestIndex, i)
+                if isGamepad then
+                    rewardData.icon = GetActiveSpectacleEventLootIconGamepad(spectacleId)
+                else
+                    rewardData.icon = GetActiveSpectacleEventLootIconKeyboard(spectacleId)
+                end
             end
 
             table.insert(data, rewardData)
@@ -798,4 +858,8 @@ end
 
 function ZO_SharedInteraction:UpdateShadowyConnectionsOnTimeComplete(control, data)
     --Should be overridden
+end
+
+function ZO_SharedInteraction:RefreshReplay()
+    -- Should be overridden
 end

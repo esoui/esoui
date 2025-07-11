@@ -125,6 +125,8 @@ function GetLostKeepCampaignEventDescription(campaignId, keepId, guildName)
     return zo_strformat(SI_CAMPAIGN_LOST_KEEP_EVENT, GetCampaignName(campaignId), GetKeepName(keepId), guildName), SOUNDS.GUILD_KEEP_LOST
 end
 
+local EMERGENCY_BACKGROUND = "EsoUI/Art/Guild/guildRanks_iconFrame_selected.dds"
+
 -- Return format is
 --  Category - The alert category to send the alert to
 --  SoundId - An optional sound id to play along with the message
@@ -1225,7 +1227,7 @@ CENTER_SCREEN_EVENT_HANDLERS[EVENT_DAILY_LOGIN_REWARDS_CLAIMED] = function()
     local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.DAILY_LOGIN_REWARDS_CLAIM_ANNOUNCEMENT)
     local secondaryText = claimedDailyLoginReward:GetQuantity() > 1 and claimedDailyLoginReward:GetFormattedNameWithStack() or claimedDailyLoginReward:GetFormattedName()
     messageParams:SetText(GetString(SI_DAILY_LOGIN_REWARDS_CLAIMED_ANNOUNCEMENT), secondaryText)
-    messageParams:SetIconData(claimedDailyLoginReward:GetPlatformLootIcon())
+    messageParams:SetIconData(claimedDailyLoginReward:GetPlatformLootIcon(), EMERGENCY_BACKGROUND)
     messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_DAILY_LOGIN_REWARD_CLAIMED)
     return messageParams
 end
@@ -1624,7 +1626,6 @@ end
 -- Center Screen Callback Handlers
 -- Usage: When we want to register with a callback object instead of an event
 
-local COLLECTIBLE_EMERGENCY_BACKGROUND = "EsoUI/Art/Guild/guildRanks_iconFrame_selected.dds"
 local MAX_INDIVIDUAL_CSAS = 4
 
 local CENTER_SCREEN_CALLBACK_HANDLERS = 
@@ -1656,7 +1657,7 @@ local CENTER_SCREEN_CALLBACK_HANDLERS =
 
                             local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.COLLECTIBLE_UNLOCKED)
                             messageParams:SetText(GetString(SI_COLLECTIONS_UPDATED_ANNOUNCEMENT_TITLE), zo_strformat(SI_COLLECTIONS_UPDATED_ANNOUNCEMENT_BODY, collectibleName, categoryName))
-                            messageParams:SetIconData(icon, COLLECTIBLE_EMERGENCY_BACKGROUND)
+                            messageParams:SetIconData(icon, EMERGENCY_BACKGROUND)
                             messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_SINGLE_COLLECTIBLE_UPDATED)
                             table.insert(messageParamsObjects, messageParams)
                         end
@@ -1750,7 +1751,7 @@ local CENTER_SCREEN_CALLBACK_HANDLERS =
 
                     local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.COLLECTIBLE_UNLOCKED)
                     messageParams:SetText(GetString(SI_ITEM_SET_COLLECTIONS_UPDATED_ANNOUNCEMENT_TITLE), zo_strformat(SI_ITEM_SET_COLLECTION_UPDATED_ANNOUNCEMENT_BODY, pieceName))
-                    messageParams:SetIconData(icon, COLLECTIBLE_EMERGENCY_BACKGROUND)
+                    messageParams:SetIconData(icon, EMERGENCY_BACKGROUND)
                     messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_SINGLE_COLLECTIBLE_UPDATED)
                     table.insert(messageParamsObjects, messageParams)
                 end

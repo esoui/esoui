@@ -1,0 +1,174 @@
+<GuiXml>
+    <Controls>
+        <Texture name="ZO_CampaignImperialKeep" mouseEnabled="true" virtual="true">
+            <Dimensions x="64" y="64"/>
+            <OnMouseEnter>
+                ZO_CampaignImperialKeep_OnMouseEnter(self)
+            </OnMouseEnter>
+            <OnMouseExit>
+                ZO_CampaignImperialKeep_OnMouseExit(self)
+            </OnMouseExit>
+        </Texture>
+
+        <Label name="ZO_CampaignEmperorLeaderboardsRowLabel" font="ZoFontWinH4" wrapMode="ELLIPSIS" virtual="true" />
+        <Label name="ZO_CampaignEmperorLeaderboardsHeaderLabel" font="ZoFontWinH4" modifyTextType="UPPERCASE" wrapMode="ELLIPSIS" virtual="true" />
+
+        <Control name="ZO_CampaignEmperorLeaderboardsRow" virtual="true">
+            <Dimensions y="30"/>
+            <Controls>
+                <Label name="$(parent)Rank" horizontalAlignment="CENTER" inherits="ZO_CampaignEmperorLeaderboardsRowLabel">
+                    <Anchor point="LEFT" />
+                    <Dimensions x="ZO_CAMPAIGN_EMPEROR_RANK_WIDTH"/>
+                </Label>
+
+                <Label name="$(parent)IsIneligible" inherits="ZO_CampaignEmperorLeaderboardsRowLabel" font="ZoFontWinT1" horizontalAlignment="CENTER" text="SI_CAMPAIGN_EMPEROR_CHARACTER_INELIGIBLE_SYMBOL" mouseEnabled="true">
+                    <Anchor point="LEFT" relativeTo="$(parent)Rank" relativePoint="RIGHT" />
+                    <Dimensions x="ZO_CAMPAIGN_EMPEROR_IS_INELIGIBLE_WIDTH"/>
+                    <OnMouseEnter>
+                        ZO_CampaignEmperorIsIneligible_OnMouseEnter(self)
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ZO_CampaignEmperorIsIneligible_OnMouseExit(self)
+                    </OnMouseExit>
+                </Label>
+
+                <Label name="$(parent)Name" inherits="ZO_CampaignEmperorLeaderboardsRowLabel" font="ZoFontWinT1" mouseEnabled="true">
+                    <Anchor point="LEFT" relativeTo="$(parent)IsIneligible" relativePoint="RIGHT" />
+                    <Dimensions x="ZO_CAMPAIGN_EMPEROR_NAME_WIDTH"/>
+                    <OnMouseEnter>
+                        ZO_CampaignEmperorName_OnMouseEnter(self)
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ZO_CampaignEmperorName_OnMouseExit(self)
+                    </OnMouseExit>
+                </Label>
+                <Control name="$(parent)AllianceSpacer">
+                    <Dimensions x="ZO_CAMPAIGN_EMPEROR_ALLIANCE_WIDTH"/>
+                    <Anchor point="LEFT" relativeTo="$(parent)Name" relativePoint="RIGHT"/>
+                </Control>
+                <Texture name="$(parent)Alliance" layer="OVERLAY">
+                    <Dimensions x="32" y="32"/>
+                    <Anchor point="CENTER" relativeTo="$(parent)AllianceSpacer" offsetX="-10"/>
+                </Texture>
+                <Label name="$(parent)Points" inherits="ZO_CampaignEmperorLeaderboardsRowLabel" horizontalAlignment="RIGHT">
+                    <Anchor point="LEFT" relativeTo="$(parent)AllianceSpacer" relativePoint="RIGHT"/>
+                    <Dimensions x="ZO_CAMPAIGN_EMPEROR_POINTS_WIDTH"/>
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="ZO_CampaignEmperorLeaderboardsNonPlayerRow" inherits="ZO_CampaignEmperorLeaderboardsRow" virtual="true">
+            <Controls>
+                <Texture name="$(parent)BG" inherits="ZO_ThinListBgStrip" />
+            </Controls>
+        </Control>
+
+        <Control name="ZO_CampaignEmperorLeaderboardsPlayerRow" inherits="ZO_CampaignEmperorLeaderboardsRow" virtual="true">
+            <Controls>
+                <Control name="$(parent)PlayerCallout">
+                    <AnchorFill/>
+                    <Controls>
+                        <Texture name="$(parent)Left" textureFile="EsoUI/Art/Campaign/emperor_playerBG_left.dds">
+                            <Dimensions x="506" y="30"/>
+                            <TextureCoords top="0.0625" bottom="0.5625" left="0" right="1" />
+                            <Anchor point="TOPLEFT"/>
+                        </Texture>
+                        <Texture name="$(parent)Right" textureFile="EsoUI/Art/Campaign/emperor_playerBG_right.dds">
+                            <Dimensions x="122" y="30"/>
+                            <TextureCoords top="0.0625" bottom="0.5625" left="0" right="1" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Left" relativePoint="TOPRIGHT" />
+                        </Texture>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+        
+        <TopLevelControl name="ZO_CampaignEmperor" inherits="ZO_CampaignOverviewSubwindow" hidden="true">
+            <OnInitialized>
+                ZO_CampaignEmperor_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Header" font="ZoFontWinH3" text="SI_CAMPAIGN_EMPEROR_NAME_HEADER" modifyTextType="UPPERCASE">
+                    <Anchor point="TOPLEFT"/>
+                </Label>
+                <Texture name="$(parent)Alliance">
+                    <Dimensions x="32" y="32"/>
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" offsetY="2"/>
+                </Texture>
+                <Label name="$(parent)Name" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="LEFT" relativeTo="$(parent)Alliance" relativePoint="RIGHT"/>
+                </Label>
+                <Label name="$(parent)ReignDuration" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPRIGHT" offsetX="-8" offsetY="32"/>
+                </Label>
+                <Control name="$(parent)TopDivider" inherits="ZO_CampaignOverviewDivider">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Alliance" relativePoint="BOTTOMLEFT" offsetY="-5" />
+                </Control>
+                <Label name="$(parent)KeepsHeader" font="ZoFontWinH3" text="SI_CAMPAIGN_EMPEROR_KEEPS_HEADER" modifyTextType="UPPERCASE">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)TopDivider" relativePoint="BOTTOMLEFT" offsetY="-14"/>
+                </Label>
+                <Label name="$(parent)KeepsRequired" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPRIGHT" offsetX="-8" offsetY="70"/>
+                </Label>
+                <Control name="$(parent)Keeps" resizeToFitDescendents="true">
+                    <Anchor point="TOP" offsetY="95"/>
+                </Control>
+                
+                <Control name="$(parent)BottomDivider" inherits="ZO_CampaignOverviewDivider">
+                    <Anchor point="TOPLEFT" offsetY="150"/>
+                </Control>
+                
+                <Label name="$(parent)LeaderboardLabel" font="ZoFontWinH3" text="SI_CAMPAIGN_EMPEROR_LEADERBOARD" modifyTextType="UPPERCASE" mouseEnabled="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)BottomDivider" relativePoint="BOTTOMLEFT" offsetY="-10" />
+                    <OnMouseUp>
+                        if(button == MOUSE_BUTTON_INDEX_LEFT and upInside) then
+                            ZO_CampaignEmperor_DropdownClicked(ZO_CampaignEmperorLeaderboardOpenDropdown)
+                        end
+                    </OnMouseUp>
+                </Label>
+
+                <Button name="$(parent)LeaderboardOpenDropdown" inherits="ZO_DropdownButton">
+                    <Dimensions x="16" y="16" />
+                    <Anchor point="LEFT" relativeTo="$(parent)LeaderboardLabel" relativePoint="RIGHT" offsetX="5" />
+
+                    <OnClicked>
+                        ZO_CampaignEmperor_DropdownClicked(self)
+                    </OnClicked>
+                </Button>
+
+                <Control name="$(parent)LeaderboardHeaders">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)LeaderboardLabel" relativePoint="BOTTOMLEFT" />
+                    <Dimensions y="32"/>
+                    <Controls>
+                        <Label name="$(parent)Rank" inherits="ZO_CampaignEmperorLeaderboardsHeaderLabel" horizontalAlignment="CENTER" text="SI_LEADERBOARDS_HEADER_RANK">
+                            <Anchor point="LEFT" />
+                            <Dimensions x="ZO_CAMPAIGN_EMPEROR_RANK_WIDTH" />
+                        </Label>
+                        <Label name="$(parent)Name" inherits="ZO_CampaignEmperorLeaderboardsHeaderLabel" text="SI_LEADERBOARDS_HEADER_NAME">
+                            <Anchor point="LEFT" relativeTo="$(parent)Rank" relativePoint="RIGHT" offsetX="ZO_CAMPAIGN_EMPEROR_NAME_HEADER_OFFSETX" />
+                            <Dimensions x="ZO_CAMPAIGN_EMPEROR_NAME_HEADER_WIDTH" />
+                        </Label>
+                        <Label name="$(parent)Alliance" inherits="ZO_CampaignEmperorLeaderboardsHeaderLabel" horizontalAlignment="CENTER" text="SI_LEADERBOARDS_HEADER_ALLIANCE">
+                            <Anchor point="LEFT" relativeTo="$(parent)Name" relativePoint="RIGHT"/>
+                            <Dimensions x="ZO_CAMPAIGN_EMPEROR_ALLIANCE_WIDTH" />
+                        </Label>
+                        <Label name="$(parent)Points" inherits="ZO_CampaignEmperorLeaderboardsHeaderLabel" horizontalAlignment="RIGHT" text="SI_LEADERBOARDS_HEADER_POINTS">
+                            <Anchor point="LEFT" relativeTo="$(parent)Alliance" relativePoint="RIGHT"/>
+                            <Dimensions x="ZO_CAMPAIGN_EMPEROR_POINTS_WIDTH" />
+                        </Label>
+                    </Controls>
+                </Control>
+                
+                <Control name="$(parent)PlayerRow" inherits="ZO_CampaignEmperorLeaderboardsPlayerRow">
+                    <Dimensions x="585" y="30" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)LeaderboardHeaders" relativePoint="BOTTOMLEFT" offsetX="5"/>
+                </Control>
+
+                <Control name="$(parent)List" inherits="ZO_ScrollList">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)PlayerRow" relativePoint="BOTTOMLEFT" offsetY="10"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="-9" />
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

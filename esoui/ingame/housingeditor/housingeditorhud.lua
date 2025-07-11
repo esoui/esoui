@@ -2611,7 +2611,9 @@ do
                     if self:GetCurrentPreviewMarketProduct() then
                         return GetString(SI_HOUSING_FURNITURE_BROWSER_PURCHASE_KEYBIND)
                     end
-                    return GetString(SI_HOUSING_EDITOR_PUT_AWAY)
+
+                    local retrieveToBagInfo = HOUSING_FURNITURE_RETRIEVE_TO_GAMEPAD:GetSelectedBagInfo()
+                    return zo_strformat(SI_HOUSING_EDITOR_PUT_AWAY_FORMATTER, GetString(SI_HOUSING_EDITOR_PUT_AWAY), retrieveToBagInfo:GetDisplayName())
                 end,
                 keybind = "HOUSING_EDITOR_SECONDARY_ACTION",
                 visible = function()
@@ -2632,10 +2634,18 @@ do
                             KEYBOARD_HOUSING_FURNITURE_BROWSER.productsPanel:RequestPurchase(previewMarketProductData, IS_PURCHASE)
                         end
                     else
-                        local result = HousingEditorRequestRemoveSelectedFurniture()
-                        ZO_AlertEvent(EVENT_HOUSING_EDITOR_REQUEST_RESULT, result)
-                        if result == HOUSING_REQUEST_RESULT_SUCCESS then
-                            PlaySound(SOUNDS.HOUSING_EDITOR_RETRIEVE_ITEM)
+                        if IsShiftKeyDown() then
+                            -- Holding shift with this keybind cycles to the next available Retrieve To bag instead.
+                            HOUSING_FURNITURE_RETRIEVE_TO_GAMEPAD:CycleSelectionToNextBag()
+                            PlaySound(SOUNDS.RADIAL_MENU_SELECTION)
+                            self:UpdateKeybinds()
+                        else
+                            -- Retrieve the item.
+                            local result = HousingEditorRequestRemoveSelectedFurniture()
+                            ZO_AlertEvent(EVENT_HOUSING_EDITOR_REQUEST_RESULT, result)
+                            if result == HOUSING_REQUEST_RESULT_SUCCESS then
+                                PlaySound(SOUNDS.HOUSING_EDITOR_RETRIEVE_ITEM)
+                            end
                         end
                     end
                 end,

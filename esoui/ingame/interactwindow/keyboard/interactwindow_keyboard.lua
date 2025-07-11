@@ -33,7 +33,7 @@ function ZO_Interaction:Initialize(control)
     self:InitInteraction()
 
     local function OnStateChange(oldState, newState)
-        if(newState == SCENE_HIDDEN) then
+        if newState == SCENE_HIDDEN then
             ZO_SharedInteraction.OnHidden(self)
         end
     end
@@ -52,6 +52,21 @@ function ZO_Interaction:InitInteraction()
     self.chatterOptionName = "ZO_ChatterOption"
     self.questRewardName = "ZO_QuestReward"
     self.currencyTemplateName = "ZO_CurrencyTemplate"
+    self.replayButton = self.control:GetNamedChild("ReplayAudio")
+    self.replayButton:SetHandler("OnClicked", function(buttonControl, button)
+        if button == MOUSE_BUTTON_INDEX_LEFT then
+            ReplayLastInteractVO()
+        end
+    end)
+
+    self.replayButton:SetHandler("OnMouseEnter", function()
+        InitializeTooltip(InformationTooltip, self.replayButton, RIGHT, 0, 0)
+        InformationTooltip:AddLine(GetString(SI_INTERACT_REPLAY_DIALOGUE), "", ZO_NORMAL_TEXT:UnpackRGBA())
+    end)
+
+    self.replayButton:SetHandler("OnMouseExit", function()
+        ClearTooltip(InformationTooltip)
+    end)
 
     --create options
     CreateControlRangeFromVirtual(self.chatterOptionName, self.control:GetNamedChild("PlayerAreaOptions"), self.chatterOptionName, 1, MAX_CHATTER_OPTIONS)
@@ -144,17 +159,17 @@ local function DisableChatterOption(option, useDisabledColor, optionUsable)
         option:SetColor(DISABLED_PLAYER_OPTION_COLOR:UnpackRGBA())
     end
 
-    GetControl(option, "IconImage"):SetDesaturation(1)
+    option:GetNamedChild("IconImage"):SetDesaturation(1)
     option.enabled = false
 end
 
 local function EnableChatterOption(option)
-    if(option.chosenBefore) then
+    if option.chosenBefore then
         option:SetColor(SEEN_PLAYER_OPTION_COLOR:UnpackRGBA())
     else
         option:SetColor(ENABLED_PLAYER_OPTION_COLOR:UnpackRGBA())
     end
-    GetControl(option, "IconImage"):SetDesaturation(0)
+    option:GetNamedChild("IconImage"):SetDesaturation(0)
     option.enabled = true
 end
 
@@ -179,7 +194,6 @@ function ZO_Interaction:PopulateChatterOption(controlID, optionIndex, optionText
     end
 
     if chatterData.optionsEnabled then
-
         if chatterData.optionUsable then
             EnableChatterOption(optionControl)
         else
@@ -216,7 +230,6 @@ function ZO_Interaction:FinalizeChatterOptions(optionCount)
 end
 
 function ZO_Interaction:UpdateChatterOptions(optionCount, backToTOCOption)
-
     self.optionCount, self.importantOptions = self:PopulateChatterOptions(optionCount, backToTOCOption)
 
     if #self.importantOptions > 0 and self.currentMouseLabel then
@@ -290,7 +303,7 @@ function ZO_Interaction:ShowQuestRewards(journalQuestIndex)
                 elseif control.itemType == REWARD_ITEM_TYPE_TRIBUTE_CARD_UPGRADE then
                     local patronDefId, cardIndex = GetJournalQuestRewardTributeCardUpgradeInfo(journalQuestIndex, i)
                     local patronData = TRIBUTE_DATA_MANAGER:GetTributePatronData(patronDefId)
-                    local baseCardId, upgradeCardId = patronData:GetDockCardInfoByIndex(cardIndex)
+                    local _, upgradeCardId = patronData:GetDockCardInfoByIndex(cardIndex)
                     control.patronDefId = patronDefId
                     control.upgradeCardId = upgradeCardId
                 end
@@ -349,11 +362,16 @@ function ZO_Interaction:UpdateShadowyConnectionsOnTimeComplete(control, data)
     control:SetColor(ENABLED_PLAYER_OPTION_COLOR:UnpackRGBA())
 end
 
+function ZO_Interaction:RefreshReplay()
+    self.replayButton:SetHidden(not CanReplayLastInteractVO())
+    self.replayButton:SetEnabled(not IsInteractVOPlaying())
+end
+
 --XML Handlers
 --------------
 
 function ZO_ChatterOption_MouseUp(label, button, upInside)
-    if(button == MOUSE_BUTTON_INDEX_LEFT and upInside) then
+    if button == MOUSE_BUTTON_INDEX_LEFT and upInside then
         INTERACTION:HandleChatterOptionClicked(label)
     end
 end

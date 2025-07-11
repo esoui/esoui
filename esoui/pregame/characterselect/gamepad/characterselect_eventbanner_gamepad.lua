@@ -24,9 +24,11 @@ function ZO_CharacterSelect_EventBanner_Gamepad:Initialize(control, conditionFun
             local data = self.carousel:GetSelectedData()
             if data then
                 --Generate the narration for the remaining time
-                local remainingTime = CHARACTER_SELECT_MANAGER:GetEventAnnouncementRemainingTimeByIndex(data.index)
-                local countdownText = ZO_FormatTime(remainingTime, TIME_FORMAT_STYLE_SHOW_LARGEST_TWO_UNITS, TIME_FORMAT_PRECISION_TWENTY_FOUR_HOUR)
-                ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_EVENT_ANNOUNCEMENT_TIME, countdownText)))
+                local remainingTimeS = CHARACTER_SELECT_MANAGER:GetEventAnnouncementRemainingTimeByIndex(data.index)
+                if remainingTimeS <= ZO_ONE_MONTH_IN_SECONDS then
+                    local countdownText = ZO_FormatTime(remainingTimeS, TIME_FORMAT_STYLE_SHOW_LARGEST_TWO_UNITS, TIME_FORMAT_PRECISION_TWENTY_FOUR_HOUR)
+                    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_EVENT_ANNOUNCEMENT_TIME, countdownText)))
+                end
                 --Generate the narration for the name and description
                 ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(data.name))
                 ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(data.description))

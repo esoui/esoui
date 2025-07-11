@@ -33,7 +33,7 @@
             </Controls>
         </Control>
         
-        <TopLevelControl name="ZO_WorldMapFilters_Gamepad" hidden="true">
+        <TopLevelControl name="ZO_WorldMapFilters_GamepadTL" hidden="true">
             <OnInitialized>
                 ZO_WorldMapFilters_Gamepad_OnInitialized(self)
             </OnInitialized>

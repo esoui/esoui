@@ -273,3 +273,23 @@ function ZO_Tooltip:LayoutPromotionalEventCampaigns()
         end
     end
 end
+
+function ZO_Tooltip:LayoutPromotionalEventActivityDescription(activityData)
+    local description = activityData:GetDescription()
+    local requiredCollectibleText = ZO_PromotionalEvents_Shared.GetActivityRequiredCollectibleText(activityData)
+    if requiredCollectibleText then
+        if description == "" then
+            description = requiredCollectibleText
+        else
+            description = string.format("%s\n\n%s", description, requiredCollectibleText)
+        end
+    end
+
+    if description ~= "" then
+        local bodySection = self:AcquireSection(self:GetStyle("bodySection"))
+        bodySection:AddLargeKeyMarkupLine(description, self:GetStyle("bodyDescription"))
+        self:AddSection(bodySection)
+        return true
+    end
+    return false
+end

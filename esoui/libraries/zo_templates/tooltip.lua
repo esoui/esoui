@@ -42,7 +42,7 @@ function ClearTooltipImmediately(tooltip)
     OnTooltipHidden(tooltip)
 end
 
-function SetTooltipText(tooltip, text, color, colorG, colorB)
+function SetTooltipText(tooltip, text, color, colorG, colorB, lineAnchor, modifyTextType, textAlignment, setToFullSize, minWidth, lineSpacing)
     if text and #text > 0 then
         local r, g, b
         if(type(color) == "number")
@@ -54,7 +54,7 @@ function SetTooltipText(tooltip, text, color, colorG, colorB)
             color = color or ZO_TOOLTIP_DEFAULT_COLOR
             r, g, b = color:UnpackRGB()
         end
-        tooltip:AddLine(text, "", r, g, b)
+        tooltip:AddLine(text, "", r, g, b, lineAnchor, modifyTextType, textAlignment, setToFullSize, minWidth, lineSpacing)
     else
         ClearTooltip(tooltip)
     end

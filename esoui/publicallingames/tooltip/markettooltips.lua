@@ -97,8 +97,9 @@ function ZO_Tooltip:LayoutMarketProductListing(marketProductId, presentationInde
     local DONT_SHOW_AS_PURCHASABLE = false
     self:LayoutMarketProduct(marketProductId, DONT_SHOW_AS_PURCHASABLE)
 
-    local achievementId, completedAchievement = GetMarketProductUnlockedByAchievementInfo(marketProductId)
+    local achievementId = GetMarketProductUnlockedByAchievementId(marketProductId)
     if achievementId ~= 0 then
+        local completedAchievement = IsAchievementComplete(achievementId)
         local criteriaSection = self:AcquireSection(self:GetStyle("achievementCriteriaSection"))
         criteriaSection:AddLine(GetString(SI_MARKET_PRODUCT_TOOLTIP_REQUIRED_ACHIEVEMENT_HEADER), self:GetStyle("achievementSummaryCriteriaHeader"))
         local achievementName = GetAchievementName(achievementId)
@@ -116,6 +117,18 @@ function ZO_Tooltip:LayoutMarketProductListing(marketProductId, presentationInde
             end
             self:AddSection(purchasableOnAltSection)
         end
+    end
+
+    local collectibleIds = { GetMarketProductUnlockedByCollectibleIds(marketProductId) }
+    if #collectibleIds > 0 then
+        local criteriaSection = self:AcquireSection(self:GetStyle("achievementCriteriaSection"))
+        criteriaSection:AddLine(GetString(SI_MARKET_PRODUCT_TOOLTIP_REQUIRED_COLLECTIBLES_HEADER), self:GetStyle("achievementSummaryCriteriaHeader"))
+        for _, collectibleId in ipairs(collectibleIds) do
+            local collectibleName = GetCollectibleName(collectibleId)
+            local ownsCollectible = IsCollectibleOwnedByDefId(collectibleId)
+            criteriaSection:AddSection(self:GetCheckboxSection(ZO_CachedStrFormat(SI_COLLECTIBLE_NAME_FORMATTER, collectibleName), ownsCollectible))
+        end
+        self:AddSection(criteriaSection)
     end
 
     local passesReqList, errorStringId = DoesMarketProductPassPurchasableReqList(marketProductId)

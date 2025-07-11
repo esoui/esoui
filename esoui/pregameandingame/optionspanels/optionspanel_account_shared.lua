@@ -12,7 +12,7 @@ function ZO_OptionsPanel_IsAccountManagementAvailable()
     if g_serviceType == PLATFORM_SERVICE_TYPE_DMM then
         return false
     end
-    return ZO_IsConsolePlatform() or IsInUI("pregame")
+    return IsInUI("pregame")
 end
 
 local function HasActivatedEmail()
@@ -26,7 +26,7 @@ local function HasActivatedEmail()
 end
 
 function ZO_OptionsPanel_GetAccountEmail()
-    if IsInUI("pregame") or ZO_IsConsolePlatform() then
+    if IsInUI("pregame") then
         return GetSecureSetting(SETTING_TYPE_ACCOUNT, ACCOUNT_SETTING_ACCOUNT_EMAIL)
     else
         return ""

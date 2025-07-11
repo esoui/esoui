@@ -230,6 +230,10 @@ function ZO_ActivityFinderLocation_Base:IsSetEntryType()
     return self:GetEntryType() == ZO_ACTIVITY_FINDER_LOCATION_ENTRY_TYPE.SET
 end
 
+function ZO_ActivityFinderLocation_Base:HasSoloBonus()
+    return false
+end
+
 -- Dynamic Data --
 
 function ZO_ActivityFinderLocation_Base:SetSelected(isSelected)
@@ -465,6 +469,10 @@ function ZO_ActivityFinderLocation_Set:InitializeFormattedNames()
     else
         ZO_ActivityFinderLocation_Base.InitializeFormattedNames(self)
     end
+end
+
+function ZO_ActivityFinderLocation_Set:HasSoloBonus()
+    return self:GetMaxGroupSize() > 1 and (self:GetActivityType() == LFG_ACTIVITY_BATTLE_GROUND_CHAMPION or self:GetActivityType() == LFG_ACTIVITY_BATTLE_GROUND_NON_CHAMPION or self:GetActivityType() == LFG_ACTIVITY_BATTLE_GROUND_LOW_LEVEL)
 end
 
 function ZO_ActivityFinderLocation_Set:AddActivitySearchEntry()

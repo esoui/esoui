@@ -101,6 +101,7 @@ function ZO_PromotionalEventTracker:ApplyPlatformStyle(style)
     ZO_HUDTracker_Base.ApplyPlatformStyle(self, style)
 
     self.progressLabel:SetFont(style.FONT_PROGRESS_LABEL)
+    self.headerLabel:SetText(GetString(SI_PROMOTIONAL_EVENT_TRACKER_HEADER))
     self.headerIcon:SetDimensions(style.HEADER_ICON_SIZE, style.HEADER_ICON_SIZE)
     self.headerIcon:SetAnchor(RIGHT, nil, LEFT, style.HEADER_ICON_OFFSET)
 end

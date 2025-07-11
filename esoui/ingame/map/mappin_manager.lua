@@ -1,18 +1,11 @@
-local function GetValueOrExecute(value, ...)
-    if type(value) == "function" then
-        return value(...)
-    end
-    return value
-end
-
 local function DefaultCompareNilable(first, second)
     if first and second then
         return first < second
     elseif first then
         return true
-    else
-        return false
     end
+
+    return false
 end
 
 ------------------
@@ -73,7 +66,6 @@ function ZO_WorldMapPins_Manager:Initialize(parentControl)
     self.currentMouseOverPins = {}
     self.previousMouseOverPins = {}
     self.mousedOverPinWasReset = false
-    self.invalidateTooltip = false
     self.mouseExitPins = {}
     self.foundTooltipMouseOverPins = {}
 
@@ -93,6 +85,13 @@ function ZO_WorldMapPins_Manager:Initialize(parentControl)
         blobControl:SetHandler("OnMouseUp", nil)
         blobControl:SetHandler("OnMouseDown", nil)
         blobControl:SetAlpha(1)
+    end)
+
+    self.writhingWallPinFXPool = ZO_ControlPool:New("ZO_WrithingWallMapPinFX", parentControl, "WrithingWallMapPinFX")
+    self.writhingWallPinFXPool:SetUsePooledObjectWrapper(true)
+
+    self.writhingWallPinFXPool:SetCustomResetBehavior(function(writhingWallPinFX)
+        writhingWallPinFX:SetParent(parentControl)
     end)
 
     self.pinFadeInAnimationPool = ZO_AnimationPool:New("ZO_WorldMapPinFadeIn")
@@ -147,6 +146,10 @@ function ZO_WorldMapPins_Manager:ReleasePinPolygonBlob(pinBlobKey)
     self.pinPolygonBlobPool:ReleaseObject(pinBlobKey)
 end
 
+function ZO_WorldMapPins_Manager:AcquireWrithingWallPinFX()
+    return self.writhingWallPinFXPool:AcquireObject()
+end
+
 function ZO_WorldMapPins_Manager:AcquirePinFadeInAnimation()
     local animation, key = self.pinFadeInAnimationPool:AcquireObject()
     animation.key = key
@@ -172,7 +175,7 @@ function ZO_WorldMapPins_Manager:OnAssistStateChanged(unassistedData, assistedDa
     if assistedData then
         self:SetQuestPinsAssisted(assistedData:GetJournalIndex(), true)
     end
-    self:InvalidateTooltip()
+    WORLD_MAP_MANAGER:MarkPinTooltipDirty()
 end
 
 function ZO_WorldMapPins_Manager:SetQuestPinsAssisted(questIndex, assisted)
@@ -874,23 +877,13 @@ function ZO_WorldMapPins_Manager:BuildMouseOverPinLists(cursorPositionX, cursorP
     return listsChanged, needsContinuousTooltipUpdates
 end
 
+function ZO_WorldMapPins_Manager:ShouldDoMouseExitForPin(pin)
+    return self.mouseExitPins[pin]
+end
+
+-- Addon compatibility
 function ZO_WorldMapPins_Manager:DoMouseExitForPin(pin)
-    if pin:IsPOI() or pin:IsFastTravelWayShrine() then
-        --reset the status to show what part of the map we're over (except if it's the name of this zone)
-        local currentLocation = WORLD_MAP_MANAGER.mouseoverCurrentLocation
-        if currentLocation ~= ZO_WorldMap.zoneName then
-            ZO_WorldMapMouseoverName:SetText(zo_strformat(SI_WORLD_MAP_LOCATION_NAME, currentLocation))
-            ZO_WorldMapMouseoverName.owner = "map"
-        else
-            ZO_WorldMapMouseoverName:SetText("")
-            ZO_WorldMapMouseoverName.owner = ""
-        end
-
-        ZO_WorldMapMouseOverDescription:SetText("")
-    end
-
-    local pinType = pin:GetPinType()
-    WORLD_MAP_MANAGER:DoMouseExitForPinType(pinType)
+    WORLD_MAP_MANAGER:DoMouseExitForPin(pinType)
 end
 
 function ZO_WorldMapPins_Manager:ResetMouseOverPins()
@@ -906,7 +899,7 @@ end
 function ZO_WorldMapPins_Manager:OnMouseOverPinReset(pin)
     if self.currentMouseOverPins[pin] then
         self.mousedOverPinWasReset = true
-        self:DoMouseExitForPin(pin)
+        WORLD_MAP_MANAGER:DoMouseExitForPin(pin)
     end
     self.currentMouseOverPins[pin] = nil
     self.previousMouseOverPins[pin] = nil
@@ -918,340 +911,25 @@ function ZO_WorldMapPins_Manager:OnMouseOverPinReset(pin)
     end
 end
 
-function ZO_WorldMapPins_Manager:GetFoundTooltipMouseOverPins()
-    return self.foundTooltipMouseOverPins
+function ZO_WorldMapPins_Manager:GetCurrentMouseOverPins()
+    return self.currentMouseOverPins
 end
 
-do
-    local function TooltipPinSortFunction(firstPin, secondPin)
-        local firstPinType = firstPin:GetPinType()
-        local secondPinType = secondPin:GetPinType()
-
-        local firstTooltipInfo = ZO_MapPin.TOOLTIP_CREATORS[firstPinType]
-        local secondTooltipInfo = ZO_MapPin.TOOLTIP_CREATORS[secondPinType]
-
-        -- If either tooltip info is nil, that pin has no tooltip, and we just need
-        --  to make sure it sorts to a consistant place.
-        if not firstTooltipInfo then
-            return false
-        elseif not secondTooltipInfo then
-            return true
-        end
-
-        local firstCategoryId = GetValueOrExecute(firstTooltipInfo.categoryId, firstPin)
-        local secondCategoryId = GetValueOrExecute(secondTooltipInfo.categoryId, secondPin)
-
-        local compareResult = DefaultCompareNilable(firstCategoryId, secondCategoryId)
-        if compareResult ~= nil then
-            -- Sort quest conditions from the same quest together
-            if firstCategoryId == secondCategoryId and firstPin:IsQuest() then
-                local firstQuestIndex = firstPin:GetQuestIndex()
-                local secondQuestIndex = secondPin:GetQuestIndex()
-                local firstPinlevel = GetJournalQuestLevel(firstQuestIndex)
-                local secondPinlevel = GetJournalQuestLevel(secondQuestIndex)
-                local firstQuestCon = GetCon(firstPinlevel)
-                local secondQuestCon = GetCon(secondPinlevel)
-                if firstQuestCon == secondQuestCon then
-                    local firstPinName = GetJournalQuestName(firstQuestIndex)
-                    local secondPinName = GetJournalQuestName(secondQuestIndex)
-                    return firstPinName < secondPinName
-                else
-                    return firstQuestCon < secondQuestCon
-                end
-            end
-
-            return compareResult
-        end
-
-        local firstEntryName = GetValueOrExecute(firstTooltipInfo.entryName, firstPin)
-        local secondEntryName = GetValueOrExecute(secondTooltipInfo.entryName, secondPin)
-        compareResult = DefaultCompareNilable(firstEntryName, secondEntryName)
-        if compareResult ~= nil then
-            return compareResult
-        end
-
-        return false
+function ZO_WorldMapPins_Manager:UpdateMouseOverPins()
+    local cursorPositionX
+    local cursorPositionY
+    if SCENE_MANAGER:IsCurrentSceneGamepad() then
+        cursorPositionX, cursorPositionY = ZO_WorldMapScroll:GetCenter()
+    else
+        cursorPositionX, cursorPositionY = GetUIMousePosition()
     end
 
-    local function GamepadTooltipPinSortFunction(firstPin, secondPin)
-        local firstPinType = firstPin:GetPinType()
-        local secondPinType = secondPin:GetPinType()
+    local mouseOverListChanged, needsContinuousTooltipUpdates = self:BuildMouseOverPinLists(cursorPositionX, cursorPositionY)
+    local mouseOverPinsChanged = mouseOverListChanged or self.mousedOverPinWasReset
 
-        local firstTooltipInfo = ZO_MapPin.TOOLTIP_CREATORS[firstPinType]
-        local secondTooltipInfo = ZO_MapPin.TOOLTIP_CREATORS[secondPinType]
+    self.mousedOverPinWasReset = false
 
-        -- If either tooltip info is nil, that pin has no tooltip, and we just need
-        --  to make sure it sorts to a consistant place.
-        if not firstTooltipInfo then
-            return false
-        elseif not secondTooltipInfo then
-            return true
-        end
-
-        local firstCategoryId = GetValueOrExecute(firstTooltipInfo.categoryId, firstPin) or GetValueOrExecute(firstTooltipInfo.gamepadCategory, firstPin)
-        local secondCategoryId = GetValueOrExecute(secondTooltipInfo.categoryId, secondPin) or GetValueOrExecute(secondTooltipInfo.gamepadCategory, secondPin)
-
-        local compareResult = DefaultCompareNilable(firstCategoryId, secondCategoryId)
-        if compareResult ~= nil then
-            -- Sort quest conditions from the same quest together
-            if firstCategoryId == secondCategoryId and firstPin:IsQuest() then
-                local firstQuestIndex = firstPin:GetQuestIndex()
-                local secondQuestIndex = secondPin:GetQuestIndex()
-                local firstPinlevel = GetJournalQuestLevel(firstQuestIndex)
-                local secondPinlevel = GetJournalQuestLevel(secondQuestIndex)
-                local firstQuestCon = GetCon(firstPinlevel)
-                local secondQuestCon = GetCon(secondPinlevel)
-                if firstQuestCon == secondQuestCon then
-                    local firstPinName = GetJournalQuestName(firstQuestIndex)
-                    local secondPinName = GetJournalQuestName(secondQuestIndex)
-                    return firstPinName < secondPinName
-                else
-                    return firstQuestCon < secondQuestCon
-                end
-            end
-            return compareResult
-        end
-
-        local firstCategory = GetValueOrExecute(firstTooltipInfo.gamepadCategory, firstPin)
-        local secondCategory = GetValueOrExecute(secondTooltipInfo.gamepadCategory, secondPin)
-        compareResult = DefaultCompareNilable(firstCategory, secondCategory)
-        if compareResult ~= nil then
-            return compareResult
-        end
-
-        local firstEntryName = GetValueOrExecute(firstTooltipInfo.entryName, firstPin)
-        local secondEntryName = GetValueOrExecute(secondTooltipInfo.entryName, secondPin)
-        compareResult = DefaultCompareNilable(firstEntryName, secondEntryName)
-        if compareResult ~= nil then
-            return compareResult
-        end
-
-        return false
-    end
-
-    function ZO_WorldMapPins_Manager:UpdateMouseOverPins(usedTooltips)
-        local isCurrentSceneGamepad = SCENE_MANAGER:IsCurrentSceneGamepad()
-        local isInGamepadPreferredMode = IsInGamepadPreferredMode()
-        local cursorPositionX
-        local cursorPositionY
-        if isCurrentSceneGamepad then
-            cursorPositionX, cursorPositionY = ZO_WorldMapScroll:GetCenter()
-        else
-            cursorPositionX, cursorPositionY = GetUIMousePosition()
-        end
-
-        local mouseOverListChanged, needsContinuousTooltipUpdates = self:BuildMouseOverPinLists(cursorPositionX, cursorPositionY)
-        local needsTooltipUpdate = mouseOverListChanged or self.mousedOverPinWasReset or needsContinuousTooltipUpdates or self.invalidateTooltip
-        local needsTooltipScrollReset = mouseOverListChanged or self.mousedOverPinWasReset
-        self.invalidateTooltip = false
-        self.mousedOverPinWasReset = false
-
-        if not needsTooltipUpdate then
-            return false
-        end
-
-        ZO_WorldMap_HideAllTooltipsLater()
-
-        -- Iterate over the current pins, using the key as the actual pin to facilitate looking up whether or not it's appropriate to call mouseEnter/mouseExit
-        -- for the pins.
-        local foundTooltipMouseOverPins = self.foundTooltipMouseOverPins
-        ZO_ClearNumericallyIndexedTable(foundTooltipMouseOverPins)
-        for pin, isMousedOver in pairs(self.currentMouseOverPins) do
-            if pin then
-                -- Do the exit pins first (so that ZO_WorldMapMouseoverName gets cleared then set in the correct order)
-                if self.mouseExitPins[pin] then
-                    self:DoMouseExitForPin(pin)
-                end
-
-                -- Verify that control is still moused over due to OnUpdate/OnShow handler issues (prevents tooltip popping)
-                if isMousedOver and pin:MouseIsOver(cursorPositionX, cursorPositionY) then
-                    table.insert(foundTooltipMouseOverPins, pin)
-                else
-                    pin:SetTargetScale(1)
-                end
-            end
-        end
-
-        if isInGamepadPreferredMode then
-            table.sort(foundTooltipMouseOverPins, GamepadTooltipPinSortFunction)
-        else
-            table.sort(foundTooltipMouseOverPins, TooltipPinSortFunction)
-
-            if #foundTooltipMouseOverPins > 0 then
-                WORLD_MAP_MANAGER:HidePinPointerBox()
-            end
-        end
-
-        local MAX_QUEST_PINS = 10
-        local currentQuestPins = 0
-        local missedQuestPins = 0
-        local maxKeepTooltipPinLevel = 0
-        local informationTooltipAppendedTo = false
-        local lastGamepadCategory = nil
-        local informationTooltip = isInGamepadPreferredMode and ZO_MapLocationTooltip_Gamepad or InformationTooltip
-        local tooltipOrder = ZO_WORLD_MAP_TOOLTIP_ORDER
-        local currentQuestHeaderIndex = nil
-
-        for index, pin in ipairs(foundTooltipMouseOverPins) do
-            local pinType = pin:GetPinType()
-            local pinTooltipInfo = ZO_MapPin.TOOLTIP_CREATORS[pinType]
-
-            if pinTooltipInfo then
-                local layoutPinTooltip = true
-                --always allow assisted pins through
-                if pin:IsQuest() and not pin:IsAssisted() then
-                    if currentQuestPins < MAX_QUEST_PINS then
-                        currentQuestPins = currentQuestPins + 1
-                    else
-                        layoutPinTooltip = false
-                        missedQuestPins = missedQuestPins + 1
-                    end
-                end
-
-                if layoutPinTooltip then
-                    if not pin:IsAreaPin() or pin:ShowsPinAndArea() then
-                        pin:SetTargetScale(1.3)
-                    end
-
-                    local layoutTooltip = true
-                    local usedTooltip = pinTooltipInfo.tooltip
-                    if not isCurrentSceneGamepad and usedTooltip == ZO_MAP_TOOLTIP_MODE.KEEP then
-                        local pinLevel = pin:GetLevel()
-                        if pinLevel > maxKeepTooltipPinLevel then
-                            maxKeepTooltipPinLevel = pinLevel
-                        else
-                            layoutTooltip = false
-                        end
-                    end
-
-                    if layoutTooltip and pinTooltipInfo.hasTooltip then
-                        layoutTooltip = pinTooltipInfo.hasTooltip(pin)
-                    end
-
-                    if layoutTooltip then
-                        if usedTooltip then
-                            if not isCurrentSceneGamepad then
-                                for i = 1, #tooltipOrder do
-                                    if tooltipOrder[i] == usedTooltip then
-                                        if not usedTooltips[i] then
-                                            usedTooltips[i] = true
-                                            if usedTooltip == ZO_MAP_TOOLTIP_MODE.KEEP then
-                                                ZO_WorldMap_GetTooltipForMode(ZO_MAP_TOOLTIP_MODE.KEEP):SetHidden(false)
-                                            else
-                                                InitializeTooltip(ZO_WorldMap_GetTooltipForMode(usedTooltip), pin:GetControl())
-                                            end
-                                        end
-                                    end
-                                end
-                            else
-                                if not ZO_WorldMap_IsWorldMapInfoShowing() and not ZO_WorldMap_IsKeepInfoShowing() then
-                                    -- We'll fire the callback later
-                                    local SUPPRESS_CALLBACK = true
-                                    ZO_WorldMap_ShowGamepadTooltip(needsTooltipScrollReset, SUPPRESS_CALLBACK)
-                                end
-                            end
-                        end
-
-                        if isCurrentSceneGamepad then
-                            local nextCategoryText = GetValueOrExecute(pinTooltipInfo.gamepadCategory, pin)
-                            if type(nextCategoryText) == "number" then
-                                nextCategoryText = GetString(nextCategoryText)
-                            end
-
-                            local nextCategory = nextCategoryText
-                            if not nextCategory then
-                                nextCategory = pinTooltipInfo.categoryId
-                            end
-
-                            local isDifferentCategory = (lastGamepadCategory ~= nextCategory)
-
-                            if nextCategoryText and isDifferentCategory then
-                                local categoryIcon = GetValueOrExecute(pinTooltipInfo.gamepadCategoryIcon, pin)
-                                local titleStyleName = pinTooltipInfo.gamepadCategoryStyleName
-                                titleStyleName = titleStyleName and informationTooltip.tooltip:GetStyle(titleStyleName)
-
-                                local groupSection = informationTooltip.tooltip:AcquireSection(titleStyleName, informationTooltip.tooltip:GetStyle("mapKeepCategorySpacing"))
-                                local mapIconTitleStyle = categoryIcon and informationTooltip.tooltip:GetStyle("mapIconTitle") or nil
-                                informationTooltip:LayoutGroupHeader(groupSection, categoryIcon, nextCategoryText, titleStyleName, mapIconTitleStyle, informationTooltip.tooltip:GetStyle("mapTitle"))
-                                informationTooltip.tooltip:AddSection(groupSection)
-                            elseif pinTooltipInfo.gamepadSpacing or isDifferentCategory then
-                                local groupSection = informationTooltip.tooltip:AcquireSection(informationTooltip.tooltip:GetStyle("mapKeepCategorySpacing"))
-                                informationTooltip.tooltip:AddSectionEvenIfEmpty(groupSection)
-                            end
-
-                            lastGamepadCategory = nextCategory
-                        else
-                            if pin:IsQuest() then
-                                if not currentQuestHeaderIndex or currentQuestHeaderIndex ~= pin:GetQuestIndex() then
-                                    currentQuestHeaderIndex = pin:GetQuestIndex()
-                                    pinTooltipInfo.headerCreator(pin)
-                                    informationTooltip:AddVerticalPadding(-8)
-                                elseif currentQuestHeaderIndex == pin:GetQuestIndex() then
-                                    informationTooltip:AddVerticalPadding(-16)
-                                end
-                            elseif currentQuestHeaderIndex ~= nil then
-                                informationTooltip:AddLine(GetString(SI_TOOLTIP_MAP_QUEST_SELECT_FOCUS), "", ZO_HIGHLIGHT_TEXT:UnpackRGB())
-                                currentQuestHeaderIndex = nil
-                            end
-                        end
-
-                        pinTooltipInfo.creator(pin)
-
-                        WORLD_MAP_MANAGER:DoMouseEnterForPinType(pinType)
-
-                        --space out the appended lines in the information tooltip
-                        if usedTooltip == ZO_MAP_TOOLTIP_MODE.INFORMATION and not isCurrentSceneGamepad then
-                            informationTooltipAppendedTo = true
-                            informationTooltip:AddVerticalPadding(5)
-                        end
-                    end
-                end
-            end
-
-            -- For POIs, add name to the top of the map
-            if pinType == MAP_PIN_TYPE_POI_COMPLETE or pinType == MAP_PIN_TYPE_POI_SEEN then
-                local poiIndex = pin:GetPOIIndex()
-                local zoneIndex = pin:GetPOIZoneIndex()
-
-                local poiName, _, poiStartDesc, poiFinishedDesc = GetPOIInfo(zoneIndex, poiIndex)
-
-                ZO_WorldMapMouseoverName.owner = "poi"
-                ZO_WorldMapMouseoverName:SetText(zo_strformat(SI_WORLD_MAP_LOCATION_NAME, poiName))
-
-                if pinType == MAP_PIN_TYPE_POI_COMPLETE then
-                    ZO_WorldMapMouseOverDescription:SetText(poiFinishedDesc)
-                else
-                    ZO_WorldMapMouseOverDescription:SetText(poiStartDesc)
-                end
-            end
-        end
-
-        if not isCurrentSceneGamepad and currentQuestHeaderIndex ~= nil then
-            informationTooltip:AddLine(GetString(SI_TOOLTIP_MAP_QUEST_SELECT_FOCUS), "", ZO_HIGHLIGHT_TEXT:UnpackRGB())
-        end
-
-        if missedQuestPins > 0 then
-            local text = string.format(zo_strformat(SI_TOOLTIP_MAP_MORE_QUESTS, missedQuestPins))
-            if isInGamepadPreferredMode then
-                local lineSection = informationTooltip.tooltip:AcquireSection(informationTooltip.tooltip:GetStyle("mapMoreQuestsContentSection"))
-                lineSection:AddLine(text, informationTooltip.tooltip:GetStyle("mapLocationTooltipContentLabel"), informationTooltip.tooltip:GetStyle("gamepadElderScrollTooltipContent"))
-                informationTooltip.tooltip:AddSection(lineSection)
-            else
-                informationTooltip:AddLine(text)
-            end
-        end
-
-        --Remove the last bit of extra padding on the end
-        if informationTooltipAppendedTo and not isCurrentSceneGamepad then
-            informationTooltip:AddVerticalPadding(-5)
-        end
-
-        return true
-    end
-end
-
-function ZO_WorldMapPins_Manager:InvalidateTooltip()
-    self.invalidateTooltip = true
+    return mouseOverPinsChanged, needsContinuousTooltipUpdates
 end
 
 --[[
@@ -1367,8 +1045,8 @@ end
 
 do
     local function SortPinDatas(firstData, secondData)
-        local firstEntryName = GetValueOrExecute(firstData.handler.name, firstData.pin)
-        local secondEntryName = GetValueOrExecute(secondData.handler.name, secondData.pin)
+        local firstEntryName = ZO_Eval(firstData.handler.name, firstData.pin)
+        local secondEntryName = ZO_Eval(secondData.handler.name, secondData.pin)
         local compareResult = DefaultCompareNilable(firstEntryName, secondEntryName)
         if compareResult ~= nil then
             return compareResult

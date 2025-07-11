@@ -1025,6 +1025,21 @@ function ZO_GroupFinder_GroupListing_GetDesiredRolesList(data, iconDimension)
     return ZO_GenerateSpaceSeparatedList(desiredRolesTable), desiredRolesNarrations
 end
 
+function ZO_GroupFinder_Shared.IsGroupFinderLocked()
+    local statusResult = GetGroupFinderStatusReason()
+    return statusResult ~= GROUP_FINDER_ACTION_RESULT_SUCCESS and statusResult ~= GROUP_FINDER_ACTION_RESULT_FAILED_ACCOUNT_TYPE_BLOCKS_CREATION
+end
+
+function ZO_GroupFinder_Shared.GetGroupFinderLockText()
+    local statusResult = GetGroupFinderStatusReason()
+    if statusResult == GROUP_FINDER_ACTION_RESULT_FAILED_LEVEL_REQUIREMENT then
+        local formatter = GetString("SI_GROUPFINDERACTIONRESULT", statusResult)
+        return zo_strformat(formatter, GROUP_FINDER_UNLOCK_LEVEL)
+    else
+        return GetString("SI_GROUPFINDERACTIONRESULT", statusResult)
+    end
+end
+
 -- Global XML
 
 function ZO_GroupFinder_GroupListing_OnInitialize(control)

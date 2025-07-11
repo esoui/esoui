@@ -251,6 +251,13 @@ ZO_TOOLTIP_STYLES =
         widthPercent = 100,
         statusBarGradientColors = ZO_XP_BAR_GRADIENT_COLORS,
     },
+    progressBar =
+    {
+        statusBarTemplate = "ZO_GamepadArrowProgressBarWithBGMedium",
+        statusBarTemplateOverrideName = "ProgressBar",
+        widthPercent = 100,
+        statusBarGradientColors = ZO_XP_BAR_GRADIENT_COLORS,
+    },
     companionRapportBar =
     {
         controlTemplate = "ZO_SlidingStatusBar",
@@ -360,20 +367,6 @@ ZO_TOOLTIP_STYLES =
     enchantDiffRemove = 
     {
         fontColorField = GAMEPAD_TOOLTIP_COLOR_FAILED,
-    },
-    enchantDiffTextureContainer = 
-    {
-        layoutPrimaryDirection = "right",
-        layoutSecondaryDirection = "down",
-        paddingLeft = -35,
-        paddingTop = 3,
-        paddingRight = 3,
-        paddingBottom = -49,
-    },
-    enchantDiffTexture = 
-    {
-        width = 32,
-        height = 32
     },
     topSection =
     {
@@ -829,6 +822,12 @@ ZO_TOOLTIP_STYLES =
     mapLocationEntrySection =
     {
         childSpacing = -5,
+        widthPercent = 100,
+    },
+    mapSpectacleHeaderSection =
+    {
+        paddingTop = 20,
+        childSpacing = 20,
         widthPercent = 100,
     },
     mapKeepUnderAttack =
@@ -1589,11 +1588,11 @@ ZO_TOOLTIP_STYLES =
         widthPercent = 100,
         horizontalAlignment = TEXT_ALIGN_CENTER
     },
-    itemSetSuppressedDescription =
+    itemBonusSuppressedDescription =
     {
         fontColorField = GENERAL_COLOR_RED
     },
-    itemSetSuppressedSection =
+    itemBonusSuppressedSection =
     {
         fontFace = "$(GAMEPAD_MEDIUM_FONT)",
         fontSize = "$(GP_27)",

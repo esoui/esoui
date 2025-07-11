@@ -3,7 +3,7 @@ local function MUST_IMPLEMENT_SENTINEL()
 end
 
 function ZO_VerifyClassImplementation(finalClass, classTraceback)
-    -- detect any instances of ZO_MUST_IMPLEMENT that are not implemented.
+    -- Detect any instances of ZO_MUST_IMPLEMENT that are not implemented.
     local function VisitClass(currentClass)
         for fieldName, fieldValue in pairs(currentClass) do
             if fieldValue == MUST_IMPLEMENT_SENTINEL and finalClass[fieldName] == MUST_IMPLEMENT_SENTINEL then
@@ -44,7 +44,7 @@ if SHOULD_VERIFY_CLASSES then
         ZO_VerifyConcreteClasses()
     end)
 else
-    -- do nothing instead of tracking and automatically verifying classes
+    -- Do nothing instead of tracking and automatically verifying classes
     function RegisterConcreteClass()
     end
     function RemoveConcreteClass()
@@ -108,9 +108,10 @@ function ZO_Object:MultiSubclass(...)
     return newClass
 end
 
---- Use MUST_IMPLEMENT to create a field that must be implemented by
--- subclasses. If a concrete class does not implement a field that contains a
--- MUST_IMPLEMENT, it will cause an error after the entire addon has been loaded.
+---
+-- Use MUST_IMPLEMENT to create a field that must be implemented by subclasses.
+-- If a concrete class does not implement a field that contains a MUST_IMPLEMENT,
+-- it will cause an error after the entire addon has been loaded.
 -- Example A: ZO_MyAbstractClass.MyAbstractFunction = ZO_MyAbstractClass:MUST_IMPLEMENT()
 -- Example B: ZO_MyAbstractClass:MUST_IMPLEMENT("MyAbstractFunction")
 function ZO_Object:MUST_IMPLEMENT(fieldName)
@@ -121,7 +122,8 @@ function ZO_Object:MUST_IMPLEMENT(fieldName)
     return MUST_IMPLEMENT_SENTINEL
 end
 
---- Use IGNORE_UNIMPLEMENTED_FUNCTIONS to mark a class as abstract. Typically used to denote an abstract derived class that
+---
+-- Use IGNORE_UNIMPLEMENTED_FUNCTIONS to mark a class as abstract. Typically used to denote an abstract derived class that
 -- does not have any of its own MUST_IMPLEMENT fields, but inherits from another abstract class that does.
 -- Example: ZO_MyAbstractDerivedClass:IGNORE_UNIMPLEMENTED()
 function ZO_Object:IGNORE_UNIMPLEMENTED()
@@ -129,7 +131,8 @@ function ZO_Object:IGNORE_UNIMPLEMENTED()
     RemoveConcreteClass(self)
 end
 
---- Use STUB to create a field that doesn't have to be implemented by subclasses, but will error if called.
+---
+-- Use STUB to create a field that doesn't have to be implemented by subclasses, but will error if called.
 -- Example A: ZO_MyParentClass.MyStubbedFunction = ZO_MyAbstractClass:STUB()
 -- Example B: ZO_MyParentClass:STUB("MyStubbedFunction")
 local function STUB_SENTINEL()
@@ -143,15 +146,17 @@ function ZO_Object:STUB(fieldName)
     return STUB_SENTINEL
 end
 
-function ZO_Object:IsInstanceOf(checkClass)
-    local function VisitClass(currentClass)
+do
+    -- Indicates whether the class 'currentClass', or any of its parent classes,
+    -- is the class 'checkClass'.
+    local function IsClassOrSubclass(currentClass, checkClass)
         if currentClass == checkClass then
             return true
         end
 
         if currentClass.__parentClasses then
             for _, parentClass in ipairs(currentClass.__parentClasses) do
-                if VisitClass(parentClass) then
+                if IsClassOrSubclass(parentClass, checkClass) then
                     return true
                 end
             end
@@ -159,11 +164,16 @@ function ZO_Object:IsInstanceOf(checkClass)
 
         return false
     end
-    return VisitClass(self.__index)
+
+    -- Indicates whether this object is an instance of the class
+    -- 'checkClass' or any class that derives from 'checkClass'.
+    function ZO_Object:IsInstanceOf(checkClass)
+        return IsClassOrSubclass(self.__index, checkClass)
+    end
 end
 
 --[[
-Here is a simple multiple inheritence example:
+Here is a simple multiple inheritance example:
 
 local A = ZO_Object:Subclass()
 
@@ -235,16 +245,17 @@ end
 
 ---
 -- ZO_InitializingObject is a new Object definition that more directly encodes
--- the practices most current ZO_Objects are actually using. in most cases, you
+-- the practices most current ZO_Objects are actually using. In most cases, you
 -- can directly replace a ZO_Object with a ZO_InitializingObject, and delete the
--- redundant :New() definition that most ZO_Object classes create.
+-- redundant :New() definition that most ZO_Object classes defined.
 --
 ZO_InitializingObject = {}
 zo_mixin(ZO_InitializingObject, ZO_Object)
 ZO_InitializingObject.__index = ZO_InitializingObject
 
 ---
--- This is the external constructor for each object. should be called like so:
+-- The external constructor for each object.
+-- Sample usage:
 --     myObject = MyClass:New([arguments])
 --
 function ZO_InitializingObject:New(...)
@@ -254,28 +265,35 @@ function ZO_InitializingObject:New(...)
 end
 
 ---
--- Override this initialization function to define how your object should be constructed. example:
+-- Override this initialization function to define how your object should be constructed.
+-- Sample usage:
 --     function MyClass:Initialize(argument1, argument2)
 --         self.myField = argument1
 --     end
--- You can still create an InitializingObject that doesn't have an Initialize
--- definition, it will just call this empty method instead.
+-- You can still create an InitializingObject that does not define an Initialize method;
+-- new instances will simply call this empty, default Initialize method instead.
 function ZO_InitializingObject:Initialize()
     -- To be overridden
 end
 
 --
--- ZO_DeferredInitializingObject is a ZO_InitializingObject wrapper that standardizes the logic around deferring some of the initialization until later.
--- Use of this abstract class requires passing in a fragment and implementing OnDeferredInitialize
--- OnDeferredInitialize will be called when the fragment is showing before calling self:OnShowing()
-
+-- ZO_DeferredInitializingObject is a ZO_InitializingObject wrapper that standardizes the
+-- logic around deferring some of the initialization until later.
+-- To use this abstract class:
+--   (1) Pass in a ZO_Scene, ZO_SceneFragment or ZO_SceneGroup object.
+--   (2) Define a custom OnDeferredInitialize method.
+--       ZO_DeferredInitializingObject will call your OnDeferredInitialize method the first
+--       time the ZO_Scene/ZO_SceneFragment/ZO_SceneGroup is shown.
+--       Note that this is handled automatically and will happen prior to calling the
+--       OnShowing method.
 ZO_DeferredInitializingObject = {}
 zo_mixin(ZO_DeferredInitializingObject, ZO_InitializingObject)
 ZO_DeferredInitializingObject.__index = ZO_DeferredInitializingObject
 
 ---
--- Override this initialization function to define how your object should be constructed. 
--- You must create a fragment, scene, or scene group and call this base Initialize function, passing the fragment, scene, or scene group. example:
+-- If you must override the Initialize method, be sure to create a ZO_Scene, ZO_SceneFragment or
+-- ZO_SceneGroup object to the pass to the base ZO_DeferredInitializingObject.Initialize method.
+-- Sample usage:
 --     function MyClass:Initialize(control, argument1, argument2)
 --         ZO_DeferredInitializingObject.Initialize(self, ZO_FadeSceneFragment:New(control))
 --         self.myField = argument1

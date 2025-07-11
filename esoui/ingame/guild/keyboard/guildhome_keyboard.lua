@@ -113,10 +113,12 @@ end
 
 function GuildHomeManager:RefreshMotD()
     self.motd:SetText(GetGuildMotD(self.guildId))
+    self:RefreshPermissions()
 end
 
 function GuildHomeManager:RefreshDescription()
     self.description:SetText(GetGuildDescription(self.guildId))
+    self:RefreshPermissions()
 end
 
 function GuildHomeManager:RefreshPermissions()

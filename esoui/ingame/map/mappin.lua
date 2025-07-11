@@ -215,7 +215,6 @@ do
         [MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_D_NEUTRAL]          = { level = 86, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_mobileCapturePoint_pin_neutral_D.dds", hitInsetX = 13, hitInsetY = 7},
         [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_AURA]                      = { level = 85, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_capturePoint_halo.dds", tint = GetObjectiveAuraPinTint, hitInsetX = 15, hitInsetY = 11},
         [MAP_PIN_TYPE_BGPIN_MOBILE_CAPTURE_AREA_AURA]               = { level = 85, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_mobileCapturePoint_halo.dds", tint = GetObjectiveAuraPinTint, hitInsetX = 15, hitInsetY = 11},
-        [MAP_PIN_TYPE_BGPIN_CAPTURE_AREA_AURA]                      = { level = 85, size = CONSTANTS.CAPTURE_AREA_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_capturePoint_halo.dds", tint = GetObjectiveAuraPinTint, hitInsetX = 15, hitInsetY = 11},
         [MAP_PIN_TYPE_BGPIN_FLAG_SPAWN_FIRE_DRAKES]                 = { level = 81, size = CONSTANTS.RETURN_OBJECTIVE_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_flagSpawn_pin_orange.dds", hitInsetX = 15, hitInsetY = 11},
         [MAP_PIN_TYPE_BGPIN_FLAG_SPAWN_PIT_DAEMONS]                 = { level = 81, size = CONSTANTS.RETURN_OBJECTIVE_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_flagSpawn_pin_green.dds", hitInsetX = 15, hitInsetY = 11},
         [MAP_PIN_TYPE_BGPIN_FLAG_SPAWN_STORM_LORDS]                 = { level = 81, size = CONSTANTS.RETURN_OBJECTIVE_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_flagSpawn_pin_purple.dds", hitInsetX = 15, hitInsetY = 11},
@@ -785,19 +784,27 @@ do
 
     local function SetWayshrineMessage(pinType, pin)
         local nodeIndex = pin:GetFastTravelNodeIndex()
-        local zoneIndex, poiIndex = GetFastTravelNodePOIIndicies(nodeIndex)
 
         local known, name = GetFastTravelNodeInfo(nodeIndex)
-        ZO_WorldMapMouseoverName.owner = "fastTravelWayshrine"
-        ZO_WorldMapMouseoverName:SetText(zo_strformat(SI_WORLD_MAP_LOCATION_NAME, name))
 
+        local zoneIndex, poiIndex = GetFastTravelNodePOIIndicies(nodeIndex)
         local poiStartDesc, poiFinishedDesc = select(3, GetPOIInfo(zoneIndex, poiIndex))
 
+        local descriptionText
         if HasCompletedFastTravelNodePOI(nodeIndex) then
-            ZO_WorldMapMouseOverDescription:SetText(poiFinishedDesc)
+            descriptionText = poiFinishedDesc
         else
-            ZO_WorldMapMouseOverDescription:SetText(poiStartDesc)
+            descriptionText = poiStartDesc
         end
+
+        local mapHeaderInfo =
+        {
+            nameText = zo_strformat(SI_WORLD_MAP_LOCATION_NAME, name),
+            descriptionText = descriptionText,
+            owner = "fastTravelWayshrine",
+        }
+
+        WORLD_MAP_MANAGER:SetMapHeader(mapHeaderInfo)
 
         ZO_WorldMap_GetTooltipForMode(ZO_MAP_TOOLTIP_MODE.INFORMATION):AppendWayshrineTooltip(pin)
     end
@@ -1861,6 +1868,17 @@ function ZO_MapPin.GetMapPinForControl(control)
     return control.m_Pin
 end
 
+-- Returns a numerically indexed table of the active spectacle event ids
+-- associated with the specified zoneIndex and poiIndex.
+-- Returns nil if there are no associated active spectacle events.
+function ZO_MapPin.GetActiveSpectacleEventIdsForZoneAndPOIIndices(zoneIndex, poiIndex)
+    local activeSpectacleEventIds = { GetActiveSpectacleEventIdsForPOI(zoneIndex, poiIndex) }
+    if #activeSpectacleEventIds > 0 then
+        return activeSpectacleEventIds
+    end
+    return nil
+end
+
 function ZO_MapPin.HidePulseAfterFadeOut(control)
     control:SetHidden(true)
 end
@@ -1878,7 +1896,9 @@ function ZO_MapPin.CreateQuestPinTag(questIndex, stepIndex, conditionIndex)
 end
 
 function ZO_MapPin.CreatePOIPinTag(zoneIndex, poiIndex, icon, linkedCollectibleIsLocked)
-    return { zoneIndex, poiIndex, icon, linkedCollectibleIsLocked }
+    local tag = { zoneIndex, poiIndex, icon, linkedCollectibleIsLocked }
+    tag.spectacleEventIds = ZO_MapPin.GetActiveSpectacleEventIdsForZoneAndPOIIndices(zoneIndex, poiIndex)
+    return tag
 end
 
 function ZO_MapPin.CreateLocationPinTag(locationIndex, icon)
@@ -1902,7 +1922,10 @@ function ZO_MapPin.CreateRestrictedLinkTravelNetworkPinTag(restrictedAlliance, b
 end
 
 function ZO_MapPin.CreateTravelNetworkPinTag(nodeIndex, icon, glowIcon, linkedCollectibleIsLocked)
-    return { nodeIndex, icon, glowIcon, linkedCollectibleIsLocked }
+    local tag = { nodeIndex, icon, glowIcon, linkedCollectibleIsLocked }
+    local zoneIndex, poiIndex = GetFastTravelNodePOIIndicies(nodeIndex)
+    tag.spectacleEventIds = ZO_MapPin.GetActiveSpectacleEventIdsForZoneAndPOIIndices(zoneIndex, poiIndex)
+    return tag
 end
 
 function ZO_MapPin.CreateForwardCampPinTag(forwardCampIndex)
@@ -2038,6 +2061,13 @@ function ZO_MapPin:GetQuestIndex()
     return -1
 end
 
+function ZO_MapPin:GetSpectacleEventIds()
+    if type(self.m_PinTag) == "table" then
+        return self.m_PinTag.spectacleEventIds
+    end
+    return nil
+end
+
 function ZO_MapPin:IsObjective()
     return ZO_MapPin.OBJECTIVE_PIN_TYPES[self.m_PinType] or ZO_MapPin.SPAWN_OBJECTIVE_PIN_TYPES[self.m_PinType] or ZO_MapPin.RETURN_OBJECTIVE_PIN_TYPES[self.m_PinType]
 end
@@ -2152,6 +2182,10 @@ end
 
 function ZO_MapPin:IsBattlegroundPin()
     return self:IsBattlegroundObjective()
+end
+
+function ZO_MapPin:IsAssociatedWithActiveSpectacleEvent()
+    return self:GetSpectacleEventIds() ~= nil
 end
 
 function ZO_MapPin:IsAreaPin()
@@ -2940,13 +2974,20 @@ function ZO_MapPin:UpdateLocation()
 
         myControl:ClearAnchors()
         myControl:SetAnchor(CENTER, nil, TOPLEFT, offsetX, offsetY)
+
         if self.pinBlob then
             self.pinBlob:ClearAnchors()
             self.pinBlob:SetAnchor(CENTER, nil, TOPLEFT, offsetX, offsetY)
         end
+
         if self.polygonBlob then
             self.polygonBlob:ClearAnchors()
             self.polygonBlob:SetAnchor(CENTER, nil, TOPLEFT, offsetX, offsetY)
+        end
+
+        if self.spectacleEventFX then
+            self.spectacleEventFX:ClearAnchors()
+            self.spectacleEventFX:SetAnchor(CENTER, nil, nil, nil, -6)
         end
     end
 end
@@ -3037,6 +3078,14 @@ function ZO_MapPin:SetLocation(xLoc, yLoc, radius, borderInformation)
             self.polygonBlob:ClearPoints()
             for i, point in ipairs(borderInformation.borderPoints) do
                 self.polygonBlob:AddPoint(point.x, point.y)
+            end
+        end
+
+        if not self.spectacleEventFX then
+            -- TODO WW: Determine which spectacle event FX to acquire based on which spectacle event is active.
+            if self:IsAssociatedWithActiveSpectacleEvent() then
+                self.spectacleEventFX = ZO_WorldMap_GetPinManager():AcquireWrithingWallPinFX()
+                self.spectacleEventFX:SetParent(self:GetControl())
             end
         end
 
@@ -3181,16 +3230,23 @@ function ZO_MapPin:Reset()
     local control = self:GetControl()
     control:SetAlpha(1)
 
-    -- Remove area blob from pin, put it back in its own pool.
+    -- Remove area blob from pin; release it back into its own pool.
     if self.pinBlobKey then
         ZO_WorldMap_GetPinManager():ReleasePinBlob(self.pinBlobKey)
         self.pinBlobKey = nil
         self.pinBlob = nil
     end
 
+    -- Remove polygon blob from pin; release it back into its own pool.
     if self.polygonBlob then
         ZO_WorldMap_GetPinManager():ReleasePinPolygonBlob(self.polygonBlobKey)
         self.polygonBlobKey = nil
         self.polygonBlob = nil
+    end
+
+    -- Remove the spectacle event FX from the pin; release it back into its own pool.
+    if self.spectacleEventFX then
+        self.spectacleEventFX:ReleaseObject()
+        self.spectacleEventFX = nil
     end
 end

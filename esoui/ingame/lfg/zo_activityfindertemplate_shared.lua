@@ -93,6 +93,8 @@ function ZO_ActivityFinderTemplate_Shared:InitializeSingularPanelControls(reward
     ApplyTemplateToControl(xpRewardControl, rewardsTemplate)
     self.xpRewardControl = xpRewardControl
 
+    self.soloBonusSection = panel:GetNamedChild("SoloBonusSection")
+
     self.tributeSeasonProgressControl = panel:GetNamedChild("TributeSeasonSection")
     self.tributeSeasonProgressHeader = self.tributeSeasonProgressControl:GetNamedChild("Header")
     self.seasonTimeRemainingLabel = self.tributeSeasonProgressControl:GetNamedChild("CountDown")
@@ -476,7 +478,14 @@ do
             self.rewardsHeader:SetText(headerText)
             self.rewardsSection:SetHidden(false)
 
-            local overrideOffsetY = (location:GetActivityType() == LFG_ACTIVITY_TRIBUTE_COMPETITIVE or location:GetActivityType() == LFG_ACTIVITY_TRIBUTE_CASUAL) and self.rewardsOffsetYTribute or self.rewardsOffsetYDefault
+            local overrideOffsetY
+            if location:GetActivityType() == LFG_ACTIVITY_TRIBUTE_COMPETITIVE or location:GetActivityType() == LFG_ACTIVITY_TRIBUTE_CASUAL then
+                overrideOffsetY = self.rewardsOffsetYTribute
+            elseif location:HasSoloBonus() then
+                overrideOffsetY = self.rewardsOffsetYBattlegroundSoloBonus
+            else
+                overrideOffsetY = self.rewardsOffsetYDefault
+            end
             local isValid, point, relativeTo, relativePoint, offsetX, offsetY = self.rewardsSection:GetAnchor()
             if isValid then
                 self.rewardsSection:ClearAnchors()

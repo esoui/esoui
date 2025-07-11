@@ -50,7 +50,7 @@
                     <!-- Anchors are set in Lua-->
                 </Texture>
 
-                <Texture name="$(parent)KeepIcon" inherits="ZO_CampaignScoring_Icon">
+                <Texture name="$(parent)KeepIcon" inherits="ZO_CampaignScoring_IconTemplate">
                     <Anchor point="BOTTOMLEFT" offsetX="68" offsetY="-25" />
                 </Texture>
 
@@ -58,7 +58,7 @@
                     <Anchor point="BOTTOMLEFT" relativeTo="$(parent)KeepIcon" relativePoint="BOTTOMRIGHT" offsetX="-18" offsetY="-11" />
                 </Label>
 
-                <Texture name="$(parent)OutpostIcon" inherits="ZO_CampaignScoring_Icon">
+                <Texture name="$(parent)OutpostIcon" inherits="ZO_CampaignScoring_IconTemplate">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)KeepIcon" relativePoint="TOPRIGHT" offsetX="70" />
                 </Texture>
 
@@ -66,7 +66,7 @@
                     <Anchor point="BOTTOMLEFT" relativeTo="$(parent)OutpostIcon" relativePoint="BOTTOMRIGHT" offsetX="-15" offsetY="-11" />
                 </Label>
 
-                <Texture name="$(parent)ResourcesIcon" inherits="ZO_CampaignScoring_Icon">
+                <Texture name="$(parent)ResourcesIcon" inherits="ZO_CampaignScoring_IconTemplate">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)OutpostIcon" relativePoint="TOPRIGHT" offsetX="70" />
                 </Texture>
 
@@ -74,7 +74,7 @@
                     <Anchor point="BOTTOMLEFT" relativeTo="$(parent)ResourcesIcon" relativePoint="BOTTOMRIGHT" offsetX="-12" offsetY="-11" />
                 </Label>
 
-                <Texture name="$(parent)ScrollIcon" inherits="ZO_CampaignScoring_Icon">
+                <Texture name="$(parent)ScrollIcon" inherits="ZO_CampaignScoring_IconTemplate">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)ResourcesIcon" relativePoint="TOPRIGHT" offsetX="70" />
                 </Texture>
 

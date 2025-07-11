@@ -105,6 +105,18 @@
                     </Controls>
                 </Control>
 
+                <Button name="$(parent)ReplayAudio">
+                    <Dimensions x="32" y="32" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)TargetArea" relativePoint="BOTTOMLEFT" offsetY="5" />
+
+                    <Textures
+                        normal="EsoUI/Art/Interaction/replayDialog_audio_up.dds"
+                        pressed="EsoUI/Art/Interaction/replayDialog_audio_down.dds"
+                        mouseOver="EsoUI/Art/Interaction/replayDialog_audio_over.dds"
+                        disabled="EsoUI/Art/Interaction/replayDialog_audio_disabled.dds"
+                    />
+                </Button>
+
                 <Control name="$(parent)CollapseContainer" resizeToFitDescendents="true">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)TargetArea" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="40" />
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)TargetArea" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="40" />

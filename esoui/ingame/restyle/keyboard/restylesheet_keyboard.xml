@@ -88,7 +88,7 @@
                 <Control name="$(parent)Secondary" override="true" hidden="false">
                     <Controls>
                         <Button name="$(parent)WeaponSwap" inherits="ZO_WeaponSwapLeft">
-                            <Anchor point="LEFT" relativePoint="RIGHT" offsetX="5" offsetY="10" />
+                            <Anchor point="LEFT" relativePoint="RIGHT" offsetX="-22" offsetY="10" />
                         </Button>
                     </Controls>
                 </Control>

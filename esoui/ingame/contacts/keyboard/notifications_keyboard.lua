@@ -35,6 +35,7 @@ ZO_KEYBOARD_NOTIFICATION_ICONS =
     [NOTIFICATION_TYPE_DISABLED_ADDON] = "EsoUI/Art/Miscellaneous/ESO_Icon_Warning.dds",
     [NOTIFICATION_TYPE_TRIBUTE_INVITE] = "EsoUI/Art/Notifications/notificationIcon_tribute.dds",
     [NOTIFICATION_TYPE_HOUSE_TOURS_HOUSE_RECOMMENDED] = "EsoUI/Art/Notifications/notificationIcon_houseToursHouseRecommended.dds",
+    [NOTIFICATION_TYPE_SPECTACLE_EVENT_PHASE_CHANGED] = "EsoUI/Art/Notifications/notificationIcon_WrithingWall.dds",
     [NOTIFICATION_TYPE_SLOTS_RESET] = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_character.dds",
     [NOTIFICATION_TYPE_CONSOLE_ADDON_MEMORY_LIMIT_REACHED] = "EsoUI/Art/Miscellaneous/ESO_Icon_Warning.dds",
     [NOTIFICATION_TYPE_CONSOLE_ADDON_SAVED_VARIABLES_LIMIT_REACHED] = "EsoUI/Art/Miscellaneous/ESO_Icon_Warning.dds",
@@ -43,7 +44,7 @@ ZO_KEYBOARD_NOTIFICATION_ICONS =
 -- Provider Overrides
 -------------------------
 
--- Friend Request Provier
+-- Friend Request Provider
 -------------------------
 
 ZO_KeyboardFriendRequestProvider = ZO_FriendRequestProvider:Subclass()
@@ -81,7 +82,7 @@ function ZO_KeyboardFriendRequestProvider:Decline(data, button, openedFromKeybin
     end
 end
 
--- Guild Invite Request Provier
+-- Guild Invite Request Provider
 -------------------------
 
 ZO_KeyboardGuildInviteProvider = ZO_GuildInviteProvider:Subclass()
@@ -313,6 +314,10 @@ function ZO_KeyboardNotificationManager:InitializeNotificationList(control)
         self:SetupRequestWithMoreInfoRow(...)
     end
 
+    local function SetupRequestWithMarketProductUnlockRow(...)
+        self:SetupRequestWithMarketProductUnlockRow(...)
+    end
+
     ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_REQUEST_DATA, "ZO_NotificationsRequestRow", ZO_NOTIFICATIONS_KEYBOARD_BASE_ROW_HEIGHT, SetupRequest)
     ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_YES_NO_DATA, "ZO_NotificationsYesNoRow", ZO_NOTIFICATIONS_KEYBOARD_BASE_ROW_HEIGHT, SetupRequest)
     ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_WAITING_DATA, "ZO_NotificationsWaitingRow", ZO_NOTIFICATIONS_KEYBOARD_BASE_ROW_HEIGHT, function(...) self:SetupWaiting(...) end)
@@ -327,9 +332,10 @@ function ZO_KeyboardNotificationManager:InitializeNotificationList(control)
     ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_GIFT_CLAIMED_DATA, "ZO_NotificationsGiftClaimedRow", ZO_NOTIFICATIONS_KEYBOARD_BASE_ROW_HEIGHT, SetupRequest)
     ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_NEW_DAILY_LOGIN_REWARD_DATA, "ZO_NotificationsNewDailyLoginRewardRow", ZO_NOTIFICATIONS_KEYBOARD_BASE_ROW_HEIGHT, SetupRequest)
     ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_GUILD_NEW_APPLICATIONS, "ZO_NotificationsGuildNewApplicationsRow", ZO_NOTIFICATIONS_KEYBOARD_BASE_ROW_HEIGHT, SetupRequest)
-    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_MARKET_PRODUCT_UNLOCKED_DATA, "ZO_NotificationsMarketProductUnlockedRow", ZO_NOTIFICATIONS_KEYBOARD_BASE_ROW_HEIGHT, SetupRequestWithMoreInfoRow)
+    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_MARKET_PRODUCT_UNLOCKED_DATA, "ZO_NotificationsMarketProductUnlockedRow", ZO_NOTIFICATIONS_KEYBOARD_BASE_ROW_HEIGHT, SetupRequestWithMarketProductUnlockRow)
     ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_POINTS_RESET_DATA, "ZO_NotificationsPointsResetRow", ZO_NOTIFICATIONS_KEYBOARD_BASE_ROW_HEIGHT, SetupRequest)
     ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_HOUSE_TOURS_HOUSE_RECOMMENDED_DATA, "ZO_NotificationsHouseToursHouseRecommendedRow", ZO_NOTIFICATIONS_KEYBOARD_BASE_ROW_HEIGHT, SetupRequest)
+    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_SPECTACLE_EVENT_UPDATE_DATA, "ZO_NotificationsSpectacleEventUpdateRow", ZO_NOTIFICATIONS_KEYBOARD_BASE_ROW_HEIGHT, SetupRequest)
     ZO_ScrollList_EnableHighlight(self.sortFilterList.list, "ZO_ThinListHighlight")
 
     self.totalNumNotifications = 0
@@ -367,6 +373,7 @@ function ZO_KeyboardNotificationManager:InitializeNotificationList(control)
         ZO_DisabledAddonsProvider:New(self),
         ZO_TributeInviteProvider:New(self),
         ZO_HouseToursHouseRecommendedProvider:New(self),
+        ZO_SpectacleEventNotificationProvider:New(self),
         ZO_ConsoleAddonsMemoryLimitProvider:New(self),
         ZO_ConsoleAddonsSavedVariableLimitProvider:New(self),
     }
@@ -467,7 +474,7 @@ function ZO_KeyboardNotificationManager:InitializeNotificationList(control)
         {
             name = GetString(SI_GUILD_BROWSER_REPORT_GUILD_KEYBIND),
 
-            keybind = "UI_SHORTCUT_REPORT_PLAYER",
+            keybind = "UI_SHORTCUT_HELP",
 
             callback = function()
                 local selectedRow = self:GetSelectedData()
@@ -594,6 +601,21 @@ function ZO_KeyboardNotificationManager:SetupRequestWithMoreInfoRow(control, dat
     self:SetupRequest(control, data)
     local moreInfoButton = control:GetNamedChild("MoreInfo")
     moreInfoButton:SetHidden(data.moreInfo ~= true)
+end
+
+function ZO_KeyboardNotificationManager:SetupRequestWithMarketProductUnlockRow(control, data)
+    self:SetupRequestWithMoreInfoRow(control, data)
+    
+    local acceptButton = control:GetNamedChild("Accept")
+    if data.allAreFromAchievements then
+        acceptButton:SetNormalTexture("EsoUI/Art/Buttons/log_out_up.dds")
+        acceptButton:SetPressedTexture("EsoUI/Art/Buttons/log_out_down.dds")
+        acceptButton:SetMouseOverTexture("EsoUI/Art/Buttons/log_out_over.dds")
+    else
+        acceptButton:SetNormalTexture("EsoUI/Art/Buttons/accept_up.dds")
+        acceptButton:SetPressedTexture("EsoUI/Art/Buttons/accept_down.dds")
+        acceptButton:SetMouseOverTexture("EsoUI/Art/Buttons/accept_over.dds")
+    end
 end
 
 --Local XML

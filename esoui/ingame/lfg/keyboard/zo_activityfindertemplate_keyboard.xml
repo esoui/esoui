@@ -196,7 +196,7 @@
                         </Label>
 
                         <Control name="$(parent)RewardsSection" override="true">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)Background" relativePoint="BOTTOMLEFT" offsetX="20" offsetY="-250" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Background" relativePoint="BOTTOMLEFT" offsetX="20" offsetY="-150" />
 
                             <Controls>
                                 <Label name="$(parent)Header" override="true" font="ZoFontWinH2" />
@@ -207,9 +207,27 @@
                             </Controls>
                         </Control>
 
+                        <Control name="$(parent)SoloBonusSection" override="true">
+                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)RewardsSection" relativePoint="TOPLEFT" offsetY="-20" />
+
+                            <Controls>
+                                <Label name="$(parent)Header" override="true" font="ZoFontWinH2">
+                                    <Anchor point="TOPLEFT" />
+                                </Label>
+                                <Texture name="$(parent)Icon" override="true">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" offsetY="20" />
+                                    <Dimensions x="64" y="64" />
+                                </Texture>
+
+                                <Label name="$(parent)Label" override="true" font="ZoFontWinH2">
+                                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="5" />
+                                </Label>
+                            </Controls>
+                        </Control>
+
                         <Control name="$(parent)SetTypesSection" override="true">
-                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)RewardsSection" relativePoint="TOPLEFT" />
-                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)RewardsSection" relativePoint="TOPRIGHT" offsetY="-24" />
+                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)SoloBonusSection" relativePoint="TOPLEFT" />
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)SoloBonusSection" relativePoint="TOPRIGHT" constrains="Y" offsetY="-24" />
 
                             <Controls>
                                 <Label name="$(parent)Header" override="true" font="ZoFontGamepad42" hidden="true" />

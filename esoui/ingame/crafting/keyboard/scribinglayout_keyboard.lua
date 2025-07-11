@@ -144,7 +144,7 @@ function ZO_ScribingLayout_Keyboard:InitializeGridList()
 
         control.statusMultiIcon:ClearIcons()
 
-        if craftedAbilityData:IsSlottedOnHotBar() then
+        if craftedAbilityData:IsScribed() then
             control.statusMultiIcon:AddIcon("EsoUI/Art/Skills/scribing_grimoire_equipped.dds")
         end
 
