@@ -226,7 +226,7 @@ function ActivityFinderRoot_Gamepad:RefreshList()
     if self.scene:IsShowing() then
         local list = self:GetMainList()
         local commitList = false
-        for i = 1, list:GetNumEntries() do
+        for i = list:GetNumEntries(), 1, -1 do
             local entryData = list:GetEntryData(i)
             local data = entryData and entryData.data
             if data then

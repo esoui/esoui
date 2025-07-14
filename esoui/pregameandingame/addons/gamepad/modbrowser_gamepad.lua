@@ -1270,6 +1270,8 @@ function ZO_ModBrowser_Gamepad:OnEulaHidden()
             ADDON_MANAGER_GAMEPAD:MarkDirty()
         end
         MOD_BROWSER_SEARCH_MANAGER:ExecuteSearch(self.searchType)
+        --Fire this if the EULA was just accepted, as it would have failed upon first entering the screen
+        OnModBrowserOpened()
     end
     self:UpdateKeybinds()
 end
@@ -1351,6 +1353,9 @@ function ZO_ModBrowser_Gamepad:OnShowing()
     self:RefreshData()
     self:Activate()
     self:RefreshHeader()
+    if HasAgreedToEULA(EULA_TYPE_ADDON_EULA) then
+        OnModBrowserOpened()
+    end
 end
 
 --Overridden from base
@@ -1365,6 +1370,9 @@ function ZO_ModBrowser_Gamepad:OnHiding()
     ZO_GamepadInteractiveSortFilterList.OnHiding(self)
     ZO_GamepadGenericHeader_Deactivate(self.contentHeader)
     GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
+    if HasAgreedToEULA(EULA_TYPE_ADDON_EULA) then
+        OnModBrowserClosed()
+    end
 end
 
 --Overridden from base
