@@ -93,6 +93,7 @@ function LoreLibrary:InitializeEvents(control)
 
     control:RegisterForEvent(EVENT_LORE_LIBRARY_INITIALIZED, OnInitialized)
     control:RegisterForEvent(EVENT_LORE_BOOK_LEARNED, OnBookLearned)
+    control:RegisterForEvent(EVENT_LORE_BOOK_COLLECTION_LEARNED, OnBookLearned)
     self.control:RegisterForEvent(EVENT_UNLOCKED_HIRELING_CORRESPONDENCE_INITIALIZED, OnInitialized)
     self.control:RegisterForEvent(EVENT_UNLOCKED_HIRELING_CORRESPONDENCE_UPDATED, OnCorrespondenceUpdated)
 end

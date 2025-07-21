@@ -6,11 +6,17 @@ function ZO_SpectacleEvents_Manager:Initialize()
 end
 
 function ZO_SpectacleEvents_Manager:InitializeEvents()
-    local function OnSpectacleEventUpdated(spectacleEventId)
+    local function OnSpectacleEventUpdated(_, spectacleEventId)
         self:UpdateActiveSpectacleEventId()
     end
 
     EVENT_MANAGER:RegisterForEvent("ZO_SpectacleEvents_Manager", EVENT_SPECTACLE_EVENT_UPDATED, OnSpectacleEventUpdated)
+
+    local function OnSpectacleEventPhaseUpdated(_, spectacleEventId, oldActivePhaseId, newActivePhaseId, isInitialUpdate)
+        self:UpdateActiveSpectacleEventPhaseId(spectacleEventId, oldActivePhaseId, newActivePhaseId, isInitialUpdate)
+    end
+
+    EVENT_MANAGER:RegisterForEvent("ZO_SpectacleEvents_Manager", EVENT_SPECTACLE_EVENT_PHASE_UPDATED, OnSpectacleEventPhaseUpdated)
 end
 
 function ZO_SpectacleEvents_Manager:GetActiveSpectacleEventId()
@@ -31,6 +37,18 @@ function ZO_SpectacleEvents_Manager:UpdateActiveSpectacleEventId()
 
     if previousActiveSpectacleEventId ~= self.activeSpectacleEventId then
         self:FireCallbacks("ActiveSpectacleEventUpdated", self.activeSpectacleEventId)
+    end
+end
+
+function ZO_SpectacleEvents_Manager:UpdateActiveSpectacleEventPhaseId(spectacleEventId, oldActivePhaseId, newActivePhaseId, isInitialUpdate)
+    if oldActivePhaseId ~= newActivePhaseId then
+        if oldActivePhaseId ~= 0 then
+            self:FireCallbacks("ActiveSpectacleEventPhaseComplete", spectacleEventId, oldActivePhaseId, isInitialUpdate)
+        end
+
+        if newActivePhaseId ~= 0 then
+            self:FireCallbacks("ActiveSpectacleEventPhaseStarted", spectacleEventId, newActivePhaseId, isInitialUpdate)
+        end
     end
 end
 

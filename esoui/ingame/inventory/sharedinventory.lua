@@ -295,6 +295,7 @@ function ZO_SharedInventoryManager:Initialize()
     end
     EVENT_MANAGER:RegisterForEvent(namespace, EVENT_LORE_LIBRARY_INITIALIZED, HandleLoreBooksUpdated)
     EVENT_MANAGER:RegisterForEvent(namespace, EVENT_LORE_BOOK_LEARNED, HandleLoreBooksUpdated)
+    EVENT_MANAGER:RegisterForEvent(namespace, EVENT_LORE_BOOK_COLLECTION_LEARNED, HandleLoreBooksUpdated)
 end
 
 function ZO_SharedInventoryManager:RegisterForConfirmUseItemEvents(namespace)
@@ -417,13 +418,33 @@ function ZO_SharedInventoryManager:GenerateFullQuestCache()
     return self.questCache
 end
 
--- Trait Information Update
-function ZO_SharedInventoryManager:RefreshAllTraitInformation()
-    -- Refresh all bags where weapons and armor can reside
-    self:RefreshBagTraitInformation(BAG_BACKPACK)
-    self:RefreshBagTraitInformation(BAG_WORN)
-    self:RefreshBagTraitInformation(BAG_BANK)
-    self:RefreshBagTraitInformation(BAG_SUBSCRIBER_BANK)
+do
+    local VALID_TRAIT_ITEM_CONTAINING_BAGS =
+    {
+        BAG_WORN,
+        BAG_BACKPACK,
+        BAG_BANK,
+        BAG_SUBSCRIBER_BANK,
+        BAG_GUILDBANK,
+        BAG_HOUSE_BANK_ONE,
+        BAG_HOUSE_BANK_TWO,
+        BAG_HOUSE_BANK_THREE,
+        BAG_HOUSE_BANK_FOUR,
+        BAG_HOUSE_BANK_FIVE,
+        BAG_HOUSE_BANK_SIX,
+        BAG_HOUSE_BANK_SEVEN,
+        BAG_HOUSE_BANK_EIGHT,
+        BAG_HOUSE_BANK_NINE,
+        BAG_HOUSE_BANK_TEN,
+    }
+
+    -- Trait Information Update
+    function ZO_SharedInventoryManager:RefreshAllTraitInformation()
+        -- Refresh all bags where weapons and armor can reside
+        for _, bag in ipairs(VALID_TRAIT_ITEM_CONTAINING_BAGS) do
+            self:RefreshBagTraitInformation(bag)
+        end
+    end
 end
 
 function ZO_SharedInventoryManager:RefreshBagTraitInformation(bagId)
@@ -453,11 +474,31 @@ function ZO_SharedInventoryManager:HandleCollectionsUpdated()
     self:RefreshAllItemSetPieceStatuses()
 end
 
-function ZO_SharedInventoryManager:RefreshAllItemSetPieceStatuses()
-    -- Refresh all bags where unlearned item sets can reside
-    self:RefreshItemSetPieceStatuses(BAG_BACKPACK)
-    self:RefreshItemSetPieceStatuses(BAG_BANK)
-    self:RefreshItemSetPieceStatuses(BAG_SUBSCRIBER_BANK)
+do
+    local VALID_ITEM_SET_PIECE_CONTAINING_BAGS =
+    {
+        BAG_BACKPACK,
+        BAG_BANK,
+        BAG_SUBSCRIBER_BANK,
+        BAG_GUILDBANK,
+        BAG_HOUSE_BANK_ONE,
+        BAG_HOUSE_BANK_TWO,
+        BAG_HOUSE_BANK_THREE,
+        BAG_HOUSE_BANK_FOUR,
+        BAG_HOUSE_BANK_FIVE,
+        BAG_HOUSE_BANK_SIX,
+        BAG_HOUSE_BANK_SEVEN,
+        BAG_HOUSE_BANK_EIGHT,
+        BAG_HOUSE_BANK_NINE,
+        BAG_HOUSE_BANK_TEN,
+    }
+
+    function ZO_SharedInventoryManager:RefreshAllItemSetPieceStatuses()
+        -- Refresh all bags where unlearned item sets can reside
+        for _, bag in ipairs(VALID_ITEM_SET_PIECE_CONTAINING_BAGS) do
+            self:RefreshItemSetPieceStatuses(bag)
+        end
+    end
 end
 
 function ZO_SharedInventoryManager:RefreshItemSetPieceStatuses(bagId)
@@ -483,11 +524,32 @@ function ZO_SharedInventoryManager:HandleLoreBooksUpdated()
     self:RefreshAllLoreBookStatuses()
 end
 
-function ZO_SharedInventoryManager:RefreshAllLoreBookStatuses()
-    -- Refresh all bags where unlearned lore books can reside
-    self:RefreshLoreBookStatuses(BAG_BACKPACK)
-    self:RefreshLoreBookStatuses(BAG_BANK)
-    self:RefreshLoreBookStatuses(BAG_SUBSCRIBER_BANK)
+do
+    local VALID_LORE_BOOK_CONTAINING_BAGS =
+    {
+        BAG_BACKPACK,
+        BAG_BANK,
+        BAG_SUBSCRIBER_BANK,
+        BAG_GUILDBANK,
+        BAG_HOUSE_BANK_ONE,
+        BAG_HOUSE_BANK_TWO,
+        BAG_HOUSE_BANK_THREE,
+        BAG_HOUSE_BANK_FOUR,
+        BAG_HOUSE_BANK_FIVE,
+        BAG_HOUSE_BANK_SIX,
+        BAG_HOUSE_BANK_SEVEN,
+        BAG_HOUSE_BANK_EIGHT,
+        BAG_HOUSE_BANK_NINE,
+        BAG_HOUSE_BANK_TEN,
+        BAG_FURNITURE_VAULT,
+    }
+
+    function ZO_SharedInventoryManager:RefreshAllLoreBookStatuses()
+        -- Refresh all bags where unlearned lore books can reside
+        for _, bag in ipairs(VALID_LORE_BOOK_CONTAINING_BAGS) do
+            self:RefreshLoreBookStatuses(bag)
+        end
+    end
 end
 
 function ZO_SharedInventoryManager:RefreshLoreBookStatuses(bagId)

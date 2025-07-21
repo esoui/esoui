@@ -759,10 +759,19 @@ do
         return pin:IsDelvePin() or pin:IsPublicDungeonPin()
     end
 
+    local function DoesPOIHaveTooltip(pin)
+        return IsDelveOrPublicDungeon(pin) or pin:IsPrimarySpectacleEventPin()
+    end
+
     local function AppendPOIInfo(pin)
-        -- Currently, delves and public dungeons are the only POIs which use this tooltip flow
+        -- Only pins that pass the DoesPOIHaveTooltip check will use this tooltip flow
         if IsDelveOrPublicDungeon(pin) then
             ZO_WorldMap_GetTooltipForMode(ZO_MAP_TOOLTIP_MODE.INFORMATION):AppendDelveInfo(pin)
+        elseif pin:IsPrimarySpectacleEventPin() then
+            local zoneIndex = pin:GetPOIZoneIndex()
+            local poiIndex = pin:GetPOIIndex()
+            local firstPrimarySpectacleEvent = GetActiveSpectacleEventIdsForWhichPOIIsPrimary(zoneIndex, poiIndex)
+            ZO_WorldMap_GetTooltipForMode(ZO_MAP_TOOLTIP_MODE.INFORMATION):AppendZoneSpectacleTooltip(firstPrimarySpectacleEvent)
         end
     end
 
@@ -894,7 +903,7 @@ do
         {
             creator = AppendPOIInfo,
             tooltip = ZO_MAP_TOOLTIP_MODE.INFORMATION,
-            hasTooltip = IsDelveOrPublicDungeon,
+            hasTooltip = DoesPOIHaveTooltip,
             categoryId = ZO_MapPin.PIN_ORDERS.DESTINATIONS,
             gamepadSpacing = true,
         },
@@ -2204,6 +2213,14 @@ function ZO_MapPin:IsDelvePin()
     local zoneCompletionType = GetPOIZoneCompletionType(zoneIndex, poiIndex)
     
     return zoneCompletionType == ZONE_COMPLETION_TYPE_DELVES or zoneCompletionType == ZONE_COMPLETION_TYPE_GROUP_DELVES
+end
+
+function ZO_MapPin:IsPrimarySpectacleEventPin()
+    local zoneIndex = self:GetPOIZoneIndex()
+    local poiIndex = self:GetPOIIndex()
+    local primarySpectacleEventIds = { GetActiveSpectacleEventIdsForWhichPOIIsPrimary(zoneIndex, poiIndex) }
+
+    return #primarySpectacleEventIds > 0
 end
 
 function ZO_MapPin:ShowsPinAndArea()

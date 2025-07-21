@@ -2154,7 +2154,7 @@ end
 local SPECTACLE_EVENT_PHASE_CHANGE_TYPES =
 {
     STARTED = "start",
-    ENDED = "end",
+    COMPLETE = "complete",
 }
 
 ZO_SpectacleEventNotificationProvider = ZO_NotificationProvider:Subclass()
@@ -2178,10 +2178,10 @@ function ZO_SpectacleEventNotificationProvider:BuildNotificationList()
         local notificationDescriptor = nil
 
         if isPhaseComplete then
-            notificationMessage = GetActiveSpectacleEventPhaseEndedNotificationMessage(activeSpectacleEventId)
+            notificationMessage = GetActiveSpectacleEventPhaseCompleteNotificationMessage(activeSpectacleEventId)
             if notificationMessage ~= "" then
-                -- A phase ended notification message is defined and the current phase has ended.
-                notificationDescriptor = self:GetNotificationDescriptor(SPECTACLE_EVENT_PHASE_CHANGE_TYPES.ENDED, activeSpectacleEventId, currentPhase)
+                -- A phase complete notification message is defined and the current phase is complete.
+                notificationDescriptor = self:GetNotificationDescriptor(SPECTACLE_EVENT_PHASE_CHANGE_TYPES.COMPLETE, activeSpectacleEventId, currentPhase)
             end
         else
             notificationMessage = GetActiveSpectacleEventPhaseStartedNotificationMessage(activeSpectacleEventId)

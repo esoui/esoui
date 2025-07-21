@@ -487,6 +487,10 @@ function ZO_PromotionalEvents_Gamepad:InitializeFoci()
 
             visible = function()
                 local selectedActivityEntry = self:GetSelectedActivity()
+                if not selectedActivityEntry then
+                    return false
+                end
+
                 if selectedActivityEntry:CanClaimReward() then
                     return true
                 elseif not selectedActivityEntry:IsRewardClaimed() then
@@ -495,6 +499,8 @@ function ZO_PromotionalEvents_Gamepad:InitializeFoci()
                         return selectedActivityEntry:MatchesCampaignKey(campaignKey) and selectedActivityEntry:GetActivityIndex() == index
                     end
                 end
+
+                return false
             end,
 
             callback = function()
@@ -509,7 +515,7 @@ function ZO_PromotionalEvents_Gamepad:InitializeFoci()
                             SCREEN_NARRATION_MANAGER:QueueSortFilterListEntry(self)
                         end
                     end
-                else
+                elseif IsReturningPlayer() then
                     SYSTEMS:ShowScene("returningPlayerIntro")
                 end
             end,

@@ -1987,6 +1987,54 @@ local CENTER_SCREEN_CALLBACK_HANDLERS =
             end
         end
     },
+
+    {
+        callbackManager = SPECTACLE_EVENTS_MANAGER,
+        callbackRegistration = "ActiveSpectacleEventPhaseComplete",
+        callbackFunction = function(spectacleEventId, spectacleEventPhaseId, isInitialUpdate)
+            if isInitialUpdate then
+                -- Only show spectacle event CSAs in response to events that are generated
+                -- after the initial update to ensure that CSAs only appear when a state
+                -- change occurs after logging in.
+                return nil
+            end
+
+            local broadcastMessage, soundId = GetSpectacleEventPhaseCompleteAnnouncementInfo(spectacleEventId, spectacleEventPhaseId)
+            if broadcastMessage ~= "" then
+                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT)
+                messageParams:SetText(string.format("|cffff00%s|r", broadcastMessage))
+                messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_SYSTEM_BROADCAST)
+                messageParams:SetSound(soundId)
+                return messageParams
+            end
+
+            return nil
+        end,
+    },
+
+    {
+        callbackManager = SPECTACLE_EVENTS_MANAGER,
+        callbackRegistration = "ActiveSpectacleEventPhaseStarted",
+        callbackFunction = function(spectacleEventId, spectacleEventPhaseId, isInitialUpdate)
+            if isInitialUpdate then
+                -- Only show spectacle event CSAs in response to events that are generated
+                -- after the initial update to ensure that CSAs only appear when a state
+                -- change occurs after logging in.
+                return nil
+            end
+
+            local broadcastMessage, soundId = GetSpectacleEventPhaseStartedAnnouncementInfo(spectacleEventId, spectacleEventPhaseId)
+            if broadcastMessage ~= "" then
+                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_SMALL_TEXT)
+                messageParams:SetText(string.format("|cffff00%s|r", broadcastMessage))
+                messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_SYSTEM_BROADCAST)
+                messageParams:SetSound(soundId)
+                return messageParams
+            end
+
+            return nil
+        end,
+    },
 }
 
 function ZO_CenterScreenAnnounce_GetCallbackHandlers()

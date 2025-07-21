@@ -468,7 +468,7 @@ function ZO_PromotionalEvents_Keyboard:InitializeKeybindStripDescriptors()
                     else
                         rewardableEventData:TryClaimReward()
                     end
-                else
+                elseif IsReturningPlayer() then
                     SYSTEMS:ShowScene("returningPlayerIntro")
                 end
             end,
