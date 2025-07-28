@@ -5735,6 +5735,7 @@ function ZO_WorldMapManager:UpdatePinTooltips(resetScroll)
     local lastGamepadCategory = nil
     local informationTooltip = ZO_WorldMap_GetTooltipForMode(ZO_MAP_TOOLTIP_MODE.INFORMATION)
     local currentQuestHeaderIndex = nil
+    local showLeftClickToTrackQuestPrompt = false
 
     for index, pin in ipairs(foundTooltipMouseOverPins) do
         local pinType = pin:GetPinType()
@@ -5829,13 +5830,19 @@ function ZO_WorldMapManager:UpdatePinTooltips(resetScroll)
                         if pin:IsQuest() then
                             if not currentQuestHeaderIndex or currentQuestHeaderIndex ~= pin:GetQuestIndex() then
                                 currentQuestHeaderIndex = pin:GetQuestIndex()
+                                if not GetTrackedIsAssisted(TRACK_TYPE_QUEST, currentQuestHeaderIndex) then
+                                    showLeftClickToTrackQuestPrompt = true
+                                end
                                 pinTooltipInfo.headerCreator(pin)
                                 informationTooltip:AddVerticalPadding(-8)
                             elseif currentQuestHeaderIndex == pin:GetQuestIndex() then
                                 informationTooltip:AddVerticalPadding(-16)
                             end
                         elseif currentQuestHeaderIndex ~= nil then
-                            informationTooltip:AddLine(GetString(SI_TOOLTIP_MAP_QUEST_SELECT_FOCUS), "", ZO_HIGHLIGHT_TEXT:UnpackRGB())
+                            if showLeftClickToTrackQuestPrompt then
+                                informationTooltip:AddLine(GetString(SI_TOOLTIP_MAP_QUEST_SELECT_FOCUS), "", ZO_HIGHLIGHT_TEXT:UnpackRGB())
+                                showLeftClickToTrackQuestPrompt = false
+                            end
                             currentQuestHeaderIndex = nil
                         end
                     end
@@ -5879,7 +5886,7 @@ function ZO_WorldMapManager:UpdatePinTooltips(resetScroll)
         end
     end
 
-    if not isCurrentSceneGamepad and currentQuestHeaderIndex ~= nil then
+    if showLeftClickToTrackQuestPrompt then
         informationTooltip:AddLine(GetString(SI_TOOLTIP_MAP_QUEST_SELECT_FOCUS), "", ZO_HIGHLIGHT_TEXT:UnpackRGB())
     end
 

@@ -205,8 +205,23 @@ function ZO_SharedInventoryManager:Initialize()
     local PLAY_ACQUIRE_SOUND_REASONS =
     {
         [CURRENCY_CHANGE_REASON_LOOT] = true,
+        [CURRENCY_CHANGE_REASON_LOOT_STOLEN] = true,
+        [CURRENCY_CHANGE_REASON_KILL] = true,
+        [CURRENCY_CHANGE_REASON_QUESTREWARD] = true,
         [CURRENCY_CHANGE_REASON_COMMAND] = true,
         [CURRENCY_CHANGE_REASON_PVP_KILL_TRANSFER] = true,
+    }
+
+    local ALWAYS_PLAY_ACQUIRE_SOUND_CURRENCIES =
+    {
+        [CURT_MONEY] = true,
+    }
+
+    local PLAY_TRANSACT_SOUND_ON_GAIN_REASONS =
+    {
+        [CURRENCY_CHANGE_REASON_VENDOR] = true,
+        [CURRENCY_CHANGE_REASON_TRADE] = true,
+        [CURRENCY_CHANGE_REASON_SELL_STOLEN] = true,
     }
 
     local EXCLUDED_PLAY_TRANSACT_SOUND_REASONS =
@@ -232,10 +247,16 @@ function ZO_SharedInventoryManager:Initialize()
         end
 
         if newAmount > oldAmount then
-            if PLAY_ACQUIRE_SOUND_REASONS[changeReason] then
+            -- Gained currency
+            if PLAY_TRANSACT_SOUND_ON_GAIN_REASONS[changeReason] then
+                -- If this is a transaction-type interaction, try to play the transact sound
+                ZO_PlayCurrencyTransactSound(currencyType)
+            elseif PLAY_ACQUIRE_SOUND_REASONS[changeReason] or ALWAYS_PLAY_ACQUIRE_SOUND_CURRENCIES[currencyType] then
+                -- Otherwise, if allowed, try to play the acquire sound
                 ZO_PlayCurrencyAcquiredSound(currencyType)
             end
         else
+            -- Lost currency, try to play the transact sound if allowed
             if not EXCLUDED_PLAY_TRANSACT_SOUND_REASONS[changeReason] then
                 ZO_PlayCurrencyTransactSound(currencyType)
             end

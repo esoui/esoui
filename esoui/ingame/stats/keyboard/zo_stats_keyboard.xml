@@ -420,12 +420,6 @@
                             <Dimensions x="64" y="64"/>
                             <Anchor point="TOPLEFT"/>
                         </Texture>
-                        <Label name="$(parent)Name" font="ZoFontHeader4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" >
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)AllianceIcon" relativePoint="TOPRIGHT" offsetX="10"/>
-                        </Label>
-                        <Label name="$(parent)RaceClass" font="ZoFontHeader2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT" offsetY="1"/>
-                        </Label>
 
                         <Control name="$(parent)EquipmentBonus" mouseEnabled="true" resizeToFitDescendents="true" >
                             <Anchor point="BOTTOMRIGHT" offsetX="5" offsetY="-5"/>
@@ -444,6 +438,15 @@
                                 </Control>
                             </Controls>
                         </Control>
+                        
+                        <Label name="$(parent)Name" inherits="ZO_TooltipIfTruncatedLabel" font="ZoFontHeader4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" maxLineCount="1">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)AllianceIcon" relativePoint="TOPRIGHT" offsetX="10"/>
+                            <Anchor point="RIGHT" relativeTo="$(parent)EquipmentBonus" relativePoint="LEFT" offsetX="-5" constrains="X" />
+                        </Label>
+                        
+                        <Label name="$(parent)RaceClass" font="ZoFontHeader2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT" offsetY="1"/>
+                        </Label>
                     </Controls>
                 </Control>
 

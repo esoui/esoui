@@ -60,11 +60,21 @@ function ZO_EndlessDungeonBuffSelector_Gamepad:InitializeKeybindStripDescriptor(
         {
             name = function()
                 local IS_GAMEPAD = true
-                rerollCost = ZO_Currency_Format(GetEndlessDungeonBuffSelectorRerollCost(), CURT_ARCHIVAL_FORTUNES, ZO_CURRENCY_FORMAT_AMOUNT_ICON, IS_GAMEPAD)
-                return zo_strformat(SI_GAMEPAD_ENDLESS_DUNGEON_REROLL_BUFFS_LABEL, rerollCost)
+                local rerollCost = GetEndlessDungeonBuffSelectorRerollCost()
+                local currencyAmount = GetCurrencyAmount(CURT_ARCHIVAL_FORTUNES, GetCurrencyPlayerStoredLocation(CURT_ARCHIVAL_FORTUNES))
+                local canAffordReroll = rerollCost <= currencyAmount
+                local extraOptions = nil
+                if not canAffordReroll then
+                    extraOptions =
+                    {
+                        color = ZO_ERROR_COLOR,
+                    }
+                end
+                local rerollCostText = ZO_Currency_Format(rerollCost, CURT_ARCHIVAL_FORTUNES, ZO_CURRENCY_FORMAT_AMOUNT_ICON, IS_GAMEPAD, extraOptions)
+                return zo_strformat(SI_GAMEPAD_ENDLESS_DUNGEON_REROLL_BUFFS_LABEL, rerollCostText)
             end,
             narrationOverrideName = function()
-                costNarration = ZO_Currency_FormatGamepad(CURT_ARCHIVAL_FORTUNES, GetEndlessDungeonBuffSelectorRerollCost(), ZO_CURRENCY_FORMAT_AMOUNT_ICON)
+                local costNarration = ZO_Currency_FormatGamepad(CURT_ARCHIVAL_FORTUNES, GetEndlessDungeonBuffSelectorRerollCost(), ZO_CURRENCY_FORMAT_AMOUNT_ICON)
                 return zo_strformat(SI_GAMEPAD_ENDLESS_DUNGEON_REROLL_BUFFS_LABEL, costNarration)
             end,
             keybind = "UI_SHORTCUT_SECONDARY",
@@ -73,8 +83,8 @@ function ZO_EndlessDungeonBuffSelector_Gamepad:InitializeKeybindStripDescriptor(
             end,
             visible = CanRerollCurrentBuffSelectorOptions,
             enabled = function()
-                rerollCost = GetEndlessDungeonBuffSelectorRerollCost()
-                currencyAmount = GetCurrencyAmount(CURT_ARCHIVAL_FORTUNES, GetCurrencyPlayerStoredLocation(CURT_ARCHIVAL_FORTUNES))
+                local rerollCost = GetEndlessDungeonBuffSelectorRerollCost()
+                local currencyAmount = GetCurrencyAmount(CURT_ARCHIVAL_FORTUNES, GetCurrencyPlayerStoredLocation(CURT_ARCHIVAL_FORTUNES))
                 return rerollCost <= currencyAmount
             end,
         },

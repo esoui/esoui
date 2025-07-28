@@ -40,10 +40,23 @@ function ZO_EndlessDungeonBuffSelector_Keyboard:RefreshBuffs()
         local IS_KEYBOARD = false
         local canAffordReroll = rerollCost <= currencyAmount
         self.rerollButton:SetEnabled(canAffordReroll)
-        rerollCost = ZO_Currency_Format(rerollCost, CURT_ARCHIVAL_FORTUNES, ZO_CURRENCY_FORMAT_AMOUNT_ICON, IS_KEYBOARD)
+        local rerollIcon = nil
+        local extraOptions = nil
+        if canAffordReroll then
+            rerollIcon = zo_iconFormat("EsoUI/Art/EndlessDungeon/reroll_buffs.dds", "200%", "200%")
+        else
+            rerollIcon = zo_iconFormatInheritColor("EsoUI/Art/EndlessDungeon/reroll_buffs.dds", "200%", "200%")
+            extraOptions =
+            {
+                color = ZO_ERROR_COLOR,
+            }
+        end
+        rerollCost = ZO_Currency_Format(rerollCost, CURT_ARCHIVAL_FORTUNES, ZO_CURRENCY_FORMAT_AMOUNT_ICON, IS_KEYBOARD, extraOptions)
         currencyAmount = ZO_Currency_Format(currencyAmount, CURT_ARCHIVAL_FORTUNES, ZO_CURRENCY_FORMAT_AMOUNT_ICON, IS_KEYBOARD)
-        local rerollLabelText = zo_strformat(SI_ENDLESS_DUNGEON_REROLL_BUFFS_LABEL, zo_iconFormat("EsoUI/Art/EndlessDungeon/reroll_buffs.dds", "200%", "200%"), rerollCost)
-        self.rerollButton:SetText(rerollLabelText)
+        local rerollButtonText = zo_strformat(SI_ENDLESS_DUNGEON_REROLL_BUFFS_LABEL, rerollIcon, rerollCost)
+        local rerollTextWidth = GetStringWidthScaled(ZoFontGame, rerollButtonText, 1, SPACE_INTERFACE)
+        self.rerollButton:SetText(rerollButtonText)
+        self.rerollButton:SetWidth(rerollTextWidth + 5)
 
         local IS_PLURAL = false
         local IS_MIXED_CASE = false
