@@ -7846,7 +7846,7 @@ SAS(SI_LOGINAUTHERROR8010, "Votre compte a été définitivement désactivé en 
 SAS(SI_LOGINAUTHERROR8011, "Votre compte doit être vérifié avant de pouvoir continuer à jouer. Veuillez vérifier l'adresse de messagerie utilisée lors de la création de votre compte ESO pour finaliser le processus de vérification. Si vous n'avez pas reçu d'e-mail, merci contactez le service client au <<1>>.", 1)
 SAS(SI_LOGINAUTHERROR8012, "L'authentification de votre compte est restreinte. Veuillez contacter le service d'assistance à <<1>>.", 0)
 SAS(SI_LOGINAUTHERROR8013, "Les serveurs sont actuellement hors-ligne pour maintenance. Veuillez réessayer ultérieurement.", 0)
-SAS(SI_LOGINAUTHERROR8016, "Nous avons reçu un signal depuis votre service de jeu indiquant que ce compte est désigné comme compte d'enfant. Les enfants ne sont pas autorisés à jouer à ce jeu. Pour plus d'informations, rendez-vous sur <<1>>.", 0)
+SAS(SI_LOGINAUTHERROR8016, "Nous avons reÃ§u un signal depuis votre service de jeu indiquant que ce compte est dÃ©signÃ© comme compte d'enfant. Les enfants ne sont pas autorisÃ©s Ã  jouer Ã  ce jeu. Pour plus d'informations, rendez-vous sur <<1>>.", 0)
 SAS(SI_LOGIN_DIALOG_TITLE_LINK_FAILED, "La création/liaison de comptes a échoué", 1)
 SAS(SI_LOGIN_DIALOG_TITLE_LOGIN_FAILED, "Échec de la connexion", 0)
 SAS(SI_LOGIN_FLOW_CREATE_ACCT_FULLNAME, "Nom complet", 1)
