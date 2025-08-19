@@ -20123,8 +20123,14 @@ h2. Game API
 * GetActiveSpectacleEventPhaseStartedNotificationMessage(*integer* _activeSpectacleEventId_)
 ** _Returns:_ *string* _phaseStartedNotificationMessage_
 
-* GetActiveSpectacleEventPhaseEndedNotificationMessage(*integer* _activeSpectacleEventId_)
-** _Returns:_ *string* _phaseEndedNotificationMessage_
+* GetActiveSpectacleEventPhaseCompleteNotificationMessage(*integer* _activeSpectacleEventId_)
+** _Returns:_ *string* _phaseCompleteNotificationMessage_
+
+* GetSpectacleEventPhaseStartedAnnouncementInfo(*integer* _activeSpectacleEventId_, *integer* _activeSpectacleEventPhaseId_)
+** _Returns:_ *string* _broadcastMessage_, *string* _soundId_
+
+* GetSpectacleEventPhaseCompleteAnnouncementInfo(*integer* _activeSpectacleEventId_, *integer* _activeSpectacleEventPhaseId_)
+** _Returns:_ *string* _broadcastMessage_, *string* _soundId_
 
 * GetActiveSpectacleEventPhaseProgressPercentage(*integer* _activeSpectacleEventId_)
 ** _Returns:_ *number* _progressPercentage_
@@ -20147,6 +20153,10 @@ h2. Game API
 * GetActiveSpectacleEventIdsForPOI(*luaindex* _zoneIndex_, *luaindex* _poiIndex_)
 ** _Uses variable returns..._
 ** _Returns:_ *integer* _activeSpectacleEventId_
+
+* GetActiveSpectacleEventIdsForWhichPOIIsPrimary(*luaindex* _zoneIndex_, *luaindex* _poiIndex_)
+** _Uses variable returns..._
+** _Returns:_ *integer* _primaryActiveSpectacleEventId_
 
 * IsActiveSpectacleEventPhaseTransitionEnabled(*integer* _activeSpectacleEventId_)
 ** _Returns:_ *bool* _phaseTransitionEnabled_
@@ -26347,6 +26357,7 @@ h2. Events
 * EVENT_LOOT_RECEIVED (*string* _receivedBy_, *string* _itemName_, *integer* _quantity_, *[ItemUISoundCategory|#ItemUISoundCategory]* _soundCategory_, *[LootItemType|#LootItemType]* _lootType_, *bool* _self_, *bool* _isPickpocketLoot_, *string* _questItemIcon_, *integer* _itemId_, *bool* _isStolen_)
 * EVENT_LOOT_UPDATED
 * EVENT_LORE_BOOK_ALREADY_KNOWN (*string* _bookTitle_)
+* EVENT_LORE_BOOK_COLLECTION_LEARNED (*luaindex* _categoryIndex_, *luaindex* _collectionIndex_, *integer* _numBooksLearned_)
 * EVENT_LORE_BOOK_LEARNED (*luaindex* _categoryIndex_, *luaindex* _collectionIndex_, *luaindex* _bookIndex_, *luaindex* _guildIndex_, *bool* _isMaxRank_)
 * EVENT_LORE_BOOK_LEARNED_SKILL_EXPERIENCE (*luaindex* _categoryIndex_, *luaindex* _collectionIndex_, *luaindex* _bookIndex_, *luaindex* _guildIndex_, *[SkillType|#SkillType]* _skillType_, *luaindex* _skillLineIndex_, *luaindex* _rank_, *integer* _previousXP_, *integer* _currentXP_)
 * EVENT_LORE_COLLECTION_COMPLETED (*luaindex* _categoryIndex_, *luaindex* _collectionIndex_, *luaindex* _guildIndex_, *bool* _isMaxRank_)
@@ -26543,6 +26554,7 @@ h2. Events
 * EVENT_SMITHING_TRAIT_RESEARCH_TIMES_UPDATED
 * EVENT_SOUL_GEM_ITEM_CHARGE_FAILURE (*[SoulGemItemChargingReason|#SoulGemItemChargingReason]* _reason_)
 * EVENT_SPAM_WARNING (*[SpamWarningType|#SpamWarningType]* _spamType_)
+* EVENT_SPECTACLE_EVENT_PHASE_UPDATED (*integer* _spectacleId_, *integer* _oldActivePhaseId_, *integer* _newActivePhaseId_, *bool* _isInitialUpdate_)
 * EVENT_SPECTACLE_EVENT_UPDATED (*integer* _spectacleId_)
 * EVENT_STABLE_INTERACT_END
 * EVENT_STABLE_INTERACT_START
