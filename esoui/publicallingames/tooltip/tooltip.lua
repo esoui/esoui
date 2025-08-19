@@ -2,11 +2,6 @@ local SELL_REASON_COLOR = ZO_ColorDef:New( GetInterfaceColor(INTERFACE_COLOR_TYP
 
 SHOW_BASE_ABILITY = true
 
-local MOUSE_OVER_TYPE_UNIT = 1
-local MOUSE_OVER_TYPE_FIXTURE = 2
-
-local g_MouseOverType = nil
-
 local BORDER_TEXTURE_NORMAL = "EsoUI/Art/Tooltips/UI-Border.dds"
 local DIVIDER_TEXTURE_NORMAL = "EsoUI/Art/Miscellaneous/horizontalDivider.dds"
 local BORDER_TEXTURE_STOLEN = "EsoUI/Art/Tooltips/UI-Border-Red.dds"
@@ -18,15 +13,6 @@ local TOOLTIP_EDGE_WIDTH  = 128
 local TOOLTIP_EDGE_HEIGHT = 16
 local TOOLTIP_EDGE_WIDTH_MYTHIC  = 256
 local TOOLTIP_EDGE_HEIGHT_MYTHIC = 32
-
-local function ClearMouseOverTooltip()
-    if g_MouseOverType == MOUSE_OVER_TYPE_FIXTURE then
-        ClearTooltip(InformationTooltip)
-    elseif g_MouseOverType == MOUSE_OVER_TYPE_UNIT then
-        ClearTooltip(GameTooltip)
-    end
-    g_MouseOverType = nil
-end
 
 RIDING_TRAIN_DESCRIPTIONS = {
     [RIDING_TRAIN_SPEED] = SI_MOUNT_TRAIN_SPEED,
@@ -55,18 +41,18 @@ local ITEM_TOOLTIP_CURRENCY_OPTIONS =
 }
 
 function ZO_ItemTooltip_AddMoney(tooltipControl, amount, reason, notEnough)
-    local moneyLine = GetControl(tooltipControl, "SellPrice")        
-    local reasonLabel = GetControl(moneyLine, "Reason")
-    local currencyControl = GetControl(moneyLine, "Currency")
-        
-    moneyLine:SetHidden(false)    
-   
+    local moneyLine = tooltipControl:GetNamedChild("SellPrice")
+    local reasonLabel = moneyLine:GetNamedChild("Reason")
+    local currencyControl = moneyLine:GetNamedChild("Currency")
+
+    moneyLine:SetHidden(false)
+
     local width = 0
     reasonLabel:ClearAnchors()
     currencyControl:ClearAnchors()
     
      -- right now reason is always a string index
-    if(reason and reason ~= 0) then
+    if reason and reason ~= 0 then
         reasonLabel:SetAnchor(TOPLEFT, nil, TOPLEFT, 0, 0)
         currencyControl:SetAnchor(TOPLEFT, reasonLabel, TOPRIGHT, REASON_CURRENCY_SPACING, -2)
 
@@ -81,7 +67,7 @@ function ZO_ItemTooltip_AddMoney(tooltipControl, amount, reason, notEnough)
         currencyControl:SetAnchor(TOPLEFT, nil, TOPLEFT, 0, 0)
     end
 
-    if(amount > 0) then
+    if amount > 0 then
         currencyControl:SetHidden(false)
         ZO_CurrencyControl_SetSimpleCurrency(currencyControl, CURT_MONEY, amount, ITEM_TOOLTIP_CURRENCY_OPTIONS, CURRENCY_DONT_SHOW_ALL, notEnough)
         width = width + currencyControl:GetWidth()
@@ -95,13 +81,13 @@ function ZO_ItemTooltip_AddMoney(tooltipControl, amount, reason, notEnough)
 end
 
 function ZO_ItemTooltip_ClearMoney(tooltipControl)
-    local currencyControl = GetControl(tooltipControl, "SellPrice")
+    local currencyControl = tooltipControl:GetNamedChild("SellPrice")
     if currencyControl then
         currencyControl:SetHidden(true)
         currencyControl:ClearAnchors()
     end
 
-    currencyControl = GetControl(tooltipControl, "SellPrice2")
+    currencyControl = tooltipControl:GetNamedChild("SellPrice2")
     if currencyControl then
         currencyControl:SetHidden(true)
         currencyControl:ClearAnchors()
@@ -109,14 +95,14 @@ function ZO_ItemTooltip_ClearMoney(tooltipControl)
 end
 
 function ZO_ItemTooltip_ClearCharges(tooltipControl)
-    local chargeMeter = GetControl(tooltipControl, "Charges")
+    local chargeMeter = tooltipControl:GetNamedChild("Charges")
     if chargeMeter then
         chargeMeter:SetHidden(true)
     end
 end
 
 function ZO_ItemTooltip_ClearCondition(tooltipControl)
-    local conditionMeter = GetControl(tooltipControl, "Condition")
+    local conditionMeter = tooltipControl:GetNamedChild("Condition")
     if conditionMeter then
         conditionMeter:SetHidden(true)
     end
@@ -358,8 +344,8 @@ function ZO_SkillTooltip_SetSkillUpgrade(tooltipControl, source, dest)
     local skillUpgradeControl = tooltipControl.upgradePool:AcquireObject()
 
     if skillUpgradeControl and source and dest then
-        GetControl(skillUpgradeControl, "SourceText"):SetText(source)
-        GetControl(skillUpgradeControl, "DestText"):SetText(dest)
+        skillUpgradeControl:GetNamedChild("SourceText"):SetText(source)
+        skillUpgradeControl:GetNamedChild("DestText"):SetText(dest)
 
         local useCell = 1
         local useLastRowAdded = true
@@ -474,4 +460,43 @@ function ZO_ChampionSkillTooltip_OnAddGameData(tooltipControl, gameDataType, ...
     else
         ZO_Tooltip_OnAddGameData(tooltipControl, gameDataType, ...)
     end
+end
+
+-- InformationTooltip
+
+function ZO_InformationTooltip_Initialize(tooltipControl)
+    tooltipControl.progressStatusBar = tooltipControl:GetNamedChild("ProgressBar")
+    ZO_StatusBar_SetGradientColor(tooltipControl.progressStatusBar, ZO_XP_BAR_GRADIENT_COLORS)
+    tooltipControl.progressStatusBar:SetMinMax(0, 1)
+
+    tooltipControl.progressStatusBarLabel = tooltipControl.progressStatusBar:GetNamedChild("Progress")
+end
+
+local function SetTooltipProgressBar(tooltipControl, progressPercent)
+    tooltipControl.progressStatusBar:SetValue(progressPercent)
+    tooltipControl:AddControl(tooltipControl.progressStatusBar)
+    tooltipControl.progressStatusBar:SetAnchor(CENTER)
+    tooltipControl.progressStatusBar:SetHidden(false)
+
+    local formattedPercentage = string.format("%.1f", (progressPercent * 100))
+    local percentageString = zo_strformat(SI_TOOLTIP_PROGRESS_BAR_PROGRESS_PERCENT, formattedPercentage)
+    tooltipControl.progressStatusBarLabel:SetText(percentageString)
+end
+
+function ZO_ItemTooltip_ClearProgressBar(tooltipControl)
+    tooltipControl.progressStatusBar:SetHidden(true)
+end
+
+function ZO_InformationTooltip_OnAddGameData(tooltipControl, gameDataType, ...)
+    if gameDataType == TOOLTIP_GAME_DATA_PROGRESS_BAR then
+        SetTooltipProgressBar(tooltipControl, ...)
+    else
+        ZO_Tooltip_OnAddGameData(tooltipControl, gameDataType, ...)
+    end
+end
+
+function ZO_InformationTooltip_Cleared(tooltipControl)
+    ZO_ItemTooltip_ClearMoney(tooltipControl)
+    ZO_ItemTooltip_ClearProgressBar(tooltipControl)
+    ZO_Tooltip_OnCleared(tooltipControl)
 end

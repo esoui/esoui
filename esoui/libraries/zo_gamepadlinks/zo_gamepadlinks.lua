@@ -133,7 +133,7 @@ function ZO_GamepadLinks:AddLinksTable(links, replaceExistingLinks)
     for linkIndex, link in ipairs(links) do
         if link.link then
             local linkType = GetLinkType(link.link)
-            local linkHandlerName = GetLinkLayoutHandlerName(linkType)
+            local linkHandlerName = ZO_GetLinkLayoutHandlerName(linkType)
             if GAMEPAD_TOOLTIPS[linkHandlerName] then
                 -- Add the validated link.
                 table.insert(self.links, link)

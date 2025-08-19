@@ -65,6 +65,13 @@ do
         [LFG_ROLE_DPS] = GetString(SI_GROUP_PREFERRED_ROLE_DPS_TOOLTIP),
     }
 
+    local SOUND_LOOKUP =
+    {
+        [LFG_ROLE_TANK] = SOUNDS.GROUP_ROLE_TANK_SELECTED,
+        [LFG_ROLE_HEAL] = SOUNDS.GROUP_ROLE_HEAL_SELECTED,
+        [LFG_ROLE_DPS] = SOUNDS.GROUP_ROLE_DPS_SELECTED,
+    }
+
     function ZO_GuildRecruitment_RoleSelectorTile_Keyboard:SetupRole(role)
         local roleName = ROLE_NAME_LOOKUP[role]
         local roleControl = self.roleControl
@@ -76,6 +83,7 @@ do
         roleControl:SetDisabledPressedTexture(string.format("EsoUI/Art/LFG/LFG_%s_down_disabled_64.dds", roleName))
         roleControl.role = role
         roleControl.tooltipString = TOOLTIP_STRING_LOOKUP[role]
+        roleControl:SetClickSound(SOUND_LOOKUP[role])
     end
 end
 
@@ -90,6 +98,7 @@ function ZO_GuildRecruitment_RoleSelectorTile_Keyboard_OnClicked(self, button)
     if ZO_CheckButton_IsChecked(self) and not self.CanToggleOff() then
         ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, GetString(SI_GUILD_RECRUITMENT_MUST_SELECT_ROLE_ALERT))
     else
-        ZO_CheckButton_OnClicked(self, button)
+        local NO_SOUND = true
+        ZO_CheckButton_OnClicked(self, button, NO_SOUND)
     end
 end

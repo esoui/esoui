@@ -237,12 +237,16 @@ function ZO_ComboBox_Base:ItemSelectedClickHelper(item, ignoreCallback)
     end
     self.m_selectedItemData = item
 
-    if item.callback and not ignoreCallback then
-        local selectionChanged = (oldItem ~= item)
-        if not selectionChanged and oldItem and item then
-            selectionChanged = item.name ~= oldItem.name
+    if not ignoreCallback then
+        PlaySound(SOUNDS.COMBO_CLICK)
+
+        if item.callback then
+            local selectionChanged = (oldItem ~= item)
+            if not selectionChanged and oldItem and item then
+                selectionChanged = item.name ~= oldItem.name
+            end
+            item.callback(self, item.name, item, selectionChanged, oldItem)
         end
-        item.callback(self, item.name, item, selectionChanged, oldItem)
     end
 
     return true

@@ -29,6 +29,7 @@ function ZO_LoreLibrary_Gamepad:InitializeEvents()
 
     self.control:RegisterForEvent(EVENT_LORE_LIBRARY_INITIALIZED, Refresh)
     self.control:RegisterForEvent(EVENT_LORE_BOOK_LEARNED, Refresh)
+    self.control:RegisterForEvent(EVENT_LORE_BOOK_COLLECTION_LEARNED, Refresh)
     self.control:RegisterForEvent(EVENT_UNLOCKED_HIRELING_CORRESPONDENCE_INITIALIZED, Refresh)
     self.control:RegisterForEvent(EVENT_UNLOCKED_HIRELING_CORRESPONDENCE_UPDATED, Refresh)
 end

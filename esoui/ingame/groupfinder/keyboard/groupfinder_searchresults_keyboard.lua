@@ -113,7 +113,7 @@ function ZO_GroupFinder_SearchResultsList_Keyboard:InitializeKeybindDescriptors(
         -- Report Listing
         {
             name = GetString(SI_GROUP_FINDER_REPORT_GROUP_LISTING_KEYBIND),
-            keybind = "UI_SHORTCUT_REPORT_PLAYER",
+            keybind = "UI_SHORTCUT_HELP",
             visible = function()
                 return self.mouseOverRow ~= nil
             end,
@@ -467,7 +467,7 @@ function ZO_GroupFinder_SearchPanel_Keyboard:InitializeKeybindStripDescriptors()
         -- Report Listing
         {
             name = GetString(SI_GROUP_FINDER_REPORT_GROUP_LISTING_KEYBIND),
-            keybind = "UI_SHORTCUT_REPORT_PLAYER",
+            keybind = "UI_SHORTCUT_HELP",
             callback = function()
                 ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:OpenReportGroupFinderListingTicketScene(self.appliedToListingData)
             end,

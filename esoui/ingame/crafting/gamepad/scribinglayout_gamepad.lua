@@ -81,8 +81,8 @@ function ZO_ScribingLayout_Gamepad:RefreshCraftedAbilityList(resetToTop, appendT
                     entryData:SetMaxIconAlpha(1)
                 end
 
-                if craftedAbilityData:IsSlottedOnHotBar() then
-                    entryData.overrideStatusIndicatorIcons = { ZO_IS_CRAFTED_ABILITY_ON_HOT_BAR_STATUS_ICON_OVERRIDE }
+                if craftedAbilityData:IsScribed() then
+                    entryData.overrideStatusIndicatorIcons = { ZO_IS_CRAFTED_ABILITY_SCRIBED_STATUS_ICON_OVERRIDE }
                 end
                 if currentHeader ~= headerText then
                     entryData:SetHeader(headerText)

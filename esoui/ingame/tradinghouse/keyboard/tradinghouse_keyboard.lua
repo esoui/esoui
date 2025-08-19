@@ -522,10 +522,10 @@ function ZO_TradingHouseManager:InitializeSearchResults(control)
             local canBeUsedToLearn = CanItemLinkBeUsedToLearn(result.itemLink)
 
             if isLockedSetPiece then
-                statusIconControl:AddIcon(LOCKED_SET_PIECE_ICON_TEXTURE, ZO_SUCCEEDED_TEXT)
+                statusIconControl:AddIcon(LOCKED_SET_PIECE_ICON_TEXTURE)
             end
             if canBeUsedToLearn then
-                statusIconControl:AddIcon(CAN_LEARN_ICON_TEXTURE, ZO_SUCCEEDED_TEXT)
+                statusIconControl:AddIcon(CAN_LEARN_ICON_TEXTURE)
             end
             statusIconControl:Show()
         end
@@ -611,10 +611,10 @@ function ZO_TradingHouseManager:InitializeListings(control)
         local canBeUsedToLearn = CanItemLinkBeUsedToLearn(postedItem.itemLink)
 
         if isLockedSetPiece then
-            statusIconControl:AddIcon(LOCKED_SET_PIECE_ICON_TEXTURE, ZO_SUCCEEDED_TEXT)
+            statusIconControl:AddIcon(LOCKED_SET_PIECE_ICON_TEXTURE)
         end
         if canBeUsedToLearn then
-            statusIconControl:AddIcon(CAN_LEARN_ICON_TEXTURE, ZO_SUCCEEDED_TEXT)
+            statusIconControl:AddIcon(CAN_LEARN_ICON_TEXTURE)
         end
         statusIconControl:Show()
 

@@ -504,10 +504,6 @@ do
             end
         end
 
-        if showCapacity then
-            table.insert(g_pendingHeaderData, CAPACITY_HEADER_DATA)
-        end
-
         if mode == ZO_MODE_STORE_BUY then
             if ZO_IsElementInNumericallyIndexedTable(self.storeUsedCurrencies, CURT_MONEY) then
                 table.insert(g_pendingHeaderData, GOLD_HEADER_DATA)
@@ -531,6 +527,10 @@ do
         else
             -- This is for selling, fencing, and the stable
             table.insert(g_pendingHeaderData, GOLD_HEADER_DATA)
+        end
+
+        if showCapacity then
+            table.insert(g_pendingHeaderData, CAPACITY_HEADER_DATA)
         end
 
         if isStable then

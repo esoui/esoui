@@ -15,30 +15,249 @@ NOTIFICATIONS_GUILD_NEW_APPLICATIONS = 14
 NOTIFICATIONS_MARKET_PRODUCT_UNLOCKED_DATA = 15
 NOTIFICATIONS_POINTS_RESET_DATA = 16
 NOTIFICATIONS_HOUSE_TOURS_HOUSE_RECOMMENDED_DATA = 17
+NOTIFICATIONS_SPECTACLE_EVENT_UPDATE_DATA = 18
 
 NOTIFICATIONS_MENU_OPENED_FROM_KEYBIND = 1
 NOTIFICATIONS_MENU_OPENED_FROM_MOUSE = 2
 
+-- Dismissed Notification Tracker
+----------------------------------
+
+-- Default maximum age of tracked notification dismissals.
+ZO_DISMISSED_NOTIFICATION_EXPIRATION_AGE_SECONDS = ZO_ONE_MONTH_IN_SECONDS
+
+ZO_DismissedNotificationTracker = ZO_InitializingCallbackObject:Subclass()
+
+--[[
+
+Tracks the dismissal of notifications of various notification types using Saved Variables.
+Dismissed notifications are automatically purged ZO_DISMISSED_NOTIFICATION_EXPIRATION_AGE_SECONDS after their initial dismissal.
+See SetNotificationTypeExpirationAgeSeconds below to define a custom expiration age for a specific type of notifications.
+
+Sample Usage:
+
+    -- Track when a notification is dismissed.
+
+    local notificationType = "SpectacleEventUpdate"
+    local notificationDescriptor = "Phase1Start"
+    DISMISSED_NOTIFICATION_TRACKER:DismissNotification(notificationType, notificationDescriptor)
+
+    -- Check if a notification was dismissed.
+
+    local notificationType = "SpectacleEventUpdate"
+    local notificationDescriptor = "Phase1Start"
+    if DISMISSED_NOTIFICATION_TRACKER:IsNotificationDismissed(notificationType, notificationDescriptor) then
+        -- ...
+    end
+
+    -- Check which specific notifications were dismissed.
+
+    local currentTimestamp = GetTimeStamp()
+    local notificationType = "SpectacleEventUpdate"
+    local notificationDescriptors = { "Phase1Start", "Phase2Start", "Phase3End" }
+    local dismissedNotificationDescriptors = DISMISSED_NOTIFICATION_TRACKER:GetDismissedNotificationDescriptors(notificationType, notificationDescriptors)
+    if next(dismissedNotificationDescriptors) then
+        for notificationDescriptor, dismissedTimestamp in pairs(dismissedNotificationDescriptors) do
+            df("%s was dismissed %s.", notificationDescriptor, ZO_FormatDurationAgo(currentTimestamp - dismissedTimestamp))
+        end
+    else
+        d("No notifications were dismissed.")
+    end
+
+    -- Set a custom expiration age, in seconds, for a specific notification type.
+
+    DISMISSED_NOTIFICATION_TRACKER:RegisterCallback("Initialized", function(tracker)
+        local notificationType = "SpectacleEventUpdate"
+        local expirationAgeSeconds = 7 * ZO_ONE_DAY_IN_SECONDS
+        tracker:SetNotificationTypeExpirationAgeSeconds(notificationType, expirationAgeSeconds)
+    end
+
+--]]
+
+function ZO_DismissedNotificationTracker:Initialize()
+    -- Custom expiration ages for specific notification types.
+    self.notificationTypeExpirationAgeSeconds = {}
+
+    local function OnAddOnLoaded(_, addOnName)
+        if addOnName == "ZO_Ingame" then
+            EVENT_MANAGER:UnregisterForEvent("NotificationTracker", EVENT_ADD_ON_LOADED)
+            self:InitializeSavedVars()
+        end
+    end
+
+    EVENT_MANAGER:RegisterForEvent("NotificationTracker", EVENT_ADD_ON_LOADED, OnAddOnLoaded)
+end
+
+function ZO_DismissedNotificationTracker:InitializeSavedVars()
+    if self:IsInitialized() then
+        return
+    end
+    self.initialized = true
+
+    local defaults = {}
+    self.savedVars = ZO_SavedVars:NewAccountWide("ZO_Ingame_SavedVariables", 1, "ZO_DismissedNotificationTracker", defaults)
+
+    -- Order matters to allow systems the opportunity to configure custom expiration ages for specific notification types:
+    self:FireCallbacks("Initialized", self)
+    self:RemoveExpiredNotificationsInternal()
+end
+
+function ZO_DismissedNotificationTracker:ClearAllDismissedNotifications()
+    local dismissedNotifications = self:GetDismissedNotificationsInternal()
+    if not dismissedNotifications then
+        return
+    end
+
+    ZO_ClearTable(dismissedNotifications)
+end
+
+function ZO_DismissedNotificationTracker:IsInitialized()
+    return self.initialized
+end
+
+function ZO_DismissedNotificationTracker:GetDismissedNotificationsInternal()
+    local savedVars = self.savedVars
+    if not savedVars then
+        return nil
+    end
+
+    if not savedVars.dismissedNotifications then
+        savedVars.dismissedNotifications = {}
+    end
+
+    return savedVars.dismissedNotifications
+end
+
+function ZO_DismissedNotificationTracker:GetDismissedNotificationsByTypeInternal(notificationTypeDescriptor)
+    local dismissedNotifications = self:GetDismissedNotificationsInternal()
+    if not dismissedNotifications then
+        return nil
+    end
+
+    return dismissedNotifications[notificationTypeDescriptor]
+end
+
+function ZO_DismissedNotificationTracker:GetOrCreateDismissedNotificationsByTypeInternal(notificationTypeDescriptor)
+    local dismissedNotifications = self:GetDismissedNotificationsInternal()
+    if not dismissedNotifications then
+        return nil
+    end
+
+    local dismissedNotificationsByType = dismissedNotifications[notificationTypeDescriptor]
+    if not dismissedNotificationsByType then
+        dismissedNotificationsByType = {}
+        dismissedNotifications[notificationTypeDescriptor] = dismissedNotificationsByType
+    end
+
+    return dismissedNotificationsByType
+end
+
+function ZO_DismissedNotificationTracker:GetDismissedNotificationTimestamp(notificationTypeDescriptor, notificationDescriptor)
+    local dismissedNotifications = self:GetDismissedNotificationsByTypeInternal(notificationTypeDescriptor)
+    if not dismissedNotifications then
+        return nil
+    end
+
+    return dismissedNotifications[notificationDescriptor]
+end
+
+function ZO_DismissedNotificationTracker:SetDismissedNotificationTimestamp(notificationTypeDescriptor, notificationDescriptor, timestamp)
+    local dismissedNotifications = self:GetOrCreateDismissedNotificationsByTypeInternal(notificationTypeDescriptor)
+    if not dismissedNotifications then
+        internalassert(false, string.format("Failed to set 'notification dismissed' timestamp:\ntype: %q\ndescriptor: %q", tostring(notificationTypeDescriptor) or "nil", tostring(notificationDescriptor) or "nil"))
+        return
+    end
+
+    dismissedNotifications[notificationDescriptor] = timestamp
+end
+
+function ZO_DismissedNotificationTracker:DismissNotification(notificationTypeDescriptor, notificationDescriptor)
+    local timestamp = GetTimeStamp()
+    self:SetDismissedNotificationTimestamp(notificationTypeDescriptor, notificationDescriptor, timestamp)
+end
+
+function ZO_DismissedNotificationTracker:IsNotificationDismissed(notificationTypeDescriptor, notificationDescriptor)
+    return self:GetDismissedNotificationTimestamp(notificationTypeDescriptor, notificationDescriptor) ~= nil
+end
+
+-- Returns a table of notificationDescriptor -> dismissedTimestamp for the specified notificationTypeDescriptor.
+-- notificationDescriptors is an optional, numerically indexed table of notificationDescriptors to check for dismissal.
+function ZO_DismissedNotificationTracker:GetDismissedNotificationDescriptors(notificationTypeDescriptor, notificationDescriptors)
+    local dismissedNotifications = self:GetDismissedNotificationsByTypeInternal(notificationTypeDescriptor)
+    if not dismissedNotifications then
+        return {}
+    end
+
+    if not notificationDescriptors then
+        -- No descriptor filter list was given; just return all dismissed
+        -- notifications of this type.
+        return dismissedNotifications
+    end
+
+    -- Construct a table of notification descriptors -> dismissed timestamp that
+    -- match the descriptor filter list.
+    local matchingDismissedNotifications = {}
+    for notificationDescriptor in ipairs(notificationDescriptors) do
+        local dismissedTimestamp = dismissedNotifications[notificationDescriptor]
+        if dismissedTimestamp then
+            matchingDismissedNotifications[notificationDescriptor] = dismissedTimestamp
+        end
+    end
+
+    return matchingDismissedNotifications
+end
+
+function ZO_DismissedNotificationTracker:RemoveExpiredNotificationsInternal()
+    local dismissedNotifications = self:GetDismissedNotificationsInternal()
+    if not dismissedNotifications then
+        return
+    end
+
+    -- Track when expired notifications were last removed to enable an internalassert
+    -- if SetNotificationTypeExpirationAgeSeconds is called after this removal occurs.
+    self.lastExpiredNotificationRemovalTimestamp = GetTimeStamp()
+
+    -- Remove notifications of any notification type that were dismissed
+    -- on or before the expiration timestamp.
+    local expirationTimestamp = GetTimeStamp() - ZO_DISMISSED_NOTIFICATION_EXPIRATION_AGE_SECONDS
+    for notificationType, notifications in pairs(dismissedNotifications) do
+        for notificationDescriptor, dismissedTimestamp in pairs(notifications) do
+            if dismissedTimestamp <= expirationTimestamp then
+                notifications[notificationDescriptor] = nil
+            end
+        end
+    end
+end
+
+-- Set a custom expiration age, in seconds, for a specific notificationType.
+-- Note this must be called from a registered "Initialized" callback handler;
+-- please see the Sample Usage description of this class (above) for details.
+function ZO_DismissedNotificationTracker:SetNotificationTypeExpirationAgeSeconds(notificationType, expirationAgeSeconds)
+    -- Assert if expired dismissed notifications have already been processed (see comment above).
+    internalassert(not self.lastExpiredNotificationRemovalTimestamp, "SetNotificationTypeExpirationAgeSeconds should be called from handlers registered for the 'Initialized' callback.")
+    self.notificationTypeExpirationAgeSeconds[notificationType] = expirationAgeSeconds
+end
+
+DISMISSED_NOTIFICATION_TRACKER = ZO_DismissedNotificationTracker:New()
+
 -- Notification Provider
 -------------------------
 
-ZO_NotificationProvider = ZO_Object:Subclass()
+ZO_NotificationProvider = ZO_InitializingObject:Subclass()
 
-function ZO_NotificationProvider:New(notificationManager, notificationEventCallback)
-    local provider = ZO_Object.New(self)
-    provider.list = {}
-    provider.hasTimer = false
-    provider.canShowGamerCard = false
-    provider.notificationManager = notificationManager
+function ZO_NotificationProvider:Initialize(notificationManager, notificationEventCallback)
+    self.list = {}
+    self.hasTimer = false
+    self.canShowGamerCard = false
+    self.notificationManager = notificationManager
 
-    provider.pushUpdateCallback = function(eventId)
+    self.pushUpdateCallback = function(eventId)
         if notificationEventCallback then
             notificationEventCallback(eventId)
         end
-        provider:PushUpdateToNotificationManager(eventId)
-    end
 
-    return provider
+        self:PushUpdateToNotificationManager(eventId)
+    end
 end
 
 function ZO_NotificationProvider:SetHasTimer(hasTimer)
@@ -96,19 +315,21 @@ function ZO_NotificationProvider:ShowGamerCard(data)
     ZO_ShowGamerCardFromCharacterName(data.characterNameForGamercard)
 end
 
---Friend Request Provier
--------------------------
+function ZO_NotificationProvider:RefreshNotifications()
+    self.notificationManager:RefreshNotificationList()
+end
+
+--Friend Request Provider
+--------------------------
 
 ZO_FriendRequestProvider = ZO_NotificationProvider:Subclass()
 
-function ZO_FriendRequestProvider:New(notificationManager)
-    local provider = ZO_NotificationProvider.New(self, notificationManager)
+function ZO_FriendRequestProvider:Initialize(notificationManager)
+    ZO_NotificationProvider.Initialize(self, notificationManager)
 
-    provider:RegisterUpdateEvent(EVENT_INCOMING_FRIEND_INVITE_ADDED)
-    provider:RegisterUpdateEvent(EVENT_INCOMING_FRIEND_INVITE_REMOVED)
-    provider:RegisterUpdateEvent(EVENT_INCOMING_FRIEND_INVITE_NOTE_UPDATED)
-
-    return provider
+    self:RegisterUpdateEvent(EVENT_INCOMING_FRIEND_INVITE_ADDED)
+    self:RegisterUpdateEvent(EVENT_INCOMING_FRIEND_INVITE_REMOVED)
+    self:RegisterUpdateEvent(EVENT_INCOMING_FRIEND_INVITE_NOTE_UPDATED)
 end
 
 function ZO_FriendRequestProvider:BuildNotificationList()
@@ -145,14 +366,12 @@ end
 
 ZO_GuildInviteProvider = ZO_NotificationProvider:Subclass()
 
-function ZO_GuildInviteProvider:New(notificationManager)
-    local provider = ZO_NotificationProvider.New(self, notificationManager)
+function ZO_GuildInviteProvider:Initialize(notificationManager)
+    ZO_NotificationProvider.Initialize(self, notificationManager)
 
-    provider:RegisterUpdateEvent(EVENT_GUILD_INVITES_INITIALIZED)
-    provider:RegisterUpdateEvent(EVENT_GUILD_INVITE_ADDED)
-    provider:RegisterUpdateEvent(EVENT_GUILD_INVITE_REMOVED)
-
-    return provider
+    self:RegisterUpdateEvent(EVENT_GUILD_INVITES_INITIALIZED)
+    self:RegisterUpdateEvent(EVENT_GUILD_INVITE_ADDED)
+    self:RegisterUpdateEvent(EVENT_GUILD_INVITE_REMOVED)
 end
 
 function ZO_GuildInviteProvider:BuildNotificationList()
@@ -194,10 +413,9 @@ end
 
 ZO_GuildMotDProvider = ZO_NotificationProvider:Subclass()
 
-function ZO_GuildMotDProvider:New(notificationManager)
-    local provider = ZO_NotificationProvider.New(self, notificationManager)
-    EVENT_MANAGER:RegisterForEvent(provider.notificationManager.eventNamespace.."MotDProvider", EVENT_ADD_ON_LOADED, function(_, name) provider:OnAddOnLoaded(name) end)
-    return provider
+function ZO_GuildMotDProvider:Initialize(notificationManager)
+    ZO_NotificationProvider.Initialize(self, notificationManager)
+    EVENT_MANAGER:RegisterForEvent(self.notificationManager.eventNamespace.."MotDProvider", EVENT_ADD_ON_LOADED, function(_, name) self:OnAddOnLoaded(name) end)
 end
 
 function ZO_GuildMotDProvider:BuildNotificationList()
@@ -266,15 +484,13 @@ end
 
 ZO_CampaignQueueProvider = ZO_NotificationProvider:Subclass()
 
-function ZO_CampaignQueueProvider:New(notificationManager)
-    local provider = ZO_NotificationProvider.New(self, notificationManager)
-    provider:SetHasTimer(true)
+function ZO_CampaignQueueProvider:Initialize(notificationManager)
+    ZO_NotificationProvider.Initialize(self, notificationManager)
+    self:SetHasTimer(true)
 
-    provider:RegisterUpdateEvent(EVENT_CAMPAIGN_QUEUE_JOINED)
-    provider:RegisterUpdateEvent(EVENT_CAMPAIGN_QUEUE_LEFT)
-    provider:RegisterUpdateEvent(EVENT_CAMPAIGN_QUEUE_STATE_CHANGED)
-
-    return provider
+    self:RegisterUpdateEvent(EVENT_CAMPAIGN_QUEUE_JOINED)
+    self:RegisterUpdateEvent(EVENT_CAMPAIGN_QUEUE_LEFT)
+    self:RegisterUpdateEvent(EVENT_CAMPAIGN_QUEUE_STATE_CHANGED)
 end
 
 function ZO_CampaignQueueProvider:BuildNotificationList()
@@ -338,15 +554,13 @@ end
 
 ZO_ResurrectProvider = ZO_NotificationProvider:Subclass()
 
-function ZO_ResurrectProvider:New(notificationManager)
-    local provider = ZO_NotificationProvider.New(self, notificationManager)
-    provider:SetHasTimer(true)
+function ZO_ResurrectProvider:Initialize(notificationManager)
+    ZO_NotificationProvider.Initialize(self, notificationManager)
+    self:SetHasTimer(true)
 
-    provider:RegisterUpdateEvent(EVENT_RESURRECT_REQUEST)
-    provider:RegisterUpdateEvent(EVENT_RESURRECT_REQUEST_REMOVED)
-    provider:RegisterUpdateEvent(EVENT_PLAYER_ALIVE)
-
-    return provider
+    self:RegisterUpdateEvent(EVENT_RESURRECT_REQUEST)
+    self:RegisterUpdateEvent(EVENT_RESURRECT_REQUEST_REMOVED)
+    self:RegisterUpdateEvent(EVENT_PLAYER_ALIVE)
 end
 
 function ZO_ResurrectProvider:BuildNotificationList()
@@ -389,13 +603,11 @@ end
 
 ZO_GroupInviteProvider = ZO_NotificationProvider:Subclass()
 
-function ZO_GroupInviteProvider:New(notificationManager)
-    local provider = ZO_NotificationProvider.New(self, notificationManager)
+function ZO_GroupInviteProvider:Initialize(notificationManager)
+    ZO_NotificationProvider.Initialize(self, notificationManager)
 
-    provider:RegisterUpdateEvent(EVENT_GROUP_INVITE_RECEIVED)
-    provider:RegisterUpdateEvent(EVENT_GROUP_INVITE_REMOVED)
-
-    return provider
+    self:RegisterUpdateEvent(EVENT_GROUP_INVITE_RECEIVED)
+    self:RegisterUpdateEvent(EVENT_GROUP_INVITE_REMOVED)
 end
 
 function ZO_GroupInviteProvider:BuildNotificationList()
@@ -434,14 +646,12 @@ end
 
 ZO_GroupElectionProvider = ZO_NotificationProvider:Subclass()
 
-function ZO_GroupElectionProvider:New(notificationManager)
-    local provider = ZO_NotificationProvider.New(self, notificationManager)
-    provider:SetHasTimer(true)
+function ZO_GroupElectionProvider:Initialize(notificationManager)
+    ZO_NotificationProvider.Initialize(self, notificationManager)
+    self:SetHasTimer(true)
 
-    provider:RegisterUpdateEvent(EVENT_GROUP_ELECTION_NOTIFICATION_ADDED)
-    provider:RegisterUpdateEvent(EVENT_GROUP_ELECTION_NOTIFICATION_REMOVED)
-
-    return provider
+    self:RegisterUpdateEvent(EVENT_GROUP_ELECTION_NOTIFICATION_ADDED)
+    self:RegisterUpdateEvent(EVENT_GROUP_ELECTION_NOTIFICATION_REMOVED)
 end
 
 function ZO_GroupElectionProvider:BuildNotificationList()
@@ -502,13 +712,11 @@ end
 
 ZO_TradeInviteProvider = ZO_NotificationProvider:Subclass()
 
-function ZO_TradeInviteProvider:New(notificationManager)
-    local provider = ZO_NotificationProvider.New(self, notificationManager)
+function ZO_TradeInviteProvider:Initialize(notificationManager)
+    ZO_NotificationProvider.Initialize(self, notificationManager)
 
-    provider:RegisterUpdateEvent(EVENT_TRADE_INVITE_CONSIDERING)
-    provider:RegisterUpdateEvent(EVENT_TRADE_INVITE_REMOVED)
-
-    return provider
+    self:RegisterUpdateEvent(EVENT_TRADE_INVITE_CONSIDERING)
+    self:RegisterUpdateEvent(EVENT_TRADE_INVITE_REMOVED)
 end
 
 function ZO_TradeInviteProvider:BuildNotificationList()
@@ -547,13 +755,11 @@ end
 
 ZO_QuestShareProvider = ZO_NotificationProvider:Subclass()
 
-function ZO_QuestShareProvider:New(notificationManager)
-    local provider = ZO_NotificationProvider.New(self, notificationManager)
+function ZO_QuestShareProvider:Initialize(notificationManager)
+    ZO_NotificationProvider.Initialize(self, notificationManager)
 
-    provider:RegisterUpdateEvent(EVENT_QUEST_SHARED)
-    provider:RegisterUpdateEvent(EVENT_QUEST_SHARE_REMOVED)
-
-    return provider
+    self:RegisterUpdateEvent(EVENT_QUEST_SHARED)
+    self:RegisterUpdateEvent(EVENT_QUEST_SHARE_REMOVED)
 end
 
 function ZO_QuestShareProvider:BuildNotificationList()
@@ -628,18 +834,16 @@ do
 
     -- ZO_PointsResetProvider functions --
     --------------------------------------
-    function ZO_PointsResetProvider:New(notificationManager)
-        local provider = ZO_NotificationProvider.New(self, notificationManager)
+    function ZO_PointsResetProvider:Initialize(notificationManager)
+        ZO_NotificationProvider.Initialize(self, notificationManager)
 
         local function updatePointsResetList() 
-            provider:PushUpdateToNotificationManager() 
+            self:PushUpdateToNotificationManager() 
         end
 
         pointResetCallbackObject:RegisterCallback("EventPointReset", updatePointsResetList)
         pointResetCallbackObject:RegisterCallback("EventPointResetAccepted", updatePointsResetList)
         pointResetCallbackObject:RegisterCallback("EventPointResetDeclined", updatePointsResetList)
-
-        return provider
     end
 
     do
@@ -712,17 +916,15 @@ do
 
     -- ZO_CraftedAbilityResetProvider functions --
     ----------------------------------------------
-    function ZO_CraftedAbilityResetProvider:New(notificationManager)
-        local provider = ZO_NotificationProvider.New(self, notificationManager)
+    function ZO_CraftedAbilityResetProvider:Initialize(notificationManager)
+        ZO_NotificationProvider.Initialize(self, notificationManager)
 
         local function ResetList()
-            provider:PushUpdateToNotificationManager()
+            self:PushUpdateToNotificationManager()
         end
 
         craftedAbilityResetCallbackObject:RegisterCallback("CraftedAbilityReset", ResetList)
         craftedAbilityResetCallbackObject:RegisterCallback("CraftedAbilityResetDeclined", ResetList)
-
-        return provider
     end
 
     function ZO_CraftedAbilityResetProvider:BuildNotificationList()
@@ -760,13 +962,11 @@ end
 
 ZO_PledgeOfMaraProvider = ZO_NotificationProvider:Subclass()
 
-function ZO_PledgeOfMaraProvider:New(notificationManager)
-    local provider = ZO_NotificationProvider.New(self, notificationManager)
+function ZO_PledgeOfMaraProvider:Initialize(notificationManager)
+    ZO_NotificationProvider.Initialize(self, notificationManager)
 
-    provider:RegisterUpdateEvent(EVENT_PLEDGE_OF_MARA_OFFER)
-    provider:RegisterUpdateEvent(EVENT_PLEDGE_OF_MARA_OFFER_REMOVED)
-
-    return provider
+    self:RegisterUpdateEvent(EVENT_PLEDGE_OF_MARA_OFFER)
+    self:RegisterUpdateEvent(EVENT_PLEDGE_OF_MARA_OFFER_REMOVED)
 end
 
 function ZO_PledgeOfMaraProvider:CreateParticipantMessage(targetName, isSender)
@@ -817,14 +1017,12 @@ end
 
 ZO_AgentChatRequestProvider = ZO_NotificationProvider:Subclass()
 
-function ZO_AgentChatRequestProvider:New(notificationManager)
-    local provider = ZO_NotificationProvider.New(self, notificationManager)
+function ZO_AgentChatRequestProvider:Initialize(notificationManager)
+    ZO_NotificationProvider.Initialize(self, notificationManager)
 
-    provider:RegisterUpdateEvent(EVENT_AGENT_CHAT_REQUESTED)
-    provider:RegisterUpdateEvent(EVENT_AGENT_CHAT_ACCEPTED)
-    provider:RegisterUpdateEvent(EVENT_AGENT_CHAT_DECLINED)
-
-    return provider
+    self:RegisterUpdateEvent(EVENT_AGENT_CHAT_REQUESTED)
+    self:RegisterUpdateEvent(EVENT_AGENT_CHAT_ACCEPTED)
+    self:RegisterUpdateEvent(EVENT_AGENT_CHAT_DECLINED)
 end
 
 function ZO_AgentChatRequestProvider:BuildNotificationList()
@@ -857,30 +1055,26 @@ function ZO_AgentChatRequestProvider:Decline(data, button, openedFromKeybind)
 end
 
 --Leaderboard Score Provider
-
---Leaderboard Score Provider
 -------------------------
 
 internalassert(LEADERBOARD_SCORE_NOTIFICATION_TYPE_MAX_VALUE == 1, "New Leaderboard Score Notification Type, please add to ZO_LeaderboardScoreProvider checks")
 
 ZO_LeaderboardScoreProvider = ZO_NotificationProvider:Subclass()
 
-function ZO_LeaderboardScoreProvider:New(notificationManager, notificationEventCallback)
-    local provider = ZO_NotificationProvider.New(self, notificationManager, notificationEventCallback)
+function ZO_LeaderboardScoreProvider:Initialize(notificationManager, notificationEventCallback)
+    ZO_NotificationProvider.Initialize(self, notificationManager, notificationEventCallback)
 
-    provider:RegisterUpdateEvent(EVENT_LEADERBOARD_SCORE_NOTIFICATION_ADDED)
-    provider:RegisterUpdateEvent(EVENT_LEADERBOARD_SCORE_NOTIFICATION_REMOVED)
+    self:RegisterUpdateEvent(EVENT_LEADERBOARD_SCORE_NOTIFICATION_ADDED)
+    self:RegisterUpdateEvent(EVENT_LEADERBOARD_SCORE_NOTIFICATION_REMOVED)
 
     local function ShowLeaderBoardNotifications_SettingsChanged()
-        provider:PushUpdateToNotificationManager()
+        self:PushUpdateToNotificationManager()
     end
 
     CALLBACK_MANAGER:RegisterCallback("LeaderboardNotifications_On", ShowLeaderBoardNotifications_SettingsChanged)
     CALLBACK_MANAGER:RegisterCallback("LeaderboardNotifications_Off", ShowLeaderBoardNotifications_SettingsChanged)
 
-    provider:BuildNotificationList()
-    
-    return provider
+    self:BuildNotificationList()
 end
 
 function ZO_LeaderboardScoreProvider:BuildNotificationList()
@@ -973,23 +1167,21 @@ end
 
 ZO_CollectionsUpdateProvider = ZO_NotificationProvider:Subclass()
 
-function ZO_CollectionsUpdateProvider:New(notificationManager)
-    local provider = ZO_NotificationProvider.New(self, notificationManager)
+function ZO_CollectionsUpdateProvider:Initialize(notificationManager)
+    ZO_NotificationProvider.Initialize(self, notificationManager)
 
     local function OnCollectionUpdated(collectionUpdateType, collectiblesByNewUnlockState)
         -- Typical unlock changes go through a direct notification event flow
         if collectionUpdateType ~= ZO_COLLECTION_UPDATE_TYPE.UNLOCK_STATE_CHANGED then
-            provider.pushUpdateCallback(EVENT_COLLECTIBLE_NOTIFICATION_NEW)
+            self.pushUpdateCallback(EVENT_COLLECTIBLE_NOTIFICATION_NEW)
         end
     end
 
-    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleNotificationNew", function() provider.pushUpdateCallback(EVENT_COLLECTIBLE_NOTIFICATION_NEW) end)
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleNotificationNew", function() self.pushUpdateCallback(EVENT_COLLECTIBLE_NOTIFICATION_NEW) end)
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", OnCollectionUpdated)
-    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleNotificationRemoved", function() provider.pushUpdateCallback(EVENT_COLLECTIBLE_NOTIFICATION_REMOVED) end)
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleNotificationRemoved", function() self.pushUpdateCallback(EVENT_COLLECTIBLE_NOTIFICATION_REMOVED) end)
 
-    provider:BuildNotificationList()
-    
-    return provider
+    self:BuildNotificationList()
 end
 
 function ZO_CollectionsUpdateProvider:BuildNotificationList()
@@ -1055,18 +1247,16 @@ end
 
 ZO_LFGUpdateProvider = ZO_NotificationProvider:Subclass()
 
-function ZO_LFGUpdateProvider:New(notificationManager)
-    local provider = ZO_NotificationProvider.New(self, notificationManager)
-    provider:SetHasTimer(true)
+function ZO_LFGUpdateProvider:Initialize(notificationManager)
+    ZO_NotificationProvider.Initialize(self, notificationManager)
+    self:SetHasTimer(true)
 
-    provider:RegisterUpdateEvent(EVENT_GROUPING_TOOLS_READY_CHECK_UPDATED)
-    provider:RegisterUpdateEvent(EVENT_GROUPING_TOOLS_READY_CHECK_CANCELLED)
-    provider:RegisterUpdateEvent(EVENT_GROUPING_TOOLS_FIND_REPLACEMENT_NOTIFICATION_NEW)
-    provider:RegisterUpdateEvent(EVENT_GROUPING_TOOLS_FIND_REPLACEMENT_NOTIFICATION_REMOVED)
+    self:RegisterUpdateEvent(EVENT_GROUPING_TOOLS_READY_CHECK_UPDATED)
+    self:RegisterUpdateEvent(EVENT_GROUPING_TOOLS_READY_CHECK_CANCELLED)
+    self:RegisterUpdateEvent(EVENT_GROUPING_TOOLS_FIND_REPLACEMENT_NOTIFICATION_NEW)
+    self:RegisterUpdateEvent(EVENT_GROUPING_TOOLS_FIND_REPLACEMENT_NOTIFICATION_REMOVED)
 
-    provider:BuildNotificationList()
-
-    return provider
+    self:BuildNotificationList()
 end
 
 function ZO_LFGUpdateProvider:BuildNotificationList()
@@ -1168,13 +1358,11 @@ end
 
 ZO_CraftBagAutoTransferProvider = ZO_NotificationProvider:Subclass()
 
-function ZO_CraftBagAutoTransferProvider:New(notificationManager)
-    local provider = ZO_NotificationProvider.New(self, notificationManager)
+function ZO_CraftBagAutoTransferProvider:Initialize(notificationManager)
+    ZO_NotificationProvider.Initialize(self, notificationManager)
 
-    provider:RegisterUpdateEvent(EVENT_INVENTORY_ITEMS_AUTO_TRANSFERRED_TO_CRAFT_BAG)
-    provider:RegisterUpdateEvent(EVENT_CRAFT_BAG_AUTO_TRANSFER_NOTIFICATION_CLEARED)
-
-    return provider
+    self:RegisterUpdateEvent(EVENT_INVENTORY_ITEMS_AUTO_TRANSFERRED_TO_CRAFT_BAG)
+    self:RegisterUpdateEvent(EVENT_CRAFT_BAG_AUTO_TRANSFER_NOTIFICATION_CLEARED)
 end
 
 function ZO_CraftBagAutoTransferProvider:BuildNotificationList()
@@ -1209,13 +1397,11 @@ end
 
 ZO_DuelInviteProvider = ZO_NotificationProvider:Subclass()
 
-function ZO_DuelInviteProvider:New(notificationManager)
-    local provider = ZO_NotificationProvider.New(self, notificationManager)
+function ZO_DuelInviteProvider:Initialize(notificationManager)
+    ZO_NotificationProvider.Initialize(self, notificationManager)
 
-    provider:RegisterUpdateEvent(EVENT_DUEL_INVITE_RECEIVED)
-    provider:RegisterUpdateEvent(EVENT_DUEL_INVITE_REMOVED)
-
-    return provider
+    self:RegisterUpdateEvent(EVENT_DUEL_INVITE_RECEIVED)
+    self:RegisterUpdateEvent(EVENT_DUEL_INVITE_REMOVED)
 end
 
 function ZO_DuelInviteProvider:BuildNotificationList()
@@ -1250,13 +1436,11 @@ end
 
 ZO_EsoPlusSubscriptionStatusProvider = ZO_NotificationProvider:Subclass()
 
-function ZO_EsoPlusSubscriptionStatusProvider:New(notificationManager)
-    local provider = ZO_NotificationProvider.New(self, notificationManager)
+function ZO_EsoPlusSubscriptionStatusProvider:Initialize(notificationManager)
+    ZO_NotificationProvider.Initialize(self, notificationManager)
 
-    provider:RegisterUpdateEvent(EVENT_ESO_PLUS_FREE_TRIAL_STATUS_CHANGED)
-    provider:RegisterUpdateEvent(EVENT_ESO_PLUS_FREE_TRIAL_NOTIFICATION_CLEARED)
-
-    return provider
+    self:RegisterUpdateEvent(EVENT_ESO_PLUS_FREE_TRIAL_STATUS_CHANGED)
+    self:RegisterUpdateEvent(EVENT_ESO_PLUS_FREE_TRIAL_NOTIFICATION_CLEARED)
 end
 
 function ZO_EsoPlusSubscriptionStatusProvider:BuildNotificationList()
@@ -1315,14 +1499,11 @@ end
 
 ZO_GiftInventoryProvider = ZO_NotificationProvider:Subclass()
 
-function ZO_GiftInventoryProvider:New(notificationManager)
-    local provider = ZO_NotificationProvider.New(self, notificationManager)
+function ZO_GiftInventoryProvider:Initialize(notificationManager)
+    ZO_NotificationProvider.Initialize(self, notificationManager)
 
-    provider:RegisterUpdateEvent(EVENT_GIFTS_UPDATED)
-
-    provider:BuildNotificationList()
-
-    return provider
+    self:RegisterUpdateEvent(EVENT_GIFTS_UPDATED)
+    self:BuildNotificationList()
 end
 
 function ZO_GiftInventoryProvider:BuildNotificationList()
@@ -1378,13 +1559,11 @@ end
 
 ZO_DailyLoginRewardsClaimProvider = ZO_NotificationProvider:Subclass()
 
-function ZO_DailyLoginRewardsClaimProvider:New(notificationManager)
-    local provider = ZO_NotificationProvider.New(self, notificationManager)
+function ZO_DailyLoginRewardsClaimProvider:Initialize(notificationManager)
+    ZO_NotificationProvider.Initialize(self, notificationManager)
 
-    provider:RegisterUpdateEvent(EVENT_NEW_DAILY_LOGIN_REWARD_AVAILABLE)
-    provider:RegisterUpdateEvent(EVENT_DAILY_LOGIN_REWARDS_CLAIMED)
-
-    return provider
+    self:RegisterUpdateEvent(EVENT_NEW_DAILY_LOGIN_REWARD_AVAILABLE)
+    self:RegisterUpdateEvent(EVENT_DAILY_LOGIN_REWARDS_CLAIMED)
 end
 
 function ZO_DailyLoginRewardsClaimProvider:BuildNotificationList()
@@ -1426,13 +1605,11 @@ end
 
 ZO_GuildNewApplicationsProvider = ZO_NotificationProvider:Subclass()
 
-function ZO_GuildNewApplicationsProvider:New(notificationManager)
-    local provider = ZO_NotificationProvider.New(self, notificationManager)
+function ZO_GuildNewApplicationsProvider:Initialize(notificationManager)
+    ZO_NotificationProvider.Initialize(self, notificationManager)
 
-    provider:RegisterUpdateEvent(EVENT_GUILD_FINDER_GUILD_APPLICATIONS_VIEWED)
-    provider:RegisterUpdateEvent(EVENT_GUILD_FINDER_GUILD_NEW_APPLICATIONS)
-
-    return provider
+    self:RegisterUpdateEvent(EVENT_GUILD_FINDER_GUILD_APPLICATIONS_VIEWED)
+    self:RegisterUpdateEvent(EVENT_GUILD_FINDER_GUILD_NEW_APPLICATIONS)
 end
 
 function ZO_GuildNewApplicationsProvider:BuildNotificationList()
@@ -1487,12 +1664,10 @@ end
 
 ZO_PlayerApplicationsProvider = ZO_NotificationProvider:Subclass()
 
-function ZO_PlayerApplicationsProvider:New(notificationManager)
-    local provider = ZO_NotificationProvider.New(self, notificationManager)
+function ZO_PlayerApplicationsProvider:Initialize(notificationManager)
+    ZO_NotificationProvider.Initialize(self, notificationManager)
 
-    provider:RegisterUpdateEvent(EVENT_GUILD_FINDER_PLAYER_APPLICATIONS_CHANGED)
-
-    return provider
+    self:RegisterUpdateEvent(EVENT_GUILD_FINDER_PLAYER_APPLICATIONS_CHANGED)
 end
 
 function ZO_PlayerApplicationsProvider:BuildNotificationList()
@@ -1549,38 +1724,53 @@ end
 
 ZO_MarketProductUnlockedProvider = ZO_NotificationProvider:Subclass()
 
-function ZO_MarketProductUnlockedProvider:New(notificationManager)
-    local provider = ZO_NotificationProvider.New(self, notificationManager)
+function ZO_MarketProductUnlockedProvider:Initialize(notificationManager)
+    ZO_NotificationProvider.Initialize(self, notificationManager)
 
-    provider:RegisterUpdateEvent(EVENT_MARKET_PRODUCTS_UNLOCKED)
-    provider:RegisterUpdateEvent(EVENT_MARKET_PRODUCTS_UNLOCKED_NOTIFICATIONS_CLEARED)
-
-    return provider
+    self:RegisterUpdateEvent(EVENT_MARKET_PRODUCTS_UNLOCKED)
+    self:RegisterUpdateEvent(EVENT_MARKET_PRODUCTS_UNLOCKED_NOTIFICATIONS_CLEARED)
 end
 
 function ZO_MarketProductUnlockedProvider:BuildNotificationList()
     ZO_ClearNumericallyIndexedTable(self.list)
 
-    local numNotifications = GetNumMarketProductUnlockNotifications()
-    if numNotifications > 0 then
-        local multipleProductsUnlocked = numNotifications > 1
-        local firstMarketProductId = GetMarketProductUnlockNotificationProductId(1)
-        self:AddNotification(firstMarketProductId, multipleProductsUnlocked)
+    local firstMarketProductId = nil
+    local multipleProductsUnlocked = false
+    local allAreFromAchievements = true
+    for i = 1, GetNumMarketProductUnlockNotifications() do
+        local marketProductId = GetMarketProductUnlockNotificationProductId(i)
+        if firstMarketProductId then
+            multipleProductsUnlocked = true
+        else
+            firstMarketProductId = marketProductId
+        end
+
+        local achievementId = GetMarketProductUnlockedByAchievementId(marketProductId)
+        if achievementId == 0 and allAreFromAchievements then
+            allAreFromAchievements = false
+            -- If any are not from achievements, make that the one we take you to in the store
+            firstMarketProductId = marketProductId
+        end
+    end
+    if firstMarketProductId then
+        self:AddNotification(firstMarketProductId, multipleProductsUnlocked, allAreFromAchievements)
     end
 end
 
-function ZO_MarketProductUnlockedProvider:AddNotification(firstMarketProductId, multipleProductsUnlocked)
+function ZO_MarketProductUnlockedProvider:AddNotification(firstMarketProductId, multipleProductsUnlocked, allAreFromAchievements)
     local message
-    -- in the case of multiple market products getting unlocked, we will use the help info off the first one in the list for simplicity
-    local _, _, helpCategoryIndex, helpIndex = GetMarketProductUnlockedByAchievementInfo(firstMarketProductId)
     if multipleProductsUnlocked then
-        message = GetString(SI_NOTIFICATIONS_MULTIPLE_MARKET_PRODUCTS_UNLOCKED_MESSAGE)
+        message = allAreFromAchievements and GetString(SI_NOTIFICATIONS_MULTIPLE_MARKET_PRODUCTS_UNLOCKED_BY_ACHIEVEMENT_MESSAGE) or GetString(SI_NOTIFICATIONS_MULTIPLE_MARKET_PRODUCTS_UNLOCKED_BY_COLLECTIBLES_MESSAGE)
     else
         local marketProductName = GetMarketProductDisplayName(firstMarketProductId)
-        message = zo_strformat(SI_NOTIFICATIONS_MARKET_PRODUCT_UNLOCKED_BY_ACHIEVEMENT_MESSAGE, ZO_WHITE:Colorize(marketProductName))
+        local formatter = allAreFromAchievements and SI_NOTIFICATIONS_MARKET_PRODUCT_UNLOCKED_BY_ACHIEVEMENT_MESSAGE or SI_NOTIFICATIONS_MARKET_PRODUCT_UNLOCKED_BY_COLLECTIBLES_MESSAGE
+        message = zo_strformat(formatter, ZO_WHITE:Colorize(marketProductName))
     end
-
+    
+    -- in the case of multiple market products getting unlocked, we will use the help info off the first one in the list for simplicity
+    local helpCategoryIndex, helpIndex = GetMarketProductUnlockedHelpIndices(firstMarketProductId)
     local hasMoreInfo = helpCategoryIndex ~= nil
+    local acceptText = allAreFromAchievements and GetString(SI_NOTIFICATIONS_LOG_OUT) or GetString(SI_NOTIFICATIONS_OPEN_CROWN_STORE)
 
     local newListEntry =
     {
@@ -1591,8 +1781,11 @@ function ZO_MarketProductUnlockedProvider:AddNotification(firstMarketProductId, 
         moreInfo = hasMoreInfo,
 
         marketProductId = firstMarketProductId,
+        allAreFromAchievements = allAreFromAchievements,
         helpCategoryIndex = helpCategoryIndex,
         helpIndex = helpIndex,
+        acceptText = acceptText,
+        declineText = GetString(SI_NOTIFICATIONS_DELETE),
 
         --For sorting
         secsSinceRequest = ZO_NormalizeSecondsSince(0),
@@ -1601,12 +1794,15 @@ function ZO_MarketProductUnlockedProvider:AddNotification(firstMarketProductId, 
 end
 
 function ZO_MarketProductUnlockedProvider:Accept(entryData)
-    if IsInGamepadPreferredMode() then
-        ZO_Dialogs_ShowGamepadDialog("GAMEPAD_LOG_OUT", { quit = false })
+    if entryData.allAreFromAchievements then
+        if IsInGamepadPreferredMode() then
+            ZO_Dialogs_ShowGamepadDialog("GAMEPAD_LOG_OUT", { quit = false })
+        else
+            ZO_Dialogs_ShowDialog("LOG_OUT")
+        end
     else
-        ZO_Dialogs_ShowDialog("LOG_OUT")
+        ShowMarketProduct(entryData.marketProductId, MARKET_OPEN_OPERATION_NOTIFICATION)
     end
-
     ClearMarketProductUnlockNotifications()
 end
 
@@ -1619,13 +1815,11 @@ end
 
 ZO_ExpiringMarketCurrencyProvider = ZO_NotificationProvider:Subclass()
 
-function ZO_ExpiringMarketCurrencyProvider:New(notificationManager)
-    local provider = ZO_NotificationProvider.New(self, notificationManager)
+function ZO_ExpiringMarketCurrencyProvider:Initialize(notificationManager)
+    ZO_NotificationProvider.Initialize(self, notificationManager)
 
-    provider:RegisterUpdateEvent(EVENT_EXPIRING_MARKET_CURRENCY_NOTIFICATION)
-    provider:RegisterUpdateEvent(EVENT_EXPIRING_MARKET_CURRENCY_NOTIFICATION_CLEARED)
-
-    return provider
+    self:RegisterUpdateEvent(EVENT_EXPIRING_MARKET_CURRENCY_NOTIFICATION)
+    self:RegisterUpdateEvent(EVENT_EXPIRING_MARKET_CURRENCY_NOTIFICATION_CLEARED)
 end
 
 function ZO_ExpiringMarketCurrencyProvider:BuildNotificationList()
@@ -1691,12 +1885,10 @@ end
 
 ZO_DisabledAddonsProvider = ZO_NotificationProvider:Subclass()
 
-function ZO_DisabledAddonsProvider:New(notificationManager)
-    local provider = ZO_NotificationProvider.New(self, notificationManager)
+function ZO_DisabledAddonsProvider:Initialize(notificationManager)
+    ZO_NotificationProvider.Initialize(self, notificationManager)
 
-    provider:RegisterUpdateEvent(EVENT_FORCE_DISABLED_ADDONS_UPDATED)
-
-    return provider
+    self:RegisterUpdateEvent(EVENT_FORCE_DISABLED_ADDONS_UPDATED)
 end
 
 function ZO_DisabledAddonsProvider:BuildNotificationList()
@@ -1705,14 +1897,14 @@ function ZO_DisabledAddonsProvider:BuildNotificationList()
     local addOnManager = GetAddOnManager()
     local numDisabledAddOns = addOnManager:GetNumForceDisabledAddOns()
     for i = 1, numDisabledAddOns do
-        local addonName, shouldShowNotification = addOnManager:GetForceDisabledAddOnInfo(i)
+        local _, shouldShowNotification, addonTitle = addOnManager:GetForceDisabledAddOnInfo(i)
         if shouldShowNotification then
             table.insert(self.list,
             {
                 dataType = NOTIFICATIONS_ALERT_DATA,
                 notificationType = NOTIFICATION_TYPE_DISABLED_ADDON,
                 shortDisplayText = GetString("SI_NOTIFICATIONTYPE", NOTIFICATION_TYPE_DISABLED_ADDON),
-                message = zo_strformat(SI_NOTIFICATIONS_DISABLED_ADDON_MESSAGE, ZO_SELECTED_TEXT:Colorize(addonName)),
+                message = zo_strformat(SI_NOTIFICATIONS_DISABLED_ADDON_MESSAGE, ZO_SELECTED_TEXT:Colorize(addonTitle)),
                 secsSinceRequest = ZO_NormalizeSecondsSince(0),
                 addonIndex = i,
             })
@@ -1730,12 +1922,10 @@ end
 
 ZO_ConsoleAddonsMemoryLimitProvider = ZO_NotificationProvider:Subclass()
 
-function ZO_ConsoleAddonsMemoryLimitProvider:New(notificationManager)
-    local provider = ZO_NotificationProvider.New(self, notificationManager)
+function ZO_ConsoleAddonsMemoryLimitProvider:Initialize(notificationManager)
+    ZO_NotificationProvider.Initialize(self, notificationManager)
 
-    provider:RegisterUpdateEvent(EVENT_CONSOLE_ADD_ONS_MEMORY_LIMIT_REACHED)
-
-    return provider
+    self:RegisterUpdateEvent(EVENT_CONSOLE_ADD_ONS_MEMORY_LIMIT_REACHED)
 end
 
 function ZO_ConsoleAddonsMemoryLimitProvider:BuildNotificationList()
@@ -1764,12 +1954,10 @@ end
 
 ZO_ConsoleAddonsSavedVariableLimitProvider = ZO_NotificationProvider:Subclass()
 
-function ZO_ConsoleAddonsSavedVariableLimitProvider:New(notificationManager)
-    local provider = ZO_NotificationProvider.New(self, notificationManager)
+function ZO_ConsoleAddonsSavedVariableLimitProvider:Initialize(notificationManager)
+    ZO_NotificationProvider.Initialize(self, notificationManager)
 
-    provider:RegisterUpdateEvent(EVENT_CONSOLE_ADD_ONS_SAVED_VARIABLES_LIMIT_REACHED)
-
-    return provider
+    self:RegisterUpdateEvent(EVENT_CONSOLE_ADD_ONS_SAVED_VARIABLES_LIMIT_REACHED)
 end
 
 function ZO_ConsoleAddonsSavedVariableLimitProvider:BuildNotificationList()
@@ -1797,13 +1985,11 @@ end
 
 ZO_TributeInviteProvider = ZO_NotificationProvider:Subclass()
 
-function ZO_TributeInviteProvider:New(notificationManager)
-    local provider = ZO_NotificationProvider.New(self, notificationManager)
+function ZO_TributeInviteProvider:Initialize(notificationManager)
+    ZO_NotificationProvider.Initialize(self, notificationManager)
 
-    provider:RegisterUpdateEvent(EVENT_TRIBUTE_INVITE_RECEIVED)
-    provider:RegisterUpdateEvent(EVENT_TRIBUTE_INVITE_REMOVED)
-
-    return provider
+    self:RegisterUpdateEvent(EVENT_TRIBUTE_INVITE_RECEIVED)
+    self:RegisterUpdateEvent(EVENT_TRIBUTE_INVITE_REMOVED)
 end
 
 function ZO_TributeInviteProvider:BuildNotificationList()
@@ -1842,15 +2028,13 @@ end
 
 ZO_HouseToursHouseRecommendedProvider = ZO_NotificationProvider:Subclass()
 
-function ZO_HouseToursHouseRecommendedProvider:New(notificationManager)
-    local provider = ZO_NotificationProvider.New(self, notificationManager)
-    provider:RegisterUpdateEvent(EVENT_HOUSE_TOURS_LISTING_RECOMMENDED_NOTIFICATIONS_UPDATED)
+function ZO_HouseToursHouseRecommendedProvider:Initialize(notificationManager)
+    ZO_NotificationProvider.Initialize(self, notificationManager)
+    self:RegisterUpdateEvent(EVENT_HOUSE_TOURS_LISTING_RECOMMENDED_NOTIFICATIONS_UPDATED)
 
     local playerListingsManager = HOUSE_TOURS_PLAYER_LISTINGS_MANAGER
-    playerListingsManager:RegisterCallback("Initialized", ZO_GetCallbackForwardingFunction(provider, provider.OnPlayerListingsManagerInitialized))
-    playerListingsManager:RegisterCallback("Initialized", ZO_GetCallbackForwardingFunction(provider, provider.PushUpdateToNotificationManager))
-
-    return provider
+    playerListingsManager:RegisterCallback("Initialized", ZO_GetCallbackForwardingFunction(self, self.OnPlayerListingsManagerInitialized))
+    playerListingsManager:RegisterCallback("Initialized", ZO_GetCallbackForwardingFunction(self, self.PushUpdateToNotificationManager))
 end
 
 function ZO_HouseToursHouseRecommendedProvider:BuildNotificationList()
@@ -1955,12 +2139,101 @@ function ZO_HouseToursHouseRecommendedProvider:RefreshNotifications()
     if NOTIFICATIONS then
         NOTIFICATIONS:RefreshNotificationList()
     end
+
     GAMEPAD_NOTIFICATIONS:RefreshNotificationList()
 end
 
 function ZO_HouseToursHouseRecommendedProvider:OnPlayerListingsManagerInitialized()
     -- The Player Listings Manager is ready; process queued notifications.
     self:RefreshNotifications()
+end
+
+-- Spectacle Event Notification Provider
+-----------------------------------------
+
+local SPECTACLE_EVENT_PHASE_CHANGE_TYPES =
+{
+    STARTED = "start",
+    COMPLETE = "complete",
+}
+
+ZO_SpectacleEventNotificationProvider = ZO_NotificationProvider:Subclass()
+
+function ZO_SpectacleEventNotificationProvider:Initialize(notificationManager)
+    ZO_NotificationProvider.Initialize(self, notificationManager)
+
+    self.notificationType = "SpectacleEvent"
+    self:RegisterUpdateEvent(EVENT_SPECTACLE_EVENT_UPDATED)
+end
+
+function ZO_SpectacleEventNotificationProvider:BuildNotificationList()
+    ZO_ClearNumericallyIndexedTable(self.list)
+    local numActiveSpectacleEvents = GetNumActiveSpectacleEvents()
+
+    for activeSpectacleEventIndex = 1, numActiveSpectacleEvents do
+        local activeSpectacleEventId = GetActiveSpectacleEventId(activeSpectacleEventIndex)
+        local currentPhase, numPhases = GetActiveSpectacleEventPhaseInfo(activeSpectacleEventId)
+        local isPhaseComplete = IsCurrentActiveSpectacleEventPhaseComplete(activeSpectacleEventId)
+        local notificationMessage = nil
+        local notificationDescriptor = nil
+
+        if isPhaseComplete then
+            notificationMessage = GetActiveSpectacleEventPhaseCompleteNotificationMessage(activeSpectacleEventId)
+            if notificationMessage ~= "" then
+                -- A phase complete notification message is defined and the current phase is complete.
+                notificationDescriptor = self:GetNotificationDescriptor(SPECTACLE_EVENT_PHASE_CHANGE_TYPES.COMPLETE, activeSpectacleEventId, currentPhase)
+            end
+        else
+            notificationMessage = GetActiveSpectacleEventPhaseStartedNotificationMessage(activeSpectacleEventId)
+            if notificationMessage ~= "" then
+                -- A phase started notification message is defined and the current phase is active.
+                notificationDescriptor = self:GetNotificationDescriptor(SPECTACLE_EVENT_PHASE_CHANGE_TYPES.STARTED, activeSpectacleEventId, currentPhase)
+            end
+        end
+
+        if notificationDescriptor then
+            -- A notification is ready to be created.
+            if not DISMISSED_NOTIFICATION_TRACKER:IsNotificationDismissed(self.notificationType, notificationDescriptor) then
+                -- This notification has not been dismissed; create and append the notification.
+                local spectacleEventDisplayName = GetActiveSpectacleEventDisplayName(activeSpectacleEventId)
+
+                table.insert(self.list,
+                {
+                    dataType = NOTIFICATIONS_SPECTACLE_EVENT_UPDATE_DATA,
+                    message = notificationMessage,
+                    notificationType = NOTIFICATION_TYPE_SPECTACLE_EVENT_PHASE_CHANGED,
+                    notificationDescriptor = notificationDescriptor,
+                    secsSinceRequest = ZO_NormalizeSecondsSince(0),
+                    shortDisplayText = spectacleEventDisplayName,
+                })
+            end
+        end
+    end
+end
+
+function ZO_SpectacleEventNotificationProvider:Dismiss(notificationData)
+    DISMISSED_NOTIFICATION_TRACKER:DismissNotification(self.notificationType, notificationData.notificationDescriptor)
+    self:RefreshNotifications()
+end
+
+function ZO_SpectacleEventNotificationProvider:Accept(notificationData)
+    self:Dismiss(notificationData)
+
+    -- Show the Activity Finder Spectacle Event category.
+    if IsInGamepadPreferredMode() then
+        ZO_ACTIVITY_FINDER_ROOT_GAMEPAD:ShowCategory(SPECTACLE_EVENTS_GAMEPAD:GetCategoryData())
+    else
+        GROUP_MENU_KEYBOARD:ShowCategoryByData(SPECTACLE_EVENTS_KEYBOARD:GetCategoryData())
+    end
+end
+
+function ZO_SpectacleEventNotificationProvider:Decline(notificationData)
+    self:Dismiss(notificationData)
+end
+
+function ZO_SpectacleEventNotificationProvider:GetNotificationDescriptor(spectacleEventPhaseChangeType, spectacleEventId, spectacleEventPhaseIndex)
+    local notificationDescriptor = string.format("%s_%u_%u", spectacleEventPhaseChangeType, spectacleEventId, spectacleEventPhaseIndex)
+    return notificationDescriptor
 end
 
 -- Sort List
@@ -1997,17 +2270,10 @@ function ZO_NotificationList:SortScrollList()
     table.sort(scrollData, self.sortFunction)
 end
 
-
 --Notification Manager
 -------------------------
 
-ZO_NotificationManager = ZO_Object:Subclass()
-
-function ZO_NotificationManager:New(control)
-    local notificationManager = ZO_Object.New(self)
-    notificationManager:Initialize(control)
-    return notificationManager
-end
+ZO_NotificationManager = ZO_InitializingObject:Subclass()
 
 function ZO_NotificationManager:Initialize(control)
     self.totalNumNotifications = 0
@@ -2026,9 +2292,15 @@ function ZO_NotificationManager:Initialize(control)
 end
 
 function ZO_NotificationManager:RefreshNotificationList()
-    self:ClearNotificationList()
-    self:BuildNotificationList()
-    self:FinishNotificationList()
+    if not self.isRefreshingNotificationList then
+        self.isRefreshingNotificationList = true
+
+        self:ClearNotificationList()
+        self:BuildNotificationList()
+        self:FinishNotificationList()
+
+        self.isRefreshingNotificationList = false
+    end
 end
 
 function ZO_NotificationManager:RefreshVisible()

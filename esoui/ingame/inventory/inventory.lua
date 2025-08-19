@@ -97,11 +97,11 @@ function ZO_UpdateStatusControlIcons(inventorySlot, slotData)
     end
 
     if slotData.isLockedSetPiece then
-        statusControl:AddIcon(LOCKED_SET_PIECE_ICON_TEXTURE, ZO_SUCCEEDED_TEXT)
+        statusControl:AddIcon(LOCKED_SET_PIECE_ICON_TEXTURE)
     end
 
     if slotData.canBeUsedToLearn then
-        statusControl:AddIcon(CAN_LEARN_ICON_TEXTURE, ZO_SUCCEEDED_TEXT)
+        statusControl:AddIcon(CAN_LEARN_ICON_TEXTURE)
     end
 
     if slotData.isBoPTradeable then
@@ -1748,20 +1748,11 @@ end
 do
     local FLASH_ANIMATION_MIN_ALPHA = 0
     local FLASH_ANIMATION_MAX_ALPHA = 0.5
-    function ZO_InventoryManager:UpdateCategoryFlashAnimation(timeline, progress)
-        local remainingPlaybackLoops = self.categoryFlashAnimationTimeline:GetPlaybackLoopsRemaining()
-        local currentAlpha
-        local alphaDelta = progress * (FLASH_ANIMATION_MAX_ALPHA - FLASH_ANIMATION_MIN_ALPHA)
-        if remainingPlaybackLoops % 2 then
-            -- Fading out
-            currentAlpha = alphaDelta + FLASH_ANIMATION_MIN_ALPHA
-        else
-            -- Fading in
-            currentAlpha = FLASH_ANIMATION_MAX_ALPHA - alphaDelta
-        end
 
+    function ZO_InventoryManager:UpdateCategoryFlashAnimation(timeline, progress)
+        local alpha = zo_lerp(FLASH_ANIMATION_MIN_ALPHA, FLASH_ANIMATION_MAX_ALPHA, progress)
         for _, control in pairs(self.listeningControls) do
-            control:SetAlpha(currentAlpha)
+            control:SetAlpha(alpha)
         end
     end
 end
@@ -1776,9 +1767,11 @@ function ZO_InventoryManager:PlayItemAddedAlert(slot, inventory)
         if slot.actorCategory == GAMEPLAY_ACTOR_CATEGORY_COMPANION then
             if tabFilter.filterType == ITEM_TYPE_DISPLAY_CATEGORY_COMPANION then
                 self:AddCategoryFlashAnimationControl(tabFilter.control:GetNamedChild("Flash"))
+
                 if not self.categoryFlashAnimationTimeline:IsPlaying() then
                     self.categoryFlashAnimationTimeline:PlayFromStart()
                 end
+
                 if not isSlotAdded then
                     table.insert(self.flashingSlots, slot)
                     slotAdded = true
@@ -1788,15 +1781,21 @@ function ZO_InventoryManager:PlayItemAddedAlert(slot, inventory)
             for _, data in ipairs(slot.filterData) do
                 local filterItemTypeDisplayCategory = ZO_ItemFilterUtils.GetItemTypeDisplayCategoryByItemFilterType(data)
                 if filterItemTypeDisplayCategory == tabFilter.filterType or tabFilter.filterType == ITEM_TYPE_DISPLAY_CATEGORY_ALL then
-                    self:AddCategoryFlashAnimationControl(tabFilter.control:GetNamedChild("Flash"))
-                    if not self.categoryFlashAnimationTimeline:IsPlaying() then
-                        self.categoryFlashAnimationTimeline:PlayFromStart()
+                    -- Verify that this slot is visible.
+                    if self:ShouldAddSlotToList(inventory, slot) then
+                        self:AddCategoryFlashAnimationControl(tabFilter.control:GetNamedChild("Flash"))
+
+                        if not self.categoryFlashAnimationTimeline:IsPlaying() then
+                            self.categoryFlashAnimationTimeline:PlayFromStart()
+                        end
+
+                        if not isSlotAdded then
+                            table.insert(self.flashingSlots, slot)
+                            slotAdded = true
+                        end
+
+                        break
                     end
-                    if not isSlotAdded then
-                        table.insert(self.flashingSlots, slot)
-                        slotAdded = true
-                    end
-                    break
                 end
             end
         end
@@ -1808,18 +1807,24 @@ function ZO_InventoryManager:PlayItemAddedAlert(slot, inventory)
             if ZO_ItemFilterUtils.IsCompanionSlotInItemTypeDisplayCategoryAndSubcategory(slot, currentFilter, subFilter.filterType) then
                 self:AddCategoryFlashAnimationControl(subFilter.control:GetNamedChild("Flash"))
             end
+
             if not isSlotAdded then
                 table.insert(self.flashingSlots, slot)
                 slotAdded = true
             end
         elseif ZO_ItemFilterUtils.IsSlotInItemTypeDisplayCategoryAndSubcategory(slot, currentFilter, subFilter.filterType) then
-            self:AddCategoryFlashAnimationControl(subFilter.control:GetNamedChild("Flash"))
-            if not self.categoryFlashAnimationTimeline:IsPlaying() then
-                self.categoryFlashAnimationTimeline:PlayFromStart()
-            end
-            if not isSlotAdded then
-                table.insert(self.flashingSlots, slot)
-                slotAdded = true
+            -- Verify that this slot is visible.
+            if self:ShouldAddSlotToList(inventory, slot) then
+                self:AddCategoryFlashAnimationControl(subFilter.control:GetNamedChild("Flash"))
+
+                if not self.categoryFlashAnimationTimeline:IsPlaying() then
+                    self.categoryFlashAnimationTimeline:PlayFromStart()
+                end
+
+                if not isSlotAdded then
+                    table.insert(self.flashingSlots, slot)
+                    slotAdded = true
+                end
             end
         end
     end
@@ -2817,6 +2822,7 @@ function ZO_InventoryManager:CreateBankScene()
                                                     elseif newState == SCENE_HIDDEN then
                                                         ZO_InventorySlot_RemoveMouseOverKeybinds()
                                                         bankFragmentBar:Clear()
+                                                        self:ClearNewStatusOnItemsThePlayerHasSeen(INVENTORY_BANK)
                                                     end
                                                 end)
 end
@@ -2888,6 +2894,8 @@ function ZO_InventoryManager:CreateFurnitureVaultScene()
                 local UPDATE_EVEN_IF_HIDDEN = true
                 self:UpdateList(INVENTORY_FURNITURE_VAULT, UPDATE_EVEN_IF_HIDDEN)
             end
+        elseif newState == SCENE_FRAGMENT_HIDDEN then
+            self:ClearNewStatusOnItemsThePlayerHasSeen(INVENTORY_FURNITURE_VAULT)
         end
     end)
 
@@ -3027,6 +3035,8 @@ function ZO_InventoryManager:CreateHouseBankScene()
                                                                 local UPDATE_EVEN_IF_HIDDEN = true
                                                                 self:UpdateList(INVENTORY_HOUSE_BANK, UPDATE_EVEN_IF_HIDDEN)
                                                             end
+                                                        elseif newState == SCENE_FRAGMENT_HIDDEN then
+                                                            self:ClearNewStatusOnItemsThePlayerHasSeen(INVENTORY_HOUSE_BANK)
                                                         end
                                                     end)
 
@@ -3131,6 +3141,8 @@ function ZO_InventoryManager:CreateGuildBankScene()
                                                                     local UPDATE_EVEN_IF_HIDDEN = true
                                                                     self:UpdateList(INVENTORY_GUILD_BANK, UPDATE_EVEN_IF_HIDDEN)
                                                                 end
+                                                            elseif newState == SCENE_FRAGMENT_HIDDEN then
+                                                                self:ClearNewStatusOnItemsThePlayerHasSeen(INVENTORY_GUILD_BANK)
                                                             end
                                                         end)
 

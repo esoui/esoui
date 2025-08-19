@@ -998,6 +998,13 @@ local AlertHandlers =
         end
     end,
 
+    [EVENT_LORE_BOOK_COLLECTION_LEARNED] = function(categoryIndex, collectionIndex, numLearnedBooks)
+        local hidden = select(5, GetLoreCollectionInfo(categoryIndex, collectionIndex))
+        if not hidden then
+            return ALERT, zo_strformat(SI_LORE_LIBRARY_ANNOUNCE_COLLECTION_LEARNED, numLearnedBooks), SOUNDS.BOOK_ACQUIRED, true
+        end
+    end,
+
     [EVENT_LOCKPICK_FAILED] = function(result)
         return ALERT, GetString(SI_ALERT_LOCKPICK_FAILED)
     end,

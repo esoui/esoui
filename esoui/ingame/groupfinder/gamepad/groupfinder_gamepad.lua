@@ -53,6 +53,8 @@ function ZO_GroupFinder_Gamepad:InitializeControls()
                         end
                     else
                         self:SetMode(data.mode)
+                        -- Only apply sound here as dialog show will handle its own sound
+                        PlaySound(SOUNDS.GAMEPAD_MENU_FORWARD)
                     end
                 else
                     --If the subcategory list is already active, try to select the currently targeted entry
@@ -78,7 +80,6 @@ function ZO_GroupFinder_Gamepad:InitializeControls()
                 end
                 return true
             end,
-            sound = SOUNDS.GAMEPAD_MENU_FORWARD,
         },
         -- Open Group Menu
         {
@@ -122,7 +123,11 @@ function ZO_GroupFinder_Gamepad:InitializeGroupFinderCategories()
             disabledMenuIcon = "EsoUI/Art/LFG/Gamepad/LFG_menuIcon_groupFinder_disabled.dds",
             sceneName = "GroupFinderGamepad",
             tooltipDescription = GetString(SI_GROUP_FINDER_DESCRIPTION),
-            isGroupFinder = true,
+            isLocked = ZO_GroupFinder_Shared.IsGroupFinderLocked,
+            lockedText = ZO_GroupFinder_Shared.GetGroupFinderLockText,
+            isNew = function()
+                return GROUP_FINDER_APPLICATIONS_LIST_MANAGER:HasNewApplication()
+            end,
         },
     }
 

@@ -272,8 +272,9 @@ SOUNDS =
     GROUP_KICK                      = "Group_Kick",
     GROUP_DISBAND                   = "Group_Disband",
     GROUP_PROMOTE                   = "Group_Promote",
-    GROUP_ROLE_SELECTED             = "Click",
-    GROUP_ROLE_DESELECTED           = "Click",
+    GROUP_ROLE_DPS_SELECTED         = "Group_Role_DPS_Click",
+    GROUP_ROLE_TANK_SELECTED        = "Group_Role_Tank_Click",
+    GROUP_ROLE_HEAL_SELECTED        = "Group_Role_Heal_Click",
 
     --LFG sounds
     LFG_SEARCH_STARTED              = "LFG_Search_Started",
@@ -1001,7 +1002,6 @@ SOUNDS =
     GUILD_FINDER_SELECT_GUILD               = "GuildFinder_SelectGuild",
     GUILD_FINDER_BACK_FROM_SELECTED_GUILD   = "GuildFinder_BackFromSelectedGuild",
     GAMEPAD_GUILD_FINDER_TOGGLE_ACTIVITY    = "Gamepad_GuildFinder_ToggleActivity",
-    GAMEPAD_GUILD_FINDER_TOGGLE_ROLE        = "Gamepad_GuildFinder_ToggleRole",
 
     --Daedric Artifacts
     DAEDRIC_ENERGY_BURST                    = "DaedricEnergy_Burst",

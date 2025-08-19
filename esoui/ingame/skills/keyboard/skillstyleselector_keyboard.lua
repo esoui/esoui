@@ -87,7 +87,7 @@ function ZO_SkillStyleIconSelector_Keyboard:OnSkillStyleSelectorEntrySetup(contr
         self:OnSkillStyleSelectorGridListEntryClicked(data.iconIndex)
     end
 
-    if data.collectibleData:IsLocked() then
+    if not self.skillData.isPurchased then
         iconContainer:SetAlpha(0.3)
     else
         iconContainer:SetAlpha(1)

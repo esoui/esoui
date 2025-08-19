@@ -594,7 +594,7 @@
                 <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
             </Action>
 
-            <Action name="UI_SHORTCUT_REPORT_PLAYER">
+            <Action name="UI_SHORTCUT_HELP">
                 <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
                 <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
             </Action>
@@ -997,17 +997,17 @@
     <!-- This layer should not be player facing, it "magically" makes the mouse buttons work differently in UI mode-->
     <Layer name="MouseUIMode">
         <Category>
-            <Action name="LEFT_MOUSE_IN_WORLD" hideAction="true" rebindable="false">
+            <Action name="LEFT_MOUSE_IN_WORLD" hideAction="true" rebindable="false" preventAutomaticInputModeChange="true">
                 <Down>LeftMouseDownInWorld()</Down>
                 <Up>LeftMouseUpInWorld()</Up>
             </Action>
 
-            <Action name="LEFT_AND_RIGHT_MOUSE_IN_WORLD" hideAction="true" rebindable="false">
+            <Action name="LEFT_AND_RIGHT_MOUSE_IN_WORLD" hideAction="true" rebindable="false" preventAutomaticInputModeChange="true">
                 <Down>LeftAndRightMouseDownInWorld()</Down>
                 <Up>LeftAndRightMouseUpInWorld()</Up>
             </Action>
 
-            <Action name="RIGHT_MOUSE_IN_WORLD" hideAction="true" rebindable="false">
+            <Action name="RIGHT_MOUSE_IN_WORLD" hideAction="true" rebindable="false" preventAutomaticInputModeChange="true">
                 <Down>RightMouseDownInWorld()</Down>
                 <Up>RightMouseUpInWorld()</Up>
             </Action>
@@ -1740,7 +1740,7 @@
                 <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
             </Action>
 
-            <Action name="HOUSING_EDITOR_REPORT_HOUSE" inheritsBindFrom="UI_SHORTCUT_REPORT_PLAYER" hideAction="true">
+            <Action name="HOUSING_EDITOR_REPORT_HOUSE" inheritsBindFrom="UI_SHORTCUT_HELP" hideAction="true">
                 <Down>return ZO_KeybindStrip_HandleKeybindDown(keybind)</Down>
                 <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
             </Action>

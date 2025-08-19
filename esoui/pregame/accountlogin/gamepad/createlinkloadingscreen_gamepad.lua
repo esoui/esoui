@@ -143,6 +143,10 @@ local function OnInvalidCredentials(eventId, errorCode, accountPageURL)
         titleStringId = SI_LOGIN_DIALOG_TITLE_ACCOUNT_SUSPENDED
         local url = GetURLTextByType(APPROVED_URL_ESO_HELP)
         descriptionString = zo_strformat(GetString("SI_LOGINAUTHERROR", LOGIN_AUTH_ERROR_ACCOUNT_SUSPENDED), url)
+     elseif errorCode == AUTHENTICATION_ERROR_ACCOUNT_IS_CHILD then
+        titleStringId = SI_LOGIN_DIALOG_TITLE_CHILD_ACCOUNT
+        local url = GetURLTextByType(APPROVED_URL_ESO_HELP)
+        descriptionString = zo_strformat(GetString("SI_LOGINAUTHERROR", LOGIN_AUTH_ERROR_GAME_ACCOUNT_IS_CHILD_ACCOUNT), url)
     else
         titleStringId = SI_GAMEPAD_GENERIC_LOGIN_ERROR
         descriptionString = GetString((GetPlatformServiceType() == PLATFORM_SERVICE_TYPE_ZOS) and SI_BAD_LOGIN_ZOS or SI_BAD_LOGIN_FIRST_PARTY)
@@ -196,6 +200,8 @@ local function OnCreateLinkLoadingError(eventId, loginError, linkingError, debug
             dialogTitle = GetString(SI_LOGIN_DIALOG_TITLE_ACCOUNT_BANNED)
         elseif loginError == LOGIN_AUTH_ERROR_ACCOUNT_SUSPENDED or loginError == LOGIN_AUTH_ERROR_GAME_ACCOUNT_SUSPENDED then
             dialogTitle = GetString(SI_LOGIN_DIALOG_TITLE_ACCOUNT_SUSPENDED)
+        elseif loginError == LOGIN_AUTH_ERROR_GAME_ACCOUNT_IS_CHILD_ACCOUNT then
+            dialogTitle = GetString(SI_LOGIN_DIALOG_TITLE_CHILD_ACCOUNT)
         else
             dialogTitle = GetString(SI_LOGIN_DIALOG_TITLE_LOGIN_FAILED)
         end

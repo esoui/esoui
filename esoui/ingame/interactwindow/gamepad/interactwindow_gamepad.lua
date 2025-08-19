@@ -25,15 +25,15 @@ function ZO_GamepadInteraction:Initialize(control)
     self:InitializeKeybindStripDescriptors()
 
     local function OnStateChange(oldState, newState)
-        if(newState == SCENE_HIDDEN) then
+        if newState == SCENE_HIDDEN then
             self:OnHidden()
         elseif newState == SCENE_SHOWING then
             self:OnShowing()
         end
     end
 
-    local interactScene = self:CreateInteractScene("gamepadInteract")
-    interactScene:RegisterCallback("StateChange", OnStateChange)
+    self.interactScene = self:CreateInteractScene("gamepadInteract")
+    self.interactScene:RegisterCallback("StateChange", OnStateChange)
 
     SYSTEMS:RegisterGamepadObject(ZO_INTERACTION_SYSTEM_NAME, self)
 
@@ -131,6 +131,18 @@ function ZO_GamepadInteraction:InitInteraction()
     self.itemList:AddDataTemplate("ZO_QuestReward_Gamepad", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
     self.itemList:AddDataTemplate("ZO_ChatterOption_Gamepad", SetupOption, ZO_GamepadMenuEntryTemplateParametricListFunction)
     self.itemList:SetDataTemplateReleaseFunction("ZO_ChatterOption_Gamepad", ReleaseChatterOptionControl)
+
+    local narrationInfo =
+    {
+        canNarrate = function()
+            return self.interactScene:IsShowing()
+        end,
+        headerNarrationFunction = function()
+            return SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetUnitName("interact"))
+        end,
+        isBlockedByInteractVO = true,
+    }
+    SCREEN_NARRATION_MANAGER:RegisterParametricList(self.itemList, narrationInfo)
 end
 
 function ZO_GamepadInteraction:InitializeKeybindStripDescriptors()
@@ -160,14 +172,24 @@ function ZO_GamepadInteraction:InitializeKeybindStripDescriptors()
         end
     end
 
-    self.keybindStripDescriptor = {}
-    ZO_Gamepad_AddForwardNavigationKeybindDescriptors(self.keybindStripDescriptor, 
-                                                        GAME_NAVIGATION_TYPE_BUTTON,
-                                                        ItemSelected,
-                                                        nil,
-                                                        IsVisible,
-                                                        IsEnabled
-                                                    )
+    self.keybindStripDescriptor = 
+    {
+        alignment = KEYBIND_STRIP_ALIGN_LEFT,
+        {
+            keybind = "UI_SHORTCUT_TERTIARY",
+            name = GetString(SI_INTERACT_REPLAY_DIALOGUE),
+            callback = function()
+                ReplayLastInteractVO()
+            end,
+            enabled = function()
+                return not IsInteractVOPlaying()
+            end,
+            visible = function()
+                return CanReplayLastInteractVO()
+            end,
+        },
+    }
+    ZO_Gamepad_AddForwardNavigationKeybindDescriptors(self.keybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON, ItemSelected, nil, IsVisible, IsEnabled)
 
     local function BackCallback()
         self:CloseChatter()
@@ -220,6 +242,9 @@ function ZO_GamepadInteraction:PopulateChatterOption(controlID, optionIndex, opt
     end
 
     self.itemList:AddEntry("ZO_ChatterOption_Gamepad", chatterData)
+
+    --Re-narrate if the dialog options change
+    SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.itemList)
 end
 
 function ZO_GamepadInteraction:FinalizeChatterOptions(optionCount)
@@ -343,6 +368,11 @@ function ZO_GamepadInteraction:UpdateShadowyConnectionsOnTimeComplete(control, d
     control.optionType = CHATTER_TALK_CHOICE_USE_SHADOWY_CONNECTIONS
     control:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
     self:RefreshList()
+    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+end
+
+--Overridden from base
+function ZO_GamepadInteraction:RefreshReplay()
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
 end
 

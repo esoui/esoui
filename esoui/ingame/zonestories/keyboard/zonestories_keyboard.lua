@@ -50,7 +50,7 @@ function ZO_ZoneStories_Keyboard:Initialize(control)
     {
         alignment = KEYBIND_STRIP_ALIGN_CENTER,
         name = GetString(SI_ZONE_STORY_MORE_INFO_KEYBIND),
-        keybind = "UI_SHORTCUT_REPORT_PLAYER",
+        keybind = "UI_SHORTCUT_HELP",
         visible = function()
             local helpCategoryIndex, helpIndex = GetZoneStoriesHelpIndices()
             return helpCategoryIndex ~= nil

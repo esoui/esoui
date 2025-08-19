@@ -183,7 +183,6 @@
 
                 <Control name="$(parent)SearchDivider" inherits="ZO_InventoryFilterDivider" hidden="true">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)SearchFilters" relativePoint="BOTTOMLEFT" offsetY="5" />
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)SearchFilters" relativePoint="BOTTOMRIGHT" offsetY="5" />
                 </Control>
 
                 <Control name="$(parent)List" inherits="ZO_InventoryList"/>

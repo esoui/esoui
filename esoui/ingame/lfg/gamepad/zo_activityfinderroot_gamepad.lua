@@ -56,6 +56,7 @@ function ActivityFinderRoot_Gamepad:Initialize(control)
     self.control:RegisterForEvent(EVENT_GROUP_FINDER_STATUS_UPDATED, RefreshList)
     self.control:RegisterForEvent(EVENT_HOUSE_TOURS_STATUS_UPDATED, RefreshList)
     PROMOTIONAL_EVENT_MANAGER:RegisterCallback("CampaignsUpdated", RefreshList)
+    self.control:RegisterForEvent(EVENT_SPECTACLE_EVENT_UPDATED, RefreshList)
 end
 
 function ActivityFinderRoot_Gamepad:InitializeKeybindStripDescriptors()
@@ -153,8 +154,7 @@ function ActivityFinderRoot_Gamepad:SetupList(list)
             end
             data:AddIcon(menuIcon)
 
-            if (categoryData.isGroupFinder and GROUP_FINDER_APPLICATIONS_LIST_MANAGER:HasNewApplication()) or
-               (categoryData.isPromotionalEvent and PROMOTIONAL_EVENT_MANAGER:DoesAnyCampaignHaveCallout()) then
+            if ZO_Eval(categoryData.isNew) then
                 data:AddIcon(ZO_GAMEPAD_NEW_ICON_64)
             end
         end
@@ -226,7 +226,7 @@ function ActivityFinderRoot_Gamepad:RefreshList()
     if self.scene:IsShowing() then
         local list = self:GetMainList()
         local commitList = false
-        for i = 1, list:GetNumEntries() do
+        for i = list:GetNumEntries(), 1, -1 do
             local entryData = list:GetEntryData(i)
             local data = entryData and entryData.data
             if data then
@@ -279,7 +279,7 @@ function ActivityFinderRoot_Gamepad:RefreshList()
 end
 
 do
-    local LOCK_TEXTURE = zo_iconFormat(ZO_GAMEPAD_LOCKED_ICON_32, "100%", "100%")
+    local LOCK_TEXTURE = zo_iconFormatInheritColor(ZO_GAMEPAD_LOCKED_ICON_32, "100%", "100%")
     local CHAMPION_ICON = zo_iconFormat(ZO_GetGamepadChampionPointsIcon(), "100%", "100%")
 
     function ActivityFinderRoot_Gamepad:RefreshTooltip(data)
@@ -290,48 +290,24 @@ do
                 local isLevelLocked, lowestLevelLimit, lowestPointsLimit = data.activityFinderObject:GetLevelLockInfo()
                 if isLevelLocked then
                     if lowestLevelLimit then
-                        lockedText = zo_strformat(SI_ACTIVITY_FINDER_TOOLTIP_LEVEL_LOCK, LOCK_TEXTURE, lowestLevelLimit)
+                        lockedText = zo_strformat(SI_ACTIVITY_FINDER_TOOLTIP_LEVEL_LOCK, lowestLevelLimit)
                     elseif lowestPointsLimit then
-                        lockedText = zo_strformat(SI_ACTIVITY_FINDER_TOOLTIP_CHAMPION_LOCK, LOCK_TEXTURE, CHAMPION_ICON, lowestPointsLimit)
+                        lockedText = zo_strformat(SI_ACTIVITY_FINDER_TOOLTIP_CHAMPION_LOCK, CHAMPION_ICON, lowestPointsLimit)
                     end
                 else
                     local numLocations = data.activityFinderObject:GetNumLocations()
                     if numLocations == 0 then
-                        lockedText = zo_strformat(SI_ACTIVITY_FINDER_TOOLTIP_NO_ACTIVITIES_LOCK, LOCK_TEXTURE)
+                        lockedText = GetString(SI_ACTIVITY_FINDER_TOOLTIP_NO_ACTIVITIES_LOCK)
+                    elseif data.isAccountRestricted and data.isAccountRestricted() then
+                        lockedText = GetString(SI_ACTIVITY_FINDER_TOOLTIP_ACCOUNT_LOCK)
                     end
                 end
+            elseif ZO_Eval(data.isLocked) then
+                lockedText = ZO_Eval(data.lockedText)
             end
 
-            if data.isZoneStories then
-                local isLocked = ZONE_STORIES_MANAGER:GetZoneData(ZONE_STORIES_MANAGER.GetDefaultZoneSelection()) == nil
-                if isLocked then
-                    lockedText = zo_strformat(SI_ZONE_STORY_TOOLTIP_UNAVAILABLE_IN_ZONE, LOCK_TEXTURE)
-                end
-            end
-
-            if data.isGroupFinder then
-                local statusResult = GetGroupFinderStatusReason()
-                if statusResult ~= GROUP_FINDER_ACTION_RESULT_SUCCESS and statusResult ~= GROUP_FINDER_ACTION_RESULT_FAILED_ACCOUNT_TYPE_BLOCKS_CREATION then
-                    if statusResult == GROUP_FINDER_ACTION_RESULT_FAILED_LEVEL_REQUIREMENT then
-                        local formatter = GetString("SI_GROUPFINDERACTIONRESULT", statusResult)
-                        lockedText = zo_strformat(formatter, LOCK_TEXTURE, GROUP_FINDER_UNLOCK_LEVEL)
-                    else
-                        lockedText = GetString("SI_GROUPFINDERACTIONRESULT", statusResult)
-                    end
-                end
-            end
-
-            if data.isHouseTours then
-                local isEnabled, houseToursLockedText = ZO_IsHouseToursEnabled()
-                if not isEnabled then
-                    lockedText = houseToursLockedText
-                end
-            end
-
-            if data.isPromotionalEvent then
-                if IsPromotionalEventSystemLocked() then
-                    lockedText = GetString(SI_ACTIVITY_FINDER_TOOLTIP_PROMOTIONAL_EVENT_LOCK)
-                end
+            if lockedText then
+                lockedText = string.format("%s %s", LOCK_TEXTURE, lockedText)
             end
 
             if data.tooltipFunction and data:tooltipFunction(lockedText) then
@@ -427,16 +403,9 @@ function ActivityFinderRoot_Gamepad:IsCategoryLocked(gamepadCategoryData)
     local activityFinderObject = gamepadCategoryData.activityFinderObject
     if activityFinderObject then
         return activityFinderObject:GetLevelLockInfo() or activityFinderObject:GetNumLocations() == 0
-    elseif gamepadCategoryData.isZoneStories then
-        return ZONE_STORIES_MANAGER:GetZoneData(ZONE_STORIES_MANAGER.GetDefaultZoneSelection()) == nil
-    elseif gamepadCategoryData.isGroupFinder then
-        local statusResult = GetGroupFinderStatusReason()
-        return statusResult ~= GROUP_FINDER_ACTION_RESULT_SUCCESS and statusResult ~= GROUP_FINDER_ACTION_RESULT_FAILED_ACCOUNT_TYPE_BLOCKS_CREATION
-    elseif gamepadCategoryData.isHouseTours then
-        local houseToursEnabled = ZO_IsHouseToursEnabled()
-        return not houseToursEnabled
-    elseif gamepadCategoryData.isPromotionalEvent then
-        return IsPromotionalEventSystemLocked()
+            or (gamepadCategoryData.isAccountRestricted and gamepadCategoryData.isAccountRestricted())
+    elseif ZO_Eval(gamepadCategoryData.isLocked) then
+        return true
     end
     return false
 end

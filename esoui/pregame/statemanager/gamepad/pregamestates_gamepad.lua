@@ -136,14 +136,13 @@ local pregameStates =
                 end
             else
                 if IsConsoleUI() then
-                    -- ESO-404970: reset overscan, gamma, and audio settings
+                    -- ESO-404970: reset overscan and gamma
                     -- to default to handle the situation where a player loads
                     -- between console profiles, which should have different
                     -- user settings. For the IIS, we want to behave in an
                     -- "agnostic" way and avoid settings leaking through both sides
                     SetOverscanOffsets(0, 0, 0, 0)
                     SetCVar("GAMMA_ADJUSTMENT", 100)
-                    ResetToDefaultSettings(SETTING_TYPE_AUDIO)
                 end
 
                 SetCurrentVideoPlaybackVolume(1.0, 4.0)

@@ -7,6 +7,7 @@ ZO_GAMEPAD_LFG_OPTION_INFO =
         iconDown = "EsoUI/Art/LFG/Gamepad/LFG_roleIcon_dps_down.dds",
         role = LFG_ROLE_DPS,
         tooltip = GetString(SI_GROUP_PREFERRED_ROLE_DPS_TOOLTIP),
+        sound = SOUNDS.GROUP_ROLE_DPS_SELECTED,
         narrationText = function()
             local selectedRole = GetSelectedLFGRole()
             return ZO_FormatRadioButtonNarrationText(GetString("SI_LFGROLE", LFG_ROLE_DPS), selectedRole == LFG_ROLE_DPS, GetString(SI_GAMEPAD_GROUP_PREFERRED_ROLES_HEADER))
@@ -20,6 +21,7 @@ ZO_GAMEPAD_LFG_OPTION_INFO =
         iconDown = "EsoUI/Art/LFG/Gamepad/LFG_roleIcon_healer_down.dds",
         role = LFG_ROLE_HEAL,
         tooltip = GetString(SI_GROUP_PREFERRED_ROLE_HEAL_TOOLTIP),
+        sound = SOUNDS.GROUP_ROLE_HEAL_SELECTED,
         narrationText = function()
             local selectedRole = GetSelectedLFGRole()
             return ZO_FormatRadioButtonNarrationText(GetString("SI_LFGROLE", LFG_ROLE_HEAL), selectedRole == LFG_ROLE_HEAL, GetString(SI_GAMEPAD_GROUP_PREFERRED_ROLES_HEADER))
@@ -33,6 +35,7 @@ ZO_GAMEPAD_LFG_OPTION_INFO =
         iconDown = "EsoUI/Art/LFG/Gamepad/LFG_roleIcon_tank_down.dds",
         role = LFG_ROLE_TANK,
         tooltip = GetString(SI_GROUP_PREFERRED_ROLE_TANK_TOOLTIP),
+        sound = SOUNDS.GROUP_ROLE_TANK_SELECTED,
         narrationText = function()
             local selectedRole = GetSelectedLFGRole()
             return ZO_FormatRadioButtonNarrationText(GetString("SI_LFGROLE", LFG_ROLE_TANK), selectedRole == LFG_ROLE_TANK, GetString(SI_GAMEPAD_GROUP_PREFERRED_ROLES_HEADER))
@@ -127,7 +130,9 @@ function ZO_GroupRolesBar_Gamepad:InitializeEvents()
 end
 
 function ZO_GroupRolesBar_Gamepad:OnPressed(buttonControl)
-    UpdateSelectedLFGRole(buttonControl.data.role)
+    local role = buttonControl.data.role
+    UpdateSelectedLFGRole(role)
+    PlaySound(ZO_GAMEPAD_LFG_OPTION_INFO[role].sound)
     ZO_ACTIVITY_FINDER_ROOT_MANAGER:UpdateLocationData()
     self:RefreshRoles()
     SCREEN_NARRATION_MANAGER:QueueGamepadButtonTabBar(self)
@@ -137,7 +142,6 @@ function ZO_GroupRolesBar_Gamepad:ToggleSelected()
     if self.selectedIndex and self.canUpdateSelectedLFGRole then
         local selectedButton = self.buttons[self.selectedIndex]
         self.onPressedCallback(selectedButton)
-        PlaySound(SOUNDS.DEFAULT_CLICK)
     end
 end
 

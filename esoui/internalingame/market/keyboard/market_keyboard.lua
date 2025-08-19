@@ -545,8 +545,6 @@ function ZO_Market_Keyboard:RequestShowMarketProduct(marketProductId)
                 self:SetQueuedMarketProductId(marketProductId)
                 self.categoryTree:SelectNode(targetNode)
             end
-        else
-            internalassert(false, string.format("Category not found for market product id: %s", tostring(marketProductId) or "nil"))
         end
     else
         self:SetQueuedMarketProductId(marketProductId)
@@ -618,11 +616,6 @@ function ZO_Market_Keyboard:TryScrollToQueuedMarketProduct()
                 local preview = self:ShouldAutomaticallyPreviewMarketProduct(queuedMarketProductId)
                 self:ScrollToMarketProduct(queuedMarketProductId, preview)
             end
-        elseif queuedMarketProductId ~= 0 then
-            -- MarketProductId of 0 indicates that the announcement has no associated marketProduct (ie. Promo), but if there is a MarketProductId other than 0
-            -- then the expectation is that there should be an active supporting Product Presentation for the MarketProductId and if that is not the case then
-            -- there is an error in the data setup of the market stamp.
-            internalassert(false, string.format("Category not found for market product id: %s", tostring(queuedMarketProductId) or "nil"))
         end
     end
 end

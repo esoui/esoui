@@ -452,7 +452,11 @@ function ZO_ActivityFinderTemplate_Gamepad:RefreshView()
                 end
             end
 
-            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(location:GetDescription()))
+            -- If there's a solo bonus, we move the description to the tooltip, which narrates automatically.
+            local hasSoloBonus = location:HasSoloBonus()
+            if not hasSoloBonus then
+                ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(location:GetDescription()))
+            end
 
             if location:IsSetEntryType() then
                 --MMR for Battlegrounds
@@ -468,6 +472,11 @@ function ZO_ActivityFinderTemplate_Gamepad:RefreshView()
                     ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(setTypesHeaderText))
                     ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(setTypesListText))
                 end
+            end
+
+            if hasSoloBonus then
+                ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_ACTIVITY_FINDER_BATTLEGROUND_SOLO_BONUS_HEADER)))
+                ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_ACTIVITY_FINDER_BATTLEGROUND_SOLO_BONUS)))
             end
 
             -- Rewards
@@ -745,7 +754,9 @@ do
 
                         entryData:SetGroupSizeRangeText(self.groupSizeRangeLabel, GROUP_SIZE_ICON_FORMAT)
 
+                        -- Order matters here; RefreshRewards must run before we deal with the solo bonus stuff.
                         self:RefreshRewards(entryData)
+                        local hasSoloBonus = entryData:HasSoloBonus()
                         if entryData.isLocked then
                             local lockReasonText = entryData.lockReasonTextOverride or entryData.lockReasonText
                             if type(lockReasonText) == "function" then
@@ -754,9 +765,20 @@ do
                                 self:LayoutLockedTooltip(lockReasonText)
                                 self.lockReasonTextFunction = nil
                             end
+                        elseif hasSoloBonus then
+                            self.descriptionLabel:SetText("")
+                            GAMEPAD_TOOLTIPS:LayoutTitleAndDescriptionTooltip(GAMEPAD_RIGHT_TOOLTIP, "", entryData:GetDescription())
                         else
                             GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
                         end
+
+                        self.rewardsSection:ClearAnchors()
+                        if hasSoloBonus then
+                            self.rewardsSection:SetAnchor(TOPLEFT, self.soloBonusSection, BOTTOMLEFT, 0, 25)
+                        else
+                            self.rewardsSection:SetAnchor(TOPLEFT, self.setTypesSectionControl, BOTTOMLEFT, 0, 25)
+                        end
+                        self.soloBonusSection:SetHidden(not hasSoloBonus)
 
                         local isCompetitive = entryData.activityType == LFG_ACTIVITY_TRIBUTE_COMPETITIVE
                         local HIDE_IF_NOT_COMPETITIVE = not isCompetitive

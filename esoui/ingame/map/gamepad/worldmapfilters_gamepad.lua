@@ -1,8 +1,8 @@
 --Filter Panel
 
-local WorldMapFilterPanel_Gamepad = ZO_WorldMapFilterPanel_Shared:Subclass()
+ZO_WorldMapFilterPanel_Gamepad = ZO_WorldMapFilterPanel_Shared:Subclass()
 
-function WorldMapFilterPanel_Gamepad:Initialize(control, mapFilterType, savedVars)
+function ZO_WorldMapFilterPanel_Gamepad:Initialize(control, mapFilterType, savedVars)
     ZO_WorldMapFilterPanel_Shared.Initialize(self, control, mapFilterType, savedVars)
     self.list = ZO_GamepadVerticalParametricScrollList:New(control:GetNamedChild("List"))
     self.list:SetAlignToScreenCenter(true)
@@ -22,7 +22,7 @@ function WorldMapFilterPanel_Gamepad:Initialize(control, mapFilterType, savedVar
     self:BuildControls()
 end
 
-function WorldMapFilterPanel_Gamepad:SetMapMode(mapMode)
+function ZO_WorldMapFilterPanel_Gamepad:SetMapMode(mapMode)
     if mapMode ~= self.mapMode then
         self.mapMode = mapMode
         self.modeVars = self.savedVars[mapMode]
@@ -30,7 +30,7 @@ function WorldMapFilterPanel_Gamepad:SetMapMode(mapMode)
     end
 end
 
-function WorldMapFilterPanel_Gamepad:ShouldShowSelectButton()
+function ZO_WorldMapFilterPanel_Gamepad:ShouldShowSelectButton()
     local selectedData = self.list:GetTargetData()
     if selectedData then
         return selectedData.showSelectButton
@@ -38,18 +38,18 @@ function WorldMapFilterPanel_Gamepad:ShouldShowSelectButton()
     return false
 end
 
-function WorldMapFilterPanel_Gamepad:OnSelect()
+function ZO_WorldMapFilterPanel_Gamepad:OnSelect()
     local selectedData = self.list:GetTargetData()
     if selectedData then
         selectedData.onSelect(selectedData)
     end
 end
 
-function WorldMapFilterPanel_Gamepad:AddHeader(header)
+function ZO_WorldMapFilterPanel_Gamepad:AddHeader(header)
     self.currentHeader = header
 end
 
-function WorldMapFilterPanel_Gamepad:AddPinFilterCheckBox(mapPinGroup, refreshFunction)
+function ZO_WorldMapFilterPanel_Gamepad:AddPinFilterCheckBox(mapPinGroup, refreshFunction)
     local function ToggleFunction(data)
         data.currentValue = not data.currentValue
         self:SetPinFilter(mapPinGroup, data.currentValue)
@@ -81,7 +81,7 @@ function WorldMapFilterPanel_Gamepad:AddPinFilterCheckBox(mapPinGroup, refreshFu
     self.list:AddEntry("ZO_GamepadWorldMapFilterCheckboxOptionTemplate", checkBox)
 end
 
-function WorldMapFilterPanel_Gamepad:AddPinFilterComboBox(optionsPinGroup, refreshFunction, header, optionsEnumStringName, ...)
+function ZO_WorldMapFilterPanel_Gamepad:AddPinFilterComboBox(optionsPinGroup, refreshFunction, header, optionsEnumStringName, ...)
 
     local checkBox = self:FindDependentCheckBox(optionsPinGroup)
     if checkBox and not checkBox.currentValue then
@@ -121,7 +121,7 @@ function WorldMapFilterPanel_Gamepad:AddPinFilterComboBox(optionsPinGroup, refre
     self.list:AddEntry("ZO_GamepadWorldMapFilterComboBoxTemplateWithHeader", comboBox)
 end
 
-function WorldMapFilterPanel_Gamepad:SetupDropDown(control, data, selected, reselectingDuringRebuild, enabled, active)
+function ZO_WorldMapFilterPanel_Gamepad:SetupDropDown(control, data, selected, reselectingDuringRebuild, enabled, active)
     control:SetAlpha(ZO_GamepadMenuEntryTemplate_GetAlpha(selected, data.disabled))
 
     local dropDown = ZO_ComboBox_ObjectFromContainer(control:GetNamedChild("Selector"))
@@ -151,88 +151,88 @@ function WorldMapFilterPanel_Gamepad:SetupDropDown(control, data, selected, rese
     data.dropDown = dropDown
 end
 
-function WorldMapFilterPanel_Gamepad:FocusDropDown(dropDown)
+function ZO_WorldMapFilterPanel_Gamepad:FocusDropDown(dropDown)
     if not self.dropDown then
         dropDown:Activate()
         self.dropDown = dropDown
     end
 end
 
-function WorldMapFilterPanel_Gamepad:UnfocusDropDown()
+function ZO_WorldMapFilterPanel_Gamepad:UnfocusDropDown()
     if self.dropDown then
         SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.list)
         self.dropDown = nil
     end
 end
 
-function WorldMapFilterPanel_Gamepad:HideDropDown()
+function ZO_WorldMapFilterPanel_Gamepad:HideDropDown()
     if self.dropDown then
         self.dropDown:Deactivate()
         self.dropDown = nil
     end
 end
 
-function WorldMapFilterPanel_Gamepad:PreBuildControls()
+function ZO_WorldMapFilterPanel_Gamepad:PreBuildControls()
     self.pinFilterCheckBoxes = {}
     self.pinFilterOptionComboBoxes = {} 
 
     self.list:Clear()
 end
 
-function WorldMapFilterPanel_Gamepad:PostBuildControls()
+function ZO_WorldMapFilterPanel_Gamepad:PostBuildControls()
     self.list:Commit()
 end
 
 --Global (Cosmic and World) Filter Panel
 
-local GlobalWorldMapFilterPanel_Gamepad = ZO_Object.MultiSubclass(ZO_GlobalWorldMapFilterPanel_Shared, WorldMapFilterPanel_Gamepad)
+ZO_GlobalWorldMapFilterPanel_Gamepad = ZO_Object.MultiSubclass(ZO_GlobalWorldMapFilterPanel_Shared, ZO_WorldMapFilterPanel_Gamepad)
 
-function GlobalWorldMapFilterPanel_Gamepad:Initialize(...)
+function ZO_GlobalWorldMapFilterPanel_Gamepad:Initialize(...)
     ZO_GlobalWorldMapFilterPanel_Shared.Initialize(self, ...)
-    WorldMapFilterPanel_Gamepad.Initialize(self, ...)
+    ZO_WorldMapFilterPanel_Gamepad.Initialize(self, ...)
 end
 
 --PvE Filter Panel
 
-local PvEWorldMapFilterPanel_Gamepad = ZO_Object.MultiSubclass(ZO_PvEWorldMapFilterPanel_Shared, WorldMapFilterPanel_Gamepad)
+ZO_PvEWorldMapFilterPanel_Gamepad = ZO_Object.MultiSubclass(ZO_PvEWorldMapFilterPanel_Shared, ZO_WorldMapFilterPanel_Gamepad)
 
-function PvEWorldMapFilterPanel_Gamepad:Initialize(...)
+function ZO_PvEWorldMapFilterPanel_Gamepad:Initialize(...)
     ZO_PvEWorldMapFilterPanel_Shared.Initialize(self, ...)
-    WorldMapFilterPanel_Gamepad.Initialize(self, ...)
+    ZO_WorldMapFilterPanel_Gamepad.Initialize(self, ...)
 end
 
 --PvP Filter Panel
 
-local PvPWorldMapFilterPanel_Gamepad = ZO_Object.MultiSubclass(ZO_PvPWorldMapFilterPanel_Shared, WorldMapFilterPanel_Gamepad)
+ZO_PvPWorldMapFilterPanel_Gamepad = ZO_Object.MultiSubclass(ZO_PvPWorldMapFilterPanel_Shared, ZO_WorldMapFilterPanel_Gamepad)
 
-function PvPWorldMapFilterPanel_Gamepad:Initialize(...)
+function ZO_PvPWorldMapFilterPanel_Gamepad:Initialize(...)
     ZO_PvPWorldMapFilterPanel_Shared.Initialize(self, ...)
-    WorldMapFilterPanel_Gamepad.Initialize(self, ...)
+    ZO_WorldMapFilterPanel_Gamepad.Initialize(self, ...)
 end
 
 --Imperial PvP Filter Panel
 
-local ImperialPvPWorldMapFilterPanel_Gamepad = ZO_Object.MultiSubclass(ZO_ImperialPvPWorldMapFilterPanel_Shared, WorldMapFilterPanel_Gamepad)
+ZO_ImperialPvPWorldMapFilterPanel_Gamepad = ZO_Object.MultiSubclass(ZO_ImperialPvPWorldMapFilterPanel_Shared, ZO_WorldMapFilterPanel_Gamepad)
 
-function ImperialPvPWorldMapFilterPanel_Gamepad:Initialize(...)
+function ZO_ImperialPvPWorldMapFilterPanel_Gamepad:Initialize(...)
     ZO_ImperialPvPWorldMapFilterPanel_Shared.Initialize(self, ...)
-    WorldMapFilterPanel_Gamepad.Initialize(self, ...)
+    ZO_WorldMapFilterPanel_Gamepad.Initialize(self, ...)
 end
 
 --Battleground Filter Panel
 
-local BattlegroundWorldMapFilterPanel_Gamepad = ZO_Object.MultiSubclass(ZO_BattlegroundWorldMapFilterPanel_Shared, WorldMapFilterPanel_Gamepad)
+ZO_BattlegroundWorldMapFilterPanel_Gamepad = ZO_Object.MultiSubclass(ZO_BattlegroundWorldMapFilterPanel_Shared, ZO_WorldMapFilterPanel_Gamepad)
 
-function BattlegroundWorldMapFilterPanel_Gamepad:Initialize(...)
+function ZO_BattlegroundWorldMapFilterPanel_Gamepad:Initialize(...)
     ZO_BattlegroundWorldMapFilterPanel_Shared.Initialize(self, ...)
-    WorldMapFilterPanel_Gamepad.Initialize(self, ...)
+    ZO_WorldMapFilterPanel_Gamepad.Initialize(self, ...)
 end
 
 --Filters
 
-local WorldMapFilters_Gamepad = ZO_WorldMapFilters_Shared:Subclass()
+ZO_WorldMapFilters_Gamepad = ZO_WorldMapFilters_Shared:Subclass()
 
-function WorldMapFilters_Gamepad:Initialize(control)
+function ZO_WorldMapFilters_Gamepad:Initialize(control)
     ZO_WorldMapFilters_Shared.Initialize(self, control)
 
     self:InitializeKeybindDescriptor()
@@ -251,15 +251,15 @@ function WorldMapFilters_Gamepad:Initialize(control)
     end)
 
     CALLBACK_MANAGER:RegisterCallback("OnWorldMapSavedVarsReady", function(savedVars)
-        self.pvePanel = PvEWorldMapFilterPanel_Gamepad:New(self.control:GetNamedChild("Main"):GetNamedChild("PvE"), MAP_FILTER_TYPE_STANDARD, savedVars)
-        self.pvpPanel = PvPWorldMapFilterPanel_Gamepad:New(self.control:GetNamedChild("Main"):GetNamedChild("PvP"), MAP_FILTER_TYPE_AVA_CYRODIIL, savedVars)
-        self.imperialPvPPanel = ImperialPvPWorldMapFilterPanel_Gamepad:New(self.control:GetNamedChild("Main"):GetNamedChild("ImperialPvP"), MAP_FILTER_TYPE_AVA_IMPERIAL, savedVars)
-        self.battlegroundPanel = BattlegroundWorldMapFilterPanel_Gamepad:New(self.control:GetNamedChild("Main"):GetNamedChild("Battleground"), MAP_FILTER_TYPE_BATTLEGROUND, savedVars)
-        self.globalPanel = GlobalWorldMapFilterPanel_Gamepad:New(self.control:GetNamedChild("Main"):GetNamedChild("Global"), MAP_FILTER_TYPE_GLOBAL, savedVars)
+        self.pvePanel = ZO_PvEWorldMapFilterPanel_Gamepad:New(self.control:GetNamedChild("Main"):GetNamedChild("PvE"), MAP_FILTER_TYPE_STANDARD, savedVars)
+        self.pvpPanel = ZO_PvPWorldMapFilterPanel_Gamepad:New(self.control:GetNamedChild("Main"):GetNamedChild("PvP"), MAP_FILTER_TYPE_AVA_CYRODIIL, savedVars)
+        self.imperialPvPPanel = ZO_ImperialPvPWorldMapFilterPanel_Gamepad:New(self.control:GetNamedChild("Main"):GetNamedChild("ImperialPvP"), MAP_FILTER_TYPE_AVA_IMPERIAL, savedVars)
+        self.battlegroundPanel = ZO_BattlegroundWorldMapFilterPanel_Gamepad:New(self.control:GetNamedChild("Main"):GetNamedChild("Battleground"), MAP_FILTER_TYPE_BATTLEGROUND, savedVars)
+        self.globalPanel = ZO_GlobalWorldMapFilterPanel_Gamepad:New(self.control:GetNamedChild("Main"):GetNamedChild("Global"), MAP_FILTER_TYPE_GLOBAL, savedVars)
     end)
 end
 
-function WorldMapFilters_Gamepad:SwitchToKeybind(keybindStripDescriptor)
+function ZO_WorldMapFilters_Gamepad:SwitchToKeybind(keybindStripDescriptor)
     if self.keybindStripDescriptor then
         KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
     end
@@ -269,13 +269,13 @@ function WorldMapFilters_Gamepad:SwitchToKeybind(keybindStripDescriptor)
     end
 end
 
-function WorldMapFilters_Gamepad:RefreshKeybind()
+function ZO_WorldMapFilters_Gamepad:RefreshKeybind()
     if self.keybindStripDescriptor then
         KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
     end
 end
 
-function WorldMapFilters_Gamepad:SelectKeybind()
+function ZO_WorldMapFilters_Gamepad:SelectKeybind()
     if not GAMEPAD_WORLD_MAP_FILTERS_FRAGMENT:IsShowing() then
         return
     end
@@ -289,7 +289,7 @@ function WorldMapFilters_Gamepad:SelectKeybind()
     end
 end
 
-function WorldMapFilters_Gamepad:InitializeKeybindDescriptor()
+function ZO_WorldMapFilters_Gamepad:InitializeKeybindDescriptor()
 
     self.keybindStripDescriptorNoSelect =
     {
@@ -328,5 +328,5 @@ end
 --Global XML
 
 function ZO_WorldMapFilters_Gamepad_OnInitialized(self)
-    GAMEPAD_WORLD_MAP_FILTERS = WorldMapFilters_Gamepad:New(self)
+    GAMEPAD_WORLD_MAP_FILTERS = ZO_WorldMapFilters_Gamepad:New(self)
 end

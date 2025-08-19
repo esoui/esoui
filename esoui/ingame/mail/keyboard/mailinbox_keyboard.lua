@@ -146,6 +146,7 @@ function MailInbox:InitializeList()
                 local selectedMailNode = navigationTree:GetSelectedNode()
                 if selectedMailNode and selectedMailNode:GetParent() == node then
                     navigationTree:ClearSelectedNode()
+                    PlaySound(SOUNDS.CC_CREATE)
                 end
             end
         end
@@ -364,7 +365,7 @@ function MailInbox:InitializeKeybindDescriptors()
         --Report Player
         {
             name = GetString(SI_MAIL_READ_REPORT_PLAYER),
-            keybind = "UI_SHORTCUT_REPORT_PLAYER",
+            keybind = "UI_SHORTCUT_HELP",
 
             visible = function()
                 if not self:HasAlreadyReportedSelectedMail() then

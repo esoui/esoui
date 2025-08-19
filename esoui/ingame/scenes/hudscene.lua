@@ -111,7 +111,7 @@ local HUD_FRAGMENT_GROUP =
     SPECTATOR_CAMERA_ACTION_LAYER_FRAGMENT,
 }
 
-local NO_DEAD_FRAGMENTS =
+ZO_NO_DEAD_FRAGMENTS =
 {
     ENDLESS_DUNGEON_HUD_FRAGMENT,
     ENDLESS_DUNGEON_HUD_TRACKER_FRAGMENT,
@@ -140,7 +140,7 @@ local DEAD_ONLY_FRAGMENTS =
 
 local function UpdateDeathFragments()
     local playerDead = IsUnitDead("player")
-    for _, fragment in ipairs(NO_DEAD_FRAGMENTS) do
+    for _, fragment in ipairs(ZO_NO_DEAD_FRAGMENTS) do
         fragment:SetHiddenForReason("Dead", playerDead)
     end
     for _, fragment in ipairs(DEAD_ONLY_FRAGMENTS) do
@@ -207,10 +207,12 @@ local function UpdateLocationSpecificFragments()
     end
 end
 
-EVENT_MANAGER:RegisterForEvent("HUDFragments", EVENT_PLAYER_ACTIVATED, function()
+-- ESO-914407: Ensure we update hud scene's location specific fragment visibility rules before attempting to possibly show the HUD scene.
+-- This will be called from the scene manager's PLAYER_ACTIVATED callback before it tries to show the scene
+function ZO_UpdateVisiblityOfHUDFragments()
     UpdateDeathFragments()
     UpdateLocationSpecificFragments()
-end)
+end
 
 ---------------
 --ZO_HUDScene

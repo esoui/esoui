@@ -9,6 +9,7 @@ function ZO_PEGIAgreement_Gamepad:Initialize(control)
         {
             dialogType = GAMEPAD_DIALOGS.PARAMETRIC,
             allowRightStickPassThrough = true,
+            allowShowOnNextScene = true,
         },
         title =
         {

@@ -19,13 +19,19 @@ function ZO_CharacterSelect_EventTile_Shared:Initialize(...)
     self.eventImageTexture = self.container:GetNamedChild("EventImage")
 
     self.control:SetHandler("OnUpdate", function()
-        local remainingTime = CHARACTER_SELECT_MANAGER:GetEventAnnouncementRemainingTimeByIndex(self.data.index)
-        self:SetTimeRemaining(remainingTime)
+        local remainingTimeS = CHARACTER_SELECT_MANAGER:GetEventAnnouncementRemainingTimeByIndex(self.data.index)
+        if remainingTimeS > ZO_ONE_MONTH_IN_SECONDS then
+            self.timeRemainingLabel:SetText("")
+            self.timeRemainingLabel:SetHidden(true)
+        else
+            self.timeRemainingLabel:SetHidden(false)
+            self:SetTimeRemaining(remainingTimeS)
+        end
     end)
 end
 
-function ZO_CharacterSelect_EventTile_Shared:SetTimeRemaining(remainingTime)
-    local countDownText = ZO_FormatTime(remainingTime, TIME_FORMAT_STYLE_SHOW_LARGEST_TWO_UNITS, TIME_FORMAT_PRECISION_TWENTY_FOUR_HOUR)
+function ZO_CharacterSelect_EventTile_Shared:SetTimeRemaining(remainingTimeS)
+    local countDownText = ZO_FormatTime(remainingTimeS, TIME_FORMAT_STYLE_SHOW_LARGEST_TWO_UNITS, TIME_FORMAT_PRECISION_TWENTY_FOUR_HOUR)
     local remainingTimeText = zo_strformat(SI_EVENT_ANNOUNCEMENT_TIME, ZO_SELECTED_TEXT:Colorize(countDownText))
     self.timeRemainingLabel:SetText(remainingTimeText)
 end

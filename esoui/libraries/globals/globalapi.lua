@@ -696,3 +696,10 @@ function ZO_GetControlOwnerObject(control)
     end
     return owner
 end
+
+function ZO_Eval(valueOrFunction, ...)
+    if type(valueOrFunction) == "function" then
+        return valueOrFunction(...)
+    end
+    return valueOrFunction
+end

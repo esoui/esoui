@@ -233,6 +233,50 @@ local ZO_OptionsPanel_Audio_ControlData =
             -- valid = dynamically determined near EOF, introMusicSetting.valid
             -- itemText = dynamically determined near EOF, introMusicSetting.itemText
         },
+        [AUDIO_SETTING_SPATIAL_SOUND] =
+        {
+            controlType = OPTIONS_CHECKBOX,
+            system = SETTING_TYPE_AUDIO,
+            settingId = AUDIO_SETTING_SPATIAL_SOUND,
+            panel = SETTING_PANEL_AUDIO,
+            text = SI_AUDIO_OPTIONS_SPATIAL_SOUND,
+            tooltipText = function()
+                if ZO_IsPlaystationPlatform() then
+                    return GetString(SI_GAMEPAD_AUDIO_OPTIONS_SPATIAL_SOUND_TOOLTIP_PROSPERO)
+                elseif ZO_IsConsolePlatform() then
+                    return GetString(SI_GAMEPAD_AUDIO_OPTIONS_SPATIAL_SOUND_TOOLTIP_SCARLETT)
+                else
+                    return GetString(SI_AUDIO_OPTIONS_SPATIAL_SOUND_TOOLTIP_WINDOWS)
+                end
+            end,
+            events = {[true] = "SpatialSound_On", [false] = "SpatialSound_Off",},
+            gamepadHasEnabledDependencies = true,
+            exists = DoesPlatformSupportSpatialSound,
+        },
+        [AUDIO_SETTING_SPATIAL_SOUND_QUALITY] =
+        {
+            controlType = OPTIONS_FINITE_LIST,
+            system = SETTING_TYPE_AUDIO,
+            settingId = AUDIO_SETTING_SPATIAL_SOUND_QUALITY,
+            panel = SETTING_PANEL_AUDIO,
+            text = SI_AUDIO_OPTIONS_SPATIAL_SOUND,
+            tooltipText = SI_AUDIO_OPTIONS_SPATIAL_SOUND_QUALITY_TOOLTIP,
+            valid = { SPATIAL_SOUND_QUALITY_SETTING_LOW, SPATIAL_SOUND_QUALITY_SETTING_HIGH },
+            valueStringPrefix = "SI_SPATIALSOUNDQUALITYSETTING",
+            eventCallbacks =
+            {
+                ["SpatialSound_On"] = ZO_Options_SetOptionActive,
+                ["SpatialSound_Off"] = ZO_Options_SetOptionInactive,
+            },
+            gamepadIsEnabledCallback = function()
+                if DoesPlatformSupportSpatialSound() then
+                    return GetSetting(SETTING_TYPE_AUDIO, AUDIO_SETTING_SPATIAL_SOUND)
+                end
+
+                return true
+            end,
+            exists = DoesPlatformSupportSpatialSoundQuality,
+        },
     },
 
     --Subtitles

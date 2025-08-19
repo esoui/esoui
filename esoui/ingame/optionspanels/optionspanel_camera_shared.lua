@@ -71,18 +71,36 @@ local ZO_OptionsPanel_Camera_ControlData =
             showValueMax = 100,
         },
         --Options_Camera_CameraSensitivityFirstPerson
-        [CAMERA_SETTING_SENSITIVITY_FIRST_PERSON] =
+        [CAMERA_SETTING_SENSITIVITY_FIRST_PERSON_X] =
         {
             controlType = OPTIONS_SLIDER,
             system = SETTING_TYPE_CAMERA,
-            settingId = CAMERA_SETTING_SENSITIVITY_FIRST_PERSON,
+            settingId = CAMERA_SETTING_SENSITIVITY_FIRST_PERSON_X,
             panel = SETTING_PANEL_CAMERA,
-            text = SI_INTERFACE_OPTIONS_CAMERA_SENSITIVITY_FIRST_PERSON,
-            tooltipText = SI_INTERFACE_OPTIONS_CAMERA_SENSITIVITY_FIRST_PERSON_TOOLTIP,
+            text = SI_INTERFACE_OPTIONS_CAMERA_SENSITIVITY_FIRST_PERSON_X,
+            tooltipText = SI_INTERFACE_OPTIONS_CAMERA_SENSITIVITY_FIRST_PERSON_X_TOOLTIP,
             minValue = 0.1,
             maxValue = 1.6,
             valueFormat = "%.2f",
             showValue = true,
+            defaultMarker = 0.85,
+            showValueMin = 0,
+            showValueMax = 100,
+        },
+        --Options_Camera_CameraSensitivityFirstPersonY
+        [CAMERA_SETTING_SENSITIVITY_FIRST_PERSON_Y] =
+        {
+            controlType = OPTIONS_SLIDER,
+            system = SETTING_TYPE_CAMERA,
+            settingId = CAMERA_SETTING_SENSITIVITY_FIRST_PERSON_Y,
+            panel = SETTING_PANEL_CAMERA,
+            text = SI_INTERFACE_OPTIONS_CAMERA_SENSITIVITY_FIRST_PERSON_Y,
+            tooltipText = SI_INTERFACE_OPTIONS_CAMERA_SENSITIVITY_FIRST_PERSON_Y_TOOLTIP,
+            minValue = 0.1,
+            maxValue = 1.6,
+            valueFormat = "%.2f",
+            showValue = true,
+            defaultMarker = 0.85,
             showValueMin = 0,
             showValueMax = 100,
         },
@@ -122,17 +140,35 @@ local ZO_OptionsPanel_Camera_ControlData =
             showValueMin = 0,
             showValueMax = 100,
         },
-        --Options_Camera_CameraSensitivityThirdPerson
-        [CAMERA_SETTING_SENSITIVITY_THIRD_PERSON] =
+        --Options_Camera_CameraSensitivityThirdPersonY
+        [CAMERA_SETTING_SENSITIVITY_THIRD_PERSON_Y] =
         {
             controlType = OPTIONS_SLIDER,
             system = SETTING_TYPE_CAMERA,
-            settingId = CAMERA_SETTING_SENSITIVITY_THIRD_PERSON,
+            settingId = CAMERA_SETTING_SENSITIVITY_THIRD_PERSON_Y,
             panel = SETTING_PANEL_CAMERA,
-            text = SI_INTERFACE_OPTIONS_CAMERA_SENSITIVITY_THIRD_PERSON,
-            tooltipText = SI_INTERFACE_OPTIONS_CAMERA_SENSITIVITY_THIRD_PERSON_TOOLTIP,
+            text = SI_INTERFACE_OPTIONS_CAMERA_SENSITIVITY_THIRD_PERSON_Y,
+            tooltipText = SI_INTERFACE_OPTIONS_CAMERA_SENSITIVITY_THIRD_PERSON_Y_TOOLTIP,
             minValue = 0.1,
             maxValue = 1.6,
+            defaultMarker = 0.85,
+            valueFormat = "%.2f",
+            showValue = true,
+            showValueMin = 0,
+            showValueMax = 100,
+        },
+        --Options_Camera_CameraSensitivityThirdPerson
+        [CAMERA_SETTING_SENSITIVITY_THIRD_PERSON_X] =
+        {
+            controlType = OPTIONS_SLIDER,
+            system = SETTING_TYPE_CAMERA,
+            settingId = CAMERA_SETTING_SENSITIVITY_THIRD_PERSON_X,
+            panel = SETTING_PANEL_CAMERA,
+            text = SI_INTERFACE_OPTIONS_CAMERA_SENSITIVITY_THIRD_PERSON_X,
+            tooltipText = SI_INTERFACE_OPTIONS_CAMERA_SENSITIVITY_THIRD_PERSON_X_TOOLTIP,
+            minValue = 0.1,
+            maxValue = 1.6,
+            defaultMarker = 0.85,
             valueFormat = "%.2f",
             showValue = true,
             showValueMin = 0,

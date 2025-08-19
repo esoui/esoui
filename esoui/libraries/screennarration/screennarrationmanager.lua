@@ -20,6 +20,11 @@ local NARRATION_ENTRY_TYPE_SPINNER = 11
 local NARRATION_ENTRY_TYPE_GAMEPAD_BUTTON_TAB_BAR = 12
 local NARRATION_ENTRY_TYPE_CUSTOM = 13
 
+--Narration is blocked due to movement, such as scrolling through a list
+local SCREEN_NARRATION_BLOCKED_REASON_MOVEMENT = 1
+--Narration is blocked due to VO currently playing
+local SCREEN_NARRATION_BLOCKED_REASON_VO = 2
+
 local SCREEN_NARRATION_QUEUE_DELAY_MS = 250
 
 internalassert(NARRATION_TYPE_MAX_VALUE == 5, "A new narration type has been added, does it need to be added to the QUEUEABLE_NARRATION_TYPES table?")
@@ -154,12 +159,31 @@ function ZO_ScreenNarrationParams:GetStartTimeMS()
     return self.startTimeMs
 end
 
-function ZO_ScreenNarrationParams:SetNarrationBlocked(isBlocked)
-    self.isBlocked = isBlocked
+function ZO_ScreenNarrationParams:GetNarrationBlocked()
+    if self.blockedReasons then
+        for reason, isBlocked in pairs(self.blockedReasons) do
+            if isBlocked then
+                return true
+            end
+        end
+    end
+    return false
 end
 
-function ZO_ScreenNarrationParams:GetNarrationBlocked()
-    return self.isBlocked
+function ZO_ScreenNarrationParams:SetNarrationBlockedForReason(isBlocked, reason)
+    if not self.blockedReasons then
+        self.blockedReasons = {}
+    end
+
+    self.blockedReasons[reason] = isBlocked
+end
+
+function ZO_ScreenNarrationParams:GetNarrationBlockedForReason(reason)
+    if self.blockedReasons then
+        return self.blockedReasons[reason]
+    end
+
+    return false
 end
 
 function ZO_ScreenNarrationParams:SetNarrationType(narrationType)
@@ -338,7 +362,7 @@ function ZO_ScreenNarrationManager:Initialize()
     self.parametricListMovementChangedCallback = function(list, isMoving)
         local queuedNarration = self:GetQueuedNarration(GetDefaultNarrationType(NARRATION_ENTRY_TYPE_PARAMETRIC_LIST_ENTRY))
         if queuedNarration and queuedNarration:GetParametricList() == list then
-            queuedNarration:SetNarrationBlocked(isMoving)
+            queuedNarration:SetNarrationBlockedForReason(isMoving, SCREEN_NARRATION_BLOCKED_REASON_MOVEMENT)
         end
     end
 
@@ -421,8 +445,25 @@ function ZO_ScreenNarrationManager:RegisterForEvents()
         end
     end
 
+    local function OnInteractVOPlayingStateUpdated()
+        if ZO_IsIngameUI() and IsInteracting() and IsInteractVOPlaying() then
+            ClearNarrationQueue(NARRATION_TYPE_UI_SCREEN)
+        end
+
+        --If there are any queued parametric list narrations that are blocked by interact VO, update them now
+        local queuedNarration = self:GetQueuedNarration(GetDefaultNarrationType(NARRATION_ENTRY_TYPE_PARAMETRIC_LIST_ENTRY))
+        if queuedNarration then
+            local list = queuedNarration:GetParametricList()
+            local narrationInfo = self.parametricListNarrationInfo[list]
+            if narrationInfo.isBlockedByInteractVO then
+                queuedNarration:SetNarrationBlockedForReason(IsInteractVOPlaying(), SCREEN_NARRATION_BLOCKED_REASON_VO)
+            end
+        end
+    end
+
     EVENT_MANAGER:RegisterForUpdate("ScreenNarrationUpdate", 0, OnUpdate)
     EVENT_MANAGER:RegisterForEvent("ScreenNarrationManager", EVENT_APP_GUI_HIDDEN_STATE_CHANGED, OnAppGuiHiddenStateChanged)
+    EVENT_MANAGER:RegisterForEvent("ScreenNarrationManager", EVENT_INTERACT_VO_PLAYING_STATE_UPDATED, OnInteractVOPlayingStateUpdated)
 end
 
 function ZO_ScreenNarrationManager:InitializeNarrationPools()
@@ -738,7 +779,9 @@ function ZO_ScreenNarrationManager:QueueParametricListEntry(list, narrateHeader,
         narrationParams:SetNarrationType(narrationInfo.narrationType)
 
         local queuedNarration = self:GetQueuedNarration(narrationParams:GetNarrationType())
-        local narrationBlocked = false
+        local narrationBlockedByMovement = false
+        local narrationBlockedByVO = narrationInfo.isBlockedByInteractVO and IsInteractVOPlaying()
+
         if queuedNarration and queuedNarration:GetNarrationEntryType() == NARRATION_ENTRY_TYPE_PARAMETRIC_LIST_ENTRY then
             local queuedList = queuedNarration:GetParametricList()
             local queuedNarrateHeader = queuedNarration:GetNarrateHeader()
@@ -750,11 +793,13 @@ function ZO_ScreenNarrationManager:QueueParametricListEntry(list, narrateHeader,
 
             --If the list we are queueing is the same one we are overwriting, then make sure we remain blocked if necessary
             if queuedList == list and queuedNarrationBlocked then
-                narrationBlocked = queuedNarrationBlocked
+                narrationBlockedByMovement = queuedNarration:GetNarrationBlockedForReason(SCREEN_NARRATION_BLOCKED_REASON_MOVEMENT)
             end
         end
+
         narrationParams:SetParametricList(list, narrateHeader)
-        narrationParams:SetNarrationBlocked(narrationBlocked)
+        narrationParams:SetNarrationBlockedForReason(narrationBlockedByMovement, SCREEN_NARRATION_BLOCKED_REASON_MOVEMENT)
+        narrationParams:SetNarrationBlockedForReason(narrationBlockedByVO, SCREEN_NARRATION_BLOCKED_REASON_VO)
         self:SetQueuedNarration(narrationParams)
     end
 end

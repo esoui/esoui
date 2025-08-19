@@ -33,6 +33,14 @@ function ZO_HousingFurnitureBrowser_Gamepad:Initialize(control)
     self:InitializeHeader()
 
     self:SetListsUseTriggerKeybinds(true)
+
+    local function OnRetrieveToBagChanged()
+        if self:IsShowing() then
+            self:RefreshCategoryHeaderData()
+        end
+    end
+
+    self.control:RegisterForEvent(EVENT_HOUSING_FURNITURE_RETRIEVE_TO_BAG_CHANGED, OnRetrieveToBagChanged)
 end
 
 function ZO_HousingFurnitureBrowser_Gamepad:InitializeKeybindStripDescriptors()
@@ -281,10 +289,21 @@ end
 
 do
     function ZO_HousingFurnitureBrowser_Gamepad:RefreshCategoryHeaderData()
+        local isHouseOwner = HOUSING_EDITOR_STATE:IsLocalPlayerHouseOwner()
         local mode = self.mode
-        if (mode == HOUSING_BROWSER_MODE.PLACEMENT or mode == HOUSING_BROWSER_MODE.PRODUCTS or mode == HOUSING_BROWSER_MODE.RETRIEVAL) and HOUSING_EDITOR_STATE:IsLocalPlayerHouseOwner() then
+        if isHouseOwner and (mode == HOUSING_BROWSER_MODE.PLACEMENT or mode == HOUSING_BROWSER_MODE.PRODUCTS) then
             self.headerData.data1HeaderText = GetString(SI_GAMEPAD_INVENTORY_CAPACITY)
             self.headerData.data1Text = zo_strformat(SI_GAMEPAD_INVENTORY_CAPACITY_FORMAT, GetNumBagUsedSlots(BAG_BACKPACK), GetBagSize(BAG_BACKPACK))
+        elseif isHouseOwner and mode == HOUSING_BROWSER_MODE.RETRIEVAL then
+            local selectedBagInfo = HOUSING_FURNITURE_RETRIEVE_TO_GAMEPAD:GetSelectedBagInfo()
+            if selectedBagInfo then
+                self.headerData.data1HeaderText = selectedBagInfo:GetDisplayName()
+                local numUsedSlots, numTotalSlots = selectedBagInfo:GetNumUsedAndTotalSlots()
+                self.headerData.data1Text = zo_strformat(SI_GAMEPAD_INVENTORY_CAPACITY_FORMAT, numUsedSlots, numTotalSlots)
+            else
+                self.headerData.data1HeaderText = GetString(SI_GAMEPAD_INVENTORY_CAPACITY)
+                self.headerData.data1Text = zo_strformat(SI_GAMEPAD_INVENTORY_CAPACITY_FORMAT, GetNumBagUsedSlots(BAG_BACKPACK), GetBagSize(BAG_BACKPACK))
+            end
         else
             self.headerData.data1HeaderText = nil
             self.headerData.data1Text = nil

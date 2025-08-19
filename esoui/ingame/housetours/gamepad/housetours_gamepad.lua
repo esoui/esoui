@@ -99,7 +99,14 @@ function ZO_HouseTours_Gamepad:InitializeActivityFinderCategory()
             disabledMenuIcon = "EsoUI/Art/LFG/Gamepad/LFG_menuIcon_houseTours_disabled.dds",
             sceneName = "houseToursGamepad",
             tooltipDescription = GetString(SI_HOUSE_TOURS_DESCRIPTION),
-            isHouseTours = true,
+            isLocked = function()
+                local isEnabled = ZO_IsHouseToursEnabled()
+                return not isEnabled
+            end,
+            lockedText = function()
+                local _, lockedText = ZO_IsHouseToursEnabled()
+                return lockedText
+            end,
         },
     }
 

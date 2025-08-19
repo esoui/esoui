@@ -370,9 +370,9 @@ function ZO_AntiquityLoreDocument_Manager:ReleaseAllObjects(parentControl)
 end
 
 function ZO_AntiquityLoreDocument_HighlightAnimation_OnUpdate(control, progress)
-    local easedProgress = ZO_EaseInCubic(progress)
+    local easedProgress = progress
     local animatedControl = control:GetAnimatedControl()
-    animatedControl.backgroundTexture:SetTextureSampleProcessingWeight(TEX_SAMPLE_PROCESSING_WEIGHT_RGB, zo_lerp(0.4, 1.5, easedProgress))
+    animatedControl.backgroundTexture:SetTextureSampleProcessingWeight(TEX_SAMPLE_PROCESSING_RGB, zo_lerp(0.4, 1.5, easedProgress))
     local drawLayer = progress > 0 and DL_CONTROLS or DL_BACKGROUND
     animatedControl:SetDrawLayer(drawLayer)
     animatedControl.backgroundTexture:SetDrawLayer(drawLayer)

@@ -19,6 +19,8 @@ local COMPANION_HEALTH_GRADIENT = { ZO_ColorDef:New("00484F"), ZO_ColorDef:New("
 local COMPANION_HEALTH_GRADIENT_LOSS = ZO_ColorDef:New("621018")
 local COMPANION_HEALTH_GRADIENT_GAIN = ZO_ColorDef:New("D0FFBC")
 
+ZO_UNITFRAMES_NUM_SUBGROUPS = NUM_SUBGROUPS
+
 local SMALL_GROUP_ELECTION_ICON_INFO =
 {
     [GROUP_VOTE_CHOICE_ABSTAIN] =
@@ -161,9 +163,11 @@ local GAMEPAD_CONSTANTS =
     SHOW_BATTLEGROUND_TEAM = true,
 }
 
-local function GetPlatformConstants()
+function ZO_UnitFrames_GetPlatformConstants()
     return IsInGamepadPreferredMode() and GAMEPAD_CONSTANTS or KEYBOARD_CONSTANTS
 end
+
+local GetPlatformConstants = ZO_UnitFrames_GetPlatformConstants
 
 local function CalculateDynamicPlatformConstants()
     local allConstants = {KEYBOARD_CONSTANTS, GAMEPAD_CONSTANTS}
@@ -236,6 +240,10 @@ local function GetGroupAnchorFrameOffsets(subgroupIndex, groupStride, constants)
     local column = zeroBasedIndex - (row * groupStride)
 
     return (constants.RAID_FRAME_BASE_OFFSET_X + (column * constants.RAID_FRAME_OFFSET_X)), (constants.RAID_FRAME_BASE_OFFSET_Y + (row * constants.RAID_FRAME_ANCHOR_CONTAINER_HEIGHT))
+end
+
+function ZO_UnitFrames_GetGroupAnchorFrameOffsets(subgroupIndex, groupStride, constants)
+    return GetGroupAnchorFrameOffsets(subgroupIndex, groupStride, constants)
 end
 
 ZO_MostRecentPowerUpdateHandler = ZO_MostRecentEventHandler:Subclass()
@@ -1777,10 +1785,13 @@ end
 function ZO_UnitFrameObject:UpdateBackground()
     if self.style == GROUP_UNIT_FRAME and ZO_Group_IsGroupUnitTag(self.unitTag) then
         local companionTag = GetCompanionUnitTagByGroupUnitTag(self.unitTag)
+        local playerGroupTag = GetLocalPlayerGroupUnitTag()
+        local playerCompanionTag = GetCompanionUnitTagByGroupUnitTag(playerGroupTag)
+        local isSummoningPlayerCompanion = companionTag == playerCompanionTag and HasPendingCompanion()
         if IsInGamepadPreferredMode() then
-            self.frame:GetNamedChild("Background2"):SetHidden(DoesUnitExist(companionTag))
+            self.frame:GetNamedChild("Background2"):SetHidden(DoesUnitExist(companionTag) or isSummoningPlayerCompanion)
         else
-            self.frame:GetNamedChild("Background1"):SetHidden(DoesUnitExist(companionTag))
+            self.frame:GetNamedChild("Background1"):SetHidden(DoesUnitExist(companionTag) or isSummoningPlayerCompanion)
         end
     end
 end
@@ -2039,6 +2050,8 @@ local function UpdateAnchorFrameVisuals()
         local offsetX, offsetY = GetGroupAnchorFrameOffsets(i, constants.GROUP_STRIDE, constants)
         SetAnchorOffsets(raidFrame, offsetX, offsetY)
     end
+
+    CALLBACK_MANAGER:FireCallbacks("OnUnitFrameAnchorsUpdated")
 end
 
 local function DoGroupUpdate()

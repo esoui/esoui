@@ -596,6 +596,44 @@ ESO_Dialogs["BAD_LOGIN_ACCOUNT_SUSPENDED"] =
     end,
 }
 
+ESO_Dialogs["BAD_LOGIN_CHILD_ACCOUNT"] =
+{
+    title =
+    {
+        text = SI_LOGIN_DIALOG_TITLE_CHILD_ACCOUNT,
+    },
+    mainText =
+    {
+        text = function(dialog)
+            return zo_strformat(GetString(SI_LOGIN_DIALOG_TEXT_CHILD_ACCOUNT), dialog.data.accountPageURL)
+        end,
+        align = TEXT_ALIGN_LEFT,
+    },
+    buttons =
+    {
+        {
+            text = SI_DIALOG_BUTTON_VIEW_ACCOUNT_PAGE,
+            keybind = "DIALOG_TERTIARY",
+            clickSound = SOUNDS.DIALOG_ACCEPT,
+            callback = function(dialog)
+                ConfirmOpenURL(dialog.data.accountPageURL)
+                PregameStateManager_ReenterLoginState()
+            end
+        },
+        {
+            text = SI_DIALOG_EXIT,
+            keybind = "DIALOG_NEGATIVE",
+            clickSound = SOUNDS.DIALOG_ACCEPT,
+            callback = function()
+                PregameStateManager_ReenterLoginState()
+            end
+        },
+    },
+    noChoiceCallback = function()
+        PregameStateManager_ReenterLoginState()
+    end,
+}
+
 ESO_Dialogs["BAD_LOGIN_NO_USERNAME_OR_PASSWORD"] = 
 {
     gamepadInfo =

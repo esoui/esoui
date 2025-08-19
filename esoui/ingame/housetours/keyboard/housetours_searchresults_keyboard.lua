@@ -374,7 +374,7 @@ function ZO_HouseToursSearchResultsTile_Keyboard:PostInitializePlatform()
     table.insert(self.keybindStripDescriptor,
     {
         name = GetString(SI_HOUSE_TOURS_REPORT_LISTING),
-        keybind = "UI_SHORTCUT_REPORT_PLAYER",
+        keybind = "UI_SHORTCUT_HELP",
         callback = self.HandleReportHome,
         visible = function()
             if self.listingData then

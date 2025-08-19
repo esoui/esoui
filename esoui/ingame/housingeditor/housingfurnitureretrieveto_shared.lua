@@ -51,8 +51,7 @@ end
 function ZO_HousingFurnitureRetrieveToBag:GetFormattedDisplayName(includeBagSlots)
     if self:IsEnabled() then
         if includeBagSlots then
-            local numUsedSlots = GetNumBagUsedSlots(self.bagId)
-            local numTotalSlots = GetBagSize(self.bagId)
+            local numUsedSlots, numTotalSlots = self:GetNumUsedAndTotalSlots()
             return zo_strformat(SI_HOUSING_EDITOR_RETRIEVE_TO_BAG_FORMATTER, self:GetDisplayName(), numUsedSlots, numTotalSlots)
         end
 
@@ -62,10 +61,15 @@ function ZO_HousingFurnitureRetrieveToBag:GetFormattedDisplayName(includeBagSlot
     return ZO_DEFAULT_DISABLED_COLOR:Colorize(self:GetDisplayName())
 end
 
+function ZO_HousingFurnitureRetrieveToBag:GetNumUsedAndTotalSlots()
+    local numUsedSlots = GetNumBagUsedSlots(self.bagId)
+    local numSlots = GetBagUseableSize(self.bagId)
+    return numUsedSlots, numSlots
+end
+
 -- Returns the "X/Y slots used" string for this bag.
 function ZO_HousingFurnitureRetrieveToBag:GetSlotUsageString()
-    local numUsedSlots = GetNumBagUsedSlots(self.bagId)
-    local numTotalSlots = GetBagSize(self.bagId)
+    local numUsedSlots, numTotalSlots = self:GetNumUsedAndTotalSlots()
     return zo_strformat(SI_GAMEPAD_HOUSING_EDITOR_RETRIEVE_TO_BAG_FORMATTER, numUsedSlots, numTotalSlots)
 end
 
@@ -213,6 +217,21 @@ function ZO_HousingFurnitureRetrieveTo_Shared:GetSelectedBagId()
     return HOUSING_EDITOR_SHARED:GetRetrieveToBag()
 end
 
+function ZO_HousingFurnitureRetrieveTo_Shared:GetSelectedBagIndex()
+    local selectedBagId = self:GetSelectedBagId()
+    local selectedBagIndex = 0
+
+    -- Find the index of the currently selected bag.
+    for bagIndex, bagInfo in ipairs(self.bags) do
+        if bagInfo:GetBagId() == selectedBagId then
+            selectedBagIndex = bagIndex
+            break
+        end
+    end
+
+    return selectedBagIndex
+end
+
 function ZO_HousingFurnitureRetrieveTo_Shared:GetSelectedBagInfo()
     -- Returns the bag info for the currently selected retrieve to bag.
     return self:GetBagInfo(self:GetSelectedBagId())
@@ -234,6 +253,43 @@ function ZO_HousingFurnitureRetrieveTo_Shared:SetSelectedBag(bagId)
     if self:GetSelectedBagId() ~= bagId then
         HOUSING_EDITOR_SHARED:SetRetrieveToBag(bagId)
     end
+end
+
+-- Returns the next bag index that follows bagIndex.
+function ZO_HousingFurnitureRetrieveTo_Shared:GetNextBagIndex(bagIndex)
+    return bagIndex < #self.bags and bagIndex + 1 or 1
+end
+
+-- Returns the index of the next available bag that follows bagIndex.
+function ZO_HousingFurnitureRetrieveTo_Shared:GetNextAvailableBagIndex(bagIndex)
+    -- Start with the bag index that follows bagIndex.
+    local nextBagIndex = self:GetNextBagIndex(bagIndex)
+
+    -- Iterate until we either come full circle back to bagIndex
+    -- or until we find a subsequent bag that is enabled for use.
+    while nextBagIndex ~= bagIndex do
+        local bagInfo = self.bags[nextBagIndex]
+        if bagInfo:IsEnabled() then
+            -- Return the index of this available bag.
+            bagIndex = nextBagIndex
+            break
+        end
+
+        -- Iterate to the next bag index.
+        nextBagIndex = self:GetNextBagIndex(nextBagIndex)
+    end
+
+    -- Return the index of either the original bagIndex
+    -- or the next available bag index, if any.
+    return bagIndex
+end
+
+-- Cycles to, and selects, the next available Retrieve To bag.
+function ZO_HousingFurnitureRetrieveTo_Shared:CycleSelectionToNextBag()
+    local selectedBagIndex = self:GetSelectedBagIndex()
+    local nextAvailableBagIndex = self:GetNextAvailableBagIndex(selectedBagIndex)
+    local newSelectedBagId = self.bags[nextAvailableBagIndex]:GetBagId()
+    HOUSING_EDITOR_SHARED:SetRetrieveToBag(newSelectedBagId)
 end
 
 -- Abstract Methods

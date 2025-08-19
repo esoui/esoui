@@ -70,7 +70,7 @@ ESO_Dialogs["ACCOUNT_MANAGEMENT_EMAIL_CHANGED"] =
     mainText =
     {
         text = function(dialog)
-            return zo_strformat(GetString("SI_ACCOUNTEMAILREQUESTRESULT", ACCOUNT_EMAIL_REQUEST_RESULT_SUCCESS_EMAIL_UPDATED), GetUserPendingActivationEmailAddress());
+            return zo_strformat(GetString("SI_ACCOUNTEMAILREQUESTRESULT", ACCOUNT_EMAIL_REQUEST_RESULT_SUCCESS_EMAIL_UPDATED), GetUserPendingActivationEmailAddress())
         end,
     },
     buttons =

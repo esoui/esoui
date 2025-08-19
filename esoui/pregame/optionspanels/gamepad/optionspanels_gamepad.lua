@@ -29,7 +29,12 @@ GAMEPAD_SETTINGS_DATA =
         {
             panel = SETTING_PANEL_CAMERA,
             system = SETTING_TYPE_GAMEPAD,
-            settingId = GAMEPAD_SETTING_CAMERA_SENSITIVITY,
+            settingId = GAMEPAD_SETTING_CAMERA_SENSITIVITY_X,
+        },
+        {
+            panel = SETTING_PANEL_CAMERA,
+            system = SETTING_TYPE_GAMEPAD,
+            settingId = GAMEPAD_SETTING_CAMERA_SENSITIVITY_Y,
         },
     },
     [SETTING_PANEL_GAMEPLAY] =
@@ -98,6 +103,18 @@ GAMEPAD_SETTINGS_DATA =
             panel = SETTING_PANEL_VIDEO,
             system = SETTING_TYPE_GRAPHICS,
             settingId = GRAPHICS_SETTING_GRAPHICS_MODE_XBSX,
+            header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_DISPLAY,
+        },
+        {
+            panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_CAP_CONSOLE_FRAMERATE_IN_MENUS,
+            header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_DISPLAY,
+        },
+        {
+            panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_ENERGY_SUSTAINABILITY_SCREEN_DIM_AND_RESOLUTION,
             header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_DISPLAY,
         },
         {
@@ -220,6 +237,16 @@ GAMEPAD_SETTINGS_DATA =
             system = SETTING_TYPE_AUDIO,
             settingId = AUDIO_SETTING_BACKGROUND_AUDIO,
             header = SI_AUDIO_OPTIONS_OUTPUT,
+        },
+        {
+            panel = SETTING_PANEL_AUDIO,
+            system = SETTING_TYPE_AUDIO,
+            settingId = AUDIO_SETTING_SPATIAL_SOUND,
+        },
+        {
+            panel = SETTING_PANEL_AUDIO,
+            system = SETTING_TYPE_AUDIO,
+            settingId = AUDIO_SETTING_SPATIAL_SOUND_QUALITY,
         },
     },
     [SETTING_PANEL_ACCOUNT] =

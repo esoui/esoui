@@ -1172,7 +1172,7 @@ function ZO_WorldMap_GetFoundTooltipMouseOverPins()
 end
 
 function ZO_WorldMap_InvalidateTooltip()
-    ZO_WorldMap_GetPinManager():InvalidateTooltip()
+    WORLD_MAP_MANAGER:MarkPinTooltipDirty()
 end
 
 function ZO_WorldMap_AddCustomPin(pinType, pinTypeAddCallback, pinTypeOnResizeCallback, pinLayoutData, pinTooltipCreator)
@@ -1205,6 +1205,14 @@ end
 
 function ZO_WorldMap_SetMapByIndex(mapIndex)
     WORLD_MAP_MANAGER:SetMapByIndex(mapIndex)
+end
+
+function ZO_WorldMapPins_Manager:InvalidateTooltip()
+    WORLD_MAP_MANAGER:MarkPinTooltipDirty()
+end
+
+function ZO_WorldMapPins_Manager:GetFoundTooltipMouseOverPins()
+    return WORLD_MAP_MANAGER:GetFoundTooltipMouseOverPins()
 end
 
 --Renaming functions in SharedTexture.lua to fit standards

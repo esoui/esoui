@@ -20,6 +20,7 @@ end
 function ZO_EndlessDungeonBuffSelector_Shared:OnDeferredInitialize()
     self:InitializeControls()
     self:InitializeKeybindStripDescriptor()
+    self:RegisterForEvents()
 end
 
 function ZO_EndlessDungeonBuffSelector_Shared:InitializeControls()
@@ -38,6 +39,14 @@ function ZO_EndlessDungeonBuffSelector_Shared:InitializeControls()
         table.insert(self.buffControls, buffControl)
         previousBuffControl = buffControl
     end
+
+    self.buffsInTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_EndDunBuffsFadeIn", containerControl)
+    self.buffsOutTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_EndDunBuffsFadeOut", containerControl)
+    local function OnFadeOutStopped()
+        self:RefreshBuffs()
+        self.buffsInTimeline:PlayFromStart()
+    end
+    self.buffsOutTimeline:SetHandler("OnStop", OnFadeOutStopped)
 end
 
 function ZO_EndlessDungeonBuffSelector_Shared:InitializeKeybindStripDescriptor()
@@ -57,6 +66,16 @@ function ZO_EndlessDungeonBuffSelector_Shared:InitializeKeybindStripDescriptor()
     }
 end
 
+function ZO_EndlessDungeonBuffSelector_Shared:RegisterForEvents()
+    local function OnBuffChoicesReceived()
+        if self.isRerolling then
+            self.buffsOutTimeline:PlayFromStart()
+            self.isRerolling = nil
+        end
+    end
+    self.control:RegisterForEvent(EVENT_ENDLESS_DUNGEON_BUFF_SELECTOR_CHOICES_RECEIVED, OnBuffChoicesReceived)
+end
+
 function ZO_EndlessDungeonBuffSelector_Shared:SetupBuffControl(buffControl, previousBuffControl)
     if previousBuffControl then
         buffControl:SetAnchor(TOPLEFT, previousBuffControl, TOPRIGHT, 60)
@@ -70,6 +89,27 @@ function ZO_EndlessDungeonBuffSelector_Shared:SetupBuffControl(buffControl, prev
 end
 
 function ZO_EndlessDungeonBuffSelector_Shared:OnShowing()
+    self:RefreshBuffs()
+    KEYBIND_STRIP:RemoveDefaultExit()
+    KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
+end
+
+function ZO_EndlessDungeonBuffSelector_Shared:OnHiding()
+    self:DeselectBuff(self.selectedBuffControl)
+
+    for i = 1, #self.buffControls do
+        local buffControl = self.buffControls[i]
+        buffControl:Reset()
+        buffControl:SetHidden(true)
+    end
+
+    self.isRerolling = nil
+
+    KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
+    KEYBIND_STRIP:RestoreDefaultExit()
+end
+
+function ZO_EndlessDungeonBuffSelector_Shared:RefreshBuffs()
     local titleBuffType = nil
     local hasAvatarVision = false
     local numChoices = 0
@@ -91,6 +131,7 @@ function ZO_EndlessDungeonBuffSelector_Shared:OnShowing()
             }
 
             local buffControl = self.buffControls[numChoices]
+            buffControl:Reset()
             buffControl:Layout(data)
             buffControl.bucketType = bucketType
             buffControl.name = ZO_CachedStrFormat(SI_ABILITY_NAME, GetAbilityName(abilityId))
@@ -117,22 +158,10 @@ function ZO_EndlessDungeonBuffSelector_Shared:OnShowing()
             PlaySound(SOUNDS.ENDLESS_DUNGEON_BUFF_SELECT_VISION)
         end
     end
-
-    KEYBIND_STRIP:RemoveDefaultExit()
-    KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
 end
 
-function ZO_EndlessDungeonBuffSelector_Shared:OnHiding()
-    self:DeselectBuff(self.selectedBuffControl)
-
-    for i = 1, #self.buffControls do
-        local buffControl = self.buffControls[i]
-        buffControl:Reset()
-        buffControl:SetHidden(true)
-    end
-
-    KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
-    KEYBIND_STRIP:RestoreDefaultExit()
+function ZO_EndlessDungeonBuffSelector_Shared:SetIsRerolling(isRerolling)
+    self.isRerolling = isRerolling
 end
 
 function ZO_EndlessDungeonBuffSelector_Shared:SelectBuff(buffControl)

@@ -49,9 +49,16 @@ panelBuilder:AddSetting({
 -- Camera -> First Person --
 ----------------------------
 panelBuilder:AddSetting({
-    controlName = "Options_Camera_CameraSensitivityFirstPerson",
+    controlName = "Options_Camera_CameraSensitivityFirstPersonX",
     settingType = SETTING_TYPE_CAMERA,
-    settingId = CAMERA_SETTING_SENSITIVITY_FIRST_PERSON,
+    settingId = CAMERA_SETTING_SENSITIVITY_FIRST_PERSON_X,
+    header = SI_CAMERA_OPTIONS_FIRST_PERSON,
+})
+
+panelBuilder:AddSetting({
+    controlName = "Options_Camera_CameraSensitivityFirstPersonY",
+    settingType = SETTING_TYPE_CAMERA,
+    settingId = CAMERA_SETTING_SENSITIVITY_FIRST_PERSON_Y,
     header = SI_CAMERA_OPTIONS_FIRST_PERSON,
 })
 
@@ -73,9 +80,16 @@ panelBuilder:AddSetting({
 -- Camera -> Third Person --
 ----------------------------
 panelBuilder:AddSetting({
-    controlName = "Options_Camera_CameraSensitivityThirdPerson",
+    controlName = "Options_Camera_CameraSensitivityThirdPersonX",
     settingType = SETTING_TYPE_CAMERA,
-    settingId = CAMERA_SETTING_SENSITIVITY_THIRD_PERSON,
+    settingId = CAMERA_SETTING_SENSITIVITY_THIRD_PERSON_X,
+    header = SI_CAMERA_OPTIONS_THIRD_PERSON,
+})
+
+panelBuilder:AddSetting({
+    controlName = "Options_Camera_CameraSensitivityThirdPersonY",
+    settingType = SETTING_TYPE_CAMERA,
+    settingId = CAMERA_SETTING_SENSITIVITY_THIRD_PERSON_Y,
     header = SI_CAMERA_OPTIONS_THIRD_PERSON,
 })
 

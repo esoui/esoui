@@ -1,5 +1,5 @@
 {TOC:maxLevel=3}
-h1. ESO UI Documentation for API Version 101046
+h1. ESO UI Documentation for API Version 101047
 h2. VM Functions
 * ScriptBuildInfo()
 ** _Returns:_ *table* _buildInfo_
@@ -743,6 +743,7 @@ h5. NotificationType
 * NOTIFICATION_TYPE_RESURRECT
 * NOTIFICATION_TYPE_SCRIPTED_WORLD_EVENT
 * NOTIFICATION_TYPE_SLOTS_RESET
+* NOTIFICATION_TYPE_SPECTACLE_EVENT_PHASE_CHANGED
 * NOTIFICATION_TYPE_TRADE
 * NOTIFICATION_TYPE_TRIBUTE_INVITE
 
@@ -860,6 +861,7 @@ h5. ProgressReason
 * PROGRESS_REASON_QUEST
 * PROGRESS_REASON_REWARD
 * PROGRESS_REASON_SCRIPTED_EVENT
+* PROGRESS_REASON_SIEGE_CAMP_COMPLETED
 * PROGRESS_REASON_SKILL_BOOK
 * PROGRESS_REASON_TRADESKILL
 * PROGRESS_REASON_TRADESKILL_ACHIEVEMENT
@@ -1134,6 +1136,7 @@ h5. TooltipGameDataType
 * TOOLTIP_GAME_DATA_MYTHIC_OR_STOLEN
 * TOOLTIP_GAME_DATA_NONE
 * TOOLTIP_GAME_DATA_PROGRESSION
+* TOOLTIP_GAME_DATA_PROGRESS_BAR
 * TOOLTIP_GAME_DATA_SKILL_UPGRADE
 
 
@@ -1394,6 +1397,7 @@ h5. AbilityType
 * ABILITY_TYPE_PACIFY
 * ABILITY_TYPE_PARRY
 * ABILITY_TYPE_PATHLINE
+* ABILITY_TYPE_PAUSECOOLDOWN
 * ABILITY_TYPE_PERSISTENTRADIUS
 * ABILITY_TYPE_PHASETHROUGH
 * ABILITY_TYPE_PLAYERFLIGHT
@@ -3046,6 +3050,10 @@ h5. DerivedStats
 * STAT_DAMAGE_RESIST_POISON
 * STAT_DAMAGE_RESIST_SHOCK
 * STAT_DAMAGE_RESIST_START
+* STAT_DEPRECATED_0
+* STAT_DEPRECATED_1
+* STAT_DEPRECATED_2
+* STAT_DEPRECATED_3
 * STAT_DODGE
 * STAT_HEALING_DONE
 * STAT_HEALING_TAKEN
@@ -3472,6 +3480,7 @@ h5. CurrencyChangeReason
 * CURRENCY_CHANGE_REASON_DEPRECATED_2
 * CURRENCY_CHANGE_REASON_DEPRECATED_3
 * CURRENCY_CHANGE_REASON_EDIT_GUILD_HERALDRY
+* CURRENCY_CHANGE_REASON_ENDLESS_DUNGEON_VISION_REROLL
 * CURRENCY_CHANGE_REASON_EXPIRATION
 * CURRENCY_CHANGE_REASON_FEED_MOUNT
 * CURRENCY_CHANGE_REASON_GUILD_BANK_DEPOSIT
@@ -5086,6 +5095,11 @@ h5. ItemSetType
 * ITEM_SET_TYPE_WORLD
 
 
+h5. ItemStatValeRequestType
+* ITEM_STAT_VALUE_REQUEST_TYPE_CURRENT_APPLIED_VALUE
+* ITEM_STAT_VALUE_REQUEST_TYPE_CURRENT_EFFECTIVE_VALUE
+
+
 h5. ItemStyleChapter
 * ITEM_STYLE_CHAPTER_ALL
 * ITEM_STYLE_CHAPTER_AXES
@@ -5109,6 +5123,21 @@ h5. ItemTagCategory
 * TAG_CATEGORY_NONE
 * TAG_CATEGORY_SOURCES
 * TAG_CATEGORY_TREASURE_TYPE
+
+
+h5. ItemTooltipDisplayFlags
+* ITEM_TOOLTIP_DISPLAY_FLAGS_DONT_SAVE_ITEM_CONTEXT
+* ITEM_TOOLTIP_DISPLAY_FLAGS_EQUIPPED
+* ITEM_TOOLTIP_DISPLAY_FLAGS_FULL_CHARGES_AND_DURABILITY
+* ITEM_TOOLTIP_DISPLAY_FLAGS_HIDE_ARMORY_BUILD
+* ITEM_TOOLTIP_DISPLAY_FLAGS_HIDE_SIEGE_CONDITION
+* ITEM_TOOLTIP_DISPLAY_FLAGS_HIDE_TRAIT
+* ITEM_TOOLTIP_DISPLAY_FLAGS_ITEM_ALREADY_BOUND
+* ITEM_TOOLTIP_DISPLAY_FLAGS_LINK_CRAFTED
+* ITEM_TOOLTIP_DISPLAY_FLAGS_SHOW_QUANTITY_IN_TITLE
+* ITEM_TOOLTIP_DISPLAY_FLAGS_SHOW_SUPPRESSION
+* ITEM_TOOLTIP_DISPLAY_FLAGS_SHOW_TRAIT_AS_NEW
+* ITEM_TOOLTIP_DISPLAY_FLAGS_SUBTOOLTIP
 
 
 h5. ItemTraitInformation
@@ -5474,6 +5503,7 @@ h5. SpecializedItemType
 * SPECIALIZED_ITEMTYPE_CONTAINER
 * SPECIALIZED_ITEMTYPE_CONTAINER_CURRENCY
 * SPECIALIZED_ITEMTYPE_CONTAINER_EVENT
+* SPECIALIZED_ITEMTYPE_CONTAINER_STACKABLE
 * SPECIALIZED_ITEMTYPE_CONTAINER_STYLE_PAGE
 * SPECIALIZED_ITEMTYPE_COSTUME
 * SPECIALIZED_ITEMTYPE_CRAFTED_ABILITY
@@ -5836,6 +5866,7 @@ h5. QuestConditionType
 * QUEST_CONDITION_TYPE_SCRIBE_ABILITY
 * QUEST_CONDITION_TYPE_SCRIPT_ACTION
 * QUEST_CONDITION_TYPE_SELL_LAUNDER_ITEM
+* QUEST_CONDITION_TYPE_SPECTACLE_EVENT_PHASE_CHANGE
 * QUEST_CONDITION_TYPE_SUBCLASS_SWAP_SKILL_LINE
 * QUEST_CONDITION_TYPE_SUBCLASS_TRAIN_SKILL_LINE
 * QUEST_CONDITION_TYPE_SUMMONED_COMPANION
@@ -6007,6 +6038,8 @@ h5. AudioSetting
 * AUDIO_SETTING_SFX_ENABLED
 * AUDIO_SETTING_SFX_VOLUME
 * AUDIO_SETTING_SOUND_ENABLED
+* AUDIO_SETTING_SPATIAL_SOUND
+* AUDIO_SETTING_SPATIAL_SOUND_QUALITY
 * AUDIO_SETTING_SPEAKER_SETUP
 * AUDIO_SETTING_UI_ENABLED
 * AUDIO_SETTING_UI_VOLUME
@@ -6059,8 +6092,10 @@ h5. CameraSetting
 * CAMERA_SETTING_INVERT_X
 * CAMERA_SETTING_INVERT_Y
 * CAMERA_SETTING_SCREEN_SHAKE
-* CAMERA_SETTING_SENSITIVITY_FIRST_PERSON
-* CAMERA_SETTING_SENSITIVITY_THIRD_PERSON
+* CAMERA_SETTING_SENSITIVITY_FIRST_PERSON_X
+* CAMERA_SETTING_SENSITIVITY_FIRST_PERSON_Y
+* CAMERA_SETTING_SENSITIVITY_THIRD_PERSON_X
+* CAMERA_SETTING_SENSITIVITY_THIRD_PERSON_Y
 * CAMERA_SETTING_SMOOTHING
 * CAMERA_SETTING_THIRD_PERSON_FIELD_OF_VIEW
 * CAMERA_SETTING_THIRD_PERSON_HORIZONTAL_OFFSET
@@ -6153,6 +6188,12 @@ h5. DepthOfFieldMode
 * DEPTH_OF_FIELD_MODE_SMOOTH
 
 
+h5. EnergySustainabilityScreenDimAndResolution
+* ENERGY_SUSTAINABILITY_SCREEN_DIM_AND_RESOLUTION_DISABLED
+* ENERGY_SUSTAINABILITY_SCREEN_DIM_AND_RESOLUTION_FIVE_MINS
+* ENERGY_SUSTAINABILITY_SCREEN_DIM_AND_RESOLUTION_TEN_MINS
+
+
 h5. GamepadChatTextSizeSetting
 * GAMEPAD_CHAT_TEXT_SIZE_SETTING_LARGE
 * GAMEPAD_CHAT_TEXT_SIZE_SETTING_MEDIUM
@@ -6160,7 +6201,8 @@ h5. GamepadChatTextSizeSetting
 
 
 h5. GamepadSetting
-* GAMEPAD_SETTING_CAMERA_SENSITIVITY
+* GAMEPAD_SETTING_CAMERA_SENSITIVITY_X
+* GAMEPAD_SETTING_CAMERA_SENSITIVITY_Y
 * GAMEPAD_SETTING_DEADZONE_INNER_LEFT_STICK
 * GAMEPAD_SETTING_DEADZONE_INNER_RIGHT_STICK
 * GAMEPAD_SETTING_DEADZONE_OUTER_LEFT_STICK
@@ -6201,6 +6243,7 @@ h5. InWorldUISetting
 * IN_WORLD_UI_SETTING_TARGET_GLOW_ENABLED
 * IN_WORLD_UI_SETTING_TARGET_GLOW_INTENSITY
 * IN_WORLD_UI_SETTING_TARGET_MARKER_SIZE
+* IN_WORLD_UI_SETTING_TOGGLE_SPRINT
 
 
 h5. KeybindDisplayMode
@@ -6666,6 +6709,7 @@ h5. AnnouncementBannerOverrideType
 * ANNOUNCEMENT_BANNER_OVERRIDE_TYPE_ARMOR_STYLES
 * ANNOUNCEMENT_BANNER_OVERRIDE_TYPE_CRATE
 * ANNOUNCEMENT_BANNER_OVERRIDE_TYPE_CURRENCIES
+* ANNOUNCEMENT_BANNER_OVERRIDE_TYPE_FURNISHING
 * ANNOUNCEMENT_BANNER_OVERRIDE_TYPE_GENERAL_REWARDS
 * ANNOUNCEMENT_BANNER_OVERRIDE_TYPE_MOTIF
 * ANNOUNCEMENT_BANNER_OVERRIDE_TYPE_NONE
@@ -6775,6 +6819,7 @@ h5. RewardType
 * REWARD_TYPE_NONE
 * REWARD_TYPE_PARTIAL_SKILL_POINTS
 * REWARD_TYPE_SKILL_LINE
+* REWARD_TYPE_SPECTACLE_PROGRESS
 * REWARD_TYPE_STYLE_STONES
 * REWARD_TYPE_TELVAR_STONES
 * REWARD_TYPE_TRIBUTE_CLUB_EXPERIENCE
@@ -7322,6 +7367,7 @@ h5. WorldEventType
 * WORLD_EVENT_TYPE_HARROWSTORM
 * WORLD_EVENT_TYPE_MIRRORMOOR
 * WORLD_EVENT_TYPE_MONSTER_HUNT
+* WORLD_EVENT_TYPE_SIEGE_CAMP
 
 
 h5. ZoneCompletionType
@@ -7372,6 +7418,11 @@ h5. OverrideMusicMode
 * OVERRIDE_MUSIC_MODE_DUELING
 * OVERRIDE_MUSIC_MODE_NONE
 * OVERRIDE_MUSIC_MODE_TRIBUTE
+
+
+h5. SpatialSoundQualitySetting
+* SPATIAL_SOUND_QUALITY_SETTING_HIGH
+* SPATIAL_SOUND_QUALITY_SETTING_LOW
 
 
 h5. Globals
@@ -8718,6 +8769,7 @@ h5. InteractType
 * CHATTER_DO_KEEP_GUILD_CLAIM
 * CHATTER_DO_KEEP_GUILD_RELEASE
 * CHATTER_ENDLESS_DUNGEON_BUFF_SELECTOR_CHOICE
+* CHATTER_ENDLESS_DUNGEON_BUFF_SELECTOR_REROLL_VISIONS
 * CHATTER_END_ADVANCE_COMPLETABLE_QUEST_CONDITIONS
 * CHATTER_END_ANTIQUITY_DIG_SPOT
 * CHATTER_END_ANTIQUITY_SCRYING
@@ -8944,8 +8996,6 @@ h5. LoginStatus
 * LOGIN_STATUS_OTP_LOCKED
 * LOGIN_STATUS_OTP_PENDING
 * LOGIN_STATUS_OTP_SUCCESS
-* LOGIN_STATUS_OVERFLOW_KICK_WAITING
-* LOGIN_STATUS_OVERFLOW_WAITING
 * LOGIN_STATUS_RESERVATION_FAILURE
 * LOGIN_STATUS_RESERVATION_SUCCESS
 * LOGIN_STATUS_RESERVATION_WAITING
@@ -9162,6 +9212,7 @@ h5. ActionResult
 * ACTION_RESULT_CANT_SWAP_HOTBAR_IS_OVERRIDDEN
 * ACTION_RESULT_CANT_SWAP_WHILE_CHANGING_GEAR
 * ACTION_RESULT_CASTER_DEAD
+* ACTION_RESULT_CAST_AT_PET_LIMIT
 * ACTION_RESULT_CHARMED
 * ACTION_RESULT_CRITICAL_DAMAGE
 * ACTION_RESULT_CRITICAL_HEAL
@@ -9289,6 +9340,12 @@ h5. EndlessDungeonBuffBucketType
 * ENDLESS_DUNGEON_BUFF_BUCKET_TYPE_UTILITY
 
 
+h5. EndlessDungeonBuffSelectorRerollError
+* ENDLESS_DUNGEON_BUFF_REROLL_ERROR_CANNOT_AFFORD
+* ENDLESS_DUNGEON_BUFF_REROLL_ERROR_INTERNAL_ERROR
+* ENDLESS_DUNGEON_BUFF_REROLL_ERROR_NO_AVAILABLE_CHOICES
+
+
 h5. EndlessDungeonBuffType
 * ENDLESS_DUNGEON_BUFF_TYPE_NONE
 * ENDLESS_DUNGEON_BUFF_TYPE_VERSE
@@ -9328,12 +9385,12 @@ h5. EndlessDungeonPointReason
 * ENDLESS_DUNGEON_POINT_REASON_STAGE
 
 
-h5. ItemSetSuppressionType
-* ITEM_SET_SUPPRESSION_TYPE_ABILITY
-* ITEM_SET_SUPPRESSION_TYPE_BATTLE_GROUND
-* ITEM_SET_SUPPRESSION_TYPE_CAMPAIGN
-* ITEM_SET_SUPPRESSION_TYPE_ITEMSET
-* ITEM_SET_SUPPRESSION_TYPE_NONE
+h5. ItemBonusSuppressionType
+* ITEM_BONUS_SUPPRESSION_TYPE_ABILITY
+* ITEM_BONUS_SUPPRESSION_TYPE_BATTLE_GROUND
+* ITEM_BONUS_SUPPRESSION_TYPE_CAMPAIGN
+* ITEM_BONUS_SUPPRESSION_TYPE_ITEMSET
+* ITEM_BONUS_SUPPRESSION_TYPE_NONE
 
 
 h5. LeaderboardScoreNotificationType
@@ -9707,7 +9764,7 @@ h5. TutorialTrigger
 * TUTORIAL_TRIGGER_ENTERED_EDITABLE_HOME
 * TUTORIAL_TRIGGER_ENTERED_OBJECTIVE_CAPTURE_AREA
 * TUTORIAL_TRIGGER_ENTERED_OWNED_HOUSING_EDITOR_AS_SUBSCRIBER
-* TUTORIAL_TRIGGER_ENTER_CYRODIIL_CHAMPIONS
+* TUTORIAL_TRIGGER_ENTER_VENGEANCE_CAMPAIGN
 * TUTORIAL_TRIGGER_EQUIPMENT_DAMAGED
 * TUTORIAL_TRIGGER_EQUIPMENT_OUT_OF_CHARGES
 * TUTORIAL_TRIGGER_EQUIPPED_ANY_ARMOR
@@ -11330,6 +11387,18 @@ h2. Game API
 
 * DoesPlatformSupportGraphicSetting(*integer* _settingId_)
 ** _Returns:_ *bool* _isSettingSupported_
+
+* DoesPlatformSupportFramerateCapInMenus()
+** _Returns:_ *bool* _isFramerateCapSupported_
+
+* DoesPlatformSupportScreenDimAndResolutionDrop()
+** _Returns:_ *bool* _isScreenDimAndResolutionDropSupported_
+
+* DoesPlatformSupportSpatialSound()
+** _Returns:_ *bool* _isSpatialSoundSupported_
+
+* DoesPlatformSupportSpatialSoundQuality()
+** _Returns:_ *bool* _isSpatialSoundQualitySupported_
 
 * ZoGetOfficialGameLanguage()
 ** _Returns:_ *[OfficialLanguage|#OfficialLanguage]* _language_
@@ -13651,6 +13720,12 @@ h2. Game API
 * GetEndlessDungeonBuffSelectorBucketTypeChoice(*[EndlessDungeonBuffBucketType|#EndlessDungeonBuffBucketType]* _bucketType_)
 ** _Returns:_ *integer* _abilityId_
 
+* CanRerollCurrentBuffSelectorOptions()
+** _Returns:_ *bool* _canRerollBuffs_
+
+* GetEndlessDungeonBuffSelectorRerollCost()
+** _Returns:_ *integer* _rerollCost_
+
 * GetEndlessDungeonCounterValue(*[EndlessDungeonCounterType|#EndlessDungeonCounterType]* _counterType_)
 ** _Returns:_ *integer* _value_
 
@@ -14090,6 +14165,9 @@ h2. Game API
 * GetJournalQuestRewardSkillLine(*luaindex* _journalQuestIndex_, *luaindex* _rewardIndex_)
 ** _Returns:_ *[SkillType|#SkillType]* _skillType_, *luaindex* _skillLineIndex_
 
+* GetJournalQuestRewardActiveSpectacleEventId(*luaindex* _journalQuestIndex_, *luaindex* _rewardIndex_)
+** _Returns:_ *integer* _activeSpectacleEventId_
+
 * GetJournalQuestStartingZone(*luaindex* _journalQuestIndex_)
 ** _Returns:_ *luaindex* _zoneIndex_
 
@@ -14293,6 +14371,16 @@ h2. Game API
 
 * ChooseEndlessDungeonBuff(*[EndlessDungeonBuffBucketType|#EndlessDungeonBuffBucketType]* _bucketType_)
 
+* RerollEndlessDungeonBuffSelection *private* ()
+
+* IsInteractVOPlaying()
+** _Returns:_ *bool* _isPlaying_
+
+* ReplayLastInteractVO()
+
+* CanReplayLastInteractVO()
+** _Returns:_ *bool* _canReplay_
+
 * CheckInventorySpaceAndWarn(*integer* _numItems_)
 ** _Returns:_ *bool* _haveSpace_
 
@@ -14321,9 +14409,15 @@ h2. Game API
 ** _Returns:_ *integer:nilable* _minLevel_, *integer:nilable* _minChampionPoints_
 
 * GetItemSetSuppressionInfo(*integer* _itemSetId_)
-** _Returns:_ *[ItemSetSuppressionType|#ItemSetSuppressionType]* _suppressionType_, *integer* _refId_
+** _Returns:_ *[ItemBonusSuppressionType|#ItemBonusSuppressionType]* _suppressionType_, *integer* _refId_
 
-* GetItemSetSuppressionName(*integer* _itemSetId_)
+* GetItemTraitSuppressionInfo(*[ItemTraitType|#ItemTraitType]* _itemTraitType_)
+** _Returns:_ *[ItemBonusSuppressionType|#ItemBonusSuppressionType]* _suppressionType_, *integer* _refId_
+
+* GetItemEnchantSuppressionInfo()
+** _Returns:_ *[ItemBonusSuppressionType|#ItemBonusSuppressionType]* _suppressionType_, *integer* _refId_
+
+* GetItemBonusSuppressionName(*[ItemBonusSuppressionType|#ItemBonusSuppressionType]* _suppressionType_, *integer* _refId_)
 ** _Returns:_ *string* _text_
 
 * GetNumAvailableMundusStoneSlots()
@@ -14497,6 +14591,9 @@ h2. Game API
 * SetMapToPlayerLocation()
 ** _Returns:_ *[SetMapResultCode|#SetMapResultCode]* _setMapResult_
 
+* ShouldPlayerMinimapBeZoomedIn()
+** _Returns:_ *bool* _zoomIn_
+
 * DoesCurrentMapMatchMapForPlayerLocation()
 ** _Returns:_ *bool* _matches_
 
@@ -14559,6 +14656,9 @@ h2. Game API
 
 * ProcessMapClick(*number* _normalizedClickX_, *number* _normalizedClickY_)
 ** _Returns:_ *[SetMapResultCode|#SetMapResultCode]* _setMapResult_
+
+* GetZoneIndexByMapId(*integer* _mapId_)
+** _Returns:_ *luaindex:nilable* _zoneIndex_
 
 * GetMapInfoByIndex(*luaindex* _index_)
 ** _Returns:_ *string* _name_, *[UIMapType|#UIMapType]* _mapType_, *[MapContentType|#MapContentType]* _mapContentType_, *luaindex* _zoneIndex_, *string* _description_
@@ -14628,7 +14728,7 @@ h2. Game API
 ** _Returns:_ *string* _header_
 
 * GetMapMouseoverInfo(*number* _normalizedMouseX_, *number* _normalizedMouseY_)
-** _Returns:_ *string* _locationName_, *string* _textureFile_, *number* _textureWidthNormalized_, *number* _textureHeightNormalized_, *number* _textureXOffsetNormalized_, *number* _textureYOffsetNormalized_
+** _Returns:_ *string* _locationName_, *string* _textureFile_, *number* _textureWidthNormalized_, *number* _textureHeightNormalized_, *number* _textureXOffsetNormalized_, *number* _textureYOffsetNormalized_, *integer* _mapId_
 
 * GetNumMapBlobs()
 ** _Returns:_ *integer* _numBlobs_
@@ -14676,7 +14776,7 @@ h2. Game API
 
 * OnMapUpdateComplete()
 
-* PingMap(*[MapDisplayPinType|#MapDisplayPinType]* _pingType_, *[MapDisplayType|#MapDisplayType]* _mapDisplayType_, *number* _normalizedX_, *number* _normalizedZ_)
+* PingMap(*[MapDisplayPinType|#MapDisplayPinType]* _pingType_, *[MapDisplayType|#MapDisplayType]* _mapDisplayType_, *number* _normalizedX_, *number* _normalizedZ_, *object* _mapDisplay_)
 
 * SetPlayerWaypointByWorldLocation(*integer* _worldX_, *integer* _worldY_, *integer* _worldZ_)
 ** _Returns:_ *bool* _success_
@@ -15405,6 +15505,9 @@ h2. Game API
 ** _Returns:_ *integer:nilable* _campaignId_, *[Alliance|#Alliance]:nilable* _alliance_, *integer:nilable* _timeLeftS_
 
 * MarkAllianceLockPendingNotificationSeen()
+
+* IsCurrentCampaignVengeanceRuleset()
+** _Returns:_ *bool* _isInVengeance_
 
 * GetExpectedGroupQueueResult()
 ** _Returns:_ *[QueueForCampaignResponseType|#QueueForCampaignResponseType]* _queueForCampaignResult_
@@ -16254,9 +16357,6 @@ h2. Game API
 
 * GetAchievementTimestamp(*integer* _achievementId_)
 ** _Returns:_ *integer53* _timestamp_
-
-* IsAchievementComplete(*integer* _achievementId_)
-** _Returns:_ *bool* _completed_
 
 * GetAchievementNumRewards(*integer* _achievementId_)
 ** _Returns:_ *integer* _numRewards_
@@ -17283,6 +17383,9 @@ h2. Game API
 ** _Returns:_ *bool* _disabled_
 
 * IsLFGActivityDisabled(*integer* _activityId_)
+** _Returns:_ *bool* _disabled_
+
+* IsLFGAccountDisabled()
 ** _Returns:_ *bool* _disabled_
 
 * HasLFGReadyCheckNotification()
@@ -19173,6 +19276,8 @@ h2. Game API
 * DestroyGuildHistoryRequest(*integer* _requestId_)
 ** _Returns:_ *bool* _successfullyDestroyed_
 
+* DumpGuildHistoryChunkInformation(*integer:nilable* _guildId_)
+
 * GetNumInProgressAntiquities()
 ** _Returns:_ *integer* _numInProgressAntiquities_
 
@@ -19591,6 +19696,9 @@ h2. Game API
 
 * RequestTributeExit(*bool* _isInterceptingCloseAction_)
 
+* GetDraftedPatronId(*[TributePatronDraftId|#TributePatronDraftId]* _patronDraftId_)
+** _Returns:_ *integer* _patronDefId_
+
 * RequestSetGroupFinderExpectingUpdates(*bool* _isExpectingUpdates_)
 
 * RequestGroupFinderSearch()
@@ -19990,6 +20098,89 @@ h2. Game API
 * MarkReturningPlayerLeaveIntroPromptShown()
 
 * HandleReturningPlayerUISystemShown(*[UISystem|#UISystem]* _uiSystem_)
+
+* CanAcceptActiveSpectacleEventQuest(*integer* _activeSpectacleEventId_)
+** _Returns:_ *bool* _canAcceptQuest_
+
+* GetNumActiveSpectacleEvents()
+** _Returns:_ *integer* _numActiveSpectacleEvents_
+
+* GetActiveSpectacleEventId(*luaindex* _activeSpectacleEventIndex_)
+** _Returns:_ *integer* _spectacleEventDefId_
+
+* GetActiveSpectacleEventDisplayName(*integer* _activeSpectacleEventId_)
+** _Returns:_ *string* _displayName_
+
+* GetActiveSpectacleEventPhaseInfo(*integer* _activeSpectacleEventId_)
+** _Returns:_ *luaindex* _currentPhase_, *integer* _numPhases_
+
+* GetActiveSpectacleEventPhaseDisplayName(*integer* _activeSpectacleEventId_)
+** _Returns:_ *string* _displayName_
+
+* GetActiveSpectacleEventPhaseDescription(*integer* _activeSpectacleEventId_)
+** _Returns:_ *string* _description_
+
+* GetActiveSpectacleEventPhaseStartedNotificationMessage(*integer* _activeSpectacleEventId_)
+** _Returns:_ *string* _phaseStartedNotificationMessage_
+
+* GetActiveSpectacleEventPhaseCompleteNotificationMessage(*integer* _activeSpectacleEventId_)
+** _Returns:_ *string* _phaseCompleteNotificationMessage_
+
+* GetSpectacleEventPhaseStartedAnnouncementInfo(*integer* _activeSpectacleEventId_, *integer* _activeSpectacleEventPhaseId_)
+** _Returns:_ *string* _broadcastMessage_, *string* _soundId_
+
+* GetSpectacleEventPhaseCompleteAnnouncementInfo(*integer* _activeSpectacleEventId_, *integer* _activeSpectacleEventPhaseId_)
+** _Returns:_ *string* _broadcastMessage_, *string* _soundId_
+
+* GetActiveSpectacleEventPhaseProgressPercentage(*integer* _activeSpectacleEventId_)
+** _Returns:_ *number* _progressPercentage_
+
+* IsCurrentActiveSpectacleEventPhaseComplete(*integer* _activeSpectacleEventId_)
+** _Returns:_ *bool* _isCurrentPhaseComplete_
+
+* GetSecondsRemainingUntilNextActiveSpectacleEventPhase(*integer* _activeSpectacleEventId_)
+** _Returns:_ *number* _secondsRemaining_
+
+* GetActiveSpectacleEventQuestIndex(*integer* _activeSpectacleEventId_)
+** _Returns:_ *luaindex:nilable* _questIndex_
+
+* RequestBestowActiveSpectacleEventQuest(*integer* _activeSpectacleEventId_)
+
+* GetActiveSpectacleEventIdsForZoneIndex(*luaindex* _zoneIndex_)
+** _Uses variable returns..._
+** _Returns:_ *integer* _activeSpectacleEventId_
+
+* GetActiveSpectacleEventIdsForPOI(*luaindex* _zoneIndex_, *luaindex* _poiIndex_)
+** _Uses variable returns..._
+** _Returns:_ *integer* _activeSpectacleEventId_
+
+* GetActiveSpectacleEventIdsForWhichPOIIsPrimary(*luaindex* _zoneIndex_, *luaindex* _poiIndex_)
+** _Uses variable returns..._
+** _Returns:_ *integer* _primaryActiveSpectacleEventId_
+
+* IsActiveSpectacleEventPhaseTransitionEnabled(*integer* _activeSpectacleEventId_)
+** _Returns:_ *bool* _phaseTransitionEnabled_
+
+* GetActiveSpectacleEventLootIconGamepad(*integer* _activeSpectacleEventId_)
+** _Returns:_ *textureName* _lootIcon_
+
+* GetActiveSpectacleEventLootIconKeyboard(*integer* _activeSpectacleEventId_)
+** _Returns:_ *textureName* _lootIcon_
+
+* GetActiveSpectacleEventActivityFinderBackgroundGamepad(*integer* _activeSpectacleEventId_)
+** _Returns:_ *textureName* _backgroundTexture_
+
+* GetActiveSpectacleEventActivityFinderBackgroundKeyboard(*integer* _activeSpectacleEventId_)
+** _Returns:_ *textureName* _backgroundTexture_
+
+* GetActiveSpectacleEventNumFeaturedAchievements(*integer* _activeSpectacleEventId_)
+** _Returns:_ *integer* _numFeaturedAchievements_
+
+* GetActiveSpectacleEventFeaturedAchievementsId(*integer* _activeSpectacleEventId_, *luaindex* _achievementIndex_)
+** _Returns:_ *integer* _achievementId_
+
+* IsCharmAbility(*integer* _abilityId_)
+** _Returns:_ *bool* _isCharmAbility_
 
 
 * IsGameCameraActive()
@@ -21363,8 +21554,15 @@ h2. Game API
 * GetMarketProductClaimGiftNoticeInfo *private* (*integer* _marketProductId_)
 ** _Returns:_ *string* _noticeText_, *luaindex:nilable* _helpCategoryIndex_, *luaindex:nilable* _helpIndex_
 
-* GetMarketProductUnlockedByAchievementInfo(*integer* _marketProductId_)
-** _Returns:_ *integer* _achievementId_, *bool* _hasCompletedAchievement_, *luaindex:nilable* _helpCategoryIndex_, *luaindex:nilable* _helpIndex_
+* GetMarketProductUnlockedByAchievementId(*integer* _marketProductId_)
+** _Returns:_ *integer* _achievementId_
+
+* GetMarketProductUnlockedByCollectibleIds(*integer* _marketProductId_)
+** _Uses variable returns..._
+** _Returns:_ *integer* _collectibleIds_
+
+* GetMarketProductUnlockedHelpIndices(*integer* _marketProductId_)
+** _Returns:_ *luaindex:nilable* _helpCategoryIndex_, *luaindex:nilable* _helpIndex_
 
 * IsMarketProductNew *private* (*integer* _marketProductId_)
 ** _Returns:_ *bool* _isNew_
@@ -22312,6 +22510,9 @@ h2. Game API
 * GetAchievementPersistenceLevel(*integer* _achievementId_)
 ** _Returns:_ *[AchievementPersistenceLevel|#AchievementPersistenceLevel]* _persistenceLevel_
 
+* IsAchievementComplete(*integer* _achievementId_)
+** _Returns:_ *bool* _completed_
+
 * GetCharIdForCompletedAchievement(*integer* _achievementId_)
 ** _Returns:_ *id64* _charId_
 
@@ -22990,7 +23191,7 @@ h3. AddOnManager
 ** _Returns:_ *integer* _version_
 
 * GetForceDisabledAddOnInfo(*luaindex* _disabledAddonIndex_)
-** _Returns:_ *string* _addonName_, *bool* _shouldShowNotification_
+** _Returns:_ *string* _addonName_, *bool* _shouldShowNotification_, *string* _addonTitle_
 
 * GetLoadOutOfDateAddOns()
 ** _Returns:_ *bool* _loadOutOfDateAddons_
@@ -23588,6 +23789,15 @@ h3. BackdropControl
 * GetCenterColor()
 ** _Returns:_ *number* _r_, *number* _g_, *number* _b_, *number* _a_
 
+* GetCenterTextureFileName()
+** _Returns:_ *string* _filename_
+
+* GetEdgeColor()
+** _Returns:_ *number* _r_, *number* _g_, *number* _b_, *number* _a_
+
+* GetEdgeTextureFileName()
+** _Returns:_ *string* _filename_
+
 * IsPixelRoundingEnabled()
 ** _Returns:_ *bool* _pixelRoundingEnabled_
 
@@ -23597,9 +23807,13 @@ h3. BackdropControl
 
 * SetCenterTexture(*string* _filename_, *layout_measurement* _tilingInterval_, *[TextureAddressMode|#TextureAddressMode]* _addressMode_)
 
+* SetCenterTextureFileName(*string* _filename_)
+
 * SetEdgeColor(*number* _r_, *number* _g_, *number* _b_, *number* _a_)
 
 * SetEdgeTexture(*string* _filename_, *integer* _edgeFileWidth_, *integer* _edgeFileHeight_, *layout_measurement* _cornerSize_, *integer* _edgeFilePadding_)
+
+* SetEdgeTextureFileName(*string* _filename_)
 
 * SetInsets(*layout_measurement* _left_, *layout_measurement* _top_, *layout_measurement* _right_, *layout_measurement* _bottom_)
 
@@ -24139,7 +24353,7 @@ Objects that inherit behavior from *Control*
 * ProjectToScreen(*number* _normalizedX_, *number* _normalizedY_)
 ** _Returns:_ *number* _screenX_, *number* _screenY_
 
-* RegisterForEvent(*integer* _event_, *function* _callback_)
+* RegisterForEvent(*integer* _event_, *function* _callback_, *bool* _doOnce_)
 ** _Returns:_ *bool* _success_
 
 * ResetTransformNormalizedOriginPoint()
@@ -24677,6 +24891,9 @@ h3. LineControl
 * GetTextureCoords()
 ** _Returns:_ *number* _left_, *number* _right_, *number* _top_, *number* _bottom_
 
+* GetTextureCoordsInPixels()
+** _Returns:_ *integer* _left_, *integer* _right_, *integer* _top_, *integer* _bottom_
+
 * GetTextureFileDimensions()
 ** _Returns:_ *integer* _pixelWidth_, *integer* _pixelHeight_
 
@@ -25133,6 +25350,9 @@ h3. TextureControl
 * GetTextureCoords()
 ** _Returns:_ *number* _left_, *number* _right_, *number* _top_, *number* _bottom_
 
+* GetTextureCoordsInPixels()
+** _Returns:_ *integer* _left_, *integer* _right_, *integer* _top_, *integer* _bottom_
+
 * GetTextureFileDimensions()
 ** _Returns:_ *integer* _pixelWidth_, *integer* _pixelHeight_
 
@@ -25201,7 +25421,7 @@ h3. TooltipControl
 
 * AddHeaderLine(*string* _text_, *string* _font_, *integer* _headerRow_, *[TooltipHeaderSide|#TooltipHeaderSide]* _headerSide_, *number* _r_, *number* _g_, *number* _b_)
 
-* AddLine(*string* _text_, *string* _font_, *number* _r_, *number* _g_, *number* _b_, *[AnchorPosition|#AnchorPosition]* _lineAnchor_, *[ModifyTextType|#ModifyTextType]* _modifyTextType_, *[TextAlignment|#TextAlignment]* _textAlignment_, *bool* _setToFullSize_, *number* _minWidth_)
+* AddLine(*string* _text_, *string* _font_, *number* _r_, *number* _g_, *number* _b_, *[AnchorPosition|#AnchorPosition]* _lineAnchor_, *[ModifyTextType|#ModifyTextType]* _modifyTextType_, *[TextAlignment|#TextAlignment]* _textAlignment_, *bool* _setToFullSize_, *number* _minWidth_, *layout_measurement* _lineSpacing_)
 
 * AddVerticalPadding(*number* _paddingY_)
 
@@ -25220,6 +25440,8 @@ h3. TooltipControl
 * AppendSkyshardHint(*integer* _skyshardId_)
 
 * AppendUnitName(*string* _unitTag_)
+
+* AppendZoneSpectacleTooltip(*integer* _spectacleId_)
 
 * ClearLines()
 
@@ -25250,7 +25472,7 @@ h3. TooltipControl
 
 * SetAttachedMailItem(*id64* _mailId_, *luaindex* _attachSlot_)
 
-* SetBagItem(*[Bag|#Bag]* _bagIndex_, *integer* _slotIndex_)
+* SetBagItem(*[Bag|#Bag]* _bagIndex_, *integer* _slotIndex_, *[ItemTooltipDisplayFlags|#ItemTooltipDisplayFlags]* _displayFlags_)
 
 * SetBook(*luaindex* _categoryIndex_, *luaindex* _collectionIndex_, *luaindex* _bookIndex_)
 
@@ -25625,7 +25847,7 @@ h3. ScriptEventManager
 * RegisterForAllEvents(*string* _name_, *function* _callback_)
 ** _Returns:_ *bool* _ret_
 
-* RegisterForEvent(*string* _name_, *integer* _event_, *function* _callback_)
+* RegisterForEvent(*string* _name_, *integer* _event_, *function* _callback_, *bool* _doOnce_)
 ** _Returns:_ *bool* _ret_
 
 * RegisterForPostEffectsUpdate(*string* _name_, *integer* _minInterval_, *function* _callback_)
@@ -25872,6 +26094,7 @@ h2. Events
 * EVENT_ENABLE_SIEGE_FIRE_ABILITY
 * EVENT_ENABLE_SIEGE_PACKUP_ABILITY
 * EVENT_ENDLESS_DUNGEON_BUFF_SELECTOR_CHOICES_RECEIVED
+* EVENT_ENDLESS_DUNGEON_BUFF_SELECTOR_REROLL_FAILED (*[EndlessDungeonBuffSelectorRerollError|#EndlessDungeonBuffSelectorRerollError]* _errorReason_)
 * EVENT_ENDLESS_DUNGEON_BUFF_STACK_COUNT_UPDATED (*[EndlessDungeonBuffType|#EndlessDungeonBuffType]* _buffType_, *integer* _abilityId_, *integer* _stackCount_)
 * EVENT_ENDLESS_DUNGEON_COMPLETED (*integer* _flags_)
 * EVENT_ENDLESS_DUNGEON_CONFIRM_COMPANION_SUMMONING (*integer* _collectibleId_)
@@ -26134,6 +26357,7 @@ h2. Events
 * EVENT_LOOT_RECEIVED (*string* _receivedBy_, *string* _itemName_, *integer* _quantity_, *[ItemUISoundCategory|#ItemUISoundCategory]* _soundCategory_, *[LootItemType|#LootItemType]* _lootType_, *bool* _self_, *bool* _isPickpocketLoot_, *string* _questItemIcon_, *integer* _itemId_, *bool* _isStolen_)
 * EVENT_LOOT_UPDATED
 * EVENT_LORE_BOOK_ALREADY_KNOWN (*string* _bookTitle_)
+* EVENT_LORE_BOOK_COLLECTION_LEARNED (*luaindex* _categoryIndex_, *luaindex* _collectionIndex_, *integer* _numBooksLearned_)
 * EVENT_LORE_BOOK_LEARNED (*luaindex* _categoryIndex_, *luaindex* _collectionIndex_, *luaindex* _bookIndex_, *luaindex* _guildIndex_, *bool* _isMaxRank_)
 * EVENT_LORE_BOOK_LEARNED_SKILL_EXPERIENCE (*luaindex* _categoryIndex_, *luaindex* _collectionIndex_, *luaindex* _bookIndex_, *luaindex* _guildIndex_, *[SkillType|#SkillType]* _skillType_, *luaindex* _skillLineIndex_, *luaindex* _rank_, *integer* _previousXP_, *integer* _currentXP_)
 * EVENT_LORE_COLLECTION_COMPLETED (*luaindex* _categoryIndex_, *luaindex* _collectionIndex_, *luaindex* _guildIndex_, *bool* _isMaxRank_)
@@ -26330,6 +26554,8 @@ h2. Events
 * EVENT_SMITHING_TRAIT_RESEARCH_TIMES_UPDATED
 * EVENT_SOUL_GEM_ITEM_CHARGE_FAILURE (*[SoulGemItemChargingReason|#SoulGemItemChargingReason]* _reason_)
 * EVENT_SPAM_WARNING (*[SpamWarningType|#SpamWarningType]* _spamType_)
+* EVENT_SPECTACLE_EVENT_PHASE_UPDATED (*integer* _spectacleId_, *integer* _oldActivePhaseId_, *integer* _newActivePhaseId_, *bool* _isInitialUpdate_)
+* EVENT_SPECTACLE_EVENT_UPDATED (*integer* _spectacleId_)
 * EVENT_STABLE_INTERACT_END
 * EVENT_STABLE_INTERACT_START
 * EVENT_STACKED_ALL_ITEMS_IN_BAG (*[Bag|#Bag]* _bagId_)
@@ -26489,6 +26715,7 @@ h2. Events
 * EVENT_TRIBUTE_PLAYER_TURN_STARTED (*bool* _isLocalPlayer_)
 
 * EVENT_ACTIVE_DISPLAY_CHANGED
+* EVENT_ADDONS_DISABLED_STATE_CHANGED (*bool* _forceDisabled_)
 * EVENT_APP_GUI_HIDDEN_STATE_CHANGED (*bool* _hidden_)
 * EVENT_AVAILABLE_DISPLAY_DEVICES_CHANGED
 * EVENT_BACKGROUND_LIST_FILTER_COMPLETE (*integer* _taskId_)
@@ -26552,6 +26779,7 @@ h2. Events
 * EVENT_INCOMING_FRIEND_INVITE_ADDED (*string* _displayName_)
 * EVENT_INCOMING_FRIEND_INVITE_NOTE_UPDATED (*string* _displayName_, *string* _message_)
 * EVENT_INCOMING_FRIEND_INVITE_REMOVED (*string* _displayName_)
+* EVENT_INTERACT_VO_PLAYING_STATE_UPDATED
 * EVENT_INTERFACE_SETTING_CHANGED (*[SettingSystemType|#SettingSystemType]* _settingSystemType_, *integer* _settingId_)
 * EVENT_JUMP_FAILED (*[JumpResult|#JumpResult]* _reason_)
 * EVENT_KEYBIND_DISPLAY_MODE_CHANGED (*[KeybindDisplayMode|#KeybindDisplayMode]* _keybindDisplayMode_)
@@ -27514,6 +27742,14 @@ h5. OnKeyUp
 * [Inherits: OnSetControlEventHandler|#OnSetControlEventHandler]
 * ScriptArguments: local self, key, ctrl, alt, shift, command = ...
 
+h5. OnLabelTextChanged
+* [Inherits: OnSetControlEventHandler|#OnSetControlEventHandler]
+* ScriptArguments: local label = ...
+
+h5. OnLabelUserAreaCreated
+* [Inherits: OnSetControlEventHandler|#OnSetControlEventHandler]
+* ScriptArguments: local label, areaData, areaText, unscaledLeft, unscaledRight, unscaledTop, unscaledBottom, continuation = ...
+
 h5. OnLinkClicked
 * [Inherits: OnSetControlEventHandler|#OnSetControlEventHandler]
 * ScriptArguments: local self, linkData, linkText, button, ctrl, alt, shift, command = ...
@@ -27892,6 +28128,8 @@ h5. Tooltip
 * [Inherits: Control|#Control]
 * [Child: OnAddGameData|#OnAddGameData]
 * [Child: OnCleared|#OnCleared]
+* [Child: OnLabelTextChanged|#OnLabelTextChanged]
+* [Child: OnLabelUserAreaCreated|#OnLabelUserAreaCreated]
 * [Child: font|#Attributes]
 * [Child: headerRowSpacing|#Attributes]
 * [Child: headerVerticalOffset|#Attributes]

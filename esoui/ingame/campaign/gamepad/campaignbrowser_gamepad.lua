@@ -398,7 +398,7 @@ function ZO_CampaignBrowser_Gamepad:RefreshContentHeader()
             -- Data 1
             headerData.data1HeaderText = GetString(SI_GAMEPAD_CAMPAIGN_NEXT_SCORING_EVALUATION)
             headerData.data1Text = function(control)
-                ZO_CampaignScoring_TimeUpdate(control, GetSecondsUntilCampaignScoreReevaluation)
+                CAMPAIGN_SCORING_GAMEPAD:OnTimeControlUpdate(control, GetSecondsUntilCampaignScoreReevaluation)
                 return true
             end
             headerData.data1TextNarration = function()

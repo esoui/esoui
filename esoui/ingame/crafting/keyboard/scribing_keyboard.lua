@@ -310,7 +310,7 @@ function ZO_Scribing_Keyboard:InitializeKeybindStripDescriptors()
             enabled = function()
                 if self:HasMouseOverCraftedAbilityEntry() then
                     local craftedAbilityData = self:GetMouseOverCraftedAbilityEntry().dataEntry.data
-                    return craftedAbilityData:IsSlottedOnHotBar()
+                    return craftedAbilityData:IsScribed()
                 end
                 return false
             end,

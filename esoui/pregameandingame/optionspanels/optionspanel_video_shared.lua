@@ -46,7 +46,7 @@ end
 
 --This is used to disable the Resolution drop down when using HDR or when in windowed mode, since in that situation we use the Desktop resolution to avoid any issue with DXGI
 local function ZO_OptionsPanel_Video_UpdateResolutionDropdown(control)
-    if IsSystemUsingHDR() or IsGameInWindowedMode() then
+    if IsGameInWindowedMode() then
         ZO_Options_SetOptionInactive(control)
     else
         ZO_Options_SetOptionActive(control)
@@ -692,9 +692,15 @@ local ZO_OptionsPanel_Video_ControlData =
             text = SI_GRAPHICS_OPTIONS_CONSOLE_ENHANCED_RENDER_QUALITY,
             tooltipText = SI_GRAPHICS_OPTIONS_CONSOLE_ENHANCED_RENDER_QUALITY_TOOLTIP_PS5,
             valid = { GRAPHICS_MODE_FIDELITY, GRAPHICS_MODE_PERFORMANCE },
+            events =
+            {
+                [GRAPHICS_MODE_FIDELITY] = "OnGraphicsModeFidelitySelected",
+                [GRAPHICS_MODE_PERFORMANCE] = "OnGraphicsModePerformanceSelected",
+            },
+            gamepadHasEnabledDependencies = true,
             valueStringPrefix = "SI_GRAPHICSMODE",
             mustPushApply = false,
-            exists =  DoesPlatformSupportGraphicSetting(GRAPHICS_SETTING_GRAPHICS_MODE_PS5)
+            exists = DoesPlatformSupportGraphicSetting(GRAPHICS_SETTING_GRAPHICS_MODE_PS5)
         },
         [GRAPHICS_SETTING_GRAPHICS_MODE_XBSS] =
         {
@@ -705,6 +711,12 @@ local ZO_OptionsPanel_Video_ControlData =
             text = SI_GRAPHICS_OPTIONS_CONSOLE_ENHANCED_RENDER_QUALITY,
             tooltipText = SI_GRAPHICS_OPTIONS_CONSOLE_ENHANCED_RENDER_QUALITY_TOOLTIP_XBSS,
             valid = { GRAPHICS_MODE_FIDELITY, GRAPHICS_MODE_PERFORMANCE },
+            events =
+            {
+                [GRAPHICS_MODE_FIDELITY] = "OnGraphicsModeFidelitySelected",
+                [GRAPHICS_MODE_PERFORMANCE] = "OnGraphicsModePerformanceSelected",
+            },
+            gamepadHasEnabledDependencies = true,
             valueStringPrefix = "SI_GRAPHICSMODE",
             mustPushApply = true,
             exists = DoesPlatformSupportGraphicSetting(GRAPHICS_SETTING_GRAPHICS_MODE_XBSS)
@@ -718,9 +730,60 @@ local ZO_OptionsPanel_Video_ControlData =
             text = SI_GRAPHICS_OPTIONS_CONSOLE_ENHANCED_RENDER_QUALITY,
             tooltipText = SI_GRAPHICS_OPTIONS_CONSOLE_ENHANCED_RENDER_QUALITY_TOOLTIP_XBSX,
             valid = { GRAPHICS_MODE_FIDELITY, GRAPHICS_MODE_PERFORMANCE },
+            events =
+            {
+                [GRAPHICS_MODE_FIDELITY] = "OnGraphicsModeFidelitySelected",
+                [GRAPHICS_MODE_PERFORMANCE] = "OnGraphicsModePerformanceSelected",
+            },
+            gamepadHasEnabledDependencies = true,
             valueStringPrefix = "SI_GRAPHICSMODE",
             mustPushApply = true,
             exists = DoesPlatformSupportGraphicSetting(GRAPHICS_SETTING_GRAPHICS_MODE_XBSX)
+        },
+        [GRAPHICS_SETTING_CAP_CONSOLE_FRAMERATE_IN_MENUS] =
+        {
+            controlType = OPTIONS_CHECKBOX,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_CAP_CONSOLE_FRAMERATE_IN_MENUS,
+            panel = SETTING_PANEL_VIDEO,
+            text = SI_GRAPHICS_OPTIONS_CAP_CONSOLE_FRAMERATE_IN_MENUS,
+            tooltipText = SI_GRAPHICS_OPTIONS_CAP_CONSOLE_FRAMERATE_IN_MENUS_TOOLTIP,
+            exists = DoesPlatformSupportFramerateCapInMenus,
+            eventCallbacks =
+            {
+                ["OnGraphicsModeFidelitySelected"] = ZO_Options_SetOptionInactive,
+                ["OnGraphicsModePerformanceSelected"] = ZO_Options_SetOptionActive,
+            },
+            gamepadIsEnabledCallback = function()
+                if DoesPlatformSupportGraphicSetting(GRAPHICS_SETTING_GRAPHICS_MODE_PS5) then
+                    return tonumber(GetSetting(SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_GRAPHICS_MODE_PS5)) == GRAPHICS_MODE_PERFORMANCE
+                elseif DoesPlatformSupportGraphicSetting(GRAPHICS_SETTING_GRAPHICS_MODE_XBSS) then
+                    return tonumber(GetSetting(SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_GRAPHICS_MODE_XBSS)) == GRAPHICS_MODE_PERFORMANCE
+                elseif DoesPlatformSupportGraphicSetting(GRAPHICS_SETTING_GRAPHICS_MODE_XBSX) then
+                    return tonumber(GetSetting(SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_GRAPHICS_MODE_XBSX)) == GRAPHICS_MODE_PERFORMANCE
+                end
+
+                return true
+            end,
+
+        },
+        [GRAPHICS_SETTING_ENERGY_SUSTAINABILITY_SCREEN_DIM_AND_RESOLUTION] =
+        {
+            controlType = OPTIONS_FINITE_LIST,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_ENERGY_SUSTAINABILITY_SCREEN_DIM_AND_RESOLUTION,
+            panel = SETTING_PANEL_VIDEO,
+            text = SI_GRAPHICS_OPTIONS_ENERGY_SUSTAINABILITY_SCREEN_DIM_AND_RESOLUTION,
+            tooltipText = function()
+                if IsConsoleUI() then
+                    return GetString(SI_GRAPHICS_OPTIONS_ENERGY_SUSTAINABILITY_SCREEN_DIM_AND_RESOLUTION_CONSOLE_TOOLTIP)
+                else
+                    return GetString(SI_GRAPHICS_OPTIONS_ENERGY_SUSTAINABILITY_SCREEN_DIM_AND_RESOLUTION_PC_TOOLTIP)
+                end
+            end,
+            valid = {ENERGY_SUSTAINABILITY_SCREEN_DIM_AND_RESOLUTION_FIVE_MINS, ENERGY_SUSTAINABILITY_SCREEN_DIM_AND_RESOLUTION_TEN_MINS, ENERGY_SUSTAINABILITY_SCREEN_DIM_AND_RESOLUTION_DISABLED},
+            valueStringPrefix = "SI_ENERGYSUSTAINABILITYSCREENDIMANDRESOLUTION",
+            exists = DoesPlatformSupportScreenDimAndResolutionDrop,
         },
         [GRAPHICS_SETTING_HDR_ENABLED] =
         {
@@ -730,7 +793,6 @@ local ZO_OptionsPanel_Video_ControlData =
             panel = SETTING_PANEL_VIDEO,
             text = SI_GRAPHICS_OPTIONS_VIDEO_HDR_ENABLED,
             tooltipText = SI_GRAPHICS_OPTIONS_VIDEO_HDR_ENABLED_TOOLTIP,
-            valueStringPrefix = "SI_HDREnabled",
             visible = DoesSystemSupportHDR,
             exists = ZO_IsPCUI,
             mustRestartToApply = true,
@@ -909,7 +971,7 @@ local ZO_OptionsPanel_Video_ControlData =
             settingId = UI_SETTING_USE_GAMEPAD_CUSTOM_SCALE,
             panel = SETTING_PANEL_VIDEO,
             text = SI_VIDEO_OPTIONS_UI_USE_CUSTOM_SCALE,
-            tooltipText = SI_GAMEPAD_VIDEO_OPTIONS_UI_USE_CUSTOM_SCALE_TOOLTIP,
+            tooltipText = IsConsoleUI() and GetString(SI_CONSOLE_GAMEPAD_VIDEO_OPTIONS_UI_USE_CUSTOM_SCALE_TOOLTIP) or GetString(SI_GAMEPAD_VIDEO_OPTIONS_UI_USE_CUSTOM_SCALE_TOOLTIP),
             exists = ZO_IsIngameUI,
         },
         [UI_SETTING_GAMEPAD_CUSTOM_SCALE] =
@@ -919,7 +981,7 @@ local ZO_OptionsPanel_Video_ControlData =
             settingId = UI_SETTING_GAMEPAD_CUSTOM_SCALE,
             panel = SETTING_PANEL_VIDEO,
             text = SI_VIDEO_OPTIONS_UI_CUSTOM_SCALE,
-            tooltipText = SI_GAMEPAD_VIDEO_OPTIONS_UI_CUSTOM_SCALE_TOOLTIP,
+            tooltipText = IsConsoleUI() and GetString(SI_CONSOLE_GAMEPAD_VIDEO_OPTIONS_UI_CUSTOM_SCALE_TOOLTIP) or GetString(SI_GAMEPAD_VIDEO_OPTIONS_UI_CUSTOM_SCALE_TOOLTIP),
             exists = ZO_IsIngameUI,
             valueFormat = "%.6f",
             minValue = GAMEPAD_CUSTOM_UI_SCALE_LOWER_BOUND,
@@ -942,7 +1004,7 @@ local ZO_OptionsPanel_Video_ControlData =
             panel = SETTING_PANEL_VIDEO,
             settingId = OPTIONS_CUSTOM_SETTING_SCREEN_ADJUST,
             text = SI_SETTING_SHOW_SCREEN_ADJUST,
-            exists = ZO_IsConsoleUI,
+            exists = IsConsoleUI,
             gamepadIsEnabledCallback = function() 
                 -- only allow resizing once the previous one has been completed.
                 return not IsGUIResizing()

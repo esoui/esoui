@@ -6,8 +6,6 @@
 
 EsoUI\Pregame\Globals\PregameGlobals.lua
 EsoUI\Pregame\Globals\PreGameDialogs.lua
-EsoUI\Pregame\Globals\OverflowDialog.lua
-EsoUI\Pregame\Globals\OverflowDialog.xml
 
 EsoUI\Pregame\Globals\Console\PreGameDialogs_Console.lua
 

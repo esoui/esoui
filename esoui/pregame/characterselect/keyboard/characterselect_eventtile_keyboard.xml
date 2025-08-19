@@ -70,6 +70,7 @@
                         <Label name="$(parent)TimeRemaining" override="true" tier="HIGH" layer="OVERLAY">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)EventImage" offsetX="30" offsetY="10" />
                             <Anchor point="TOPRIGHT" relativeTo="$(parent)EventImage" />
+                            <DimensionConstraints minY="8" />
                         </Label>
 
                         <Label name="$(parent)Title" override="true" tier="HIGH" layer="OVERLAY" font="ZoFontHeader4">

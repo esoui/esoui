@@ -46,6 +46,13 @@ panelBuilder:AddSetting({
 })
 
 panelBuilder:AddSetting({
+    controlName = "Options_Gameplay_ToggleSprint",
+    settingType = SETTING_TYPE_IN_WORLD,
+    settingId = IN_WORLD_UI_SETTING_TOGGLE_SPRINT,
+    header = SI_GAMEPLAY_OPTIONS_GENERAL,
+})
+
+panelBuilder:AddSetting({
     controlName = "Options_Gameplay_CompanionReactions",
     settingType = SETTING_TYPE_IN_WORLD,
     settingId = IN_WORLD_UI_SETTING_COMPANION_REACTION_FREQUENCY,

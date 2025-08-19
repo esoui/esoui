@@ -510,26 +510,29 @@ do
     function ZO_ChatSystem:Maximize()
         if self.isMinimized then
             for _, container in pairs(self.containers) do
-                -- Calculate the distance to the original position
-                local maximizeDistance = container.originalPosition - container.control:GetRight()
+                -- If Minimize() was called before chat containers were created, trying access originalPosition will error.
+                if container.originalPosition then
+                    -- Calculate the distance to the original position
+                    local maximizeDistance = container.originalPosition - container.control:GetRight()
 
-                -- Setup the animation and fire it
-                local animationTimeline = GetOrCreateMinimizeAnimationTimeline(container)
-                animationTimeline:GetAnimation(1):SetTranslateDeltas(maximizeDistance, 0)
-                animationTimeline:PlayFromStart()
+                    -- Setup the animation and fire it
+                    local animationTimeline = GetOrCreateMinimizeAnimationTimeline(container)
+                    animationTimeline:GetAnimation(1):SetTranslateDeltas(maximizeDistance, 0)
+                    animationTimeline:PlayFromStart()
 
-                -- Show the tabs that haven't overflowed
-                for _, tab in pairs(container.tabGroup.m_Buttons) do
-                    if tab.index < container.hiddenTabStartIndex then
-                        tab:SetHidden(false)
-                    elseif container.overflowTab then
-                        container.overflowTab:SetHidden(false)
+                    -- Show the tabs that haven't overflowed
+                    for _, tab in pairs(container.tabGroup.m_Buttons) do
+                        if tab.index < container.hiddenTabStartIndex then
+                            tab:SetHidden(false)
+                        elseif container.overflowTab then
+                            container.overflowTab:SetHidden(false)
+                        end
                     end
+                    if container.newWindowTab then
+                        container.newWindowTab:SetHidden(false)
+                    end
+                    container:FadeIn()
                 end
-                if container.newWindowTab then
-                    container.newWindowTab:SetHidden(false)
-                end
-                container:FadeIn()
             end
 
             -- Hide the minimized bar and fade in the windows

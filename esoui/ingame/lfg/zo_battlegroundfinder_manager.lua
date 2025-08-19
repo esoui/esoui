@@ -8,6 +8,7 @@ local categoryData =
         pressedIcon = "EsoUI/Art/LFG/LFG_indexIcon_battlegrounds_down.dds",
         mouseoverIcon = "EsoUI/Art/LFG/LFG_indexIcon_battlegrounds_over.dds",
         disabledIcon = "EsoUI/Art/LFG/LFG_indexIcon_battlegrounds_disabled.dds",
+        isAccountRestricted = IsLFGAccountDisabled,
     },
     gamepadData =
     {
@@ -17,6 +18,7 @@ local categoryData =
         disabledMenuIcon = "EsoUI/Art/LFG/Gamepad/gp_LFG_menuIcon_battlegrounds_disabled.dds",
         sceneName = "gamepadBattlegroundFinder",
         tooltipDescription = GetString(SI_GAMEPAD_ACTIVITY_FINDER_TOOLTIP_BATTLEGROUNDS),
+        isAccountRestricted = IsLFGAccountDisabled,
     },
 }
 

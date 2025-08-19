@@ -1,4 +1,5 @@
-local gameEntries = {}
+local g_gameEntries = {}
+local g_shouldShowAddonsInMenu
 
 -- Resume Game
 
@@ -44,7 +45,7 @@ local function HideAddons()
 end
 
 local function AddAddonsEntry(entryTable)
-    if not AreUserAddOnsSupported() then
+    if not g_shouldShowAddonsInMenu then
         return
     end
 
@@ -114,15 +115,15 @@ end
 -- Setup
 
 local function RebuildTree(gameMenu)
-    gameEntries = {}
-    AddResumeEntry(gameEntries)
-    AddSettingsEntries(gameEntries)
-    AddControlsEntries(gameEntries)
-    AddAddonsEntry(gameEntries)
-    AddAnnouncementsEntry(gameEntries)
-    AddLogoutEntry(gameEntries)
-    AddQuitEntry(gameEntries)
-    gameMenu:SubmitLists(gameEntries)
+    g_gameEntries = {}
+    AddResumeEntry(g_gameEntries)
+    AddSettingsEntries(g_gameEntries)
+    AddControlsEntries(g_gameEntries)
+    AddAddonsEntry(g_gameEntries)
+    AddAnnouncementsEntry(g_gameEntries)
+    AddLogoutEntry(g_gameEntries)
+    AddQuitEntry(g_gameEntries)
+    gameMenu:SubmitLists(g_gameEntries)
 end
 
 function ZO_GameMenu_InGame_Initialize(self)
@@ -135,14 +136,17 @@ function ZO_GameMenu_InGame_Initialize(self)
     end
     local GAME_MENU_INGAME = ZO_GameMenu_Initialize(self, OnShow, OnHide)
 
+    --Only display the addons option if user addons are supported
+    g_shouldShowAddonsInMenu = AreUserAddOnsSupported()
+
     local gameMenuIngameFragment = ZO_FadeSceneFragment:New(self)
-    gameMenuIngameFragment:RegisterCallback("StateChange",   function(oldState, newState)
-                                            if(newState == SCENE_FRAGMENT_SHOWING) then
-                                                PushActionLayerByName("GameMenu")
-                                            elseif(newState == SCENE_FRAGMENT_HIDING) then
-                                                RemoveActionLayerByName("GameMenu")
-                                            end
-                                        end)
+    gameMenuIngameFragment:RegisterCallback("StateChange", function(oldState, newState)
+        if newState == SCENE_FRAGMENT_SHOWING then
+            PushActionLayerByName("GameMenu")
+        elseif newState == SCENE_FRAGMENT_HIDING then
+            RemoveActionLayerByName("GameMenu")
+        end
+    end)
 
     GAME_MENU_SCENE = ZO_Scene:New("gameMenuInGame", SCENE_MANAGER)
     GAME_MENU_SCENE:AddFragment(gameMenuIngameFragment)
@@ -152,4 +156,11 @@ function ZO_GameMenu_InGame_Initialize(self)
     end
 
     CALLBACK_MANAGER:RegisterCallback("AddOnEULAHidden", UpdateNewStates)
+
+    local function OnAddOnsDisabledStateChanged(_, addOnsDisabled)
+        if AreUserAddOnsSupported() then
+            g_shouldShowAddonsInMenu = true
+        end
+    end
+    EVENT_MANAGER:RegisterForEvent("GameMenu_Ingame", EVENT_ADDONS_DISABLED_STATE_CHANGED, OnAddOnsDisabledStateChanged)
 end

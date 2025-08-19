@@ -46,6 +46,7 @@ function ZO_ModBrowser_Gamepad:RegisterForEvents()
     EVENT_MANAGER:RegisterForEvent("ModBrowser", EVENT_MOD_LISTING_DEPENDENCIES_LOAD_COMPLETE, function(_, ...) self:OnModListingDependenciesLoadComplete(...) end)
     EVENT_MANAGER:RegisterForEvent("ModBrowser", EVENT_MOD_LISTING_REPORT_SUBMITTED, function(_, ...) self:OnModListingReportSubmitted(...) end)
     EVENT_MANAGER:RegisterForEvent("ModBrowser", EVENT_CONSOLE_ADDONS_DISABLED_STATE_CHANGED, function(_, ...) self:OnConsoleAddOnsDisabledStateChanged(...) end)
+    EVENT_MANAGER:RegisterForEvent("ModBrowser", EVENT_ADDONS_DISABLED_STATE_CHANGED, function(_, ...) self:OnAddOnsDisabledStateChanged(...) end)
     EVENT_MANAGER:RegisterForEvent("ModBrowser", EVENT_MOD_LISTING_RELEASE_NOTE_LOAD_COMPLETE, function(_, ...) self:OnModListingReleaseNoteLoadComplete(...) end)
 end
 
@@ -1236,6 +1237,15 @@ function ZO_ModBrowser_Gamepad:OnConsoleAddOnsDisabledStateChanged(consoleAddOns
     end
 end
 
+function ZO_ModBrowser_Gamepad:OnAddOnsDisabledStateChanged(addOnsDisabled)
+    if self:IsShowing() and addOnsDisabled then
+        --If addons were disabled, close all open dialogs and kick the player out of the screen
+        local FORCE_CLOSE_DIALOGS = true
+        ZO_Dialogs_ReleaseAllDialogs(FORCE_CLOSE_DIALOGS)
+        SCENE_MANAGER:HideCurrentScene(ZO_BHSCR_ACCESS_FORBIDDEN)
+    end
+end
+
 function ZO_ModBrowser_Gamepad:RefreshSearchState()
     local currentSearchState = MOD_BROWSER_SEARCH_MANAGER:GetSearchState()
     if currentSearchState == ZO_MOD_BROWSER_SEARCH_STATES.WAITING then
@@ -1260,6 +1270,8 @@ function ZO_ModBrowser_Gamepad:OnEulaHidden()
             ADDON_MANAGER_GAMEPAD:MarkDirty()
         end
         MOD_BROWSER_SEARCH_MANAGER:ExecuteSearch(self.searchType)
+        --Fire this if the EULA was just accepted, as it would have failed upon first entering the screen
+        OnModBrowserOpened()
     end
     self:UpdateKeybinds()
 end
@@ -1341,6 +1353,9 @@ function ZO_ModBrowser_Gamepad:OnShowing()
     self:RefreshData()
     self:Activate()
     self:RefreshHeader()
+    if HasAgreedToEULA(EULA_TYPE_ADDON_EULA) then
+        OnModBrowserOpened()
+    end
 end
 
 --Overridden from base
@@ -1355,6 +1370,9 @@ function ZO_ModBrowser_Gamepad:OnHiding()
     ZO_GamepadInteractiveSortFilterList.OnHiding(self)
     ZO_GamepadGenericHeader_Deactivate(self.contentHeader)
     GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
+    if HasAgreedToEULA(EULA_TYPE_ADDON_EULA) then
+        OnModBrowserClosed()
+    end
 end
 
 --Overridden from base

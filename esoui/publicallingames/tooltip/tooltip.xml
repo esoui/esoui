@@ -274,9 +274,36 @@
         <TopLevelControl name="InformationTooltipTopLevel" inherits="TooltipTopLevel">
             <Controls>
                 <Tooltip name="InformationTooltip" inherits="ZO_BaseTooltip">
+                    <OnInitialized>
+                        ZO_InformationTooltip_Initialize(self)
+                    </OnInitialized>
+
+                    <OnAddGameData>
+                        ZO_InformationTooltip_OnAddGameData(...)
+                    </OnAddGameData>
+
+                    <OnCleared>
+                        ZO_InformationTooltip_Cleared(self)
+                    </OnCleared>
+
                     <Controls>
                         <Control name="$(parent)SellPrice" inherits="ZO_TooltipMoneyLine" hidden="true"/>
+                        <StatusBar name="$(parent)ProgressBar" inherits="ZO_ArrowProgressBarWithBG" hidden="true" />
                     </Controls>
+                </Tooltip>
+            </Controls>
+        </TopLevelControl>
+
+        <TopLevelControl name="SmallKeyMarkupInformationTooltipTopLevel" inherits="TooltipTopLevel">
+            <Controls>
+                <Tooltip name="SmallKeyMarkupInformationTooltip" inherits="ZO_BaseTooltip">
+                    <OnLabelTextChanged>
+                        ZO_SmallKeyMarkupLabel_OnTextChanged(...)
+                    </OnLabelTextChanged>
+
+                    <OnLabelUserAreaCreated>
+                        ZO_SmallKeyMarkupLabel_OnNewUserAreaCreated(...)
+                    </OnLabelUserAreaCreated>
                 </Tooltip>
             </Controls>
         </TopLevelControl>

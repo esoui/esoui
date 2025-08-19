@@ -20,7 +20,7 @@ ZO_RESTYLE_SLOT_ICON_INNER_WIDTH = ZO_RESTYLE_SLOT_ICON_WIDTH - 8
 ZO_RESTYLE_SLOT_ICON_INNER_HEIGHT = ZO_RESTYLE_SLOT_ICON_INNER_WIDTH
 
 do
-    local GRID_PADDING_X = 30
+    local GRID_PADDING_X = 20
     local GRID_PADDING_Y = 12
 
     function ZO_RestyleSlot_Base:Initialize(owner, restyleSlotType, gridData, container)

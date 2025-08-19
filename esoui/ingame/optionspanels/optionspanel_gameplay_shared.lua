@@ -368,6 +368,17 @@ local ZO_OptionsPanel_Gameplay_ControlData =
             tooltipText = SI_INTERFACE_OPTIONS_LIMIT_FOLLOWERS_IN_TOWNS_TOOLTIP,
         },
 
+        --Options_Gameplay_ToggleSprint
+        [IN_WORLD_UI_SETTING_TOGGLE_SPRINT] =
+        {
+            controlType = OPTIONS_CHECKBOX,
+            system = SETTING_TYPE_IN_WORLD,
+            settingId = IN_WORLD_UI_SETTING_TOGGLE_SPRINT,
+            panel = SETTING_PANEL_GAMEPLAY,
+            text = SI_INTERFACE_OPTIONS_TOGGLE_SPRINT,
+            tooltipText = SI_INTERFACE_OPTIONS_TOGGLE_SPRINT_TOOLTIP,
+        },
+
         --Options_Gameplay_CompanionReactions
         [IN_WORLD_UI_SETTING_COMPANION_REACTION_FREQUENCY] =
         {
@@ -470,11 +481,9 @@ local ZO_OptionsPanel_Gameplay_ControlData =
             system = SETTING_TYPE_CUSTOM,
             settingId = OPTIONS_CUSTOM_SETTING_RESET_GAMEPAD_DEADZONES,
             panel = SETTING_PANEL_GAMEPLAY,
-            text = SI_GAMEPAD_OPTIONS_RESET_DEADZONES,
-            customResetToDefaultsFunction = function() ResetGamepadDeadzonesToDefault() end,
-            exists = function()
-                return IsInGamepadPreferredMode()
-            end,
+            text = IsConsoleUI() and GetString(SI_CONSOLE_GAMEPAD_OPTIONS_RESET_DEADZONES) or GetString(SI_GAMEPAD_OPTIONS_RESET_DEADZONES),
+            customResetToDefaultsFunction = ResetGamepadDeadzonesToDefault,
+            exists = IsInGamepadPreferredMode,
             callback = function()
                 ZO_Dialogs_ShowPlatformDialog("KEYBINDINGS_RESET_GAMEPAD_DEADZONES_TO_DEFAULTS")
             end,
