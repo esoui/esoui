@@ -6,6 +6,7 @@ ZO_MODE_STORE_REPAIR           = 4
 ZO_MODE_STORE_SELL_STOLEN      = 5
 ZO_MODE_STORE_LAUNDER          = 6
 ZO_MODE_STORE_STABLE           = 7
+ZO_MODE_STORE_SELL_VENGEANCE   = 8
 
 ZO_STORE_WINDOW_MODE_NORMAL = 1
 ZO_STORE_WINDOW_MODE_STABLE = 2
@@ -23,6 +24,7 @@ ZO_STORE_MODE_HAS_TEXT_SEARCH =
     [ZO_MODE_STORE_REPAIR] = true,
     [ZO_MODE_STORE_SELL_STOLEN] = true,
     [ZO_MODE_STORE_LAUNDER] = true,
+    [ZO_MODE_STORE_SELL_VENGEANCE] = true,
 }
 
 -- Shared object
@@ -44,6 +46,7 @@ function ZO_SharedStoreManager:Initialize(control)
                 BAG_BACKPACK,
                 BAG_BUYBACK,
                 BAG_WORN,
+                BAG_VENGEANCE,
             }
         },
     }
@@ -194,6 +197,7 @@ local DOES_STORE_MODE_REPRESENT_INVENTORY =
     [ZO_MODE_STORE_SELL_STOLEN]      = true,
     [ZO_MODE_STORE_LAUNDER]          = true,
     [ZO_MODE_STORE_STABLE]           = false,
+    [ZO_MODE_STORE_SELL_VENGEANCE]   = true,
 }
 
 function ZO_StoreManager_IsInventoryStoreMode(mode)

@@ -28,7 +28,7 @@
             </Controls>
         </Control>
         
-        <TopLevelControl name="ZO_EndDunBuffTracker_Gamepad" inherits="ZO_EndDunBuffTracker_Shared" resizeToFitDescendents="true">
+        <TopLevelControl name="ZO_EndDunBuffTracker_Gamepad" inherits="ZO_EndDunBuffTracker_Shared">
             <Anchor point="CENTER" offsetY="-100" />
             <DimensionConstraints minX="605" minY="60" />
             <ResizeToFitPadding width="50" height="30" />

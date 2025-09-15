@@ -403,6 +403,7 @@ local function CanUseSecondaryActionOnSlot(inventorySlot)
            and not IsBankOpen()
            and not IsGuildBankOpen()
            and not (GetItemActorCategory(bag, index) == GAMEPLAY_ACTOR_CATEGORY_COMPANION)
+           and not (IsCurrentCampaignVengeanceRuleset() and bag == BAG_VENGEANCE)
 end
 
 local function CanUseItemQuestItem(inventorySlot)

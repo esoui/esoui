@@ -38,7 +38,7 @@ local consolePregameStates =
     },
 }
 
-PregameStateManager_AddGamepadStates(consolePregameStates)
+ZO_PregameStateManager_AddGamepadStates(consolePregameStates)
 
 local function OnProfileLoginResult(event, isSuccess, profileError)
     --Don't return to IIS if we're on Server Select and NO_PROFILE was returned because they probably cancelled the selection

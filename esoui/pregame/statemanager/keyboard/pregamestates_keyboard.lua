@@ -26,7 +26,7 @@ local pregameStates =
     ["CharacterSelect"] =
     {
         OnEnter = function()
-            Pregame_ShowScene("gameMenuCharacterSelect")
+            ZO_Pregame_ShowScene("gameMenuCharacterSelect")
             if DoesPlatformRequirePregamePEGI() and not HasAgreedToPEGI() then
                 ZO_Dialogs_ShowDialog("PEGI_COUNTRY_SELECT")
             end
@@ -91,7 +91,7 @@ local pregameStates =
             end
             LOGIN_KEYBOARD:InitializeCredentialEditBoxes()
             PregameLogout()
-            RegisterForLoadingUpdates()
+            ZO_Pregame_RegisterForLoadingUpdates()
 
             if ZO_PREGAME_HAD_GLOBAL_ERROR then
                 AbortVideoPlayback()
@@ -101,12 +101,12 @@ local pregameStates =
             ZO_PREGAME_CHARACTER_LIST_RECEIVED = false
             ZO_PREGAME_CHARACTER_COUNT = 0
 
-            Pregame_ShowScene("gameMenuPregame")
+            ZO_Pregame_ShowScene("gameMenuPregame")
             if IsErrorQueuedFromIngame() then
                 ZO_Pregame_DisplayServerDisconnectedError()
             end
 
-            AttemptQuickLaunch()
+            ZO_AttemptQuickLaunch()
         end,
 
         OnExit = function()
@@ -128,7 +128,7 @@ local pregameStates =
     {
         OnEnter = function()
             ZO_WorldSelect_SetSelectionEnabled(true)
-            Pregame_ShowScene("worldSelect")
+            ZO_Pregame_ShowScene("worldSelect")
         end,
 
         OnExit = function()
@@ -145,7 +145,7 @@ local pregameStates =
             SCENE_MANAGER:ShowBaseScene()
             ZO_Dialogs_ShowDialog("SERVER_SELECT_DIALOG", { onSelectedCallback = function()
                 SetCVar("IsServerSelected", "1")
-                PregameStateManager_AdvanceStateFromState("ServerSelectIntro")
+                ZO_PregameStateManager_AdvanceStateFromState("ServerSelectIntro")
             end })
         end,
 
@@ -158,7 +158,7 @@ local pregameStates =
     },
 }
 
-PregameStateManager_AddKeyboardStates(pregameStates)
+ZO_PregameStateManager_AddKeyboardStates(pregameStates)
 
 --[[
 Various PC-only functions.
@@ -169,8 +169,8 @@ local function OnServerLocked()
 end
 
 local function OnWorldListReceived()
-    if PregameStateManager_GetCurrentState() == "WorldSelect_Requested" then
-        PregameStateManager_SetState("WorldSelect_ShowList")
+    if ZO_PregameStateManager_GetCurrentState() == "WorldSelect_Requested" then
+        ZO_PregameStateManager_SetState("WorldSelect_ShowList")
     end
 end
 
@@ -215,9 +215,9 @@ local function GlobalError(eventCode, errorCode, helpLinkURL, ...)
     end
 
     if errorCodeToStateChange[errorCode] then
-        PregameStateManager_SetState(errorCodeToStateChange[errorCode])
+        ZO_PregameStateManager_SetState(errorCodeToStateChange[errorCode])
     else
-        PregameStateManager_ReenterLoginState()
+        ZO_PregameStateManager_ReenterLoginState()
     end
 
     local force = true
@@ -230,7 +230,7 @@ local function GlobalError(eventCode, errorCode, helpLinkURL, ...)
 end
 
 local LOGIN_REQUEST_TIME_MAX = 60
-function PregameStateManager_ShowLoginRequested()
+function ZO_PregameStateManager_ShowLoginRequested()
     ZO_Dialogs_ShowDialog("LOGIN_REQUESTED", {loginTimeMax = LOGIN_REQUEST_TIME_MAX})
 end
 
@@ -245,7 +245,7 @@ local function PregameStateManager_Initialize()
 
     local function OnPregameUILoaded(eventId, addOnName)
         if addOnName == "ZO_Pregame" then
-            RegisterForLoadingUpdates()
+            ZO_Pregame_RegisterForLoadingUpdates()
             EVENT_MANAGER:UnregisterForEvent("PregameStateManager", EVENT_ADD_ON_LOADED)
         end
     end

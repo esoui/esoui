@@ -216,12 +216,13 @@ function ZO_Tooltip:AddTopLinesToTopSection(topSection, itemLink, showPlayerLock
     end
 
     -- Item Counts
-    local bagCount, bankCount, craftBagCount, houseBanksCount, furnitureVaultCount = GetItemLinkStacks(itemLink)
+    local bagCount, bankCount, craftBagCount, houseBanksCount, furnitureVaultCount, vengeanceBagCount = GetItemLinkStacks(itemLink)
     AddItemStackCountLine(topSubsection, bagCount, "EsoUI/Art/Tooltips/icon_bag.dds", SI_GAMEPAD_INVENTORY_STACK_COUNT_BAG_BACKPACK)
     AddItemStackCountLine(topSubsection, bankCount, "EsoUI/Art/Tooltips/icon_bank.dds", SI_GAMEPAD_INVENTORY_STACK_COUNT_BAG_BANK)
     AddItemStackCountLine(topSubsection, craftBagCount, "EsoUI/Art/Tooltips/icon_craft_bag.dds", SI_GAMEPAD_INVENTORY_STACK_COUNT_BAG_CRAFT_BAG)
     AddItemStackCountLine(topSubsection, houseBanksCount, "EsoUI/Art/Tooltips/icon_house_bank.dds", SI_GAMEPAD_INVENTORY_STACK_COUNT_BAG_HOUSE_BANK)
     AddItemStackCountLine(topSubsection, furnitureVaultCount, "EsoUI/Art/Tooltips/icon_furniture_vault.dds", SI_GAMEPAD_INVENTORY_STACK_COUNT_BAG_FURNITURE_VAULT)
+    AddItemStackCountLine(topSubsection, vengeanceBagCount, "EsoUI/Art/Tooltips/icon_vengeance_bag.dds", SI_GAMEPAD_INVENTORY_STACK_COUNT_BAG_VENGEANCE)
 
     topSection:AddSectionEvenIfEmpty(topSubsection)
 end
@@ -1604,7 +1605,7 @@ function ZO_Tooltip:LayoutStoreWindowItem(itemData)
     end
 
     local requiredToBuyErrorText = itemData.dataSource.requiredToBuyErrorText
-    if requiredToBuyErrorText ~= "" then
+    if requiredToBuyErrorText and requiredToBuyErrorText ~= "" then
         local styleSection = self:AcquireSection(self:GetStyle("bodySection"))
         styleSection:AddLine(requiredToBuyErrorText, self:GetStyle("requirementFail"))
         self:AddSection(styleSection)
@@ -1789,6 +1790,23 @@ do
                     end
                 end
             end
+        end
+
+        local errorStyle = GetInteractionType() == INTERACTION_VENDOR and "bodyDescription" or "requirementFail"
+        if IsCurrentCampaignVengeanceRuleset() then
+            if IsItemLinkVisuallyDisabledInVengeance(itemLink) then
+                local errorSection = self:AcquireSection(self:GetStyle("bodySection"))
+                errorSection:AddLine(GetString(SI_CAMPAIGN_VENGEANCE_TOOLTIP_ITEM_NOT_USABLE_IN_VENGEANCE), self:GetStyle(errorStyle))
+                self:AddSection(errorSection)
+            elseif not IsItemLinkUsableOutsideVengeance(itemLink) then
+                local errorSection = self:AcquireSection(self:GetStyle("bodySection"))
+                errorSection:AddLine(GetString(SI_CAMPAIGN_VENGEANCE_TOOLTIP_ITEM_NOT_USABLE_OUTSIDE_VENGEANCE), self:GetStyle("bodyDescription"))
+                self:AddSection(errorSection)
+            end
+        elseif not IsItemLinkUsableOutsideVengeance(itemLink) then
+            local errorSection = self:AcquireSection(self:GetStyle("bodySection"))
+            errorSection:AddLine(GetString(SI_CAMPAIGN_VENGEANCE_TOOLTIP_ITEM_NOT_USABLE_OUTSIDE_VENGEANCE), self:GetStyle(errorStyle))
+            self:AddSection(errorSection)
         end
 
         return isValidItemLink
@@ -2223,10 +2241,10 @@ do
         local locationSection
         local locationCurrenciesSection
         for currencyType = CURT_ITERATION_BEGIN, CURT_ITERATION_END do
-            if CanCurrencyBeStoredInLocation(currencyType, currencyLocation) then
+            if CanCurrencyBeStoredInLocation(currencyType, currencyLocation) and ShouldShowCurrencyInCurrencyPanel(currencyType) then
                 if not locationCurrenciesSection then
                     locationSection = mainSection:AcquireSection(self:GetStyle("currencyLocationSection"))
-                    
+
                     --Title
                     locationSection:AddLine(GetString("SI_CURRENCYLOCATION", currencyLocation), self:GetStyle("currencyLocationTitle"))
 
@@ -2251,12 +2269,12 @@ do
         end
     end
 
-    function ZO_Tooltip:LayoutCurrencies()  
+    function ZO_Tooltip:LayoutCurrencies()
         local currencyMainSection = self:AcquireSection(self:GetStyle("currencyMainSection"))
 
         self:AddCurrencyLocationSection(currencyMainSection, CURRENCY_LOCATION_CHARACTER)
-        self:AddCurrencyLocationSection(currencyMainSection, CURRENCY_LOCATION_ACCOUNT)        
-        
+        self:AddCurrencyLocationSection(currencyMainSection, CURRENCY_LOCATION_ACCOUNT)
+
         self:AddSection(currencyMainSection)
     end
 end

@@ -120,7 +120,7 @@ function ZO_CharacterCreate_Manager:Initialize()
     end
 
     local function OnChapterUpgraded()
-        -- match the conditional in AttemptToFireCharacterConstructionReady which fires the "OnCharacterConstructionReady" callback
+        -- match the conditional in ZO_AttemptToFireCharacterConstructionReady which fires the "OnCharacterConstructionReady" callback
         -- if we don't check that the character list has been received we can attempt to generate a random character
         -- before the pregame cahracter manager is ready
         if IsPregameCharacterConstructionReady() and ZO_PREGAME_CHARACTER_LIST_RECEIVED then
@@ -535,7 +535,7 @@ function ZO_CharacterCreate_Base:OnCharacterCreated(characterId)
     ZO_CHARACTERCREATE_MANAGER:SetRandomCharacterGenerated(false) -- the next time we enter character create, we want to generate a random character again.
     self.characterCreateOption = CHARACTER_CREATE_DEFAULT_LOCATION
 
-    PregameStateManager_PlayCharacter(characterId, self.characterStartLocation)
+    ZO_PregameStateManager_PlayCharacter(characterId, self.characterStartLocation)
 end
 
 function ZO_CharacterCreate_Base:SaveCharacterChanges()
@@ -560,7 +560,7 @@ end
 function ZO_CharacterCreate_Base:ExitToState(stateName)
     local createMode = self:GetCharacterCreateMode()
     if createMode == CHARACTER_CREATE_MODE_CREATE then
-        PregameStateManager_SetState(stateName)
+        ZO_PregameStateManager_SetState(stateName)
     else
         local tokenType
         if createMode == CHARACTER_CREATE_MODE_EDIT_APPEARANCE then
@@ -660,7 +660,7 @@ function ZO_CharacterCreate_FinishTransitions()
     ZO_CharacterCreateOverlay:SetMouseEnabled(false)
     ZO_CHARACTERCREATE_MANAGER:SetPlayingTransitionAnimations(false)
 
-    PregameStateManager_SetState("CharacterCreate")
+    ZO_PregameStateManager_SetState("CharacterCreate")
 end
 
 function OnCharacterCreateOptionChanged()

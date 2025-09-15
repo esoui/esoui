@@ -60,7 +60,7 @@ ESO_Dialogs["CONNECTING_TO_REALM"] =
             keybind =   false,
             callback =  function(dialog)
                             CancelLogin()
-                            PregameStateManager_SetState("WaitForPreloginWorld")
+                            ZO_PregameStateManager_SetState("WaitForPreloginWorld")
                         end
         }
     }
@@ -370,7 +370,7 @@ ESO_Dialogs["LOGIN_TIMEOUT"] =
             keybind = "DIALOG_NEGATIVE",
             clickSound = SOUNDS.DIALOG_ACCEPT,
             callback =  function(dialog)
-                            PregameStateManager_ReenterLoginState()
+                            ZO_PregameStateManager_ReenterLoginState()
                         end
         }
     }
@@ -397,7 +397,7 @@ ESO_Dialogs["LOGIN_REQUESTED"] =
             keybind =   false,
             callback =  function(dialog)
                             CancelLogin()
-                            PregameStateManager_ReenterLoginState()
+                            ZO_PregameStateManager_ReenterLoginState()
                         end
         }
     },
@@ -405,7 +405,7 @@ ESO_Dialogs["LOGIN_REQUESTED"] =
     updateFn =  function(dialog, currentTime)
                     if(dialog.data.endTime == nil) then
                         dialog.data.endTime = currentTime + dialog.data.loginTimeMax
-                        PregameStateManager_ClearError()
+                        ZO_PregameStateManager_ClearError()
                     end
                     
                     if(currentTime > dialog.data.endTime) then
@@ -440,7 +440,7 @@ ESO_Dialogs["LOGIN_QUEUED"] =
             keybind =   false,
             callback =  function(dialog)
                             CancelLogin()
-                            PregameStateManager_SetState("WaitForPreloginWorld")
+                            ZO_PregameStateManager_SetState("WaitForPreloginWorld")
                         end,
         }
     },
@@ -471,7 +471,7 @@ ESO_Dialogs["BAD_LOGIN"] =
             clickSound = SOUNDS.DIALOG_ACCEPT,
             callback =  function(dialog)
                             ConfirmOpenURL(dialog.data.accountPageURL)
-                            PregameStateManager_ReenterLoginState()
+                            ZO_PregameStateManager_ReenterLoginState()
                         end
         },
         {
@@ -479,12 +479,12 @@ ESO_Dialogs["BAD_LOGIN"] =
             keybind =   "DIALOG_NEGATIVE",
             clickSound = SOUNDS.DIALOG_ACCEPT,
             callback =  function()
-                            PregameStateManager_ReenterLoginState()
+                            ZO_PregameStateManager_ReenterLoginState()
                         end
         }
     },
     noChoiceCallback = function()
-        PregameStateManager_ReenterLoginState()
+        ZO_PregameStateManager_ReenterLoginState()
     end,
 }
 
@@ -507,7 +507,7 @@ ESO_Dialogs["BAD_LOGIN_PAYMENT_EXPIRED"] =
             clickSound = SOUNDS.DIALOG_ACCEPT,
             callback =  function(dialog)
                             ConfirmOpenURL(dialog.data.accountPageURL)
-                            PregameStateManager_ReenterLoginState()
+                            ZO_PregameStateManager_ReenterLoginState()
                         end
         },
         {
@@ -515,12 +515,12 @@ ESO_Dialogs["BAD_LOGIN_PAYMENT_EXPIRED"] =
             keybind = "DIALOG_NEGATIVE",
             clickSound = SOUNDS.DIALOG_ACCEPT,
             callback =  function()
-                            PregameStateManager_ReenterLoginState()
+                            ZO_PregameStateManager_ReenterLoginState()
                         end
         },
     },
     noChoiceCallback = function()
-        PregameStateManager_ReenterLoginState()
+        ZO_PregameStateManager_ReenterLoginState()
     end,
 }
 
@@ -543,7 +543,7 @@ ESO_Dialogs["BAD_LOGIN_ACCOUNT_BANNED"] =
             clickSound = SOUNDS.DIALOG_ACCEPT,
             callback =  function()
                 ConfirmOpenURL(GetURLTextByType(APPROVED_URL_ESO_HELP))
-                PregameStateManager_ReenterLoginState()
+                ZO_PregameStateManager_ReenterLoginState()
             end
         },
         {
@@ -551,12 +551,12 @@ ESO_Dialogs["BAD_LOGIN_ACCOUNT_BANNED"] =
             keybind = "DIALOG_NEGATIVE",
             clickSound = SOUNDS.DIALOG_ACCEPT,
             callback =  function()
-                PregameStateManager_ReenterLoginState()
+                ZO_PregameStateManager_ReenterLoginState()
             end
         },
     },
     noChoiceCallback = function()
-        PregameStateManager_ReenterLoginState()
+        ZO_PregameStateManager_ReenterLoginState()
     end,
 }
 
@@ -579,7 +579,7 @@ ESO_Dialogs["BAD_LOGIN_ACCOUNT_SUSPENDED"] =
             clickSound = SOUNDS.DIALOG_ACCEPT,
             callback =  function()
                 ConfirmOpenURL(GetURLTextByType(APPROVED_URL_ESO_HELP))
-                PregameStateManager_ReenterLoginState()
+                ZO_PregameStateManager_ReenterLoginState()
             end
         },
         {
@@ -587,12 +587,12 @@ ESO_Dialogs["BAD_LOGIN_ACCOUNT_SUSPENDED"] =
             keybind = "DIALOG_NEGATIVE",
             clickSound = SOUNDS.DIALOG_ACCEPT,
             callback =  function()
-                PregameStateManager_ReenterLoginState()
+                ZO_PregameStateManager_ReenterLoginState()
             end
         },
     },
     noChoiceCallback = function()
-        PregameStateManager_ReenterLoginState()
+        ZO_PregameStateManager_ReenterLoginState()
     end,
 }
 
@@ -617,7 +617,7 @@ ESO_Dialogs["BAD_LOGIN_CHILD_ACCOUNT"] =
             clickSound = SOUNDS.DIALOG_ACCEPT,
             callback = function(dialog)
                 ConfirmOpenURL(dialog.data.accountPageURL)
-                PregameStateManager_ReenterLoginState()
+                ZO_PregameStateManager_ReenterLoginState()
             end
         },
         {
@@ -625,12 +625,12 @@ ESO_Dialogs["BAD_LOGIN_CHILD_ACCOUNT"] =
             keybind = "DIALOG_NEGATIVE",
             clickSound = SOUNDS.DIALOG_ACCEPT,
             callback = function()
-                PregameStateManager_ReenterLoginState()
+                ZO_PregameStateManager_ReenterLoginState()
             end
         },
     },
     noChoiceCallback = function()
-        PregameStateManager_ReenterLoginState()
+        ZO_PregameStateManager_ReenterLoginState()
     end,
 }
 
@@ -763,7 +763,7 @@ ESO_Dialogs["SERVER_DOWN_FOR_MAINTENANCE"] =
         {
             text = SI_OK,
             callback =  function(dialog)
-                            PregameStateManager_ReenterLoginState()
+                            ZO_PregameStateManager_ReenterLoginState()
                         end
         },
     }
@@ -782,7 +782,7 @@ local function UpdateOTPDuration(dialog)
         ZO_Dialogs_UpdateDialogMainText(dialog, nil, otpTextParams)
     else
         ZO_Dialogs_ReleaseDialog(dialog)
-        PregameStateManager_ReenterLoginState()
+        ZO_PregameStateManager_ReenterLoginState()
     end
 end
 
@@ -793,7 +793,7 @@ local otpButtons = {
             text = SI_OTP_DIALOG_SUBMIT,
             callback =  function(dialog)
                             SendOneTimePassword(ZO_Dialogs_GetEditBoxText(dialog))
-                            PregameStateManager_ShowLoginRequested() -- The verification might take a little to get back from the server, show this dialog immediately.
+                            ZO_PregameStateManager_ShowLoginRequested() -- The verification might take a little to get back from the server, show this dialog immediately.
                         end
         },
         
@@ -802,7 +802,7 @@ local otpButtons = {
             text = SI_OTP_DIALOG_CANCEL,
             keybind = false,
             callback =  function(dialog)
-                            PregameStateManager_ReenterLoginState()
+                            ZO_PregameStateManager_ReenterLoginState()
                         end
         }
 }
@@ -1210,7 +1210,7 @@ ESO_Dialogs["CHARACTER_CREATE_NO_CHANGES_MADE"] =
             text = SI_DIALOG_CONFIRM,
             keybind = "DIALOG_PRIMARY",
             callback =  function(dialog)
-                            PregameStateManager_SetState(dialog.data.newState)
+                            ZO_PregameStateManager_SetState(dialog.data.newState)
                         end,
         },
 
@@ -1350,7 +1350,7 @@ ESO_Dialogs["CHARACTER_CREATE_SAVE_SUCCESS"] =
                 return dialog.data.pendingAllianceChange
             end,
             callback = function(dialog)
-                PregameStateManager_PlayCharacter(dialog.data.characterId, CHARACTER_OPTION_EXISTING_AREA)
+                ZO_PregameStateManager_PlayCharacter(dialog.data.characterId, CHARACTER_OPTION_EXISTING_AREA)
             end,
         },
         {
@@ -1366,7 +1366,7 @@ ESO_Dialogs["CHARACTER_CREATE_SAVE_SUCCESS"] =
                 return not dialog.data.pendingAllianceChange
             end,
             callback = function(dialog)
-                PregameStateManager_SetState("CharacterSelect_FromIngame")
+                ZO_PregameStateManager_SetState("CharacterSelect_FromIngame")
             end,
         },
     },
@@ -1394,7 +1394,7 @@ ESO_Dialogs["CHARACTER_CREATE_CONFIRM_REVERT_CHANGES"] =
             text = SI_DIALOG_YES,
             keybind = "DIALOG_PRIMARY",
             callback =  function(dialog)
-                            PregameStateManager_SetState(dialog.data.newState)
+                            ZO_PregameStateManager_SetState(dialog.data.newState)
                         end,
         },
 

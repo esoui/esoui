@@ -703,3 +703,19 @@ function ZO_Eval(valueOrFunction, ...)
     end
     return valueOrFunction
 end
+
+do
+    local FONT_STYLE_MAP =
+    {
+        [FONT_STYLE_SHADOW] = "|shadow",
+        [FONT_STYLE_OUTLINE] = "|outline",
+        [FONT_STYLE_OUTLINE_THICK] = "|thick-outline",
+        [FONT_STYLE_SOFT_SHADOW_THIN] = "|soft-shadow-thin",
+        [FONT_STYLE_SOFT_SHADOW_THICK] = "|soft-shadow-thick",
+    }
+
+    function ZO_CreateFontString(faceName, size, style)
+        local styleString = style and FONT_STYLE_MAP[style] or ""
+        return string.format("%s|%u%s", faceName, size, styleString)
+    end
+end

@@ -85,6 +85,13 @@ panelBuilder:AddSetting({
 })
 
 panelBuilder:AddSetting({
+    controlName = "Options_Interface_CompassDistanceTracking",
+    settingType = SETTING_TYPE_UI,
+    settingId = UI_SETTING_COMPASS_DISTANCE_TRACKING,
+    header = SI_INTERFACE_OPTIONS_HEADS_UP_DISPLAY,
+})
+
+panelBuilder:AddSetting({
     controlName = "Options_Interface_ShowWeaponIndicator",
     settingType = SETTING_TYPE_UI,
     settingId = UI_SETTING_SHOW_WEAPON_INDICATOR,

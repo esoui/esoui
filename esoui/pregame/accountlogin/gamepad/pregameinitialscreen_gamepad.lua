@@ -65,7 +65,7 @@ function PregameInitialScreen_Gamepad:Initialize(control)
             StartPregameMusic()
         elseif newState == SCENE_HIDDEN then
             self:ClearError()
-            PregameStateManager_ClearError()
+            ZO_PregameStateManager_ClearError()
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.currentKeybindStripDescriptor)
             KEYBIND_STRIP:RestoreDefaultExit()
             self.continueDesired = false
@@ -118,7 +118,7 @@ function PregameInitialScreen_Gamepad:PerformDeferredInitialization()
             self.fadeMode = LOGO_WAIT_FOR_BUTTON
             self:PlayPressAnyButtonAnimationFromStart()
         elseif self.fadeMode == LOGO_FADING_OUT then
-            PregameStateManager_AdvanceState()
+            ZO_PregameStateManager_AdvanceState()
         end
     end)
 
@@ -303,7 +303,7 @@ function PregameInitialScreen_Gamepad:ShowError(errorTitle, errorMessage)
     self:RefreshScreen()
 
     self:SetupError(errorTitle, errorMessage)
-    PregameStateManager_SetState("WaitForPreloginWorld")
+    ZO_PregameStateManager_SetState("WaitForPreloginWorld")
 end
 
 function PregameInitialScreen_Gamepad:SetupError(errorTitle, errorMessage)

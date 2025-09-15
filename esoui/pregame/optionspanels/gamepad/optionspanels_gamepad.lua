@@ -42,6 +42,24 @@ GAMEPAD_SETTINGS_DATA =
         {
             panel = SETTING_PANEL_GAMEPLAY,
             system = SETTING_TYPE_GAMEPAD,
+            settingId = GAMEPAD_SETTING_INPUT_PREFERRED_MODE,
+            header = GAMEPAD_SECTION_HEADER_ID,
+        },
+        {
+            panel = SETTING_PANEL_GAMEPLAY,
+            system = SETTING_TYPE_GAMEPAD,
+            settingId = GAMEPAD_SETTING_KEYBIND_DISPLAY_MODE,
+            header = GAMEPAD_SECTION_HEADER_ID,
+        },
+        {
+            panel = SETTING_PANEL_GAMEPLAY,
+            system = SETTING_TYPE_GAMEPAD,
+            settingId = GAMEPAD_SETTING_USE_KEYBOARD_LOGIN,
+            header = GAMEPAD_SECTION_HEADER_ID,
+        },
+        {
+            panel = SETTING_PANEL_GAMEPLAY,
+            system = SETTING_TYPE_GAMEPAD,
             settingId = GAMEPAD_SETTING_VIBRATION,
         },
         {

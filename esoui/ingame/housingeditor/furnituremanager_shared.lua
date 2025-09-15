@@ -56,7 +56,7 @@ ZO_HOUSING_FURNITURE_LOCATION_FILTER_BAGS =
 
 -- Make sure no new bags have been added since the last time we updated ZO_PLACEABLE_FURNITURE_BAGS
 -- If a new bag was added and it's possible to place furniture from it add it to the table
-internalassert(BAG_MAX_VALUE == 19, "Update ZO_SharedFurnitureManager to handle new bag")
+internalassert(BAG_MAX_VALUE == 20, "Update ZO_SharedFurnitureManager to handle new bag")
 
 local FURNITURE_COMMAND_REMOVE = 1
 local FURNITURE_COMMAND_REMOVE_PATH_NODE = 2

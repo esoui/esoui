@@ -258,7 +258,7 @@
                     <Anchor point="BOTTOMRIGHT" offsetX="-210" offsetY="-14" />
 
                     <OnClicked>
-                        PregameStateManager_SetState("CharacterCreate")
+                        ZO_PregameStateManager_SetState("CharacterCreate")
                     </OnClicked>
                 </Button>
 
@@ -294,7 +294,7 @@
                             </OnMouseExit>
                             
                             <OnClicked>
-                                PregameStateManager_SetState("ChapterUpgrade")
+                                ZO_PregameStateManager_SetState("ChapterUpgrade")
                             </OnClicked>
                         </Button>
 

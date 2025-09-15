@@ -28,7 +28,7 @@ local HEADER_ICONS =
 local LEADERBOARD_RANK_MAP =
 {
     [RAID_CATEGORY_TRIAL] = LEADERBOARD_TYPE_OVERALL,
-    [RAID_CATEGORY_CHALLENGE] = LEADERBOARD_TYPE_CLASS,
+    [RAID_CATEGORY_CHALLENGE] = LEADERBOARD_TYPE_OVERALL,
 }
 
 function ZO_GetNextRaidLeaderboardIdIter(raidCategory)
@@ -64,23 +64,6 @@ function ZO_RaidLeaderboardsManager_Shared:RegisterForEvents()
 end
 
 do
-    local function GetClassIdAndIndexFromTotalIndex(entryIndex, categoryData)
-        local classId = 0
-        local classIndex = entryIndex
-        local previousGate
-        for i, gate in ipairs(categoryData.classGates) do
-            if entryIndex <= gate.count then
-                classId = gate.classId
-                if previousGate then
-                    classIndex = classIndex - previousGate.count
-                end
-                break
-            end
-            previousGate = gate
-        end
-        return classId, classIndex
-    end
-
     local function GetSingleRaidEntryInfo(entryIndex, categoryData)
         if categoryData.raidCategory == RAID_CATEGORY_TRIAL then
             if categoryData.isWeekly then
@@ -90,12 +73,10 @@ do
             end
         elseif categoryData.raidCategory == RAID_CATEGORY_CHALLENGE then
             --We keep track of these gates for the info function that'll be called later
-            local classId, classIndex = GetClassIdAndIndexFromTotalIndex(entryIndex, categoryData)
-        
             if categoryData.isWeekly then
-                return GetChallengeOfTheWeekLeaderboardEntryInfo(classId, classIndex)
+                return GetChallengeOfTheWeekLeaderboardEntryInfo(entryIndex)
             else
-                return GetChallengeLeaderboardEntryInfo(categoryData.raidId, classId, classIndex)
+                return GetChallengeLeaderboardEntryInfo(categoryData.raidId, entryIndex)
             end
         end
         return nil
@@ -122,12 +103,10 @@ do
                 return ZO_ID_REQUEST_TYPE_TRIAL_LEADERBOARD, categoryData.raidId, entryIndex
             end
         elseif categoryData.raidCategory == RAID_CATEGORY_CHALLENGE then
-            local classId, classIndex = GetClassIdAndIndexFromTotalIndex(entryIndex, categoryData)
-
             if categoryData.isWeekly then
-                return ZO_ID_REQUEST_TYPE_CHALLENGE_OF_THE_WEEK_LEADERBOARD, classId, classIndex
+                return ZO_ID_REQUEST_TYPE_CHALLENGE_OF_THE_WEEK_LEADERBOARD, entryIndex
             else
-                return ZO_ID_REQUEST_TYPE_CHALLENGE_LEADERBOARD, categoryData.raidId, classId, classIndex
+                return ZO_ID_REQUEST_TYPE_CHALLENGE_LEADERBOARD, categoryData.raidId, entryIndex
             end
         end
         return nil
@@ -149,25 +128,11 @@ do
                     return GetNumTrialLeaderboardEntries(categoryData.raidId)
                 end
             elseif categoryData.raidCategory == RAID_CATEGORY_CHALLENGE then
-                local count = 0
-                --We keep track of these gates for the info function that'll be called later
-                if categoryData.classGates then
-                    ZO_ClearNumericallyIndexedTable(categoryData.classGates)
+                if categoryData.isWeekly then
+                    return GetNumChallengeOfTheWeekLeaderboardEntries()
                 else
-                    categoryData.classGates = {}
+                    return GetNumChallengeLeaderboardEntries(categoryData.raidId)
                 end
-            
-                for i = 1, GetNumClasses() do
-                    local classId = GetClassInfo(i)
-                    if categoryData.isWeekly then
-                        count = count + GetNumChallengeOfTheWeekLeaderboardEntries(classId)
-                    else
-                        count = count + GetNumChallengeLeaderboardEntries(categoryData.raidId, classId)
-                    end
-                    table.insert(categoryData.classGates, { count = count,  classId = classId})
-                end
-
-                return count
             end
 
             return 0
@@ -393,25 +358,14 @@ function ZO_RaidLeaderboardsManager_Shared:SendLeaderboardQuery()
     self.requestedRaidCategory = self.selectedSubType.raidCategory
     self.requestedRaidId = self.selectedSubType.isWeekly and 0 or self.selectedSubType.raidId
 
-    local readyState = nil
-    if self.requestedRaidCategory == RAID_CATEGORY_CHALLENGE then
-        if IsInGamepadPreferredMode() then
-            self.requestedClassId = GAMEPAD_LEADERBOARDS:GetSelectedClassFilter()
-        else
-            self.requestedClassId = LEADERBOARDS:GetSelectedClassFilter()
-        end
-    else
-        self.requestedClassId = nil
-    end
     LEADERBOARD_LIST_MANAGER:QueryLeaderboardData(LEADERBOARD_DATA_TYPE.RAID, self:GenerateRequestData())
 end
 
 function ZO_RaidLeaderboardsManager_Shared:GenerateRequestData()
     local data =
-    { 
+    {
         raidId = self.requestedRaidId,
         raidCategory = self.requestedRaidCategory,
-        classId = self.requestedClassId,
     }
     return data
 end

@@ -1,5 +1,5 @@
 {TOC:maxLevel=3}
-h1. ESO UI Documentation for API Version 101047
+h1. ESO UI Documentation for API Version 101048
 h2. VM Functions
 * ScriptBuildInfo()
 ** _Returns:_ *table* _buildInfo_
@@ -36,6 +36,7 @@ h5. ActionBarSlotType
 * ACTION_TYPE_NOTHING
 * ACTION_TYPE_QUEST_ITEM
 * ACTION_TYPE_QUICK_CHAT
+* ACTION_TYPE_VENGEANCE_PERK
 
 
 h5. ActionSlotType
@@ -106,6 +107,7 @@ h5. BonusDropSource
 
 h5. BookMedium
 * BOOK_MEDIUM_ANIMAL_SKIN
+* BOOK_MEDIUM_BLOODY_YELLOWED_PAPER
 * BOOK_MEDIUM_ELVEN_SCROLL
 * BOOK_MEDIUM_LETTER
 * BOOK_MEDIUM_METAL
@@ -211,6 +213,7 @@ h5. CenterScreenAnnounceType
 * CENTER_SCREEN_ANNOUNCE_TYPE_TIMED_ACTIVITY_COMPLETED
 * CENTER_SCREEN_ANNOUNCE_TYPE_TRIBUTE_CLUB_RANK_CHANGED
 * CENTER_SCREEN_ANNOUNCE_TYPE_TRIBUTE_GAME_STATE_CHANGED
+* CENTER_SCREEN_ANNOUNCE_TYPE_VENGEANCE_LOADOUT_EQUIPPED
 
 
 h5. CenterScreenAnnouncementCategory
@@ -426,6 +429,7 @@ h5. JumpResult
 * JUMP_RESULT_JUMP_FAILED_TOO_DIFFICULT
 * JUMP_RESULT_JUMP_FAILED_ZONE_COLLECTIBLE
 * JUMP_RESULT_JUMP_FAILED_ZONE_REQUIREMENT
+* JUMP_RESULT_JUMP_ON_COOLDOWN
 * JUMP_RESULT_LOCAL_JUMP_SUCCESSFUL
 * JUMP_RESULT_NO_JUMP_PERMISSION
 * JUMP_RESULT_REMOTE_JUMP_INITIATED
@@ -440,7 +444,6 @@ h5. LeaderboardType
 * LEADERBOARD_TYPE_ALLIANCE
 * LEADERBOARD_TYPE_BATTLEGROUND
 * LEADERBOARD_TYPE_CLASS
-* LEADERBOARD_TYPE_ENDLESS_DUNGEON_CLASS
 * LEADERBOARD_TYPE_ENDLESS_DUNGEON_OVERALL
 * LEADERBOARD_TYPE_HOUSE
 * LEADERBOARD_TYPE_OVERALL
@@ -586,6 +589,7 @@ h5. MouseContentType
 * MOUSE_CONTENT_STORE_BUYBACK_ITEM
 * MOUSE_CONTENT_STORE_ITEM
 * MOUSE_CONTENT_TRADE_ITEM
+* MOUSE_CONTENT_VENGEANCE_PERK
 
 
 h5. MouseDestroyItemFailedReason
@@ -1183,6 +1187,7 @@ h5. UISystem
 * UI_SYSTEM_SKILLS
 * UI_SYSTEM_TRIBUTE
 * UI_SYSTEM_TRIBUTE_FINDER
+* UI_SYSTEM_VENGEANCE
 * UI_SYSTEM_ZONE_GUIDE
 
 
@@ -2079,6 +2084,7 @@ h5. KeepRecallStoneUseResult
 * KEEP_RECALL_STONE_USE_RESULT_INVALID_ZONE
 * KEEP_RECALL_STONE_USE_RESULT_IN_COMBAT
 * KEEP_RECALL_STONE_USE_RESULT_NEAR_KEEP
+* KEEP_RECALL_STONE_USE_RESULT_ON_COOLDOWN
 * KEEP_RECALL_STONE_USE_RESULT_REQUIRES_ITEM
 * KEEP_RECALL_STONE_USE_RESULT_SUCCESS
 
@@ -2287,7 +2293,48 @@ h5. UnassignCampaignResult
 * UNASSIGN_CAMPAIGN_RESULT_SUCCESS
 
 
+h5. VengeanceActionResult
+* VENGEANCE_ACTION_RESULT_DEAD
+* VENGEANCE_ACTION_RESULT_FAILED_PERK_APPLICATION
+* VENGEANCE_ACTION_RESULT_FAILED_PERK_REMOVAL
+* VENGEANCE_ACTION_RESULT_INVALID_LOADOUT
+* VENGEANCE_ACTION_RESULT_INVALID_PERK
+* VENGEANCE_ACTION_RESULT_INVALID_PERK_FOR_LOADOUT
+* VENGEANCE_ACTION_RESULT_INVALID_PERK_SLOT
+* VENGEANCE_ACTION_RESULT_INVALID_ROLE
+* VENGEANCE_ACTION_RESULT_INVALID_ROLE_FOR_LOADOUT
+* VENGEANCE_ACTION_RESULT_INVALID_SUBZONE
+* VENGEANCE_ACTION_RESULT_IN_COMBAT
+* VENGEANCE_ACTION_RESULT_LOADOUTS_NOT_SUPPORTED
+* VENGEANCE_ACTION_RESULT_PERK_ALREADY_EQUIPPED
+* VENGEANCE_ACTION_RESULT_PERK_DISABLED
+* VENGEANCE_ACTION_RESULT_PERK_SLOT_INCOMPATIBLE
+* VENGEANCE_ACTION_RESULT_ROLE_ALREADY_EQUIPPED
+* VENGEANCE_ACTION_RESULT_ROLE_DISABLED
+* VENGEANCE_ACTION_RESULT_ROLE_SWAP_ON_COOLDOWN
+* VENGEANCE_ACTION_RESULT_SUCCESS
+
+
+h5. VengeanceMiscStat
+* VENGEANCE_MISC_STAT_DAMAGE_DONE
+* VENGEANCE_MISC_STAT_HEALING_DONE
+* VENGEANCE_MISC_STAT_HEALING_TAKEN
+* VENGEANCE_MISC_STAT_MOUNT_SPEED
+* VENGEANCE_MISC_STAT_NONE
+
+
+h5. VengeancePerkSlotFlags
+* VENGEANCE_PERK_SLOT_BLUE
+* VENGEANCE_PERK_SLOT_RED
+* VENGEANCE_PERK_SLOT_RED_BLUE
+* VENGEANCE_PERK_SLOT_RED_YELLOW
+* VENGEANCE_PERK_SLOT_RED_YELLOW_BLUE
+* VENGEANCE_PERK_SLOT_YELLOW
+* VENGEANCE_PERK_SLOT_YELLOW_BLUE
+
+
 h5. Globals
+* MAX_PERKS_AVAILABLE_PER_LOADOUT
 
 
 h5. ChromaBlendMode
@@ -3030,6 +3077,11 @@ h5. DamageType
 * DAMAGE_TYPE_SHOCK
 
 
+h5. DerivedStatDisplayType
+* DERIVED_STAT_DISPLAY_FLAT_VALUE
+* DERIVED_STAT_DISPLAY_PERCENT
+
+
 h5. DerivedStats
 * STAT_ARMOR_RATING
 * STAT_ATTACK_POWER
@@ -3545,7 +3597,6 @@ h5. CurrencyLocation
 h5. CurrencyType
 * CURT_ALLIANCE_POINTS
 * CURT_ARCHIVAL_FORTUNES
-* CURT_CHAOTIC_CREATIA
 * CURT_CROWNS
 * CURT_CROWN_GEMS
 * CURT_ENDEAVOR_SEALS
@@ -3555,6 +3606,7 @@ h5. CurrencyType
 * CURT_NONE
 * CURT_STYLE_STONES
 * CURT_TELVAR_STONES
+* CURT_TRANSMUTE_CRYSTALS
 * CURT_UNDAUNTED_KEYS
 * CURT_WRIT_VOUCHERS
 
@@ -4767,6 +4819,7 @@ h5. Bag
 * BAG_HOUSE_BANK_THREE
 * BAG_HOUSE_BANK_TWO
 * BAG_SUBSCRIBER_BANK
+* BAG_VENGEANCE
 * BAG_VIRTUAL
 * BAG_WORN
 
@@ -4953,7 +5006,9 @@ h5. InventoryCountBagOption
 * INVENTORY_COUNT_BAG_OPTION_BACKPACK_AND_BANK
 * INVENTORY_COUNT_BAG_OPTION_BACKPACK_AND_BANK_AND_CRAFT_BAG
 * INVENTORY_COUNT_BAG_OPTION_BACKPACK_AND_CRAFT_BAG
+* INVENTORY_COUNT_BAG_OPTION_BACKPACK_AND_VENGEANCE
 * INVENTORY_COUNT_BAG_OPTION_BACKPACK_AND_WORN
+* INVENTORY_COUNT_BAG_OPTION_BACKPACK_AND_WORN_AND_VENGEANCE
 * INVENTORY_COUNT_BAG_OPTION_BANK
 * INVENTORY_COUNT_BAG_OPTION_CRAFT_BAG
 * INVENTORY_COUNT_BAG_OPTION_FURNITURE
@@ -4969,6 +5024,7 @@ h5. InventoryCountBagOption
 * INVENTORY_COUNT_BAG_OPTION_HOUSE_BANK_TEN
 * INVENTORY_COUNT_BAG_OPTION_HOUSE_BANK_THREE
 * INVENTORY_COUNT_BAG_OPTION_HOUSE_BANK_TWO
+* INVENTORY_COUNT_BAG_OPTION_VENGEANCE
 * INVENTORY_COUNT_BAG_OPTION_WORN
 
 
@@ -5442,6 +5498,7 @@ h5. LootItemResult
 * LOOT_ITEM_RESULT_IS_UNIQUE
 * LOOT_ITEM_RESULT_IS_UNIQUE_LOOT_ALL
 * LOOT_ITEM_RESULT_NOT_AVAILABLE
+* LOOT_ITEM_RESULT_NOT_IN_VENGEANCE
 * LOOT_ITEM_RESULT_QUEST_RESTRICTED
 * LOOT_ITEM_RESULT_SUCCESS
 
@@ -5878,6 +5935,7 @@ h5. QuestConditionType
 * QUEST_CONDITION_TYPE_TRIBUTE_WON_MATCH_MONSTER
 * QUEST_CONDITION_TYPE_TRIBUTE_WON_MATCH_PLAYER
 * QUEST_CONDITION_TYPE_UNEARTH_ANTIQUITY
+* QUEST_CONDITION_TYPE_USE_EMOTE
 * QUEST_CONDITION_TYPE_USE_QUEST_ITEM
 * QUEST_CONDITION_TYPE_VENDOR_GOLD_TRANSACTION
 
@@ -6535,6 +6593,7 @@ h5. UISetting
 * UI_SETTING_AUTO_DECLINE_TRIBUTE_INVITES
 * UI_SETTING_COMPASS_ACTIVE_QUESTS
 * UI_SETTING_COMPASS_COMPANION
+* UI_SETTING_COMPASS_DISTANCE_TRACKING
 * UI_SETTING_COMPASS_GROUP_LEADER
 * UI_SETTING_COMPASS_GROUP_MEMBER_AVA
 * UI_SETTING_COMPASS_GROUP_MEMBER_BATTLEGROUND
@@ -6964,6 +7023,7 @@ h5. RespecResult
 * RESPEC_RESULT_INVALID_PROGRESSION_LINE
 * RESPEC_RESULT_INVALID_SKILL_LINE
 * RESPEC_RESULT_INVALID_SKILL_SELECTION
+* RESPEC_RESULT_IN_VENGEANCE
 * RESPEC_RESULT_IS_IN_COMBAT
 * RESPEC_RESULT_IS_IN_COMBAT_ATTRIBUTE
 * RESPEC_RESULT_NOT_AT_SKILL_RESPEC_SHRINE
@@ -7016,6 +7076,8 @@ h5. RespecType
 * RESPEC_TYPE_CHAMPION_SLOTS
 * RESPEC_TYPE_SKILLS
 * RESPEC_TYPE_SUBCLASS
+* RESPEC_TYPE_VENGEANCE_PERKS
+* RESPEC_TYPE_VENGEANCE_ROLE
 
 
 h5. SkillGrowthType
@@ -7190,6 +7252,7 @@ h5. MarketPurchasableResult
 * MARKET_PURCHASE_RESULT_ALREADY_COMPLETED_INSTANT_UNLOCK
 * MARKET_PURCHASE_RESULT_ALREADY_COMPLETED_QUEST
 * MARKET_PURCHASE_RESULT_ALREADY_HAVE_QUEST
+* MARKET_PURCHASE_RESULT_CAMPAIGN_LOCKED
 * MARKET_PURCHASE_RESULT_CANNOT_GIFT_ENDEAVOR_SEAL_PRODUCTS
 * MARKET_PURCHASE_RESULT_CANNOT_GIFT_GEM_PRODUCTS
 * MARKET_PURCHASE_RESULT_CANNOT_GIFT_PRODUCT
@@ -7713,6 +7776,7 @@ h5. GroupElectionFailure
 * GROUP_ELECTION_FAILURE_ADDON_FORBIDDEN
 * GROUP_ELECTION_FAILURE_ALREADY_VOTED
 * GROUP_ELECTION_FAILURE_ANOTHER_IN_PROGRESS
+* GROUP_ELECTION_FAILURE_GROUP_MEMBER_IN_READY_CHECK
 * GROUP_ELECTION_FAILURE_INITIATOR_CANNOT_VOTE
 * GROUP_ELECTION_FAILURE_INITIATOR_NOT_FOUND
 * GROUP_ELECTION_FAILURE_IN_BATTLEGROUND
@@ -9582,7 +9646,6 @@ h5. GameCameraFramingScreenType
 * FRAMING_SCREEN_JOURNAL
 * FRAMING_SCREEN_LOOT
 * FRAMING_SCREEN_MAP
-* FRAMING_SCREEN_REUSE_ME_2
 * FRAMING_SCREEN_SKILLS
 * FRAMING_SCREEN_SOCIAL
 * FRAMING_SCREEN_SYSTEM
@@ -9924,6 +9987,9 @@ h5. TutorialTrigger
 * TUTORIAL_TRIGGER_UNIVERSAL_DECONSTRUCTION_OPENED
 * TUTORIAL_TRIGGER_UNIVERSAL_STYLE_ITEM
 * TUTORIAL_TRIGGER_UNOWNED_LOCK_VIEWED
+* TUTORIAL_TRIGGER_VENGEANCE_INVENTORY_OPENED
+* TUTORIAL_TRIGGER_VENGEANCE_LOADOUTS_OPENED
+* TUTORIAL_TRIGGER_VENGEANCE_PERKS_OPENED
 * TUTORIAL_TRIGGER_VOICE_CHAT_OPEN_CHANNELS
 * TUTORIAL_TRIGGER_VOICE_CHAT_OPEN_HISTORY
 * TUTORIAL_TRIGGER_WEAPON_SWAPPING_UNLOCKED
@@ -10044,6 +10110,9 @@ h5. Globals
 * MOD_BROWSER_TEXT_SEARCH_MAX_LENGTH
 
 
+h5. Globals
+
+
 h5. AddOnLoadState
 * ADDON_STATE_DEPENDENCIES_DISABLED
 * ADDON_STATE_DISABLED
@@ -10161,6 +10230,7 @@ h5. ControlOrientation
 h5. ControlType
 * CT_BACKDROP
 * CT_BUTTON
+* CT_CANVAS
 * CT_COLORSELECT
 * CT_COMPASS
 * CT_CONTROL
@@ -13263,6 +13333,9 @@ h2. Game API
 * GetCursorCraftedAbilityScriptId()
 ** _Returns:_ *integer:nilable* _scriptId_
 
+* GetCursorVengeancePerkData()
+** _Returns:_ *luaindex:nilable* _vengeancePerkIndex_, *[VengeancePerkSlotFlags|#VengeancePerkSlotFlags]:nilable* _vengeancePerkSlotFlag_
+
 * PlaceInActionBar *protected* (*luaindex* _actionSlot_, *[HotBarCategory|#HotBarCategory]:nilable* _hotbarCategory_)
 
 * PlaceInInventory *protected* (*[Bag|#Bag]* _bagId_, *integer* _slotIndex_)
@@ -13314,6 +13387,8 @@ h2. Game API
 * PickupCraftedAbility *protected* (*integer* _craftedAbilityId_)
 
 * PickupCraftedAbilityScript *protected* (*integer* _craftedAbilityScriptId_)
+
+* PickupVengeancePerk *protected* (*luaindex* _vengeancePerkIndex_, *[VengeancePerkSlotFlags|#VengeancePerkSlotFlags]* _vengeancePerkSlotFlag_)
 
 * RespondToDestroyRequest *private* (*bool* _destroyItem_)
 
@@ -13436,6 +13511,24 @@ h2. Game API
 
 * GetCurrentSynergyInfo()
 ** _Returns:_ *bool* _hasSynergy_, *string* _synergyName_, *textureName* _iconFilename_, *string* _prompt_, *integer* _priority_
+
+* GetNumberOfAvailableSynergies()
+** _Returns:_ *integer* _numAvailable_
+
+* GetSynergyInfoAtIndex(*luaindex* _synergyIndex_)
+** _Returns:_ *string* _synergyName_, *textureName* _iconFilename_, *string* _prompt_, *integer* _priority_, *integer* _synergyAbilityId_, *bool* _canBeUsed_
+
+* CanUseSynergyAtIndex(*luaindex* _synergyIndex_)
+** _Returns:_ *bool* _canBeUsed_
+
+* SetSynergyPriorityOverride(*integer* _synergyAbilityId_, *integer* _priority_)
+
+* GetSynergyPriorityOverride(*integer* _synergyAbilityId_)
+** _Returns:_ *integer* _priority_
+
+* ClearSynergyPriorityOverride(*integer* _synergyAbilityId_)
+
+* ClearAllSynergyPriorityOverrides()
 
 * HasSynergyEffects()
 ** _Returns:_ *bool* _hasSynergy_
@@ -13610,7 +13703,7 @@ h2. Game API
 * GetRaidDuration()
 ** _Returns:_ *integer* _raidTime_
 
-* QueryRaidLeaderboardData(*[RaidCategory|#RaidCategory]* _raidCategory_, *integer* _raidId_, *integer* _classId_)
+* QueryRaidLeaderboardData(*[RaidCategory|#RaidCategory]* _raidCategory_, *integer* _raidId_)
 ** _Returns:_ *[LeaderboardDataReadyState|#LeaderboardDataReadyState]* _readyState_
 
 * GetNumRaidLeaderboards(*[RaidCategory|#RaidCategory]* _raidCategory_)
@@ -13637,10 +13730,10 @@ h2. Game API
 * GetNumTrialLeaderboardEntries(*integer* _raidId_)
 ** _Returns:_ *integer* _count_
 
-* GetNumChallengeOfTheWeekLeaderboardEntries(*integer* _classId_)
+* GetNumChallengeOfTheWeekLeaderboardEntries()
 ** _Returns:_ *integer* _count_
 
-* GetNumChallengeLeaderboardEntries(*integer* _raidId_, *integer* _classId_)
+* GetNumChallengeLeaderboardEntries(*integer* _raidId_)
 ** _Returns:_ *integer* _count_
 
 * GetTrialOfTheWeekLeaderboardEntryInfo(*luaindex* _entryIndex_)
@@ -13649,10 +13742,10 @@ h2. Game API
 * GetTrialLeaderboardEntryInfo(*integer* _raidId_, *luaindex* _entryIndex_)
 ** _Returns:_ *integer* _ranking_, *string* _charName_, *integer* _time_, *integer* _classId_, *integer* _allianceId_, *string* _displayName_
 
-* GetChallengeOfTheWeekLeaderboardEntryInfo(*integer* _classId_, *luaindex* _entryIndex_)
+* GetChallengeOfTheWeekLeaderboardEntryInfo(*luaindex* _entryIndex_)
 ** _Returns:_ *integer* _ranking_, *string* _charName_, *integer* _time_, *integer* _retClassId_, *integer* _allianceId_, *string* _displayName_
 
-* GetChallengeLeaderboardEntryInfo(*integer* _raidId_, *integer* _classId_, *luaindex* _entryIndex_)
+* GetChallengeLeaderboardEntryInfo(*integer* _raidId_, *luaindex* _entryIndex_)
 ** _Returns:_ *integer* _ranking_, *string* _charName_, *integer* _time_, *integer* _retClassId_, *integer* _allianceId_, *string* _displayName_
 
 * GetRaidOfTheWeekTimes()
@@ -13750,7 +13843,7 @@ h2. Game API
 * IsEndlessDungeonCompleted()
 ** _Returns:_ *bool* _isEndlessDungeonCompleted_
 
-* QueryEndlessDungeonLeaderboardData(*[EndlessDungeonGroupType|#EndlessDungeonGroupType]* _endlessDungeonGroupType_, *integer* _endlessDungeonId_, *integer* _classId_)
+* QueryEndlessDungeonLeaderboardData(*[EndlessDungeonGroupType|#EndlessDungeonGroupType]* _endlessDungeonGroupType_, *integer* _endlessDungeonId_)
 ** _Returns:_ *[LeaderboardDataReadyState|#LeaderboardDataReadyState]* _readyState_
 
 * GetEndlessDungeonOfTheWeekLeaderboardLocalPlayerInfo(*[EndlessDungeonGroupType|#EndlessDungeonGroupType]* _endlessDungeonGroupType_)
@@ -13777,10 +13870,10 @@ h2. Game API
 * GetNumEndlessDungeonDuoLeaderboardEntries(*integer* _endlessDungeonId_)
 ** _Returns:_ *integer* _count_
 
-* GetNumEndlessDungeonOfTheWeekSoloLeaderboardEntries(*integer* _classId_)
+* GetNumEndlessDungeonOfTheWeekSoloLeaderboardEntries()
 ** _Returns:_ *integer* _count_
 
-* GetNumEndlessDungeonSoloLeaderboardEntries(*integer* _endlessDungeonId_, *integer* _classId_)
+* GetNumEndlessDungeonSoloLeaderboardEntries(*integer* _endlessDungeonId_)
 ** _Returns:_ *integer* _count_
 
 * GetEndlessDungeonOfTheWeekDuoLeaderboardEntryInfo(*luaindex* _entryIndex_)
@@ -13789,10 +13882,10 @@ h2. Game API
 * GetEndlessDungeonDuoLeaderboardEntryInfo(*integer* _endlessDungeonId_, *luaindex* _entryIndex_)
 ** _Returns:_ *integer* _ranking_, *string* _charName_, *integer* _score_, *integer* _classId_, *string* _displayName_, *integer* _stage_, *integer* _cycle_, *integer* _arc_
 
-* GetEndlessDungeonOfTheWeekSoloLeaderboardEntryInfo(*integer* _classId_, *luaindex* _entryIndex_)
+* GetEndlessDungeonOfTheWeekSoloLeaderboardEntryInfo(*luaindex* _entryIndex_)
 ** _Returns:_ *integer* _ranking_, *string* _charName_, *integer* _score_, *integer* _retClassId_, *string* _displayName_, *integer* _stage_, *integer* _cycle_, *integer* _arc_
 
-* GetEndlessDungeonSoloLeaderboardEntryInfo(*integer* _endlessDungeonId_, *integer* _classId_, *luaindex* _entryIndex_)
+* GetEndlessDungeonSoloLeaderboardEntryInfo(*integer* _endlessDungeonId_, *luaindex* _entryIndex_)
 ** _Returns:_ *integer* _ranking_, *string* _charName_, *integer* _score_, *integer* _retClassId_, *string* _displayName_, *integer* _stage_, *integer* _cycle_, *integer* _arc_
 
 * GetEndlessDungeonOfTheWeekTimes()
@@ -14037,6 +14130,9 @@ h2. Game API
 
 * ActivateSynergy *private* ()
 
+* ActivateSynergyAtIndex *private* (*luaindex* _synergyIndex_)
+** _Returns:_ *[ClientUseAbilityResult|#ClientUseAbilityResult]* _castResult_
+
 * GetOfferedQuestInfo()
 ** _Returns:_ *string* _dialogue_, *string* _response_
 
@@ -14073,6 +14169,9 @@ h2. Game API
 
 * GetJournalQuestInfo(*luaindex* _journalQuestIndex_)
 ** _Returns:_ *string* _questName_, *string* _backgroundText_, *string* _activeStepText_, *integer* _activeStepType_, *string* _activeStepTrackerOverrideText_, *bool* _completed_, *bool* _tracked_, *integer* _questLevel_, *bool* _pushed_, *integer* _questType_, *[ZoneDisplayType|#ZoneDisplayType]* _zoneDisplayType_
+
+* GetJournalQuestId(*luaindex* _journalQuestIndex_)
+** _Returns:_ *integer* _questId_
 
 * GetJournalQuestIsComplete(*luaindex* _journalQuestIndex_)
 ** _Returns:_ *bool* _completed_
@@ -14202,6 +14301,12 @@ h2. Game API
 
 * HasCompletedQuest(*integer* _questId_)
 ** _Returns:_ *bool* _hasCompleted_
+
+* GetQuestType(*integer* _questId_)
+** _Returns:_ *[QuestType|#QuestType]* _questType_
+
+* GetQuestRepeatableType(*integer* _questId_)
+** _Returns:_ *[QuestRepeatableType|#QuestRepeatableType]* _repeatType_
 
 * GetQuestConditionItemInfo(*luaindex* _journalQuestIndex_, *luaindex* _stepIndex_, *luaindex* _conditionIndex_)
 ** _Returns:_ *integer* _itemId_, *integer* _materialItemId_, *[TradeskillType|#TradeskillType]* _craftingType_, *[ItemQuality|#ItemQuality]* _itemQuality_
@@ -14362,9 +14467,6 @@ h2. Game API
 
 * IsInteractingWithMyCompanion()
 ** _Returns:_ *bool* _interactingWithCompanion_
-
-* GetInteractionType()
-** _Returns:_ *[InteractionType|#InteractionType]* _interactType_
 
 * IsPendingInteractionConfirmationValid()
 ** _Returns:_ *bool* _isValid_
@@ -14590,9 +14692,6 @@ h2. Game API
 
 * SetMapToPlayerLocation()
 ** _Returns:_ *[SetMapResultCode|#SetMapResultCode]* _setMapResult_
-
-* ShouldPlayerMinimapBeZoomedIn()
-** _Returns:_ *bool* _zoomIn_
 
 * DoesCurrentMapMatchMapForPlayerLocation()
 ** _Returns:_ *bool* _matches_
@@ -15505,9 +15604,6 @@ h2. Game API
 ** _Returns:_ *integer:nilable* _campaignId_, *[Alliance|#Alliance]:nilable* _alliance_, *integer:nilable* _timeLeftS_
 
 * MarkAllianceLockPendingNotificationSeen()
-
-* IsCurrentCampaignVengeanceRuleset()
-** _Returns:_ *bool* _isInVengeance_
 
 * GetExpectedGroupQueueResult()
 ** _Returns:_ *[QueueForCampaignResponseType|#QueueForCampaignResponseType]* _queueForCampaignResult_
@@ -16512,8 +16608,14 @@ h2. Game API
 * GetLoreBookInfo(*luaindex* _categoryIndex_, *luaindex* _collectionIndex_, *luaindex* _bookIndex_)
 ** _Returns:_ *string* _title_, *textureName* _icon_, *bool* _known_, *integer* _bookId_
 
+* GetBookMediumInfo(*integer* _mediumId_)
+** _Returns:_ *textureName* _bg_, *integer* _numPages_, *integer* _pageWidthPixels_, *integer* _pageHeightPixels_, *integer* _pageYOffsetPixels_, *integer* _leftPageXOffsetPixels_, *integer* _rightPageXOffsetPixels_, *string* _openUISound_, *string* _closeUISound_, *string* _turnPageUISound_
+
+* GetBookMediumFontInfo(*integer* _mediumId_, *bool* _isGamepad_)
+** _Returns:_ *string* _titleFontName_, *integer* _titleFontSize_, *[FontStyle|#FontStyle]* _titleFontStyle_, *string* _bodyFontName_, *integer* _bodyFontSize_, *[FontStyle|#FontStyle]* _bodyFontStyle_, *number* _fontColorR_, *number* _fontColorG_, *number* _fontColorB_, *number* _fontColorA_, *number* _fontStyleColorR_, *number* _fontStyleColorG_, *number* _fontStyleColorB_, *number* _fontStyleColorA_
+
 * ReadLoreBook(*luaindex* _categoryIndex_, *luaindex* _collectionIndex_, *luaindex* _bookIndex_)
-** _Returns:_ *string* _body_, *[BookMedium|#BookMedium]* _medium_, *bool* _showTitle_
+** _Returns:_ *string* _body_, *integer* _mediumId_, *bool* _showTitle_
 
 * GetLoreBookLink(*luaindex* _categoryIndex_, *luaindex* _collectionIndex_, *luaindex* _bookIndex_, *[LinkStyle|#LinkStyle]* _linkStyle_)
 ** _Returns:_ *string* _link_
@@ -20097,6 +20199,9 @@ h2. Game API
 
 * MarkReturningPlayerLeaveIntroPromptShown()
 
+* HasReceivedPromotionalEventUpdate()
+** _Returns:_ *bool* _hasReceivedUpdate_
+
 * HandleReturningPlayerUISystemShown(*[UISystem|#UISystem]* _uiSystem_)
 
 * CanAcceptActiveSpectacleEventQuest(*integer* _activeSpectacleEventId_)
@@ -20181,6 +20286,90 @@ h2. Game API
 
 * IsCharmAbility(*integer* _abilityId_)
 ** _Returns:_ *bool* _isCharmAbility_
+
+* RequestSetLoadoutRoleByIndex(*luaindex* _index_)
+** _Returns:_ *[VengeanceActionResult|#VengeanceActionResult]* _result_
+
+* CanLoadoutRoleBeEquippedByIndex(*luaindex* _index_)
+** _Returns:_ *[VengeanceActionResult|#VengeanceActionResult]* _result_
+
+* GetNumberOfVengeanceRolesAvailableToPlayer()
+** _Returns:_ *integer* _result_
+
+* GetVengeanceRoleNameAtIndex(*luaindex* _index_)
+** _Returns:_ *string* _roleName_
+
+* GetVengeanceRoleIconAtIndex(*luaindex:nilable* _roleIndex_)
+** _Returns:_ *textureName* _icon_
+
+* IsLoadoutRoleEquippedAtIndex(*luaindex* _index_)
+** _Returns:_ *bool* _isEquipped_
+
+* GetRemainingCooldownForRoleSwapMs()
+** _Returns:_ *integer* _cooldownRemaining_
+
+* GetNumberOfImportantDerivedStatDisplaysForRoleAtIndex(*luaindex* _index_)
+** _Returns:_ *integer* _result_
+
+* GetImportantDerivedStatDisplayInfoForRoleAtIndex(*luaindex* _roleIndex_, *luaindex* _statIndex_)
+** _Returns:_ *[DerivedStats|#DerivedStats]* _derivedStat_, *integer* _oldValue_, *integer* _newValue_, *[DerivedStatDisplayType|#DerivedStatDisplayType]* _displayType_
+
+* GetNumberOfImportantMiscStatDisplaysForRoleAtIndex(*luaindex* _index_)
+** _Returns:_ *integer* _result_
+
+* GetImportantMiscStatDisplayInfoForRoleAtIndex(*luaindex* _roleIndex_, *luaindex* _statIndex_)
+** _Returns:_ *[VengeanceMiscStat|#VengeanceMiscStat]* _miscStat_, *number* _oldValue_, *number* _newValue_, *[DerivedStatDisplayType|#DerivedStatDisplayType]* _displayType_
+
+* GetAbilityIdForHotbarSlotAtIndex(*luaindex* _roleIndex_, *[HotBarCategory|#HotBarCategory]* _hotbar_, *luaindex* _slot_)
+** _Returns:_ *integer* _abilityId_
+
+* GetDerivedStatValueForRoleAtIndex(*[DerivedStats|#DerivedStats]* _derivedStat_, *luaindex* _roleIndex_)
+** _Returns:_ *integer* _statValue_
+
+* GetNumberOfPerksAvailableToLoadoutRoleDef(*luaindex:nilable* _roleIndex_)
+** _Returns:_ *integer* _numPerks_
+
+* GetNumberOfPerksAvailableToLoadoutRoleDefInSlot(*[VengeancePerkSlotFlags|#VengeancePerkSlotFlags]* _aSlotFlag_, *luaindex:nilable* _roleIndex_)
+** _Returns:_ *integer* _numPerks_
+
+* CanPerkBeSlottedInSlotForRole(*luaindex* _slotIndex_, *[VengeancePerkSlotFlags|#VengeancePerkSlotFlags]* _aSlotFlag_, *luaindex:nilable* _roleIndex_)
+** _Returns:_ *[VengeanceActionResult|#VengeanceActionResult]* _result_
+
+* RequestSetPerkSelectionForRoleByIndex(*luaindex* _redPerkIndex_, *luaindex* _yellowPerkIndex_, *luaindex* _bluePerkIndex_, *luaindex:nilable* _roleIndex_)
+** _Returns:_ *[VengeanceActionResult|#VengeanceActionResult]* _result_
+
+* GetVengeancePerkNameAtIndex(*luaindex* _perkIndex_, *luaindex:nilable* _roleIndex_)
+** _Returns:_ *string* _perkName_
+
+* GetVengeancePerkTooltipTextAtIndex(*luaindex* _perkIndex_, *luaindex:nilable* _roleIndex_)
+** _Returns:_ *string* _tooltipText_
+
+* GetActiveLoadoutRoleIndex()
+** _Returns:_ *luaindex* _roleIndex_
+
+* GetIndexOfPerkInSlotForRole(*[VengeancePerkSlotFlags|#VengeancePerkSlotFlags]* _slotFlag_, *luaindex:nilable* _roleIndex_)
+** _Returns:_ *luaindex* _globalPerkIndex_
+
+* GetSlotIndexOfPerkInSlotForRole(*[VengeancePerkSlotFlags|#VengeancePerkSlotFlags]* _slotFlag_, *luaindex:nilable* _roleIndex_)
+** _Returns:_ *luaindex* _perkSlotIndex_
+
+* GetNumberOfSlotFlagsForPerkAtIndex(*luaindex* _globalPerkIndex_, *luaindex:nilable* _roleIndex_)
+** _Returns:_ *integer* _numSlotFlags_
+
+* GetSlotFlagForSlotAtIndex(*luaindex* _globalPerkIndex_, *luaindex* _slotFlagIndex_, *luaindex:nilable* _roleIndex_)
+** _Returns:_ *[VengeancePerkSlotFlags|#VengeancePerkSlotFlags]* _slotFlag_
+
+* GetPerkIndexForSlotAtSlotIndex(*[VengeancePerkSlotFlags|#VengeancePerkSlotFlags]* _slotFlag_, *luaindex* _slotIndex_, *luaindex:nilable* _roleIndex_)
+** _Returns:_ *luaindex* _globalPerkIndex_
+
+* GetVengeancePerkIconAtIndex(*luaindex* _perkIndex_, *luaindex:nilable* _roleIndex_)
+** _Returns:_ *textureName* _icon_
+
+* GetVengeancePerkIcon(*integer* _defId_)
+** _Returns:_ *textureName* _icon_
+
+* GetVengeanceRoleIcon(*integer* _defId_)
+** _Returns:_ *textureName* _icon_
 
 
 * IsGameCameraActive()
@@ -20554,6 +20743,9 @@ h2. Game API
 * AreItemDyeChannelsDyeable(*[Bag|#Bag]* _bagId_, *integer* _slotIndex_)
 ** _Returns:_ *bool* _primary_, *bool* _secondary_, *bool* _accent_
 
+* IsItemVisuallyDisabledInVengeance(*[Bag|#Bag]* _bagId_, *integer* _slotIndex_)
+** _Returns:_ *bool* _isDisabled_
+
 * HasItemInSlot(*[Bag|#Bag]* _bagId_, *integer* _slotIndex_)
 ** _Returns:_ *bool* _hasItemInSlot_
 
@@ -20828,7 +21020,7 @@ h2. Game API
 ** _Returns:_ *bool* _itemStackable_
 
 * GetItemLinkStacks(*string* _itemLink_)
-** _Returns:_ *integer* _stackCountBackpack_, *integer* _stackCountBank_, *integer* _stackCountCraftBag_, *integer* _stackCountHouseBanks_, *integer* _stackCountFurnitureVault_
+** _Returns:_ *integer* _stackCountBackpack_, *integer* _stackCountBank_, *integer* _stackCountCraftBag_, *integer* _stackCountHouseBanks_, *integer* _stackCountFurnitureVault_, *integer* _stackCountVengeanceBag_
 
 * GetItemLinkInventoryCount(*string* _itemLink_, *[InventoryCountBagOption|#InventoryCountBagOption]* _countType_)
 ** _Returns:_ *integer* _inventoryCount_
@@ -20920,6 +21112,12 @@ h2. Game API
 
 * GetItemLinkItemTagInfo(*string* _itemLink_, *luaindex* _itemTagIndex_)
 ** _Returns:_ *string* _itemTagDescription_, *[ItemTagCategory|#ItemTagCategory]* _itemTagCategory_
+
+* IsItemLinkVisuallyDisabledInVengeance(*string* _itemLink_)
+** _Returns:_ *bool* _isDisabled_
+
+* IsItemLinkUsableOutsideVengeance(*string* _itemLink_)
+** _Returns:_ *bool* _canUseOutsideVengeance_
 
 * HasCraftBagAutoTransferNotification()
 ** _Returns:_ *bool* _hasTransferNotification_
@@ -21038,6 +21236,9 @@ h2. Game API
 * GetCurrencyPlayerStoredLocation(*[CurrencyType|#CurrencyType]* _currencyType_)
 ** _Returns:_ *[CurrencyLocation|#CurrencyLocation]* _currencyLocation_
 
+* GetCurrencyTypeFromRewardType(*[RewardType|#RewardType]* _rewardType_)
+** _Returns:_ *[CurrencyType|#CurrencyType]* _currencyType_
+
 * GetCurrencyName(*[CurrencyType|#CurrencyType]* _currencyType_, *bool* _isSingular_, *bool* _isLower_)
 ** _Returns:_ *string* _name_
 
@@ -21067,6 +21268,9 @@ h2. Game API
 
 * ShouldShowCurrencyInLootHistory(*[CurrencyType|#CurrencyType]* _currencyType_)
 ** _Returns:_ *bool* _shouldShowInLootHistory_
+
+* ShouldShowCurrencyInCurrencyPanel(*[CurrencyType|#CurrencyType]* _currencyType_)
+** _Returns:_ *bool* _shouldShowInCurrencyPanel_
 
 * IsCurrencyCapped(*[CurrencyType|#CurrencyType]* _currencyType_, *[CurrencyLocation|#CurrencyLocation]* _currencyLocation_)
 ** _Returns:_ *bool* _isCapped_
@@ -22168,6 +22372,9 @@ h2. Game API
 * IsInteractionUsingInteractCamera()
 ** _Returns:_ *bool* _enabled_
 
+* GetInteractionType()
+** _Returns:_ *[InteractionType|#InteractionType]* _interactType_
+
 * GetScribingCollectibleId()
 ** _Returns:_ *integer* _scribingCollectibleId_
 
@@ -23157,6 +23364,9 @@ h2. Game API
 * GetCharacterNameById(*id64* _charId_)
 ** _Returns:_ *string* _name_
 
+* IsCurrentCampaignVengeanceRuleset()
+** _Returns:_ *bool* _isInVengeance_
+
 
 h2. Object API
 
@@ -23899,6 +24109,57 @@ h3. ButtonControl
 * SetVerticalAlignment(*[TextAlignment|#TextAlignment]* _verticalAlign_)
 
 
+h3. CanvasControl
+* Arc(*number* _centerX_, *number* _centerY_, *number* _radius_, *number* _startAngle_, *number* _endAngle_, *bool* _isCounterClockwise_)
+
+* ArcTo(*number* _controlPoint1X_, *number* _controlPoint1Y_, *number* _controlPoint2X_, *number* _controlPoint2Y_, *number* _radius_)
+
+* BeginPath()
+
+* Clear()
+
+* ClosePath()
+
+* Fill()
+
+* FillRect(*number* _x_, *number* _y_, *number* _width_, *number* _height_)
+
+* GetObjectFit()
+** _Returns:_ *[ObjectFit|#ObjectFit]* _objectFit_
+
+* LineTo(*number* _x_, *number* _y_)
+
+* MoveTo(*number* _x_, *number* _y_)
+
+* QuadraticCurveTo(*number* _controlPointX_, *number* _controlPointY_, *number* _endPointX_, *number* _endPointY_)
+
+* Rect(*number* _x_, *number* _y_, *number* _width_, *number* _height_)
+
+* RoundRect(*number* _x_, *number* _y_, *number* _width_, *number* _height_, *number* _upperLeftRadius_, *number* _upperRightRadius_, *number* _lowerRightRadius_, *number* _lowerLeftRadius_)
+
+* SetCanvasSize(*number* _width_, *number* _height_)
+
+* SetFillColor(*number* _r_, *number* _g_, *number* _b_, *number* _a_)
+
+* SetObjectFit(*[ObjectFit|#ObjectFit]* _objectFit_)
+
+* SetStrokeCapStyle(*[StrokeCapStyle|#StrokeCapStyle]* _capStyle_)
+
+* SetStrokeColor(*number* _r_, *number* _g_, *number* _b_, *number* _a_)
+
+* SetStrokeJoinType(*[StrokeJoinType|#StrokeJoinType]* _joinType_, *number* _miterLimit_)
+
+* SetStrokeLineDash(*number* _lineDashArray_)
+
+* SetStrokeLineDashOffset(*number* _lineDashOffset_)
+
+* SetStrokeWidth(*number* _width_)
+
+* Stroke()
+
+* StrokeRect(*number* _x_, *number* _y_, *number* _width_, *number* _height_)
+
+
 h3. ColorSelectControl
 * GetColorAsHSV()
 ** _Returns:_ *number* _hue_, *number* _saturation_, *number* _value_
@@ -23971,7 +24232,7 @@ h3. CompassDisplayControl
 
 h3. Control
 Objects that inherit behavior from *Control*
-[BackdropControl|#BackdropControl], [ButtonControl|#ButtonControl], [ColorSelectControl|#ColorSelectControl], [CompassDisplayControl|#CompassDisplayControl], [CooldownControl|#CooldownControl], [DebugTextControl|#DebugTextControl], [EditControl|#EditControl], [LabelControl|#LabelControl], [LineControl|#LineControl], [MapDisplayControl|#MapDisplayControl], [PolygonControl|#PolygonControl], [RootWindow|#RootWindow], [ScrollControl|#ScrollControl], [SliderControl|#SliderControl], [StatusBarControl|#StatusBarControl], [TextBufferControl|#TextBufferControl], [TextureCompositeControl|#TextureCompositeControl], [TextureControl|#TextureControl], [TooltipControl|#TooltipControl], [TopLevelWindow|#TopLevelWindow], [VectorControl|#VectorControl]
+[BackdropControl|#BackdropControl], [ButtonControl|#ButtonControl], [CanvasControl|#CanvasControl], [ColorSelectControl|#ColorSelectControl], [CompassDisplayControl|#CompassDisplayControl], [CooldownControl|#CooldownControl], [DebugTextControl|#DebugTextControl], [EditControl|#EditControl], [LabelControl|#LabelControl], [LineControl|#LineControl], [MapDisplayControl|#MapDisplayControl], [PolygonControl|#PolygonControl], [RootWindow|#RootWindow], [ScrollControl|#ScrollControl], [SliderControl|#SliderControl], [StatusBarControl|#StatusBarControl], [TextBufferControl|#TextBufferControl], [TextureCompositeControl|#TextureCompositeControl], [TextureControl|#TextureControl], [TooltipControl|#TooltipControl], [TopLevelWindow|#TopLevelWindow], [VectorControl|#VectorControl]
 
 * AddFilterForEvent(*integer* _event_, *variant* _filterParameter_)
 ** _Returns:_ *bool* _success_
@@ -25614,6 +25875,10 @@ h3. TooltipControl
 
 * SetTributeSeasonRewardList(*[TributeTier|#TributeTier]* _tributeTier_, *integer* _rewardListId_)
 
+* SetVengeancePerk(*luaindex* _perkIndex_, *[VengeanceActionResult|#VengeanceActionResult]:nilable* _actionResult_, *luaindex:nilable* _roleIndex_)
+
+* SetVengeancePerkId(*integer* _perkDefId_)
+
 * SetVerticalPadding(*number* _paddingY_)
 
 * SetWornItem(*[EquipSlot|#EquipSlot]* _equipSlot_, *[Bag|#Bag]* _bagId_)
@@ -26100,7 +26365,7 @@ h2. Events
 * EVENT_ENDLESS_DUNGEON_CONFIRM_COMPANION_SUMMONING (*integer* _collectibleId_)
 * EVENT_ENDLESS_DUNGEON_COUNTER_VALUE_CHANGED (*[EndlessDungeonCounterType|#EndlessDungeonCounterType]* _counterType_, *integer* _counterValue_)
 * EVENT_ENDLESS_DUNGEON_INITIALIZED (*integer* _endlessDungeonId_, *integer* _flags_, *bool* _completed_)
-* EVENT_ENDLESS_DUNGEON_LEADERBOARD_DATA_RECEIVED (*[EndlessDungeonGroupType|#EndlessDungeonGroupType]* _endlessDungeonGroupType_, *integer* _endlessDungeonId_, *integer* _classId_)
+* EVENT_ENDLESS_DUNGEON_LEADERBOARD_DATA_RECEIVED (*[EndlessDungeonGroupType|#EndlessDungeonGroupType]* _endlessDungeonGroupType_, *integer* _endlessDungeonId_)
 * EVENT_ENDLESS_DUNGEON_LEADERBOARD_PLAYER_DATA_CHANGED
 * EVENT_ENDLESS_DUNGEON_NEW_BEST_SCORE (*string* _endlessDungeonName_, *integer* _score_, *bool* _isWeekly_)
 * EVENT_ENDLESS_DUNGEON_OF_THE_WEEK_TURNOVER
@@ -26471,7 +26736,7 @@ h2. Events
 * EVENT_QUEST_TIMER_UPDATED (*luaindex* _journalIndex_)
 * EVENT_QUEST_TOOL_UPDATED (*luaindex* _journalIndex_, *string* _questName_, *integer* _countDelta_, *string* _iconFilename_, *integer* _questItemId_, *string* _name_)
 * EVENT_QUEUE_FOR_CAMPAIGN_RESPONSE (*[QueueForCampaignResponseType|#QueueForCampaignResponseType]* _response_)
-* EVENT_RAID_LEADERBOARD_DATA_RECEIVED (*[RaidCategory|#RaidCategory]* _raidCategory_, *integer* _raidId_, *integer* _classId_)
+* EVENT_RAID_LEADERBOARD_DATA_RECEIVED (*[RaidCategory|#RaidCategory]* _raidCategory_, *integer* _raidId_)
 * EVENT_RAID_LEADERBOARD_PLAYER_DATA_CHANGED
 * EVENT_RAID_OF_THE_WEEK_INFO_RECEIVED
 * EVENT_RAID_OF_THE_WEEK_TURNOVER
@@ -26523,7 +26788,7 @@ h2. Events
 * EVENT_SCRIPTED_WORLD_EVENT_INVITE_REMOVED (*integer* _eventId_)
 * EVENT_SCRYING_EXIT_RESPONSE (*bool* _accept_)
 * EVENT_SELL_RECEIPT (*string* _itemName_, *integer* _itemQuantity_, *integer* _money_)
-* EVENT_SHOW_BOOK (*string* _bookTitle_, *string* _body_, *[BookMedium|#BookMedium]* _medium_, *bool* _showTitle_, *integer* _bookId_)
+* EVENT_SHOW_BOOK (*string* _bookTitle_, *string* _body_, *integer* _mediumId_, *bool* _showTitle_, *integer* _bookId_)
 * EVENT_SHOW_DAILY_LOGIN_REWARDS_SCENE
 * EVENT_SHOW_SPECIFIC_HELP_PAGE (*luaindex* _helpCategoryIndex_, *luaindex* _helpIndex_)
 * EVENT_SHOW_SUBTITLE (*[ChannelType|#ChannelType]* _channelType_, *string* _speakerName_, *string* _text_)
@@ -26654,6 +26919,10 @@ h2. Events
 * EVENT_UNLOCKED_HIRELING_CORRESPONDENCE_UPDATED
 * EVENT_UNSPENT_CHAMPION_POINTS_CHANGED
 * EVENT_UPDATE_BUYBACK
+* EVENT_VENGEANCE_ACTION_RESULT (*[VengeanceActionResult|#VengeanceActionResult]* _vengeanceActionResult_)
+* EVENT_VENGEANCE_EXIT_LOADOUT_SWAP_SUBZONE
+* EVENT_VENGEANCE_LOADOUT_ROLE_UPDATED
+* EVENT_VENGEANCE_PERKS_UPDATED
 * EVENT_VETERAN_DIFFICULTY_CHANGED (*string* _unitTag_, *bool* _isDifficult_)
 * EVENT_VIBRATION (*integer* _duration_, *number* _coarseMotor_, *number* _fineMotor_, *number* _leftTriggerMotor_, *number* _rightTriggerMotor_, *string* _debugSourceInfo_)
 * EVENT_VISUAL_LAYER_CHANGED
@@ -27220,6 +27489,15 @@ h5. Callback
 h5. Callbacks
 * [Child: Callback|#Callback]
 
+h5. Canvas
+* [Inherits: Control|#Control]
+* [Child: CanvasSize|#CanvasSize]
+* [Child: objectFit|#Attributes]
+
+h5. CanvasSize
+* _attribute:_ *number* _width_
+* _attribute:_ *number* _height_
+
 h5. Caustic
 * _attribute:_ *number* _frequencyX_
 * _attribute:_ *number* _frequencyY_
@@ -27390,6 +27668,7 @@ h5. Control
 h5. Controls
 * [Child: Backdrop|#Backdrop]
 * [Child: Button|#Button]
+* [Child: Canvas|#Canvas]
 * [Child: ColorSelect|#ColorSelect]
 * [Child: Compass|#Compass]
 * [Child: Control|#Control]

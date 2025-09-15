@@ -297,7 +297,7 @@ function ZO_ArmoryWeaponSetRow_Keyboard:SetHotbarCategory(hotbarCategory)
 end
 
 function ZO_ArmoryWeaponSetRow_Keyboard:AssignArmoryBuildData(data)
-    self.skills:AssignArmoryBuildData(data)
+    self.skills:AssignSkillsData(data)
     self:AssignArmoryBuildDataToEquipSlots(data)
     self.buildData = data
 end

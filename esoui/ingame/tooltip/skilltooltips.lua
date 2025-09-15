@@ -183,7 +183,7 @@ function ZO_Tooltip:LayoutSkillProgression(skillProgressionData, showRankNeededL
         if not shouldOverrideRankForComparison then
             local currentRank = skillProgressionData:GetCurrentRank()
             --if you have never owned an active then the rank is nil and we don't show an XP bar
-            if currentRank then
+            if currentRank and not IsCurrentCampaignVengeanceRuleset() then
                 local currentXP = skillProgressionData:GetCurrentXP()
                 local lastRankXP, nextRankXP = skillProgressionData:GetRankXPExtents(currentRank)
                 self:AddAbilityProgressBar(currentXP, lastRankXP, nextRankXP)
@@ -243,9 +243,11 @@ function ZO_Tooltip:LayoutAbilityWithSkillProgressionData(abilityId, skillProgre
         local formattedNameAndRank = ZO_CachedStrFormat(SI_ABILITY_NAME_AND_RANK, abilityName, currentRank)
         self:AddLine(formattedNameAndRank, self:GetStyle("title"))
 
-        local currentXP = skillProgressionData:GetCurrentXP()
-        local lastRankXP, nextRankXP = skillProgressionData:GetRankXPExtents(currentRank)
-        self:AddAbilityProgressBar(currentXP, lastRankXP, nextRankXP)
+        if not IsCurrentCampaignVengeanceRuleset() then
+            local currentXP = skillProgressionData:GetCurrentXP()
+            local lastRankXP, nextRankXP = skillProgressionData:GetRankXPExtents(currentRank)
+            self:AddAbilityProgressBar(currentXP, lastRankXP, nextRankXP)
+        end
 
         self:AddAbilityStats(abilityId, currentRank)
         local descriptionText = GetAbilityDescription(abilityId, currentRank)

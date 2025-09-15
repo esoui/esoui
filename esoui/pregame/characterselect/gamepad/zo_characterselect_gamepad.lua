@@ -648,7 +648,7 @@ local function InitKeybindingDescriptor(self)
 
         callback = function()
             -- fix to keep both buttons from being pushable in the time it takes for the state to change
-            local state = PregameStateManager_GetCurrentState()
+            local state = ZO_PregameStateManager_GetCurrentState()
             if state == "CharacterSelect" then
                 SCENE_MANAGER:Push("gamepad_options_root")
             end
@@ -741,7 +741,7 @@ local function InitKeybindingDescriptor(self)
                 self.characterList:Deactivate() -- So we can't select a different character
                 PlaySound(SOUNDS.DIALOG_ACCEPT)
                 PlaySound(SOUNDS.GAMEPAD_MENU_FORWARD)
-                PregameStateManager_SetState("CharacterCreate")
+                ZO_PregameStateManager_SetState("CharacterCreate")
             end,
         },
         optionsKeybind,
@@ -761,7 +761,7 @@ local function InitKeybindingDescriptor(self)
                 self.characterList:Deactivate() -- So we can't select a different character
                 PlaySound(SOUNDS.DIALOG_ACCEPT)
                 PlaySound(SOUNDS.GAMEPAD_MENU_FORWARD)
-                PregameStateManager_SetState("ChapterUpgrade")
+                ZO_PregameStateManager_SetState("ChapterUpgrade")
             end,
         },
         optionsKeybind,
@@ -876,13 +876,13 @@ local function InitKeybindingDescriptor(self)
                     ZO_CharacterSelect_Gamepad_BeginRename()
                 elseif self.serviceMode == SERVICE_TOKEN_RACE_CHANGE then
                     ZO_CHARACTERCREATE_MANAGER:InitializeForRaceChange(CHARACTER_SELECT_MANAGER:GetSelectedCharacterData())
-                    PregameStateManager_SetState("CharacterCreate_Barbershop")
+                    ZO_PregameStateManager_SetState("CharacterCreate_Barbershop")
                 elseif self.serviceMode == SERVICE_TOKEN_APPEARANCE_CHANGE then
                     ZO_CHARACTERCREATE_MANAGER:InitializeForAppearanceChange(CHARACTER_SELECT_MANAGER:GetSelectedCharacterData())
-                    PregameStateManager_SetState("CharacterCreate_Barbershop")
+                    ZO_PregameStateManager_SetState("CharacterCreate_Barbershop")
                 elseif self.serviceMode == SERVICE_TOKEN_ALLIANCE_CHANGE then
                     ZO_CHARACTERCREATE_MANAGER:InitializeForAllianceChange(CHARACTER_SELECT_MANAGER:GetSelectedCharacterData())
-                    PregameStateManager_SetState("CharacterCreate_Barbershop")
+                    ZO_PregameStateManager_SetState("CharacterCreate_Barbershop")
                 end
             end,
         },
@@ -1228,13 +1228,13 @@ function ZO_CharacterSelect_Gamepad_Initialize(self)
     self:RegisterForEvent(EVENT_CHARACTER_DELETED, ContextFilter(CharacterDeleted))
     self:RegisterForEvent(EVENT_ENTITLEMENT_STATE_CHANGED, function()
         -- Need the game data to be loaded before we can recreate the list, which is handled by OnPregameFullyLoaded()
-        if PregameIsFullyLoaded() then
+        if ZO_PregameIsFullyLoaded() then
             RecreateList(self)
         end
     end)
 
     CHARACTER_SELECT_MANAGER:RegisterCallback("EventAnnouncementsReceived", function()
-        if PregameIsFullyLoaded() then
+        if ZO_PregameIsFullyLoaded() then
             ZO_CharacterSelect_Gamepad_ShowEventAnnouncementsBanner(CHARACTER_SELECT_MANAGER:GetEventAnnouncementAutoShowIndex())
         end
     end)
@@ -1350,11 +1350,11 @@ function ZO_CharacterSelect_Gamepad_BeginRename()
 end
 
 function ZO_CharacterSelect_Gamepad_Login(option)
-    local state = PregameStateManager_GetCurrentState()
+    local state = ZO_PregameStateManager_GetCurrentState()
     if state == "CharacterSelect" then
         local selectedCharacterData = CHARACTER_SELECT_MANAGER:GetSelectedCharacterData()
         if selectedCharacterData then
-            PregameStateManager_PlayCharacter(selectedCharacterData.id, option)
+            ZO_PregameStateManager_PlayCharacter(selectedCharacterData.id, option)
             return true
         end
     end

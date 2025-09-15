@@ -160,7 +160,7 @@ function ZO_LeaderboardsManager_Gamepad:AddEntry(leaderboardObject, name, titleN
     return entryData
 end
 
-local CATEGORY_SORT_KEYS = 
+local CATEGORY_SORT_KEYS =
 {
     group = { tiebreaker = "index" },
     index = { tiebreaker = "titleName", isNumeric = true },
@@ -279,17 +279,6 @@ function ZO_LeaderboardsManager_Gamepad:RefreshCategoryList()
     self.categoryList:Commit()
 end
 
-function ZO_LeaderboardsManager_Gamepad:RepopulateFilterDropdown()
-    local function OnFilterChanged(comboBox, entryText, entry)
-        local leaderboard = self:GetSelectedLeaderboardData()
-        if not leaderboard.leaderboardObject:HandleFilterDropdownChanged() then
-            GAMEPAD_LEADERBOARD_LIST:RefreshFilters()
-        end
-    end
-
-    GAMEPAD_LEADERBOARD_LIST:RepopulateFilterDropdown(OnFilterChanged)
-end
-
 function ZO_LeaderboardsManager_Gamepad:SetKeybindButtonGroup(descriptor)
     if self.currentKeybindButtonGroup then
         KEYBIND_STRIP:RemoveKeybindButtonGroup(self.currentKeybindButtonGroup)
@@ -300,10 +289,6 @@ function ZO_LeaderboardsManager_Gamepad:SetKeybindButtonGroup(descriptor)
     end
 
     self.currentKeybindButtonGroup = descriptor
-end
-
-function ZO_LeaderboardsManager_Gamepad:GetSelectedClassFilter()
-    return GAMEPAD_LEADERBOARD_LIST:GetSelectedClassFilter()
 end
 
 function ZO_LeaderboardsManager_Gamepad:SetLoadingSpinnerVisibility(show)

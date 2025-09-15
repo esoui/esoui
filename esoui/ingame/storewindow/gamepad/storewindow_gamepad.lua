@@ -28,6 +28,11 @@ function ZO_GamepadStoreManager:Initialize(control)
             end
 
             table.insert(componentTable, ZO_MODE_STORE_SELL)
+
+            if IsCurrentCampaignVengeanceRuleset() and ZO_VENGEANCE_BAG_SELL_ENABLED then
+                table.insert(componentTable, ZO_MODE_STORE_SELL_VENGEANCE)
+            end
+
             table.insert(componentTable, ZO_MODE_STORE_BUY_BACK)
 
             if CanStoreRepair() then
@@ -579,7 +584,8 @@ function ZO_GamepadStoreManager:UpdateRightTooltip(list, mode)
             itemLink = selectedData.itemLink
         elseif mode == ZO_MODE_STORE_BUY_BACK then
             itemLink = selectedData.itemLink
-        elseif mode == ZO_MODE_STORE_SELL then
+        elseif mode == ZO_MODE_STORE_SELL
+            or mode == ZO_MODE_STORE_SELL_VENGEANCE then
             itemLink = GetItemLink(selectedData.bagId, selectedData.slotIndex)
         end
     end
@@ -671,4 +677,5 @@ function ZO_Store_OnInitialize_Gamepad(control)
     STORE_WINDOW_GAMEPAD:AddComponent(ZO_GamepadStoreBuyback:New(STORE_WINDOW_GAMEPAD))
     STORE_WINDOW_GAMEPAD:AddComponent(ZO_GamepadStoreSell:New(STORE_WINDOW_GAMEPAD))
     STORE_WINDOW_GAMEPAD:AddComponent(ZO_GamepadStoreRepair:New(STORE_WINDOW_GAMEPAD))
+    STORE_WINDOW_GAMEPAD:AddComponent(ZO_GamepadStoreSellVengeance:New(STORE_WINDOW_GAMEPAD))
 end

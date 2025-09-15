@@ -72,7 +72,7 @@ function ZO_LeaderboardsListManager_Shared:SetupDataTable(dataTable)
         local rank, playerDisplayName, characterName, points, class, alliance
 
         --Get and setup Leaderboard Type specific data
-        if self.leaderboardRankType == LEADERBOARD_TYPE_ENDLESS_DUNGEON_OVERALL or self.leaderboardRankType == LEADERBOARD_TYPE_ENDLESS_DUNGEON_CLASS then
+        if self.leaderboardRankType == LEADERBOARD_TYPE_ENDLESS_DUNGEON_OVERALL then
             local stage, cycle, arc
             rank, characterName, points, class, playerDisplayName, stage, cycle, arc = self.infoFunction(dataTable.index, self.subType)
             dataTable.stage = stage
@@ -86,6 +86,7 @@ function ZO_LeaderboardsListManager_Shared:SetupDataTable(dataTable)
 
         --Setup common leaderboard data
         dataTable.characterName = characterName
+        dataTable.hasCharacter = characterName ~= ""
         dataTable.displayName = playerDisplayName
         dataTable.type = ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_SEARCH_TYPE_NAMES
         --This is the overall rank for the specific type of leaderboard you've requested.
@@ -100,7 +101,7 @@ function ZO_LeaderboardsListManager_Shared:SetupDataTable(dataTable)
     end
 end
 
-function ZO_LeaderboardsListManager_Shared:FilterScrollList(list, filteredClass, preAddCallback, searchCallback)
+function ZO_LeaderboardsListManager_Shared:FilterScrollList(list, preAddCallback, searchCallback)
     local scrollData = ZO_ScrollList_GetDataList(list)
     ZO_ClearNumericallyIndexedTable(scrollData)
 
@@ -111,29 +112,27 @@ function ZO_LeaderboardsListManager_Shared:FilterScrollList(list, filteredClass,
     local filteredIndex = 1
 
     for _, data in ipairs(self:GetMasterList()) do
-        if not filteredClass or data.class == filteredClass then
-            --Re-rank based on class filtering
-            if data.trueRank > lastTrueRank then
-                lastTrueRank = data.trueRank
-                currentRank = filteredIndex
-            end
-
-            --The list comes pre-sorted by rank, so all later entries don't matter
-            if maxAllowedRank and currentRank > maxAllowedRank then
-                break
-            end
-
-            data.rank = currentRank
-
-            if not searchCallback or searchCallback(data) then
-                if preAddCallback then
-                    preAddCallback(data)
-                    table.insert(scrollData, ZO_ScrollList_CreateDataEntry(ZO_LEADERBOARD_PLAYER_DATA, data))
-                end
-            end
-
-            filteredIndex = filteredIndex + 1
+        --Re-rank
+        if data.trueRank > lastTrueRank then
+            lastTrueRank = data.trueRank
+            currentRank = filteredIndex
         end
+
+        --The list comes pre-sorted by rank, so all later entries don't matter
+        if maxAllowedRank and currentRank > maxAllowedRank then
+            break
+        end
+
+        data.rank = currentRank
+
+        if not searchCallback or searchCallback(data) then
+            if preAddCallback then
+                preAddCallback(data)
+                table.insert(scrollData, ZO_ScrollList_CreateDataEntry(ZO_LEADERBOARD_PLAYER_DATA, data))
+            end
+        end
+
+        filteredIndex = filteredIndex + 1
     end
 end
 
@@ -161,9 +160,9 @@ function ZO_LeaderboardsListManager_Shared:QueryLeaderboardData(leaderboardType,
             self:OnCampaignLeaderboardDataReceived(queryData.campaignId, queryData.alliance)
         end
     elseif leaderboardType == LEADERBOARD_DATA_TYPE.RAID then
-        readyState = QueryRaidLeaderboardData(queryData.raidCategory, queryData.raidId, queryData.classId)
+        readyState = QueryRaidLeaderboardData(queryData.raidCategory, queryData.raidId)
         if readyState == LEADERBOARD_DATA_READY then
-            self:OnRaidLeaderboardDataReceived(queryData.raidCategory, queryData.raidId, queryData.classId)
+            self:OnRaidLeaderboardDataReceived(queryData.raidCategory, queryData.raidId)
         end
     elseif leaderboardType == LEADERBOARD_DATA_TYPE.TRIBUTE then
         readyState = QueryTributeLeaderboardData(queryData.tributeType)
@@ -171,9 +170,9 @@ function ZO_LeaderboardsListManager_Shared:QueryLeaderboardData(leaderboardType,
             self:OnTributeLeaderboardDataReceived(queryData.tributeType)
         end
     elseif leaderboardType == LEADERBOARD_DATA_TYPE.ENDLESS_DUNGEON then
-        readyState = QueryEndlessDungeonLeaderboardData(queryData.endlessDungeonGroupType, queryData.endlessDungeonId, queryData.classId)
+        readyState = QueryEndlessDungeonLeaderboardData(queryData.endlessDungeonGroupType, queryData.endlessDungeonId)
         if readyState == LEADERBOARD_DATA_READY then
-            self:OnEndlessDungeonLeaderboardDataReceived(queryData.endlessDungeonGroupType, queryData.endlessDungeonId, queryData.classId)
+            self:OnEndlessDungeonLeaderboardDataReceived(queryData.endlessDungeonGroupType, queryData.endlessDungeonId)
         end
     end
 
@@ -182,15 +181,14 @@ function ZO_LeaderboardsListManager_Shared:QueryLeaderboardData(leaderboardType,
     end
 end
 
-function ZO_LeaderboardsListManager_Shared:OnRaidLeaderboardDataReceived(raidCategory, raidId, classId)
+function ZO_LeaderboardsListManager_Shared:OnRaidLeaderboardDataReceived(raidCategory, raidId)
     if self.pendingRequestType ~= LEADERBOARD_DATA_TYPE.RAID then
         return
     end
 
     local passesCategoryCheck = self.pendingRequestData.raidCategory == raidCategory
     local passesIdCheck = self.pendingRequestData.raidId == raidId
-    local passesClassCheck = raidCategory == RAID_CATEGORY_TRIAL or self.pendingRequestData.classId == classId
-    if passesCategoryCheck and passesIdCheck and passesClassCheck then
+    if passesCategoryCheck and passesIdCheck then
         self:SetLoadingState(false)
     end
 end
@@ -227,15 +225,14 @@ function ZO_LeaderboardsListManager_Shared:OnTributeLeaderboardDataReceived(trib
     end
 end
 
-function ZO_LeaderboardsListManager_Shared:OnEndlessDungeonLeaderboardDataReceived(groupType, endlessDungeonId, classId)
+function ZO_LeaderboardsListManager_Shared:OnEndlessDungeonLeaderboardDataReceived(groupType, endlessDungeonId)
     if self.pendingRequestType ~= LEADERBOARD_DATA_TYPE.ENDLESS_DUNGEON then
         return
     end
 
     local passesGroupTypeCheck = self.pendingRequestData.endlessDungeonGroupType == groupType
     local passesIdCheck = self.pendingRequestData.endlessDungeonId == endlessDungeonId
-    local passesClassCheck = groupType == ENDLESS_DUNGEON_GROUP_TYPE_DUO or self.pendingRequestData.classId == classId
-    if passesGroupTypeCheck and passesIdCheck and passesClassCheck then
+    if passesGroupTypeCheck and passesIdCheck then
         self:SetLoadingState(false)
     end
 end
@@ -274,7 +271,6 @@ function ZO_LeaderboardsManager_Shared:Initialize(control, leaderboardControl)
     self:InitializeScenes()
 
     self.leaderboardDataMetatable = {__index = function(dataTable, key) self:IndexFunction(dataTable, key) end}
-    LEADERBOARD_LIST_MANAGER:RegisterCallback("LeaderboardRankTypeChanged", function() self:RepopulateFilterDropdown() end)
     LEADERBOARD_LIST_MANAGER:RegisterCallback("OnLeaderboardMasterListUpdated", function()
         if self.scene:IsShowing() then
             self:OnLeaderboardDataChanged(self.leaderboardObject)
@@ -302,10 +298,6 @@ function ZO_LeaderboardsManager_Shared:SetSelectedLeaderboardObject(leaderboardO
 end
 
 function ZO_LeaderboardsManager_Shared:RefreshLeaderboardType(leaderboardType)
-    -- Should be overridden
-end
-
-function ZO_LeaderboardsManager_Shared:RepopulateFilterDropdown()
     -- Should be overridden
 end
 
@@ -355,14 +347,14 @@ function ZO_LeaderboardsManager_Shared:SetupLeaderboardPlayerEntry(control, data
     --Rank
     control.rankLabel:SetHidden(data.rank == 0)
     control.rankLabel:SetText(data.rank)
-        
+
     --Name
     local safeDisplayName = data.displayName ~= "" and data.displayName or GetString(SI_LEADERBOARDS_STAT_NOT_AVAILABLE)
     local nameToUse = ZO_GetPlatformUserFacingName(data.characterName, safeDisplayName)
     control.nameLabel:SetText(nameToUse)
-        
+
     --Class/Alliance/Progress
-    local isEndlessDungeonLeaderboardType = leaderboardData.leaderboardRankType == LEADERBOARD_TYPE_ENDLESS_DUNGEON_OVERALL or leaderboardData.leaderboardRankType == LEADERBOARD_TYPE_ENDLESS_DUNGEON_CLASS
+    local isEndlessDungeonLeaderboardType = leaderboardData.leaderboardRankType == LEADERBOARD_TYPE_ENDLESS_DUNGEON_OVERALL
     local isBattlegroundLeaderboardType = leaderboardData.leaderboardRankType == LEADERBOARD_TYPE_BATTLEGROUND
     local isTributeLeaderboardType = self.leaderboardRankType == LEADERBOARD_TYPE_TRIBUTE
     local shouldShowClass = not isBattlegroundLeaderboardType and not isTributeLeaderboardType
@@ -370,7 +362,7 @@ function ZO_LeaderboardsManager_Shared:SetupLeaderboardPlayerEntry(control, data
 
     if shouldShowClass then
         local classTexture = ZO_GetPlatformClassIcon(data.class)
-        if(classTexture) then
+        if classTexture then
             control.classIcon:SetHidden(false)
             control.classIcon:SetTexture(classTexture)
         else
@@ -382,7 +374,7 @@ function ZO_LeaderboardsManager_Shared:SetupLeaderboardPlayerEntry(control, data
 
     if shouldShowAlliance then
         local allianceTexture = ZO_GetPlatformAllianceSymbolIcon(data.alliance)
-        if(allianceTexture) then
+        if allianceTexture then
             control.allianceIcon:SetHidden(false)
             control.allianceIcon:SetTexture(allianceTexture)
         else
@@ -415,58 +407,4 @@ end
 function ZO_LeaderboardsManager_Shared:CommitScrollList()
     ZO_Scroll_ResetToTop(self.list)
     ZO_SortFilterList.CommitScrollList(self)
-end
-
-do
-    local INCLUDE_ALL_FILTER =
-    {
-        [LEADERBOARD_TYPE_OVERALL] = true,
-        [LEADERBOARD_TYPE_ALLIANCE] = true,
-        [LEADERBOARD_TYPE_BATTLEGROUND] = true,
-        [LEADERBOARD_TYPE_TRIBUTE] = true,
-        [LEADERBOARD_TYPE_ENDLESS_DUNGEON_OVERALL] = true,
-    }
-
-    local INCLUDE_CLASS_FILTERS =
-    {
-        [LEADERBOARD_TYPE_OVERALL] = true,
-        [LEADERBOARD_TYPE_ALLIANCE] = true,
-        [LEADERBOARD_TYPE_CLASS] = true,
-        [LEADERBOARD_TYPE_ENDLESS_DUNGEON_OVERALL] = true,
-        [LEADERBOARD_TYPE_ENDLESS_DUNGEON_CLASS] = true,
-    }
-
-    function ZO_Leaderboards_PopulateDropdownFilter(dropdown, changedCallback, leaderboardType)
-        dropdown:ClearItems()
-
-        local defaultIndex = 1
-        local currentIndex = 0
-
-        local includeAllFilter = INCLUDE_ALL_FILTER[leaderboardType]
-        if includeAllFilter then
-            local entry = dropdown:CreateItemEntry(GetString(SI_LEADERBOARDS_FILTER_ALL_CLASSES), changedCallback)
-            dropdown:AddItem(entry, ZO_COMBOBOX_SUPPRESS_UPDATE)
-            currentIndex = currentIndex + 1
-        end
-
-        if INCLUDE_CLASS_FILTERS[leaderboardType] then
-            local desiredClass = not includeAllFilter and GetUnitClassId("player")
-
-            for i = 1, GetNumClasses() do
-                local classId = GetClassInfo(i)
-                local className = zo_strformat(SI_CLASS_NAME, GetClassName(GENDER_MALE, classId))
-                local entry = dropdown:CreateItemEntry(className, changedCallback)
-                entry.classId = classId
-                dropdown:AddItem(entry, ZO_COMBOBOX_SUPPRESS_UPDATE)
-                currentIndex = currentIndex + 1
-                if desiredClass and desiredClass == classId then
-                    defaultIndex = currentIndex
-                end
-            end
-        end
-
-        local IGNORE_CALLBACK = true
-        dropdown:SelectItemByIndex(defaultIndex, IGNORE_CALLBACK)
-        dropdown:GetContainer():SetHidden(currentIndex == 1)
-    end
 end

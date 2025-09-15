@@ -688,7 +688,7 @@ local REWARD_CREATORS =
         end,
     [REWARD_TYPE_CHAOTIC_CREATIA] =
         function(control, name, amount, currencyOptions)
-            SetupCurrencyReward(control, CURT_CHAOTIC_CREATIA, amount, currencyOptions)
+            SetupCurrencyReward(control, CURT_TRANSMUTE_CRYSTALS, amount, currencyOptions)
         end,
     [REWARD_TYPE_STYLE_STONES] =
         function(control, name, amount, currencyOptions)
@@ -712,44 +712,21 @@ local REWARD_CREATORS =
         end,
 }
 
-internalassert(REWARD_TYPE_MAX_VALUE == 16, "Check if new RewardType is a currencyRewards")
-local currencyRewards =
-{
-    [REWARD_TYPE_MONEY] = true,
-    [REWARD_TYPE_ALLIANCE_POINTS] = true,
-    [REWARD_TYPE_TELVAR_STONES] = true,
-    [REWARD_TYPE_WRIT_VOUCHERS] = true,
-    [REWARD_TYPE_CHAOTIC_CREATIA] = true,
-    [REWARD_TYPE_STYLE_STONES] = true,
-    [REWARD_TYPE_EVENT_TICKETS] = true,
-    [REWARD_TYPE_UNDAUNTED_KEYS] = true,
-    [REWARD_TYPE_IMPERIAL_FRAGMENTS] = true,
-}
-
 function ZO_SharedInteraction:IsCurrencyReward(rewardType)
-    return currencyRewards[rewardType]
+    local currencyType = GetCurrencyTypeFromRewardType(rewardType)
+    return currencyType ~= CURT_NONE
 end
 
-internalassert(REWARD_TYPE_MAX_VALUE == 16, "Check if new RewardType maps to a currencyRewardToCurrencyType")
-local currencyRewardToCurrencyType =
-{
-    [REWARD_TYPE_MONEY] = CURT_MONEY,
-    [REWARD_TYPE_ALLIANCE_POINTS] = CURT_ALLIANCE_POINTS,
-    [REWARD_TYPE_TELVAR_STONES] = CURT_TELVAR_STONES,
-    [REWARD_TYPE_WRIT_VOUCHERS] = CURT_WRIT_VOUCHERS,
-    [REWARD_TYPE_CHAOTIC_CREATIA] = CURT_CHAOTIC_CREATIA,
-    [REWARD_TYPE_STYLE_STONES] = CURT_STYLE_STONES,
-    [REWARD_TYPE_EVENT_TICKETS] = CURT_EVENT_TICKETS,
-    [REWARD_TYPE_UNDAUNTED_KEYS] = CURT_UNDAUNTED_KEYS,
-    [REWARD_TYPE_IMPERIAL_FRAGMENTS] = CURT_IMPERIAL_FRAGMENTS,
-}
-
 function ZO_SharedInteraction:GetCurrencyTypeFromReward(rewardType)
-    return currencyRewardToCurrencyType[rewardType]
+    local currencyType = GetCurrencyTypeFromRewardType(rewardType)
+    if currencyType == CURT_NONE then
+        return nil
+    end
+    return currencyType
 end
 
 function ZO_SharedInteraction:WouldCurrencyExceedMax(rewardType, rewardAmount)
-    local currencyType = currencyRewardToCurrencyType[rewardType]
+    local currencyType = self:GetCurrencyTypeFromReward(rewardType)
     if not currencyType then
         return nil
     end

@@ -206,7 +206,7 @@ function ZO_CollectibleData_Base:IsSlottable()
 end
 
 function ZO_CollectibleData_Base:IsNew()
-    return IsCollectibleNew(self.IsSlottable)
+    return IsCollectibleNew(self.collectibleId)
 end
 
 function ZO_CollectibleData_Base:GetReferenceId()

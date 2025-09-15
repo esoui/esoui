@@ -941,6 +941,7 @@ function ZO_GamepadSkills:InitializeCategoryList()
         if selected then
             GAMEPAD_SKILLS_ROOT_SCENE:AddFragment(self.skillLineXPBarFragment)
             ZO_GamepadSkillLineXpBar_Setup(data.skillLineData, self.skillInfo.xpBar, self.skillInfo.name, true)
+            self.skillInfo.xpBar:SetHidden(IsCurrentCampaignVengeanceRuleset())
         end
     end
 
@@ -1191,6 +1192,11 @@ function ZO_GamepadSkills:InitializeEvents()
         self.selectedTooltipRefreshGroup:MarkDirty("Full")
     end
 
+    local function OnSkillBuildAvailabilityChanged()
+        self.categoryListRefreshGroup:MarkDirty("List")
+        self.selectedTooltipRefreshGroup:MarkDirty("Full")
+    end
+
     self.control:RegisterForEvent(EVENT_PLAYER_ACTIVATED, FullRebuild)
     self.control:RegisterForEvent(EVENT_QUEST_ADDED, OnQuestsChanged)
     self.control:RegisterForEvent(EVENT_QUEST_REMOVED, OnQuestsChanged)
@@ -1206,6 +1212,7 @@ function ZO_GamepadSkills:InitializeEvents()
     SKILLS_AND_ACTION_BAR_MANAGER:RegisterCallback("RespecStateReset", FullRebuild)
     ACTION_BAR_ASSIGNMENT_MANAGER:RegisterCallback("CurrentHotbarUpdated", OnCurrentHotbarUpdated)
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", OnCollectionUpdated)
+    ZO_SKILLS_ADVISOR_SINGLETON:RegisterCallback("OnSkillsAdvisorAvailabilityChanged", OnSkillBuildAvailabilityChanged)
 
     --Weapon Swap
     local function OnHotbarSwapVisibleStateChanged()
@@ -1305,9 +1312,11 @@ do
         scribeLibraryEntryData.isScribeLibrary = true
         self.categoryList:AddEntry("ZO_GamepadMenuEntryTemplate", scribeLibraryEntryData)
 
-        local skillsAdvisorEntryData = ZO_GamepadEntryData:New(zo_strformat(SI_SKILLS_ENTRY_NAME_FORMAT, GetString(SI_SKILLS_ADVISOR_TITLE)))
-        skillsAdvisorEntryData.isSkillsAdvisor = true
-        self.categoryList:AddEntry("ZO_GamepadMenuEntryTemplate", skillsAdvisorEntryData)
+        if ZO_SKILLS_ADVISOR_SINGLETON:CanUseSkillsAdvisor() then
+            local skillsAdvisorEntryData = ZO_GamepadEntryData:New(zo_strformat(SI_SKILLS_ENTRY_NAME_FORMAT, GetString(SI_SKILLS_ADVISOR_TITLE)))
+            skillsAdvisorEntryData.isSkillsAdvisor = true
+            self.categoryList:AddEntry("ZO_GamepadMenuEntryTemplate", skillsAdvisorEntryData)
+        end
 
         for _, skillTypeData in SKILLS_DATA_MANAGER:SkillTypeIterator() do
             local isHeader = true
@@ -1448,7 +1457,7 @@ do
             warning = 
             {
                 text = function(dialog)
-                    if not ZO_SKILLS_ADVISOR_SINGLETON:IsAdvancedModeSelected() and dialog.data.purchaseSkillProgressionData:IsAdvised() then
+                    if ZO_SKILLS_ADVISOR_SINGLETON:CanUseSkillsAdvisor() and not ZO_SKILLS_ADVISOR_SINGLETON:IsAdvancedModeSelected() and dialog.data.purchaseSkillProgressionData:IsAdvised() then
                         ZO_GenericGamepadDialog_SetDialogWarningColor(dialog, ZO_SKILLS_ADVISOR_ADVISED_COLOR)
                         return GetString(SI_SKILLS_ADVISOR_PURCHASE_ADVISED)
                     end
@@ -1494,7 +1503,7 @@ do
                 text = function(dialog)
                     local currentSkillProgressionData = dialog.data.currentSkillProgressionData
                     local upgradeSkillProgressionData = currentSkillProgressionData:GetNextRankData()
-                    if not ZO_SKILLS_ADVISOR_SINGLETON:IsAdvancedModeSelected() and upgradeSkillProgressionData:IsAdvised() then
+                    if ZO_SKILLS_ADVISOR_SINGLETON:CanUseSkillsAdvisor() and not ZO_SKILLS_ADVISOR_SINGLETON:IsAdvancedModeSelected() and upgradeSkillProgressionData:IsAdvised() then
                         ZO_GenericGamepadDialog_SetDialogWarningColor(dialog, ZO_SKILLS_ADVISOR_ADVISED_COLOR)
                         return GetString(SI_SKILLS_ADVISOR_PURCHASE_ADVISED)
                     end

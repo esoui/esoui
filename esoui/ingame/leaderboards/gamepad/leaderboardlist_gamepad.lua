@@ -29,10 +29,6 @@ local LEADERBOARD_TYPE_HIDDEN_COLUMNS =
     {
         ["progress"] = true,
     },
-    [LEADERBOARD_TYPE_CLASS] = 
-    {
-        ["progress"] = true,
-    },
     [LEADERBOARD_TYPE_ALLIANCE] = 
     {
         ["progress"] = true,
@@ -51,10 +47,6 @@ local LEADERBOARD_TYPE_HIDDEN_COLUMNS =
         ["progress"] = true,
     },
     [LEADERBOARD_TYPE_ENDLESS_DUNGEON_OVERALL] = 
-    {
-        ["alliance"] = true,
-    },
-    [LEADERBOARD_TYPE_ENDLESS_DUNGEON_CLASS] = 
     {
         ["alliance"] = true,
     },
@@ -89,6 +81,13 @@ function LeaderboardList_Gamepad:InitializeHeader()
         data3HeaderText = "",
     }
     ZO_GamepadInteractiveSortFilterList.InitializeHeader(self, contentHeaderData)
+end
+
+function LeaderboardList_Gamepad:InitializeFilters()
+    ZO_GamepadInteractiveSortFilterList.InitializeFilters(self)
+
+    local filterControl = self:GetDropdownFilterControl()
+    filterControl:SetHidden(true)
 end
 
 function LeaderboardList_Gamepad:InitializeKeybinds()
@@ -166,7 +165,6 @@ end
 
 function LeaderboardList_Gamepad:FilterScrollList()
     local playerName = GetUnitName("player")
-    local filteredClass = self.filterDropdown:GetSelectedItemData().classId
     local searchTerm = self:GetCurrentSearch()
 
     local function SearchCallback(data)
@@ -177,7 +175,7 @@ function LeaderboardList_Gamepad:FilterScrollList()
         data.recolorName = data.characterName == playerName
     end
 
-    LEADERBOARD_LIST_MANAGER:FilterScrollList(self.list, filteredClass, PreAddCallback, SearchCallback)
+    LEADERBOARD_LIST_MANAGER:FilterScrollList(self.list, PreAddCallback, SearchCallback)
 end
 
 function LeaderboardList_Gamepad:OnSelectionChanged(oldData, newData)
@@ -187,7 +185,7 @@ end
 
 function LeaderboardList_Gamepad:SetupLeaderboardPlayerEntry(control, data)
     ZO_LeaderboardsManager_Shared.SetupLeaderboardPlayerEntry(GAMEPAD_LEADERBOARDS, control, data)
-    
+
     local leaderboardData = GAMEPAD_LEADERBOARDS:GetSelectedLeaderboardData()
     local shouldHideCharacterLabel = leaderboardData.leaderboardRankType == LEADERBOARD_TYPE_TRIBUTE
     control.characterNameLabel:SetHidden(shouldHideCharacterLabel)
@@ -218,18 +216,6 @@ function LeaderboardList_Gamepad:ColorName(control, data, textColor)
     local textColor = textColor or GAMEPAD_LEADERBOARDS:GetRowColors(self, data)
     local nameControl = GetControl(control, "Name")
     nameControl:SetColor(textColor:UnpackRGBA())
-end
-
-function LeaderboardList_Gamepad:RepopulateFilterDropdown(onFilterChangedCallback)
-    ZO_Leaderboards_PopulateDropdownFilter(self.filterDropdown, onFilterChangedCallback, LEADERBOARD_LIST_MANAGER.leaderboardRankType)
-end
-
-function LeaderboardList_Gamepad:GetSelectedClassFilter()
-    local selectedData = self.filterDropdown:GetSelectedItemData()
-    if selectedData then
-        return selectedData.classId
-    end
-    return nil
 end
 
 function LeaderboardList_Gamepad:SetLoadingSpinnerVisibility(show)

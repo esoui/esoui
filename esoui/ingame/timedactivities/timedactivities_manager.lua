@@ -38,6 +38,10 @@ function ZO_TimedActivityData:IsWeeklyActivity()
     return self:GetType() == TIMED_ACTIVITY_TYPE_WEEKLY
 end
 
+function ZO_TimedActivityData:GetDifficulty()
+    return GetTimedActivityDifficulty(self.index)
+end
+
 function ZO_TimedActivityData:GetNumRewards()
     return GetNumTimedActivityRewards(self.index)
 end
@@ -189,7 +193,7 @@ function ZO_TimedActivities_Manager:RefreshMasterList()
     local numTimedActivities = GetNumTimedActivities()
     for index = 1, numTimedActivities do
         local timedActivityData = ZO_TimedActivityData:New(index)
-        self.activitiesData[index] = timedActivityData
+        table.insert(self.activitiesData, timedActivityData)
     end
 
     self:RefreshTimedActivityTypeLimitData()
@@ -226,7 +230,21 @@ function ZO_TimedActivities_Manager:RegisterEvents()
 end
 
 function ZO_TimedActivities_Manager:ActivitiesIterator(filterFunctions)
-    return ZO_FilteredNonContiguousTableIterator(self.activitiesData, filterFunctions)
+    return ZO_FilteredNumericallyIndexedTableIterator(self.activitiesData, filterFunctions)
+end
+
+function ZO_TimedActivities_Manager:GetFirstActivityDataByFilter(filterFunctions)
+    for index, activityData in TIMED_ACTIVITIES_MANAGER:ActivitiesIterator(filterFunctions) do
+        return activityData
+    end
+    return nil
+end
+
+function ZO_TimedActivities_Manager:GetActivityDataByTypeAndId(timedActivityType, timedActivityId)
+    local function ActivityMatches(activityData)
+        return activityData:GetType() == timedActivityType and activityData:GetId() == timedActivityId
+    end
+    return self:GetFirstActivityDataByFilter({ ActivityMatches })
 end
 
 function ZO_TimedActivities_Manager:GetActivityDataByIndex(activityIndex)

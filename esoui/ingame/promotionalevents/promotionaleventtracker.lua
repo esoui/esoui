@@ -88,7 +88,7 @@ function ZO_PromotionalEventTracker:Update()
                 
                 local progress = activityData:GetProgress()
                 local completionThreshold = activityData:GetCompletionThreshold()
-                local progressText = zo_strformat(SI_PROMOTIONAL_EVENT_TRACKER_PROGRESS_FORMATTER, ZO_CommaDelimitNumber(progress), ZO_CommaDelimitNumber(completionThreshold))
+                local progressText = zo_strformat(SI_TIMED_ACTIVITY_TRACKER_PROGRESS_FORMATTER, ZO_CommaDelimitNumber(progress), ZO_CommaDelimitNumber(completionThreshold))
                 self.progressLabel:SetText(progressText)
                 hidden = false
             end

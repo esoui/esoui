@@ -21,7 +21,7 @@ function ZO_MarketCurrency_Shared:Initialize(control)
             tooltip = zo_strformat(SI_MARKET_CURRENCY_TOOLTIP, GetCurrencyName(CURT_ENDEAVOR_SEALS, IS_PLURAL, IS_UPPER)),
         },
     }
-    internalassert(MKCT_MAX_VALUE == MKCT_ENDEAVOR_SEALS, "New market currency types must be configured.")
+    internalassert(MKCT_MAX_VALUE == 4, "New market currency types must be configured.")
 
     self.marketCurrencyTypeMap = {}
     for _, data in ipairs(self.marketCurrencyTypes) do

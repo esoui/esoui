@@ -171,7 +171,7 @@ function InventoryWalletManager:UpdateList()
     local IS_PLURAL = false
     local IS_UPPER = false
     for currencyType = CURT_ITERATION_BEGIN, CURT_ITERATION_END do
-        if IsCurrencyValid(currencyType) then
+        if IsCurrencyValid(currencyType) and ShouldShowCurrencyInCurrencyPanel(currencyType) then
             local currencyPlayerStoredLocation = GetCurrencyPlayerStoredLocation(currencyType)
             if self.currencyLocationFilter == CURRENCY_LOCATION_ALL or currencyPlayerStoredLocation == self.currencyLocationFilter then
                 local entryData =

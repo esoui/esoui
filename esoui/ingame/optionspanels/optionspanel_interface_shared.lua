@@ -249,6 +249,16 @@ local ZO_OptionsPanel_Interface_ControlData =
             text = SI_INTERFACE_OPTIONS_COMPASS_TARGET_MARKERS,
             tooltipText = SI_INTERFACE_OPTIONS_COMPASS_TARGET_MARKERS_TOOLTIP,
         },
+        --UI_Settings_ShowCompassDistanceTracking
+        [UI_SETTING_COMPASS_DISTANCE_TRACKING] =
+        {
+            controlType = OPTIONS_CHECKBOX,
+            system = SETTING_TYPE_UI,
+            settingId = UI_SETTING_COMPASS_DISTANCE_TRACKING,
+            panel = SETTING_PANEL_INTERFACE,
+            text = SI_INTERFACE_OPTIONS_COMPASS_DISTANCE_TRACKING,
+            tooltipText = SI_INTERFACE_OPTIONS_COMPASS_DISTANCE_TRACKING_TOOLTIP,
+        },
     },
 
     --Chat bubbles

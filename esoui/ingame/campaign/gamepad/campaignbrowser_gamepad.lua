@@ -1,12 +1,14 @@
 local GAMEPAD_AVA_ROOT_SCENE_NAME = "gamepad_campaign_root"
 
-local CAMPAIGN_BROWSER_MODES = {
+local CAMPAIGN_BROWSER_MODES =
+{
     CAMPAIGNS = 1,
     BONUSES = 2,
     CAMPAIGN_RULESET_TYPES = 3,
 }
 
-local ENTRY_TYPES = {
+local ENTRY_TYPES =
+{
     CAMPAIGN = 1,
     BONUSES = 2,
     SCORING = 3,
@@ -17,14 +19,18 @@ local ENTRY_TYPES = {
     SET_HOME = 8,
     ABANDON_CAMPAIGN = 9,
     CAMPAIGN_RULESET_TYPE = 10,
+    VENGEANCE = 11,
 }
 
-local CONTENT_TYPES = {
+local CONTENT_TYPES =
+{
     BONUSES = 1,
     SCORING = 2,
     EMPERORSHIP = 3,
     CAMPAIGN = 4,
     CAMPAIGN_RULESET_TYPE = 5,
+    VENGEANCE_LOADOUTS = 6,
+    VENGEANCE_PERKS = 7,
 }
 
 local ICON_ENTER = "EsoUI/Art/Campaign/Gamepad/gp_campaign_menuIcon_enter.dds"
@@ -37,10 +43,6 @@ local ICON_SCORING = "EsoUI/Art/Campaign/Gamepad/gp_overview_menuIcon_scoring.dd
 local ICON_EMPEROR = "EsoUI/Art/Campaign/Gamepad/gp_overview_menuIcon_emperor.dds"
 
 ZO_CampaignBrowser_Gamepad = ZO_Gamepad_ParametricList_Screen:Subclass()
-
-function ZO_CampaignBrowser_Gamepad:New(...)
-    return ZO_Gamepad_ParametricList_Screen.New(self, ...)
-end
 
 function ZO_CampaignBrowser_Gamepad:Initialize(control)
     GAMEPAD_AVA_ROOT_SCENE = ZO_Scene:New(GAMEPAD_AVA_ROOT_SCENE_NAME, SCENE_MANAGER)
@@ -58,7 +60,15 @@ end
 function ZO_CampaignBrowser_Gamepad:OnShowing()
     ZO_Gamepad_ParametricList_Screen.OnShowing(self)
 
-    self:SetCurrentMode(CAMPAIGN_BROWSER_MODES.CAMPAIGN_RULESET_TYPES)
+    local selectedIndex = nil
+    local currentMode = CAMPAIGN_BROWSER_MODES.CAMPAIGN_RULESET_TYPES
+    if self.showingFromVengeanceScreenIndex then
+        currentMode = self.currentMode
+        selectedIndex = self.showingFromVengeanceScreenIndex
+        self.showingFromVengeanceScreenIndex = nil
+    end
+
+    self:SetCurrentMode(currentMode, selectedIndex)
 
     -- need to update the content here because all the fragments have been removed,
     -- so we need to add the appropriate fragment back
@@ -102,6 +112,10 @@ function ZO_CampaignBrowser_Gamepad:GetCampaignQueryType(campaignId)
     end
 end
 
+function ZO_CampaignBrowser_Gamepad:SetFromVengeanceScreenIndex(index)
+    self.showingFromVengeanceScreenIndex = index
+end
+
 function ZO_CampaignBrowser_Gamepad:HasCampaignInformation(campaignId)
     return campaignId == GetAssignedCampaignId() or campaignId == GetCurrentCampaignId()
 end
@@ -111,6 +125,7 @@ function ZO_CampaignBrowser_Gamepad:UpdateContentPane(updateFromTimer)
     local hideScoring = true
     local hideEmperor = true
     local hideBonuses = true
+    local hideVengeance = true
 
     local targetData = self:GetTargetData()
     if targetData ~= nil then
@@ -122,6 +137,7 @@ function ZO_CampaignBrowser_Gamepad:UpdateContentPane(updateFromTimer)
                 queryType = self:GetCampaignQueryType(targetData.id)
         end
 
+        GAMEPAD_TOOLTIPS:ClearLines(GAMEPAD_LEFT_TOOLTIP)
         if displayContentType == CONTENT_TYPES.CAMPAIGN then
             if not updateFromTimer then
                 SCENE_MANAGER:AddFragment(GAMEPAD_AVA_CAMPAIGN_INFO_FRAGMENT)
@@ -146,9 +162,13 @@ function ZO_CampaignBrowser_Gamepad:UpdateContentPane(updateFromTimer)
                 SCENE_MANAGER:AddFragment(CAMPAIGN_BONUSES_GAMEPAD_FRAGMENT)
             end
             hideBonuses = false
+        elseif displayContentType == CONTENT_TYPES.VENGEANCE_LOADOUTS or displayContentType == CONTENT_TYPES.VENGEANCE_PERKS then
+            SCENE_MANAGER:AddFragment(ZO_VENGEANCE_EQUIPPED_LOADOUT_OVERVIEW_GAMEPAD_FRAGMENT)
+            SCENE_MANAGER:AddFragment(GAMEPAD_NAV_QUADRANT_2_BACKGROUND_FRAGMENT)
+            hideVengeance = false
         end
     end
-    
+
     if hideContent then
         SCENE_MANAGER:RemoveFragment(GAMEPAD_AVA_CAMPAIGN_INFO_FRAGMENT)
     end
@@ -160,6 +180,10 @@ function ZO_CampaignBrowser_Gamepad:UpdateContentPane(updateFromTimer)
     end
     if hideBonuses then
         SCENE_MANAGER:RemoveFragment(CAMPAIGN_BONUSES_GAMEPAD_FRAGMENT)
+    end
+    if hideVengeance then
+        SCENE_MANAGER:RemoveFragment(ZO_VENGEANCE_EQUIPPED_LOADOUT_OVERVIEW_GAMEPAD_FRAGMENT)
+        SCENE_MANAGER:RemoveFragment(GAMEPAD_NAV_QUADRANT_2_BACKGROUND_FRAGMENT)
     end
 
     local hideBackgroundAndHeader = hideScoring and hideContent and hideEmperor and hideBonuses
@@ -317,12 +341,15 @@ function ZO_CampaignBrowser_Gamepad:SetCampaignRulesetTypeFilter(campaignRuleset
     self.campaignRulesetTypeFilter = campaignRulesetTypeFilter
 end
 
-function ZO_CampaignBrowser_Gamepad:SetCurrentMode(mode)
+function ZO_CampaignBrowser_Gamepad:SetCurrentMode(mode, selectedIndex)
     self.currentMode = mode
     if mode == CAMPAIGN_BROWSER_MODES.CAMPAIGN_RULESET_TYPES then
         self:SetCurrentList(self.campaignRulesetTypeList)
     else
         self:SetCurrentList(self.campaignList)
+    end
+    if selectedIndex then
+        self:GetCurrentList():SetSelectedIndex(selectedIndex)
     end
     self:Update()
 end
@@ -489,12 +516,11 @@ end
 --------------
 
 function ZO_CampaignBrowser_Gamepad:InitializeKeybindStripDescriptors()
-    self.keybindStripDescriptor = { 
+    self.keybindStripDescriptor =
+    {
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
-        
         { -- select
             keybind = "UI_SHORTCUT_PRIMARY",
-
             name = function()
                 local targetData = self:GetTargetData()
                 -- Contextual campaign action
@@ -507,13 +533,10 @@ function ZO_CampaignBrowser_Gamepad:InitializeKeybindStripDescriptors()
                         return GetString(SI_CAMPAIGN_BROWSER_QUEUE_CAMPAIGN)
                     end
                 end
-
                 return GetString(SI_GAMEPAD_SELECT_OPTION)
             end,
-
             callback = function()
                 local targetData = self:GetTargetData()
-
                 local entryType = targetData.entryType
 
                 -- Contextual campaign action
@@ -545,9 +568,15 @@ function ZO_CampaignBrowser_Gamepad:InitializeKeybindStripDescriptors()
                     self:SetCampaignRulesetTypeFilter(targetData.rulesetType)
                     self:SetCurrentMode(CAMPAIGN_BROWSER_MODES.CAMPAIGNS)
                     PlaySound(SOUNDS.GAMEPAD_MENU_FORWARD)
+                elseif entryType == ENTRY_TYPES.VENGEANCE then
+                    local contentType = targetData.displayContentType
+                    if contentType == CONTENT_TYPES.VENGEANCE_LOADOUTS then
+                        SCENE_MANAGER:Push("gamepad_vengeance_loadouts")
+                    elseif contentType == CONTENT_TYPES.VENGEANCE_PERKS then
+                        SCENE_MANAGER:Push("gamepad_vengeance_perks")
+                    end
                 end
             end,
-
             visible = function()
                 local targetData = self:GetTargetData()
                 if not targetData then
@@ -570,11 +599,12 @@ function ZO_CampaignBrowser_Gamepad:InitializeKeybindStripDescriptors()
                     return true
                 elseif targetData.entryType == ENTRY_TYPES.CAMPAIGN_RULESET_TYPE then
                     return true
+                elseif targetData.entryType == ENTRY_TYPES.VENGEANCE then
+                    return true
                 else
                     return false
                 end
             end,
-
             enabled = function()
                 local targetData = self:GetTargetData()
                 if targetData then
@@ -585,13 +615,25 @@ function ZO_CampaignBrowser_Gamepad:InitializeKeybindStripDescriptors()
                     end
                 end
                 return true
-            end
+            end,
+            sound = function()
+                local targetData = self:GetTargetData()
+                -- Contextual campaign action
+                if targetData and targetData.entryType == ENTRY_TYPES.CAMPAIGN then
+                    if self:CanEnter(targetData) then
+                        -- enter campaign after queue
+                        return SOUNDS.CAMPAIGN_ENTER_CAMPAIGN
+                    elseif self:CanQueueForCampaign(targetData) then
+                        -- enter campaign queue
+                        return SOUNDS.CAMPAIGN_QUEUE_CAMPAIGN
+                    end
+                end
+                return SOUNDS.GAMEPAD_MENU_FORWARD
+            end,
         },
-
         { -- back
             name = GetString(SI_GAMEPAD_BACK_OPTION),
             keybind = "UI_SHORTCUT_NEGATIVE",
-
             callback = function()
                 if self.currentMode == CAMPAIGN_BROWSER_MODES.BONUSES then
                     CAMPAIGN_BONUSES_GAMEPAD:Deactivate()
@@ -600,6 +642,7 @@ function ZO_CampaignBrowser_Gamepad:InitializeKeybindStripDescriptors()
                     self:SetCurrentMode(CAMPAIGN_BROWSER_MODES.CAMPAIGNS)
                     PlaySound(SOUNDS.GAMEPAD_MENU_BACK)
                 elseif self.currentMode == CAMPAIGN_BROWSER_MODES.CAMPAIGNS then
+                    GAMEPAD_TOOLTIPS:ClearLines(GAMEPAD_LEFT_TOOLTIP)
                     self:SetCurrentMode(CAMPAIGN_BROWSER_MODES.CAMPAIGN_RULESET_TYPES)
                     PlaySound(SOUNDS.GAMEPAD_MENU_BACK)
                 else
@@ -611,8 +654,7 @@ function ZO_CampaignBrowser_Gamepad:InitializeKeybindStripDescriptors()
         { -- set home campaign
             keybind = "UI_SHORTCUT_SECONDARY",
             name = GetString(SI_GAMEPAD_CAMPAIGN_BROWSER_CHOOSE_HOME_CAMPAIGN),
-
-            visible = function() 
+            visible = function()
                 local targetData = self:GetTargetData()
                 if not targetData then
                     return
@@ -624,7 +666,6 @@ function ZO_CampaignBrowser_Gamepad:InitializeKeybindStripDescriptors()
 
                 return false
             end,
-
             callback = function() 
                 local targetCampaignData = self:GetTargetData()
                 self:DoSetHomeCampaign(targetCampaignData)
@@ -632,9 +673,7 @@ function ZO_CampaignBrowser_Gamepad:InitializeKeybindStripDescriptors()
         },
         { -- Leave a non-home/local campaign
             keybind = "UI_SHORTCUT_RIGHT_STICK",
-
             name = GetString(SI_CAMPAIGN_BROWSER_LEAVE_QUEUE),
-
             callback = function()
                 local targetData = self:GetTargetData()
 
@@ -642,7 +681,6 @@ function ZO_CampaignBrowser_Gamepad:InitializeKeybindStripDescriptors()
                     self:DoLeaveCampaignQueue(targetData)
                 end
             end,
-
             visible = function()
                 local targetData = self:GetTargetData()
 
@@ -651,6 +689,7 @@ function ZO_CampaignBrowser_Gamepad:InitializeKeybindStripDescriptors()
                 end
                 return false
             end,
+            sound = SOUNDS.CAMPAIGN_LEAVE_CAMPAIGN,
         },
     }
     
@@ -765,8 +804,9 @@ do
         name = { tiebreaker = "id" },
         id = { isId64 = true },
     }
-    local HOME_CAMPAIGN_SORT_ID = -2 -- sort first, before campaign ruleset ids
-    local LOCAL_CAMPAIGN_SORT_ID = -1 -- sort second, before campaign ruleset ids and after home campaign
+    local VENGEANCE_MENUS_SORT_ID = -3 -- sort first, before everything else
+    local HOME_CAMPAIGN_SORT_ID = -2 -- sort before campaign ruleset ids and local campaigns
+    local LOCAL_CAMPAIGN_SORT_ID = -1 -- sort next, before campaign ruleset ids and after home campaign
     function ZO_CampaignBrowser_Gamepad:CreateAndSortCampaignEntries()
         local campaignDataList = CAMPAIGN_BROWSER_MANAGER:GetCampaignDataList()
 
@@ -774,6 +814,50 @@ do
         local currentCampaign = GetCurrentCampaignId()
 
         ZO_ClearNumericallyIndexedTable(self.campaignEntries)
+        -- Vengeance Entries - Only added if currently in a vengeance campaign
+        if IsCurrentCampaignVengeanceRuleset() then
+            local vengeanceLoadoutsEntry = ZO_GamepadEntryData:New(GetString(SI_CAMPAIGN_OVERVIEW_SUBCATEGORY_LOADOUTS))
+            vengeanceLoadoutsEntry.displayContentType = CONTENT_TYPES.VENGEANCE_LOADOUTS
+            vengeanceLoadoutsEntry.entryType = ENTRY_TYPES.VENGEANCE
+            vengeanceLoadoutsEntry.contentHeaderTitle = GetString(SI_CAMPAIGN_OVERVIEW_SUBCATEGORY_LOADOUTS)
+            vengeanceLoadoutsEntry.campaignSort = VENGEANCE_MENUS_SORT_ID
+            vengeanceLoadoutsEntry.headerText = GetString(SI_CAMPAIGN_OVERVIEW_CATEGORY_VENGEANCE)
+            vengeanceLoadoutsEntry.name = GetString(SI_CAMPAIGN_OVERVIEW_SUBCATEGORY_LOADOUTS)
+
+            vengeanceLoadoutsEntry.narrationText = function(listEntryData, listEntryControl)
+                local narrations = {}
+                -- Generate the standard parametric list entry narration
+                ZO_AppendNarration(narrations, ZO_GetSharedGamepadEntryDefaultNarrationText(listEntryData, listEntryControl))
+
+                --Generate the narration for the selected campaign screen
+                ZO_AppendNarration(narrations, VENGEANCE_EQUIPPED_LOADOUT_OVERVIEW_GAMEPAD:GetNarrationText())
+                return narrations
+            end
+
+            table.insert(self.campaignEntries, vengeanceLoadoutsEntry)
+
+            local vengeancePerksEntry = ZO_GamepadEntryData:New(GetString(SI_CAMPAIGN_OVERVIEW_SUBCATEGORY_PERKS))
+            vengeancePerksEntry.displayContentType = CONTENT_TYPES.VENGEANCE_PERKS
+            vengeancePerksEntry.entryType = ENTRY_TYPES.VENGEANCE
+            vengeancePerksEntry.contentHeaderTitle = GetString(SI_CAMPAIGN_OVERVIEW_SUBCATEGORY_PERKS)
+            vengeancePerksEntry.campaignSort = VENGEANCE_MENUS_SORT_ID
+            vengeancePerksEntry.headerText = GetString(SI_CAMPAIGN_OVERVIEW_CATEGORY_VENGEANCE)
+            vengeancePerksEntry.name = GetString(SI_CAMPAIGN_OVERVIEW_SUBCATEGORY_PERKS)
+
+            vengeancePerksEntry.narrationText = function(listEntryData, listEntryControl)
+                local narrations = {}
+                -- Generate the standard parametric list entry narration
+                ZO_AppendNarration(narrations, ZO_GetSharedGamepadEntryDefaultNarrationText(listEntryData, listEntryControl))
+
+                --Generate the narration for the selected campaign screen
+                ZO_AppendNarration(narrations, VENGEANCE_EQUIPPED_LOADOUT_OVERVIEW_GAMEPAD:GetNarrationText())
+                return narrations
+            end
+
+            table.insert(self.campaignEntries, vengeancePerksEntry)
+        end
+
+        -- Typical Campaign Entries
         for _, campaignData in ipairs(campaignDataList) do
             local campaignEntry = ZO_GamepadEntryData:New(campaignData.name)
             campaignEntry:SetDataSource(campaignData)
@@ -1008,6 +1092,14 @@ function ZO_CampaignBrowser_Gamepad:BuildCampaignList()
                 else
                     self.campaignList:AddEntry("ZO_GamepadNewMenuEntryTemplate", entry)
                 end
+            end
+        elseif campaignEntry.entryType == ENTRY_TYPES.VENGEANCE then
+            if lastCampaignListHeaderText ~= campaignEntry.headerText then
+                campaignEntry:SetHeader(campaignEntry.headerText)
+                self.campaignList:AddEntryWithHeader("ZO_GamepadNewMenuEntryTemplate", campaignEntry)
+                lastCampaignListHeaderText = campaignEntry.headerText
+            else
+                self.campaignList:AddEntry("ZO_GamepadNewMenuEntryTemplate", campaignEntry)
             end
         end
     end

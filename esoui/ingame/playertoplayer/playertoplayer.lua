@@ -26,6 +26,7 @@ local INTERACT_TYPE =
     TRIBUTE_INVITE = 20,
     GROUP_FINDER_APPLICATION = 21,
     PROMOTIONAL_EVENT_REWARD = 22,
+    CHANGE_VENGANCE_LOADOUTS = 23,
 }
 
 -- For use outside of this file (e.g. InGameDialogs)
@@ -792,6 +793,41 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
         end
     end
 
+    local function OnCurrentCampaignChanged()
+        if ZO_VENGEANCE_MANAGER:IsEquippedLoadoutEditableForCurrentZone() then
+            self.shouldShowVengeanceLoadouts = true
+        end
+    end
+
+    local function OnChangeVengenceLoadoutsUpdated()
+        if self.shouldShowVengeanceLoadouts  then
+            self.shouldShowVengeanceLoadouts = false
+            if not self:ExistsInQueue(INTERACT_TYPE.CHANGE_VENGANCE_LOADOUTS) then
+                PlaySound(SOUNDS.VENGEANCE_CHANGE_LOADOUT_PROMPT)
+
+                local changeLoadoutDescriptionText = GetString(SI_PLAYER_TO_PLAYER_VENGEANCE_CHANGE_LOADOUT_PROMPT)
+
+                local function AcceptChangeLoadout()
+                    ZO_UI_SYSTEM_MANAGER:RequestOpenUISystem(UI_SYSTEM_VENGEANCE)
+                end
+
+                local function DeclineChangeLoadout()
+                    -- Do nothing
+                end
+
+                local data = self:AddPromptToIncomingQueue(INTERACT_TYPE.CHANGE_VENGANCE_LOADOUTS, nil, nil, changeLoadoutDescriptionText, AcceptChangeLoadout, DeclineChangeLoadout)
+                data.acceptText = GetString(SI_YES)
+                data.declineText = GetString(SI_NO)
+            end
+        else
+            self:RemoveFromIncomingQueue(INTERACT_TYPE.CHANGE_VENGANCE_LOADOUTS)
+        end
+    end
+
+    local function OnExitLoadoutSwapSubzone()
+        self:RemoveFromIncomingQueue(INTERACT_TYPE.CHANGE_VENGANCE_LOADOUTS)
+    end
+
     self.control:RegisterForEvent(EVENT_DUEL_INVITE_RECEIVED, OnDuelInviteReceived)
     self.control:RegisterForEvent(EVENT_DUEL_INVITE_REMOVED, OnDuelInviteRemoved)
     self.control:RegisterForEvent(EVENT_TRIBUTE_INVITE_RECEIVED, OnTributeInviteReceived)
@@ -822,6 +858,9 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
     self.control:RegisterForEvent(EVENT_GROUPING_TOOLS_READY_CHECK_UPDATED, function(event, ...) self:OnGroupingToolsReadyCheckUpdated(...) end)
     self.control:RegisterForEvent(EVENT_GROUPING_TOOLS_READY_CHECK_CANCELLED, function(event, ...) self:OnGroupingToolsReadyCheckCancelled(...) end)
     self.control:RegisterForEvent(EVENT_LEVEL_UP_REWARD_UPDATED, OnLevelUpRewardUpdated)
+    self.control:RegisterForEvent(EVENT_CURRENT_CAMPAIGN_CHANGED, OnCurrentCampaignChanged)
+    self.control:RegisterForEvent(EVENT_PLAYER_ACTIVATED, OnChangeVengenceLoadoutsUpdated)
+    self.control:RegisterForEvent(EVENT_VENGEANCE_EXIT_LOADOUT_SWAP_SUBZONE, OnExitLoadoutSwapSubzone)
 
     GIFT_INVENTORY_MANAGER:RegisterCallback("GiftListsChanged", OnGiftsUpdated)
     GROUP_FINDER_APPLICATIONS_LIST_MANAGER:RegisterCallback("ApplicationsListUpdated", OnGroupFinderApplicationsUpdated)
@@ -1117,6 +1156,7 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
         self:RemoveFromIncomingQueue(INTERACT_TYPE.QUEST_SHARE)
         self:RemoveFromIncomingQueue(INTERACT_TYPE.TRAVEL_TO_LEADER)
         self:RemoveFromIncomingQueue(INTERACT_TYPE.PROMOTIONAL_EVENT_REWARD)
+        self:RemoveFromIncomingQueue(INTERACT_TYPE.CHANGE_VENGANCE_LOADOUTS)
     end
 
     self.control:RegisterForEvent(EVENT_PLAYER_ACTIVATED, OnPlayerActivated)

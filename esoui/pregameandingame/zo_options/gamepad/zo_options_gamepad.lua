@@ -252,7 +252,7 @@ do
                         data.callback()
                     else
                         self.currentCategory = data.panelId
-                        if IsInUI("pregame") and not IsAccountLoggedIn() and PregameStateManager_GetCurrentState() ~= "FirstTimeAccessibilitySettings" then
+                        if IsInUI("pregame") and not IsAccountLoggedIn() and ZO_PregameStateManager_GetCurrentState() ~= "FirstTimeAccessibilitySettings" then
                             GAMEPAD_OPTIONS_PANEL_SCENE:AddTemporaryFragment(PREGAME_ANIMATED_BACKGROUND_FRAGMENT)
                         end
                         SCENE_MANAGER:Push("gamepad_options_panel")

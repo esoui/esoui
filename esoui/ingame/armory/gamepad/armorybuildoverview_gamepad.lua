@@ -73,8 +73,8 @@ do
             self.skillBarRow1.control:ClearAnchors()
             self.skillBarRow1.control:SetAnchor(TOPLEFT, previousControl, BOTTOMLEFT, -50, -30)
 
-            self.skillBarRow1:AssignArmoryBuildData(self.armoryBuildData)
-            self.skillBarRow2:AssignArmoryBuildData(self.armoryBuildData)
+            self.skillBarRow1:AssignSkillsData(self.armoryBuildData)
+            self.skillBarRow2:AssignSkillsData(self.armoryBuildData)
 
             -- Setup the champion bar data
             local totalChampionPoints = self.armoryBuildData:GetChampionTotalSpentPoints()

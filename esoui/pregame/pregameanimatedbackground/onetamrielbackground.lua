@@ -80,7 +80,7 @@ function OneTamrielBackground:Initialize(control)
         end
     end)
     PREGAME_ANIMATED_BACKGROUND_FRAGMENT:SetConditional(function()
-        return not IsPreloginWorldEnabled()
+        return not ZO_IsPreloginWorldEnabled()
     end)
 
     control:SetHandler("OnUpdate", function(_, timeS) self:OnUpdate(timeS) end)

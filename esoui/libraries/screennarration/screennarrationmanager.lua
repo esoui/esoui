@@ -452,7 +452,7 @@ function ZO_ScreenNarrationManager:RegisterForEvents()
 
         --If there are any queued parametric list narrations that are blocked by interact VO, update them now
         local queuedNarration = self:GetQueuedNarration(GetDefaultNarrationType(NARRATION_ENTRY_TYPE_PARAMETRIC_LIST_ENTRY))
-        if queuedNarration then
+        if queuedNarration and queuedNarration:GetNarrationEntryType() == NARRATION_ENTRY_TYPE_PARAMETRIC_LIST_ENTRY then
             local list = queuedNarration:GetParametricList()
             local narrationInfo = self.parametricListNarrationInfo[list]
             if narrationInfo.isBlockedByInteractVO then

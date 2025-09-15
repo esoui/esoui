@@ -104,7 +104,7 @@ function ZO_AntiquityJournalGamepad:InitializeLists()
         self:OnSubcategoryTargetChanged(targetData)
     end)
 
-    -- Initialize each lists' keybinds.
+    -- Initialize each list's keybinds.
     self.categoryList.keybindStripDescriptor =
     {
         alignment = KEYBIND_STRIP_ALIGN_LEFT,

@@ -125,7 +125,7 @@ function ZO_WorldSelect_SelectWorldForPlay()
                 ZO_Dialogs_ShowDialog("SERVER_UNAVAILABLE", nil, { mainTextParams = { worldData.name } })
             end
         else
-            PregameStateManager_SetState("CharacterSelect_FromIngame")
+            ZO_PregameStateManager_SetState("CharacterSelect_FromIngame")
         end
     end
 end
@@ -147,7 +147,7 @@ end
 
 function ZO_WorldSelect_Cancel()
     SetCVar("QuickLaunch", "0")
-    PregameStateManager_SetState("WaitForPreloginWorld")
+    ZO_PregameStateManager_SetState("WaitForPreloginWorld")
 end
 
 function ZO_WorldSelect_Initialize(control)

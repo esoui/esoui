@@ -6,7 +6,8 @@ function ZO_LoreLibrary_ReadBook(categoryIndex, collectionIndex, bookIndex)
 end
 
 function ZO_LoreLibrary_ReadHirelingCorrespondence(hirelingType, index)
-    local SHOW_TITLE = false
     local _, subject, message = GetHirelingCorrespondenceInfoByIndex(hirelingType, index)
-    LORE_READER:Show(subject, message, BOOK_MEDIUM_LETTER, SHOW_TITLE)
+    local SHOW_TITLE = false
+    local LETTER_MEDIUM = 4 -- The old enum value for BOOK_MEDIUM_LETTER (4) is now the def id for the equivalent medium
+    LORE_READER:Show(subject, message, LETTER_MEDIUM, SHOW_TITLE)
 end

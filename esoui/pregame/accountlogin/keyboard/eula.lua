@@ -204,7 +204,7 @@ function ZO_EULA:CreateEULAScene()
             self:ShowNextEULA()
         elseif newState == SCENE_HIDDEN then
             ZO_Dialogs_ReleaseDialog("SHOW_EULA")
-            PregameStateManager_AdvanceStateFromState("ShowEULA")
+            ZO_PregameStateManager_AdvanceStateFromState("ShowEULA")
         end
     end)
 end

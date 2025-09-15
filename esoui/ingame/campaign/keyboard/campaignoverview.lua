@@ -1,29 +1,69 @@
-local CAMPAIGN_OVERVIEW_TYPE_SCORING = 1
-local CAMPAIGN_OVERVIEW_TYPE_BONUSES = 2
-local CAMPAIGN_OVERVIEW_TYPE_EMPEROR = 3
+ZO_CAMPAIGN_OVERVIEW_TYPE =
+{
+    SCORING = 1,
+    BONUSES = 2,
+    EMPEROR = 3,
+    VENGEANCE = 4,
+}
+
+ZO_CAMPAIGN_OVERVIEW_TYPE_VENGEANCE =
+{
+    LOADOUTS = 1,
+    PERKS = 2,
+}
 
 ZO_CAMPAIGN_OVERVIEW_TYPE_INFO =
 {
-    [CAMPAIGN_OVERVIEW_TYPE_SCORING] =
+    [ZO_CAMPAIGN_OVERVIEW_TYPE.SCORING] =
     {
         name = GetString(SI_CAMPAIGN_OVERVIEW_CATEGORY_SCORING),
         normalIcon = "EsoUI/Art/Campaign/overview_indexIcon_scoring_up.dds",
         pressedIcon = "EsoUI/Art/Campaign/overview_indexIcon_scoring_down.dds",
         mouseoverIcon = "EsoUI/Art/Campaign/overview_indexIcon_scoring_over.dds",
-        priority = CAMPAIGN_OVERVIEW_TYPE_SCORING * 10,
+        priority = ZO_CAMPAIGN_OVERVIEW_TYPE.SCORING * 10,
         categoryFragmentFunction = function()
             CAMPAIGN_OVERVIEW:RemoveAllCategoryFragments()
             CAMPAIGN_OVERVIEW:ShowCampaignSelector()
             CAMPAIGN_OVERVIEW_SCENE:AddFragment(CAMPAIGN_SCORING_FRAGMENT)
         end,
     },
-    [CAMPAIGN_OVERVIEW_TYPE_BONUSES] =
+    [ZO_CAMPAIGN_OVERVIEW_TYPE.VENGEANCE] =
+    {
+        name = GetString(SI_CAMPAIGN_OVERVIEW_CATEGORY_VENGEANCE),
+        normalIcon = "EsoUI/Art/Campaign/overview_indexIcon_vengeance_up.dds",
+        pressedIcon = "EsoUI/Art/Campaign/overview_indexIcon_vengeance_down.dds",
+        mouseoverIcon = "EsoUI/Art/Campaign/overview_indexIcon_vengeance_over.dds",
+        priority = 12,
+        children =
+        {
+            [ZO_CAMPAIGN_OVERVIEW_TYPE_VENGEANCE.LOADOUTS] =
+            {
+                name = GetString(SI_CAMPAIGN_OVERVIEW_SUBCATEGORY_LOADOUTS),
+                categoryFragmentFunction = function()
+                    CAMPAIGN_OVERVIEW:RemoveAllCategoryFragments()
+                    CAMPAIGN_OVERVIEW:HideCampaignSelector()
+                    CAMPAIGN_OVERVIEW_SCENE:AddFragment(VENGEANCE_LOADOUT_KEYBOARD_FRAGMENT)
+                end,
+            },
+            [ZO_CAMPAIGN_OVERVIEW_TYPE_VENGEANCE.PERKS] =
+            {
+                name = GetString(SI_CAMPAIGN_OVERVIEW_SUBCATEGORY_PERKS),
+                categoryFragmentFunction = function()
+                    CAMPAIGN_OVERVIEW:RemoveAllCategoryFragments()
+                    CAMPAIGN_OVERVIEW:HideCampaignSelector()
+                    CAMPAIGN_OVERVIEW_SCENE:AddFragment(VENGEANCE_PERKS_KEYBOARD_FRAGMENT)
+                end,
+            }
+        },
+        visible = IsCurrentCampaignVengeanceRuleset,
+    },
+    [ZO_CAMPAIGN_OVERVIEW_TYPE.BONUSES] =
     {
         name = GetString(SI_CAMPAIGN_OVERVIEW_CATEGORY_BONUSES),
         normalIcon = "EsoUI/Art/Campaign/overview_indexIcon_bonus_up.dds",
         pressedIcon = "EsoUI/Art/Campaign/overview_indexIcon_bonus_down.dds",
         mouseoverIcon = "EsoUI/Art/Campaign/overview_indexIcon_bonus_over.dds",
-        priority = CAMPAIGN_OVERVIEW_TYPE_BONUSES * 10,
+        priority = ZO_CAMPAIGN_OVERVIEW_TYPE.BONUSES * 10,
         categoryFragmentFunction = function()
             CAMPAIGN_OVERVIEW:RemoveAllCategoryFragments()
             CAMPAIGN_OVERVIEW:ShowCampaignSelector()
@@ -31,13 +71,13 @@ ZO_CAMPAIGN_OVERVIEW_TYPE_INFO =
         end,
         visible = function() return GetAssignedCampaignId() ~= 0 end,
     },
-    [CAMPAIGN_OVERVIEW_TYPE_EMPEROR] =
+    [ZO_CAMPAIGN_OVERVIEW_TYPE.EMPEROR] =
     {
         name = GetString(SI_CAMPAIGN_OVERVIEW_CATEGORY_EMPERORSHIP),
         normalIcon = "EsoUI/Art/Campaign/overview_indexIcon_emperor_up.dds",
         pressedIcon = "EsoUI/Art/Campaign/overview_indexIcon_emperor_down.dds",
         mouseoverIcon = "EsoUI/Art/Campaign/overview_indexIcon_emperor_over.dds",
-        priority = CAMPAIGN_OVERVIEW_TYPE_EMPEROR * 10,
+        priority = ZO_CAMPAIGN_OVERVIEW_TYPE.EMPEROR * 10,
         categoryFragmentFunction = function()
             CAMPAIGN_OVERVIEW:RemoveAllCategoryFragments()
             CAMPAIGN_OVERVIEW:ShowCampaignSelector()
@@ -50,6 +90,7 @@ ZO_CampaignOverviewManager = ZO_InitializingObject:Subclass()
 
 function ZO_CampaignOverviewManager:Initialize(control)
     self.control = control
+    self.shouldShowVengeanceLoadouts = false
 
     local function OnStateChange(oldState, newState)
         if newState == ZO_STATE.SHOWING then
@@ -204,7 +245,16 @@ function ZO_CampaignOverviewManager:InitializeCategories()
 
     self:RefreshCategories()
 
-    self.control:RegisterForEvent(EVENT_ASSIGNED_CAMPAIGN_CHANGED, function() self:RefreshCategories() end)
+    local function OnPlayerActivated()
+        self:RefreshCategories()
+    end
+
+    self.control:RegisterForEvent(EVENT_PLAYER_ACTIVATED, OnPlayerActivated)
+end
+
+function ZO_CampaignOverviewManager:GetTreeNodeByCategoryFragment(categoryFragment)
+    local node = self.categoryFragmentToNodeLookup[categoryFragment]
+    return node
 end
 
 function ZO_CampaignOverviewManager:GetTreeNodeByCategoryData(categoryData)
@@ -314,9 +364,10 @@ do
     end
 
     function ZO_CampaignOverviewManager:AddCategoryTreeNodes(nodeDataList, parentNode)
-        table.sort(nodeDataList, PrioritySort)
+        local sortedNodeDataList = ZO_CreateSortableTableFromValues(nodeDataList)
+        table.sort(sortedNodeDataList, PrioritySort)
 
-        for index, nodeData in ipairs(nodeDataList) do
+        for index, nodeData in ipairs(sortedNodeDataList) do
             local isVisible = true
             if nodeData.visible ~= nil then
                 isVisible = nodeData.visible
@@ -369,6 +420,8 @@ function ZO_CampaignOverviewManager:RemoveAllCategoryFragments()
     CAMPAIGN_OVERVIEW_SCENE:RemoveFragment(CAMPAIGN_SCORING_FRAGMENT)
     CAMPAIGN_OVERVIEW_SCENE:RemoveFragment(CAMPAIGN_BONUSES_FRAGMENT)
     CAMPAIGN_OVERVIEW_SCENE:RemoveFragment(CAMPAIGN_EMPEROR_FRAGMENT)
+    CAMPAIGN_OVERVIEW_SCENE:RemoveFragment(VENGEANCE_LOADOUT_KEYBOARD_FRAGMENT)
+    CAMPAIGN_OVERVIEW_SCENE:RemoveFragment(VENGEANCE_PERKS_KEYBOARD_FRAGMENT)
 end
 
 function ZO_CampaignOverviewManager:ShowCampaignSelector()

@@ -292,6 +292,12 @@ function ZO_KeyboardPointsResetProvider:Accept(data)
         MAIN_MENU_KEYBOARD:ShowScene("skills")
     elseif data.respecType == RESPEC_TYPE_CHAMPION or data.respecType == RESPEC_TYPE_CHAMPION_SLOTS then
         MAIN_MENU_KEYBOARD:ShowScene("championPerks")
+    elseif data.respecType == RESPEC_TYPE_VENGEANCE_PERKS then
+        CAMPAIGN_OVERVIEW:SetCategoryOnShowByData(ZO_CAMPAIGN_OVERVIEW_TYPE_INFO[ZO_CAMPAIGN_OVERVIEW_TYPE.VENGEANCE].children[ZO_CAMPAIGN_OVERVIEW_TYPE_VENGEANCE.PERKS])
+        MAIN_MENU_KEYBOARD:ShowScene("campaignOverview")
+    elseif data.respecType == RESPEC_TYPE_VENGEANCE_ROLE then
+        CAMPAIGN_OVERVIEW:SetCategoryOnShowByData(ZO_CAMPAIGN_OVERVIEW_TYPE_INFO[ZO_CAMPAIGN_OVERVIEW_TYPE.VENGEANCE].children[ZO_CAMPAIGN_OVERVIEW_TYPE_VENGEANCE.LOADOUTS])
+        MAIN_MENU_KEYBOARD:ShowScene("campaignOverview")
     end
 end
 

@@ -1656,7 +1656,7 @@ function SharedChatSystem:ValidateChatChannel()
     if self.channelRequirement and not self.channelRequirement(self.currentChannel) then
         --if it isn't valid, try to revert to the last valid channel
         local lastChannelData = self.channelData[self.lastValidChannel]
-        if not lastChannelData.requires or lastChannelData.requires(lastChannelData.id) then
+        if lastChannelData and (not lastChannelData.requires or lastChannelData.requires(lastChannelData.id)) then
             self:SetChannel(self.lastValidChannel, self.lastValidTarget)
         else
             --if that doesn't work, just revert to default chat channel

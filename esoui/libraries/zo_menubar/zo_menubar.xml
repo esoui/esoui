@@ -27,13 +27,13 @@
                 <Texture name="$(parent)Image" level="1" excludeFromResizeToFitExtents="true" pixelRoundingEnabled="false">
                     <Anchor point="CENTER" />
                     <Controls>
-                        <Texture name="$(parent)Highlight" level="0" excludeFromResizeToFitExtents="true" pixelRoundingEnabled="false">
+                        <Texture name="$(parent)Highlight" level="2" blendMode="ADD" excludeFromResizeToFitExtents="true" pixelRoundingEnabled="false"> 
                             <AnchorFill />
                         </Texture>
                     </Controls>
                 </Texture>
 
-                <Texture name="$(parent)Status" level="2" excludeFromResizeToFitExtents="true" resizeToFitFile="true" hidden="true">
+                <Texture name="$(parent)Status" level="3" excludeFromResizeToFitExtents="true" resizeToFitFile="true" hidden="true">
                     <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Image" relativePoint="BOTTOMLEFT" />
                 </Texture>
             </Controls>

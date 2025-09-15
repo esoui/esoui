@@ -78,7 +78,7 @@ end
 
 function ZO_WorldSelect_Gamepad:OnWorldSelected()
     SavePlayerConsoleProfile()
-    PregameStateManager_AdvanceState()
+    ZO_PregameStateManager_AdvanceState()
 end
 
 function ZO_WorldSelect_Gamepad:IsSelectionValid()

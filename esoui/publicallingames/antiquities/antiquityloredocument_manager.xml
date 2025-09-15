@@ -66,13 +66,13 @@
                     <Anchor point="TOPLEFT" />
                     <Anchor point="TOPRIGHT" />
                 </Texture>
-                
-                <Label name="$(parent)Title" inherits="ZO_TooltipIfTruncatedLabel" color="INTERFACE_COLOR_TYPE_BOOK_MEDIUM:BOOK_MEDIUM_SCROLL" alpha="0.65">
+
+                <Label name="$(parent)Title" inherits="ZO_TooltipIfTruncatedLabel" color="2B1912" alpha="0.65">
                     <Anchor point="TOPLEFT" offsetX="ZO_ANTIQUITY_LORE_BACKGROUND_DOUBLE_PADDING_X" offsetY="ZO_ANTIQUITY_LORE_BACKGROUND_PADDING_Y" />
                     <Anchor point="TOPRIGHT" offsetX="-ZO_ANTIQUITY_LORE_BACKGROUND_DOUBLE_PADDING_X" offsetY="ZO_ANTIQUITY_LORE_BACKGROUND_PADDING_Y" />
                 </Label>
 
-                <Label name="$(parent)Body" color="INTERFACE_COLOR_TYPE_BOOK_MEDIUM:BOOK_MEDIUM_SCROLL" alpha="0.65">
+                <Label name="$(parent)Body" color="2B1912" alpha="0.65">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetX="-ZO_ANTIQUITY_LORE_BACKGROUND_PADDING_X" offsetY="ZO_ANTIQUITY_LORE_LABEL_PADDING_Y" />
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)Title" relativePoint="BOTTOMRIGHT" offsetX="ZO_ANTIQUITY_LORE_BACKGROUND_PADDING_X" offsetY="ZO_ANTIQUITY_LORE_LABEL_PADDING_Y" />
                 </Label>

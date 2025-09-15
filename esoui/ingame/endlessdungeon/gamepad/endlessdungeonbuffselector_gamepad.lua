@@ -99,20 +99,19 @@ function ZO_EndlessDungeonBuffSelector_Gamepad:InitializeFooter()
                 return ""
             end
             local IS_GAMEPAD = true
-            currencyAmount = ZO_Currency_Format(GetCurrencyAmount(CURT_ARCHIVAL_FORTUNES, GetCurrencyPlayerStoredLocation(CURT_ARCHIVAL_FORTUNES)), CURT_ARCHIVAL_FORTUNES, ZO_CURRENCY_FORMAT_AMOUNT_ICON, IS_GAMEPAD)
+            local currencyAmount = ZO_Currency_Format(GetCurrencyAmount(CURT_ARCHIVAL_FORTUNES, GetCurrencyPlayerStoredLocation(CURT_ARCHIVAL_FORTUNES)), CURT_ARCHIVAL_FORTUNES, ZO_CURRENCY_FORMAT_AMOUNT_ICON, IS_GAMEPAD)
                 
             local IS_PLURAL = false
             local IS_MIXED_CASE = false
             local currencyName = GetCurrencyName(CURT_ARCHIVAL_FORTUNES, IS_PLURAL, IS_MIXED_CASE)
 
-            formattedText = zo_strformat(SI_ENDLESS_DUNGEON_BUFF_SELECTOR_CURRENCY_FORMAT, currencyName, currencyAmount)
-            return formattedText
+            return zo_strformat(SI_ENDLESS_DUNGEON_BUFF_SELECTOR_CURRENCY_FORMAT, currencyName, currencyAmount)
         end,
         data1TextNarration = function()
             if not CanRerollCurrentBuffSelectorOptions() then
                 return ""
             end
-            currencyAmount = ZO_Currency_FormatGamepad(CURT_ARCHIVAL_FORTUNES, GetCurrencyAmount(CURT_ARCHIVAL_FORTUNES, GetCurrencyPlayerStoredLocation(CURT_ARCHIVAL_FORTUNES)), ZO_CURRENCY_FORMAT_AMOUNT_ICON)
+            local currencyAmount = ZO_Currency_FormatGamepad(CURT_ARCHIVAL_FORTUNES, GetCurrencyAmount(CURT_ARCHIVAL_FORTUNES, GetCurrencyPlayerStoredLocation(CURT_ARCHIVAL_FORTUNES)), ZO_CURRENCY_FORMAT_AMOUNT_ICON)
 
             local IS_PLURAL = false
             local currencyName = GetCurrencyName(CURT_ARCHIVAL_FORTUNES, IS_PLURAL)

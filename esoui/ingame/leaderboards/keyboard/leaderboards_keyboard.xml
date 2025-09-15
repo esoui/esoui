@@ -139,11 +139,18 @@
                     <Anchor point="TOPLEFT" relativeTo="$(parent)NavigationContainer" relativePoint="TOPRIGHT" offsetX="10" offsetY="15" />
                 </Control>
 
-                <Control name="$(parent)Filter" inherits="ZO_ComboBox">
-                    <Dimensions x="222" y="32" />
+                <Backdrop name="$(parent)Search" tier="HIGH" inherits="ZO_SingleLineEditBackdrop_Keyboard">
                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)TopDivider" relativePoint="TOPRIGHT" offsetX="28" />
-                </Control>
-                
+                    <Dimensions x="240"/>
+                    <Controls>
+                        <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop" defaultText="SI_ACHIEVEMENT_SEARCH_EDIT_DEFAULT">
+                            <OnTextChanged>
+                                ZO_Leaderboards_OnSearchTextChanged(self)
+                            </OnTextChanged>
+                        </EditBox>
+                    </Controls>
+                </Backdrop>
+
                 <Label name="$(parent)ActiveLeaderboard" font="ZoFontWinH2" modifyTextType="UPPERCASE" mouseEnabled="true">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)TopDivider" relativePoint="BOTTOMLEFT" offsetX="10" offsetY="-5" />
                 </Label>

@@ -126,7 +126,7 @@ function Market_Manager:AddMarketProductPurchaseWarningStringsToTable(marketProd
 end
 
 do
-    internalassert(MARKET_PURCHASE_RESULT_MAX_VALUE == 42, "Update market error flow to handle new purchase result")
+    internalassert(MARKET_PURCHASE_RESULT_MAX_VALUE == 45, "Update market error flow to handle new purchase result")
     local IS_SIMPLE_MARKET_PURCHASE_ERROR =
     {
         [MARKET_PURCHASE_RESULT_ALREADY_COMPLETED_INSTANT_UNLOCK] = true,
@@ -141,6 +141,7 @@ do
         [MARKET_PURCHASE_RESULT_CANNOT_GRANT_QUEST] = true,
         [MARKET_PURCHASE_RESULT_NOT_ENOUGH_ENDEAVOR_SEALS] = true,
         [MARKET_PURCHASE_RESULT_TOO_MANY_PENDING_GIFTS] = true,
+        [MARKET_PURCHASE_RESULT_CAMPAIGN_LOCKED] = true,
     }
     function Market_Manager:GetMarketProductPurchaseErrorInfo(marketProductData)
         local expectedPurchaseResult = marketProductData:CouldPurchase()

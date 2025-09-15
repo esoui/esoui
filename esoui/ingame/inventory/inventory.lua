@@ -9,6 +9,7 @@ INVENTORY_HOUSE_BANK = 4
 INVENTORY_GUILD_BANK = 5
 INVENTORY_CRAFT_BAG = 6
 INVENTORY_FURNITURE_VAULT = 7
+INVENTORY_VENGEANCE = 8
 
 local DONT_USE_SHORT_FORMAT = false
 local PREVENT_LAYOUT = false
@@ -178,6 +179,12 @@ local function SetupInventoryItemRow(rowControl, slot, overrideOptions)
     nameControl:SetText(slot.name) -- already formatted
     nameControl:SetColor(r, g, b, 1)
 
+    local locked = slot.locked or IsUnitDead("player")
+    if IsCurrentCampaignVengeanceRuleset() and IsItemVisuallyDisabledInVengeance(slot.bagId, slot.slotIndex) then
+        nameControl:SetColor(ZO_ERROR_COLOR:UnpackRGBA())
+        locked = true
+    end
+
     local itemValue
     if type(options.overrideSellValue) == "function" then
         itemValue = options.overrideSellValue(slot)
@@ -191,7 +198,7 @@ local function SetupInventoryItemRow(rowControl, slot, overrideOptions)
 
     local inventorySlot = rowControl:GetNamedChild("Button")
     ZO_Inventory_BindSlot(inventorySlot, slot.inventory.slotType, slot.slotIndex, slot.bagId)
-    ZO_PlayerInventorySlot_SetupSlot(rowControl, slot.stackCount, slot.iconFile, slot.meetsUsageRequirement, slot.locked or IsUnitDead("player"))
+    ZO_PlayerInventorySlot_SetupSlot(rowControl, slot.stackCount, slot.iconFile, slot.meetsUsageRequirement, locked)
 
     slot.slotControl = rowControl
 
@@ -367,6 +374,18 @@ function ZO_InventoryManager:Initialize(control)
     }
 
     local CRAFT_BAG_FILTERS = GetFiltersForKeys(CRAFT_BAG_FILTER_KEYS, INVENTORY_CRAFT_BAG)
+
+    local VENGEANCE_FILTER_KEYS =
+    {
+        ITEM_TYPE_DISPLAY_CATEGORY_JUNK,
+        ITEM_TYPE_DISPLAY_CATEGORY_MISCELLANEOUS,
+        ITEM_TYPE_DISPLAY_CATEGORY_CONSUMABLE,
+        ITEM_TYPE_DISPLAY_CATEGORY_JEWELRY,
+        ITEM_TYPE_DISPLAY_CATEGORY_ARMOR,
+        ITEM_TYPE_DISPLAY_CATEGORY_WEAPONS,
+        ITEM_TYPE_DISPLAY_CATEGORY_ALL,
+    }
+    local VENGEANCE_FILTERS = GetFiltersForKeys(VENGEANCE_FILTER_KEYS, INVENTORY_VENGEANCE)
 
     local IS_SUB_FILTER = true
     local function GetSearchFilters(searchFilterKeys, inventoryType)
@@ -626,6 +645,22 @@ function ZO_InventoryManager:Initialize(control)
 
     local CRAFT_BAG_SEARCH_FILTERS = GetSearchFilters(CRAFT_BAG_SEARCH_FILTER_KEYS, INVENTORY_CRAFT_BAG)
 
+    local VENGEANCE_SEARCH_FILTER_KEYS =
+    {
+        [ITEM_TYPE_DISPLAY_CATEGORY_ALL] = BACKPACK_SEARCH_FILTER_KEYS[ITEM_TYPE_DISPLAY_CATEGORY_ALL],
+        [ITEM_TYPE_DISPLAY_CATEGORY_WEAPONS] = BACKPACK_SEARCH_FILTER_KEYS[ITEM_TYPE_DISPLAY_CATEGORY_WEAPONS],
+        [ITEM_TYPE_DISPLAY_CATEGORY_ARMOR] = BACKPACK_SEARCH_FILTER_KEYS[ITEM_TYPE_DISPLAY_CATEGORY_ARMOR],
+        [ITEM_TYPE_DISPLAY_CATEGORY_JEWELRY] = BACKPACK_SEARCH_FILTER_KEYS[ITEM_TYPE_DISPLAY_CATEGORY_JEWELRY],
+        [ITEM_TYPE_DISPLAY_CATEGORY_CONSUMABLE] = BACKPACK_SEARCH_FILTER_KEYS[ITEM_TYPE_DISPLAY_CATEGORY_CONSUMABLE],
+        [ITEM_TYPE_DISPLAY_CATEGORY_CRAFTING] = BACKPACK_SEARCH_FILTER_KEYS[ITEM_TYPE_DISPLAY_CATEGORY_CRAFTING],
+        [ITEM_TYPE_DISPLAY_CATEGORY_FURNISHING] = BACKPACK_SEARCH_FILTER_KEYS[ITEM_TYPE_DISPLAY_CATEGORY_FURNISHING],
+        [ITEM_TYPE_DISPLAY_CATEGORY_COMPANION] = BACKPACK_SEARCH_FILTER_KEYS[ITEM_TYPE_DISPLAY_CATEGORY_COMPANION],
+        [ITEM_TYPE_DISPLAY_CATEGORY_MISCELLANEOUS] = BACKPACK_SEARCH_FILTER_KEYS[ITEM_TYPE_DISPLAY_CATEGORY_MISCELLANEOUS],
+        [ITEM_TYPE_DISPLAY_CATEGORY_JUNK] = BACKPACK_SEARCH_FILTER_KEYS[ITEM_TYPE_DISPLAY_CATEGORY_JUNK],
+    }
+
+    local VENGEANCE_SEARCH_FILTERS = GetSearchFilters(VENGEANCE_SEARCH_FILTER_KEYS, INVENTORY_VENGEANCE)
+
     local function BackpackAltFreeSlotType()
         if self:IsBanking() then
             return self:GetBankInventoryType()
@@ -825,6 +860,32 @@ function ZO_InventoryManager:Initialize(control)
             rowTemplate = "ZO_PlayerInventorySlot",
             activeTab = ZO_FurnitureVaultTabsActive,
         },
+        [INVENTORY_VENGEANCE] =
+        {
+            searchBox = ZO_VengeanceInventorySearchFiltersTextSearchBox,
+            slotType = SLOT_TYPE_ITEM,
+            backingBags = { BAG_VENGEANCE },
+            slots = { [BAG_VENGEANCE] = {} },
+            listView = ZO_VengeanceInventoryList,
+            listDataType = INVENTORY_DATA_TYPE_BACKPACK,
+            listSetupCallback = SetupBackpackInventoryItemRow,
+            listHiddenCallback = OnInventoryItemRowHidden,
+            freeSlotsLabel = ZO_VengeanceInventoryInfoBarFreeSlots,
+            altFreeSlotsLabel = ZO_VengeanceInventoryInfoBarAltFreeSlots,
+            freeSlotType = INVENTORY_BACKPACK,
+            altFreeSlotType = INVENTORY_VENGEANCE,
+            freeSlotsStringId = SI_INVENTORY_BACKPACK_REMAINING_SPACES,
+            freeSlotsFullStringId = SI_INVENTORY_BACKPACK_COMPLETELY_FULL,
+            currentSortKey = "statusSortOrder",
+            currentSortOrder = ZO_SORT_ORDER_DOWN,
+            currentFilter = ITEM_TYPE_DISPLAY_CATEGORY_ALL,
+            tabFilters = VENGEANCE_FILTERS,
+            subFilters = VENGEANCE_SEARCH_FILTERS,
+            filterBar = ZO_VengeanceInventoryTabs,
+            subFilterBar = ZO_VengeanceInventorySearchFiltersSubTabs,
+            rowTemplate = "ZO_PlayerInventorySlot",
+            activeTab = ZO_VengeanceInventoryTabsActive,
+        },
     }
 
     self.isListDirty = {}
@@ -836,6 +897,7 @@ function ZO_InventoryManager:Initialize(control)
     self:InitializeHeaderSort(INVENTORY_CRAFT_BAG, inventories[INVENTORY_CRAFT_BAG], ZO_CraftBagSortBy)
     self:InitializeHeaderSort(INVENTORY_QUEST_ITEM, inventories[INVENTORY_QUEST_ITEM], ZO_QuestItemsSortBy)
     self:InitializeHeaderSort(INVENTORY_FURNITURE_VAULT, inventories[INVENTORY_FURNITURE_VAULT], ZO_FurnitureVaultSortBy)
+    self:InitializeHeaderSort(INVENTORY_VENGEANCE, inventories[INVENTORY_VENGEANCE], ZO_VengeanceInventorySortBy)
 
     self.inventories = inventories
     self.searchToInventoryType = {}
@@ -847,6 +909,7 @@ function ZO_InventoryManager:Initialize(control)
         [BAG_GUILDBANK] = INVENTORY_GUILD_BANK,
         [BAG_VIRTUAL] = INVENTORY_CRAFT_BAG,
         [BAG_FURNITURE_VAULT] = INVENTORY_FURNITURE_VAULT,
+        [BAG_VENGEANCE] = INVENTORY_VENGEANCE,
     }
     for i = BAG_HOUSE_BANK_ONE, BAG_HOUSE_BANK_TEN do
         self.bagToInventoryType[i] = INVENTORY_HOUSE_BANK
@@ -885,7 +948,7 @@ function ZO_InventoryManager:Initialize(control)
             self:UpdateFreeSlots(INVENTORY_BACKPACK)
 
             self:UpdateApparelSection()
-            --Reseting the comparison stats here since its too later when the window is already hidden.
+            --Resetting the comparison stats here since its too later when the window is already hidden.
             ZO_CharacterWindowStats_HideComparisonValues()
         elseif newState == SCENE_FRAGMENT_HIDDEN then
             if TEXT_SEARCH_MANAGER:IsActiveTextSearch("playerInventoryTextSearch") then
@@ -911,6 +974,44 @@ function ZO_InventoryManager:Initialize(control)
         end
     end)
 
+    VENGEANCE_INVENTORY_FRAGMENT = ZO_FadeSceneFragment:New(ZO_VengeanceInventory)
+
+    VENGEANCE_INVENTORY_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
+        if newState == SCENE_FRAGMENT_SHOWING then
+            -- If no current context is set for inventory then assume the inventory is being opened
+            if not self.inventories[INVENTORY_VENGEANCE].currentContext then
+                self:ActivateInventorySearch()
+            else
+                self.inventories[INVENTORY_VENGEANCE].searchBox:SetText(TEXT_SEARCH_MANAGER:GetSearchText(self.inventories[INVENTORY_VENGEANCE].currentContext))
+            end
+
+            -- Start tab and subtab flashing for new items
+            for _, data in ipairs(self.newItemList) do
+                self:PlayItemAddedAlert(data, data.inventory)
+            end
+
+            local UPDATE_EVEN_IF_HIDDEN = true
+            if self.isListDirty[INVENTORY_VENGEANCE] then
+                if TEXT_SEARCH_MANAGER:IsFilterTargetInContext(self.inventories[INVENTORY_VENGEANCE].currentContext, BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT) then
+                    self:UpdateList(INVENTORY_VENGEANCE, UPDATE_EVEN_IF_HIDDEN)
+                end
+            end
+            self:RefreshMoney()
+            self:UpdateFreeSlots(INVENTORY_VENGEANCE)
+
+            self:UpdateApparelSection()
+            --Resetting the comparison stats here since its too later when the window is already hidden.
+            ZO_CharacterWindowStats_HideComparisonValues()
+        elseif newState == SCENE_FRAGMENT_HIDDEN then
+            if TEXT_SEARCH_MANAGER:IsActiveTextSearch("playerInventoryTextSearch") then
+                self:DeactivateInventorySearch()
+            end
+            ZO_InventorySlot_RemoveMouseOverKeybinds()
+            self:ClearNewStatusOnItemsThePlayerHasSeen(INVENTORY_VENGEANCE)
+            self.newItemList = {}
+        end
+    end)
+
     self.itemsLockedDueToDeath = IsUnitDead("player")
 
     self:SetupInitialFilter()
@@ -919,6 +1020,7 @@ function ZO_InventoryManager:Initialize(control)
     self:RefreshAllInventorySlots(INVENTORY_CRAFT_BAG)
     self:RefreshAllInventorySlots(INVENTORY_BANK)
     self:RefreshAllInventorySlots(INVENTORY_FURNITURE_VAULT)
+    self:RefreshAllInventorySlots(INVENTORY_VENGEANCE)
     self:RefreshAllQuests()
     self:RefreshMoney()
 
@@ -1005,11 +1107,12 @@ function ZO_InventoryManager:SetContextForInventories(context, inventoryTypeList
 end
 
 function ZO_InventoryManager:ActivateInventorySearch()
-    self:SetContextForInventories("playerInventoryTextSearch", { INVENTORY_BACKPACK, INVENTORY_CRAFT_BAG })
+    self:SetContextForInventories("playerInventoryTextSearch", { INVENTORY_BACKPACK, INVENTORY_CRAFT_BAG, INVENTORY_VENGEANCE })
 
     local inventorySearchText = TEXT_SEARCH_MANAGER:GetSearchText("playerInventoryTextSearch")
     self.inventories[INVENTORY_BACKPACK].searchBox:SetText(inventorySearchText)
     self.inventories[INVENTORY_CRAFT_BAG].searchBox:SetText(inventorySearchText)
+    self.inventories[INVENTORY_VENGEANCE].searchBox:SetText(inventorySearchText)
 end
 
 function ZO_InventoryManager:DeactivateInventorySearch()
@@ -1162,6 +1265,11 @@ do
     end
 
     local function HandleCursorPickup(eventCode, cursorType, unused1, unused2, unused3, unused4, unused5, unused6, itemSoundCategory)
+        -- Don't allow sound to play for irrelevent pickups
+        if cursorType == MOUSE_CONTENT_VENGEANCE_PERK then
+            return
+        end
+
         if cursorType == MOUSE_CONTENT_INVENTORY_ITEM or cursorType == MOUSE_CONTENT_EQUIPPED_ITEM or cursorType == MOUSE_CONTENT_QUEST_ITEM then
             ZO_InventoryLandingArea_SetHidden(ZO_PlayerBankBackpackLandingArea, false)
             ZO_InventoryLandingArea_SetHidden(ZO_PlayerInventoryListLandingArea, false)
@@ -1398,22 +1506,28 @@ end
 ---------
 
 --Selects a filter tab in this inventory type and then sorts by a key that appears under that filter tab
-function ZO_InventoryManager:SelectAndChangeSort(inventoryType, tabFilterType, newSortKey, newSortOrder)
-    local inventoryInfo = self.inventories[inventoryType]
-    if inventoryInfo then
-        local tabFilter
-        for _, searchTabFilter in ipairs(inventoryInfo.tabFilters) do
-            if searchTabFilter.filterType == tabFilterType then
-                tabFilter = searchTabFilter
-                break
-            end
-        end
+function ZO_InventoryManager:SelectAndChangeSort(inventoryTypes, tabFilterType, newSortKey, newSortOrder)
+    if type(inventoryTypes) ~= "table" then
+        inventoryTypes = { inventoryTypes }
+    end
 
-        if tabFilter then
-            self:ChangeFilter(tabFilter)
-            --The sort headers change based on the selected tab filter
-            inventoryInfo.sortHeaders:SelectHeaderByKey(newSortKey, ZO_SortHeaderGroup.SUPPRESS_CALLBACKS, not ZO_SortHeaderGroup.FORCE_RESELECT, newSortOrder)
-            self:ChangeSort(newSortKey, inventoryType, newSortOrder)
+    for i, inventoryType in ipairs(inventoryTypes) do
+        local inventoryInfo = self.inventories[inventoryType]
+        if inventoryInfo then
+            local tabFilter
+            for _, searchTabFilter in ipairs(inventoryInfo.tabFilters) do
+                if searchTabFilter.filterType == tabFilterType then
+                    tabFilter = searchTabFilter
+                    break
+                end
+            end
+
+            if tabFilter then
+                self:ChangeFilter(tabFilter)
+                --The sort headers change based on the selected tab filter
+                inventoryInfo.sortHeaders:SelectHeaderByKey(newSortKey, ZO_SortHeaderGroup.SUPPRESS_CALLBACKS, not ZO_SortHeaderGroup.FORCE_RESELECT, newSortOrder)
+                self:ChangeSort(newSortKey, inventoryType, newSortOrder)
+            end
         end
     end
 end
@@ -1446,6 +1560,8 @@ function ZO_InventoryManager:ApplySort(inventoryType)
         inventory = self.inventories[INVENTORY_QUEST_ITEM]
     elseif inventoryType == INVENTORY_FURNITURE_VAULT then
         inventory = self.inventories[INVENTORY_FURNITURE_VAULT]
+    elseif inventoryType == INVENTORY_VENGEANCE then
+        inventory = self.inventories[INVENTORY_VENGEANCE]
     else
         -- Use normal inventory by default (instead of the quest item inventory for example)
         inventory = self.inventories[self.selectedTabType]
@@ -1721,6 +1837,7 @@ function ZO_InventoryManager:SetupInitialFilter()
     ZO_MenuBar_SelectDescriptor(self.inventories[INVENTORY_GUILD_BANK].filterBar, ITEM_TYPE_DISPLAY_CATEGORY_ALL)
     ZO_MenuBar_SelectDescriptor(self.inventories[INVENTORY_CRAFT_BAG].filterBar, ITEM_TYPE_DISPLAY_CATEGORY_ALL)
     ZO_MenuBar_SelectDescriptor(self.inventories[INVENTORY_FURNITURE_VAULT].filterBar, ITEM_TYPE_DISPLAY_CATEGORY_FURNISHING)
+    ZO_MenuBar_SelectDescriptor(self.inventories[INVENTORY_VENGEANCE].filterBar, ITEM_TYPE_DISPLAY_CATEGORY_ALL)
 end
 
 function ZO_InventoryManager:SetupCategoryFlashAnimation()
@@ -1850,18 +1967,26 @@ function ZO_InventoryManager:AddInventoryItem(inventoryType, slotIndex, bagId)
     end
 end
 
-function ZO_InventoryManager:UpdateNewStatus(inventoryType, slotIndex, bagId)
-    local inventory = self.inventories[inventoryType]
-    if inventory.backingBags then
-        -- Default bagId to backingBags[1] for addon backwards-compatibility
-        bagId = bagId or inventory.backingBags[1]
+function ZO_InventoryManager:UpdateNewStatus(inventoryTypeList, slotIndex, bagId)
+    if type(inventoryTypeList) == "number" then
+        inventoryTypeList = { inventoryTypeList }
+    end
 
-        -- might not have the slot data yet depending on who is calling this and when, this will ensure we have the correct data
-        -- if the slot data was already created this will essentially be a no-op (some table lookups)
-        self:AddInventoryItem(inventoryType, slotIndex, bagId)
-        local slot = inventory.slots[bagId][slotIndex]
-        if slot and slot.age ~= 0 then
-            slot.clearAgeOnClose = true
+    for i, inventoryType in ipairs(inventoryTypeList) do
+        local inventory = self.inventories[inventoryType]
+        if inventory.backingBags then
+            -- Default bagId to backingBags[1] for addon backwards-compatibility
+            bagId = bagId or inventory.backingBags[1]
+            if ZO_IsElementInNumericallyIndexedTable(inventory.backingBags, bagId) then
+                -- might not have the slot data yet depending on who is calling this and when, this will ensure we have the correct data
+                -- if the slot data was already created this will essentially be a no-op (some table lookups)
+                self:AddInventoryItem(inventoryType, slotIndex, bagId)
+                local slot = inventory.slots[bagId][slotIndex]
+                if slot and slot.age ~= 0 then
+                    slot.clearAgeOnClose = true
+                end
+                return
+            end
         end
     end
 end
@@ -2356,6 +2481,7 @@ function ZO_InventoryManager:ApplyBackpackLayout(layoutData)
 
     self:ApplySharedBagLayout(ZO_PlayerInventory, layoutData)
     self:ApplySharedBagLayout(ZO_CraftBag, layoutData)
+    self:ApplySharedBagLayout(ZO_VengeanceInventory, layoutData)
 
     local inventory = self.inventories[INVENTORY_BACKPACK]
     inventory.additionalFilter = layoutData.additionalFilter
@@ -3370,6 +3496,8 @@ function ZO_InventoryManager:UpdateEmptyBagLabel(inventoryType, isEmptyList)
             label = ZO_QuestItems:GetNamedChild("Empty")
         elseif inventoryType == INVENTORY_FURNITURE_VAULT then
             label = ZO_FurnitureVault:GetNamedChild("Empty")
+        elseif inventoryType == INVENTORY_VENGEANCE then
+            label = ZO_VengeanceInventory:GetNamedChild("Empty")
         end
 
         if label then

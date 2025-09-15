@@ -21,7 +21,7 @@ local ENDLESS_DUNGEON_HEADER_ICONS =
 local LEADERBOARD_RANK_MAP =
 {
     [ENDLESS_DUNGEON_GROUP_TYPE_DUO] = LEADERBOARD_TYPE_ENDLESS_DUNGEON_OVERALL,
-    [ENDLESS_DUNGEON_GROUP_TYPE_SOLO] = LEADERBOARD_TYPE_ENDLESS_DUNGEON_CLASS,
+    [ENDLESS_DUNGEON_GROUP_TYPE_SOLO] = LEADERBOARD_TYPE_ENDLESS_DUNGEON_OVERALL,
 }
 
 ZO_EndlessDungeonLeaderboardsManager_Shared = ZO_LeaderboardBase_Shared:Subclass()
@@ -52,37 +52,19 @@ function ZO_EndlessDungeonLeaderboardsManager_Shared:RegisterForEvents()
 end
 
 do
-    local function GetClassIdAndIndexFromTotalIndex(entryIndex, categoryData)
-        local classId = 0
-        local classIndex = entryIndex
-        local previousGate
-        for i, gate in ipairs(categoryData.classGates) do
-            if entryIndex <= gate.count then
-                classId = gate.classId
-                if previousGate then
-                    classIndex = classIndex - previousGate.count
-                end
-                break
-            end
-            previousGate = gate
-        end
-        return classId, classIndex
-    end
-
     local function GetSingleEndlessDungeonEntryInfo(entryIndex, categoryData)
         if categoryData.endlessDungeonGroupType == ENDLESS_DUNGEON_GROUP_TYPE_DUO then
             if categoryData.isWeekly then
                 return GetEndlessDungeonOfTheWeekDuoLeaderboardEntryInfo(entryIndex)
             else
-            	return GetEndlessDungeonDuoLeaderboardEntryInfo(categoryData.endlessDungeonId, entryIndex)
+                return GetEndlessDungeonDuoLeaderboardEntryInfo(categoryData.endlessDungeonId, entryIndex)
             end
         elseif categoryData.endlessDungeonGroupType == ENDLESS_DUNGEON_GROUP_TYPE_SOLO then
             --We keep track of these gates for the info function that'll be called later
-            local classId, classIndex = GetClassIdAndIndexFromTotalIndex(entryIndex, categoryData)
             if categoryData.isWeekly then
-                return GetEndlessDungeonOfTheWeekSoloLeaderboardEntryInfo(classId, classIndex)
+                return GetEndlessDungeonOfTheWeekSoloLeaderboardEntryInfo(entryIndex)
             else
-                return GetEndlessDungeonSoloLeaderboardEntryInfo(categoryData.endlessDungeonId, classId, classIndex)
+                return GetEndlessDungeonSoloLeaderboardEntryInfo(categoryData.endlessDungeonId, entryIndex)
             end
         end
         return nil
@@ -93,15 +75,13 @@ do
             if categoryData.isWeekly then
                 return ZO_ID_REQUEST_TYPE_ENDLESS_DUNGEON_OF_THE_WEEK_DUO_LEADERBOARD, entryIndex
             else
-            	return ZO_ID_REQUEST_TYPE_ENDLESS_DUNGEON_DUO_LEADERBOARD, categoryData.endlessDungeonId, entryIndex
+                return ZO_ID_REQUEST_TYPE_ENDLESS_DUNGEON_DUO_LEADERBOARD, categoryData.endlessDungeonId, entryIndex
             end
         elseif categoryData.endlessDungeonGroupType == ENDLESS_DUNGEON_GROUP_TYPE_SOLO then
-            local classId, classIndex = GetClassIdAndIndexFromTotalIndex(entryIndex, categoryData)
-
             if categoryData.isWeekly then
-                return ZO_ID_REQUEST_TYPE_ENDLESS_DUNGEON_OF_THE_WEEK_SOLO_LEADERBOARD, classId, classIndex
+                return ZO_ID_REQUEST_TYPE_ENDLESS_DUNGEON_OF_THE_WEEK_SOLO_LEADERBOARD
             else
-                return ZO_ID_REQUEST_TYPE_ENDLESS_DUNGEON_SOLO_LEADERBOARD, categoryData.endlessDungeonId, classId, classIndex
+                return ZO_ID_REQUEST_TYPE_ENDLESS_DUNGEON_SOLO_LEADERBOARD, categoryData.endlessDungeonId
             end
         end
         return nil
@@ -122,25 +102,11 @@ do
                     return GetNumEndlessDungeonDuoLeaderboardEntries(categoryData.endlessDungeonId)
                 end
             elseif categoryData.endlessDungeonGroupType == ENDLESS_DUNGEON_GROUP_TYPE_SOLO then
-                local count = 0
-                --We keep track of these gates for the info function that'll be called later
-                if categoryData.classGates then
-                    ZO_ClearNumericallyIndexedTable(categoryData.classGates)
+                if categoryData.isWeekly then
+                    return GetNumEndlessDungeonOfTheWeekSoloLeaderboardEntries()
                 else
-                    categoryData.classGates = {}
+                    return GetNumEndlessDungeonSoloLeaderboardEntries(categoryData.endlessDungeonId)
                 end
-            
-                for i = 1, GetNumClasses() do
-                    local classId = GetClassInfo(i)
-                    if categoryData.isWeekly then
-                        count = count + GetNumEndlessDungeonOfTheWeekSoloLeaderboardEntries(classId)
-                    else
-                        count = count + GetNumEndlessDungeonSoloLeaderboardEntries(categoryData.endlessDungeonId, classId)
-                    end
-                    table.insert(categoryData.classGates, { count = count,  classId = classId})
-                end
-
-                return count
             end
 
             return 0
@@ -348,30 +314,19 @@ end
 function ZO_EndlessDungeonLeaderboardsManager_Shared:SendLeaderboardQuery()
     if not self.selectedSubType then
         return
-    end 
+    end
 
     self.requestedEndlessDungeonGroupType = self.selectedSubType.endlessDungeonGroupType
     self.requestedEndlessDungeonId = self.selectedSubType.isWeekly and 0 or self.selectedSubType.endlessDungeonId
 
-    local readyState = nil
-    if self.requestedEndlessDungeonGroupType == ENDLESS_DUNGEON_GROUP_TYPE_SOLO then
-        if IsInGamepadPreferredMode() then
-            self.requestedClassId = GAMEPAD_LEADERBOARDS:GetSelectedClassFilter()
-        else
-            self.requestedClassId = LEADERBOARDS:GetSelectedClassFilter()
-        end
-    else
-        self.requestedClassId = nil
-    end
     LEADERBOARD_LIST_MANAGER:QueryLeaderboardData(LEADERBOARD_DATA_TYPE.ENDLESS_DUNGEON, self:GenerateRequestData())
 end
 
 function ZO_EndlessDungeonLeaderboardsManager_Shared:GenerateRequestData()
     local data =
-    { 
+    {
         endlessDungeonId = self.requestedEndlessDungeonId,
         endlessDungeonGroupType = self.requestedEndlessDungeonGroupType,
-        classId = self.requestedClassId
     }
     return data
 end

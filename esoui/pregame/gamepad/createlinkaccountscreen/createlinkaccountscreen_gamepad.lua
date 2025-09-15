@@ -40,7 +40,7 @@ end
 function CreateLinkAccount_Console:AddOption(title, selectedState)
     local option = ZO_GamepadEntryData:New(title)
     option:SetFontScaleOnSelection(true)
-    option.selectedCallback = function() PregameStateManager_SetState(selectedState) end
+    option.selectedCallback = function() ZO_PregameStateManager_SetState(selectedState) end
     self.optionsList:AddEntry("ZO_GamepadMenuEntryTemplate", option)
 end
 
@@ -79,7 +79,7 @@ function CreateLinkAccount_Console:InitKeybindingDescriptor()
         -- Back
         KEYBIND_STRIP:GenerateGamepadBackButtonDescriptor(function()
                 PlaySound(SOUNDS.NEGATIVE_CLICK)
-                PregameStateManager_SetState("WaitForPreloginWorld")
+                ZO_PregameStateManager_SetState("WaitForPreloginWorld")
             end)
     }
 end

@@ -1,0 +1,9 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_Vengeance_Loadouts_Gamepad_TopLevel" inherits="ZO_Gamepad_ParametricList_Screen">
+            <OnInitialized>
+                ZO_Vengeance_Loadouts_Gamepad.OnControlInitialized(self)
+            </OnInitialized>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

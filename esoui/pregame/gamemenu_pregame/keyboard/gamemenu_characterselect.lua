@@ -5,7 +5,7 @@ local gameEntries = {}
 -- Characters
 
 local function ShowCharacterSelect()
-    if PregameIsFullyLoaded() then
+    if ZO_PregameIsFullyLoaded() then
         SCENE_MANAGER:AddFragment(CHARACTER_SELECT_FRAGMENT)
     else
         local function OnPregameFullyLoaded()
@@ -86,7 +86,12 @@ end
 -- Back
 
 local function AddBackEntry(entryTable)
-    local data = {name = GetString(SI_GAME_MENU_BACK), callback = ZO_Disconnect}
+    local function BackCallback(self)
+        PlaySound(self.node.selectSound)
+        ZO_Disconnect()
+    end
+
+    local data = {name = GetString(SI_GAME_MENU_BACK), callback = BackCallback}
     table.insert(entryTable, data)
 end
 

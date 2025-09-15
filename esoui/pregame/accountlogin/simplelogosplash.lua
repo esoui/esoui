@@ -28,7 +28,7 @@ do
         ZO_FadeSceneFragment.OnHidden(self)
         self.control:SetHandler("OnUpdate", nil)
 
-        PregameStateManager_AdvanceState()
+        ZO_PregameStateManager_AdvanceState()
     end
 
     CreateSimpleLogoSplashScene = function(control)

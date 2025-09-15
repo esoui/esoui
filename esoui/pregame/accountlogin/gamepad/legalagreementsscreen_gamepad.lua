@@ -54,7 +54,7 @@ end
 
 function ZO_PCLegalDocsProvider:OnDocsFinished()
     -- log in
-    PregameStateManager_AdvanceState()
+    ZO_PregameStateManager_AdvanceState()
 end
 
 -- On consoles, EULAs are loaded from disk, but other types of docs need to be asynchronously fetched from services. We only fetch the docs that have not yet been accepted.
@@ -72,7 +72,7 @@ function ZO_ConsoleLegalDocsProvider:Initialize()
     EVENT_MANAGER:RegisterForEvent("ZO_ConsoleLegalDocsProvider", EVENT_FETCHED_LEGAL_DOCS, function()
         self.haveFetchedRemoteDocs = true
         self.nextLegalDocIndex = 1
-        PregameStateManager_SetState("LegalAgreements")
+        ZO_PregameStateManager_SetState("LegalAgreements")
     end)
 end
 
@@ -120,7 +120,7 @@ function ZO_ConsoleLegalDocsProvider:OnDocsFinished()
     if not self.haveFetchedRemoteDocs then
         -- we need to attempt to log in, which will fail us if there are any remote docs we need to accept. To do this we'll just advance the state
         -- then we will fetch those docs and restart the flow
-        PregameStateManager_AdvanceState()
+        ZO_PregameStateManager_AdvanceState()
     else
         -- We have already fetched the docs and accepted at this point, but remote legal docs require an extra confirmation step before we consider them to be accepted, then we'll advance
         ZO_Dialogs_ShowGamepadDialog("LEGAL_AGREEMENT_UPDATED_ACKNOWLEDGE")

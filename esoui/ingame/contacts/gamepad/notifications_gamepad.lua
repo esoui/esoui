@@ -415,6 +415,10 @@ function ZO_GamepadPointsResetProvider:Accept(data)
         MAIN_MENU_GAMEPAD:ShowScene("gamepad_skills_root")
     elseif data.respecType == RESPEC_TYPE_CHAMPION or data.respecType == RESPEC_TYPE_CHAMPION_SLOTS then
         MAIN_MENU_GAMEPAD:ShowScene("gamepad_championPerks_root")
+    elseif data.respecType == RESPEC_TYPE_VENGEANCE_PERKS then
+        MAIN_MENU_GAMEPAD:ShowScene("gamepad_vengeance_perks")
+    elseif data.respecType == RESPEC_TYPE_VENGEANCE_ROLE then
+        MAIN_MENU_GAMEPAD:ShowScene("gamepad_vengeance_loadouts")
     end
 end
 

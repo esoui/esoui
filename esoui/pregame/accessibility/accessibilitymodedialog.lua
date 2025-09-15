@@ -92,6 +92,6 @@ function ZO_AccessibilityModePrompt_OnContinueClicked()
     else
         SetSetting(SETTING_TYPE_GAMEPAD, GAMEPAD_SETTING_INPUT_PREFERRED_MODE, INPUT_PREFERRED_MODE_ALWAYS_KEYBOARD)
         SetCVar("PregameAccessibilityPromptEnabled", "false")
-        PregameStateManager_SetState("ScreenAdjustIntro")
+        ZO_PregameStateManager_SetState("ScreenAdjustIntro")
     end
 end
