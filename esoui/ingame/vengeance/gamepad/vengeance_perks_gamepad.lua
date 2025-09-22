@@ -14,11 +14,16 @@ function ZO_Vengeance_Perks_Gamepad:Initialize(control)
     self.headerData =
     {
         titleText = GetString(SI_CAMPAIGN_OVERVIEW_SUBCATEGORY_PERKS),
-
-        messageText = function()
+        messageText = function(headerControl)
             if self:IsShowing() then
-                local loadout = ZO_VENGEANCE_MANAGER:GetEquippedLoadoutData()
-                return zo_strformat(SI_CAMPAIGN_VENGEANCE_PERKS_LOADOUT_HEADER, loadout:GetName())
+                if not ZO_VENGEANCE_MANAGER:IsEquippedLoadoutEditableForCurrentZone() then
+                    headerControl:SetColor(ZO_ERROR_COLOR:UnpackRGBA())
+                    return GetString(SI_CAMPAIGN_VENGEANCE_PERKS_EDIT_INVALID_SUBZONE)
+                else
+                    local loadout = ZO_VENGEANCE_MANAGER:GetEquippedLoadoutData()
+                    headerControl:SetColor(ZO_NORMAL_TEXT:UnpackRGBA())
+                    return zo_strformat(SI_CAMPAIGN_VENGEANCE_PERKS_LOADOUT_HEADER, loadout:GetName())
+                end
             end
         end,
     }
@@ -77,7 +82,7 @@ function ZO_Vengeance_Perks_Gamepad:InitializeLists()
                 end
             end,
             enabled = function()
-                return ZO_VENGEANCE_MANAGER:IsEquippedLoadoutEditableForCurrentZone()
+                return ZO_VENGEANCE_MANAGER:IsEquippedLoadoutEditableForCurrentZone(), GetString(SI_CAMPAIGN_VENGEANCE_PERKS_EDIT_INVALID_SUBZONE)
             end,
             sound = SOUNDS.GAMEPAD_MENU_FORWARD,
         },
@@ -224,6 +229,7 @@ function ZO_Vengeance_Perks_Gamepad:OnHiding()
     self.currentlySelectedPerkSlot = nil
     self:HideTooltips()
     self:RemoveCurrentListKeybinds()
+    ZO_VENGEANCE_MANAGER:ApplyEquippedPerks()
 end
 
 function ZO_Vengeance_Perks_Gamepad:RefreshKeybinds()

@@ -223,6 +223,8 @@ function ZO_SharedInventoryManager:Initialize()
         [CURRENCY_CHANGE_REASON_VENDOR] = true,
         [CURRENCY_CHANGE_REASON_TRADE] = true,
         [CURRENCY_CHANGE_REASON_SELL_STOLEN] = true,
+        [CURRENCY_CHANGE_REASON_BANK_WITHDRAWAL] = true,
+        [CURRENCY_CHANGE_REASON_GUILD_BANK_WITHDRAWAL] = true,
     }
 
     local EXCLUDED_PLAY_TRANSACT_SOUND_REASONS =

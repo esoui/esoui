@@ -182,6 +182,7 @@ end
 
 function ZO_Vengeance_Loadouts_Keyboard:RegisterForEvents()
     self.control:RegisterForEvent(EVENT_VENGEANCE_LOADOUT_ROLE_UPDATED, function() self:RefreshLoadouts() end)
+    self.control:RegisterForEvent(EVENT_VENGEANCE_PERKS_UPDATED, function() self:RefreshLoadouts() end)
 
     self.control:SetHandler("OnUpdate", function() self:UpdateInstructionText() end)
 end
@@ -290,7 +291,6 @@ function ZO_Vengeance_Loadouts_Keyboard:SetSelectedLoadoutIndex(loadoutIndex)
         self.selectedLoadoutIndex = loadoutIndex
         local SCROLL_TO_SELECTED = true
         self:RefreshLoadouts(SCROLL_TO_SELECTED)
-        self:UpdateDerivedStatsComparisonValues()
     end
 end
 

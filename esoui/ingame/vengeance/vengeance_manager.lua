@@ -321,9 +321,16 @@ function ZO_Vengeance_Manager:Initialize()
         PlaySound(SOUNDS.VENGEANCE_LOADOUT_EQUIPPED)
     end
 
+    local function OnVengeanceLoadoutPerksChanged()
+        self:RefreshPerkData()
+        if self.equippedLoadout then
+            self.equippedLoadout:RefreshDerivedStats()
+        end
+    end
+
     EVENT_MANAGER:RegisterForEvent("VengeanceManager", EVENT_PLAYER_ACTIVATED, function() self:RefreshPerkData() end)
     EVENT_MANAGER:RegisterForEvent("VengeanceManager", EVENT_VENGEANCE_LOADOUT_ROLE_UPDATED, OnVengeanceLoadoutRoleChanged)
-    EVENT_MANAGER:RegisterForEvent("VengeanceManager", EVENT_VENGEANCE_PERKS_UPDATED, function() self:RefreshPerkData() end)
+    EVENT_MANAGER:RegisterForEvent("VengeanceManager", EVENT_VENGEANCE_PERKS_UPDATED, OnVengeanceLoadoutPerksChanged)
 end
 
 function ZO_Vengeance_Manager:PerformDeferredInitialization()
@@ -370,7 +377,6 @@ function ZO_Vengeance_Manager:IsLoadoutIndexKeybindVisible(loadoutIndex)
     return canEquipResult == VENGEANCE_ACTION_RESULT_SUCCESS
         or canEquipResult == VENGEANCE_ACTION_RESULT_ROLE_SWAP_ON_COOLDOWN
         or canEquipResult == VENGEANCE_ACTION_RESULT_INVALID_SUBZONE
-        or canEquipResult == VENGEANCE_ACTION_RESULT_ROLE_ALREADY_EQUIPPED
 end
 
 function ZO_Vengeance_Manager:LoadoutDataIterator(filterFunctions)

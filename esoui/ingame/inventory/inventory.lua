@@ -2319,6 +2319,10 @@ function ZO_InventoryManager:RefreshInventorySlotLocked(inventoryType, slotIndex
             if bag then
                 local slot = bag[slotIndex]
                 if slot and slot.locked ~= locked then
+                    if IsCurrentCampaignVengeanceRuleset() and IsItemVisuallyDisabledInVengeance(slot.bagId, slot.slotIndex) then
+                        locked = true
+                    end
+
                     slot.locked = locked
                     if inventory.listView and slot.slotControl then
                         ZO_PlayerInventorySlot_SetupUsableAndLockedColor(slot.slotControl, slot.meetsUsageRequirement, slot.locked)

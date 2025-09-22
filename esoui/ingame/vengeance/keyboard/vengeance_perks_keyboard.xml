@@ -120,8 +120,12 @@
                     </Controls>
                 </Control>
 
+                <Label name="$(parent)InstructionText" font="ZoFontHeader">
+                    <Anchor point="TOP" offsetY="-40" />
+                </Label>
+
                 <Control name="$(parent)List" inherits="ZO_GridScrollList_Keyboard">
-                    <Anchor point="TOPLEFT" offsetY="-40"/>
+                    <Anchor point="TOPLEFT" offsetY="-20" />
                     <Anchor point="BOTTOMRIGHT" />
                 </Control>
             </Controls>

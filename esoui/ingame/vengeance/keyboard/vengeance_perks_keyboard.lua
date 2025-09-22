@@ -50,7 +50,7 @@ function ZO_VengeancePerkTile_Keyboard:PostInitializePlatform()
         end,
         enabled = function()
             local canEquip, result = self.perkData:CanEquipPerk()
-            return canEquip or result == VENGEANCE_ACTION_RESULT_PERK_ALREADY_EQUIPPED, GetString("SI_VENGEANCEACTIONRESULT", result)
+            return canEquip or result == VENGEANCE_ACTION_RESULT_PERK_ALREADY_EQUIPPED, GetString(SI_CAMPAIGN_VENGEANCE_PERKS_EDIT_INVALID_SUBZONE)
         end,
         visible = function()
             return self.perkData ~= nil
@@ -126,7 +126,7 @@ function ZO_VengeancePerkTile_Keyboard:RefreshMouseoverVisuals()
 end
 
 function ZO_VengeancePerkTile_Keyboard:ShowMenu()
-    if self.perkData then
+    if ZO_VENGEANCE_MANAGER:IsEquippedLoadoutEditableForCurrentZone() and self.perkData then
         ClearMenu()
         self:AddMenuOptions()
         ShowMenu(self.control)
@@ -170,7 +170,8 @@ function ZO_VengeancePerkTile_Keyboard:OnMouseDoubleClick(button)
 end
 
 function ZO_VengeancePerkTile_Keyboard:TryPickupPerkFromList(control)
-    if not ZO_VENGEANCE_MANAGER:IsPerkEquippedInDifferentSlot(self.perkData) then
+    if ZO_VENGEANCE_MANAGER:IsEquippedLoadoutEditableForCurrentZone()
+        and not ZO_VENGEANCE_MANAGER:IsPerkEquippedInDifferentSlot(self.perkData) then
         PickupVengeancePerk(self.perkData:GetPerkIndex(), self.perkData:GetSlot())
     end
 end
@@ -199,6 +200,7 @@ ZO_Vengeance_Perks_Keyboard = ZO_DeferredInitializingObject:Subclass()
 
 function ZO_Vengeance_Perks_Keyboard:Initialize(control)
     self.control = control
+    self.instructionLabel = control:GetNamedChild("InstructionText")
     self.equippedPerksContainer = control:GetNamedChild("EquippedPerksContainer")
     self.loadoutHeader = self.equippedPerksContainer:GetNamedChild("LoadoutHeader")
     self.equippedPerkControls =
@@ -265,6 +267,21 @@ function ZO_Vengeance_Perks_Keyboard:InitializeEvents()
     self.control:RegisterForEvent(EVENT_CURSOR_DROPPED, HandleCursorCleared)
 end
 
+function ZO_Vengeance_Perks_Keyboard:UpdateInstructionText()
+    local isErrorText = false
+    if not ZO_VENGEANCE_MANAGER:IsEquippedLoadoutEditableForCurrentZone() then
+        self.instructionLabel:SetText(GetString(SI_CAMPAIGN_VENGEANCE_PERKS_EDIT_INVALID_SUBZONE))
+        self.instructionLabel:SetColor(ZO_ERROR_COLOR:UnpackRGBA())
+        isErrorText = true
+    end
+
+    if not isErrorText then
+        local loadout = ZO_VENGEANCE_MANAGER:GetEquippedLoadoutData()
+        self.instructionLabel:SetText(zo_strformat(SI_CAMPAIGN_VENGEANCE_PERKS_LOADOUT_HEADER, loadout:GetName()))
+        self.instructionLabel:SetColor(ZO_NORMAL_TEXT:UnpackRGBA())
+    end
+end
+
 function ZO_Vengeance_Perks_Keyboard:OnShowing()
     TriggerTutorial(TUTORIAL_TRIGGER_VENGEANCE_PERKS_OPENED)
     SCENE_MANAGER:AddFragment(MEDIUM_LEFT_PANEL_BG_FRAGMENT)
@@ -291,6 +308,8 @@ function ZO_Vengeance_Perks_Keyboard:BuildGridList()
     end
 
     self.gridList:CommitGridList()
+
+    self:UpdateInstructionText()
 end
 
 function ZO_Vengeance_Perks_Keyboard:RefreshLoadoutHeader()
@@ -317,6 +336,7 @@ end
 function ZO_Vengeance_Perks_Keyboard:RefreshGridList()
     self.gridList:RefreshGridList()
     self:RefreshEquippedPerks()
+    self:UpdateInstructionText()
 end
 
 function ZO_Vengeance_Perks_Keyboard:ShowSlotDropCalloutsForEquippedPerks(perkIndex)
@@ -359,31 +379,35 @@ function ZO_Vengeance_Perks_Keyboard:TryEquipPerkFromMouse(targetControl)
 end
 
 function ZO_Vengeance_Perks_Keyboard:TryPickupPerkFromEquippedSlot(targetControl)
-    for slot, control in pairs(self.equippedPerkControls) do
-        if targetControl == control then
-            local perkIndex = ZO_VENGEANCE_MANAGER:GetEquippedPerkIndexBySlot(slot)
-            PickupVengeancePerk(perkIndex, slot)
-            ZO_VENGEANCE_MANAGER:ClearEquippedPerkBySlot(slot)
-            self.isEquippedPerkOnCursor = true
-            return
+    if ZO_VENGEANCE_MANAGER:IsEquippedLoadoutEditableForCurrentZone() then
+        for slot, control in pairs(self.equippedPerkControls) do
+            if targetControl == control then
+                local perkIndex = ZO_VENGEANCE_MANAGER:GetEquippedPerkIndexBySlot(slot)
+                PickupVengeancePerk(perkIndex, slot)
+                ZO_VENGEANCE_MANAGER:ClearEquippedPerkBySlot(slot)
+                self.isEquippedPerkOnCursor = true
+                return
+            end
         end
     end
 end
 
 function ZO_Vengeance_Perks_Keyboard:ShowEquippedSlotControlContextMenu(targetControl)
-    for slot, control in pairs(self.equippedPerkControls) do
-        if targetControl == control then
-            local perkIndex = ZO_VENGEANCE_MANAGER:GetEquippedPerkIndexBySlot(slot)
-            local perkData = ZO_VENGEANCE_MANAGER:GetPerkByIndex(perkIndex, slot)
-            if perkData then
-                ClearMenu()
-                local function UnequipPerk()
-                    ZO_VENGEANCE_MANAGER:ClearEquippedPerk(perkData)
+    if ZO_VENGEANCE_MANAGER:IsEquippedLoadoutEditableForCurrentZone() then
+        for slot, control in pairs(self.equippedPerkControls) do
+            if targetControl == control then
+                local perkIndex = ZO_VENGEANCE_MANAGER:GetEquippedPerkIndexBySlot(slot)
+                local perkData = ZO_VENGEANCE_MANAGER:GetPerkByIndex(perkIndex, slot)
+                if perkData then
+                    ClearMenu()
+                    local function UnequipPerk()
+                        ZO_VENGEANCE_MANAGER:ClearEquippedPerk(perkData)
+                    end
+                    AddMenuItem(GetString(SI_CAMPAIGN_VENGEANCE_PERK_DESELECT), UnequipPerk)
+                    ShowMenu(targetControl)
                 end
-                AddMenuItem(GetString(SI_CAMPAIGN_VENGEANCE_PERK_DESELECT), UnequipPerk)
-                ShowMenu(targetControl)
+                return
             end
-            return
         end
     end
 end

@@ -47,6 +47,9 @@ function ZO_DyeStamp_Confirmation_Base:InitializeKeybindStripDescriptors()
             name = GetString(SI_DYEING_COMMIT),
             keybind = "UI_SHORTCUT_SECONDARY",
             callback = function() self:ShowConfirmationDialog() end,
+            enabled = function()
+                return not IsCurrentCampaignVengeanceRuleset(), GetString(SI_ITEM_ACTION_ERROR_NOT_IN_VENGEANCE)
+            end,
         },
 
     }
