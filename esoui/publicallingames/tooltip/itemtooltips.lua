@@ -418,7 +418,8 @@ function ZO_Tooltip:AddEnchant(itemLink, enchantDiffMode, equipSlot, extraData)
     local noEnchantDiff = enchantDiffMode == ZO_ENCHANT_DIFF_NONE
     local itemBonusSuppressionType = ITEM_BONUS_SUPPRESSION_TYPE_NONE
     local itemBonusSuppressionRefId = 0
-    
+
+    local isSuppressed = false
     local headerStyle = "bodyHeader"
     local descriptionStyle = "activeBonus"
     if noEnchantDiff and extraData and extraData.showSuppression then
@@ -426,6 +427,7 @@ function ZO_Tooltip:AddEnchant(itemLink, enchantDiffMode, equipSlot, extraData)
         if itemBonusSuppressionType ~= ITEM_BONUS_SUPPRESSION_TYPE_NONE then
             headerStyle = "itemBonusSuppressedSection"
             descriptionStyle = "itemBonusSuppressedDescription"
+            isSuppressed = true
         end
     end
 
@@ -433,7 +435,7 @@ function ZO_Tooltip:AddEnchant(itemLink, enchantDiffMode, equipSlot, extraData)
 
     if noEnchantDiff then
         if IsItemAffectedByPairedPoison(equipSlot) then
-            local suppressedStyle = self:GetStyle("suppressedAbility")
+            local suppressedStyle = isSuppressed and self:GetStyle(descriptionStyle) or self:GetStyle("suppressedAbility")
             enchantSection:AddLine(GetString(SI_TOOLTIP_ENCHANT_SUPPRESSED_BY_POISON), suppressedStyle, self:GetStyle("bodyDescription"))
         else
             enchantSection:AddLine(enchantDescription, self:GetStyle(descriptionStyle), self:GetStyle("bodyDescription"))
@@ -615,11 +617,13 @@ function ZO_Tooltip:AddSet(itemLink, equipped, extraData)
         local headerStyle = "bodyHeader"
         local bonusStyle = "activeBonus"
 
+        local isSuppressed = false
         if extraData and extraData.showSuppression then
             itemBonusSuppressionType, itemBonusSuppressionRefId = GetItemSetSuppressionInfo(setId)
             if itemBonusSuppressionType ~= ITEM_BONUS_SUPPRESSION_TYPE_NONE then
                 headerStyle = "itemBonusSuppressedSection"
                 bonusStyle = "itemBonusSuppressedDescription"
+                isSuppressed = true
             end
         end
         if isPerfectedSet then
@@ -885,7 +889,7 @@ function ZO_Tooltip:LayoutGenericItem(itemLink, equipped, creatorName, forceFull
         if itemBonusSuppressionType then
             local suppressionSection = self:AcquireSection(self:GetStyle("bodySection"))
             local suppressionName = GetItemBonusSuppressionName(itemBonusSuppressionType, itemBonusSuppressionRefId)
-            suppressionSection:AddLine(zo_strformat(SI_ITEM_FORMAT_STR_DISABLED_BY, suppressionName), self:GetStyle("itemBonusSuppressedSection"))
+            suppressionSection:AddLine(zo_strformat(SI_ITEM_FORMAT_STR_DISABLED_BY, suppressionName), self:GetStyle("itemBonusSuppressedBySection"))
             self:AddSection(suppressionSection)
         end
     end

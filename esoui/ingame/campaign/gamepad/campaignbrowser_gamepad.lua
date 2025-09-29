@@ -815,7 +815,7 @@ do
 
         ZO_ClearNumericallyIndexedTable(self.campaignEntries)
         -- Vengeance Entries - Only added if currently in a vengeance campaign
-        if IsCurrentCampaignVengeanceRuleset() then
+        if IsCurrentCampaignVengeanceRuleset() and self.campaignRulesetTypeFilter == CAMPAIGN_RULESET_TYPE_CYRODIIL then
             local vengeanceLoadoutsEntry = ZO_GamepadEntryData:New(GetString(SI_CAMPAIGN_OVERVIEW_SUBCATEGORY_LOADOUTS))
             vengeanceLoadoutsEntry.displayContentType = CONTENT_TYPES.VENGEANCE_LOADOUTS
             vengeanceLoadoutsEntry.entryType = ENTRY_TYPES.VENGEANCE

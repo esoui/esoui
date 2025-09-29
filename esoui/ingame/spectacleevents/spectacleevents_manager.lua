@@ -53,8 +53,22 @@ function ZO_SpectacleEvents_Manager:UpdateActiveSpectacleEventPhaseId(spectacleE
 end
 
 function ZO_SpectacleEvents_Manager:GetActiveSpectacleEventNextPhaseBeginsString(spectacleEventId)
+    local secondsRemainingUntilStart = GetSecondsRemainingUntilNextActiveSpectacleEventPhase(spectacleEventId)
+    local timeRemainingString
+    if secondsRemainingUntilStart < ZO_ONE_MINUTE_IN_SECONDS then
+        timeRemainingString = GetString(SI_STR_TIME_LESS_THAN_MINUTE_SHORT)
+    else
+        timeRemainingString = ZO_FormatTimeLargestTwo(secondsRemainingUntilStart, TIME_FORMAT_STYLE_DESCRIPTIVE_MINIMAL_HIDE_ZEROES)
+    end
+
     local currentPhase, numPhases = GetActiveSpectacleEventPhaseInfo(spectacleEventId)
-    if currentPhase == numPhases then
+    if currentPhase >= numPhases then
+        -- There can be a phantom phase at the end of the event to allow for a more graceful ending
+        -- In that case currentPhase == numPhases, but the server will have sent us a transition time
+        if secondsRemainingUntilStart > 0 then
+            return zo_strformat(SI_SPECTACLE_EVENTS_EVENT_ENDS_IN_FORMATTER, ZO_SELECTED_TEXT:Colorize(timeRemainingString))
+        end
+
         return nil
     end
 
@@ -63,18 +77,11 @@ function ZO_SpectacleEvents_Manager:GetActiveSpectacleEventNextPhaseBeginsString
         return zo_strformat(SI_SPECTACLE_EVENTS_PHASE_BEGINS_NEXT_UPDATE_FORMATTER, nextPhase)
     end
 
-    local secondsRemainingUntilStart = GetSecondsRemainingUntilNextActiveSpectacleEventPhase(spectacleEventId)
     if secondsRemainingUntilStart <= 0 then
         return zo_strformat(SI_SPECTACLE_EVENTS_PHASE_BEGINS_SOON_FORMATTER, nextPhase)
     end
 
-    local timeLeftString
-    if secondsRemainingUntilStart < ZO_ONE_MINUTE_IN_SECONDS then
-        timeLeftString = GetString(SI_STR_TIME_LESS_THAN_MINUTE_SHORT)
-    else
-        timeLeftString = ZO_FormatTimeLargestTwo(secondsRemainingUntilStart, TIME_FORMAT_STYLE_DESCRIPTIVE_MINIMAL_HIDE_ZEROES)
-    end
-    return zo_strformat(SI_SPECTACLE_EVENTS_PHASE_BEGINS_IN_FORMATTER, nextPhase, ZO_SELECTED_TEXT:Colorize(timeLeftString))
+    return zo_strformat(SI_SPECTACLE_EVENTS_PHASE_BEGINS_IN_FORMATTER, nextPhase, ZO_SELECTED_TEXT:Colorize(timeRemainingString))
 end
 
 SPECTACLE_EVENTS_MANAGER = ZO_SpectacleEvents_Manager:New()
