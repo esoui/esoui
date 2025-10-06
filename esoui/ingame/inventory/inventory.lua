@@ -1067,14 +1067,17 @@ function ZO_InventoryManager:InitializeHeaderSort(inventoryType, inventory, head
 end
 
 function ZO_InventoryManager:RefreshPlayerInventorySearchContext()
-    if not INVENTORY_FRAGMENT:IsHidden() then
+    if not INVENTORY_FRAGMENT:IsHidden() or not VENGEANCE_INVENTORY_FRAGMENT:IsHidden() then
         -- If the inventory fragment is shown then shown was called before the previous context screen
         -- was closed and the search context was not properly updated at that time, so update it now.
         self:ActivateInventorySearch()
 
         local UPDATE_EVEN_IF_HIDDEN = true
-        if TEXT_SEARCH_MANAGER:IsFilterTargetInContext(self.inventories[INVENTORY_BACKPACK].currentContext, BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT) then
+        if not INVENTORY_FRAGMENT:IsHidden() and TEXT_SEARCH_MANAGER:IsFilterTargetInContext(self.inventories[INVENTORY_BACKPACK].currentContext, BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT) then
             self:UpdateList(INVENTORY_BACKPACK, UPDATE_EVEN_IF_HIDDEN)
+        end
+        if not VENGEANCE_INVENTORY_FRAGMENT:IsHidden() and TEXT_SEARCH_MANAGER:IsFilterTargetInContext(self.inventories[INVENTORY_VENGEANCE].currentContext, BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT) then
+            self:UpdateList(INVENTORY_VENGEANCE, UPDATE_EVEN_IF_HIDDEN)
         end
     end
 end
@@ -1120,7 +1123,7 @@ function ZO_InventoryManager:DeactivateInventorySearch()
         TEXT_SEARCH_MANAGER:DeactivateTextSearch("playerInventoryTextSearch")
 
         local REMOVE_CONTEXT = nil
-        self:SetContextForInventories(REMOVE_CONTEXT, { INVENTORY_BACKPACK })
+        self:SetContextForInventories(REMOVE_CONTEXT, { INVENTORY_BACKPACK, INVENTORY_CRAFT_BAG, INVENTORY_VENGEANCE })
     end
 end
 

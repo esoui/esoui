@@ -296,6 +296,7 @@ function ZO_SharedInventoryManager:Initialize()
                 BAG_WORN,
                 BAG_BACKPACK,
                 BAG_VIRTUAL,
+                BAG_VENGEANCE,
             }
         },
         [BACKGROUND_LIST_FILTER_TARGET_QUEST_ITEM_ID] =

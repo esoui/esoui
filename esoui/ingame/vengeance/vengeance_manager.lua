@@ -280,8 +280,8 @@ function ZO_VengeancePerkData:IsPerkEquipped()
 end
 
 function ZO_VengeancePerkData:IsPerkDisabled()
+    local isDisabled = IsVengeancePerkAtIndexDisabled(self.index, self.slot)
     local result = CanPerkBeSlottedInSlotForRole(self.index, self.slot)
-    local isDisabled = false
     local reason = VENGEANCE_ACTION_RESULT_SUCCESS
     if result == VENGEANCE_ACTION_RESULT_PERK_DISABLED then
         isDisabled = true
@@ -290,6 +290,8 @@ function ZO_VengeancePerkData:IsPerkDisabled()
         -- Don't check this reason from the client as it doesn't reflect local uncommitted changes
         isDisabled = true
         reason = VENGEANCE_ACTION_RESULT_PERK_ALREADY_EQUIPPED
+    elseif isDisabled then
+        reason = VENGEANCE_ACTION_RESULT_PERK_DISABLED
     end
     return isDisabled, reason
 end

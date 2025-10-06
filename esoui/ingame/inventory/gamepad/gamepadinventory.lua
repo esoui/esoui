@@ -169,8 +169,12 @@ function ZO_GamepadInventory:OnStateChanged(oldState, newState)
         local listToActivate = self.previousListType or INVENTORY_CATEGORY_LIST
         -- We normally do not want to enter the gamepad inventory on the item list
         -- the exception is if we are coming back to the inventory, like from looting a container
-        if listToActivate == INVENTORY_ITEM_LIST and not SCENE_MANAGER:WasSceneOnStack(ZO_GAMEPAD_INVENTORY_SCENE_NAME) then
-            listToActivate = INVENTORY_CATEGORY_LIST
+        if (listToActivate == INVENTORY_ITEM_LIST or listToActivate == INVENTORY_VENGEANCE_ITEM_LIST) and not SCENE_MANAGER:WasSceneOnStack(ZO_GAMEPAD_INVENTORY_SCENE_NAME) then
+            if listToActivate == INVENTORY_ITEM_LIST then
+                listToActivate = INVENTORY_CATEGORY_LIST
+            elseif listToActivate == INVENTORY_VENGEANCE_ITEM_LIST then
+                listToActivate = INVENTORY_VENGEANCE_CATEGORY_LIST
+            end
         end
 
         -- switching the active list will handle activating/refreshing header, keybinds, etc.
@@ -295,7 +299,7 @@ function ZO_GamepadInventory:SwitchActiveList(listDescriptor, selectDefaultEntry
     self.previousListType = self.currentListType
     self.currentListType = listDescriptor
 
-    if self.previousListType == INVENTORY_ITEM_LIST then
+    if self.previousListType == INVENTORY_ITEM_LIST or self.previousListType == INVENTORY_VENGEANCE_ITEM_LIST then
         self.listWaitingOnDestroyRequest = nil
         self:TryClearNewStatusOnHidden()
         ZO_SavePlayerConsoleProfile()
@@ -330,8 +334,9 @@ function ZO_GamepadInventory:SwitchActiveList(listDescriptor, selectDefaultEntry
         elseif listDescriptor == INVENTORY_ITEM_LIST then
             self:SetActiveKeybinds(self.itemFilterKeybindStripDescriptor)
 
-            self:RefreshActiveItemList(selectDefaultEntry)
+            -- Order matters as we need to set the current list before we refresh it and need to activate the keybinds last to avoid duplicate keybinds.
             self:SetCurrentList(self.itemList)
+            self:RefreshActiveItemList(selectDefaultEntry)
 
             if self.selectedItemFilterType == ITEMFILTERTYPE_QUICKSLOT then
                 TriggerTutorial(TUTORIAL_TRIGGER_INVENTORY_OPENED_AND_QUICKSLOTS_AVAILABLE)
@@ -365,7 +370,7 @@ function ZO_GamepadInventory:SwitchActiveList(listDescriptor, selectDefaultEntry
         elseif listDescriptor == INVENTORY_VENGEANCE_CATEGORY_LIST then
             self:OnInventoryShown()
 
-            --ESO-714374: Order matters as we need to set the current list to CategoryList before we refresh it and need to activate the keybinds last to avoid duplicate keybinds.
+            --ESO-714374: Order matters as we need to set the current list before we refresh it and need to activate the keybinds last to avoid duplicate keybinds.
             self:SetCurrentList(self.vengeanceCategoryList)
             self:RefreshActiveCategoryList(selectDefaultEntry)
 
@@ -385,8 +390,9 @@ function ZO_GamepadInventory:SwitchActiveList(listDescriptor, selectDefaultEntry
         elseif listDescriptor == INVENTORY_VENGEANCE_ITEM_LIST then
             self:SetActiveKeybinds(self.itemFilterKeybindStripDescriptor)
 
-            self:RefreshActiveItemList(selectDefaultEntry)
+            -- Order matters as we need to set the current list before we refresh it and need to activate the keybinds last to avoid duplicate keybinds.
             self:SetCurrentList(self.vengeanceItemList)
+            self:RefreshActiveItemList(selectDefaultEntry)
 
             if self.selectedItemFilterType == ITEMFILTERTYPE_QUICKSLOT then
                 TriggerTutorial(TUTORIAL_TRIGGER_INVENTORY_OPENED_AND_QUICKSLOTS_AVAILABLE)

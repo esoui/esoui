@@ -50,7 +50,13 @@ function ZO_VengeancePerkTile_Keyboard:PostInitializePlatform()
         end,
         enabled = function()
             local canEquip, result = self.perkData:CanEquipPerk()
-            return canEquip or result == VENGEANCE_ACTION_RESULT_PERK_ALREADY_EQUIPPED, GetString(SI_CAMPAIGN_VENGEANCE_PERKS_EDIT_INVALID_SUBZONE)
+            local errorString = ""
+            if result == VENGEANCE_ACTION_RESULT_INVALID_SUBZONE then
+                errorString = GetString(SI_CAMPAIGN_VENGEANCE_PERKS_EDIT_INVALID_SUBZONE)
+            else
+                errorString = GetString("SI_VENGEANCEACTIONRESULT", result)
+            end
+            return canEquip or result == VENGEANCE_ACTION_RESULT_PERK_ALREADY_EQUIPPED, errorString
         end,
         visible = function()
             return self.perkData ~= nil
@@ -171,7 +177,8 @@ end
 
 function ZO_VengeancePerkTile_Keyboard:TryPickupPerkFromList(control)
     if ZO_VENGEANCE_MANAGER:IsEquippedLoadoutEditableForCurrentZone()
-        and not ZO_VENGEANCE_MANAGER:IsPerkEquippedInDifferentSlot(self.perkData) then
+        and not ZO_VENGEANCE_MANAGER:IsPerkEquippedInDifferentSlot(self.perkData)
+        and self.perkData:CanEquipPerk() then
         PickupVengeancePerk(self.perkData:GetPerkIndex(), self.perkData:GetSlot())
     end
 end
