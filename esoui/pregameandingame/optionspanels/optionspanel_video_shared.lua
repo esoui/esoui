@@ -292,11 +292,11 @@ local ZO_OptionsPanel_Video_ControlData =
             exists = ZO_IsPCUI,
 
             events = {
-                [ANTIALIASING_TYPE_NONE] = "DLSSDisabled",
-                [ANTIALIASING_TYPE_FXAA] = "DLSSDisabled",
-                [ANTIALIASING_TYPE_TAA]  = "DLSSDisabled",
+                [ANTIALIASING_TYPE_NONE] = "DLSSAndNVAADisabled",
+                [ANTIALIASING_TYPE_FXAA] = "DLSSAndNVAADisabled",
+                [ANTIALIASING_TYPE_TAA]  = "DLSSAndNVAADisabled",
                 [ANTIALIASING_TYPE_DLSS] = "DLSSEnabled",
-                [ANTIALIASING_TYPE_NVAA] = "DLSSDisabled",
+                [ANTIALIASING_TYPE_NVAA] = "NVAAEnabled",
             },
 
             eventCallbacks =
@@ -413,8 +413,13 @@ local ZO_OptionsPanel_Video_ControlData =
             eventCallbacks =
             {
                 ["DLSSEnabled"] = ZO_Options_SetOptionActive,
-                ["DLSSDisabled"] = ZO_Options_SetOptionInactive,
+                ["DLSSAndNVAADisabled"] = ZO_Options_SetOptionInactive,
+                ["NVAAEnabled"] = ZO_Options_SetOptionInactive,
             },
+
+            gamepadIsEnabledCallback = function()
+                return tonumber(GetSetting(SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_ANTIALIASING_TYPE)) == ANTIALIASING_TYPE_DLSS
+            end,
         },
         --Options_Video_FSR_Mode 
         [GRAPHICS_SETTING_FSR_MODE] =
@@ -434,13 +439,18 @@ local ZO_OptionsPanel_Video_ControlData =
                 ["DLSSEnabled"] = function(control)
                     SetSetting(SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_FSR_MODE, FSR_MODE_OFF)
                     ZO_Options_UpdateOption(control)
+                    ZO_Options_SetOptionInactive(control)
                 end,
 
-                ["DLSSDisabled"] = function(control)
-                    if tonumber(GetSetting(SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_ANTIALIASING_TYPE)) == ANTIALIASING_TYPE_NVAA then
-                        SetSetting(SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_FSR_MODE, FSR_MODE_OFF)
-                        ZO_Options_UpdateOption(control)
-                    end
+                ["NVAAEnabled"] = function(control)
+                    SetSetting(SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_FSR_MODE, FSR_MODE_OFF)
+                    ZO_Options_UpdateOption(control)
+                    ZO_Options_SetOptionInactive(control)
+                end,
+
+                ["DLSSAndNVAADisabled"] = function(control)
+                    ZO_Options_UpdateOption(control)
+                    ZO_Options_SetOptionActive(control)
                 end,
             },
 
@@ -451,6 +461,11 @@ local ZO_OptionsPanel_Video_ControlData =
                 [FSR_MODE_BALANCED]      = "FSREnabled",
                 [FSR_MODE_PERFORMANCE]   = "FSREnabled",
             },
+
+            gamepadIsEnabledCallback = function()
+                return tonumber(GetSetting(SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_ANTIALIASING_TYPE)) ~= ANTIALIASING_TYPE_DLSS and
+                    tonumber(GetSetting(SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_ANTIALIASING_TYPE)) ~= ANTIALIASING_TYPE_NVAA
+            end,
         },
         --Options_Video_Sub_Sampling
         [GRAPHICS_SETTING_SUB_SAMPLING] =
@@ -468,7 +483,8 @@ local ZO_OptionsPanel_Video_ControlData =
             eventCallbacks =
             {
                 ["DLSSEnabled"]  = ZO_Options_SetOptionInactive,
-                ["DLSSDisabled"] = ZO_Options_SetOptionActive,
+                ["NVAAEnabled"]  = ZO_Options_SetOptionActive,
+                ["DLSSAndNVAADisabled"] = ZO_Options_SetOptionActive,
                 ["FSREnabled"]   = ZO_Options_SetOptionInactive,
                 ["FSRDisabled"]  = ZO_Options_SetOptionActive,
             },
