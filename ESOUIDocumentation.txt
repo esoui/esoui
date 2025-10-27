@@ -4648,6 +4648,7 @@ h5. ItemTooltipColors
 * ITEM_TOOLTIP_COLOR_SOCKET_FULL
 * ITEM_TOOLTIP_COLOR_SOCKET_PASS_CHECK
 * ITEM_TOOLTIP_COLOR_STYLE
+* ITEM_TOOLTIP_COLOR_SUPPRESSED
 * ITEM_TOOLTIP_COLOR_TRADE_BOP
 
 
@@ -5513,6 +5514,7 @@ h5. ScribingItemUseResult
 * SCRIBING_ITEM_USE_RESULT_CRAFTED_ABILITY_ALREADY_UNLOCKED
 * SCRIBING_ITEM_USE_RESULT_CRAFTED_ABILITY_SCRIPT_ALREADY_UNLOCKED
 * SCRIBING_ITEM_USE_RESULT_NONE
+* SCRIBING_ITEM_USE_RESULT_NOT_ALLOWED_IN_VENGEANCE
 
 
 h5. SmithingDeconstructionType
@@ -9586,6 +9588,7 @@ h5. ScribingErrorResult
 * SCRIBING_ERROR_RESULT_INVALID_LINKED_SKILL
 * SCRIBING_ERROR_RESULT_MARKED_FOR_DELETE
 * SCRIBING_ERROR_RESULT_NONE
+* SCRIBING_ERROR_RESULT_NOT_ALLOWED_IN_VENGEANCE
 * SCRIBING_ERROR_RESULT_NO_SCRIPTS_UPDATED
 * SCRIBING_ERROR_RESULT_PRIMARY_CRAFTED_ABILITY_SCRIPT_DISABLED
 * SCRIBING_ERROR_RESULT_PRIMARY_CRAFTED_ABILITY_SCRIPT_NOT_UNLOCKED
@@ -14517,6 +14520,9 @@ h2. Game API
 ** _Returns:_ *[ItemBonusSuppressionType|#ItemBonusSuppressionType]* _suppressionType_, *integer* _refId_
 
 * GetItemEnchantSuppressionInfo()
+** _Returns:_ *[ItemBonusSuppressionType|#ItemBonusSuppressionType]* _suppressionType_, *integer* _refId_
+
+* GetItemPoisonSuppressionInfo()
 ** _Returns:_ *[ItemBonusSuppressionType|#ItemBonusSuppressionType]* _suppressionType_, *integer* _refId_
 
 * GetItemBonusSuppressionName(*[ItemBonusSuppressionType|#ItemBonusSuppressionType]* _suppressionType_, *integer* _refId_)
@@ -20364,6 +20370,15 @@ h2. Game API
 
 * GetVengeancePerkIconAtIndex(*luaindex* _perkIndex_, *luaindex:nilable* _roleIndex_)
 ** _Returns:_ *textureName* _icon_
+
+* IsVengeancePerkDisabled(*luaindex* _perkDefId_)
+** _Returns:_ *bool* _isDisabled_
+
+* IsVengeancePerkAtIndexDisabled(*luaindex* _globalPerkIndex_, *luaindex:nilable* _roleIndex_)
+** _Returns:_ *bool* _isDisabled_
+
+* IsVengeancePerkAtSlotIndexDisabled(*[VengeancePerkSlotFlags|#VengeancePerkSlotFlags]* _slotFlag_, *luaindex* _slotIndex_, *luaindex:nilable* _roleIndex_)
+** _Returns:_ *bool* _isDisabled_
 
 * GetVengeancePerkIcon(*integer* _defId_)
 ** _Returns:_ *textureName* _icon_

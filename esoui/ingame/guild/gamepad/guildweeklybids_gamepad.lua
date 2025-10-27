@@ -10,6 +10,9 @@ function ZO_GuildWeeklyBids_Gamepad:Initialize(control)
     ZO_GuildWeeklyBids_Shared.Initialize(self, "ZO_GuildWeeklyBidsRow_Gamepad", ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_ROW_HEIGHT)
 
     self:SetAutomaticallyColorRows(false)
+
+    self.currencyOptions = ZO_ShallowTableCopy(ZO_GAMEPAD_CURRENCY_OPTIONS_LONG_FORMAT)
+    self.currencyOptions.font = "ZoFontGamepad34"
 end
 
 function ZO_GuildWeeklyBids_Gamepad:BuildOptionsList()

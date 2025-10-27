@@ -945,7 +945,7 @@ function ZO_GamepadInventory:RequestLeaveHeader()
     local actionMode = self.actionMode
     if actionMode == ITEM_LIST_ACTION_MODE
         or actionMode == VENGEANCE_ITEM_LIST_ACTION_MODE then
-        local activeItemList = self:GetActiveCategoryList()
+        local activeItemList = self:GetActiveItemList()
         if activeItemList:IsActive() then
             targetData = activeItemList:GetTargetData()
             self:SetSelectedInventoryData(targetData)
