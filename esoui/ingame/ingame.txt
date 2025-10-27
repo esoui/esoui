@@ -52,6 +52,7 @@ EsoUI\Ingame\Tooltip\SocialTooltips.lua
 EsoUI\Ingame\Tooltip\StableTooltips.lua
 EsoUI\Ingame\Tooltip\UtilityWheelTooltips.lua
 EsoUI\Ingame\Tooltip\Console\VoiceChatTooltips.lua
+EsoUI\Ingame\Tooltip\Vengeance_Tooltips.lua
 
 EsoUI\Ingame\Gamepad\GamepadTemplates\GamepadTemplates.xml
 EsoUI\Ingame\Gamepad\GamepadTemplates\GamepadTemplates.lua
@@ -94,6 +95,12 @@ EsoUI\Ingame\Skills\SkillsAndActionBarManager.lua
 EsoUI\Ingame\Skills\SkillLineAssignmentManager.lua
 EsoUI\Ingame\Skills\SkillPointAllocationManager.lua
 EsoUI\Ingame\Skills\ActionBarAssignmentManager.lua
+EsoUI\Ingame\Skills\SkillsActionBar.lua
+EsoUI\Ingame\Skills\SkillsActionBar.xml
+EsoUI\Ingame\Skills\Keyboard\SkillsActionBar_Keyboard.lua
+EsoUI\Ingame\Skills\Keyboard\SkillsActionBar_Keyboard.xml
+EsoUI\Ingame\Skills\Gamepad\SkillsActionBar_Gamepad.lua
+EsoUI\Ingame\Skills\Gamepad\SkillsActionBar_Gamepad.xml
 
 EsoUI\Ingame\Crafting\ScribingData.lua
 EsoUI\Ingame\Crafting\ScribingDataManager.lua
@@ -576,6 +583,7 @@ EsoUI\Ingame\StoreWindow\Gamepad\StoreWindowBuy_Gamepad.lua
 EsoUI\Ingame\StoreWindow\Gamepad\StoreWindowBuyBack_Gamepad.lua
 EsoUI\Ingame\StoreWindow\Gamepad\StoreWindowSell_Gamepad.lua
 EsoUI\Ingame\StoreWindow\Gamepad\StoreWindowRepair_Gamepad.lua
+EsoUI\Ingame\StoreWindow\Gamepad\StoreWindowSellVengeance_Gamepad.lua
 EsoUI\Ingame\StoreWindow\Gamepad\StoreWindow_Gamepad.lua
 EsoUI\Ingame\StoreWindow\Gamepad\StoreWindow_Gamepad.xml
 
@@ -668,10 +676,6 @@ EsoUI\Ingame\SpectacleEvents\Keyboard\SpectacleEvents_Keyboard.lua
 EsoUI\Ingame\SpectacleEvents\Keyboard\SpectacleEvents_Keyboard.xml
 EsoUI\Ingame\SpectacleEvents\Gamepad\SpectacleEvents_Gamepad.lua
 EsoUI\Ingame\SpectacleEvents\Gamepad\SpectacleEvents_Gamepad.xml
-
-EsoUI\Ingame\CenterScreenAnnounce\CenterScreenAnnounceHandlers.lua
-EsoUI\Ingame\CenterScreenAnnounce\CenterScreenAnnounce.lua
-EsoUI\Ingame\CenterScreenAnnounce\CenterScreenAnnounce.xml
 
 EsoUI\Ingame\Collections\Gamepad\CollectionsBook_Gamepad.lua
 EsoUI\Ingame\Collections\Gamepad\CollectionsBook_Gamepad.xml
@@ -1704,8 +1708,6 @@ EsoUI\Ingame\Armory\ArmoryBuildData.lua
 EsoUI\Ingame\Armory\Armory_Manager.lua
 EsoUI\Ingame\Armory\ArmoryChampionActionBar.lua
 EsoUI\Ingame\Armory\ArmoryChampionActionBar.xml
-EsoUI\Ingame\Armory\ArmorySkillsActionBar.lua
-EsoUI\Ingame\Armory\ArmorySkillsActionBar.xml
 EsoUI\Ingame\Armory\ArmoryDialogs.lua
 EsoUI\Ingame\Armory\ArmoryBuildIconPicker_Shared.lua
 EsoUI\Ingame\Armory\Keyboard\ArmoryBuildIconPicker_Keyboard.lua
@@ -1740,6 +1742,27 @@ EsoUI\Ingame\PromotionalEvents\Gamepad\PromotionalEvents_Gamepad.lua
 EsoUI\Ingame\PromotionalEvents\Gamepad\PromotionalEvents_Gamepad.xml
 EsoUI\Ingame\PromotionalEvents\PromotionalEventTracker.lua
 EsoUI\Ingame\PromotionalEvents\PromotionalEventTracker.xml
+
+EsoUI\Ingame\Vengeance\Vengeance_Manager.lua
+EsoUI\Ingame\Vengeance\Vengeance_Templates.lua
+EsoUI\Ingame\Vengeance\Vengeance_Templates.xml
+EsoUI\Ingame\Vengeance\Keyboard\Vengeance_Templates_Keyboard.lua
+EsoUI\Ingame\Vengeance\Keyboard\Vengeance_Templates_Keyboard.xml
+EsoUI\Ingame\Vengeance\Keyboard\Vengeance_Loadouts_Keyboard.lua
+EsoUI\Ingame\Vengeance\Keyboard\Vengeance_Loadouts_Keyboard.xml
+EsoUI\Ingame\Vengeance\Keyboard\Vengeance_Perks_Keyboard.lua
+EsoUI\Ingame\Vengeance\Keyboard\Vengeance_Perks_Keyboard.xml
+EsoUI\Ingame\Vengeance\Gamepad\Vengeance_Tooltips.lua
+EsoUI\Ingame\Vengeance\Gamepad\Vengeance_LoadoutOverviews_Gamepad.lua
+EsoUI\Ingame\Vengeance\Gamepad\Vengeance_LoadoutOverviews_Gamepad.xml
+EsoUI\Ingame\Vengeance\Gamepad\Vengeance_Loadouts_Gamepad.lua
+EsoUI\Ingame\Vengeance\Gamepad\Vengeance_Loadouts_Gamepad.xml
+EsoUI\Ingame\Vengeance\Gamepad\Vengeance_Perks_Gamepad.lua
+EsoUI\Ingame\Vengeance\Gamepad\Vengeance_Perks_Gamepad.xml
+
+EsoUI\Ingame\CenterScreenAnnounce\CenterScreenAnnounceHandlers.lua
+EsoUI\Ingame\CenterScreenAnnounce\CenterScreenAnnounce.lua
+EsoUI\Ingame\CenterScreenAnnounce\CenterScreenAnnounce.xml
 
 ; Subtitles needs to be loaded after PlayerToPlayer so it can anchor off of it
 EsoUI\Ingame\Subtitles\Subtitles.lua

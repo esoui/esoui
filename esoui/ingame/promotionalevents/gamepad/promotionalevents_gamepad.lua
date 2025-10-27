@@ -352,9 +352,15 @@ function ZO_PromotionalEvents_Gamepad:InitializeFoci()
         },
         -- Claim all
         CLAIM_ALL_DESCRIPTOR,
-         -- Preview
+        -- Preview
         {
-            name = GetString(SI_PROMOTIONAL_EVENT_REWARD_PREVIEW_ACTION),
+            name = function()
+                local rewardId = self.selectedMilestone.rewardObject.displayRewardData:GetRewardId()
+                if GetRewardType(rewardId) == REWARD_ENTRY_TYPE_REWARD_LIST then
+                    return GetString(SI_PROMOTIONAL_EVENT_REWARD_VIEW_ACTION)
+                end
+                return GetString(SI_PROMOTIONAL_EVENT_REWARD_PREVIEW_ACTION)
+            end,
             keybind = "UI_SHORTCUT_SECONDARY",
 
             callback = function()
@@ -420,7 +426,13 @@ function ZO_PromotionalEvents_Gamepad:InitializeFoci()
         CLAIM_ALL_DESCRIPTOR,
         -- Preview
         {
-            name = GetString(SI_PROMOTIONAL_EVENT_REWARD_PREVIEW_ACTION),
+            name = function()
+                local rewardId = self.capstoneRewardObject.displayRewardData:GetRewardId()
+                if GetRewardType(rewardId) == REWARD_ENTRY_TYPE_REWARD_LIST then
+                    return GetString(SI_PROMOTIONAL_EVENT_REWARD_VIEW_ACTION)
+                end
+                return GetString(SI_PROMOTIONAL_EVENT_REWARD_PREVIEW_ACTION)
+            end,
             keybind = "UI_SHORTCUT_SECONDARY",
 
             callback = function()
@@ -524,7 +536,18 @@ function ZO_PromotionalEvents_Gamepad:InitializeFoci()
         CLAIM_ALL_DESCRIPTOR,
         -- Preview
         {
-            name = GetString(SI_PROMOTIONAL_EVENT_REWARD_PREVIEW_ACTION),
+            name = function()
+                local selectedActivityEntry = self:GetSelectedActivity()
+                local rewardObject = self:GetActivityRewardObject(selectedActivityEntry)
+                local displayRewardData = rewardObject and rewardObject.displayRewardData
+                if displayRewardData then
+                    local rewardId = displayRewardData:GetRewardId()
+                    if GetRewardType(rewardId) == REWARD_ENTRY_TYPE_REWARD_LIST then
+                        return GetString(SI_PROMOTIONAL_EVENT_REWARD_VIEW_ACTION)
+                    end
+                end
+                return GetString(SI_PROMOTIONAL_EVENT_REWARD_PREVIEW_ACTION)
+            end,
             keybind = "UI_SHORTCUT_SECONDARY",
 
             callback = function()
@@ -1511,6 +1534,13 @@ function ZO_PromotionalEvents_RewardList_Screen_Gamepad:InitializeKeybindStripDe
                         if IsCurrentlyPreviewing() then
                             return GetString(SI_PROMOTIONAL_EVENT_REWARD_END_PREVIEW_ACTION)
                         else
+                            local targetData = self.list:GetTargetData()
+                            if targetData then
+                                local rewardId = targetData:GetRewardId()
+                                if GetRewardType(rewardId) == REWARD_ENTRY_TYPE_REWARD_LIST then
+                                    return GetString(SI_PROMOTIONAL_EVENT_REWARD_VIEW_ACTION)
+                                end
+                            end
                             return GetString(SI_PROMOTIONAL_EVENT_REWARD_PREVIEW_ACTION)
                         end
                     end,

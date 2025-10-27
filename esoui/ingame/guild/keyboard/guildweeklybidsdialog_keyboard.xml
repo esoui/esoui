@@ -21,7 +21,7 @@
                     <Dimensions y="ZO_GUILD_WEEKLY_BIDS_DIALOG_ROW_KEYBOARD_HEIGHT" />
                     <Controls>
                         <Label name="$(parent)Text" inherits="ZO_CurrencyTemplate" horizontalAlignment="RIGHT">
-                            <Anchor point="RIGHT" />
+                            <Anchor point="TOPRIGHT" />
                         </Label>
                     </Controls>
                 </Control>

@@ -852,7 +852,7 @@ function ZO_SkillsSubclassing_Gamepad.OnDialogInitialized(control)
         customControl = control,
         gamepadInfo =
         {
-            dialogType = GAMEPAD_DIALOGS.CUSTOM,
+            dialogType = GAMEPAD_DIALOGS.PARAMETRIC,
         },
         title =
         {
@@ -879,6 +879,7 @@ function ZO_SkillsSubclassing_Gamepad.OnDialogInitialized(control)
                 entryData.skillLineData = currentSkillLineData
                 entryData.errorTooltips = {}
                 entryData.setup = DialogSkillLineEntryTemplateSetup
+                entryData.narrationTooltip = GAMEPAD_LEFT_TOOLTIP
                 local currentSkillLineName = ZO_WHITE:Colorize(currentSkillLineData:GetName())
 
                 local currentSkillLineClassId = currentSkillLineData:GetClassId()

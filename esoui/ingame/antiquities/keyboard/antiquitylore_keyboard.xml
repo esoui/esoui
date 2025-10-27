@@ -20,7 +20,7 @@
 
         <Label name="ZO_AntiquityLoreHeadingLabel_Keyboard" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" font="ZoFontWinH3" modifyTextType="UPPERCASE" wrapMode="ELLIPSIS" virtual="true" />
 
-        <Label name="ZO_AntiquityLoreBaseLabel_Keyboard" color="INTERFACE_COLOR_TYPE_BOOK_MEDIUM:BOOK_MEDIUM_SCROLL" alpha="0.65" virtual="true" />
+        <Label name="ZO_AntiquityLoreBaseLabel_Keyboard" color="2B1912" alpha="0.65" virtual="true" />
 
         <Label name="ZO_AntiquityLoreTitleLabel_Keyboard" inherits="ZO_AntiquityLoreBaseLabel_Keyboard" font="ZoFontBookScrollTitle" wrapMode="ELLIPSIS" virtual="true" />
 

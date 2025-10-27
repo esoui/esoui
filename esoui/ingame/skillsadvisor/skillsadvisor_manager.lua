@@ -2,15 +2,10 @@
 --[[ SkillsAdvisor Singleton ]]--
 --
 
-local SkillsAdvisor_Manager = ZO_CallbackObject:Subclass()
-
-function SkillsAdvisor_Manager:New(...)
-    ZO_SKILLS_ADVISOR_SINGLETON = ZO_CallbackObject.New(self)
-    ZO_SKILLS_ADVISOR_SINGLETON:Initialize(...) -- ZO_CallbackObject does not have an initialize function
-    return ZO_SKILLS_ADVISOR_SINGLETON
-end
+local SkillsAdvisor_Manager = ZO_InitializingCallbackObject:Subclass()
 
 function SkillsAdvisor_Manager:Initialize()
+    ZO_SKILLS_ADVISOR_SINGLETON = self
     self.skillBuilds = {}
     self.availableAbilityList = {}
     self.purchasedAbilityList = {}
@@ -45,6 +40,7 @@ function SkillsAdvisor_Manager:Initialize()
     SKILLS_AND_ACTION_BAR_MANAGER:RegisterCallback("RespecStateReset", RefreshVisibleAbilityLists)
 
     EVENT_MANAGER:RegisterForEvent("SkillsAdvisor_Manager", EVENT_SKILL_BUILD_SELECTION_UPDATED, function(eventId, ...) self:OnBuildSelectionUpdated(...) end)
+    EVENT_MANAGER:RegisterForEvent("SkillsAdvisor_Manager", EVENT_CURRENT_CAMPAIGN_CHANGED, function(eventId, ...) self:OnCurrentCampaignChanged(...) end)
 
     --TODO: Support def changes
 
@@ -156,6 +152,14 @@ end
 
 function SkillsAdvisor_Manager:IsAdvancedModeSelected()
     return self.isAdvancedMode
+end
+
+function SkillsAdvisor_Manager:CanUseSkillsAdvisor()
+    return not IsCurrentCampaignVengeanceRuleset()
+end
+
+function SkillsAdvisor_Manager:OnCurrentCampaignChanged()
+    self:FireCallbacks("OnSkillsAdvisorAvailabilityChanged")
 end
 
 function SkillsAdvisor_Manager:GetNumSkillBuildOptions()

@@ -83,7 +83,7 @@ function ZO_ConfirmLinkAccount_Gamepad:InitKeybindingDescriptor()
             keybind = "UI_SHORTCUT_NEGATIVE",
             callback = function()
                     PlaySound(SOUNDS.NEGATIVE_CLICK)
-                    PregameStateManager_SetState("LinkAccount")
+                    ZO_PregameStateManager_SetState("LinkAccount")
                 end,
         },
 
@@ -92,7 +92,7 @@ function ZO_ConfirmLinkAccount_Gamepad:InitKeybindingDescriptor()
             keybind = "UI_SHORTCUT_PRIMARY",
             callback = function()
                     PlaySound(SOUNDS.POSITIVE_CLICK)
-                    PregameStateManager_AdvanceState()
+                    ZO_PregameStateManager_AdvanceState()
                 end,
         },
     }

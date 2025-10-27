@@ -302,10 +302,11 @@ do
     end
 
     function ZO_OutfitSlotManipulator:OnPendingDataChanged(suppressCallbacks)
+        -- Dyeable channels may have changed, so don't keep pending dye changes that they can't even see
+        -- Order matters here. We need to clean the pending dyes before we update the preview
+        self.restyleSlotData:CleanPendingDyes()
         local noSuppression = not suppressCallbacks
         self:UpdatePreview(noSuppression)
-        -- Dyeable channels may have changed, so don't keep pending dye changes that they can't even see
-        self.restyleSlotData:CleanPendingDyes()
         if noSuppression then
             PlayChangeOutfitSound(self.pendingCollectibleId)
             self.owner:OnSlotPendingDataChanged(self.outfitSlotIndex)

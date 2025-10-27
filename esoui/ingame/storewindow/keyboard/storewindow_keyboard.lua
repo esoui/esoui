@@ -26,7 +26,7 @@ function ZO_StoreManager:Initialize(control)
 
     STORE_FRAGMENT = ZO_FadeSceneFragment:New(control)
 
-    local INVENTORY_TYPE_LIST = { INVENTORY_BACKPACK }
+    local INVENTORY_TYPE_LIST = { INVENTORY_BACKPACK, INVENTORY_VENGEANCE }
     STORE_FRAGMENT:RegisterCallback("StateChange",   function(oldState, newState)
                                                     if newState == SCENE_FRAGMENT_SHOWING then
                                                         self:RefreshCurrency()
@@ -235,7 +235,7 @@ function ZO_StoreManager:Initialize(control)
             TEXT_SEARCH_MANAGER:ActivateTextSearch("storeTextSearch")
 
             self:InitializeStore()
-            PLAYER_INVENTORY:SelectAndChangeSort(INVENTORY_BACKPACK, ITEMFILTERTYPE_ALL, "sellInformationSortOrder", ZO_SORT_ORDER_UP)
+            PLAYER_INVENTORY:SelectAndChangeSort({ INVENTORY_BACKPACK, INVENTORY_VENGEANCE }, ITEMFILTERTYPE_ALL, "sellInformationSortOrder", ZO_SORT_ORDER_UP)
         elseif newState == SCENE_HIDDEN then
             if TEXT_SEARCH_MANAGER:IsActiveTextSearch("storeTextSearch") then
                 TEXT_SEARCH_MANAGER:DeactivateTextSearch("storeTextSearch")
@@ -246,7 +246,7 @@ function ZO_StoreManager:Initialize(control)
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
             self.modeBar:Clear()
 
-            PLAYER_INVENTORY:SelectAndChangeSort(INVENTORY_BACKPACK, ITEMFILTERTYPE_ALL, "statusSortOrder", ZO_SORT_ORDER_DOWN)
+            PLAYER_INVENTORY:SelectAndChangeSort({ INVENTORY_BACKPACK, INVENTORY_VENGEANCE }, ITEMFILTERTYPE_ALL, "statusSortOrder", ZO_SORT_ORDER_DOWN)
             if GetCursorContentType() == MOUSE_CONTENT_STORE_ITEM then
                 ClearCursor()
             end
@@ -338,6 +338,11 @@ function ZO_StoreManager:InitializeTabs()
                                             "EsoUI/Art/Vendor/vendor_tabIcon_sell_down.dds",
                                             "EsoUI/Art/Vendor/vendor_tabIcon_sell_over.dds")
 
+    --Sell Vengeance Button
+    self.sellVengeanceButtonData = CreateButtonData("EsoUI/Art/Vendor/vendor_tabIcon_sellVengeance_up.dds",
+                                            "EsoUI/Art/Vendor/vendor_tabIcon_sellVengeance_down.dds",
+                                            "EsoUI/Art/Vendor/vendor_tabIcon_sellVengeance_over.dds")
+
     --Buy Back Button
     self.buyBackButtonData = CreateButtonData("EsoUI/Art/Vendor/vendor_tabIcon_buyBack_up.dds",
                                                "EsoUI/Art/Vendor/vendor_tabIcon_buyBack_down.dds",
@@ -356,6 +361,9 @@ function ZO_StoreManager:RebuildTabs()
         self.modeBar:Add(SI_STORE_MODE_BUY, { STORE_FRAGMENT }, self.buyButtonData)
     end
     self.modeBar:Add(SI_STORE_MODE_SELL, { INVENTORY_FRAGMENT, BACKPACK_STORE_LAYOUT_FRAGMENT }, self.sellButtonData, self.stackAllButton)
+    if IsCurrentCampaignVengeanceRuleset() and ZO_VENGEANCE_BAG_SELL_ENABLED then
+        self.modeBar:Add(SI_STORE_MODE_SELL_VENGEANCE, { VENGEANCE_INVENTORY_FRAGMENT, BACKPACK_STORE_LAYOUT_FRAGMENT }, self.sellVengeanceButtonData, self.stackAllButton)
+    end
     self.modeBar:Add(SI_STORE_MODE_BUY_BACK, { BUY_BACK_FRAGMENT }, self.buyBackButtonData)
     if CanStoreRepair() then
         self.modeBar:Add(SI_STORE_MODE_REPAIR, { REPAIR_FRAGMENT }, self.repairButtonData)

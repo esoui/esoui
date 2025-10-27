@@ -28,7 +28,7 @@ local pregameStates =
         OnEnter = function()
             EVENT_MANAGER:RegisterForUpdate("PregameWaitForGuiRender", 0, function()
                 if IsGuiShaderLoaded() then
-                    PregameStateManager_AdvanceState()
+                    ZO_PregameStateManager_AdvanceState()
                 end
             end)
         end,
@@ -56,19 +56,19 @@ local pregameStates =
             -- Hide any currently showing scene such as Keyboard UI Settings.
             SCENE_MANAGER:HideCurrentScene()
 
-            if not IsPreloginWorldReady() then
+            if not ZO_IsPreloginWorldReady() then
                 -- Show the Prelogin Overlay loading scene.
                 WriteToInterfaceLog("Waiting for Prelogin World to load...")
                 PRELOGIN_OVERLAY:SetHidden(false)
 
                 -- Monitor for Prelogin World load completion.
                 EVENT_MANAGER:RegisterForUpdate("WaitForPreloginWorld", 1, function()
-                    if IsPreloginWorldReady() then
-                        PregameStateManager_AdvanceState()
+                    if ZO_IsPreloginWorldReady() then
+                        ZO_PregameStateManager_AdvanceState()
                     end
                 end)
             else
-                PregameStateManager_AdvanceState()
+                ZO_PregameStateManager_AdvanceState()
             end
         end,
 
@@ -124,14 +124,14 @@ local pregameStates =
                         SetCVar("IsServerSelected", "true")
                         SetCVar("SelectedServer", CONSOLE_SERVER_NORTH_AMERICA)
                         WriteToInterfaceLog("Quick Launch was successful.")
-                        PregameStateManager_AdvanceState()
+                        ZO_PregameStateManager_AdvanceState()
                     end
                 end)
 
                 if ZO_IsConsolePlatform() then
                     PregameSelectProfile()
                 else
-                    AttemptQuickLaunch()
+                    ZO_AttemptQuickLaunch()
                     SCENE_MANAGER:Show("PregameInitialScreen_Gamepad")
                 end
             else
@@ -403,7 +403,7 @@ local pregameStates =
         OnEnter = function(username, password)
             local function LinkAccount()
                 if ZO_IsForceConsoleFlow() then
-                    PregameStateManager_AdvanceState()
+                    ZO_PregameStateManager_AdvanceState()
                 else
                     PregameLinkAccount(username, password)
                 end
@@ -494,7 +494,7 @@ local pregameStates =
                 if DoesPlatformRequirePregamePEGI() and not HasAgreedToPEGI() then
                     ZO_Dialogs_ShowGamepadDialog("PEGI_COUNTRY_SELECT_GAMEPAD")
                 else
-                    Pregame_ShowScene("gamepadCharacterSelect")
+                    ZO_Pregame_ShowScene("gamepadCharacterSelect")
                 end
             end
         end,
@@ -506,4 +506,4 @@ local pregameStates =
 
 }
 
-PregameStateManager_AddGamepadStates(pregameStates)
+ZO_PregameStateManager_AddGamepadStates(pregameStates)

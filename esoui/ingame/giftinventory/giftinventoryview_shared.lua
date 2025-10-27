@@ -186,7 +186,7 @@ function ZO_GiftInventoryView_Shared:TogglePreview()
     end
 end
 
-internalassert(MARKET_PURCHASE_RESULT_MAX_VALUE == 42, "Update gift claim dialog to handle new purchase result")
+internalassert(MARKET_PURCHASE_RESULT_MAX_VALUE == 45, "Update gift claim dialog to handle new purchase result")
 function ZO_GiftInventoryView_Shared:ClaimGift()
     local marketProductId = self.gift:GetMarketProductId()
     local expectedClaimResult = CouldAcquireMarketProduct(marketProductId)

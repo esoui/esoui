@@ -9,6 +9,8 @@ SOUNDS =
     MENU_BAR_CLICK                  = "Click_MenuBar",
     TREE_HEADER_CLICK               = "Click_TreeHeader",
     TREE_SUBCATEGORY_CLICK          = "Click_TreeSubcategory",
+    LOGIN_SETTINGS_SCREEN_TAB_CLICK = "Click_LoginSettingsScreen_Tab",
+    LOGIN_SCREEN_TAB_CLICK          = "Click_LoginScreen_Tab",
 
     -- Window Sounds
     DEFAULT_WINDOW_OPEN             = "Window_Open",
@@ -95,6 +97,9 @@ SOUNDS =
     -- Spinner Sounds
     SPINNER_UP                      = "Spinner_Up",
     SPINNER_DOWN                    = "Spinner_Down",
+
+    -- Character Select Sounds
+    CS_SELECT                       = "CS_Select",
 
     --character create sounds
     CC_SELECTOR_CLICK               = "Click_CC_Selector",
@@ -377,6 +382,9 @@ SOUNDS =
     GUILD_KEEP_LOST = "Guild_Keep_Lost",
 
     CAMPAIGN_READY_CHECK = "Campaign_Ready_Check",
+    CAMPAIGN_ENTER_CAMPAIGN = "Campaign_Enter_Campaign",
+    CAMPAIGN_QUEUE_CAMPAIGN = "Campaign_Queue_Campaign",
+    CAMPAIGN_LEAVE_CAMPAIGN = "Campaign_Leave_Campaign",
 
     -- Broadcast sounds
     MESSAGE_BROADCAST               = "System_Broadcast",
@@ -505,6 +513,7 @@ SOUNDS =
 
     --General Settings Sounds
     SINGLE_SETTING_RESET_TO_DEFAULT = "Single_Setting_Reset",
+    LOGIN_SCREEN_EXIT_SETTINGS      = "Login_Screen_Exit_Settings",
 
     --Radial Menu Sounds
     RADIAL_MENU_OPEN                = "Radial_Menu_Open",
@@ -1144,4 +1153,14 @@ SOUNDS =
     RETURNING_PLAYER_OPEN_GAMEPAD = "Console_ReturningPlayer_Open",
     RETURNING_PLAYER_CLOSE_GAMEPAD = "Console_ReturningPlayer_Close",
     RETURNING_PLAYER_ENTER_INTRO_GAMEPLAY = "HerosReturn_Enter",
+
+    -- Vengeance
+    VENGEANCE_LOADOUT_EQUIPPED = "VengeanceLoadoutEquipped",
+    VENGEANCE_LOADOUT_SELECTED = "VengeanceLoadoutSelected",
+    VENGEANCE_LOADOUT_EQUIPPED_ANNOUNCEMENT = "VengeanceLoadoutEquipped_Announcement",
+    VENGEANCE_PERK_EQUIPPED = "VengeancePerkEquipped",
+    VENGEANCE_PERK_UNEQUIPPED = "VengeancePerkUnequipped",
+    VENGEANCE_PERK_PICKUP = "VengeancePerkPickup",
+    VENGEANCE_PERK_DROP = "VengeancePerkDrop",
+    VENGEANCE_CHANGE_LOADOUT_PROMPT = "VengeanceChangeLoadoutPrompt",
 }

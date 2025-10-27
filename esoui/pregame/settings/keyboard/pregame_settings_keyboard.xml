@@ -1,6 +1,6 @@
 <GuiXml>
     <Controls>
-        <Label name="ZO_Pregame_Settings_Keyboard_Subcategory_Label" inherits="ZO_HorizontalMenu_LabelHeader" font="ZoFontWinH1" virtual="true">
+        <Label name="ZO_Pregame_Settings_Keyboard_Subcategory_Label" inherits="ZO_HorizontalMenu_LabelHeader" font="ZoFontWinH3" virtual="true">
             <Dimensions y="48" />
             <OnMouseUp>
                 ZO_Pregame_Settings_Keyboard_Subcategory_Label_MouseUp(self, upInside)
@@ -32,14 +32,15 @@
                     <Dimensions x="600" />
                 </Control>
 
-                <Label name="$(parent)Title" font="ZoFontCenterScreenAnnounceLarge" horizontalAlignment="CENTER" modifyTextType="UPPERCASE" text="SI_GAME_MENU_SETTINGS">
-                    <Anchor offsetX="200" offsetY="25" />
-                </Label>
-
-                <Control name="$(parent)Subcategory">
+                <Control name="$(parent)Subcategory" clampedToScreen="true" resizeToFitConstrains="X">
                     <Dimensions y="50" />
-                    <Anchor point="TOP" relativeTo="$(parent)Title" relativePoint="BOTTOM" />
+                    <Anchor point="BOTTOM" relativeTo="ZO_OptionsWindowDivider" relativePoint="TOP" offsetX="30" />
+                    <ClampedToScreenInsets left="-45" />
                 </Control>
+
+                <Label name="$(parent)Title" font="ZoFontCenterScreenAnnounceLarge" horizontalAlignment="CENTER" modifyTextType="UPPERCASE" text="SI_GAME_MENU_SETTINGS">
+                    <Anchor point="BOTTOM" relativeTo="ZO_OptionsWindowDivider" relativePoint="TOP" offsetX="30" offsetY="-50" />
+                </Label>
                 
                 <Control name="$(parent)BackButton" inherits="ZO_DialogButton">
                     <Anchor point="TOPLEFT" relativeTo="ZO_OptionsWindowResetToDefaultButton" relativePoint="TOPRIGHT" offsetX="30" />

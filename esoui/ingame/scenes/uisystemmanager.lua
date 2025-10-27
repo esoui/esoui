@@ -70,6 +70,16 @@ function ZO_UISystemManager:Initialize()
                 ZO_ACTIVITY_FINDER_ROOT_GAMEPAD:ShowCategory(TRIBUTE_FINDER_MANAGER:GetCategoryData())
             end,
         },
+        [UI_SYSTEM_VENGEANCE] =
+        {
+            keyboardOpen = function()
+                CAMPAIGN_OVERVIEW:SetCategoryOnShowByData(ZO_CAMPAIGN_OVERVIEW_TYPE_INFO[ZO_CAMPAIGN_OVERVIEW_TYPE.VENGEANCE].children[ZO_CAMPAIGN_OVERVIEW_TYPE_VENGEANCE.LOADOUTS])
+                MAIN_MENU_KEYBOARD:ShowScene("campaignOverview")
+            end,
+            gamepadOpen = function()
+                SCENE_MANAGER:CreateStackFromScratch("mainMenuGamepad", "gamepad_campaign_root", "gamepad_vengeance_loadouts")
+            end,
+        },
     }
 
     -- ... is a series of param1, param2, etc.
@@ -99,8 +109,8 @@ function ZO_UISystemManager:Initialize()
 
     self.queuedUISystem = nil
     self.queuedParams = {}
-    self.waitingForMarketAnnouncements = true
-    self.waitingForPromotionalEvents = true
+    self.waitingForMarketAnnouncements = not HasShownMarketAnnouncement()
+    self.waitingForPromotionalEvents = not HasReceivedPromotionalEventUpdate()
 end
 
 function ZO_UISystemManager:OnPlayerActivated()
@@ -192,6 +202,7 @@ end
 function ZO_UISystemManager:CanOpenUISystem()
     return IsPlayerActivated()
         and not self.waitingForMarketAnnouncements
+        and not self.waitingForPromotionalEvents
         and not self:IsShowingAnnouncement()
 end
 

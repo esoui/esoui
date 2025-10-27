@@ -95,7 +95,7 @@ function ZO_LinkAccount_Gamepad:LinkAccountSelected()
     elseif (self.password == nil) or (self.password == "") then
         self:ShowError(GetString(SI_CONSOLE_LINKACCOUNT_NOPASSWORD))
     else
-        PregameStateManager_AdvanceState()
+        ZO_PregameStateManager_AdvanceState()
     end
 end
 
@@ -116,7 +116,7 @@ function ZO_LinkAccount_Gamepad:InitKeybindingDescriptors()
         },
         -- Back
         KEYBIND_STRIP:GenerateGamepadBackButtonDescriptor(function()
-                PregameStateManager_SetState("CreateLinkAccount")
+                ZO_PregameStateManager_SetState("CreateLinkAccount")
                 PlaySound(SOUNDS.NEGATIVE_CLICK)
             end)
     }

@@ -3,14 +3,10 @@ INVENTORY_MENU_CRAFT_BAG_BUTTON = "craftBag"
 INVENTORY_MENU_WALLET_BUTTON = "wallet"
 INVENTORY_MENU_QUEST_ITEMS_BUTTON = "quest"
 INVENTORY_MENU_QUICKSLOT_BUTTON = "quickslot"
+INVENTORY_MENU_VENGEANCE_BUTTON = "vengeance"
 
-ZO_InventoryMenuBar = ZO_Object:Subclass()
+ZO_InventoryMenuBar = ZO_InitializingObject:Subclass()
 
-function ZO_InventoryMenuBar:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
 do
     local DEFAULT_BAR_DATA =
     {
@@ -41,6 +37,16 @@ do
                 self:OnFragmentHidden()
             end
         end)
+
+        local function OnCurrentCampaignChanged()
+            local startingFragment = SI_INVENTORY_MODE_ITEMS
+            if IsCurrentCampaignVengeanceRuleset() then
+                startingFragment = SI_INVENTORY_MODE_VENGEANCE
+            end
+            self.modeBar:SetStartingFragment(startingFragment)
+        end
+
+        control:RegisterForEvent(EVENT_CURRENT_CAMPAIGN_CHANGED, OnCurrentCampaignChanged)
     end
 end
 
@@ -91,7 +97,7 @@ function ZO_InventoryMenuBar:LayoutCraftBagTooltip(tooltip)
 end
 
 do
-    local function CreateButtonData(normal, pressed, highlight, clickSound, callback, tooltipFunction, statusIcon)
+    local function CreateButtonData(normal, pressed, highlight, clickSound, callback, tooltipFunction, statusIcon, visible)
         return {
             normal = normal,
             pressed = pressed,
@@ -100,6 +106,7 @@ do
             callback = callback,
             CustomTooltipFunction = tooltipFunction,
             statusIcon = statusIcon,
+            visible = visible,
         }
     end
 
@@ -146,6 +153,14 @@ do
                                                     "EsoUI/Art/Inventory/inventory_tabIcon_quickslot_over.dds",
                                                     SOUNDS.QUICKSLOT_OPEN,
                                                     onButtonClicked)
+        self.vengeanceButtonData = CreateButtonData("EsoUI/Art/Inventory/inventory_tabIcon_vengeance_up.dds",
+                                                    "EsoUI/Art/Inventory/inventory_tabIcon_vengeance_down.dds",
+                                                    "EsoUI/Art/Inventory/inventory_tabIcon_vengeance_over.dds",
+                                                    SOUNDS.QUICKSLOT_CLOSE,
+                                                    onButtonClicked,
+                                                    nil,
+                                                    nil,
+                                                    IsCurrentCampaignVengeanceRuleset)
     end
 end
 
@@ -163,6 +178,8 @@ function ZO_InventoryMenuBar:AddTab(tabType, keybinds, additionalFragment)
             self.modeBar:Add(SI_INVENTORY_MODE_QUEST_ITEMS, { QUEST_ITEMS_FRAGMENT, additionalFragment }, self.questButtonData, keybinds)
         elseif tabType == INVENTORY_MENU_QUICKSLOT_BUTTON then
             self.modeBar:Add(SI_INVENTORY_MODE_QUICKSLOTS, { KEYBOARD_QUICKSLOT_FRAGMENT, KEYBOARD_QUICKSLOT_CIRCLE_FRAGMENT, additionalFragment }, self.quickslotsButtonData, keybinds)
+        elseif tabType == INVENTORY_MENU_VENGEANCE_BUTTON then
+            self.modeBar:Add(SI_INVENTORY_MODE_VENGEANCE, { VENGEANCE_INVENTORY_FRAGMENT, additionalFragment }, self.vengeanceButtonData, keybinds)
         end
     end
 end
@@ -292,6 +309,7 @@ function PlayerInventoryMenuBar:Initialize(control)
         stowMaterialsKeybind,
     }
 
+    self:AddTab(INVENTORY_MENU_VENGEANCE_BUTTON, keybindButtons, BACKPACK_MENU_BAR_LAYOUT_FRAGMENT)
     self:AddTab(INVENTORY_MENU_INVENTORY_BUTTON, keybindButtons, BACKPACK_MENU_BAR_LAYOUT_FRAGMENT)
     self:AddTab(INVENTORY_MENU_CRAFT_BAG_BUTTON, nil, BACKPACK_MENU_BAR_LAYOUT_FRAGMENT)
     self:AddTab(INVENTORY_MENU_WALLET_BUTTON)
@@ -304,6 +322,8 @@ end
 
 -- overriden function from ZO_InventoryMenuBar
 function PlayerInventoryMenuBar:OnFragmentShown()
+    self.modeBar:UpdateButtons()
+
     TriggerTutorial(TUTORIAL_TRIGGER_INVENTORY_OPENED)
 
     if PLAYER_INVENTORY:HasAnyQuickSlottableItems(INVENTORY_BACKPACK) then
@@ -320,6 +340,10 @@ function PlayerInventoryMenuBar:OnFragmentShown()
 
     if HasFishInBag(INVENTORY_BACKPACK) then
         TriggerTutorial(TUTORIAL_TRIGGER_INVENTORY_OPENED_AND_FISH_PRESENT)
+    end
+
+    if IsCurrentCampaignVengeanceRuleset() then
+        TriggerTutorial(TUTORIAL_TRIGGER_VENGEANCE_INVENTORY_OPENED)
     end
 end
 

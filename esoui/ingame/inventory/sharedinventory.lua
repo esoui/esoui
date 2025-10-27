@@ -57,8 +57,9 @@ function ZO_SharedInventoryManager:Initialize()
             end
             self:RefreshInventory(BAG_COMPANION_WORN)
             self:RefreshInventory(BAG_FURNITURE_VAULT)
+            self:RefreshInventory(BAG_VENGEANCE)
             -- We should see if the new bag should be refreshed on refresh all
-            internalassert(BAG_MAX_VALUE == 19, "Update ZO_SharedInventory to handle new bag")
+            internalassert(BAG_MAX_VALUE == 20, "Update ZO_SharedInventory to handle new bag")
         end,
         RefreshSingle = function(...)
             self:RefreshSingleSlot(...)
@@ -222,6 +223,8 @@ function ZO_SharedInventoryManager:Initialize()
         [CURRENCY_CHANGE_REASON_VENDOR] = true,
         [CURRENCY_CHANGE_REASON_TRADE] = true,
         [CURRENCY_CHANGE_REASON_SELL_STOLEN] = true,
+        [CURRENCY_CHANGE_REASON_BANK_WITHDRAWAL] = true,
+        [CURRENCY_CHANGE_REASON_GUILD_BANK_WITHDRAWAL] = true,
     }
 
     local EXCLUDED_PLAY_TRANSACT_SOUND_REASONS =
@@ -231,7 +234,7 @@ function ZO_SharedInventoryManager:Initialize()
         [CURRENCY_CHANGE_REASON_PVP_KILL_TRANSFER] = true,
     }
     
-    internalassert(CURRENCY_CHANGE_REASON_MAX_VALUE == 83, "Check if new currency change reason should play acquire sounds or suppress transact sounds")
+    internalassert(CURRENCY_CHANGE_REASON_MAX_VALUE == 84, "Check if new currency change reason should play acquire sounds or suppress transact sounds")
 
     local function OnCurrencyUpdated(_, currencyType, currencyLocation, newAmount, oldAmount, changeReason)
         if changeReason == CURRENCY_CHANGE_REASON_PLAYER_INIT then
@@ -293,6 +296,7 @@ function ZO_SharedInventoryManager:Initialize()
                 BAG_WORN,
                 BAG_BACKPACK,
                 BAG_VIRTUAL,
+                BAG_VENGEANCE,
             }
         },
         [BACKGROUND_LIST_FILTER_TARGET_QUEST_ITEM_ID] =

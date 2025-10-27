@@ -8,7 +8,7 @@ function CreateAccount_Gamepad_Final_Initialize(control)
             keybind = "UI_SHORTCUT_PRIMARY",
             callback = function()
                 PlaySound(SOUNDS.POSITIVE_CLICK)
-                PregameStateManager_AdvanceState()
+                ZO_PregameStateManager_AdvanceState()
             end,
         },
     }

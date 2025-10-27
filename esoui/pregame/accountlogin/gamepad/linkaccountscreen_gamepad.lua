@@ -50,7 +50,7 @@ function LinkAccount_Gamepad:PerformDeferredInitialize()
 
     local function OnAccountLinkSuccessful()
         if LINK_ACCOUNT_ACTIVATION_SCENE:IsShowing() then
-            PregameStateManager_AdvanceState()
+            ZO_PregameStateManager_AdvanceState()
         end
     end
 
@@ -109,7 +109,7 @@ function LinkAccount_Gamepad:InitializeKeybindStripDescriptors()
         },
         -- Back
         KEYBIND_STRIP:GenerateGamepadBackButtonDescriptor(function()
-            PregameStateManager_SetState("CreateLinkAccount")
+            ZO_PregameStateManager_SetState("CreateLinkAccount")
             PlaySound(SOUNDS.NEGATIVE_CLICK)
         end)
     }

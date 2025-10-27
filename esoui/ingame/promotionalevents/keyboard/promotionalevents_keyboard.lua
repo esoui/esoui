@@ -62,14 +62,17 @@ function ZO_PromotionalEventReward_Keyboard:OnMouseUp(button, upInside)
                 showMenu = true
             end
 
-            if CanPreviewReward(rewardId) or GetRewardType(rewardId) == REWARD_ENTRY_TYPE_REWARD_LIST then
-                AddMenuItem(GetString(SI_PROMOTIONAL_EVENT_REWARD_PREVIEW_ACTION), function()
+            local canPreviewReward = CanPreviewReward(rewardId)
+            local isRewardList = GetRewardType(rewardId) == REWARD_ENTRY_TYPE_REWARD_LIST
+            if canPreviewReward or isRewardList then
+                local menuString = isRewardList and SI_PROMOTIONAL_EVENT_REWARD_VIEW_ACTION or SI_PROMOTIONAL_EVENT_REWARD_PREVIEW_ACTION
+                AddMenuItem(GetString(menuString), function()
                     g_PromotionalEventsKeyboard:BeginPreview(rewardId, self.control)
                     KEYBIND_STRIP:UpdateKeybindButtonGroup(g_PromotionalEventsKeyboard.keybindStripDescriptor)
                 end)
                 showMenu = true
             end
-            
+
             if showMenu then
                 ShowMenu(self.control)
             end
@@ -500,7 +503,15 @@ function ZO_PromotionalEvents_Keyboard:InitializeKeybindStripDescriptors()
 
         -- Preview
         {
-            name = GetString(SI_PROMOTIONAL_EVENT_REWARD_PREVIEW_ACTION),
+            name = function()
+                if self.mouseOverObject and self.mouseOverObject:IsInstanceOf(ZO_PromotionalEventReward_Keyboard) then
+                    local rewardId = self.mouseOverObject.displayRewardData:GetRewardId()
+                    if GetRewardType(rewardId) == REWARD_ENTRY_TYPE_REWARD_LIST then
+                        return GetString(SI_PROMOTIONAL_EVENT_REWARD_VIEW_ACTION)
+                    end
+                end
+                return GetString(SI_PROMOTIONAL_EVENT_REWARD_PREVIEW_ACTION)
+            end,
             keybind = "UI_SHORTCUT_SECONDARY",
 
             callback = function()

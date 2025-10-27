@@ -71,7 +71,6 @@ end
 function ZO_StatEntry_Keyboard:UpdateStatValue()
     if not self.control:IsHidden() then
         self.nextStatsRefreshSeconds = GetFrameTimeSeconds() + ZO_STATS_REFRESH_TIME_SECONDS
-        local value = self:GetValue()
         local displayValue = self:GetDisplayValue()
         local pendingBonusAmount = self:GetPendingStatBonuses()
 

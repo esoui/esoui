@@ -1,6 +1,6 @@
 
 -- Armory Build Data --
-ZO_ArmoryBuildData = ZO_InitializingObject:Subclass()
+ZO_ArmoryBuildData = ZO_InitializingObject:MultiSubclass(ZO_SkillsActionBarData)
 
 function ZO_ArmoryBuildData:Initialize(buildIndex)
     self.buildIndex = buildIndex

@@ -8,7 +8,7 @@ function LinkAccountScreen_Gamepad_Final_Initialize(self)
             keybind = "UI_SHORTCUT_PRIMARY",
             callback = function()
                 PlaySound(SOUNDS.POSITIVE_CLICK)
-                PregameStateManager_AdvanceState()
+                ZO_PregameStateManager_AdvanceState()
             end,
         },
     }

@@ -63,6 +63,7 @@
 
 local ADJUST_SIZE_INSTANT = true
 local ADJUST_SIZE_ANIMATED = false
+local SUPPRESS_TEXTURE_UPDATE = true 
 
 local MenuBarButton = ZO_Object:Subclass()
 
@@ -87,7 +88,7 @@ function MenuBarButton:Reset()
     if self.m_anim then
         self.m_anim:GetTimeline():Stop()
     end
-    self.m_highlightHidden = true
+    self:SetHighlightHidden(true, SUPPRESS_TEXTURE_UPDATE)
     self.m_statusIcon:SetHidden(true)
     self.m_locked = false
     self:SetState(BSTATE_DISABLED, ADJUST_SIZE_INSTANT)
@@ -102,11 +103,14 @@ function MenuBarButton:UpdateTexturesFromState()
     local state = self.m_state
     local buttonData = self.m_buttonData
     local texture
-    if(state == BSTATE_NORMAL) then
+    local highlightHidden = true
+    if state == BSTATE_NORMAL then
         texture = buttonData.normal
-    elseif(state == BSTATE_PRESSED) then
+        -- NORMAL is the only state that allows highlighting
+        highlightHidden = self.m_highlightHidden
+    elseif state == BSTATE_PRESSED then
         texture = buttonData.pressed
-    elseif(state == BSTATE_DISABLED) then
+    elseif state == BSTATE_DISABLED then
         texture = buttonData.disabled
     end
     if type(texture) == "function" then
@@ -114,7 +118,7 @@ function MenuBarButton:UpdateTexturesFromState()
     end
 
     self.m_image:SetTexture(texture)
-    self.m_highlight:SetHidden(self.m_highlightHidden)
+    self.m_highlight:SetHidden(highlightHidden)
 end
 
 local legalStates =
@@ -175,10 +179,12 @@ function MenuBarButton:SetState(state, adjustSizeInstant)
     end
 end
 
-function MenuBarButton:SetHighlightHidden(hidden)
+function MenuBarButton:SetHighlightHidden(hidden, suppressTextureUpdate)
     if hidden ~= self.m_highlightHidden then
         self.m_highlightHidden = hidden
-        self:UpdateTexturesFromState()
+        if not suppressTextureUpdate then
+            self:UpdateTexturesFromState()
+        end
     end
 end
 
@@ -212,6 +218,11 @@ function MenuBarButton:SizeDown()
 end
 
 function MenuBarButton:SetData(owner, buttonData)
+    -- Preload the pressed icon so we don't flicker the first time going from normal to pressed due to texture loading
+    -- This is similar to how ButtonControls operate, conceptually.
+    if buttonData.pressed and type(buttonData.pressed) ~= "function" and (not self.m_buttonData or self.m_buttonData.pressed ~= buttonData.pressed) then
+        self.m_image:SetTexture(buttonData.pressed)
+    end
     self.m_buttonData = buttonData
     self.m_menuBar = owner
     local highlight = buttonData.highlight
@@ -247,7 +258,7 @@ end
 
 function MenuBarButton:UnPress(adjustSizeInstant)
     if self.m_state ~= BSTATE_DISABLED then
-        self.m_highlightHidden = true -- batch update, don't allow texture update from this
+        self:SetHighlightHidden(true, SUPPRESS_TEXTURE_UPDATE)
         self:SetState(BSTATE_NORMAL, adjustSizeInstant)
     end
 end
@@ -267,7 +278,7 @@ function MenuBarButton:SetEnabled(enabled, adjustSizeInstant)
             if MouseIsOver(self.m_button) then
                 zo_callHandler(self.m_button, "OnMouseExit")
             end
-            self.m_highlightHidden = true
+            self:SetHighlightHidden(true, SUPPRESS_TEXTURE_UPDATE)
             self:SetState(BSTATE_DISABLED, adjustSizeInstant)
         end
     end
@@ -626,11 +637,12 @@ end
 
 function MenuBar:SetDescriptorEnabled(descriptor, enabled)
     local buttonObject = self:ButtonObjectForDescriptor(descriptor)
-    if(buttonObject) then
+    if buttonObject then
         local currentState = buttonObject:GetState()
         if(enabled and currentState == BSTATE_DISABLED) then
             buttonObject:SetState(BSTATE_NORMAL, ADJUST_SIZE_INSTANT)
-        elseif(not enabled) then
+        elseif not enabled then
+            buttonObject:SetHighlightHidden(true, SUPPRESS_TEXTURE_UPDATE)
             buttonObject:SetState(BSTATE_DISABLED, ADJUST_SIZE_INSTANT)
         end
     end

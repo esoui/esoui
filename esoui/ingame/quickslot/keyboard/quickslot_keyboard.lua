@@ -115,26 +115,6 @@ function ZO_Quickslot_Keyboard:OnDeferredInitialize()
 
     self.quickslotFilters = {}
 
-    self:InsertCollectibleCategories()
-
-    table.insert(self.quickslotFilters, self:CreateNewTabFilterData(ITEMFILTERTYPE_QUEST_QUICKSLOT,
-                          GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_QUEST_QUICKSLOT),
-                          "EsoUI/Art/Inventory/inventory_tabIcon_quest_up.dds",
-                          "EsoUI/Art/Inventory/inventory_tabIcon_quest_down.dds",
-                          "EsoUI/Art/Inventory/inventory_tabIcon_quest_over.dds"))
-
-    table.insert(self.quickslotFilters, self:CreateNewTabFilterData(ITEMFILTERTYPE_QUICKSLOT,
-                          GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_QUICKSLOT),
-                          "EsoUI/Art/Inventory/inventory_tabIcon_items_up.dds",
-                          "EsoUI/Art/Inventory/inventory_tabIcon_items_down.dds",
-                          "EsoUI/Art/Inventory/inventory_tabIcon_items_over.dds"))
-
-    table.insert(self.quickslotFilters, self:CreateNewTabFilterData(ITEMFILTERTYPE_ALL,
-                          GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_ALL),
-                          "EsoUI/Art/Inventory/inventory_tabIcon_all_up.dds",
-                          "EsoUI/Art/Inventory/inventory_tabIcon_all_down.dds",
-                          "EsoUI/Art/Inventory/inventory_tabIcon_all_over.dds"))
-
     local menuBarData =
     {
         initialButtonAnchorPoint = RIGHT,
@@ -147,11 +127,7 @@ function ZO_Quickslot_Keyboard:OnDeferredInitialize()
 
     ZO_MenuBar_SetData(self.tabs, menuBarData)
 
-    for _, data in ipairs(self.quickslotFilters) do
-        ZO_MenuBar_AddButton(self.tabs, data)
-    end
-
-    ZO_MenuBar_SelectDescriptor(self.tabs, ITEMFILTERTYPE_QUICKSLOT)
+    self:RefreshQuickslotFilters()
 
     local function OnSortHeaderClicked(key, order)
         self.currentFilter.sortKey = key
@@ -211,6 +187,10 @@ function ZO_Quickslot_Keyboard:OnDeferredInitialize()
         ZO_ScrollList_RefreshVisible(self.list, nil, ZO_InventorySlot_UpdateCooldowns)
     end
 
+    local function HandleCurrentCampaignChanged()
+        self:RefreshQuickslotFilters()
+    end
+
     self.control:RegisterForEvent(EVENT_MONEY_UPDATE, OnMoneyUpdated)
     self.control:RegisterForEvent(EVENT_INVENTORY_FULL_UPDATE, HandleInventoryChanged)
     self.control:RegisterForEvent(EVENT_INVENTORY_SINGLE_SLOT_UPDATE, HandleInventoryChanged)
@@ -219,12 +199,44 @@ function ZO_Quickslot_Keyboard:OnDeferredInitialize()
     self.control:RegisterForEvent(EVENT_INVENTORY_SLOT_LOCKED, HandleInventorySlotLocked)
     self.control:RegisterForEvent(EVENT_INVENTORY_SLOT_UNLOCKED, HandleInventorySlotUnlocked)
     self.control:RegisterForEvent(EVENT_ACTION_UPDATE_COOLDOWNS, HandleCooldownUpdates)
+    self.control:RegisterForEvent(EVENT_CURRENT_CAMPAIGN_CHANGED, HandleCurrentCampaignChanged)
 
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", RefreshQuickslotWindow)
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleUpdated", RefreshQuickslotWindow)
 
     SHARED_INVENTORY:RegisterCallback("FullQuestUpdate", RefreshQuickslotWindow)
     SHARED_INVENTORY:RegisterCallback("SingleQuestUpdate", RefreshQuickslotWindow)
+end
+
+function ZO_Quickslot_Keyboard:RefreshQuickslotFilters()
+    ZO_ClearTable(self.quickslotFilters)
+
+    self:InsertCollectibleCategories()
+
+    table.insert(self.quickslotFilters, self:CreateNewTabFilterData(ITEMFILTERTYPE_QUEST_QUICKSLOT,
+                          GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_QUEST_QUICKSLOT),
+                          "EsoUI/Art/Inventory/inventory_tabIcon_quest_up.dds",
+                          "EsoUI/Art/Inventory/inventory_tabIcon_quest_down.dds",
+                          "EsoUI/Art/Inventory/inventory_tabIcon_quest_over.dds"))
+
+    table.insert(self.quickslotFilters, self:CreateNewTabFilterData(ITEMFILTERTYPE_QUICKSLOT,
+                          GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_QUICKSLOT),
+                          "EsoUI/Art/Inventory/inventory_tabIcon_items_up.dds",
+                          "EsoUI/Art/Inventory/inventory_tabIcon_items_down.dds",
+                          "EsoUI/Art/Inventory/inventory_tabIcon_items_over.dds"))
+
+    table.insert(self.quickslotFilters, self:CreateNewTabFilterData(ITEMFILTERTYPE_ALL,
+                          GetString("SI_ITEMFILTERTYPE", ITEMFILTERTYPE_ALL),
+                          "EsoUI/Art/Inventory/inventory_tabIcon_all_up.dds",
+                          "EsoUI/Art/Inventory/inventory_tabIcon_all_down.dds",
+                          "EsoUI/Art/Inventory/inventory_tabIcon_all_over.dds"))
+
+    ZO_MenuBar_ClearButtons(self.tabs)
+    for _, data in ipairs(self.quickslotFilters) do
+        ZO_MenuBar_AddButton(self.tabs, data)
+    end
+
+    ZO_MenuBar_SelectDescriptor(self.tabs, ITEMFILTERTYPE_QUICKSLOT)
 end
 
 function ZO_Quickslot_Keyboard:AreQuickSlotsShowing()
@@ -235,7 +247,7 @@ function ZO_Quickslot_Keyboard:ChangeFilter(filterData)
     self.currentFilter = filterData
     self.activeTab:SetText(filterData.activeTabText)
     self:UpdateList()
-    
+
     self.sortHeaders:SelectAndResetSortForKey(filterData.sortKey)
 
     local isNotItemFilter = self.currentFilter.descriptor ~= ITEMFILTERTYPE_QUICKSLOT
@@ -244,7 +256,11 @@ function ZO_Quickslot_Keyboard:ChangeFilter(filterData)
 end
 
 function ZO_Quickslot_Keyboard:ShouldAddItemToList(itemData)
-    return ZO_IsElementInNumericallyIndexedTable(itemData.filterData, ITEMFILTERTYPE_QUICKSLOT) and TEXT_SEARCH_MANAGER:IsDataInSearchTextResults("quickslotTextSearch", BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT, itemData.bagId, itemData.slotIndex)
+    local isUsable = true
+    if IsCurrentCampaignVengeanceRuleset() then
+        isUsable = not IsItemVisuallyDisabledInVengeance(itemData.bagId, itemData.slotIndex)
+    end
+    return isUsable and ZO_IsElementInNumericallyIndexedTable(itemData.filterData, ITEMFILTERTYPE_QUICKSLOT) and TEXT_SEARCH_MANAGER:IsDataInSearchTextResults("quickslotTextSearch", BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT, itemData.bagId, itemData.slotIndex)
 end
 
 function ZO_Quickslot_Keyboard:ShouldAddQuestItemToList(questItemData)
@@ -305,8 +321,14 @@ function ZO_Quickslot_Keyboard:UpdateList()
         self:AppendItemData(scrollData)
         self:AppendCollectiblesData(scrollData)
         self:AppendQuestItemData(scrollData)
+        if IsCurrentCampaignVengeanceRuleset() then
+            self:AppendVengeanceItemData(scrollData)
+        end
     elseif currentFilterType == ITEMFILTERTYPE_QUICKSLOT then
         self:AppendItemData(scrollData)
+        if IsCurrentCampaignVengeanceRuleset() then
+            self:AppendVengeanceItemData(scrollData)
+        end
     elseif currentFilterType == ITEMFILTERTYPE_COLLECTIBLE then
         local collectibleCategoryData = self.currentFilter.extraInfo
         self:AppendCollectiblesData(scrollData, collectibleCategoryData)
@@ -322,8 +344,7 @@ function ZO_Quickslot_Keyboard:UpdateList()
 end
 
 function ZO_Quickslot_Keyboard:AppendItemData(scrollData)
-    local bagSlots = GetBagSize(BAG_BACKPACK)
-    for slotIndex = 0, bagSlots - 1 do
+    for slotIndex in ZO_IterateBagSlots(BAG_BACKPACK) do
         local slotData = SHARED_INVENTORY:GenerateSingleSlotData(BAG_BACKPACK, slotIndex)
         if slotData and slotData.stackCount > 0 then
             local itemData =
@@ -413,8 +434,51 @@ function ZO_Quickslot_Keyboard:AppendQuestItemData(scrollData)
     end
 end
 
+function ZO_Quickslot_Keyboard:AppendVengeanceItemData(scrollData)
+    for slotIndex in ZO_IterateBagSlots(BAG_VENGEANCE) do
+        local slotData = SHARED_INVENTORY:GenerateSingleSlotData(BAG_VENGEANCE, slotIndex)
+        if slotData and slotData.stackCount > 0 then
+            local itemData =
+            {
+                iconFile = slotData.iconFile,
+                stackCount = slotData.stackCount,
+                sellPrice = slotData.sellPrice,
+                stackSellPrice = slotData.stackCount * slotData.sellPrice,
+                bagId = BAG_VENGEANCE,
+                slotIndex = slotIndex,
+                meetsUsageRequirement = slotData.meetsUsageRequirement,
+                locked = slotData.locked,
+                functionalQuality = slotData.functionalQuality,
+                displayQuality = slotData.displayQuality,
+                -- slotData.quality is deprecated, included here for addon backwards compatibility
+                quality = slotData.displayQuality,
+                slotType = SLOT_TYPE_ITEM,
+                filterData = { GetItemFilterTypeInfo(BAG_VENGEANCE, slotIndex) },
+                age = slotData.age,
+                stolen = IsItemStolen(BAG_VENGEANCE, slotIndex),
+                name = slotData.name or zo_strformat(SI_TOOLTIP_ITEM_NAME, GetItemName(BAG_VENGEANCE, slotIndex)),
+                isGemmable = slotData.isGemmable,
+                searchData =
+                {
+                    type = ZO_TEXT_SEARCH_TYPE_INVENTORY,
+                    bagId = BAG_VENGEANCE,
+                    slotIndex = slotIndex,
+                },
+            }
+
+            if self:ShouldAddItemToList(itemData) then
+                table.insert(scrollData, ZO_ScrollList_CreateDataEntry(DATA_TYPE_QUICKSLOT_ITEM, itemData))
+            end
+        end
+    end
+end
+
 local function UpdateNewStatusControl(control, data)
-    PLAYER_INVENTORY:UpdateNewStatus(INVENTORY_BACKPACK, data.slotIndex, data.bagId)
+    local inventoryTypeList = { INVENTORY_BACKPACK }
+    if IsCurrentCampaignVengeanceRuleset() then
+        table.insert(inventoryTypeList, INVENTORY_VENGEANCE)
+    end
+    PLAYER_INVENTORY:UpdateNewStatus(inventoryTypeList, data.slotIndex, data.bagId)
 end
 
 function ZO_Quickslot_Keyboard:SetUpQuickSlot(control, data)

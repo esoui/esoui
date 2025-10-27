@@ -132,6 +132,7 @@ end
 
 function ZO_HorizontalMenu_LabelHeader_MouseUp(control, upInside)
     if upInside and control.data.onSelectedCallback then
-       control.data.onSelectedCallback(control)
+        PlaySound(SOUNDS.LOGIN_SCREEN_TAB_CLICK)
+        control.data.onSelectedCallback(control)
     end
 end

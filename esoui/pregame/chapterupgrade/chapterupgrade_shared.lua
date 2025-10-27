@@ -103,7 +103,7 @@ end
 function ZO_ChapterUpgrade_Shared:Hide()
     if SCENE_MANAGER:IsShowing(self.sceneName) then
         SCENE_MANAGER:Hide(self.sceneName)
-        PregameStateManager_AdvanceState()
+        ZO_PregameStateManager_AdvanceState()
     end
 end
 

@@ -1314,6 +1314,12 @@ local AlertHandlers =
             return ALERT, zo_strformat(GetString("SI_RETURNINGPLAYERINSTANCEJUMPRESULT", result), activityName)
         end
     end,
+
+    [EVENT_VENGEANCE_ACTION_RESULT] = function(result)
+        if result ~= VENGEANCE_ACTION_RESULT_SUCCESS then
+            return ALERT, GetString("SI_VENGEANCEACTIONRESULT", result), SOUNDS.GENERAL_ALERT_ERROR
+        end
+    end,
 }
 
 ZO_AntiquityScryingResultsToAlert =

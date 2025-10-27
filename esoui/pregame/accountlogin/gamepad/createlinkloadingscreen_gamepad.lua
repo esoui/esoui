@@ -64,13 +64,13 @@ function ZO_CreateLinkLoading_Gamepad:InitKeybindingDescriptor()
                 if self.previousState == "AccountLogin" then
                     CancelLogin()
                 end
-                PregameStateManager_SetState(self.previousState)
+                ZO_PregameStateManager_SetState(self.previousState)
             end),
     }
 end
 
 local function OnSuccess()
-    PregameStateManager_AdvanceState()
+    ZO_PregameStateManager_AdvanceState()
 end
 
 local function OnLoggedIn()
@@ -78,11 +78,11 @@ local function OnLoggedIn()
 end
 
 local function OnWorldListReceived()
-    PregameStateManager_AdvanceState()
+    ZO_PregameStateManager_AdvanceState()
 end
 
 local function OnNoLink()
-    PregameStateManager_SetState("CreateLinkAccount")
+    ZO_PregameStateManager_SetState("CreateLinkAccount")
 end
 
 do
@@ -191,7 +191,7 @@ local function OnCreateLinkLoadingError(eventId, loginError, linkingError, debug
 
     if loginError == LOGIN_AUTH_ERROR_SERVER_PSN_FREE_TRIAL_END then
         local PSN_FREE_TRIAL_END = true
-        PregameStateManager_SetState("GameStartup", PSN_FREE_TRIAL_END)
+        ZO_PregameStateManager_SetState("GameStartup", PSN_FREE_TRIAL_END)
         return
     end
 
@@ -275,7 +275,7 @@ function ZO_CreateLinkLoading_Gamepad:RegisterEvents()
     self:RegisterForEvent(EVENT_CREATE_LINK_LOADING_ERROR, OnCreateLinkLoadingError)
 
     -- Misc.
-    RegisterForLoadingUpdates()
+    ZO_Pregame_RegisterForLoadingUpdates()
 end
 
 function ZO_CreateLinkLoading_Gamepad:UnregisterEvents()
@@ -374,7 +374,7 @@ function ZO_CreateLinkLoading_Gamepad:InitializeOtpDialog()
                 GAMEPAD_TOOLTIPS:LayoutTextBlockTooltip(GAMEPAD_LEFT_DIALOG_TOOLTIP, instructionText)
             else
                 ZO_Dialogs_ReleaseDialog(dialog)
-                PregameStateManager_ReenterLoginState()
+                ZO_PregameStateManager_ReenterLoginState()
             end
         end,
 
@@ -413,7 +413,7 @@ function ZO_CreateLinkLoading_Gamepad:InitializeOtpDialog()
                 text = SI_DIALOG_CANCEL,
                 callback = function(dialog)
                     ZO_Dialogs_ReleaseDialogOnButtonPress(dialogName)
-                    PregameStateManager_ReenterLoginState()
+                    ZO_PregameStateManager_ReenterLoginState()
                 end,
             },
         },

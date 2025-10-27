@@ -8,13 +8,18 @@ ZO_GAMEPAD_SPLIT_STACK_DIALOG = "GAMEPAD_SPLIT_STACK"
 local CATEGORY_ITEM_ACTION_MODE = 1
 local ITEM_LIST_ACTION_MODE = 2
 local CRAFT_BAG_ACTION_MODE = 3
+local VENGEANCE_CATEGORY_ITEM_ACTION_MODE = 4
+local VENGEANCE_ITEM_LIST_ACTION_MODE = 5
 
 local INVENTORY_TAB_INDEX = 1
 local CRAFT_BAG_TAB_INDEX = 2
+local VENGEANCE_TAB_INDEX = 3
 
 local INVENTORY_CATEGORY_LIST = "categoryList"
 local INVENTORY_ITEM_LIST = "itemList"
 local INVENTORY_CRAFT_BAG_LIST = "craftBagList"
+local INVENTORY_VENGEANCE_CATEGORY_LIST = "vengeanceCategoryList"
+local INVENTORY_VENGEANCE_ITEM_LIST = "vengeanceItemList"
 
 local BLOCK_TABBAR_CALLBACK = true
 
@@ -57,7 +62,7 @@ function ZO_GamepadInventory:Initialize(control)
     local function RefreshVisualLayer()
         if self.scene:IsShowing() then
             if self.actionMode == CATEGORY_ITEM_ACTION_MODE then
-                self:RefreshCategoryList()
+                self:RefreshActiveCategoryList()
             end
         end
     end
@@ -84,6 +89,8 @@ function ZO_GamepadInventory:OnDeferredInitialize()
     self:InitializeCategoryList()
     self:InitializeItemList()
     self:InitializeCraftBagList()
+    self:InitializeVengeanceCategoryList()
+    self:InitializeVengeanceItemList()
 
     self:InitializeHeader()
 
@@ -120,7 +127,7 @@ function ZO_GamepadInventory:OnDeferredInitialize()
             -- we only want to update immediately if we are in the gamepad inventory scene
             local currentList = self:GetCurrentList()
             if currentList == self.categoryList then
-                self:RefreshCategoryList()
+                self:RefreshActiveCategoryList()
             elseif currentList == self.itemList then
                 if self.selectedItemFilterType == ITEMFILTERTYPE_JEWELRY or self.selectedItemFilterType == ITEMFILTERTYPE_ARMOR or self.selectedItemFilterType == ITEMFILTERTYPE_WEAPONS then
                     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
@@ -162,8 +169,12 @@ function ZO_GamepadInventory:OnStateChanged(oldState, newState)
         local listToActivate = self.previousListType or INVENTORY_CATEGORY_LIST
         -- We normally do not want to enter the gamepad inventory on the item list
         -- the exception is if we are coming back to the inventory, like from looting a container
-        if listToActivate == INVENTORY_ITEM_LIST and not SCENE_MANAGER:WasSceneOnStack(ZO_GAMEPAD_INVENTORY_SCENE_NAME) then
-            listToActivate = INVENTORY_CATEGORY_LIST
+        if (listToActivate == INVENTORY_ITEM_LIST or listToActivate == INVENTORY_VENGEANCE_ITEM_LIST) and not SCENE_MANAGER:WasSceneOnStack(ZO_GAMEPAD_INVENTORY_SCENE_NAME) then
+            if listToActivate == INVENTORY_ITEM_LIST then
+                listToActivate = INVENTORY_CATEGORY_LIST
+            elseif listToActivate == INVENTORY_VENGEANCE_ITEM_LIST then
+                listToActivate = INVENTORY_VENGEANCE_CATEGORY_LIST
+            end
         end
 
         -- switching the active list will handle activating/refreshing header, keybinds, etc.
@@ -198,12 +209,19 @@ function ZO_GamepadInventory:OnUpdate(currentFrameTimeSeconds)
     if not currentFrameTimeSeconds or (self.nextUpdateTimeSeconds and (currentFrameTimeSeconds >= self.nextUpdateTimeSeconds)) then
         self.nextUpdateTimeSeconds = nil
 
-        if self.actionMode == ITEM_LIST_ACTION_MODE then
-            self:RefreshItemList()
+        if self.actionMode == ITEM_LIST_ACTION_MODE
+            or self.actionMode == VENGEANCE_ITEM_LIST_ACTION_MODE then
+            self:RefreshActiveItemList()
+
+            local currentList = self:GetCurrentList()
             -- it's possible we removed the last item from this list
             -- so we want to switch back to the category list
-            if self.itemList:IsEmpty() then
-                self:SwitchActiveList(INVENTORY_CATEGORY_LIST)
+            if currentList:IsEmpty() then
+                if currentList == self.itemList then
+                    self:SwitchActiveList(INVENTORY_CATEGORY_LIST)
+                else
+                    self:SwitchActiveList(INVENTORY_VENGEANCE_CATEGORY_LIST)
+                end
             else
                 -- don't refresh item actions if we are switching back to the category view
                 -- otherwise we get keybindstrip errors (Item actions will try to add an "A" keybind
@@ -214,8 +232,9 @@ function ZO_GamepadInventory:OnUpdate(currentFrameTimeSeconds)
         elseif self.actionMode == CRAFT_BAG_ACTION_MODE then
             self:RefreshCraftBagList()
             self:RefreshItemActions()
-        else -- CATEGORY_ITEM_ACTION_MODE
-            self:UpdateCategoryLeftTooltip(self.categoryList:GetTargetData())
+        else -- CATEGORY_ITEM_ACTION_MODE or VENGEANCE_CATEGORY_ITEM_ACTION_MODE
+            local activeCategoryList = self:GetActiveCategoryList()
+            self:UpdateCategoryLeftTooltip(activeCategoryList:GetTargetData())
             self:UpdateRightTooltip()
         end
     end
@@ -233,7 +252,7 @@ function ZO_GamepadInventory:OnUpdate(currentFrameTimeSeconds)
 end
 
 do
-    local GAMEPAD_INVENTORY_UPDATE_DELAY_S = .01
+    local GAMEPAD_INVENTORY_UPDATE_DELAY_S = 0.01
 
     function ZO_GamepadInventory:MarkDirty()
         if not self.nextUpdateTimeSeconds then
@@ -255,11 +274,15 @@ function ZO_GamepadInventory:OnInventoryShown()
     if HasFishInBag(INVENTORY_BACKPACK) then
         TriggerTutorial(TUTORIAL_TRIGGER_INVENTORY_OPENED_AND_FISH_PRESENT)
     end
+
+    if IsCurrentCampaignVengeanceRuleset() then
+        TriggerTutorial(TUTORIAL_TRIGGER_VENGEANCE_INVENTORY_OPENED)
+    end
 end
 
 function ZO_GamepadInventory:OnUpdateSearchResults()
-    self:RefreshCategoryList()
-    self:RefreshItemList()
+    self:RefreshActiveCategoryList()
+    self:RefreshActiveItemList()
     self:RefreshCraftBagList()
 end
 
@@ -276,7 +299,7 @@ function ZO_GamepadInventory:SwitchActiveList(listDescriptor, selectDefaultEntry
     self.previousListType = self.currentListType
     self.currentListType = listDescriptor
 
-    if self.previousListType == INVENTORY_ITEM_LIST then
+    if self.previousListType == INVENTORY_ITEM_LIST or self.previousListType == INVENTORY_VENGEANCE_ITEM_LIST then
         self.listWaitingOnDestroyRequest = nil
         self:TryClearNewStatusOnHidden()
         ZO_SavePlayerConsoleProfile()
@@ -293,7 +316,7 @@ function ZO_GamepadInventory:SwitchActiveList(listDescriptor, selectDefaultEntry
 
             --ESO-714374: Order matters as we need to set the current list to CategoryList before we refresh it and need to activate the keybinds last to avoid duplicate keybinds.
             self:SetCurrentList(self.categoryList)
-            self:RefreshCategoryList(selectDefaultEntry)
+            self:RefreshActiveCategoryList(selectDefaultEntry)
 
             -- For the case where the previous list didn't have any selectible items which would allow the header to be exited we need to attempt
             -- to exit the header again if there are items in the new list (which there will be in this case as Category List has Currency)
@@ -311,8 +334,9 @@ function ZO_GamepadInventory:SwitchActiveList(listDescriptor, selectDefaultEntry
         elseif listDescriptor == INVENTORY_ITEM_LIST then
             self:SetActiveKeybinds(self.itemFilterKeybindStripDescriptor)
 
-            self:RefreshItemList(selectDefaultEntry)
+            -- Order matters as we need to set the current list before we refresh it and need to activate the keybinds last to avoid duplicate keybinds.
             self:SetCurrentList(self.itemList)
+            self:RefreshActiveItemList(selectDefaultEntry)
 
             if self.selectedItemFilterType == ITEMFILTERTYPE_QUICKSLOT then
                 TriggerTutorial(TUTORIAL_TRIGGER_INVENTORY_OPENED_AND_QUICKSLOTS_AVAILABLE)
@@ -343,6 +367,44 @@ function ZO_GamepadInventory:SwitchActiveList(listDescriptor, selectDefaultEntry
             self:LayoutCraftBagTooltip(GAMEPAD_RIGHT_TOOLTIP)
 
             TriggerTutorial(TUTORIAL_TRIGGER_CRAFT_BAG_OPENED)
+        elseif listDescriptor == INVENTORY_VENGEANCE_CATEGORY_LIST then
+            self:OnInventoryShown()
+
+            --ESO-714374: Order matters as we need to set the current list before we refresh it and need to activate the keybinds last to avoid duplicate keybinds.
+            self:SetCurrentList(self.vengeanceCategoryList)
+            self:RefreshActiveCategoryList(selectDefaultEntry)
+
+            -- For the case where the previous list didn't have any selectible items which would allow the header to be exited we need to attempt
+            -- to exit the header again if there are items in the new list (which there will be in this case as Category List has Currency)
+            -- so that we can ensure that the header and main list will not be active at the same time, which would cause a keybind conflict
+            if self:IsHeaderActive() then
+                self:RequestLeaveHeader()
+            end
+
+            self:SetActiveKeybinds(self.categoryListKeybindStripDescriptor)
+
+            self:SetSelectedItemUniqueId(self:GenerateItemSlotData(self.vengeanceCategoryList:GetTargetData()))
+            self.actionMode = VENGEANCE_CATEGORY_ITEM_ACTION_MODE
+            self:RefreshHeader()
+            self:ActivateHeader()
+        elseif listDescriptor == INVENTORY_VENGEANCE_ITEM_LIST then
+            self:SetActiveKeybinds(self.itemFilterKeybindStripDescriptor)
+
+            -- Order matters as we need to set the current list before we refresh it and need to activate the keybinds last to avoid duplicate keybinds.
+            self:SetCurrentList(self.vengeanceItemList)
+            self:RefreshActiveItemList(selectDefaultEntry)
+
+            if self.selectedItemFilterType == ITEMFILTERTYPE_QUICKSLOT then
+                TriggerTutorial(TUTORIAL_TRIGGER_INVENTORY_OPENED_AND_QUICKSLOTS_AVAILABLE)
+            end
+
+            self:SetSelectedItemUniqueId(self.vengeanceItemList:GetTargetData())
+            self.actionMode = VENGEANCE_ITEM_LIST_ACTION_MODE
+            self:RefreshItemActions()
+            self:UpdateItemLeftTooltip(self.vengeanceItemList:GetTargetData())
+            self:UpdateRightTooltip()
+            self:RefreshHeader(BLOCK_TABBAR_CALLBACK)
+            self:DeactivateHeader()
         end
 
         self:RefreshKeybinds()
@@ -538,12 +600,14 @@ function ZO_GamepadInventory:OnActionsDialogFinished()
         -- make sure to wipe out the keybinds added by actions
         self:SetActiveKeybinds(self.keybindStripDescriptor)
         --restore the selected inventory item
-        if self.actionMode == CATEGORY_ITEM_ACTION_MODE then
+        if self.actionMode == CATEGORY_ITEM_ACTION_MODE
+            or self.actionMode == VENGENCE_CATEGORY_ITEM_ACTION_MODE then
             --if we refresh item actions we will get a keybind conflict
+            local activeCategoryList = self:GetActiveCategoryList()
             local currentList = self:GetCurrentList()
             if currentList then
                 local targetData = currentList:GetTargetData()
-                if currentList == self.categoryList then
+                if currentList == activeCategoryList then
                     targetData = self:GenerateItemSlotData(targetData)
                 end
                 self:SetSelectedItemUniqueId(targetData)
@@ -555,8 +619,9 @@ function ZO_GamepadInventory:OnActionsDialogFinished()
         self:RefreshKeybinds()
 
         self:OnUpdate()
-        if self.actionMode == CATEGORY_ITEM_ACTION_MODE then
-            self:RefreshCategoryList()
+        if self.actionMode == CATEGORY_ITEM_ACTION_MODE
+            or self.actionMode == VENGEANCE_CATEGORY_ITEM_ACTION_MODE then
+            self:RefreshActiveCategoryList()
         end
     end
 end
@@ -588,7 +653,8 @@ function ZO_GamepadInventory:InitializeKeybindStrip()
                 end
             end,
             visible = function()
-                if self.categoryList:IsEmpty() or not self.currentlySelectedData or self.currentlySelectedData.isCurrencyEntry then
+                local activeCategoryList = self:GetActiveCategoryList()
+                if activeCategoryList:IsEmpty() or not self.currentlySelectedData or self.currentlySelectedData.isCurrencyEntry then
                     return false
                 end
 
@@ -612,7 +678,8 @@ function ZO_GamepadInventory:InitializeKeybindStrip()
             order = 1500,
             disabledDuringSceneHiding = true,
             callback = function()
-                StackBag(BAG_BACKPACK)
+                local backingBag = self:GetBackingBag()
+                StackBag(backingBag)
             end,
         },
         {
@@ -621,7 +688,8 @@ function ZO_GamepadInventory:InitializeKeybindStrip()
             order = 2000,
             disabledDuringSceneHiding = true,
             visible = function()
-                return IsESOPlusSubscriber() and CanAnyItemsBeStoredInCraftBag(BAG_BACKPACK)
+                local backingBag = self:GetBackingBag()
+                return IsESOPlusSubscriber() and CanAnyItemsBeStoredInCraftBag(backingBag)
             end,
             callback = function()
                 ZO_Inventory_TryStowAllMaterials()
@@ -668,12 +736,14 @@ function ZO_GamepadInventory:InitializeKeybindStrip()
 
             visible = function()
                 if IsQuickSlotEnabled() then
-                    local targetData = self.itemList:GetTargetData()
+                    local activeItemList = self:GetActiveItemList()
+                    local targetData = activeItemList:GetTargetData()
                     if targetData and ZO_InventorySlot_CanQuickslotItem(targetData) then
                         return true
                     end
                 elseif IsCompareModeEnabled() then
-                    local targetCategoryData = self.categoryList:GetTargetData()
+                    local activeCategoryList = self:GetActiveCategoryList()
+                    local targetCategoryData = activeCategoryList:GetTargetData()
                     if targetCategoryData then
                         local equipSlotHasItem = GetWornItemInfo(BAG_WORN, targetCategoryData.equipSlot)
                         return equipSlotHasItem
@@ -688,7 +758,8 @@ function ZO_GamepadInventory:InitializeKeybindStrip()
                     self.savedVars.useStatComparisonTooltip = not self.savedVars.useStatComparisonTooltip
                     self:UpdateRightTooltip()
                     --Re-narrate when the stat comparison tooltip is toggled
-                    SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.itemList)
+                    local activeItemList = self:GetActiveItemList()
+                    SCREEN_NARRATION_MANAGER:QueueParametricListEntry(activeItemList)
                 end
             end,
         },
@@ -703,7 +774,8 @@ function ZO_GamepadInventory:InitializeKeybindStrip()
                     return true
                 end
 
-                local inventorySlot = self.itemList:GetTargetData()
+                local activeItemList = self:GetActiveItemList()
+                local inventorySlot = activeItemList:GetTargetData()
                 if inventorySlot ~= nil and inventorySlot.dataSource ~= nil and inventorySlot.dataSource.questIndex ~= nil and inventorySlot.dataSource.questIndex > 0 then
                     return self.selectedItemFilterType == ITEMFILTERTYPE_QUEST
                 end
@@ -723,7 +795,8 @@ function ZO_GamepadInventory:InitializeKeybindStrip()
             name = GetString(SI_ITEM_ACTION_STACK_ALL),
 
             callback = function()
-                StackBag(BAG_BACKPACK)
+                local backingBag = self:GetBackingBag()
+                StackBag(backingBag)
             end,
         },
         {
@@ -734,15 +807,17 @@ function ZO_GamepadInventory:InitializeKeybindStrip()
             name = GetString(SI_ITEM_ACTION_DESTROY),
 
             visible = function()
-                local targetData = self.itemList:GetTargetData()
+                local activeItemList = self:GetActiveItemList()
+                local targetData = activeItemList:GetTargetData()
                 return self.selectedItemUniqueId ~= nil and targetData ~= nil and ZO_InventorySlot_CanDestroyItem(targetData)
             end,
 
             callback = function()
-                local targetData = self.itemList:GetTargetData()
+                local activeItemList = self:GetActiveItemList()
+                local targetData = activeItemList:GetTargetData()
                 if ZO_InventorySlot_CanDestroyItem(targetData) and ZO_InventorySlot_InitiateDestroyItem(targetData) then
-                    self.itemList:Deactivate()
-                    self.listWaitingOnDestroyRequest = self.itemList
+                    activeItemList:Deactivate()
+                    self.listWaitingOnDestroyRequest = activeItemList
                 end
             end
         },
@@ -762,7 +837,8 @@ function ZO_GamepadInventory:InitializeKeybindStrip()
 
             visible = function()
                 if not IsCurrentlyPreviewing() then
-                    local targetData = self.itemList:GetTargetData()
+                    local activeItemList = self:GetActiveItemList()
+                    local targetData = activeItemList:GetTargetData()
                     return self:CanEntryDataBePreviewed(targetData) and IsCharacterPreviewingAvailable()
                 end
 
@@ -773,13 +849,14 @@ function ZO_GamepadInventory:InitializeKeybindStrip()
                 if IsCurrentlyPreviewing() then
                     self:EndPreview()
                 else
-                    local targetData = self.itemList:GetTargetData()
+                    local activeItemList = self:GetActiveItemList()
+                    local targetData = activeItemList:GetTargetData()
                     if targetData ~= nil then
                         self:PreviewInventoryItem(targetData.bagId, targetData.slotIndex)
                     end
                 end
                 self:RefreshKeybinds()
-                SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.itemList)
+                SCREEN_NARRATION_MANAGER:QueueParametricListEntry(activeItemList)
             end,
         },
     }
@@ -808,6 +885,10 @@ end
 function ZO_GamepadInventory:OnBackButtonClicked()
    if self.currentListType == INVENTORY_ITEM_LIST or self.itemList:IsActive() then
         self:SwitchActiveList(INVENTORY_CATEGORY_LIST)
+        PlaySound(SOUNDS.GAMEPAD_MENU_BACK)
+        self:EndPreview()
+    elseif self.currentListType == INVENTORY_VENGEANCE_ITEM_LIST or self.vengeanceItemList:IsActive() then
+        self:SwitchActiveList(INVENTORY_VENGEANCE_CATEGORY_LIST)
         PlaySound(SOUNDS.GAMEPAD_MENU_BACK)
         self:EndPreview()
     else
@@ -862,20 +943,22 @@ function ZO_GamepadInventory:RequestLeaveHeader()
 
     local targetData
     local actionMode = self.actionMode
-    if actionMode == ITEM_LIST_ACTION_MODE then
-        targetData = self.itemList:GetTargetData()
-
-        if self:GetCurrentList() and self:GetCurrentList():IsActive() then
+    if actionMode == ITEM_LIST_ACTION_MODE
+        or actionMode == VENGEANCE_ITEM_LIST_ACTION_MODE then
+        local activeItemList = self:GetActiveItemList()
+        if activeItemList:IsActive() then
+            targetData = activeItemList:GetTargetData()
             self:SetSelectedInventoryData(targetData)
         end
     elseif actionMode == CRAFT_BAG_ACTION_MODE then
-        targetData = self.craftBagList:GetTargetData()
-
-        if self:GetCurrentList() and self:GetCurrentList():IsActive() then
+        local currentList = self:GetCurrentList()
+        if currentList and currentList:IsActive() then
+            targetData = self.craftBagList:GetTargetData()
             self:SetSelectedInventoryData(targetData)
         end
-    else -- CATEGORY_ITEM_ACTION_MODE
-        targetData = self:GenerateItemSlotData(self.categoryList:GetTargetData())
+    else -- CATEGORY_ITEM_ACTION_MODE and VENGENCE_CATEGORY_ACTION_MODE
+        local activeCategoryList = self:GetActiveCategoryList()
+        targetData = self:GenerateItemSlotData(activeCategoryList:GetTargetData())
         self:UpdateCategoryLeftTooltip(self.currentlySelectedData)
         self:UpdateRightTooltip()
     end
@@ -888,20 +971,51 @@ function ZO_GamepadInventory:InitializeItemActions()
     self.itemActions = ZO_ItemSlotActionsController:New(KEYBIND_STRIP_ALIGN_LEFT)
 end
 
+function ZO_GamepadInventory:GetBackingBag()
+    local currentList = self:GetCurrentList()
+    if currentList == self.vengeanceCategoryList or currentList == self.vengeanceItemList then
+        return BAG_VENGEANCE
+    else
+        return BAG_BACKPACK
+    end
+end
+
+function ZO_GamepadInventory:GetActiveCategoryList()
+    local currentList = self:GetCurrentList()
+    if currentList == self.vengeanceCategoryList or currentList == self.vengeanceItemList then
+       return self.vengeanceCategoryList
+    else
+        return self.categoryList
+    end
+end
+
+function ZO_GamepadInventory:GetActiveItemList()
+    local currentList = self:GetCurrentList()
+    if currentList == self.vengeanceCategoryList or currentList == self.vengeanceItemList then
+       return self.vengeanceItemList
+    else
+        return self.itemList
+    end
+end
+
 -- Calling this function will add keybinds to the strip, likely using the primary key
 -- The primary key will conflict with the category keybind descriptor if added
 function ZO_GamepadInventory:RefreshItemActions()
     local targetData
     local actionMode = self.actionMode
-    if actionMode == ITEM_LIST_ACTION_MODE then
-        targetData = self.itemList:GetTargetData()
+    if actionMode == ITEM_LIST_ACTION_MODE
+        or actionMode == VENGEANCE_ITEM_LIST_ACTION_MODE then
+        local activeItemList = self:GetActiveItemList()
+        targetData = activeItemList:GetTargetData()
     elseif actionMode == CRAFT_BAG_ACTION_MODE then
         targetData = self.craftBagList:GetTargetData()
-    else -- CATEGORY_ITEM_ACTION_MODE
-        targetData = self:GenerateItemSlotData(self.categoryList:GetTargetData())
+    else -- CATEGORY_ITEM_ACTION_MODE and VENGEANCE_CATEGORY_ITEM_ACTION_MODE
+        local activeCategoryList = self:GetActiveCategoryList()
+        targetData = self:GenerateItemSlotData(activeCategoryList:GetTargetData())
     end
 
-    if self:GetCurrentList() and self:GetCurrentList():IsActive() then
+    local currentList = self:GetCurrentList()
+    if currentList and currentList:IsActive() then
         self:SetSelectedInventoryData(targetData)
     end
 
@@ -983,39 +1097,44 @@ function ZO_GamepadInventory.AreCategoryListEntriesEqual(entry1, entry2)
     return entry1 == entry2 or entry1.text == entry2.text
 end
 
+function ZO_GamepadInventory:SetupCategoryList(list)
+    list:AddDataTemplate("ZO_GamepadItemEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, ZO_GamepadInventory.AreCategoryListEntriesEqual)
+    list:AddDataTemplateWithHeader("ZO_GamepadItemEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, ZO_GamepadInventory.AreCategoryListEntriesEqual, "ZO_GamepadMenuEntryHeaderTemplate")
+    list:SetReselectBehavior(ZO_PARAMETRIC_SCROLL_LIST_RESELECT_BEHAVIOR.MATCH_OR_RESET_TO_DEFAULT)
+end
+
+--Match the tooltip to the selected data because it looks nicer
+function ZO_GamepadInventory:OnSelectedCategoryChanged(list, selectedData)
+    self:UpdateCategoryLeftTooltip(selectedData)
+    self:UpdateRightTooltip()
+end
+
+--Match the functionality to the target data
+function ZO_GamepadInventory:OnTargetCategoryChanged(list, targetData, oldTargetData)
+    if targetData then
+        self.selectedEquipSlot = targetData.equipSlot
+        self:SetSelectedItemUniqueId(self:GenerateItemSlotData(targetData))
+        self.selectedItemFilterType = targetData.filterType
+    else
+        self:SetSelectedItemUniqueId(nil)
+    end
+
+    self.currentlySelectedData = targetData
+    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.categoryListKeybindStripDescriptor)
+end
+
 function ZO_GamepadInventory:InitializeCategoryList()
-    local function SetupCategoryList(list)
-        list:AddDataTemplate("ZO_GamepadItemEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, ZO_GamepadInventory.AreCategoryListEntriesEqual)
-        list:AddDataTemplateWithHeader("ZO_GamepadItemEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, ZO_GamepadInventory.AreCategoryListEntriesEqual, "ZO_GamepadMenuEntryHeaderTemplate")
-        list:SetReselectBehavior(ZO_PARAMETRIC_SCROLL_LIST_RESELECT_BEHAVIOR.MATCH_OR_RESET_TO_DEFAULT)
-    end
-
-    self.categoryList = self:AddList("Category", SetupCategoryList)
+    self.categoryList = self:AddList("Category", function(...) self:SetupCategoryList(...) end)
     self.categoryList:SetNoItemText(GetString(SI_GAMEPAD_INVENTORY_EMPTY))
+    self.categoryList:SetOnSelectedDataChangedCallback(function(...) self:OnSelectedCategoryChanged(...) end)
+    self.categoryList:SetOnTargetDataChangedCallback(function(...) self:OnTargetCategoryChanged(...) end)
+end
 
-    --Match the tooltip to the selected data because it looks nicer
-    local function OnSelectedCategoryChanged(list, selectedData)
-        self:UpdateCategoryLeftTooltip(selectedData)
-        self:UpdateRightTooltip()
-    end
-
-    self.categoryList:SetOnSelectedDataChangedCallback(OnSelectedCategoryChanged)
-
-    --Match the functionality to the target data
-    local function OnTargetCategoryChanged(list, targetData, oldTargetData)
-        if targetData then
-            self.selectedEquipSlot = targetData.equipSlot
-            self:SetSelectedItemUniqueId(self:GenerateItemSlotData(targetData))
-            self.selectedItemFilterType = targetData.filterType
-        else
-            self:SetSelectedItemUniqueId(nil)
-        end
-
-        self.currentlySelectedData = targetData
-        KEYBIND_STRIP:UpdateKeybindButtonGroup(self.categoryListKeybindStripDescriptor)
-    end
-
-    self.categoryList:SetOnTargetDataChangedCallback(OnTargetCategoryChanged)
+function ZO_GamepadInventory:InitializeVengeanceCategoryList()
+    self.vengeanceCategoryList = self:AddList("VengeanceCategory", function(...) self:SetupCategoryList(...) end)
+    self.vengeanceCategoryList:SetNoItemText(GetString(SI_GAMEPAD_INVENTORY_EMPTY))
+    self.vengeanceCategoryList:SetOnSelectedDataChangedCallback(function(...) self:OnSelectedCategoryChanged(...) end)
+    self.vengeanceCategoryList:SetOnTargetDataChangedCallback(function(...) self:OnTargetCategoryChanged(...) end)
 end
 
 local function GetCategoryTypeFromWeaponType(bagId, slotIndex)
@@ -1045,12 +1164,14 @@ end
 function ZO_GamepadInventory:AddFilteredBackpackCategoryIfPopulated(filterType, iconFile)
     local isListEmpty = self:IsItemListEmpty(nil, filterType)
     if not isListEmpty then
+        local backingBag = self:GetBackingBag()
+        local activeCategoryList = self:GetActiveCategoryList()
         local name = GetString("SI_ITEMFILTERTYPE", filterType)
-        local hasAnyNewItems = SHARED_INVENTORY:AreAnyItemsNew(ZO_InventoryUtils_DoesNewItemMatchFilterType, filterType, BAG_BACKPACK)
+        local hasAnyNewItems = SHARED_INVENTORY:AreAnyItemsNew(ZO_InventoryUtils_DoesNewItemMatchFilterType, filterType, backingBag)
         local data = ZO_GamepadEntryData:New(name, iconFile, nil, nil, hasAnyNewItems)
         data.filterType = filterType
         data:SetIconTintOnSelection(true)
-        self.categoryList:AddEntry("ZO_GamepadItemEntryTemplate", data)
+        activeCategoryList:AddEntry("ZO_GamepadItemEntryTemplate", data)
     end
 end
 
@@ -1058,87 +1179,93 @@ function ZO_GamepadInventory:GetQuestItemDataFilterComparator(questItemId)
     return self:IsDataInSearchTextResults(ZO_QUEST_ITEMS_FILTER_BAG, questItemId)
 end
 
-function ZO_GamepadInventory:RefreshCategoryList(selectDefaultEntry, forceUpdate)
-    if self.currentListType == INVENTORY_CATEGORY_LIST or self.categoryList:IsActive() or forceUpdate then
-        self.categoryList:Clear()
+function ZO_GamepadInventory:RefreshActiveCategoryList(selectDefaultEntry, forceUpdate)
+    local activeCategoryList = self:GetActiveCategoryList()
+    local backingBag = self:GetBackingBag()
 
-        --Mundus Entries
-        self.mundusEntries = {}
-        local activeMundusStoneBuffIndices = { GetUnitActiveMundusStoneBuffIndices("player") }
-        local numActiveMundusStoneBuffs = #activeMundusStoneBuffIndices
-        local numMundusSlots = GetNumAvailableMundusStoneSlots()
-        local isPlayerAtMundusWarningLevel = GetUnitLevel("player") >= GetMundusWarningLevel()
-        for i = 1, numMundusSlots do
-            local mundusEntry = nil
-            if numActiveMundusStoneBuffs >= i then
-                local buffName, _, _, buffSlot, _, _, _, _, _, _, abilityId = GetUnitBuffInfo("player", activeMundusStoneBuffIndices[i])
-                local mundusStoneIndex = GetAbilityMundusStoneType(abilityId)
-                mundusEntry = ZO_GamepadEntryData:New(zo_strformat(SI_STATS_MUNDUS_FORMATTER, buffName), ZO_STAT_MUNDUS_ICONS[mundusStoneIndex])
-                mundusEntry.data =
-                {
-                    name = buffName,
-                    description = GetAbilityEffectDescription(buffSlot),
-                    mundusBuffIndex = activeMundusStoneBuffIndices[i],
-                    statEffects = {},
-                }
-                local numStatsForAbility = GetAbilityNumDerivedStats(abilityId)
-                for i = 1, numStatsForAbility do
-                    local statType, effectValue = GetAbilityDerivedStatAndEffectByIndex(abilityId, i)
-                    local statEffect =
+    if activeCategoryList or forceUpdate then
+        activeCategoryList:Clear()
+
+        local numMundusSlots = 0
+        if activeCategoryList == self.categoryList then
+            --Mundus Entries
+            self.mundusEntries = {}
+            local activeMundusStoneBuffIndices = { GetUnitActiveMundusStoneBuffIndices("player") }
+            local numActiveMundusStoneBuffs = #activeMundusStoneBuffIndices
+            numMundusSlots = GetNumAvailableMundusStoneSlots()
+            local isPlayerAtMundusWarningLevel = GetUnitLevel("player") >= GetMundusWarningLevel()
+            for i = 1, numMundusSlots do
+                local mundusEntry = nil
+                if numActiveMundusStoneBuffs >= i then
+                    local buffName, _, _, buffSlot, _, _, _, _, _, _, abilityId = GetUnitBuffInfo("player", activeMundusStoneBuffIndices[i])
+                    local mundusStoneIndex = GetAbilityMundusStoneType(abilityId)
+                    mundusEntry = ZO_GamepadEntryData:New(zo_strformat(SI_STATS_MUNDUS_FORMATTER, buffName), ZO_STAT_MUNDUS_ICONS[mundusStoneIndex])
+                    mundusEntry.data =
                     {
-                        statType = statType,
-                        effect = effectValue,
+                        name = buffName,
+                        description = GetAbilityEffectDescription(buffSlot),
+                        mundusBuffIndex = activeMundusStoneBuffIndices[i],
+                        statEffects = {},
                     }
-                    table.insert(mundusEntry.data.statEffects, statEffect)
-                end
-                self.mundusAdvancedStats = {}
-                local numAdvancedStatsForAbility = GetAbilityNumAdvancedStats(abilityId)
-                for i = 1, numAdvancedStatsForAbility do
-                    local statType, statFormat, effectValue = GetAbilityAdvancedStatAndEffectByIndex(abilityId, i)
-                    local statEffect =
+                    local numStatsForAbility = GetAbilityNumDerivedStats(abilityId)
+                    for i = 1, numStatsForAbility do
+                        local statType, effectValue = GetAbilityDerivedStatAndEffectByIndex(abilityId, i)
+                        local statEffect =
+                        {
+                            statType = statType,
+                            effect = effectValue,
+                        }
+                        table.insert(mundusEntry.data.statEffects, statEffect)
+                    end
+                    self.mundusAdvancedStats = {}
+                    local numAdvancedStatsForAbility = GetAbilityNumAdvancedStats(abilityId)
+                    for i = 1, numAdvancedStatsForAbility do
+                        local statType, statFormat, effectValue = GetAbilityAdvancedStatAndEffectByIndex(abilityId, i)
+                        local statEffect =
+                        {
+                            statType = statType,
+                            format = statFormat,
+                            value = effectValue,
+                        }
+                        table.insert(self.mundusAdvancedStats, statEffect)
+                    end
+                elseif numMundusSlots >= i then
+                    mundusEntry =  ZO_GamepadEntryData:New(GetString("SI_MUNDUSSTONE", MUNDUS_STONE_INVALID), ZO_STAT_MUNDUS_ICONS[MUNDUS_STONE_INVALID])
+                    mundusEntry.data =
                     {
-                        statType = statType,
-                        format = statFormat,
-                        value = effectValue,
+                        name = GetString(SI_STATS_MUNDUS_NONE_TOOLTIP_TITLE),
+                        description = GetString(SI_STATS_MUNDUS_NONE_TOOLTIP_DESCRIPTION),
                     }
-                    table.insert(self.mundusAdvancedStats, statEffect)
+                    if isPlayerAtMundusWarningLevel then
+                        mundusEntry:SetNameColors(ZO_ERROR_COLOR, ZO_ERROR_COLOR)
+                        mundusEntry:SetIconTint(ZO_ERROR_COLOR, ZO_ERROR_COLOR)
+                    else
+                        local USE_DEFAULT_COLORS = nil
+                        mundusEntry:SetNameColors(USE_DEFAULT_COLORS, USE_DEFAULT_COLORS)
+                        mundusEntry:SetIconTint(USE_DEFAULT_COLORS, USE_DEFAULT_COLORS)
+                    end
                 end
-            elseif numMundusSlots >= i then
-                mundusEntry =  ZO_GamepadEntryData:New(GetString("SI_MUNDUSSTONE", MUNDUS_STONE_INVALID), ZO_STAT_MUNDUS_ICONS[MUNDUS_STONE_INVALID])
-                mundusEntry.data =
-                {
-                    name = GetString(SI_STATS_MUNDUS_NONE_TOOLTIP_TITLE),
-                    description = GetString(SI_STATS_MUNDUS_NONE_TOOLTIP_DESCRIPTION),
-                }
-                if isPlayerAtMundusWarningLevel then
-                    mundusEntry:SetNameColors(ZO_ERROR_COLOR, ZO_ERROR_COLOR)
-                    mundusEntry:SetIconTint(ZO_ERROR_COLOR, ZO_ERROR_COLOR)
-                else
-                    local USE_DEFAULT_COLORS = nil
-                    mundusEntry:SetNameColors(USE_DEFAULT_COLORS, USE_DEFAULT_COLORS)
-                    mundusEntry:SetIconTint(USE_DEFAULT_COLORS, USE_DEFAULT_COLORS)
+                if mundusEntry then
+                    mundusEntry.isMundusEntry = true
+                    if i == 1 then
+                        mundusEntry:SetHeader(GetString(SI_STATS_MUNDUS_TITLE))
+                        activeCategoryList:AddEntry("ZO_GamepadItemEntryTemplateWithHeader", mundusEntry)
+                    else
+                        activeCategoryList:AddEntry("ZO_GamepadItemEntryTemplate", mundusEntry)
+                    end
                 end
             end
-            if mundusEntry then
-                mundusEntry.isMundusEntry = true
-                if i == 1 then
-                    mundusEntry:SetHeader(GetString(SI_STATS_MUNDUS_TITLE))
-                    self.categoryList:AddEntry("ZO_GamepadItemEntryTemplateWithHeader", mundusEntry)
-                else
-                    self.categoryList:AddEntry("ZO_GamepadItemEntryTemplate", mundusEntry)
-                end
-            end
-        end
 
-        -- Currencies
-        do
-            local name = GetString(SI_INVENTORY_CURRENCIES)
-            local iconFile = "EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_currencies.dds"
-            local data = ZO_GamepadEntryData:New(name, iconFile, nil, nil, false)
-            data.isCurrencyEntry = true
-            data:SetIconTintOnSelection(true)
-            self.categoryList:AddEntry("ZO_GamepadItemEntryTemplateWithHeader", data)
-            data:SetHeader(GetString(SI_GAMEPAD_INVENTORY_PACK_CATEGORY_HEADER))
+            -- Currencies
+            do
+                local name = GetString(SI_INVENTORY_CURRENCIES)
+                local iconFile = "EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_currencies.dds"
+                local data = ZO_GamepadEntryData:New(name, iconFile, nil, nil, false)
+                data.isCurrencyEntry = true
+                data:SetIconTintOnSelection(true)
+                activeCategoryList:AddEntry("ZO_GamepadItemEntryTemplateWithHeader", data)
+                data:SetHeader(GetString(SI_GAMEPAD_INVENTORY_PACK_CATEGORY_HEADER))
+            end
         end
 
         -- Supplies
@@ -1150,10 +1277,10 @@ function ZO_GamepadInventory:RefreshCategoryList(selectDefaultEntry, forceUpdate
             if not isListEmpty then
                 local name = GetString(SI_INVENTORY_SUPPLIES)
                 local iconFile = "EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_all.dds"
-                local hasAnyNewItems = SHARED_INVENTORY:AreAnyItemsNew(ZO_InventoryUtils_DoesNewItemMatchSupplies, nil, BAG_BACKPACK)
+                local hasAnyNewItems = SHARED_INVENTORY:AreAnyItemsNew(ZO_InventoryUtils_DoesNewItemMatchSupplies, nil, backingBag)
                 local data = ZO_GamepadEntryData:New(name, iconFile, nil, nil, hasAnyNewItems)
                 data:SetIconTintOnSelection(true)
-                self.categoryList:AddEntry("ZO_GamepadItemEntryTemplate", data)
+                activeCategoryList:AddEntry("ZO_GamepadItemEntryTemplate", data)
             end
         end
 
@@ -1161,7 +1288,9 @@ function ZO_GamepadInventory:RefreshCategoryList(selectDefaultEntry, forceUpdate
         self:AddFilteredBackpackCategoryIfPopulated(ITEMFILTERTYPE_CRAFTING, "EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_materials.dds")
 
         -- Consumables
-        self:AddFilteredBackpackCategoryIfPopulated(ITEMFILTERTYPE_QUICKSLOT, "EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_quickslot.dds")
+        if not (backingBag == BAG_BACKPACK and IsCurrentCampaignVengeanceRuleset()) then
+            self:AddFilteredBackpackCategoryIfPopulated(ITEMFILTERTYPE_QUICKSLOT, "EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_quickslot.dds")
+        end
 
         -- Furnishing
         self:AddFilteredBackpackCategoryIfPopulated(ITEMFILTERTYPE_FURNISHING, "EsoUI/Art/Crafting/Gamepad/gp_crafting_menuIcon_furnishings.dds")
@@ -1187,7 +1316,7 @@ function ZO_GamepadInventory:RefreshCategoryList(selectDefaultEntry, forceUpdate
                 local data = ZO_GamepadEntryData:New(name, iconFile)
                 data.filterType = ITEMFILTERTYPE_QUEST
                 data:SetIconTintOnSelection(true)
-                self.categoryList:AddEntry("ZO_GamepadItemEntryTemplate", data)
+                activeCategoryList:AddEntry("ZO_GamepadItemEntryTemplate", data)
             end
         end
 
@@ -1223,7 +1352,7 @@ function ZO_GamepadInventory:RefreshCategoryList(selectDefaultEntry, forceUpdate
                     return ZO_Character_DoesEquipSlotUseEquipType(equipSlot, itemData.equipType) and itemData.actorCategory ~= GAMEPLAY_ACTOR_CATEGORY_COMPANION
                 end
 
-                local hasAnyNewItems = SHARED_INVENTORY:AreAnyItemsNew(DoesNewItemMatchEquipSlot, nil, BAG_BACKPACK)
+                local hasAnyNewItems = SHARED_INVENTORY:AreAnyItemsNew(DoesNewItemMatchEquipSlot, nil, backingBag)
 
                 local data = ZO_GamepadEntryData:New(name, iconFile, nil, nil, hasAnyNewItems)
                 data:SetMaxIconAlpha(offhandTransparency)
@@ -1237,20 +1366,20 @@ function ZO_GamepadInventory:RefreshCategoryList(selectDefaultEntry, forceUpdate
                 --Headers for Equipment Visual Categories (Weapons, Apparel, Accessories): display header for the first equip slot of a category to be visible 
                 local visualCategory = ZO_Character_GetEquipSlotVisualCategory(equipSlot)
                 if headersUsed[visualCategory] == nil then
-                    self.categoryList:AddEntry("ZO_GamepadItemEntryTemplateWithHeader", data)
+                    activeCategoryList:AddEntry("ZO_GamepadItemEntryTemplateWithHeader", data)
                     data:SetHeader(GetString("SI_EQUIPSLOTVISUALCATEGORY", visualCategory))
 
                     headersUsed[visualCategory] = true
                 --No Header Needed
                 else
-                    self.categoryList:AddEntry("ZO_GamepadItemEntryTemplate", data)
+                    activeCategoryList:AddEntry("ZO_GamepadItemEntryTemplate", data)
                 end
             end
         end
 
         -- Order matters:
-        self.categoryList:SetDefaultSelectedIndex(numMundusSlots + 1)
-        self.categoryList:Commit()
+        activeCategoryList:SetDefaultSelectedIndex(numMundusSlots + 1)
+        activeCategoryList:Commit()
     end
 end
 
@@ -1318,23 +1447,29 @@ local function SetupItemList(list)
     list:AddDataTemplateWithHeader("ZO_GamepadItemSubEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, MenuEntryTemplateEquality, "ZO_GamepadMenuEntryHeaderTemplate")
 end
 
+function ZO_GamepadInventory:OnSelectedDataChangedCallback(list, selectedData)
+    self.currentlySelectedData = selectedData
+    self:UpdateItemLeftTooltip(selectedData)
+
+    local activeItemList = self:GetActiveItemList()
+    if activeItemList:IsActive() then
+        self:SetSelectedInventoryData(selectedData)
+    end
+    self:PrepareNextClearNewStatus(selectedData)
+    local activeItemList = self:GetActiveItemList()
+    activeItemList:RefreshVisible()
+    self:UpdateRightTooltip()
+    self:RefreshKeybinds()
+end
+
 function ZO_GamepadInventory:InitializeItemList()
     self.itemList = self:AddList("Items", SetupItemList)
+    self.itemList:SetOnSelectedDataChangedCallback(function(...) self:OnSelectedDataChangedCallback(...) end)
+end
 
-    local function OnSelectedDataChangedCallback(list, selectedData)
-        self.currentlySelectedData = selectedData
-        self:UpdateItemLeftTooltip(selectedData)
-
-        if self:GetCurrentList() and self:GetCurrentList():IsActive() then
-            self:SetSelectedInventoryData(selectedData)
-        end
-        self:PrepareNextClearNewStatus(selectedData)
-        self.itemList:RefreshVisible()
-        self:UpdateRightTooltip()
-        self:RefreshKeybinds()
-    end
-
-    self.itemList:SetOnSelectedDataChangedCallback(OnSelectedDataChangedCallback)
+function ZO_GamepadInventory:InitializeVengeanceItemList()
+    self.vengeanceItemList = self:AddList("VengeanceItems", SetupItemList)
+    self.vengeanceItemList:SetOnSelectedDataChangedCallback(function(...) self:OnSelectedDataChangedCallback(...) end)
 end
 
 local DEFAULT_GAMEPAD_ITEM_SORT =
@@ -1424,7 +1559,8 @@ end
 
 function ZO_GamepadInventory:IsItemListEmpty(filteredEquipSlot, nonEquipableFilterType)
     local comparator = self:GetItemDataFilterComparator(filteredEquipSlot, nonEquipableFilterType)
-    return SHARED_INVENTORY:IsFilteredSlotDataEmpty(comparator, BAG_BACKPACK, BAG_WORN)
+    local backingBag = self:GetBackingBag()
+    return SHARED_INVENTORY:IsFilteredSlotDataEmpty(comparator, backingBag, BAG_WORN)
 end
 
 function ZO_GamepadInventory:GetNumSlots(bag)
@@ -1450,13 +1586,29 @@ do
         return narrations
     end
 
-    function ZO_GamepadInventory:RefreshItemList(selectDefaultEntry)
+    function ZO_GamepadInventory:RefreshActiveItemList(selectDefaultEntry)
+        local activeCategoryList
+        local activeItemList
+        local backingBag
+        local currentCategoryType
         if self.currentListType == INVENTORY_ITEM_LIST or self.itemList:IsActive() then
-            -- Order matters:
-            local targetCategoryData = self.categoryList:GetTargetData()
-            self.itemList:Clear()
+            activeCategoryList = self.categoryList
+            activeItemList = self.itemList
+            backingBag = BAG_BACKPACK
+            currentCategoryType = INVENTORY_CATEGORY_LIST
+        elseif self.currentListType == INVENTORY_VENGEANCE_ITEM_LIST or self.vengeanceItemList:IsActive() then
+            activeCategoryList = self.vengeanceCategoryList
+            activeItemList = self.vengeanceItemList
+            backingBag = BAG_VENGEANCE
+            currentCategoryType = INVENTORY_VENGEANCE_CATEGORY_LIST
+        end
 
-            if self.categoryList:IsEmpty() then
+        if activeItemList then
+            -- Order matters:
+            local targetCategoryData = activeCategoryList:GetTargetData()
+            activeItemList:Clear()
+
+            if activeCategoryList:IsEmpty() then
                 return
             end
 
@@ -1481,7 +1633,7 @@ do
             else
                 local comparator = self:GetItemDataFilterComparator(filteredEquipSlot, nonEquipableFilterType)
 
-                filteredDataTable = SHARED_INVENTORY:GenerateFullSlotData(comparator, BAG_BACKPACK, BAG_WORN)
+                filteredDataTable = SHARED_INVENTORY:GenerateFullSlotData(comparator, backingBag, BAG_WORN)
                 for _, itemData in pairs(filteredDataTable) do
                     itemData.bestItemCategoryName = zo_strformat(SI_INVENTORY_HEADER, GetBestItemCategoryDescription(itemData))
                 end
@@ -1526,13 +1678,17 @@ do
 
                 entryData:SetIgnoreTraitInformation(true)
 
+                if IsCurrentCampaignVengeanceRuleset() and activeCategoryList == self.categoryList then
+                    entryData.enabled = not IsItemVisuallyDisabledInVengeance(itemData.bagId, itemData.slotIndex)
+                end
+
                 if itemData.bestItemCategoryName ~= lastBestItemCategoryName then
                     lastBestItemCategoryName = itemData.bestItemCategoryName
 
                     entryData:SetHeader(lastBestItemCategoryName)
-                    self.itemList:AddEntry("ZO_GamepadItemSubEntryTemplateWithHeader", entryData)
+                    activeItemList:AddEntry("ZO_GamepadItemSubEntryTemplateWithHeader", entryData)
                 else
-                    self.itemList:AddEntry("ZO_GamepadItemSubEntryTemplate", entryData)
+                    activeItemList:AddEntry("ZO_GamepadItemSubEntryTemplate", entryData)
                 end
 
                 entryData.narrationText = GetItemNarrationText
@@ -1542,18 +1698,18 @@ do
             -- which is set by CategoryList being updated when the ItemList is refreshed
             local DONT_SELECT_DEFAULT = nil
             local FORCE_UPDATE = true
-            self:RefreshCategoryList(DONT_SELECT_DEFAULT, FORCE_UPDATE)
+            self:RefreshActiveCategoryList(DONT_SELECT_DEFAULT, FORCE_UPDATE)
 
             -- ESO-871103: Must refresh the category list first so that self.currentlySelectData
             -- remains data in itemList rather than being set to the selected data in category list
-            self.itemList:Commit()
+            activeItemList:Commit()
             self:UpdateItemLeftTooltip(self.currentlySelectedData)
 
-            if not ZO_GamepadInventory.AreCategoryListEntriesEqual(targetCategoryData, self.categoryList:GetTargetData()) then
+            if not ZO_GamepadInventory.AreCategoryListEntriesEqual(targetCategoryData, activeCategoryList:GetTargetData()) then
                 -- The category has changed; clear the item list and switch to the category list.
-                self.itemList:Clear()
+                activeItemList:Clear()
                 local DO_NOT_SELECT_DEFAULT_ENTRY = false
-                self:SwitchActiveList(INVENTORY_CATEGORY_LIST, DO_NOT_SELECT_DEFAULT_ENTRY)
+                self:SwitchActiveList(currentCategoryType, DO_NOT_SELECT_DEFAULT_ENTRY)
             end
         end
     end
@@ -1644,8 +1800,15 @@ function ZO_GamepadInventory:RefreshHeader(blockCallback)
     local currentList = self:GetCurrentList()
     local headerData
     if currentList == self.craftBagList then
+        self.craftBagHeaderData.tabBarEntries = self:GetTabBarEntries()
         headerData = self.craftBagHeaderData
+    elseif currentList == self.vengeanceCategoryList then
+        self.vengeanceCategoryHeaderData.tabBarEntries = self:GetTabBarEntries()
+        headerData = self.vengeanceCategoryHeaderData
+    elseif currentList == self.vengeanceItemList then
+        headerData = self.vengeanceItemListHeaderData
     elseif currentList == self.categoryList then
+        self.categoryHeaderData.tabBarEntries = self:GetTabBarEntries()
         headerData = self.categoryHeaderData
     else
         headerData = self.itemListHeaderData
@@ -1664,27 +1827,49 @@ local function UpdateCapacityString()
     return zo_strformat(SI_GAMEPAD_INVENTORY_CAPACITY_FORMAT, GetNumBagUsedSlots(BAG_BACKPACK), GetBagSize(BAG_BACKPACK))
 end
 
-function ZO_GamepadInventory:InitializeHeader()
-    local function UpdateTitleText()
-        return self.categoryList:GetTargetData().text
+function ZO_GamepadInventory:GetTabBarEntries()
+    local SELECT_DEFAULT_ENTRY = true
+    local tabBarEntries = {}
+
+    if IsCurrentCampaignVengeanceRuleset() then
+        local vengeanceTab =
+        {
+            text = GetString(SI_GAMEPAD_INVENTORY_VENGEANCE_HEADER),
+            callback = function()
+                self:SwitchActiveList(INVENTORY_VENGEANCE_CATEGORY_LIST, SELECT_DEFAULT_ENTRY)
+            end,
+        }
+        table.insert(tabBarEntries, vengeanceTab)
     end
 
-    local SELECT_DEFAULT_ENTRY = true
-    local tabBarEntries =
+    local backpackTab =
     {
-        {
-            text = GetString(SI_GAMEPAD_INVENTORY_CATEGORY_HEADER),
-            callback = function()
-                self:SwitchActiveList(INVENTORY_CATEGORY_LIST, SELECT_DEFAULT_ENTRY)
-            end,
-        },
-        {
-            text = GetString(SI_GAMEPAD_INVENTORY_CRAFT_BAG_HEADER),
-            callback = function()
-                self:SwitchActiveList(INVENTORY_CRAFT_BAG_LIST, SELECT_DEFAULT_ENTRY)
-            end,
-        },
+        text = GetString(SI_GAMEPAD_INVENTORY_CATEGORY_HEADER),
+        callback = function()
+            self:SwitchActiveList(INVENTORY_CATEGORY_LIST, SELECT_DEFAULT_ENTRY)
+        end,
     }
+    table.insert(tabBarEntries, backpackTab)
+
+    local craftBagTab =
+    {
+        text = GetString(SI_GAMEPAD_INVENTORY_CRAFT_BAG_HEADER),
+        callback = function()
+            self:SwitchActiveList(INVENTORY_CRAFT_BAG_LIST, SELECT_DEFAULT_ENTRY)
+        end,
+    }
+    table.insert(tabBarEntries, craftBagTab)
+
+    return tabBarEntries
+end
+
+function ZO_GamepadInventory:InitializeHeader()
+    local function UpdateTitleText()
+        local activeCategoryList = self:GetActiveCategoryList()
+        return activeCategoryList:GetTargetData().text
+    end
+
+    local tabBarEntries = self:GetTabBarEntries()
 
     self.categoryHeaderData =
     {
@@ -1708,6 +1893,30 @@ function ZO_GamepadInventory:InitializeHeader()
     }
 
     self.itemListHeaderData =
+    {
+        titleText = UpdateTitleText,
+
+        data1HeaderText = GetString(SI_GAMEPAD_INVENTORY_AVAILABLE_FUNDS),
+        data1Text = UpdateGold,
+        data1TextNarration = ZO_Currency_GetPlayerCarriedGoldNarration,
+
+        data2HeaderText = GetString(SI_GAMEPAD_INVENTORY_CAPACITY),
+        data2Text = UpdateCapacityString,
+    }
+
+    self.vengeanceCategoryHeaderData =
+    {
+        tabBarEntries = tabBarEntries,
+
+        data1HeaderText = GetString(SI_GAMEPAD_INVENTORY_AVAILABLE_FUNDS),
+        data1Text = UpdateGold,
+        data1TextNarration = ZO_Currency_GetPlayerCarriedGoldNarration,
+
+        data2HeaderText = GetString(SI_GAMEPAD_INVENTORY_CAPACITY),
+        data2Text = UpdateCapacityString,
+    }
+
+    self.vengeanceItemListHeaderData =
     {
         titleText = UpdateTitleText,
 
@@ -1828,12 +2037,18 @@ end
 
 function ZO_GamepadInventory:Select()
     local SELECT_DEFAULT_ENTRY = true
-    self:SwitchActiveList(INVENTORY_ITEM_LIST, SELECT_DEFAULT_ENTRY)
+    local currentList = self:GetCurrentList()
+    if currentList == self.categoryList then
+        self:SwitchActiveList(INVENTORY_ITEM_LIST, SELECT_DEFAULT_ENTRY)
+    elseif currentList == self.vengeanceCategoryList then
+        self:SwitchActiveList(INVENTORY_VENGEANCE_ITEM_LIST, SELECT_DEFAULT_ENTRY)
+    end
     PlaySound(SOUNDS.GAMEPAD_MENU_FORWARD)
 end
 
 function ZO_GamepadInventory:ShowQuickslot()
-    local targetData = self.itemList:GetTargetData()
+    local activeItemList = self:GetActiveItemList()
+    local targetData = activeItemList:GetTargetData()
     local useAccessibleWheel = GetSetting_Bool(SETTING_TYPE_ACCESSIBILITY, ACCESSIBILITY_SETTING_ACCESSIBLE_QUICKWHEELS)
     if targetData then
         if ZO_InventoryUtils_DoesNewItemMatchFilterType(targetData, ITEMFILTERTYPE_QUEST) then

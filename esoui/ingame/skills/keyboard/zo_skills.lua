@@ -166,7 +166,7 @@ local function InitializeKeyboardConfirmDialog()
 
             dialog.warning:SetText(zo_strformat(SI_SKILLS_IMPROVEMENT_COST, skillData:GetSkillPointCostMultiplier()))
 
-            local hideAdvisement = ZO_SKILLS_ADVISOR_SINGLETON:IsAdvancedModeSelected() or not skillProgressionData:IsAdvised()
+            local hideAdvisement = (not ZO_SKILLS_ADVISOR_SINGLETON:CanUseSkillsAdvisor()) or ZO_SKILLS_ADVISOR_SINGLETON:IsAdvancedModeSelected() or (not skillProgressionData:IsAdvised())
             dialog.advisementLabel:SetHidden(hideAdvisement)
         end
     end
@@ -238,7 +238,7 @@ local function InitializeKeyboardUpgradeDialog()
 
             dialog.warning:SetText(zo_strformat(SI_SKILLS_IMPROVEMENT_COST, skillData:GetSkillPointCostMultiplier()))
 
-            local hideAdvisement = ZO_SKILLS_ADVISOR_SINGLETON:IsAdvancedModeSelected() or not skillData:IsAdvised()
+            local hideAdvisement = (not ZO_SKILLS_ADVISOR_SINGLETON:CanUseSkillsAdvisor()) or ZO_SKILLS_ADVISOR_SINGLETON:IsAdvancedModeSelected() or (not skillProgressionData:IsAdvised())
             advisementLabel:SetHidden(hideAdvisement)
         end
     end
@@ -809,7 +809,7 @@ function ZO_SkillsManager:InitializeKeybindDescriptors()
                 self:UpdateSkillsAdvisorVisibility()
             end,
             visible = function()
-                return ZO_SKILLS_ADVISOR_SINGLETON:IsAdvancedModeSelected()
+                return ZO_SKILLS_ADVISOR_SINGLETON:IsAdvancedModeSelected() and ZO_SKILLS_ADVISOR_SINGLETON:CanUseSkillsAdvisor()
             end
         },
         {
@@ -914,7 +914,13 @@ function ZO_SkillsManager:RegisterForEvents()
         self.skillListRefreshGroup:MarkDirty("Visible")
     end
 
+    local function OnSkillBuildAvailabilityChanged()
+        self:UpdateSkillsAdvisorVisibility()
+        self.skillListRefreshGroup:MarkDirty("Visible")
+    end
+    
     ZO_SKILLS_ADVISOR_SINGLETON:RegisterCallback("OnSelectedSkillBuildUpdated", OnSelectedSkillBuildUpdated)
+    ZO_SKILLS_ADVISOR_SINGLETON:RegisterCallback("OnSkillsAdvisorAvailabilityChanged", OnSkillBuildAvailabilityChanged)
 
     control:RegisterForEvent(EVENT_PLAYER_ACTIVATED, OnFullSystemUpdated)
 
@@ -1034,7 +1040,7 @@ end
 
 function ZO_SkillsManager:UpdateSkillsAdvisorVisibility()
     if SKILLS_FRAGMENT:IsShowing() then
-        if not ZO_SKILLS_ADVISOR_SINGLETON:IsAdvancedModeSelected() or self.showAdvisorInAdvancedMode then
+        if self:IsSkillsAdvisorShown() then
             SCENE_MANAGER:RemoveFragment(FRAME_TARGET_STANDARD_RIGHT_PANEL_FRAGMENT)
             SCENE_MANAGER:RemoveFragment(FRAME_TARGET_BLUR_STANDARD_RIGHT_PANEL_FRAGMENT)
             SCENE_MANAGER:AddFragment(FRAME_TARGET_STANDARD_RIGHT_PANEL_MEDIUM_LEFT_PANEL_FRAGMENT)
@@ -1052,7 +1058,7 @@ function ZO_SkillsManager:UpdateSkillsAdvisorVisibility()
 end
 
 function ZO_SkillsManager:IsSkillsAdvisorShown()
-    return not ZO_SKILLS_ADVISOR_SINGLETON:IsAdvancedModeSelected() or self.showAdvisorInAdvancedMode
+    return ZO_SKILLS_ADVISOR_SINGLETON:CanUseSkillsAdvisor() and (not ZO_SKILLS_ADVISOR_SINGLETON:IsAdvancedModeSelected() or self.showAdvisorInAdvancedMode)
 end
 
 function ZO_SkillsManager:StopSelectedSkillBuildSkillAnimations()

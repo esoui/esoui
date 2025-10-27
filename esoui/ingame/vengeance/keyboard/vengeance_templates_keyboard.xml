@@ -1,0 +1,16 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_VengeancePerk_FramedIcon_Keyboard" inherits="ZO_VengeancePerk_FramedIcon" mouseEnabled="true" virtual="true">
+            <OnInitialized>
+                ZO_VengeancePerk_Icon_Keyboard.OnControlInitialized(self)
+            </OnInitialized>
+
+            <OnMouseEnter>
+                ZO_VengeancePerk_Icon_Keyboard.VengeancePerk_OnMouseEnter(self)
+            </OnMouseEnter>
+            <OnMouseExit>
+                ZO_VengeancePerk_Icon_Keyboard.VengeancePerk_OnMouseExit(self)
+            </OnMouseExit>
+        </Control>
+    </Controls>
+</GuiXml>

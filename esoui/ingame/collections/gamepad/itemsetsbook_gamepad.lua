@@ -27,7 +27,7 @@ function ZO_ItemSetsBook_Gamepad_Base:InitializeHeader()
         return zo_strformat(SI_GAMEPAD_INVENTORY_CAPACITY_FORMAT, GetNumBagUsedSlots(BAG_BACKPACK), GetBagSize(BAG_BACKPACK))
     end
 
-    local currencyType = CURT_CHAOTIC_CREATIA
+    local currencyType = CURT_TRANSMUTE_CRYSTALS
     local currencyLocation = GetCurrencyPlayerStoredLocation(currencyType)
     local IS_ENOUGH = false
     local CURRENCY_OPTIONS =

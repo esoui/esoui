@@ -10,6 +10,9 @@ function ZO_GuildWeeklyBidsDialog_Keyboard:Initialize(control)
     ZO_SortFilterList.Initialize(self, control)
     ZO_GuildWeeklyBids_Shared.Initialize(self, "ZO_GuildWeeklyBidsDialogRow_Keyboard", ZO_GUILD_WEEKLY_BIDS_DIALOG_ROW_KEYBOARD_HEIGHT)
 
+    self.currencyOptions = ZO_ShallowTableCopy(ZO_KEYBOARD_CURRENCY_OPTIONS)
+    self.currencyOptions.font = "ZoFontGame"
+
     ZO_PreHookHandler(self.control, "OnEffectivelyHidden", function() self.guildId = nil end)
 
     local function OnGuildPermissionChanged(event, guildId)

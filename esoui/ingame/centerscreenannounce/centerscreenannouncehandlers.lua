@@ -2035,6 +2035,19 @@ local CENTER_SCREEN_CALLBACK_HANDLERS =
             return nil
         end,
     },
+
+    {
+        callbackManager = ZO_VENGEANCE_MANAGER,
+        callbackRegistration = "VengeanceLoadoutRoleChanged",
+        callbackFunction = function()
+            local equippedLoadoutData = ZO_VENGEANCE_MANAGER:GetEquippedLoadoutData()
+            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
+            messageParams:SetText(zo_strformat(SI_CAMPAIGN_VENGEANCE_LOADOUT_EQUIP_ANNOUNCEMENT, equippedLoadoutData:GetName()), GetString(SI_CAMPAIGN_VENGEANCE_LOADOUT_ANNOUNCEMENT_DECRIPTION))
+            messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_SYSTEM_BROADCAST)
+            messageParams:SetSound(SOUNDS.VENGEANCE_LOADOUT_EQUIPPED_ANNOUNCEMENT)
+            return messageParams
+        end,
+    },
 }
 
 function ZO_CenterScreenAnnounce_GetCallbackHandlers()

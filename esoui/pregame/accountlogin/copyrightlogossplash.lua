@@ -43,7 +43,7 @@ do
 
         -- After all videos and the splash screen have shown, the user is no longer *required* to sit through them.
         SetCVar("HasPlayedPregameVideo", "1")
-        PregameStateManager_AdvanceState()
+        ZO_PregameStateManager_AdvanceState()
     end
 
     CreateCopyrightLogosSplashScene = function(control)

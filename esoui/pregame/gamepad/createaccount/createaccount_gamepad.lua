@@ -116,7 +116,7 @@ function ZO_CreateAccount_Gamepad:CreateAccountSelected()
         self:ShowError(GetString(SI_CONSOLE_CREATEACCOUNT_NOEMAIL))
     elseif not self.creatingAccount then
         self:ClearError()
-        PregameStateManager_AdvanceState()
+        ZO_PregameStateManager_AdvanceState()
         self.creatingAccount = true
     end
 end
@@ -139,7 +139,7 @@ function ZO_CreateAccount_Gamepad:InitKeybindingDescriptors()
         -- Back
         KEYBIND_STRIP:GenerateGamepadBackButtonDescriptor(function()
                 PlaySound(SOUNDS.NEGATIVE_CLICK)
-                PregameStateManager_SetState("CreateLinkAccount")
+                ZO_PregameStateManager_SetState("CreateLinkAccount")
             end)
     }
     ZO_Gamepad_AddListTriggerKeybindDescriptors(self.mainKeybindStripDescriptor, self.optionsList)

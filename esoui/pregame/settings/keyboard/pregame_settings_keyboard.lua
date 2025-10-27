@@ -14,17 +14,17 @@ function ZO_Pregame_Settings_Keyboard:Initialize(control)
     self.control = control
 
     local subcategoriesMenuControl = control:GetNamedChild("Subcategory")
-    self.subcategoriesMenu = ZO_Horizontal_Menu:New(subcategoriesMenuControl, ZO_HORIZONAL_MENU_ALIGN_CENTER)
-    subcategoriesMenuControl:SetAnchor(BOTTOM, ZO_OptionsWindow:GetNamedChild("Divider"), TOP, -75)
+    self.subcategoriesMenu = ZO_Horizontal_Menu:New(subcategoriesMenuControl)
 
     SETTINGS_FRAGMENT = ZO_FadeSceneFragment:New(control)
-    SETTINGS_FRAGMENT:RegisterCallback("StateChange",   function(oldState, newState)
-                                                            if newState == SCENE_FRAGMENT_SHOWING then
-                                                                self:ShowSettings()
-                                                            elseif newState == SCENE_FRAGMENT_HIDDEN then
-                                                                self:HideSettings()
-                                                            end
-                                                        end)
+    SETTINGS_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
+        if newState == SCENE_FRAGMENT_SHOWING then
+            self:ShowSettings()
+        elseif newState == SCENE_FRAGMENT_HIDDEN then
+            PlaySound(SOUNDS.LOGIN_SCREEN_EXIT_SETTINGS)
+            self:HideSettings()
+        end
+    end)
 
     local function OnHorizontalMenuItemSetup(menuControl, data)
         menuControl:SetModifyTextType(MODIFY_TEXT_TYPE_UPPERCASE)
@@ -54,6 +54,7 @@ function ZO_Pregame_Settings_Keyboard:BuildSubcategoriesMenu()
         self.settingsCategories = ZO_GameMenuManager_GetVisibleSettingsEntries()
         for i, subcategory in ipairs(self.settingsCategories) do
             local function OnSelectionCallback(control)
+                PlaySound(SOUNDS.LOGIN_SETTINGS_SCREEN_TAB_CLICK)
                 subcategory.callback(control, ZO_ReanchorControlTopHorizontalMenu)
             end
             self.subcategoriesMenu:AddMenuItem(subcategory.name, subcategory.name, OnSelectionCallback, subcategory.unselectedCallback)

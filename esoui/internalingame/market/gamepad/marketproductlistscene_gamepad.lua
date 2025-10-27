@@ -34,9 +34,10 @@ function GamepadMarketProductListScene:InitializeKeybindStripDescriptors()
                                     collectibleId, _, _, collectibleType = GetMarketProductCollectibleInfo(targetData.marketProductId)
                                 end
                                 if collectibleType == COLLECTIBLE_CATEGORY_TYPE_OUTFIT_STYLE then
-                                    local collectibleData = ZO_CollectibleData_Base:New()
-                                    collectibleData:SetId(collectibleId)
-                                    if ZO_GAMEPAD_MARKET:IsPreviewingOutfitStyle(collectibleData) then
+                                    local collectibleData = ZO_CollectibleData_Base.Acquire(collectibleId)
+                                    local isPreviewing = ZO_GAMEPAD_MARKET:IsPreviewingOutfitStyle(collectibleData)
+                                    collectibleData:ReleaseObject()
+                                    if isPreviewing then
                                         return GetString(SI_MARKET_END_PREVIEW_KEYBIND_TEXT)
                                     end
                                 elseif self.shouldAutoPreview then

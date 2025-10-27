@@ -8,6 +8,10 @@
                 ZO_LoreReader_OnInitialize(self)
             </OnInitialized>
 
+            <OnEffectivelyShown>
+                ZO_LoreReader_OnShow(self)
+            </OnEffectivelyShown>
+            
             <OnHide>
                 ZO_LoreReader_OnHide(self)
             </OnHide>

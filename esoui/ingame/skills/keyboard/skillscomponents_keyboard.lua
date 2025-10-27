@@ -199,7 +199,7 @@ do
         end
 
         -- xp bar
-        local showXPBar = skillProgressionData:HasRankData()
+        local showXPBar = skillProgressionData:HasRankData() and not IsCurrentCampaignVengeanceRuleset()
         if showXPBar then
             local currentRank = skillProgressionData:GetCurrentRank()
             local startXP, endXP = skillProgressionData:GetRankXPExtents(currentRank)

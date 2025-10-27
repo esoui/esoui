@@ -155,7 +155,7 @@ end
 function ZO_ConsoleServerSelector:OnConsolePlatformsListLoaded(serverChoice)
     self.selectedServerChoice = serverChoice
     -- if we've already exited this state or backed out to IIS, don't do anything
-    if PregameStateManager_GetCurrentState() == "GameStartup" then
+    if ZO_PregameStateManager_GetCurrentState() == "GameStartup" then
         self:SetConsoleLastSelectedPlatform()
         RequestAnnouncements()
     end
@@ -462,7 +462,7 @@ function ZO_GameStartup_Gamepad:InitializeKeybindDescriptor()
 
                     if self.isWaitingForDurangoAccountSelection == false then
                         self.serverSelector:OnPlayButtonPressed()
-                        PregameStateManager_AdvanceStateFromState("GameStartup") -- only advance state from startup state (button spam protection)
+                        ZO_PregameStateManager_AdvanceStateFromState("GameStartup") -- only advance state from startup state (button spam protection)
                         PlaySound(SOUNDS.DIALOG_ACCEPT)
                     end
                 elseif data.entryType == ENTRY_TYPE.VO_LANGUAGE then
@@ -471,12 +471,12 @@ function ZO_GameStartup_Gamepad:InitializeKeybindDescriptor()
                     local editBox = data.control.editBox
                     editBox:TakeFocus()
                 elseif data.entryType == ENTRY_TYPE.SETTINGS then
-                    if not IsPreloginWorldEnabled() then
+                    if not ZO_IsPreloginWorldEnabled() then
                         GAMEPAD_OPTIONS_ROOT_SCENE:AddTemporaryFragment(PREGAME_ANIMATED_BACKGROUND_FRAGMENT)
                     end
                     SCENE_MANAGER:Push(GAMEPAD_OPTIONS_ROOT_SCENE:GetName())
                 elseif data.entryType == ENTRY_TYPE.CREDITS then
-                    if not IsPreloginWorldEnabled() then
+                    if not ZO_IsPreloginWorldEnabled() then
                         GAMEPAD_CREDITS_ROOT_SCENE:AddTemporaryFragment(PREGAME_ANIMATED_BACKGROUND_FRAGMENT)
                     end
                     SCENE_MANAGER:Push(GAMEPAD_CREDITS_ROOT_SCENE:GetName())
@@ -541,7 +541,7 @@ function ZO_GameStartup_Gamepad:InitializeKeybindDescriptor()
                 if self.canCancelOrLoadPlatforms == true then
                     PlaySound(SOUNDS.DIALOG_DECLINE)
                     self.canCancelOrLoadPlatforms = false
-                    PregameStateManager_SetState("WaitForPreloginWorld")
+                    ZO_PregameStateManager_SetState("WaitForPreloginWorld")
                 end
             end)
     }
@@ -574,7 +574,7 @@ function ZO_GameStartup_Gamepad:InitializeKeybindDescriptor()
             callback = function()
                 local data = self.initialList:GetTargetData()
                 self.serverSelector:OnSelectedFromInitialList(data)
-                PregameStateManager_AdvanceState()
+                ZO_PregameStateManager_AdvanceState()
             end,
             sound = SOUNDS.DIALOG_ACCEPT,
         },
@@ -582,7 +582,7 @@ function ZO_GameStartup_Gamepad:InitializeKeybindDescriptor()
         --Back
         KEYBIND_STRIP:GenerateGamepadBackButtonDescriptor(function()
                 PlaySound(SOUNDS.DIALOG_DECLINE)
-                PregameStateManager_SetState("WaitForPreloginWorld")
+                ZO_PregameStateManager_SetState("WaitForPreloginWorld")
             end)
     }
 
@@ -602,7 +602,7 @@ function ZO_GameStartup_Gamepad:InitializeKeybindDescriptor()
         -- Back
         KEYBIND_STRIP:GenerateGamepadBackButtonDescriptor(function()
             PlaySound(SOUNDS.DIALOG_DECLINE)
-            PregameStateManager_SetState("WaitForPreloginWorld")
+            ZO_PregameStateManager_SetState("WaitForPreloginWorld")
         end),
     }
 end
@@ -610,7 +610,7 @@ end
 function ZO_GameStartup_Gamepad:InitializeEvents()
     local function OnAnnouncementsResult(eventCode, success)
         -- if we've already exited this state or backed out to IIS, don't do anything
-        if PregameStateManager_GetCurrentState() == "GameStartup" then
+        if ZO_PregameStateManager_GetCurrentState() == "GameStartup" then
             local message
             if success then
                 message = GetAnnouncementMessage()

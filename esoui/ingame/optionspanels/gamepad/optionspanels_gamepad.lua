@@ -973,6 +973,11 @@ GAMEPAD_SETTINGS_DATA =
         {
             panel = SETTING_PANEL_INTERFACE,
             system = SETTING_TYPE_UI,
+            settingId = UI_SETTING_COMPASS_DISTANCE_TRACKING,
+        },
+        {
+            panel = SETTING_PANEL_INTERFACE,
+            system = SETTING_TYPE_UI,
             settingId = UI_SETTING_SHOW_WEAPON_INDICATOR,
         },
         {

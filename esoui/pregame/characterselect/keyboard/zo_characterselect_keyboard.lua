@@ -151,6 +151,10 @@ local function SelectedCharacterChanged(self, previouslySelectedCharacterData, s
     end
 
     if selectedCharacterData then
+        if CHARACTER_SELECT_FRAGMENT:IsShowing() then
+            PlaySound(SOUNDS.CS_SELECT)
+        end
+        
         if IsPregameCharacterConstructionReady() then
             ZO_CharacterSelect_EnableSelection(selectedCharacterData)
         end
@@ -400,7 +404,7 @@ function ZO_CharacterSelect_Initialize(self)
     self:RegisterForEvent(EVENT_CHARACTER_SELECTED_FOR_PLAY, OnCharacterSelectedForPlay)
     self:RegisterForEvent(EVENT_ENTITLEMENT_STATE_CHANGED, function()
         -- Need the game data to be loaded before we can populate the carousel, which is handled by OnPregameFullyLoaded()
-        if PregameIsFullyLoaded() then
+        if ZO_PregameIsFullyLoaded() then
             PopulateCarousel()
         end
     end)
@@ -494,14 +498,14 @@ function ZO_CharacterSelect_ClearList()
 end
 
 function ZO_CharacterSelect_Login(option)
-    local state = PregameStateManager_GetCurrentState()
+    local state = ZO_PregameStateManager_GetCurrentState()
     if state == "CharacterSelect" then
         local selectedData = ZO_ScrollList_GetSelectedData(ZO_CharacterSelectScrollList)
         if selectedData then
             if selectedData.needsRename then
                 ZO_CharacterSelect_BeginRename(selectedData)
             else
-                PregameStateManager_PlayCharacter(selectedData.id, option)
+                ZO_PregameStateManager_PlayCharacter(selectedData.id, option)
             end
         end
     end
@@ -542,7 +546,7 @@ end
 local function ChangeSelectedCharacter(direction)
     local list = ZO_CharacterSelectScrollList
     local selectedData = ZO_ScrollList_GetSelectedData(list)
-    if PregameStateManager_GetCurrentState() == "CharacterSelect" and selectedData ~= nil then
+    if ZO_PregameStateManager_GetCurrentState() == "CharacterSelect" and selectedData ~= nil then
         local dataList = ZO_ScrollList_GetDataList(list)
         local selectedDataIndex
         for index, dataEntry in ipairs(dataList) do
@@ -899,7 +903,7 @@ function RaceChangeTokenIndicator:OnMouseUp()
         PlaySound(SOUNDS.DEFAULT_CLICK)
         local characterData = ZO_CharacterSelect_GetSelectedCharacterData()
         ZO_CHARACTERCREATE_MANAGER:InitializeForRaceChange(characterData)
-        PregameStateManager_SetState("CharacterCreate_Barbershop")
+        ZO_PregameStateManager_SetState("CharacterCreate_Barbershop")
     end
 end
 
@@ -924,7 +928,7 @@ function AppearanceChangeTokenIndicator:OnMouseUp()
         PlaySound(SOUNDS.DEFAULT_CLICK)
         local characterData = ZO_CharacterSelect_GetSelectedCharacterData()
         ZO_CHARACTERCREATE_MANAGER:InitializeForAppearanceChange(characterData)
-        PregameStateManager_SetState("CharacterCreate_Barbershop")
+        ZO_PregameStateManager_SetState("CharacterCreate_Barbershop")
     end
 end
 
@@ -949,7 +953,7 @@ function AllianceChangeTokenIndicator:OnMouseUp()
         PlaySound(SOUNDS.DEFAULT_CLICK)
         local characterData = ZO_CharacterSelect_GetSelectedCharacterData()
         ZO_CHARACTERCREATE_MANAGER:InitializeForAllianceChange(characterData)
-        PregameStateManager_SetState("CharacterCreate_Barbershop")
+        ZO_PregameStateManager_SetState("CharacterCreate_Barbershop")
     end
 end
 

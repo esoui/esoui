@@ -42,12 +42,12 @@ end
 function ZO_GetPlatformUserFacingName(characterName, displayName)
     local userFacingName
 
-    if IsInGamepadPreferredMode() then
+    if IsInGamepadPreferredMode() or ZO_ShouldPreferUserId() then
         -- Prioritize the userID if using the gamepad UI, but fallback to character name on PC for cases where
         -- we have the character name but not the userID
         userFacingName = displayName ~= "" and ZO_FormatUserFacingDisplayName(displayName) or ZO_FormatUserFacingCharacterName(characterName)
     else
-        -- Prioritize the character name in the keyboard UI.
+        -- Prioritize the character name in the keyboard UI unless user setting specifies otherwise.
         userFacingName = characterName ~= "" and ZO_FormatUserFacingCharacterName(characterName) or ZO_FormatUserFacingDisplayName(displayName)
     end
 

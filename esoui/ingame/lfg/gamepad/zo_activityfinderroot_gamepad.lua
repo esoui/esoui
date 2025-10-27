@@ -26,10 +26,6 @@ end
 
 local ActivityFinderRoot_Gamepad = ZO_Gamepad_ParametricList_Screen:Subclass()
 
-function ActivityFinderRoot_Gamepad:New(...)
-    return ZO_Gamepad_ParametricList_Screen.New(self, ...)
-end
-
 function ActivityFinderRoot_Gamepad:Initialize(control)
     local ACTIVATE_LIST_ON_SHOW = true
     GAMEPAD_ACTIVITY_FINDER_ROOT_SCENE = ZO_Scene:New(ZO_GAMEPAD_ACTIVITY_FINDER_ROOT_SCENE_NAME, SCENE_MANAGER)
@@ -177,30 +173,32 @@ function ActivityFinderRoot_Gamepad:SetupList(list)
     list:AddDataTemplateWithHeader("ZO_GamepadMenuEntryTemplate", CategoryEntrySetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
 
     local function OnSelectedMenuEntry(_, selectedData, oldSelectedData)
-        if GAMEPAD_ACTIVITY_FINDER_ROOT_SCENE:GetState() ~= SCENE_HIDDEN then
-            if oldSelectedData and oldSelectedData.data then
-                local oldCategoryFragment = GetCategoryDataFragment(oldSelectedData.data)
-                if oldCategoryFragment then
-                    SCENE_MANAGER:RemoveFragment(oldCategoryFragment)
-                end
-            end
-
-            if selectedData.data.isRoleSelector then
-                GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
-                GAMEPAD_GROUP_ROLES_BAR:Activate()
-            else
-                GAMEPAD_GROUP_ROLES_BAR:Deactivate()
-                local selectedCategoryFragment = GetCategoryDataFragment(selectedData.data)
-                if selectedCategoryFragment and not self:IsCategoryLocked(selectedData.data) then
-                    GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
-                    SCENE_MANAGER:AddFragment(selectedCategoryFragment)
-                else
-                    self:RefreshTooltip(selectedData.data)
-                end
-            end
-
-            KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+        if self.scene:IsHiding() then
+            return
         end
+
+        if oldSelectedData and oldSelectedData.data then
+            local oldCategoryFragment = GetCategoryDataFragment(oldSelectedData.data)
+            if oldCategoryFragment then
+                SCENE_MANAGER:RemoveFragment(oldCategoryFragment)
+            end
+        end
+
+        if selectedData.data.isRoleSelector then
+            GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
+            GAMEPAD_GROUP_ROLES_BAR:Activate()
+        else
+            GAMEPAD_GROUP_ROLES_BAR:Deactivate()
+            local selectedCategoryFragment = GetCategoryDataFragment(selectedData.data)
+            if selectedCategoryFragment and not self:IsCategoryLocked(selectedData.data) then
+                GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
+                SCENE_MANAGER:AddFragment(selectedCategoryFragment)
+            else
+                self:RefreshTooltip(selectedData.data)
+            end
+        end
+
+        KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
     end
 
     list:SetOnSelectedDataChangedCallback(OnSelectedMenuEntry)

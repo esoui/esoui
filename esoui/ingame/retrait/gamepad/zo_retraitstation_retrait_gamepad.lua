@@ -231,7 +231,7 @@ function ZO_RetraitStation_Retrait_Gamepad:InitializeHeader()
     self.control:RegisterForEvent(EVENT_INVENTORY_SINGLE_SLOT_UPDATE, OnInventoryUpdate)
 
     local function OnCurrencyUpdate(currencyType, currencyLocation, newAmount, oldAMount, reason)
-        if not self.control:IsHidden() and currencyType == CURT_CHAOTIC_CREATIA then
+        if not self.control:IsHidden() and currencyType == CURT_TRANSMUTE_CRYSTALS then
             self:RefreshHeader()
         end
     end
@@ -266,10 +266,10 @@ function ZO_RetraitStation_Retrait_Gamepad:InitializeHeader()
     local HAS_ENOUGH = false
     local displayOptions =
     {
-        currencyCapAmount = GetMaxPossibleCurrency(CURT_CHAOTIC_CREATIA, CURRENCY_LOCATION_ACCOUNT),
+        currencyCapAmount = GetMaxPossibleCurrency(CURT_TRANSMUTE_CRYSTALS, CURRENCY_LOCATION_ACCOUNT),
     }
     local function SetChaoticCreatiaAmount(control)
-        ZO_CurrencyControl_SetSimpleCurrency(control, CURT_CHAOTIC_CREATIA, GetCurrencyAmount(CURT_CHAOTIC_CREATIA, CURRENCY_LOCATION_ACCOUNT), ZO_GAMEPAD_CURRENCY_OPTIONS_LONG_FORMAT, CURRENCY_SHOW_ALL, HAS_ENOUGH, displayOptions)
+        ZO_CurrencyControl_SetSimpleCurrency(control, CURT_TRANSMUTE_CRYSTALS, GetCurrencyAmount(CURT_TRANSMUTE_CRYSTALS, CURRENCY_LOCATION_ACCOUNT), ZO_GAMEPAD_CURRENCY_OPTIONS_LONG_FORMAT, CURRENCY_SHOW_ALL, HAS_ENOUGH, displayOptions)
         -- must return a non-nil value so that the control isn't auto-hidden
         return true
     end
@@ -280,12 +280,12 @@ function ZO_RetraitStation_Retrait_Gamepad:InitializeHeader()
         currencyLocation = CURRENCY_LOCATION_ACCOUNT,
     }
     local function GetChaoticCreatiaAmountNarration()
-        return ZO_Currency_FormatGamepad(CURT_CHAOTIC_CREATIA, GetCurrencyAmount(CURT_CHAOTIC_CREATIA, CURRENCY_LOCATION_ACCOUNT), ZO_CURRENCY_FORMAT_AMOUNT_ICON, CURRENCY_NARRATION_OPTIONS)
+        return ZO_Currency_FormatGamepad(CURT_TRANSMUTE_CRYSTALS, GetCurrencyAmount(CURT_TRANSMUTE_CRYSTALS, CURRENCY_LOCATION_ACCOUNT), ZO_CURRENCY_FORMAT_AMOUNT_ICON, CURRENCY_NARRATION_OPTIONS)
     end
 
     local IS_PLURAL = false
     local IS_LOWER = true
-    local retraitCurrencyName = GetCurrencyName(CURT_CHAOTIC_CREATIA, IS_PLURAL, IS_LOWER)
+    local retraitCurrencyName = GetCurrencyName(CURT_TRANSMUTE_CRYSTALS, IS_PLURAL, IS_LOWER)
 
     self.headerData = 
     {

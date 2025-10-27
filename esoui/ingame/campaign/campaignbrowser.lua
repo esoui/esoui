@@ -203,7 +203,7 @@ function CampaignBrowser:InitializeKeybindDescriptors()
     self.keybindStripDescriptor =
     {
         alignment = KEYBIND_STRIP_ALIGN_RIGHT,
-        
+
         --Leave/Abandon
         {
             name = function()
@@ -215,9 +215,7 @@ function CampaignBrowser:InitializeKeybindDescriptors()
                     end
                 end
             end,
-
             keybind = "UI_SHORTCUT_NEGATIVE",
-        
             callback = function()
                 if self.mouseOverRow then
                     if self:CanLeaveCampaignQueue() then
@@ -227,21 +225,19 @@ function CampaignBrowser:InitializeKeybindDescriptors()
                     end
                 end
             end,
-
             visible = function()
                 return self:CanLeaveCampaignQueue() or self:CanAbandon()
-            end
+            end,
+            sound = SOUNDS.CAMPAIGN_LEAVE_CAMPAIGN,
         },
 
         -- Home
         {
             name = GetString(SI_CAMPAIGN_BROWSER_CHOOSE_HOME_CAMPAIGN),
             keybind = "UI_SHORTCUT_SECONDARY",
-        
             callback = function()
                 self:DoSetHomeCampaign()
             end,
-
             visible = function()
                 return self:CanSetHomeCampaign()
             end,
@@ -259,9 +255,7 @@ function CampaignBrowser:InitializeKeybindDescriptors()
                     end
                 end
             end,
-
             keybind = "UI_SHORTCUT_PRIMARY",
-        
             callback = function()
                 if self.mouseOverRow then
                     local data = ZO_ScrollList_GetData(self.mouseOverRow)
@@ -272,10 +266,10 @@ function CampaignBrowser:InitializeKeybindDescriptors()
                     end
                 end
             end,
-
             visible = function()
                 return self:CanQueueForCampaign() or self:CanEnter()
             end,
+            sound = SOUNDS.CAMPAIGN_ENTER_CAMPAIGN,
         },
     }
 end

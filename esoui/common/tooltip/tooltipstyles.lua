@@ -1590,9 +1590,18 @@ ZO_TOOLTIP_STYLES =
     },
     itemBonusSuppressedDescription =
     {
-        fontColorField = GENERAL_COLOR_RED
+        fontColorType = INTERFACE_COLOR_TYPE_ITEM_TOOLTIP,
+        fontColorField = ITEM_TOOLTIP_COLOR_SUPPRESSED,
     },
     itemBonusSuppressedSection =
+    {
+        fontFace = "$(GAMEPAD_MEDIUM_FONT)",
+        fontSize = "$(GP_27)",
+        uppercase = true,
+        fontColorType = INTERFACE_COLOR_TYPE_ITEM_TOOLTIP,
+        fontColorField = ITEM_TOOLTIP_COLOR_SUPPRESSED,
+    },
+    itemBonusSuppressedBySection =
     {
         fontFace = "$(GAMEPAD_MEDIUM_FONT)",
         fontSize = "$(GP_27)",

@@ -169,15 +169,15 @@ function ZO_SharedOptions.AddTableToPanel(panel, table)
     end
 end
 
-function ZO_SharedOptions.AddTableToSystem(panel, system, table)
+function ZO_SharedOptions.AddTableToSystem(panel, settingType, table)
     for key, entry in pairs(table) do
         if ZO_SharedOptions_SettingsData[panel] == nil then
             ZO_SharedOptions_SettingsData[panel] = {}
         end
-        if ZO_SharedOptions_SettingsData[panel][system] == nil then
-            ZO_SharedOptions_SettingsData[panel][system] = {}
+        if ZO_SharedOptions_SettingsData[panel][settingType] == nil then
+            ZO_SharedOptions_SettingsData[panel][settingType] = {}
         end
-        ZO_SharedOptions_SettingsData[panel][system][key] = entry
+        ZO_SharedOptions_SettingsData[panel][settingType][key] = entry
     end
 end
 

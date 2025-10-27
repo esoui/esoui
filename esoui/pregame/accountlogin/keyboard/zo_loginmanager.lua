@@ -222,8 +222,8 @@ function LoginManager_Keyboard:OnLoginSuccessful()
     if IsUsingLinkedLogin() then
         self:SwitchToLoginFragment()
     end
-    if PregameStateManager_GetCurrentState() == "AccountLogin" then
-        PregameStateManager_SetState("WorldSelect_Requested")
+    if ZO_PregameStateManager_GetCurrentState() == "AccountLogin" then
+        ZO_PregameStateManager_SetState("WorldSelect_Requested")
     end
 end
 
@@ -267,7 +267,7 @@ function LoginManager_Keyboard:OnBadClientVersion()
 end
 
 function LoginManager_Keyboard:OnLoginRequested()
-    PregameStateManager_ShowLoginRequested()
+    ZO_PregameStateManager_ShowLoginRequested()
 end
 
 function LoginManager_Keyboard:OnBadLogin(errorCode, accountPageURL)

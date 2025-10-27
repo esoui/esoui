@@ -183,6 +183,7 @@ EsoUI\Pregame\OptionsPanels\Keyboard\PregameOptionsPanels_Keyboard.lua
 EsoUI\Pregame\OptionsPanels\Keyboard\OptionsPanel_Account_Keyboard.lua
 EsoUI\Pregame\OptionsPanels\Keyboard\OptionsPanel_Account_Keyboard.xml
 EsoUI\Pregame\OptionsPanels\Keyboard\OptionsPanel_Interface_Keyboard.lua
+EsoUI\Pregame\OptionsPanels\Keyboard\OptionsPanel_Gameplay_Keyboard.lua
 
 EsoUI\Pregame\Settings\Keyboard\Pregame_Settings_Keyboard.lua
 EsoUI\Pregame\Settings\Keyboard\Pregame_Settings_Keyboard.xml

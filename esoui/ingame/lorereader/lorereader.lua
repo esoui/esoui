@@ -23,7 +23,6 @@ function LoreReader:Initialize(control)
     local function OnShowBook(eventCode, title, body, medium, showTitle, bookId)
         local overrideImage, overrideImageTitlePosition = GetLoreBookOverrideImageFromBookId(bookId)
         self:Show(title, body, medium, showTitle, overrideImage, overrideImageTitlePosition)
-        PlaySound(self.OpenSound)
     end
 
     local function OnHideBook()
@@ -175,229 +174,23 @@ function LoreReader:SetupBook(title, body, medium, showTitle, isGamepad, overrid
     self:SetText(title, body, showTitle, overrideImageTitlePosition)
 end
 
+function LoreReader:OnShow()
+    PlaySound(self.OpenSound)
+end
+
 function LoreReader:OnHide()
     EndInteraction(INTERACTION_BOOK)
     PlaySound(self.CloseSound)
 end
 
-local READER_MEDIA =
-{
-    [BOOK_MEDIUM_NONE] = {}, -- Intentionally left blank to cause UI errors if referenced.
-    [BOOK_MEDIUM_YELLOWED_PAPER] =
-    {
-        NumPages = 2,
-        Bg = "EsoUI/Art/LoreLibrary/loreLibrary_paperBook.dds",
-        keyboardFonts =
-        {
-            TitleFont = "ZoFontBookPaperTitle",
-            BodyFont = "ZoFontBookPaper",
-        },
-        gamepadFonts =
-        {
-            TitleFont = "ZoFontGamepadBookPaperTitle",
-            BodyFont = "ZoFontGamepadBookPaper",
-        },
-        OpenSound = SOUNDS.BOOK_OPEN,
-        CloseSound = SOUNDS.BOOK_CLOSE,
-        TurnPageSound = SOUNDS.BOOK_PAGE_TURN,
-    },
-    [BOOK_MEDIUM_ANIMAL_SKIN] =
-    {
-        NumPages = 2,
-        Bg = "EsoUI/Art/LoreLibrary/loreLibrary_skinBook.dds",
-        keyboardFonts =
-        {
-            TitleFont = "ZoFontBookSkinTitle",
-            BodyFont = "ZoFontBookSkin",
-        },
-        gamepadFonts =
-        {
-            TitleFont = "ZoFontGamepadBookSkinTitle",
-            BodyFont = "ZoFontGamepadBookSkin",
-        },
-        OpenSound = SOUNDS.BOOK_OPEN,
-        CloseSound = SOUNDS.BOOK_CLOSE,
-        TurnPageSound = SOUNDS.BOOK_PAGE_TURN,
-    },
-    [BOOK_MEDIUM_RUBBING_PAPER] =
-    {
-        NumPages = 2,
-        Bg = "EsoUI/Art/LoreLibrary/loreLibrary_rubbingBook.dds",
-        keyboardFonts =
-        {
-            TitleFont = "ZoFontBookRubbingTitle",
-            BodyFont = "ZoFontBookRubbing",
-        },
-        gamepadFonts =
-        {
-            TitleFont = "ZoFontGamepadBookRubbingTitle",
-            BodyFont = "ZoFontGamepadBookRubbing",
-        },
-        OpenSound = SOUNDS.BOOK_OPEN,
-        CloseSound = SOUNDS.BOOK_CLOSE,
-        TurnPageSound = SOUNDS.BOOK_PAGE_TURN,
-    },
-    [BOOK_MEDIUM_LETTER] =
-    {
-        NumPages = 1,
-        Bg = "EsoUI/Art/LoreLibrary/loreLibrary_letter.dds",
-        keyboardFonts =
-        {
-            TitleFont = "ZoFontBookLetterTitle",
-            BodyFont = "ZoFontBookLetter",
-        },
-        gamepadFonts =
-        {
-            TitleFont = "ZoFontGamepadBookLetterTitle",
-            BodyFont = "ZoFontGamepadBookLetter",
-        },
-        PageWidth = 520,
-        PageHeight = 725,
-        OpenSound = SOUNDS.LORE_NOTE_OPEN,
-        CloseSound = SOUNDS.LORE_NOTE_CLOSE,
-        TurnPageSound = SOUNDS.LORE_NOTE_PAGE_TURN,
-    },
-    [BOOK_MEDIUM_NOTE] =
-    {
-        NumPages = 1,
-        Bg = "EsoUI/Art/LoreLibrary/loreLibrary_note.dds",
-        keyboardFonts =
-        {
-            TitleFont = "ZoFontBookNoteTitle",
-            BodyFont = "ZoFontBookNote",
-        },
-        gamepadFonts =
-        {
-            TitleFont = "ZoFontGamepadBookNoteTitle",
-            BodyFont = "ZoFontGamepadBookNote",
-        },
-        PageWidth = 520,
-        PageHeight = 725,
-        OpenSound = SOUNDS.LORE_NOTE_OPEN,
-        CloseSound = SOUNDS.LORE_NOTE_CLOSE,
-        TurnPageSound = SOUNDS.LORE_NOTE_PAGE_TURN,
-    },
-    [BOOK_MEDIUM_SCROLL] =
-    {
-        NumPages = 1,
-        Bg = "EsoUI/Art/LoreLibrary/loreLibrary_scroll.dds",
-        keyboardFonts =
-        {
-            TitleFont = "ZoFontBookScrollTitle",
-            BodyFont = "ZoFontBookScroll",
-        },
-        gamepadFonts ={
-            TitleFont = "ZoFontGamepadBookScrollTitle",
-            BodyFont = "ZoFontGamepadBookScroll",
-        },
-        PageWidth = 480,
-        PageHeight = 650,
-        FontAlpha = .65,
-        OpenSound = SOUNDS.LORE_NOTE_OPEN,
-        CloseSound = SOUNDS.LORE_NOTE_CLOSE,
-        TurnPageSound = SOUNDS.LORE_NOTE_PAGE_TURN,
-    },
-    [BOOK_MEDIUM_STONE_TABLET] =
-    {
-        NumPages = 1,
-        Bg = "EsoUI/Art/LoreLibrary/loreLibrary_stoneTablet.dds",
-        keyboardFonts =
-        {
-            TitleFont = "ZoFontBookTabletTitle",
-            BodyFont = "ZoFontBookTablet",
-        },
-        gamepadFonts =
-        {
-            TitleFont = "ZoFontGamepadBookTabletTitle",
-            BodyFont = "ZoFontGamepadBookTablet",
-        },
-        PageHeight = 765,
-        PageWidth = 780,
-        FontAlpha = .65,
-        FontStyleColor = ZO_ColorDef:New(1, 1, 1, .8),
-        OpenSound = SOUNDS.TABLET_OPEN,
-        CloseSound = SOUNDS.TABLET_CLOSE,
-        TurnPageSound = SOUNDS.TABLET_PAGE_TURN,
-    },
-    [BOOK_MEDIUM_METAL] =
-    {
-        NumPages = 2,
-        Bg = "EsoUI/Art/LoreLibrary/loreLibrary_dwemerBook.dds",
-        keyboardFonts =
-        {
-            TitleFont = "ZoFontBookMetalTitle",
-            BodyFont = "ZoFontBookMetal",
-        },
-        gamepadFonts =
-        {
-            TitleFont = "ZoFontGamepadBookMetalTitle",
-            BodyFont = "ZoFontGamepadBookMetal",
-        },
-        LeftPageXOffset = 95,
-        RightPageXOffset = -80,
-        FontStyleColor = ZO_ColorDef:New(1, 1, 1, .4),
-        OpenSound = SOUNDS.BOOK_METAL_OPEN,
-        CloseSound = SOUNDS.BOOK_METAL_CLOSE,
-        TurnPageSound = SOUNDS.BOOK_METAL_PAGE_TURN,
-    },
-    [BOOK_MEDIUM_METAL_TABLET] =
-    {
-        NumPages = 1,
-        Bg = "EsoUI/Art/LoreLibrary/loreLibrary_dwemerPage.dds",
-        keyboardFonts =
-        {
-            TitleFont = "ZoFontBookMetalTitle",
-            BodyFont = "ZoFontBookMetal",
-        },
-        gamepadFonts =
-        {
-            TitleFont = "ZoFontGamepadBookMetalTitle",
-            BodyFont = "ZoFontGamepadBookMetal",
-        },
-        PageWidth = 520,
-        PageHeight = 725,
-        FontStyleColor = ZO_ColorDef:New(1, 1, 1, .4),
-        OpenSound = SOUNDS.BOOK_METAL_OPEN,
-        CloseSound = SOUNDS.BOOK_METAL_CLOSE,
-        TurnPageSound = SOUNDS.BOOK_METAL_PAGE_TURN,
-    },
-    [BOOK_MEDIUM_ELVEN_SCROLL] =
-    {
-        NumPages = 1,
-        Bg = "EsoUI/Art/LoreLibrary/loreLibrary_RiteOfPropagation.dds",
-        keyboardFonts =
-        {
-            TitleFont = "ZoFontBookScrollTitle",
-            BodyFont ="ZoFontBookScroll",
-        },
-        gamepadFonts ={
-            TitleFont = "ZoFontGamepadBookScrollTitle",
-            BodyFont = "ZoFontGamepadBookScroll",
-        },
-        PageWidth = 480,
-        PageHeight = 650,
-        PageYOffset = -4,
-        OpenSound = SOUNDS.LORE_NOTE_OPEN,
-        CloseSound = SOUNDS.LORE_NOTE_CLOSE,
-        TurnPageSound = SOUNDS.LORE_NOTE_PAGE_TURN,
-    },
-}
-
 function LoreReader:ApplyMedium(medium, isGamepad, overrideImage)
-    local mediumData = READER_MEDIA[medium] or READER_MEDIA[BOOK_MEDIUM_YELLOWED_PAPER]
-    local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_BOOK_MEDIUM, medium)
-    local a = mediumData.FontAlpha or .8
-    local styleR, styleG, styleB, styleA
-    if mediumData.FontStyleColor then
-        styleR, styleG, styleB, styleA = mediumData.FontStyleColor:UnpackRGBA()
-    else
-        styleR, styleG, styleB, styleA = 0, 0, 0, 1
-    end
-    local fonts = isGamepad and mediumData.gamepadFonts or mediumData.keyboardFonts
-    local titleFont = fonts.TitleFont
-    local bodyFont = fonts.BodyFont
-    self.CloseSound = mediumData.CloseSound
-    self.OpenSound = mediumData.OpenSound
+    local bg, numPages, pageWidth, pageHeight, pageYOffset, leftPageXOffset, rightPageXOffset, openSound, closeSound, turnPageSound = GetBookMediumInfo(medium)
+    local titleFontName, titleFontSize, titleFontStyle, bodyFontName, bodyFontSize, bodyFontStyle, r, g, b, a, styleR, styleG, styleB, styleA = GetBookMediumFontInfo(medium, isGamepad)
+    local titleFont = ZO_CreateFontString(titleFontName, titleFontSize, titleFontStyle)
+    local bodyFont = ZO_CreateFontString(bodyFontName, bodyFontSize, bodyFontStyle)
+
+    self.CloseSound = closeSound
+    self.OpenSound = openSound
 
     self.useOverrideImage = overrideImage ~= nil
     if self.useOverrideImage then
@@ -412,9 +205,9 @@ function LoreReader:ApplyMedium(medium, isGamepad, overrideImage)
         self.bookContainer:SetHidden(false)
         self.overrideImageTexture:SetHidden(true)
 
-        self.renderablePageHeight = mediumData.PageHeight or 660
+        self.renderablePageHeight = pageHeight
 
-        self.mediumBg:SetTexture(mediumData.Bg)
+        self.mediumBg:SetTexture(bg)
 
         self.title:SetColor(r, g, b, a)
         self.title:SetStyleColor(styleR, styleG, styleB, styleA)
@@ -424,27 +217,22 @@ function LoreReader:ApplyMedium(medium, isGamepad, overrideImage)
         self.secondPage.body:SetStyleColor(styleR, styleG, styleB, styleA)
 
         self.title:SetFont(titleFont)
-        self.firstPage:SetHeight(self.renderablePageHeight)
+        self.firstPage:SetHeight(pageHeight)
         self.firstPage.body:SetFont(bodyFont)
 
-        self.secondPage:SetHeight(self.renderablePageHeight)
+        self.secondPage:SetHeight(pageHeight)
         self.secondPage.body:SetFont(bodyFont)
 
         self.firstPage:ClearAnchors()
         self.secondPage:ClearAnchors()
 
-        local pageWidth = mediumData.PageWidth or 375
-        local pageYOffset = mediumData.PageYOffset or -20
         self.title:SetWidth(pageWidth)
-        self.numPagesPerGrouping = mediumData.NumPages
-        if self.numPagesPerGrouping > 1 then
-            local leftPageXOffset = mediumData.LeftPageXOffset or 100
-            local rightPageXOffset = mediumData.RightPageXOffset or -95
-
+        self.numPagesPerGrouping = numPages
+        if numPages > 1 then
             self.firstPage:SetAnchor(LEFT, nil, LEFT, leftPageXOffset, pageYOffset)
             self.secondPage:SetAnchor(RIGHT, nil, RIGHT, rightPageXOffset, pageYOffset)
         else
-            local pageXOffset = mediumData.LeftPageXOffset or 0
+            local pageXOffset = leftPageXOffset
             self.firstPage:SetAnchor(CENTER, nil, CENTER, pageXOffset, pageYOffset)
         end
     
@@ -453,7 +241,7 @@ function LoreReader:ApplyMedium(medium, isGamepad, overrideImage)
         self.secondPage:SetWidth(pageWidth)
         self.secondPage.body:SetWidth(pageWidth)
 
-        self.TurnPageSound = mediumData.TurnPageSound
+        self.TurnPageSound = turnPageSound
     end
 end
 
@@ -636,6 +424,10 @@ end
 --[[ XML Handlers ]]--
 function ZO_LoreReader_OnInitialize(control)
     LORE_READER = LoreReader:New(control)
+end
+
+function ZO_LoreReader_OnShow(control)
+    control.owner:OnShow()
 end
 
 function ZO_LoreReader_OnHide(control)

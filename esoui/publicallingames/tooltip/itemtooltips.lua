@@ -216,12 +216,13 @@ function ZO_Tooltip:AddTopLinesToTopSection(topSection, itemLink, showPlayerLock
     end
 
     -- Item Counts
-    local bagCount, bankCount, craftBagCount, houseBanksCount, furnitureVaultCount = GetItemLinkStacks(itemLink)
+    local bagCount, bankCount, craftBagCount, houseBanksCount, furnitureVaultCount, vengeanceBagCount = GetItemLinkStacks(itemLink)
     AddItemStackCountLine(topSubsection, bagCount, "EsoUI/Art/Tooltips/icon_bag.dds", SI_GAMEPAD_INVENTORY_STACK_COUNT_BAG_BACKPACK)
     AddItemStackCountLine(topSubsection, bankCount, "EsoUI/Art/Tooltips/icon_bank.dds", SI_GAMEPAD_INVENTORY_STACK_COUNT_BAG_BANK)
     AddItemStackCountLine(topSubsection, craftBagCount, "EsoUI/Art/Tooltips/icon_craft_bag.dds", SI_GAMEPAD_INVENTORY_STACK_COUNT_BAG_CRAFT_BAG)
     AddItemStackCountLine(topSubsection, houseBanksCount, "EsoUI/Art/Tooltips/icon_house_bank.dds", SI_GAMEPAD_INVENTORY_STACK_COUNT_BAG_HOUSE_BANK)
     AddItemStackCountLine(topSubsection, furnitureVaultCount, "EsoUI/Art/Tooltips/icon_furniture_vault.dds", SI_GAMEPAD_INVENTORY_STACK_COUNT_BAG_FURNITURE_VAULT)
+    AddItemStackCountLine(topSubsection, vengeanceBagCount, "EsoUI/Art/Tooltips/icon_vengeance_bag.dds", SI_GAMEPAD_INVENTORY_STACK_COUNT_BAG_VENGEANCE)
 
     topSection:AddSectionEvenIfEmpty(topSubsection)
 end
@@ -417,7 +418,8 @@ function ZO_Tooltip:AddEnchant(itemLink, enchantDiffMode, equipSlot, extraData)
     local noEnchantDiff = enchantDiffMode == ZO_ENCHANT_DIFF_NONE
     local itemBonusSuppressionType = ITEM_BONUS_SUPPRESSION_TYPE_NONE
     local itemBonusSuppressionRefId = 0
-    
+
+    local isSuppressed = false
     local headerStyle = "bodyHeader"
     local descriptionStyle = "activeBonus"
     if noEnchantDiff and extraData and extraData.showSuppression then
@@ -425,6 +427,7 @@ function ZO_Tooltip:AddEnchant(itemLink, enchantDiffMode, equipSlot, extraData)
         if itemBonusSuppressionType ~= ITEM_BONUS_SUPPRESSION_TYPE_NONE then
             headerStyle = "itemBonusSuppressedSection"
             descriptionStyle = "itemBonusSuppressedDescription"
+            isSuppressed = true
         end
     end
 
@@ -432,7 +435,7 @@ function ZO_Tooltip:AddEnchant(itemLink, enchantDiffMode, equipSlot, extraData)
 
     if noEnchantDiff then
         if IsItemAffectedByPairedPoison(equipSlot) then
-            local suppressedStyle = self:GetStyle("suppressedAbility")
+            local suppressedStyle = isSuppressed and self:GetStyle(descriptionStyle) or self:GetStyle("suppressedAbility")
             enchantSection:AddLine(GetString(SI_TOOLTIP_ENCHANT_SUPPRESSED_BY_POISON), suppressedStyle, self:GetStyle("bodyDescription"))
         else
             enchantSection:AddLine(enchantDescription, self:GetStyle(descriptionStyle), self:GetStyle("bodyDescription"))
@@ -614,11 +617,13 @@ function ZO_Tooltip:AddSet(itemLink, equipped, extraData)
         local headerStyle = "bodyHeader"
         local bonusStyle = "activeBonus"
 
+        local isSuppressed = false
         if extraData and extraData.showSuppression then
             itemBonusSuppressionType, itemBonusSuppressionRefId = GetItemSetSuppressionInfo(setId)
             if itemBonusSuppressionType ~= ITEM_BONUS_SUPPRESSION_TYPE_NONE then
                 headerStyle = "itemBonusSuppressedSection"
                 bonusStyle = "itemBonusSuppressedDescription"
+                isSuppressed = true
             end
         end
         if isPerfectedSet then
@@ -884,7 +889,7 @@ function ZO_Tooltip:LayoutGenericItem(itemLink, equipped, creatorName, forceFull
         if itemBonusSuppressionType then
             local suppressionSection = self:AcquireSection(self:GetStyle("bodySection"))
             local suppressionName = GetItemBonusSuppressionName(itemBonusSuppressionType, itemBonusSuppressionRefId)
-            suppressionSection:AddLine(zo_strformat(SI_ITEM_FORMAT_STR_DISABLED_BY, suppressionName), self:GetStyle("itemBonusSuppressedSection"))
+            suppressionSection:AddLine(zo_strformat(SI_ITEM_FORMAT_STR_DISABLED_BY, suppressionName), self:GetStyle("itemBonusSuppressedBySection"))
             self:AddSection(suppressionSection)
         end
     end
@@ -1604,7 +1609,7 @@ function ZO_Tooltip:LayoutStoreWindowItem(itemData)
     end
 
     local requiredToBuyErrorText = itemData.dataSource.requiredToBuyErrorText
-    if requiredToBuyErrorText ~= "" then
+    if requiredToBuyErrorText and requiredToBuyErrorText ~= "" then
         local styleSection = self:AcquireSection(self:GetStyle("bodySection"))
         styleSection:AddLine(requiredToBuyErrorText, self:GetStyle("requirementFail"))
         self:AddSection(styleSection)
@@ -1789,6 +1794,23 @@ do
                     end
                 end
             end
+        end
+
+        local errorStyle = GetInteractionType() == INTERACTION_VENDOR and "bodyDescription" or "requirementFail"
+        if IsCurrentCampaignVengeanceRuleset() then
+            if IsItemLinkVisuallyDisabledInVengeance(itemLink) then
+                local errorSection = self:AcquireSection(self:GetStyle("bodySection"))
+                errorSection:AddLine(GetString(SI_CAMPAIGN_VENGEANCE_TOOLTIP_ITEM_NOT_USABLE_IN_VENGEANCE), self:GetStyle(errorStyle))
+                self:AddSection(errorSection)
+            elseif not IsItemLinkUsableOutsideVengeance(itemLink) then
+                local errorSection = self:AcquireSection(self:GetStyle("bodySection"))
+                errorSection:AddLine(GetString(SI_CAMPAIGN_VENGEANCE_TOOLTIP_ITEM_NOT_USABLE_OUTSIDE_VENGEANCE), self:GetStyle("bodyDescription"))
+                self:AddSection(errorSection)
+            end
+        elseif not IsItemLinkUsableOutsideVengeance(itemLink) then
+            local errorSection = self:AcquireSection(self:GetStyle("bodySection"))
+            errorSection:AddLine(GetString(SI_CAMPAIGN_VENGEANCE_TOOLTIP_ITEM_NOT_USABLE_OUTSIDE_VENGEANCE), self:GetStyle(errorStyle))
+            self:AddSection(errorSection)
         end
 
         return isValidItemLink
@@ -2223,10 +2245,10 @@ do
         local locationSection
         local locationCurrenciesSection
         for currencyType = CURT_ITERATION_BEGIN, CURT_ITERATION_END do
-            if CanCurrencyBeStoredInLocation(currencyType, currencyLocation) then
+            if CanCurrencyBeStoredInLocation(currencyType, currencyLocation) and ShouldShowCurrencyInCurrencyPanel(currencyType) then
                 if not locationCurrenciesSection then
                     locationSection = mainSection:AcquireSection(self:GetStyle("currencyLocationSection"))
-                    
+
                     --Title
                     locationSection:AddLine(GetString("SI_CURRENCYLOCATION", currencyLocation), self:GetStyle("currencyLocationTitle"))
 
@@ -2251,12 +2273,12 @@ do
         end
     end
 
-    function ZO_Tooltip:LayoutCurrencies()  
+    function ZO_Tooltip:LayoutCurrencies()
         local currencyMainSection = self:AcquireSection(self:GetStyle("currencyMainSection"))
 
         self:AddCurrencyLocationSection(currencyMainSection, CURRENCY_LOCATION_CHARACTER)
-        self:AddCurrencyLocationSection(currencyMainSection, CURRENCY_LOCATION_ACCOUNT)        
-        
+        self:AddCurrencyLocationSection(currencyMainSection, CURRENCY_LOCATION_ACCOUNT)
+
         self:AddSection(currencyMainSection)
     end
 end

@@ -443,7 +443,7 @@ function ZO_CollectibleData:GetOutfitStyleCost()
     return 0 -- No one should ever hit this code
 end
 
--- Begin ZO_CollectibleData_Base Overrides --
+-- End ZO_CollectibleData_Base Overrides --
 
 -----------------------------------
 -- Specialized Sorted Collectibles

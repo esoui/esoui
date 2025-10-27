@@ -300,6 +300,7 @@ function ZO_Armory_Gamepad:InitializeKeybindStripDescriptors()
 end
 
 function ZO_Armory_Gamepad:InitializeLists()
+    local NO_EQUALITY_FUNCTION = nil
     local function SetupBuildList(list)
         list:AddDataTemplate("ZO_GamepadItemSubEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
         list:AddDataTemplateWithHeader("ZO_GamepadItemSubEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, NO_EQUALITY_FUNCTION, "ZO_GamepadMenuEntryHeaderTemplate")

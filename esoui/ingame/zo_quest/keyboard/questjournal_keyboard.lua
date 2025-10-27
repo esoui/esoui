@@ -34,7 +34,7 @@ function ZO_QuestJournal_Keyboard:Initialize(control)
     self:RefreshQuestList()
 end
 
-internalassert(ZONE_DISPLAY_TYPE_MAX_VALUE == 12, "A zone display type has been added. Please add it to RegisterIcons and RegisterTooltips")
+internalassert(ZONE_DISPLAY_TYPE_MAX_VALUE == 13, "A zone display type has been added. Please add it to RegisterIcons and RegisterTooltips")
 
 function ZO_QuestJournal_Keyboard:RegisterIcons()
     self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     ZONE_DISPLAY_TYPE_SOLO,             "EsoUI/Art/Journal/journal_Quest_Instance.dds")

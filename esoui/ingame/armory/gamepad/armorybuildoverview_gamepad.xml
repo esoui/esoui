@@ -60,11 +60,11 @@
                     <Controls>
                         <Control name="$(parent)ScrollChild" override="true">
                             <Controls>
-                                <Control name="$(parent)SkillsActionBar1" inherits="ZO_ArmorySkillsActionBar_Gamepad">
+                                <Control name="$(parent)SkillsActionBar1" inherits="ZO_SkillsActionBar_Gamepad_Control">
                                     <Anchor point="TOPLEFT" />
                                 </Control>
 
-                                <Control name="$(parent)SkillsActionBar2" inherits="ZO_ArmorySkillsActionBar_Gamepad">
+                                <Control name="$(parent)SkillsActionBar2" inherits="ZO_SkillsActionBar_Gamepad_Control">
                                     <ClearAnchors />
                                     <Anchor point="TOPLEFT" relativeTo="$(parent)SkillsActionBar1" relativePoint="BOTTOMLEFT" offsetY="-30" />
                                 </Control>

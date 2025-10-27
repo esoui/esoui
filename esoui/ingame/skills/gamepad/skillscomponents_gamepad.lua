@@ -60,7 +60,7 @@ function ZO_GamepadSkillLineEntryTemplate_Setup(control, skillLineEntry, selecte
     local NO_NAME_CONTROL = nil
     ZO_GamepadSkillLineXpBar_Setup(skillLineData, xpBar, NO_NAME_CONTROL, noWrap)
 
-    control.barContainer:SetHidden(not selected)
+    control.barContainer:SetHidden(not selected or IsCurrentCampaignVengeanceRuleset())
 end
 
 function ZO_GamepadSkillLineEntryTemplate_OnLevelChanged(xpBar, rank)

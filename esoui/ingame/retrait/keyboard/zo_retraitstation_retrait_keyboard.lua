@@ -425,7 +425,7 @@ do
         -- setup the currency label, which will manage its own dirty state
         ZO_SharedInventory_ConnectPlayerCurrencyLabel(infoBar:GetNamedChild("Money"), CURT_MONEY, CURRENCY_LOCATION_CHARACTER, ZO_KEYBOARD_CURRENCY_OPTIONS)
         local SHOW_CURRENCY_CAP = true
-        ZO_SharedInventory_ConnectPlayerCurrencyLabel(infoBar:GetNamedChild("RetraitCurrency"), CURT_CHAOTIC_CREATIA, CURRENCY_LOCATION_ACCOUNT, ZO_KEYBOARD_CURRENCY_OPTIONS, SHOW_CURRENCY_CAP)
+        ZO_SharedInventory_ConnectPlayerCurrencyLabel(infoBar:GetNamedChild("RetraitCurrency"), CURT_TRANSMUTE_CRYSTALS, CURRENCY_LOCATION_ACCOUNT, ZO_KEYBOARD_CURRENCY_OPTIONS, SHOW_CURRENCY_CAP)
 
         -- Setup handling for slot counts changing
         local slotsDirty = true

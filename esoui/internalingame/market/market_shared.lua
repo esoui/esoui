@@ -890,8 +890,7 @@ do
     end
 
     function ZO_Market_Shared:PreviewOutfitStyle(collectibleId)
-        local collectibleData = ZO_CollectibleData_Base:New()
-        collectibleData:SetId(collectibleId)
+        local collectibleData = ZO_CollectibleData_Base.Acquire(collectibleId)
         local preferredOutfitSlot = GetPreferredOutfitSlotForStyle(collectibleData)
 
         if preferredOutfitSlot and IsCharacterPreviewingAvailable() then
@@ -899,6 +898,7 @@ do
                 ClearOutfitSlotPreviewElementFromPreviewCollection(preferredOutfitSlot)
                 ApplyChangesToPreviewCollectionShown()
                 self.currentSlotPreviews[preferredOutfitSlot] = nil
+                collectibleData:ReleaseObject()
                 return
             end
 
@@ -910,6 +910,7 @@ do
                 collectibleId = collectibleId,
             }
         end
+        collectibleData:ReleaseObject()
     end
 
     function ZO_Market_Shared:HasAnyCurrentSlotPreviews()

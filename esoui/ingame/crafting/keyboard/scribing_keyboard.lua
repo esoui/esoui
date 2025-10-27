@@ -346,9 +346,6 @@ function ZO_Scribing_Keyboard:OnShowing()
     local oldMode = self.mode
     ZO_MenuBar_SelectDescriptor(self.modeBar, ZO_SCRIBING_KEYBOARD_MODE_SCRIBING)
 
-    KEYBIND_STRIP:RemoveDefaultExit()
-    KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
-
     -- make sure we update the crafted ability list if it was previously showing
     -- since ZO_MenuBar_SelectDescriptor won't do anything if it was already selected
     if oldMode == ZO_SCRIBING_KEYBOARD_MODE_SCRIBING then
@@ -361,6 +358,9 @@ end
 
 function ZO_Scribing_Keyboard:OnShown()
     ZO_Scribing_Shared.OnShow(self)
+
+    KEYBIND_STRIP:RemoveDefaultExit()
+    KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
 
     CRAFTING_RESULTS:SetCraftingTooltip(self.resultTooltip)
     CRAFTING_RESULTS:SetTooltipAnimationSounds(SOUNDS.SCRIBING_SCRIBE_TOOLTIP_GLOW)

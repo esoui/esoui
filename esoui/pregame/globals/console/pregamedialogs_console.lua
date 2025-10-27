@@ -15,7 +15,7 @@ ESO_Dialogs["LEGAL_AGREEMENT_UPDATED_ACKNOWLEDGE"] =
             text = SI_CONSOLE_LEGAL_BUTTON_AGREE,
             keybind = "DIALOG_PRIMARY",
             callback = function(dialog)
-                PregameStateManager_AdvanceState()
+                ZO_PregameStateManager_AdvanceState()
             end,
         },
 

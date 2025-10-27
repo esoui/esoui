@@ -7,26 +7,19 @@ function ZO_LeaderboardsManager_Keyboard:Initialize(control, leaderboardControl)
     ZO_LeaderboardsManager_Shared.Initialize(self)
     ZO_SortFilterList.InitializeSortFilterList(self, control)
 
-    self.activeLeaderboardLabel = GetControl(control, "ActiveLeaderboard")
-    self.pointsHeaderLabel = GetControl(control, "HeadersPoints")
-    self.classHeaderLabel = GetControl(control, "HeadersClass")
-    self.allianceHeaderLabel = GetControl(control, "HeadersAlliance")
-    self.progressHeaderLabel = GetControl(control, "HeadersProgress")
-    self.emptyRow = GetControl(control, "EmptyRow")
+    self.activeLeaderboardLabel = self.control:GetNamedChild("ActiveLeaderboard")
+    self.pointsHeaderLabel = self.control:GetNamedChild("HeadersPoints")
+    self.classHeaderLabel = self.control:GetNamedChild("HeadersClass")
+    self.allianceHeaderLabel = self.control:GetNamedChild("HeadersAlliance")
+    self.progressHeaderLabel = self.control:GetNamedChild("HeadersProgress")
+    self.emptyRow = self.control:GetNamedChild("EmptyRow")
     self.loadingIcon = self.control:GetNamedChild("LoadingIcon")
+    self.searchEditBox = self.control:GetNamedChild("SearchBox")
 
-    self:InitializeFilters()
     self:InitializeCategoryList()
     self:InitializeLeaderboard()
 
     LEADERBOARDS_FRAGMENT = ZO_FadeSceneFragment:New(ZO_Leaderboards)
-end
-
-function ZO_LeaderboardsManager_Keyboard:InitializeFilters()
-    self.filterComboBox = ZO_ComboBox_ObjectFromContainer(self.control:GetNamedChild("Filter"))
-    self.filterComboBox:SetSortsItems(false)
-    self.filterComboBox:SetFont("ZoFontWinT1")
-    self.filterComboBox:SetSpacing(4)
 end
 
 function ZO_LeaderboardsManager_Keyboard:InitializeLeaderboard()
@@ -50,7 +43,7 @@ function ZO_LeaderboardsManager_Keyboard:InitializeCategoryList()
 
         local iconTexture = (open and data.pressedIcon or data.normalIcon) or "EsoUI/Art/Icons/icon_missing.dds"
         local mouseoverTexture = data.mouseoverIcon or "EsoUI/Art/Icons/icon_missing.dds"
-        
+
         control.icon:SetTexture(iconTexture)
         control.iconHighlight:SetTexture(mouseoverTexture)
 
@@ -83,14 +76,38 @@ function ZO_LeaderboardsManager_Keyboard:InitializeScenes()
             end
         end
     end)
+
+    local function SearchProcessingFunction(stringSearch, data, searchTerm, cache)
+        return self:ProcessDisplayName(stringSearch, data, searchTerm, cache)
+    end
+
+    self.search = ZO_StringSearch:New()
+    self.search:AddProcessor(SOCIAL_NAME_SEARCH, SearchProcessingFunction)
+end
+
+function ZO_LeaderboardsManager_Keyboard:ProcessDisplayName(stringSearch, data, searchTerm, cache)
+    local lowerSearchTerm = searchTerm:lower()
+
+    if zo_plainstrfind(data.displayName:lower(), lowerSearchTerm) then
+        return true
+    end
+
+    if data.characterName ~= nil and zo_plainstrfind(data.characterName:lower(), lowerSearchTerm) then
+        return true
+    end
+end
+
+function ZO_LeaderboardsManager_Keyboard:SetSearchString(stringSearch)
+    self:FilterScrollList()
+    self:RefreshFilters()
 end
 
 function ZO_LeaderboardsManager_Keyboard:AddCategory(name, normalIcon, pressedIcon, mouseoverIcon)
-    local entryData = 
+    local entryData =
     {
         name = name,
-        normalIcon = normalIcon, 
-        pressedIcon = pressedIcon, 
+        normalIcon = normalIcon,
+        pressedIcon = pressedIcon,
         mouseoverIcon = mouseoverIcon,
     }
 
@@ -99,7 +116,7 @@ end
 
 -- NOTE: Adding a maxRankFunction will require that all data is loaded up right away, instead of as-needed. Use a maxRankFunction ONLY when you want/need that behavior.
 function ZO_LeaderboardsManager_Keyboard:AddEntry(leaderboardObject, name, titleName, parent, subType, countFunction, maxRankFunction, infoFunction, pointsFormatFunction, pointsHeaderString, consoleIdRequestParamsFunction, iconPath, leaderboardRankType, playerInfoUpdateFunction)
-    local entryData = 
+    local entryData =
     {
         leaderboardObject = leaderboardObject,
         name = name,
@@ -162,7 +179,7 @@ end
 function ZO_LeaderboardsManager_Keyboard:RefreshLeaderboardType(leaderboardType)
     local isBattlegroundLeaderboard = leaderboardType == LEADERBOARD_TYPE_BATTLEGROUND
     local isTributeLeaderboard = leaderboardType == LEADERBOARD_TYPE_TRIBUTE
-    local isEndlessDungeonLeaderboard = leaderboardType == LEADERBOARD_TYPE_ENDLESS_DUNGEON_OVERALL or leaderboardType == LEADERBOARD_TYPE_ENDLESS_DUNGEON_CLASS
+    local isEndlessDungeonLeaderboard = leaderboardType == LEADERBOARD_TYPE_ENDLESS_DUNGEON_OVERALL
 
     local shouldHideClass = isBattlegroundLeaderboard or isTributeLeaderboard
     local shouldHideAlliance = isBattlegroundLeaderboard or isTributeLeaderboard or isEndlessDungeonLeaderboard
@@ -223,46 +240,27 @@ function ZO_LeaderboardsManager_Keyboard:BuildMasterList()
 end
 
 function ZO_LeaderboardsManager_Keyboard:FilterScrollList()
-    local selectedData = self.filterComboBox:GetSelectedItemData()
-    if selectedData then
-        local playerName = GetUnitName("player")
-        local index = 0
-        local function PreAddCallback(data)
-            index = index + 1
-            data.index = index
-            data.recolorName = data.characterName == playerName
-        end
-
-        local filteredClass = self:GetSelectedClassFilter()
-        LEADERBOARD_LIST_MANAGER:FilterScrollList(self.list, filteredClass, PreAddCallback)
-
-        self.emptyRow:SetHidden(index > 0)
+    local playerName = GetUnitName("player")
+    local searchTerm = self.searchEditBox:GetText()
+    local index = 0
+    local function PreAddCallback(data)
+        index = index + 1
+        data.index = index
+        data.recolorName = data.characterName == playerName
     end
+
+    local function SearchCallback(data)
+        return searchTerm == "" or self.search:IsMatch(searchTerm, data)
+    end
+
+    LEADERBOARD_LIST_MANAGER:FilterScrollList(self.list, PreAddCallback, SearchCallback)
+
+    self.emptyRow:SetHidden(index > 0)
 end
 
 function ZO_LeaderboardsManager_Keyboard:ColorRow(control, data)
     local nameColor = data.recolorName and ZO_SELECTED_TEXT or ZO_SECOND_CONTRAST_TEXT
     control.nameLabel:SetColor(nameColor:UnpackRGBA())
-end
-
-function ZO_LeaderboardsManager_Keyboard:RepopulateFilterDropdown()
-    local function OnFilterChanged(comboBox, entryText, entry)
-        local leaderboard = self:GetSelectedLeaderboardData()
-        if not leaderboard.leaderboardObject:HandleFilterDropdownChanged() then
-            self:RefreshFilters()
-        end
-    end
-
-    ZO_Leaderboards_PopulateDropdownFilter(self.filterComboBox, OnFilterChanged, LEADERBOARD_LIST_MANAGER.leaderboardRankType)
-end
-
-function ZO_LeaderboardsManager_Keyboard:GetSelectedClassFilter()
-    local selectedData = self.filterComboBox:GetSelectedItemData()
-    if selectedData then
-        return selectedData.classId
-    end
-    
-    return 0
 end
 
 function ZO_LeaderboardsManager_Keyboard:SetLoadingSpinnerVisibility(show)
@@ -283,11 +281,19 @@ end
 -----------------------
 
 function ZO_LeaderboardsRowName_OnMouseEnter(control)
-    ZO_SocialListKeyboard.CharacterName_OnMouseEnter(LEADERBOARDS, control)
+    if ZO_ShouldPreferUserId() then
+        ZO_SocialListKeyboard.DisplayName_OnMouseEnter(LEADERBOARDS, control)
+    else
+        ZO_SocialListKeyboard.CharacterName_OnMouseEnter(LEADERBOARDS, control)
+    end
 end
 
 function ZO_LeaderboardsRowName_OnMouseExit(control)
-     ZO_SocialListKeyboard.CharacterName_OnMouseExit(LEADERBOARDS, control)
+    if ZO_ShouldPreferUserId() then
+        ZO_SocialListKeyboard.DisplayName_OnMouseExit(LEADERBOARDS, control)
+    else
+        ZO_SocialListKeyboard.CharacterName_OnMouseExit(LEADERBOARDS, control)
+    end
 end
 
 function ZO_LeaderboardsRowClass_OnMouseEnter(control)
@@ -308,4 +314,8 @@ end
 
 function ZO_Leaderboards_OnInitialized(self)
     LEADERBOARDS = ZO_LeaderboardsManager_Keyboard:New(self)
+end
+
+function ZO_Leaderboards_OnSearchTextChanged(editBox)
+    LEADERBOARDS:SetSearchString(editBox:GetText())
 end

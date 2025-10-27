@@ -155,10 +155,10 @@ function ZO_PEGIAgreement_Gamepad:OnCountrySelectionConfirmed()
     else
         AgreeToPEGI()
         ZO_Dialogs_ReleaseDialogOnButtonPress("PEGI_COUNTRY_SELECT_GAMEPAD")
-        if PregameStateManager_GetCurrentState() == "CharacterSelect" then
-            Pregame_ShowScene("gamepadCharacterSelect")
-        elseif PregameStateManager_GetCurrentState() == "CharacterCreate" then
-            Pregame_ShowScene("gamepadCharacterCreate")
+        if ZO_PregameStateManager_GetCurrentState() == "CharacterSelect" then
+            ZO_Pregame_ShowScene("gamepadCharacterSelect")
+        elseif ZO_PregameStateManager_GetCurrentState() == "CharacterCreate" then
+            ZO_Pregame_ShowScene("gamepadCharacterCreate")
         end
     end
 end
@@ -189,10 +189,10 @@ function ZO_PEGI_AgreementDialog_Gamepad_OnInitialized(control)
                 callback = function(dialog)
                     AgreeToPEGI()
                     ZO_Dialogs_ReleaseDialogOnButtonPress("PEGI_AGREEMENT_GAMEPAD")
-                    if PregameStateManager_GetCurrentState() == "CharacterSelect" then
-                        Pregame_ShowScene("gamepadCharacterSelect")
-                    elseif PregameStateManager_GetCurrentState() == "CharacterCreate" then
-                        Pregame_ShowScene("gamepadCharacterCreate")
+                    if ZO_PregameStateManager_GetCurrentState() == "CharacterSelect" then
+                        ZO_Pregame_ShowScene("gamepadCharacterSelect")
+                    elseif ZO_PregameStateManager_GetCurrentState() == "CharacterCreate" then
+                        ZO_Pregame_ShowScene("gamepadCharacterCreate")
                     end
                 end,
             },

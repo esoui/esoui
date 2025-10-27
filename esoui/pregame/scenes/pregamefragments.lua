@@ -62,7 +62,7 @@ function ZO_PregameSceneStateAdvanceFromFragment:Hide()
     --also only advance if we are in an expected state
     if not self.advancing then
         self.advancing = true
-        PregameStateManager_AdvanceStateFromState(self.advanceFromState)
+        ZO_PregameStateManager_AdvanceStateFromState(self.advanceFromState)
         self:OnHidden()
     end
     self.advancing = nil

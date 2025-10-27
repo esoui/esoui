@@ -205,6 +205,27 @@ local function GetSellItems(searchContext)
     return unequippedItems
 end
 
+local function GetSellVengeanceItems(searchContext)
+    local items = SHARED_INVENTORY:GenerateFullSlotData(nil, BAG_VENGEANCE)
+    local unequippedItems = {}
+
+    --- Setup sort filter
+    for _, itemData in ipairs(items) do
+        if not itemData.stolen and not itemData.isPlayerLocked  and searchContext and TEXT_SEARCH_MANAGER:IsDataInSearchTextResults(searchContext, BACKGROUND_LIST_FILTER_TARGET_BAG_SLOT, itemData.bagId, itemData.slotIndex) then
+            itemData.isEquipped = false
+            itemData.meetsRequirementsToBuy = true
+            itemData.meetsRequirementsToEquip = itemData.meetsUsageRequirements
+
+            itemData.storeGroup = GetItemStoreGroup(itemData)
+            itemData.bestGamepadItemCategoryName = GetBestSellItemCategoryDescription(itemData)
+            itemData.customSortOrder = itemData.sellInformationSortOrder
+            table.insert(unequippedItems, itemData)
+        end
+    end
+
+    return unequippedItems
+end
+
 local function GetBuybackItems(searchContext)
     local items = {}
     for entryIndex = 1, GetNumBuybackItems() do
@@ -381,6 +402,7 @@ local MODE_TO_UPDATE_FUNC = {
         [ZO_MODE_STORE_SELL_STOLEN] =  {updateFunc = GetStolenSellItems,    sortFunc = ItemSortFunc},
         [ZO_MODE_STORE_LAUNDER] =      {updateFunc = GetLaunderItems,       sortFunc = ItemSortFunc},
         [ZO_MODE_STORE_STABLE] =       {updateFunc = GetStableItems},
+        [ZO_MODE_STORE_SELL_VENGEANCE] = {updateFunc = GetSellVengeanceItems, sortFunc = SellSortFunc},
     }
 
 -- These functions are appropriated by ZO_GamepadStoreListComponent without inheriting.
