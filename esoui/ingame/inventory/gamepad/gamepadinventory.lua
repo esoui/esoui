@@ -856,7 +856,7 @@ function ZO_GamepadInventory:InitializeKeybindStrip()
                     end
                 end
                 self:RefreshKeybinds()
-                SCREEN_NARRATION_MANAGER:QueueParametricListEntry(activeItemList)
+                SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self:GetActiveItemList())
             end,
         },
     }
