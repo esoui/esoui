@@ -4,16 +4,13 @@
             TODO: ZO_Menu needs to become virtual and be reparented to ZO_Menus to enable
             nesting.  This is just a quick first pass.
         -->
-
         <Control name="ZO_MenuItem" mouseEnabled="true" virtual="true">
             <OnMouseEnter>
                 ZO_Menu_EnterItem(self)
             </OnMouseEnter>
-
             <OnMouseExit>
                 ZO_Menu_ExitItem(self)
             </OnMouseExit>
-
             <OnMouseDown>
                 IgnoreMouseDownEditFocusLoss()
             </OnMouseDown>
@@ -22,61 +19,49 @@
                     ZO_Menu_ClickItem(self, button)
                 end
             </OnMouseUp>
-
             <Controls>
                 <Label name="$(parent)Name">
-                    <Anchor point="TOPLEFT" />
+                    <Anchor point="TOPLEFT"/>
                 </Label>
             </Controls>
         </Control>
-
         <Button name="ZO_MenuItemCheckButton" inherits="ZO_CheckButton" virtual="true">
             <OnMouseEnter>
                 ZO_Menu_EnterItem(self)
             </OnMouseEnter>
-
             <OnMouseExit>
                 ZO_Menu_ExitItem(self)
             </OnMouseExit>
         </Button>
-
-        <Backdrop name="ZO_MenuItemHighlight" inherits="ZO_SelectionHighlight" hidden="true" virtual="true" />
-
+        <Backdrop name="ZO_MenuItemHighlight" inherits="ZO_SelectionHighlight" hidden="true" virtual="true"/>
         <TopLevelControl name="ZO_Menus" tier="HIGH" level="ZO_HIGH_TIER_KEYBOARD_COMBO_BOX_DROPDOWN">
             <OnInitialized>
                 ZO_Menu_Initialize()
             </OnInitialized>
-
             <Controls>
                 <Control name="ZO_Menu" clampedToScreen="true" mouseEnabled="true" hidden="true">
                     <OnMouseEnter>
                         -- This is just to prevent tooltips from items underneath from showing up over the menu
                     </OnMouseEnter>
-
                     <OnHide>
                         ZO_Menu_OnHide(self)
                     </OnHide>
-
                     <Controls>
                         <Texture name="$(parent)Underlay" color="000000" mouseEnabled="true" alpha="0.0" excludeFromResizeToFitExtents="true">
-                            <Anchor point="TOPLEFT" relativeTo="GuiRoot" />
-                            <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" />
-
-                            <OnMouseWheel />
+                            <Anchor point="TOPLEFT" relativeTo="GuiRoot"/>
+                            <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot"/>
+                            <OnMouseWheel/>
                         </Texture>
-                        
                         <Backdrop name="$(parent)BG">
-                            <AnchorFill />
-
+                            <AnchorFill/>
                             <Controls>
                                 <Texture name="$(parent)MungeOverlay" textureFile="EsoUI/Art/Tooltips/munge_overlay.dds" addressMode="WRAP">
-                                    <Anchor point="TOPLEFT" />
-                                    <Anchor point="BOTTOMRIGHT" />
+                                    <Anchor point="TOPLEFT"/>
+                                    <Anchor point="BOTTOMRIGHT"/>
                                 </Texture>
                             </Controls>
                         </Backdrop>
-
-                        <Backdrop name="$(parent)Highlight" inherits="ZO_SelectionHighlight" hidden="true" />
+                        <Backdrop name="$(parent)Highlight" inherits="ZO_SelectionHighlight" hidden="true"/>
                     </Controls>
                 </Control>
             </Controls>

@@ -20,10 +20,11 @@ function WorldMapKey_Gamepad:Initialize(control)
 
     self.symbolParams = SYMBOL_PARAMS
 
-    self.mainControl = control:GetNamedChild("Main")
-    self.scrollControl = self.mainControl:GetNamedChild("Scroll")
-    self.scrollChildControl = self.mainControl:GetNamedChild("ScrollChild")
-    self.scrollIndicator = self.mainControl:GetNamedChild("ScrollIndicator")
+    local mainControl = control:GetNamedChild("Main")
+    self.mainControl = mainControl
+    self.scrollControl = mainControl:GetNamedChild("Scroll")
+    self.scrollChildControl = mainControl:GetNamedChild("ScrollChild")
+    self.scrollIndicator = mainControl:GetNamedChild("ScrollIndicator")
 
     self.columns = {}
     local anchorTo = self.scrollChildControl
@@ -38,10 +39,10 @@ function WorldMapKey_Gamepad:Initialize(control)
         relativePoint1, relativePoint2 = TOPRIGHT, BOTTOMRIGHT
     end
 
-    self.noKeyLabel = self.mainControl:GetNamedChild("NoKey")
+    self.noKeyLabel = mainControl:GetNamedChild("NoKey")
 
     local function Reset(control)
-        control:SetParent(mainControl)
+        control:SetParent(self.mainControl)
     end
 
     self.symbolPool = ZO_ControlPool:New("ZO_WorldMapKeySymbol_Gamepad", mainControl, "Symbol")

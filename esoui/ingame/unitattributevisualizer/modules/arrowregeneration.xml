@@ -8,13 +8,11 @@
             </Animations>
         </AnimationTimeline>
     </Animations>
-
     <Controls>
         <Texture name="ZO_ArrowRegeneration" alpha="0" tier="MEDIUM" virtual="true">
-            <Dimensions x="16" y="16" />
+            <Dimensions x="16" y="16"/>
         </Texture>
-
-        <Texture name="ZO_ArrowRegeneration_Keyboard_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_arrow.dds" virtual="true" />
-        <Texture name="ZO_ArrowRegeneration_Gamepad_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_attributeBar_arrow.dds" virtual="true" />
+        <Texture name="ZO_ArrowRegeneration_Keyboard_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/attributeBar_arrow.dds" virtual="true"/>
+        <Texture name="ZO_ArrowRegeneration_Gamepad_Template" textureFile="EsoUI/Art/UnitAttributeVisualizer/Gamepad/gp_attributeBar_arrow.dds" virtual="true"/>
     </Controls>
 </GuiXml>

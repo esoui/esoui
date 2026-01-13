@@ -16,7 +16,6 @@
                         local HIDE_WHEN_UNEARNED = true
                         ZO_WeaponSwap_OnInitialized(self, HIDE_WHEN_UNEARNED)
                     </OnInitialized>
-
                     <OnMouseEnter>
                         ZO_WeaponSwap_OnMouseEnter(self, RIGHT, -5)
                     </OnMouseEnter>

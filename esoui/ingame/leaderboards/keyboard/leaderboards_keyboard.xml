@@ -1,34 +1,29 @@
 <GuiXml>
     <Controls>
-        <Label name="ZO_LeaderboardsInformationArea_Text" font="ZoFontWinT1" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true" />
-        <Label name="ZO_LeaderboardsHeaderLabel" font="ZoFontWinH4" modifyTextType="UPPERCASE" wrapMode="ELLIPSIS" virtual="true" />
+        <Label name="ZO_LeaderboardsInformationArea_Text" font="ZoFontWinT1" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true"/>
+        <Label name="ZO_LeaderboardsHeaderLabel" font="ZoFontWinH4" modifyTextType="UPPERCASE" wrapMode="ELLIPSIS" virtual="true"/>
         <Label name="ZO_LeaderboardsRowLabel" font="ZoFontWinH4" wrapMode="ELLIPSIS" verticalAlignment="CENTER" virtual="true">
-            <Dimensions y="30" />
+            <Dimensions y="30"/>
         </Label>
-      
         <TopLevelControl name="ZO_LeaderboardsInformationArea" hidden="true" virtual="true">
-            <Dimensions x="595" y="100" />
-            <Anchor point="TOPLEFT" relativeTo="ZO_LeaderboardsTopDivider" relativePoint="BOTTOMLEFT" offsetX="10" offsetY="-5" />
-            <Anchor point="TOPRIGHT" relativeTo="ZO_LeaderboardsTopDivider" relativePoint="BOTTOMRIGHT" offsetX="10" offsetY="-5" />
+            <Dimensions x="595" y="100"/>
+            <Anchor point="TOPLEFT" relativeTo="ZO_LeaderboardsTopDivider" relativePoint="BOTTOMLEFT" offsetX="10" offsetY="-5"/>
+            <Anchor point="TOPRIGHT" relativeTo="ZO_LeaderboardsTopDivider" relativePoint="BOTTOMRIGHT" offsetX="10" offsetY="-5"/>
             <Controls>
                 <Label name="$(parent)CurrentScore" inherits="ZO_LeaderboardsInformationArea_Text">
-                    <Anchor point="BOTTOMLEFT" offsetY="-23" />
+                    <Anchor point="BOTTOMLEFT" offsetY="-23"/>
                 </Label>
-
                 <Label name="$(parent)CurrentRank" inherits="ZO_LeaderboardsInformationArea_Text">
-                    <Anchor point="BOTTOMLEFT" />
+                    <Anchor point="BOTTOMLEFT"/>
                 </Label>
-
                 <Label name="$(parent)ScoringInfo" inherits="ZO_LeaderboardsInformationArea_Text">
-                    <Anchor point="BOTTOMRIGHT" offsetY="-23" />
+                    <Anchor point="BOTTOMRIGHT" offsetY="-23"/>
                 </Label>
-
                 <Label name="$(parent)Timer" inherits="ZO_LeaderboardsInformationArea_Text">
-                    <Anchor point="BOTTOMRIGHT" />
+                    <Anchor point="BOTTOMRIGHT"/>
                 </Label>
             </Controls>
         </TopLevelControl>
-
         <Control name="ZO_LeaderboardsPlayerRow" virtual="true">
             <OnInitialized>
                 self.rankLabel = GetControl(self, "Rank")
@@ -41,13 +36,12 @@
             <Dimensions y="30"/>
             <Controls>
                 <Label name="$(parent)Rank" inherits="ZO_LeaderboardsRowLabel">
-                    <Dimensions x="40" />
-                    <Anchor point="LEFT" />
+                    <Dimensions x="40"/>
+                    <Anchor point="LEFT"/>
                 </Label>
-                
                 <Label name="$(parent)Name" inherits="ZO_LeaderboardsRowLabel" font="ZoFontWinT1" mouseEnabled="true">
-                    <Dimensions x="220" />
-                    <Anchor point="LEFT" relativeTo="$(parent)Rank" relativePoint="RIGHT" offsetX="10" />
+                    <Dimensions x="220"/>
+                    <Anchor point="LEFT" relativeTo="$(parent)Rank" relativePoint="RIGHT" offsetX="10"/>
                     <OnMouseEnter>
                         ZO_LeaderboardsRowName_OnMouseEnter(self)
                     </OnMouseEnter>
@@ -55,10 +49,9 @@
                         ZO_LeaderboardsRowName_OnMouseExit(self)
                     </OnMouseExit>
                 </Label>
-                
                 <Texture name="$(parent)Class" mouseEnabled="true" layer="OVERLAY">
-                    <Dimensions x="32" y="32" />
-                    <Anchor point="CENTER" relativeTo="$(parent)Name" relativePoint="RIGHT" offsetX="60" />
+                    <Dimensions x="32" y="32"/>
+                    <Anchor point="CENTER" relativeTo="$(parent)Name" relativePoint="RIGHT" offsetX="60"/>
                     <OnMouseEnter>
                         ZO_LeaderboardsRowClass_OnMouseEnter(self)
                     </OnMouseEnter>
@@ -66,12 +59,10 @@
                         ZO_LeaderboardsRowClass_OnMouseExit(self)
                     </OnMouseExit>
                 </Texture>
-
                 <!-- Alliance and Progress are mutually exclusive, so both anchor to Class -->
-                
                 <Texture name="$(parent)Alliance" mouseEnabled="true" layer="OVERLAY">
                     <Dimensions x="32" y="32"/>
-                    <Anchor point="CENTER" relativeTo="$(parent)Class" relativePoint="CENTER" offsetX="110" />
+                    <Anchor point="CENTER" relativeTo="$(parent)Class" relativePoint="CENTER" offsetX="110"/>
                     <OnMouseEnter>
                         ZO_LeaderboardsRowAlliance_OnMouseEnter(self)
                     </OnMouseEnter>
@@ -79,36 +70,30 @@
                         ZO_LeaderboardsRowAlliance_OnMouseExit(self)
                     </OnMouseExit>
                 </Texture>
-                
                 <Label name="$(parent)Progress" inherits="ZO_LeaderboardsRowLabel" font="ZoFontWinT1" mouseEnabled="true">
-                    <Anchor point="CENTER" relativeTo="$(parent)Class" relativePoint="CENTER" offsetX="110" />
+                    <Anchor point="CENTER" relativeTo="$(parent)Class" relativePoint="CENTER" offsetX="110"/>
                 </Label>
-                
                 <Label name="$(parent)Points" inherits="ZO_LeaderboardsRowLabel" horizontalAlignment="RIGHT">
-                    <Anchor point="RIGHT" offsetX="-10" />
+                    <Anchor point="RIGHT" offsetX="-10"/>
                     <Anchor point="LEFT" relativeTo="$(parent)Alliance" relativePoint="RIGHT" offsetX="40"/>
                 </Label>
-
-                <Texture name="$(parent)BG" inherits="ZO_ThinListBgStrip" />
+                <Texture name="$(parent)BG" inherits="ZO_ThinListBgStrip"/>
             </Controls>
         </Control>
-
-        <Control name="ZO_LeaderboardsNavigationHeader" virtual="true" inherits="ZO_IconHeader" >
+        <Control name="ZO_LeaderboardsNavigationHeader" virtual="true" inherits="ZO_IconHeader">
             <Controls>
                 <Label name="$(parent)Text" override="true" wrapMode="ELLIPSIS" maxLineCount="2">
-                    <Dimensions x="200" />
+                    <Dimensions x="200"/>
                 </Label>
             </Controls>
         </Control>
-
         <Label name="ZO_LeaderboardsNavigationEntry" virtual="true" inherits="ZO_SelectableTooltipIfTruncatedLabel" font="ZoFontHeader" maxLineCount="1">
-          <Anchor point="RIGHT" relativeTo="$(parent)" relativePoint="RIGHT" />
-          <Dimensions x="200" />
-          <OnMouseUp>
+            <Anchor point="RIGHT" relativeTo="$(parent)" relativePoint="RIGHT"/>
+            <Dimensions x="200"/>
+            <OnMouseUp>
               ZO_TreeEntry_OnMouseUp(self, upInside)
           </OnMouseUp>
         </Label>
-
         <Control name="ZO_LeaderboardsDivider" virtual="true">
             <Dimensions x="604" y="30"/>
             <Controls>
@@ -118,12 +103,11 @@
                 </Texture>
                 <Texture name="$(parent)Right" textureFile="EsoUI/Art/AvA/AvA_rightColumnDivider_right.dds">
                     <Dimensions x="92" y="4"/>
-                    <Anchor point="RIGHT" />
+                    <Anchor point="RIGHT"/>
                     <TextureCoords left="0" right="0.359375" top="0" bottom="1"/>
                 </Texture>
             </Controls>
         </Control>
-
         <TopLevelControl name="ZO_Leaderboards" inherits="ZO_RightPanelFootPrint" hidden="true">
             <OnInitialized>
                 ZO_Leaderboards_OnInitialized(self)
@@ -131,16 +115,14 @@
             <Controls>
                 <Control name="$(parent)NavigationContainer" inherits="ZO_ScrollContainer">
                     <Dimensions x="280"/>
-                    <Anchor point="TOPLEFT" offsetX="-10" offsetY="55" />
-                    <Anchor point="BOTTOMLEFT" offsetX="-10" />
+                    <Anchor point="TOPLEFT" offsetX="-10" offsetY="55"/>
+                    <Anchor point="BOTTOMLEFT" offsetX="-10"/>
                 </Control>
-
                 <Control name="$(parent)TopDivider" inherits="ZO_LeaderboardsDivider">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)NavigationContainer" relativePoint="TOPRIGHT" offsetX="10" offsetY="15" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)NavigationContainer" relativePoint="TOPRIGHT" offsetX="10" offsetY="15"/>
                 </Control>
-
                 <Backdrop name="$(parent)Search" tier="HIGH" inherits="ZO_SingleLineEditBackdrop_Keyboard">
-                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)TopDivider" relativePoint="TOPRIGHT" offsetX="28" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)TopDivider" relativePoint="TOPRIGHT" offsetX="28"/>
                     <Dimensions x="240"/>
                     <Controls>
                         <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop" defaultText="SI_ACHIEVEMENT_SEARCH_EDIT_DEFAULT">
@@ -150,71 +132,57 @@
                         </EditBox>
                     </Controls>
                 </Backdrop>
-
                 <Label name="$(parent)ActiveLeaderboard" font="ZoFontWinH2" modifyTextType="UPPERCASE" mouseEnabled="true">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)TopDivider" relativePoint="BOTTOMLEFT" offsetX="10" offsetY="-5" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)TopDivider" relativePoint="BOTTOMLEFT" offsetX="10" offsetY="-5"/>
                 </Label>
-
                 <Control name="$(parent)BottomDivider" inherits="ZO_LeaderboardsDivider">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)NavigationContainer" relativePoint="TOPRIGHT"  offsetX="10" offsetY="140" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)NavigationContainer" relativePoint="TOPRIGHT" offsetX="10" offsetY="140"/>
                 </Control>
-
                 <Control name="$(parent)Headers">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)BottomDivider" relativePoint="BOTTOMLEFT" offsetX="10" offsetY="-10"/>
                     <Dimensions x="630" y="32"/>
                     <Controls>
                         <Label name="$(parent)Rank" inherits="ZO_LeaderboardsHeaderLabel" text="SI_LEADERBOARDS_HEADER_RANK">
-                            <Dimensions x="40" />
-                            <Anchor point="LEFT" />
+                            <Dimensions x="40"/>
+                            <Anchor point="LEFT"/>
                         </Label>
-
                         <Label name="$(parent)Name" inherits="ZO_LeaderboardsHeaderLabel" text="SI_LEADERBOARDS_HEADER_NAME">
-                            <Dimensions x="220" />
-                            <Anchor point="LEFT" relativeTo="$(parent)Rank" relativePoint="RIGHT" offsetX="10" />
+                            <Dimensions x="220"/>
+                            <Anchor point="LEFT" relativeTo="$(parent)Rank" relativePoint="RIGHT" offsetX="10"/>
                         </Label>
-
                         <Label name="$(parent)Class" inherits="ZO_LeaderboardsHeaderLabel" text="SI_LEADERBOARDS_HEADER_CLASS" horizontalAlignment="CENTER">
-                            <Dimensions x="100" />
-                            <Anchor point="LEFT" relativeTo="$(parent)Name" relativePoint="RIGHT" offsetX="10" />
+                            <Dimensions x="100"/>
+                            <Anchor point="LEFT" relativeTo="$(parent)Name" relativePoint="RIGHT" offsetX="10"/>
                         </Label>
-
                         <!-- Alliance and Progress are mutually exclusive, so both anchor to Class -->
-                        
                         <Label name="$(parent)Alliance" inherits="ZO_LeaderboardsHeaderLabel" text="SI_LEADERBOARDS_HEADER_ALLIANCE" horizontalAlignment="CENTER">
-                            <Dimensions x="100" />
-                            <Anchor point="LEFT" relativeTo="$(parent)Class" relativePoint="RIGHT" offsetX="10" />
+                            <Dimensions x="100"/>
+                            <Anchor point="LEFT" relativeTo="$(parent)Class" relativePoint="RIGHT" offsetX="10"/>
                         </Label>
-
                         <Label name="$(parent)Progress" inherits="ZO_LeaderboardsHeaderLabel" text="SI_LEADERBOARDS_HEADER_PROGRESS" horizontalAlignment="CENTER">
-                            <Dimensions x="102" />
-                            <Anchor point="LEFT" relativeTo="$(parent)Class" relativePoint="RIGHT" offsetX="10" />
+                            <Dimensions x="102"/>
+                            <Anchor point="LEFT" relativeTo="$(parent)Class" relativePoint="RIGHT" offsetX="10"/>
                         </Label>
-
                         <Label name="$(parent)Points" inherits="ZO_LeaderboardsHeaderLabel" horizontalAlignment="RIGHT">
-                            <Anchor point="RIGHT" offsetX="-35" />
+                            <Anchor point="RIGHT" offsetX="-35"/>
                         </Label>
-                        
                     </Controls>
                 </Control>
-
                 <Control name="$(parent)List" inherits="ZO_ScrollList">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Headers" relativePoint="BOTTOMLEFT"/>
                     <Anchor point="BOTTOMRIGHT" offsetX="-12" offsetY="-32"/>
                 </Control>
-
                 <Control name="$(parent)LoadingIcon" inherits="ZO_Loading">
-                    <Anchor point="TOP" relativeTo="$(parent)Headers" relativePoint="BOTTOM" offsetY="77" />
+                    <Anchor point="TOP" relativeTo="$(parent)Headers" relativePoint="BOTTOM" offsetY="77"/>
                     <OnInitialized>
                         ZO_Loading_Initialize(self)
                     </OnInitialized>
                 </Control>
-                
                 <Control name="$(parent)EmptyRow" inherits="ZO_SortFilterListEmptyRow_Keyboard" hidden="true">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)List" offsetY="5" />
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)List" offsetY="5" />
-
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)List" offsetY="5"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)List" offsetY="5"/>
                     <Controls>
-                        <Label name="$(parent)Message" override="true" text="SI_LEADERBOARDS_NO_RANKINGS_FOUND" />
+                        <Label name="$(parent)Message" override="true" text="SI_LEADERBOARDS_NO_RANKINGS_FOUND"/>
                     </Controls>
                 </Control>
             </Controls>

@@ -1,13 +1,12 @@
-﻿<GuiXml>
+<GuiXml>
     <Controls>
         <Control name="ZO_GamepadMarket_TitleAnchors" virtual="true">
             <Anchor point="TOPLEFT"/>
             <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" offsetY="56"/>
         </Control>
-        
         <Control name="ZO_GamepadMarket_TabBarEntryTemplate" resizeToFitDescendents="true" virtual="true">
             <Anchor point="CENTER"/>
-            <DimensionConstraints maxX="ZO_GAMEPAD_QUADRANT_1_2_3_CONTAINER_WIDTH" />
+            <DimensionConstraints maxX="ZO_GAMEPAD_QUADRANT_1_2_3_CONTAINER_WIDTH"/>
             <OnInitialized>
                 ZO_GamepadTabBarTemplate_OnInitialized(self)
             </OnInitialized>
@@ -17,11 +16,10 @@
                 </Label>
             </Controls>
         </Control>
-
         <Control name="ZO_GamepadMarket_GridScreen" inherits="ZO_GamepadGrid_NavQuadrant_1_2_3_Anchors" virtual="true">
             <Controls>
                 <Control name="$(parent)FullPane">
-                    <AnchorFill />
+                    <AnchorFill/>
                     <Controls>
                         <Control name="$(parent)Container" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
                             <Controls>
@@ -33,7 +31,6 @@
                                             <OnInitialized>
                                                 self:GetParent().header = self
                                             </OnInitialized>
-
                                             <Controls>
                                                 <Control name="$(parent)TabBarContainer" inherits="ZO_GamepadMarket_TitleAnchors">
                                                     <Controls>
@@ -50,7 +47,6 @@
                                                         </Control>
                                                     </Controls>
                                                 </Control>
-
                                                 <Control name="$(parent)DividerSimple" inherits="ZO_GamepadHeaderHorizontalDividerSimple">
                                                     <Anchor point="TOPLEFT" relativeTo="$(parent)TabBar" relativePoint="BOTTOMLEFT"/>
                                                     <Anchor point="TOPRIGHT" relativeTo="$(parent)TabBar" relativePoint="BOTTOMRIGHT" offsetY="ZO_GAMEPAD_CONTENT_TITLE_DIVIDER_PADDING_Y"/>
@@ -59,27 +55,19 @@
                                         </Control>
                                     </Controls>
                                 </Control>
-
                                 <Control name="$(parent)Content" inherits="ZO_ScrollContainer">
                                     <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)HeaderContainerHeader" offsetX="-20"/>
-                                    <Anchor point="BOTTOMRIGHT" offsetX="20" />
-                                    <OnEffectivelyShown/> <!-- Overrides the parent's OnEffectivelyShown so it is not called. It is mouse related and not needed in the gamepad market. -->
-                                    <OnEffectivelyHidden/> <!-- Overrides the parent's OnEffectivelyHidden so it is not called. It is mouse related and not needed in the gamepad market -->
+                                    <Anchor point="BOTTOMRIGHT" offsetX="20"/>
+                                    <OnEffectivelyShown/>
+                                    <!-- Overrides the parent's OnEffectivelyShown so it is not called. It is mouse related and not needed in the gamepad market. -->
+                                    <OnEffectivelyHidden/>
+                                    <!-- Overrides the parent's OnEffectivelyHidden so it is not called. It is mouse related and not needed in the gamepad market -->
                                     <Controls>
                                         <Control name="$(parent)ScrollChild" resizeToFitDescendents="false" override="true"/>
                                         <Slider name="$(parent)ScrollBar" hidden="true" mouseEnabled="false" override="true">
                                             <Anchor point="TOPLEFT" relativeTo="$(parent)Scroll" relativePoint="TOPRIGHT" offsetX="-4" offsetY="16"/>
                                             <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Scroll" relativePoint="BOTTOMRIGHT" offsetX="-4" offsetY="-16"/>
-                                            <ThumbTexture
-                                                textureFile="EsoUI/Art/Windows/Gamepad/gp_nav1_horDividerFlat.dds"
-                                                disabledTextureFile="EsoUI/Art/Windows/Gamepad/gp_nav1_horDividerFlat.dds"
-                                                thumbWidth="8"
-                                                thumbHeight="32"
-                                                top="0.5"
-                                                left="0" 
-                                                bottom="0.5"
-                                                right="1"
-                                            />
+                                            <ThumbTexture textureFile="EsoUI/Art/Windows/Gamepad/gp_nav1_horDividerFlat.dds" disabledTextureFile="EsoUI/Art/Windows/Gamepad/gp_nav1_horDividerFlat.dds" thumbWidth="8" thumbHeight="32" top="0.5" left="0" bottom="0.5" right="1"/>
                                             <Controls>
                                                 <Button name="$(parent)Up" inherits="ZO_ScrollUpButton" hidden="true" override="true"/>
                                                 <Button name="$(parent)Down" inherits="ZO_ScrollDownButton" hidden="true" override="true"/>
@@ -95,7 +83,6 @@
             </Controls>
         </Control>
     </Controls>
-
     <Animations>
         <AnimationTimeline name="ZO_GamepadMarket_GridScreen_PageInSceneAnimation">
             <Animations>
@@ -108,7 +95,6 @@
                 </AlphaAnimation>
             </Animations>
         </AnimationTimeline>
-
         <AnimationTimeline name="ZO_GamepadMarket_GridScreen_PageOutSceneAnimation">
             <Animations>
                 <TranslateAnimation duration="150" anchorIndex="0"/>

@@ -30,7 +30,6 @@
                         </Texture>
                     </Controls>
                 </Control>
-
                 <Scroll name="$(parent)Mask" inherits="ZO_PixelUnitsControl">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Frame" offsetX="2" offsetY="2"/>
                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Frame" offsetX="-2" offsetY="-2"/>
@@ -41,13 +40,11 @@
                         </Texture>
                     </Controls>
                 </Scroll>
-
                 <Label name="$(parent)Title" modifyTextType="UPPERCASE">
-                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Art" offsetY="-5" offsetX="10" />
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Art" offsetY="-5" offsetX="10"/>
                 </Label>
             </Controls>
         </Control>
-
         <Control name="ZO_LevelUpRewardsArtTileAndRewards" inherits="ZO_LevelUpRewardsArtTile" resizeToFitDescendents="true" virtual="true">
             <OnInitialized>
                 ZO_LevelUpRewardsArtTileAndRewards_OnInitialized(self)

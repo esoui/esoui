@@ -1,24 +1,22 @@
 <GuiXml>
     <Controls>
         <Control name="ZO_PromotionalEventTile_GP" inherits="ZO_PromotionalEventTile_Control ZO_ActionTile_Gamepad_Control" mouseEnabled="true" virtual="true">
-            <Dimensions x="ZO_MARKET_ANNOUNCEMENT_TILE_DIMENSIONS_X" y="ZO_MARKET_ANNOUNCEMENT_TILE_DIMENSIONS_Y" />
+            <Dimensions x="ZO_MARKET_ANNOUNCEMENT_TILE_DIMENSIONS_X" y="ZO_MARKET_ANNOUNCEMENT_TILE_DIMENSIONS_Y"/>
             <OnInitialized>
                 ZO_PromotionalEventTile_Gamepad.OnControlInitialized(self)
             </OnInitialized>
-
             <Controls>
                 <Control name="$(parent)Container" override="true">
                     <Controls>
                         <Label name="$(parent)TextCallout" override="true" inherits="ZO_MarketTextCallout_Gamepad" font="ZoFontGamepad34">
-                            <Anchor point="BOTTOMLEFT" offsetX="17" offsetY="-15" />
-                            <DimensionConstraints maxX="281" />
-
+                            <Anchor point="BOTTOMLEFT" offsetX="17" offsetY="-15"/>
+                            <DimensionConstraints maxX="281"/>
                             <Controls>
                                 <Control name="$(parent)Background" override="true">
                                     <Controls>
-                                        <Texture name="$(parent)Center" override="true" color="INTERFACE_COLOR_TYPE_MARKET_COLORS:MARKET_COLORS_NEW" level="ZO_MARKET_TILE_TEXT_LEVEL" />
-                                        <Texture name="$(parent)Left" override="true" color="INTERFACE_COLOR_TYPE_MARKET_COLORS:MARKET_COLORS_NEW" level="ZO_MARKET_TILE_TEXT_LEVEL" />
-                                        <Texture name="$(parent)Right" override="true" color="INTERFACE_COLOR_TYPE_MARKET_COLORS:MARKET_COLORS_NEW" level="ZO_MARKET_TILE_TEXT_LEVEL" />
+                                        <Texture name="$(parent)Center" override="true" color="INTERFACE_COLOR_TYPE_MARKET_COLORS:MARKET_COLORS_NEW" level="ZO_MARKET_TILE_TEXT_LEVEL"/>
+                                        <Texture name="$(parent)Left" override="true" color="INTERFACE_COLOR_TYPE_MARKET_COLORS:MARKET_COLORS_NEW" level="ZO_MARKET_TILE_TEXT_LEVEL"/>
+                                        <Texture name="$(parent)Right" override="true" color="INTERFACE_COLOR_TYPE_MARKET_COLORS:MARKET_COLORS_NEW" level="ZO_MARKET_TILE_TEXT_LEVEL"/>
                                     </Controls>
                                 </Control>
                             </Controls>

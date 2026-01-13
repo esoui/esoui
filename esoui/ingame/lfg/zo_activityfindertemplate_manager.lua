@@ -63,7 +63,7 @@ end
 function ZO_ActivityFinderTemplate_Manager:Initialize(name, categoryData, filterModeData)
     self.name = name
     self.filterModeData = filterModeData
-    if not IsConsoleUI() then
+    if not ZO_IsConsoleOrGameCoreUI() then
         self.keyboardObject = ZO_ActivityFinderTemplate_Keyboard:New(self, categoryData.keyboardData, categoryData.keyboardData.priority)
     end
     self.gamepadObject = ZO_ActivityFinderTemplate_Gamepad:New(self, categoryData.gamepadData, categoryData.gamepadData.priority)

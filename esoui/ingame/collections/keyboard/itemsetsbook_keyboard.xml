@@ -1,173 +1,137 @@
 <GuiXml>
     <Controls>
         <Control name="ZO_ItemSetsBook_SummaryEntry_Header_Keyboard" inherits="ZO_ItemSetsBook_SummaryEntry_Header_Shared" mouseEnabled="true" virtual="true">
-            <Dimensions y="67" />
-            
+            <Dimensions y="67"/>
             <OnInitialized name="Keyboard">
                 ZO_ItemSetsBook_SummaryEntry_Header_Keyboard_OnInitialize(self)
             </OnInitialized>
-            
             <OnMouseUp>
                 ZO_ItemSetsBook_SummaryEntry_Header_Keyboard_OnMouseUp(self, button, upInside)
             </OnMouseUp>
-
             <OnMouseEnter>
                 ZO_ItemSetsBook_SummaryEntry_Header_Keyboard_OnMouseEnter(self)
             </OnMouseEnter>
-
             <OnMouseExit>
                 ZO_ItemSetsBook_SummaryEntry_Header_Keyboard_OnMouseExit(self)
             </OnMouseExit>
-            
             <Controls>
-                <Label name="$(parent)Name" override="true" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" />
-
-                <StatusBar name="$(parent)Progress" override="true" inherits="ZO_ResponsiveArrowProgressBarWithBG" mouseEnabled="false" />
+                <Label name="$(parent)Name" override="true" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE"/>
+                <StatusBar name="$(parent)Progress" override="true" inherits="ZO_ResponsiveArrowProgressBarWithBG" mouseEnabled="false"/>
             </Controls>
         </Control>
-        
         <Control name="ZO_ItemSetsBook_Entry_Header_Keyboard" inherits="ZO_ItemSetsBook_Entry_Header_Shared" mouseEnabled="true" virtual="true">
-            <Dimensions y="60" />
-            
+            <Dimensions y="60"/>
             <OnInitialized name="Keyboard">
                 ZO_ItemSetsBook_Entry_Header_Keyboard_OnInitialize(self)
             </OnInitialized>
-            
             <OnMouseUp>
                 ZO_ItemSetsBook_Entry_Header_Keyboard_OnMouseUp(self, button, upInside)
             </OnMouseUp>
-
             <OnMouseEnter>
                 ZO_ItemSetsBook_Entry_Header_Keyboard_OnMouseEnter(self)
             </OnMouseEnter>
-
             <OnMouseExit>
                 ZO_ItemSetsBook_Entry_Header_Keyboard_OnMouseExit(self)
             </OnMouseExit>
-            
             <Controls>
                 <Button name="$(parent)ExpandedState" inherits="ZO_TreeButtonArrow">
-                    <Anchor point="TOPLEFT" />
-
+                    <Anchor point="TOPLEFT"/>
                     <OnClicked>
                         local UP_INSIDE = true
                         ZO_PropagateHandler(self:GetParent(), "OnMouseUp", button, UP_INSIDE)
                     </OnClicked>
                 </Button>
-                
                 <Label name="$(parent)Name" override="true" font="ZoFontWinH3">
-                    <Anchor point="LEFT" relativeTo="$(parent)ExpandedState" relativePoint="RIGHT" />
-                    <Anchor point="RIGHT" offsetX="-10" constrains="X" />
+                    <Anchor point="LEFT" relativeTo="$(parent)ExpandedState" relativePoint="RIGHT"/>
+                    <Anchor point="RIGHT" offsetX="-10" constrains="X"/>
                 </Label>
-
-                <Label name="$(parent)Cost" override="true" font="ZoFontGameBold" />
-
-                <StatusBar name="$(parent)Progress" override="true" inherits="ZO_ArrowProgressBarWithBG" />
-
-                <Label name="$(parent)CostHeader" override="true" font="ZoFontGameBold" />
+                <Label name="$(parent)Cost" override="true" font="ZoFontGameBold"/>
+                <StatusBar name="$(parent)Progress" override="true" inherits="ZO_ArrowProgressBarWithBG"/>
+                <Label name="$(parent)CostHeader" override="true" font="ZoFontGameBold"/>
             </Controls>
         </Control>
-        
         <TopLevelControl name="ZO_ItemSetsBook_Keyboard_TopLevel" inherits="ZO_RightPanelFootPrint" hidden="true">
             <OnInitialized>
                 ZO_ItemSetsBook_Keyboard_OnInitialize(self)
             </OnInitialized>
-
             <Controls>
                 <Control name="$(parent)Filters">
-                    <Dimensions y="66" />
-                    <Anchor point="TOPLEFT" />
-                    <Anchor point="TOPRIGHT" offsetX="-17" />
-                    
+                    <Dimensions y="66"/>
+                    <Anchor point="TOPLEFT"/>
+                    <Anchor point="TOPRIGHT" offsetX="-17"/>
                     <Controls>
                         <Backdrop name="$(parent)Search" tier="HIGH" inherits="ZO_SingleLineEditBackdrop_Keyboard">
                             <Dimensions x="240"/>
-                            <Anchor point="BOTTOMLEFT" offsetX="9" />
-
+                            <Anchor point="BOTTOMLEFT" offsetX="9"/>
                             <Controls>
-                                <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop" defaultText="SI_ENTER_KEYWORD_SEARCH_EDIT_DEFAULT" />
+                                <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop" defaultText="SI_ENTER_KEYWORD_SEARCH_EDIT_DEFAULT"/>
                             </Controls>
                         </Backdrop>
-
                         <Label name="$(parent)SearchLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontHeader" text="SI_SEARCH_FILTER_BY">
-                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Search" relativePoint="TOPLEFT" />
+                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Search" relativePoint="TOPLEFT"/>
                         </Label>
-
                         <Control name="$(parent)ApparelFilterTypes" inherits="ZO_ComboBox">
-                            <Dimensions x="175" />
-                            <Anchor point="LEFT" relativeTo="$(parent)Search" relativePoint="RIGHT" offsetX="20" />
+                            <Dimensions x="175"/>
+                            <Anchor point="LEFT" relativeTo="$(parent)Search" relativePoint="RIGHT" offsetX="20"/>
                         </Control>
-
                         <Control name="$(parent)WeaponFilterTypes" inherits="ZO_ComboBox">
-                            <Dimensions x="175" />
-                            <Anchor point="LEFT" relativeTo="$(parent)ApparelFilterTypes" relativePoint="RIGHT" offsetX="20" />
+                            <Dimensions x="175"/>
+                            <Anchor point="LEFT" relativeTo="$(parent)ApparelFilterTypes" relativePoint="RIGHT" offsetX="20"/>
                         </Control>
-
                         <Button name="$(parent)ShowLocked" inherits="ZO_CheckButton">
-                            <Anchor point="LEFT" relativeTo="$(parent)WeaponFilterTypes" relativePoint="RIGHT" offsetX="20" />
+                            <Anchor point="LEFT" relativeTo="$(parent)WeaponFilterTypes" relativePoint="RIGHT" offsetX="20"/>
                         </Button>
                     </Controls>
                 </Control>
-
                 <Control name="$(parent)Categories" inherits="ZO_ScrollContainer">
-                    <Dimensions x="353" />
-                    <Anchor point="TOPLEFT" offsetX="-28" offsetY="77" />
-                    <Anchor point="BOTTOMLEFT" offsetX="-28" />
+                    <Dimensions x="353"/>
+                    <Anchor point="TOPLEFT" offsetX="-28" offsetY="77"/>
+                    <Anchor point="BOTTOMLEFT" offsetX="-28"/>
                 </Control>
-
                 <Control name="$(parent)CategoryContent">
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Filters" relativePoint="BOTTOMRIGHT" offsetY="18" />
-                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Categories" relativePoint="BOTTOMRIGHT" />
-
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Filters" relativePoint="BOTTOMRIGHT" offsetY="18"/>
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Categories" relativePoint="BOTTOMRIGHT"/>
                     <Controls>
                         <StatusBar name="$(parent)CategoryProgress" inherits="ZO_ArrowProgressBarWithBG">
-                            <Anchor point="TOPLEFT" offsetX="10" />
-                            <Anchor point="TOPRIGHT" offsetX="-23" />
+                            <Anchor point="TOPLEFT" offsetX="10"/>
+                            <Anchor point="TOPRIGHT" offsetX="-23"/>
                             <Controls>
-                                <Control name="$(parent)Overlay" override="true" tier="MEDIUM" />
-                                <Label name="$(parent)Progress" override="true" tier="MEDIUM" />
+                                <Control name="$(parent)Overlay" override="true" tier="MEDIUM"/>
+                                <Label name="$(parent)Progress" override="true" tier="MEDIUM"/>
                             </Controls>
                         </StatusBar>
-
                         <Label name="$(parent)SelectReconstructItemHeader" font="ZoFontHeader" maxLineCount="1" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_ITEM_SETS_BOOK_SELECT_RECONSTRUCT_ITEM_HEADER" hidden="true">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)CategoryProgress" />
-                            <Anchor point="TOPRIGHT" relativeTo="$(parent)CategoryProgress" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)CategoryProgress"/>
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)CategoryProgress"/>
                         </Label>
-
                         <Control name="$(parent)List" inherits="ZO_GridScrollList_Keyboard">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)CategoryProgress" relativePoint="BOTTOMLEFT" offsetX="-10" offsetY="10" />
-                            <Anchor point="BOTTOMRIGHT" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)CategoryProgress" relativePoint="BOTTOMLEFT" offsetX="-10" offsetY="10"/>
+                            <Anchor point="BOTTOMRIGHT"/>
                         </Control>
                     </Controls>
                 </Control>
-
                 <Label name="$(parent)NoMatchMessage" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="SI_COLLECTIONS_BOOK_SEARCH_NO_MATCHES" horizontalAlignment="CENTER" hidden="true">
-                    <Anchor point="TOP" relativeTo="$(parent)CategoryContentList" />
+                    <Anchor point="TOP" relativeTo="$(parent)CategoryContentList"/>
                 </Label>
-
                 <Control name="$(parent)Summary" hidden="true">
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Filters" relativePoint="BOTTOMRIGHT" offsetY="12" />
-                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Categories" relativePoint="BOTTOMRIGHT" offsetX="40" />
-
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Filters" relativePoint="BOTTOMRIGHT" offsetY="12"/>
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Categories" relativePoint="BOTTOMRIGHT" offsetX="40"/>
                     <Controls>
                         <Label name="$(parent)Header" font="ZoFontWinH2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" maxLineCount="1" modifyTextType="UPPERCASE" text="SI_ITEM_SET_CATEGORY_SUMMARY_LABEL" wrapMode="ELLIPSIS">
-                            <Anchor point="BOTTOMLEFT" relativeTo="$(grandparent)Categories" relativePoint="TOPRIGHT" offsetX="38" />
-                            <Anchor point="TOPRIGHT" relativeTo="$(grandparent)Filters" offsetY="11" />
+                            <Anchor point="BOTTOMLEFT" relativeTo="$(grandparent)Categories" relativePoint="TOPRIGHT" offsetX="38"/>
+                            <Anchor point="TOPRIGHT" relativeTo="$(grandparent)Filters" offsetY="11"/>
                         </Label>
-
                         <Control name="$(parent)Content" inherits="ZO_ScrollContainer">
-                            <Anchor point="TOPRIGHT" />
-                            <Anchor point="BOTTOMLEFT" />
-
+                            <Anchor point="TOPRIGHT"/>
+                            <Anchor point="BOTTOMLEFT"/>
                             <Controls>
                                 <Control name="$(parent)ScrollChild" override="true">
                                     <Controls>
                                         <Control name="$(parent)Total" inherits="ZO_ItemSetsBook_SummaryEntry_Header_Keyboard">
-                                            <Anchor point="TOPLEFT" offsetX="6" />
-                                            <Anchor point="RIGHT" relativeTo="$(grandparent)" constrains="X" offsetX="-25" />
-
+                                            <Anchor point="TOPLEFT" offsetX="6"/>
+                                            <Anchor point="RIGHT" relativeTo="$(grandparent)" constrains="X" offsetX="-25"/>
                                             <Controls>
-                                                <Label name="$(parent)Name" override="true" text="SI_ITEM_SET_SUMMARY_ITEM_COUNT_LABEL" />
+                                                <Label name="$(parent)Name" override="true" text="SI_ITEM_SET_SUMMARY_ITEM_COUNT_LABEL"/>
                                             </Controls>
                                         </Control>
                                     </Controls>

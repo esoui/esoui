@@ -19,11 +19,7 @@
         </Button>
         <Button name="ZO_NotificationsRowNote" inherits="ZO_NotificationsRowButton" virtual="true">
             <Anchor point="LEFT" relativeTo="$(parent)Message" relativePoint="RIGHT" offsetX="5"/>
-            <Textures
-                normal="EsoUI/Art/Contacts/social_note_up.dds"
-                pressed="EsoUI/Art/Contacts/social_note_down.dds"
-                mouseOver="EsoUI/Art/Contacts/social_note_over.dds"
-            />
+            <Textures normal="EsoUI/Art/Contacts/social_note_up.dds" pressed="EsoUI/Art/Contacts/social_note_down.dds" mouseOver="EsoUI/Art/Contacts/social_note_over.dds"/>
             <Dimensions x="32" y="32"/>
             <OnMouseEnter>
                 ZO_NotificationsRowNote_OnMouseEnter(self)
@@ -33,11 +29,7 @@
             </OnMouseExit>
         </Button>
         <Button name="ZO_NotificationsRowMoreInfo" inherits="ZO_NotificationsRowButton" virtual="true">
-            <Textures
-                normal="EsoUI/Art/Notifications/notification_help_up.dds"
-                pressed="EsoUI/Art/Notifications/notification_help_down.dds"
-                mouseOver="EsoUI/Art/Notifications/notification_help_over.dds"
-            />
+            <Textures normal="EsoUI/Art/Notifications/notification_help_up.dds" pressed="EsoUI/Art/Notifications/notification_help_down.dds" mouseOver="EsoUI/Art/Notifications/notification_help_over.dds"/>
             <Dimensions x="32" y="32"/>
             <OnMouseEnter>
                 ZO_NotificationsRowMoreInfo_OnMouseEnter(self)
@@ -49,7 +41,6 @@
                 ZO_NotificationsRowMoreInfo_OnClicked(self)
             </OnClicked>
         </Button>
-
         <Control name="ZO_NotificationsBaseRow" mouseEnabled="true" virtual="true">
             <Dimensions x="1237" y="ZO_NOTIFICATIONS_KEYBOARD_BASE_ROW_HEIGHT"/>
             <OnMouseEnter>
@@ -59,13 +50,13 @@
                 ZO_NotificationsBaseRow_OnMouseExit(self)
             </OnMouseExit>
             <Controls>
-                <Texture name="$(parent)BG" inherits="ZO_ThinListBgStrip" />
+                <Texture name="$(parent)BG" inherits="ZO_ThinListBgStrip"/>
                 <Texture name="$(parent)Icon">
                     <Anchor point="LEFT" offsetX="5"/>
                     <Dimensions x="32" y="32"/>
                 </Texture>
                 <Label name="$(parent)Type" inherits="ZO_NotificationsRowLabel" font="ZoFontHeader" modifyTextType="UPPERCASE" maxLineCount="2">
-                    <Dimensions x="200" />
+                    <Dimensions x="200"/>
                     <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="10" offsetY="-2"/>
                     <OnInitialized>
                         self.normalColor = ZO_NORMAL_TEXT
@@ -73,7 +64,6 @@
                 </Label>
             </Controls>
         </Control>
-
         <Control name="ZO_NotificationsOneButtonRow" inherits="ZO_NotificationsBaseRow" virtual="true">
             <Controls>
                 <Label name="$(parent)Message" inherits="ZO_NotificationsRowMessage"/>
@@ -91,10 +81,9 @@
                 </Button>
             </Controls>
         </Control>
-
         <Control name="ZO_NotificationsTwoButtonRow" inherits="ZO_NotificationsBaseRow" virtual="true">
             <Controls>
-                <Label name="$(parent)Message" inherits="ZO_NotificationsRowMessage" />
+                <Label name="$(parent)Message" inherits="ZO_NotificationsRowMessage"/>
                 <Button name="$(parent)Decline" inherits="ZO_NotificationsRowButton">
                     <Anchor point="RIGHT" offsetX="-5"/>
                     <OnMouseEnter>
@@ -106,11 +95,7 @@
                     <OnClicked>
                         ZO_NotificationsTwoButtonDecline_OnClicked(self)
                     </OnClicked>
-                    <Textures
-                    normal="EsoUI/Art/Buttons/decline_up.dds"
-                    pressed="EsoUI/Art/Buttons/decline_down.dds"
-                    mouseOver="EsoUI/Art/Buttons/decline_over.dds"
-                    />
+                    <Textures normal="EsoUI/Art/Buttons/decline_up.dds" pressed="EsoUI/Art/Buttons/decline_down.dds" mouseOver="EsoUI/Art/Buttons/decline_over.dds"/>
                 </Button>
                 <Button name="$(parent)Accept" inherits="ZO_NotificationsRowButton">
                     <Anchor point="RIGHT" relativePoint="LEFT" relativeTo="$(parent)Decline" offsetX="-10"/>
@@ -123,15 +108,10 @@
                     <OnClicked>
                         ZO_NotificationsTwoButtonAccept_OnClicked(self)
                     </OnClicked>
-                    <Textures
-                        normal="EsoUI/Art/Buttons/accept_up.dds"
-                        pressed="EsoUI/Art/Buttons/accept_down.dds"
-                        mouseOver="EsoUI/Art/Buttons/accept_over.dds"
-                    />
+                    <Textures normal="EsoUI/Art/Buttons/accept_up.dds" pressed="EsoUI/Art/Buttons/accept_down.dds" mouseOver="EsoUI/Art/Buttons/accept_over.dds"/>
                 </Button>
             </Controls>
         </Control>
-
         <Control name="ZO_NotificationsRequestRow" inherits="ZO_NotificationsTwoButtonRow" virtual="true">
             <OnInitialized>
                 self.acceptText = GetString(SI_NOTIFICATIONS_REQUEST_ACCEPT)
@@ -141,33 +121,24 @@
                 <Button name="$(parent)Note" inherits="ZO_NotificationsRowNote"/>
             </Controls>
         </Control>
-
         <Control name="ZO_NotificationsYesNoRow" inherits="ZO_NotificationsTwoButtonRow" virtual="true">
             <OnInitialized>
                 self.acceptText = GetString(SI_YES)
                 self.declineText = GetString(SI_NO)
             </OnInitialized>
         </Control>
-        
         <Control name="ZO_NotificationsLeaderboardRow" inherits="ZO_NotificationsTwoButtonRow" virtual="true">
             <OnInitialized>
                 self.acceptText = GetString(SI_NOTIFICATIONS_LEADERBOARD_SHOW_LEADERBOARD)
                 self.declineText = GetString(SI_NOTIFICATIONS_DELETE)
             </OnInitialized>
-
             <Controls>
-                <Label name="$(parent)Message" override="true" inherits="ZO_NotificationsRowMessageMouseOverBehavior" />
-
+                <Label name="$(parent)Message" override="true" inherits="ZO_NotificationsRowMessageMouseOverBehavior"/>
                 <Button name="$(parent)Accept" override="true">
-                    <Textures
-                        normal="EsoUI/Art/Notifications/notification_leaderboardAccept_up.dds"
-                        pressed="EsoUI/Art/Notifications/notification_leaderboardAccept_down.dds"
-                        mouseOver="EsoUI/Art/Notifications/notification_leaderboardAccept_over.dds"
-                    />
+                    <Textures normal="EsoUI/Art/Notifications/notification_leaderboardAccept_up.dds" pressed="EsoUI/Art/Notifications/notification_leaderboardAccept_down.dds" mouseOver="EsoUI/Art/Notifications/notification_leaderboardAccept_over.dds"/>
                 </Button>
             </Controls>
         </Control>
-
         <Control name="ZO_NotificationsWaitingRow" inherits="ZO_NotificationsBaseRow" virtual="true">
             <Controls>
                 <Control name="$(parent)Loading" inherits="ZO_Loading">
@@ -178,7 +149,6 @@
                 </Control>
             </Controls>
         </Control>
-
         <Control name="ZO_NotificationsAlertRow" inherits="ZO_NotificationsBaseRow" virtual="true">
             <OnInitialized>
                 self.declineText = GetString(SI_NOTIFICATIONS_DELETE)
@@ -186,11 +156,7 @@
             <Controls>
                 <Label name="$(parent)Message" inherits="ZO_NotificationsRowMessage"/>
                 <Button name="$(parent)Decline" inherits="ZO_NotificationsRowButton">
-                    <Textures
-                        normal = "EsoUI/Art/Buttons/decline_up.dds"
-                        pressed = "EsoUI/Art/Buttons/decline_down.dds"
-                        mouseOver = "EsoUI/Art/Buttons/decline_over.dds"
-                    />
+                    <Textures normal="EsoUI/Art/Buttons/decline_up.dds" pressed="EsoUI/Art/Buttons/decline_down.dds" mouseOver="EsoUI/Art/Buttons/decline_over.dds"/>
                     <Anchor point="RIGHT" offsetX="-5"/>
                     <OnMouseEnter>
                         ZO_NotificationsTwoButtonDecline_OnMouseEnter(self)
@@ -205,148 +171,117 @@
                 <Button name="$(parent)Note" inherits="ZO_NotificationsRowNote"/>
             </Controls>
         </Control>
-
         <Control name="ZO_NotificationsCollectibleRow" inherits="ZO_NotificationsTwoButtonRow" virtual="true">
             <OnInitialized>
                 self.acceptText = GetString(SI_COLLECTIONS_NOTIFICATION_BUTTON)
                 self.declineText = GetString(SI_NOTIFICATIONS_DELETE)
             </OnInitialized>
-
             <Controls>
                 <Button name="$(parent)MoreInfo" inherits="ZO_NotificationsRowMoreInfo">
                     <Anchor point="RIGHT" relativePoint="LEFT" relativeTo="$(parent)Accept" offsetX="-10"/>
                 </Button>
             </Controls>
         </Control>
-
         <Control name="ZO_NotificationsLFGReadyCheckRow" inherits="ZO_NotificationsTwoButtonRow" virtual="true">
             <OnInitialized>
                 self.acceptText = GetString(SI_LFG_READY_CHECK_ACCEPT)
                 self.declineText = GetString(SI_NOTIFICATIONS_REQUEST_DECLINE)
             </OnInitialized>
         </Control>
-
         <Control name="ZO_NotificationsLFGFindReplacementRow" inherits="ZO_NotificationsTwoButtonRow" virtual="true">
             <OnInitialized>
                 self.acceptText = GetString(SI_LFG_FIND_REPLACEMENT_ACCEPT)
                 self.declineText = GetString(SI_NOTIFICATIONS_REQUEST_DECLINE)
             </OnInitialized>
         </Control>
-
         <Control name="ZO_NotificationsEsoPlusSubscriptionRow" inherits="ZO_NotificationsTwoButtonRow" virtual="true">
             <OnInitialized>
                 self.acceptText = GetString(SI_NOTIFICATIONS_ESO_PLUS_TRIAL_VIEW_BENEFITS)
                 self.declineText = GetString(SI_NOTIFICATIONS_DELETE)
             </OnInitialized>
-
             <Controls>
                 <Button name="$(parent)MoreInfo" inherits="ZO_NotificationsRowMoreInfo">
                     <Anchor point="RIGHT" relativePoint="LEFT" relativeTo="$(parent)Accept" offsetX="-10"/>
                 </Button>
             </Controls>
         </Control>
-
         <Control name="ZO_NotificationsGiftReceivedRow" inherits="ZO_NotificationsTwoButtonRow" virtual="true">
             <OnInitialized>
                 self.acceptText = GetString(SI_GIFT_INVENTORY_OPEN_CLAIM_SCREEN_TEXT)
                 self.declineText = GetString(SI_GIFT_INVENTORY_DISMISS_NOTIFICATION)
             </OnInitialized>
         </Control>
-
         <Control name="ZO_NotificationsGiftReturnedRow" inherits="ZO_NotificationsTwoButtonRow" virtual="true">
             <OnInitialized>
                 self.acceptText = GetString(SI_GIFT_INVENTORY_OPEN_GIFT_SCREEN_TEXT)
                 self.declineText = GetString(SI_GIFT_INVENTORY_DISMISS_NOTIFICATION)
             </OnInitialized>
         </Control>
-
         <Control name="ZO_NotificationsGiftClaimedRow" inherits="ZO_NotificationsTwoButtonRow" virtual="true">
             <OnInitialized>
                 self.acceptText = GetString(SI_NOTIFICATIONS_GIFT_CLAIMED_VIEW_GIFT)
                 self.declineText = GetString(SI_GIFT_INVENTORY_DISMISS_NOTIFICATION)
             </OnInitialized>
         </Control>
-
         <Control name="ZO_NotificationsOpenCrownStoreRow" inherits="ZO_NotificationsTwoButtonRow" virtual="true">
             <OnInitialized>
                 self.acceptText = GetString(SI_NOTIFICATIONS_OPEN_CROWN_STORE)
                 self.declineText = GetString(SI_NOTIFICATIONS_DELETE)
             </OnInitialized>
-
             <Controls>
-                <Label name="$(parent)Message" override="true" inherits="ZO_NotificationsRowMessageMouseOverBehavior" />
-                
+                <Label name="$(parent)Message" override="true" inherits="ZO_NotificationsRowMessageMouseOverBehavior"/>
                 <Button name="$(parent)MoreInfo" inherits="ZO_NotificationsRowMoreInfo">
                     <Anchor point="RIGHT" relativePoint="LEFT" relativeTo="$(parent)Accept" offsetX="-10"/>
                 </Button>
             </Controls>
         </Control>
-
         <Control name="ZO_NotificationsMarketProductUnlockedRow" inherits="ZO_NotificationsTwoButtonRow" virtual="true">
             <Controls>
-                <Label name="$(parent)Message" override="true" inherits="ZO_NotificationsRowMessageMouseOverBehavior" />
-
+                <Label name="$(parent)Message" override="true" inherits="ZO_NotificationsRowMessageMouseOverBehavior"/>
                 <Button name="$(parent)MoreInfo" inherits="ZO_NotificationsRowMoreInfo">
                     <Anchor point="RIGHT" relativePoint="LEFT" relativeTo="$(parent)Accept" offsetX="-10"/>
                 </Button>
-
                 <!-- Accept button textures determined programmatically -->
             </Controls>
         </Control>
-        
         <Control name="ZO_NotificationsNewDailyLoginRewardRow" inherits="ZO_NotificationsOneButtonRow" virtual="true">
             <OnInitialized>
                 self.acceptText = GetString(SI_NOTIFICATIONS_NEW_DAILY_LOGIN_REWARDS_OPEN_REWARDS)
             </OnInitialized>
-
             <Controls>
                 <Button name="$(parent)Accept" override="true">
-                    <Textures
-                        normal="EsoUI/Art/Buttons/accept_up.dds"
-                        pressed="EsoUI/Art/Buttons/accept_down.dds"
-                        mouseOver="EsoUI/Art/Buttons/accept_over.dds"
-                    />
+                    <Textures normal="EsoUI/Art/Buttons/accept_up.dds" pressed="EsoUI/Art/Buttons/accept_down.dds" mouseOver="EsoUI/Art/Buttons/accept_over.dds"/>
                 </Button>
             </Controls>
         </Control>
-
         <Control name="ZO_NotificationsGuildNewApplicationsRow" inherits="ZO_NotificationsTwoButtonRow" virtual="true">
             <OnInitialized>
                 self.acceptText = GetString(SI_NOTIFICATIONS_GUILD_NEW_APPLICATIONS_BUTTON)
                 self.declineText = GetString(SI_NOTIFICATIONS_DELETE)
             </OnInitialized>
         </Control>
-
         <Control name="ZO_NotificationsPointsResetRow" inherits="ZO_NotificationsTwoButtonRow" virtual="true">
             <OnInitialized>
                 self.declineText = GetString(SI_NOTIFICATIONS_DELETE)
             </OnInitialized>
         </Control>
-        
         <Control name="ZO_NotificationsHouseToursHouseRecommendedRow" inherits="ZO_NotificationsTwoButtonRow" virtual="true">
             <OnInitialized>
                 self.acceptText = GetString(SI_HOUSE_TOURS_MANAGE_LISTING)
                 self.declineText = GetString(SI_NOTIFICATIONS_REQUEST_DECLINE)
             </OnInitialized>
-
             <Controls>
                 <Button name="$(parent)Accept" override="true">
-                    <Textures
-                        normal="EsoUI/Art/Notifications/notificationIcon_houseToursViewRecommendedHouse.dds"
-                        pressed="EsoUI/Art/Notifications/notificationIcon_houseToursViewRecommendedHouse.dds"
-                        mouseOver="EsoUI/Art/Notifications/notificationIcon_houseToursViewRecommendedHouse_mouseOver.dds"
-                    />
+                    <Textures normal="EsoUI/Art/Notifications/notificationIcon_houseToursViewRecommendedHouse.dds" pressed="EsoUI/Art/Notifications/notificationIcon_houseToursViewRecommendedHouse.dds" mouseOver="EsoUI/Art/Notifications/notificationIcon_houseToursViewRecommendedHouse_mouseOver.dds"/>
                 </Button>
             </Controls>
         </Control>
-
         <Control name="ZO_NotificationsSpectacleEventUpdateRow" inherits="ZO_NotificationsTwoButtonRow" virtual="true">
             <OnInitialized>
                 self.acceptText = GetString(SI_SPECTACLE_EVENTS_NOTIFICATION_VIEW)
                 self.declineText = GetString(SI_SPECTACLE_EVENTS_NOTIFICATION_DISMISS)
             </OnInitialized>
         </Control>
-
         <TopLevelControl name="ZO_Notifications" inherits="ZO_RightPanelFootPrint" hidden="true">
             <OnInitialized>
                 ZO_Notifications_OnInitialized(self)

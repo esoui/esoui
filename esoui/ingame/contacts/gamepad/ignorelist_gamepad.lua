@@ -43,7 +43,7 @@ end
 function IgnoreList_Gamepad:BuildOptionsList()
     local groupId = self:AddOptionTemplateGroup(ZO_SocialOptionsDialogGamepad.GetDefaultHeader)
     self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildRemoveIgnoreOption)
-    self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildGamerCardOption, IsConsoleUI)
+    self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildGamerCardOption, ZO_IsConsoleOrGameCoreUI)
 end
 
 function IgnoreList_Gamepad:RefreshTooltip()

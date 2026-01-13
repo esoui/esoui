@@ -24,6 +24,7 @@ function ZO_ChapterUpgradePane_Gamepad:InitializeSortFilterList(...)
     ZO_SortFilterList_Gamepad.InitializeSortFilterList(self, ...)
 
     local function SetupRewardsHeader(control, data)
+        ZO_SortFilterList_Gamepad.SetupRow(self, control, data)
         control.descriptor:SetText(data.text)
         if control.collectorsLabel and data.collectorsLabelText then
             control.collectorsLabel:SetText(data.collectorsLabelText)
@@ -31,6 +32,7 @@ function ZO_ChapterUpgradePane_Gamepad:InitializeSortFilterList(...)
     end
 
     local function SetupReward(control, data)
+        ZO_SortFilterList_Gamepad.SetupRow(self, control, data)
         control.icon:SetTexture(data.icon)
         control.displayName:SetText(data.text)
         control.standardCheckMark:SetHidden(not data.isStandardReward)

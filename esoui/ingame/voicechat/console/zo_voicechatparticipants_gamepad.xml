@@ -6,7 +6,7 @@
                     <Dimensions x="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_WIDTH_VOICECHAT_HISTORY"/>
                 </Label>
                 <Texture name="$(parent)Icon" override="true">
-                    <Anchor point="CENTER" relativeTo="$(parent)Label" relativePoint="RIGHT" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_ICON_X_OFFSET_VOICECHAT" />
+                    <Anchor point="CENTER" relativeTo="$(parent)Label" relativePoint="RIGHT" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_ICON_X_OFFSET_VOICECHAT"/>
                 </Texture>
             </Controls>
         </Control>

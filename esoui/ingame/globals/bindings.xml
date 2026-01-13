@@ -467,6 +467,10 @@
                 <Down>SYSTEMS:GetObject("mainMenu"):ToggleCategory(MENU_CATEGORY_CROWN_CRATES)</Down>
             </Action>
 
+            <Action name="TOGGLE_TAMRIEL_TOMES">
+                <Down>SYSTEMS:GetObject("mainMenu"):ToggleCategory(MENU_CATEGORY_TAMRIEL_TOMES)</Down>
+            </Action>
+
             <Action name="TOGGLE_HELP">
                 <Down> HELP_MANAGER:ToggleHelp() </Down>
             </Action>
@@ -479,12 +483,16 @@
                 <Down>FOCUSED_QUEST_TRACKER:AssistNext()</Down>
             </Action>
 
-            <Action name="TOGGLE_ENDLESS_DUNGEON_BUFF_TRACKER">
+            <Action name="TOGGLE_ACTIVITY_HUD_TRACKER">
                 <Down>
-                    if ENDLESS_DUNGEON_SUMMARY:IsShowing() then
-                        SCENE_MANAGER:HideCurrentScene()
-                    else
-                        ZO_EndlessDungeonBuffTracker_Shared.ToggleVisibility()
+                    if ENDLESS_DUNGEON_MANAGER:IsPlayerInEndlessDungeon() then
+                        if ENDLESS_DUNGEON_SUMMARY:IsShowing() then
+                            SCENE_MANAGER:HideCurrentScene()
+                        else
+                            ZO_EndlessDungeonBuffTracker_Shared.ToggleVisibility()
+                        end
+                    elseif IsInAdventureZone and IsInAdventureZone() then
+                        SYSTEMS:ShowScene("adventureZoneBossTree")
                     end
                 </Down>
             </Action>
@@ -547,7 +555,7 @@
             <AllowAction name="TAKE_SCREENSHOT"/>
             <AllowAction name="TOGGLE_GAMEPAD_MODE"/>
             <AllowAction name="CLEAR_ACTIVE_NARRATION"/>
-            <AllowAction name="TOGGLE_ENDLESS_DUNGEON_BUFF_TRACKER"/>
+            <AllowAction name="TOGGLE_ACTIVITY_HUD_TRACKER"/>
 
             <AllowAction name="TOGGLE_MARKET"/>
             <AllowAction name="TOGGLE_INVENTORY"/>
@@ -565,6 +573,7 @@
             <AllowAction name="TOGGLE_NOTIFICATIONS"/>
             <AllowAction name="TOGGLE_ACTIVITY_FINDER"/>
             <AllowAction name="TOGGLE_HELP"/>
+            <AllowAction name="TOGGLE_TAMRIEL_TOMES"/>
         </Category>
     </Layer>
     <Layer name="SI_KEYBINDINGS_LAYER_USER_INTERFACE_SHORTCUTS">
@@ -1247,11 +1256,15 @@
                 <Down>return true</Down>
             </Action>
 
+            <Action name="INTERCEPT_TOGGLE_TAMRIEL_TOMES" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_TAMRIEL_TOMES">
+                <Down>return true</Down>
+            </Action>
+
             <Action name="INTERCEPT_TOGGLE_HELP" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_HELP">
                 <Down>return true</Down>
             </Action>
 
-            <Action name="INTERCEPT_TOGGLE_ENDLESS_DUNGEON_BUFF_TRACKER" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_ENDLESS_DUNGEON_BUFF_TRACKER">
+            <Action name="INTERCEPT_TOGGLE_ACTIVITY_HUD_TRACKER" hideAction="true" rebindable="false" inheritsBindFrom="TOGGLE_ACTIVITY_HUD_TRACKER">
                 <Down>return true</Down>
             </Action>
         </Category>

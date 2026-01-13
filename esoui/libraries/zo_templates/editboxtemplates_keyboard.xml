@@ -2,27 +2,23 @@
     <Controls>
         <Backdrop name="ZO_EditBackdrop" virtual="true">
             <Dimensions y="28"/>
-            <Edge file="EsoUI/Art/ChatWindow/textEntry_edge.dds" edgeFileWidth="64" edgeFileHeight="8" />
-            <Center file="EsoUI/Art/ChatWindow/textEntry_center.dds" />
-            <Insets left="8" top="8" right="-8" bottom="-8" />
+            <Edge file="EsoUI/Art/ChatWindow/textEntry_edge.dds" edgeFileWidth="64" edgeFileHeight="8"/>
+            <Center file="EsoUI/Art/ChatWindow/textEntry_center.dds"/>
+            <Insets left="8" top="8" right="-8" bottom="-8"/>
         </Backdrop>
-
         <Backdrop name="ZO_SingleLineEditBackdrop_Keyboard" inherits="ZO_EditBackdrop" virtual="true">
             <OnInitialized>
                 ZO_SingleLineEditContainerSize_Keyboard_OnInitialized(self)
             </OnInitialized>
         </Backdrop>
-
         <Backdrop name="ZO_SingleLineEditBackdropDark_Keyboard" inherits="ZO_DefaultBackdrop" virtual="true">
             <OnInitialized>
                 ZO_SingleLineEditContainerDarkSize_Keyboard_OnInitialized(self)
             </OnInitialized>
         </Backdrop>
-
         <Backdrop name="ZO_MultiLineEditBackdrop_Keyboard" inherits="ZO_EditBackdrop" virtual="true"/>
-
         <EditBox name="ZO_DefaultEdit" font="ZoFontEdit" mouseEnabled="true" defaultTextColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DEFAULT_TEXT" virtual="true">
-            <Dimensions y="24" />
+            <Dimensions y="24"/>
             <OnMouseDown>
                 self:TakeFocus()
             </OnMouseDown>
@@ -32,24 +28,20 @@
             <OnEscape>
                 self:LoseFocus()
             </OnEscape>
-
             <OnFocusGained>
                 if WINDOW_MANAGER:IsHandlingHardwareEvent() then
                     PlaySound(SOUNDS.EDIT_CLICK)
                 end
             </OnFocusGained>
         </EditBox>
-
         <EditBox name="ZO_DefaultEditForBackdrop" inherits="ZO_DefaultEdit" virtual="true">
             <Anchor point="TOPLEFT" offsetX="ZO_SINGLE_LINE_EDIT_CONTAINER_PADDING_LEFT" offsetY="ZO_SINGLE_LINE_EDIT_CONTAINER_PADDING_TOP"/>
             <Anchor point="BOTTOMRIGHT" offsetX="-ZO_SINGLE_LINE_EDIT_CONTAINER_PADDING_RIGHT" offsetY="-ZO_SINGLE_LINE_EDIT_CONTAINER_PADDING_BOTTOM"/>
         </EditBox>
-
         <EditBox name="ZO_DefaultEditForDarkBackdrop" inherits="ZO_DefaultEdit" font="ZoFontEdit20NoShadow" virtual="true">
             <Anchor point="TOPLEFT" offsetX="ZO_SINGLE_LINE_EDIT_CONTAINER_DARK_PADDING_LEFT" offsetY="ZO_SINGLE_LINE_EDIT_CONTAINER_DARK_PADDING_TOP"/>
             <Anchor point="BOTTOMRIGHT" offsetX="-ZO_SINGLE_LINE_EDIT_CONTAINER_DARK_PADDING_LEFT" offsetY="-ZO_SINGLE_LINE_EDIT_CONTAINER_DARK_PADDING_BOTTOM"/>
         </EditBox>
-
         <EditBox name="ZO_DefaultEditMultiLine" font="ZoFontEdit" mouseEnabled="true" multiLine="true" defaultTextColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DEFAULT_TEXT" virtual="true">
             <OnMouseDown>
                 self:TakeFocus()
@@ -65,46 +57,34 @@
                 local nextLine = zo_clamp(currentLine - delta, 1, self:GetScrollExtents() + 1)
                 self:SetTopLineIndex(nextLine)
             </OnMouseWheel>
-
             <OnFocusGained>
                 if WINDOW_MANAGER:IsHandlingHardwareEvent() then
                     PlaySound(SOUNDS.EDIT_CLICK)
                 end
             </OnFocusGained>
         </EditBox>
-
         <EditBox name="ZO_DefaultEditMultiLineForBackdrop" inherits="ZO_DefaultEditMultiLine" virtual="true">
             <Anchor point="TOPLEFT" offsetX="ZO_MULTI_LINE_EDIT_CONTAINER_PADDING_LEFT" offsetY="ZO_MULTI_LINE_EDIT_CONTAINER_PADDING_TOP"/>
             <Anchor point="BOTTOMRIGHT" offsetX="-ZO_MULTI_LINE_EDIT_CONTAINER_PADDING_RIGHT" offsetY="-ZO_MULTI_LINE_EDIT_CONTAINER_PADDING_BOTTOM"/>
         </EditBox>
-
         <Button name="ZO_TogglePasswordEditBoxButton" clickSound="Click" mouseOverBlendMode="ADD" virtual="true">
-            <Dimensions x="30" y="30" />
-            <Anchor point="LEFT" relativePoint="RIGHT" />
-
+            <Dimensions x="30" y="30"/>
+            <Anchor point="LEFT" relativePoint="RIGHT"/>
             <OnClicked>
                 ZO_EditBoxKeyboard_TogglePassword(self:GetParent(), self)
             </OnClicked>
-
-            <Textures
-                normal="EsoUI/Art/Miscellaneous/Keyboard/hidden_up.dds"
-                pressed="EsoUI/Art/Miscellaneous/Keyboard/hidden_down.dds"
-                mouseOver="EsoUI/Art/Miscellaneous/Keyboard/hidden_over.dds"
-            />
+            <Textures normal="EsoUI/Art/Miscellaneous/Keyboard/hidden_up.dds" pressed="EsoUI/Art/Miscellaneous/Keyboard/hidden_down.dds" mouseOver="EsoUI/Art/Miscellaneous/Keyboard/hidden_over.dds"/>
         </Button>
-        
         <EditBox name="ZO_TogglePasswordEditBox" inherits="ZO_DefaultEdit" isPassword="true" virtual="true">
             <Anchor point="TOPLEFT" offsetX="ZO_SINGLE_LINE_EDIT_CONTAINER_PADDING_LEFT" offsetY="ZO_SINGLE_LINE_EDIT_CONTAINER_PADDING_TOP"/>
             <Anchor point="BOTTOMRIGHT" offsetX="-ZO_SINGLE_LINE_TOGGLE_PASSWORD_EDIT_CONTAINER_PADDING_RIGHT" offsetY="-ZO_SINGLE_LINE_EDIT_CONTAINER_PADDING_BOTTOM"/>
-
             <Controls>
-                <Button name="$(parent)TogglePasswordButton" inherits="ZO_TogglePasswordEditBoxButton" />
+                <Button name="$(parent)TogglePasswordButton" inherits="ZO_TogglePasswordEditBoxButton"/>
             </Controls>
         </EditBox>
-
         <Control name="ZO_TogglePasswordEditBoxWithBackground" inherits="ZO_SingleLineEditBackdrop_Keyboard" virtual="true">
             <Controls>
-                <EditBox name="$(parent)Edit" inherits="ZO_TogglePasswordEditBox" />
+                <EditBox name="$(parent)Edit" inherits="ZO_TogglePasswordEditBox"/>
             </Controls>
         </Control>
     </Controls>

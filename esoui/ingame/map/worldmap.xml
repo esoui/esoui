@@ -2,201 +2,156 @@
     <Animations>
         <AnimationTimeline name="ZO_WorldMapPinFadeIn">
             <Animations>
-                <AlphaAnimation duration="500" startAlpha="0" endAlpha="1" />
-                <AlphaAnimation duration="500" startAlpha="0" endAlpha="1" />
+                <AlphaAnimation duration="500" startAlpha="0" endAlpha="1"/>
+                <AlphaAnimation duration="500" startAlpha="0" endAlpha="1"/>
             </Animations>
         </AnimationTimeline>
         <AnimationTimeline name="ZO_WorldMapBlobNameFadeIn">
             <Animations>
-                <CustomAnimation duration="250" />
+                <CustomAnimation duration="250"/>
             </Animations>
         </AnimationTimeline>
     </Animations>
-
     <Controls>
         <Texture name="ZO_MapTile" pixelRoundingEnabled="false" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES" virtual="true">
-            <Dimensions x="230" y="230" />
+            <Dimensions x="230" y="230"/>
         </Texture>
-        
         <Line name="ZO_MapKeepLink" level="1" thickness="8" virtual="true"/>
-
-        <Texture name="ZO_MapOverlay" virtual="true" level="1" />
-        
-        <Label name="ZO_MapLocation" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER" layer="BACKGROUND" level="3" virtual="true" />
-        
+        <Texture name="ZO_MapOverlay" virtual="true" level="1"/>
+        <Label name="ZO_MapLocation" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER" layer="BACKGROUND" level="3" virtual="true"/>
         <Label name="ZO_MapBlobName" font="$(HANDWRITTEN_FONT)|34" color="544426" pixelRoundingEnabled="false" horizontalAlignment="CENTER" verticalAlignment="CENTER" layer="BACKGROUND" level="4" virtual="true">
             <Controls>
                 <Label name="$(parent)Shadow" font="$(HANDWRITTEN_FONT)|34" color="C9A04D" horizontalAlignment="CENTER" verticalAlignment="CENTER" layer="BACKGROUND" level="3">
-                    <Anchor point="CENTER" offsetX="1" offsetY="1" />
+                    <Anchor point="CENTER" offsetX="1" offsetY="1"/>
                 </Label>
             </Controls>
         </Label>
-        
         <!-- High tier to show over top of the gamepad ragged edge border-->
         <Texture name="ZO_PinBlob" tier="HIGH" virtual="true" level="6" pixelRoundingEnabled="false" shaderEffectType="HALO"/>
-
         <Polygon name="ZO_PinPolygonBlob" pointLayout="COUNTER_CLOCKWISE" smoothingEnabled="true" layer="BACKGROUND" tier="HIGH" level="6" mouseEnabled="true" virtual="true">
             <Border minThickness="3px" maxThickness="3px" textureFile="EsoUI\Art\MapPins\PolygonPinBorder.dds"/>
             <OnMouseEnter>
                 ZO_WorldMap_HandlePinEnter()
             </OnMouseEnter>
-
             <OnMouseExit>
                 ZO_WorldMap_HandlePinExit()
             </OnMouseExit>
         </Polygon>
-
         <Control name="ZO_MapNavigationButtons_Gamepad" resizeToFitDescendents="true" virtual="true">
             <Controls>
                 <Label name="$(parent)RightKeybind" inherits="ZO_ClickableKeybindLabel_Gamepad" verticalAlignment="CENTER">
-                    <Anchor point="BOTTOMRIGHT" />
+                    <Anchor point="BOTTOMRIGHT"/>
                 </Label>
-
                 <Label name="$(parent)Label" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" font="ZoFontGamepad34" modifyTextType="UPPERCASE">
-                    <Anchor point="RIGHT" relativeTo="$(parent)RightKeybind" relativePoint="LEFT" offsetX="-10" />
+                    <Anchor point="RIGHT" relativeTo="$(parent)RightKeybind" relativePoint="LEFT" offsetX="-10"/>
                 </Label>
-
                 <Label name="$(parent)LeftKeybind" inherits="ZO_ClickableKeybindLabel_Gamepad" verticalAlignment="CENTER">
-                    <Anchor point="RIGHT" relativeTo="$(parent)Label" relativePoint="LEFT" offsetX="-10" />
+                    <Anchor point="RIGHT" relativeTo="$(parent)Label" relativePoint="LEFT" offsetX="-10"/>
                 </Label>
             </Controls>
         </Control>
-
         <Control name="ZO_MapNavigationButtons_Keyboard" virtual="true">
             <Controls>
                 <Button name="$(parent)Down" inherits="ZO_KeyButton">
-                    <Dimensions x="42" y="42" />
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Text" relativePoint="TOPLEFT" offsetX ="-5" />
+                    <Dimensions x="42" y="42"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Text" relativePoint="TOPLEFT" offsetX="-5"/>
                 </Button>
-
                 <Button name="$(parent)Up" inherits="ZO_KeyButton">
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Down" relativePoint="TOPLEFT" />
-                    <Dimensions x="42" y="42" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Down" relativePoint="TOPLEFT"/>
+                    <Dimensions x="42" y="42"/>
                 </Button>
             </Controls>
         </Control>
-
         <Button name="ZO_DungeonFloorSelect" inherits="ZO_KeyButton" virtual="true">
             <OnClicked>
                 ZO_WorldMap_ChangeFloor(self)
             </OnClicked>
-
             <OnMouseEnter>
                 ZO_WorldMap_ShowDungeonFloorTooltip(self)
             </OnMouseEnter>
-
             <OnMouseExit>
                 SetTooltipText(InformationTooltip)
             </OnMouseExit>
         </Button>
-
         <Button name="ZO_WorldMapZoomButton" inherits="ZO_DefaultSmoothSliderButton" virtual="true">
             <OnMouseWheel>
                 ZO_WorldMapZoom_OnMouseWheel(delta)
             </OnMouseWheel>
         </Button>
-
-        <Texture name="ZO_WorldMapFrameMunge" textureFile="EsoUI/Art/Tooltips/munge_overlay.dds" addressMode="WRAP" layer="OVERLAY" virtual="true"/>
-
         <Backdrop name="ZO_WorldMapFrame_Keyboard_Template" layer="OVERLAY" virtual="true">
-            <Edge file="EsoUI/Art/WorldMap/worldmap_frame_edge.dds" edgeFileWidth="128" edgeFileHeight="16" />
-            <Insets left="16" top="16" right="-16" bottom="-16" />
+            <Edge file="EsoUI/Art/WorldMap/worldmap_frame_edge.dds" edgeFileWidth="128" edgeFileHeight="16"/>
+            <Insets left="16" top="16" right="-16" bottom="-16"/>
             <Anchor point="TOPLEFT" relativeTo="$(parent)Scroll"/>
             <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Scroll"/>
-            <Controls>
-                <Texture name="$(parent)TopMunge" hidden="false" />
-                <Texture name="$(parent)LeftMunge" hidden="false" />
-                <Texture name="$(parent)RightMunge" hidden="false" />
-                <Texture name="$(parent)BottomMunge" hidden="false" />
-            </Controls>
         </Backdrop>
-
         <Backdrop name="ZO_WorldMapFrame_Gamepad_Template" inherits="ZO_DefaultBackdrop_Gamepad" layer="BACKGROUND" virtual="true">
-            <Anchor point="TOPLEFT" relativeTo="$(parent)Scroll" offsetX="-10" offsetY="-10" />
+            <Anchor point="TOPLEFT" relativeTo="$(parent)Scroll" offsetX="-10" offsetY="-10"/>
             <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Scroll" offsetX="10" offsetY="10"/>
-            <Controls>
-                <Texture name="$(parent)TopMunge" hidden="true" />
-                <Texture name="$(parent)LeftMunge" hidden="true" />
-                <Texture name="$(parent)RightMunge" hidden="true" />
-                <Texture name="$(parent)BottomMunge" hidden="true" />
-            </Controls>
         </Backdrop>
-
         <StatusBar name="ZO_WorldMap_ProgressBar" tier="MEDIUM" virtual="true">
             <OnInitialized>
                 self.gloss = self:GetNamedChild("Gloss")
             </OnInitialized>
-
             <OnMinMaxValueChanged>
                 self.gloss:SetMinMax(min, max)
             </OnMinMaxValueChanged>
-
             <OnValueChanged>
                 self.gloss:SetValue(value)
             </OnValueChanged>
-
             <Controls>
-                <StatusBar name="$(parent)Gloss" />
-                <Control name="$(parent)BG" />
-                <Control name="$(parent)Overlay" />
+                <StatusBar name="$(parent)Gloss"/>
+                <Control name="$(parent)BG"/>
+                <Control name="$(parent)Overlay"/>
                 <Label name="$(parent)Progress" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" tier="HIGH">
-                    <Anchor point="CENTER" />
+                    <Anchor point="CENTER"/>
                 </Label>
             </Controls>
         </StatusBar>
-
         <StatusBar name="ZO_WorldMap_ProgressBar_Keyboard_Template" textureFile="EsoUI/Art/Miscellaneous/progressbar_genericFill.dds" virtual="true">
-            <TextureCoords left="0" right="1" top="0" bottom="0.625" />
-            <LeadingEdge textureFile="EsoUI/Art/Miscellaneous/progressbar_genericFill_leadingEdge.dds" width="8" height="20" />
-            <LeadingEdgeTextureCoords left="0" right="1" top="0" bottom="0.625" />
-            <Dimensions x="250" y="20" />
-
+            <TextureCoords left="0" right="1" top="0" bottom="0.625"/>
+            <LeadingEdge textureFile="EsoUI/Art/Miscellaneous/progressbar_genericFill_leadingEdge.dds" width="8" height="20"/>
+            <LeadingEdgeTextureCoords left="0" right="1" top="0" bottom="0.625"/>
+            <Dimensions x="250" y="20"/>
             <Controls>
                 <StatusBar name="$(parent)Gloss" textureFile="EsoUI/Art/Miscellaneous/progressbar_genericFill_gloss.dds">
-                    <AnchorFill />
-                    <LeadingEdge textureFile="EsoUI/Art/Miscellaneous/progressbar_genericFill_leadingEdge_gloss.dds" width="8" height="20" />
-                    <TextureCoords left="0" right="1" top="0" bottom="0.625" />
-                    <LeadingEdgeTextureCoords left="0" right="1" top="0" bottom="0.625" />
+                    <AnchorFill/>
+                    <LeadingEdge textureFile="EsoUI/Art/Miscellaneous/progressbar_genericFill_leadingEdge_gloss.dds" width="8" height="20"/>
+                    <TextureCoords left="0" right="1" top="0" bottom="0.625"/>
+                    <LeadingEdgeTextureCoords left="0" right="1" top="0" bottom="0.625"/>
                 </StatusBar>
-                <Control name="$(parent)BG" inherits="ZO_ArrowStatusBarBG" />
-                <Control name="$(parent)Overlay" inherits="ZO_ArrowStatusBarOverlay" />
-                <Label name="$(parent)Progress" font="ZoFontWinH5" horizontalAlignment="CENTER" verticalAlignment="CENTER" layer="OVERLAY" level="1" />
+                <Control name="$(parent)BG" inherits="ZO_ArrowStatusBarBG"/>
+                <Control name="$(parent)Overlay" inherits="ZO_ArrowStatusBarOverlay"/>
+                <Label name="$(parent)Progress" font="ZoFontWinH5" horizontalAlignment="CENTER" verticalAlignment="CENTER" layer="OVERLAY" level="1"/>
             </Controls>
         </StatusBar>
-
         <StatusBar name="ZO_WorldMap_ProgressBar_Gamepad_Template" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_medium_fill.dds" level="500" virtual="true">
-            <TextureCoords left="0" right="1" top="0.15625" bottom="0.84375" />
-            <LeadingEdge textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_medium_leadingEdge.dds" width="8" height="22" />
-            <LeadingEdgeTextureCoords left="0" right="0.5" top="0.15625" bottom="0.84375" />
-            <Dimensions x="315" y="32" />
-
+            <TextureCoords left="0" right="1" top="0.15625" bottom="0.84375"/>
+            <LeadingEdge textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_medium_leadingEdge.dds" width="8" height="22"/>
+            <LeadingEdgeTextureCoords left="0" right="0.5" top="0.15625" bottom="0.84375"/>
+            <Dimensions x="315" y="32"/>
             <Controls>
-                <StatusBar name="$(parent)Gloss" inherits="ZO_GamepadStatusBarGlossMedium" />
-                <Control name="$(parent)BG" inherits="ZO_GamepadArrowStatusBarBGMedium" />
-                <Control name="$(parent)Overlay" inherits="ZO_GamepadArrowStatusBarOverlayMedium" />
+                <StatusBar name="$(parent)Gloss" inherits="ZO_GamepadStatusBarGlossMedium"/>
+                <Control name="$(parent)BG" inherits="ZO_GamepadArrowStatusBarBGMedium"/>
+                <Control name="$(parent)Overlay" inherits="ZO_GamepadArrowStatusBarOverlayMedium"/>
                 <Label name="$(parent)Progress" font="ZoFontGamepadBold34"/>
             </Controls>
         </StatusBar>
-
         <TopLevelControl name="ZO_WorldMapAutoNavigationOverlay" layer="OVERLAY" tier="HIGH" mouseEnabled="true" hidden="true">
-            <AnchorFill />
-
+            <AnchorFill/>
             <!-- Make sure to consume the mouse wheel input -->
-            <OnMouseWheel />
-
+            <OnMouseWheel/>
             <Controls>
                 <Control name="$(parent)ContinueKeybind" inherits="ZO_KeybindButton" hidden="true">
                     <Controls>
                         <Texture name="$(parent)Bg" textureFile="EsoUI/Art/Performance/StatusMeterMunge.dds" excludeFromResizeToFitExtents="true">
-                            <TextureCoords left="0.15625" right="0.828125" top="0.3671875" bottom="0.625" />
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)KeyLabel" offsetX="-30" offsetY="-12" />
-                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)NameLabel" offsetX="30" offsetY="12" />
+                            <TextureCoords left="0.15625" right="0.828125" top="0.3671875" bottom="0.625"/>
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)KeyLabel" offsetX="-30" offsetY="-12"/>
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)NameLabel" offsetX="30" offsetY="12"/>
                         </Texture>
                     </Controls>
                 </Control>
             </Controls>
         </TopLevelControl>
-
         <TopLevelControl name="ZO_WorldMapZoom" level="1" resizeToFitDescendents="true" hidden="true">
             <OnInitialized>
                 ZO_WorldMapZoom_OnInitialized(self)
@@ -227,7 +182,6 @@
                 </Texture>
             </Controls>
         </TopLevelControl>
-
         <TopLevelControl name="ZO_WorldMapRespawnTimer" resizeToFitDescendents="true" hidden="true" tier="HIGH">
             <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot" offsetX="12" offsetY="-12"/>
             <Controls>
@@ -239,130 +193,104 @@
                 </Label>
             </Controls>
         </TopLevelControl>
-
         <TopLevelControl name="ZO_WorldMap" mouseEnabled="true" clampedToScreen="true" resizeHandleSize="8" hidden="true">
-            <Dimensions x="690" y="708" />
-            <Anchor point="TOPLEFT" relativeTo="GuiRoot" />
-
+            <Dimensions x="690" y="708"/>
+            <Anchor point="TOPLEFT" relativeTo="GuiRoot"/>
             <OnInitialized>
                 ZO_WorldMap_Initialize(self)
             </OnInitialized>
-
             <OnShow>
                 ZO_WorldMap_OnShow()
             </OnShow>
-
             <OnHide>
                 ZO_WorldMap_OnHide()
             </OnHide>
-
             <OnResizeStart>
                 ZO_WorldMap_OnResizeStart(self)
             </OnResizeStart>
-
             <OnResizeStop>
                 ZO_WorldMap_OnResizeStop(self)
             </OnResizeStop>
-
             <Controls>
                 <Control name="$(parent)TitleBar" mouseEnabled="true">
                     <OnDragStart>
                         ZO_WorldMapTitleBar_OnDragStart()
                     </OnDragStart>
-
                     <OnMouseUp>
                         ZO_WorldMapTitleBar_OnMouseUp(button, upInside)
                     </OnMouseUp>
-
                     <OnMouseDoubleClick>
                         ZO_WorldMap_ToggleSize()
                     </OnMouseDoubleClick>
-
-                    <Dimensions y="26" />
-                    <Anchor point="TOPLEFT" offsetX="4" offsetY="4" />
-                    <Anchor point="TOPRIGHT" offsetX="-4" offsetY="4" />
-
+                    <Dimensions y="26"/>
+                    <Anchor point="TOPLEFT" offsetX="4" offsetY="4"/>
+                    <Anchor point="TOPRIGHT" offsetX="-4" offsetY="4"/>
                     <Controls>
                         <Texture name="$(parent)BG" color="000000">
                             <AnchorFill/>
                         </Texture>
                     </Controls>
                 </Control>
-
                 <Label name="$(parent)Title" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontHeader3">
                     <Anchor point="BOTTOM"/>
                 </Label>
-
                 <Scroll name="$(parent)Scroll" mouseEnabled="true">
                     <Controls>
                         <Control name="ZO_WorldMapContainer" mouseEnabled="true" hidden="false" tier="MEDIUM">
                             <Anchor point="CENTER"/>
-
                             <OnMouseDown>
                                 ZO_WorldMap_MouseDown(button, ctrl, alt, shift)
                             </OnMouseDown>
-
                             <OnMouseUp>
                                 ZO_WorldMap_MouseUp(self, button, upInside)
                             </OnMouseUp>
-
                             <OnMouseWheel>
                                 ZO_WorldMap_MouseWheel(delta)
                             </OnMouseWheel>
-
                             <OnMouseEnter>
                                 ZO_WorldMap_MouseEnter(self)
                             </OnMouseEnter>
-
                             <OnMouseExit>
                                 ZO_WorldMap_MouseExit(self)
                             </OnMouseExit>
-
                             <Controls>
                                 <Control name="$(parent)KeepLinks">
                                     <AnchorFill/>
                                 </Control>
-                                
                                 <Texture name="$(parent)MouseoverBlob" level="2" blendMode="ADD" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES" pixelRoundingEnabled="false" hidden="true">
-                                    <Anchor point="TOPLEFT" />
+                                    <Anchor point="TOPLEFT"/>
                                 </Texture>
                             </Controls>
                         </Control>
-
                         <Texture name="ZO_WorldMapContainerBackground" textureFile="EsoUI/Art/WorldMap/worldmap_map_background_512tile.dds" addressMode="WRAP" autoAdjustTextureCoords="false">
-                            <Anchor point="CENTER" relativeTo="ZO_WorldMapContainer" />
+                            <Anchor point="CENTER" relativeTo="ZO_WorldMapContainer"/>
                             <TextureCoords left="0" right="4" top="0" bottom="4"/>
                         </Texture>
-
                         <Control name="ZO_WorldMapContainerRaggedEdge" layer="BACKGROUND" tier="HIGH">
                             <Controls>
                                 <Texture name="$(parent)TopLeft" textureFile="EsoUI/Art/WorldMap/worldmap_map_edge.dds">
-                                    <Dimensions x="128" y="128" />
-                                    <Anchor point="TOPLEFT" />
-                                    <TextureCoords left="0.5" right="0.625" top="0" bottom="1" />
+                                    <Dimensions x="128" y="128"/>
+                                    <Anchor point="TOPLEFT"/>
+                                    <TextureCoords left="0.5" right="0.625" top="0" bottom="1"/>
                                 </Texture>
-
                                 <Texture name="$(parent)TopRight" textureFile="EsoUI/Art/WorldMap/worldmap_map_edge.dds">
-                                    <Dimensions x="128" y="128" />
-                                    <Anchor point="TOPRIGHT" />
-                                    <TextureCoords left="0.625" right="0.75" top="0" bottom="1" />
+                                    <Dimensions x="128" y="128"/>
+                                    <Anchor point="TOPRIGHT"/>
+                                    <TextureCoords left="0.625" right="0.75" top="0" bottom="1"/>
                                 </Texture>
-
                                 <Texture name="$(parent)BottomLeft" textureFile="EsoUI/Art/WorldMap/worldmap_map_edge.dds">
-                                    <Dimensions x="128" y="128" />
-                                    <Anchor point="BOTTOMLEFT" />
-                                    <TextureCoords left="0.75" right="0.875" top="0" bottom="1" />
+                                    <Dimensions x="128" y="128"/>
+                                    <Anchor point="BOTTOMLEFT"/>
+                                    <TextureCoords left="0.75" right="0.875" top="0" bottom="1"/>
                                 </Texture>
-
                                 <Texture name="$(parent)BottomRight" textureFile="EsoUI/Art/WorldMap/worldmap_map_edge.dds">
-                                    <Dimensions x="128" y="128" />
-                                    <Anchor point="BOTTOMRIGHT" />
-                                    <TextureCoords left="0.875" right="1" top="0" bottom="1" />
+                                    <Dimensions x="128" y="128"/>
+                                    <Anchor point="BOTTOMRIGHT"/>
+                                    <TextureCoords left="0.875" right="1" top="0" bottom="1"/>
                                 </Texture>
-
                                 <Texture name="$(parent)TopEdge" textureFile="EsoUI/Art/WorldMap/worldmap_map_edge.dds" addressMode="WRAP" autoAdjustTextureCoords="false">
-                                    <Anchor point="TOPLEFT" relativeTo="$(parent)TopLeft" relativePoint="TOPRIGHT" />
-                                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)TopRight" relativePoint="BOTTOMLEFT" />
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)TopLeft" relativePoint="TOPRIGHT"/>
+                                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)TopRight" relativePoint="BOTTOMLEFT"/>
                                     <OnInitialized>
                                         self:SetVertexUV(VERTEX_POINTS_TOPLEFT, 0.25, 1)
                                         self:SetVertexUV(VERTEX_POINTS_TOPRIGHT, 0.25, -4)
@@ -370,10 +298,9 @@
                                         self:SetVertexUV(VERTEX_POINTS_BOTTOMRIGHT, 0.375, -4)
                                     </OnInitialized>
                                 </Texture>
-
                                 <Texture name="$(parent)BottomEdge" textureFile="EsoUI/Art/WorldMap/worldmap_map_edge.dds" addressMode="WRAP" autoAdjustTextureCoords="false">
-                                    <Anchor point="TOPLEFT" relativeTo="$(parent)BottomLeft" relativePoint="TOPRIGHT" />
-                                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)BottomRight" relativePoint="BOTTOMLEFT" />
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)BottomLeft" relativePoint="TOPRIGHT"/>
+                                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)BottomRight" relativePoint="BOTTOMLEFT"/>
                                     <OnInitialized>
                                         self:SetVertexUV(VERTEX_POINTS_TOPLEFT, 0.375, 1)
                                         self:SetVertexUV(VERTEX_POINTS_TOPRIGHT, 0.375, -4)
@@ -381,112 +308,69 @@
                                         self:SetVertexUV(VERTEX_POINTS_BOTTOMRIGHT, 0.5, -4)
                                     </OnInitialized>
                                 </Texture>
-
                                 <Texture name="$(parent)LeftEdge" textureFile="EsoUI/Art/WorldMap/worldmap_map_edge.dds" addressMode="WRAP" autoAdjustTextureCoords="false">
-                                    <Anchor point="TOPLEFT" relativeTo="$(parent)TopLeft" relativePoint="BOTTOMLEFT" />
-                                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)BottomLeft" relativePoint="TOPRIGHT" />
-                                    <TextureCoords left="0" top="0" right="0.125" bottom="4" />
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)TopLeft" relativePoint="BOTTOMLEFT"/>
+                                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)BottomLeft" relativePoint="TOPRIGHT"/>
+                                    <TextureCoords left="0" top="0" right="0.125" bottom="4"/>
                                 </Texture>
-
                                 <Texture name="$(parent)RightEdge" textureFile="EsoUI/Art/WorldMap/worldmap_map_edge.dds" addressMode="WRAP" autoAdjustTextureCoords="false">
-                                    <Anchor point="TOPLEFT" relativeTo="$(parent)TopRight" relativePoint="BOTTOMLEFT" />
-                                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)BottomRight" relativePoint="TOPRIGHT" />
-                                    <TextureCoords left="0.125" top="0" right="0.25" bottom="4" />
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)TopRight" relativePoint="BOTTOMLEFT"/>
+                                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)BottomRight" relativePoint="TOPRIGHT"/>
+                                    <TextureCoords left="0.125" top="0" right="0.25" bottom="4"/>
                                 </Texture>
                             </Controls>
                         </Control>
                     </Controls>
                 </Scroll>
-
                 <Texture name="$(parent)MapBlackOut" color="000000">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Scroll"/>
                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Scroll"/>
                 </Texture>
-
                 <Texture name="$(parent)CenterPoint" textureFile="EsoUI/Art/WorldMap/map_centerReticle.dds" layer="OVERLAY" resizeToFitFile="true" hidden="true">
                     <Anchor point="CENTER" relativeTo="$(parent)Scroll"/>
                 </Texture>
-
                 <Backdrop name="$(parent)MapFrame" tier="LOW">
                     <OnInitialized>
                         self:SetCenterColor(0, 0, 0, 0)
                     </OnInitialized>
-                    <Controls>
-                        <Texture name="$(parent)TopMunge" inherits="ZO_WorldMapFrameMunge">
-                            <Dimensions y="2"/>
-                            <Anchor point="TOPLEFT" offsetX="4"/>
-                            <Anchor point="TOPRIGHT" offsetX="-4"/>
-                        </Texture>
-                        <Texture name="$(parent)LeftMunge" inherits="ZO_WorldMapFrameMunge">
-                            <Dimensions x="2"/>
-                            <Anchor point="TOPLEFT" offsetY="4"/>
-                            <Anchor point="BOTTOMLEFT" offsetY="-4"/>
-                        </Texture>
-                        <Texture name="$(parent)RightMunge" inherits="ZO_WorldMapFrameMunge">
-                            <Dimensions x="2"/>
-                            <Anchor point="TOPRIGHT" offsetY="4"/>
-                            <Anchor point="BOTTOMRIGHT" offsetY="-4"/>
-                        </Texture>
-                        <Texture name="$(parent)BottomMunge" inherits="ZO_WorldMapFrameMunge">
-                            <Dimensions y="2"/>
-                            <Anchor point="BOTTOMLEFT" offsetX="4"/>
-                            <Anchor point="BOTTOMRIGHT" offsetX="-4"/>
-                        </Texture>
-                    </Controls>
                 </Backdrop>
-
                 <!-- NOTE: Font and anchors for these labels are set in LUA. -->
-                <Label name="$(parent)MouseoverName" horizontalAlignment="CENTER" />
-                <Label name="$(parent)MouseOverDescription" horizontalAlignment="CENTER" />
-                <StatusBar name="$(parent)MouseoverProgressBar" inherits="ZO_WorldMap_ProgressBar" hidden="true" />
-
-                <Control name="$(parent)ZoomKeybind" inherits="ZO_KeybindButton" hidden="true" />
-
+                <Label name="$(parent)MouseoverName" horizontalAlignment="CENTER"/>
+                <Label name="$(parent)MouseOverDescription" horizontalAlignment="CENTER"/>
+                <StatusBar name="$(parent)MouseoverProgressBar" inherits="ZO_WorldMap_ProgressBar" hidden="true"/>
+                <Control name="$(parent)ZoomKeybind" inherits="ZO_KeybindButton" hidden="true"/>
                 <Control name="$(parent)Buttons">
                     <Dimensions y="36"/>
-                    <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMLEFT" offsetX="4" offsetY="-4" />
-                    <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT" offsetX="-4" offsetY="-4" />
+                    <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMLEFT" offsetX="4" offsetY="-4"/>
+                    <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT" offsetX="-4" offsetY="-4"/>
                     <Controls>
                         <Texture name="$(parent)BG" color="000000">
-                            <AnchorFill />
+                            <AnchorFill/>
                         </Texture>
-
                         <Slider name="$(parent)HistorySlider" inherits="ZO_Slider">
-                            <Dimensions x="300" y="16" />
+                            <Dimensions x="300" y="16"/>
                             <Anchor point="CENTER"/>
                             <OnValueChanged>
                                 ZO_WorldMapHistorySlider_OnValueChanged(self, value, eventReason)
                             </OnValueChanged>
                         </Slider>
-
                         <Control name="$(parent)Floors_Keyboard" resizeToFitDescendents="true">
                             <Anchor point="TOPRIGHT" offsetX="-11" offsetY="1"/>
                             <Controls>
                                 <Button name="$(parent)Up" inherits="ZO_DungeonFloorSelect">
-                                    <Anchor point="TOPRIGHT" />
-                                    <Dimensions x="20" y="20" />
-                                    <Textures
-                                        normal="EsoUI/Art/WorldMap/mapNav_upArrow_up.dds"
-                                        pressed="EsoUI/Art/WorldMap/mapNav_upArrow_down.dds"
-                                        mouseOver="EsoUI/Art/Buttons/ESO_buttonLarge_mouseOver.dds"
-                                        disabled="EsoUI/Art/WorldMap/mapNav_upArrow_disabled.dds"
-                                    />
+                                    <Anchor point="TOPRIGHT"/>
+                                    <Dimensions x="20" y="20"/>
+                                    <Textures normal="EsoUI/Art/WorldMap/mapNav_upArrow_up.dds" pressed="EsoUI/Art/WorldMap/mapNav_upArrow_down.dds" mouseOver="EsoUI/Art/Buttons/ESO_buttonLarge_mouseOver.dds" disabled="EsoUI/Art/WorldMap/mapNav_upArrow_disabled.dds"/>
                                     <OnInitialized>
                                         ZO_KeyControl_OnInitialized(self)
                                         self.floorDirection = MAP_FLOOR_CHANGE_DIRECTION_DOWN
                                         self.tooltipFormatString = GetString(SI_DUNGEON_FLOOR_UP_TOOLTIP)
                                     </OnInitialized>
                                 </Button>
-
                                 <Button name="$(parent)Down" inherits="ZO_DungeonFloorSelect">
-                                    <Dimensions x="20" y="20" />
-                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Up" relativePoint="TOPLEFT" offsetX="-10" />
-                                    <Textures
-                                        normal="EsoUI/Art/WorldMap/mapNav_downArrow_up.dds"
-                                        pressed="EsoUI/Art/WorldMap/mapNav_downArrow_down.dds"
-                                        mouseOver="EsoUI/Art/Buttons/ESO_buttonLarge_mouseOver.dds"
-                                        disabled="EsoUI/Art/WorldMap/mapNav_downArrow_disabled.dds"
-                                    />
+                                    <Dimensions x="20" y="20"/>
+                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Up" relativePoint="TOPLEFT" offsetX="-10"/>
+                                    <Textures normal="EsoUI/Art/WorldMap/mapNav_downArrow_up.dds" pressed="EsoUI/Art/WorldMap/mapNav_downArrow_down.dds" mouseOver="EsoUI/Art/Buttons/ESO_buttonLarge_mouseOver.dds" disabled="EsoUI/Art/WorldMap/mapNav_downArrow_disabled.dds"/>
                                     <OnInitialized>
                                         ZO_KeyControl_OnInitialized(self)
                                         self.floorDirection = MAP_FLOOR_CHANGE_DIRECTION_UP
@@ -495,7 +379,6 @@
                                 </Button>
                             </Controls>
                         </Control>
-                        
                         <Control name="$(parent)Floors_Gamepad" inherits="ZO_MapNavigationButtons_Gamepad">
                             <Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT" offsetY="8"/>
                             <OnInitialized>
@@ -503,10 +386,9 @@
                                 ZO_WorldMap_ZoomKeybindOnInitialized(self:GetNamedChild("LeftKeybind"), "UI_SHORTCUT_LEFT_SHOULDER")
                             </OnInitialized>
                             <Controls>
-                                <Label name="$(parent)Label" override="true" text="SI_GAMEPAD_WORLD_MAP_SWITCH_ELEVATION_KEYBIND" />
+                                <Label name="$(parent)Label" override="true" text="SI_GAMEPAD_WORLD_MAP_SWITCH_ELEVATION_KEYBIND"/>
                             </Controls>
                         </Control>
-
                         <Control name="$(parent)Levels_Gamepad" inherits="ZO_MapNavigationButtons_Gamepad">
                             <Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT" offsetY="8"/>
                             <OnInitialized>
@@ -514,17 +396,16 @@
                                 ZO_WorldMap_ZoomKeybindOnInitialized(self:GetNamedChild("LeftKeybind"), "UI_SHORTCUT_LEFT_SHOULDER")
                             </OnInitialized>
                             <Controls>
-                                <Label name="$(parent)Label" override="true" text="SI_GAMEPAD_WORLD_MAP_SWITCH_LEVEL_KEYBIND" />
+                                <Label name="$(parent)Label" override="true" text="SI_GAMEPAD_WORLD_MAP_SWITCH_LEVEL_KEYBIND"/>
                             </Controls>
                         </Control>
                     </Controls>
                 </Control>
-
                 <Label name="$(parent)GamepadInteractKeybind" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" font="ZoFontGamepadBold34" horizontalAlignment="CENTER" modifyTextType="UPPERCASE" hidden="true">
-                    <Anchor point="TOP" relativePoint="CENTER" offsetY="40" />
+                    <Anchor point="TOP" relativePoint="CENTER" offsetY="40"/>
                     <Controls>
                         <Label name="$(parent)KeyLabel" inherits="ZO_LargeKeyMarkupLabel_Gamepad">
-                            <Anchor point="CENTER" relativeTo="$(parent)" relativePoint="LEFT" offsetX="-20" />
+                            <Anchor point="CENTER" relativeTo="$(parent)" relativePoint="LEFT" offsetX="-20"/>
                             <OnInitialized>
                                 ZO_Keybindings_RegisterLabelForBindingUpdate(self, "UI_SHORTCUT_PRIMARY")
                                 ZO_KeyMarkupLabel_SetCustomOffsets(self, -5, 5, -2, 3)
@@ -532,13 +413,11 @@
                         </Label>
                     </Controls>
                 </Label>
-
-                <Label name="$(parent)PinPointerBoxContents" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" hidden="true" >
+                <Label name="$(parent)PinPointerBoxContents" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" hidden="true">
                     <DimensionConstraints maxX="290"/>
                 </Label>
             </Controls>
         </TopLevelControl>
-
         <TopLevelControl name="ZO_WorldMapHeader_Gamepad" hidden="true">
             <Controls>
                 <Control name="$(parent)ZoomKeybind" inherits="ZO_MapNavigationButtons_Gamepad">
@@ -548,10 +427,9 @@
                         ZO_WorldMap_ZoomKeybindOnInitialized(self:GetNamedChild("LeftKeybind"), "UI_SHORTCUT_LEFT_TRIGGER")
                     </OnInitialized>
                     <Controls>
-                        <Label name="$(parent)Label" override="true" text="SI_WORLD_MAP_ZOOM" />
+                        <Label name="$(parent)Label" override="true" text="SI_WORLD_MAP_ZOOM"/>
                     </Controls>
                 </Control>
-                
                 <Label name="$(parent)Title" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
                     <OnInitialized>
                         local fonts =

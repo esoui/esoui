@@ -5,10 +5,9 @@
                 <Label name="$(parent)GuildHeader" inherits="ZO_DialogContentAnchors" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame"/>
                 <Control name="$(parent)Guild" inherits="ZO_ComboBox">
                     <Dimensions y="36"/>
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)GuildHeader" relativePoint="BOTTOMLEFT" offsetY="10" />
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)GuildHeader" relativePoint="BOTTOMRIGHT" offsetY="10" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)GuildHeader" relativePoint="BOTTOMLEFT" offsetY="10"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)GuildHeader" relativePoint="BOTTOMRIGHT" offsetY="10"/>
                 </Control>
-
                 <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton"/>
                 <Control name="$(parent)Accept" inherits="ZO_CustomDialogButton"/>
             </Controls>

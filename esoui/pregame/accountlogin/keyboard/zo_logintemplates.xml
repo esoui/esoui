@@ -1,68 +1,47 @@
 <GuiXml>
     <Controls>
         <Control name="ZO_LoginBase_Keyboard" virtual="true">
-            <Anchor point="TOPLEFT" relativeTo="GuiRoot" />
-            <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" />
-
+            <Anchor point="TOPLEFT" relativeTo="GuiRoot"/>
+            <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot"/>
             <Controls>
                 <Texture name="$(parent)BGMunge" textureFile="EsoUI/Art/Login/login_UIWindowBG_left.dds" hidden="true">
-                    <Dimensions x="512" y="914" />
-                    <Anchor point="TOPLEFT" offsetX="160" offsetY="10" />
-                    <TextureCoords left="0" top="0" right="1" bottom="0.892578125" />
+                    <Dimensions x="512" y="914"/>
+                    <Anchor point="TOPLEFT" offsetX="160" offsetY="10"/>
+                    <TextureCoords left="0" top="0" right="1" bottom="0.892578125"/>
                     <Controls>
                         <Texture name="$(parent)Right" textureFile="EsoUI/Art/Login/login_UIWindowBG_right.dds">
-                            <Dimensions x="256" y="914" />
-                            <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" />
-                            <TextureCoords left="0" top="0" right="1" bottom="0.892578125" />
+                            <Dimensions x="256" y="914"/>
+                            <Anchor point="TOPLEFT" relativePoint="TOPRIGHT"/>
+                            <TextureCoords left="0" top="0" right="1" bottom="0.892578125"/>
                         </Texture>
                     </Controls>
                 </Texture>
-
                 <Control name="$(parent)ESOLogo" resizeToFitDescendents="true">
                     <Anchor point="TOP" offsetY="180"/>
-
                     <Controls>
                         <Texture name="$(parent)Left" textureFile="EsoUI/Art/Login/login_logo_left.dds" resizeToFitFile="true">
-                            <Anchor point="BOTTOMLEFT" />
+                            <Anchor point="BOTTOMLEFT"/>
                         </Texture>
-
                         <Texture name="$(parent)Right" textureFile="EsoUI/Art/Login/login_logo_right.dds" resizeToFitFile="true">
-                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Left" relativePoint="BOTTOMRIGHT" />
+                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Left" relativePoint="BOTTOMRIGHT"/>
                         </Texture>
                     </Controls>
                 </Control>
             </Controls>
         </Control>
-
         <Button name="ZO_LoginMenuButton" inherits="ZO_DefaultTextButton" font="ZoFontWinH2" modifyTextType="UPPERCASE" virtual="true">
-            <PressedOffset x="2" y="2" />
+            <PressedOffset x="2" y="2"/>
             <Dimensions x="256" y="64"/>
-
-            <Textures
-                normal="EsoUI/Art/Login/Keyboard/LoginButton_Normal.dds"
-                pressed="EsoUI/Art/Login/Keyboard/LoginButton_mouseDown.dds"
-                mouseOver="EsoUI/Art/Login/Keyboard/LoginButton_mouseOver.dds"
-                disabled="EsoUI/Art/Login/Keyboard/LoginButton_Disabled.dds"
-            />
-
-            <FontColors
-                 normalColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"
-                 pressedColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED"
-                 mouseOverColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_HIGHLIGHT"
-                 disabledColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED"
-            />
+            <Textures normal="EsoUI/Art/Login/Keyboard/LoginButton_Normal.dds" pressed="EsoUI/Art/Login/Keyboard/LoginButton_mouseDown.dds" mouseOver="EsoUI/Art/Login/Keyboard/LoginButton_mouseOver.dds" disabled="EsoUI/Art/Login/Keyboard/LoginButton_Disabled.dds"/>
+            <FontColors normalColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" pressedColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" mouseOverColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_HIGHLIGHT" disabledColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED"/>
         </Button>
-
-        <Label name="ZO_LoginMenuEditLabel" font="ZoFontWinH3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE" virtual="true" />
-
-        <Label name="ZO_LoginMenuSectionHeader" font="ZoFontWinH3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" virtual="true" />
-
-        <Label name="ZO_LoginMenuInfoLabel" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true" />
-
+        <Label name="ZO_LoginMenuEditLabel" font="ZoFontWinH3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE" virtual="true"/>
+        <Label name="ZO_LoginMenuSectionHeader" font="ZoFontWinH3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" virtual="true"/>
+        <Label name="ZO_LoginMenuInfoLabel" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true"/>
         <Label name="ZO_LoginMenuCapsLockWarning" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="SI_CAPS_LOCK_PASSWORD_WARNING" virtual="true">
             <Controls>
                 <Texture name="$(parent)Icon" textureFile="EsoUI\Art\Miscellaneous\ESO_Icon_Warning.dds" resizeToFitFile="true">
-                    <Anchor point="RIGHT" relativePoint="LEFT" />
+                    <Anchor point="RIGHT" relativePoint="LEFT"/>
                 </Texture>
             </Controls>
         </Label>

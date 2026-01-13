@@ -4,52 +4,43 @@
             <OnInitialized>
                 ZO_SpectacleEvents_Gamepad.OnControlInitialized(self)
             </OnInitialized>
-
             <Controls>
                 <Texture name="$(parent)Background" color="666666" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
-                    <Dimensions y="1024" />
-                    <Anchor point="TOPLEFT" offsetX="ZO_GAMEPAD_QUADRANT_VERT_DIVIDER_PADDING" offsetY="-ZO_GAMEPAD_SAFE_ZONE_INSET_Y" />
-                    <Anchor point="BOTTOMRIGHT" offsetX="-ZO_GAMEPAD_QUADRANT_VERT_DIVIDER_PADDING" />
-
+                    <Dimensions y="1024"/>
+                    <Anchor point="TOPLEFT" offsetX="ZO_GAMEPAD_QUADRANT_VERT_DIVIDER_PADDING" offsetY="-ZO_GAMEPAD_SAFE_ZONE_INSET_Y"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="-ZO_GAMEPAD_QUADRANT_VERT_DIVIDER_PADDING"/>
                     <!-- 1024x1024 image cropped to 832x955 -->
-                    <TextureCoords left="0" right="ZO_GAMEPAD_SPECTACLE_EVENTS_BACKGROUND_TEXTURE_COORDS_RIGHT" top="0" bottom="ZO_GAMEPAD_SPECTACLE_EVENTS_BACKGROUND_TEXTURE_COORDS_BOTTOM" />
+                    <TextureCoords left="0" right="ZO_GAMEPAD_SPECTACLE_EVENTS_BACKGROUND_TEXTURE_COORDS_RIGHT" top="0" bottom="ZO_GAMEPAD_SPECTACLE_EVENTS_BACKGROUND_TEXTURE_COORDS_BOTTOM"/>
                 </Texture>
-
                 <Control name="$(parent)InfoContainer" inherits="ZO_SpectacleEvents_InfoContainerTemplate ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
                     <Controls>
                         <Label name="$(parent)Title" override="true" font="ZoFontGamepad42">
-                            <Anchor point="TOPLEFT" offsetY="120" />
+                            <Anchor point="TOPLEFT" offsetY="120"/>
                         </Label>
-
                         <Label name="$(parent)Description" override="true" font="ZoFontGamepadCondensed42">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" />
-                            <Anchor point="RIGHT" constrains="X" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT"/>
+                            <Anchor point="RIGHT" constrains="X"/>
                         </Label>
-
                         <Control name="$(parent)GridList" override="true" inherits="ZO_GridScrollList_NotAnchored_Gamepad">
-                            <Dimensions y="205" />
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)Description" relativePoint="BOTTOMLEFT" offsetX="-10" offsetY="20" />
+                            <Dimensions y="205"/>
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Description" relativePoint="BOTTOMLEFT" offsetX="-10" offsetY="20"/>
                             <Anchor point="RIGHT" constrains="X" offsetX="30"/>
                         </Control>
-
                         <Label name="$(parent)ProgressBarHeader" override="true" font="ZoFontGamepad42">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)GridList" relativePoint="BOTTOMLEFT" offsetY="20" offsetX="10" />
-                            <Anchor point="RIGHT" constrains="X" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)GridList" relativePoint="BOTTOMLEFT" offsetY="20" offsetX="10"/>
+                            <Anchor point="RIGHT" constrains="X"/>
                         </Label>
-
                         <StatusBar name="$(parent)ProgressBar" override="true" inherits="ZO_GamepadArrowProgressBarWithBGMedium">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)ProgressBarHeader" relativePoint="BOTTOMLEFT" offsetY="10" />
-                            <Anchor point="TOPRIGHT" relativeTo="$(parent)ProgressBarHeader" relativePoint="BOTTOMRIGHT" offsetY="10" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)ProgressBarHeader" relativePoint="BOTTOMLEFT" offsetY="10"/>
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)ProgressBarHeader" relativePoint="BOTTOMRIGHT" offsetY="10"/>
                         </StatusBar>
-
                         <Label name="$(parent)PhaseCompleteLabel" override="true" font="ZoFontGamepad42">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)GridList" relativePoint="BOTTOMLEFT" offsetY="20" offsetX="10" />
-                            <Anchor point="RIGHT" constrains="X" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)GridList" relativePoint="BOTTOMLEFT" offsetY="20" offsetX="10"/>
+                            <Anchor point="RIGHT" constrains="X"/>
                         </Label>
-
                         <Label name="$(parent)NextPhaseBeginsLabel" override="true" font="ZoFontGamepad42">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)PhaseCompleteLabel" relativePoint="BOTTOMLEFT" offsetY="10" />
-                            <Anchor point="TOPRIGHT" relativeTo="$(parent)PhaseCompleteLabel" relativePoint="BOTTOMRIGHT" offsetY="10" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)PhaseCompleteLabel" relativePoint="BOTTOMLEFT" offsetY="10"/>
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)PhaseCompleteLabel" relativePoint="BOTTOMRIGHT" offsetY="10"/>
                         </Label>
                     </Controls>
                 </Control>

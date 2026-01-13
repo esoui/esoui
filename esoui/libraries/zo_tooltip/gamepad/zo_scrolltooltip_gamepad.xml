@@ -1,83 +1,72 @@
-﻿<GuiXml>
+<GuiXml>
     <Controls>
         <Control name="ZO_ScrollTooltip_Gamepad" virtual="true">
             <Controls>
                 <Scroll name="$(parent)Scroll">
-                    <Anchor point="TOPLEFT" />
-                    <Anchor point="BOTTOMRIGHT" />
-
+                    <Anchor point="TOPLEFT"/>
+                    <Anchor point="BOTTOMRIGHT"/>
                     <Controls>
                         <Control name="$(parent)ScrollChild" resizeToFitDescendents="true">
-                            <Anchor point="TOPLEFT" />
+                            <Anchor point="TOPLEFT"/>
                             <Controls>
                                 <Control name="$(parent)Tooltip" inherits="ZO_Tooltip">
-                                    <Anchor point="TOPLEFT" />
+                                    <Anchor point="TOPLEFT"/>
                                 </Control>
                             </Controls>
                         </Control>
                     </Controls>
                 </Scroll>
-
                 <!-- Anchors for the ScrollIndicator are setup when tooltip initializes -->
-                <Texture name="$(parent)ScrollIndicator" layer="OVERLAY" tier="HIGH" hidden="true" >
+                <Texture name="$(parent)ScrollIndicator" layer="OVERLAY" tier="HIGH" hidden="true">
                     <Dimensions x="64" y="64"/>
                     <OnInitialized>
                         ZO_GamepadTypeBasedControl_OnInitialized(self)
                         self:SetTextureSource(GetGamepadRightStickScrollIcon)
                     </OnInitialized>
                 </Texture>
-
                 <Label name="$(parent)ScrollKeyUp" inherits="ZO_LargeKeyMarkupLabel_Gamepad" layer="OVERLAY" tier="HIGH" hidden="true">
-                    <Anchor point="CENTER" relativeTo="$(parent)ScrollIndicator" relativePoint="TOP" offsetY="10" />
+                    <Anchor point="CENTER" relativeTo="$(parent)ScrollIndicator" relativePoint="TOP" offsetY="10"/>
                     <Controls>
-                        <Texture name="$(parent)Arrow" textureFile="EsoUI\Art\Buttons\Gamepad\gp_upArrow.dds" layer="TEXT" >
-                            <Dimensions x="24" y="24" />
-                            <Anchor point="BOTTOM" relativePoint="TOP" />
+                        <Texture name="$(parent)Arrow" textureFile="EsoUI\Art\Buttons\Gamepad\gp_upArrow.dds" layer="TEXT">
+                            <Dimensions x="24" y="24"/>
+                            <Anchor point="BOTTOM" relativePoint="TOP"/>
                         </Texture>
                     </Controls>
                 </Label>
-
                 <Label name="$(parent)ScrollKeyDown" inherits="ZO_LargeKeyMarkupLabel_Gamepad" layer="OVERLAY" tier="HIGH" hidden="true">
-                    <Anchor point="CENTER" relativeTo="$(parent)ScrollIndicator" relativePoint="BOTTOM" offsetY="-10" />
+                    <Anchor point="CENTER" relativeTo="$(parent)ScrollIndicator" relativePoint="BOTTOM" offsetY="-10"/>
                     <Controls>
-                        <Texture name="$(parent)Arrow" textureFile="EsoUI\Art\Buttons\Gamepad\gp_downArrow.dds" layer="TEXT" >
-                            <Dimensions x="24" y="24" />
-                            <Anchor point="TOP" relativePoint="BOTTOM" />
+                        <Texture name="$(parent)Arrow" textureFile="EsoUI\Art\Buttons\Gamepad\gp_downArrow.dds" layer="TEXT">
+                            <Dimensions x="24" y="24"/>
+                            <Anchor point="TOP" relativePoint="BOTTOM"/>
                         </Texture>
                     </Controls>
                 </Label>
             </Controls>
         </Control>
-
-        <Control name="ZO_ScrollTooltipBackdrop_Gamepad" inherits="ZO_DefaultBackdrop_Gamepad ZO_Gamepad_Background_Screen_Center_Template" virtual="true" />
-
+        <Control name="ZO_ScrollTooltipBackdrop_Gamepad" inherits="ZO_DefaultBackdrop_Gamepad ZO_Gamepad_Background_Screen_Center_Template" virtual="true"/>
         <Control name="ZO_ResizingFloatingScrollTooltip_Gamepad" tier="HIGH" virtual="true">
-            <Dimensions x="ZO_GAMEPAD_PANEL_WIDTH" />
-
+            <Dimensions x="ZO_GAMEPAD_PANEL_WIDTH"/>
             <OnInitialized>
                 ZO_ResizingFloatingScrollTooltip_Gamepad_OnInitialized(self)
             </OnInitialized>
-
             <Controls>
                 <Backdrop name="$(parent)Border" centerColor="00000000" tier="HIGH" layer="OVERLAY" excludeFromResizeToFitExtents="true" hidden="true">
-                    <Anchor point="TOPLEFT" offsetX="7" offsetY="7" />
-                    <Anchor point="BOTTOMRIGHT" offsetX="-7" offsetY="-7" />
+                    <Anchor point="TOPLEFT" offsetX="7" offsetY="7"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="-7" offsetY="-7"/>
                 </Backdrop>
-
                 <Backdrop name="$(parent)Bg" inherits="ZO_ScrollTooltipBackdrop_Gamepad" tier="MEDIUM" excludeFromResizeToFitExtents="true">
-                    <AnchorFill />
+                    <AnchorFill/>
                 </Backdrop>
-
                 <Texture name="$(parent)Icon" excludeFromResizeToFitExtents="true" layer="OVERLAY">
-                    <Dimensions x="64" y="64" />
+                    <Dimensions x="64" y="64"/>
                     <Anchor point="CENTER" relativePoint="TOP"/>
                 </Texture>
-
                 <Control name="$(parent)Container" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
                     <Controls>
                         <Control name="$(parent)Tip" inherits="ZO_ScrollTooltip_Gamepad" tier="MEDIUM">
-                            <Anchor point="TOPLEFT" offsetY="ZO_GAMEPAD_FLOATING_SCROLL_TOOLTIP_TOP_ICON_PADDING_Y" />
-                            <Anchor point="BOTTOMRIGHT" offsetY="-ZO_GAMEPAD_FLOATING_SCROLL_TOOLTIP_TOP_ICON_PADDING_Y" />
+                            <Anchor point="TOPLEFT" offsetY="ZO_GAMEPAD_FLOATING_SCROLL_TOOLTIP_TOP_ICON_PADDING_Y"/>
+                            <Anchor point="BOTTOMRIGHT" offsetY="-ZO_GAMEPAD_FLOATING_SCROLL_TOOLTIP_TOP_ICON_PADDING_Y"/>
                         </Control>
                     </Controls>
                 </Control>

@@ -278,6 +278,7 @@ function ZO_SmithingCreation:OnRefreshAllLists()
     -- Need to do this on PC, as the first selection can be garbage otherwise with the style<->pattern cyclic dependencies.
     -- On gamepad, the list auto-scrolls to an item and refreshes twice on its own, so this isn't necessary.
     self:CreatePatternList()
+    self:UpdateUniversalStyleItemCheckBox()
 end
 
 function ZO_SmithingCreation:InitializeMaterialList(...)
@@ -350,7 +351,6 @@ function ZO_SmithingCreation_UniversalStyleItemOnMouseEnter(control)
     InformationTooltip:AddLine(zo_strformat(SI_CRAFTING_USE_UNIVERSAL_STYLE_ITEM, universalStyleItemCount), "", ZO_COLOR_UNIVERSAL_ITEM:UnpackRGBA())
     local r,g,b = ZO_NORMAL_TEXT:UnpackRGB()
     InformationTooltip:AddLine(GetString(SI_CRAFTING_UNIVERSAL_STYLE_ITEM_TOOLTIP), "", r, g, b)
-    InformationTooltip:AddLine(GetString(SI_CRAFTING_UNIVERSAL_STYLE_ITEM_CROWN_STORE_TOOLTIP), "", r, g, b)
 end
 
 function ZO_SmithingCreation_UniversalStyleItemOnMouseExit(control)

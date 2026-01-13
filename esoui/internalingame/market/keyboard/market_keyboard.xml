@@ -7,41 +7,34 @@
                 self.SetSelected = ZO_IconHeader_Setup
             </OnInitialized>
         </Control>
-
         <Control name="ZO_MarketCategoryWithChildren" inherits="ZO_IconHeader" virtual="true">
             <Controls>
                 <Label name="$(parent)Text" override="true">
                     <Anchor point="TOPLEFT" offsetX="74" offsetY="9"/>
                     <DimensionConstraints maxX="ZO_MARKET_CATEGORY_LABEL_WIDTH"/>
                 </Label>
-
                 <Texture name="$(parent)MultiIcon" inherits="ZO_MultiIcon" hidden="true">
                     <Dimensions x="32" y="32"/>
                     <Anchor point="LEFT" relativePoint="TOPLEFT" offsetY="24"/>
                 </Texture>
-
                 <Texture name="$(parent)Icon" override="true">
-                    <Anchor point="CENTER" relativeTo="$(parent)MultiIcon" relativePoint="RIGHT" offsetX="18" />
+                    <Anchor point="CENTER" relativeTo="$(parent)MultiIcon" relativePoint="RIGHT" offsetX="18"/>
                 </Texture>
             </Controls>
         </Control>
-
         <Label name="ZO_MarketSubCategory" inherits="ZO_SelectableLabel" font="ZoFontHeader" newLineIndent="10" virtual="true">
             <DimensionConstraints maxX="ZO_MARKET_SUBCATEGORY_LABEL_WIDTH"/>
             <OnMouseUp>
                 ZO_TreeEntry_OnMouseUp(self, upInside)
             </OnMouseUp>
-
             <Controls>
                 <Texture name="$(parent)MultiIcon" inherits="ZO_MultiIcon" hidden="true">
                     <Dimensions x="20" y="20"/>
-                    <Anchor point="TOPRIGHT" relativePoint="TOPLEFT" offsetX="-2" offsetY="2" />
+                    <Anchor point="TOPRIGHT" relativePoint="TOPLEFT" offsetX="-2" offsetY="2"/>
                 </Texture>
             </Controls>
         </Label>
-
-        <Label name="ZO_Market_GroupLabel" inherits="ZO_GridScrollList_Entry_Header_Keyboard" font="ZoFontHeader" modifyTextType="UPPERCASE"  virtual="true" />
-
+        <Label name="ZO_Market_GroupLabel" inherits="ZO_GridScrollList_Entry_Header_Keyboard" font="ZoFontHeader" modifyTextType="UPPERCASE" virtual="true"/>
         <Control name="ZO_MarketFragmentBackLabel" inherits="ZO_IconHeader" virtual="true">
             <OnInitialized>
                 ZO_IconHeader_OnInitialized(self)
@@ -49,105 +42,86 @@
                 self.allowIconScaling = false
                 self.OnMouseUp = nil
             </OnInitialized>
-
             <Controls>
                 <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Buttons/large_leftArrow_down.dds" override="true">
                     <Controls>
-                        <Texture name="$(parent)Highlight" textureFile="EsoUI/Art/Buttons/large_leftArrow_over.dds" override="true" />
+                        <Texture name="$(parent)Highlight" textureFile="EsoUI/Art/Buttons/large_leftArrow_over.dds" override="true"/>
                     </Controls>
                 </Texture>
-
-                <Label name="$(parent)Text" text="SI_MARKET_CONFIRM_PURCHASE_BACK_KEYBIND_LABEL" override="true" />
+                <Label name="$(parent)Text" text="SI_MARKET_CONFIRM_PURCHASE_BACK_KEYBIND_LABEL" override="true"/>
             </Controls>
         </Control>
-
         <Control name="ZO_MarketListEntry" inherits="ZO_ListEntry_BackdropAndHighlight_Template" mouseEnabled="true" virtual="true">
-            <Dimensions x="509" y="ZO_MARKET_LIST_ENTRY_HEIGHT" />
-
-             <OnInitialized>
+            <Dimensions x="509" y="ZO_MARKET_LIST_ENTRY_HEIGHT"/>
+            <OnInitialized>
                 self.background = self:GetNamedChild("Bg")
                 self.highlight = self:GetNamedChild("Highlight")
                 self.iconControl = self:GetNamedChild("Icon")
                 self.stackCount = self.iconControl:GetNamedChild("StackCount")
                 self.nameControl = self:GetNamedChild("Name")
             </OnInitialized>
-
             <Controls>
                 <Texture name="$(parent)Icon">
-                    <Dimensions x="40" y="40" />
-                    <Anchor point="CENTER" relativePoint="TOPLEFT" offsetX="74" offsetY="26" />
-
+                    <Dimensions x="40" y="40"/>
+                    <Anchor point="CENTER" relativePoint="TOPLEFT" offsetX="74" offsetY="26"/>
                     <Controls>
                         <Label name="$(parent)StackCount" horizontalAlignment="RIGHT" verticalAlignment="BOTTOM" font="ZoFontGameOutline" inheritScale="false" hidden="true">
-                            <Anchor point="TOPLEFT" offsetX="1" offsetY="1" />
+                            <Anchor point="TOPLEFT" offsetX="1" offsetY="1"/>
                             <Anchor point="BOTTOMRIGHT" offsetX="-4" offsetY="-1"/>
                         </Label>
                     </Controls>
                 </Texture>
-
                 <Label name="$(parent)Name" font="ZoFontGameShadow" wrapMode="ELLIPSIS">
-                    <Dimensions x="450" />
-                    <Anchor point="LEFT" offsetX="115" />
+                    <Dimensions x="450"/>
+                    <Anchor point="LEFT" offsetX="115"/>
                 </Label>
-
             </Controls>
         </Control>
-
         <Control name="ZO_MarketListHeader" virtual="true">
-            <Dimensions x="509" y="ZO_MARKET_LIST_ENTRY_HEIGHT" />
-
+            <Dimensions x="509" y="ZO_MARKET_LIST_ENTRY_HEIGHT"/>
             <OnInitialized>
                 self.nameControl = self:GetNamedChild("Name")
             </OnInitialized>
-
             <Controls>
                 <Label name="$(parent)Name" font="ZoFontWinH4" modifyTextType="UPPERCASE" wrapMode="ELLIPSIS">
-                    <Dimensions x="450" />
-                    <Anchor point="LEFT" />
+                    <Dimensions x="450"/>
+                    <Anchor point="LEFT"/>
                 </Label>
             </Controls>
         </Control>
-
         <Control name="ZO_KeyboardMarketProductList" mouseEnabled="true" hidden="true" virtual="true">
             <Controls>
-
                 <Control name="$(parent)BackLabel" level="1" inherits="ZO_MarketFragmentBackLabel">
-                    <Anchor point="TOPLEFT" offsetY="80" />
+                    <Anchor point="TOPLEFT" offsetY="80"/>
                 </Control>
-
                 <Label name="$(parent)ListHeader" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE">
-                    <Anchor point="TOPLEFT" offsetX="280" offsetY="37" />
-                    <Anchor point="TOPRIGHT" offsetX="-12" offsetY="37" />
+                    <Anchor point="TOPLEFT" offsetX="280" offsetY="37"/>
+                    <Anchor point="TOPRIGHT" offsetX="-12" offsetY="37"/>
                 </Label>
-
                 <Control name="$(parent)List" inherits="ZO_ScrollList">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)ListHeader" relativePoint="BOTTOMLEFT" offsetY="40"/>
-                    <Dimensions x="633" y="584" /> <!-- static dimensions so the list calculates its height correctly -->
+                    <Dimensions x="633" y="584"/>
+                    <!-- static dimensions so the list calculates its height correctly -->
                 </Control>
-
                 <Label name="$(parent)ContentHeader" font="ZoFontHeader3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
                     <Anchor point="BOTTOMLEFT" relativeTo="$(parent)ListHeader" relativePoint="TOPLEFT" offsetY="-5"/>
                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)ListHeader" relativePoint="TOPRIGHT" offsetY="-5"/>
                 </Label>
-
             </Controls>
         </Control>
-
         <TopLevelControl name="ZO_MarketTemplate" inherits="ZO_RightPanelFootPrint" mouseEnabled="true" hidden="true" virtual="true">
             <OnInitialized>
                 ZO_Market_OnInitialize(self)
             </OnInitialized>
-
             <Controls>
                 <Control name="$(parent)Message">
-                    <Anchor point="TOPLEFT" offsetY="5" />
-                    <Anchor point="BOTTOMRIGHT" offsetX="-5" />
+                    <Anchor point="TOPLEFT" offsetY="5"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="-5"/>
                     <Controls>
                         <Label name="$(parent)Label" font="ZoFontWinH3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER">
                             <Dimensions y="100"/>
                             <Anchor point="TOP" offsetY="77"/>
                         </Label>
-
                         <Control name="$(parent)LoadingIcon" inherits="ZO_Loading">
                             <Anchor point="TOPRIGHT" relativeTo="$(parent)Label" relativePoint="TOPLEFT" offsetX="-10"/>
                             <OnInitialized>
@@ -156,51 +130,43 @@
                         </Control>
                     </Controls>
                 </Control>
-
                 <Control name="$(parent)Contents" mouseEnabled="true" hidden="true">
                     <Anchor point="TOPLEFT" offsetY="5"/>
                     <Anchor point="BOTTOMRIGHT" offsetX="-5"/>
                     <Controls>
                         <Backdrop name="$(parent)Search" tier="HIGH" inherits="ZO_SingleLineEditBackdrop_Keyboard">
-                            <Anchor point="TOPLEFT" offsetX="10" offsetY="26" />
+                            <Anchor point="TOPLEFT" offsetX="10" offsetY="26"/>
                             <Dimensions x="240"/>
                             <Controls>
                                 <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop" defaultText="SI_MARKET_SEARCH_EDIT_DEFAULT">
                                     <OnTextChanged>
                                         ZO_Market_OnSearchTextChanged(self)
                                     </OnTextChanged>
-
                                     <OnEnter>
                                         ZO_Market_OnSearchEnterKeyPressed(self)
                                     </OnEnter>
                                 </EditBox>
                             </Controls>
                         </Backdrop>
-
                         <Label name="$(parent)SearchLabel" inherits="ZO_MarketDefaultLabel" text="SI_MARKET_SEARCH_FILTER_BY_LABEL">
                             <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Search" relativePoint="TOPLEFT"/>
                         </Label>
-
                         <Control name="$(parent)Filter" inherits="ZO_ComboBox">
-                            <Dimensions x="222" y="32" />
+                            <Dimensions x="222" y="32"/>
                             <Anchor point="TOPRIGHT" offsetX="-30" offsetY="26"/>
                         </Control>
-
                         <Label name="$(parent)FilterLabel" inherits="ZO_MarketDefaultLabel" text="SI_MARKET_FILTER_LABEL">
                             <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Filter" relativePoint="TOPLEFT"/>
                         </Label>
-
                         <Control name="$(parent)Categories" inherits="ZO_ScrollContainer">
-                            <Dimensions x="ZO_MARKET_CATEGORY_CONTAINER_WIDTH" />
+                            <Dimensions x="ZO_MARKET_CATEGORY_CONTAINER_WIDTH"/>
                             <Anchor point="TOPLEFT" offsetX="-28" offsetY="72"/>
                             <Anchor point="BOTTOMLEFT" offsetX="-28" offsetY="-130"/>
                         </Control>
-
                         <Control name="$(parent)ProductList" inherits="ZO_GridScrollList_Keyboard">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)Categories" relativePoint="TOPRIGHT" offsetX="10" offsetY="-10"/>
                             <Anchor point="BOTTOMRIGHT" offsetX="-12"/>
                         </Control>
-
                         <Label name="$(parent)NoMatchMessage" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="SI_MARKET_SEARCH_NO_MATCHES" horizontalAlignment="CENTER" hidden="true">
                             <Anchor point="TOP" relativeTo="$(parent)ProductList"/>
                         </Label>

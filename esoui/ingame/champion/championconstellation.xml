@@ -1,10 +1,9 @@
 <GuiXml>
     <Controls>
-        <Texture name="ZO_Constellation" pixelRoundingEnabled="false" blendMode="ADD" virtual="true" />
-        <Texture name="ZO_ConstellationZoomedIn" pixelRoundingEnabled="false" blendMode="ADD" virtual="true" />
-        <Texture name="ZO_ConstellationMouseOver" pixelRoundingEnabled="false" blendMode="ADD" virtual="true" />
-        <Texture name="ZO_Cluster" pixelRoundingEnabled="false" blendMode="ADD" alpha="0" virtual="true" />
-
+        <Texture name="ZO_Constellation" pixelRoundingEnabled="false" blendMode="ADD" virtual="true"/>
+        <Texture name="ZO_ConstellationZoomedIn" pixelRoundingEnabled="false" blendMode="ADD" virtual="true"/>
+        <Texture name="ZO_ConstellationMouseOver" pixelRoundingEnabled="false" blendMode="ADD" virtual="true"/>
+        <Texture name="ZO_Cluster" pixelRoundingEnabled="false" blendMode="ADD" alpha="0" virtual="true"/>
         <Line name="ZO_ChampionStarLink" textureFile="EsoUI/Art/Champion/champion_star_link.dds" virtual="true"/>
     </Controls>
 </GuiXml>

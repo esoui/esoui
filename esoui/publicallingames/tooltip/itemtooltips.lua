@@ -1170,7 +1170,7 @@ function ZO_Tooltip:LayoutCraftedAbilityScriptItem(itemLink, itemName, tradeBoPD
             descriptionSection:AddLine(description, self:GetStyle("bodyDescription"))
             self:AddSection(descriptionSection)
         end
-        
+
         local slot = GetString("SI_SCRIBINGSLOT_SHORT", craftedAbilityScriptData:GetScribingSlot())
         local onUseInfo = zo_strformat(SI_ITEM_TOOLTIP_CRAFTED_ABILITY_SCRIPT_ON_USE_FORMATTER, craftedAbilityScriptData:GetDisplayName(), slot)
         local onUseSection = self:AcquireSection(self:GetStyle("bodySection"))
@@ -1185,6 +1185,25 @@ function ZO_Tooltip:LayoutCraftedAbilityScriptItem(itemLink, itemName, tradeBoPD
         alreadyKnownSection:AddLine(GetString(SI_ITEM_TOOLTIP_CRAFTED_ABILITY_SCRIPT_ALREADY_KNOWN), self:GetStyle("bodyDescription"))
         self:AddSection(alreadyKnownSection)
     end
+
+    self:AddPrioritySellText(itemLink)
+    self:AddItemTags(itemLink)
+    self:LayoutTradeBoPInfo(tradeBoPData)
+    self:AddItemValue(itemLink)
+end
+
+function ZO_Tooltip:LayoutConsumableAbilityItem(itemLink, itemName, tradeBoPData, extraData)
+    local abilityId = GetItemLinkOnUseAbilityId(itemLink)
+    
+    self:AddTopSection(itemLink, DONT_SHOW_PLAYER_LOCKED, NO_TRADE_BOP_DATA, extraData)
+    self:AddItemTitle(itemLink, itemName)
+
+    if not IsAbilityPassive(abilityId) then
+        self:AddAbilityStats(abilityId)
+    end
+    self:AddAbilityDescription(abilityId)
+
+    self:AddFlavorText(itemLink)
 
     self:AddPrioritySellText(itemLink)
     self:AddItemTags(itemLink)
@@ -1644,7 +1663,6 @@ function ZO_Tooltip:LayoutUniversalStyleItem(itemLink)
 
     local styleSection = self:AcquireSection(self:GetStyle("bodySection"))
     styleSection:AddLine(GetString(SI_CRAFTING_UNIVERSAL_STYLE_ITEM_TOOLTIP), self:GetStyle("bodyDescription"))
-    styleSection:AddLine(GetString(SI_CRAFTING_UNIVERSAL_STYLE_ITEM_CROWN_STORE_TOOLTIP), self:GetStyle("bodyDescription"))
     self:AddSection(styleSection)
     self:AddPrioritySellText(itemLink)
     self:AddItemTags(itemLink)
@@ -1750,6 +1768,8 @@ do
 
         [ITEMTYPE_CRAFTED_ABILITY] = function(self, itemLink, creatorName, itemName, tradeBoPData, extraData) self:LayoutCraftedAbilityItem(itemLink, itemName, tradeBoPData, extraData) end,
         [ITEMTYPE_CRAFTED_ABILITY_SCRIPT] = function(self, itemLink, creatorName, itemName, tradeBoPData, extraData) self:LayoutCraftedAbilityScriptItem(itemLink, itemName, tradeBoPData, extraData) end,
+
+        [ITEMTYPE_CONSUMABLE_ABILITY] = function(self, itemLink, creatorName, itemName, tradeBoPData, extraData) self:LayoutConsumableAbilityItem(itemLink, itemName, tradeBoPData, extraData) end,
     }
 
     --TODO: Get creatorName from itemLink?

@@ -4,21 +4,18 @@
             <OnInitialized>
                 ZO_AntiquityLoreTopLevel_Gamepad_OnInitialized(self)
             </OnInitialized>
-
             <Controls>
                 <Control name="$(parent)LoreEntries">
-                    <Anchor point="TOPLEFT" relativeTo="GuiRoot" offsetX="ZO_GAMEPAD_QUADRANT_2_LEFT_OFFSET" />
-                    <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot" offsetX="ZO_GAMEPAD_QUADRANT_2_LEFT_OFFSET" offsetY="ZO_GAMEPAD_QUADRANT_BOTTOM_OFFSET" />
-                    <Dimensions x="ZO_GAMEPAD_QUADRANT_2_3_4_WIDTH" />
-
+                    <Anchor point="TOPLEFT" relativeTo="GuiRoot" offsetX="ZO_GAMEPAD_QUADRANT_2_LEFT_OFFSET"/>
+                    <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot" offsetX="ZO_GAMEPAD_QUADRANT_2_LEFT_OFFSET" offsetY="ZO_GAMEPAD_QUADRANT_BOTTOM_OFFSET"/>
+                    <Dimensions x="ZO_GAMEPAD_QUADRANT_2_3_4_WIDTH"/>
                     <Controls>
                         <Scroll name="$(parent)Scroll">
-                            <AnchorFill />
-
+                            <AnchorFill/>
                             <Controls>
                                 <Control name="$(parent)ScrollChild">
-                                    <Anchor point="TOPLEFT" />
-                                    <Dimensions x="ZO_GAMEPAD_QUADRANT_2_3_4_WIDTH" />
+                                    <Anchor point="TOPLEFT"/>
+                                    <Dimensions x="ZO_GAMEPAD_QUADRANT_2_3_4_WIDTH"/>
                                 </Control>
                             </Controls>
                         </Scroll>

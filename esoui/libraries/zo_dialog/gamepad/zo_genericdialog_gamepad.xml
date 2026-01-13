@@ -1,16 +1,11 @@
 <GuiXml>
     <Controls>
         <!-- Style Templates -->
-
         <!-- Parametric List Menu Items -->
         <Control name="ZO_GamepadDropdownItem" inherits="ZO_Gamepad_Dropdown_Item_FullWidth" virtual="true"/>
-        
         <Control name="ZO_GamepadMultiSelectionDropdownItem" inherits="ZO_Gamepad_MultiSelection_Dropdown_Item_FullWidth" virtual="true"/>
-
         <Control name="ZO_GamepadMultiSelectionDropdownItem_Indented" inherits="ZO_Gamepad_MultiSelection_Dropdown_Item_Indented" virtual="true"/>
-        
-        <Control name="ZO_GamepadIconSelectorItem" inherits="ZO_GamepadMenuEntryDimensionsTemplate ZO_GamepadMenuEntryControlSizedTemplate ZO_GamepadIconSelectorTemplate" virtual="true" />
-
+        <Control name="ZO_GamepadIconSelectorItem" inherits="ZO_GamepadMenuEntryDimensionsTemplate ZO_GamepadMenuEntryControlSizedTemplate ZO_GamepadIconSelectorTemplate" virtual="true"/>
         <Control name="ZO_GamepadTextFieldSubmitItem" inherits="ZO_GamepadMenuEntryDimensionsTemplate ZO_GamepadMenuEntryLabelSizedTemplate" virtual="true">
             <Controls>
                 <Label name="$(parent)Label" inherits="ZO_GamepadMenuEntryLabelTemplate">
@@ -18,7 +13,6 @@
                 </Label>
             </Controls>
         </Control>
-
         <Control name="ZO_GamepadTextFieldItem" inherits="ZO_Gamepad_TextEditEntry_FullWidth" virtual="true">
             <OnInitialized>
                 ZO_GamepadTextFieldItem_OnInitialized(self)
@@ -40,7 +34,6 @@
                 </Backdrop>
             </Controls>
         </Control>
-
         <Control name="ZO_Gamepad_GenericDialog_Parametric_TextFieldItem" inherits="ZO_GamepadTextFieldItem" virtual="true">
             <Controls>
                 <Backdrop name="$(parent)TextField" override="true">
@@ -54,7 +47,6 @@
                 </Backdrop>
             </Controls>
         </Control>
-
         <Control name="ZO_GamepadTextFieldItem_Multiline" inherits="ZO_Gamepad_TextEditEntry_FullWidth_Multiline" virtual="true">
             <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" y="135"/>
             <OnInitialized>
@@ -86,7 +78,6 @@
                 </Backdrop>
             </Controls>
         </Control>
-
         <Control name="ZO_Gamepad_GenericDialog_Parametric_TextFieldItem_Multiline" inherits="ZO_GamepadTextFieldItem_Multiline" virtual="true">
             <Controls>
                 <Backdrop name="$(parent)TextField" override="true">
@@ -100,13 +91,10 @@
                 </Backdrop>
             </Controls>
         </Control>
-
         <Control name="ZO_Gamepad_GenericDialog_TextFieldItem_Multiline_Large" inherits="ZO_Gamepad_GenericDialog_Parametric_TextFieldItem_Multiline" virtual="true">
             <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" y="180"/>
         </Control>
-
         <!-- Static List Item -->
-
         <Control name="ZO_GamepadStaticListIconEntry" inherits="ZO_GamepadMenuEntryDimensionsTemplate" hidden="true" virtual="true">
             <OnInitialized>
                 self.iconControl = self:GetNamedChild("Icon")
@@ -119,21 +107,18 @@
             </OnInitialized>
             <Controls>
                 <Texture name="$(parent)Icon">
-                    <Anchor point="LEFT" />
+                    <Anchor point="LEFT"/>
                 </Texture>
-                
                 <Label name="$(parent)Label" font="ZoFontGamepadCondensed34" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="20" />
-                    <Dimensions x="330" />
+                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="20"/>
+                    <Dimensions x="330"/>
                 </Label>
             </Controls>
         </Control>
-        
         <Control name="ZO_GamepadStaticListHeader" inherits="ZO_GamepadMenuEntryDimensionsTemplate" hidden="true" virtual="true">
             <OnInitialized>
                 self.labelControl = self:GetNamedChild("Label")
             </OnInitialized>
-            
             <Controls>
                 <Label name="$(parent)Label" font="ZoFontGamepadCondensed42" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
                     <Anchor point="TOPLEFT"/>
@@ -141,18 +126,14 @@
                 </Label>
             </Controls>
         </Control>
-
         <!-- Generic Gamepad Dialogs -->
-
         <TopLevelControl name="ZO_GenericGamepadDialogBase" inherits="ZO_GamepadGrid_NavQuadrant_1_Anchors" hidden="true" tier="MEDIUM" level="100" virtual="true">
             <OnInitialized>
                 ZO_GenericGamepadDialog_OnInitialized(self)
             </OnInitialized>
-
             <Controls>
-                <Control name="$(parent)Bg" inherits="ZO_SharedGamepadDialog_Background_Template" tier="LOW" />
-
-                <Control name="$(parent)HeaderContainer" inherits="ZO_GamepadScreenHeaderContainer ZO_GamepadGrid_NavQuadrant_ContainerAnchors" >
+                <Control name="$(parent)Bg" inherits="ZO_SharedGamepadDialog_Background_Template" tier="LOW"/>
+                <Control name="$(parent)HeaderContainer" inherits="ZO_GamepadScreenHeaderContainer ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
                     <Controls>
                         <Control name="$(parent)Header" override="true">
                             <Controls>
@@ -170,26 +151,24 @@
                         </Control>
                     </Controls>
                 </Control>
-
-                <Control name="$(parent)Container" inherits="ZO_ScrollContainer_Gamepad" >
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)HeaderContainerHeader" relativePoint="BOTTOMLEFT" offsetY="34" />
-                    <Anchor point="BOTTOMRIGHT" offsetX="-40" />
+                <Control name="$(parent)Container" inherits="ZO_ScrollContainer_Gamepad">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)HeaderContainerHeader" relativePoint="BOTTOMLEFT" offsetY="34"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="-40"/>
                     <Controls>
                         <Control name="$(parent)ScrollChild" override="true" resizeToFitConstrains="Y">
-                            <Dimensions x="100%" />
-                            
+                            <Dimensions x="100%"/>
                             <Controls>
                                 <Label name="$(parent)MainText" inherits="ZO_LargeKeyMarkupLabel" font="ZoFontGamepadCondensed42" horizontalAlignment="LEFT" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                                    <Anchor point="TOPLEFT" />
-                                    <Anchor point="TOPRIGHT" />
+                                    <Anchor point="TOPLEFT"/>
+                                    <Anchor point="TOPRIGHT"/>
                                 </Label>
                                 <Label name="$(parent)SubText" font="ZoFontGamepadCondensed27" horizontalAlignment="LEFT" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                                    <Anchor point="TOPLEFT" relativeTo="$(parent)MainText" relativePoint="BOTTOMLEFT" />
-                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)MainText" relativePoint="BOTTOMRIGHT" />
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)MainText" relativePoint="BOTTOMLEFT"/>
+                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)MainText" relativePoint="BOTTOMRIGHT"/>
                                 </Label>
                                 <Label name="$(parent)WarningText" horizontalAlignment="LEFT" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_FAILED">
-                                    <Anchor point="TOPLEFT" relativeTo="$(parent)SubText" relativePoint="BOTTOMLEFT" offsetY="30" />
-                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)SubText" relativePoint="BOTTOMRIGHT" offsetY="30" />
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)SubText" relativePoint="BOTTOMLEFT" offsetY="30"/>
+                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)SubText" relativePoint="BOTTOMRIGHT" offsetY="30"/>
                                     <OnInitialized>
                                         local fonts =
                                         {
@@ -214,17 +193,14 @@
                 </Control>
             </Controls>
         </TopLevelControl>
-        
         <TopLevelControl name="ZO_GenericParametricListGamepadDialogTemplate" inherits="ZO_GenericGamepadDialogBase" virtual="true">
             <OnInitialized>
                 ZO_GenericParametricListGamepadDialogTemplate_OnInitialized(self)
             </OnInitialized>
-            
             <Controls>
                 <Scroll name="$(parent)EntryList">
-                    <Anchor point="BOTTOMRIGHT" />
+                    <Anchor point="BOTTOMRIGHT"/>
                     <Anchor point="TOPLEFT" relativeTo="$(parent)ContainerScrollChild" relativePoint="BOTTOMLEFT" offsetX="-ZO_GAMEPAD_CONTENT_INSET_X"/>
-                    
                     <Controls>
                         <Control name="$(parent)List" inherits="ZO_VerticalParametricScrollListTemplate">
                             <AnchorFill/>
@@ -233,38 +209,31 @@
                 </Scroll>
             </Controls>
         </TopLevelControl>
-
         <TopLevelControl name="ZO_GenericCooldownGamepadDialogTemplate" inherits="ZO_GenericGamepadDialogBase" virtual="true">
             <OnInitialized>
                 ZO_GenericCooldownGamepadDialogTemplate_OnInitialized(self)
             </OnInitialized>
-
             <Controls>
                 <Control name="$(parent)CenterIsAlongTop">
-                    <Anchor point="TOPLEFT" relativeTo="GuiRoot" relativePoint="LEFT" />
-                    <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOM" />
+                    <Anchor point="TOPLEFT" relativeTo="GuiRoot" relativePoint="LEFT"/>
+                    <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOM"/>
                 </Control>
-
-                <Control name="$(parent)LoadingContainer" >
+                <Control name="$(parent)LoadingContainer">
                     <Anchor point="CENTER" relativePoint="TOPRIGHT" relativeTo="$(parent)CenterIsAlongTop"/>
                     <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH"/>
-
                     <Controls>
                         <Control name="$(parent)Loading" inherits="ZO_LoadingIcon_Gamepad" hidden="true">
-                            <Anchor point="LEFT" />
+                            <Anchor point="LEFT"/>
                             <Dimensions x="90" y="90"/>
                         </Control>
-                        
                         <Label name="$(parent)CooldownLabel" inherits="ZO_GamepadScreenHeaderMessageTextTemplate" horizontalAlignment="LEFT">
                             <Anchor point="LEFT" relativeTo="$(parent)Loading" relativePoint="RIGHT" offsetX="10"/>
                             <Anchor point="RIGHT"/>
                         </Label>
                     </Controls>
                 </Control>
-                
             </Controls>
         </TopLevelControl>
-
         <Control name="ZO_GenericCenteredGamepadDialog_Background" inherits="ZO_Gamepad_BackgroundControl_Base_Template" virtual="true">
             <Controls>
                 <Texture name="$(parent)Bg" color="000000" alpha="0.5">
@@ -272,55 +241,45 @@
                 </Texture>
             </Controls>
         </Control>
-
         <TopLevelControl name="ZO_GenericCenteredGamepadDialogTemplate" hidden="true" tier="HIGH" level="ZO_HIGH_TIER_OVER_GAMEPAD_KEYBIND_STRIP" virtual="true">
-            <Dimensions x="930" y="480" />
+            <Dimensions x="930" y="480"/>
             <Anchor point="TOP" relativeTo="GuiRoot" offsetY="228"/>
-
             <OnInitialized>
                 ZO_GenericCenteredGamepadDialogTemplate_OnInitialized(self)
             </OnInitialized>
-
             <Controls>
-                <Control name="$(parent)Bg" inherits="ZO_GenericCenteredGamepadDialog_Background" >
+                <Control name="$(parent)Bg" inherits="ZO_GenericCenteredGamepadDialog_Background">
                     <AnchorFill/>
                 </Control>
-
                 <Texture name="$(parent)BgDialog" color="000000">
                     <AnchorFill/>
                 </Texture>
-
                 <Texture name="$(parent)LeftBorder" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                    <Dimensions x="2" />
-                    <Anchor point="TOPLEFT" />
-                    <Anchor point="BOTTOMLEFT" />
+                    <Dimensions x="2"/>
+                    <Anchor point="TOPLEFT"/>
+                    <Anchor point="BOTTOMLEFT"/>
                 </Texture>
-
                 <Texture name="$(parent)RightBorder" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                    <Dimensions x="2" />
-                    <Anchor point="TOPRIGHT" />
-                    <Anchor point="BOTTOMRIGHT" />
+                    <Dimensions x="2"/>
+                    <Anchor point="TOPRIGHT"/>
+                    <Anchor point="BOTTOMRIGHT"/>
                 </Texture>
-
                 <Texture name="$(parent)TopBorder" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                    <Dimensions y="2" />
-                    <Anchor point="TOPLEFT" />
-                    <Anchor point="TOPRIGHT" />
+                    <Dimensions y="2"/>
+                    <Anchor point="TOPLEFT"/>
+                    <Anchor point="TOPRIGHT"/>
                 </Texture>
-
                 <Texture name="$(parent)BottomBorder" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                    <Dimensions y="2" />
-                    <Anchor point="BOTTOMLEFT" />
-                    <Anchor point="BOTTOMRIGHT" />
+                    <Dimensions y="2"/>
+                    <Anchor point="BOTTOMLEFT"/>
+                    <Anchor point="BOTTOMRIGHT"/>
                 </Texture>
-
-                <Control name="$(parent)HeaderContainer" inherits="ZO_GamepadScreenHeaderContainer" >
-                    <Anchor point="TOPLEFT" offsetY="-8" offsetX="90" />
-                    <Anchor point="BOTTOMRIGHT"  offsetY="-78"  offsetX="-90"/>
+                <Control name="$(parent)HeaderContainer" inherits="ZO_GamepadScreenHeaderContainer">
+                    <Anchor point="TOPLEFT" offsetY="-8" offsetX="90"/>
+                    <Anchor point="BOTTOMRIGHT" offsetY="-78" offsetX="-90"/>
                 </Control>
-
-                <Control name="$(parent)Container" inherits="ZO_ScrollContainer_Gamepad" >
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)HeaderContainerHeader" relativePoint="BOTTOMLEFT" offsetY="-8" />
+                <Control name="$(parent)Container" inherits="ZO_ScrollContainer_Gamepad">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)HeaderContainerHeader" relativePoint="BOTTOMLEFT" offsetY="-8"/>
                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)HeaderContainer" relativePoint="BOTTOMRIGHT"/>
                     <Controls>
                         <Texture name="$(parent)ScrollIndicator" override="true">
@@ -328,9 +287,9 @@
                         </Texture>
                         <Control name="$(parent)ScrollChild" override="true">
                             <Controls>
-                                <Label name="$(parent)MainText" inherits="ZO_LargeKeyMarkupLabel" font="ZoFontGamepadCondensed42"  lineSpacing="9" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" >
-                                    <Anchor point="TOPLEFT" />
-                                    <Anchor point="TOPRIGHT" relativePoint="TOPLEFT" offsetX="734" />
+                                <Label name="$(parent)MainText" inherits="ZO_LargeKeyMarkupLabel" font="ZoFontGamepadCondensed42" lineSpacing="9" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                                    <Anchor point="TOPLEFT"/>
+                                    <Anchor point="TOPRIGHT" relativePoint="TOPLEFT" offsetX="734"/>
                                 </Label>
                                 <Control name="$(parent)Padding">
                                     <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)MainText"/>
@@ -340,86 +299,69 @@
                         </Control>
                     </Controls>
                 </Control>
-
                 <Control name="$(parent)InteractKeybind" inherits="ZO_KeybindButton_Gamepad">
-                    <Anchor point="CENTER" relativePoint="BOTTOM" offsetY="-48" />
+                    <Anchor point="CENTER" relativePoint="BOTTOM" offsetY="-48"/>
                 </Control>
             </Controls>
         </TopLevelControl>
-
         <TopLevelControl name="ZO_CustomCenteredGamepadDialogTemplate" hidden="true" tier="HIGH" level="ZO_HIGH_TIER_OVER_GAMEPAD_KEYBIND_STRIP" virtual="true">
-            <Anchor point="CENTER" relativeTo="GuiRoot" />
-
+            <Anchor point="CENTER" relativeTo="GuiRoot"/>
             <OnInitialized>
                 ZO_CustomCenteredGamepadDialogTemplate_OnInitialized(self)
             </OnInitialized>
-
             <Controls>
                 <Backdrop name="$(parent)EdgeFrame" inherits="ZO_GamepadNormalOutlineHighlight" tier="HIGH" excludeFromResizeToFitExtents="true">
                     <Anchor point="TOPLEFT" offsetX="-4" offsetY="-4"/>
                     <Anchor point="BOTTOMRIGHT" offsetX="4" offsetY="4"/>
-                    <Center file="EsoUI/Art/Miscellaneous/Gamepad/gp_edgeFill.dds" />
+                    <Center file="EsoUI/Art/Miscellaneous/Gamepad/gp_edgeFill.dds"/>
                 </Backdrop>
-
                 <Texture name="$(parent)BgDialog" color="000000" excludeFromResizeToFitExtents="true">
                     <AnchorFill/>
                 </Texture>
             </Controls>
         </TopLevelControl>
-        
         <TopLevelControl name="ZO_GenericGamepadStaticListDialogTemplate" inherits="ZO_GenericGamepadDialogBase" virtual="true">
             <OnInitialized>
                 ZO_GenericGamepadStaticListDialogTemplate_OnInitialized(self)
             </OnInitialized>
         </TopLevelControl>
-        
         <!-- ZO_GenericGamepadItemSlider -->
-        
-        <Label name="ZO_GamepadSliderValueLabelTemplate" horizontalAlignment="CENTER" verticalAlignment="CENTER" font="ZoFontGamepad42" wrapMode="ELLIPSIS" modifyTextType="UPPERCASE" virtual="true" />
-        
+        <Label name="ZO_GamepadSliderValueLabelTemplate" horizontalAlignment="CENTER" verticalAlignment="CENTER" font="ZoFontGamepad42" wrapMode="ELLIPSIS" modifyTextType="UPPERCASE" virtual="true"/>
         <TopLevelControl name="ZO_GenericGamepadItemSliderDialogTemplate" inherits="ZO_GenericGamepadDialogBase" virtual="true">
             <OnInitialized>
                 ZO_GenericGamepadItemSliderDialogTemplate_OnInitialized(self)
             </OnInitialized>
-
             <Controls>
-                <Control name="$(parent)ItemSlider" resizeToFitDescendents="true" >
-                    <Anchor point="TOPLEFT" relativeTo="GuiRoot" relativePoint="LEFT" offsetX="ZO_GAMEPAD_SAFE_ZONE_INSET_X" offsetY="-32" />
-                    
+                <Control name="$(parent)ItemSlider" resizeToFitDescendents="true">
+                    <Anchor point="TOPLEFT" relativeTo="GuiRoot" relativePoint="LEFT" offsetX="ZO_GAMEPAD_SAFE_ZONE_INSET_X" offsetY="-32"/>
                     <Controls>
                         <Control name="$(parent)RootSpacer">
-                            <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" y="4" />
+                            <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" y="4"/>
                             <Anchor point="TOPLEFT"/>
                         </Control>
-                        
                         <Texture name="$(parent)Icon1">
-                            <Dimensions x="64" y="64" />
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)RootSpacer" />
+                            <Dimensions x="64" y="64"/>
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)RootSpacer"/>
                         </Texture>
-
                         <Texture name="$(parent)Icon2">
-                            <Dimensions x="64" y="64" />
-                            <Anchor point="TOPRIGHT" relativeTo="$(parent)RootSpacer" />
+                            <Dimensions x="64" y="64"/>
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)RootSpacer"/>
                         </Texture>
-                
-                        <Label name="$(parent)SliderValue1" inherits="ZO_GamepadSliderValueLabelTemplate" >
-                            <Dimensions x="64" />
-                            <Anchor point="TOP" relativeTo="$(parent)Icon1" relativePoint="BOTTOM" offsetY="15" />
+                        <Label name="$(parent)SliderValue1" inherits="ZO_GamepadSliderValueLabelTemplate">
+                            <Dimensions x="64"/>
+                            <Anchor point="TOP" relativeTo="$(parent)Icon1" relativePoint="BOTTOM" offsetY="15"/>
                         </Label>
-
-                        <Label name="$(parent)SliderValue2" inherits="ZO_GamepadSliderValueLabelTemplate" >
-                            <Dimensions x="64" />
-                            <Anchor point="TOP" relativeTo="$(parent)Icon2" relativePoint="BOTTOM" offsetY="15" />
+                        <Label name="$(parent)SliderValue2" inherits="ZO_GamepadSliderValueLabelTemplate">
+                            <Dimensions x="64"/>
+                            <Anchor point="TOP" relativeTo="$(parent)Icon2" relativePoint="BOTTOM" offsetY="15"/>
                         </Label>
-
-                        <Slider name="$(parent)Slider" inherits="ZO_GamepadSlider" >
-                            <Dimensions y="18" />
-                            <Anchor point="LEFT" relativeTo="$(parent)Icon1" relativePoint="RIGHT" offsetX="10" />
-                            <Anchor point="RIGHT" relativeTo="$(parent)Icon2" relativePoint="LEFT" offsetX="-10" />
+                        <Slider name="$(parent)Slider" inherits="ZO_GamepadSlider">
+                            <Dimensions y="18"/>
+                            <Anchor point="LEFT" relativeTo="$(parent)Icon1" relativePoint="RIGHT" offsetX="10"/>
+                            <Anchor point="RIGHT" relativeTo="$(parent)Icon2" relativePoint="LEFT" offsetX="-10"/>
                             <OnInitialized>
                                 ZO_GamepadSlider_OnInitialized(self)
                             </OnInitialized>
-
                             <OnValueChanged>
                                 ZO_GamepadSlider_OnValueChanged(self, value)
                             </OnValueChanged>

@@ -5,7 +5,6 @@
                 ZO_ChromaAnimation_OnStop(self, completedPlaying)
             </OnStop>
         </AnimationTimeline>
-        
         <AnimationTimeline name="ZO_ChromaDeathPulsateAnimation" inherits="ZO_ChromaAnimationBase">
             <Animations>
                 <CustomAnimation duration="500">
@@ -20,7 +19,6 @@
                 </CustomAnimation>
             </Animations>
         </AnimationTimeline>
-
         <AnimationTimeline name="ZO_ChromaDeathFadeOutAnimation" inherits="ZO_ChromaAnimationBase">
             <Animations>
                 <CustomAnimation duration="2000">
@@ -30,7 +28,6 @@
                 </CustomAnimation>
             </Animations>
         </AnimationTimeline>
-
         <AnimationTimeline name="ZO_ChromaOnePulseAnimation" inherits="ZO_ChromaAnimationBase">
             <Animations>
                 <CustomAnimation duration="250">
@@ -45,7 +42,6 @@
                 </CustomAnimation>
             </Animations>
         </AnimationTimeline>
-
         <AnimationTimeline name="ZO_ChromaSteadyPulsateAnimation" inherits="ZO_ChromaAnimationBase">
             <Animations>
                 <CustomAnimation duration="750">

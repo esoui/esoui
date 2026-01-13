@@ -1090,8 +1090,13 @@ function ZO_Market_Keyboard:OnMarketUpdate()
     end
 end
 
+function ZO_Market_Keyboard:GetMarketLockedText()
+    return GetString(SI_MARKET_LOCKED_TEXT)
+end
+
 function ZO_Market_Keyboard:OnMarketLocked()
-    self.messageLabel:SetText(GetString(SI_MARKET_LOCKED_TEXT))
+    local lockedText = self:GetMarketLockedText()
+    self.messageLabel:SetText(lockedText)
     self:ShowMarket(false)
     self.messageLoadingIcon:Hide()
 end

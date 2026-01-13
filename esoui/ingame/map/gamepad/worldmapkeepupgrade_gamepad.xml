@@ -1,22 +1,20 @@
 <GuiXml>
     <Controls>
         <Button name="ZO_WorldMapKeepUpgradeButton_Gamepad" virtual="true">
-            <Dimensions x="ZO_WORLD_MAP_KEEP_UPGRADE_GAMEPAD_BUTTON_SIZE" y="ZO_WORLD_MAP_KEEP_UPGRADE_GAMEPAD_BUTTON_SIZE" />
+            <Dimensions x="ZO_WORLD_MAP_KEEP_UPGRADE_GAMEPAD_BUTTON_SIZE" y="ZO_WORLD_MAP_KEEP_UPGRADE_GAMEPAD_BUTTON_SIZE"/>
             <Controls>
                 <Texture name="$(parent)Icon" tier="MEDIUM">
                     <Dimensions x="48" y="48"/>
-                    <Anchor point="CENTER" />
+                    <Anchor point="CENTER"/>
                 </Texture>
-                <Backdrop name="$(parent)Border" inherits="ZO_GamepadAbilityIconFrame" tier="LOW" />
+                <Backdrop name="$(parent)Border" inherits="ZO_GamepadAbilityIconFrame" tier="LOW"/>
                 <Texture name="$(parent)Lock" textureFile="EsoUI/Art/Progression/lock.dds" tier="HIGH" hidden="true">
                     <Dimensions x="48" y="48"/>
-                    <Anchor point="CENTER" relativeTo="$(parent)Icon" />
+                    <Anchor point="CENTER" relativeTo="$(parent)Icon"/>
                 </Texture>
             </Controls>
         </Button>
-
         <Label name="ZO_WorldMapKeepUpgradeHeader_Gamepad" inherits="ZO_GridScrollList_Entry_Header_Template_Gamepad" override="true" font="ZoFontGamepadBold27" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_HIGHLIGHT" virtual="true"/>
-
         <TopLevelControl name="ZO_WorldMapKeepUpgrade_Gamepad" inherits="ZO_WorldMapKeepInfoContent_Gamepad" hidden="true">
             <OnInitialized>
                 ZO_WorldMapKeepUpgrade_Gamepad_OnInitialized(self)
@@ -25,16 +23,13 @@
                 <Label name="$(parent)CurrentLevel" font="ZoFontGamepad54">
                     <Anchor point="TOPLEFT"/>
                 </Label>
-
-                <StatusBar name="$(parent)Bar" inherits="ZO_GamepadArrowStatusBarWithBGMedium" >
+                <StatusBar name="$(parent)Bar" inherits="ZO_GamepadArrowStatusBarWithBGMedium">
                     <Dimensions x="275"/>
-                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)CurrentLevel" relativePoint="BOTTOMRIGHT" offsetX="15" offsetY="-12" />
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)CurrentLevel" relativePoint="BOTTOMRIGHT" offsetX="15" offsetY="-12"/>
                 </StatusBar>
-
                 <Label name="$(parent)BarLabel" font="ZoFontGamepadBold27" modifyTextType="UPPERCASE">
                     <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Bar" relativePoint="TOPLEFT"/>
                 </Label>
-
                 <Control name="$(parent)Time" mouseEnabled="true" resizeToFitDescendents="true">
                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Bar" relativePoint="TOPRIGHT" offsetX="-10" offsetY="-2"/>
                     <Controls>
@@ -47,17 +42,14 @@
                         </Label>
                     </Controls>
                 </Control>
-
                 <Control name="$(parent)Divider" inherits="ZO_GamepadHeaderHorizontalDividerSimple">
-                    <Anchor point="TOPRIGHT" />
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)CurrentLevel" relativePoint="BOTTOMLEFT" offsetY="20" />
+                    <Anchor point="TOPRIGHT"/>
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)CurrentLevel" relativePoint="BOTTOMLEFT" offsetY="20"/>
                 </Control>
-
                 <Control name="$(parent)Levels" inherits="ZO_GridScrollList_NotAnchored_Gamepad">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Divider" relativePoint="BOTTOMLEFT" offsetX="35" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Divider" relativePoint="BOTTOMLEFT" offsetX="35"/>
                     <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT" offsetX="ZO_SCROLL_BAR_WIDTH"/>
                 </Control>
-
                 <Control name="$(parent)SideContent" inherits="ZO_GamepadGrid_NavQuadrant_4_Anchors">
                     <Controls>
                         <Control name="$(parent)Tooltip" inherits="ZO_ScrollTooltip_Gamepad ZO_GamepadGrid_NavQuadrant_ContainerAnchors"/>

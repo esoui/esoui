@@ -17,7 +17,7 @@ function ZO_ConfirmLinkAccount_Gamepad:Initialize(control)
     local accountIcon
 
     local uiPlatform = GetUIPlatform()
-    if uiPlatform == UI_PLATFORM_XBOX then
+    if IsGameCoreUI() then
         confirmation2Text = GetString(SI_CONSOLE_LINKACCOUNT_CONFIRM_2_XBOX)
         confirmation3Text = GetString(SI_CONSOLE_LINKACCOUNT_CONFIRM_3_XBOX)
         accountIcon = "EsoUI/Art/Login/Gamepad/console_LoginLogo_XB.dds"
@@ -107,7 +107,7 @@ function ZO_ConfirmLinkAccount_Gamepad:Show(username, password)
     self.password = password
     self.esoAccountNameLabel:SetText(username)
     local accountName
-    if IsConsoleUI() then
+    if ZO_IsConsoleOrGameCoreUI() then
         accountName = GetOnlineIdForActiveProfile()
     elseif GetPlatformServiceType() == PLATFORM_SERVICE_TYPE_DMM then
         accountName = GetString(SI_KEYBOARD_LINKACCOUNT_GENERIC_ACCOUNT_NAME_DMM)

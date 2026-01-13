@@ -1,45 +1,37 @@
 <GuiXml>
     <Controls>
         <Control name="ZO_TradingHouseSearchResult" inherits="ZO_ListEntry_BackdropAndHighlight_Template ZO_ListInventorySlotBehavior" virtual="true">
-            <Dimensions y="52" />
-
+            <Dimensions y="52"/>
             <OnInitialized name="TradingHouseSearchResult">
                 self.currencyControl = { self:GetNamedChild("SellPricePerUnitText"), self:GetNamedChild("SellPriceText") }
             </OnInitialized>
-            
             <OnMouseUp>
                 if upInside then
                     ZO_TradingHouse_OnSearchResultClicked(self, button)
                 end
             </OnMouseUp>
-
             <OnMouseEnter>
                 ZO_TradingHouse_OnSearchResultMouseEnter(self)
             </OnMouseEnter>
-
             <OnMouseExit>
                 ZO_TradingHouse_OnSearchResultMouseExit(self)
             </OnMouseExit>
-
             <Controls>
                 <Texture name="$(parent)StatusIcon" mouseEnabled="true" inherits="ZO_MultiIcon">
-                    <Dimensions x="28" y="28" />
-                    <Anchor point="CENTER" relativePoint="TOPLEFT" offsetX="15" offsetY="26" />
+                    <Dimensions x="28" y="28"/>
+                    <Anchor point="CENTER" relativePoint="TOPLEFT" offsetX="15" offsetY="26"/>
                 </Texture>
-
                 <Button name="$(parent)Button" inherits="ZO_InventorySlotNoMouseover">
-                    <Dimensions x="40" y="40" />
-                    <Anchor point="LEFT" relativePoint="LEFT" offsetX="31" />
+                    <Dimensions x="40" y="40"/>
+                    <Anchor point="LEFT" relativePoint="LEFT" offsetX="31"/>
                 </Button>
-
                 <Label name="$(parent)Name" font="ZoFontGameShadow" wrapMode="ELLIPSIS" maxLineCount="2">
-                    <Dimensions x="ZO_TRADING_HOUSE_SEARCH_RESULT_ITEM_NAME_WITHOUT_TRAIT_COLUMN_WIDTH" />
-                    <Anchor point="LEFT" relativePoint="LEFT" offsetX="ZO_TRADING_HOUSE_SEARCH_RESULT_ITEM_ICON_MAX_WIDTH" />
+                    <Dimensions x="ZO_TRADING_HOUSE_SEARCH_RESULT_ITEM_NAME_WITHOUT_TRAIT_COLUMN_WIDTH"/>
+                    <Anchor point="LEFT" relativePoint="LEFT" offsetX="ZO_TRADING_HOUSE_SEARCH_RESULT_ITEM_ICON_MAX_WIDTH"/>
                 </Label>
-
                 <Texture name="$(parent)TraitInfo" mouseEnabled="true" inherits="ZO_MultiIcon">
-                    <Dimensions x="22" y="22" />
-                    <Anchor point="LEFT" relativeTo="$(parent)Name" relativePoint="RIGHT" />
+                    <Dimensions x="22" y="22"/>
+                    <Anchor point="LEFT" relativeTo="$(parent)Name" relativePoint="RIGHT"/>
                     <OnMouseEnter>
                         ZO_TradingHouse_SearchResult_TraitInfo_OnMouseEnter(self)
                     </OnMouseEnter>
@@ -47,225 +39,183 @@
                         ZO_TradingHouse_SearchResult_TraitInfo_OnMouseExit(self)
                     </OnMouseExit>
                 </Texture>
-
                 <Label name="$(parent)TimeRemaining" font="ZoFontGameShadow" maxLineCount="1">
-                    <Dimensions x="ZO_TRADING_HOUSE_SEARCH_RESULT_TIME_LEFT_WIDTH" />
-                    <Anchor point="LEFT" relativeTo="$(parent)Name" relativePoint="left" offsetX="ZO_TRADING_HOUSE_SEARCH_RESULT_ITEM_NAME_WIDTH" />
+                    <Dimensions x="ZO_TRADING_HOUSE_SEARCH_RESULT_TIME_LEFT_WIDTH"/>
+                    <Anchor point="LEFT" relativeTo="$(parent)Name" relativePoint="left" offsetX="ZO_TRADING_HOUSE_SEARCH_RESULT_ITEM_NAME_WIDTH"/>
                 </Label>
-
                 <Control name="$(parent)SellPricePerUnit">
-                    <Dimensions x="ZO_TRADING_HOUSE_SEARCH_RESULT_UNIT_PRICE_WIDTH" />
-                    <Anchor point="LEFT" relativeTo="$(parent)TimeRemaining" relativePoint="RIGHT" />
-
+                    <Dimensions x="ZO_TRADING_HOUSE_SEARCH_RESULT_UNIT_PRICE_WIDTH"/>
+                    <Anchor point="LEFT" relativeTo="$(parent)TimeRemaining" relativePoint="RIGHT"/>
                     <Controls>
                         <Label name="$(parent)Text" inherits="ZO_CurrencyTemplate" maxLineCount="1">
-                            <Anchor point="RIGHT" />
+                            <Anchor point="RIGHT"/>
                         </Label>
                     </Controls>
                 </Control>
-
                 <Control name="$(parent)SellPrice">
-                    <Dimensions x="ZO_TRADING_HOUSE_SEARCH_RESULT_PRICE_WIDTH" />
-                    <Anchor point="LEFT" relativeTo="$(parent)SellPricePerUnit" relativePoint="RIGHT" />
-
+                    <Dimensions x="ZO_TRADING_HOUSE_SEARCH_RESULT_PRICE_WIDTH"/>
+                    <Anchor point="LEFT" relativeTo="$(parent)SellPricePerUnit" relativePoint="RIGHT"/>
                     <Controls>
                         <Label name="$(parent)Text" inherits="ZO_CurrencyTemplate" maxLineCount="1">
-                            <Anchor point="RIGHT" />
+                            <Anchor point="RIGHT"/>
                         </Label>
                     </Controls>
                 </Control>
             </Controls>
         </Control>
-
         <Control name="ZO_TradingHouseItemListing" inherits="ZO_ListEntry_BackdropAndHighlight_Template ZO_ListInventorySlotBehavior" virtual="true">
-            <Dimensions x="509" y="48" />
-
+            <Dimensions x="509" y="48"/>
             <OnInitialized name="InventorySlot_Base">
                 self.currencyControl = self:GetNamedChild("SellPrice")
             </OnInitialized>
-
             <Controls>
                 <Texture name="$(parent)StatusIcon" mouseEnabled="true" inherits="ZO_MultiIcon">
-                    <Dimensions x="28" y="28" />
-                    <Anchor point="CENTER" relativePoint="TOPLEFT" offsetX="15" offsetY="26" />
-                </Texture>                
-                
-                <Button name="$(parent)Button" inherits="ZO_InventorySlotNoMouseover">
-                    <Dimensions x="40" y="40" />
-                    <Anchor point="LEFT" relativePoint="LEFT" offsetX="31" />
-                </Button>
-
-                <Label name="$(parent)Name" font="ZoFontGameShadow" wrapMode="ELLIPSIS">
-                    <Dimensions x="317" y="20" />
-                    <Anchor point="LEFT" offsetX="82" />
-                </Label>
-
-                <Texture name="$(parent)TraitInfo" mouseEnabled="true" inherits="ZO_MultiIcon">
-                    <Dimensions x="22" y="22" />
-                    <Anchor point="LEFT" relativeTo="$(parent)Name" relativePoint="RIGHT" />
+                    <Dimensions x="28" y="28"/>
+                    <Anchor point="CENTER" relativePoint="TOPLEFT" offsetX="15" offsetY="26"/>
                 </Texture>
-
+                <Button name="$(parent)Button" inherits="ZO_InventorySlotNoMouseover">
+                    <Dimensions x="40" y="40"/>
+                    <Anchor point="LEFT" relativePoint="LEFT" offsetX="31"/>
+                </Button>
+                <Label name="$(parent)Name" font="ZoFontGameShadow" wrapMode="ELLIPSIS">
+                    <Dimensions x="317" y="20"/>
+                    <Anchor point="LEFT" offsetX="82"/>
+                </Label>
+                <Texture name="$(parent)TraitInfo" mouseEnabled="true" inherits="ZO_MultiIcon">
+                    <Dimensions x="22" y="22"/>
+                    <Anchor point="LEFT" relativeTo="$(parent)Name" relativePoint="RIGHT"/>
+                </Texture>
                 <Label name="$(parent)TimeRemaining" font="ZoFontGameShadow">
-                    <Dimensions x="98" y="20" />
-                    <Anchor point="LEFT" relativeTo="$(parent)TraitInfo" relativePoint="RIGHT" offsetX="40" />
+                    <Dimensions x="98" y="20"/>
+                    <Anchor point="LEFT" relativeTo="$(parent)TraitInfo" relativePoint="RIGHT" offsetX="40"/>
                 </Label>
-
                 <Label name="$(parent)SellPrice" inherits="ZO_CurrencyTemplate">
-                    <Anchor point="RIGHT" offsetX="-140" />
+                    <Anchor point="RIGHT" offsetX="-140"/>
                 </Label>
-
                 <Button name="$(parent)CancelSale" mouseOverBlendMode="ADD">
-                    <Dimensions x="32" y="32" />
-                    <Anchor point="CENTER" relativePoint="TOPRIGHT" offsetX="-50" offsetY="26" />
-
+                    <Dimensions x="32" y="32"/>
+                    <Anchor point="CENTER" relativePoint="TOPRIGHT" offsetX="-50" offsetY="26"/>
                     <OnMouseEnter>
                         ZO_Tooltips_ShowTextTooltip(self, TOP, GetString(SI_TRADING_HOUSE_CANCEL_LISTING_LABEL))
                     </OnMouseEnter>
-
                     <OnMouseExit>
                         ZO_Tooltips_HideTextTooltip()
                     </OnMouseExit>
-
-                    <Textures normal="EsoUI/Art/Buttons/decline_up.dds" pressed="EsoUI/Art/Buttons/decline_down.dds" mouseOver="EsoUI/Art/Buttons/decline_over.dds" />
+                    <Textures normal="EsoUI/Art/Buttons/decline_up.dds" pressed="EsoUI/Art/Buttons/decline_down.dds" mouseOver="EsoUI/Art/Buttons/decline_over.dds"/>
                 </Button>
             </Controls>
         </Control>
-
         <Control name="TradingHouseDropDownFeatureControl" hidden="true" virtual="true" inherits="ZO_ComboBox">
-            <Dimensions x="210" />
+            <Dimensions x="210"/>
         </Control>
-
-        <EditBox name="ZO_TradingHouse_LevelBox" font="ZoFontWinT1" maxInputCharacters="3" textType="NUMERIC_UNSIGNED_INT" inherits="ZO_DefaultEditForBackdrop" virtual="true" />
-
+        <EditBox name="ZO_TradingHouse_LevelBox" font="ZoFontWinT1" maxInputCharacters="3" textType="NUMERIC_UNSIGNED_INT" inherits="ZO_DefaultEditForBackdrop" virtual="true"/>
         <Control name="TradingHouseLevelRangeFeatureControl" hidden="true" virtual="true" resizeToFitDescendents="true">
             <Controls>
                 <Label name="$(parent)LevelTypeName" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontHeader" text="SI_TRADING_HOUSE_BROWSE_LEVEL_RANGE_LABEL">
                     <Anchor point="TOPLEFT" offsetY="3"/>
                 </Label>
-
                 <Button name="$(parent)LevelTypeToggle">
                     <Dimensions x="32" y="32"/>
-                    <Anchor point="LEFT" relativeTo="$(parent)LevelTypeName" relativePoint="RIGHT" offsetX="5" />
-
-                    <Textures normal="EsoUI/Art/LFG/LFG_championDungeon_up.dds" pressed="EsoUI/Art/LFG/LFG_championDungeon_down.dds" mouseOver="EsoUI/Art/LFG/LFG_championDungeon_over.dds" />
+                    <Anchor point="LEFT" relativeTo="$(parent)LevelTypeName" relativePoint="RIGHT" offsetX="5"/>
+                    <Textures normal="EsoUI/Art/LFG/LFG_championDungeon_up.dds" pressed="EsoUI/Art/LFG/LFG_championDungeon_down.dds" mouseOver="EsoUI/Art/LFG/LFG_championDungeon_over.dds"/>
                 </Button>
-
                 <Backdrop name="$(parent)MinLevel" inherits="ZO_SingleLineEditBackdrop_Keyboard">
-                    <Dimensions x="42" />
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)LevelTypeToggle" relativePoint="TOPRIGHT" offsetX="5" offsetY="-1" />
-
+                    <Dimensions x="42"/>
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)LevelTypeToggle" relativePoint="TOPRIGHT" offsetX="5" offsetY="-1"/>
                     <Controls>
-                        <EditBox name="$(parent)Box" inherits="ZO_TradingHouse_LevelBox" />
+                        <EditBox name="$(parent)Box" inherits="ZO_TradingHouse_LevelBox"/>
                     </Controls>
                 </Backdrop>
-
                 <Texture name="$(parent)Divider" color="FFFFFF">
-                    <Dimensions x="10" y="2" />
-                    <Anchor point="LEFT" relativeTo="$(parent)MinLevel" relativePoint="RIGHT" offsetX="2" />
+                    <Dimensions x="10" y="2"/>
+                    <Anchor point="LEFT" relativeTo="$(parent)MinLevel" relativePoint="RIGHT" offsetX="2"/>
                 </Texture>
-
                 <Backdrop name="$(parent)MaxLevel" inherits="ZO_SingleLineEditBackdrop_Keyboard">
-                    <Dimensions x="42" />
-                    <Anchor point="LEFT" relativeTo="$(parent)Divider" relativePoint="RIGHT" offsetX="2" />
-
+                    <Dimensions x="42"/>
+                    <Anchor point="LEFT" relativeTo="$(parent)Divider" relativePoint="RIGHT" offsetX="2"/>
                     <Controls>
-                        <EditBox name="$(parent)Box" inherits="ZO_TradingHouse_LevelBox" />
+                        <EditBox name="$(parent)Box" inherits="ZO_TradingHouse_LevelBox"/>
                     </Controls>
                 </Backdrop>
             </Controls>
         </Control>
-
         <!-- Wrap early, and when wrapping, indent the next line to make it clear that the line is part of the same label -->
         <Label name="ZO_TradingHouse_CategoryLabel" inherits="ZO_TreeLabelSubCategory" maxLineCount="2" newLineIndent="10" virtual="true">
-            <Dimensions x="210" />
+            <Dimensions x="210"/>
         </Label>
-
         <TopLevelControl name="ZO_TradingHouseItemConfirmationDialog" inherits="ZO_CustomDialogBase" virtual="true">
             <Controls>
                 <Label name="$(parent)Description" inherits="ZO_DialogContentAnchors" font="ZoFontGameMedium" text="SI_TRADING_HOUSE_PURCHASE_ITEM_DIALOG_DESCRIPTION" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"/>
-
                 <Button name="$(parent)Item" inherits="ZO_InventorySlotNoMouseover">
-                    <Dimensions x="64" y="64" />
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Description" relativePoint="BOTTOMLEFT" offsetX="30" offsetY="20" />
+                    <Dimensions x="64" y="64"/>
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Description" relativePoint="BOTTOMLEFT" offsetX="30" offsetY="20"/>
                 </Button>
-
                 <Label name="$(parent)ItemName" font="ZoFontGameLargeBold" maxLineCount="2" wrapMode="ELLIPSIS">
-                    <Dimensions x="230" />
-                    <Anchor point="LEFT" relativeTo="$(parent)Item" relativePoint="RIGHT" offsetX="15" />
+                    <Dimensions x="230"/>
+                    <Anchor point="LEFT" relativeTo="$(parent)Item" relativePoint="RIGHT" offsetX="15"/>
                 </Label>
-
                 <Label name="$(parent)Cost" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Item" relativePoint="BOTTOMLEFT" offsetX="-30" offsetY="20"/>
                 </Label>
-
                 <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton"/>
                 <Control name="$(parent)Accept" inherits="ZO_CustomDialogButton"/>
             </Controls>
         </TopLevelControl>
-
         <TopLevelControl name="ZO_TradingHouse" inherits="ZO_RightPanelFootPrint" hidden="true">
             <OnInitialized>
                 ZO_TradingHouse_OnInitialized(self)
             </OnInitialized>
             <Controls>
                 <Control name="$(parent)Title">
-                    <Dimensions x="1024" y="50" />
-                    <Anchor point="RIGHT" relativeTo="GuiRoot" offsetX="30" offsetY="-335" />
+                    <Dimensions x="1024" y="50"/>
+                    <Anchor point="RIGHT" relativeTo="GuiRoot" offsetX="30" offsetY="-335"/>
                     <Controls>
                         <Label name="$(parent)Label" font="ZoFontWindowTitle" wrapMode="ELLIPSIS" maxLineCount="1" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE">
-                            <Dimensions x="500" />
-                            <Anchor point="LEFT" offsetX="50" />
+                            <Dimensions x="500"/>
+                            <Anchor point="LEFT" offsetX="50"/>
                         </Label>
-
                         <Texture name="$(parent)Divider" textureFile="EsoUI/Art/Miscellaneous/centerscreen_topDivider.dds">
-                            <Dimensions x="1024" y="4" />
+                            <Dimensions x="1024" y="4"/>
                             <Anchor point="BOTTOM"/>
                         </Texture>
                     </Controls>
                 </Control>
-
                 <Control name="$(parent)MenuBar" inherits="ZO_LabelButtonBar">
-                    <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" offsetX="-40" offsetY="-12" />
+                    <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" offsetX="-40" offsetY="-12"/>
                 </Control>
-
                 <!-- Browse Tab -->
                 <Control name="$(parent)BrowseItemsLeftPane">
-                    <Dimensions x="265" />
-                    <Anchor point="TOPLEFT" offsetY="60" />
-                    <Anchor point="BOTTOMLEFT" offsetY="-10" />
-
+                    <Dimensions x="265"/>
+                    <Anchor point="TOPLEFT" offsetY="60"/>
+                    <Anchor point="BOTTOMLEFT" offsetY="-10"/>
                     <Controls>
                         <Control name="$(parent)GlobalFeatureArea" resizeToFitDescendents="true">
-                            <Anchor point="BOTTOMLEFT" />
-                            <Anchor point="BOTTOMRIGHT" />
-
+                            <Anchor point="BOTTOMLEFT"/>
+                            <Anchor point="BOTTOMRIGHT"/>
                             <Controls>
                                 <!-- Quality -->
                                 <Control name="$(parent)Quality" inherits="ZO_ComboBox">
-                                    <Anchor point="TOPLEFT" />
-                                    <Anchor point="TOPRIGHT" />
+                                    <Anchor point="TOPLEFT"/>
+                                    <Anchor point="TOPRIGHT"/>
                                 </Control>
-
                                 <Control name="$(parent)PriceRange" resizeToFitDescendents="true">
-                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Quality" relativePoint="BOTTOMLEFT" offsetY="8" />
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Quality" relativePoint="BOTTOMLEFT" offsetY="8"/>
                                     <Controls>
                                         <!-- Price range -->
                                         <Backdrop name="$(parent)MinPrice" inherits="ZO_SingleLineEditBackdrop_Keyboard">
                                             <Dimensions x="104"/>
-                                            <Anchor point="TOPLEFT" />
+                                            <Anchor point="TOPLEFT"/>
                                             <Controls>
-                                                <EditBox name="$(parent)Box" textType="NUMERIC_UNSIGNED_INT" inherits="ZO_DefaultEditForBackdrop" />
+                                                <EditBox name="$(parent)Box" textType="NUMERIC_UNSIGNED_INT" inherits="ZO_DefaultEditForBackdrop"/>
                                             </Controls>
                                         </Backdrop>
-
                                         <Texture name="$(parent)MinPriceIcon" mouseEnabled="true">
-                                            <Dimensions x="20" y="20" />
-                                            <Anchor point="LEFT" relativeTo="$(parent)MinPrice" relativePoint="RIGHT" offsetX="2" />
+                                            <Dimensions x="20" y="20"/>
+                                            <Anchor point="LEFT" relativeTo="$(parent)MinPrice" relativePoint="RIGHT" offsetX="2"/>
                                             <OnInitialized>
                                                 self:SetTexture(ZO_Currency_GetKeyboardCurrencyIcon(CURT_MONEY))
                                                 self.type = CURT_MONEY
                                             </OnInitialized>
-
                                             <OnMouseEnter>
                                                 ZO_CurrencyTemplate_OnMouseEnter(self)
                                             </OnMouseEnter>
@@ -273,29 +223,24 @@
                                                 ZO_CurrencyTemplate_OnMouseExit(self)
                                             </OnMouseExit>
                                         </Texture>
-
                                         <Texture name="$(parent)PriceRangeDivider" color="FFFFFF">
-                                            <Dimensions x="10" y="2" />
-                                            <Anchor point="LEFT" relativeTo="$(parent)MinPriceIcon" relativePoint="RIGHT" offsetX="2" />
+                                            <Dimensions x="10" y="2"/>
+                                            <Anchor point="LEFT" relativeTo="$(parent)MinPriceIcon" relativePoint="RIGHT" offsetX="2"/>
                                         </Texture>
-
                                         <Backdrop name="$(parent)MaxPrice" inherits="ZO_SingleLineEditBackdrop_Keyboard">
-                                            <Dimensions x="104" />
-                                            <Anchor point="LEFT" relativeTo="$(parent)PriceRangeDivider" relativePoint="RIGHT" offsetX="2" />
-
+                                            <Dimensions x="104"/>
+                                            <Anchor point="LEFT" relativeTo="$(parent)PriceRangeDivider" relativePoint="RIGHT" offsetX="2"/>
                                             <Controls>
-                                                <EditBox name="$(parent)Box" textType="NUMERIC_UNSIGNED_INT" inherits="ZO_DefaultEditForBackdrop" />
+                                                <EditBox name="$(parent)Box" textType="NUMERIC_UNSIGNED_INT" inherits="ZO_DefaultEditForBackdrop"/>
                                             </Controls>
                                         </Backdrop>
-
                                         <Texture name="$(parent)MaxPriceIcon" mouseEnabled="true">
-                                            <Dimensions x="20" y="20" />
-                                            <Anchor point="LEFT" relativeTo="$(parent)MaxPrice" relativePoint="RIGHT" offsetX="2" />
+                                            <Dimensions x="20" y="20"/>
+                                            <Anchor point="LEFT" relativeTo="$(parent)MaxPrice" relativePoint="RIGHT" offsetX="2"/>
                                             <OnInitialized>
                                                 self:SetTexture(ZO_Currency_GetKeyboardCurrencyIcon(CURT_MONEY))
                                                 self.type = CURT_MONEY
                                             </OnInitialized>
-
                                             <OnMouseEnter>
                                                 ZO_CurrencyTemplate_OnMouseEnter(self)
                                             </OnMouseEnter>
@@ -305,67 +250,57 @@
                                         </Texture>
                                     </Controls>
                                 </Control>
-
                             </Controls>
                         </Control>
-
                         <Control name="$(parent)CategoryListContainer" inherits="ZO_ScrollContainer">
-                            <Anchor point="TOPLEFT" offsetX="-15" offsetY="5" />
-                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)GlobalFeatureArea" relativePoint="TOPRIGHT" offsetY="-5" />
+                            <Anchor point="TOPLEFT" offsetX="-15" offsetY="5"/>
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)GlobalFeatureArea" relativePoint="TOPRIGHT" offsetY="-5"/>
                         </Control>
                     </Controls>
                 </Control>
-
                 <Backdrop name="$(parent)ItemNameSearch" tier="HIGH" inherits="ZO_SingleLineEditBackdrop_Keyboard">
-                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)BrowseItemsLeftPane" relativePoint="TOPLEFT" />
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)BrowseItemsLeftPane" relativePoint="TOPLEFT"/>
                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)BrowseItemsLeftPane" relativePoint="TOPRIGHT" offsetX="-21"/>
                     <Controls>
-                        <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop" defaultText="SI_TRADING_HOUSE_BROWSE_ITEM_NAME_SEARCH_EDIT_DEFAULT" />
-                        
+                        <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop" defaultText="SI_TRADING_HOUSE_BROWSE_ITEM_NAME_SEARCH_EDIT_DEFAULT"/>
                         <Button name="$(parent)Clear" inherits="ZO_CloseButton">
                             <Anchor point="LEFT" relativePoint="RIGHT" offsetX="2"/>
                         </Button>
                     </Controls>
                 </Backdrop>
-
                 <Control name="$(parent)ItemNameSearchAutoComplete" inherits="ZO_TradingHouseNameSearchAutoComplete_Menu">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)ItemNameSearch" relativePoint="BOTTOMLEFT" offsetX="4" offsetY="10" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)ItemNameSearch" relativePoint="BOTTOMLEFT" offsetX="4" offsetY="10"/>
                 </Control>
-
                 <Label name="$(parent)ItemNameSearchLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontHeader">
-                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)ItemNameSearch" relativePoint="TOPLEFT" />
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)ItemNameSearch" relativePoint="TOPLEFT"/>
                 </Label>
-
                 <Control name="$(parent)BrowseItemsRightPane">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)BrowseItemsLeftPane" relativePoint="TOPRIGHT" offsetX="30" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)BrowseItemsLeftPane" relativePoint="TOPRIGHT" offsetX="30"/>
                     <Anchor point="BOTTOMRIGHT" offsetY="-12"/>
-
                     <Controls>
                         <Control name="$(parent)FeatureArea">
-                            <Dimensions y="48" />
-                            <Anchor point="TOPRIGHT" />
-                            <Anchor point="TOPLEFT" />
+                            <Dimensions y="48"/>
+                            <Anchor point="TOPRIGHT"/>
+                            <Anchor point="TOPLEFT"/>
                             <Controls>
                                 <Control name="$(parent)TopDivider" inherits="ZO_DynamicHorizontalDivider">
-                                    <Anchor point="TOPLEFT" />
-                                    <Anchor point="TOPRIGHT" />
+                                    <Anchor point="TOPLEFT"/>
+                                    <Anchor point="TOPRIGHT"/>
                                 </Control>
-
                                 <Control name="$(parent)BottomDivider" inherits="ZO_DynamicHorizontalDivider">
-                                    <Anchor point="BOTTOMLEFT" />
-                                    <Anchor point="BOTTOMRIGHT" />
+                                    <Anchor point="BOTTOMLEFT"/>
+                                    <Anchor point="BOTTOMRIGHT"/>
                                 </Control>
                             </Controls>
                         </Control>
-
                         <Control name="$(parent)SearchSortBy">
-                            <Dimensions y="32" />
+                            <Dimensions y="32"/>
                             <Anchor point="TOPRIGHT" relativeTo="$(parent)FeatureArea" relativePoint="BOTTOMRIGHT"/>
                             <Anchor point="TOPLEFT" relativeTo="$(parent)FeatureArea" relativePoint="BOTTOMLEFT"/>
                             <Controls>
                                 <Control name="$(parent)Name" inherits="ZO_SortHeader" mouseEnabled="false">
-                                    <Dimensions x="ZO_TRADING_HOUSE_SEARCH_RESULT_ITEM_NAME_WIDTH" y="20" />
-                                    <Anchor point="LEFT" offsetX="ZO_TRADING_HOUSE_SEARCH_RESULT_ITEM_ICON_MAX_WIDTH" />
+                                    <Dimensions x="ZO_TRADING_HOUSE_SEARCH_RESULT_ITEM_NAME_WIDTH" y="20"/>
+                                    <Anchor point="LEFT" offsetX="ZO_TRADING_HOUSE_SEARCH_RESULT_ITEM_ICON_MAX_WIDTH"/>
                                     <OnInitialized>
                                         local NO_SORT_TYPE = nil
                                         local sortString = GetString(SI_TRADING_HOUSE_COLUMN_ITEM)
@@ -373,8 +308,8 @@
                                     </OnInitialized>
                                 </Control>
                                 <Control name="$(parent)TimeRemaining" inherits="ZO_SortHeader">
-                                    <Dimensions x="ZO_TRADING_HOUSE_SEARCH_RESULT_TIME_LEFT_WIDTH" y="20" />
-                                    <Anchor point="LEFT" relativeTo="$(parent)Name" relativePoint="RIGHT" />
+                                    <Dimensions x="ZO_TRADING_HOUSE_SEARCH_RESULT_TIME_LEFT_WIDTH" y="20"/>
+                                    <Anchor point="LEFT" relativeTo="$(parent)Name" relativePoint="RIGHT"/>
                                     <OnInitialized>
                                         local sortType = TRADING_HOUSE_SORT_EXPIRY_TIME
                                         local sortString = GetString("SI_TRADINGHOUSESORTFIELD", sortType)
@@ -382,8 +317,8 @@
                                     </OnInitialized>
                                 </Control>
                                 <Control name="$(parent)PricePerUnit" inherits="ZO_SortHeader">
-                                    <Dimensions x="ZO_TRADING_HOUSE_SEARCH_RESULT_UNIT_PRICE_WIDTH" y="20" />
-                                    <Anchor point="LEFT" relativeTo="$(parent)TimeRemaining" relativePoint="RIGHT" />
+                                    <Dimensions x="ZO_TRADING_HOUSE_SEARCH_RESULT_UNIT_PRICE_WIDTH" y="20"/>
+                                    <Anchor point="LEFT" relativeTo="$(parent)TimeRemaining" relativePoint="RIGHT"/>
                                     <OnInitialized>
                                         local sortType = TRADING_HOUSE_SORT_SALE_PRICE_PER_UNIT
                                         local sortString = GetString("SI_TRADINGHOUSESORTFIELD", sortType)
@@ -391,8 +326,8 @@
                                     </OnInitialized>
                                 </Control>
                                 <Control name="$(parent)Price" inherits="ZO_SortHeader">
-                                    <Dimensions x="ZO_TRADING_HOUSE_SEARCH_RESULT_PRICE_WIDTH" y="20" />
-                                    <Anchor point="LEFT" relativeTo="$(parent)PricePerUnit" relativePoint="RIGHT" />
+                                    <Dimensions x="ZO_TRADING_HOUSE_SEARCH_RESULT_PRICE_WIDTH" y="20"/>
+                                    <Anchor point="LEFT" relativeTo="$(parent)PricePerUnit" relativePoint="RIGHT"/>
                                     <OnInitialized>
                                         local sortType = TRADING_HOUSE_SORT_SALE_PRICE
                                         local sortString = GetString("SI_TRADINGHOUSESORTFIELD", sortType)
@@ -401,194 +336,160 @@
                                 </Control>
                             </Controls>
                         </Control>
-
                         <Control name="$(parent)SearchResults" inherits="ZO_ScrollList" hidden="true">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)SearchSortBy" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="10" />
-                            <Anchor point="BOTTOMRIGHT" offsetX="-5" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)SearchSortBy" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="10"/>
+                            <Anchor point="BOTTOMRIGHT" offsetX="-5"/>
                         </Control>
-
                         <Control name="$(parent)SearchResultsMessageContainer">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)SearchSortBy" relativePoint="BOTTOMLEFT" offsetX="-19" offsetY="9" />
-                            <Anchor point="BOTTOMRIGHT" offsetX="-10" offsetY="-12" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)SearchSortBy" relativePoint="BOTTOMLEFT" offsetX="-19" offsetY="9"/>
+                            <Anchor point="BOTTOMRIGHT" offsetX="-10" offsetY="-12"/>
                             <Controls>
                                 <Label name="$(parent)Message" hidden="true" font="ZoFontGameLargeBold" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
-                                    <Anchor point="TOPLEFT" offsetY="70" />
-                                    <Anchor point="TOPRIGHT" />
+                                    <Anchor point="TOPLEFT" offsetY="70"/>
+                                    <Anchor point="TOPRIGHT"/>
                                 </Label>
                             </Controls>
                         </Control>
                     </Controls>
                 </Control>
-
                 <Control name="$(parent)SubcategoryTabs" inherits="ZO_InventoryTabs">
-                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)BrowseItemsRightPane" relativePoint="TOPRIGHT" offsetX="-42" offsetY="-15" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)BrowseItemsRightPane" relativePoint="TOPRIGHT" offsetX="-42" offsetY="-15"/>
                 </Control>
-
                 <Control name="$(parent)SearchControls">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)BrowseItemsRightPane" relativePoint="BOTTOMLEFT" />
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)BrowseItemsRightPane" relativePoint="BOTTOMRIGHT" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)BrowseItemsRightPane" relativePoint="BOTTOMLEFT"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)BrowseItemsRightPane" relativePoint="BOTTOMRIGHT"/>
                     <Controls>
                         <Control name="$(parent)TopDivider" inherits="ZO_DynamicHorizontalDivider">
-                            <Anchor point="TOPLEFT" />
-                            <Anchor point="TOPRIGHT" />
+                            <Anchor point="TOPLEFT"/>
+                            <Anchor point="TOPRIGHT"/>
                         </Control>
-
                         <Label name="$(parent)ResultCount" font="ZoFontGameLarge" verticalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
                             <Anchor point="TOPLEFT" offsetY="5"/>
                         </Label>
-
                         <Label name="$(parent)Money" inherits="ZO_CurrencyTemplate">
-                            <Anchor point="TOPRIGHT" offsetX="-21" offsetY="5" />
+                            <Anchor point="TOPRIGHT" offsetX="-21" offsetY="5"/>
                         </Label>
-
                         <Label name="$(parent)PageNumber" font="ZoFontGame">
                             <Anchor point="TOP" offsetY="4"/>
                         </Label>
-
                         <Button name="$(parent)PreviousPage" inherits="ZO_DefaultTextButton" font="ZoFontGame" text="SI_TRADING_HOUSE_RESULTS_PREVIOUS_PAGE">
-                            <Anchor point="TOPRIGHT" relativeTo="$(parent)PageNumber" relativePoint="TOPLEFT" offsetX="-5" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)PageNumber" relativePoint="TOPLEFT" offsetX="-5"/>
                         </Button>
-
                         <Button name="$(parent)NextPage" inherits="ZO_DefaultTextButton" font="ZoFontGame" text="SI_TRADING_HOUSE_RESULTS_NEXT_PAGE">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)PageNumber" relativePoint="TOPRIGHT" offsetX="5" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)PageNumber" relativePoint="TOPRIGHT" offsetX="5"/>
                         </Button>
                     </Controls>
                 </Control>
-
                 <!-- Sell Tab. The inventory is actually the player inventory fragment, so this is only the left pane. -->
                 <Control name="$(parent)PostItemPane">
-                    <Dimensions x="300" />
-                    <Anchor point="TOPLEFT" offsetY="60" />
-                    <Anchor point="BOTTOMLEFT" offsetY="-10" />
-
+                    <Dimensions x="300"/>
+                    <Anchor point="TOPLEFT" offsetY="60"/>
+                    <Anchor point="BOTTOMLEFT" offsetY="-10"/>
                     <Controls>
                         <Texture name="$(parent)PendingBG" textureFile="EsoUI/Art/TradingHouse/tradinghouse_sellBlock-bgHighlight_top.dds">
-                            <Dimensions x="512" y="512" />
-                            <Anchor point="TOPRIGHT" offsetX="50" />
-
+                            <Dimensions x="512" y="512"/>
+                            <Anchor point="TOPRIGHT" offsetX="50"/>
                             <Controls>
                                 <Texture name="$(parent)Bottom" textureFile="EsoUI/Art/TradingHouse/tradinghouse_sellBlock-bgHighlight_bottom.dds">
-                                    <Dimensions x="512" y="256" />
-                                    <Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT" />
+                                    <Dimensions x="512" y="256"/>
+                                    <Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT"/>
                                 </Texture>
-
                                 <Texture name="$(parent)ItemHighlight" textureFile="EsoUI/Art/TradingHouse/tradinghouse_itemIcon_highlightBG.dds">
-                                    <Dimensions x="256" y="256" />
-                                    <Anchor point="TOPRIGHT" offsetX="-10" offsetY="-32" />
+                                    <Dimensions x="256" y="256"/>
+                                    <Anchor point="TOPRIGHT" offsetX="-10" offsetY="-32"/>
                                 </Texture>
                             </Controls>
                         </Texture>
-
                         <Control name="$(parent)Form">
-                            <Dimensions x="200" />
-                            <Anchor point="TOPLEFT" offsetY="14" />
-                            <Anchor point="TOPRIGHT" offsetY="14" />
-
+                            <Dimensions x="200"/>
+                            <Anchor point="TOPLEFT" offsetY="14"/>
+                            <Anchor point="TOPRIGHT" offsetY="14"/>
                             <Controls>
                                 <Control name="$(parent)Info">
-                                    <Dimensions y="192" />
-                                    <Anchor point="TOPLEFT" />
-                                    <Anchor point="TOPRIGHT" />
-
+                                    <Dimensions y="192"/>
+                                    <Anchor point="TOPLEFT"/>
+                                    <Anchor point="TOPRIGHT"/>
                                     <Controls>
                                         <Label name="$(parent)Name" font="ZoFontWinH4" maxLineCount="3" inherits="ZO_TooltipIfTruncatedLabel" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_TRADING_HOUSE_SELECT_AN_ITEM_TO_SELL">
-                                            <Anchor point="TOPLEFT" />
-                                            <Anchor point="TOPRIGHT" />
+                                            <Anchor point="TOPLEFT"/>
+                                            <Anchor point="TOPRIGHT"/>
                                         </Label>
-
                                         <Button name="$(parent)Item" mouseEnabled="true" inherits="ZO_InventorySlotNoMouseover">
-                                            <Dimensions x="64" y="64" />
+                                            <Dimensions x="64" y="64"/>
                                             <Anchor point="TOP" relativeTo="$(parent)Name" relativePoint="BOTTOM" offsetY="10"/>
                                         </Button>
-
                                         <Label name="$(parent)ListingCount" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                                            <Anchor point="TOP" relativeTo="$(parent)Item" relativePoint="BOTTOM" offsetY="10" />
+                                            <Anchor point="TOP" relativeTo="$(parent)Item" relativePoint="BOTTOM" offsetY="10"/>
                                         </Label>
                                     </Controls>
                                 </Control>
-
                                 <Control name="$(parent)Invoice">
-                                    <Dimensions y="250" />
-                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Info" relativePoint="BOTTOMLEFT" />
-                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Info" relativePoint="BOTTOMRIGHT" />
-
+                                    <Dimensions y="250"/>
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Info" relativePoint="BOTTOMLEFT"/>
+                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Info" relativePoint="BOTTOMRIGHT"/>
                                     <Controls>
                                         <!-- How many do you want to sell? -->
                                         <Label name="$(parent)QuantityLabel" font="ZoFontWinH4" inherits="ZO_TooltipIfTruncatedLabel" text="SI_TRADING_HOUSE_POSTING_QUANTITY" hidden="true">
-                                            <Dimensions x="88" y="25" />
-                                            <Anchor point="TOPLEFT" />
+                                            <Dimensions x="88" y="25"/>
+                                            <Anchor point="TOPLEFT"/>
                                         </Label>
-
                                         <Backdrop name="$(parent)Quantity" inherits="ZO_SingleLineEditBackdrop_Keyboard" hidden="true">
-                                            <Dimensions x="88" />
-                                            <Anchor point="LEFT" relativeTo="$(parent)QuantityLabel" relativePoint="RIGHT" offsetY="2" />
-
+                                            <Dimensions x="88"/>
+                                            <Anchor point="LEFT" relativeTo="$(parent)QuantityLabel" relativePoint="RIGHT" offsetY="2"/>
                                             <Controls>
-                                                <EditBox name="$(parent)Box" font="ZoFontWinT1" textType="NUMERIC_UNSIGNED_INT" inherits="ZO_DefaultEditForBackdrop" />
+                                                <EditBox name="$(parent)Box" font="ZoFontWinT1" textType="NUMERIC_UNSIGNED_INT" inherits="ZO_DefaultEditForBackdrop"/>
                                             </Controls>
                                         </Backdrop>
-
                                         <!-- What's the cost per item? -->
                                         <Label name="$(parent)SellPriceLabel" font="ZoFontWinH4" inherits="ZO_TooltipIfTruncatedLabel" text="SI_TRADING_HOUSE_POSTING_PRICE_TOTAL">
-                                            <Dimensions x="200" />
-                                            <Anchor point="TOPLEFT" relativeTo="$(parent)QuantityLabel" relativePoint="BOTTOMLEFT" offsetY="5" />
+                                            <Dimensions x="200"/>
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)QuantityLabel" relativePoint="BOTTOMLEFT" offsetY="5"/>
                                         </Label>
-
                                         <Backdrop name="$(parent)SellPrice" inherits="ZO_DefaultCurrencyInputField">
-                                            <Dimensions x="207" />
-                                            <Anchor point="TOPLEFT" relativeTo="$(parent)SellPriceLabel" relativePoint="BOTTOMLEFT" offsetX="-2" offsetY="5" />
-
+                                            <Dimensions x="207"/>
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)SellPriceLabel" relativePoint="BOTTOMLEFT" offsetX="-2" offsetY="5"/>
                                             <OnMouseUp>
                                                 if TRADING_HOUSE and upInside and button == MOUSE_BUTTON_INDEX_LEFT then
                                                     TRADING_HOUSE:BeginSetPendingPostPrice(self)
                                                 end
                                             </OnMouseUp>
                                         </Backdrop>
-
                                         <Texture name="$(parent)ListingFeeHelp" inherits="ZO_HelpIcon">
                                             <Anchor point="TOPLEFT" relativeTo="$(parent)SellPrice" relativePoint="BOTTOMLEFT" offsetY="10"/>
                                             <OnInitialized>
                                                 ZO_HelpIcon_Initialize(self, zo_strformat(SI_TRADING_HOUSE_POSTING_LISTING_FEE_TOOLTIP, GetTradingHouseListingPercentage()), RIGHT)
                                             </OnInitialized>
                                         </Texture>
-
                                         <Label name="$(parent)ListingFeeLabel" font="ZoFontWinH4" text="SI_TRADING_HOUSE_POSTING_LISTING_FEE">
                                             <Dimensions x="192"/>
                                             <Anchor point="LEFT" relativeTo="$(parent)ListingFeeHelp" relativePoint="RIGHT" offsetX="3" offsetY="-2"/>
                                         </Label>
-
                                         <Label name="$(parent)ListingFeePrice" inherits="ZO_CurrencyTemplate">
                                             <Anchor point="TOPRIGHT" relativeTo="$(parent)ListingFeeLabel" relativePoint="BOTTOMRIGHT" offsetY="5"/>
                                         </Label>
-
                                         <Texture name="$(parent)TheirCutHelp" inherits="ZO_HelpIcon">
-                                            <Anchor point="TOPLEFT" relativeTo="$(parent)ListingFeeHelp" relativePoint="BOTTOMLEFT" offsetY="30" />
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)ListingFeeHelp" relativePoint="BOTTOMLEFT" offsetY="30"/>
                                             <OnInitialized>
                                                 ZO_HelpIcon_Initialize(self, zo_strformat(SI_TRADING_HOUSE_POSTING_CUT_TOOLTIP, GetTradingHouseCutPercentage()), RIGHT)
                                             </OnInitialized>
                                         </Texture>
-
                                         <Label name="$(parent)TheirCutLabel" font="ZoFontWinH4" text="SI_TRADING_HOUSE_POSTING_TH_CUT">
                                             <Dimensions x="192"/>
                                             <Anchor point="LEFT" relativeTo="$(parent)TheirCutHelp" relativePoint="RIGHT" offsetX="3" offsetY="-2"/>
                                         </Label>
-
                                         <Label name="$(parent)TheirCutPrice" inherits="ZO_CurrencyTemplate">
                                             <Anchor point="TOPRIGHT" relativeTo="$(parent)TheirCutLabel" relativePoint="BOTTOMRIGHT" offsetY="5"/>
                                         </Label>
-
                                         <!-- Tally it all up... -->
                                         <Texture name="$(parent)Divider" textureFile="EsoUI/Art/TradingHouse/tradinghouse_divider_short.dds">
-                                            <Dimensions x="256" y="4" />
-                                            <Anchor point="TOPLEFT" relativeTo="$(parent)TheirCutHelp" relativePoint="BOTTOMLEFT" offsetX="-10" offsetY="35" />
+                                            <Dimensions x="256" y="4"/>
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)TheirCutHelp" relativePoint="BOTTOMLEFT" offsetX="-10" offsetY="35"/>
                                         </Texture>
-
                                         <!-- And here's how much you should expect to profit -->
                                         <Label name="$(parent)ProfitLabel" font="ZoFontWinH4" text="SI_TRADING_HOUSE_POSTING_PROFIT">
-                                            <Dimensions x="192" />
-                                            <Anchor point="TOPLEFT" relativeTo="$(parent)TheirCutLabel" relativePoint="BOTTOMLEFT" offsetY="55" />
+                                            <Dimensions x="192"/>
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)TheirCutLabel" relativePoint="BOTTOMLEFT" offsetY="55"/>
                                         </Label>
-
                                         <Label name="$(parent)ProfitAmount" inherits="ZO_CurrencyTemplate">
                                             <Anchor point="TOPRIGHT" relativeTo="$(parent)ProfitLabel" relativePoint="BOTTOMRIGHT" offsetY="5"/>
                                         </Label>
@@ -598,35 +499,31 @@
                         </Control>
                     </Controls>
                 </Control>
-
-
                 <!-- Listings Tab -->
                 <Control name="$(parent)PostedItems">
-                    <Anchor point="TOPLEFT" offsetX="40" offsetY="57" />
-                    <Anchor point="BOTTOMRIGHT" />
-
+                    <Anchor point="TOPLEFT" offsetX="40" offsetY="57"/>
+                    <Anchor point="BOTTOMRIGHT"/>
                     <Controls>
                         <Control name="$(parent)NoItemsContainer">
-                            <Anchor point="TOPLEFT" offsetY="9" />
-                            <Anchor point="TOPRIGHT" offsetY="9" offsetX="-10" />
+                            <Anchor point="TOPLEFT" offsetY="9"/>
+                            <Anchor point="TOPRIGHT" offsetY="9" offsetX="-10"/>
                             <Controls>
                                 <Label name="$(parent)NoItems" hidden="true" font="ZoFontGameLargeBold" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="SI_GUILD_STORE_NO_LISTINGS">
-                                    <Anchor point="TOPLEFT" />
-                                    <Anchor point="TOPRIGHT" />
+                                    <Anchor point="TOPLEFT"/>
+                                    <Anchor point="TOPRIGHT"/>
                                 </Label>
                             </Controls>
                         </Control>
-
                         <!-- Listings Headers -->
                         <Control name="$(parent)Header">
-                            <Dimensions y="32" />
-                            <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" offsetX="-50" offsetY="9" />
-                            <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" offsetX="10" offsetY="9" />
+                            <Dimensions y="32"/>
+                            <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" offsetX="-50" offsetY="9"/>
+                            <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" offsetX="10" offsetY="9"/>
                             <Controls>
                                 <!-- None of these actually sort, they just inherit visual behavior from sort headers to give names to the columns -->
                                 <Control name="$(parent)Name" inherits="ZO_SortHeader" mouseEnabled="false">
-                                    <Dimensions x="338" y="20" />
-                                    <Anchor point="LEFT" offsetX="106" />
+                                    <Dimensions x="338" y="20"/>
+                                    <Anchor point="LEFT" offsetX="106"/>
                                     <OnInitialized>
                                         local headerText = GetString("SI_TRADINGHOUSELISTINGSORTTYPE", TRADING_HOUSE_LISTING_SORT_TYPE_NAME)
                                         local NO_SORT_KEY = nil
@@ -634,8 +531,8 @@
                                     </OnInitialized>
                                 </Control>
                                 <Control name="$(parent)Price" inherits="ZO_SortHeader" mouseEnabled="false">
-                                    <Dimensions x="93" y="20" />
-                                    <Anchor point="RIGHT" offsetX="-177" />
+                                    <Dimensions x="93" y="20"/>
+                                    <Anchor point="RIGHT" offsetX="-177"/>
                                     <OnInitialized>
                                         local headerText = GetString("SI_TRADINGHOUSELISTINGSORTTYPE", TRADING_HOUSE_LISTING_SORT_TYPE_PRICE)
                                         local NO_SORT_KEY = nil
@@ -643,8 +540,8 @@
                                     </OnInitialized>
                                 </Control>
                                 <Control name="$(parent)TimeRemaining" inherits="ZO_SortHeader" mouseEnabled="false">
-                                    <Dimensions x="140" y="20" />
-                                    <Anchor point="RIGHT" relativeTo="$(parent)Price" relativePoint="LEFT" offsetX="-46" />
+                                    <Dimensions x="140" y="20"/>
+                                    <Anchor point="RIGHT" relativeTo="$(parent)Price" relativePoint="LEFT" offsetX="-46"/>
                                     <OnInitialized>
                                         local headerText = GetString("SI_TRADINGHOUSELISTINGSORTTYPE", TRADING_HOUSE_LISTING_SORT_TYPE_TIME)
                                         local NO_SORT_KEY = nil
@@ -653,19 +550,17 @@
                                 </Control>
                             </Controls>
                         </Control>
-
                         <Control name="$(parent)List" inherits="ZO_ScrollList" hidden="true">
-                            <Anchor point="TOPLEFT" offsetY="9" />
-                            <Anchor point="BOTTOMRIGHT" offsetX="-10" offsetY="-12" />
+                            <Anchor point="TOPLEFT" offsetY="9"/>
+                            <Anchor point="BOTTOMRIGHT" offsetX="-10" offsetY="-12"/>
                         </Control>
                     </Controls>
                 </Control>
             </Controls>
         </TopLevelControl>
-
         <!-- Trading House Dialogs -->
         <TopLevelControl name="ZO_SelectTradingHouseGuildDialog" inherits="ZO_SelectGuildDialogTemplate"/>
-        <TopLevelControl name="ZO_TradingHousePurchaseItemDialog" inherits="ZO_TradingHouseItemConfirmationDialog" />
-        <TopLevelControl name="ZO_TradingHouseCancelListingDialog" inherits="ZO_TradingHouseItemConfirmationDialog" />
+        <TopLevelControl name="ZO_TradingHousePurchaseItemDialog" inherits="ZO_TradingHouseItemConfirmationDialog"/>
+        <TopLevelControl name="ZO_TradingHouseCancelListingDialog" inherits="ZO_TradingHouseItemConfirmationDialog"/>
     </Controls>
 </GuiXml>

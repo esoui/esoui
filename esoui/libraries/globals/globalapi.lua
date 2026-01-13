@@ -704,18 +704,23 @@ function ZO_Eval(valueOrFunction, ...)
     return valueOrFunction
 end
 
-do
-    local FONT_STYLE_MAP =
-    {
-        [FONT_STYLE_SHADOW] = "|shadow",
-        [FONT_STYLE_OUTLINE] = "|outline",
-        [FONT_STYLE_OUTLINE_THICK] = "|thick-outline",
-        [FONT_STYLE_SOFT_SHADOW_THIN] = "|soft-shadow-thin",
-        [FONT_STYLE_SOFT_SHADOW_THICK] = "|soft-shadow-thick",
-    }
-
-    function ZO_CreateFontString(faceName, size, style)
-        local styleString = style and FONT_STYLE_MAP[style] or ""
-        return string.format("%s|%u%s", faceName, size, styleString)
+function ZO_CreateFontString(faceName, size, style)
+    local styleString = GetFontStyleString(style)
+    if styleString == "" then
+        return string.format("%s|%u", faceName, size)
+    else
+        return string.format("%s|%u|%s", faceName, size, styleString)
     end
+end
+
+function ZO_CreateEnumTable(...)
+    local tbl = {}
+    for i = 1, select("#", ...) do
+        local key = select(i, ...)
+        if tbl[key] then
+            internalassert(false, string.format("Enum key %q is not unique.", key))
+        end
+        tbl[key] = i
+    end
+    return tbl
 end

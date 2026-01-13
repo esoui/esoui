@@ -1,4 +1,4 @@
-﻿<GuiXml>
+<GuiXml>
     <Animations>
         <AnimationTimeline name="ZO_DyeingSlot_Gamepad_FocusScaleAnimation">
             <Animations>
@@ -8,26 +8,24 @@
     </Animations>
     <Controls>
         <Control name="ZO_DyeingSlot_Gamepad" virtual="true">
-            <Dimensions x="77" y="106" />
+            <Dimensions x="77" y="106"/>
             <OnInitialized>
                 ZO_DyeingSlot_Gamepad_Initialize(self)
             </OnInitialized>
             <Controls>
                 <Button name="$(parent)Slot" inherits="ZO_ItemSlot">
-                    <Dimensions x="69" y="69" />
-                    <Anchor point="TOP" />
-                    <Textures mouseOver="" pressedMouseOver="" />
-                </Button>            
+                    <Dimensions x="69" y="69"/>
+                    <Anchor point="TOP"/>
+                    <Textures mouseOver="" pressedMouseOver=""/>
+                </Button>
                 <Backdrop name="$(parent)Frame" inherits="ZO_GamepadAbilityIconFrame">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Slot" offsetX="-8" offsetY="-8"/>
                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Slot" offsetX="8" offsetY="8"/>
                 </Backdrop>
-                
                 <Control name="$(parent)Dyes" inherits="ZO_DyeingSwatchSlotDyes_Gamepad">
-                    <Anchor point="TOP" relativeTo="$(parent)Frame" relativePoint="BOTTOM" />
+                    <Anchor point="TOP" relativeTo="$(parent)Frame" relativePoint="BOTTOM"/>
                 </Control>
-
-                <Backdrop name="$(parent)SharedHighlight" inherits="ZO_DyeingHighlight_Gamepad" />
+                <Backdrop name="$(parent)SharedHighlight" inherits="ZO_DyeingHighlight_Gamepad"/>
             </Controls>
         </Control>
     </Controls>

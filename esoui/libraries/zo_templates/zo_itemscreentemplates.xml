@@ -1,16 +1,15 @@
-﻿<GuiXml>
+<GuiXml>
     <Controls>
         <Control name="ZO_ItemImprovementShared" virtual="true">
-            <AnchorFill />
+            <AnchorFill/>
             <Controls>
                 <Button name="$(parent)Slot" inherits="ZO_InventorySlot">
-                    <Dimensions x="48" y="48" />
+                    <Dimensions x="48" y="48"/>
                     <Anchor point="TOPLEFT"/>
-                    <PressedOffset x="0" y="0" />
+                    <PressedOffset x="0" y="0"/>
                 </Button>
-
                 <Control name="$(parent)ImprovementContainer" inherits="ZO_InventoryItemImprovementStatusBar">
-                    <Anchor point="LEFT" relativeTo="$(parent)Slot" relativePoint="RIGHT" offsetX="5" />
+                    <Anchor point="LEFT" relativeTo="$(parent)Slot" relativePoint="RIGHT" offsetX="5"/>
                 </Control>
             </Controls>
         </Control>

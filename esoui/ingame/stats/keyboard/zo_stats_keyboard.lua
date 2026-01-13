@@ -21,7 +21,7 @@ end
 local SHOW_HIDE_INSTANT = 1
 local SHOW_HIDE_ANIMATED = 2
 
-function ZO_InitializeKeyboardRespecConfirmationGoldDialog(control)
+function ZO_InitializeKeyboardAttributeRespecConfirmationGoldDialog(control)
     local function SetupRespecConfirmationGoldDialog()
         local balance = GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)
         local cost = GetAttributeRespecGoldCost()
@@ -61,6 +61,45 @@ function ZO_InitializeKeyboardRespecConfirmationGoldDialog(control)
                 text = SI_DIALOG_CANCEL,
             },
         }
+    })
+end
+
+function ZO_InitializeKeyboardAttributeRespecCastDialog(control)
+    control.bar = control:GetNamedChild("ContentContainerProgress")
+
+    local function SetupRespecCastDialog(dialog)
+        ZO_StatusBar_SetGradientColor(dialog.bar, ZO_XP_BAR_GRADIENT_COLORS)
+        dialog.bar:SetMinMax(0, RESPEC_CAST_TIME_MS)
+        dialog.bar:SetValue(0)
+    end
+
+    ZO_Dialogs_RegisterCustomDialog("ATTRIBUTE_RESPEC_CAST_KEYBOARD",
+    {
+        customControl = control,
+        setup = SetupRespecCastDialog,
+        title =
+        {
+            text = GetString(SI_STATS_RESPEC_ATTRIBUTES_BUTTON),
+        },
+        buttons =
+        {
+            {
+                keybind = "DIALOG_NEGATIVE",
+                control = control:GetNamedChild("Cancel"),
+                text = SI_DIALOG_CANCEL,
+                sound = SOUNDS.DIALOG_DECLINE,
+                callback = function()
+                    CancelAttributePointAllocationRequest()
+                end,
+            },
+        },
+        updateFn = function(dialog)
+            local progress = RESPEC_CAST_TIME_MS - GetAttributeRespecCastTimeRemainingMs()
+            dialog.bar:SetValue(progress)
+        end,
+        noChoiceCallback = function(dialog)
+            CancelAttributePointAllocationRequest()
+        end,
     })
 end
 
@@ -124,6 +163,29 @@ function ZO_Stats:OnShowing()
         self.control:RegisterForEvent(EVENT_ATTRIBUTE_UPGRADE_UPDATED, function() self:UpdateSpendablePoints() end)
         self.control:RegisterForEvent(EVENT_PLAYER_ACTIVATED, OnPlayerActivated)
 
+        local function OnStartRespecCast()
+            if not IsInGamepadPreferredMode() then
+                PlaySound(SOUNDS.RESPEC_CAST_TIME_START)
+                ZO_Dialogs_ShowDialog("ATTRIBUTE_RESPEC_CAST_KEYBOARD")
+            end
+        end
+
+        local function OnAttributeRespecResult(eventId, result)
+            if ZO_Dialogs_IsShowing("ATTRIBUTE_RESPEC_CAST_KEYBOARD") then
+                PlaySound(SOUNDS.RESPEC_CAST_TIME_COMPLETE)
+                ZO_Dialogs_ReleaseDialog("ATTRIBUTE_RESPEC_CAST_KEYBOARD")
+            end
+
+            if result == RESPEC_RESULT_SUCCESS then
+                self.resetAddedPoints = true
+                self:SetAttributePointAllocationMode(ATTRIBUTE_POINT_ALLOCATION_MODE_PURCHASE_ONLY)
+                self:UpdateSpendablePoints()
+            end
+        end
+
+        self.control:RegisterForEvent(EVENT_START_ATTRIBUTE_RESPEC_CAST, OnStartRespecCast)
+        self.control:RegisterForEvent(EVENT_ATTRIBUTE_RESPEC_RESULT, OnAttributeRespecResult)
+
         local function UpdateLevelUpRewards()
             self:UpdateLevelUpRewards()
         end
@@ -143,11 +205,12 @@ function ZO_Stats:OnShowing()
     end
 
     self:UpdateSpendablePoints()
-    self:RefreshEquipmentBonus()
 
     self:UpdateLevelUpRewards()
 
     self:UpdateTitles()
+
+    self:UpdateGuilds()
 
     TriggerTutorial(TUTORIAL_TRIGGER_STATS_OPENED)
     if GetAttributeUnspentPoints() > 0 then
@@ -181,6 +244,22 @@ function ZO_Stats:OnHidden()
     self.resetAddedPoints = true
     self:UpdateSpendablePoints()
     self:SetAttributePointAllocationMode(ATTRIBUTE_POINT_ALLOCATION_MODE_PURCHASE_ONLY)
+end
+
+function ZO_Stats:OnStartAttributeRespec(allocationMode, paymentType)
+    --ESO-931416: Only set the attribute respec payment type and allocation mode when in keyboard UI
+    if not IsInGamepadPreferredMode() then
+        self:SetAttributeRespecPaymentType(paymentType)
+        self:SetAttributePointAllocationMode(allocationMode)
+
+        if STATS_SCENE:IsShowing() then
+            --If the scene is already showing we just need to refresh
+            self:UpdateSpendablePoints()
+            KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindButtons)
+        else
+            SCENE_MANAGER:Push("stats")
+        end
+    end
 end
 
 function ZO_Stats:OnConfirmHideScene(scene, nextSceneName, bypassHideSceneConfirmationReason)
@@ -266,8 +345,10 @@ function ZO_Stats:InitializeKeybindButtons()
                 elseif self:DoesAttributePointAllocationModeBatchSave() and self:DoesChangeIncurCost() then
                     if self:IsPaymentTypeScroll(self) then
                         ZO_Dialogs_ShowDialog("STAT_EDIT_CONFIRM")
-                    else
+                    elseif GetAttributeRespecGoldCost() > 0 then
                         ZO_Dialogs_ShowDialog("ATTRIBUTE_RESPEC_CONFIRM_GOLD_KEYBOARD")
+                    else
+                        self:RespecAttributes()
                     end
                 else
                      ZO_Dialogs_ShowDialog("STAT_ASSIGNMENT_CONFIRM")
@@ -288,6 +369,7 @@ function ZO_Stats:InitializeKeybindButtons()
                     attributeControl.pointLimitedSpinner:RefreshSpinnerMax()
                     attributeControl.pointLimitedSpinner.pointsSpinner:SetValue(0)
                 end
+                PlaySound(SOUNDS.STATS_RESPEC_CLEAR_ALL)
             end,
         },
          -- Level Up Help
@@ -296,12 +378,34 @@ function ZO_Stats:InitializeKeybindButtons()
             name = GetString(SI_LEVEL_UP_REWARDS_HELP_KEYBIND),
             keybind = "UI_SHORTCUT_TERTIARY",
             visible = function()
-                local helpCategoryIndex, helpIndex = GetLevelUpHelpIndicesForLevel(ZO_LEVEL_UP_REWARDS_MANAGER:GetPendingRewardLevel())
+                local helpCategoryIndex = GetLevelUpHelpIndicesForLevel(ZO_LEVEL_UP_REWARDS_MANAGER:GetPendingRewardLevel())
                 return helpCategoryIndex ~= nil
             end,
             callback = function()
                 local helpCategoryIndex, helpIndex = GetLevelUpHelpIndicesForLevel(ZO_LEVEL_UP_REWARDS_MANAGER:GetPendingRewardLevel())
                 HELP:ShowSpecificHelp(helpCategoryIndex, helpIndex)
+            end,
+        },
+        -- Respec Attributes
+        {
+            alignment = KEYBIND_STRIP_ALIGN_CENTER,
+            name = GetString(SI_STATS_RESPEC_ATTRIBUTES_BUTTON),
+            keybind = "UI_SHORTCUT_QUATERNARY",
+            visible = function()
+                return not self:DoesAttributePointAllocationModeBatchSave()
+            end,
+            enabled = function()
+                return not IsCurrentCampaignVengeanceRuleset(), GetString("SI_RESPECRESULT", RESPEC_RESULT_IN_VENGEANCE)
+            end,
+            callback = function()
+                if GetInteractionType() == INTERACTION_ATTRIBUTE_RESPEC then
+                    --If the interaction is already active we just need to update the allocation mode and refresh
+                    self:SetAttributePointAllocationMode(ATTRIBUTE_POINT_ALLOCATION_MODE_PURCHASE_FULL)
+                    self:UpdateSpendablePoints()
+                    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindButtons)
+                else
+                    StartAttributeRespecFromUI()
+                end
             end,
         },
         -- Close advanced stats
@@ -348,40 +452,22 @@ function ZO_Stats:SetUpTitleSection()
         ClearTooltip(InformationTooltip)
     end)
 
-    self.equipmentBonus = titleSectionControl:GetNamedChild("EquipmentBonus")
-    local equipmentBonusIcons = self.equipmentBonus:GetNamedChild("Icons")
-    self.equipmentBonus.iconPool = ZO_ControlPool:New("ZO_StatsEquipmentBonusIcon", equipmentBonusIcons)
-    self.equipmentBonus.value = EQUIPMENT_BONUS_LOW
-    self.equipmentBonus.lowestEquipSlot = EQUIP_SLOT_NONE
+    self.mundusInfoControl = titleSectionControl:GetNamedChild("MundusInfo")
+    self.mundusIconContainer = titleSectionControl:GetNamedChild("MundusIcons")
+    self.mundusIconControls = {}
+    self.mundusNameControls = {}
+
+    local MAX_MUNDUS_SLOTS = 2
+    for i = 1, MAX_MUNDUS_SLOTS do
+        local mundusIconControl = self.mundusIconContainer:GetNamedChild("MundusIcon" .. i)
+        local mundusNameControl = self.mundusInfoControl:GetNamedChild("Name" .. i)
+        table.insert(self.mundusIconControls, mundusIconControl)
+        table.insert(self.mundusNameControls, mundusNameControl)
+    end
+
+    self:UpdateMundusRow()
 
     self:RefreshTitleSection()
-end
-
-function ZO_Stats:SetEquipmentBonusTooltip()
-    InformationTooltip:AddLine(GetString(SI_STATS_EQUIPMENT_BONUS), "", ZO_NORMAL_TEXT:UnpackRGBA())
-    InformationTooltip:AddVerticalPadding(10)
-
-    InformationTooltip:AddLine(GetString("SI_EQUIPMENTBONUS", self.equipmentBonus.value))
-    InformationTooltip:AddVerticalPadding(10)
-
-    InformationTooltip:AddLine(GetString(SI_STATS_EQUIPMENT_BONUS_GENERAL_TOOLTIP))
-    InformationTooltip:AddVerticalPadding(10)
-
-    if self.equipmentBonus.value < EQUIPMENT_BONUS_SUPERIOR and self.equipmentBonus.lowestEquipSlot ~= EQUIP_SLOT_NONE then
-        local equipSlotHasItem = GetWornItemInfo(BAG_WORN, self.equipmentBonus.lowestEquipSlot)
-        local lowestItemText
-        if equipSlotHasItem then
-            local lowestItemLink = GetItemLink(BAG_WORN, self.equipmentBonus.lowestEquipSlot)
-            lowestItemText = GetItemLinkName(lowestItemLink)
-            local displayQuality = GetItemLinkDisplayQuality(lowestItemLink)
-            local qualityColor = GetItemQualityColor(displayQuality)
-            lowestItemText = qualityColor:Colorize(lowestItemText)
-        else
-            lowestItemText = zo_strformat(SI_STATS_EQUIPMENT_BONUS_TOOLTIP_EMPTY_SLOT, GetString("SI_EQUIPSLOT", self.equipmentBonus.lowestEquipSlot))
-            lowestItemText = ZO_ERROR_COLOR:Colorize(lowestItemText)
-        end
-        InformationTooltip:AddLine(zo_strformat(SI_STATS_EQUIPMENT_BONUS_LOWEST_PIECE_KEYBOARD, lowestItemText), "", ZO_NORMAL_TEXT:UnpackRGBA())
-    end
 end
 
 function ZO_Stats:RefreshTitleSection()
@@ -446,13 +532,39 @@ function ZO_Stats:CreateBackgroundSection()
     ZO_OUTFIT_MANAGER:RegisterCallback("RefreshEquippedOutfitIndex", UpdateEquippedOutfit)
     ZO_OUTFIT_MANAGER:RegisterCallback("RefreshOutfits", UpdateOutfits)
     ZO_OUTFIT_MANAGER:RegisterCallback("RefreshOutfitName", UpdateOutfits)
-    
+
+
+    -- Guilds --
+
+    local guildDropdownRow = self:AddDropdownRow(GetString(SI_STATS_GUILD))
+    self.guildDropdownRow = guildDropdownRow
+    self.guildDropdown = guildDropdownRow.dropdown
+    self.guildDropdown:SetSortsItems(false)
+    self.guildDropdownRow:SetMouseEnabled(true)
+
+    local function OnGuildDropdownMouseEnter(control)
+        InitializeTooltip(InformationTooltip, control, RIGHT, -5)
+        InformationTooltip:AddLine(GetString(SI_STATS_GUILD_TOOLTIP_DESCRIPTION), "", ZO_NORMAL_TEXT:UnpackRGBA())
+        if IsPlayerWearingGuildTabard() then
+            InformationTooltip:AddLine(GetString(SI_STATS_GUILD_TOOLTIP_TABARD_WARNING), "", ZO_ERROR_COLOR:UnpackRGBA())
+        end
+    end
+
+    local function OnGuildDropdownMouseExit()
+        ClearTooltip(InformationTooltip)
+    end
+
+    self.guildDropdownRow:SetHandler("OnMouseEnter", OnGuildDropdownMouseEnter)
+    self.guildDropdownRow:SetHandler("OnMouseExit", OnGuildDropdownMouseExit)
+
+    self:UpdateGuilds()
+
     -- Alliance Ranks --
 
     local iconRow = self:AddIconRow(GetString(SI_STATS_ALLIANCE_RANK))
 
     local function UpdateRank()
-        local rank, subRank = GetUnitAvARank("player")
+        local rank = GetUnitAvARank("player")
 
         if rank == 0 then
             iconRow.icon:SetHidden(true)
@@ -467,8 +579,7 @@ function ZO_Stats:CreateBackgroundSection()
     UpdateRank()
 
     -- Bounty --
-
-    local bountyRow = self:AddBountyRow(GetString(SI_STATS_BOUNTY_LABEL))
+    self:AddBountyRow(GetString(SI_STATS_BOUNTY_LABEL))
 
     self.control:RegisterForEvent(EVENT_TITLE_UPDATE, UpdateSelectedTitle)
     self.control:AddFilterForEvent(EVENT_TITLE_UPDATE, REGISTER_FILTER_UNIT_TAG, "player")
@@ -500,6 +611,12 @@ function ZO_Stats:UpdateTitles()
     self:UpdateTitleDropdownSelection(dropdown)
 end
 
+function ZO_Stats:UpdateGuilds()
+    self.guildDropdown:SetEnabled(not IsPlayerWearingGuildTabard())
+
+    self:UpdateGuildDropdownGuilds(self.guildDropdown)
+end
+
 function ZO_Stats:CreateAttributesSection()
     self.attributesHeader = self:CreateControlFromVirtual("Header", "ZO_AttributesHeader")
     self.attributesHeaderTitle = self.attributesHeader:GetNamedChild("Title")
@@ -519,9 +636,6 @@ function ZO_Stats:CreateAttributesSection()
     self:SetUpAttributeControl(attributesRow:GetNamedChild("Magicka"), STAT_MAGICKA_MAX, ATTRIBUTE_MAGICKA, COMBAT_MECHANIC_FLAGS_MAGICKA)
     self:SetUpAttributeControl(attributesRow:GetNamedChild("Stamina"), STAT_STAMINA_MAX, ATTRIBUTE_STAMINA, COMBAT_MECHANIC_FLAGS_STAMINA)
 
-    self:AddDivider()
-    self:AddHeader(SI_STATS_MUNDUS_TITLE)
-    self:AddMundusRow()
     self:AddDivider()
 
     self:SetNextControlPadding(5)
@@ -722,8 +836,6 @@ end
 function ZO_Stats:RespecAttributes()
     PlaySound(SOUNDS.STATS_PURCHASE)
     SendAttributePointAllocationRequest(self.attributeRespecPaymentType, self.attributeControls[ATTRIBUTE_HEALTH].pointLimitedSpinner.addedPoints, self.attributeControls[ATTRIBUTE_MAGICKA].pointLimitedSpinner.addedPoints, self.attributeControls[ATTRIBUTE_STAMINA].pointLimitedSpinner.addedPoints)
-    self.resetAddedPoints = true
-    self:SetAttributePointAllocationMode(ATTRIBUTE_POINT_ALLOCATION_MODE_PURCHASE_ONLY)
 end
 
 
@@ -891,15 +1003,11 @@ end
 
 function ZO_Stats:HideComparisonForDerivedStat(statType)
     if self.statEntries[statType] then
-        self.statEntries[statType]:HideComparisonValue(value)
+        self.statEntries[statType]:HideComparisonValue()
     end
 end
 
 function ZO_Stats:UpdateMundusRow()
-    local activeMundusStoneBuffIndices = { GetUnitActiveMundusStoneBuffIndices("player") }
-    local numActiveMundusStoneBuffs = #activeMundusStoneBuffIndices
-    local isPlayerAtMundusWarningLevel = GetUnitLevel("player") >= GetMundusWarningLevel()
-
     local function GetDerivedStatByTypeFunction(statType)
         if self.statEntries[statType] then
             self.statEntries[statType]:SetHasMundusEffect(true)
@@ -907,26 +1015,19 @@ function ZO_Stats:UpdateMundusRow()
         end
     end
 
-    -- clear mundus values before reseting them
+    -- clear mundus values before resetting them
     self:RefreshAllAttributes()
 
     local mundusStoneNameList = ZO_SharedStats_SetupMundusIconControls(self.mundusIconControls, RIGHT, -5, GetDerivedStatByTypeFunction)
-    self.mundusRow.name:SetText(ZO_GenerateCommaSeparatedListWithoutAnd(mundusStoneNameList))
-end
-
-function ZO_Stats:AddMundusRow()
-    self.mundusRow = self:CreateControlFromVirtual("MundusRow", "ZO_StatsMundusRow")
-
-    self.mundusIconControls = {}
-    local MAX_MUNDUS_SLOTS = 2
-    for i = 1, MAX_MUNDUS_SLOTS do
-        local mundusIconControl = self.mundusRow:GetNamedChild("MundusIcon" .. i)
-        table.insert(self.mundusIconControls, mundusIconControl)
+    for i, mundusNameControl in ipairs(self.mundusNameControls) do
+        local mundusName = mundusStoneNameList[i]
+        if mundusName and mundusName ~= "" then
+            mundusNameControl:SetHidden(false)
+            mundusNameControl:SetText(mundusName)
+        else
+            mundusNameControl:SetHidden(true)
+        end
     end
-
-    self:UpdateMundusRow()
-
-    return self.mundusRow
 end
 
 function ZO_Stats:SetNextControlPadding(padding)
@@ -1004,7 +1105,7 @@ function ZO_Stats:AddLongTermEffects(container, effectsRowPool)
             end
 
             for i = 1, GetNumBuffs("player") do
-                local buffName, startTime, endTime, buffSlot, stackCount, iconFile, deprecatedBuffType, effectType, abilityType, statusEffectType = GetUnitBuffInfo("player", i)
+                local buffName, startTime, endTime, buffSlot, stackCount, iconFile, _, effectType, _ = GetUnitBuffInfo("player", i)
 
                 if buffSlot > 0 and buffName ~= "" then
                     local effectsRow = effectsRowPool:AcquireObject()
@@ -1374,15 +1475,6 @@ end
 
 function ZO_Stats_Initialize(control)
     STATS = ZO_Stats:New(control)
-end
-
-function ZO_Stats_EquipmentBonus_OnMouseEnter(control)
-    InitializeTooltip(InformationTooltip, control, BOTTOMRIGHT, 0, -5, TOPRIGHT)
-    STATS:SetEquipmentBonusTooltip()
-end
-
-function ZO_Stats_EquipmentBonus_OnMouseExit(control)
-    ClearTooltip(InformationTooltip)
 end
 
 local ATTRIBUTE_DESCRIPTIONS =

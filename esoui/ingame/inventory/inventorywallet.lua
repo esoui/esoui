@@ -6,21 +6,16 @@ local CURRENCY_LOCATION_ALL = CURRENCY_LOCATION_MAX_VALUE + 1
 --InventoryWallet Manager
 -------------------
 
-local InventoryWalletManager = ZO_Object:Subclass()
-
-function InventoryWalletManager:New(...)
-    local manager = ZO_Object.New(self)
-    manager:Initialize(...)
-    return manager
-end
+local InventoryWalletManager = ZO_InitializingObject:Subclass()
 
 function InventoryWalletManager:Initialize(container)
     self.container = container
-    self.money = GetControl(container, "InfoBarMoney")
+    self.money = container:GetNamedChild("InfoBarMoney")
 
-    self.freeSlotsLabel = GetControl(container, "InfoBarFreeSlots")
+    self.freeSlotsLabel = container:GetNamedChild("InfoBarFreeSlots")
+    self.bagUpgradeButton = container:GetNamedChild("InfoBarBuyBagSpace")
 
-    self.list = GetControl(container, "List")
+    self.list = container:GetNamedChild("List")
     ZO_ScrollList_AddDataType(self.list, DATA_TYPE_CURRENCY_ITEM, "ZO_InventoryWalletSlot", LIST_ENTRY_HEIGHT, function(control, data) self:SetUpEntry(control, data) end, nil, nil, ZO_InventorySlot_OnPoolReset)
 
     self.sortHeadersControl = container:GetNamedChild("SortBy")
@@ -42,13 +37,13 @@ function InventoryWalletManager:Initialize(container)
     self:RefreshCurrency()
 
     WALLET_FRAGMENT = ZO_FadeSceneFragment:New(ZO_InventoryWallet)
-    WALLET_FRAGMENT:RegisterCallback("StateChange",  function(oldState, newState)
-                                                            if newState == SCENE_FRAGMENT_SHOWING then
-                                                                self:UpdateList()
-                                                                self:UpdateFreeSlots()
-                                                                self:RefreshCurrency()
-                                                            end
-                                                        end)
+    WALLET_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
+        if newState == SCENE_FRAGMENT_SHOWING then
+            self:UpdateList()
+            self:UpdateFreeSlots()
+            self:RefreshCurrency()
+        end
+    end)
 
 end
 
@@ -108,6 +103,8 @@ function InventoryWalletManager:RegisterEvents()
 
     ZO_InventoryWallet:RegisterForEvent(EVENT_INVENTORY_FULL_UPDATE, UpdateFreeSlots)
     ZO_InventoryWallet:RegisterForEvent(EVENT_INVENTORY_SINGLE_SLOT_UPDATE, UpdateFreeSlots)
+
+    ZO_InventoryWallet:RegisterForEvent(EVENT_INVENTORY_BOUGHT_BAG_SPACE, UpdateFreeSlots)
 end
 
 do
@@ -117,10 +114,10 @@ do
     }
 
     function InventoryWalletManager:SetUpEntry(control, data)
-        local nameControl = GetControl(control, "Name")
+        local nameControl = control:GetNamedChild("Name")
         nameControl:SetText(zo_strformat(SI_CURRENCY_NAME_FORMAT, data.name))
 
-        local amountControl = GetControl(control, "Amount")
+        local amountControl = control:GetNamedChild("Amount")
         FORMAT_EXTRA_OPTIONS.currencyLocation = GetCurrencyPlayerStoredLocation(data.currencyType)
         amountControl:SetText(ZO_Currency_FormatKeyboard(data.currencyType, data.amount, ZO_CURRENCY_FORMAT_AMOUNT_ICON, FORMAT_EXTRA_OPTIONS))
         amountControl.type = data.currencyType
@@ -156,11 +153,20 @@ end
 
 function InventoryWalletManager:UpdateFreeSlots()
     local numUsedSlots, numSlots = PLAYER_INVENTORY:GetNumSlots(INVENTORY_BACKPACK)
-    if(numUsedSlots < numSlots) then
+    if numUsedSlots < numSlots then
         self.freeSlotsLabel:SetText(zo_strformat(SI_INVENTORY_BACKPACK_REMAINING_SPACES, numUsedSlots, numSlots))
     else
         self.freeSlotsLabel:SetText(zo_strformat(SI_INVENTORY_BACKPACK_COMPLETELY_FULL, numUsedSlots, numSlots))
     end
+
+    self:UpdateBagUpgradeButton()
+end
+
+function InventoryWalletManager:UpdateBagUpgradeButton()
+    local currentUnlock = GetCurrentBackpackUpgrade()
+    local maxUnlock = GetMaxBackpackUpgrade()
+
+    self.bagUpgradeButton:SetHidden(currentUnlock >= maxUnlock)
 end
 
 function InventoryWalletManager:UpdateList()

@@ -131,10 +131,16 @@ function ZO_Death_DoesReviveCostRaidLife()
 end
 
 function DeathType:LayoutHereButton(hereButton)
+    if GetIsInDisableSelfResurrectInPlaceSubzone() then
+        hereButton:SetHidden(true)
+        return
+    else
+        hereButton:SetHidden(false)
+    end
+
     local soulGemAvailable, freeRevive = select(9, GetDeathInfo())
 
     local inReviveCounterRaid = IsPlayerInReviveCounterRaid()
-
     if freeRevive and not inReviveCounterRaid then
         hereButton:SetEnabled(true)
         hereButton:SetText(GetString(SI_DEATH_PROMPT_HERE))
@@ -143,7 +149,8 @@ function DeathType:LayoutHereButton(hereButton)
 
     local level = GetUnitEffectiveLevel("player")
     local name, soulGemIcon, soulGemStackCount, soulGemQuality = GetSoulGemInfo(SOUL_GEM_TYPE_FILLED, level)
-    local enabled = (soulGemStackCount > 0 or freeRevive) and not self:AreButtonsDisabledDueToCyclicRespawn()
+    local enabled = (soulGemStackCount > 0 or freeRevive)
+        and not self:AreButtonsDisabledDueToCyclicRespawn()
     hereButton:SetEnabled(enabled)
 
     local soulGemSuccess, coloredFilledText, coloredSoulGemIconMarkup = ZO_Death_GetResurrectSoulGemText(level)

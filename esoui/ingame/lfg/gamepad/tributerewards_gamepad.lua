@@ -178,6 +178,7 @@ function ZO_TributeRewardsList_Gamepad:InitializeLists()
     local listControl = self:GetListControl()
 
     local function SetupTributeRewardsRow(control, data)
+        self:SetupRow(control, data)
         control.iconTexture:SetTexture(data:GetTierIcon())
         control.tierLabel:SetText(data:GetTierName())
         control.rewardsNameLabel:SetText(data:GetRewardListName())

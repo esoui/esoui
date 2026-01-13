@@ -374,6 +374,8 @@ function ZO_Character_Initialize(control)
         ZO_CharacterEquipmentSlotsBackupMainHighlight:SetHidden(disabled or activeWeaponPair ~= ACTIVE_WEAPON_PAIR_BACKUP)
         ZO_CharacterEquipmentSlotsBackupOffHighlight:SetHidden(disabled or activeWeaponPair ~= ACTIVE_WEAPON_PAIR_BACKUP)
         ZO_CharacterEquipmentSlotsBackupPoisonHighlight:SetHidden(disabled or activeWeaponPair ~= ACTIVE_WEAPON_PAIR_BACKUP)
+
+        ZO_Character_UpdateEffects()
     end
 
     local function OnLevelUpdate(_, unitTag)

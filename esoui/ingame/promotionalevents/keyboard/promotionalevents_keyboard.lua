@@ -663,8 +663,8 @@ function ZO_PromotionalEvents_Keyboard:SetMouseOverObject(mouseOverObject)
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
 end
 
-function ZO_PromotionalEvents_Keyboard:OnRewardsClaimed(...)
-    ZO_PromotionalEvents_Shared.OnRewardsClaimed(self, ...)
+function ZO_PromotionalEvents_Keyboard:OnRewardsClaimed(campaignData, rewards)
+    ZO_PromotionalEvents_Shared.OnRewardsClaimed(self, campaignData, rewards)
 
     if self:IsShowing() and self.currentCampaignData == campaignData then
         KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)

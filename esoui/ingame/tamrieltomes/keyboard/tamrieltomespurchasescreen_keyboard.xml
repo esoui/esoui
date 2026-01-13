@@ -1,0 +1,61 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_TamrielTomesPurchaseReward_Keyboard" inherits="ZO_TamrielTomesPurchaseReward_Shared" mouseEnabled="true" virtual="true">
+            <Dimensions x="ZO_TAMRIEL_TOMES_PURCHASE_REWARD_DIMENSIONS_KEYBOARD" y="ZO_TAMRIEL_TOMES_PURCHASE_REWARD_DIMENSIONS_KEYBOARD"/>
+            <OnMouseEnter>
+                ZO_TamrielTomesPurchaseScreen_Keyboard.Reward_OnMouseEnter(self)
+            </OnMouseEnter>
+            <OnMouseExit>
+                ZO_TamrielTomesPurchaseScreen_Keyboard.Reward_OnMouseExit(self)
+            </OnMouseExit>
+            <Controls>
+                <Control name="$(parent)Container" override="true">
+                    <Controls>
+                        <Backdrop name="$(parent)Backdrop" override="true" inherits="ZO_CenterlessBackdrop"/>
+                        <Label name="$(parent)Quantity" override="true" font="ZoFontGameOutline" inheritScale="false"/>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+        <Control name="ZO_TamrielTomesPurchaseVerticalDivider_Keyboard" inherits="ZO_TamrielTomesPurchaseVerticalDivider_Shared" virtual="true">
+            <Dimensions x="ZO_TAMRIEL_TOMES_PURCHASE_VERTICAL_DIVIDER_WIDTH_KEYBOARD" y="ZO_TAMRIEL_TOMES_PURCHASE_REWARD_DIMENSIONS_KEYBOARD"/>
+        </Control>
+        <TopLevelControl name="ZO_TamrielTomesPurchase_KeyboardTL" inherits="ZO_TamrielTomesPurchase_SharedTL">
+            <Anchor point="RIGHT" offsetX="-20"/>
+            <OnInitialized>
+                ZO_TamrielTomesPurchaseScreen_Keyboard.OnControlInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Title" override="true" font="ZoFontWinH1"/>
+                <Control name="$(parent)Divider" override="true" inherits="ZO_PlatformStyleDynamicHorizontalDivider_Keyboard_Template"/>
+                <Control name="$(parent)GridList" override="true" inherits="ZO_GridScrollList_Keyboard">
+                    <Dimensions x="ZO_TAMRIEL_TOMES_PURCHASE_GRID_WIDTH_KEYBOARD" y="ZO_TAMRIEL_TOMES_PURCHASE_GRID_HEIGHT_KEYBOARD"/>
+                </Control>
+                <Control name="$(parent)Buttons" override="true">
+                    <Dimensions x="700" y="65"/>
+                    <Controls>
+                        <Control name="$(parent)Row1" override="true">
+                            <Dimensions x="700" y="30"/>
+                            <Controls>
+                                <Button name="$(parent)PremiumButton" override="true" inherits="ZO_DefaultButton">
+                                    <Dimensions x="270"/>
+                                </Button>
+                                <Button name="$(parent)PremiumPlusButton" override="true" inherits="ZO_DefaultButton">
+                                    <Dimensions x="270"/>
+                                </Button>
+                            </Controls>
+                        </Control>
+                        <Control name="$(parent)Row2" override="true">
+                            <Dimensions x="700" y="30"/>
+                            <Controls>
+                                <Button name="$(parent)TokenButton" override="true" inherits="ZO_DefaultButton">
+                                    <Dimensions x="270"/>
+                                </Button>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

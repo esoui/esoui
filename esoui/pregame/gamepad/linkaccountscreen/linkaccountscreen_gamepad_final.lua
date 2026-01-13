@@ -14,8 +14,7 @@ function LinkAccountScreen_Gamepad_Final_Initialize(self)
     }
 
     local fillText = self:GetNamedChild("Container"):GetNamedChild("FillText")
-    local isXbox = GetUIPlatform() == UI_PLATFORM_XBOX
-    fillText:SetText(GetString(isXbox and SI_CONSOLE_LINKACCOUNT_SUCCESS_FULL_XBOX or SI_CONSOLE_LINKACCOUNT_SUCCESS_FULL_PS4))
+    fillText:SetText(GetString(IsGameCoreUI() and SI_CONSOLE_LINKACCOUNT_SUCCESS_FULL_XBOX or SI_CONSOLE_LINKACCOUNT_SUCCESS_FULL_PS4))
 
     local linkAccountScreen_Gamepad_Final_Fragment = ZO_FadeSceneFragment:New(self)
     LINK_ACCOUNT_FINAL_GAMEPAD_SCENE = ZO_Scene:New("LinkAccountScreen_Gamepad_Final", SCENE_MANAGER)

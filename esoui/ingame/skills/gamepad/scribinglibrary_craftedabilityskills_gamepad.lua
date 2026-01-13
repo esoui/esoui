@@ -226,11 +226,13 @@ do
 end
 
 function ZO_ScribingLibrary_CraftedAbilitySkills_Gamepad:ScribingCraftedAbilityEntryTemplateSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
+    self:SetupRow(control, data)
     ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
     ZO_GamepadSkillEntryTemplate_Setup(control, data, selected, activated, ZO_SKILL_ABILITY_DISPLAY_VIEW)
 end
 
 function ZO_ScribingLibrary_CraftedAbilitySkills_Gamepad:ScribingCraftedAbilityTextDisplayTemplateSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
+    self:SetupRow(control, data)
     control.label:SetText(data.text)
 end
 

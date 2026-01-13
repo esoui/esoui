@@ -4,48 +4,40 @@
             <OnInitialized>
                 ZO_ConfirmCollectibleEvolution_Gamepad_OnInitialized(self)
             </OnInitialized>
-
             <Controls>
                 <Control name="$(parent)Container" override="true">
                     <Controls>
                         <Texture name="$(parent)Arrow" inherits="ZO_CollectibleEvolutionArrow">
-                            <Anchor point="TOP" />
+                            <Anchor point="TOP"/>
                         </Texture>
-
                         <Texture name="$(parent)BaseIcon" inherits="ZO_CollectibleEvolutionTexture">
-                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Arrow" relativePoint="TOPLEFT" offsetX="-10" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Arrow" relativePoint="TOPLEFT" offsetX="-10"/>
                         </Texture>
-
                         <Texture name="$(parent)EvolvedIcon" inherits="ZO_CollectibleEvolutionTexture">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)Arrow" relativePoint="TOPRIGHT" offsetX="10" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Arrow" relativePoint="TOPRIGHT" offsetX="10"/>
                         </Texture>
-
                         <Scroll name="$(parent)Scroll" override="true">
                             <!-- overriding the anchoring here so we can offset below the icons above -->
-                            <Anchor point="TOPLEFT" offsetY="124" />
-                            <Anchor point="BOTTOMRIGHT" />
+                            <Anchor point="TOPLEFT" offsetY="124"/>
+                            <Anchor point="BOTTOMRIGHT"/>
                         </Scroll>
                     </Controls>
                 </Control>
             </Controls>
         </TopLevelControl>
-
         <!-- This dialog will show a tooltip ZO_GamepadDialogTooltipTopLevel which is on the HIGH tier. This can conflict with the dialog's scroll indicator
              so we need to bump up this dialog tier and level so the dialog is on top of the tooltip as necessary. -->
         <TopLevelControl name="ZO_ConfirmAdvancedCombinationDialog_Gamepad" inherits="ZO_GenericGamepadDialogBase" tier="HIGH" level="ZO_HIGH_TIER_UNDER_GAMEPAD_KEYBIND_STRIP_BG">
             <OnInitialized>
                 ZO_ConfirmAdvancedCombinationDialog_Gamepad_OnInitialized(self)
             </OnInitialized>
-
             <Controls>
                 <Control name="$(parent)Container" override="true">
                     <Controls>
                         <!-- These controls will all be anchored programmatically as well as the Scroll control -->
-                        <Control name="$(parent)ComponentsContainer" resizeToFitDescendents="true" />
-
-                        <Texture name="$(parent)Arrow" inherits="ZO_CollectibleEvolutionArrow" />
-
-                        <Control name="$(parent)UnlocksContainer" resizeToFitDescendents="true" />
+                        <Control name="$(parent)ComponentsContainer" resizeToFitDescendents="true"/>
+                        <Texture name="$(parent)Arrow" inherits="ZO_CollectibleEvolutionArrow"/>
+                        <Control name="$(parent)UnlocksContainer" resizeToFitDescendents="true"/>
                     </Controls>
                 </Control>
             </Controls>

@@ -3,31 +3,27 @@
         <AnimationTimeline name="CenterScreenLargeTextWipe">
             <Animations>
                 <!-- Keep the height "large" so that we don't have to worry about fitting the scroll around the text -->
-                <SizeAnimation duration="1700" startWidth="ZO_MIN_CSA_SCROLL_WIDTH" endWidth="ZO_MAX_CSA_SCROLL_WIDTH" startHeight="ZO_MAX_CSA_SCROLL_HEIGHT" endHeight="ZO_MAX_CSA_SCROLL_HEIGHT" />
-                <SizeAnimation duration="2000" delay="3500" startWidth="ZO_MAX_CSA_SCROLL_WIDTH" endWidth="ZO_MIN_CSA_SCROLL_WIDTH" startHeight="ZO_MAX_CSA_SCROLL_HEIGHT" endHeight="ZO_MAX_CSA_SCROLL_HEIGHT" />
+                <SizeAnimation duration="1700" startWidth="ZO_MIN_CSA_SCROLL_WIDTH" endWidth="ZO_MAX_CSA_SCROLL_WIDTH" startHeight="ZO_MAX_CSA_SCROLL_HEIGHT" endHeight="ZO_MAX_CSA_SCROLL_HEIGHT"/>
+                <SizeAnimation duration="2000" delay="3500" startWidth="ZO_MAX_CSA_SCROLL_WIDTH" endWidth="ZO_MIN_CSA_SCROLL_WIDTH" startHeight="ZO_MAX_CSA_SCROLL_HEIGHT" endHeight="ZO_MAX_CSA_SCROLL_HEIGHT"/>
             </Animations>
         </AnimationTimeline>
-        
         <AnimationTimeline name="CenterScreenLargeTextFade">
             <Animations>
                 <!-- Keep the height "large" so that we don't have to worry about fitting the scroll around the text -->
-                <SizeAnimation duration="1700" startWidth="ZO_MIN_CSA_SCROLL_WIDTH" endWidth="ZO_MAX_CSA_SCROLL_WIDTH" startHeight="ZO_MAX_CSA_SCROLL_HEIGHT" endHeight="ZO_MAX_CSA_SCROLL_HEIGHT" />
-                <AlphaAnimation duration="500" delay="3500" startAlpha="1" endAlpha="0" />
+                <SizeAnimation duration="1700" startWidth="ZO_MIN_CSA_SCROLL_WIDTH" endWidth="ZO_MAX_CSA_SCROLL_WIDTH" startHeight="ZO_MAX_CSA_SCROLL_HEIGHT" endHeight="ZO_MAX_CSA_SCROLL_HEIGHT"/>
+                <AlphaAnimation duration="500" delay="3500" startAlpha="1" endAlpha="0"/>
             </Animations>
         </AnimationTimeline>
-
         <AnimationTimeline name="CenterScreenSmallTextFadeIn">
             <Animations>
-                <AlphaAnimation duration="500" startAlpha="0" endAlpha="1" />
+                <AlphaAnimation duration="500" startAlpha="0" endAlpha="1"/>
             </Animations>
         </AnimationTimeline>
-
         <AnimationTimeline name="CenterScreenSmallTextFadeOut">
             <Animations>
-                <AlphaAnimation duration="500" delay="3500" startAlpha="1" endAlpha="0" />
+                <AlphaAnimation duration="500" delay="3500" startAlpha="1" endAlpha="0"/>
             </Animations>
         </AnimationTimeline>
-
         <AnimationTimeline name="CenterScreenSmallTextTranslate">
             <Animations>
                 <TranslateAnimation duration="800" deltaX="0" deltaY="0" anchorIndex="0">
@@ -37,7 +33,6 @@
                 </TranslateAnimation>
             </Animations>
         </AnimationTimeline>
-        
         <AnimationTimeline name="CenterScreenMajorTextPopIn">
             <Animations>
                 <ScaleAnimation duration="150" startScale="1.2" endScale="1.0"/>
@@ -46,7 +41,6 @@
                 <ScaleAnimation duration="150" delay="675" startScale="1" endScale="0.9"/>
             </Animations>
         </AnimationTimeline>
-        
         <AnimationTimeline name="CenterScreenCountdownLoop">
             <Animations>
                 <ScaleAnimation duration="100" startScale="0.8" endScale="1.2"/>
@@ -55,7 +49,6 @@
                 <AlphaAnimation duration="50" delay="950" startAlpha="1.0" endAlpha="0"/>
             </Animations>
         </AnimationTimeline>
-        
         <AnimationTimeline name="CenterScreenCountdownEndImage">
             <Animations>
                 <ScaleAnimation duration="150" startScale="1.2" endScale="1.0"/>
@@ -63,14 +56,12 @@
                 <AlphaAnimation duration="100" delay="2500" startAlpha="1.0" endAlpha="0"/>
             </Animations>
         </AnimationTimeline>
-        
         <AnimationTimeline name="CenterScreenCountdownBuffer">
             <Animations>
                 <!-- duration is set in code -->
-                <CustomAnimation />
+                <CustomAnimation/>
             </Animations>
         </AnimationTimeline>
-    
         <AnimationTimeline name="CenterScreenMajorTextContainerExpand">
             <Animations>
                 <CustomAnimation duration="100">
@@ -80,13 +71,11 @@
                 </CustomAnimation>
             </Animations>
         </AnimationTimeline>
-
         <AnimationTimeline name="CenterScreenScryingUpdatedIconFadeIn">
             <Animations>
-                <AlphaAnimation applyToChildControlName="AchievedIcon" duration="200" startAlpha="0" endAlpha="1" />
+                <AlphaAnimation applyToChildControlName="AchievedIcon" duration="200" startAlpha="0" endAlpha="1"/>
             </Animations>
         </AnimationTimeline>
-
         <AnimationTimeline name="CenterScreenRollingMeterProgressTransition">
             <Animations>
                 <CustomAnimation>
@@ -98,7 +87,6 @@
                 </CustomAnimation>
             </Animations>
         </AnimationTimeline>
-
         <AnimationTimeline name="CenterScreenBackgroundFadeIn">
             <Animations>
                 <AlphaAnimation duration="200" startAlpha="0" endAlpha="0.9">
@@ -108,13 +96,11 @@
                 </AlphaAnimation>
             </Animations>
         </AnimationTimeline>
-
         <AnimationTimeline name="CenterScreenBackgroundFadeOut">
             <Animations>
-                <AlphaAnimation duration="200" startAlpha="0.9" endAlpha="0" />
+                <AlphaAnimation duration="200" startAlpha="0.9" endAlpha="0"/>
             </Animations>
         </AnimationTimeline>
-
         <AnimationTimeline name="CenterScreenEndDunBuffAddedAnimation">
             <Animations>
                 <AlphaAnimation duration="1000" delay="500" startAlpha="0" endAlpha="1">
@@ -122,13 +108,11 @@
                         return ZO_EaseOutQuadratic(progress)
                     </EasingFunction>
                 </AlphaAnimation>
-
                 <CustomAnimation duration="1000" delay="2500">
                     <UpdateFunction>
                         ZO_CenterScreenEndlessDungeonBuffAddedAnimation_OnUpdate(self, progress)
                     </UpdateFunction>
                 </CustomAnimation>
-
                 <AlphaAnimation duration="1000" delay="2500" startAlpha="1" endAlpha="0">
                     <EasingFunction>
                         return ZO_EaseInQuintic(progress)
@@ -137,92 +121,77 @@
             </Animations>
         </AnimationTimeline>
     </Animations>
-
     <Controls>
         <Control name="ZO_CenterScreenAnnounce_RollingMeterProgressTemplate" resizeToFitDescendents="true" resizeToFitConstrains="X" virtual="true">
-            <Dimensions y="40" />
-
+            <Dimensions y="40"/>
             <OnInitialized>
                 ZO_CenterScreenAnnounce_RollingMeterProgress_OnInitialized(self)
             </OnInitialized>
-
             <Controls>
                 <Texture name="$(parent)Icon">
-                    <Anchor point="TOPLEFT" offsetY="5" />
-                    <Dimensions x="40" y="40" />
+                    <Anchor point="TOPLEFT" offsetY="5"/>
+                    <Dimensions x="40" y="40"/>
                 </Texture>
-
                 <Control name="$(parent)Label" inherits="ZO_RollingMeterLabel">
-                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="2" />
-                    <Dimensions y="40" />
+                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="2"/>
+                    <Dimensions y="40"/>
                 </Control>
             </Controls>
         </Control>
-
         <Control name="ZO_CenterScreenAnnounceCountdownTextTemplate" virtual="true">
             <Controls>
                 <Label name="$(parent)Countdown" horizontalAlignment="CENTER">
-                    <Anchor point="CENTER" />
+                    <Anchor point="CENTER"/>
                 </Label>
-                <Texture name="$(parent)EndImage" >
-                    <Dimensions x="128" y="128" />
-                    <Anchor point="CENTER" />
+                <Texture name="$(parent)EndImage">
+                    <Dimensions x="128" y="128"/>
+                    <Anchor point="CENTER"/>
                 </Texture>
             </Controls>
         </Control>
-
         <Label name="ZO_CenterScreenAnnounceTextTemplate" horizontalAlignment="CENTER" virtual="true">
-            <Dimensions x="1280" />
-            <Anchor point="TOP" />
+            <Dimensions x="1280"/>
+            <Anchor point="TOP"/>
         </Label>
-
-        <Label name="ZO_CenterScreenAnnounceLargeTextTemplate" inherits="ZO_CenterScreenAnnounceTextTemplate" modifyTextType="UPPERCASE" verticalAlignment="CENTER" virtual="true" >
+        <Label name="ZO_CenterScreenAnnounceLargeTextTemplate" inherits="ZO_CenterScreenAnnounceTextTemplate" modifyTextType="UPPERCASE" verticalAlignment="CENTER" virtual="true">
             <Dimensions y="64"/>
         </Label>
-        <Label name="ZO_CenterScreenAnnounceSmallTextTemplate" inherits="ZO_CenterScreenAnnounceTextTemplate" virtual="true" >
+        <Label name="ZO_CenterScreenAnnounceSmallTextTemplate" inherits="ZO_CenterScreenAnnounceTextTemplate" virtual="true">
             <Controls>
                 <Texture name="$(parent)Icon" level="3" hidden="true">
-                    <Dimensions x="50" y="50" />
-                    <Anchor point="RIGHT" relativePoint="LEFT" offsetX="-5" />
+                    <Dimensions x="50" y="50"/>
+                    <Anchor point="RIGHT" relativePoint="LEFT" offsetX="-5"/>
                     <Controls>
                         <Texture name="$(parent)BG" hidden="true" level="2">
-                            <AnchorFill />
+                            <AnchorFill/>
                         </Texture>
-
                         <Texture name="$(parent)Frame" layer="CONTROLS">
-                            <AnchorFill />
+                            <AnchorFill/>
                         </Texture>
                     </Controls>
                 </Texture>
             </Controls>
         </Label>
-
         <Scroll name="ZO_CenterScreenAnnounceLargeTextLineTemplate" virtual="true">
-            <FadeGradient x1="1" y1="0" size1="512" x2="-1" y2="0" size2="512" />
-
+            <FadeGradient x1="1" y1="0" size1="512" x2="-1" y2="0" size2="512"/>
             <Controls>
                 <Label name="$(parent)Text" inherits="ZO_CenterScreenAnnounceLargeTextTemplate">
                     <Anchor point="TOP" relativeTo="$(grandparent)MajorLineContainer" relativePoint="BOTTOM"/>
                     <Controls>
-                        <Label name="$(parent)Combined" inherits="ZO_CenterScreenAnnounceSmallTextTemplate" />
-
+                        <Label name="$(parent)Combined" inherits="ZO_CenterScreenAnnounceSmallTextTemplate"/>
                         <Texture name="$(parent)LargeInformationIcon" level="3" hidden="true">
-                            <Dimensions x="64" y="64" />
+                            <Dimensions x="64" y="64"/>
                             <Anchor point="TOP" relativeTo="$(parent)Combined" relativePoint="BOTTOM" offsetY="10"/>
                         </Texture>
-
                         <Control name="$(parent)RaidCompleteText" inherits="ZO_RaidCompleteText">
-                            <Anchor point="TOP" relativePoint="BOTTOM" />
+                            <Anchor point="TOP" relativePoint="BOTTOM"/>
                         </Control>
-
-                        <Control name="$(parent)ScryingUpdatedSection" resizeToFitDescendents="true" />
-
-                        <Control name="$(parent)RollingMeterProgressSection" resizeToFitDescendents="true" />
+                        <Control name="$(parent)ScryingUpdatedSection" resizeToFitDescendents="true"/>
+                        <Control name="$(parent)RollingMeterProgressSection" resizeToFitDescendents="true"/>
                     </Controls>
                 </Label>
             </Controls>
         </Scroll>
-            
         <Control name="ZO_CenterScreenAnnounce_LargeTextContainer_Keyboard_Template" virtual="true">
             <Controls>
                 <Label name="$(parent)Text" font="ZoFontCenterScreenAnnounceLarge">
@@ -230,50 +199,40 @@
                         <Label name="$(parent)Combined" font="ZoFontCenterScreenAnnounceSmall">
                             <Anchor point="TOP" relativePoint="BOTTOM" offsetY="5"/>
                         </Label>
-
                         <Control name="$(parent)RaidCompleteText">
                             <Anchor point="TOP" relativePoint="BOTTOM" offsetY="10"/>
                             <Controls>
-                                <Label name="$(parent)TimeAmount" font="ZoFontAnnounce" />
-
-                                <Label name="$(parent)TimeLabel" font="ZoFontAnnounce" text="SI_TRIAL_COMPLETE_TOTAL_TIME"  modifyTextType="NONE">
+                                <Label name="$(parent)TimeAmount" font="ZoFontAnnounce"/>
+                                <Label name="$(parent)TimeLabel" font="ZoFontAnnounce" text="SI_TRIAL_COMPLETE_TOTAL_TIME" modifyTextType="NONE">
                                     <Anchor point="RIGHT" relativeTo="$(parent)TimeAmount" relativePoint="LEFT" offsetX="-5"/>
                                 </Label>
-
-                                <Label name="$(parent)ScoreAmount" font="ZoFontAnnounce" >
+                                <Label name="$(parent)ScoreAmount" font="ZoFontAnnounce">
                                     <Anchor point="RIGHT" relativeTo="$(parent)TimeLabel" relativePoint="LEFT" offsetX="-20"/>
                                 </Label>
-
-                                <Label name="$(parent)ScoreLabel" font="ZoFontAnnounce" text="SI_TRIAL_COMPLETE_FINAL_SCORE"  modifyTextType="NONE">
+                                <Label name="$(parent)ScoreLabel" font="ZoFontAnnounce" text="SI_TRIAL_COMPLETE_FINAL_SCORE" modifyTextType="NONE">
                                     <Anchor point="RIGHT" relativeTo="$(parent)ScoreAmount" relativePoint="LEFT" offsetX="-5"/>
                                 </Label>
-
                                 <Label name="$(parent)VitalityLabel" font="ZoFontAnnounce" text="SI_TRIAL_COMPLETE_VITALITY_BONUS" modifyTextType="NONE">
                                     <Anchor point="LEFT" relativeTo="$(parent)TimeAmount" relativePoint="RIGHT" offsetX="20"/>
                                 </Label>
-
-                                <Label name="$(parent)VitalityAmount" font="ZoFontAnnounce" >
+                                <Label name="$(parent)VitalityAmount" font="ZoFontAnnounce">
                                     <Anchor point="LEFT" relativeTo="$(parent)VitalityLabel" relativePoint="RIGHT" offsetX="5"/>
                                 </Label>
-
-                                <Label name="$(parent)VitalityPercent" font="ZoFontAnnounce" >
+                                <Label name="$(parent)VitalityPercent" font="ZoFontAnnounce">
                                     <Anchor point="LEFT" relativeTo="$(parent)VitalityIcon" relativePoint="RIGHT" offsetX="5"/>
                                 </Label>
                             </Controls>
                         </Control>
-
                         <Control name="$(parent)ScryingUpdatedSection">
-                            <Anchor point="TOP" relativeTo="$(parent)Combined" relativePoint="BOTTOM" offsetY="10" />
+                            <Anchor point="TOP" relativeTo="$(parent)Combined" relativePoint="BOTTOM" offsetY="10"/>
                         </Control>
-
                         <Control name="$(parent)RollingMeterProgressSection" override="true">
-                            <Anchor point="TOP" relativeTo="$(parent)Combined" relativePoint="BOTTOM" offsetY="10" />
+                            <Anchor point="TOP" relativeTo="$(parent)Combined" relativePoint="BOTTOM" offsetY="10"/>
                         </Control>
                     </Controls>
                 </Label>
             </Controls>
         </Control>
-
         <Control name="ZO_CenterScreenAnnounce_LargeTextContainer_Gamepad_Template" virtual="true">
             <Controls>
                 <Label name="$(parent)Text" font="ZoFontGamepadBold48">
@@ -281,75 +240,57 @@
                         <Label name="$(parent)Combined" font="ZoFontGamepad42">
                             <Anchor point="TOP" relativePoint="BOTTOM" offsetY="10"/>
                         </Label>
-
                         <Control name="$(parent)RaidCompleteText">
                             <Anchor point="TOP" relativePoint="BOTTOM" offsetY="10"/>
                             <Controls>
-                                <Label name="$(parent)TimeAmount" font="ZoFontGamepad42" /> 
-
-                                <Label name="$(parent)TimeLabel" font="ZoFontGamepad27" text="SI_TRIAL_COMPLETE_TOTAL_TIME"  modifyTextType="UPPERCASE">
+                                <Label name="$(parent)TimeAmount" font="ZoFontGamepad42"/>
+                                <Label name="$(parent)TimeLabel" font="ZoFontGamepad27" text="SI_TRIAL_COMPLETE_TOTAL_TIME" modifyTextType="UPPERCASE">
                                     <Anchor point="RIGHT" relativeTo="$(parent)TimeAmount" relativePoint="LEFT" offsetX="-10" offsetY="5"/>
                                 </Label>
-
                                 <Label name="$(parent)ScoreAmount" font="ZoFontGamepad42">
                                     <Anchor point="RIGHT" relativeTo="$(parent)TimeLabel" relativePoint="LEFT" offsetX="-20" offsetY="-5"/>
                                 </Label>
-
                                 <Label name="$(parent)ScoreLabel" font="ZoFontGamepad27" text="SI_TRIAL_COMPLETE_FINAL_SCORE" modifyTextType="UPPERCASE">
                                     <Anchor point="RIGHT" relativeTo="$(parent)ScoreAmount" relativePoint="LEFT" offsetX="-10" offsetY="5"/>
                                 </Label>
-
                                 <Label name="$(parent)VitalityLabel" font="ZoFontGamepad27" text="SI_TRIAL_COMPLETE_VITALITY_BONUS" modifyTextType="UPPERCASE">
                                     <Anchor point="LEFT" relativeTo="$(parent)TimeAmount" relativePoint="RIGHT" offsetX="20" offsetY="5"/>
                                 </Label>
-
-                                <Label name="$(parent)VitalityAmount" font="ZoFontGamepad42" >
+                                <Label name="$(parent)VitalityAmount" font="ZoFontGamepad42">
                                     <Anchor point="LEFT" relativeTo="$(parent)VitalityLabel" relativePoint="RIGHT" offsetX="10" offsetY="-5"/>
                                 </Label>
-
-                                <Label name="$(parent)VitalityPercent" font="ZoFontGamepad42" >
-                                    <Anchor point="LEFT" relativeTo="$(parent)VitalityIcon" relativePoint="RIGHT" offsetX="10" />
+                                <Label name="$(parent)VitalityPercent" font="ZoFontGamepad42">
+                                    <Anchor point="LEFT" relativeTo="$(parent)VitalityIcon" relativePoint="RIGHT" offsetX="10"/>
                                 </Label>
                             </Controls>
                         </Control>
-
                         <Control name="$(parent)ScryingUpdatedSection">
-                            <Anchor point="TOP" relativeTo="$(parent)Combined" relativePoint="BOTTOM" offsetY="20" />
+                            <Anchor point="TOP" relativeTo="$(parent)Combined" relativePoint="BOTTOM" offsetY="20"/>
                         </Control>
-
                         <Control name="$(parent)RollingMeterProgressSection" override="true">
-                            <Anchor point="TOP" relativeTo="$(parent)Combined" relativePoint="BOTTOM" offsetY="20" />
+                            <Anchor point="TOP" relativeTo="$(parent)Combined" relativePoint="BOTTOM" offsetY="20"/>
                         </Control>
                     </Controls>
                 </Label>
             </Controls>
         </Control>
-
         <Control name="ZO_RaidCompleteText" virtual="true">
             <Controls>
                 <Label name="$(parent)TimeAmount" horizontalAlignment="CENTER">
                     <Anchor point="TOP" relativePoint="BOTTOM"/>
                 </Label>
-
-                <Label name="$(parent)TimeLabel" text="SI_TRIAL_COMPLETE_TOTAL_TIME" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" />
-
-                <Label name="$(parent)ScoreAmount" />
-
-                <Label name="$(parent)ScoreLabel" text="SI_TRIAL_COMPLETE_FINAL_SCORE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" />
-
-                <Label name="$(parent)VitalityLabel" text="SI_TRIAL_COMPLETE_VITALITY_BONUS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" />
-
-                <Label name="$(parent)VitalityAmount" />
-
+                <Label name="$(parent)TimeLabel" text="SI_TRIAL_COMPLETE_TOTAL_TIME" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"/>
+                <Label name="$(parent)ScoreAmount"/>
+                <Label name="$(parent)ScoreLabel" text="SI_TRIAL_COMPLETE_FINAL_SCORE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"/>
+                <Label name="$(parent)VitalityLabel" text="SI_TRIAL_COMPLETE_VITALITY_BONUS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"/>
+                <Label name="$(parent)VitalityAmount"/>
                 <Texture name="$(parent)VitalityIcon" textureFile="EsoUI/Art/Trials/VitalityDepletion.dds">
                     <Dimensions x="40" y="40"/>
                     <Anchor point="LEFT" relativeTo="$(parent)VitalityAmount" relativePoint="RIGHT" offsetX="20"/>
                 </Texture>
-
-                <Label name="$(parent)VitalityPercent" />
+                <Label name="$(parent)VitalityPercent"/>
             </Controls>
         </Control>
-
         <Texture name="ZO_CenterScreenAnnounce_ScryingUpdated_Icon" textureFile="EsoUI/Art/Antiquities/digsite_unknown.dds" virtual="true">
             <Dimensions x="50" y="50"/>
             <OnInitialized>
@@ -361,63 +302,52 @@
                 </Texture>
             </Controls>
         </Texture>
-
         <Control name="ZO_CenterScreenAnnounce_Keyboard_Template" virtual="true">
-            <Anchor point="TOP" relativeTo="GuiRoot" offsetY="230" />
-
+            <Anchor point="TOP" relativeTo="GuiRoot" offsetY="230"/>
             <Controls>
                 <Control name="$(parent)MajorLineContainer">
-                    <Anchor point="TOP" offsetY="10" />
+                    <Anchor point="TOP" offsetY="10"/>
                 </Control>
                 <Control name="$(parent)CountdownLineContainer">
-                    <Anchor point="TOP" offsetY="80" />
+                    <Anchor point="TOP" offsetY="80"/>
                 </Control>
             </Controls>
         </Control>
-
         <Control name="ZO_CenterScreenAnnounce_Gamepad_Template" virtual="true">
-            <Anchor point="TOP" relativeTo="GuiRoot" offsetY="290" />
-
+            <Anchor point="TOP" relativeTo="GuiRoot" offsetY="290"/>
             <Controls>
                 <Control name="$(parent)MajorLineContainer">
-                    <Anchor point="TOP" />
+                    <Anchor point="TOP"/>
                 </Control>
                 <Control name="$(parent)CountdownLineContainer">
-                    <Anchor point="TOP" offsetY="10" />
+                    <Anchor point="TOP" offsetY="10"/>
                 </Control>
             </Controls>
         </Control>
-
         <TopLevelControl name="ZO_CenterScreenEndDunBuffAdded" tier="HIGH" level="ZO_HIGH_TIER_CENTER_SCREEN_ANNOUNCE">
             <Controls>
                 <Texture name="$(parent)Icon" alpha="0" hidden="true">
-                    <TextureCoords left="-0.25" right="1.25" top="-0.25" bottom="1.25" />
+                    <TextureCoords left="-0.25" right="1.25" top="-0.25" bottom="1.25"/>
                 </Texture>
             </Controls>
         </TopLevelControl>
-
         <TopLevelControl name="ZO_CenterScreenAnnounce" tier="HIGH" level="ZO_HIGH_TIER_CENTER_SCREEN_ANNOUNCE">
-            <Dimensions x="1160" />
-
+            <Dimensions x="1160"/>
             <OnInitialized>
                 ZO_CenterScreenAnnounce_Initialize(self)
             </OnInitialized>
-
             <Controls>
-                <Control name="$(parent)MajorLineContainer" />
-                
-                <Control name="$(parent)CountdownLineContainer" />
-            
-                <Control name="$(parent)SmallLineContainer" resizeToFitDescendents="true" >
+                <Control name="$(parent)MajorLineContainer"/>
+                <Control name="$(parent)CountdownLineContainer"/>
+                <Control name="$(parent)SmallLineContainer" resizeToFitDescendents="true">
                     <Anchor point="TOP" relativeTo="$(parent)MajorLineContainer" relativePoint="BOTTOM" offsetY="20"/>
                 </Control>
-
                 <Control name="$(parent)BackgroundContainer" hidden="true">
-                    <Anchor point="LEFT" relativeTo="GuiRoot" relativePoint="LEFT" />
-                    <Anchor point="RIGHT" relativeTo="GuiRoot" relativePoint="RIGHT" />
+                    <Anchor point="LEFT" relativeTo="GuiRoot" relativePoint="LEFT"/>
+                    <Anchor point="RIGHT" relativeTo="GuiRoot" relativePoint="RIGHT"/>
                     <Controls>
                         <Texture name="$(parent)BG" textureFile="EsoUI/Art/Windows/Gamepad/gp_HUD_Window.dds">
-                            <Dimensions x="100%" />
+                            <Dimensions x="100%"/>
                         </Texture>
                     </Controls>
                 </Control>

@@ -132,10 +132,9 @@ function ZO_CampaignOverviewManager:InitializeCategories()
     self.categoryFragmentToNodeLookup = {}
     self.nodeList = {}
 
-    local function RefreshNode(control, categoryData, open, enabled)
+    local function RefreshNode(control, categoryData, open)
         if control.icon then
             local iconTexture = open and categoryData.pressedIcon or categoryData.normalIcon
-            iconTexture = not enabled and categoryData.disabledIcon or iconTexture
             if type(iconTexture) == "function" then
                 iconTexture = iconTexture()
             end
@@ -156,7 +155,7 @@ function ZO_CampaignOverviewManager:InitializeCategories()
 
             statusIcon:Show()
 
-            ZO_IconHeader_Setup(control, open, enabled)
+            ZO_IconHeader_Setup(control, open)
         end
     end
 
@@ -165,13 +164,13 @@ function ZO_CampaignOverviewManager:InitializeCategories()
         control.text:SetModifyTextType(MODIFY_TEXT_TYPE_UPPERCASE)
 
         local selected = node.selected or open
-        RefreshNode(control, categoryData, selected, not disabled)
+        RefreshNode(control, categoryData, selected)
     end
 
     local function SetupParentNode(node, control, categoryData, open, userRequested)
         SetupNode(node, control, categoryData, open)
 
-        if node.enabled and open and userRequested then
+        if open and userRequested then
             local selectedNode = self.navigationTree:GetSelectedNode()
             if not selectedNode or selectedNode.parentNode ~= node then
                 self.navigationTree:SelectFirstChild(node)
@@ -223,7 +222,7 @@ function ZO_CampaignOverviewManager:InitializeCategories()
             end
         end
 
-        RefreshNode(control, categoryData, selected, control.enabled)
+        RefreshNode(control, categoryData, selected)
     end
 
     local CHILD_SPACING = 0

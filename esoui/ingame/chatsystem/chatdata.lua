@@ -372,7 +372,7 @@ local ChannelInfo =
 }
 
 --TODO: Allow these in console when we implement tabs and filters
-if not IsConsoleUI() then
+if not ZO_IsConsoleOrGameCoreUI() then
     for language = OFFICIAL_LANGUAGE_ITERATION_BEGIN, OFFICIAL_LANGUAGE_ITERATION_END do
         local channel = ZO_OFFICIAL_LANGUAGE_TO_CHAT_INFO[language].channel
         ChannelInfo[channel] =

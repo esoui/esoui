@@ -10,20 +10,16 @@
             </OnMouseExit>
             <Controls>
                 <Label name="$(parent)Name" inherits="ZO_GuildFinder_Application_Keyboard_RowLabel">
-                    <Anchor point="LEFT" />
-                    <Dimensions x="400" />
+                    <Anchor point="LEFT"/>
+                    <Dimensions x="400"/>
                 </Label>
                 <Label name="$(parent)Expires" inherits="ZO_GuildFinder_Application_Keyboard_RowLabel" horizontalAlignment="RIGHT">
                     <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Name" offsetX="105"/>
-                    <Dimensions x="75" />
+                    <Dimensions x="75"/>
                 </Label>
                 <Button name="$(parent)Rescind" inherits="ZO_IgnoreListRowButton">
                     <Anchor point="LEFT" relativeTo="$(parent)Expires" relativePoint="RIGHT" offsetX="20"/>
-                    <Textures
-                        normal="EsoUI/Art/Buttons/decline_up.dds"
-                        pressed="EsoUI/Art/Buttons/decline_down.dds"
-                        mouseOver="EsoUI/Art/Buttons/decline_over.dds"
-                    />
+                    <Textures normal="EsoUI/Art/Buttons/decline_up.dds" pressed="EsoUI/Art/Buttons/decline_down.dds" mouseOver="EsoUI/Art/Buttons/decline_over.dds"/>
                     <OnMouseEnter>
                         ZO_GuildBrowser_ApplicationsList_Row_OnMouseEnter(self:GetParent())
                     </OnMouseEnter>
@@ -36,33 +32,31 @@
                 </Button>
             </Controls>
         </Control>
-
         <TopLevelControl name="ZO_GuildBrowser_ApplicationsList_Keyboard_TopLevel" inherits="ZO_RightPanelFootPrint" hidden="true">
             <OnInitialized>
                 ZO_GuildBrowser_ApplicationsList_Keyboard_OnInitialized(self)
             </OnInitialized>
             <Controls>
                 <Control name="$(parent)Headers">
-                    <Anchor point="TOPLEFT" relativeTo="ZO_GuildBrowser_Keyboard_TopLevelList" relativePoint="TOPRIGHT" offsetX="40" />
+                    <Anchor point="TOPLEFT" relativeTo="ZO_GuildBrowser_Keyboard_TopLevelList" relativePoint="TOPRIGHT" offsetX="40"/>
                     <Dimensions y="ZO_GUILD_FINDER_APPLICATIONS_LIST_KEYBOARD_ROW_HEIGHT"/>
                     <Controls>
                         <Control name="$(parent)GuildName" inherits="ZO_SortHeader">
-                            <Anchor point="TOPLEFT" />
-                            <Dimensions x="255" y="ZO_GUILD_FINDER_APPLICATIONS_LIST_KEYBOARD_ROW_HEIGHT" />
+                            <Anchor point="TOPLEFT"/>
+                            <Dimensions x="255" y="ZO_GUILD_FINDER_APPLICATIONS_LIST_KEYBOARD_ROW_HEIGHT"/>
                             <OnInitialized>
                                 ZO_SortHeader_Initialize(self, GetString("SI_GUILDMETADATAATTRIBUTE", GUILD_META_DATA_ATTRIBUTE_NAME), "guildName", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
                             </OnInitialized>
                         </Control>
                         <Control name="$(parent)Expires" inherits="ZO_SortHeader">
                             <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)GuildName" offsetX="250"/>
-                            <Dimensions x="75" y="ZO_GUILD_FINDER_APPLICATIONS_LIST_KEYBOARD_ROW_HEIGHT" />
+                            <Dimensions x="75" y="ZO_GUILD_FINDER_APPLICATIONS_LIST_KEYBOARD_ROW_HEIGHT"/>
                             <OnInitialized>
                                 ZO_SortHeader_Initialize(self, GetString(SI_GUILD_FINDER_APPLICATIONS_SORT_HEADER_EXPIRATION), "durationS", ZO_SORT_ORDER_DOWN, TEXT_ALIGN_RIGHT, "ZoFontGameLargeBold")
                             </OnInitialized>
                         </Control>
                     </Controls>
                 </Control>
-
                 <Control name="$(parent)List" inherits="ZO_ScrollList">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Headers" relativePoint="BOTTOMLEFT" offsetY="3"/>
                     <Anchor point="BOTTOMRIGHT" offsetX="-10" offsetY="-10"/>

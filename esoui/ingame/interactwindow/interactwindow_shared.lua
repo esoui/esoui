@@ -640,7 +640,20 @@ local function SetupSpectacleProgressReward(control, name, icon)
     control:SetHidden(false)
 end
 
-internalassert(REWARD_TYPE_MAX_VALUE == 16, "Check if new RewardType needs REWARD_CREATORS")
+local function SetupAdventureZoneFactionPointsReward(control, name, icon)
+    local nameControl = control:GetNamedChild("Name")
+    local iconTexture = control:GetNamedChild("Icon")
+    iconTexture:SetHidden(false)
+    iconTexture:SetTexture(icon)
+    control:GetNamedChild("StackSize"):SetHidden(true)
+
+    nameControl:SetText(name)
+    nameControl:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_SELECTED))
+    control.allowTooltip = false
+    control:SetHidden(false)
+end
+
+internalassert(REWARD_TYPE_MAX_VALUE == 17, "Check if new RewardType needs REWARD_CREATORS")
 local REWARD_CREATORS =
 {
     [REWARD_TYPE_AUTO_ITEM] =
@@ -666,9 +679,9 @@ local REWARD_CREATORS =
         function(control, name, amount, currencyOptions)
             SetupCurrencyReward(control, CURT_TELVAR_STONES, amount, currencyOptions)
         end,
-    [REWARD_TYPE_EVENT_TICKETS] =
+    [REWARD_TYPE_TRADE_BARS] =
         function(control, name, amount, currencyOptions)
-            SetupCurrencyReward(control, CURT_EVENT_TICKETS, amount, currencyOptions)
+            SetupCurrencyReward(control, CURT_TRADE_BARS, amount, currencyOptions)
         end,
     [REWARD_TYPE_MONEY] =
         function(control, name, amount, currencyOptions)
@@ -709,6 +722,10 @@ local REWARD_CREATORS =
     [REWARD_TYPE_SPECTACLE_PROGRESS] =
         function(control, name, amount, icon)
             SetupSpectacleProgressReward(control, name, icon)
+        end,
+    [REWARD_TYPE_ADVENTURE_ZONE_FACTION_POINTS] =
+        function(control, name, amount, icon)
+            SetupAdventureZoneFactionPointsReward(control, name, icon)
         end,
 }
 
@@ -782,6 +799,9 @@ function ZO_SharedInteraction:GetRewardData(journalQuestIndex, isGamepad)
                 else
                     rewardData.icon = GetActiveSpectacleEventLootIconKeyboard(spectacleId)
                 end
+            elseif rewardType == REWARD_TYPE_ADVENTURE_ZONE_FACTION_POINTS then
+                local faction = GetUnitAdventureZoneFaction("player")
+                rewardData.icon = ZO_GetAdventureZoneFactionIcon64(faction)
             end
 
             table.insert(data, rewardData)

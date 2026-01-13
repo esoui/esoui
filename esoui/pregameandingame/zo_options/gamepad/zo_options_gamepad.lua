@@ -88,6 +88,10 @@ function ZO_GamepadOptions:InitializeScenes()
             self:DisableCurrentList()
             self:DeactivateSelectedControl()
             self:SaveCachedSettings()
+            -- SaveSettings only exists in Pregame
+            if ZO_IsPregameUI() and SaveSettings then
+                SaveSettings()
+            end
             ZO_SavePlayerConsoleProfile()
             SetCameraOptionsPreviewModeEnabled(false, CAMERA_OPTIONS_PREVIEW_NONE)
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.panelKeybindDescriptor)
@@ -525,7 +529,7 @@ function ZO_GamepadOptions:InitializeControl(control, selected)
     if not control.data.enabled and control.data.disabledText then
         label:SetText(self:GetTextEntry(control.data.disabledText, control))
     else
-        if IsConsoleUI() and control.data.consoleTextOverride then
+        if ZO_IsConsoleOrGameCoreUI() and control.data.consoleTextOverride then
             label:SetText(self:GetTextEntry(control.data.consoleTextOverride, control))
         elseif control.data.gamepadTextOverride then
             label:SetText(self:GetTextEntry(control.data.gamepadTextOverride, control))
@@ -564,7 +568,7 @@ end
 
 do
     internalassert(GAMEPAD_TYPE_MAX_VALUE == 7, "Make sure every gamepad type is properly handled in ZO_GamepadOptions:RefreshGamepadInfoPanel()")
-    local GAMEPAD_TYPE_HAS_SOUTHERN_LEFT_STICK = ZO_CreateSetFromArguments(GAMEPAD_TYPE_PS4, GAMEPAD_TYPE_PS4_NO_TOUCHPAD, GAMEPAD_TYPE_PS5, GAMEPAD_TYPE_STADIA, GAMEPAD_TYPE_SWITCH)
+    local GAMEPAD_TYPE_HAS_SOUTHERN_LEFT_STICK = ZO_CreateSetFromArguments(GAMEPAD_TYPE_PS4, GAMEPAD_TYPE_PS5, GAMEPAD_TYPE_STADIA, GAMEPAD_TYPE_SWITCH)
     local GAMEPAD_TYPE_HAS_SWAPPED_FACE_BUTTONS = ZO_CreateSetFromArguments(GAMEPAD_TYPE_SWITCH)
     function ZO_GamepadOptions:RefreshGamepadInfoPanel()
         if not self:HasInfoPanel() then

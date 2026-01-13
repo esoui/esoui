@@ -1,91 +1,78 @@
 <GuiXml>
     <Animations>
         <!-- ZO_MoneyInput changes to ZO_CurrencyInput -->
-        <AnimationTimeline name="MoneyInputPulse" inherits="CurrencyInputPulse" />
-        <AnimationTimeline name="MoneyInputBadInput" inherits="CurrencyInputBadInput" />
+        <AnimationTimeline name="MoneyInputPulse" inherits="CurrencyInputPulse"/>
+        <AnimationTimeline name="MoneyInputBadInput" inherits="CurrencyInputBadInput"/>
         <!-- Companion skills refactor -->
-        <AnimationTimeline name="GamepadSkillsSingleAssignActionBarAnimation" inherits="ZO_GamepadSkillsActionBarFocusAnimation" />
+        <AnimationTimeline name="GamepadSkillsSingleAssignActionBarAnimation" inherits="ZO_GamepadSkillsActionBarFocusAnimation"/>
         <!-- Pending loop refactor -->
-        <AnimationTimeline name="ZO_Restyle_PendingLoop" inherits="ZO_PendingLoop_Timeline" />
+        <AnimationTimeline name="ZO_Restyle_PendingLoop" inherits="ZO_PendingLoop_Timeline"/>
     </Animations>
-    
     <Controls>
         <!-- ZO_MoneyInput changes to ZO_CurrencyInput -->
-        <Backdrop name="ZO_DefaultMoneyInputField" inherits="ZO_DefaultCurrencyInputField" virtual="true" />
+        <Backdrop name="ZO_DefaultMoneyInputField" inherits="ZO_DefaultCurrencyInputField" virtual="true"/>
         <!-- Companion skills refactor -->
-        <Control name="ZO_SkillsSkillHeader" inherits="ZO_Skills_SkillLineInfo_Keyboard" virtual="true" />
-        <Control name="GamepadSkillsSimpleActionButtonTemplate" inherits="ZO_GamepadSkillsActionButtonNoKeybind" virtual="true" />
-        <Control name="GamepadSkillsActionButtonTemplate" inherits="ZO_GamepadSkillsActionButton" virtual="true" />
-        <Control name="GamepadSkillsActionBarTemplate" inherits="ZO_GamepadSkillsPlayerActionBar" virtual="true" />
+        <Control name="ZO_SkillsSkillHeader" inherits="ZO_Skills_SkillLineInfo_Keyboard" virtual="true"/>
+        <Control name="GamepadSkillsSimpleActionButtonTemplate" inherits="ZO_GamepadSkillsActionButtonNoKeybind" virtual="true"/>
+        <Control name="GamepadSkillsActionButtonTemplate" inherits="ZO_GamepadSkillsActionButton" virtual="true"/>
+        <Control name="GamepadSkillsActionBarTemplate" inherits="ZO_GamepadSkillsPlayerActionBar" virtual="true"/>
         <!-- EditBox default text has moved to the C++ control -->
-        <EditBox name="ZO_EditDefaultText" defaultTextColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DEFAULT_TEXT" virtual="true" />
-        <EditBox name="ZO_EditDefaultText_Gamepad" defaultTextColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED" virtual="true" />
+        <EditBox name="ZO_EditDefaultText" defaultTextColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DEFAULT_TEXT" virtual="true"/>
+        <EditBox name="ZO_EditDefaultText_Gamepad" defaultTextColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED" virtual="true"/>
         <!-- Old way used in one place that isn't a good model anymore -->
         <Control name="ZO_UnderlinedEditBackdrop_Keyboard" virtual="true">
             <OnInitialized>
                 ZO_SingleLineEditContainerSize_Keyboard_OnInitialized(self)
             </OnInitialized>
-
             <Controls>
                 <Texture name="$(parent)Background" textureFile="EsoUI/Art/Login/Keyboard/Login_TextLineShadow.dds">
-                    <Dimensions x="512" y="64" />
+                    <Dimensions x="512" y="64"/>
                     <Anchor point="TOPLEFT" offsetX="-2" offsetY="-10"/>
                 </Texture>
             </Controls>
         </Control>
-        
         <Control name="ZO_EditBox" inherits="ZO_UnderlinedEditBackdrop_Keyboard" virtual="true">
             <Controls>
-                <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" />
-
+                <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED"/>
                 <Label name="$(parent)Empty" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED" layer="BACKGROUND" hidden="true">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Edit"/>
                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Edit"/>
                 </Label>
             </Controls>
         </Control>
-
         <!-- Combo box refactor, ZO_ComboBox can now be used in place of ZO_ScrollableComboBox -->
-        <Control name="ZO_ScrollableComboBoxItem" inherits="ZO_ComboBoxEntry" level="3" mouseEnabled="true" virtual="true" />
-        <Control name="ZO_ScrollableComboBox" mouseEnabled="true" inherits="ZO_ComboBox" virtual="true" />
-
+        <Control name="ZO_ScrollableComboBoxItem" inherits="ZO_ComboBoxEntry" level="3" mouseEnabled="true" virtual="true"/>
+        <Control name="ZO_ScrollableComboBox" mouseEnabled="true" inherits="ZO_ComboBox" virtual="true"/>
         <Control name="ZO_MultiselectComboBox" mouseEnabled="true" virtual="true">
-            <Dimensions x="135" y="31" />
+            <Dimensions x="135" y="31"/>
             <OnInitialized>
                 ZO_MultiSelectComboBox:New(self)
             </OnInitialized>
-
             <OnMouseUp>
                 ZO_ComboBoxDropdown_Keyboard.OnClicked(self, button, upInside)
             </OnMouseUp>
-
             <Controls>
                 <Backdrop name="$(parent)BG" inherits="ZO_DefaultBackdrop">
-                    <AnchorFill />
+                    <AnchorFill/>
                 </Backdrop>
-
                 <Label name="$(parent)SelectedItemText" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" wrapMode="ELLIPSIS" verticalAlignment="CENTER">
-                    <Anchor point="TOPLEFT" offsetX="8" />
-                    <Anchor point="BOTTOMRIGHT" offsetX="-20" />
+                    <Anchor point="TOPLEFT" offsetX="8"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="-20"/>
                 </Label>
-
                 <Button name="$(parent)OpenDropdown" inherits="ZO_DropdownButton">
-                    <Dimensions x="16" y="16" />
-                    <Anchor point="RIGHT" offsetX="-3" />
-
+                    <Dimensions x="16" y="16"/>
+                    <Anchor point="RIGHT" offsetX="-3"/>
                     <OnClicked>
                         ZO_ComboBoxDropdown_Keyboard.OnClicked(self:GetParent(), button, upInside)
                     </OnClicked>
                 </Button>
             </Controls>
         </Control>
-
         <!-- Battleground refactor -->
-        <Control name="ZO_Battleground_Scoreboard_Alliance_Panel" inherits="ZO_Battleground_Scoreboard_Team_Panel" virtual="true" />
-        <Control name="ZO_Battleground_Scoreboard_Alliance_Panel_Keyboard_Template" inherits="ZO_Battleground_Scoreboard_Team_Panel_Keyboard_Template" virtual="true" />
-        <Control name="ZO_Battleground_Scoreboard_Alliance_Panel_Gamepad_Template" inherits="ZO_Battleground_Scoreboard_Team_Panel_Gamepad_Template" virtual="true" />
-
+        <Control name="ZO_Battleground_Scoreboard_Alliance_Panel" inherits="ZO_Battleground_Scoreboard_Team_Panel" virtual="true"/>
+        <Control name="ZO_Battleground_Scoreboard_Alliance_Panel_Keyboard_Template" inherits="ZO_Battleground_Scoreboard_Team_Panel_Keyboard_Template" virtual="true"/>
+        <Control name="ZO_Battleground_Scoreboard_Alliance_Panel_Gamepad_Template" inherits="ZO_Battleground_Scoreboard_Team_Panel_Gamepad_Template" virtual="true"/>
         <!-- Pending loop refactor -->
-        <Texture name="ZO_Restyle_PendingGlow" inherits="ZO_PendingLoop_Glow" virtual="true" />
+        <Texture name="ZO_Restyle_PendingGlow" inherits="ZO_PendingLoop_Glow" virtual="true"/>
     </Controls>
 </GuiXml>

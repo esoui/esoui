@@ -276,6 +276,14 @@ function ZO_Gamepad_ParametricList_Screen:SetScene(scene)
     self.scene = scene
 end
 
+function ZO_Gamepad_ParametricList_Screen:GetScene()
+    return self.scene
+end
+
+function ZO_Gamepad_ParametricList_Screen:GetSceneGroup()
+    return self.sceneGroup
+end
+
 function ZO_Gamepad_ParametricList_Screen:SetSceneGroup(sceneGroup)
     -- Make sure we don't register multiple callbacks
     if self.scene then

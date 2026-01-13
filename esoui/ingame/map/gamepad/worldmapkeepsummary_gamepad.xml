@@ -26,7 +26,6 @@
                 </Label>
             </Controls>
         </Control>
-        
         <TopLevelControl name="ZO_WorldMapKeepSummary_Gamepad" inherits="ZO_WorldMapKeepInfoContent_Gamepad" hidden="true">
             <OnInitialized>
                 ZO_WorldMapKeepSummary_Gamepad_OnInitialized(self)

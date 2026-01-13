@@ -145,6 +145,10 @@ function ZO_AbstractGridScrollList_Gamepad:CommitGridList()
     ZO_ScrollList_RefreshLastHoldPosition(self.list)
 end
 
+function ZO_AbstractGridScrollList_Gamepad:RefreshLastHoldPosition()
+    ZO_ScrollList_RefreshLastHoldPosition(self.list)
+end
+
 function ZO_AbstractGridScrollList_Gamepad:Activate(foregoDirectionalInput)
     if self.active ~= true then
         self.active = true
@@ -226,6 +230,17 @@ end
 function ZO_AbstractGridScrollList_Gamepad:GetHeaderNarration()
     if self.headerNarrationFunction then
         return self.headerNarrationFunction()
+    end
+end
+
+-- Folows the same rules as the main header, but plays after the selection narration and before the keybind narration
+function ZO_AbstractGridScrollList_Gamepad:SetPostHeaderNarrationFunction(postHeaderNarrationFunction)
+    self.postHeaderNarrationFunction = postHeaderNarrationFunction
+end
+
+function ZO_AbstractGridScrollList_Gamepad:GetPostHeaderNarration()
+    if self.postHeaderNarrationFunction then
+        return self.postHeaderNarrationFunction()
     end
 end
 

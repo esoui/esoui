@@ -30,6 +30,7 @@ function HousingPreviewDialog_Keyboard:InitializePurchaseButtons()
     self:InitializePurchaseButton(self.goldPurchaseOptionControl.button, function(control) self:BuyForGold(control) end)
     self:InitializePurchaseButton(self.crownsPurchaseOptionControl.button, function(control) self:BuyFromMarket(control) end)
     self:InitializePurchaseButton(self.crownGemsPurchaseOptionControl.button, function(control) self:BuyFromMarket(control) end)
+    self:InitializePurchaseButton(self.tradeBarsPurchaseOptionControl.button, function(control) self:BuyFromMarket(control) end)
 end
 
 function HousingPreviewDialog_Keyboard:InitializePurchaseButton(buttonControl, callback)

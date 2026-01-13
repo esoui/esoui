@@ -4,7 +4,6 @@
             <OnInitialized>
                 ZO_OutfitStylesBook_Keyboard_OnInitialize(self)
             </OnInitialized>
-
             <Controls>
                 <Backdrop name="$(parent)Search" override="true">
                     <Controls>
@@ -15,8 +14,7 @@
                         </EditBox>
                     </Controls>
                 </Backdrop>
-
-                <Control name="$(parent)InfoBar" override="true" hidden="true" />
+                <Control name="$(parent)InfoBar" override="true" hidden="true"/>
             </Controls>
         </TopLevelControl>
     </Controls>

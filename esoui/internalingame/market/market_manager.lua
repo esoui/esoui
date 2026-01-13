@@ -89,7 +89,7 @@ function Market_Manager:InitializePlatformErrors()
     local consoleStoreName
     local platformServiceType = GetPlatformServiceType()
 
-    if IsConsoleUI() then
+    if ZO_IsConsoleOrGameCoreUI() then
         self.insufficientFundsMainText = zo_strformat(SI_MARKET_INSUFFICIENT_FUNDS_TEXT, ZO_Currency_GetPlatformFormattedCurrencyIcon(CURT_CROWNS), ZO_GetPlatformStoreName())
     elseif platformServiceType == PLATFORM_SERVICE_TYPE_STEAM then
         self.insufficientFundsMainText = zo_strformat(SI_MARKET_INSUFFICIENT_FUNDS_TEXT_STEAM, ZO_Currency_GetPlatformFormattedCurrencyIcon(CURT_CROWNS))
@@ -139,9 +139,10 @@ do
         [MARKET_PURCHASE_RESULT_ALREADY_HAVE_QUEST] = true,
         [MARKET_PURCHASE_RESULT_ALREADY_COMPLETED_QUEST] = true,
         [MARKET_PURCHASE_RESULT_CANNOT_GRANT_QUEST] = true,
-        [MARKET_PURCHASE_RESULT_NOT_ENOUGH_ENDEAVOR_SEALS] = true,
+        [MARKET_PURCHASE_RESULT_NOT_ENOUGH_SEALS] = true,
         [MARKET_PURCHASE_RESULT_TOO_MANY_PENDING_GIFTS] = true,
         [MARKET_PURCHASE_RESULT_CAMPAIGN_LOCKED] = true,
+        [MARKET_PURCHASE_RESULT_NOT_ENOUGH_TRADE_BARS] = true,
     }
     function Market_Manager:GetMarketProductPurchaseErrorInfo(marketProductData)
         local expectedPurchaseResult = marketProductData:CouldPurchase()

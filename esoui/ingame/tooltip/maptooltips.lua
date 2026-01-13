@@ -371,3 +371,40 @@ function ZO_MapInformationTooltip_Gamepad_Mixin:AppendZoneSpectacleTooltip(spect
         tooltip:AddSection(bodySection)
     end
 end
+
+do
+    local TEAM_TYPE_TO_ZONE_DISPLAY_TYPE =
+    {
+        [TEAM_TYPE_BATTLEGROUND] = ZONE_DISPLAY_TYPE_BATTLEGROUND,
+        [TEAM_TYPE_ADVENTURE_ZONE] = ZONE_DISPLAY_TYPE_ADVENTURE_ZONE,
+    }
+
+    function ZO_MapInformationTooltip_Gamepad_Mixin:AppendTeamScores(teamType)
+        local tooltip = self.tooltip
+        local scoresSection = tooltip:AcquireSection(tooltip:GetStyle("teamScoresSection"))
+        local zoneDisplayType = TEAM_TYPE_TO_ZONE_DISPLAY_TYPE[teamType]
+        if zoneDisplayType then
+            scoresSection:AddLine(GetString("SI_ZONEDISPLAYTYPE", zoneDisplayType), tooltip:GetStyle("teamScoresHeader"))
+        end
+
+        -- Currently all team types have 3 teams. If we ever actually go to support this for BGs, we'll want to consider 2 vs 3 team BGs.
+        for teamValue = 1, 3 do
+            self:AppendTeamScore(scoresSection, teamType, teamValue)
+        end
+
+        tooltip:AddSection(scoresSection)
+    end
+end
+
+function ZO_MapInformationTooltip_Gamepad_Mixin:AppendTeamScore(scoresSection, teamType, teamValue)
+    local tooltip = self.tooltip
+    local teamName, teamIcon, teamScore, isMyTeam = ZO_Tooltip_GetTeamScoreInfo(teamType, teamValue)
+    local scoreControl = tooltip:AcquireCustomControl(tooltip:GetStyle("teamScoreEntryRow"))
+
+    scoreControl.teamNameLabel:SetText(teamName)
+    scoreControl.teamIconTexture:SetTexture(teamIcon)
+    scoreControl.scoreLabel:SetText(ZO_CommaDelimitNumber(teamScore))
+    scoreControl.myTeamIndicatorTexture:SetHidden(not isMyTeam)
+    scoreControl:SetHeight(scoreControl.scoreLabel:GetBottom() - scoreControl.teamNameLabel:GetTop())
+    scoresSection:AddCustomControl(scoreControl)
+end

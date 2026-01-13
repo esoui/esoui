@@ -184,11 +184,13 @@ do
 end
 
 function ZO_ArmoryBuildChampion_Gamepad:GamepadSingleLineAbilityEntryTemplateSetup(control, data, parentControl)
+    self:SetupRow(control, data)
     local SELECTED = true
     ZO_SharedGamepadEntry_OnSetup(control, data, SELECTED)
 end
 
 function ZO_ArmoryBuildChampion_Gamepad:ArmoryBuildChampionTextDisplayTemplateSetup(control, data, parentControl)
+    self:SetupRow(control, data)
     control.label:SetText(data.text)
 end
 

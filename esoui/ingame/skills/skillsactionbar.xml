@@ -6,11 +6,10 @@
                 self.lockIcon = self:GetNamedChild("Lock")
             </OnInitialized>
             <Controls>
-                <Texture name="$(parent)Icon" hidden="true" />
+                <Texture name="$(parent)Icon" hidden="true"/>
                 <Texture name="$(parent)Lock" hidden="true"/>
             </Controls>
         </Control>
-
         <Control name="ZO_SkillsActionBar_Control" virtual="true">
             <OnInitialized>
                 ZO_SkillsActionBar:New(self, ZO_SkillsActionBarSlot)

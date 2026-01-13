@@ -27,6 +27,9 @@ SOUNDS =
     CODEX_WINDOW_CLOSE              = "Codex_Close",
     MAP_WINDOW_OPEN                 = "Map_Open",
     MAP_WINDOW_CLOSE                = "Map_Close",
+    MAP_NAVIGATE_IN                 = "Map_Navigate_In";
+    MAP_NAVIGATE_OUT                = "Map_Navigate_Out";
+    MAP_SHOW_INFO                   = "Map_Show_Info";
     GROUP_WINDOW_OPEN               = "Group_Open",
     GROUP_WINDOW_CLOSE              = "Group_Close",
     CONTACTS_WINDOW_OPEN            = "Contacts_Open",
@@ -383,7 +386,6 @@ SOUNDS =
 
     CAMPAIGN_READY_CHECK = "Campaign_Ready_Check",
     CAMPAIGN_ENTER_CAMPAIGN = "Campaign_Enter_Campaign",
-    CAMPAIGN_QUEUE_CAMPAIGN = "Campaign_Queue_Campaign",
     CAMPAIGN_LEAVE_CAMPAIGN = "Campaign_Leave_Campaign",
 
     -- Broadcast sounds
@@ -436,6 +438,7 @@ SOUNDS =
     --Skill point allocation
     SKILL_PURCHASED                     = "Ability_SkillPurchased",
     SKILL_RESPEC_PURCHASED              = "Ability_Respec_SkillPurchased",
+    SKILL_RESPEC_CLEAR_ALL              = "Ability_Respec_ClearAll",
     SKILL_SOLD                          = "Ability_SkillSold",
     ACTIVE_SKILL_MORPH_CHOSEN           = "Ability_MorphPurchased",
     ACTIVE_SKILL_RESPEC_MORPH_CHOSEN    = "Ability_Respec_MorphPurchased",
@@ -551,6 +554,8 @@ SOUNDS =
     SKILLS_ENTER_RESPEC_MODE        = "Skills_Enter_Respec_Mode",
 
     --Stats Sounds
+    STATS_ENTER_RESPEC_MODE         = "Stats_Enter_Respec_Mode",
+    STATS_RESPEC_CLEAR_ALL          = "Stats_Respec_ClearAll",
     STATS_PURCHASE                  = "Stats_Purchase",
     GAMEPAD_STATS_SINGLE_PURCHASE   = "Console_Stats_Single_Purchase",
 
@@ -1064,8 +1069,9 @@ SOUNDS =
     ITEM_SET_EXPANDED = "ItemSet_Expanded",
     ITEM_SET_COLLAPSED = "ItemSet_Collapsed",
 
-    -- Endeavors
-    ENDEAVOR_COMPLETED = "Endeavor_Complete",
+    -- Timed Activities
+    TRACK_TIMED_ACTIVITY_CLICK = "TimedActivity_Track_Click",
+    TRACK_TIMED_ACTIVITY_UNCLICK = "TimedActivity_Track_Unclick",
 
     -- Armory
     ARMORY_OPEN = "Armory_Open",
@@ -1163,4 +1169,28 @@ SOUNDS =
     VENGEANCE_PERK_PICKUP = "VengeancePerkPickup",
     VENGEANCE_PERK_DROP = "VengeancePerkDrop",
     VENGEANCE_CHANGE_LOADOUT_PROMPT = "VengeanceChangeLoadoutPrompt",
+
+    -- Respec Cast Time
+    RESPEC_CAST_TIME_START = "RespecCastTime_Start",
+    RESPEC_CAST_TIME_COMPLETE = "RespecCastTime_Complete",
+
+    -- Tamriel Tomes
+    TAMRIEL_TOMES_BOOK_CLOSED = "TamrielTomes_BookClosed",
+    TAMRIEL_TOMES_BOOK_OPENED = "TamrielTomes_BookOpened",
+    TAMRIEL_TOMES_CHALLENGE_REWARD_CLAIMED = "TamrielTomes_ChallengeRewardClaimed", -- TODO Tamriel Tomes
+    TAMRIEL_TOMES_PAGE_FLIPPED = "TamrielTomes_PageFlipped",
+    TAMRIEL_TOMES_PAGE_UNLOCKED = "TamrielTomes_PageUnlocked", -- TODO Tamriel Tomes
+    TAMRIEL_TOMES_PASS_PURCHASED = "TamrielTomes_PassPurchased",
+    TAMRIEL_TOMES_REWARD_PURCHASED = "TamrielTomes_RewardPurchased",
+    TAMRIEL_TOMES_TOME_POINTS_ROLLING_ENDED = "TamrielTomes_TomePointsRollingEnded",
+    TAMRIEL_TOMES_TOME_POINTS_ROLLING_STARTED = "TamrielTomes_TomePointsRollingStarted",
+
+    -- Riding Skill Improvement
+    RIDING_SKILL_IMPROVEMENT = "Stable_Upgrade_Announce",
+
+    -- Adventure Zone
+    ADVENTURE_ZONE_BOSS_TREE_OPENED = "AdventureZone_BossTreeOpened",
+    ADVENTURE_ZONE_BOSS_TREE_CLOSED = "AdventureZone_BossTreeClosed",
+    ADVENTURE_ZONE_OVERVIEW_OPENED = "AdventureZone_OverviewOpened",
+    ADVENTURE_ZONE_OVERVIEW_CLOSED = "AdventureZone_OverviewClosed",
 }

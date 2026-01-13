@@ -1196,7 +1196,7 @@ function ZO_TributeCard:ShowBoardLocationPatronsTooltip()
         anchor = LEFT
     end
 
-    if TRIBUTE:IsInputStyleMouse() then
+    if TRIBUTE:IsInputStyleMouse() and not IsInGamepadPreferredMode() then
         local control = NarrowTooltip
         InitializeTooltip(control, GuiRoot, anchor, offsetX, offsetY, TOPLEFT)
         control:SetTributeBoardLocationPatrons(boardLocation)

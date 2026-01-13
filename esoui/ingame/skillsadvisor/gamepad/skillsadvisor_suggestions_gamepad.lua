@@ -237,6 +237,7 @@ do
 end
 
 function SkillsAdvisorSuggestions_Gamepad:GamepadSingleLineAbilityEntryTemplateSetup(control, data, parentControl)
+    self:SetupRow(control, data)
     local SELECTED = true
     local ACTIVATED = true
     ZO_SharedGamepadEntry_OnSetup(control, data, SELECTED)
@@ -244,6 +245,7 @@ function SkillsAdvisorSuggestions_Gamepad:GamepadSingleLineAbilityEntryTemplateS
 end
 
 function SkillsAdvisorSuggestions_Gamepad:SkillsAdvisorSuggestionsTextDisplayTemplateSetup(control, data, parentControl)
+    self:SetupRow(control, data)
     control.label:SetText(data.text)
 end
 

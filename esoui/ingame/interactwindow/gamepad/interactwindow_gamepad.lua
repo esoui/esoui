@@ -337,7 +337,7 @@ function ZO_GamepadInteraction:ShowQuestRewards(journalQuestIndex)
 
         entry.rewardData = rewardData
 
-        if rewardData.rewardType ~= REWARD_TYPE_TRIBUTE_CLUB_EXPERIENCE then
+        if rewardData.rewardType ~= REWARD_TYPE_TRIBUTE_CLUB_EXPERIENCE and rewardData.rewardType ~= REWARD_TYPE_ADVENTURE_ZONE_FACTION_POINTS then
             entry:SetStackCount(rewardData.amount)
         end
 

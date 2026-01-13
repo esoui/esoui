@@ -11,6 +11,7 @@ LOOT_ENTRY_TYPE_ANTIQUITY_LEAD = 10
 LOOT_ENTRY_TYPE_COMPANION_EXPERIENCE = 11
 LOOT_ENTRY_TYPE_COMPANION_RAPPORT = 12
 LOOT_ENTRY_TYPE_TRIBUTE_CARD_UPGRADE = 13
+LOOT_ENTRY_TYPE_ADVENTURE_ZONE_FACTION_REPUTATION = 14
 
 LOOT_EXPERIENCE_ICON = "EsoUI/Art/Icons/Icon_Experience.dds"
 LOOT_LEADERBOARD_SCORE_ICON = "EsoUI/Art/Icons/Battleground_Score.dds"
@@ -164,6 +165,13 @@ do
                 SetupEntryText(control, currentEntryData)
                 ZO_CraftingResults_Base_PlayPulse(control.icon)
             end
+        elseif currentEntryData.entryType == LOOT_ENTRY_TYPE_ADVENTURE_ZONE_FACTION_REPUTATION then
+            currentEntryData.gainedRep = currentEntryData.gainedRep + newEntryData.gainedRep
+            currentEntryData.stackCount = currentEntryData.gainedRep
+            if control then
+                SetupIconOverlayText(control, currentEntryData)
+                ZO_CraftingResults_Base_PlayPulse(control.icon)
+            end
         elseif currentEntryData.entryType ~= LOOT_ENTRY_TYPE_MEDAL and currentEntryData.entryType ~= LOOT_ENTRY_TYPE_SCORE then
             currentEntryData.stackCount = currentEntryData.stackCount + newEntryData.stackCount
             if control and control.iconOverlayText then
@@ -276,7 +284,7 @@ do
             text = GetCurrencyString,
             icon = icon,
             stackCount = currencyAdded,
-            color = currencyType == CURT_EVENT_TICKETS and ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, ITEM_DISPLAY_QUALITY_LEGENDARY)) or ZO_SELECTED_TEXT,
+            color = currencyType == CURT_TRADE_BARS and ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_ITEM_QUALITY_COLORS, ITEM_DISPLAY_QUALITY_LEGENDARY)) or ZO_SELECTED_TEXT,
             currencyType = currencyType,
             entryType = LOOT_ENTRY_TYPE_CURRENCY,
             iconOverlayText = ZO_LootHistory_Shared.GetStackCountStringFromData,
@@ -472,6 +480,23 @@ function ZO_LootHistory_Shared:AddTributeCardUpgradeEntry(cardData)
     end
 end
 
+function ZO_LootHistory_Shared:AddAdventureZoneFactionReputation(reputationAdded)
+        local lootData =
+        {
+            text = GetString(SI_LOOT_HISTORY_ADVENTURE_ZONE_FACTION_REPUTATION),
+            icon = ZO_ADVENTURE_ZONE_FACTION_ICONS[GetUnitAdventureZoneFaction("player")],
+            stackCount = reputationAdded,
+            color = ZO_SELECTED_TEXT,
+            gainedRep = reputationAdded,
+            entryType = LOOT_ENTRY_TYPE_ADVENTURE_ZONE_FACTION_REPUTATION,
+            iconOverlayText = ZO_LootHistory_Shared.GetStackCountStringFromData,
+            showIconOverlayText = ZO_LootHistory_Shared.ShouldShowStackCountStringFromData
+        }
+        local lootEntry = self:CreateLootEntry(lootData)
+        lootEntry.isPersistent = true
+        self:InsertOrQueue(lootEntry)
+    end
+
 function ZO_LootHistory_Shared:OnNewItemReceived(itemLinkOrName, stackCount, itemSound, lootType, questItemIcon, itemId, isVirtual, isStolen, bonusDropSource, isLockedSetPiece, canBeUsedToLearn)
     if self:CanShowItemsInHistory() then
         local itemName
@@ -645,6 +670,12 @@ function ZO_LootHistory_Shared:OnTributeProgressionUpgradeStatusChanged(patronId
                 self:AddTributeCardUpgradeEntry(upgradeCardData)
             end
         end
+    end
+end
+
+function ZO_LootHistory_Shared:OnAdventureZoneFactionReputationChanged(newReputation, deltaReputation)
+    if deltaReputation ~= 0 then
+        self:AddAdventureZoneFactionReputation(deltaReputation)
     end
 end
 

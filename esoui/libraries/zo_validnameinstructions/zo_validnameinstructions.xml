@@ -1,14 +1,13 @@
 <GuiXml>
     <Controls>
         <Label name="ZO_TextInstructionLine" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame" virtual="true">
-            <Dimensions x="200" />
+            <Dimensions x="200"/>
         </Label>
-
         <Control name="ZO_TextInstructionsTemplate" resizeToFitDescendents="true" clampedToScreen="true" hidden="true" virtual="true">
-            <ResizeToFitPadding width="20" height="20" />
+            <ResizeToFitPadding width="20" height="20"/>
             <Controls>
                 <Backdrop name="$(parent)BG" inherits="ZO_DefaultBackdrop" excludeFromResizeToFitExtents="true">
-                    <AnchorFill />
+                    <AnchorFill/>
                 </Backdrop>
             </Controls>
         </Control>

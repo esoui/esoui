@@ -4,14 +4,12 @@
             <OnInitialized name="PerkEntry">
                 ZO_Vengeance_Perks_Gamepad.OnMenuEntryInitialized(self)
             </OnInitialized>
-
             <Controls>
                 <Control name="$(parent)FramedIcon" inherits="ZO_VengeancePerk_FramedIcon" hidden="true" scale="0.75">
-                    <Anchor point="CENTER" relativeTo="$(parent)Label" relativePoint="LEFT" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_ICON_X_OFFSET" />
+                    <Anchor point="CENTER" relativeTo="$(parent)Label" relativePoint="LEFT" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_ICON_X_OFFSET"/>
                 </Control>
             </Controls>
         </Control>
-
         <TopLevelControl name="ZO_Vengeance_Perks_Gamepad_TopLevel" inherits="ZO_Gamepad_ParametricList_Screen">
             <OnInitialized>
                 ZO_Vengeance_Perks_Gamepad.OnControlInitialized(self)

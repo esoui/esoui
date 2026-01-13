@@ -9,12 +9,9 @@
                 <Control name="$(parent)Status" inherits="ZO_ComboBox" mouseEnabled="true">
                     <Anchor point="TOPLEFT"/>
                     <Dimensions x="48" y="32"/>
-
                     <Controls>
-                        <Backdrop name="$(parent)BG" override="true" hidden="true" />
-
-                        <Label name="$(parent)SelectedItemText" override="true" hidden="true" />
-
+                        <Backdrop name="$(parent)BG" override="true" hidden="true"/>
+                        <Label name="$(parent)SelectedItemText" override="true" hidden="true"/>
                         <Button name="$(parent)SelectedItem" mouseOverBlendMode="ADD">
                             <Dimensions x="32" y="32"/>
                             <Anchor point="TOPLEFT"/>
@@ -29,9 +26,8 @@
                                 ZO_ComboBoxDropdown_Keyboard.OnClicked(self:GetParent(), button, true)
                             </OnClicked>
                         </Button>
-
                         <Button name="$(parent)OpenDropdown" override="true">
-                            <Anchor point="LEFT" relativeTo="$(parent)SelectedItem" relativePoint="RIGHT" offsetX="-4" />
+                            <Anchor point="LEFT" relativeTo="$(parent)SelectedItem" relativePoint="RIGHT" offsetX="-4"/>
                             <OnMouseEnter>
                                 ZO_PlayerStatus_OnMouseEnter(self:GetParent())
                             </OnMouseEnter>
@@ -44,7 +40,6 @@
                         </Button>
                     </Controls>
                 </Control>
-
                 <Label name="$(parent)DisplayNameLabel" text="SI_DISPLAY_NAME_LABEL" font="ZoFontGameLargeBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Status" relativePoint="TOPRIGHT" offsetX="4" offsetY="4"/>
                 </Label>

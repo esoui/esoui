@@ -7,7 +7,7 @@
                         return ZO_EaseOutCubic(progress)
                     </EasingFunction>
                 </TranslateAnimation>
-        </Animations>
+            </Animations>
         </AnimationTimeline>
         <AnimationTimeline name="ZO_LootTitleSlideInAnimation">
             <Animations>
@@ -25,121 +25,101 @@
                         return ZO_EaseOutQuadratic(progress)
                     </EasingFunction>
                 </AlphaAnimation>
-             </Animations>
+            </Animations>
         </AnimationTimeline>
         <AnimationTimeline name="ZO_LootInteractFadeOutAnimation">
             <Animations>
-                <AlphaAnimation duration="500" startAlpha="1.0" endAlpha="0.0" />
+                <AlphaAnimation duration="500" startAlpha="1.0" endAlpha="0.0"/>
             </Animations>
         </AnimationTimeline>
     </Animations>
-    
     <Controls>
         <Control name="ZO_LootItemSlot" inherits="ZO_ListEntry_BackdropAndHighlight_Template ZO_ListInventorySlotBehavior" virtual="true">
-            <Dimensions y="52" />
-
+            <Dimensions y="52"/>
             <OnMouseEnter>
                 ZO_LootItemSlot_OnMouseEnter(self)
             </OnMouseEnter>
-
             <OnMouseExit>
                 ZO_LootItemSlot_OnMouseExit(self)
             </OnMouseExit>
-
             <OnMouseDoubleClick>
                 if(button == MOUSE_BUTTON_INDEX_LEFT) then
                     TakeLoot(GetControl(self, "Button"))
                 end
             </OnMouseDoubleClick>
-
             <Controls>
                 <Texture name="$(parent)StatusIcon" inherits="ZO_MultiIcon" mouseEnabled="false">
-                    <Dimensions x="32" y="32" />
-                    <Anchor point="CENTER" relativePoint="TOPLEFT" offsetX="27" offsetY="26" />
+                    <Dimensions x="32" y="32"/>
+                    <Anchor point="CENTER" relativePoint="TOPLEFT" offsetX="27" offsetY="26"/>
                 </Texture>
-                
                 <Texture name="$(parent)MultiIcon" inherits="ZO_MultiIcon" mouseEnabled="false">
-                    <Dimensions x="40" y="40" />
-                    <Anchor point="CENTER" relativePoint="TOPLEFT" offsetX="67" offsetY="26" />
+                    <Dimensions x="40" y="40"/>
+                    <Anchor point="CENTER" relativePoint="TOPLEFT" offsetX="67" offsetY="26"/>
                 </Texture>
-
                 <Button name="$(parent)Button" inherits="ZO_InventorySlotNoMouseover">
-                    <Dimensions x="40" y="40" />
-                    <Anchor point="CENTER" relativePoint="TOPLEFT" offsetX="67" offsetY="26" />
+                    <Dimensions x="40" y="40"/>
+                    <Anchor point="CENTER" relativePoint="TOPLEFT" offsetX="67" offsetY="26"/>
                 </Button>
-
                 <Label name="$(parent)Name" font="ZoFontGameShadow" maxLineCount="2" wrapMode="ELLIPSIS">
-                    <Dimensions x="250" />
-                    <Anchor point="LEFT" offsetX="105" />
+                    <Dimensions x="250"/>
+                    <Anchor point="LEFT" offsetX="105"/>
                 </Label>
             </Controls>
         </Control>
-
         <Control name="ZO_LootBlankItemSlot" virtual="true">
-            <Dimensions x="270" y="52" />
-
+            <Dimensions x="270" y="52"/>
             <Controls>
                 <Texture name="$(parent)Bg" textureFile="EsoUI/Art/Miscellaneous/listItem_backdrop.dds">
-                    <AnchorFill />
-                    <TextureCoords left="0" right="1" top="0" bottom=".8125" />
+                    <AnchorFill/>
+                    <TextureCoords left="0" right="1" top="0" bottom=".8125"/>
                 </Texture>
             </Controls>
         </Control>
-
         <TopLevelControl name="ZO_Loot" hidden="true">
-            <Dimensions x="405" y="350" />
-            <Anchor point="TOPLEFT" relativeTo="ZO_ReticleContainerInteractContext" relativePoint="BOTTOMLEFT" offsetX="-60" offsetY="-37" />
-
+            <Dimensions x="405" y="350"/>
+            <Anchor point="TOPLEFT" relativeTo="ZO_ReticleContainerInteractContext" relativePoint="BOTTOMLEFT" offsetX="-60" offsetY="-37"/>
             <OnInitialized>
                 ZO_Loot_Initialize(self)
             </OnInitialized>
-
             <Controls>
                 <Label name="$(parent)Title" font="ZoInteractionPrompt">
-                    <DimensionConstraints maxX="260" />
-                    <Anchor point="BOTTOMLEFT" relativeTo="ZO_ReticleContainerInteractContext" offsetY="-2" />
+                    <DimensionConstraints maxX="260"/>
+                    <Anchor point="BOTTOMLEFT" relativeTo="ZO_ReticleContainerInteractContext" offsetY="-2"/>
                 </Label>
-
                 <Control name="$(parent)KeybindButton" inherits="ZO_KeybindButton">
-                    <Anchor point="TOPLEFT" relativeTo="ZO_ReticleContainerInteractKeybindButton" />
+                    <Anchor point="TOPLEFT" relativeTo="ZO_ReticleContainerInteractKeybindButton"/>
                 </Control>
-
                 <Control name="$(parent)AlphaContainer">
-                    <AnchorFill />
+                    <AnchorFill/>
                     <Controls>
                         <Texture name="$(parent)BG" textureFile="EsoUI/Art/Loot/loot_windowBG.dds">
-                            <Dimensions x="512" y="512" />
-                            <Anchor point="TOPLEFT" offsetX="-42" offsetY="-52" />
+                            <Dimensions x="512" y="512"/>
+                            <Anchor point="TOPLEFT" offsetX="-42" offsetY="-52"/>
                         </Texture>
-
                         <Texture name="$(parent)Divider" textureFile="EsoUI/Art/Loot/loot_topDivider.dds">
                             <Dimensions x="512" y="4"/>
-                            <Anchor point="TOPLEFT" offsetX="20" offsetY="36" />
+                            <Anchor point="TOPLEFT" offsetX="20" offsetY="36"/>
                         </Texture>
-
                         <Control name="$(parent)List" inherits="ZO_ScrollList">
-                            <Anchor point="TOPLEFT" offsetY="40" />
-                            <Anchor point="BOTTOMRIGHT" offsetY="-50" />
+                            <Anchor point="TOPLEFT" offsetY="40"/>
+                            <Anchor point="BOTTOMRIGHT" offsetY="-50"/>
                         </Control>
-
                         <Control name="$(parent)Button1" inherits="ZO_DialogButton" tier="MEDIUM">
-                            <Anchor point="BOTTOMRIGHT" offsetY="-12" />
+                            <Anchor point="BOTTOMRIGHT" offsetY="-12"/>
                             <OnInitialized>
                                 ZO_ChromaKeybindButtonTemplate_Setup(self, "LOOT_ALL", ZO_LootActionButtonCallback_LootAll, GetString(SI_LOOT_TAKE_ALL))
                             </OnInitialized>
                         </Control>
-
                         <Control name="$(parent)Button2" inherits="ZO_DialogButton" hidden="true" tier="MEDIUM">
-                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Button1" relativePoint="BOTTOMLEFT" offsetX="-10" />
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Button1" relativePoint="BOTTOMLEFT" offsetX="-10"/>
                             <OnInitialized>
                                 ZO_ChromaKeybindButtonTemplate_Setup(self, "LOOT_ITEM", ZO_LootActionButtonCallback_LootItem, GetString(SI_LOOT_TAKE))
                             </OnInitialized>
                         </Control>
                     </Controls>
                 </Control>
-
                 <Control name="$(parent)StealthIcon" inherits="ZO_StealthIconContainer">
-                    <Anchor point="CENTER"  relativeTo="GuiRoot" relativePoint="CENTER" />
+                    <Anchor point="CENTER" relativeTo="GuiRoot" relativePoint="CENTER"/>
                 </Control>
             </Controls>
         </TopLevelControl>

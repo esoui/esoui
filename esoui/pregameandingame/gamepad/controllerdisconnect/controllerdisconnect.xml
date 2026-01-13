@@ -4,15 +4,12 @@
             <OnShow>
                 PushActionLayerByName("ControllerDisconnect")
             </OnShow>
-
             <OnHide>
                 RemoveActionLayerByName("ControllerDisconnect")
             </OnHide>
-
             <OnKeyDown>
                 ZO_ControllerDisconnect_DismissPopup()
             </OnKeyDown>
-
             <OnInitialized>
                 ZO_ControllerDisconnect_Initialize(self)
             </OnInitialized>

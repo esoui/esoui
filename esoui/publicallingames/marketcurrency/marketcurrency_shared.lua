@@ -17,8 +17,12 @@ function ZO_MarketCurrency_Shared:Initialize(control)
             tooltip = zo_strformat(SI_MARKET_CURRENCY_TOOLTIP, GetCurrencyName(CURT_CROWN_GEMS, IS_PLURAL, IS_UPPER)),
         },
         {
-            marketCurrencyType = MKCT_ENDEAVOR_SEALS,
-            tooltip = zo_strformat(SI_MARKET_CURRENCY_TOOLTIP, GetCurrencyName(CURT_ENDEAVOR_SEALS, IS_PLURAL, IS_UPPER)),
+            marketCurrencyType = MKCT_TRADE_BARS,
+            tooltip = zo_strformat(SI_MARKET_CURRENCY_TOOLTIP, GetCurrencyName(CURT_TRADE_BARS, IS_PLURAL, IS_UPPER)),
+        },
+        {
+            marketCurrencyType = MKCT_SEALS,
+            tooltip = zo_strformat(SI_MARKET_CURRENCY_TOOLTIP, GetCurrencyName(CURT_SEALS, IS_PLURAL, IS_UPPER)),
         },
     }
     internalassert(MKCT_MAX_VALUE == 4, "New market currency types must be configured.")

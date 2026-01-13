@@ -189,7 +189,7 @@ function ZO_GameStartup_Gamepad:Initialize(control)
     self.isWaitingForDurangoAccountSelection = false
     self.canCancelOrLoadPlatforms = true
     self.profileSaveInProgress = false
-    if IsConsoleUI() then
+    if ZO_IsConsoleOrGameCoreUI() then
         self.serverSelector = ZO_ConsoleServerSelector:New(self)
     elseif ZO_IsPCUI() then
         self.serverSelector = ZO_PCServerSelector:New(self)
@@ -282,7 +282,7 @@ function ZO_GameStartup_Gamepad:Initialize(control)
     local function OnStreamingInstallDialogResult(event, result)
         if result == PLATFORM_DIALOG_RESULT_OK then
             if not CanDownloadAdditionalContent(ADDITIONAL_CONTENT_TYPE_VO) then
-                if IsConsoleUI() then
+                if ZO_IsConsoleOrGameCoreUI() then
                     -- Open store to offer the "purchase" of the additional content entitlement
                     ShowPlatformESOVOAdditionalContentUI()
                 else
@@ -406,7 +406,7 @@ end
 
 function ZO_GameStartup_Gamepad:RefreshHeader(titleText)
     local accountName
-    if ZO_IsForceConsoleFlow() then
+    if ZO_IsForceConsoleFlow() and not IsGameCoreUI() then
         accountName = DecorateDisplayName(GetCVar("AccountName"))
     elseif ZO_IsPCUI() then
         -- PC UI will not show account name in the header since we need to specify a username and password
@@ -531,7 +531,7 @@ function ZO_GameStartup_Gamepad:InitializeKeybindDescriptor()
                 ShowXboxAccountPicker()
             end,
             visible = function()
-                return GetUIPlatform() == UI_PLATFORM_XBOX and not self.profileSaveInProgress
+                return IsGameCoreUI() and not self.profileSaveInProgress
             end,
         },
 
@@ -546,23 +546,23 @@ function ZO_GameStartup_Gamepad:InitializeKeybindDescriptor()
             end)
     }
 
-    --[[#$ internal:   Internal controller support for opening the Pregame Animated Background Dev Tools
-    if IsInternalBuild() and IsConsoleUI() then
-        -- Pregame Dev Tool
-        pregameDevToolKeybindDescriptor =
-        {
-            alignment = KEYBIND_STRIP_ALIGN_RIGHT,
-            name = "Pregame Dev Tool",
-            keybind = "UI_SHORTCUT_QUINARY",
-            disabledDuringSceneHiding = true,
-            sound = SOUNDS.DIALOG_ACCEPT,
-            callback = function()
-                ZO_TogglePregameAnimatedBackgroundTweakTool()
-            end,
-        }
-        table.insert(self.mainKeybindStripDescriptor, pregameDevToolKeybindDescriptor)
-    end
-    -- internal:        Internal controller support for opening the Pregame Animated Background Dev Tools  #$]]
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     self.initialKeybindStripDescriptor = {
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
@@ -635,7 +635,7 @@ function ZO_GameStartup_Gamepad:InitializeEvents()
     EVENT_MANAGER:RegisterForEvent("GameStartup", EVENT_ANNOUNCEMENTS_RESULT, OnAnnouncementsResult)
     EVENT_MANAGER:RegisterForEvent("GameStartup", EVENT_SAVE_DATA_START, function() OnProfileAccess(true) end)
     EVENT_MANAGER:RegisterForEvent("GameStartup", EVENT_SAVE_DATA_COMPLETE, function() OnProfileAccess(false) end)
-    if GetUIPlatform() == UI_PLATFORM_XBOX then
+    if IsGameCoreUI() then
         EVENT_MANAGER:RegisterForEvent("GameStartup", EVENT_DURANGO_ACCOUNT_PICKER_RETURNED, function(eventCode) self.isWaitingForDurangoAccountSelection = false end)
     end
 end

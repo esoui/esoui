@@ -68,6 +68,8 @@ function ZO_WorldMapZoneStory_Keyboard:InitializeList()
         control.progressBar:SetMinMax(0, totalActivities)
         control.progressBar:SetValue(numCompletedActivities)
         control.progressBarProgressLabel:SetText(progressText)
+        local color = ZO_ZoneStories_Manager.IsZoneCompletionTypeComplete(zoneId, zoneCompletionType) and ZO_NORMAL_TEXT or ZO_SELECTED_TEXT
+        control.progressBarProgressLabel:SetColor(color:UnpackRGB())
     end
 
     ZO_ScrollList_AddDataType(self.list, ZONE_COMPLETION_TYPE_ROW_DATA, "ZO_WorldMapZoneStoryRow_Keyboard", ZO_WORLD_MAP_ZONE_STORY_ROW_HEIGHT, SetupCompletionType)

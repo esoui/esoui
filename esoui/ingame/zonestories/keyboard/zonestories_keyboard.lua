@@ -2,9 +2,6 @@ local KEYBOARD_ZONE_STORIES_BACKGROUND_TEXTURE_WIDTH = 620
 local KEYBOARD_ZONE_STORIES_BACKGROUND_SOURCE_WIDTH = 1024
 ZO_KEYBOARD_ZONE_STORIES_BACKGROUND_TEXTURE_COORD_RIGHT = KEYBOARD_ZONE_STORIES_BACKGROUND_TEXTURE_WIDTH / KEYBOARD_ZONE_STORIES_BACKGROUND_SOURCE_WIDTH
 
-local ZONE_STORIES_TILE_GRID_PADDING_X = 2
-local ZONE_STORIES_TILE_GRID_PADDING_Y = 20
-
 ZO_ZoneStories_Keyboard = ZO_ZoneStories_Shared:Subclass()
 
 function ZO_ZoneStories_Keyboard:New(...)
@@ -15,13 +12,14 @@ function ZO_ZoneStories_Keyboard:Initialize(control)
     local templateData =
     {
         gridListClass = ZO_GridScrollList_Keyboard,
+        gridListClassInitExtraArgs = {},
         achievements =
         {
             entryTemplate = "ZO_ZoneStory_AchievementTile_Keyboard_Control",
             dimensionsX = ZO_ZONE_STORIES_ACHIEVEMENT_TILE_KEYBOARD_DIMENSIONS_X,
             dimensionsY = ZO_ZONE_STORIES_ACHIEVEMENT_TILE_KEYBOARD_DIMENSIONS_Y,
-            gridPaddingX = ZONE_STORIES_TILE_GRID_PADDING_X,
-            gridPaddingY = ZONE_STORIES_TILE_GRID_PADDING_Y,
+            gridPaddingX = 2,
+            gridPaddingY = 20,
         },
         activityCompletion =
         {
@@ -29,11 +27,11 @@ function ZO_ZoneStories_Keyboard:Initialize(control)
             entryTemplate = "ZO_ZoneStory_ActivityCompletionTile_Keyboard_Control",
             dimensionsX = ZO_ZONE_STORIES_ACTIVITY_COMPLETION_TILE_KEYBOARD_DIMENSIONS_X,
             dimensionsY = ZO_ZONE_STORIES_ACTIVITY_COMPLETION_TILE_KEYBOARD_DIMENSIONS_Y,
-            gridPaddingX = ZONE_STORIES_TILE_GRID_PADDING_X,
-            gridPaddingY = ZONE_STORIES_TILE_GRID_PADDING_Y,
+            gridPaddingX = 4,
+            gridPaddingY = 16,
             headerHeight = 40,
         },
-        headerPrePadding = ZONE_STORIES_TILE_GRID_PADDING_Y
+        headerPrePadding = 20
     }
 
     local buttonContainer = control:GetNamedChild("ButtonContainer")

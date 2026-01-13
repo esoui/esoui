@@ -261,7 +261,9 @@ do
     {
         ["market"] = true,
         ["endeavorSealStoreSceneKeyboard"] = true,
+        ["gildbarStoreSceneKeyboard"] = true,
         ["gamepad_endeavor_seal_market_pre_scene"] = true,
+        ["gamepad_gildbar_market_pre_scene"] = true,
         ["gamepad_market_pre_scene"] = true,
         ["gamepad_market"] = true,
         ["gamepad_market_preview"] = true,
@@ -637,7 +639,11 @@ function ZO_IngameSceneManager:OnToggleGameMenuBinding()
 
     --System Menu Toggle
     if not (topLevelHidden or baseSceneShown) and ZO_IsPCUI() then
-        SCENE_MANAGER:Toggle("gameMenuInGame")
+        if IsGameCoreUI() then
+            self:OnToggleUIModeBinding()
+        else
+            SCENE_MANAGER:Toggle("gameMenuInGame")
+        end
     end
 end
 

@@ -1,0 +1,16 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_AdvZoneBossTree_Gamepad" inherits="ZO_AdvZoneBossTree_Shared">
+            <Anchor point="CENTER" offsetX="-250" offsetY="-60"/>
+            <OnInitialized>
+                ZO_AdventureZoneBossTree_Gamepad.OnControlInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Backdrop name="$(parent)BG" override="true" inherits="ZO_DefaultBackdrop_Gamepad" alpha="1" edgeColor="INTERFACE_COLOR_TYPE_GENERAL:INTERFACE_GENERAL_COLOR_ENABLED" centerColor="INTERFACE_COLOR_TYPE_GENERAL:INTERFACE_GENERAL_COLOR_ENABLED"/>
+                <Label name="$(parent)Title" override="true" font="ZoFontGamepadBold34">
+                    <Anchor point="TOP" relativePoint="TOP"/>
+                </Label>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

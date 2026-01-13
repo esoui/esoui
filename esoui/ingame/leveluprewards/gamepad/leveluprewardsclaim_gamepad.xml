@@ -5,18 +5,16 @@
                 <Label name="$(parent)Label" inherits="ZO_GamepadSubMenuEntryLabelTemplate"/>
                 <Texture name="$(parent)Icon" inherits="ZO_GamepadMenuEntryIconTemplate">
                     <Controls>
-                        <Label name="$(parent)StackCount" inherits="ZO_GamepadMenuEntryStackCountTemplate" />
+                        <Label name="$(parent)StackCount" inherits="ZO_GamepadMenuEntryStackCountTemplate"/>
                     </Controls>
                 </Texture>
             </Controls>
         </Control>
-
         <Control name="ZO_GamepadClaimChoiceRewardEntryTemplate" inherits="ZO_GamepadClaimRewardEntryTemplate" virtual="true">
             <Controls>
-                <Texture name="$(parent)StatusIndicator" inherits="ZO_GamepadMenuEntryStatusIndicationTemplate" />
+                <Texture name="$(parent)StatusIndicator" inherits="ZO_GamepadMenuEntryStatusIndicationTemplate"/>
             </Controls>
         </Control>
-        
         <TopLevelControl name="ZO_ClaimLevelUpRewards_Gamepad" inherits="ZO_Gamepad_ParametricList_Screen">
             <OnInitialized>
                 ZO_ClaimLevelUpRewards_Gamepad_OnInitialized(self)

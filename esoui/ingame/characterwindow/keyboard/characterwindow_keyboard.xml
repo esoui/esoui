@@ -1,37 +1,31 @@
 <GuiXml>
     <Controls>
         <Control name="ZO_MundusStonesStatsEntry" mouseEnabled="true" virtual="true">
-            <Dimensions x="295" y="24" />
-
+            <Dimensions x="295" y="24"/>
             <OnInitialized>
                 self.mundus1 = self:GetNamedChild("MundusIcon1")
                 self.mundus2 = self:GetNamedChild("MundusIcon2")
             </OnInitialized>
-
             <Controls>
                 <Control name="$(parent)Divider" inherits="ZO_DynamicHorizontalDivider">
-                    <Anchor point="TOPLEFT" />
-                    <Anchor point="TOPRIGHT" />
+                    <Anchor point="TOPLEFT"/>
+                    <Anchor point="TOPRIGHT"/>
                 </Control>
-
                 <Control name="$(parent)MundusIcon1" inherits="ZO_StatsMundusIcon" hidden="true">
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Divider" relativePoint="BOTTOMRIGHT" offsetX="-20" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Divider" relativePoint="BOTTOMRIGHT" offsetX="-20"/>
                 </Control>
-
                 <Control name="$(parent)MundusIcon2" inherits="ZO_StatsMundusIcon" hidden="true">
                     <Anchor point="RIGHT" relativeTo="$(parent)MundusIcon1" relativePoint="LEFT" offsetX="-10"/>
                 </Control>
-
                 <Label name="$(parent)Header" inherits="ZO_StatsHeader" text="SI_STATS_MUNDUS_TITLE">
-                    <Dimensions x="160" />
-                    <Anchor point="LEFT" constrains="X" />
-                    <Anchor point="RIGHT" relativeTo="$(parent)MundusIcon1" relativePoint="LEFT" constrains="Y" />
+                    <Dimensions x="160"/>
+                    <Anchor point="LEFT" constrains="X"/>
+                    <Anchor point="RIGHT" relativeTo="$(parent)MundusIcon1" relativePoint="LEFT" constrains="Y"/>
                 </Label>
             </Controls>
         </Control>
-
         <Button name="ZO_InventoryEquippedSlot" inherits="ZO_InventorySlot" virtual="true">
-            <Dimensions x="44" y="44" />
+            <Dimensions x="44" y="44"/>
             <OnInitialized>
                 self:SetNormalTexture()
                 self:SetPressedTexture()
@@ -39,177 +33,154 @@
                 self:SetDisabledPressedTexture()
             </OnInitialized>
             <Controls>
-                <Texture name="$(parent)Sparkle" inherits="ZO_SparkleTemplate" />
-
+                <Texture name="$(parent)Sparkle" inherits="ZO_SparkleTemplate"/>
                 <Texture name="$(parent)DropCallout" layer="OVERLAY" hidden="true" textureFile="EsoUI/Art/ActionBar/actionBar_mouseOver.dds">
-                    <AnchorFill />
+                    <AnchorFill/>
                 </Texture>
             </Controls>
         </Button>
-
         <Button name="ZO_InventoryWeaponSlot" inherits="ZO_InventoryEquippedSlot" virtual="true">
             <Controls>
                 <Texture name="$(parent)Highlight" hidden="true" textureFile="EsoUI/Art/Quickslots/quickslot_dragSlot.dds">
-                    <Dimensions x="90" y="90" />
-                    <Anchor point="CENTER" />
+                    <Dimensions x="90" y="90"/>
+                    <Anchor point="CENTER"/>
                 </Texture>
             </Controls>
         </Button>
-
         <Texture name="ZO_CharacterSheetDivider" textureFile="EsoUI/Art/CharacterWindow/characterWindow_leftSide_divider.dds" virtual="true">
-            <Dimensions x="256" y="4" />
-
+            <Dimensions x="256" y="4"/>
             <Controls>
                 <Label name="$(parent)Text" font="ZoFontHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE">
-                    <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" offsetX="14" offsetY="5" />
+                    <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" offsetX="14" offsetY="5"/>
                 </Label>
             </Controls>
         </Texture>
-
         <TopLevelControl name="ZO_Character" mouseEnabled="true" hidden="true">
-            <Anchor point="TOPLEFT" relativeTo="ZO_SharedWideLeftPanelBackground" offsetY="-40" />
-            <Anchor point="BOTTOMLEFT" relativeTo="ZO_SharedWideLeftPanelBackground" offsetY="-30" />
-            <Dimensions x="190" />
-
+            <Anchor point="TOPLEFT" relativeTo="ZO_SharedWideLeftPanelBackground" offsetY="-40"/>
+            <Anchor point="BOTTOMLEFT" relativeTo="ZO_SharedWideLeftPanelBackground" offsetY="-30"/>
+            <Dimensions x="190"/>
             <OnInitialized>
                 ZO_Character_Initialize(self)
             </OnInitialized>
-
             <Controls>
                 <Control name="$(parent)HeaderSection" hidden="true">
-                    <Anchor point="TOPLEFT" />
+                    <Anchor point="TOPLEFT"/>
                     <Controls>
                         <Label name="$(parent)Title" font="ZoFontHeader4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" text="SI_CHARACTER_EQUIP_TITLE">
-                            <Anchor point="TOPLEFT" offsetX="14" offsetY="26" />
+                            <Anchor point="TOPLEFT" offsetX="14" offsetY="26"/>
                         </Label>
-
                         <Texture name="$(parent)Divider" textureFile="EsoUI/Art/CharacterWindow/characterWindow_leftSide_divider.dds">
-                            <Dimensions x="256" y="4" />
-                            <Anchor point="TOPLEFT" offsetY="63" />
+                            <Dimensions x="256" y="4"/>
+                            <Anchor point="TOPLEFT" offsetY="63"/>
                         </Texture>
                     </Controls>
                 </Control>
-
                 <Label name="$(parent)ApparelSectionText" font="ZoFontHeader" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)HeaderSectionDivider" relativePoint="BOTTOMLEFT" offsetX="14" offsetY="5" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)HeaderSectionDivider" relativePoint="BOTTOMLEFT" offsetX="14" offsetY="5"/>
                 </Label>
-
                 <Button name="$(parent)EquipmentSlotsHead" inherits="ZO_InventoryEquippedSlot">
-                    <Anchor point="TOP" relativePoint="TOPLEFT" offsetX="87" offsetY="100" />
+                    <Anchor point="TOP" relativePoint="TOPLEFT" offsetX="87" offsetY="100"/>
                 </Button>
-
                 <Texture name="$(parent)PaperDoll">
-                    <Dimensions x="64" y="256" />
-                    <Anchor point="TOP" relativeTo="$(parent)EquipmentSlotsHead" relativePoint="BOTTOM" offsetY="6" />
+                    <Dimensions x="64" y="256"/>
+                    <Anchor point="TOP" relativeTo="$(parent)EquipmentSlotsHead" relativePoint="BOTTOM" offsetY="6"/>
                 </Texture>
-
                 <!-- left side -->
                 <Button name="$(parent)EquipmentSlotsShoulder" inherits="ZO_InventoryEquippedSlot">
-                    <Anchor point="TOPLEFT" offsetX="10" offsetY="156" />
+                    <Anchor point="TOPLEFT" offsetX="10" offsetY="156"/>
                 </Button>
                 <Button name="$(parent)EquipmentSlotsGlove" inherits="ZO_InventoryEquippedSlot">
-                    <Anchor point="TOP" relativeTo="$(parent)EquipmentSlotsShoulder" relativePoint="BOTTOM" offsetY="10" />
+                    <Anchor point="TOP" relativeTo="$(parent)EquipmentSlotsShoulder" relativePoint="BOTTOM" offsetY="10"/>
                 </Button>
                 <Button name="$(parent)EquipmentSlotsLeg" inherits="ZO_InventoryEquippedSlot">
-                    <Anchor point="TOP" relativeTo="$(parent)EquipmentSlotsGlove" relativePoint="BOTTOM" offsetY="10" />
+                    <Anchor point="TOP" relativeTo="$(parent)EquipmentSlotsGlove" relativePoint="BOTTOM" offsetY="10"/>
                 </Button>
-
                 <!-- right side -->
                 <Button name="$(parent)EquipmentSlotsChest" inherits="ZO_InventoryEquippedSlot">
-                    <Anchor point="TOPLEFT" offsetX="124" offsetY="156" />
+                    <Anchor point="TOPLEFT" offsetX="124" offsetY="156"/>
                 </Button>
                 <Button name="$(parent)EquipmentSlotsBelt" inherits="ZO_InventoryEquippedSlot">
-                    <Anchor point="TOP" relativeTo="$(parent)EquipmentSlotsChest" relativePoint="BOTTOM" offsetY="10" />
+                    <Anchor point="TOP" relativeTo="$(parent)EquipmentSlotsChest" relativePoint="BOTTOM" offsetY="10"/>
                 </Button>
                 <Button name="$(parent)EquipmentSlotsFoot" inherits="ZO_InventoryEquippedSlot">
-                    <Anchor point="TOP" relativeTo="$(parent)EquipmentSlotsBelt" relativePoint="BOTTOM" offsetY="10" />
+                    <Anchor point="TOP" relativeTo="$(parent)EquipmentSlotsBelt" relativePoint="BOTTOM" offsetY="10"/>
                 </Button>
-
                 <!-- bottom part 1 -->
                 <Texture name="$(parent)AccessoriesSection" inherits="ZO_CharacterSheetDivider">
-                    <Anchor point="TOPLEFT" offsetY="314" />
+                    <Anchor point="TOPLEFT" offsetY="314"/>
                     <OnInitialized>
                         self:GetNamedChild("Text"):SetText(GetString("SI_EQUIPSLOTVISUALCATEGORY", EQUIP_SLOT_VISUAL_CATEGORY_ACCESSORIES))
                     </OnInitialized>
                 </Texture>
-
                 <Button name="$(parent)EquipmentSlotsCostume" inherits="ZO_InventoryEquippedSlot">
-                    <Anchor point="TOPLEFT" offsetX="10" offsetY="345" />
+                    <Anchor point="TOPLEFT" offsetX="10" offsetY="345"/>
                 </Button>
                 <Button name="$(parent)EquipmentSlotsNeck" inherits="ZO_InventoryEquippedSlot">
-                    <Anchor point="LEFT" relativeTo="$(parent)EquipmentSlotsCostume" relativePoint="RIGHT" offsetX="4" />
+                    <Anchor point="LEFT" relativeTo="$(parent)EquipmentSlotsCostume" relativePoint="RIGHT" offsetX="4"/>
                 </Button>
                 <Button name="$(parent)EquipmentSlotsRing1" inherits="ZO_InventoryEquippedSlot">
-                    <Anchor point="LEFT" relativeTo="$(parent)EquipmentSlotsNeck" relativePoint="RIGHT" offsetX="4" />
+                    <Anchor point="LEFT" relativeTo="$(parent)EquipmentSlotsNeck" relativePoint="RIGHT" offsetX="4"/>
                 </Button>
                 <Button name="$(parent)EquipmentSlotsRing2" inherits="ZO_InventoryEquippedSlot">
-                    <Anchor point="LEFT" relativeTo="$(parent)EquipmentSlotsRing1" relativePoint="RIGHT" offsetX="4" />
+                    <Anchor point="LEFT" relativeTo="$(parent)EquipmentSlotsRing1" relativePoint="RIGHT" offsetX="4"/>
                 </Button>
-
                 <!-- bottom part 2 -->
                 <Texture name="$(parent)WeaponsSection" inherits="ZO_CharacterSheetDivider">
-                    <Anchor point="TOPLEFT" offsetY="400" />
+                    <Anchor point="TOPLEFT" offsetY="400"/>
                     <OnInitialized>
                         self:GetNamedChild("Text"):SetText(GetString("SI_EQUIPSLOTVISUALCATEGORY", EQUIP_SLOT_VISUAL_CATEGORY_WEAPONS))
                     </OnInitialized>
                 </Texture>
-
                 <Button name="$(parent)EquipmentSlotsMainHand" inherits="ZO_InventoryWeaponSlot">
-                    <Anchor point="TOPLEFT" offsetX="10" offsetY="432" />
+                    <Anchor point="TOPLEFT" offsetX="10" offsetY="432"/>
                 </Button>
-                <Button name="$(parent)EquipmentSlotsOffHand" inherits="ZO_InventoryWeaponSlot" >
-                    <Anchor point="LEFT" relativeTo="$(parent)EquipmentSlotsMainHand" relativePoint="RIGHT" offsetX="10" />
+                <Button name="$(parent)EquipmentSlotsOffHand" inherits="ZO_InventoryWeaponSlot">
+                    <Anchor point="LEFT" relativeTo="$(parent)EquipmentSlotsMainHand" relativePoint="RIGHT" offsetX="10"/>
                 </Button>
-                <Button name="$(parent)EquipmentSlotsPoison" inherits="ZO_InventoryWeaponSlot" >
-                    <Anchor point="LEFT" relativeTo="$(parent)EquipmentSlotsOffHand" relativePoint="RIGHT" offsetX="10" />
+                <Button name="$(parent)EquipmentSlotsPoison" inherits="ZO_InventoryWeaponSlot">
+                    <Anchor point="LEFT" relativeTo="$(parent)EquipmentSlotsOffHand" relativePoint="RIGHT" offsetX="10"/>
                     <Controls>
                         <Label name="$(parent)StackCount" override="true">
-                            <Anchor point="BOTTOMRIGHT" offsetX="-4" offsetY="2" />
+                            <Anchor point="BOTTOMRIGHT" offsetX="-4" offsetY="2"/>
                         </Label>
                     </Controls>
                 </Button>
                 <Button name="$(parent)EquipmentSlotsBackupMain" inherits="ZO_InventoryWeaponSlot">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)EquipmentSlotsMainHand" relativePoint="BOTTOMLEFT" offsetY="4" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)EquipmentSlotsMainHand" relativePoint="BOTTOMLEFT" offsetY="4"/>
                 </Button>
                 <Button name="$(parent)EquipmentSlotsBackupOff" inherits="ZO_InventoryWeaponSlot">
-                    <Anchor point="LEFT" relativeTo="$(parent)EquipmentSlotsBackupMain" relativePoint="RIGHT" offsetX="10" />
+                    <Anchor point="LEFT" relativeTo="$(parent)EquipmentSlotsBackupMain" relativePoint="RIGHT" offsetX="10"/>
                 </Button>
-                <Button name="$(parent)EquipmentSlotsBackupPoison" inherits="ZO_InventoryWeaponSlot" >
-                    <Anchor point="LEFT" relativeTo="$(parent)EquipmentSlotsBackupOff" relativePoint="RIGHT" offsetX="10" />
+                <Button name="$(parent)EquipmentSlotsBackupPoison" inherits="ZO_InventoryWeaponSlot">
+                    <Anchor point="LEFT" relativeTo="$(parent)EquipmentSlotsBackupOff" relativePoint="RIGHT" offsetX="10"/>
                     <Controls>
                         <Label name="$(parent)StackCount" override="true">
-                            <Anchor point="BOTTOMRIGHT" offsetX="-4" offsetY="2" />
+                            <Anchor point="BOTTOMRIGHT" offsetX="-4" offsetY="2"/>
                         </Label>
                     </Controls>
                 </Button>
-
                 <Button name="$(parent)WeaponSwap" inherits="ZO_WeaponSwapLeft">
-                    <Anchor point="LEFT" relativeTo="$(parent)EquipmentSlotsPoison" relativePoint="BOTTOMRIGHT" offsetX="3" />
+                    <Anchor point="LEFT" relativeTo="$(parent)EquipmentSlotsPoison" relativePoint="BOTTOMRIGHT" offsetX="3"/>
                 </Button>
             </Controls>
         </TopLevelControl>
-
         <TopLevelControl name="ZO_CharacterWindowStats" mouseEnabled="true" hidden="true">
-            <Anchor point="TOPLEFT" relativeTo="ZO_CharacterHeaderSectionDivider" relativePoint="TOPRIGHT" />
+            <Anchor point="TOPLEFT" relativeTo="ZO_CharacterHeaderSectionDivider" relativePoint="TOPRIGHT"/>
             <Anchor point="BOTTOMLEFT" relativeTo="ZO_Character" relativePoint="BOTTOMRIGHT" offsetX="20"/>
-            <Dimensions x="303" />
-
+            <Dimensions x="303"/>
             <OnInitialized>
                 ZO_CharacterWindowStats_Initialize(self)
             </OnInitialized>
-
             <OnEffectivelyShown>
                 ZO_Character_UpdateEffects()
             </OnEffectivelyShown>
-
             <OnEffectivelyHidden>
                 ZO_CharacterWindowStats_RefreshKeybinds()
             </OnEffectivelyHidden>
-
             <Controls>
                 <Control name="$(parent)Scroll" inherits="ZO_ScrollContainer">
-                    <Anchor point="TOPLEFT" />
-                    <Anchor point="BOTTOMRIGHT" offsetX="24" offsetY="15" />
+                    <Anchor point="TOPLEFT"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="24" offsetY="15"/>
                 </Control>
             </Controls>
         </TopLevelControl>

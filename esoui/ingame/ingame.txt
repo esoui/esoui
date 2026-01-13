@@ -72,6 +72,8 @@ EsoUI\Ingame\Scenes\InteractScene.lua
 
 EsoUI\Ingame\Utility\ZO_SlotUtil.lua
 
+EsoUI\Ingame\DirectPurchase\DirectPurchase_Manager.lua
+
 EsoUI\Ingame\RzChroma\IngameRzChroma_Manager.lua
 EsoUI\Ingame\RzChroma\IngameRzChroma_Effects.lua
 
@@ -234,6 +236,22 @@ EsoUI\Ingame\EndlessDungeon\Gamepad\EndlessDungeonBuffSelector_Gamepad.xml
 EsoUI\Ingame\EndlessDungeon\Gamepad\EndlessDungeonBuffTracker_Gamepad.lua
 EsoUI\Ingame\EndlessDungeon\Gamepad\EndlessDungeonBuffTracker_Gamepad.xml
 
+EsoUI\Ingame\AdventureZone\AdventureZoneOverview_Shared.lua
+EsoUI\Ingame\AdventureZone\AdventureZoneOverview_Shared.xml
+EsoUI\Ingame\AdventureZone\AdventureZoneBossTree_Shared.lua
+EsoUI\Ingame\AdventureZone\AdventureZoneBossTree_Shared.xml
+EsoUI\Ingame\AdventureZone\AdventureZoneHUD.lua
+EsoUI\Ingame\AdventureZone\AdventureZoneHUD.xml
+EsoUI\Ingame\AdventureZone\Keyboard\AdventureZoneOverview_Keyboard.lua
+EsoUI\Ingame\AdventureZone\Keyboard\AdventureZoneOverview_Keyboard.xml
+EsoUI\Ingame\AdventureZone\Keyboard\AdventureZoneBossTree_Keyboard.lua
+EsoUI\Ingame\AdventureZone\Keyboard\AdventureZoneBossTree_Keyboard.xml
+EsoUI\Ingame\AdventureZone\Gamepad\AdventureZoneTooltips.lua
+EsoUI\Ingame\AdventureZone\Gamepad\AdventureZoneOverview_Gamepad.lua
+EsoUI\Ingame\AdventureZone\Gamepad\AdventureZoneOverview_Gamepad.xml
+EsoUI\Ingame\AdventureZone\Gamepad\AdventureZoneBossTree_Gamepad.lua
+EsoUI\Ingame\AdventureZone\Gamepad\AdventureZoneBossTree_Gamepad.xml
+
 EsoUI\Ingame\MainMenu\Gamepad\ZO_Main_Menu_Helper_Panel_Gamepad.lua
 
 EsoUI\Ingame\MainMenu\ZO_MainMenu_Manager.lua
@@ -342,6 +360,12 @@ EsoUI\Ingame\HUD\HUDTracker_Base.xml
 
 EsoUI\Ingame\EndlessDungeon\EndlessDungeonHUDTracker.lua
 EsoUI\Ingame\EndlessDungeon\EndlessDungeonHUDTracker.xml
+
+EsoUI\Ingame\AdventureZone\AdventureZoneHUDTracker.lua
+EsoUI\Ingame\AdventureZone\AdventureZoneHUDTracker.xml
+
+EsoUI\Ingame\DynamicEvents\DynamicEventsTracker.lua
+EsoUI\Ingame\DynamicEvents\DynamicEventsTracker.xml
 
 EsoUI\Ingame\ZO_Quest\QuestTimer.lua
 EsoUI\Ingame\ZO_Quest\QuestTimer.xml
@@ -1578,8 +1602,6 @@ EsoUI\Ingame\ZoneStories\ZoneStories_Shared.lua
 EsoUI\Ingame\ZoneStories\ZoneStories_Shared.xml
 EsoUI\Ingame\ZoneStories\ZoneStory_AchievementTile.lua
 EsoUI\Ingame\ZoneStories\ZoneStory_AchievementTile.xml
-EsoUI\Ingame\ZoneStories\ZoneStory_TaskCompletionTile.lua
-EsoUI\Ingame\ZoneStories\ZoneStory_TaskCompletionTile.xml
 EsoUI\Ingame\ZoneStories\Keyboard\ZoneStory_AchievementTile_Keyboard.lua
 EsoUI\Ingame\ZoneStories\Keyboard\ZoneStory_AchievementTile_Keyboard.xml
 EsoUI\Ingame\ZoneStories\Keyboard\ZoneStory_TaskCompletionTile_Keyboard.lua
@@ -1760,6 +1782,39 @@ EsoUI\Ingame\Vengeance\Gamepad\Vengeance_Loadouts_Gamepad.xml
 EsoUI\Ingame\Vengeance\Gamepad\Vengeance_Perks_Gamepad.lua
 EsoUI\Ingame\Vengeance\Gamepad\Vengeance_Perks_Gamepad.xml
 
+EsoUI\Ingame\TamrielTomes\TamrielTomesData.lua
+EsoUI\Ingame\TamrielTomes\TamrielTomes_Manager.lua
+EsoUI\Ingame\TamrielTomes\TamrielTomesRewardTile_Shared.lua
+EsoUI\Ingame\TamrielTomes\TamrielTomesRewardTile_Shared.xml
+EsoUI\Ingame\TamrielTomes\Keyboard\TamrielTomesRewardTile_Keyboard.lua
+EsoUI\Ingame\TamrielTomes\Keyboard\TamrielTomesRewardTile_Keyboard.xml
+EsoUI\Ingame\TamrielTomes\Gamepad\TamrielTomesRewardTile_Gamepad.lua
+EsoUI\Ingame\TamrielTomes\Gamepad\TamrielTomesRewardTile_Gamepad.xml
+EsoUI\Ingame\TamrielTomes\TamrielTomesIntroScreen_Shared.lua
+EsoUI\Ingame\TamrielTomes\TamrielTomesIntroScreen_Shared.xml
+EsoUI\Ingame\TamrielTomes\Keyboard\TamrielTomesIntroScreen_Keyboard.lua
+EsoUI\Ingame\TamrielTomes\Keyboard\TamrielTomesIntroScreen_Keyboard.xml
+EsoUI\Ingame\TamrielTomes\Gamepad\TamrielTomesIntroScreen_Gamepad.lua
+EsoUI\Ingame\TamrielTomes\Gamepad\TamrielTomesIntroScreen_Gamepad.xml
+EsoUI\Ingame\TamrielTomes\TamrielTomesScreen_Shared.lua
+EsoUI\Ingame\TamrielTomes\TamrielTomesScreen_Shared.xml
+EsoUI\Ingame\TamrielTomes\Keyboard\TamrielTomesScreen_Keyboard.lua
+EsoUI\Ingame\TamrielTomes\Keyboard\TamrielTomesScreen_Keyboard.xml
+EsoUI\Ingame\TamrielTomes\Gamepad\TamrielTomesScreen_Gamepad.lua
+EsoUI\Ingame\TamrielTomes\Gamepad\TamrielTomesScreen_Gamepad.xml
+EsoUI\Ingame\TamrielTomes\Gamepad\TamrielTomesRewardPreviewScreen_Gamepad.lua
+EsoUI\Ingame\TamrielTomes\Gamepad\TamrielTomesRewardPreviewScreen_Gamepad.xml
+EsoUI\Ingame\TamrielTomes\TamrielTomesPurchaseScreen_Shared.lua
+EsoUI\Ingame\TamrielTomes\TamrielTomesPurchaseScreen_Shared.xml
+EsoUI\Ingame\TamrielTomes\Keyboard\TamrielTomesPurchaseScreen_Keyboard.lua
+EsoUI\Ingame\TamrielTomes\Keyboard\TamrielTomesPurchaseScreen_Keyboard.xml
+EsoUI\Ingame\TamrielTomes\Gamepad\TamrielTomesPurchaseScreen_Gamepad.lua
+EsoUI\Ingame\TamrielTomes\Gamepad\TamrielTomesPurchaseScreen_Gamepad.xml
+EsoUI\Ingame\TamrielTomes\Keyboard\TamrielTomesDialogs_Keyboard.lua
+EsoUI\Ingame\TamrielTomes\Keyboard\TamrielTomesDialogs_Keyboard.xml
+EsoUI\Ingame\TamrielTomes\Gamepad\TamrielTomesDialogs_Gamepad.lua
+EsoUI\Ingame\TamrielTomes\Gamepad\TamrielTomesDialogs_Gamepad.xml
+
 EsoUI\Ingame\CenterScreenAnnounce\CenterScreenAnnounceHandlers.lua
 EsoUI\Ingame\CenterScreenAnnounce\CenterScreenAnnounce.lua
 EsoUI\Ingame\CenterScreenAnnounce\CenterScreenAnnounce.xml
@@ -1772,6 +1827,9 @@ EsoUI\Ingame\HUD\HUDWarnings.lua
 EsoUI\Ingame\HUD\HUDWarnings.xml
 
 EsoUI\Ingame\Profiler\ProfilerUtils.lua
+
+ESOUI\Ingame\BuildMarkupTest\BuildMarkupTest.lua
+ESOUI\Ingame\BuildMarkupTest\BuildMarkupTest.xml
 
 ; These should remain at the bottom, but above fragment/scene files to help mitigate breaking addons with API changes
 EsoUI\Ingame\AddonCompatibilityAliases\AddonCompatibilityAliases_Shared.lua

@@ -1,0 +1,49 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_TamrielTomesPurchaseReward_Gamepad" inherits="ZO_TamrielTomesPurchaseReward_Shared" virtual="true">
+            <Dimensions x="ZO_TAMRIEL_TOMES_PURCHASE_REWARD_DIMENSIONS_GAMEPAD" y="ZO_TAMRIEL_TOMES_PURCHASE_REWARD_DIMENSIONS_GAMEPAD"/>
+            <Controls>
+                <Control name="$(parent)Container" override="true">
+                    <Controls>
+                        <Backdrop name="$(parent)Backdrop" override="true" inherits="ZO_CenterlessBackdrop"/>
+                        <Label name="$(parent)Quantity" override="true" font="ZoFontGamepad25" inheritScale="false"/>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+        <Control name="ZO_TamrielTomesPurchaseVerticalDivider_Gamepad" inherits="ZO_TamrielTomesPurchaseVerticalDivider_Shared" virtual="true">
+            <Dimensions x="ZO_TAMRIEL_TOMES_PURCHASE_VERTICAL_DIVIDER_WIDTH_GAMEPAD" y="ZO_TAMRIEL_TOMES_PURCHASE_REWARD_DIMENSIONS_GAMEPAD"/>
+        </Control>
+        <TopLevelControl name="ZO_TamrielTomesPurchase_GamepadTL" inherits="ZO_TamrielTomesPurchase_SharedTL">
+            <Anchor point="LEFT" offsetX="20" offsetY="-50"/>
+            <OnInitialized>
+                ZO_TamrielTomesPurchaseScreen_Gamepad.OnControlInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Title" override="true" font="ZoFontGamepad42"/>
+                <Control name="$(parent)Divider" override="true" inherits="ZO_PlatformStyleDynamicHorizontalDivider_Gamepad_Template"/>
+                <Control name="$(parent)GridList" override="true" inherits="ZO_GridScrollList_NotAnchored_Gamepad">
+                    <Dimensions x="ZO_TAMRIEL_TOMES_PURCHASE_GRID_WIDTH_GAMEPAD" y="ZO_TAMRIEL_TOMES_PURCHASE_GRID_HEIGHT_GAMEPAD"/>
+                </Control>
+                <Control name="$(parent)Buttons" override="true">
+                    <Dimensions x="710" y="110"/>
+                    <Controls>
+                        <Control name="$(parent)Row1" override="true">
+                            <Dimensions x="710" y="50"/>
+                            <Controls>
+                                <Button name="$(parent)PremiumButton" override="true" inherits="ZO_TamrielTomes_GamepadButtonTemplate"/>
+                                <Button name="$(parent)PremiumPlusButton" override="true" inherits="ZO_TamrielTomes_GamepadButtonTemplate"/>
+                            </Controls>
+                        </Control>
+                        <Control name="$(parent)Row2" override="true">
+                            <Dimensions x="710" y="50"/>
+                            <Controls>
+                                <Button name="$(parent)TokenButton" override="true" inherits="ZO_TamrielTomes_GamepadButtonTemplate"/>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

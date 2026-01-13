@@ -7,7 +7,7 @@
             <OnInitialized>
                 ZO_ScreenAdjust_OnInitialized(self)
             </OnInitialized>
-            <Anchor point="CENTER" relativeTo="GuiRoot" />
+            <Anchor point="CENTER" relativeTo="GuiRoot"/>
             <Controls>
                 <Texture name="$(parent)BG" color="222222">
                     <Anchor point="TOPLEFT" relativeTo="GuiRoot"/>
@@ -25,7 +25,6 @@
                 <Texture name="$(parent)BottomRight" inherits="ZO_ScreenAdjustCorner" textureCoordsRotation="ZO_PI">
                     <Anchor point="BOTTOMRIGHT"/>
                 </Texture>
-
                 <Control name="$(parent)GamepadInstructions" hidden="true" resizeToFitDescendents="true">
                     <Anchor point="CENTER"/>
                     <ResizeToFitPadding width="40" height="40"/>
@@ -53,7 +52,6 @@
                         </Control>
                     </Controls>
                 </Control>
-
                 <Control name="$(parent)KeyboardInstructions" hidden="true" resizeToFitDescendents="true">
                     <Anchor point="CENTER"/>
                     <ResizeToFitPadding width="40" height="40"/>

@@ -144,7 +144,7 @@ function ZO_LegalAgreementsScreen_Gamepad:Initialize(control)
     self.control = control
     self.scrollAvailableAtMS = nil
     self.docData = nil
-    if IsConsoleUI() then
+    if ZO_IsConsoleOrGameCoreUI() then
         self.docProvider = ZO_ConsoleLegalDocsProvider:New()
     elseif ZO_IsPCUI() then
         self.docProvider = ZO_PCLegalDocsProvider:New()

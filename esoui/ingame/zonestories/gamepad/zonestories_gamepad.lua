@@ -6,8 +6,6 @@ local GAMEPAD_ZONE_STORIES_BACKGROUND_SOURCE_HEIGHT = 1024
 local GAMEPAD_ZONE_STORIES_BACKGROUND_TEXTURE_HEIGHT = 955
 ZO_GAMEPAD_ZONE_STORIES_BACKGROUND_TEXTURE_COORDS_BOTTOM = GAMEPAD_ZONE_STORIES_BACKGROUND_TEXTURE_HEIGHT / GAMEPAD_ZONE_STORIES_BACKGROUND_SOURCE_HEIGHT
 
-local ZONE_STORIES_TILE_GRID_PADDING_X = 5
-local ZONE_STORIES_TILE_GRID_PADDING_Y = 25
 local COMPLETION_ACTIVITY_DESCRIPTION_TOOLTIP_INDEX = 0
 
 ZO_ZoneStories_Gamepad = ZO_Object.MultiSubclass(ZO_ZoneStories_Shared, ZO_Gamepad_ParametricList_Screen)
@@ -20,13 +18,14 @@ function ZO_ZoneStories_Gamepad:Initialize(control)
     local templateData =
     {
         gridListClass = ZO_GridScrollList_Gamepad,
+        gridListClassInitExtraArgs = { "ZO_ZoneStories_Gamepad_GridScrollList_Highlight" },
         achievements = 
         {
             entryTemplate = "ZO_ZoneStory_AchievementTile_Gamepad_Control",
             dimensionsX = ZO_ZONE_STORIES_ACHIEVEMENT_TILE_GAMEPAD_DIMENSIONS_X,
             dimensionsY = ZO_ZONE_STORIES_ACHIEVEMENT_TILE_GAMEPAD_DIMENSIONS_Y,
-            gridPaddingX = ZONE_STORIES_TILE_GRID_PADDING_X,
-            gridPaddingY = ZONE_STORIES_TILE_GRID_PADDING_Y,
+            gridPaddingX = 5,
+            gridPaddingY = 25,
         },
         activityCompletion =
         {
@@ -34,11 +33,11 @@ function ZO_ZoneStories_Gamepad:Initialize(control)
             entryTemplate = "ZO_ZoneStory_ActivityCompletionTile_Gamepad_Control",
             dimensionsX = ZO_ZONE_STORIES_ACTIVITY_COMPLETION_TILE_GAMEPAD_DIMENSIONS_X,
             dimensionsY = ZO_ZONE_STORIES_ACTIVITY_COMPLETION_TILE_GAMEPAD_DIMENSIONS_Y,
-            gridPaddingX = ZONE_STORIES_TILE_GRID_PADDING_X,
-            gridPaddingY = ZONE_STORIES_TILE_GRID_PADDING_Y,
+            gridPaddingX = 5,
+            gridPaddingY = 12,
             headerHeight = 70,
         },
-        headerPrePadding = ZONE_STORIES_TILE_GRID_PADDING_Y
+        headerPrePadding = 25
     }
 
     local sceneName = "zoneStoriesGamepad"
@@ -73,6 +72,7 @@ function ZO_ZoneStories_Gamepad:Initialize(control)
     GAMEPAD_ZONE_STORIES_SCENE:AddFragment(rightPaneFragment)
 
     local infoContainerControl = rightPane:GetNamedChild("InfoContainer")
+    self.trackingMessageLabel = infoContainerControl:GetNamedChild("TrackingMessage")
     ZO_ZoneStories_Shared.Initialize(self, control, infoContainerControl, templateData)
 
     self.headerData =
@@ -111,15 +111,23 @@ function ZO_ZoneStories_Gamepad:InitializeGridList()
     ZO_ZoneStories_Shared.InitializeGridList(self)
 
     local function GetHeaderNarration()
-        local narrations = {}
-        local data = self:GetSelectedStoryData()
-        local zoneData = ZONE_STORIES_MANAGER:GetZoneData(data.id)
-        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zoneData.name))
-        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zoneData.description))
-        return narrations
+        local zoneId = self:GetSelectedZoneId()
+        local zoneData = ZONE_STORIES_MANAGER:GetZoneData(zoneId)
+        return SCREEN_NARRATION_MANAGER:CreateNarratableObject(zoneData.name)
+    end
+
+    local function GetPostHeaderNarration()
+        local zoneId = self:GetSelectedZoneId()
+        local arePriorityQuestsBlocked, errorStringText = ZO_ZoneStories_Manager.GetZoneCompletionTypeBlockingInfo(zoneId, ZONE_COMPLETION_TYPE_PRIORITY_QUESTS)
+        if arePriorityQuestsBlocked and errorStringText ~= nil then
+            return SCREEN_NARRATION_MANAGER:CreateNarratableObject(errorStringText)
+        end
+
+        return nil
     end
 
     self.gridList:SetHeaderNarrationFunction(GetHeaderNarration)
+    self.gridList:SetPostHeaderNarrationFunction(GetPostHeaderNarration)
     self.gridList:SetOnSelectedDataChangedCallback(function(...) self:OnGridSelectionChanged(...) end)
 end
 
@@ -127,7 +135,7 @@ function ZO_ZoneStories_Gamepad:Deactivate()
     ZO_Gamepad_ParametricList_Screen.Deactivate(self)
 
     self.gridList:Deactivate()
-    GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_QUAD1_TOOLTIP)
+    GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
     KEYBIND_STRIP:RemoveKeybindButtonGroup(self.zoneKeybindStripDescriptor)
 end
 
@@ -137,25 +145,76 @@ function ZO_ZoneStories_Gamepad:InitializeKeybindStripDescriptors()
         alignment = KEYBIND_STRIP_ALIGN_CENTER,
 
         name = function()
+            local zoneId = self:GetSelectedZoneId()
+            if ZO_ZoneStories_Shared.IsZoneCollectibleUnlocked(zoneId) then
+                local completionType = self:GetSelectedCompletionType()
+                if completionType and completionType ~= ZONE_COMPLETION_TYPE_FEATURED_ACHIEVEMENTS then
+                    return ZO_ZoneStories_Shared.GetPlayStoryActionTextByZoneAndCompletionType(zoneId, completionType)
+                end
+            end
+            
             return self:GetPlayStoryButtonText()
         end,
 
         keybind = "UI_SHORTCUT_SECONDARY",
 
         callback = function()
+            local zoneId = self:GetSelectedZoneId()
+            if ZO_ZoneStories_Shared.IsZoneCollectibleUnlocked(zoneId) then
+                local completionType = self:GetSelectedCompletionType()
+                if completionType and completionType ~= ZONE_COMPLETION_TYPE_FEATURED_ACHIEVEMENTS then
+                    local SET_AUTO_MAP_NAVIGATION_TARGET = true
+                    TrackNextActivityForZoneStory(zoneId, completionType, SET_AUTO_MAP_NAVIGATION_TARGET)
+                    self:BuildZonesList()
+                    return
+                end
+            end
+
             self:TrackNextActivity()
             self:BuildZonesList()
         end,
 
         enabled = function()
             local zoneId = self:GetSelectedZoneId()
-            local isZoneAvailable = ZO_ZoneStories_Manager.GetZoneAvailability(zoneId)
+            local isZoneAvailable, errorString = ZO_ZoneStories_Manager.GetZoneAvailability(zoneId)
+            if not isZoneAvailable then
+                return false, errorString
+            end
+
+            local isZoneComplete = ZO_ZoneStories_Manager.IsZoneComplete(zoneId)
+            if isZoneComplete then
+                return false
+            end
+            
+            local completionType = self:GetSelectedCompletionType()
+            if completionType and completionType ~= ZONE_COMPLETION_TYPE_FEATURED_ACHIEVEMENTS then
+                if ZO_ZoneStories_Manager.IsZoneCompletionTypeComplete(zoneId, completionType) then
+                    return false, GetString(SI_ZONE_STORY_SPECIFIC_ACTION_DISABLED_COMPLETE)
+                end
+
+                local isCompletionTypeBlocked, blockingErrorStringText = ZO_ZoneStories_Manager.GetZoneCompletionTypeBlockingInfo(zoneId, completionType)
+                if isCompletionTypeBlocked then
+                    return false, blockingErrorStringText
+                end
+            end
+
             local canContinueZone = CanZoneStoryContinueTrackingActivities(zoneId)
-            return isZoneAvailable and canContinueZone
+            if not canContinueZone then
+                return false
+            end
+
+            return true
         end,
 
         visible = function()
-            return self:GetSelectedZoneId() ~= nil
+            if self:GetSelectedZoneId() == nil then
+                return false
+            end
+            local completionType = self:GetSelectedCompletionType()
+            if completionType and completionType ~= ZONE_COMPLETION_TYPE_FEATURED_ACHIEVEMENTS then
+                return ZO_ZoneStories_Manager.CanTrackCompletionType(completionType)
+            end
+            return true
         end,
 
         sound = SOUNDS.ZONE_STORIES_TRACK_ACTIVITY,
@@ -215,10 +274,9 @@ function ZO_ZoneStories_Gamepad:InitializeKeybindStripDescriptors()
         -- Back
         KEYBIND_STRIP:GenerateGamepadBackButtonDescriptor(function()
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.zoneKeybindStripDescriptor)
-            KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
             self.gridList:Deactivate()
-            GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_QUAD1_TOOLTIP)
-            self:UpdateInfoTooltip(GAMEPAD_RIGHT_TOOLTIP)
+            KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
+            self:UpdateInfoTooltip()
             self:ActivateCurrentList()
         end, "UI_SHORTCUT_NEGATIVE", SOUNDS.GAMEPAD_MENU_BACK),
 
@@ -329,8 +387,6 @@ function ZO_ZoneStories_Gamepad:SetFocusOnSelectedZone()
     self.gridList:Activate()
     KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
     KEYBIND_STRIP:AddKeybindButtonGroup(self.zoneKeybindStripDescriptor)
-
-    self:UpdateInfoTooltip(GAMEPAD_QUAD1_TOOLTIP)
 end
 
 function ZO_ZoneStories_Gamepad:UpdatePlayStoryButtonText()
@@ -355,11 +411,11 @@ end
 function ZO_ZoneStories_Gamepad:UpdateZoneStory()
     ZO_ZoneStories_Shared.UpdateZoneStory(self)
 
-    self:UpdateInfoTooltip(GAMEPAD_RIGHT_TOOLTIP)
+    self:UpdateInfoTooltip()
 end
 
-function ZO_ZoneStories_Gamepad:UpdateInfoTooltip(tooltipType)
-    GAMEPAD_TOOLTIPS:ClearTooltip(tooltipType)
+function ZO_ZoneStories_Gamepad:UpdateInfoTooltip()
+    GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
 
     if GAMEPAD_ZONE_STORIES_SCENE:IsShowing() then
         local selectedData = self:GetSelectedStoryData()
@@ -367,15 +423,23 @@ function ZO_ZoneStories_Gamepad:UpdateInfoTooltip(tooltipType)
             local selectedZoneId = selectedData.id
 
             local isZoneAvailable, zoneAvailableErrorText = ZO_ZoneStories_Manager.GetZoneAvailability(selectedZoneId)
-            local shouldShowBlockingMessage = not isZoneAvailable and zoneAvailableErrorText ~= nil
-            if shouldShowBlockingMessage then
-                GAMEPAD_TOOLTIPS:LayoutTextBlockTooltip(tooltipType, zoneAvailableErrorText)
+            local blockingErrorText = ""
+            if not isZoneAvailable and zoneAvailableErrorText ~= nil then
+                blockingErrorText = zoneAvailableErrorText
             else
                 local arePriorityQuestsBlocked, errorStringText = ZO_ZoneStories_Manager.GetZoneCompletionTypeBlockingInfo(selectedZoneId, ZONE_COMPLETION_TYPE_PRIORITY_QUESTS)
-                shouldShowBlockingMessage = arePriorityQuestsBlocked and errorStringText ~= nil
-                if shouldShowBlockingMessage then
-                    GAMEPAD_TOOLTIPS:LayoutTextBlockTooltip(tooltipType, errorStringText)
+                if arePriorityQuestsBlocked and errorStringText ~= nil then
+                    blockingErrorText = errorStringText
                 end
+            end
+
+            self.trackingMessageLabel:SetText(blockingErrorText)
+
+            if not self.gridList:IsActive() then
+                local zoneData = ZONE_STORIES_MANAGER:GetZoneData(selectedZoneId)
+                local title = zoneData.name
+                local description = zoneData.description
+                GAMEPAD_TOOLTIPS:LayoutTitleAndDescriptionTooltip(GAMEPAD_RIGHT_TOOLTIP, title, description)
             end
         end
     end
@@ -383,7 +447,7 @@ end
 
 function ZO_ZoneStories_Gamepad:OnGridSelectionChanged(oldSelectedData, selectedData)
     -- Deselect previous tile
-    if oldSelectedData and oldSelectedData.dataSource and oldSelectedData.dataEntry then
+    if oldSelectedData and oldSelectedData.dataEntry then
         if oldSelectedData.dataEntry.control then
             oldSelectedData.dataEntry.control.object:SetSelected(false)
         end
@@ -448,11 +512,27 @@ function ZO_ZoneStories_Gamepad:BuildZonesList()
     end
 end
 
+function ZO_ZoneStories_Gamepad:BuildGridList()
+    ZO_ZoneStories_Shared.BuildGridList(self)
+
+    local lastActivityCompletionControl = self:GetLastActivityCompletionControl()
+    if lastActivityCompletionControl then
+        self.trackingMessageLabel:SetAnchor(TOP, lastActivityCompletionControl, BOTTOM, 0, 15, ANCHOR_CONSTRAINS_Y)
+    end
+end
 function ZO_ZoneStories_Gamepad:GetSelectedZoneId()
     local list = self:GetMainList()
     local data = list:GetSelectedData()
     if data then
         return data.id
+    end
+    return nil
+end
+
+function ZO_ZoneStories_Gamepad:GetSelectedCompletionType()
+    local selectedData = self.gridList:IsActive() and self.gridList:GetSelectedData()
+    if selectedData then
+        return selectedData.completionType
     end
     return nil
 end

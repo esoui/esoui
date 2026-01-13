@@ -528,10 +528,12 @@ function ZO_Lockpick:UpdateVirtualMousePosition()
         self.virtualNormalizedMouseX = STARTING_NORMALIZED_LOCKPICK_X
         self:OnVirtualLockpickPositionChanged()
     else
-        local deltaX
+        local deltaX = 0
         if IsInGamepadPreferredMode() then
             deltaX = ZO_Gamepad_GetLeftStickEasedX() * GAMEPAD_SPEED_FACTOR
-        else
+        end
+
+        if deltaX == 0 and not IsConsoleUI() then
             deltaX = GetUIMouseDeltas()
         end
         deltaX = deltaX * GetFrameDeltaNormalizedForTargetFramerate()

@@ -1,31 +1,26 @@
 <GuiXml>
     <Controls>
         <TopLevelControl name="ZO_CampaignSelector" hidden="true">
-            <Dimensions x="400" y="50" />
-            <Anchor point="RIGHT" relativeTo="GuiRoot" offsetX="-29" offsetY="-214" />
+            <Dimensions x="400" y="50"/>
+            <Anchor point="RIGHT" relativeTo="GuiRoot" offsetX="-29" offsetY="-214"/>
             <OnInitialized>
                 ZO_CampaignSelector_OnInitialized(self)
             </OnInitialized>
-
             <Controls>
                 <Control name="$(parent)ComboBox" inherits="ZO_ComboBox" resizeToFitDescendents="true" mouseEnabled="true">
                     <Anchor point="RIGHT"/>
-                    <Dimensions x="0" y="0" />
-
+                    <Dimensions x="0" y="0"/>
                     <Controls>
-                        <Backdrop name="$(parent)BG" override="true" hidden="true" />
-                        
+                        <Backdrop name="$(parent)BG" override="true" hidden="true"/>
                         <Button name="$(parent)OpenDropdown" override="true">
                             <Anchor point="TOPRIGHT"/>
                         </Button>
-
                         <Label name="$(parent)SelectedItemText" override="true" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
-                            <Anchor point="RIGHT" relativeTo="$(parent)OpenDropdown" relativePoint="LEFT" offsetX="-3" />
+                            <Anchor point="RIGHT" relativeTo="$(parent)OpenDropdown" relativePoint="LEFT" offsetX="-3"/>
                         </Label>
                     </Controls>
                 </Control>
             </Controls>
-
         </TopLevelControl>
     </Controls>
 </GuiXml>

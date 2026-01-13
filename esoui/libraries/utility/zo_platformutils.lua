@@ -1,7 +1,7 @@
 
 
 function ZO_FormatUserFacingDisplayName(name)
-    return IsConsoleUI() and UndecorateDisplayName(name) or name
+    return ZO_IsConsoleOrGameCoreUI() and UndecorateDisplayName(name) or name
 end
 
 do
@@ -26,7 +26,7 @@ function ZO_FormatUserFacingCharacterOrDisplayName(characterOrDisplayName)
 end
 
 function ZO_FormatManualNameEntry(name)
-    return IsConsoleUI() and DecorateDisplayName(name) or name
+    return ZO_IsConsoleOrGameCoreUI() and DecorateDisplayName(name) or name
 end
 
 internalassert(UI_PLATFORM_MAX_VALUE == ACCOUNT_LABEL_MAX_VALUE, "There should be a platform account label for every platform")
@@ -55,14 +55,14 @@ function ZO_GetPlatformUserFacingName(characterName, displayName)
 end
 
 function ZO_SavePlayerConsoleProfile()
-    if IsConsoleUI() and SavePlayerConsoleProfile ~= nil then
+    if ZO_IsConsoleOrGameCoreUI() and SavePlayerConsoleProfile ~= nil then
         SavePlayerConsoleProfile()
     end
 end
 
 function ZO_GetInviteInstructions()
-    local instructions 
-    if IsConsoleUI() then
+    local instructions
+    if ZO_IsConsoleOrGameCoreUI() then
         local platform = ZO_GetPlatformAccountLabel()
         instructions = zo_strformat(SI_REQUEST_DISPLAY_NAME_INSTRUCTIONS, platform)
     else
@@ -73,7 +73,7 @@ end
 
 function ZO_PlatformIgnorePlayer(displayName, idRequestType, ...)
     if not IsIgnored(displayName) then
-        if not IsConsoleUI() then
+        if not ZO_IsConsoleOrGameCoreUI() then
             AddIgnore(displayName)
         else
             if not idRequestType or idRequestType == ZO_ID_REQUEST_TYPE_DISPLAY_NAME then
@@ -96,10 +96,6 @@ do
         return not IsConsoleUI()
     end
 
-    function ZO_IsConsoleUI()
-        return IsConsoleUI()
-    end
-
     function ZO_IsWindowsUI()
         return ZO_IsPCUI() and not IsMacUI()
     end
@@ -114,8 +110,12 @@ do
         return ZO_IsPlaystationPlatform() or platform == UI_PLATFORM_XBOX
     end
 
+    function ZO_IsConsoleOrGameCoreUI()
+        return IsConsoleUI() or IsGameCoreUI()
+    end
+
     function ZO_IsForceConsoleFlow()
-        if IsConsoleUI() then
+        if ZO_IsConsoleOrGameCoreUI() then
             return GetUIPlatform() == UI_PLATFORM_PC
         end
         return false

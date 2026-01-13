@@ -1,202 +1,161 @@
 <GuiXml>
     <Controls>
         <Control name="ZO_SkillsSubclassing_Swap_SkillLine_Keyboard" inherits="ZO_Skills_ResponsiveSkillLineInfo_Keyboard" virtual="true">
-            <Dimensions x="450" />
+            <Dimensions x="450"/>
             <Controls>
-               <Button name="$(parent)ClickableArea">
-                    <Anchor point="TOPLEFT" />
-                    <Anchor point="BOTTOMRIGHT" />
+                <Button name="$(parent)ClickableArea">
+                    <Anchor point="TOPLEFT"/>
+                    <Anchor point="BOTTOMRIGHT"/>
                 </Button>
-
                 <Texture name="$(parent)Check" textureFile="EsoUI/Art/Miscellaneous/check_icon_64.dds" hidden="true">
                     <Dimensions x="45" y="45"/>
-                    <Anchor point="RIGHT" relativeTo="$(parent)ClickableArea" relativePoint="LEFT" />
+                    <Anchor point="RIGHT" relativeTo="$(parent)ClickableArea" relativePoint="LEFT"/>
                 </Texture>
             </Controls>
         </Control>
-
         <TopLevelControl name="ZO_SkillLineSwapSelectionDialog" inherits="ZO_CustomDialogBase">
             <Controls>
                 <Label name="$(parent)Description" inherits="ZO_DialogContentAnchors" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"/>
-
                 <Control name="$(parent)Options">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Divider" relativePoint="BOTTOMLEFT" offsetY="100"/>
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)Divider" relativePoint="BOTTOMRIGHT" offsetY="100"/>
                     <Controls>
                         <Control name="$(parent)CurrentSkillLine1" inherits="ZO_SkillsSubclassing_Swap_SkillLine_Keyboard">
-                            <Anchor point="TOP" relativeTo="$(parent)Arrows" relativePoint="BOTTOM" offsetX="20" />
+                            <Anchor point="TOP" relativeTo="$(parent)Arrows" relativePoint="BOTTOM" offsetX="20"/>
                         </Control>
-
                         <Control name="$(parent)CurrentSkillLine2" inherits="ZO_SkillsSubclassing_Swap_SkillLine_Keyboard">
-                            <Anchor point="TOP" relativeTo="$(parent)CurrentSkillLine1" relativePoint="BOTTOM" />
+                            <Anchor point="TOP" relativeTo="$(parent)CurrentSkillLine1" relativePoint="BOTTOM"/>
                         </Control>
-
                         <Control name="$(parent)CurrentSkillLine3" inherits="ZO_SkillsSubclassing_Swap_SkillLine_Keyboard">
-                            <Anchor point="TOP" relativeTo="$(parent)CurrentSkillLine2" relativePoint="BOTTOM" />
+                            <Anchor point="TOP" relativeTo="$(parent)CurrentSkillLine2" relativePoint="BOTTOM"/>
                         </Control>
                     </Controls>
                 </Control>
-
                 <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton"/>
                 <Control name="$(parent)Confirm" inherits="ZO_CustomDialogButton"/>
             </Controls>
         </TopLevelControl>
-
         <Control name="ZO_Class_Header_Entry_Keyboard" virtual="true">
-            <Dimensions y="40" />
-
+            <Dimensions y="40"/>
             <OnInitialized>
                 ZO_SkillsSubclassing_Keyboard.OnClassHeaderInitialize(self)
             </OnInitialized>
-
             <Controls>
                 <Control name="$(parent)Contents" mouseEnabled="true">
-                    <Anchor point="TOPLEFT" offsetX="50" />
-                    <Anchor point="BOTTOMRIGHT" />
-
+                    <Anchor point="TOPLEFT" offsetX="50"/>
+                    <Anchor point="BOTTOMRIGHT"/>
                     <OnMouseUp>
                         ZO_Class_Header_Entry_Keyboard_OnMouseUp(self:GetParent(), button, upInside)
                     </OnMouseUp>
-
                     <OnMouseEnter>
                         ZO_SkillsSubclassing_Keyboard.OnClassHeaderMouseEnter(self:GetParent())
                     </OnMouseEnter>
-
                     <OnMouseExit>
                         ZO_SkillsSubclassing_Keyboard.OnClassHeaderMouseExit(self:GetParent())
                     </OnMouseExit>
-
                     <Controls>
                         <Button name="$(parent)ExpandedState" inherits="ZO_TreeButtonArrow ZO_PropagateMouseOverBehavior ZO_PropagateMouseButtonBehavior">
-                            <Anchor point="TOPLEFT" />
+                            <Anchor point="TOPLEFT"/>
                         </Button>
-
                         <Label name="$(parent)Name" font="ZoFontWinH3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                            <Anchor point="LEFT" relativeTo="$(parent)ExpandedState" relativePoint="RIGHT" />
-                            <Anchor point="RIGHT" offsetX="-10" constrains="X" />
+                            <Anchor point="LEFT" relativeTo="$(parent)ExpandedState" relativePoint="RIGHT"/>
+                            <Anchor point="RIGHT" offsetX="-10" constrains="X"/>
                         </Label>
                     </Controls>
                 </Control>
             </Controls>
         </Control>
-
         <Control name="ZO_SkillsSubclassing_SkillLine_Keyboard" inherits="ZO_Skills_ResponsiveSkillLineInfo_Keyboard" virtual="true">
             <OnInitialized name="Subclassing">
                 ZO_SkillsSubclassing_SkillLine_Keyboard_OnInitialize(self)
             </OnInitialized>
-
             <Controls>
                 <Control name="$(parent)HighlightArea" mouseEnabled="true">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Rank" />
-                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)XPBar" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Rank"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)XPBar"/>
                 </Control>
-
                 <Label name="$(parent)Rank" override="true">
-                    <Anchor point="LEFT" offsetX="150" />
+                    <Anchor point="LEFT" offsetX="150"/>
                 </Label>
-
                 <Button name="$(parent)Action" hidden="true">
                     <Dimensions x="64" y="64"/>
-                    <Anchor point="RIGHT" relativeTo="$(parent)Name" relativePoint="LEFT" offsetX="-60" offsetY="12" />
-
+                    <Anchor point="RIGHT" relativeTo="$(parent)Name" relativePoint="LEFT" offsetX="-60" offsetY="12"/>
                     <OnClicked>
                         ZO_Skills_SubclassSkillLine_OnClicked(self, shift)
                     </OnClicked>
-
                     <OnMouseEnter>
                         ZO_Skills_SubclassSkillLine_OnMouseEnter(self)
                     </OnMouseEnter>
-
                     <OnMouseExit>
                         ZO_Skills_SubclassSkillLine_OnMouseExit(self)
                     </OnMouseExit>
                 </Button>
-
                 <Button name="$(parent)Untrain" hidden="true">
                     <Dimensions x="64" y="64"/>
-                    <Anchor point="RIGHT" relativeTo="$(parent)Action" relativePoint="LEFT" />
-
+                    <Anchor point="RIGHT" relativeTo="$(parent)Action" relativePoint="LEFT"/>
                     <OnClicked>
                         ZO_Skills_SubclassSkillLine_Untrain_OnClicked(self, shift)
                     </OnClicked>
-
                     <OnMouseEnter>
                         ZO_Skills_SubclassSkillLine_Untrain_OnMouseEnter(self)
                     </OnMouseEnter>
-
                     <OnMouseExit>
                         ZO_Skills_SubclassSkillLine_Untrain_OnMouseExit(self)
                     </OnMouseExit>
-
-                    <Textures
-                        normal="EsoUI/Art/Progression/untrain_up.dds"
-                        pressed="EsoUI/Art/Progression/untrain_down.dds"
-                        mouseOver="EsoUI/Art/Progression/untrain_over.dds"
-                        disabled="EsoUI/Art/Progression/untrain_disabled.dds"
-                     />
+                    <Textures normal="EsoUI/Art/Progression/untrain_up.dds" pressed="EsoUI/Art/Progression/untrain_down.dds" mouseOver="EsoUI/Art/Progression/untrain_over.dds" disabled="EsoUI/Art/Progression/untrain_disabled.dds"/>
                 </Button>
             </Controls>
         </Control>
-
         <Control name="ZO_SkillsSubclassingPanel" virtual="true">
             <Controls>
                 <Control name="$(parent)TrainingInfo" resizeToFitDescendents="true" mouseEnabled="true">
-                    <Anchor point="TOPRIGHT" offsetY="10" />
+                    <Anchor point="TOPRIGHT" offsetY="10"/>
                     <OnMouseEnter>
                         ZO_SkillsTrainingInfo_Keyboard_OnMouseEnter(self)
                     </OnMouseEnter>
-
                     <OnMouseExit>
                         ZO_SkillsTrainingInfo_Keyboard_OnMouseExit(self)
                     </OnMouseExit>
-
                     <Controls>
                         <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Progression/training_32.dds">
                             <Dimensions x="32" y="32"/>
-                            <Anchor point="TOPRIGHT" />
+                            <Anchor point="TOPRIGHT"/>
                         </Texture>
-
                         <Label name="$(parent)Text" font="ZoFontWinH3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                            <Anchor point="RIGHT" relativeTo="$(parent)Icon" relativePoint="LEFT" />
+                            <Anchor point="RIGHT" relativeTo="$(parent)Icon" relativePoint="LEFT"/>
                         </Label>
                     </Controls>
                 </Control>
-
                 <Control name="$(parent)ClassSkillLineList" inherits="ZO_ScrollList">
-                    <Anchor point="TOPLEFT" offsetX="-60" offsetY="50" />
-                    <Anchor point="BOTTOMRIGHT" />
+                    <Anchor point="TOPLEFT" offsetX="-60" offsetY="50"/>
+                    <Anchor point="BOTTOMRIGHT"/>
                 </Control>
-
                 <Control name="$(parent)SkillsListContainer" hidden="true">
-                    <Anchor point="TOPLEFT" offsetX="-60" offsetY="50" />
-                    <Anchor point="BOTTOMRIGHT" />
+                    <Anchor point="TOPLEFT" offsetX="-60" offsetY="50"/>
+                    <Anchor point="BOTTOMRIGHT"/>
                     <Controls>
                         <Control name="$(parent)BackLabel" level="1" inherits="ZO_IconHeader">
-                            <Anchor point="TOPLEFT" offsetX="-290" offsetY="40" />
+                            <Anchor point="TOPLEFT" offsetX="-290" offsetY="40"/>
                             <OnInitialized name="SkillsSubclassing">
                                 self.enabled = true
                                 self.allowIconScaling = false
                                 self.OnMouseUp = ZO_Skills_SubclassSkillLine_SkillsListBackButton_OnClicked
                             </OnInitialized>
-
                             <Controls>
                                 <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Buttons/large_leftArrow_down.dds" override="true">
                                     <Controls>
-                                        <Texture name="$(parent)Highlight" textureFile="EsoUI/Art/Buttons/large_leftArrow_over.dds" override="true" />
+                                        <Texture name="$(parent)Highlight" textureFile="EsoUI/Art/Buttons/large_leftArrow_over.dds" override="true"/>
                                     </Controls>
                                 </Texture>
-
-                                <Label name="$(parent)Text" text="SI_SKILLS_SUBCLASSING_EXIT_PREVIEW_ACTION" override="true" />
+                                <Label name="$(parent)Text" text="SI_SKILLS_SUBCLASSING_EXIT_PREVIEW_ACTION" override="true"/>
                             </Controls>
                         </Control>
-
                         <Control name="$(parent)SkillInfo" inherits="ZO_SkillsSubclassing_SkillLine_Keyboard">
-                            <Anchor point="TOPLEFT" offsetX="-85" offsetY="-37" />
+                            <Anchor point="TOPLEFT" offsetX="-85" offsetY="-37"/>
                         </Control>
-
                         <Control name="$(parent)SkillsList" inherits="ZO_ScrollList">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)SkillInfo" relativePoint="BOTTOMLEFT" offsetX="100" />
-                            <Anchor point="BOTTOMRIGHT" offsetY="-55" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)SkillInfo" relativePoint="BOTTOMLEFT" offsetX="100"/>
+                            <Anchor point="BOTTOMRIGHT" offsetY="-55"/>
                         </Control>
                     </Controls>
                 </Control>

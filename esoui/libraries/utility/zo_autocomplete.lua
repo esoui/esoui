@@ -25,7 +25,7 @@ AUTO_COMPLETION_SELECTED_BY_ENTER = 1
 AUTO_COMPLETION_SELECTED_BY_CLICK = 2
 AUTO_COMPLETION_SELECTED_BY_TAB = 3
 
-ZO_AutoComplete = ZO_CallbackObject:Subclass()
+ZO_AutoComplete = ZO_InitializingCallbackObject:Subclass()
 ZO_AutoComplete.ON_ENTRY_SELECTED = "ZO_AutoComplete_On_Entry_Selected"
 
 AUTO_COMPLETE_FLAG_ALL = -1
@@ -36,13 +36,6 @@ ZO_AutoComplete.FlagHandlers = { }
 function ZO_AutoComplete.AddFlag(handler)
     table.insert(ZO_AutoComplete.FlagHandlers, handler)
     return #ZO_AutoComplete.FlagHandlers
-end
-
-
-function ZO_AutoComplete:New(...)
-    local autoComplete = ZO_CallbackObject.New(self)
-    autoComplete:Initialize(...)
-    return autoComplete
 end
 
 function ZO_AutoComplete:Initialize(editControl, includeFlags, excludeFlags, onlineOnly, maxResults, mode, allowArrows, dontCallHookedHandlers)
@@ -56,7 +49,7 @@ function ZO_AutoComplete:Initialize(editControl, includeFlags, excludeFlags, onl
     self.anchorStyle = AUTO_COMPLETION_ANCHOR_TOP
     self.useArrows = allowArrows == nil or AUTO_COMPLETION_USE_ARROWS == allowArrows
     self.dontCallHookedHandlers = dontCallHookedHandlers
-    if(self.dontCallHookedHandlers == nil) then
+    if self.dontCallHookedHandlers == nil then
         self.dontCallHookedHandlers = true
     end
 
@@ -121,11 +114,11 @@ function ZO_AutoComplete:SetEditControl(editControl)
             ZO_PreHookHandler(editControl, "OnDownArrow", function() self:ChangeAutoCompleteIndex(1) end)
             ZO_PreHookHandler(editControl, "OnUpArrow", function() self:ChangeAutoCompleteIndex(-1) end)
         end
-    
+
         ZO_PreHookHandler(editControl, "OnFocusLost", function() self:Hide() end)
         ZO_PreHookHandler(editControl, "OnHide", function() self:Hide() end)
     end
-    
+
     self.editControl = editControl
 end
 
@@ -177,11 +170,11 @@ do
         return 0
     end
 
-    function ComputeScore(source, scoringText, startIndex, trimmedTextToScore)
+    local function ComputeScore(source, scoringText, startIndex, trimmedTextToScore)
         return ComputeStringDistance(source, scoringText) - ComputeSubStringMatchScore(source, startIndex, trimmedTextToScore)
     end
 
-    local POOR_MATCH_RATIO = .75
+    local POOR_MATCH_RATIO = 0.75
     local POOR_MATCH_MIN = 1
 
     local scores = {}
@@ -257,15 +250,11 @@ do
         end
     end
 
-    function GetAutoCompletion(input, maxResults, onlineOnly, includeFlags, excludeFlags, noMinScore)
-        maxResults = maxResults or 10
-        input = input:lower()
-
-        return GenerateAutoCompletionResults(input, maxResults, onlineOnly, includeFlags, excludeFlags, noMinScore)
-    end
-
     function ZO_AutoComplete:GetAutoCompletionResults(text)
-        return GetAutoCompletion(text, self.maxResults, self.onlineOnly, self.includeFlags, self.excludeFlags)
+        local maxResults = self.maxResults or 10
+        local lowerText = text:lower()
+
+        return GenerateAutoCompletionResults(lowerText, maxResults, self.onlineOnly, self.includeFlags, self.excludeFlags)
     end
 end
 
@@ -275,7 +264,7 @@ function ZO_AutoComplete:ApplyAutoCompletionResults(...)
         SetMenuMinimumWidth(self.editControl:GetWidth() - GetMenuPadding() * 2)
 
         local numResults = select("#", ...)
-        for i=1, numResults do
+        for i = 1, numResults do
             local name = select(i, ...)
             AddMenuItem(name, function()
                 if self.useCallbacks then
@@ -285,7 +274,7 @@ function ZO_AutoComplete:ApplyAutoCompletionResults(...)
                 end
             end)
         end
-        
+
         ShowMenu(self.owner, nil, MENU_TYPE_TEXT_ENTRY_DROP_DOWN)
 
         if self.anchorStyle == AUTO_COMPLETION_ANCHOR_BOTTOM then
@@ -297,16 +286,16 @@ function ZO_AutoComplete:ApplyAutoCompletionResults(...)
             ZO_Menu:SetAnchor(TOPLEFT, self.editControl, BOTTOMLEFT, -8 + self.widthOffsetLeft, 2)
             ZO_Menu:SetAnchor(TOPRIGHT, self.editControl, BOTTOMRIGHT, 8 + self.widthOffsetRight, 2)
         end
-        
+
         return true
     end
-    
+
     return false
 end
 
 function ZO_AutoComplete:OnTextChanged()
     if self.enabled and self.editControl:HasFocus() and self.editControl:GetText() ~= "" then
-        self:Show(self.editControl:GetText())        
+        self:Show(self.editControl:GetText())
     else
         self:Hide()
     end

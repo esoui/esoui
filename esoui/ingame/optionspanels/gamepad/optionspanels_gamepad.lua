@@ -81,28 +81,28 @@ GAMEPAD_SETTINGS_DATA =
         },
         {
             panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_USE_BACKGROUND_FPS_LIMIT,
+        },
+        {
+            panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_BACKGROUND_FPS_LIMIT,
+        },
+        {
+            panel = SETTING_PANEL_VIDEO,
             system = SETTING_TYPE_CUSTOM,
             settingId = OPTIONS_CUSTOM_SETTING_GAMMA_ADJUST,
         },
         {
             panel = SETTING_PANEL_VIDEO,
             system = SETTING_TYPE_CUSTOM,
-            settingId = OPTIONS_CUSTOM_SETTING_SCREEN_ADJUST,
-        },
-        {
-            panel = SETTING_PANEL_VIDEO,
-            system = SETTING_TYPE_UI,
-            settingId = UI_SETTING_USE_GAMEPAD_CUSTOM_SCALE,
-        },
-        {
-            panel = SETTING_PANEL_VIDEO,
-            system = SETTING_TYPE_UI,
-            settingId = UI_SETTING_GAMEPAD_CUSTOM_SCALE,
-        },
-        {
-            panel = SETTING_PANEL_VIDEO,
-            system = SETTING_TYPE_CUSTOM,
             settingId = OPTIONS_CUSTOM_SETTING_SCREENSHOT_MODE,
+        },
+        {
+            panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_HDR_ENABLED,
         },
         {
             panel = SETTING_PANEL_VIDEO,
@@ -133,6 +133,23 @@ GAMEPAD_SETTINGS_DATA =
             panel = SETTING_PANEL_VIDEO,
             system = SETTING_TYPE_GRAPHICS,
             settingId = GRAPHICS_SETTING_HDR_MODE,
+        },
+        {
+            panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_CUSTOM,
+            settingId = OPTIONS_CUSTOM_SETTING_SCREEN_ADJUST,
+        },
+        {
+            panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_UI,
+            settingId = UI_SETTING_USE_GAMEPAD_CUSTOM_SCALE,
+            header = SI_VIDEO_OPTIONS_INTERFACE,
+        },
+        {
+            panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_UI,
+            settingId = UI_SETTING_GAMEPAD_CUSTOM_SCALE,
+            header = SI_VIDEO_OPTIONS_INTERFACE,
         },
         {
             panel = SETTING_PANEL_VIDEO,
@@ -317,6 +334,16 @@ GAMEPAD_SETTINGS_DATA =
             panel = SETTING_PANEL_CAMERA,
             system = SETTING_TYPE_CAMERA,
             settingId = CAMERA_SETTING_THIRD_PERSON_HORIZONTAL_OFFSET,
+        },
+        {
+            panel = SETTING_PANEL_CAMERA,
+            system = SETTING_TYPE_CAMERA,
+            settingId = CAMERA_SETTING_THIRD_PERSON_VERTICAL_OFFSET,
+        },
+        {
+            panel = SETTING_PANEL_CAMERA,
+            system = SETTING_TYPE_CAMERA,
+            settingId = CAMERA_SETTING_THIRD_PERSON_SIEGE_WEAPONRY,
         },
     },
     [SETTING_PANEL_GAMEPLAY] =
@@ -990,7 +1017,7 @@ GAMEPAD_SETTINGS_DATA =
             panel = SETTING_PANEL_INTERFACE,
             system = SETTING_TYPE_CHAT_BUBBLE,
             settingId = CHAT_BUBBLE_SETTING_ENABLED,
-            header = IsConsoleUI() and SI_INTERFACE_OPTIONS_QUICK_CHAT or SI_INTERFACE_OPTIONS_CHAT_BUBBLES,
+            header = ZO_IsConsoleOrGameCoreUI() and SI_INTERFACE_OPTIONS_QUICK_CHAT or SI_INTERFACE_OPTIONS_CHAT_BUBBLES,
         },
         {
             panel = SETTING_PANEL_INTERFACE,

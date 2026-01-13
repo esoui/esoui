@@ -10,7 +10,6 @@
                         <Control name="$(parent)List" inherits="ZO_VerticalParametricScrollListTemplate">
                             <AnchorFill/>
                         </Control>
-
                         <Label name="$(parent)NoHouses" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGamepadCondensed42" text="SI_WORLD_MAP_NO_HOUSES" hidden="true">
                             <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH"/>
                             <Anchor point="CENTER" offsetY="-35"/>

@@ -10,26 +10,22 @@ ZO_RESTYLE_TEXTURE_LEVEL_PENDING_LOOP = 4
 ZO_RESTYLE_TEXTURE_LEVEL_ICON = 6
 ZO_RESTYLE_TEXTURE_LEVEL_STATUS = 8
 
-do
-    local STACK_COUNT = 1
-
-    function ZO_Restyle_SetupSlotControl(control, restyleSlotData)
-        local icon = restyleSlotData:GetIcon()
-        if icon == ZO_NO_TEXTURE_FILE then
-            icon = ZO_Restyle_GetEmptySlotTexture(restyleSlotData)
-        end
-
-        local actorCategory = ZO_OUTFIT_MANAGER.GetActorCategoryByRestyleMode(restyleSlotData:GetRestyleMode())
-        local bagId = GetWornBagForGameplayActorCategory(actorCategory)
-
-        if restyleSlotData:IsEquipment() then
-            ZO_Inventory_BindSlot(control, SLOT_TYPE_DYEABLE_EQUIPMENT, restyleSlotData:GetRestyleSlotType(), bagId)
-        end
-
-        control.restyleSlotData = restyleSlotData
-
-        control.iconTexture:SetTexture(icon)
+function ZO_Restyle_SetupSlotControl(control, restyleSlotData)
+    local icon = restyleSlotData:GetIcon()
+    if icon == ZO_NO_TEXTURE_FILE then
+        icon = ZO_Restyle_GetEmptySlotTexture(restyleSlotData)
     end
+
+    local actorCategory = ZO_OUTFIT_MANAGER.GetActorCategoryByRestyleMode(restyleSlotData:GetRestyleMode())
+    local bagId = GetWornBagForGameplayActorCategory(actorCategory)
+
+    if restyleSlotData:IsEquipment() then
+        ZO_Inventory_BindSlot(control, SLOT_TYPE_DYEABLE_EQUIPMENT, restyleSlotData:GetRestyleSlotType(), bagId)
+    end
+
+    control.restyleSlotData = restyleSlotData
+
+    control.iconTexture:SetTexture(icon)
 end
 
 do
@@ -314,15 +310,32 @@ function ZO_RestyleSlotData:GetDyeChannelChangedStates()
     return changedChannels
 end
 
-function ZO_RestyleSlotData:ShouldBeHidden()
-    local restyleSlotType = self.restyleSlotType
-    if self:IsOutfitSlot() then
-        if ZO_OUTFIT_MANAGER:IsOutfitSlotWeapon(restyleSlotType) then
-            local actorCategory = ZO_OUTFIT_MANAGER.GetActorCategoryByRestyleMode(self.restyleMode)
-            return not ZO_OUTFIT_MANAGER:IsWeaponOutfitSlotCurrentlyEquipped(restyleSlotType, actorCategory)
+do
+    local RESTYLE_MODE_OMITTED_SLOT_TYPES =
+    {
+        [RESTYLE_MODE_COMPANION_OUTFIT] =
+        {
+            [EQUIP_SLOT_HEAD] = true,
+        },
+        [RESTYLE_MODE_COMPANION_COLLECTIBLE] =
+        {
+            [COLLECTIBLE_CATEGORY_TYPE_HAT] = true,
+        },
+    }
+
+    function ZO_RestyleSlotData:ShouldBeHidden()
+        local restyleSlotType = self.restyleSlotType
+
+        if self:IsOutfitSlot() then
+            if ZO_OUTFIT_MANAGER:IsOutfitSlotWeapon(restyleSlotType) then
+                local actorCategory = ZO_OUTFIT_MANAGER.GetActorCategoryByRestyleMode(self.restyleMode)
+                return not ZO_OUTFIT_MANAGER:IsWeaponOutfitSlotCurrentlyEquipped(restyleSlotType, actorCategory)
+            end
         end
+
+        local isOmittedSlotType = RESTYLE_MODE_OMITTED_SLOT_TYPES[self.restyleMode] and RESTYLE_MODE_OMITTED_SLOT_TYPES[self.restyleMode][restyleSlotType]
+        return isOmittedSlotType
     end
-    return false
 end
 
 function ZO_RestyleSlotData:IsEquipment()

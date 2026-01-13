@@ -1,0 +1,49 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_TamrielTomesIntroHighlight_Shared" resizeToFitConstrains="Y" virtual="true">
+            <OnInitialized>
+                self.titleLabel = self:GetNamedChild("Title")
+                self.bodyTextLabel = self:GetNamedChild("BodyText")
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Title">
+                    <Anchor point="TOPLEFT" offsetX="4" offsetY="4"/>
+                    <Anchor point="TOPRIGHT" offsetX="-4" offsetY="4"/>
+                </Label>
+                <Label name="$(parent)BodyText">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetY="4"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Title" relativePoint="BOTTOMRIGHT" offsetY="4"/>
+                </Label>
+            </Controls>
+        </Control>
+        <TopLevelControl name="ZO_TamrielTomesIntro_SharedTL" hidden="true" virtual="true">
+            <Dimensions x="1810" y="854"/>
+            <Anchor point="CENTER"/>
+            <Controls>
+                <!-- Left side of book -->
+                <Label name="$(parent)Title" horizontalAlignment="CENTER">
+                    <Anchor point="TOPLEFT" offsetX="10" offsetY="20"/>
+                    <Anchor point="TOPRIGHT" relativePoint="TOP" offsetX="-10" offsetY="20"/>
+                </Label>
+                <Control name="$(parent)Image">
+                    <Dimensions x="770" y="435"/>
+                    <Anchor point="TOP" relativeTo="$(parent)Title" relativePoint="BOTTOM" offsetY="60"/>
+                    <Controls>
+                        <Texture name="$(parent)Background" level="1">
+                            <AnchorFill/>
+                        </Texture>
+                        <Backdrop name="$(parent)OverlayBorder" centerColor="00000000" level="2">
+                            <Edge file="EsoUI/Art/Market/Gamepad/gp_market_cel_dark_edgeFrame_8.dds" edgeFileWidth="64" edgeFileHeight="8"/>
+                            <AnchorFill/>
+                        </Backdrop>
+                    </Controls>
+                </Control>
+                <!-- Right side of book -->
+                <Control name="$(parent)Highlights">
+                    <Anchor point="TOPLEFT" relativePoint="TOP" offsetX="10" offsetY="20"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="-10" offsetY="-20"/>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

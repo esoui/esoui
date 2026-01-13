@@ -1,0 +1,86 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_DirectPurchaseLabelValueContainer_Keyboard" resizeToFitConstrains="Y" virtual="true">
+            <OnInitialized>
+                self.label = self:GetNamedChild("Label")
+                self.value = self:GetNamedChild("Value")
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Label" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPLEFT"/>
+                </Label>
+                <Label name="$(parent)Value" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" horizontalAlignment="RIGHT">
+                    <Anchor point="TOPRIGHT"/>
+                </Label>
+            </Controls>
+        </Control>
+        <Control name="ZO_DirectPurchaseLabelEditBoxContainer_Keyboard" resizeToFitConstrains="Y" virtual="true">
+            <OnInitialized>
+                self.label = self:GetNamedChild("Label")
+                self.editBox = self:GetNamedChild("InfoEditBox")
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Label" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPLEFT"/>
+                </Label>
+                <Backdrop name="$(parent)Info" inherits="ZO_SingleLineEditBackdrop_Keyboard">
+                    <Dimensions x="70" y="30"/>
+                    <Anchor point="TOPRIGHT"/>
+                    <Controls>
+                        <EditBox name="$(parent)EditBox" inherits="ZO_DefaultEditForBackdrop" mouseEnabled="false"/>
+                    </Controls>
+                </Backdrop>
+            </Controls>
+        </Control>
+        <TopLevelControl name="ZO_DirectPurchaseConfirmPurchaseDialog_Keyboard" inherits="ZO_CustomDialogBase">
+            <OnInitialized>
+                ZO_DirectPurchaseConfirmPurchaseDialog_Keyboard_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)SkuName" inherits="ZO_DialogContentAnchors" font="ZoFontWinH2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" horizontalAlignment="CENTER"/>
+                <Control name="$(parent)SubtotalContainer" inherits="ZO_DirectPurchaseLabelValueContainer_Keyboard">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)SkuName" relativePoint="BOTTOMLEFT" offsetY="20"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)SkuName" relativePoint="BOTTOMRIGHT" offsetY="20"/>
+                    <Controls>
+                        <Label name="$(parent)Label" override="true" text="SI_DIRECT_PURCHASE_CONFIRM_PURCHASE_SUBTOTAL_LABEL_KEYBOARD"/>
+                    </Controls>
+                </Control>
+                <Control name="$(parent)TaxContainer" inherits="ZO_DirectPurchaseLabelValueContainer_Keyboard">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)SubtotalContainer" relativePoint="BOTTOMLEFT" offsetY="6"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)SubtotalContainer" relativePoint="BOTTOMRIGHT" offsetY="6"/>
+                    <Controls>
+                        <Label name="$(parent)Label" override="true" text="SI_DIRECT_PURCHASE_CONFIRM_PURCHASE_TAX_LABEL_KEYBOARD"/>
+                    </Controls>
+                </Control>
+                <Control name="$(parent)TotalDivider" inherits="ZO_PlatformStyleDynamicHorizontalDivider ZO_PlatformStyleDynamicHorizontalDivider_Keyboard_Template">
+                    <Dimensions y="6"/>
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)TaxContainer" relativePoint="BOTTOMLEFT" offsetY="4"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)TaxContainer" relativePoint="BOTTOMRIGHT" offsetY="4"/>
+                </Control>
+                <Control name="$(parent)TotalContainer" inherits="ZO_DirectPurchaseLabelValueContainer_Keyboard">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)TotalDivider" relativePoint="BOTTOMLEFT" offsetY="4"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)TotalDivider" relativePoint="BOTTOMRIGHT" offsetY="4"/>
+                    <Controls>
+                        <Label name="$(parent)Label" override="true" text="SI_DIRECT_PURCHASE_CONFIRM_PURCHASE_TOTAL_LABEL_KEYBOARD"/>
+                    </Controls>
+                </Control>
+                <EditBox name="$(parent)BillingInfo" inherits="ZO_DirectPurchaseLabelEditBoxContainer_Keyboard">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)TotalContainer" relativePoint="BOTTOMLEFT" offsetY="6"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)TotalContainer" relativePoint="BOTTOMRIGHT" offsetY="6"/>
+                    <Controls>
+                        <Label name="$(parent)Label" override="true" text="SI_DIRECT_PURCHASE_CONFIRM_PURCHASE_BILLING_INFO_LABEL_KEYBOARD"/>
+                    </Controls>
+                </EditBox>
+                <Label name="$(parent)Info" inherits="ZO_DialogContentAnchors" font="ZoFontGame" linkEnabled="true" mouseEnabled="true" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)BillingInfo" relativePoint="BOTTOMLEFT" offsetY="10"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)BillingInfo" relativePoint="BOTTOMRIGHT" offsetY="10"/>
+                    <OnLinkClicked>
+                        ZO_LinkHandler_OnLinkMouseUp(linkText, button, self)
+                    </OnLinkClicked>
+                </Label>
+                <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton"/>
+                <Control name="$(parent)Confirm" inherits="ZO_CustomDialogButton"/>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

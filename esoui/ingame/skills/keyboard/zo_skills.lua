@@ -270,16 +270,62 @@ local function InitializeKeyboardUpgradeDialog()
     })
 end
 
-function ZO_InitializeKeyboardRespecConfirmationGoldDialog(control)
+function ZO_InitializeKeyboardSkillRespecCastDialog(control)
+    control.bar = control:GetNamedChild("ContentContainerProgress")
+
+    local function SetupRespecCastDialog(dialog)
+        ZO_StatusBar_SetGradientColor(dialog.bar, ZO_XP_BAR_GRADIENT_COLORS)
+        dialog.bar:SetMinMax(0, RESPEC_CAST_TIME_MS)
+        dialog.bar:SetValue(0)
+    end
+
+    ZO_Dialogs_RegisterCustomDialog("SKILL_RESPEC_CAST_KEYBOARD",
+    {
+        customControl = control,
+        setup = SetupRespecCastDialog,
+        title =
+        {
+            text = GetString(SI_SKILL_RESPEC_START_RESPEC_KEYBIND),
+        },
+        buttons =
+        {
+            {
+                keybind = "DIALOG_NEGATIVE",
+                control = control:GetNamedChild("Cancel"),
+                text = SI_DIALOG_CANCEL,
+                sound = SOUNDS.DIALOG_DECLINE,
+                callback = function()
+                    CancelSkillPointAllocationRequest()
+                end,
+            },
+        },
+        updateFn = function(dialog)
+            local progress = RESPEC_CAST_TIME_MS - GetSkillRespecCastTimeRemainingMs()
+            dialog.bar:SetValue(progress)
+        end,
+        noChoiceCallback = function(dialog)
+            CancelSkillPointAllocationRequest()
+        end,
+    })
+end
+
+function ZO_InitializeKeyboardSkillRespecConfirmationGoldDialog(control)
     local function SetupRespecConfirmationGoldDialog()
         local balance = GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)
         local cost = GetSkillRespecCost(SKILLS_AND_ACTION_BAR_MANAGER:GetSkillPointAllocationMode())
+        local showCost = cost > 0
 
         local balanceControl = control:GetNamedChild("Balance")
+        local balanceHeaderControl = control:GetNamedChild("BalanceHeader")
         ZO_CurrencyControl_SetSimpleCurrency(balanceControl, CURT_MONEY, balance, CURRENCY_OPTIONS)
+        balanceControl:SetHidden(not showCost)
+        balanceHeaderControl:SetHidden(not showCost)
 
         local costControl = control:GetNamedChild("Cost")
+        local costHeaderControl = control:GetNamedChild("CostHeader")
         ZO_CurrencyControl_SetSimpleCurrency(costControl, CURT_MONEY, cost, CURRENCY_OPTIONS)
+        costControl:SetHidden(not showCost)
+        costHeaderControl:SetHidden(not showCost)
     end
 
     ZO_Dialogs_RegisterCustomDialog("SKILL_RESPEC_CONFIRM_GOLD_KEYBOARD",
@@ -364,6 +410,7 @@ local function InitializeKeyboardSkillRespecConfirmClearDialog()
                     else
                         SKILL_POINT_ALLOCATION_MANAGER:ClearPointsOnAllSkillLines()
                     end
+                    PlaySound(SOUNDS.SKILL_RESPEC_CLEAR_ALL)
                 end,
             },
             {
@@ -726,22 +773,49 @@ function ZO_SkillsManager:InitializeKeybindDescriptors()
             end
         },
         {
-            name = GetString(SI_SKILL_RESPEC_CONFIRM_KEYBIND),
-            keybind = "UI_SHORTCUT_SECONDARY",
-            callback = function()
-                if SKILLS_AND_ACTION_BAR_MANAGER:DoPendingChangesIncurCost() then
-                    if SKILLS_AND_ACTION_BAR_MANAGER:GetSkillRespecPaymentType() == RESPEC_PAYMENT_TYPE_GOLD then
-                        ZO_Dialogs_ShowDialog("SKILL_RESPEC_CONFIRM_GOLD_KEYBOARD")
-                    else
-                        ZO_Dialogs_ShowDialog("SKILL_RESPEC_CONFIRM_SCROLL")
-                    end
+            name = function()
+                if SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeBatchSave() then
+                    return GetString(SI_SKILL_RESPEC_CONFIRM_KEYBIND)
                 else
-                    ZO_Dialogs_ShowDialog("SKILL_RESPEC_CONFIRM_FREE")
+                    return GetString(SI_SKILL_RESPEC_START_RESPEC_KEYBIND)
                 end
             end,
-            visible = function()
-                return SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeBatchSave()
-            end
+            keybind = "UI_SHORTCUT_SECONDARY",
+            enabled = function()
+                if SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeBatchSave() then
+                    return true
+                else
+                    return not IsCurrentCampaignVengeanceRuleset(), GetString("SI_RESPECRESULT", RESPEC_RESULT_IN_VENGEANCE)
+                end
+            end,
+            callback = function()
+                if SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeBatchSave() then
+                    if SKILLS_AND_ACTION_BAR_MANAGER:DoPendingChangesIncurCost() then
+                        if SKILLS_AND_ACTION_BAR_MANAGER:GetSkillRespecPaymentType() == RESPEC_PAYMENT_TYPE_GOLD then
+                            if GetSkillRespecCost(SKILLS_AND_ACTION_BAR_MANAGER:GetSkillPointAllocationMode()) > 0 or SKILL_LINE_ASSIGNMENT_MANAGER:HasSubclassingChanges() then
+                                ZO_Dialogs_ShowDialog("SKILL_RESPEC_CONFIRM_GOLD_KEYBOARD")
+                            else
+                                SKILLS_AND_ACTION_BAR_MANAGER:ApplyChanges()
+                            end
+                        else
+                            ZO_Dialogs_ShowDialog("SKILL_RESPEC_CONFIRM_SCROLL")
+                        end
+                    else
+                        if SKILL_LINE_ASSIGNMENT_MANAGER:HasSubclassingChanges() then
+                            ZO_Dialogs_ShowDialog("SKILL_RESPEC_CONFIRM_FREE")
+                        else
+                            SKILLS_AND_ACTION_BAR_MANAGER:ApplyChanges()
+                        end
+                    end
+                else
+                    if GetInteractionType() == INTERACTION_SKILL_RESPEC then
+                        --If the interaction is already active we just need to update the allocation mode
+                        SKILLS_AND_ACTION_BAR_MANAGER:SetSkillPointAllocationMode(SKILL_POINT_ALLOCATION_MODE_FULL)
+                    else
+                        StartSkillRespecFromUI()
+                    end
+                end
+            end,
         },
         {
             name = function()
@@ -783,12 +857,8 @@ function ZO_SkillsManager:InitializeKeybindDescriptors()
             keybind = "UI_SHORTCUT_TERTIARY",
             callback = function()
                 local collectibleData = SCRIBING_DATA_MANAGER:GetScribingPurchasableCollectibleData()
-                if collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_CHAPTER) then
-                    ZO_ShowChapterUpgradePlatformScreen(MARKET_OPEN_OPERATION_SKILLS_SCRIBING_LIBRARY)
-                else
-                    local searchTerm = zo_strformat(SI_CROWN_STORE_SEARCH_FORMAT_STRING, collectibleData:GetName())
-                    ShowMarketAndSearch(searchTerm, MARKET_OPEN_OPERATION_SKILLS_SCRIBING_LIBRARY)
-                end
+                local searchTerm = zo_strformat(SI_CROWN_STORE_SEARCH_FORMAT_STRING, collectibleData:GetName())
+                ShowMarketAndSearch(searchTerm, MARKET_OPEN_OPERATION_SKILLS_SCRIBING_LIBRARY)
             end,
             visible = function()
                 return not SCRIBING_DATA_MANAGER:IsScribingUnlocked() and self.scribingLibraryTab_isMousedOver
@@ -1012,6 +1082,23 @@ function ZO_SkillsManager:RegisterForEvents()
 
     control:RegisterForEvent(EVENT_QUEST_ADDED, OnQuestsChanged)
     control:RegisterForEvent(EVENT_QUEST_REMOVED, OnQuestsChanged)
+
+    local function OnStartRespecCast()
+        if not IsInGamepadPreferredMode() then
+            PlaySound(SOUNDS.RESPEC_CAST_TIME_START)
+            ZO_Dialogs_ShowDialog("SKILL_RESPEC_CAST_KEYBOARD")
+        end
+    end
+
+    local function OnSkillRespecResult(eventId, result)
+        if ZO_Dialogs_IsShowing("SKILL_RESPEC_CAST_KEYBOARD") then
+            PlaySound(SOUNDS.RESPEC_CAST_TIME_COMPLETE)
+            ZO_Dialogs_ReleaseDialog("SKILL_RESPEC_CAST_KEYBOARD")
+        end
+    end
+
+    control:RegisterForEvent(EVENT_START_SKILL_RESPEC_CAST, OnStartRespecCast)
+    control:RegisterForEvent(EVENT_SKILL_RESPEC_RESULT, OnSkillRespecResult)
 end
 
 function ZO_SkillsManager:OnScribingLibraryTabMouseEnter()

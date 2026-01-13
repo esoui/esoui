@@ -270,10 +270,8 @@ do
     end
 
     function ZO_RadialMenu:OnUpdate()
-        if not IsInGamepadPreferredMode() then
-            if self:UpdateVirtualMousePosition() then
-                self:UpdateSelectedEntryFromVirtualMousePosition()
-            end
+        if self:UpdateVirtualMousePosition() then
+            self:UpdateSelectedEntryFromVirtualMousePosition()
         end
     end
     

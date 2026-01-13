@@ -1,117 +1,96 @@
-﻿<GuiXml>
+<GuiXml>
     <Controls>
         <Control name="ZO_Gamepad_MarketProductTemplate" inherits="ZO_LargeSingleMarketProduct_BaseTemplate" hidden="true" virtual="true">
-            <Dimensions x="ZO_GAMEPAD_MARKET_INDIVIDUAL_PRODUCT_WIDTH" y ="ZO_GAMEPAD_MARKET_INDIVIDUAL_PRODUCT_HEIGHT" />
+            <Dimensions x="ZO_GAMEPAD_MARKET_INDIVIDUAL_PRODUCT_WIDTH" y="ZO_GAMEPAD_MARKET_INDIVIDUAL_PRODUCT_HEIGHT"/>
             <OnInitialized>
                 ZO_MarketProductGamepad_OnInitialized(self)
             </OnInitialized>
-
             <Controls>
                 <Texture name="$(parent)Background" override="true">
-                    <TextureCoords left="0" right="ZO_GAMEPAD_MARKET_INDIVIDUAL_TEXTURE_WIDTH_COORD" top="0" bottom="ZO_GAMEPAD_MARKET_INDIVIDUAL_TEXTURE_HEIGHT_COORD" />
+                    <TextureCoords left="0" right="ZO_GAMEPAD_MARKET_INDIVIDUAL_TEXTURE_WIDTH_COORD" top="0" bottom="ZO_GAMEPAD_MARKET_INDIVIDUAL_TEXTURE_HEIGHT_COORD"/>
                 </Texture>
-
                 <Control name="$(parent)Highlight" hidden="true">
-                    <AnchorFill />
+                    <AnchorFill/>
                     <Controls>
                         <Backdrop name="$(parent)Normal" inherits="ZO_GamepadWhiteOutlineThick" layer="OVERLAY">
-                            <Anchor point="TOPLEFT" offsetX="-3" offsetY="-3" />
-                            <Anchor point="BOTTOMRIGHT" offsetX="3" offsetY="3" />
+                            <Anchor point="TOPLEFT" offsetX="-3" offsetY="-3"/>
+                            <Anchor point="BOTTOMRIGHT" offsetX="3" offsetY="3"/>
                         </Backdrop>
                     </Controls>
                 </Control>
-
-                <Label name="$(parent)Title" override="true" font="ZoFontGamepad34" />
-
-                <Label name="$(parent)PreviousCost" override="true" font="ZoFontGamepadBold27" />
-
-                <Label name="$(parent)Cost" override="true" font="ZoFontGamepadBold27" />
-
-                <Label name="$(parent)EsoPlusCost" override="true" font="ZoFontGamepadBold27" />
-
-                <Label name="$(parent)Purchased" override="true" font="ZoFontGamepadBold27" />
-
-                <Label name="$(parent)EsoPlusDeal" override="true" font="ZoFontGamepadBold27" />
-
-                <Label name="$(parent)TextCallout" override="true" />
-
+                <Label name="$(parent)Title" override="true" font="ZoFontGamepad34"/>
+                <Label name="$(parent)PreviousCost" override="true" font="ZoFontGamepadBold27"/>
+                <Label name="$(parent)Cost" override="true" font="ZoFontGamepadBold27"/>
+                <Label name="$(parent)EsoPlusCost" override="true" font="ZoFontGamepadBold27"/>
+                <Label name="$(parent)Purchased" override="true" font="ZoFontGamepadBold27"/>
+                <Label name="$(parent)EsoPlusDeal" override="true" font="ZoFontGamepadBold27"/>
+                <Label name="$(parent)TextCallout" override="true"/>
                 <Label name="$(parent)BundledProducts" override="true" font="ZoFontGamepad34">
                     <Anchor point="BOTTOMRIGHT" offsetX="-20" offsetY="-10"/>
                     <Controls>
-                        <Label name="$(parent)Label" override="true" font="ZoFontGamepadBold25" />
+                        <Label name="$(parent)Label" override="true" font="ZoFontGamepadBold25"/>
                     </Controls>
                 </Label>
             </Controls>
         </Control>
-
         <Control name="ZO_Gamepad_MarketProductBundleAttachmentTemplate" inherits="ZO_Gamepad_MarketProductTemplate" virtual="true">
             <Controls>
-                <Label name="$(parent)Cost" override="true" hidden="true" />
+                <Label name="$(parent)Cost" override="true" hidden="true"/>
             </Controls>
         </Control>
-
         <Control name="ZO_Gamepad_MarketBlankTileTemplate" virtual="true">
             <Controls>
                 <Texture name="$(parent)Background" level="ZO_MARKET_TILE_BACKGROUND_LEVEL" color="00000000" alpha="0.2">
-                    <AnchorFill />
+                    <AnchorFill/>
                 </Texture>
-
                 <Backdrop name="$(parent)OverlayBorder" centerColor="00000000" level="ZO_MARKET_TILE_BORDER_LEVEL">
                     <Edge file="EsoUI/Art/Market/Gamepad/gp_market_cel_dark_edgeFrame_8.dds" edgeFileWidth="64" edgeFileHeight="8"/>
                     <AnchorFill/>
                 </Backdrop>
-
                 <Control name="$(parent)Highlight">
-                    <AnchorFill />
+                    <AnchorFill/>
                     <Controls>
                         <Backdrop name="$(parent)Normal" inherits="ZO_GamepadWhiteOutlineThick" layer="OVERLAY" edgeColor="INTERFACE_COLOR_TYPE_MARKET_COLORS:MARKET_COLORS_PURCHASED" alpha="0.5">
-                            <Edge edgeFileWidth="2" edgeFileHeight="2" />
-                            <Insets left="2" top="2" right="-2" bottom="-2" />
-                            <AnchorFill />
+                            <Edge edgeFileWidth="2" edgeFileHeight="2"/>
+                            <Insets left="2" top="2" right="-2" bottom="-2"/>
+                            <AnchorFill/>
                         </Backdrop>
                     </Controls>
                 </Control>
             </Controls>
         </Control>
-
         <Control name="ZO_Gamepad_MarketGenericTileTemplate" virtual="true">
             <OnInitialized>
                 ZO_GamepadMarketGenericTile_OnInitialized(self)
             </OnInitialized>
-
             <Controls>
                 <Texture name="$(parent)Background" level="ZO_MARKET_TILE_BACKGROUND_LEVEL" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
-                    <TextureCoords left="0" right="ZO_GAMEPAD_MARKET_INDIVIDUAL_TEXTURE_WIDTH_COORD" top="0" bottom="ZO_GAMEPAD_MARKET_INDIVIDUAL_TEXTURE_HEIGHT_COORD" />
-                    <AnchorFill />
+                    <TextureCoords left="0" right="ZO_GAMEPAD_MARKET_INDIVIDUAL_TEXTURE_WIDTH_COORD" top="0" bottom="ZO_GAMEPAD_MARKET_INDIVIDUAL_TEXTURE_HEIGHT_COORD"/>
+                    <AnchorFill/>
                 </Texture>
-
                 <!-- The Overlay should appear over top of the background -->
                 <Texture name="$(parent)OverlayGradient" textureFile="EsoUI/Art/Market/market_ItemGradient_256.dds" alpha="0.6" level="ZO_MARKET_TILE_OVERLAY_LEVEL">
-                    <AnchorFill />
+                    <AnchorFill/>
                 </Texture>
-
                 <Backdrop name="$(parent)OverlayBorder" centerColor="00000000" level="ZO_MARKET_TILE_BORDER_LEVEL">
                     <Edge file="EsoUI/Art/Market/Gamepad/gp_market_cel_dark_edgeFrame_8.dds" edgeFileWidth="64" edgeFileHeight="8"/>
                     <AnchorFill/>
                 </Backdrop>
-
                 <Control name="$(parent)Highlight" hidden="true">
-                    <AnchorFill />
+                    <AnchorFill/>
                     <Controls>
                         <Backdrop name="$(parent)Normal" inherits="ZO_GamepadWhiteOutlineThick" layer="OVERLAY">
-                            <Anchor point="TOPLEFT" offsetX="-3" offsetY="-3" />
-                            <Anchor point="BOTTOMRIGHT" offsetX="3" offsetY="3" />
+                            <Anchor point="TOPLEFT" offsetX="-3" offsetY="-3"/>
+                            <Anchor point="BOTTOMRIGHT" offsetX="3" offsetY="3"/>
                         </Backdrop>
                     </Controls>
                 </Control>
-
                 <Label name="$(parent)Title" font="ZoFontGamepad34" level="ZO_MARKET_TILE_TEXT_LEVEL">
-                    <Anchor point="TOPLEFT" offsetX="10" offsetY="ZO_LARGE_SINGLE_MARKET_PRODUCT_CONTENT_TOP_INSET_Y" />
-                    <Anchor point="TOPRIGHT" offsetX="-10" offsetY="ZO_LARGE_SINGLE_MARKET_PRODUCT_CONTENT_TOP_INSET_Y" />
+                    <Anchor point="TOPLEFT" offsetX="10" offsetY="ZO_LARGE_SINGLE_MARKET_PRODUCT_CONTENT_TOP_INSET_Y"/>
+                    <Anchor point="TOPRIGHT" offsetX="-10" offsetY="ZO_LARGE_SINGLE_MARKET_PRODUCT_CONTENT_TOP_INSET_Y"/>
                 </Label>
-
                 <Label name="$(parent)Text" font="ZoFontGamepadBold27" modifyTextType="UPPERCASE" level="ZO_MARKET_TILE_TEXT_LEVEL">
-                    <Anchor point="BOTTOMLEFT" offsetX="10" offsetY="-10" />
+                    <Anchor point="BOTTOMLEFT" offsetX="10" offsetY="-10"/>
                 </Label>
             </Controls>
         </Control>

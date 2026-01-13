@@ -477,7 +477,7 @@ function ZO_GuildRecruitment_Applications_Gamepad:InitializeOptionsDialog()
                 {
                     text = GetString(ZO_GetGamerCardStringId()),
                     setup = ZO_SharedGamepadEntry_OnSetup,
-                    visible = IsConsoleUI,
+                    visible = ZO_IsConsoleOrGameCoreUI,
                     callback = function()
                         local selectedData = self:GetSelectedData()
                         if selectedData then

@@ -11,27 +11,22 @@
                 ZO_CrownGemificationRow_OnMouseUp(self, button, upInside)
             </OnMouseUp>
         </Control>
-        
         <TopLevelControl name="ZO_CrownGemification_KeyboardTopLevel" hidden="true" inherits="ZO_NarrowRightPanelFootPrint">
             <Controls>
                 <Label name="$(parent)Title" font="ZoFontHeader4" modifyTextType="UPPERCASE" text="SI_GEMIFICATION_TITLE">
                     <Anchor point="TOPRIGHT"/>
                 </Label>
-
                 <Control name="$(parent)TitleBarDivider" inherits="ZO_WideHorizontalDivider">
                     <Anchor point="RIGHT" constrains="X"/>
                     <Anchor point="TOP" relativeTo="$(parent)Title" relativePoint="BOTTOM" offsetY="3" constrains="Y"/>
                 </Control>
-                
                 <Control name="$(parent)Tabs" inherits="ZO_InventoryTabs">
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)TitleBarDivider" relativePoint="BOTTOMRIGHT" offsetX="-10" offsetY="10"/>
                 </Control>
-
                 <Control name="$(parent)MenuBarDivider" inherits="ZO_WideHorizontalDivider">
                     <Anchor point="RIGHT" constrains="X"/>
                     <Anchor point="TOP" relativeTo="$(parent)Tabs" relativePoint="BOTTOM" offsetY="13" constrains="Y"/>
                 </Control>
-
                 <Control name="$(parent)Headers">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)MenuBarDivider" relativePoint="BOTTOMLEFT" offsetY="5"/>
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)MenuBarDivider" relativePoint="BOTTOMRIGHT" offsetX="-20" offsetY="5"/>
@@ -54,7 +49,6 @@
                         </Control>
                     </Controls>
                 </Control>
-                    
                 <Control name="$(parent)List" inherits="ZO_ScrollList">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Headers" relativePoint="BOTTOMLEFT" offsetY="5"/>
                     <Anchor point="BOTTOMRIGHT"/>

@@ -30,7 +30,7 @@ function ZO_TradeManager:InitiateTrade(displayName)
         return
     end
 
-    if IsConsoleUI() then
+    if ZO_IsConsoleOrGameCoreUI() then
         local function TradeInviteCallback(success)
             if success then
                 TradeInviteByName(displayName)

@@ -362,75 +362,73 @@ function CampaignBrowser:SelectAssignedCampainRulesetNode()
     end
 end
 
-do
-    internalassert(CAMPAIGN_RULESET_TYPE_MAX_VALUE == 4, "Update Campaign Rulesets")
-    local HIDDEN_COLUMN_KEYS_BY_RULESET_TYPE =
-    {
-        [CAMPAIGN_RULESET_TYPE_CYRODIIL] = {},
-        [CAMPAIGN_RULESET_TYPE_IMPERIAL_CITY] = {["numGroupMembers"] = true, ["numFriends"] = true, ["numGuildMembers"] = true},
-    }
-    function CampaignBrowser:FilterScrollList()
-        -- Apply filter to list
-        ZO_ClearNumericallyIndexedTable(self.filteredList)
-        for _, campaignData in ipairs(self.masterList) do
-            if self.rulesetIdFilter == campaignData.rulesetId then
-                table.insert(self.filteredList, ZO_ScrollList_CreateDataEntry(ZO_CAMPAIGN_DATA_TYPE_CAMPAIGN, campaignData))
-            end
-        end
-
-        -- Apply filter to headers
-        local rulesetType = GetCampaignRulesetType(self.rulesetIdFilter)
-        -- ESO-808426: Speculative fix. Theoretically, if encountered during a load screen we can get an invalid value of 0
-        if rulesetType ~= 0 then
-            local hiddenColumns = HIDDEN_COLUMN_KEYS_BY_RULESET_TYPE[rulesetType]
-            local HIDDEN = true
-            self.sortHeaderGroup:SetHeadersHiddenFromKeyList(hiddenColumns, HIDDEN)
-
-            if hiddenColumns[self.sortHeaderGroup:GetCurrentSortKey()] then
-                -- Table was sorted by a column that is gone now: fallback to name
-                self.sortHeaderGroup:SelectHeaderByKey("name")
-            end
+internalassert(CAMPAIGN_RULESET_TYPE_MAX_VALUE == 5, "Update Campaign Rulesets")
+ZO_HIDDEN_COLUMN_KEYS_BY_RULESET_TYPE =
+{
+    [CAMPAIGN_RULESET_TYPE_CYRODIIL] = {},
+    [CAMPAIGN_RULESET_TYPE_IMPERIAL_CITY] = {["numGroupMembers"] = true, ["numFriends"] = true, ["numGuildMembers"] = true},
+}
+function CampaignBrowser:FilterScrollList()
+    -- Apply filter to list
+    ZO_ClearNumericallyIndexedTable(self.filteredList)
+    for _, campaignData in ipairs(self.masterList) do
+        if self.rulesetIdFilter == campaignData.rulesetId then
+            table.insert(self.filteredList, ZO_ScrollList_CreateDataEntry(ZO_CAMPAIGN_DATA_TYPE_CAMPAIGN, campaignData))
         end
     end
 
-    function CampaignBrowser:SetupCampaign(control, data)
-        ZO_SortFilterList.SetupRow(self, control, data)
+    -- Apply filter to headers
+    local rulesetType = GetCampaignRulesetType(self.rulesetIdFilter)
+    -- ESO-808426: Speculative fix. Theoretically, if encountered during a load screen we can get an invalid value of 0
+    if rulesetType ~= 0 then
+        local hiddenColumns = ZO_HIDDEN_COLUMN_KEYS_BY_RULESET_TYPE[rulesetType]
+        local HIDDEN = true
+        self.sortHeaderGroup:SetHeadersHiddenFromKeyList(hiddenColumns, HIDDEN)
+
+        if hiddenColumns[self.sortHeaderGroup:GetCurrentSortKey()] then
+            -- Table was sorted by a column that is gone now: fallback to name
+            self.sortHeaderGroup:SelectHeaderByKey("name")
+        end
+    end
+end
+
+function CampaignBrowser:SetupCampaign(control, data)
+    ZO_SortFilterList.SetupRow(self, control, data)
      
-        local name = GetControl(control, "Name")
+    local name = GetControl(control, "Name")
 
-        name:SetText(data.name)
+    name:SetText(data.name)
 
-        local icon = GetControl(control, "Icon")
-        if data.id == GetAssignedCampaignId() then
-            icon:SetHidden(false)
-            icon:SetTexture("EsoUI/Art/Campaign/campaignBrowser_homeCampaign.dds")
-        elseif not ZO_CampaignBrowser_DoesPlayerMatchAllianceLock(data) then
-            icon:SetHidden(false)
-            icon:SetTexture("EsoUI/Art/Miscellaneous/status_locked.dds")
-        else
-            icon:SetHidden(true)
-        end
+    local icon = GetControl(control, "Icon")
+    if data.id == GetAssignedCampaignId() then
+        icon:SetHidden(false)
+        icon:SetTexture("EsoUI/Art/Campaign/campaignBrowser_homeCampaign.dds")
+    elseif not ZO_CampaignBrowser_DoesPlayerMatchAllianceLock(data) then
+        icon:SetHidden(false)
+        icon:SetTexture("EsoUI/Art/Miscellaneous/status_locked.dds")
+    else
+        icon:SetHidden(true)
+    end
 
-        local selectionIndex = data.selectionIndex
+    local selectionIndex = data.selectionIndex
 
-        local alliancePopulation1 = control:GetNamedChild("AlliancePopulation1")
-        self:SetupAllianceControl(alliancePopulation1, {population = data.alliancePopulation1, selectionIndex = selectionIndex, alliance = ALLIANCE_ALDMERI_DOMINION})
+    local alliancePopulation1 = control:GetNamedChild("AlliancePopulation1")
+    self:SetupAllianceControl(alliancePopulation1, {population = data.alliancePopulation1, selectionIndex = selectionIndex, alliance = ALLIANCE_ALDMERI_DOMINION})
 
-        local alliancePopulation2 = control:GetNamedChild("AlliancePopulation2")
-        self:SetupAllianceControl(alliancePopulation2, {population = data.alliancePopulation2, selectionIndex = selectionIndex, alliance = ALLIANCE_EBONHEART_PACT})
+    local alliancePopulation2 = control:GetNamedChild("AlliancePopulation2")
+    self:SetupAllianceControl(alliancePopulation2, {population = data.alliancePopulation2, selectionIndex = selectionIndex, alliance = ALLIANCE_EBONHEART_PACT})
 
-        local alliancePopulation3 = control:GetNamedChild("AlliancePopulation3")
-        self:SetupAllianceControl(alliancePopulation3, {population = data.alliancePopulation3, selectionIndex = selectionIndex, alliance = ALLIANCE_DAGGERFALL_COVENANT})
+    local alliancePopulation3 = control:GetNamedChild("AlliancePopulation3")
+    self:SetupAllianceControl(alliancePopulation3, {population = data.alliancePopulation3, selectionIndex = selectionIndex, alliance = ALLIANCE_DAGGERFALL_COVENANT})
 
-        local rulesetType = GetCampaignRulesetType(self.rulesetIdFilter)
-        -- ESO-774582: If encountered during a load screen we can get an invalid value of 0
-        if rulesetType ~= 0 then
-            local hiddenColumns = HIDDEN_COLUMN_KEYS_BY_RULESET_TYPE[rulesetType]
+    local rulesetType = GetCampaignRulesetType(self.rulesetIdFilter)
+    -- ESO-774582: If encountered during a load screen we can get an invalid value of 0
+    if rulesetType ~= 0 then
+        local hiddenColumns = ZO_HIDDEN_COLUMN_KEYS_BY_RULESET_TYPE[rulesetType]
 
-            control:GetNamedChild("GroupMembers"):SetHidden(hiddenColumns["numGroupMembers"] or data.numGroupMembers == 0)
-            control:GetNamedChild("Friends"):SetHidden(hiddenColumns["numFriends"] or data.numFriends == 0)
-            control:GetNamedChild("GuildMembers"):SetHidden(hiddenColumns["numGuildMembers"] or data.numGuildMembers == 0)
-        end
+        control:GetNamedChild("GroupMembers"):SetHidden(hiddenColumns["numGroupMembers"] or data.numGroupMembers == 0)
+        control:GetNamedChild("Friends"):SetHidden(hiddenColumns["numFriends"] or data.numFriends == 0)
+        control:GetNamedChild("GuildMembers"):SetHidden(hiddenColumns["numGuildMembers"] or data.numGuildMembers == 0)
     end
 end
 

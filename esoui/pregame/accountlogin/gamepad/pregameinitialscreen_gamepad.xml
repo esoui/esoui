@@ -2,10 +2,9 @@
     <Animations>
         <AnimationTimeline name="ZO_PregameInitialScreen_AnimatedBackgroundAnimation">
             <Animations>
-                <CustomAnimation duration="2000" />
+                <CustomAnimation duration="2000"/>
             </Animations>
         </AnimationTimeline>
-        
         <AnimationTimeline name="ZO_PregameInitialScreen_PressTextFadeAnimation">
             <Animations>
                 <AlphaAnimation duration="1000" startAlpha="0" endAlpha="1">
@@ -16,42 +15,35 @@
             </Animations>
         </AnimationTimeline>
     </Animations>
-
     <Controls>
         <TopLevelControl name="PregameInitialScreen_Gamepad" hidden="true">
             <AnchorFill/>
             <OnInitialized>
                 PregameInitialScreen_Gamepad_Initialize(self)
             </OnInitialized>
-
             <Controls>
                 <Control name="$(parent)Logo" resizeToFitDescendents="true">
-                    <Anchor point="TOP" />
+                    <Anchor point="TOP"/>
                     <Controls>
                         <Texture name="$(parent)Ouroboros" resizeToFitFile="true" textureFile="EsoUI/Art/Login/Gamepad/console-Ouroboros.dds">
                             <Anchor point="CENTER" relativeTo="GuiRoot"/>
                         </Texture>
                     </Controls>
                 </Control>
-
                 <Label name="$(parent)PressText" inherits="ZO_LargeKeyMarkupLabel_Gamepad" alpha="0" modifyTextType="UPPERCASE" font="ZoFontGamepad34" horizontalAlignment="CENTER">
-                    <Anchor point="BOTTOM" relativeTo="GuiRoot" offsetY="-45" />
+                    <Anchor point="BOTTOM" relativeTo="GuiRoot" offsetY="-45"/>
                 </Label>
-
                 <Control name="$(parent)ErrorBox" inherits="ZO_GamepadGrid_NavQuadrant_1_Anchors" hidden="true">
-
                     <Controls>
-                        <Control name="$(parent)Bg" inherits="ZO_SharedGamepadDialog_Background_Template" tier="LOW" />
-                        
+                        <Control name="$(parent)Bg" inherits="ZO_SharedGamepadDialog_Background_Template" tier="LOW"/>
                         <Control name="$(parent)Container">
                             <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH"/>
-                            <Anchor point="LEFT" />
+                            <Anchor point="LEFT"/>
                             <Controls>
                                 <Label name="$(parent)ErrorTitle" font="ZoFontGamepadBold48" modifyTextType="UPPERCASE">
                                     <Anchor point="TOPLEFT"/>
                                     <Anchor point="TOPRIGHT"/>
                                 </Label>
-
                                 <Label name="$(parent)ErrorMessage" font="ZoFontGamepad42">
                                     <Anchor point="TOPLEFT" relativeTo="$(parent)ErrorTitle" relativePoint="BOTTOMLEFT"/>
                                     <Anchor point="TOPRIGHT" relativeTo="$(parent)ErrorTitle" relativePoint="BOTTOMRIGHT" offsetY="ZO_GAMEPAD_CONTENT_DIVIDER_INFO_PADDING_Y"/>

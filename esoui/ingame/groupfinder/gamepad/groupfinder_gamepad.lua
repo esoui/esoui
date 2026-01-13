@@ -146,6 +146,9 @@ function ZO_GroupFinder_Gamepad:InitializeGroupFinderCategories()
                 GROUP_FINDER_SEARCH_MANAGER:ExecuteSearch()
                 SCENE_MANAGER:Push("group_finder_gamepad_list")
             end,
+            visible = function()
+                return IsGroupFinderCategoryAvailable(index)
+            end,
         }
         table.insert(findGroupCategoryData, data)
     end
@@ -387,22 +390,26 @@ function ZO_GroupFinder_Gamepad:RefreshSubcategoryList(resetToTop)
     end
 
     local selectedIndex = 1
+    local entryIndex = 0
     if self.subcategoryData[self.mode] then
         local selectedCategory = GetGroupFinderFilterCategory()
         --Build the list using the subcategory data for the current mode
         for i, subcategoryData in ipairs(self.subcategoryData[self.mode]) do
-            local entryData = ZO_GamepadEntryData:New(subcategoryData.name, subcategoryData.menuIcon)
-            entryData.selectCallback = subcategoryData.selectCallback
-            entryData.enabled = subcategoryData.enabled or entryData.enabled
+            if ZO_Eval(subcategoryData.visible) then
+                entryIndex = entryIndex + 1
+                local entryData = ZO_GamepadEntryData:New(subcategoryData.name, subcategoryData.menuIcon)
+                entryData.selectCallback = subcategoryData.selectCallback
+                entryData.enabled = subcategoryData.enabled or entryData.enabled
 
-            if self.mode == ZO_GROUP_FINDER_MODES.SEARCH and subcategoryData.subcategoryType == selectedCategory then
-                selectedIndex = i
-            end
+                if self.mode == ZO_GROUP_FINDER_MODES.SEARCH and subcategoryData.subcategoryType == selectedCategory then
+                    selectedIndex = entryIndex
+                end
 
-            list:AddEntry("ZO_GamepadItemEntryTemplate", entryData)
+                list:AddEntry("ZO_GamepadItemEntryTemplate", entryData)
 
-            if self.mode == ZO_GROUP_FINDER_MODES.MANAGE then
-                GROUP_FINDER_APPLICATIONS_LIST_MANAGER:SetHasNewApplication(false)
+                if self.mode == ZO_GROUP_FINDER_MODES.MANAGE then
+                    GROUP_FINDER_APPLICATIONS_LIST_MANAGER:SetHasNewApplication(false)
+                end
             end
         end
     end

@@ -436,6 +436,22 @@ function ZO_TriStateCheckButton_SetStateChangeFunction(buttonControl, stateChang
     buttonControl.stateChangeFunction = stateChangeFunction
 end
 
+function ZO_ReadOnlyCheckBox_OnInitialized(textureControl, checkedTexture, uncheckedTexture, indeterminateTexture)
+    textureControl.SetCheckState = function(control, checkState)
+        if checkState == TRISTATE_CHECK_BUTTON_CHECKED then
+            control:SetTexture(checkedTexture)
+        elseif checkState == TRISTATE_CHECK_BUTTON_UNCHECKED then
+            control:SetTexture(uncheckedTexture)
+        elseif checkState == TRISTATE_CHECK_BUTTON_INDETERMINATE then
+            if indeterminateTexture then
+                control:SetTexture(indeterminateTexture)
+            else
+                control:SetTexture(uncheckedTexture)
+            end
+        end
+    end
+end
+
 function ZO_MenuDropDownTextButton_SetSelectedState(buttonControl, selected)
     if selected then
         if buttonControl.selectedFont then

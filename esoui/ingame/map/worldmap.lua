@@ -146,7 +146,8 @@ local g_imperialCityMapIndex
 
 local g_mapDragX
 local g_mapDragY
-local g_dragging = false
+local g_mouseDragging = false
+local g_directionalDragging = false
 local g_mapPanAndZoom
 
 local g_pinUpdateTime = nil
@@ -1380,7 +1381,7 @@ function ZO_MapPanAndZoom:Update(currentTime)
 
         ZO_WorldMapContainer:SetAnchor(CENTER, nil, CENTER, nextOffsetX, nextOffsetY)
     elseif self:HasTargetOffset() then
-        local amount = g_dragging and 1.0 or ZO_MapPanAndZoom.LERP_FACTOR
+        local amount = (g_mouseDragging or g_directionalDragging) and 1.0 or ZO_MapPanAndZoom.LERP_FACTOR
         self.reachedTargetOffset = true
 
         if self.targetOffsetX then
@@ -1459,7 +1460,7 @@ function GamepadMap:Initialize()
 end
 
 function GamepadMap:UpdateDirectionalInput()
-    if IsInGamepadPreferredMode() and not WORLD_MAP_MANAGER:IsPreventingMapNavigation() then
+    if IsInGamepadPreferredMode() and not WORLD_MAP_MANAGER:IsPreventingMapNavigation() and not g_mouseDragging then
         --Only show the center reticle if we have input to move
         local isInputAvailable = DIRECTIONAL_INPUT:IsAvailable(ZO_DI_LEFT_STICK) or DIRECTIONAL_INPUT:IsAvailable(ZO_DI_DPAD)
         ZO_WorldMapCenterPoint:SetHidden(not isInputAvailable)
@@ -1470,9 +1471,9 @@ function GamepadMap:UpdateDirectionalInput()
         local wantsToZoom = zoomDelta ~= 0
 
         local motionX, motionY = DIRECTIONAL_INPUT:GetXY(ZO_DI_LEFT_STICK, ZO_DI_DPAD)
-        g_dragging = (motionX ~= 0 or motionY ~= 0)
+        g_directionalDragging = (motionX ~= 0 or motionY ~= 0)
 
-        if g_dragging or wantsToZoom then
+        if g_directionalDragging or wantsToZoom then
             g_stickyPin:ClearStickyPin(g_mapPanAndZoom)
             WORLD_MAP_MANAGER:StopAutoNavigationMovement()
         end
@@ -1495,11 +1496,11 @@ function GamepadMap:UpdateDirectionalInput()
             performedZoom = self:TryZoom(zoomDelta, GetFrameDeltaSeconds(), deltaX, deltaY, navigateInAt, navigateOutAt)
         end
 
-        if g_dragging and not performedZoom then
+        if g_directionalDragging and not performedZoom then
             g_mapPanAndZoom:AddCurrentOffsetDelta(deltaX, deltaY)
         end
 
-        if not (g_dragging or wantsToZoom) then
+        if not (g_directionalDragging or wantsToZoom) then
             local motionMagSq = (motionX * motionX) + (motionY * motionY)
             local stickyPin = g_stickyPin:GetStickyPin()
             if reachedTarget and stickyPin and motionMagSq < self.FREE_MOTION_THRESHOLD_SQ then
@@ -2404,6 +2405,12 @@ local function PlayerChosenMapUpdate(playerChoseMap, navigateIn)
     if playerChoseMap == nil then playerChoseMap = true end
     g_playerChoseCurrentMap = playerChoseMap
 
+    if navigateIn then
+        PlaySound(SOUNDS.MAP_NAVIGATE_IN)
+    else
+        PlaySound(SOUNDS.MAP_NAVIGATE_OUT)
+    end
+
     CALLBACK_MANAGER:FireCallbacks("OnWorldMapChanged", navigateIn)
 end
 
@@ -2500,7 +2507,7 @@ local function MapDragUpdate()
     local diffX = x - g_mapDragX
     local diffY = y - g_mapDragY
 
-    if g_dragging then
+    if g_mouseDragging then
         g_mapPanAndZoom:AddTargetOffsetDelta(diffX, diffY)
         g_mapDragX = x
         g_mapDragY = y
@@ -2509,17 +2516,13 @@ local function MapDragUpdate()
         if distSq > CONSTANTS.DRAG_START_DIST_SQ then
             g_mapDragX = x
             g_mapDragY = y
-            g_dragging = true
+            g_mouseDragging = true
             WINDOW_MANAGER:SetMouseCursor(MOUSE_CURSOR_PAN)
         end
     end
 end
 
 function ZO_WorldMap_MouseDown(button, ctrl, alt, shift)
-    if IsInGamepadPreferredMode() then
-        return
-    end
-
     if button == MOUSE_BUTTON_INDEX_LEFT then
         local x, y = NormalizePreferredMousePositionToMap()
 
@@ -2533,8 +2536,8 @@ function ZO_WorldMap_MouseDown(button, ctrl, alt, shift)
             g_mapPanAndZoom:ClearLockPoint()
             g_mapPanAndZoom:AddTargetOffsetDelta(0, 0)
 
-            g_dragging = not WouldProcessMapClick(x, y)
-            if g_dragging then
+            g_mouseDragging = not WouldProcessMapClick(x, y)
+            if g_mouseDragging then
                 WINDOW_MANAGER:SetMouseCursor(MOUSE_CURSOR_PAN)
             end
 
@@ -2548,8 +2551,8 @@ end
 function ZO_WorldMap_MouseUp(mapControl, mouseButton, upInside)
     ZO_WorldMapContainer:SetHandler("OnUpdate", nil)
 
-    if g_dragging and not IsInGamepadPreferredMode() then
-        g_dragging = false
+    if g_mouseDragging then
+        g_mouseDragging = false
         WINDOW_MANAGER:SetMouseCursor(MOUSE_CURSOR_DO_NOT_CARE)
 
         local lastFrameDeltaX, lastFrameDeltaY = GetUIMouseDeltas()
@@ -3729,14 +3732,17 @@ do
 
         [EVENT_WORLD_EVENTS_INITIALIZED] = function()
             g_mapRefresh:RefreshAll("worldEvent")
+            g_mapRefresh:RefreshAll("location")
         end,
 
         [EVENT_WORLD_EVENT_ACTIVATED] = function(_, worldEventInstanceId)
             g_mapRefresh:RefreshSingle("worldEvent", worldEventInstanceId)
+            g_mapRefresh:RefreshAll("location")
         end,
 
         [EVENT_WORLD_EVENT_DEACTIVATED] = function(_, worldEventInstanceId)
             g_mapRefresh:RefreshSingle("worldEvent", worldEventInstanceId)
+            g_mapRefresh:RefreshAll("location")
         end,
 
         [EVENT_WORLD_EVENT_UNIT_CREATED] = function(_, worldEventInstanceId)
@@ -4374,6 +4380,7 @@ function ZO_WorldMapManager:InitializeKeybinds()
             callback = function()
                 GAMEPAD_WORLD_MAP_KEEP_INFO:HideKeep()
             end,
+            sound = SOUNDS.GAMEPAD_MENU_BACK,
         },
     }
 
@@ -5907,6 +5914,25 @@ function ZO_WorldMapManager:UpdatePinTooltips(resetScroll)
     end
 end
 
+local function TryInitInformationTooltip(control)
+    local informationTooltip = ZO_WorldMap_GetTooltipForMode(ZO_MAP_TOOLTIP_MODE.INFORMATION)
+    for i, tooltip in ipairs(g_tooltipOrder) do
+        if tooltip == ZO_MAP_TOOLTIP_MODE.INFORMATION then
+            if not g_usedTooltips[i] then
+                g_usedTooltips[i] = true
+                InitializeTooltip(informationTooltip, control)
+            end
+            return
+        end
+    end
+end
+
+local TEAM_TYPE_TO_ZONE_DISPLAY_TYPE =
+{
+    [TEAM_TYPE_BATTLEGROUND] = ZONE_DISPLAY_TYPE_BATTLEGROUND,
+    [TEAM_TYPE_ADVENTURE_ZONE] = ZONE_DISPLAY_TYPE_ADVENTURE_ZONE,
+}
+
 function ZO_WorldMapManager:UpdateMouseoverTooltips()
     local lastShownSpectacleId = self.tooltipSpectacleId
 
@@ -5918,12 +5944,31 @@ function ZO_WorldMapManager:UpdateMouseoverTooltips()
 
     local updateSpectacleTooltip = mouseoverSpectacleId ~= lastShownSpectacleId
 
+    local lastShownScoresTeamType = self.tooltipScoresTeamType
+
     local mouseOverPinsChanged, needsContinuousTooltipUpdates = g_mapPinManager:UpdateMouseOverPins()
     local updatePinTooltips = mouseOverPinsChanged or needsContinuousTooltipUpdates or self:IsPinTooltipDirty()
 
+    local mouseoverScoresTeamType = nil
+    if mouseOverPinsChanged then
+        local currentMouseoverPins = g_mapPinManager:GetCurrentMouseOverPins()
+        for pin, isMousedOver in pairs(currentMouseoverPins) do
+            if isMousedOver then
+                local teamType = pin:GetAssociatedTeamType()
+                if teamType ~= TEAM_TYPE_NONE then
+                    mouseoverScoresTeamType = teamType
+                    break
+                end
+            end
+        end
+    else
+        mouseoverScoresTeamType = lastShownScoresTeamType
+    end
+    local updateScoresTooltip = mouseoverScoresTeamType ~= lastShownScoresTeamType
+
     local resetTooltipScroll = not needsContinuousTooltipUpdates
 
-    local updateTooltips = updateSpectacleTooltip or updatePinTooltips
+    local updateTooltips = updateSpectacleTooltip or updateScoresTooltip or updatePinTooltips
     if not updateTooltips then
         return
     end
@@ -5945,16 +5990,33 @@ function ZO_WorldMapManager:UpdateMouseoverTooltips()
                 informationTooltip:AppendZoneSpectacleTooltip(mouseoverSpectacleId)
             end
         else
-            for i, tooltip in ipairs(g_tooltipOrder) do
-                if tooltip == ZO_MAP_TOOLTIP_MODE.INFORMATION then
-                    if not g_usedTooltips[i] then
-                        g_usedTooltips[i] = true
-                        InitializeTooltip(informationTooltip, self.control)
-                    end
-                    break
-                end
-            end
+            TryInitInformationTooltip(self.control)
             informationTooltip:AppendZoneSpectacleTooltip(mouseoverSpectacleId)
+        end
+    end
+
+    if mouseoverScoresTeamType then
+        local informationTooltip = ZO_WorldMap_GetTooltipForMode(ZO_MAP_TOOLTIP_MODE.INFORMATION)
+        if IsInGamepadPreferredMode() then
+            if not ZO_WorldMap_IsWorldMapInfoShowing() and not ZO_WorldMap_IsKeepInfoShowing() then
+                -- We'll fire the callback later
+                local SUPPRESS_CALLBACK = true
+                ZO_WorldMap_ShowGamepadTooltip(resetTooltipScroll, SUPPRESS_CALLBACK)
+                
+                informationTooltip:AppendTeamScores(mouseoverScoresTeamType)
+            end
+        else
+            TryInitInformationTooltip(self.control)
+
+            local zoneDisplayType = TEAM_TYPE_TO_ZONE_DISPLAY_TYPE[mouseoverScoresTeamType]
+            if zoneDisplayType then
+                informationTooltip:AddLine(GetString("SI_ZONEDISPLAYTYPE", zoneDisplayType), "ZoFontWinH3", ZO_WHITE:UnpackRGB())
+            end
+
+            -- Currently all team types have 3 teams. If we ever actually go to support this for BGs, we'll want to consider 2 vs 3 team BGs.
+            for i = 1, 3 do
+                informationTooltip:AppendTeamScore(mouseoverScoresTeamType, i)
+            end
         end
     end
 

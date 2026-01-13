@@ -3,33 +3,27 @@
         <Texture name="ZO_GamepadGuildPermissionCheckmark" textureFile="EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_equipped.dds" tier="HIGH" virtual="true">
             <Dimensions x="32" y="32"/>
         </Texture>
-
         <Control name="ZO_GuildPermissionRow_Gamepad" virtual="true" resizeToFitDescendents="true"/>
-
-        <Backdrop name="ZO_GuildRanks_Permission_Gamepad_Highlight_Template" centerColor="00000000" virtual="true" />
-
+        <Backdrop name="ZO_GuildRanks_Permission_Gamepad_Highlight_Template" centerColor="00000000" virtual="true"/>
         <Control name="ZO_GuildRanks_Permission_Gamepad_Header_Template" virtual="true">
             <Controls>
                 <Label name="$(parent)Text" inherits="ZO_GridScrollList_Entry_Header_Template_Gamepad">
-                    <Anchor point="TOPLEFT" offsetY="5" />
+                    <Anchor point="TOPLEFT" offsetY="5"/>
                 </Label>
             </Controls>
         </Control>
-
         <TopLevelControl name="ZO_GuildRanks_Gamepad" hidden="true" inherits="ZO_GuildHomeContentAnchor">
             <OnInitialized>
                 ZO_GuildRanks_Gamepad_Initialize(self)
             </OnInitialized>
-
             <Controls>
                 <Control name="$(parent)PermissionsPanel" inherits="ZO_GridScrollList_Gamepad">
-                    <Anchor point="TOPLEFT" offsetX="-ZO_GAMEPAD_CONTENT_INSET_X" />
-                    <Anchor point="BOTTOMRIGHT" offsetX="ZO_GAMEPAD_CONTENT_INSET_X" />
+                    <Anchor point="TOPLEFT" offsetX="-ZO_GAMEPAD_CONTENT_INSET_X"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="ZO_GAMEPAD_CONTENT_INSET_X"/>
                 </Control>
-
                 <Control name="$(parent)RankIconPicker" inherits="ZO_GridScrollList_Gamepad" hidden="true">
-                    <Anchor point="CENTER" />
-                    <Dimensions x="500" y="500" />
+                    <Anchor point="CENTER"/>
+                    <Dimensions x="500" y="500"/>
                 </Control>
             </Controls>
         </TopLevelControl>

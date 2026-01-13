@@ -116,6 +116,7 @@ function HousingPreviewDialog_Gamepad:InitializeFoci()
     CreatePurchaseOptionFocusData(self.goldPurchaseOptionControl, HousingPreviewDialog_Gamepad.BuyForGold, CURT_MONEY)
     CreatePurchaseOptionFocusData(self.crownsPurchaseOptionControl, HousingPreviewDialog_Gamepad.BuyFromMarket, CURT_CROWNS)
     CreatePurchaseOptionFocusData(self.crownGemsPurchaseOptionControl, HousingPreviewDialog_Gamepad.BuyFromMarket, CURT_CROWN_GEMS)
+    CreatePurchaseOptionFocusData(self.tradeBarsPurchaseOptionControl, HousingPreviewDialog_Gamepad.BuyFromMarket, CURT_TRADE_BARS)
 
     self.purchaseOptionsFocusSwitcher = ZO_GamepadFocus:New(self.purchaseOptionsControl, DEFAULT_MOVEMENT_CONTROLLER, MOVEMENT_CONTROLLER_DIRECTION_HORIZONTAL)
     self.purchaseOptionsFocusSwitcher:SetFocusChangedCallback(function(...) self:OnPurchaseSelectionChanged(...) end)
@@ -218,6 +219,10 @@ function HousingPreviewDialog_Gamepad:OnFilterChanged(entryData)
 
     if not self.crownGemsPurchaseOptionControl:IsControlHidden() then
         purchaseOptionsFocusSwitcher:AddEntry(self.crownGemsPurchaseOptionControl.focusData)
+    end
+
+    if not self.tradeBarsPurchaseOptionControl:IsControlHidden() then
+        purchaseOptionsFocusSwitcher:AddEntry(self.tradeBarsPurchaseOptionControl.focusData)
     end
 
     -- if we are adding additional lines of text our combo box control may not be tall enough to fit it

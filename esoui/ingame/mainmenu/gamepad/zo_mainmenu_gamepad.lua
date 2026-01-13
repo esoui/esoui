@@ -3,69 +3,66 @@ ZO_GAMEPAD_DEFAULT_LIST_ENTRY_WITH_ARROW_WIDTH_AFTER_INDENT = ZO_GAMEPAD_DEFAULT
 
 ZO_MENU_ENTRIES = {}
 
-ZO_MENU_MAIN_ENTRIES =
-{
-    CROWN_STORE                     = 1,
-    ANNOUNCEMENTS                   = 2,
-    RETURNING_PLAYER_ANNOUNCEMENTS  = 3,
-    NOTIFICATIONS                   = 4,
-    COLLECTIONS                     = 5,
-    INVENTORY                       = 6,
-    CHARACTER                       = 7,
-    SKILLS                          = 8,
-    CHAMPION                        = 9,
-    CAMPAIGN                        = 10,
-    JOURNAL                         = 11,
-    SOCIAL                          = 12,
-    ACTIVITY_FINDER                 = 13,
-    HELP                            = 14,
-    OPTIONS                         = 15,
-    QUIT                            = 16,
-    LOG_OUT                         = 17,
-}
+ZO_MENU_MAIN_ENTRIES = ZO_CreateEnumTable(
+    "CROWN_STORE",
+    "TAMRIEL_TOMES",
+    "ANNOUNCEMENTS",
+    "RETURNING_PLAYER_ANNOUNCEMENTS",
+    "NOTIFICATIONS",
+    "COLLECTIONS",
+    "INVENTORY",
+    "CHARACTER",
+    "SKILLS",
+    "CHAMPION",
+    "CAMPAIGN",
+    "JOURNAL",
+    "SOCIAL",
+    "ACTIVITY_FINDER",
+    "HELP",
+    "OPTIONS",
+    "QUIT",
+    "LOG_OUT"
+)
 
 local MENU_MAIN_ENTRIES = ZO_MENU_MAIN_ENTRIES
 
-local MENU_CROWN_STORE_ENTRIES =
-{
-    CROWN_STORE                 = 1,
-    EXPIRING_MARKET_CURRENCY    = 2,
-    ENDEAVOR_SEAL_STORE         = 3,
-    DAILY_LOGIN_REWARDS         = 4,
-    CROWN_CRATES                = 5,
-    CHAPTERS                    = 6,
-    GIFT_INVENTORY              = 7,
-    REDEEM_CODE                 = 8,
-}
+local MENU_CROWN_STORE_ENTRIES = ZO_CreateEnumTable(
+    "CROWN_STORE",
+    "EXPIRING_MARKET_CURRENCY",
+    "GILDBAR_STORE",
+    "ENDEAVOR_SEAL_STORE",
+    "DAILY_LOGIN_REWARDS",
+    "CROWN_CRATES",
+    "CHAPTERS",
+    "GIFT_INVENTORY",
+    "REDEEM_CODE"
+)
 
 ZO_MENU_CROWN_STORE_ENTRIES = MENU_CROWN_STORE_ENTRIES
 
-local MENU_COLLECTIONS_ENTRIES =
-{
-    COLLECTIONS         = 1,
-    ITEM_SETS           = 2,
-    TRIBUTE_PATRONS     = 3,
-}
-local MENU_JOURNAL_ENTRIES =
-{
-    QUESTS              = 1,
-    CADWELLS_JOURNAL    = 2,
-    ANTIQUITIES         = 3,
-    LORE_LIBRARY        = 4,
-    ACHIEVEMENTS        = 5,
-    LEADERBOARDS        = 6,
-}
-local MENU_SOCIAL_ENTRIES =
-{
-    VOICE_CHAT  = 1,
-    TEXT_CHAT   = 2,
-    EMOTES      = 3,
-    GROUP       = 4,
-    GUILDS      = 5,
-    FRIENDS     = 6,
-    IGNORED     = 7,
-    MAIL        = 8,
-}
+local MENU_COLLECTIONS_ENTRIES = ZO_CreateEnumTable(
+    "COLLECTIONS",
+    "ITEM_SETS",
+    "TRIBUTE_PATRONS"
+)
+local MENU_JOURNAL_ENTRIES = ZO_CreateEnumTable(
+    "QUESTS",
+    "CADWELLS_JOURNAL",
+    "ANTIQUITIES",
+    "LORE_LIBRARY",
+    "ACHIEVEMENTS",
+    "LEADERBOARDS"
+)
+local MENU_SOCIAL_ENTRIES = ZO_CreateEnumTable(
+    "VOICE_CHAT",
+    "TEXT_CHAT",
+    "EMOTES",
+    "GROUP",
+    "GUILDS",
+    "FRIENDS",
+    "IGNORED",
+    "MAIL"
+)
 
 local function IsAnySubMenuNewCallback(entryData)
     for entryIndex, entry in ipairs(entryData.subMenu) do
@@ -125,11 +122,18 @@ local MENU_ENTRY_DATA =
                 end,
 
             },
+            [MENU_CROWN_STORE_ENTRIES.GILDBAR_STORE] =
+            {
+                scene = "gamepad_gildbar_market_pre_scene",
+                sceneGroup = "gamepad_market_scenegroup",
+                name = GetString(SI_GAMEPAD_MAIN_MENU_TRADE_BAR_MARKET_ENTRY),
+                icon = "EsoUI/Art/MenuBar/Gamepad/gp_PlayerMenu_icon_gildbarStore.dds",
+            },
             [MENU_CROWN_STORE_ENTRIES.ENDEAVOR_SEAL_STORE] =
             {
                 scene = "gamepad_endeavor_seal_market_pre_scene",
                 sceneGroup = "gamepad_market_scenegroup",
-                name = GetString(SI_GAMEPAD_MAIN_MENU_ENDEAVOR_SEAL_MARKET_ENTRY),
+                name = GetString(SI_GAMEPAD_MAIN_MENU_SEAL_MARKET_ENTRY),
                 icon = "EsoUI/Art/MenuBar/Gamepad/gp_PlayerMenu_icon_sealStore.dds",
             },
             [MENU_CROWN_STORE_ENTRIES.DAILY_LOGIN_REWARDS] =
@@ -147,6 +151,9 @@ local MENU_ENTRY_DATA =
                 end,
                 isNewCallback = function()
                     return GetDailyLoginClaimableRewardIndex() ~= nil
+                end,
+                isVisibleCallback = function()
+                    return not ZO_DAILYLOGINREWARDS_MANAGER:IsDailyRewardsLocked()
                 end,
             },
             [MENU_CROWN_STORE_ENTRIES.CROWN_CRATES] =
@@ -196,12 +203,44 @@ local MENU_ENTRY_DATA =
             },
         },
     },
+    [MENU_MAIN_ENTRIES.TAMRIEL_TOMES] =
+    {
+        sceneGroup = "gamepad_tamrielTomes_scenegroup",
+        name = GetString(SI_MAIN_MENU_TAMRIEL_TOMES),
+        icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_tamrielTomes.dds",
+        sceneGroupPreferredSceneFunction = function()
+            local selectedTomeId = TAMRIEL_TOMES_MANAGER:GetSelectedTomeId()
+            local hasSeenTome = TAMRIEL_TOMES_MANAGER:HasSeenTome(selectedTomeId)
+            if hasSeenTome then
+                return "TamrielTomesSceneGamepad"
+            end
+
+            return "TamrielTomesIntroSceneGamepad"
+        end,
+        onSelectedCallback = function()
+            if MAIN_MENU_GAMEPAD:IsShowing() then
+                if TAMRIEL_TOMES_MANAGER and TAMRIEL_TOMES_MANAGER:GetNumActiveTomes() <= 0 then
+                    GAMEPAD_TOOLTIPS:LayoutTitleAndDescriptionTooltip(GAMEPAD_LEFT_TOOLTIP, GetString(SI_MAIN_MENU_TAMRIEL_TOMES), GetString(SI_TAMRIEL_TOMES_ARE_UNAVAILABLE))
+                else
+                    GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
+                end
+            end
+        end,
+        onUnselectedCallback = function()
+            if MAIN_MENU_GAMEPAD:IsShowing() then
+                GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
+            end
+        end,
+        shouldDisableFunction = function()
+            return TAMRIEL_TOMES_MANAGER and TAMRIEL_TOMES_MANAGER:GetNumActiveTomes() <= 0
+        end,
+    },
     [MENU_MAIN_ENTRIES.ANNOUNCEMENTS] =
     {
+        scene = "marketAnnouncement",
         name = GetString(SI_MAIN_MENU_ANNOUNCEMENTS),
         icon = "EsoUI/Art/AnnounceWindow/gamepad/gp_announcement_Icon.dds",
         activatedCallback = function()
-            SCENE_MANAGER:Show("marketAnnouncement")
             RequestMarketAnnouncement()
         end,
         isVisibleCallback = function()
@@ -434,14 +473,14 @@ local MENU_ENTRY_DATA =
                 name = GetString(SI_MAIN_MENU_GAMEPAD_VOICECHAT),
                 icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_communications.dds",
                 header = GetString(SI_MAIN_MENU_SOCIAL),
-                isVisibleCallback = IsConsoleUI
+                isVisibleCallback = ZO_IsConsoleOrGameCoreUI,
             },
             [MENU_SOCIAL_ENTRIES.TEXT_CHAT] =
             {
                 scene = "gamepadChatMenu",
                 name = GetString(SI_GAMEPAD_TEXT_CHAT),
                 icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_textChat.dds",
-                header = not IsConsoleUI() and GetString(SI_MAIN_MENU_SOCIAL) or nil,
+                header = not ZO_IsConsoleOrGameCoreUI() and GetString(SI_MAIN_MENU_SOCIAL) or nil,
                 isVisibleCallback = IsChatSystemAvailableForCurrentPlatform
             },
             [MENU_SOCIAL_ENTRIES.EMOTES] =
@@ -449,7 +488,7 @@ local MENU_ENTRY_DATA =
                 scene = "gamepad_player_emote",
                 name = GetString(SI_GAMEPAD_MAIN_MENU_EMOTES),
                 icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_emotes.dds",
-                header = (not IsConsoleUI() and not IsChatSystemAvailableForCurrentPlatform()) and GetString(SI_MAIN_MENU_SOCIAL) or nil,
+                header = (not ZO_IsConsoleOrGameCoreUI() and not IsChatSystemAvailableForCurrentPlatform()) and GetString(SI_MAIN_MENU_SOCIAL) or nil,
             },
             [MENU_SOCIAL_ENTRIES.GROUP] =
             {
@@ -475,7 +514,7 @@ local MENU_ENTRY_DATA =
                 name = GetString(SI_GAMEPAD_CONTACTS_IGNORED_LIST_TITLE),
                 icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_contacts.dds",
                 isVisibleCallback = function()
-                    return not IsConsoleUI()
+                    return not ZO_IsConsoleOrGameCoreUI()
                 end,
             },
             [MENU_SOCIAL_ENTRIES.MAIL] =
@@ -553,6 +592,7 @@ CATEGORY_TO_ENTRY_DATA =
     [MENU_CATEGORY_NOTIFICATIONS]   = MENU_ENTRY_DATA[MENU_MAIN_ENTRIES.NOTIFICATIONS],
     [MENU_CATEGORY_MARKET]          = MENU_ENTRY_DATA[MENU_MAIN_ENTRIES.CROWN_STORE].subMenu[MENU_CROWN_STORE_ENTRIES.CROWN_STORE],
     [MENU_CATEGORY_CROWN_CRATES]    = MENU_ENTRY_DATA[MENU_MAIN_ENTRIES.CROWN_STORE].subMenu[MENU_CROWN_STORE_ENTRIES.CROWN_CRATES],
+    [MENU_CATEGORY_TAMRIEL_TOMES]   = MENU_ENTRY_DATA[MENU_MAIN_ENTRIES.TAMRIEL_TOMES], -- TODO Tamriel Tomes: Submenus / scene group
     [MENU_CATEGORY_GIFT_INVENTORY]  = MENU_ENTRY_DATA[MENU_MAIN_ENTRIES.CROWN_STORE].subMenu[MENU_CROWN_STORE_ENTRIES.GIFT_INVENTORY],
     [MENU_CATEGORY_COLLECTIONS]     = MENU_ENTRY_DATA[MENU_MAIN_ENTRIES.COLLECTIONS].subMenu[MENU_COLLECTIONS_ENTRIES.COLLECTIONS],
     [MENU_CATEGORY_INVENTORY]       = MENU_ENTRY_DATA[MENU_MAIN_ENTRIES.INVENTORY],
@@ -651,7 +691,9 @@ function ZO_MainMenuManager_Gamepad:Initialize(control)
         end
         ZO_Gamepad_ParametricList_Screen.OnStateChanged(self, oldState, newState)
     end)
+
     MAIN_MENU_MANAGER:RegisterCallback("OnPlayerStateUpdate", function() self:UpdateEntryEnabledStates() end)
+
     control:RegisterForEvent(EVENT_DAILY_LOGIN_REWARDS_UPDATED, function() self:UpdateEntryEnabledStates() end)
     control:RegisterForEvent(EVENT_NEW_DAILY_LOGIN_REWARD_AVAILABLE, function() self:UpdateEntryEnabledStates() end)
     control:RegisterForEvent(EVENT_DAILY_LOGIN_REWARDS_CLAIMED, function() self:UpdateEntryEnabledStates() end)
@@ -879,7 +921,7 @@ function ZO_MainMenuManager_Gamepad:InitializeKeybindStripDescriptors()
             name = GetString(SI_MAIN_MENU_GAMEPAD_VOICECHAT),
             keybind = "UI_SHORTCUT_TERTIARY",
             callback = function() SCENE_MANAGER:Push("gamepad_voice_chat") end,
-            visible = IsConsoleUI,
+            visible = ZO_IsConsoleOrGameCoreUI,
         },
         {
             name = GetString(SI_GAMEPAD_TEXT_CHAT),
@@ -905,17 +947,30 @@ function ZO_MainMenuManager_Gamepad:InitializeKeybindStripDescriptors()
     end)
 end
 
+function ZO_MainMenuManager_Gamepad:SetPreferredActiveScene(entryData, sceneGroup)
+    if entryData.sceneGroupPreferredSceneFunction then
+        local sceneNameToShow = entryData.sceneGroupPreferredSceneFunction()
+        if sceneNameToShow then
+            sceneGroup:SetActiveScene(sceneNameToShow)
+        end
+    end
+end
+
 function ZO_MainMenuManager_Gamepad:SwitchToSelectedScene(list)
     local entry = list:GetTargetData()
     
     if entry.enabled then
         local entryData = entry.data
-        local scene = entryData.scene
         local activatedCallback = entryData.activatedCallback
 
-        if scene then
+        if entryData.scene then
             list:SetActive(false)
-            SCENE_MANAGER:Push(scene)
+            SCENE_MANAGER:Push(entryData.scene)
+        elseif entryData.sceneGroup then
+            local sceneGroup = SCENE_MANAGER:GetSceneGroup(entryData.sceneGroup)
+            self:SetPreferredActiveScene(entryData, sceneGroup)
+            local activeScene = sceneGroup:GetActiveScene()
+            SCENE_MANAGER:Push(activeScene)
         elseif entryData.subMenu then
             list:SetActive(false)
             SCENE_MANAGER:Push("playerSubmenu")
@@ -1111,7 +1166,13 @@ function ZO_MainMenuManager_Gamepad:ToggleCategory(category)
             return
         end
 
-        self:ToggleScene(entryData.scene)
+        local toggleScene = entryData.scene
+        if not toggleScene and entryData.sceneGroup then
+            local sceneGroup = SCENE_MANAGER:GetSceneGroup(entryData.sceneGroup)
+            self:SetPreferredActiveScene(entryData, sceneGroup)
+            toggleScene = sceneGroup:GetActiveScene()
+        end
+        self:ToggleScene(toggleScene)
     end
 end
 

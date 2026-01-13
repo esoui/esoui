@@ -278,7 +278,7 @@ end
 
 local function TryShowActionBarTooltip(abilitySlot)
     local button = ZO_ActionBar_GetButton(abilitySlot.slotNum, abilitySlot.hotbarCategory)
-    if button then
+    if button and not IsInGamepadPreferredMode() then
         local actionSlotIndex = button:GetSlot()
         if abilitySlot.hotbarCategory == HOTBAR_CATEGORY_QUICKSLOT_WHEEL then
             --this is a quickslot, use the quickslot path

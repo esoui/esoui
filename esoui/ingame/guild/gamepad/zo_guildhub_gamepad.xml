@@ -2,22 +2,18 @@
     <Controls>
         <Label name="ZO_GamepadGuildHubText" font="ZoFontGamepadCondensed42" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true"/>
         <Label name="ZO_GamepadGuildHubHighlightText" font="ZoFontGamepad34" virtual="true"/>
-
         <TopLevelControl name="ZO_GamepadGuildHubTopLevel" inherits="ZO_Gamepad_ParametricList_Screen">
             <OnInitialized>
                 ZO_GamepadGuildHub_OnInitialize(self)
             </OnInitialized>
-
             <Controls>
                 <Control name="$(parent)RightPaneContainer" inherits="ZO_GamepadGrid_NavQuadrant_2_3_Anchors">
                     <Controls>
-                        <Control name="$(parent)ContentHeader" inherits="ZO_GamepadContentHeaderContainer ZO_GamepadGrid_NavQuadrant_ContainerAnchors" />
-
+                        <Control name="$(parent)ContentHeader" inherits="ZO_GamepadContentHeaderContainer ZO_GamepadGrid_NavQuadrant_ContainerAnchors"/>
                         <Label name="$(parent)CreatingGuildInfo" font="ZoFontGamepadCondensed42" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" hidden="true">
                             <Dimensions x="ZO_GAMEPAD_QUADRANT_2_3_CONTAINER_WIDTH"/>
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)ContentHeaderHeader" relativePoint="BOTTOMLEFT" offsetY="54" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)ContentHeaderHeader" relativePoint="BOTTOMLEFT" offsetY="54"/>
                         </Label>
-
                         <Control name="$(parent)CreateGuildExplanation" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors" hidden="true">
                             <Controls>
                                 <Control name="$(parent)ScrollContainer" inherits="ZO_ScrollContainer_Gamepad">
@@ -29,8 +25,7 @@
                                     </OnInitialized>
                                     <Controls>
                                         <Control name="$(parent)ScrollChild" override="true" resizeToFitConstrains="Y">
-                                            <Dimensions x="100%" />
-
+                                            <Dimensions x="100%"/>
                                             <Controls>
                                                 <Label name="$(parent)Section1" text="SI_GUILD_INTRODUCTION" inherits="ZO_GamepadGuildHubText">
                                                     <Anchor point="TOPLEFT"/>
@@ -50,7 +45,6 @@
                                 </Control>
                             </Controls>
                         </Control>
-
                         <Control name="$(parent)GuildBrowserExplanation" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors" hidden="true">
                             <Controls>
                                 <Control name="$(parent)ScrollContainer" inherits="ZO_ScrollContainer_Gamepad">
@@ -62,8 +56,7 @@
                                     </OnInitialized>
                                     <Controls>
                                         <Control name="$(parent)ScrollChild" override="true" resizeToFitConstrains="Y">
-                                            <Dimensions x="100%" />
-
+                                            <Dimensions x="100%"/>
                                             <Controls>
                                                 <Label name="$(parent)Section1" text="SI_GAMEPAD_GUILD_BROWSER_DESCRIPTION" inherits="ZO_GamepadGuildHubText">
                                                     <Anchor point="TOPLEFT"/>
@@ -77,8 +70,7 @@
                         </Control>
                     </Controls>
                 </Control>
-
-                <Control name="$(parent)AllianceSelector" inherits="ZO_GamepadIconSelectorTemplate" hidden="true" >
+                <Control name="$(parent)AllianceSelector" inherits="ZO_GamepadIconSelectorTemplate" hidden="true">
                     <AnchorFill/>
                     <Controls>
                         <Control name="$(parent)Highlight" override="true">

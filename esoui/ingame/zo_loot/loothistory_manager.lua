@@ -143,6 +143,12 @@ function LootHistory_Manager:Initialize()
         end
     end
 
+    local function OnAdventureZoneFactionReputationChanged(...)
+        if CanAddLootEntry() then
+            SYSTEMS:GetObject(ZO_LOOT_HISTORY_NAME):OnAdventureZoneFactionReputationChanged(...)
+        end
+    end
+
     EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_INVENTORY_SINGLE_SLOT_UPDATE, function(eventId, ...) OnInventorySlotUpdate(...) end)
     EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_CURRENCY_UPDATE, function(eventId, ...) OnCurrencyUpdate(...) end)
     EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_PENDING_CURRENCY_REWARD_CACHED, function(eventId, ...) OnPendingCurrencyRewardCached(...) end)
@@ -158,6 +164,7 @@ function LootHistory_Manager:Initialize()
     EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_COMPANION_EXPERIENCE_GAIN, function(eventId, ...) OnCompanionExperienceGainUpdate(...) end)
     EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_COMPANION_RAPPORT_UPDATE, function(eventId, ...) OnCompanionRapportUpdate(...) end)
     TRIBUTE_DATA_MANAGER:RegisterCallback("ProgressionUpgradeStatusChanged", function(...) OnTributeProgressionUpgradeStatusChanged(...) end)
+    EVENT_MANAGER:RegisterForEvent(ZO_LOOT_HISTORY_NAME, EVENT_ADVENTURE_ZONE_FACTION_REPUTATION_CHANGED, function(eventId, ...) OnAdventureZoneFactionReputationChanged(...) end)
 end
 
 ZO_LOOT_HISTORY_MANAGER = LootHistory_Manager:New()

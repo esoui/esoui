@@ -4,65 +4,52 @@
             <OnMouseEnter name="ZO_PropagateMouseOverBehavior">
                 ZO_PropagateHandlerToAllAncestors("OnMouseEnter", ...)
             </OnMouseEnter>
-
             <OnMouseExit name="ZO_PropagateMouseOverBehavior">
                 ZO_PropagateHandlerToAllAncestors("OnMouseExit", ...)
             </OnMouseExit>
         </Control>
-
         <Control name="ZO_PropagateMouseOverBehaviorToNearestAncestor" mouseEnabled="true" virtual="true">
             <OnMouseEnter name="ZO_PropagateMouseOverBehavior">
                 ZO_PropagateHandlerToNearestAncestor("OnMouseEnter", ...)
             </OnMouseEnter>
-
             <OnMouseExit name="ZO_PropagateMouseOverBehavior">
                 ZO_PropagateHandlerToNearestAncestor("OnMouseExit", ...)
             </OnMouseExit>
         </Control>
-
         <Control name="ZO_PropagateMouseOverBehavior" mouseEnabled="true" virtual="true">
             <OnMouseEnter name="ZO_PropagateMouseOverBehavior">
                 ZO_PropagateHandlerToParent("OnMouseEnter", ...)
             </OnMouseEnter>
-
             <OnMouseExit name="ZO_PropagateMouseOverBehavior">
                 ZO_PropagateHandlerToParent("OnMouseExit", ...)
             </OnMouseExit>
         </Control>
-
         <Control name="ZO_PropagateMouseButtonBehavior" mouseEnabled="true" virtual="true">
             <OnMouseDoubleClick name="ZO_PropagateMouseButtonBehavior">
                 ZO_PropagateHandlerToParent("OnMouseDoubleClick", ...)
             </OnMouseDoubleClick>
-
             <OnMouseUp name="ZO_PropagateMouseButtonBehavior">
                 ZO_PropagateHandlerToParent("OnMouseUp", ...)
             </OnMouseUp>
-
             <OnMouseDown name="ZO_PropagateMouseButtonBehavior">
                 ZO_PropagateHandlerToParent("OnMouseDown", ...)
             </OnMouseDown>
         </Control>
-
         <Control name="ZO_PropagateMouseDragBehavior" mouseEnabled="true" virtual="true">
             <OnDragStart name="ZO_PropagateMouseDragBehavior">
                 ZO_PropagateHandlerToParent("OnDragStart", ...)
             </OnDragStart>
-
             <OnReceiveDrag name="ZO_PropagateMouseDragBehavior">
                 ZO_PropagateHandlerToParent("OnReceiveDrag", ...)
             </OnReceiveDrag>
         </Control>
-
         <Control name="ZO_MouseTooltipBehavior" mouseEnabled="true" virtual="true">
             <OnInitialized name="ZO_MouseTooltipBehavior">
                 ZO_MouseTooltipBehavior_OnInitialized(self)
             </OnInitialized>
-
             <OnMouseEnter name="ZO_MouseTooltipBehavior">
                 ZO_MouseTooltipBehavior_OnMouseEnter(self)
             </OnMouseEnter>
-
             <OnMouseExit name="ZO_MouseTooltipBehavior">
                 ZO_MouseTooltipBehavior_OnMouseExit(self)
             </OnMouseExit>

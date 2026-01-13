@@ -2,58 +2,47 @@
     <Animations>
         <AnimationTimeline name="SpinnerFadeAnimation">
             <Animations>
-                <AlphaAnimation duration="500" startAlpha="0" endAlpha="1" />
+                <AlphaAnimation duration="500" startAlpha="0" endAlpha="1"/>
             </Animations>
         </AnimationTimeline>
     </Animations>
-    
     <Controls>
         <Backdrop name="ZO_LoadingScreen_KeyBackdrop" virtual="true">
             <Edge file="EsoUI/Art/Screens_App/interactKeyFrame_edge.dds" edgeFileWidth="64" edgeFileHeight="8"/>
-            <Center file="EsoUI/Art/Screens_App/interactKeyFrame_center.dds" />
-            <Insets left="8" top="8" right="-8" bottom="-8" />
+            <Center file="EsoUI/Art/Screens_App/interactKeyFrame_center.dds"/>
+            <Insets left="8" top="8" right="-8" bottom="-8"/>
         </Backdrop>
-
         <Control name="ZO_LoadingScreenBase" hidden="true" virtual="true">
-            <AnchorFill />
-
+            <AnchorFill/>
             <OnUpdate>
                 self:Update()
             </OnUpdate>
-
             <Controls>
                 <Texture name="$(parent)Bg" color="000000">
-                    <AnchorFill />
+                    <AnchorFill/>
                 </Texture>
-
                 <Texture name="$(parent)Art" alpha="0" pixelRoundingEnabled="false" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
                     <!-- The bottom value is fractional instead of 1.0 to compensate for difference in the height of the image and that of the actual content. 
                          The fractional value allows us to remove the two pixel high empty space at the bottom of the image. -->
                     <TextureCoords left="0" right="1.0" top="0" bottom="0.9980988"/>
-                    <Anchor point="CENTER" relativeTo="GuiRoot" />
+                    <Anchor point="CENTER" relativeTo="GuiRoot"/>
                 </Texture>
-
                 <Texture name="$(parent)TopMunge" alpha="0">
-                    <Anchor point="TOPLEFT" relativeTo="GuiRoot" />
-                    <Anchor point="TOPRIGHT" relativeTo="GuiRoot" />
+                    <Anchor point="TOPLEFT" relativeTo="GuiRoot"/>
+                    <Anchor point="TOPRIGHT" relativeTo="GuiRoot"/>
                     <Dimensions y="256"/>
-
                     <!-- TODO: Texture coords are a hack to get around vertical wrapping issue; needs shader work and some more addressing modes -->
-                    <TextureCoords left="0" right="1" top="-0.01" bottom="1" />
+                    <TextureCoords left="0" right="1" top="-0.01" bottom="1"/>
                 </Texture>
-
                 <Texture name="$(parent)BottomMunge" alpha="0">
                     <Dimensions y="295"/>
                     <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot"/>
                     <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot"/>
-
                     <!-- TODO: Texture coords are a hack to get around vertical wrapping issue; needs shader work and some more addressing modes -->
-                    <TextureCoords left="0" right="1" top="0.01" bottom="1" />
-
+                    <TextureCoords left="0" right="1" top="0.01" bottom="1"/>
                     <Controls>
                         <Label name="$(grandparent)ZoneDescription" horizontalAlignment="CENTER" hidden="true" inheritScale="false">
                             <Dimensions x="1120"/>
-
                             <OnUserAreaCreated>
                                 self:GetParent():GetParent():OnZoneDescriptionNewUserAreaCreated(...)
                             </OnUserAreaCreated>
@@ -75,11 +64,10 @@
                         </Control>
                     </Controls>
                 </Texture>
-
                 <Texture name="$(parent)Spinner" textureFile="EsoUI/Art/LoadScreen/Keyboard/load_ourosboros.dds">
-                    <Dimensions x="128" y="128" />
+                    <Dimensions x="128" y="128"/>
                 </Texture>
             </Controls>
         </Control>
-    </Controls>        
+    </Controls>
 </GuiXml>

@@ -4,6 +4,7 @@ function ZO_HouseInformationTracker:Initialize(control, ...)
     -- Order matters
     self.populationLabel = control:GetNamedChild("ContainerPopulation")
     self.tagsLabel = control:GetNamedChild("ContainerTags")
+
     ZO_HUDTracker_Base.Initialize(self, control, ...)
 
     HOUSE_INFORMATION_TRACKER_FRAGMENT = self:GetFragment()
@@ -24,7 +25,6 @@ function ZO_HouseInformationTracker:InitializeSetting()
 end
 
 function ZO_HouseInformationTracker:InitializeStyles()
-    -- ZO_HUDTracker_Base override.
     self.styles =
     {
         keyboard =
@@ -38,23 +38,16 @@ function ZO_HouseInformationTracker:InitializeStyles()
             FONT_TAGS = "ZoFontGameShadow",
             RESIZE_TO_FIT_PADDING_HEIGHT = 10,
 
-            HEADER_PRIMARY_ANCHOR = ZO_Anchor:New(TOPLEFT, self.container),
-            HEADER_SECONDARY_ANCHOR = ZO_Anchor:New(TOPRIGHT, self.container),
-
             POPULATION_HEADERLABEL_PRIMARY_ANCHOR = ZO_Anchor:New(TOPLEFT, self.headerLabel, BOTTOMLEFT, 10, 2),
             POPULATION_HEADERLABEL_SECONDARY_ANCHOR = ZO_Anchor:New(TOPRIGHT, self.headerLabel, BOTTOMRIGHT, 0, 2),
 
             POPULATION_SUBLABEL_PRIMARY_ANCHOR = ZO_Anchor:New(TOPLEFT, self.subLabel, BOTTOMLEFT, 0, 0),
             POPULATION_SUBLABEL_SECONDARY_ANCHOR = ZO_Anchor:New(TOPRIGHT, self.subLabel, BOTTOMRIGHT, 0, 0),
 
-            SUBLABEL_PRIMARY_ANCHOR = ZO_Anchor:New(TOPLEFT, self.headerLabel, BOTTOMLEFT, 10, 2),
-            SUBLABEL_SECONDARY_ANCHOR = ZO_Anchor:New(TOPRIGHT, self.headerLabel, BOTTOMRIGHT, 0, 2),
-
             TAGS_LABEL_PRIMARY_ANCHOR = ZO_Anchor:New(TOPLEFT, self.populationLabel, BOTTOMLEFT, 0, 0),
             TAGS_LABEL_SECONDARY_ANCHOR = ZO_Anchor:New(TOPRIGHT, self.populationLabel, BOTTOMRIGHT, 0, 0),
 
             TEXT_HORIZONTAL_ALIGNMENT = TEXT_ALIGN_LEFT,
-            TEXT_TYPE_HEADER = MODIFY_TEXT_TYPE_NONE,
 
             TOP_LEVEL_PRIMARY_ANCHOR = ZO_Anchor:New(TOPLEFT, ZO_PromotionalEventTracker_TL, BOTTOMLEFT),
             TOP_LEVEL_SECONDARY_ANCHOR = ZO_Anchor:New(RIGHT, GuiRoot, RIGHT, -15, 0, ANCHOR_CONSTRAINS_X),
@@ -70,35 +63,25 @@ function ZO_HouseInformationTracker:InitializeStyles()
             FONT_TAGS = "ZoFontGamepad34",
             RESIZE_TO_FIT_PADDING_HEIGHT = 20,
 
-            HEADER_PRIMARY_ANCHOR = ZO_Anchor:New(TOPRIGHT, self.container),
-
             POPULATION_HEADERLABEL_PRIMARY_ANCHOR = ZO_Anchor:New(TOPRIGHT, self.headerLabel, BOTTOMRIGHT, 0, 10),
 
             POPULATION_SUBLABEL_PRIMARY_ANCHOR = ZO_Anchor:New(TOPRIGHT, self.subLabel, BOTTOMRIGHT, 0, 0),
 
-            SUBLABEL_PRIMARY_ANCHOR = ZO_Anchor:New(TOPRIGHT, self.headerLabel, BOTTOMRIGHT, 0, 10),
-
             TAGS_LABEL_PRIMARY_ANCHOR = ZO_Anchor:New(TOPRIGHT, self.populationLabel, BOTTOMRIGHT, 0, 0),
 
             TEXT_HORIZONTAL_ALIGNMENT = TEXT_ALIGN_RIGHT,
-            TEXT_TYPE_HEADER = MODIFY_TEXT_TYPE_UPPERCASE,
 
             TOP_LEVEL_PRIMARY_ANCHOR = ZO_Anchor:New(TOPLEFT, ZO_PromotionalEventTracker_TL, BOTTOMLEFT),
             TOP_LEVEL_SECONDARY_ANCHOR = ZO_Anchor:New(RIGHT, GuiRoot, RIGHT, -15, 0, ANCHOR_CONSTRAINS_X),
         },
     }
 
-    self.platformStyle = ZO_PlatformStyle:New(function(style)
-        self:ApplyPlatformStyle(style)
-    end, self.styles.keyboard, self.styles.gamepad)
-
-    self.platformStyle:Apply()
+    ZO_HUDTracker_Base.InitializeStyles(self)
 end
 
 function ZO_HouseInformationTracker:ApplyPlatformStyle(style)
     ZO_HUDTracker_Base.ApplyPlatformStyle(self, style)
 
-    self.headerLabel:SetHorizontalAlignment(style.TEXT_HORIZONTAL_ALIGNMENT)
     self.populationLabel:SetFont(style.FONT_POPULATION)
     self.populationLabel:SetHorizontalAlignment(style.TEXT_HORIZONTAL_ALIGNMENT)
     self.subLabel:SetHorizontalAlignment(style.TEXT_HORIZONTAL_ALIGNMENT)

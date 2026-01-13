@@ -1,12 +1,13 @@
-﻿ZO_GAMEPAD_MARKET_SCENE_NAME = "gamepad_market"
+ZO_GAMEPAD_MARKET_SCENE_NAME = "gamepad_market"
 ZO_GAMEPAD_MARKET_BUNDLE_CONTENTS_SCENE_NAME = "gamepad_market_bundle_contents"
 ZO_GAMEPAD_MARKET_LOCKED_SCENE_NAME = "gamepad_market_locked"
 ZO_GAMEPAD_MARKET_PRE_SCENE_NAME = "gamepad_market_pre_scene"
 ZO_GAMEPAD_ENDEAVOR_SEAL_MARKET_PRE_SCENE_NAME = "gamepad_endeavor_seal_market_pre_scene"
+ZO_GAMEPAD_GILDBAR_MARKET_PRE_SCENE_NAME = "gamepad_gildbar_market_pre_scene"
 
 local TERTIARY_OPTION_NONE = 0
 local TERTIARY_OPTION_BUY_CROWNS = 1
-local TERTIARY_OPTION_OPEN_ENDEAVORS = 2
+local TERTIARY_OPTION_OPEN_TAMRIEL_TOMES = 2
 
 ZO_GAMEPAD_MARKET_TEMPLATES =
 {
@@ -28,7 +29,7 @@ ZO_GAMEPAD_MARKET_TEMPLATES =
                 {
                     MKCT_CROWNS,
                     MKCT_CROWN_GEMS,
-                    MKCT_ENDEAVOR_SEALS,
+                    MKCT_SEALS,
                 },
             },
         },
@@ -59,6 +60,42 @@ ZO_GAMEPAD_MARKET_TEMPLATES =
         showFeaturedProducts = true,
         tertiaryOption = TERTIARY_OPTION_BUY_CROWNS,
     },
+    GILDBAR_STORE =
+    {
+        shownCurrencyTypeBalances =
+        {
+            {
+                categoryIndex = nil, -- Default for all categories
+                currencyTypes =
+                {
+                    MKCT_TRADE_BARS,
+                },
+            },
+        },
+        displayGroup = MARKET_DISPLAY_GROUP_CROWN_STORE,
+        featuredMarketProductFiltersMask = MARKET_PRODUCT_FILTER_TYPE_COST_TRADE_BARS,
+        preSceneName = ZO_GAMEPAD_GILDBAR_MARKET_PRE_SCENE_NAME,
+        marketProductFilterTypes =
+        {
+            MARKET_PRODUCT_FILTER_TYPE_COST_TRADE_BARS,
+        },
+        newMarketProductFilterTypes =
+        {
+            MARKET_PRODUCT_FILTER_TYPE_COST_TRADE_BARS + MARKET_PRODUCT_FILTER_TYPE_NEW,
+        },
+        esoPlusOfferFilterTypes =
+        {
+            MARKET_PRODUCT_FILTER_TYPE_COST_TRADE_BARS + MARKET_PRODUCT_FILTER_TYPE_ESO_PLUS_OFFERS,
+        },
+        newEsoPlusOfferFilterTypes =
+        {
+            MARKET_PRODUCT_FILTER_TYPE_COST_TRADE_BARS + MARKET_PRODUCT_FILTER_TYPE_ESO_PLUS_OFFERS + MARKET_PRODUCT_FILTER_TYPE_NEW,
+        },
+        showEsoPlusOffers = true,
+        showFeaturedProducts = true,
+        tertiaryOption = TERTIARY_OPTION_OPEN_TAMRIEL_TOMES,
+        marketOpenedTutorialTriggerType = TUTORIAL_TRIGGER_TRADE_BAR_STORE_OPENED,
+     },
     SEAL_STORE =
     {
         shownCurrencyTypeBalances =
@@ -67,32 +104,32 @@ ZO_GAMEPAD_MARKET_TEMPLATES =
                 categoryIndex = nil, -- Default for all categories
                 currencyTypes =
                 {
-                    MKCT_ENDEAVOR_SEALS,
+                    MKCT_SEALS,
                 },
             },
         },
         displayGroup = MARKET_DISPLAY_GROUP_CROWN_STORE,
-        featuredMarketProductFiltersMask = MARKET_PRODUCT_FILTER_TYPE_COST_ENDEAVOR_SEALS,
+        featuredMarketProductFiltersMask = MARKET_PRODUCT_FILTER_TYPE_COST_SEALS,
         preSceneName = ZO_GAMEPAD_ENDEAVOR_SEAL_MARKET_PRE_SCENE_NAME,
         marketProductFilterTypes = 
         {
-            MARKET_PRODUCT_FILTER_TYPE_COST_ENDEAVOR_SEALS,
+            MARKET_PRODUCT_FILTER_TYPE_COST_SEALS,
         },
         newMarketProductFilterTypes = 
         {
-            MARKET_PRODUCT_FILTER_TYPE_COST_ENDEAVOR_SEALS + MARKET_PRODUCT_FILTER_TYPE_NEW,
+            MARKET_PRODUCT_FILTER_TYPE_COST_SEALS + MARKET_PRODUCT_FILTER_TYPE_NEW,
         },
         esoPlusOfferFilterTypes =
         {
-            MARKET_PRODUCT_FILTER_TYPE_COST_ENDEAVOR_SEALS + MARKET_PRODUCT_FILTER_TYPE_ESO_PLUS_OFFERS,
+            MARKET_PRODUCT_FILTER_TYPE_COST_SEALS + MARKET_PRODUCT_FILTER_TYPE_ESO_PLUS_OFFERS,
         },
         newEsoPlusOfferFilterTypes =
         {
-            MARKET_PRODUCT_FILTER_TYPE_COST_ENDEAVOR_SEALS + MARKET_PRODUCT_FILTER_TYPE_ESO_PLUS_OFFERS + MARKET_PRODUCT_FILTER_TYPE_NEW,
+            MARKET_PRODUCT_FILTER_TYPE_COST_SEALS + MARKET_PRODUCT_FILTER_TYPE_ESO_PLUS_OFFERS + MARKET_PRODUCT_FILTER_TYPE_NEW,
         },
         showEsoPlusOffers = true,
         showFeaturedProducts = true,
-        tertiaryOption = TERTIARY_OPTION_OPEN_ENDEAVORS,
+        tertiaryOption = TERTIARY_OPTION_OPEN_TAMRIEL_TOMES,
         marketOpenedTutorialTriggerType = TUTORIAL_TRIGGER_SEAL_MARKET_OPENED,
      },
 }
@@ -101,6 +138,7 @@ ZO_GAMEPAD_MARKET_TEMPLATES =
 ZO_GAMEPAD_PRIORITIZED_MARKET_TEMPLATES =
 {
     ZO_GAMEPAD_MARKET_TEMPLATES.CROWN_STORE,
+    ZO_GAMEPAD_MARKET_TEMPLATES.GILDBAR_STORE,
     ZO_GAMEPAD_MARKET_TEMPLATES.SEAL_STORE,
 }
 
@@ -121,8 +159,8 @@ local MARKET_TERTIARY_BUTTON_DESCRIPTOR =
         local tertiaryOption = ZO_GAMEPAD_MARKET:GetTertiaryOption()
         if tertiaryOption == TERTIARY_OPTION_BUY_CROWNS then
             return GetString(SI_MARKET_BUY_CROWNS)
-        elseif tertiaryOption == TERTIARY_OPTION_OPEN_ENDEAVORS then
-            return GetString(SI_ACTIVITY_FINDER_OPEN_ENDEAVORS)
+        elseif tertiaryOption == TERTIARY_OPTION_OPEN_TAMRIEL_TOMES then
+            return GetString(SI_OPEN_TAMRIEL_TOMES_ACTION)
         end
     end,
     keybind = "UI_SHORTCUT_TERTIARY",
@@ -130,8 +168,8 @@ local MARKET_TERTIARY_BUTTON_DESCRIPTOR =
         local tertiaryOption = ZO_GAMEPAD_MARKET:GetTertiaryOption()
         if tertiaryOption == TERTIARY_OPTION_BUY_CROWNS then
             ZO_ShowBuyCrownsPlatformDialog()
-        elseif tertiaryOption == TERTIARY_OPTION_OPEN_ENDEAVORS then
-            RequestOpenTimedActivities()
+        elseif tertiaryOption == TERTIARY_OPTION_OPEN_TAMRIEL_TOMES then
+            RequestOpenTamrielTome()
         end
     end,
 }
@@ -2135,4 +2173,12 @@ function ZO_GamepadEndeavorSealMarket_PreScene_OnInitialize(control)
     local PRE_SCENE_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GamepadEndeavorSealMarket_PreScene)
     ZO_ENDEAVOR_SEAL_MARKET_PRE_SCENE = GamepadMarketPreScene:New(control, MARKET_TEMPLATE, PRE_SCENE_NAME, PRE_SCENE_FRAGMENT)
     ZO_GAMEPAD_ENDEAVOR_SEAL_MARKET_PRE_SCENE = ZO_ENDEAVOR_SEAL_MARKET_PRE_SCENE:GetScene()
+end
+
+function ZO_GamepadGildbarMarket_PreScene_OnInitialize(control)
+    local MARKET_TEMPLATE = ZO_GAMEPAD_MARKET_TEMPLATES.GILDBAR_STORE
+    local PRE_SCENE_NAME = ZO_GAMEPAD_GILDBAR_MARKET_PRE_SCENE_NAME
+    local PRE_SCENE_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GamepadEndeavorSealMarket_PreScene)
+    ZO_ENDEAVOR_SEAL_MARKET_PRE_SCENE = GamepadMarketPreScene:New(control, MARKET_TEMPLATE, PRE_SCENE_NAME, PRE_SCENE_FRAGMENT)
+    ZO_GAMEPAD_GILDBAR_MARKET_PRE_SCENE = ZO_ENDEAVOR_SEAL_MARKET_PRE_SCENE:GetScene()
 end

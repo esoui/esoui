@@ -1,6 +1,6 @@
 <GuiXml>
     <Controls>
-        <TopLevelControl name="ZO_TrialAccountSplashDialog" tier="HIGH" level="ZO_HIGH_TIER_TRIAL_DIALOG" inherits="ZO_CustomDialogBase" >
+        <TopLevelControl name="ZO_TrialAccountSplashDialog" tier="HIGH" level="ZO_HIGH_TIER_TRIAL_DIALOG" inherits="ZO_CustomDialogBase">
             <OnInitialized>
                 self:GetNamedChild("Title"):SetWidth(750)
                 ZO_TrialAccountSplashDialog_OnInitialized(self)

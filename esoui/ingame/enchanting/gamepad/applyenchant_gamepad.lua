@@ -1,4 +1,4 @@
-﻿local ZO_ApplyEnchant_Gamepad = ZO_InventoryItemImprovement_Gamepad:Subclass()
+local ZO_ApplyEnchant_Gamepad = ZO_InventoryItemImprovement_Gamepad:Subclass()
 
 function ZO_ApplyEnchant_Gamepad:New(...)
     local screen = ZO_Object.New(self)

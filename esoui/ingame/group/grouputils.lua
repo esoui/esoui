@@ -35,7 +35,7 @@ function TryGroupInviteByName(characterOrDisplayName, sentFromChat, displayInvit
         return
     end
 
-    if IsConsoleUI() then
+    if ZO_IsConsoleOrGameCoreUI() then
         local displayName = characterOrDisplayName
 
         local function GroupInviteCallback(success)

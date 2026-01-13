@@ -1,0 +1,10 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_TamrielTomesRewardPreview_GamepadTL">
+            <OnInitialized>
+                ZO_TamrielTomesRewardPreviewScreen_Gamepad.OnControlInitialized(self)
+            </OnInitialized>
+            <!-- TODO Tamriel Tomes -->
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

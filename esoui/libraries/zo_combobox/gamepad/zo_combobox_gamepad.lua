@@ -35,6 +35,15 @@ function ZO_ComboBox_Gamepad:Initialize(control)
     local _, selectedSize = _G[self.m_highlightFont]:GetFontInfo()
     self.m_fontRatio = unselectedSize / selectedSize
     SCREEN_NARRATION_MANAGER:RegisterComboBox(self)
+
+    local function OnMouseWheelNavigation(_, delta)
+        if delta > 0 then
+            self.m_focus:MovePrevious()
+        else
+            self.m_focus:MoveNext()
+        end
+    end
+    self.m_dropdown:SetOnMouseWheelCallback(OnMouseWheelNavigation)
 end
 
 function ZO_ComboBox_Gamepad:ShowDropdownInternal()
@@ -420,7 +429,7 @@ function ZO_GamepadComboBoxDropdown:Initialize(control)
     self.scrollControl = control:GetNamedChild("Scroll")
     self.backgroundControl = control:GetNamedChild("Background")
     self.templateName = ZO_GAMEPAD_COMBOBOX_DROPDOWN_TEMPLATE_STANDARD
-    self.pools = 
+    self.pools =
     {
         [ZO_GAMEPAD_COMBOBOX_DROPDOWN_TEMPLATE_STANDARD] = ZO_ControlPool:New(ZO_GAMEPAD_COMBOBOX_DROPDOWN_TEMPLATE_STANDARD, self.scrollControl, ZO_GAMEPAD_COMBOBOX_DROPDOWN_TEMPLATE_STANDARD),
         [ZO_GAMEPAD_COMBOBOX_DROPDOWN_TEMPLATE_MULTISELECTION] = ZO_ControlPool:New(ZO_GAMEPAD_COMBOBOX_DROPDOWN_TEMPLATE_MULTISELECTION, self.scrollControl, ZO_GAMEPAD_COMBOBOX_DROPDOWN_TEMPLATE_MULTISELECTION)
@@ -435,6 +444,13 @@ function ZO_GamepadComboBoxDropdown:Initialize(control)
     end
     RefreshMaxY()
     EVENT_MANAGER:RegisterForEvent("GamepadComboBoxDropdown", EVENT_SCREEN_RESIZED, RefreshMaxY)
+
+    local function OnMouseWheel(_, delta)
+        if self.onMouseWheelCallback then
+            self.onMouseWheelCallback(_, delta)
+        end
+    end
+    self.dropdownControl:SetHandler("OnMouseWheel", OnMouseWheel)
 end
 
 function ZO_GamepadComboBoxDropdown:SetPadding(padding)
@@ -517,6 +533,10 @@ end
 
 function ZO_GamepadComboBoxDropdown:SetTemplate(template)
     self.template = template
+end
+
+function ZO_GamepadComboBoxDropdown:SetOnMouseWheelCallback(onMouseWheelCallback)
+    self.onMouseWheelCallback = onMouseWheelCallback
 end
 
 function ZO_GamepadComboBoxDropdown:GetControlPoolFromTemplate(template)

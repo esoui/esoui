@@ -10,6 +10,7 @@ function ZO_HUDTracker_Base:Initialize(control)
 
     self.container = control:GetNamedChild("Container")
     self.headerLabel = self.container:GetNamedChild("Header")
+    self.headerText = self.headerLabel:GetText()
     self.subLabel = self.container:GetNamedChild("SubLabel")
 
     self.fragment = ZO_HUDFadeSceneFragment:New(self.container)
@@ -45,12 +46,17 @@ function ZO_HUDTracker_Base:InitializeStyles()
     local gamepadStyle = self.styles.gamepad
     local allConstants = { keyboardStyle, gamepadStyle }
     for _, constants in ipairs(allConstants) do
-        constants.HEADER_PRIMARY_ANCHOR = ZO_Anchor:New(TOPRIGHT)
-        constants.SUBLABEL_PRIMARY_ANCHOR = ZO_Anchor:New(TOPRIGHT, self.headerLabel, BOTTOMRIGHT, 0, constants.SUBLABEL_PRIMARY_ANCHOR_OFFSET_Y)
+        constants.HEADER_PRIMARY_ANCHOR = constants.HEADER_PRIMARY_ANCHOR or ZO_Anchor:New(TOPRIGHT)
+        constants.SUBLABEL_PRIMARY_ANCHOR_OFFSET_Y = constants.SUBLABEL_PRIMARY_ANCHOR_OFFSET_Y or 2
+        constants.SUBLABEL_PRIMARY_ANCHOR = constants.SUBLABEL_PRIMARY_ANCHOR or ZO_Anchor:New(TOPRIGHT, self.headerLabel, BOTTOMRIGHT, 0, constants.SUBLABEL_PRIMARY_ANCHOR_OFFSET_Y)
     end
 
-    keyboardStyle.HEADER_SECONDARY_ANCHOR = ZO_Anchor:New(TOPLEFT)
-    keyboardStyle.SUBLABEL_SECONDARY_ANCHOR = ZO_Anchor:New(TOPLEFT, self.headerLabel, BOTTOMLEFT, 10, keyboardStyle.SUBLABEL_PRIMARY_ANCHOR_OFFSET_Y)
+    keyboardStyle.HEADER_SECONDARY_ANCHOR = keyboardStyle.HEADER_SECONDARY_ANCHOR or ZO_Anchor:New(TOPLEFT)
+    keyboardStyle.SUBLABEL_PRIMARY_ANCHOR_OFFSET_Y = keyboardStyle.SUBLABEL_PRIMARY_ANCHOR_OFFSET_Y or 10
+    keyboardStyle.SUBLABEL_SECONDARY_ANCHOR = keyboardStyle.SUBLABEL_SECONDARY_ANCHOR or ZO_Anchor:New(TOPLEFT, self.headerLabel, BOTTOMLEFT, 10, keyboardStyle.SUBLABEL_PRIMARY_ANCHOR_OFFSET_Y)
+    keyboardStyle.TEXT_TYPE_HEADER = keyboardStyle.TEXT_TYPE_HEADER or MODIFY_TEXT_TYPE_NONE
+
+    gamepadStyle.TEXT_TYPE_HEADER = gamepadStyle.TEXT_TYPE_HEADER or MODIFY_TEXT_TYPE_UPPERCASE
 
     ZO_PlatformStyle:New(function(style) self:ApplyPlatformStyle(style) end, keyboardStyle, gamepadStyle)
 end
@@ -100,6 +106,7 @@ function ZO_HUDTracker_Base:GetSecondaryAnchor()
 end
 
 function ZO_HUDTracker_Base:SetHeaderText(text)
+    self.headerText = text
     self.headerLabel:SetText(text)
 end
 
@@ -109,9 +116,13 @@ end
 
 function ZO_HUDTracker_Base:ApplyPlatformStyle(style)
     self.currentStyle = style
-
+    
+    if style.TEXT_HORIZONTAL_ALIGNMENT then
+        self.headerLabel:SetHorizontalAlignment(style.TEXT_HORIZONTAL_ALIGNMENT)
+    end
     self.headerLabel:SetModifyTextType(style.TEXT_TYPE_HEADER)
     self.headerLabel:SetFont(style.FONT_HEADER)
+    self.headerLabel:SetText(self.headerText)
     self.subLabel:SetFont(style.FONT_SUBLABEL)
     self.control:SetResizeToFitPadding(0, style.RESIZE_TO_FIT_PADDING_HEIGHT)
 

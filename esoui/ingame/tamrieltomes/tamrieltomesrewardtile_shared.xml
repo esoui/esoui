@@ -1,0 +1,85 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_TamrielTomesReward_Template_Shared" virtual="true">
+            <Dimensions x="ZO_TAMRIEL_TOMES_REWARD_TEMPLATE_WIDTH" y="ZO_TAMRIEL_TOMES_REWARD_TEMPLATE_HEIGHT"/>
+            <Controls>
+                <Texture name="$(parent)Background" textureFile="EsoUI/Art/TamrielTomes/tome_slot_bg.dds" level="1">
+                    <Anchor point="CENTER"/>
+                    <Dimensions x="128" y="158"/>
+                    <TextureCoords left="0" right="1" top="0" bottom="0.61718"/>
+                </Texture>
+                <Texture name="$(parent)Border" textureFile="EsoUI/Art/TamrielTomes/tome_slot_outline.dds" level="3">
+                    <Anchor point="CENTER"/>
+                    <Dimensions x="128" y="158"/>
+                    <TextureCoords left="0" right="1" top="0" bottom="0.61718"/>
+                </Texture>
+                <Texture name="$(parent)RarityBorder" textureFile="EsoUI/Art/TamrielTomes/tome_slot_rarity_border.dds" level="4">
+                    <Anchor point="CENTER"/>
+                    <Dimensions x="128" y="158"/>
+                    <TextureCoords left="0" right="1" top="0" bottom="0.61718"/>
+                </Texture>
+                <Texture name="$(parent)Icon" level="5">
+                    <Anchor point="CENTER" relativePoint="TOP" offsetY="64"/>
+                    <Dimensions x="64" y="64"/>
+                </Texture>
+                <Texture name="$(parent)Locked" textureFile="EsoUI/Art/TamrielTomes/tome_slot_lock.dds" hidden="true" level="6">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Icon" offsetX="4" offsetY="4"/>
+                </Texture>
+                <Label name="$(parent)Quantity" horizontalAlignment="RIGHT" verticalAlignment="BOTTOM">
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icon"/>
+                </Label>
+                <Texture name="$(parent)CostBackground" textureFile="EsoUI/Art/TamrielTomes/tome_slot_currency_bg.dds" level="2">
+                    <TextureCoords left="0" right="1" top="0" bottom="0.640625"/>
+                    <Dimensions x="128" y="40"/>
+                    <Anchor point="BOTTOM"/>
+                </Texture>
+                <Label name="$(parent)Cost" override="true" inherits="ZO_CurrencyTemplate" horizontalAlignment="CENTER">
+                    <Anchor point="CENTER" relativeTo="$(parent)CostBackground" offsetY="-6"/>
+                </Label>
+            </Controls>
+        </Control>
+        <Control name="ZO_TamrielTomes_RewardDivider_FullWidth_Shared" virtual="true">
+            <Dimensions x="ZO_TAMRIEL_TOMES_REWARD_DIVIDER_WIDTH" y="48"/>
+        </Control>
+        <Control name="ZO_TamrielTomes_RewardTile_1xWidth_Shared" inherits="ZO_Tile_Control" virtual="true">
+            <Dimensions x="ZO_TAMRIEL_TOMES_REWARD_TILE_1_X_WIDTH" y="ZO_TAMRIEL_TOMES_REWARD_TILE_HEIGHT"/>
+            <Controls>
+                <Control name="$(parent)Reward">
+                    <Anchor point="TOPLEFT" offsetX="2" offsetY="2"/>
+                </Control>
+            </Controls>
+        </Control>
+        <Control name="ZO_TamrielTomes_RewardTile_2xWidth_Left_Shared" inherits="ZO_Tile_Control" virtual="true">
+            <Dimensions x="ZO_TAMRIEL_TOMES_REWARD_TILE_2_X_WIDTH" y="ZO_TAMRIEL_TOMES_REWARD_TILE_HEIGHT"/>
+            <Controls>
+                <Control name="$(parent)Reward">
+                    <Anchor point="TOPLEFT" offsetX="2" offsetY="2"/>
+                </Control>
+            </Controls>
+        </Control>
+        <Control name="ZO_TamrielTomes_RewardTile_2xWidth_Right_Shared" inherits="ZO_Tile_Control" virtual="true">
+            <Dimensions x="ZO_TAMRIEL_TOMES_REWARD_TILE_2_X_WIDTH" y="ZO_TAMRIEL_TOMES_REWARD_TILE_HEIGHT"/>
+            <Controls>
+                <Control name="$(parent)Reward">
+                    <Anchor point="TOPRIGHT" offsetX="-2" offsetY="2"/>
+                </Control>
+            </Controls>
+        </Control>
+        <Control name="ZO_TamrielTomes_RewardTile_2_5xWidth_Left_Shared" inherits="ZO_Tile_Control" virtual="true">
+            <Dimensions x="ZO_TAMRIEL_TOMES_REWARD_TILE_2_5_X_WIDTH" y="ZO_TAMRIEL_TOMES_REWARD_TILE_HEIGHT"/>
+            <Controls>
+                <Control name="$(parent)Reward">
+                    <Anchor point="TOPLEFT" offsetX="2" offsetY="2"/>
+                </Control>
+            </Controls>
+        </Control>
+        <Control name="ZO_TamrielTomes_RewardTile_2_5xWidth_Right_Shared" inherits="ZO_Tile_Control" virtual="true">
+            <Dimensions x="ZO_TAMRIEL_TOMES_REWARD_TILE_2_5_X_WIDTH" y="ZO_TAMRIEL_TOMES_REWARD_TILE_HEIGHT"/>
+            <Controls>
+                <Control name="$(parent)Reward">
+                    <Anchor point="TOPRIGHT" offsetX="-2" offsetY="2"/>
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

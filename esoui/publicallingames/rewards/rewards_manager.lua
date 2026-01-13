@@ -1,3 +1,11 @@
+-- Rewardable Data Base --
+ZO_RewardableData_Base = ZO_InitializingObject:Subclass()
+
+ZO_RewardableData_Base:MUST_IMPLEMENT("IsRewardClaimed")
+ZO_RewardableData_Base:MUST_IMPLEMENT("CanClaimReward")
+ZO_RewardableData_Base:MUST_IMPLEMENT("TryClaimReward")
+ZO_RewardableData_Base:MUST_IMPLEMENT("GetRewardData")
+
 -- TODO: One day I'd like to fold LFGReward into the RewardDef system. This is a stop gap solution.
 -- This will allow us to eaily define unique custom reward types that won't collide with the REWARD_ENTRY_TYPE enum values
 ZO_REWARD_CUSTOM_ENTRY_TYPE =

@@ -3,34 +3,30 @@
         <Control name="ZO_PregameGamepadHeaderImageTemplate" resizeToFitDescendents="true" virtual="true">
             <Anchor point="TOPLEFT"/>
             <Anchor point="TOPRIGHT"/>
-
             <Controls>
                 <Texture name="$(parent)Image" textureFile="EsoUI/Art/Login/Gamepad/login_ESO_Logo.dds" resizeToFitFile="true">
-                    <Anchor point="TOPLEFT" offsetX="-65" />
+                    <Anchor point="TOPLEFT" offsetX="-65"/>
                 </Texture>
-
                 <Label name="$(parent)Text" font="ZoFontGamepad34" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE">
-                    <Anchor point="TOPRIGHT" />
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Image" relativePoint="BOTTOMLEFT" offsetX="65" />
+                    <Anchor point="TOPRIGHT"/>
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Image" relativePoint="BOTTOMLEFT" offsetX="65"/>
                 </Label>
             </Controls>
         </Control>
-
         <Label name="ZO_PregameGamepadTextEditHeaderTemplate" inherits="ZO_GamepadMenuEntryHeaderFontTemplate" virtual="true">
             <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT"/>
-            <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" offsetY="-10" />
-            <Dimensions y="24" />
+            <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" offsetY="-10"/>
+            <Dimensions y="24"/>
         </Label>
-
         <Control name="ZO_PregameGamepadTextEditTemplate" virtual="true">
             <OnInitialized>
                 ZO_PregameGamepadTextEditTemplate_OnInitialized(self)
             </OnInitialized>
-            <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" y="62" />
+            <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" y="62"/>
             <Controls>
                 <Backdrop name="$(parent)Backdrop" inherits="ZO_SingleLineEditBackdrop_Keyboard">
-                    <Anchor point="TOPLEFT" />
-                    <Anchor point="BOTTOMRIGHT" />
+                    <Anchor point="TOPLEFT"/>
+                    <Anchor point="BOTTOMRIGHT"/>
                     <Controls>
                         <Backdrop name="$(parent)Highlight" inherits="ZO_GamepadWhiteOutlineHighlight" hidden="true">
                             <AnchorFill/>
@@ -44,7 +40,6 @@
                 </Backdrop>
             </Controls>
         </Control>
-
         <Control name="ZO_PregameGamepadButtonWithTextTemplate" virtual="true">
             <Dimensions x="440" y="60"/>
             <Anchor point="TOPLEFT"/>
@@ -53,8 +48,8 @@
             </OnInitialized>
             <Controls>
                 <Label name="$(parent)Label" inherits="ZO_GamepadMenuEntryLabelTemplate">
-                    <Anchor point="TOPLEFT" offsetX="25" />
-                    <Anchor point="TOPRIGHT" />
+                    <Anchor point="TOPLEFT" offsetX="25"/>
+                    <Anchor point="TOPRIGHT"/>
                 </Label>
             </Controls>
         </Control>

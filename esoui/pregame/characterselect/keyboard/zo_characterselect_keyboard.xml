@@ -1,7 +1,7 @@
 <GuiXml>
     <Controls>
         <Button name="ZO_CharacterEntryOrderButton" virtual="true" inherits="ZO_ButtonBehaviorClickSound">
-            <Dimensions x="32" y="32" />
+            <Dimensions x="32" y="32"/>
             <OnMouseEnter>
                 local parent = self:GetParent()
                 ZO_PropagateHandler(parent, "OnMouseEnter", parent)
@@ -11,120 +11,99 @@
                 ZO_PropagateHandler(parent, "OnMouseExit", parent)
             </OnMouseExit>
         </Button>
-        
         <Control name="ZO_CharacterEntry" mouseEnabled="true" virtual="true">
-            <Dimensions x="367" y="ZO_CHARACTER_SELECT_ENTRY_HEIGHT" />
-
+            <Dimensions x="367" y="ZO_CHARACTER_SELECT_ENTRY_HEIGHT"/>
             <OnMouseDown>
                 if button == MOUSE_BUTTON_INDEX_LEFT then
                     ZO_CharacterEntry_OnMouseClick(self)
                 end
             </OnMouseDown>
-            
             <OnMouseUp>
                 if button == MOUSE_BUTTON_INDEX_LEFT then
                     ZO_CharacterEntry_OnMouseUp(self)
                 end
             </OnMouseUp>
-
             <OnMouseDoubleClick>
                 ZO_CharacterEntry_OnMouseDoubleClick(self, button)
             </OnMouseDoubleClick>
-
             <OnMouseEnter>
                 ZO_CharacterEntry_OnMouseEnter(self)
             </OnMouseEnter>
-
             <OnMouseExit>
                 ZO_CharacterEntry_OnMouseExit(self)
             </OnMouseExit>
-
             <OnDragStart>
                 if button == MOUSE_BUTTON_INDEX_LEFT then
                     ZO_CharacterEntry_OnDragStart(self)
                 end
             </OnDragStart>
-
             <Controls>
                 <Texture name="$(parent)BG" textureFile="EsoUI/Art/Miscellaneous/listItem_backdrop.dds">
-                    <AnchorFill />
-                    <TextureCoords left="0" right="1" top="0" bottom=".799" />
+                    <AnchorFill/>
+                    <TextureCoords left="0" right="1" top="0" bottom=".799"/>
                 </Texture>
-
                 <Texture name="$(parent)Alliance">
-                    <Dimensions x="32" y="64" />
+                    <Dimensions x="32" y="64"/>
                     <Anchor point="LEFT" offsetX="5"/>
                 </Texture>
-
                 <Label name="$(parent)Name" font="ZoFontWinH3SoftShadowThin" maxLineCount="1" wrapMode="ELLIPSIS">
                     <Anchor point="TOPLEFT" offsetX="52" offsetY="7"/>
                     <Anchor point="TOPRIGHT" offsetX="-30" offsetY="7"/>
                 </Label>
-                
                 <Label name="$(parent)ClassLevel" font="ZoFontGameShadow" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" maxLineCount="1" wrapMode="ELLIPSIS">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT"/>
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)Name" relativePoint="BOTTOMRIGHT"/>
                 </Label>
-                
                 <Label name="$(parent)Location" font="ZoFontGameShadow" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_CONTRAST" maxLineCount="1" wrapMode="ELLIPSIS">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)ClassLevel" relativePoint="BOTTOMLEFT" />
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)ClassLevel" relativePoint="BOTTOMRIGHT" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)ClassLevel" relativePoint="BOTTOMLEFT"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)ClassLevel" relativePoint="BOTTOMRIGHT"/>
                 </Label>
-                
                 <Button name="$(parent)OrderUp" inherits="ZO_CharacterEntryOrderButton">
                     <Anchor point="TOPRIGHT" offsetX="-5" offsetY="10"/>
-                    <Textures normal="EsoUI/Art/Buttons/large_upArrow_up.dds" mouseOver="EsoUI/Art/Buttons/large_upArrow_over.dds" pressed="EsoUI/Art/Buttons/large_upArrow_down.dds" disabled="EsoUI/Art/Buttons/large_upArrow_disabled.dds" />
+                    <Textures normal="EsoUI/Art/Buttons/large_upArrow_up.dds" mouseOver="EsoUI/Art/Buttons/large_upArrow_over.dds" pressed="EsoUI/Art/Buttons/large_upArrow_down.dds" disabled="EsoUI/Art/Buttons/large_upArrow_disabled.dds"/>
                     <OnClicked>
                         ZO_CharacterSelect_Move_Character_Up()
                     </OnClicked>
                 </Button>
-
                 <Button name="$(parent)OrderDown" inherits="ZO_CharacterEntryOrderButton">
-                    <Anchor point="TOP" relativeTo="$(parent)OrderUp" relativePoint="BOTTOM" offsetY="10" />
-                    <Textures normal="EsoUI/Art/Buttons/large_downArrow_up.dds" mouseOver="EsoUI/Art/Buttons/large_downArrow_over.dds" pressed="EsoUI/Art/Buttons/large_downArrow_down.dds" disabled="EsoUI/Art/Buttons/large_downArrow_disabled.dds" />
+                    <Anchor point="TOP" relativeTo="$(parent)OrderUp" relativePoint="BOTTOM" offsetY="10"/>
+                    <Textures normal="EsoUI/Art/Buttons/large_downArrow_up.dds" mouseOver="EsoUI/Art/Buttons/large_downArrow_over.dds" pressed="EsoUI/Art/Buttons/large_downArrow_down.dds" disabled="EsoUI/Art/Buttons/large_downArrow_disabled.dds"/>
                     <OnClicked>
                         ZO_CharacterSelect_Move_Character_Down()
                     </OnClicked>
                 </Button>
             </Controls>
         </Control>
-
         <Control name="ZO_ServiceTokenIndicator" mouseEnabled="true" virtual="true">
-            <Dimensions x="64" y="64" />
+            <Dimensions x="64" y="64"/>
             <Controls>
                 <Backdrop name="$(parent)BG" inherits="ZO_DefaultBackdrop" tier="LOW">
-                    <Anchor point="TOPLEFT" offsetX="-2" offsetY="-2" />
-                    <Anchor point="BOTTOMRIGHT" offsetX="2" offsetY="2" />
-
+                    <Anchor point="TOPLEFT" offsetX="-2" offsetY="-2"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="2" offsetY="2"/>
                     <Controls>
                         <Texture name="$(parent)Highlight" layer="OVERLAY" hidden="true" textureFile="EsoUI/Art/ActionBar/actionBar_mouseOver.dds">
-                            <AnchorFill />
+                            <AnchorFill/>
                         </Texture>
                     </Controls>
                 </Backdrop>
-                
                 <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Icons/icon_missing.dds">
-                    <AnchorFill />
+                    <AnchorFill/>
                 </Texture>
-                
                 <Label name="$(parent)TokenCount" font="ZoFontGameShadow" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" horizontalAlignment="RIGHT">
-                    <Anchor point="BOTTOMLEFT" offsetX="5" />
-                    <Anchor point="BOTTOMRIGHT" offsetX="-5" />
+                    <Anchor point="BOTTOMLEFT" offsetX="5"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="-5"/>
                 </Label>
             </Controls>
         </Control>
-
         <TopLevelControl name="ZO_RenameCharacterDialog" inherits="ZO_CustomDialogBase">
             <OnInitialized>
                 ZO_RenameCharacterDialog_OnInitialized(self)
             </OnInitialized>
             <Controls>
                 <Label name="$(parent)Title" override="true">
-                    <Dimensions x="440" />
+                    <Dimensions x="440"/>
                 </Label>
-                
-                <Label name="$(parent)NameHeader" inherits="ZO_DialogContentAnchors" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame" />
-
+                <Label name="$(parent)NameHeader" inherits="ZO_DialogContentAnchors" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame"/>
                 <Backdrop name="$(parent)Name" inherits="ZO_SingleLineEditBackdrop_Keyboard">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)NameHeader" relativePoint="BOTTOMLEFT" offsetY="10"/>
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)NameHeader" relativePoint="BOTTOMRIGHT" offsetY="10"/>
@@ -136,135 +115,103 @@
                         </EditBox>
                     </Controls>
                 </Backdrop>
-
-                <Control name="$(parent)RenameInstructions" inherits="ZO_TextInstructionsTemplate" excludeFromResizeToFitExtents="true" />
-
+                <Control name="$(parent)RenameInstructions" inherits="ZO_TextInstructionsTemplate" excludeFromResizeToFitExtents="true"/>
                 <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton"/>
                 <Control name="$(parent)AttemptRename" inherits="ZO_CustomDialogButton"/>
             </Controls>
         </TopLevelControl>
-
         <TopLevelControl name="ZO_CharacterSelectBG" layer="BACKGROUND" hidden="true">
             <Controls>
                 <Control name="$(parent)BGLeft" inherits="ZO_LeftFullscreenPanelBG" alpha=".55">
                     <Anchor point="TOPLEFT" relativeTo="GuiRoot" offsetX="-300"/>
-                    <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot" offsetX="-300" offsetY="120" />
+                    <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot" offsetX="-300" offsetY="120"/>
                 </Control>
             </Controls>
         </TopLevelControl>
-
         <TopLevelControl name="ZO_CharacterSelect" layer="TEXT" hidden="true" mouseEnabled="true">
-            <Dimensions x="410" />
-            <Anchor point="TOPRIGHT" relativeTo="GuiRoot" />
-            <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" />
-
+            <Dimensions x="410"/>
+            <Anchor point="TOPRIGHT" relativeTo="GuiRoot"/>
+            <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot"/>
             <OnInitialized>
               ZO_CharacterSelect_Initialize(self)
             </OnInitialized>
-
             <Controls>
                 <Control name="$(parent)BGRight" inherits="ZO_RightFullscreenPanelBG">
                     <Anchor point="TOPRIGHT" offsetX="195"/>
-                    <Anchor point="BOTTOMRIGHT" offsetX="195" offsetY="120" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="195" offsetY="120"/>
                 </Control>
-
                 <Label name="$(parent)CharacterSlots" font="ZoFontWindowTitle" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"/>
-
                 <Label name="$(parent)ExtraCharacterSlots" font="ZoFontWindowSubtitle" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                    <Dimensions x="350" />
-                    <Anchor point="TOP" relativeTo="$(parent)CharacterSlots" relativePoint="BOTTOM" offsetY="3" />
+                    <Dimensions x="350"/>
+                    <Anchor point="TOP" relativeTo="$(parent)CharacterSlots" relativePoint="BOTTOM" offsetY="3"/>
                 </Label>
-
                 <Control name="$(parent)ScrollList" inherits="ZO_ScrollList">
-                    <Anchor point="TOPLEFT" offsetX="30" offsetY="105" />
-                    <Anchor point="BOTTOMRIGHT" offsetX="-20" offsetY="-70" />
+                    <Anchor point="TOPLEFT" offsetX="30" offsetY="105"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="-20" offsetY="-70"/>
                 </Control>
-
-                <Control name="$(parent)CharacterViewport" inherits="ZO_PaperdollManipulation" />
-
+                <Control name="$(parent)CharacterViewport" inherits="ZO_PaperdollManipulation"/>
                 <Button name="$(parent)Login" inherits="ZO_ExtraLargeButton" modifyTextType="UPPERCASE" font="ZoFontWinH2" text="SI_LOGIN_CHARACTER">
-                    <PressedOffset x="2" y="2" />
+                    <PressedOffset x="2" y="2"/>
                     <Anchor point="BOTTOM" relativeTo="$(parent)CharacterViewport" offsetX="-215" offsetY="-14"/>
                     <Dimensions x="230" y="67"/>
                     <OnClicked>
                         ZO_CharacterSelect_Login(CHARACTER_OPTION_EXISTING_AREA)
                     </OnClicked>
                 </Button>
-
                 <Control name="$(parent)NameChange" inherits="ZO_ServiceTokenIndicator">
-                    <Anchor point="BOTTOM" offsetX="-480" offsetY="-16" />
-                    
+                    <Anchor point="BOTTOM" offsetX="-480" offsetY="-16"/>
                     <OnInitialized>
                         ZO_NameChangeIndicator_Initialize(self)
                     </OnInitialized>
-
                 </Control>
-
                 <Control name="$(parent)RaceChange" inherits="ZO_ServiceTokenIndicator">
-                    <Anchor point="LEFT" relativeTo="$(parent)NameChange" relativePoint="RIGHT" offsetX="10" />
-
+                    <Anchor point="LEFT" relativeTo="$(parent)NameChange" relativePoint="RIGHT" offsetX="10"/>
                     <OnInitialized>
                         ZO_RaceChangeIndicator_Initialize(self)
                     </OnInitialized>
-                    
                 </Control>
-
                 <Control name="$(parent)AppearanceChange" inherits="ZO_ServiceTokenIndicator">
-                    <Anchor point="LEFT" relativeTo="$(parent)RaceChange" relativePoint="RIGHT" offsetX="10" />
-
+                    <Anchor point="LEFT" relativeTo="$(parent)RaceChange" relativePoint="RIGHT" offsetX="10"/>
                     <OnInitialized>
                         ZO_AppearanceChangeIndicator_Initialize(self)
                     </OnInitialized>
-
                 </Control>
-
                 <Control name="$(parent)AllianceChange" inherits="ZO_ServiceTokenIndicator">
-                    <Anchor point="LEFT" relativeTo="$(parent)AppearanceChange" relativePoint="RIGHT" offsetX="10" />
-
+                    <Anchor point="LEFT" relativeTo="$(parent)AppearanceChange" relativePoint="RIGHT" offsetX="10"/>
                     <OnInitialized>
                         ZO_AllianceChangeIndicator_Initialize(self)
                     </OnInitialized>
-
                 </Control>
-
                 <Label name="$(parent)ChampionPoints" font="ZoFontWinH2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                    <Anchor point="TOPLEFT" relativeTo="GuiRoot" offsetX="35" offsetY="35" />
+                    <Anchor point="TOPLEFT" relativeTo="GuiRoot" offsetX="35" offsetY="35"/>
                 </Label>
-                
                 <Control name="$(parent)Selected" resizeToFitDescendents="true">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)ChampionPoints" relativePoint="BOTTOMLEFT" offsetY="40" />
-
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)ChampionPoints" relativePoint="BOTTOMLEFT" offsetY="40"/>
                     <Controls>
                         <Label name="$(parent)Name" font="ZoFontWinH1">
-                            <Anchor point="TOPLEFT" />
+                            <Anchor point="TOPLEFT"/>
                         </Label>
-
                         <Label name="$(parent)Race" font="ZoFontWinH2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_CONTRAST">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT"/>
                         </Label>
-
                         <Label name="$(parent)ClassLevel" font="ZoFontWinH2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_CONTRAST">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)Race" relativePoint="BOTTOMLEFT" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Race" relativePoint="BOTTOMLEFT"/>
                         </Label>
-
                         <Label name="$(parent)Location" font="ZoFontWinH3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_CONTRAST">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)ClassLevel" relativePoint="BOTTOMLEFT" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)ClassLevel" relativePoint="BOTTOMLEFT"/>
                         </Label>
                     </Controls>
                 </Control>
-
                 <Button name="$(parent)Create" inherits="ZO_DefaultButton" tier="MEDIUM" text="SI_CREATE_CHARACTER">
                     <Dimensions x="185" y="40"/>
-                    <Anchor point="BOTTOMRIGHT" offsetX="-210" offsetY="-14" />
-
+                    <Anchor point="BOTTOMRIGHT" offsetX="-210" offsetY="-14"/>
                     <OnClicked>
                         ZO_PregameStateManager_SetState("CharacterCreate")
                     </OnClicked>
                 </Button>
-
                 <Button name="$(parent)Delete" inherits="ZO_DefaultButton">
                     <Dimensions x="185" y="40"/>
-                    <Anchor point="BOTTOMRIGHT" offsetX="-20" offsetY="-14" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-20" offsetY="-14"/>
                     <OnMouseEnter>
                         ZO_CharacterSelectDelete_OnMouseEnter(self)
                     </OnMouseEnter>
@@ -275,117 +222,88 @@
                         ZO_CharacterSelect_DeleteSelected()
                     </OnClicked>
                 </Button>
-
                 <Control name="$(parent)ChapterUpgrade">
-                    <Dimensions x="300" />
-                    <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot" />
-
+                    <Dimensions x="300"/>
+                    <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot"/>
                     <Controls>
                         <Button name="$(parent)RegisterButton" inherits="ZO_DefaultButton" text="SI_CHARACTER_SELECT_CHAPTER_UPGRADE_REGISTER">
-                            <Dimensions x="140" />
-                            <Anchor point="BOTTOM" offsetY="-16" />
-
+                            <Dimensions x="140"/>
+                            <Anchor point="BOTTOM" offsetY="-16"/>
                             <OnMouseEnter>
                                 ZO_CharacterSelectChapterUpgradeRegisterButton_OnMouseEnter(self)
                             </OnMouseEnter>
-                            
                             <OnMouseExit>
                                 ZO_CharacterSelectChapterUpgradeRegisterButton_OnMouseExit(self)
                             </OnMouseExit>
-                            
                             <OnClicked>
                                 ZO_PregameStateManager_SetState("ChapterUpgrade")
                             </OnClicked>
                         </Button>
-
                         <Texture name="$(parent)Image">
-                            <Anchor point="BOTTOM" relativeTo="$(parent)RegisterButton" relativePoint="TOP" />
-                            <Dimensions x="256" y="256" />
+                            <Anchor point="BOTTOM" relativeTo="$(parent)RegisterButton" relativePoint="TOP"/>
+                            <Dimensions x="256" y="256"/>
                         </Texture>
-
                         <Label name="$(parent)Title" font="ZoFontWinH2" modifyTextType="UPPERCASE" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Image" relativePoint="TOPLEFT" offsetY="-5" />
-                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Image" relativePoint="TOPRIGHT" offsetY="-5" />
+                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Image" relativePoint="TOPLEFT" offsetY="-5"/>
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Image" relativePoint="TOPRIGHT" offsetY="-5"/>
                         </Label>
                     </Controls>
                 </Control>
-
                 <Control name="$(parent)EventMinimized">
-                    <Dimensions x="512" y="512" />
-                    <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot" />
-
+                    <Dimensions x="512" y="512"/>
+                    <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot"/>
                     <Controls>
                         <Texture name="$(parent)OverlayBackground" layer="BACKGROUND" textureFile="EsoUI/Art/CharacterSelect/Keyboard/characterSelect_eventMinimized_overlay.dds">
-                            <Anchor point="TOPLEFT" />
-                            <Anchor point="BOTTOMRIGHT" />
+                            <Anchor point="TOPLEFT"/>
+                            <Anchor point="BOTTOMRIGHT"/>
                         </Texture>
-
                         <Texture name="$(parent)Background" textureFile="EsoUI/Art/CharacterSelect/Keyboard/characterSelect_eventMinimized_background.dds">
-                            <AnchorFill />
+                            <AnchorFill/>
                         </Texture>
-
                         <Control name="$(parent)Carousel" inherits="ZO_Carousel_Control">
-                            <Dimensions x="358" y="283" />
-                            <Anchor point="BOTTOMLEFT" offsetY="-64" />
-
+                            <Dimensions x="358" y="283"/>
+                            <Anchor point="BOTTOMLEFT" offsetY="-64"/>
                             <Controls>
                                 <Control name="$(parent)SelectionIndicator" tier="MEDIUM" layer="OVERLAY" override="true">
-                                    <ClearAnchors />
+                                    <ClearAnchors/>
                                     <Anchor point="TOP" relativePoint="BOTTOM" offsetY="20"/>
                                 </Control>
-
                                 <Scroll name="$(parent)Scroll" override="true">
-                                    <ClearAnchors />
-                                    <Anchor point="TOPLEFT" />
-                                    <Anchor point="BOTTOMRIGHT" />
-                                    <FadeGradient x1="0" y1="0" size1="0" x2="0" y2="0" size2="0" />
-
+                                    <ClearAnchors/>
+                                    <Anchor point="TOPLEFT"/>
+                                    <Anchor point="BOTTOMRIGHT"/>
+                                    <FadeGradient x1="0" y1="0" size1="0" x2="0" y2="0" size2="0"/>
                                     <Controls>
                                         <Texture name="$(parent)OverlayMunge" layer="TEXT" textureFile="EsoUI/Art/CharacterSelect/Keyboard/characterSelect_eventMinimized_overlay.dds">
-                                            <Anchor point="TOPLEFT" offsetY="-165" />
-                                            <Anchor point="BOTTOMRIGHT" offsetX="154" offsetY="64" />
+                                            <Anchor point="TOPLEFT" offsetY="-165"/>
+                                            <Anchor point="BOTTOMRIGHT" offsetX="154" offsetY="64"/>
                                         </Texture>
                                     </Controls>
                                 </Scroll>
-
                                 <Button name="$(parent)LeftArrow" layer="OVERLAY" override="true">
-                                    <Dimensions x="16" y="16" />
-                                    <ClearAnchors />
-                                    <Anchor point="LEFT" offsetX= "40" constrains="X" />
-                                    <Anchor point="RIGHT" relativeTo="$(parent)SelectionIndicator" relativePoint="LEFT" constrains="Y" />
-                                    <Textures
-                                        normal="EsoUI/Art/Buttons/leftArrow_up.dds"
-                                        pressed="EsoUI/Art/Buttons/leftArrow_down.dds"
-                                        mouseOver="EsoUI/Art/Buttons/leftArrow_over.dds"
-                                        disabled="EsoUI/Art/Buttons/leftArrow_disabled.dds"
-                                    />
+                                    <Dimensions x="16" y="16"/>
+                                    <ClearAnchors/>
+                                    <Anchor point="LEFT" offsetX="40" constrains="X"/>
+                                    <Anchor point="RIGHT" relativeTo="$(parent)SelectionIndicator" relativePoint="LEFT" constrains="Y"/>
+                                    <Textures normal="EsoUI/Art/Buttons/leftArrow_up.dds" pressed="EsoUI/Art/Buttons/leftArrow_down.dds" mouseOver="EsoUI/Art/Buttons/leftArrow_over.dds" disabled="EsoUI/Art/Buttons/leftArrow_disabled.dds"/>
                                 </Button>
-
                                 <Button name="$(parent)RightArrow" layer="OVERLAY" override="true">
-                                    <Dimensions x="16" y="16" />
-                                    <ClearAnchors />
-                                    <Anchor point="RIGHT" offsetX= "-40" constrains="X" />
-                                    <Anchor point="LEFT" relativeTo="$(parent)SelectionIndicator" relativePoint="RIGHT" constrains="Y" />
-                                    <Textures
-                                        normal="EsoUI/Art/Buttons/rightArrow_up.dds"
-                                        pressed="EsoUI/Art/Buttons/rightArrow_down.dds"
-                                        mouseOver="EsoUI/Art/Buttons/rightArrow_over.dds"
-                                        disabled="EsoUI/Art/Buttons/rightArrow_disabled.dds"
-                                    />
+                                    <Dimensions x="16" y="16"/>
+                                    <ClearAnchors/>
+                                    <Anchor point="RIGHT" offsetX="-40" constrains="X"/>
+                                    <Anchor point="LEFT" relativeTo="$(parent)SelectionIndicator" relativePoint="RIGHT" constrains="Y"/>
+                                    <Textures normal="EsoUI/Art/Buttons/rightArrow_up.dds" pressed="EsoUI/Art/Buttons/rightArrow_down.dds" mouseOver="EsoUI/Art/Buttons/rightArrow_over.dds" disabled="EsoUI/Art/Buttons/rightArrow_disabled.dds"/>
                                 </Button>
                             </Controls>
                         </Control>
-
                         <Texture name="$(parent)NavigationDivider" textureFile="EsoUI/Art/CharacterSelect/Keyboard/characterSelect_eventMinimized_divider.dds">
-                            <Dimensions y="4" />
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)Carousel" relativePoint="BOTTOMLEFT" />
-                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Carousel" relativePoint="BOTTOMRIGHT" />
+                            <Dimensions y="4"/>
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Carousel" relativePoint="BOTTOMLEFT"/>
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Carousel" relativePoint="BOTTOMRIGHT"/>
                         </Texture>
-
                         <Button name="$(parent)HitArea" tier="HIGH">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)CarouselScroll" relativePoint="TOPLEFT" />
-                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)CarouselScroll" relativePoint="BOTTOMRIGHT" />
-
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)CarouselScroll" relativePoint="TOPLEFT"/>
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)CarouselScroll" relativePoint="BOTTOMRIGHT"/>
                             <OnClicked>
                                 ZO_CharacterSelect_ShowEventBanner()
                             </OnClicked>
@@ -394,18 +312,15 @@
                 </Control>
             </Controls>
         </TopLevelControl>
-
         <TopLevelControl name="ZO_CharacterOrderDivider" hidden="true">
-            <Dimensions x="367" y="16" />
-
+            <Dimensions x="367" y="16"/>
             <OnInitialized>
                 ZO_CharacterOrderDivider_Initialize(self)
             </OnInitialized>
-
             <Controls>
                 <Texture name="$(parent)Line" textureFile="EsoUI/Art/Miscellaneous/listItem_divider.dds">
-                    <AnchorFill />
-                    <TextureCoords left="0" right="1" top="0" bottom=".799" />
+                    <AnchorFill/>
+                    <TextureCoords left="0" right="1" top="0" bottom=".799"/>
                 </Texture>
             </Controls>
         </TopLevelControl>

@@ -6,32 +6,27 @@
             </OnInitialized>
             <Controls>
                 <Label name="$(parent)Price" inherits="ZO_CurrencyTemplate">
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)RootSpacer" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)RootSpacer"/>
                 </Label>
-
                 <Label name="$(parent)Label" override="true">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)RootSpacer" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_INDENT" />
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Price" relativePoint="TOPLEFT" offsetX="-10" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)RootSpacer" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_INDENT"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Price" relativePoint="TOPLEFT" offsetX="-10"/>
                 </Label>
-
-                <Texture name="$(parent)StatusIndicator" inherits="ZO_GamepadMenuEntryStatusIndicationTemplate" />
+                <Texture name="$(parent)StatusIndicator" inherits="ZO_GamepadMenuEntryStatusIndicationTemplate"/>
             </Controls>
         </Control>
-
-        <Label name="ZO_TradingHouse_ItemListSubLabelTemplate" font="ZoFontGamepadCondensed34" modifyTextType="UPPERCASE" virtual="true" />
-
+        <Label name="ZO_TradingHouse_ItemListSubLabelTemplate" font="ZoFontGamepadCondensed34" modifyTextType="UPPERCASE" virtual="true"/>
         <Control name="ZO_TradingHouse_ItemList_Gamepad" hidden="true" virtual="true">
-            <AnchorFill />
+            <AnchorFill/>
             <Controls>
                 <Control name="$(parent)List" inherits="ZO_VerticalParametricScrollListTemplate">
-                    <AnchorFill />
+                    <AnchorFill/>
                 </Control>
             </Controls>
         </Control>
-
         <Backdrop name="ZO_Gamepad_TradingHouse_Highlight" inherits="ZO_GamepadWhiteOutlineHighlight" tier="HIGH" layer="OVERLAY" blendMode="ADD" hidden="false" virtual="true">
-            <Anchor point="TOPLEFT" offsetY="-8" />
-            <Anchor point="BOTTOMRIGHT" offsetY="8" />
+            <Anchor point="TOPLEFT" offsetY="-8"/>
+            <Anchor point="BOTTOMRIGHT" offsetY="8"/>
         </Backdrop>
     </Controls>
 </GuiXml>

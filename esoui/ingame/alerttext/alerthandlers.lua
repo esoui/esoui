@@ -706,10 +706,10 @@ local AlertHandlers =
         end
     end,
 
-    [EVENT_QUEUE_FOR_CAMPAIGN_RESPONSE] = function(response)
+    [EVENT_QUEUE_FOR_CAMPAIGN_RESPONSE] = function(response, parameter)
         local responseString = GetString("SI_QUEUEFORCAMPAIGNRESPONSETYPE", response)
         if responseString ~= "" then
-            return ERROR, responseString, SOUNDS.GENERAL_ALERT_ERROR
+            return ERROR, zo_strformat(responseString, parameter), SOUNDS.GENERAL_ALERT_ERROR
         end
     end,
 
@@ -1318,6 +1318,12 @@ local AlertHandlers =
     [EVENT_VENGEANCE_ACTION_RESULT] = function(result)
         if result ~= VENGEANCE_ACTION_RESULT_SUCCESS then
             return ALERT, GetString("SI_VENGEANCEACTIONRESULT", result), SOUNDS.GENERAL_ALERT_ERROR
+        end
+    end,
+
+    [EVENT_DIRECT_PURCHASE_PURCHASE_SKU_RESULT] = function(result)
+        if result ~= DIRECT_PURCHASE_PURCHASE_SKU_RESULT_SUCCESS then
+            return ALERT, GetString("SI_DIRECTPURCHASEPURCHASESKURESULT", result), SOUNDS.GENERAL_ALERT_ERROR
         end
     end,
 }

@@ -6,14 +6,13 @@
             </Animations>
         </AnimationTimeline>
     </Animations>
-
     <Controls>
         <Control name="ZO_ClaimTile_Control" inherits="ZO_ActionTile_Control" virtual="true">
             <Controls>
                 <Control name="$(parent)Container" override="true">
                     <Controls>
                         <Texture name="$(parent)ClaimFlash" color="FFFFFFFF" layer="OVERLAY" alpha="0">
-                            <AnchorFill />
+                            <AnchorFill/>
                         </Texture>
                     </Controls>
                 </Control>

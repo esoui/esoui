@@ -2,57 +2,57 @@
     <Controls>
         <Texture name="ZO_GamepadStatsEquipmentBonusIcon" virtual="true">
             <Dimensions x="32" y="32"/>
-            <Anchor point="BOTTOMLEFT" />
+            <Anchor point="BOTTOMLEFT"/>
         </Texture>
-        
         <Label name="ZO_GamepadStatsCharacterNameTemplate" font="ZoFontGamepad42" verticalAlignment="BOTTOM" wrapMode="ELLIPSIS" virtual="true">
             <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT"/>
-            <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" />
-            <Dimensions y="40" />
+            <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT"/>
+            <Dimensions y="40"/>
         </Label>
-
         <Label name="ZO_GamepadStatsHeaderTemplate" font="ZoFontGamepad27" verticalAlignment="BOTTOM" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" wrapMode="ELLIPSIS" virtual="true">
-            <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" />
-            <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" />
-            <Dimensions y="40" />
+            <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT"/>
+            <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT"/>
+            <Dimensions y="40"/>
         </Label>
-
         <Label name="ZO_GamepadStatsDataTemplate" font="ZoFontGamepad34" verticalAlignment="BOTTOM" horizontalAlignment="RIGHT" wrapMode="ELLIPSIS" virtual="true">
-            <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" />
-            <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" />
-            <Dimensions y="40" />
+            <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT"/>
+            <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT"/>
+            <Dimensions y="40"/>
         </Label>
-
         <Control name="ZO_GamepadStatsHeaderDataPairTemplate" resizeToFitDescendents="true" virtual="true">
             <Controls>
                 <Label name="$(parent)Header" font="ZoFontGamepad27" verticalAlignment="BOTTOM" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
                     <Anchor point="TOPLEFT"/>
-                    <Dimensions y="40" />
+                    <Dimensions y="40"/>
                 </Label>
                 <Label name="$(parent)Data" font="ZoFontGamepad34" verticalAlignment="BOTTOM" horizontalAlignment="RIGHT">
                     <Anchor point="TOPRIGHT"/>
                     <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMRIGHT" offsetX="25"/>
                 </Label>
-                <Label name="$(parent)Bonus" inherits="ZO_GamepadStatsDataTemplate" hidden="true" >
-                    <Anchor point="TOPRIGHT" offsetX="-100" />
+                <Label name="$(parent)Bonus" inherits="ZO_GamepadStatsDataTemplate" hidden="true">
+                    <Anchor point="TOPRIGHT" offsetX="-100"/>
                 </Label>
-                <Backdrop name="$(parent)Highlight" inherits="ZO_GamepadWhiteOutlineHighlight" hidden="true" >
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Header" offsetX="-10" />
+                <Backdrop name="$(parent)Highlight" inherits="ZO_GamepadWhiteOutlineHighlight" hidden="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Header" offsetX="-10"/>
                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Data" offsetX="10" offsetY="3"/>
                 </Backdrop>
             </Controls>
         </Control>
-
-        <Label name="ZO_GamepadStatsDescTemplate" font="ZoFontGamepad34" verticalAlignment="TOP" horizontalAlignment="LEFT" virtual="true" />
-
-		<Control name="ZO_GamepadStatTitleRow" inherits="ZO_Gamepad_Dropdown_Item_Indented" virtual="true">
-			<Controls>
-				<Texture name="$(parent)StatusIndicator" inherits="ZO_GamepadMenuEntryStatusIndicationTemplate" hidden="true">
-					<Anchor point="CENTER" relativeTo="$(parent)Dropdown" relativePoint="LEFT" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_ICON_X_OFFSET" />
-				</Texture>
-			</Controls>
-		</Control>
-		
+        <Label name="ZO_GamepadStatsDescTemplate" font="ZoFontGamepad34" verticalAlignment="TOP" horizontalAlignment="LEFT" virtual="true"/>
+        <Control name="ZO_GamepadStatTitleRow" inherits="ZO_Gamepad_Dropdown_Item_Indented" virtual="true">
+            <Controls>
+                <Texture name="$(parent)StatusIndicator" inherits="ZO_GamepadMenuEntryStatusIndicationTemplate" hidden="true">
+                    <Anchor point="CENTER" relativeTo="$(parent)Dropdown" relativePoint="LEFT" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_ICON_X_OFFSET"/>
+                </Texture>
+            </Controls>
+        </Control>
+        <Control name="ZO_GamepadStatGuildRow" inherits="ZO_Gamepad_Dropdown_Item_Indented" virtual="true">
+            <Controls>
+                <Texture name="$(parent)StatusIndicator" inherits="ZO_GamepadMenuEntryStatusIndicationTemplate" hidden="true">
+                    <Anchor point="CENTER" relativeTo="$(parent)Dropdown" relativePoint="LEFT" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_ICON_X_OFFSET"/>
+                </Texture>
+            </Controls>
+        </Control>
         <Control name="ZO_GamepadStatAttributeRow" inherits="ZO_GamepadMenuEntryDimensionsTemplate ZO_GamepadMenuEntryLabelSizedTemplate" virtual="true">
             <Controls>
                 <Control name="$(parent)Spinner" mouseEnabled="true" excludeFromResizeToFitExtents="true">
@@ -60,78 +60,68 @@
                     <Dimensions y="42"/>
                     <Controls>
                         <Button name="$(parent)Increase">
-                            <Dimensions x="32" y="35" />
+                            <Dimensions x="32" y="35"/>
                             <Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" offsetY="5"/>
-                            <TextureCoords left="0" right="1" top="0.234" bottom="0.765625" />
-                            <Textures normal="EsoUI/Art/Buttons/Gamepad/gp_spinnerLR.dds"
-                                      disabled="EsoUI/Art/Buttons/Gamepad/gp_spinnerLR_disabled.dds"/>
+                            <TextureCoords left="0" right="1" top="0.234" bottom="0.765625"/>
+                            <Textures normal="EsoUI/Art/Buttons/Gamepad/gp_spinnerLR.dds" disabled="EsoUI/Art/Buttons/Gamepad/gp_spinnerLR_disabled.dds"/>
                         </Button>
-
                         <Label name="$(parent)Display" inherits="ZO_GamepadStatsDataTemplate">
-                            <Anchor point="TOPRIGHT" relativePoint="TOPLEFT" relativeTo="$(parent)Increase" offsetX="-8" offsetY="-5" />
+                            <Anchor point="TOPRIGHT" relativePoint="TOPLEFT" relativeTo="$(parent)Increase" offsetX="-8" offsetY="-5"/>
                         </Label>
-
                         <Button name="$(parent)Decrease">
-                            <Dimensions x="32" y="35" />
-                            <Anchor point="TOPRIGHT" relativePoint="TOPLEFT" relativeTo="$(parent)Display" offsetX="-10" offsetY="5" />
-                            <TextureCoords left="1" right="0" top="0.234" bottom="0.765625" />
-                            <Textures normal="EsoUI/Art/Buttons/Gamepad/gp_spinnerLR.dds"
-                                      disabled="EsoUI/Art/Buttons/Gamepad/gp_spinnerLR_disabled.dds"/>
+                            <Dimensions x="32" y="35"/>
+                            <Anchor point="TOPRIGHT" relativePoint="TOPLEFT" relativeTo="$(parent)Display" offsetX="-10" offsetY="5"/>
+                            <TextureCoords left="1" right="0" top="0.234" bottom="0.765625"/>
+                            <Textures normal="EsoUI/Art/Buttons/Gamepad/gp_spinnerLR.dds" disabled="EsoUI/Art/Buttons/Gamepad/gp_spinnerLR_disabled.dds"/>
                         </Button>
                     </Controls>
                 </Control>
-
                 <Label name="$(parent)Label" inherits="ZO_GamepadMenuEntryLabelTemplate">
                     <Dimensions x="180"/>
                 </Label>
                 <Texture name="$(parent)Icon" inherits="ZO_GamepadMenuEntryIconTemplate"/>
-                <Texture name="$(parent)StatusIndicator" inherits="ZO_GamepadMenuEntryStatusIndicationTemplate" />
+                <Texture name="$(parent)StatusIndicator" inherits="ZO_GamepadMenuEntryStatusIndicationTemplate"/>
             </Controls>
         </Control>
-		
         <Control name="ZO_GamepadAttributeRowTemplate" inherits="ZO_GamepadMenuEntryDimensionsTemplate ZO_GamepadMenuEntryLabelSizedTemplate" virtual="true">
             <Controls>
-                <Label name="$(parent)Label" inherits="ZO_GamepadMenuEntryLabelTemplate" modifyTextType="NONE" />
+                <Label name="$(parent)Label" inherits="ZO_GamepadMenuEntryLabelTemplate" modifyTextType="NONE"/>
                 <Texture name="$(parent)Icon" inherits="ZO_GamepadMenuEntryIconTemplate">
                     <Controls>
                         <Label name="$(parent)StackCount" inherits="ZO_GamepadMenuEntryStackCountTemplate">
-                            <Anchor point="BOTTOMRIGHT" offsetX="-4" offsetY="1" />
+                            <Anchor point="BOTTOMRIGHT" offsetX="-4" offsetY="1"/>
                         </Label>
                     </Controls>
-                </Texture> 
+                </Texture>
                 <Cooldown name="$(parent)Cooldown" textureFile="EsoUI/Art/Miscellaneous/timer_overlay_32.dds" excludeFromResizeToFitExtents="true" hidden="true">
                     <Dimensions x="32" y="32"/>
-                    <Anchor point="CENTER" relativeTo="$(parent)Label" relativePoint="LEFT" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_SECOND_ICON_X_OFFSET" />
+                    <Anchor point="CENTER" relativeTo="$(parent)Label" relativePoint="LEFT" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_SECOND_ICON_X_OFFSET"/>
                 </Cooldown>
             </Controls>
         </Control>
-
         <Control name="ZO_GamepadEffectAttributeRow" inherits="ZO_GamepadAttributeRowTemplate" virtual="true">
             <Controls>
-                <Backdrop name="$(parent)Frame" inherits="ZO_GamepadAbilityIconFrame" tier="LOW" />
+                <Backdrop name="$(parent)Frame" inherits="ZO_GamepadAbilityIconFrame" tier="LOW"/>
             </Controls>
         </Control>
-        
         <Control name="ZO_GamepadStatsContentAnchor" virtual="true">
             <Anchor point="TOPLEFT" relativeTo="ZO_GamepadStatsTopLevelRightPaneHeaderContainerHeader" relativePoint="BOTTOMLEFT"/>
-            <Anchor point="BOTTOMRIGHT" relativeTo="ZO_GamepadStatsTopLevelRightPaneHeaderContainer" relativePoint="BOTTOMRIGHT" />
+            <Anchor point="BOTTOMRIGHT" relativeTo="ZO_GamepadStatsTopLevelRightPaneHeaderContainer" relativePoint="BOTTOMRIGHT"/>
         </Control>
-
         <Control name="ZO_AdvancedAttributes_CategoryHeader_Template_Gamepad" virtual="true">
-            <Dimensions x="ZO_ADVANCED_STATS_GAMEPAD_CONSTANTS_HEADER_WIDTH" y="ZO_ADVANCED_STATS_GAMEPAD_CONSTANTS_ENTRY_HEIGHT" />
+            <Dimensions x="ZO_ADVANCED_STATS_GAMEPAD_CONSTANTS_HEADER_WIDTH" y="ZO_ADVANCED_STATS_GAMEPAD_CONSTANTS_ENTRY_HEIGHT"/>
             <OnInitialized>
                 self.nameLabel = self:GetNamedChild("NameLabel")
             </OnInitialized>
             <Controls>
                 <Label name="$(parent)NameLabel" font="ZoFontGamepad27" verticalAlignment="BOTTOM" modifyTextType="UPPERCASE">
                     <Anchor point="LEFT" offsetX="5"/>
-                    <Dimensions y="ZO_ADVANCED_STATS_GAMEPAD_CONSTANTS_ENTRY_HEIGHT" />
+                    <Dimensions y="ZO_ADVANCED_STATS_GAMEPAD_CONSTANTS_ENTRY_HEIGHT"/>
                 </Label>
             </Controls>
         </Control>
-
         <Control name="ZO_AdvancedAttributes_GridEntry_Template_Gamepad" virtual="true">
-            <Dimensions x="ZO_ADVANCED_STATS_GAMEPAD_CONSTANTS_ENTRY_WIDTH" y="ZO_ADVANCED_STATS_GAMEPAD_CONSTANTS_ENTRY_HEIGHT" />
+            <Dimensions x="ZO_ADVANCED_STATS_GAMEPAD_CONSTANTS_ENTRY_WIDTH" y="ZO_ADVANCED_STATS_GAMEPAD_CONSTANTS_ENTRY_HEIGHT"/>
             <OnInitialized>
                 self.nameLabel = self:GetNamedChild("NameLabel")
                 self.valueLabel = self:GetNamedChild("ValueLabel")
@@ -142,28 +132,48 @@
                 </Label>
                 <Label name="$(parent)NameLabel" font="ZoFontGamepad27" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE" verticalAlignment="BOTTOM" maxLineCount="1" wrapMode="ELLIPSIS">
                     <Anchor point="LEFT" offsetX="5"/>
-                    <Anchor point="RIGHT" relativeTo="$(parent)ValueLabel" relativePoint="LEFT" offsetX="-10" />
+                    <Anchor point="RIGHT" relativeTo="$(parent)ValueLabel" relativePoint="LEFT" offsetX="-10"/>
                 </Label>
             </Controls>
         </Control>
-
-        <Control name="ZO_AdvancedAttributes_GridEntryFlat_Template_Gamepad" inherits="ZO_AdvancedAttributes_GridEntry_Template_Gamepad" virtual="true" >
+        <Control name="ZO_AdvancedAttributes_GridEntryFlat_Template_Gamepad" inherits="ZO_AdvancedAttributes_GridEntry_Template_Gamepad" virtual="true">
             <Controls>
-                <Label name="$(parent)NameLabel" override="true" text="SI_STATS_ADVANCED_VALUE_TYPE_FLAT" />
+                <Label name="$(parent)NameLabel" override="true" text="SI_STATS_ADVANCED_VALUE_TYPE_FLAT"/>
             </Controls>
         </Control>
-        <Control name="ZO_AdvancedAttributes_GridEntryPercent_Template_Gamepad" inherits="ZO_AdvancedAttributes_GridEntry_Template_Gamepad" virtual="true" >
+        <Control name="ZO_AdvancedAttributes_GridEntryPercent_Template_Gamepad" inherits="ZO_AdvancedAttributes_GridEntry_Template_Gamepad" virtual="true">
             <Controls>
-                <Label name="$(parent)NameLabel" override="true" text="SI_STATS_ADVANCED_VALUE_TYPE_PERCENT" />
+                <Label name="$(parent)NameLabel" override="true" text="SI_STATS_ADVANCED_VALUE_TYPE_PERCENT"/>
             </Controls>
         </Control>
     </Controls>
-    
     <Controls>
+        <TopLevelControl name="ZO_AttributeRespecCastDialog_Gamepad" inherits="ZO_GenericGamepadDialogBase">
+            <OnInitialized>
+                ZO_GamepadStats.OnAttributeRespecCastDialogInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)Container" override="true">
+                    <Controls>
+                        <Control name="$(parent)ScrollChild" override="true">
+                            <Controls>
+                                <Label name="$(parent)RespecText" font="ZoFontGamepadCondensed34" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_RESPEC_CAST_TIME_DIALOG_DESCRIPTION">
+                                    <Anchor point="TOPLEFT" offsetX="5" offsetY="200"/>
+                                </Label>
+                                <StatusBar name="$(parent)Progress" inherits="ZO_GamepadArrowStatusBarWithBGLarge">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)RespecText" relativePoint="BOTTOMLEFT" offsetY="5"/>
+                                    <Dimensions x="275"/>
+                                </StatusBar>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
         <TopLevelControl name="ZO_GamepadStatsTopLevel" inherits="ZO_Gamepad_ParametricList_Screen">
             <OnInitialized>
                 ZO_GamepadStats_OnInitialize(self)
-            </OnInitialized>   
+            </OnInitialized>
             <Controls>
                 <Scroll name="$(parent)Mask" override="true">
                     <Controls>
@@ -174,7 +184,7 @@
                                         <Control name="$(parent)Header" override="true">
                                             <Controls>
                                                 <Control name="$(parent)OutfitSelector" inherits="ZO_OutfitSelector_List_Header">
-                                                    <Anchor point="TOP" relativeTo="$(parent)Message" relativePoint="BOTTOM" offsetY="25" />
+                                                    <Anchor point="TOP" relativeTo="$(parent)Message" relativePoint="BOTTOM" offsetY="25"/>
                                                 </Control>
                                             </Controls>
                                         </Control>
@@ -184,184 +194,134 @@
                         </Control>
                     </Controls>
                 </Scroll>
-                
                 <Control name="$(parent)RightPane" hidden="true" inherits="ZO_GamepadGrid_NavQuadrant_2_3_Anchors">
                     <Controls>
-                        <Control name="$(parent)HeaderContainer" inherits="ZO_GamepadContentHeaderContainer ZO_GamepadGrid_NavQuadrant_ContainerAnchors" />
-                        <Control name="$(parent)EquipmentBonus" resizeToFitDescendents="true" >
-                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)HeaderContainerHeader" offsetX="20" offsetY="-46" />
-                            <Controls>
-                                <Label name="$(parent)Header" text="SI_STATS_EQUIPMENT_BONUS" font="ZoFontGamepad27" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" >
-                                    <Anchor point="BOTTOMLEFT" />
-                                </Label>
-                                <Control name="$(parent)Icons" resizeToFitDescendents="true" >
-                                    <Anchor point ="BOTTOMLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMRIGHT" offsetX="7" offsetY="-7" />
-                                </Control>
-                                <Backdrop name="$(parent)Highlight" inherits="ZO_GamepadWhiteOutlineHighlight" hidden="true" >
-                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Header" offsetX="-10" offsetY="-15"/>
-                                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icons" offsetX="10" offsetY="10"/>
-                                </Backdrop>
-                            </Controls>
-                        </Control>
-
+                        <Control name="$(parent)HeaderContainer" inherits="ZO_GamepadContentHeaderContainer ZO_GamepadGrid_NavQuadrant_ContainerAnchors"/>
                         <Control name="$(parent)InfoPanel" inherits="ZO_GamepadStatsContentAnchor">
                             <Controls>
                                 <Control name="$(parent)CharacterEffectsPanel" hidden="true">
                                     <AnchorFill/>
                                     <Controls>
                                         <Control name="$(parent)TitleSection">
-                                            <Anchor point="TOPLEFT" offsetY="15" />
-                                            <Anchor point="BOTTOMRIGHT" />
-
+                                            <Anchor point="TOPLEFT" offsetY="15"/>
+                                            <Anchor point="BOTTOMRIGHT"/>
                                             <Controls>
                                                 <Label name="$(parent)EffectDesc" inherits="ZO_GamepadStatsDescTemplate">
-                                                    <Anchor point="TOPRIGHT" />
-                                                    <Anchor point="TOPLEFT" />
+                                                    <Anchor point="TOPRIGHT"/>
+                                                    <Anchor point="TOPLEFT"/>
                                                 </Label>
                                             </Controls>
                                         </Control>
                                     </Controls>
                                 </Control>
-
                                 <Control name="$(parent)AttributesPanel" hidden="true">
                                     <AnchorFill/>
                                 </Control>
-
                                 <Control name="$(parent)AdvancedAttributesPanel" inherits="ZO_GridScrollList_NotAnchored_Gamepad" hidden="true">
-                                    <Anchor point="TOPLEFT" />
-                                    <Anchor point="BOTTOMRIGHT" offsetY="-15" />
+                                    <Anchor point="TOPLEFT"/>
+                                    <Anchor point="BOTTOMRIGHT" offsetY="-15"/>
                                 </Control>
-                                
                                 <Control name="$(parent)CharacterStatsPanel" hidden="true">
                                     <AnchorFill/>
                                     <Controls>
                                         <Control name="$(parent)LeftColumn">
-                                            <Dimensions x="375" />
-                                            <Anchor point="TOPLEFT" offsetY="20" />
-
+                                            <Dimensions x="375"/>
+                                            <Anchor point="TOPLEFT" offsetY="20"/>
                                             <Controls>
                                                 <!-- Headers -->
                                                 <Label name="$(parent)RaceHeader" text="SI_STAT_GAMEPAD_RACE_LABEL" inherits="ZO_GamepadStatsHeaderTemplate">
-                                                    <Anchor point="TOPLEFT" />
+                                                    <Anchor point="TOPLEFT"/>
                                                 </Label>
-
                                                 <Label name="$(parent)ClassHeader" text="SI_STAT_GAMEPAD_CLASS_LABEL" inherits="ZO_GamepadStatsHeaderTemplate">
-                                                    <Anchor point="TOPLEFT" relativeTo="$(parent)RaceHeader" relativePoint="BOTTOMLEFT" />
+                                                    <Anchor point="TOPLEFT" relativeTo="$(parent)RaceHeader" relativePoint="BOTTOMLEFT"/>
                                                 </Label>
-
                                                 <Label name="$(parent)ChampionPointsHeader" text="SI_STAT_GAMEPAD_CHAMPION_POINTS_LABEL" inherits="ZO_GamepadStatsHeaderTemplate" hidden="true">
-                                                    <Anchor point="TOPLEFT" relativeTo="$(parent)ClassHeader" relativePoint="BOTTOMLEFT" />
+                                                    <Anchor point="TOPLEFT" relativeTo="$(parent)ClassHeader" relativePoint="BOTTOMLEFT"/>
                                                 </Label>
-
                                                 <Label name="$(parent)RidingSpeedHeader" text="SI_STAT_GAMEPAD_RIDING_HEADER_SPEED" inherits="ZO_GamepadStatsHeaderTemplate">
-                                                    <Anchor point="TOPLEFT" relativeTo="$(parent)ChampionPointsHeader" relativePoint="BOTTOMLEFT" offsetY="50" />
+                                                    <Anchor point="TOPLEFT" relativeTo="$(parent)ChampionPointsHeader" relativePoint="BOTTOMLEFT" offsetY="50"/>
                                                 </Label>
-
                                                 <Label name="$(parent)RidingCapacityHeader" text="SI_STAT_GAMEPAD_RIDING_HEADER_CAPACITY" inherits="ZO_GamepadStatsHeaderTemplate">
-                                                    <Anchor point="TOPLEFT" relativeTo="$(parent)RidingSpeedHeader" relativePoint="BOTTOMLEFT" />
+                                                    <Anchor point="TOPLEFT" relativeTo="$(parent)RidingSpeedHeader" relativePoint="BOTTOMLEFT"/>
                                                 </Label>
-
                                                 <!-- Values -->
                                                 <Label name="$(parent)Race" inherits="ZO_GamepadStatsDataTemplate">
-                                                    <Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" offsetY="2" />
+                                                    <Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" offsetY="2"/>
                                                 </Label>
-
                                                 <Label name="$(parent)Class" inherits="ZO_GamepadStatsDataTemplate">
-                                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Race" relativePoint="BOTTOMRIGHT" />
+                                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Race" relativePoint="BOTTOMRIGHT"/>
                                                 </Label>
-
                                                 <Label name="$(parent)ChampionPoints" inherits="ZO_GamepadStatsDataTemplate" hidden="true">
-                                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Class" relativePoint="BOTTOMRIGHT" />
+                                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Class" relativePoint="BOTTOMRIGHT"/>
                                                 </Label>
-                                                
                                                 <Label name="$(parent)RidingSpeed" inherits="ZO_GamepadStatsDataTemplate">
-                                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)ChampionPoints" relativePoint="BOTTOMRIGHT" offsetY="50" />
+                                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)ChampionPoints" relativePoint="BOTTOMRIGHT" offsetY="50"/>
                                                 </Label>
-
                                                 <Label name="$(parent)RidingCapacity" inherits="ZO_GamepadStatsDataTemplate">
-                                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)RidingSpeed" relativePoint="BOTTOMRIGHT" />
+                                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)RidingSpeed" relativePoint="BOTTOMRIGHT"/>
                                                 </Label>
                                             </Controls>
                                         </Control>
-
                                         <Control name="$(parent)RightColumn">
-                                            <Dimensions x="375" />
-                                            <Anchor point="TOPLEFT" relativeTo="$(parent)LeftColumn" relativePoint="TOPRIGHT" offsetX="40" />
-
+                                            <Dimensions x="375"/>
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)LeftColumn" relativePoint="TOPRIGHT" offsetX="40"/>
                                             <Controls>
-
                                                 <!-- Header/Value Pairs to allow expansion for multiple lines if needed-->
-
-                                                <Control name="$(parent)Alliance" inherits="ZO_GamepadStatsHeaderDataPairTemplate" >
-                                                    <Anchor point="TOPLEFT" />
-                                                    <Anchor point="TOPRIGHT" />
+                                                <Control name="$(parent)Alliance" inherits="ZO_GamepadStatsHeaderDataPairTemplate">
+                                                    <Anchor point="TOPLEFT"/>
+                                                    <Anchor point="TOPRIGHT"/>
                                                     <Controls>
-                                                        <Label name="$(parent)Header" text="SI_STAT_GAMEPAD_ALLIANCE_LABEL" override="true" />
+                                                        <Label name="$(parent)Header" text="SI_STAT_GAMEPAD_ALLIANCE_LABEL" override="true"/>
                                                     </Controls>
                                                 </Control>
-
-                                                <Control name="$(parent)Rank" inherits="ZO_GamepadStatsHeaderDataPairTemplate" >
-                                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Alliance" relativePoint="BOTTOMLEFT" />
-                                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Alliance" relativePoint="BOTTOMRIGHT"  />
+                                                <Control name="$(parent)Rank" inherits="ZO_GamepadStatsHeaderDataPairTemplate">
+                                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Alliance" relativePoint="BOTTOMLEFT"/>
+                                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Alliance" relativePoint="BOTTOMRIGHT"/>
                                                     <Controls>
-                                                        <Label name="$(parent)Header" text="SI_STAT_GAMEPAD_RANK_LABEL" override="true" />
+                                                        <Label name="$(parent)Header" text="SI_STAT_GAMEPAD_RANK_LABEL" override="true"/>
                                                     </Controls>
                                                 </Control>
-                                                
                                                 <!-- Headers -->
-
                                                 <Label name="$(parent)BountyHeader" text="SI_STAT_GAMEPAD_BOUNTY_LABEL" inherits="ZO_GamepadStatsHeaderTemplate">
-                                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Rank" relativePoint="BOTTOMLEFT" />
+                                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Rank" relativePoint="BOTTOMLEFT"/>
                                                 </Label>
-
                                                 <Label name="$(parent)RidingStaminaHeader" text="SI_STAT_GAMEPAD_RIDING_HEADER_STAMINA" inherits="ZO_GamepadStatsHeaderTemplate">
-                                                    <Anchor point="TOPLEFT" relativeTo="$(parent)BountyHeader" relativePoint="BOTTOMLEFT" offsetY="50" />
+                                                    <Anchor point="TOPLEFT" relativeTo="$(parent)BountyHeader" relativePoint="BOTTOMLEFT" offsetY="50"/>
                                                 </Label>
-
                                                 <Label name="$(parent)RidingTrainingHeader" text="SI_STAT_GAMEPAD_RIDING_HEADER_TRAINING" inherits="ZO_GamepadStatsHeaderTemplate">
-                                                    <Anchor point="TOPLEFT" relativeTo="$(parent)RidingStaminaHeader" relativePoint="BOTTOMLEFT" />
+                                                    <Anchor point="TOPLEFT" relativeTo="$(parent)RidingStaminaHeader" relativePoint="BOTTOMLEFT"/>
                                                 </Label>
-
                                                 <!-- Values -->
-                                                
-
                                                 <Label name="$(parent)BountyDisplay" inherits="ZO_BountyDisplay ZO_GamepadStatsDataTemplate">
                                                     <OnInitialized>
                                                         ZO_Stats_Gamepad_BountyDisplay_Initialize(self)
                                                     </OnInitialized>
-                                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Rank" relativePoint="BOTTOMRIGHT" />
+                                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Rank" relativePoint="BOTTOMRIGHT"/>
                                                 </Label>
-
                                                 <Label name="$(parent)RidingStamina" inherits="ZO_GamepadStatsDataTemplate">
-                                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)BountyDisplay" relativePoint="BOTTOMRIGHT" offsetY="50" />
+                                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)BountyDisplay" relativePoint="BOTTOMRIGHT" offsetY="50"/>
                                                 </Label>
-
                                                 <Label name="$(parent)RidingTrainingReady" text="SI_GAMEPAD_STABLE_TRAINABLE_READY" inherits="ZO_GamepadStatsDataTemplate">
-                                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)RidingStamina" relativePoint="BOTTOMRIGHT" />
+                                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)RidingStamina" relativePoint="BOTTOMRIGHT"/>
                                                 </Label>
-
                                                 <Label name="$(parent)RidingTrainingTimer" inherits="ZO_GamepadStatsDataTemplate" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SECOND_CONTRAST" hidden="true">
-                                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)RidingStamina" relativePoint="BOTTOMRIGHT" />
+                                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)RidingStamina" relativePoint="BOTTOMRIGHT"/>
                                                 </Label>
                                             </Controls>
                                         </Control>
-
                                         <Label name="$(parent)ExperienceProgressLabel" text="SI_STAT_GAMEPAD_EXPERIENCE_LABEL" inherits="ZO_GamepadStatsHeaderTemplate">
-                                            <Anchor point="TOPLEFT" relativeTo="$(parent)LeftColumnRidingCapacityHeader" relativePoint="BOTTOMLEFT" offsetY="50" />
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)LeftColumnRidingCapacityHeader" relativePoint="BOTTOMLEFT" offsetY="50"/>
                                         </Label>
-
                                         <Label name="$(parent)ExperienceProgress" inherits="ZO_GamepadStatsDataTemplate">
                                             <Anchor point="BOTTOMLEFT" relativeTo="$(parent)ExperienceProgressLabel" relativePoint="BOTTOMRIGHT" offsetX="10"/>
                                         </Label>
-
                                         <StatusBar name="$(parent)ExperienceBar" inherits="ZO_GamepadPlayerProgressBarTemplate">
-                                            <Dimensions x="400" y ="30" />
-                                            <Anchor point="TOPLEFT" relativeTo="$(parent)ExperienceProgressLabel" relativePoint="BOTTOMLEFT" offsetY="10" />
+                                            <Dimensions x="400" y="30"/>
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)ExperienceProgressLabel" relativePoint="BOTTOMLEFT" offsetY="10"/>
                                         </StatusBar>
-
                                         <Label name="$(parent)Enlightenment" font="ZoFontGamepad34" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SUCCEEDED">
-                                            <Dimensions x="700" />
-                                            <Anchor point="TOPLEFT" relativeTo="$(parent)ExperienceBar" relativePoint="BOTTOMLEFT" offsetY="20" />
+                                            <Dimensions x="700"/>
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)ExperienceBar" relativePoint="BOTTOMLEFT" offsetY="20"/>
                                         </Label>
                                     </Controls>
                                 </Control>
@@ -369,7 +329,7 @@
                         </Control>
                     </Controls>
                 </Control>
-            </Controls>        
+            </Controls>
         </TopLevelControl>
     </Controls>
 </GuiXml>

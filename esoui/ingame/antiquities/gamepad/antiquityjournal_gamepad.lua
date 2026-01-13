@@ -722,36 +722,42 @@ function ZO_AntiquityJournalListGamepad:InitializeLists()
     local listControl = self:GetListControl()
 
     local function SetupInProgressAntiquityRow(control, data)
+        self:SetupRow(control, data)
         self:SetupInProgressAntiquityRow(control, data)
     end
     ZO_ScrollList_AddDataType(listControl, IN_PROGRESS_ANTIQUITY_ROW_DATA, "ZO_AntiquityJournalInProgressAntiquityRow_Gamepad", ZO_IN_PROGRESS_ANTIQUITY_DATA_ROW_HEIGHT_GAMEPAD, SetupInProgressAntiquityRow)
     ZO_ScrollList_SetEqualityFunction(listControl, IN_PROGRESS_ANTIQUITY_ROW_DATA, AntiquityOrSetEqualityFunction)
 
     local function SetupInProgressAntiquityNearExpirationRow(control, data)
+        self:SetupRow(control, data)
         self:SetupInProgressAntiquityNearExpirationRow(control, data)
     end
     ZO_ScrollList_AddDataType(listControl, IN_PROGRESS_ANTIQUITY_NEAR_EXPIRATION_ROW_DATA, "ZO_AntiquityJournalInProgressAntiquityNearExpirationRow_Gamepad", ZO_IN_PROGRESS_ANTIQUITY_NEAR_EXPIRATION_DATA_ROW_HEIGHT_GAMEPAD, SetupInProgressAntiquityNearExpirationRow)
     ZO_ScrollList_SetEqualityFunction(listControl, IN_PROGRESS_ANTIQUITY_NEAR_EXPIRATION_ROW_DATA, AntiquityOrSetEqualityFunction)
 
     local function SetupScryableAntiquityRow(control, data)
+        self:SetupRow(control, data)
         self:SetupScryableAntiquityRow(control, data)
     end
     ZO_ScrollList_AddDataType(listControl, SCRYABLE_ANTIQUITY_ROW_DATA, "ZO_AntiquityJournalScryableAntiquityRow_Gamepad", ZO_SCRYABLE_ANTIQUITY_DATA_ROW_HEIGHT_GAMEPAD, SetupScryableAntiquityRow)
     ZO_ScrollList_SetEqualityFunction(listControl, SCRYABLE_ANTIQUITY_ROW_DATA, AntiquityOrSetEqualityFunction)
 
     local function SetupScryableAntiquityNearExpirationRow(control, data)
+        self:SetupRow(control, data)
         self:SetupScryableAntiquityNearExpirationRow(control, data)
     end
     ZO_ScrollList_AddDataType(listControl, SCRYABLE_ANTIQUITY_NEAR_EXPIRATION_ROW_DATA, "ZO_AntiquityJournalScryableAntiquityNearExpirationRow_Gamepad", ZO_SCRYABLE_ANTIQUITY_NEAR_EXPIRATION_DATA_ROW_HEIGHT_GAMEPAD, SetupScryableAntiquityNearExpirationRow)
     ZO_ScrollList_SetEqualityFunction(listControl, SCRYABLE_ANTIQUITY_NEAR_EXPIRATION_ROW_DATA, AntiquityOrSetEqualityFunction)
 
     local function SetupAntiquityRow(control, data)
+        self:SetupRow(control, data)
         self:SetupAntiquityRow(control, data)
     end
     ZO_ScrollList_AddDataType(listControl, ANTIQUITY_ROW_DATA, "ZO_AntiquityJournalAntiquityRow_Gamepad", ZO_ANTIQUITY_DATA_ROW_HEIGHT_GAMEPAD, SetupAntiquityRow)
     ZO_ScrollList_SetEqualityFunction(listControl, ANTIQUITY_ROW_DATA, AntiquityOrSetEqualityFunction)
 
     local function SetupAntiquitySetRow(control, data)
+        self:SetupRow(control, data)
         self:SetupAntiquitySetRow(control, data)
     end
     ZO_ScrollList_AddDataType(listControl, ANTIQUITY_SET_1_ROW_DATA, "ZO_AntiquityJournalAntiquitySet1Row_Gamepad", ZO_ANTIQUITY_SET_1_DATA_ROW_HEIGHT_GAMEPAD, SetupAntiquitySetRow)
@@ -764,6 +770,7 @@ function ZO_AntiquityJournalListGamepad:InitializeLists()
     ZO_ScrollList_SetEqualityFunction(listControl, ANTIQUITY_SET_4_ROW_DATA, AntiquityOrSetEqualityFunction)
 
     local function SetupAntiquitySectionRow(control, data)
+        self:SetupRow(control, data)
         self:SetupAntiquitySectionRow(control, data)
     end
     ZO_ScrollList_AddDataType(listControl, ANTIQUITY_SECTION_ROW_DATA, "ZO_AntiquityJournalAntiquitySectionRow_Gamepad", ZO_ANTIQUITY_SECTION_DATA_ROW_HEIGHT_GAMEPAD, SetupAntiquitySectionRow)

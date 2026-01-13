@@ -167,7 +167,7 @@ function DeathRecap:SetWindowOpen(open)
     self.windowOpen = open
     self:RefreshVisibility()
 
-    if IsConsoleUI() then
+    if ZO_IsConsoleOrGameCoreUI() then
         AUTO_SAVING:MarkDirty()
     end
 end
@@ -236,7 +236,7 @@ function DeathRecap:SetupAttacks()
 
     --Cert requires that we show the display name if there's no way other way to get it from character name
     --But it's not the desire of design to show so much name so we only show the double name if we absolutely must
-    local showBothPlayerNames = IsConsoleUI() and tonumber(GetSetting(SETTING_TYPE_UI, UI_SETTING_PRIMARY_PLAYER_NAME_GAMEPAD)) == PRIMARY_PLAYER_NAME_SETTING_PREFER_CHARACTER
+    local showBothPlayerNames = ZO_IsConsoleOrGameCoreUI() and tonumber(GetSetting(SETTING_TYPE_UI, UI_SETTING_PRIMARY_PLAYER_NAME_GAMEPAD)) == PRIMARY_PLAYER_NAME_SETTING_PREFER_CHARACTER
 
     local prevAttackControl
     for i, attackInfo in ipairs(attacks) do

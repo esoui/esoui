@@ -4,42 +4,35 @@
             <OnInitialized>
                 ZO_ChatMenu_Gamepad_OnInitialized(self)
             </OnInitialized>
-            
             <Controls>
                 <Scroll name="$(parent)Mask" override="true">
                     <Controls>
                         <Control name="$(parent)TextInput" override="true">
-                            
                             <Controls>
                                 <Control name="$(parent)Channel" inherits="ZO_GamepadFocusDropdown">
-                                    <Dimensions y="60" />
-                                    <Anchor point="BOTTOMLEFT" />
-
+                                    <Dimensions y="60"/>
+                                    <Anchor point="BOTTOMLEFT"/>
                                     <Controls>
                                         <Control name="$(parent)Dropdown" override="true">
                                             <Controls>
-                                                <Texture name="$(parent)OpenDropdown" override="true" hidden="true" />
-
+                                                <Texture name="$(parent)OpenDropdown" override="true" hidden="true"/>
                                                 <Label name="$(parent)SelectedItemText" font="ZoFontGamepad36" override="true" horizontalAlignment="RIGHT">
-                                                    <Anchor point="LEFT" />
-                                                    <Anchor point="RIGHT" />
+                                                    <Anchor point="LEFT"/>
+                                                    <Anchor point="RIGHT"/>
                                                 </Label>
-                                                
                                                 <Label name="$(parent)SelectedItemFakeTextForResizing" font="ZoFontGamepad36" modifyTextType="UPPERCASE" hidden="true">
-                                                    <Anchor point="RIGHT" relativeTo="$(parent)SelectedItemText" />
+                                                    <Anchor point="RIGHT" relativeTo="$(parent)SelectedItemText"/>
                                                 </Label>
                                             </Controls>
                                         </Control>
                                     </Controls>
                                 </Control>
-
                                 <Control name="$(parent)Text" override="true">
-                                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Channel" relativePoint="BOTTOMRIGHT" offsetX="15" />
-                                    <Anchor point="TOPRIGHT" />
+                                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Channel" relativePoint="BOTTOMRIGHT" offsetX="15"/>
+                                    <Anchor point="TOPRIGHT"/>
                                 </Control>
                             </Controls>
                         </Control>
-
                     </Controls>
                 </Scroll>
             </Controls>

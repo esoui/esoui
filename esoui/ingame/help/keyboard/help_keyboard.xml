@@ -1,11 +1,10 @@
 <GuiXml>
-    <Controls>        
+    <Controls>
         <Label name="ZO_Help_NavigationEntry" virtual="true" inherits="ZO_SelectableLabel" font="ZoFontHeader">
             <OnMouseUp>
                 ZO_TreeEntry_OnMouseUp(self, upInside)
             </OnMouseUp>
         </Label>
-
         <Control name="ZO_Help_Header" inherits="ZO_IconHeader" virtual="true">
             <Controls>
                 <Label name="$(parent)Text" override="true" modifyTextType="UPPERCASE">
@@ -13,81 +12,67 @@
                 </Label>
             </Controls>
         </Control>
-        
         <TopLevelControl name="ZO_Help" inherits="ZO_RightPanelFootPrint" hidden="true">
             <OnInitialized>
                 ZO_Help_Initialize(self)
             </OnInitialized>
-
             <Controls>
                 <Backdrop name="$(parent)Search" tier="HIGH" inherits="ZO_SingleLineEditBackdrop_Keyboard">
-                    <Anchor point="TOPLEFT" offsetX="9" offsetY="33" />
+                    <Anchor point="TOPLEFT" offsetX="9" offsetY="33"/>
                     <Dimensions x="240"/>
                     <Controls>
                         <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop" defaultText="SI_ENTER_KEYWORD_SEARCH_EDIT_DEFAULT">
                             <OnTextChanged>
                                 ZO_Help_OnSearchTextChanged(self)
                             </OnTextChanged>
-
                             <OnEnter>
                                 ZO_Help_OnSearchEnterKeyPressed(self)
                             </OnEnter>
                         </EditBox>
                     </Controls>
                 </Backdrop>
-
                 <Label name="$(parent)SearchLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontHeader" text="SI_HELP_FILTER_BY">
                     <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" relativeTo="$(parent)Search"/>
                 </Label>
-                
                 <Control name="$(parent)NavigationContainer" inherits="ZO_ScrollContainer">
                     <Dimensions x="ZO_HELP_NAVIGATION_CONTAINER_WIDTH"/>
-                    <Anchor point="TOPLEFT" offsetY="72" />
+                    <Anchor point="TOPLEFT" offsetY="72"/>
                     <Anchor point="BOTTOMLEFT"/>
                 </Control>
-
                 <Control name="$(parent)DetailsContainer" inherits="ZO_ScrollContainer">
                     <Dimensions x="550"/>
-                    <Anchor point="TOPRIGHT" offsetX="-33" offsetY="72" />
-                    <Anchor point="BOTTOMRIGHT" />
+                    <Anchor point="TOPRIGHT" offsetX="-33" offsetY="72"/>
+                    <Anchor point="BOTTOMRIGHT"/>
                 </Control>
-
                 <Label name="$(parent)DetailsTitle" font="ZoFontWinH2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" horizontalAlignment="CENTER">
-                    <Dimensions x="490" />
+                    <Dimensions x="490"/>
                 </Label>
-
                 <Label name="$(parent)NoMatchMessage" font="ZoFontWinH2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="SI_HELP_NO_MATCHES" modifyTextType="UPPERCASE" hidden="true">
-                    <Dimensions x="490" />
+                    <Dimensions x="490"/>
                 </Label>
-
                 <Label name="$(parent)DetailsBody1" inherits="ZO_SmallKeyMarkupLabel" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)DetailsTitle" relativePoint="BOTTOMLEFT" offsetY="5" />
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)DetailsTitle" relativePoint="BOTTOMRIGHT" offsetY="5" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)DetailsTitle" relativePoint="BOTTOMLEFT" offsetY="5"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)DetailsTitle" relativePoint="BOTTOMRIGHT" offsetY="5"/>
                 </Label>
-
                 <Texture name="$(parent)DetailsImage" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
                     <OnTextureLoaded>
                         ZO_Tutorials_Entries_OnTextureLoaded(self)
                     </OnTextureLoaded>
-                    <Anchor point="TOP" relativeTo="$(parent)DetailsBody1" relativePoint="BOTTOM" offsetY="10" />
+                    <Anchor point="TOP" relativeTo="$(parent)DetailsBody1" relativePoint="BOTTOM" offsetY="10"/>
                 </Texture>
-
                 <Label name="$(parent)DetailsBody2" inherits="ZO_SmallKeyMarkupLabel" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                    <Dimensions x="490" />
-                    <Anchor point="TOP" relativeTo="$(parent)DetailsImage" relativePoint="BOTTOM" offsetY="10" />
+                    <Dimensions x="490"/>
+                    <Anchor point="TOP" relativeTo="$(parent)DetailsImage" relativePoint="BOTTOM" offsetY="10"/>
                 </Label>
             </Controls>
         </TopLevelControl>
-
-
         <TopLevelControl name="HelpOverlayModal" layer="BACKGROUND" level="1" hidden="true">
-            <Anchor point="TOPLEFT" relativeTo="GuiRoot" />
-            <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" />
-
+            <Anchor point="TOPLEFT" relativeTo="GuiRoot"/>
+            <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot"/>
             <Controls>
                 <Texture name="$(parent)Underlay" color="000000" mouseEnabled="true" alpha=".3">
-                    <AnchorFill />
-                    <OnMouseWheel />
+                    <AnchorFill/>
+                    <OnMouseWheel/>
                 </Texture>
             </Controls>
         </TopLevelControl>

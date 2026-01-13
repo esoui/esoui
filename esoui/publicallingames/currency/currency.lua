@@ -38,6 +38,22 @@ do
             currencyInfo.gamepadLootTexture = GetCurrencyLootGamepadIcon(currencyType)
 
             g_currenciesData[currencyType] = currencyInfo
+        else
+            local currencyInfo =
+            {
+                amountLabel = "",
+                color = ZO_WHITE,
+                gamepadColor = ZO_WHITE,
+                isDefaultLowercase = false,
+                keyboardTexture = ZO_NO_TEXTURE_FILE,
+                keyboardPercentOfLineSize = "100%",
+                keyboardLootTexture = ZO_NO_TEXTURE_FILE,
+                gamepadTexture = ZO_NO_TEXTURE_FILE,
+                gamepadPercentOfLineSize = "100%",
+                gamepadLootTexture = ZO_NO_TEXTURE_FILE,
+            }
+
+            g_currenciesData[currencyType] = currencyInfo
         end
     end
 end

@@ -214,6 +214,20 @@ function ZO_SortFilterList:OnSortHeaderClicked(key, order)
     self:RefreshSort()
 end
 
+function ZO_SortFilterList:AddMouseBehaviorToControl(control)
+    if not IsConsoleUI() then
+        control:SetMouseEnabled(true)
+        control:SetHandler("OnMouseUp", function(_, button, upInside)
+            local isActive = ZO_Eval(self.IsActive, self)
+            if isActive then
+                if button == MOUSE_BUTTON_INDEX_LEFT and upInside then
+                    self:SelectRow(control)
+                end
+            end
+        end)
+    end
+end
+
 function ZO_SortFilterList:SetHighlightedRow(row)
     if self.mouseOverRow then
         self:ExitRow(self.mouseOverRow)
@@ -306,7 +320,7 @@ function ZO_SortFilterList:SetupRow(control, data)
     else
         if mocBelongsToRow then
             self:EnterRow(control)
-        else 
+        else
             self:ColorRow(control, data, false)
         end
     end

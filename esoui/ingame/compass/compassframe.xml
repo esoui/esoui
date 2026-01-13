@@ -57,78 +57,66 @@
             </Animations>
         </AnimationTimeline>
     </Animations>
-
     <Controls>
         <Control name="ZO_CompassFrame_Keyboard_Template" virtual="true">
-            <Dimensions y="ZO_COMPASS_FRAME_HEIGHT_KEYBOARD" />
-            <Anchor point="TOP" relativeTo="GuiRoot" offsetY="40" />
-
+            <Dimensions y="ZO_COMPASS_FRAME_HEIGHT_KEYBOARD"/>
+            <Anchor point="TOP" relativeTo="GuiRoot" offsetY="40"/>
             <Controls>
                 <Texture name="$(parent)Center" textureFile="$(COMPASS_PATH)compass.dds">
-                    <TextureCoords left="0.78125" right="1" top="0" bottom="0.609375" />
+                    <TextureCoords left="0.78125" right="1" top="0" bottom="0.609375"/>
                 </Texture>
-
                 <Texture name="$(parent)Left" textureFile="$(COMPASS_PATH)compass.dds">
-                    <Dimensions x="18" y="ZO_COMPASS_FRAME_HEIGHT_KEYBOARD" />
-                    <TextureCoords left="0" right="0.28125" top="0" bottom="0.609375" />
+                    <Dimensions x="18" y="ZO_COMPASS_FRAME_HEIGHT_KEYBOARD"/>
+                    <TextureCoords left="0" right="0.28125" top="0" bottom="0.609375"/>
                 </Texture>
-
                 <Texture name="$(parent)Right" textureFile="$(COMPASS_PATH)compass.dds">
-                    <Dimensions x="18" y="ZO_COMPASS_FRAME_HEIGHT_KEYBOARD" />
-                    <TextureCoords left="0.28125" right="0" top="0" bottom="0.609375" />
+                    <Dimensions x="18" y="ZO_COMPASS_FRAME_HEIGHT_KEYBOARD"/>
+                    <TextureCoords left="0.28125" right="0" top="0" bottom="0.609375"/>
                 </Texture>
             </Controls>
         </Control>
-
         <Control name="ZO_CompassFrame_Gamepad_Template" virtual="true">
-            <Dimensions y="ZO_COMPASS_FRAME_HEIGHT_GAMEPAD" />
-            <Anchor point="TOP" relativeTo="GuiRoot" offsetY="58" />
-
+            <Dimensions y="ZO_COMPASS_FRAME_HEIGHT_GAMEPAD"/>
+            <Anchor point="TOP" relativeTo="GuiRoot" offsetY="58"/>
             <Controls>
                 <Texture name="$(parent)Center" textureFile="$(COMPASS_PATH)Gamepad/gp_compass.dds">
-                    <TextureCoords left="0.78125" right="1" top="0" bottom="0.75" />
+                    <TextureCoords left="0.78125" right="1" top="0" bottom="0.75"/>
                 </Texture>
-
                 <Texture name="$(parent)Left" textureFile="$(COMPASS_PATH)Gamepad/gp_compass.dds">
-                    <Dimensions x="14" y="ZO_COMPASS_FRAME_HEIGHT_GAMEPAD" />
-                    <TextureCoords left="0" right="0.4375" top="0" bottom="0.75" />
+                    <Dimensions x="14" y="ZO_COMPASS_FRAME_HEIGHT_GAMEPAD"/>
+                    <TextureCoords left="0" right="0.4375" top="0" bottom="0.75"/>
                 </Texture>
-
                 <Texture name="$(parent)Right" textureFile="$(COMPASS_PATH)Gamepad/gp_compass.dds">
-                    <Dimensions x="14" y="ZO_COMPASS_FRAME_HEIGHT_GAMEPAD" />
-                    <TextureCoords left="0.4375" right="0" top="0" bottom="0.75" />
+                    <Dimensions x="14" y="ZO_COMPASS_FRAME_HEIGHT_GAMEPAD"/>
+                    <TextureCoords left="0.4375" right="0" top="0" bottom="0.75"/>
                 </Texture>
             </Controls>
         </Control>
-
         <TopLevelControl name="ZO_CompassFrame" hidden="true">
             <OnInitialized>
                 ZO_CompassFrame_OnInitialized(self)
             </OnInitialized>
-    
             <Controls>
                 <Texture name="$(parent)Center">
-                    <AnchorFill />
+                    <AnchorFill/>
                     <Controls>
                         <Texture name="$(parent)TopMungeOverlay" inherits="ZO_RandomizedMunge" level="1">
-                            <Dimensions y="4" />
-                            <Anchor point="TOPLEFT" offsetY="2" />
-                            <Anchor point="TOPRIGHT" offsetY="2" />
+                            <Dimensions y="4"/>
+                            <Anchor point="TOPLEFT" offsetY="2"/>
+                            <Anchor point="TOPRIGHT" offsetY="2"/>
                         </Texture>
                         <Texture name="$(parent)BottomMungeOverlay" inherits="ZO_RandomizedMunge" level="1">
-                            <Dimensions y="3" />
-                            <Anchor point="BOTTOMLEFT" offsetY="-4" />
-                            <Anchor point="BOTTOMRIGHT" offsetY="-4" />
+                            <Dimensions y="3"/>
+                            <Anchor point="BOTTOMLEFT" offsetY="-4"/>
+                            <Anchor point="BOTTOMRIGHT" offsetY="-4"/>
                         </Texture>
                     </Controls>
                 </Texture>
-
                 <Texture name="$(parent)Left">
-                    <Anchor point="RIGHT" relativeTo="$(parent)Center" relativePoint="LEFT" />
+                    <Anchor point="RIGHT" relativeTo="$(parent)Center" relativePoint="LEFT"/>
                 </Texture>
-
                 <Texture name="$(parent)Right">
-                    <Anchor point="LEFT" relativeTo="$(parent)Center" relativePoint="RIGHT" />
+                    <Anchor point="LEFT" relativeTo="$(parent)Center" relativePoint="RIGHT"/>
                 </Texture>
             </Controls>
         </TopLevelControl>

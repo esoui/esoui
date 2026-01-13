@@ -1,8 +1,7 @@
 <GuiXml>
     <Controls>
         <TopLevelControl name="ZO_Tutorial" level="ZO_HIGH_TIER_TUTORIAL" tier="HIGH">
-            <AnchorFill />
-            
+            <AnchorFill/>
             <OnInitialized>
                 ZO_Tutorial_Initialize(self)
             </OnInitialized>

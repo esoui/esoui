@@ -2471,14 +2471,14 @@ end
 
 function ChampionPerks:RefreshMenuIndicators()
     MAIN_MENU_GAMEPAD:RefreshLists()
-    if not IsConsoleUI() then
+    if not ZO_IsConsoleOrGameCoreUI() then
         MAIN_MENU_KEYBOARD:RefreshCategoryIndicators()
     end
 end
 
 function ChampionPerks:RefreshMenus()
     MAIN_MENU_GAMEPAD:RefreshLists()
-    if not IsConsoleUI() then
+    if not ZO_IsConsoleOrGameCoreUI() then
         MAIN_MENU_KEYBOARD:RefreshCategoryBar()
     end
 end

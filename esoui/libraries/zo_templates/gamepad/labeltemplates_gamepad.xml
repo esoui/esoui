@@ -6,7 +6,6 @@
                 ZO_SelectableLabel_SetNormalColor(self, ZO_DISABLED_TEXT)
             </OnInitialized>
         </Label>
-
         <Label name="ZO_ThreeLineHeaderAdjustingWrapLabel_Gamepad" virtual="true">
             <OnInitialized>
                 local fonts =

@@ -306,7 +306,7 @@ end
 
 function ZO_Keybinding_GetGamepadActionName(actionName)
     local localizedConsoleActionName = ""
-    if IsConsoleUI() then
+    if ZO_IsConsoleOrGameCoreUI() then
         localizedConsoleActionName = GetString(_G["SI_BINDING_NAME_CONSOLE_"..actionName])
     end
 
@@ -350,29 +350,39 @@ function ZO_Keybindings_ShouldShowGamepadKeybind(alwaysPreferGamepadMode)
     return false
 end
 
-function ZO_Keybindings_GetPreferredKeyType(alwaysPreferGamepadMode)
-    if alwaysPreferGamepadMode then
-        return PREFERRED_INPUT_DEVICE_TYPE_GAMEPAD
+do
+    local function IsAccessibilityModeEnabled()
+        return GetSetting_Bool(SETTING_TYPE_ACCESSIBILITY, ACCESSIBILITY_SETTING_ACCESSIBILITY_MODE)
     end
 
-    if IsInGamepadPreferredMode() then
-        local keybindDisplayMode = tonumber(GetSetting(SETTING_TYPE_GAMEPAD, GAMEPAD_SETTING_KEYBIND_DISPLAY_MODE))
-        if keybindDisplayMode == KEYBIND_DISPLAY_MODE_ALWAYS_KEYBOARD then
-            return PREFERRED_INPUT_DEVICE_TYPE_KEYBOARD
-        elseif keybindDisplayMode == KEYBIND_DISPLAY_MODE_ALWAYS_GAMEPAD then
+    function ZO_Keybindings_GetPreferredKeyType(alwaysPreferGamepadMode)
+        if alwaysPreferGamepadMode then
             return PREFERRED_INPUT_DEVICE_TYPE_GAMEPAD
-        else -- keybindDisplayMode == KEYBIND_DISPLAY_MODE_AUTOMATIC
-            if AreKeyboardBindingsSupportedInGamepadUI() then
-                if WasLastInputGamepad() then
-                    return PREFERRED_INPUT_DEVICE_TYPE_GAMEPAD
-                else
-                    return PREFERRED_INPUT_DEVICE_TYPE_KEYBOARD
-                end
-            else
+        end
+
+        if IsInGamepadPreferredMode() then
+            local keybindDisplayMode = tonumber(GetSetting(SETTING_TYPE_GAMEPAD, GAMEPAD_SETTING_KEYBIND_DISPLAY_MODE))
+            if keybindDisplayMode == KEYBIND_DISPLAY_MODE_ALWAYS_KEYBOARD then
+                return PREFERRED_INPUT_DEVICE_TYPE_KEYBOARD
+            elseif keybindDisplayMode == KEYBIND_DISPLAY_MODE_ALWAYS_GAMEPAD then
                 return PREFERRED_INPUT_DEVICE_TYPE_GAMEPAD
+            else -- keybindDisplayMode == KEYBIND_DISPLAY_MODE_AUTOMATIC
+                if AreKeyboardBindingsSupportedInGamepadUI() then
+                    if WasLastInputGamepad() then
+                        return PREFERRED_INPUT_DEVICE_TYPE_GAMEPAD
+                    else
+                        if IsAccessibilityModeEnabled() then
+                            return PREFERRED_INPUT_DEVICE_TYPE_KEYBOARD
+                        else
+                            return PREFERRED_INPUT_DEVICE_TYPE_KEYBOARD_OR_MOUSE
+                        end
+                    end
+                else
+                    return PREFERRED_INPUT_DEVICE_TYPE_GAMEPAD
+                end
             end
         end
-    end
 
-    return PREFERRED_INPUT_DEVICE_TYPE_KEYBOARD_OR_MOUSE
+        return PREFERRED_INPUT_DEVICE_TYPE_KEYBOARD_OR_MOUSE
+    end
 end

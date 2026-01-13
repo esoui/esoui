@@ -19,7 +19,7 @@ function ZO_Stable_Keyboard:InitializeControls()
     STABLES_FRAGMENT = ZO_FadeSceneFragment:New(self.stableControl)
 
     self.instructions = self.stableControl:GetNamedChild("Instructions")
-    self.instructions:SetText(zo_strformat(SI_STABLE_INTRUCTIONS, ZO_Currency_FormatKeyboard(CURT_MONEY, GetTrainingCost(), ZO_CURRENCY_FORMAT_WHITE_AMOUNT_ICON)))
+    self.instructions:SetText(zo_strformat(SI_STABLE_INTRUCTIONS, GetNumUpgradesPerStablemasterTraining(), ZO_Currency_FormatKeyboard(CURT_MONEY, GetTrainingCost(), ZO_CURRENCY_FORMAT_WHITE_AMOUNT_ICON)))
 
     self.noSkinWarning = self.stableControl:GetNamedChild("NoSkinWarning")
     self.skillHeader = self.stableControl:GetNamedChild("RidingSkillHeader")
@@ -145,7 +145,7 @@ function ZO_Stable_Keyboard:RefreshActiveMount()
     if hadSkin ~= hasSkin then
         self.currentSkinId = currentSkinId
         self.noSkinWarning:SetHidden(hasSkin)
-        properAnchorControl = hasSkin and self.instructions or self.noSkinWarning
+        local properAnchorControl = hasSkin and self.instructions or self.noSkinWarning
         self.skillHeader:ClearAnchors()
         self.skillHeader:SetAnchor(TOPLEFT, properAnchorControl, BOTTOMLEFT, 0, 20)
         self.skillHeader:SetAnchor(TOPRIGHT, properAnchorControl, BOTTOMRIGHT, 0, 20)

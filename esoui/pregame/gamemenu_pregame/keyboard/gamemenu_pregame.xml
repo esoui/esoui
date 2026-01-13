@@ -1,17 +1,17 @@
 <GuiXml>
     <Controls>
         <TopLevelControl name="ZO_GameMenu_PreGame" hidden="true">
-            <Anchor point="TOPLEFT" relativeTo="GuiRoot" />
-            <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" />
+            <Anchor point="TOPLEFT" relativeTo="GuiRoot"/>
+            <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot"/>
             <OnInitialized>
                 ZO_GameMenu_PreGame_Initialize(self)
             </OnInitialized>
             <Controls>
-                <Label name="$(parent)Quit" inherits="ZO_HorizontalMenu_LabelHeader" >
-                    <Anchor point="TOPRIGHT" offsetX="-50" offsetY="10" />
+                <Label name="$(parent)Quit" inherits="ZO_HorizontalMenu_LabelHeader">
+                    <Anchor point="TOPRIGHT" offsetX="-50" offsetY="10"/>
                 </Label>
                 <Control name="$(parent)HorizontalMenu">
-                    <Anchor point="TOPLEFT" offsetX="50" offsetY="10" />
+                    <Anchor point="TOPLEFT" offsetX="50" offsetY="10"/>
                 </Control>
             </Controls>
         </TopLevelControl>

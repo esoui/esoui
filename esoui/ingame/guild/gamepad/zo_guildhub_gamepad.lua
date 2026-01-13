@@ -601,7 +601,7 @@ function ZO_GamepadGuildHub:InitializeCreateGuildDialog()
                     setup = SetupRequestEntry,
                     callback = function(dialog)
                         if self.noViolations then
-                            if IsConsoleUI() then
+                            if ZO_IsConsoleOrGameCoreUI() then
                                 PLAYER_CONSOLE_INFO_REQUEST_MANAGER:RequestNameValidation(self.selectedName, GuildNameValidationCallback)
                             else
                                 GuildCreate(self.selectedName, self.selectedAllianceIndex)
@@ -898,7 +898,7 @@ do
             end
             AddEntry(data)
 
-            if GetUIPlatform() == UI_PLATFORM_XBOX and GetNumberConsoleFriends() > 0 then
+            if IsGameCoreUI() and GetNumberConsoleFriends() > 0 then
                 data = ZO_GamepadEntryData:New(GetString(SI_GAMEPAD_GUILD_ADD_FRIEND), ICON_INVITE)
                 data.guildId = self.optionsGuildId
                 data.selectCallback = function(optionsSelectedData)

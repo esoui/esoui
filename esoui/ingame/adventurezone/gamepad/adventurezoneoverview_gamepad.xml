@@ -1,0 +1,46 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_AdvZoneOverview_FactionScoreContainer_Gamepad" inherits="ZO_AdvZoneOverview_FactionScoreContainer_Shared" virtual="true">
+            <Controls>
+                <Label name="$(parent)Name" override="true" font="ZoFontGamepad36"/>
+                <Label name="$(parent)Score" override="true" font="ZoFontGamepad36"/>
+            </Controls>
+        </Control>
+        <Control name="ZO_AdvZoneOverviewEventTile_Gamepad_Control" inherits="ZO_AdvZoneOverviewEventTile_Shared_Control ZO_ContextualActionsTile_Gamepad_Control" virtual="true">
+            <OnInitialized>
+                ZO_AdventureZoneEventTile_Gamepad:New(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Location" override="true" font="ZoFontGamepad25"/>
+                <Label name="$(parent)Title" override="true" font="ZoFontGamepad34"/>
+                <Label name="$(parent)Status" override="true" font="ZoFontGamepad25"/>
+            </Controls>
+        </Control>
+        <TopLevelControl name="ZO_AdvZoneOverview_Gamepad" inherits="ZO_AdvZoneOverview_Shared">
+            <DimensionConstraints minX="605" minY="60"/>
+            <ResizeToFitPadding width="50" height="30"/>
+            <OnInitialized>
+                ZO_AdventureZoneOverview_Gamepad.OnControlInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Backdrop name="$(parent)BG" override="true" inherits="ZO_DefaultBackdrop_Gamepad" alpha="1" edgeColor="INTERFACE_COLOR_TYPE_GENERAL:INTERFACE_GENERAL_COLOR_ENABLED" centerColor="INTERFACE_COLOR_TYPE_GENERAL:INTERFACE_GENERAL_COLOR_ENABLED"/>
+                <Label name="$(parent)Title" override="true" font="ZoFontGamepadBold48"/>
+                <Control name="$(parent)FactionScore1" override="true" inherits="ZO_AdvZoneOverview_FactionScoreContainer_Gamepad"/>
+                <Control name="$(parent)FactionScore2" override="true" inherits="ZO_AdvZoneOverview_FactionScoreContainer_Gamepad"/>
+                <Control name="$(parent)FactionScore3" override="true" inherits="ZO_AdvZoneOverview_FactionScoreContainer_Gamepad"/>
+                <Control name="$(parent)PlayerPointsContainer" override="true">
+                    <Controls>
+                        <Label name="$(parent)PlayerPointsLabel" override="true" font="ZoFontGamepadCondensed34"/>
+                    </Controls>
+                </Control>
+                <Control name="$(parent)EventsContainer" override="true" resizeToFitDescendents="true">
+                    <Controls>
+                        <Control name="$(parent)Event1" override="true" inherits="ZO_AdvZoneOverviewEventTile_Gamepad_Control"/>
+                        <Control name="$(parent)Event2" override="true" inherits="ZO_AdvZoneOverviewEventTile_Gamepad_Control"/>
+                        <Control name="$(parent)Event3" override="true" inherits="ZO_AdvZoneOverviewEventTile_Gamepad_Control"/>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

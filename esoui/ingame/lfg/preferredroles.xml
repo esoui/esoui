@@ -4,35 +4,27 @@
             <OnInitialized>
                 ZO_PreferredRoles_OnInitialized(self)
             </OnInitialized>
-
             <Controls>
                 <Label name="$(parent)Label" text="SI_GROUP_LIST_PANEL_PREFERRED_ROLES_LABEL" font="ZoFontHeader3" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER">
-                    <Anchor point="TOP" />
+                    <Anchor point="TOP"/>
                 </Label>
-
                 <Control name="$(parent)Buttons" resizeToFitDescendents="true">
-                    <Anchor point="TOP" relativeTo="$(parent)Label" relativePoint="BOTTOM" />
-
+                    <Anchor point="TOP" relativeTo="$(parent)Label" relativePoint="BOTTOM"/>
                     <Controls>
                         <Button name="$(parent)Heal" inherits="ZO_PreferredRolesButton" clickSound="Group_Role_Heal_Click">
-                            <Anchor point="TOP" />
-
+                            <Anchor point="TOP"/>
                             <OnInitialized>
                                 ZO_PreferredRoleButton_OnInitialized(self, LFG_ROLE_HEAL)
                             </OnInitialized>
                         </Button>
-
                         <Button name="$(parent)Tank" inherits="ZO_PreferredRolesButton" clickSound="Group_Role_Tank_Click">
-                            <Anchor point="RIGHT" relativeTo="$(parent)Heal" relativePoint="LEFT" offsetX="-5" />
-
+                            <Anchor point="RIGHT" relativeTo="$(parent)Heal" relativePoint="LEFT" offsetX="-5"/>
                             <OnInitialized>
                                 ZO_PreferredRoleButton_OnInitialized(self, LFG_ROLE_TANK)
                             </OnInitialized>
                         </Button>
-
                         <Button name="$(parent)DPS" inherits="ZO_PreferredRolesButton" clickSound="Group_Role_DPS_Click">
-                            <Anchor point="LEFT" relativeTo="$(parent)Heal" relativePoint="RIGHT" offsetX="5" />
-
+                            <Anchor point="LEFT" relativeTo="$(parent)Heal" relativePoint="RIGHT" offsetX="5"/>
                             <OnInitialized>
                                 ZO_PreferredRoleButton_OnInitialized(self, LFG_ROLE_DPS)
                             </OnInitialized>

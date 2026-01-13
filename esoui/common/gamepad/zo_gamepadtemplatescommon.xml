@@ -2,170 +2,148 @@
     <Animations>
         <AnimationTimeline name="GamepadMenuEntryFocusedAnimation">
             <Animations>
-                <AlphaAnimation duration="200" startAlpha="0.4" endAlpha="1" />
+                <AlphaAnimation duration="200" startAlpha="0.4" endAlpha="1"/>
             </Animations>
         </AnimationTimeline>
     </Animations>
-    
     <Controls>
-        <Label name="ZO_GamepadMenuEntryHeaderFontTemplate" font="ZoFontGamepadBold22" modifyTextType="UPPERCASE" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true" />
+        <Label name="ZO_GamepadMenuEntryHeaderFontTemplate" font="ZoFontGamepadBold22" modifyTextType="UPPERCASE" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true"/>
         <Label name="ZO_GamepadMenuEntryHeaderTemplate" inherits="ZO_GamepadMenuEntryHeaderFontTemplate" virtual="true">
-            <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_INDENT" />
-            <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" offsetY="-19" />
-            <Dimensions y="24" />
+            <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_INDENT"/>
+            <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" offsetY="-19"/>
+            <Dimensions y="24"/>
         </Label>
-
         <Label name="ZO_GamepadMenuEntryFullWidthHeaderTemplate" inherits="ZO_GamepadMenuEntryHeaderFontTemplate" virtual="true">
             <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT"/>
-            <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" offsetY="-19" />
-            <Dimensions y="24" />
+            <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" offsetY="-19"/>
+            <Dimensions y="24"/>
         </Label>
-
         <Label name="ZO_GamepadMenuEntryFullWidthHeaderWithLockTemplate" inherits="ZO_GamepadMenuEntryFullWidthHeaderTemplate" virtual="true">
             <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT"/>
-            <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" offsetX="-32" offsetY="-19" />
+            <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" offsetX="-32" offsetY="-19"/>
             <Controls>
                 <Texture name="$(parent)Locked" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_icon_locked32.dds">
-                    <Dimensions x="32" y="32" />
-                    <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" />
+                    <Dimensions x="32" y="32"/>
+                    <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT"/>
                 </Texture>
             </Controls>
         </Label>
-        
         <Label name="ZO_GamepadMenuEntryWithIconHeaderTemplate" inherits="ZO_GamepadMenuEntryHeaderTemplate" virtual="true">
             <Controls>
                 <Texture name="$(parent)Icon" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" hidden="true">
-                    <Dimensions x="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_ICON_DIMENSION" y="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_ICON_DIMENSION" />
-                    <Anchor point="CENTER" relativePoint="LEFT" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_ICON_X_OFFSET" />
+                    <Dimensions x="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_ICON_DIMENSION" y="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_ICON_DIMENSION"/>
+                    <Anchor point="CENTER" relativePoint="LEFT" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_ICON_X_OFFSET"/>
                 </Texture>
             </Controls>
-        </Label>      
-
+        </Label>
         <Control name="ZO_Gamepad_InfoBar" virtual="true">
-            <Dimensions x="480" />
-            <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" relativeTo="GuiRoot" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_INDENT" offsetY="217" />
+            <Dimensions x="480"/>
+            <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" relativeTo="GuiRoot" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_INDENT" offsetY="217"/>
             <Controls>
                 <Texture name="$(parent)TopRail" textureFile="EsoUI/Art/Windows/Gamepad/gp_nav1_horDivider.dds">
-                    <Dimensions y="8" />
-                    <Anchor point="BOTTOMLEFT" offsetY="-40" />
-                    <Anchor point="BOTTOMRIGHT" offsetX="-60" offsetY="-40" />
+                    <Dimensions y="8"/>
+                    <Anchor point="BOTTOMLEFT" offsetY="-40"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="-60" offsetY="-40"/>
                 </Texture>
-
                 <Texture name="$(parent)BottomRail" textureFile="EsoUI/Art/Windows/Gamepad/gp_nav1_horDivider.dds">
-                    <Dimensions y="8" />
-                    <Anchor point="BOTTOMLEFT" offsetY="22" />
-                    <Anchor point="BOTTOMRIGHT" offsetX="-60" offsetY="14" />
+                    <Dimensions y="8"/>
+                    <Anchor point="BOTTOMLEFT" offsetY="22"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="-60" offsetY="14"/>
                 </Texture>
             </Controls>
         </Control>
-
         <!-- General Component Templates -->
         <Texture name="ZO_GamepadHorizontalDivider" virtual="true">
             <Anchor point="LEFT" offsetX="-100"/>
-            <Anchor point="RIGHT" offsetX="100" />
+            <Anchor point="RIGHT" offsetX="100"/>
             <Controls>
                 <Texture name="$(parent)Left" textureFile="EsoUI/Art/Windows/Gamepad/gp_nav1_horDividerFlat.dds">
-                    <Anchor point="LEFT" />
-                    <Dimensions x="4" y="8" />
-                    <TextureCoords left="0" right="0.25" top=".25" bottom=".75" />
+                    <Anchor point="LEFT"/>
+                    <Dimensions x="4" y="8"/>
+                    <TextureCoords left="0" right="0.25" top=".25" bottom=".75"/>
                 </Texture>
-
                 <Texture name="$(parent)Right" textureFile="EsoUI/Art/Windows/Gamepad/gp_nav1_horDividerFlat.dds">
-                    <Anchor point="RIGHT" />
-                    <Dimensions x="4" y="8" />
-                    <TextureCoords left="0.75" right="1" top=".25" bottom=".75" />
+                    <Anchor point="RIGHT"/>
+                    <Dimensions x="4" y="8"/>
+                    <TextureCoords left="0.75" right="1" top=".25" bottom=".75"/>
                 </Texture>
-
                 <Texture name="$(parent)Center" textureFile="EsoUI/Art/Windows/Gamepad/gp_nav1_horDividerFlat.dds">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Left" relativePoint="TOPRIGHT" />
-                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Right" relativePoint="BOTTOMLEFT" />
-                    <TextureCoords left="0.25" right="0.75" top=".25" bottom=".75" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Left" relativePoint="TOPRIGHT"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Right" relativePoint="BOTTOMLEFT"/>
+                    <TextureCoords left="0.25" right="0.75" top=".25" bottom=".75"/>
                 </Texture>
             </Controls>
         </Texture>
-
         <Backdrop name="ZO_GamepadAbilityIconFrame" edgeColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" pixelRoundingEnabled="false" virtual="true">
-            <Anchor point="TOPLEFT" relativeTo="$(parent)Icon" offsetX="-8" offsetY="-8" />
-            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icon" offsetX="8" offsetY="8" />
-
-            <Edge file="EsoUI/Art/Miscellaneous/Gamepad/gp_frameEdge_8px.dds" edgeFileWidth="64" edgeFileHeight="8" />
-            <Center file="EsoUI/Art/Miscellaneous/Gamepad/gp_edgeFill.dds" />
-            <Insets left="8" top="8" right="-8" bottom="-8" />
+            <Anchor point="TOPLEFT" relativeTo="$(parent)Icon" offsetX="-8" offsetY="-8"/>
+            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icon" offsetX="8" offsetY="8"/>
+            <Edge file="EsoUI/Art/Miscellaneous/Gamepad/gp_frameEdge_8px.dds" edgeFileWidth="64" edgeFileHeight="8"/>
+            <Center file="EsoUI/Art/Miscellaneous/Gamepad/gp_edgeFill.dds"/>
+            <Insets left="8" top="8" right="-8" bottom="-8"/>
         </Backdrop>
-
         <Backdrop name="ZO_GamepadNormalOutlineHighlight" edgeColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" centerColor="00000000" virtual="true">
-            <Edge file="EsoUI/Art/Miscellaneous/Gamepad/edgeframeGamepadBorder.dds" edgeFileWidth="128" edgeFileHeight="16" />
-            <Insets left="4" top="4" right="-4" bottom="-4" />
+            <Edge file="EsoUI/Art/Miscellaneous/Gamepad/edgeframeGamepadBorder.dds" edgeFileWidth="128" edgeFileHeight="16"/>
+            <Insets left="4" top="4" right="-4" bottom="-4"/>
         </Backdrop>
-
         <Backdrop name="ZO_GamepadBlackOutlineHighlight" edgeColor="000000" centerColor="00000000" virtual="true">
-            <Edge file="EsoUI/Art/Miscellaneous/Gamepad/edgeframeGamepadBorder.dds" edgeFileWidth="128" edgeFileHeight="16" />
-            <Insets left="4" top="4" right="-4" bottom="-4" />
+            <Edge file="EsoUI/Art/Miscellaneous/Gamepad/edgeframeGamepadBorder.dds" edgeFileWidth="128" edgeFileHeight="16"/>
+            <Insets left="4" top="4" right="-4" bottom="-4"/>
         </Backdrop>
-
         <Backdrop name="ZO_GamepadWhiteOutlineHighlight" centerColor="00000000" virtual="true">
-            <Edge file="EsoUI/Art/Miscellaneous/Gamepad/edgeframeGamepadBorder.dds" edgeFileWidth="128" edgeFileHeight="16" />
-            <Insets left="4" top="4" right="-4" bottom="-4" />
+            <Edge file="EsoUI/Art/Miscellaneous/Gamepad/edgeframeGamepadBorder.dds" edgeFileWidth="128" edgeFileHeight="16"/>
+            <Insets left="4" top="4" right="-4" bottom="-4"/>
         </Backdrop>
-
         <Backdrop name="ZO_GamepadGreyOutlineHighlight" edgeColor="797979" centerColor="00000000" virtual="true">
-            <Edge file="EsoUI/Art/Miscellaneous/Gamepad/edgeframeGamepadBorder.dds" edgeFileWidth="128" edgeFileHeight="16" />
-            <Insets left="4" top="4" right="-4" bottom="-4" />
+            <Edge file="EsoUI/Art/Miscellaneous/Gamepad/edgeframeGamepadBorder.dds" edgeFileWidth="128" edgeFileHeight="16"/>
+            <Insets left="4" top="4" right="-4" bottom="-4"/>
         </Backdrop>
-
         <Backdrop name="ZO_GamepadBlueOutlineHighlight" edgeColor="58a7a7" centerColor="00000000" virtual="true">
-            <Edge file="EsoUI/Art/Miscellaneous/Gamepad/edgeframeGamepadBorder.dds" edgeFileWidth="128" edgeFileHeight="16" />
-            <Insets left="4" top="4" right="-4" bottom="-4" />
+            <Edge file="EsoUI/Art/Miscellaneous/Gamepad/edgeframeGamepadBorder.dds" edgeFileWidth="128" edgeFileHeight="16"/>
+            <Insets left="4" top="4" right="-4" bottom="-4"/>
         </Backdrop>
-
         <Backdrop name="ZO_GamepadNormalOutlineThin" edgeColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" centerColor="00000000" virtual="true">
-            <Edge file="EsoUI/Art/Miscellaneous/Gamepad/edgeframeGamepadBorder_thin.dds" edgeFileWidth="128" edgeFileHeight="16" />
-            <Insets left="2" top="2" right="-2" bottom="-2" />
+            <Edge file="EsoUI/Art/Miscellaneous/Gamepad/edgeframeGamepadBorder_thin.dds" edgeFileWidth="128" edgeFileHeight="16"/>
+            <Insets left="2" top="2" right="-2" bottom="-2"/>
         </Backdrop>
-
         <Backdrop name="ZO_GamepadBlackOutlineThin" edgeColor="000000" centerColor="00000000" virtual="true">
-            <Edge file="EsoUI/Art/Miscellaneous/Gamepad/edgeframeGamepadBorder_thin.dds" edgeFileWidth="128" edgeFileHeight="16" />
-            <Insets left="2" top="2" right="-2" bottom="-2" />
+            <Edge file="EsoUI/Art/Miscellaneous/Gamepad/edgeframeGamepadBorder_thin.dds" edgeFileWidth="128" edgeFileHeight="16"/>
+            <Insets left="2" top="2" right="-2" bottom="-2"/>
         </Backdrop>
-
         <Backdrop name="ZO_GamepadWhiteOutlineThin" centerColor="00000000" virtual="true">
-            <Edge file="EsoUI/Art/Miscellaneous/Gamepad/edgeframeGamepadBorder_thin.dds" edgeFileWidth="128" edgeFileHeight="16" />
-            <Insets left="2" top="2" right="-2" bottom="-2" />
+            <Edge file="EsoUI/Art/Miscellaneous/Gamepad/edgeframeGamepadBorder_thin.dds" edgeFileWidth="128" edgeFileHeight="16"/>
+            <Insets left="2" top="2" right="-2" bottom="-2"/>
         </Backdrop>
-
         <Backdrop name="ZO_GamepadGreyOutlineThin" edgeColor="797979" centerColor="00000000" virtual="true">
-            <Edge file="EsoUI/Art/Miscellaneous/Gamepad/edgeframeGamepadBorder_thin.dds" edgeFileWidth="128" edgeFileHeight="16" />
-            <Insets left="2" top="2" right="-2" bottom="-2" />
+            <Edge file="EsoUI/Art/Miscellaneous/Gamepad/edgeframeGamepadBorder_thin.dds" edgeFileWidth="128" edgeFileHeight="16"/>
+            <Insets left="2" top="2" right="-2" bottom="-2"/>
         </Backdrop>
-
         <Backdrop name="ZO_GamepadWhiteOutlineThick" centerColor="00000000" virtual="true">
             <Edge file="EsoUI/Art/Miscellaneous/Gamepad/edgeframeGamepadBorder_thick.dds" edgeFileWidth="32" edgeFileHeight="8"/>
-            <Insets left="4" top="4" right="-4" bottom="-4" />
+            <Insets left="4" top="4" right="-4" bottom="-4"/>
         </Backdrop>
-
         <Backdrop name="ZO_GamepadWhiteSelectorHighlight" centerColor="00000000" virtual="true">
-            <Edge file="EsoUI/Art/Miscellaneous/Gamepad/edgeframeGamepadBorder.dds" edgeFileWidth="128" edgeFileHeight="16" />
-            <Insets left="4" top="4" right="-4" bottom="-4" />
+            <Edge file="EsoUI/Art/Miscellaneous/Gamepad/edgeframeGamepadBorder.dds" edgeFileWidth="128" edgeFileHeight="16"/>
+            <Insets left="4" top="4" right="-4" bottom="-4"/>
         </Backdrop>
-
         <Backdrop name="ZO_GamepadGreySelectorHighlight" centerColor="797979" edgeColor="797979" virtual="true">
-            <Edge file="EsoUI/Art/Miscellaneous/Gamepad/edgeframeGamepadBorder.dds" edgeFileWidth="128" edgeFileHeight="16" />
-            <Insets left="4" top="4" right="-4" bottom="-4" />
+            <Edge file="EsoUI/Art/Miscellaneous/Gamepad/edgeframeGamepadBorder.dds" edgeFileWidth="128" edgeFileHeight="16"/>
+            <Insets left="4" top="4" right="-4" bottom="-4"/>
         </Backdrop>
-
+        <Backdrop name="ZO_GamepadWhiteOutlineSelection" centerColor="00000000" virtual="true">
+            <Edge file="EsoUI/Art/Miscellaneous/Gamepad/edgeframeGamepadSelectedBorder.dds" edgeFileWidth="128" edgeFileHeight="16"/>
+            <Insets left="8" top="8" right="-8" bottom="-8"/>
+        </Backdrop>
         <Control name="ZO_GamepadMenuEntryControlSizedTemplate" virtual="true">
             <OnInitialized>
                 ZO_SharedGamepadEntry_OnInitialized(self)
             </OnInitialized>
         </Control>
-        
         <Control name="ZO_GamepadMenuEntryLabelSizedTemplate" virtual="true">
             <OnInitialized>
                 ZO_SharedGamepadEntry_OnInitialized(self)
                 ZO_SharedGamepadEntry_SetHeightFromLabels(self)
             </OnInitialized>
         </Control>
-
         <Control name="ZO_GamepadMenuEntryDimensionsTemplate" resizeToFitDescendents="true" virtual="true">
             <Controls>
                 <Control name="$(parent)RootSpacer">
@@ -174,107 +152,90 @@
                 </Control>
             </Controls>
         </Control>
-
         <Texture name="ZO_GamepadMenuEntryIconTemplate" tier="MEDIUM" inherits="ZO_MultiIcon" excludeFromResizeToFitExtents="true" level="1" pixelRoundingEnabled="false" virtual="true">
-            <Dimensions x="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_ICON_DIMENSION" y="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_ICON_DIMENSION" />
-            <Anchor point="CENTER" relativeTo="$(parent)Label" relativePoint="LEFT" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_ICON_X_OFFSET" />
+            <Dimensions x="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_ICON_DIMENSION" y="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_ICON_DIMENSION"/>
+            <Anchor point="CENTER" relativeTo="$(parent)Label" relativePoint="LEFT" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_ICON_X_OFFSET"/>
             <Controls>
                 <Texture name="$(parent)Highlight" pixelRoundingEnabled="false" level="0">
-                    <AnchorFill />
+                    <AnchorFill/>
                 </Texture>
             </Controls>
         </Texture>
-
         <Label name="ZO_GamepadSubMenuEntryLabelTemplate" font="ZoFontGamepad34" verticalAlignment="CENTER" wrapMode="ELLIPSIS" virtual="true">
             <Anchor point="TOPLEFT" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_INDENT"/>
             <Dimensions x="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_WIDTH_AFTER_INDENT"/>
         </Label>
-
         <Label name="ZO_GamepadSubMenuEntryLabelTemplateLowercase42" font="ZoFontGamepad42" verticalAlignment="CENTER" wrapMode="ELLIPSIS" virtual="true">
             <Anchor point="TOPLEFT" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_INDENT"/>
             <Dimensions x="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_WIDTH_AFTER_INDENT"/>
         </Label>
-
         <Texture name="ZO_GamepadMenuEntrySecondIconTemplate" tier="MEDIUM" excludeFromResizeToFitExtents="true" pixelRoundingEnabled="false" virtual="true">
             <Dimensions x="32" y="32"/>
-            <Anchor point="CENTER" relativeTo="$(parent)Label" relativePoint="LEFT" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_SECOND_ICON_X_OFFSET" />
+            <Anchor point="CENTER" relativeTo="$(parent)Label" relativePoint="LEFT" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_SECOND_ICON_X_OFFSET"/>
         </Texture>
-
         <Label name="ZO_GamepadMenuEntryStackCountTemplate" horizontalAlignment="RIGHT" verticalAlignment="BOTTOM" font="ZoFontGamepad25" inheritScale="false" virtual="true">
             <Anchor point="BOTTOMRIGHT" offsetX="1" offsetY="5"/>
         </Label>
-
         <Texture name="ZO_GamepadMenuEntryPlayerLockedTemplate" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_icon_locked32.dds" tier="HIGH" inheritScale="false" virtual="true" hidden="true">
             <Dimensions x="32" y="32"/>
-            <Anchor point="BOTTOMRIGHT" />
+            <Anchor point="BOTTOMRIGHT"/>
         </Texture>
-
         <Label name="ZO_GamepadMenuEntryLabelTemplate" font="ZoFontGamepad34" verticalAlignment="CENTER" wrapMode="ELLIPSIS" modifyTextType="UPPERCASE" virtual="true">
             <Anchor point="TOPLEFT" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_INDENT"/>
             <Dimensions x="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_WIDTH_AFTER_INDENT"/>
         </Label>
-
         <Label name="ZO_GamepadMenuEntryLabelTemplateLowercase34" modifyTextType="NONE" inherits="ZO_GamepadMenuEntryLabelTemplate" virtual="true"/>
-
         <Label name="ZO_GamepadMenuEntryLabelTemplateLowercase42" font="ZoFontGamepad42" verticalAlignment="CENTER" wrapMode="ELLIPSIS" virtual="true">
             <Anchor point="TOPLEFT" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_INDENT"/>
             <Dimensions x="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_WIDTH_AFTER_INDENT"/>
         </Label>
-        
         <!-- General Scroll List Templates -->
         <Control name="ZO_GamepadMenuEntryTemplateLowercase42" inherits="ZO_GamepadMenuEntryDimensionsTemplate ZO_GamepadMenuEntryLabelSizedTemplate" virtual="true">
             <Controls>
-                <Label name="$(parent)Label" inherits="ZO_GamepadMenuEntryLabelTemplateLowercase42" />
+                <Label name="$(parent)Label" inherits="ZO_GamepadMenuEntryLabelTemplateLowercase42"/>
                 <Texture name="$(parent)Icon" inherits="ZO_GamepadMenuEntryIconTemplate">
                     <Controls>
-                        <Label name="$(parent)StackCount" inherits="ZO_GamepadMenuEntryStackCountTemplate" />
+                        <Label name="$(parent)StackCount" inherits="ZO_GamepadMenuEntryStackCountTemplate"/>
                     </Controls>
                 </Texture>
             </Controls>
         </Control>
-        
         <Control name="ZO_GamepadMenuEntryTemplate" inherits="ZO_GamepadMenuEntryDimensionsTemplate ZO_GamepadMenuEntryLabelSizedTemplate" virtual="true">
             <Controls>
-                <Label name="$(parent)Label" inherits="ZO_GamepadMenuEntryLabelTemplate" />
+                <Label name="$(parent)Label" inherits="ZO_GamepadMenuEntryLabelTemplate"/>
                 <Texture name="$(parent)Icon" inherits="ZO_GamepadMenuEntryIconTemplate">
                     <Controls>
-                        <Label name="$(parent)StackCount" inherits="ZO_GamepadMenuEntryStackCountTemplate" />
+                        <Label name="$(parent)StackCount" inherits="ZO_GamepadMenuEntryStackCountTemplate"/>
                     </Controls>
                 </Texture>
             </Controls>
         </Control>
-
         <Control name="ZO_GamepadFullWidthLabelEntryTemplate" inherits="ZO_GamepadMenuEntryDimensionsTemplate ZO_GamepadMenuEntryLabelSizedTemplate" virtual="true">
             <Controls>
-                <Label name="$(parent)Label" inherits="ZO_GamepadFullWidthLabelTemplate" />
+                <Label name="$(parent)Label" inherits="ZO_GamepadFullWidthLabelTemplate"/>
             </Controls>
         </Control>
-
         <Control name="ZO_GamepadFullWidthLeftLabelEntryTemplate" inherits="ZO_GamepadMenuEntryDimensionsTemplate ZO_GamepadMenuEntryLabelSizedTemplate" virtual="true">
             <Controls>
-                <Label name="$(parent)Label" inherits="ZO_GamepadFullWidthLabelTemplate" horizontalAlignment="LEFT" />
+                <Label name="$(parent)Label" inherits="ZO_GamepadFullWidthLabelTemplate" horizontalAlignment="LEFT"/>
             </Controls>
         </Control>
-
         <Control name="ZO_GamepadMenuEntryTemplateLowercase34" inherits="ZO_GamepadMenuEntryDimensionsTemplate ZO_GamepadMenuEntryLabelSizedTemplate" virtual="true">
             <Controls>
-                <Label name="$(parent)Label" inherits="ZO_GamepadMenuEntryLabelTemplateLowercase34" />
+                <Label name="$(parent)Label" inherits="ZO_GamepadMenuEntryLabelTemplateLowercase34"/>
                 <Texture name="$(parent)Icon" inherits="ZO_GamepadMenuEntryIconTemplate">
                     <Controls>
-                        <Label name="$(parent)StackCount" inherits="ZO_GamepadMenuEntryStackCountTemplate" />
+                        <Label name="$(parent)StackCount" inherits="ZO_GamepadMenuEntryStackCountTemplate"/>
                     </Controls>
                 </Texture>
             </Controls>
         </Control>
-
         <Label name="ZO_GamepadMenuEntrySubLabelTemplateMain" font="ZoFontGamepad25" verticalAlignment="CENTER" wrapMode="ELLIPSIS" virtual="true"/>
-
         <Control name="ZO_GamepadMenuEntryNoCapitalization" inherits="ZO_GamepadMenuEntryTemplate" virtual="true">
             <Controls>
                 <Label name="$(parent)Label" override="true" modifyTextType="NONE"/>
             </Controls>
         </Control>
-        
         <Control name="ZO_GamepadSubMenuEntryTemplate" inherits="ZO_GamepadMenuEntryDimensionsTemplate ZO_GamepadMenuEntryLabelSizedTemplate" virtual="true">
             <Controls>
                 <Label name="$(parent)Label" inherits="ZO_GamepadSubMenuEntryLabelTemplate"/>
@@ -282,14 +243,13 @@
                     <Controls>
                         <Label name="$(parent)StackCount" inherits="ZO_GamepadMenuEntryStackCountTemplate" excludeFromResizeToFitExtents="true"/>
                         <Texture name="$(parent)SubStatusIcon" pixelRoundingEnabled="false" inherits="ZO_MultiIcon" tier="HIGH" inheritScale="false">
-                            <Dimensions x="32" y="32" />
-                            <Anchor point="BOTTOMRIGHT" />
+                            <Dimensions x="32" y="32"/>
+                            <Anchor point="BOTTOMRIGHT"/>
                         </Texture>
                     </Controls>
                 </Texture>
             </Controls>
         </Control>
-
         <Control name="ZO_GamepadSubMenuEntryTemplateLowercase42" inherits="ZO_GamepadMenuEntryDimensionsTemplate ZO_GamepadMenuEntryLabelSizedTemplate" virtual="true">
             <Controls>
                 <Label name="$(parent)Label" inherits="ZO_GamepadSubMenuEntryLabelTemplateLowercase42"/>
@@ -300,49 +260,40 @@
                 </Texture>
             </Controls>
         </Control>
-
         <!--
             A template for adding a static entry to a parameteric scroll list.
         -->
-
         <Control name="ZO_GamepadDisplayEntryTemplate" resizeToFitConstrains="Y" virtual="true">
-            <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" />
-
+            <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH"/>
             <Controls>
                 <Texture name="$(parent)Icon">
-                    <Anchor point="LEFT" />
-                    <Dimensions x="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_ICON_FULL_SIZE_DIMENSION" y="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_ICON_FULL_SIZE_DIMENSION" />
-
+                    <Anchor point="LEFT"/>
+                    <Dimensions x="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_ICON_FULL_SIZE_DIMENSION" y="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_ICON_FULL_SIZE_DIMENSION"/>
                     <Controls>
-                        <Label name="$(parent)StackCount" inherits="ZO_GamepadMenuEntryStackCountTemplate" />
+                        <Label name="$(parent)StackCount" inherits="ZO_GamepadMenuEntryStackCountTemplate"/>
                     </Controls>
                 </Texture>
-
                 <Label name="$(parent)Label" font="ZoFontGamepad34" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE">
-                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="15" />
-                    <Anchor point="RIGHT" />
+                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="15"/>
+                    <Anchor point="RIGHT"/>
                 </Label>
             </Controls>
         </Control>
-
         <Control name="ZO_GamepadDisplayEntryTemplateLowercase34" inherits="ZO_GamepadDisplayEntryTemplate" virtual="true">
             <Controls>
-                <Label name="$(parent)Label" override="true" modifyTextType="NONE" />
+                <Label name="$(parent)Label" override="true" modifyTextType="NONE"/>
             </Controls>
         </Control>
-
         <Control name="ZO_GamepadDisplayEntryTemplate42" inherits="ZO_GamepadDisplayEntryTemplate" virtual="true">
             <Controls>
-                <Label name="$(parent)Label" override="true" font="ZoFontGamepad42" />
+                <Label name="$(parent)Label" override="true" font="ZoFontGamepad42"/>
             </Controls>
         </Control>
-
         <Control name="ZO_GamepadDisplayEntryTemplateLowercase42" inherits="ZO_GamepadDisplayEntryTemplate42" virtual="true">
             <Controls>
-                <Label name="$(parent)Label" override="true" modifyTextType="NONE" />
+                <Label name="$(parent)Label" override="true" modifyTextType="NONE"/>
             </Controls>
         </Control>
-
         <!--
             A template for adding a checkbox to a parameteric scroll list.
 
@@ -358,26 +309,22 @@
             <OnInitialized>
                 ZO_GamepadCheckBoxTemplate_OnInitialized(self, ZO_GAMEPAD_DEFAULT_LIST_ENTRY_INDENT)
             </OnInitialized>
-
             <Controls>
                 <Button name="$(parent)CheckBox" inherits="ZO_GamepadCheckButton">
                     <Anchor point="LEFT" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_INDENT"/>
                 </Button>
-
                 <Label name="$(parent)Label" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" font="ZoFontGamepad34" modifyTextType="UPPERCASE">
                     <Anchor point="LEFT" relativeTo="$(parent)CheckBox" relativePoint="RIGHT" offsetX="5"/>
                 </Label>
             </Controls>
         </Control>
-        
         <Control name="ZO_CheckBoxTemplate_WithoutIndent_Gamepad" inherits="ZO_CheckBoxTemplate_Gamepad" virtual="true">
             <Controls>
                 <Button name="$(parent)CheckBox" override="true">
-                    <Anchor point="LEFT" />
+                    <Anchor point="LEFT"/>
                 </Button>
             </Controls>
         </Control>
-
         <Control name="ZO_CheckBoxTemplate_WithPadding_Gamepad" inherits="ZO_CheckBoxTemplate_Gamepad" virtual="true">
             <Controls>
                 <Button name="$(parent)CheckBox" override="true">
@@ -385,52 +332,46 @@
                 </Button>
             </Controls>
         </Control>
-        
         <Control name="ZO_CheckBoxTemplate_Pregame_Gamepad" inherits="ZO_CheckBoxTemplate_Gamepad" virtual="true">
             <OnInitialized>
                 ZO_GamepadCheckBoxTemplate_OnInitialized(self)
             </OnInitialized>
-            
             <Controls>
                 <Button name="$(parent)CheckBox" inherits="ZO_GamepadCheckButton" override="true">
-                    <Anchor point="LEFT" />
+                    <Anchor point="LEFT"/>
                 </Button>
             </Controls>
         </Control>
-
         <Control name="ZO_OptionsCheckbox_GamepadTemplate" virtual="true">
             <Controls>
                 <Texture name="$(parent)OutlineIcon" textureFile="EsoUI/Art/Buttons/Gamepad/Console-Widget-CheckBoxBack.dds">
-                    <Dimensions x="24" y="24" />
+                    <Dimensions x="24" y="24"/>
                 </Texture>
                 <Texture name="$(parent)EnabledIcon" textureFile="EsoUI/Art/Buttons/Gamepad/Console-Widget-CheckBox.dds">
-                    <Dimensions x="24" y="24" />
+                    <Dimensions x="24" y="24"/>
                 </Texture>
             </Controls>
         </Control>
-
         <Control name="ZO_OptionsRightCheckbox_Gamepad" inherits="ZO_OptionsCheckbox_GamepadTemplate" virtual="true">
             <Controls>
                 <Texture name="$(parent)OutlineIcon" override="true">
-                    <Anchor point="RIGHT" offsetX="-12" />
+                    <Anchor point="RIGHT" offsetX="-12"/>
                 </Texture>
                 <Texture name="$(parent)EnabledIcon" override="true">
-                    <Anchor point="RIGHT" offsetX="-12" />
+                    <Anchor point="RIGHT" offsetX="-12"/>
                 </Texture>
             </Controls>
         </Control>
-
         <Control name="ZO_OptionsLeftCheckbox_Gamepad" inherits="ZO_OptionsCheckbox_GamepadTemplate" virtual="true">
             <Controls>
                 <Texture name="$(parent)OutlineIcon" override="true">
-                    <Anchor point="LEFT" offsetX="12" />
+                    <Anchor point="LEFT" offsetX="12"/>
                 </Texture>
                 <Texture name="$(parent)EnabledIcon" override="true">
-                    <Anchor point="LEFT" offsetX="12" />
+                    <Anchor point="LEFT" offsetX="12"/>
                 </Texture>
             </Controls>
         </Control>
-        
         <!--
             This template is intended for usage with the template setup function set to ZO_GamepadMenuHeaderTemplate_Setup.
              When using that setup function, this template includes a few additional features that can be enabled in the item
@@ -453,7 +394,6 @@
                 </Label>
             </Controls>
         </Control>
-
         <Control name="ZO_GamepadMenuHeaderUppercaseTemplate" virtual="true">
             <Dimensions x="440" y="60"/>
             <Anchor point="TOPLEFT"/>
@@ -466,27 +406,24 @@
                 </Label>
             </Controls>
         </Control>
-
         <Control name="ZO_TabBarScrollListTemplate" mouseEnabled="true" virtual="true">
             <OnMouseWheel>
                 <!-- TODO: We should come up with a more robust "mouse interacting with gamepad screens" setup 
                      if we plan on supporting it -->
                 local DONT_ALLOW_WRAPPING = false
                 local SUPPRESS_FAIL_SOUND = true
-                if delta > 0 then
+                if delta &gt; 0 then
                     self.scrollList:MoveNext(DONT_ALLOW_WRAPPING, SUPPRESS_FAIL_SOUND)
                 else
                     self.scrollList:MovePrevious(DONT_ALLOW_WRAPPING, SUPPRESS_FAIL_SOUND)
                 end
             </OnMouseWheel>
-
             <Controls>
                 <Scroll name="$(parent)Scroll">
-                    <AnchorFill />
+                    <AnchorFill/>
                 </Scroll>
             </Controls>
         </Control>
-
         <!--
             This template is intended for usage with the template setup function set to ZO_GamepadTabBarTemplate_Setup,
             and the container should inherit from ZO_GamepadTabBarScrollListTemplate.
@@ -499,54 +436,47 @@
             </OnInitialized>
             <Controls>
                 <Label name="$(parent)Label" inherits="ZO_ThreeLineHeaderAdjustingWrapLabel_Gamepad" horizontalAlignment="CENTER" verticalAlignment="BOTTOM" modifyTextType="UPPERCASE">
-                    <Anchor point="BOTTOMLEFT" />
-                    <Anchor point="BOTTOMRIGHT" />
+                    <Anchor point="BOTTOMLEFT"/>
+                    <Anchor point="BOTTOMRIGHT"/>
                 </Label>
             </Controls>
         </Control>
-
         <Control name="ZO_GamepadTabBarPip" virtual="true">
-            <Dimensions x="32" y="32" />
+            <Dimensions x="32" y="32"/>
             <Controls>
                 <Texture name="$(parent)Active" textureFile="EsoUI/Art/Miscellaneous/Gamepad/pip_active.dds" tier="HIGH">
-                    <AnchorFill />
+                    <AnchorFill/>
                 </Texture>
                 <Texture name="$(parent)Inactive" textureFile="EsoUI/Art/Miscellaneous/Gamepad/pip_inactive.dds" tier="HIGH">
-                    <AnchorFill />
+                    <AnchorFill/>
                 </Texture>
             </Controls>
         </Control>
-
         <!-- These templates are used to make the horizontal scroll list entries seen in ZO_GamepadOptions and GameStartup_Gamepad -->
         <Label name="ZO_GamepadHorizontalListEntry" font="ZoFontGamepad27" horizontalAlignment="CENTER" modifyTextType="UPPERCASE" virtual="true" maxLineCount="1">
             <Dimensions x="320"/>
         </Label>
-
-        <Control name="ZO_GamepadHorizontalListTemplate" virtual="true">
+        <Control name="ZO_GamepadHorizontalListTemplate" inherits="ZO_HorizontalScrollListTemplate" virtual="true">
             <Controls>
-                <Scroll name="$(parent)Scroll">
+                <Scroll name="$(parent)Scroll" override="true">
                     <Anchor point="TOPLEFT" offsetX="24"/>
-                    <Anchor point="BOTTOMRIGHT" offsetX="-24" />
-                    <FadeGradient x1="0" y1="0" size1="0" x2="0" y2="0" size2="0" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-24"/>
+                    <FadeGradient x1="0" y1="0" size1="0" x2="0" y2="0" size2="0"/>
                 </Scroll>
-
-                <Button name="$(parent)LeftArrow" hidden="true">
-                    <Dimensions x="24" y="48" />
-                    <Anchor point="LEFT" />
-
-                    <Textures normal="EsoUI/Art/Buttons/Gamepad/gp_spinnerLR.dds" pressed="" disabled=""/>
-                    <TextureCoords left="1" right="0" top="0" bottom="1" />
+                <Button name="$(parent)LeftArrow" override="true" hidden="true">
+                    <Dimensions x="24" y="48"/>
+                    <Anchor point="LEFT"/>
+                    <Textures normal="EsoUI/Art/Buttons/Gamepad/gp_spinnerLR.dds" pressed="" mouseOver="" disabled=""/>
+                    <TextureCoords left="1" right="0" top="0" bottom="1"/>
                 </Button>
-
-                <Button name="$(parent)RightArrow" hidden="true" >
-                    <Dimensions x="24" y="48" />
-                    <Anchor point="RIGHT" />
-                    <Textures normal="EsoUI/Art/Buttons/Gamepad/gp_spinnerLR.dds" pressed="" disabled="" />
-                    <TextureCoords left="0" right="1" top="0" bottom="1" />
+                <Button name="$(parent)RightArrow" override="true" hidden="true">
+                    <Dimensions x="24" y="48"/>
+                    <Anchor point="RIGHT"/>
+                    <Textures normal="EsoUI/Art/Buttons/Gamepad/gp_spinnerLR.dds" pressed="" mouseOver="" disabled=""/>
+                    <TextureCoords left="0" right="1" top="0" bottom="1"/>
                 </Button>
             </Controls>
         </Control>
-
         <Control name="ZO_SpinnerEntry_Indented_Gamepad" inherits="ZO_GamepadMenuEntryDimensionsTemplate ZO_GamepadMenuEntryLabelSizedTemplate" virtual="true">
             <Controls>
                 <Control name="$(parent)Spinner" mouseEnabled="true" excludeFromResizeToFitExtents="true">
@@ -554,55 +484,46 @@
                     <Dimensions y="42"/>
                     <Controls>
                         <Button name="$(parent)Increase">
-                            <Dimensions x="32" y="35" />
+                            <Dimensions x="32" y="35"/>
                             <Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" offsetY="5"/>
-                            <TextureCoords left="0" right="1" top="0.234" bottom="0.765625" />
-                            <Textures normal="EsoUI/Art/Buttons/Gamepad/gp_spinnerLR.dds"
-                                      disabled="EsoUI/Art/Buttons/Gamepad/gp_spinnerLR_disabled.dds"/>
+                            <TextureCoords left="0" right="1" top="0.234" bottom="0.765625"/>
+                            <Textures normal="EsoUI/Art/Buttons/Gamepad/gp_spinnerLR.dds" disabled="EsoUI/Art/Buttons/Gamepad/gp_spinnerLR_disabled.dds"/>
                         </Button>
-
                         <Label name="$(parent)Display" inherits="ZO_GamepadStatsDataTemplate">
-                            <Anchor point="TOPRIGHT" relativePoint="TOPLEFT" relativeTo="$(parent)Increase" offsetX="-8" offsetY="-5" />
+                            <Anchor point="TOPRIGHT" relativePoint="TOPLEFT" relativeTo="$(parent)Increase" offsetX="-8" offsetY="-5"/>
                         </Label>
-
                         <Button name="$(parent)Decrease">
-                            <Dimensions x="32" y="35" />
-                            <Anchor point="TOPRIGHT" relativePoint="TOPLEFT" relativeTo="$(parent)Display" offsetX="-10" offsetY="5" />
-                            <TextureCoords left="1" right="0" top="0.234" bottom="0.765625" />
-                            <Textures normal="EsoUI/Art/Buttons/Gamepad/gp_spinnerLR.dds"
-                                      disabled="EsoUI/Art/Buttons/Gamepad/gp_spinnerLR_disabled.dds"/>
+                            <Dimensions x="32" y="35"/>
+                            <Anchor point="TOPRIGHT" relativePoint="TOPLEFT" relativeTo="$(parent)Display" offsetX="-10" offsetY="5"/>
+                            <TextureCoords left="1" right="0" top="0.234" bottom="0.765625"/>
+                            <Textures normal="EsoUI/Art/Buttons/Gamepad/gp_spinnerLR.dds" disabled="EsoUI/Art/Buttons/Gamepad/gp_spinnerLR_disabled.dds"/>
                         </Button>
                     </Controls>
                 </Control>
-
                 <Label name="$(parent)Label" inherits="ZO_GamepadMenuEntryLabelTemplate">
                     <Dimensions x="180"/>
                 </Label>
                 <Texture name="$(parent)Icon" inherits="ZO_GamepadMenuEntryIconTemplate"/>
-                <Texture name="$(parent)StatusIndicator" inherits="ZO_GamepadMenuEntryStatusIndicationTemplate" />
+                <Texture name="$(parent)StatusIndicator" inherits="ZO_GamepadMenuEntryStatusIndicationTemplate"/>
             </Controls>
         </Control>
-
         <Label name="ZO_GamepadFullWidthLabelTemplate" inherits="ZO_GamepadMenuEntryLabelTemplate" horizontalAlignment="CENTER" virtual="true">
             <Anchor point="TOPLEFT" relativeTo="$(parent)RootSpacer" relativePoint="TOPLEFT"/>
             <Anchor point="TOPRIGHT" relativeTo="$(parent)RootSpacer" relativePoint="TOPRIGHT"/>
         </Label>
-
         <Control name="ZO_GamepadHorizontalListRow" inherits="ZO_GamepadMenuEntryDimensionsTemplate" virtual="true">
             <OnInitialized>
                 ZO_GamepadHorizontalListRow_Initialize(self, ZO_GamepadDefaultHorizontalListEntrySetup)
             </OnInitialized>
             <Controls>
                 <Label name="$(parent)Name" inherits="ZO_GamepadFullWidthLabelTemplate"/>
-
                 <Control name="$(parent)HorizontalList" inherits="ZO_GamepadHorizontalListTemplate">
-                    <Dimensions y="28" />
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT" />
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Name" relativePoint="BOTTOMRIGHT" />
+                    <Dimensions y="28"/>
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Name" relativePoint="BOTTOMRIGHT"/>
                 </Control>
             </Controls>
         </Control>
-
         <Control name="ZO_Gamepad_Dropdown_Base" virtual="true">
             <OnInitialized>
                 ZO_SharedGamepadEntry_OnInitialized(self)
@@ -611,31 +532,26 @@
                     return self.dropdown:GetHeight()
                 end
             </OnInitialized>
-
             <Controls>
                 <Control name="$(parent)Dropdown" inherits="ZO_ComboBox_Gamepad">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)RootSpacer" />
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)RootSpacer" />
-                </Control>
-            </Controls>
-        </Control>
-
-        <Control name="ZO_Gamepad_Dropdown_FullWidth_Template" virtual="true">
-            <Anchor point="TOPLEFT"/>
-            <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" y="48"/>
-        </Control>
-
-        <Control name="ZO_Gamepad_Dropdown_Item_FullWidth" inherits="ZO_Gamepad_Dropdown_FullWidth_Template ZO_Gamepad_Dropdown_Base" virtual="true" />
-        
-        <Control name="ZO_Gamepad_Dropdown_Item_Indented" inherits="ZO_GamepadMenuEntryDimensionsTemplate ZO_Gamepad_Dropdown_Base" virtual="true">
-            <Controls>
-                <Control name="$(parent)Dropdown" override="true">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)RootSpacer" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_INDENT" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)RootSpacer"/>
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)RootSpacer"/>
                 </Control>
             </Controls>
         </Control>
-
+        <Control name="ZO_Gamepad_Dropdown_FullWidth_Template" virtual="true">
+            <Anchor point="TOPLEFT"/>
+            <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" y="48"/>
+        </Control>
+        <Control name="ZO_Gamepad_Dropdown_Item_FullWidth" inherits="ZO_Gamepad_Dropdown_FullWidth_Template ZO_Gamepad_Dropdown_Base" virtual="true"/>
+        <Control name="ZO_Gamepad_Dropdown_Item_Indented" inherits="ZO_GamepadMenuEntryDimensionsTemplate ZO_Gamepad_Dropdown_Base" virtual="true">
+            <Controls>
+                <Control name="$(parent)Dropdown" override="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)RootSpacer" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_INDENT"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)RootSpacer"/>
+                </Control>
+            </Controls>
+        </Control>
         <Control name="ZO_Gamepad_MultiSelection_Dropdown_Base" virtual="true">
             <OnInitialized>
                 ZO_SharedGamepadEntry_OnInitialized(self)
@@ -644,7 +560,6 @@
                     return self.dropdown:GetHeight()
                 end
             </OnInitialized>
-
             <Controls>
                 <Control name="$(parent)Dropdown" inherits="ZO_MultiSelection_ComboBox_Gamepad">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)RootSpacer"/>
@@ -652,22 +567,18 @@
                 </Control>
             </Controls>
         </Control>
-        
-        <Control name="ZO_Gamepad_MultiSelection_Dropdown_Item_FullWidth" inherits="ZO_Gamepad_Dropdown_FullWidth_Template ZO_Gamepad_MultiSelection_Dropdown_Base" virtual="true" />
-
+        <Control name="ZO_Gamepad_MultiSelection_Dropdown_Item_FullWidth" inherits="ZO_Gamepad_Dropdown_FullWidth_Template ZO_Gamepad_MultiSelection_Dropdown_Base" virtual="true"/>
         <Control name="ZO_Gamepad_MultiSelection_Dropdown_Item_Indented" inherits="ZO_GamepadMenuEntryDimensionsTemplate ZO_Gamepad_MultiSelection_Dropdown_Base" virtual="true">
             <Controls>
                 <Control name="$(parent)Dropdown" override="true">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)RootSpacer" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_INDENT" />
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)RootSpacer" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)RootSpacer" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_INDENT"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)RootSpacer"/>
                 </Control>
             </Controls>
         </Control>
-
         <Control name="ZO_Gamepad_TextFieldEntry_FullWidth" virtual="true">
             <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" y="62"/>
         </Control>
-        
         <Control name="ZO_Gamepad_TextEditEntry_FullWidth" inherits="ZO_Gamepad_TextFieldEntry_FullWidth" virtual="true">
             <OnInitialized>
                 ZO_SharedGamepadEntry_OnInitialized(self)
@@ -678,7 +589,7 @@
                     <Anchor point="TOPLEFT"/>
                     <Anchor point="TOPRIGHT"/>
                     <Controls>
-                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop_Gamepad" />
+                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop_Gamepad"/>
                     </Controls>
                 </Backdrop>
                 <Backdrop name="$(parent)Highlight" inherits="ZO_GamepadWhiteOutlineHighlight" hidden="true">
@@ -687,7 +598,6 @@
                 </Backdrop>
             </Controls>
         </Control>
-
         <Control name="ZO_Gamepad_TextEditEntry_FullWidth_Multiline" inherits="ZO_Gamepad_TextFieldEntry_FullWidth" virtual="true">
             <OnInitialized>
                 ZO_SharedGamepadEntry_OnInitialized(self)
@@ -697,7 +607,7 @@
                 <Backdrop name="$(parent)TextField" inherits="ZO_MultiLineEditBackdrop_Gamepad">
                     <AnchorFill/>
                     <Controls>
-                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditMultiLineForBackdrop_Gamepad" />
+                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditMultiLineForBackdrop_Gamepad"/>
                     </Controls>
                 </Backdrop>
                 <Backdrop name="$(parent)Highlight" inherits="ZO_GamepadWhiteOutlineHighlight" hidden="true">
@@ -706,7 +616,6 @@
                 </Backdrop>
             </Controls>
         </Control>
-
         <Control name="ZO_Gamepad_TextEditLockedEntry_FullWidth" inherits="ZO_Gamepad_TextFieldEntry_FullWidth" virtual="true">
             <OnInitialized>
                 ZO_SharedGamepadEntry_OnInitialized(self)
@@ -714,8 +623,8 @@
             </OnInitialized>
             <Controls>
                 <Backdrop name="$(parent)TextField" inherits="ZO_MultiLineEditBackdrop_Gamepad">
-                    <Edge file="EsoUI/Art/ChatWindow/Gamepad/textEntry_edge_grey.dds" edgeFileWidth="64" edgeFileHeight="8" />
-                    <Center file="EsoUI/Art/ChatWindow/Gamepad/textEntry_center_grey.dds" />
+                    <Edge file="EsoUI/Art/ChatWindow/Gamepad/textEntry_edge_grey.dds" edgeFileWidth="64" edgeFileHeight="8"/>
+                    <Center file="EsoUI/Art/ChatWindow/Gamepad/textEntry_center_grey.dds"/>
                     <AnchorFill/>
                     <Controls>
                         <Label name="$(parent)Label" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DEFAULT_TEXT" font="ZoFontGamepad34">

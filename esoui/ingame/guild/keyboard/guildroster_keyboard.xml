@@ -13,8 +13,7 @@
                 ZO_KeyboardGuildRosterRow_OnMouseUp(self, button, upInside)
             </OnMouseUp>
             <Controls>
-                <Texture name="$(parent)BG" inherits="ZO_ThinListBgStrip" />
-                
+                <Texture name="$(parent)BG" inherits="ZO_ThinListBgStrip"/>
                 <Texture name="$(parent)StatusIcon" mouseEnabled="true" layer="OVERLAY">
                     <Anchor point="LEFT"/>
                     <Dimensions x="32" y="32"/>
@@ -87,11 +86,7 @@
                     <Dimensions x="45" y="20"/>
                 </Label>
                 <Button name="$(parent)Note">
-                    <Textures
-                        normal="EsoUI/Art/Contacts/social_note_up.dds"
-                        pressed="EsoUI/Art/Contacts/social_note_down.dds"
-                        mouseOver="EsoUI/Art/Contacts/social_note_over.dds"
-                    />
+                    <Textures normal="EsoUI/Art/Contacts/social_note_up.dds" pressed="EsoUI/Art/Contacts/social_note_down.dds" mouseOver="EsoUI/Art/Contacts/social_note_over.dds"/>
                     <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Level" offsetX="18"/>
                     <Dimensions x="32" y="32"/>
                     <OnMouseEnter>
@@ -106,7 +101,6 @@
                 </Button>
             </Controls>
         </Control>
-
         <TopLevelControl name="ZO_GuildRoster" inherits="ZO_RightPanelFootPrint" hidden="true">
             <OnInitialized>
                 ZO_KeyboardGuildRoster_OnInitialized(self)
@@ -116,22 +110,19 @@
                     <Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" offsetX="-38" offsetY="28"/>
                     <Dimensions x="270"/>
                     <Controls>
-                        <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop" defaultText="SI_REQUEST_NAME_INSTRUCTIONS" />
+                        <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop" defaultText="SI_REQUEST_NAME_INSTRUCTIONS"/>
                     </Controls>
                 </Backdrop>
-
                 <Label name="$(parent)SearchLabel" text="SI_FRIENDS_LIST_PANEL_SEARCH" font="ZoFontGameLargeBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
                     <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" relativeTo="$(parent)Search" offsetY="-2"/>
                 </Label>
-
                 <Button name="$(parent)HideOffline" inherits="ZO_CheckButton">
-                    <Anchor relativeTo="$(parent)" relativePoint="TOP" offsetX="-80" offsetY="35" />
+                    <Anchor relativeTo="$(parent)" relativePoint="TOP" offsetX="-80" offsetY="35"/>
                     <OnInitialized>
                         ZO_CheckButton_SetLabelText(self, GetString(SI_SOCIAL_LIST_HIDE_OFFLINE))
                         ZO_CheckButton_SetToggleFunction(self, ZO_KeyboardGuildRoster_ToggleHideOffline)
                     </OnInitialized>
                 </Button>
-
                 <Control name="$(parent)Headers">
                     <Anchor point="TOPLEFT" offsetX="30" offsetY="67"/>
                     <Anchor point="TOPRIGHT" offsetY="67"/>
@@ -143,7 +134,7 @@
                                 ZO_SortHeader_SetTooltip(self, GetString(SI_FRIENDS_LIST_PANEL_TOOLTIP_STATUS))
                             </OnInitialized>
                             <Anchor point="TOPLEFT" offsetX="8"/>
-                            <Dimensions x="16" y="32" />
+                            <Dimensions x="16" y="32"/>
                         </Control>
                         <Control name="$(parent)Alliance" inherits="ZO_SortHeaderIcon">
                             <OnInitialized>
@@ -151,7 +142,7 @@
                                 ZO_SortHeader_SetTooltip(self, GetString(SI_FRIENDS_LIST_PANEL_TOOLTIP_ALLIANCE))
                             </OnInitialized>
                             <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Status" offsetX="17"/>
-                            <Dimensions x="16" y="32" />
+                            <Dimensions x="16" y="32"/>
                         </Control>
                         <Control name="$(parent)Rank" inherits="ZO_SortHeaderIcon">
                             <OnInitialized>
@@ -159,7 +150,7 @@
                                 ZO_SortHeader_SetTooltip(self, GetString(SI_GUILD_TOOLTIP_RANK))
                             </OnInitialized>
                             <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Alliance" offsetX="17"/>
-                            <Dimensions x="16" y="32" />
+                            <Dimensions x="16" y="32"/>
                         </Control>
                         <Control name="$(parent)DisplayName" inherits="ZO_SortHeader">
                             <OnInitialized>
@@ -181,7 +172,7 @@
                                 ZO_SortHeader_SetTooltip(self, GetString(SI_FRIENDS_LIST_PANEL_TOOLTIP_CLASS))
                             </OnInitialized>
                             <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Zone" offsetX="25"/>
-                            <Dimensions x="16" y="32" />
+                            <Dimensions x="16" y="32"/>
                         </Control>
                         <Control name="$(parent)Level" inherits="ZO_SortHeaderIcon">
                             <OnInitialized>
@@ -189,47 +180,41 @@
                                 ZO_SortHeader_SetTooltip(self, GetString(SI_FRIENDS_LIST_PANEL_TOOLTIP_LEVEL))
                             </OnInitialized>
                             <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Class" offsetX="60"/>
-                            <Dimensions x="16" y="32" />
+                            <Dimensions x="16" y="32"/>
                         </Control>
                     </Controls>
                 </Control>
-
                 <Control name="$(parent)List" inherits="ZO_ScrollList">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Headers" relativePoint="BOTTOMLEFT" offsetY="3"/>
                     <Anchor point="BOTTOMRIGHT" offsetX="-35" offsetY="-32"/>
                 </Control>
             </Controls>
         </TopLevelControl>
-
         <TopLevelControl name="ZO_ConfirmRemoveGuildMemberDialog_Keyboard" inherits="ZO_CustomDialogBase">
             <OnInitialized>
                 ZO_ConfirmRemoveGuildMemberDialog_Keyboard_OnInitialized(self)
             </OnInitialized>
             <Controls>
-                <Label name="$(parent)Text" inherits="ZO_DialogContentAnchors" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame" />
-
+                <Label name="$(parent)Text" inherits="ZO_DialogContentAnchors" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame"/>
                 <Button name="$(parent)Check" inherits="ZO_CheckButton">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Text" relativePoint="BOTTOMLEFT" offsetY="10"/>
                 </Button>
-
                 <Backdrop name="$(parent)BlacklistMessage" inherits="ZO_MultiLineEditBackdrop_Keyboard" hidden="true">
-                    <Anchor point="RIGHT" relativeTo="$(parent)Text" relativePoint="RIGHT" constrains="X" />
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Check" relativePoint="BOTTOMLEFT" offsetY="10" />
+                    <Anchor point="RIGHT" relativeTo="$(parent)Text" relativePoint="RIGHT" constrains="X"/>
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Check" relativePoint="BOTTOMLEFT" offsetY="10"/>
                     <Dimensions y="180"/>
                     <Controls>
-                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditMultiLineForBackdrop" maxInputCharacters="MAX_GUILD_BLACKLIST_MESSAGE_LENGTH" defaultText="SI_GUILD_RECRUITMENT_BLACKLIST_NOTE_DEFAULT_TEXT" />
+                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditMultiLineForBackdrop" maxInputCharacters="MAX_GUILD_BLACKLIST_MESSAGE_LENGTH" defaultText="SI_GUILD_RECRUITMENT_BLACKLIST_NOTE_DEFAULT_TEXT"/>
                     </Controls>
                 </Backdrop>
-
                 <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton"/>
                 <Control name="$(parent)Confirm" inherits="ZO_CustomDialogButton"/>
             </Controls>
         </TopLevelControl>
-
         <Control name="ZO_GuildSetRankDialogRank_Keyboard" resizeToFitDescendents="true" virtual="true">
             <Controls>
                 <Label name="$(parent)Bind" inherits="ZO_LargeKeyMarkupLabel" font="ZoFontGame">
-                    <Anchor point="TOPLEFT" offsetX="5" />
+                    <Anchor point="TOPLEFT" offsetX="5"/>
                 </Label>
                 <Button name="$(parent)Button" inherits="ZO_LabeledRadioButton">
                     <Anchor point="LEFT" relativeTo="$(parent)Bind" relativePoint="RIGHT" offsetX="20"/>
@@ -239,7 +224,6 @@
                 </Button>
             </Controls>
         </Control>
-        
         <TopLevelControl name="ZO_GuildSetRankDialog_Keyboard" inherits="ZO_CustomDialogBase">
             <OnInitialized>
                 ZO_GuildSetRankDialog_Keyboard_OnInitialized(self)
@@ -249,16 +233,13 @@
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetX="46" offsetY="30"/>
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)Title" relativePoint="BOTTOMRIGHT" offsetY="30"/>
                 </Label>
-
                 <Control name="$(parent)Buttons" resizeToFitDescendents="true">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Text" relativePoint="BOTTOMLEFT" offsetX="-46" offsetY="15"/>
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)Text" relativePoint="BOTTOMRIGHT" offsetY="15"/>
                 </Control>
-                
                 <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton"/>
                 <Control name="$(parent)Confirm" inherits="ZO_CustomDialogButton"/>
             </Controls>
         </TopLevelControl>
-
     </Controls>
 </GuiXml>

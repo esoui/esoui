@@ -1,4 +1,4 @@
-﻿<GuiXml>
+<GuiXml>
     <Controls>
         <TopLevelControl name="ZO_Gamepad_RepairKits" inherits="ZO_Gamepad_ParametricList_Screen" hidden="true">
             <OnInitialized>

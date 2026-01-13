@@ -26,6 +26,20 @@ endeavorSealStoreScene:AddFragment(TREE_UNDERLAY_FRAGMENT)
 endeavorSealStoreScene:AddFragment(KEYBIND_STRIP_FADE_FRAGMENT)
 endeavorSealStoreScene:AddFragment(UI_SHORTCUTS_ACTION_LAYER_FRAGMENT)
 
+----------------------------
+--Gildbar Store Scene
+----------------------------
+
+local gildbarStoreScene = SCENE_MANAGER:GetScene("gildbarStoreSceneKeyboard")
+-- The preview options fragment needs to be added before the ITEM_PREVIEW_KEYBOARD fragment,
+-- which is part of ZO_ITEM_PREVIEW_LIST_HELPER_KEYBOARD_FRAGMENT_GROUP
+gildbarStoreScene:AddFragment(MARKET_ITEM_PREVIEW_OPTIONS_FRAGMENT)
+gildbarStoreScene:AddFragmentGroup(ZO_ITEM_PREVIEW_LIST_HELPER_KEYBOARD_FRAGMENT_GROUP)
+
+gildbarStoreScene:AddFragment(TREE_UNDERLAY_FRAGMENT)
+gildbarStoreScene:AddFragment(KEYBIND_STRIP_FADE_FRAGMENT)
+gildbarStoreScene:AddFragment(UI_SHORTCUTS_ACTION_LAYER_FRAGMENT)
+
 -------------------
 --Eso Plus Offers Scene
 -------------------
@@ -44,4 +58,3 @@ esoPlusOffersScene:AddFragment(UI_SHORTCUTS_ACTION_LAYER_FRAGMENT)
 --Crown Crates Scene
 -------------------
 local remoteCrownCratesSceneKeyboard = ZO_RemoteScene:New("crownCrateKeyboard", SCENE_MANAGER)
-

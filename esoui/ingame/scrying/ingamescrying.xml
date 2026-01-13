@@ -1,12 +1,10 @@
 <GuiXml>
     <Controls>
         <TopLevelControl name="ZO_IngameScryingTopLevel" hidden="true">
-            <AnchorFill />
-
+            <AnchorFill/>
             <OnInitialized>
                 ZO_IngameScrying_OnInitialized(self)
             </OnInitialized>
-
             <Controls>
                 <Control name="$(parent)HelpTutorialsKeybindButton" inherits="ZO_KeybindButton">
                     <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" offsetX="-100" offsetY="-40"/>

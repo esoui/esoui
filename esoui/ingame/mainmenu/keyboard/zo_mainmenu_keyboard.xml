@@ -2,13 +2,12 @@
     <Animations>
         <AnimationTimeline name="ZO_CrownStoreShineAnimation" playbackType="LOOP" loopCount="LOOP_INDEFINITELY">
             <Animations>
-                <TextureAnimation delay="3000" duration="1000" cellsWide="32" cellsHigh="1" />
-                <AlphaAnimation delay="3000" duration="20" startAlpha="0" endAlpha="1" />
-                <AlphaAnimation delay="4000" duration="20" startAlpha="1" endAlpha="0" />
+                <TextureAnimation delay="3000" duration="1000" cellsWide="32" cellsHigh="1"/>
+                <AlphaAnimation delay="3000" duration="20" startAlpha="0" endAlpha="1"/>
+                <AlphaAnimation delay="4000" duration="20" startAlpha="1" endAlpha="0"/>
             </Animations>
         </AnimationTimeline>
     </Animations>
-    
     <Controls>
         <Control name="ZO_MainMenuSubcategoryBar" virtual="true" resizeToFitDescendents="true" hidden="true"/>
         <Label name="ZO_MainMenuSubcategoryButton" virtual="true" font="ZoFontHeader3" mouseEnabled="true" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_CONTRAST">
@@ -28,15 +27,15 @@
             </OnMouseExit>
             <Controls>
                 <Label name="$(parent)RemainingCrowns" font="ZoFontHeader2" mouseEnabled="false" hidden="true" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" horizontalAlignment="RIGHT" excludeFromResizeToFitExtents="true">
-                    <Anchor point="RIGHT" relativePoint="LEFT" offsetX="-20" offsetY="0" />
+                    <Anchor point="RIGHT" relativePoint="LEFT" offsetX="-20" offsetY="0"/>
                 </Label>
                 <Label name="$(parent)Membership" font="ZoFontGameSmall" mouseEnabled="false" hidden="true" color="INTERFACE_COLOR_TYPE_MARKET_COLORS:MARKET_COLORS_ESO_PLUS" horizontalAlignment="RIGHT" excludeFromResizeToFitExtents="true">
-                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)RemainingCrowns" relativePoint="TOPRIGHT" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)RemainingCrowns" relativePoint="TOPRIGHT"/>
                 </Label>
                 <Texture name="$(parent)Image" level="1" excludeFromResizeToFitExtents="true" pixelRoundingEnabled="false" override="true">
                     <Controls>
                         <Texture name="$(parent)Animation" level="20" excludeFromResizeToFitExtents="true" pixelRoundingEnabled="false" hidden="true">
-                            <AnchorFill />
+                            <AnchorFill/>
                         </Texture>
                     </Controls>
                 </Texture>
@@ -55,10 +54,8 @@
                 <Control name="$(parent)CategoryBar" inherits="ZO_MenuBarTemplate" hidden="true">
                     <Anchor point="TOP"/>
                 </Control>
-
                 <Control name="$(parent)SceneGroupBar" inherits="ZO_LabelButtonBar" hidden="true">
-                    <Anchor point="RIGHT" relativeTo="GuiRoot" offsetX="-40" offsetY="-340" />
-                    
+                    <Anchor point="RIGHT" relativeTo="GuiRoot" offsetX="-40" offsetY="-340"/>
                     <Controls>
                         <Label name="$(parent)Label" override="true">
                             <OnTextChanged>

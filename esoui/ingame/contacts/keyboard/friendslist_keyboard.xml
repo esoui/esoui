@@ -13,7 +13,7 @@
                 ZO_FriendsListRow_OnMouseUp(self, button, upInside)
             </OnMouseUp>
             <Controls>
-                <Texture name="$(parent)BG" inherits="ZO_ThinListBgStrip" />
+                <Texture name="$(parent)BG" inherits="ZO_ThinListBgStrip"/>
                 <Texture name="$(parent)StatusIcon" layer="OVERLAY" mouseEnabled="true">
                     <Anchor point="LEFT"/>
                     <Dimensions x="32" y="32"/>
@@ -33,7 +33,7 @@
                     <OnMouseExit>
                         ZO_FriendsListRowAlliance_OnMouseExit(self)
                     </OnMouseExit>
-                </Texture>                
+                </Texture>
                 <Label name="$(parent)DisplayName" inherits="ZO_FriendsListRowLabel" verticalAlignment="CENTER" mouseEnabled="true">
                     <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)AllianceIcon" offsetX="25"/>
                     <Dimensions x="225" y="30"/>
@@ -76,11 +76,7 @@
                     <Dimensions x="45" y="20"/>
                 </Label>
                 <Button name="$(parent)Note">
-                    <Textures
-                        normal="EsoUI/Art/Contacts/social_note_up.dds"
-                        pressed="EsoUI/Art/Contacts/social_note_down.dds"
-                        mouseOver="EsoUI/Art/Contacts/social_note_over.dds"
-                    />                        
+                    <Textures normal="EsoUI/Art/Contacts/social_note_up.dds" pressed="EsoUI/Art/Contacts/social_note_down.dds" mouseOver="EsoUI/Art/Contacts/social_note_over.dds"/>
                     <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Level" offsetX="18"/>
                     <Dimensions x="32" y="32"/>
                     <OnMouseEnter>
@@ -95,7 +91,6 @@
                 </Button>
             </Controls>
         </Control>
-
         <Control name="ZO_FriendsListHeaders" mouseEnabled="true" virtual="true">
             <Anchor point="TOPLEFT" offsetX="30" offsetY="67"/>
             <Anchor point="TOPRIGHT" offsetY="67"/>
@@ -107,7 +102,7 @@
                         ZO_SortHeader_SetTooltip(self, GetString(SI_FRIENDS_LIST_PANEL_TOOLTIP_STATUS))
                     </OnInitialized>
                     <Anchor point="TOPLEFT" offsetX="8"/>
-                    <Dimensions x="16" y="32" />
+                    <Dimensions x="16" y="32"/>
                 </Control>
                 <Control name="$(parent)Alliance" inherits="ZO_SortHeaderIcon">
                     <OnInitialized>
@@ -115,7 +110,7 @@
                         ZO_SortHeader_SetTooltip(self, GetString(SI_FRIENDS_LIST_PANEL_TOOLTIP_ALLIANCE))
                     </OnInitialized>
                     <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Status" offsetX="17"/>
-                    <Dimensions x="16" y="32" />
+                    <Dimensions x="16" y="32"/>
                 </Control>
                 <Control name="$(parent)DisplayName" inherits="ZO_SortHeader">
                     <OnInitialized>
@@ -137,7 +132,7 @@
                         ZO_SortHeader_SetTooltip(self, GetString(SI_FRIENDS_LIST_PANEL_TOOLTIP_CLASS))
                     </OnInitialized>
                     <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Zone" offsetX="25"/>
-                    <Dimensions x="16" y="32" />
+                    <Dimensions x="16" y="32"/>
                 </Control>
                 <Control name="$(parent)Level" inherits="ZO_SortHeaderIcon">
                     <OnInitialized>
@@ -145,11 +140,10 @@
                         ZO_SortHeader_SetTooltip(self, GetString(SI_FRIENDS_LIST_PANEL_TOOLTIP_LEVEL))
                     </OnInitialized>
                     <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Class" offsetX="62"/>
-                    <Dimensions x="16" y="32" />
+                    <Dimensions x="16" y="32"/>
                 </Control>
             </Controls>
         </Control>
-
         <TopLevelControl name="ZO_KeyboardFriendsList" inherits="ZO_RightPanelFootPrint" hidden="true">
             <OnInitialized>
                 ZO_FriendsList_OnInitialized(self)
@@ -159,25 +153,21 @@
                     <Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" offsetX="-38" offsetY="28"/>
                     <Dimensions x="270"/>
                     <Controls>
-                        <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop" defaultText="SI_REQUEST_NAME_INSTRUCTIONS" />
+                        <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop" defaultText="SI_REQUEST_NAME_INSTRUCTIONS"/>
                     </Controls>
                 </Backdrop>
-
                 <Label name="$(parent)SearchLabel" text="SI_FRIENDS_LIST_PANEL_SEARCH" font="ZoFontGameLargeBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
                     <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" relativeTo="$(parent)Search" offsetY="-2"/>
                 </Label>
-
                 <Button name="$(parent)HideOffline" inherits="ZO_CheckButton">
-                    <Anchor relativeTo="$(parent)" relativePoint="TOP" offsetX="-80" offsetY="35" />
+                    <Anchor relativeTo="$(parent)" relativePoint="TOP" offsetX="-80" offsetY="35"/>
                     <OnInitialized>
                         ZO_CheckButton_SetLabelText(self, GetString(SI_SOCIAL_LIST_HIDE_OFFLINE))
                         ZO_CheckButton_SetToggleFunction(self, ZO_FriendsList_ToggleHideOffline)
                     </OnInitialized>
                 </Button>
-
                 <!-- Headers control added dynamically based on above templates -->
-
-                <Control name="$(parent)List" inherits="ZO_ScrollList" />
+                <Control name="$(parent)List" inherits="ZO_ScrollList"/>
             </Controls>
         </TopLevelControl>
     </Controls>

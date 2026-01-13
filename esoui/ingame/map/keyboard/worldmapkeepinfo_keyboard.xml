@@ -4,10 +4,9 @@
             <Anchor point="TOPLEFT" relativeTo="ZO_WorldMapKeepInfoKeepName" relativePoint="BOTTOMLEFT"/>
             <Anchor point="BOTTOMRIGHT" relativeTo="ZO_WorldMapKeepInfo" relativePoint="BOTTOMRIGHT"/>
         </TopLevelControl>
-
         <TopLevelControl name="ZO_WorldMapKeepInfo" hidden="true">
-            <Dimensions x="350" y="485" />
-            <Anchor point="LEFT" relativeTo="GuiRoot" offsetY="-105" />
+            <Dimensions x="350" y="485"/>
+            <Anchor point="LEFT" relativeTo="GuiRoot" offsetY="-105"/>
             <OnInitialized>
                 ZO_WorldMapKeepInfo_OnInitialize(self)
             </OnInitialized>
@@ -17,12 +16,12 @@
                     <Controls>
                         <Texture name="$(parent)Divider" inherits="ZO_HorizontalDivider" excludeFromResizeToFitExtents="true">
                             <Dimensions x="472"/>
-                            <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" offsetX="-72" offsetY="14" />
+                            <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" offsetX="-72" offsetY="14"/>
                         </Texture>
                     </Controls>
                 </Control>
                 <Label name="$(parent)KeepName" font="ZoFontHeader4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" excludeFromResizeToFitExtents="true">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)MenuBar" relativePoint="BOTTOMLEFT" offsetY="25" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)MenuBar" relativePoint="BOTTOMLEFT" offsetY="25"/>
                     <Dimensions x="320"/>
                 </Label>
             </Controls>

@@ -4,49 +4,41 @@
             <Anchor point="TOPLEFT" relativeTo="ZO_GamepadSmithingTopLevelHeaderContainerHeader" relativePoint="BOTTOMLEFT"/>
             <Anchor point="TOPRIGHT" relativeTo="ZO_GamepadSmithingTopLevelHeaderContainerHeader" relativePoint="BOTTOMRIGHT"/>
         </Control>
-
         <Control name="ZO_GamepadSmithingBelowHeaderAreaAnchors" virtual="true">
             <Anchor point="TOPLEFT" relativeTo="ZO_GamepadSmithingTopLevelHeaderContainerHeader" relativePoint="BOTTOMLEFT"/>
             <Anchor point="BOTTOMRIGHT"/>
         </Control>
-        
         <Texture name="ZO_GamepadSmithingHeaderBottomDivider" inherits="ZO_GamepadHorizontalDivider" virtual="true">
             <Anchor point="TOP" relativeTo="ZO_GamepadSmithingTopLevelHeaderContainerHeader" relativePoint="BOTTOM"/>
         </Texture>
-        
-        <TopLevelControl name="ZO_GamepadSmithingTopLevelSkillInfo" inherits="ZO_GamepadSkillsFooter" hidden="true" />
-        
+        <TopLevelControl name="ZO_GamepadSmithingTopLevelSkillInfo" inherits="ZO_GamepadSkillsFooter" hidden="true"/>
         <TopLevelControl name="ZO_GamepadSmithingTopLevel" inherits="ZO_AnchoredToQuadrant1Background" hidden="true">
             <OnInitialized>
                 ZO_Smithing_Gamepad_Initialize(self)
             </OnInitialized>
-
             <Controls>
                 <Control name="$(parent)HeaderContainer" inherits="ZO_GamepadScreenHeaderContainer ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
                     <Controls>
                         <Control name="$(parent)Header" override="true">
                             <Controls>
                                 <Control name="$(parent)SetSelector" hidden="true">
-                                    <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" y="75" />
-                                    <Anchor point="TOP" relativeTo="$(parent)Message" relativePoint="BOTTOM" offsetY="25" />
+                                    <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" y="75"/>
+                                    <Anchor point="TOP" relativeTo="$(parent)Message" relativePoint="BOTTOM" offsetY="25"/>
                                     <Controls>
                                         <Label name="$(parent)Title" text="SI_GAMEPAD_SMITHING_CONSOLIDATED_STATION_ITEM_SET_HEADER" font="ZoFontGamepad27" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER">
-                                            <Anchor point="TOPLEFT" />
-                                            <Anchor point="TOPRIGHT" />
+                                            <Anchor point="TOPLEFT"/>
+                                            <Anchor point="TOPRIGHT"/>
                                         </Label>
-
                                         <Label name="$(parent)SetName" font="ZoFontGamepad34" wrapMode="ELLIPSIS" horizontalAlignment="CENTER">
-                                            <Anchor point="CENTER" relativeTo="$(parent)Title" relativePoint="BOTTOM" offsetY="25" />
+                                            <Anchor point="CENTER" relativeTo="$(parent)Title" relativePoint="BOTTOM" offsetY="25"/>
                                         </Label>
-
                                         <Texture name="$(parent)OpenDropdown" textureFile="EsoUI/Art/Buttons/Gamepad/gp_downArrow.dds">
-                                            <Dimensions x="24" y="24" />
+                                            <Dimensions x="24" y="24"/>
                                             <Anchor point="LEFT" relativeTo="$(parent)SetName" relativePoint="RIGHT" offsetX="10" offsetY="4"/>
                                         </Texture>
-                                        
                                         <Texture name="$(parent)QuestPin" excludeFromResizeToFitExtents="true" pixelRoundingEnabled="false" textureFile="EsoUI/Art/WritAdvisor/Gamepad/gp_advisor_trackedPin_icon.dds" hidden="true">
-                                            <Dimensions x="32" y="32" />
-                                            <Anchor point="RIGHT" relativeTo="$(parent)SetName" relativePoint="LEFT" offsetX="-5" />
+                                            <Dimensions x="32" y="32"/>
+                                            <Anchor point="RIGHT" relativeTo="$(parent)SetName" relativePoint="LEFT" offsetX="-5"/>
                                         </Texture>
                                     </Controls>
                                 </Control>
@@ -54,7 +46,6 @@
                         </Control>
                     </Controls>
                 </Control>
-
                 <Scroll name="$(parent)Mask" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
                     <Controls>
                         <Control name="$(parent)Container">
@@ -70,10 +61,9 @@
                         <Control name="$(parent)Refinement" inherits="ZO_GamepadSmithingExtractionPanelContent"/>
                         <Control name="$(parent)Deconstruction" inherits="ZO_GamepadSmithingExtractionPanelContent"/>
                         <Control name="$(parent)Improvement" inherits="ZO_GamepadSmithingImprovementPanelContent"/>
-                        <Control name="$(parent)Research" inherits="ZO_GamepadSmithingResearchPanelContent" />
+                        <Control name="$(parent)Research" inherits="ZO_GamepadSmithingResearchPanelContent"/>
                     </Controls>
                 </Scroll>
-
                 <Control name="$(parent)Creation" inherits="ZO_GamepadSmithingCreationFloatingContent" hidden="true"/>
                 <Control name="$(parent)Refinement" inherits="ZO_GamepadSmithingExtractionFloatingContent" hidden="true"/>
                 <Control name="$(parent)Deconstruction" inherits="ZO_GamepadSmithingExtractionFloatingContent" hidden="true"/>

@@ -8,22 +8,20 @@
                 </Label>
             </Controls>
         </Control>
-
         <Control name="ZO_GamepadWorldMapFilterComboBoxTemplate" virtual="true">
             <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" y="48"/>
             <Controls>
-                <Control name="$(parent)Selector" inherits="ZO_ComboBox_Gamepad" >
+                <Control name="$(parent)Selector" inherits="ZO_ComboBox_Gamepad">
                     <AnchorFill/>
                     <Controls>
                         <!-- Align the open dropdown arrow with the check boxes -->
                         <Texture name="$(parent)OpenDropdown" override="true">
-                            <Anchor point="RIGHT" offsetX="-12" />
+                            <Anchor point="RIGHT" offsetX="-12"/>
                         </Texture>
                     </Controls>
                 </Control>
             </Controls>
         </Control>
-
         <Control name="ZO_GamepadWorldMapFilterPanelTemplate" hidden="true" virtual="true">
             <AnchorFill/>
             <Controls>
@@ -32,7 +30,6 @@
                 </Control>
             </Controls>
         </Control>
-        
         <TopLevelControl name="ZO_WorldMapFilters_GamepadTL" hidden="true">
             <OnInitialized>
                 ZO_WorldMapFilters_Gamepad_OnInitialized(self)
@@ -40,15 +37,11 @@
             <Controls>
                 <Control name="$(parent)Main" inherits="ZO_WorldMapInfoContent_Gamepad">
                     <Controls>
-                        <Control name="$(parent)PvE" inherits="ZO_GamepadWorldMapFilterPanelTemplate" />
-                        
-                        <Control name="$(parent)PvP" inherits="ZO_GamepadWorldMapFilterPanelTemplate" />
-                        
-                        <Control name="$(parent)ImperialPvP" inherits="ZO_GamepadWorldMapFilterPanelTemplate" />
-
-                        <Control name="$(parent)Battleground" inherits="ZO_GamepadWorldMapFilterPanelTemplate" />
-
-                        <Control name="$(parent)Global" inherits="ZO_GamepadWorldMapFilterPanelTemplate" />
+                        <Control name="$(parent)PvE" inherits="ZO_GamepadWorldMapFilterPanelTemplate"/>
+                        <Control name="$(parent)PvP" inherits="ZO_GamepadWorldMapFilterPanelTemplate"/>
+                        <Control name="$(parent)ImperialPvP" inherits="ZO_GamepadWorldMapFilterPanelTemplate"/>
+                        <Control name="$(parent)Battleground" inherits="ZO_GamepadWorldMapFilterPanelTemplate"/>
+                        <Control name="$(parent)Global" inherits="ZO_GamepadWorldMapFilterPanelTemplate"/>
                     </Controls>
                 </Control>
             </Controls>

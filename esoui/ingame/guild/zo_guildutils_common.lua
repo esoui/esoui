@@ -136,7 +136,7 @@ function ZO_TryGuildInvite(guildId, displayName)
     end
 
     local guildName = GetGuildName(guildId)
-    if IsConsoleUI() then
+    if ZO_IsConsoleOrGameCoreUI() then
         local function GuildInviteCallback(success)
             if success then
                 GuildInvite(guildId, displayName)

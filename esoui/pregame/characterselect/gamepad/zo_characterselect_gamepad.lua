@@ -967,7 +967,7 @@ function ZO_CharacterSelect_Gamepad_RefreshHeader()
 
     local profileNameString = nil
     local profileLabelString = nil
-    if IsConsoleUI() then
+    if ZO_IsConsoleOrGameCoreUI() then
         -- Use the console's active profile name
         profileNameString = GetOnlineIdForActiveProfile()
         profileLabelString = GetString(SI_CHARACTER_SELECT_PROFILE_LABEL)

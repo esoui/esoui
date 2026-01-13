@@ -175,8 +175,6 @@ function ZO_AttributeTooltipsGrid_Gamepad:RefreshAttributeTooltip()
             mundusName = currentAttributeItem.mundus.name
         end
         GAMEPAD_TOOLTIPS:LayoutAttributeTooltip(GAMEPAD_RIGHT_TOOLTIP, currentStatType, mundusName)
-    else
-        GAMEPAD_TOOLTIPS:LayoutEquipmentBonusTooltip(GAMEPAD_RIGHT_TOOLTIP, GAMEPAD_STATS:GetEquipmentBonusInfo())
     end
 end
 
@@ -219,17 +217,6 @@ function ZO_AttributeTooltipsGrid_Gamepad:GetNarrationText()
         local currentStatType = currentAttributeItem.statType
         if currentStatType ~= STAT_NONE then
             return GAMEPAD_STATS:GetAttributeItem(currentStatType):GetNarrationText()
-        else
-            local bonusValue = GAMEPAD_STATS:GetEquipmentBonusInfo()
-            local narrations = { SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_STATS_EQUIPMENT_BONUS))}
-            local bonusNarrationText
-            if bonusValue == EQUIPMENT_BONUS_MAX_VALUE then
-                bonusNarrationText = zo_strformat(SI_STAT_GAMEPAD_EQUIPMENT_BONUS_NARRATION, bonusValue, EQUIPMENT_BONUS_MAX_VALUE)
-            else
-                bonusNarrationText = zo_strformat(SI_STAT_GAMEPAD_EQUIPMENT_BONUS_NARRATION, bonusValue, EQUIPMENT_BONUS_MAX_VALUE - 1)
-            end
-            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(bonusNarrationText))
-            return narrations
         end
     end
 end
@@ -254,6 +241,7 @@ local GAMEPAD_STATS_DISPLAY_MODE =
     UPCOMING_LEVEL_UP_REWARDS = 7,
     ADVANCED_ATTRIBUTES = 8,
     MUNDUS = 9,
+    GUILD = 10,
 }
 
 ZO_GamepadStats = ZO_InitializingObject.MultiSubclass(ZO_Stats_Common, ZO_Gamepad_ParametricList_Screen)
@@ -312,7 +300,6 @@ function ZO_GamepadStats:OnStateChanged(oldState, newState)
 
         self:TryResetScreenState()
 
-        self:RefreshEquipmentBonus()
         self:RegisterForEvents()
 
         self:Update()
@@ -330,6 +317,10 @@ function ZO_GamepadStats:OnStateChanged(oldState, newState)
 
         if self.currentTitleDropdown ~= nil then
             self.currentTitleDropdown:Deactivate(true)
+        end
+
+        if self.currentGuildDropdown ~= nil then
+            self.currentGuildDropdown:Deactivate(true)
         end
 
         if self.attributeTooltips then
@@ -392,6 +383,28 @@ do
                 KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
             end
         end)
+
+        local function OnStartRespecCast()
+            if IsInGamepadPreferredMode() then
+                ZO_Dialogs_ShowGamepadDialog("ATTRIBUTE_RESPEC_CAST_GAMEPAD")
+                PlaySound(SOUNDS.RESPEC_CAST_TIME_START)
+            end
+        end
+
+        local function OnAttributeRespecResult(eventId, result)
+            if ZO_Dialogs_IsShowing("ATTRIBUTE_RESPEC_CAST_GAMEPAD") then
+                ZO_Dialogs_ReleaseDialog("ATTRIBUTE_RESPEC_CAST_GAMEPAD")
+                PlaySound(SOUNDS.RESPEC_CAST_TIME_COMPLETE)
+            end
+
+            if result == RESPEC_RESULT_SUCCESS then
+                self:ResetAttributeData()
+                self:SetAttributePointAllocationMode(ATTRIBUTE_POINT_ALLOCATION_MODE_PURCHASE_ONLY)
+            end
+        end
+
+        self.control:RegisterForEvent(EVENT_START_ATTRIBUTE_RESPEC_CAST, OnStartRespecCast)
+        self.control:RegisterForEvent(EVENT_ATTRIBUTE_RESPEC_RESULT, OnAttributeRespecResult)
     end
 
     function ZO_GamepadStats:UnregisterForEvents()
@@ -421,6 +434,23 @@ function ZO_GamepadStats:OnShowing()
     end
 
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+end
+
+function ZO_GamepadStats:OnStartAttributeRespec(allocationMode, paymentType)
+    --ESO-931416: Only set the attribute respec payment type and allocation mode when in gamepad UI
+    if IsInGamepadPreferredMode() then
+        self:SetAttributeRespecPaymentType(paymentType)
+        self:SetAttributePointAllocationMode(allocationMode)
+
+        if self:IsShowing() then
+            --If the screen is already showing we just need to refresh the keybinds and re-narrate
+            KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+            SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self:GetCurrentList())
+        else
+            SCENE_MANAGER:Push("gamepad_stats_root")
+            self:SelectAttributes()
+        end
+    end
 end
 
 function ZO_GamepadStats:ActivateMainList()
@@ -454,6 +484,17 @@ function ZO_GamepadStats:ActivateTitleDropdown()
     end
 end
 
+function ZO_GamepadStats:ActivateGuildDropdown()
+    if self.currentGuildDropdown ~= nil then
+        self:DeactivateMainList()
+        
+        self.currentGuildDropdown:Activate()
+
+        local currentDropdownGuildIndex = self:GetDropdownGuildIndex(self.currentGuildDropdown)
+        self.currentGuildDropdown:SetHighlightedItem(currentDropdownGuildIndex)
+    end
+end
+
 function ZO_GamepadStats:ShowOutfitSelector()
     SCENE_MANAGER:Push("gamepad_outfits_selection")
 end
@@ -463,6 +504,14 @@ function ZO_GamepadStats:ShowLevelUpRewards()
 end
 
 function ZO_GamepadStats:OnTitleDropdownDeactivated()
+    self:ActivateMainList()
+    if self.refreshMainListOnDropdownClose then
+        self:RefreshMainList()
+        self.refreshMainListOnDropdownClose = false
+    end
+end
+
+function ZO_GamepadStats:OnGuildDropdownDeactivated()
     self:ActivateMainList()
     if self.refreshMainListOnDropdownClose then
         self:RefreshMainList()
@@ -556,7 +605,8 @@ function ZO_GamepadStats:InitializeKeybindStripDescriptors()
             name = function()
                 if self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.OUTFIT
                     or self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.TITLE
-                    or self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.LEVEL_UP_REWARDS then
+                    or self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.LEVEL_UP_REWARDS 
+                    or self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.GUILD then
                     return GetString(SI_GAMEPAD_SELECT_OPTION)
                 elseif self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.MUNDUS then
                     return GetString(SI_STATS_MUNDUS_INFO_BUTTON)
@@ -581,6 +631,8 @@ function ZO_GamepadStats:InitializeKeybindStripDescriptors()
                     or self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.TITLE
                     or self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.LEVEL_UP_REWARDS then
                     return true
+                elseif self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.GUILD then
+                    return not IsPlayerWearingGuildTabard()
                 elseif self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.MUNDUS then
                     local targetData = self.mainList:GetTargetData()
                     if targetData and targetData.data then
@@ -596,6 +648,8 @@ function ZO_GamepadStats:InitializeKeybindStripDescriptors()
                     self:ShowOutfitSelector()
                 elseif self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.TITLE then
                     self:ActivateTitleDropdown()
+                elseif self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.GUILD then
+                    self:ActivateGuildDropdown()
                 elseif self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.LEVEL_UP_REWARDS then
                     self:ShowLevelUpRewards()
                 elseif self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.MUNDUS then
@@ -605,8 +659,10 @@ function ZO_GamepadStats:InitializeKeybindStripDescriptors()
                     if self:DoesAttributePointAllocationModeBatchSave() and self:DoesChangeIncurCost() then
                         if self:IsPaymentTypeScroll() then
                             ZO_Dialogs_ShowPlatformDialog("STAT_EDIT_CONFIRM")
-                        else
+                        elseif GetAttributeRespecGoldCost() > 0 then
                             ZO_Dialogs_ShowPlatformDialog("ATTRIBUTE_RESPEC_CONFIRM_GOLD_GAMEPAD")
+                        else
+                            self:RespecAttributes()
                         end
                     else
                         ZO_Dialogs_ShowGamepadDialog(GAMEPAD_STATS_COMMIT_POINTS_DIALOG_NAME)
@@ -662,19 +718,46 @@ function ZO_GamepadStats:InitializeKeybindStripDescriptors()
                 end
             end,
         },
-        -- Clear Attributes
+        -- Clear Attributes / Start Respec
         {
-            name = GetString(SI_STATS_CLEAR_ALL_ATTRIBUTES_BUTTON),
+            name = function()
+                if self:DoesAttributePointAllocationModeBatchSave() then
+                    return GetString(SI_STATS_CLEAR_ALL_ATTRIBUTES_BUTTON)
+                else
+                    return GetString(SI_STATS_RESPEC_ATTRIBUTES_BUTTON)
+                end
+            end,
             keybind = "UI_SHORTCUT_TERTIARY",
+            enabled = function()
+                if self:DoesAttributePointAllocationModeBatchSave() then
+                    return true
+                else
+                    return not IsCurrentCampaignVengeanceRuleset(), GetString("SI_RESPECRESULT", RESPEC_RESULT_IN_VENGEANCE)
+                end
+            end,
             visible = function()
-                return self:DoesAttributePointAllocationModeBatchSave() and self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.ATTRIBUTES
+                return self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.ATTRIBUTES
+            end,
+            sound = function()
+                if self:DoesAttributePointAllocationModeBatchSave() then
+                    return SOUNDS.STATS_RESPEC_CLEAR_ALL
+                end
             end,
             callback = function()
-                self:ResetAttributeData()
-                for index, attributeData in ipairs(self.attributeEntries) do
-                    local control = self.mainList:GetControlFromData(attributeData)
-                    control.pointLimitedSpinner:RefreshSpinnerMax()
-                    control.pointLimitedSpinner.pointsSpinner:SetValue(0)
+                if self:DoesAttributePointAllocationModeBatchSave() then
+                    self:ResetAttributeData()
+                    for index, attributeData in ipairs(self.attributeEntries) do
+                        local control = self.mainList:GetControlFromData(attributeData)
+                        control.pointLimitedSpinner:RefreshSpinnerMax()
+                        control.pointLimitedSpinner.pointsSpinner:SetValue(0)
+                    end
+                elseif GetInteractionType() == INTERACTION_ATTRIBUTE_RESPEC then
+                    --If the interaction is already active we just need to update the allocation mode and refresh
+                    self:SetAttributePointAllocationMode(ATTRIBUTE_POINT_ALLOCATION_MODE_PURCHASE_FULL)
+                    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+                    SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self:GetCurrentList())
+                else
+                    StartAttributeRespecFromUI()
                 end
             end,
         },
@@ -730,8 +813,6 @@ end
 function ZO_GamepadStats:RespecAttributes()
     PlaySound(SOUNDS.STATS_PURCHASE)
     SendAttributePointAllocationRequest(self.attributeRespecPaymentType, self.attributeData[ATTRIBUTE_HEALTH].addedPoints, self.attributeData[ATTRIBUTE_MAGICKA].addedPoints, self.attributeData[ATTRIBUTE_STAMINA].addedPoints)
-    self:ResetAttributeData()
-    self:SetAttributePointAllocationMode(ATTRIBUTE_POINT_ALLOCATION_MODE_PURCHASE_ONLY)
 end
 
 function ZO_GamepadStats:UpdateScreenVisibility()
@@ -742,6 +823,7 @@ function ZO_GamepadStats:UpdateScreenVisibility()
     local isAdvancedAttributesHidden = true
 
     GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
+    GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
     if self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.CHARACTER then
         isCharacterHidden = false
         self:RefreshCharacterPanel()
@@ -773,11 +855,12 @@ function ZO_GamepadStats:UpdateScreenVisibility()
             self:RefreshAttributesPanel()
         end
         GAMEPAD_TOOLTIPS:LayoutMundusTooltip(GAMEPAD_RIGHT_TOOLTIP, targetData.data)
+    elseif self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.GUILD then
+        GAMEPAD_TOOLTIPS:LayoutGuildNameplateTooltip(GAMEPAD_LEFT_TOOLTIP)
     end
 
     self.characterStatsPanel:SetHidden(isCharacterHidden)
     self.attributesPanel:SetHidden(isAttributesHidden)
-    self.equipmentBonus:SetHidden(isAttributesHidden)
     self.characterEffects:SetHidden(isEffectsHidden)
     self.advancedAttributesPanel:SetHidden(isAdvancedAttributesHidden)
 
@@ -1127,6 +1210,15 @@ do
             return narrations
         end
 
+        --Guild Entry
+        self.guildEntry = ZO_GamepadEntryData:New("")
+        self.guildEntry.displayMode = GAMEPAD_STATS_DISPLAY_MODE.GUILD
+        self.guildEntry.statsObject = self
+        self.guildEntry:SetHeader(GetString(SI_STATS_GUILD))
+        self.guildEntry.narrationText = function(entryData, entryControl)
+            return self.currentGuildDropdown:GetNarrationText()
+        end
+
         local function CanSpendAttributePoints()
             return GetAttributeUnspentPoints() > 0
         end
@@ -1186,6 +1278,9 @@ do
         list:AddDataTemplate("ZO_GamepadStatTitleRow", ZO_GamepadStatTitleRow_Setup, ZO_GamepadMenuEntryTemplateParametricListFunction)
         list:AddDataTemplateWithHeader("ZO_GamepadStatTitleRow", ZO_GamepadStatTitleRow_Setup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
 
+        list:AddDataTemplate("ZO_GamepadStatGuildRow", ZO_GamepadStatGuildRow_Setup, ZO_GamepadMenuEntryTemplateParametricListFunction)
+        list:AddDataTemplateWithHeader("ZO_GamepadStatGuildRow", ZO_GamepadStatGuildRow_Setup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
+
         list:AddDataTemplate("ZO_GamepadStatAttributeRow", ZO_GamepadStatAttributeRow_Setup, ZO_GamepadMenuEntryTemplateParametricListFunction)
         list:AddDataTemplateWithHeader("ZO_GamepadStatAttributeRow", ZO_GamepadStatAttributeRow_Setup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
 
@@ -1231,6 +1326,11 @@ do
 
     function ZO_GamepadStats:RefreshMainList()
         if self.currentTitleDropdown and self.currentTitleDropdown:IsDropdownVisible() then
+            self.refreshMainListOnDropdownClose = true
+            return
+        end
+
+        if self.currentGuildDropdown and self.currentGuildDropdown:IsDropdownVisible() then
             self.refreshMainListOnDropdownClose = true
             return
         end
@@ -1338,6 +1438,9 @@ do
         -- Character Info
         self.mainList:AddEntryWithHeader("ZO_GamepadMenuEntryTemplate", self.advancedStatsEntry)
         self.mainList:AddEntry("ZO_GamepadMenuEntryTemplate", self.characterEntry)
+
+        --Guild
+        self.mainList:AddEntryWithHeader("ZO_GamepadStatGuildRow", self.guildEntry)
 
         -- Active Effects--
         self.numActiveEffects = 0
@@ -1623,14 +1726,6 @@ do
         self.attributeTooltips = ZO_AttributeTooltipsGrid_Gamepad:New(self.attributesPanel, ROW_MAJOR, OnViewAttributesBack)
 
         local rowNumber = 1
-        local EQUIPMENT_BONUS_COLUMN = 1
-
-        --Equipment Bonus
-        self.equipmentBonus = self.control:GetNamedChild("RightPane"):GetNamedChild("EquipmentBonus")
-        local equipmentBonusIcons = self.equipmentBonus:GetNamedChild("Icons")
-        self.equipmentBonus.iconPool = ZO_ControlPool:New("ZO_GamepadStatsEquipmentBonusIcon", equipmentBonusIcons)
-        self.attributeTooltips:AddGridItem(self.equipmentBonus, STAT_NONE, EQUIPMENT_BONUS_COLUMN, rowNumber)
-        rowNumber = rowNumber + 1
 
         -- Attributes
         local function CreateAttribute(objectPool)
@@ -2060,12 +2155,63 @@ function ZO_GamepadStats:GetEnlightenedPool()
     end
 end
 
+function ZO_GamepadStats.OnAttributeRespecCastDialogInitialized(control)
+    ZO_GenericGamepadDialog_OnInitialized(control)
+
+    control.bar = control:GetNamedChild("ContainerScrollChildProgress")
+
+    ZO_Dialogs_RegisterCustomDialog("ATTRIBUTE_RESPEC_CAST_GAMEPAD",
+    {
+        customControl = control,
+        canQueue = true,
+        setup = function(dialog)
+            ZO_StatusBar_SetGradientColor(dialog.bar, ZO_XP_BAR_GRADIENT_COLORS)
+            dialog.bar:SetMinMax(0, RESPEC_CAST_TIME_MS)
+            dialog.bar:SetValue(0)
+            dialog:setupFunc()
+        end,
+        gamepadInfo =
+        {
+            dialogType = GAMEPAD_DIALOGS.CUSTOM,
+        },
+        title =
+        {
+            text = SI_STATS_RESPEC_ATTRIBUTES_BUTTON,
+        },
+        buttons =
+        {
+            {
+                keybind = "DIALOG_NEGATIVE",
+                text = SI_DIALOG_CANCEL,
+                sound = SOUNDS.DIALOG_DECLINE,
+                callback = function()
+                    CancelAttributePointAllocationRequest()
+                end,
+            },
+        },
+        narrationText = function(dialog)
+            return SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_RESPEC_CAST_TIME_DIALOG_DESCRIPTION))
+        end,
+        noChoiceCallback = function(dialog)
+            CancelAttributePointAllocationRequest()
+        end,
+        updateFn = function(dialog)
+            local progress = RESPEC_CAST_TIME_MS - GetAttributeRespecCastTimeRemainingMs()
+            dialog.bar:SetValue(progress)
+        end,
+    })
+end
+
 function ZO_GamepadStats_OnInitialize(control)
     GAMEPAD_STATS = ZO_GamepadStats:New(control)
 end
 
 function ZO_GamepadStats:SetCurrentTitleDropdown(dropdown)
     self.currentTitleDropdown = dropdown
+end
+
+function ZO_GamepadStats:SetCurrentGuildDropdown(dropdown)
+    self.currentGuildDropdown = dropdown
 end
 
 function ZO_GamepadStats:InitializeRespecConfirmationGoldDialog()
@@ -2147,6 +2293,31 @@ function ZO_GamepadStatTitleRow_Setup(control, data, selected, selectedDuringReb
     control.dropdown:SetDeactivatedCallback(data.statsObject.OnTitleDropdownDeactivated, data.statsObject)
     control.dropdown:SetSelectedItemTextColor(selected)
 end
+
+------------------------------
+-- Stat Guild Attribute Row --
+------------------------------
+
+function ZO_GamepadStatGuildRow_Setup(control, data, selected, selectedDuringRebuild, enabled, activated)
+    ZO_SharedGamepadEntry_OnSetup(control, data, selected, selectedDuringRebuild, enabled, activated)
+    control.dropdown:SetSortsItems(false)
+
+    data.statsObject:SetCurrentGuildDropdown(control.dropdown)
+    data.statsObject:UpdateGuildDropdownGuilds(control.dropdown)
+    local statsObject = data.statsObject
+    statsObject:SetCurrentGuildDropdown(control.dropdown)
+    statsObject:UpdateGuildDropdownGuilds(control.dropdown)
+
+    local isWearingTabard = IsPlayerWearingGuildTabard()
+    local normalColor = isWearingTabard and ZO_GAMEPAD_DISABLED_UNSELECTED_COLOR or ZO_GAMEPAD_UNSELECTED_COLOR
+    local highlightColor = isWearingTabard and ZO_GAMEPAD_DISABLED_SELECTED_COLOR or ZO_GAMEPAD_SELECTED_COLOR
+    control.dropdown:SetNormalColor(normalColor:UnpackRGB())
+    control.dropdown:SetHighlightedColor(highlightColor:UnpackRGB())
+
+    control.dropdown:SetDeactivatedCallback(data.statsObject.OnGuildDropdownDeactivated, data.statsObject)
+    control.dropdown:SetSelectedItemTextColor(selected)
+end
+
 ------------------------
 -- Stat Attribute Row --
 ------------------------

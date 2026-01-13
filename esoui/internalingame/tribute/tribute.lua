@@ -434,7 +434,7 @@ function ZO_Tribute:RegisterDialogs()
             local parametricList = dialog.info.parametricList
             ZO_ClearNumericallyIndexedTable(parametricList)
             table.insert(parametricList, GAMEPAD_TRIBUTE_AUTO_PLAY_ENTRY)
-            if IsConsoleUI() and (data.opponentPlayerType == TRIBUTE_PLAYER_TYPE_REMOTE_PLAYER or data.opponentPlayerType == TRIBUTE_PLAYER_TYPE_PLAYER) then
+            if ZO_IsConsoleOrGameCoreUI() and (data.opponentPlayerType == TRIBUTE_PLAYER_TYPE_REMOTE_PLAYER or data.opponentPlayerType == TRIBUTE_PLAYER_TYPE_PLAYER) then
                 table.insert(parametricList, GAMEPAD_TRIBUTE_SHOW_GAMER_CARD_ENTRY)
             end
             table.insert(parametricList, GAMEPAD_TRIBUTE_CONCEDE_ENTRY)
@@ -804,7 +804,7 @@ do
             end
         end
 
-        if not IsConsoleUI() then
+        if not ZO_IsConsoleOrGameCoreUI() then
             TRIBUTE_PILE_VIEWER_KEYBOARD_FRAGMENT:RegisterCallback("StateChange", PileViewerFragmentStateChanged)
         end
         TRIBUTE_PILE_VIEWER_GAMEPAD_FRAGMENT:RegisterCallback("StateChange", PileViewerFragmentStateChanged)
@@ -823,7 +823,7 @@ do
             end
         end
 
-        if not IsConsoleUI() then
+        if not ZO_IsConsoleOrGameCoreUI() then
             TRIBUTE_TARGET_VIEWER_KEYBOARD_FRAGMENT:RegisterCallback("StateChange", TargetViewerFragmentStateChanged)
         end
 
@@ -862,7 +862,7 @@ do
             end
         end
 
-        if not IsConsoleUI() then
+        if not ZO_IsConsoleOrGameCoreUI() then
             TRIBUTE_CONFINEMENT_VIEWER_KEYBOARD_FRAGMENT:RegisterCallback("StateChange", ConfinementViewerFragmentStateChanged)
         end
         TRIBUTE_CONFINEMENT_VIEWER_GAMEPAD_FRAGMENT:RegisterCallback("StateChange", ConfinementViewerFragmentStateChanged)
@@ -875,7 +875,7 @@ do
                 self:RefreshInputState()
             end
         end
-        if not IsConsoleUI() then
+        if not ZO_IsConsoleOrGameCoreUI() then
             TRIBUTE_PATRON_SELECTION_KEYBOARD_FRAGMENT:RegisterCallback("StateChange", PatronSelectionStateChanged)
         end
         TRIBUTE_PATRON_SELECTION_GAMEPAD_FRAGMENT:RegisterCallback("StateChange", PatronSelectionStateChanged)
@@ -1024,31 +1024,35 @@ do
             refreshEffectiveCardStates = true
         end
 
-        local inputStyle = TRIBUTE_INPUT_STYLE_NONE
+        local mouseInputStyle = TRIBUTE_INPUT_STYLE_NONE
+        local gamepadInputStyle = TRIBUTE_INPUT_STYLE_NONE
         if allowPlayerInput or (isUsingViewer and activeViewer:IsViewingBoard()) then
-            inputStyle = IsInGamepadPreferredMode() and TRIBUTE_INPUT_STYLE_GAMEPAD or TRIBUTE_INPUT_STYLE_MOUSE
+            mouseInputStyle = IsConsoleUI() and TRIBUTE_INPUT_STYLE_GAMEPAD or TRIBUTE_INPUT_STYLE_MOUSE
+            gamepadInputStyle = IsInGamepadPreferredMode() and TRIBUTE_INPUT_STYLE_GAMEPAD or TRIBUTE_INPUT_STYLE_MOUSE
         end
 
         if self.gameFlowState == TRIBUTE_GAME_FLOW_STATE_PATRON_DRAFT and not isShowingDialog then
-            inputStyle = IsInGamepadPreferredMode() and TRIBUTE_INPUT_STYLE_NONE or TRIBUTE_INPUT_STYLE_MOUSE
+            mouseInputStyle = IsConsoleUI() and TRIBUTE_INPUT_STYLE_NONE or TRIBUTE_INPUT_STYLE_MOUSE
+            gamepadInputStyle = IsInGamepadPreferredMode() and TRIBUTE_INPUT_STYLE_NONE or TRIBUTE_INPUT_STYLE_MOUSE
         end
 
-        if self.inputStyle ~= inputStyle then
+        if self.mouseInputStyle ~= mouseInputStyle or self.gamepadInputStyle ~= gamepadInputStyle then
             refreshEffectiveCardStates = true
             resetTargetObjects = false
 
-            local oldInputStyle = self.inputStyle
-            self.inputStyle = inputStyle
-            SetTributeInputStyle(inputStyle)
-        
+            local oldInputStyle = self.mouseInputStyle
+            self.mouseInputStyle = mouseInputStyle
+            self.gamepadInputStyle = gamepadInputStyle
+            SetTributeInputStyle(gamepadInputStyle == TRIBUTE_INPUT_STYLE_GAMEPAD and gamepadInputStyle or mouseInputStyle)
+
             local wasMouseStyle = oldInputStyle == TRIBUTE_INPUT_STYLE_MOUSE
-            local isMouseStyle = inputStyle == TRIBUTE_INPUT_STYLE_MOUSE
+            local isMouseStyle = mouseInputStyle == TRIBUTE_INPUT_STYLE_MOUSE
             if wasMouseStyle or isMouseStyle then
                 self:SetMouseControlsEnabled(isMouseStyle)
             end
-        
+
             local wasGamepadStyle = oldInputStyle == TRIBUTE_INPUT_STYLE_GAMEPAD
-            local isGamepadStyle = inputStyle == TRIBUTE_INPUT_STYLE_GAMEPAD
+            local isGamepadStyle = gamepadInputStyle == TRIBUTE_INPUT_STYLE_GAMEPAD
             if wasGamepadStyle or isGamepadStyle then
                 self:SetGamepadControlsEnabled(isGamepadStyle)
             end
@@ -1106,7 +1110,7 @@ function ZO_Tribute:SetMouseControlsEnabled(enabled)
 end
 
 function ZO_Tribute:IsInputStyleMouse()
-    return self.inputStyle == TRIBUTE_INPUT_STYLE_MOUSE
+    return self.mouseInputStyle == TRIBUTE_INPUT_STYLE_MOUSE
 end
 
 function ZO_Tribute:SetGamepadControlsEnabled(enabled)
@@ -1114,7 +1118,7 @@ function ZO_Tribute:SetGamepadControlsEnabled(enabled)
 end
 
 function ZO_Tribute:IsInputStyleGamepad()
-    return self.inputStyle == TRIBUTE_INPUT_STYLE_GAMEPAD
+    return self.gamepadInputStyle == TRIBUTE_INPUT_STYLE_GAMEPAD
 end
 
 function ZO_Tribute:CanInteractWithCards()
@@ -1388,7 +1392,7 @@ function ZO_Tribute:ShowCardTooltip(cardObject, anchorPoint, anchorControl, anch
 
     self.activeCardTooltip.cardObject = cardObject
 
-    if self:IsInputStyleMouse() then
+    if self:IsInputStyleMouse() and not IsInGamepadPreferredMode() then
         local tooltipControl = ItemTooltip
         InitializeTooltip(tooltipControl, anchorControl, anchorPoint, anchorOffsetX, anchorOffsetY, anchorRelativePoint)
         tooltipControl:SetTributeCard(cardObject:GetPatronDefId(), cardObject:GetCardDefId())
@@ -1696,10 +1700,4 @@ end
 
 function ZO_Tribute_OnInitialized(control)
     TRIBUTE = ZO_Tribute:New(control)
-end
-
-function ZO_GetNextTributeCardWithStateFlagMask(stateFlagMask)
-    return function(state, lastCardInstanceId)
-        return GetNextTributeCardWithStateFlagsMask(stateFlagMask, lastCardInstanceId)
-    end
 end

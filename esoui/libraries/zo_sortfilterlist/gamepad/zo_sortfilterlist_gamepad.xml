@@ -2,7 +2,7 @@
     <Controls>
         <Control name="ZO_SortFilterListEmptyRow_Gamepad" inherits="ZO_SortFilterListEmptyRow" virtual="true">
             <Controls>
-                <Label name="$(parent)Message" override="true" font="ZoFontGamepadCondensed42" />
+                <Label name="$(parent)Message" override="true" font="ZoFontGamepadCondensed42"/>
             </Controls>
         </Control>
     </Controls>

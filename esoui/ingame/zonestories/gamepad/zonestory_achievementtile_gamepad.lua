@@ -1,5 +1,5 @@
 ZO_ZONE_STORIES_ACHIEVEMENT_TILE_GAMEPAD_DIMENSIONS_X = 390
-ZO_ZONE_STORIES_ACHIEVEMENT_TILE_GAMEPAD_DIMENSIONS_Y = 90
+ZO_ZONE_STORIES_ACHIEVEMENT_TILE_GAMEPAD_DIMENSIONS_Y = 104
 ZO_ZONE_STORIES_ACHIEVEMENT_TILE_GAMEPAD_ICON_DIMENSIONS = 64
 
 -- Primary logic class must be subclassed after the platform class so that platform specific functions will have priority over the logic class functionality

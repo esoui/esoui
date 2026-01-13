@@ -1171,6 +1171,11 @@ function ZO_ScreenNarrationManager:NarrateGridListEntry(gridList, narrateHeader,
     end
 
     ZO_AppendNarration(narrations, self:GetTooltipNarration())
+
+    if narrateHeader then
+        ZO_AppendNarration(narrations, gridList:GetPostHeaderNarration())
+    end
+
     ZO_AppendNarration(narrations, self:GetKeybindNarration())
 
     self:NarrateText(narrations, narrationType)

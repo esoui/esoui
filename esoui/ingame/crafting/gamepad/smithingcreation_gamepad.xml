@@ -1,53 +1,40 @@
 <GuiXml>
     <Controls>
         <Control name="ZO_GamepadSmithingCreationPanelContent" inherits="ZO_GamepadSmithingBelowHeaderAreaAnchors" virtual="true">
-            <Controls>                
+            <Controls>
                 <Control name="$(parent)Create" hidden="true">
                     <AnchorFill/>
                     <Controls>
-                        <Control name="$(parent)PatternList" inherits="ZO_GamepadSmithingHorizontalListTemplate">                            
+                        <Control name="$(parent)PatternList" inherits="ZO_GamepadSmithingHorizontalListTemplate">
                             <Anchor point="TOPLEFT"/>
                             <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH"/>
                         </Control>
-
                         <Control name="$(parent)MaterialList" inherits="ZO_GamepadSmithingHorizontalListTemplate">
                             <Dimensions y="335"/>
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)PatternList" relativePoint="BOTTOMLEFT" offsetY="ZO_GAMEPAD_SMITHING_CONTAINER_ITEM_PADDING_Y" />
-                            <Anchor point="TOPRIGHT" relativeTo="$(parent)PatternList" relativePoint="BOTTOMRIGHT" offsetY="ZO_GAMEPAD_SMITHING_CONTAINER_ITEM_PADDING_Y" />
-
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)PatternList" relativePoint="BOTTOMLEFT" offsetY="ZO_GAMEPAD_SMITHING_CONTAINER_ITEM_PADDING_Y"/>
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)PatternList" relativePoint="BOTTOMRIGHT" offsetY="ZO_GAMEPAD_SMITHING_CONTAINER_ITEM_PADDING_Y"/>
                             <Controls>
                                 <Control name="$(parent)Spinner">
-                                    <Dimensions y="36" />
-                                    <DimensionConstraints maxX="ZO_GAMEPAD_CONTENT_WIDTH" />
+                                    <Dimensions y="36"/>
+                                    <DimensionConstraints maxX="ZO_GAMEPAD_CONTENT_WIDTH"/>
                                     <Anchor point="TOP" relativeTo="$(parent)List" relativePoint="BOTTOM" offsetY="4"/>
                                     <Controls>
                                         <Button name="$(parent)Decrease">
-                                            <Dimensions x="32" y="32" />
+                                            <Dimensions x="32" y="32"/>
                                             <Anchor point="LEFT"/>
-                                            <Textures
-                                                normal="EsoUI/Art/Miscellaneous/Gamepad/spinner_arrow_left_up.dds"
-                                                pressed="EsoUI/Art/Miscellaneous/Gamepad/spinner_arrow_left_down.dds"
-                                                disabled="EsoUI/Art/Miscellaneous/Gamepad/spinner_arrow_left_disabled.dds"
-                                            />
+                                            <Textures normal="EsoUI/Art/Miscellaneous/Gamepad/spinner_arrow_left_up.dds" pressed="EsoUI/Art/Miscellaneous/Gamepad/spinner_arrow_left_down.dds" disabled="EsoUI/Art/Miscellaneous/Gamepad/spinner_arrow_left_disabled.dds"/>
                                         </Button>
-
                                         <Button name="$(parent)Increase">
-                                            <Dimensions x="32" y="32" />
+                                            <Dimensions x="32" y="32"/>
                                             <Anchor point="RIGHT"/>
-                                            <Textures
-                                                normal="EsoUI/Art/Miscellaneous/Gamepad/spinner_arrow_right_up.dds"
-                                                pressed="EsoUI/Art/Miscellaneous/Gamepad/spinner_arrow_right_down.dds"
-                                                disabled="EsoUI/Art/Miscellaneous/Gamepad/spinner_arrow_right_disabled.dds"
-                                            />
+                                            <Textures normal="EsoUI/Art/Miscellaneous/Gamepad/spinner_arrow_right_up.dds" pressed="EsoUI/Art/Miscellaneous/Gamepad/spinner_arrow_right_down.dds" disabled="EsoUI/Art/Miscellaneous/Gamepad/spinner_arrow_right_disabled.dds"/>
                                         </Button>
-
                                         <Label name="$(parent)Display" font="ZoFontGamepad36" modifyTextType="UPPERCASE" horizontalAlignment="CENTER" verticalAlignment="CENTER">
-                                            <Anchor point="TOPLEFT" offsetX="34" offsetY="-4" />
-                                            <Anchor point="BOTTOMRIGHT" offsetX="-34" />
+                                            <Anchor point="TOPLEFT" offsetX="34" offsetY="-4"/>
+                                            <Anchor point="BOTTOMRIGHT" offsetX="-34"/>
                                         </Label>
                                     </Controls>
                                 </Control>
-
                                 <Label name="$(parent)ExtraInfoLabel" override="true">
                                     <ClearAnchors/>
                                     <Dimensions x="360"/>
@@ -55,42 +42,35 @@
                                 </Label>
                             </Controls>
                         </Control>
-
                         <Control name="$(parent)StyleList" inherits="ZO_GamepadSmithingHorizontalListTemplate">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)MaterialList" relativePoint="BOTTOMLEFT" offsetY="ZO_GAMEPAD_SMITHING_CONTAINER_ITEM_PADDING_Y" />
-                            <Anchor point="TOPRIGHT" relativeTo="$(parent)MaterialList" relativePoint="BOTTOMRIGHT" offsetY="ZO_GAMEPAD_SMITHING_CONTAINER_ITEM_PADDING_Y" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)MaterialList" relativePoint="BOTTOMLEFT" offsetY="ZO_GAMEPAD_SMITHING_CONTAINER_ITEM_PADDING_Y"/>
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)MaterialList" relativePoint="BOTTOMRIGHT" offsetY="ZO_GAMEPAD_SMITHING_CONTAINER_ITEM_PADDING_Y"/>
                         </Control>
-
                         <Control name="$(parent)TraitList" inherits="ZO_GamepadSmithingHorizontalListTemplate">
                             <!-- The anchor for this is dynamically set -->
                         </Control>
-
                         <Control name="$(parent)BottomPadding">
                             <Dimensions y="150"/>
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)TraitList" relativePoint="BOTTOMLEFT" offsetY="ZO_GAMEPAD_SMITHING_CONTAINER_ITEM_PADDING_Y" />
-                            <Anchor point="TOPRIGHT" relativeTo="$(parent)TraitList" relativePoint="BOTTOMRIGHT" offsetY="ZO_GAMEPAD_SMITHING_CONTAINER_ITEM_PADDING_Y" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)TraitList" relativePoint="BOTTOMLEFT" offsetY="ZO_GAMEPAD_SMITHING_CONTAINER_ITEM_PADDING_Y"/>
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)TraitList" relativePoint="BOTTOMRIGHT" offsetY="ZO_GAMEPAD_SMITHING_CONTAINER_ITEM_PADDING_Y"/>
                         </Control>
                     </Controls>
                 </Control>
-
                 <Control name="$(parent)ScrollContainer" inherits="ZO_ScrollContainer_Gamepad">
                     <AnchorFill/>
-
                     <OnInitialized>
                         ZO_Scroll_Initialize_Gamepad(self)
                         self:DisableUpdateHandler()
                     </OnInitialized>
-
                     <Controls>
                         <Control name="$(parent)ScrollChild" override="true" resizeToFitConstrains="Y">
-                            <Dimensions x="100%" />
+                            <Dimensions x="100%"/>
                             <!-- controls are parented to this in lua, see ZO_GamepadSmithingCreation:InitializeScrollPanel() -->
                         </Control>
                     </Controls>
                 </Control>
             </Controls>
         </Control>
-        
         <Control name="ZO_GamepadSmithingCreationFloatingContent" virtual="true">
             <Controls>
                 <Control name="$(parent)ResultTooltip" inherits="ZO_CraftingTooltip_Gamepad" hidden="true">

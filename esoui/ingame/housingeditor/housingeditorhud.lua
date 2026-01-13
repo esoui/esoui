@@ -1319,12 +1319,16 @@ do
             local isTranslation = false
 
             if axis.axis == HOUSING_EDITOR_POSITION_AXIS_X1 or axis.axis == HOUSING_EDITOR_POSITION_AXIS_X2 then
+                -- Apply the Y-axis rotation offset (radians) for this furnishing.
+                self.focusInitialYaw = self.focusInitialYaw - HousingEditorGetSelectedFurnitureYAxisRotationOffset()
                 self.focusRangeAxis = GetVisibleTranslationRange(centerX, centerY, centerZ, self.focusInitialYaw, AXIS_TYPE_X)
                 isTranslation = true
             elseif axis.axis == HOUSING_EDITOR_POSITION_AXIS_Y1 or axis.axis == HOUSING_EDITOR_POSITION_AXIS_Y2 then
                 self.focusRangeAxis = GetVisibleTranslationRange(centerX, centerY, centerZ, GetPlayerCameraHeading(), AXIS_TYPE_Y)
                 isTranslation = true
             elseif axis.axis == HOUSING_EDITOR_POSITION_AXIS_Z1 or axis.axis == HOUSING_EDITOR_POSITION_AXIS_Z2 then
+                -- Apply the Y-axis rotation offset (radians) for this furnishing.
+                self.focusInitialYaw = self.focusInitialYaw - HousingEditorGetSelectedFurnitureYAxisRotationOffset()
                 self.focusRangeAxis = GetVisibleTranslationRange(centerX, centerY, centerZ, self.focusInitialYaw, AXIS_TYPE_Z)
                 isTranslation = true
             end

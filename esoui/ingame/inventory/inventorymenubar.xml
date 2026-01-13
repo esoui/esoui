@@ -8,23 +8,20 @@
                     <Anchor point="TOPRIGHT"/>
                     <Controls>
                         <Label name="$(parent)Label" font="ZoFontHeader4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" excludeFromResizeToFitExtents="true">
-                            <Anchor point="RIGHT" relativePoint="LEFT" offsetX="-25" offsetY="7" />
+                            <Anchor point="RIGHT" relativePoint="LEFT" offsetX="-25" offsetY="7"/>
                         </Label>
                     </Controls>
                 </Control>
-
                 <Control name="$(parent)Divider" inherits="ZO_WideHorizontalDivider">
-                    <Anchor point="BOTTOM" offsetX="27" offsetY="4" />
+                    <Anchor point="BOTTOM" offsetX="27" offsetY="4"/>
                 </Control>
             </Controls>
         </Control>
-        
         <TopLevelControl name="ZO_PlayerInventoryMenu" level="2" inherits="ZO_InventoryMenuBar_Template">
             <OnInitialized>
                 ZO_PlayerInventoryMenu_OnInitialized(self)
             </OnInitialized>
         </TopLevelControl>
-        
         <TopLevelControl name="ZO_VendorInventoryMenu" inherits="ZO_InventoryMenuBar_Template">
             <Dimensions y="99"/>
             <OnInitialized>
@@ -34,7 +31,7 @@
                 <Control name="$(parent)Bar" override="true">
                     <Anchor point="TOPRIGHT" offsetY="54"/>
                     <Controls>
-                        <Label name="$(parent)Label" font="ZoFontConversationOption" override="true" />
+                        <Label name="$(parent)Label" font="ZoFontConversationOption" override="true"/>
                     </Controls>
                 </Control>
             </Controls>

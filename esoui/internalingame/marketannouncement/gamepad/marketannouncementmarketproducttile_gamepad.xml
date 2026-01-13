@@ -16,11 +16,10 @@
                 ZO_FontAdjustingWrapLabel_OnInitialized(self:GetNamedChild("Title"), fonts, TEXT_WRAP_MODE_ELLIPSIS)
                 ZO_MarketAnnouncementMarketProductTile_Gamepad_OnInitialized(self)
             </OnInitialized>
-
             <Controls>
                 <!-- Lua class inherits from an ActionTile though the xml does not inherit from ActionTile_Gamepad.
                      Since ActionTile expects a Container object it is necessary to add this element manually to the xml -->
-                <Control name="$(parent)Container" />
+                <Control name="$(parent)Container"/>
             </Controls>
         </Control>
     </Controls>

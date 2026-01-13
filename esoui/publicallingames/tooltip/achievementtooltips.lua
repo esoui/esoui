@@ -88,8 +88,8 @@ function ZO_Tooltip:LayoutAchievement(achievementId)
             local completedSection = self:AcquireSection(self:GetStyle("bodySection"))
             local characterName = GetCharacterNameById(completeByCharId)
             if characterName ~= "" then
-                local colorizedCharacterName = ZO_SELECTED_TEXT:Colorize(colorizedCharacterName)
-                completedSection:AddLine(zo_strformat(SI_ACHIEVEMENT_EARNED_FORMATTER, characterName), self:GetStyle("flavorText"))
+                local colorizedCharacterName = ZO_SELECTED_TEXT:Colorize(characterName)
+                completedSection:AddLine(zo_strformat(SI_ACHIEVEMENT_EARNED_FORMATTER, colorizedCharacterName), self:GetStyle("flavorText"))
                 self:AddSection(completedSection)
             end
         end

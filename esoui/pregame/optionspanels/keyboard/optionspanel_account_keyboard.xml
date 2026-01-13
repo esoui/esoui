@@ -5,31 +5,27 @@
                 ZO_Options_Account_ChangeEmail_Dialog_Keyboard_OnInitialized(self)
             </OnInitialized>
             <Controls>
-                <Label name="$(parent)Text" inherits="ZO_DialogContentAnchors" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame" text="SI_INTERFACE_OPTIONS_ACCOUNT_EMAIL_HEADER" />
-
+                <Label name="$(parent)Text" inherits="ZO_DialogContentAnchors" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame" text="SI_INTERFACE_OPTIONS_ACCOUNT_EMAIL_HEADER"/>
                 <Backdrop name="$(parent)NewEmailEntry" inherits="ZO_SingleLineEditBackdrop_Keyboard">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Text" relativePoint="BOTTOMLEFT" offsetY="10"/>
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)Text" relativePoint="BOTTOMRIGHT" offsetY="10"/>
                     <Dimensions y="180"/>
                     <Controls>
-                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop" maxInputCharacters="MAX_EMAIL_LENGTH" defaultText="SI_INTERFACE_OPTIONS_ACCOUNT_EMAIL_DIALOG_ENTRY_DEFAULT" />
+                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop" maxInputCharacters="MAX_EMAIL_LENGTH" defaultText="SI_INTERFACE_OPTIONS_ACCOUNT_EMAIL_DIALOG_ENTRY_DEFAULT"/>
                     </Controls>
                 </Backdrop>
-
                 <Label name="$(parent)ConfirmText" inherits="ZO_DialogContentAnchors" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame" text="SI_KEYBOARD_INTERFACE_OPTIONS_ACCOUNT_EMAIL_DIALOG_CONFIRM_ENTRY_TITLE">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)NewEmailEntry" relativePoint="BOTTOMLEFT" offsetY="10"/>
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)NewEmailEntry" relativePoint="BOTTOMRIGHT" offsetY="10"/>
                 </Label>
-
                 <Backdrop name="$(parent)ConfirmNewEmailEntry" inherits="ZO_SingleLineEditBackdrop_Keyboard">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)ConfirmText" relativePoint="BOTTOMLEFT" offsetY="10"/>
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)ConfirmText" relativePoint="BOTTOMRIGHT" offsetY="10"/>
                     <Dimensions y="180"/>
                     <Controls>
-                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop" maxInputCharacters="MAX_EMAIL_LENGTH" />
+                        <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop" maxInputCharacters="MAX_EMAIL_LENGTH"/>
                     </Controls>
                 </Backdrop>
-
                 <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton"/>
                 <Control name="$(parent)Confirm" inherits="ZO_CustomDialogButton"/>
             </Controls>

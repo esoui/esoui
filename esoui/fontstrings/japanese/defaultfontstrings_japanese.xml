@@ -1,43 +1,33 @@
 <GuiXml>
     <!-- Faces -->
-    <String name="MEDIUM_FONT" value="EsoUI/Common/Fonts/ESO_FWNTLGUDC70-DB.slug" />
+    <String name="MEDIUM_FONT" value="EsoUI/Common/Fonts/ESO_FWNTLGUDC70-DB.slug"/>
     <FallbackFont font="$(MEDIUM_FONT)"/>
     <BackupFont originalFont="$(MEDIUM_FONT)" backupFont="EsoUI/Common/Fonts/Univers57.slug"/>
     <BackupFont originalFont="$(MEDIUM_FONT)" backupFont="EsoUI/Common/Fonts/Univers57Cyrillic-Condensed.slug"/>
     <BackupFont originalFont="$(MEDIUM_FONT)" backupFont="EsoUI/Common/Fonts/MYingHeiPRC-W5.slug"/>
-
-    <String name="BOLD_FONT" value="EsoUI/Common/Fonts/ESO_FWNTLGUDC70-DB.slug" />
+    <String name="BOLD_FONT" value="EsoUI/Common/Fonts/ESO_FWNTLGUDC70-DB.slug"/>
     <BackupFont originalFont="$(BOLD_FONT)" backupFont="EsoUI/Common/Fonts/Univers67.slug"/>
     <BackupFont originalFont="$(BOLD_FONT)" backupFont="EsoUI/Common/Fonts/Univers67Cyrillic-CondensedBold.slug"/>
     <BackupFont originalFont="$(BOLD_FONT)" backupFont="EsoUI/Common/Fonts/MYingHeiPRC-W5.slug"/>
-
-    <String name="CHAT_FONT" value="EsoUI/Common/Fonts/ESO_FWUDC_70-M.slug" />
+    <String name="CHAT_FONT" value="EsoUI/Common/Fonts/ESO_FWUDC_70-M.slug"/>
     <BackupFont originalFont="$(CHAT_FONT)" backupFont="EsoUI/Common/Fonts/Univers57.slug"/>
     <BackupFont originalFont="$(CHAT_FONT)" backupFont="EsoUI/Common/Fonts/Univers57Cyrillic-Condensed.slug"/>
     <BackupFont originalFont="$(CHAT_FONT)" backupFont="EsoUI/Common/Fonts/MYingHeiPRC-W5.slug"/>
-
-    <String name="GAMEPAD_LIGHT_FONT" value="EsoUI/Common/Fonts/ESO_FWNTLGUDC70-DB.slug" />
+    <String name="GAMEPAD_LIGHT_FONT" value="EsoUI/Common/Fonts/ESO_FWNTLGUDC70-DB.slug"/>
     <BackupFont originalFont="$(GAMEPAD_LIGHT_FONT)" backupFont="EsoUI/Common/Fonts/FTN47.slug"/>
     <BackupFont originalFont="$(GAMEPAD_LIGHT_FONT)" backupFont="EsoUI/Common/Fonts/MYingHeiPRC-W5.slug"/>
-
-    <String name="GAMEPAD_MEDIUM_FONT" value="EsoUI/Common/Fonts/FTN57.slug" />
+    <String name="GAMEPAD_MEDIUM_FONT" value="EsoUI/Common/Fonts/FTN57.slug"/>
     <BackupFont originalFont="$(GAMEPAD_MEDIUM_FONT)" backupFont="EsoUI/Common/Fonts/ESO_FWNTLGUDC70-DB.slug"/>
     <BackupFont originalFont="$(GAMEPAD_MEDIUM_FONT)" backupFont="EsoUI/Common/Fonts/MYingHeiPRC-W5.slug"/>
-
     <!-- Split out from GAMEPAD_MEDIUM_FONT so we don't have to generate outlines for large CJK fonts. 
     This currently saves about 100 MB of memory, but is only useful as long as we only use outlines with latin characters (usually numbers). -->
-    <String name="GAMEPAD_MEDIUM_FONT_LATIN" value="EsoUI/Common/Fonts/FTN57.slug" />
-
-    <String name="GAMEPAD_BOLD_FONT" value="EsoUI/Common/Fonts/FTN87.slug" />
+    <String name="GAMEPAD_MEDIUM_FONT_LATIN" value="EsoUI/Common/Fonts/FTN57.slug"/>
+    <String name="GAMEPAD_BOLD_FONT" value="EsoUI/Common/Fonts/FTN87.slug"/>
     <BackupFont originalFont="$(GAMEPAD_BOLD_FONT)" backupFont="EsoUI/Common/Fonts/ESO_FWNTLGUDC70-DB.slug"/>
     <BackupFont originalFont="$(GAMEPAD_BOLD_FONT)" backupFont="EsoUI/Common/Fonts/MYingHeiPRC-W5.slug"/>
-
-    <String name="ANTIQUE_FONT" value="EsoUI/Common/Fonts/ESO_KafuPenji-M.slug" />
-    
-    <String name="HANDWRITTEN_FONT" value="EsoUI/Common/Fonts/ESO_KafuPenji-M.slug" />
-
-    <String name="STONE_TABLET_FONT" value="EsoUI/Common/Fonts/ESO_KafuPenji-M.slug" />
-
+    <String name="ANTIQUE_FONT" value="EsoUI/Common/Fonts/ESO_KafuPenji-M.slug"/>
+    <String name="HANDWRITTEN_FONT" value="EsoUI/Common/Fonts/ESO_KafuPenji-M.slug"/>
+    <String name="STONE_TABLET_FONT" value="EsoUI/Common/Fonts/ESO_KafuPenji-M.slug"/>
     <!-- Sizes -->
     <String name="KB_8" value="8"/>
     <String name="KB_9" value="9"/>
@@ -66,7 +56,6 @@
     <String name="KB_40" value="36"/>
     <String name="KB_48" value="43"/>
     <String name="KB_54" value="49"/>
-
     <String name="GP_18" value="14"/>
     <String name="GP_20" value="15"/>
     <String name="GP_22" value="17"/>

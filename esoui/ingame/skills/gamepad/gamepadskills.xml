@@ -1,37 +1,55 @@
 <GuiXml>
     <Controls>
         <Control name="ZO_GamepadSkillsDummyMenuEntry" virtual="true">
-            <Dimensions x="440" y="0" />
+            <Dimensions x="440" y="0"/>
         </Control>
-
         <Control name="ZO_GamepadSkills_RespecBindings" hidden="true" virtual="true">
             <Dimensions y="36"/>
             <Controls>
                 <Control name="$(parent)Increase" inherits="ZO_KeybindButton">
-                    <Anchor point="TOPLEFT" />
+                    <Anchor point="TOPLEFT"/>
                     <OnInitialized>
                         ZO_GamepadSkills_RespecBindingsBinding_OnInitialized(self, "UI_SHORTCUT_LEFT_SHOULDER")
                     </OnInitialized>
                 </Control>
                 <Control name="$(parent)Decrease" inherits="ZO_KeybindButton">
-                    <Anchor point="TOPRIGHT" />
+                    <Anchor point="TOPRIGHT"/>
                     <OnInitialized>
                         ZO_GamepadSkills_RespecBindingsBinding_OnInitialized(self, "UI_SHORTCUT_RIGHT_SHOULDER")
                     </OnInitialized>
                 </Control>
             </Controls>
         </Control>
-
+        <TopLevelControl name="ZO_SkillsRespecCastDialog_Gamepad" inherits="ZO_GenericGamepadDialogBase">
+            <OnInitialized>
+                ZO_GamepadSkills.OnSkillsRespecCastDialogInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)Container" override="true">
+                    <Controls>
+                        <Control name="$(parent)ScrollChild" override="true">
+                            <Controls>
+                                <Label name="$(parent)RespecText" font="ZoFontGamepadCondensed34" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_RESPEC_CAST_TIME_DIALOG_DESCRIPTION">
+                                    <Anchor point="TOPLEFT" offsetX="5" offsetY="200"/>
+                                </Label>
+                                <StatusBar name="$(parent)Progress" inherits="ZO_GamepadArrowStatusBarWithBGLarge">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)RespecText" relativePoint="BOTTOMLEFT" offsetY="5"/>
+                                    <Dimensions x="275"/>
+                                </StatusBar>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
         <TopLevelControl name="ZO_GamepadSkillsTopLevelSkillInfo" inherits="ZO_GamepadSkillsFooter" hidden="true"/>
-
         <TopLevelControl name="ZO_GamepadSkillsTopLevel" inherits="ZO_Gamepad_ParametricList_Screen">
             <OnInitialized>
                 ZO_GamepadSkills_OnInitialize(self)
             </OnInitialized>
             <Controls>
                 <!-- parented outside of mask so it can extend to the edges of the list, this will be anchored to the assignable action bar -->
-                <Backdrop name="$(parent)Bg" inherits="ZO_DefaultBackdrop_Gamepad" />
-
+                <Backdrop name="$(parent)Bg" inherits="ZO_DefaultBackdrop_Gamepad"/>
                 <Scroll name="$(parent)Mask" override="true">
                     <Controls>
                         <Control name="$(parent)Container" override="true">
@@ -41,7 +59,7 @@
                                         <Control name="$(parent)Header" override="true">
                                             <Controls>
                                                 <Control name="$(parent)AssignableActionBar" inherits="ZO_GamepadSkillsPlayerActionBar">
-                                                    <Anchor point="TOP" relativeTo="$(parent)Message" relativePoint="BOTTOM" offsetY="60" />
+                                                    <Anchor point="TOP" relativeTo="$(parent)Message" relativePoint="BOTTOM" offsetY="60"/>
                                                 </Control>
                                             </Controls>
                                         </Control>
@@ -51,8 +69,7 @@
                         </Control>
                     </Controls>
                 </Scroll>
-
-                <Scroll name="$(parent)QuickMenu" inherits="ZO_GamepadSkillsActionBar_QuickMenu" />
+                <Scroll name="$(parent)QuickMenu" inherits="ZO_GamepadSkillsActionBar_QuickMenu"/>
             </Controls>
         </TopLevelControl>
     </Controls>

@@ -931,13 +931,13 @@ function PlayerProgressBar:Bar_OnMouseEnter(bar)
     local levelSize = 0
     barTypeInfo = self:GetBarTypeInfo()
     level, current, levelSize = self:GetMostRecentlyShownInfo()
-    
-    if(barTypeInfo) then
+
+    if barTypeInfo and not IsInGamepadPreferredMode() then
         InitializeTooltip(InformationTooltip, bar, TOP, 0, 10)
         SetTooltipText(InformationTooltip, zo_strformat(SI_LEVEL_DISPLAY, barTypeInfo:GetLevelTypeText(), level))
 
         local reachedMaxLevel = false
-        if(levelSize) then
+        if levelSize then
             reachedMaxLevel = current == levelSize
             if reachedMaxLevel then
                 InformationTooltip:AddLine(GetString(SI_EXPERIENCE_LIMIT_REACHED))

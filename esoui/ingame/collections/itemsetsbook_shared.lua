@@ -137,7 +137,7 @@ function ZO_ItemSetsBook_Shared:SetupGridHeaderEntry(control, data, selected)
 
     local CURRENCY_OPTIONS =
     {
-        showTooltips = not IsConsoleUI(),
+        showTooltips = not ZO_IsConsoleOrGameCoreUI(),
         useShortFormat = false,
         iconSide = RIGHT,
     }

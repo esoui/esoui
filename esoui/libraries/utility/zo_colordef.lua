@@ -1,26 +1,22 @@
 -- ColorDef implementation
 
-ZO_ColorDef = ZO_Object:Subclass()
+ZO_ColorDef = ZO_InitializingObject:Subclass()
 
-function ZO_ColorDef:New(r, g, b, a)
-    local c = ZO_Object.New(self)
-
+function ZO_ColorDef:Initialize(r, g, b, a)
     if type(r) == "string" then
-        c.r, c.g, c.b, c.a = self.HexToFloats(r)
+        self.r, self.g, self.b, self.a = self.HexToFloats(r)
     elseif type(r) == "table" then
         local otherColorDef = r
-        c.r = otherColorDef.r or 1
-        c.g = otherColorDef.g or 1
-        c.b = otherColorDef.b or 1
-        c.a = otherColorDef.a or 1
+        self.r = otherColorDef.r or 1
+        self.g = otherColorDef.g or 1
+        self.b = otherColorDef.b or 1
+        self.a = otherColorDef.a or 1
     else
-        c.r = r or 1
-        c.g = g or 1
-        c.b = b or 1
-        c.a = a or 1
+        self.r = r or 1
+        self.g = g or 1
+        self.b = b or 1
+        self.a = a or 1
     end
-
-    return c
 end
 
 function ZO_ColorDef.FromInterfaceColor(colorType, fieldValue)
@@ -36,16 +32,16 @@ function ZO_ColorDef:UnpackRGBA()
 end
 
 function ZO_ColorDef:SetRGB(r, g, b)
-	self.r = r
-	self.g = g
-	self.b = b
+    self.r = r
+    self.g = g
+    self.b = b
 end
 
 function ZO_ColorDef:SetRGBA(r, g, b, a)
-	self.r = r
-	self.g = g
-	self.b = b
-	self.a = a
+    self.r = r
+    self.g = g
+    self.b = b
+    self.a = a
 end
 
 function ZO_ColorDef:SetAlpha(a)
@@ -74,7 +70,7 @@ end
 
 -- Returns a new color that is the linear interpolation between this color and the specified color.
 function ZO_ColorDef:Lerp(colorToLerpTorwards, amount)
-	return ZO_ColorDef:New(
+    return ZO_ColorDef:New(
         zo_lerp(self.r, colorToLerpTorwards.r, amount),
         zo_lerp(self.g, colorToLerpTorwards.g, amount),
         zo_lerp(self.b, colorToLerpTorwards.b, amount),
@@ -90,7 +86,7 @@ function ZO_ColorDef:IsEqual(other)
 end
 
 function ZO_ColorDef:Clone()
-	return ZO_ColorDef:New(self:UnpackRGBA())
+    return ZO_ColorDef:New(self:UnpackRGBA())
 end
 
 function ZO_ColorDef:ToHex()
@@ -101,9 +97,28 @@ function ZO_ColorDef:ToARGBHex()
     return self.FloatsToHex(self.r, self.g, self.b, self.a)
 end
 
-function ZO_ColorDef:Colorize(text)
-	local combineTable = { "|c", self:ToHex(), tostring(text), "|r" }
-	return table.concat(combineTable)
+do
+    local combineTable = { "|c", "", "", "|r" }
+    local HEX_INDEX = 2
+    local TEXT_INDEX = 3
+
+    function ZO_ColorDef:Colorize(text)
+        combineTable[HEX_INDEX] = self:ToHex()
+        combineTable[TEXT_INDEX] = tostring(text)
+        return table.concat(combineTable)
+    end
+
+    function ZO_ColorDef:ColorizeDim(text)
+        combineTable[HEX_INDEX] = self:GetDim():ToHex()
+        combineTable[TEXT_INDEX] = tostring(text)
+        return table.concat(combineTable)
+    end
+
+    function ZO_ColorDef:ColorizeBright(text)
+        combineTable[HEX_INDEX] = self:GetBright():ToHex()
+        combineTable[TEXT_INDEX] = tostring(text)
+        return table.concat(combineTable)
+    end
 end
 
 function ZO_ColorDef:ToHSL()

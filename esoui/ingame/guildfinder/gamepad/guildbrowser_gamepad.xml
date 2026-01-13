@@ -4,20 +4,17 @@
             <Controls>
                 <Backdrop name="$(parent)TextField" override="true">
                     <Controls>
-                        <EditBox name="$(parent)Edit" maxInputCharacters="4" textType="NUMERIC_UNSIGNED_INT" override="true">
-                        </EditBox>
+                        <EditBox name="$(parent)Edit" maxInputCharacters="4" textType="NUMERIC_UNSIGNED_INT" override="true"/>
                     </Controls>
                 </Backdrop>
             </Controls>
         </Control>
-
         <TopLevelControl name="ZO_GuildBrowser_Gamepad_TopLevel" inherits="ZO_Gamepad_ParametricList_Screen" hidden="true">
             <OnInitialized>
                 ZO_GuildBrowser_Gamepad_OnInitialized(self)
             </OnInitialized>
-            
             <Controls>
-                <Control name="$(parent)ContentHeader" inherits="ZO_GamepadContentHeaderContainer ZO_GamepadGrid_NavQuadrant_ContainerAnchors" />
+                <Control name="$(parent)ContentHeader" inherits="ZO_GamepadContentHeaderContainer ZO_GamepadGrid_NavQuadrant_ContainerAnchors"/>
             </Controls>
         </TopLevelControl>
     </Controls>

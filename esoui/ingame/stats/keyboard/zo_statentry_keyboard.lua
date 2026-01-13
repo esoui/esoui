@@ -141,7 +141,6 @@ function ZO_StatsEntry_OnMouseEnter(control)
         if description then
             InitializeTooltip(InformationTooltip, control, statEntry.tooltipAnchorSide, -5)
 
-            local value = statEntry:GetValue()
             local displayValue = statEntry:GetDisplayValue()
             local statName = zo_strformat(SI_STAT_NAME_FORMAT, GetString("SI_DERIVEDSTATS", statType))
 
@@ -244,7 +243,7 @@ function ZO_SharedStats_SetupMundusIconControls(mundusIconControls, mouseOverAnc
             end
             control:SetHidden(false)
             if mundusStoneNameListContainsBuff or #mundusStoneNameList == 0 then
-                table.insert(mundusStoneNameList, 1, zo_strformat(SI_STATS_MUNDUS_FORMATTER, nameText))
+                table.insert(mundusStoneNameList, zo_strformat(SI_STATS_MUNDUS_FORMATTER, nameText))
             end
         elseif i <= numMundusSlots then
             local buffName, _, _, buffSlot, _, _, _, _, _, _, abilityId = GetUnitBuffInfo("player", activeMundusStoneBuffIndices[i - (numMundusSlots - numActiveMundusStoneBuffs)])
@@ -254,12 +253,12 @@ function ZO_SharedStats_SetupMundusIconControls(mundusIconControls, mouseOverAnc
             control.icon:SetTexture(ZO_STAT_MUNDUS_ICONS[mundusStoneIndex])
             control.icon:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
             control:SetHidden(false)
-            table.insert(mundusStoneNameList, 1, zo_strformat(SI_STATS_MUNDUS_FORMATTER, buffName))
+            table.insert(mundusStoneNameList, zo_strformat(SI_STATS_MUNDUS_FORMATTER, buffName))
             mundusStoneNameListContainsBuff = true
 
             local numStatsForAbility = GetAbilityNumDerivedStats(abilityId)
-            for i = 1, numStatsForAbility do
-                local statType, effectValue = GetAbilityDerivedStatAndEffectByIndex(abilityId, i)
+            for statIndex = 1, numStatsForAbility do
+                local statType, effectValue = GetAbilityDerivedStatAndEffectByIndex(abilityId, statIndex)
                 local statControl = GetDerivedStatByTypeFunction(statType)
                 if statControl then
                     statControl.statEntry:SetHasMundusEffect(true)

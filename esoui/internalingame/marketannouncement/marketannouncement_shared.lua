@@ -19,6 +19,7 @@ ZO_ACTION_SORTED_TILE_TYPE =
     ZO_ACTION_TILE_TYPE.EVENT_ANNOUNCEMENT,
     ZO_ACTION_TILE_TYPE.DAILY_REWARDS,
     ZO_ACTION_TILE_TYPE.PROMOTIONAL_EVENT,
+    ZO_ACTION_TILE_TYPE.ZONE_STORIES,
 }
 
 ZO_MarketAnnouncement_Shared = ZO_Object:Subclass()
@@ -339,13 +340,14 @@ do
 
                 -- Set Anchors
                 local ACTION_TILE_HORIZONTAL_PADDING = 34
-                if #self.actionTileList > 1 then
-                    actionTileControl:SetAnchor(TOPLEFT, self.actionTileList[i-1], TOPRIGHT, ACTION_TILE_HORIZONTAL_PADDING)
+                local numActionTiles = #self.actionTileList
+                if numActionTiles > 1 then
+                    actionTileControl:SetAnchor(TOPLEFT, self.actionTileList[numActionTiles - 1], TOPRIGHT, ACTION_TILE_HORIZONTAL_PADDING)
                 else 
                     actionTileControl:SetAnchor(TOPLEFT)
                 end
 
-                if #self.actionTileList == NUM_MAX_DISPLAY_TILES then
+                if numActionTiles == NUM_MAX_DISPLAY_TILES then
                     break
                 end
             else

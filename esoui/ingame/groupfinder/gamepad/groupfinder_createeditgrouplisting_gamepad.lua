@@ -240,6 +240,7 @@ do
                     local groupFinderCategory = self.userTypeData:GetCategory()
                     return self.userTypeData:GetUserType() == GROUP_FINDER_GROUP_LISTING_USER_TYPE_GROUP_LISTING_DRAFT
                         and groupFinderCategory ~= GROUP_FINDER_CATEGORY_ENDLESS_DUNGEON
+                        and groupFinderCategory ~= GROUP_FINDER_CATEGORY_ADVENTURE_ZONE
                         and groupFinderCategory ~= GROUP_FINDER_CATEGORY_CUSTOM
                 end,
                 narrationText = ZO_GetDefaultParametricListDropdownNarrationText,
@@ -274,6 +275,7 @@ do
                     local groupFinderCategory = self.userTypeData:GetCategory()
                     return self.userTypeData:GetUserType() == GROUP_FINDER_GROUP_LISTING_USER_TYPE_GROUP_LISTING_DRAFT
                         and groupFinderCategory ~= GROUP_FINDER_CATEGORY_ENDLESS_DUNGEON
+                        and groupFinderCategory ~= GROUP_FINDER_CATEGORY_ADVENTURE_ZONE
                         and groupFinderCategory ~= GROUP_FINDER_CATEGORY_CUSTOM
                 end,
                 narrationText = ZO_GetDefaultParametricListDropdownNarrationText,

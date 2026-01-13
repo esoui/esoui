@@ -1,14 +1,6 @@
--- Rewardable Data Base --
-ZO_PromotionalEventRewardableData_Base = ZO_InitializingObject:Subclass()
-
-ZO_PromotionalEventRewardableData_Base:MUST_IMPLEMENT("IsRewardClaimed")
-ZO_PromotionalEventRewardableData_Base:MUST_IMPLEMENT("CanClaimReward")
-ZO_PromotionalEventRewardableData_Base:MUST_IMPLEMENT("TryClaimReward")
-ZO_PromotionalEventRewardableData_Base:MUST_IMPLEMENT("GetRewardData")
-
 -- Activity Data --
 
-ZO_PromotionalEventActivityData = ZO_PromotionalEventRewardableData_Base:Subclass()
+ZO_PromotionalEventActivityData = ZO_RewardableData_Base:Subclass()
 
 function ZO_PromotionalEventActivityData:Initialize(campaignData, activityIndex)
     self.campaignData = campaignData
@@ -130,7 +122,7 @@ end
 
 -- Milestone Data --
 
-ZO_PromotionalEventMilestoneData = ZO_PromotionalEventRewardableData_Base:Subclass()
+ZO_PromotionalEventMilestoneData = ZO_RewardableData_Base:Subclass()
 
 function ZO_PromotionalEventMilestoneData:Initialize(campaignData, milestoneIndex)
     self.campaignData = campaignData
@@ -200,7 +192,7 @@ end
 
 -- Campaign Data --
 
-ZO_PromotionalEventCampaignData = ZO_PromotionalEventRewardableData_Base:Subclass()
+ZO_PromotionalEventCampaignData = ZO_RewardableData_Base:Subclass()
 
 function ZO_PromotionalEventCampaignData:Initialize(campaignKey)
     self.campaignKey = campaignKey

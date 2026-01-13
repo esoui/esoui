@@ -1,6 +1,6 @@
 ZO_MARKET_CURRENCY_BUTTON_TYPE_NONE = 0
 ZO_MARKET_CURRENCY_BUTTON_TYPE_BUY_CROWNS = 1
-ZO_MARKET_CURRENCY_BUTTON_TYPE_OPEN_ENDEAVORS = 2
+ZO_MARKET_CURRENCY_BUTTON_TYPE_OPEN_TAMRIEL_TOMES = 2
 
 ZO_MarketCurrency_Keyboard = ZO_MarketCurrency_Shared:Subclass()
 
@@ -13,7 +13,7 @@ end
 function ZO_MarketCurrency_Keyboard:InitializeControls()
     self.container = self.control:GetNamedChild("Container")
     self.buyCrownsButton = self.container:GetNamedChild("BuyCrowns")
-    self.endeavorsButton = self.container:GetNamedChild("Endeavors")
+    self.openTamrielTomesButton = self.container:GetNamedChild("OpenTamrielTomes")
 
     self.currencyControls = {}
     for index, data in ipairs(self.marketCurrencyTypes) do
@@ -34,7 +34,7 @@ end
 
 function ZO_MarketCurrency_Keyboard:ShowMarketCurrencyButtonType(buttonType)
     self.buyCrownsButton:SetHidden(buttonType ~= ZO_MARKET_CURRENCY_BUTTON_TYPE_BUY_CROWNS)
-    self.endeavorsButton:SetHidden(buttonType ~= ZO_MARKET_CURRENCY_BUTTON_TYPE_OPEN_ENDEAVORS)
+    self.openTamrielTomesButton:SetHidden(buttonType ~= ZO_MARKET_CURRENCY_BUTTON_TYPE_OPEN_TAMRIEL_TOMES)
 end
 
 function ZO_MarketCurrency_Keyboard:OnMarketCurrencyTypeVisibilityUpdated()

@@ -370,7 +370,8 @@ function ZO_KeyboardNotificationManager:InitializeNotificationList(control)
         ZO_DuelInviteProvider:New(self),
         ZO_KeyboardEsoPlusSubscriptionStatusProvider:New(self),
         ZO_GiftInventoryProvider:New(self),
-        ZO_DailyLoginRewardsClaimProvider:New(self),
+        -- TODO Tamriel Tomes: Reinstate DLR later...?
+        -- ZO_DailyLoginRewardsClaimProvider:New(self),
         ZO_KeyboardGuildNewApplicationsProvider:New(self),
         ZO_PlayerApplicationsProvider:New(self),
         ZO_KeyboardMarketProductUnlockedProvider:New(self),

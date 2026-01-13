@@ -245,6 +245,10 @@ function ZO_ObjectPool_DefaultResetObject(object)
     object:Reset()
 end
 
+function ZO_ObjectPool_DefaultAcquireControl(control)
+    control:SetHidden(false)
+end
+
 function ZO_ObjectPool_DefaultResetControl(control)
     control:SetHidden(true)
 end

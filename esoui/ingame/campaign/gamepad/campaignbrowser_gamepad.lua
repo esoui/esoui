@@ -550,10 +550,13 @@ function ZO_CampaignBrowser_Gamepad:InitializeKeybindStripDescriptors()
 
                 if entryType == ENTRY_TYPES.ENTER_CAMPAIGN then
                     self:DoQueueForCampaign(targetData)
+                    PlaySound(SOUNDS.CAMPAIGN_ENTER_CAMPAIGN)
                 elseif entryType == ENTRY_TYPES.TRAVEL_TO_CAMPAIGN then
                     ConfirmCampaignEntry(targetData.id, targetData.isGroup, true)
+                    PlaySound(SOUNDS.CAMPAIGN_ENTER_CAMPAIGN)
                 elseif entryType == ENTRY_TYPES.LEAVE_QUEUE then
                     self:DoLeaveCampaignQueue(targetData)
+                    PlaySound(SOUNDS.CAMPAIGN_LEAVE_CAMPAIGN)
                 elseif entryType == ENTRY_TYPES.SET_HOME then
                     self:DoSetHomeCampaign(targetData)
                 elseif entryType == ENTRY_TYPES.BONUSES then
@@ -615,20 +618,6 @@ function ZO_CampaignBrowser_Gamepad:InitializeKeybindStripDescriptors()
                     end
                 end
                 return true
-            end,
-            sound = function()
-                local targetData = self:GetTargetData()
-                -- Contextual campaign action
-                if targetData and targetData.entryType == ENTRY_TYPES.CAMPAIGN then
-                    if self:CanEnter(targetData) then
-                        -- enter campaign after queue
-                        return SOUNDS.CAMPAIGN_ENTER_CAMPAIGN
-                    elseif self:CanQueueForCampaign(targetData) then
-                        -- enter campaign queue
-                        return SOUNDS.CAMPAIGN_QUEUE_CAMPAIGN
-                    end
-                end
-                return SOUNDS.GAMEPAD_MENU_FORWARD
             end,
         },
         { -- back

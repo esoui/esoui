@@ -10,12 +10,10 @@
                 </Label>
             </Controls>
         </Control>
-
         <Control name="ZO_SortFilterListEmptyRow_Keyboard" inherits="ZO_SortFilterListEmptyRow" resizeToFitDescendents="true" virtual="true">
             <Controls>
-                <Texture name="$(parent)BG" inherits="ZO_ThinListBgStrip" />
-
-                <Label name="$(parent)Message" override="true" font="ZoFontGame" />
+                <Texture name="$(parent)BG" inherits="ZO_ThinListBgStrip"/>
+                <Label name="$(parent)Message" override="true" font="ZoFontGame"/>
             </Controls>
         </Control>
     </Controls>

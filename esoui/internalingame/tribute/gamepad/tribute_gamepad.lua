@@ -42,6 +42,10 @@ ZO_TributeCursor_Gamepad = ZO_InitializingCallbackObject:Subclass()
 function ZO_TributeCursor_Gamepad:Initialize(control)
     self.control = control
     self:Reset()
+
+    if not IsConsoleUI() then
+        self.control:SetHandler("OnUpdate", function() self:OnUpdate() end)
+    end
 end
 
 function ZO_TributeCursor_Gamepad:Reset()
@@ -76,10 +80,16 @@ function ZO_TributeCursor_Gamepad:UpdateDirectionalInput()
         local clampedX, clampedY = self.control:GetCenter()
         if clampedX ~= self.x or clampedY ~= self.y then
             self.x, self.y = clampedX, clampedY
+            self.directionalX = self.x + dx
+            self.directionalY = self.y + dy
             cursorMoved = true
         end
     end
 
+    self:UpdateCursorInfo(cursorMoved)
+end
+
+function ZO_TributeCursor_Gamepad:UpdateCursorInfo(cursorMoved)
     self:RefreshObjectUnderCursor()
     local targetFriction = ZO_TRIBUTE_GAMEPAD_CURSOR_FRICTION_FACTORS[self.objectTypeUnderCursor]
     self.frictionInterpolationFactor = zo_deltaNormalizedLerp(self.frictionInterpolationFactor, targetFriction, ZO_TRIBUTE_GAMEPAD_CURSOR_FRICTION_INTERPOLATION_RATE)
@@ -206,6 +216,40 @@ function ZO_TributeCursor_Gamepad:RefreshInsets()
         self.control:SetClampedToScreenInsets(0, 0, 0, ZO_KEYBIND_STRIP_GAMEPAD_VISUAL_HEIGHT)
     else
         self.control:SetClampedToScreenInsets(0, 0, 0, 0)
+    end
+end
+
+function ZO_TributeCursor_Gamepad:UpdateVirtualMousePosition()
+    if self.cursorId ~= nil then
+        local deltaX, deltaY = GetUIMouseDeltas()
+        if deltaX ~= 0 or deltaY ~= 0 then
+            -- This code allows the player to use the mouse on the gamepad UI on a PC build.
+            -- If movement is coming from directional input (ei. arrows, joystick) then the
+            -- mouse should jump to the crosshairs when used again. When mouse is the primary
+            -- mode of movement then the gamepad crosshairs (self.control) will follow.
+            local mouseX, mouseY = self.directionalX, self.directionalY
+            if mouseX == nil or mouseY == nil then
+                mouseX, mouseY = GetUIMousePosition()
+            else
+                WINDOW_MANAGER:SetMouseFocusByName(self.control:GetName())
+                self.directionalX = nil
+                self.directionalY = nil
+            end
+
+            self.control:SetAnchor(CENTER, GuiRoot, TOPLEFT, mouseX, mouseY)
+            local clampedX, clampedY = self.control:GetCenter()
+            if clampedX ~= self.x or clampedY ~= self.y then
+                self.x, self.y = clampedX, clampedY
+                return true
+            end
+        end
+    end
+    return false
+end
+
+function ZO_TributeCursor_Gamepad:OnUpdate()
+    if self:UpdateVirtualMousePosition() then
+        self:UpdateCursorInfo()
     end
 end
 

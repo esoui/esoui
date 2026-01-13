@@ -1,84 +1,72 @@
 <GuiXml>
     <Controls>
         <TopLevelControl name="ZO_MarketAnnouncementBase_Control" tier="HIGH" hidden="true" virtual="true">
-            <AnchorFill />
-
+            <AnchorFill/>
             <Controls>
                 <!-- Underlay to eat all the mouse input. Hidden for design reasons. -->
                 <Control name="$(parent)ModalUnderlay" mouseEnabled="true">
-                    <Anchor point="TOPLEFT" relativeTo="GuiRoot" />
-                    <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" />
-
+                    <Anchor point="TOPLEFT" relativeTo="GuiRoot"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot"/>
                     <!-- Eat the mouse wheel input -->
-                    <OnMouseWheel />
+                    <OnMouseWheel/>
                 </Control>
-
                 <Control name="$(parent)Container">
                     <Dimensions x="1150" y="970"/>
-                    <Anchor point="CENTER" />
+                    <Anchor point="CENTER"/>
                     <Controls>
                         <Backdrop name="$(parent)BG">
-                            <AnchorFill />
+                            <AnchorFill/>
                         </Backdrop>
-
                         <Control name="$(parent)Carousel" inherits="ZO_Carousel_Control">
                             <Dimensions x="1090" y="520"/>
                             <Anchor point="TOP" relativeTo="$(parent)BG" relativePoint="TOP" offsetY="37"/>
                         </Control>
-
                         <Control name="$(parent)LockedCrownStore" hidden="true">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)Carousel" />
-                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Carousel" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Carousel"/>
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Carousel"/>
                             <Controls>
                                 <Texture name="$(parent)Background" textureFile="EsoUI/Art/Icons/icon_missing.dds">
-                                    <AnchorFill />
+                                    <AnchorFill/>
                                 </Texture>
-                                
                                 <Label name="$(parent)TitleText">
-                                    <Dimensions x="220" />
-                                    <Anchor point="TOPLEFT" offsetX="50" offsetY="100" />
+                                    <Dimensions x="220"/>
+                                    <Anchor point="TOPLEFT" offsetX="50" offsetY="100"/>
                                 </Label>
                                 <Label name="$(parent)DescriptionText" text="SI_MARKET_ANNOUNCEMENT_LOCKED_CROWN_STORE_DESCRIPTION" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                                    <Anchor point="TOPLEFT" relativeTo="$(parent)TitleText" relativePoint="BOTTOMLEFT" />
-                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)TitleText" relativePoint="BOTTOMRIGHT" />
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)TitleText" relativePoint="BOTTOMLEFT"/>
+                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)TitleText" relativePoint="BOTTOMRIGHT"/>
                                 </Label>
                             </Controls>
                         </Control>
-
                         <Control name="$(parent)Greeting" resizeToFitDescendents="true">
                             <Anchor point="TOP" relativeTo="$(parent)Carousel" relativePoint="BOTTOM" offsetY="10"/>
                             <Controls>
                                 <Control name="$(parent)TopDivider">
                                     <Anchor point="TOP"/>
-                                    <Dimensions x="1000" /> 
+                                    <Dimensions x="1000"/>
                                 </Control>
-
                                 <Label name="$(parent)Welcome" text="SI_MARKET_ANNOUNCEMENT_WELCOME" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE">
-                                    <Anchor point="TOPLEFT" relativeTo="$(parent)TopDivider" relativePoint="BOTTOMLEFT" />
-                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)TopDivider" relativePoint="BOTTOMRIGHT" />
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)TopDivider" relativePoint="BOTTOMLEFT"/>
+                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)TopDivider" relativePoint="BOTTOMRIGHT"/>
                                 </Label>
-
                                 <Control name="$(parent)BottomDivider">
-                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Welcome" relativePoint="BOTTOMLEFT" />
-                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Welcome" relativePoint="BOTTOMRIGHT" />
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Welcome" relativePoint="BOTTOMLEFT"/>
+                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Welcome" relativePoint="BOTTOMRIGHT"/>
                                 </Control>
                             </Controls>
                         </Control>
-
                         <Control name="$(parent)ActionTileList" resizeToFitDescendents="true">
-                            <Anchor point="TOP" relativeTo="$(parent)Greeting" relativePoint="BOTTOM" offsetY="23" />
+                            <Anchor point="TOP" relativeTo="$(parent)Greeting" relativePoint="BOTTOM" offsetY="23"/>
                         </Control>
-
                         <Control name="$(parent)Close" inherits="ZO_KeybindButton">
-                            <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT" offsetX="-40" offsetY="-30" />
+                            <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT" offsetX="-40" offsetY="-30"/>
                             <Controls>
-                                <Label name="$(parent)NameLabel" text="SI_DIALOG_EXIT" override="true" />
+                                <Label name="$(parent)NameLabel" text="SI_DIALOG_EXIT" override="true"/>
                             </Controls>
                         </Control>
                     </Controls>
                 </Control>
             </Controls>
-
         </TopLevelControl>
     </Controls>
 </GuiXml>

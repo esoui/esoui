@@ -3,7 +3,7 @@
         <Control name="ZO_CampaignBrowserDialogsGamepadMenuEntryNoIcon" inherits="ZO_GamepadMenuEntryTemplate" virtual="true">
             <Controls>
                 <Label name="$(parent)Label" override="true">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)RootSpacer" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)RootSpacer"/>
                 </Label>
             </Controls>
         </Control>

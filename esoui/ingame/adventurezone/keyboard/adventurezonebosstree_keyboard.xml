@@ -1,0 +1,49 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_AdvZoneBossControl_Keyboard" mouseEnabled="true" virtual="true">
+            <OnMouseEnter>
+                ZO_AdventureZoneBossTree_Keyboard.OnBossControlMouseEnter(self)
+            </OnMouseEnter>
+            <OnMouseExit>
+                ZO_AdventureZoneBossTree_Keyboard.OnBossControlMouseExit(self)
+            </OnMouseExit>
+        </Control>
+        <TopLevelControl name="ZO_AdvZoneBossTree_Keyboard" inherits="ZO_AdvZoneBossTree_Shared">
+            <OnInitialized>
+                ZO_AdventureZoneBossTree_Keyboard.OnControlInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Backdrop name="$(parent)BG" override="true" inherits="ZO_MinorMungeBackdrop_SemiTransparentBlack"/>
+                <Label name="$(parent)Title" override="true" font="ZoFontWinH2">
+                    <Anchor point="TOP" relativePoint="TOP" offsetY="20"/>
+                </Label>
+                <Control name="$(parent)BossContainer" override="true">
+                    <Controls>
+                        <Control name="$(parent)EasyContainer" override="true">
+                            <Controls>
+                                <Control name="$(parent)BossEasy1" override="true" inherits="ZO_AdvZoneBossControl_Keyboard"/>
+                                <Control name="$(parent)BossEasy2" override="true" inherits="ZO_AdvZoneBossControl_Keyboard"/>
+                                <Control name="$(parent)BossEasy3" override="true" inherits="ZO_AdvZoneBossControl_Keyboard"/>
+                                <Control name="$(parent)BossEasy4" override="true" inherits="ZO_AdvZoneBossControl_Keyboard"/>
+                                <Control name="$(parent)BossEasy5" override="true" inherits="ZO_AdvZoneBossControl_Keyboard"/>
+                                <Control name="$(parent)BossEasy6" override="true" inherits="ZO_AdvZoneBossControl_Keyboard"/>
+                            </Controls>
+                        </Control>
+                        <Control name="$(parent)MediumContainer" override="true">
+                            <Controls>
+                                <Control name="$(parent)BossMedium1" override="true" inherits="ZO_AdvZoneBossControl_Keyboard"/>
+                                <Control name="$(parent)BossMedium2" override="true" inherits="ZO_AdvZoneBossControl_Keyboard"/>
+                                <Control name="$(parent)BossMedium3" override="true" inherits="ZO_AdvZoneBossControl_Keyboard"/>
+                            </Controls>
+                        </Control>
+                        <Control name="$(parent)HardContainer" override="true">
+                            <Controls>
+                                <Control name="$(parent)BossHard" override="true" inherits="ZO_AdvZoneBossControl_Keyboard"/>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

@@ -146,7 +146,6 @@ panelBuilder:AddSetting({
     settingId =  OPTIONS_CUSTOM_SETTING_CHAT_BUBBLE_SAY_ENABLED,
     header = SI_INTERFACE_OPTIONS_CHAT_BUBBLES,
     indentLevel = 1,
-    initializeControlFunction = ZO_OptionsPanel_Interface_ChatBubbleChannel_OnInitialized,
 })
 
 panelBuilder:AddSetting({
@@ -155,7 +154,6 @@ panelBuilder:AddSetting({
     settingId =  OPTIONS_CUSTOM_SETTING_CHAT_BUBBLE_YELL_ENABLED,
     header = SI_INTERFACE_OPTIONS_CHAT_BUBBLES,
     indentLevel = 1,
-    initializeControlFunction = ZO_OptionsPanel_Interface_ChatBubbleChannel_OnInitialized,
 })
 
 panelBuilder:AddSetting({
@@ -164,7 +162,6 @@ panelBuilder:AddSetting({
     settingId =  OPTIONS_CUSTOM_SETTING_CHAT_BUBBLE_WHISPER_ENABLED,
     header = SI_INTERFACE_OPTIONS_CHAT_BUBBLES,
     indentLevel = 1,
-    initializeControlFunction = ZO_OptionsPanel_Interface_ChatBubbleChannel_OnInitialized,
 })
 
 panelBuilder:AddSetting({
@@ -173,7 +170,6 @@ panelBuilder:AddSetting({
     settingId =  OPTIONS_CUSTOM_SETTING_CHAT_BUBBLE_GROUP_ENABLED,
     header = SI_INTERFACE_OPTIONS_CHAT_BUBBLES,
     indentLevel = 1,
-    initializeControlFunction = ZO_OptionsPanel_Interface_ChatBubbleChannel_OnInitialized,
 })
 
 panelBuilder:AddSetting({
@@ -182,7 +178,6 @@ panelBuilder:AddSetting({
     settingId =  OPTIONS_CUSTOM_SETTING_CHAT_BUBBLE_EMOTE_ENABLED,
     header = SI_INTERFACE_OPTIONS_CHAT_BUBBLES,
     indentLevel = 1,
-    initializeControlFunction = ZO_OptionsPanel_Interface_ChatBubbleChannel_OnInitialized,
 })
 
 ------------------------------

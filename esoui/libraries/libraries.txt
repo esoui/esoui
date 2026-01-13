@@ -170,6 +170,9 @@ EsoUI\Libraries\ZO_SortFilterList\Gamepad\ZO_InteractiveSortFilterList_Gamepad.l
 EsoUI\Libraries\ZO_SortFilterList\Gamepad\ZO_InteractiveSortFilterList_Gamepad.xml
 EsoUI\Libraries\ZO_SortFilterList\Gamepad\ZO_NoSelectionSortFilterList_Gamepad.lua
 
+EsoUI\Libraries\ZO_PageNavigation\ZO_PageNavigation.lua
+EsoUI\Libraries\ZO_PageNavigation\ZO_PageNavigation.xml
+
 EsoUI\Libraries\ZO_PagedList\ZO_PagedList.lua
 EsoUI\Libraries\ZO_PagedList\ZO_PagedList.xml
 

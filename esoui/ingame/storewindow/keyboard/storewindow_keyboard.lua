@@ -17,47 +17,43 @@ local STORE_ITEMS = false
 
 ZO_StoreManager = ZO_SharedStoreManager:Subclass()
 
-function ZO_StoreManager:New(...)
-    return ZO_SharedStoreManager.New(self, ...)
-end
-
 function ZO_StoreManager:Initialize(control)
     ZO_SharedStoreManager.Initialize(self, control)
 
     STORE_FRAGMENT = ZO_FadeSceneFragment:New(control)
 
     local INVENTORY_TYPE_LIST = { INVENTORY_BACKPACK, INVENTORY_VENGEANCE }
-    STORE_FRAGMENT:RegisterCallback("StateChange",   function(oldState, newState)
-                                                    if newState == SCENE_FRAGMENT_SHOWING then
-                                                        self:RefreshCurrency()
-                                                        self:SetupDefaultSort()
-                                                        self:GetStoreItems()
-                                                        self:UpdateList()
-                                                        self:UpdateFreeSlots()
-                                                        if self.windowMode == ZO_STORE_WINDOW_MODE_STABLE then
-                                                            KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
-                                                        end
-                                                    elseif newState == SCENE_FRAGMENT_HIDING then
-                                                        if ITEM_PREVIEW_KEYBOARD:IsInteractionCameraPreviewEnabled() then
-                                                            self:TogglePreviewMode()
-                                                        end
-                                                        if self.windowMode == ZO_STORE_WINDOW_MODE_STABLE then
-                                                            KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
-                                                        end
-                                                    end
-                                                end)
+    STORE_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
+        if newState == SCENE_FRAGMENT_SHOWING then
+            self:RefreshCurrency()
+            self:SetupDefaultSort()
+            self:GetStoreItems()
+            self:UpdateList()
+            self:UpdateFreeSlots()
+            if self.windowMode == ZO_STORE_WINDOW_MODE_STABLE then
+                KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
+            end
+        elseif newState == SCENE_FRAGMENT_HIDING then
+            if ITEM_PREVIEW_KEYBOARD:IsInteractionCameraPreviewEnabled() then
+                self:TogglePreviewMode()
+            end
+            if self.windowMode == ZO_STORE_WINDOW_MODE_STABLE then
+                KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
+            end
+        end
+    end)
 
     self:InitializeTabs()
     self:InitializeKeybindStripDescriptors()
 
-    self.currency1Display = GetControl(control, "InfoBarCurrency1")
-    self.currency2Display = GetControl(control, "InfoBarCurrency2")
-    self.currencyMoneyDisplay = GetControl(control, "InfoBarMoney")
-    self.freeSlotsLabel = GetControl(control, "InfoBarFreeSlots")
+    self.currency1Display = control:GetNamedChild("InfoBarCurrency1")
+    self.currency2Display = control:GetNamedChild("InfoBarCurrency2")
+    self.currencyMoneyDisplay = control:GetNamedChild("InfoBarMoney")
+    self.freeSlotsLabel = control:GetNamedChild("InfoBarFreeSlots")
 
     ZO_CurrencyControl_InitializeDisplayTypes(self.currencyMoneyDisplay, CURT_MONEY)
 
-    self.activeTab = GetControl(control, "TabsActive")
+    self.activeTab = control:GetNamedChild("TabsActive")
 
     self.multipleDialog = ZO_BuyMultipleDialog
     ZO_Dialogs_RegisterCustomDialog("BUY_MULTIPLE",
@@ -71,17 +67,17 @@ function ZO_StoreManager:Initialize(control)
         {
             [1] =
             {
-                control = GetControl(self.multipleDialog, "Purchase"),
-                text =  SI_DIALOG_PURCHASE,
-                callback =  function(dialog)
-                                STORE_WINDOW:BuyMultiplePurchase()
-                            end,
+                control = self.multipleDialog:GetNamedChild("Purchase"),
+                text = SI_DIALOG_PURCHASE,
+                callback = function(dialog)
+                    STORE_WINDOW:BuyMultiplePurchase()
+                end,
             },
 
             [2] =
             {
-                control =   GetControl(self.multipleDialog, "Cancel"),
-                text =      SI_DIALOG_CANCEL,
+                control = self.multipleDialog:GetNamedChild("Cancel"),
+                text = SI_DIALOG_CANCEL,
             }
         }
     })
@@ -91,14 +87,14 @@ function ZO_StoreManager:Initialize(control)
         return zo_min(zo_max(GetStoreEntryMaxBuyable(entryIndex), 1), MAX_STORE_WINDOW_STACK_QUANTITY) -- always attempt to let one item be bought, just to show the error; ensure that the quantity can't go above 999
     end
 
-    local spinnerControl = GetControl(ZO_BuyMultipleDialog, "Spinner")
+    local spinnerControl = ZO_BuyMultipleDialog:GetNamedChild("Spinner")
     self.buyMultipleSpinner = ZO_Spinner:New(spinnerControl, 1, GetBuyMultipleMaximum)
     self.buyMultipleSpinner:RegisterCallback("OnValueChanged", function() self:RefreshBuyMultiple() end)
 
-    self.list = GetControl(control, "List")
+    self.list = control:GetNamedChild("List")
     ZO_ScrollList_AddDataType(self.list, DATA_TYPE_STORE_ITEM, "ZO_StoreEntrySlot", 52, function(currentControl, data) self:SetUpBuySlot(currentControl, data) end, nil, nil, ZO_InventorySlot_OnPoolReset)
 
-    self.landingArea = GetControl(self.list, "SellToVendorArea")
+    self.landingArea = self.list:GetNamedChild("SellToVendorArea")
 
     self.sortHeaderGroup = ZO_SortHeaderGroup:New(control:GetNamedChild("SortBy"), true)
     self.sortHeaderGroup:SelectHeaderByKey("name")
@@ -114,7 +110,7 @@ function ZO_StoreManager:Initialize(control)
     self.sortHeaderGroup:ReplaceKey("stackSellPrice", "stackBuyPrice")
     self.sortHeaderGroup:SelectHeaderByKey("name", ZO_SortHeaderGroup.SUPPRESS_CALLBACKS)
 
-    self.tabs = GetControl(control, "Tabs")
+    self.tabs = control:GetNamedChild("Tabs")
 
     local typicalHiddenColumns =
     {
@@ -198,7 +194,6 @@ function ZO_StoreManager:Initialize(control)
     local function RefreshStoreWindow()
         if not STORE_FRAGMENT:IsHidden() then
             self:RefreshCurrency()
-
             self:GetStoreItems()
             self:UpdateList()
         end
@@ -472,23 +467,27 @@ function ZO_StoreManager:ShouldAddItemToList(itemData)
     return false
 end
 
-local sortKeys =
-{
-    name = { },
-    stackBuyPrice = { tiebreaker = "stackBuyPriceCurrency1", isNumeric = true },
-    stackBuyPriceCurrency1 = { tiebreaker = "stackBuyPriceCurrency2", isNumeric = true },
-    stackBuyPriceCurrency2 = { tiebreaker = "name", isNumeric = true },
-    sellInformationSortOrder = { tiebreaker = "name", isNumeric = true },
-}
+do
+    local sortKeys =
+    {
+        name = { },
+        stackBuyPrice = { tiebreaker = "stackBuyPriceCurrency1", isNumeric = true },
+        stackBuyPriceCurrency1 = { tiebreaker = "stackBuyPriceCurrency2", isNumeric = true },
+        stackBuyPriceCurrency2 = { tiebreaker = "name", isNumeric = true },
+        sellInformationSortOrder = { tiebreaker = "name", isNumeric = true },
+    }
 
-function ZO_StoreManager:SortData()
-    local scrollData = ZO_ScrollList_GetDataList(self.list)
+    function ZO_StoreManager:SortData()
+        local scrollData = ZO_ScrollList_GetDataList(self.list)
 
-    self.sortFunction = self.sortFunction or function(entry1, entry2)
-        return ZO_TableOrderingFunction(entry1.data, entry2.data, self.sortHeaderGroup:GetCurrentSortKey(), sortKeys, self.sortHeaderGroup:GetSortDirection())
+        self.sortFunction = self.sortFunction or function(entry1, entry2)
+            local modifiedSortKeys = ZO_ShallowTableCopy(sortKeys)
+            modifiedSortKeys.meetsRequirementsToBuy = { tiebreaker = self.sortHeaderGroup:GetCurrentSortKey(), tieBreakerSortOrder = self.sortHeaderGroup:GetSortDirection() }
+            return ZO_TableOrderingFunction(entry1.data, entry2.data, "meetsRequirementsToBuy", modifiedSortKeys, ZO_SORT_ORDER_DOWN)
+        end
+
+        table.sort(scrollData, self.sortFunction)
     end
-
-    table.sort(scrollData, self.sortFunction)
 end
 
 function ZO_StoreManager:ApplySort()
@@ -675,10 +674,10 @@ function ZO_StoreManager:RefreshBuyMultiple()
 
     local entryIndex = self.multipleDialog.index
 
-    local slotControl = GetControl(self.multipleDialog, "Slot")
-    local iconControl = GetControl(self.multipleDialog, "SlotIcon")
-    local quantityControl = GetControl(self.multipleDialog, "SlotStackCount")
-    local currencyControl = GetControl(self.multipleDialog, "Currency")
+    local slotControl = self.multipleDialog:GetNamedChild("Slot")
+    local iconControl = self.multipleDialog:GetNamedChild("SlotIcon")
+    local quantityControl = self.multipleDialog:GetNamedChild("SlotStackCount")
+    local currencyControl = self.multipleDialog:GetNamedChild("Currency")
 
     local icon, _, stack, price, _, meetsRequirementsToBuy, meetsRequirementsToEquip, _, _, currencyType1, currencyQuantity1,
             currencyType2, currencyQuantity2 = GetStoreEntryInfo(entryIndex)

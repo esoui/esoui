@@ -231,6 +231,7 @@ function ZO_QuestJournal_Gamepad:RegisterIcons()
     self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     ZONE_DISPLAY_TYPE_ZONE_STORY,       "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_zoneStory.dds")
     self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     ZONE_DISPLAY_TYPE_COMPANION,        "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_companion.dds")
     self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     ZONE_DISPLAY_TYPE_ENDLESS_DUNGEON,  "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_endlessDungeon.dds")
+    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     ZONE_DISPLAY_TYPE_ADVENTURE_ZONE,   "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_adventureZone.dds")
 end
 
 function ZO_QuestJournal_Gamepad:RegisterTooltips()
@@ -246,6 +247,7 @@ function ZO_QuestJournal_Gamepad:RegisterTooltips()
     local zoneStoryIcon = zo_iconFormat("EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_zoneStory.dds", ICON_SIZE, ICON_SIZE)
     local companionIcon = zo_iconFormat("EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_companion.dds", ICON_SIZE, ICON_SIZE)
     local endlessDungeonIcon = zo_iconFormat("EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_endlessDungeon.dds", ICON_SIZE, ICON_SIZE)
+    local adventureZoneIcon = zo_iconFormat("EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_adventureZone.dds", ICON_SIZE, ICON_SIZE)
 
     self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     ZONE_DISPLAY_TYPE_SOLO,             zo_strformat(SI_GAMEPAD_QUEST_JOURNAL_INSTANCE_TYPE_SOLO, soloIcon))
     self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     ZONE_DISPLAY_TYPE_DUNGEON,          zo_strformat(SI_GAMEPAD_QUEST_JOURNAL_INSTANCE_TYPE_DUNGEON, dungeonIcon))
@@ -258,6 +260,7 @@ function ZO_QuestJournal_Gamepad:RegisterTooltips()
     self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     ZONE_DISPLAY_TYPE_ZONE_STORY,       zo_strformat(SI_GAMEPAD_QUEST_JOURNAL_ZONE_STORY, zoneStoryIcon))
     self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     ZONE_DISPLAY_TYPE_COMPANION,        zo_strformat(SI_GAMEPAD_QUEST_JOURNAL_COMPANION, companionIcon))
     self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     ZONE_DISPLAY_TYPE_ENDLESS_DUNGEON,  zo_strformat(SI_GAMEPAD_QUEST_JOURNAL_ENDLESS_DUNGEON, endlessDungeonIcon))
+    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE,     ZONE_DISPLAY_TYPE_ADVENTURE_ZONE,   zo_strformat(SI_GAMEPAD_QUEST_JOURNAL_ADVENTURE_ZONE, adventureZoneIcon))
 end
 
 function ZO_QuestJournal_Gamepad:GetQuestDataString()

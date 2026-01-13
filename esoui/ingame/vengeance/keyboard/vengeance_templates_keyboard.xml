@@ -4,7 +4,6 @@
             <OnInitialized>
                 ZO_VengeancePerk_Icon_Keyboard.OnControlInitialized(self)
             </OnInitialized>
-
             <OnMouseEnter>
                 ZO_VengeancePerk_Icon_Keyboard.VengeancePerk_OnMouseEnter(self)
             </OnMouseEnter>

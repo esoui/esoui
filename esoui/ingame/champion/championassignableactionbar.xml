@@ -1,13 +1,12 @@
 <GuiXml>
     <Controls>
         <Control name="ZO_ChampionAssignableActionBar" virtual="true"/>
-
         <Control name="ZO_ChampionAssignableActionSlot" virtual="true">
-            <Dimensions x="37" y="37" />
+            <Dimensions x="37" y="37"/>
             <Controls>
                 <Button name="$(parent)Button" pixelRoundingEnabled="true">
-                    <AnchorFill />
-                    <MouseButton button="RIGHT" enabled="true" />
+                    <AnchorFill/>
+                    <MouseButton button="RIGHT" enabled="true"/>
                     <OnClicked>
                         ZO_ChampionAssignableActionSlot_OnMouseClicked(self, button)
                     </OnClicked>
@@ -24,21 +23,17 @@
                        ZO_ChampionAssignableActionSlot_OnMouseExit(self)
                     </OnMouseExit>
                 </Button>
-
                 <TextureComposite name="$(parent)Star" inherits="ZO_ChampionStarVisuals" level="1" pixelRoundingEnabled="true">
-                    <AnchorFill />
+                    <AnchorFill/>
                 </TextureComposite>
-
                 <Texture name="$(parent)Icon" level="1" pixelRoundingEnabled="true">
-                    <AnchorFill />
+                    <AnchorFill/>
                 </Texture>
-
                 <Texture name="$(parent)DragAndDropCallout" layer="OVERLAY" pixelRoundingEnabled="true" hidden="true">
-                    <AnchorFill />
+                    <AnchorFill/>
                 </Texture>
             </Controls>
         </Control>
-
         <!-- high tier to be placed above existing champion screen -->
         <TopLevelControl name="ZO_Champion_QuickMenuTopLevel_Gamepad" tier="HIGH" inherits="ZO_Gamepad_ParametricList_Screen">
             <OnInitialized>
@@ -49,7 +44,7 @@
                 main reason for this is that the background needs to exist
                 above the champion scene, like a dialog, instead of below
                 everything, the way it's used in most scenes. -->
-                <Control name="$(parent)Background" inherits="ZO_SharedGamepadNavQuadrant_1_Background_Template" />
+                <Control name="$(parent)Background" inherits="ZO_SharedGamepadNavQuadrant_1_Background_Template"/>
             </Controls>
         </TopLevelControl>
     </Controls>

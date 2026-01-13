@@ -1,49 +1,41 @@
-﻿<GuiXml>
+<GuiXml>
     <Controls>
         <Control name="ZO_MarketCurrencyLabel_Keyboard" mouseEnabled="true" resizeToFitDescendents="true" virtual="true">
             <Controls>
                 <Label name="$(parent)Label" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE">
-                    <Anchor point="LEFT" />
+                    <Anchor point="LEFT"/>
                 </Label>
-
                 <Label name="$(parent)Amount" font="ZoFontWinH3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" horizontalAlignment="RIGHT">
-                    <AnchorToBaseline side="RIGHT" relativeToLabel="$(parent)Label" offsetX="5" />
+                    <AnchorToBaseline side="RIGHT" relativeToLabel="$(parent)Label" offsetX="5"/>
                 </Label>
             </Controls>
         </Control>
-
         <TopLevelControl name="ZO_Market_Currency_Keyboard" inherits="ZO_RightPanelFootPrint" hidden="true" level="1">
             <OnInitialized>
                 ZO_MarketCurrency_Keyboard_OnInitialized(self)
             </OnInitialized>
-            
             <Controls>
-                <Control name="$(parent)Container" resizeToFitDescendents="true" >
-                    <Anchor point="BOTTOMLEFT" offsetY="0" offsetX="20" />
-
+                <Control name="$(parent)Container" resizeToFitDescendents="true">
+                    <Anchor point="BOTTOMLEFT" offsetY="0" offsetX="20"/>
                     <Controls>
                         <Button name="$(parent)BuyCrowns" inherits="ZO_DefaultButton" text="SI_MARKET_BUY_CROWNS">
-                            <Anchor point="BOTTOMLEFT" />
-                            <Dimensions x="200" />
-
+                            <Anchor point="BOTTOMLEFT"/>
+                            <Dimensions x="200"/>
                             <OnClicked>
                                 ZO_MarketCurrencyBuyCrowns_OnClicked(self)
                             </OnClicked>
-
                             <Controls>
                                 <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Icons/store_crowns.dds" layer="CONTROLS">
-                                    <Anchor point="RIGHT" relativePoint="LEFT" offsetX="32" />
-                                    <Dimensions x="64" y="64" />
+                                    <Anchor point="RIGHT" relativePoint="LEFT" offsetX="32"/>
+                                    <Dimensions x="64" y="64"/>
                                 </Texture>
                             </Controls>
                         </Button>
-
-                        <Button name="$(parent)Endeavors" inherits="ZO_DefaultButton" hidden="true" text="SI_ACTIVITY_FINDER_OPEN_ENDEAVORS">
-                            <Anchor point="BOTTOMLEFT" />
-                            <Dimensions x="200" />
-
+                        <Button name="$(parent)OpenTamrielTomes" inherits="ZO_DefaultButton" hidden="true" text="SI_OPEN_TAMRIEL_TOMES_ACTION">
+                            <Anchor point="BOTTOMLEFT"/>
+                            <Dimensions x="200"/>
                             <OnClicked>
-                                RequestOpenTimedActivities()
+                                RequestOpenTamrielTome()
                             </OnClicked>
                         </Button>
                     </Controls>

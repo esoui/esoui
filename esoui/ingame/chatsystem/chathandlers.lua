@@ -161,7 +161,7 @@ local BUILTIN_MESSAGE_FORMATTERS = {
         -- Only one name will be sent here, so use that and do not use special formatting since this appears in chat
         local nameToDisplay
         if characterName ~= "" then
-            nameToDisplay = IsConsoleUI() and ZO_FormatUserFacingCharacterName(characterName) or characterName
+            nameToDisplay = ZO_IsConsoleOrGameCoreUI() and ZO_FormatUserFacingCharacterName(characterName) or characterName
         else
             nameToDisplay = ZO_FormatUserFacingDisplayName(displayName)
         end
@@ -333,8 +333,8 @@ function ZO_ChatRouter:Initialize()
         self:RegisterMessageFormatter(eventCode, messageFormatter)
     end
 
-    if IsConsoleUI() then
-        -- VOICE_CHAT_MANAGER is console only
+    if ZO_IsConsoleOrGameCoreUI() then
+        -- VOICE_CHAT_MANAGER is console and pc gamepass only
         local function SetTranscriptForwardingEnabled()
             local enableTranscriptForwarding = GetSetting_Bool(SETTING_TYPE_ACCESSIBILITY, ACCESSIBILITY_SETTING_SEND_TRANSCRIPT_TO_TEXT_CHAT)
             self:SetTranscriptForwardingEnabled(enableTranscriptForwarding)
@@ -432,11 +432,11 @@ function ZO_ChatRouter:AddTranscriptMessage(messageText)
 end
 
 local function AddTranscriptMessage(...)
-    CHAT_ROUTER:AddTranscriptMessage(...) 
+    CHAT_ROUTER:AddTranscriptMessage(...)
 end
 
-if IsConsoleUI() then
-    -- VOICE_CHAT_MANAGER is console only
+if ZO_IsConsoleOrGameCoreUI() then
+    -- VOICE_CHAT_MANAGER is console and pc gamepass only
     function ZO_ChatRouter:SetTranscriptForwardingEnabled(enabled)
         if enabled then
             VOICE_CHAT_MANAGER:RegisterCallback("VoiceChatTranscript", AddTranscriptMessage)

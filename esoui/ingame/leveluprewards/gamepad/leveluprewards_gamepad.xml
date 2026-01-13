@@ -3,7 +3,7 @@
         <Control name="ZO_LevelUpRewardsArtTileAndRewards_Gamepad" inherits="ZO_LevelUpRewardsArtTileAndRewards" virtual="true">
             <Controls>
                 <Control name="$(parent)Frame" override="true">
-                    <Dimensions x="ZO_LEVEL_UP_REWARDS_GAMEPAD_BACKGROUND_WIDTH" y="ZO_LEVEL_UP_REWARDS_GAMEPAD_BACKGROUND_HEIGHT" />
+                    <Dimensions x="ZO_LEVEL_UP_REWARDS_GAMEPAD_BACKGROUND_WIDTH" y="ZO_LEVEL_UP_REWARDS_GAMEPAD_BACKGROUND_HEIGHT"/>
                 </Control>
                 <Label name="$(parent)Title" font="ZoFontGamepad27" override="true"/>
             </Controls>

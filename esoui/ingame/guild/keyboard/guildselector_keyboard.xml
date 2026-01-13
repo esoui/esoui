@@ -1,42 +1,35 @@
 <GuiXml>
     <Controls>
         <TopLevelControl name="ZO_GuildSelector" hidden="true">
-            <Dimensions x="1024" y="50" />
-            <Anchor point="RIGHT" relativeTo="GuiRoot" offsetX="30" offsetY="-335" />
+            <Dimensions x="1024" y="50"/>
+            <Anchor point="RIGHT" relativeTo="GuiRoot" offsetX="30" offsetY="-335"/>
             <OnInitialized>
                 ZO_GuildSelector_OnInitialized(self)
             </OnInitialized>
-            
             <Controls>
                 <Texture name="$(parent)GuildIcon" mouseEnabled="false">
                     <Anchor point="TOPLEFT" relativePoint="TOPLEFT" offsetX="65" offsetY="10"/>
-                    <Dimensions x="32" y="32" />
+                    <Dimensions x="32" y="32"/>
                 </Texture>
-
                 <Control name="$(parent)ComboBox" inherits="ZO_ComboBox" resizeToFitDescendents="true" mouseEnabled="true">
-                    <Anchor point="LEFT" offsetX="115" />
-                    <Dimensions x="0" y="0" />
-
+                    <Anchor point="LEFT" offsetX="115"/>
+                    <Dimensions x="0" y="0"/>
                     <Controls>
-                        <Backdrop name="$(parent)BG" override="true" hidden="true" />
-
+                        <Backdrop name="$(parent)BG" override="true" hidden="true"/>
                         <Label name="$(parent)SelectedItemText" override="true" inherits="ZO_TooltipIfTruncatedLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
-                            <Dimensions y="35" />
+                            <Dimensions y="35"/>
                             <Anchor point="TOPLEFT"/>
-
                             <OnMouseUp>
                                 ZO_ComboBoxDropdown_Keyboard.OnClicked(self:GetParent(), button, upInside)
                             </OnMouseUp>
                         </Label>
-
                         <Button name="$(parent)OpenDropdown" override="true">
-                            <Anchor point="LEFT" relativeTo="$(parent)SelectedItemText" relativePoint="RIGHT" offsetX="3" />
+                            <Anchor point="LEFT" relativeTo="$(parent)SelectedItemText" relativePoint="RIGHT" offsetX="3"/>
                         </Button>
                     </Controls>
                 </Control>
-
                 <Texture name="$(parent)Divider" textureFile="EsoUI/Art/Miscellaneous/centerscreen_topDivider.dds">
-                    <Dimensions x="1024" y="4" />
+                    <Dimensions x="1024" y="4"/>
                     <Anchor point="BOTTOM"/>
                 </Texture>
             </Controls>

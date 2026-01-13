@@ -73,7 +73,7 @@ function ZO_EndlessDungeonBuffTracker_Shared:InitializeKeybindStripDescriptor()
     {
         -- Even though this is an ethereal keybind, the name will still be read during screen narration
         name = GetString(SI_DIALOG_CLOSE),
-        keybind = "TOGGLE_ENDLESS_DUNGEON_BUFF_TRACKER",
+        keybind = "TOGGLE_ACTIVITY_HUD_TRACKER",
         ethereal = true,
         narrateEthereal = true,
         etherealNarrationOrder = 2,

@@ -4,22 +4,18 @@
             <OnClicked>
                 self:GetParent().object:OnButtonClicked(self)
             </OnClicked>
-
             <OnMouseEnter>
                 self:GetParent().object:OnMouseEnter(self)
             </OnMouseEnter>
-
             <OnMouseExit>
                 self:GetParent().object:OnMouseExit(self)
             </OnMouseExit>
-
             <Controls>
                 <Texture name="$(parent)ButtonTexture" layer="CONTROLS" level="3">
-                    <AnchorFill />
+                    <AnchorFill/>
                 </Texture>
             </Controls>
         </Button>
-
         <Control name="ZO_SelectionIndicator_Control" resizeToFitDescendents="true" virtual="true">
             <OnInitialized>
                 ZO_SelectionIndicator_OnInitialized(self)

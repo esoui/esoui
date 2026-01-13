@@ -17,6 +17,7 @@ local DEFAULT_BACKPACK_LAYOUT_DATA =
     useSearchBar = true,
     hideBankInfo = true,
     hideCurrencyInfo = false,
+    hideBagUpgrade = true,
 }
 
 function ZO_BackpackLayoutFragment:New(...)
@@ -62,6 +63,12 @@ BACKPACK_MENU_BAR_LAYOUT_FRAGMENT = ZO_BackpackLayoutFragment:New(
     {
         inventoryTopOffsetY = DEFAULT_INVENTORY_TOP_OFFSET_Y,
         inventoryFilterDividerTopOffsetY = DEFAULT_INVENTORY_FILTER_DIVIDER_TOP_OFFSET_Y,
+        hideBagUpgrade = function()
+            local currentUnlock = GetCurrentBackpackUpgrade()
+            local maxUnlock = GetMaxBackpackUpgrade()
+
+            return currentUnlock >= maxUnlock
+        end,
     })
 
 BACKPACK_BANK_LAYOUT_FRAGMENT = ZO_BackpackLayoutFragment:New(

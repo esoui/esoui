@@ -538,7 +538,8 @@ function ZO_GamepadNotificationManager:InitializeNotificationList(control)
         ZO_GamepadDuelInviteProvider:New(self),
         ZO_GamepadEsoPlusSubscriptionStatusProvider:New(self),
         ZO_GiftInventoryProvider:New(self),
-        ZO_DailyLoginRewardsClaimProvider:New(self),
+        -- TODO Tamriel Tomes: Reinstate DLR later...?
+        -- ZO_DailyLoginRewardsClaimProvider:New(self),
         ZO_GamepadGuildNewApplicationsProvider:New(self),
         ZO_PlayerApplicationsProvider:New(self),
         ZO_GamepadMarketProductUnlockedProvider:New(self),
@@ -679,7 +680,7 @@ function ZO_GamepadNotificationManager:InitializeKeybindStripDescriptors()
                 end
             end,
             visible = function()
-                if IsConsoleUI() then
+                if ZO_IsConsoleOrGameCoreUI() then
                     local data = self:GetTargetData()
                     if data ~= nil then
                         return data.provider:CanShowGamerCard()
@@ -718,49 +719,50 @@ function ZO_GamepadNotificationManager:InitializeConfirmDeclineDialog()
     local dialogName = GAMEPAD_NOTIFICATIONS_CONFIRM_DECLINE_DIALOG_NAME
 
     local declineOption =
-        {
-            template = "ZO_GamepadMenuEntryTemplate",
-            templateData = {
-                text = GetString(SI_GAMEPAD_NOTIFICATIONS_DECLINE_OPTION),
-                setup = ZO_SharedGamepadEntry_OnSetup,
-                callback = function(dialog)
-                    dialog.data.declineFunction()
-                end
-            },
-        }
+    {
+        template = "ZO_GamepadMenuEntryTemplate",
+        templateData = {
+            text = GetString(SI_GAMEPAD_NOTIFICATIONS_DECLINE_OPTION),
+            setup = ZO_SharedGamepadEntry_OnSetup,
+            callback = function(dialog)
+                dialog.data.declineFunction()
+            end
+        },
+    }
     local ignoreOption =
+    {
+        template = "ZO_GamepadMenuEntryTemplate",
+        templateData = {
+            text = GetString(ZO_IsConsoleOrGameCoreUI() and SI_GAMEPAD_NOTIFICATIONS_REQUEST_BLOCK_PLAYER or SI_GAMEPAD_NOTIFICATIONS_REQUEST_IGNORE_PLAYER),
+            setup = ZO_SharedGamepadEntry_OnSetup,
+            callback = function(dialog)
+                dialog.data.ignoreFunction()
+            end
+        },
+    }
+    local reportOption =
+    {
+        template = "ZO_GamepadMenuEntryTemplate",
+        templateData =
         {
-            template = "ZO_GamepadMenuEntryTemplate",
-            templateData = {
-                text = GetString(IsConsoleUI() and SI_GAMEPAD_NOTIFICATIONS_REQUEST_BLOCK_PLAYER or SI_GAMEPAD_NOTIFICATIONS_REQUEST_IGNORE_PLAYER),
-                setup = ZO_SharedGamepadEntry_OnSetup,
-                callback = function(dialog)
-                    dialog.data.ignoreFunction()
-                end
-            },
-        }
-    local reportOption = 
-        {
-            template = "ZO_GamepadMenuEntryTemplate",
-            templateData = {
-                text = GetString(SI_GAMEPAD_NOTIFICATIONS_REQUEST_REPORT_SPAMMING),
-                setup = ZO_SharedGamepadEntry_OnSetup,
-                callback = function(dialog)
-                    dialog.data.reportFunction()
-                end
-            },
-        }
+            text = GetString(SI_GAMEPAD_NOTIFICATIONS_REQUEST_REPORT_SPAMMING),
+            setup = ZO_SharedGamepadEntry_OnSetup,
+            callback = function(dialog)
+                dialog.data.reportFunction()
+            end
+        },
+    }
 
     local parametricListOptions = {}
     table.insert(parametricListOptions, declineOption)
-    if not IsConsoleUI() or ZO_DoesConsoleSupportTargetedIgnore() then
+    if not ZO_IsConsoleOrGameCoreUI() or ZO_DoesConsoleSupportTargetedIgnore() then
         table.insert(parametricListOptions, ignoreOption)
     end
     table.insert(parametricListOptions, reportOption)
 
     ZO_Dialogs_RegisterCustomDialog(dialogName,
     {
-        gamepadInfo = 
+        gamepadInfo =
         {
             dialogType = GAMEPAD_DIALOGS.PARAMETRIC,
         },

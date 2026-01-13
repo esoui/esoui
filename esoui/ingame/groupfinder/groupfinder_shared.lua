@@ -137,7 +137,10 @@ function ZO_GroupFinder_Shared.SetUpGroupListingFromData(control, controlPool, d
     control.groupTitleLabel:SetColor(titleColor:UnpackRGBA())
 
     local category = data:GetCategory()
-    if category ~= GROUP_FINDER_CATEGORY_ENDLESS_DUNGEON and category ~= GROUP_FINDER_CATEGORY_CUSTOM then
+    if category ~= GROUP_FINDER_CATEGORY_ENDLESS_DUNGEON 
+        and category ~= GROUP_FINDER_CATEGORY_ADVENTURE_ZONE
+        and category ~= GROUP_FINDER_CATEGORY_CUSTOM then
+
         local firstText = category == GROUP_FINDER_CATEGORY_PVP and data:GetPrimaryOptionText() or data:GetSecondaryOptionText()
         local secondText = category == GROUP_FINDER_CATEGORY_PVP and data:GetSecondaryOptionText() or data:GetPrimaryOptionText()
         control.settingsLabel:SetText(ZO_GenerateCommaSeparatedListWithoutAnd({ firstText, secondText }))
@@ -476,7 +479,7 @@ ZO_GroupFinder_AdditionalFilters_Shared.Refresh = ZO_GroupFinder_AdditionalFilte
 function ZO_GroupFinder_AdditionalFilters_Shared:GetPrimaryDropdownByCategory()
     local category = GetGroupFinderFilterCategory()
 
-    if category == GROUP_FINDER_CATEGORY_ENDLESS_DUNGEON or category == GROUP_FINDER_CATEGORY_ZONE or category == GROUP_FINDER_CATEGORY_CUSTOM then
+    if category == GROUP_FINDER_CATEGORY_ENDLESS_DUNGEON or category == GROUP_FINDER_CATEGORY_ZONE or category == GROUP_FINDER_CATEGORY_ADVENTURE_ZONE or category == GROUP_FINDER_CATEGORY_CUSTOM then
         return self.primaryOptionDropdown
     else
         return self.primaryOptionDropdownSingleSelect
@@ -547,7 +550,7 @@ end
 
 function ZO_GroupFinder_AdditionalFilters_Shared:PopulatePrimaryDropdownSingleSelect()
     local category = GetGroupFinderFilterCategory()
-    if self.primaryOptionDropdownSingleSelect and not (category == GROUP_FINDER_CATEGORY_ENDLESS_DUNGEON or category == GROUP_FINDER_CATEGORY_ZONE or category == GROUP_FINDER_CATEGORY_CUSTOM) then
+    if self.primaryOptionDropdownSingleSelect and not (category == GROUP_FINDER_CATEGORY_ENDLESS_DUNGEON or category == GROUP_FINDER_CATEGORY_ZONE or category == GROUP_FINDER_CATEGORY_ADVENTURE_ZONE or category == GROUP_FINDER_CATEGORY_CUSTOM) then
         local defaultText = ""
 
         local function OnPrimarySelection(...)
@@ -566,7 +569,7 @@ end
 
 function ZO_GroupFinder_AdditionalFilters_Shared:PopulatePrimaryDropdown()
     local category = GetGroupFinderFilterCategory()
-    if self.primaryOptionDropdown and (category == GROUP_FINDER_CATEGORY_ENDLESS_DUNGEON or category == GROUP_FINDER_CATEGORY_ZONE or category == GROUP_FINDER_CATEGORY_CUSTOM) then
+    if self.primaryOptionDropdown and (category == GROUP_FINDER_CATEGORY_ENDLESS_DUNGEON or category == GROUP_FINDER_CATEGORY_ZONE or category == GROUP_FINDER_CATEGORY_ADVENTURE_ZONE or category == GROUP_FINDER_CATEGORY_CUSTOM) then
         local function OnPrimarySelection(...)
             self:OnPrimarySelection(...)
         end
@@ -900,7 +903,7 @@ function ZO_GroupFinder_PopulateFiltersPrimaryOptionsDropdown(primaryOptionsDrop
         multiSelectionText = SI_GROUP_FINDER_FILTERS_ACTIVITY_DROPDOWN_TEXT
     elseif category == GROUP_FINDER_CATEGORY_PVP then
         -- TODO GroupFinder: Implement this along with implementing the single-select PvP filter dropdown.
-    elseif category == GROUP_FINDER_CATEGORY_CUSTOM then
+    elseif category == GROUP_FINDER_CATEGORY_ENDLESS_DUNGEON or category == GROUP_FINDER_CATEGORY_ADVENTURE_ZONE or category == GROUP_FINDER_CATEGORY_CUSTOM then
         -- This state should disable the dropdown so no value is necessary.
     end
 
@@ -923,8 +926,8 @@ function ZO_GroupFinder_PopulateUserTypeSecondaryOptionsDropdown(secondaryOption
         else
             defaultText = GetString(SI_GROUP_FINDER_CREATE_BATTLEGROUND_DEFAULT_TEXT)
         end
-    elseif category == GROUP_FINDER_CATEGORY_ENDLESS_DUNGEON or category == GROUP_FINDER_CATEGORY_CUSTOM then
-        -- ENDLESS_DUNGEON and CUSTOM should disable the dropdown so no value is necessary
+    elseif category == GROUP_FINDER_CATEGORY_ENDLESS_DUNGEON or category == GROUP_FINDER_CATEGORY_ADVENTURE_ZONE or category == GROUP_FINDER_CATEGORY_CUSTOM then
+        -- ENDLESS_DUNGEON, ADVENTURE_ZONE, and CUSTOM should disable the dropdown so no value is necessary
     else
         defaultText = GetString("SI_GROUPFINDERCATEGORY_SINGLESELECTDEFAULT", category)
     end
@@ -955,8 +958,8 @@ function ZO_GroupFinder_PopulateFiltersSecondaryOptionsDropdown(secondaryOptionD
             defaultText = GetString(SI_GROUP_FINDER_FILTERS_BATTLEGROUND_DEFAULT_TEXT)
             multiSelectionText = GetString(SI_GROUP_FINDER_FILTERS_BATTLEGROUND_DROPDOWN_TEXT)
         end
-    elseif category == GROUP_FINDER_CATEGORY_ENDLESS_DUNGEON or category == GROUP_FINDER_CATEGORY_CUSTOM then
-        -- ENDLESS_DUNGEON and CUSTOM should disable the dropdown so no value is necessary
+    elseif category == GROUP_FINDER_CATEGORY_ENDLESS_DUNGEON or category == GROUP_FINDER_CATEGORY_ADVENTURE_ZONE or category == GROUP_FINDER_CATEGORY_CUSTOM then
+        -- ENDLESS_DUNGEON, ADVENTURE_ZONE, and CUSTOM should disable the dropdown so no value is necessary
     else
         defaultText = GetString("SI_GROUPFINDERCATEGORY_MULTISELECTDEFAULT", category)
         multiSelectionText = GetString("SI_GROUPFINDERCATEGORY_MULTISELECTSELECTIONS", category)

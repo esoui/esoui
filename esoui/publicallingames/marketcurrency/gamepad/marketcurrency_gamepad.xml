@@ -1,22 +1,19 @@
-﻿<GuiXml>
+<GuiXml>
     <Controls>
         <Control name="ZO_MarketCurrencyLabel_Gamepad" resizeToFitDescendents="true" virtual="true">
             <Controls>
                 <Label name="$(parent)Amount" font="ZoFontGamepad42" inherits="ZO_GamepadHeaderDataTextTemplate">
-                    <Anchor point="BOTTOMRIGHT" />
-                    <Dimensions y="42" />
+                    <Anchor point="BOTTOMRIGHT"/>
+                    <Dimensions y="42"/>
                 </Label>
-            
                 <Label name="$(parent)Label" inherits="ZO_GamepadHeaderLabelTextTemplate">
-                    <AnchorToBaseline side="LEFT" relativeToLabel="$(parent)Amount" offsetX="-10" />
-                    <Dimensions y="27" />
+                    <AnchorToBaseline side="LEFT" relativeToLabel="$(parent)Amount" offsetX="-10"/>
+                    <Dimensions y="27"/>
                 </Label>
             </Controls>
         </Control>
-
         <TopLevelControl name="ZO_MarketCurrency_Gamepad_TopLevel" resizeToFitDescendents="true" tier="HIGH" level="ZO_HIGH_TIER_OVER_GAMEPAD_KEYBIND_STRIP" hidden="true">
-            <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" offsetX="-ZO_GAMEPAD_SCREEN_PADDING" offsetY="-64" />
-
+            <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" offsetX="-ZO_GAMEPAD_SCREEN_PADDING" offsetY="-64"/>
             <OnInitialized>
                 ZO_MarketCurrency_Gamepad_OnInitialized(self)
             </OnInitialized>
