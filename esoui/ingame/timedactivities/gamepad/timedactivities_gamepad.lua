@@ -18,9 +18,6 @@ local TIMED_ACTIVITY_TIME_REMAINING_ROW_DATA_3 = 7
 local TIMED_ACTIVITY_TIME_REMAINING_ROW_DATA_4 = 8
 local MAX_LINES_SUPPORTED = 4
 
-local COMPLETE_ACTIVITY_ALPHA = 0.5
-local INCOMPLETE_ACTIVITY_ALPHA = 1
-
 local g_checkboxControlPool = nil
 local function GetCheckboxControlPool()
     if not g_checkboxControlPool then
@@ -338,6 +335,8 @@ function ZO_TimedActivitiesList_Gamepad:Initialize(control)
                 end
                 return false
             end,
+            -- Play the sound assuming there shouldn't be any real situation where this keybind is present but claiming fails
+            sound = SOUNDS.TAMRIEL_TOMES_CHALLENGE_REWARD_CLAIMED
         },
 
         -- Reroll
@@ -382,76 +381,55 @@ end
 function ZO_TimedActivitiesList_Gamepad:SetupActivityRow(control, data)
     local dataSource = data.dataSource
     control.data = dataSource
+    local isFullyClaimedOrExpired = dataSource:IsFullyClaimedOrExpired()
+
     local name = dataSource:GetName()
     if dataSource:IsTracked() then
         name = string.format("%s%s", self.pinTexture, name)
     end
     control.nameLabel:SetText(name)
+    local selectedTextColor = isFullyClaimedOrExpired and ZO_DISABLED_TEXT or ZO_SELECTED_TEXT
+    control.nameLabel:SetColor(selectedTextColor:UnpackRGBA())
 
     local maxProgress = dataSource:GetMaxProgress()
-    local progress = dataSource:GetProgress()
-    local progressPercent
-    if maxProgress < 1 or progress >= maxProgress then
-        progressPercent = 1
-    else
-        progressPercent = progress / maxProgress
-    end
-    control.progressStatusBar:SetValue(progressPercent)
+    control.progressStatusBar:SetMinMax(0, maxProgress)
 
-    if progressPercent < 1 then
-        local progressString = zo_strformat(SI_TIMED_ACTIVITIES_ACTIVITY_COMPLETION_VALUES, progress, maxProgress)
-        control.progressLabel:SetText(progressString)
-        control.progressLabel:SetHidden(false)
-        control.completeIcon:SetHidden(true)
-    else
+    if isFullyClaimedOrExpired then
+        control.progressStatusBar:SetValue(0)
         control.progressLabel:SetHidden(true)
-        control.completeIcon:SetHidden(false)
+        ZO_StatusBar_SetOverlayColor(control.progressStatusBar, 0.5, 0.5, 0.5, 1)
+    else
+        local progress = dataSource:GetProgress()
+        control.progressStatusBar:SetValue(progress)
+        control.progressLabel:SetText(zo_strformat(SI_TIMED_ACTIVITIES_ACTIVITY_COMPLETION_VALUES, progress, maxProgress))
+        control.progressLabel:SetHidden(false)
+        ZO_StatusBar_SetOverlayColor(control.progressStatusBar, 1, 1, 1, 1)
     end
-
-    local completed = dataSource:IsCompleted()
-    control:SetAlpha(completed and COMPLETE_ACTIVITY_ALPHA or INCOMPLETE_ACTIVITY_ALPHA)
 
     if not control.activityRewardPool then
         control.activityRewardPool = ZO_MetaPool:New(self.activityRewardPool)
     end
 
-    --TODO Tamriel Tomes: Remove concept of multiple rewards
-    local nextRewardAnchorTo = nil
-    local rewardList = dataSource:GetRewardList()
-    if #rewardList > 0 then
-        for rewardIndex, rewardData in ZO_NumericallyIndexedTableReverseIterator(rewardList) do
-            local activityReward = control.activityRewardPool:AcquireObject()
+    local rewardCurrencyType, rewardCurrencyQuantity = dataSource:GetCurrencyRewardInfo()
+    if rewardCurrencyType ~= CURT_NONE then
+        local activityReward = control.activityRewardPool:AcquireObject()
 
-            activityReward:SetParent(control.rewardContainer)
-            if nextRewardAnchorTo then
-                activityReward:SetAnchor(BOTTOMRIGHT, nextRewardAnchorTo, BOTTOMLEFT, -10)
-            else
-                activityReward:SetAnchor(BOTTOMRIGHT)
-            end
-            nextRewardAnchorTo = activityReward
+        activityReward:SetParent(control.rewardContainer)
+        activityReward:SetAnchor(BOTTOMRIGHT)
 
-            activityReward.amountLabel:SetText(rewardData:GetAbbreviatedQuantity())
-            activityReward.iconTexture:SetTexture(rewardData:GetGamepadIcon())
-            activityReward.rewardData = rewardData
-        end
-    else
-        local rewardCurrencyType, rewardCurrencyQuantity = dataSource:GetCurrencyRewardInfo()
-        if rewardCurrencyType ~= CURT_NONE then
-            local activityReward = control.activityRewardPool:AcquireObject()
-
-            activityReward:SetParent(control.rewardContainer)
-            activityReward:SetAnchor(BOTTOMRIGHT)
-
-            activityReward.amountLabel:SetText(ZO_AbbreviateAndLocalizeNumber(rewardCurrencyQuantity, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES))
-            activityReward.iconTexture:SetTexture(GetCurrencyGamepadIcon(rewardCurrencyType))
-        end
+        activityReward.amountLabel:SetText(ZO_AbbreviateAndLocalizeNumber(rewardCurrencyQuantity, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES))
+        activityReward.amountLabel:SetColor(selectedTextColor:UnpackRGBA())
+        activityReward.iconTexture:SetTexture(GetCurrencyGamepadIcon(rewardCurrencyType))
+        activityReward.iconTexture:SetColor(selectedTextColor:UnpackRGBA())
     end
 
-    ZO_TimedActivities_Shared.SetupClaimProgress(dataSource, control.claimableLabel, control.checkboxControlPool)
+    ZO_TimedActivities_Shared.SetupClaimProgress(dataSource, control.claimedLabel, control.checkboxControlPool)
 
     if control.timeRemainingLabel then
         ZO_TimedActivities_Shared.RefreshTimeRemaining(dataSource, control.timeRemainingLabel)
     end
+
+    control.claimableHighlight:SetHidden(not dataSource:CanClaim())
 end
 
 function ZO_TimedActivitiesList_Gamepad:RefreshList(currentActivityType, activitiesList)
@@ -546,11 +524,11 @@ end
 function ZO_TimedActivityRow_Gamepad_OnInitialized(control)
     control.nameLabel = control:GetNamedChild("Name")
     control.timeRemainingLabel = control:GetNamedChild("TimeRemaining")
-    control.claimableLabel = control:GetNamedChild("ClaimableHeader")
+    control.claimedLabel = control:GetNamedChild("ClaimedHeader")
+    control.claimableHighlight = control:GetNamedChild("ClaimableHighlight")
     control.rewardContainer = control:GetNamedChild("RewardContainer")
     control.progressStatusBar = control:GetNamedChild("ProgressBar")
-    ZO_StatusBar_SetGradientColor(control.progressStatusBar, ZO_SKILL_XP_BAR_GRADIENT_COLORS)
+    ZO_StatusBar_SetGradientColor(control.progressStatusBar, ZO_XP_BAR_GRADIENT_COLORS)
     control.progressLabel = control.progressStatusBar:GetNamedChild("Progress")
-    control.completeIcon = control:GetNamedChild("CompleteIcon")
     control.checkboxControlPool = ZO_MetaPool:New(GetCheckboxControlPool())
 end

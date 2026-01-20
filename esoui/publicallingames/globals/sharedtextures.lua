@@ -339,7 +339,7 @@ do
     {
         [ADVENTURE_ZONE_FACTION_THE_RUCKUS] = "EsoUI/Art/Stats/u49_faction_ruckus_32.dds",
         [ADVENTURE_ZONE_FACTION_THOUSAND_EYES] = "EsoUI/Art/Stats/u49_faction_thousandeyes_32.dds",
-        [ADVENTURE_ZONE_FACTION_GLITTERING_GLOAD] = "EsoUI/Art/Stats/u49_faction_glittering_32.dds",
+        [ADVENTURE_ZONE_FACTION_GLITTERING_GOAD] = "EsoUI/Art/Stats/u49_faction_glittering_32.dds",
     }
 
     function ZO_GetAdventureZoneFactionIcon32(adventureZoneFaction)
@@ -354,7 +354,7 @@ do
     {
         [ADVENTURE_ZONE_FACTION_THE_RUCKUS] = "EsoUI/Art/Stats/u49_faction_ruckus_64.dds",
         [ADVENTURE_ZONE_FACTION_THOUSAND_EYES] = "EsoUI/Art/Stats/u49_faction_thousandeyes_64.dds",
-        [ADVENTURE_ZONE_FACTION_GLITTERING_GLOAD] = "EsoUI/Art/Stats/u49_faction_glittering_64.dds",
+        [ADVENTURE_ZONE_FACTION_GLITTERING_GOAD] = "EsoUI/Art/Stats/u49_faction_glittering_64.dds",
     }
 
     function ZO_GetAdventureZoneFactionIcon64(adventureZoneFaction)

@@ -171,7 +171,7 @@ function ZO_Stats:OnShowing()
         end
 
         local function OnAttributeRespecResult(eventId, result)
-            if ZO_Dialogs_IsShowing("ATTRIBUTE_RESPEC_CAST_KEYBOARD") then
+            if ZO_Dialogs_IsShowing("ATTRIBUTE_RESPEC_CAST_KEYBOARD") and not ZO_Dialogs_IsDialogHiding("ATTRIBUTE_RESPEC_CAST_KEYBOARD") then
                 PlaySound(SOUNDS.RESPEC_CAST_TIME_COMPLETE)
                 ZO_Dialogs_ReleaseDialog("ATTRIBUTE_RESPEC_CAST_KEYBOARD")
             end

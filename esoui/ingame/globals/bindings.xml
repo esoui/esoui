@@ -492,7 +492,7 @@
                             ZO_EndlessDungeonBuffTracker_Shared.ToggleVisibility()
                         end
                     elseif IsInAdventureZone and IsInAdventureZone() then
-                        SYSTEMS:ShowScene("adventureZoneBossTree")
+                        ADVENTURE_ZONE_MANAGER:ToggleAdventureZonePanel()
                     end
                 </Down>
             </Action>

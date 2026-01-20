@@ -95,6 +95,12 @@ function ZO_TimedActivityData:GetTimeRemainingS()
     return nil -- No end time, so time remaining is infinite
 end
 
+function ZO_TimedActivityData:IsExpired()
+    local timeRemainingS = self:GetTimeRemainingS()
+    -- nil time remaining never expires
+    return timeRemainingS == 0
+end
+
 do
     local function TimedActivityRewardComparator(left, right)
         local leftRewardId = left:GetRewardId()
@@ -193,8 +199,16 @@ function ZO_TimedActivityData:GetNumTimesClaimed()
 end
 
 function ZO_TimedActivityData:IsFullyClaimed()
-    -- TODO Tamriel Tomes: Account for infinitely repeatable activities (TotalNumTimesClaimable of 0)
-    return self:GetNumTimesClaimed() == self:GetTotalNumTimesClaimable()
+    local totalNumTimesClaimable = self:GetTotalNumTimesClaimable()
+    if totalNumTimesClaimable > 0 then
+        return self:GetNumTimesClaimed() == totalNumTimesClaimable
+    else
+        return false
+    end
+end
+
+function ZO_TimedActivityData:IsFullyClaimedOrExpired()
+    return self:IsFullyClaimed() or self:IsExpired()
 end
 
 function ZO_TimedActivityData:CanClaim()

@@ -28,7 +28,8 @@ function ZO_TimedActivityTile_Keyboard:InitializePlatform()
 
     self.progressBar = self.control:GetNamedChild("Progress")
     self.progressBarProgressLabel = self.progressBar:GetNamedChild("Progress")
-    self.claimableLabel = self.control:GetNamedChild("Claimable")
+    self.claimedLabel = self.control:GetNamedChild("Claimed")
+    self.claimableHighlight = self.control:GetNamedChild("ClaimableHighlight")
     self.rewardCurrencyLabel = self.control:GetNamedChild("RewardCurrency")
     self.timeRemainingLabel = self.control:GetNamedChild("TimeRemaining")
 
@@ -42,7 +43,7 @@ function ZO_TimedActivityTile_Keyboard:PostInitializePlatform()
     local PIN_SIZE = 32
     self.pinTexture = zo_iconFormat(PIN_TEXTURE, PIN_SIZE, PIN_SIZE)
 
-    ZO_StatusBar_SetGradientColor(self.progressBar, ZO_SKILL_XP_BAR_GRADIENT_COLORS)
+    ZO_StatusBar_SetGradientColor(self.progressBar, ZO_XP_BAR_GRADIENT_COLORS)
 
     self.keybindStripDescriptor =
     {
@@ -79,6 +80,8 @@ function ZO_TimedActivityTile_Keyboard:PostInitializePlatform()
                 end
                 return false
             end,
+            -- Play the sound assuming there shouldn't be any real situation where this keybind is present but claiming fails
+            sound = SOUNDS.TAMRIEL_TOMES_CHALLENGE_REWARD_CLAIMED
         },
 
         -- Reroll
@@ -105,6 +108,14 @@ do
     {
         font = "ZoFontGameBold",
         iconSide = RIGHT,
+        color = ZO_SELECTED_TEXT,
+    }
+
+    local CURRENCY_DISABLED_OPTIONS = 
+    {
+        font = "ZoFontGameBold",
+        iconSide = RIGHT,
+        color = ZO_DISABLED_TEXT,
     }
 
     function ZO_TimedActivityTile_Keyboard:LayoutPlatform(timedActivityData)
@@ -114,24 +125,41 @@ do
             return
         end
 
+        local isFullyClaimedOrExpired = timedActivityData:IsFullyClaimedOrExpired()
+
         local titleText = timedActivityData:GetName()
         if timedActivityData:IsTracked() then
             titleText = string.format("%s%s", self.pinTexture, titleText)
         end
         self:SetTitle(titleText)
 
-        local rewardCurrency, rewardCurrencyAmount = timedActivityData:GetCurrencyRewardInfo()
-        ZO_CurrencyControl_SetSimpleCurrency(self.rewardCurrencyLabel, rewardCurrency, rewardCurrencyAmount, CURRENCY_OPTIONS)
+        local titleColor = isFullyClaimedOrExpired and ZO_NORMAL_TEXT:GetDim() or ZO_NORMAL_TEXT
+        self.titleLabel:SetColor(titleColor:UnpackRGBA())
 
-        ZO_TimedActivities_Shared.SetupClaimProgress(timedActivityData, self.claimableLabel, self.checkboxControlPool)
+        local rewardCurrency, rewardCurrencyAmount = timedActivityData:GetCurrencyRewardInfo()
+        local currencyOptions = isFullyClaimedOrExpired and CURRENCY_DISABLED_OPTIONS or CURRENCY_OPTIONS
+        ZO_CurrencyControl_SetSimpleCurrency(self.rewardCurrencyLabel, rewardCurrency, rewardCurrencyAmount, currencyOptions)
+
+        ZO_TimedActivities_Shared.SetupClaimProgress(timedActivityData, self.claimedLabel, self.checkboxControlPool)
 
         ZO_TimedActivities_Shared.RefreshTimeRemaining(timedActivityData, self.timeRemainingLabel)
 
-        local progress = timedActivityData:GetProgress()
         local maxProgress = timedActivityData:GetMaxProgress()
         self.progressBar:SetMinMax(0, maxProgress)
-        self.progressBar:SetValue(progress)
-        self.progressBarProgressLabel:SetText(zo_strformat(SI_TAMRIEL_TOMES_CHALLENGES_PROGRESS, progress, maxProgress))
+
+        if isFullyClaimedOrExpired then
+            self.progressBar:SetValue(0)
+            self.progressBarProgressLabel:SetHidden(true)
+            ZO_StatusBar_SetOverlayColor(self.progressBar, 0.5, 0.5, 0.5, 1)
+        else
+            local progress = timedActivityData:GetProgress()
+            self.progressBar:SetValue(progress)
+            self.progressBarProgressLabel:SetText(zo_strformat(SI_TAMRIEL_TOMES_CHALLENGES_PROGRESS, progress, maxProgress))
+            self.progressBarProgressLabel:SetHidden(false)
+            ZO_StatusBar_SetOverlayColor(self.progressBar, 1, 1, 1, 1)
+        end
+
+        self.claimableHighlight:SetHidden(not timedActivityData:CanClaim())
     end
 end
 
@@ -313,9 +341,18 @@ function ZO_TimedActivities_Keyboard:OnHidden()
     EVENT_MANAGER:UnregisterForUpdate("ZO_TimedActivities_Keyboard.RefreshCurrentActivityInfo")
 end
 
-function ZO_TimedActivities_Keyboard:UpdateRerollAmount()
-    local currencyAmount = GetPlayerStoredCurrencyAmount(CURT_TOME_CHALLENGE_REROLLS)
-    ZO_CurrencyControl_SetSimpleCurrency(self.currencyBalanceLabel, CURT_TOME_CHALLENGE_REROLLS, currencyAmount, ZO_KEYBOARD_CURRENCY_OPTIONS)
+do
+    local CURRENCY_OPTIONS =
+    {
+        showTooltips = true,
+        font = "ZoFontWinH2",
+        iconSide = RIGHT,
+        iconSize = "100%",
+    }
+    function ZO_TimedActivities_Keyboard:UpdateRerollAmount()
+        local currencyAmount = GetPlayerStoredCurrencyAmount(CURT_TOME_CHALLENGE_REROLLS)
+        ZO_CurrencyControl_SetSimpleCurrency(self.currencyBalanceLabel, CURT_TOME_CHALLENGE_REROLLS, currencyAmount, CURRENCY_OPTIONS)
+    end
 end
 
 function ZO_TimedActivities_Keyboard:OnRerollCurrencyUpdated()

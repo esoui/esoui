@@ -136,8 +136,12 @@ function ZO_TamrielTomesRewardData:IsRewardInfinitelyRepeatable()
     return self.isInfinitelyRepeatable
 end
 
+function ZO_TamrielTomesRewardData:CanAffordReward()
+    return GetPlayerStoredCurrencyAmount(CURT_TOME_POINTS) >= self:GetRewardCost()
+end
+
 function ZO_TamrielTomesRewardData:CanClaimReward()
-    return not self:IsRewardClaimed()
+    return not self:IsRewardClaimed() or self:IsRewardInfinitelyRepeatable()
 end
 
 function ZO_TamrielTomesRewardData:TryClaimReward()

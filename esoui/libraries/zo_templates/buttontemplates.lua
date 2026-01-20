@@ -333,6 +333,14 @@ function ZO_CheckButton_Enable(buttonControl)
     end
 end
 
+function ZO_ReadonlyCheckButton_SetEnableState(buttonControl, enabled)
+    if enabled then
+        buttonControl:SetColor(ZO_DEFAULT_ENABLED_COLOR:UnpackRGBA())
+    else
+        buttonControl:SetColor(ZO_DEFAULT_DISABLED_COLOR:UnpackRGBA())
+    end
+end
+
 function ZO_CheckButton_SetTooltipEnabledState(buttonControl, enabled)
     buttonControl.tooltipEnabled = enabled
 end

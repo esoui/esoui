@@ -247,7 +247,7 @@ local ZO_OptionsPanel_Video_ControlData =
             exists = ZO_IsPCUI,
 
             gamepadIsEnabledCallback = function()
-                return tonumber(GetSetting(SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_FULLSCREEN)) == FULLSCREEN_MODE_FULLSCREEN_EXCLUSIVE
+                return tonumber(GetSetting(SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_FULLSCREEN)) ~= FULLSCREEN_MODE_WINDOWED
             end,
 
             eventCallbacks =

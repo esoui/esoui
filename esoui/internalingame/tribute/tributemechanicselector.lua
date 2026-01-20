@@ -72,7 +72,7 @@ function ZO_TributeMechanicCard:GetMechanicIndex()
 end
 
 function ZO_TributeMechanicCard:OnMouseUp(button, upInside)
-    if not IsInGamepadPreferredMode() and button == MOUSE_BUTTON_INDEX_LEFT and upInside then
+    if button == MOUSE_BUTTON_INDEX_LEFT and upInside then
         TributeChooseMechanic(self.mechanicIndex)
         PlaySound(SOUNDS.TRIBUTE_MECHANIC_CHOSEN)
     end

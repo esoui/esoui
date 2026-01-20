@@ -44,11 +44,15 @@
             </Controls>
         </Control>
         <TopLevelControl name="ZO_TamrielTomesPurchase_SharedTL" hidden="true" virtual="true">
-            <Dimensions x="900" y="900"/>
+            <Dimensions x="1000" y="1190"/>
             <Controls>
+                <Texture name="$(parent)BookBG" textureFile="/EsoUI/Art/TamrielTomes/upgrade_tome_bg.dds">
+                    <AnchorFill/>
+                    <TextureCoords left="0.09277" top="0.04101" right="0.87897" bottom="0.93950"/>
+                </Texture>
                 <Label name="$(parent)Title" horizontalAlignment="CENTER" modifyTextType="UPPERCASE" text="SI_TAMRIEL_TOMES_UPGRADE_TOME_HEADER">
-                    <Anchor point="TOPLEFT" offsetX="10" offsetY="20"/>
-                    <Anchor point="TOPRIGHT" offsetX="-10" offsetY="20"/>
+                    <Anchor point="TOPLEFT" offsetX="125" offsetY="110"/>
+                    <Anchor point="TOPRIGHT" offsetX="-125" offsetY="110"/>
                 </Label>
                 <Control name="$(parent)Divider" inherits="ZO_PlatformStyleDynamicHorizontalDivider">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetY="4"/>
@@ -56,13 +60,13 @@
                 </Control>
                 <Texture name="$(parent)Image" level="3">
                     <Dimensions x="840" y="400"/>
-                    <Anchor point="TOP" relativeTo="$(parent)Divider" relativePoint="BOTTOM" offsetY="15"/>
+                    <Anchor point="TOP" relativeTo="$(parent)Divider" relativePoint="BOTTOM" offsetY="60"/>
                 </Texture>
                 <Control name="$(parent)GridList">
-                    <Anchor point="TOP" relativeTo="$(parent)Image" relativePoint="BOTTOM" offsetY="15"/>
+                    <Anchor point="TOP" relativeTo="$(parent)Image" relativePoint="BOTTOM" offsetY="60"/>
                 </Control>
                 <Control name="$(parent)Buttons">
-                    <Anchor point="BOTTOM" offsetY="-20"/>
+                    <Anchor point="BOTTOM" offsetX="10" offsetY="-200"/>
                     <Controls>
                         <Control name="$(parent)Row1">
                             <Anchor point="TOP"/>
@@ -85,9 +89,6 @@
                         </Control>
                     </Controls>
                 </Control>
-                <Texture name="$(parent)Background" textureFile="EsoUI/Art/Icons/icon_missing.dds">
-                    <AnchorFill/>
-                </Texture>
             </Controls>
         </TopLevelControl>
     </Controls>

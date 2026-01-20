@@ -15,7 +15,7 @@
             <Dimensions x="ZO_TAMRIEL_TOMES_PURCHASE_VERTICAL_DIVIDER_WIDTH_GAMEPAD" y="ZO_TAMRIEL_TOMES_PURCHASE_REWARD_DIMENSIONS_GAMEPAD"/>
         </Control>
         <TopLevelControl name="ZO_TamrielTomesPurchase_GamepadTL" inherits="ZO_TamrielTomesPurchase_SharedTL">
-            <Anchor point="LEFT" offsetX="20" offsetY="-50"/>
+            <Anchor point="LEFT"/>
             <OnInitialized>
                 ZO_TamrielTomesPurchaseScreen_Gamepad.OnControlInitialized(self)
             </OnInitialized>

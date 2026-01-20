@@ -96,19 +96,19 @@
         <Control name="ZO_ArrowStatusBarBG" virtual="true">
             <AnchorFill/>
             <Controls>
-                <Texture name="$(parent)Left" textureFile="EsoUI/Art/Miscellaneous/progressbar_frame_bg.dds">
+                <Texture name="$(parent)Left" textureFile="EsoUI/Art/Miscellaneous/progressbar_frame_bg.dds" level="1">
                     <Dimensions x="10"/>
                     <Anchor point="TOPLEFT"/>
                     <Anchor point="BOTTOMLEFT"/>
                     <TextureCoords left="0" right="0.0195" top="0" bottom="0.6250"/>
                 </Texture>
-                <Texture name="$(parent)Right" textureFile="EsoUI/Art/Miscellaneous/progressbar_frame_bg.dds">
+                <Texture name="$(parent)Right" textureFile="EsoUI/Art/Miscellaneous/progressbar_frame_bg.dds" level="1">
                     <Dimensions x="10"/>
                     <Anchor point="TOPRIGHT"/>
                     <Anchor point="BOTTOMRIGHT"/>
                     <TextureCoords left="0.5938" right="0.6133" top="0" bottom="0.6250"/>
                 </Texture>
-                <Texture name="$(parent)Middle" textureFile="EsoUI/Art/Miscellaneous/progressbar_frame_bg.dds">
+                <Texture name="$(parent)Middle" textureFile="EsoUI/Art/Miscellaneous/progressbar_frame_bg.dds" level="1">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Left" relativePoint="TOPRIGHT"/>
                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Right" relativePoint="BOTTOMLEFT"/>
                     <TextureCoords left="0.0195" right="0.5898" top="0" bottom="0.6250"/>

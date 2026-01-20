@@ -120,6 +120,8 @@ end
 
 function ZO_TimedActivities_Shared.SetupClaimProgress(timedActivityData, claimableLabel, checkboxControlPool)
     checkboxControlPool:ReleaseAllObjects()
+
+    local isFullyClaimedOrExpired = timedActivityData:IsFullyClaimedOrExpired()
     local numTimesClaimed = timedActivityData:GetNumTimesClaimed()
     local totalNumTimesClaimable = timedActivityData:GetTotalNumTimesClaimable()
     if totalNumTimesClaimable <= 5 then
@@ -145,24 +147,37 @@ function ZO_TimedActivities_Shared.SetupClaimProgress(timedActivityData, claimab
                 checkboxControl:SetCheckState(TRISTATE_CHECK_BUTTON_UNCHECKED)
             end
 
+            ZO_ReadonlyCheckButton_SetEnableState(checkboxControl, not isFullyClaimedOrExpired)
+
             previousCheckboxControl = checkboxControl
         end
     else
-        claimableLabel:SetText(zo_strformat(SI_TIMED_ACTIVITY_CLAIMED_PROGRESS, numTimesClaimed, totalNumTimesClaimable))
+        local formatter = isFullyClaimedOrExpired and SI_TIMED_ACTIVITY_CLAIMED_PROGRESS_DISABLED or SI_TIMED_ACTIVITY_CLAIMED_PROGRESS
+        claimableLabel:SetText(zo_strformat(formatter, numTimesClaimed, totalNumTimesClaimable))
     end
+
+    local claimableLabelColor = isFullyClaimedOrExpired and ZO_NORMAL_TEXT:GetDim() or ZO_NORMAL_TEXT
+    claimableLabel:SetColor(claimableLabelColor:UnpackRGBA())
 end
 
 function ZO_TimedActivities_Shared.RefreshTimeRemaining(timedActivityData, timeRemainingLabel)
     local timeRemainingS = timedActivityData:GetTimeRemainingS()
     if timeRemainingS then
+        local isFullyClaimed = timedActivityData:IsFullyClaimed()
         local timeRemainingText
         if timeRemainingS == 0 then
             timeRemainingText = zo_strformat(SI_TIMED_ACTIVITY_TIME_REMAINING, GetString(SI_TIMED_ACTIVITY_TIME_EXPIRED))
             timeRemainingText = ZO_ERROR_COLOR:ColorizeDim(timeRemainingText)
         else
             timeRemainingText = ZO_FormatTimeLargestTwo(timeRemainingS, TIME_FORMAT_STYLE_DESCRIPTIVE_MINIMAL)
-            timeRemainingText = ZO_WHITE:Colorize(timeRemainingText)
+            if isFullyClaimed then
+                timeRemainingText = ZO_WHITE:ColorizeDim(timeRemainingText)
+            else
+                timeRemainingText = ZO_WHITE:Colorize(timeRemainingText)
+            end
         end
+        local timeRemainingColor = isFullyClaimed and ZO_NORMAL_TEXT:GetDim() or ZO_NORMAL_TEXT
+        timeRemainingLabel:SetColor(timeRemainingColor:UnpackRGBA())
         timeRemainingLabel:SetText(zo_strformat(SI_TIMED_ACTIVITY_TIME_REMAINING, timeRemainingText))
         timeRemainingLabel:SetHidden(false)
 

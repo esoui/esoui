@@ -812,6 +812,8 @@ do
             vengeanceLoadoutsEntry.campaignSort = VENGEANCE_MENUS_SORT_ID
             vengeanceLoadoutsEntry.headerText = GetString(SI_CAMPAIGN_OVERVIEW_CATEGORY_VENGEANCE)
             vengeanceLoadoutsEntry.name = GetString(SI_CAMPAIGN_OVERVIEW_SUBCATEGORY_LOADOUTS)
+            -- Entry requires an id for sorting, give it a negative number so as to never conflict with a real campaign data
+            vengeanceLoadoutsEntry.id = -2
 
             vengeanceLoadoutsEntry.narrationText = function(listEntryData, listEntryControl)
                 local narrations = {}
@@ -832,6 +834,8 @@ do
             vengeancePerksEntry.campaignSort = VENGEANCE_MENUS_SORT_ID
             vengeancePerksEntry.headerText = GetString(SI_CAMPAIGN_OVERVIEW_CATEGORY_VENGEANCE)
             vengeancePerksEntry.name = GetString(SI_CAMPAIGN_OVERVIEW_SUBCATEGORY_PERKS)
+            -- Entry requires an id for sorting, give it a negative number so as to never conflict with a real campaign data
+            vengeancePerksEntry.id = -1
 
             vengeancePerksEntry.narrationText = function(listEntryData, listEntryControl)
                 local narrations = {}

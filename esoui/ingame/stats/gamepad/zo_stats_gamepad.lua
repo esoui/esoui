@@ -392,7 +392,7 @@ do
         end
 
         local function OnAttributeRespecResult(eventId, result)
-            if ZO_Dialogs_IsShowing("ATTRIBUTE_RESPEC_CAST_GAMEPAD") then
+            if ZO_Dialogs_IsShowing("ATTRIBUTE_RESPEC_CAST_GAMEPAD") and not ZO_Dialogs_IsDialogHiding("ATTRIBUTE_RESPEC_CAST_GAMEPAD") then
                 ZO_Dialogs_ReleaseDialog("ATTRIBUTE_RESPEC_CAST_GAMEPAD")
                 PlaySound(SOUNDS.RESPEC_CAST_TIME_COMPLETE)
             end

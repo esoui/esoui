@@ -74,6 +74,11 @@ function ZO_AdventureZoneBossTree_Shared:InitializeKeybindStripDescriptor()
                 return self.selectedBoss and GetAdventureZoneBossState(self.selectedBoss) == ADVENTURE_ZONE_BOSS_STATE_AVAILABLE
             end,
         },
+
+        {
+            name = GetString(SI_DIALOG_CLOSE),
+            keybind = "TOGGLE_ACTIVITY_HUD_TRACKER",
+        },
     }
 end
 
@@ -82,11 +87,18 @@ function ZO_AdventureZoneBossTree_Shared:OnShowing()
 
     PlaySound(SOUNDS.ADVENTURE_ZONE_BOSS_TREE_OPENED)
     KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
+    KEYBIND_STRIP:RemoveDefaultExit()
+
+    ADVENTURE_ZONE_MANAGER:SetPanelToOpen(ZO_ADVENTURE_ZONE_PANELS.BOSS_TREE)
 end
 
 function ZO_AdventureZoneBossTree_Shared:OnHiding()
     PlaySound(SOUNDS.ADVENTURE_ZONE_BOSS_TREE_CLOSED)
     KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
+end
+
+function ZO_AdventureZoneBossTree_Shared:OnHidden()
+    KEYBIND_STRIP:RestoreDefaultExit()
 end
 
 function ZO_AdventureZoneBossTree_Shared:IsShowing()

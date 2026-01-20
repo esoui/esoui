@@ -21,7 +21,7 @@
             <Dimensions x="ZO_TAMRIEL_TOMES_PURCHASE_VERTICAL_DIVIDER_WIDTH_KEYBOARD" y="ZO_TAMRIEL_TOMES_PURCHASE_REWARD_DIMENSIONS_KEYBOARD"/>
         </Control>
         <TopLevelControl name="ZO_TamrielTomesPurchase_KeyboardTL" inherits="ZO_TamrielTomesPurchase_SharedTL">
-            <Anchor point="RIGHT" offsetX="-20"/>
+            <Anchor point="RIGHT"/>
             <OnInitialized>
                 ZO_TamrielTomesPurchaseScreen_Keyboard.OnControlInitialized(self)
             </OnInitialized>

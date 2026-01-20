@@ -24,21 +24,21 @@
                     <Anchor point="TOPLEFT" offsetX="10" offsetY="10"/>
                     <Dimensions x="ZO_TIMED_ACTIVITY_DATA_ROW_NAME_WIDTH_GAMEPAD"/>
                 </Label>
-                <Label name="$(parent)ClaimableHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_CONTRAST" font="ZoFontGamepad25">
+                <Label name="$(parent)ClaimedHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_CONTRAST" font="ZoFontGamepad25">
                     <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT" offsetY="60"/>
                 </Label>
+                <Texture name="$(parent)ClaimableHighlight" color="734100" alpha="0.5" hidden="true">
+                    <AnchorFill/>
+                    <FadeGradient x1="1" y1="0" size1="400" x2="-1" y2="0" size2="400"/>
+                </Texture>
                 <Control name="$(parent)RewardContainer">
-                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)ClaimableHeader" relativePoint="BOTTOMRIGHT" offsetX="15"/>
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)ClaimedHeader" relativePoint="BOTTOMRIGHT" offsetX="15"/>
                     <Anchor point="RIGHT" offsetX="-10" constrains="X"/>
                 </Control>
                 <StatusBar name="$(parent)ProgressBar" inherits="ZO_GamepadArrowProgressBarWithBGMedium">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)ClaimableHeader" relativePoint="BOTTOMLEFT"/>
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)ClaimedHeader" relativePoint="BOTTOMLEFT"/>
                     <Anchor point="RIGHT" relativeTo="$(parent)RewardContainer" constrains="X"/>
                 </StatusBar>
-                <Texture name="$(parent)CompleteIcon" hidden="true" inheritAlpha="false" layer="OVERLAY" textureFile="EsoUI/Art/Miscellaneous/check_icon_32.dds" tier="HIGH">
-                    <Anchor point="CENTER" relativeTo="$(parent)ProgressBar"/>
-                    <Dimensions x="48" y="48"/>
-                </Texture>
             </Controls>
         </Control>
         <Control name="ZO_TimedActivityRow_TimeRemaining_Gamepad" inherits="ZO_TimedActivityRow_Gamepad" virtual="true">
@@ -46,7 +46,7 @@
                 <Label name="$(parent)TimeRemaining" font="ZoFontGamepadBold25" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT" offsetY="10"/>
                 </Label>
-                <Label name="$(parent)ClaimableHeader" override="true">
+                <Label name="$(parent)ClaimedHeader" override="true">
                     <Anchor point="BOTTOMLEFT" relativeTo="$(parent)TimeRemaining" relativePoint="BOTTOMLEFT" offsetY="40"/>
                 </Label>
             </Controls>

@@ -1,6 +1,6 @@
 <GuiXml>
     <Controls>
-        <Control name="ZO_TimedActivityTile_Keyboard_Control" inherits="ZO_ContextualActionsTile_Control ZO_ContextualActionsTile_Keyboard_Control" virtual="true">
+        <Control name="ZO_TimedActivityTile_Keyboard_Control" inherits="ZO_ContextualActionsTile_Control ZO_FrameGlowHighlightContextualActionsTile_Keyboard_Control" virtual="true">
             <Dimensions x="ZO_TAMRIEL_TOMES_CHALLENGE_TILE_WIDTH_KEYBOARD" y="ZO_TAMRIEL_TOMES_CHALLENGE_TILE_HEIGHT_KEYBOARD"/>
             <OnInitialized>
                 ZO_TimedActivityTile_Keyboard:New(self)
@@ -18,10 +18,14 @@
                 <Label name="$(parent)RewardCurrency" inherits="ZO_CurrencyTemplate" horizontalAlignment="RIGHT">
                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Progress" relativePoint="TOPRIGHT" offsetY="-5"/>
                 </Label>
-                <Label name="$(parent)Claimable" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_CONTRAST">
+                <Label name="$(parent)Claimed" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_CONTRAST">
                     <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Progress" relativePoint="TOPLEFT" offsetY="-5"/>
                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)RewardCurrency" relativePoint="BOTTOMLEFT" offsetX="-5"/>
                 </Label>
+                <Texture name="$(parent)ClaimableHighlight" color="734100" alpha="0.5" hidden="true">
+                    <AnchorFill/>
+                    <FadeGradient x1="1" y1="0" size1="400" x2="-1" y2="0" size2="400"/>
+                </Texture>
                 <Label name="$(parent)TimeRemaining" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
                     <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Claimable" relativePoint="TOPLEFT" offsetY="-5"/>
                 </Label>

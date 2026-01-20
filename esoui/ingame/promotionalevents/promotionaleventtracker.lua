@@ -104,8 +104,7 @@ function ZO_PromotionalEventTracker:Update()
         local activityData = index and TIMED_ACTIVITIES_MANAGER:GetActivityDataByIndex(index) or nil
         if activityData then
             self:SetHeaderText(GetString(SI_TAMRIEL_TOMES_TRACKER_HEADER))
-            -- TODO Tamriel Tomes: Pull from a more permanant location
-            self.headerIcon:SetTexture("EsoUI/DevAddOns/TamrielTomes/menuIcon_TamrielTomes.dds")
+            self.headerIcon:SetTexture("EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_tamrielTomes.dds")
             self:SetSubLabelText(activityData:GetName())
 
             local progress = activityData:GetProgress()

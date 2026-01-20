@@ -1177,7 +1177,7 @@ SOUNDS =
     -- Tamriel Tomes
     TAMRIEL_TOMES_BOOK_CLOSED = "TamrielTomes_BookClosed",
     TAMRIEL_TOMES_BOOK_OPENED = "TamrielTomes_BookOpened",
-    TAMRIEL_TOMES_CHALLENGE_REWARD_CLAIMED = "TamrielTomes_ChallengeRewardClaimed", -- TODO Tamriel Tomes
+    TAMRIEL_TOMES_CHALLENGE_REWARD_CLAIMED = "TamrielTomes_ChallengeRewardClaimed",
     TAMRIEL_TOMES_PAGE_FLIPPED = "TamrielTomes_PageFlipped",
     TAMRIEL_TOMES_PAGE_UNLOCKED = "TamrielTomes_PageUnlocked", -- TODO Tamriel Tomes
     TAMRIEL_TOMES_PASS_PURCHASED = "TamrielTomes_PassPurchased",

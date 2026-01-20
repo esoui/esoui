@@ -1246,7 +1246,7 @@ function ZO_GamepadSkills:InitializeEvents()
     end
 
     local function OnSkillRespecResult(eventId, result)
-        if ZO_Dialogs_IsShowing("SKILL_RESPEC_CAST_GAMEPAD") then
+        if ZO_Dialogs_IsShowing("SKILL_RESPEC_CAST_GAMEPAD") and not ZO_Dialogs_IsDialogHiding("SKILL_RESPEC_CAST_GAMEPAD") then
             PlaySound(SOUNDS.RESPEC_CAST_TIME_COMPLETE)
             ZO_Dialogs_ReleaseDialog("SKILL_RESPEC_CAST_GAMEPAD")
         end

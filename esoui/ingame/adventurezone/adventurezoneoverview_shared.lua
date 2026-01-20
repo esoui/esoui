@@ -2,7 +2,7 @@ ZO_ADVENTURE_ZONE_FACTION_ICONS =
 {
     [ADVENTURE_ZONE_FACTION_THE_RUCKUS] = "EsoUI/Art/Stats/u49_faction_ruckus_64.dds",
     [ADVENTURE_ZONE_FACTION_THOUSAND_EYES] = "EsoUI/Art/Stats/u49_faction_thousandeyes_64.dds",
-    [ADVENTURE_ZONE_FACTION_GLITTERING_GLOAD] = "EsoUI/Art/Stats/u49_faction_glittering_64.dds",
+    [ADVENTURE_ZONE_FACTION_GLITTERING_GOAD] = "EsoUI/Art/Stats/u49_faction_glittering_64.dds",
 }
 
 -------------------------------
@@ -74,7 +74,7 @@ function ZO_AdventureZoneOverview_Shared:Initialize(control)
 
         [ADVENTURE_ZONE_FACTION_THOUSAND_EYES] = self.control:GetNamedChild("FactionScore2"),
 
-        [ADVENTURE_ZONE_FACTION_GLITTERING_GLOAD] = self.control:GetNamedChild("FactionScore3"),
+        [ADVENTURE_ZONE_FACTION_GLITTERING_GOAD] = self.control:GetNamedChild("FactionScore3"),
     }
 
     self.eventsDivider = self.control:GetNamedChild("EventsDivider")
@@ -149,6 +149,11 @@ function ZO_AdventureZoneOverview_Shared:InitializeKeybindStripDescriptor()
                 return self.selectedEvent
             end,
         },
+
+        {
+            name = GetString(SI_DIALOG_CLOSE),
+            keybind = "TOGGLE_ACTIVITY_HUD_TRACKER",
+        },
     }
 end
 
@@ -171,11 +176,18 @@ function ZO_AdventureZoneOverview_Shared:OnShowing()
 
     PlaySound(SOUNDS.ADVENTURE_ZONE_OVERVIEW_OPENED)
     KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
+    KEYBIND_STRIP:RemoveDefaultExit()
+
+    ADVENTURE_ZONE_MANAGER:SetPanelToOpen(ZO_ADVENTURE_ZONE_PANELS.OVERVIEW)
 end
 
 function ZO_AdventureZoneOverview_Shared:OnHiding()
     PlaySound(SOUNDS.ADVENTURE_ZONE_OVERVIEW_CLOSED)
     KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
+end
+
+function ZO_AdventureZoneOverview_Shared:OnHidden()
+    KEYBIND_STRIP:RestoreDefaultExit()
 end
 
 function ZO_AdventureZoneOverview_Shared:IsShowing()

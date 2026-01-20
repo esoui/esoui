@@ -7,6 +7,16 @@ function ZO_TamrielTomesScreen_Keyboard:Initialize(control)
     {
         gridClass = ZO_GridScrollList_Keyboard,
 
+        [ZO_TAMRIEL_TOMES_REWARD_TEMPLATE_TYPES.TEMPLATE_TOP_MARGIN] =
+        {
+            entryTemplate = "ZO_TamrielTomes_TopMargin_FullWidth_Shared",
+            width = ZO_TAMRIEL_TOMES_REWARD_TOP_MARGIN_WIDTH,
+            height = ZO_TAMRIEL_TOMES_REWARD_TOP_MARGIN_HEIGHT,
+            resetCallback = ZO_ObjectPool_DefaultResetControl,
+            setupCallback = ZO_ObjectPool_DefaultAcquireControl,
+            isSelectable = false,
+        },
+
         [ZO_TAMRIEL_TOMES_REWARD_TEMPLATE_TYPES.TEMPLATE_DIVIDER] =
         {
             entryTemplate = "ZO_TamrielTomes_RewardDivider_FullWidth_Keyboard",
@@ -96,11 +106,24 @@ function ZO_TamrielTomesScreen_Keyboard:InitializeKeybindStripDescriptor()
 
             name = GetString(SI_TAMRIEL_TOMES_CLAIM_ACTION),
 
-            callback = function()
+            handlesKeyUp = true,
+
+            callback = function(isKeyUp)
                 local selectedData = self:GetSelectedTamrielTomesRewardData()
-                if selectedData then
-                    selectedData:TryClaimReward()
+                if not selectedData then
+                    return
                 end
+
+                if isKeyUp then
+                    self:EndClaimReward(selectedData)
+                else
+                    self:BeginClaimReward(selectedData)
+                end
+            end,
+
+            enabled = function()
+                local selectedData = self:GetSelectedTamrielTomesRewardData()
+                return selectedData and selectedData:CanAffordReward()
             end,
 
             visible = function()

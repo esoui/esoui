@@ -35,6 +35,9 @@ function ZO_TamrielTomesPurchaseScreen_Shared:OnDeferredInitialize()
     TAMRIEL_TOMES_MANAGER:RegisterCallback("DirectPurchaseDataUpdated", OnPurchaseDataUpdated)
 
     DIRECT_PURCHASE_MANAGER:RegisterCallback("PurchaseSkuResult", self.OnPurchaseSkuResult, self)
+    DIRECT_PURCHASE_MANAGER:RegisterCallback("SettingsUpdated", self.OnSettingsUpdated, self)
+
+    self:OnSettingsUpdated()
 end
 
 function ZO_TamrielTomesPurchaseScreen_Shared:InitializeControls()
@@ -65,6 +68,10 @@ function ZO_TamrielTomesPurchaseScreen_Shared:OnPurchaseSkuResult(result)
     if result == DIRECT_PURCHASE_PURCHASE_SKU_RESULT_SUCCESS then
         PlaySound(SOUNDS.TAMRIEL_TOMES_PASS_PURCHASED)
     end
+end
+
+function ZO_TamrielTomesPurchaseScreen_Shared:OnSettingsUpdated()
+    self:UpdateButtons()
 end
 
 function ZO_TamrielTomesPurchaseScreen_Shared:OnShowing()
@@ -106,6 +113,13 @@ function ZO_TamrielTomesPurchaseScreen_Shared:UpdateGridList()
 end
 
 function ZO_TamrielTomesPurchaseScreen_Shared:UpdateButtons()
+    -- Use the enabled state of the Direct Purchase system to determine whether the buttons are visible.
+    local isSystemEnabled = DIRECT_PURCHASE_MANAGER:IsSystemEnabled()
+    self.buttonContainer:SetHidden(not isSystemEnabled)
+    if not isSystemEnabled then
+        return
+    end
+
     local premiumProductData = TAMRIEL_TOMES_MANAGER:GetPurchaseDataForSelectedTomeProductType(TAMRIEL_TOME_PRODUCT_TYPE_PREMIUM)
     self.premiumButton.productData = premiumProductData
     if premiumProductData then

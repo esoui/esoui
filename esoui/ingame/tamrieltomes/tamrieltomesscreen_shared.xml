@@ -51,22 +51,18 @@
                         </Control>
                         <Control name="$(parent)Currency" resizeToFitDescendents="true">
                             <Controls>
-                                <Control name="$(parent)Balance" resizeToFitDescendents="true">
-                                    <Dimensions y="32"/>
+                                <Control name="$(parent)Balance">
+                                    <Dimensions x="300" y="32"/>
                                     <Controls>
-                                        <Label name="$(parent)Name" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
-                                            <Anchor point="LEFT"/>
-                                        </Label>
-                                        <Control name="$(parent)Amount" inherits="ZO_RollingMeterLabel">
-                                            <Anchor point="LEFT" relativeTo="$(parent)Name" relativePoint="RIGHT" offsetX="5"/>
-                                        </Control>
+                                        <Label name="$(parent)Name" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED"/>
+                                        <Control name="$(parent)Amount" excludeFromResizeToFitExtents="true"/>
                                         <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Icons/icon_missing.dds" layer="CONTROLS">
                                             <Dimensions x="32" y="32"/>
-                                            <Anchor point="LEFT" relativeTo="$(parent)Amount" relativePoint="RIGHT" offsetX="5"/>
                                         </Texture>
                                     </Controls>
                                 </Control>
                                 <Control name="$(parent)Bonus" hidden="true" resizeToFitDescendents="true">
+                                    <Dimensions x="300"/>
                                     <Controls>
                                         <Label name="$(parent)Percent" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SUCCEEDED"/>
                                         <Texture name="$(parent)Icon" textureFile="EsoUI/Art/TamrielTomes/currencyBonusArrow.dds" layer="CONTROLS">

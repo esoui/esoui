@@ -46,7 +46,15 @@
                                 <Control name="$(parent)Balance" override="true">
                                     <Anchor point="TOPRIGHT" offsetX="-15" offsetY="5"/>
                                     <Controls>
-                                        <Label name="$(parent)Name" override="true" font="ZoFontHeader2"/>
+                                        <Texture name="$(parent)Icon" override="true">
+                                            <Anchor point="RIGHT"/>
+                                        </Texture>
+                                        <Control name="$(parent)Amount" override="true" inherits="ZO_RollingMeterLabel">
+                                            <Anchor point="RIGHT" relativeTo="$(parent)Icon" relativePoint="LEFT" offsetX="-8"/>
+                                        </Control>
+                                        <Label name="$(parent)Name" override="true" font="ZoFontHeader2">
+                                            <Anchor point="RIGHT" relativeTo="$(parent)Amount" relativePoint="LEFT" offsetX="-8"/>
+                                        </Label>
                                     </Controls>
                                 </Control>
                                 <Control name="$(parent)Bonus" override="true">
@@ -75,6 +83,12 @@
                         <Control name="$(parent)GridList" override="true" inherits="ZO_GridScrollList_Keyboard">
                             <Anchor point="TOP" offsetY="120"/>
                             <Dimensions x="ZO_TAMRIEL_TOMES_GRID_LIST_WIDTH" y="ZO_TAMRIEL_TOMES_GRID_LIST_HEIGHT"/>
+                            <Controls>
+                                <Control name="$(parent)Container" override="true">
+                                    <Anchor point="TOPLEFT" offsetY="-21"/>
+                                    <Anchor point="BOTTOMRIGHT"/>
+                                </Control>
+                            </Controls>
                         </Control>
                         <Texture name="$(parent)PremiumGroupBorder" override="true">
                             <Controls>

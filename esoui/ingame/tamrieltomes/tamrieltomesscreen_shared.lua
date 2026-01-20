@@ -1,5 +1,5 @@
-ZO_TAMRIEL_TOMES_GRID_LIST_WIDTH = ZO_TAMRIEL_TOMES_REWARD_TILE_1_X_WIDTH * 5 + ZO_SCROLL_BAR_WIDTH + 10
-ZO_TAMRIEL_TOMES_GRID_LIST_HEIGHT = ZO_TAMRIEL_TOMES_REWARD_TILE_HEIGHT * 3 + ZO_TAMRIEL_TOMES_REWARD_DIVIDER_HEIGHT
+ZO_TAMRIEL_TOMES_GRID_LIST_WIDTH = ZO_TAMRIEL_TOMES_REWARD_TILE_1_X_WIDTH * 5 + ZO_SCROLL_BAR_WIDTH + 5
+ZO_TAMRIEL_TOMES_GRID_LIST_HEIGHT = ZO_TAMRIEL_TOMES_REWARD_TILE_HEIGHT * 3 + ZO_TAMRIEL_TOMES_REWARD_DIVIDER_HEIGHT + 40
 
 ZO_TAMRIEL_TOMES_REWARD_DATA_PREVIEW_TYPES =
 {
@@ -10,16 +10,20 @@ ZO_TAMRIEL_TOMES_REWARD_DATA_PREVIEW_TYPES =
 
 ZO_TAMRIEL_TOMES_REWARD_TEMPLATE_TYPES =
 {
-    TEMPLATE_DIVIDER = 1,
-    TEMPLATE_1X_WIDTH = 2,
-    TEMPLATE_2X_WIDTH_LEFT = 3,
-    TEMPLATE_2X_WIDTH_RIGHT = 4,
-    TEMPLATE_2_5X_WIDTH_LEFT = 5,
-    TEMPLATE_2_5X_WIDTH_RIGHT = 6,
+    TEMPLATE_TOP_MARGIN = 1,
+    TEMPLATE_DIVIDER = 2,
+    TEMPLATE_1X_WIDTH = 3,
+    TEMPLATE_2X_WIDTH_LEFT = 4,
+    TEMPLATE_2X_WIDTH_RIGHT = 5,
+    TEMPLATE_2_5X_WIDTH_LEFT = 6,
+    TEMPLATE_2_5X_WIDTH_RIGHT = 7,
 }
 
 ZO_TAMRIEL_TOMES_REWARD_ENTRY_TEMPLATE_LAYOUT =
 {
+    -- Row 0
+    ZO_TAMRIEL_TOMES_REWARD_TEMPLATE_TYPES.TEMPLATE_TOP_MARGIN,
+
     -- Row 1
     ZO_TAMRIEL_TOMES_REWARD_TEMPLATE_TYPES.TEMPLATE_2_5X_WIDTH_RIGHT,
     ZO_TAMRIEL_TOMES_REWARD_TEMPLATE_TYPES.TEMPLATE_2_5X_WIDTH_LEFT,
@@ -65,6 +69,18 @@ function ZO_TamrielTomesScreen_Shared:OnDeferredInitialize()
     self:InitializeKeybindStripDescriptor()
     self:InitializeParticleSystems()
     self:RegisterForEvents()
+
+    if self.buttonsFocus then
+        local originalOnFocusChangedFunction = self.buttonsFocus.onFocusChangedFunction
+
+        self.buttonsFocus.onFocusChangedFunction = function(...)
+            originalOnFocusChangedFunction(self.buttonsFocus, ...)
+
+            local focusItem = self.buttonsFocus:GetFocusItem()
+            local upgradeButtonHasFocus = focusItem and focusItem.control == self.upgradeButton
+            self:OnUpgradeButtonFocusChanged(upgradeButtonHasFocus)
+        end
+    end
 end
 
 function ZO_TamrielTomesScreen_Shared:InitializeControls()
@@ -74,6 +90,8 @@ function ZO_TamrielTomesScreen_Shared:InitializeControls()
     self.buttonContainer = headerContainer:GetNamedChild("Buttons")
     self.challengesButton = self.buttonContainer:GetNamedChild("ChallengesButton")
     self.upgradeButton = self.buttonContainer:GetNamedChild("UpgradeButton")
+    self.upgradeButton:SetHandler("OnMouseEnter", function() self:OnUpgradeButtonFocusChanged(true) end, "DisabledMessage")
+    self.upgradeButton:SetHandler("OnMouseExit", function() self:OnUpgradeButtonFocusChanged(false) end, "DisabledMessage")
 
     local bookContainer = self.control:GetNamedChild("Book")
     self.particleGeneratorPositionControl = bookContainer:GetNamedChild("RewardParticleGeneratorPosition")
@@ -201,6 +219,7 @@ function ZO_TamrielTomesScreen_Shared:RegisterForEvents()
     end
 
     TAMRIEL_TOMES_MANAGER:RegisterCallback("DirectPurchaseDataUpdated", OnPurchaseDataUpdated)
+    DIRECT_PURCHASE_MANAGER:RegisterCallback("SettingsUpdated", OnPurchaseDataUpdated)
 end
 
 function ZO_TamrielTomesScreen_Shared:ShowClaimedRewardFlair(gridTile)
@@ -384,8 +403,8 @@ function ZO_TamrielTomesScreen_Shared:RebuildGridList()
             break
         end
 
-        if entryTemplate == ZO_TAMRIEL_TOMES_REWARD_TEMPLATE_TYPES.TEMPLATE_DIVIDER then
-            self:AddGridEntryInternal({}, ZO_TAMRIEL_TOMES_REWARD_TEMPLATE_TYPES.TEMPLATE_DIVIDER)
+        if entryTemplate == ZO_TAMRIEL_TOMES_REWARD_TEMPLATE_TYPES.TEMPLATE_TOP_MARGIN or entryTemplate == ZO_TAMRIEL_TOMES_REWARD_TEMPLATE_TYPES.TEMPLATE_DIVIDER then
+            self:AddGridEntryInternal({}, entryTemplate)
         else
             self:AddGridEntryInternal(entryData, entryTemplate)
             entryData = self:GetNextTamrielTomesRewardData()
@@ -421,9 +440,31 @@ function ZO_TamrielTomesScreen_Shared:RefreshGridList()
     self.gridList:RefreshGridList()
 end
 
-function ZO_TamrielTomesScreen_Shared:UpdateButtons()
+function ZO_TamrielTomesScreen_Shared:IsDirectPurchaseEnabled()
+    local isDirectPurchaseEnabled = DIRECT_PURCHASE_MANAGER:IsSystemEnabled()
     local shouldEnableUpgrade = TAMRIEL_TOMES_MANAGER:CanPurchaseAnySelectedTomeProduct()
-    self.upgradeButton:SetEnabled(shouldEnableUpgrade)
+    return isDirectPurchaseEnabled and shouldEnableUpgrade
+end
+
+function ZO_TamrielTomesScreen_Shared:OnUpgradeButtonFocusChanged(hasFocus)
+    if hasFocus and not self:IsDirectPurchaseEnabled() then
+        local message = GetString(SI_TAMRIEL_TOMES_UPGRADE_DISABLED)
+        if IsInGamepadPreferredMode() then
+            GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
+            GAMEPAD_TOOLTIPS:LayoutTextBlockTooltip(GAMEPAD_RIGHT_TOOLTIP, message)
+        else
+            InitializeTooltip(InformationTooltip, self.upgradeButton, RIGHT)
+            InformationTooltip:AddLine(message, "", ZO_ERROR_COLOR:UnpackRGB())
+        end
+    else
+        ClearTooltip(InformationTooltip)
+        GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
+    end
+end
+
+function ZO_TamrielTomesScreen_Shared:UpdateButtons()
+    local isEnabled = self:IsDirectPurchaseEnabled()
+    self.upgradeButton:SetEnabled(isEnabled)
 end
 
 function ZO_TamrielTomesScreen_Shared:BeginActivePreviewInternal(previousTamrielTomesRewardData, tamrielTomesRewardData)
@@ -605,6 +646,28 @@ function ZO_TamrielTomesScreen_Shared:SetIsTamrielTomesRewardPreviewing(tamrielT
     end
 
     tile.object:GetReward():SetPreviewing(isPreviewing)
+end
+
+function ZO_TamrielTomesScreen_Shared:BeginClaimReward(tamrielTomesRewardData)
+    local tileControl = self:GetTileByTamrielTomesRewardData(tamrielTomesRewardData)
+    if not tileControl then
+        internalasset(false, "Tile control not found for Tamriel Tomes Reward Data.")
+        return
+    end
+
+    local rewardObject = tileControl.object.rewardControl.object
+    rewardObject:BeginClaimReward()
+end
+
+function ZO_TamrielTomesScreen_Shared:EndClaimReward(tamrielTomesRewardData)
+    local tileControl = self:GetTileByTamrielTomesRewardData(tamrielTomesRewardData)
+    if not tileControl then
+        internalasset(false, "Tile control not found for Tamriel Tomes Reward Data.")
+        return
+    end
+
+    local rewardObject = tileControl.object.rewardControl.object
+    rewardObject:EndClaimReward()
 end
 
 function ZO_TamrielTomesScreen_Shared:UpdateKeybinds()

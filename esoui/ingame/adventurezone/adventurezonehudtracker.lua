@@ -35,7 +35,7 @@ function ZO_AdventureZoneHUDTracker:DeferredInitialize(...)
             score = self.container:GetNamedChild("FactionScore2"),
             icon = self.container:GetNamedChild("FactionIcon2"),
         },
-        [ADVENTURE_ZONE_FACTION_GLITTERING_GLOAD] =
+        [ADVENTURE_ZONE_FACTION_GLITTERING_GOAD] =
         {
             score = self.container:GetNamedChild("FactionScore3"),
             icon = self.container:GetNamedChild("FactionIcon3"),

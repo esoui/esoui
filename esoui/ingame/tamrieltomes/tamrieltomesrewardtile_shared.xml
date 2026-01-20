@@ -33,10 +33,28 @@
                     <Dimensions x="128" y="40"/>
                     <Anchor point="BOTTOM"/>
                 </Texture>
-                <Label name="$(parent)Cost" override="true" inherits="ZO_CurrencyTemplate" horizontalAlignment="CENTER">
+                <Label name="$(parent)Cost" inherits="ZO_CurrencyTemplate" horizontalAlignment="CENTER">
                     <Anchor point="CENTER" relativeTo="$(parent)CostBackground" offsetY="-6"/>
                 </Label>
+                <Control name="$(parent)ClaimRewardOverlay" hidden="true">
+                    <Anchor point="CENTER" relativePoint="TOP" offsetY="72"/>
+                    <Dimensions x="192" y="192"/>
+                    <Controls>
+                        <Texture name="$(parent)Highlight" layer="OVERLAY" level="10" tier="HIGH" textureFile="EsoUI/Art/TamrielTomes/tome_slot_claim_highlight.dds">
+                            <Anchor point="CENTER" relativeTo="$(grandparent)" offsetY="2"/>
+                            <Dimensions x="128" y="158"/>
+                            <TextureCoords left="0" right="1" top="0" bottom="0.61718"/>
+                        </Texture>
+                        <Texture name="$(parent)Overlay" blendMode="ADD" layer="OVERLAY" level="11" tier="HIGH" textureFile="EsoUI/Art/TamrielTomes/tome_slot_claim_overlay.dds" shaderEffectType="RADIAL_BLUR">
+                            <AnchorFill/>
+                            <RadialBlur originX="0.5" originY="0" numSamples="16" blurRadius="0.1" offsetRadius="0"/>
+                        </Texture>
+                    </Controls>
+                </Control>
             </Controls>
+        </Control>
+        <Control name="ZO_TamrielTomes_TopMargin_FullWidth_Shared" virtual="true">
+            <Dimensions x="ZO_TAMRIEL_TOMES_REWARD_DIVIDER_WIDTH" y="0"/>
         </Control>
         <Control name="ZO_TamrielTomes_RewardDivider_FullWidth_Shared" virtual="true">
             <Dimensions x="ZO_TAMRIEL_TOMES_REWARD_DIVIDER_WIDTH" y="48"/>

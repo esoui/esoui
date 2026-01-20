@@ -251,6 +251,7 @@ EsoUI\Ingame\AdventureZone\Gamepad\AdventureZoneOverview_Gamepad.lua
 EsoUI\Ingame\AdventureZone\Gamepad\AdventureZoneOverview_Gamepad.xml
 EsoUI\Ingame\AdventureZone\Gamepad\AdventureZoneBossTree_Gamepad.lua
 EsoUI\Ingame\AdventureZone\Gamepad\AdventureZoneBossTree_Gamepad.xml
+EsoUI\Ingame\AdventureZone\AdventureZoneManager.lua
 
 EsoUI\Ingame\MainMenu\Gamepad\ZO_Main_Menu_Helper_Panel_Gamepad.lua
 

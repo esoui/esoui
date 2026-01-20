@@ -8,6 +8,16 @@ function ZO_TamrielTomesScreen_Gamepad:Initialize(control)
         gridClass = ZO_GridScrollList_Gamepad,
         gamepadHighlightTemplate = "ZO_TamrielTomes_Reward_Gamepad_Highlight_Template",
 
+        [ZO_TAMRIEL_TOMES_REWARD_TEMPLATE_TYPES.TEMPLATE_TOP_MARGIN] =
+        {
+            entryTemplate = "ZO_TamrielTomes_TopMargin_FullWidth_Shared",
+            width = ZO_TAMRIEL_TOMES_REWARD_TOP_MARGIN_WIDTH,
+            height = ZO_TAMRIEL_TOMES_REWARD_TOP_MARGIN_HEIGHT,
+            resetCallback = ZO_ObjectPool_DefaultResetControl,
+            setupCallback = ZO_ObjectPool_DefaultAcquireControl,
+            isSelectable = false,
+        },
+
         [ZO_TAMRIEL_TOMES_REWARD_TEMPLATE_TYPES.TEMPLATE_DIVIDER] =
         {
             entryTemplate = "ZO_TamrielTomes_RewardDivider_FullWidth_Gamepad",
@@ -106,11 +116,19 @@ function ZO_TamrielTomesScreen_Gamepad:InitializeKeybindStripDescriptor()
                 return GetString(SI_GAMEPAD_SELECT_OPTION)
             end,
 
-            callback = function()
+            handlesKeyUp = true,
+
+            callback = function(isKeyUp)
                 if self:IsCurrentFocusArea(self.rewardsFocusArea) then
                     local selectedData = self:GetSelectedTamrielTomesRewardData()
-                    if selectedData then
-                        selectedData:TryClaimReward()
+                    if not selectedData then
+                        return
+                    end
+
+                    if isKeyUp then
+                        self:EndClaimReward(selectedData)
+                    else
+                        self:BeginClaimReward(selectedData)
                     end
                 elseif self:IsCurrentFocusArea(self.buttonsFocusArea) then
                     local data = self.buttonsFocus:GetFocusItem()
@@ -123,8 +141,11 @@ function ZO_TamrielTomesScreen_Gamepad:InitializeKeybindStripDescriptor()
             enabled = function()
                 if self:IsCurrentFocusArea(self.buttonsFocusArea) then
                     local data = self.buttonsFocus:GetFocusItem()
-                    if data and data.enabled then
-                        return data.enabled()
+                    if data and data.enabled and data.enabled() then
+                        local selectedData = self:GetSelectedTamrielTomesRewardData()
+                        if selectedData then
+                            return selectedData:CanAffordReward()
+                        end
                     end
                 end
 
@@ -239,14 +260,18 @@ function ZO_TamrielTomesScreen_Gamepad:InitializeMultiFocusAreas()
     local upgradeTomeButtonFocusData =
     {
         highlight = self.upgradeButton:GetNamedChild("Highlight"),
+
         control = self.upgradeButton,
+
         callback = function()
             self:ShowPurchaseScreen()
         end,
+
         enabled = function()
             -- TODO Tamriel Tomes: Error Text?
             return self.upgradeButton:GetState() ~= BSTATE_DISABLED
         end,
+
         narrationText = function()
             local narrations = {}
             ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.upgradeButton.text))
