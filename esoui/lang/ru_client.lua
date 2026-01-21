@@ -9990,7 +9990,7 @@ SAS(SI_SKILL_RESPEC_CONFIRM_DIALOG_BODY_COST_SCROLL, "Будет потраче�
 SAS(SI_SKILL_RESPEC_CONFIRM_DIALOG_BODY_INTRO, "Вы уверены, что хотите применить изменения?", 0)
 SAS(SI_SKILL_RESPEC_CONFIRM_DIALOG_TITLE, "Подтвердить изменения", 0)
 SAS(SI_SKILL_RESPEC_CONFIRM_KEYBIND, "Подтвердить", 1)
-SAS(SI_SKILL_RESPEC_MORPHS_ONLY_CANNOT_SELL_BASE_ABILITY, "Вы не можете сбросить базовые способности, пока меняете преобразования.", 0)
+SAS(SI_SKILL_RESPEC_MORPHS_ONLY_CANNOT_SELL_BASE_ABILITY, "Вы не можете сбросить базовые способности, пока перераспределяете преобразования.", 0)
 SAS(SI_SKILL_STYLE_GAMEPAD_CHANGE_STYLE, "Сменить стиль", 0)
 SAS(SI_SKILL_STYLING_ADDITIONAL_NAME, "Дополнительно", 0)
 SAS(SI_SKILL_STYLING_DEFAULT_NAME, "По умолчанию", 0)

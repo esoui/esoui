@@ -146,6 +146,7 @@ function ZO_GamepadSkills:Initialize(control)
             --Disable now so it's not possible to change the selected skill live/skills advisor entry as the scene is hiding since the line filter list depends on it being a skill line
             self:DisableCurrentList()
         elseif newState == SCENE_HIDDEN then
+            self.selectSkillData = nil
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.categoryKeybindStripDescriptor)
             GAMEPAD_TOOLTIPS:Reset(GAMEPAD_LEFT_TOOLTIP)
             GAMEPAD_TOOLTIPS:Reset(GAMEPAD_RIGHT_TOOLTIP)

@@ -9990,7 +9990,7 @@ SAS(SI_SKILL_RESPEC_CONFIRM_DIALOG_BODY_COST_SCROLL, "Cela consommera |cffffff1x
 SAS(SI_SKILL_RESPEC_CONFIRM_DIALOG_BODY_INTRO, "Êtes-vous sûr(e) de vouloir dépenser vos points ?", 0)
 SAS(SI_SKILL_RESPEC_CONFIRM_DIALOG_TITLE, "Confirmer changements", 0)
 SAS(SI_SKILL_RESPEC_CONFIRM_KEYBIND, "Confirmer", 1)
-SAS(SI_SKILL_RESPEC_MORPHS_ONLY_CANNOT_SELL_BASE_ABILITY, "Vous ne pouvez pas vous faire rembourser vos compétences de bases lorsque vous respécialisez vos évolutions.", 0)
+SAS(SI_SKILL_RESPEC_MORPHS_ONLY_CANNOT_SELL_BASE_ABILITY, "Vous ne pouvez pas vous faire rembourser vos compétences de bases lorsque vous redistribuez vos évolutions.", 0)
 SAS(SI_SKILL_STYLE_GAMEPAD_CHANGE_STYLE, "Changer le style", 0)
 SAS(SI_SKILL_STYLING_ADDITIONAL_NAME, "Supplémentaire", 0)
 SAS(SI_SKILL_STYLING_DEFAULT_NAME, "Défaut", 0)
