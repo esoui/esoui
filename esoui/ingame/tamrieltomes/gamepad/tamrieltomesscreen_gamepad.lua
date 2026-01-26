@@ -92,7 +92,7 @@ end
 function ZO_TamrielTomesScreen_Gamepad:InitializeCurrencyRollingMeter()
     ZO_TamrielTomesScreen_Shared.InitializeCurrencyRollingMeter(self)
 
-    self.currencyAmountRollingMeter:SetFont("ZoFontGamepad34")
+    self.currencyAmountRollingMeter:SetFont("ZoFontGamepad25")
 
     local currencyIcon = GetCurrencyGamepadIcon(CURT_TOME_POINTS)
     self.currencyIconControl:SetTexture(currencyIcon)
@@ -111,7 +111,17 @@ function ZO_TamrielTomesScreen_Gamepad:InitializeKeybindStripDescriptor()
 
             name = function()
                 if self:IsCurrentFocusArea(self.rewardsFocusArea) then
-                    return GetString(SI_TAMRIEL_TOMES_CLAIM_ACTION)
+                    local selectedData = self:GetSelectedTamrielTomesRewardData()
+                    if selectedData then
+                        local rewardObject = self:GetTamrielTomesRewardObject(selectedData)
+                        if rewardObject then
+                            local timeRemainingSeconds = rewardObject:GetClaimRewardTimeRemainingSeconds()
+                            if timeRemainingSeconds then
+                                return zo_strformat(SI_TAMRIEL_TOMES_CLAIM_ACTION_HELD, ZO_FormatTimeAsDecimalWhenBelowThreshold(timeRemainingSeconds))
+                            end
+                        end
+                    end
+                    return GetString(SI_TAMRIEL_TOMES_CLAIM_ACTION_HOLD)
                 end
                 return GetString(SI_GAMEPAD_SELECT_OPTION)
             end,
@@ -189,10 +199,12 @@ function ZO_TamrielTomesScreen_Gamepad:InitializeKeybindStripDescriptor()
         {
             keybind = "UI_SHORTCUT_TERTIARY",
 
+            enabled = function()
+                return GetPlayerStoredCurrencyAmount(CURT_TOME_POINT_CACHES) > 0
+            end,
+
             name = function()
-                local IS_PLURAL = false
-                local currencyName = GetCurrencyName(CURT_TOME_POINTS, IS_PLURAL)
-                return zo_strformat(SI_TAMRIEL_TOMES_ADD_CURRENCY_ACTION, currencyName)
+                return zo_strformat(SI_TAMRIEL_TOMES_ADD_CURRENCY_ACTION, ZO_SELECTED_TEXT:Colorize(GetPlayerStoredCurrencyAmount(CURT_TOME_POINT_CACHES)))
             end,
 
             callback = function()
@@ -201,7 +213,7 @@ function ZO_TamrielTomesScreen_Gamepad:InitializeKeybindStripDescriptor()
             end,
 
             visible = function()
-                return self:GetCurrentPreviewType() ~= ZO_TAMRIEL_TOMES_REWARD_DATA_PREVIEW_TYPES.ACTIVE_PREVIEW and GetPlayerStoredCurrencyAmount(CURT_TOME_POINT_CACHES) > 0
+                return self:GetCurrentPreviewType() ~= ZO_TAMRIEL_TOMES_REWARD_DATA_PREVIEW_TYPES.ACTIVE_PREVIEW
             end,
         },
 
@@ -325,16 +337,16 @@ function ZO_TamrielTomesScreen_Gamepad:IsNextSceneRewardPreview()
     return nextScene == TAMRIEL_TOMES_PREVIEW_REWARD_SCENE_GAMEPAD
 end
 
+function ZO_TamrielTomesScreen_Gamepad:EndPreviewRewardList()
+    -- TODO Tamriel Tomes
+end
+
 function ZO_TamrielTomesScreen_Gamepad:PreviewRewardList(rewardId)
     -- TODO Tamriel Tomes
 end
 
 function ZO_TamrielTomesScreen_Gamepad:OnGridSelectionChanged(previousData, newData)
-    if newData then
-        self:SetSelectedTamrielTomesRewardData(newData)
-    else
-        self:SetSelectedTamrielTomesRewardData(nil)
-    end
+    self:SetSelectedTamrielTomesRewardData(newData)
 end
 
 -- Indicates whether this scene should retain the current preview when hidden.

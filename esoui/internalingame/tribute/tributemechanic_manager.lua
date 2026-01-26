@@ -360,7 +360,7 @@ function ZO_TributeMechanicCardTile:ShowPopupAndTooltip()
     cardPopup:ShowAsPopup(ZO_TRIBUTE_MECHANIC_TILE_UI_WIDTH, top, ZO_TRIBUTE_CARD_POPUP_TYPE.MECHANIC)
     cardPopup:SetMechanicGlowHidden(self.mechanicActivationSource, self.mechanicIndex, false)
 
-    if isMouseMode then
+    if isMouseMode and not IsInGamepadPreferredMode() then
         local tooltipControl = ItemTooltip
         InitializeTooltip(tooltipControl, cardPopup:GetControl(), LEFT, HORIZONTAL_MARGIN, VERTICAL_MARGIN, RIGHT)
         tooltipControl:SetTributeCard(cardPopup:GetPatronDefId(), cardPopup:GetCardDefId())

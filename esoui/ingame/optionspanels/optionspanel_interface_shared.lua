@@ -132,6 +132,7 @@ local ZO_OptionsPanel_Interface_ControlData =
             panel = SETTING_PANEL_INTERFACE,
             text = SI_INTERFACE_OPTIONS_SHOW_FRAMERATE,
             tooltipText = SI_INTERFACE_OPTIONS_SHOW_FRAMERATE_TOOLTIP,
+            exists = ZO_IsPCUI,
         },
          --Options_Interface_LatencyCheck
         [UI_SETTING_SHOW_LATENCY] =
@@ -142,6 +143,7 @@ local ZO_OptionsPanel_Interface_ControlData =
             panel = SETTING_PANEL_INTERFACE,
             text = SI_INTERFACE_OPTIONS_SHOW_LATENCY,
             tooltipText = SI_INTERFACE_OPTIONS_SHOW_LATENCY_TOOLTIP,
+            exists = ZO_IsPCUI,
         },
         --Options_Interface_FramerateLatencyLockCheck
         [UI_SETTING_FRAMERATE_LATENCY_LOCK] =
@@ -152,6 +154,7 @@ local ZO_OptionsPanel_Interface_ControlData =
             panel = SETTING_PANEL_INTERFACE,
             text = SI_INTERFACE_OPTIONS_FRAMERATE_LATENCY_LOCK,
             tooltipText = SI_INTERFACE_OPTIONS_FRAMERATE_LATENCY_LOCK_TOOLTIP,
+            exists = ZO_IsPCUI,
         },
         --Options_Interface_QuestBestowerIndicators
         [UI_SETTING_SHOW_QUEST_BESTOWER_INDICATORS] =

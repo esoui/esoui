@@ -910,6 +910,7 @@ end
 
 function ZO_Tribute:ApplyPlatformStyle()
     ApplyTemplateToControl(self.confirmButton, ZO_GetPlatformTemplate("ZO_KeybindButton"))
+    ApplyTemplateToControl(self.confinedCardsButton, ZO_GetPlatformTemplate("ZO_KeybindButton"))
     --Reset the text here to handle the force uppercase on gamepad
     self.confirmButton:SetText(GetString(SI_TRIBUTE_TARGET_VIEWER_CONFIRM_ACTION))
     self.confirmButton:UpdateEnabledState()

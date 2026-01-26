@@ -8,6 +8,7 @@ function ZO_AdventureZoneHUDTracker:Initialize(...)
     fragment:SetHiddenForReason("NotInAdventureZone", true)
 
     self.control:RegisterForEvent(EVENT_PLAYER_ACTIVATED, ZO_GetEventForwardingFunction(self, self.Update))
+    self.control:RegisterForEvent(EVENT_HOLIDAYS_CHANGED, ZO_GetEventForwardingFunction(self, self.Update))
 end
 
 function ZO_AdventureZoneHUDTracker:DeferredInitialize(...)
@@ -139,7 +140,7 @@ function ZO_AdventureZoneHUDTracker:OnShown()
 end
 
 function ZO_AdventureZoneHUDTracker:Update()
-    local hidden = not IsInAdventureZone()
+    local hidden = not (IsInAdventureZone() and IsAdventureZoneActive())
     self:GetFragment():SetHiddenForReason("NotInAdventureZone", hidden, DEFAULT_HUD_DURATION, DEFAULT_HUD_DURATION)
     return true
 end

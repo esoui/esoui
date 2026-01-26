@@ -2,8 +2,8 @@
     <Controls>
         <Control name="ZO_TamrielTomesIntroHighlight_Keyboard" inherits="ZO_TamrielTomesIntroHighlight_Shared" virtual="true">
             <Controls>
-                <Label name="$(parent)Title" override="true" font="ZoFontWinH1"/>
-                <Label name="$(parent)BodyText" override="true" font="ZoFontTooltipTitle"/>
+                <Label name="$(parent)Title" override="true" font="$(ANTIQUE_FONT)|34"/>
+                <Label name="$(parent)BodyText" override="true" font="$(ANTIQUE_FONT)|22"/>
             </Controls>
         </Control>
         <TopLevelControl name="ZO_TamrielTomesIntro_KeyboardTL" inherits="ZO_TamrielTomesIntro_SharedTL">
@@ -11,7 +11,7 @@
                 ZO_TamrielTomesIntroScreen_Keyboard.OnControlInitialized(self)
             </OnInitialized>
             <Controls>
-                <Label name="$(parent)Title" override="true" font="ZoFontCallout2"/>
+                <Label name="$(parent)Title" override="true" font="$(ANTIQUE_FONT)|48"/>
                 <Control name="$(parent)ButtonContainer">
                     <Dimensions y="78"/>
                     <Anchor point="BOTTOMLEFT" relativePoint="BOTTOM" offsetX="10" offsetY="-92"/>
@@ -23,9 +23,9 @@
                         </Button>
                     </Controls>
                 </Control>
-                <Control name="$(parent)Highlights" override="true">
-                    <Anchor point="TOPLEFT" relativePoint="TOP" offsetX="80" offsetY="85"/>
-                    <Anchor point="BOTTOMRIGHT" offsetX="-75" offsetY="-175"/>
+                <Control name="$(parent)Highlights" override="true" inherits="ZO_ScrollContainer">
+                    <Anchor point="TOPLEFT" relativePoint="TOP" offsetX="50" offsetY="85"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="-80" offsetY="-175"/>
                 </Control>
             </Controls>
         </TopLevelControl>

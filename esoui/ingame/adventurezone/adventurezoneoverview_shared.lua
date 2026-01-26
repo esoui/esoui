@@ -32,15 +32,17 @@ function ZO_AdventureZoneEventTile_Shared:Layout(index)
     local function UpdateTimer()
         if self.parentObject and self.parentObject:IsShowing() then
             local eventState = GetAdventureZoneEventLocationState(index)
+            local statusText = ""
             if eventState == ADVENTURE_ZONE_WORLD_EVENT_LOCATION_STATE_INACTIVE then
-                self.statusLabel:SetText(GetString(SI_ADVENTURE_ZONE_EVENT_INACTIVE))
+                statusText = GetString(SI_ADVENTURE_ZONE_EVENT_INACTIVE)
             elseif eventState == ADVENTURE_ZONE_WORLD_EVENT_LOCATION_STATE_STARTS_SOON then
-                local secondsRemaining = GetAdventureZoneEventLocationTimeLeftToStartMs(index) / ZO_ONE_SECOND_IN_MILLISECONDS
+                local secondsRemaining = zo_max((self.startTimestamp / ZO_ONE_SECOND_IN_MILLISECONDS) - GetTimeStamp(), 0) 
                 local timeRemainingText = ZO_FormatTime(secondsRemaining, TIME_FORMAT_STYLE_SHOW_LARGEST_TWO_UNITS, TIME_FORMAT_PRECISION_SECONDS)
-                self.statusLabel:SetText(zo_strformat(SI_ADVENTURE_ZONE_EVENT_STARTS_SOON_FORMATTER, timeRemainingText))
+                statusText = zo_strformat(SI_ADVENTURE_ZONE_EVENT_STARTS_SOON_FORMATTER, timeRemainingText)
             elseif eventState == ADVENTURE_ZONE_WORLD_EVENT_LOCATION_STATE_ACTIVE then
-                self.statusLabel:SetText(GetString(SI_ADVENTURE_ZONE_EVENT_ACTIVE))
+                statusText = GetString(SI_ADVENTURE_ZONE_EVENT_ACTIVE)
             end
+            self.statusLabel:SetText(statusText)
         end
     end
 
@@ -125,6 +127,13 @@ function ZO_AdventureZoneOverview_Shared:RegisterForEvents()
 
     self.control:RegisterForEvent(EVENT_ADVENTURE_ZONE_FACTION_STANDING_UPDATE_RECEIVED, RefreshScores)
     self.control:RegisterForEvent(EVENT_ADVENTURE_ZONE_FACTION_REPUTATION_CHANGED, RefreshScores)
+
+    local function RefreshEvents()
+        self:RefreshEvents()
+    end
+
+    self.control:RegisterForEvent(EVENT_ADVENTURE_ZONE_WORLD_EVENT_INIT, RefreshEvents)
+    self.control:RegisterForEvent(EVENT_ADVENTURE_ZONE_WORLD_EVENT_STARTS_SOON, RefreshEvents)
 end
 
 function ZO_AdventureZoneOverview_Shared:InitializeKeybindStripDescriptor()
@@ -159,6 +168,7 @@ end
 
 function ZO_AdventureZoneOverview_Shared:OnShowing()
     self:RefreshScores()
+    self:RefreshEvents()
 
     self.playerPointsControl:ClearAnchors()
     self.eventsDivider:ClearAnchors()
@@ -202,6 +212,12 @@ function ZO_AdventureZoneOverview_Shared:RefreshScores()
     end
 
     self.playerPointsLabel:SetText(zo_strformat(SI_ADVENTURE_ZONE_POINTS_EARNED, ZO_SELECTED_TEXT:Colorize(GetAdventureZonePlayerReputation())))
+end
+
+function ZO_AdventureZoneOverview_Shared:RefreshEvents()
+    for index, eventTile in ipairs(self.eventTileControls) do
+        eventTile.object.startTimestamp = GetAdventureZoneEventLocationStartTimestampMs(index)
+    end
 end
 
 function ZO_AdventureZoneOverview_Shared:UpdateKeybinds()

@@ -78,14 +78,14 @@ function ZO_TamrielTomesRewardData:GetRewardIndex()
     return self.rewardIndex
 end
 
-function ZO_TamrielTomesRewardData:GetPlatformIcon()
+function ZO_TamrielTomesRewardData:GetPlatformLootIcon()
     local rewardData = self:GetRewardListRewardDataByIndex(1)
     if not rewardData then
         rewardData = self:GetRewardData()
     end
 
     if rewardData then
-        return rewardData:GetPlatformIcon()
+        return rewardData:GetPlatformLootIcon()
     end
 
     return nil
@@ -105,6 +105,14 @@ function ZO_TamrielTomesRewardData:GetRewardType()
         return rewardData:GetRewardType()
     end
     return nil
+end
+
+function ZO_TamrielTomesRewardData:HasAccessToComponent()
+    return self.hasAccessToComponent
+end
+
+function ZO_TamrielTomesRewardData:HasAccessToReward()
+    return self.hasAccessToReward
 end
 
 function ZO_TamrielTomesRewardData:IsRewardList()
@@ -141,7 +149,7 @@ function ZO_TamrielTomesRewardData:CanAffordReward()
 end
 
 function ZO_TamrielTomesRewardData:CanClaimReward()
-    return not self:IsRewardClaimed() or self:IsRewardInfinitelyRepeatable()
+    return self:IsRewardInfinitelyRepeatable() or not (self:IsLocked() or self:IsRewardClaimed())
 end
 
 function ZO_TamrielTomesRewardData:TryClaimReward()
@@ -157,8 +165,7 @@ function ZO_TamrielTomesRewardData:CanPreviewReward()
 end
 
 function ZO_TamrielTomesRewardData:IsLocked()
-    -- TODO Tamriel Tomes
-    return false
+    return not (self.hasAccessToComponent and self.hasAccessToReward)
 end
 
 function ZO_TamrielTomesRewardData:Update()
@@ -167,6 +174,10 @@ function ZO_TamrielTomesRewardData:Update()
     local component = self:GetRewardComponent()
     local index = self:GetRewardIndex()
     self.isClaimed, self.isFallback, self.isInfinitelyRepeatable = GetRewardTrackRewardClaimedState(REWARD_TRACK_TYPE_TAMRIEL_TOMES, trackIndex, tierIndex, component, index)
+    self.hasAccessToComponent = HasAccessToRewardTrackComponent(REWARD_TRACK_TYPE_TAMRIEL_TOMES, trackIndex, component)
+
+    local _, currentTier, progressToNextTier = GetInfoForRewardTrack(REWARD_TRACK_TYPE_TAMRIEL_TOMES, trackIndex)
+    self.hasAccessToReward = currentTier >= tierIndex
 end
 
 
@@ -194,15 +205,68 @@ function ZO_TamrielTomeData:GetRewardTrackId()
 end
 
 function ZO_TamrielTomeData:GetCurrentTier()
-    return self.currentTier
+    local _, currentTier = GetInfoForRewardTrack(REWARD_TRACK_TYPE_TAMRIEL_TOMES, self.tamrielTomeIndex)
+    return currentTier
+end
+
+function ZO_TamrielTomeData:GetNextTier()
+    local currentTier = self:GetCurrentTier()
+    local nextTier = currentTier + 1
+    if nextTier <= self:GetNumTotalTiers() then
+        return nextTier
+    end
+    return 0
+end
+
+function ZO_TamrielTomeData:GetNumBaseTiers()
+    return GetNumBaseTiersForRewardTrack(self.rewardTrackId)
+end
+
+function ZO_TamrielTomeData:GetNumBonusTiers()
+    return GetNumBonusTiersForRewardTrack(self.rewardTrackId)
+end
+
+function ZO_TamrielTomeData:GetNumTotalTiers()
+    return GetTotalNumTiersForRewardTrack(self.rewardTrackId)
+end
+
+function ZO_TamrielTomeData:GetCostToProgressToTier(tier)
+    local currentTier = self:GetCurrentTier()
+    if tier <= currentTier then
+        -- The requested tier has already been unlocked.
+        return 0
+    end
+
+    if tier > self:GetNumTotalTiers() then
+        -- The requested tier does not exist.
+        return 0
+    end
+
+    -- Calculate the cost to progress to the next tier.
+    local progressToNextTier = self:GetProgressToNextTier()
+    local totalCostToProgress = -progressToNextTier
+
+    -- Add the cost to progress to any subsequent tier(s) between the next tier and the requested tier.
+    local maxTier = zo_max(currentTier, tier - 1)
+    for nextTier = currentTier, maxTier do
+        totalCostToProgress = totalCostToProgress + GetCostToProgressToNextTier(self.rewardTrackId, nextTier)
+    end
+
+    return totalCostToProgress
+end
+
+function ZO_TamrielTomeData:GetCostToProgressToNextTier()
+    return self:GetCostToProgressToTier(self.rewardTrackId, self:GetCurrentTier() + 1)
 end
 
 function ZO_TamrielTomeData:GetProgressToNextTier()
-    return self.progressToNextTier
+    local _, _, progressToNextTier = GetInfoForRewardTrack(REWARD_TRACK_TYPE_TAMRIEL_TOMES, self.tamrielTomeIndex)
+    return progressToNextTier
 end
 
 function ZO_TamrielTomeData:GetEndTime()
-    return self.endTime
+    local _, _, _, endTime = GetInfoForRewardTrack(REWARD_TRACK_TYPE_TAMRIEL_TOMES, self.tamrielTomeIndex)
+    return endTime
 end
 
 function ZO_TamrielTomeData:GetDisplayFlags()
@@ -249,6 +313,10 @@ function ZO_TamrielTomeData:GetFeaturedRewardInfo(rewardIndex)
     return GetTamrielTomeFeaturedRewardInfo(self.tamrielTomeId, rewardIndex)
 end
 
+function ZO_TamrielTomeData:HasAccessToComponent(component)
+    return HasAccessToRewardTrackComponent(REWARD_TRACK_TYPE_TAMRIEL_TOMES, self.tamrielTomeIndex, component)
+end
+
 function ZO_TamrielTomeData:Update()
-    self.rewardTrackId, self.currentTier, self.progressToNextTier, self.endTime = GetInfoForRewardTrack(REWARD_TRACK_TYPE_TAMRIEL_TOMES, self.tamrielTomeIndex)
+    self.rewardTrackId = GetInfoForRewardTrack(REWARD_TRACK_TYPE_TAMRIEL_TOMES, self.tamrielTomeIndex)
 end

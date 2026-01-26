@@ -102,7 +102,13 @@ function ZO_TamrielTomeCurrencyRedemptionDialog_Keyboard_OnInitialized(control)
                     control = control:GetNamedChild("Confirm"),
                     text = SI_MARKET_CONFIRM_PURCHASE_KEYBIND_TEXT,
                     callback = function(dialog)
-                         -- TODO Tamriel Tomes: Redeem cache
+                        local quantity = tonumber(dialog.data.quantity)
+                        if quantity and quantity > 0 then
+                            local maxQuantity = GetPlayerStoredCurrencyAmount(CURT_TOME_POINT_CACHES)
+                            if quantity <= maxQuantity then
+                                TryRedeemCachesForTomePoints(quantity)
+                            end
+                        end
                     end,
                 },
 

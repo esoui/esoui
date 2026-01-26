@@ -10,14 +10,23 @@
             <OnMouseExit>
                 self.object:OnMouseExit()
             </OnMouseExit>
+            <OnMouseDown>
+                self.object:OnMouseDown(button)
+            </OnMouseDown>
             <OnMouseUp>
                 self.object:OnMouseUp(button, upInside)
             </OnMouseUp>
             <Controls>
-                <Texture name="$(parent)Locked" override="true">
-                    <Dimensions x="16" y="16"/>
-                </Texture>
-                <Label name="$(parent)Quantity" override="true" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED"/>
+                <Control name="$(parent)Reward" override="true">
+                    <Controls>
+                        <Label name="$(parent)Quantity" override="true" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icon" offsetX="3" offsetY="3"/>
+                        </Label>
+                        <Texture name="$(parent)Check" override="true">
+                            <Dimensions x="48" y="48"/>
+                        </Texture>
+                    </Controls>
+                </Control>
                 <Label name="$(parent)Cost" override="true" font="ZoFontWinH2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED"/>
             </Controls>
         </Control>

@@ -2083,7 +2083,7 @@ function ChampionPerks:UpdateDirectionalInput()
         self.gamepadCursor:UpdateDirectionalInput()
     elseif self:IsViewingRing() then
         -- pick a constellation
-        self:UpdateGamepadSelectedConstellation()
+        self:UpdateRingDirectionalInput()
     end
 end
 

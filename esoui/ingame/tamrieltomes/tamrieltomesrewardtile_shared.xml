@@ -18,16 +18,25 @@
                     <Dimensions x="128" y="158"/>
                     <TextureCoords left="0" right="1" top="0" bottom="0.61718"/>
                 </Texture>
-                <Texture name="$(parent)Icon" level="5">
-                    <Anchor point="CENTER" relativePoint="TOP" offsetY="64"/>
-                    <Dimensions x="64" y="64"/>
-                </Texture>
-                <Texture name="$(parent)Locked" textureFile="EsoUI/Art/TamrielTomes/tome_slot_lock.dds" hidden="true" level="6">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Icon" offsetX="4" offsetY="4"/>
-                </Texture>
-                <Label name="$(parent)Quantity" horizontalAlignment="RIGHT" verticalAlignment="BOTTOM">
-                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icon"/>
-                </Label>
+                <Control name="$(parent)Reward">
+                    <Anchor point="TOPLEFT" relativePoint="TOP" offsetX="-48" offsetY="16"/>
+                    <Anchor point="BOTTOMRIGHT" relativePoint="TOP" offsetX="48" offsetY="112"/>
+                    <Controls>
+                        <Texture name="$(parent)Icon" level="5">
+                            <Anchor point="CENTER"/>
+                            <Dimensions x="64" y="64"/>
+                        </Texture>
+                        <Label name="$(parent)Quantity" horizontalAlignment="RIGHT" verticalAlignment="BOTTOM" level="6">
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icon"/>
+                        </Label>
+                        <Texture name="$(parent)Locked" textureFile="EsoUI/Art/TamrielTomes/tome_slot_lock.dds" hidden="true" level="7">
+                            <Anchor point="TOPLEFT"/>
+                        </Texture>
+                        <Texture name="$(parent)Check" textureFile="EsoUI/Art/Miscellaneous/check_icon_64.dds" hidden="true" level="8">
+                            <Anchor point="CENTER"/>
+                        </Texture>
+                    </Controls>
+                </Control>
                 <Texture name="$(parent)CostBackground" textureFile="EsoUI/Art/TamrielTomes/tome_slot_currency_bg.dds" level="2">
                     <TextureCoords left="0" right="1" top="0" bottom="0.640625"/>
                     <Dimensions x="128" y="40"/>

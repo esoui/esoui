@@ -48,6 +48,7 @@ function ZO_TamrielTomesPurchaseScreen_Shared:InitializeControls()
     self.row1ButtonContainer = self.buttonContainer:GetNamedChild("Row1")
     self.premiumButton = self.row1ButtonContainer:GetNamedChild("PremiumButton")
     self.premiumPlusButton = self.row1ButtonContainer:GetNamedChild("PremiumPlusButton")
+    self.premiumPlusDescription = self.row1ButtonContainer:GetNamedChild("PremiumPlusDescription")
     self.row2ButtonContainer = self.buttonContainer:GetNamedChild("Row2")
     self.tokenButton = self.row2ButtonContainer:GetNamedChild("TokenButton")
 end
@@ -102,12 +103,18 @@ function ZO_TamrielTomesPurchaseScreen_Shared:UpdateGridList()
         self.gridList:AddEntry(rewardEntry, rewardEntryTemplate)
     end
 
-    if #rewards > 0 then
-        local verticalDividerEntryTemplate = self:GetVerticalDividerEntryTemplate()
-        self.gridList:AddEntry({}, verticalDividerEntryTemplate)
-    end
+    local bonusRewardId, bonusRewardQuantity = TAMRIEL_TOMES_MANAGER:GetTomePremiumPlusBonusRewardInfo(selectedTomeId)
+    local bonusRewardData = REWARDS_MANAGER:GetInfoForReward(bonusRewardId, bonusRewardQuantity)
 
-    -- TODO Tamriel Tomes bonus products
+    if bonusRewardData then
+        if #rewards > 0 then
+            local verticalDividerEntryTemplate = self:GetVerticalDividerEntryTemplate()
+            self.gridList:AddEntry({}, verticalDividerEntryTemplate)
+        end
+
+        local rewardEntry = ZO_GridSquareEntryData_Shared:New(bonusRewardData)
+        self.gridList:AddEntry(rewardEntry, rewardEntryTemplate)
+    end
 
     self.gridList:CommitGridList()
 end
@@ -152,6 +159,10 @@ function ZO_TamrielTomesPurchaseScreen_Shared:UpdateButtons()
 
     self.premiumPlusButton:SetEnabled(hasPremiumPlusProductData)
     self.tokenButton:SetEnabled(hasPremiumPlusProductData)
+
+    local selectedTomeId = TAMRIEL_TOMES_MANAGER:GetSelectedTomeId()
+    local premiumPlusDescription = hasPremiumPlusProductData and TAMRIEL_TOMES_MANAGER:GetTomePremiumPlusRewardDescription(selectedTomeId) or ""
+    self.premiumPlusDescription:SetText(premiumPlusDescription)
 
     local currencyCost = GetCurrencyCostToUpgradeTamrielTome()
     local IS_UPPER = false

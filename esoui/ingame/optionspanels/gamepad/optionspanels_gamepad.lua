@@ -1060,6 +1060,23 @@ GAMEPAD_SETTINGS_DATA =
             system = SETTING_TYPE_CUSTOM,
             settingId = OPTIONS_CUSTOM_SETTING_CHAT_BUBBLE_EMOTE_ENABLED,
         },
+        -- performance
+        {
+            panel = SETTING_PANEL_INTERFACE,
+            system = SETTING_TYPE_UI,
+            settingId = UI_SETTING_SHOW_FRAMERATE,
+            header = SI_INTERFACE_OPTIONS_PERFORMANCE,
+        },
+        {
+            panel = SETTING_PANEL_INTERFACE,
+            system = SETTING_TYPE_UI,
+            settingId = UI_SETTING_SHOW_LATENCY,
+        },
+        {
+            panel = SETTING_PANEL_INTERFACE,
+            system = SETTING_TYPE_UI,
+            settingId = UI_SETTING_FRAMERATE_LATENCY_LOCK,
+        },
     },
     [SETTING_PANEL_NAMEPLATES] =
     {

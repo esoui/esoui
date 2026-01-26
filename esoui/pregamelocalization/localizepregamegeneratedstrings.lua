@@ -3610,15 +3610,15 @@ EsoStrings =
     "Cannot claim the reward because you would exceed the currency's cap.", -- SI_CLAIMREWARDRESULT15
     "Cannot claim rewards in this campaign.", -- SI_CLAIMREWARDRESULT16
     "Cannot claim rewards in this campaign.", -- SI_CLAIMREWARDRESULT17
-    "[DEBUG] Error.", -- SI_CLAIMREWARDRESULT18
-    "[DEBUG] Error.", -- SI_CLAIMREWARDRESULT19
-    "[DEBUG] Error.", -- SI_CLAIMREWARDRESULT20
-    "[DEBUG] Error.", -- SI_CLAIMREWARDRESULT21
-    "[DEBUG] Error.", -- SI_CLAIMREWARDRESULT22
+    "This reward has already been claimed.", -- SI_CLAIMREWARDRESULT18
+    "You do not have access to this reward.", -- SI_CLAIMREWARDRESULT19
+    "You need more progress to unlock this reward.", -- SI_CLAIMREWARDRESULT20
+    "This track is not currently active.", -- SI_CLAIMREWARDRESULT21
+    "Insufficient currency to purchase reward.", -- SI_CLAIMREWARDRESULT22
     "You are not in the correct campaign to claim this reward.", -- SI_CLAIMREWARDRESULT23
-    "[DEBUG] Error.", -- SI_CLAIMREWARDRESULT24
-    "[DEBUG] Error.", -- SI_CLAIMREWARDRESULT25
-    "[DEBUG] Error.", -- SI_CLAIMREWARDRESULT26
+    "All rewards already claimed.", -- SI_CLAIMREWARDRESULT24
+    "Challenge not yet complete.", -- SI_CLAIMREWARDRESULT25
+    "You do not have that many caches to redeem.", -- SI_CLAIMREWARDRESULT26
     "Upgrade", -- SI_INSTANTUNLOCKREWARDCATEGORY0
     "Upgrade", -- SI_INSTANTUNLOCKREWARDCATEGORY1
     "Service", -- SI_INSTANTUNLOCKREWARDCATEGORY2
@@ -13103,6 +13103,14 @@ SAV(SI_OUTFITSLOT27, 1)
 SAV(SI_OUTFITSLOT28, 1)
 SAV(SI_OUTFITSLOT29, 1)
 SAV(SI_APPLYOUTFITCHANGESRESULT3, 2)
+SAV(SI_CLAIMREWARDRESULT18, 1)
+SAV(SI_CLAIMREWARDRESULT19, 1)
+SAV(SI_CLAIMREWARDRESULT20, 1)
+SAV(SI_CLAIMREWARDRESULT21, 1)
+SAV(SI_CLAIMREWARDRESULT22, 1)
+SAV(SI_CLAIMREWARDRESULT24, 1)
+SAV(SI_CLAIMREWARDRESULT25, 1)
+SAV(SI_CLAIMREWARDRESULT26, 1)
 SAV(SI_SKILLTYPE4, 1)
 SAV(SI_SKILLTYPE6, 1)
 SAV(SI_RESPECTYPE0, 1)

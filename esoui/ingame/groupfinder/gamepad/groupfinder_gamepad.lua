@@ -395,7 +395,7 @@ function ZO_GroupFinder_Gamepad:RefreshSubcategoryList(resetToTop)
         local selectedCategory = GetGroupFinderFilterCategory()
         --Build the list using the subcategory data for the current mode
         for i, subcategoryData in ipairs(self.subcategoryData[self.mode]) do
-            if ZO_Eval(subcategoryData.visible) then
+            if subcategoryData.visible == nil or ZO_Eval(subcategoryData.visible) then
                 entryIndex = entryIndex + 1
                 local entryData = ZO_GamepadEntryData:New(subcategoryData.name, subcategoryData.menuIcon)
                 entryData.selectCallback = subcategoryData.selectCallback

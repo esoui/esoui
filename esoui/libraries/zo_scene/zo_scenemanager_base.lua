@@ -149,6 +149,12 @@ function ZO_SceneManager_Base:RemoveFragmentGroup(fragmentGroup)
     end
 end
 
+function ZO_SceneManager_Base:RemoveFragmentGroupImmediately(fragmentGroup)
+    for _, fragment in pairs(fragmentGroup) do
+        self:RemoveFragmentImmediately(fragment)
+    end
+end
+
 -- base scene, next scene, and current scene
 
 function ZO_SceneManager_Base:SetBaseScene(sceneName)

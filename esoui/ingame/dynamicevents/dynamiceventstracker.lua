@@ -72,7 +72,7 @@ function ZO_DynamicEventsTracker:RegisterEvents()
     self.control:RegisterForEvent(EVENT_WORLD_EVENT_PARTICIPATION_BEGIN, OnUpdate)
     self.control:RegisterForEvent(EVENT_WORLD_EVENT_PARTICIPATION_END, OnUpdate)
 
-    local function OnStepChanged(worldEventInstanceId, stepIndex)
+    local function OnStepChanged(_, worldEventInstanceId, stepIndex)
         if worldEventInstanceId == self.worldEventInstanceId then
             self:Update()
         end

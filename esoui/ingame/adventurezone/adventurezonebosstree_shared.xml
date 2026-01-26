@@ -1,4 +1,12 @@
 <GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_AdvZone_HighlightFadeAnimation" playbackType="LOOP" loopCount="LOOP_INDEFINITELY">
+            <Animations>
+                <AlphaAnimation duration="1000" startAlpha="1" endAlpha="0.33"/>
+                <AlphaAnimation delay="1000" duration="1000" startAlpha="0.33" endAlpha="1"/>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
     <Controls>
         <Control name="ZO_AdvZoneBossControl_Shared" virtual="true">
             <Dimensions x="128" y="200"/>
@@ -7,9 +15,9 @@
                     <AnchorFill/>
                     <TextureCoords left="0" right="1" top="0" bottom="0.78125"/>
                 </Texture>
-                <Texture name="$(parent)Highlight" textureFile="EsoUI/Art/AdventureZone/bossTreeHighlight.dds" level="2" hidden="true">
-                    <Dimensions x="64" y="64"/>
-                    <Anchor point="TOP" offsetY="86"/>
+                <Texture name="$(parent)Highlight" color="D98C0C" textureFile="EsoUI/Art/AdventureZone/bossTreeHighlight.dds" level="2" hidden="true">
+                    <Dimensions x="96" y="96"/>
+                    <Anchor point="TOP" offsetY="70"/>
                 </Texture>
                 <Texture name="$(parent)Icon" level="1">
                     <Dimensions x="64" y="64"/>

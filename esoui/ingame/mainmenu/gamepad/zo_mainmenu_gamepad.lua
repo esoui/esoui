@@ -232,7 +232,7 @@ local MENU_ENTRY_DATA =
             end
         end,
         shouldDisableFunction = function()
-            return TAMRIEL_TOMES_MANAGER and TAMRIEL_TOMES_MANAGER:GetNumActiveTomes() <= 0
+            return TAMRIEL_TOMES_MANAGER and not TAMRIEL_TOMES_MANAGER:AreTomesAvailable()
         end,
     },
     [MENU_MAIN_ENTRIES.ANNOUNCEMENTS] =

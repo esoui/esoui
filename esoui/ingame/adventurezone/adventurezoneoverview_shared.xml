@@ -31,7 +31,7 @@
                 <Label name="$(parent)Title" override="true">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Location" relativePoint="BOTTOMLEFT" offsetY="5"/>
                 </Label>
-                <Label name="$(parent)Status">
+                <Label name="$(parent)Status" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
                     <Anchor point="BOTTOMLEFT" offsetX="16" offsetY="-12"/>
                 </Label>
             </Controls>

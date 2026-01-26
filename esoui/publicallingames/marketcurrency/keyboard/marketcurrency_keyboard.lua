@@ -34,7 +34,13 @@ end
 
 function ZO_MarketCurrency_Keyboard:ShowMarketCurrencyButtonType(buttonType)
     self.buyCrownsButton:SetHidden(buttonType ~= ZO_MARKET_CURRENCY_BUTTON_TYPE_BUY_CROWNS)
-    self.openTamrielTomesButton:SetHidden(buttonType ~= ZO_MARKET_CURRENCY_BUTTON_TYPE_OPEN_TAMRIEL_TOMES)
+
+    if buttonType == ZO_MARKET_CURRENCY_BUTTON_TYPE_OPEN_TAMRIEL_TOMES then
+        local activeTomeIds = { GetActiveReferenceTrackIdsForRewardTrackType(REWARD_TRACK_TYPE_TAMRIEL_TOMES) }
+        self.openTamrielTomesButton:SetHidden(#activeTomeIds <= 0)
+    else
+        self.openTamrielTomesButton:SetHidden(true)
+    end
 end
 
 function ZO_MarketCurrency_Keyboard:OnMarketCurrencyTypeVisibilityUpdated()

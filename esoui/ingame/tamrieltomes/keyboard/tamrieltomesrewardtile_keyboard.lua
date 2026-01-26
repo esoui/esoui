@@ -29,28 +29,16 @@ function ZO_TamrielTomesReward_Keyboard:Initialize(control)
     control.icon = self.iconTexture
 end
 
-function ZO_TamrielTomesReward_Keyboard:ClaimReward()
-    local tamrielTomesRewardData = self:GetTamrielTomesRewardData()
-    if tamrielTomesRewardData:CanClaimReward() then
-        local rewardId = self:GetRewardData():GetRewardId()
-        if GetRewardType(rewardId) == REWARD_ENTRY_TYPE_CHOICE then
-            local CLAIM_ONE = false
-            TAMRIEL_TOMES_SCREEN_KEYBOARD:ShowClaimChoiceDialog(tamrielTomesRewardData, CLAIM_ONE)
-        else
-            tamrielTomesRewardData:TryClaimReward()
-        end
-    end
-end
-
 function ZO_TamrielTomesReward_Keyboard:OnMouseEnter()
-    ZO_Rewards_Shared_OnMouseEnter(self.control, RIGHT, LEFT, -5)
     ZO_GridEntry_SetIconScaledUp(self.control, true)
     local rewardData = self:GetTamrielTomesRewardData()
     TAMRIEL_TOMES_SCREEN_KEYBOARD:SetSelectedTamrielTomesRewardData(rewardData)
 
-    if rewardData and rewardData:CanPreviewReward() then
-        WINDOW_MANAGER:SetMouseCursor(MOUSE_CURSOR_PREVIEW)
+    if rewardData and rewardData:CanAffordReward() and rewardData:CanClaimReward() then
+        WINDOW_MANAGER:SetMouseCursor(MOUSE_CURSOR_UI_HAND)
     end
+
+    ZO_Rewards_Shared_OnMouseEnter(self.control, RIGHT, LEFT, -5)
 end
 
 function ZO_TamrielTomesReward_Keyboard:OnMouseExit()
@@ -60,16 +48,27 @@ function ZO_TamrielTomesReward_Keyboard:OnMouseExit()
     WINDOW_MANAGER:SetMouseCursor(MOUSE_CURSOR_DO_NOT_CARE)
 end
 
-function ZO_TamrielTomesReward_Keyboard:OnMouseUp(button, upInside)
-    if not (upInside and button == MOUSE_BUTTON_INDEX_LEFT and self:HasRewardData()) then
-        return
+function ZO_TamrielTomesReward_Keyboard:OnMouseDown(button)
+    if button == MOUSE_BUTTON_INDEX_LEFT and self:HasRewardData() then
+        local rewardData = self:GetTamrielTomesRewardData()
+        if rewardData:CanAffordReward() and rewardData:CanClaimReward() then
+            TAMRIEL_TOMES_SCREEN_KEYBOARD:SetSelectedTamrielTomesRewardData(rewardData)
+            TAMRIEL_TOMES_SCREEN_KEYBOARD:BeginClaimReward(rewardData)
+        end
     end
+end
 
-    local rewardId = self:GetRewardData():GetRewardId()
-    if CanPreviewReward(rewardId) or GetRewardType(rewardId) == REWARD_ENTRY_TYPE_REWARD_LIST then
-        local tamrielTomesRewardData = self:GetTamrielTomesRewardData()
-        TAMRIEL_TOMES_SCREEN_KEYBOARD:BeginPreview(ZO_TAMRIEL_TOMES_REWARD_DATA_PREVIEW_TYPES.ACTIVE_PREVIEW, tamrielTomesRewardData)
+function ZO_TamrielTomesReward_Keyboard:OnMouseUp(button, upInside)
+    if button == MOUSE_BUTTON_INDEX_LEFT and self:HasRewardData() then
+        local rewardData = self:GetTamrielTomesRewardData()
+        TAMRIEL_TOMES_SCREEN_KEYBOARD:EndClaimReward(rewardData)
     end
+end
+
+function ZO_TamrielTomesReward_Keyboard:UpdateClaimRewardProgressInternal()
+    ZO_TamrielTomesReward_Shared.UpdateClaimRewardProgressInternal(self)
+
+    TAMRIEL_TOMES_SCREEN_KEYBOARD:UpdateKeybinds()
 end
 
 function ZO_TamrielTomesReward_Keyboard.OnControlInitialized(control)

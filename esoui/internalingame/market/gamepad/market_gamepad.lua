@@ -153,7 +153,15 @@ local MARKET_TERTIARY_BUTTON_DESCRIPTOR =
     alignment = KEYBIND_STRIP_ALIGN_RIGHT,
     gamepadOrder = 1,
     visible = function()
-        return ZO_GAMEPAD_MARKET:GetTertiaryOption() ~= TERTIARY_OPTION_NONE
+        local option = ZO_GAMEPAD_MARKET:GetTertiaryOption()
+        if option == TERTIARY_OPTION_BUY_CROWNS then
+            return true
+        end
+        if option == TERTIARY_OPTION_OPEN_TAMRIEL_TOMES then
+            local activeTomeIds = { GetActiveReferenceTrackIdsForRewardTrackType(REWARD_TRACK_TYPE_TAMRIEL_TOMES) }
+            return #activeTomeIds > 0
+        end
+        return false
     end,
     name = function()
         local tertiaryOption = ZO_GAMEPAD_MARKET:GetTertiaryOption()
@@ -417,6 +425,26 @@ function GamepadMarket:RefreshMarketCurrencyTypeBalances()
     MARKET_CURRENCY_GAMEPAD:SetVisibleMarketCurrencyTypes(activeCurrencyTypes)
 end
 
+function GamepadMarket:RegisterForTamrielTomesEvents()
+    local function RefreshKeybinds()
+        if self:IsShowing() then
+            self:RefreshKeybinds()
+        end
+    end
+
+    EVENT_MANAGER:RegisterForEvent("GamepadMarket", EVENT_HOLIDAYS_CHANGED, RefreshKeybinds)
+    EVENT_MANAGER:RegisterForEvent("GamepadMarket", EVENT_REWARD_TRACK_UPDATE_RECEIVED, RefreshKeybinds)
+    EVENT_MANAGER:RegisterForEvent("GamepadMarket", EVENT_REWARD_TRACK_SETTINGS_UPDATE_RECEIVED, RefreshKeybinds)
+    EVENT_MANAGER:RegisterForEvent("GamepadMarket", EVENT_REWARD_TRACK_STARTED, RefreshKeybinds)
+end
+
+function GamepadMarket:UnregisterForTamrielTomesEvents()
+    EVENT_MANAGER:UnregisterForEvent("GamepadMarket", EVENT_HOLIDAYS_CHANGED)
+    EVENT_MANAGER:UnregisterForEvent("GamepadMarket", EVENT_REWARD_TRACK_UPDATE_RECEIVED)
+    EVENT_MANAGER:UnregisterForEvent("GamepadMarket", EVENT_REWARD_TRACK_SETTINGS_UPDATE_RECEIVED)
+    EVENT_MANAGER:UnregisterForEvent("GamepadMarket", EVENT_REWARD_TRACK_STARTED)
+end
+
 function GamepadMarket:OnShown()
     if self.marketState == MARKET_STATE_OPEN then
         self:OnMarketOpen()
@@ -430,6 +458,7 @@ function GamepadMarket:OnShown()
         ZO_GamepadMarket_GridScreen.OnShown(self)
         self:RefreshKeybinds()
         CALLBACK_MANAGER:RegisterCallback("OnGamepadDialogHidden", self.OnGamepadDialogHidden)
+        self:RegisterForTamrielTomesEvents()
 
         self:ProcessQueuedNavigation()
     else
@@ -454,6 +483,7 @@ function GamepadMarket:OnHiding()
     self:RemoveKeybinds()
     self:ClearLastPreviewedMarketProductId()
     CALLBACK_MANAGER:UnregisterCallback("OnGamepadDialogHidden", self.OnGamepadDialogHidden)
+    self:UnregisterForTamrielTomesEvents()
     EVENT_MANAGER:UnregisterForUpdate("GamepadMarket_Tooltip")
 end
 

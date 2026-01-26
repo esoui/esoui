@@ -19,34 +19,26 @@
             </Controls>
         </Button>
         <TopLevelControl name="ZO_TamrielTomes_GamepadTL" inherits="ZO_TamrielTomes_SharedTL">
-            <Anchor point="TOPLEFT" offsetY="25"/>
+            <Anchor point="LEFT" offsetX="13" offsetY="24"/>
+            <Dimensions x="850"/>
             <OnInitialized>
                 ZO_TamrielTomesScreen_Gamepad.OnControlInitialized(self)
             </OnInitialized>
             <Controls>
                 <Texture name="$(parent)PageBackground" override="true">
-                    <Anchor point="TOPLEFT" relativeTo="GuiRoot" offsetX="-150"/>
-                    <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot" offsetX="-150"/>
-                    <TextureCoords left="0" right="0.959" top="0.035"/>
-                </Texture>
-                <Texture name="$(parent)BookEdge" override="true">
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)PageBackground" offsetX="12"/>
-                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)PageBackground" offsetX="12"/>
-                    <TextureCoords left="0" right="0.59375"/>
-                </Texture>
-                <Texture name="$(parent)BookEdgeDamage" override="true">
-                    <TextureCoords left="0" right="0.59375"/>
+                    <Anchor point="TOPLEFT" relativeTo="GuiRoot" offsetY="-40"/>
+                    <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot"/>
+                    <TextureCoords left="0.959" right="0"/>
                 </Texture>
                 <Control name="$(parent)Header" override="true">
-                    <Anchor point="TOP" offsetY="10"/>
+                    <Anchor point="TOP"/>
+                    <Dimensions x="850" y="150"/>
                     <Controls>
-                        <Label name="$(parent)Title" override="true" font="ZoFontGamepad34"/>
+                        <Label name="$(parent)Title" override="true" font="ZoFontGamepadBold48"/>
                         <Label name="$(parent)Subtitle" override="true" font="ZoFontGamepad27"/>
-                        <Control name="$(parent)Divider" override="true" inherits="ZO_PlatformStyleDynamicHorizontalDivider_Gamepad_Template">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)Subtitle" relativePoint="BOTTOMLEFT" offsetX="4" offsetY="4"/>
-                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Subtitle" relativePoint="BOTTOMRIGHT" offsetX="-95" offsetY="4"/>
-                        </Control>
                         <Control name="$(parent)Buttons" override="true">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Subtitle" relativePoint="BOTTOMLEFT" offsetY="8"/>
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Subtitle" relativePoint="BOTTOMRIGHT" offsetY="8"/>
                             <Controls>
                                 <Button name="$(parent)ChallengesButton" override="true" inherits="ZO_TamrielTomes_GamepadButtonTemplate"/>
                                 <Button name="$(parent)UpgradeButton" override="true" inherits="ZO_TamrielTomes_GamepadButtonTemplate"/>
@@ -55,16 +47,16 @@
                     </Controls>
                 </Control>
                 <Control name="$(parent)Book" override="true">
-                    <Dimensions x="860" y="835"/>
+                    <Dimensions x="850" y="835"/>
                     <Anchor point="TOP" relativeTo="$(parent)Header" relativePoint="BOTTOM"/>
                     <Controls>
                         <Control name="$(parent)Currency" override="true">
-                            <Anchor point="LEFT" relativePoint="TOPLEFT" offsetY="40"/>
+                            <Anchor point="TOPLEFT" offsetY="10"/>
                             <Controls>
                                 <Control name="$(parent)Balance" override="true">
                                     <Anchor point="TOPLEFT" offsetX="15"/>
                                     <Controls>
-                                        <Label name="$(parent)Name" override="true" font="ZoFontGamepad27" modifyTextType="UPPERCASE">
+                                        <Label name="$(parent)Name" override="true" font="ZoFontGamepad25" modifyTextType="UPPERCASE">
                                             <Anchor point="LEFT"/>
                                         </Label>
                                         <Control name="$(parent)Amount" override="true" inherits="ZO_RollingMeterLabel">
@@ -76,10 +68,10 @@
                                     </Controls>
                                 </Control>
                                 <Control name="$(parent)Bonus" override="true">
-                                    <Anchor point="TOPLEFT" offsetX="15" offsetY="32"/>
+                                    <Anchor point="TOPLEFT" offsetX="15" offsetY="22"/>
                                     <Controls>
-                                        <Label name="$(parent)Percent" override="true" font="ZoFontGamepad27" modifyTextType="UPPERCASE">
-                                            <Anchor point="LEFT" relativePoint="TOPLEFT" offsetY="24"/>
+                                        <Label name="$(parent)Percent" override="true" font="ZoFontGamepad25" modifyTextType="UPPERCASE">
+                                            <Anchor point="LEFT" relativePoint="TOPLEFT" offsetY="21"/>
                                         </Label>
                                         <Texture name="$(parent)Icon" override="true" textureFile="EsoUI/Art/TamrielTomes/currencyBonusArrow.dds">
                                             <Anchor point="LEFT" relativeTo="$(parent)Percent" relativePoint="RIGHT" offsetX="4"/>
@@ -88,33 +80,43 @@
                                 </Control>
                                 <Texture name="$(parent)BalanceBackdrop" override="true">
                                     <Anchor point="LEFT" relativeTo="GuiRoot" constrains="X"/>
-                                    <Anchor point="CENTER" relativeTo="$(parent)Balance" constrains="Y"/>
+                                    <Anchor point="CENTER" relativeTo="$(parent)Balance" constrains="Y" offsetY="-7"/>
                                     <TextureCoords left="1" top="0" right="0.1445" bottom="0.6953"/>
                                 </Texture>
                                 <Texture name="$(parent)FullBackdrop" override="true">
                                     <Anchor point="LEFT" relativeTo="GuiRoot" constrains="X"/>
-                                    <Anchor point="CENTER" constrains="Y"/>
+                                    <Anchor point="CENTER" constrains="Y" offsetY="-7"/>
                                     <TextureCoords left="1" top="0" right="0.1445" bottom="0.6953"/>
                                 </Texture>
                             </Controls>
                         </Control>
                         <Control name="$(parent)GridList" override="true" inherits="ZO_GridScrollList_NotAnchored_Gamepad">
-                            <Anchor point="TOP" offsetX="-35" offsetY="120"/>
+                            <Anchor point="TOP" offsetY="80" offsetX="6"/>
                             <Dimensions x="ZO_TAMRIEL_TOMES_GRID_LIST_WIDTH" y="ZO_TAMRIEL_TOMES_GRID_LIST_HEIGHT"/>
                             <Controls>
                                 <Control name="$(parent)Container" override="true">
-                                    <Anchor point="TOPLEFT" offsetY="-21"/>
+                                    <Anchor point="TOPLEFT" offsetY="-15"/>
                                     <Anchor point="BOTTOMRIGHT"/>
                                 </Control>
                             </Controls>
                         </Control>
                         <Texture name="$(parent)PremiumGroupBorder" override="true">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)GridList" offsetX="-22" offsetY="-8"/>
                             <Controls>
                                 <Label name="$(parent)Label" override="true" font="ZoFontGamepad27"/>
                             </Controls>
                         </Texture>
-                        <Label name="$(parent)UnlockPointsRequired" override="true" font="ZoFontGamepadCondensed34"/>
-                        <Control name="$(parent)PageNavigation" override="true" inherits="ZO_PageNavigation_Gamepad"/>
+                        <Control name="$(parent)PageNavigation" override="true" inherits="ZO_PageNavigation_Gamepad">
+                            <Anchor point="TOP" relativeTo="$(parent)GridList" relativePoint="BOTTOM" offsetX="-10" offsetY="30"/>
+                        </Control>
+                        <Label name="$(parent)UnlockPointsRequired" override="true" font="ZoFontGamepadCondensed36">
+                            <Anchor point="TOP" relativeTo="$(parent)GridList" relativePoint="BOTTOM" offsetX="-10" offsetY="-28"/>
+                            <Controls>
+                                <Texture name="$(parent)Background" override="true">
+                                    <Dimensions x="660" y="45"/>
+                                </Texture>
+                            </Controls>
+                        </Label>
                     </Controls>
                 </Control>
             </Controls>

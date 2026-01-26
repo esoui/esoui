@@ -50,6 +50,12 @@ end
 
 function ZO_AdventureZoneBossTree_Shared:OnDeferredInitialize()
     self:InitializeKeybindStripDescriptor()
+
+    for boss, bossControl in pairs(self.bossControls) do
+        bossControl.highlightTexture = bossControl:GetNamedChild("Highlight")
+        bossControl.highlightAnimation = GetAnimationManager():CreateTimelineFromVirtual("ZO_AdvZone_HighlightFadeAnimation")
+        bossControl.highlightAnimation:ApplyAllAnimationsToControl(bossControl.highlightTexture)
+    end
 end
 
 function ZO_AdventureZoneBossTree_Shared:InitializeKeybindStripDescriptor()
@@ -113,7 +119,13 @@ function ZO_AdventureZoneBossTree_Shared:RefreshBosses()
         local bossIconControl = bossControl:GetNamedChild("Icon")
         bossIconControl:SetTexture(bossIcon)
         bossIconControl:SetDesaturation(desaturation)
-        bossControl:GetNamedChild("Highlight"):SetHidden(bossState ~= ADVENTURE_ZONE_BOSS_STATE_AVAILABLE)
+        local isBossAvailable = bossState == ADVENTURE_ZONE_BOSS_STATE_AVAILABLE
+        if isBossAvailable then
+            bossControl.highlightAnimation:PlayFromStart()
+        else
+            bossControl.highlightAnimation:PlayInstantlyToEnd()
+        end
+        bossControl.highlightTexture:SetHidden(not isBossAvailable)
 
         -- This should only matter for values greater than ADVENTURE_ZONE_BOSS_PARCH_WORLD_BOSS_2
         -- but base it on the presence of the control in case enums change their order for some reason.

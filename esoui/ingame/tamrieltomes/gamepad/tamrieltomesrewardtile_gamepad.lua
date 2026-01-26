@@ -39,3 +39,9 @@ end
 function ZO_TamrielTomesReward_Gamepad.OnControlInitialized(control)
     ZO_TamrielTomesReward_Gamepad:New(control)
 end
+
+function ZO_TamrielTomesReward_Gamepad:UpdateClaimRewardProgressInternal()
+    ZO_TamrielTomesReward_Shared.UpdateClaimRewardProgressInternal(self)
+
+    TAMRIEL_TOMES_SCREEN_GAMEPAD:UpdateKeybinds()
+end

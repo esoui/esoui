@@ -12,8 +12,8 @@ function ZO_TamrielTomesIntroScreen_Shared:Initialize(control, scene, highlightT
 end
 
 function ZO_TamrielTomesIntroScreen_Shared:OnDeferredInitialize()
-    local highlightsContainer = self.control:GetNamedChild("Highlights")
-    self.highlightsControlPool = ZO_ControlPool:New(self.highlightTemplate, highlightsContainer, "Entry")
+    self.highlightsContainer = self.control:GetNamedChild("HighlightsScrollChild")
+    self.highlightsControlPool = ZO_ControlPool:New(self.highlightTemplate, self.highlightsContainer, "Entry")
 
     self.titleLabel = self.control:GetNamedChild("Title")
     self.rewardImageControl = self.control:GetNamedChild("ImageBackground")
@@ -54,14 +54,13 @@ function ZO_TamrielTomesIntroScreen_Shared:ShowTomeInfo(tamrielTomeId)
     for highlightIndex = 1, numHighlights do
         local title, text = tomeData:GetHighlightInfo(highlightIndex)
         local highlightControl = self.highlightsControlPool:AcquireObject()
+        highlightControl:SetParent(self.highlightsContainer)
         highlightControl.titleLabel:SetText(title)
         highlightControl.bodyTextLabel:SetText(text)
         if previousControl then
             highlightControl:SetAnchor(TOPLEFT, previousControl, BOTTOMLEFT, 0, 15)
-            highlightControl:SetAnchor(TOPRIGHT, previousControl, BOTTOMRIGHT, 0, 15)
         else
             highlightControl:SetAnchor(TOPLEFT, nil, TOPLEFT, 0, 0)
-            highlightControl:SetAnchor(TOPRIGHT, nil, TOPRIGHT, 0, 0)
         end
 
         previousControl = highlightControl

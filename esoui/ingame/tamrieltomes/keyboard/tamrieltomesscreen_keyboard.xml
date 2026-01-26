@@ -1,36 +1,27 @@
 <GuiXml>
     <Controls>
         <TopLevelControl name="ZO_TamrielTomes_KeyboardTL" inherits="ZO_TamrielTomes_SharedTL">
-            <Anchor point="TOPRIGHT" offsetX="-53" offsetY="80"/>
+            <Anchor point="RIGHT" offsetX="-10" offsetY="35"/>
             <OnInitialized>
                 ZO_TamrielTomesScreen_Keyboard.OnControlInitialized(self)
             </OnInitialized>
             <Controls>
                 <Texture name="$(parent)PageBackground" override="true">
-                    <TextureCoords left="0.959" right="0"/>
-                    <Anchor point="TOPRIGHT" relativeTo="GuiRoot"/>
+                    <TextureCoords left="0" right="0.959"/>
+                    <Anchor point="TOPRIGHT" relativeTo="GuiRoot" offsetY="60"/>
                     <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot"/>
-                </Texture>
-                <Texture name="$(parent)BookEdge" override="true">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)PageBackground" offsetX="-12"/>
-                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)PageBackground" offsetX="-12"/>
-                    <TextureCoords left="0.59375" right="0"/>
-                </Texture>
-                <Texture name="$(parent)BookEdgeDamage" override="true">
-                    <TextureCoords left="0.59375" right="0"/>
                 </Texture>
                 <Control name="$(parent)Header" override="true">
                     <Controls>
-                        <Label name="$(parent)Title" override="true" font="ZoFontWinH1"/>
-                        <Label name="$(parent)Subtitle" override="true" font="ZoFontWinH3"/>
-                        <Control name="$(parent)Divider" override="true" inherits="ZO_PlatformStyleDynamicHorizontalDivider_Keyboard_Template"/>
+                        <Label name="$(parent)Title" override="true" font="ZoFontCallout"/>
+                        <Label name="$(parent)Subtitle" override="true" font="ZoFontHeader3"/>
                         <Control name="$(parent)Buttons" override="true">
                             <Controls>
-                                <Button name="$(parent)ChallengesButton" override="true" inherits="ZO_DefaultButton">
-                                    <Dimensions x="270"/>
+                                <Button name="$(parent)ChallengesButton" override="true" inherits="ZO_DefaultButton" font="ZoFontWinH2">
+                                    <Dimensions x="270" y="28"/>
                                 </Button>
-                                <Button name="$(parent)UpgradeButton" override="true" inherits="ZO_DefaultButton">
-                                    <Dimensions x="270"/>
+                                <Button name="$(parent)UpgradeButton" override="true" inherits="ZO_DefaultButton" font="ZoFontWinH2">
+                                    <Dimensions x="270" y="28"/>
                                 </Button>
                             </Controls>
                         </Control>
@@ -38,13 +29,13 @@
                 </Control>
                 <Control name="$(parent)Book" override="true">
                     <Dimensions x="860" y="900"/>
-                    <Anchor point="TOP" relativeTo="$(parent)Header" relativePoint="BOTTOM" offsetY="20"/>
+                    <Anchor point="TOP" relativeTo="$(parent)Header" relativePoint="BOTTOM" offsetY="18"/>
                     <Controls>
                         <Control name="$(parent)Currency" override="true">
-                            <Anchor point="RIGHT" relativePoint="TOPRIGHT" offsetY="35"/>
+                            <Anchor point="RIGHT" relativePoint="TOPRIGHT" offsetY="28"/>
                             <Controls>
                                 <Control name="$(parent)Balance" override="true">
-                                    <Anchor point="TOPRIGHT" offsetX="-15" offsetY="5"/>
+                                    <Anchor point="TOPRIGHT" offsetX="-15"/>
                                     <Controls>
                                         <Texture name="$(parent)Icon" override="true">
                                             <Anchor point="RIGHT"/>
@@ -52,15 +43,15 @@
                                         <Control name="$(parent)Amount" override="true" inherits="ZO_RollingMeterLabel">
                                             <Anchor point="RIGHT" relativeTo="$(parent)Icon" relativePoint="LEFT" offsetX="-8"/>
                                         </Control>
-                                        <Label name="$(parent)Name" override="true" font="ZoFontHeader2">
+                                        <Label name="$(parent)Name" override="true" font="ZoFontHeader">
                                             <Anchor point="RIGHT" relativeTo="$(parent)Amount" relativePoint="LEFT" offsetX="-8"/>
                                         </Label>
                                     </Controls>
                                 </Control>
                                 <Control name="$(parent)Bonus" override="true">
-                                    <Anchor point="TOPRIGHT" offsetX="-15" offsetY="35"/>
+                                    <Anchor point="TOPRIGHT" offsetX="-15" offsetY="16"/>
                                     <Controls>
-                                        <Label name="$(parent)Percent" override="true" font="ZoFontHeader2">
+                                        <Label name="$(parent)Percent" override="true" font="ZoFontHeader">
                                             <Anchor point="RIGHT" relativePoint="TOPRIGHT" offsetX="-48" offsetY="24"/>
                                         </Label>
                                         <Texture name="$(parent)Icon" override="true" textureFile="EsoUI/Art/TamrielTomes/currencyBonusArrow.dds">
@@ -70,18 +61,18 @@
                                 </Control>
                                 <Texture name="$(parent)BalanceBackdrop" override="true">
                                     <Anchor point="RIGHT" relativeTo="GuiRoot" constrains="X"/>
-                                    <Anchor point="CENTER" relativeTo="$(parent)Balance" constrains="Y"/>
+                                    <Anchor point="CENTER" relativeTo="$(parent)Balance" offsetY="-5" constrains="Y"/>
                                     <TextureCoords left="0.1445" top="0" right="1" bottom="0.6953"/>
                                 </Texture>
                                 <Texture name="$(parent)FullBackdrop" override="true">
                                     <Anchor point="RIGHT" relativeTo="GuiRoot" constrains="X"/>
-                                    <Anchor point="CENTER" constrains="Y"/>
+                                    <Anchor point="CENTER" constrains="Y" offsetY="-5"/>
                                     <TextureCoords left="0.1445" top="0" right="1" bottom="0.6953"/>
                                 </Texture>
                             </Controls>
                         </Control>
                         <Control name="$(parent)GridList" override="true" inherits="ZO_GridScrollList_Keyboard">
-                            <Anchor point="TOP" offsetY="120"/>
+                            <Anchor point="TOP" offsetX="10" offsetY="75"/>
                             <Dimensions x="ZO_TAMRIEL_TOMES_GRID_LIST_WIDTH" y="ZO_TAMRIEL_TOMES_GRID_LIST_HEIGHT"/>
                             <Controls>
                                 <Control name="$(parent)Container" override="true">
@@ -91,12 +82,15 @@
                             </Controls>
                         </Control>
                         <Texture name="$(parent)PremiumGroupBorder" override="true">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)GridList" offsetX="-22" offsetY="-18"/>
                             <Controls>
                                 <Label name="$(parent)Label" override="true" font="ZoFontHeader2"/>
                             </Controls>
                         </Texture>
-                        <Control name="$(parent)PageNavigation" override="true" inherits="ZO_PageNavigation_Keyboard"/>
-                        <Label name="$(parent)UnlockPointsRequired" override="true" font="ZoFontHeader2"/>
+                        <Control name="$(parent)PageNavigation" override="true" inherits="ZO_PageNavigation_Keyboard">
+                            <Anchor point="TOP" relativeTo="$(parent)GridList" relativePoint="BOTTOM" offsetX="-10" offsetY="4"/>
+                        </Control>
+                        <Label name="$(parent)UnlockPointsRequired" override="true" font="ZoFontHeader"/>
                     </Controls>
                 </Control>
             </Controls>

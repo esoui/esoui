@@ -71,6 +71,18 @@ function ZO_TamrielTomesScreen_Keyboard:Initialize(control)
     ZO_TamrielTomesScreen_Shared.Initialize(self, control, TAMRIEL_TOMES_SCENE_KEYBOARD, templateData)
 
     SYSTEMS:RegisterKeyboardRootScene("tamrielTomes", self.scene)
+
+    self.RewardListEntryMouseEnterHandler = function(control)
+        self:OnRewardListEntryMouseEnter(control)
+    end
+
+    self.RewardListEntryMouseExitHandler = function(control)
+        self:OnRewardListEntryMouseExit(control)
+    end
+
+    self.HideRewardListHandler = function()
+        self:EndPreviewRewardList()
+    end
 end
 
 function ZO_TamrielTomesScreen_Keyboard:InitializeControls()
@@ -90,7 +102,7 @@ end
 function ZO_TamrielTomesScreen_Keyboard:InitializeCurrencyRollingMeter()
     ZO_TamrielTomesScreen_Shared.InitializeCurrencyRollingMeter(self)
 
-    self.currencyAmountRollingMeter:SetFont("ZoFontHeader3")
+    self.currencyAmountRollingMeter:SetFont("ZoFontHeader")
 
     local currencyIcon = GetCurrencyKeyboardIcon(CURT_TOME_POINTS)
     self.currencyIconControl:SetTexture(currencyIcon)
@@ -104,7 +116,19 @@ function ZO_TamrielTomesScreen_Keyboard:InitializeKeybindStripDescriptor()
         {
             keybind = "UI_SHORTCUT_PRIMARY",
 
-            name = GetString(SI_TAMRIEL_TOMES_CLAIM_ACTION),
+            name = function()
+                local selectedData = self:GetSelectedTamrielTomesRewardData()
+                if selectedData then
+                    local rewardObject = self:GetTamrielTomesRewardObject(selectedData)
+                    if rewardObject then
+                        local timeRemainingSeconds = rewardObject:GetClaimRewardTimeRemainingSeconds()
+                        if timeRemainingSeconds then
+                            return zo_strformat(SI_TAMRIEL_TOMES_CLAIM_ACTION_HELD, ZO_FormatTimeAsDecimalWhenBelowThreshold(timeRemainingSeconds))
+                        end
+                    end
+                end
+                return GetString(SI_TAMRIEL_TOMES_CLAIM_ACTION_HOLD)
+            end,
 
             handlesKeyUp = true,
 
@@ -153,10 +177,12 @@ function ZO_TamrielTomesScreen_Keyboard:InitializeKeybindStripDescriptor()
 
             alignment = KEYBIND_STRIP_ALIGN_CENTER,
 
+            enabled = function()
+                return GetPlayerStoredCurrencyAmount(CURT_TOME_POINT_CACHES) > 0
+            end,
+
             name = function()
-                local IS_PLURAL = false
-                local currencyName = GetCurrencyName(CURT_TOME_POINTS, IS_PLURAL)
-                return zo_strformat(SI_TAMRIEL_TOMES_ADD_CURRENCY_ACTION, currencyName)
+                return zo_strformat(SI_TAMRIEL_TOMES_ADD_CURRENCY_ACTION, ZO_SELECTED_TEXT:Colorize(GetPlayerStoredCurrencyAmount(CURT_TOME_POINT_CACHES)))
             end,
 
             callback = function()
@@ -165,7 +191,7 @@ function ZO_TamrielTomesScreen_Keyboard:InitializeKeybindStripDescriptor()
             end,
 
             visible = function()
-                return GetPlayerStoredCurrencyAmount(CURT_TOME_POINT_CACHES) > 0
+                return self:GetCurrentPreviewType() ~= ZO_TAMRIEL_TOMES_REWARD_DATA_PREVIEW_TYPES.ACTIVE_PREVIEW
             end,
         },
 
@@ -191,33 +217,68 @@ function ZO_TamrielTomesScreen_Keyboard:EndPreviewInternal()
     self:UpdateSceneFragments()
 end
 
-function ZO_TamrielTomesScreen_Keyboard:PreviewRewardList(rewardId)
-    -- TODO Tamriel Tomes: Clean up this method.
+function ZO_TamrielTomesScreen_Keyboard:EndPreviewRewardList()
+    EVENT_MANAGER:UnregisterForUpdate("ZO_TamrielTomesScreen_Keyboard_HideRewardList")
 
+    if self.currentPreviewRewardListId then
+        POPUP_LIST:Hide()
+        ZO_Rewards_Shared_OnMouseExit()
+        self.currentPreviewRewardListId = nil
+    end
+end
+
+function ZO_TamrielTomesScreen_Keyboard:PreviewRewardList(rewardId, tileControl)
     POPUP_LIST:ClearList()
 
     local rewardListId = GetRewardListIdFromReward(rewardId)
+    self.currentPreviewRewardListId = rewardListId
+
     local rewards = REWARDS_MANAGER:GetAllRewardInfoForRewardList(rewardListId)
     for _, reward in ipairs(rewards) do
         POPUP_LIST:AddItem(ZO_POPUP_LIST_DATA_TYPE_ITEM, reward)
     end
 
     POPUP_LIST:UpdateList()
-
-    POPUP_LIST:SetOnMouseEnterCallback(function(control)
-        ZO_GridEntry_SetIconScaledUp(control, true)
-        ZO_Rewards_Shared_OnMouseEnter(control, RIGHT, LEFT, -5)
-        TAMRIEL_TOMES_SCREEN_KEYBOARD:SetSelectedTamrielTomesRewardData(control.dataEntry.data)
-    end)
-
-    POPUP_LIST:SetOnMouseExitCallback(function(control)
-        ZO_GridEntry_SetIconScaledUp(control, false)
-        ZO_Rewards_Shared_OnMouseExit(control)
-        TAMRIEL_TOMES_SCREEN_KEYBOARD:SetSelectedTamrielTomesRewardData(nil)
-    end)
-
-    POPUP_LIST.control:SetAnchor(RIGHT, self.control, LEFT, -100)
+    POPUP_LIST:SetOnMouseEnterCallback(self.RewardListEntryMouseEnterHandler)
+    POPUP_LIST:SetOnMouseExitCallback(self.RewardListEntryMouseExitHandler)
+    POPUP_LIST.control:SetAnchor(RIGHT, tileControl or self.control, LEFT, -10)
     POPUP_LIST.control:SetHidden(false)
+end
+
+function ZO_TamrielTomesScreen_Keyboard:OnRewardListEntryMouseEnter(control)
+    EVENT_MANAGER:UnregisterForUpdate("ZO_TamrielTomesScreen_Keyboard_HideRewardList")
+
+    ZO_GridEntry_SetIconScaledUp(control, true)
+    ZO_Rewards_Shared_OnMouseEnter(control, LEFT, RIGHT, 5)
+    local rewardId = control.dataEntry.data.rewardId
+    self:QuickPreviewRewardInternal(rewardId)
+end
+
+function ZO_TamrielTomesScreen_Keyboard:OnRewardListEntryMouseExit(control)
+    ZO_GridEntry_SetIconScaledUp(control, false)
+
+    EVENT_MANAGER:RegisterForUpdate("ZO_TamrielTomesScreen_Keyboard_HideRewardList", 600, self.HideRewardListHandler)
+end
+
+function ZO_TamrielTomesScreen_Keyboard:OnBeginActivePreview()
+    self:EndPreviewRewardList()
+
+    ZO_TamrielTomesScreen_Shared.OnBeginActivePreview(self)
+
+    SCENE_MANAGER:AddFragmentGroup(FRAGMENT_GROUP.FRAME_TARGET_CENTERED_NO_BLUR)
+end
+
+function ZO_TamrielTomesScreen_Keyboard:OnBeginQuickPreview()
+    self:EndPreviewRewardList()
+
+    ZO_TamrielTomesScreen_Shared.OnBeginQuickPreview(self)
+end
+
+function ZO_TamrielTomesScreen_Keyboard:OnEndActivePreview()
+    ZO_TamrielTomesScreen_Shared.OnEndActivePreview(self)
+
+    SCENE_MANAGER:RemoveFragmentGroup(FRAGMENT_GROUP.FRAME_TARGET_CENTERED_NO_BLUR)
+    FRAME_TARGET_STANDARD_RIGHT_PANEL_FRAGMENT.UpdateTarget()
 end
 
 function ZO_TamrielTomesScreen_Keyboard:OnShowing()
@@ -236,17 +297,6 @@ function ZO_TamrielTomesScreen_Keyboard:OnPreviewedTamrielTomesRewardDataChanged
     ZO_TamrielTomesScreen_Shared.OnPreviewedTamrielTomesRewardDataChanged(self, previousTamrielTomesRewardData, newTamrielTomesRewardData)
 
     self:UpdateSceneFragments()
-end
-
-function ZO_TamrielTomesScreen_Keyboard:OnSelectedTamrielTomesRewardDataChanged(previousData, newData, previousTileControl, newTileControl)
-    ZO_TamrielTomesScreen_Shared.OnSelectedTamrielTomesRewardDataChanged(self, previousData, newData, previousTileControl, newTileControl)
-
-    if newData and newTileControl then
-        local rewardControl = newTileControl.object:GetRewardControl()
-        ZO_Rewards_Shared_OnMouseEnter(rewardControl, RIGHT, LEFT, -50, 0)
-    else
-        ClearTooltip(InformationTooltip)
-    end
 end
 
 function ZO_TamrielTomesScreen_Keyboard:ShowIntroScreen()

@@ -55,6 +55,12 @@
                         ZO_PerformanceMeters_OnMouseExit(self)
                     </OnMouseExit>
                 </Control>
+                <Control name="$(parent)GamepadTooltip" inherits="ZO_ResizingFloatingScrollTooltip_Gamepad" clampedToScreen="true" hidden="true">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)" relativePoint="TOPLEFT"/>
+                    <Controls>
+                        <Texture name="$(parent)Icon" override="true" hidden="true"/>
+                    </Controls>
+                </Control>
             </Controls>
             <OnMoveStop>
                 ZO_PerformanceMeters_OnMoveStop(self)
@@ -63,5 +69,28 @@
                 ZO_PerformanceMeters_OnInitialized(self)
             </OnInitialized>
         </TopLevelControl>
+        <Control name="FramerateMeter_Gamepad_Template" virtual="true">
+            <Dimensions x="65" y="40"/>
+            <Controls>
+                <Label name="$(parent)Label" font="ZoFontGamepad18"/>
+            </Controls>
+        </Control>
+        <Control name="LatencyMeter_Gamepad_Template" virtual="true">
+            <Dimensions x="65" y="40"/>
+            <Controls>
+                <Label name="$(parent)Label" font="ZoFontGamepad18"/>
+            </Controls>
+        </Control>
+        <Control name="FramerateMeter_Keyboard_Template" virtual="true">
+            <Controls>
+                <Label name="$(parent)Label" font="ZoFontWinT2"/>
+            </Controls>
+        </Control>
+        <Control name="LatencyMeter_Keyboard_Template" virtual="true">
+            <Dimensions x="65" y="40"/>
+            <Controls>
+                <Label name="$(parent)Label" font="ZoFontWinT2"/>
+            </Controls>
+        </Control>
     </Controls>
 </GuiXml>

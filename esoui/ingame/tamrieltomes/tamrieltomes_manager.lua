@@ -66,16 +66,29 @@ function TamrielTomes_Manager:Initialize()
 
     EVENT_MANAGER:RegisterForEvent("TamrielTomes_Manager", EVENT_ADD_ON_LOADED, OnAddOnLoaded)
 
+    local function OnCurrencyUpdated(_, currencyType, currencyLocation, newAmount, oldAmount, reason, reasonSupplementaryInfo)
+        self:OnCurrencyUpdated(currencyType, currencyLocation, newAmount, oldAmount, reason, reasonSupplementaryInfo)
+    end
+
+    EVENT_MANAGER:RegisterForEvent("TamrielTomes_Manager", EVENT_CURRENCY_UPDATE, OnCurrencyUpdated)
+
+    local function OnRewardTrackProgressGained(_, rewardTrackType, referenceTrackId, newTier, newProgress)
+        self:OnRewardTrackProgressGained(rewardTrackType, referenceTrackId, newTier, newProgress)
+    end
+
+    EVENT_MANAGER:RegisterForEvent("TamrielTomes_Manager", EVENT_REWARD_TRACK_PROGRESS_GAINED, OnRewardTrackProgressGained)
+
     local function UpdateTamrielTomesAvailability()
         self:UpdateTamrielTomesAvailability()
     end
 
     local function OnRewardTrackStarted(_, rewardTrackType, rewardTrackId)
         if rewardTrackType == REWARD_TRACK_TYPE_TAMRIEL_TOMES then
-            UpdateTamrielTomesAvailability()
+            self:UpdateTamrielTomesAvailability()
         end
     end
 
+    -- Note that these same events must also be handled by GamepadMarket and ZO_Market_Keyboard.
     EVENT_MANAGER:RegisterForEvent("TamrielTomes_Manager", EVENT_HOLIDAYS_CHANGED, UpdateTamrielTomesAvailability)
     EVENT_MANAGER:RegisterForEvent("TamrielTomes_Manager", EVENT_REWARD_TRACK_UPDATE_RECEIVED, UpdateTamrielTomesAvailability)
     EVENT_MANAGER:RegisterForEvent("TamrielTomes_Manager", EVENT_REWARD_TRACK_SETTINGS_UPDATE_RECEIVED, UpdateTamrielTomesAvailability)
@@ -182,6 +195,11 @@ function TamrielTomes_Manager:HasSeenTome(tomeId)
     return lastSeenTimestamp <= GetTimeStamp()
 end
 
+-- Indicates whether there are any Tomes currently available.
+function TamrielTomes_Manager:AreTomesAvailable()
+    return self:GetNumActiveTomes() > 0
+end
+
 -- Returns the first active Tome Id, if any, or nil.
 function TamrielTomes_Manager:GetActiveTomeId()
     local activeTomeIds = self:GetActiveTomeIds()
@@ -224,8 +242,11 @@ function TamrielTomes_Manager:SelectTomeId(tomeId)
 end
 
 function TamrielTomes_Manager:OpenTamrielTome(tomeId)
-    self:SelectTomeId(tomeId)
-    SYSTEMS:ShowScene("tamrielTomes")
+    if self:AreTomesAvailable() then
+        self:SelectTomeId(tomeId)
+        SYSTEMS:ShowScene("tamrielTomes")
+        return true
+    end
 end
 
 function TamrielTomes_Manager:GetFeaturedTomeRewards(tomeId)
@@ -237,7 +258,7 @@ function TamrielTomes_Manager:GetFeaturedTomeRewards(tomeId)
     local rewardTrackId = GetRewardTrackIdFromReferenceTrackId(REWARD_TRACK_TYPE_TAMRIEL_TOMES, tomeId)
     local rewards = {}
     for rewardIndex = 1, numRewards do
-        local rewardTierIndex, rewardComponent, rewardIndex = GetTamrielTomeFeaturedRewardInfo()
+        local rewardTierIndex, rewardComponent, rewardIndex = GetTamrielTomeFeaturedRewardInfo(tomeId, rewardIndex)
         local rewardId, rewardQuantity, rewardCost, rewardDisplayQuality = GetTamrielTomesRewardInfo(rewardTrackId, rewardTierIndex, rewardComponent, rewardIndex)
         local rewardData = REWARDS_MANAGER:GetInfoForReward(rewardId, rewardQuantity)
         if rewardData then
@@ -249,6 +270,16 @@ function TamrielTomes_Manager:GetFeaturedTomeRewards(tomeId)
     return rewards
 end
 
+function TamrielTomes_Manager:GetTomePremiumPlusBonusRewardInfo(tomeId)
+    local bonusRewardId, bonusRewardQuantity = GetTamrielTomePremiumPlusBonusRewardInfo(tomeId)
+    return bonusRewardId, bonusRewardQuantity
+end
+
+function TamrielTomes_Manager:GetTomePremiumPlusRewardDescription(tomeId)
+    local description = GetTamrielTomePremiumPlusRewardDescription(tomeId)
+    return description
+end
+
 function TamrielTomes_Manager:UpdateTamrielTomesAvailability()
     self:RefreshMainMenus()
 end
@@ -258,6 +289,18 @@ function TamrielTomes_Manager:RefreshMainMenus()
 
     if MAIN_MENU_KEYBOARD then
         MAIN_MENU_KEYBOARD:UpdateCategories()
+    end
+end
+
+function TamrielTomes_Manager:OnCurrencyUpdated(currencyType, currencyLocation, newAmount, oldAmount, reason, reasonSupplementaryInfo)
+    if currencyType == CURT_TOME_POINTS then
+        self:FireCallbacks("RewardsUpdated")
+    end
+end
+
+function TamrielTomes_Manager:OnRewardTrackProgressGained(rewardTrackType, referenceTrackId, newTier, newProgress)
+    if rewardTrackType == REWARD_TRACK_TYPE_TAMRIEL_TOMES then
+        self:FireCallbacks("ProgressUpdated")
     end
 end
 

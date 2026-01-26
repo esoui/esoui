@@ -1,20 +1,22 @@
-ZO_TAMRIEL_TOMES_REWARD_TEMPLATE_WIDTH = 136
+ZO_TAMRIEL_TOMES_REWARD_TEMPLATE_WIDTH = 128
 ZO_TAMRIEL_TOMES_REWARD_TEMPLATE_HEIGHT = 158
-ZO_TAMRIEL_TOMES_REWARD_TILE_X_MARGIN = 8
-ZO_TAMRIEL_TOMES_REWARD_TILE_Y_MARGIN = 0
-ZO_TAMRIEL_TOMES_REWARD_TILE_HEIGHT = ZO_TAMRIEL_TOMES_REWARD_TEMPLATE_HEIGHT + ZO_TAMRIEL_TOMES_REWARD_TILE_Y_MARGIN
-ZO_TAMRIEL_TOMES_REWARD_TILE_1_X_WIDTH = ZO_TAMRIEL_TOMES_REWARD_TEMPLATE_WIDTH + ZO_TAMRIEL_TOMES_REWARD_TILE_X_MARGIN
+
+ZO_TAMRIEL_TOMES_REWARD_TILE_HEIGHT = ZO_TAMRIEL_TOMES_REWARD_TEMPLATE_HEIGHT
+ZO_TAMRIEL_TOMES_REWARD_TILE_1_X_WIDTH = ZO_TAMRIEL_TOMES_REWARD_TEMPLATE_WIDTH
 ZO_TAMRIEL_TOMES_REWARD_TILE_2_X_WIDTH = ZO_TAMRIEL_TOMES_REWARD_TILE_1_X_WIDTH * 2
 ZO_TAMRIEL_TOMES_REWARD_TILE_2_5_X_WIDTH = ZO_TAMRIEL_TOMES_REWARD_TILE_1_X_WIDTH * 2.5
 
 ZO_TAMRIEL_TOMES_REWARD_DIVIDER_WIDTH = ZO_TAMRIEL_TOMES_REWARD_TILE_1_X_WIDTH * 5
-ZO_TAMRIEL_TOMES_REWARD_DIVIDER_HEIGHT = 50
+ZO_TAMRIEL_TOMES_REWARD_DIVIDER_HEIGHT = 40
 
 ZO_TAMRIEL_TOMES_REWARD_TOP_MARGIN_WIDTH = ZO_TAMRIEL_TOMES_REWARD_TILE_1_X_WIDTH * 5
 ZO_TAMRIEL_TOMES_REWARD_TOP_MARGIN_HEIGHT = 16
 
 local CLAIM_REWARD_COMPLETE_SECONDS = 0.65
 local CLAIM_REWARD_INTERVAL_SECONDS = 1.2
+internalassert(CLAIM_REWARD_COMPLETE_SECONDS <= CLAIM_REWARD_INTERVAL_SECONDS, "CLAIM_REWARD_COMPLETE_SECONDS must be less than or equal to CLAIM_REWARD_INTERVAL_SECONDS")
+
+ZO_BRIGHT_DISABLED_TEXT_COLOR = ZO_ColorDef:New(0.85, 0.85, 0.85, 1)
 
 -------------------------------
 -- Tamriel Tomes Reward Tile --
@@ -57,127 +59,196 @@ function ZO_TamrielTomesReward_Shared:Initialize(control)
     self.control = control
     control.object = self
 
+    self.rewardContainer = control:GetNamedChild("Reward")
+    self.backgroundTexture = control:GetNamedChild("Background")
+    self.borderTexture = control:GetNamedChild("Border")
     self.rarityBorderTexture = control:GetNamedChild("RarityBorder")
     self.costLabel = control:GetNamedChild("Cost")
-    self.iconTexture = control:GetNamedChild("Icon")
-    self.lockedTexture = control:GetNamedChild("Locked")
-    self.quantityLabel = control:GetNamedChild("Quantity")
+    self.costBackgroundTexture = control:GetNamedChild("CostBackground")
+    self.checkTexture = self.rewardContainer:GetNamedChild("Check")
+    self.iconTexture = self.rewardContainer:GetNamedChild("Icon")
+    self.lockedTexture = self.rewardContainer:GetNamedChild("Locked")
+    self.quantityLabel = self.rewardContainer:GetNamedChild("Quantity")
     self.claimRewardOverlay = control:GetNamedChild("ClaimRewardOverlay")
     self.claimHighlightTexture = self.claimRewardOverlay:GetNamedChild("Highlight")
     self.claimOverlayTexture = self.claimRewardOverlay:GetNamedChild("Overlay")
 
-    self.claimRewardEndTimeSeconds = nil
-    self.claimRewardNormalizedProgress = 0
-    self.claimRewardRequested = false
     self.isSelected = false
+    self:ResetClaimReward()
 
     -- Required by ZO_Rewards_Shared_OnMouseEnter
     self.control.GetRewardData = function()
         return self:GetRewardData()
     end
+
+    self.control.onClaimUpdate = function(_, currentFrameTimeSeconds)
+        local frameDeltaSeconds = GetFrameDeltaSeconds()
+        self:UpdateClaimRewardProgress(frameDeltaSeconds)
+    end
 end
 
 function ZO_TamrielTomesReward_Shared:BeginClaimReward()
+    if self.claimRewardRequested then
+        -- A request to claim this reward has already been submitted.
+        return
+    end
+
     local tamrielTomesRewardData = self:GetTamrielTomesRewardData()
     if not (tamrielTomesRewardData and tamrielTomesRewardData:CanClaimReward() and tamrielTomesRewardData:CanAffordReward()) then
+        -- This reward is too expensive or otherwise ineligible for claiming.
         return
     end
 
-    self:SetClaimRewardProgress(0)
-    self.claimRewardEndTimeSeconds = GetFrameTimeSeconds() + CLAIM_REWARD_INTERVAL_SECONDS
-    self.claimRewardRequested = false
-    self.control:SetHandler("OnUpdate", function(_, currentFrameTimeSeconds)
-        self:UpdateClaimRewardProgress(currentFrameTimeSeconds)
-    end)
+    self:SetClaimRewardMultiplier(1)
 end
 
-function ZO_TamrielTomesReward_Shared:EndClaimReward(force)
-    local claimingTimeElapsedSeconds = self:GetClaimingRewardTimeElapsedSeconds()
-    if force or not self.claimRewardRequested then
+function ZO_TamrielTomesReward_Shared:EndClaimReward()
+    if self.claimRewardRequested then
+        -- A request to claim this reward has already been submitted.
+        return
+    end
+
+    self:SetClaimRewardMultiplier(-1)
+end
+
+function ZO_TamrielTomesReward_Shared:ResetClaimReward()
+    -- Force the claim reward process to reset.
+    self:SetClaimRewardMultiplier(0)
+    self:SetClaimRewardTimeElapsedSeconds(0)
+    self:SetClaimRewardRequested(false)
+end
+
+function ZO_TamrielTomesReward_Shared:GetClaimRewardMultiplier()
+    return self.claimRewardMultiplier or 0
+end
+
+function ZO_TamrielTomesReward_Shared:SetClaimRewardMultiplier(multiplier)
+    if not (multiplier == 0 or multiplier == 1 or multiplier == -1) then
+        internalassert(false, string.format("Invalid multiplier specified: %s", tostring(multiplier) or "nil"))
+        return
+    end
+
+    self.claimRewardMultiplier = multiplier
+
+    if multiplier == 0 then
+        -- No progress will be made in either direction.
         self.control:SetHandler("OnUpdate", nil)
-        self.claimRewardEndTimeSeconds = nil
-        self.claimRewardRequested = false
-        self:SetClaimRewardProgress(0)
+    else
+        -- Progress will be increased or reduced.
+        self.control:SetHandler("OnUpdate", self.control.onClaimUpdate)
     end
 end
 
-function ZO_TamrielTomesReward_Shared:GetClaimingRewardNormalizedProgress()
-    local remainingTimeSeconds = self:GetClaimingRewardTimeRemainingSeconds()
-    if not remainingTimeSeconds then
+function ZO_TamrielTomesReward_Shared:GetClaimRewardNormalizedProgress()
+    return self.claimRewardNormalizedProgress
+end
+
+function ZO_TamrielTomesReward_Shared:SetClaimRewardNormalizedProgress(normalizedProgress)
+    normalizedProgress = zo_clamp(normalizedProgress, 0, 1)
+    self.claimRewardNormalizedProgress = normalizedProgress
+    self:UpdateClaimRewardProgressInternal()
+end
+
+function ZO_TamrielTomesReward_Shared:GetClaimRewardRequested()
+    return self.claimRewardRequested
+end
+
+function ZO_TamrielTomesReward_Shared:SetClaimRewardRequested(isRequested)
+    self.claimRewardRequested = isRequested
+end
+
+function ZO_TamrielTomesReward_Shared:GetClaimRewardTimeElapsedSeconds(timeElapsedSeconds)
+    return self.claimRewardTimeElapsedSeconds
+end
+
+function ZO_TamrielTomesReward_Shared:SetClaimRewardTimeElapsedSeconds(timeElapsedSeconds)
+    -- Update the time elapsed and the normalized progress.
+    self.claimRewardTimeElapsedSeconds = zo_clamp(timeElapsedSeconds, 0, CLAIM_REWARD_INTERVAL_SECONDS)
+    local normalizedProgress = zo_clamp(self.claimRewardTimeElapsedSeconds / CLAIM_REWARD_INTERVAL_SECONDS, 0, 1)
+    self:SetClaimRewardNormalizedProgress(normalizedProgress)
+end
+
+function ZO_TamrielTomesReward_Shared:GetClaimRewardTimeRemainingSeconds()
+    local claimRewardMultiplier = self:GetClaimRewardMultiplier()
+    if not (claimRewardMultiplier == 1 or claimRewardMultiplier == -1) then
+        -- Claim reward process has not been started.
         return nil
     end
 
-    local normalizedProgress = 1 - (remainingTimeSeconds / CLAIM_REWARD_INTERVAL_SECONDS)
-    return normalizedProgress
+    local claimRewardTimeElapsedSeconds = self:GetClaimRewardTimeElapsedSeconds()
+    local claimRewardTimeRemainingSeconds = zo_max(0, CLAIM_REWARD_COMPLETE_SECONDS - claimRewardTimeElapsedSeconds)
+    return claimRewardTimeRemainingSeconds
 end
 
-function ZO_TamrielTomesReward_Shared:GetClaimingRewardTimeRemainingSeconds()
-    local endTimeSeconds = self.claimRewardEndTimeSeconds
-    if not endTimeSeconds then
-        return nil
-    end
+function ZO_TamrielTomesReward_Shared:UpdateClaimRewardProgress(timeIncrementSeconds)
+    -- Add or deduct the time increment from the total claim reward time elapsed.
+    local claimRewardTimeElapsedSeconds = self:GetClaimRewardTimeElapsedSeconds()
+    local claimRewardMultiplier = self:GetClaimRewardMultiplier()
+    self:SetClaimRewardTimeElapsedSeconds(claimRewardTimeElapsedSeconds + timeIncrementSeconds * claimRewardMultiplier)
+    claimRewardTimeElapsedSeconds = self:GetClaimRewardTimeElapsedSeconds()
 
-    local currentTimeSeconds = GetFrameTimeSeconds()
-    local remainingTimeSeconds = zo_max(0, endTimeSeconds - currentTimeSeconds)
-    return remainingTimeSeconds
-end
-
-function ZO_TamrielTomesReward_Shared:GetClaimingRewardTimeElapsedSeconds()
-    local remainingTimeSeconds = self:GetClaimingRewardTimeRemainingSeconds()
-    if not remainingTimeSeconds then
-        return nil
-    end
-
-    local elapsedTimeSeconds = CLAIM_REWARD_INTERVAL_SECONDS - remainingTimeSeconds
-    return elapsedTimeSeconds
-end
-
-function ZO_TamrielTomesReward_Shared:IsClaimingReward()
-    return self.claimRewardEndTimeSeconds ~= nil
-end
-
-function ZO_TamrielTomesReward_Shared:UpdateClaimRewardProgress(currentFrameTimeSeconds)
-    local elapsedTimeSeconds = self:GetClaimingRewardTimeElapsedSeconds()
-    if not elapsedTimeSeconds then
-        self:EndClaimReward()
-        return
-    end
-
-    if not self.claimRewardRequested and elapsedTimeSeconds >= CLAIM_REWARD_COMPLETE_SECONDS then
-        self.claimRewardRequested = true
-
+    if claimRewardMultiplier > 0 and not self.claimRewardRequested and claimRewardTimeElapsedSeconds >= CLAIM_REWARD_COMPLETE_SECONDS then
         local tamrielTomesRewardData = self:GetTamrielTomesRewardData()
         if tamrielTomesRewardData then
+            -- Sufficient time has elapsed; submit the claim reward request.
+            self.claimRewardRequested = true
             tamrielTomesRewardData:TryClaimReward()
         end
     end
 
-    local normalizedProgress = self:GetClaimingRewardNormalizedProgress()
-    self:SetClaimRewardProgress(normalizedProgress)
-
-    if normalizedProgress >= 1 then
-        local FORCE = true
-        self:EndClaimReward(FORCE)
+    local normalizedProgress = self:GetClaimRewardNormalizedProgress()
+    if (normalizedProgress >= 1 and claimRewardMultiplier > 0) or (normalizedProgress <= 0 and claimRewardMultiplier < 0) then
+        -- The claim reward process time has elapsed or rolled back.
+        self:ResetClaimReward()
     end
+end
+
+function ZO_TamrielTomesReward_Shared:UpdateClaimRewardProgressInternal()
+    -- Update the visuals of the claim reward process.
+    local normalizedProgress = self:GetClaimRewardNormalizedProgress()
+    local hasProgress = normalizedProgress > 0 and normalizedProgress < 1
+    if hasProgress then
+        local BLUR_ORIGIN_X = 0.5
+        local BLUR_ORIGIN_Y = 0.5
+        local BLUR_SAMPLES = 11
+        local blurRadius = normalizedProgress * 0.16
+        local blurOffset = normalizedProgress * 0.08 - 0.08
+        self.claimOverlayTexture:SetRadialBlur(BLUR_ORIGIN_X, BLUR_ORIGIN_Y, BLUR_SAMPLES, blurRadius, blurOffset)
+
+        local alpha
+        if normalizedProgress < 0.75 then
+            alpha = zo_min(0.7, zo_sin(normalizedProgress * ZO_HALF_PI))
+        else
+            alpha = zo_min(0.7, zo_sin((0.5 + (normalizedProgress - 0.75) * 2.5) * ZO_PI))
+        end
+        self.claimOverlayTexture:SetAlpha(alpha)
+        self.claimHighlightTexture:SetAlpha(alpha)
+    end
+
+    self:SetClaimRewardOverlayHidden(not hasProgress)
 end
 
 function ZO_TamrielTomesReward_Shared:SetHidden(hidden)
     self.control:SetHidden(hidden)
-
     if hidden then
-        local FORCE = true
-        self:EndClaimReward(FORCE)
+        -- Hiding this reward automatically resets the claim reward process.
+        self:ResetClaimReward()
     end
 end
 
 function ZO_TamrielTomesReward_Shared:CanPreviewReward()
     local tamrielTomesRewardData = self:GetTamrielTomesRewardData()
-    return tamrielTomesRewardData:CanPreviewReward()
+    if tamrielTomesRewardData then
+        return tamrielTomesRewardData:CanPreviewReward()
+    end
+
+    return nil
 end
 
 function ZO_TamrielTomesReward_Shared:GetRewardData()
-    if self.tamrielTomesRewardData then
-        return self.tamrielTomesRewardData:GetRewardData()
+    local tamrielTomesRewardData = self:GetTamrielTomesRewardData()
+    if tamrielTomesRewardData then
+        return tamrielTomesRewardData:GetRewardData()
     end
 
     return nil
@@ -201,35 +272,6 @@ function ZO_TamrielTomesReward_Shared:SetClaimRewardOverlayHidden(hidden)
     self.claimRewardOverlay:SetHidden(hidden)
 end
 
-function ZO_TamrielTomesReward_Shared:SetClaimRewardProgress(normalizedProgress)
-    normalizedProgress = zo_clamp(normalizedProgress, 0, 1)
-    self.claimRewardNormalizedProgress = normalizedProgress
-
-    local hasProgress = normalizedProgress > 0 and normalizedProgress < 1
-    if hasProgress then
-        local BLUR_ORIGIN_X = 0.5
-        local BLUR_ORIGIN_Y = 0.5
-        local BLUR_SAMPLES = 11
-        local blurRadius = normalizedProgress * 0.16
-        local blurOffset = normalizedProgress * 0.08 - 0.08
-        self.claimOverlayTexture:SetRadialBlur(BLUR_ORIGIN_X, BLUR_ORIGIN_Y, BLUR_SAMPLES, blurRadius, blurOffset)
-
-        local alpha
-        if normalizedProgress < 0.75 then
-            alpha = zo_min(0.7, zo_sin(normalizedProgress * ZO_HALF_PI))
-        else
-            alpha = zo_min(0.7, zo_sin((0.5 + (normalizedProgress - 0.75) * 2.5) * ZO_PI))
-        end
-        self.claimOverlayTexture:SetAlpha(alpha)
-        self.claimHighlightTexture:SetAlpha(alpha)
-    end
-
-    self:SetClaimRewardOverlayHidden(not hasProgress)
-
-    local iconIntensity = 2 - zo_abs(ZO_ExponentialEaseOutIn(normalizedProgress, 2) * 2 - 1)
-    self.iconTexture:SetTextureSampleProcessingWeight(TEX_SAMPLE_PROCESSING_RGB, iconIntensity)
-end
-
 function ZO_TamrielTomesReward_Shared:Refresh()
     if not self:HasRewardData() then
         self:SetHidden(true)
@@ -237,20 +279,51 @@ function ZO_TamrielTomesReward_Shared:Refresh()
     end
 
     local tamrielTomesRewardData = self:GetTamrielTomesRewardData()
-    self.quantityLabel:SetText(ZO_CommaDelimitNumber(tamrielTomesRewardData.rewardQuantity))
     ZO_CurrencyControl_SetSimpleCurrency(self.costLabel, CURT_TOME_POINTS, tamrielTomesRewardData.rewardCost, self.currencyOptions)
 
-    local rewardData = self:GetRewardData()
-    local iconTextureFile = rewardData:GetPlatformIcon()
+    local quantity = tamrielTomesRewardData.rewardQuantity
+    local isRewardList = tamrielTomesRewardData:IsRewardList()
+    if isRewardList then
+        local rewardListData = tamrielTomesRewardData:GetRewardListData()
+        if rewardListData then
+            quantity = #rewardListData - 1
+        end
+    end
+    if quantity <= 1 then
+        quantity = ""
+    else
+        quantity = ZO_CommaDelimitNumber(quantity)
+        if isRewardList then
+            quantity = zo_strformat(SI_TAMRIEL_TOMES_REWARD_LIST_QUANTITY_FORMATTER, quantity)
+        end
+    end
+    self.quantityLabel:SetText(quantity)
+
+    local iconTextureFile = tamrielTomesRewardData:GetPlatformLootIcon()
     self.iconTexture:SetTexture(iconTextureFile)
 
     local displayQuality = tamrielTomesRewardData:GetRewardDisplayQuality()
-    local displayQualityColor = GetDimItemQualityColor(displayQuality)
+    local displayQualityColor = GetItemQualityColor(displayQuality)
     self.claimOverlayTexture:SetColor(displayQualityColor:UnpackRGB())
+
+    local component = tamrielTomesRewardData:GetRewardComponent()
+    if component == REWARD_TRACK_COMPONENT_SECONDARY then
+        self.lockedTexture:SetTexture("EsoUI/Art/TamrielTomes/premium_tome_slot_lock.dds")
+        self.lockedTexture:SetDimensions(45, 45)
+    else
+        self.lockedTexture:SetTexture("EsoUI/Art/TamrielTomes/tome_slot_lock.dds")
+        self.lockedTexture:SetDimensions(32, 32)
+    end
 
     self:EndClaimReward()
     self:RefreshState()
     self:SetHidden(false)
+end
+
+function ZO_TamrielTomesReward_Shared:UpdateTextureVisualsInternal(textureControl, desaturation, samplingWeightAlpha, samplingWeightRGB)
+    textureControl:SetDesaturation(desaturation)
+    textureControl:SetTextureSampleProcessingWeight(TEX_SAMPLE_PROCESSING_ALPHA_AS_RGB, samplingWeightAlpha)
+    textureControl:SetTextureSampleProcessingWeight(TEX_SAMPLE_PROCESSING_RGB, samplingWeightRGB)
 end
 
 function ZO_TamrielTomesReward_Shared:RefreshState()
@@ -259,37 +332,43 @@ function ZO_TamrielTomesReward_Shared:RefreshState()
         return
     end
 
-    local isLocked = self:IsLocked()
+    local canAfford = tamrielTomesRewardData:CanAffordReward()
+    local isClaimed = tamrielTomesRewardData:IsRewardClaimed()
+    self.checkTexture:SetHidden(not isClaimed)
+
+    local isLocked = self:IsLocked() and not isClaimed
     self.lockedTexture:SetHidden(not isLocked)
 
+    local iconDesaturation = 0
+    local tileLabelColor = ZO_WHITE
+    local tileDesaturation = 0
+    local tileSamplingWeightAlpha = 0
+    local tileSamplingWeightRGB = 1
     if isLocked then
-        self.iconTexture:SetColor(ZO_DEFAULT_DISABLED_COLOR:UnpackRGBA())
-    else
-        self.iconTexture:SetColor(ZO_DEFAULT_ENABLED_COLOR:UnpackRGBA())
+        iconDesaturation = 1
+        tileDesaturation = 1
+        tileLabelColor = ZO_BRIGHT_DISABLED_TEXT_COLOR
+        tileSamplingWeightAlpha = 0.3
+        tileSamplingWeightRGB = 0.7
+    elseif not canAfford then
+        iconDesaturation = 1
+        tileLabelColor = ZO_BRIGHT_DISABLED_TEXT_COLOR
+    elseif isClaimed then
+        iconDesaturation = 1
     end
 
-    if tamrielTomesRewardData:GetHideRewardQuality() then
-        self.rarityBorderTexture:SetHidden(true)
-    else
-        local displayQuality = tamrielTomesRewardData:GetRewardDisplayQuality()
-        local borderColor = ZO_WHITE
-        if isLocked then
-            if self:IsSelected() then
-                borderColor = GetItemQualityColor(displayQuality)
-            else
-                borderColor = GetDimItemQualityColor(displayQuality)
-            end
-        elseif self:IsSelected() or tamrielTomesRewardData:IsRewardClaimed() or not tamrielTomesRewardData:CanClaimReward() then
-            borderColor = GetBrightItemQualityColor(displayQuality)
-        else
-            borderColor = GetItemQualityColor(displayQuality)
-        end
+    self:UpdateTextureVisualsInternal(self.backgroundTexture, tileDesaturation, tileSamplingWeightAlpha, tileSamplingWeightRGB)
+    self:UpdateTextureVisualsInternal(self.borderTexture, tileDesaturation, tileSamplingWeightAlpha, tileSamplingWeightRGB)
+    self:UpdateTextureVisualsInternal(self.costBackgroundTexture, tileDesaturation, tileSamplingWeightAlpha, tileSamplingWeightRGB)
+    self:UpdateTextureVisualsInternal(self.iconTexture, iconDesaturation, tileSamplingWeightAlpha, tileSamplingWeightRGB)
 
-        local r, g, b = borderColor:UnpackRGB()
-        local BORDER_ALPHA = 0.65
-        self.rarityBorderTexture:SetColor(r, g, b, BORDER_ALPHA)
-        self.rarityBorderTexture:SetHidden(false)
-    end
+    self.costLabel:SetColor(tileLabelColor:UnpackRGBA())
+    self.quantityLabel:SetColor(tileLabelColor:UnpackRGBA())
+
+    local displayQuality = tamrielTomesRewardData:GetRewardDisplayQuality()
+    local rarityBorderColor = GetItemQualityColor(displayQuality)
+    self.rarityBorderTexture:SetColor(rarityBorderColor:UnpackRGBA())
+    self.rarityBorderTexture:SetHidden(tamrielTomesRewardData:GetHideRewardQuality())
 end
 
 function ZO_TamrielTomesReward_Shared:IsLocked()

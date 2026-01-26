@@ -44,10 +44,13 @@ ZO_TAMRIEL_TOMES_REWARD_ENTRY_TEMPLATE_LAYOUT =
     ZO_TAMRIEL_TOMES_REWARD_TEMPLATE_TYPES.TEMPLATE_1X_WIDTH,
 }
 
+local LOCKED_PAGE_COLOR = ZO_ColorDef:New(.6, .6, .6)
+
 local QUICK_PREVIEW_DELAY_SECONDS = 0.5
 
 ZO_TamrielTomesScreen_Shared = ZO_DeferredInitializingObject:Subclass()
 
+ZO_TamrielTomesScreen_Shared:MUST_IMPLEMENT("EndPreviewRewardList")
 ZO_TamrielTomesScreen_Shared:MUST_IMPLEMENT("InitializeKeybindStripDescriptor")
 ZO_TamrielTomesScreen_Shared:MUST_IMPLEMENT("PreviewRewardList")
 ZO_TamrielTomesScreen_Shared:MUST_IMPLEMENT("ShowIntroScreen")
@@ -55,6 +58,7 @@ ZO_TamrielTomesScreen_Shared:MUST_IMPLEMENT("ShowIntroScreen")
 function ZO_TamrielTomesScreen_Shared:Initialize(control, scene, templateData)
     self.control = control
     self.templateData = templateData
+    ZO_TamrielTomesScreen_Shared.SetPreviousCurrencyAmount(GetPlayerStoredCurrencyAmount(CURT_TOME_POINTS))
 
     ZO_DeferredInitializingObject.Initialize(self, scene)
 
@@ -109,6 +113,9 @@ function ZO_TamrielTomesScreen_Shared:InitializeControls()
     self.currencyBonusPercentLabel = currencyBonusContainer:GetNamedChild("Percent")
     self.currencyBonusIconTexture = currencyBonusContainer:GetNamedChild("Icon")
 
+    self.premiumGroupBorderControl = bookContainer:GetNamedChild("PremiumGroupBorder")
+    self.premiumGroupBorderLockedTexture = self.premiumGroupBorderControl:GetNamedChild("Locked")
+
     local pageNavigationControl = bookContainer:GetNamedChild("PageNavigation")
     self.pageNavigation = ZO_PageNavigation:New(pageNavigationControl)
     self.pageNavigation:SetStartingPageNumber(0)
@@ -148,7 +155,7 @@ function ZO_TamrielTomesScreen_Shared:InitializeGridList()
     -- Override default highlight template to hide white outline around tiles on gamepad
     local gridList = templateData.gridClass:New(self.gridListControl, templateData.gamepadHighlightTemplate)
     self.gridList = gridList
-    gridList:SetIndentAmount(10)
+    gridList:SetIndentAmount(0)
     gridList:SetHeaderPrePadding(0)
     gridList:SetHeaderPostPadding(0)
     gridList:SetYDistanceFromEdgeWhereSelectionCausesScroll(10)
@@ -176,6 +183,7 @@ function ZO_TamrielTomesScreen_Shared:RegisterForEvents()
         if not self.control:IsHidden() then
             if currencyType == CURT_TOME_POINTS then
                 self:UpdateCurrencyAmount()
+                self:UpdatePageNavigation()
             elseif currencyType == CURT_TOME_POINT_CACHES then
                 self:UpdateKeybinds()
             end
@@ -183,6 +191,17 @@ function ZO_TamrielTomesScreen_Shared:RegisterForEvents()
     end
 
     self.control:RegisterForEvent(EVENT_CURRENCY_UPDATE, OnCurrencyUpdated)
+
+    local function UpdateGridListAndNavigation()
+        if self:IsShowing() then
+            self:RefreshGridList()
+            self:UpdatePageNavigation()
+        end
+    end
+
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", UpdateGridListAndNavigation)
+    TAMRIEL_TOMES_MANAGER:RegisterCallback("ProgressUpdated", UpdateGridListAndNavigation)
+    TAMRIEL_TOMES_MANAGER:RegisterCallback("RewardsUpdated", UpdateGridListAndNavigation)
 
     local function OnRewardTrackRewardClaimed(_, rewardTrackType, rewardTrackId, rewardTrackTier, rewardTrackComponent, rewardIndex, isFallback)
         if self.control:IsHidden() then
@@ -212,14 +231,15 @@ function ZO_TamrielTomesScreen_Shared:RegisterForEvents()
 
     TAMRIEL_TOMES_MANAGER:RegisterCallback("SelectedTomeChanged", OnSelectedTomeChanged)
 
-    local function OnPurchaseDataUpdated()
+    local function UpdateButtonsAndPageNavigation()
         if self:IsShowing() then
             self:UpdateButtons()
+            self:UpdatePageNavigation()
         end
     end
 
-    TAMRIEL_TOMES_MANAGER:RegisterCallback("DirectPurchaseDataUpdated", OnPurchaseDataUpdated)
-    DIRECT_PURCHASE_MANAGER:RegisterCallback("SettingsUpdated", OnPurchaseDataUpdated)
+    TAMRIEL_TOMES_MANAGER:RegisterCallback("DirectPurchaseDataUpdated", UpdateButtonsAndPageNavigation)
+    DIRECT_PURCHASE_MANAGER:RegisterCallback("SettingsUpdated", UpdateButtonsAndPageNavigation)
 end
 
 function ZO_TamrielTomesScreen_Shared:ShowClaimedRewardFlair(gridTile)
@@ -289,6 +309,16 @@ end
 function ZO_TamrielTomesScreen_Shared:GetTileByTamrielTomesRewardData(tamrielTomesRewardData)
     if tamrielTomesRewardData then
         return self.gridList:GetControlFromData(tamrielTomesRewardData)
+    end
+
+    return nil
+end
+
+function ZO_TamrielTomesScreen_Shared:GetTamrielTomesRewardObject(tamrielTomesRewardData)
+    local tileControl = self:GetTileByTamrielTomesRewardData(tamrielTomesRewardData)
+    if tileControl then
+        local rewardObject = tileControl.object.rewardControl.object
+        return rewardObject
     end
 
     return nil
@@ -412,6 +442,9 @@ function ZO_TamrielTomesScreen_Shared:RebuildGridList()
     end
 
     self.gridList:CommitGridList()
+    self:RefreshUnlockRequirements()
+    self:UpdateCurrencyAmount()
+    self:UpdateKeybinds()
 end
 
 function ZO_TamrielTomesScreen_Shared:Refresh()
@@ -422,7 +455,7 @@ function ZO_TamrielTomesScreen_Shared:Refresh()
     local titleText = GetRewardTrackDisplayName(rewardTrackId)
     self.titleLabel:SetText(titleText)
 
-    local currencyBonusPercentage = GetCurrencyBonusPercentage(CURT_TOME_POINTS)
+    local currencyBonusPercentage = GetTomePointGainBonusPercentage()
     local hasCurrencyBonus = currencyBonusPercentage > 0
     self.currencyBonusContainer:SetHidden(not hasCurrencyBonus)
     self.currencyBalanceBackdrop:SetHidden(hasCurrencyBonus)
@@ -431,13 +464,41 @@ function ZO_TamrielTomesScreen_Shared:Refresh()
         self.currencyBonusPercentLabel:SetText(zo_strformat(SI_TAMRIEL_TOMES_CURRENCY_BONUS_PERCENTAGE_LABEL, currencyBonusPercentage))
     end
 
-    local UPDATE_IMMEDIATELY = true
-    self:UpdateCurrencyAmount(UPDATE_IMMEDIATELY)
+    self:UpdateCurrencyAmount()
+    self:RefreshUnlockRequirements()
     self:UpdateKeybinds()
 end
 
 function ZO_TamrielTomesScreen_Shared:RefreshGridList()
     self.gridList:RefreshGridList()
+    self:RefreshUnlockRequirements()
+    self:UpdateCurrencyAmount()
+    self:UpdateKeybinds()
+end
+
+function ZO_TamrielTomesScreen_Shared:RefreshUnlockRequirements()
+    self.premiumGroupBorderLockedTexture:SetHidden(true)
+    self.unlockPointsRequired:SetHidden(true)
+
+    if self.selectedTomeData then
+        -- Show the message that indicates how many additional Tome Points must be
+        -- earned to unlock the next locked page, if any page is still locked.
+        local nextPage = (self.selectedTomeData:GetCurrentTier() or 0) + 1
+        local currentPage = self.pageNavigation:GetCurrentPage() or 0
+        local tier = zo_max(nextPage, currentPage)
+        local unlockPointsRemaining = self.selectedTomeData:GetCostToProgressToTier(tier)
+        if unlockPointsRemaining > 0 then
+            local unlockPointsRemainingString = ZO_Currency_FormatPlatform(CURT_TOME_POINTS, unlockPointsRemaining, ZO_CURRENCY_FORMAT_AMOUNT_ICON)
+            local unlockPointsRequiredString = zo_strformat(SI_TAMRIEL_TOMES_PAGE_UNLOCK_REQUIREMENT, unlockPointsRemainingString, tostring(tier))
+            self.unlockPointsRequired:SetText(unlockPointsRequiredString)
+            self.unlockPointsRequired:SetHidden(false)
+        end
+
+        -- Show the lock icon next to the Premium section caption if the premium
+        -- component is not accessible.
+        local hasPremiumComponent = self.selectedTomeData:HasAccessToComponent(REWARD_TRACK_COMPONENT_SECONDARY)
+        self.premiumGroupBorderLockedTexture:SetHidden(hasPremiumComponent)
+    end
 end
 
 function ZO_TamrielTomesScreen_Shared:IsDirectPurchaseEnabled()
@@ -467,6 +528,24 @@ function ZO_TamrielTomesScreen_Shared:UpdateButtons()
     self.upgradeButton:SetEnabled(isEnabled)
 end
 
+function ZO_TamrielTomesScreen_Shared:ActivePreviewRewardInternal(rewardId)
+    if CanPreviewReward(rewardId) then
+        SYSTEMS:GetObject("itemPreview"):PreviewReward(rewardId)
+        self:SetPreviewControlsHidden(false)
+    else
+        self:SetPreviewControlsHidden(true)
+    end
+end
+
+function ZO_TamrielTomesScreen_Shared:QuickPreviewRewardInternal(rewardId)
+    self:EndPreviewInternal()
+    self:SetPreviewControlsHidden(true)
+
+    if CanPreviewReward(rewardId) then
+        SYSTEMS:GetObject("itemPreview"):PreviewReward(rewardId)
+    end
+end
+
 function ZO_TamrielTomesScreen_Shared:BeginActivePreviewInternal(previousTamrielTomesRewardData, tamrielTomesRewardData)
     -- Active preview is a higher priority than quick preview.
     -- Order matters
@@ -475,15 +554,17 @@ function ZO_TamrielTomesScreen_Shared:BeginActivePreviewInternal(previousTamriel
 
     local rewardId = tamrielTomesRewardData:GetRewardId()
     if GetRewardType(rewardId) == REWARD_ENTRY_TYPE_REWARD_LIST then
-        self:PreviewRewardList(rewardId)
+        local tile = self:GetTileByTamrielTomesRewardData(tamrielTomesRewardData)
+        self:PreviewRewardList(rewardId, tile)
     else
-        SYSTEMS:GetObject("itemPreview"):PreviewReward(rewardId)
+        self:ActivePreviewRewardInternal(rewardId)
     end
-    self:SetPreviewControlsHidden(false)
 
     local newPreviewRewardData = self:GetCurrentPreviewTamrielTomesRewardData()
     self:OnPreviewedTamrielTomesRewardDataChanged(previousTamrielTomesRewardData, newPreviewRewardData)
     self:UpdateKeybinds()
+
+    self:OnBeginActivePreview()
 end
 
 function ZO_TamrielTomesScreen_Shared:BeginPreview(previewType, tamrielTomesRewardData)
@@ -513,20 +594,22 @@ function ZO_TamrielTomesScreen_Shared:BeginQuickPreview(tamrielTomesRewardData)
 end
 
 function ZO_TamrielTomesScreen_Shared:BeginQuickPreviewInternal(previousTamrielTomesRewardData, tamrielTomesRewardData)
+    self:OnBeginQuickPreview()
+
+    local rewardId = tamrielTomesRewardData:GetRewardId()
+    if GetRewardType(rewardId) == REWARD_ENTRY_TYPE_REWARD_LIST then
+        local tile = self:GetTileByTamrielTomesRewardData(tamrielTomesRewardData)
+        self:PreviewRewardList(rewardId, tile)
+        return
+    end
+
     if not self:CanQuickPreview() then
         self:EndQuickPreview()
         return
     end
 
     self.quickPreviewTamrielTomesRewardData = tamrielTomesRewardData
-
-    local rewardId = tamrielTomesRewardData:GetRewardId()
-    if GetRewardType(rewardId) == REWARD_ENTRY_TYPE_REWARD_LIST then
-        self:PreviewRewardList(rewardId)
-    else
-        SYSTEMS:GetObject("itemPreview"):PreviewReward(rewardId)
-    end
-    self:SetPreviewControlsHidden(true)
+    self:QuickPreviewRewardInternal(rewardId)
 
     local newPreviewRewardData = self:GetCurrentPreviewTamrielTomesRewardData()
     self:OnPreviewedTamrielTomesRewardDataChanged(previousTamrielTomesRewardData, newPreviewRewardData)
@@ -539,15 +622,14 @@ function ZO_TamrielTomesScreen_Shared:EndActivePreview()
         self.activePreviewTamrielTomesRewardData = nil
         self:EndPreviewInternal()
         self:OnPreviewedTamrielTomesRewardDataChanged(previousTamrielTomesRewardData, nil)
+        self:OnEndActivePreview()
     end
 end
 
 function ZO_TamrielTomesScreen_Shared:EndPreviewInternal()
-    if self:IsPreviewing() then
-        SYSTEMS:GetObject("itemPreview"):ClearPreviewCollection()
-        ApplyChangesToPreviewCollectionShown()
-        self:UpdateKeybinds()
-    end
+    SYSTEMS:GetObject("itemPreview"):ClearPreviewCollection()
+    ApplyChangesToPreviewCollectionShown()
+    self:UpdateKeybinds()
 end
 
 function ZO_TamrielTomesScreen_Shared:EndPreview()
@@ -649,24 +731,20 @@ function ZO_TamrielTomesScreen_Shared:SetIsTamrielTomesRewardPreviewing(tamrielT
 end
 
 function ZO_TamrielTomesScreen_Shared:BeginClaimReward(tamrielTomesRewardData)
-    local tileControl = self:GetTileByTamrielTomesRewardData(tamrielTomesRewardData)
-    if not tileControl then
+    local rewardObject = self:GetTamrielTomesRewardObject(tamrielTomesRewardData)
+    if not rewardObject then
         internalasset(false, "Tile control not found for Tamriel Tomes Reward Data.")
         return
     end
-
-    local rewardObject = tileControl.object.rewardControl.object
     rewardObject:BeginClaimReward()
 end
 
 function ZO_TamrielTomesScreen_Shared:EndClaimReward(tamrielTomesRewardData)
-    local tileControl = self:GetTileByTamrielTomesRewardData(tamrielTomesRewardData)
-    if not tileControl then
+    local rewardObject = self:GetTamrielTomesRewardObject(tamrielTomesRewardData)
+    if not rewardObject then
         internalasset(false, "Tile control not found for Tamriel Tomes Reward Data.")
         return
     end
-
-    local rewardObject = tileControl.object.rewardControl.object
     rewardObject:EndClaimReward()
 end
 
@@ -684,6 +762,22 @@ function ZO_TamrielTomesScreen_Shared:UpdateKeybinds()
             self.areKeybindsAdded = false
         end
     end
+end
+
+function ZO_TamrielTomesScreen_Shared:OnBeginActivePreview()
+    -- Can be overridden
+end
+
+function ZO_TamrielTomesScreen_Shared:OnEndActivePreview()
+    -- Can be overridden
+end
+
+function ZO_TamrielTomesScreen_Shared:OnBeginQuickPreview()
+    -- Can be overridden
+end
+
+function ZO_TamrielTomesScreen_Shared:OnEndQuickPreview()
+    -- Can be overridden
 end
 
 function ZO_TamrielTomesScreen_Shared:OnPreviewedTamrielTomesRewardDataChanged(previousTamrielTomesRewardData, newTamrielTomesRewardData)
@@ -716,13 +810,14 @@ function ZO_TamrielTomesScreen_Shared:ShouldRetainPreview()
 end
 
 function ZO_TamrielTomesScreen_Shared:OnHiding()
-    if self:ShouldRetainPreview() then
+    if self:GetCurrentPreviewType() ~= ZO_TAMRIEL_TOMES_REWARD_DATA_PREVIEW_TYPES.NONE and self:ShouldRetainPreview() then
         -- The upcoming scene will need the current preview, if any, to remain visible.
         self:SetPreviewControlsHidden(false)
     else
         self:EndPreview()
     end
 
+    self:EndPreviewRewardList()
     self:UpdateKeybinds()
 end
 
@@ -738,15 +833,21 @@ function ZO_TamrielTomesScreen_Shared:OnShown()
     TAMRIEL_TOMES_MANAGER:MarkTomeSeen(selectedTomeId)
 
     TriggerTutorial(TUTORIAL_TRIGGER_TAMRIEL_TOMES_OPENED)
+
+    self:UpdateCurrencyAmount()
 end
 
 function ZO_TamrielTomesScreen_Shared:OnSelectedTamrielTomesRewardDataChanged(previousData, newData, previousTileControl, newTileControl)
-    if newData and newData:CanPreviewReward() then
-        self:BeginQuickPreview(newData)
-    else
-        self.quickPreviewTimeoutSeconds = GetFrameTimeSeconds() + QUICK_PREVIEW_DELAY_SECONDS
-        self:ClearQueuedQuickPreview()
+    if newData and newTileControl then
+        local tamrielTomesRewardData = newTileControl.object and newTileControl.object.rewardData or nil
+        if tamrielTomesRewardData and tamrielTomesRewardData:CanPreviewReward() then
+            self:BeginQuickPreview(tamrielTomesRewardData)
+            return
+        end
     end
+
+    self.quickPreviewTimeoutSeconds = GetFrameTimeSeconds() + QUICK_PREVIEW_DELAY_SECONDS
+    self:ClearQueuedQuickPreview()
 end
 
 function ZO_TamrielTomesScreen_Shared:OnUpdate(currentFrameTimeSeconds)
@@ -783,18 +884,27 @@ function ZO_TamrielTomesScreen_Shared:OnUpdate(currentFrameTimeSeconds)
 end
 
 function ZO_TamrielTomesScreen_Shared:GetNumBaseRewardPages()
-    local rewardTrackId = self.currentRewardTrackId
-    return GetNumBaseTiersForRewardTrack(rewardTrackId)
+    local tomeData = self.selectedTomeData
+    if tomeData then
+        return tomeData:GetNumBaseTiers()
+    end
+    return 0
 end
 
 function ZO_TamrielTomesScreen_Shared:GetNumBonusRewardPages()
-    local rewardTrackId = self.currentRewardTrackId
-    return GetNumBonusTiersForRewardTrack(rewardTrackId)
+    local tomeData = self.selectedTomeData
+    if tomeData then
+        return tomeData:GetNumBonusTiers()
+    end
+    return 0
 end
 
 function ZO_TamrielTomesScreen_Shared:GetNumRewardPages()
-    local rewardTrackId = self.currentRewardTrackId
-    return GetTotalNumTiersForRewardTrack(rewardTrackId)
+    local tomeData = self.selectedTomeData
+    if tomeData then
+        return tomeData:GetNumTotalTiers()
+    end
+    return 0
 end
 
 function ZO_TamrielTomesScreen_Shared:OnPageChanged(pageNumber)
@@ -805,22 +915,7 @@ function ZO_TamrielTomesScreen_Shared:OnPageChanged(pageNumber)
 
     self.currentTierIndex = zo_clamp(pageNumber, 1, self:GetNumRewardPages())
     self:RebuildGridList()
-
-    -- TODO Tamriel Tomes: Update the label to show the number of points remaining to unlock this page, if it is not unlocked, or the subsequent page (if any exists).
-    self.unlockPointsRequired:SetHidden(true)
-    if self.selectedTomeData then
-        local unlockPointsRemaining = self.selectedTomeData:GetProgressToNextTier()
-        if unlockPointsRemaining > 0 then
-            local currentTier = self.selectedTomeData:GetCurrentTier()
-            if currentTier <= self.pageNavigation:GetCurrentPage() then
-                local nextTier = currentTier + 1
-                local unlockPointsRemainingString = ZO_Currency_FormatPlatform(CURT_TOME_POINTS, unlockPointsRemaining, ZO_CURRENCY_FORMAT_AMOUNT_ICON)
-                local unlockPointsRequiredString = zo_strformat(SI_TAMRIEL_TOMES_PAGE_UNLOCK_REQUIREMENT, unlockPointsRemainingString, tostring(nextTier))
-                self.unlockPointsRequired:SetText(unlockPointsRequiredString)
-                self.unlockPointsRequired:SetHidden(false)
-            end
-        end
-    end
+    self:RefreshUnlockRequirements()
 end
 
 function ZO_TamrielTomesScreen_Shared:UpdatePageNavigation()
@@ -836,11 +931,24 @@ function ZO_TamrielTomesScreen_Shared:UpdatePageNavigation()
     -- Add initial intro page (page 0).
     pageNavigation:AddPage()
 
+    local unlockedPageIndicatorInfo = {}
+    local lockedPageIndicatorInfo =
+    {
+        color = LOCKED_PAGE_COLOR,
+    }
+
     -- Add page 1 through n.
     local numBaseRewardPages = self:GetNumBaseRewardPages()
-    pageNavigation:AddPages(numBaseRewardPages)
+    local highestUnlockedPage = self.selectedTomeData and self.selectedTomeData:GetCurrentTier() or 0
+    for pageIndex = 1, numBaseRewardPages do
+        if pageIndex <= highestUnlockedPage then
+            pageNavigation:AddPage(unlockedPageIndicatorInfo)
+        else
+            pageNavigation:AddPage(lockedPageIndicatorInfo)
+        end
+    end
 
-    -- Add any optional bonus pages.
+    -- Add bonus pages, if any.
     local numBonusRewardPages = self:GetNumBonusRewardPages()
     local pageIndicatorInfo =
     {
@@ -853,13 +961,32 @@ function ZO_TamrielTomesScreen_Shared:UpdatePageNavigation()
     pageNavigation:Commit(pageToSelect)
 end
 
-function ZO_TamrielTomesScreen_Shared:UpdateCurrencyAmount(updateImmediately)
-    local currencyAmount = GetPlayerStoredCurrencyAmount(CURT_TOME_POINTS)
+function ZO_TamrielTomesScreen_Shared:UpdateCurrencyAmount()
+    if not self:IsShowing() then
+        return
+    end
 
-    if updateImmediately then
-        self.currencyAmountTransitionManager:SetValueImmediately(currencyAmount)
-    else
+    local currencyAmount = GetPlayerStoredCurrencyAmount(CURT_TOME_POINTS)
+    local previousCurrencyAmount = ZO_TamrielTomesScreen_Shared.GetPreviousCurrencyAmount()
+    if currencyAmount ~= previousCurrencyAmount then
+        -- The currency amount has changed.
+        self.currentCurrencyAmount = currencyAmount
+        ZO_TamrielTomesScreen_Shared.SetPreviousCurrencyAmount(currencyAmount)
         self.currencyAmountTransitionManager:SetValue(currencyAmount)
         PlaySound(SOUNDS.TAMRIEL_TOMES_TOME_POINTS_ROLLING_STARTED)
+    elseif currencyAmount ~= self.currentCurrencyAmount then
+        -- The currency amount has changed but that change was presented in the opposing UI view (Gamepad vs. Keyboard).
+        self.currentCurrencyAmount = currencyAmount
+        self.currencyAmountTransitionManager:SetValueImmediately(currencyAmount)
     end
+end
+
+-- Static methods
+
+function ZO_TamrielTomesScreen_Shared.GetPreviousCurrencyAmount()
+    return ZO_TamrielTomesScreen_Shared.previousCurrencyAmount
+end
+
+function ZO_TamrielTomesScreen_Shared.SetPreviousCurrencyAmount(amount)
+    ZO_TamrielTomesScreen_Shared.previousCurrencyAmount = amount
 end

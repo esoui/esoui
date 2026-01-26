@@ -113,7 +113,7 @@ ZO_CATEGORY_LAYOUT_INFO =
         categoryName = SI_MAIN_MENU_TAMRIEL_TOMES,
         previousButtonExtraPadding = 10,
         barPadding = 20,
-        hideCategoryBar = true,
+        hideCategoryBar = false,
         hideSceneGroupBar = true,
         disabledTooltipText = zo_strformat(SI_TAMRIEL_TOMES_MAIN_MENU_TOOLTIP_FORMATTER, GetString(SI_MAIN_MENU_TAMRIEL_TOMES), GetString(SI_TAMRIEL_TOMES_ARE_UNAVAILABLE)),
 
@@ -656,11 +656,13 @@ function MainMenu_Keyboard:AddSceneGroup(category, sceneGroupName, menuBarIconDa
 
     local layoutInfo = ZO_CATEGORY_LAYOUT_INFO[category]
     local sceneGroupBarFragment = ZO_FadeSceneFragment:New(self.sceneGroupBar)
-    if not layoutInfo.hideCategoryBar then
+    if not layoutInfo.hideSceneGroupBar then
         for i = 1, #menuBarIconData do
             local sceneName = menuBarIconData[i].descriptor
             local scene = SCENE_MANAGER:GetScene(sceneName)
-            scene:AddFragment(sceneGroupBarFragment)
+            if not menuBarIconData[i].hideSceneGroupBar then
+                scene:AddFragment(sceneGroupBarFragment)
+            end
         end
     end
 
@@ -952,7 +954,7 @@ do
             return MAIN_MENU_CATEGORY_DISABLED_WHILE_WEREWOLF
         elseif categoryInfo.disableWhenPassenger and MAIN_MENU_MANAGER:IsPlayerPassenger() then
             return MAIN_MENU_CATEGORY_DISABLED_WHILE_PASSENGER
-        elseif categoryInfo.disableWhenNoTamrielTomesAreAvailable and TAMRIEL_TOMES_MANAGER and TAMRIEL_TOMES_MANAGER:GetNumActiveTomes() <= 0 then
+        elseif categoryInfo.disableWhenNoTamrielTomesAreAvailable and TAMRIEL_TOMES_MANAGER and not TAMRIEL_TOMES_MANAGER:AreTomesAvailable() then
             return MAIN_MENU_CATEGORY_DISABLED_WHILE_NO_TAMRIEL_TOMES_ARE_AVAILABLE
         else
             return MAIN_MENU_CATEGORY_ENABLED

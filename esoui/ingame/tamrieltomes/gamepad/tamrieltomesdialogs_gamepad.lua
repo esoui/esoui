@@ -209,8 +209,14 @@ ZO_Dialogs_RegisterCustomDialog("TAMRIEL_TOME_CURRENCY_REDEMPTION_GAMEPAD",
                     return true
                 end,
                 callback = function(dialog)
-                    -- TODO Tamriel Tomes: Redeem cache, disable keybind if quantity is over max
-                    ZO_Dialogs_ReleaseDialogOnButtonPress("TAMRIEL_TOME_CURRENCY_REDEMPTION_GAMEPAD")
+                    local quantity = tonumber(dialog.data.quantity)
+                    if quantity and quantity > 0 then
+                        local maxQuantity = GetPlayerStoredCurrencyAmount(CURT_TOME_POINT_CACHES)
+                        if quantity <= maxQuantity then
+                            TryRedeemCachesForTomePoints(quantity)
+                            ZO_Dialogs_ReleaseDialogOnButtonPress("TAMRIEL_TOME_CURRENCY_REDEMPTION_GAMEPAD")
+                        end
+                    end
                 end,
             },
         },

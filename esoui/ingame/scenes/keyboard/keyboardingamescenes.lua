@@ -1271,6 +1271,7 @@ do
 
         return "TamrielTomesIntroSceneKeyboard"
     end
+
     MAIN_MENU_KEYBOARD:AddSceneGroup(MENU_CATEGORY_TAMRIEL_TOMES, "tamrielTomesSceneGroup", iconData, GetPreferredScene)
 end
 
