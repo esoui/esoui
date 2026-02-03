@@ -261,13 +261,17 @@ local MENU_ENTRY_DATA =
             return ZO_PROMOTIONAL_EVENT_SELECTED_COLOR, ZO_PROMOTIONAL_EVENT_UNSELECTED_COLOR
         end,
         onSelectedCallback = function()
-            local campaignDisplayName = RETURNING_PLAYER_MANAGER:GetColorizedIntroCampaignDisplayName()
-            local descriptionText = zo_strformat(SI_RETURNING_PLAYER_DAILY_LOGIN_REWARD_DESCRIPTION, campaignDisplayName)
+            if MAIN_MENU_GAMEPAD:IsShowing() then
+                local campaignDisplayName = RETURNING_PLAYER_MANAGER:GetColorizedIntroCampaignDisplayName()
+                local descriptionText = zo_strformat(SI_RETURNING_PLAYER_DAILY_LOGIN_REWARD_DESCRIPTION, campaignDisplayName)
 
-            GAMEPAD_TOOLTIPS:LayoutTitleAndDescriptionTooltip(GAMEPAD_LEFT_TOOLTIP, campaignDisplayName, descriptionText)
+                GAMEPAD_TOOLTIPS:LayoutTitleAndDescriptionTooltip(GAMEPAD_LEFT_TOOLTIP, campaignDisplayName, descriptionText)
+            end
         end,
         onUnselectedCallback = function()
-            GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
+            if MAIN_MENU_GAMEPAD:IsShowing() then
+                GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
+            end
         end,
         activatedCallback = function()
             RETURNING_PLAYER_MANAGER:ShowReturningPlayerAnnouncementScreen()

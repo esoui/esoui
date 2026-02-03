@@ -149,17 +149,14 @@ function ZO_TamrielTomesScreen_Gamepad:InitializeKeybindStripDescriptor()
             end,
 
             enabled = function()
-                if self:IsCurrentFocusArea(self.buttonsFocusArea) then
-                    local data = self.buttonsFocus:GetFocusItem()
-                    if data and data.enabled and data.enabled() then
-                        local selectedData = self:GetSelectedTamrielTomesRewardData()
-                        if selectedData then
-                            return selectedData:CanAffordReward()
-                        end
-                    end
+                if self:IsCurrentFocusArea(self.rewardsFocusArea) then
+                    local selectedData = self:GetSelectedTamrielTomesRewardData()
+                    return selectedData and selectedData:CanAffordReward()
                 end
 
-                return true
+                -- If we're not in rewards, we're in buttons
+                local data = self.buttonsFocus:GetFocusItem()
+                return data and data.enabled and data.enabled()
             end,
 
             visible = function()
@@ -172,7 +169,7 @@ function ZO_TamrielTomesScreen_Gamepad:InitializeKeybindStripDescriptor()
                     return selectedData and selectedData:CanClaimReward()
                 end
 
-                return true
+                return self:IsCurrentFocusArea(self.buttonsFocusArea)
             end,
         },
 

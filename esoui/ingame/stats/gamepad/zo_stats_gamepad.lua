@@ -732,7 +732,19 @@ function ZO_GamepadStats:InitializeKeybindStripDescriptors()
                 if self:DoesAttributePointAllocationModeBatchSave() then
                     return true
                 else
-                    return not IsCurrentCampaignVengeanceRuleset(), GetString("SI_RESPECRESULT", RESPEC_RESULT_IN_VENGEANCE)
+                    if IsCurrentCampaignVengeanceRuleset() then
+                        return false, GetString("SI_RESPECRESULT", RESPEC_RESULT_IN_VENGEANCE)
+                    end
+
+                    if IsRaidInProgress() then
+                        return false, GetString("SI_RESPECRESULT", RESPEC_RESULT_DISALLOWED_IN_ACTIVITY)
+                    end
+
+                    if IsUnitInCombat("player") then
+                        return false, GetString("SI_RESPECRESULT", RESPEC_RESULT_IS_IN_COMBAT_ATTRIBUTE)
+                    end
+
+                    return true
                 end
             end,
             visible = function()

@@ -47,15 +47,16 @@ function ZO_HUDTracker_Base:InitializeStyles()
     local allConstants = { keyboardStyle, gamepadStyle }
     for _, constants in ipairs(allConstants) do
         constants.HEADER_PRIMARY_ANCHOR = constants.HEADER_PRIMARY_ANCHOR or ZO_Anchor:New(TOPRIGHT)
-        constants.SUBLABEL_PRIMARY_ANCHOR_OFFSET_Y = constants.SUBLABEL_PRIMARY_ANCHOR_OFFSET_Y or 2
-        constants.SUBLABEL_PRIMARY_ANCHOR = constants.SUBLABEL_PRIMARY_ANCHOR or ZO_Anchor:New(TOPRIGHT, self.headerLabel, BOTTOMRIGHT, 0, constants.SUBLABEL_PRIMARY_ANCHOR_OFFSET_Y)
     end
 
     keyboardStyle.HEADER_SECONDARY_ANCHOR = keyboardStyle.HEADER_SECONDARY_ANCHOR or ZO_Anchor:New(TOPLEFT)
-    keyboardStyle.SUBLABEL_PRIMARY_ANCHOR_OFFSET_Y = keyboardStyle.SUBLABEL_PRIMARY_ANCHOR_OFFSET_Y or 10
+    keyboardStyle.SUBLABEL_PRIMARY_ANCHOR_OFFSET_Y = keyboardStyle.SUBLABEL_PRIMARY_ANCHOR_OFFSET_Y or 2
+    keyboardStyle.SUBLABEL_PRIMARY_ANCHOR = keyboardStyle.SUBLABEL_PRIMARY_ANCHOR or ZO_Anchor:New(TOPRIGHT, self.headerLabel, BOTTOMRIGHT, 0, keyboardStyle.SUBLABEL_PRIMARY_ANCHOR_OFFSET_Y)
     keyboardStyle.SUBLABEL_SECONDARY_ANCHOR = keyboardStyle.SUBLABEL_SECONDARY_ANCHOR or ZO_Anchor:New(TOPLEFT, self.headerLabel, BOTTOMLEFT, 10, keyboardStyle.SUBLABEL_PRIMARY_ANCHOR_OFFSET_Y)
     keyboardStyle.TEXT_TYPE_HEADER = keyboardStyle.TEXT_TYPE_HEADER or MODIFY_TEXT_TYPE_NONE
 
+    gamepadStyle.SUBLABEL_PRIMARY_ANCHOR_OFFSET_Y = gamepadStyle.SUBLABEL_PRIMARY_ANCHOR_OFFSET_Y or 10
+    gamepadStyle.SUBLABEL_PRIMARY_ANCHOR = gamepadStyle.SUBLABEL_PRIMARY_ANCHOR or ZO_Anchor:New(TOPRIGHT, self.headerLabel, BOTTOMRIGHT, 0, gamepadStyle.SUBLABEL_PRIMARY_ANCHOR_OFFSET_Y)
     gamepadStyle.TEXT_TYPE_HEADER = gamepadStyle.TEXT_TYPE_HEADER or MODIFY_TEXT_TYPE_UPPERCASE
 
     ZO_PlatformStyle:New(function(style) self:ApplyPlatformStyle(style) end, keyboardStyle, gamepadStyle)

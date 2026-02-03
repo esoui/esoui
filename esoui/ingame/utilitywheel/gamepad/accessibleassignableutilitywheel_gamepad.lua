@@ -141,8 +141,8 @@ function ZO_AccessibleAssignableUtilityWheel_Gamepad:OnShowing()
     ZO_Gamepad_ParametricList_Screen.OnShowing(self)
 end
 
-function ZO_AccessibleAssignableUtilityWheel_Gamepad:OnHide()
-    ZO_Gamepad_ParametricList_Screen.OnHide(self)
+function ZO_AccessibleAssignableUtilityWheel_Gamepad:OnHiding()
+    ZO_Gamepad_ParametricList_Screen.OnHiding(self)
     self.wheel:Hide()
 end
 

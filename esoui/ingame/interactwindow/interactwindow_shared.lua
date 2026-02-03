@@ -460,34 +460,36 @@ function ZO_SharedInteraction:GetChatterOptionData(optionIndex, optionText, opti
 
             local previousIconCount = #chatterData.iconFiles
             -- Consider breadcrumb pathing in journal quests
-            for questIndex = 1, GetNumJournalQuests() do
-                local stepsTable = WORLD_MAP_QUEST_BREADCRUMBS:GetSteps(questIndex)
-                -- Check against nil since not every quest is pathable
-                if stepsTable then
-                    for stepIndex, step in pairs(stepsTable) do
-                        for conditionIndex, condition in pairs(step) do
-                            if condition.teleportNPCId == chatterData.teleportNPCId and ZO_IsElementInNumericallyIndexedTable(chatterData.waypointIdTable, condition.waypointId) then
-                                if GetJournalQuestZoneDisplayType(questIndex) == ZONE_DISPLAY_TYPE_ZONE_STORY then
-                                    if questIndex == QUEST_JOURNAL_MANAGER:GetFocusedQuestIndex() then
-                                        if #chatterData.iconFiles == previousIconCount then
-                                            table.insert(chatterData.iconFiles, "EsoUI/Art/Compass/zoneStoryQuest_icon_door_assisted.dds")
-                                        else
-                                            chatterData.iconFiles[previousIconCount + 1] = "EsoUI/Art/Compass/zoneStoryQuest_icon_door_assisted.dds"
+            for questIndex = 1, MAX_JOURNAL_QUESTS do
+                if IsValidQuestIndex(questIndex) then
+                    local stepsTable = WORLD_MAP_QUEST_BREADCRUMBS:GetSteps(questIndex)
+                    -- Check against nil since not every quest is pathable
+                    if stepsTable then
+                        for stepIndex, step in pairs(stepsTable) do
+                            for conditionIndex, condition in pairs(step) do
+                                if condition.teleportNPCId == chatterData.teleportNPCId and ZO_IsElementInNumericallyIndexedTable(chatterData.waypointIdTable, condition.waypointId) then
+                                    if GetJournalQuestZoneDisplayType(questIndex) == ZONE_DISPLAY_TYPE_ZONE_STORY then
+                                        if questIndex == QUEST_JOURNAL_MANAGER:GetFocusedQuestIndex() then
+                                            if #chatterData.iconFiles == previousIconCount then
+                                                table.insert(chatterData.iconFiles, "EsoUI/Art/Compass/zoneStoryQuest_icon_door_assisted.dds")
+                                            else
+                                                chatterData.iconFiles[previousIconCount + 1] = "EsoUI/Art/Compass/zoneStoryQuest_icon_door_assisted.dds"
+                                            end
+                                            break
+                                        elseif #chatterData.iconFiles == previousIconCount then
+                                            table.insert(chatterData.iconFiles, "EsoUI/Art/Compass/zoneStoryQuest_icon_door.dds")
                                         end
-                                        break
-                                    elseif #chatterData.iconFiles == previousIconCount then
-                                        table.insert(chatterData.iconFiles, "EsoUI/Art/Compass/zoneStoryQuest_icon_door.dds")
-                                    end
-                                else
-                                    if questIndex == QUEST_JOURNAL_MANAGER:GetFocusedQuestIndex() then
-                                        if #chatterData.iconFiles == previousIconCount then
-                                            table.insert(chatterData.iconFiles, "EsoUI/Art/Compass/quest_icon_door_assisted.dds")
-                                        else
-                                            chatterData.iconFiles[previousIconCount + 1] = "EsoUI/Art/Compass/quest_icon_door_assisted.dds"
+                                    else
+                                        if questIndex == QUEST_JOURNAL_MANAGER:GetFocusedQuestIndex() then
+                                            if #chatterData.iconFiles == previousIconCount then
+                                                table.insert(chatterData.iconFiles, "EsoUI/Art/Compass/quest_icon_door_assisted.dds")
+                                            else
+                                                chatterData.iconFiles[previousIconCount + 1] = "EsoUI/Art/Compass/quest_icon_door_assisted.dds"
+                                            end
+                                            break
+                                        elseif #chatterData.iconFiles == previousIconCount then
+                                            table.insert(chatterData.iconFiles, "EsoUI/Art/Compass/quest_icon_door.dds")
                                         end
-                                        break
-                                    elseif #chatterData.iconFiles == previousIconCount then
-                                        table.insert(chatterData.iconFiles, "EsoUI/Art/Compass/quest_icon_door.dds")
                                     end
                                 end
                             end

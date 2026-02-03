@@ -415,7 +415,7 @@
                     <CompassPinType name="AGGRO" pinSize="24" pinTexture="$(MAP_PIN_PATH)hostile_pin.dds" maxDistanceM="200" closeScale="1" farScale="1" closeAlpha="1" farAlpha="1" layer="OVERLAY" drawLevelOffsetBase="161"/>
                     <CompassPinType name="TIMELY_ESCAPE_NPC" pinTexture="$(COMPASS_PATH)timely_escape_npc.dds" maxDistanceM="COMPASS_PIN_NO_MAX_DISTANCE" closeAlpha="1.0" farAlpha="0.75" farAlphaDistanceM="85" farScaleDistanceM="200" layer="OVERLAY" drawLevelOffsetBase="162"/>
                     <CompassPinType name="ZONE_STORY_SUGGESTED_AREA" pinTexture="$(COMPASS_PATH)suggestedAreaPin.dds" clamped="true" maxDistanceM="COMPASS_PIN_NO_MAX_DISTANCE" closeAlpha="1.0" farAlpha="0.75" farAlphaDistanceM="85" farScaleDistanceM="200" drawLevelOffsetBase="200"/>
-                    <CompassPinType name="WORLD_EVENT_MAP_LOCATION_ACTIVE" maxDistanceM="COMPASS_PIN_NO_MAX_DISTANCE" closeAlpha="1.0" farAlpha="0.75" farAlphaDistanceM="85" farScaleDistanceM="200" drawLevelOffsetBase="3"/>
+                    <CompassPinType name="WORLD_EVENT_MAP_LOCATION_ACTIVE" maxDistanceM="375" closeAlpha="1.0" farAlpha="0.75" farAlphaDistanceM="85" farScaleDistanceM="200" drawLevelOffsetBase="3"/>
                 </Compass>
             </Controls>
         </Control>

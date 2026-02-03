@@ -115,7 +115,7 @@ function ZO_AdventureZoneBossTree_Shared:RefreshBosses()
     for boss, bossControl in pairs(self.bossControls) do
         local bossState = GetAdventureZoneBossState(boss)
         local bossIcon = bossState == ADVENTURE_ZONE_BOSS_STATE_DEFEATED and GetAdventureZoneBossKeyFragmentIconFileIndex(boss) or GetAdventureZoneBossIconFileIndex(boss)
-        local desaturation = ZO_AdventureZoneBossTree_Shared.HasBossBeenBeaten(boss) and 1 or 0
+        local desaturation = ZO_AdventureZoneBossTree_Shared.HasBossBeenBeaten(boss) and 0 or 1
         local bossIconControl = bossControl:GetNamedChild("Icon")
         bossIconControl:SetTexture(bossIcon)
         bossIconControl:SetDesaturation(desaturation)

@@ -785,7 +785,19 @@ function ZO_SkillsManager:InitializeKeybindDescriptors()
                 if SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeBatchSave() then
                     return true
                 else
-                    return not IsCurrentCampaignVengeanceRuleset(), GetString("SI_RESPECRESULT", RESPEC_RESULT_IN_VENGEANCE)
+                    if IsCurrentCampaignVengeanceRuleset() then
+                        return false, GetString("SI_RESPECRESULT", RESPEC_RESULT_IN_VENGEANCE)
+                    end
+
+                    if IsRaidInProgress() then
+                        return false, GetString("SI_RESPECRESULT", RESPEC_RESULT_DISALLOWED_IN_ACTIVITY)
+                    end
+
+                    if IsUnitInCombat("player") then
+                        return false, GetString("SI_RESPECRESULT", RESPEC_RESULT_IS_IN_COMBAT)
+                    end
+
+                    return true
                 end
             end,
             callback = function()
