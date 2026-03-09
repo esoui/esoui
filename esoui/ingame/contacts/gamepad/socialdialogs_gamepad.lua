@@ -284,12 +284,13 @@ function ZO_GamepadSocialDialogs:InitializeAddFriendDialog()
         },
     }
 
-    if not IsConsoleUI() then
-        table.insert(friendParametricList, 2, 
+    if not ZO_IsConsoleOrGameCoreUI() then
+        table.insert(friendParametricList, 2,
         -- note
         {
             template = "ZO_Gamepad_GenericDialog_Parametric_TextFieldItem",
-            templateData = {
+            templateData =
+            {
                 textChangedCallback = function(control) 
                     noteText = control:GetText()
                 end,
@@ -316,7 +317,6 @@ function ZO_GamepadSocialDialogs:InitializeAddFriendDialog()
                 end,
                 narrationText = ZO_GetDefaultParametricListEditBoxNarrationText,
             },
-            visible = IsConsoleUI,
         })
     end
 

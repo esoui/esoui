@@ -208,7 +208,7 @@ local ZO_OptionsPanel_Audio_ControlData =
             text = SI_GAMEPAD_AUDIO_OPTIONS_VOICECHAT_VOLUME,
             minValue = 40,
             maxValue = 75,
-            exists = IsConsoleUI,
+            exists = ZO_IsConsoleOrGameCoreUI,
         },
         --Options_Audio_CombatMusicMode
         [AUDIO_SETTING_COMBAT_MUSIC_MODE] =

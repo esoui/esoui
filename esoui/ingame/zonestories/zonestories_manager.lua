@@ -19,6 +19,13 @@ ZO_ZONE_STORY_ACTIVITY_COMPLETION_TYPES_SORTED_LIST =
     ZONE_COMPLETION_TYPE_MAGES_GUILD_BOOKS,
 }
 
+ZO_ZONE_STORY_NON_TRACKABLE_TYPES =
+{
+    [ZONE_COMPLETION_TYPE_NONE] = true,
+    [ZONE_COMPLETION_TYPE_FEATURED_ACHIEVEMENTS] = true,
+    [ZONE_COMPLETION_TYPE_MAGES_GUILD_BOOKS] = true,
+}
+
 ZO_ZoneStories_Manager = ZO_InitializingCallbackObject:Subclass()
 
 function ZO_ZoneStories_Manager:Initialize()
@@ -168,6 +175,10 @@ end
 
 function ZO_ZoneStories_Manager.GetActivityCompletionProgressText(zoneId, completionType)
     return select(5, ZO_ZoneStories_Manager.GetActivityCompletionProgressValuesAndText(zoneId, completionType))
+end
+
+function ZO_ZoneStories_Manager.CanTrackCompletionType(completionType)
+    return not ZO_ZONE_STORY_NON_TRACKABLE_TYPES[completionType]
 end
 
 function ZO_ZoneStories_Manager.IsZoneComplete(zoneId)

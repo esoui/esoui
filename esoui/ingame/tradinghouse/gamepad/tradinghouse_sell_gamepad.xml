@@ -1,5 +1,5 @@
 <GuiXml>
     <Controls>
-        <Control name="ZO_TradingHouse_Sell_Gamepad" inherits="ZO_TradingHouse_ItemList_Gamepad" virtual="true" hidden="true" />
+        <Control name="ZO_TradingHouse_Sell_Gamepad" inherits="ZO_TradingHouse_ItemList_Gamepad" virtual="true" hidden="true"/>
     </Controls>
 </GuiXml>

@@ -20,7 +20,6 @@
                 </Label>
             </Controls>
         </Control>
-
         <TopLevelControl name="ZO_GuildWeeklyBidsTopLevel_Gamepad" hidden="true" inherits="ZO_AnchoredToQuadrant_1_2_3_Background ZO_GamepadInteractiveSortFilterListControl">
             <OnInitialized>
                 ZO_GuildWeeklyBidsTopLevel_Gamepad_OnInitialized(self)
@@ -38,7 +37,7 @@
                             <Controls>
                                 <Control name="$(parent)Order" inherits="ZO_GamepadInteractiveFilterHeader">
                                     <Dimensions x="65"/>
-                                    <Anchor point="TOPLEFT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_HIGHLIGHT_PADDING" />
+                                    <Anchor point="TOPLEFT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_HIGHLIGHT_PADDING"/>
                                     <OnInitialized>
                                         ZO_GamepadInteractiveSortFilterHeader_Initialize(self, GetString(SI_GUILD_WEEKLY_BIDS_HEADER_ORDER), "order", TEXT_ALIGN_LEFT)
                                     </OnInitialized>

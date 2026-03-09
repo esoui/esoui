@@ -4,13 +4,12 @@
             <OnInitialized>
                 ZO_HousingFurnitureBrowser_Gamepad_OnInitialize(self)
             </OnInitialized>
-
             <Controls>
-                <Control name="$(parent)Occupants" inherits="ZO_HousingOccupants_Gamepad" />
-                <Control name="$(parent)Visitors" inherits="ZO_HousingPermissionsVisitors_Gamepad" />
-                <Control name="$(parent)BanList" inherits="ZO_HousingPermissionsBanList_Gamepad" />
-                <Control name="$(parent)GuildVisitors" inherits="ZO_HousingPermissionsGuildVisitors_Gamepad" />
-                <Control name="$(parent)GuildBanList" inherits="ZO_HousingPermissionsGuildBanList_Gamepad" />
+                <Control name="$(parent)Occupants" inherits="ZO_HousingOccupants_Gamepad"/>
+                <Control name="$(parent)Visitors" inherits="ZO_HousingPermissionsVisitors_Gamepad"/>
+                <Control name="$(parent)BanList" inherits="ZO_HousingPermissionsBanList_Gamepad"/>
+                <Control name="$(parent)GuildVisitors" inherits="ZO_HousingPermissionsGuildVisitors_Gamepad"/>
+                <Control name="$(parent)GuildBanList" inherits="ZO_HousingPermissionsGuildBanList_Gamepad"/>
             </Controls>
         </TopLevelControl>
     </Controls>

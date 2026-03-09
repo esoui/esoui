@@ -1,0 +1,94 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_TamrielTomeCurrencyRedemptionDialog_Keyboard" inherits="ZO_CustomDialogBase">
+            <OnInitialized>
+                ZO_TamrielTomeCurrencyRedemptionDialog_Keyboard_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)ItemContainer" inherits="ZO_DialogContentAnchors" resizeToFitDescendents="true">
+                    <Controls>
+                        <Texture name="$(parent)Icon" level="3">
+                            <Anchor point="TOPLEFT"/>
+                            <Dimensions x="64" y="64"/>
+                        </Texture>
+                        <Label name="$(parent)ItemName" font="ZoFontWinH2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Icon" relativePoint="TOPRIGHT" offsetX="10"/>
+                            <Dimensions x="300"/>
+                        </Label>
+                        <Control name="$(parent)QuantityContainer" resizeToFitDescendents="true">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)ItemName" relativePoint="BOTTOMLEFT"/>
+                            <Controls>
+                                <Label name="$(parent)Name" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_TAMRIEL_TOMES_CURRENCY_REDEMPTION_QUANTITY_LABEL">
+                                    <Anchor point="LEFT" offsetY="6"/>
+                                </Label>
+                                <Control name="$(parent)Spinner" inherits="ZO_EditSpinner">
+                                    <Anchor point="LEFT" relativeTo="$(parent)Name" relativePoint="RIGHT" offsetX="10"/>
+                                    <Dimensions x="60" y="28"/>
+                                </Control>
+                                <Label name="$(parent)Maximum" font="ZoFontGame" hidden="true" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                                    <Anchor point="LEFT" relativeTo="$(parent)Spinner" relativePoint="RIGHT" offsetX="10"/>
+                                </Label>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+                <Control name="$(parent)BalanceContainer" inherits="ZO_DialogCurrencyLabelValueContainer_Keyboard">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)ItemContainer" relativePoint="BOTTOMLEFT" offsetY="20"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)ItemContainer" relativePoint="BOTTOMRIGHT" offsetY="20"/>
+                    <Controls>
+                        <Label name="$(parent)CurrencyLabel" override="true" text="SI_TAMRIEL_TOMES_CURRENCY_REDEMPTION_CURRENT_BALANCE_LABEL_KEYBOARD"/>
+                    </Controls>
+                </Control>
+                <Control name="$(parent)PostBalanceContainer" inherits="ZO_DialogCurrencyLabelValueContainer_Keyboard">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)BalanceContainer" relativePoint="BOTTOMLEFT" offsetY="30"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)BalanceContainer" relativePoint="BOTTOMRIGHT" offsetY="30"/>
+                    <Controls>
+                        <Label name="$(parent)CurrencyLabel" override="true" text="SI_TAMRIEL_TOMES_CURRENCY_REDEMPTION_POST_REDEMPTION_BALANCE_LABEL_KEYBOARD"/>
+                    </Controls>
+                </Control>
+                <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton"/>
+                <Control name="$(parent)Confirm" inherits="ZO_CustomDialogButton"/>
+            </Controls>
+        </TopLevelControl>
+        <TopLevelControl name="ZO_TamrielTomeTokenRedemptionDialog_Keyboard" inherits="ZO_CustomDialogBase">
+            <OnInitialized>
+                ZO_TamrielTomeTokenRedemptionDialog_Keyboard_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Text" inherits="ZO_DialogContentAnchors" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame"/>
+                <Control name="$(parent)BalanceContainer" inherits="ZO_DialogCurrencyLabelValueContainer_Keyboard">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Text" relativePoint="BOTTOMLEFT" offsetY="30"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Text" relativePoint="BOTTOMRIGHT" offsetY="30"/>
+                    <Controls>
+                        <Label name="$(parent)CurrencyLabel" override="true" text="SI_TAMRIEL_TOMES_TOKEN_REDEMPTION_PRE_REDEMPTION_BALANCE_LABEL_KEYBOARD"/>
+                    </Controls>
+                </Control>
+                <Control name="$(parent)PostBalanceContainer" inherits="ZO_DialogCurrencyLabelValueContainer_Keyboard">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)BalanceContainer" relativePoint="BOTTOMLEFT" offsetY="30"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)BalanceContainer" relativePoint="BOTTOMRIGHT" offsetY="30"/>
+                    <Controls>
+                        <Label name="$(parent)CurrencyLabel" override="true" text="SI_TAMRIEL_TOMES_TOKEN_REDEMPTION_POST_REDEMPTION_BALANCE_LABEL_KEYBOARD"/>
+                    </Controls>
+                </Control>
+                <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton"/>
+                <Control name="$(parent)Confirm" inherits="ZO_CustomDialogButton"/>
+            </Controls>
+        </TopLevelControl>
+        <TopLevelControl name="ZO_TamrielTomeInsufficientTokenRedemptionDialog_Keyboard" inherits="ZO_CustomDialogBase">
+            <OnInitialized>
+                ZO_TamrielTomeInsufficientTokenRedemptionDialog_Keyboard_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Text" inherits="ZO_DialogContentAnchors" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame"/>
+                <Control name="$(parent)BalanceContainer" inherits="ZO_DialogCurrencyLabelValueContainer_Keyboard">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Text" relativePoint="BOTTOMLEFT" offsetY="30"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Text" relativePoint="BOTTOMRIGHT" offsetY="30"/>
+                    <Controls>
+                        <Label name="$(parent)CurrencyLabel" override="true" text="SI_TAMRIEL_TOMES_CURRENCY_REDEMPTION_CURRENT_BALANCE_LABEL_KEYBOARD"/>
+                    </Controls>
+                </Control>
+                <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton"/>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

@@ -40,10 +40,12 @@ function ZO_HousingPreviewDialog_Shared:Initialize(control, dialogName)
     self.goldPurchaseOptionControl = SetupPurchaseOptionControl("Gold")
     self.crownsPurchaseOptionControl = SetupPurchaseOptionControl("Crowns")
     self.crownGemsPurchaseOptionControl = SetupPurchaseOptionControl("CrownGems")
+    self.tradeBarsPurchaseOptionControl = SetupPurchaseOptionControl("TradeBars")
     self.marketPurchaseOptionControlsByCurrencyType =
     {
         [MKCT_CROWNS] = self.crownsPurchaseOptionControl,
         [MKCT_CROWN_GEMS] = self.crownGemsPurchaseOptionControl,
+        [MKCT_TRADE_BARS] = self.tradeBarsPurchaseOptionControl,
     }
 
     self.dialogName = dialogName
@@ -193,7 +195,7 @@ do
         local currencyColor = ZO_SELECTED_TEXT
         if requiredToBuyErrorText then
             currencyColor = ZO_DISABLED_TEXT
-        elseif (currencyType ~= CURT_CROWNS and currencyType ~= CURT_CROWN_GEMS) and GetCurrencyAmount(currencyType, currencyLocation) < priceAfterDiscount then
+        elseif (not self.marketPurchaseOptionControlsByCurrencyType[currencyType]) and GetCurrencyAmount(currencyType, currencyLocation) < priceAfterDiscount then
             currencyColor = ZO_ERROR_COLOR
         end
 
@@ -287,6 +289,7 @@ do
         ResetPurchaseOptionControl(self.goldPurchaseOptionControl)
         ResetPurchaseOptionControl(self.crownsPurchaseOptionControl)
         ResetPurchaseOptionControl(self.crownGemsPurchaseOptionControl)
+        ResetPurchaseOptionControl(self.tradeBarsPurchaseOptionControl)
 
         if entryData then
             local currentHousePreviewTemplateId = GetCurrentHousePreviewTemplateId()

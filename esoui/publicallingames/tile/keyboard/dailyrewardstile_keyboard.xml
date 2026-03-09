@@ -4,13 +4,11 @@
             <OnInitialized>
                 ZO_DailyRewardsTile_Keyboard_OnInitialized(self)
             </OnInitialized>
-            
             <Controls>
                 <Control name="$(parent)Container" override="true">
                     <Controls>
-                        <Backdrop name="$(parent)Highlight" inherits="ZO_AnnouncementTileHighlight_Keyboard" />
-
-                        <Button name="$(parent)ActionButton" override="true" mouseOverBlendMode="ALPHA" level="5" />
+                        <Backdrop name="$(parent)Highlight" inherits="ZO_AnnouncementTileHighlight_Keyboard"/>
+                        <Button name="$(parent)ActionButton" override="true" mouseOverBlendMode="ALPHA" level="5"/>
                     </Controls>
                 </Control>
             </Controls>

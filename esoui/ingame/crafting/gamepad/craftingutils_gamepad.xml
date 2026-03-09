@@ -1,78 +1,67 @@
 <GuiXml>
     <Controls>
         <Button name="ZO_CraftingSlot_Gamepad" inherits="ZO_ItemSlot_Gamepad" virtual="true">
-            <Dimensions x="64" y="64" />
-
+            <Dimensions x="64" y="64"/>
             <OnInitialized>
                 ZO_CraftingSlot_OnInitialized(self)
             </OnInitialized>
-
-            <Textures mouseOver="" pressedMouseOver="" />
-
+            <Textures mouseOver="" pressedMouseOver=""/>
             <Controls>
                 <Backdrop name="$(parent)Bg" inherits="ZO_DefaultBackdrop_Gamepad" excludeFromResizeToFitExtents="true">
-                    <Anchor point="TOPLEFT" offsetX="-65" offsetY="-22" />
-                    <Anchor point="BOTTOMRIGHT" offsetX="65" offsetY="106" />
+                    <Anchor point="TOPLEFT" offsetX="-65" offsetY="-22"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="65" offsetY="106"/>
                 </Backdrop>
                 <Texture name="$(parent)Glow" textureFile="EsoUI/Art/Quickslots/quickslot_highlight_blob.dds" alpha="0" level="0">
                     <Dimensions x="128" y="128"/>
                     <Anchor point="CENTER"/>
                 </Texture>
                 <Texture name="$(parent)DropCallout" layer="OVERLAY" hidden="true" textureFile="EsoUI/Art/ActionBar/actionBar_mouseOver.dds">
-                    <Dimensions x="64" y="64" />
+                    <Dimensions x="64" y="64"/>
                     <Anchor point="CENTER"/>
                 </Texture>
                 <Texture name="$(parent)EmptySlotIcon" layer="OVERLAY" hidden="true">
-                    <Dimensions x="128" y="128" />
-                    <Anchor point="CENTER" relativeTo="$(parent)Bg" />
+                    <Dimensions x="128" y="128"/>
+                    <Anchor point="CENTER" relativeTo="$(parent)Bg"/>
                 </Texture>
             </Controls>
         </Button>
-        
         <Control name="ZO_CraftingTooltip_Gamepad" inherits="ZO_ResizingFloatingScrollTooltip_Gamepad ZO_CraftingTooltip_AddBurstAndGlow" virtual="true">
             <OnInitialized>
                 ZO_GamepadCraftingUtils_CraftingTooltip_Gamepad_Initialize(self, ZO_GamepadCraftingUtils_CraftingTooltip_StandardFloatingBottomScreenResizeHandler)
             </OnInitialized>
         </Control>
-        
         <Control name="ZO_GamepadCraftingIngredientBarTemplate" virtual="true">
-            <Dimensions y="ZO_GAMEPAD_CRAFTING_UTILS_FLOATING_SLOT_STANDARD_HEIGHT" />
+            <Dimensions y="ZO_GAMEPAD_CRAFTING_UTILS_FLOATING_SLOT_STANDARD_HEIGHT"/>
             <Anchor point="BOTTOM" relativeTo="GuiRoot" relativePoint="BOTTOMLEFT" offsetX="ZO_GAMEPAD_PANEL_FLOATING_CENTER_QUADRANT_1_SHOWN" offsetY="ZO_GAMEPAD_CRAFTING_UTILS_FLOATING_BOTTOM_OFFSET"/>
             <Controls>
                 <Control name="$(parent)SlotCenter">
-                    <Dimensions y="64" x="64" />
+                    <Dimensions y="64" x="64"/>
                     <Anchor point="TOP" offsetY="22"/>
                 </Control>
             </Controls>
         </Control>
-
         <Control name="ZO_GamepadMultiCraftSpinnerTemplate" virtual="true">
-            <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" y="58" />
+            <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" y="58"/>
             <Controls>
                 <Backdrop name="$(parent)Highlight" inherits="ZO_GamepadWhiteOutlineHighlight" excludeFromResizeToFitExtents="true">
-                    <Anchor point="TOPLEFT" offsetX="-20" />
-                    <Anchor point="BOTTOMRIGHT" offsetX="20" />
+                    <Anchor point="TOPLEFT" offsetX="-20"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="20"/>
                 </Backdrop>
-
                 <Label name="$(parent)Label" text="SI_GAMEPAD_QUANTITY_SPINNER_TEMPLATE_LABEL" font="ZoFontGamepad27" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE">
-                    <Anchor point="LEFT" />
+                    <Anchor point="LEFT"/>
                 </Label>
-
                 <Control name="$(parent)Spinner" inherits="ZO_GamepadSpinner">
-                    <Anchor point="CENTER" />
-                    <Dimensions x="110" y="42" />
+                    <Anchor point="CENTER"/>
+                    <Dimensions x="110" y="42"/>
                     <Controls>
-                        <Label name="$(parent)Display" font="ZoFontGamepad42" override="true" />
+                        <Label name="$(parent)Display" font="ZoFontGamepad42" override="true"/>
                     </Controls>
                 </Control>
             </Controls>
         </Control>
-
         <!-- This alias is so we can use an independent templateData from the multicraft template -->
-        <Control name="ZO_GamepadMultiDeconstructSpinnerTemplate" inherits="ZO_GamepadMultiCraftSpinnerTemplate" virtual="true" />
-        
+        <Control name="ZO_GamepadMultiDeconstructSpinnerTemplate" inherits="ZO_GamepadMultiCraftSpinnerTemplate" virtual="true"/>
     </Controls>
-  
     <Animations>
         <AnimationTimeline name="ZO_CraftingSlot_Gamepad_Bounce">
             <Animations>

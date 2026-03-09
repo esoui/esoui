@@ -31,9 +31,9 @@
             <Controls>
                 <Backdrop name="$(parent)Overlay" hidden="true">
                     <AnchorFill/>
-                    <Center file="EsoUI/Art/UICombatOverlay/UICombatOverlayCenter.dds" />
-                    <Edge file="EsoUI/Art/UICombatOverlay/UICombatOverlayEdge.dds" edgeFileWidth="2048" edgeFileHeight="256" />
-                    <Insets left="256" top="256" right="-256" bottom="-256" />
+                    <Center file="EsoUI/Art/UICombatOverlay/UICombatOverlayCenter.dds"/>
+                    <Edge file="EsoUI/Art/UICombatOverlay/UICombatOverlayEdge.dds" edgeFileWidth="2048" edgeFileHeight="256"/>
+                    <Insets left="256" top="256" right="-256" bottom="-256"/>
                 </Backdrop>
             </Controls>
         </TopLevelControl>

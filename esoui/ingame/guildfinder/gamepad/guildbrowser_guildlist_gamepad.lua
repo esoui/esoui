@@ -89,6 +89,7 @@ function ZO_GuildBrowser_GuildList_Gamepad:PopulateList()
 end
 
 function ZO_GuildBrowser_GuildList_Gamepad:SetupRow(control, data)
+    ZO_SortFilterList_Gamepad.SetupRow(self, control, data)
     ZO_GuildBrowser_GuildList_Shared.SetupRow(self, control, data)
 
     control.guildSizeHeaderLabel:SetText(GetString("SI_GUILDMETADATAATTRIBUTE", GUILD_META_DATA_ATTRIBUTE_SIZE))

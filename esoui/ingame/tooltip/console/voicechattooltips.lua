@@ -87,7 +87,7 @@ function ZO_Tooltip:LayoutVoiceChatParticipants(channelData, participantDataList
         local badRepText
         if ZO_IsPlaystationPlatform() then
             badRepText = GetString(SI_GAMEPAD_VOICECHAT_PARTICIPANTS_REPUTATION_RESTRICTION_PS4)
-        elseif GetUIPlatform() == UI_PLATFORM_XBOX then
+        elseif ZO_IsConsoleOrGameCoreUI() then
             badRepText = GetString(SI_GAMEPAD_VOICECHAT_PARTICIPANTS_REPUTATION_RESTRICTION_XB1)
         end
         reputationSection:AddLine(badRepText, self:GetStyle("voiceChatGamepadReputation"))

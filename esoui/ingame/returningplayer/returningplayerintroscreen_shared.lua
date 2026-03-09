@@ -1,6 +1,6 @@
 ZO_ReturningPlayerIntroScreen_Shared = ZO_DeferredInitializingObject:Subclass()
 
-function ZO_ReturningPlayerIntroScreen_Shared:Initialize(control, scene, rewardTemplate)
+function ZO_ReturningPlayerIntroScreen_Shared:Initialize(control, scene)
     self.control = control
 
     ZO_DeferredInitializingObject.Initialize(self, scene)
@@ -9,8 +9,6 @@ function ZO_ReturningPlayerIntroScreen_Shared:Initialize(control, scene, rewardT
     scene:AddFragment(self.fragment)
 
     scene:SetHideSceneConfirmationCallback(function(...) self:OnConfirmHideScene(...) end)
-
-    self.rewardTemplate = rewardTemplate
 end
 
 function ZO_ReturningPlayerIntroScreen_Shared:OnDeferredInitialize()

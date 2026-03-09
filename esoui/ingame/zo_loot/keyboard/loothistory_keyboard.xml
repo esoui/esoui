@@ -1,39 +1,34 @@
-<GuiXml> 
+<GuiXml>
     <Controls>
         <Control name="ZO_LootHistory_KeyboardEntry" inherits="ZO_LootHistory_SharedEntry" virtual="true">
-            <Anchor point="BOTTOMRIGHT" />
-          
+            <Anchor point="BOTTOMRIGHT"/>
             <Controls>
                 <Texture name="$(parent)Icon" override="true">
                     <Controls>
-                        <Label name="$(parent)OverlayText" override="true" font="ZoFontGameOutline" />
-                        
+                        <Label name="$(parent)OverlayText" override="true" font="ZoFontGameOutline"/>
                         <Texture name="$(parent)StatusIcon" override="true">
                             <Anchor point="RIGHT" relativePoint="LEFT" offsetX="-5"/>
                         </Texture>
                     </Controls>
                 </Texture>
-
-                <Label name="$(parent)Label" font="ZoFontGameShadow"  verticalAlignment="CENTER" wrapMode="ELLIPSIS" maxLineCount="2">
+                <Label name="$(parent)Label" font="ZoFontGameShadow" verticalAlignment="CENTER" wrapMode="ELLIPSIS" maxLineCount="2">
                     <Dimensions x="230"/>
                     <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="10"/>
                 </Label>
-              
                 <Texture name="$(parent)Bg" textureFile="EsoUI/Art/Miscellaneous/listItem_backdrop_white.dds" override="true">
-                    <TextureCoords left="0" right="1" top="0" bottom=".78125" />
+                    <TextureCoords left="0" right="1" top="0" bottom=".78125"/>
                     <Anchor point="TOPLEFT" offsetX="-50"/>
                     <Anchor point="BOTTOMRIGHT" offsetX="50"/>
                     <Controls>
                         <Texture name="$(parent)Highlight" override="true">
-                            <TextureCoords left="0" right="1" top="0" bottom=".75" />
-                            <Dimensions x="128" y="50" />
+                            <TextureCoords left="0" right="1" top="0" bottom=".75"/>
+                            <Dimensions x="128" y="50"/>
                             <Anchor point="TOPLEFT" offsetX="-20"/>
                         </Texture>
                     </Controls>
                 </Texture>
             </Controls>
         </Control>
-      
         <TopLevelControl name="ZO_LootHistoryControl_Keyboard" inherits="ZO_LootHistory_Shared">
             <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" offsetY="-95"/>
             <OnInitialized>
@@ -41,7 +36,7 @@
             </OnInitialized>
             <Controls>
                 <Control name="$(parent)Container" override="true">
-                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)PersistentContainer" relativePoint="TOPRIGHT" offsetY="ZO_GAMEPAD_LOOT_HISTORY_ENTRY_SPACING_Y" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)PersistentContainer" relativePoint="TOPRIGHT" offsetY="ZO_GAMEPAD_LOOT_HISTORY_ENTRY_SPACING_Y"/>
                 </Control>
             </Controls>
         </TopLevelControl>

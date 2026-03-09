@@ -1,0 +1,5 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="BuildMarkupTestTemplate" virtual="true"/>
+    </Controls>
+</GuiXml>

@@ -254,10 +254,11 @@ do
             end
         end
 
-        if #marketProductIds == 0 then
+        local currentChapterId = self.currentChapterData:GetChapterUpgradeId()
+        if #marketProductIds == 0 and currentChapterId ~= 0 then
             --static fallback data
             table.insert(self.chapterUpgradeDataList, self.currentChapterData)
-            self.chapterUpgradeDataById[self.currentChapterData:GetChapterUpgradeId()] = self.currentChapterData
+            self.chapterUpgradeDataById[currentChapterId] = self.currentChapterData
         end
 
         table.sort(self.chapterUpgradeDataList, ChapterUpgradeDataSort)

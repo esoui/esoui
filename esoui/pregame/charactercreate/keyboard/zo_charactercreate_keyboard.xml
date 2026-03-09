@@ -1,9 +1,8 @@
 <GuiXml>
     <Controls>
-        <Label name="CCLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true" />
-        
+        <Label name="CCLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true"/>
         <Button name="ZO_CharacterCreateSliderPadlock_Keyboard" inherits="ZO_ButtonBehaviorClickSound" mouseOverBlendMode="ADD" virtual="true">
-            <Dimensions x="16" y="16" />
+            <Dimensions x="16" y="16"/>
             <OnInitialized>
                 ZO_ToggleButton_Initialize(self, TOGGLE_BUTTON_TYPE_PADLOCK)
             </OnInitialized>
@@ -11,136 +10,110 @@
                 ZO_CharacterCreateSlider_Keyboard_TogglePadlock(self)
             </OnClicked>
         </Button>
-
         <Button name="SelectorButton" mouseOverBlendMode="ADD" hidden="true" virtual="true" clickSound="Click_CC_Selector">
             <OnClicked>
                 ZO_CharacterCreate_OnSelectorClicked(self)
             </OnClicked>
-
             <OnMouseEnter>
                 ZO_CharacterCreate_MouseEnterNamedSelector(self)
             </OnMouseEnter>
-
             <OnMouseExit>
                 ZO_CharacterCreate_MouseExitNamedSelector(self)
             </OnMouseExit>
         </Button>
-
         <Button name="RaceSelectorButton" inherits="SelectorButton" virtual="true" clickSound="Click_RaceButton">
-            <Dimensions x="64" y="64" />
+            <Dimensions x="64" y="64"/>
             <OnInitialized>
                 self.selectorType = CHARACTER_CREATE_SELECTOR_RACE
                 self.tooltipFormatter = SI_CREATE_CHARACTER_RACE_SELECTOR_TOOLTIP
             </OnInitialized>
         </Button>
-
         <Control name="RaceSelector" virtual="true">
-            <Dimensions x="120" y="270" />
-
+            <Dimensions x="120" y="270"/>
             <Controls>
                 <Button name="$(parent)1" inherits="RaceSelectorButton">
-                    <Anchor point="TOP" offsetY="6" />
+                    <Anchor point="TOP" offsetY="6"/>
                 </Button>
-
                 <Button name="$(parent)2" inherits="RaceSelectorButton">
-                    <Anchor point="TOP" offsetY="86" />
+                    <Anchor point="TOP" offsetY="86"/>
                 </Button>
-
                 <Button name="$(parent)3" inherits="RaceSelectorButton">
-                    <Anchor point="TOP" offsetY="166" />
+                    <Anchor point="TOP" offsetY="166"/>
                 </Button>
             </Controls>
         </Control>
-
         <Button name="AllianceSelectorButton" inherits="SelectorButton" virtual="true" clickSound="Click_AllianceButton">
-            <Dimensions x="64" y="64" />
+            <Dimensions x="64" y="64"/>
             <OnInitialized>
                 self.selectorType = CHARACTER_CREATE_SELECTOR_ALLIANCE
                 self.tooltipFormatter = SI_CREATE_CHARACTER_ALLIANCE_SELECTOR_TOOLTIP
             </OnInitialized>
         </Button>
-
         <Control name="AllianceSelector" virtual="true">
-            <Dimensions x="360" y="64" />
-
+            <Dimensions x="360" y="64"/>
             <Controls>
                 <Button name="$(parent)1" inherits="AllianceSelectorButton">
-                    <Anchor point="TOPLEFT" offsetX="30" />
+                    <Anchor point="TOPLEFT" offsetX="30"/>
                 </Button>
-
                 <Button name="$(parent)2" inherits="AllianceSelectorButton">
-                    <Anchor point="TOPLEFT" offsetX="150" />
+                    <Anchor point="TOPLEFT" offsetX="150"/>
                 </Button>
-
                 <Button name="$(parent)3" inherits="AllianceSelectorButton">
-                    <Anchor point="TOPLEFT" offsetX="270" />
+                    <Anchor point="TOPLEFT" offsetX="270"/>
                 </Button>
             </Controls>
         </Control>
-
-        <Control name="GenderSelector" resizeToFitDescendents="true" virtual="true" >
+        <Control name="GenderSelector" resizeToFitDescendents="true" virtual="true">
             <Controls>
                 <Button name="$(parent)Button" inherits="SelectorButton" hidden="false">
-                    <Dimensions x="64" y="64" />
-                    <Anchor point="TOP" />
-
+                    <Dimensions x="64" y="64"/>
+                    <Anchor point="TOP"/>
                     <OnInitialized>
                         self.selectorType = CHARACTER_CREATE_SELECTOR_GENDER
                     </OnInitialized>
-
                     <OnMouseEnter>
                         ZO_CharacterCreateGenderSelector_OnMouseEnter(self)
                     </OnMouseEnter>
-
                     <OnMouseExit>
                         ZO_CharacterCreateGenderSelector_OnMouseExit(self)
                     </OnMouseExit>
                 </Button>
-
                 <Label name="$(parent)Label" inherits="CCLabel" font="ZoFontGameShadow" mouseEnabled="true">
-                    <Anchor point="TOP" relativeTo="$(parent)Button" relativePoint="BOTTOM" offsetY="5" />
+                    <Anchor point="TOP" relativeTo="$(parent)Button" relativePoint="BOTTOM" offsetY="5"/>
                     <OnMouseUp>
                         ZO_CharacterCreateGenderSelectorLabel_OnMouseClicked(self, button, upInside)
                     </OnMouseUp>
                 </Label>
             </Controls>
         </Control>
-
         <Button name="ClassSelectorButton" inherits="SelectorButton" virtual="true" clickSound="Click_ClassButton">
-            <Dimensions x="64" y="64" />
+            <Dimensions x="64" y="64"/>
             <OnInitialized>
                 self.selectorType = "class"
                 self.tooltipFormatter = SI_CREATE_CHARACTER_CLASS_SELECTOR_TOOLTIP
             </OnInitialized>
         </Button>
-
         <Control name="ZO_PaperdollManipulation" virtual="true">
             <Anchor point="TOPLEFT" relativeTo="GuiRoot" offsetX="328"/>
             <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" offsetX="-430"/>
-
             <OnEffectivelyShown>
                 ZO_PaperdollManipulation_OnEffectivelyShown(self)
             </OnEffectivelyShown>
-
             <OnEffectivelyHidden>
                 ZO_PaperdollManipulation_OnEffectivelyHidden(self)
             </OnEffectivelyHidden>
-
             <OnMouseEnter>
                 WINDOW_MANAGER:SetMouseCursor(MOUSE_CURSOR_ROTATE)
             </OnMouseEnter>
-
             <OnMouseExit>
                 WINDOW_MANAGER:SetMouseCursor(MOUSE_CURSOR_DO_NOT_CARE)
             </OnMouseExit>
-
             <OnMouseDown>
                 CharacterCreateStartMouseSpin()
             </OnMouseDown>
-
             <OnMouseWheel>
                 if delta ~= 0 then
-                    if delta > 0 then
+                    if delta &gt; 0 then
                         MoveCharacterCameraZoomAmount(1)
                     else
                         MoveCharacterCameraZoomAmount(-1)
@@ -148,70 +121,56 @@
                 end
             </OnMouseWheel>
         </Control>
-
         <TopLevelControl name="ZO_CharacterCreateSkipTutorialDialog" inherits="ZO_CustomDialogBase">
             <OnInitialized>
                 ZO_CharacterCreateSkipTutorialDialog_Initialize(self)
             </OnInitialized>
-
             <Controls>
                 <Label name="$(parent)Title" override="true">
-                    <Dimensions x="440" />
+                    <Dimensions x="440"/>
                 </Label>
                 <Label name="$(parent)Text" inherits="ZO_SmallKeyMarkupLabel ZO_DialogContentAnchors" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"/>
-
-                <Control name="$(parent)Skip" inherits="ZO_CustomDialogButton" />
-                <Control name="$(parent)Play" inherits="ZO_CustomDialogButton" />
-                <Control name="$(parent)Back" inherits="ZO_CustomDialogButton" />
+                <Control name="$(parent)Skip" inherits="ZO_CustomDialogButton"/>
+                <Control name="$(parent)Play" inherits="ZO_CustomDialogButton"/>
+                <Control name="$(parent)Back" inherits="ZO_CustomDialogButton"/>
             </Controls>
         </TopLevelControl>
-
         <TopLevelControl name="ZO_CharacterCreate" layer="BACKGROUND" hidden="true" alpha="0">
-            <AnchorFill />
-
+            <AnchorFill/>
             <OnInitialized>
                 ZO_CharacterCreate_Initialize(self)
             </OnInitialized>
-
             <Controls>
                 <Control name="$(parent)RightBg" inherits="ZO_RightFullscreenPanelBG">
-                    <Anchor point="TOPRIGHT" relativeTo="GuiRoot" offsetX="195" />
-
+                    <Anchor point="TOPRIGHT" relativeTo="GuiRoot" offsetX="195"/>
                     <OnInitialized>
                         self:SetHeight(GuiRoot:GetHeight() + 120)
                         self:RegisterForEvent(EVENT_SCREEN_RESIZED, function() self:SetHeight(GuiRoot:GetHeight() + 120) end)
                     </OnInitialized>
                 </Control>
-
                 <Control name="$(parent)Buckets">
-                    <Dimensions x="410" />
-                    <Anchor point="TOPRIGHT" />
-                    <Anchor point="BOTTOMRIGHT" />
+                    <Dimensions x="410"/>
+                    <Anchor point="TOPRIGHT"/>
+                    <Anchor point="BOTTOMRIGHT"/>
                 </Control>
-
-                <Control name="$(parent)CharacterViewport" inherits="ZO_PaperdollManipulation" />
-
+                <Control name="$(parent)CharacterViewport" inherits="ZO_PaperdollManipulation"/>
                 <Backdrop name="$(parent)Character" inherits="ZO_SingleLineEditBackdropDark_Keyboard" tier="MEDIUM">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Buckets" offsetX="20" offsetY="88" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Buckets" offsetX="20" offsetY="88"/>
                     <Dimensions x="370"/>
                     <Controls>
                         <EditBox name="$(parent)Name" inherits="ZO_DefaultEditForDarkBackdrop" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" textType="ALPHABETIC_NO_FULLWIDTH_LATIN" maxInputCharacters="CHARNAME_MAX_LENGTH">
                             <OnTextChanged>
                                 ZO_CharacterCreate_CheckEnableCreateButton(self)
                             </OnTextChanged>
-
                             <OnFocusGained>
                                 ZO_CharacterCreate_OnNameFieldFocusGained(self)
                             </OnFocusGained>
-
                             <OnFocusLost>
                                 ZO_CharacterCreate_OnNameFieldFocusLost(self)
                             </OnFocusLost>
-
                             <Controls>
                                 <Label name="$(parent)Instructions" font="ZoFontWinH3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED" text="SI_CREATE_CHARACTER_TITLE_NAME">
-                                    <AnchorFill />
-
+                                    <AnchorFill/>
                                     <OnInitialized>
                                         local anim = ZO_AlphaAnimation:New(self)
                                         anim:PingPong(1, .4, 1000, LOOP_INDEFINITELY)
@@ -221,249 +180,179 @@
                         </EditBox>
                     </Controls>
                 </Backdrop>
-
                 <Texture name="$(parent)TopDivider" tier="MEDIUM" textureFile="EsoUI/Art/CharacterCreate/windowDivider.dds">
-                    <Dimensions x="432" y="4" />
-                    <Anchor point="TOPRIGHT" offsetX="5" offsetY="128" />
+                    <Dimensions x="432" y="4"/>
+                    <Anchor point="TOPRIGHT" offsetX="5" offsetY="128"/>
                 </Texture>
-
                 <Texture name="$(parent)BottomDivider" tier="MEDIUM" textureFile="EsoUI/Art/CharacterCreate/windowDivider.dds">
-                    <Dimensions x="432" y="4" />
-                    <Anchor point="BOTTOMRIGHT" offsetX="5" offsetY="-58" />
+                    <Dimensions x="432" y="4"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="5" offsetY="-58"/>
                 </Texture>
-
-                <Control name="$(parent)NameInstructions" inherits="ZO_TextInstructionsTemplate" />
-
+                <Control name="$(parent)NameInstructions" inherits="ZO_TextInstructionsTemplate"/>
                 <Control name="$(parent)Race" resizeToFitDescendents="true">
                     <Controls>
                         <Texture name="$(parent)TopDivider" tier="MEDIUM" textureFile="EsoUI/Art/CharacterCreate/windowDivider.dds">
-                            <Dimensions x="360" y="4" />
-                            <Anchor point="TOP" />
+                            <Dimensions x="360" y="4"/>
+                            <Anchor point="TOP"/>
                         </Texture>
-
                         <Label name="$(parent)AllianceSection" inherits="CCLabel" font="ZoFontWinH2" modifyTextType="UPPERCASE" text="SI_CREATE_CHARACTER_ALLIANCE_LABEL">
-                            <Dimensions x="360" />
-                            <Anchor point="TOPLEFT" offsetY="8" />
+                            <Dimensions x="360"/>
+                            <Anchor point="TOPLEFT" offsetY="8"/>
                         </Label>
-
                         <Texture name="$(parent)AllianceBG" resizeToFitFile="true" excludeFromResizeToFitExtents="true">
-                            <Anchor point="TOPLEFT" offsetX="13" offsetY="-2" />
+                            <Anchor point="TOPLEFT" offsetX="13" offsetY="-2"/>
                             <Controls>
                                 <Texture name="$(parent)Bottom" resizeToFitFile="true">
-                                    <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" />
+                                    <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT"/>
                                 </Texture>
                             </Controls>
                         </Texture>
-
                         <Control name="$(parent)AllianceSelector" inherits="AllianceSelector">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)AllianceSection" relativePoint="BOTTOMLEFT" offsetY="8" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)AllianceSection" relativePoint="BOTTOMLEFT" offsetY="8"/>
                         </Control>
-
                         <Label name="$(parent)RaceSection" inherits="CCLabel" font="ZoFontWinH2" modifyTextType="UPPERCASE" text="SI_CREATE_CHARACTER_RACE_LABEL">
-                            <Dimensions x="360" />
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)AllianceSelector" relativePoint="BOTTOMLEFT" offsetY="20" />
+                            <Dimensions x="360"/>
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)AllianceSelector" relativePoint="BOTTOMLEFT" offsetY="20"/>
                         </Label>
-                            
                         <Control name="$(parent)Column1" inherits="RaceSelector">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)RaceSection" relativePoint="BOTTOMLEFT" offsetY="8" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)RaceSection" relativePoint="BOTTOMLEFT" offsetY="8"/>
                         </Control>
-
                         <Control name="$(parent)Column2" inherits="RaceSelector">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)Column1" relativePoint="TOPRIGHT" offsetX="0" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Column1" relativePoint="TOPRIGHT" offsetX="0"/>
                         </Control>
-
                         <Control name="$(parent)Column3" inherits="RaceSelector">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)Column2" relativePoint="TOPRIGHT" offsetX="0" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Column2" relativePoint="TOPRIGHT" offsetX="0"/>
                         </Control>
-
                         <Button name="$(parent)SingleButton" inherits="RaceSelectorButton">
-                            <Anchor point="TOP" relativeTo="$(parent)Column2" relativePoint="BOTTOM" offsetY="0" />
+                            <Anchor point="TOP" relativeTo="$(parent)Column2" relativePoint="BOTTOM" offsetY="0"/>
                         </Button>
-                        
                         <Label name="$(parent)Name" inherits="CCLabel" font="ZoFontWindowTitle" horizontalAlignment="CENTER">
-                            <Dimensions x="360" />
-                            <Anchor point="TOP" relativeTo="$(parent)Column2" relativePoint="BOTTOM" offsetY="70" />
+                            <Dimensions x="360"/>
+                            <Anchor point="TOP" relativeTo="$(parent)Column2" relativePoint="BOTTOM" offsetY="70"/>
                         </Label>
-
                         <Label name="$(parent)Alliance" inherits="CCLabel" font="ZoFontWindowSubtitle" horizontalAlignment="CENTER">
-                            <Dimensions x="360" />
-                            <Anchor point="TOP" relativeTo="$(parent)Name" relativePoint="BOTTOM" offsetY="5" />
+                            <Dimensions x="360"/>
+                            <Anchor point="TOP" relativeTo="$(parent)Name" relativePoint="BOTTOM" offsetY="5"/>
                         </Label>
-
                         <Label name="$(parent)Description" inherits="CCLabel" font="ZoFontGameShadow">
-                            <Dimensions x="350" />
-                            <Anchor point="TOP" relativeTo="$(parent)Alliance" relativePoint="BOTTOM" offsetY="5" />
+                            <Dimensions x="350"/>
+                            <Anchor point="TOP" relativeTo="$(parent)Alliance" relativePoint="BOTTOM" offsetY="5"/>
                         </Label>
                     </Controls>
                 </Control>
-
                 <Control name="$(parent)ClassSelection" resizeToFitDescendents="true">
                     <Controls>
                         <Control name="$(parent)ButtonArea" resizeToFitDescendents="true">
-                            <Anchor point="TOP" />
+                            <Anchor point="TOP"/>
                         </Control>
-
                         <Label name="$(parent)Name" inherits="CCLabel" font="ZoFontWindowTitle">
-                            <Anchor point="TOP" relativeTo="$(parent)ButtonArea" relativePoint="BOTTOM" offsetY="30" />
+                            <Anchor point="TOP" relativeTo="$(parent)ButtonArea" relativePoint="BOTTOM" offsetY="30"/>
                         </Label>
-
                         <Label name="$(parent)Description" inherits="CCLabel" font="ZoFontGameShadow">
-                            <Dimensions x="350" />
-                            <Anchor point="TOP" relativeTo="$(parent)Name" relativePoint="BOTTOM" offsetY="10" />
+                            <Dimensions x="350"/>
+                            <Anchor point="TOP" relativeTo="$(parent)Name" relativePoint="BOTTOM" offsetY="10"/>
                         </Label>
-
                         <Control name="$(parent)Spacer">
-                            <Dimensions x="280" y="6" />
-                            <Anchor point="TOP" relativeTo="$(parent)Description" relativePoint="BOTTOM" />
+                            <Dimensions x="280" y="6"/>
+                            <Anchor point="TOP" relativeTo="$(parent)Description" relativePoint="BOTTOM"/>
                         </Control>
                     </Controls>
                 </Control>
-
                 <Control name="$(parent)GenderSelection">
-                    <Dimensions x="350" y="100" />
+                    <Dimensions x="350" y="100"/>
                     <Controls>
                         <Control name="$(parent)Male" inherits="GenderSelector">
-                            <Anchor point="TOP" offsetX="-64" offsetY="5" />
+                            <Anchor point="TOP" offsetX="-64" offsetY="5"/>
                             <Controls>
                                 <Button name="$(parent)Button" override="true">
-                                    <Textures
-                                        normal="EsoUI/Art/CharacterCreate/CharacterCreate_maleIcon_up.dds"
-                                        pressed="EsoUI/Art/CharacterCreate/CharacterCreate_maleIcon_down.dds"
-                                        mouseOver="EsoUI/Art/CharacterCreate/CharacterCreate_maleIcon_over.dds"
-                                    />
+                                    <Textures normal="EsoUI/Art/CharacterCreate/CharacterCreate_maleIcon_up.dds" pressed="EsoUI/Art/CharacterCreate/CharacterCreate_maleIcon_down.dds" mouseOver="EsoUI/Art/CharacterCreate/CharacterCreate_maleIcon_over.dds"/>
                                 </Button>
                             </Controls>
                         </Control>
-
                         <Control name="$(parent)Female" inherits="GenderSelector">
-                            <Anchor point="LEFT" relativeTo="$(parent)Male" relativePoint="RIGHT" offsetX="40" />
+                            <Anchor point="LEFT" relativeTo="$(parent)Male" relativePoint="RIGHT" offsetX="40"/>
                             <Controls>
                                 <Button name="$(parent)Button" override="true">
-                                    <Textures
-                                        normal="EsoUI/Art/CharacterCreate/CharacterCreate_femaleIcon_up.dds"
-                                        pressed="EsoUI/Art/CharacterCreate/CharacterCreate_femaleIcon_down.dds"
-                                        mouseOver="EsoUI/Art/CharacterCreate/CharacterCreate_femaleIcon_over.dds"
-                                    />
+                                    <Textures normal="EsoUI/Art/CharacterCreate/CharacterCreate_femaleIcon_up.dds" pressed="EsoUI/Art/CharacterCreate/CharacterCreate_femaleIcon_down.dds" mouseOver="EsoUI/Art/CharacterCreate/CharacterCreate_femaleIcon_over.dds"/>
                                 </Button>
                             </Controls>
                         </Control>
                     </Controls>
                 </Control>
-                
                 <Control name="$(parent)Template" inherits="ZO_ComboBox">
-                    <Dimensions x="350" y="25" />
-                    <Anchor point="TOPLEFT" offsetX="20" offsetY="8" />
+                    <Dimensions x="350" y="25"/>
+                    <Anchor point="TOPLEFT" offsetX="20" offsetY="8"/>
                 </Control>
-
                 <Button name="$(parent)RandomizeAppearance" inherits="ZO_DefaultButton" text="SI_RANDOMIZE_APPEARANCE_BUTTON" clickSound="Click_RandomizeButton">
-                    <Dimensions x="230" />
-                    <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" offsetX="-20" offsetY="-16" />
+                    <Dimensions x="230"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" offsetX="-20" offsetY="-16"/>
                     <OnClicked>
                         ZO_CharacterCreate_RandomizeAppearance()
                     </OnClicked>
-
                     <OnMouseEnter>
                         ZO_CharacterCreate_RandomizeAppearance_OnMouseEnter(self)
                     </OnMouseEnter>
-
                     <OnMouseExit>
                         ZO_CharacterCreate_RandomizeAppearance_OnMouseExit(self)
                     </OnMouseExit>
                 </Button>
-
                 <Button name="$(parent)CreateButton" inherits="ZO_DefaultButton" text="SI_CREATE_CHARACTER_BUTTON" clickSound="Click_CreateButton">
-                    <Anchor point="RIGHT" relativeTo="$(parent)RandomizeAppearance" relativePoint="LEFT" offsetX="-22" />
+                    <Anchor point="RIGHT" relativeTo="$(parent)RandomizeAppearance" relativePoint="LEFT" offsetX="-22"/>
                     <OnClicked>
                         ZO_CharacterCreate_OnCreateButtonClicked()
                     </OnClicked>
                 </Button>
-
                 <Button name="$(parent)SaveButton" inherits="ZO_DefaultButton" text="SI_SAVE_CHARACTER_BUTTON" clickSound="Click_SaveButton" hidden="true">
-                    <Anchor point="RIGHT" relativeTo="$(parent)RandomizeAppearance" relativePoint="LEFT" offsetX="-22" />
+                    <Anchor point="RIGHT" relativeTo="$(parent)RandomizeAppearance" relativePoint="LEFT" offsetX="-22"/>
                     <OnClicked>
                         ZO_CharacterCreate_OnSaveButtonClicked()
                     </OnClicked>
                 </Button>
-
                 <Button name="$(parent)RotateCharLeft" inherits="ZO_ButtonBehaviorClickSound" mouseOverBlendMode="ADD">
-                    <Dimensions x="64" y="64" />
-                    <Anchor point="BOTTOMRIGHT" relativeTo="ZO_CharacterCreateCharacterViewport" relativePoint="BOTTOM" offsetX="81" />
-
-                    <Textures
-                        normal="EsoUI/Art/CharacterCreate/rotate_left_up.dds"
-                        pressed="EsoUI/Art/CharacterCreate/rotate_left_down.dds"
-                        mouseOver="EsoUI/Art/CharacterCreate/rotate_left_over.dds"
-                    />
-
+                    <Dimensions x="64" y="64"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="ZO_CharacterCreateCharacterViewport" relativePoint="BOTTOM" offsetX="81"/>
+                    <Textures normal="EsoUI/Art/CharacterCreate/rotate_left_up.dds" pressed="EsoUI/Art/CharacterCreate/rotate_left_down.dds" mouseOver="EsoUI/Art/CharacterCreate/rotate_left_over.dds"/>
                     <OnMouseDown>
                         CharacterCreateStartMouseSpin(3)
                     </OnMouseDown>
-                    
                     <OnMouseUp>
                         CharacterCreateStopMouseSpin()
                     </OnMouseUp>
                 </Button>
-
                 <Button name="$(parent)RotateCharRight" inherits="ZO_ButtonBehaviorClickSound" mouseOverBlendMode="ADD">
-                    <Dimensions x="64" y="64" />
-                    <Anchor point="BOTTOMLEFT" relativeTo="ZO_CharacterCreateCharacterViewport" relativePoint="BOTTOM" offsetX="95" />
-
-                    <Textures
-                        normal="EsoUI/Art/CharacterCreate/rotate_right_up.dds"
-                        pressed="EsoUI/Art/CharacterCreate/rotate_right_down.dds"
-                        mouseOver="EsoUI/Art/CharacterCreate/rotate_right_over.dds"
-                    />
-
+                    <Dimensions x="64" y="64"/>
+                    <Anchor point="BOTTOMLEFT" relativeTo="ZO_CharacterCreateCharacterViewport" relativePoint="BOTTOM" offsetX="95"/>
+                    <Textures normal="EsoUI/Art/CharacterCreate/rotate_right_up.dds" pressed="EsoUI/Art/CharacterCreate/rotate_right_down.dds" mouseOver="EsoUI/Art/CharacterCreate/rotate_right_over.dds"/>
                     <OnMouseDown>
                         CharacterCreateStartMouseSpin(-3)
                     </OnMouseDown>
-                    
                     <OnMouseUp>
                         CharacterCreateStopMouseSpin()
                     </OnMouseUp>
                 </Button>
-
                 <Button name="$(parent)ZoomOut" inherits="ZO_ButtonBehaviorClickSound" mouseOverBlendMode="ADD">
-                    <Dimensions x="32" y="32" />
-                    <Anchor point="BOTTOM" relativeTo="$(parent)RotateCharLeft" relativePoint="TOP" offsetX="10" />
-
-                    <Textures
-                        normal="EsoUI/Art/CharacterCreate/CharacterCreate_zoom-_up.dds"
-                        pressed="EsoUI/Art/CharacterCreate/CharacterCreate_zoom-_down.dds"
-                        mouseOver="EsoUI/Art/CharacterCreate/CharacterCreate_zoom-_over.dds"
-                        disabled="EsoUI/Art/CharacterCreate/CharacterCreate_zoom-_disabled.dds"
-                    />
-
+                    <Dimensions x="32" y="32"/>
+                    <Anchor point="BOTTOM" relativeTo="$(parent)RotateCharLeft" relativePoint="TOP" offsetX="10"/>
+                    <Textures normal="EsoUI/Art/CharacterCreate/CharacterCreate_zoom-_up.dds" pressed="EsoUI/Art/CharacterCreate/CharacterCreate_zoom-_down.dds" mouseOver="EsoUI/Art/CharacterCreate/CharacterCreate_zoom-_over.dds" disabled="EsoUI/Art/CharacterCreate/CharacterCreate_zoom-_disabled.dds"/>
                     <OnInitialized>
                         self:SetState(BSTATE_DISABLED, true)
                     </OnInitialized>
-
                     <OnClicked>
                         MoveCharacterCameraZoomAmount(-1)
                     </OnClicked>
                 </Button>
-                
                 <Button name="$(parent)ZoomIn" inherits="ZO_ButtonBehaviorClickSound" mouseOverBlendMode="ADD">
-                    <Dimensions x="32" y="32" />
-                    <Anchor point="BOTTOM" relativeTo="$(parent)RotateCharRight" relativePoint="TOP" offsetX="-10" />
-
-                    <Textures
-                        normal="EsoUI/Art/CharacterCreate/CharacterCreate_zoom+_up.dds"
-                        pressed="EsoUI/Art/CharacterCreate/CharacterCreate_zoom+_down.dds"
-                        mouseOver="EsoUI/Art/CharacterCreate/CharacterCreate_zoom+_over.dds"
-                        disabled="EsoUI/Art/CharacterCreate/CharacterCreate_zoom+_disabled.dds"
-                    />
-
+                    <Dimensions x="32" y="32"/>
+                    <Anchor point="BOTTOM" relativeTo="$(parent)RotateCharRight" relativePoint="TOP" offsetX="-10"/>
+                    <Textures normal="EsoUI/Art/CharacterCreate/CharacterCreate_zoom+_up.dds" pressed="EsoUI/Art/CharacterCreate/CharacterCreate_zoom+_down.dds" mouseOver="EsoUI/Art/CharacterCreate/CharacterCreate_zoom+_over.dds" disabled="EsoUI/Art/CharacterCreate/CharacterCreate_zoom+_disabled.dds"/>
                     <OnInitialized>
                         self:SetEnabled(true)
                     </OnInitialized>
-
                     <OnClicked>
                         MoveCharacterCameraZoomAmount(1)
                     </OnClicked>
                 </Button>
             </Controls>
         </TopLevelControl>
-        
     </Controls>
 </GuiXml>

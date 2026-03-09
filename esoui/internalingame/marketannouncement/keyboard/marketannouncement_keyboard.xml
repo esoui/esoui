@@ -1,40 +1,33 @@
 <GuiXml>
     <Controls>
         <TopLevelControl name="ZO_MarketAnnouncement_Keyboard" inherits="ZO_MarketAnnouncementBase_Control">
-            <AnchorFill />
-
+            <AnchorFill/>
             <OnInitialized>
                 ZO_MarketAnnouncement_Keyboard_OnInitialize(self)
             </OnInitialized>
-
             <Controls>
                 <Control name="$(parent)Container" override="true">
                     <Controls>
-                        <Backdrop name="$(parent)BG" inherits="ZO_DefaultBackdrop" override="true" />
-
+                        <Backdrop name="$(parent)BG" inherits="ZO_DefaultBackdrop" override="true"/>
                         <Control name="$(parent)LockedCrownStore" override="true">
                             <Controls>
-                                <Label name="$(parent)TitleText" override="true" font="ZoFontWinH1" />
-                                <Label name="$(parent)DescriptionText" override="true" font="ZoFontWinT1" />
+                                <Label name="$(parent)TitleText" override="true" font="ZoFontWinH1"/>
+                                <Label name="$(parent)DescriptionText" override="true" font="ZoFontWinT1"/>
                             </Controls>
                         </Control>
-
                         <Control name="$(parent)Carousel" override="true">
                             <Controls>
                                 <Scroll name="$(parent)Scroll" override="true">
-                                    <FadeGradient x1="1" y1="0" size1="5" x2="-1" y2="0" size2="5" />
+                                    <FadeGradient x1="1" y1="0" size1="5" x2="-1" y2="0" size2="5"/>
                                 </Scroll>
                             </Controls>
                         </Control>
-                        
                         <Control name="$(parent)Greeting" override="true">
                             <Controls>
                                 <Control name="$(parent)TopDivider" inherits="ZO_DynamicHorizontalDivider" override="true">
                                     <Dimensions y="6"/>
                                 </Control>
-                                
-                                <Label name="$(parent)Welcome" font="ZoFontAnnounce" override="true" />
-                                    
+                                <Label name="$(parent)Welcome" font="ZoFontAnnounce" override="true"/>
                                 <Control name="$(parent)BottomDivider" inherits="ZO_DynamicHorizontalDivider" override="true">
                                     <Dimensions y="6"/>
                                 </Control>
@@ -43,7 +36,6 @@
                     </Controls>
                 </Control>
             </Controls>
-
         </TopLevelControl>
     </Controls>
 </GuiXml>

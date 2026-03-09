@@ -1,0 +1,22 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_TamrielTomesIntroHighlight_Gamepad" inherits="ZO_TamrielTomesIntroHighlight_Shared" virtual="true">
+            <Controls>
+                <Label name="$(parent)Title" override="true" font="$(GAMEPAD_BOLD_FONT)|$(GP_42)"/>
+                <Label name="$(parent)BodyText" override="true" font="ZoFontGamepad42NoShadow"/>
+            </Controls>
+        </Control>
+        <TopLevelControl name="ZO_TamrielTomesIntro_GamepadTL" inherits="ZO_TamrielTomesIntro_SharedTL">
+            <OnInitialized>
+                ZO_TamrielTomesIntroScreen_Gamepad.OnControlInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Title" override="true" font="$(GAMEPAD_BOLD_FONT)|$(GP_54)"/>
+                <Control name="$(parent)Highlights" override="true" inherits="ZO_ScrollContainer_Gamepad">
+                    <Anchor point="TOPLEFT" relativePoint="TOP" offsetX="50" offsetY="85"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="-80" offsetY="-130"/>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

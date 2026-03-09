@@ -2,7 +2,7 @@
     <Animations>
         <AnimationTimeline name="StatsAttributeIncrementLoop" playbackType="PING_PONG" loopCount="LOOP_INDEFINITELY">
             <Animations>
-                <AlphaAnimation duration="750" startAlpha=".25" endAlpha="1" />
+                <AlphaAnimation duration="750" startAlpha=".25" endAlpha="1"/>
             </Animations>
         </AnimationTimeline>
         <AnimationTimeline name="ZO_AttributesHeaderCrossFade" playbackType="LOOP" loopCount="LOOP_INDEFINITELY">
@@ -18,20 +18,14 @@
         </AnimationTimeline>
     </Animations>
     <Controls>
-        <Texture name="ZO_StatsEquipmentBonusIcon" virtual="true">
-            <Dimensions x="25" y="25"/>
-            <Anchor point="BOTTOMLEFT"/>
-        </Texture>
-
         <Label name="ZO_AdvancedStatsHeader" inherits="ZO_StatsHeader ZO_TooltipIfTruncatedLabel" wrapMode="ELLIPSIS" maxLineCount="1" virtual="true">
-            <Dimensions x="295" />
+            <Dimensions x="295"/>
         </Label>
-
         <Control name="ZO_AttributesHeader" virtual="true">
             <Dimensions x="607"/>
             <Controls>
                 <Label name="$(parent)Title" font="ZoFontHeader2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE">
-                    <Anchor point="LEFT" offsetY="5" />
+                    <Anchor point="LEFT" offsetY="5"/>
                 </Label>
                 <Label name="$(parent)AttributePointsValue" font="ZoFontHeader2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
                     <Anchor point="RIGHT" offsetY="5"/>
@@ -41,63 +35,42 @@
                 </Label>
             </Controls>
         </Control>
-
-        <Control name="ZO_StatsMundusRow" virtual="true">
-            <Dimensions x="607" y="24" />
-            <OnInitialized>
-                self.name = self:GetNamedChild("Name")
-            </OnInitialized>
-            <Controls>
-                <Label name="$(parent)Name" inherits="ZO_StatsRowName"/>
-                <Control name="$(parent)MundusIcon1" inherits="ZO_StatsMundusIcon" hidden="true">
-                    <Anchor point="RIGHT" offsetY="-9"/>
-                </Control>
-                <Control name="$(parent)MundusIcon2" inherits="ZO_StatsMundusIcon" hidden="true">
-                    <Anchor point="RIGHT" relativeTo="$(parent)MundusIcon1" relativePoint="LEFT" offsetX="-10"/>
-                </Control>
-            </Controls>
-        </Control>
-
         <Control name="ZO_StatsTitleComboBoxEntry" inherits="ZO_ComboBoxEntry" virtual="true">
             <Controls>
                 <Control name="$(parent)NewContainer" resizeToFitConstrains="X">
-                    <Anchor point="LEFT" />
-                    <Dimensions y="32" />
+                    <Anchor point="LEFT"/>
+                    <Dimensions y="32"/>
                     <Controls>
                         <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Inventory/newItem_icon.dds" hidden="true">
-                            <Anchor point="LEFT" />
-                            <Dimensions x="32" y="32" />
+                            <Anchor point="LEFT"/>
+                            <Dimensions x="32" y="32"/>
                         </Texture>
                     </Controls>
                 </Control>
-
                 <Label name="$(parent)Label" override="true">
-                    <Anchor point="LEFT" relativeTo="$(parent)NewContainer" relativePoint="RIGHT" offsetX="ZO_COMBO_BOX_ENTRY_TEMPLATE_LABEL_PADDING" />
-                    <Anchor point="RIGHT" offsetX="-ZO_COMBO_BOX_ENTRY_TEMPLATE_LABEL_PADDING" />
+                    <Anchor point="LEFT" relativeTo="$(parent)NewContainer" relativePoint="RIGHT" offsetX="ZO_COMBO_BOX_ENTRY_TEMPLATE_LABEL_PADDING"/>
+                    <Anchor point="RIGHT" offsetX="-ZO_COMBO_BOX_ENTRY_TEMPLATE_LABEL_PADDING"/>
                 </Label>
             </Controls>
         </Control>
-
         <Control name="ZO_StatsDropdownRow" virtual="true">
-            <Dimensions x="607" y="30" />
+            <Dimensions x="607" y="30"/>
             <OnInitialized>
                 self.name = self:GetNamedChild("Name")
                 self.dropdown = ZO_ComboBox_ObjectFromContainer(self:GetNamedChild("Dropdown"))
             </OnInitialized>
             <Controls>
                 <Label name="$(parent)Name" inherits="ZO_StatsRowName"/>
-                <Control name="$(parent)Dropdown" inherits="ZO_ComboBox">
+                <Control name="$(parent)Dropdown" inherits="ZO_ComboBox ZO_PropagateMouseOverBehavior">
                     <Dimensions x="300"/>
                     <Anchor point="RIGHT"/>
                 </Control>
-
                 <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Inventory/newItem_icon.dds" hidden="true">
-                    <Dimensions x="32" y="32" />
-                    <Anchor point="CENTER" relativeTo="$(parent)Dropdown" relativePoint="TOPLEFT" />
+                    <Dimensions x="32" y="32"/>
+                    <Anchor point="CENTER" relativeTo="$(parent)Dropdown" relativePoint="TOPLEFT"/>
                 </Texture>
             </Controls>
         </Control>
-
         <Control name="ZO_StatsRow" virtual="true">
             <Dimensions x="607" y="24"/>
             <Controls>
@@ -109,19 +82,17 @@
                 </Control>
             </Controls>
         </Control>
-
         <Control name="ZO_AdvancedStatsDividerEntry" virtual="true">
             <Dimensions x="295" y="25"/>
             <Controls>
                 <Control name="$(parent)Divider" inherits="ZO_DynamicHorizontalDivider">
-                    <Anchor point="LEFT" />
-                    <Anchor point="RIGHT" />
+                    <Anchor point="LEFT"/>
+                    <Anchor point="RIGHT"/>
                 </Control>
             </Controls>
         </Control>
-
         <Control name="ZO_StatsIconRow" virtual="true">
-            <Dimensions x="607" y="20" />
+            <Dimensions x="607" y="20"/>
             <OnInitialized>
                 self.name = self:GetNamedChild("Name")
                 self.icon = self:GetNamedChild("Icon")
@@ -132,13 +103,12 @@
                 <Label name="$(parent)Value" inherits="ZO_StatsRowValue"/>
                 <Texture name="$(parent)Icon">
                     <Dimensions x="32" y="32"/>
-                    <Anchor point="RIGHT" relativeTo="$(parent)Value" relativePoint="LEFT" offsetX="-5" />
+                    <Anchor point="RIGHT" relativeTo="$(parent)Value" relativePoint="LEFT" offsetX="-5"/>
                 </Texture>
             </Controls>
         </Control>
-
         <Control name="ZO_StatsBountyRow" virtual="true">
-            <Dimensions x="607" y="20" />
+            <Dimensions x="607" y="20"/>
             <OnInitialized>
                 self.name = self:GetNamedChild("Name")
                 self.bountyDisplay = self:GetNamedChild("BountyDisplay")
@@ -146,12 +116,11 @@
             </OnInitialized>
             <Controls>
                 <Label name="$(parent)Name" inherits="ZO_StatsRowName"/>
-                <Label name="$(parent)BountyDisplay" inherits="ZO_BountyDisplay ZO_StatsRowValue" />
+                <Label name="$(parent)BountyDisplay" inherits="ZO_BountyDisplay ZO_StatsRowValue"/>
             </Controls>
         </Control>
-
         <Control name="ZO_StatsAttribute" virtual="true">
-            <Dimensions x="190" y="80" />
+            <Dimensions x="190" y="80"/>
             <OnInitialized>
                 self.name = self:GetNamedChild("Name")
                 self.bar = self:GetNamedChild("Bar")
@@ -173,7 +142,6 @@
                         self:GetParent().pointLimitedSpinner:OnMouseWheel(delta)
                     </OnMouseWheel>
                 </Label>
-
                 <Texture name="$(parent)Bar" mouseEnabled="true">
                     <Anchor point="TOP" relativeTo="$(parent)Name" relativePoint="BOTTOM"/>
                     <Dimensions x="138" y="16"/>
@@ -188,49 +156,38 @@
                         self:GetParent().pointLimitedSpinner:OnMouseWheel(delta)
                     </OnMouseWheel>
                 </Texture>
-
                 <Control name="$(parent)Spinner" mouseEnabled="true">
-                    <Dimensions x="110" y="36" />
+                    <Dimensions x="110" y="36"/>
                     <Anchor point="TOP" relativeTo="$(parent)Bar" relativePoint="BOTTOM"/>
                     <Controls>
                         <Button name="$(parent)Decrease">
-                            <Dimensions x="32" y="32" />
+                            <Dimensions x="32" y="32"/>
                             <Anchor point="LEFT"/>
-                            <Textures normal="EsoUI/Art/Buttons/pointsMinus_up.dds"
-                                      pressed="EsoUI/Art/Buttons/pointsMinus_down.dds"
-                                      mouseOver="EsoUI/Art/Buttons/pointsMinus_over.dds"
-                                      disabled="EsoUI/Art/Buttons/pointsMinus_disabled.dds"/>
+                            <Textures normal="EsoUI/Art/Buttons/pointsMinus_up.dds" pressed="EsoUI/Art/Buttons/pointsMinus_down.dds" mouseOver="EsoUI/Art/Buttons/pointsMinus_over.dds" disabled="EsoUI/Art/Buttons/pointsMinus_disabled.dds"/>
                         </Button>
-
                         <Button name="$(parent)Increase">
-                            <Dimensions x="32" y="32" />
+                            <Dimensions x="32" y="32"/>
                             <Anchor point="RIGHT"/>
-                            <Textures normal="EsoUI/Art/Buttons/pointsPlus_up.dds"
-                                      pressed="EsoUI/Art/Buttons/pointsPlus_down.dds"
-                                      mouseOver="EsoUI/Art/Buttons/pointsPlus_over.dds"
-                                      disabled="EsoUI/Art/Buttons/pointsPlus_disabled.dds"/>
+                            <Textures normal="EsoUI/Art/Buttons/pointsPlus_up.dds" pressed="EsoUI/Art/Buttons/pointsPlus_down.dds" mouseOver="EsoUI/Art/Buttons/pointsPlus_over.dds" disabled="EsoUI/Art/Buttons/pointsPlus_disabled.dds"/>
                         </Button>
-
                         <Texture name="$(parent)IncreaseHighlight" textureFile="EsoUI/Art/Buttons/pointsPlus_highlight.dds" hidden="true">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)Increase" relativePoint="TOPLEFT" />
-                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Increase" relativePoint="BOTTOMRIGHT" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Increase" relativePoint="TOPLEFT"/>
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Increase" relativePoint="BOTTOMRIGHT"/>
                             <OnInitialized>
                                 self.glowAnimation = ANIMATION_MANAGER:CreateTimelineFromVirtual("StatsAttributeIncrementLoop", self)
                                 self.glowAnimation:PlayFromStart()
                             </OnInitialized>
                         </Texture>
-
                         <Label name="$(parent)Display" font="ZoFontHeader4" horizontalAlignment="CENTER" verticalAlignment="CENTER">
-                            <Anchor point="TOPLEFT" offsetX="34" />
-                            <Anchor point="BOTTOMRIGHT" offsetX="-34" />
+                            <Anchor point="TOPLEFT" offsetX="34"/>
+                            <Anchor point="BOTTOMRIGHT" offsetX="-34"/>
                         </Label>
                     </Controls>
                 </Control>
             </Controls>
         </Control>
-        
         <Control name="ZO_StatsAttributesRow" virtual="true">
-            <Dimensions x="607" y="80" />
+            <Dimensions x="607" y="80"/>
             <Controls>
                 <Control name="$(parent)Magicka" inherits="ZO_StatsAttribute">
                     <Anchor point="TOPLEFT"/>
@@ -243,7 +200,6 @@
                 </Control>
             </Controls>
         </Control>
-
         <Control name="ZO_StatsRidingSkillIcon" mouseEnabled="true" virtual="true">
             <Dimensions y="50" x="120"/>
             <OnMouseEnter>
@@ -253,26 +209,22 @@
             <OnMouseExit>
                 ClearTooltip(InformationTooltip)
             </OnMouseExit>
-
             <Controls>
                 <Texture name="$(parent)Icon">
-                    <Dimensions x="40" y="40" />
+                    <Dimensions x="40" y="40"/>
                     <Anchor point="LEFT"/>
                 </Texture>
-            
                 <Label name="$(parent)Stat" font="ZoFontHeader2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" verticalAlignment="CENTER">
-                    <Dimensions x="65" y="40" />
+                    <Dimensions x="65" y="40"/>
                     <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="15"/>
                 </Label>
             </Controls>
         </Control>
-        
         <Control name="ZO_StatsStableSlotRow" mouseEnabled="true" virtual="true">
-            <Dimensions x="607" y="50" />
+            <Dimensions x="607" y="50"/>
             <OnInitialized>
                 ZO_Stats_InitializeRidingSkills(self)
             </OnInitialized>
-            
             <Controls>
                 <Control name="$(parent)SpeedInfo" inherits="ZO_StatsRidingSkillIcon">
                     <Anchor point="LEFT" offsetX="5"/>
@@ -280,23 +232,20 @@
                         ZO_StatsRidingSkillIcon_Initialize(self, RIDING_TRAIN_SPEED)
                     </OnInitialized>
                 </Control>
-
                 <Control name="$(parent)StaminaInfo" inherits="ZO_StatsRidingSkillIcon">
                     <Anchor point="LEFT" relativeTo="$(parent)SpeedInfo" relativePoint="RIGHT" offsetX="10"/>
                     <OnInitialized>
                         ZO_StatsRidingSkillIcon_Initialize(self, RIDING_TRAIN_STAMINA)
                     </OnInitialized>
                 </Control>
-
                 <Control name="$(parent)CarryInfo" inherits="ZO_StatsRidingSkillIcon">
                     <Anchor point="LEFT" relativeTo="$(parent)StaminaInfo" relativePoint="RIGHT" offsetX="10"/>
                     <OnInitialized>
                         ZO_StatsRidingSkillIcon_Initialize(self, RIDING_TRAIN_CARRYING_CAPACITY)
                     </OnInitialized>
                 </Control>
-
                 <Texture name="$(parent)Timer" textureFile="EsoUI/Art/Miscellaneous/timer_32.dds" mouseEnabled="true" layer="CONTROLS" hidden="true">
-                    <Dimensions x="32" y="32" />
+                    <Dimensions x="32" y="32"/>
                     <Anchor point="RIGHT" offsetX="-20"/>
                     <OnMouseEnter>
                         self.mouseInside = true
@@ -308,14 +257,13 @@
                     </OnMouseExit>
                     <Controls>
                         <Cooldown name="$(parent)Overlay" textureFile="EsoUI/Art/Miscellaneous/timer_overlay_32.dds">
-                            <AnchorFill />
+                            <AnchorFill/>
                         </Cooldown>
                     </Controls>
                 </Texture>
-                
                 <Texture name="$(parent)ReadyForTrain" textureFile="EsoUI/Art/Mounts/ridingSkill_ready.dds" mouseEnabled="true" layer="CONTROLS" hidden="true">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Timer" />
-                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Timer" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Timer"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Timer"/>
                     <OnMouseEnter>
                         InitializeTooltip(InformationTooltip, self, RIGHT)
                         SetTooltipText(InformationTooltip, zo_strformat(SI_STATS_RIDING_TRAINABLE_TOOLTIP))
@@ -326,16 +274,14 @@
                 </Texture>
             </Controls>
         </Control>
-
         <Control name="ZO_StatsActiveEffectRow" inherits="ZO_ListEntry_BackdropAndHighlight_Template" mouseEnabled="true" virtual="true">
-            <Dimensions x="607" y="40" />
+            <Dimensions x="607" y="40"/>
             <OnInitialized>
                 self.name = self:GetNamedChild("Name")
                 self.icon = self:GetNamedChild("Icon")
                 self.time = self:GetNamedChild("Time")
                 self.stackCount = self:GetNamedChild("Icon"):GetNamedChild("StackCount")
             </OnInitialized>
-
             <OnMouseEnter>
                 ZO_StatsActiveEffect_OnMouseEnter(self)
             </OnMouseEnter>
@@ -347,21 +293,19 @@
             </OnMouseUp>
             <Controls>
                 <Texture name="$(parent)Icon">
-                    <Dimensions x="40" y="40" />
-                    <Anchor point="LEFT" />
+                    <Dimensions x="40" y="40"/>
+                    <Anchor point="LEFT"/>
                     <Controls>
                         <Label name="$(parent)StackCount" font="ZoFontGameOutline">
-                            <Anchor point="BOTTOMRIGHT" offsetX="-3" offsetY="1" />
+                            <Anchor point="BOTTOMRIGHT" offsetX="-3" offsetY="1"/>
                         </Label>
                     </Controls>
                 </Texture>
-                
                 <Label name="$(parent)Name" inherits="ZO_StatsRowName">
-                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="5" />
+                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="5"/>
                 </Label>
-
                 <Label name="$(parent)Time" font="ZoFontHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SECOND_CONTRAST">
-                    <Anchor point="RIGHT" />
+                    <Anchor point="RIGHT"/>
                     <OnUpdate>
                         local timeLeft = self.endTime - GetFrameTimeSeconds()
                         self:SetText(ZO_FormatTime(timeLeft, TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_TWELVE_HOUR))
@@ -369,48 +313,58 @@
                 </Label>
             </Controls>
         </Control>
-
         <Control name="ZO_StatsActiveEffects" virtual="true" resizeToFitDescendents="true"/>
-
         <Button name="ZO_AdvancedStatsButton" inherits="ZO_DefaultButton" text="SI_STATS_ADVANCED_ATTRIBUTES" virtual="true">
             <Dimensions x="220"/>
         </Button>
-
         <TopLevelControl name="ZO_AttributesRespecConfirmationGoldDialog" inherits="ZO_CustomDialogBase">
             <OnInitialized>
-                ZO_InitializeKeyboardRespecConfirmationGoldDialog(self)
+                ZO_InitializeKeyboardAttributeRespecConfirmationGoldDialog(self)
             </OnInitialized>
             <Controls>
                 <Label name="$(parent)Text" inherits="ZO_DialogContentAnchors" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"/>
-
                 <Label name="$(parent)Balance" inherits="ZO_CurrencyTemplate">
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Text" relativePoint="BOTTOMRIGHT" offsetY="20" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Text" relativePoint="BOTTOMRIGHT" offsetY="20"/>
                 </Label>
-
                 <Label name="$(parent)BalanceHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGameBold" text="SI_KEYBOARD_SKILL_RESPEC_CONFIRM_DIALOG_BALANCE_HEADER">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Text" relativePoint="BOTTOMLEFT" offsetY="20" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Text" relativePoint="BOTTOMLEFT" offsetY="20"/>
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)Balance" relativePoint="TOPLEFT" offsetX="-10"/>
                 </Label>
-
                 <Label name="$(parent)Cost" inherits="ZO_CurrencyTemplate">
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Balance" relativePoint="BOTTOMRIGHT" offsetY="5" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Balance" relativePoint="BOTTOMRIGHT" offsetY="5"/>
                 </Label>
-
                 <Label name="$(parent)CostHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGameBold" text="SI_KEYBOARD_SKILL_RESPEC_CONFIRM_DIALOG_COST_HEADER">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)BalanceHeader" relativePoint="BOTTOMLEFT" offsetY="20" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)BalanceHeader" relativePoint="BOTTOMLEFT" offsetY="20"/>
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)Cost" relativePoint="TOPLEFT" offsetX="-10"/>
                 </Label>
-
                 <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton"/>
                 <Control name="$(parent)Confirm" inherits="ZO_CustomDialogButton"/>
             </Controls>
         </TopLevelControl>
-
+        <TopLevelControl name="ZO_AttributeRespecCastDialog" inherits="ZO_CustomDialogBase">
+            <OnInitialized>
+                ZO_InitializeKeyboardAttributeRespecCastDialog(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)ContentContainer" inherits="ZO_DialogContentAnchors">
+                    <Controls>
+                        <StatusBar name="$(parent)Progress" inherits="ZO_ArrowStatusBarWithBG">
+                            <Anchor point="TOP" offsetY="15"/>
+                            <Controls>
+                                <Label name="$(parent)Label" font="ZoFontWinH4" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_RESPEC_CAST_TIME_DIALOG_DESCRIPTION">
+                                    <Anchor point="BOTTOM" relativePoint="TOP" offsetY="-4"/>
+                                </Label>
+                            </Controls>
+                        </StatusBar>
+                    </Controls>
+                </Control>
+                <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton"/>
+            </Controls>
+        </TopLevelControl>
         <TopLevelControl name="ZO_StatsPanel" inherits="ZO_StatsFootPrint" hidden="true">
             <OnInitialized>
                 ZO_Stats_Initialize(self)
             </OnInitialized>
-
             <Controls>
                 <Control name="$(parent)TitleSection">
                     <Anchor point="TOPLEFT"/>
@@ -420,77 +374,79 @@
                             <Dimensions x="64" y="64"/>
                             <Anchor point="TOPLEFT"/>
                         </Texture>
-
-                        <Control name="$(parent)EquipmentBonus" mouseEnabled="true" resizeToFitDescendents="true" >
-                            <Anchor point="BOTTOMRIGHT" offsetX="5" offsetY="-5"/>
-                            <OnMouseEnter>
-                                ZO_Stats_EquipmentBonus_OnMouseEnter(self)
-                            </OnMouseEnter>
-                            <OnMouseExit>
-                                ZO_Stats_EquipmentBonus_OnMouseExit(self)
-                            </OnMouseExit>
+                        <Control name="$(parent)Mundus" resizeToFitDescendents="true">
+                            <Anchor point="BOTTOMRIGHT" offsetX="10" offsetY="-5"/>
                             <Controls>
-                                <Label name="$(parent)Header" font="ZoFontHeader2" text="SI_STATS_EQUIPMENT_BONUS_TITLE_KEYBOARD" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                                    <Anchor point="TOPRIGHT" />
-                                </Label>
-                                <Control name="$(parent)Icons" resizeToFitDescendents="true" >
-                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Header" relativePoint="BOTTOMRIGHT" />
+                                <Control name="$(parent)Icons" resizeToFitDescendents="true">
+                                    <Anchor point="RIGHT"/>
+                                    <Controls>
+                                        <Control name="$(parent)MundusIcon1" inherits="ZO_StatsMundusIcon" hidden="true">
+                                            <Anchor point="LEFT"/>
+                                        </Control>
+                                        <Control name="$(parent)MundusIcon2" inherits="ZO_StatsMundusIcon" hidden="true">
+                                            <Anchor point="LEFT" relativeTo="$(parent)MundusIcon1" relativePoint="RIGHT"/>
+                                        </Control>
+                                    </Controls>
+                                </Control>
+                                <Control name="$(parent)Info" resizeToFitDescendents="true">
+                                    <Anchor point="RIGHT" relativeTo="$(parent)Icons" relativePoint="LEFT"/>
+                                    <Controls>
+                                        <Label name="$(parent)Header" font="ZoFontHeader2" text="SI_STATS_MUNDUS_TITLE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                                            <Anchor point="TOPRIGHT"/>
+                                        </Label>
+                                        <Label name="$(parent)Name1" font="ZoFontHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Header" relativePoint="BOTTOMRIGHT"/>
+                                        </Label>
+                                        <Label name="$(parent)Name2" font="ZoFontHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" hidden="true">
+                                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Name1" relativePoint="BOTTOMRIGHT"/>
+                                        </Label>
+                                    </Controls>
                                 </Control>
                             </Controls>
                         </Control>
-                        
                         <Label name="$(parent)Name" inherits="ZO_TooltipIfTruncatedLabel" font="ZoFontHeader4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" maxLineCount="1">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)AllianceIcon" relativePoint="TOPRIGHT" offsetX="10"/>
-                            <Anchor point="RIGHT" relativeTo="$(parent)EquipmentBonus" relativePoint="LEFT" offsetX="-5" constrains="X" />
+                            <Anchor point="RIGHT" relativeTo="$(parent)Mundus" relativePoint="LEFT" offsetX="-5" constrains="X"/>
                         </Label>
-                        
                         <Label name="$(parent)RaceClass" font="ZoFontHeader2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT" offsetY="1"/>
                         </Label>
                     </Controls>
                 </Control>
-
                 <Control name="$(parent)Pane" inherits="ZO_ScrollContainer">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)TitleSection" relativePoint="BOTTOMLEFT"/>
                     <Anchor point="BOTTOMRIGHT" offsetX="-7"/>
                 </Control>
-
-                <Label name="$(parent)AttributesPointerBoxContents" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" hidden="true" text="SI_STATS_SPEND_ATTRIBUTE_POINTS_MESSAGE" horizontalAlignment="CENTER" >
+                <Label name="$(parent)AttributesPointerBoxContents" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" hidden="true" text="SI_STATS_SPEND_ATTRIBUTE_POINTS_MESSAGE" horizontalAlignment="CENTER">
                     <Dimensions x="290"/>
                 </Label>
             </Controls>
         </TopLevelControl>
-        
         <TopLevelControl name="ZO_AdvancedStatsPanel" mouseEnabled="true" hidden="true">
-            <Anchor point="TOPRIGHT" relativeTo="ZO_StatsPanel" relativePoint="TOPLEFT" />
+            <Anchor point="TOPRIGHT" relativeTo="ZO_StatsPanel" relativePoint="TOPLEFT"/>
             <Dimensions x="295" y="750"/>
-            
             <OnInitialized>
                 ZO_AdvancedStats_Keyboard_OnInitialized(self)
             </OnInitialized>
-            
             <Controls>
                 <Control name="$(parent)AdvancedTitleSection">
-                    <Anchor point="TOPLEFT" />
-                    <Anchor point="TOPRIGHT" />
+                    <Anchor point="TOPLEFT"/>
+                    <Anchor point="TOPRIGHT"/>
                     <Dimensions y="40"/>
                     <Controls>
                         <Label name="$(parent)Name" font="ZoFontHeader4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="SI_STATS_ADVANCED_ATTRIBUTES">
-                            <Anchor point="TOPLEFT" />
+                            <Anchor point="TOPLEFT"/>
                         </Label>
                     </Controls>
                 </Control>
-                
-                <Control name="$(parent)Divider" inherits="ZO_DynamicHorizontalDivider" >
+                <Control name="$(parent)Divider" inherits="ZO_DynamicHorizontalDivider">
                     <Anchor point="TOPLEFT" offsetY="35"/>
-                    <Anchor point="RIGHT" offsetX="-10" constrains="X" />
+                    <Anchor point="RIGHT" offsetX="-10" constrains="X"/>
                 </Control>
-
                 <Control name="$(parent)AdvancedStatList" inherits="ZO_ScrollList">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)AdvancedTitleSection" relativePoint="BOTTOMLEFT" offsetY="10"/>
-                    <Anchor point="BOTTOMRIGHT" offsetY="-50" />
+                    <Anchor point="BOTTOMRIGHT" offsetY="-50"/>
                 </Control>
-
                 <Control name="$(parent)Close" inherits="ZO_KeybindButton">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)AdvancedStatList" relativePoint="BOTTOMLEFT" offsetY="10"/>
                 </Control>

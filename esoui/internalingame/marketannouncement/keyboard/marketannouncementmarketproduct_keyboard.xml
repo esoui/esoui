@@ -3,44 +3,34 @@
         <Control name="ZO_MarketAnnouncement_MarketProductTemplate_Keyboard" inherits="ZO_MarketAnnouncement_MarketProductTemplate_Base" virtual="true">
             <Controls>
                 <Backdrop name="$(parent)Highlight" centerColor="00000000" alpha="0" layer="OVERLAY" level="ZO_MARKET_TILE_HIGHLIGHT_LEVEL" blendMode="ADD">
-                    <Edge file="EsoUI/Art/Market/market_highlightEdge16.dds" edgeFileWidth="128" edgeFileHeight="16" />
+                    <Edge file="EsoUI/Art/Market/market_highlightEdge16.dds" edgeFileWidth="128" edgeFileHeight="16"/>
                     <Anchor point="TOPLEFT" offsetX="5" offsetY="5"/>
                     <Anchor point="BOTTOMRIGHT" offsetX="-5" offsetY="-5"/>
                 </Backdrop>
-                
-                <Label name="$(parent)Type" override="true" font="ZoFontWinH1" />
-
-                <Label name="$(parent)Title" override="true" font="ZoFontCallout" />
-
-                <Label name="$(parent)TextCallout" override="true" font="ZoMarketAnnouncementCalloutFont" />
-
-                <Label name="$(parent)PreviousCost" override="true" font="ZoFontHeader3" />
-
-                <Label name="$(parent)Cost" override="true" font="ZoFontHeader3" />
-
-                <Label name="$(parent)EsoPlusCost" override="true" font="ZoFontHeader3" />
-
-                <Label name="$(parent)Purchased" override="true" hidden="true" />
-
-                <Label name="$(parent)EsoPlusDeal" override="true" font="ZoFontHeader3" />
-
+                <Label name="$(parent)Type" override="true" font="ZoFontWinH1"/>
+                <Label name="$(parent)Title" override="true" font="ZoFontCallout"/>
+                <Label name="$(parent)TextCallout" override="true" font="ZoMarketAnnouncementCalloutFont"/>
+                <Label name="$(parent)PreviousCost" override="true" font="ZoFontHeader3"/>
+                <Label name="$(parent)Cost" override="true" font="ZoFontHeader3"/>
+                <Label name="$(parent)EsoPlusCost" override="true" font="ZoFontHeader3"/>
+                <Label name="$(parent)Purchased" override="true" hidden="true"/>
+                <Label name="$(parent)EsoPlusDeal" override="true" font="ZoFontHeader3"/>
                 <Control name="$(parent)ProductDescription" inherits="ZO_ScrollContainer">
-                    <Dimensions x="ZO_MARKET_ANNOUNCEMENT_MARKET_PRODUCT_INFO_WIDTH" />
+                    <Dimensions x="ZO_MARKET_ANNOUNCEMENT_MARKET_PRODUCT_INFO_WIDTH"/>
                     <Controls>
                         <Control name="$(parent)ScrollChild" override="true">
                             <Controls>
                                 <Label name="$(parent)ProductDescriptionText" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGameMedium">
-                                    <Dimensions x="ZO_MARKET_ANNOUNCEMENT_MARKET_PRODUCT_INFO_WIDTH_WITH_SCROLLBAR" />
-                                    <Anchor point="TOPLEFT" />
+                                    <Dimensions x="ZO_MARKET_ANNOUNCEMENT_MARKET_PRODUCT_INFO_WIDTH_WITH_SCROLLBAR"/>
+                                    <Anchor point="TOPLEFT"/>
                                 </Label>
                             </Controls>
                         </Control>
                     </Controls>
                 </Control>
-
                 <Label name="$(parent)BundledProducts" override="true" font="ZoFontHeader3">
                     <Controls>
-                        <Label name="$(parent)Label" override="true" font="ZoFontHeader3" />
+                        <Label name="$(parent)Label" override="true" font="ZoFontHeader3"/>
                     </Controls>
                 </Label>
             </Controls>

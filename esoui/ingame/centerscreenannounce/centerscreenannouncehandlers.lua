@@ -1181,7 +1181,7 @@ CENTER_SCREEN_EVENT_HANDLERS[EVENT_DUEL_FINISHED] = function(result, wasLocalPla
 end
 
 CENTER_SCREEN_EVENT_HANDLERS[EVENT_RIDING_SKILL_IMPROVEMENT] = function(ridingSkill, previous, current, source)
-    local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
+    local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.RIDING_SKILL_IMPROVEMENT)
     messageParams:SetText(GetString(SI_RIDING_SKILL_ANNOUCEMENT_BANNER), zo_strformat(SI_RIDING_SKILL_ANNOUCEMENT_SKILL_INCREASE, GetString("SI_RIDINGTRAINTYPE", ridingSkill), previous, current))
     messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_RIDING_SKILL_IMPROVEMENT)
     return messageParams
@@ -1285,37 +1285,6 @@ CENTER_SCREEN_EVENT_HANDLERS[EVENT_ANTIQUITY_SCRYING_RESULT] = function(result)
             messageParams:SetScryingProgressData(numGoalsAchieved, numGoalsAchieved, antiquityData:GetTotalNumGoals())
             return messageParams
         end
-    end
-end
-
-CENTER_SCREEN_EVENT_HANDLERS[EVENT_TIMED_ACTIVITY_PROGRESS_UPDATED] = function(timedActivityIndex, previousProgress, currentProgress, complete)
-    if complete then
-        local activityData = ZO_TimedActivityData:New(timedActivityIndex)
-        if activityData then
-            local activityName = activityData:GetName()
-            if activityName ~= "" then
-                local activityType = activityData:GetType()
-                local activityTypeName = GetString("SI_TIMEDACTIVITYTYPE", activityType)
-                local activityCompletionType = zo_strformat(SI_TIMED_ACTIVITY_COMPLETED_CSA, activityTypeName)
-
-                local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.ENDEAVOR_COMPLETED)
-                messageParams:SetText(activityCompletionType, activityName)
-                return messageParams
-            end
-        end
-    end
-end
-
-CENTER_SCREEN_EVENT_HANDLERS[EVENT_TIMED_ACTIVITY_TYPE_PROGRESS_UPDATED] = function(activityType, previousNumComplete, currentNumComplete, complete)
-    if complete then
-        local activityTypeName = GetString("SI_TIMEDACTIVITYTYPE", activityType)
-        local _, maxNumActivities = TIMED_ACTIVITIES_MANAGER:GetTimedActivityTypeLimitInfo(activityType)
-        local messageTitle = zo_strformat(SI_TIMED_ACTIVITY_TYPE_COMPLETED_CSA, currentNumComplete, maxNumActivities, activityTypeName)
-        local messageSubheading = GetString("SI_TIMEDACTIVITYTYPE_FOLLOWUPHINT", activityType)
-
-        local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
-        messageParams:SetText(messageTitle, messageSubheading)
-        return messageParams
     end
 end
 

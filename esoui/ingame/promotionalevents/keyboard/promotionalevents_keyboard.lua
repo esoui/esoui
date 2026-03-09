@@ -65,7 +65,7 @@ function ZO_PromotionalEventReward_Keyboard:OnMouseUp(button, upInside)
             local canPreviewReward = CanPreviewReward(rewardId)
             local isRewardList = GetRewardType(rewardId) == REWARD_ENTRY_TYPE_REWARD_LIST
             if canPreviewReward or isRewardList then
-                local menuString = isRewardList and SI_PROMOTIONAL_EVENT_REWARD_VIEW_ACTION or SI_PROMOTIONAL_EVENT_REWARD_PREVIEW_ACTION
+                local menuString = isRewardList and SI_REWARD_LIST_VIEW_ACTION or SI_REWARD_PREVIEW_ACTION
                 AddMenuItem(GetString(menuString), function()
                     g_PromotionalEventsKeyboard:BeginPreview(rewardId, self.control)
                     KEYBIND_STRIP:UpdateKeybindButtonGroup(g_PromotionalEventsKeyboard.keybindStripDescriptor)
@@ -507,18 +507,18 @@ function ZO_PromotionalEvents_Keyboard:InitializeKeybindStripDescriptors()
                 if self.mouseOverObject and self.mouseOverObject:IsInstanceOf(ZO_PromotionalEventReward_Keyboard) then
                     local rewardId = self.mouseOverObject.displayRewardData:GetRewardId()
                     if GetRewardType(rewardId) == REWARD_ENTRY_TYPE_REWARD_LIST then
-                        return GetString(SI_PROMOTIONAL_EVENT_REWARD_VIEW_ACTION)
+                        return GetString(SI_REWARD_LIST_VIEW_ACTION)
                     end
                 end
-                return GetString(SI_PROMOTIONAL_EVENT_REWARD_PREVIEW_ACTION)
+                return GetString(SI_REWARD_PREVIEW_ACTION)
             end,
             keybind = "UI_SHORTCUT_SECONDARY",
 
             callback = function()
                 if self.mouseOverObject:IsInstanceOf(ZO_PromotionalEventReward_Keyboard) then
-                    g_PromotionalEventsKeyboard:BeginPreview(self.mouseOverObject.displayRewardData:GetRewardId())
+                    self:BeginPreview(self.mouseOverObject.displayRewardData:GetRewardId())
                 elseif self.mouseOverObject:IsInstanceOf(ZO_RewardData) then
-                    g_PromotionalEventsKeyboard:BeginPreview(self.mouseOverObject:GetRewardId())
+                    self:BeginPreview(self.mouseOverObject:GetRewardId())
                 end
                 KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
             end,
@@ -542,7 +542,7 @@ function ZO_PromotionalEvents_Keyboard:InitializeKeybindStripDescriptors()
         -- End Preview
         {
             alignment = KEYBIND_STRIP_ALIGN_CENTER,
-            name = GetString(SI_PROMOTIONAL_EVENT_REWARD_END_PREVIEW_ACTION),
+            name = GetString(SI_REWARD_END_PREVIEW_ACTION),
             keybind = "UI_SHORTCUT_NEGATIVE",
 
             callback = function()
@@ -614,35 +614,16 @@ end
 local g_highlightAnimationProvider = ZO_ReversibleAnimationProvider:New("ShowOnMouseOverLabelAnimation")
 
 function ZO_PromotionalEvents_Keyboard:PreviewRewardList(rewardId, anchorControl)
-    local rewardListId = GetRewardListIdFromReward(rewardId)
-    local rewards = REWARDS_MANAGER:GetAllRewardInfoForRewardList(rewardListId)
-    POPUP_LIST:ClearList()
-    for _, reward in ipairs(rewards) do
-        POPUP_LIST:AddItem(ZO_POPUP_LIST_DATA_TYPE_ITEM, reward)
+    local function OnMouseEnter(control)
+        self:SetMouseOverObject(control.dataEntry.data)
     end
-    POPUP_LIST:UpdateList()
-    POPUP_LIST:SetOnMouseEnterCallback(function(control)
-        ZO_GridEntry_SetIconScaledUp(control, true)
-        local highlight = control:GetNamedChild("Highlight")
-        if highlight and highlight:GetType() == CT_TEXTURE then
-            g_highlightAnimationProvider:PlayForward(highlight)
-        end
-        ZO_Rewards_Shared_OnMouseEnter(control, RIGHT, LEFT, -5)
-        g_PromotionalEventsKeyboard:SetMouseOverObject(control.dataEntry.data)
-    end)
-    POPUP_LIST:SetOnMouseExitCallback(function(control)
-        ZO_GridEntry_SetIconScaledUp(control, false)
-        local highlight = control:GetNamedChild("Highlight")
-        if highlight and highlight:GetType() == CT_TEXTURE then
-            g_highlightAnimationProvider:PlayBackward(highlight)
-        end
-        ZO_Rewards_Shared_OnMouseExit(control)
-        g_PromotionalEventsKeyboard:SetMouseOverObject(nil)
-    end)
+
+    local function OnMouseExit(control)
+        self:SetMouseOverObject(nil)
+    end
 
     local anchorControl = anchorControl or self.mouseOverObject.control
-    POPUP_LIST.control:SetAnchor(BOTTOMRIGHT, anchorControl, BOTTOMLEFT)
-    POPUP_LIST.control:SetHidden(false)
+    POPUP_LIST:ShowRewardList(rewardId, OnMouseEnter, OnMouseExit, BOTTOMRIGHT, anchorControl, BOTTOMLEFT)
 end
 
 function ZO_PromotionalEvents_Keyboard:OnActivityControlSetup(control, data)
@@ -663,8 +644,8 @@ function ZO_PromotionalEvents_Keyboard:SetMouseOverObject(mouseOverObject)
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
 end
 
-function ZO_PromotionalEvents_Keyboard:OnRewardsClaimed(...)
-    ZO_PromotionalEvents_Shared.OnRewardsClaimed(self, ...)
+function ZO_PromotionalEvents_Keyboard:OnRewardsClaimed(campaignData, rewards)
+    ZO_PromotionalEvents_Shared.OnRewardsClaimed(self, campaignData, rewards)
 
     if self:IsShowing() and self.currentCampaignData == campaignData then
         KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)

@@ -581,7 +581,7 @@ end
 
 function ZO_AddOnManager_Gamepad:InitializeFooter()
     --Custom keybinds are not supported on consoles
-    if not IsConsoleUI() then
+    if not ZO_IsConsoleOrGameCoreUI() then
         self.footerData =
         {
             data1Text = function()
@@ -916,6 +916,8 @@ do
     local ADDON_ACTIVE_PARTIAL_TEXTURE = "EsoUI/Art/Addons/Gamepad/gp_addon_active_partial.dds"
 
     function ZO_AddOnManager_Gamepad:SetupRow(control, data)
+        ZO_SortFilterList_Gamepad.SetupRow(self, control, data)
+
         local addOnIndex = data.addOnIndex
         local hasDependencyError = data.hasDependencyError
 

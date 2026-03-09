@@ -220,7 +220,7 @@ function ZO_GroupFinder_CreateEditGroupListing_Keyboard:PopulatePrimaryDropdown(
     local category = self.userTypeData:GetCategory()
     local secondaryOptionAnchorParent
     local showDifficultyAsPrimaryOption = category == GROUP_FINDER_CATEGORY_DUNGEON or category == GROUP_FINDER_CATEGORY_ARENA or category == GROUP_FINDER_CATEGORY_TRIAL
-    local dontShowPrimaryOrSecondary = category == GROUP_FINDER_CATEGORY_ENDLESS_DUNGEON or category == GROUP_FINDER_CATEGORY_CUSTOM
+    local dontShowPrimaryOrSecondary = category == GROUP_FINDER_CATEGORY_ENDLESS_DUNGEON or category == GROUP_FINDER_CATEGORY_ADVENTURE_ZONE or category == GROUP_FINDER_CATEGORY_CUSTOM
     local isUserTypeDraft = userType == GROUP_FINDER_GROUP_LISTING_USER_TYPE_GROUP_LISTING_DRAFT
 
     self.primaryOptionDropdownControl:SetHidden(showDifficultyAsPrimaryOption or dontShowPrimaryOrSecondary)

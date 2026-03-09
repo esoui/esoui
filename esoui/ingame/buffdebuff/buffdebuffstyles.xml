@@ -5,19 +5,16 @@
                 <Control name="$(parent)Container1">
                     <Anchor point="RIGHT" relativePoint="CENTER" offsetX="-10"/>
                 </Control>
-
                 <Control name="$(parent)Container2">
                     <Anchor point="LEFT" relativePoint="CENTER" offsetX="10"/>
                 </Control>
             </Controls>
         </Control>
-
         <Control name="ZO_BuffDebuffAllCenteredStyle_Template" resizeToFitConstrains="X" virtual="true">
             <Controls>
                 <Control name="$(parent)Container1">
-                    <Anchor point="LEFT" />
+                    <Anchor point="LEFT"/>
                 </Control>
-
                 <Control name="$(parent)Container2">
                     <Anchor point="LEFT" relativeTo="$(parent)Container1" relativePoint="RIGHT" offsetX="5"/>
                 </Control>

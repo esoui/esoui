@@ -3,11 +3,10 @@
         <Control name="ZO_GroupMenuGamepadDungeonDifficultyEntry" inherits="ZO_Gamepad_Dropdown_Item_Indented" virtual="true">
             <Controls>
                 <Texture name="$(parent)Icon" inherits="ZO_GamepadMenuEntryIconTemplate">
-                    <Anchor point="CENTER" relativeTo="$(parent)Dropdown" relativePoint="LEFT" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_ICON_X_OFFSET" />
+                    <Anchor point="CENTER" relativeTo="$(parent)Dropdown" relativePoint="LEFT" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_ICON_X_OFFSET"/>
                 </Texture>
             </Controls>
         </Control>
-      
         <TopLevelControl name="ZO_GroupMenuGamepad" inherits="ZO_Gamepad_ParametricList_Screen">
             <OnInitialized>
                 ZO_GroupMenuGamepad_OnInitialized(self)

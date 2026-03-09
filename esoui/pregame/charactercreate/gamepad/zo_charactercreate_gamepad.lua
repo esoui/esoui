@@ -172,7 +172,7 @@ function ZO_CharacterCreate_Gamepad:Initialize(...)
                 self.characterName = characterName
 
                 if characterName and #characterName > 0 then
-                    if IsConsoleUI() then
+                    if ZO_IsConsoleOrGameCoreUI() then
                         PLAYER_CONSOLE_INFO_REQUEST_MANAGER:RequestNameValidation(characterName, CharacterNameValidationCallback)
                     else
                         CharacterNameValidationCallback(IsValidName(characterName))

@@ -191,13 +191,7 @@ function ZO_GetFormattedDialogText(dialog, textTable, params)
         params[timer] = timerParam
     end
     
-    local textOrCallback = textTable.text
-    local finalText
-    if type(textOrCallback) == "function" then
-        finalText = textOrCallback(dialog)
-    else
-        finalText = textOrCallback
-    end
+    local finalText = ZO_Eval(textTable.text, dialog)
 
     local formattedText = GetFormattedDialogText(finalText, params)
 
@@ -324,11 +318,7 @@ local function RefreshMainText(dialog, dialogInfo, textParams)
         mainText = dialogInfo.mainText
         if textControl then
             if mainText then
-                if type(mainText) == "function" then
-                    dialog.mainText = mainText(dialog)
-                else
-                    dialog.mainText = mainText
-                end
+                dialog.mainText = ZO_Eval(mainText, dialog)
 
                 if dialog.mainText.lineSpacing then
                     textControl:SetLineSpacing(dialog.mainText.lineSpacing)
@@ -473,11 +463,7 @@ function ZO_Dialogs_ShowDialog(name, data, textParams, isGamepad)
             return nil
         end
     elseif dialogInfo.customControl then
-        if type(dialogInfo.customControl) == "function" then
-            dialog = dialogInfo.customControl()
-        else
-            dialog = dialogInfo.customControl
-        end
+        dialog = ZO_Eval(dialogInfo.customControl)
 
         if not dialog then
             return nil
@@ -541,11 +527,7 @@ function ZO_Dialogs_ShowDialog(name, data, textParams, isGamepad)
 
             local buttonVisible = true
             if buttonInfo.visible ~= nil then
-                if type(buttonInfo.visible) == "function" then
-                    buttonVisible = buttonInfo.visible(dialog)
-                else
-                    buttonVisible = buttonInfo.visible
-                end
+                buttonVisible = ZO_Eval(buttonInfo.visible, dialog)
             end
 
             if not buttonVisible then
@@ -570,11 +552,7 @@ function ZO_Dialogs_ShowDialog(name, data, textParams, isGamepad)
                 local keybind
                 local hasKeybind = true
                 if buttonInfo.keybind then
-                    if type(buttonInfo.keybind) == "function" then
-                        keybind = buttonInfo.keybind(dialog)
-                    else
-                        keybind = buttonInfo.keybind
-                    end
+                    keybind = ZO_Eval(buttonInfo.keybind, dialog)
                 elseif buttonInfo.keybind == nil then
                     if i == 1 then
                         keybind = "DIALOG_PRIMARY"
@@ -587,11 +565,7 @@ function ZO_Dialogs_ShowDialog(name, data, textParams, isGamepad)
 
                 local isButtonEnabled
                 if buttonInfo.enabled ~= nil then
-                    if type(buttonInfo.enabled) == "function" then
-                        isButtonEnabled = buttonInfo.enabled(dialog)
-                    else
-                        isButtonEnabled = buttonInfo.enabled
-                    end
+                    isButtonEnabled = ZO_Eval(buttonInfo.enabled, dialog)
                 end
 
                 if isButtonEnabled ~= nil then
@@ -1149,11 +1123,7 @@ function ZO_Dialogs_UpdateButtonVisibilityAndEnabledState(dialog)
 
             local buttonVisible = true
             if buttonInfo.visible ~= nil then
-                if type(buttonInfo.visible) == "function" then
-                    buttonVisible = buttonInfo.visible(dialog)
-                else
-                    buttonVisible = buttonInfo.visible
-                end
+                buttonVisible = ZO_Eval(buttonInfo.visible, dialog)
             end
 
             if not buttonVisible then
@@ -1162,17 +1132,42 @@ function ZO_Dialogs_UpdateButtonVisibilityAndEnabledState(dialog)
             else
                 local isButtonEnabled = true
                 if buttonInfo.enabled ~= nil then
-                    if type(buttonInfo.enabled) == "function" then
-                        isButtonEnabled = buttonInfo.enabled(dialog)
-                    else
-                        isButtonEnabled = buttonInfo.enabled
-                    end
+                    isButtonEnabled = ZO_Eval(buttonInfo.enabled, dialog)
                 end
 
                 local hasKeybind = button:GetKeybind() ~= nil
                 button:SetHidden(false)
                 button:SetEnabled(isButtonEnabled)
                 button:SetKeybindEnabled(hasKeybind and isButtonEnabled)
+            end
+        end
+    end
+end
+
+function ZO_Dialogs_RefreshButtonTexts(dialog)
+    if not dialog.isGamepad then
+        local buttonInfos = dialog.info.buttons
+        
+        for i, buttonInfo in ipairs(buttonInfos) do
+            local button = GetButtonControl(dialog, i)
+
+            local buttonVisible = true
+            if buttonInfo.visible ~= nil then
+                buttonVisible = ZO_Eval(buttonInfo.visible, dialog)
+            end
+
+            if buttonVisible then
+                local buttonText
+                if textParams and textParams.buttonTextOverrides and textParams.buttonTextOverrides[i] then
+                    buttonText = textParams.buttonTextOverrides[i]
+                elseif type(buttonInfo.text) == "number" then
+                    buttonText = GetString(buttonInfo.text)
+                elseif type(buttonInfo.text) == "function" then
+                    buttonText = buttonInfo.text(dialog)
+                else
+                    buttonText = buttonInfo.text
+                end
+                button:SetText(buttonText)
             end
         end
     end
@@ -1419,4 +1414,117 @@ if EVENT_PLAYER_ACTIVATED ~= nil then
             RemoveActionLayerByName(GetString(SI_KEYBINDINGS_LAYER_DIALOG))
         end
     end)
+end
+
+do
+    local LOADING_DELAY_MS = 500
+    local TIMEOUT_THRESHOLD_S = 5
+
+    local function BasePendingResultDialogSetup(dialog, data)
+        for _, eventData in ipairs(data.events) do
+            dialog:RegisterForEvent(eventData.event, function(_, ...)
+                dialog:UnregisterForEvent(eventData.event)
+                local args = { ... }
+                -- add a delay so the dialog transition is smoother
+                zo_callLater(function()
+                    ZO_Dialogs_ReleaseDialogOnButtonPress(dialog.name)
+                    eventData.callback(data, unpack(args))
+                end, LOADING_DELAY_MS)
+            end)
+        end
+        
+        if data.onSetup then
+            data.onSetup(dialog)
+        end
+
+        dialog.timeoutAtS = GetFrameTimeSeconds() + TIMEOUT_THRESHOLD_S
+    end
+
+    local function KeyboardPendingResultDialogSetup(dialog, data)
+        BasePendingResultDialogSetup(dialog, data)
+
+        local SHOW_LOADING_ICON = true
+        ZO_Dialogs_SetDialogLoadingIcon(dialog:GetNamedChild("Loading"), dialog:GetNamedChild("Text"), SHOW_LOADING_ICON)
+    end
+
+    local function GamepadPendingResultDialogSetup(dialog, data)
+        BasePendingResultDialogSetup(dialog, data)
+
+        dialog:setupFunc()
+    end
+
+    local function OnPendingResultDialogFinished(dialog)
+        for _, eventData in ipairs(dialog.data.events) do
+            dialog:UnregisterForEvent(eventData.event)
+        end
+    end
+
+    local function OnPendingResultDialogUpdate(dialog, frameTimeSeconds)
+        if dialog.timeoutAtS and dialog.timeoutAtS <= frameTimeSeconds then
+            dialog.timeoutAtS = nil
+            ZO_Dialogs_ReleaseDialogOnButtonPress(dialog.name)
+            if dialog.data.onTimeout then
+                dialog.data.onTimeout(dialog)
+            end
+        end
+    end
+
+    function ZO_KeyboardPendingResultDialog_OnInitialized(control)
+        ZO_Dialogs_RegisterCustomDialog("KEYBOARD_PENDING_RESULT_DIALOG",
+        {
+            canQueue = true,
+            mustChoose = true,
+            customControl = control,
+            setup = KeyboardPendingResultDialogSetup,
+            finishedCallback = OnPendingResultDialogFinished,
+            updateFn = OnKeyboardPendingResultDialogUpdate,
+            title =
+            {
+                text = function(dialog)
+                    return dialog.data.title
+                end
+            },
+            mainText =
+            {
+                text = function(dialog)
+                    return dialog.data.mainText
+                end,
+                align = TEXT_ALIGN_CENTER,
+            },
+        })
+    end
+
+    function ZO_GamepadPendingResultDialog_Initialize()
+        ZO_Dialogs_RegisterCustomDialog("GAMEPAD_PENDING_RESULT_DIALOG",
+        {
+            canQueue = true,
+            mustChoose = true,
+            setup = GamepadPendingResultDialogSetup,
+            finishedCallback = OnPendingResultDialogFinished,
+            updateFn = OnPendingResultDialogUpdate,
+            gamepadInfo =
+            {
+                dialogType = GAMEPAD_DIALOGS.COOLDOWN,
+                dialogFragmentGroup = ZO_GAMEPAD_KEYBINDS_FRAGMENT_GROUP,
+            },
+            title =
+            {
+                text = function(dialog)
+                    return dialog.data.title
+                end
+            },
+            mainText =
+            {
+                text = function(dialog)
+                    return dialog.data.mainText
+                end,
+            },
+            loading = 
+            {
+                text = function(dialog)
+                    return dialog.data.loadingText
+                end,
+            },
+        })
+    end
 end

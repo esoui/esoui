@@ -25,7 +25,6 @@
                 </Label>
             </Controls>
         </Control>
-        
         <TopLevelControl name="ZO_WorldMapKeepSummary" inherits="ZO_WorldMapKeepInfoContent">
             <OnInitialized>
                 ZO_WorldMapKeepSummary_OnInitialized(self)
@@ -50,7 +49,7 @@
                 </Label>
                 <Texture name="$(parent)Divider" inherits="ZO_HorizontalDivider" excludeFromResizeToFitExtents="true">
                     <Dimensions x="472"/>
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Alliance" relativePoint="BOTTOMLEFT" offsetX="-72" offsetY="15" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Alliance" relativePoint="BOTTOMLEFT" offsetX="-72" offsetY="15"/>
                 </Texture>
             </Controls>
         </TopLevelControl>

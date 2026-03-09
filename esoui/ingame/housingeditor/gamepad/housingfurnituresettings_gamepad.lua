@@ -842,7 +842,7 @@ do
             if data and data.control and data.control.editBoxControl then
                 if ZO_IsPlaystationPlatform() then
                     return true
-                elseif GetUIPlatform() == UI_PLATFORM_XBOX then
+                elseif ZO_IsConsoleOrGameCoreUI() then
                     if GetNumberConsoleFriends() > 0 then
                         return true
                     end

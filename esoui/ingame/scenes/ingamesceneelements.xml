@@ -20,7 +20,7 @@
         <TopLevelControl name="ZO_SharedTreeUnderlay" inherits="ZO_TreeUnderlay" hidden="true" layer="BACKGROUND" level="2"/>
         <TopLevelControl name="ZO_SharedTitle" inherits="ZO_PanelTitle" hidden="true" layer="BACKGROUND" level="2"/>
         <TopLevelControl name="ZO_SharedRightPanelTitle" inherits="ZO_PanelTitle" hidden="true" layer="BACKGROUND" level="2">
-            <Dimensions x="675" />
+            <Dimensions x="675"/>
         </TopLevelControl>
     </Controls>
 </GuiXml>

@@ -11,13 +11,11 @@
                         <Control name="$(parent)Tooltip" inherits="ZO_ScrollTooltip_Gamepad ZO_GamepadGrid_NavQuadrant_ContainerAnchors"/>
                     </Controls>
                 </Control>
-
                 <Control name="$(parent)Main" inherits="ZO_WorldMapInfoContent_Gamepad">
                     <Controls>
                         <Control name="$(parent)List" inherits="ZO_VerticalParametricScrollListTemplate">
                             <AnchorFill/>
                         </Control>
-
                         <Label name="$(parent)NoQuests" text="SI_WORLD_MAP_NO_QUESTS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGamepadCondensed42">
                             <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH"/>
                             <Anchor point="CENTER" offsetY="-35"/>

@@ -222,7 +222,7 @@ function ZO_GroupFinder_AdditionalFilters_Keyboard:Refresh()
     local categoryIndex = category + 1 -- Category Enum starts at 0 so index will always be one greater than value.
     local showDifficultyAsPrimaryOption = category == GROUP_FINDER_CATEGORY_DUNGEON or category == GROUP_FINDER_CATEGORY_ARENA or category == GROUP_FINDER_CATEGORY_TRIAL
     local showSingleSelectAsPrimaryOption = category == GROUP_FINDER_CATEGORY_PVP
-    local dontShowPrimaryOrSecondary = category == GROUP_FINDER_CATEGORY_ENDLESS_DUNGEON or category == GROUP_FINDER_CATEGORY_CUSTOM
+    local dontShowPrimaryOrSecondary = category == GROUP_FINDER_CATEGORY_ENDLESS_DUNGEON or category == GROUP_FINDER_CATEGORY_ADVENTURE_ZONE or category == GROUP_FINDER_CATEGORY_CUSTOM
 
     UpdateGroupFinderFilterOptions()
 

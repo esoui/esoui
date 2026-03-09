@@ -1,6 +1,6 @@
 <GuiXml>
     <Controls>
-        <Control name="ZO_CampaignChangeCost" virtual="true" >
+        <Control name="ZO_CampaignChangeCost" virtual="true">
             <Dimensions x="350" y="50"/>
             <Controls>
                 <Label name="$(parent)Free" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
@@ -32,7 +32,6 @@
                 </Control>
             </Controls>
         </Control>
-        
         <TopLevelControl name="ZO_SelectHomeCampaignDialog" inherits="ZO_DialogBase" hidden="true">
             <OnInitialized>
                 ZO_SelectHomeCampaignDialog_OnInitialized(self)
@@ -45,7 +44,7 @@
                             <Anchor point="TOPRIGHT"/>
                         </Label>
                         <Control name="$(parent)Exit" inherits="ZO_DialogButton">
-                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Message" relativePoint="BOTTOMRIGHT" offsetY="23" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Message" relativePoint="BOTTOMRIGHT" offsetY="23"/>
                         </Control>
                     </Controls>
                 </Control>
@@ -59,7 +58,6 @@
                             <Anchor point="TOPLEFT" relativeTo="$(parent)Query" relativePoint="BOTTOMLEFT" offsetY="20"/>
                             <Anchor point="TOPRIGHT" relativeTo="$(parent)Query" relativePoint="BOTTOMRIGHT" offsetY="20"/>
                         </Label>
-                        
                         <!-- Radio Buttons -->
                         <Button name="$(parent)SetNow" inherits="ZO_DialogRadioButton">
                             <!-- dynamically reanchored to handle hidden AllianceLockWarning -->
@@ -68,31 +66,28 @@
                                 ZO_SelectHomeCampaignDialogSetNow_OnClicked(self)
                             </OnClicked>
                             <Controls>
-                                <Label name="$(parent)Label" override="true" mouseEnabled="true" text="SI_SELECT_HOME_CAMPAIGN_NOW" />
+                                <Label name="$(parent)Label" override="true" mouseEnabled="true" text="SI_SELECT_HOME_CAMPAIGN_NOW"/>
                             </Controls>
                         </Button>
-
                         <Button name="$(parent)SetOnEnd" inherits="ZO_DialogRadioButton">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)SetNow" relativePoint="BOTTOMLEFT" offsetY="10"/>
                             <OnClicked>
                                 ZO_SelectHomeCampaignDialogSetOnEnd_OnClicked(self)
                             </OnClicked>
                             <Controls>
-                                <Label name="$(parent)Label" override="true" mouseEnabled="true" text="SI_SELECT_HOME_CAMPAIGN_ON_END" />
+                                <Label name="$(parent)Label" override="true" mouseEnabled="true" text="SI_SELECT_HOME_CAMPAIGN_ON_END"/>
                             </Controls>
                         </Button>
-
                         <!-- Cost -->
                         <Control name="$(parent)Cost" inherits="ZO_CampaignChangeCost">
                             <!-- dynamically reanchored to handle hidden RadioButtons -->
                             <Anchor point="TOPLEFT" relativeTo="$(parent)SetOnEnd" relativePoint="BOTTOMLEFT" offsetY="15" offsetX="-20"/>
                             <Controls>
-                                <Label name="$(parent)Free" override="true" text="SI_SELECT_HOME_CAMPAIGN_FREE" />
+                                <Label name="$(parent)Free" override="true" text="SI_SELECT_HOME_CAMPAIGN_FREE"/>
                             </Controls>
                         </Control>
-                        
                         <Control name="$(parent)Exit" inherits="ZO_DialogButton">
-                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Cost" relativePoint="BOTTOMRIGHT" offsetY="23" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Cost" relativePoint="BOTTOMRIGHT" offsetY="23"/>
                         </Control>
                         <Control name="$(parent)Accept" inherits="ZO_DialogButton">
                             <Anchor point="TOPRIGHT" relativeTo="$(parent)Exit" relativePoint="TOPLEFT" offsetX="-15"/>
@@ -101,7 +96,6 @@
                 </Control>
             </Controls>
         </TopLevelControl>
-
         <TopLevelControl name="ZO_AbandonHomeCampaignDialog" inherits="ZO_DialogBase" hidden="true">
             <OnInitialized>
                 ZO_AbandonHomeCampaignDialog_OnInitialized(self)
@@ -114,7 +108,7 @@
                             <Anchor point="TOPRIGHT"/>
                         </Label>
                         <Control name="$(parent)Exit" inherits="ZO_DialogButton">
-                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Message" relativePoint="BOTTOMRIGHT" offsetY="23" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Message" relativePoint="BOTTOMRIGHT" offsetY="23"/>
                         </Control>
                     </Controls>
                 </Control>
@@ -124,38 +118,34 @@
                             <Anchor point="TOPLEFT"/>
                             <Anchor point="TOPRIGHT"/>
                         </Label>
-
-                        <!-- Radio Buttons --> 
+                        <!-- Radio Buttons -->
                         <Button name="$(parent)UseAlliancePoints" inherits="ZO_DialogRadioButton">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)Query" relativePoint="BOTTOMLEFT" offsetX="20" offsetY="15"/>
                             <OnClicked>
                                 ZO_AbandonHomeCampaignDialogUseAlliancePoints_OnClicked(self)
                             </OnClicked>
                             <Controls>
-                                <Label name="$(parent)Label" override="true" mouseEnabled="true" text="SI_ABANDON_HOME_CAMPAIGN_USE_ALLIANCE_POINTS" />
+                                <Label name="$(parent)Label" override="true" mouseEnabled="true" text="SI_ABANDON_HOME_CAMPAIGN_USE_ALLIANCE_POINTS"/>
                             </Controls>
                         </Button>
-
                         <Button name="$(parent)UseGold" inherits="ZO_DialogRadioButton">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)UseAlliancePoints" relativePoint="BOTTOMLEFT" offsetY="10"/>
                             <OnClicked>
                                 ZO_AbandonHomeCampaignDialogUseGold_OnClicked(self)
                             </OnClicked>
                             <Controls>
-                                <Label name="$(parent)Label" override="true" mouseEnabled="true" text="SI_ABANDON_HOME_CAMPAIGN_USE_GOLD" />
+                                <Label name="$(parent)Label" override="true" mouseEnabled="true" text="SI_ABANDON_HOME_CAMPAIGN_USE_GOLD"/>
                             </Controls>
                         </Button>
-
                         <!-- Cost -->
                         <Control name="$(parent)Cost" inherits="ZO_CampaignChangeCost">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)UseGold" relativePoint="BOTTOMLEFT" offsetY="15" offsetX="-20"/>
                             <Controls>
-                                <Label name="$(parent)Free" override="true" text="SI_ABANDON_HOME_CAMPAIGN_FREE" />
+                                <Label name="$(parent)Free" override="true" text="SI_ABANDON_HOME_CAMPAIGN_FREE"/>
                             </Controls>
                         </Control>
-
                         <Control name="$(parent)Exit" inherits="ZO_DialogButton">
-                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Cost" relativePoint="BOTTOMRIGHT" offsetY="23" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Cost" relativePoint="BOTTOMRIGHT" offsetY="23"/>
                         </Control>
                         <Control name="$(parent)Accept" inherits="ZO_DialogButton">
                             <Anchor point="TOPRIGHT" relativeTo="$(parent)Exit" relativePoint="TOPLEFT" offsetX="-15"/>
@@ -164,35 +154,30 @@
                 </Control>
             </Controls>
         </TopLevelControl>
-
         <TopLevelControl name="ZO_CampaignQueueDialog" inherits="ZO_CustomDialogBase">
             <OnInitialized>
                 ZO_CampaignQueueDialog_OnInitialized(self)
             </OnInitialized>
             <Controls>
                 <Label name="$(parent)Prompt" inherits="ZO_DialogContentAnchors" font="ZoFontGame" text="SI_CAMPAIGN_BROWSER_QUEUE_DIALOG_PROMPT" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"/>
-
                 <Control name="$(parent)RadioButtons" resizeToFitDescendents="true">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Prompt" relativePoint="BOTTOMLEFT" offsetY="15"/>
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Prompt" relativePoint="BOTTOMRIGHT" offsetY="15" />
-
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Prompt" relativePoint="BOTTOMRIGHT" offsetY="15"/>
                     <Controls>
                         <Button name="$(parent)GroupQueue" inherits="ZO_DialogRadioButton">
                             <Anchor point="TOPLEFT" offsetX="15"/>
                             <Controls>
-                                <Label name="$(parent)Label" override="true" mouseEnabled="true" text="SI_CAMPAIGN_BROWSER_QUEUE_GROUP" />
+                                <Label name="$(parent)Label" override="true" mouseEnabled="true" text="SI_CAMPAIGN_BROWSER_QUEUE_GROUP"/>
                             </Controls>
                         </Button>
-
                         <Button name="$(parent)SoloQueue" inherits="ZO_DialogRadioButton">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)GroupQueue" relativePoint="BOTTOMLEFT" offsetY="10" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)GroupQueue" relativePoint="BOTTOMLEFT" offsetY="10"/>
                             <Controls>
-                                <Label name="$(parent)Label" override="true" mouseEnabled="true" text="SI_CAMPAIGN_BROWSER_QUEUE_SOLO" />
+                                <Label name="$(parent)Label" override="true" mouseEnabled="true" text="SI_CAMPAIGN_BROWSER_QUEUE_SOLO"/>
                             </Controls>
                         </Button>
                     </Controls>
                 </Control>
-
                 <!-- have to make buttons for a custom dialog -->
                 <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton"/>
                 <Control name="$(parent)Confirm" inherits="ZO_CustomDialogButton"/>

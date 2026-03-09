@@ -28,9 +28,7 @@
                 </Label>
             </Controls>
         </Control>
-
         <Label name="ZO_MapQuestDetailsCondition" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true"/>
-        
         <TopLevelControl name="ZO_MapQuestDetailsTooltipTopLevel" inherits="TooltipTopLevel">
             <Controls>
                 <Tooltip name="ZO_MapQuestDetailsTooltip" inherits="ZO_BaseTooltip">
@@ -44,7 +42,6 @@
                 </Tooltip>
             </Controls>
         </TopLevelControl>
-
         <TopLevelControl name="ZO_WorldMapQuests" inherits="ZO_WorldMapInfoContent">
             <OnInitialized>
                 ZO_WorldMapQuests_OnInitialized(self)

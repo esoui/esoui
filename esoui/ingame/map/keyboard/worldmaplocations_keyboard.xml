@@ -14,7 +14,6 @@
                 </Label>
             </Controls>
         </Control>
-        
         <TopLevelControl name="ZO_WorldMapLocations" inherits="ZO_WorldMapInfoContent">
             <OnInitialized>
                 ZO_WorldMapLocations_OnInitialized(self)

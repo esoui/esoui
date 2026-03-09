@@ -10,14 +10,11 @@
                 end
             </OnPlay>
         </AlphaAnimation>
-
-        <AlphaAnimation name="FadeInOutAnimation" duration="200" startAlpha="0" endAlpha="1" />
-
+        <AlphaAnimation name="FadeInOutAnimation" duration="200" startAlpha="0" endAlpha="1"/>
         <AnimationTimeline name="LoadingCompleteAnimation">
             <Animations>
                 <!-- Art -->
-                <AlphaAnimation inherits="PopToFullAlphaAnimation" />
-
+                <AlphaAnimation inherits="PopToFullAlphaAnimation"/>
                 <!-- Top Munge -->
                 <TranslateAnimation duration="850" anchorIndex="3">
                     <OnPlay>
@@ -28,8 +25,7 @@
                         end
                     </OnPlay>
                 </TranslateAnimation>
-                <AlphaAnimation inherits="PopToFullAlphaAnimation" />
-
+                <AlphaAnimation inherits="PopToFullAlphaAnimation"/>
                 <!-- Bottom Munge -->
                 <TranslateAnimation duration="850" anchorIndex="3">
                     <OnPlay>
@@ -40,34 +36,27 @@
                         end
                     </OnPlay>
                 </TranslateAnimation>
-                <AlphaAnimation inherits="PopToFullAlphaAnimation" />
+                <AlphaAnimation inherits="PopToFullAlphaAnimation"/>
             </Animations>
         </AnimationTimeline>
     </Animations>
-    
-    <Controls>      
+    <Controls>
         <TopLevelControl name="LoadingScreen" inherits="ZO_LoadingScreenBase" mouseEnabled="true">
-            <AnchorFill />
-            
+            <AnchorFill/>
             <OnInitialized>
                 ZO_InitKeyboardLoadScreen(self)
             </OnInitialized>
-
             <OnMouseEnter>
                 GetWindowManager():SetMouseCursor(MOUSE_CURSOR_DO_NOT_CARE)
             </OnMouseEnter>
-
-            <OnMouseWheel />
-
+            <OnMouseWheel/>
             <Controls>
-                <Texture name="$(parent)TopMunge" override="true" textureFile="EsoUI/Art/Screens_App/LoadScreen_topMunge_tile.dds" addressMode="WRAP" />
-
+                <Texture name="$(parent)TopMunge" override="true" textureFile="EsoUI/Art/Screens_App/LoadScreen_topMunge_tile.dds" addressMode="WRAP"/>
                 <Texture name="$(parent)BottomMunge" override="true" textureFile="EsoUI/Art/Screens_App/LoadScreen_bottomMunge_tile.dds" addressMode="WRAP" scale=".75">
                     <Controls>
                         <Label name="$(grandparent)ZoneDescription" font="ZoFontWinH3" override="true">
-                            <Anchor point="CENTER" offsetY="55" />
+                            <Anchor point="CENTER" offsetY="55"/>
                         </Label>
-
                         <Control name="$(grandparent)ZoneInfoContainer" override="true">
                             <Controls>
                                 <Label name="$(parent)ZoneName" override="true" font="ZoFontWinH2"/>
@@ -75,14 +64,11 @@
                             </Controls>
                         </Control>
                     </Controls>
-               </Texture>
-
+                </Texture>
                 <Texture name="$(parent)Spinner" override="true">
-                    <Anchor point="BOTTOMRIGHT" offsetX="0" offsetY="-2" />
-                </Texture>                
-                
-            </Controls>            
-            
-        </TopLevelControl>        
+                    <Anchor point="BOTTOMRIGHT" offsetX="0" offsetY="-2"/>
+                </Texture>
+            </Controls>
+        </TopLevelControl>
     </Controls>
 </GuiXml>

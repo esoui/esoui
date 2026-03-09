@@ -429,32 +429,6 @@ function ZO_Smithing:InitializeKeybindStripDescriptors()
                 end
             end,
         },
-
-        -- Crown Store opening action
-        {
-            name = function()
-                if self.mode == SMITHING_MODE_CREATION then
-                    return GetString(SI_SMITHING_BUY_CRAFTING_ITEMS)
-                end
-            end,
-
-            keybind = "UI_SHORTCUT_TERTIARY",
-
-            callback = function()
-                if self.mode == SMITHING_MODE_CREATION then
-                    self.creationPanel:BuyCraftingItems()
-                end
-            end,
-
-            visible = function()
-                if not ZO_CraftingUtils_IsPerformingCraftProcess() then
-                    if self.mode == SMITHING_MODE_CREATION and not self.creationPanel:ShouldIgnoreStyleItems() then
-                        return true
-                    end
-                    return false
-                end
-            end,
-        },
     }
 
     ZO_CraftingUtils_ConnectKeybindButtonGroupToCraftingProcess(self.keybindStripDescriptor)

@@ -91,6 +91,8 @@ end
 
 -- Zone Display Type --
 do
+    -- If this assert is hit, also check SharedLoadingScreen.lua's ZONE_DISPLAY_TYPE_ICONS table.
+    internalassert(ZONE_DISPLAY_TYPE_MAX_VALUE == 13, "A new Zone Display Type may need a new icon")
     local ZONE_DISPLAY_TYPE_ICONS =
     {
         [ZONE_DISPLAY_TYPE_SOLO] = "EsoUI/Art/Icons/mapKey/mapKey_soloInstance.dds",
@@ -103,6 +105,7 @@ do
         [ZONE_DISPLAY_TYPE_HOUSING] = "EsoUI/Art/Icons/mapKey/mapKey_housing.dds",
         [ZONE_DISPLAY_TYPE_ZONE_STORY] = "EsoUI/Art/Icons/mapKey/mapKey_zoneStory.dds",
         [ZONE_DISPLAY_TYPE_ENDLESS_DUNGEON] = "EsoUI/Art/Icons/mapKey/mapKey_endlessDungeon.dds",
+        [ZONE_DISPLAY_TYPE_ADVENTURE_ZONE] = "EsoUI/Art/Icons/mapKey/mapKey_adventureZone.dds",
     }
 
     function ZO_GetZoneDisplayTypeIcon(zoneDisplayType)
@@ -327,6 +330,46 @@ end
 
 function ZO_GetBattlegroundIconMarkup(battlegroundTeam, size)
     return zo_iconFormatInheritColor(ZO_GetBattlegroundTeamIcon(battlegroundTeam), size, size)
+end
+
+-- Adventure Zone --
+
+do
+    local KEYBOARD_ADVENTURE_ZONE_FACTION_ICONS =
+    {
+        [ADVENTURE_ZONE_FACTION_THE_RUCKUS] = "EsoUI/Art/Stats/u49_faction_ruckus_32.dds",
+        [ADVENTURE_ZONE_FACTION_THOUSAND_EYES] = "EsoUI/Art/Stats/u49_faction_thousandeyes_32.dds",
+        [ADVENTURE_ZONE_FACTION_GLITTERING_GOAD] = "EsoUI/Art/Stats/u49_faction_glittering_32.dds",
+    }
+
+    function ZO_GetAdventureZoneFactionIcon32(adventureZoneFaction)
+        return KEYBOARD_ADVENTURE_ZONE_FACTION_ICONS[adventureZoneFaction]
+    end
+
+    ZO_GetKeyboardAdventureZoneFactionIcon = ZO_GetAdventureZoneFactionIcon32
+end
+
+do
+    local GAMEPAD_ADVENTURE_ZONE_FACTION_ICONS =
+    {
+        [ADVENTURE_ZONE_FACTION_THE_RUCKUS] = "EsoUI/Art/Stats/u49_faction_ruckus_64.dds",
+        [ADVENTURE_ZONE_FACTION_THOUSAND_EYES] = "EsoUI/Art/Stats/u49_faction_thousandeyes_64.dds",
+        [ADVENTURE_ZONE_FACTION_GLITTERING_GOAD] = "EsoUI/Art/Stats/u49_faction_glittering_64.dds",
+    }
+
+    function ZO_GetAdventureZoneFactionIcon64(adventureZoneFaction)
+        return GAMEPAD_ADVENTURE_ZONE_FACTION_ICONS[adventureZoneFaction]
+    end
+
+    ZO_GetGamepadAdventureZoneFactionIcon = ZO_GetAdventureZoneFactionIcon64
+end
+
+function ZO_GetAdventureZoneFactionIcon(adventureZoneFaction)
+    if IsInGamepadPreferredMode() then
+        return ZO_GetGamepadAdventureZoneFactionIcon(adventureZoneFaction)
+    else
+        return ZO_GetKeyboardAdventureZoneFactionIcon(adventureZoneFaction)
+    end
 end
 
 -- Difficulty --

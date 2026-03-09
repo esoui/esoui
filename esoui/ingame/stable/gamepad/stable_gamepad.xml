@@ -9,20 +9,17 @@
                 ZO_StableTrainingRow_Init(self)
             </OnInitialized>
             <Controls>
-                <Texture name="$(parent)StatusIndicator" inherits="ZO_GamepadMenuEntryStatusIndicationTemplate" /> 
-
+                <Texture name="$(parent)StatusIndicator" inherits="ZO_GamepadMenuEntryStatusIndicationTemplate"/>
                 <Control name="$(parent)BarContainer" inherits="ZO_StableTrainingBar_Gamepad">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Label" relativePoint="BOTTOMLEFT"/>
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)Label" relativePoint="BOTTOMRIGHT"/>
                 </Control>
             </Controls>
         </Control>
-        
         <TopLevelControl name="ZO_StablePanelGamepad" inherits="ZO_GamepadGrid_NavQuadrant_1_Anchors" hidden="true">
             <OnInitialized>
                 ZO_Stable_Gamepad_Initialize(self)
             </OnInitialized>
-
             <Controls>
                 <Control name="$(parent)Notifications" resizeToFitDescendents="true">
                     <Anchor point="TOPLEFT" relativeTo="ZO_StoreWindow_GamepadMaskContainerHeaderContainerHeader" relativePoint="BOTTOMLEFT" offsetY="10"/>

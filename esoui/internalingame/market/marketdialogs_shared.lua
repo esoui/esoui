@@ -38,7 +38,8 @@ do
     local TEXTURE_SCALE_PERCENT = 100
     function ZO_MarketDialogs_Shared_GetPreviewHouseDialogMainTextParams(marketProductId)
         local keybindString
-        local key, mod1, mod2, mod3, mod4 = GetIngameHighestPriorityActionBindingInfoFromName("SHOW_HOUSING_PANEL", IsInGamepadPreferredMode())
+        local preferredKeybindType = ZO_Keybindings_GetPreferredKeyType()
+        local key, mod1, mod2, mod3, mod4 = GetIngameHighestPriorityActionBindingInfoFromNameAndInputDevice("SHOW_HOUSING_PANEL", preferredKeybindType)
         if key ~= KEY_INVALID then
             keybindString = ZO_Keybindings_GetBindingStringFromKeys(key, mod1, mod2, mod3, mod4, KEYBIND_TEXT_OPTIONS_FULL_NAME, KEYBIND_TEXTURE_OPTIONS_EMBED_MARKUP, TEXTURE_SCALE_PERCENT)
         else

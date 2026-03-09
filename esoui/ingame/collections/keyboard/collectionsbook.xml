@@ -2,9 +2,8 @@
     <Controls>
         <!-- Wrap early, and when wrapping, indent the next line to make it clear that the line is part of the same label -->
         <Label name="ZO_CollectionsBook_SubCategory" inherits="ZO_TreeStatusLabelSubCategory" maxLineCount="2" newLineIndent="10" virtual="true">
-            <Dimensions x="228" />
+            <Dimensions x="228"/>
         </Label>
-
         <Control name="ZO_CollectionsBook_StatusIconHeader" inherits="ZO_StatusIconHeader" virtual="true">
             <Controls>
                 <Label name="$(parent)Text" override="true">
@@ -12,7 +11,6 @@
                 </Label>
             </Controls>
         </Control>
-
         <Control name="ZO_CollectionsBook_StatusIconChildlessHeader" inherits="ZO_StatusIconChildlessHeader" virtual="true">
             <Controls>
                 <Label name="$(parent)Text" override="true">
@@ -20,29 +18,25 @@
                 </Label>
             </Controls>
         </Control>
-
         <TopLevelControl name="ZO_CollectionsBook_TopLevel" inherits="ZO_RightPanelFootPrint" mouseEnabled="true" hidden="true">
             <OnInitialized>
                 ZO_CollectionsBook_OnInitialize(self)
             </OnInitialized>
-
             <Controls>
                 <Control name="$(parent)WheelContainer" hidden="true">
                     <Controls>
                         <Control name="$(parent)UtilityWheel" inherits="ZO_AssignableUtilityWheel_Keyboard_Template">
-                            <Anchor point="RIGHT" relativeTo="ZO_SharedRightBackground" relativePoint="LEFT" offsetX="-250" />
+                            <Anchor point="RIGHT" relativeTo="ZO_SharedRightBackground" relativePoint="LEFT" offsetX="-250"/>
                         </Control>
                     </Controls>
                 </Control>
-                
                 <Control name="$(parent)Categories" inherits="ZO_ScrollContainer">
-                    <Dimensions x="353" />
-                    <Anchor point="TOPLEFT" offsetX="-28" offsetY="77" />
-                    <Anchor point="BOTTOMLEFT" offsetX="-28" />
+                    <Dimensions x="353"/>
+                    <Anchor point="TOPLEFT" offsetX="-28" offsetY="77"/>
+                    <Anchor point="BOTTOMLEFT" offsetX="-28"/>
                 </Control>
-
                 <Backdrop name="$(parent)Search" tier="HIGH" inherits="ZO_SingleLineEditBackdrop_Keyboard">
-                    <Anchor point="TOPLEFT" offsetX="9" offsetY="33" />
+                    <Anchor point="TOPLEFT" offsetX="9" offsetY="33"/>
                     <Dimensions x="240"/>
                     <Controls>
                         <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop" defaultText="SI_COLLECTIONS_BOOK_SEARCH_EDIT_DEFAULT">
@@ -52,46 +46,38 @@
                         </EditBox>
                     </Controls>
                 </Backdrop>
-
                 <Label name="$(parent)SearchLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontHeader" text="SI_SEARCH_FILTER_BY">
-                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Search" relativePoint="TOPLEFT" />
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Search" relativePoint="TOPLEFT"/>
                 </Label>
-
                 <Control name="$(parent)Filter" inherits="ZO_ComboBox">
-                    <Dimensions x="222" y="32" />
-                    <Anchor point="TOPRIGHT" offsetX="-15" offsetY="25" />
+                    <Dimensions x="222" y="32"/>
+                    <Anchor point="TOPRIGHT" offsetX="-15" offsetY="25"/>
                 </Control>
-
                 <Control name="$(parent)List" inherits="ZO_GridScrollList_Keyboard">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Categories" relativePoint="TOPRIGHT" offsetY="5" />
-                    <Anchor point="BOTTOMRIGHT" offsetX="-17" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Categories" relativePoint="TOPRIGHT" offsetY="5"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="-17"/>
                 </Control>
-                
                 <Label name="$(parent)NoMatchMessage" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="SI_COLLECTIONS_BOOK_SEARCH_NO_MATCHES" horizontalAlignment="CENTER" hidden="true">
-                    <Anchor point="TOP" relativeTo="$(parent)List" />
+                    <Anchor point="TOP" relativeTo="$(parent)List"/>
                 </Label>
             </Controls>
         </TopLevelControl>
-
         <TopLevelControl name="ZO_CollectibleRenameDialog" inherits="ZO_CustomDialogBase">
-            <ResizeToFitPadding width="50" height="33" />
+            <ResizeToFitPadding width="50" height="33"/>
             <OnInitialized>
                 ZO_CollectibleRenameDialog_OnInitialized(self)
             </OnInitialized>
-
             <Controls>
                 <Control name="$(parent)ContentContainer" resizeToFitDescendents="true">
-                    <Anchor point="TOP" relativeTo="$(parent)Title" relativePoint="BOTTOM" offsetY="30" />
+                    <Anchor point="TOP" relativeTo="$(parent)Title" relativePoint="BOTTOM" offsetY="30"/>
                     <Controls>
                         <Control name="$(parent)NameInstructions" inherits="ZO_TextInstructionsTemplate" tier="HIGH" excludeFromResizeToFitExtents="true"/>
-
                         <Label name="$(parent)NameHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" font="ZoFontGame" text="SI_COLLECTIONS_INVENTORY_DIALOG_RENAME_COLLECTIBLE_MAIN">
-                            <Anchor point="TOPLEFT" offsetX="-12" />
+                            <Anchor point="TOPLEFT" offsetX="-12"/>
                         </Label>
-
                         <Backdrop name="$(parent)Edit" inherits="ZO_SingleLineEditBackdrop_Keyboard">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)NameHeader" relativePoint="BOTTOMLEFT" offsetY="5"/>
-                            <Dimensions x="340" />
+                            <Dimensions x="340"/>
                             <Controls>
                                 <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop">
                                     <OnTextChanged>
@@ -111,12 +97,11 @@
                         </Backdrop>
                     </Controls>
                 </Control>
-
                 <Control name="$(parent)Keybinds" resizeToFitDescendents="true">
-                    <Anchor point="TOP" relativeTo="$(parent)ContentContainer" relativePoint="BOTTOM" offsetY="20" />
+                    <Anchor point="TOP" relativeTo="$(parent)ContentContainer" relativePoint="BOTTOM" offsetY="20"/>
                     <Controls>
                         <Control name="$(parent)Default" inherits="ZO_DialogButton">
-                            <Anchor point="LEFT" />
+                            <Anchor point="LEFT"/>
                         </Control>
                         <Control name="$(parent)Ok" inherits="ZO_DialogButton">
                             <Anchor point="LEFT" relativeTo="$(parent)Default" relativePoint="RIGHT" offsetX="20"/>
@@ -128,5 +113,5 @@
                 </Control>
             </Controls>
         </TopLevelControl>
-    </Controls>   
+    </Controls>
 </GuiXml>

@@ -38,8 +38,10 @@ end
 ZO_DI_LEFT_STICK = 1
 ZO_DI_RIGHT_STICK = 2
 ZO_DI_DPAD = 3
+ZO_DI_LEFT_STICK_NO_KEYBOARD = 4
+ZO_DI_RIGHT_STICK_NO_KEYBOARD = 5
 
-local NUM_INPUT_DEVICES = 3
+local NUM_INPUT_DEVICES = 5
 
 local DirectionalInput = ZO_Object:Subclass()
 
@@ -265,6 +267,12 @@ local INPUT_DEVICE_QUERY_X =
     [ZO_DI_RIGHT_STICK] = function(self)
         return GetGamepadOrKeyboardRightStickX(GAMEPAD_INCLUDE_DEADZONE)
     end,
+    [ZO_DI_LEFT_STICK_NO_KEYBOARD] = function(self)
+        return GetGamepadLeftStickX(GAMEPAD_INCLUDE_DEADZONE)
+    end,
+    [ZO_DI_RIGHT_STICK_NO_KEYBOARD] = function(self)
+        return GetGamepadRightStickX(GAMEPAD_INCLUDE_DEADZONE)
+    end,
     [ZO_DI_DPAD] = function(self)
         local hasFocusControl = HasActiveEditControl()
         local negativeMagnitude = 0
@@ -293,6 +301,12 @@ local INPUT_DEVICE_QUERY_Y =
     end,
     [ZO_DI_RIGHT_STICK] = function(self)
         return GetGamepadOrKeyboardRightStickY(GAMEPAD_INCLUDE_DEADZONE)
+    end,
+    [ZO_DI_LEFT_STICK_NO_KEYBOARD] = function(self)
+        return GetGamepadLeftStickY(GAMEPAD_INCLUDE_DEADZONE)
+    end,
+    [ZO_DI_RIGHT_STICK_NO_KEYBOARD] = function(self)
+        return GetGamepadRightStickY(GAMEPAD_INCLUDE_DEADZONE)
     end,
     [ZO_DI_DPAD] = function(self)
         local hasFocusControl = HasActiveEditControl()

@@ -462,18 +462,20 @@ end
 do
     local function ShowUnavailableMessage(self)
         self.headerData.messageText = zo_strformat(GetString(SI_GAMEPAD_VOICECHAT_UNAVAILABLE), GetString(SI_GAMEPAD_HELP_WEBSITE))
+        self:UpdateKeybinds()
     end
     local function HideUnavailableMessage(self)
         self.headerData.messageText = nil
+        self:UpdateKeybinds()
     end
-    
+
     function ZO_VoiceChatChannelsGamepad:PerformUpdate()
         self.dirty = false
         self.list:Clear()
-    
+
         if VOICE_CHAT_MANAGER:HasChannelData() then
             HideUnavailableMessage(self)
-            
+
             if self.currentList == LIST_CHANNELS then
                 self:PopulateChannels()
                 TriggerTutorial(TUTORIAL_TRIGGER_VOICE_CHAT_OPEN_CHANNELS)
@@ -485,7 +487,7 @@ do
             ShowUnavailableMessage(self)
         end
         self:RefreshHeaderData()
-    
+
         self.list:Commit()
     end
 end

@@ -134,6 +134,12 @@ function ZO_SkillLineAssignmentManager:IsActivationOrDeactivationPending()
     return #self.pendingDeactivationLines > 0 or #self.pendingActivationLines > 0
 end
 
+function ZO_SkillLineAssignmentManager:HasSubclassingChanges()
+    local pendingTrainingLines = self:GetPendingTrainingLines()
+    local hasSwap = self:IsActivationOrDeactivationPending() and self:DoAnyChangesIncurPointRefunds()
+    return #pendingTrainingLines > 0 or hasSwap
+end
+
 function ZO_SkillLineAssignmentManager:IsAnyChangePending()
     return self:IsAnyTrainingChangePending() or self:IsActivationOrDeactivationPending()
 end

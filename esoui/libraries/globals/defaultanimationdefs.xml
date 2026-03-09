@@ -5,13 +5,11 @@
                 <AlphaAnimation duration="DEFAULT_SCENE_TRANSITION_TIME" startAlpha="0.0" endAlpha="1.0"/>
             </Animations>
         </AnimationTimeline>
-
         <TranslateAnimation name="BaseTranslateSceneAnimation">
             <EasingFunction>
                 return ZO_EaseOutQuadratic(progress)
             </EasingFunction>
         </TranslateAnimation>
-
         <AnimationTimeline name="TranslateFromLeftSceneAnimation">
             <Animations>
                 <TranslateAnimation inherits="BaseTranslateSceneAnimation" anchorIndex="0">
@@ -31,7 +29,6 @@
                 </AlphaAnimation>
             </Animations>
         </AnimationTimeline>
-
         <AnimationTimeline name="TranslateFromRightSceneAnimation">
             <Animations>
                 <TranslateAnimation inherits="BaseTranslateSceneAnimation" anchorIndex="0">
@@ -51,7 +48,6 @@
                 </AlphaAnimation>
             </Animations>
         </AnimationTimeline>
-        
         <AnimationTimeline name="TranslateFromBottomSceneAnimation">
             <Animations>
                 <TranslateAnimation inherits="BaseTranslateSceneAnimation" anchorIndex="0">
@@ -71,7 +67,6 @@
                 </AlphaAnimation>
             </Animations>
         </AnimationTimeline>
-
         <AnimationTimeline name="TranslateFromTopSceneAnimation">
             <Animations>
                 <TranslateAnimation inherits="BaseTranslateSceneAnimation" anchorIndex="0">
@@ -91,11 +86,10 @@
                 </AlphaAnimation>
             </Animations>
         </AnimationTimeline>
-
         <AnimationTimeline name="ConveyorInSceneAnimation">
             <Animations>
-                <TranslateAnimation duration="ZO_CONVEYOR_TRANSITION_TIME" anchorIndex="0" />
-                <TranslateAnimation duration="ZO_CONVEYOR_TRANSITION_TIME" anchorIndex="1" />
+                <TranslateAnimation duration="ZO_CONVEYOR_TRANSITION_TIME" anchorIndex="0"/>
+                <TranslateAnimation duration="ZO_CONVEYOR_TRANSITION_TIME" anchorIndex="1"/>
                 <AlphaAnimation duration="ZO_CONVEYOR_TRANSITION_TIME" startAlpha="0.25" endAlpha="1.0">
                     <EasingFunction>
                         return ZO_LinearEase(progress)
@@ -103,11 +97,10 @@
                 </AlphaAnimation>
             </Animations>
         </AnimationTimeline>
-
         <AnimationTimeline name="ConveyorOutSceneAnimation">
             <Animations>
-                <TranslateAnimation duration="ZO_CONVEYOR_TRANSITION_TIME" anchorIndex="0" />
-                <TranslateAnimation duration="ZO_CONVEYOR_TRANSITION_TIME" anchorIndex="1" />
+                <TranslateAnimation duration="ZO_CONVEYOR_TRANSITION_TIME" anchorIndex="0"/>
+                <TranslateAnimation duration="ZO_CONVEYOR_TRANSITION_TIME" anchorIndex="1"/>
                 <AlphaAnimation duration="ZO_CONVEYOR_TRANSITION_TIME" startAlpha="1.0" endAlpha="0.25">
                     <EasingFunction>
                         return ZO_LinearEase(progress)
@@ -115,20 +108,17 @@
                 </AlphaAnimation>
             </Animations>
         </AnimationTimeline>
-
         <AnimationTimeline name="DefaultRadialMenuAnimation">
             <Animations>
                 <AlphaAnimation duration="100" startAlpha="0.0" endAlpha="1.0"/>
                 <ScaleAnimation duration="100" startScale="0.975" endScale="1.0"/>
             </Animations>
         </AnimationTimeline>
-
         <AnimationTimeline name="DefaultRadialMenuEntryAnimation">
             <Animations>
                 <ScaleAnimation duration="100" startScale="0.75" endScale="1.0"/>
             </Animations>
         </AnimationTimeline>
-
         <AnimationTimeline name="SelectableItemRadialMenuEntryAnimation" inherits="DefaultRadialMenuEntryAnimation">
             <Animations>
                 <AlphaAnimation duration="100" startAlpha="0.0" endAlpha="1.0"/>

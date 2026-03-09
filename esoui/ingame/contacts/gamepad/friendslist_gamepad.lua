@@ -49,8 +49,7 @@ function FriendsList_Gamepad:OnFriendCharacterInfoReceived(displayName, hasChara
 end
 
 function FriendsList_Gamepad:GetAddKeybind()
-    local platform = GetUIPlatform()
-    if platform ~= UI_PLATFORM_XBOX then
+    if not ZO_IsConsoleOrGameCoreUI() then
         local keybind =
         {
             alignment = KEYBIND_STRIP_ALIGN_LEFT,
@@ -91,7 +90,7 @@ function FriendsList_Gamepad:OnNumTotalFriendsChanged()
 end
 
 function FriendsList_Gamepad:OnShowing()
-    if IsConsoleUI() and RequestSocialListForActiveProfile then
+    if ZO_IsConsoleOrGameCoreUI() and RequestSocialListForActiveProfile then
         EVENT_MANAGER:RegisterForUpdate("FriendsListConsoleRefresh", 60000, function() RequestSocialListForActiveProfile() end)
         RequestSocialListForActiveProfile()
     end
@@ -101,7 +100,7 @@ function FriendsList_Gamepad:OnShowing()
 end
 
 function FriendsList_Gamepad:OnHidden()
-    if IsConsoleUI() then
+    if ZO_IsConsoleOrGameCoreUI() then
         EVENT_MANAGER:UnregisterForUpdate("FriendsListConsoleRefresh")
     end
 end
@@ -155,7 +154,7 @@ function FriendsList_Gamepad:BuildOptionsList()
     self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildInviteToTributeOption, ShouldShowInviteToTribute)
 
     self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildSendMailOption)
-    self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildGamerCardOption, IsConsoleUI)
+    self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildGamerCardOption, ZO_IsConsoleOrGameCoreUI)
     self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildIgnoreOption)
     self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildRemoveFriendOption, ZO_SocialOptionsDialogGamepad.ShouldAddRemoveFriendOption)
 

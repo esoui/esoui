@@ -460,34 +460,36 @@ function ZO_SharedInteraction:GetChatterOptionData(optionIndex, optionText, opti
 
             local previousIconCount = #chatterData.iconFiles
             -- Consider breadcrumb pathing in journal quests
-            for questIndex = 1, GetNumJournalQuests() do
-                local stepsTable = WORLD_MAP_QUEST_BREADCRUMBS:GetSteps(questIndex)
-                -- Check against nil since not every quest is pathable
-                if stepsTable then
-                    for stepIndex, step in pairs(stepsTable) do
-                        for conditionIndex, condition in pairs(step) do
-                            if condition.teleportNPCId == chatterData.teleportNPCId and ZO_IsElementInNumericallyIndexedTable(chatterData.waypointIdTable, condition.waypointId) then
-                                if GetJournalQuestZoneDisplayType(questIndex) == ZONE_DISPLAY_TYPE_ZONE_STORY then
-                                    if questIndex == QUEST_JOURNAL_MANAGER:GetFocusedQuestIndex() then
-                                        if #chatterData.iconFiles == previousIconCount then
-                                            table.insert(chatterData.iconFiles, "EsoUI/Art/Compass/zoneStoryQuest_icon_door_assisted.dds")
-                                        else
-                                            chatterData.iconFiles[previousIconCount + 1] = "EsoUI/Art/Compass/zoneStoryQuest_icon_door_assisted.dds"
+            for questIndex = 1, MAX_JOURNAL_QUESTS do
+                if IsValidQuestIndex(questIndex) then
+                    local stepsTable = WORLD_MAP_QUEST_BREADCRUMBS:GetSteps(questIndex)
+                    -- Check against nil since not every quest is pathable
+                    if stepsTable then
+                        for stepIndex, step in pairs(stepsTable) do
+                            for conditionIndex, condition in pairs(step) do
+                                if condition.teleportNPCId == chatterData.teleportNPCId and ZO_IsElementInNumericallyIndexedTable(chatterData.waypointIdTable, condition.waypointId) then
+                                    if GetJournalQuestZoneDisplayType(questIndex) == ZONE_DISPLAY_TYPE_ZONE_STORY then
+                                        if questIndex == QUEST_JOURNAL_MANAGER:GetFocusedQuestIndex() then
+                                            if #chatterData.iconFiles == previousIconCount then
+                                                table.insert(chatterData.iconFiles, "EsoUI/Art/Compass/zoneStoryQuest_icon_door_assisted.dds")
+                                            else
+                                                chatterData.iconFiles[previousIconCount + 1] = "EsoUI/Art/Compass/zoneStoryQuest_icon_door_assisted.dds"
+                                            end
+                                            break
+                                        elseif #chatterData.iconFiles == previousIconCount then
+                                            table.insert(chatterData.iconFiles, "EsoUI/Art/Compass/zoneStoryQuest_icon_door.dds")
                                         end
-                                        break
-                                    elseif #chatterData.iconFiles == previousIconCount then
-                                        table.insert(chatterData.iconFiles, "EsoUI/Art/Compass/zoneStoryQuest_icon_door.dds")
-                                    end
-                                else
-                                    if questIndex == QUEST_JOURNAL_MANAGER:GetFocusedQuestIndex() then
-                                        if #chatterData.iconFiles == previousIconCount then
-                                            table.insert(chatterData.iconFiles, "EsoUI/Art/Compass/quest_icon_door_assisted.dds")
-                                        else
-                                            chatterData.iconFiles[previousIconCount + 1] = "EsoUI/Art/Compass/quest_icon_door_assisted.dds"
+                                    else
+                                        if questIndex == QUEST_JOURNAL_MANAGER:GetFocusedQuestIndex() then
+                                            if #chatterData.iconFiles == previousIconCount then
+                                                table.insert(chatterData.iconFiles, "EsoUI/Art/Compass/quest_icon_door_assisted.dds")
+                                            else
+                                                chatterData.iconFiles[previousIconCount + 1] = "EsoUI/Art/Compass/quest_icon_door_assisted.dds"
+                                            end
+                                            break
+                                        elseif #chatterData.iconFiles == previousIconCount then
+                                            table.insert(chatterData.iconFiles, "EsoUI/Art/Compass/quest_icon_door.dds")
                                         end
-                                        break
-                                    elseif #chatterData.iconFiles == previousIconCount then
-                                        table.insert(chatterData.iconFiles, "EsoUI/Art/Compass/quest_icon_door.dds")
                                     end
                                 end
                             end
@@ -640,7 +642,20 @@ local function SetupSpectacleProgressReward(control, name, icon)
     control:SetHidden(false)
 end
 
-internalassert(REWARD_TYPE_MAX_VALUE == 16, "Check if new RewardType needs REWARD_CREATORS")
+local function SetupAdventureZoneFactionPointsReward(control, name, icon)
+    local nameControl = control:GetNamedChild("Name")
+    local iconTexture = control:GetNamedChild("Icon")
+    iconTexture:SetHidden(false)
+    iconTexture:SetTexture(icon)
+    control:GetNamedChild("StackSize"):SetHidden(true)
+
+    nameControl:SetText(name)
+    nameControl:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_SELECTED))
+    control.allowTooltip = false
+    control:SetHidden(false)
+end
+
+internalassert(REWARD_TYPE_MAX_VALUE == 17, "Check if new RewardType needs REWARD_CREATORS")
 local REWARD_CREATORS =
 {
     [REWARD_TYPE_AUTO_ITEM] =
@@ -666,9 +681,9 @@ local REWARD_CREATORS =
         function(control, name, amount, currencyOptions)
             SetupCurrencyReward(control, CURT_TELVAR_STONES, amount, currencyOptions)
         end,
-    [REWARD_TYPE_EVENT_TICKETS] =
+    [REWARD_TYPE_TRADE_BARS] =
         function(control, name, amount, currencyOptions)
-            SetupCurrencyReward(control, CURT_EVENT_TICKETS, amount, currencyOptions)
+            SetupCurrencyReward(control, CURT_TRADE_BARS, amount, currencyOptions)
         end,
     [REWARD_TYPE_MONEY] =
         function(control, name, amount, currencyOptions)
@@ -709,6 +724,10 @@ local REWARD_CREATORS =
     [REWARD_TYPE_SPECTACLE_PROGRESS] =
         function(control, name, amount, icon)
             SetupSpectacleProgressReward(control, name, icon)
+        end,
+    [REWARD_TYPE_ADVENTURE_ZONE_FACTION_POINTS] =
+        function(control, name, amount, icon)
+            SetupAdventureZoneFactionPointsReward(control, name, icon)
         end,
 }
 
@@ -782,6 +801,9 @@ function ZO_SharedInteraction:GetRewardData(journalQuestIndex, isGamepad)
                 else
                     rewardData.icon = GetActiveSpectacleEventLootIconKeyboard(spectacleId)
                 end
+            elseif rewardType == REWARD_TYPE_ADVENTURE_ZONE_FACTION_POINTS then
+                local faction = GetUnitAdventureZoneFaction("player")
+                rewardData.icon = ZO_GetAdventureZoneFactionIcon64(faction)
             end
 
             table.insert(data, rewardData)

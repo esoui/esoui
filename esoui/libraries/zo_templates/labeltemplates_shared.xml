@@ -4,31 +4,25 @@
             <OnInitialized>
                 ZO_SelectableLabel_OnInitialized(self)
             </OnInitialized>
-
             <OnMouseEnter>
                 ZO_SelectableLabel_OnMouseEnter(self)
             </OnMouseEnter>
-
             <OnMouseExit>
                 ZO_SelectableLabel_OnMouseExit(self)
             </OnMouseExit>
         </Label>
-
         <Label name="ZO_WindowTitle" font="ZoFontWindowTitle" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" wrapMode="ELLIPSIS" virtual="true">
-            <Dimensions y="28" />
-            <Anchor point="TOP" offsetY="-7" />
+            <Dimensions y="28"/>
+            <Anchor point="TOP" offsetY="-7"/>
         </Label>
-        
         <Label name="ZO_TooltipIfTruncatedLabel" mouseEnabled="true" wrapMode="ELLIPSIS" virtual="true">
             <OnMouseEnter>
                 ZO_TooltipIfTruncatedLabel_OnMouseEnter(self)
             </OnMouseEnter>
-
             <OnMouseExit>
                 ZO_TooltipIfTruncatedLabel_OnMouseExit(self)
             </OnMouseExit>
         </Label>
-
         <Label name="ZO_SelectableTooltipIfTruncatedLabel" inherits="ZO_SelectableLabel" wrapMode="ELLIPSIS" virtual="true">
             <OnMouseEnter>
                 ZO_SelectableLabel_OnMouseEnter(self)
@@ -39,7 +33,6 @@
                     SetTooltipText(InformationTooltip, self:GetText())
                 end
             </OnMouseEnter>
-
             <OnMouseExit>
                 ZO_SelectableLabel_OnMouseExit(self)
                 
@@ -48,68 +41,55 @@
                 end
             </OnMouseExit>
         </Label>
-        
         <Label name="ZO_LoadingText" virtual="true" font="ZoFontHeader">
             <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="5"/>
         </Label>
-
         <Backdrop name="ZO_LargeKeyBackdrop" layer="CONTROLS" virtual="true">
             <Edge file="EsoUI/Art/Miscellaneous/interactKeyFrame_edge.dds" edgeFileWidth="64" edgeFileHeight="8"/>
-            <Center file="EsoUI/Art/Miscellaneous/interactKeyFrame_center.dds" />
-            <Insets left="8" top="8" right="-8" bottom="-8" />
+            <Center file="EsoUI/Art/Miscellaneous/interactKeyFrame_center.dds"/>
+            <Insets left="8" top="8" right="-8" bottom="-8"/>
         </Backdrop>
-
         <Label name="ZO_LargeKeyMarkupLabel" virtual="true">
             <OnTextChanged>
                 ZO_LargeKeyMarkupLabel_OnTextChanged(...)
             </OnTextChanged>
-
             <OnUserAreaCreated>
                 ZO_LargeKeyMarkupLabel_OnNewUserAreaCreated(...)
             </OnUserAreaCreated>
         </Label>
-
         <Label name="ZO_LargeKeyMarkupLabel_Gamepad" inherits="ZO_LargeKeyMarkupLabel" font="ZoFontGamepad18" virtual="true">
             <OnInitialized>
                 ZO_KeyMarkupLabel_SetCustomOffsets(self, -5, 5, -2, 3)
             </OnInitialized>
         </Label>
-
         <Label name="ZO_SmallKeyMarkupLabel" lineSpacing="5" virtual="true">
             <OnTextChanged>
                 ZO_SmallKeyMarkupLabel_OnTextChanged(...)
             </OnTextChanged>
-
             <OnUserAreaCreated>
                 ZO_SmallKeyMarkupLabel_OnNewUserAreaCreated(...)
             </OnUserAreaCreated>
         </Label>
-
         <Control name="ZO_RollingMeterLabel" autoRectClipChildren="true" virtual="true">
             <OnInitialized name="RollingMeterLabel">
                 ZO_RollingMeterLabel_OnInitialized(self)
             </OnInitialized>
-
             <OnUpdate name="RollingMeterLabel">
                 self:OnUpdate(time)
             </OnUpdate>
-
             <Controls>
                 <Label name="$(parent)InLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
                     <OnRectHeightChanged>
                         self:GetParent():OnLabelRectChanged(self, newHeight, oldHeight)
                     </OnRectHeightChanged>
-
                     <OnRectWidthChanged>
                         self:GetParent():OnLabelRectChanged(self, newWidth, oldWidth)
                     </OnRectWidthChanged>
                 </Label>
-
                 <Label name="$(parent)OutLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
                     <OnRectHeightChanged>
                         self:GetParent():OnLabelRectChanged(self, newHeight, oldHeight)
                     </OnRectHeightChanged>
-
                     <OnRectWidthChanged>
                         self:GetParent():OnLabelRectChanged(self, newWidth, oldWidth)
                     </OnRectWidthChanged>

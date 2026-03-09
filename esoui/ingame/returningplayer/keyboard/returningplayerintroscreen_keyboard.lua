@@ -8,8 +8,7 @@ ZO_ReturningPlayerIntroScreen_Keyboard = ZO_ReturningPlayerIntroScreen_Shared:Su
 function ZO_ReturningPlayerIntroScreen_Keyboard:Initialize(control)
     RETURNING_PLAYER_INTRO_SCENE_KEYBOARD = ZO_Scene:New("ReturningPlayerIntroSceneKeyboard", SCENE_MANAGER)
 
-    local REWARD_TEMPLATE = "ZO_ReturningPlayerIntroReward_Keyboard"
-    ZO_ReturningPlayerIntroScreen_Shared.Initialize(self, control, RETURNING_PLAYER_INTRO_SCENE_KEYBOARD, REWARD_TEMPLATE)
+    ZO_ReturningPlayerIntroScreen_Shared.Initialize(self, control, RETURNING_PLAYER_INTRO_SCENE_KEYBOARD)
 
     SYSTEMS:RegisterKeyboardRootScene("returningPlayerIntro", self.scene)
 end

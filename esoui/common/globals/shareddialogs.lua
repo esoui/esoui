@@ -193,7 +193,7 @@ ESO_Dialogs["SHOW_REDEEM_CODE_CONSOLE"] =
         {
             text = SI_DIALOG_LOG_OUT_ENTER_CODE,
             callback = function(dialog)
-                if IsConsoleUI() then
+                if ZO_IsConsoleOrGameCoreUI() then
                     ShowConsoleRedeemCodeUI()
                 else
                     OpenURLByType(APPROVED_URL_ESO_ACCOUNT)

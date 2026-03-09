@@ -441,40 +441,184 @@ ESO_Dialogs["BUY_BAG_SPACE"] =
     },
     mainText =
     {
-        text = zo_strformat(SI_BUY_BAG_SPACE, NUM_BACKPACK_SLOTS_PER_UPGRADE),
+       text = function(dialog)
+            local buyBagSpaceText = zo_strformat(SI_BUY_BAG_SPACE, NUM_BACKPACK_SLOTS_PER_UPGRADE)
+
+            local currentUnlock = GetCurrentBackpackUpgrade()
+            local maxUnlock = GetMaxBackpackUpgrade()
+            local unlocksRemainingText = zo_strformat(SI_BUY_BAG_SPACE_UPGRADES_REMAINING, maxUnlock - currentUnlock)
+
+            return ZO_GenerateParagraphSeparatedList({buyBagSpaceText, unlocksRemainingText})
+        end,
     },
     noChoiceCallback = function(dialog)
-                            INTERACT_WINDOW:EndInteraction(BUY_BAG_SPACE_INTERACTION)
-                         end,
+        INTERACT_WINDOW:EndInteraction(BUY_BAG_SPACE_INTERACTION)
+    end,
     buttons =
     {
         [1] =
         {
             text = SI_DIALOG_ACCEPT,
             callback = function(dialog)
-                            BuyBagSpace()
-                            INTERACT_WINDOW:EndInteraction(BUY_BAG_SPACE_INTERACTION)
-                        end,
+                BuyBagSpace()
+                INTERACT_WINDOW:EndInteraction(BUY_BAG_SPACE_INTERACTION)
+            end,
         },
         [2] =
         {
             text = SI_DIALOG_DECLINE,
             callback = function(dialog)
-                            INTERACT_WINDOW:EndInteraction(BUY_BAG_SPACE_INTERACTION)
-                         end,
+                INTERACT_WINDOW:EndInteraction(BUY_BAG_SPACE_INTERACTION)
+            end,
         },
     },
     updateFn = function(dialog)
         local cost = dialog.data.cost
+
+        local currentUnlock = GetCurrentBackpackUpgrade()
+        local maxUnlock = GetMaxBackpackUpgrade()
+        local unlocksRemainingText = zo_strformat(SI_BUY_BAG_SPACE_UPGRADES_REMAINING, maxUnlock - currentUnlock)
+
         if cost > GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER) then
+            local mainText = ZO_GenerateParagraphSeparatedList({GetString(SI_BUY_BAG_SPACE_CANNOT_AFFORD), unlocksRemainingText})
             ZO_Dialogs_UpdateButtonState(dialog, 1, BSTATE_DISABLED)
-            ZO_Dialogs_UpdateDialogMainText(dialog, { text = SI_BUY_BAG_SPACE_CANNOT_AFFORD })
+            ZO_Dialogs_UpdateDialogMainText(dialog, { text = mainText })
         else
+            local mainText = ZO_GenerateParagraphSeparatedList({zo_strformat(SI_BUY_BAG_SPACE, NUM_BACKPACK_SLOTS_PER_UPGRADE), unlocksRemainingText})
             ZO_Dialogs_UpdateButtonState(dialog, 1, BSTATE_NORMAL)
-            ZO_Dialogs_UpdateDialogMainText(dialog, { text = zo_strformat(SI_BUY_BAG_SPACE, NUM_BACKPACK_SLOTS_PER_UPGRADE) })
+            ZO_Dialogs_UpdateDialogMainText(dialog, { text = mainText })
         end
         ZO_Dialogs_UpdateButtonCost(dialog, 1, cost)
     end,
+}
+
+ESO_Dialogs["BUY_BAG_SPACE_FROM_INVENTORY"] =
+{
+    title =
+    {
+        text = SI_PROMPT_TITLE_BUY_BAG_SPACE,
+    },
+    mainText =
+    {
+        text = function(dialog)
+            local buyBagSpaceText = zo_strformat(SI_BUY_BAG_SPACE, NUM_BACKPACK_SLOTS_PER_UPGRADE)
+
+            local currentUnlock = GetCurrentBackpackUpgrade()
+            local maxUnlock = GetMaxBackpackUpgrade()
+            local unlocksRemainingText = zo_strformat(SI_BUY_BAG_SPACE_UPGRADES_REMAINING, maxUnlock - currentUnlock)
+
+            return ZO_GenerateParagraphSeparatedList({buyBagSpaceText, unlocksRemainingText})
+        end,
+    },
+    buttons =
+    {
+        {
+            text = SI_DIALOG_ACCEPT,
+            callback = function(dialog)
+                BuyBagSpaceFromInventory()
+            end,
+        },
+        {
+            text = SI_DIALOG_DECLINE,
+        },
+    },
+    updateFn = function(dialog)
+        local cost = dialog.data.cost
+
+        local currentUnlock = GetCurrentBackpackUpgrade()
+        local maxUnlock = GetMaxBackpackUpgrade()
+        local unlocksRemainingText = zo_strformat(SI_BUY_BAG_SPACE_UPGRADES_REMAINING, maxUnlock - currentUnlock)
+
+        if cost > GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER) then
+            local mainText = ZO_GenerateParagraphSeparatedList({GetString(SI_BUY_BAG_SPACE_CANNOT_AFFORD), unlocksRemainingText})
+            ZO_Dialogs_UpdateButtonState(dialog, 1, BSTATE_DISABLED)
+            ZO_Dialogs_UpdateDialogMainText(dialog, { text = mainText })
+        else
+            local mainText = ZO_GenerateParagraphSeparatedList({zo_strformat(SI_BUY_BAG_SPACE, NUM_BACKPACK_SLOTS_PER_UPGRADE), unlocksRemainingText})
+            ZO_Dialogs_UpdateButtonState(dialog, 1, BSTATE_NORMAL)
+            ZO_Dialogs_UpdateDialogMainText(dialog, { text = mainText })
+        end
+        ZO_Dialogs_UpdateButtonCost(dialog, 1, cost)
+    end,
+}
+
+ESO_Dialogs["BUY_BAG_SPACE_FROM_INVENTORY_GAMEPAD"] =
+{
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    title =
+    {
+        text = SI_PROMPT_TITLE_BUY_BAG_SPACE,
+    },
+    mainText =
+    {
+        text = function(dialog)
+            local mainText = {}
+            if dialog.data.cost <= GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER) then
+                table.insert(mainText, zo_strformat(SI_BUY_BAG_SPACE, NUM_BACKPACK_SLOTS_PER_UPGRADE))
+            else
+                table.insert(mainText, GetString(SI_BUY_BAG_SPACE_CANNOT_AFFORD))
+            end
+
+            local currentUnlock = GetCurrentBackpackUpgrade()
+            local maxUnlock = GetMaxBackpackUpgrade()
+            local unlocksRemainingText = zo_strformat(SI_BUY_BAG_SPACE_UPGRADES_REMAINING, maxUnlock - currentUnlock)
+            table.insert(mainText, unlocksRemainingText)
+
+            return ZO_GenerateParagraphSeparatedList(mainText)
+        end,
+    },
+    setup = function(dialog)
+
+        local headerData =
+        {
+            data1 =
+            {
+                header = GetCurrencyName(CURT_MONEY, false, false),
+                value = function(control)
+                    ZO_CurrencyControl_SetSimpleCurrency(control, CURT_MONEY, GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER), ZO_GAMEPAD_CURRENCY_OPTIONS)
+                    return true
+                end,
+                valueNarration = ZO_Currency_GetPlayerCarriedGoldCurrencyNameNarration,
+            },
+            data2 =
+            {
+                header = GetString(SI_GAMEPAD_BUY_BAG_SPACE_COST),
+                value = function(control)
+                    ZO_CurrencyControl_SetSimpleCurrency(control, CURT_MONEY, dialog.data.cost, ZO_GAMEPAD_CURRENCY_OPTIONS)
+                    return true
+                end,
+                valueNarration = function()
+                    return ZO_Currency_FormatGamepad(CURT_MONEY, dialog.data.cost, ZO_CURRENCY_FORMAT_AMOUNT_NAME)
+                end,
+            }
+        }
+        dialog:setupFunc(headerData)
+    end,
+    buttons =
+    {
+        {
+            text = SI_DIALOG_ACCEPT,
+            callback = function(dialog)
+                BuyBagSpaceFromInventory()
+                ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, zo_strformat(SI_GAMEPAD_BUY_BAG_SPACE_ALERT_MESSAGE, NUM_BACKPACK_SLOTS_PER_UPGRADE))
+            end,
+            visible = function(dialog)
+                return dialog.data.cost <= GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)
+            end,
+        },
+        {
+            text = function(dialog)
+                if dialog.data.cost <= GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER) then
+                    return GetString(SI_DIALOG_DECLINE)
+                else
+                    return GetString(SI_DIALOG_EXIT)
+                end
+            end,
+        },
+    },
 }
 
 ESO_Dialogs["REPAIR_ALL"] =
@@ -4347,6 +4491,42 @@ ESO_Dialogs["STAT_EDIT_CONFIRM"] =
     },
 }
 
+ESO_Dialogs["STAT_EDIT_FREE_CONFIRM"] =
+{
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    canQueue = true,
+    title =
+    {
+        text = SI_ATTRIBUTE_RESPEC_CONFIRM_DIALOG_TITLE,
+    },
+
+    mainText =
+    {
+        text = SI_ATTRIBUTE_RESPEC_CONFIRM_DIALOG_BODY_INTRO,
+    },
+
+    buttons =
+    {
+        {
+            text = SI_DIALOG_CONFIRM,
+            callback = function()
+                if IsInGamepadPreferredMode() then
+                    GAMEPAD_STATS:RespecAttributes()
+                else
+                    STATS:RespecAttributes()
+                end
+            end,
+        },
+
+        {
+            text = SI_DIALOG_CANCEL,
+        },
+    },
+}
+
 ESO_Dialogs["GUILD_ACCEPT_APPLICATION"] =
 {
     gamepadInfo =
@@ -5074,7 +5254,7 @@ ESO_Dialogs["KEYBINDINGS_RESET_GAMEPAD_DEADZONES_TO_DEFAULTS"] =
     },
     mainText =
     {
-        text = IsConsoleUI() and GetString(SI_KEYBINDINGS_CONSOLE_GAMEPAD_RESET_DEADZONES_PROMPT) or GetString(SI_KEYBINDINGS_GAMEPAD_RESET_DEADZONES_PROMPT),
+        text = ZO_IsConsoleOrGameCoreUI() and GetString(SI_KEYBINDINGS_CONSOLE_GAMEPAD_RESET_DEADZONES_PROMPT) or GetString(SI_KEYBINDINGS_GAMEPAD_RESET_DEADZONES_PROMPT),
     },
     buttons =
     {
@@ -5091,4 +5271,54 @@ ESO_Dialogs["KEYBINDINGS_RESET_GAMEPAD_DEADZONES_TO_DEFAULTS"] =
             text = SI_DIALOG_CANCEL,
         },
     }
+}
+
+ESO_Dialogs["TAMRIEL_TOME_PURCHASE_RESULT"] =
+{
+    canQueue = true,
+
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+
+    title =
+    {
+        text = function(dialog)
+            if dialog.data.result == TAMRIEL_TOME_PURCHASE_RESULT_SUCCESS then
+                return GetString(SI_TRANSACTION_COMPLETE_TITLE)
+            end
+            return GetString(SI_TRANSACTION_FAILED_TITLE)
+        end,
+    },
+
+    mainText =
+    {
+        text = function(dialog)
+            local result = dialog.data.result
+            local skuId = GetTamrielTomeSkuId(dialog.data.tomeId, TAMRIEL_TOME_PRODUCT_TYPE_PREMIUM_PLUS)
+            if result == TAMRIEL_TOME_PURCHASE_RESULT_SUCCESS then
+                local skuData = ZO_DirectPurchaseSkuData:New(skuId)
+                return zo_strformat(SI_TRANSACTION_COMPLETE_PRODUCT_NAME_BODY, ZO_WHITE:Colorize(skuData:GetDisplayName()))
+            end
+
+            local resultString = GetString("SI_TAMRIELTOMEPURCHASERESULT", result)
+            if result == TAMRIEL_TOME_PURCHASE_RESULT_NOT_ENOUGH_CURRENCY then
+                local NO_AMOUNT = nil
+                local currencyName = ZO_Currency_FormatPlatform(CURT_TOME_TOKENS, NO_AMOUNT, ZO_CURRENCY_FORMAT_PLURAL_NAME_ICON)
+                return zo_strformat(resultString, currencyName)
+            end
+
+            return resultString
+        end,
+    },
+
+    buttons =
+    {
+        {
+            keybind = "DIALOG_PRIMARY",
+            gamepadPreferredKeybind = "DIALOG_NEGATIVE",
+            text = SI_DIALOG_BACK,
+        },
+    },
 }

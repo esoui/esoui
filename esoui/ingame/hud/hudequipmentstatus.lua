@@ -75,7 +75,9 @@ end
 -- Global XML
 
 function ZO_HUDEquipmentStatus_Indicator_OnMouseEnter(control)
-    control.indicator:SetTooltip()
+    if not IsInGamepadPreferredMode() then
+        control.indicator:SetTooltip()
+    end
 end
 
 function ZO_HUDEquipmentStatus_Indicator_OnMouseExit(control)

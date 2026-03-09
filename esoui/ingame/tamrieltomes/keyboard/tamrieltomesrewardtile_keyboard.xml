@@ -1,0 +1,75 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_TamrielTomesReward_Template_Keyboard" inherits="ZO_TamrielTomesReward_Template_Shared" mouseEnabled="true" virtual="true">
+            <OnInitialized>
+                ZO_TamrielTomesReward_Keyboard.OnControlInitialized(self)
+            </OnInitialized>
+            <OnMouseEnter>
+                self.object:OnMouseEnter()
+            </OnMouseEnter>
+            <OnMouseExit>
+                self.object:OnMouseExit()
+            </OnMouseExit>
+            <OnMouseDown>
+                self.object:OnMouseDown(button)
+            </OnMouseDown>
+            <OnMouseUp>
+                self.object:OnMouseUp(button, upInside)
+            </OnMouseUp>
+            <Controls>
+                <Control name="$(parent)Reward" override="true">
+                    <Controls>
+                        <Label name="$(parent)Quantity" override="true" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icon" offsetX="3" offsetY="3"/>
+                        </Label>
+                        <Texture name="$(parent)Check" override="true">
+                            <Dimensions x="48" y="48"/>
+                        </Texture>
+                    </Controls>
+                </Control>
+                <Label name="$(parent)Cost" override="true" font="ZoFontWinH2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED"/>
+            </Controls>
+        </Control>
+        <Control name="ZO_TamrielTomes_RewardDivider_FullWidth_Keyboard" inherits="ZO_TamrielTomes_RewardDivider_FullWidth_Shared" virtual="true"/>
+        <Control name="ZO_TamrielTomes_RewardTile_1xWidth_Keyboard" inherits="ZO_TamrielTomes_RewardTile_1xWidth_Shared ZO_Tile_Keyboard_Control" virtual="true">
+            <OnInitialized>
+                ZO_TamrielTomes_RewardTile_Keyboard.OnControlInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)Reward" override="true" inherits="ZO_TamrielTomesReward_Template_Keyboard"/>
+            </Controls>
+        </Control>
+        <Control name="ZO_TamrielTomes_RewardTile_2xWidth_Left_Keyboard" inherits="ZO_TamrielTomes_RewardTile_2xWidth_Left_Shared ZO_Tile_Keyboard_Control" virtual="true">
+            <OnInitialized>
+                ZO_TamrielTomes_RewardTile_Keyboard.OnControlInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)Reward" override="true" inherits="ZO_TamrielTomesReward_Template_Keyboard"/>
+            </Controls>
+        </Control>
+        <Control name="ZO_TamrielTomes_RewardTile_2xWidth_Right_Keyboard" inherits="ZO_TamrielTomes_RewardTile_2xWidth_Right_Shared ZO_Tile_Keyboard_Control" virtual="true">
+            <OnInitialized>
+                ZO_TamrielTomes_RewardTile_Keyboard.OnControlInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)Reward" override="true" inherits="ZO_TamrielTomesReward_Template_Keyboard"/>
+            </Controls>
+        </Control>
+        <Control name="ZO_TamrielTomes_RewardTile_2_5xWidth_Left_Keyboard" inherits="ZO_TamrielTomes_RewardTile_2_5xWidth_Left_Shared ZO_Tile_Keyboard_Control" virtual="true">
+            <OnInitialized>
+                ZO_TamrielTomes_RewardTile_Keyboard.OnControlInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)Reward" override="true" inherits="ZO_TamrielTomesReward_Template_Keyboard"/>
+            </Controls>
+        </Control>
+        <Control name="ZO_TamrielTomes_RewardTile_2_5xWidth_Right_Keyboard" inherits="ZO_TamrielTomes_RewardTile_2_5xWidth_Right_Shared ZO_Tile_Keyboard_Control" virtual="true">
+            <OnInitialized>
+                ZO_TamrielTomes_RewardTile_Keyboard.OnControlInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)Reward" override="true" inherits="ZO_TamrielTomesReward_Template_Keyboard"/>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

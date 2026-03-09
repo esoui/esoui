@@ -98,7 +98,7 @@ local ZO_Panel_Account_ControlData =
             panel = SETTING_PANEL_ACCOUNT,
             text = SI_INTERFACE_OPTIONS_ACCOUNT_GET_UPDATES,
             tooltipText = function()
-                if not IsConsoleUI() then
+                if not ZO_IsConsoleOrGameCoreUI() then
                     if HasActivatedEmail() then
                         return GetString(SI_INTERFACE_OPTIONS_ACCOUNT_GET_UPDATES_TOOLTIP_TEXT)
                     else

@@ -8,6 +8,6 @@
                     <Anchor point="BOTTOMRIGHT" relativeTo="$(grandparent)"/>
                 </Texture>
             </Controls>
-        </Scroll>        
+        </Scroll>
     </Controls>
 </GuiXml>

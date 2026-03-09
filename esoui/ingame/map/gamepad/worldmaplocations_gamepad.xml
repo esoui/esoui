@@ -1,5 +1,5 @@
 <GuiXml>
-    <Controls>      
+    <Controls>
         <TopLevelControl name="ZO_WorldMapLocations_Gamepad" hidden="true">
             <OnInitialized>
                 ZO_WorldMapLocations_Gamepad_OnInitialized(self)
@@ -12,7 +12,6 @@
                         </Control>
                     </Controls>
                 </Control>
-
                 <Control name="$(parent)SideContent" inherits="ZO_GamepadGrid_NavQuadrant_4_Anchors">
                     <Controls>
                         <Control name="$(parent)Container" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">

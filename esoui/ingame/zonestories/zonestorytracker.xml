@@ -4,13 +4,12 @@
             <OnInitialized>
                 ZO_ZoneStoryTracker_OnInitialized(self)
             </OnInitialized>
-
             <Controls>
                 <Control name="$(parent)Container" override="true">
                     <Controls>
                         <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Icons/icon_missing.dds" hidden="true">
-                            <Dimensions x="32" y ="32" />
-                            <Anchor point="RIGHT" relativeTo="$(parent)Header" relativePoint="LEFT" />
+                            <Dimensions x="32" y="32"/>
+                            <Anchor point="RIGHT" relativeTo="$(parent)Header" relativePoint="LEFT"/>
                         </Texture>
                         <Control name="$(parent)Assisted" inherits="ZO_KeybindButton" excludeFromResizeToFitExtents="true">
                             <Anchor point="RIGHT" relativeTo="$(parent)Header" relativePoint="LEFT" offsetX="-5" offsetY="5"/>

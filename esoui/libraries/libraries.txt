@@ -170,6 +170,9 @@ EsoUI\Libraries\ZO_SortFilterList\Gamepad\ZO_InteractiveSortFilterList_Gamepad.l
 EsoUI\Libraries\ZO_SortFilterList\Gamepad\ZO_InteractiveSortFilterList_Gamepad.xml
 EsoUI\Libraries\ZO_SortFilterList\Gamepad\ZO_NoSelectionSortFilterList_Gamepad.lua
 
+EsoUI\Libraries\ZO_PageNavigation\ZO_PageNavigation.lua
+EsoUI\Libraries\ZO_PageNavigation\ZO_PageNavigation.xml
+
 EsoUI\Libraries\ZO_PagedList\ZO_PagedList.lua
 EsoUI\Libraries\ZO_PagedList\ZO_PagedList.xml
 
@@ -184,6 +187,7 @@ EsoUI\Libraries\Utility\ZO_AutoComplete.lua
 
 EsoUI\Libraries\Utility\ZO_LinkHandler.lua
 EsoUI\Libraries\Utility\ZO_SavedVars.lua
+EsoUI\Libraries\Utility\ZO_SavedKeys.lua
 
 EsoUI\Libraries\Utility\ZO_FadingControlBuffer.lua
 EsoUI\Libraries\Utility\ZO_FadingStationaryControlBuffer.lua

@@ -417,12 +417,8 @@ function ZO_GamepadSkills:InitializeCategoryKeybindStrip()
                     SCENE_MANAGER:Push("gamepad_skills_scribing_library_root")
                 else
                     local collectibleData = SCRIBING_DATA_MANAGER:GetScribingPurchasableCollectibleData()
-                    if collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_CHAPTER) then
-                        ZO_ShowChapterUpgradePlatformScreen(MARKET_OPEN_OPERATION_SKILLS_SCRIBING_LIBRARY)
-                    else
-                        local searchTerm = zo_strformat(SI_CROWN_STORE_SEARCH_FORMAT_STRING, collectibleData:GetName())
-                        ShowMarketAndSearch(searchTerm, MARKET_OPEN_OPERATION_SKILLS_SCRIBING_LIBRARY)
-                    end
+                    local searchTerm = zo_strformat(SI_CROWN_STORE_SEARCH_FORMAT_STRING, collectibleData:GetName())
+                    ShowMarketAndSearch(searchTerm, MARKET_OPEN_OPERATION_SKILLS_SCRIBING_LIBRARY)
                 end
             elseif targetData and targetData.isSubclassing then
                 SCENE_MANAGER:Push("gamepad_skills_subclassing_root")
@@ -446,13 +442,51 @@ function ZO_GamepadSkills:InitializeCategoryKeybindStrip()
     -- Confirm Bind
     table.insert(self.categoryKeybindStripDescriptor,
     {
-        name = GetString(SI_SKILL_RESPEC_CONFIRM_KEYBIND),
-        keybind = "UI_SHORTCUT_SECONDARY",
-        callback = function()
-            self:ShowConfirmRespecDialog()
+        name = function()
+            if SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeBatchSave() then
+                return GetString(SI_SKILL_RESPEC_CONFIRM_KEYBIND)
+            else
+                return GetString(SI_SKILL_RESPEC_START_RESPEC_KEYBIND)
+            end
         end,
-        visible = function()
-            return SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeBatchSave()
+        keybind = "UI_SHORTCUT_SECONDARY",
+        enabled = function()
+            if SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeBatchSave() then
+                return true
+            else
+                if IsCurrentCampaignVengeanceRuleset() then
+                    return false, GetString("SI_RESPECRESULT", RESPEC_RESULT_IN_VENGEANCE)
+                end
+
+                if IsRaidInProgress() then
+                    return false, GetString("SI_RESPECRESULT", RESPEC_RESULT_DISALLOWED_IN_ACTIVITY)
+                end
+
+                if IsUnitInCombat("player") then
+                    return false, GetString("SI_RESPECRESULT", RESPEC_RESULT_IS_IN_COMBAT)
+                end
+
+                return true
+            end
+        end,
+        callback = function()
+            if SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeBatchSave() then
+                self:FinalizeRespecChanges()
+            else
+                if GetInteractionType() == INTERACTION_SKILL_RESPEC then
+                    --If the interaction is already active we just need to update the allocation mode
+                    SKILLS_AND_ACTION_BAR_MANAGER:SetSkillPointAllocationMode(SKILL_POINT_ALLOCATION_MODE_FULL)
+                else
+                    StartSkillRespecFromUI()
+                end
+
+                --Re-narrate depending on what is currently selected
+                if self.assignableActionBar:IsActive() then
+                    SCREEN_NARRATION_MANAGER:QueueCustomEntry("skillAssignableActionBar")
+                else
+                    SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self:GetCurrentList())
+                end
+            end
         end,
     })
 
@@ -560,7 +594,7 @@ function ZO_GamepadSkills:InitializeLineFilterKeybindStrip()
         callback = function()
             --This is confirm when respecing and assign otherwise
             if SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeBatchSave() then
-                self:ShowConfirmRespecDialog()
+                self:FinalizeRespecChanges()
             else
                 local skillEntry = self.lineFilterList:GetTargetData()
                 local skillData = skillEntry.skillData
@@ -1215,6 +1249,24 @@ function ZO_GamepadSkills:InitializeEvents()
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", OnCollectionUpdated)
     ZO_SKILLS_ADVISOR_SINGLETON:RegisterCallback("OnSkillsAdvisorAvailabilityChanged", OnSkillBuildAvailabilityChanged)
 
+
+    local function OnStartRespecCast()
+        if IsInGamepadPreferredMode() then
+            PlaySound(SOUNDS.RESPEC_CAST_TIME_START)
+            ZO_Dialogs_ShowGamepadDialog("SKILL_RESPEC_CAST_GAMEPAD")
+        end
+    end
+
+    local function OnSkillRespecResult(eventId, result)
+        if ZO_Dialogs_IsShowing("SKILL_RESPEC_CAST_GAMEPAD") and not ZO_Dialogs_IsDialogHiding("SKILL_RESPEC_CAST_GAMEPAD") then
+            PlaySound(SOUNDS.RESPEC_CAST_TIME_COMPLETE)
+            ZO_Dialogs_ReleaseDialog("SKILL_RESPEC_CAST_GAMEPAD")
+        end
+    end
+
+    self.control:RegisterForEvent(EVENT_START_SKILL_RESPEC_CAST, OnStartRespecCast)
+    self.control:RegisterForEvent(EVENT_SKILL_RESPEC_RESULT, OnSkillRespecResult)
+
     --Weapon Swap
     local function OnHotbarSwapVisibleStateChanged()
         if not self.control:IsHidden() then
@@ -1839,7 +1891,12 @@ function ZO_GamepadSkills:InitializeRespecConfirmationGoldDialog()
             local IS_GAMEPAD = true
             dialogData.data1.value = ZO_Currency_Format(balance, CURT_MONEY, ZO_CURRENCY_FORMAT_AMOUNT_ICON, IS_GAMEPAD)
             dialogData.data2.value = ZO_Currency_Format(cost, CURT_MONEY, balance > cost and ZO_CURRENCY_FORMAT_AMOUNT_ICON or ZO_CURRENCY_FORMAT_ERROR_AMOUNT_ICON, IS_GAMEPAD)
-            dialog.setupFunc(dialog, dialogData)
+
+            if cost > 0 then
+                dialog.setupFunc(dialog, dialogData)
+            else
+                dialog.setupFunc(dialog)
+            end
         end,
         buttons =
         {
@@ -1858,15 +1915,23 @@ function ZO_GamepadSkills:InitializeRespecConfirmationGoldDialog()
     })
 end
 
-function ZO_GamepadSkills:ShowConfirmRespecDialog()
+function ZO_GamepadSkills:FinalizeRespecChanges()
     if SKILLS_AND_ACTION_BAR_MANAGER:DoPendingChangesIncurCost() then
         if SKILLS_AND_ACTION_BAR_MANAGER:GetSkillRespecPaymentType() == RESPEC_PAYMENT_TYPE_GOLD then
-            ZO_Dialogs_ShowGamepadDialog("SKILL_RESPEC_CONFIRM_GOLD_GAMEPAD")
+            if GetSkillRespecCost(SKILLS_AND_ACTION_BAR_MANAGER:GetSkillPointAllocationMode()) > 0 or SKILL_LINE_ASSIGNMENT_MANAGER:HasSubclassingChanges() then
+                ZO_Dialogs_ShowGamepadDialog("SKILL_RESPEC_CONFIRM_GOLD_GAMEPAD")
+            else
+                SKILLS_AND_ACTION_BAR_MANAGER:ApplyChanges()
+            end
         else
             ZO_Dialogs_ShowGamepadDialog("SKILL_RESPEC_CONFIRM_SCROLL")
         end
     else
-        ZO_Dialogs_ShowGamepadDialog("SKILL_RESPEC_CONFIRM_FREE")
+        if SKILL_LINE_ASSIGNMENT_MANAGER:HasSubclassingChanges() then
+            ZO_Dialogs_ShowGamepadDialog("SKILL_RESPEC_CONFIRM_FREE")
+        else
+            SKILLS_AND_ACTION_BAR_MANAGER:ApplyChanges()
+        end
     end
 end
 
@@ -1925,6 +1990,7 @@ function ZO_GamepadSkills:InitializeConfirmClearAllDialog()
                     else
                         SKILL_POINT_ALLOCATION_MANAGER:ClearPointsOnAllSkillLines()
                     end
+                    PlaySound(SOUNDS.SKILL_RESPEC_CLEAR_ALL)
                 end,
             },
             {
@@ -2337,6 +2403,53 @@ function ZO_GamepadSkills:InitializeOptionsDialog()
                 end,
             },
         }
+    })
+end
+
+function ZO_GamepadSkills.OnSkillsRespecCastDialogInitialized(control)
+    ZO_GenericGamepadDialog_OnInitialized(control)
+
+    control.bar= control:GetNamedChild("ContainerScrollChildProgress")
+
+    ZO_Dialogs_RegisterCustomDialog("SKILL_RESPEC_CAST_GAMEPAD",
+    {
+        customControl = control,
+        canQueue = true,
+        setup = function(dialog)
+            ZO_StatusBar_SetGradientColor(dialog.bar, ZO_XP_BAR_GRADIENT_COLORS)
+            dialog.bar:SetMinMax(0, RESPEC_CAST_TIME_MS)
+            dialog.bar:SetValue(0)
+            dialog:setupFunc()
+        end,
+        gamepadInfo =
+        {
+            dialogType = GAMEPAD_DIALOGS.CUSTOM,
+        },
+        title =
+        {
+            text = SI_SKILL_RESPEC_START_RESPEC_KEYBIND,
+        },
+        buttons =
+        {
+            {
+                keybind = "DIALOG_NEGATIVE",
+                text = SI_DIALOG_CANCEL,
+                sound = SOUNDS.DIALOG_DECLINE,
+                callback = function()
+                    CancelSkillPointAllocationRequest()
+                end,
+            },
+        },
+        narrationText = function(dialog)
+            return SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_RESPEC_CAST_TIME_DIALOG_DESCRIPTION))
+        end,
+        noChoiceCallback = function(dialog)
+            CancelSkillPointAllocationRequest()
+        end,
+        updateFn = function(dialog)
+            local progress = RESPEC_CAST_TIME_MS - GetSkillRespecCastTimeRemainingMs()
+            dialog.bar:SetValue(progress)
+        end,
     })
 end
 

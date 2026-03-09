@@ -1,0 +1,9 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_GildbarStoreTopLevel_Keyboard" inherits="ZO_MarketTemplate">
+            <OnInitialized>
+                ZO_GildbarStore_Keyboard.OnControlInitialized(self)
+            </OnInitialized>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

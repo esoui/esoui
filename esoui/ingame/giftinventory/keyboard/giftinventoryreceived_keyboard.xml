@@ -33,7 +33,6 @@
                 </Label>
             </Controls>
         </Control>
-        
         <Control name="ZO_GiftInventoryReceived_Keyboard_Control" hidden="true">
             <OnInitialized>
                 ZO_GiftInventoryReceived_Keyboard_OnInitialized(self)
@@ -53,7 +52,7 @@
                                 ZO_SortHeader_InitializeArrowHeader(self, "seen", ZO_SORT_ORDER_UP)
                             </OnInitialized>
                             <Anchor point="TOPLEFT" offsetX="8"/>
-                            <Dimensions x="16" y="32" />
+                            <Dimensions x="16" y="32"/>
                         </Control>
                         <Control name="$(parent)SenderName" inherits="ZO_SortHeader">
                             <OnInitialized>

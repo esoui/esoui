@@ -2,63 +2,51 @@
     <Controls>
         <Control name="ZO_InventoryInfoBar" virtual="true">
             <Dimensions y="64"/>
-
             <Controls>
                 <Control name="$(parent)Divider" inherits="ZO_WideHorizontalDivider">
-                    <Anchor point="TOP" />
+                    <Anchor point="TOP"/>
                 </Control>
-                
                 <Label name="$(parent)FreeSlots" font="ZoFontGameLargeBold" verticalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                    <Dimensions y="32" />
+                    <Dimensions y="32"/>
                     <Anchor point="TOPLEFT" offsetX="27" offsetY="1"/>
                 </Label>
-
                 <Label name="$(parent)Money" inherits="ZO_CurrencyTemplate">
-                    <Anchor point="TOPRIGHT" offsetX="-21" offsetY="5" />
+                    <Anchor point="TOPRIGHT" offsetX="-21" offsetY="5"/>
                 </Label>
             </Controls>
         </Control>
-
         <Control name="ZO_InventoryInfoBarBackpack" inherits="ZO_InventoryInfoBar" virtual="true">
             <Dimensions y="64"/>
-
             <Controls>
                 <Label name="$(parent)AltFreeSlots" font="ZoFontGameLargeBold" verticalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" hidden="true">
-                    <Dimensions y="32" />
+                    <Dimensions y="32"/>
                     <Anchor point="TOPLEFT" relativeTo="$(parent)FreeSlots" relativePoint="BOTTOMLEFT" offsetY="-9"/>
                 </Label>
-
-                <Label name="$(parent)AltMoney" inherits="ZO_CurrencyTemplate"  hidden="true">
+                <Label name="$(parent)AltMoney" inherits="ZO_CurrencyTemplate" hidden="true">
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)Money" relativePoint="BOTTOMRIGHT" offsetY="1"/>
                 </Label>
             </Controls>
         </Control>
-
         <Control name="ZO_InventoryInfoBar_Gamepad" virtual="true">
             <Dimensions y="64"/>
-
             <Controls>
                 <Label name="$(parent)CapacityDescription" text="SI_GAMEPAD_INVENTORY_CAPACITY" font="ZoFontGamepad27" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
                     <Dimensions y="32"/>
                     <Anchor point="BOTTOMLEFT"/>
                 </Label>
                 <Label name="$(parent)FreeSlots" font="ZoFontGamepad34" modifyTextType="UPPERCASE" verticalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                    <Dimensions y="32" />
+                    <Dimensions y="32"/>
                     <AnchorToBaseline relativeToLabel="$(parent)CapacityDescription" side="RIGHT" offsetX="10"/>
                 </Label>
-
                 <Label name="$(parent)Money" inherits="ZO_CurrencyTemplate">
                     <Anchor point="BOTTOMRIGHT" offsetX="-27"/>
                 </Label>
-
                 <Label name="$(parent)AlliancePoints" inherits="ZO_CurrencyTemplate">
                     <Anchor point="BOTTOMRIGHT" offsetX="-150"/>
                 </Label>
-
             </Controls>
         </Control>
-
-       <Backdrop name="ZO_InventorySearchTemplate" inherits="ZO_SingleLineEditBackdrop_Keyboard" virtual="true">
+        <Backdrop name="ZO_InventorySearchTemplate" inherits="ZO_SingleLineEditBackdrop_Keyboard" virtual="true">
             <Controls>
                 <EditBox name="$(parent)Box" inherits="ZO_DefaultEditForBackdrop" defaultText="SI_ITEM_FILTER_BY_TEXT">
                     <OnEnter>
@@ -67,28 +55,23 @@
                 </EditBox>
             </Controls>
         </Backdrop>
-
         <Control name="ZO_InventoryFilterTabTemplate" inherits="ZO_MenuBarButtonTemplate1" virtual="true">
             <OnMouseEnter>
                 ZO_PlayerInventory_FilterButtonOnMouseEnter(self)
             </OnMouseEnter>
-
             <OnMouseExit>
                 ZO_PlayerInventory_FilterButtonOnMouseExit(self)
             </OnMouseExit>
-
             <Controls>
                 <Texture name="$(parent)Flash" alpha="0" textureFile="EsoUI/Art/Miscellaneous/icon_highlight_pulse.dds" excludeFromResizeToFitExtents="true">
-                    <Anchor point="TOPLEFT" offsetX="-20" offsetY="-20" />
-                    <Anchor point="BOTTOMRIGHT" offsetX="20" offsetY="20" />
+                    <Anchor point="TOPLEFT" offsetX="-20" offsetY="-20"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="20" offsetY="20"/>
                 </Texture>
             </Controls>
         </Control>
-
         <Control name="ZO_InventoryFilterSubTabTemplate" inherits="ZO_InventoryFilterTabTemplate" virtual="true">
-            <Dimensions x="16" y="16" />
+            <Dimensions x="16" y="16"/>
         </Control>
-
         <Control name="ZO_InventoryTabs" inherits="ZO_MenuBarTemplate" virtual="true">
             <OnInitialized>
                 ZO_MenuBar_OnInitialized(self)
@@ -103,7 +86,7 @@
                 }
                 ZO_MenuBar_SetData(self, filterBarData)
             </OnInitialized>
-            <Anchor point="TOPRIGHT" offsetX="-33" offsetY="14" />
+            <Anchor point="TOPRIGHT" offsetX="-33" offsetY="14"/>
             <Controls>
                 <Label name="$(parent)Active" inherits="ZO_TooltipIfTruncatedLabel" font="ZoFontHeader2" verticalAlignment="CENTER" horizontalAlignment="RIGHT" modifyTextType="UPPERCASE" excludeFromResizeToFitExtents="true">
                     <OnInitialized>
@@ -121,13 +104,12 @@
                         }
                         ZO_FontAdjustingWrapLabel_OnInitialized(self, fonts, TEXT_WRAP_MODE_ELLIPSIS)
                     </OnInitialized>
-                    <Dimensions y="64" />
+                    <Dimensions y="64"/>
                     <Anchor point="LEFT" relativeTo="$(grandparent)" offsetX="-10" constrains="X"/>
                     <Anchor point="RIGHT" relativePoint="LEFT" offsetX="-20"/>
                 </Label>
             </Controls>
         </Control>
-
         <Control name="ZO_InventorySubTabs" inherits="ZO_MenuBarTemplate" virtual="true">
             <OnInitialized>
                 ZO_MenuBar_OnInitialized(self)
@@ -142,54 +124,44 @@
                 }
                 ZO_MenuBar_SetData(self, filterBarData)
             </OnInitialized>
-            <Anchor point="TOPRIGHT" offsetX="-33" offsetY="14" />
+            <Anchor point="TOPRIGHT" offsetX="-33" offsetY="14"/>
             <Controls>
                 <Label name="$(parent)Active" font="ZoFontHeader2" verticalAlignment="CENTER" modifyTextType="UPPERCASE" excludeFromResizeToFitExtents="true">
-                    <Dimensions y="64" />
+                    <Dimensions y="64"/>
                     <Anchor point="RIGHT" relativePoint="LEFT" offsetX="-20"/>
                 </Label>
             </Controls>
         </Control>
-
         <Control name="ZO_InventoryFilterDivider" inherits="ZO_WideHorizontalDivider" virtual="true">
-            <Anchor point="TOP" relativeTo="ZO_SharedRightPanelBackground" offsetY="DEFAULT_INVENTORY_FILTER_DIVIDER_TOP_OFFSET_Y" />
+            <Anchor point="TOP" relativeTo="ZO_SharedRightPanelBackground" offsetY="DEFAULT_INVENTORY_FILTER_DIVIDER_TOP_OFFSET_Y"/>
         </Control>
-
         <Control name="ZO_InventorySortHeaders" virtual="true">
-            <Dimensions x="565" y="32" />
-            <Anchor point="TOPRIGHT" offsetY="63" />
+            <Dimensions x="565" y="32"/>
+            <Anchor point="TOPRIGHT" offsetY="63"/>
         </Control>
-
         <Control name="ZO_InventoryList" inherits="ZO_ScrollList" virtual="true">
             <Dimensions x="565"/>
             <Anchor point="TOPRIGHT" offsetY="96"/>
-            <Anchor point="BOTTOMRIGHT" />
+            <Anchor point="BOTTOMRIGHT"/>
         </Control>
-
         <TopLevelControl name="ZO_InventoryTemplate" mouseEnabled="true" hidden="true" virtual="true">
-            <Dimensions x="565" />
-            <Anchor point="TOPLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="-20" />
-            <Anchor point="BOTTOMLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="-30" />
-
+            <Dimensions x="565"/>
+            <Anchor point="TOPLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="-20"/>
+            <Anchor point="BOTTOMLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="-30"/>
             <Controls>
                 <Control name="$(parent)Tabs" inherits="ZO_InventoryTabs"/>
-
                 <Control name="$(parent)FilterDivider" inherits="ZO_InventoryFilterDivider"/>
-
                 <Control name="$(parent)SearchFilters" inherits="ZO_InventorySubFiltersWithSearch" hidden="true">
-                    <Anchor point="RIGHT" relativeTo="$(parent)Tabs" />
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)FilterDivider" relativePoint="BOTTOMLEFT" />
+                    <Anchor point="RIGHT" relativeTo="$(parent)Tabs"/>
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)FilterDivider" relativePoint="BOTTOMLEFT"/>
                 </Control>
-
                 <Control name="$(parent)SearchDivider" inherits="ZO_InventoryFilterDivider" hidden="true">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)SearchFilters" relativePoint="BOTTOMLEFT" offsetY="5" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)SearchFilters" relativePoint="BOTTOMLEFT" offsetY="5"/>
                 </Control>
-
                 <Control name="$(parent)List" inherits="ZO_InventoryList"/>
-
                 <Control name="$(parent)InfoBar" inherits="ZO_InventoryInfoBar">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)List" relativePoint="BOTTOMLEFT" />
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)List" relativePoint="BOTTOMRIGHT" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)List" relativePoint="BOTTOMLEFT"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)List" relativePoint="BOTTOMRIGHT"/>
                 </Control>
             </Controls>
         </TopLevelControl>

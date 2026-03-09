@@ -1,3 +1,9 @@
+function ZO_Tooltip:LayoutPerformanceTooltip(tooltipText)
+    local section = self:AcquireSection(self:GetStyle("bodySection"))
+    section:AddLine(tooltipText, self:GetStyle("bodyDescription"))
+    self:AddSection(section)
+end
+
 local PerformanceMeters = ZO_Object:Subclass()
 
 local HIGH_LATENCY = 300
@@ -29,11 +35,13 @@ end
 
 function PerformanceMeters:Initialize(control)
     self.control = control
-    self.framerateControl = GetControl(control, "FramerateMeter")
-    self.framerateLabel = GetControl(self.framerateControl, "Label")
-    self.latencyControl = GetControl(control, "LatencyMeter")
-    self.latencyLabel = GetControl(self.latencyControl, "Label")
-    self.latencyBars = GetControl(self.latencyControl, "Bars")
+    self.framerateControl = control:GetNamedChild("FramerateMeter")
+    self.framerateLabel = self.framerateControl:GetNamedChild("Label")
+    self.latencyControl = control:GetNamedChild("LatencyMeter")
+    self.latencyLabel = self.latencyControl:GetNamedChild("Label")
+    self.latencyBars = self.latencyControl:GetNamedChild("Bars")
+    self.backgroundTexture = control:GetNamedChild("Bg")
+    self.gamepadTooltip = control:GetNamedChild("GamepadTooltip")
 
     local function OnAddOnLoaded(event, name)
         if name == "ZO_Ingame" then
@@ -43,6 +51,7 @@ function PerformanceMeters:Initialize(control)
             self:UpdateVisibility()
             self:UpdateMovable()
             self.control:UnregisterForEvent(EVENT_ADD_ON_LOADED)
+            self.isAddOnLoaded = true
         end
     end
 
@@ -59,8 +68,17 @@ function PerformanceMeters:Initialize(control)
     self.control:RegisterForEvent(EVENT_ADD_ON_LOADED, OnAddOnLoaded)
     self.control:RegisterForEvent(EVENT_INTERFACE_SETTING_CHANGED, OnInterfaceSettingChanged)
     EVENT_MANAGER:RegisterForUpdate("ZO_PerformanceMeters", 1000, function() self:OnUpdate() end)
-    
+
     PERFORMANCE_METER_FRAGMENT = ZO_HUDFadeSceneFragment:New(control)
+
+    local function ApplyStyle()
+        if self.isAddOnLoaded then
+            self.gamepadTooltip:SetHidden(true)
+            ClearTooltip(InformationTooltip)
+            self:UpdateVisibility()
+        end
+    end
+    ZO_PlatformStyle:New(ApplyStyle)
 end
 
 function PerformanceMeters:OnUpdate()
@@ -123,6 +141,10 @@ function PerformanceMeters:UpdateVisibility()
     local latencyOn = GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_SHOW_LATENCY)
     local anyOn = (framerateOn or latencyOn) and isPC
     if anyOn then
+        ApplyTemplateToControl(self.framerateControl, ZO_GetPlatformTemplate("FramerateMeter"))
+        ApplyTemplateToControl(self.latencyControl, ZO_GetPlatformTemplate("LatencyMeter"))
+        self.backgroundTexture:SetHidden(IsInGamepadPreferredMode())
+
         self.framerateControl:ClearAnchors()
         self.latencyControl:ClearAnchors()
         if framerateOn and latencyOn then
@@ -157,15 +179,24 @@ function PerformanceMeters:Meter_OnMouseEnter(control)
     elseif control == self.latencyControl then
         tooltipText = GetString(SI_LATENCY_METER_TOOLTIP)
     end
-    
+
     if tooltipText then
-        InitializeTooltip(InformationTooltip, control, BOTTOM, 0, 0)
-        SetTooltipText(InformationTooltip, tooltipText)
+        if IsInGamepadPreferredMode() then
+            self.gamepadTooltip.tip:LayoutPerformanceTooltip(tooltipText)
+            self.gamepadTooltip:SetHidden(false)
+        else
+            InitializeTooltip(InformationTooltip, control, BOTTOM, 0, 0)
+            SetTooltipText(InformationTooltip, tooltipText)
+        end
     end
 end
 
 function PerformanceMeters:Meter_OnMouseExit(control)
-    ClearTooltip(InformationTooltip)
+    if IsInGamepadPreferredMode() then
+        self.gamepadTooltip:SetHidden(true)
+    else
+        ClearTooltip(InformationTooltip)
+    end
 end
 
 function ZO_PerformanceMeters_OnMouseEnter(control)

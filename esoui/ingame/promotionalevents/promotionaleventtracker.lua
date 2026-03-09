@@ -1,3 +1,5 @@
+-- TODO Tamriel Tomes: Rename file to TimedActivityTracker.lua and class to ZO_TimedActivityTracker
+
 ZO_PromotionalEventTracker = ZO_HUDTracker_Base:Subclass()
 
 function ZO_PromotionalEventTracker:Initialize(control)
@@ -22,7 +24,6 @@ function ZO_PromotionalEventTracker:InitializeStyles()
             FONT_HEADER = "ZoFontGameShadow",
             FONT_SUBLABEL = "ZoFontGameShadow",
             FONT_PROGRESS_LABEL = "ZoFontGameShadow",
-            TEXT_TYPE_HEADER = MODIFY_TEXT_TYPE_NONE,
             RESIZE_TO_FIT_PADDING_HEIGHT = 10,
 
             TOP_LEVEL_PRIMARY_ANCHOR = ZO_Anchor:New(TOPLEFT, ZO_ZoneStoryTracker, BOTTOMLEFT),
@@ -34,8 +35,6 @@ function ZO_PromotionalEventTracker:InitializeStyles()
             PROGRESS_LABEL_PRIMARY_ANCHOR = ZO_Anchor:New(TOPLEFT, self.subLabel, BOTTOMLEFT, 0, 2),
             PROGRESS_LABEL_SECONDARY_ANCHOR = ZO_Anchor:New(TOPRIGHT, self.subLabel, BOTTOMRIGHT, 0, 2),
 
-            SUBLABEL_PRIMARY_ANCHOR_OFFSET_Y = 2,
-
             HEADER_ICON_SIZE = 25,
             HEADER_ICON_OFFSET = -2,
         },
@@ -44,7 +43,6 @@ function ZO_PromotionalEventTracker:InitializeStyles()
             FONT_HEADER = "ZoFontGamepadBold27",
             FONT_SUBLABEL = "ZoFontGamepad34",
             FONT_PROGRESS_LABEL = "ZoFontGamepad34",
-            TEXT_TYPE_HEADER = MODIFY_TEXT_TYPE_UPPERCASE,
             RESIZE_TO_FIT_PADDING_HEIGHT = 20,
 
             TOP_LEVEL_PRIMARY_ANCHOR = ZO_Anchor:New(TOPLEFT, ZO_ZoneStoryTracker, BOTTOMLEFT),
@@ -53,13 +51,12 @@ function ZO_PromotionalEventTracker:InitializeStyles()
             CONTAINER_PRIMARY_ANCHOR = ZO_Anchor:New(TOPRIGHT),
 
             PROGRESS_LABEL_PRIMARY_ANCHOR = ZO_Anchor:New(TOPRIGHT, self.subLabel, BOTTOMRIGHT, 0, 10),
-
-            SUBLABEL_PRIMARY_ANCHOR_OFFSET_Y = 10,
             
             HEADER_ICON_SIZE = 48,
             HEADER_ICON_OFFSET = -10,
         }
     }
+
     ZO_HUDTracker_Base.InitializeStyles(self)
 end
 
@@ -74,6 +71,11 @@ function ZO_PromotionalEventTracker:RegisterEvents()
     PROMOTIONAL_EVENT_MANAGER:RegisterCallback("RewardsClaimed", Update)
     PROMOTIONAL_EVENT_MANAGER:RegisterCallback("ActivityProgressUpdated", Update)
     self.control:RegisterForEvent(EVENT_PROMOTIONAL_EVENTS_ACTIVITY_TRACKING_UPDATED, Update)
+
+    TIMED_ACTIVITIES_MANAGER:RegisterCallback("OnRefreshAvailability", Update)
+    TIMED_ACTIVITIES_MANAGER:RegisterCallback("OnActivitiesUpdated", Update)
+    TIMED_ACTIVITIES_MANAGER:RegisterCallback("OnActivityUpdated", Update)
+    self.control:RegisterForEvent(EVENT_TIMED_ACTIVITY_TRACKING_UPDATED, Update)
 end
 
 function ZO_PromotionalEventTracker:Update()
@@ -84,6 +86,8 @@ function ZO_PromotionalEventTracker:Update()
         if campaignData and campaignData:ShouldCampaignBeVisible() then
             local activityData = campaignData:GetActivityData(activityIndex)
             if activityData then
+                self:SetHeaderText(GetString(SI_PROMOTIONAL_EVENT_TRACKER_HEADER))
+                self.headerIcon:SetTexture("EsoUI/Art/LFG/Gamepad/LFG_menuIcon_PromotionalEvents.dds")
                 self:SetSubLabelText(activityData:GetDisplayName())
                 
                 local progress = activityData:GetProgress()
@@ -94,6 +98,24 @@ function ZO_PromotionalEventTracker:Update()
             end
         end
     end
+
+    if hidden and IsTimedActivitySystemAvailable() then
+        local index = GetTrackedTimedActivityInfo()
+        local activityData = index and TIMED_ACTIVITIES_MANAGER:GetActivityDataByIndex(index) or nil
+        if activityData then
+            self:SetHeaderText(GetString(SI_TAMRIEL_TOMES_TRACKER_HEADER))
+            self.headerIcon:SetTexture("EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_tamrielTomes.dds")
+            self:SetSubLabelText(activityData:GetName())
+
+            local progress = activityData:GetProgress()
+            local completionThreshold = activityData:GetMaxProgress()
+            local progressText = zo_strformat(SI_TIMED_ACTIVITY_TRACKER_PROGRESS_FORMATTER, ZO_CommaDelimitNumber(progress), ZO_CommaDelimitNumber(completionThreshold))
+            self.progressLabel:SetText(progressText)
+
+            hidden = false
+        end
+    end
+
     self:GetFragment():SetHiddenForReason("NoTrackedPromotionalEvent", hidden, DEFAULT_HUD_DURATION, DEFAULT_HUD_DURATION)
 end
 
@@ -101,7 +123,6 @@ function ZO_PromotionalEventTracker:ApplyPlatformStyle(style)
     ZO_HUDTracker_Base.ApplyPlatformStyle(self, style)
 
     self.progressLabel:SetFont(style.FONT_PROGRESS_LABEL)
-    self.headerLabel:SetText(GetString(SI_PROMOTIONAL_EVENT_TRACKER_HEADER))
     self.headerIcon:SetDimensions(style.HEADER_ICON_SIZE, style.HEADER_ICON_SIZE)
     self.headerIcon:SetAnchor(RIGHT, nil, LEFT, style.HEADER_ICON_OFFSET)
 end

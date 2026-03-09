@@ -202,6 +202,8 @@ function ZO_ArmoryBuildSkills_Gamepad:AddSkillsCategoryHeader(scrollData, hotbar
 end
 
 function ZO_ArmoryBuildSkills_Gamepad:GamepadSingleLineAbilityEntryTemplateSetup(control, data, parentControl)
+    self:SetupRow(control, data)
+
     local SELECTED = true
     ZO_SharedGamepadEntry_OnSetup(control, data, SELECTED)
     if not data.isEntryEmpty and not data.showLock then
@@ -222,6 +224,7 @@ function ZO_ArmoryBuildSkills_Gamepad:GamepadSingleLineAbilityEntryTemplateSetup
 end
 
 function ZO_ArmoryBuildSkills_Gamepad:ArmoryBuildSkillsTextDisplayTemplateSetup(control, data, parentControl)
+    self:SetupRow(control, data)
     control.label:SetText(data.text)
 end
 

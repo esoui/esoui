@@ -7,7 +7,7 @@
         </AnimationTimeline>
         <AnimationTimeline name="StealthIconStealthTextFadeAnimation">
             <Animations>
-                <AlphaAnimation duration="200" startAlpha="0" endAlpha="1" />
+                <AlphaAnimation duration="200" startAlpha="0" endAlpha="1"/>
                 <CustomAnimation delay="2800" duration="200">
                     <UpdateFunction>
                         local stealthState = GetUnitStealthState("player")
@@ -47,50 +47,42 @@
             <Controls>
                 <Texture name="$(parent)StealthEye" textureFile="EsoUI/Art/Stealth/stealth_64.dds" hidden="true">
                     <Dimensions x="64" y="64"/>
-                    <Anchor point="CENTER" />
+                    <Anchor point="CENTER"/>
                 </Texture>
-
                 <Label name="$(parent)StealthText" font="ZoFontWinH3" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_HIGHLIGHT" alpha="0">
-                    <Anchor point="CENTER" offsetY="-35" />
+                    <Anchor point="CENTER" offsetY="-35"/>
                 </Label>
             </Controls>
         </Control>
         <TopLevelControl name="ZO_ReticleContainer" hidden="true" tier="LOW" layer="BACKGROUND">
             <AnchorFill/>
-
             <OnInitialized>
                 ZO_Reticle_Initialize(self)
             </OnInitialized>
-
             <Controls>
-                <Texture name="$(parent)Reticle" textureFile="EsoUI/Art/Reticle/reticleAnim.dds" >
-                    <Dimensions x="64" y="64" />
-                    <Anchor point="CENTER" />
+                <Texture name="$(parent)Reticle" textureFile="EsoUI/Art/Reticle/reticleAnim.dds">
+                    <Dimensions x="64" y="64"/>
+                    <Anchor point="CENTER"/>
                 </Texture>
-
                 <Control name="$(parent)StealthIcon" inherits="ZO_StealthIconContainer">
-                    <Anchor point="CENTER" />
+                    <Anchor point="CENTER"/>
                 </Control>
-                       
                 <Control name="$(parent)Interact" hidden="true">
-                    <Dimensions x="200" y="50" />
-                    <Anchor point="LEFT" relativePoint="CENTER" offsetX="45" offsetY="40" />
+                    <Dimensions x="200" y="50"/>
+                    <Anchor point="LEFT" relativePoint="CENTER" offsetX="45" offsetY="40"/>
                     <Controls>
                         <Label name="$(parent)Context">
-                            <DimensionConstraints maxX="380" />
-                            <Anchor point="BOTTOMLEFT" />
+                            <DimensionConstraints maxX="380"/>
+                            <Anchor point="BOTTOMLEFT"/>
                         </Label>
-
                         <Control name="$(parent)KeybindButton" inherits="ZO_KeybindButton">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)Context" relativePoint="BOTTOMLEFT" offsetX="20" offsetY="6"/>
                         </Control>
-
                         <Label name="$(parent)AdditionalInfo" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_CONTRAST">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)KeybindButtonNameLabel" relativePoint="BOTTOMLEFT" offsetY="6"/>
                         </Label>
                     </Controls>
                 </Control>
-
                 <Control name="$(parent)NonInteract" resizeToFitDescendents="true" hidden="true">
                     <Anchor point="LEFT" relativePoint="CENTER" offsetX="45"/>
                     <Controls>

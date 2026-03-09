@@ -24,7 +24,7 @@ function ZO_ZoneStories_Shared:InitializeGridList()
     -- Initialize grid list object
     local gridListControl = self.infoContainerControl:GetNamedChild("GridList")
     self.gridListControl = gridListControl
-    self.gridList = self.templateData.gridListClass:New(gridListControl)
+    self.gridList = self.templateData.gridListClass:New(gridListControl, unpack(self.templateData.gridListClassInitExtraArgs))
 
     local HIDE_CALLBACK = nil
     local achievementData = self.templateData.achievements
@@ -53,6 +53,11 @@ function ZO_ZoneStories_Shared:GetSelectedStoryData()
     -- To be overridden
 end
 
+function ZO_ZoneStories_Shared:GetTrackedCompletionTypeForSelectedZone()
+    local trackedZoneId, trackedZoneCompletionType = GetTrackedZoneStoryActivityInfo()
+    return trackedZoneId == self:GetSelectedZoneId() and trackedZoneCompletionType or nil
+end
+
 function ZO_ZoneStories_Shared:UpdatePlayStoryButtonText()
     -- To be overridden
 end
@@ -68,16 +73,33 @@ function ZO_ZoneStories_Shared:GetPlayStoryButtonText()
             return ZO_ZoneStories_Shared.GetZoneCollectibleUnlockText(selectedData.id)
         elseif ZO_ZoneStories_Manager.IsZoneComplete(selectedData.id) then
             return zo_strformat(SI_ZONE_STORY_ZONE_COMPLETE_ACTION)
-        elseif ZO_ZoneStories_Manager.IsZoneCompletionTypeComplete(selectedData.id, ZONE_COMPLETION_TYPE_PRIORITY_QUESTS)
-                or not CanZoneStoryContinueTrackingActivitiesForCompletionType(selectedData.id, ZONE_COMPLETION_TYPE_PRIORITY_QUESTS) then
-            return zo_strformat(SI_ZONE_STORY_EXPLORE_ZONE_ACTION)
-        elseif not IsZoneStoryStarted(selectedData.id) then
-            return zo_strformat(SI_ZONE_STORY_START_STORY_ACTION)
         else
-            return zo_strformat(SI_ZONE_STORY_CONTINUE_STORY_ACTION)
+            local trackedCompletionType = self:GetTrackedCompletionTypeForSelectedZone()
+            if trackedCompletionType then
+                return ZO_ZoneStories_Shared.GetPlayStoryActionTextByZoneAndCompletionType(self:GetSelectedZoneId(), trackedCompletionType)
+            elseif ZO_ZoneStories_Manager.IsZoneCompletionTypeComplete(selectedData.id, ZONE_COMPLETION_TYPE_PRIORITY_QUESTS)
+                    or not CanZoneStoryContinueTrackingActivitiesForCompletionType(selectedData.id, ZONE_COMPLETION_TYPE_PRIORITY_QUESTS) then
+                return zo_strformat(SI_ZONE_STORY_EXPLORE_ZONE_ACTION)
+            elseif not IsZoneStoryStarted(selectedData.id) then
+                return zo_strformat(SI_ZONE_STORY_START_STORY_ACTION)
+            else
+                return zo_strformat(SI_ZONE_STORY_CONTINUE_STORY_ACTION)
+            end
         end
     end
     return ""
+end
+
+function ZO_ZoneStories_Shared.GetPlayStoryActionTextByZoneAndCompletionType(zoneId, completionType)
+    if completionType == ZONE_COMPLETION_TYPE_PRIORITY_QUESTS then
+        if IsZoneStoryStarted(zoneId) then
+            return zo_strformat(SI_ZONE_STORY_CONTINUE_STORY_ACTION)
+        end
+        return zo_strformat(SI_ZONE_STORY_START_STORY_ACTION)
+    end
+
+    local completionTypeDescriptor = GetString("SI_ZONECOMPLETIONTYPE", completionType)
+    return ZO_CachedStrFormat(SI_ZONE_STORY_EXPLORE_SPECIFIC_ACTION, completionTypeDescriptor)
 end
 
 function ZO_ZoneStories_Shared.IsZoneCollectibleUnlocked(zoneId)
@@ -141,6 +163,7 @@ function ZO_ZoneStories_Shared:BuildActivityCompletionList()
                         gridHeaderName = GetString(SI_ZONE_STORY_ACTIVITY_COMPLETION_HEADER),
                         gridHeaderTemplate = self.templateData.activityCompletion.headerTemplate,
                     }
+                    self.lastData = data
                     self.gridList:AddEntry(data, self.templateData.activityCompletion.entryTemplate)
                 end
             end
@@ -148,13 +171,18 @@ function ZO_ZoneStories_Shared:BuildActivityCompletionList()
     end
 end
 
+function ZO_ZoneStories_Shared:GetLastActivityCompletionControl()
+    return self.gridList:GetControlFromData(self.lastData)
+end
+
 function ZO_ZoneStories_Shared:UpdateZoneStory()
     local data = self:GetSelectedStoryData()
 
     local zoneData = ZONE_STORIES_MANAGER:GetZoneData(data.id)
     self.titleControl:SetText(zoneData.name)
-    self.descriptionControl:SetText(zoneData.description)
-
+    if self.descriptionControl then
+        self.descriptionControl:SetText(zoneData.description)
+    end
     self:BuildGridList()
     self:UpdatePlayStoryButtonText()
     self:UpdateBackgroundTexture()
@@ -165,8 +193,8 @@ function ZO_ZoneStories_Shared:TrackNextActivity()
     if zoneId then
         if ZO_ZoneStories_Shared.IsZoneCollectibleUnlocked(zoneId) then
             local SET_AUTO_MAP_NAVIGATION_TARGET = true
-            local COMPLETION_TYPE_ALL = nil
-            TrackNextActivityForZoneStory(zoneId, COMPLETION_TYPE_ALL, SET_AUTO_MAP_NAVIGATION_TARGET)
+            local completionType = self:GetTrackedCompletionTypeForSelectedZone()
+            TrackNextActivityForZoneStory(zoneId, completionType, SET_AUTO_MAP_NAVIGATION_TARGET)
         else
             local lockedZoneCollectibleId = GetCollectibleIdForZone(GetZoneIndex(zoneId))
             local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(lockedZoneCollectibleId)

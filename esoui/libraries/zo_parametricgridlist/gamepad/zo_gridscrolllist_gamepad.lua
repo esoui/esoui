@@ -68,6 +68,38 @@ function ZO_AbstractGridScrollList_Gamepad:SetScrollToExtent(scrollToExtent)
     ZO_ScrollList_SetScrollToExtent(self.list, scrollToExtent)
 end
 
+function ZO_AbstractGridScrollList_Gamepad:GetNavigateDownSound()
+    return self.navigateDownSound
+end
+
+function ZO_AbstractGridScrollList_Gamepad:SetNavigateDownSound(soundId)
+    self.navigateDownSound = soundId
+end
+
+function ZO_AbstractGridScrollList_Gamepad:GetNavigateLeftSound()
+    return self.navigateLeftSound
+end
+
+function ZO_AbstractGridScrollList_Gamepad:SetNavigateLeftSound(soundId)
+    self.navigateLeftSound = soundId
+end
+
+function ZO_AbstractGridScrollList_Gamepad:GetNavigateRightSound()
+    return self.navigateRightSound
+end
+
+function ZO_AbstractGridScrollList_Gamepad:SetNavigateRightSound(soundId)
+    self.navigateRightSound = soundId
+end
+
+function ZO_AbstractGridScrollList_Gamepad:GetNavigateUpSound()
+    return self.navigateUpSound
+end
+
+function ZO_AbstractGridScrollList_Gamepad:SetNavigateUpSound(soundId)
+    self.navigateUpSound = soundId
+end
+
 function ZO_AbstractGridScrollList_Gamepad:SetDirectionalInputEnabled(enabled)
     if self.directionalInputEnabled ~= enabled then
         self.directionalInputEnabled = enabled
@@ -112,13 +144,13 @@ do
 
         if currentSelection ~= ZO_ScrollList_GetSelectedDataIndex(self.list) then
             if scrollYDirection == ZO_SCROLL_MOVEMENT_DIRECTION_POSITIVE then
-                PlaySound(SOUNDS.GAMEPAD_MENU_DOWN)
+                PlaySound(self.navigateDownSound or SOUNDS.GAMEPAD_MENU_DOWN)
             elseif scrollYDirection == ZO_SCROLL_MOVEMENT_DIRECTION_NEGATIVE then
-                PlaySound(SOUNDS.GAMEPAD_MENU_UP)
+                PlaySound(self.navigateUpSound or SOUNDS.GAMEPAD_MENU_UP)
             elseif scrollXDirection == ZO_SCROLL_MOVEMENT_DIRECTION_POSITIVE then
-                PlaySound(SOUNDS.GAMEPAD_MENU_RIGHT)
+                PlaySound(self.navigateRightSound or SOUNDS.GAMEPAD_MENU_RIGHT)
             elseif scrollXDirection == ZO_SCROLL_MOVEMENT_DIRECTION_NEGATIVE then
-                PlaySound(SOUNDS.GAMEPAD_MENU_LEFT)
+                PlaySound(self.navigateLeftSound or SOUNDS.GAMEPAD_MENU_LEFT)
             end
         end
     end
@@ -142,6 +174,10 @@ function ZO_AbstractGridScrollList_Gamepad:CommitGridList()
     if self.active then
         self:RefreshSelection()
     end
+    ZO_ScrollList_RefreshLastHoldPosition(self.list)
+end
+
+function ZO_AbstractGridScrollList_Gamepad:RefreshLastHoldPosition()
     ZO_ScrollList_RefreshLastHoldPosition(self.list)
 end
 
@@ -226,6 +262,17 @@ end
 function ZO_AbstractGridScrollList_Gamepad:GetHeaderNarration()
     if self.headerNarrationFunction then
         return self.headerNarrationFunction()
+    end
+end
+
+-- Folows the same rules as the main header, but plays after the selection narration and before the keybind narration
+function ZO_AbstractGridScrollList_Gamepad:SetPostHeaderNarrationFunction(postHeaderNarrationFunction)
+    self.postHeaderNarrationFunction = postHeaderNarrationFunction
+end
+
+function ZO_AbstractGridScrollList_Gamepad:GetPostHeaderNarration()
+    if self.postHeaderNarrationFunction then
+        return self.postHeaderNarrationFunction()
     end
 end
 

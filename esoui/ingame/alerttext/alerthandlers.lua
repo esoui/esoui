@@ -706,10 +706,10 @@ local AlertHandlers =
         end
     end,
 
-    [EVENT_QUEUE_FOR_CAMPAIGN_RESPONSE] = function(response)
+    [EVENT_QUEUE_FOR_CAMPAIGN_RESPONSE] = function(response, parameter)
         local responseString = GetString("SI_QUEUEFORCAMPAIGNRESPONSETYPE", response)
         if responseString ~= "" then
-            return ERROR, responseString, SOUNDS.GENERAL_ALERT_ERROR
+            return ERROR, zo_strformat(responseString, parameter), SOUNDS.GENERAL_ALERT_ERROR
         end
     end,
 

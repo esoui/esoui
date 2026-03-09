@@ -692,6 +692,12 @@ local SPECIALIZED_ITEM_TYPE_ICONS =
         down = "EsoUI/Art/TradingHouse/Tradinghouse_Trophy_Runebox_Fragment_Down.dds",
         over = "EsoUI/Art/TradingHouse/Tradinghouse_Trophy_Runebox_Fragment_Over.dds",
     },
+    [SPECIALIZED_ITEMTYPE_CONSUMABLE_ABILITY] =
+    {
+        up = "EsoUI/Art/TradingHouse/Tradinghouse_Consumable_Ability_Up.dds",
+        down = "EsoUI/Art/TradingHouse/Tradinghouse_Consumable_Ability_Down.dds",
+        over = "EsoUI/Art/TradingHouse/Tradinghouse_Consumable_Ability_Over.dds",
+    },
 }
 
 -- Setup Types Tables

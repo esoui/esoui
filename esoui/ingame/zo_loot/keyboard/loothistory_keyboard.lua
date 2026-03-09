@@ -57,6 +57,9 @@ do
         ["dailyLoginRewards"] = true,
         ["mailInbox"] = true,
         ["market"] = true,
+        ["esoPlusOffersSceneKeyboard"] = true,
+        ["endeavorSealStoreSceneKeyboard"] = true,
+        ["gildbarStoreSceneKeyboard"] = true,
     }
     function ZO_LootHistory_Keyboard:CanShowItemsInHistory()
         local currentSceneName = SCENE_MANAGER:GetCurrentSceneName()

@@ -857,8 +857,10 @@ end
 -- Many of the internals/method calls have changed in chat system to support multiple chat systems at once.
 -- This will preserve compatibility with addons that add messages to chat using CHAT_SYSTEM:AddMessage(), but more complex chat addons may need rewrites.
 CHAT_SYSTEM = KEYBOARD_CHAT_SYSTEM
-function CHAT_SYSTEM:AddMessage(messageText)
-    return CHAT_ROUTER:AddSystemMessage(messageText)
+if CHAT_SYSTEM then
+    function CHAT_SYSTEM:AddMessage(messageText)
+        return CHAT_ROUTER:AddSystemMessage(messageText)
+    end
 end
 
 function ZO_ChatSystem_GetEventHandlers()
@@ -1617,3 +1619,6 @@ function ZO_StoreManager_OnPurchased(eventId, entryName, entryType, entryQuantit
     local currencyTypeForSound = specialCurrencyType1 == CURT_NONE and CURT_MONEY or specialCurrencyType1
     ZO_PlayCurrencyTransactSound(currencyTypeForSound)
 end
+
+-- Keybinding Manager
+KEYBINDING_MANAGER = KEYBOARD_KEYBINDING_MANAGER

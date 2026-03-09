@@ -9,7 +9,6 @@
                 </AlphaAnimation>
             </Animations>
         </AnimationTimeline>
-
         <AnimationTimeline name="CharacterCreateMainControlsFade">
             <Animations>
                 <AlphaAnimation duration="1000" startAlpha="0" endAlpha="1">
@@ -23,18 +22,15 @@
             </Animations>
         </AnimationTimeline>
     </Animations>
-
     <Controls>
         <TopLevelControl name="ZO_CharacterCreateOverlay" topmost="true" tier="HIGH" layer="OVERLAY" level="1000" mouseEnabled="false" hidden="true">
-            <AnchorFill />
-
+            <AnchorFill/>
             <OnInitialized>
                 self.fadeTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("CharacterCreateSceneFade", self)
             </OnInitialized>
-
             <Controls>
                 <Texture name="$(parent)Texture" color="000000" mouseEnabled="false">
-                    <AnchorFill />
+                    <AnchorFill/>
                 </Texture>
             </Controls>
         </TopLevelControl>

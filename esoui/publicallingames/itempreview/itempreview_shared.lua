@@ -735,13 +735,7 @@ function ZO_ItemPreview_Shared:SharedPreviewSetup(previewType, ...)
 
     self.numPreviewVariations = self.currentPreviewTypeObject:GetNumVariations()
 
-    if self.numPreviewVariations > 1 then
-        self:SetVariationControlsHidden(false)
-        self.variationLabel:SetText(self.currentPreviewTypeObject:GetVariationName(self.previewVariationIndex))
-    else
-        self:SetVariationControlsHidden(true)
-    end
-
+    self:SetupVariationControls()
     self:SetupActionCarousel()
 
     self:SetCanChangePreview(false)
@@ -930,6 +924,15 @@ function ZO_ItemPreview_Shared:SetupActionCarousel()
         self.actionLabel:SetText(self.currentPreviewTypeObject:GetActionName(self.previewVariationIndex, self.previewActionIndex))
     else
         self:SetActionControlsHidden(true)
+    end
+end
+
+function ZO_ItemPreview_Shared:SetupVariationControls()
+    if self.numPreviewVariations > 1 then
+        self:SetVariationControlsHidden(false)
+        self.variationLabel:SetText(self.currentPreviewTypeObject:GetVariationName(self.previewVariationIndex))
+    else
+        self:SetVariationControlsHidden(true)
     end
 end
 

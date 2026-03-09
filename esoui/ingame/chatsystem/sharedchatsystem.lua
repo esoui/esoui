@@ -141,7 +141,7 @@ function TextEntry:Initialize(system, control, chatEditBufferTop, chatEditBuffer
     local NO_EXCLUDE_FLAGS = nil
     local DEFAULT_ONLINE_ONLY = nil
     local MAX_RESULTS = 8
-    self.slashCommandAutoComplete = SlashCommandAutoComplete:New(self.editControl, NO_INCLUDE_FLAGS, NO_EXCLUDE_FLAGS, DEFAULT_ONLINE_ONLY, MAX_RESULTS, AUTO_COMPLETION_AUTOMATIC_MODE, AUTO_COMPLETION_DONT_USE_ARROWS)
+    self.slashCommandAutoComplete = ZO_SlashCommandAutoComplete:New(self.editControl, NO_INCLUDE_FLAGS, NO_EXCLUDE_FLAGS, DEFAULT_ONLINE_ONLY, MAX_RESULTS, AUTO_COMPLETION_AUTOMATIC_MODE, AUTO_COMPLETION_DONT_USE_ARROWS)
 
     self.control:SetAlpha(TEXT_ENTRY_MIN_ALPHA)
 end
@@ -1902,6 +1902,7 @@ ZO_CHAT_BLOCKING_SCENE_NAMES =
 {
     ["codeRedemptionGamepad"] = true,
     ["gamepad_endeavor_seal_market_pre_scene"] = true,
+    ["gamepad_gildbar_market_pre_scene"] = true,
     ["gamepad_market"] = true,
     ["gamepad_market_pre_scene"] = true,
     ["gamepad_market_preview"] = true,

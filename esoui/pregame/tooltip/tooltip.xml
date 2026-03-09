@@ -1,14 +1,12 @@
 <GuiXml>
     <Controls>
         <TopLevelControl name="ZO_Tooltips" tier="HIGH" topmost="true">
-            <AnchorFill />
-
+            <AnchorFill/>
             <Controls>
-                <Tooltip name="InformationTooltip"  inherits="ZO_BaseTooltip" />
-
+                <Tooltip name="InformationTooltip" inherits="ZO_BaseTooltip"/>
                 <Tooltip name="ServiceTooltip" inherits="ZO_BaseTooltip">
                     <ResizeToFitPadding width="32" height="32"/>
-                    <DimensionConstraints minX="416" maxX="416" />
+                    <DimensionConstraints minX="416" maxX="416"/>
                 </Tooltip>
             </Controls>
         </TopLevelControl>

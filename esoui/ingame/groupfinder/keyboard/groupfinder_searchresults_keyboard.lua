@@ -507,7 +507,7 @@ end
 
 function ZO_GroupFinder_SearchPanel_Keyboard:PopulatePrimaryDropdown()
     local category = self:GetSearchCategory()
-    if self.primaryOptionDropdown and (category == GROUP_FINDER_CATEGORY_ENDLESS_DUNGEON or category == GROUP_FINDER_CATEGORY_ZONE or category == GROUP_FINDER_CATEGORY_CUSTOM) then
+    if self.primaryOptionDropdown and (category == GROUP_FINDER_CATEGORY_ENDLESS_DUNGEON or category == GROUP_FINDER_CATEGORY_ADVENTURE_ZONE or category == GROUP_FINDER_CATEGORY_ZONE or category == GROUP_FINDER_CATEGORY_CUSTOM) then
         local function OnPrimarySelection(dropdown, selectedDataName, selectedData)
             SetGroupFinderFilterPrimaryOptionByIndex(selectedData.value, dropdown:IsItemSelected(selectedData))
             self:PopulateSecondaryDropdown()
@@ -519,7 +519,7 @@ end
 
 function ZO_GroupFinder_SearchPanel_Keyboard:PopulatePrimaryDropdownSingleSelect()
     local category = self:GetSearchCategory()
-    if self.primaryOptionDropdownSingleSelect and not (category == GROUP_FINDER_CATEGORY_ENDLESS_DUNGEON or category == GROUP_FINDER_CATEGORY_ZONE or category == GROUP_FINDER_CATEGORY_CUSTOM) then
+    if self.primaryOptionDropdownSingleSelect and not (category == GROUP_FINDER_CATEGORY_ENDLESS_DUNGEON or category == GROUP_FINDER_CATEGORY_ADVENTURE_ZONE or category == GROUP_FINDER_CATEGORY_ZONE or category == GROUP_FINDER_CATEGORY_CUSTOM) then
         local defaultText = ""
 
         local function OnPrimarySelection(dropdown, selectedDataName, selectedData)

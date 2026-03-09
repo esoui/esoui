@@ -5,14 +5,12 @@
                 ZO_TradingHouse_Gamepad_Initialize(self)
             </OnInitialized>
             <Controls>
-
                 <Scroll name="$(parent)Mask" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
                     <Controls>
                         <Control name="$(parent)HeaderContainer" inherits="ZO_GamepadScreenHeaderContainer">
                             <Anchor point="TOPLEFT"/>
                             <Anchor point="TOPRIGHT"/>
                         </Control>
-
                         <Control name="$(parent)Container">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)HeaderContainer" relativePoint="BOTTOMLEFT"/>
                             <Anchor point="BOTTOMRIGHT"/>
@@ -24,7 +22,6 @@
                                 <Control name="$(parent)Listings" inherits="ZO_TradingHouse_Listings_Gamepad"/>
                             </Controls>
                         </Control>
-
                         <Control name="$(parent)Loading" hidden="true" inherits="ZO_GamepadCenteredLoadingIconAndLabelTemplate">
                             <Controls>
                                 <Control name="$(parent)Container" override="true">
@@ -36,7 +33,6 @@
                         </Control>
                     </Controls>
                 </Scroll>
-
             </Controls>
         </TopLevelControl>
     </Controls>

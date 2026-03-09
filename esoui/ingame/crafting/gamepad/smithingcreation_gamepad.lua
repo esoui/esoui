@@ -26,16 +26,7 @@ local optionFilterQuests =
 
 local GAMEPAD_SMITHING_CREATION_OPTION_ACTION_CROWN_STORE = 1
 
-local g_globalActions = 
-{
-    [GAMEPAD_SMITHING_CREATION_OPTION_ACTION_CROWN_STORE] = 
-    {
-        actionName = GetString(SI_GAMEPAD_SMITHING_PURCHASE_MORE),
-        callback = function()
-            ShowMarketAndSearch("", MARKET_OPEN_OPERATION_UNIVERSAL_STYLE_ITEM)
-        end,
-    }
-}
+local g_globalActions = {}
 ZO_GAMEPAD_SMITHING_CONTAINER_ITEM_PADDING_Y = 3
 
 --[[ SmithingHorizontalScrollList ]]--
@@ -405,21 +396,6 @@ function ZO_GamepadSmithingCreation:InitializeKeybindStripDescriptors()
         end
     }
 
-    local purchaseButton =
-    {
-        keybind= "UI_SHORTCUT_RIGHT_STICK",
-        alignment = KEYBIND_STRIP_ALIGN_LEFT,
-        gamepadOrder = 1040,
-
-        name = GetString(SI_GAMEPAD_SMITHING_PURCHASE_MORE),
-
-        callback = function()
-            ShowMarketAndSearch("", MARKET_OPEN_OPERATION_UNIVERSAL_STYLE_ITEM)
-        end,
-
-        visible = ShowUniversalItemKeybind
-    }
-
     self.keybindStripDescriptor = {}
     table.insert(self.keybindStripDescriptor, startButton)
     table.insert(self.keybindStripDescriptor, backButton)
@@ -427,7 +403,6 @@ function ZO_GamepadSmithingCreation:InitializeKeybindStripDescriptors()
     table.insert(self.keybindStripDescriptor, craftButton)
     table.insert(self.keybindStripDescriptor, multiCraftButton)
     table.insert(self.keybindStripDescriptor, optionsButton)
-    table.insert(self.keybindStripDescriptor, purchaseButton)
     ZO_CraftingUtils_ConnectKeybindButtonGroupToCraftingProcess(self.keybindStripDescriptor)
 end
 

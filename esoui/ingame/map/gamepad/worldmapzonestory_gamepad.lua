@@ -77,6 +77,8 @@ function ZO_WorldMapZoneStory_Gamepad:RefreshInfo()
                 --Clear out the desired width so the label sizes based on the text in it
                 control.progressLabel:SetWidth(0)
                 control.progressLabel:SetText(text)
+                local color = ZO_ZoneStories_Manager.IsZoneCompletionTypeComplete(zoneId, zoneCompletionType) and ZO_NORMAL_TEXT or ZO_SELECTED_TEXT
+                control.progressLabel:SetColor(color:UnpackRGB())
                 maxProgressLabelWidth = zo_max(maxProgressLabelWidth, control.progressLabel:GetTextWidth())
                 control.progressBar:SetMinMax(0, totalActivities > 0 and totalActivities or 1)
                 control.progressBar:SetValue(numCompletedActivities)

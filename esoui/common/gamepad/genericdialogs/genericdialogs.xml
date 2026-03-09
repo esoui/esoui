@@ -3,19 +3,17 @@
         <!--
             Generic Dialogs
         -->
-
-        <TopLevelControl name="ZO_GamepadDialogBase" inherits="ZO_GenericGamepadDialogBase" />
-        <TopLevelControl name="ZO_GamepadDialogPara" inherits="ZO_GenericParametricListGamepadDialogTemplate" />
-        <TopLevelControl name="ZO_GamepadDialogCool" inherits="ZO_GenericCooldownGamepadDialogTemplate" />
-        <TopLevelControl name="ZO_GamepadDialogCentered" inherits="ZO_GenericCenteredGamepadDialogTemplate" />
-        <TopLevelControl name="ZO_GamepadDialogStaticList" inherits="ZO_GenericGamepadStaticListDialogTemplate" />
-        <TopLevelControl name="ZO_GamepadDialogItemSlider" inherits="ZO_GenericGamepadItemSliderDialogTemplate" />
-
+        <TopLevelControl name="ZO_GamepadDialogBase" inherits="ZO_GenericGamepadDialogBase"/>
+        <TopLevelControl name="ZO_GamepadDialogPara" inherits="ZO_GenericParametricListGamepadDialogTemplate"/>
+        <TopLevelControl name="ZO_GamepadDialogCool" inherits="ZO_GenericCooldownGamepadDialogTemplate"/>
+        <TopLevelControl name="ZO_GamepadDialogCentered" inherits="ZO_GenericCenteredGamepadDialogTemplate"/>
+        <TopLevelControl name="ZO_GamepadDialogStaticList" inherits="ZO_GenericGamepadStaticListDialogTemplate"/>
+        <TopLevelControl name="ZO_GamepadDialogItemSlider" inherits="ZO_GenericGamepadItemSliderDialogTemplate"/>
         <TopLevelControl name="ZO_GamepadDialogBackgroundFade" tier="MEDIUM" layer="OVERLAY" hidden="true">
-            <AnchorFill />
+            <AnchorFill/>
             <Controls>
                 <Texture name="$(parent)Fade" color="000000" alpha="0.6">
-                    <AnchorFill />
+                    <AnchorFill/>
                 </Texture>
             </Controls>
         </TopLevelControl>

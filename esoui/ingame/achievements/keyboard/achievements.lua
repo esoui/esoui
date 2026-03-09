@@ -196,7 +196,8 @@ function Achievement:Show(achievementId)
     self.points:SetText(tostring(points))
 
     local titleNormalColor = self.isCharacterPersistent and ZO_SECOND_SELECTED_TEXT or ZO_SELECTED_TEXT
-    local titleDisabledColor = self.isCharacterPersistent and ZO_SECOND_NORMAL_TEXT or NO_DISABLED_COLOR
+    local DEFAULT_DISABLED_COLOR = nil
+    local titleDisabledColor = self.isCharacterPersistent and ZO_SECOND_NORMAL_TEXT or DEFAULT_DISABLED_COLOR
     ZO_Achievements_ApplyTextColorToLabel(self.points, completed, ZO_SELECTED_TEXT)
     ZO_Achievements_ApplyTextColorToLabel(self.title, completed, titleNormalColor, titleDisabledColor)
     ZO_Achievements_ApplyTextColorToLabel(self.description, completed)

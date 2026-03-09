@@ -1076,6 +1076,7 @@ function ZO_ModBrowser_Gamepad:UpdateTooltip(resetImage, resetToTop)
 end
 
 function ZO_ModBrowser_Gamepad:SetupRow(control, data)
+    ZO_GamepadInteractiveSortFilterList.SetupRow(self, control, data)
     local modTitle = data:GetTitle()
     local USE_UPPERCASE_NUMBER_SUFFIXES = true
     local users = ZO_AbbreviateNumber(data:GetNumUsers(), NUMBER_ABBREVIATION_PRECISION_HUNDREDTHS, USE_UPPERCASE_NUMBER_SUFFIXES)

@@ -140,9 +140,7 @@ function ReturningPlayer_Manager:ShowReturningPlayerAnnouncementScreen()
 end
 
 function ReturningPlayer_Manager:IsShowingReturningPlayerScene()
-    local introScene = SYSTEMS:GetRootScene("returningPlayerIntro")
-    local sceneGroup = introScene:GetSceneGroup()
-    return sceneGroup:IsShowing()
+    return SCENE_MANAGER:IsSceneGroupShowing("gamepad_returningPlayer_scenegroup")
 end
 
 function ReturningPlayer_Manager:GetDailyLoginRewards()

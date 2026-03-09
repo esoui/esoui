@@ -21,31 +21,25 @@
                 ZO_FontAdjustingWrapLabel_OnInitialized(self, fonts, TEXT_WRAP_MODE_ELLIPSIS)
             </OnInitialized>
         </Label>
-
         <TopLevelControl name="ZO_PlayerProgressBar_Gamepad">
             <Controls>
                 <!-- Name and location fragment to be anchored next to the gamepad player progression bar. -->
-
                 <Control name="ZO_GamepadPlayerProgressBarNameLocationFragmentControl" resizeToFitDescendents="true" hidden="true">
                     <OnInitialized>
                         ZO_GamepadPlayerProgressBarNameLocation_OnInitialized(self)
                     </OnInitialized>
-
                     <Controls>
                         <Label name="$(parent)Location" inherits="ZO_GamepadProgressBarDataLabel">
-                            <Anchor point="BOTTOMRIGHT" offsetX="-20" />
-                            <DimensionConstraints maxX="260" />
+                            <Anchor point="BOTTOMRIGHT" offsetX="-20"/>
+                            <DimensionConstraints maxX="260"/>
                         </Label>
-
-                        <Label name="$(parent)LocationHeader" text="SI_GAMEPAD_PLAYER_PROGERSS_BAR_LOCATION_HEADER" inherits="ZO_GamepadHeaderLabelTextTemplate" >
+                        <Label name="$(parent)LocationHeader" text="SI_GAMEPAD_PLAYER_PROGERSS_BAR_LOCATION_HEADER" inherits="ZO_GamepadHeaderLabelTextTemplate">
                             <AnchorToBaseline relativeToLabel="$(parent)Location" side="LEFT" offsetX="-10"/>
                         </Label>
-
-                        <Label name="$(parent)UserName" inherits="ZO_GamepadProgressBarDataLabel" >
+                        <Label name="$(parent)UserName" inherits="ZO_GamepadProgressBarDataLabel">
                             <AnchorToBaseline relativeToLabel="$(parent)LocationHeader" side="LEFT" offsetX="-20"/>
-                            <DimensionConstraints maxX="300" />
+                            <DimensionConstraints maxX="300"/>
                         </Label>
-
                         <Label name="$(parent)UserNameHeader" text="SI_GAMEPAD_PLAYER_PROGRESS_BAR_USER_NAME_HEADER" inherits="ZO_GamepadHeaderLabelTextTemplate">
                             <AnchorToBaseline relativeToLabel="$(parent)UserName" side="LEFT" offsetX="-10"/>
                         </Label>
@@ -53,80 +47,68 @@
                 </Control>
             </Controls>
         </TopLevelControl>
-        
         <StatusBar name="ZO_GamepadPlayerProgressBarTemplate" tier="MEDIUM" inherits="ZO_GamepadStatusBarMedium" virtual="true">
-            <Dimensions x="205" y="22" />
+            <Dimensions x="205" y="22"/>
             <Controls>
                 <Control name="$(parent)GlowContainer" inherits="ZO_GamepadArrowStatusBarGlowMedium">
                     <Controls>
-                        <Texture name="$(parent)Left" inherits="ZO_GamepadArrowStatusBarGlowLeftMedium" textureFile="EsoUI/Art/Progression/Gamepad/gp_progressBar_genericGlow.dds" />
-                        <Texture name="$(parent)Right" inherits="ZO_GamepadArrowStatusBarGlowRightMedium" textureFile="EsoUI/Art/Progression/Gamepad/gp_progressBar_genericGlow.dds" />
-                        <Texture name="$(parent)Center" inherits="ZO_GamepadArrowStatusBarGlowCenterMedium" textureFile="EsoUI/Art/Progression/Gamepad/gp_progressBar_genericGlow.dds" />
+                        <Texture name="$(parent)Left" inherits="ZO_GamepadArrowStatusBarGlowLeftMedium" textureFile="EsoUI/Art/Progression/Gamepad/gp_progressBar_genericGlow.dds"/>
+                        <Texture name="$(parent)Right" inherits="ZO_GamepadArrowStatusBarGlowRightMedium" textureFile="EsoUI/Art/Progression/Gamepad/gp_progressBar_genericGlow.dds"/>
+                        <Texture name="$(parent)Center" inherits="ZO_GamepadArrowStatusBarGlowCenterMedium" textureFile="EsoUI/Art/Progression/Gamepad/gp_progressBar_genericGlow.dds"/>
                     </Controls>
                 </Control>
-
                 <Control name="$(parent)BG" inherits="ZO_GamepadArrowStatusBarBGMedium" tier="LOW"/>
-                <Control name="$(parent)Overlay" inherits="ZO_GamepadArrowStatusBarOverlayMedium" />
-
-                <StatusBar name="$(parent)EnlightenedBar" alpha="0.3" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_medium_fill.dds" >
+                <Control name="$(parent)Overlay" inherits="ZO_GamepadArrowStatusBarOverlayMedium"/>
+                <StatusBar name="$(parent)EnlightenedBar" alpha="0.3" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_medium_fill.dds">
                     <!-- Taking the chunk of the texture that is just the middle fill part of the bar -->
-                    <TextureCoords left="0.40625" right="0.0625" top="0.15625" bottom="0.84375" />
+                    <TextureCoords left="0.40625" right="0.0625" top="0.15625" bottom="0.84375"/>
                     <!-- Taking the part of the texture that just contains the arrow part of the bar -->
-                    <LeadingEdgeTextureCoords left="0" right="0.5" top="0.15625" bottom="0.84375" />
-                    <LeadingEdge textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_medium_leadingEdge.dds" width="11" height="22" />
-                    <AnchorFill />
+                    <LeadingEdgeTextureCoords left="0" right="0.5" top="0.15625" bottom="0.84375"/>
+                    <LeadingEdge textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_dynamicBar_medium_leadingEdge.dds" width="11" height="22"/>
+                    <AnchorFill/>
                 </StatusBar>
-                
             </Controls>
         </StatusBar>
-
         <Control name="ZO_GamepadPlayerProgressTemplate" tier="HIGH" level="ZO_HIGH_TIER_OVER_GAMEPAD_KEYBIND_STRIP" virtual="true">
-            <Dimensions x="255" y="56" />
+            <Dimensions x="255" y="56"/>
             <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" offsetX="-98" offsetY="-53"/>
             <Controls>
                 <Label name="$(parent)Level" font="ZoFontGamepad42">
                     <Anchor point="TOPLEFT"/>
                 </Label>
-
-                <Texture name="$(parent)ChampionIcon" hidden="true" />
-                
+                <Texture name="$(parent)ChampionIcon" hidden="true"/>
                 <StatusBar name="$(parent)Bar" inherits="ZO_GamepadPlayerProgressBarTemplate">
-                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Level" relativePoint="BOTTOMRIGHT" offsetX="5" offsetY="-6" />
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Level" relativePoint="BOTTOMRIGHT" offsetX="5" offsetY="-6"/>
                     <Controls>
-                        <StatusBar name="$(parent)EnlightenedBar" hidden="true" />
+                        <StatusBar name="$(parent)EnlightenedBar" hidden="true"/>
                     </Controls>
                 </StatusBar>
-
                 <Texture name="$(parent)LevelTypeIcon" hidden="true">
-                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Bar" relativePoint="TOPLEFT" />
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Bar" relativePoint="TOPLEFT"/>
                     <!-- The width is handled in the actual control's OnShow/OnHide handlers, and hidden must be "true" so the width is set properly when the template is changed-->
                     <Dimensions x="0" y="24"/>
                 </Texture>
                 <Label name="$(parent)LevelType" font="ZoFontGamepad27" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE">
                     <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Bar" relativePoint="TOPLEFT" offsetX="1" offsetY="7"/>
                 </Label>
-                <Label name="$(parent)ChampionPoints" font="ZoFontGamepad27" >
-                    <Anchor point="LEFT" relativeTo="$(parent)LevelType" relativePoint="RIGHT" offsetX="7" />
+                <Label name="$(parent)ChampionPoints" font="ZoFontGamepad27">
+                    <Anchor point="LEFT" relativeTo="$(parent)LevelType" relativePoint="RIGHT" offsetX="7"/>
                 </Label>
-
             </Controls>
         </Control>
-        
         <Control name="ZO_GamepadPlayerChampionProgressTemplate" tier="HIGH" level="ZO_HIGH_TIER_OVER_GAMEPAD_KEYBIND_STRIP" virtual="true">
-            <Dimensions x="255" y="56" />
+            <Dimensions x="255" y="56"/>
             <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" offsetX="-135" offsetY="-53"/>
             <Controls>
                 <Label name="$(parent)Level" font="ZoFontGamepad42">
                     <Anchor point="TOPLEFT"/>
                 </Label>
                 <Texture name="$(parent)ChampionIcon" hidden="true"/>
-
                 <StatusBar name="$(parent)Bar" inherits="ZO_GamepadPlayerProgressBarTemplate">
-                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)ChampionIcon" relativePoint="BOTTOMRIGHT" offsetY="-5" />
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)ChampionIcon" relativePoint="BOTTOMRIGHT" offsetY="-5"/>
                 </StatusBar>
-
                 <Texture name="$(parent)LevelTypeIcon" hidden="true">
-                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Bar" relativePoint="TOPLEFT" />
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Bar" relativePoint="TOPLEFT"/>
                     <!-- The width is handled in the actual control's OnShow/OnHide handlers, and hidden must be "true" so the width is set properly when the template is changed-->
                     <Dimensions x="0" y="24"/>
                 </Texture>
@@ -134,7 +116,7 @@
                     <Anchor point="BOTTOMLEFT" relativeTo="$(parent)LevelTypeIcon" relativePoint="BOTTOMRIGHT" offsetX="3" offsetY="7"/>
                 </Label>
                 <Label name="$(parent)ChampionPoints" font="ZoFontGamepad27">
-                    <Anchor point="LEFT" relativeTo="$(parent)LevelType" relativePoint="RIGHT" offsetX="2" offsetY="-1" />
+                    <Anchor point="LEFT" relativeTo="$(parent)LevelType" relativePoint="RIGHT" offsetX="2" offsetY="-1"/>
                 </Label>
             </Controls>
         </Control>

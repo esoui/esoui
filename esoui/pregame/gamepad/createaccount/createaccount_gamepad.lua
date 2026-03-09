@@ -272,7 +272,7 @@ function ZO_CreateAccount_Gamepad:ResetMainList()
 
     self.optionsList:Clear()
 
-    if ZO_IsPCUI() then
+    if not ZO_IsConsoleOrGameCoreUI() then
         self:AddTextEdit(GetString(SI_KEYBOARD_CREATEACCOUNT_ACCOUNT_NAME_LABEL), function(data) return self.enteredAccountName end, function(control, data) self:ActivateEditbox(control.edit, true) end, function(newText) self.enteredAccountName = newText end)
     end
 

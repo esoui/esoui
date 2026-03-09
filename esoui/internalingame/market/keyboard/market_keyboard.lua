@@ -1090,8 +1090,13 @@ function ZO_Market_Keyboard:OnMarketUpdate()
     end
 end
 
+function ZO_Market_Keyboard:GetMarketLockedText()
+    return GetString(SI_MARKET_LOCKED_TEXT)
+end
+
 function ZO_Market_Keyboard:OnMarketLocked()
-    self.messageLabel:SetText(GetString(SI_MARKET_LOCKED_TEXT))
+    local lockedText = self:GetMarketLockedText()
+    self.messageLabel:SetText(lockedText)
     self:ShowMarket(false)
     self.messageLoadingIcon:Hide()
 end
@@ -1284,16 +1289,40 @@ function ZO_Market_Keyboard:SetMarketCurrencyButtonType(buttonType)
     self.marketCurrencyButtonType = buttonType
 end
 
-function ZO_Market_Keyboard:OnShowing()
-    ZO_Market_Shared.OnShowing(self)
-    ITEM_PREVIEW_KEYBOARD:RegisterCallback("RefreshActions", self.refreshActionsCallback)
-    UpdateMarketDisplayGroup(self:GetDisplayGroup())
-
+function ZO_Market_Keyboard:UpdateCurrencyTypeBalances()
     if self.shownCurrencyTypeBalances then
         local currencyControl = MARKET_CURRENCY_KEYBOARD
         currencyControl:SetVisibleMarketCurrencyTypes(self.shownCurrencyTypeBalances)
         currencyControl:ShowMarketCurrencyButtonType(self.marketCurrencyButtonType)
     end
+end
+
+function ZO_Market_Keyboard:RegisterForTamrielTomesEvents()
+    local function UpdateMarketCurrencyTypeBalances()
+        if self:IsShowing() then
+            self:UpdateCurrencyTypeBalances()
+        end
+    end
+
+    EVENT_MANAGER:RegisterForEvent("ZO_Market_Keyboard", EVENT_HOLIDAYS_CHANGED, UpdateMarketCurrencyTypeBalances)
+    EVENT_MANAGER:RegisterForEvent("ZO_Market_Keyboard", EVENT_REWARD_TRACK_UPDATE_RECEIVED, UpdateMarketCurrencyTypeBalances)
+    EVENT_MANAGER:RegisterForEvent("ZO_Market_Keyboard", EVENT_REWARD_TRACK_SETTINGS_UPDATE_RECEIVED, UpdateMarketCurrencyTypeBalances)
+    EVENT_MANAGER:RegisterForEvent("ZO_Market_Keyboard", EVENT_REWARD_TRACK_STARTED, UpdateMarketCurrencyTypeBalances)
+end
+
+function ZO_Market_Keyboard:UnregisterForTamrielTomesEvents()
+    EVENT_MANAGER:UnregisterForEvent("ZO_Market_Keyboard", EVENT_HOLIDAYS_CHANGED)
+    EVENT_MANAGER:UnregisterForEvent("ZO_Market_Keyboard", EVENT_REWARD_TRACK_UPDATE_RECEIVED)
+    EVENT_MANAGER:UnregisterForEvent("ZO_Market_Keyboard", EVENT_REWARD_TRACK_SETTINGS_UPDATE_RECEIVED)
+    EVENT_MANAGER:UnregisterForEvent("ZO_Market_Keyboard", EVENT_REWARD_TRACK_STARTED)
+end
+
+function ZO_Market_Keyboard:OnShowing()
+    ZO_Market_Shared.OnShowing(self)
+    ITEM_PREVIEW_KEYBOARD:RegisterCallback("RefreshActions", self.refreshActionsCallback)
+    UpdateMarketDisplayGroup(self:GetDisplayGroup())
+
+    self:UpdateCurrencyTypeBalances()
 end
 
 function ZO_Market_Keyboard:OnShown()
@@ -1314,6 +1343,8 @@ function ZO_Market_Keyboard:OnShown()
             self.queuedPreviewProductData = nil
         end
     end
+
+    self:RegisterForTamrielTomesEvents()
 end
 
 function ZO_Market_Keyboard:OnHidden()
@@ -1324,6 +1355,8 @@ function ZO_Market_Keyboard:OnHidden()
     self.marketScene:AddFragment(self.contentFragment)
     ITEM_PREVIEW_KEYBOARD:UnregisterCallback("RefreshActions", self.refreshActionsCallback)
     self.queuedPreviewProductData = nil
+
+    self:UnregisterForTamrielTomesEvents()
 end
 
 function ZO_Market_Keyboard:RefreshProducts()

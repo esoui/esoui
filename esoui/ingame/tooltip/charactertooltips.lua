@@ -97,3 +97,19 @@ function ZO_Tooltip:LayoutMundusTooltip(mundusData)
         self:AddSection(bodySection)
     end
 end
+
+function ZO_Tooltip:LayoutGuildNameplateTooltip()
+    local headerSection = self:AcquireSection(self:GetStyle("title"))
+    headerSection:AddLine(GetString(SI_STATS_GUILD))
+    self:AddSection(headerSection)
+
+    local bodySection = self:AcquireSection(self:GetStyle("bodySection"))
+    bodySection:AddLine(GetString(SI_STATS_GUILD_TOOLTIP_DESCRIPTION), self:GetStyle("bodyDescription"))
+    self:AddSection(bodySection)
+
+    if IsPlayerWearingGuildTabard() then
+        local tabardEquippedSection = self:AcquireSection(self:GetStyle("bodySection"))
+        tabardEquippedSection:AddLine(GetString(SI_STATS_GUILD_TOOLTIP_TABARD_WARNING), self:GetStyle("bodyDescription"), self:GetStyle("failed"))
+        self:AddSection(tabardEquippedSection)
+    end
+end

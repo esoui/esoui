@@ -1,25 +1,21 @@
 <GuiXml>
     <Controls>
-        <Label name="ZO_ConfirmLinkAccountScreen_AccountNameLabel" font="ZoFontGamepad27" verticalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true" />
-        
+        <Label name="ZO_ConfirmLinkAccountScreen_AccountNameLabel" font="ZoFontGamepad27" verticalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true"/>
         <TopLevelControl name="ConfirmLinkAccountScreen_Gamepad" inherits="ZO_AnchoredToQuadrant1Background" hidden="true">
             <OnInitialized>
                 ConfirmLinkAccountScreen_Gamepad_Initialize(self)
             </OnInitialized>
-            
             <Controls>
                 <Control name="$(parent)Container" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
                     <Controls>
                         <Control name="$(parent)Header" inherits="ZO_PregameGamepadHeaderImageTemplate"/>
-
                         <Control name="$(parent)ScrollContainer" inherits="ZO_ScrollContainer_Gamepad">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT"/>
                             <Anchor point="BOTTOMRIGHT"/>
                             <OnInitialized>
                                 ZO_Scroll_Initialize_Gamepad(self)
                                 ZO_Scroll_Gamepad_SetScrollIndicatorSide(self:GetNamedChild("ScrollIndicator"), ZO_SharedGamepadNavQuadrant_1_Background, RIGHT )
                             </OnInitialized>
-                            
                             <Controls>
                                 <Control name="$(parent)ScrollChild" override="true">
                                     <Controls>
@@ -27,29 +23,25 @@
                                             <Anchor point="TOPLEFT"/>
                                             <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH"/>
                                         </Label>
-
                                         <Texture name="$(parent)LinkIcon" textureFile="EsoUI/Art/Login/Gamepad/console-Login-LinkExisting.dds" resizeToFitFile="true">
-                                            <Anchor point="TOPLEFT" relativeTo="$(parent)Confirmation" relativePoint="BOTTOMLEFT" offsetY="64" />
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)Confirmation" relativePoint="BOTTOMLEFT" offsetY="64"/>
                                         </Texture>
-
                                         <!-- Console Account Information. -->
                                         <Texture name="$(parent)ConsoleIcon" resizeToFitFile="true">
-                                            <Anchor point="LEFT" relativeTo="$(parent)LinkIcon" relativePoint="TOPRIGHT" />
+                                            <Anchor point="LEFT" relativeTo="$(parent)LinkIcon" relativePoint="TOPRIGHT"/>
                                         </Texture>
                                         <Label name="$(parent)ConsoleAccount" inherits="ZO_ConfirmLinkAccountScreen_AccountNameLabel">
-                                            <Anchor point="TOPLEFT" relativeTo="$(parent)ConsoleIcon" relativePoint="TOPRIGHT" />
-                                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)ConsoleIcon" relativePoint="BOTTOMRIGHT" offsetX="13" />
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)ConsoleIcon" relativePoint="TOPRIGHT"/>
+                                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)ConsoleIcon" relativePoint="BOTTOMRIGHT" offsetX="13"/>
                                         </Label>
-
                                         <!-- ESO Account Information. -->
                                         <Texture name="$(parent)ESOIcon" textureFile="EsoUI/Art/Login/Gamepad/loading-Ouroboros.dds" resizeToFitFile="true">
-                                            <Anchor point="LEFT" relativeTo="$(parent)LinkIcon" relativePoint="BOTTOMRIGHT" />
+                                            <Anchor point="LEFT" relativeTo="$(parent)LinkIcon" relativePoint="BOTTOMRIGHT"/>
                                         </Texture>
                                         <Label name="$(parent)ESOAccount" inherits="ZO_ConfirmLinkAccountScreen_AccountNameLabel">
-                                            <Anchor point="TOPLEFT" relativeTo="$(parent)ESOIcon" relativePoint="TOPRIGHT" />
-                                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)ESOIcon" relativePoint="BOTTOMRIGHT" offsetX="13" />
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)ESOIcon" relativePoint="TOPRIGHT"/>
+                                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)ESOIcon" relativePoint="BOTTOMRIGHT" offsetX="13"/>
                                         </Label>
-
                                         <Label name="$(parent)Confirmation_2" font="ZoFontGamepadCondensed42" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
                                             <Anchor point="TOPLEFT" relativeTo="$(parent)LinkIcon" relativePoint="BOTTOMLEFT" offsetY="64"/>
                                             <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH"/>

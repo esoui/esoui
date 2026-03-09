@@ -4,10 +4,9 @@
             <OnInitialized>
                 ZO_RevealingControl_OnInitialized(self)
             </OnInitialized>
-
             <Controls>
                 <Control name="$(parent)MaskSimulator" excludeFromResizeToFitExtents="true">
-                    <Anchor point="CENTER" />
+                    <Anchor point="CENTER"/>
                 </Control>
             </Controls>
         </Control>

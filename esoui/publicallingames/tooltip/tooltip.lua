@@ -464,6 +464,58 @@ end
 
 -- InformationTooltip
 
+do
+    local TEAM_ICON_LOOKUP_FUNCTION =
+    {
+        [TEAM_TYPE_ALLIANCE] = ZO_GetAllianceSymbolIcon,
+        [TEAM_TYPE_BATTLEGROUND] = ZO_GetBattlegroundTeamIcon,
+        [TEAM_TYPE_ADVENTURE_ZONE] = ZO_GetAdventureZoneFactionIcon,
+    }
+
+    local TEAM_SCORE_LOOKUP_FUNCTION =
+    {
+        [TEAM_TYPE_ALLIANCE] = function(teamValue)
+            -- TODO: Proof of concept, no actual use case, reevaluate if we ever decide to actually show this
+            GetCampaignAllianceScore(GetCurrentCampaignId(), teamValue)
+        end,
+        [TEAM_TYPE_BATTLEGROUND] = function(teamValue)
+            -- TODO: Proof of concept, no actual use case, reevaluate if we ever decide to actually show this
+            GetCurrentBattlegroundScore(GetCurrentBattlegroundRoundIndex(), teamValue)
+        end,
+        [TEAM_TYPE_ADVENTURE_ZONE] = GetAdventureZoneFactionReputation,
+    }
+
+    local MY_TEAM_LOOKUP_FUNCTION =
+    {
+        [TEAM_TYPE_ALLIANCE] = GetUnitAlliance,
+        [TEAM_TYPE_BATTLEGROUND] = GetUnitBattlegroundTeam,
+        [TEAM_TYPE_ADVENTURE_ZONE] = GetUnitAdventureZoneFaction,
+    }
+
+    local TEAM_NAME_PREFIX =
+    {
+        [TEAM_TYPE_ALLIANCE] = "SI_ALLIANCE",
+        [TEAM_TYPE_BATTLEGROUND] = "SI_BATTLEGROUNDTEAM",
+        [TEAM_TYPE_ADVENTURE_ZONE] = "SI_ADVENTUREZONEFACTION",
+    }
+
+    function ZO_Tooltip_GetTeamScoreInfo(teamType, teamValue)
+        if teamType and teamValue then
+            local teamNamePrefix = TEAM_NAME_PREFIX[teamType]
+            local teamName = GetString(teamNamePrefix, teamValue)
+            local iconLookupFunc = TEAM_ICON_LOOKUP_FUNCTION[teamType]
+            local teamIcon = iconLookupFunc(teamValue)
+            local myTeamLookupFunc = MY_TEAM_LOOKUP_FUNCTION[teamType]
+            local myTeam = myTeamLookupFunc("player")
+            local isMyTeam = myTeam == teamValue
+            local teamScoreLookupFunc = TEAM_SCORE_LOOKUP_FUNCTION[teamType]
+            local teamScore = teamScoreLookupFunc(teamValue)
+
+            return teamName, teamIcon, teamScore, isMyTeam
+        end
+    end
+end
+
 function ZO_InformationTooltip_Initialize(tooltipControl)
     tooltipControl.progressStatusBar = tooltipControl:GetNamedChild("ProgressBar")
     ZO_StatusBar_SetGradientColor(tooltipControl.progressStatusBar, ZO_XP_BAR_GRADIENT_COLORS)
@@ -472,31 +524,55 @@ function ZO_InformationTooltip_Initialize(tooltipControl)
     tooltipControl.progressStatusBarLabel = tooltipControl.progressStatusBar:GetNamedChild("Progress")
 end
 
-local function SetTooltipProgressBar(tooltipControl, progressPercent)
-    tooltipControl.progressStatusBar:SetValue(progressPercent)
-    tooltipControl:AddControl(tooltipControl.progressStatusBar)
-    tooltipControl.progressStatusBar:SetAnchor(CENTER)
-    tooltipControl.progressStatusBar:SetHidden(false)
+do
+    local function InformationTooltip_SetProgressBar(tooltipControl, progressPercent)
+        tooltipControl.progressStatusBar:SetValue(progressPercent)
+        tooltipControl:AddControl(tooltipControl.progressStatusBar)
+        tooltipControl.progressStatusBar:SetAnchor(CENTER)
+        tooltipControl.progressStatusBar:SetHidden(false)
 
-    local formattedPercentage = string.format("%.1f", (progressPercent * 100))
-    local percentageString = zo_strformat(SI_TOOLTIP_PROGRESS_BAR_PROGRESS_PERCENT, formattedPercentage)
-    tooltipControl.progressStatusBarLabel:SetText(percentageString)
-end
+        local formattedPercentage = string.format("%.1f", (progressPercent * 100))
+        local percentageString = zo_strformat(SI_TOOLTIP_PROGRESS_BAR_PROGRESS_PERCENT, formattedPercentage)
+        tooltipControl.progressStatusBarLabel:SetText(percentageString)
+    end
 
-function ZO_ItemTooltip_ClearProgressBar(tooltipControl)
-    tooltipControl.progressStatusBar:SetHidden(true)
-end
+    local function InformationTooltip_AddTeamScore(tooltipControl, teamType, teamValue)
+        if teamType and teamValue then
+            if not tooltipControl.teamScorePool then
+                tooltipControl.teamScorePool = ZO_ControlPool:New("ZO_Tooltip_TeamScore_Keyboard", tooltipControl, "Score")
+            end
 
-function ZO_InformationTooltip_OnAddGameData(tooltipControl, gameDataType, ...)
-    if gameDataType == TOOLTIP_GAME_DATA_PROGRESS_BAR then
-        SetTooltipProgressBar(tooltipControl, ...)
-    else
-        ZO_Tooltip_OnAddGameData(tooltipControl, gameDataType, ...)
+            local scoreControl = tooltipControl.teamScorePool:AcquireObject()
+            if scoreControl then
+               local teamName, teamIcon, teamScore, isMyTeam = ZO_Tooltip_GetTeamScoreInfo(teamType, teamValue)
+
+                scoreControl.teamNameLabel:SetText(teamName)
+                scoreControl.teamIconTexture:SetTexture(teamIcon)
+                scoreControl.scoreLabel:SetText(ZO_CommaDelimitNumber(teamScore))
+                scoreControl.myTeamIndicatorTexture:SetHidden(not isMyTeam)
+
+                tooltipControl:AddControl(scoreControl)
+                scoreControl:SetAnchor(TOP)
+            end
+        end
+    end
+
+    function ZO_InformationTooltip_OnAddGameData(tooltipControl, gameDataType, ...)
+        if gameDataType == TOOLTIP_GAME_DATA_PROGRESS_BAR then
+            InformationTooltip_SetProgressBar(tooltipControl, ...)
+        elseif gameDataType == TOOLTIP_GAME_DATA_TEAM_SCORE then
+            InformationTooltip_AddTeamScore(tooltipControl, ...)
+        else
+            ZO_Tooltip_OnAddGameData(tooltipControl, gameDataType, ...)
+        end
     end
 end
 
 function ZO_InformationTooltip_Cleared(tooltipControl)
     ZO_ItemTooltip_ClearMoney(tooltipControl)
-    ZO_ItemTooltip_ClearProgressBar(tooltipControl)
+    tooltipControl.progressStatusBar:SetHidden(true)
+    if tooltipControl.teamScorePool then
+        tooltipControl.teamScorePool:ReleaseAllObjects()
+    end
     ZO_Tooltip_OnCleared(tooltipControl)
 end

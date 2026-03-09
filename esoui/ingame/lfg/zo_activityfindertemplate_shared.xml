@@ -5,136 +5,113 @@
                 self.icon = self:GetNamedChild("Icon")
                 self.text = self:GetNamedChild("Text")
             </OnInitialized>
-            
             <Controls>
                 <Texture name="$(parent)Icon" layer="CONTROLS">
-                    <Dimensions x="64" y="64" />
-                    <Anchor point="LEFT" />
+                    <Dimensions x="64" y="64"/>
+                    <Anchor point="LEFT"/>
                 </Texture>
-
                 <Label name="$(parent)Text" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" maxLineCount="3" wrapMode="ELLIPSIS">
-                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="5" />
+                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="5"/>
                 </Label>
             </Controls>
         </Control>
-
         <Control name="ZO_ActivityFinderTemplateSetTypesSection_Shared" resizeToFitDescendents="true" virtual="true">
             <Controls>
                 <Label name="$(parent)Header" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" hidden="true">
-                    <Anchor point="TOPLEFT" />
-                    <Anchor point="TOPRIGHT" />
+                    <Anchor point="TOPLEFT"/>
+                    <Anchor point="TOPRIGHT"/>
                 </Label>
-
                 <Label name="$(parent)List" wrapMode="ELLIPSIS" maxLineCount="3" hidden="true">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" offsetY="5" />
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Header" relativePoint="BOTTOMRIGHT" offsetY="5" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" offsetY="5"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Header" relativePoint="BOTTOMRIGHT" offsetY="5"/>
                 </Label>
             </Controls>
         </Control>
-
         <Control name="ZO_ActivityFinderSingularTemplate_Shared" virtual="true">
             <Controls>
                 <Texture name="$(parent)Background" textureFile="EsoUI/Art/Icons/icon_missing.dds"/>
-
-                <Label name="$(parent)GroupSizeLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" />
-
-                <Label name="$(parent)Title" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" />
-
-                <Label name="$(parent)Description" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" />
-
+                <Label name="$(parent)GroupSizeLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"/>
+                <Label name="$(parent)Title" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED"/>
+                <Label name="$(parent)Description" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"/>
                 <Control name="$(parent)RatingSection" inherits="ZO_ActivityFinderTemplateSetTypesSection_Shared">
                     <Controls>
-                        <Label name="$(parent)Header" override="true" />
-                        <Label name="$(parent)List" override="true" />
+                        <Label name="$(parent)Header" override="true"/>
+                        <Label name="$(parent)List" override="true"/>
                     </Controls>
                 </Control>
-
                 <Control name="$(parent)SetTypesSection" inherits="ZO_ActivityFinderTemplateSetTypesSection_Shared">
                     <Controls>
-                        <Label name="$(parent)Header" override="true" />
-                        <Label name="$(parent)List" override="true" />
+                        <Label name="$(parent)Header" override="true"/>
+                        <Label name="$(parent)List" override="true"/>
                     </Controls>
                 </Control>
-
                 <Control name="$(parent)SoloBonusSection" resizeToFitDescendents="true" hidden="true">
                     <Controls>
-                        <Label name="$(parent)Header" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="SI_ACTIVITY_FINDER_BATTLEGROUND_SOLO_BONUS_HEADER" />
-                        <Texture name="$(parent)Icon" textureFile="EsoUI/Art/LFG/LFG_solo_bonus.dds" layer="CONTROLS" />
+                        <Label name="$(parent)Header" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="SI_ACTIVITY_FINDER_BATTLEGROUND_SOLO_BONUS_HEADER"/>
+                        <Texture name="$(parent)Icon" textureFile="EsoUI/Art/LFG/LFG_solo_bonus.dds" layer="CONTROLS"/>
                         <Label name="$(parent)Label" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="SI_ACTIVITY_FINDER_BATTLEGROUND_SOLO_BONUS"/>
                     </Controls>
                 </Control>
-
                 <Control name="$(parent)RewardsSection" resizeToFitDescendents="true" hidden="true">
                     <Controls>
                         <Label name="$(parent)Header" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
-                            <Anchor point="TOPLEFT" />
+                            <Anchor point="TOPLEFT"/>
                         </Label>
-
                         <Control name="$(parent)Entries" resizeToFitDescendents="true">
                             <Controls>
                                 <Control name="$(parent)XPReward" inherits="ZO_ActivityFinderTemplateRewardTemplate_Shared" hidden="true">
                                     <Controls>
-                                        <Texture name="$(parent)Icon" override="true" textureFile="EsoUI/Art/Icons/Icon_Experience.dds" />
+                                        <Texture name="$(parent)Icon" override="true" textureFile="EsoUI/Art/Icons/Icon_Experience.dds"/>
                                     </Controls>
                                 </Control>
                             </Controls>
                         </Control>
                     </Controls>
                 </Control>
-
                 <Control name="$(parent)TributeSeasonSection" hidden="true">
                     <Controls>
                         <Label name="$(parent)Header" text="SI_TRIBUTE_FINDER_SEASON_PROGRESS_HEADER" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
-                            <Anchor point="TOPLEFT" />
+                            <Anchor point="TOPLEFT"/>
                         </Label>
-
                         <Label name="$(parent)CountDown" text="SI_TRIBUTE_FINDER_SEASON_PROGRESS_HEADER" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
                             <Anchor point="TOPRIGHT" offsetX="-20"/>
                         </Label>
-
                         <Label name="$(parent)LeaderboardRank" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" hidden="true">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" offsetY="10" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" offsetY="10"/>
                         </Label>
-
                         <Texture name="$(parent)CurrentRankIcon" textureFile="EsoUI/Art/icons/icon_missing.dds" layer="CONTROLS">
-                            <Dimensions x="64" y="64" />
+                            <Dimensions x="64" y="64"/>
                         </Texture>
-
                         <Texture name="$(parent)NextRankIcon" textureFile="EsoUI/Art/icons/icon_missing.dds" layer="CONTROLS">
                             <Anchor point="RIGHT" offsetX="-30" constrains="X"/>
-                            <Anchor point="TOP" relativeTo="$(parent)CurrentRankIcon" relativePoint="TOP" constrains="Y" />
-                            <Dimensions x="64" y="64" />
+                            <Anchor point="TOP" relativeTo="$(parent)CurrentRankIcon" relativePoint="TOP" constrains="Y"/>
+                            <Dimensions x="64" y="64"/>
                         </Texture>
-
                         <Control name="$(parent)PlacementMatchProgressBar" hidden="true">
-                            <Anchor point="LEFT" relativeTo="$(parent)CurrentRankIcon" relativePoint="RIGHT" offsetX="10" />
-                            <Anchor point="RIGHT" relativeTo="$(parent)NextRankIcon" relativePoint="LEFT" offsetX="-10" />
-                            <Dimensions y="32" />
+                            <Anchor point="LEFT" relativeTo="$(parent)CurrentRankIcon" relativePoint="RIGHT" offsetX="10"/>
+                            <Anchor point="RIGHT" relativeTo="$(parent)NextRankIcon" relativePoint="LEFT" offsetX="-10"/>
+                            <Dimensions y="32"/>
                         </Control>
-
                         <Control name="$(parent)SeasonRankBarContainer" tier="MEDIUM" hidden="true">
-                            <Anchor point="LEFT" relativeTo="$(parent)CurrentRankIcon" relativePoint="RIGHT" offsetX="10" />
-                            <Anchor point="RIGHT" relativeTo="$(parent)NextRankIcon" relativePoint="LEFT" offsetX="-10" />
-                            <Dimensions y="32" />
+                            <Anchor point="LEFT" relativeTo="$(parent)CurrentRankIcon" relativePoint="RIGHT" offsetX="10"/>
+                            <Anchor point="RIGHT" relativeTo="$(parent)NextRankIcon" relativePoint="LEFT" offsetX="-10"/>
+                            <Dimensions y="32"/>
                             <Controls>
                                 <StatusBar name="$(parent)ProgressBar">
-                                    <Anchor point="LEFT" />
-                                    <Anchor point="RIGHT" />
+                                    <Anchor point="LEFT"/>
+                                    <Anchor point="RIGHT"/>
                                 </StatusBar>
-
-                                <Control name="$(parent)Bg" inherits="ZO_ArrowStatusBarBG" >
-                                    <Anchor point="TOPLEFT" relativeTo="$(parent)ProgressBar" />
-                                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)ProgressBar" />
+                                <Control name="$(parent)Bg" inherits="ZO_ArrowStatusBarBG">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)ProgressBar"/>
+                                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)ProgressBar"/>
                                 </Control>
                             </Controls>
                         </Control>
-
                         <Label name="$(parent)ProgressStateLabel" modifyTextType="UPPERCASE">
-                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)SeasonRankBarContainer" relativePoint="TOPLEFT" />
+                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)SeasonRankBarContainer" relativePoint="TOPLEFT"/>
                         </Label>
-
                         <Label name="$(parent)ProgressValueLabel" modifyTextType="UPPERCASE">
-                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)SeasonRankBarContainer" relativePoint="TOPRIGHT" offsetX="-5" />
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)SeasonRankBarContainer" relativePoint="TOPRIGHT" offsetX="-5"/>
                         </Label>
                     </Controls>
                 </Control>

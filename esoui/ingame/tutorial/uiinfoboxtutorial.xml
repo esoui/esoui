@@ -18,7 +18,6 @@
                         </Control>
                     </Controls>
                 </Control>
-                
                 <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton"/>
             </Controls>
         </TopLevelControl>

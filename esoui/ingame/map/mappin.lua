@@ -1439,6 +1439,7 @@ local KEEP_INFO_BIND =
         local keepId = pin:GetKeepId()
 
         SYSTEMS:GetObject("world_map_keep_info"):ToggleKeep(keepId)
+        PlaySound(SOUNDS.MAP_SHOW_INFO)
     end,
 }
 
@@ -2485,6 +2486,17 @@ function ZO_MapPin:GetFastTravelDrawLevel()
     end
 
     return 0
+end
+
+function ZO_MapPin:GetAssociatedTeamType()
+    if self:IsFastTravelWayShrine() then
+        local nodeIndex = self:GetFastTravelNodeIndex()
+        local zoneDisplayType = GetFastTravelNodeZoneDisplayType(nodeIndex)
+        if zoneDisplayType == ZONE_DISPLAY_TYPE_ADVENTURE_ZONE then
+            return TEAM_TYPE_ADVENTURE_ZONE
+        end
+    end
+    return TEAM_TYPE_NONE
 end
 
 function ZO_MapPin:GetUnitTag()

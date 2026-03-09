@@ -23,7 +23,7 @@ function ZO_IsPreloginWorldReady()
 end
 
 function ZO_Pregame_CanSkipVideos()
-    return GetCVar("HasPlayedPregameVideo") ~= "0" or ZO_IsConsoleUI()
+    return GetCVar("HasPlayedPregameVideo") ~= "0" or ZO_IsConsoleOrGameCoreUI()
 end
 
 function ZO_Pregame_ShouldSkipVideos()
@@ -372,7 +372,7 @@ local g_sharedPregameStates =
         end,
 
         GetStateTransitionData = function()
-            if IsConsoleUI() then
+            if ZO_IsConsoleOrGameCoreUI() then
                 return "AccountLoginEntryPoint"
             else
                 return "ShowAccessibilityModePrompt"
@@ -405,7 +405,7 @@ local g_sharedPregameStates =
     ["FirstTimeAccessibilitySettings"] =
     {
         ShouldAdvance = function()
-            local accessibilityModeEnabled = IsConsoleUI() or GetSetting_Bool(SETTING_TYPE_ACCESSIBILITY, ACCESSIBILITY_SETTING_ACCESSIBILITY_MODE)
+            local accessibilityModeEnabled = ZO_IsConsoleOrGameCoreUI() or GetSetting_Bool(SETTING_TYPE_ACCESSIBILITY, ACCESSIBILITY_SETTING_ACCESSIBILITY_MODE)
             return not accessibilityModeEnabled or GetCVar("PregameAccessibilitySettingMenuEnabled") ~= "1"
         end,
 
@@ -431,7 +431,7 @@ local g_sharedPregameStates =
     ["ScreenAdjustIntro"] =
     {
         ShouldAdvance = function()
-            return not IsConsoleUI() or GetCVar("PregameScreenAdjustEnabled") ~= "1"
+            return not ZO_IsConsoleOrGameCoreUI() or GetCVar("PregameScreenAdjustEnabled") ~= "1"
         end,
 
         OnEnter = function()
@@ -462,7 +462,7 @@ local g_sharedPregameStates =
         end,
 
         GetStateTransitionData = function()
-            if IsConsoleUI() or not DoesPlatformSelectServer() then
+            if ZO_IsConsoleOrGameCoreUI() or not DoesPlatformSelectServer() then
                 return "ShowEULA"
             else
                 return "AccountLoginEntryPoint"
@@ -973,25 +973,24 @@ EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_CHARACTER_SELECTED_F
 EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, ZO_Pregame_OnGamepadPreferredModeChanged)
 EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_DISCONNECTED_FROM_SERVER, OnDisconnectedFromServer)
 
---[[#$ internal:   Support for overriding Pre-Login World settings via the Pregame Animated Background Dev Tools
-if IsInternalBuild() then
-    function OnPreloginWorldSavedVarsUpdated()
-        local enablePreloginWorld = ZO_IsPreloginWorldEnabled()
-        SetUsePreloginWorld(enablePreloginWorld)
-        PREGAME_ANIMATED_BACKGROUND_FRAGMENT:Refresh()
-    end
 
-    EVENT_MANAGER:RegisterForEvent("PregameStateManager", EVENT_ADD_ON_LOADED, function(_, addOnName)
-        if addOnName == "ZO_Pregame" then
-            local defaultVars =
-            {
-                PreloginWorldEnabled = 1,
-            }
-            ZO_PRELOGIN_WORLD_SAVED_VARS = ZO_SavedVars:NewAccountWide("ZO_Pregame_SavedVariables", 2, "PreloginWorld", defaultVars)
-            OnPreloginWorldSavedVarsUpdated()
 
-            EVENT_MANAGER:UnregisterForEvent("PregameStateManager", EVENT_ADD_ON_LOADED)
-        end
-    end)
-end
--- internal:        Support for overriding Pre-Login World settings via the Pregame Animated Background Dev Tools  #$]]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

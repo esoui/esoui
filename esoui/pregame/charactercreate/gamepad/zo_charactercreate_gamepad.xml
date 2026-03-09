@@ -1,315 +1,254 @@
 <GuiXml>
     <Controls>
-        <Control name="ZO_CharacterCreateEntry_Gamepad" virtual="true" />
-
-        <Label name="CCLabel_Gamepad" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true" />
-
+        <Control name="ZO_CharacterCreateEntry_Gamepad" virtual="true"/>
+        <Label name="CCLabel_Gamepad" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true"/>
         <Button name="SelectorButton_Gamepad" level="3" hidden="true" virtual="true" clickSound="Click_CC_Selector">
-            <Dimensions x="64" y="64" />
+            <Dimensions x="64" y="64"/>
         </Button>
-
         <Button name="RaceSelectorButton_Gamepad" inherits="SelectorButton_Gamepad" clickSound="Click_RaceButton" virtual="true">
             <OnInitialized>
                 self.selectorType = CHARACTER_CREATE_SELECTOR_RACE
             </OnInitialized>
         </Button>
-
         <Control name="RaceSelector_Gamepad" resizeToFitConstrains="Y" virtual="true">
             <Dimensions x="120"/>
             <Controls>
                 <Button name="$(parent)1" inherits="RaceSelectorButton_Gamepad">
-                    <Anchor point="TOP" />
+                    <Anchor point="TOP"/>
                 </Button>
-
                 <Button name="$(parent)2" inherits="RaceSelectorButton_Gamepad">
-                    <Anchor point="TOP" relativeTo="$(parent)1" relativePoint="BOTTOM" offsetY="36" />
+                    <Anchor point="TOP" relativeTo="$(parent)1" relativePoint="BOTTOM" offsetY="36"/>
                 </Button>
-
                 <Button name="$(parent)3" inherits="RaceSelectorButton_Gamepad">
-                    <Anchor point="TOP" relativeTo="$(parent)2" relativePoint="BOTTOM" offsetY="36" />
+                    <Anchor point="TOP" relativeTo="$(parent)2" relativePoint="BOTTOM" offsetY="36"/>
                 </Button>
             </Controls>
         </Control>
-
         <Button name="AllianceSelectorButton_Gamepad" inherits="SelectorButton_Gamepad" virtual="true" clickSound="Click_AllianceButton">
             <OnInitialized>
                 self.selectorType = CHARACTER_CREATE_SELECTOR_ALLIANCE
             </OnInitialized>
         </Button>
-
         <Control name="AllianceSelector_Gamepad" virtual="true">
-            <Dimensions x="360" y="84" />
-
+            <Dimensions x="360" y="84"/>
             <Controls>
                 <Button name="$(parent)1" inherits="AllianceSelectorButton_Gamepad">
-                    <Anchor point="TOP"  offsetX="-120" />
+                    <Anchor point="TOP" offsetX="-120"/>
                 </Button>
-
                 <Button name="$(parent)2" inherits="AllianceSelectorButton_Gamepad">
-                    <Anchor point="TOP" offsetX="0" />
+                    <Anchor point="TOP" offsetX="0"/>
                 </Button>
-
                 <Button name="$(parent)3" inherits="AllianceSelectorButton_Gamepad">
-                    <Anchor point="TOP" offsetX="120" />
+                    <Anchor point="TOP" offsetX="120"/>
                 </Button>
             </Controls>
         </Control>
-
         <Button name="ClassSelectorButton_Gamepad" inherits="SelectorButton_Gamepad" virtual="true" clickSound="Click_ClassButton">
             <OnInitialized>
                 self.selectorType = CHARACTER_CREATE_SELECTOR_CLASS
             </OnInitialized>
         </Button>
-
         <Control name="ClassSelector_Gamepad" resizeToFitConstrains="Y" virtual="true">
             <Dimensions x="120"/>
-
             <Controls>
                 <Button name="$(parent)Row1" inherits="ClassSelectorButton_Gamepad">
-                    <Anchor point="TOP" />
+                    <Anchor point="TOP"/>
                 </Button>
-
                 <Button name="$(parent)Row2" inherits="ClassSelectorButton_Gamepad">
-                    <Anchor point="TOP" relativeTo="$(parent)Row1" relativePoint="BOTTOM" offsetY="36" />
+                    <Anchor point="TOP" relativeTo="$(parent)Row1" relativePoint="BOTTOM" offsetY="36"/>
                 </Button>
-
                 <Button name="$(parent)Row3" inherits="ClassSelectorButton_Gamepad">
-                    <Anchor point="TOP" relativeTo="$(parent)Row2" relativePoint="BOTTOM" offsetY="36" />
+                    <Anchor point="TOP" relativeTo="$(parent)Row2" relativePoint="BOTTOM" offsetY="36"/>
                 </Button>
             </Controls>
         </Control>
-
         <Button name="CCPadlock_Gamepad" virtual="true">
-            <Dimensions x="32" y="32" />
+            <Dimensions x="32" y="32"/>
             <OnInitialized>
                 ZO_ToggleButton_Initialize(self, TOGGLE_BUTTON_TYPE_PADLOCK_GAMEPAD)
             </OnInitialized>
         </Button>
-
         <Control name="ZO_PaperdollManipulation_Gamepad" virtual="true">
             <OnInitialized>
                 ZO_PaperdollManipulation_Gamepad_Initialize(self)
             </OnInitialized>
         </Control>
-
         <TopLevelControl name="ZO_CharacterCreate_GamepadFinishError" inherits="ZO_GamepadGrid_NavQuadrant_2_Anchors" hidden="true">
             <Controls>
                 <Control name="$(parent)Bg" inherits="ZO_SharedGamepadNavQuadrant_2_Background_Template"/>
                 <Label name="$(parent)Errors" font="ZoFontGamepadCondensed42" horizontalAlignment="LEFT">
                     <Anchor point="LEFT" relativePoint="TOPLEFT" offsetX="40" offsetY="508"/>
-                    <Anchor point="RIGHT" relativePoint="TOPRIGHT" offsetX="-40" offsetY="508" />
+                    <Anchor point="RIGHT" relativePoint="TOPRIGHT" offsetX="-40" offsetY="508"/>
                 </Label>
             </Controls>
         </TopLevelControl>
-
         <TopLevelControl name="ZO_CharacterCreate_GamepadLoreInfo" inherits="ZO_GamepadGrid_NavQuadrant_4_Anchors" hidden="true">
             <OnInitialized>
                 ZO_CharacterCreate_GamepadLoreInfo_Initialize(self)
             </OnInitialized>
-
             <Controls>
                 <Texture name="$(parent)AllianceIcon" tier="MEDIUM">
-                    <Dimensions x="64" y="64" />
-                    <Anchor point="CENTER" relativePoint="TOP" offsetY="138" />
+                    <Dimensions x="64" y="64"/>
+                    <Anchor point="CENTER" relativePoint="TOP" offsetY="138"/>
                 </Texture>
-
                 <Label name="$(parent)AllianceName" inherits="CCLabel_Gamepad" font="ZoFontGamepadBold34" modifyTextType="UPPERCASE" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                    <Anchor point="BOTTOM" relativePoint="TOP" offsetY="222" />
+                    <Anchor point="BOTTOM" relativePoint="TOP" offsetY="222"/>
                 </Label>
-
                 <Label name="$(parent)AllianceDescription" inherits="CCLabel_Gamepad" font="ZoFontGamepadCondensed42" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                    <Dimensions x="370" />
-                    <Anchor point="TOP" relativeTo="$(parent)AllianceName" relativePoint="BOTTOM" offsetY="55" />
+                    <Dimensions x="370"/>
+                    <Anchor point="TOP" relativeTo="$(parent)AllianceName" relativePoint="BOTTOM" offsetY="55"/>
                 </Label>
-
                 <Texture name="$(parent)RaceIcon" tier="MEDIUM">
-                    <Dimensions x="64" y="64" />
+                    <Dimensions x="64" y="64"/>
                     <Anchor point="TOP" relativeTo="$(parent)AllianceIcon" relativePoint="TOP"/>
                 </Texture>
-
                 <Label name="$(parent)RaceName" inherits="CCLabel_Gamepad" font="ZoFontGamepadBold34" modifyTextType="UPPERCASE" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
                     <Anchor point="TOP" relativeTo="$(parent)AllianceName" relativePoint="TOP"/>
                 </Label>
-
                 <Label name="$(parent)RaceDescription" inherits="CCLabel_Gamepad" font="ZoFontGamepadCondensed42" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                    <Dimensions x="370" />
+                    <Dimensions x="370"/>
                     <Anchor point="TOP" relativeTo="$(parent)AllianceDescription" relativePoint="TOP"/>
                 </Label>
-
                 <Texture name="$(parent)ClassIcon" tier="MEDIUM">
-                    <Dimensions x="64" y="64" />
+                    <Dimensions x="64" y="64"/>
                     <Anchor point="TOP" relativeTo="$(parent)AllianceIcon" relativePoint="TOP"/>
                 </Texture>
-
                 <Label name="$(parent)ClassName" inherits="CCLabel_Gamepad" font="ZoFontGamepadBold34" modifyTextType="UPPERCASE" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
                     <Anchor point="TOP" relativeTo="$(parent)AllianceName" relativePoint="TOP"/>
                 </Label>
-
                 <Label name="$(parent)ClassDescription" inherits="CCLabel_Gamepad" font="ZoFontGamepadCondensed42" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                    <Dimensions x="370" />
+                    <Dimensions x="370"/>
                     <Anchor point="TOP" relativeTo="$(parent)AllianceDescription" relativePoint="TOP"/>
                 </Label>
             </Controls>
         </TopLevelControl>
-
         <TopLevelControl name="ZO_CharacterCreate_GamepadInformationTooltip" inherits="ZO_GamepadGrid_NavQuadrant_2_Anchors" hidden="true">
             <OnInitialized>
                 ZO_CharacterCreate_GamepadInformationTooltip_Initialize(self)
             </OnInitialized>
-
             <Controls>
                 <Control name="$(parent)Container">
                     <Anchor point="TOPLEFT" offsetX="20" offsetY="176"/>
                     <Anchor point="BOTTOMRIGHT" offsetX="-20"/>
-
                     <Controls>
                         <Label name="$(parent)Title" font="ZoFontGamepad42" modifyTextType="UPPERCASE">
                             <Anchor point="TOPLEFT" offsetX="20"/>
-                            <Anchor point="TOPRIGHT" />
+                            <Anchor point="TOPRIGHT"/>
                         </Label>
-
-                        <Label name="$(parent)Description" inherits="CCLabel_Gamepad" font="ZoFontGamepadCondensed42" >
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetY="40" />
-                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Title" relativePoint="BOTTOMRIGHT" offsetY="40" />
+                        <Label name="$(parent)Description" inherits="CCLabel_Gamepad" font="ZoFontGamepadCondensed42">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetY="40"/>
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Title" relativePoint="BOTTOMRIGHT" offsetY="40"/>
                         </Label>
                     </Controls>
                 </Control>
             </Controls>
         </TopLevelControl>
-
         <TopLevelControl name="ZO_CharacterCreate_Gamepad_CollectibleBlockingInfo" inherits="ZO_GamepadGrid_NavQuadrant_4_Anchors" hidden="true">
             <OnInitialized>
                 ZO_CharacterCreate_Gamepad_CollectibleBlockingInfo_Initialize(self)
             </OnInitialized>
-
             <Controls>
                 <Label name="$(parent)Title" inherits="CCLabel_Gamepad" text="SI_CHARACTER_CREATE_PREVIEWING_COLLECTIBLES_TOOLTIP_TITLE" font="ZoFontGamepad42" modifyTextType="UPPERCASE" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
-                    <Anchor point="BOTTOM" relativePoint="TOP" offsetY="222" />
+                    <Anchor point="BOTTOM" relativePoint="TOP" offsetY="222"/>
                 </Label>
-
                 <Label name="$(parent)Description" inherits="CCLabel_Gamepad" font="ZoFontGamepadCondensed42" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                    <Dimensions x="370" />
-                    <Anchor point="TOP" relativeTo="$(parent)Title" relativePoint="BOTTOM" offsetY="55" />
+                    <Dimensions x="370"/>
+                    <Anchor point="TOP" relativeTo="$(parent)Title" relativePoint="BOTTOM" offsetY="55"/>
                 </Label>
             </Controls>
         </TopLevelControl>
-
         <TopLevelControl name="ZO_CharacterCreate_Gamepad" hidden="true">
-            <AnchorFill />
-
+            <AnchorFill/>
             <OnInitialized>
                 ZO_CharacterCreate_Gamepad_Initialize(self)
             </OnInitialized>
-
             <Controls>
-
-                <Control name="$(parent)CharacterViewport" inherits="ZO_PaperdollManipulation_Gamepad" />
-
+                <Control name="$(parent)CharacterViewport" inherits="ZO_PaperdollManipulation_Gamepad"/>
                 <Control name="$(parent)Container" inherits="ZO_AnchoredToQuadrant1Background">
-
                     <Controls>
-                        <Control name="$(parent)HeaderContainer" inherits="ZO_GamepadScreenHeaderContainer ZO_GamepadGrid_NavQuadrant_ContainerAnchors" />
-
-                        <Label name="$(parent)Preview" font="ZoFontGamepad27" modifyTextType="UPPERCASE"  horizontalAlignment="CENTER" maxLineCount="1" wrapMode="ELLIPSIS" >
-                            <Anchor point="TOPLEFT" />
-                            <Anchor point="TOPRIGHT" offsetY="140" />
+                        <Control name="$(parent)HeaderContainer" inherits="ZO_GamepadScreenHeaderContainer ZO_GamepadGrid_NavQuadrant_ContainerAnchors"/>
+                        <Label name="$(parent)Preview" font="ZoFontGamepad27" modifyTextType="UPPERCASE" horizontalAlignment="CENTER" maxLineCount="1" wrapMode="ELLIPSIS">
+                            <Anchor point="TOPLEFT"/>
+                            <Anchor point="TOPRIGHT" offsetY="140"/>
                         </Label>
-
                         <Control name="$(parent)Inner">
                             <Anchor point="TOPLEFT" offsetX="20" offsetY="130"/>
                             <Anchor point="BOTTOMRIGHT" offsetX="-20" offsetY="50"/>
                             <Controls>
                                 <Control name="$(parent)Buckets">
-                                    <Anchor point="TOPLEFT" offsetY="-100" />
-                                    <Anchor point="BOTTOMRIGHT" />
+                                    <Anchor point="TOPLEFT" offsetY="-100"/>
+                                    <Anchor point="BOTTOMRIGHT"/>
                                 </Control>
                             </Controls>
                         </Control>
                     </Controls>
                 </Control>
-
                 <Control name="$(parent)Alliance" resizeToFitDescendents="true" hidden="true">
                     <OnInitialized>
                         ZO_CharacterCreate_Gamepad_CreateAllianceSelector(self)
                     </OnInitialized>
-
                     <Controls>
                         <Label name="$(parent)Name" inherits="CCLabel_Gamepad" font="ZoFontGamepad34" horizontalAlignment="CENTER" modifyTextType="UPPERCASE" text="SI_CREATE_CHARACTER_ALLIANCE_LABEL" color="FF79797A">
-                            <Dimensions x="360" />
-                            <Anchor point="TOP" />
+                            <Dimensions x="360"/>
+                            <Anchor point="TOP"/>
                         </Label>
-
                         <Label name="$(parent)SelectionName" inherits="CCLabel_Gamepad" font="ZoFontGamepad27" horizontalAlignment="CENTER" modifyTextType="UPPERCASE" color="FF79797A">
-                            <Dimensions x="360" />
-                            <Anchor point="TOP" offsetY="53" />
+                            <Dimensions x="360"/>
+                            <Anchor point="TOP" offsetY="53"/>
                         </Label>
-
                         <Control name="$(parent)AllianceSelector" inherits="AllianceSelector_Gamepad">
-                            <Anchor point="TOP" relativeTo="$(parent)SelectionName" relativePoint="BOTTOM" offsetY="18" />
+                            <Anchor point="TOP" relativeTo="$(parent)SelectionName" relativePoint="BOTTOM" offsetY="18"/>
                         </Control>
                     </Controls>
                 </Control>
-
                 <Control name="$(parent)Race" resizeToFitDescendents="true" hidden="true">
                     <OnInitialized>
                         ZO_CharacterCreate_Gamepad_CreateRaceSelector(self)
                     </OnInitialized>
-
                     <Controls>
                         <Label name="$(parent)Name" inherits="CCLabel_Gamepad" font="ZoFontGamepad34" horizontalAlignment="CENTER" modifyTextType="UPPERCASE" text="SI_CREATE_CHARACTER_RACE_LABEL" color="FF79797A">
-                            <Dimensions x="360" />
-                            <Anchor point="TOP" />
+                            <Dimensions x="360"/>
+                            <Anchor point="TOP"/>
                         </Label>
-
                         <Label name="$(parent)SelectionName" inherits="CCLabel_Gamepad" font="ZoFontGamepad27" horizontalAlignment="CENTER" modifyTextType="UPPERCASE" color="FF79797A">
-                            <Dimensions x="360" />
-                            <Anchor point="TOP" offsetY="53" />
+                            <Dimensions x="360"/>
+                            <Anchor point="TOP" offsetY="53"/>
                         </Label>
-
                         <Control name="$(parent)Column1" inherits="RaceSelector_Gamepad">
-                            <Anchor point="TOP" relativeTo="$(parent)SelectionName" relativePoint="BOTTOM" offsetX="-120" offsetY="18" />
+                            <Anchor point="TOP" relativeTo="$(parent)SelectionName" relativePoint="BOTTOM" offsetX="-120" offsetY="18"/>
                         </Control>
-
                         <Control name="$(parent)Column2" inherits="RaceSelector_Gamepad">
-                            <Anchor point="TOP" relativeTo="$(parent)SelectionName" relativePoint="BOTTOM" offsetY="18" />
+                            <Anchor point="TOP" relativeTo="$(parent)SelectionName" relativePoint="BOTTOM" offsetY="18"/>
                         </Control>
-
                         <Control name="$(parent)Column3" inherits="RaceSelector_Gamepad">
-                            <Anchor point="TOP" relativeTo="$(parent)SelectionName" relativePoint="BOTTOM" offsetX="120" offsetY="18" />
+                            <Anchor point="TOP" relativeTo="$(parent)SelectionName" relativePoint="BOTTOM" offsetX="120" offsetY="18"/>
                         </Control>
-                        
                         <Button name="$(parent)SingleButton" inherits="RaceSelectorButton_Gamepad">
-                            <Anchor point="TOP" relativeTo="$(parent)Column2" relativePoint="BOTTOM" offsetY="36" />
+                            <Anchor point="TOP" relativeTo="$(parent)Column2" relativePoint="BOTTOM" offsetY="36"/>
                         </Button>
                     </Controls>
                 </Control>
-
                 <Control name="$(parent)Class" resizeToFitDescendents="true" hidden="true">
                     <OnInitialized>
                         ZO_CharacterCreate_Gamepad_CreateClassSelector(self)
                     </OnInitialized>
-
                     <Controls>
-                        <Label name="$(parent)Name" inherits="CCLabel_Gamepad" font="ZoFontGamepad34"  horizontalAlignment="CENTER" modifyTextType="UPPERCASE" text="SI_CREATE_CHARACTER_GAMEPAD_CLASS_LABEL" color="FF79797A">
-                            <Dimensions x="360" />
-                            <Anchor point="TOP" />
+                        <Label name="$(parent)Name" inherits="CCLabel_Gamepad" font="ZoFontGamepad34" horizontalAlignment="CENTER" modifyTextType="UPPERCASE" text="SI_CREATE_CHARACTER_GAMEPAD_CLASS_LABEL" color="FF79797A">
+                            <Dimensions x="360"/>
+                            <Anchor point="TOP"/>
                         </Label>
-
-                        <Label name="$(parent)SelectionName" inherits="CCLabel_Gamepad" font="ZoFontGamepad27"  horizontalAlignment="CENTER" modifyTextType="UPPERCASE" color="FF79797A">
-                            <Dimensions x="360" />
-                            <Anchor point="TOP" offsetY="53" />
+                        <Label name="$(parent)SelectionName" inherits="CCLabel_Gamepad" font="ZoFontGamepad27" horizontalAlignment="CENTER" modifyTextType="UPPERCASE" color="FF79797A">
+                            <Dimensions x="360"/>
+                            <Anchor point="TOP" offsetY="53"/>
                         </Label>
-
                         <Control name="$(parent)Column1" inherits="ClassSelector_Gamepad">
-                            <Anchor point="TOP" relativeTo="$(parent)SelectionName" relativePoint="BOTTOM" offsetX="-120" offsetY="18" />
+                            <Anchor point="TOP" relativeTo="$(parent)SelectionName" relativePoint="BOTTOM" offsetX="-120" offsetY="18"/>
                         </Control>
-
                         <Control name="$(parent)Column2" inherits="ClassSelector_Gamepad">
-                            <Anchor point="TOP" relativeTo="$(parent)SelectionName" relativePoint="BOTTOM" offsetY="18" />
+                            <Anchor point="TOP" relativeTo="$(parent)SelectionName" relativePoint="BOTTOM" offsetY="18"/>
                         </Control>
-
                         <Control name="$(parent)Column3" inherits="ClassSelector_Gamepad">
-                            <Anchor point="TOP" relativeTo="$(parent)SelectionName" relativePoint="BOTTOM" offsetX="120" offsetY="18" />
+                            <Anchor point="TOP" relativeTo="$(parent)SelectionName" relativePoint="BOTTOM" offsetX="120" offsetY="18"/>
                         </Control>
                     </Controls>
                 </Control>

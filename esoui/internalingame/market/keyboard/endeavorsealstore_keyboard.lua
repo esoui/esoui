@@ -9,11 +9,11 @@ function ZO_EndeavorSealStore_Keyboard:Initialize(control, sceneName)
 
     self.marketOpenedTutorialTriggerType = TUTORIAL_TRIGGER_SEAL_MARKET_OPENED
     self:SetDisplayGroup(MARKET_DISPLAY_GROUP_CROWN_STORE)
-    self:SetMarketCurrencyButtonType(ZO_MARKET_CURRENCY_BUTTON_TYPE_OPEN_ENDEAVORS)
-    self:SetFeaturedMarketProductFiltersMask(MARKET_PRODUCT_FILTER_TYPE_COST_ENDEAVOR_SEALS)
-    self:SetMarketProductFilterTypes({MARKET_PRODUCT_FILTER_TYPE_COST_ENDEAVOR_SEALS})
-    self:SetNewMarketProductFilterTypes({MARKET_PRODUCT_FILTER_TYPE_NEW + MARKET_PRODUCT_FILTER_TYPE_COST_ENDEAVOR_SEALS})
-    self:SetShownCurrencyTypeBalances(MKCT_ENDEAVOR_SEALS)
+    self:SetMarketCurrencyButtonType(ZO_MARKET_CURRENCY_BUTTON_TYPE_OPEN_TAMRIEL_TOMES)
+    self:SetFeaturedMarketProductFiltersMask(MARKET_PRODUCT_FILTER_TYPE_COST_SEALS)
+    self:SetMarketProductFilterTypes({MARKET_PRODUCT_FILTER_TYPE_COST_SEALS})
+    self:SetNewMarketProductFilterTypes({MARKET_PRODUCT_FILTER_TYPE_NEW + MARKET_PRODUCT_FILTER_TYPE_COST_SEALS})
+    self:SetShownCurrencyTypeBalances(MKCT_SEALS)
 end
 
 function ZO_EndeavorSealStore_Keyboard:GetCategoryMarketProductPresentations(categoryIndex, marketProductPresentations)
@@ -32,6 +32,10 @@ function ZO_EndeavorSealStore_Keyboard:GetCategoryMarketProductPresentations(cat
 end
 
 -- Begin ZO_Market_Keyboard overrides
+
+function ZO_EndeavorSealStore_Keyboard:GetMarketLockedText()
+    return GetString(SI_SEALS_STORE_LOCKED_TEXT)
+end
 
 function ZO_EndeavorSealStore_Keyboard:AddTopLevelCategories()
     self:ClearMarketProducts()

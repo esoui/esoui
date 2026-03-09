@@ -1,13 +1,11 @@
 <GuiXml>
     <Controls>
         <Button name="ZO_SmithingResearchSlot" inherits="ZO_ItemSlot" virtual="true">
-            <Dimensions x="48" y="41" />
+            <Dimensions x="48" y="41"/>
             <OnInitialized>
                 ZO_SmithingResearchSlot_OnInitialized(self)
             </OnInitialized>
-            
-            <Textures mouseOver="" pressedMouseOver="" />
-
+            <Textures mouseOver="" pressedMouseOver=""/>
             <OnMouseDoubleClick>
                 ZO_SmithingResearchSlot_OnMouseDoubleClick(self)
             </OnMouseDoubleClick>
@@ -20,100 +18,81 @@
             <OnMouseExit>
                 ZO_SmithingResearchSlot_OnMouseExit(self)
             </OnMouseExit>
-
             <Controls>
                 <Texture name="$(parent)Bg" inherits="ZO_ThinListBgStrip" mouseEnabled="true">
-                    <Dimensions x="526" y="43" />
-                    <Anchor point="LEFT" />
-
+                    <Dimensions x="526" y="43"/>
+                    <Anchor point="LEFT"/>
                     <OnMouseDoubleClick>
                         zo_callHandler(self:GetParent(), "OnMouseDoubleClick")
                     </OnMouseDoubleClick>
-
                     <OnMouseEnter>
                         zo_callHandler(self:GetParent(), "OnMouseEnter")
                     </OnMouseEnter>
-
                     <OnMouseExit>
                         zo_callHandler(self:GetParent(), "OnMouseExit")
                     </OnMouseExit>
-                    
                     <OnMouseUp>
                         if upInside then
                             zo_callHandler(self:GetParent(), "OnClicked", button)
                         end
                     </OnMouseUp>
                 </Texture>
-
                 <Texture name="$(parent)LockIcon" textureFile="EsoUI/Art/Progression/progression_crafting_locked_up.dds">
-                    <Dimensions x="48" y="48" />
+                    <Dimensions x="48" y="48"/>
                     <Anchor point="CENTER"/>
                 </Texture>
                 <Texture name="$(parent)TimerIcon" textureFile="EsoUI/Art/Miscellaneous/timer_32.dds">
-                    <Dimensions x="32" y="32" />
+                    <Dimensions x="32" y="32"/>
                     <Anchor point="CENTER"/>
                 </Texture>
-
                 <Texture name="$(parent)Highlight" textureFile="EsoUI/Art/Miscellaneous/listItem_highlight.dds" alpha="0">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Bg" />
-                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Bg" />
-                    <TextureCoords left="0" right="1" top="0" bottom=".625" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Bg"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Bg"/>
+                    <TextureCoords left="0" right="1" top="0" bottom=".625"/>
                 </Texture>
-                
                 <Label name="$(parent)Name" font="ZoFontWinT1">
-                    <Anchor point="LEFT" relativePoint="RIGHT" offsetX="10" />
+                    <Anchor point="LEFT" relativePoint="RIGHT" offsetX="10"/>
                 </Label>
-
                 <Label name="$(parent)Status" font="ZoFontWinT1">
-                    <Anchor point="CENTER" relativeTo="$(parent)Bg" relativePoint="RIGHT" offsetX="-70" />
+                    <Anchor point="CENTER" relativeTo="$(parent)Bg" relativePoint="RIGHT" offsetX="-70"/>
                 </Label>
             </Controls>
         </Button>
-
         <Button name="ZO_SmithingResearchListSlot" inherits="ZO_SmithingListSlot" virtual="true">
             <OnInitialized>
                 self.timerIcon = self:GetNamedChild("TimerIcon")
             </OnInitialized>
-
             <Controls>
                 <Texture name="$(parent)TimerIcon" tier="MEDIUM" textureFile="EsoUI/Art/Miscellaneous/timer_32.dds" pixelRoundingEnabled="false" alpha=".85">
-                    <Dimensions x="32" y="32" />
+                    <Dimensions x="32" y="32"/>
                     <Anchor point="CENTER" relativePoint="BOTTOMRIGHT"/>
                 </Texture>
             </Controls>
         </Button>
-        
         <Control name="ZO_SmithingResearchPanel" virtual="true">
             <Controls>
-                <Control name="$(parent)Tabs" inherits="ZO_InventoryTabs" />
-
+                <Control name="$(parent)Tabs" inherits="ZO_InventoryTabs"/>
                 <Label name="$(parent)NumResearching" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                    <Anchor point="TOPLEFT" offsetX="68" offsetY="18" />
+                    <Anchor point="TOPLEFT" offsetX="68" offsetY="18"/>
                 </Label>
-
                 <Texture name="$(parent)TimerIcon" textureFile="EsoUI/Art/Miscellaneous/timer_32.dds">
-                    <Dimensions x="32" y="32" />
-                    <Anchor point="RIGHT" relativeTo="$(parent)NumResearching" relativePoint="LEFT" offsetX="-2" />
+                    <Dimensions x="32" y="32"/>
+                    <Anchor point="RIGHT" relativeTo="$(parent)NumResearching" relativePoint="LEFT" offsetX="-2"/>
                 </Texture>
-
                 <Control name="$(parent)ButtonDivider" inherits="ZO_InventoryFilterDivider">
-                    <Anchor point="TOPLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetX="13" offsetY="DEFAULT_INVENTORY_FILTER_DIVIDER_TOP_OFFSET_Y" />
+                    <Anchor point="TOPLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetX="13" offsetY="DEFAULT_INVENTORY_FILTER_DIVIDER_TOP_OFFSET_Y"/>
                 </Control>
-
                 <Button name="$(parent)IncludeBanked" inherits="ZO_CheckButton">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)ButtonDivider" relativePoint="BOTTOMLEFT" offsetX="30" offsetY="10" />
-
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)ButtonDivider" relativePoint="BOTTOMLEFT" offsetX="30" offsetY="10"/>
                     <OnMouseEnter>
                         ZO_SmithingExtraction_IncludeBankedItemsOnMouseEnter(self)
                     </OnMouseEnter>
-
                     <OnMouseExit>
                         ZO_SmithingExtraction_FilterOnMouseExit(self)
                     </OnMouseExit>
                 </Button>
-
                 <Control name="$(parent)ResearchLineList" inherits="ZO_SmithingHorizontalListTemplate">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)IncludeBanked" offsetX="-5" offsetY="30" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)IncludeBanked" offsetX="-5" offsetY="30"/>
                     <Dimensions y="155"/>
                     <Controls>
                         <Control name="$(parent)List" override="true">
@@ -125,11 +104,9 @@
                         </Control>
                     </Controls>
                 </Control>
-
                 <Control name="$(parent)TimerBar">
-                    <Dimensions x="270" y="24" />
+                    <Dimensions x="270" y="24"/>
                     <Anchor point="BOTTOM" relativeTo="$(parent)ResearchLineList" offsetY="-12"/>
-
                     <Controls>
                         <StatusBar name="$(parent)Status" inherits="ZO_ArrowStatusBarWithBG">
                             <OnInitialized>
@@ -139,33 +116,28 @@
                             <AnchorFill/>
                         </StatusBar>
                         <Texture name="$(parent)TimerIcon" textureFile="EsoUI/Art/Miscellaneous/timer_32.dds" tier="HIGH">
-                            <Dimensions x="32" y="32" />
-                            <Anchor point="RIGHT" relativePoint="LEFT" />
+                            <Dimensions x="32" y="32"/>
+                            <Anchor point="RIGHT" relativePoint="LEFT"/>
                         </Texture>
                         <Label name="$(parent)Time" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
-                            <Anchor point="CENTER" />
+                            <Anchor point="CENTER"/>
                         </Label>
                     </Controls>
                 </Control>
-
                 <Control name="$(parent)ContainerDivider" inherits="ZO_WideHorizontalDivider">
                     <Anchor point="TOP" relativeTo="$(parent)ResearchLineList" relativePoint="BOTTOM" offsetY="-1"/>
                 </Control>
-
                 <Label name="$(parent)ResearchProgressLabel" font="ZoFontWinH3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" text="SI_SMITHING_RESEARCH_PROGRESS_HEADER">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)ContainerDivider" relativePoint="BOTTOMLEFT" offsetX="25" offsetY="8" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)ContainerDivider" relativePoint="BOTTOMLEFT" offsetX="25" offsetY="8"/>
                 </Label>
-                
                 <Control name="$(parent)TraitContainer">
-                    <Dimensions x="576" y="700" />
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)ResearchProgressLabel" relativePoint="BOTTOMLEFT" offsetY="8" />
+                    <Dimensions x="576" y="700"/>
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)ResearchProgressLabel" relativePoint="BOTTOMLEFT" offsetY="8"/>
                 </Control>
             </Controls>
         </Control>
-
         <Control name="ZO_SmithingResearchSelectPanel" hidden="true">
-            <Dimensions x="236" y="64" />
-
+            <Dimensions x="236" y="64"/>
             <OnInitialized>
                 ZO_SmithingResearchSelect_OnInitialize(self)
             </OnInitialized>

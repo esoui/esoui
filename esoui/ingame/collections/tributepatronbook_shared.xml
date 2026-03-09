@@ -3,8 +3,7 @@
         <Control name="ZO_TributePatronBook_Layout_Template" virtual="true">
             <Controls>
                 <!-- TODO Tribute: Add Deck Fragments, Deck Upgrades and filters here -->
-
-                <Control name="$(parent)GridList" />
+                <Control name="$(parent)GridList"/>
             </Controls>
         </Control>
     </Controls>

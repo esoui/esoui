@@ -1,18 +1,16 @@
 <GuiXml>
     <Controls>
-        <Control name="ZO_HelpCustomerService_Type" inherits="ZO_IconChildlessHeader" virtual="true" />
-        <Label name="ZO_HelpCustomerService_Keyboard_Title" font="ZoFontWinH2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" horizontalAlignment="LEFT" virtual="true" />
+        <Control name="ZO_HelpCustomerService_Type" inherits="ZO_IconChildlessHeader" virtual="true"/>
+        <Label name="ZO_HelpCustomerService_Keyboard_Title" font="ZoFontWinH2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" horizontalAlignment="LEFT" virtual="true"/>
         <Label name="ZO_HelpCustomerService_Keyboard_Details" font="ZoFontWinT1" maxLineCount="5" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" wrapMode="ELLIPSIS" virtual="true">
-            <Dimensions x="100%" />
+            <Dimensions x="100%"/>
         </Label>
-  
         <Control name="ZO_HelpCustomerService_Keyboard_ComboBox" inherits="ZO_ComboBox" virtual="true">
-            <Dimensions x="322" />
+            <Dimensions x="322"/>
             <OnInitialized name="Help">
                 self.m_comboBox:SetHeight(450)
             </OnInitialized>
         </Control>
-
         <Control name="ZO_HelpCustomerServiceDivider" virtual="true">
             <Dimensions x="768" y="30"/>
             <Controls>
@@ -22,28 +20,25 @@
                 </Texture>
                 <Texture name="$(parent)Right" textureFile="EsoUI/Art/AvA/AvA_rightColumnDivider_right.dds">
                     <Dimensions x="256" y="4"/>
-                    <Anchor point="RIGHT" />
+                    <Anchor point="RIGHT"/>
                 </Texture>
             </Controls>
         </Control>
-        
         <TopLevelControl name="ZO_HelpCustomerService_Keyboard" inherits="ZO_RightPanelFootPrint" hidden="true">
             <OnInitialized>
                 ZO_HelpCustomerService_Keyboard_Initialize(self)
             </OnInitialized>
-
             <Controls>
                 <Control name="$(parent)Categories">
-                    <Dimensions x="290" />
+                    <Dimensions x="290"/>
                     <Anchor point="TOPLEFT" offsetX="-10" offsetY="68"/>
-                    <Anchor point="BOTTOMLEFT" offsetX="-10" />
+                    <Anchor point="BOTTOMLEFT" offsetX="-10"/>
                 </Control>
             </Controls>
         </TopLevelControl>
-
         <Control name="ZO_HelpCustomerService_Keyboard_ContentAnchors" virtual="true">
-            <Anchor point="TOPRIGHT" relativeTo="ZO_HelpCustomerService_Keyboard" offsetX="-44" offsetY="50" />
-            <Anchor point="BOTTOMLEFT" relativeTo="ZO_HelpCustomerService_KeyboardCategories" relativePoint="BOTTOMRIGHT" offsetX="40" />
+            <Anchor point="TOPRIGHT" relativeTo="ZO_HelpCustomerService_Keyboard" offsetX="-44" offsetY="50"/>
+            <Anchor point="BOTTOMLEFT" relativeTo="ZO_HelpCustomerService_KeyboardCategories" relativePoint="BOTTOMRIGHT" offsetX="40"/>
         </Control>
     </Controls>
 </GuiXml>

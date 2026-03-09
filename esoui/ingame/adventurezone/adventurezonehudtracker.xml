@@ -1,0 +1,41 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_AdvZoneHUDTracker" inherits="ZO_HUDTracker_Base_Template" hidden="false">
+            <Anchor point="TOPRIGHT" relativeTo="ZO_EndDunHUDTracker" relativePoint="BOTTOMRIGHT"/>
+            <OnInitialized>
+                ZO_AdventureZoneHUDTracker.OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)Container" override="true">
+                    <Controls>
+                        <Control name="$(parent)ShowOverview" inherits="ZO_KeybindButton" excludeFromResizeToFitExtents="true"/>
+                        <Control name="$(parent)FactionScore1" inherits="ZO_RollingMeterLabel" excludeFromResizeToFitExtents="true">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" offsetX="10" offsetY="20"/>
+                        </Control>
+                        <Texture name="$(parent)FactionIcon1">
+                            <Anchor point="RIGHT" relativeTo="$(parent)FactionScore1" relativePoint="LEFT" offsetX="-10"/>
+                            <Dimensions x="40" y="40"/>
+                        </Texture>
+                        <Control name="$(parent)FactionScore2" inherits="ZO_RollingMeterLabel" excludeFromResizeToFitExtents="true">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)FactionScore1" relativePoint="BOTTOMLEFT" offsetY="20"/>
+                        </Control>
+                        <Texture name="$(parent)FactionIcon2">
+                            <Anchor point="RIGHT" relativeTo="$(parent)FactionScore2" relativePoint="LEFT" offsetX="-10"/>
+                            <Dimensions x="40" y="40"/>
+                        </Texture>
+                        <Control name="$(parent)FactionScore3" inherits="ZO_RollingMeterLabel" excludeFromResizeToFitExtents="true">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)FactionScore2" relativePoint="BOTTOMLEFT" offsetY="20"/>
+                        </Control>
+                        <Texture name="$(parent)FactionIcon3">
+                            <Anchor point="RIGHT" relativeTo="$(parent)FactionScore3" relativePoint="LEFT" offsetX="-10"/>
+                            <Dimensions x="40" y="40"/>
+                        </Texture>
+                        <Texture name="$(parent)PlayerFactionIndicator" textureFile="EsoUI/Art/Miscellaneous/indicator_arrow.dds">
+                            <Dimensions x="16" y="16"/>
+                        </Texture>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

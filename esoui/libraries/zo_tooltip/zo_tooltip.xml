@@ -5,8 +5,8 @@
         <Texture name="ZO_TooltipColorSwatch" virtual="true">
             <Controls>
                 <Backdrop name="$(parent)Backdrop" centerColor="00000000">
-                    <Anchor point="TOPLEFT" offsetX="-2" offsetY="-2" />
-                    <Anchor point="BOTTOMRIGHT" offsetX="2" offsetY="2" />
+                    <Anchor point="TOPLEFT" offsetX="-2" offsetY="-2"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="2" offsetY="2"/>
                 </Backdrop>
                 <Label name="$(parent)Label">
                     <Anchor point="LEFT" relativeTo="$(parent)Backdrop" relativePoint="RIGHT" offsetX="5"/>
@@ -24,10 +24,10 @@
         <Control name="ZO_TooltipStatValueSlider" virtual="true">
             <Controls>
                 <Label name="$(parent)Stat">
-                    <Anchor point="TOPLEFT" offsetX="-10" offsetY="-5" />
+                    <Anchor point="TOPLEFT" offsetX="-10" offsetY="-5"/>
                 </Label>
                 <Control name="$(parent)Slider" inherits="ZO_AttributeBar">
-                    <Anchor point="TOPLEFT" offsetX="75" />
+                    <Anchor point="TOPLEFT" offsetX="75"/>
                 </Control>
                 <Label name="$(parent)Value"/>
             </Controls>

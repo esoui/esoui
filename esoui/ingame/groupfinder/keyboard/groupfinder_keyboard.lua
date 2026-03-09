@@ -182,13 +182,16 @@ function ZO_GroupFinder_Keyboard:InitializeGroupFinderCategories()
     for index = GROUP_FINDER_CATEGORY_ITERATION_BEGIN, GROUP_FINDER_CATEGORY_ITERATION_END do
         local category =
         {
-        -- Increment index by 1 to account for the overview.
+            -- Increment index by 1 to account for the overview.
             priority = CATEGORY_PRIORITY + (index + 1) * 10,
             name = GetString("SI_GROUPFINDERCATEGORY", index),
             searchCategory = index,
             categoryFragment = self.sceneFragment,
             onTreeEntrySelected = OnTreeEntrySelected,
             mode = ZO_GROUP_FINDER_MODES.SEARCH,
+            visible = function()
+                return IsGroupFinderCategoryAvailable(index)
+            end,
         }
         table.insert(self.categoryData, category)
     end
@@ -207,7 +210,9 @@ function ZO_GroupFinder_Keyboard:InitializeGroupFinderCategories()
         table.insert(categories, overview)
 
         for _, category in ipairs(self.categoryData) do
-            table.insert(categories, category)
+            if ZO_Eval(category.visible) then
+                table.insert(categories, category)
+            end
         end
 
         return categories

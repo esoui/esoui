@@ -22,7 +22,6 @@
                 </Control>
             </Controls>
         </TopLevelControl>
-
         <TopLevelControl name="ZO_BattlegroundHudTopLevel_Gamepad" virtual="true">
             <Dimensions x="292" y="267"/>
             <Controls>
@@ -35,7 +34,7 @@
                     <Anchor point="RIGHT" relativeTo="$(parent)Header" relativePoint="LEFT" offsetX="-5"/>
                 </Control>
                 <Label name="$(parent)State" override="true" font="ZoFontGamepad34">
-                    <DimensionConstraints maxX="210" />
+                    <DimensionConstraints maxX="210"/>
                     <ClearAnchors/>
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)Header" relativePoint="BOTTOMRIGHT" offsetY="10"/>
                 </Label>
@@ -45,7 +44,6 @@
                 </Control>
             </Controls>
         </TopLevelControl>
-        
         <TopLevelControl name="ZO_BattlegroundHUDFragmentTopLevel" hidden="true">
             <Anchor point="TOPRIGHT" relativeTo="ZO_ActivityTracker" relativePoint="BOTTOMRIGHT"/>
             <OnInitialized>
@@ -53,11 +51,8 @@
             </OnInitialized>
             <Controls>
                 <Control name="$(parent)KeybindButton" inherits="ZO_KeybindButton"/>
-                
                 <Label name="$(parent)Header" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"/>
-
                 <Label name="$(parent)State"/>
-
                 <Control name="$(parent)BattlegroundScoreHud" inherits="ZO_BattlegroundScoreHud"/>
             </Controls>
         </TopLevelControl>

@@ -11,33 +11,29 @@
                     <Anchor point="LEFT"/>
                 </Label>
                 <Label name="$(parent)Stat2" inherits="ZO_StatsRowValue">
-                    <Anchor point="LEFT" offsetX="250" />
+                    <Anchor point="LEFT" offsetX="250"/>
                 </Label>
             </Controls>
         </Control>
-
         <Control name="ZO_Vengeance_LoadoutPerk_Keyboard" resizeToFitDescendents="true" mouseEnabled="true" virtual="true">
             <OnInitialized>
                 self.icon = self:GetNamedChild("Icon")
             </OnInitialized>
-
             <OnMouseEnter>
                 ZO_Vengeance_Loadouts_Keyboard.LoadoutPerk_OnMouseEnter(self)
             </OnMouseEnter>
             <OnMouseExit>
                 ZO_Vengeance_Loadouts_Keyboard.LoadoutPerk_OnMouseExit(self)
             </OnMouseExit>
-
             <Controls>
                 <Texture name="$(parent)Icon" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
                     <Dimensions x="48" y="48"/>
-                    <Anchor point="TOPLEFT" />
+                    <Anchor point="TOPLEFT"/>
                 </Texture>
             </Controls>
         </Control>
-
         <Control name="ZO_Vengeance_Perks_Keyboard" virtual="true">
-            <Dimensions x="200" y="50" />
+            <Dimensions x="200" y="50"/>
             <OnInitialized>
                 self.icons =
                 {
@@ -46,69 +42,51 @@
                     [VENGEANCE_PERK_SLOT_BLUE] = self:GetNamedChild("BlueIcon").object,
                 }
             </OnInitialized>
-
             <Controls>
                 <Control name="$(parent)RedIcon" inherits="ZO_VengeancePerk_FramedIcon_Keyboard" scale="0.85">
-                    <Anchor point="TOPLEFT" offsetX="5" offsetY="3" />
+                    <Anchor point="TOPLEFT" offsetX="5" offsetY="3"/>
                 </Control>
-
                 <Control name="$(parent)YellowIcon" inherits="ZO_VengeancePerk_FramedIcon_Keyboard" scale="0.85">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)RedIcon" relativePoint="TOPRIGHT" offsetX="23" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)RedIcon" relativePoint="TOPRIGHT" offsetX="23"/>
                 </Control>
-
                 <Control name="$(parent)BlueIcon" inherits="ZO_VengeancePerk_FramedIcon_Keyboard" scale="0.85">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)YellowIcon" relativePoint="TOPRIGHT" offsetX="23"/>
                 </Control>
             </Controls>
         </Control>
-
         <Control name="ZO_Vengeance_CollapsedLoadoutEntry" virtual="true">
             <Dimensions y="ZO_VENGEANCE_LOADOUT_KEYBOARD_COLLAPSED_ENTRY_HEIGHT"/>
-
             <OnInitialized>
                 self.nameLabel = self:GetNamedChild("ContainerName")
                 self.iconTexture = self:GetNamedChild("ContainerIcon")
                 self.isEquippedIndicator = self:GetNamedChild("ContainerCheck")
             </OnInitialized>
-
             <Controls>
                 <Control name="$(parent)Container" mouseEnabled="true">
-                    <Anchor point="TOPLEFT" offsetX="10" offsetY="2" />
-                    <Anchor point="BOTTOMRIGHT" offsetX="-10" offsetY="-2" />
-
+                    <Anchor point="TOPLEFT" offsetX="10" offsetY="2"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="-10" offsetY="-2"/>
                     <OnMouseUp>
                         ZO_Vengeance_Loadouts_Keyboard.CollapsedEntry_OnMouseUp(self, button, upInside)
                     </OnMouseUp>
-
                     <Controls>
                         <Backdrop name="$(parent)Background" inherits="ZO_DefaultBackdrop">
                             <AnchorFill/>
                         </Backdrop>
-
                         <Texture name="$(parent)Check" textureFile="EsoUI/Art/Miscellaneous/check_icon_64.dds" hidden="true">
                             <Dimensions x="45" y="45"/>
-                            <Anchor point="LEFT" offsetX="10" />
+                            <Anchor point="LEFT" offsetX="10"/>
                         </Texture>
-
                         <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Icons/icon_missing.dds">
-                            <Dimensions x="48" y="48" />
-                            <Anchor point="LEFT" offsetX="60" />
+                            <Dimensions x="48" y="48"/>
+                            <Anchor point="LEFT" offsetX="60"/>
                         </Texture>
-
-                        <Label name="$(parent)Name" font="ZoFontHeader2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" >
-                            <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="15" />
+                        <Label name="$(parent)Name" font="ZoFontHeader2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                            <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="15"/>
                         </Label>
-
                         <Button name="$(parent)Expand">
-                            <Dimensions x="16" y="16" />
+                            <Dimensions x="16" y="16"/>
                             <Anchor point="RIGHT" offsetX="-10"/>
-                            <Textures
-                                normal="EsoUI/Art/Buttons/scrollbox_downArrow_up.dds"
-                                pressed="EsoUI/Art/Buttons/scrollbox_downArrow_down.dds"
-                                mouseOver="EsoUI/Art/Buttons/scrollbox_downArrow_over.dds"
-                                disabled="EsoUI/Art/Buttons/scrollbox_downArrow_up_disabled.dds"
-                            />
-
+                            <Textures normal="EsoUI/Art/Buttons/scrollbox_downArrow_up.dds" pressed="EsoUI/Art/Buttons/scrollbox_downArrow_down.dds" mouseOver="EsoUI/Art/Buttons/scrollbox_downArrow_over.dds" disabled="EsoUI/Art/Buttons/scrollbox_downArrow_up_disabled.dds"/>
                             <OnClicked>
                                 local UP_INSIDE = true
                                 ZO_PropagateHandler(self:GetParent(), "OnMouseUp", button, UP_INSIDE)
@@ -118,56 +96,41 @@
                 </Control>
             </Controls>
         </Control>
-
         <Control name="ZO_Vengeance_ExpandedLoadoutEntry" virtual="true">
             <OnInitialized>
                 ZO_Vengeance_Loadouts_Keyboard.ExpandedEntry_OnInitialized(self)
             </OnInitialized>
-
             <Controls>
                 <Control name="$(parent)Container">
-                    <Anchor point="TOPLEFT" offsetX="10" offsetY="2" />
-                    <Anchor point="BOTTOMRIGHT" offsetX="-10" offsetY="-2" />
-
+                    <Anchor point="TOPLEFT" offsetX="10" offsetY="2"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="-10" offsetY="-2"/>
                     <Controls>
                         <Backdrop name="$(parent)Background" inherits="ZO_DefaultBackdrop">
                             <AnchorFill/>
                         </Backdrop>
-
                         <Control name="$(parent)Header" mouseEnabled="true">
                             <Dimensions y="76"/>
                             <Anchor point="TOPLEFT"/>
                             <Anchor point="TOPRIGHT"/>
-
                             <OnMouseUp>
                                 ZO_Vengeance_Loadouts_Keyboard.ExpandedEntry_OnMouseUp(self, button, upInside)
                             </OnMouseUp>
-
                             <Controls>
                                 <Texture name="$(parent)Check" textureFile="EsoUI/Art/Miscellaneous/check_icon_64.dds" hidden="true">
                                     <Dimensions x="45" y="45"/>
-                                    <Anchor point="LEFT" offsetX="10" />
+                                    <Anchor point="LEFT" offsetX="10"/>
                                 </Texture>
-
                                 <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Icons/icon_missing.dds">
-                                    <Dimensions x="48" y="48" />
-                                    <Anchor point="LEFT" offsetX="60" />
+                                    <Dimensions x="48" y="48"/>
+                                    <Anchor point="LEFT" offsetX="60"/>
                                 </Texture>
-
-                                <Label name="$(parent)Name" font="ZoFontHeader2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" >
-                                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="15" />
+                                <Label name="$(parent)Name" font="ZoFontHeader2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="15"/>
                                 </Label>
-
                                 <Button name="$(parent)Collapse">
-                                    <Dimensions x="16" y="16" />
-                                    <Anchor point="RIGHT" offsetX="-10" />
-                                    <Textures
-                                        normal="EsoUI/Art/Buttons/scrollbox_upArrow_up.dds"
-                                        pressed="EsoUI/Art/Buttons/scrollbox_upArrow_down.dds"
-                                        mouseOver="EsoUI/Art/Buttons/scrollbox_upArrow_over.dds"
-                                        disabled="EsoUI/Art/Buttons/scrollbox_upArrow_up_disabled.dds"
-                                    />
-
+                                    <Dimensions x="16" y="16"/>
+                                    <Anchor point="RIGHT" offsetX="-10"/>
+                                    <Textures normal="EsoUI/Art/Buttons/scrollbox_upArrow_up.dds" pressed="EsoUI/Art/Buttons/scrollbox_upArrow_down.dds" mouseOver="EsoUI/Art/Buttons/scrollbox_upArrow_over.dds" disabled="EsoUI/Art/Buttons/scrollbox_upArrow_up_disabled.dds"/>
                                     <OnClicked>
                                         local UP_INSIDE = true
                                         ZO_PropagateHandler(self:GetParent(), "OnMouseUp", button, UP_INSIDE)
@@ -175,42 +138,35 @@
                                 </Button>
                             </Controls>
                         </Control>
-
-                        <Control name="$(parent)Divider" inherits="ZO_DynamicHorizontalDivider" >
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT"  offsetX="15" />
+                        <Control name="$(parent)Divider" inherits="ZO_DynamicHorizontalDivider">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" offsetX="15"/>
                             <Anchor point="RIGHT" constrains="X" offsetX="-15"/>
                         </Control>
-
                         <Control name="$(parent)ImportantStatsContainer" resizeToFitDescendents="true">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)Divider" relativePoint="BOTTOMLEFT" offsetY="10"/>
                             <Controls>
                                 <Label name="$(parent)Label" font="ZoFontHeader" text="SI_CAMPAIGN_VENGEANCE_LOADOUT_STATS_HEADER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
-                                    <Anchor point="TOPLEFT" />
+                                    <Anchor point="TOPLEFT"/>
                                 </Label>
-
                                 <Control name="$(parent)Entries" resizeToFitDescendents="true">
-                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Label" relativePoint="BOTTOMLEFT" offsetY="10" />
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Label" relativePoint="BOTTOMLEFT" offsetY="10"/>
                                 </Control>
                             </Controls>
                         </Control>
-
                         <Control name="$(parent)PerksSkillsContainer" resizeToFitDescendents="true">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)ImportantStatsContainer" relativePoint="BOTTOMLEFT" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)ImportantStatsContainer" relativePoint="BOTTOMLEFT"/>
                             <Controls>
                                 <Label name="$(parent)Label" font="ZoFontHeader" text="SI_CAMPAIGN_VENGEANCE_LOADOUT_ABILITIES_HEADER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
-                                    <Anchor point="TOPLEFT" offsetY="10" />
+                                    <Anchor point="TOPLEFT" offsetY="10"/>
                                 </Label>
-
                                 <Control name="$(parent)Perks" inherits="ZO_Vengeance_Perks_Keyboard">
-                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Label" relativePoint="BOTTOMLEFT" offsetY="10" />
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Label" relativePoint="BOTTOMLEFT" offsetY="10"/>
                                 </Control>
-
                                 <Control name="$(parent)PrimaryActionBar" inherits="ZO_SkillsActionBar_Keyboard_Control">
-                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Perks" relativePoint="TOPRIGHT" offsetX="10" />
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Perks" relativePoint="TOPRIGHT" offsetX="10"/>
                                 </Control>
-
                                 <Control name="$(parent)BackupActionBar" inherits="ZO_SkillsActionBar_Keyboard_Control">
-                                    <Anchor point="TOPLEFT" relativeTo="$(parent)PrimaryActionBar" relativePoint="BOTTOMLEFT" offsetY="10" />
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)PrimaryActionBar" relativePoint="BOTTOMLEFT" offsetY="10"/>
                                 </Control>
                             </Controls>
                         </Control>
@@ -218,25 +174,21 @@
                 </Control>
             </Controls>
         </Control>
-
         <TopLevelControl name="ZO_Vengeance_Loadouts_Keyboard_TopLevel" inherits="ZO_CampaignOverviewSubwindow" hidden="true">
             <OnInitialized>
                 ZO_Vengeance_Loadouts_Keyboard.OnControlInitialized(self)
             </OnInitialized>
-
             <Controls>
                 <Control name="$(parent)DerivedStatsContainer" inherits="ZO_ScrollContainer" hidden="true">
-                    <Anchor point="TOPLEFT" relativeTo="ZO_SharedMediumLeftPanelBackground" offsetX="20" />
-                    <Anchor point="BOTTOMRIGHT" relativeTo="ZO_SharedMediumLeftPanelBackground" />
+                    <Anchor point="TOPLEFT" relativeTo="ZO_SharedMediumLeftPanelBackground" offsetX="20"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="ZO_SharedMediumLeftPanelBackground"/>
                 </Control>
-
                 <Label name="$(parent)InstructionText" font="ZoFontHeader">
                     <Anchor point="TOP" offsetY="-40"/>
                 </Label>
-
                 <Control name="$(parent)List" inherits="ZO_ScrollList">
                     <Anchor point="TOPLEFT" offsetY="-10"/>
-                    <Anchor point="BOTTOMRIGHT" />
+                    <Anchor point="BOTTOMRIGHT"/>
                 </Control>
             </Controls>
         </TopLevelControl>

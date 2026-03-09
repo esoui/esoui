@@ -200,10 +200,14 @@ function ZO_Market_Shared:OnShowMarketProduct(marketProductId)
         -- The Crown Store processes requests for both Keyboard Crown and Crown Gem products and all Gamepad products.
         SCENE_MANAGER:Show("show_market")
         self:RequestShowMarketProduct(marketProductId)
-    elseif DoesAnyMarketProductPresentationMatchFilter(marketProductId, MARKET_PRODUCT_FILTER_TYPE_COST_ENDEAVOR_SEALS) then
+    elseif DoesAnyMarketProductPresentationMatchFilter(marketProductId, MARKET_PRODUCT_FILTER_TYPE_COST_SEALS) then
         -- Keyboard Seals of Endeavor Store products.
         SCENE_MANAGER:Show(ENDEAVOR_SEAL_STORE_KEYBOARD.sceneName)
         ENDEAVOR_SEAL_STORE_KEYBOARD:RequestShowMarketProduct(marketProductId)
+    elseif DoesAnyMarketProductPresentationMatchFilter(marketProductId, MARKET_PRODUCT_FILTER_TYPE_COST_TRADE_BARS) then
+        -- Keyboard Gildbar Store products.
+        SCENE_MANAGER:Show(GILDBAR_STORE_KEYBOARD.sceneName)
+        GILDBAR_STORE_KEYBOARD:RequestShowMarketProduct(marketProductId)
     else
         -- If we couldn't figure out where to go, just fall back to opening the crown store
         -- This can happen if we haven't fully initialized crown store data, meaning that DoesAnyMarketProductPresentationMatchFilter may not be able to give us the right answer

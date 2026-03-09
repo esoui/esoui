@@ -94,4 +94,6 @@ EsoUI\PublicAllIngames\Tribute\Gamepad\TributePatronTile_Gamepad.xml
 EsoUI\PublicAllIngames\PromotionalEvent\PromotionalEventData.lua
 EsoUI\PublicAllIngames\PromotionalEvent\PromotionalEvent_Manager.lua
 
+EsoUI\PublicAllIngames\TamrielTomes\TamrielTomesData.lua
+
 EsoUI\PublicAllIngames\Achievements\AchievementsUtils.lua

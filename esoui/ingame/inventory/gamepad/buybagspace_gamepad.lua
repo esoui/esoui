@@ -1,13 +1,7 @@
 
 GAMEPAD_BUY_BAG_SPACE_SCENE_NAME = "gamepad_buy_bag_space"
 
-ZO_BuyBagSpace_Gamepad = ZO_Object:Subclass()
-
-function ZO_BuyBagSpace_Gamepad:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
+ZO_BuyBagSpace_Gamepad = ZO_InitializingObject:Subclass()
 
 local function BuyBagSpaceAndAlert()
     BuyBagSpace()
@@ -15,13 +9,13 @@ local function BuyBagSpaceAndAlert()
 end
 
 function ZO_BuyBagSpace_Gamepad:Initialize(control)
-    
     self.control = control
     self.buySpace = ZO_BuySpaceGamepad:New(control:GetNamedChild("BuySpace"), zo_strformat(SI_BUY_BAG_SPACE, NUM_BACKPACK_SLOTS_PER_UPGRADE), GetString(SI_BUY_BAG_SPACE_CANNOT_AFFORD), BuyBagSpaceAndAlert)
 
     self.header = control:GetNamedChild("HeaderContainer"):GetNamedChild("Header")
     ZO_GamepadGenericHeader_Initialize(self.header, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE)
-    self.headerData = {
+    self.headerData =
+    {
         titleText = GetString(SI_PROMPT_TITLE_BUY_BAG_SPACE)
     }
     ZO_GamepadGenericHeader_RefreshData(self.header, self.headerData)
@@ -31,12 +25,28 @@ function ZO_BuyBagSpace_Gamepad:Initialize(control)
     local StateChanged = function(oldState, newState)
         if newState == SCENE_SHOWING then
             self.buySpace:Activate(self.cost)
+            local NARRATE_HEADER = true
+            SCREEN_NARRATION_MANAGER:QueueCustomEntry("buyBagSpace", NARRATE_HEADER)
         elseif newState == SCENE_HIDDEN then
             self.buySpace:Deactivate()
         end
     end
 
     GAMEPAD_BUY_BAG_SPACE_SCENE:RegisterCallback("StateChange", StateChanged)
+
+    local narrationInfo =
+    {
+        canNarrate = function()
+            return GAMEPAD_BUY_BAG_SPACE_SCENE:IsShowing()
+        end,
+        headerNarrationFunction = function()
+            return ZO_GamepadGenericHeader_GetNarrationText(self.header, self.headerData)
+        end,
+        selectedNarrationFunction = function()
+            return self.buySpace:GetNarrationText()
+        end,
+    }
+    SCREEN_NARRATION_MANAGER:RegisterCustomObject("buyBagSpace", narrationInfo)
 end
 
 function ZO_BuyBagSpace_Gamepad:Show(cost)

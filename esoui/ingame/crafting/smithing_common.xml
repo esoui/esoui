@@ -7,7 +7,6 @@
                         return ZO_EaseInQuadratic(progress)
                     </EasingFunction>
                 </AlphaAnimation>
-
                 <AlphaAnimation delay="70" duration="160" startAlpha=".8" endAlpha=".55">
                     <EasingFunction>
                         return ZO_EaseOutQuadratic(progress)
@@ -18,72 +17,60 @@
     </Animations>
     <Controls>
         <Button name="ZO_SmithingListSlot" virtual="true">
-            <Dimensions x="70" y="70" />
+            <Dimensions x="70" y="70"/>
             <Controls>
                 <Texture name="$(parent)Icon" pixelRoundingEnabled="false" level="2">
-                    <Dimensions x="64" y="64" />
+                    <Dimensions x="64" y="64"/>
                     <Anchor point="CENTER"/>
                 </Texture>
-
                 <Label name="$(parent)StackCount" horizontalAlignment="RIGHT" verticalAlignment="BOTTOM" font="ZoFontGameOutline" inheritScale="false">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Icon" offsetX="-10" offsetY="1" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Icon" offsetX="-10" offsetY="1"/>
                     <!-- Allow extra space for large stack counts like 898.8k -->
                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icon" offsetX="2" offsetY="-1"/>
                 </Label>
-
                 <Texture name="$(parent)QuestPin" textureFile="EsoUI\Art\WritAdvisor\advisor_trackedPin_icon.dds" inheritScale="false" pixelRoundingEnabled="false" level="3" hidden="true">
-                    <Dimensions x="32" y="32" />
-                    <Anchor point="TOPRIGHT" offsetX="5" />
+                    <Dimensions x="32" y="32"/>
+                    <Anchor point="TOPRIGHT" offsetX="5"/>
                 </Texture>
             </Controls>
         </Button>
-
         <Control name="ZO_SmithingHorizontalListTemplate" virtual="true">
-            <Dimensions x="500" y="127" />
-
+            <Dimensions x="500" y="127"/>
             <OnInitialized>
                 ZO_SmithingHorizontalListTemplate_OnInitialized(self)
             </OnInitialized>
-
             <Controls>
                 <Control name="$(parent)Divider" inherits="ZO_WideHorizontalDivider">
-                    <Anchor point="TOP" />
+                    <Anchor point="TOP"/>
                 </Control>
-
                 <Control name="$(parent)List" inherits="ZO_HorizontalScrollListTemplate">
-                    <Dimensions x="470" y="70" />
-                    <Anchor point="CENTER" />
+                    <Dimensions x="470" y="70"/>
+                    <Anchor point="CENTER"/>
                 </Control>
-
                 <Label name="$(parent)Title" font="ZoFontWinH3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE">
                     <Anchor point="TOPLEFT" offsetY="8"/>
                 </Label>
-
                 <!-- This label's width is computed in ZO_SmithingHorizontalListTemplate_OnInitialized-->
                 <Label name="$(parent)SelectedLabel" inherits="ZO_TooltipIfTruncatedLabel" horizontalAlignment="CENTER" maxLineCount="1" wrapMode="ELLIPSIS" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
                     <Anchor point="TOP" offsetY="8"/>
                 </Label>
-
                 <Label name="$(parent)ExtraInfoLabel" horizontalAlignment="CENTER" maxLineCount="1" wrapMode="ELLIPSIS" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" hidden="true">
                     <Anchor point="BOTTOMLEFT" offsetY="-8"/>
                     <Anchor point="BOTTOMRIGHT" offsetY="-8"/>
                 </Label>
             </Controls>
         </Control>
-
         <Control name="ZO_SmithingUniversalItemHorizontalListTemplate" inherits="ZO_SmithingHorizontalListTemplate" virtual="true">
             <OnInitialized>
                 ZO_SmithingHorizontalListTemplate_OnInitialized(self)
                 self.universalItemBg = self:GetNamedChild("UniversalItemBg")
             </OnInitialized>
-
             <Controls>
                 <Texture name="$(parent)UniversalItemBg" textureFile="EsoUI/Art/Crafting/UniversalStyle_RowBackground.dds" color="INTERFACE_COLOR_TYPE_MARKET_COLORS:MARKET_COLORS_UNIVERSAL_ITEM" alpha=".35">
                     <AnchorFill/>
                 </Texture>
             </Controls>
         </Control>
-
         <Control name="ZO_GamepadSmithingHorizontalListTemplate" virtual="true">
             <Dimensions y="300"/>
             <OnInitialized>
@@ -97,12 +84,10 @@
                     <Anchor point="TOPLEFT"/>
                     <Anchor point="TOPRIGHT" offsetY="ZO_GAMEPAD_SMITHING_HORIZONTAL_LIST_Y_PADDING"/>
                 </Label>
-
                 <Control name="$(parent)List" inherits="ZO_GamepadHorizontalScrollListTemplate">
-                    <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" y="70" />
+                    <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" y="70"/>
                     <Anchor point="CENTER"/>
                 </Control>
-
                 <Label name="$(parent)SelectedLabel" font="ZoFontGamepad34" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED" horizontalAlignment="CENTER">
                     <OnInitialized>                        
                         local fonts =
@@ -121,20 +106,16 @@
                     <Anchor point="LEFT" relativeTo="$(parent)List" relativePoint="TOPLEFT" offsetX="ZO_GAMEPAD_SMITHING_HORIZONTAL_LIST_X_PADDING" offsetY="-46"/>
                     <Anchor point="RIGHT" relativeTo="$(parent)List" relativePoint="TOPRIGHT" offsetX="-ZO_GAMEPAD_SMITHING_HORIZONTAL_LIST_X_PADDING" offsetY="-46"/>
                 </Label>
-
                 <Label name="$(parent)ExtraInfoLabel" font="ZoFontGamepad27" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" horizontalAlignment="CENTER">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)List" relativePoint="BOTTOMLEFT" offsetX="ZO_GAMEPAD_SMITHING_HORIZONTAL_LIST_X_PADDING"/>
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)List" relativePoint="BOTTOMRIGHT" offsetX="-ZO_GAMEPAD_SMITHING_HORIZONTAL_LIST_X_PADDING" offsetY="ZO_GAMEPAD_SMITHING_HORIZONTAL_LIST_Y_PADDING"/>
                 </Label>
-
                 <Backdrop name="$(parent)BG_Inactive" inherits="ZO_GamepadGreyOutlineHighlight" hidden="true" excludeFromResizeToFitExtents="true">
                     <AnchorFill/>
                 </Backdrop>
-
                 <Backdrop name="$(parent)BG_Active" inherits="ZO_GamepadWhiteOutlineHighlight" excludeFromResizeToFitExtents="true">
                     <AnchorFill/>
                 </Backdrop>
-
                 <Texture name="$(parent)UniversalItemBg" textureFile="EsoUI/Art/Crafting/Gamepad/gp_UniversalStyle_RowBackground.dds" hidden="true">
                     <AnchorFill/>
                 </Texture>

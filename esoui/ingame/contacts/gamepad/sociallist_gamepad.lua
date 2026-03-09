@@ -62,6 +62,7 @@ function ZO_GamepadSocialListPanel:OnSelectionChanged(oldData, newData)
 end
 
 function ZO_GamepadSocialListPanel:SetupRow(control, data)
+    ZO_GamepadInteractiveSortFilterList.SetupRow(self, control, data)
     self:ColorRow(control, data)
     self.socialManager:SetupEntry(control, data)
 end

@@ -1,0 +1,97 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_AdvZoneOverview_FactionScoreContainer_Shared" layer="OVERLAY" virtual="true">
+            <Dimensions x="288" y="64"/>
+            <Controls>
+                <Label name="$(parent)Name" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Dimensions x="180" y="30"/>
+                    <Anchor point="BOTTOM" relativePoint="CENTER" offsetY="-2.5"/>
+                </Label>
+                <Label name="$(parent)Score" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                    <Dimensions x="180" y="30"/>
+                    <Anchor point="TOP" relativePoint="CENTER" offsetY="2.5"/>
+                </Label>
+                <Texture name="$(parent)Icon">
+                    <Dimensions x="64" y="64"/>
+                    <Anchor point="RIGHT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT" offsetX="-5" offsetY="2.5"/>
+                </Texture>
+            </Controls>
+        </Control>
+        <Control name="ZO_AdvZoneOverviewEventTile_Shared_Control" inherits="ZO_ContextualActionsTile_Control" virtual="true">
+            <Dimensions x="315" y="210"/>
+            <Controls>
+                <Texture name="$(parent)Icon" override="true">
+                    <AnchorFill/>
+                    <!-- display portion of the texture is 300x200 in a total texture size of 512x256 -->
+                    <TextureCoords left="0" right="0.586" top="0" bottom="0.781"/>
+                </Texture>
+                <Label name="$(parent)Location" override="true" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPLEFT" offsetX="16" offsetY="12"/>
+                </Label>
+                <Label name="$(parent)Title" override="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Location" relativePoint="BOTTOMLEFT" offsetY="5"/>
+                </Label>
+                <Label name="$(parent)Status" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="BOTTOMLEFT" offsetX="16" offsetY="-12"/>
+                </Label>
+            </Controls>
+        </Control>
+        <TopLevelControl name="ZO_AdvZoneOverview_Shared" clampedToScreen="true" hidden="true" layer="OVERLAY" virtual="true">
+            <Dimensions x="1100" y="550"/>
+            <Anchor point="CENTER"/>
+            <Controls>
+                <Backdrop name="$(parent)BG" excludeFromResizeToFitExtents="true">
+                    <Anchor point="TOPLEFT" offsetX="-20" offsetY="-20"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="20" offsetY="20"/>
+                </Backdrop>
+                <Label name="$(parent)Title" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" text="SI_ADVENTURE_ZONE_OVERVIEW_TITLE">
+                    <Anchor point="TOP" offsetY="15"/>
+                </Label>
+                <Control name="$(parent)FactionScoresDivider" inherits="ZO_DynamicHorizontalDivider">
+                    <Anchor point="TOP" relativeTo="$(parent)Title" relativePoint="BOTTOM" offsetY="5"/>
+                    <Dimensions x="1000"/>
+                </Control>
+                <Control name="$(parent)FactionScore2">
+                    <Anchor point="TOP" relativeTo="$(parent)FactionScoresDivider" relativePoint="BOTTOM" offsetY="20"/>
+                </Control>
+                <Control name="$(parent)FactionScore1">
+                    <Anchor point="RIGHT" relativeTo="$(parent)FactionScore2" relativePoint="LEFT" offsetX="-50"/>
+                </Control>
+                <Control name="$(parent)FactionScore3">
+                    <Anchor point="LEFT" relativeTo="$(parent)FactionScore2" relativePoint="RIGHT" offsetX="50"/>
+                </Control>
+                <Control name="$(parent)PlayerPointsContainer">
+                    <Dimensions x="288" y="64"/>
+                    <Controls>
+                        <Label name="$(parent)PlayerPointsLabel" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                            <Anchor point="CENTER"/>
+                        </Label>
+                        <Texture name="$(parent)PlayerFaction">
+                            <Dimensions x="32" y="32"/>
+                            <Anchor point="RIGHT" relativeTo="$(parent)PlayerPointsLabel" relativePoint="LEFT" offsetX="-5"/>
+                        </Texture>
+                    </Controls>
+                </Control>
+                <Control name="$(parent)EventsDivider" inherits="ZO_DynamicHorizontalDivider">
+                    <Anchor point="CENTER" relativeTo="$(parent)FactionScore2" constrains="X"/>
+                    <Anchor point="TOP" relativeTo="$(parent)PlayerPointsContainer" relativePoint="BOTTOM" offsetY="5" constrains="Y"/>
+                    <Dimensions x="1000"/>
+                </Control>
+                <Control name="$(parent)EventsContainer" resizeToFitDescendents="true">
+                    <Anchor point="TOP" relativeTo="$(parent)EventsDivider" relativePoint="BOTTOM" offsetY="50"/>
+                    <Controls>
+                        <Control name="$(parent)Event1">
+                            <Anchor point="TOP"/>
+                        </Control>
+                        <Control name="$(parent)Event2">
+                            <Anchor point="RIGHT" relativeTo="$(parent)Event1" relativePoint="LEFT" offsetX="-30"/>
+                        </Control>
+                        <Control name="$(parent)Event3">
+                            <Anchor point="LEFT" relativeTo="$(parent)Event1" relativePoint="RIGHT" offsetX="30"/>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

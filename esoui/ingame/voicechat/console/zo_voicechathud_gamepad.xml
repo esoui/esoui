@@ -4,7 +4,6 @@
             <OnInitialized>
                 ZO_VoiceChatHUDGamepad_OnInitialize(self)
             </OnInitialized>
-
             <OnUpdate>
                 ZO_VoiceChatHUDGamepad_OnUpdate(self)
             </OnUpdate>

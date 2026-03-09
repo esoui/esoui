@@ -260,8 +260,6 @@ function ZO_RestyleStation_Keyboard:RemoveKeybinds()
 end
 
 function ZO_RestyleStation_Keyboard:InitializeModeData()
-    local selectedTabDescriptor = ZO_MenuBar_GetSelectedDescriptor(self.tabs)
-
     local IS_ENABLED = true
     if CanUseCollectibleDyeing() then
         ZO_MenuBar_SetDescriptorEnabled(self.tabs, self.collectiblesTabDescriptor, IS_ENABLED)
@@ -305,7 +303,7 @@ function ZO_RestyleStation_Keyboard:LayoutEquipmentAppearanceTooltip(tooltip)
 
     if not ZO_HasActiveOrBlockedCompanion() then
         local requirements = GetString(SI_DYEING_EQUIPMENT_TAB_REQUIREMENTS)
-        tooltip:AddLine(requirement, "", r, g, b)
+        tooltip:AddLine(requirements, "", r, g, b)
     end
 end
 
@@ -638,15 +636,15 @@ do
             buttons =
             {
                 {
-                    control =   self.confirmButton,
-                    text =      function() self:GetConfirmButtonText() end,
-                    keybind =   "DIALOG_PRIMARY",
-                    callback =  function() self:Confirm() end,
+                    control = self.confirmButton,
+                    text = function() self:GetConfirmButtonText() end,
+                    keybind = "DIALOG_PRIMARY",
+                    callback = function() self:Confirm() end,
                 },
                 {
-                    control =   contentsControl:GetNamedChild("Cancel"),
-                    text =      SI_DIALOG_CANCEL,
-                    keybind =   "DIALOG_NEGATIVE",
+                    control = contentsControl:GetNamedChild("Cancel"),
+                    text = SI_DIALOG_CANCEL,
+                    keybind = "DIALOG_NEGATIVE",
                 },
             }
         })
@@ -672,7 +670,7 @@ function OutfitConfirmCostDialog_Keyboard:RefreshValues()
     local currencyLocation = GetCurrencyPlayerStoredLocation(currencyType)
     local balance = GetCurrencyAmount(currencyType, currencyLocation)
     local slotsCost, flatCost = self.outfitManipulator:GetAllCostsForPendingChanges()
-    displayedCost = clickedButton == self.perSlotRadioButton and slotsCost or flatCost
+    local displayedCost = clickedButton == self.perSlotRadioButton and slotsCost or flatCost
     self.notEnoughCurrency = displayedCost > balance
     local currencyOptions =
     {
@@ -682,35 +680,17 @@ function OutfitConfirmCostDialog_Keyboard:RefreshValues()
     ZO_CurrencyControl_SetSimpleCurrency(self.costValueLabel, currencyType, displayedCost, currencyOptions, SHOW_ALL, self.notEnoughCurrency)
     ZO_CurrencyControl_SetSimpleCurrency(self.balanceValueLabel, currencyType, balance, currencyOptions)
     self.confirmButton:SetText(self:GetConfirmButtonText())
-    self.confirmButton:SetEnabled(clickedButton == self.flatRadioButton or not self.notEnoughCurrency)
+    self.confirmButton:SetEnabled(not self.notEnoughCurrency)
 end
 
-do
-    local IS_PLURAL = false
-    local IS_UPPER = false
-
-    function OutfitConfirmCostDialog_Keyboard:GetConfirmButtonText()
-        if self.radioButtonGroup:GetClickedButton() == self.flatRadioButton and self.notEnoughCurrency then
-            return zo_strformat(SI_BUY_CURRENCY, GetCurrencyName(self.flatRadioButton.currencyType, IS_PLURAL, IS_UPPER))
-        end
-        return GetString(SI_DIALOG_CONFIRM)
-    end
+function OutfitConfirmCostDialog_Keyboard:GetConfirmButtonText()
+    return GetString(SI_DIALOG_CONFIRM)
 end
 
 function OutfitConfirmCostDialog_Keyboard:Confirm()
     if self.outfitManipulator then
-        if self.radioButtonGroup:GetClickedButton() == self.flatRadioButton and self.notEnoughCurrency then
-            local exitDestinationData =
-            {
-                crownStoreSearch = GetString(SI_CROWN_STORE_SEARCH_OUTFIT_CURRENCY),
-                crownStoreOpenOperation = MARKET_OPEN_OPERATION_OUTFIT_CURRENCY,
-                preservePendingChanges = true,
-            }
-            ZO_RESTYLE_STATION_KEYBOARD:AttemptExit(exitDestinationData)
-        else
-            local useFlatCurrency = self.radioButtonGroup:GetClickedButton() == self.flatRadioButton
-            self.outfitManipulator:SendOutfitChangeRequest(useFlatCurrency)
-        end
+        local useFlatCurrency = self.radioButtonGroup:GetClickedButton() == self.flatRadioButton
+        self.outfitManipulator:SendOutfitChangeRequest(useFlatCurrency)
     end
 end
 

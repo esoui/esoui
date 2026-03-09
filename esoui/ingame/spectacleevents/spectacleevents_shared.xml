@@ -2,19 +2,13 @@
     <Controls>
         <Control name="ZO_SpectacleEvents_InfoContainerTemplate" virtual="true">
             <Controls>
-                <Label name="$(parent)Title" modifyTextType="UPPERCASE" />
-
-                <Label name="$(parent)Description" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" />
-
-                <Control name="$(parent)GridList" />
-
-                <Label name="$(parent)ProgressBarHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" />
-
-                <StatusBar name="$(parent)ProgressBar" />
-
-                <Label name="$(parent)PhaseCompleteLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" hidden="true" />
-
-                <Label name="$(parent)NextPhaseBeginsLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" hidden="true" />
+                <Label name="$(parent)Title" modifyTextType="UPPERCASE"/>
+                <Label name="$(parent)Description" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"/>
+                <Control name="$(parent)GridList"/>
+                <Label name="$(parent)ProgressBarHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED"/>
+                <StatusBar name="$(parent)ProgressBar"/>
+                <Label name="$(parent)PhaseCompleteLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" hidden="true"/>
+                <Label name="$(parent)NextPhaseBeginsLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" hidden="true"/>
             </Controls>
         </Control>
     </Controls>

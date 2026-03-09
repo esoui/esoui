@@ -34,8 +34,6 @@ function ZO_OptionsPanel_Interface_ChatBubbleChannel_OnInitialized(self)
         ["ChatBubbles_Off"]   = ZO_Options_SetOptionInactive,
         ["ChatBubbles_On"]    = ZO_Options_SetOptionActive,
     }
-
-    ZO_OptionsWindow_InitializeControl(self)
 end
 
 local ZO_OptionsPanel_Interface_ControlData =
@@ -134,6 +132,7 @@ local ZO_OptionsPanel_Interface_ControlData =
             panel = SETTING_PANEL_INTERFACE,
             text = SI_INTERFACE_OPTIONS_SHOW_FRAMERATE,
             tooltipText = SI_INTERFACE_OPTIONS_SHOW_FRAMERATE_TOOLTIP,
+            exists = ZO_IsPCUI,
         },
          --Options_Interface_LatencyCheck
         [UI_SETTING_SHOW_LATENCY] =
@@ -144,6 +143,7 @@ local ZO_OptionsPanel_Interface_ControlData =
             panel = SETTING_PANEL_INTERFACE,
             text = SI_INTERFACE_OPTIONS_SHOW_LATENCY,
             tooltipText = SI_INTERFACE_OPTIONS_SHOW_LATENCY_TOOLTIP,
+            exists = ZO_IsPCUI,
         },
         --Options_Interface_FramerateLatencyLockCheck
         [UI_SETTING_FRAMERATE_LATENCY_LOCK] =
@@ -154,6 +154,7 @@ local ZO_OptionsPanel_Interface_ControlData =
             panel = SETTING_PANEL_INTERFACE,
             text = SI_INTERFACE_OPTIONS_FRAMERATE_LATENCY_LOCK,
             tooltipText = SI_INTERFACE_OPTIONS_FRAMERATE_LATENCY_LOCK_TOOLTIP,
+            exists = ZO_IsPCUI,
         },
         --Options_Interface_QuestBestowerIndicators
         [UI_SETTING_SHOW_QUEST_BESTOWER_INDICATORS] =
@@ -346,8 +347,8 @@ local ZO_OptionsPanel_Interface_ControlData =
             text = SI_INTERFACE_OPTIONS_CHAT_SAY,
             tooltipText = SI_INTERFACE_OPTIONS_SAY_TOOLTIP,
             exists = ZO_IsPCUI,
-            
             channelCategories = { CHAT_CATEGORY_SAY },
+            onInitializeFunction = ZO_OptionsPanel_Interface_ChatBubbleChannel_OnInitialized,
         },
         --Options_Interface_ChatBubblesYellChannel
         [OPTIONS_CUSTOM_SETTING_CHAT_BUBBLE_YELL_ENABLED] = 
@@ -357,8 +358,8 @@ local ZO_OptionsPanel_Interface_ControlData =
             text = SI_INTERFACE_OPTIONS_CHAT_YELL,
             tooltipText = SI_INTERFACE_OPTIONS_YELL_TOOLTIP,
             exists = ZO_IsPCUI,
-            
             channelCategories = { CHAT_CATEGORY_YELL },
+            onInitializeFunction = ZO_OptionsPanel_Interface_ChatBubbleChannel_OnInitialized,
         },
         --Options_Interface_ChatBubblesWhisperChannel
         [OPTIONS_CUSTOM_SETTING_CHAT_BUBBLE_WHISPER_ENABLED] =
@@ -368,8 +369,8 @@ local ZO_OptionsPanel_Interface_ControlData =
             text = SI_INTERFACE_OPTIONS_CHAT_TELL,
             tooltipText = SI_INTERFACE_OPTIONS_TELL_TOOLTIP,
             exists = ZO_IsPCUI,
-            
             channelCategories = { CHAT_CATEGORY_WHISPER_INCOMING, CHAT_CATEGORY_WHISPER_OUTGOING },
+            onInitializeFunction = ZO_OptionsPanel_Interface_ChatBubbleChannel_OnInitialized,
         },
         --Options_Interface_ChatBubblesGroupChannel
         [OPTIONS_CUSTOM_SETTING_CHAT_BUBBLE_GROUP_ENABLED] =
@@ -379,8 +380,8 @@ local ZO_OptionsPanel_Interface_ControlData =
             text = SI_INTERFACE_OPTIONS_CHAT_GROUP,
             tooltipText = SI_INTERFACE_OPTIONS_GROUP_TOOLTIP,
             exists = ZO_IsPCUI,
-            
             channelCategories = { CHAT_CATEGORY_PARTY },
+            onInitializeFunction = ZO_OptionsPanel_Interface_ChatBubbleChannel_OnInitialized,
         },
         --Options_Interface_ChatBubblesEmoteChannel
         [OPTIONS_CUSTOM_SETTING_CHAT_BUBBLE_EMOTE_ENABLED] =
@@ -390,8 +391,8 @@ local ZO_OptionsPanel_Interface_ControlData =
             text = SI_INTERFACE_OPTIONS_CHAT_EMOTE,
             tooltipText = SI_INTERFACE_OPTIONS_EMOTE_TOOLTIP,
             exists = ZO_IsPCUI,
-            
             channelCategories = { CHAT_CATEGORY_EMOTE },
+            onInitializeFunction = ZO_OptionsPanel_Interface_ChatBubbleChannel_OnInitialized,
         },
         --Options_Interface_FramerateLatencyResetPosition
         [OPTIONS_CUSTOM_SETTING_FRAMERATE_LATENCY_RESET_POSITION] =

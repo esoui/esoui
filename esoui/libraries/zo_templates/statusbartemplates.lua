@@ -12,6 +12,24 @@ function ZO_StatusBar_InitializeDefaultColors(statusBar)
     statusBar:SetGradientColors(startR, startG, startB, 1, endR, endG, endB, 1)
 end
 
+function ZO_StatusBar_SetOverlayColor(statusBar, colorOrR, g, b, a)
+    local overlay = statusBar:GetNamedChild("Overlay")
+    if overlay then
+        local r
+        if type(colorOrR == "number") then
+            r = colorOrR
+        else
+            r, g, b, a = colorOrR:UnpackRGBA()
+        end
+        local left = overlay:GetNamedChild("Left")
+        local right = overlay:GetNamedChild("Right")
+        local middle = overlay:GetNamedChild("Middle")
+        left:SetColor(r, g, b, a)
+        right:SetColor(r, g, b, a)
+        middle:SetColor(r, g, b, a)
+    end
+end
+
 local function ZO_GetOrCreateArrowBarGlowAnimationTimeline(control)
     if not control.glowAnimation then
         control.glowAnimation = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_ArrowBarGlowAnimation", control:GetNamedChild("Glow"))

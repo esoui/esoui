@@ -177,6 +177,8 @@ function ZO_GuildHistory_Gamepad:PopulateCategoryList()
 end
 
 function ZO_GuildHistory_Gamepad:SetupEventRow(control, eventData)
+    ZO_SortFilterList_Gamepad.SetupRow(self, control, eventData)
+
     local IS_GAMEPAD = true
     ZO_GuildHistory_Shared.SetupEventRow(self, control, eventData, IS_GAMEPAD)
 end

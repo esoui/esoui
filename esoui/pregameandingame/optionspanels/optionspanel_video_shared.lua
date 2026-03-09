@@ -2,26 +2,19 @@ local function GetSystemDisplayList(numDisplays)
      local valid = {}
      local events = {}
      local itemText = {}
- 
+
      for i = 1, numDisplays do
          local optionText = zo_strformat(SI_GRAPHICS_OPTIONS_VIDEO_ACTIVE_DISPLAY_FORMAT, i) 
          valid[i] = i - 1 -- Identifying indices start at 0
          events[i] = "ActiveDisplayChanged"
          itemText[i] = optionText
      end
- 
+
     return valid, events, itemText
 end
- 
+
 local function InitializeDisplays(control, numDisplays)
     local valid, events, itemText = GetSystemDisplayList(numDisplays)
-
-    for i = 1, numDisplays do
-        local optionText = zo_strformat(SI_GRAPHICS_OPTIONS_VIDEO_ACTIVE_DISPLAY_FORMAT, i) 
-        valid[i] = i - 1 -- Identifying indices start at 0
-        events[i] = "ActiveDisplayChanged"
-        itemText[i] = optionText
-    end
 
     control.data.valid = valid
     control.data.events = events
@@ -54,7 +47,7 @@ local function ZO_OptionsPanel_Video_UpdateResolutionDropdown(control)
     ZO_Options_UpdateOption(control)
 end
 
-local function InitializeResolution(control, ...)
+local function GetResolutions(...)
     local valid = {}
     local itemText = {}
 
@@ -66,6 +59,12 @@ local function InitializeResolution(control, ...)
             itemText[#itemText + 1] = optionText
         end
     end
+
+    return valid, itemText
+end
+
+local function InitializeResolution(control, ...)
+    local valid, itemText = GetResolutions(...)
 
     control.data.valid = valid
     control.data.itemText = itemText
@@ -181,6 +180,14 @@ local function OnHDRToggleUpdated(control)
     ZO_Options_UpdateOption(control)
 end
 
+local function GetValidFullscreenModes()
+    if ShouldAllowFullscreenExclusive() then
+        return { FULLSCREEN_MODE_FULLSCREEN_EXCLUSIVE, FULLSCREEN_MODE_WINDOWED, FULLSCREEN_MODE_FULLSCREEN_WINDOWED, }
+    end
+
+    return { FULLSCREEN_MODE_WINDOWED, FULLSCREEN_MODE_FULLSCREEN_WINDOWED, }
+end
+
 local ZO_OptionsPanel_Video_ControlData =
 {
     --Graphics
@@ -195,10 +202,10 @@ local ZO_OptionsPanel_Video_ControlData =
             panel = SETTING_PANEL_VIDEO,
             text = SI_GRAPHICS_OPTIONS_VIDEO_DISPLAY_MODE,
             tooltipText = SI_GRAPHICS_OPTIONS_VIDEO_DISPLAY_MODE_TOOLTIP,
-            valid = {FULLSCREEN_MODE_FULLSCREEN_EXCLUSIVE, FULLSCREEN_MODE_WINDOWED, FULLSCREEN_MODE_FULLSCREEN_WINDOWED, },
+            valid = GetValidFullscreenModes(),
             valueStringPrefix = "SI_FULLSCREENMODE",
             exists = ZO_IsPCUI,
-            events = { 
+            events = {
                 [FULLSCREEN_MODE_WINDOWED] = "DisplayModeWindowed", 
                 [FULLSCREEN_MODE_FULLSCREEN_WINDOWED] = "DisplayModeFullscreenWindowed", 
                 [FULLSCREEN_MODE_FULLSCREEN_EXCLUSIVE] = "DisplayModeFullscreenExclusive",
@@ -240,7 +247,7 @@ local ZO_OptionsPanel_Video_ControlData =
             exists = ZO_IsPCUI,
 
             gamepadIsEnabledCallback = function()
-                return tonumber(GetSetting(SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_FULLSCREEN)) == FULLSCREEN_MODE_FULLSCREEN_EXCLUSIVE
+                return tonumber(GetSetting(SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_FULLSCREEN)) ~= FULLSCREEN_MODE_WINDOWED
             end,
 
             eventCallbacks =
@@ -248,8 +255,8 @@ local ZO_OptionsPanel_Video_ControlData =
                 ["DisplayModeWindowed"] = ZO_OptionsPanel_Video_OnDisplayResolutionChanged,
                 ["DisplayModeFullscreenExclusive"] = ZO_OptionsPanel_Video_OnDisplayResolutionChanged,
                 ["ActiveDisplayChanged"] = ZO_OptionsPanel_Video_OnDisplayResolutionChanged,
-				["OnHDRToggled"] = ZO_OptionsPanel_Video_OnDisplayResolutionChanged,
-				["DisplayModeFullscreenWindowed"] = ZO_OptionsPanel_Video_OnDisplayResolutionChanged,
+                ["OnHDRToggled"] = ZO_OptionsPanel_Video_OnDisplayResolutionChanged,
+                ["DisplayModeFullscreenWindowed"] = ZO_OptionsPanel_Video_OnDisplayResolutionChanged,
             },
         },
         --Options_Video_VSync
@@ -320,7 +327,8 @@ local ZO_OptionsPanel_Video_ControlData =
             text = SI_GRAPHICS_OPTIONS_USE_BACKGROUND_FPS_LIMIT,
             tooltipText = SI_GRAPHICS_OPTIONS_USE_BACKGROUND_FPS_LIMIT_TOOLTIP,
             exists = ZO_IsPCUI,
-            events = {
+            events =
+            {
                 [true] = "UseBackgroundFPSLimitToggled",
                 [false] = "UseBackgroundFPSLimitToggled",
             },
@@ -370,7 +378,7 @@ local ZO_OptionsPanel_Video_ControlData =
             text = SI_GRAPHICS_OPTIONS_VIDEO_PRESETS,
             tooltipText = SI_GRAPHICS_OPTIONS_VIDEO_PRESETS_TOOLTIP,
 
-            valid = IsMinSpecMachine() 
+            valid = IsMinSpecMachine()
                     and {GRAPHICS_PRESETS_MINIMUM, GRAPHICS_PRESETS_LOW, GRAPHICS_PRESETS_MEDIUM, GRAPHICS_PRESETS_CUSTOM}
                     or {GRAPHICS_PRESETS_MINIMUM, GRAPHICS_PRESETS_LOW, GRAPHICS_PRESETS_MEDIUM, GRAPHICS_PRESETS_HIGH, GRAPHICS_PRESETS_ULTRA, GRAPHICS_PRESETS_MAXIMUM, GRAPHICS_PRESETS_CUSTOM},
 
@@ -791,7 +799,7 @@ local ZO_OptionsPanel_Video_ControlData =
             panel = SETTING_PANEL_VIDEO,
             text = SI_GRAPHICS_OPTIONS_ENERGY_SUSTAINABILITY_SCREEN_DIM_AND_RESOLUTION,
             tooltipText = function()
-                if IsConsoleUI() then
+                if ZO_IsConsoleOrGameCoreUI() then
                     return GetString(SI_GRAPHICS_OPTIONS_ENERGY_SUSTAINABILITY_SCREEN_DIM_AND_RESOLUTION_CONSOLE_TOOLTIP)
                 else
                     return GetString(SI_GRAPHICS_OPTIONS_ENERGY_SUSTAINABILITY_SCREEN_DIM_AND_RESOLUTION_PC_TOOLTIP)
@@ -812,7 +820,8 @@ local ZO_OptionsPanel_Video_ControlData =
             visible = DoesSystemSupportHDR,
             exists = ZO_IsPCUI,
             mustRestartToApply = true,
-            events = {
+            events =
+            {
                 [true]  = "OnHDRToggled",
                 [false] = "OnHDRToggled",
             },
@@ -987,7 +996,7 @@ local ZO_OptionsPanel_Video_ControlData =
             settingId = UI_SETTING_USE_GAMEPAD_CUSTOM_SCALE,
             panel = SETTING_PANEL_VIDEO,
             text = SI_VIDEO_OPTIONS_UI_USE_CUSTOM_SCALE,
-            tooltipText = IsConsoleUI() and GetString(SI_CONSOLE_GAMEPAD_VIDEO_OPTIONS_UI_USE_CUSTOM_SCALE_TOOLTIP) or GetString(SI_GAMEPAD_VIDEO_OPTIONS_UI_USE_CUSTOM_SCALE_TOOLTIP),
+            tooltipText = ZO_IsConsoleOrGameCoreUI() and GetString(SI_CONSOLE_GAMEPAD_VIDEO_OPTIONS_UI_USE_CUSTOM_SCALE_TOOLTIP) or GetString(SI_GAMEPAD_VIDEO_OPTIONS_UI_USE_CUSTOM_SCALE_TOOLTIP),
             exists = ZO_IsIngameUI,
         },
         [UI_SETTING_GAMEPAD_CUSTOM_SCALE] =
@@ -997,7 +1006,7 @@ local ZO_OptionsPanel_Video_ControlData =
             settingId = UI_SETTING_GAMEPAD_CUSTOM_SCALE,
             panel = SETTING_PANEL_VIDEO,
             text = SI_VIDEO_OPTIONS_UI_CUSTOM_SCALE,
-            tooltipText = IsConsoleUI() and GetString(SI_CONSOLE_GAMEPAD_VIDEO_OPTIONS_UI_CUSTOM_SCALE_TOOLTIP) or GetString(SI_GAMEPAD_VIDEO_OPTIONS_UI_CUSTOM_SCALE_TOOLTIP),
+            tooltipText = ZO_IsConsoleOrGameCoreUI() and GetString(SI_CONSOLE_GAMEPAD_VIDEO_OPTIONS_UI_CUSTOM_SCALE_TOOLTIP) or GetString(SI_GAMEPAD_VIDEO_OPTIONS_UI_CUSTOM_SCALE_TOOLTIP),
             exists = ZO_IsIngameUI,
             valueFormat = "%.6f",
             minValue = GAMEPAD_CUSTOM_UI_SCALE_LOWER_BOUND,
@@ -1020,8 +1029,8 @@ local ZO_OptionsPanel_Video_ControlData =
             panel = SETTING_PANEL_VIDEO,
             settingId = OPTIONS_CUSTOM_SETTING_SCREEN_ADJUST,
             text = SI_SETTING_SHOW_SCREEN_ADJUST,
-            exists = IsConsoleUI,
-            gamepadIsEnabledCallback = function() 
+            exists = ZO_IsConsoleOrGameCoreUI,
+            gamepadIsEnabledCallback = function()
                 -- only allow resizing once the previous one has been completed.
                 return not IsGUIResizing()
             end,
@@ -1081,6 +1090,13 @@ do
     local valid, events, itemText = GetSystemDisplayList(GetNumDisplays())
     availableDisplaysSetting.valid = valid
     availableDisplaysSetting.itemText = itemText
+end
+
+do
+    local availableResolutionsSetting = ZO_OptionsPanel_Video_ControlData[SETTING_TYPE_GRAPHICS][GRAPHICS_SETTING_RESOLUTION]
+    local valid, itemText = GetResolutions(GetDisplayModes(DEFAULT_DISPLAY_INDEX))
+    availableResolutionsSetting.valid = valid
+    availableResolutionsSetting.itemText = itemText
 end
 
 ZO_SharedOptions.AddTableToPanel(SETTING_PANEL_VIDEO, ZO_OptionsPanel_Video_ControlData)

@@ -1222,7 +1222,6 @@ function ZO_RestyleStation_Gamepad:SwitchToAction(action)
         self.actionMode = action
 
         if action ~= ACTION_NONE then
-            local nextActionPanel = self:GetActionPanel(action)
             self:UpdateCurrentActionFragmentGroup()
 
             self:GetMainList():RefreshVisible()
@@ -1733,20 +1732,20 @@ function ZO_RestyleStation_Gamepad:InitializeConfirmationDialog()
 
             -- gold
             if slotCosts > 0 then
-                local entryData = ZO_GamepadEntryData:New(GetCurrencyName(CURT_MONEY, IS_SINGULAR, IS_UPPER))
-                entryData.currencyType = CURT_MONEY
-                entryData.setup = SetupOutfitApplyOption
-                entryData.currencyLocation = CURRENCY_LOCATION_CHARACTER
-                entryData.value = slotCosts
-                entryData.useFlatCurrency = false
-                entryData.narrationText = function(entryData, entryControl)
+                local goldEntryData = ZO_GamepadEntryData:New(GetCurrencyName(CURT_MONEY, IS_SINGULAR, IS_UPPER))
+                goldEntryData.currencyType = CURT_MONEY
+                goldEntryData.setup = SetupOutfitApplyOption
+                goldEntryData.currencyLocation = CURRENCY_LOCATION_CHARACTER
+                goldEntryData.value = slotCosts
+                goldEntryData.useFlatCurrency = false
+                goldEntryData.narrationText = function(entryData, entryControl)
                     return { SCREEN_NARRATION_MANAGER:CreateNarratableObject(entryData.text), SCREEN_NARRATION_MANAGER:CreateNarratableObject(entryData.value) }
                 end
 
                 local listItem =
                 {
                     template = "ZO_Restyle_ApplyChanges_EntryTemplate_Gamepad",
-                    entryData = entryData,
+                    entryData = goldEntryData,
                     header = GetString(SI_GAMEPAD_OUTFITS_APPLY_CHANGES_LIST_HEADER),
                     headerTemplate = "ZO_GamepadMenuEntryFullWidthHeaderTemplate",
                 }
@@ -1755,20 +1754,20 @@ function ZO_RestyleStation_Gamepad:InitializeConfirmationDialog()
 
             -- outfit scraps
             if flatCost > 0 then
-                local entryData = ZO_GamepadEntryData:New(zo_strformat(SI_CURRENCY_NAME_FORMAT, GetCurrencyName(CURT_STYLE_STONES, IS_SINGULAR, IS_UPPER)))
-                entryData.currencyType = CURT_STYLE_STONES
-                entryData.currencyLocation = CURRENCY_LOCATION_ACCOUNT
-                entryData.setup = SetupOutfitApplyOption
-                entryData.value = flatCost
-                entryData.useFlatCurrency = true
-                entryData.narrationText = function(entryData, entryControl)
+                local tokenEntryData = ZO_GamepadEntryData:New(zo_strformat(SI_CURRENCY_NAME_FORMAT, GetCurrencyName(CURT_STYLE_STONES, IS_SINGULAR, IS_UPPER)))
+                tokenEntryData.currencyType = CURT_STYLE_STONES
+                tokenEntryData.currencyLocation = CURRENCY_LOCATION_ACCOUNT
+                tokenEntryData.setup = SetupOutfitApplyOption
+                tokenEntryData.value = flatCost
+                tokenEntryData.useFlatCurrency = true
+                tokenEntryData.narrationText = function(entryData, entryControl)
                     return { SCREEN_NARRATION_MANAGER:CreateNarratableObject(entryData.text), SCREEN_NARRATION_MANAGER:CreateNarratableObject(entryData.value) }
                 end
 
                 local listItem =
                 {
                     template = "ZO_Restyle_ApplyChanges_EntryTemplate_Gamepad",
-                    entryData = entryData,
+                    entryData = tokenEntryData,
                 }
                 table.insert(parametricList, listItem)
             end
@@ -1777,17 +1776,17 @@ function ZO_RestyleStation_Gamepad:InitializeConfirmationDialog()
         end,
         parametricList = {}, -- Added Dynamically
         parametricListOnSelectionChangedCallback = function(dialog, list, newSelectedData, oldSelectedData)
-                                                        if newSelectedData then
-                                                            local IS_GAMEPAD = true
-                                                            local USE_SHORT_FORMAT = false
-                                                            local balanceData =
-                                                            {
-                                                                data1 = { header = GetString(SI_GAMEPAD_OUTFITS_APPLY_CHANGES_BALANCE), 
-                                                                value = ZO_CurrencyControl_FormatCurrencyAndAppendIcon(GetCurrencyAmount(newSelectedData.currencyType, newSelectedData.currencyLocation), USE_SHORT_FORMAT, newSelectedData.currencyType, IS_GAMEPAD) },
-                                                            }
-                                                            ZO_GenericGamepadDialog_RefreshHeaderData(dialog, balanceData)
-                                                        end
-                                                    end,
+            if newSelectedData then
+                local IS_GAMEPAD = true
+                local USE_SHORT_FORMAT = false
+                local balanceData =
+                {
+                    data1 = { header = GetString(SI_GAMEPAD_OUTFITS_APPLY_CHANGES_BALANCE), 
+                    value = ZO_CurrencyControl_FormatCurrencyAndAppendIcon(GetCurrencyAmount(newSelectedData.currencyType, newSelectedData.currencyLocation), USE_SHORT_FORMAT, newSelectedData.currencyType, IS_GAMEPAD) },
+                }
+                ZO_GenericGamepadDialog_RefreshHeaderData(dialog, balanceData)
+            end
+        end,
         blockDialogReleaseOnPress = true,
         buttons =
         {
@@ -1803,29 +1802,20 @@ function ZO_RestyleStation_Gamepad:InitializeConfirmationDialog()
                     ZO_Dialogs_ReleaseDialogOnButtonPress("GAMEPAD_RESTYLE_STATION_CONFIRM_APPLY")
                 end,
                 enabled = function(dialog)
-                                local targetData = dialog.entryList:GetTargetData()
-                                if targetData then
-                                    local slotCosts, flatCost = self.currentOutfitManipulator:GetAllCostsForPendingChanges()
-                                    local costToUse = targetData.currencyType == CURT_MONEY and slotCosts or flatCost
-                                    return costToUse <= GetCurrencyAmount(targetData.currencyType, targetData.currencyLocation)
-                                end
-                                return false
-                            end,
+                    local targetData = dialog.entryList:GetTargetData()
+                    if targetData then
+                        local slotCosts, flatCost = self.currentOutfitManipulator:GetAllCostsForPendingChanges()
+                        local costToUse = targetData.currencyType == CURT_MONEY and slotCosts or flatCost
+                        return costToUse <= GetCurrencyAmount(targetData.currencyType, targetData.currencyLocation)
+                    end
+                    return false
+                end,
             },
             {
                 keybind = "DIALOG_NEGATIVE",
                 text = SI_GAMEPAD_BACK_OPTION,
                 callback =  function(dialog)
                     ZO_Dialogs_ReleaseDialogOnButtonPress("GAMEPAD_RESTYLE_STATION_CONFIRM_APPLY")
-                end,
-            },     
-            {
-                keybind = "DIALOG_SECONDARY",
-                text = zo_strformat(SI_BUY_CURRENCY, GetCurrencyName(CURT_STYLE_STONES, IS_SINGULAR, IS_UPPER)),
-                callback =  function(dialog)
-                    ZO_Dialogs_ReleaseDialogOnButtonPress("GAMEPAD_RESTYLE_STATION_CONFIRM_APPLY")
-                    self.currentOutfitManipulator:SetMarkedForPreservation(true)
-                    ShowMarketAndSearch("", MARKET_OPEN_OPERATION_OUTFIT_CURRENCY)
                 end,
             },     
         } 

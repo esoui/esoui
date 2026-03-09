@@ -267,7 +267,7 @@ function ZO_SocialOptionsDialogGamepad:BuildInviteToTributeOption()
 end
 
 function ZO_SocialOptionsDialogGamepad:BuildGamerCardOption()
-    if IsConsoleUI() then
+    if ZO_IsConsoleOrGameCoreUI() then
         local callback = function()
             local data = self.socialData
             local displayName = data.displayName
@@ -321,7 +321,7 @@ function ZO_SocialOptionsDialogGamepad:BuildIgnoreOption()
 end
 
 function ZO_SocialOptionsDialogGamepad:ShouldAddRemoveFriendOption()
-    return not IsConsoleUI() and IsFriend(DecorateDisplayName(self.socialData.displayName))
+    return not ZO_IsConsoleOrGameCoreUI() and IsFriend(DecorateDisplayName(self.socialData.displayName))
 end
 
 function ZO_SocialOptionsDialogGamepad:BuildRemoveFriendOption()
@@ -344,8 +344,8 @@ function ZO_SocialOptionsDialogGamepad:ShouldAddFriendOption()
 end
 
 function ZO_SocialOptionsDialogGamepad:BuildAddFriendOption()
-    local callback = function()      
-        if IsConsoleUI() then
+    local callback = function()
+        if ZO_IsConsoleOrGameCoreUI() then
             local displayName = self.socialData.displayName
             ZO_ShowConsoleAddFriendDialogFromDisplayName(displayName)
         else

@@ -3,69 +3,58 @@
         <Control name="ZO_GuildHeraldry_Style_Gamepad_Header_Template" virtual="true">
             <Controls>
                 <Label name="$(parent)Text" inherits="ZO_GridScrollList_Entry_Header_Template_Gamepad" excludeFromResizeToFitExtents="true">
-                    <Anchor point="TOPLEFT" offsetY="30" />
+                    <Anchor point="TOPLEFT" offsetY="30"/>
                 </Label>
             </Controls>
         </Control>
-
         <Control name="ZO_GuildHeraldry_StyleCategoryList_Gamepad" inherits="ZO_GamepadHorizontalScrollListTemplate" virtual="true">
-            <Dimensions y="100" />
-            <Anchor point="TOPLEFT" />
-            <Anchor point="TOPRIGHT" offsetY="ZO_GUILD_HERALDRY_STYLE_GAMEPAD_LIST_VERT_PADDING" />
-
+            <Dimensions y="100"/>
+            <Anchor point="TOPLEFT"/>
+            <Anchor point="TOPRIGHT" offsetY="ZO_GUILD_HERALDRY_STYLE_GAMEPAD_LIST_VERT_PADDING"/>
             <OnInitialized>
                 self.highlight = self:GetNamedChild("Highlight")
             </OnInitialized>
-
             <Controls>
                 <Label name="$(parent)CategoriesHeader" inherits="ZO_GridScrollList_Entry_Header_Template_Gamepad" text="SI_GUILD_HERALDRY_TYPE_HEADER">
-                    <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" />
+                    <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT"/>
                 </Label>
-
                 <Label name="$(parent)SelectedLabel" font="ZoFontGamepad27" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
                     <Anchor point="BOTTOM" relativePoint="TOP" offsetY="2"/>
                 </Label>
-
                 <Backdrop name="$(parent)Highlight" inherits="ZO_GamepadWhiteOutlineHighlight" hidden="true">
-                    <Dimensions x="ZO_GAMEPAD_DEFAULT_SELECTION_ICON_HIGHLIGHT_SIZE" y="ZO_GAMEPAD_DEFAULT_SELECTION_ICON_HIGHLIGHT_SIZE" />
+                    <Dimensions x="ZO_GAMEPAD_DEFAULT_SELECTION_ICON_HIGHLIGHT_SIZE" y="ZO_GAMEPAD_DEFAULT_SELECTION_ICON_HIGHLIGHT_SIZE"/>
                     <Anchor point="TOP" offsetY="10"/>
                 </Backdrop>
             </Controls>
         </Control>
-
         <Texture name="ZO_GuildHeraldry_StyleCategory_Gamepad" pixelRoundingEnabled="false" virtual="true">
-            <Dimensions x="ZO_GAMEPAD_DEFAULT_SELECTION_ICON_SIZE" y="ZO_GAMEPAD_DEFAULT_SELECTION_ICON_SIZE" />
+            <Dimensions x="ZO_GAMEPAD_DEFAULT_SELECTION_ICON_SIZE" y="ZO_GAMEPAD_DEFAULT_SELECTION_ICON_SIZE"/>
         </Texture>
-
-        <Control  name="ZO_GuildHeraldry_Style_Gamepad" hidden="true" virtual="true">
-            <Dimensions x="ZO_GUILD_HERALDRY_STYLE_GAMEPAD_ICON_SIZE" y="ZO_GUILD_HERALDRY_STYLE_GAMEPAD_ICON_SIZE" />
+        <Control name="ZO_GuildHeraldry_Style_Gamepad" hidden="true" virtual="true">
+            <Dimensions x="ZO_GUILD_HERALDRY_STYLE_GAMEPAD_ICON_SIZE" y="ZO_GUILD_HERALDRY_STYLE_GAMEPAD_ICON_SIZE"/>
             <Controls>
                 <Backdrop name="$(parent)Highlight" inherits="ZO_GamepadWhiteOutlineHighlight" hidden="true">
-                    <Dimensions x="ZO_GUILD_HERALDRY_STYLE_GAMEPAD_ICON_SIZE" y="ZO_GUILD_HERALDRY_STYLE_GAMEPAD_ICON_SIZE" />
+                    <Dimensions x="ZO_GUILD_HERALDRY_STYLE_GAMEPAD_ICON_SIZE" y="ZO_GUILD_HERALDRY_STYLE_GAMEPAD_ICON_SIZE"/>
                     <Anchor point="CENTER"/>
                 </Backdrop>
-
                 <Texture name="$(parent)Icon" level="5">
-                    <Dimensions x="ZO_GAMEPAD_DEFAULT_SELECTION_ICON_SIZE" y="ZO_GAMEPAD_DEFAULT_SELECTION_ICON_SIZE" />
-                    <Anchor point="CENTER" />
+                    <Dimensions x="ZO_GAMEPAD_DEFAULT_SELECTION_ICON_SIZE" y="ZO_GAMEPAD_DEFAULT_SELECTION_ICON_SIZE"/>
+                    <Anchor point="CENTER"/>
                 </Texture>
-
                 <Control name="$(parent)CurrentIconIndicator" hidden="true">
                     <Dimensions x="ZO_GAMEPAD_DEFAULT_SELECTION_ICON_SIZE" y="ZO_GAMEPAD_DEFAULT_SELECTION_ICON_SIZE"/>
-                    <Anchor point="CENTER" />
+                    <Anchor point="CENTER"/>
                     <Controls>
                         <Texture name="$(parent)Background" color="80FFFFFF" level="2">
-                            <AnchorFill />
+                            <AnchorFill/>
                         </Texture>
-
                         <Backdrop name="$(parent)Outline" inherits="ZO_GamepadWhiteOutlineHighlight" level="1">
-                            <AnchorFill />
+                            <AnchorFill/>
                         </Backdrop>
                     </Controls>
                 </Control>
             </Controls>
         </Control>
-
         <TextureComposite name="ZO_GuildHeraldry_Color_Gamepad" inherits="ZO_DyeingSwatch_Gamepad" virtual="true">
             <OnMouseEnter>
                 ZO_GuildHeraldry_DyeingSwatch_OnMouseEnter(self)
@@ -75,40 +64,35 @@
             </OnMouseExit>
             <Controls>
                 <Texture name="$(parent)Checkmark" textureFile="EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_equipped.dds" inheritScale="false">
-                    <Anchor point="CENTER" />
+                    <Anchor point="CENTER"/>
                     <Dimensions x="ZO_GUILD_HERALDRY_COLOR_GAMEPAD_CHECKMARK_SIZE" y="ZO_GUILD_HERALDRY_COLOR_GAMEPAD_CHECKMARK_SIZE"/>
                 </Texture>
             </Controls>
         </TextureComposite>
-
         <TopLevelControl name="ZO_GuildHeraldry_Gamepad" tier="MEDIUM" hidden="true" inherits="ZO_GuildHomeContentAnchor">
             <OnInitialized>
                 ZO_GuildHeraldry_Gamepad_OnInitialized(self)
             </OnInitialized>
-
             <OnHide>
                 EndHeraldryCustomization()
             </OnHide>
-
             <Controls>
                 <Scroll name="$(parent)ColorPane" inherits="ZO_GridScrollList_Gamepad">
-                    <Anchor point="TOPLEFT" />
-                    <Anchor point="BOTTOMRIGHT" />
+                    <Anchor point="TOPLEFT"/>
+                    <Anchor point="BOTTOMRIGHT"/>
                 </Scroll>
-
-                <Control name="$(parent)BGStyleCategoryList" inherits="ZO_GuildHeraldry_StyleCategoryList_Gamepad" />
-                <Control name="$(parent)CrestStyleCategoryList" inherits="ZO_GuildHeraldry_StyleCategoryList_Gamepad" />
-
+                <Control name="$(parent)BGStyleCategoryList" inherits="ZO_GuildHeraldry_StyleCategoryList_Gamepad"/>
+                <Control name="$(parent)CrestStyleCategoryList" inherits="ZO_GuildHeraldry_StyleCategoryList_Gamepad"/>
                 <Control name="$(parent)StylePane" inherits="ZO_GridScrollList_Gamepad">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)BGStyleCategoryList" relativePoint="BOTTOMLEFT" offsetY="ZO_GAMEPAD_CONTENT_VERT_OFFSET_PADDING" />
-                    <Anchor point="BOTTOMRIGHT" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)BGStyleCategoryList" relativePoint="BOTTOMLEFT" offsetY="ZO_GAMEPAD_CONTENT_VERT_OFFSET_PADDING"/>
+                    <Anchor point="BOTTOMRIGHT"/>
                     <Controls>
                         <Label name="$(parent)StylesHeader" inherits="ZO_GridScrollList_Entry_Header_Template_Gamepad">
-                            <Anchor point="TOPLEFT" />
+                            <Anchor point="TOPLEFT"/>
                         </Label>
                         <Control name="$(parent)Container" override="true">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)StylesHeader" relativePoint="BOTTOMRIGHT" offsetX="20" />
-                            <Anchor point="BOTTOMRIGHT" offsetX="-ZO_GAMEPAD_CONTENT_INSET_X" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)StylesHeader" relativePoint="BOTTOMRIGHT" offsetX="20"/>
+                            <Anchor point="BOTTOMRIGHT" offsetX="-ZO_GAMEPAD_CONTENT_INSET_X"/>
                         </Control>
                     </Controls>
                 </Control>

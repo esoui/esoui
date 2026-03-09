@@ -1,132 +1,105 @@
 <GuiXml>
     <Controls>
         <Control name="ZO_VengeancePerkTile_Keyboard_Control" inherits="ZO_ContextualActionsTile_Control ZO_ContextualActionsTile_Keyboard_Control" virtual="true">
-            <Dimensions x="ZO_VENGEANCE_PERK_TILE_KEYBOARD_DIMENSIONS_X" y="ZO_VENGEANCE_PERK_TILE_KEYBOARD_DIMENSIONS_Y" />
-
+            <Dimensions x="ZO_VENGEANCE_PERK_TILE_KEYBOARD_DIMENSIONS_X" y="ZO_VENGEANCE_PERK_TILE_KEYBOARD_DIMENSIONS_Y"/>
             <OnInitialized>
                 ZO_VengeancePerkTile_Keyboard.OnControlInitialized(self)
             </OnInitialized>
-
             <OnDragStart>
                 ZO_VengeancePerkTile_Keyboard.VengeancePerk_OnStartDrag(...)
             </OnDragStart>
-
             <Controls>
-                <Texture name="$(parent)Icon" override="true" hidden="true" />
-
+                <Texture name="$(parent)Icon" override="true" hidden="true"/>
                 <Control name="$(parent)FramedIcon" inherits="ZO_VengeancePerk_FramedIcon">
                     <Anchor point="CENTER" offsetY="41" relativePoint="TOP"/>
                 </Control>
-
                 <Label name="$(parent)Title" override="true" inherits="ZO_CollectibleTileDefaultLabel">
-                    <Dimensions y="54" />
-                    <Anchor point="BOTTOMLEFT"  offsetX="7" offsetY="-2" />
-                    <Anchor point="BOTTOMRIGHT" offsetX="-7" offsetY="-2" />
+                    <Dimensions y="54"/>
+                    <Anchor point="BOTTOMLEFT" offsetX="7" offsetY="-2"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="-7" offsetY="-2"/>
                 </Label>
-
                 <Texture name="$(parent)Status" inherits="ZO_MultiIcon" level="3">
-                    <Dimensions x="32" y="32" />
-                    <Anchor point="TOPLEFT" offsetX="3" offsetY="3" />
+                    <Dimensions x="32" y="32"/>
+                    <Anchor point="TOPLEFT" offsetX="3" offsetY="3"/>
                 </Texture>
             </Controls>
         </Control>
-
         <Control name="ZO_VengeanceEquippedPerk_Keyboard" resizeToFitDescendents="true" mouseEnabled="true" virtual="true">
             <OnInitialized>
                 self.name = self:GetNamedChild("Name")
                 self.icon = self:GetNamedChild("FramedIcon").object
                 self.highlight = self:GetNamedChild("Highlight")
             </OnInitialized>
-
             <OnMouseEnter>
                 ZO_Vengeance_Perks_Keyboard.EquippedPerk_OnMouseEnter(self)
             </OnMouseEnter>
-
             <OnMouseExit>
                 ZO_Vengeance_Perks_Keyboard.EquippedPerk_OnMouseExit(self)
             </OnMouseExit>
-
             <OnMouseUp>
                 ZO_Vengeance_Perks_Keyboard.EquippedPerk_OnMouseUp(...)
             </OnMouseUp>
-
             <OnDragStart>
                 ZO_Vengeance_Perks_Keyboard.EquippedPerk_OnStartDrag(...)
             </OnDragStart>
-
             <OnReceiveDrag>
                 ZO_Vengeance_Perks_Keyboard.EquippedPerk_OnReceiveDrag(...)
             </OnReceiveDrag>
-
             <Controls>
                 <Control name="$(parent)FramedIcon" inherits="ZO_VengeancePerk_FramedIcon_Keyboard" mouseEnabled="false">
-                    <Anchor point="TOPLEFT" />
+                    <Anchor point="TOPLEFT"/>
                 </Control>
-
                 <Texture name="$(parent)Highlight" level="5" textureFile="EsoUI/Art/ActionBar/actionBar_mouseOver.dds" hidden="true">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)FramedIcon" />
-                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)FramedIcon" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)FramedIcon"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)FramedIcon"/>
                 </Texture>
-
                 <Label name="$(parent)Name" font="ZoFontWindowSubtitle" wrapMode="ELLIPSIS" maxLineCount="2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
-                    <Dimensions x="200" />
-                    <Anchor point="LEFT" relativeTo="$(parent)FramedIcon" relativePoint="RIGHT" offsetX="20" />
+                    <Dimensions x="200"/>
+                    <Anchor point="LEFT" relativeTo="$(parent)FramedIcon" relativePoint="RIGHT" offsetX="20"/>
                 </Label>
             </Controls>
         </Control>
-
         <TopLevelControl name="ZO_Vengeance_Perks_Keyboard_TopLevel" inherits="ZO_CampaignOverviewSubwindow" hidden="true">
             <OnInitialized>
                 ZO_Vengeance_Perks_Keyboard.OnControlInitialized(self)
             </OnInitialized>
-
             <Controls>
                 <Control name="$(parent)EquippedPerksContainer">
-                    <Anchor point="TOPLEFT" relativeTo="ZO_SharedMediumLeftPanelBackground" offsetX="20" />
-
+                    <Anchor point="TOPLEFT" relativeTo="ZO_SharedMediumLeftPanelBackground" offsetX="20"/>
                     <Controls>
                         <Label name="$(parent)LoadoutHeader" font="ZoFontHeader3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
-                            <Anchor point="TOPLEFT" />
+                            <Anchor point="TOPLEFT"/>
                         </Label>
-
-                        <Control name="$(parent)Divider" inherits="ZO_LeftPanel_HorizontalDivider" >
-                            <Anchor point="TOPLEFT" offsetX="10" offsetY="35" />
-                            <Anchor point="RIGHT" relativeTo="ZO_SharedMediumLeftPanelBackground" relativePoint="RIGHT" offsetX="-40" constrains="X" />
+                        <Control name="$(parent)Divider" inherits="ZO_LeftPanel_HorizontalDivider">
+                            <Anchor point="TOPLEFT" offsetX="10" offsetY="35"/>
+                            <Anchor point="RIGHT" relativeTo="ZO_SharedMediumLeftPanelBackground" relativePoint="RIGHT" offsetX="-40" constrains="X"/>
                         </Control>
-
                         <Label name="$(parent)RedHeader" font="ZoFontHeader2" text="SI_CAMPAIGN_VENGEANCE_PERK_SLOT_RED" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)Divider" relativePoint="BOTTOMLEFT" offsetY="10" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Divider" relativePoint="BOTTOMLEFT" offsetY="10"/>
                         </Label>
-
                         <Control name="$(parent)RedPerk" inherits="ZO_VengeanceEquippedPerk_Keyboard">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)RedHeader" relativePoint="BOTTOMLEFT" offsetY="15"/>
                         </Control>
-
                         <Label name="$(parent)YellowHeader" font="ZoFontHeader2" text="SI_CAMPAIGN_VENGEANCE_PERK_SLOT_YELLOW" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)RedPerk" relativePoint="BOTTOMLEFT" offsetY="15" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)RedPerk" relativePoint="BOTTOMLEFT" offsetY="15"/>
                         </Label>
-
                         <Control name="$(parent)YellowPerk" inherits="ZO_VengeanceEquippedPerk_Keyboard">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)YellowHeader" relativePoint="BOTTOMLEFT" offsetY="15" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)YellowHeader" relativePoint="BOTTOMLEFT" offsetY="15"/>
                         </Control>
-
                         <Label name="$(parent)BlueHeader" font="ZoFontHeader2" text="SI_CAMPAIGN_VENGEANCE_PERK_SLOT_BLUE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)YellowPerk" relativePoint="BOTTOMLEFT" offsetY="15" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)YellowPerk" relativePoint="BOTTOMLEFT" offsetY="15"/>
                         </Label>
-
                         <Control name="$(parent)BluePerk" inherits="ZO_VengeanceEquippedPerk_Keyboard">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)BlueHeader" relativePoint="BOTTOMLEFT" offsetY="10" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)BlueHeader" relativePoint="BOTTOMLEFT" offsetY="10"/>
                         </Control>
                     </Controls>
                 </Control>
-
                 <Label name="$(parent)InstructionText" font="ZoFontHeader">
-                    <Anchor point="TOP" offsetY="-40" />
+                    <Anchor point="TOP" offsetY="-40"/>
                 </Label>
-
                 <Control name="$(parent)List" inherits="ZO_GridScrollList_Keyboard">
-                    <Anchor point="TOPLEFT" offsetY="-20" />
-                    <Anchor point="BOTTOMRIGHT" />
+                    <Anchor point="TOPLEFT" offsetY="-20"/>
+                    <Anchor point="BOTTOMRIGHT"/>
                 </Control>
             </Controls>
         </TopLevelControl>

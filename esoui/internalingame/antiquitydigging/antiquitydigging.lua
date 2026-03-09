@@ -368,7 +368,7 @@ end
 -- Begin Gamepad Actions --
 
 function ZO_AntiquityDigging:UpdateDirectionalInput()
-    self.gamepadX, self.gamepadY = DIRECTIONAL_INPUT:GetXY(ZO_DI_LEFT_STICK, ZO_DI_DPAD)
+    self.gamepadX, self.gamepadY = DIRECTIONAL_INPUT:GetXY(ZO_DI_LEFT_STICK_NO_KEYBOARD, ZO_DI_DPAD)
     local moveX = self.horizontalMovementController:CheckMovement()
     local moveY = self.verticalMovementController:CheckMovement()
     local deltaX = moveX == MOVEMENT_CONTROLLER_MOVE_PREVIOUS and -1 or moveX == MOVEMENT_CONTROLLER_MOVE_NEXT and 1 or 0

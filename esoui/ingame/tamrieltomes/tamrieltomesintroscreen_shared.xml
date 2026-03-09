@@ -1,0 +1,52 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_TamrielTomesIntroHighlight_Shared" resizeToFitConstrains="Y" virtual="true">
+            <Dimensions x="760"/>
+            <OnInitialized>
+                self.titleLabel = self:GetNamedChild("Title")
+                self.bodyTextLabel = self:GetNamedChild("BodyText")
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Title" color="INTERFACE_COLOR_TYPE_BOOK_MEDIUM:BOOK_MEDIUM_BLOODY_YELLOWED_PAPER">
+                    <Anchor point="TOPLEFT" offsetY="4"/>
+                    <Anchor point="TOPRIGHT" offsetX="-4" offsetY="4"/>
+                </Label>
+                <Label name="$(parent)BodyText" color="INTERFACE_COLOR_TYPE_BOOK_MEDIUM:BOOK_MEDIUM_BLOODY_YELLOWED_PAPER">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetX="14" offsetY="4"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Title" relativePoint="BOTTOMRIGHT" offsetX="-4" offsetY="4"/>
+                </Label>
+            </Controls>
+        </Control>
+        <TopLevelControl name="ZO_TamrielTomesIntro_SharedTL" hidden="true" virtual="true">
+            <Dimensions x="1810" y="998"/>
+            <Anchor point="BOTTOM"/>
+            <Controls>
+                <Texture name="$(parent)BookBG" textureFile="/EsoUI/Art/TamrielTomes/two_page_open_tome.dds">
+                    <AnchorFill/>
+                    <TextureCoords left="0.01855" top="0.01269" right="0.98145" bottom="0.98731"/>
+                </Texture>
+                <!-- Left side of book -->
+                <Label name="$(parent)Title" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_BOOK_MEDIUM:BOOK_MEDIUM_BLOODY_YELLOWED_PAPER">
+                    <Anchor point="TOPLEFT" offsetX="100" offsetY="100"/>
+                    <Anchor point="TOPRIGHT" relativePoint="TOP" offsetX="-70" offsetY="100"/>
+                </Label>
+                <Control name="$(parent)Image">
+                    <Dimensions x="770" y="435"/>
+                    <Anchor point="TOP" relativeTo="$(parent)Title" relativePoint="BOTTOM" offsetX="-4" offsetY="60"/>
+                    <Controls>
+                        <Texture name="$(parent)Background" level="2" alpha="0.8">
+                            <AnchorFill/>
+                        </Texture>
+                    </Controls>
+                </Control>
+                <Texture name="$(parent)PremiumGroupBorder" textureFile="EsoUI/Art/TamrielTomes/tome_group_premium_slots_border.dds" level="3">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Image" offsetX="-7" offsetY="-9"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Image" offsetX="7" offsetY="9"/>
+                    <TextureCoords left="0" right="0.6699" top="0" bottom="0.6895"/>
+                </Texture>
+                <!-- Right side of book -->
+                <Control name="$(parent)Highlights"/>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

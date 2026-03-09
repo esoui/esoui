@@ -1,4 +1,4 @@
-local PRIMARY_SYSTEM_CURRENCY = CURT_ENDEAVOR_SEALS
+local PRIMARY_SYSTEM_CURRENCY = CURT_SEALS
 
 -- Timed Activity Data --
 
@@ -8,6 +8,7 @@ function ZO_TimedActivityData:Initialize(index)
     self.index = index
     -- For troubleshooting purposes only
     self.timedActivityId = GetTimedActivityId(index)
+    self.encodedId = GetTimedActivityEncodedId(index)
 end
 
 function ZO_TimedActivityData:GetIndex()
@@ -16,6 +17,10 @@ end
 
 function ZO_TimedActivityData:GetId()
     return self.timedActivityId
+end
+
+function ZO_TimedActivityData:GetEncodedId()
+    return self.encodedId
 end
 
 function ZO_TimedActivityData:GetName()
@@ -38,6 +43,10 @@ function ZO_TimedActivityData:IsWeeklyActivity()
     return self:GetType() == TIMED_ACTIVITY_TYPE_WEEKLY
 end
 
+function ZO_TimedActivityData:IsSeasonalActivity()
+    return self:GetType() == TIMED_ACTIVITY_TYPE_SEASONAL
+end
+
 function ZO_TimedActivityData:GetDifficulty()
     return GetTimedActivityDifficulty(self.index)
 end
@@ -51,6 +60,11 @@ function ZO_TimedActivityData:GetRewardInfo(rewardIndex)
     return rewardId, rewardQuantity
 end
 
+function ZO_TimedActivityData:GetCurrencyRewardInfo()
+    local rewardCurrency, rewardCurrencyAmount = GetTimedActivityCurrencyRewardInfo(self.index)
+    return rewardCurrency, rewardCurrencyAmount
+end
+
 function ZO_TimedActivityData:GetProgress()
     return GetTimedActivityProgress(self.index)
 end
@@ -60,11 +74,31 @@ function ZO_TimedActivityData:GetMaxProgress()
 end
 
 function ZO_TimedActivityData:IsCompleted()
+    -- IsCompleted here means that the current progress is at maximum. It may or may not also be claimable (CanClaim) or fully claimed (IsFullyClaimed).
+    -- This definition of complete differs from the backend, which considers fully claimed activities to be "complete".
     return self:GetProgress() >= self:GetMaxProgress()
 end
 
+function ZO_TimedActivityData:GetEndTimeS()
+    return GetTimedActivityEndTimeS(self.index)
+end
+
 function ZO_TimedActivityData:GetTimeRemainingS()
-    return GetTimedActivityTimeRemainingSeconds(self.index)
+    local activeSeasonEndTimeS = TIMED_ACTIVITIES_MANAGER:GetActiveSeasonEndTimeS()
+    if activeSeasonEndTimeS then
+        local endTimeS = self:GetEndTimeS()
+        -- Any activity that ends when the season ends we don't want to show the time for
+        if endTimeS > 0 and endTimeS ~= activeSeasonEndTimeS then
+            return zo_max(0, endTimeS - GetTimeStamp())
+        end
+    end
+    return nil -- No end time, so time remaining is infinite
+end
+
+function ZO_TimedActivityData:IsExpired()
+    local timeRemainingS = self:GetTimeRemainingS()
+    -- nil time remaining never expires
+    return timeRemainingS == 0
 end
 
 do
@@ -156,25 +190,106 @@ do
     end
 end
 
+function ZO_TimedActivityData:GetTotalNumTimesClaimable()
+    return GetTimedActivityTotalNumTimesClaimable(self.index)
+end
+
+function ZO_TimedActivityData:GetNumTimesClaimed()
+    return GetTimedActivityNumTimesClaimed(self.index)
+end
+
+function ZO_TimedActivityData:IsFullyClaimed()
+    local totalNumTimesClaimable = self:GetTotalNumTimesClaimable()
+    if totalNumTimesClaimable > 0 then
+        return self:GetNumTimesClaimed() == totalNumTimesClaimable
+    else
+        return false
+    end
+end
+
+function ZO_TimedActivityData:IsFullyClaimedOrExpired()
+    return self:IsFullyClaimed() or self:IsExpired()
+end
+
+function ZO_TimedActivityData:CanClaim()
+    return not self:IsFullyClaimed() and self:IsCompleted()
+end
+
+function ZO_TimedActivityData:Claim()
+    ClaimTimedActivityReward(self.index)
+end
+
+function ZO_TimedActivityData:CanReroll()
+    return self:GetNumTimesClaimed() == 0 and not self:IsSeasonalActivity()
+end
+
+function ZO_TimedActivityData:Reroll()
+    local result = RerollTimedActivity(self.index)
+    return result
+end
+
+function ZO_TimedActivityData:CanTrack()
+    local numTimesClaimed = self:GetNumTimesClaimed()
+    local numTimesClaimable = self:GetTotalNumTimesClaimable()
+    local numClaimsRemaining = numTimesClaimable - numTimesClaimed
+    if numClaimsRemaining > 1 then
+        return true
+    elseif numClaimsRemaining == 1 then
+        return not self:IsCompleted()
+    end
+    return false
+end
+
+function ZO_TimedActivityData:IsTracked()
+    local index = GetTrackedTimedActivityInfo()
+    return self.index == index
+end
+
+function ZO_TimedActivityData:ToggleTracking(suppressSound)
+    if self:IsTracked() then
+        ClearTrackedTimedActivity()
+        if not suppressSound then
+            PlaySound(SOUNDS.TRACK_TIMED_ACTIVITY_UNCLICK)
+        end
+    else
+        TrackTimedActivity(self.index)
+        if not suppressSound then
+            PlaySound(SOUNDS.TRACK_TIMED_ACTIVITY_CLICK)
+        end
+    end
+end
+
+function ZO_TimedActivityData:Equals(otherData)
+    return AreId64sEqual(self:GetEncodedId(), otherData:GetEncodedId())
+end
+
 -- Timed Activities Manager --
 
-local ZO_TimedActivities_Manager = ZO_InitializingCallbackObject:Subclass()
+ZO_TimedActivities_Manager = ZO_InitializingCallbackObject:Subclass()
 
 function ZO_TimedActivities_Manager:Initialize()
     self.availableActivityTypes = {}
     self.activitiesData = {}
+    self.seenActivityEncodedIds = SAVED_KEYS:GetOrCreateSavedKeys("SeenActivityEncodedIds")
 
-    self.activityTypeLimitData = {}
-    for activityType = TIMED_ACTIVITY_TYPE_MIN_VALUE, TIMED_ACTIVITY_TYPE_MAX_VALUE do
-        self.activityTypeLimitData[activityType] =
-        {
-            completed = 0,
-            limit = GetTimedActivityTypeLimit(activityType),
-        }
+    local function OnSeenActivitiesUpdated()
+        self:RefreshMainMenu()
+        self:FireCallbacks("SeenActivitiesUpdated")
     end
+
+    self.seenActivityEncodedIds:RegisterCallback("AddedKeys", OnSeenActivitiesUpdated)
+    self.seenActivityEncodedIds:RegisterCallback("RemovedKeys", OnSeenActivitiesUpdated)
 
     self:RefreshMasterList()
     self:RegisterEvents()
+end
+
+function ZO_TimedActivities_Manager:RefreshMainMenu()
+    MAIN_MENU_GAMEPAD:RefreshLists()
+
+    if not ZO_IsConsoleOrGameCoreUI() then
+        MAIN_MENU_KEYBOARD:RefreshCategoryBar()
+    end
 end
 
 function ZO_TimedActivities_Manager:RefreshAvailability()
@@ -184,7 +299,12 @@ function ZO_TimedActivities_Manager:RefreshAvailability()
         self.availableActivityTypes[activityType] = isSystemAvailable and self:GetNumTimedActivities(activityType) > 0
     end
 
+    self:RefreshMainMenu()
     self:FireCallbacks("OnRefreshAvailability", self.availableActivityTypes)
+end
+
+function ZO_TimedActivities_Manager:GetAvailableActivityTypes()
+    return self.availableActivityTypes
 end
 
 function ZO_TimedActivities_Manager:RefreshMasterList()
@@ -196,7 +316,6 @@ function ZO_TimedActivities_Manager:RefreshMasterList()
         table.insert(self.activitiesData, timedActivityData)
     end
 
-    self:RefreshTimedActivityTypeLimitData()
     self:RefreshAvailability()
     self:FireCallbacks("OnActivitiesUpdated")
 end
@@ -204,7 +323,6 @@ end
 function ZO_TimedActivities_Manager:RefreshSingleMasterListItem(index)
     self.activitiesData[index] = ZO_TimedActivityData:New(index)
 
-    self:RefreshTimedActivityTypeLimitData()
     self:RefreshAvailability()
     self:FireCallbacks("OnActivityUpdated", index)
 end
@@ -222,19 +340,39 @@ function ZO_TimedActivities_Manager:RegisterEvents()
         self:RefreshAvailability()
     end
 
-    EVENT_MANAGER:RegisterForEvent("TimedActivitiesManager", EVENT_PLAYER_ACTIVATED, OnActivitiesUpdated)
+    local function UpdateSeasonEndTime()
+        local endTimeS = GetActiveTamrielTomeSeasonEndTimeS()
+        self.activeSeasonEndTimeS = endTimeS > 0 and endTimeS or nil
+    end
+
+    local function OnPlayerActivated()
+        self:RefreshMasterList()
+        UpdateSeasonEndTime()
+    end
+
+    EVENT_MANAGER:RegisterForEvent("TimedActivitiesManager", EVENT_PLAYER_ACTIVATED, OnPlayerActivated)
     EVENT_MANAGER:RegisterForEvent("TimedActivitiesManager", EVENT_TIMED_ACTIVITIES_UPDATED, OnActivitiesUpdated)
+    EVENT_MANAGER:RegisterForEvent("TimedActivitiesManager", EVENT_TIMED_ACTIVITY_TRACKING_UPDATED, OnActivitiesUpdated)
     EVENT_MANAGER:RegisterForEvent("TimedActivitiesManager", EVENT_TIMED_ACTIVITY_PROGRESS_UPDATED, OnActivityUpdated)
     EVENT_MANAGER:RegisterForEvent("TimedActivitiesManager", EVENT_TIMED_ACTIVITY_SYSTEM_STATUS_UPDATED, OnSystemStatusUpdated)
     EVENT_MANAGER:RegisterForEvent("TimedActivitiesManager", EVENT_OPEN_TIMED_ACTIVITIES, ZO_ShowTimedActivities)
+    EVENT_MANAGER:RegisterForEvent("TimedActivitiesManager", EVENT_HOLIDAYS_CHANGED, UpdateSeasonEndTime)
 end
 
 function ZO_TimedActivities_Manager:ActivitiesIterator(filterFunctions)
     return ZO_FilteredNumericallyIndexedTableIterator(self.activitiesData, filterFunctions)
 end
 
+function ZO_TimedActivities_Manager:GetActivityDatasByFilter(filterFunctions)
+    local activityDatas = {}
+    for index, activityData in self:ActivitiesIterator(filterFunctions) do
+        table.insert(activityDatas, activityData)
+    end
+    return activityDatas
+end
+
 function ZO_TimedActivities_Manager:GetFirstActivityDataByFilter(filterFunctions)
-    for index, activityData in TIMED_ACTIVITIES_MANAGER:ActivitiesIterator(filterFunctions) do
+    for index, activityData in self:ActivitiesIterator(filterFunctions) do
         return activityData
     end
     return nil
@@ -247,8 +385,51 @@ function ZO_TimedActivities_Manager:GetActivityDataByTypeAndId(timedActivityType
     return self:GetFirstActivityDataByFilter({ ActivityMatches })
 end
 
+function ZO_TimedActivities_Manager:GetActivityDatasByType(timedActivityType)
+    local function ActivityMatches(activityData)
+        return activityData:GetType() == timedActivityType
+    end
+    return self:GetActivityDatasByFilter({ ActivityMatches })
+end
+
+function ZO_TimedActivities_Manager:GetClaimableActivityDatasByActivityType(timedActivityType)
+    local ActivityMatches
+    if timedActivityType then
+        ActivityMatches = function(activityData)
+            return activityData:CanClaim() and activityData:GetType() == timedActivityType
+        end
+    else
+        ActivityMatches = function(activityData)
+            return activityData:CanClaim()
+        end
+    end
+    return self:GetActivityDatasByFilter({ ActivityMatches })
+end
+
+function ZO_TimedActivities_Manager:GetActivityDatasByEncodedIds(timedActivityEncodedIds)
+    local function ActivityMatches(activityData)
+        return ZO_IsElementInNumericallyIndexedTable(timedActivityEncodedIds, activityData:GetEncodedId())
+    end
+    return self:GetActivityDatasByFilter({ ActivityMatches })
+end
+
+function ZO_TimedActivities_Manager:GetActivityDataByEncodedId(timedActivityEncodedId)
+    local function ActivityMatches(activityData)
+        return activityData:GetEncodedId() == timedActivityEncodedId
+    end
+    return self:GetFirstActivityDataByFilter({ ActivityMatches })
+end
+
 function ZO_TimedActivities_Manager:GetActivityDataByIndex(activityIndex)
     return self.activitiesData[activityIndex]
+end
+
+function ZO_TimedActivities_Manager:GetEncodedIdsForActivityDatas(activityDatas)
+    local timedActivityEncodedIds = {}
+    for activityIndex, activityData in ipairs(activityDatas) do
+        table.insert(timedActivityEncodedIds, activityData:GetEncodedId())
+    end
+    return timedActivityEncodedIds
 end
 
 function ZO_TimedActivities_Manager.GetPrimaryTimedActivitiesCurrencyType()
@@ -256,24 +437,8 @@ function ZO_TimedActivities_Manager.GetPrimaryTimedActivitiesCurrencyType()
 end
 
 function ZO_TimedActivities_Manager:GetTimedActivityTypeTimeRemainingSeconds(timedActivityType)
-    local filterFunctions
-    if timedActivityType == TIMED_ACTIVITY_TYPE_DAILY then
-        filterFunctions = {ZO_TimedActivityData.IsDailyActivity}
-    elseif timedActivityType == TIMED_ACTIVITY_TYPE_WEEKLY then
-        filterFunctions = {ZO_TimedActivityData.IsWeeklyActivity}
-    else
-        return 0
-    end
-
-    local minimumTimeRemainingS = nil
-    for _, timedActivity in self:ActivitiesIterator(filterFunctions) do
-        local timeRemainingS = timedActivity:GetTimeRemainingS()
-        if timeRemainingS > 0 and (not minimumTimeRemainingS or timeRemainingS < minimumTimeRemainingS) then
-            minimumTimeRemainingS = timeRemainingS
-        end
-    end
-
-    return minimumTimeRemainingS or 0
+    local endTimeS = GetTimedActivityTypeResetTimeS(timedActivityType)
+    return zo_max(0, endTimeS - GetTimeStamp())
 end
 
 function ZO_TimedActivities_Manager:GetNumTimedActivities(activityType)
@@ -286,35 +451,66 @@ function ZO_TimedActivities_Manager:GetNumTimedActivities(activityType)
     return numActivities
 end
 
-function ZO_TimedActivities_Manager:RefreshTimedActivityTypeLimitData()
-    for activityType = TIMED_ACTIVITY_TYPE_MIN_VALUE, TIMED_ACTIVITY_TYPE_MAX_VALUE do
-        self.activityTypeLimitData[activityType].completed = 0
+function ZO_TimedActivities_Manager.GetNumRemainingRerollAttempts()
+    local currencyAmount = GetPlayerStoredCurrencyAmount(CURT_TOME_CHALLENGE_REROLLS)
+    return currencyAmount
+end
+
+function ZO_TimedActivities_Manager:GetActiveSeasonEndTimeS()
+    return self.activeSeasonEndTimeS
+end
+
+function ZO_TimedActivities_Manager:GetNewTimedActivityEncodedIds(activityDatas)
+    if not self.seenActivityEncodedIds:IsInitialized() then
+        return {}
     end
 
-    for _, timedActivity in self:ActivitiesIterator() do
-        if timedActivity:IsCompleted() then
-            local activityType = timedActivity:GetType()
-            self.activityTypeLimitData[activityType].completed = self.activityTypeLimitData[activityType].completed + 1
+    local allEncodedIds = zo_id64ToString(self:GetEncodedIdsForActivityDatas(activityDatas or self.activitiesData))
+    local foundEncodedIds, missingEncodedIds = self.seenActivityEncodedIds:FindKeys(allEncodedIds)
+    return zo_stringToId64(missingEncodedIds)
+end
+
+function ZO_TimedActivities_Manager:IsNewTimedActivity(activityData)
+    return self.seenActivityEncodedIds:IsInitialized() and
+        not self.seenActivityEncodedIds:HasKey(Id64ToString(activityData:GetEncodedId()))
+end
+
+function ZO_TimedActivities_Manager:HasNewTimedActivities(timedActivityType)
+    -- Get the encoded ids of any activities that have not been seen yet.
+    local newActivityEncodedIds = self:GetNewTimedActivityEncodedIds(self.activitiesData)
+
+    if timedActivityType == nil then
+        -- Check if there is at least one new activity.
+        return next(newActivityEncodedIds) ~= nil
+    end
+
+    -- Check if there is at least one new activity of the specified type.
+    for _, encodedId in ipairs(newActivityEncodedIds) do
+        local activityData = self:GetActivityDataByEncodedId(encodedId)
+        if activityData and activityData:GetType() == timedActivityType then
+            return true
         end
     end
+
+    return false
 end
 
-function ZO_TimedActivities_Manager:GetTimedActivityTypeLimitInfo(activityType)
-    local limitData = self.activityTypeLimitData[activityType]
-    return limitData.completed, limitData.limit
+function ZO_TimedActivities_Manager:HasClaimableTimedActivities(timedActivityType)
+    local claimableActivityDatas = self:GetClaimableActivityDatasByActivityType(timedActivityType)
+    return next(claimableActivityDatas) ~= nil
 end
 
-function ZO_TimedActivities_Manager:IsAtTimedActivityTypeLimit(activityType)
-    local numActivitiesCompleted, activityLimit = self:GetTimedActivityTypeLimitInfo(activityType)
-    return numActivitiesCompleted >= activityLimit
+function ZO_TimedActivities_Manager:MarkTimedActivitiesAsSeen(activityDatas)
+    local encodedIds = {}
+    for _, activityData in ipairs(activityDatas) do
+        table.insert(encodedIds, Id64ToString(activityData:GetEncodedId()))
+    end
+    self.seenActivityEncodedIds:AddKeys(unpack(encodedIds))
 end
 
 function ZO_ShowTimedActivities()
-    if IsInGamepadPreferredMode() then
-        ZO_ACTIVITY_FINDER_ROOT_GAMEPAD:ShowCategory(TIMED_ACTIVITIES_GAMEPAD:GetCategoryData())
-    else
-        GROUP_MENU_KEYBOARD:ShowCategory(TIMED_ACTIVITIES_FRAGMENT)
-    end
+    local scene = IsInGamepadPreferredMode() and "TimedActivitiesGamepad" or "TimedActivitiesKeyboard"
+    SCENE_MANAGER:Push(scene)
 end
 
 function ZO_ShowSealStore()

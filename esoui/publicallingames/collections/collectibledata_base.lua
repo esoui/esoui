@@ -428,7 +428,7 @@ function ZO_CollectibleData_Base:GetPrimaryInteractionStringId(actorCategory)
 end
 
 function ZO_CollectibleData_Base:IsPlaceableFurniture()
-    return IsCollectibleCategoryPlaceableFurniture(self:GetCategoryType())
+    return IsCollectiblePlaceableFurniture(self.collectibleId)
 end
 
 function ZO_CollectibleData_Base:GetInventoryBag()

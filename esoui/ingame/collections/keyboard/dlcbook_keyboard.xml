@@ -4,7 +4,6 @@
             <OnInitialized>
                 ZO_DLCBook_Keyboard_OnInitialize(self)
             </OnInitialized>
-
             <Controls>
                 <Control name="$(parent)Contents" override="true">
                     <Controls>
@@ -13,61 +12,50 @@
                                 <Control name="$(parent)ScrollChild" override="true">
                                     <Controls>
                                         <Label name="$(parent)UnlockStatusLabel" inherits="ZO_SpecializedCollection_Book_DefaultLabel_Keyboard" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
-                                            <Anchor point="TOPLEFT" relativeTo="$(parent)Description" relativePoint="BOTTOMLEFT" offsetY="10" />
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)Description" relativePoint="BOTTOMLEFT" offsetY="10"/>
                                         </Label>
-
                                         <Label name="$(parent)QuestStatusLabel" inherits="ZO_SpecializedCollection_Book_DefaultLabel_Keyboard">
-                                            <Anchor point="TOPLEFT" relativeTo="$(parent)UnlockStatusLabel" relativePoint="BOTTOMLEFT" offsetY="5" />
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)UnlockStatusLabel" relativePoint="BOTTOMLEFT" offsetY="5"/>
                                         </Label>
-
                                         <Label name="$(parent)QuestAvailable" inherits="ZO_SpecializedCollection_Book_DefaultLabel_Dimensions_Keyboard" font="ZoFontHeader2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" hidden="true">
-                                            <Anchor point="TOPLEFT" relativeTo="$(parent)QuestStatusLabel" relativePoint="BOTTOMLEFT" offsetY="30" />
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)QuestStatusLabel" relativePoint="BOTTOMLEFT" offsetY="30"/>
                                         </Label>
-
                                         <Label name="$(parent)QuestDescription" inherits="ZO_SpecializedCollection_Book_DefaultLabel_Keyboard ZO_SpecializedCollection_Book_DefaultLabel_Dimensions_Keyboard" hidden="true">
-                                            <Anchor point="TOPLEFT" relativeTo="$(parent)QuestAvailable" relativePoint="BOTTOMLEFT" />
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)QuestAvailable" relativePoint="BOTTOMLEFT"/>
                                         </Label>
                                     </Controls>
                                 </Control>
                             </Controls>
                         </Control>
-
                         <Control name="$(parent)DLCInteractButtons" resizeToFitDescendents="true">
-                            <Anchor point="BOTTOM" offsetY="-20" />
+                            <Anchor point="BOTTOM" offsetY="-20"/>
                             <Controls>
                                 <Button name="$(parent)QuestAccept" inherits="ZO_DefaultButton" text="SI_COLLECTIBLE_ACTION_ACCEPT_QUEST">
-                                    <Dimensions x="200" />
-                                    <Anchor point="BOTTOMLEFT" />
-
+                                    <Dimensions x="200"/>
+                                    <Anchor point="BOTTOMLEFT"/>
                                     <OnClicked>
                                         ZO_DLCBook_Keyboard_OnQuestAcceptClicked(self)
                                     </OnClicked>
                                 </Button>
-
                                 <Button name="$(parent)UnlockPermanently" inherits="ZO_DefaultButton" text="SI_DLC_BOOK_ACTION_OPEN_CROWN_STORE">
-                                    <Dimensions x="200" />
-                                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)QuestAccept"  relativePoint="BOTTOMRIGHT" />
-
+                                    <Dimensions x="200"/>
+                                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)QuestAccept" relativePoint="BOTTOMRIGHT"/>
                                     <OnClicked>
                                         ZO_DLCBook_Keyboard_OnUnlockPermanentlyClicked(self)
                                     </OnClicked>
                                 </Button>
-
                                 <Button name="$(parent)ChapterUpgrade" inherits="ZO_DefaultButton" text="SI_DLC_BOOK_ACTION_CHAPTER_UPGRADE">
-                                    <Dimensions x="200" />
-                                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)QuestAccept"  relativePoint="BOTTOMRIGHT" />
-
+                                    <Dimensions x="200"/>
+                                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)QuestAccept" relativePoint="BOTTOMRIGHT"/>
                                     <OnClicked>
                                         ZO_DLCBook_Keyboard_OnChapterUpgradeClicked(self)
                                     </OnClicked>
                                 </Button>
                             </Controls>
                         </Control>
-
                         <Button name="$(parent)SubscribeButton" inherits="ZO_DefaultButton" text="SI_DLC_BOOK_ACTION_GET_SUBSCRIPTION">
-                            <Dimensions x="200" />
-                            <Anchor point="TOP" relativeTo="$(grandparent)NavigationList"  relativePoint="BOTTOM" offsetY="10"/>
-
+                            <Dimensions x="200"/>
+                            <Anchor point="TOP" relativeTo="$(grandparent)NavigationList" relativePoint="BOTTOM" offsetY="10"/>
                             <OnClicked>
                                 ZO_DLCBook_Keyboard_OnSubscribeClicked(self)
                             </OnClicked>

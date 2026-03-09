@@ -12,7 +12,7 @@ function ZO_EsoPlusOffers_Keyboard:Initialize(control, sceneName)
     self:SetFeaturedMarketProductFiltersMask(MARKET_PRODUCT_FILTER_TYPE_ESO_PLUS_OFFERS)
     self:SetMarketProductFilterTypes({MARKET_PRODUCT_FILTER_TYPE_ESO_PLUS_OFFERS})
     self:SetNewMarketProductFilterTypes({MARKET_PRODUCT_FILTER_TYPE_NEW + MARKET_PRODUCT_FILTER_TYPE_ESO_PLUS_OFFERS})
-    self:SetShownCurrencyTypeBalances(MKCT_CROWNS, MKCT_CROWN_GEMS, MKCT_ENDEAVOR_SEALS)
+    self:SetShownCurrencyTypeBalances(MKCT_CROWNS, MKCT_CROWN_GEMS, MKCT_TRADE_BARS, MKCT_SEALS)
     self:InitializeEsoPlusCategory()
 end
 

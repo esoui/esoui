@@ -12,7 +12,7 @@ end
 
 ZO_AddOnMemoryDisplay = ZO_InitializingObject:Subclass()
 
-if IsConsoleUI() then
+if ZO_IsConsoleOrGameCoreUI() then
     function ZO_AddOnMemoryDisplay:Initialize(control)
         self.control = control
         self.memoryLabel = control:GetNamedChild("Memory")
@@ -65,7 +65,7 @@ if IsConsoleUI() then
 end
 
 function ZO_AddOnMemoryDisplay.OnControlInitialized(control)
-    if IsConsoleUI() then
+    if ZO_IsConsoleOrGameCoreUI() then
         ADD_ON_MEMORY_DISPLAY = ZO_AddOnMemoryDisplay:New(control)
     end
 end

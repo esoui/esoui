@@ -6,8 +6,8 @@
             </OnInitialized>
             <Controls>
                 <Label name="$(parent)Description" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_GUILD_BROWSER_APPLICATIONS_MESSAGE_DESCRIPTION">
-                    <Anchor point="TOPLEFT" relativeTo="ZO_GuildBrowser_Keyboard_TopLevelList" relativePoint="TOPRIGHT" offsetX="40" />
-                    <Dimensions x="590" />
+                    <Anchor point="TOPLEFT" relativeTo="ZO_GuildBrowser_Keyboard_TopLevelList" relativePoint="TOPRIGHT" offsetX="40"/>
+                    <Dimensions x="590"/>
                 </Label>
                 <Label name="$(parent)MessageHeader" font="ZoFontHeader2" text="SI_GUILD_BROWSER_APPLICATIONS_MESSAGE">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Description" relativePoint="BOTTOMLEFT" offsetX="10" offsetY="10"/>

@@ -184,6 +184,7 @@ function LeaderboardList_Gamepad:OnSelectionChanged(oldData, newData)
 end
 
 function LeaderboardList_Gamepad:SetupLeaderboardPlayerEntry(control, data)
+    ZO_GamepadInteractiveSortFilterList.SetupRow(self, control, data)
     ZO_LeaderboardsManager_Shared.SetupLeaderboardPlayerEntry(GAMEPAD_LEADERBOARDS, control, data)
 
     local leaderboardData = GAMEPAD_LEADERBOARDS:GetSelectedLeaderboardData()
@@ -208,7 +209,7 @@ end
 
 function LeaderboardList_Gamepad:BuildOptionsList()
     local groupId = self:AddOptionTemplateGroup(ZO_SocialOptionsDialogGamepad.GetDefaultHeader)
-    self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildGamerCardOption, IsConsoleUI)
+    self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildGamerCardOption, ZO_IsConsoleOrGameCoreUI)
     self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildAddFriendOption, ZO_SocialOptionsDialogGamepad.ShouldAddFriendOption)
 end
 

@@ -5,7 +5,6 @@
                 return ZO_EaseInQuadratic(progress)
             </EasingFunction>
         </AlphaAnimation>
-
         <AnimationTimeline name="CraftingResultTooltipAnimation_Base">
             <Animations>
                 <!-- Tooltip -->
@@ -14,7 +13,6 @@
                         return ZO_EaseOutQuadratic(progress)
                     </EasingFunction>
                 </AlphaAnimation>
-
                 <AlphaAnimation delay="2500" duration="200" startAlpha="0" endAlpha="1">
                     <EasingFunction>
                         return ZO_EaseInCubic(progress)
@@ -25,7 +23,6 @@
                 </AlphaAnimation>
             </Animations>
         </AnimationTimeline>
-
         <AnimationTimeline name="CraftingResultTooltipAnimation" inherits="CraftingResultTooltipAnimation_Base">
             <Animations>
                 <!-- Tooltip background glow -->
@@ -34,18 +31,14 @@
                         return ZO_EaseInQuadratic(progress)
                     </EasingFunction>
                 </AlphaAnimation>
-
                 <!-- Burst1 -->
-                <AlphaAnimation inherits="CraftingResultBurstFadeIn" />
-                
+                <AlphaAnimation inherits="CraftingResultBurstFadeIn"/>
                 <!-- Burst2 -->
-                <AlphaAnimation inherits="CraftingResultBurstFadeIn" />
-
+                <AlphaAnimation inherits="CraftingResultBurstFadeIn"/>
                 <!-- Burst Rotations -->
-                <AnimationTimeline inherits="CraftingBurstRotationTimeline" />
+                <AnimationTimeline inherits="CraftingBurstRotationTimeline"/>
             </Animations>
         </AnimationTimeline>
-
         <AnimationTimeline name="CraftingResultFade">
             <Animations>
                 <AlphaAnimation duration="700" startAlpha="0" endAlpha="1">
@@ -53,10 +46,9 @@
                         return ZO_EaseOutQuadratic(progress)
                     </EasingFunction>
                 </AlphaAnimation>
-                <AlphaAnimation duration="300" startAlpha="1" endAlpha="0" />
+                <AlphaAnimation duration="300" startAlpha="1" endAlpha="0"/>
             </Animations>
         </AnimationTimeline>
-
         <AnimationTimeline name="CraftingResultTranslate">
             <Animations>
                 <TranslateAnimation duration="0" deltaX="0" deltaY="0" anchorIndex="0">
@@ -66,7 +58,6 @@
                 </TranslateAnimation>
             </Animations>
         </AnimationTimeline>
-
         <AnimationTimeline name="CraftingResultPulse">
             <Animations>
                 <AlphaAnimation duration="100" startAlpha="0" endAlpha=".5">
@@ -74,13 +65,11 @@
                         return ZO_EaseInQuadratic(progress)
                     </EasingFunction>
                 </AlphaAnimation>
-
                 <AlphaAnimation delay="100" duration="360" startAlpha=".5" endAlpha="1">
                     <EasingFunction>
                         return ZO_EaseInQuadratic(progress)
                     </EasingFunction>
                 </AlphaAnimation>
-
                 <AlphaAnimation delay="460" duration="460" startAlpha="1" endAlpha="0">
                     <EasingFunction>
                         return ZO_EaseOutQuadratic(progress)
@@ -88,7 +77,6 @@
                 </AlphaAnimation>
             </Animations>
         </AnimationTimeline>
-
         <!-- Right now this is essentially just an animation that sits here and does nothing for a certain amount of time, but we can modify this down the line if design wants to add special visuals-->
         <AnimationTimeline name="CraftingResultsConsumeStation_Animation">
             <Animations>
@@ -103,25 +91,21 @@
             </Animations>
         </AnimationTimeline>
     </Animations>
-    
     <Controls>
         <Control name="ZO_CraftingResultPulseTexture" virtual="true">
-            <AnchorFill />
-
+            <AnchorFill/>
             <OnInitialized>
                 local timeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("CraftingBurstRotationTimeline")
                 timeline:GetFirstAnimation():SetAnimatedControl(self:GetNamedChild("Burst1"))
                 timeline:GetLastAnimation():SetAnimatedControl(self:GetNamedChild("Burst2"))
                 timeline:PlayFromStart()
             </OnInitialized>
-
             <Controls>
                 <Texture name="$(parent)Burst1" inherits="ZO_Crafting_BlueStarBurst">
-                    <Dimensions x="160" y="160" />
+                    <Dimensions x="160" y="160"/>
                 </Texture>
-
                 <Texture name="$(parent)Burst2" inherits="ZO_Crafting_BlueStarBurst">
-                    <Dimensions x="160" y="160" />
+                    <Dimensions x="160" y="160"/>
                 </Texture>
             </Controls>
         </Control>

@@ -345,9 +345,11 @@ function ZO_BuffDebuffIcon_OnInitialized(control)
 end
 
 function ZO_BuffDebuffIcon_OnMouseEnter(control)
-    InitializeTooltip(InformationTooltip, control, BOTTOM)
-    local formattedName = zo_strformat(SI_ABILITY_TOOLTIP_NAME, control.data.buffName)
-    InformationTooltip:AddLine(formattedName)
+    if not IsInGamepadPreferredMode() then
+        InitializeTooltip(InformationTooltip, control, BOTTOM)
+        local formattedName = zo_strformat(SI_ABILITY_TOOLTIP_NAME, control.data.buffName)
+        InformationTooltip:AddLine(formattedName)
+    end
 end
 
 function ZO_BuffDebuffIcon_OnMouseExit(control)

@@ -14,7 +14,7 @@
                                         <Control name="$(parent)Header" override="true">
                                             <Controls>
                                                 <Control name="$(parent)OutfitSelector" inherits="ZO_OutfitSelector_List_Header">
-                                                    <Anchor point="TOP" relativeTo="$(parent)DividerSimple" relativePoint="BOTTOM" offsetY="25" />
+                                                    <Anchor point="TOP" relativeTo="$(parent)DividerSimple" relativePoint="BOTTOM" offsetY="25"/>
                                                 </Control>
                                             </Controls>
                                         </Control>

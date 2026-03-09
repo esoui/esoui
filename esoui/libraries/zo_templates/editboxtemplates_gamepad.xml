@@ -2,21 +2,18 @@
     <Controls>
         <Backdrop name="ZO_EditBackdrop_Gamepad" virtual="true">
             <Dimensions y="46"/>
-            <Edge file="EsoUI/Art/ChatWindow/Gamepad/textEntry_edge.dds" edgeFileWidth="64" edgeFileHeight="8" />
-            <Center file="EsoUI/Art/ChatWindow/Gamepad/textEntry_center.dds" />
-            <Insets left="8" top="8" right="-8" bottom="-8" />
+            <Edge file="EsoUI/Art/ChatWindow/Gamepad/textEntry_edge.dds" edgeFileWidth="64" edgeFileHeight="8"/>
+            <Center file="EsoUI/Art/ChatWindow/Gamepad/textEntry_center.dds"/>
+            <Insets left="8" top="8" right="-8" bottom="-8"/>
         </Backdrop>
-
         <Backdrop name="ZO_SingleLineEditBackdrop_Gamepad" inherits="ZO_EditBackdrop_Gamepad" virtual="true">
             <OnInitialized>
                 ZO_SingleLineEditContainerSize_Gamepad_OnInitialized(self)
             </OnInitialized>
         </Backdrop>
-
         <Backdrop name="ZO_MultiLineEditBackdrop_Gamepad" inherits="ZO_EditBackdrop" virtual="true"/>
-
         <EditBox name="ZO_DefaultEdit_Gamepad" font="ZoFontGamepad34" mouseEnabled="true" defaultTextColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED" virtual="true">
-            <Dimensions y="36" />
+            <Dimensions y="36"/>
             <OnMouseDown>
                 self:TakeFocus()
             </OnMouseDown>
@@ -26,24 +23,20 @@
             <OnEscape>
                 self:LoseFocus()
             </OnEscape>
-
             <OnFocusGained>
                 ZO_GamepadEditBox_FocusGained(self)
                 if WINDOW_MANAGER:IsHandlingHardwareEvent() then
                     PlaySound(SOUNDS.EDIT_CLICK)
                 end
             </OnFocusGained>
-
             <OnFocusLost>
                 ZO_GamepadEditBox_FocusLost(self)
             </OnFocusLost>
         </EditBox>
-
         <EditBox name="ZO_DefaultEditForBackdrop_Gamepad" inherits="ZO_DefaultEdit_Gamepad" virtual="true">
             <Anchor point="TOPLEFT" offsetX="ZO_SINGLE_LINE_EDIT_CONTAINER_GAMEPAD_PADDING_LEFT" offsetY="ZO_SINGLE_LINE_EDIT_CONTAINER_GAMEPAD_PADDING_TOP"/>
             <Anchor point="BOTTOMRIGHT" offsetX="-ZO_SINGLE_LINE_EDIT_CONTAINER_GAMEPAD_PADDING_RIGHT" offsetY="-ZO_SINGLE_LINE_EDIT_CONTAINER_GAMEPAD_PADDING_BOTTOM"/>
         </EditBox>
-
         <EditBox name="ZO_DefaultEditMultiLine_Gamepad" font="ZoFontGamepad34" mouseEnabled="true" multiLine="true" defaultTextColor="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED" virtual="true">
             <OnMouseDown>
                 self:TakeFocus()
@@ -59,19 +52,16 @@
                 local nextLine = zo_clamp(currentLine - delta, 1, self:GetScrollExtents() + 1)
                 self:SetTopLineIndex(nextLine)
             </OnMouseWheel>
-
             <OnFocusGained>
                 ZO_GamepadEditBox_FocusGained(self)
                 if WINDOW_MANAGER:IsHandlingHardwareEvent() then
                     PlaySound(SOUNDS.EDIT_CLICK)
                 end
             </OnFocusGained>
-
             <OnFocusLost>
                 ZO_GamepadEditBox_FocusLost(self)
             </OnFocusLost>
         </EditBox>
-
         <EditBox name="ZO_DefaultEditMultiLineForBackdrop_Gamepad" inherits="ZO_DefaultEditMultiLine_Gamepad" virtual="true">
             <Anchor point="TOPLEFT" offsetX="ZO_MULTI_LINE_EDIT_CONTAINER_GAMEPAD_PADDING_LEFT" offsetY="ZO_MULTI_LINE_EDIT_CONTAINER_GAMEPAD_PADDING_TOP"/>
             <Anchor point="BOTTOMRIGHT" offsetX="-ZO_MULTI_LINE_EDIT_CONTAINER_GAMEPAD_PADDING_RIGHT" offsetY="-ZO_MULTI_LINE_EDIT_CONTAINER_GAMEPAD_PADDING_BOTTOM"/>

@@ -481,7 +481,7 @@ local ZO_OptionsPanel_Gameplay_ControlData =
             system = SETTING_TYPE_CUSTOM,
             settingId = OPTIONS_CUSTOM_SETTING_RESET_GAMEPAD_DEADZONES,
             panel = SETTING_PANEL_GAMEPLAY,
-            text = IsConsoleUI() and GetString(SI_CONSOLE_GAMEPAD_OPTIONS_RESET_DEADZONES) or GetString(SI_GAMEPAD_OPTIONS_RESET_DEADZONES),
+            text = ZO_IsConsoleOrGameCoreUI() and GetString(SI_CONSOLE_GAMEPAD_OPTIONS_RESET_DEADZONES) or GetString(SI_GAMEPAD_OPTIONS_RESET_DEADZONES),
             customResetToDefaultsFunction = ResetGamepadDeadzonesToDefault,
             exists = IsInGamepadPreferredMode,
             callback = function()
@@ -540,15 +540,17 @@ local ZO_SharedOptions_Gameplay_GamepadSettingsData =
             end,
         },
         enabled = function()
-            return not IsAccessibilityModeEnabled() and not IsInputPreferredSettingKeyboard()
+            return not IsAccessibilityModeEnabled() and not IsInputPreferredSettingKeyboard() and not IsGameCoreUI()
         end,
         gamepadIsEnabledCallback = function()
-            return not IsAccessibilityModeEnabled() and not IsInputPreferredSettingKeyboard()
+            return not IsAccessibilityModeEnabled() and not IsInputPreferredSettingKeyboard() and not IsGameCoreUI()
         end,
         gamepadCustomTooltipFunction = function(tooltip)
             GAMEPAD_TOOLTIPS:LayoutSettingAccessibilityTooltipWarning(tooltip, GetString(SI_GAMEPAD_OPTIONS_USE_KEYBOARD_CHAT_TOOLTIP), GetString(SI_OPTIONS_ACCESSIBILITY_MODE_ENABLED_WARNING), IsAccessibilityModeEnabled())
         end,
-        exists = ZO_IsPCUI,
+        exists = function()
+            return ZO_IsPCUI() and not IsGameCoreUI()
+        end,
         initializeControlFunction = function(control)
             ZO_OptionsWindow_InitializeControl(control)
             EVENT_MANAGER:RegisterForEvent("ZO_OptionsPanel_Gameplay", EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function()

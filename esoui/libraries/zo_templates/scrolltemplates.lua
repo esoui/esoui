@@ -521,7 +521,7 @@ function ZO_Scroll_SetScrollToRealOffsetAccountingForGradients(self, finalTotalH
     local scrollHeight = scroll:GetHeight()
     local finalVerticalExtents = zo_max(finalTotalHeight - scrollHeight, 0)
     local finalVerticalOffset = controlFinalTopOffset
-    if self.useFadeGradient then            
+    if self.useFadeGradient then
         local topGradientHeight = ComputeScrollFadeDistancesFromRealValues(finalVerticalOffset, 0, finalVerticalExtents, ZO_Scroll_GetMaxFadeDistance(self))
             -- divide by 2 for effect
         finalVerticalOffset = finalVerticalOffset - topGradientHeight * 0.5
@@ -675,9 +675,9 @@ function ZO_Scroll_SetupGutterTexture(self, textureControl)
     textureControl:SetAnchor(TOPLEFT, self.scrollUpButton, BOTTOMLEFT, 0, 0)
     textureControl:SetAnchor(BOTTOMRIGHT, self.scrollDownButton, TOPRIGHT, 0, 0)
     textureControl:SetParent(self.scrollbar)
-    
+
     self.gutter = textureControl
-    
+
     ZO_Scroll_UpdateScrollBar(self)
 end
 
@@ -721,12 +721,12 @@ function ZO_ScrollList_Initialize(self)
     self.mode = SCROLL_LIST_UNIFORM
     self.buildDirection = ZO_SCROLL_BUILD_DIRECTION_LEFT_TO_RIGHT
     self.uniformControlHeight = NO_HEIGHT_SET
-    
+
     self.highlightLocked = false
     self.highlightedControl = nil
     self.highlightCallback = nil
     self.pendingHighlightControl = nil
-    
+
     self.selectedControl = nil
     self.selectedData = nil
     self.selectedDataIndex = nil
@@ -734,14 +734,14 @@ function ZO_ScrollList_Initialize(self)
     self.selectionDataTypes = nil
     self.deselectOnReselect = true
     self.autoSelect = false
-    
+
     self.contents = GetControl(self, "Contents")
     self.scrollbar = GetControl(self, "ScrollBar")
     self.upButton = GetControl(self.scrollbar, "Up")
     self.upButton:SetHandler("OnMouseDown", ZO_ScrollListUp_OnMouseDown)
     self.downButton = GetControl(self.scrollbar, "Down")
     self.downButton:SetHandler("OnMouseDown", ZO_ScrollListDown_OnMouseDown)
-    
+
     self.scrollbar:SetEnabled(false)
 
     self.animation, self.timeline = CreateScrollAnimation(self)
@@ -752,6 +752,16 @@ function ZO_ScrollList_Initialize(self)
     self.useFadeGradient = true
 
     ZO_ScrollList_Commit(self)
+end
+
+function ZO_ScrollList_OnGamepadMouseWheel(self, delta)
+    if IsInGamepadPreferredMode() then
+        if delta > 0 then
+            ZO_ScrollList_SelectPreviousData(self)
+        else
+            ZO_ScrollList_SelectNextData(self)
+        end
+    end
 end
 
 function ZO_ScrollList_SetYDistanceFromEdgeWhereSelectionCausesScroll(self, yDistanceFromEdgeWhereSelectionCausesScroll)
@@ -2571,7 +2581,7 @@ function ZO_ScrollList_UpdateScroll(self)
             if controlPool then
                 local control, key = controlPool:AcquireObject()
                 local setupCallback = dataType.setupCallback
-            
+
                 control:SetHidden(false)
                 control.dataEntry = dataEntry
                 dataEntry.control = control
@@ -2582,7 +2592,7 @@ function ZO_ScrollList_UpdateScroll(self)
                 end
                 table.insert(activeControls, control)
                 consideredMap[dataEntry] = true
-            
+
                 if AreDataEqualSelections(self, dataEntry.data, self.selectedData) then
                     SelectControl(self, control, ANIMATE_INSTANTLY)
                 end

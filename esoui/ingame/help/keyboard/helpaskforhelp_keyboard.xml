@@ -1,106 +1,92 @@
 <GuiXml>
-    <Controls>        
+    <Controls>
         <TopLevelControl name="ZO_Help_Ask_For_Help_Keyboard_Control" inherits="ZO_HelpCustomerService_Keyboard_ContentAnchors" hidden="true">
             <OnInitialized>
                 ZO_HelpAskForHelp_Keyboard_OnInitialized(self)
             </OnInitialized>
-
             <Controls>
                 <Label name="$(parent)ImpactTitle" inherits="ZO_HelpCustomerService_Keyboard_Title" text="SI_CUSTOMER_SERVICE_IMPACT">
                     <Anchor point="TOPLEFT"/>
                 </Label>
-
                 <Control name="$(parent)ImpactComboBox" inherits="ZO_HelpCustomerService_Keyboard_ComboBox">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)ImpactTitle" relativePoint="BOTTOMLEFT" offsetY="10" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)ImpactTitle" relativePoint="BOTTOMLEFT" offsetY="10"/>
                 </Control>
-
                 <Control name="$(parent)CategoryContainer" resizeToFitDescendents="true" level="2">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)ImpactComboBox" relativePoint="BOTTOMLEFT" offsetY="20" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)ImpactComboBox" relativePoint="BOTTOMLEFT" offsetY="20"/>
                     <Controls>
                         <Label name="$(grandparent)CategoryTitle" inherits="ZO_HelpCustomerService_Keyboard_Title" text="SI_CUSTOMER_SERVICE_CATEGORY">
-                            <Anchor point="TOPLEFT" />
+                            <Anchor point="TOPLEFT"/>
                         </Label>
                         <Control name="$(grandparent)CategoryComboBox" inherits="ZO_HelpCustomerService_Keyboard_ComboBox">
-                            <Dimensions x="500" />
-                            <Anchor point="TOPLEFT" relativeTo="$(grandparent)CategoryTitle" relativePoint="BOTTOMLEFT" offsetY="10" />
+                            <Dimensions x="500"/>
+                            <Anchor point="TOPLEFT" relativeTo="$(grandparent)CategoryTitle" relativePoint="BOTTOMLEFT" offsetY="10"/>
                         </Control>
                     </Controls>
                 </Control>
-
                 <Control name="$(parent)SubcategoryContainer" resizeToFitDescendents="true" level="1">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)CategoryContainer" relativePoint="BOTTOMLEFT" offsetY="20" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)CategoryContainer" relativePoint="BOTTOMLEFT" offsetY="20"/>
                     <Controls>
                         <Label name="$(grandparent)SubcategoryTitle" inherits="ZO_HelpCustomerService_Keyboard_Title" text="SI_CUSTOMER_SERVICE_SUBCATEGORY">
-                            <Anchor point="TOPLEFT" />
+                            <Anchor point="TOPLEFT"/>
                         </Label>
                         <Control name="$(grandparent)SubcategoryComboBox" inherits="ZO_HelpCustomerService_Keyboard_ComboBox">
-                            <Dimensions x="500" />
-                            <Anchor point="TOPLEFT" relativeTo="$(grandparent)SubcategoryTitle" relativePoint="BOTTOMLEFT" offsetY="10" />
+                            <Dimensions x="500"/>
+                            <Anchor point="TOPLEFT" relativeTo="$(grandparent)SubcategoryTitle" relativePoint="BOTTOMLEFT" offsetY="10"/>
                         </Control>
                     </Controls>
                 </Control>
-                
                 <Control name="$(parent)DetailsContainer" resizeToFitDescendents="true">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)SubcategoryContainer" relativePoint="BOTTOMLEFT" offsetY="20" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)SubcategoryContainer" relativePoint="BOTTOMLEFT" offsetY="20"/>
                     <Controls>
                         <Label name="$(grandparent)DetailsTitle" inherits="ZO_HelpCustomerService_Keyboard_Title">
-                            <Anchor point="TOPLEFT" />
+                            <Anchor point="TOPLEFT"/>
                         </Label>
                         <Backdrop name="$(grandparent)DetailsTextLine" inherits="ZO_SingleLineEditBackdrop_Keyboard">
-                            <Dimensions x="322" />
-                            <Anchor point="TOPLEFT" relativeTo="$(grandparent)DetailsTitle" relativePoint="BOTTOMLEFT" offsetY="10" />
+                            <Dimensions x="322"/>
+                            <Anchor point="TOPLEFT" relativeTo="$(grandparent)DetailsTitle" relativePoint="BOTTOMLEFT" offsetY="10"/>
                             <Controls>
-                                <EditBox name="$(parent)Field" inherits="ZO_DefaultEditForBackdrop" />
+                                <EditBox name="$(parent)Field" inherits="ZO_DefaultEditForBackdrop"/>
                             </Controls>
                         </Backdrop>
                     </Controls>
                 </Control>
-                
                 <Label name="$(parent)Instructions" inherits="ZO_HelpCustomerService_Keyboard_Details" hidden="true">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)DetailsContainer" relativePoint="BOTTOMLEFT" offsetY="20" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)DetailsContainer" relativePoint="BOTTOMLEFT" offsetY="20"/>
                 </Label>
-                
                 <Label name="$(parent)DescriptionTitle" inherits="ZO_HelpCustomerService_Keyboard_Title" text="SI_CUSTOMER_SERVICE_ASK_FOR_HELP_ADDITIONAL_DETAILS">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)DetailsContainer" relativePoint="BOTTOMLEFT" offsetY="20" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)DetailsContainer" relativePoint="BOTTOMLEFT" offsetY="20"/>
                 </Label>
-
                 <Backdrop name="$(parent)DescriptionBody" inherits="ZO_MultiLineEditBackdrop_Keyboard">
                     <Dimensions x="100%" y="150"/>
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)DescriptionTitle" relativePoint="BOTTOMLEFT" offsetY="10" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)DescriptionTitle" relativePoint="BOTTOMLEFT" offsetY="10"/>
                     <Controls>
                         <EditBox name="$(parent)Field" inherits="ZO_DefaultEditMultiLineForBackdrop"/>
                     </Controls>
                 </Backdrop>
-
                 <Control name="$(parent)ExternalInfo" mouseEnabled="true" resizeToFitDescendents="true" hidden="true">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)DescriptionBody" relativePoint="BOTTOMLEFT"/>
                     <OnMouseEnter>
                         HELP_CUSTOMER_SERVICE_ASK_FOR_HELP_KEYBOARD:OnExternalInfoMouseEnter()
                     </OnMouseEnter>
-
                     <OnMouseExit>
                         HELP_CUSTOMER_SERVICE_ASK_FOR_HELP_KEYBOARD:OnExternalInfoMouseExit()
                     </OnMouseExit>
-                    
                     <Controls>
                         <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Help/help_tabIcon_tutorial_up.dds">
-                            <Anchor point="TOPLEFT" />
-                            <Dimensions x="64" y="64" />
+                            <Anchor point="TOPLEFT"/>
+                            <Dimensions x="64" y="64"/>
                         </Texture>
-                        
                         <Label name="$(parent)Title" font="ZoFontWinT1" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SECOND_CONTRAST">
-                            <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" />
+                            <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT"/>
                         </Label>
                     </Controls>
                 </Control>
-
                 <Label name="$(parent)AdditionalInstructions" inherits="ZO_HelpCustomerService_Keyboard_Details" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_CONTRAST" hidden="true">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)ExternalInfo" relativePoint="BOTTOMLEFT" offsetY="20" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)ExternalInfo" relativePoint="BOTTOMLEFT" offsetY="20"/>
                 </Label>
-
                 <Button name="$(parent)SubmitButton" inherits="ZO_DefaultButton" text="SI_CUSTOMER_SERVICE_SUBMIT">
-                    <Dimensions x="200" />
-                    <Anchor point="BOTTOM" offsetY="-20" />
+                    <Dimensions x="200"/>
+                    <Anchor point="BOTTOM" offsetY="-20"/>
                     <OnClicked>
                         HELP_CUSTOMER_SERVICE_ASK_FOR_HELP_KEYBOARD:AttemptToSendTicket()
                     </OnClicked>

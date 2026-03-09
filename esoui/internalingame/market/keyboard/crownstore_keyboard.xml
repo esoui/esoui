@@ -4,7 +4,6 @@
             <OnInitialized>
                 ZO_CrownStore_Keyboard_OnInitialize(self)
             </OnInitialized>
-
             <Controls>
                 <Control name="$(parent)Contents" override="true">
                     <Controls>

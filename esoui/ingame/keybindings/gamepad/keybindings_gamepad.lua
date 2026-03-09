@@ -594,7 +594,7 @@ function ZO_BindKeyDialog_Gamepad:SetupDialog(dialog, data)
     self.numMouseButtonsDown = 0
     self.numKeysDown = 0
 
-    self.allowChording = KEYBINDING_MANAGER:IsChordingAlwaysEnabled() or ctrl or alt or shift or command
+    self.allowChording = KEYBINDINGS_MANAGER:IsChordingAlwaysEnabled() or ctrl or alt or shift or command
                              or self.defaultCtrl or self.defaultAlt or self.defaultShift or self.defaultCommand
 
     BlockAutomaticInputModeChange(true)

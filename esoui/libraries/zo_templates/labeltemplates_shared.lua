@@ -385,7 +385,7 @@ end
     rollingMeterLabel:SetTransitionSpeedFactor(2)
     -- Limit transitions to, at most, 20 roll over animations regardless
     -- of the difference between the current value and the new value.
-    rollingMeterLabel:SetTransitionMaxSteps(20)
+    rollingMeterLabel:SetMaxTransitionSteps(20)
 
     -- OPTIONAL:
     -- Register a TransitionComplete callback to be notified whenever the
@@ -616,6 +616,14 @@ function RollingMeterLabel:GetOrCreateTransitionManager()
     return self.transitionManager
 end
 
+function RollingMeterLabel:IsCommaDelimited()
+    return self.isCommaDelimited
+end
+
+function RollingMeterLabel:SetIsCommaDelimited(isCommaDelimited)
+    self.isCommaDelimited = isCommaDelimited
+end
+
 function RollingMeterLabel:IsLayoutDirty()
     return self.isLayoutDirty
 end
@@ -725,8 +733,13 @@ function RollingMeterLabel:UpdateValue()
         end
 
         -- Update the animation visuals.
-        self.inLabel:SetText(self.incomingValue)
-        self.outLabel:SetText(self.outgoingValue)
+        if self:IsCommaDelimited() then
+            self.inLabel:SetText(self.incomingValue and ZO_CommaDelimitNumber(self.incomingValue) or "")
+            self.outLabel:SetText(self.outgoingValue and ZO_CommaDelimitNumber(self.outgoingValue) or "")
+        else
+            self.inLabel:SetText(self.incomingValue)
+            self.outLabel:SetText(self.outgoingValue)
+        end
         self:OnUpdate()
         self.outLabel:SetHidden(false)
 
@@ -766,11 +779,16 @@ function RollingMeterLabel:SetValue(text, animationNormalizedIntervalOffset, ani
         self.outgoingValue = self.targetValue
         self.targetAnimationNormalizedIntervalOffset = nil
         self.targetAnimationOverrideEasingFunction = nil
-        self.inLabel:SetText(self.targetValue)
         self.inLabelOffsetY = 0
         self.outLabel:SetHidden(true)
-        self.outLabel:SetText(self.targetValue)
         self.outLabelOffsetY = 0
+        if self:IsCommaDelimited() then
+            self.inLabel:SetText(ZO_CommaDelimitNumber(self.targetValue))
+            self.outLabel:SetText(ZO_CommaDelimitNumber(self.targetValue))
+        else
+            self.inLabel:SetText(self.targetValue)
+            self.outLabel:SetText(self.targetValue)
+        end
         self:UpdateLabelAnchorOffsets()
         return
     end
@@ -801,8 +819,8 @@ end
 --RollingMeterLabelTransition--
 -------------------------------
 
-local BASE_TRANSITION_INTERVAL_MAX_MS = 500       -- Slowest roll over animation interval
-local BASE_TRANSITION_INTERVAL_MIN_MS = 100       -- Fastest roll over animation interval
+local BASE_TRANSITION_INTERVAL_MAX_MS = 300       -- Slowest roll over animation interval
+local BASE_TRANSITION_INTERVAL_MIN_MS = 80        -- Fastest roll over animation interval
 local BASE_TRANSITION_RECOIL_INTERVAL_MS = 1000   -- Final "recoil" roll over animation interval
 local TRANSITION_RECOIL_EASING_FUNCTION = ZO_GenerateCubicBezierEase(0.97, 0, 0.5, 1.67)
 
@@ -818,7 +836,7 @@ function ZO_RollingMeterLabelTransition:Reset()
     self.currentValue = 0
     self.initialValue = 0
     self.maxIntervalMs = nil
-    self.maxTransitionSteps = 20
+    self.maxTransitionSteps = 15
     self.minIntervalMs = nil
     self.minTransitionIntervalMs = nil
     self.numTransitionSteps = nil
@@ -869,7 +887,7 @@ function ZO_RollingMeterLabelTransition:GetTransitionEasingFunction()
 end
 
 function ZO_RollingMeterLabelTransition:SetTransitionEasingFunction(easingFunction)
-    self.transitionEasingFunction = easingFunction
+    self.transitionEasingFunction = easingFunction or ZO_LinearEase
 end
 
 function ZO_RollingMeterLabelTransition:GetTransitionSpeedFactor()
@@ -909,14 +927,40 @@ function ZO_RollingMeterLabelTransition:SetValue(value, optionalInitialValue)
     end
 
     -- Calculate the number of transition steps required for the given range.
-    local integralDifference = zo_ceil(zo_abs(self.targetValue - self.currentValue))
-    local transitionSteps = zo_clamp(integralDifference, 1, self.maxTransitionSteps)
+    local integerDelta = zo_ceil(zo_abs(self.targetValue - self.currentValue))
+    local transitionSteps = zo_clamp(integerDelta, 1, self.maxTransitionSteps)
     self.numTransitionSteps = transitionSteps
     self.currentTransitionStep = 0
 
-    -- Calculate transition easing.
-    local transitionEasingCoefficient = zo_max(integralDifference / transitionSteps, 1)
-    self.transitionEasingFunction = ZO_CreateExponentialEaseInOutFunction(transitionEasingCoefficient)
+    if self.numTransitionSteps < self.maxTransitionSteps then
+        self:SetTransitionEasingFunction(ZO_LinearEase)
+    else
+        -- Generate a smooth transition easing function that ensures that the first and last few
+        -- transitions are in increments of 1 to reinforce the visual appearance of speeding up
+        -- and slowing down respectively.
+        local numTransitionStepsPerBoundary = zo_min(2, zo_floor(self.maxTransitionSteps * 0.5))
+        local normalizedTransitionStepSize = 1.0 / self.numTransitionSteps -- Step size to increment per transition.
+        local normalizedUnitStepSize = 1.0 / zo_max(1, integerDelta) -- Step size to increment by one.
+        self:SetTransitionEasingFunction(function(progress)
+            local transitionStepIndex = progress / normalizedTransitionStepSize
+            local easedProgress = ZO_EaseInOutCubic(progress)
+
+            if transitionStepIndex <= numTransitionStepsPerBoundary then
+                -- Slow initial starting increments.
+                local unitStepIndex = transitionStepIndex
+                return zo_min(easedProgress, unitStepIndex * normalizedUnitStepSize)
+            end
+
+            if transitionStepIndex >= self.numTransitionSteps - numTransitionStepsPerBoundary then
+                -- Slow final ending increments.
+                local unitStepIndex = integerDelta - (self.numTransitionSteps - transitionStepIndex)
+                return zo_max(easedProgress, unitStepIndex * normalizedUnitStepSize)
+            end
+
+            -- Standard, eased interval.
+            return easedProgress
+        end)
+    end
 
     -- Calculate animation easing and maximum animation speed.
     local animationEasingExponent = self.transitionAccelerationFactor * zo_max(math.log(transitionSteps), 1)
@@ -966,7 +1010,7 @@ function ZO_RollingMeterLabelTransition:Update()
 
     -- Calculate the current value.
     local progress = currentStep / numSteps
-    local easedProgress = self.transitionEasingFunction(progress)
+    local easedProgress = self:GetTransitionEasingFunction()(progress)
     if currentStep < numSteps then
         self.currentValue = zo_lerp(self.initialValue, self.targetValue, easedProgress)
     else

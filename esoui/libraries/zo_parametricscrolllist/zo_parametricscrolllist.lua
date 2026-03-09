@@ -809,7 +809,7 @@ function ZO_ParametricScrollList:Commit(dontReselect, blockSelectionChangedCallb
         --  such, we need to check for that condition, and move to the next item if we hit it.
         if not CanSelectData(self.selectedData) then
             -- NOTE: MoveNext() will skip over additional unselectable items internally.
-            if matchingIndex == dataListSize then
+            if nextSelectedIndex == dataListSize then
                 self:MovePrevious()
             else
                 self:MoveNext()

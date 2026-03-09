@@ -4,11 +4,10 @@
             <OnInitialized>
                 ZO_EndlessDungeonHUDTracker.OnInitialized(self)
             </OnInitialized>
-
             <Controls>
                 <Control name="$(parent)Container" override="true">
                     <Controls>
-                        <Control name="$(parent)ShowBuffTracker" inherits="ZO_KeybindButton" excludeFromResizeToFitExtents="true" />
+                        <Control name="$(parent)ShowBuffTracker" inherits="ZO_KeybindButton" excludeFromResizeToFitExtents="true"/>
                     </Controls>
                 </Control>
             </Controls>

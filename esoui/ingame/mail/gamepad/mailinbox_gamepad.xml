@@ -7,8 +7,8 @@
                         <Control name="$(parent)Container" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
                             <Controls>
                                 <Control name="$(parent)Inbox" hidden="true">
-                                    <Anchor point="TOPLEFT" offsetY="68" />
-                                    <Anchor point="BOTTOMRIGHT" offsetY="-120" />
+                                    <Anchor point="TOPLEFT" offsetY="68"/>
+                                    <Anchor point="BOTTOMRIGHT" offsetY="-120"/>
                                     <OnInitialized>
                                         self.codNotice = self:GetNamedChild("CODNotice")
                                         self.addressLabel = self:GetNamedChild("AddressLabel")
@@ -31,46 +31,39 @@
                                         self.GetSubject = ZO_MailView_GetSubject_Gamepad
                                         self.GetBody = ZO_MailView_GetBody_Gamepad
                                     </OnInitialized>
-
                                     <Controls>
                                         <Label name="$(parent)CODNotice" text="SI_GAMEPAD_MAIL_INBOX_COD_NOTICE" inherits="ZO_Mail_Gamepad_Label" hidden="true">
-                                            <Anchor point="TOPLEFT" />
-                                            <Anchor point="TOPRIGHT" />
+                                            <Anchor point="TOPLEFT"/>
+                                            <Anchor point="TOPRIGHT"/>
                                         </Label>
-
                                         <Label name="$(parent)AddressLabel" inherits="ZO_Mail_Gamepad_Label">
                                             <!-- Dynamically anchored to either parent or CODNotice -->
                                         </Label>
                                         <Backdrop name="$(parent)AddressField" inherits="ZO_Mail_Gamepad_LabelBox">
-                                            <Anchor point="TOPRIGHT" />
-                                            <Anchor point="TOPLEFT" relativeTo="$(parent)AddressLabel" relativePoint="BOTTOMLEFT" />
+                                            <Anchor point="TOPRIGHT"/>
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)AddressLabel" relativePoint="BOTTOMLEFT"/>
                                         </Backdrop>
-
                                         <Label name="$(parent)SubjectLabel" text="SI_GAMEPAD_MAIL_SUBJECT_LABEL" inherits="ZO_Mail_Gamepad_Label">
-                                            <Anchor point="TOPLEFT" relativeTo="$(parent)AddressField" relativePoint="BOTTOMLEFT" offsetY="15" />
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)AddressField" relativePoint="BOTTOMLEFT" offsetY="15"/>
                                         </Label>
                                         <Backdrop name="$(parent)SubjectField" inherits="ZO_Mail_Gamepad_LabelBox">
-                                            <Anchor point="TOPRIGHT" />
-                                            <Anchor point="TOPLEFT" relativeTo="$(parent)SubjectLabel" relativePoint="BOTTOMLEFT" />
+                                            <Anchor point="TOPRIGHT"/>
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)SubjectLabel" relativePoint="BOTTOMLEFT"/>
                                         </Backdrop>
-
                                         <Label name="$(parent)BodyLabel" text="SI_GAMEPAD_MAIL_BODY_LABEL" inherits="ZO_Mail_Gamepad_Label">
-                                            <Anchor point="TOPLEFT" relativeTo="$(parent)SubjectField" relativePoint="BOTTOMLEFT" offsetY="15" />
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)SubjectField" relativePoint="BOTTOMLEFT" offsetY="15"/>
                                         </Label>
-                                        
                                         <Control name="$(parent)Body" inherits="ZO_Mail_Gamepad_Scrollable_LabelBox">
-                                            <Anchor point="TOPLEFT" relativeTo="$(parent)BodyLabel" relativePoint="BOTTOMLEFT" />
-                                            <Anchor point="BOTTOMRIGHT" offsetY="-115" />
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)BodyLabel" relativePoint="BOTTOMLEFT"/>
+                                            <Anchor point="BOTTOMRIGHT" offsetY="-115"/>
                                         </Control>
-
                                         <Control name="$(parent)AttachmentsBox">
-                                            <Anchor point="TOPLEFT" relativeTo="$(parent)Body" relativePoint="BOTTOMLEFT" offsetY="15" />
-                                            <Anchor point="BOTTOMRIGHT" offsetY="-15" />
-
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)Body" relativePoint="BOTTOMLEFT" offsetY="15"/>
+                                            <Anchor point="BOTTOMRIGHT" offsetY="-15"/>
                                             <Controls>
                                                 <!-- Sent Money/C.O.D. -->
                                                 <Label name="$(parent)MoneyLabel" inherits="ZO_Mail_Gamepad_Label">
-                                                    <Anchor point="TOPLEFT" />
+                                                    <Anchor point="TOPLEFT"/>
                                                 </Label>
                                                 <Label name="$(parent)Money" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
                                                     <!-- NOTE: font is set in the money format options in lua. -->
@@ -79,17 +72,16 @@
                                                 <Label name="$(parent)NoMoney" text="SI_GAMEPAD_MAIL_INBOX_NO_ATTACHED_GOLD" inherits="ZO_Mail_Gamepad_Value">
                                                     <Anchor point="TOPLEFT" relativeTo="$(parent)MoneyLabel" relativePoint="BOTTOMLEFT" offsetY="3"/>
                                                 </Label>
-
                                                 <!-- Attached Items -->
                                                 <Label name="$(parent)AttachmentsLabel" text="SI_MAIL_ATTACHMENTS_HEADER" inherits="ZO_Mail_Gamepad_Label">
-                                                    <Anchor point="TOPLEFT" relativePoint="TOP" />
+                                                    <Anchor point="TOPLEFT" relativePoint="TOP"/>
                                                 </Label>
                                                 <Label name="$(parent)NoAttachments" text="SI_GAMEPAD_MAIL_INBOX_NO_ATTACHMENTS" inherits="ZO_Mail_Gamepad_Value">
                                                     <Anchor point="TOPLEFT" relativeTo="$(parent)AttachmentsLabel" relativePoint="BOTTOMLEFT" offsetY="3"/>
                                                 </Label>
                                                 <Control name="$(parent)AttachmentsBase" hidden="true">
                                                     <!-- Controls are dynamically anchored to this base. -->
-                                                    <Dimensions x="0" y="55" />
+                                                    <Dimensions x="0" y="55"/>
                                                     <Anchor point="TOPLEFT" relativeTo="$(parent)AttachmentsLabel" relativePoint="BOTTOMLEFT" offsetY="3"/>
                                                 </Control>
                                             </Controls>

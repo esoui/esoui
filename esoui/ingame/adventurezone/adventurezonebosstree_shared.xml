@@ -1,0 +1,155 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="ZO_AdvZone_HighlightFadeAnimation" playbackType="LOOP" loopCount="LOOP_INDEFINITELY">
+            <Animations>
+                <AlphaAnimation duration="1000" startAlpha="1" endAlpha="0.33"/>
+                <AlphaAnimation delay="1000" duration="1000" startAlpha="0.33" endAlpha="1"/>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    <Controls>
+        <Control name="ZO_AdvZoneBossControl_Shared" virtual="true">
+            <Dimensions x="128" y="200"/>
+            <Controls>
+                <Texture name="$(parent)Frame" level="3">
+                    <AnchorFill/>
+                    <TextureCoords left="0" right="1" top="0" bottom="0.78125"/>
+                </Texture>
+                <Texture name="$(parent)Highlight" color="D98C0C" textureFile="EsoUI/Art/AdventureZone/bossTreeHighlight.dds" level="2" hidden="true">
+                    <Dimensions x="96" y="96"/>
+                    <Anchor point="TOP" offsetY="70"/>
+                </Texture>
+                <Texture name="$(parent)Icon" level="1">
+                    <Dimensions x="64" y="64"/>
+                    <Anchor point="TOP" offsetY="87"/>
+                </Texture>
+                <!-- Only used on gamepad -->
+                <Backdrop name="$(parent)SelectionBox" inherits="ZO_GamepadWhiteOutlineHighlight" tier="HIGH" layer="OVERLAY" level="2" blendMode="ADD" alpha="0">
+                    <Anchor point="TOPLEFT" offsetX="-3" offsetY="-3"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="3" offsetY="3"/>
+                </Backdrop>
+            </Controls>
+        </Control>
+        <Control name="ZO_AdvZoneBossControlEasy_Shared" inherits="ZO_AdvZoneBossControl_Shared" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Frame" override="true" textureFile="EsoUI/Art/AdventureZone/bossTreeFrameEasy.dds"/>
+                <Texture name="$(parent)Highlight" override="true" textureFile="EsoUI/Art/AdventureZone/bossTreeHighlight_easy.dds" level="2" hidden="true">
+                    <TextureCoords left="0" right="0.75" top="0" bottom="0.75"/>
+                </Texture>
+            </Controls>
+        </Control>
+        <Control name="ZO_AdvZoneBossControlMedium_Shared" inherits="ZO_AdvZoneBossControl_Shared" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Frame" override="true" textureFile="EsoUI/Art/AdventureZone/bossTreeFrameMedium.dds"/>
+                <Texture name="$(parent)KeyIcon">
+                    <Dimensions x="64" y="64"/>
+                </Texture>
+                <!-- Only used on gamepad -->
+                <Backdrop name="$(parent)SelectionBox" override="true" inherits="ZO_GamepadWhiteOutlineHighlight" tier="HIGH" layer="OVERLAY" level="2" blendMode="ADD" alpha="0">
+                    <Anchor point="TOPLEFT" offsetX="-3" offsetY="-3"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="3" offsetY="-10"/>
+                </Backdrop>
+            </Controls>
+        </Control>
+        <Control name="ZO_AdvZoneBossControlHard_Shared" inherits="ZO_AdvZoneBossControl_Shared" virtual="true">
+            <Dimensions x="200" y="200"/>
+            <Controls>
+                <Texture name="$(parent)Frame" override="true" textureFile="EsoUI/Art/AdventureZone/bossTreeFrameHard.dds">
+                    <TextureCoords left="0" right="0.78125" top="0" bottom="0.78125"/>
+                </Texture>
+                <Texture name="$(parent)KeyIcon">
+                    <Anchor point="TOP" relativePoint="BOTTOM" offsetY="-16"/>
+                    <Dimensions x="64" y="64"/>
+                </Texture>
+            </Controls>
+        </Control>
+        <TopLevelControl name="ZO_AdvZoneBossTree_Shared" hidden="true" layer="OVERLAY" virtual="true">
+            <Dimensions x="1100" y="870"/>
+            <Anchor point="CENTER" offsetY="-40"/>
+            <Controls>
+                <Backdrop name="$(parent)BG" excludeFromResizeToFitExtents="true">
+                    <Anchor point="TOPLEFT" offsetX="-20" offsetY="-20"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="20" offsetY="20"/>
+                </Backdrop>
+                <Label name="$(parent)Title" text="SI_ADVENTURE_ZONE_BOSS_TREE_TITLE" modifyTextType="UPPERCASE">
+                    <Anchor point="TOP" relativePoint="TOP"/>
+                </Label>
+                <Control name="$(parent)Divider" inherits="ZO_DynamicHorizontalDivider">
+                    <Anchor point="TOP" relativeTo="$(parent)Title" relativePoint="BOTTOM" offsetY="5"/>
+                    <Dimensions x="1000"/>
+                </Control>
+                <Control name="$(parent)BossContainer">
+                    <Dimensions x="990" y="800"/>
+                    <Anchor point="TOP" relativeTo="$(parent)Divider" relativePoint="BOTTOM" offsetY="5"/>
+                    <Controls>
+                        <Texture name="$(parent)Tree" textureFile="EsoUI/Art/AdventureZone/bossTreeBG.dds">
+                            <AnchorFill/>
+                            <TextureCoords left="0" right="0.966796875" top="0" bottom="0.78125"/>
+                        </Texture>
+                        <Control name="$(parent)EasyContainer" resizeToFitDescendents="true">
+                            <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMLEFT" offsetX="45" offsetY="-50"/>
+                            <Controls>
+                                <Control name="$(parent)BossEasy1" inherits="ZO_AdvZoneBossControlEasy_Shared">
+                                    <Anchor point="BOTTOMLEFT"/>
+                                </Control>
+                                <Control name="$(parent)BossEasy2" inherits="ZO_AdvZoneBossControlEasy_Shared">
+                                    <Anchor point="LEFT" relativeTo="$(parent)BossEasy1" relativePoint="RIGHT" offsetX="20"/>
+                                </Control>
+                                <Control name="$(parent)BossEasy3" inherits="ZO_AdvZoneBossControlEasy_Shared">
+                                    <Anchor point="LEFT" relativeTo="$(parent)BossEasy2" relativePoint="RIGHT" offsetX="38"/>
+                                </Control>
+                                <Control name="$(parent)BossEasy4" inherits="ZO_AdvZoneBossControlEasy_Shared">
+                                    <Anchor point="LEFT" relativeTo="$(parent)BossEasy3" relativePoint="RIGHT" offsetX="20"/>
+                                </Control>
+                                <Control name="$(parent)BossEasy5" inherits="ZO_AdvZoneBossControlEasy_Shared">
+                                    <Anchor point="LEFT" relativeTo="$(parent)BossEasy4" relativePoint="RIGHT" offsetX="38"/>
+                                </Control>
+                                <Control name="$(parent)BossEasy6" inherits="ZO_AdvZoneBossControlEasy_Shared">
+                                    <Anchor point="LEFT" relativeTo="$(parent)BossEasy5" relativePoint="RIGHT" offsetX="20"/>
+                                </Control>
+                            </Controls>
+                        </Control>
+                        <Control name="$(parent)MediumContainer" resizeToFitDescendents="true">
+                            <Anchor point="LEFT" relativePoint="LEFT" offsetX="213" constrains="X"/>
+                            <Anchor point="BOTTOM" relativeTo="$(parent)EasyContainerBossEasy1" relativePoint="TOP" offsetY="-50" constrains="Y"/>
+                            <Controls>
+                                <Control name="$(parent)BossMedium1" inherits="ZO_AdvZoneBossControlMedium_Shared">
+                                    <Anchor point="BOTTOMLEFT"/>
+                                    <Controls>
+                                        <Texture name="$(parent)KeyIcon" override="true">
+                                            <Anchor point="RIGHT" relativePoint="BOTTOMLEFT" offsetX="-16"/>
+                                        </Texture>
+                                    </Controls>
+                                </Control>
+                                <Control name="$(parent)BossMedium2" inherits="ZO_AdvZoneBossControlMedium_Shared">
+                                    <Anchor point="LEFT" relativeTo="$(parent)BossMedium1" relativePoint="RIGHT" offsetX="90"/>
+                                    <Controls>
+                                        <Texture name="$(parent)KeyIcon" override="true">
+                                            <Anchor point="CENTER" relativePoint="BOTTOM"/>
+                                        </Texture>
+                                    </Controls>
+                                </Control>
+                                <Control name="$(parent)BossMedium3" inherits="ZO_AdvZoneBossControlMedium_Shared">
+                                    <Anchor point="LEFT" relativeTo="$(parent)BossMedium2" relativePoint="RIGHT" offsetX="90"/>
+                                    <Controls>
+                                        <Texture name="$(parent)KeyIcon" override="true">
+                                            <Anchor point="LEFT" relativePoint="BOTTOMRIGHT" offsetX="16"/>
+                                        </Texture>
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Control>
+                        <Control name="$(parent)HardContainer" resizeToFitDescendents="true">
+                            <Anchor point="BOTTOM" relativeTo="$(parent)MediumContainerBossMedium2" relativePoint="TOP" offsetY="-50"/>
+                            <Controls>
+                                <Control name="$(parent)BossHard" inherits="ZO_AdvZoneBossControlHard_Shared">
+                                    <Anchor point="BOTTOM"/>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

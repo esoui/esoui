@@ -5,41 +5,33 @@
             <OnMouseUp>
                 ZO_ChatterOption_MouseUp(self, button, upInside)
             </OnMouseUp>
-
             <OnMouseEnter>
                 ZO_ChatterOption_MouseEnter(self)
             </OnMouseEnter>
-
             <OnMouseExit>
                 ZO_ChatterOption_MouseExit(self)
             </OnMouseExit>
-
             <Controls>
                 <Control name="$(parent)Icon" mouseEnabled="true">
-                    <Dimensions x="28" y="28" />
-                    <Anchor point="RIGHT" relativePoint="LEFT" offsetX="-5" />
-
+                    <Dimensions x="28" y="28"/>
+                    <Anchor point="RIGHT" relativePoint="LEFT" offsetX="-5"/>
                     <OnMouseUp>
                         ZO_ChatterOption_MouseUp(self:GetParent(), button, upInside)
                     </OnMouseUp>
-
                     <OnMouseEnter>
                         ZO_ChatterOption_MouseEnter(self:GetParent())
                     </OnMouseEnter>
-
                     <OnMouseExit>
                         ZO_ChatterOption_MouseExit(self:GetParent())
                     </OnMouseExit>
-
                     <Controls>
                         <Texture name="$(parent)Image" inherits="ZO_MultiIcon" level="1">
-                            <AnchorFill />
+                            <AnchorFill/>
                         </Texture>
                     </Controls>
                 </Control>
             </Controls>
         </Label>
-
         <!-- Quest Reward Controls -->
         <Control name="ZO_QuestReward" mouseEnabled="true" virtual="true">
             <Dimensions x="ZO_REWARD_SIZE_X" y="ZO_REWARD_SIZE_Y"/>
@@ -60,7 +52,7 @@
                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icon" offsetX="-2" offsetY="-2"/>
                 </Label>
                 <Label name="$(parent)Name" mouseEnabled="true" font="ZoFontConversationQuestReward" verticalAlignment="CENTER" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" maxLineCount="2">
-                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="4" />
+                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="4"/>
                     <Anchor point="RIGHT" offsetX="-4" constrains="X"/>
                     <OnMouseEnter>
                         ZO_QuestRewardName_MouseEnter(self)
@@ -71,14 +63,11 @@
                 </Label>
             </Controls>
         </Control>
-
         <TopLevelControl name="ZO_InteractWindow" hidden="true">
-            <AnchorFill />
-
+            <AnchorFill/>
             <OnInitialized>
                 ZO_InteractWindow_Initialize(self)
             </OnInitialized>
-
             <Controls>
                 <!-- 
                     The other conversation window elements are anchored to this divider which is dynamically anchored depending on screen resolution 
@@ -87,57 +76,44 @@
                 <Control name="$(parent)Divider">
                     <Dimensions x="100" y="75"/>
                 </Control>
-
                 <Control name="$(parent)TargetArea">
                     <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Divider" relativePoint="TOPLEFT"/>
                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Divider" relativePoint="TOPRIGHT"/>
-
                     <Controls>
                         <Label name="$(parent)BodyText" font="ZoFontConversationText" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_CHATTER_NPC">
-                            <Anchor point="BOTTOMLEFT" />
-                            <Anchor point="BOTTOMRIGHT" />
+                            <Anchor point="BOTTOMLEFT"/>
+                            <Anchor point="BOTTOMRIGHT"/>
                         </Label>
-
                         <Label name="$(parent)Title" font="ZoFontConversationName" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_CHATTER_NPC" horizontalAlignment="CENTER">
-                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)BodyText" relativePoint="TOPLEFT" offsetY="-10" />
-                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)BodyText" relativePoint="TOPRIGHT" offsetY="-10" />
+                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)BodyText" relativePoint="TOPLEFT" offsetY="-10"/>
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)BodyText" relativePoint="TOPRIGHT" offsetY="-10"/>
                         </Label>
                     </Controls>
                 </Control>
-
                 <Button name="$(parent)ReplayAudio">
-                    <Dimensions x="32" y="32" />
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)TargetArea" relativePoint="BOTTOMLEFT" offsetY="5" />
-
-                    <Textures
-                        normal="EsoUI/Art/Interaction/replayDialog_audio_up.dds"
-                        pressed="EsoUI/Art/Interaction/replayDialog_audio_down.dds"
-                        mouseOver="EsoUI/Art/Interaction/replayDialog_audio_over.dds"
-                        disabled="EsoUI/Art/Interaction/replayDialog_audio_disabled.dds"
-                    />
+                    <Dimensions x="32" y="32"/>
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)TargetArea" relativePoint="BOTTOMLEFT" offsetY="5"/>
+                    <Textures normal="EsoUI/Art/Interaction/replayDialog_audio_up.dds" pressed="EsoUI/Art/Interaction/replayDialog_audio_down.dds" mouseOver="EsoUI/Art/Interaction/replayDialog_audio_over.dds" disabled="EsoUI/Art/Interaction/replayDialog_audio_disabled.dds"/>
                 </Button>
-
                 <Control name="$(parent)CollapseContainer" resizeToFitDescendents="true">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)TargetArea" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="40" />
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)TargetArea" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="40" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)TargetArea" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="40"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)TargetArea" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="40"/>
                     <Controls>
                         <Control name="$(parent)RewardArea">
-                            <Anchor point="TOPLEFT" />
-                            <Anchor point="TOPRIGHT" />
+                            <Anchor point="TOPLEFT"/>
+                            <Anchor point="TOPRIGHT"/>
                             <Controls>
                                 <Label name="$(parent)Header" font="ZoFontConversationQuestReward" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_CHATTER_NPC" text="SI_INTERACT_REWARDS_GIVEN">
-                                    <Anchor point="TOPLEFT" />
-                                    <Anchor point="TOPRIGHT" />
+                                    <Anchor point="TOPLEFT"/>
+                                    <Anchor point="TOPRIGHT"/>
                                 </Label>
                             </Controls>
                         </Control>
                     </Controls>
                 </Control>
-
                 <Control name="$(parent)PlayerArea" mouseEnabled="true">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)CollapseContainer" relativePoint="BOTTOMLEFT" offsetY="15" />
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)CollapseContainer" relativePoint="BOTTOMRIGHT" offsetY="15" />
-
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)CollapseContainer" relativePoint="BOTTOMLEFT" offsetY="15"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)CollapseContainer" relativePoint="BOTTOMRIGHT" offsetY="15"/>
                     <Controls>
                         <Control name="$(parent)Highlight" inherits="ZO_LineBorderHighlight" hidden="true"/>
                         <Control name="$(parent)Options" resizeToFitDescendents="true">
@@ -145,23 +121,19 @@
                         </Control>
                     </Controls>
                 </Control>
-
                 <Texture name="$(parent)TopBG" textureFile="EsoUI/Art/Interaction/conversation_textBG.dds">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)TargetAreaTitle" offsetX="-10" offsetY="-120" />
-                    <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" relativePoint="RIGHT" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)TargetAreaTitle" offsetX="-10" offsetY="-120"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" relativePoint="RIGHT"/>
                 </Texture>
-
                 <Texture name="$(parent)BottomBG" textureFile="EsoUI/Art/Interaction/conversation_textBG.dds">
                     <TextureCoords left="0" right="1" top="1" bottom="0"/>
                 </Texture>
-
                 <Texture name="$(parent)VerticalSeparator" textureFile="EsoUI/Art/Interaction/conversation_verticalBorder.dds">
-                    <Dimensions x="4" />
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)TopBG" relativePoint="TOPLEFT" />
-                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)BottomBG" relativePoint="BOTTOMLEFT" />
+                    <Dimensions x="4"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)TopBG" relativePoint="TOPLEFT"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)BottomBG" relativePoint="BOTTOMLEFT"/>
                 </Texture>
             </Controls>
         </TopLevelControl>
-
     </Controls>
 </GuiXml>

@@ -79,7 +79,6 @@ ZO_CATEGORY_LAYOUT_INFO =
         categoryName = SI_MAIN_MENU_CROWN_CRATES,
         scene = "crownCrateKeyboard",
         previousButtonExtraPadding = 10,
-        barPadding = 20,
         hideCategoryBar = true,
 
         descriptor = MENU_CATEGORY_CROWN_CRATES,
@@ -107,6 +106,30 @@ ZO_CATEGORY_LAYOUT_INFO =
             --Crown crates will properly refresh again when it closes its scene
             return CanInteractWithCrownCratesSystem() or SYSTEMS:IsShowing("crownCrate")
         end,
+    },
+    [MENU_CATEGORY_TAMRIEL_TOMES] =
+    {
+        binding = "TOGGLE_TAMRIEL_TOMES",
+        categoryName = SI_MAIN_MENU_TAMRIEL_TOMES,
+        previousButtonExtraPadding = 10,
+        barPadding = 20,
+        hideCategoryBar = false,
+        hideSceneGroupBar = true,
+        disabledTooltipText = zo_strformat(SI_TAMRIEL_TOMES_MAIN_MENU_TOOLTIP_FORMATTER, GetString(SI_MAIN_MENU_TAMRIEL_TOMES), GetString(SI_TAMRIEL_TOMES_ARE_UNAVAILABLE)),
+
+        descriptor = MENU_CATEGORY_TAMRIEL_TOMES,
+        normal = "EsoUI/Art/MainMenu/menuBar_tamrielTomes_up.dds",
+        pressed = "EsoUI/Art/MainMenu/menuBar_tamrielTomes_down.dds",
+        disabled = "EsoUI/Art/MainMenu/menuBar_tamrielTomes_disabled.dds",
+        highlight = "EsoUI/Art/MainMenu/menuBar_tamrielTomes_over.dds",
+
+        indicators = function()
+            if TAMRIEL_TOMES_MANAGER and (TAMRIEL_TOMES_MANAGER:HasNewTomes() or TIMED_ACTIVITIES_MANAGER:HasClaimableTimedActivities() or TIMED_ACTIVITIES_MANAGER:HasNewTimedActivities()) then
+                return { ZO_KEYBOARD_NEW_ICON }
+            end
+        end,
+
+        disableWhenNoTamrielTomesAreAvailable = true,
     },
     [MENU_CATEGORY_INVENTORY] =
     {
@@ -637,11 +660,16 @@ function MainMenu_Keyboard:AddSceneGroup(category, sceneGroupName, menuBarIconDa
         self:SetLastSceneGroupName(categoryInfo, sceneGroupName)
     end
 
+    local layoutInfo = ZO_CATEGORY_LAYOUT_INFO[category]
     local sceneGroupBarFragment = ZO_FadeSceneFragment:New(self.sceneGroupBar)
-    for i = 1, #menuBarIconData do
-        local sceneName = menuBarIconData[i].descriptor
-        local scene = SCENE_MANAGER:GetScene(sceneName)
-        scene:AddFragment(sceneGroupBarFragment)
+    if not layoutInfo.hideSceneGroupBar then
+        for i = 1, #menuBarIconData do
+            local sceneName = menuBarIconData[i].descriptor
+            local scene = SCENE_MANAGER:GetScene(sceneName)
+            if not menuBarIconData[i].hideSceneGroupBar then
+                scene:AddFragment(sceneGroupBarFragment)
+            end
+        end
     end
 
     self.sceneGroupInfo[sceneGroupName] =
@@ -893,7 +921,7 @@ end
 
 function MainMenu_Keyboard:ToggleSceneGroup(sceneGroupName, specificScene)
     local sceneGroupInfo = self.sceneGroupInfo[sceneGroupName]
-    if self:IsShowing() and self.lastCategory == sceneGroupInfo.category then
+    if (self:IsShowing() or SCENE_MANAGER:IsSceneGroupShowing(sceneGroupName)) and self.lastCategory == sceneGroupInfo.category then
         SCENE_MANAGER:ShowBaseScene()
     else
         self:ShowSceneGroup(sceneGroupName, specificScene)
@@ -920,18 +948,20 @@ end
 
 do
     local function GetCategoryState(categoryInfo)
-        if MAIN_MENU_MANAGER:IsPlayerDead() and categoryInfo.disableWhenDead then
+        if categoryInfo.disableWhenDead and MAIN_MENU_MANAGER:IsPlayerDead() then
             return MAIN_MENU_CATEGORY_DISABLED_WHILE_DEAD
-        elseif MAIN_MENU_MANAGER:IsPlayerInCombat() and categoryInfo.disableWhenInCombat then
+        elseif categoryInfo.disableWhenInCombat and MAIN_MENU_MANAGER:IsPlayerInCombat() then
             return MAIN_MENU_CATEGORY_DISABLED_WHILE_IN_COMBAT
-        elseif MAIN_MENU_MANAGER:IsPlayerReviving() and categoryInfo.disableWhenReviving then
+        elseif categoryInfo.disableWhenReviving and MAIN_MENU_MANAGER:IsPlayerReviving() then
             return MAIN_MENU_CATEGORY_DISABLED_WHILE_REVIVING
-        elseif MAIN_MENU_MANAGER:IsPlayerSwimming() and categoryInfo.disableWhenSwimming then
+        elseif categoryInfo.disableWhenSwimming and MAIN_MENU_MANAGER:IsPlayerSwimming() then
             return MAIN_MENU_CATEGORY_DISABLED_WHILE_SWIMMING
-        elseif MAIN_MENU_MANAGER:IsPlayerWerewolf() and categoryInfo.disableWhenWerewolf then
+        elseif categoryInfo.disableWhenWerewolf and MAIN_MENU_MANAGER:IsPlayerWerewolf() then
             return MAIN_MENU_CATEGORY_DISABLED_WHILE_WEREWOLF
-        elseif MAIN_MENU_MANAGER:IsPlayerPassenger() and categoryInfo.disableWhenPassenger then
+        elseif categoryInfo.disableWhenPassenger and MAIN_MENU_MANAGER:IsPlayerPassenger() then
             return MAIN_MENU_CATEGORY_DISABLED_WHILE_PASSENGER
+        elseif categoryInfo.disableWhenNoTamrielTomesAreAvailable and TAMRIEL_TOMES_MANAGER and not TAMRIEL_TOMES_MANAGER:AreTomesAvailable() then
+            return MAIN_MENU_CATEGORY_DISABLED_WHILE_NO_TAMRIEL_TOMES_ARE_AVAILABLE
         else
             return MAIN_MENU_CATEGORY_ENABLED
         end
@@ -953,8 +983,10 @@ do
             ZO_AlertEvent(EVENT_UI_ERROR, SI_CANNOT_DO_THAT_WHILE_WEREWOLF)
         elseif categoryState == MAIN_MENU_CATEGORY_DISABLED_WHILE_PASSENGER then
             ZO_AlertEvent(EVENT_UI_ERROR, SI_CANNOT_DO_THAT_WHILE_PASSENGER)
+        elseif categoryState == MAIN_MENU_CATEGORY_DISABLED_WHILE_NO_TAMRIEL_TOMES_ARE_AVAILABLE then
+            ZO_AlertEvent(EVENT_UI_ERROR, SI_TAMRIEL_TOMES_ARE_UNAVAILABLE)
         else
-            if(categoryLayoutInfo.visible == nil or categoryLayoutInfo.visible()) then
+            if categoryLayoutInfo.visible == nil or categoryLayoutInfo.visible() then
                 local categoryInfo = self.categoryInfo[category]
                 if(categoryInfo.lastSceneName) then
                     self:ToggleScene(categoryInfo.lastSceneName)
@@ -1052,13 +1084,21 @@ function ZO_MainMenuCategoryBarButton_OnMouseEnter(self)
     local buttonData = ZO_MenuBarButtonTemplate_GetData(self)
     local bindingString = ZO_Keybindings_GetHighestPriorityBindingStringFromAction(buttonData.binding)
     local button = self.m_object.m_menuBar:ButtonObjectForDescriptor(buttonData.descriptor)
-    
-    local tooltipText = GetString(SI_MAIN_MENU_TOOLTIP_DISABLED_BUTTON)
-    if (button.m_state ~= BSTATE_DISABLED) then
+
+    local tooltipText = nil
+    if button.m_state == BSTATE_DISABLED then
+        if buttonData.disabledTooltipText then
+            tooltipText = ZO_Eval(buttonData.disabledTooltipText)
+        else
+            tooltipText = GetString(SI_MAIN_MENU_TOOLTIP_DISABLED_BUTTON)
+        end
+    else
         tooltipText = zo_strformat(SI_MAIN_MENU_KEYBIND, GetString(buttonData.categoryName), bindingString or GetString(SI_ACTION_IS_NOT_BOUND))
     end
-    
-    SetTooltipText(InformationTooltip, tooltipText)
+
+    if tooltipText then
+        SetTooltipText(InformationTooltip, tooltipText)
+    end
 end
 
 function ZO_MainMenuCategoryBarButton_OnMouseExit(self)

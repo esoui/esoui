@@ -111,7 +111,7 @@ local function IsInputPreferredSettingGamepad()
     return tonumber(GetSetting(SETTING_TYPE_GAMEPAD, GAMEPAD_SETTING_INPUT_PREFERRED_MODE)) == INPUT_PREFERRED_MODE_ALWAYS_GAMEPAD
 end
 
-local ZO_SharedOptions_Gameplay_GamepadSettingsData = 
+local ZO_SharedOptions_Gameplay_GamepadSettingsData =
 {
     --Options_Gameplay_InputModePreferred
     [GAMEPAD_SETTING_INPUT_PREFERRED_MODE] =
@@ -128,7 +128,7 @@ local ZO_SharedOptions_Gameplay_GamepadSettingsData =
             INPUT_PREFERRED_MODE_ALWAYS_GAMEPAD,
             INPUT_PREFERRED_MODE_AUTOMATIC,
         },
-        events = 
+        events =
         {
             [INPUT_PREFERRED_MODE_ALWAYS_KEYBOARD] = "OnInputPreferredModeKeyboard",
             [INPUT_PREFERRED_MODE_ALWAYS_GAMEPAD] = "OnInputPreferredModeGamepad",
@@ -146,6 +146,9 @@ local ZO_SharedOptions_Gameplay_GamepadSettingsData =
                 ZO_Options_HideAssociatedWarning(control)
             end,
         },
+        visible = function()
+            return not IsGameCoreUI()
+        end,
         enabled = function()
              return not IsAccessibilityModeEnabled()
         end,
@@ -311,15 +314,17 @@ local ZO_SharedOptions_Gameplay_GamepadSettingsData =
             end,
         },
         enabled = function()
-            return not IsAccessibilityModeEnabled() and not IsInputPreferredSettingKeyboard()
+            return not IsAccessibilityModeEnabled() and not IsInputPreferredSettingKeyboard() and not IsGameCoreUI()
         end,
         gamepadIsEnabledCallback = function()
-            return not IsAccessibilityModeEnabled() and not IsInputPreferredSettingKeyboard()
+            return not IsAccessibilityModeEnabled() and not IsInputPreferredSettingKeyboard() and not IsGameCoreUI()
         end,
         gamepadCustomTooltipFunction = function(tooltip)
             GAMEPAD_TOOLTIPS:LayoutSettingAccessibilityTooltipWarning(tooltip, GetString(SI_GAMEPAD_OPTIONS_USE_KEYBOARD_LOGIN_TOOLTIP), GetString(SI_OPTIONS_ACCESSIBILITY_MODE_ENABLED_WARNING), IsAccessibilityModeEnabled())
         end,
-        exists = ZO_IsPCUI,
+        exists = function()
+            return ZO_IsPCUI() and not IsGameCoreUI()
+        end,
         initializeControlFunction = function(control)
             ZO_OptionsWindow_InitializeControl(control)
             EVENT_MANAGER:RegisterForEvent("ZO_OptionsPanel_Gameplay", EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function()

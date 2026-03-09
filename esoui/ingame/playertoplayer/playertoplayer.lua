@@ -958,6 +958,17 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
 
         local function AcceptCallback()
             local SET_AUTO_MAP_NAVIGATION_TARGET = true
+
+            -- Start by trying to continue forward from what was being tracked
+            local sortedIndex = ZO_IndexOfElementInNumericallyIndexedTable(ZO_ZONE_STORY_ACTIVITY_COMPLETION_TYPES_SORTED_LIST, zoneCompletionType)
+            for i = sortedIndex, #ZO_ZONE_STORY_ACTIVITY_COMPLETION_TYPES_SORTED_LIST do
+                local nextCompletionType = ZO_ZONE_STORY_ACTIVITY_COMPLETION_TYPES_SORTED_LIST[i]
+                if TrackNextActivityForZoneStory(zoneId, nextCompletionType, SET_AUTO_MAP_NAVIGATION_TARGET) then
+                    return
+                end
+            end
+
+            -- Otherwise just start from the beginning
             local COMPLETION_TYPE_ALL = nil
             TrackNextActivityForZoneStory(zoneId, COMPLETION_TYPE_ALL, SET_AUTO_MAP_NAVIGATION_TARGET)
         end
@@ -1871,7 +1882,7 @@ end
 
 function ZO_PlayerToPlayer:TryShowingStandardInteractLabel()
     local function GetPlatformIgnoredString()
-        return IsConsoleUI() and SI_PLAYER_TO_PLAYER_TARGET_BLOCKED or SI_PLAYER_TO_PLAYER_TARGET_IGNORED
+        return ZO_IsConsoleOrGameCoreUI() and SI_PLAYER_TO_PLAYER_TARGET_BLOCKED or SI_PLAYER_TO_PLAYER_TARGET_IGNORED
     end
 
     if CanUnitTrade(P2P_UNIT_TAG) then
@@ -2038,7 +2049,7 @@ function ZO_PlayerToPlayer:OnUpdate()
         self.promptKeybindButton2.shouldHide = true
         self.pendingResurrectInfoChanged = false
 
-        if (not self.isInteracting) or (not IsConsoleUI()) then
+        if (not self.isInteracting) or not ZO_IsConsoleOrGameCoreUI() then
             self.gamerID:SetHidden(true)
         end
 
@@ -2284,7 +2295,7 @@ function ZO_PlayerToPlayer:AddMenuEntry(text, icons, enabled, selectedFunction, 
 end
 
 do
-    local ALERT_IGNORED_STRING = IsConsoleUI() and SI_PLAYER_TO_PLAYER_BLOCKED or SI_PLAYER_TO_PLAYER_IGNORED
+    local ALERT_IGNORED_STRING = ZO_IsConsoleOrGameCoreUI() and SI_PLAYER_TO_PLAYER_BLOCKED or SI_PLAYER_TO_PLAYER_IGNORED
 
     local function AlertIgnored()
         ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, ALERT_IGNORED_STRING)
@@ -2310,13 +2321,13 @@ do
 
         self:GetRadialMenu():Clear()
         --Gamecard--
-        if IsConsoleUI() then
+        if ZO_IsConsoleOrGameCoreUI() then
             self:AddShowGamerCard(currentTargetDisplayName, currentTargetCharacterName)
         end
 
         --Whisper--
         if IsChatSystemAvailableForCurrentPlatform() then
-            local nameToUse = IsConsoleUI() and currentTargetDisplayName or primaryNameInternal
+            local nameToUse = ZO_IsConsoleOrGameCoreUI() and currentTargetDisplayName or primaryNameInternal
             local function WhisperOption() StartChatInput(nil, CHAT_CHANNEL_WHISPER, nameToUse) end
             local isEnabled = ENABLED_IF_NOT_IGNORED and isRestrictedCommunicationPermitted
             local whisperFunction = isEnabled and WhisperOption or disabledOption
@@ -2368,7 +2379,7 @@ do
             self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_ADD_FRIEND), platformIcons[SI_PLAYER_TO_PLAYER_ADD_FRIEND], DISABLED, AlreadyFriendsWarning)
         else
             local function RequestFriendOption()
-                if IsConsoleUI() then
+                if ZO_IsConsoleOrGameCoreUI() then
                     ZO_ShowConsoleAddFriendDialog(currentTargetCharacterName)
                 else
                     RequestFriend(currentTargetDisplayName)
@@ -2409,7 +2420,7 @@ do
             local function DuelInviteOption()
                 ChallengeTargetToDuel(currentTargetCharacterName)
             end
-            local isEnabled = ENABLED_IF_NOT_IGNORED and (not IsConsoleUI() or not IsConsoleCommunicationRestricted()) and isRestrictedCommunicationPermitted
+            local isEnabled = ENABLED_IF_NOT_IGNORED and (not ZO_IsConsoleOrGameCoreUI() or not IsConsoleCommunicationRestricted()) and isRestrictedCommunicationPermitted
             self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_INVITE_DUEL), platformIcons[SI_PLAYER_TO_PLAYER_INVITE_DUEL], isEnabled, isEnabled and DuelInviteOption or disabledOption)
         end
 
@@ -2432,7 +2443,7 @@ do
             local function TributeLockedAlert()
                 ZO_AlertNoSuppression(UI_ALERT_CATEGORY_ALERT, nil, SI_PLAYER_TO_PLAYER_TRIBUTE_LOCKED)
             end
-            local isEnabled = ENABLED_IF_NOT_IGNORED and not ZO_IsTributeLocked() and (not IsConsoleUI() or not IsConsoleCommunicationRestricted()) and isRestrictedCommunicationPermitted
+            local isEnabled = ENABLED_IF_NOT_IGNORED and not ZO_IsTributeLocked() and (not ZO_IsConsoleOrGameCoreUI() or not IsConsoleCommunicationRestricted()) and isRestrictedCommunicationPermitted
             local entryFunction
             if isEnabled then
                 entryFunction = TributeInviteOption
@@ -2446,7 +2457,7 @@ do
 
         --Trade--
         local function TradeInviteOption() TRADE_WINDOW:InitiateTrade(primaryNameInternal) end
-        local isEnabled = ENABLED_IF_NOT_IGNORED and (not IsConsoleUI() or not IsConsoleCommunicationRestricted()) and isRestrictedCommunicationPermitted
+        local isEnabled = ENABLED_IF_NOT_IGNORED and (not ZO_IsConsoleOrGameCoreUI() or not IsConsoleCommunicationRestricted()) and isRestrictedCommunicationPermitted
         local tradeInviteFunction = isEnabled and TradeInviteOption or disabledOption
         self:AddMenuEntry(GetString(SI_PLAYER_TO_PLAYER_INVITE_TRADE), platformIcons[SI_PLAYER_TO_PLAYER_INVITE_TRADE], isEnabled, tradeInviteFunction)
 

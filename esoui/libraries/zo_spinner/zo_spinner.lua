@@ -40,9 +40,7 @@ function ZO_Spinner:Initialize(control, min, max, isGamepad, spinnerMode, accele
     self.normalColor = ZO_SELECTED_TEXT
     self.errorColor = ZO_ERROR_COLOR
 
-    if(isGamepad ~= true) then
-        self:InitializeHandlers()
-    end
+    self:InitializeHandlers()
 
     if spinnerMode == SPINNER_MODE_WRAP then
         self.constrainRangeFunc = WrapInt

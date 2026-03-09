@@ -354,6 +354,26 @@ ZO_TOOLTIP_STYLES =
         height = 51,
         widthPercent = 100,
     },
+    teamScoresSection =
+    {
+        childSpacing = 10,
+        widthPercent = 100,
+    },
+    teamScoresHeader =
+    {
+        fontFace = "$(GAMEPAD_MEDIUM_FONT)",
+        fontSize = "$(GP_42)",
+        fontStyle = "soft-shadow-thick",
+        uppercase = true,
+        fontColorType = INTERFACE_COLOR_TYPE_TEXT_COLORS,
+        fontColorField = INTERFACE_TEXT_COLOR_SELECTED,
+    },
+    teamScoreEntryRow =
+    {
+        controlTemplate = "ZO_Tooltip_TeamScore_Gamepad",
+        controlTemplateOverrideName = "teamScoreEntry",
+        widthPercent = 100,
+    },
     enchantDiff =
     {
         customSpacing = 30,

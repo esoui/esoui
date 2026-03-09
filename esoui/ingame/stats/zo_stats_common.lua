@@ -98,6 +98,11 @@ function ZO_Stats_Common:SetAttributePointAllocationMode(attributePointAllocatio
     if attributePointAllocationMode ~= self.attributePointAllocationMode then
         local oldAttributePointAllocationMode = self.attributePointAllocationMode
         self.attributePointAllocationMode = attributePointAllocationMode
+
+        if self:DoesAttributePointAllocationModeBatchSave() then
+            PlaySound(SOUNDS.STATS_ENTER_RESPEC_MODE)
+        end
+
         self:FireCallbacks("AttributePointAllocationModeChanged", attributePointAllocationMode, oldAttributePointAllocationMode)
     end
 end
@@ -124,17 +129,6 @@ end
 
 function ZO_Stats_Common:IsPaymentTypeScroll()
     return self.attributeRespecPaymentType == RESPEC_PAYMENT_TYPE_RESPEC_SCROLL
-end
-
-function ZO_Stats_Common:OnStartAttributeRespec(allocationMode, paymentType)
-    self:SetAttributeRespecPaymentType(paymentType)
-    self:SetAttributePointAllocationMode(allocationMode)
-    if IsInGamepadPreferredMode() then
-        SCENE_MANAGER:Push("gamepad_stats_root")
-        GAMEPAD_STATS:SelectAttributes()
-    else
-        SCENE_MANAGER:Push("stats")
-    end
 end
 
 function ZO_Stats_Common:GetAvailablePoints()
@@ -214,133 +208,49 @@ function ZO_Stats_Common:UpdateTitleDropdownTitles(dropdown)
     self:UpdateTitleDropdownSelection(dropdown)
 end
 
+function ZO_Stats_Common:GetDropdownGuildIndex(dropdown)
+    local currentGuildId = GetRepresentedGuildId()
+    if currentGuildId == 0 then
+        return 1
+    end
+    local function IsItemCurrentGuild(item)
+        return item.guildId and item.guildId == currentGuildId
+    end
+    return dropdown:GetIndexByEval(IsItemCurrentGuild)
+end
+
+function ZO_Stats_Common:UpdateGuildDropdownSelection(dropdown)
+    local dropdownGuildIndex = self:GetDropdownGuildIndex(dropdown)
+    if dropdownGuildIndex then
+        dropdown:SelectItemByIndex(dropdownGuildIndex, ZO_COMBOBOX_SUPPRESS_UPDATE)
+    else
+        dropdown:SelectItemByIndex(1, ZO_COMBOBOX_SUPPRESS_UPDATE)
+    end
+end
+
+function ZO_Stats_Common:UpdateGuildDropdownGuilds(dropdown)
+    dropdown:ClearItems()
+     -- First add the none item into the start of the dropdown list 
+    dropdown:AddItem(dropdown:CreateItemEntry(GetString(SI_STATS_NO_GUILD), function() SetRepresentedGuildId(0) end), ZO_COMBOBOX_SUPPRESS_UPDATE)
+
+    for i = 1, GetNumGuilds() do
+        local guildId = GetGuildId(i)
+        local guildName = GetGuildName(guildId)
+        local guildListItem = dropdown:CreateItemEntry(guildName, function() SetRepresentedGuildId(guildId) end)
+        guildListItem.guildId = guildId
+        dropdown:AddItem(guildListItem, ZO_COMBOBOX_SUPPRESS_UPDATE)
+    end 
+
+    dropdown:UpdateItems()
+
+    self:UpdateGuildDropdownSelection(dropdown)
+end
+
 function ZO_Stats_Common:IsPlayerBattleLeveled()
     return IsUnitChampionBattleLeveled("player") or IsUnitBattleLeveled("player")
 end
 
-function ZO_Stats_Common:GetEquipmentBonusInfo()
-    return self.equipmentBonus.value, self.equipmentBonus.lowestEquipSlot
-end
-
-do
-    --to break ties for the player's lowest scoring piece of equipment and show the most important piece
-    local COMBAT_EQUIP_SLOT_IMPORTANCE =
-    {
-        [EQUIP_SLOT_MAIN_HAND]      = 12,
-        [EQUIP_SLOT_BACKUP_MAIN]    = 12,
-        [EQUIP_SLOT_OFF_HAND]       = 11,
-        [EQUIP_SLOT_BACKUP_OFF]     = 11,
-        [EQUIP_SLOT_CHEST]          = 10,
-        [EQUIP_SLOT_LEGS]           = 9,
-        [EQUIP_SLOT_HEAD]           = 8,
-        [EQUIP_SLOT_SHOULDERS]      = 7,
-        [EQUIP_SLOT_FEET]           = 6,
-        [EQUIP_SLOT_HAND]           = 5,
-        [EQUIP_SLOT_WAIST]          = 4,
-        [EQUIP_SLOT_NECK]           = 3,
-        [EQUIP_SLOT_RING1]          = 2,
-        [EQUIP_SLOT_RING2]          = 1,
-    }
-
-    local EQUIPMENT_BONUS_FILLED_TEXTURE = "EsoUI/Art/CharacterWindow/equipmentBonusIcon_full.dds"
-    local EQUIPMENT_BONUS_EMPTY_TEXTURE = "EsoUI/Art/CharacterWindow/equipmentBonusIcon_empty.dds"
-    local EQUIPMENT_BONUS_GOLD_TEXTURE = "EsoUI/Art/CharacterWindow/equipmentBonusIcon_full_gold.dds"
-
-    function ZO_Stats_Common:RefreshEquipmentBonus()
-        --calculate total combat equipment bonus rating
-        local totalEquipmentBonusRating = 0
-        local lowestEquipmentBonusRating
-        local lowestEquipSlot
-        
-        --check if our active weapon is two-handed (for special consideration in weighting weapon equipment bonus value and showing lowest piece in tooltips)
-        local heldWeaponPair = GetHeldWeaponPair()
-        local mainHandSlot = heldWeaponPair == ACTIVE_WEAPON_PAIR_BACKUP and EQUIP_SLOT_BACKUP_MAIN or EQUIP_SLOT_MAIN_HAND
-        local equipType = select(6, GetItemInfo(BAG_WORN, mainHandSlot))
-        local isUsingTwoHanded = equipType == EQUIP_TYPE_TWO_HAND
-
-        for equipSlot = EQUIP_SLOT_ITERATION_BEGIN, EQUIP_SLOT_ITERATION_END do
-            -- filter out an "non-combat" slots as well as the inactive weapon pair
-            if IsActiveCombatRelatedEquipmentSlot(equipSlot) then
-                local considerSlotForOverallRating = true
-                --don't consider off hand weapon slots if player is wielding a two-handed weapon
-                if equipSlot == EQUIP_SLOT_OFF_HAND or equipSlot == EQUIP_SLOT_BACKUP_OFF then
-                    if isUsingTwoHanded then
-                        considerSlotForOverallRating = false
-                    end
-                end
-
-                if considerSlotForOverallRating then
-                    local equipmentBonusRating = GetEquipmentBonusRating(BAG_WORN, equipSlot)
-
-                    if not lowestEquipmentBonusRating or equipmentBonusRating < lowestEquipmentBonusRating then
-                        lowestEquipmentBonusRating = equipmentBonusRating
-                        lowestEquipSlot = equipSlot
-                    elseif equipmentBonusRating == lowestEquipmentBonusRating and COMBAT_EQUIP_SLOT_IMPORTANCE[equipSlot] > COMBAT_EQUIP_SLOT_IMPORTANCE[lowestEquipSlot] then
-                        lowestEquipSlot = equipSlot
-                    end
-
-                    --weight two-handed weapons twice so that they count double in the total
-                    --this is to compensate for their empty off hand weapon slot, so they aren't penalized for 2H weapons in the total
-                    if equipSlot == EQUIP_SLOT_MAIN_HAND or equipSlot == EQUIP_SLOT_BACKUP_MAIN then
-                        if isUsingTwoHanded then
-                            equipmentBonusRating = equipmentBonusRating * 2
-                        end
-                    end
-
-                    totalEquipmentBonusRating = totalEquipmentBonusRating + equipmentBonusRating
-                end
-                -- else don't add the bonus rating to the total because we aren't considering it
-            end
-        end
-
-        --set equipment bonus
-        local averageEquipmentBonusRating = totalEquipmentBonusRating / NUM_COMBAT_RELATED_EQUIP_SLOTS
-        local playerLevel = GetUnitLevel("player")
-        local playerChampionPoints = GetUnitChampionPoints("player")
-        local averageRelativeEquipmentBonusRating = GetUnitEquipmentBonusRatingRelativeToLevel("player", averageEquipmentBonusRating)
-        local equipmentBonus = EQUIPMENT_BONUS_ITERATION_BEGIN
-        for thresholdNumber = EQUIPMENT_BONUS_ITERATION_END, EQUIPMENT_BONUS_ITERATION_BEGIN, -1 do
-            local thresholdValue = GetEquipmentBonusThreshold(playerLevel, playerChampionPoints, thresholdNumber)
-            if averageRelativeEquipmentBonusRating >= thresholdValue then
-                equipmentBonus = thresholdNumber
-                break
-            end
-        end
-
-        self.equipmentBonus.value = equipmentBonus
-        self.equipmentBonus.lowestEquipSlot = lowestEquipSlot
-
-        --setup icons
-        self.equipmentBonus.iconPool:ReleaseAllObjects()
-
-        local lastIcon
-        --we setup 2 fewer icons than the number of EQUIPMENT_BONUS levels: the lowest equipment bonus level is all empty icons, and the highest adds a bonus icon separately
-        for iconNumber = EQUIPMENT_BONUS_ITERATION_BEGIN, EQUIPMENT_BONUS_ITERATION_END - 2 do 
-            local equipmentBonusIconControl = self.equipmentBonus.iconPool:AcquireObject()
-            local equipmentBonusIconTexture
-            if iconNumber < self.equipmentBonus.value then
-                equipmentBonusIconTexture = self.equipmentBonus.value == EQUIPMENT_BONUS_EXTRAORDINARY and EQUIPMENT_BONUS_GOLD_TEXTURE or EQUIPMENT_BONUS_FILLED_TEXTURE
-            else
-                equipmentBonusIconTexture = EQUIPMENT_BONUS_EMPTY_TEXTURE
-            end
-            equipmentBonusIconControl:SetTexture(equipmentBonusIconTexture)
-
-            if lastIcon then
-                equipmentBonusIconControl:SetAnchor(BOTTOMLEFT, lastIcon, BOTTOMRIGHT, 4, 0)
-            else
-                 equipmentBonusIconControl:SetAnchor(BOTTOMLEFT)
-            end
-            lastIcon = equipmentBonusIconControl
-        end
-
-        --add bonus icon if at the highest level
-        if self.equipmentBonus.value == EQUIPMENT_BONUS_MAX_VALUE then
-            local equipmentBonusIconControl = self.equipmentBonus.iconPool:AcquireObject()
-            equipmentBonusIconControl:SetTexture(EQUIPMENT_BONUS_GOLD_TEXTURE)
-            equipmentBonusIconControl:SetAnchor(BOTTOMLEFT, lastIcon, BOTTOMRIGHT, 4, 0)
-        end
-    end
-end
+ZO_Stats_Common.OnStartAttributeRespec = ZO_Stats_Common:MUST_IMPLEMENT()
 
 function ZO_StatsRidingSkillIcon_Initialize(control, trainingType)
     control.trainingType = trainingType

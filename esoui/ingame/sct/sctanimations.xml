@@ -11,7 +11,6 @@
                 </CustomAnimation>
             </Animations>
         </AnimationTimeline>
-
         <AnimationTimeline name="ZO_SCTUpAnimation">
             <Animations>
                 <ScaleAnimation duration="150" startScale="1.6" endScale="1.0"/>
@@ -20,12 +19,11 @@
                     <UpdateFunction>
                         SetSCTAnimationOffsetY(self:GetTimeline(), progress * 10)
                     </UpdateFunction>
-                </CustomAnimation>                
+                </CustomAnimation>
                 <AlphaAnimation duration="150" delay="675" startAlpha="1.0" endAlpha="0"/>
                 <ScaleAnimation duration="150" delay="675" startScale="1" endScale="0.9"/>
             </Animations>
         </AnimationTimeline>
-
         <AnimationTimeline name="ZO_SCTCritAnimation">
             <Animations>
                 <ScaleAnimation duration="150" startScale="2" endScale="1.0"/>
@@ -33,7 +31,6 @@
                 <AlphaAnimation duration="400" delay="500" startAlpha="1.0" endAlpha="0"/>
             </Animations>
         </AnimationTimeline>
-
         <AnimationTimeline name="ZO_SCTStatusAnimation">
             <Animations>
                 <AlphaAnimation duration="10" startAlpha="0.0" endAlpha="1.0"/>

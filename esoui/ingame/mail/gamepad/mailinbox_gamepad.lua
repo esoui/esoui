@@ -272,7 +272,7 @@ function ZO_MailInbox_Gamepad:InitializeOptionsDialog()
 
             local mailData = self:GetActiveMailData()
             if mailData and not IsMailSystem(mailData) then
-                if IsConsoleUI() then
+                if ZO_IsConsoleOrGameCoreUI() then
                     table.insert(parametricListEntries, SHOW_GAMERCARD_ENTRY)
                 end
 
@@ -282,8 +282,7 @@ function ZO_MailInbox_Gamepad:InitializeOptionsDialog()
                     table.insert(parametricListEntries, RETURN_TO_SENDER_ENTRY)
                 end
 
-                --Customer service options are not currently available for PC Gamepad
-                if IsConsoleUI() and IsMailReportable(mailData) then
+                if IsMailReportable(mailData) then
                     table.insert(parametricListEntries, REPORT_PLAYER_ENTRY)
                 end
             end

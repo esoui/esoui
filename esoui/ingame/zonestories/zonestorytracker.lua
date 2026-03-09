@@ -1,13 +1,10 @@
 local ZoneStoryTracker = ZO_HUDTracker_Base:Subclass()
 
-function ZoneStoryTracker:New(...)
-    return ZO_HUDTracker_Base.New(self, ...)
-end
-
 function ZoneStoryTracker:Initialize(control)
     ZO_HUDTracker_Base.Initialize(self, control)
 
     self.iconControl = self.container:GetNamedChild("Icon")
+    self.assistedKeybindButton = self.container:GetNamedChild("Assisted")
 
     ZONE_STORY_TRACKER_FRAGMENT = self:GetFragment()
 end
@@ -19,7 +16,6 @@ function ZoneStoryTracker:InitializeStyles()
         {
             FONT_HEADER = "ZoFontGameShadow",
             FONT_SUBLABEL = "ZoFontGameShadow",
-            TEXT_TYPE_HEADER = MODIFY_TEXT_TYPE_NONE,
             RESIZE_TO_FIT_PADDING_HEIGHT = 10,
 
             -- Quest Tracker anchors are old and complicated and there's not an easy way to set up a consitent scheme
@@ -32,13 +28,13 @@ function ZoneStoryTracker:InitializeStyles()
             CONTAINER_PRIMARY_ANCHOR = ZO_Anchor:New(TOPLEFT),
             CONTAINER_SECONDARY_ANCHOR = ZO_Anchor:New(TOPRIGHT),
 
-            SUBLABEL_PRIMARY_ANCHOR_OFFSET_Y = 2,
+            KEYBIND_BUTTON_TEMPLATE = "ZO_KeybindButton_Keyboard_Template",
+            KEYBIND_ANCHOR = ZO_Anchor:New(RIGHT, self.headerLabel, LEFT, -5, 5),
         },
         gamepad =
         {
             FONT_HEADER = "ZoFontGamepadBold27",
             FONT_SUBLABEL = "ZoFontGamepad34",
-            TEXT_TYPE_HEADER = MODIFY_TEXT_TYPE_UPPERCASE,
             RESIZE_TO_FIT_PADDING_HEIGHT = 20,
 
             TOP_LEVEL_PRIMARY_ANCHOR_QUEST_TRACKER = ZO_Anchor:New(TOPRIGHT, ZO_FocusedQuestTrackerPanelContainerQuestContainer, BOTTOMRIGHT, 0, 20),
@@ -46,7 +42,8 @@ function ZoneStoryTracker:InitializeStyles()
 
             CONTAINER_PRIMARY_ANCHOR = ZO_Anchor:New(TOPRIGHT),
 
-            SUBLABEL_PRIMARY_ANCHOR_OFFSET_Y = 10,
+            KEYBIND_BUTTON_TEMPLATE = "ZO_KeybindButton_Gamepad_Template",
+            KEYBIND_ANCHOR = ZO_Anchor:New(RIGHT, self.headerLabel, LEFT, -5, 0),
         }
     }
     ZO_HUDTracker_Base.InitializeStyles(self)
@@ -73,6 +70,14 @@ function ZoneStoryTracker:Update()
         self:SetHeaderText(ZO_CachedStrFormat(SI_ZONE_STORY_TRACKER_TITLE, data.name))
         self:SetSubLabelText(subLabelText)
     end
+end
+
+function ZoneStoryTracker:ApplyPlatformStyle(style)
+    ZO_HUDTracker_Base.ApplyPlatformStyle(self, style)
+
+    ApplyTemplateToControl(self.assistedKeybindButton, style.KEYBIND_BUTTON_TEMPLATE)
+    self.assistedKeybindButton:ClearAnchors()
+    style.KEYBIND_ANCHOR:AddToControl(self.assistedKeybindButton)
 end
 
 function ZoneStoryTracker:GetPrimaryAnchor()

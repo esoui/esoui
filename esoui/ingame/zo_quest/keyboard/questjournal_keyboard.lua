@@ -48,6 +48,7 @@ function ZO_QuestJournal_Keyboard:RegisterIcons()
     self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     ZONE_DISPLAY_TYPE_ZONE_STORY,       "EsoUI/Art/Journal/journal_Quest_ZoneStory.dds")
     self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     ZONE_DISPLAY_TYPE_COMPANION,        "EsoUI/Art/Journal/journal_Quest_Companion.dds")
     self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     ZONE_DISPLAY_TYPE_ENDLESS_DUNGEON,  "EsoUI/Art/Journal/journal_Quest_EndlessDungeon.dds")
+    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE,     ZONE_DISPLAY_TYPE_ADVENTURE_ZONE,   "EsoUI/Art/Journal/journal_Quest_AdventureZone.dds")
 end
 
 function ZO_QuestJournal_Keyboard:RegisterTooltips()

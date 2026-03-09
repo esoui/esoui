@@ -1,39 +1,40 @@
 <GuiXml>
     <Controls>
-        <Control name="ZO_GamepadBuyBagSpaceGoldAndLabel" virtual="true">
+        <Control name="ZO_GamepadBuyBagSpaceGoldAndLabel" resizeToFitDescendents="true" virtual="true">
             <Controls>
                 <Label name="$(parent)Label" font="ZoFontGamepad34" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                    <Anchor point="TOPLEFT" />
+                    <Anchor point="TOPLEFT"/>
                 </Label>
-          
                 <Label name="$(parent)Amount" inherits="ZO_CurrencyTemplate" font="ZoFontGamepad34">
                     <AnchorToBaseline side="LEFT" relativeToLabel="$(parent)Label" offsetX="385"/>
                 </Label>
             </Controls>
         </Control>
-
         <Control name="ZO_GamepadBuySpaceCommonTemplate" virtual="true">
             <Controls>
-                <Label name="$(parent)Info" font="ZoFontGamepadCondensed42" horizontalAlignment="LEFT" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                    <Anchor point="LEFT" offsetX="5" />
-                    <Anchor point="RIGHT" offsetY="-200"/>
-                </Label>
-
                 <Control name="$(parent)MyGold" inherits="ZO_GamepadBuyBagSpaceGoldAndLabel">
                     <OnInitialized>
                         local IS_PLURAL = false
                         local IS_UPPER = false
                         self:GetNamedChild("Label"):SetText(GetCurrencyName(CURT_MONEY, IS_PLURAL, IS_UPPER))
                     </OnInitialized>
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Info" relativePoint="BOTTOMLEFT" offsetY="30" />
+                    <Anchor point="TOPLEFT" offsetX="5"/>
+                    <Anchor point="RIGHT" offsetY="-250"/>
                 </Control>
-              
                 <Control name="$(parent)Cost" inherits="ZO_GamepadBuyBagSpaceGoldAndLabel">
-                  <Anchor point="TOPLEFT" relativeTo="$(parent)MyGoldLabel" relativePoint="BOTTOMLEFT" offsetY="10" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)MyGoldLabel" relativePoint="BOTTOMLEFT" offsetY="10"/>
                     <Controls>
-                        <Label name="$(parent)Label" override="true" text="SI_GAMEPAD_BUY_BAG_SPACE_COST" />
+                        <Label name="$(parent)Label" override="true" text="SI_GAMEPAD_BUY_BAG_SPACE_COST"/>
                     </Controls>
                 </Control>
+                <Label name="$(parent)Info" font="ZoFontGamepadCondensed42" horizontalAlignment="LEFT" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Cost" relativePoint="BOTTOMLEFT" offsetY="30"/>
+                    <Anchor point="RIGHT" constrains="X"/>
+                </Label>
+                <Label name="$(parent)UnlocksRemaining" font="ZoFontGamepadCondensed42" horizontalAlignment="LEFT" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Info" relativePoint="BOTTOMLEFT" offsetY="30"/>
+                    <Anchor point="RIGHT" constrains="X"/>
+                </Label>
             </Controls>
         </Control>
     </Controls>

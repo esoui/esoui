@@ -1,13 +1,12 @@
 <GuiXml>
     <Controls>
         <Control name="ZO_GamepadGrid_ListAnchors" virtual="true">
-            <Anchor point="TOPLEFT" offsetY="200" />
-            <Anchor point="BOTTOMRIGHT" offsetY="-100" />
+            <Anchor point="TOPLEFT" offsetY="200"/>
+            <Anchor point="BOTTOMRIGHT" offsetY="-100"/>
         </Control>
-
         <Control name="ZO_GamepadGrid_SubListAnchors" virtual="true">
-            <Anchor point="TOPLEFT" offsetY="300" />
-            <Anchor point="BOTTOMRIGHT" offsetY="-200" />
+            <Anchor point="TOPLEFT" offsetY="300"/>
+            <Anchor point="BOTTOMRIGHT" offsetY="-200"/>
         </Control>
     </Controls>
 </GuiXml>

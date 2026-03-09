@@ -1,6 +1,8 @@
 local KeybindingsManager = ZO_InitializingCallbackObject:Subclass()
 
 function KeybindingsManager:Initialize()
+    self.chordingAlwaysEnabled = false
+
     local function OnAddOnLoaded(event, name)
         if name == "ZO_Ingame" then
             PushActionLayerByName(GetString(SI_KEYBINDINGS_LAYER_GENERAL))
@@ -145,6 +147,14 @@ function KeybindingsManager:GetBindTypeTextFromIndex(bindingIndex)
     else
         return GetString(SI_KEYBINDINGS_QUATERNARY)
     end
+end
+
+function KeybindingsManager:SetChordingAlwaysEnabled(alwaysEnabled)
+    self.chordingAlwaysEnabled = alwaysEnabled
+end
+
+function KeybindingsManager:IsChordingAlwaysEnabled()
+    return self.chordingAlwaysEnabled
 end
 
 KEYBINDINGS_MANAGER = KeybindingsManager:New()

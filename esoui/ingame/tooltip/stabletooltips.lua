@@ -21,7 +21,12 @@ function ZO_Tooltip:LayoutRidingSkill(trainingType, bonus, maxBonus)
     self:AddSection(bodySection)
 
     local warningSection = self:AcquireSection(self:GetStyle("bodySection"))
-    local warningText = GetString(bonus < maxBonus and SI_GAMEPAD_STABLE_ONCE_PER_DAY_WARNING or SI_GAMEPAD_STABLE_FULLY_UPGRADED_WARNING)
+    local warningText
+    if bonus < maxBonus then
+        warningText = zo_strformat(SI_GAMEPAD_STABLE_ONCE_PER_DAY_WARNING, GetNumUpgradesPerStablemasterTraining())
+    else
+        warningText = GetString(SI_GAMEPAD_STABLE_FULLY_UPGRADED_WARNING)
+    end
     warningSection:AddLine(warningText, self:GetStyle("bodyDescription"))
     self:AddSection(warningSection)
 end

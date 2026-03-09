@@ -80,6 +80,15 @@ function ZO_UISystemManager:Initialize()
                 SCENE_MANAGER:CreateStackFromScratch("mainMenuGamepad", "gamepad_campaign_root", "gamepad_vengeance_loadouts")
             end,
         },
+        [UI_SYSTEM_TAMRIEL_TOMES] =
+        {
+            keyboardOpen = function(tomeId)
+                TAMRIEL_TOMES_MANAGER:OpenTamrielTome(tomeId)
+            end,
+            gamepadOpen = function(tomeId)
+                TAMRIEL_TOMES_MANAGER:OpenTamrielTome(tomeId)
+            end,
+        },
     }
 
     -- ... is a series of param1, param2, etc.

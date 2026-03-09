@@ -31,7 +31,6 @@
                 </Label>
             </Controls>
         </Control>
-
         <Control name="ZO_GiftInventorySent_Keyboard_Control" hidden="true">
             <OnInitialized>
                 ZO_GiftInventorySent_Keyboard_OnInitialized(self)

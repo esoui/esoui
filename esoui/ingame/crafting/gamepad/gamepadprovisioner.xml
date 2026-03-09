@@ -4,15 +4,14 @@
             <OnInitialized>
                 ZO_ProvisionerIngredientBarSlotTemplate_OnInitialized(self)
             </OnInitialized>
-            <Dimensions x="205" y="205" />
-
+            <Dimensions x="205" y="205"/>
             <Controls>
                 <Backdrop name="$(parent)Bg" inherits="ZO_DefaultBackdrop_Gamepad" excludeFromResizeToFitExtents="true">
                     <AnchorFill/>
                 </Backdrop>
                 <Texture name="$(parent)Icon" level="2">
                     <Dimensions x="64" y="64"/>
-                    <Anchor point="CENTER" relativePoint="TOPLEFT" offsetX="57" offsetY="57" />
+                    <Anchor point="CENTER" relativePoint="TOPLEFT" offsetX="57" offsetY="57"/>
                 </Texture>
                 <Control name="$(parent)Count" inherits="ZO_FractionDisplay">
                     <Anchor point="CENTER" relativePoint="TOPRIGHT" offsetX="-57" offsetY="57"/>
@@ -23,7 +22,6 @@
                 </Label>
             </Controls>
         </Button>
-
         <Control name="ZO_Provisioner_GamepadItemSubEntryTemplate" inherits="ZO_GamepadItemSubEntryTemplate" virtual="true">
             <OnInitialized>
                 ZO_SharedGamepadEntry_OnInitialized(self)
@@ -32,22 +30,18 @@
             </OnInitialized>
             <Controls>
                 <Texture name="$(parent)QuestPin" textureFile="EsoUI\Art\WritAdvisor\Gamepad\gp_advisor_trackedPin_icon.dds" excludeFromResizeToFitExtents="true" pixelRoundingEnabled="false" level="3" hidden="true">
-                    <Dimensions x="32" y="32" />
+                    <Dimensions x="32" y="32"/>
                     <Anchor point="RIGHT" relativeTo="$(parent)Icon" relativePoint="LEFT" offsetX="-2"/>
                 </Texture>
             </Controls>
         </Control>
-
-        <TopLevelControl name="ZO_GamepadProvisionerTopLevelSkillInfo" inherits="ZO_GamepadSkillsFooter" hidden="true" />
-
+        <TopLevelControl name="ZO_GamepadProvisionerTopLevelSkillInfo" inherits="ZO_GamepadSkillsFooter" hidden="true"/>
         <TopLevelControl name="ZO_GamepadProvisionerTopLevel" inherits="ZO_AnchoredToQuadrant1Background" hidden="true">
             <OnInitialized>
                 ZO_GamepadProvisioner_Initialize(self)
             </OnInitialized>
-
             <Controls>
                 <Control name="$(parent)HeaderContainer" inherits="ZO_GamepadScreenHeaderContainer ZO_GamepadGrid_NavQuadrant_ContainerAnchors"/>
-
                 <Scroll name="$(parent)Mask" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
                     <Controls>
                         <Control name="$(parent)Container">
@@ -59,10 +53,9 @@
                                 </Control>
                             </Controls>
                         </Control>
-                        <Control name="$(parent)Fillet" inherits="ZO_FishFillet_Gamepad_PanelContent" />
+                        <Control name="$(parent)Fillet" inherits="ZO_FishFillet_Gamepad_PanelContent"/>
                     </Controls>
                 </Scroll>
-
                 <Scroll name="$(parent)Container" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
                     <Controls>
                         <Control name="$(parent)Recipe">
@@ -74,7 +67,6 @@
                                 </Control>
                             </Controls>
                         </Control>
-
                         <Control name="$(parent)Options" hidden="true">
                             <Anchor point="TOPLEFT" relativeTo="$(grandparent)HeaderContainerHeader" relativePoint="BOTTOMLEFT"/>
                             <Anchor point="BOTTOMRIGHT"/>
@@ -86,14 +78,11 @@
                         </Control>
                     </Controls>
                 </Scroll>
-
                 <Control name="$(parent)IngredientsBar" inherits="ZO_GamepadCraftingIngredientBarTemplate">
                     <Dimensions y="205"/>
                     <Anchor point="BOTTOM" relativeTo="GuiRoot" relativePoint="BOTTOMLEFT" offsetX="ZO_GAMEPAD_PROVISIONER_INGREDIENTS_BAR_OFFSET_X" offsetY="ZO_GAMEPAD_CRAFTING_UTILS_FLOATING_BOTTOM_OFFSET"/>
                 </Control>
-
-                <Control name="$(parent)Fillet" inherits="ZO_FishFillet_Gamepad_FloatingContent" hidden="true" />
-
+                <Control name="$(parent)Fillet" inherits="ZO_FishFillet_Gamepad_FloatingContent" hidden="true"/>
                 <Control name="$(parent)Tooltip" inherits="ZO_CraftingTooltip_Gamepad">
                     <Anchor point="BOTTOM" relativeTo="$(parent)IngredientsBar" relativePoint="TOP" offsetY="-61"/>
                 </Control>

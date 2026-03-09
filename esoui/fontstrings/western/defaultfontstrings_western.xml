@@ -1,6 +1,6 @@
 <GuiXml>
     <!-- Faces -->
-    <String name="MEDIUM_FONT" value="EsoUI/Common/Fonts/Univers57.slug" />
+    <String name="MEDIUM_FONT" value="EsoUI/Common/Fonts/Univers57.slug"/>
     <FallbackFont font="$(MEDIUM_FONT)"/>
     <BackupFont originalFont="$(MEDIUM_FONT)" backupFont="EsoUI/Common/Fonts/Univers57Cyrillic-Condensed.slug"/>
     <!-- ESO-829122: In Japanese, MEDIUM_FONT would normally be ESO_FWNTLGUDC70-DB.slug. However, due to the nature of backup fonts, 
@@ -8,42 +8,32 @@
     70-DB glyphs before loading 70-M glyphs, which is undesirable. This is a compromise until backup fonts can be augmented to correct for this. -->
     <BackupFont originalFont="$(MEDIUM_FONT)" backupFont="EsoUI/Common/Fonts/ESO_FWUDC_70-M.slug"/>
     <BackupFont originalFont="$(MEDIUM_FONT)" backupFont="EsoUI/Common/Fonts/MYingHeiPRC-W5.slug"/>
-
-    <String name="BOLD_FONT" value="EsoUI/Common/Fonts/Univers67.slug" />
+    <String name="BOLD_FONT" value="EsoUI/Common/Fonts/Univers67.slug"/>
     <BackupFont originalFont="$(BOLD_FONT)" backupFont="EsoUI/Common/Fonts/Univers67Cyrillic-CondensedBold.slug"/>
     <BackupFont originalFont="$(BOLD_FONT)" backupFont="EsoUI/Common/Fonts/ESO_FWNTLGUDC70-DB.slug"/>
     <BackupFont originalFont="$(BOLD_FONT)" backupFont="EsoUI/Common/Fonts/MYingHeiPRC-W5.slug"/>
-
-    <String name="CHAT_FONT" value="EsoUI/Common/Fonts/Univers57.slug" />
+    <String name="CHAT_FONT" value="EsoUI/Common/Fonts/Univers57.slug"/>
     <BackupFont originalFont="$(CHAT_FONT)" backupFont="EsoUI/Common/Fonts/Univers57Cyrillic-Condensed.slug"/>
     <BackupFont originalFont="$(CHAT_FONT)" backupFont="EsoUI/Common/Fonts/ESO_FWUDC_70-M.slug"/>
     <BackupFont originalFont="$(CHAT_FONT)" backupFont="EsoUI/Common/Fonts/MYingHeiPRC-W5.slug"/>
-
-    <String name="GAMEPAD_LIGHT_FONT" value="EsoUI/Common/Fonts/FTN47.slug" />
+    <String name="GAMEPAD_LIGHT_FONT" value="EsoUI/Common/Fonts/FTN47.slug"/>
     <BackupFont originalFont="$(GAMEPAD_LIGHT_FONT)" backupFont="EsoUI/Common/Fonts/ESO_FWNTLGUDC70-DB.slug"/>
     <BackupFont originalFont="$(GAMEPAD_LIGHT_FONT)" backupFont="EsoUI/Common/Fonts/MYingHeiPRC-W5.slug"/>
-
-    <String name="GAMEPAD_MEDIUM_FONT" value="EsoUI/Common/Fonts/FTN57.slug" />
+    <String name="GAMEPAD_MEDIUM_FONT" value="EsoUI/Common/Fonts/FTN57.slug"/>
     <BackupFont originalFont="$(GAMEPAD_MEDIUM_FONT)" backupFont="EsoUI/Common/Fonts/ESO_FWNTLGUDC70-DB.slug"/>
     <BackupFont originalFont="$(GAMEPAD_MEDIUM_FONT)" backupFont="EsoUI/Common/Fonts/MYingHeiPRC-W5.slug"/>
-
     <!-- Split out from GAMEPAD_MEDIUM_FONT so we don't have to generate outlines for large CJK fonts. 
     This currently saves about 100 MB of memory, but is only useful as long as we only use outlines with latin characters (usually numbers). -->
-    <String name="GAMEPAD_MEDIUM_FONT_LATIN" value="EsoUI/Common/Fonts/FTN57.slug" />
-
-    <String name="GAMEPAD_BOLD_FONT" value="EsoUI/Common/Fonts/FTN87.slug" />
+    <String name="GAMEPAD_MEDIUM_FONT_LATIN" value="EsoUI/Common/Fonts/FTN57.slug"/>
+    <String name="GAMEPAD_BOLD_FONT" value="EsoUI/Common/Fonts/FTN87.slug"/>
     <BackupFont originalFont="$(GAMEPAD_BOLD_FONT)" backupFont="EsoUI/Common/Fonts/ESO_FWNTLGUDC70-DB.slug"/>
     <BackupFont originalFont="$(GAMEPAD_BOLD_FONT)" backupFont="EsoUI/Common/Fonts/MYingHeiPRC-W5.slug"/>
-
-    <String name="ANTIQUE_FONT" value="EsoUI/Common/Fonts/ProseAntiquePSMT.slug" />
+    <String name="ANTIQUE_FONT" value="EsoUI/Common/Fonts/ProseAntiquePSMT.slug"/>
     <BackupFont originalFont="$(ANTIQUE_FONT)" backupFont="EsoUI/Common/Fonts/ProseAntiquePSMTCyrillic.slug"/>
-
-    <String name="HANDWRITTEN_FONT" value="EsoUI/Common/Fonts/Handwritten_Bold.slug" />
+    <String name="HANDWRITTEN_FONT" value="EsoUI/Common/Fonts/Handwritten_Bold.slug"/>
     <BackupFont originalFont="$(HANDWRITTEN_FONT)" backupFont="EsoUI/Common/Fonts/HandwrittenCyrillic_Bold.slug"/>
-
-    <String name="STONE_TABLET_FONT" value="EsoUI/Common/Fonts/TrajanPro-Regular.slug" />
+    <String name="STONE_TABLET_FONT" value="EsoUI/Common/Fonts/TrajanPro-Regular.slug"/>
     <BackupFont originalFont="$(STONE_TABLET_FONT)" backupFont="EsoUI/Common/Fonts/TrajanProCyrillic-Regular.slug"/>
-
     <!-- Sizes -->
     <String name="KB_8" value="8"/>
     <String name="KB_9" value="9"/>
@@ -72,7 +62,6 @@
     <String name="KB_40" value="40"/>
     <String name="KB_48" value="48"/>
     <String name="KB_54" value="54"/>
-
     <String name="GP_18" value="18"/>
     <String name="GP_20" value="20"/>
     <String name="GP_22" value="22"/>

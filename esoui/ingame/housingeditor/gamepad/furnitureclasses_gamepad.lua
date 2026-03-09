@@ -1096,7 +1096,7 @@ function ZO_HousingSettingsList_Gamepad:BuildOptionsList()
     end
 
     local function ShouldShowGamerCardOption()
-        return IsConsoleUI() and (self.rowDataType == ZO_SETTINGS_VISITOR_DATA_TYPE or self.rowDataType == ZO_SETTINGS_BANLIST_DATA_TYPE or self.rowDataType == ZO_SETTINGS_OCCUPANT_DATA_TYPE)
+        return ZO_IsConsoleOrGameCoreUI() and (self.rowDataType == ZO_SETTINGS_VISITOR_DATA_TYPE or self.rowDataType == ZO_SETTINGS_BANLIST_DATA_TYPE or self.rowDataType == ZO_SETTINGS_OCCUPANT_DATA_TYPE)
     end
 
     self:AddOptionTemplate(groupingId, BuildChangeUserGroupPermissionsOption, ZO_HousingSettingsList_Gamepad.SelectedDataHasPreset)
@@ -1122,6 +1122,8 @@ function ZO_HousingSettingsList_Gamepad:GetBackKeybindCallback()
 end
 
 function ZO_HousingSettingsList_Gamepad:SetupRow(control, data, selected)
+    ZO_GamepadInteractiveSortFilterList.SetupRow(self, control, data)
+
     local displayNameControl = control:GetNamedChild("DisplayName")
     local permissionControl = control:GetNamedChild("Permission")
 

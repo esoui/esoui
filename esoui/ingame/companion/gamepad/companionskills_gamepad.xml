@@ -14,7 +14,7 @@
                                         <Control name="$(parent)Header" override="true">
                                             <Controls>
                                                 <Control name="$(parent)AssignableActionBar" inherits="ZO_GamepadSkillsCompanionActionBar">
-                                                    <Anchor point="TOP" relativeTo="$(parent)DividerSimple" relativePoint="BOTTOM" offsetY="25" />
+                                                    <Anchor point="TOP" relativeTo="$(parent)DividerSimple" relativePoint="BOTTOM" offsetY="25"/>
                                                 </Control>
                                             </Controls>
                                         </Control>
@@ -24,14 +24,11 @@
                         </Control>
                     </Controls>
                 </Scroll>
-
                 <!-- parented outside of mask so it can extend to the edges of the list, this will be anchored to the assignable action bar -->
-                <Backdrop name="$(parent)ActionBarBackground" inherits="ZO_DefaultBackdrop_Gamepad" alpha="0" />
-
-                <Scroll name="$(parent)QuickMenu" inherits="ZO_GamepadSkillsActionBar_QuickMenu" />
+                <Backdrop name="$(parent)ActionBarBackground" inherits="ZO_DefaultBackdrop_Gamepad" alpha="0"/>
+                <Scroll name="$(parent)QuickMenu" inherits="ZO_GamepadSkillsActionBar_QuickMenu"/>
             </Controls>
         </TopLevelControl>
-
         <TopLevelControl name="ZO_CompanionSkills_Gamepad_Footer" inherits="ZO_GamepadSkillsFooter" hidden="true"/>
     </Controls>
 </GuiXml>

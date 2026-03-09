@@ -1,0 +1,121 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_TamrielTomes_SharedTL" hidden="true" resizeToFitDescendents="true" virtual="true" mouseEnabled="true">
+            <Controls>
+                <Texture name="$(parent)PageBackground" textureFile="EsoUI/Art/TamrielTomes/single_side_full_tome.dds" level="1" excludeFromResizeToFitExtents="true">
+                    <Dimensions x="982"/>
+                </Texture>
+                <Control name="$(parent)Header">
+                    <Dimensions x="850" y="120"/>
+                    <Anchor point="TOP" offsetY="118"/>
+                    <Controls>
+                        <Texture name="$(parent)Backdrop" alpha="0.6" textureFile="EsoUI/Art/TamrielTomes/tome_rewards_title_bg.dds" level="1" excludeFromResizeToFitExtents="true">
+                            <Anchor point="TOPLEFT" offsetX="-3" offsetY="-3"/>
+                            <Anchor point="BOTTOMRIGHT" offsetX="3" offsetY="3"/>
+                            <Dimensions x="850" y="140"/>
+                            <TextureCoords left="0" top="0" bottom="0.543" right="0.831"/>
+                        </Texture>
+                        <Label name="$(parent)Title" horizontalAlignment="CENTER">
+                            <Anchor point="TOPLEFT" offsetX="10"/>
+                            <Anchor point="TOPRIGHT" offsetX="-10"/>
+                        </Label>
+                        <Label name="$(parent)Subtitle" horizontalAlignment="CENTER">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetY="-4"/>
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Title" relativePoint="BOTTOMRIGHT" offsetY="-4"/>
+                        </Label>
+                        <Control name="$(parent)Buttons">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Subtitle" relativePoint="BOTTOMLEFT" offsetY="30"/>
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Subtitle" relativePoint="BOTTOMRIGHT" offsetY="30"/>
+                            <Controls>
+                                <Button name="$(parent)ChallengesButton" text="SI_TAMRIEL_TOMES_VIEW_CHALLENGES_LABEL">
+                                    <Anchor point="RIGHT" relativePoint="TOP" offsetX="-20"/>
+                                    <Dimensions x="400" y="75"/>
+                                </Button>
+                                <Button name="$(parent)UpgradeButton" text="SI_TAMRIEL_TOMES_UPGRADE_TOME_LABEL">
+                                    <Anchor point="LEFT" relativePoint="TOP" offsetX="20"/>
+                                    <Dimensions x="400" y="75"/>
+                                </Button>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+                <Control name="$(parent)Book">
+                    <Controls>
+                        <Control name="$(parent)RewardParticleGeneratorPosition" tier="MEDIUM">
+                            <Anchor point="TOPLEFT"/>
+                        </Control>
+                        <Control name="$(parent)Currency" resizeToFitDescendents="true">
+                            <Controls>
+                                <Control name="$(parent)Balance">
+                                    <Dimensions x="300" y="28"/>
+                                    <Controls>
+                                        <Label name="$(parent)Name" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED"/>
+                                        <Control name="$(parent)Amount" excludeFromResizeToFitExtents="true"/>
+                                        <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Icons/icon_missing.dds" layer="CONTROLS">
+                                            <Dimensions x="32" y="32"/>
+                                        </Texture>
+                                    </Controls>
+                                </Control>
+                                <Control name="$(parent)Bonus" hidden="true" resizeToFitDescendents="true">
+                                    <Dimensions x="300" y="28"/>
+                                    <Controls>
+                                        <Label name="$(parent)Percent" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SUCCEEDED"/>
+                                        <Texture name="$(parent)Icon" textureFile="EsoUI/Art/TamrielTomes/currencyBonusArrow.dds" layer="CONTROLS">
+                                            <Dimensions x="48" y="48"/>
+                                        </Texture>
+                                    </Controls>
+                                </Control>
+                                <Texture name="$(parent)BalanceBackdrop" textureFile="EsoUI/Art/TamrielTomes/tome_currency_backdrop.dds" hidden="true" excludeFromResizeToFitExtents="true" level="10">
+                                    <Dimensions x="350" y="40"/>
+                                </Texture>
+                                <Texture name="$(parent)FullBackdrop" textureFile="EsoUI/Art/TamrielTomes/tome_currency_backdrop.dds" hidden="true" excludeFromResizeToFitExtents="true" level="10">
+                                    <Dimensions x="350" y="56"/>
+                                </Texture>
+                            </Controls>
+                        </Control>
+                        <Control name="$(parent)GridList"/>
+                        <Texture name="$(parent)PremiumGroupBorder" textureFile="EsoUI/Art/TamrielTomes/tome_group_premium_slots_border.dds" level="5">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)GridList" offsetX="-23" offsetY="-18"/>
+                            <Dimensions x="686" y="372"/>
+                            <TextureCoords left="0" right="0.6699" top="0" bottom="0.7266"/>
+                            <Controls>
+                                <Label name="$(parent)Label" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="SI_TAMRIEL_TOMES_PREMIUM_REWARDS" level="6" modifyTextType="UPPERCASE">
+                                    <Anchor point="CENTER" relativePoint="BOTTOM" offsetY="-25"/>
+                                    <Controls>
+                                        <Texture name="$(parent)Backdrop" textureFile="EsoUI/Art/TamrielTomes/tome_premium_bg.dds" level="4">
+                                            <Anchor point="CENTER"/>
+                                            <Dimensions x="512" y="32"/>
+                                        </Texture>
+                                    </Controls>
+                                </Label>
+                                <Texture name="$(parent)Locked" hidden="true" level="7" textureFile="EsoUI/Art/TamrielTomes/premium_tome_slot_lock.dds">
+                                    <Anchor point="RIGHT" relativeTo="$(parent)Label" relativePoint="LEFT" offsetX="-4"/>
+                                    <Dimensions x="32" y="32"/>
+                                </Texture>
+                            </Controls>
+                        </Texture>
+                        <Control name="$(parent)PageNavigation" inherits="ZO_PageNavigation">
+                            <Anchor point="TOP" relativeTo="$(parent)GridList" relativePoint="BOTTOM" offsetY="4"/>
+                            <Controls>
+                                <Texture name="$(parent)Background" textureFile="EsoUI/Art/TamrielTomes/tome_page_selection_bg.dds" level="10" excludeFromResizeToFitExtents="true">
+                                    <Dimensions x="720" y="64"/>
+                                    <Anchor point="CENTER"/>
+                                    <TextureCoords left="0.1484" right="0.8516" top="0" bottom="1"/>
+                                </Texture>
+                            </Controls>
+                        </Control>
+                        <Label name="$(parent)UnlockPointsRequired" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                            <Anchor point="TOP" relativeTo="$(parent)GridList" relativePoint="BOTTOM" offsetY="-35"/>
+                            <Controls>
+                                <Texture name="$(parent)Background" textureFile="EsoUI/Art/TamrielTomes/tome_points_remaining_to_unlock_page_bg.dds" level="10">
+                                    <Dimensions x="700" y="28"/>
+                                    <Anchor point="CENTER"/>
+                                </Texture>
+                            </Controls>
+                        </Label>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

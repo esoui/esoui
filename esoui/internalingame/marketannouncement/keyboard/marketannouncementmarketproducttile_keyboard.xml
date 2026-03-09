@@ -21,24 +21,18 @@
                 ZO_FontAdjustingWrapLabel_OnInitialized(self:GetNamedChild("Title"), fonts, TEXT_WRAP_MODE_ELLIPSIS)
                 ZO_MarketAnnouncementMarketProductTile_Keyboard_OnInitialized(self)
             </OnInitialized>
-
             <Controls>
                 <Control name="$(parent)Container">
-                    <AnchorFill />
+                    <AnchorFill/>
                     <Controls>
                         <Button name="$(parent)ActionButton" inherits="ZO_DefaultButton">
-                            <Dimensions x="200" />
-                            <Anchor point="BOTTOMLEFT" relativeTo="$(grandparent)Background"  relativePoint="BOTTOMLEFT" offsetX="18" offsetY="-62" />
+                            <Dimensions x="200"/>
+                            <Anchor point="BOTTOMLEFT" relativeTo="$(grandparent)Background" relativePoint="BOTTOMLEFT" offsetX="18" offsetY="-62"/>
                         </Button>
                         <Button name="$(parent)Help" mouseEnabled="true" layer="OVERLAY" alpha="0" hidden="true">
                             <Dimensions x="64" y="64"/>
-                            <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT" offsetX="-10" offsetY="-10" />
-                            <Textures
-                                normal = "EsoUI/Art/MenuBar/menuBar_help_up.dds"
-                                pressed = "EsoUI/Art/MenuBar/menuBar_help_down.dds"
-                                disabled = "EsoUI/Art/MenuBar/menuBar_help_disabled.dds"
-                                mouseOver = "EsoUI/Art/MenuBar/menuBar_help_over.dds"
-                            />
+                            <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT" offsetX="-10" offsetY="-10"/>
+                            <Textures normal="EsoUI/Art/MenuBar/menuBar_help_up.dds" pressed="EsoUI/Art/MenuBar/menuBar_help_down.dds" disabled="EsoUI/Art/MenuBar/menuBar_help_disabled.dds" mouseOver="EsoUI/Art/MenuBar/menuBar_help_over.dds"/>
                         </Button>
                     </Controls>
                 </Control>

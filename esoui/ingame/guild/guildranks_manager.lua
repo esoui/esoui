@@ -28,7 +28,7 @@ function ZO_GuildRanks_Manager:BuildPermissionsGridData()
     {
         [self.permissionsCategories.CHAT_CATEGORY] =
         {
-            header = GetString(IsConsoleUI() and SI_GUILD_RANK_PERMISSIONS_VOICE_CHAT or SI_GUILD_RANK_PERMISSIONS_CHAT),
+            header = GetString(ZO_IsConsoleOrGameCoreUI() and SI_GUILD_RANK_PERMISSIONS_VOICE_CHAT or SI_GUILD_RANK_PERMISSIONS_CHAT),
             permissions =
             {
                 GUILD_PERMISSION_CHAT,

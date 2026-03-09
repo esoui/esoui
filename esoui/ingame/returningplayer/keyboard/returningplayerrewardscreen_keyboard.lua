@@ -125,8 +125,10 @@ function ZO_ReturningPlayerRewardScreen_Keyboard.IntroReward_OnMouseExit(control
     RETURNING_PLAYER_REWARD_SCREEN_KEYBOARD:OnMouseExitReward(control)
 end
 
-function ZO_ReturningPlayerRewardScreen_Keyboard.IntroReward_OnMouseUp(control)
-    RETURNING_PLAYER_REWARD_SCREEN_KEYBOARD:OnMouseUp(control)
+function ZO_ReturningPlayerRewardScreen_Keyboard.IntroReward_OnMouseUp(control, button, upInside)
+    if upInside then
+        RETURNING_PLAYER_REWARD_SCREEN_KEYBOARD:OnMouseUp(control)
+    end
 end
 
 function ZO_ReturningPlayerRewardScreen_Keyboard.GoToPromotionalEvent_OnClicked(control)

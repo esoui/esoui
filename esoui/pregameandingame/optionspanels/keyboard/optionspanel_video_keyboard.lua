@@ -11,7 +11,9 @@ panelBuilder:AddSetting({
     initializeControlFunction = function(control)
         ZO_OptionsWindow_InitializeControl(control)
         EVENT_MANAGER:RegisterForEvent("ZO_OptionsPanel_Video", EVENT_FULLSCREEN_MODE_CHANGED, function()
-            ZO_Options_UpdateOption(control)
+            if not IsInGamepadPreferredMode() then
+                ZO_Options_UpdateOption(control)
+            end
         end)
     end,
 })

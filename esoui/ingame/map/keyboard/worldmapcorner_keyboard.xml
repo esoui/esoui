@@ -11,7 +11,7 @@
             <Controls>
                 <Label name="$(parent)Title" font="ZoFontWinH1">
                     <Anchor point="TOPLEFT"/>
-                    <Anchor point="TOPRIGHT" relativeTo="ZO_MainMenuCategoryBarButton1Membership" relativePoint="TOPLEFT" />
+                    <Anchor point="TOPRIGHT" relativeTo="ZO_MainMenuCategoryBarButton1Membership" relativePoint="TOPLEFT"/>
                     <OnInitialized>
                         local fonts =
                         {

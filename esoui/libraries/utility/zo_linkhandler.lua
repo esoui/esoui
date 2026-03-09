@@ -114,12 +114,12 @@ function ZO_LinkHandler_CreateDisplayNameLink(displayName)
         undecoratedDisplayName = UndecorateDisplayName(displayName)
     end
 
-    local userFacingDisplayName = IsConsoleUI() and undecoratedDisplayName or displayName
+    local userFacingDisplayName = ZO_IsConsoleOrGameCoreUI() and undecoratedDisplayName or displayName
     return ZO_LinkHandler_CreateLink(userFacingDisplayName, nil, DISPLAY_NAME_LINK_TYPE, undecoratedDisplayName)
 end
 
 function ZO_LinkHandler_CreateCharacterLink(characterName)
-    if IsConsoleUI() then
+    if ZO_IsConsoleOrGameCoreUI() then
         return string.format("[%s]", ZO_FormatUserFacingCharacterName(characterName))
     else
         return ZO_LinkHandler_CreateLink(characterName, nil, CHARACTER_LINK_TYPE, characterName)

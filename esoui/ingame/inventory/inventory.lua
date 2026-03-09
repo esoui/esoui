@@ -689,6 +689,7 @@ function ZO_InventoryManager:Initialize(control)
             altFreeSlotType = BackpackAltFreeSlotType,
             freeSlotsStringId = SI_INVENTORY_BACKPACK_REMAINING_SPACES,
             freeSlotsFullStringId = SI_INVENTORY_BACKPACK_COMPLETELY_FULL,
+            bagUpgradeButton = ZO_PlayerInventoryInfoBarBuyBagSpace,
             currentSortKey = "statusSortOrder",
             currentSortOrder = ZO_SORT_ORDER_DOWN,
             currentFilter = ITEM_TYPE_DISPLAY_CATEGORY_ALL,
@@ -1831,6 +1832,22 @@ function ZO_InventoryManager:UpdateFreeSlots(inventoryType)
             inventory.altFreeSlotsLabel:SetText(zo_strformat(altFreeSlotInventory.freeSlotsFullStringId, numUsedSlots, numSlots))
         end
     end
+
+    self:UpdateBagUpgradeButton(inventoryType)
+end
+
+function ZO_InventoryManager:UpdateBagUpgradeButton(inventoryType)
+    local inventory = self.inventories[inventoryType]
+    if inventory.bagUpgradeButton then
+        local hideButton
+        if type(inventory.hideBagUpgrade) == "function" then
+            hideButton = inventory.hideBagUpgrade()
+        else
+            hideButton = inventory.hideBagUpgrade
+        end
+
+        inventory.bagUpgradeButton:SetHidden(hideButton)
+    end
 end
 
 function ZO_InventoryManager:SetupInitialFilter()
@@ -2492,6 +2509,9 @@ function ZO_InventoryManager:ApplyBackpackLayout(layoutData)
 
     local inventory = self.inventories[INVENTORY_BACKPACK]
     inventory.additionalFilter = layoutData.additionalFilter
+    inventory.hideBagUpgrade = layoutData.hideBagUpgrade
+
+    self:UpdateFreeSlots(INVENTORY_BACKPACK)
 
     local craftBag = self.inventories[INVENTORY_CRAFT_BAG]
     craftBag.additionalFilter = layoutData.additionalCraftBagFilter

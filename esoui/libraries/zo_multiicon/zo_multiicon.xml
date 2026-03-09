@@ -16,7 +16,7 @@
             <OnStop>
                 ZO_MultiIconAnimation_OnStop(self)
             </OnStop>
-        </AnimationTimeline>        
+        </AnimationTimeline>
     </Animations>
     <Controls>
         <Texture name="ZO_MultiIcon" hidden="true" virtual="true">

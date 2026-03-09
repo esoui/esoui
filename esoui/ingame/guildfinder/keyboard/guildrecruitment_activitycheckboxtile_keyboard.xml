@@ -11,7 +11,6 @@
                 </Button>
             </Controls>
         </Control>
-
         <Control name="ZO_GuildRecruitment_ActivityCheckboxEndTile_Keyboard_Control" inherits="ZO_Tile_Control ZO_GuildRecruitment_ActivityCheckboxTile_Keyboard_Control" virtual="true">
             <Dimensions y="ZO_GUILD_RECRUITMENT_GUILD_LISTING_KEYBOARD_CHECKBOX_END_HEIGHT"/>
         </Control>

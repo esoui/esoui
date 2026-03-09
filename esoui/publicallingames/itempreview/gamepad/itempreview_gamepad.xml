@@ -6,15 +6,19 @@
             </OnInitialized>
             <Controls>
                 <Label name="$(parent)VariationLabel" font="ZoFontGamepadBold34" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER" maxLineCount="2" wrapMode="ELLIPSIS" hidden="true">
-                    <DimensionConstraints maxX="330" minX="200" />
+                    <DimensionConstraints maxX="330" minX="200"/>
                     <Anchor point="BOTTOM" offsetY="-20"/>
                 </Label>
-
                 <Label name="$(parent)ActionLabel" font="ZoFontGamepadBold34" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER" maxLineCount="2" wrapMode="ELLIPSIS" hidden="true">
-                    <DimensionConstraints maxX="330" minX="200" />
+                    <DimensionConstraints maxX="330" minX="200"/>
                     <Anchor point="BOTTOM" relativeTo="$(parent)VariationLabel" relativePoint="TOP" offsetY="-20"/>
                 </Label>
             </Controls>
+        </TopLevelControl>
+        <TopLevelControl name="ZO_PreviewRewardList_Screen_Gamepad_TL" inherits="ZO_Gamepad_ParametricList_Screen">
+            <OnInitialized>
+                ZO_PreviewRewardList_Screen_Gamepad.OnControlInitialized(self)
+            </OnInitialized>
         </TopLevelControl>
     </Controls>
 </GuiXml>

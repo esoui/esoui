@@ -149,7 +149,7 @@ function ZO_SkillsAndActionBarManager:OnStartRespec(allocationMode, paymentType)
 end
 
 do
-    internalassert(RESPEC_RESULT_MAX_VALUE == 73, "Update EXPECTED_RESPEC_FAILURES")
+    internalassert(RESPEC_RESULT_MAX_VALUE == 77, "Update EXPECTED_RESPEC_FAILURES")
     local EXPECTED_RESPEC_FAILURES =
     {
         [RESPEC_RESULT_IS_IN_COMBAT] = true,
@@ -162,7 +162,11 @@ do
         [RESPEC_RESULT_SKILL_SWAPPING_DISABLED] = true,
         [RESPEC_RESULT_SUBCLASSING_TRAINING_DISABLED] = true,
         [RESPEC_RESULT_SUBCLASSING_DISABLED] = true,
-        [RESPEC_RESULT_IN_VENGEANCE] = true
+        [RESPEC_RESULT_IN_VENGEANCE] = true,
+        [RESPEC_RESULT_ON_COOLDOWN_SKILLS] = true,
+        [RESPEC_RESULT_ON_COOLDOWN_ATTRIBUTES] = true,
+        [RESPEC_RESULT_CAST_CANCELED] = true,
+        [RESPEC_RESULT_DISALLOWED_IN_ACTIVITY] = true,
     }
     function ZO_SkillsAndActionBarManager:OnSkillRespecResult(result)
         if result == RESPEC_RESULT_SUCCESS then

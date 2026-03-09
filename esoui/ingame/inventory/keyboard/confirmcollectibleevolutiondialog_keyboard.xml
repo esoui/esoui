@@ -6,56 +6,45 @@
             </OnInitialized>
             <Controls>
                 <Control name="$(parent)Container" resizeToFitDescendents="true">
-                    <Anchor point="TOP" relativeTo="$(parent)Divider" relativePoint="BOTTOM" offsetY="20" />
-
+                    <Anchor point="TOP" relativeTo="$(parent)Divider" relativePoint="BOTTOM" offsetY="20"/>
                     <Controls>
                         <Texture name="$(parent)BaseIcon" inherits="ZO_CollectibleEvolutionTexture">
-                            <Anchor point="TOPLEFT" />
+                            <Anchor point="TOPLEFT"/>
                         </Texture>
-
                         <Texture name="$(parent)Arrow" inherits="ZO_CollectibleEvolutionArrow">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)BaseIcon" relativePoint="TOPRIGHT" offsetX="10" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)BaseIcon" relativePoint="TOPRIGHT" offsetX="10"/>
                         </Texture>
-
                         <Texture name="$(parent)EvolvedIcon" inherits="ZO_CollectibleEvolutionTexture">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)Arrow" relativePoint="TOPRIGHT" offsetX="10" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Arrow" relativePoint="TOPRIGHT" offsetX="10"/>
                         </Texture>
                     </Controls>
                 </Control>
-
                 <Label name="$(parent)Text" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetY="124"/>
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)Title" relativePoint="BOTTOMRIGHT" offsetY="124"/>
                 </Label>
-
                 <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton"/>
                 <Control name="$(parent)Confirm" inherits="ZO_CustomDialogButton"/>
             </Controls>
         </TopLevelControl>
-
         <TopLevelControl name="ZO_ConfirmAdvancedCombinationDialog_Keyboard" inherits="ZO_CustomDialogBase">
             <OnInitialized>
                 ZO_ConfirmAdvancedCombinationDialog_Keyboard_OnInitialized(self)
             </OnInitialized>
             <Controls>
                 <Control name="$(parent)Container" resizeToFitDescendents="true">
-                    <Anchor point="TOP" relativeTo="$(parent)Divider" relativePoint="BOTTOM" offsetY="20" />
-
+                    <Anchor point="TOP" relativeTo="$(parent)Divider" relativePoint="BOTTOM" offsetY="20"/>
                     <Controls>
                         <!-- These controls will all be anchored programmatically -->
-                        <Control name="$(parent)ComponentsContainer" resizeToFitDescendents="true" />
-
-                        <Texture name="$(parent)Arrow" inherits="ZO_CollectibleEvolutionArrow" />
-
-                        <Control name="$(parent)UnlocksContainer" resizeToFitDescendents="true" />
+                        <Control name="$(parent)ComponentsContainer" resizeToFitDescendents="true"/>
+                        <Texture name="$(parent)Arrow" inherits="ZO_CollectibleEvolutionArrow"/>
+                        <Control name="$(parent)UnlocksContainer" resizeToFitDescendents="true"/>
                     </Controls>
                 </Control>
-
                 <Label name="$(parent)Text" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                    <Dimensions x="360" />
-                    <Anchor point="TOP" relativeTo="$(parent)Container" relativePoint="BOTTOM" offsetY="20" />
+                    <Dimensions x="360"/>
+                    <Anchor point="TOP" relativeTo="$(parent)Container" relativePoint="BOTTOM" offsetY="20"/>
                 </Label>
-
                 <Control name="$(parent)Cancel" inherits="ZO_CustomDialogButton"/>
                 <Control name="$(parent)Confirm" inherits="ZO_CustomDialogButton"/>
             </Controls>

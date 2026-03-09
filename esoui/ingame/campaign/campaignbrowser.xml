@@ -9,9 +9,8 @@
         </Control>
         <!-- Wrap early, and when wrapping, indent the next line to make it clear that the line is part of the same label -->
         <Label name="ZO_RulesetEntry" inherits="ZO_TreeLabelSubCategory" maxLineCount="2" newLineIndent="10" virtual="true">
-            <Dimensions x="180" />
+            <Dimensions x="180"/>
         </Label>
-
         <Label name="ZO_CampaignBrowserLoadingLabel" virtual="true" inherits="ZO_LoadingText" font="ZoFontGame"/>
         <Label name="ZO_CampaignBrowserLabel" font="ZoFontGame" wrapMode="ELLIPSIS" virtual="true"/>
         <Texture name="ZO_CampaignBrowserTexture" layer="OVERLAY" mouseEnabled="true" virtual="true">
@@ -32,8 +31,7 @@
                 ZO_CampaignBrowserRow_OnMouseDoubleClick(self)
             </OnMouseDoubleClick>
             <Controls>
-                <Texture name="$(parent)BG" inherits="ZO_ThinListBgStrip" />
-
+                <Texture name="$(parent)BG" inherits="ZO_ThinListBgStrip"/>
                 <Texture name="$(parent)Icon" inherits="ZO_CampaignBrowserTexture">
                     <Anchor point="LEFT"/>
                     <OnMouseEnter>
@@ -103,7 +101,6 @@
                 </Texture>
             </Controls>
         </Control>
-
         <Control name="ZO_CampaignBrowserQueueRow" mouseEnabled="true" virtual="true">
             <Dimensions y="30"/>
             <OnMouseEnter>
@@ -118,9 +115,8 @@
             <OnMouseDoubleClick>
               ZO_CampaignBrowserQueueRow_OnMouseDoubleClick(self)
             </OnMouseDoubleClick>
-
-          <Controls>
-                <Texture name="$(parent)BG" inherits="ZO_ThinListBgStrip" />
+            <Controls>
+                <Texture name="$(parent)BG" inherits="ZO_ThinListBgStrip"/>
                 <Texture name="$(parent)Icon" inherits="ZO_CampaignBrowserTexture">
                     <Anchor point="LEFT" offsetX="32"/>
                     <OnMouseEnter>
@@ -142,7 +138,6 @@
                 </Control>
             </Controls>
         </Control>
-        
         <TopLevelControl name="ZO_CampaignBrowser" inherits="ZO_RightPanelFootPrint" hidden="true">
             <OnInitialized>
                 ZO_CampaignBrowser_OnInitialized(self)
@@ -152,7 +147,6 @@
                     <Anchor point="TOPLEFT" offsetX="5" offsetY="68"/>
                     <Dimensions x="265" y="290"/>
                 </Control>
-
                 <Label name="$(parent)RulesHeader" font="ZoFontHeader3" text="SI_CAMPAIGN_BROWSER_RULES_HEADER" modifyTextType="UPPERCASE">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Categories" relativePoint="BOTTOMLEFT" offsetX="20" offsetY="10"/>
                 </Label>
@@ -164,7 +158,6 @@
                     <Anchor point="TOPLEFT" relativeTo="$(parent)RulesHeader" relativePoint="BOTTOMLEFT" offsetY="15"/>
                     <Dimensions x="250" y="310"/>
                 </Label>
-                
                 <Control name="$(parent)Headers">
                     <Anchor point="TOPLEFT" offsetX="290" offsetY="73"/>
                     <Anchor point="TOPRIGHT" offsetY="73"/>
@@ -227,7 +220,6 @@
                         </Control>
                     </Controls>
                 </Control>
-
                 <Texture name="$(parent)ListDividerLeft" textureFile="EsoUI/Art/Campaign/campaignBrowser_listDivider_left.dds">
                     <Dimensions x="512" y="4"/>
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Headers" relativePoint="BOTTOMLEFT"/>
@@ -236,11 +228,10 @@
                     <Anchor point="TOPLEFT" relativeTo="$(parent)ListDividerLeft" relativePoint="TOPRIGHT"/>
                     <Dimensions x="240" y="4"/>
                 </Texture>
-
                 <Control name="$(parent)List" inherits="ZO_ScrollList">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Headers" relativePoint="BOTTOMLEFT" offsetY="3"/>
                     <Anchor point="BOTTOMRIGHT" offsetX="-8" offsetY="-32"/>
-                </Control>        
+                </Control>
             </Controls>
         </TopLevelControl>
     </Controls>

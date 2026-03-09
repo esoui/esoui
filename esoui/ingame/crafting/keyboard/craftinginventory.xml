@@ -5,81 +5,67 @@
                 self.owner:SetMousedOverRow(self)
                 ZO_InventorySlot_OnMouseEnter(self)
             </OnMouseEnter>
-
             <OnMouseExit>
                 self.owner:SetMousedOverRow(nil)
                 ZO_InventorySlot_OnMouseExit(self)
             </OnMouseExit>
-
             <OnMouseUp>
                 ZO_CraftingInventoryComponentRow_OnMouseUp(self, button, upInside)
             </OnMouseUp>
-
             <OnMouseDoubleClick>
                 -- override to disable double click action
             </OnMouseDoubleClick>
             <Controls>
                 <Texture name="$(parent)QuestPin" textureFile="EsoUI\Art\WritAdvisor\advisor_trackedPin_icon.dds" excludeFromResizeToFitExtents="true" pixelRoundingEnabled="false" level="3" hidden="true">
-                    <Dimensions x="32" y="32" />
+                    <Dimensions x="32" y="32"/>
                     <Anchor point="LEFT" relativePoint="LEFT" offsetX="10" offsetY="0"/>
                 </Texture>
             </Controls>
         </Control>
-
         <Control name="ZO_CraftingInventoryTab" inherits="ZO_MenuBarButtonTemplate1" virtual="true">
             <OnMouseEnter>
                 ZO_CraftingInventory_FilterButtonOnMouseEnter(self)
             </OnMouseEnter>
-
             <OnMouseExit>
                 ZO_CraftingInventory_FilterButtonOnMouseExit(self)
             </OnMouseExit>
         </Control>
-
         <Control name="ZO_CraftingInventoryFilterTab" inherits="ZO_InventoryFilterTabTemplate" virtual="true">
             <OnInitialized name="ZO_CraftingInventoryFilterTab">
                 self.questPin = self:GetNamedChild("QuestPin")
             </OnInitialized>
             <Controls>
                 <Texture name="$(parent)QuestPin" textureFile="EsoUI\Art\WritAdvisor\advisor_trackedPin_icon.dds" excludeFromResizeToFitExtents="true" pixelRoundingEnabled="false" level="3" hidden="true">
-                    <Dimensions x="32" y="32" />
-                    <Anchor point="TOPRIGHT" offsetX="15" offsetY="-10" />
+                    <Dimensions x="32" y="32"/>
+                    <Anchor point="TOPRIGHT" offsetX="15" offsetY="-10"/>
                 </Texture>
             </Controls>
         </Control>
-        
         <Control name="ZO_CraftingInventoryTabs" inherits="ZO_InventoryTabs" virtual="true">
             <OnInitialized>
                 ZO_CraftingInventoryTabs_OnInitialized(self)
             </OnInitialized>
         </Control>
-
         <Control name="ZO_CraftingInventoryTemplate" virtual="true" mouseEnabled="true">
-            <Dimensions x="565" />
-            <Anchor point="TOPLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="45" />
-            <Anchor point="BOTTOMLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="-30" />
-            
+            <Dimensions x="565"/>
+            <Anchor point="TOPLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="45"/>
+            <Anchor point="BOTTOMLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="-30"/>
             <OnEffectivelyShown>
                 self.owner:OnShow()
             </OnEffectivelyShown>
             <Controls>
                 <Control name="$(parent)Tabs" inherits="ZO_CraftingInventoryTabs"/>
-
                 <Control name="$(parent)FilterDivider" inherits="ZO_InventoryFilterDivider"/>
-
                 <!-- Sort Headers -->
                 <Control name="$(parent)SortBy" inherits="ZO_InventorySortByHeaders"/>
-
                 <Control name="$(parent)Backpack" inherits="ZO_InventoryList"/>
-
                 <Label name="$(parent)NoItemsLabel" font="ZoFontWinH4" horizontalAlignment="CENTER" hidden="true">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Backpack" offsetY="20" />
-                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Backpack" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Backpack" offsetY="20"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Backpack"/>
                 </Label>
-
                 <Control name="$(parent)InfoBar" inherits="ZO_InventoryInfoBar">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Backpack" relativePoint="BOTTOMLEFT" />
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Backpack" relativePoint="BOTTOMRIGHT" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Backpack" relativePoint="BOTTOMLEFT"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Backpack" relativePoint="BOTTOMRIGHT"/>
                 </Control>
             </Controls>
         </Control>

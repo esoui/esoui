@@ -1,84 +1,73 @@
 <GuiXml>
     <Controls>
         <Control name="ZO_KeybindStripButtonTemplate" inherits="ZO_KeybindButtonBehavior" virtual="true">
-            <DimensionConstraints minY="55" maxY="55" />
+            <DimensionConstraints minY="55" maxY="55"/>
             <ResizeToFitPadding width="40"/>
             <OnInitialized>
                 ZO_KeybindButtonTemplate_OnInitialized(self)
             </OnInitialized>
-
             <Controls>
-                <Label name="$(parent)NameLabel" font="ZoFontKeybindStripDescription" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" >
+                <Label name="$(parent)NameLabel" font="ZoFontKeybindStripDescription" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
                     <Anchor point="RIGHT" offsetX="-20"/>
                 </Label>
-
                 <Label name="$(parent)KeyLabel" font="ZoFontKeybindStripKey" inherits="ZO_LargeKeyMarkupLabel">
                     <Anchor point="RIGHT" relativeTo="$(parent)NameLabel" relativePoint="LEFT" offsetX="-15"/>
                 </Label>
             </Controls>
         </Control>
-
-        <Control name="ZO_KeybindStripRightScrollKeybind" inherits="ZO_KeybindButton" virtual="true" />
-
+        <Control name="ZO_KeybindStripRightScrollKeybind" inherits="ZO_KeybindButton" virtual="true"/>
         <Control name="ZO_KeybindStripLeftSlideKeybind" inherits="ZO_KeybindButton" virtual="true">
             <Controls>
                 <Label name="$(parent)RightKeyLabel" inherits="ZO_LargeKeyMarkupLabel_Gamepad" hidden="true">
-                    <Anchor point="RIGHT" relativeTo="$(parent)KeyLabel" relativePoint="RIGHT" offsetX="-15" />
+                    <Anchor point="RIGHT" relativeTo="$(parent)KeyLabel" relativePoint="RIGHT" offsetX="-15"/>
                     <Controls>
-                        <Texture name="$(parent)Arrow" textureFile="EsoUI\Art\Buttons\Gamepad\gp_menu_rightArrow.dds" layer="TEXT" >
-                            <Dimensions x="24" y="24" />
-                            <Anchor point="LEFT" relativePoint="RIGHT" />
+                        <Texture name="$(parent)Arrow" textureFile="EsoUI\Art\Buttons\Gamepad\gp_menu_rightArrow.dds" layer="TEXT">
+                            <Dimensions x="24" y="24"/>
+                            <Anchor point="LEFT" relativePoint="RIGHT"/>
                         </Texture>
                     </Controls>
                 </Label>
-
                 <Label name="$(parent)LeftKeyLabel" inherits="ZO_LargeKeyMarkupLabel_Gamepad" hidden="true">
-                    <Anchor point="RIGHT" relativeTo="$(parent)RightKeyLabel" relativePoint="LEFT" offsetX="-15" />
+                    <Anchor point="RIGHT" relativeTo="$(parent)RightKeyLabel" relativePoint="LEFT" offsetX="-15"/>
                     <Controls>
-                        <Texture name="$(parent)Arrow" textureFile="EsoUI\Art\Buttons\Gamepad\gp_menu_rightArrow.dds" textureCoordsRotation="ZO_PI" layer="TEXT" >
-                            <Dimensions x="24" y="24" />
-                            <Anchor point="RIGHT" relativePoint="LEFT" />
+                        <Texture name="$(parent)Arrow" textureFile="EsoUI\Art\Buttons\Gamepad\gp_menu_rightArrow.dds" textureCoordsRotation="ZO_PI" layer="TEXT">
+                            <Dimensions x="24" y="24"/>
+                            <Anchor point="RIGHT" relativePoint="LEFT"/>
                         </Texture>
                     </Controls>
                 </Label>
             </Controls>
         </Control>
-
         <!-- The Keybind strip Initialize assumes that these backgrounds exist -->
         <TopLevelControl name="ZO_KeybindStripMungeBackground" layer="BACKGROUND" hidden="true">
-            <Dimensions y="55" />
-            <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot" />
-            <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" />
+            <Dimensions y="55"/>
+            <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot"/>
+            <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot"/>
             <Controls>
-                <Texture name="$(parent)Texture" inherits="ZO_BottomBarBG" />
+                <Texture name="$(parent)Texture" inherits="ZO_BottomBarBG"/>
             </Controls>
         </TopLevelControl>
-
         <TopLevelControl name="ZO_KeybindStripGamepadBackground" hidden="true">
-            <Dimensions y="ZO_GAMEPAD_KEYBIND_STRIP_BACKGROUND_HEIGHT" />
-            <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot" />
-            <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" />
+            <Dimensions y="ZO_GAMEPAD_KEYBIND_STRIP_BACKGROUND_HEIGHT"/>
+            <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot"/>
+            <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot"/>
             <Controls>
-                <Texture name="$(parent)Texture" textureFile="EsoUI/Art/Windows/Gamepad/gp_hintbar.dds" >
-                    <AnchorFill />
-
-                    <TextureCoords left="0" right="0.9375" top="0" bottom="1" />
+                <Texture name="$(parent)Texture" textureFile="EsoUI/Art/Windows/Gamepad/gp_hintbar.dds">
+                    <AnchorFill/>
+                    <TextureCoords left="0" right="0.9375" top="0" bottom="1"/>
                 </Texture>
             </Controls>
         </TopLevelControl>
-
         <TopLevelControl name="ZO_KeybindStripControl" hidden="true" tier="MEDIUM" level="ZO_MEDIUM_TIER_KEYBIND_STRIP">
-            <Dimensions y="55" />
-            <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot" />
-            <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot" />
-
+            <Dimensions y="55"/>
+            <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot"/>
+            <Anchor point="BOTTOMRIGHT" relativeTo="GuiRoot"/>
             <OnInitialized>
                 ZO_KeybindStrip_OnInitialized(self)
             </OnInitialized>
-            
             <Controls>
                 <Control name="$(parent)CenterParent" resizeToFitDescendents="true">
-                    <Anchor point="CENTER" />
+                    <Anchor point="CENTER"/>
                 </Control>
             </Controls>
         </TopLevelControl>

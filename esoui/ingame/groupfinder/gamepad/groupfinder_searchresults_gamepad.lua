@@ -91,7 +91,7 @@ function ZO_GroupFinder_Gamepad_SearchResultsList_Filter:IsActive()
 end
 
 do
-    internalassert(GROUP_FINDER_CATEGORY_MAX_VALUE == 6, "A Group Finder category has been added. Please add it to the PRIMARY_FILTER_TYPE_BY_CATEGORY and SECONDARY_FILTER_TYPE_BY_CATEGORY tables")
+    internalassert(GROUP_FINDER_CATEGORY_MAX_VALUE == 7, "A Group Finder category has been added. Please add it to the PRIMARY_FILTER_TYPE_BY_CATEGORY and SECONDARY_FILTER_TYPE_BY_CATEGORY tables")
     local PRIMARY_FILTER_TYPE_BY_CATEGORY =
     {
         [GROUP_FINDER_CATEGORY_DUNGEON] = GROUP_FINDER_SEARCH_RESULTS_DROPDOWN_TYPES.SINGLE_SELECT,
@@ -100,6 +100,7 @@ do
         [GROUP_FINDER_CATEGORY_ENDLESS_DUNGEON] = GROUP_FINDER_SEARCH_RESULTS_DROPDOWN_TYPES.NONE,
         [GROUP_FINDER_CATEGORY_PVP] = GROUP_FINDER_SEARCH_RESULTS_DROPDOWN_TYPES.SINGLE_SELECT,
         [GROUP_FINDER_CATEGORY_ZONE] = GROUP_FINDER_SEARCH_RESULTS_DROPDOWN_TYPES.MULTI_SELECT,
+        [GROUP_FINDER_CATEGORY_ADVENTURE_ZONE] = GROUP_FINDER_SEARCH_RESULTS_DROPDOWN_TYPES.NONE,
         [GROUP_FINDER_CATEGORY_CUSTOM] = GROUP_FINDER_SEARCH_RESULTS_DROPDOWN_TYPES.NONE,
     }
 
@@ -111,6 +112,7 @@ do
         [GROUP_FINDER_CATEGORY_ENDLESS_DUNGEON] = GROUP_FINDER_SEARCH_RESULTS_DROPDOWN_TYPES.NONE,
         [GROUP_FINDER_CATEGORY_PVP] = GROUP_FINDER_SEARCH_RESULTS_DROPDOWN_TYPES.MULTI_SELECT,
         [GROUP_FINDER_CATEGORY_ZONE] = GROUP_FINDER_SEARCH_RESULTS_DROPDOWN_TYPES.MULTI_SELECT,
+        [GROUP_FINDER_CATEGORY_ADVENTURE_ZONE] = GROUP_FINDER_SEARCH_RESULTS_DROPDOWN_TYPES.NONE,
         [GROUP_FINDER_CATEGORY_CUSTOM] = GROUP_FINDER_SEARCH_RESULTS_DROPDOWN_TYPES.NONE,
     }
 
@@ -242,7 +244,7 @@ ZO_GroupFinder_SearchResultsList_Gamepad = ZO_GamepadInteractiveSortFilterList:S
 
 function ZO_GroupFinder_SearchResultsList_Gamepad:Initialize(control)
     ZO_GamepadInteractiveSortFilterList.Initialize(self, control)
-    
+
     self.masterList = {}
 
     local NO_HIDE_CALLBACK = nil
@@ -928,6 +930,7 @@ function ZO_GroupFinder_SearchResultsList_Gamepad:RefreshSelectedTooltip()
 end
 
 function ZO_GroupFinder_SearchResultsList_Gamepad:SetupRow(control, data)
+    ZO_GamepadInteractiveSortFilterList.SetupRow(self, control, data)
     ZO_GroupFinder_Shared.SetUpGroupListingFromData(control, self.roleControlPool, data, ZO_GROUP_LISTING_ROLE_CONTROL_PADDING_GAMEPAD)
 end
 

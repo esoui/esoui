@@ -343,7 +343,9 @@ function ZO_GroupFinder_AdditionalFilters_Gamepad:BuildFiltersList()
             end,
             visible = function(dialog)
                 local category = GetGroupFinderFilterCategory()
-                return category ~= GROUP_FINDER_CATEGORY_ENDLESS_DUNGEON and category ~= GROUP_FINDER_CATEGORY_CUSTOM
+                return category ~= GROUP_FINDER_CATEGORY_ENDLESS_DUNGEON 
+                    and category ~= GROUP_FINDER_CATEGORY_ADVENTURE_ZONE
+                    and category ~= GROUP_FINDER_CATEGORY_CUSTOM
             end,
             narrationText = ZO_GetDefaultParametricListDropdownNarrationText,
         },

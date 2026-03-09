@@ -94,7 +94,7 @@ function ZO_GroupFinderGroupListingTooltip_SetGroupFinderListing(tooltipControl,
     local category = data:GetCategory()
     local categoryString = GetString("SI_GROUPFINDERCATEGORY", category)
 
-    if category ~= GROUP_FINDER_CATEGORY_ENDLESS_DUNGEON and category ~= GROUP_FINDER_CATEGORY_CUSTOM then
+    if category ~= GROUP_FINDER_CATEGORY_ENDLESS_DUNGEON and category ~= GROUP_FINDER_CATEGORY_ADVENTURE_ZONE and category ~= GROUP_FINDER_CATEGORY_CUSTOM then
         local firstText = category == GROUP_FINDER_CATEGORY_PVP and data:GetPrimaryOptionText() or data:GetSecondaryOptionText()
         local secondText = category == GROUP_FINDER_CATEGORY_PVP and data:GetSecondaryOptionText() or data:GetPrimaryOptionText()
         local optionsString = ZO_SELECTED_TEXT:Colorize(ZO_GenerateCommaSeparatedListWithoutAnd({ firstText, secondText }))

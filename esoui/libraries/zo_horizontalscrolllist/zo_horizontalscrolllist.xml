@@ -4,43 +4,29 @@
             <OnMouseWheel>
                 ZO_HorizontalScrollList_OnMouseWheel(self, delta)
             </OnMouseWheel>
-
             <Controls>
                 <Scroll name="$(parent)Scroll">
-                    <AnchorFill />
-                    <FadeGradient x1="1" y1="0" size1="200" x2="-1" y2="0" size2="200" />
+                    <AnchorFill/>
+                    <FadeGradient x1="1" y1="0" size1="200" x2="-1" y2="0" size2="200"/>
                 </Scroll>
                 <Button name="$(parent)LeftArrow">
-                    <Dimensions x="64" y="64" />
-                    <Anchor point="CENTER" relativePoint="LEFT" />
-                    
-                    <Textures
-                        normal="EsoUI/Art/Buttons/large_leftArrow_up.dds"
-                        pressed="EsoUI/Art/Buttons/large_leftArrow_down.dds"
-                        mouseOver="EsoUI/Art/Buttons/large_leftArrow_over.dds"
-                        disabled="EsoUI/Art/Buttons/large_leftArrow_disabled.dds"
-                    />
+                    <Dimensions x="64" y="64"/>
+                    <Anchor point="CENTER" relativePoint="LEFT"/>
+                    <Textures normal="EsoUI/Art/Buttons/large_leftArrow_up.dds" pressed="EsoUI/Art/Buttons/large_leftArrow_down.dds" mouseOver="EsoUI/Art/Buttons/large_leftArrow_over.dds" disabled="EsoUI/Art/Buttons/large_leftArrow_disabled.dds"/>
                     <OnClicked>
                         self:GetParent().horizontalScrollList:MoveRight()
                     </OnClicked>
                 </Button>
-
                 <Button name="$(parent)RightArrow">
-                    <Dimensions x="64" y="64" />
-                    <Anchor point="CENTER" relativePoint="RIGHT" />
-                    <Textures
-                        normal="EsoUI/Art/Buttons/large_rightArrow_up.dds"
-                        pressed="EsoUI/Art/Buttons/large_rightArrow_down.dds"
-                        mouseOver="EsoUI/Art/Buttons/large_rightArrow_over.dds"
-                        disabled="EsoUI/Art/Buttons/large_rightArrow_disabled.dds"
-                    />
+                    <Dimensions x="64" y="64"/>
+                    <Anchor point="CENTER" relativePoint="RIGHT"/>
+                    <Textures normal="EsoUI/Art/Buttons/large_rightArrow_up.dds" pressed="EsoUI/Art/Buttons/large_rightArrow_down.dds" mouseOver="EsoUI/Art/Buttons/large_rightArrow_over.dds" disabled="EsoUI/Art/Buttons/large_rightArrow_disabled.dds"/>
                     <OnClicked>
                         self:GetParent().horizontalScrollList:MoveLeft()
                     </OnClicked>
                 </Button>
-
                 <Label name="$(parent)NoItemsLabel" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" hidden="true">
-                    <Anchor point="CENTER" />
+                    <Anchor point="CENTER"/>
                 </Label>
             </Controls>
         </Control>

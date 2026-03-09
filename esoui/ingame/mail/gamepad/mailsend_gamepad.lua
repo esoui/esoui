@@ -64,7 +64,7 @@ end
 local function GetDefaultAddresseeText()
     local addresseeText
 
-    if IsConsoleUI() then
+    if ZO_IsConsoleOrGameCoreUI() then
         addresseeText = zo_strformat(GetString(SI_GAMEPAD_MAIL_DEFAULT_ADDRESSEE), ZO_GetPlatformAccountLabel())
     else
         addresseeText = GetString(SI_REQUEST_NAME_DEFAULT_TEXT)
@@ -547,7 +547,7 @@ function ZO_MailSend_Gamepad:PopulateMainList()
 
         if ZO_IsPlaystationPlatform() then
             self:AddMainListEntry(GetString(SI_GAMEPAD_MAIL_SEND_TO), NO_HEADER, NO_ICON, userListCallback, NO_SECONDARY_CALLBACK_NAME, NO_SECONDARY_CALLBACK, mailSendNarrationText)
-        elseif GetUIPlatform() == UI_PLATFORM_XBOX then
+        elseif ZO_IsConsoleOrGameCoreUI() then
             if GetNumberConsoleFriends() > 0 then
                 self:AddMainListEntry(GetString(SI_GAMEPAD_MAIL_SEND_TO), NO_HEADER, NO_ICON, editBoxCallback, GetString(SI_GAMEPAD_CONSOLE_CHOOSE_FRIEND), userListCallback, mailSendNarrationText)
             else
@@ -650,7 +650,7 @@ function ZO_MailSend_Gamepad:PopulateMainList()
         local to = self.mailView:GetAddress()
         local subject = self.mailView:GetSubject()
         local body = self.mailView:GetBody()
-        if IsConsoleUI() then
+        if ZO_IsConsoleOrGameCoreUI() then
             ZO_ConsoleAttemptCommunicateOrError(function(success)
                 if success then
                     SendMail(to, subject, body)

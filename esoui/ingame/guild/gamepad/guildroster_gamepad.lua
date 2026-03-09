@@ -52,7 +52,7 @@ function ZO_GamepadGuildRosterManager:PerformDeferredInitialization()
     if self.initialized then return end
     self.initialized = true
 
-    if GetUIPlatform() == UI_PLATFORM_XBOX then
+    if ZO_IsConsoleOrGameCoreUI() then
         local keybind  =
         {
             alignment = KEYBIND_STRIP_ALIGN_LEFT,
@@ -276,7 +276,7 @@ function ZO_GamepadGuildRosterManager:BuildOptionsList()
     self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildInviteToTributeOption, ZO_SocialOptionsDialogGamepad.SelectedDataIsLoggedIn)
     self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildSendMailOption, function() return not SelectedIndexIsPlayerIndex() and self.socialData.rankId ~= DEFAULT_INVITED_RANK end)
     self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildAddFriendOption, ZO_SocialOptionsDialogGamepad.ShouldAddFriendOption)
-    self:AddOptionTemplate(groupId, ZO_GamepadGuildRosterManager.BuildShowGamerCardOption, IsConsoleUI)
+    self:AddOptionTemplate(groupId, ZO_GamepadGuildRosterManager.BuildShowGamerCardOption, ZO_IsConsoleOrGameCoreUI)
 end
 
 function ZO_GamepadGuildRosterManager:BuildPromoteOption()
@@ -338,8 +338,8 @@ function ZO_GamepadGuildRosterManager:BuildLeaveGuildOption()
 end
 
 function ZO_GamepadGuildRosterManager:BuildAddFriendOption()
-    local callback = function()      
-        if IsConsoleUI() then
+    local callback = function()
+        if ZO_IsConsoleOrGameCoreUI() then
              ZO_ShowConsoleAddFriendDialogFromDisplayNameOrFallback(self.socialData.displayName, ZO_ID_REQUEST_TYPE_GUILD_INFO, self.guildId, self.socialData.index)
         else
             local data = { displayName = self.socialData.displayName, }
@@ -351,7 +351,7 @@ function ZO_GamepadGuildRosterManager:BuildAddFriendOption()
 end
 
 function ZO_GamepadGuildRosterManager:BuildShowGamerCardOption()
-    if(IsConsoleUI()) then
+    if ZO_IsConsoleOrGameCoreUI() then
         local callback = function()
             ZO_ShowGamerCardFromDisplayNameOrFallback(self.socialData.displayName, ZO_ID_REQUEST_TYPE_GUILD_INFO, self.guildId, self.socialData.index)
         end

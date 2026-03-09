@@ -4,7 +4,7 @@
             <Controls>
                 <Label name="$(parent)Label" inherits="ZO_GamepadMenuEntryLabelTemplate" modifyTextType="NONE">
                     <Anchor point="TOPLEFT"/>
-                    <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" />
+                    <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH"/>
                 </Label>
             </Controls>
         </Control>

@@ -3,6 +3,8 @@ ZO_EndlessDungeonHUDTracker = ZO_HUDTracker_Base:Subclass()
 function ZO_EndlessDungeonHUDTracker:Initialize(...)
     ZO_HUDTracker_Base.Initialize(self, ...)
 
+    self:SetHeaderText(GetString(SI_ENDLESS_DUNGEON_HUD_TRACKER_TITLE))
+
     local fragment = self:GetFragment()
     ENDLESS_DUNGEON_HUD_TRACKER_FRAGMENT = fragment
     fragment:SetHiddenForReason("InactiveDungeon", true)
@@ -24,7 +26,7 @@ function ZO_EndlessDungeonHUDTracker:DeferredInitialize(...)
     self.showBuffTrackerKeybindDescriptor =
     {
         -- Even though this is an ethereal keybind, the name will still be read during screen narration
-        keybind = "TOGGLE_ENDLESS_DUNGEON_BUFF_TRACKER",
+        keybind = "TOGGLE_ACTIVITY_HUD_TRACKER",
         ethereal = true,
         narrateEthereal = true,
         etherealNarrationOrder = 1,
@@ -39,12 +41,9 @@ function ZO_EndlessDungeonHUDTracker:DeferredInitialize(...)
     self.showBuffTrackerKeybindButton:SetKeybindButtonDescriptor(self.showBuffTrackerKeybindDescriptor)
 
     ZO_HUDTracker_Base.DeferredInitialize(self, ...)
-    self:Update()
 end
 
 function ZO_EndlessDungeonHUDTracker:InitializeStyles()
-    -- Intentional override of ZO_HUDTracker_Base behavior.
-
     self.styles =
     {
         keyboard =
@@ -55,14 +54,9 @@ function ZO_EndlessDungeonHUDTracker:InitializeStyles()
             FONT_HEADER = "ZoFontGameShadow",
             FONT_SUBLABEL = "ZoFontGameShadow",
             RESIZE_TO_FIT_PADDING_HEIGHT = 10,
-            HEADER_PRIMARY_ANCHOR = ZO_Anchor:New(TOPLEFT, self.container),
-            HEADER_SECONDARY_ANCHOR = ZO_Anchor:New(TOPRIGHT, self.container),
             KEYBIND_ANCHOR = ZO_Anchor:New(TOPRIGHT, self.headerLabel, TOPLEFT, 0, -7),
             KEYBIND_BUTTON_TEMPLATE = "ZO_KeybindButton_Keyboard_Template",
-            SUBLABEL_PRIMARY_ANCHOR = ZO_Anchor:New(TOPLEFT, self.headerLabel, BOTTOMLEFT, 10, 2),
-            SUBLABEL_SECONDARY_ANCHOR = ZO_Anchor:New(TOPRIGHT, self.headerLabel, BOTTOMRIGHT, 0, 2),
             TEXT_HORIZONTAL_ALIGNMENT = TEXT_ALIGN_LEFT,
-            TEXT_TYPE_HEADER = MODIFY_TEXT_TYPE_NONE,
             TOP_LEVEL_PRIMARY_ANCHOR = ZO_Anchor:New(TOPLEFT, GuiRoot, TOPRIGHT, -230, 90),
             TOP_LEVEL_SECONDARY_ANCHOR = ZO_Anchor:New(TOPRIGHT, GuiRoot, nil, 0, 90),
         },
@@ -74,22 +68,15 @@ function ZO_EndlessDungeonHUDTracker:InitializeStyles()
             FONT_HEADER = "ZoFontGamepadBold27",
             FONT_SUBLABEL = "ZoFontGamepad34",
             RESIZE_TO_FIT_PADDING_HEIGHT = 20,
-            HEADER_PRIMARY_ANCHOR = ZO_Anchor:New(TOPRIGHT, self.container),
             KEYBIND_ANCHOR = ZO_Anchor:New(RIGHT, self.headerLabel, LEFT, -5, 5),
             KEYBIND_BUTTON_TEMPLATE = "ZO_KeybindButton_Gamepad_Template",
-            SUBLABEL_PRIMARY_ANCHOR = ZO_Anchor:New(TOPRIGHT, self.headerLabel, BOTTOMRIGHT, 0, 10),
             TEXT_HORIZONTAL_ALIGNMENT = TEXT_ALIGN_RIGHT,
-            TEXT_TYPE_HEADER = MODIFY_TEXT_TYPE_UPPERCASE,
             TOP_LEVEL_PRIMARY_ANCHOR = ZO_Anchor:New(TOPLEFT, GuiRoot, TOPRIGHT, -275, 0),
             TOP_LEVEL_SECONDARY_ANCHOR = ZO_Anchor:New(TOPRIGHT, GuiRoot, nil, 0, 100),
         },
     }
 
-    self.platformStyle = ZO_PlatformStyle:New(function(style)
-        self:ApplyPlatformStyle(style)
-    end, self.styles.keyboard, self.styles.gamepad)
-
-    self.platformStyle:Apply()
+    ZO_HUDTracker_Base.InitializeStyles(self)
 end
 
 function ZO_EndlessDungeonHUDTracker:ApplyPlatformStyle(style)
@@ -97,9 +84,6 @@ function ZO_EndlessDungeonHUDTracker:ApplyPlatformStyle(style)
 
     self.container:SetResizeToFitPadding(unpack(style.CONTAINER_RESIZE_TO_FIT_PADDING))
 
-    -- Order matters:
-    self.headerLabel:SetHorizontalAlignment(style.TEXT_HORIZONTAL_ALIGNMENT)
-    self.headerLabel:SetText(GetString(SI_ENDLESS_DUNGEON_HUD_TRACKER_TITLE))
     self.showBuffTrackerKeybindButton:ClearAnchors()
     style.KEYBIND_ANCHOR:AddToControl(self.showBuffTrackerKeybindButton)
     ApplyTemplateToControl(self.showBuffTrackerKeybindButton, style.KEYBIND_BUTTON_TEMPLATE)

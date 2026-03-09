@@ -1,105 +1,85 @@
 <GuiXml>
     <Controls>
         <Control name="ZO_ActivityFinderTemplateNavigationHeader_Keyboard" inherits="ZO_IconHeader" virtual="true">
-            <DimensionConstraints minY="48" maxY="48" />
-
+            <DimensionConstraints minY="48" maxY="48"/>
             <Controls>
                 <Texture name="$(parent)Icon" override="true">
-                    <Anchor point="CENTER" relativePoint="LEFT" offsetX="7" />
+                    <Anchor point="CENTER" relativePoint="LEFT" offsetX="7"/>
                 </Texture>
-
                 <Label name="$(parent)Text" override="true" font="ZoFontHeader3" inherits="ZO_SelectableLabel">
                     <DimensionConstraints maxX="600"/>
-                    <Anchor point="TOPLEFT" offsetX="20" offsetY="9" />
+                    <Anchor point="TOPLEFT" offsetX="20" offsetY="9"/>
                 </Label>
             </Controls>
         </Control>
-
         <StatusBar name="ZO_TributeFinder_ArrowStatusBarTemplate_Keyboard" inherits="ZO_ArrowStatusBarWithBG" virtual="true">
             <Controls>
-                <Control name="$(parent)Overlay" override="true" tier="LOW" />
+                <Control name="$(parent)Overlay" override="true" tier="LOW"/>
             </Controls>
         </StatusBar>
-
         <Control name="ZO_ActivityFinderTemplateNavigationEntry_Keyboard" mouseEnabled="true" resizeToFitDescendents="true" virtual="true">
             <OnInitialized>
                 ZO_ActivityFinderTemplateNavigationEntryKeyboard_OnInitialized(self)
             </OnInitialized>
-
             <OnMouseUp>
                 ZO_ActivityFinderTemplateNavigationEntryKeyboard_OnClicked(self, button)
             </OnMouseUp>
-
             <OnMouseEnter>
                 ZO_ActivityFinderTemplateNavigationEntryKeyboard_OnMouseEnter(self)
             </OnMouseEnter>
-
             <OnMouseExit>
                 ZO_ActivityFinderTemplateNavigationEntryKeyboard_OnMouseExit(self)
             </OnMouseExit>
-
             <Controls>
                 <Texture name="$(parent)LockIcon" textureFile="EsoUI/Art/Miscellaneous/locked_disabled.dds" layer="OVERLAY" hidden="true">
                     <Dimensions x="16" y="16"/>
                     <Anchor point="LEFT"/>
                 </Texture>
-
                 <Button name="$(parent)Check" inherits="ZO_CheckButton" mouseEnabled="false">
-                    <Anchor point="CENTER" relativeTo="$(parent)LockIcon" />
+                    <Anchor point="CENTER" relativeTo="$(parent)LockIcon"/>
                 </Button>
-
                 <Label name="$(parent)Text" inherits="ZO_SelectableLabel" font="ZoFontWinH3" mouseEnabled="false">
                     <Anchor point="LEFT" relativeTo="$(parent)Check" relativePoint="RIGHT" offsetX="5"/>
                 </Label>
             </Controls>
         </Control>
-
         <Control name="ZO_ActivityFinderTemplateRewardTemplate_Keyboard" virtual="true">
             <Controls>
                 <Label name="$(parent)Text" font="ZoFontWinH2">
-                    <Dimensions x="220" />
+                    <Dimensions x="220"/>
                 </Label>
             </Controls>
         </Control>
-
         <TopLevelControl name="ZO_ActivityFinderTemplateTooltip_Keyboard" hidden="true" tier="HIGH" clampedToScreen="true">
-            <Dimensions x="420" y="240" />
-
+            <Dimensions x="420" y="240"/>
             <Controls>
                 <Backdrop name="$(parent)Frame" inherits="ZO_DefaultBackdrop">
                     <Anchor point="TOPLEFT" offsetX="-2" offsetY="-3"/>
                     <Anchor point="BOTTOMRIGHT" offsetX="4" offsetY="4"/>
                 </Backdrop>
-
                 <Texture name="$(parent)ArtTexture">
                     <AnchorFill/>
                     <TextureCoords left="0" top="0" right="0.6836" bottom="0.78125"/>
                 </Texture>
-
                 <Control name="$(parent)Contents">
                     <Anchor point="TOPLEFT" offsetX="12" offsetY="12"/>
                     <Anchor point="BOTTOMRIGHT" offsetX="-12" offsetY="-12"/>
-
                     <Controls>
                         <Label name="$(parent)GroupSizeLabel" font="ZoFontHeader2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                            <Anchor point="TOPRIGHT" offsetY="-5" />
+                            <Anchor point="TOPRIGHT" offsetY="-5"/>
                         </Label>
-
                         <Label name="$(parent)NameLabel" font="ZoFontHeader3" modifyTextType="UPPERCASE">
                             <Anchor point="TOPLEFT"/>
                             <Anchor point="TOPRIGHT" relativeTo="$(parent)GroupSizeLabel" relativePoint="TOPLEFT" offsetX="-10"/>
                         </Label>
-
                         <Control name="$(parent)SetTypesSection" inherits="ZO_ActivityFinderTemplateSetTypesSection_Shared">
-                            <Anchor point="TOPRIGHT" relativeTo="$(parent)GroupSizeLabel" relativePoint="BOTTOMRIGHT" offsetY="20" />
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)NameLabel" relativePoint="BOTTOMLEFT" offsetY="20" />
-
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)GroupSizeLabel" relativePoint="BOTTOMRIGHT" offsetY="20"/>
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)NameLabel" relativePoint="BOTTOMLEFT" offsetY="20"/>
                             <Controls>
-                                <Label name="$(parent)Header" override="true" font="ZoFontHeader" />
-                                <Label name="$(parent)List" override="true" font="ZoFontHeader" />
+                                <Label name="$(parent)Header" override="true" font="ZoFontHeader"/>
+                                <Label name="$(parent)List" override="true" font="ZoFontHeader"/>
                             </Controls>
                         </Control>
-
                         <Label name="$(parent)LockedInfoLabel" font="ZoFontHeader">
                             <Anchor point="BOTTOMLEFT"/>
                             <Anchor point="BOTTOMRIGHT"/>
@@ -108,213 +88,168 @@
                 </Control>
             </Controls>
         </TopLevelControl>
-
         <TopLevelControl name="ZO_ActivityFinderTemplateTopLevel_Keyboard" inherits="ZO_GroupMenuKeyboard_ContentAnchors" hidden="true" virtual="true">
             <Controls>
                 <Control name="$(parent)ActionButtonContainer" resizeToFitDescendents="true">
-                    <Anchor point="BOTTOM" />
+                    <Anchor point="BOTTOM"/>
                     <Controls>
                         <Button name="$(parent)QueueButton" inherits="ZO_DefaultButton" text="SI_LFG_JOIN_QUEUE">
-                            <Anchor point="TOPLEFT" />
-                            <Dimensions x="200" />
-
+                            <Anchor point="TOPLEFT"/>
+                            <Dimensions x="200"/>
                             <OnClicked>
                                 ZO_ActivityFinderTemplateQueueButtonKeyboard_OnClicked(self, button)
                             </OnClicked>
                         </Button>
-
                         <Button name="$(parent)ViewRewards" inherits="ZO_DefaultButton" text="SI_LFG_VIEW_REWARDS" hidden="true">
-                            <Anchor point="TOPLEFT" />
-                            <Dimensions x="200" />
-
+                            <Anchor point="TOPLEFT"/>
+                            <Dimensions x="200"/>
                             <OnClicked>
                                 ZO_ActivityFinderTemplateViewRewardsKeyboard_OnClicked(self, button)
                             </OnClicked>
                         </Button>
-
                         <Button name="$(parent)AcceptQuest" inherits="ZO_DefaultButton" text="SI_LFG_ACCEPT_QUEST" hidden="true">
-                            <Anchor point="TOPLEFT" />
-                            <Dimensions x="200" />
-
+                            <Anchor point="TOPLEFT"/>
+                            <Dimensions x="200"/>
                             <OnClicked>
                                 ZO_ActivityFinderTemplateAcceptQuestKeyboard_OnClicked(self, button)
                             </OnClicked>
                         </Button>
-
                         <Button name="$(parent)UnlockPermanently" inherits="ZO_DefaultButton" text="SI_DLC_BOOK_ACTION_OPEN_CROWN_STORE" hidden="true">
-                            <Anchor point="TOPLEFT" />
-                            <Dimensions x="200" />
-
+                            <Anchor point="TOPLEFT"/>
+                            <Dimensions x="200"/>
                             <OnClicked>
                                 ZO_ActivityFinderTemplateUnlockPermanentlyKeyboard_OnClicked(self)
                             </OnClicked>
                         </Button>
-
                         <Button name="$(parent)ChapterUpgrade" inherits="ZO_DefaultButton" text="SI_DLC_BOOK_ACTION_CHAPTER_UPGRADE" hidden="true">
-                            <Anchor point="TOPLEFT" />
-                            <Dimensions x="200" />
-
+                            <Anchor point="TOPLEFT"/>
+                            <Dimensions x="200"/>
                             <OnClicked>
                                 ZO_ShowChapterUpgradePlatformScreen(MARKET_OPEN_OPERATION_ACTIVITY_FINDER)
                             </OnClicked>
                         </Button>
                     </Controls>
                 </Control>
-
                 <Label name="$(parent)LockReason" font="ZoFontWinH3" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" maxLineCount="2" wrapMode="ELLIPSIS">
-                    <Dimensions x="600" />
-                    <Anchor point="BOTTOM" relativeTo="$(parent)ActionButtonContainer" relativePoint="TOP" offsetY="-10" />
+                    <Dimensions x="600"/>
+                    <Anchor point="BOTTOM" relativeTo="$(parent)ActionButtonContainer" relativePoint="TOP" offsetY="-10"/>
                 </Label>
-
                 <Control name="$(parent)SingularSection" inherits="ZO_ActivityFinderSingularTemplate_Shared">
-                    <AnchorFill />
-
+                    <AnchorFill/>
                     <Controls>
                         <Texture name="$(parent)Background" override="true" level="2" color="a3a3a3">
-                            <Dimensions y="512" />
-                            <Anchor point="TOPLEFT" />
-                            <Anchor point="TOPRIGHT" />
+                            <Dimensions y="512"/>
+                            <Anchor point="TOPLEFT"/>
+                            <Anchor point="TOPRIGHT"/>
                             <!-- 1024x512 image cropped to 614x512-->
                             <TextureCoords left="0" right="0.599609375" top="0" bottom="1"/>
                             <Controls>
-                                <Backdrop name="$(parent)Border" inherits="ZO_DarkThinFrame" />
+                                <Backdrop name="$(parent)Border" inherits="ZO_DarkThinFrame"/>
                             </Controls>
                         </Texture>
-
                         <Label name="$(parent)GroupSizeLabel" override="true" font="ZoFontWinH4">
-                            <Dimensions y="24" />
-                            <Anchor point="TOPRIGHT" offsetX="-10" offsetY="30" />
+                            <Dimensions y="24"/>
+                            <Anchor point="TOPRIGHT" offsetX="-10" offsetY="30"/>
                         </Label>
-
                         <Label name="$(parent)Title" override="true" font="ZoFontWinH2">
-                            <Anchor point="TOPLEFT" offsetX="20" offsetY="30" />
+                            <Anchor point="TOPLEFT" offsetX="20" offsetY="30"/>
                         </Label>
-
                         <Label name="$(parent)Description" override="true" wrapMode="ELLIPSIS" font="ZoFontWinH4">
-                            <Anchor point="TOPRIGHT" relativeTo="$(parent)GroupSizeLabel" relativePoint="BOTTOMRIGHT" offsetX="-10" offsetY="10" />
-                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)RatingSection" relativePoint="TOPLEFT" offsetY="-20" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)GroupSizeLabel" relativePoint="BOTTOMRIGHT" offsetX="-10" offsetY="10"/>
+                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)RatingSection" relativePoint="TOPLEFT" offsetY="-20"/>
                         </Label>
-
                         <Control name="$(parent)RewardsSection" override="true">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)Background" relativePoint="BOTTOMLEFT" offsetX="20" offsetY="-150" />
-
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Background" relativePoint="BOTTOMLEFT" offsetX="20" offsetY="-150"/>
                             <Controls>
-                                <Label name="$(parent)Header" override="true" font="ZoFontWinH2" />
-
+                                <Label name="$(parent)Header" override="true" font="ZoFontWinH2"/>
                                 <Control name="$(parent)Entries" override="true">
-                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" offsetY="20" />
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" offsetY="20"/>
                                 </Control>
                             </Controls>
                         </Control>
-
                         <Control name="$(parent)SoloBonusSection" override="true">
-                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)RewardsSection" relativePoint="TOPLEFT" offsetY="-20" />
-
+                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)RewardsSection" relativePoint="TOPLEFT" offsetY="-20"/>
                             <Controls>
                                 <Label name="$(parent)Header" override="true" font="ZoFontWinH2">
-                                    <Anchor point="TOPLEFT" />
+                                    <Anchor point="TOPLEFT"/>
                                 </Label>
                                 <Texture name="$(parent)Icon" override="true">
-                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" offsetY="20" />
-                                    <Dimensions x="64" y="64" />
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" offsetY="20"/>
+                                    <Dimensions x="64" y="64"/>
                                 </Texture>
-
                                 <Label name="$(parent)Label" override="true" font="ZoFontWinH2">
-                                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="5" />
+                                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="5"/>
                                 </Label>
                             </Controls>
                         </Control>
-
                         <Control name="$(parent)SetTypesSection" override="true">
-                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)SoloBonusSection" relativePoint="TOPLEFT" />
-                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)SoloBonusSection" relativePoint="TOPRIGHT" constrains="Y" offsetY="-24" />
-
+                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)SoloBonusSection" relativePoint="TOPLEFT"/>
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)SoloBonusSection" relativePoint="TOPRIGHT" constrains="Y" offsetY="-24"/>
                             <Controls>
-                                <Label name="$(parent)Header" override="true" font="ZoFontGamepad42" hidden="true" />
-
+                                <Label name="$(parent)Header" override="true" font="ZoFontGamepad42" hidden="true"/>
                                 <Label name="$(parent)List" override="true" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                                    <Anchor point="TOPLEFT" />
-                                    <Anchor point="TOPRIGHT" />
+                                    <Anchor point="TOPLEFT"/>
+                                    <Anchor point="TOPRIGHT"/>
                                 </Label>
                             </Controls>
                         </Control>
-
                         <Control name="$(parent)RatingSection" override="true">
-                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)SetTypesSection" relativePoint="TOPLEFT" />
-                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)SetTypesSection" relativePoint="TOPRIGHT" />
-
+                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)SetTypesSection" relativePoint="TOPLEFT"/>
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)SetTypesSection" relativePoint="TOPRIGHT"/>
                             <Controls>
-                                <Label name="$(parent)Header" override="true" font="ZoFontGamepad42" hidden="true" />
-
+                                <Label name="$(parent)Header" override="true" font="ZoFontGamepad42" hidden="true"/>
                                 <Label name="$(parent)List" override="true" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                                    <Anchor point="TOPLEFT" />
-                                    <Anchor point="TOPRIGHT" />
+                                    <Anchor point="TOPLEFT"/>
+                                    <Anchor point="TOPRIGHT"/>
                                 </Label>
                             </Controls>
                         </Control>
-
                         <Control name="$(parent)TributeSeasonSection" override="true">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)RewardsSection" relativePoint="BOTTOMLEFT" offsetY="20" />
-                            <Anchor point="RIGHT" relativeTo="$(parent)Background" relativePoint="RIGHT" constrains="X" />
-
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)RewardsSection" relativePoint="BOTTOMLEFT" offsetY="20"/>
+                            <Anchor point="RIGHT" relativeTo="$(parent)Background" relativePoint="RIGHT" constrains="X"/>
                             <Controls>
-                                <Label name="$(parent)Header" override="true" font="ZoFontWinH2" />
-
-                                <Label name="$(parent)CountDown" override="true" font="ZoFontWinH2" />
-
-                                <Label name="$(parent)LeaderboardRank" override="true" font="ZoFontWinH4" />
-
+                                <Label name="$(parent)Header" override="true" font="ZoFontWinH2"/>
+                                <Label name="$(parent)CountDown" override="true" font="ZoFontWinH2"/>
+                                <Label name="$(parent)LeaderboardRank" override="true" font="ZoFontWinH4"/>
                                 <Texture name="$(parent)CurrentRankIcon" override="true">
-                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" offsetY="20" />
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" offsetY="20"/>
                                 </Texture>
-
-                                <Control name="$(parent)PlacementMatchProgressBar" override="true" mouseEnabled="true" />
-
+                                <Control name="$(parent)PlacementMatchProgressBar" override="true" mouseEnabled="true"/>
                                 <Control name="$(parent)SeasonRankBarContainer" override="true">
                                     <Controls>
-                                        <StatusBar name="$(parent)ProgressBar" override="true" inherits="ZO_ArrowStatusBarWithBG" mouseEnabled="true" />
+                                        <StatusBar name="$(parent)ProgressBar" override="true" inherits="ZO_ArrowStatusBarWithBG" mouseEnabled="true"/>
                                     </Controls>
                                 </Control>
-
-                                <Label name="$(parent)ProgressStateLabel" override="true" font="ZoFontWinH3" />
-
-                                <Label name="$(parent)ProgressValueLabel" override="true" font="ZoFontWinH3" />
+                                <Label name="$(parent)ProgressStateLabel" override="true" font="ZoFontWinH3"/>
+                                <Label name="$(parent)ProgressValueLabel" override="true" font="ZoFontWinH3"/>
                             </Controls>
                         </Control>
                     </Controls>
                 </Control>
-
                 <Control name="$(parent)ListSection" inherits="ZO_ScrollContainer" hidden="true">
-                    <Anchor point="TOPLEFT" />
-                    <Anchor point="BOTTOMRIGHT" offsetY="-100" />
+                    <Anchor point="TOPLEFT"/>
+                    <Anchor point="BOTTOMRIGHT" offsetY="-100"/>
                 </Control>
-
                 <Control name="$(parent)LFMPromptSection" hidden="true">
-                    <AnchorFill />
-
+                    <AnchorFill/>
                     <Controls>
                         <Label name="$(parent)Title" font="ZoFontWinH2" horizontalAlignment="CENTER" text="SI_LFG_FIND_REPLACEMENT_TITLE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
-                            <Anchor point="TOP" offsetY="100" />
+                            <Anchor point="TOP" offsetY="100"/>
                         </Label>
-
                         <Label name="$(parent)Body" font="ZoFontWinH4" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                            <Anchor point="TOP" relativeTo="$(parent)Title" relativePoint="BOTTOM" offsetY="20" />
+                            <Anchor point="TOP" relativeTo="$(parent)Title" relativePoint="BOTTOM" offsetY="20"/>
                         </Label>
-
                         <Button name="$(parent)Accept" inherits="ZO_DefaultButton" text="SI_LFG_FIND_REPLACEMENT_ACCEPT">
-                            <Dimensions x="200" />
-                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Body" relativePoint="BOTTOM" offsetX="-20" offsetY="50" />
-
+                            <Dimensions x="200"/>
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Body" relativePoint="BOTTOM" offsetX="-20" offsetY="50"/>
                             <OnClicked>
                                 local ACCEPT = true
                                 ZO_ACTIVITY_FINDER_ROOT_MANAGER:HandleLFMPromptResponse(ACCEPT)
                             </OnClicked>
                         </Button>
-
                         <Button name="$(parent)Decline" inherits="ZO_DefaultButton" text="SI_NOTIFICATIONS_REQUEST_DECLINE">
-                            <Dimensions x="200" />
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)Body" relativePoint="BOTTOM" offsetX="20" offsetY="50" />
-
+                            <Dimensions x="200"/>
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Body" relativePoint="BOTTOM" offsetX="20" offsetY="50"/>
                             <OnClicked>
                                 local DECLINE = false
                                 ZO_ACTIVITY_FINDER_ROOT_MANAGER:HandleLFMPromptResponse(DECLINE)
@@ -322,31 +257,26 @@
                         </Button>
                     </Controls>
                 </Control>
-
                 <Control name="$(parent)Filter" inherits="ZO_ComboBox">
-                    <Dimensions x="300" y="33" />
-                    <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" offsetX="2" offsetY="-7" />
+                    <Dimensions x="300" y="33"/>
+                    <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" offsetX="2" offsetY="-7"/>
                 </Control>
-
                 <Control name="$(parent)ClubRank" resizeToFitDescendents="true" hidden="true">
-                    <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" offsetX="-5" />
+                    <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" offsetX="-5"/>
                     <Controls>
                         <Texture name="$(parent)Icon">
-                            <Anchor point="LEFT" offsetX="5" />
-                            <Dimensions x="64" y="64" />
+                            <Anchor point="LEFT" offsetX="5"/>
+                            <Dimensions x="64" y="64"/>
                         </Texture>
-
                         <Label name="$(parent)Rank" font="ZoFontCallout3">
-                            <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="5" />
+                            <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="5"/>
                         </Label>
-
                         <Label name="$(parent)Name" font="ZoFontHeader2" modifyTextType="UPPERCASE">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)Rank" relativePoint="TOPRIGHT" offsetX="15" offsetY="9" />
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Rank" relativePoint="TOPRIGHT" offsetX="15" offsetY="9"/>
                         </Label>
-
                         <StatusBar name="$(parent)XPBar" mouseEnabled="true" inherits="ZO_ArrowStatusBarWithBG">
-                            <Dimensions x="210" />
-                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Rank" relativePoint="BOTTOMRIGHT" offsetX="15" offsetY="-11" />
+                            <Dimensions x="210"/>
+                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Rank" relativePoint="BOTTOMRIGHT" offsetX="15" offsetY="-11"/>
                         </StatusBar>
                     </Controls>
                 </Control>

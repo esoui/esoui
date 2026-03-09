@@ -135,7 +135,7 @@ local pregameStates =
                     SCENE_MANAGER:Show("PregameInitialScreen_Gamepad")
                 end
             else
-                if IsConsoleUI() then
+                if ZO_IsConsoleOrGameCoreUI() then
                     -- ESO-404970: reset overscan and gamma
                     -- to default to handle the situation where a player loads
                     -- between console profiles, which should have different
@@ -195,7 +195,7 @@ local pregameStates =
         end,
 
         GetStateTransitionData = function()
-            if IsConsoleUI() then
+            if ZO_IsConsoleOrGameCoreUI() then
                 return "FirstTimeAccessibilitySettings"
             else
                 return "ShowEULA"
@@ -231,10 +231,10 @@ local pregameStates =
         OnEnter = function()
             --Smoke video audio fade out to prevent audio clicking on console due to load time hitches
             --4 seconds seems to be a good fade out time for here
-            if IsConsoleUI() then
+            if ZO_IsConsoleOrGameCoreUI() then
                 SetCurrentVideoPlaybackVolume(0.0, 4.0)
             end
-            
+
             if (ZO_IsPCUI() or ZO_IsForceConsoleFlow()) and not IsUsingLinkedLogin() then
                 -- login using the username/password the user provides
                 function Login()
@@ -402,7 +402,7 @@ local pregameStates =
 
         OnEnter = function(username, password)
             local function LinkAccount()
-                if ZO_IsForceConsoleFlow() then
+                if ZO_IsForceConsoleFlow() and not IsGameCoreUI() then
                     ZO_PregameStateManager_AdvanceState()
                 else
                     PregameLinkAccount(username, password)

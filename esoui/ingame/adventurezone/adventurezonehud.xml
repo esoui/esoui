@@ -1,0 +1,15 @@
+<GuiXml>
+    <Controls>
+        <TopLevelControl name="ZO_AdvZoneHUD_TopLevel" hidden="true">
+            <Anchor point="TOPLEFT" offsetX="15" offsetY="15"/>
+            <Anchor point="BOTTOMRIGHT" offsetX="-15" offsetY="-15"/>
+            <OnInitialized>
+                ZO_AdventureZoneHUD.OnControlInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Texture name="$(parent)PlayerFactionIcon"/>
+                <Control name="$(parent)PlayerScoreLabel" inherits="ZO_RollingMeterLabel"/>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

@@ -7,10 +7,9 @@
                         return ZO_EaseOutQuadratic(progress)
                     </EasingFunction>
                 </AlphaAnimation>
-                <AlphaAnimation duration="300" startAlpha="1" endAlpha="0" />
+                <AlphaAnimation duration="300" startAlpha="1" endAlpha="0"/>
             </Animations>
         </AnimationTimeline>
-
         <AnimationTimeline name="AlertTranslateGamepad">
             <Animations>
                 <TranslateAnimation duration="0" deltaX="0" deltaY="0" anchorIndex="0">
@@ -21,14 +20,12 @@
             </Animations>
         </AnimationTimeline>
     </Animations>
-
     <Controls>
         <Label name="ZO_AlertLineGamepad" horizontalAlignment="RIGHT" font="ZoFontGamepad34" modifyTextType="UPPERCASE" virtual="true">
-            <Anchor point="TOPRIGHT" />
+            <Anchor point="TOPRIGHT"/>
         </Label>
-
         <TopLevelControl name="ZO_AlertTextNotificationGamepad" tier="HIGH" level="ZO_HIGH_TIER_ALERT_TEXT">
-            <Anchor point="TOPRIGHT" relativeTo="GuiRoot" offsetX="-15" offsetY="10" />
+            <Anchor point="TOPRIGHT" relativeTo="GuiRoot" offsetX="-15" offsetY="10"/>
             <OnInitialized>
                 ZO_AlertTextGamepad_OnInitialized(self)
             </OnInitialized>

@@ -1,7 +1,6 @@
 <GuiXml>
     <Controls>
         <Label name="ZO_WorldMapKeyHeader" virtual="true" font="ZoFontHeader" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"/>
-
         <Texture name="ZO_WorldMapKeySymbol" layer="CONTROLS" mouseEnabled="true" virtual="true">
             <OnMouseEnter>
                 ZO_WorldMapKeySymbol_OnMouseEnter(self)
@@ -10,7 +9,6 @@
                 ZO_WorldMapKeySymbol_OnMouseExit(self)
             </OnMouseExit>
         </Texture>
-        
         <TopLevelControl name="ZO_WorldMapKey" inherits="ZO_WorldMapInfoContent">
             <OnInitialized>
                 ZO_WorldMapKey_OnInitialized(self)

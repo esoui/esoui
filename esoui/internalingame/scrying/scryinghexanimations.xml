@@ -7,7 +7,6 @@
                 <TextureSlideAnimation applyToChildControlName="ScrollingBackgroundB"/>
             </Animations>
         </AnimationTimeline>
-
         <!-- Flash animation: played when performing a normal action-->
         <AnimationTimeline name="ZO_ScryingHex_Flash">
             <Animations>
@@ -17,7 +16,7 @@
                         return ZO_EaseOutQuadratic(progress)
                     </EasingFunction>
                     <UpdateFunction>
-                        -- 0 -> 1
+                        -- 0 -&gt; 1
                         self:GetAnimatedControl():SetSurfaceAlpha(ZO_SCRYING_HEX_FLASH_SURFACE, progress)
                     </UpdateFunction>
                 </CustomAnimation>
@@ -26,39 +25,33 @@
                         return ZO_EaseOutQuadratic(progress)
                     </EasingFunction>
                     <UpdateFunction>
-                        -- 1 -> 0
+                        -- 1 -&gt; 0
                         self:GetAnimatedControl():SetSurfaceAlpha(ZO_SCRYING_HEX_FLASH_SURFACE, 1-progress)
                     </UpdateFunction>
                 </CustomAnimation>
             </Animations>
         </AnimationTimeline>
-
         <AnimationTimeline name="ZO_ScryingGoal_UnownedFlipbook" playbackType="LOOP" loopCount="LOOP_INDEFINITELY">
             <Animations>
-                <TextureAnimation cellsWide="8" cellsHigh="8" framerate="20" />
+                <TextureAnimation cellsWide="8" cellsHigh="8" framerate="20"/>
             </Animations>
         </AnimationTimeline>
-
         <AnimationTimeline name="ZO_ScryingGoal_ActivateFlipbook">
             <Animations>
-                <TextureAnimation cellsWide="8" cellsHigh="8" framerate="40" />
+                <TextureAnimation cellsWide="8" cellsHigh="8" framerate="40"/>
             </Animations>
         </AnimationTimeline>
-
         <AnimationTimeline name="ZO_ScryingGoal_OwnedFlipbook" playbackType="LOOP" loopCount="LOOP_INDEFINITELY">
             <Animations>
-                <TextureAnimation cellsWide="8" cellsHigh="8" framerate="20" />
+                <TextureAnimation cellsWide="8" cellsHigh="8" framerate="20"/>
             </Animations>
         </AnimationTimeline>
     </Animations>
-
     <Controls>
-        <Texture name="ZO_ScryingGoal" level="5" excludeFromResizeToFitExtents="true" virtual="true" />
-
+        <Texture name="ZO_ScryingGoal" level="5" excludeFromResizeToFitExtents="true" virtual="true"/>
         <Polygon name="ZO_ScryingIsland" virtual="true">
             <AnchorFill/>
         </Polygon>
-
         <Polygon name="ZO_ScryingBorderOutline" inherits="ZO_ScryingIsland" centerColor="00FFFFFF" virtual="true">
             <Border color="FFFFFFFF" textureFile="EsoUI/Art/Scrying/hex_line.dds"/>
         </Polygon>

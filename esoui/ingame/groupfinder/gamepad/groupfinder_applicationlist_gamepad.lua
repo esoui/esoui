@@ -205,6 +205,8 @@ function ZO_GroupFinder_ApplicationList_Gamepad:Initialize(control)
 end
 
 function ZO_GroupFinder_ApplicationList_Gamepad:SetupRow(control, data)
+    ZO_GamepadInteractiveSortFilterList.SetupRow(self, control, data)
+
     control.displayNameLabel:SetText(data:GetFormattedDisplayName())
     control.characterNameLabel:SetText(ZO_FormatUserFacingCharacterName(data:GetCharacterName()))
     control.classIconControl:SetTexture(data:GetClassIcon())
@@ -274,7 +276,7 @@ end
 --Overridden from base
 function ZO_GroupFinder_ApplicationList_Gamepad:BuildOptionsList()
     local groupId = self:AddOptionTemplateGroup(ZO_SocialOptionsDialogGamepad.GetDefaultHeader)
-    self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildGamerCardOption, IsConsoleUI)
+    self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildGamerCardOption, ZO_IsConsoleOrGameCoreUI)
     self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildWhisperOption)
     self:AddOptionTemplate(groupId, ZO_SocialOptionsDialogGamepad.BuildIgnoreOption, ZO_SocialOptionsDialogGamepad.SelectedDataIsNotPlayer)
 end

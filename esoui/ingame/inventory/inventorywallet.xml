@@ -1,53 +1,65 @@
 <GuiXml>
     <Controls>
         <Control name="ZO_InventoryWalletSlot" inherits="ZO_ListEntry_BackdropAndHighlight_Template ZO_ListInventorySlotBehavior" virtual="true">
-            <Dimensions x="509" y="52" />
-
+            <Dimensions x="509" y="52"/>
             <OnInitialized name="InventoryWalletSlot">
                 self.currencyControl = self:GetNamedChild("Amount")
             </OnInitialized>
-
             <Controls>
                 <Label name="$(parent)Name" font="ZoFontGameShadow" wrapMode="ELLIPSIS">
-                    <Dimensions x="291" />
-                    <Anchor point="LEFT" offsetX="53" />
+                    <Dimensions x="291"/>
+                    <Anchor point="LEFT" offsetX="53"/>
                 </Label>
-
                 <Label name="$(parent)Amount" inherits="ZO_CurrencyTemplate" tier="HIGH">
-                    <Anchor point="RIGHT" offsetX="-5" />
+                    <Anchor point="RIGHT" offsetX="-5"/>
                 </Label>
-
                 <!--Hidden icon to get the mouse over behavior -->
-                <Button name="$(parent)Button" inherits="ZO_InventorySlotNoMouseover" hidden="true" />
+                <Button name="$(parent)Button" inherits="ZO_InventorySlotNoMouseover" hidden="true"/>
             </Controls>
         </Control>
-
         <TopLevelControl name="ZO_InventoryWallet" inherits="ZO_InventoryTemplate" mouseEnabled="true" hidden="true">
-            <Anchor point="TOPLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="45" />
-            <Anchor point="BOTTOMLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="-30" />
-
+            <Anchor point="TOPLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="45"/>
+            <Anchor point="BOTTOMLEFT" relativeTo="ZO_SharedRightPanelBackground" offsetY="-30"/>
             <OnInitialized>
                 ZO_InventoryWallet_OnInitialize(self)
             </OnInitialized>
-
             <Controls>
                 <!-- Sort Headers -->
                 <Control name="$(parent)SortBy" inherits="ZO_InventorySortHeaders">
                     <Controls>
                         <Control name="$(parent)Name" inherits="ZO_SortHeader">
-                            <Dimensions x="241" y="20" />
-                            <Anchor point="LEFT" offsetX="51" />
+                            <Dimensions x="241" y="20"/>
+                            <Anchor point="LEFT" offsetX="51"/>
                             <OnInitialized>
                                 ZO_PlayerInventory_InitSortHeader(self, SI_INVENTORY_SORT_TYPE_NAME, TEXT_ALIGN_LEFT, "name")
                             </OnInitialized>
                         </Control>
                         <Control name="$(parent)Amount" inherits="ZO_SortHeader">
-                            <Dimensions x="70" y="20" />
-                            <Anchor point="RIGHT" offsetX="-21" />
+                            <Dimensions x="70" y="20"/>
+                            <Anchor point="RIGHT" offsetX="-21"/>
                             <OnInitialized>
                                 ZO_PlayerInventory_InitSortHeader(self, SI_INVENTORY_SORT_TYPE_PRICE, TEXT_ALIGN_RIGHT, "amount")
                             </OnInitialized>
                         </Control>
+                    </Controls>
+                </Control>
+                <Control name="$(parent)InfoBar" override="true">
+                    <Controls>
+                        <Button name="$(parent)BuyBagSpace" hidden="true">
+                            <Dimensions x="32" y="32"/>
+                            <Anchor point="LEFT" relativeTo="$(parent)FreeSlots" relativePoint="RIGHT" offsetX="5"/>
+                            <Textures normal="EsoUI/Art/Inventory/inventory_upgradeBag_up.dds" pressed="EsoUI/Art/Inventory/inventory_upgradeBag_down.dds" mouseOver="EsoUI/Art/Inventory/inventory_upgradeBag_over.dds" disabled="EsoUI/Art/Inventory/inventory_upgradeBag_disabled.dds"/>
+                            <OnMouseEnter>
+                                InitializeTooltip(InformationTooltip, self, LEFT, 5)
+                                SetTooltipText(InformationTooltip, GetString(SI_INVENTORY_BAG_UPGRADE_LABEL))
+                            </OnMouseEnter>
+                            <OnMouseExit>
+                                ClearTooltip(InformationTooltip)
+                            </OnMouseExit>
+                            <OnClicked>
+                                ZO_Dialogs_ShowDialog("BUY_BAG_SPACE_FROM_INVENTORY", { cost = GetNextBackpackUpgradePrice() })
+                            </OnClicked>
+                        </Button>
                     </Controls>
                 </Control>
             </Controls>

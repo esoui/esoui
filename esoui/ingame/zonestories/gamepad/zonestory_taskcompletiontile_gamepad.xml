@@ -1,29 +1,29 @@
 <GuiXml>
     <Controls>
-        <Control name="ZO_ZoneStory_ActivityCompletionHeader_Gamepad" inherits="ZO_ZoneStory_ActivityCompletionHeader" virtual="true">
+        <Control name="ZO_ZoneStory_ActivityCompletionHeader_Gamepad" virtual="true">
             <Controls>
-                <Label name="$(parent)Text" override="true" font="ZoFontGamepad42">
-                    <Anchor point="TOPLEFT" offsetX="15" />
+                <Label name="$(parent)Text" font="ZoFontGamepad42" modifyTextType="UPPERCASE">
+                    <Anchor point="TOPLEFT" offsetX="15"/>
                 </Label>
             </Controls>
         </Control>
-
-        <Control name="ZO_ZoneStory_ActivityCompletionTile_Gamepad_Control" inherits="ZO_ZoneStory_ActivityCompletionTile_Control ZO_Tile_Gamepad_Control" virtual="true">
-            <Dimensions x="ZO_ZONE_STORIES_ACTIVITY_COMPLETION_TILE_GAMEPAD_DIMENSIONS_X" y="ZO_ZONE_STORIES_ACTIVITY_COMPLETION_TILE_GAMEPAD_DIMENSIONS_Y" />
-
+        <Control name="ZO_ZoneStory_ActivityCompletionTile_Gamepad_Control" inherits="ZO_Tile_Gamepad_Control" virtual="true">
+            <Dimensions x="ZO_ZONE_STORIES_ACTIVITY_COMPLETION_TILE_GAMEPAD_DIMENSIONS_X" y="ZO_ZONE_STORIES_ACTIVITY_COMPLETION_TILE_GAMEPAD_DIMENSIONS_Y"/>
             <OnInitialized>
-                ZO_ZoneStory_ActivityCompletionTile_Gamepad_OnInitialized(self)
+                ZO_ZoneStory_ActivityCompletionTile_Gamepad.OnControlInitialized(self)
             </OnInitialized>
-
             <Controls>
+                <Backdrop name="$(parent)SelectionFrame" inherits="ZO_GamepadWhiteOutlineSelection" edgeColor="76BCC3" layer="BACKGROUND" level="2" hidden="true">
+                    <Anchor point="TOPLEFT" offsetX="0" offsetY="0"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="0" offsetY="0"/>
+                </Backdrop>
                 <Texture name="$(parent)Icon" override="true">
-                    <Dimensions x="ZO_ZONE_STORIES_ACTIVITY_COMPLETION_TILE_GAMEPAD_ICON_DIMENSIONS" y="ZO_ZONE_STORIES_ACTIVITY_COMPLETION_TILE_GAMEPAD_ICON_DIMENSIONS" />
-                    <Anchor point="TOPLEFT" />
+                    <Dimensions x="ZO_ZONE_STORIES_ACTIVITY_COMPLETION_TILE_GAMEPAD_ICON_DIMENSIONS" y="ZO_ZONE_STORIES_ACTIVITY_COMPLETION_TILE_GAMEPAD_ICON_DIMENSIONS"/>
+                    <Anchor point="LEFT" offsetX="5"/>
                 </Texture>
-                
-                <Label name="$(parent)Value" override="true" font="ZoFontGamepad34">
-                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="10" />
-                    <Anchor point="RIGHT" constrains="X" />
+                <Label name="$(parent)Title" override="true" font="ZoFontGamepad34">
+                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="10"/>
+                    <Anchor point="RIGHT" constrains="X"/>
                 </Label>
             </Controls>
         </Control>

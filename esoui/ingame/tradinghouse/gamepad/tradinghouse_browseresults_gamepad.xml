@@ -11,91 +11,80 @@
                 self.unitPriceLabel = self:GetNamedChild("UnitPrice")
                 self.priceLabel = self:GetNamedChild("Price")
             </OnInitialized>
-
             <Controls>
                 <Control name="$(parent)Status" inherits="ZO_GamepadInteractiveSortFilterListMultiIcon" tier="MEDIUM">
-                    <Dimensions x="ZO_GAMEPAD_TRADING_HOUSE_SEARCH_RESULTS_STATUS_WIDTH" y="ZO_GAMEPAD_TRADING_HOUSE_SEARCH_RESULTS_STATUS_WIDTH" />
-                    <Anchor point="LEFT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X" />
+                    <Dimensions x="ZO_GAMEPAD_TRADING_HOUSE_SEARCH_RESULTS_STATUS_WIDTH" y="ZO_GAMEPAD_TRADING_HOUSE_SEARCH_RESULTS_STATUS_WIDTH"/>
+                    <Anchor point="LEFT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X"/>
                     <Controls>
                         <Texture name="$(parent)Icon" override="true">
                             <Dimensions x="ZO_GAMEPAD_TRADING_HOUSE_SEARCH_RESULTS_STATUS_WIDTH" y="ZO_GAMEPAD_TRADING_HOUSE_SEARCH_RESULTS_STATUS_WIDTH"/>
                         </Texture>
                     </Controls>
                 </Control>
-
                 <Button name="$(parent)Slot" inherits="ZO_ItemSlot_Gamepad">
-                    <Dimensions x="ZO_GAMEPAD_TRADING_HOUSE_SEARCH_RESULTS_ICON_SIZE" y="ZO_GAMEPAD_TRADING_HOUSE_SEARCH_RESULTS_ICON_SIZE" />
-                    <Anchor point="LEFT" relativeTo="$(parent)Status" relativePoint="RIGHT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X" />
+                    <Dimensions x="ZO_GAMEPAD_TRADING_HOUSE_SEARCH_RESULTS_ICON_SIZE" y="ZO_GAMEPAD_TRADING_HOUSE_SEARCH_RESULTS_ICON_SIZE"/>
+                    <Anchor point="LEFT" relativeTo="$(parent)Status" relativePoint="RIGHT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X"/>
                 </Button>
-
                 <Label name="$(parent)Name" inherits="ZO_GamepadInteractiveSortFilterListRowLabel" maxLineCount="2">
-                    <Dimensions x="ZO_GAMEPAD_TRADING_HOUSE_SEARCH_RESULTS_NAME_WIDTH" />
-                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Slot" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X" />
+                    <Dimensions x="ZO_GAMEPAD_TRADING_HOUSE_SEARCH_RESULTS_NAME_WIDTH"/>
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Slot" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X"/>
                 </Label>
-
                 <Label name="$(parent)TimeLeft" inherits="ZO_GamepadInteractiveSortFilterListRowLabel">
-                    <Dimensions x="ZO_GAMEPAD_TRADING_HOUSE_SEARCH_RESULTS_TIME_LEFT_WIDTH" />
-                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Name" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X" />
+                    <Dimensions x="ZO_GAMEPAD_TRADING_HOUSE_SEARCH_RESULTS_TIME_LEFT_WIDTH"/>
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Name" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X"/>
                 </Label>
-
                 <Label name="$(parent)UnitPrice" inherits="ZO_GamepadInteractiveSortFilterListRowLabel" horizontalAlignment="RIGHT">
-                    <Dimensions x="ZO_GAMEPAD_TRADING_HOUSE_SEARCH_RESULTS_UNIT_PRICE_WIDTH" />
-                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)TimeLeft" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X" />
+                    <Dimensions x="ZO_GAMEPAD_TRADING_HOUSE_SEARCH_RESULTS_UNIT_PRICE_WIDTH"/>
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)TimeLeft" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X"/>
                 </Label>
-
                 <Label name="$(parent)Price" inherits="ZO_GamepadInteractiveSortFilterListRowLabel" horizontalAlignment="RIGHT">
-                    <Dimensions x="ZO_GAMEPAD_TRADING_HOUSE_SEARCH_RESULTS_PRICE_WIDTH" />
-                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)UnitPrice" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X" />
+                    <Dimensions x="ZO_GAMEPAD_TRADING_HOUSE_SEARCH_RESULTS_PRICE_WIDTH"/>
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)UnitPrice" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X"/>
                 </Label>
             </Controls>
         </Control>
-
         <TopLevelControl name="ZO_TradingHouse_BrowseResults_Gamepad" inherits="ZO_AnchoredToQuadrant_2_3_Background ZO_GamepadInteractiveSortFilterListControl" hidden="true">
             <OnInitialized>
                 ZO_TradingHouse_BrowseResults_Gamepad_OnInitialize(self)
             </OnInitialized>
-
             <Controls>
                 <Control name="$(parent)Container" override="true">
-                    <ClearAnchors />
-                    <Anchor point="TOPLEFT" offsetX="10" />
-                    <Anchor point="BOTTOMRIGHT" offsetX="-10" />
+                    <ClearAnchors/>
+                    <Anchor point="TOPLEFT" offsetX="10"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="-10"/>
                     <Controls>
                         <Control name="$(parent)Headers" override="true">
                             <Controls>
                                 <Control name="$(parent)Name" inherits="ZO_GamepadDisabledInteractiveFilterHeader">
-                                    <Dimensions x="ZO_GAMEPAD_TRADING_HOUSE_SEARCH_RESULTS_NAME_WIDTH" />
-                                    <Anchor point="TOPLEFT" offsetX="ZO_GAMEPAD_TRADING_HOUSE_SEARCH_RESULTS_HEADER_INITIAL_OFFSET" />
+                                    <Dimensions x="ZO_GAMEPAD_TRADING_HOUSE_SEARCH_RESULTS_NAME_WIDTH"/>
+                                    <Anchor point="TOPLEFT" offsetX="ZO_GAMEPAD_TRADING_HOUSE_SEARCH_RESULTS_HEADER_INITIAL_OFFSET"/>
                                     <OnInitialized>
                                         local NO_SORT_TYPE = nil
                                         local sortString = GetString(SI_TRADING_HOUSE_COLUMN_ITEM)
                                         ZO_GamepadInteractiveSortFilterHeader_Initialize(self, sortString, NO_SORT_TYPE, TEXT_ALIGN_LEFT)
                                     </OnInitialized>
                                 </Control>
-
                                 <Control name="$(parent)TimeLeft" inherits="ZO_GamepadInteractiveFilterHeader">
-                                    <Dimensions x="ZO_GAMEPAD_TRADING_HOUSE_SEARCH_RESULTS_TIME_LEFT_WIDTH" />
-                                    <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Name" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X" />
+                                    <Dimensions x="ZO_GAMEPAD_TRADING_HOUSE_SEARCH_RESULTS_TIME_LEFT_WIDTH"/>
+                                    <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Name" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X"/>
                                     <OnInitialized>
                                         local sortType = TRADING_HOUSE_SORT_EXPIRY_TIME
                                         local sortString = GetString("SI_TRADINGHOUSESORTFIELD", sortType)
                                         ZO_GamepadInteractiveSortFilterHeader_Initialize(self, sortString, sortType, TEXT_ALIGN_LEFT)
                                     </OnInitialized>
                                 </Control>
-
                                 <Control name="$(parent)UnitPrice" inherits="ZO_GamepadInteractiveFilterHeader">
-                                    <Dimensions x="ZO_GAMEPAD_TRADING_HOUSE_SEARCH_RESULTS_UNIT_PRICE_WIDTH" />
-                                    <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)TimeLeft" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X" />
+                                    <Dimensions x="ZO_GAMEPAD_TRADING_HOUSE_SEARCH_RESULTS_UNIT_PRICE_WIDTH"/>
+                                    <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)TimeLeft" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X"/>
                                     <OnInitialized>
                                         local sortType = TRADING_HOUSE_SORT_SALE_PRICE_PER_UNIT
                                         local sortString = GetString("SI_TRADINGHOUSESORTFIELD", sortType)
                                         ZO_GamepadInteractiveSortFilterHeader_Initialize(self, sortString, sortType, TEXT_ALIGN_RIGHT)
                                     </OnInitialized>
                                 </Control>
-
                                 <Control name="$(parent)Price" inherits="ZO_GamepadInteractiveFilterHeader">
-                                    <Dimensions x="ZO_GAMEPAD_TRADING_HOUSE_SEARCH_RESULTS_PRICE_WIDTH" />
-                                    <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)UnitPrice" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X" />
+                                    <Dimensions x="ZO_GAMEPAD_TRADING_HOUSE_SEARCH_RESULTS_PRICE_WIDTH"/>
+                                    <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)UnitPrice" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X"/>
                                     <OnInitialized>
                                         local sortType = TRADING_HOUSE_SORT_SALE_PRICE
                                         local sortString = GetString("SI_TRADINGHOUSESORTFIELD", sortType)
@@ -104,14 +93,12 @@
                                 </Control>
                             </Controls>
                         </Control>
-
                         <Control name="$(parent)List" override="true">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)Headers" relativePoint="BOTTOMLEFT" offsetY="5"/>
                             <Anchor point="BOTTOMRIGHT" offsetY="-64"/>
                         </Control>
-
                         <Control name="$(grandparent)Footer" inherits="ZO_PagedListFooterBar">
-                            <Anchor point="TOP" relativeTo="$(parent)List" relativePoint="BOTTOM" />
+                            <Anchor point="TOP" relativeTo="$(parent)List" relativePoint="BOTTOM"/>
                         </Control>
                     </Controls>
                 </Control>

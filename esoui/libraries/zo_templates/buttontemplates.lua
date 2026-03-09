@@ -333,6 +333,14 @@ function ZO_CheckButton_Enable(buttonControl)
     end
 end
 
+function ZO_ReadonlyCheckButton_SetEnableState(buttonControl, enabled)
+    if enabled then
+        buttonControl:SetColor(ZO_DEFAULT_ENABLED_COLOR:UnpackRGBA())
+    else
+        buttonControl:SetColor(ZO_DEFAULT_DISABLED_COLOR:UnpackRGBA())
+    end
+end
+
 function ZO_CheckButton_SetTooltipEnabledState(buttonControl, enabled)
     buttonControl.tooltipEnabled = enabled
 end
@@ -434,6 +442,22 @@ end
 
 function ZO_TriStateCheckButton_SetStateChangeFunction(buttonControl, stateChangeFunction)
     buttonControl.stateChangeFunction = stateChangeFunction
+end
+
+function ZO_ReadOnlyCheckBox_OnInitialized(textureControl, checkedTexture, uncheckedTexture, indeterminateTexture)
+    textureControl.SetCheckState = function(control, checkState)
+        if checkState == TRISTATE_CHECK_BUTTON_CHECKED then
+            control:SetTexture(checkedTexture)
+        elseif checkState == TRISTATE_CHECK_BUTTON_UNCHECKED then
+            control:SetTexture(uncheckedTexture)
+        elseif checkState == TRISTATE_CHECK_BUTTON_INDETERMINATE then
+            if indeterminateTexture then
+                control:SetTexture(indeterminateTexture)
+            else
+                control:SetTexture(uncheckedTexture)
+            end
+        end
+    end
 end
 
 function ZO_MenuDropDownTextButton_SetSelectedState(buttonControl, selected)

@@ -1,12 +1,10 @@
 <GuiXml>
     <Controls>
-        <Label name="ZO_Mail_Gamepad_Label" font="ZoFontGamepad27" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED" virtual="true" />
-        <Label name="ZO_Mail_Gamepad_Value" font="ZoFontGamepad34" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" virtual="true" />
-
+        <Label name="ZO_Mail_Gamepad_Label" font="ZoFontGamepad27" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DISABLED" virtual="true"/>
+        <Label name="ZO_Mail_Gamepad_Value" font="ZoFontGamepad34" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" virtual="true"/>
         <Button name="ZO_MailAttachmentSlot_Gamepad" inherits="ZO_InventorySlot_Gamepad" virtual="true">
-            <Dimensions x="55" y="55" />
+            <Dimensions x="55" y="55"/>
         </Button>
-
         <Control name="ZO_Mail_Gamepad_EditBox" virtual="true">
             <OnInitialized>
                 self.edit = self:GetNamedChild("Backdrop"):GetNamedChild("Edit")
@@ -30,7 +28,6 @@
                 </Backdrop>
             </Controls>
         </Control>
-
         <Control name="ZO_Mail_Gamepad_EditBox_Multiline" virtual="true">
             <OnInitialized>
                 self.edit = self:GetNamedChild("Backdrop"):GetNamedChild("Edit")
@@ -49,7 +46,6 @@
                 </Backdrop>
             </Controls>
         </Control>
-
         <Backdrop name="ZO_Mail_Gamepad_LabelBox" virtual="true" inherits="ZO_DefaultBackdrop_Gamepad" resizeToFitDescendents="true">
             <ResizeToFitPadding height="12"/>
             <OnInitialized>
@@ -57,23 +53,22 @@
             </OnInitialized>
             <Controls>
                 <Label name="$(parent)Label" font="ZoFontGamepad34" minLineCount="1" maxLineCount="1" wrapMode="ELLIPSIS">
-                    <Anchor point="TOPLEFT" offsetX="11" offsetY="6" />
-                    <Anchor point="TOPRIGHT" offsetX="-11" offsetY="6" />
+                    <Anchor point="TOPLEFT" offsetX="11" offsetY="6"/>
+                    <Anchor point="TOPRIGHT" offsetX="-11" offsetY="6"/>
                 </Label>
             </Controls>
         </Backdrop>
-
         <Control name="ZO_Mail_Gamepad_Scrollable_LabelBox" virtual="true">
             <OnInitialized>
                 self.edit = self:GetNamedChild("BackdropScrollContainerScrollChildLabel")
             </OnInitialized>
             <Controls>
                 <Backdrop name="$(parent)Backdrop" inherits="ZO_DefaultBackdrop_Gamepad">
-                    <AnchorFill />
+                    <AnchorFill/>
                     <Controls>
                         <Control name="$(parent)ScrollContainer" inherits="ZO_ScrollContainer_Gamepad">
-                            <Anchor point="TOPLEFT" offsetX="11" offsetY="2" />
-                            <Anchor point="BOTTOMRIGHT" offsetX="-6" offsetY="-2" />
+                            <Anchor point="TOPLEFT" offsetX="11" offsetY="2"/>
+                            <Anchor point="BOTTOMRIGHT" offsetX="-6" offsetY="-2"/>
                             <OnInitialized>
                                 ZO_Scroll_Initialize_Gamepad(self)
                                 local label = self:GetNamedChild("ScrollChildLabel")
@@ -81,11 +76,10 @@
                             </OnInitialized>
                             <Controls>
                                 <Texture name="$(parent)ScrollIndicator" override="true">
-                                    <Anchor point="CENTER" relativePoint="RIGHT" offsetX="3" />
+                                    <Anchor point="CENTER" relativePoint="RIGHT" offsetX="3"/>
                                 </Texture>
                                 <Control name="$(parent)ScrollChild" override="true" resizeToFitConstrains="Y">
-                                    <Dimensions x="100%" />
-
+                                    <Dimensions x="100%"/>
                                     <Controls>
                                         <Label name="$(parent)Label" font="ZoFontGamepad34">
                                             <Anchor point="TOPLEFT"/>

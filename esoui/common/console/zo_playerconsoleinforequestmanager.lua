@@ -120,7 +120,7 @@ end
 function PlayerConsoleInfoRequestManager:RequestIdFromDisplayNameOrFallbackType(displayName, block, fallbackRequestType, callback, ...)
     if ZO_IsPlaystationPlatform() then
         callback(true, displayName, 0)
-    elseif GetUIPlatform() == UI_PLATFORM_XBOX then
+    elseif ZO_IsConsoleOrGameCoreUI() then
         self:RequestId(fallbackRequestType, block, callback, ...)
     end
 end
@@ -134,7 +134,7 @@ function PlayerConsoleInfoRequestManager:RequestIdFromUserListDialog(callback, t
 end
 
 function PlayerConsoleInfoRequestManager:RequestTextValidation(text, callback)
-    if ZO_IsConsolePlatform() then
+    if ZO_IsConsolePlatform() or IsGameCoreUI() then
         local data =
         {
             validationKey = RequestConsoleTextValidation(text),
@@ -153,7 +153,7 @@ function PlayerConsoleInfoRequestManager:RequestNameValidation(name, callback)
     if not IsValidName(name) then
         callback(false)
     else
-        if ZO_IsConsolePlatform() then
+        if ZO_IsConsolePlatform() or IsGameCoreUI() then
         local data =
         {
             validationKey = RequestConsoleTextValidation(name),

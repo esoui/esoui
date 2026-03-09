@@ -123,3 +123,7 @@ function ZO_SortFilterList_Gamepad:GetEmptyRowNarration()
     end
     return narrations
 end
+
+function ZO_SortFilterList_Gamepad:SetupRow(control, data)
+    self:AddMouseBehaviorToControl(control, data)
+end

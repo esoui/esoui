@@ -1,0 +1,1290 @@
+ZO_TAMRIEL_TOMES_REWARD_DATA_PREVIEW_TYPES =
+{
+    NONE = 0,
+    QUICK_PREVIEW = 1,
+    FULL_PREVIEW = 2,
+}
+
+-- The default delay that precedes the beginning of an active preview.
+ZO_DEFAULT_QUEUED_PREVIEW_DELAY_SECONDS = 0.5
+-- The default delay that precedes the ending of the active preview.
+ZO_DEFAULT_QUEUED_END_PREVIEW_DELAY_SECONDS = 0.6
+
+ZO_TAMRIEL_TOMES_GRID_LIST_WIDTH = ZO_TAMRIEL_TOMES_REWARD_TILE_1_X_WIDTH * 5 + ZO_SCROLL_BAR_WIDTH + 5
+ZO_TAMRIEL_TOMES_GRID_LIST_HEIGHT = ZO_TAMRIEL_TOMES_REWARD_TILE_HEIGHT * 3 + ZO_TAMRIEL_TOMES_REWARD_DIVIDER_HEIGHT + 40
+
+ZO_TAMRIEL_TOMES_REWARD_TEMPLATE_TYPES =
+{
+    TEMPLATE_TOP_MARGIN = 1,
+    TEMPLATE_DIVIDER = 2,
+    TEMPLATE_1X_WIDTH = 3,
+    TEMPLATE_2X_WIDTH_LEFT = 4,
+    TEMPLATE_2X_WIDTH_RIGHT = 5,
+    TEMPLATE_2_5X_WIDTH_LEFT = 6,
+    TEMPLATE_2_5X_WIDTH_RIGHT = 7,
+}
+
+ZO_TAMRIEL_TOMES_REWARD_ENTRY_TEMPLATE_LAYOUT =
+{
+    -- Row 0
+    ZO_TAMRIEL_TOMES_REWARD_TEMPLATE_TYPES.TEMPLATE_TOP_MARGIN,
+
+    -- Row 1
+    ZO_TAMRIEL_TOMES_REWARD_TEMPLATE_TYPES.TEMPLATE_2_5X_WIDTH_RIGHT,
+    ZO_TAMRIEL_TOMES_REWARD_TEMPLATE_TYPES.TEMPLATE_2_5X_WIDTH_LEFT,
+
+    -- Row 2
+    ZO_TAMRIEL_TOMES_REWARD_TEMPLATE_TYPES.TEMPLATE_2X_WIDTH_RIGHT,
+    ZO_TAMRIEL_TOMES_REWARD_TEMPLATE_TYPES.TEMPLATE_1X_WIDTH,
+    ZO_TAMRIEL_TOMES_REWARD_TEMPLATE_TYPES.TEMPLATE_2X_WIDTH_LEFT,
+
+    -- Divider
+    ZO_TAMRIEL_TOMES_REWARD_TEMPLATE_TYPES.TEMPLATE_DIVIDER,
+
+    -- Row 3
+    ZO_TAMRIEL_TOMES_REWARD_TEMPLATE_TYPES.TEMPLATE_1X_WIDTH,
+    ZO_TAMRIEL_TOMES_REWARD_TEMPLATE_TYPES.TEMPLATE_1X_WIDTH,
+    ZO_TAMRIEL_TOMES_REWARD_TEMPLATE_TYPES.TEMPLATE_1X_WIDTH,
+    ZO_TAMRIEL_TOMES_REWARD_TEMPLATE_TYPES.TEMPLATE_1X_WIDTH,
+    ZO_TAMRIEL_TOMES_REWARD_TEMPLATE_TYPES.TEMPLATE_1X_WIDTH,
+}
+
+local UNLOCKED_PAGE_INDICATOR_INFO =
+{
+    selectedTexture = "/EsoUI/Art/TamrielTomes/selected_page_outline.dds",
+    highlightedTexture = "/EsoUI/Art/TamrielTomes/highlighted_page_backdrop.dds",
+}
+local LOCKED_PAGE_INDICATOR_INFO =
+{
+    color = ZO_ColorDef:New(.6, .6, .6, 1),
+    highlightedTexture = "/EsoUI/Art/TamrielTomes/highlighted_page_backdrop.dds",
+    selectedColor = ZO_ColorDef:New(.75, .75, .75, 1),
+    selectedTexture = "/EsoUI/Art/TamrielTomes/selected_page_outline.dds",
+}
+local UNLOCKED_BONUS_PAGE_INDICATOR_INFO =
+{
+    icon = "/EsoUI/Art/TamrielTomes/tome_bonus_page_icon.dds",
+    highlightedTexture = "/EsoUI/Art/TamrielTomes/highlighted_page_backdrop.dds",
+    selectedTexture = "/EsoUI/Art/TamrielTomes/selected_page_outline.dds",
+}
+local LOCKED_BONUS_PAGE_INDICATOR_INFO =
+{
+    color = ZO_ColorDef:New(.4, .4, .4, 1),
+    icon = "/EsoUI/Art/TamrielTomes/tome_bonus_page_icon.dds",
+    highlightedTexture = "/EsoUI/Art/TamrielTomes/highlighted_page_backdrop.dds",
+    selectedColor = ZO_ColorDef:New(.55, .55, .55, 1),
+    selectedTexture = "/EsoUI/Art/TamrielTomes/selected_page_outline.dds",
+}
+
+ZO_TamrielTomesScreen_Shared = ZO_DeferredInitializingObject:Subclass()
+
+ZO_TamrielTomesScreen_Shared:MUST_IMPLEMENT("BeginPreviewInternal")
+ZO_TamrielTomesScreen_Shared:MUST_IMPLEMENT("EndPreviewInternal")
+ZO_TamrielTomesScreen_Shared:MUST_IMPLEMENT("InitializeKeybindStripDescriptor")
+ZO_TamrielTomesScreen_Shared:MUST_IMPLEMENT("ShowIntroScreen")
+
+function ZO_TamrielTomesScreen_Shared:Initialize(control, scene, templateData)
+    self.control = control
+    self.templateData = templateData
+    self.activePreviewType = ZO_TAMRIEL_TOMES_REWARD_DATA_PREVIEW_TYPES.NONE
+    self.pendingPreviewType = ZO_TAMRIEL_TOMES_REWARD_DATA_PREVIEW_TYPES.NONE
+
+    ZO_TamrielTomesScreen_Shared.SetPreviousCurrencyAmount(GetPlayerStoredCurrencyAmount(CURT_TOME_POINTS))
+    ZO_TamrielTomesScreen_Shared.ClearSeenTiers()
+
+    ZO_DeferredInitializingObject.Initialize(self, scene)
+
+    self.fragment = ZO_FadeSceneFragment:New(control)
+    scene:AddFragment(self.fragment)
+
+    self.control:SetHandler("OnUpdate", function(_, ...) self:OnUpdate(...) end)
+end
+
+function ZO_TamrielTomesScreen_Shared:OnDeferredInitialize()
+    self:InitializeControls()
+    self:InitializeKeybindStripDescriptor()
+    self:InitializeParticleSystems()
+    self:RegisterForEvents()
+
+    if self.buttonsFocus then
+        local originalOnFocusChangedFunction = self.buttonsFocus.onFocusChangedFunction
+
+        self.buttonsFocus.onFocusChangedFunction = function(...)
+            originalOnFocusChangedFunction(self.buttonsFocus, ...)
+
+            local focusItem = self.buttonsFocus:GetFocusItem()
+            local upgradeButtonHasFocus = focusItem and focusItem.control == self.upgradeButton
+            self:OnUpgradeButtonFocusChanged(upgradeButtonHasFocus)
+        end
+    end
+end
+
+function ZO_TamrielTomesScreen_Shared:InitializeControls()
+    self.pageBackgroundTexture = self.control:GetNamedChild("PageBackground")
+
+    local headerContainer = self.control:GetNamedChild("Header")
+    self.titleLabel = headerContainer:GetNamedChild("Title")
+    self.subtitleLabel = headerContainer:GetNamedChild("Subtitle")
+    self.buttonContainer = headerContainer:GetNamedChild("Buttons")
+    self.challengesButton = self.buttonContainer:GetNamedChild("ChallengesButton")
+    self.challengesButton:SetClickSound(SOUNDS.TAMRIEL_TOMES_NAVIGATE_FORWARD)
+    self.upgradeButton = self.buttonContainer:GetNamedChild("UpgradeButton")
+    self.upgradeButton:SetClickSound(SOUNDS.TAMRIEL_TOMES_NAVIGATE_FORWARD)
+    self.upgradeButton:SetHandler("OnMouseEnter", function() self:OnUpgradeButtonFocusChanged(true) end, "DisabledMessage")
+    self.upgradeButton:SetHandler("OnMouseExit", function() self:OnUpgradeButtonFocusChanged(false) end, "DisabledMessage")
+
+    local bookContainer = self.control:GetNamedChild("Book")
+    self.particleGeneratorPositionControl = bookContainer:GetNamedChild("RewardParticleGeneratorPosition")
+
+    local currencyInfoContainer = bookContainer:GetNamedChild("Currency")
+    local currencyContainer = currencyInfoContainer:GetNamedChild("Balance")
+    self.currencyBalanceBackdrop = currencyInfoContainer:GetNamedChild("BalanceBackdrop")
+    self.currencyFullBackdrop = currencyInfoContainer:GetNamedChild("FullBackdrop")
+    self.currencyNameLabel = currencyContainer:GetNamedChild("Name")
+    self.currencyAmountRollingMeter = currencyContainer:GetNamedChild("Amount")
+    self.currencyIconControl = currencyContainer:GetNamedChild("Icon")
+
+    local currencyBonusContainer = currencyInfoContainer:GetNamedChild("Bonus")
+    self.currencyBonusContainer = currencyBonusContainer
+    self.currencyBonusPercentLabel = currencyBonusContainer:GetNamedChild("Percent")
+    self.currencyBonusIconTexture = currencyBonusContainer:GetNamedChild("Icon")
+
+    self.premiumGroupBorderControl = bookContainer:GetNamedChild("PremiumGroupBorder")
+    self.premiumGroupBorderLockedTexture = self.premiumGroupBorderControl:GetNamedChild("Locked")
+
+    local pageNavigationControl = bookContainer:GetNamedChild("PageNavigation")
+    self.pageNavigation = ZO_PageNavigation:New(pageNavigationControl)
+    self.pageNavigation:SetStartingPageNumber(0)
+    -- Note that page change sounds are handled manually via the PageChanged callback.
+    self.pageNavigation:SetPageChangeSound(nil)
+    self.pageNavigation:SetPageChangePreviousSound(nil)
+    self.pageNavigation:SetPageChangeNextSound(nil)
+    self.pageNavigation:RegisterCallback("PageChanged", self.OnPageChanged, self)
+    self.unlockPointsRequired = bookContainer:GetNamedChild("UnlockPointsRequired")
+
+    self.gridListControl = bookContainer:GetNamedChild("GridList")
+
+    self:InitializeCurrencyRollingMeter()
+    self:InitializeGridList()
+end
+
+function ZO_TamrielTomesScreen_Shared:InitializeCurrencyRollingMeter()
+    self.currencyAmountRollingMeter:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
+    self.currencyAmountRollingMeter:SetIsCommaDelimited(true)
+    self.currencyAmountRollingMeter:SetResizeToFitLabels(true)
+    self.currencyAmountRollingMeter:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
+
+    self.currencyAmountTransitionManager = self.currencyAmountRollingMeter:GetOrCreateTransitionManager()
+    self.currencyAmountTransitionManager:SetTransitionAnimationStartedCallback(function(rollingMeterLabel, currentStep, numSteps, currentValue, targetValue)
+        if currentValue == targetValue and not self.fragment:IsHidden() then
+            PlaySound(SOUNDS.TAMRIEL_TOMES_TOME_POINTS_ROLLING_ENDED)
+        end
+    end)
+
+    local IS_PLURAL = false
+    local currencyName = GetCurrencyName(CURT_TOME_POINTS, IS_PLURAL)
+    local formattedCurrencyNameString = zo_strformat(SI_TAMRIEL_TOMES_CURRENCY_NAME_LABEL, currencyName)
+    self.currencyNameLabel:SetText(formattedCurrencyNameString)
+end
+
+function ZO_TamrielTomesScreen_Shared:InitializeGridList()
+    local templateData = self.templateData
+
+    -- Override default highlight template to hide white outline around tiles on gamepad
+    local gridList = templateData.gridClass:New(self.gridListControl, templateData.gamepadHighlightTemplate)
+    self.gridList = gridList
+    gridList:SetIndentAmount(0)
+    gridList:SetHeaderPrePadding(0)
+    gridList:SetHeaderPostPadding(0)
+    gridList:SetYDistanceFromEdgeWhereSelectionCausesScroll(10)
+
+    local function EntryEqualityFunction(left, right)
+        if left.dataEntry.Equals and right.dataEntry.Equals then
+            return left.dataEntry:Equals(right.dataEntry)
+        end
+        return false
+    end
+
+    local DEFAULT_HIDE_CALLBACK = nil
+    local DEFAULT_ENTRIES_CENTERED = nil
+    local templateTypes = ZO_TAMRIEL_TOMES_REWARD_TEMPLATE_TYPES
+    for _, templateTypeIndex in pairs(templateTypes) do
+        local typeData = templateData[templateTypeIndex]
+        local setupCallback = typeData.setupCallback or ZO_DefaultGridTileEntrySetup
+        local resetCallback = typeData.resetCallback or ZO_DefaultGridTileEntryReset
+        self.gridList:AddEntryTemplate(typeData.entryTemplate, typeData.width, typeData.height, setupCallback, DEFAULT_HIDE_CALLBACK, resetCallback, 0, 0, DEFAULT_ENTRIES_CENTERED, typeData.isSelectable)
+        self.gridList:SetEntryTemplateEqualityFunction(typeData.entryTemplate, EntryEqualityFunction)
+    end
+end
+
+function ZO_TamrielTomesScreen_Shared:InitializeParticleSystems()
+    self.blastParticleSystem = ZO_BlastParticleSystem:New()
+    self.blastParticleSystem:SetSound(SOUNDS.TAMRIEL_TOMES_REWARD_PURCHASED)
+    self.blastParticleSystem:SetParentControl(self.particleGeneratorPositionControl)
+end
+
+function ZO_TamrielTomesScreen_Shared:RegisterForEvents()
+    -- eventId, currencyType, currencyLocation, delta, reason, reasonInfo
+    local function OnCurrencyUpdated(_, currencyType)
+        if not self.control:IsHidden() then
+            if currencyType == CURT_TOME_POINTS then
+                self:UpdateCurrencyAmount()
+                self:UpdatePageNavigation()
+            elseif currencyType == CURT_TOME_POINT_CACHES then
+                self:UpdateKeybinds()
+            end
+        end
+    end
+
+    self.control:RegisterForEvent(EVENT_CURRENCY_UPDATE, OnCurrencyUpdated)
+
+    local function UpdateGridListAndNavigation()
+        if self:IsShowing() then
+            self:RefreshGridList()
+            self:UpdatePageNavigation()
+        end
+    end
+
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", UpdateGridListAndNavigation)
+    TAMRIEL_TOMES_MANAGER:RegisterCallback("ProgressUpdated", UpdateGridListAndNavigation)
+    TAMRIEL_TOMES_MANAGER:RegisterCallback("RewardsUpdated", UpdateGridListAndNavigation)
+
+    local function OnRewardTrackRewardClaimed(_, rewardTrackType, rewardTrackId, rewardTrackTier, rewardTrackComponent, rewardIndex, isFallback)
+        if self.control:IsHidden() then
+            return
+        end
+
+        if rewardTrackType ~= REWARD_TRACK_TYPE_TAMRIEL_TOMES then
+            return
+        end
+
+        self:RebuildGridList()
+
+        local gridTile = self:GetTileByTamrielTomesRewardIndex(rewardTrackId, rewardTrackTier, rewardTrackComponent, rewardIndex)
+        if gridTile then
+            self:ShowClaimedRewardFlair(gridTile)
+        end
+    end
+
+    self.control:RegisterForEvent(EVENT_REWARD_TRACK_REWARD_CLAIMED, OnRewardTrackRewardClaimed)
+
+    local function OnSelectedTomeChanged(tomeId)
+        if self:IsShowing() then
+            self:UpdateTomeInfo(tomeId)
+
+            local FORCE_UPDATE = true
+            self:UpdateSeenTiers(FORCE_UPDATE)
+        end
+    end
+
+    TAMRIEL_TOMES_MANAGER:RegisterCallback("SelectedTomeChanged", OnSelectedTomeChanged)
+
+    local function UpdateButtonsAndPageNavigation()
+        if self:IsShowing() then
+            self:UpdateButtons()
+            self:UpdatePageNavigation()
+        end
+    end
+
+    TAMRIEL_TOMES_MANAGER:RegisterCallback("DirectPurchaseDataUpdated", UpdateButtonsAndPageNavigation)
+    DIRECT_PURCHASE_MANAGER:RegisterCallback("SettingsUpdated", UpdateButtonsAndPageNavigation)
+end
+
+function ZO_TamrielTomesScreen_Shared:ShowClaimedRewardFlair(gridTile)
+    local tileReward = gridTile:GetNamedChild("Reward")
+    if not tileReward then
+        return
+    end
+
+    self.particleGeneratorPositionControl:ClearAnchors()
+    self.particleGeneratorPositionControl:SetAnchor(CENTER, tileReward, CENTER, 0, -10)
+    self.blastParticleSystem:Start()
+
+    ZO_CraftingResults_Base_PlayPulse(tileReward)
+end
+
+function ZO_TamrielTomesScreen_Shared:UpdateTomeInfo(tomeId)
+    if tomeId == self.selectedTomeId then
+        return
+    end
+
+    self.selectedTomeId = tomeId
+    self.selectedTomeData = ZO_TamrielTomeData:New(tomeId)
+    self.selectedTomeIndex = self.selectedTomeData:GetTamrielTomeIndex()
+    self.currentRewardTrackId = self.selectedTomeData:GetRewardTrackId()
+    self.currentTierIndex = 1
+
+    self:UpdateButtons()
+    self:UpdatePageNavigation()
+end
+
+function ZO_TamrielTomesScreen_Shared:MarkCurrentTierAsSeenIfUnlocked()
+    local currentTier = self.pageNavigation:GetCurrentPage() or 0
+    local highestUnlockedTier = self:GetHighestUnlockedPage()
+    if currentTier <= highestUnlockedTier then
+        ZO_TamrielTomesScreen_Shared.AddSeenTier(currentTier)
+    end
+end
+
+function ZO_TamrielTomesScreen_Shared:RefreshSeenTiers()
+    self.pageNavigation:ClearHighlightedPages()
+
+    local highestUnlockedTier = self:GetHighestUnlockedPage()
+    local seenTiers = ZO_TamrielTomesScreen_Shared.GetSeenTiers()
+    local numTiers = self:GetNumRewardPages()
+    for tier = 1, numTiers do
+        if tier <= highestUnlockedTier and not seenTiers[tier] then
+            -- This page has not yet been seen.
+            self.pageNavigation:SetHighlightedPage(tier, true)
+        end
+    end
+
+    self.pageNavigation:RefreshPageIndicators()
+end
+
+function ZO_TamrielTomesScreen_Shared:UpdateSeenTiers(forceUpdate)
+    if ZO_TamrielTomesScreen_Shared.AreSeenTiersInitialized() and not forceUpdate then
+        return
+    end
+
+    ZO_TamrielTomesScreen_Shared.ClearSeenTiers()
+
+    local highestUnlockedTier = self:GetHighestUnlockedPage()
+    for existingTier = 1, highestUnlockedTier do
+        ZO_TamrielTomesScreen_Shared.AddSeenTier(existingTier)
+    end
+
+    self:RefreshSeenTiers()
+    ZO_TamrielTomesScreen_Shared.SetAreSeenTiersInitialized(true)
+end
+
+function ZO_TamrielTomesScreen_Shared:GetSelectedTamrielTomesRewardData()
+    return self.selectedTamrielTomesRewardData
+end
+
+function ZO_TamrielTomesScreen_Shared:SetSelectedTamrielTomesRewardData(newData)
+    if newData == self.selectedTamrielTomesRewardData then
+        return
+    end
+
+    local previousData = self.selectedTamrielTomesRewardData
+    local previousTileControl = self:GetSelectedTile()
+    if previousTileControl then
+        previousTileControl.object:GetReward():SetSelected(false)
+    end
+
+    self.selectedTamrielTomesRewardData = newData
+    self:RefreshGridList()
+
+    local newTileControl = self:GetSelectedTile()
+    if newTileControl then
+        newTileControl.object:GetReward():SetSelected(true)
+    end
+
+    self:OnSelectedTamrielTomesRewardDataChanged(previousData, newData, previousTileControl, newTileControl)
+    self:UpdateKeybinds()
+end
+
+function ZO_TamrielTomesScreen_Shared:CompareRewardDataIndices(rewardData1, rewardData2)
+    if not (rewardData1 and rewardData2) then
+        return 0
+    end
+
+    local component1 = rewardData1:GetRewardComponent()
+    local component2 = rewardData2:GetRewardComponent()
+    if component1 < component2 then
+        return -1
+    end
+    if component2 < component1 then
+        return 1
+    end
+
+    local index1 = rewardData1:GetRewardIndex()
+    local index2 = rewardData2:GetRewardIndex()
+    if index1 < index2 then
+        return -1
+    end
+    if index2 < index1 then
+        return 1
+    end
+
+    return 0
+end
+
+function ZO_TamrielTomesScreen_Shared:GetSelectedTile()
+    return self:GetTileByTamrielTomesRewardData(self.selectedTamrielTomesRewardData)
+end
+
+function ZO_TamrielTomesScreen_Shared:GetTileByTamrielTomesRewardData(tamrielTomesRewardData)
+    if tamrielTomesRewardData then
+        return self.gridList:GetControlFromData(tamrielTomesRewardData)
+    end
+
+    return nil
+end
+
+function ZO_TamrielTomesScreen_Shared:GetTamrielTomesRewardObject(tamrielTomesRewardData)
+    local tileControl = self:GetTileByTamrielTomesRewardData(tamrielTomesRewardData)
+    if tileControl then
+        local rewardObject = tileControl.object.rewardControl.object
+        return rewardObject
+    end
+
+    return nil
+end
+
+function ZO_TamrielTomesScreen_Shared:GetTamrielTomeRewardDataFromEntryData(entryData)
+    if entryData and entryData.rewardTrackId then
+        return entryData
+    end
+
+    return nil
+end
+
+function ZO_TamrielTomesScreen_Shared:GetTileByTamrielTomesRewardIndex(rewardTrackId, rewardTrackTier, rewardTrackComponent, rewardIndex)
+    local gridEntries = self.gridList:GetData()
+    if not gridEntries then
+        return nil
+    end
+
+    for _, entry in ipairs(gridEntries) do
+        local entryData = entry.data
+        if entryData then
+            local tamrielTomeRewardData = self:GetTamrielTomeRewardDataFromEntryData(entryData)
+            if tamrielTomeRewardData and tamrielTomeRewardData:Equals(rewardTrackId, rewardTrackTier, rewardTrackComponent, rewardIndex) then
+                return self.gridList:GetControlFromData(entryData)
+            end
+        end
+    end
+
+    return nil
+end
+
+function ZO_TamrielTomesScreen_Shared:HasSelectedTamrielTomesRewardData()
+    return self:GetSelectedTamrielTomesRewardData() ~= nil
+end
+
+function ZO_TamrielTomesScreen_Shared:AddGridEntryInternal(rewardData, entryTemplateId)
+    local templateData = self.templateData[entryTemplateId]
+    if not templateData then
+        internalassert(templateData, string.format("Invalid entryTemplateId specified: %s", tostring(entryTemplateId or "nil")))
+        return
+    end
+
+    self.gridList:AddEntry(rewardData, templateData.entryTemplate)
+end
+
+function ZO_TamrielTomesScreen_Shared:ClearTamrielTomesRewardCursor()
+    self.currentRewardComponent = nil
+    self.currentRewardIndex = nil
+end
+
+function ZO_TamrielTomesScreen_Shared:GetCurrentTamrielTomesRewardData()
+    local tamrielTomesRewardData = ZO_TamrielTomesRewardData:New(self.selectedTomeId, self.currentRewardTrackId, self.currentTierIndex, self.currentRewardComponent, self.currentRewardIndex)
+    return tamrielTomesRewardData
+end
+
+function ZO_TamrielTomesScreen_Shared:GetFirstTamrielTomesRewardData()
+    self.currentRewardComponent = REWARD_TRACK_COMPONENT_SECONDARY
+    self.currentRewardIndex = 0
+    return self:GetNextTamrielTomesRewardData()
+end
+
+function ZO_TamrielTomesScreen_Shared:GetNextTamrielTomesRewardData()
+    if not self:IsTamrielTomesRewardDataCursorValid() then
+        internalassert(false, "Tamriel Tomes Reward Data cursor is invalid. Call GetFirstTamrielTomesRewardData() to create a new cursor.")
+        return nil
+    end
+
+    if not self:HasNextTamrielTomesRewardDataForCurrentRewardComponent() then
+        if self.currentRewardComponent == REWARD_TRACK_COMPONENT_SECONDARY then
+            -- Advance to secondary reward components.
+            self.currentRewardComponent = REWARD_TRACK_COMPONENT_PRIMARY
+            self.currentRewardIndex = 0
+
+            if not self:HasNextTamrielTomesRewardDataForCurrentRewardComponent() then
+                -- No secondary reward components exist.
+                self:ClearTamrielTomesRewardCursor()
+                return nil
+            end
+        else
+            -- End of primary and secondary rewards.
+            self:ClearTamrielTomesRewardCursor()
+            return nil
+        end
+    end
+
+    self.currentRewardIndex = self.currentRewardIndex + 1
+    local tamrielTomesRewardData = self:GetCurrentTamrielTomesRewardData()
+    return tamrielTomesRewardData
+end
+
+function ZO_TamrielTomesScreen_Shared:GetNumTamrielTomesRewardDataForCurrentRewardComponent()
+    local numRewards = GetNumRewardsAtRewardTrackTier(self.currentRewardTrackId, self.currentTierIndex, self.currentRewardComponent)
+    return numRewards
+end
+
+function ZO_TamrielTomesScreen_Shared:HasNextTamrielTomesRewardDataForCurrentRewardComponent()
+    return self.currentRewardIndex < self:GetNumTamrielTomesRewardDataForCurrentRewardComponent()
+end
+
+function ZO_TamrielTomesScreen_Shared:IsTamrielTomesRewardDataCursorValid()
+    return self.currentRewardComponent and self.currentRewardIndex
+end
+
+function ZO_TamrielTomesScreen_Shared:RebuildGridList()
+    local previousSelectedData = self:GetSelectedTamrielTomesRewardData()
+    local currentSelectedData = nil
+    self.gridList:ClearGridList()
+
+    local entryData = self:GetFirstTamrielTomesRewardData()
+    for entryIndex, entryTemplate in ipairs(ZO_TAMRIEL_TOMES_REWARD_ENTRY_TEMPLATE_LAYOUT) do
+        if not entryData then
+            -- End of rewards reached.
+            break
+        end
+
+        if entryTemplate == ZO_TAMRIEL_TOMES_REWARD_TEMPLATE_TYPES.TEMPLATE_TOP_MARGIN or entryTemplate == ZO_TAMRIEL_TOMES_REWARD_TEMPLATE_TYPES.TEMPLATE_DIVIDER then
+            self:AddGridEntryInternal({}, entryTemplate)
+        else
+            if previousSelectedData and previousSelectedData:Equals(entryData) then
+                currentSelectedData = entryData
+            end
+            self:AddGridEntryInternal(entryData, entryTemplate)
+            entryData = self:GetNextTamrielTomesRewardData()
+        end
+    end
+
+    -- Order matters
+    self.gridList:CommitGridList()
+    if currentSelectedData then
+        self.gridList:SelectData(currentSelectedData)
+        self:SetSelectedTamrielTomesRewardData(currentSelectedData)
+    end
+    self:RefreshUnlockRequirements()
+    self:RefreshSeenTiers()
+    self:UpdateCurrencyAmount()
+    self:UpdateKeybinds()
+end
+
+function ZO_TamrielTomesScreen_Shared:Refresh()
+    local selectedTomeId = TAMRIEL_TOMES_MANAGER:GetSelectedTomeId()
+    self:UpdateTomeInfo(selectedTomeId)
+
+    local rewardTrackId = self.currentRewardTrackId
+    local titleText = GetRewardTrackDisplayName(rewardTrackId)
+    self.titleLabel:SetText(titleText)
+
+    local currencyBonusPercentage = GetTomePointGainBonusPercentage()
+    local hasCurrencyBonus = currencyBonusPercentage > 0
+    self.currencyBonusContainer:SetHidden(not hasCurrencyBonus)
+    self.currencyBalanceBackdrop:SetHidden(hasCurrencyBonus)
+    self.currencyFullBackdrop:SetHidden(not hasCurrencyBonus)
+    if hasCurrencyBonus then
+        self.currencyBonusPercentLabel:SetText(zo_strformat(SI_TAMRIEL_TOMES_CURRENCY_BONUS_PERCENTAGE_LABEL, currencyBonusPercentage))
+    end
+
+    self:RefreshUnlockRequirements()
+    self:RefreshPageBackground()
+    self:RefreshNewIndicators()
+    self:RefreshSeenTiers()
+    self:UpdateCurrencyAmount()
+    self:UpdateKeybinds()
+end
+
+function ZO_TamrielTomesScreen_Shared:RefreshNewIndicators()
+    local challengesButtonLabelText = GetString(SI_TAMRIEL_TOMES_VIEW_CHALLENGES_LABEL)
+    if TIMED_ACTIVITIES_MANAGER:HasClaimableTimedActivities() or TIMED_ACTIVITIES_MANAGER:HasNewTimedActivities() then
+        challengesButtonLabelText = string.format("%s %s", zo_iconFormat("/esoui/art/miscellaneous/new_icon.dds", 32, 32), challengesButtonLabelText)
+    end
+    self.challengesButton:SetText(challengesButtonLabelText)
+end
+
+function ZO_TamrielTomesScreen_Shared:RefreshGridList()
+    self.gridList:RefreshGridList()
+    self:RefreshUnlockRequirements()
+    self:RefreshPageBackground()
+    self:RefreshNewIndicators()
+    self:RefreshSeenTiers()
+    self:UpdateCurrencyAmount()
+    self:UpdateKeybinds()
+end
+
+function ZO_TamrielTomesScreen_Shared:RefreshPageBackground()
+    if self:IsCurrentBasePageLocked() then
+        self.pageBackgroundTexture:SetColor(0.9, 0.9, 0.9, 1.0)
+    else
+        self.pageBackgroundTexture:SetColor(1.0, 1.0, 1.0, 1.0)
+    end
+end
+
+function ZO_TamrielTomesScreen_Shared:RefreshUnlockRequirements()
+    self.premiumGroupBorderLockedTexture:SetHidden(true)
+    self.unlockPointsRequired:SetHidden(true)
+
+    if self.selectedTomeData then
+        -- Show the message that indicates how many additional Tome Points must be
+        -- earned to unlock the next locked page, if any page is still locked.
+        local nextPage = (self.selectedTomeData:GetCurrentTier() or 0) + 1
+        local currentPage = self.pageNavigation:GetCurrentPage() or 0
+        local tier = zo_max(nextPage, currentPage)
+        local unlockPointsRemaining = self.selectedTomeData:GetCostToProgressToTier(tier)
+        if unlockPointsRemaining > 0 then
+            local unlockPointsRemainingString = ZO_Currency_FormatPlatform(CURT_TOME_POINTS, unlockPointsRemaining, ZO_CURRENCY_FORMAT_AMOUNT_ICON)
+            local unlockPointsRequiredString
+            local numBaseTiers = self.selectedTomeData:GetNumBaseTiers()
+            if tier <= numBaseTiers then
+                unlockPointsRequiredString = zo_strformat(SI_TAMRIEL_TOMES_PAGE_UNLOCK_REQUIREMENT, unlockPointsRemainingString, tostring(tier))
+            else
+                local bonusTier = tier - numBaseTiers
+                unlockPointsRequiredString = zo_strformat(SI_TAMRIEL_TOMES_BONUS_PAGE_UNLOCK_REQUIREMENT, unlockPointsRemainingString, tostring(bonusTier))
+            end
+
+            self.unlockPointsRequired:SetText(unlockPointsRequiredString)
+            self.unlockPointsRequired:SetHidden(false)
+        end
+
+        -- Show the lock icon next to the Premium section caption if the premium
+        -- component is not accessible.
+        local hasPremiumComponent = self.selectedTomeData:HasAccessToComponent(REWARD_TRACK_COMPONENT_SECONDARY)
+        self.premiumGroupBorderLockedTexture:SetHidden(hasPremiumComponent)
+    end
+end
+
+function ZO_TamrielTomesScreen_Shared:OnUpgradeButtonFocusChanged(hasFocus)
+    local message = nil
+    if hasFocus then
+        message = TAMRIEL_TOMES_MANAGER:GetPurchaseDisabledMessage()
+    end
+
+    if message then
+        if IsInGamepadPreferredMode() then
+            GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
+            GAMEPAD_TOOLTIPS:LayoutTextBlockTooltip(GAMEPAD_RIGHT_TOOLTIP, message)
+        else
+            InitializeTooltip(InformationTooltip, self.upgradeButton, RIGHT)
+            InformationTooltip:AddLine(message, "", ZO_WHITE:UnpackRGB())
+        end
+    else
+        ClearTooltip(InformationTooltip)
+        GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
+    end
+end
+
+function ZO_TamrielTomesScreen_Shared:UpdateButtons()
+    local isEnabled = TAMRIEL_TOMES_MANAGER:GetPurchaseDisabledMessage() == nil
+    self.upgradeButton:SetEnabled(isEnabled)
+end
+
+function ZO_TamrielTomesScreen_Shared:BeginClaimReward(tamrielTomesRewardData)
+    local rewardObject = self:GetTamrielTomesRewardObject(tamrielTomesRewardData)
+    if not rewardObject then
+        internalasset(false, "Tile control not found for Tamriel Tomes Reward Data.")
+        return
+    end
+
+    rewardObject:BeginClaimReward()
+    PlaySound(SOUNDS.TAMRIEL_TOMES_REWARD_CLAIM_START)
+end
+
+function ZO_TamrielTomesScreen_Shared:EndClaimReward(tamrielTomesRewardData)
+    local rewardObject = self:GetTamrielTomesRewardObject(tamrielTomesRewardData)
+    if not rewardObject then
+        internalasset(false, "Tile control not found for Tamriel Tomes Reward Data.")
+        return
+    end
+
+    rewardObject:EndClaimReward()
+end
+
+function ZO_TamrielTomesScreen_Shared:ShouldHideKeybinds()
+    return not self.scene:IsShowing()
+end
+
+function ZO_TamrielTomesScreen_Shared:UpdateKeybinds()
+    local hideKeybinds = self:ShouldHideKeybinds()
+    self:SetKeybindsHidden(hideKeybinds)
+end
+
+function ZO_TamrielTomesScreen_Shared:SetKeybindsHidden(hidden)
+    if hidden then
+        if self.areKeybindsAdded then
+            KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
+            self.areKeybindsAdded = false
+            KEYBIND_STRIP:RestoreDefaultExit()
+        end
+
+        return
+    end
+
+    KEYBIND_STRIP:RemoveDefaultExit()
+    if self.areKeybindsAdded then
+        KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+    else
+        KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
+        self.areKeybindsAdded = true
+    end
+end
+
+function ZO_TamrielTomesScreen_Shared:SetIsTamrielTomesRewardPreviewing(tamrielTomesRewardData, isPreviewing)
+    local tile = self:GetTileByTamrielTomesRewardData(tamrielTomesRewardData)
+    if not tile then
+        return
+    end
+
+    tile.object:GetReward():SetPreviewing(isPreviewing)
+end
+
+-- Indicates whether this scene should retain the current preview when hidden.
+function ZO_TamrielTomesScreen_Shared:ShouldRetainPreview()
+    return false
+end
+
+function ZO_TamrielTomesScreen_Shared:OnHiding()
+    -- Order matters
+    if self:ShouldRetainPreview() then
+        self:ClearQueuedEndPreview()
+    else
+        self:ClearQueuedEndPreview()
+        self:UpdateKeybinds()
+    end
+end
+
+function ZO_TamrielTomesScreen_Shared:OnShowing()
+    if self:GetActivePreviewType() == ZO_TAMRIEL_TOMES_REWARD_DATA_PREVIEW_TYPES.FULL_PREVIEW then
+        -- If a Full Preview was active, downgrade it to a Quick Preview.
+        self.activePreviewType = ZO_TAMRIEL_TOMES_REWARD_DATA_PREVIEW_TYPES.QUICK_PREVIEW
+    end
+
+    self:Refresh()
+    self:RefreshGridList()
+    self:UpdateSeenTiers()
+
+    DIRECT_PURCHASE_MANAGER:RequestCatalog()
+end
+
+function ZO_TamrielTomesScreen_Shared:OnShown()
+    local selectedTomeId = TAMRIEL_TOMES_MANAGER:GetSelectedTomeId()
+    TAMRIEL_TOMES_MANAGER:MarkTomeSeen(selectedTomeId)
+
+    TriggerTutorial(TUTORIAL_TRIGGER_TAMRIEL_TOMES_OPENED)
+
+    self:UpdateCurrencyAmount()
+end
+
+function ZO_TamrielTomesScreen_Shared:OnSelectedTamrielTomesRewardDataChanged(previousData, newData, previousTileControl, newTileControl)
+    if not (newData and newTileControl and newTileControl.object and newTileControl.object.rewardData and newTileControl.object.rewardData:CanPreviewReward()) then
+        if self:ShouldRetainPreview() then
+            return
+        end
+
+        self:QueueEndPreview(ZO_DEFAULT_QUEUED_PREVIEW_DELAY_SECONDS)
+        self:ClearQueuedPreview()
+        return
+    end
+
+    local tamrielTomesRewardData = newTileControl.object.rewardData
+    self:QueuePreview(ZO_TAMRIEL_TOMES_REWARD_DATA_PREVIEW_TYPES.QUICK_PREVIEW, tamrielTomesRewardData:GetRewardData(), tamrielTomesRewardData, ZO_DEFAULT_QUEUED_PREVIEW_DELAY_SECONDS)
+end
+
+function ZO_TamrielTomesScreen_Shared:UpdateClaimReward(currentFrameTimeSeconds)
+    if not self.nextTimeRemainingUpdateS or currentFrameTimeSeconds > self.nextTimeRemainingUpdateS then
+        local endTimeS = GetActiveTamrielTomeSeasonEndTimeS()
+        local timeRemainingS = zo_max(0, endTimeS - GetTimeStamp())
+        local timeRemainingText = ""
+        if timeRemainingS > 0 then
+            local durationText
+            if timeRemainingS > ZO_ONE_MINUTE_IN_SECONDS then
+                durationText = ZO_FormatTimeLargestTwo(timeRemainingS, TIME_FORMAT_STYLE_DESCRIPTIVE)
+            else
+                durationText = GetString(SI_STR_TIME_LESS_THAN_MINUTE)
+            end
+            timeRemainingText = zo_strformat(SI_EVENT_ANNOUNCEMENT_TIME, durationText)
+
+            if timeRemainingS > ZO_ONE_DAY_IN_SECONDS + ZO_ONE_HOUR_IN_SECONDS then
+                self.nextTimeRemainingUpdateS = currentFrameTimeSeconds + ZO_ONE_HOUR_IN_SECONDS
+            elseif timeRemainingS > ZO_ONE_HOUR_IN_SECONDS + ZO_ONE_MINUTE_IN_SECONDS then
+                self.nextTimeRemainingUpdateS = currentFrameTimeSeconds + ZO_ONE_MINUTE_IN_SECONDS
+            else
+                self.nextTimeRemainingUpdateS = currentFrameTimeSeconds + 1
+            end
+        end
+        self.subtitleLabel:SetText(timeRemainingText)
+    end
+end
+
+function ZO_TamrielTomesScreen_Shared:GetNumBaseRewardPages()
+    local tomeData = self.selectedTomeData
+    if tomeData then
+        return tomeData:GetNumBaseTiers()
+    end
+    return 0
+end
+
+function ZO_TamrielTomesScreen_Shared:GetNumBonusRewardPages()
+    local tomeData = self.selectedTomeData
+    if tomeData then
+        return tomeData:GetNumBonusTiers()
+    end
+    return 0
+end
+
+function ZO_TamrielTomesScreen_Shared:GetNumRewardPages()
+    local tomeData = self.selectedTomeData
+    if tomeData then
+        return tomeData:GetNumTotalTiers()
+    end
+    return 0
+end
+
+function ZO_TamrielTomesScreen_Shared:GetHighestUnlockedPage()
+    return self.selectedTomeData and self.selectedTomeData:GetCurrentTier() or 0
+end
+
+function ZO_TamrielTomesScreen_Shared:IsCurrentBasePageLocked()
+    local currentPage = self.currentTierIndex or 0
+    local maxUnlockedPage = self:GetHighestUnlockedPage()
+    return currentPage > maxUnlockedPage
+end
+
+function ZO_TamrielTomesScreen_Shared:OnPageChanged(pageNumber, direction)
+    -- Order matters
+    local previousTierIndex = self.currentTierIndex
+    self.currentTierIndex = zo_clamp(pageNumber, 1, self:GetNumRewardPages())
+    local hasPageChanged = self.currentTierIndex ~= previousTierIndex
+    if hasPageChanged then
+        self:EndPreview()
+    end
+
+    local isShowing = not self.fragment:IsHidden()
+    if isShowing then
+        -- Applies to transitions between pages and between pages and the intro.
+        PlaySound(SOUNDS.TAMRIEL_TOMES_PAGE_FLIPPED)
+    end
+
+    if pageNumber == 0 then
+        self:ShowIntroScreen()
+        return
+    end
+
+    if isShowing then
+        -- Applies to transitions between pages only.
+        if direction and direction < 0 then
+            PlaySound(SOUNDS.TAMRIEL_TOMES_PAGE_FLIPPED_BACK)
+        else
+            PlaySound(SOUNDS.TAMRIEL_TOMES_PAGE_FLIPPED_FORWARD)
+        end
+    end
+
+    -- Order matters
+    local RETAIN_SELECTION = not hasPageChanged
+    self:RebuildGridList(RETAIN_SELECTION)
+    self:RefreshUnlockRequirements()
+    self:RefreshPageBackground()
+    self:MarkCurrentTierAsSeenIfUnlocked()
+    self:RefreshSeenTiers()
+end
+
+function ZO_TamrielTomesScreen_Shared:UpdatePageNavigation()
+    local numRewardPages = self:GetNumRewardPages()
+    local pageNavigation = self.pageNavigation
+
+    -- Order matters
+    local pageToSelect = pageNavigation:GetCurrentPage()
+    if pageToSelect == nil or pageToSelect == 0 or pageToSelect > numRewardPages then
+        pageToSelect = 1
+    end
+    pageNavigation:Clear()
+
+    -- Add initial intro page (page 0).
+    pageNavigation:AddPage()
+
+    -- Add page 1 through n.
+    local numBaseRewardPages = self:GetNumBaseRewardPages()
+    local highestUnlockedPage = self:GetHighestUnlockedPage()
+    for pageIndex = 1, numBaseRewardPages do
+        if pageIndex <= highestUnlockedPage then
+            pageNavigation:AddPage(UNLOCKED_PAGE_INDICATOR_INFO)
+        else
+            pageNavigation:AddPage(LOCKED_PAGE_INDICATOR_INFO)
+        end
+    end
+
+    -- Add bonus pages, if any.
+    local numBonusRewardPages = self:GetNumBonusRewardPages()
+    for pageIndex = 1, numBonusRewardPages do
+        if pageIndex + numBaseRewardPages <= highestUnlockedPage then
+            pageNavigation:AddPage(UNLOCKED_BONUS_PAGE_INDICATOR_INFO)
+        else
+            pageNavigation:AddPage(LOCKED_BONUS_PAGE_INDICATOR_INFO)
+        end
+    end
+
+    -- Order matters
+    pageNavigation:Commit(pageToSelect)
+    self:RefreshSeenTiers()
+end
+
+function ZO_TamrielTomesScreen_Shared:UpdateCurrencyAmount()
+    if not self:IsShowing() then
+        return
+    end
+
+    local currencyAmount = GetPlayerStoredCurrencyAmount(CURT_TOME_POINTS)
+    local previousCurrencyAmount = ZO_TamrielTomesScreen_Shared.GetPreviousCurrencyAmount()
+    if currencyAmount ~= previousCurrencyAmount then
+        -- The currency amount has changed.
+        self.currentCurrencyAmount = currencyAmount
+        ZO_TamrielTomesScreen_Shared.SetPreviousCurrencyAmount(currencyAmount)
+        self.currencyAmountTransitionManager:SetValue(currencyAmount)
+        PlaySound(SOUNDS.TAMRIEL_TOMES_TOME_POINTS_ROLLING_STARTED)
+    elseif currencyAmount ~= self.currentCurrencyAmount then
+        -- The currency amount has changed but that change was presented in the opposing UI view (Gamepad vs. Keyboard).
+        self.currentCurrencyAmount = currencyAmount
+        self.currencyAmountTransitionManager:SetValueImmediately(currencyAmount)
+    end
+end
+
+-- Begins a preview of type 'previewType' for 'tamrielTomesRewardData'.
+-- Returns true if the preview was successfully shown.
+function ZO_TamrielTomesScreen_Shared:BeginPreviewTamrielTomesRewardData(previewType, tamrielTomesRewardData)
+    assert(tamrielTomesRewardData and tamrielTomesRewardData:IsInstaneOf(ZO_TamrielTomesRewardData), "A valid instance of ZO_TamrielTomesRewardData is required.")
+
+    local rewardData = tamrielTomesRewardData:GetRewardData()
+    if not rewardData then
+        return false
+    end
+
+    return self:BeginPreview(previewType, rewardData, tamrielTomesRewardData)
+end
+
+function ZO_TamrielTomesScreen_Shared:GetActivePreviewTamrielTomesRewardData()
+    local previewType, rewardData, previewKey = self:GetActivePreviewInfo()
+    if previewType == ZO_TAMRIEL_TOMES_REWARD_DATA_PREVIEW_TYPES.NONE then
+        return nil
+    end
+
+    if not (rewardData and previewKey) then
+        return nil
+    end
+
+    -- In the context of Tamriel Tomes' reward previews, 'previewKey' is the
+    -- ZO_TamrielTomesRewardData instance associated with the reward being previewed.
+    return previewKey
+end
+
+function ZO_TamrielTomesScreen_Shared:GetActivePreviewRewardTileControl()
+    local tamrielTomesRewardData = self:GetActivePreviewTamrielTomesRewardData()
+    if not tamrielTomesRewardData then
+        return nil
+    end
+
+    local tileControl = self:GetTileByTamrielTomesRewardData(tamrielTomesRewardData)
+    return tileControl
+end
+
+function ZO_TamrielTomesScreen_Shared:OnBeginPreview(previewType, rewardData, previewKey)
+    -- 'previewKey' is the ZO_TamrielTomeRewardData instance.
+    if previewKey then
+        self:SetIsTamrielTomesRewardPreviewing(previewKey, true)
+    end
+end
+
+function ZO_TamrielTomesScreen_Shared:OnEndPreview(previewType, rewardData, previewKey)
+    -- 'previewKey' is the ZO_TamrielTomeRewardData instance.
+    if previewKey then
+        self:SetIsTamrielTomesRewardPreviewing(previewKey, false)
+    end
+end
+
+-- Begins a preview of type 'previewType' of 'rewardData' (including an optional 'previewKey' for reference).
+-- Returns true if the preview was successfully shown.
+function ZO_TamrielTomesScreen_Shared:BeginPreview(previewType, rewardData, previewKey)
+    if not self:CanBeginPreview(previewType, rewardData) then
+        return false
+    end
+
+    if rewardData ~= self.activePreviewRewardData then
+        self.GetPreviewSystem():EndCurrentPreview()
+    end
+
+    -- Order matters
+    self.activePreviewEndTimeS = nil
+    self.activePreviewKey = previewKey
+    self.activePreviewRewardData = rewardData
+    self.activePreviewType = previewType
+    self:UpdateKeybinds()
+    self:BeginPreviewInternal()
+    self:OnBeginPreview(previewType, rewardData, previewKey)
+    return true
+end
+
+-- Returns true if a preview of type 'previewType' can be shown right now for 'rewardData'.
+function ZO_TamrielTomesScreen_Shared:CanBeginPreview(previewType, rewardData)
+    assert(previewType and previewType ~= ZO_TAMRIEL_TOMES_REWARD_DATA_PREVIEW_TYPES.NONE, "A valid previewType is required.")
+
+    if self.ComparePreviewTypePriorities(previewType, self.activePreviewType) < 0 and not self.activePreviewEndTimeS then
+        -- The requested preview type is suppressed by the active preview type.
+        return false
+    end
+
+    if not self.CanPreviewReward(rewardData) then
+        return false
+    end
+
+    if previewType == ZO_TAMRIEL_TOMES_REWARD_DATA_PREVIEW_TYPES.QUICK_PREVIEW and rewardData:GetRewardType() == REWARD_ENTRY_TYPE_REWARD_LIST then
+        -- Reward lists must be full previewed in order to show the list.
+        return false
+    end
+
+    return true
+end
+
+function ZO_TamrielTomesScreen_Shared:ClearQueuedEndPreview()
+    self.activePreviewEndTimeS = nil
+end
+
+function ZO_TamrielTomesScreen_Shared:ClearQueuedPreview()
+    self.pendingPreviewKey = nil
+    self.pendingPreviewRewardData = nil
+    self.pendingPreviewStartTimeS = nil
+    self.pendingPreviewType = ZO_TAMRIEL_TOMES_REWARD_DATA_PREVIEW_TYPES.NONE
+end
+
+function ZO_TamrielTomesScreen_Shared:EndPreview()
+    -- Order matters
+    local activePreviewType = self.activePreviewType
+    local activePreviewRewardData = self.activePreviewRewardData
+    local activePreviewKey = self.activePreviewKey
+    self.activePreviewEndTimeS = nil
+    self.activePreviewKey = nil
+    self.activePreviewRewardData = nil
+    self.activePreviewType = ZO_TAMRIEL_TOMES_REWARD_DATA_PREVIEW_TYPES.NONE
+    self:OnEndPreview(activePreviewType, activePreviewRewardData, activePreviewKey)
+
+    -- Order matters
+    self:EndPreviewInternal()
+    self:SetPreviewActionsHidden(true)
+    self:SetPreviewVariationsHidden(true)
+    self:UpdateKeybinds()
+end
+
+function ZO_TamrielTomesScreen_Shared:GetActivePreviewRewardData()
+    return self.activePreviewRewardData
+end
+
+function ZO_TamrielTomesScreen_Shared:GetActivePreviewEndTimeSeconds()
+    return self.activePreviewEndTimeS
+end
+
+function ZO_TamrielTomesScreen_Shared:GetActivePreviewInfo()
+    return self.activePreviewType, self.activePreviewRewardData, self.activePreviewKey
+end
+
+function ZO_TamrielTomesScreen_Shared:GetActivePreviewType()
+    return self.activePreviewType
+end
+
+function ZO_TamrielTomesScreen_Shared:GetPendingPreviewInfo()
+    return self.pendingPreviewType, self.pendingPreviewRewardData, self.pendingPreviewKey, self.pendingPreviewStartTimeS
+end
+
+function ZO_TamrielTomesScreen_Shared:OnUpdate(currentFrameTimeS)
+    self:UpdatePreview(currentFrameTimeS)
+    self:UpdateClaimReward(currentFrameTimeS)
+end
+
+-- Queues the end of the active preview.
+function ZO_TamrielTomesScreen_Shared:QueueEndPreview(delaySeconds)
+    assert(tonumber(delaySeconds), "A valid delaySeconds is required.")
+
+    if self:GetActivePreviewType() == ZO_TAMRIEL_TOMES_REWARD_DATA_PREVIEW_TYPES.NONE then
+        return
+    end
+
+    self.activePreviewEndTimeS = GetFrameTimeSeconds() + delaySeconds
+end
+
+-- Queues a preview of type 'previewType' of 'rewardData' (including an optional 'previewKey' for reference) to begin in 'delaySeconds'.
+-- Returns true if the preview was successfully queued.
+function ZO_TamrielTomesScreen_Shared:QueuePreview(previewType, rewardData, previewKey, delaySeconds)
+    assert(previewType and previewType ~= ZO_TAMRIEL_TOMES_REWARD_DATA_PREVIEW_TYPES.NONE, "A valid previewType is required.")
+    assert(tonumber(delaySeconds), "A valid delaySeconds is required.")
+
+    if rewardData == self.activePreviewRewardData then
+        -- The request is for the same reward; just retain the active preview.
+        self:ClearQueuedPreview()
+        self:ClearQueuedEndPreview()
+
+        -- Update the preview details in the event that this request came from a different source
+        -- or the preview type itself has changed.
+        self.activePreviewKey = previewKey
+        self.activePreviewType = previewType
+        self:BeginPreviewInternal()
+
+        return true
+    end
+
+    if not self.CanPreviewReward(rewardData) then
+        return false
+    end
+
+    self.pendingPreviewKey = previewKey
+    self.pendingPreviewRewardData = rewardData
+    self.pendingPreviewStartTimeS = GetFrameTimeSeconds() + delaySeconds
+    self.pendingPreviewType = previewType
+    return true
+end
+
+function ZO_TamrielTomesScreen_Shared:SetPreviewActionsHidden(hidden)
+    local previewSystem = self.GetPreviewSystem()
+    if hidden then
+        previewSystem:SetActionControlsHidden(true)
+    else
+        previewSystem:SetupActionCarousel()
+    end
+end
+
+function ZO_TamrielTomesScreen_Shared:SetPreviewVariationsHidden(hidden)
+    local previewSystem = self.GetPreviewSystem()
+    if hidden then
+        previewSystem:SetVariationControlsHidden(true)
+    else
+        previewSystem:SetupVariationControls()
+    end
+end
+
+function ZO_TamrielTomesScreen_Shared:SetPreviewControlsHidden(hidden)
+    self:SetPreviewActionsHidden(hidden)
+    self:SetPreviewVariationsHidden(hidden)
+end
+
+function ZO_TamrielTomesScreen_Shared:ShouldActivePreviewShowFullPreview()
+    local previewType = self:GetActivePreviewType()
+    if previewType ~= ZO_TAMRIEL_TOMES_REWARD_DATA_PREVIEW_TYPES.FULL_PREVIEW then
+        return false
+    end
+
+    local previewEndTimeS = self:GetActivePreviewEndTimeSeconds()
+    if previewEndTimeS then
+        return false
+    end
+
+    local rewardData = self:GetActivePreviewRewardData()
+    if not rewardData or rewardData:GetRewardType() == REWARD_ENTRY_TYPE_REWARD_LIST then
+        return false
+    end
+
+    return true
+end
+
+function ZO_TamrielTomesScreen_Shared:ShouldHidePreviewControls()
+    local previewType = self:GetActivePreviewType()
+    if previewType == ZO_TAMRIEL_TOMES_REWARD_DATA_PREVIEW_TYPES.FULL_PREVIEW then
+        local previewRewardData = self:GetActivePreviewRewardData()
+        if previewRewardData and previewRewardData:GetRewardType() ~= REWARD_ENTRY_TYPE_REWARD_LIST then
+            return false
+        end
+    end
+
+    return true
+end
+
+function ZO_TamrielTomesScreen_Shared:RefreshPreviewControls()
+    local hidden = self:ShouldHidePreviewControls()
+    self:SetPreviewControlsHidden(hidden)
+end
+
+function ZO_TamrielTomesScreen_Shared:UpdatePreview(currentFrameTimeS)
+    if not self:IsShowing() then
+        return
+    end
+
+    -- Process a queued preview request prior to a queued end preview request
+    -- to ensure that a follow up preview is not cleared as a result of the
+    -- scheduled termination of the previous preview.
+
+    if self.pendingPreviewStartTimeS and currentFrameTimeS >= self.pendingPreviewStartTimeS then
+        -- Order matters
+        local previewKey = self.pendingPreviewKey
+        local rewardData = self.pendingPreviewRewardData
+        local previewType = self.pendingPreviewType
+        self:ClearQueuedPreview()
+        self:BeginPreview(previewType, rewardData, previewKey)
+    elseif self.activePreviewEndTimeS and currentFrameTimeS >= self.activePreviewEndTimeS then
+        self:EndPreview()
+    end
+end
+
+-- Static methods
+
+-- Returns true if 'rewardData' can be previewed.
+function ZO_TamrielTomesScreen_Shared.CanPreviewReward(rewardData)
+    assert(rewardData and rewardData:IsInstanceOf(ZO_RewardData), "A valid instance of ZO_RewardData is required.")
+
+    local rewardType = rewardData:GetRewardType()
+    if rewardType == REWARD_ENTRY_TYPE_REWARD_LIST then
+        return true
+    end
+
+    local rewardId = rewardData:GetRewardId()
+    if not CanPreviewReward(rewardId) then
+        return false
+    end
+
+    return true
+end
+
+-- Returns a positive integer if previewType1 is a higher priority than previewType2;
+-- returns a negative integer if previewType1 is a lower priority than previewType2;
+-- returns zero if both preview types are of equal priority.
+function ZO_TamrielTomesScreen_Shared.ComparePreviewTypePriorities(previewType1, previewType2)
+    if previewType1 < previewType2 then
+        return -1
+    end
+
+    if previewType1 > previewType2 then
+        return 1
+    end
+
+    return 0
+end
+
+function ZO_TamrielTomesScreen_Shared.GetPreviewSystem()
+    return SYSTEMS:GetObject("itemPreview")
+end
+
+function ZO_TamrielTomesScreen_Shared.GetPreviousCurrencyAmount()
+    return ZO_TamrielTomesScreen_Shared.previousCurrencyAmount
+end
+
+function ZO_TamrielTomesScreen_Shared.SetPreviousCurrencyAmount(amount)
+    ZO_TamrielTomesScreen_Shared.previousCurrencyAmount = amount
+end
+
+function ZO_TamrielTomesScreen_Shared.AddSeenTier(tier)
+    local seenTiers = ZO_TamrielTomesScreen_Shared.GetSeenTiers()
+    seenTiers[tier] = true
+end
+
+function ZO_TamrielTomesScreen_Shared.AreSeenTiersInitialized()
+    return ZO_TamrielTomesScreen_Shared.areSeenTiersInitialized
+end
+
+function ZO_TamrielTomesScreen_Shared.ClearSeenTiers()
+    local seenTiers = ZO_TamrielTomesScreen_Shared.GetSeenTiers()
+    ZO_ClearTable(seenTiers)
+end
+
+function ZO_TamrielTomesScreen_Shared.GetSeenTiers()
+    local seenTiers = ZO_TamrielTomesScreen_Shared.seenTiers
+    if not seenTiers then
+        seenTiers = {}
+        ZO_TamrielTomesScreen_Shared.seenTiers = seenTiers
+    end
+    return seenTiers
+end
+
+function ZO_TamrielTomesScreen_Shared.SetAreSeenTiersInitialized(initialized)
+    ZO_TamrielTomesScreen_Shared.areSeenTiersInitialized = initialized
+end

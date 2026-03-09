@@ -7,7 +7,6 @@ local KeybindsScrollList
 
 function KeybindingsManager:Initialize(control)
     self.control = control
-    self.chordingAlwaysEnabled = false
 
     self.currentKeyboardLayoutLabel = control:GetNamedChild("CurrentKeyboardLayout")
     self.currentBindingsSavedLabel = control:GetNamedChild("CurrentBindingsSaved")
@@ -73,14 +72,6 @@ end
 
 function KeybindingsManager:RefreshList()
     self.list:RefreshData()
-end
-
-function KeybindingsManager:SetChordingAlwaysEnabled(alwaysEnabled)
-    self.chordingAlwaysEnabled = alwaysEnabled
-end
-
-function KeybindingsManager:IsChordingAlwaysEnabled()
-    return self.chordingAlwaysEnabled
 end
 
 --
@@ -200,7 +191,7 @@ function BindKeyDialog:SetupDialog(data)
     self.numMouseButtonsDown = 0
     self.numKeysDown = 0
 
-    self.allowChording = KEYBINDING_MANAGER:IsChordingAlwaysEnabled() or ctrl or alt or shift or command
+    self.allowChording = KEYBINDINGS_MANAGER:IsChordingAlwaysEnabled() or ctrl or alt or shift or command
                              or self.defaultCtrl or self.defaultAlt or self.defaultShift or self.defaultCommand
 
     BlockAutomaticInputModeChange(true)
@@ -481,5 +472,5 @@ function ZO_KeybindingListButton_OnClicked(control)
 end
 
 function ZO_Keybindings_OnInitialize(control)
-    KEYBINDING_MANAGER = KeybindingsManager:New(control)
+    KEYBOARD_KEYBINDING_MANAGER = KeybindingsManager:New(control)
 end

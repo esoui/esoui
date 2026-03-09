@@ -796,7 +796,7 @@ function ChampionPerks:AddKeybindStrips()
     end
 end
 
-function ChampionPerks:RefreshKeybinds()   
+function ChampionPerks:RefreshKeybinds()
     --If we don't have a keybind strip id we shouldn't be manipulating the keybind strip, so just return early
     if not self.keybindStripId then
         return
@@ -2037,24 +2037,33 @@ local function ClampRadialSelectorAngle(angle)
     end
 end
 
-function ChampionPerks:UpdateKeyboardSelectedConstellation()
-    local mx, my = GetUIMousePosition()
-    local cx, cy = self.radialSelectorNode:TransformPoint(0, 0, ZO_CHAMPION_STAR_DEPTH)
-    local dx = mx - cx
-    local dy = my - cy
-    local angle = ClampRadialSelectorAngle(math.atan2(-dy, dx)) -- atan2 assumes +y = up
-    self:MoveConstellationSelectorToAngle(angle)
+function ChampionPerks:UpdateVirtualMousePosition()
+    local deltaX, deltaY = GetUIMouseDeltas()
+    if deltaX ~= 0 or deltaY ~= 0 then
+        -- This code allows the player to use the mouse on the gamepad UI on a PC build.
+        if self.directionalX == nil or self.directionalY == nil then
+            local mouseX, mouseY = GetUIMousePosition()
+            local radialNodeX, radialNodeY = self.radialSelectorNode:TransformPoint(0, 0, ZO_CHAMPION_STAR_DEPTH)
+            deltaX = mouseX - radialNodeX
+            deltaY = mouseY - radialNodeY
+        end
+
+        self:UpdateCursorInfo(deltaX, deltaY)
+    end
 end
 
-function ChampionPerks:UpdateGamepadSelectedConstellation()
-    -- this math assumes +y = up
-    local dx, dy = DIRECTIONAL_INPUT:GetXY(ZO_DI_LEFT_STICK, ZO_DI_DPAD)
-    local magSq = dx * dx + dy * dy
+function ChampionPerks:UpdateRingDirectionalInput()
+    local deltaX, deltaY = DIRECTIONAL_INPUT:GetXY(ZO_DI_LEFT_STICK, ZO_DI_DPAD)
+    local magSq = deltaX * deltaX + deltaY * deltaY
     if magSq > 0.04 and (self.radialSelectorLastMagSq == nil or magSq + 0.01 >= self.radialSelectorLastMagSq) then
-        local angle = ClampRadialSelectorAngle(math.atan2(dy, dx))
-        self:MoveConstellationSelectorToAngle(angle)
+        self:UpdateCursorInfo(deltaX, deltaY)
     end
     self.radialSelectorLastMagSq = zo_min(0.85, magSq)
+end
+
+function ChampionPerks:UpdateCursorInfo(deltaX, deltaY)
+    local angle = ClampRadialSelectorAngle(math.atan2(-deltaY, deltaX)) -- atan2 assumes +y = up
+    self:MoveConstellationSelectorToAngle(angle)
 end
 
 function ChampionPerks:ResetConstellationSelectorToTop()
@@ -2083,7 +2092,7 @@ function ChampionPerks:UpdateDirectionalInput()
         self.gamepadCursor:UpdateDirectionalInput()
     elseif self:IsViewingRing() then
         -- pick a constellation
-        self:UpdateGamepadSelectedConstellation()
+        self:UpdateRingDirectionalInput()
     end
 end
 
@@ -2249,10 +2258,9 @@ function ChampionPerks:OnUpdate(timeSecs)
     local frameDeltaSecs = zo_min(GetFrameDeltaSeconds(), 0.25)
 
     local isEnteringConstellation = self.stateMachine:IsCurrentState("CONSTELLATION_IN")
-
-    if not IsInGamepadPreferredMode()  and not isEnteringConstellation then
+    if not IsConsoleUI() and not isEnteringConstellation then
         if self:IsViewingRing() then
-            self:UpdateKeyboardSelectedConstellation()
+            self:UpdateVirtualMousePosition()
         else
             self:SelectConstellationNodeInternal(nil)
         end
@@ -2471,14 +2479,14 @@ end
 
 function ChampionPerks:RefreshMenuIndicators()
     MAIN_MENU_GAMEPAD:RefreshLists()
-    if not IsConsoleUI() then
+    if not ZO_IsConsoleOrGameCoreUI() then
         MAIN_MENU_KEYBOARD:RefreshCategoryIndicators()
     end
 end
 
 function ChampionPerks:RefreshMenus()
     MAIN_MENU_GAMEPAD:RefreshLists()
-    if not IsConsoleUI() then
+    if not ZO_IsConsoleOrGameCoreUI() then
         MAIN_MENU_KEYBOARD:RefreshCategoryBar()
     end
 end
@@ -2513,6 +2521,10 @@ function ZO_ChampionConstellationCursor_Gamepad:Initialize(control)
     self.control = control
     self.control:SetHidden(true)
     self.depth = ZO_CHAMPION_CURSOR_DEPTH
+
+    if not IsConsoleUI() then
+        self.control:SetHandler("OnUpdate", function() self:OnUpdate() end)
+    end
 end
 
 function ZO_ChampionConstellationCursor_Gamepad:OnZoomIn()
@@ -2536,12 +2548,22 @@ function ZO_ChampionConstellationCursor_Gamepad:UpdateDirectionalInput()
     local dx, dy = DIRECTIONAL_INPUT:GetXY(ZO_DI_LEFT_STICK, ZO_DI_DPAD)
     dx, dy = zo_clampLength2D(dx, dy, 1.0) -- clamp dpad output
     local frameDelta = GetFrameDeltaNormalizedForTargetFramerate()
-    dx = dx * frameDelta * ZO_CHAMPION_CURSOR_SPEED * self.sensitivityFactor
-    dy = -dy * frameDelta * ZO_CHAMPION_CURSOR_SPEED * self.sensitivityFactor
+    local magnitude = frameDelta * self.sensitivityFactor * ZO_CHAMPION_CURSOR_SPEED
+    dx = dx * magnitude
+    dy = -dy * magnitude
 
     self.control:SetAnchor(CENTER, GuiRoot, TOPLEFT, self.x + dx, self.y + dy)
-    self.x, self.y = self.control:GetCenter() -- store clamped values
+    local clampedX, clampedY = self.control:GetCenter()
+    if clampedX ~= self.x or clampedY ~= self.y then
+        self.x, self.y = clampedX, clampedY
+        self.directionalX = self.x + dx
+        self.directionalY = self.y + dy
+    end
 
+    self:UpdateCursorInfo()
+end
+
+function ZO_ChampionConstellationCursor_Gamepad:UpdateCursorInfo()
     local counterScrollX = (self.x - self.initialX) * ZO_CHAMPION_COUNTERSCROLL_FACTOR_X
     local counterScrollY = (self.y - self.initialY) * -ZO_CHAMPION_COUNTERSCROLL_FACTOR_Y
 
@@ -2550,9 +2572,9 @@ function ZO_ChampionConstellationCursor_Gamepad:UpdateDirectionalInput()
     local constellation = CHAMPION_PERKS:GetChosenConstellation()
 
     WINDOW_MANAGER:UpdateCursorPosition(self.cursorId, self.x, self.y)
-    local mouseOverControl = WINDOW_MANAGER:GetControlAtCursor(self.cursorId) 
+    local mouseOverControl = WINDOW_MANAGER:GetControlAtCursor(self.cursorId)
     self.mouseOverControl = mouseOverControl
-    
+
     local targetSensitivity
     if mouseOverControl and mouseOverControl.star then
         constellation:SelectStar(mouseOverControl.star)
@@ -2562,6 +2584,40 @@ function ZO_ChampionConstellationCursor_Gamepad:UpdateDirectionalInput()
         targetSensitivity = 1
     end
     self.sensitivityFactor = zo_deltaNormalizedLerp(self.sensitivityFactor, targetSensitivity, ZO_CHAMPION_SENSITIVITY_APPROACH)
+end
+
+function ZO_ChampionConstellationCursor_Gamepad:UpdateVirtualMousePosition()
+    if self.cursorId ~= nil then
+        local deltaX, deltaY = GetUIMouseDeltas()
+        if deltaX ~= 0 or deltaY ~= 0 then
+            -- This code allows the player to use the mouse on the gamepad UI on a PC build.
+            -- If movement is coming from directional input (ei. arrows, joystick) then the
+            -- mouse should jump to the crosshairs when used again. When mouse is the primary
+            -- mode of movement then the gamepad crosshairs (self.control) will follow.
+            local mouseX, mouseY = self.directionalX, self.directionalY
+            if mouseX == nil or mouseY == nil then
+                mouseX, mouseY = GetUIMousePosition()
+            else
+                WINDOW_MANAGER:SetMouseFocusByName(self.control:GetName())
+                self.directionalX = nil
+                self.directionalY = nil
+            end
+
+            self.control:SetAnchor(CENTER, GuiRoot, TOPLEFT, mouseX, mouseY)
+            local clampedX, clampedY = self.control:GetCenter()
+            if clampedX ~= self.x or clampedY ~= self.y then
+                self.x, self.y = clampedX, clampedY
+                return true
+            end
+        end
+    end
+    return false
+end
+
+function ZO_ChampionConstellationCursor_Gamepad:OnUpdate()
+    if self:UpdateVirtualMousePosition() then
+        self:UpdateCursorInfo()
+    end
 end
 
 function ZO_ChampionConstellationCursor_Gamepad:UpdateVisibility()
@@ -2591,7 +2647,7 @@ function ZO_ChampionConstellationCursor_Gamepad:UpdateVisibility()
 
     if not show then
         self.mouseOverControl = nil
-    end 
+    end
 end
 
 function ZO_ChampionConstellationCursor_Gamepad:GetLastSelectedStar()

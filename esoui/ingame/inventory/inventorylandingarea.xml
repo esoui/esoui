@@ -1,13 +1,11 @@
 <GuiXml>
     <Controls>
         <Control name="InventoryLandingArea" mouseEnabled="true" hidden="true" tier="LOW" layer="CONTROLS" virtual="true">
-            <Anchor point="TOPLEFT" />
-            <Anchor point="BOTTOMRIGHT" offsetX="-18" />
-
+            <Anchor point="TOPLEFT"/>
+            <Anchor point="BOTTOMRIGHT" offsetX="-18"/>
             <OnReceiveDrag>
                 ZO_InventoryLandingArea_DropCursor(self)
             </OnReceiveDrag>
-
             <OnMouseUp>
                 if button == MOUSE_BUTTON_INDEX_LEFT and upInside then
                     ZO_InventoryLandingArea_DropCursor(self)

@@ -1,20 +1,18 @@
 <GuiXml>
     <Controls>
         <Control name="ZO_ChatterOption_Gamepad" virtual="true">
-            <Dimensions x="590" />
+            <Dimensions x="590"/>
             <Controls>
                 <Texture name="$(parent)Icon" inherits="ZO_MultiIcon" level="1" hidden="true">
-                    <Dimensions x="40" y="40" />
-                    <Anchor point="TOPLEFT" offsetY="3" />
+                    <Dimensions x="40" y="40"/>
+                    <Anchor point="TOPLEFT" offsetY="3"/>
                 </Texture>
-
                 <Label name="$(parent)Text" font="ZoFontGamepad42">
-                    <Anchor point="TOPLEFT" />
-                    <Anchor point="TOPRIGHT" />
+                    <Anchor point="TOPLEFT"/>
+                    <Anchor point="TOPRIGHT"/>
                 </Label>
             </Controls>
         </Control>
-
         <Control name="ZO_QuestReward_Gamepad" virtual="true" inherits="ZO_GamepadMenuEntryTemplate">
             <Controls>
                 <Label name="$(parent)Label" override="true">
@@ -22,41 +20,34 @@
                 </Label>
             </Controls>
         </Control>
-
         <Label name="ZO_GamepadQuestRewardEntryHeaderTemplate" inherits="ZO_GamepadMenuEntryHeaderFontTemplate" virtual="true">
-            <Anchor point="TOPLEFT" offsetY="6" />
-            <Dimensions y="24" />
+            <Anchor point="TOPLEFT" offsetY="6"/>
+            <Dimensions y="24"/>
         </Label>
-
         <Control name="ZO_QuestReward_Title_Gamepad" virtual="true">
             <Dimensions x="590" y="44"/>
-            <Anchor point="TOPLEFT" relativePoint="TOPLEFT" offsetX ="20"/>
+            <Anchor point="TOPLEFT" relativePoint="TOPLEFT" offsetX="20"/>
             <Controls>
                 <Label name="$(parent)Gold" inherits="ZO_CurrencyTemplate" horizontalAlignment="RIGHT">
-                    <Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" offsetX="-32" />
+                    <Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" offsetX="-32"/>
                 </Label>
             </Controls>
         </Control>
-               
         <TopLevelControl name="ZO_InteractWindow_Gamepad" inherits="ZO_GamepadGrid_NavQuadrant_4Wide_Anchors" hidden="true" tier="MEDIUM">
             <OnInitialized>
                 ZO_InteractWindow_Gamepad_Initialize(self)
             </OnInitialized>
-
             <Controls>
                 <Control name="$(parent)BG" inherits="ZO_LeftArrowGamepadNavQuadrant_4Wide_Background_Template"/>
-
                 <Label name="$(parent)Title" font="ZoFontGamepad42" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_CHATTER_NPC" horizontalAlignment="RIGHT" verticalAlignment="CENTER">
                     <Anchor point="RIGHT" relativeTo="$(parent)BG" relativePoint="LEFT" offsetY="ZO_INTERACT_CENTER_OFFSET" offsetX="-25"/>
                 </Label>
-
                 <Control name="$(parent)Container" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
                     <Controls>
                         <Control name="$(parent)Divider" inherits="ZO_GamepadHeaderHorizontalDividerSimple">
-                            <Anchor point="LEFT" relativeTo="$(grandparent)BG" relativePoint="LEFT" offsetX="ZO_GAMEPAD_CONTENT_INSET_X" offsetY="-110" />
-                            <Anchor point="RIGHT" relativeTo="$(grandparent)BG" relativePoint="RIGHT" offsetX="-ZO_GAMEPAD_CONTENT_INSET_X" offsetY="-110" />
+                            <Anchor point="LEFT" relativeTo="$(grandparent)BG" relativePoint="LEFT" offsetX="ZO_GAMEPAD_CONTENT_INSET_X" offsetY="-110"/>
+                            <Anchor point="RIGHT" relativeTo="$(grandparent)BG" relativePoint="RIGHT" offsetX="-ZO_GAMEPAD_CONTENT_INSET_X" offsetY="-110"/>
                         </Control>
-
                         <Label name="$(parent)Text" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="LEFT" verticalAlignment="BOTTOM">
                             <OnInitialized>
                                 local fonts =
@@ -80,12 +71,11 @@
                                 }
                                 ZO_FontAdjustingWrapLabel_OnInitialized(self, fonts, TEXT_WRAP_MODE_ELLIPSIS)
                             </OnInitialized>
-                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Divider" relativePoint="TOPLEFT" offsetY="-ZO_GAMEPAD_CONTENT_TITLE_DIVIDER_PADDING_Y" />
+                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Divider" relativePoint="TOPLEFT" offsetY="-ZO_GAMEPAD_CONTENT_TITLE_DIVIDER_PADDING_Y"/>
                             <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Divider" relativePoint="TOPRIGHT" offsetY="-ZO_GAMEPAD_CONTENT_TITLE_DIVIDER_PADDING_Y"/>
                         </Label>
-
                         <Scroll name="$(parent)Interact">
-                            <AnchorFill />
+                            <AnchorFill/>
                             <Controls>
                                 <Control name="$(parent)List" inherits="ZO_VerticalParametricScrollListTemplate">
                                     <Anchor point="TOPLEFT" relativeTo="$(grandparent)Divider" relativePoint="BOTTOMLEFT"/>
@@ -93,9 +83,8 @@
                                     <Controls>
                                         <Texture name="$(parent)ScrollUp" textureFile="EsoUI/Art/Miscellaneous/gamepad/gp_scrollArrow_up.dds" hidden="true">
                                             <Dimensions x="32" y="32"/>
-                                            <Anchor point="LEFT" relativePoint="TOPLEFT" />
+                                            <Anchor point="LEFT" relativePoint="TOPLEFT"/>
                                         </Texture>
-
                                         <Texture name="$(parent)ScrollDown" textureFile="EsoUI/Art/Miscellaneous/gamepad/gp_scrollArrow.dds" hidden="true">
                                             <Dimensions x="32" y="32"/>
                                             <Anchor point="LEFT" relativePoint="BOTTOMLEFT" offsetY="-15"/>

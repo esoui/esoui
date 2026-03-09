@@ -348,7 +348,7 @@ marketScene:AddFragment(TITLE_FRAGMENT)
 marketScene:AddFragment(CROWN_STORE_TITLE_FRAGMENT)
 
 ----------------------------
---Endeavor Seals Store Scene
+-- Endeavor Seals Store Scene
 ----------------------------
 
 local endeavorSealStoreScene = ZO_RemoteScene:New("endeavorSealStoreSceneKeyboard", SCENE_MANAGER)
@@ -366,6 +366,26 @@ endeavorSealStoreScene:AddFragment(PREVIEW_KEYBIND_INTERCEPT_LAYER_FRAGMENT)
 endeavorSealStoreScene:AddFragment(MINIMIZE_CHAT_FRAGMENT)
 endeavorSealStoreScene:AddFragment(TITLE_FRAGMENT)
 endeavorSealStoreScene:AddFragment(CROWN_STORE_TITLE_FRAGMENT)
+
+----------------------------
+-- Gildbar Store Scene
+----------------------------
+
+local gildbarStoreScene = ZO_RemoteScene:New("gildbarStoreSceneKeyboard", SCENE_MANAGER)
+gildbarStoreScene:AddFragmentGroup(FRAGMENT_GROUP.PLAYER_PROGRESS_BAR_KEYBOARD_CURRENT)
+gildbarStoreScene:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW_NO_KEYBIND_STRIP)
+gildbarStoreScene:AddFragment(MARKET_KEYBIND_STRIP_FRAGMENT)
+gildbarStoreScene:AddFragment(KEYBIND_STRIP_MUNGE_BACKDROP_FRAGMENT)
+gildbarStoreScene:AddFragment(FRAME_TARGET_STANDARD_RIGHT_PANEL_FRAGMENT)
+gildbarStoreScene:AddFragment(FRAME_PLAYER_FRAGMENT)
+gildbarStoreScene:AddFragment(RIGHT_BG_FRAGMENT)
+gildbarStoreScene:AddFragment(FRAME_EMOTE_FRAGMENT_CROWN_STORE)
+gildbarStoreScene:AddFragment(STOP_MOVEMENT_FRAGMENT)
+gildbarStoreScene:AddFragment(MARKET_WINDOW_SOUNDS)
+gildbarStoreScene:AddFragment(PREVIEW_KEYBIND_INTERCEPT_LAYER_FRAGMENT)
+gildbarStoreScene:AddFragment(MINIMIZE_CHAT_FRAGMENT)
+gildbarStoreScene:AddFragment(TITLE_FRAGMENT)
+gildbarStoreScene:AddFragment(CROWN_STORE_TITLE_FRAGMENT)
 
 ------------------------
 -- Daily Login Rewards
@@ -1070,6 +1090,13 @@ do
                 highlight = "EsoUI/Art/Market/Keyboard/tabIcon_crownStore_over.dds",
             },
             {
+                categoryName = SI_CROWN_STORE_MENU_TRADE_BAR_STORE_LABEL,
+                descriptor = "gildbarStoreSceneKeyboard",
+                normal = "EsoUI/Art/Market/Keyboard/tabIcon_gildbarStore_up.dds",
+                pressed = "EsoUI/Art/Market/Keyboard/tabIcon_gildbarStore_down.dds",
+                highlight = "EsoUI/Art/Market/Keyboard/tabIcon_gildbarStore_over.dds",
+            },
+            {
                 categoryName = SI_CROWN_STORE_MENU_SEALS_STORE_LABEL,
                 descriptor = "endeavorSealStoreSceneKeyboard",
                 normal = "EsoUI/Art/Market/Keyboard/tabIcon_sealsStore_up.dds",
@@ -1095,6 +1122,9 @@ do
                     end
                     return nil
                 end,
+                visible = function()
+                    return not ZO_DAILYLOGINREWARDS_MANAGER:IsDailyRewardsLocked()
+                end,
             },
             {
                 categoryName = SI_CROWN_STORE_MENU_GIFT_INVENTORY_LABEL,
@@ -1111,9 +1141,11 @@ do
             },
         }
 
-    SCENE_MANAGER:AddSceneGroup("marketSceneGroup", ZO_SceneGroup:New("market", "endeavorSealStoreSceneKeyboard", "esoPlusOffersSceneKeyboard", "dailyLoginRewards", "giftInventoryKeyboard"))
+    SCENE_MANAGER:AddSceneGroup("marketSceneGroup", ZO_SceneGroup:New("market", "gildbarStoreSceneKeyboard", "endeavorSealStoreSceneKeyboard", "esoPlusOffersSceneKeyboard", "dailyLoginRewards", "giftInventoryKeyboard"))
     local NO_PREFERRED_SCENE_FUNCTION = nil
     MAIN_MENU_KEYBOARD:AddSceneGroup(MENU_CATEGORY_MARKET, "marketSceneGroup", iconData, NO_PREFERRED_SCENE_FUNCTION, TUTORIAL_TRIGGER_CROWN_STORE_TABS_SHOWN_POINTER_BOX)
+    MAIN_MENU_KEYBOARD:EvaluateSceneGroupVisibilityOnEvent("marketSceneGroup", EVENT_DAILY_LOGIN_REWARDS_UPDATED)
+    MAIN_MENU_KEYBOARD:EvaluateSceneGroupVisibilityOnEvent("marketSceneGroup", EVENT_DAILY_LOGIN_MONTH_CHANGED)
 end
 
 --Inventory
@@ -1181,6 +1213,67 @@ MAIN_MENU_KEYBOARD:AddScene(MENU_CATEGORY_GROUP, "groupMenuKeyboard")
 --Crown Crates
 
 MAIN_MENU_KEYBOARD:AddScene(MENU_CATEGORY_CROWN_CRATES, "crownCrateKeyboard")
+
+--Tamriel Tomes
+
+do
+    local iconData =
+    {
+        {
+            -- These category names and icons are not displayed because the bar is hidden.
+            -- This is just to work within the existing system and to help with debugging.
+            categoryName = "[Debug] Intro",
+            descriptor = "TamrielTomesIntroSceneKeyboard",
+            normal = ZO_NO_TEXTURE_FILE,
+            pressed = ZO_NO_TEXTURE_FILE,
+            highlight = ZO_NO_TEXTURE_FILE,
+        },
+        {
+            categoryName = "[Debug] Rewards",
+            descriptor = "TamrielTomesSceneKeyboard",
+            normal = ZO_NO_TEXTURE_FILE,
+            pressed = ZO_NO_TEXTURE_FILE,
+            highlight = ZO_NO_TEXTURE_FILE,
+        },
+        {
+            categoryName = "[Debug] Challenges",
+            descriptor = "TimedActivitiesKeyboard",
+            normal = ZO_NO_TEXTURE_FILE,
+            pressed = ZO_NO_TEXTURE_FILE,
+            highlight = ZO_NO_TEXTURE_FILE,
+        },
+        {
+            categoryName = "[Debug] Purchase",
+            descriptor = "TamrielTomesPurchaseSceneKeyboard",
+            normal = ZO_NO_TEXTURE_FILE,
+            pressed = ZO_NO_TEXTURE_FILE,
+            highlight = ZO_NO_TEXTURE_FILE,
+        },
+    }
+
+    TAMRIEL_TOMES_SCENE_GROUP_KEYBOARD = ZO_SceneGroup:New("TamrielTomesIntroSceneKeyboard", "TamrielTomesSceneKeyboard", "TimedActivitiesKeyboard", "TamrielTomesPurchaseSceneKeyboard")
+    SCENE_MANAGER:AddSceneGroup("tamrielTomesSceneGroup", TAMRIEL_TOMES_SCENE_GROUP_KEYBOARD)
+
+    TAMRIEL_TOMES_SCENE_GROUP_KEYBOARD:RegisterCallback("StateChange", function(_, newState)
+        if newState == ZO_STATE.SHOWING then
+            PlaySound(SOUNDS.TAMRIEL_TOMES_BOOK_OPENED)
+        elseif newState == ZO_STATE.HIDING then
+            PlaySound(SOUNDS.TAMRIEL_TOMES_BOOK_CLOSED)
+        end
+    end)
+
+    local function GetPreferredScene()
+        local selectedTomeId = TAMRIEL_TOMES_MANAGER:GetSelectedTomeId()
+        local hasSeenTome = TAMRIEL_TOMES_MANAGER:HasSeenTome(selectedTomeId)
+        if hasSeenTome then
+            return "TamrielTomesSceneKeyboard"
+        end
+
+        return "TamrielTomesIntroSceneKeyboard"
+    end
+
+    MAIN_MENU_KEYBOARD:AddSceneGroup(MENU_CATEGORY_TAMRIEL_TOMES, "tamrielTomesSceneGroup", iconData, GetPreferredScene)
+end
 
 --Collections Scene Group
 
@@ -1519,3 +1612,56 @@ RETURNING_PLAYER_REWARD_SCENE_KEYBOARD:AddFragment(MINIMIZE_CHAT_FRAGMENT)
 RETURNING_PLAYER_REWARD_SCENE_KEYBOARD:AddFragment(RETURNING_PLAYER_ANNOUNCEMENT_ACTION_LAYER_FRAGMENT)
 
 RETURNING_PLAYER_SCENE_GROUP_KEYBOARD = ZO_SceneGroup:New(RETURNING_PLAYER_INTRO_SCENE_KEYBOARD:GetName(), RETURNING_PLAYER_REWARD_SCENE_KEYBOARD:GetName())
+
+----------------------------
+--Tamriel Tomes Scenes
+----------------------------
+
+TAMRIEL_TOMES_INTRO_SCENE_KEYBOARD:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW)
+TAMRIEL_TOMES_INTRO_SCENE_KEYBOARD:AddFragment(UNIFORM_BLUR_FRAGMENT)
+TAMRIEL_TOMES_INTRO_SCENE_KEYBOARD:AddFragment(MINIMIZE_CHAT_FRAGMENT)
+TAMRIEL_TOMES_INTRO_SCENE_KEYBOARD:AddFragment(FRAME_EMOTE_FRAGMENT_REWARD_TRACK_BOOK)
+TAMRIEL_TOMES_INTRO_SCENE_KEYBOARD:AddFragment(FRAME_TARGET_STANDARD_RIGHT_PANEL_FRAGMENT)
+TAMRIEL_TOMES_INTRO_SCENE_KEYBOARD:AddFragment(FRAME_PLAYER_FRAGMENT)
+
+TAMRIEL_TOMES_SCENE_KEYBOARD:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW)
+TAMRIEL_TOMES_SCENE_KEYBOARD:AddFragment(ITEM_PREVIEW_KEYBOARD:GetFragment())
+TAMRIEL_TOMES_SCENE_KEYBOARD:AddFragment(MINIMIZE_CHAT_FRAGMENT)
+TAMRIEL_TOMES_SCENE_KEYBOARD:AddFragment(PREVIEW_KEYBIND_INTERCEPT_LAYER_FRAGMENT)
+TAMRIEL_TOMES_SCENE_KEYBOARD:AddFragment(STOP_MOVEMENT_FRAGMENT)
+TAMRIEL_TOMES_SCENE_KEYBOARD:AddFragment(FRAME_EMOTE_FRAGMENT_REWARD_TRACK_BOOK)
+TAMRIEL_TOMES_SCENE_KEYBOARD:AddFragment(FRAME_TARGET_STANDARD_RIGHT_PANEL_FRAGMENT)
+TAMRIEL_TOMES_SCENE_KEYBOARD:AddFragment(FRAME_PLAYER_FRAGMENT)
+
+TAMRIEL_TOMES_PURCHASE_SCENE_KEYBOARD:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW)
+TAMRIEL_TOMES_PURCHASE_SCENE_KEYBOARD:AddFragment(RIGHT_BG_ITEM_PREVIEW_OPTIONS_FRAGMENT)
+TAMRIEL_TOMES_PURCHASE_SCENE_KEYBOARD:AddFragment(ITEM_PREVIEW_KEYBOARD:GetFragment())
+TAMRIEL_TOMES_PURCHASE_SCENE_KEYBOARD:AddFragment(MINIMIZE_CHAT_FRAGMENT)
+TAMRIEL_TOMES_PURCHASE_SCENE_KEYBOARD:AddFragment(PREVIEW_KEYBIND_INTERCEPT_LAYER_FRAGMENT)
+TAMRIEL_TOMES_PURCHASE_SCENE_KEYBOARD:AddFragment(STOP_MOVEMENT_FRAGMENT)
+TAMRIEL_TOMES_PURCHASE_SCENE_KEYBOARD:AddFragment(FRAME_EMOTE_FRAGMENT_REWARD_TRACK_BOOK)
+TAMRIEL_TOMES_PURCHASE_SCENE_KEYBOARD:AddFragment(FRAME_TARGET_STANDARD_RIGHT_PANEL_FRAGMENT)
+TAMRIEL_TOMES_PURCHASE_SCENE_KEYBOARD:AddFragment(FRAME_PLAYER_FRAGMENT)
+
+TIMED_ACTIVITIES_SCENE_KEYBOARD:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW)
+TIMED_ACTIVITIES_SCENE_KEYBOARD:AddFragment(MINIMIZE_CHAT_FRAGMENT)
+TIMED_ACTIVITIES_SCENE_KEYBOARD:AddFragment(UNIFORM_BLUR_FRAGMENT)
+TIMED_ACTIVITIES_SCENE_KEYBOARD:AddFragment(FRAME_EMOTE_FRAGMENT_REWARD_TRACK_BOOK)
+TIMED_ACTIVITIES_SCENE_KEYBOARD:AddFragment(FRAME_TARGET_STANDARD_RIGHT_PANEL_FRAGMENT)
+TIMED_ACTIVITIES_SCENE_KEYBOARD:AddFragment(FRAME_PLAYER_FRAGMENT)
+
+--------------------------------
+-- Adventure Zone Overview Scene
+--------------------------------
+
+ADVENTURE_ZONE_OVERVIEW_SCENE_KEYBOARD:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW)
+ADVENTURE_ZONE_OVERVIEW_SCENE_KEYBOARD:AddFragment(UNIFORM_BLUR_FRAGMENT)
+ADVENTURE_ZONE_OVERVIEW_SCENE_KEYBOARD:AddFragment(MINIMIZE_CHAT_FRAGMENT)
+
+----------------------------------
+-- Adventure Zone Boss Panel Scene
+----------------------------------
+
+ADVENTURE_ZONE_BOSS_TREE_SCENE_KEYBOARD:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW)
+ADVENTURE_ZONE_BOSS_TREE_SCENE_KEYBOARD:AddFragment(UNIFORM_BLUR_FRAGMENT)
+ADVENTURE_ZONE_BOSS_TREE_SCENE_KEYBOARD:AddFragment(MINIMIZE_CHAT_FRAGMENT)

@@ -7,62 +7,52 @@
             </OnInitialized>
             <Controls>
                 <Label name="$(parent)Label" inherits="ZO_GamepadSubMenuEntryLabelTemplate">
-                    <Dimensions x="315" />
-                    <Anchor point="TOPLEFT" offsetX="58" />
+                    <Dimensions x="315"/>
+                    <Anchor point="TOPLEFT" offsetX="58"/>
                 </Label>
                 <Control name="$(parent)Icon" inherits="ZO_VengeancePerk_FramedIcon" scale="0.75">
-                    <Anchor point="CENTER" relativeTo="$(parent)Label" relativePoint="LEFT" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_ICON_X_OFFSET" />
+                    <Anchor point="CENTER" relativeTo="$(parent)Label" relativePoint="LEFT" offsetX="ZO_GAMEPAD_DEFAULT_LIST_ENTRY_ICON_X_OFFSET"/>
                 </Control>
             </Controls>
         </Control>
-
         <TopLevelControl name="ZO_Vengeance_LoadoutOverview_Gamepad_TopLevel" inherits="ZO_GamepadGrid_NavQuadrant_2_Anchors" virtual="true" hidden="true">
             <OnInitialized>
                 ZO_Vengeance_EquippedLoadoutOverview_Gamepad.OnInitialized(self)
             </OnInitialized>
-
             <Controls>
                 <Control name="$(parent)Container" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
                     <Controls>
                         <Control name="$(parent)BottomRail" inherits="ZO_GamepadHeaderHorizontalDividerSimple" tier="HIGH">
-                            <Anchor point="TOPLEFT" />
-                            <Anchor point="TOPRIGHT" offsetY="ZO_GAMEPAD_CONTENT_HEADER_DIVIDER_OFFSET_Y" />
+                            <Anchor point="TOPLEFT"/>
+                            <Anchor point="TOPRIGHT" offsetY="ZO_GAMEPAD_CONTENT_HEADER_DIVIDER_OFFSET_Y"/>
                         </Control>
-
                         <Control name="$(parent)ScrollContainer" inherits="ZO_ScrollContainer_Gamepad">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)BottomRail" relativePoint="BOTTOMLEFT" />
-                            <Anchor point="BOTTOMRIGHT" />
-
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)BottomRail" relativePoint="BOTTOMLEFT"/>
+                            <Anchor point="BOTTOMRIGHT"/>
                             <OnInitialized>
                                 ZO_Scroll_Initialize_Gamepad(self)
                             </OnInitialized>
-
                             <Controls>
                                 <Control name="$(parent)ScrollChild" override="true">
-                                    <ResizeToFitPadding height="50" />
-
+                                    <ResizeToFitPadding height="50"/>
                                     <Controls>
                                         <Label name="$(parent)LoadoutName" font="ZoFontGamepad42">
-                                            <Anchor point="TOPLEFT" offsetY="50" />
+                                            <Anchor point="TOPLEFT" offsetY="50"/>
                                         </Label>
-
                                         <Label name="$(parent)SkillsHeader" inherits="ZO_GamepadHeaderLabelTextTemplate" text="SI_GAMEPAD_VENGEANCE_LOADOUT_SKILLS_CATEGORY">
-                                            <Anchor point="TOPLEFT" relativeTo="$(parent)LoadoutName" relativePoint="BOTTOMLEFT" offsetY="30" />
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)LoadoutName" relativePoint="BOTTOMLEFT" offsetY="30"/>
                                         </Label>
-
                                         <Control name="$(parent)SkillsActionBar1" inherits="ZO_SkillsActionBar_Gamepad_Control">
                                             <Anchor point="TOPLEFT" relativeTo="$(parent)SkillsHeader" relativePoint="BOTTOMLEFT" offsetX="-50" offsetY="-30"/>
                                         </Control>
-
                                         <Control name="$(parent)SkillsActionBar2" inherits="ZO_SkillsActionBar_Gamepad_Control">
-                                            <ClearAnchors />
-                                            <Anchor point="TOPLEFT" relativeTo="$(parent)SkillsActionBar1" relativePoint="BOTTOMLEFT" offsetY="-30" />
+                                            <ClearAnchors/>
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)SkillsActionBar1" relativePoint="BOTTOMLEFT" offsetY="-30"/>
                                         </Control>
                                     </Controls>
                                 </Control>
-
                                 <Texture name="$(parent)ScrollIndicator" override="true">
-                                    <Anchor point="CENTER" relativePoint="RIGHT" offsetY="-38" offsetX="37" />
+                                    <Anchor point="CENTER" relativePoint="RIGHT" offsetY="-38" offsetX="37"/>
                                 </Texture>
                             </Controls>
                         </Control>
@@ -70,43 +60,36 @@
                 </Control>
             </Controls>
         </TopLevelControl>
-
         <TopLevelControl name="ZO_Vengeance_EquippedLoadoutOverview_Gamepad_TL" inherits="ZO_Vengeance_LoadoutOverview_Gamepad_TopLevel" hidden="true">
             <OnInitialized>
                 ZO_Vengeance_EquippedLoadoutOverview_Gamepad.OnInitialized(self)
             </OnInitialized>
-
             <Controls>
                 <Control name="$(parent)Container" override="true">
                     <Controls>
                         <Label name="$(parent)StatusLabel" font="ZoFontGamepad27" verticalAlignment="BOTTOM" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_GAMEPAD_EQUIPPED_ITEM_HEADER">
-                            <Anchor point="BOTTOMLEFT" relativeTo="BottomRail" relativePoint="TOPLEFT" offsetY="ZO_GAMEPAD_CONTENT_TITLE_HEIGHT" />
+                            <Anchor point="BOTTOMLEFT" relativeTo="BottomRail" relativePoint="TOPLEFT" offsetY="ZO_GAMEPAD_CONTENT_TITLE_HEIGHT"/>
                         </Label>
-
                         <Control name="$(parent)ScrollContainer" override="true">
                             <Controls>
                                 <Control name="$(parent)ScrollChild" override="true">
                                     <Controls>
                                         <Label name="$(parent)PerksHeader" inherits="ZO_GamepadHeaderLabelTextTemplate" text="SI_GAMEPAD_VENGEANCE_LOADOUT_PERKS_CATEGORY">
-                                            <Anchor point="TOPLEFT" relativeTo="$(parent)SkillsActionBar2" relativePoint="BOTTOMLEFT" offsetX="50" offsetY="30" />
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)SkillsActionBar2" relativePoint="BOTTOMLEFT" offsetX="50" offsetY="30"/>
                                         </Label>
-
                                         <Control name="$(parent)RedPerk" inherits="ZO_Vengeance_LoadoutOverview_PerkRow">
-                                            <Anchor point="TOPLEFT" relativeTo="$(parent)PerksHeader" relativePoint="BOTTOMLEFT" offsetX="10" offsetY="10" />
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)PerksHeader" relativePoint="BOTTOMLEFT" offsetX="10" offsetY="10"/>
                                         </Control>
-
                                         <Control name="$(parent)YellowPerk" inherits="ZO_Vengeance_LoadoutOverview_PerkRow">
-                                            <Anchor point="TOPLEFT" relativeTo="$(parent)RedPerk" relativePoint="BOTTOMLEFT" offsetY="10" />
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)RedPerk" relativePoint="BOTTOMLEFT" offsetY="10"/>
                                         </Control>
-
                                         <Control name="$(parent)BluePerk" inherits="ZO_Vengeance_LoadoutOverview_PerkRow">
-                                            <Anchor point="TOPLEFT" relativeTo="$(parent)YellowPerk" relativePoint="BOTTOMLEFT" offsetY="10" />
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)YellowPerk" relativePoint="BOTTOMLEFT" offsetY="10"/>
                                         </Control>
                                     </Controls>
                                 </Control>
-
                                 <Texture name="$(parent)ScrollIndicator" override="true">
-                                    <Anchor point="CENTER" relativePoint="RIGHT" offsetY="-38" offsetX="37" />
+                                    <Anchor point="CENTER" relativePoint="RIGHT" offsetY="-38" offsetX="37"/>
                                 </Texture>
                             </Controls>
                         </Control>
@@ -114,12 +97,10 @@
                 </Control>
             </Controls>
         </TopLevelControl>
-
         <TopLevelControl name="ZO_Vengeance_UnequippedLoadoutOverview_Gamepad_TL" inherits="ZO_Vengeance_LoadoutOverview_Gamepad_TopLevel" hidden="true">
             <OnInitialized>
                 ZO_Vengeance_UnequippedLoadoutOverview_Gamepad.OnInitialized(self)
             </OnInitialized>
-
             <Controls>
                 <Control name="$(parent)Container" override="true">
                     <Controls>
@@ -128,33 +109,27 @@
                                 <Control name="$(parent)ScrollChild" override="true">
                                     <Controls>
                                         <Label name="$(parent)PerksHeader" inherits="ZO_GamepadHeaderLabelTextTemplate" text="SI_GAMEPAD_VENGEANCE_LOADOUT_PERKS_CATEGORY">
-                                            <Anchor point="TOPLEFT" relativeTo="$(parent)SkillsActionBar2" relativePoint="BOTTOMLEFT" offsetX="50" offsetY="30" />
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)SkillsActionBar2" relativePoint="BOTTOMLEFT" offsetX="50" offsetY="30"/>
                                         </Label>
-
                                         <Control name="$(parent)RedPerk" inherits="ZO_VengeancePerk_FramedIcon">
-                                            <Anchor point="TOPLEFT" relativeTo="$(parent)PerksHeader" relativePoint="BOTTOMLEFT" offsetX="15" offsetY="10" />
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)PerksHeader" relativePoint="BOTTOMLEFT" offsetX="15" offsetY="10"/>
                                         </Control>
-
                                         <Control name="$(parent)YellowPerk" inherits="ZO_VengeancePerk_FramedIcon">
-                                            <Anchor point="LEFT" relativeTo="$(parent)RedPerk" relativePoint="RIGHT" offsetX="25" />
+                                            <Anchor point="LEFT" relativeTo="$(parent)RedPerk" relativePoint="RIGHT" offsetX="25"/>
                                         </Control>
-
                                         <Control name="$(parent)BluePerk" inherits="ZO_VengeancePerk_FramedIcon">
-                                            <Anchor point="LEFT" relativeTo="$(parent)YellowPerk" relativePoint="RIGHT" offsetX="25" />
+                                            <Anchor point="LEFT" relativeTo="$(parent)YellowPerk" relativePoint="RIGHT" offsetX="25"/>
                                         </Control>
-
                                         <Label name="$(parent)ImportantStatsHeader" inherits="ZO_GamepadHeaderLabelTextTemplate" text="SI_CAMPAIGN_VENGEANCE_LOADOUT_STATS_HEADER">
-                                            <Anchor point="TOPLEFT" relativeTo="$(parent)RedPerk" relativePoint="BOTTOMLEFT" offsetX="-15" offsetY="30" />
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)RedPerk" relativePoint="BOTTOMLEFT" offsetX="-15" offsetY="30"/>
                                         </Label>
-
                                         <Control name="$(parent)ImportantStatsContainer">
-                                            <Anchor point="TOPLEFT" relativeTo="$(parent)ImportantStatsHeader" relativePoint="BOTTOMLEFT" />
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)ImportantStatsHeader" relativePoint="BOTTOMLEFT"/>
                                         </Control>
                                     </Controls>
                                 </Control>
-
                                 <Texture name="$(parent)ScrollIndicator" override="true">
-                                    <Anchor point="CENTER" relativePoint="RIGHT" offsetY="-38" offsetX="37" />
+                                    <Anchor point="CENTER" relativePoint="RIGHT" offsetY="-38" offsetX="37"/>
                                 </Texture>
                             </Controls>
                         </Control>

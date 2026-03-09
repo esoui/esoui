@@ -1,0 +1,9 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_DirectPurchaseBillingInfoEditBox_Gamepad" inherits="ZO_Gamepad_GenericDialog_Parametric_TextFieldItem" virtual="true">
+            <Controls>
+                <Backdrop name="$(parent)Highlight" override="true" inherits="ZO_GamepadNormalOutlineHighlight"/>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

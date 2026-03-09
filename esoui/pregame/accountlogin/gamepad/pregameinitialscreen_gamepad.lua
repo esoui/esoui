@@ -161,7 +161,7 @@ function PregameInitialScreen_Gamepad:PerformDeferredInitialization()
         end
     end
 
-    if IsConsoleUI() then
+    if ZO_IsConsoleOrGameCoreUI() then
         EVENT_MANAGER:RegisterForEvent("PregameInitialScreen", EVENT_PROFILE_LOGIN_RESULT, ProfileLoginResult)
         EVENT_MANAGER:RegisterForEvent("PregameInitialScreen", EVENT_RESEND_VERIFICATION_EMAIL_RESULT, ShowVerificationAlertDialog)
     end
@@ -244,7 +244,7 @@ function PregameInitialScreen_Gamepad:ContinueFunction()
             self.pressTextAnimation:PlayFromEnd()
         end
 
-        if IsConsoleUI() and not ZO_IsForceConsoleFlow() then
+        if (IsConsoleUI() and not ZO_IsForceConsoleFlow()) or IsGameCoreUI() then
             if not PregameHasProfileSelected() then
                 WriteToInterfaceLog(string.format("PregameInitialScreen_Gamepad:ContinueFunction Selecting profile"))
                 PregameSelectProfile()

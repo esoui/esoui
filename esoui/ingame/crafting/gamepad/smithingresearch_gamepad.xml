@@ -1,72 +1,61 @@
 <GuiXml>
     <Controls>
         <Button name="ZO_GamepadSmithingResearchSlot" inherits="ZO_ItemSlot" virtual="true">
-            <Dimensions x="48" y="43" />
+            <Dimensions x="48" y="43"/>
             <OnInitialized>
                 self.nameLabel = self:GetNamedChild("Name")
                 self.statusLabel = self:GetNamedChild("Status")
                 self.timerIcon = self:GetNamedChild("TimerIcon")
             </OnInitialized>
-
             <Controls>
                 <Texture name="$(parent)Bg" hidden="true">
-                    <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" y="48" />
-                    <Anchor point="LEFT" />
+                    <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" y="48"/>
+                    <Anchor point="LEFT"/>
                 </Texture>
-
                 <Texture name="$(parent)TimerIcon" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_icon_timer32.dds">
-                    <Dimensions x="32" y="32" />
+                    <Dimensions x="32" y="32"/>
                     <Anchor point="CENTER"/>
                 </Texture>
-
                 <Backdrop name="$(parent)Highlight" inherits="ZO_GamepadWhiteOutlineHighlight" hidden="true">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Bg" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Bg"/>
                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Bg"/>
                 </Backdrop>
-
                 <Label name="$(parent)Name" font="ZoFontGamepad34">
-                    <Anchor point="LEFT" relativePoint="RIGHT" offsetX="10" />
+                    <Anchor point="LEFT" relativePoint="RIGHT" offsetX="10"/>
                 </Label>
-
                 <Label name="$(parent)Status" font="ZoFontGamepad34">
-                    <Anchor point="RIGHT" relativeTo="$(parent)Bg" offsetX="-10" />
+                    <Anchor point="RIGHT" relativeTo="$(parent)Bg" offsetX="-10"/>
                 </Label>
             </Controls>
         </Button>
-
         <Control name="ZO_GamepadSmithingListSlot" virtual="true">
-            <Dimensions x="64" y="64" />
+            <Dimensions x="64" y="64"/>
             <Controls>
                 <Texture name="$(parent)Icon" pixelRoundingEnabled="false" level="2">
                     <AnchorFill/>
                 </Texture>
-
                 <Label name="$(parent)StackCount" horizontalAlignment="RIGHT" verticalAlignment="BOTTOM" font="ZoFontGamepad27" inheritScale="false">
-                    <Anchor point="TOPLEFT" offsetX="-10" offsetY="1" />
+                    <Anchor point="TOPLEFT" offsetX="-10" offsetY="1"/>
                     <!-- Allow extra space for large stack counts like 898.8k -->
                     <Anchor point="BOTTOMRIGHT" offsetX="2" offsetY="-1"/>
                 </Label>
-
                 <Texture name="$(parent)QuestPin" textureFile="EsoUI\Art\WritAdvisor\Gamepad\gp_advisor_trackedPin_icon.dds" inheritScale="false" pixelRoundingEnabled="false" level="3" hidden="true">
-                    <Dimensions x="32" y="32" />
-                    <Anchor point="TOPRIGHT" offsetX="5" />
+                    <Dimensions x="32" y="32"/>
+                    <Anchor point="TOPRIGHT" offsetX="5"/>
                 </Texture>
             </Controls>
         </Control>
-
         <Control name="ZO_GamepadSmithingResearchListSlot" inherits="ZO_GamepadSmithingListSlot" virtual="true">
             <OnInitialized>
                 self.timerIcon = self:GetNamedChild("TimerIcon")
             </OnInitialized>
-
             <Controls>
                 <Texture name="$(parent)TimerIcon" tier="MEDIUM" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_icon_timer32.dds" pixelRoundingEnabled="false" alpha=".85">
-                    <Dimensions x="32" y="32" />
+                    <Dimensions x="32" y="32"/>
                     <Anchor point="CENTER" relativePoint="BOTTOMRIGHT"/>
                 </Texture>
             </Controls>
         </Control>
-
         <Control name="ZO_GamepadSmithingResearchPanelContent" inherits="ZO_GamepadSmithingBelowHeaderAreaAnchors" virtual="true">
             <Controls>
                 <Control name="$(parent)Research" hidden="true">
@@ -84,10 +73,8 @@
                                 </Label>
                             </Controls>
                         </Control>
-
                         <Control name="$(parent)TimerBar">
-                            <Dimensions x="270" y="30" />
-
+                            <Dimensions x="270" y="30"/>
                             <Controls>
                                 <StatusBar name="$(parent)Status" hidden="true" inherits="ZO_GamepadArrowStatusBarWithBGLarge">
                                     <OnInitialized>
@@ -96,30 +83,25 @@
                                     </OnInitialized>
                                     <AnchorFill/>
                                 </StatusBar>
-
                                 <Label name="$(parent)Time" font="ZoFontGamepad34" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
-                                    <Anchor point="CENTER" />
+                                    <Anchor point="CENTER"/>
                                 </Label>
-
                                 <Texture name="$(parent)TimerIcon" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_icon_timer32.dds" tier="HIGH">
-                                    <Dimensions x="32" y="32" />
+                                    <Dimensions x="32" y="32"/>
                                     <Anchor point="RIGHT" relativeTo="$(parent)Time" relativePoint="LEFT"/>
                                 </Texture>
                             </Controls>
                         </Control>
-
                         <Label name="$(parent)ResearchProgressLabel" font="ZoFontGamepadBold22" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE" text="SI_SMITHING_RESEARCH_PROGRESS_HEADER" horizontalAlignment="CENTER">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)ResearchLineList" relativePoint="BOTTOMLEFT" offsetY="30"/>
                             <Anchor point="TOPRIGHT" relativeTo="$(parent)ResearchLineList" relativePoint="BOTTOMRIGHT" offsetY="30"/>
                         </Label>
-
                         <Control name="$(parent)TraitContainer">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)ResearchProgressLabel" relativePoint="BOTTOMLEFT"/>
                             <Anchor point="TOPRIGHT" relativeTo="$(parent)ResearchProgressLabel" relativePoint="BOTTOMRIGHT"/>
                         </Control>
                     </Controls>
                 </Control>
-
                 <Control name="$(parent)Confirm" hidden="true">
                     <AnchorFill/>
                     <Controls>
@@ -127,7 +109,6 @@
                             <Anchor point="TOPLEFT" offsetY="50"/>
                             <Anchor point="TOPRIGHT" offsetY="50"/>
                         </Label>
-
                         <Control name="$(parent)List" inherits="ZO_VerticalParametricScrollListTemplate">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)SelectionText" relativePoint="BOTTOMLEFT"/>
                             <Anchor point="BOTTOMRIGHT"/>

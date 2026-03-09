@@ -3,11 +3,10 @@
         <Control name="ZO_GroupMenuKeyboard_StatusIconHeader" inherits="ZO_StatusIconHeader" virtual="true">
             <Controls>
                 <Label name="$(parent)Text" override="true">
-                    <DimensionConstraints maxX="ZO_GROUP_MENU_KEYBOARD_TREE_LABEL_WIDTH" />
+                    <DimensionConstraints maxX="ZO_GROUP_MENU_KEYBOARD_TREE_LABEL_WIDTH"/>
                 </Label>
             </Controls>
         </Control>
-
         <Control name="ZO_GroupMenuKeyboard_StatusIconChildlessHeader" inherits="ZO_StatusIconChildlessHeader" virtual="true">
             <OnInitialized name="GroupMenu">
                 local textLabel = self:GetNamedChild("Text")
@@ -31,60 +30,50 @@
             </OnInitialized>
             <Controls>
                 <Label name="$(parent)Text" override="true">
-                    <DimensionConstraints maxX="ZO_GROUP_MENU_KEYBOARD_TREE_LABEL_WIDTH" />
+                    <DimensionConstraints maxX="ZO_GROUP_MENU_KEYBOARD_TREE_LABEL_WIDTH"/>
                 </Label>
             </Controls>
         </Control>
-
         <Label name="ZO_GroupMenuKeyboard_Subcategory" inherits="ZO_TreeStatusLabelSubCategory" maxLineCount="2" newLineIndent="10" virtual="true">
             <DimensionConstraints maxX="ZO_GROUP_MENU_KEYBOARD_TREE_SUBCATEGORY_LABEL_WIDTH"/>
         </Label>
-
         <Button name="ZO_PreferredRolesButton" inherits="ZO_RadioButton" virtual="true">
             <Dimensions x="48" y="48"/>
-
             <OnMouseEnter>
                 ZO_PreferredRolesButton_OnMouseEnter(self)
             </OnMouseEnter>
-
             <OnMouseExit>
                 ZO_PreferredRolesButton_OnMouseExit(self)
             </OnMouseExit>
         </Button>
-        
         <TopLevelControl name="ZO_GroupMenu_Keyboard" inherits="ZO_RightPanelFootPrint" hidden="true">
             <OnInitialized>
                 ZO_GroupMenuKeyboard_OnInitialized(self)
             </OnInitialized>
-            
             <Controls>
                 <Control name="$(parent)Header">
-                    <Dimensions y="70" />
-                    <Anchor point="TOPLEFT" />
-                    <Anchor point="TOPRIGHT" offsetX="-10" />
+                    <Dimensions y="70"/>
+                    <Anchor point="TOPLEFT"/>
+                    <Anchor point="TOPRIGHT" offsetX="-10"/>
                 </Control>
-
                 <Control name="$(parent)PreferredRoles" inherits="ZO_PreferredRoles_Keyboard_Template">
                     <DimensionConstraints minX="265"/>
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" offsetX="-8" offsetY="-5" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" offsetX="-8" offsetY="-5"/>
                 </Control>
-
                 <Control name="$(parent)RolesCategoriesDivider" inherits="ZO_DynamicHorizontalDivider">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)PreferredRoles" relativePoint="BOTTOMLEFT" offsetY="5" />
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)PreferredRoles" relativePoint="BOTTOMRIGHT" offsetY="5" />
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)PreferredRoles" relativePoint="BOTTOMLEFT" offsetY="5"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)PreferredRoles" relativePoint="BOTTOMRIGHT" offsetY="5"/>
                 </Control>
-                
                 <Control name="$(parent)Categories" inherits="ZO_ScrollContainer">
-                    <Dimensions x="ZO_GROUP_MENU_KEYBOARD_TREE_WIDTH" />
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)RolesCategoriesDivider" relativePoint="BOTTOMLEFT" offsetX="-28" offsetY="10" />
+                    <Dimensions x="ZO_GROUP_MENU_KEYBOARD_TREE_WIDTH"/>
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)RolesCategoriesDivider" relativePoint="BOTTOMLEFT" offsetX="-28" offsetY="10"/>
                     <Anchor point="BOTTOMLEFT" offsetX="-28" offsetY="-90"/>
                 </Control>
             </Controls>
         </TopLevelControl>
-
         <Control name="ZO_GroupMenuKeyboard_ContentAnchors" virtual="true">
-            <Anchor point="TOPRIGHT" relativeTo="ZO_GroupMenu_KeyboardHeader" relativePoint="BOTTOMRIGHT" offsetX="-10" />
-            <Anchor point="BOTTOMLEFT" relativeTo="ZO_GroupMenu_KeyboardCategories" relativePoint="BOTTOMRIGHT" offsetX="10" offsetY="90" />
+            <Anchor point="TOPRIGHT" relativeTo="ZO_GroupMenu_KeyboardHeader" relativePoint="BOTTOMRIGHT" offsetX="-10"/>
+            <Anchor point="BOTTOMLEFT" relativeTo="ZO_GroupMenu_KeyboardCategories" relativePoint="BOTTOMRIGHT" offsetX="10" offsetY="90"/>
         </Control>
     </Controls>
 </GuiXml>

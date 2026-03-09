@@ -1,25 +1,21 @@
 ﻿<GuiXml>
     <Controls>
         <TopLevelControl name="ZO_HousingFurnitureRetrieveTo_TopLevel" hidden="true" resizeToFitDescendents="true">
-            <Anchor point="BOTTOM" offsetX="-300" offsetY="-150" />
-            <ResizeToFitPadding width="32" height="32" />
-
+            <Anchor point="BOTTOM" offsetX="-300" offsetY="-150"/>
+            <ResizeToFitPadding width="32" height="32"/>
             <OnInitialized>
                 ZO_HousingFurnitureRetrieveTo_Keyboard.OnControlInitialized(self)
             </OnInitialized>
-            
             <Controls>
                 <Backdrop name="$(parent)BG" inherits="ZO_DefaultBackdrop" excludeFromResizeToFitExtents="true">
-                    <AnchorFill />
+                    <AnchorFill/>
                 </Backdrop>
-
                 <Label name="$(parent)Title" font="ZoFontHeader4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" text="SI_HOUSING_EDITOR_RETRIEVE_TO">
-                    <Anchor point="TOP" offsetY="16" />
+                    <Anchor point="TOP" offsetY="16"/>
                 </Label>
-                
                 <Control name="$(parent)Bag" inherits="ZO_ComboBoxResizeToFit">
-                    <Anchor point="TOP" relativeTo="$(parent)Title" relativePoint="BOTTOM" offsetY="8" />
-                    <DimensionConstraints minX="250" maxX="350" />
+                    <Anchor point="TOP" relativeTo="$(parent)Title" relativePoint="BOTTOM" offsetY="8"/>
+                    <DimensionConstraints minX="250" maxX="350"/>
                 </Control>
             </Controls>
         </TopLevelControl>

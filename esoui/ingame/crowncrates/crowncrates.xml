@@ -5,13 +5,13 @@
                 <CustomAnimation/>
             </Animations>
         </AnimationTimeline>
-   </Animations>
+    </Animations>
     <Controls>
         <Control name="ZO_CrownCrates_GemsCounter_Keyboard_Template" virtual="true">
-            <Anchor point="BOTTOMLEFT" offsetX="32" offsetY="-10" />
+            <Anchor point="BOTTOMLEFT" offsetX="32" offsetY="-10"/>
             <Controls>
-                <Label name="$(parent)GemsHeader" font="ZoFontKeybindStripDescription" />
-                <Label name="$(parent)Gems" font="ZoFontKeybindStripDescription" />
+                <Label name="$(parent)GemsHeader" font="ZoFontKeybindStripDescription"/>
+                <Label name="$(parent)Gems" font="ZoFontKeybindStripDescription"/>
                 <Texture name="$(parent)GemIcon">
                     <OnInitialized>
                         self:SetTexture(ZO_Currency_GetKeyboardCurrencyIcon(CURT_CROWN_GEMS))
@@ -19,12 +19,11 @@
                 </Texture>
             </Controls>
         </Control>
-
         <Control name="ZO_CrownCrates_GemsCounter_Gamepad_Template" virtual="true">
-            <Anchor point="BOTTOMRIGHT" offsetX="-ZO_GAMEPAD_SAFE_ZONE_INSET_X" offsetY="-ZO_GAMEPAD_SAFE_ZONE_INSET_Y" />
+            <Anchor point="BOTTOMRIGHT" offsetX="-ZO_GAMEPAD_SAFE_ZONE_INSET_X" offsetY="-ZO_GAMEPAD_SAFE_ZONE_INSET_Y"/>
             <Controls>
-                <Label name="$(parent)GemsHeader" font="ZoFontGamepad42" />
-                <Label name="$(parent)Gems" font="ZoFontGamepad42" />
+                <Label name="$(parent)GemsHeader" font="ZoFontGamepad42"/>
+                <Label name="$(parent)Gems" font="ZoFontGamepad42"/>
                 <Texture name="$(parent)GemIcon">
                     <OnInitialized>
                         self:SetTexture(ZO_Currency_GetGamepadCurrencyIcon(CURT_CROWN_GEMS))
@@ -32,7 +31,6 @@
                 </Texture>
             </Controls>
         </Control>
-
         <!-- this needs to be a top level control so that it can render over the keybind strip while other crown crate controls don't -->
         <TopLevelControl name="ZO_CrownCratesGemsCounter" resizeToFitDescendents="true" hidden="true" tier="HIGH" level="ZO_HIGH_TIER_OVER_GAMEPAD_KEYBIND_STRIP">
             <OnInitialized>
@@ -54,7 +52,6 @@
                 </Texture>
             </Controls>
         </TopLevelControl>
-
         <TopLevelControl name="ZO_CrownCratesTopLevel" hidden="true">
             <OnInitialized>
                 ZO_CrownCrates_OnInitialized(self)

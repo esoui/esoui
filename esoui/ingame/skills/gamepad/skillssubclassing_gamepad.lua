@@ -813,12 +813,20 @@ end
 function ZO_SkillsSubclassing_Gamepad:ShowConfirmRespecDialog()
     if SKILLS_AND_ACTION_BAR_MANAGER:DoPendingChangesIncurCost() then
         if SKILLS_AND_ACTION_BAR_MANAGER:GetSkillRespecPaymentType() == RESPEC_PAYMENT_TYPE_GOLD then
-            ZO_Dialogs_ShowGamepadDialog("SKILL_RESPEC_CONFIRM_GOLD_GAMEPAD")
+            if GetSkillRespecCost(SKILLS_AND_ACTION_BAR_MANAGER:GetSkillPointAllocationMode()) > 0 or SKILL_LINE_ASSIGNMENT_MANAGER:HasSubclassingChanges() then
+                ZO_Dialogs_ShowGamepadDialog("SKILL_RESPEC_CONFIRM_GOLD_GAMEPAD")
+            else
+                SKILLS_AND_ACTION_BAR_MANAGER:ApplyChanges()
+            end
         else
             ZO_Dialogs_ShowGamepadDialog("SKILL_RESPEC_CONFIRM_SCROLL")
         end
     else
-        ZO_Dialogs_ShowGamepadDialog("SKILL_RESPEC_CONFIRM_FREE")
+        if SKILL_LINE_ASSIGNMENT_MANAGER:HasSubclassingChanges() then
+            ZO_Dialogs_ShowGamepadDialog("SKILL_RESPEC_CONFIRM_FREE")
+        else
+            SKILLS_AND_ACTION_BAR_MANAGER:ApplyChanges()
+        end
     end
 end
 

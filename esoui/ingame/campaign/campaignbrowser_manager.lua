@@ -102,7 +102,7 @@ do
     function ZO_CampaignBrowser_Manager:CanQueueForCampaign(data)
         local canQueueIndividual = false
         local canQueueGroup = false
-        if IsCampaignData(data) and not self:IsPlayerInSameCampaignType(data) and not IsQueuedForCampaign(data.id, CAMPAIGN_QUEUE_INDIVIDUAL) and DoesPlayerMeetCampaignRequirements(data.id) then
+        if IsCampaignData(data) and not IsQueuedForCampaign(data.id, CAMPAIGN_QUEUE_INDIVIDUAL) and DoesPlayerMeetCampaignRequirements(data.id) then
             if not IsActiveWorldBattleground() and not IsUnitDead("player") then
                 canQueueIndividual = true
             end
@@ -388,37 +388,37 @@ end
 CAMPAIGN_BROWSER_MANAGER = ZO_CampaignBrowser_Manager:New()
 
 -- Global functions
-do
-    internalassert(CAMPAIGN_RULESET_TYPE_MAX_VALUE == 4, "Update ruleset icons")
-    local CAMPAIGN_RULESET_TYPE_KEYBOARD_ICONS =
-    {
-        [CAMPAIGN_RULESET_TYPE_CYRODIIL] = 
-        {
-            up = "EsoUI/Art/LFG/LFG_indexIcon_allianceWar_up.dds",
-            down = "EsoUI/Art/LFG/LFG_indexIcon_allianceWar_down.dds",
-            over = "EsoUI/Art/LFG/LFG_indexIcon_allianceWar_over.dds",
-        },
-        [CAMPAIGN_RULESET_TYPE_IMPERIAL_CITY] = 
-        {
-            up = "EsoUI/Art/LFG/LFG_indexIcon_imperialCity_up.dds",
-            down = "EsoUI/Art/LFG/LFG_indexIcon_imperialCity_down.dds",
-            over = "EsoUI/Art/LFG/LFG_indexIcon_imperialCity_over.dds",
-        },
-    }
-    local CAMPAIGN_RULESET_TYPE_GAMEPAD_ICONS =
-    {
-        [CAMPAIGN_RULESET_TYPE_CYRODIIL] = "EsoUI/Art/LFG/Gamepad/LFG_activityIcon_cyrodiil.dds",
-        [CAMPAIGN_RULESET_TYPE_IMPERIAL_CITY] = "EsoUI/Art/LFG/Gamepad/LFG_activityIcon_imperialCity.dds",
-    }
 
-    function ZO_CampaignBrowser_GetKeyboardIconsForRulesetType(rulesetType)
-        return CAMPAIGN_RULESET_TYPE_KEYBOARD_ICONS[rulesetType]
-    end
+internalassert(CAMPAIGN_RULESET_TYPE_MAX_VALUE == 5, "Update ruleset icons")
+ZO_CAMPAIGN_RULESET_TYPE_KEYBOARD_ICONS =
+{
+    [CAMPAIGN_RULESET_TYPE_CYRODIIL] =
+    {
+        up = "EsoUI/Art/LFG/LFG_indexIcon_allianceWar_up.dds",
+        down = "EsoUI/Art/LFG/LFG_indexIcon_allianceWar_down.dds",
+        over = "EsoUI/Art/LFG/LFG_indexIcon_allianceWar_over.dds",
+    },
+    [CAMPAIGN_RULESET_TYPE_IMPERIAL_CITY] =
+    {
+        up = "EsoUI/Art/LFG/LFG_indexIcon_imperialCity_up.dds",
+        down = "EsoUI/Art/LFG/LFG_indexIcon_imperialCity_down.dds",
+        over = "EsoUI/Art/LFG/LFG_indexIcon_imperialCity_over.dds",
+    },
+}
+local CAMPAIGN_RULESET_TYPE_GAMEPAD_ICONS =
+{
+    [CAMPAIGN_RULESET_TYPE_CYRODIIL] = "EsoUI/Art/LFG/Gamepad/LFG_activityIcon_cyrodiil.dds",
+    [CAMPAIGN_RULESET_TYPE_IMPERIAL_CITY] = "EsoUI/Art/LFG/Gamepad/LFG_activityIcon_imperialCity.dds",
+}
 
-    function ZO_CampaignBrowser_GetGamepadIconForRulesetType(rulesetType)
-        return CAMPAIGN_RULESET_TYPE_GAMEPAD_ICONS[rulesetType]
-    end
+function ZO_CampaignBrowser_GetKeyboardIconsForRulesetType(rulesetType)
+    return ZO_CAMPAIGN_RULESET_TYPE_KEYBOARD_ICONS[rulesetType]
 end
+
+function ZO_CampaignBrowser_GetGamepadIconForRulesetType(rulesetType)
+    return CAMPAIGN_RULESET_TYPE_GAMEPAD_ICONS[rulesetType]
+end
+
 
 do
     local POPULATION_ICONS =

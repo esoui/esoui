@@ -71,7 +71,7 @@ function ZO_Tooltip:LayoutGroupFinderGroupListingTooltip(data)
     -- Category/location
     local categorySection = self:AcquireSection(self:GetStyle("bodySection"))
     categorySection:AddLine(GetString("SI_GROUPFINDERCATEGORY", category), self:GetStyle("bodyHeader"))
-    if category ~= GROUP_FINDER_CATEGORY_ENDLESS_DUNGEON and category ~= GROUP_FINDER_CATEGORY_CUSTOM then
+    if category ~= GROUP_FINDER_CATEGORY_ENDLESS_DUNGEON and category ~= GROUP_FINDER_CATEGORY_ADVENTURE_ZONE and category ~= GROUP_FINDER_CATEGORY_CUSTOM then
         local firstText = category == GROUP_FINDER_CATEGORY_PVP and data:GetPrimaryOptionText() or data:GetSecondaryOptionText()
         local secondText = category == GROUP_FINDER_CATEGORY_PVP and data:GetSecondaryOptionText() or data:GetPrimaryOptionText()
         local optionsString = ZO_GenerateCommaSeparatedListWithoutAnd({ firstText, secondText})

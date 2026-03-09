@@ -329,6 +329,38 @@ function zo_getSafeId64Key(id)
     return Id64ToString(id)
 end
 
+-- Convert one or more id64s to strings.
+function zo_id64ToString(...)
+    local inputValues = {...}
+    if type(inputValues[1]) == "table" then
+        -- If a table passed as the first parameter, process the table itself.
+        inputValues = inputValues[1]
+    end
+
+    local outputValues = {}
+    for _, inputValue in ipairs(inputValues) do
+        table.insert(outputValues, Id64ToString(inputValue))
+    end
+
+    return outputValues
+end
+
+-- Convert one or more strings to id64s.
+function zo_stringToId64(...)
+    local inputValues = {...}
+    if type(inputValues[1]) == "table" then
+        -- If a table passed as the first parameter, process the table itself.
+        inputValues = inputValues[1]
+    end
+
+    local outputValues = {}
+    for _, inputValue in ipairs(inputValues) do
+        table.insert(outputValues, StringToId64(inputValue))
+    end
+
+    return outputValues
+end
+
 function zo_distance(x1, y1, x2, y2)
     local diffX = x1 - x2
     local diffY = y1 - y2
@@ -704,18 +736,23 @@ function ZO_Eval(valueOrFunction, ...)
     return valueOrFunction
 end
 
-do
-    local FONT_STYLE_MAP =
-    {
-        [FONT_STYLE_SHADOW] = "|shadow",
-        [FONT_STYLE_OUTLINE] = "|outline",
-        [FONT_STYLE_OUTLINE_THICK] = "|thick-outline",
-        [FONT_STYLE_SOFT_SHADOW_THIN] = "|soft-shadow-thin",
-        [FONT_STYLE_SOFT_SHADOW_THICK] = "|soft-shadow-thick",
-    }
-
-    function ZO_CreateFontString(faceName, size, style)
-        local styleString = style and FONT_STYLE_MAP[style] or ""
-        return string.format("%s|%u%s", faceName, size, styleString)
+function ZO_CreateFontString(faceName, size, style)
+    local styleString = GetFontStyleString(style)
+    if styleString == "" then
+        return string.format("%s|%u", faceName, size)
+    else
+        return string.format("%s|%u|%s", faceName, size, styleString)
     end
+end
+
+function ZO_CreateEnumTable(...)
+    local tbl = {}
+    for i = 1, select("#", ...) do
+        local key = select(i, ...)
+        if tbl[key] then
+            internalassert(false, string.format("Enum key %q is not unique.", key))
+        end
+        tbl[key] = i
+    end
+    return tbl
 end

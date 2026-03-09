@@ -145,6 +145,17 @@ function ZO_GamepadInventory:OnDeferredInitialize()
     SHARED_INVENTORY:RegisterCallback("FullQuestUpdate", OnInventoryUpdated)
     SHARED_INVENTORY:RegisterCallback("SingleQuestUpdate", OnInventoryUpdated)
 
+    local function OnBagSpaceUpdated()
+        if self.scene:IsShowing() then
+            local currentList = self:GetCurrentList()
+            if currentList == self.categoryList then
+                self:RefreshActiveCategoryList()
+                self:RefreshHeader(BLOCK_TABBAR_CALLBACK)
+            end
+        end
+    end
+    self.control:RegisterForEvent(EVENT_INVENTORY_BOUGHT_BAG_SPACE, OnBagSpaceUpdated)
+
     self.onRefreshActionsCallback = function()
         if self.itemList and self.itemList:IsActive() then
             SCREEN_NARRATION_MANAGER:QueueParametricListEntry(self.itemList)
@@ -315,6 +326,7 @@ function ZO_GamepadInventory:SwitchActiveList(listDescriptor, selectDefaultEntry
             self:OnInventoryShown()
 
             --ESO-714374: Order matters as we need to set the current list to CategoryList before we refresh it and need to activate the keybinds last to avoid duplicate keybinds.
+            self.lastSelectedCategoryData = nil
             self:SetCurrentList(self.categoryList)
             self:RefreshActiveCategoryList(selectDefaultEntry)
 
@@ -335,6 +347,7 @@ function ZO_GamepadInventory:SwitchActiveList(listDescriptor, selectDefaultEntry
             self:SetActiveKeybinds(self.itemFilterKeybindStripDescriptor)
 
             -- Order matters as we need to set the current list before we refresh it and need to activate the keybinds last to avoid duplicate keybinds.
+            self.lastSelectedCategoryData = self.categoryList:GetEntryData(self.categoryList:GetSelectedIndex())
             self:SetCurrentList(self.itemList)
             self:RefreshActiveItemList(selectDefaultEntry)
 
@@ -368,29 +381,25 @@ function ZO_GamepadInventory:SwitchActiveList(listDescriptor, selectDefaultEntry
 
             TriggerTutorial(TUTORIAL_TRIGGER_CRAFT_BAG_OPENED)
         elseif listDescriptor == INVENTORY_VENGEANCE_CATEGORY_LIST then
+            self:SetActiveKeybinds(self.categoryListKeybindStripDescriptor)
             self:OnInventoryShown()
 
             --ESO-714374: Order matters as we need to set the current list before we refresh it and need to activate the keybinds last to avoid duplicate keybinds.
+            self.lastSelectedCategoryData = nil
             self:SetCurrentList(self.vengeanceCategoryList)
-            self:RefreshActiveCategoryList(selectDefaultEntry)
 
-            -- For the case where the previous list didn't have any selectible items which would allow the header to be exited we need to attempt
-            -- to exit the header again if there are items in the new list (which there will be in this case as Category List has Currency)
-            -- so that we can ensure that the header and main list will not be active at the same time, which would cause a keybind conflict
-            if self:IsHeaderActive() then
-                self:RequestLeaveHeader()
-            end
-
-            self:SetActiveKeybinds(self.categoryListKeybindStripDescriptor)
-
-            self:SetSelectedItemUniqueId(self:GenerateItemSlotData(self.vengeanceCategoryList:GetTargetData()))
             self.actionMode = VENGEANCE_CATEGORY_ITEM_ACTION_MODE
             self:RefreshHeader()
             self:ActivateHeader()
+
+            self:RefreshActiveCategoryList(selectDefaultEntry)
+
+            self:SetSelectedItemUniqueId(self:GenerateItemSlotData(self.vengeanceCategoryList:GetTargetData()))
         elseif listDescriptor == INVENTORY_VENGEANCE_ITEM_LIST then
             self:SetActiveKeybinds(self.itemFilterKeybindStripDescriptor)
 
             -- Order matters as we need to set the current list before we refresh it and need to activate the keybinds last to avoid duplicate keybinds.
+            self.lastSelectedCategoryData = self.categoryList:GetEntryData(self.vengeanceCategoryList:GetSelectedIndex())
             self:SetCurrentList(self.vengeanceItemList)
             self:RefreshActiveItemList(selectDefaultEntry)
 
@@ -648,6 +657,8 @@ function ZO_GamepadInventory:InitializeKeybindStrip()
                 if self.currentlySelectedData.isMundusEntry then
                     local helpCategoryIndex, helpIndex = GetMundusStoneHelpIndices()
                     HELP_TUTORIALS_ENTRIES_GAMEPAD:Show(helpCategoryIndex, helpIndex)
+                elseif self.currentlySelectedData.isBagSpaceEntry then
+                    ZO_Dialogs_ShowGamepadDialog("BUY_BAG_SPACE_FROM_INVENTORY_GAMEPAD", { cost = GetNextBackpackUpgradePrice() })
                 else
                     self:Select()
                 end
@@ -1163,10 +1174,11 @@ end
 
 function ZO_GamepadInventory:AddFilteredBackpackCategoryIfPopulated(filterType, iconFile)
     local isListEmpty = self:IsItemListEmpty(nil, filterType)
-    if not isListEmpty then
+    local categoryName = GetString("SI_ITEMFILTERTYPE", filterType)
+    if not isListEmpty or (self.lastSelectedCategoryData and self.lastSelectedCategoryData.text == categoryName) then
         local backingBag = self:GetBackingBag()
         local activeCategoryList = self:GetActiveCategoryList()
-        local name = GetString("SI_ITEMFILTERTYPE", filterType)
+        local name = categoryName
         local hasAnyNewItems = SHARED_INVENTORY:AreAnyItemsNew(ZO_InventoryUtils_DoesNewItemMatchFilterType, filterType, backingBag)
         local data = ZO_GamepadEntryData:New(name, iconFile, nil, nil, hasAnyNewItems)
         data.filterType = filterType
@@ -1176,7 +1188,7 @@ function ZO_GamepadInventory:AddFilteredBackpackCategoryIfPopulated(filterType, 
 end
 
 function ZO_GamepadInventory:GetQuestItemDataFilterComparator(questItemId)
-    return self:IsDataInSearchTextResults(ZO_QUEST_ITEMS_FILTER_BAG, questItemId)
+    return self:IsQuestItemInSearchTextResults(questItemId)
 end
 
 function ZO_GamepadInventory:RefreshActiveCategoryList(selectDefaultEntry, forceUpdate)
@@ -1266,6 +1278,19 @@ function ZO_GamepadInventory:RefreshActiveCategoryList(selectDefaultEntry, force
                 activeCategoryList:AddEntry("ZO_GamepadItemEntryTemplateWithHeader", data)
                 data:SetHeader(GetString(SI_GAMEPAD_INVENTORY_PACK_CATEGORY_HEADER))
             end
+
+            -- Upgrade Bag
+            local currentUnlock = GetCurrentBackpackUpgrade()
+            local maxUnlock = GetMaxBackpackUpgrade()
+
+            if currentUnlock < maxUnlock then
+                local name = GetString(SI_INVENTORY_BAG_UPGRADE_LABEL)
+                local iconFile = "EsoUI/Art/Inventory/Gamepad/gp_inventory_upgradeBag_icon.dds"
+                local upgradeBagData = ZO_GamepadEntryData:New(name, iconFile, nil, nil, false)
+                upgradeBagData:SetIconTintOnSelection(true)
+                upgradeBagData.isBagSpaceEntry = true
+                activeCategoryList:AddEntry("ZO_GamepadItemEntryTemplate", upgradeBagData)
+            end
         end
 
         -- Supplies
@@ -1274,8 +1299,9 @@ function ZO_GamepadInventory:RefreshActiveCategoryList(selectDefaultEntry, force
         -- otherwise items will show up in both the categories
         do
             local isListEmpty = self:IsItemListEmpty()
-            if not isListEmpty then
-                local name = GetString(SI_INVENTORY_SUPPLIES)
+            local suppliesName = GetString(SI_INVENTORY_SUPPLIES)
+            if not isListEmpty or (self.lastSelectedCategoryData and self.lastSelectedCategoryData.text == suppliesName) then
+                local name = suppliesName
                 local iconFile = "EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_all.dds"
                 local hasAnyNewItems = SHARED_INVENTORY:AreAnyItemsNew(ZO_InventoryUtils_DoesNewItemMatchSupplies, nil, backingBag)
                 local data = ZO_GamepadEntryData:New(name, iconFile, nil, nil, hasAnyNewItems)
@@ -1310,8 +1336,9 @@ function ZO_GamepadInventory:RefreshActiveCategoryList(selectDefaultEntry, force
                 end
             end
 
-            if next(textSearchFilteredQuestCache) then
-                local name = GetString(SI_GAMEPAD_INVENTORY_QUEST_ITEMS)
+            local questItemsName = GetString(SI_GAMEPAD_INVENTORY_QUEST_ITEMS)
+            if next(textSearchFilteredQuestCache) or (self.lastSelectedCategoryData and self.lastSelectedCategoryData.text == questItemsName) then
+                local name = questItemsName
                 local iconFile = "EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_quest.dds"
                 local data = ZO_GamepadEntryData:New(name, iconFile)
                 data.filterType = ITEMFILTERTYPE_QUEST
@@ -1325,8 +1352,9 @@ function ZO_GamepadInventory:RefreshActiveCategoryList(selectDefaultEntry, force
         for _, equipSlot in ZO_Character_EnumerateOrderedEquipSlots() do
             local locked = IsLockedWeaponSlot(equipSlot)
             local isListEmpty = self:IsItemListEmpty(equipSlot, nil)
-            if not locked and not isListEmpty then
-                local name = zo_strformat(SI_CHARACTER_EQUIP_SLOT_FORMAT, GetString("SI_EQUIPSLOT", equipSlot))
+            local equipSlotName = zo_strformat(SI_CHARACTER_EQUIP_SLOT_FORMAT, GetString("SI_EQUIPSLOT", equipSlot))
+            if (not locked and not isListEmpty) or (self.lastSelectedCategoryData and self.lastSelectedCategoryData.text == equipSlotName)  then
+                local name = equipSlotName
                 local slotHasItem, iconFile  = GetWornItemInfo(BAG_WORN, equipSlot)
                 if not slotHasItem then
                     iconFile = nil
@@ -1380,6 +1408,10 @@ function ZO_GamepadInventory:RefreshActiveCategoryList(selectDefaultEntry, force
         -- Order matters:
         activeCategoryList:SetDefaultSelectedIndex(numMundusSlots + 1)
         activeCategoryList:Commit()
+
+        if activeCategoryList:GetNumItems() == 0 then
+            self:RequestEnterHeader()
+        end
     end
 end
 
