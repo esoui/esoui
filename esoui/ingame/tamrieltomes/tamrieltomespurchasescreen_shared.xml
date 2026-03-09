@@ -38,45 +38,47 @@
             <TextureCoords left="0.15625" right="0.84082" top="0.27344" bottom="0.72656"/>
         </Texture>
         <TopLevelControl name="ZO_TamrielTomesPurchase_SharedTL" hidden="true" virtual="true">
-            <Dimensions x="1000" y="1190"/>
+            <Dimensions x="1000" y="975"/>
             <Controls>
                 <Texture name="$(parent)BookBG" textureFile="/EsoUI/Art/TamrielTomes/upgrade_tome_bg.dds">
                     <AnchorFill/>
                     <TextureCoords left="0.09277" top="0.04101" right="0.87897" bottom="0.952"/>
                 </Texture>
                 <Label name="$(parent)Title" horizontalAlignment="CENTER" modifyTextType="UPPERCASE" text="SI_TAMRIEL_TOMES_UPGRADE_TOME_HEADER">
-                    <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" offsetX="120" offsetY="150"/>
-                    <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" offsetX="-90" offsetY="150"/>
+                    <Anchor point="LEFT" relativePoint="TOPLEFT" offsetX="120" offsetY="110"/>
+                    <Anchor point="RIGHT" relativePoint="TOPRIGHT" offsetX="-90" offsetY="110"/>
                     <Controls>
                         <Texture name="$(parent)BG" inherits="ZO_TamrielTomesPurchase_Contrast">
-                            <Anchor point="TOPLEFT" offsetX="-30" offsetY="-25"/>
-                            <Anchor point="BOTTOMRIGHT" offsetX="30" offsetY="25"/>
+                            <Anchor point="CENTER"/>
+                            <Dimensions x="850" y="110"/>
                         </Texture>
                     </Controls>
                 </Label>
                 <Texture name="$(parent)Image" level="3" alpha="0.8">
                     <Dimensions x="840" y="400"/>
-                    <Anchor point="TOP" relativeTo="$(parent)Title" relativePoint="BOTTOM" offsetY="60"/>
-                    <Controls>
-                        <Texture name="$(parent)PremiumGroupBorder" textureFile="EsoUI/Art/TamrielTomes/tome_group_premium_slots_border.dds" level="4" inheritAlpha="false">
-                            <Anchor point="TOPLEFT" offsetX="-4" offsetY="-4"/>
-                            <Anchor point="BOTTOMRIGHT" offsetX="4" offsetY="4"/>
-                            <TextureCoords left="0" right="0.6699" top="0" bottom="0.6895"/>
-                        </Texture>
-                    </Controls>
+                    <Anchor point="TOP" relativeTo="$(parent)Title" relativePoint="CENTER" offsetY="75"/>
+                </Texture>
+                <Texture name="$(parent)ImageFrame" textureFile="EsoUI/Art/TamrielTomes/tome_group_premium_slots_border.dds" level="4">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Image" offsetX="-4" offsetY="-4"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Image" offsetX="4" offsetY="4"/>
+                    <TextureCoords left="0" right="0.6699" top="0" bottom="0.6895"/>
                 </Texture>
                 <Control name="$(parent)GridList">
-                    <Anchor point="TOP" relativeTo="$(parent)Image" relativePoint="BOTTOM" offsetY="60"/>
+                    <Anchor point="TOP" relativeTo="$(parent)Image" relativePoint="BOTTOM" offsetY="35"/>
                     <Controls>
                         <Texture name="$(parent)Frame" textureFile="EsoUI/Art/TamrielTomes/upgrade_tome_item_container.dds" alpha="0.3">
                             <TextureCoords left="0.15625" right="0.83984" top="0.17578" bottom="0.82422"/>
                             <Anchor point="CENTER"/>
-                            <Dimensions x="850" y="150"/>
+                            <Dimensions x="850" y="120"/>
                         </Texture>
                     </Controls>
                 </Control>
+                <Texture name="$(parent)PremiumPlusIcon" textureFile="EsoUI/Art/TamrielTomes/premium_plus_icon.dds" layer="CONTROLS" hidden="true">
+                    <Anchor point="CENTER" relativeTo="$(parent)GridList" relativePoint="BOTTOM"/>
+                    <Dimensions x="48" y="48"/>
+                </Texture>
                 <Control name="$(parent)Buttons">
-                    <Anchor point="TOP" relativePoint="BOTTOM" offsetX="15" offsetY="-250"/>
+                    <Anchor point="TOP" relativePoint="BOTTOM" offsetX="15" offsetY="-145"/>
                     <Dimensions x="10" y="10"/>
                     <Controls>
                         <Control name="$(parent)Row1">
@@ -89,19 +91,20 @@
                                 <Button name="$(parent)PremiumPlusButton">
                                     <Anchor point="LEFT" relativePoint="CENTER" offsetX="20"/>
                                 </Button>
-                                <Label name="$(parent)PremiumPlusDescription" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" horizontalAlignment="CENTER">
-                                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)PremiumPlusButton" relativePoint="TOPLEFT" offsetX="5" offsetY="-5"/>
-                                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)PremiumPlusButton" relativePoint="TOPRIGHT" offsetX="-5" offsetY="-5"/>
+                                <Label name="$(parent)PremiumPlusDescription" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" horizontalAlignment="CENTER" maxLineCount="3" wrapMode="ELLIPSIS">
+                                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)PremiumPlusButton" relativePoint="TOPLEFT" offsetX="15" offsetY="-5"/>
+                                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)PremiumPlusButton" relativePoint="TOPRIGHT" offsetX="-15" offsetY="-5"/>
                                     <Controls>
                                         <Texture name="$(parent)BG" inherits="ZO_TamrielTomesPurchase_Contrast">
-                                            <AnchorFill/>
+                                            <Anchor point="TOPLEFT" offsetX="-10"/>
+                                            <Anchor point="BOTTOMRIGHT" offsetX="10"/>
                                         </Texture>
                                     </Controls>
                                 </Label>
                             </Controls>
                         </Control>
                         <Control name="$(parent)Row2">
-                            <Anchor point="CENTER" relativeTo="$(parent)Row1" offsetY="115"/>
+                            <Anchor point="CENTER" relativeTo="$(parent)Row1" offsetY="70"/>
                             <Dimensions x="10" y="10"/>
                             <Controls>
                                 <Button name="$(parent)TokenButton">

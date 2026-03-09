@@ -137,6 +137,15 @@ local function TokenRedemptionDialog_Setup(dialog, data)
     ZO_CurrencyControl_SetSimpleCurrency(postBalanceAmountLabel, CURT_TOME_TOKENS, postCurrencyAmount)
 end
 
+local function ShowResultDialog(tomeId, result)
+    -- TODO Tamriel Tomes: Refactor dialogs to support a universal setup function
+    if result == TAMRIEL_TOME_PURCHASE_RESULT_SUCCESS then
+        PlaySound(SOUNDS.TAMRIEL_TOMES_PASS_PURCHASED)
+    end
+
+    ZO_Dialogs_ShowDialog("TAMRIEL_TOME_PURCHASE_RESULT", { tomeId = tomeId, result = result })
+end
+
 function ZO_TamrielTomeTokenRedemptionDialog_Keyboard_OnInitialized(control)
     control.balanceContainer = control:GetNamedChild("BalanceContainer")
     control.postBalanceContainer = control:GetNamedChild("PostBalanceContainer")
@@ -153,7 +162,7 @@ function ZO_TamrielTomeTokenRedemptionDialog_Keyboard_OnInitialized(control)
             {
                 text = function()
                     local currencyCost = GetCurrencyCostToUpgradeTamrielTome()
-                    local currencyString = ZO_Currency_FormatKeyboard(CURT_TOME_TOKENS, currencyCost, ZO_CURRENCY_FORMAT_WHITE_AMOUNT_WHITE_NAME)
+                    local currencyString = ZO_Currency_FormatKeyboard(CURT_TOME_TOKENS, currencyCost, ZO_CURRENCY_FORMAT_WHITE_AMOUNT_WHITE_NAME_ICON)
                     return zo_strformat(SI_TAMRIEL_TOMES_TOKEN_REDEMPTION_TEXT, currencyString)
                 end,
             },
@@ -164,7 +173,27 @@ function ZO_TamrielTomeTokenRedemptionDialog_Keyboard_OnInitialized(control)
                     control = control:GetNamedChild("Confirm"),
                     text = SI_MARKET_CONFIRM_PURCHASE_KEYBIND_TEXT,
                     callback = function(dialog)
-                         TryPurchaseTamrielTomePremiumPlus(dialog.data.tomeId)
+                        local pendingDialogData =
+                        {
+                            title = GetString(SI_TAMRIEL_TOMES_TOKEN_REDEMPTION_TITLE),
+                            mainText = GetString(SI_DIALOG_PROCESSING_PURCHASE),
+                            onSetup = function()
+                                TryPurchaseTamrielTomePremiumPlus(dialog.data.tomeId)
+                            end,
+                            onTimeout = function()
+                                ShowResultDialog(tomeId, TAMRIEL_TOME_PURCHASE_RESULT_TIMED_OUT)
+                            end,
+                            events =
+                            {
+                                {
+                                    event = EVENT_TAMRIEL_TOME_PURCHASE_RESULT,
+                                    callback = function(_, tomeId, result)
+                                        ShowResultDialog(tomeId, result)
+                                    end
+                                },
+                            }
+                        }
+                        ZO_Dialogs_ShowDialog("KEYBOARD_PENDING_RESULT_DIALOG", pendingDialogData)
                     end,
                 },
 
@@ -206,7 +235,7 @@ function ZO_TamrielTomeInsufficientTokenRedemptionDialog_Keyboard_OnInitialized(
             {
                 text = function()
                     local currencyCost = GetCurrencyCostToUpgradeTamrielTome()
-                    local currencyString = ZO_Currency_FormatKeyboard(CURT_TOME_TOKENS, currencyCost, ZO_CURRENCY_FORMAT_WHITE_AMOUNT_WHITE_NAME)
+                    local currencyString = ZO_Currency_FormatKeyboard(CURT_TOME_TOKENS, currencyCost, ZO_CURRENCY_FORMAT_WHITE_AMOUNT_WHITE_NAME_ICON)
                     return zo_strformat(SI_TAMRIEL_TOMES_INSUFFICIENT_TOKENS_DIALOG_TEXT, currencyString)
                 end,
             },

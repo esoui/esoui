@@ -8,12 +8,12 @@
             </OnInitialized>
             <Controls>
                 <Label name="$(parent)Title" color="INTERFACE_COLOR_TYPE_BOOK_MEDIUM:BOOK_MEDIUM_BLOODY_YELLOWED_PAPER">
-                    <Anchor point="TOPLEFT" offsetX="4" offsetY="4"/>
+                    <Anchor point="TOPLEFT" offsetY="4"/>
                     <Anchor point="TOPRIGHT" offsetX="-4" offsetY="4"/>
                 </Label>
                 <Label name="$(parent)BodyText" color="INTERFACE_COLOR_TYPE_BOOK_MEDIUM:BOOK_MEDIUM_BLOODY_YELLOWED_PAPER">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetY="4"/>
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Title" relativePoint="BOTTOMRIGHT" offsetY="4"/>
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetX="14" offsetY="4"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Title" relativePoint="BOTTOMRIGHT" offsetX="-4" offsetY="4"/>
                 </Label>
             </Controls>
         </Control>

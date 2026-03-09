@@ -1,50 +1,4 @@
 ----------
--- ZO_TamrielTomeDirectPurchaseData
-----------
-
-ZO_TamrielTomeDirectPurchaseData = ZO_InitializingObject:Subclass()
-
-function ZO_TamrielTomeDirectPurchaseData:Initialize(tomeId, productType)
-    self.tomeId = tomeId
-    self.productType = productType
-
-    self:Update()
-end
-
-function ZO_TamrielTomeDirectPurchaseData:GetTomeId()
-    return self.tomeId
-end
-
-function ZO_TamrielTomeDirectPurchaseData:GetProductType()
-    return self.productType
-end
-
-function ZO_TamrielTomeDirectPurchaseData:Update()
-    self.skuId = GetTamrielTomeSkuId(self.tomeId, self.productType)
-end
-
-function ZO_TamrielTomeDirectPurchaseData:IsAvailableForPurchase()
-    return IsSkuAvailableForPurchase(self.skuId)
-end
-
-function ZO_TamrielTomeDirectPurchaseData:IsOwned()
-    return HasTamrielTomeProductType(self.tomeId, self.productType)
-end
-
-function ZO_TamrielTomeDirectPurchaseData:CanPurchase()
-    return not self:IsOwned() and self:IsAvailableForPurchase()
-end
-
-function ZO_TamrielTomeDirectPurchaseData:GetPricingInfo()
-    local currentPrice, basePrice, currency = GetSkuPricingInfo(self.skuId)
-    return currentPrice, basePrice, currency
-end
-
-function ZO_TamrielTomeDirectPurchaseData:RequestPurchase()
-    DIRECT_PURCHASE_MANAGER:RequestPurchase(self.skuId)
-end
-
-----------
 -- TamrielTomes_Manager
 ----------
 
@@ -99,6 +53,7 @@ function TamrielTomes_Manager:Initialize()
     end
 
     DIRECT_PURCHASE_MANAGER:RegisterCallback("CatalogUpdated", OnCatalogUpdated)
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", OnCatalogUpdated)
 end
 
 function TamrielTomes_Manager:SetupSavedVars()
@@ -178,6 +133,10 @@ function TamrielTomes_Manager:MarkTomeSeen(tomeId)
 end
 
 function TamrielTomes_Manager:GetTomeLastSeenTimestamp(tomeId)
+    if not self:AreSavedVarsInitialized() then
+        return nil
+    end
+
     local tomeSavedVars = self:GetSavedVarsForTome(tomeId)
     if tomeSavedVars then
         return tomeSavedVars.lastSeenTimestamp
@@ -193,6 +152,17 @@ function TamrielTomes_Manager:HasSeenTome(tomeId)
     end
 
     return lastSeenTimestamp <= GetTimeStamp()
+end
+
+function TamrielTomes_Manager:HasNewTomes()
+    local tomeIds = self:GetActiveTomeIds()
+    for _, tomeId in ipairs(tomeIds) do
+        if not self:HasSeenTome(tomeId) then
+            return true
+        end
+    end
+
+    return false
 end
 
 -- Indicates whether there are any Tomes currently available.
@@ -228,10 +198,14 @@ function TamrielTomes_Manager:GetSelectedTomeId()
 end
 
 function TamrielTomes_Manager:SelectTomeId(tomeId)
-    if tomeId == nil or tomeId == 0 then
+    if TAMRIEL_TOMES_MANAGER and not TAMRIEL_TOMES_MANAGER:AreTomesAvailable() then
+        tomeId = nil
+    elseif tomeId == nil or tomeId == 0 then
         -- Default to the active season's tome.
         tomeId = self:GetActiveTomeId()
     end
+
+    -- TODO Tamriel Tomes: Verify that 'tomeId' is a valid, accessible Tome Id.
 
     if tomeId ~= self.selectedTomeId then
         -- Order matters
@@ -281,6 +255,9 @@ function TamrielTomes_Manager:GetTomePremiumPlusRewardDescription(tomeId)
 end
 
 function TamrielTomes_Manager:UpdateTamrielTomesAvailability()
+    -- Refresh the selected Tome to validate the selection now that the Tomes have changed.
+    self:SelectTomeId(self.selectedTomeId)
+
     self:RefreshMainMenus()
 end
 
@@ -323,6 +300,16 @@ function TamrielTomes_Manager:UpdateDirectPurchaseData()
     self:FireCallbacks("DirectPurchaseDataUpdated")
 end
 
+function TamrielTomes_Manager:IsDirectPurchaseEnabled()
+    if not DIRECT_PURCHASE_MANAGER:IsSystemEnabled() then
+        return false
+    end
+
+    local accountTypeId = GetTrialInfo()
+    local isFreeTrial = accountTypeId and accountTypeId ~= 0
+    return not isFreeTrial
+end
+
 function TamrielTomes_Manager:IsAnySelectedTomeProductAvailableForPurchase()
     for productType, purchaseData in pairs(self.selectedTomePurchaseData) do
         if purchaseData:IsAvailableForPurchase() then
@@ -333,6 +320,16 @@ function TamrielTomes_Manager:IsAnySelectedTomeProductAvailableForPurchase()
     return false
 end
 
+function TamrielTomes_Manager:AreAllSelectedTomeProductsOwned()
+    for productType, purchaseData in pairs(self.selectedTomePurchaseData) do
+        if not purchaseData:IsOwned() then
+            return false
+        end
+    end
+
+    return true
+end
+
 function TamrielTomes_Manager:CanPurchaseAnySelectedTomeProduct()
     for productType, purchaseData in pairs(self.selectedTomePurchaseData) do
         if purchaseData:CanPurchase() then
@@ -341,6 +338,18 @@ function TamrielTomes_Manager:CanPurchaseAnySelectedTomeProduct()
     end
 
     return false
+end
+
+function TamrielTomes_Manager:GetPurchaseDisabledMessage()
+    local message = nil
+    if self:AreAllSelectedTomeProductsOwned() then
+        message = GetString(SI_TAMRIEL_TOMES_UPGRADE_DISABLED_FULLY_UPGRADED)
+    elseif not self:IsDirectPurchaseEnabled() then
+        message = ZO_ERROR_COLOR:Colorize(GetString(SI_TAMRIEL_TOMES_UPGRADE_DISABLED))
+    elseif not self:IsAnySelectedTomeProductAvailableForPurchase() then
+        message = GetString(SI_TAMRIEL_TOMES_UPGRADE_DISABLED_NO_SKU_DATA)
+    end
+    return message
 end
 
 function TamrielTomes_Manager:GetPurchaseDataForSelectedTomeProductType(productType)

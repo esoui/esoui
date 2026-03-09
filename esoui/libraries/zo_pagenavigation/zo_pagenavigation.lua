@@ -11,16 +11,78 @@ function ZO_PageNavigationIndicator:Initialize(control, parent)
     control.owner = self
     self.parent = parent
 
-    self.numberLabel = self.control:GetNamedChild("Number")
-    self.iconControl = self.control:GetNamedChild("Icon")
+    self.numberLabel = control:GetNamedChild("Number")
+    self.iconControl = control:GetNamedChild("Icon")
+    self.selectedTexture = control:GetNamedChild("Selected")
+    self.highlightedTexture = control:GetNamedChild("Highlighted")
 end
 
 function ZO_PageNavigationIndicator:GetControl()
     return self.control
 end
 
+function ZO_PageNavigationIndicator:GetNumberLabelControl()
+    return self.numberLabel
+end
+
+function ZO_PageNavigationIndicator:GetIconTextureControl()
+    return self.iconControl
+end
+
+function ZO_PageNavigationIndicator:GetSelectedTextureControl()
+    return self.selectedTexture
+end
+
+function ZO_PageNavigationIndicator:GetHighlightedTextureControl()
+    return self.highlightedTexture
+end
+
 function ZO_PageNavigationIndicator:GetData()
     return self.data
+end
+
+function ZO_PageNavigationIndicator:GetIconTexture()
+    return self.data.icon
+end
+
+function ZO_PageNavigationIndicator:GetFocusColor()
+    return self.data.focusColor and self.data.focusColor or ZO_HIGHLIGHT_TEXT
+end
+
+function ZO_PageNavigationIndicator:GetNormalColor()
+    return self.data.color and self.data.color or ZO_NORMAL_TEXT
+end
+
+function ZO_PageNavigationIndicator:GetSelectedColor()
+    return self.data.selectedColor and self.data.selectedColor or ZO_SELECTED_TEXT
+end
+
+function ZO_PageNavigationIndicator:GetColor()
+    if self:IsSelected() then
+        return self:GetSelectedColor()
+    end
+
+    if self:IsFocused() then
+        return self:GetFocusColor()
+    end
+
+    return self:GetNormalColor()
+end
+
+function ZO_PageNavigationIndicator:GetDefaultFont()
+    return self.parent:GetDefaultIndicatorFont()
+end
+
+function ZO_PageNavigationIndicator:GetFont()
+    return self.data.font or self:GetDefaultFont()
+end
+
+function ZO_PageNavigationIndicator:GetHighlightedTexture()
+    return self.data.highlightedTexture
+end
+
+function ZO_PageNavigationIndicator:GetSelectedTexture()
+    return self.data.selectedTexture
 end
 
 -- indicatorData - a table of various options to modify the indicator
@@ -32,10 +94,6 @@ function ZO_PageNavigationIndicator:SetData(pageNumber, indicatorData)
     self.pageNumber = pageNumber
     self.data = indicatorData or {}
     self:Refresh()
-end
-
-function ZO_PageNavigationIndicator:GetDefaultFont()
-    return self.parent:GetDefaultIndicatorFont()
 end
 
 function ZO_PageNavigationIndicator:IsHidden()
@@ -54,6 +112,14 @@ function ZO_PageNavigationIndicator:GetParent()
     return self.parent
 end
 
+function ZO_PageNavigationIndicator:IsFocused()
+    return self.pageNumber == self.parent:GetFocusPage()
+end
+
+function ZO_PageNavigationIndicator:IsHighlighted()
+    return self.parent:IsPageHighlighted(self.pageNumber)
+end
+
 function ZO_PageNavigationIndicator:IsSelected()
     return self.pageNumber == self.parent:GetCurrentPage()
 end
@@ -63,26 +129,35 @@ function ZO_PageNavigationIndicator:Select()
 end
 
 function ZO_PageNavigationIndicator:Refresh()
-    local data = self.data
-    local color
-    if self:IsSelected() then
-        color = data.selectedColor or ZO_SELECTED_TEXT
-    else
-        color = data.color or ZO_NORMAL_TEXT
-    end
-
-    local hasIcon = data.icon ~= nil
+    local iconTexture = self:GetIconTexture()
+    local hasIcon = iconTexture ~= nil
     self.iconControl:SetHidden(not hasIcon)
     self.numberLabel:SetHidden(hasIcon)
 
+    local color = self:GetColor()
     if hasIcon then
-        self.iconControl:SetTexture(data.icon)
-        -- TODO use optional selected textures or a specific icon color
+        self.iconControl:SetTexture(iconTexture)
         self.iconControl:SetColor(color:UnpackRGBA())
     else
-        self.numberLabel:SetFont(data.font or self:GetDefaultFont())
+        self.numberLabel:SetFont(self:GetFont())
         self.numberLabel:SetColor(color:UnpackRGBA())
-        self.numberLabel:SetText(self.pageNumber)
+        self.numberLabel:SetText(self:GetPageNumber())
+    end
+
+    local selectedTexture = self:GetSelectedTexture()
+    if selectedTexture and self:IsSelected() then
+        self.selectedTexture:SetTexture(selectedTexture)
+        self.selectedTexture:SetHidden(false)
+    else
+        self.selectedTexture:SetHidden(true)
+    end
+
+    local highlightedTexture = self:GetHighlightedTexture()
+    if highlightedTexture and self:IsHighlighted() then
+        self.highlightedTexture:SetTexture(highlightedTexture)
+        self.highlightedTexture:SetHidden(false)
+    else
+        self.highlightedTexture:SetHidden(true)
     end
 end
 
@@ -97,6 +172,14 @@ end
 
 function ZO_PageNavigationIndicator:OnClicked()
     self:Select()
+end
+
+function ZO_PageNavigationIndicator:OnMouseEnter()
+    self.parent:OnMouseEnter(self)
+end
+
+function ZO_PageNavigationIndicator:OnMouseExit()
+    self.parent:OnMouseExit(self)
 end
 
 -----------------
@@ -116,6 +199,7 @@ function ZO_PageNavigation:Initialize(control)
     self.nextPageControl.owner = self
     self.previousPageControl = self.control:GetNamedChild("PreviousPage")
     self.previousPageControl.owner = self
+    self.highlightedPages = {}
 
     local function CreatePageIndicator(objectPool)
         local pageIndicatorControl = ZO_ObjectPool_CreateNamedControl("$(parent)Indicator", "ZO_PageNavigationIndicator", objectPool, control)
@@ -131,9 +215,10 @@ function ZO_PageNavigation:Initialize(control)
     self.allowWrapping = false
     self.startingPageNumber = 1
     self.currentPage = nil
+    self.focusPage = nil
     self.indicatorInfos = {}
     self.indicatorSpacing = 5
-    self.pageChangeSound = SOUNDS.DEFAULT_CLICK -- TODO Tamriel Tomes
+    self.pageChangeSound = SOUNDS.DEFAULT_CLICK
     self.pageIndicators = {}
     self.hidePageIndicators = false
     self.showTooltip = true
@@ -206,6 +291,7 @@ end
 
 function ZO_PageNavigation:Clear()
     self.currentPage = nil
+    self.focusPage = nil
     self.numPages = nil
     self.pageIndicatorPool:ReleaseAllObjects()
     ZO_ClearTable(self.pageIndicators)
@@ -257,9 +343,11 @@ function ZO_PageNavigation:Commit(selectedPage)
         end
     end
 
-    local pageToSelect = selectedPage or self.startingPageNumber
-    local SUPPRESS_SOUND = true
-    self:SelectPage(pageToSelect, SUPPRESS_SOUND)
+    if selectedPage or not self.currentPage then
+        local pageToSelect = selectedPage or self.startingPageNumber
+        local SUPPRESS_SOUND = true
+        self:SelectPage(pageToSelect, SUPPRESS_SOUND)
+    end
 end
 
 function ZO_PageNavigation:UpdateNavigationButtons()
@@ -306,12 +394,44 @@ function ZO_PageNavigation:GetPageChangeSound()
     return self.pageChangeSound
 end
 
+function ZO_PageNavigation:GetPageChangeNextSound()
+    return self.pageChangeNextSound
+end
+
+function ZO_PageNavigation:GetPageChangePreviousSound()
+    return self.pageChangePreviousSound
+end
+
 function ZO_PageNavigation:SetPageChangeSound(sound)
     self.pageChangeSound = sound
 end
 
+function ZO_PageNavigation:SetPageChangeNextSound(sound)
+    self.pageChangeNextSound = sound
+end
+
+function ZO_PageNavigation:SetPageChangePreviousSound(sound)
+    self.pageChangePreviousSound = sound
+end
+
 function ZO_PageNavigation:GetCurrentPage()
     return self.currentPage
+end
+
+function ZO_PageNavigation:GetFocusPage()
+    return self.focusPage
+end
+
+function ZO_PageNavigation:ClearHighlightedPages()
+    ZO_ClearTable(self.highlightedPages)
+end
+
+function ZO_PageNavigation:IsPageHighlighted(pageNumber)
+    return self.highlightedPages[pageNumber]
+end
+
+function ZO_PageNavigation:SetHighlightedPage(pageNumber, isHighlighted)
+    self.highlightedPages[pageNumber] = isHighlighted
 end
 
 function ZO_PageNavigation:ChangePage(direction)
@@ -326,26 +446,44 @@ function ZO_PageNavigation:ChangePage(direction)
         end
     end
 
-    self:SelectPage(pageToSelect)
+    local DONT_SUPPRESS_SOUND = false
+    self:SelectPage(pageToSelect, DONT_SUPPRESS_SOUND, direction)
 end
 
-function ZO_PageNavigation:SelectPage(pageNumber, suppressSound)
-    if pageNumber < self.startingPageNumber or pageNumber > self:GetHighestPageNumber() then
-        return
-    end
+-- Sets the current page number.
+function ZO_PageNavigation:SetCurrentPage(pageNumber)
+    local newPageNumber = zo_clamp(pageNumber or self.startingPageNumber, self.startingPageNumber, self:GetHighestPageNumber())
 
-    if pageNumber == self:GetCurrentPage() then
-        return
-    end
-
-    self.currentPage = pageNumber
+    -- Order matters
+    self.currentPage = newPageNumber
     self:RefreshPageIndicators()
     self:UpdateNavigationButtons()
-    if not suppressSound then
-        PlaySound(self.pageChangeSound)
+    return self.currentPage
+end
+
+-- Sets the current page number, plays the associated sound (if any) and fires the PageChanged callback.
+function ZO_PageNavigation:SelectPage(pageNumber, suppressSound, direction)
+    local previousPage = self.currentPage or self.startingPageNumber or 1
+    pageNumber = self:SetCurrentPage(pageNumber)
+
+    if direction == nil then
+        -- Infer the direction of the page change.
+        if previousPage == pageNumber then
+            direction = 0
+        else
+            direction = previousPage < pageNumber and 1 or -1
+        end
     end
 
-    self:FireCallbacks("PageChanged", pageNumber)
+    if not suppressSound then
+        if direction < 0 then
+            PlaySound(self.pageChangePreviousSound or self.pageChangeSound)
+        elseif direction > 0 then
+            PlaySound(self.pageChangeNextSound or self.pageChangeSound)
+        end
+    end
+
+    self:FireCallbacks("PageChanged", pageNumber, direction)
 end
 
 function ZO_PageNavigation:GetPreviousPageKeybindDescriptor()
@@ -364,6 +502,16 @@ function ZO_PageNavigation:GetNextPageKeybindDescriptor()
     return nil
 end
 
+function ZO_PageNavigation:OnMouseEnter(pageIndicator)
+    self.focusPage = pageIndicator:GetPageNumber()
+    self:RefreshPageIndicators()
+end
+
+function ZO_PageNavigation:OnMouseExit(pageIndicator)
+    self.focusPage = nil
+    self:RefreshPageIndicators()
+end
+
 --[[ Xml Functions ]]--
 
 function ZO_PageNavigation.PreviousPage_OnMouseClicked(control)
@@ -372,7 +520,7 @@ end
 
 function ZO_PageNavigation.PreviousPage_OnMouseEnter(control)
     if control.owner:GetShowTooltips() then
-        InitializeTooltip(InformationTooltip, control, RIGHT, 0, 0, LEFT)
+        InitializeTooltip(InformationTooltip, control, BOTTOM, 0, -10, TOP)
         SetTooltipText(InformationTooltip, GetString(SI_PAGE_NAVIGATION_PREVIOUS_PAGE_LABEL))
     end
 end
@@ -387,7 +535,7 @@ end
 
 function ZO_PageNavigation.NextPage_OnMouseEnter(control)
     if control.owner:GetShowTooltips() then
-        InitializeTooltip(InformationTooltip, control, LEFT, 0, 0, RIGHT)
+        InitializeTooltip(InformationTooltip, control, BOTTOM, 0, -10, TOP)
         SetTooltipText(InformationTooltip, GetString(SI_PAGE_NAVIGATION_NEXT_PAGE_LABEL))
     end
 end

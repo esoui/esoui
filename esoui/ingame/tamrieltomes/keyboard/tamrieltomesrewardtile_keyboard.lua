@@ -33,11 +33,6 @@ function ZO_TamrielTomesReward_Keyboard:OnMouseEnter()
     ZO_GridEntry_SetIconScaledUp(self.control, true)
     local rewardData = self:GetTamrielTomesRewardData()
     TAMRIEL_TOMES_SCREEN_KEYBOARD:SetSelectedTamrielTomesRewardData(rewardData)
-
-    if rewardData and rewardData:CanAffordReward() and rewardData:CanClaimReward() then
-        WINDOW_MANAGER:SetMouseCursor(MOUSE_CURSOR_UI_HAND)
-    end
-
     ZO_Rewards_Shared_OnMouseEnter(self.control, RIGHT, LEFT, -5)
 end
 
@@ -45,7 +40,6 @@ function ZO_TamrielTomesReward_Keyboard:OnMouseExit()
     ZO_Rewards_Shared_OnMouseExit(self.control)
     ZO_GridEntry_SetIconScaledUp(self.control, false)
     TAMRIEL_TOMES_SCREEN_KEYBOARD:SetSelectedTamrielTomesRewardData(nil)
-    WINDOW_MANAGER:SetMouseCursor(MOUSE_CURSOR_DO_NOT_CARE)
 end
 
 function ZO_TamrielTomesReward_Keyboard:OnMouseDown(button)

@@ -323,6 +323,8 @@ function ZO_GenericGamepadDialog_GetControl(dialogType)
     return nil
 end
 
+ZO_GamepadPendingResultDialog_Initialize()
+
 -----------------------
 -- Dialog Management --
 -----------------------

@@ -15,8 +15,20 @@ function ZO_TamrielTomesRewardData:Initialize(tamrielTomeId, rewardTrackId, tier
     self:Update()
 end
 
-function ZO_TamrielTomesRewardData:Equals(rewardTrackId, rewardTrackTier, rewardTrackComponent, rewardIndex)
-    return self:GetRewardTrackId() == rewardTrackId and self:GetTierIndex() == rewardTrackTier and self:GetRewardComponent() == rewardTrackComponent and self:GetRewardIndex() == rewardIndex
+function ZO_TamrielTomesRewardData:Equals(rewardTrackIdOrData, rewardTrackTier, rewardTrackComponent, rewardIndex)
+    if type(rewardTrackIdOrData) == "table" then
+        local data = rewardTrackIdOrData
+        if not data:IsInstanceOf(ZO_TamrielTomesRewardData) then
+            return false
+        end
+
+        rewardTrackIdOrData = data:GetRewardTrackId()
+        rewardTrackTier = data:GetTierIndex()
+        rewardTrackComponent = data:GetRewardComponent()
+        rewardIndex = data:GetRewardIndex()
+    end
+
+    return self:GetRewardTrackId() == rewardTrackIdOrData and self:GetTierIndex() == rewardTrackTier and self:GetRewardComponent() == rewardTrackComponent and self:GetRewardIndex() == rewardIndex
 end
 
 function ZO_TamrielTomesRewardData:GetRewardData()
@@ -164,19 +176,23 @@ function ZO_TamrielTomesRewardData:CanPreviewReward()
     return CanPreviewReward(self:GetRewardId()) or self:IsRewardList()
 end
 
+function ZO_TamrielTomesRewardData:CanQuickPreviewReward()
+    return CanPreviewReward(self:GetRewardId()) and not self:IsRewardList()
+end
+
 function ZO_TamrielTomesRewardData:IsLocked()
     return not (self.hasAccessToComponent and self.hasAccessToReward)
 end
 
 function ZO_TamrielTomesRewardData:Update()
-    local trackIndex = self:GetTamrielTomeIndex()
+    local tomeIndex = self:GetTamrielTomeIndex()
     local tierIndex = self:GetTierIndex()
     local component = self:GetRewardComponent()
-    local index = self:GetRewardIndex()
-    self.isClaimed, self.isFallback, self.isInfinitelyRepeatable = GetRewardTrackRewardClaimedState(REWARD_TRACK_TYPE_TAMRIEL_TOMES, trackIndex, tierIndex, component, index)
-    self.hasAccessToComponent = HasAccessToRewardTrackComponent(REWARD_TRACK_TYPE_TAMRIEL_TOMES, trackIndex, component)
+    local rewardIndex = self:GetRewardIndex()
+    self.isClaimed, self.isFallback, self.isInfinitelyRepeatable = GetRewardTrackRewardClaimedState(REWARD_TRACK_TYPE_TAMRIEL_TOMES, tomeIndex, tierIndex, component, rewardIndex)
+    self.hasAccessToComponent = HasAccessToRewardTrackComponent(REWARD_TRACK_TYPE_TAMRIEL_TOMES, tomeIndex, component)
 
-    local _, currentTier, progressToNextTier = GetInfoForRewardTrack(REWARD_TRACK_TYPE_TAMRIEL_TOMES, trackIndex)
+    local _, currentTier, progressToNextTier = GetInfoForRewardTrack(REWARD_TRACK_TYPE_TAMRIEL_TOMES, tomeIndex)
     self.hasAccessToReward = currentTier >= tierIndex
 end
 
@@ -318,5 +334,104 @@ function ZO_TamrielTomeData:HasAccessToComponent(component)
 end
 
 function ZO_TamrielTomeData:Update()
-    self.rewardTrackId = GetInfoForRewardTrack(REWARD_TRACK_TYPE_TAMRIEL_TOMES, self.tamrielTomeIndex)
+    self.rewardTrackId = GetRewardTrackIdFromReferenceTrackId(REWARD_TRACK_TYPE_TAMRIEL_TOMES, self.tamrielTomeId)
+end
+
+
+-- SKU Data
+
+ZO_DirectPurchaseSkuData = ZO_InitializingObject:Subclass()
+
+function ZO_DirectPurchaseSkuData:Initialize(skuId)
+    self.skuId = skuId
+end
+
+function ZO_DirectPurchaseSkuData:GetSkuId()
+    return self.skuId
+end
+
+function ZO_DirectPurchaseSkuData:GetDisplayName()
+    return GetSkuDisplayName(self.skuId)
+end
+
+function ZO_DirectPurchaseSkuData:IsAvailableForPurchase()
+    return IsSkuAvailableForPurchase(self.skuId)
+end
+
+function ZO_DirectPurchaseSkuData:GetPricingInfo()
+    local currentPrice, basePrice, currency = GetSkuPricingInfo(self.skuId)
+    return currentPrice, basePrice, currency
+end
+
+function ZO_DirectPurchaseSkuData:GetPricingInfoFormatted()
+    local currentPriceString, basePriceString = GetSkuPricingInfoFormatted(self.skuId)
+    return currentPriceString, basePriceString
+end
+
+function ZO_DirectPurchaseSkuData:GetPricingInfoWithTax()
+    if GetSkuPricingInfoWithTax then
+        local currentPrice, basePrice, taxPrice, totalPrice, currency, isVatIncluded = GetSkuPricingInfoWithTax(self.skuId)
+        return currentPrice, basePrice, taxPrice, totalPrice, currency, isVatIncluded
+    end
+    return nil
+end
+
+function ZO_DirectPurchaseSkuData:GetPricingInfoWithTaxFormatted()
+    if GetSkuPricingInfoWithTaxFormatted then
+        local currentPriceString, basePriceString, taxPriceString, totalPriceString, isVatIncluded = GetSkuPricingInfoWithTaxFormatted(self.skuId)
+        return currentPriceString, basePriceString, taxPriceString, totalPriceString, isVatIncluded
+    end
+    return nil
+end
+
+function ZO_DirectPurchaseSkuData:RequestPurchase()
+    DIRECT_PURCHASE_MANAGER:RequestPurchase(self.skuId)
+end
+
+function ZO_DirectPurchaseSkuData:ConfirmPurchase()
+    local purchaseRequestId = ConfirmPurchaseSku and ConfirmPurchaseSku(self.skuId) or 0
+    return purchaseRequestId ~= 0
+end
+
+
+-- Tamriel Tome Direct Purchase Data
+
+ZO_TamrielTomeDirectPurchaseData = ZO_InitializingObject:Subclass()
+
+function ZO_TamrielTomeDirectPurchaseData:Initialize(tomeId, productType)
+    self.tomeId = tomeId
+    self.productType = productType
+
+    self:Update()
+end
+
+function ZO_TamrielTomeDirectPurchaseData:GetTomeId()
+    return self.tomeId
+end
+
+function ZO_TamrielTomeDirectPurchaseData:GetProductType()
+    return self.productType
+end
+
+function ZO_TamrielTomeDirectPurchaseData:GetSkuData()
+    return self.skuData
+end
+
+function ZO_TamrielTomeDirectPurchaseData:Update()
+    local skuId = GetTamrielTomeSkuId(self.tomeId, self.productType)
+    if not self.skuData or self.skuData:GetSkuId() ~= skuId then
+        self.skuData = ZO_DirectPurchaseSkuData:New(skuId)
+    end
+end
+
+function ZO_TamrielTomeDirectPurchaseData:IsAvailableForPurchase()
+    return self.skuData:IsAvailableForPurchase()
+end
+
+function ZO_TamrielTomeDirectPurchaseData:IsOwned()
+    return HasTamrielTomeProductType(self.tomeId, self.productType)
+end
+
+function ZO_TamrielTomeDirectPurchaseData:CanPurchase()
+    return not self:IsOwned() and self:IsAvailableForPurchase()
 end

@@ -1,4 +1,4 @@
-<GuiXml>
+﻿<GuiXml>
     <Controls>
         <Control name="ZO_BattlegroundScoreboardRoundIndicatorRound" mouseEnabled="true" virtual="true">
             <Dimensions x="32" y="72"/>

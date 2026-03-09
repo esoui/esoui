@@ -1,4 +1,4 @@
-<GuiXml>
+﻿<GuiXml>
     <Controls>
         <Label name="ZO_Gamepad_GuildKiosk_HeaderTemplate" inherits="ZO_GamepadMenuEntryHeaderFontTemplate" virtual="true">
             <Anchor point="BOTTOM" relativePoint="TOP" offsetY="-19"/>

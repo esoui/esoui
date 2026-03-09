@@ -1,4 +1,4 @@
-<GuiXml>
+﻿<GuiXml>
     <Controls>
         <Label name="ZO_Gamepad_ItemImprovement_StatLabel" font="ZoFontGamepad27" modifyTextType="UPPERCASE" virtual="true"/>
         <Label name="ZO_Gamepad_ItemImprovement_ValueLabel" font="ZoFontGamepad34" virtual="true"/>

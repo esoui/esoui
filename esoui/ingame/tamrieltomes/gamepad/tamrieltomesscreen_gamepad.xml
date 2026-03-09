@@ -37,8 +37,8 @@
                         <Label name="$(parent)Title" override="true" font="ZoFontGamepadBold48"/>
                         <Label name="$(parent)Subtitle" override="true" font="ZoFontGamepad27"/>
                         <Control name="$(parent)Buttons" override="true">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)Subtitle" relativePoint="BOTTOMLEFT" offsetY="8"/>
-                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Subtitle" relativePoint="BOTTOMRIGHT" offsetY="8"/>
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Subtitle" relativePoint="BOTTOMLEFT" offsetY="36"/>
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Subtitle" relativePoint="BOTTOMRIGHT" offsetY="36"/>
                             <Controls>
                                 <Button name="$(parent)ChallengesButton" override="true" inherits="ZO_TamrielTomes_GamepadButtonTemplate"/>
                                 <Button name="$(parent)UpgradeButton" override="true" inherits="ZO_TamrielTomes_GamepadButtonTemplate"/>
@@ -48,7 +48,7 @@
                 </Control>
                 <Control name="$(parent)Book" override="true">
                     <Dimensions x="850" y="835"/>
-                    <Anchor point="TOP" relativeTo="$(parent)Header" relativePoint="BOTTOM"/>
+                    <Anchor point="TOP" relativeTo="$(parent)Header" relativePoint="BOTTOM" offsetY="6"/>
                     <Controls>
                         <Control name="$(parent)Currency" override="true">
                             <Anchor point="TOPLEFT" offsetY="10"/>

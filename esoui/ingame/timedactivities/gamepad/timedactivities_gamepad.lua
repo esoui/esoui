@@ -18,6 +18,8 @@ local TIMED_ACTIVITY_TIME_REMAINING_ROW_DATA_3 = 7
 local TIMED_ACTIVITY_TIME_REMAINING_ROW_DATA_4 = 8
 local MAX_LINES_SUPPORTED = 4
 
+local TIMED_ACTIVITY_CLEAR_NEW_INDICATOR_TIMER_SECONDS = 0.2
+
 local g_checkboxControlPool = nil
 local function GetCheckboxControlPool()
     if not g_checkboxControlPool then
@@ -89,19 +91,7 @@ function ZO_TimedActivities_Gamepad:InitializeControls()
 
     self.categoryList = self:GetMainList()
     self.categoryList:AddDataTemplate("ZO_GamepadItemEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
-    self.categoryList:Clear()
-    do
-        local entryData = ZO_GamepadEntryData:New(GetString("SI_TIMEDACTIVITYTYPE", TIMED_ACTIVITY_TYPE_WEEKLY), "EsoUI/Art/TamrielTomes/Gamepad/gp_timedActivityCategory_weekly.dds")
-        entryData:SetDataSource({ activityType = TIMED_ACTIVITY_TYPE_WEEKLY })
-        self.categoryList:AddEntry("ZO_GamepadItemEntryTemplate", entryData)
-    end
-    do
-        local entryData = ZO_GamepadEntryData:New(GetString("SI_TIMEDACTIVITYTYPE", TIMED_ACTIVITY_TYPE_SEASONAL), "EsoUI/Art/TamrielTomes/Gamepad/gp_timedActivityCategory_seasonal.dds")
-        entryData:SetDataSource({ activityType = TIMED_ACTIVITY_TYPE_SEASONAL })
-        self.categoryList:AddEntry("ZO_GamepadItemEntryTemplate", entryData)
-    end
-    local RESET_SELECTION_TO_TOP = true
-    self.categoryList:Commit(RESET_SELECTION_TO_TOP)
+    self:RefreshCategoryList()
 
     local function OnTargetDataChanged(list, targetData, oldTargetData)
         self:SetCurrentActivityType(targetData.activityType)
@@ -131,7 +121,7 @@ function ZO_TimedActivities_Gamepad:InitializeControls()
             callback = function()
                 SCENE_MANAGER:HideCurrentScene()
             end,
-            sound = SOUNDS.GAMEPAD_MENU_BACK,
+            sound = SOUNDS.TAMRIEL_TOMES_NAVIGATE_BACK,
         },
     }
     self:SetListsUseTriggerKeybinds(true)
@@ -141,9 +131,37 @@ function ZO_TimedActivities_Gamepad:GetCategoryData()
     return self.categoryData
 end
 
+function ZO_TimedActivities_Gamepad:RefreshCategoryList()
+    self.categoryList:Clear()
+    do
+        local function isNewCallback()
+            return TIMED_ACTIVITIES_MANAGER:HasClaimableTimedActivities(TIMED_ACTIVITY_TYPE_WEEKLY) or TIMED_ACTIVITIES_MANAGER:HasNewTimedActivities(TIMED_ACTIVITY_TYPE_WEEKLY)
+        end
+
+        local entryData = ZO_GamepadEntryData:New(GetString("SI_TIMEDACTIVITYTYPE", TIMED_ACTIVITY_TYPE_WEEKLY), "EsoUI/Art/TamrielTomes/Gamepad/gp_timedActivityCategory_weekly.dds", nil, nil, isNewCallback)
+        entryData:SetDataSource({ activityType = TIMED_ACTIVITY_TYPE_WEEKLY })
+        self.categoryList:AddEntry("ZO_GamepadItemEntryTemplate", entryData)
+    end
+    do
+        local function isNewCallback()
+            return TIMED_ACTIVITIES_MANAGER:HasClaimableTimedActivities(TIMED_ACTIVITY_TYPE_SEASONAL) or TIMED_ACTIVITIES_MANAGER:HasNewTimedActivities(TIMED_ACTIVITY_TYPE_SEASONAL)
+        end
+
+        local entryData = ZO_GamepadEntryData:New(GetString("SI_TIMEDACTIVITYTYPE", TIMED_ACTIVITY_TYPE_SEASONAL), "EsoUI/Art/TamrielTomes/Gamepad/gp_timedActivityCategory_seasonal.dds", nil, nil, isNewCallback)
+        entryData:SetDataSource({ activityType = TIMED_ACTIVITY_TYPE_SEASONAL })
+        self.categoryList:AddEntry("ZO_GamepadItemEntryTemplate", entryData)
+    end
+    local RESET_SELECTION_TO_TOP = true
+    self.categoryList:Commit(RESET_SELECTION_TO_TOP)
+end
+
 function ZO_TimedActivities_Gamepad:RefreshList()
     local currentActivityType, activityEntries = ZO_TimedActivities_Shared.RefreshList(self)
     self.activitiesList:RefreshList(currentActivityType, activityEntries)
+end
+
+function ZO_TimedActivities_Gamepad:RefreshNewIndicators()
+    self.categoryList:RefreshVisible()
 end
 
 function ZO_TimedActivities_Gamepad:RefreshCurrentActivityInfo()
@@ -254,6 +272,10 @@ function ZO_TimedActivitiesList_Gamepad:Initialize(control)
     local PIN_SIZE = 40
     self.pinTexture = zo_iconFormat(PIN_TEXTURE, PIN_SIZE, PIN_SIZE)
 
+    local NEW_INDICATOR_TEXTURE = "/esoui/art/miscellaneous/new_icon.dds"
+    local NEW_INDICATOR_SIZE = 40
+    self.newIndicatorTexture = zo_iconFormat(NEW_INDICATOR_TEXTURE, NEW_INDICATOR_SIZE, NEW_INDICATOR_SIZE)
+
     local function SetupActivityRow(entryControl, data)
         self:SetupRow(entryControl, data)
         self:SetupActivityRow(entryControl, data)
@@ -300,31 +322,10 @@ function ZO_TimedActivitiesList_Gamepad:Initialize(control)
             sound = SOUNDS.GAMEPAD_MENU_BACK,
         },
 
-        -- Track
-        {
-            name = function()
-                if self:GetSelectedData():IsTracked() then
-                    return GetString(SI_TAMRIEL_TOMES_CHALLENGES_ACTION_NAME_UNPIN)
-                end
-                return GetString(SI_TAMRIEL_TOMES_CHALLENGES_ACTION_NAME_PIN)
-            end,
-            keybind = "UI_SHORTCUT_PRIMARY",
-            callback = function()
-                self:GetSelectedData():ToggleTracking()
-            end,
-            visible = function()
-                local selectedData = self:GetSelectedData()
-                if selectedData then
-                    return selectedData:CanTrack() 
-                end
-                return false
-            end,
-        },
-
         -- Claim
         {
             name = GetString(SI_TAMRIEL_TOMES_CHALLENGES_ACTION_NAME_CLAIM),
-            keybind = "UI_SHORTCUT_SECONDARY",
+            keybind = "UI_SHORTCUT_PRIMARY",
             callback = function()
                 self:GetSelectedData():Claim()
             end,
@@ -337,6 +338,27 @@ function ZO_TimedActivitiesList_Gamepad:Initialize(control)
             end,
             -- Play the sound assuming there shouldn't be any real situation where this keybind is present but claiming fails
             sound = SOUNDS.TAMRIEL_TOMES_CHALLENGE_REWARD_CLAIMED
+        },
+
+        -- Track
+        {
+            name = function()
+                if self:GetSelectedData():IsTracked() then
+                    return GetString(SI_TAMRIEL_TOMES_CHALLENGES_ACTION_NAME_UNPIN)
+                end
+                return GetString(SI_TAMRIEL_TOMES_CHALLENGES_ACTION_NAME_PIN)
+            end,
+            keybind = "UI_SHORTCUT_SECONDARY",
+            callback = function()
+                self:GetSelectedData():ToggleTracking()
+            end,
+            visible = function()
+                local selectedData = self:GetSelectedData()
+                if selectedData then
+                    return selectedData:CanTrack() 
+                end
+                return false
+            end,
         },
 
         -- Reroll
@@ -355,6 +377,7 @@ function ZO_TimedActivitiesList_Gamepad:Initialize(control)
                 end
                 return false
             end,
+            sound = SOUNDS.TAMRIEL_TOMES_CHALLENGE_REROLL,
         },
     }
 end
@@ -383,9 +406,13 @@ function ZO_TimedActivitiesList_Gamepad:SetupActivityRow(control, data)
     control.data = dataSource
     local isFullyClaimedOrExpired = dataSource:IsFullyClaimedOrExpired()
 
+    -- TODO Tamriel Tomes: Evaluate the option of using a multi-icon for the Tracked and New/Claimable indicators.
     local name = dataSource:GetName()
     if dataSource:IsTracked() then
         name = string.format("%s%s", self.pinTexture, name)
+    end
+    if dataSource:CanClaim() or TIMED_ACTIVITIES_MANAGER:IsNewTimedActivity(dataSource) then
+        name = string.format("%s%s", self.newIndicatorTexture, name)
     end
     control.nameLabel:SetText(name)
     local selectedTextColor = isFullyClaimedOrExpired and ZO_DISABLED_TEXT or ZO_SELECTED_TEXT
@@ -495,9 +522,27 @@ end
 function ZO_TimedActivitiesList_Gamepad:OnSelectionChanged(oldData, newData)
     ZO_SortFilterList_Gamepad.OnSelectionChanged(self, oldData, newData)
 
+    if oldData and self.selectedDataFrameTimeS then
+        -- If the oldData remained selected for the minimum duration,
+        -- mark this Timed Activity as seen.
+        if GetFrameTimeSeconds() - self.selectedDataFrameTimeS >= TIMED_ACTIVITY_CLEAR_NEW_INDICATOR_TIMER_SECONDS then
+            TIMED_ACTIVITIES_MANAGER:MarkTimedActivitiesAsSeen({oldData})
+
+            local control = ZO_ScrollList_GetDataControl(self.listControl, oldData)
+            if control then
+                self:SetupActivityRow(control, oldData)
+            end
+        end
+
+        self.selectedDataFrameTimeS = nil
+    end
+
     if newData then
         local activityIndex = newData:GetIndex()
         self:ShowActivityTooltip(activityIndex)
+
+        -- Track when this data was selected.
+        self.selectedDataFrameTimeS = GetFrameTimeSeconds()
     else
         self:ClearActivityTooltip()
     end

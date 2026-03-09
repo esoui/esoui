@@ -1,4 +1,4 @@
-<GuiXml>
+﻿<GuiXml>
     <Controls>
         <Control name="ZO_MarketCurrencyLabel_Gamepad" resizeToFitDescendents="true" virtual="true">
             <Controls>

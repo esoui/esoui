@@ -19,11 +19,17 @@ function ZO_TimedActivities_Shared:OnDeferredInitialize()
 
     local function OnActivitiesUpdated()
         self:MarkDirty()
+        self:RefreshNewIndicators()
+    end
+
+    local function OnSeenActivitiesUpdated()
+        self:RefreshNewIndicators()
     end
 
     TIMED_ACTIVITIES_MANAGER:RegisterCallback("OnRefreshAvailability", OnRefreshAvailability)
     TIMED_ACTIVITIES_MANAGER:RegisterCallback("OnActivitiesUpdated", OnActivitiesUpdated)
     TIMED_ACTIVITIES_MANAGER:RegisterCallback("OnActivityUpdated", OnActivitiesUpdated)
+    TIMED_ACTIVITIES_MANAGER:RegisterCallback("SeenActivitiesUpdated", OnSeenActivitiesUpdated)
 
         -- eventId, currencyType, currencyLocation, delta, reason, reasonInfo
     local function OnCurrencyUpdated(_, currencyType)
@@ -100,8 +106,10 @@ function ZO_TimedActivities_Shared:RefreshList()
     end
 
     local activityEntries = {}
+    local activityDatas = {}
     for index, activityData in TIMED_ACTIVITIES_MANAGER:ActivitiesIterator(activityTypeFilters) do
         table.insert(activityEntries, ZO_EntryData:New(activityData))
+        table.insert(activityDatas, activityData)
     end
 
     return currentActivityType, activityEntries
@@ -116,6 +124,16 @@ function ZO_TimedActivities_Shared:RefreshAvailability()
         emptyMessage = zo_strformat(SI_TIMED_ACTIVITIES_EMPTY_LIST, activityTypeName)
     end
     return isAvailable, emptyMessage
+end
+
+function ZO_TimedActivities_Shared:RefreshNewIndicators()
+    local showIndicator
+
+    showIndicator = TIMED_ACTIVITIES_MANAGER:HasClaimableTimedActivities(TIMED_ACTIVITY_TYPE_WEEKLY) or TIMED_ACTIVITIES_MANAGER:HasNewTimedActivities(TIMED_ACTIVITY_TYPE_WEEKLY)
+    self.weeklyNewIndicatorTexture:SetHidden(not showIndicator)
+
+    showIndicator = TIMED_ACTIVITIES_MANAGER:HasClaimableTimedActivities(TIMED_ACTIVITY_TYPE_SEASONAL) or TIMED_ACTIVITIES_MANAGER:HasNewTimedActivities(TIMED_ACTIVITY_TYPE_SEASONAL)
+    self.seasonalNewIndicatorTexture:SetHidden(not showIndicator)
 end
 
 function ZO_TimedActivities_Shared.SetupClaimProgress(timedActivityData, claimableLabel, checkboxControlPool)
@@ -207,6 +225,7 @@ ZO_TimedActivities_Shared:MUST_IMPLEMENT("OnRerollCurrencyUpdated")
 
 function ZO_TimedActivities_Shared:OnShowing()
     self.refreshGroups:UpdateRefreshGroups()
+    self:RefreshNewIndicators()
 end
 
 function ZO_TimedActivities_Shared:OnShown()

@@ -1,4 +1,4 @@
-<GuiXml>
+﻿<GuiXml>
     <Controls>
         <Control name="ZO_GamepadMarket_CategoryTemplate" hidden="true" resizeToFitDescendents="true" virtual="true">
             <Anchor point="TOPLEFT" relativeTo="$(grandparent)"/>

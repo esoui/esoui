@@ -187,6 +187,7 @@ EsoUI\Libraries\Utility\ZO_AutoComplete.lua
 
 EsoUI\Libraries\Utility\ZO_LinkHandler.lua
 EsoUI\Libraries\Utility\ZO_SavedVars.lua
+EsoUI\Libraries\Utility\ZO_SavedKeys.lua
 
 EsoUI\Libraries\Utility\ZO_FadingControlBuffer.lua
 EsoUI\Libraries\Utility\ZO_FadingStationaryControlBuffer.lua

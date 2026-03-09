@@ -1,4 +1,4 @@
-ZO_GAMEPAD_MARKET_SCENE_NAME = "gamepad_market"
+﻿ZO_GAMEPAD_MARKET_SCENE_NAME = "gamepad_market"
 ZO_GAMEPAD_MARKET_BUNDLE_CONTENTS_SCENE_NAME = "gamepad_market_bundle_contents"
 ZO_GAMEPAD_MARKET_LOCKED_SCENE_NAME = "gamepad_market_locked"
 ZO_GAMEPAD_MARKET_PRE_SCENE_NAME = "gamepad_market_pre_scene"

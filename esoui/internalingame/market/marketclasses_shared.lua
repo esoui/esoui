@@ -1,4 +1,4 @@
--- layers for the various elements on the market product tiles
+﻿-- layers for the various elements on the market product tiles
 -- controls are layered to ensure correct display order
 -- Background layer
 ZO_MARKET_TILE_BACKGROUND_LEVEL =   1

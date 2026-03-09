@@ -3,10 +3,10 @@
         <Control name="ZO_TamrielTomesPurchaseReward_Keyboard" inherits="ZO_TamrielTomesPurchaseReward_Shared" mouseEnabled="true" virtual="true">
             <Dimensions x="ZO_TAMRIEL_TOMES_PURCHASE_REWARD_DIMENSIONS_KEYBOARD" y="ZO_TAMRIEL_TOMES_PURCHASE_REWARD_DIMENSIONS_KEYBOARD"/>
             <OnMouseEnter>
-                ZO_TamrielTomesPurchaseScreen_Keyboard.Reward_OnMouseEnter(self)
+                TAMRIEL_TOMES_PURCHASE_SCREEN_KEYBOARD:OnMouseEnterReward(self)
             </OnMouseEnter>
             <OnMouseExit>
-                ZO_TamrielTomesPurchaseScreen_Keyboard.Reward_OnMouseExit(self)
+                TAMRIEL_TOMES_PURCHASE_SCREEN_KEYBOARD:OnMouseExitReward(self)
             </OnMouseExit>
             <Controls>
                 <Control name="$(parent)Container" override="true">
@@ -20,7 +20,7 @@
             <Dimensions x="ZO_TAMRIEL_TOMES_PURCHASE_VERTICAL_DIVIDER_WIDTH_KEYBOARD" y="ZO_TAMRIEL_TOMES_PURCHASE_REWARD_DIMENSIONS_KEYBOARD"/>
         </Control>
         <Button name="ZO_TamrielTomesPurchaseButton_Keyboard" inherits="ZO_DefaultButton" font="ZoFontWinH2" virtual="true">
-            <Dimensions x="400" y="75"/>
+            <Dimensions x="400" y="50"/>
         </Button>
         <TopLevelControl name="ZO_TamrielTomesPurchase_KeyboardTL" inherits="ZO_TamrielTomesPurchase_SharedTL">
             <Anchor point="RIGHT"/>
@@ -38,7 +38,7 @@
                             <Controls>
                                 <Button name="$(parent)PremiumButton" override="true" inherits="ZO_TamrielTomesPurchaseButton_Keyboard"/>
                                 <Button name="$(parent)PremiumPlusButton" override="true" inherits="ZO_TamrielTomesPurchaseButton_Keyboard"/>
-                                <Label name="$(parent)PremiumPlusDescription" override="true" font="ZoFontWinH3"/>
+                                <Label name="$(parent)PremiumPlusDescription" override="true" font="ZoFontWinH4"/>
                             </Controls>
                         </Control>
                         <Control name="$(parent)Row2" override="true">

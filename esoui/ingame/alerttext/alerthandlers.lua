@@ -1320,12 +1320,6 @@ local AlertHandlers =
             return ALERT, GetString("SI_VENGEANCEACTIONRESULT", result), SOUNDS.GENERAL_ALERT_ERROR
         end
     end,
-
-    [EVENT_DIRECT_PURCHASE_PURCHASE_SKU_RESULT] = function(result)
-        if result ~= DIRECT_PURCHASE_PURCHASE_SKU_RESULT_SUCCESS then
-            return ALERT, GetString("SI_DIRECTPURCHASEPURCHASESKURESULT", result), SOUNDS.GENERAL_ALERT_ERROR
-        end
-    end,
 }
 
 ZO_AntiquityScryingResultsToAlert =

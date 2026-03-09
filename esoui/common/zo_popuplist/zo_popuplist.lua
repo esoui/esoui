@@ -89,6 +89,60 @@ function ZO_PopupList:Hide()
     self.onMouseExitCallback = nil
 end
 
+function ZO_PopupList:Show(...)
+    self:SetAnchor(...)
+    self.control:SetHidden(false)
+end
+
+do
+    local g_highlightAnimationProvider = ZO_ReversibleAnimationProvider:New("ShowOnMouseOverLabelAnimation")
+
+    function ZO_PopupList:ShowRewardList(rewardId, onMouseEnterCallback, onMouseExitCallback, ...)
+        local rewardListId = GetRewardListIdFromReward(rewardId)
+        local rewards = REWARDS_MANAGER:GetAllRewardInfoForRewardList(rewardListId)
+        self:ClearList()
+        for _, reward in ipairs(rewards) do
+            self:AddItem(ZO_POPUP_LIST_DATA_TYPE_ITEM, reward)
+        end
+        self:UpdateList()
+        self:SetOnMouseEnterCallback(function(control)
+            ZO_GridEntry_SetIconScaledUp(control, true)
+            local highlight = control:GetNamedChild("Highlight")
+            if highlight and highlight:GetType() == CT_TEXTURE then
+                g_highlightAnimationProvider:PlayForward(highlight)
+            end
+            ZO_Rewards_Shared_OnMouseEnter(control, RIGHT, LEFT, -5)
+
+            if onMouseEnterCallback then
+                onMouseEnterCallback(control)
+            end
+        end)
+        self:SetOnMouseExitCallback(function(control)
+            ZO_GridEntry_SetIconScaledUp(control, false)
+            local highlight = control:GetNamedChild("Highlight")
+            if highlight and highlight:GetType() == CT_TEXTURE then
+                g_highlightAnimationProvider:PlayBackward(highlight)
+            end
+            ZO_Rewards_Shared_OnMouseExit()
+            
+            if onMouseExitCallback then
+                onMouseExitCallback(control)
+            end
+        end)
+
+        self:Show(...)
+    end
+end
+
+function ZO_PopupList:SetAnchor(anchorFromPoint, anchorToControl, anchorToPoint, offsetX, offsetY)
+    if not anchorFromPoint then
+        return
+    end
+
+    self.control:ClearAnchors()
+    self.control:SetAnchor(anchorFromPoint, anchorToControl, anchorToPoint, offsetX, offsetY)
+end
+
 function ZO_PopupList:SetOnMouseEnterCallback(onMouseEnterCallback)
     self.onMouseEnterCallback = onMouseEnterCallback
 end

@@ -15,5 +15,10 @@
                 </Label>
             </Controls>
         </TopLevelControl>
+        <TopLevelControl name="ZO_PreviewRewardList_Screen_Gamepad_TL" inherits="ZO_Gamepad_ParametricList_Screen">
+            <OnInitialized>
+                ZO_PreviewRewardList_Screen_Gamepad.OnControlInitialized(self)
+            </OnInitialized>
+        </TopLevelControl>
     </Controls>
 </GuiXml>

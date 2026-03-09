@@ -5272,3 +5272,53 @@ ESO_Dialogs["KEYBINDINGS_RESET_GAMEPAD_DEADZONES_TO_DEFAULTS"] =
         },
     }
 }
+
+ESO_Dialogs["TAMRIEL_TOME_PURCHASE_RESULT"] =
+{
+    canQueue = true,
+
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+
+    title =
+    {
+        text = function(dialog)
+            if dialog.data.result == TAMRIEL_TOME_PURCHASE_RESULT_SUCCESS then
+                return GetString(SI_TRANSACTION_COMPLETE_TITLE)
+            end
+            return GetString(SI_TRANSACTION_FAILED_TITLE)
+        end,
+    },
+
+    mainText =
+    {
+        text = function(dialog)
+            local result = dialog.data.result
+            local skuId = GetTamrielTomeSkuId(dialog.data.tomeId, TAMRIEL_TOME_PRODUCT_TYPE_PREMIUM_PLUS)
+            if result == TAMRIEL_TOME_PURCHASE_RESULT_SUCCESS then
+                local skuData = ZO_DirectPurchaseSkuData:New(skuId)
+                return zo_strformat(SI_TRANSACTION_COMPLETE_PRODUCT_NAME_BODY, ZO_WHITE:Colorize(skuData:GetDisplayName()))
+            end
+
+            local resultString = GetString("SI_TAMRIELTOMEPURCHASERESULT", result)
+            if result == TAMRIEL_TOME_PURCHASE_RESULT_NOT_ENOUGH_CURRENCY then
+                local NO_AMOUNT = nil
+                local currencyName = ZO_Currency_FormatPlatform(CURT_TOME_TOKENS, NO_AMOUNT, ZO_CURRENCY_FORMAT_PLURAL_NAME_ICON)
+                return zo_strformat(resultString, currencyName)
+            end
+
+            return resultString
+        end,
+    },
+
+    buttons =
+    {
+        {
+            keybind = "DIALOG_PRIMARY",
+            gamepadPreferredKeybind = "DIALOG_NEGATIVE",
+            text = SI_DIALOG_BACK,
+        },
+    },
+}

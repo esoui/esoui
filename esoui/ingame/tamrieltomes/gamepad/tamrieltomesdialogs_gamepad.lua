@@ -272,42 +272,70 @@ local function TokenRedemptionDialog_Setup(dialog, data)
     dialog:setupFunc(headerData)
 end
 
+local function ShowResultDialog(tomeId, result)
+    -- TODO Tamriel Tomes: Refactor dialogs to support a universal setup function
+    if result == TAMRIEL_TOME_PURCHASE_RESULT_SUCCESS then
+        PlaySound(SOUNDS.TAMRIEL_TOMES_PASS_PURCHASED)
+    end
+
+    ZO_Dialogs_ShowGamepadDialog("TAMRIEL_TOME_PURCHASE_RESULT", { tomeId = tomeId, result = result })
+end
+
 ZO_Dialogs_RegisterCustomDialog("TAMRIEL_TOME_TOKEN_REDEMPTION_GAMEPAD",
+{
+    setup = TokenRedemptionDialog_Setup,
+    canQueue = true,
+    gamepadInfo =
     {
-        setup = TokenRedemptionDialog_Setup,
-        canQueue = true,
-        gamepadInfo =
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    title =
+    {
+        text = GetString(SI_TAMRIEL_TOMES_TOKEN_REDEMPTION_TITLE),
+    },
+    mainText =
+    {
+        text = function()
+            local currencyCost = GetCurrencyCostToUpgradeTamrielTome()
+            local currencyString = ZO_Currency_FormatGamepad(CURT_TOME_TOKENS, currencyCost, ZO_CURRENCY_FORMAT_WHITE_AMOUNT_WHITE_NAME_ICON)
+            return zo_strformat(SI_TAMRIEL_TOMES_TOKEN_REDEMPTION_TEXT, currencyString)
+        end,
+    },
+    buttons =
+    {
         {
-            dialogType = GAMEPAD_DIALOGS.BASIC,
-        },
-        title =
-        {
-            text = GetString(SI_TAMRIEL_TOMES_TOKEN_REDEMPTION_TITLE),
-        },
-        mainText =
-        {
-            text = function()
-                local currencyCost = GetCurrencyCostToUpgradeTamrielTome()
-                local currencyString = ZO_Currency_FormatKeyboard(CURT_TOME_TOKENS, currencyCost, ZO_CURRENCY_FORMAT_WHITE_AMOUNT_WHITE_NAME)
-                return zo_strformat(SI_TAMRIEL_TOMES_TOKEN_REDEMPTION_TEXT, currencyString)
+            keybind = "DIALOG_PRIMARY",
+            text = GetString(SI_MARKET_CONFIRM_PURCHASE_KEYBIND_TEXT),
+            callback = function(dialog)
+                local pendingDialogData =
+                {
+                    title = GetString(SI_TAMRIEL_TOMES_TOKEN_REDEMPTION_TITLE),
+                    loadingText = GetString(SI_DIALOG_PROCESSING_PURCHASE),
+                    onSetup = function()
+                        TryPurchaseTamrielTomePremiumPlus(dialog.data.tomeId)
+                    end,
+                    onTimeout = function()
+                        ShowResultDialog(tomeId, TAMRIEL_TOME_PURCHASE_RESULT_TIMED_OUT)
+                    end,
+                    events =
+                    {
+                        {
+                            event = EVENT_TAMRIEL_TOME_PURCHASE_RESULT,
+                            callback = function(_, tomeId, result)
+                                ShowResultDialog(tomeId, result)
+                            end
+                        },
+                    }
+                }
+                ZO_Dialogs_ShowGamepadDialog("GAMEPAD_PENDING_RESULT_DIALOG", pendingDialogData)
             end,
         },
-        buttons =
         {
-            {
-                keybind = "DIALOG_PRIMARY",
-                text = GetString(SI_MARKET_CONFIRM_PURCHASE_KEYBIND_TEXT),
-                callback = function(dialog)
-                    TryPurchaseTamrielTomePremiumPlus(dialog.data.tomeId)
-                end,
-            },
-            {
-                keybind = "DIALOG_NEGATIVE",
-                text = SI_DIALOG_DECLINE,
-            },
+            keybind = "DIALOG_NEGATIVE",
+            text = SI_DIALOG_DECLINE,
         },
-    }
-)
+    },
+})
 
 --------------
 -- Tome Insufficient Token Redemption Dialog
@@ -359,7 +387,7 @@ ZO_Dialogs_RegisterCustomDialog("TAMRIEL_TOME_INSUFFICIENT_TOKEN_REDEMPTION_GAME
         {
             text = function()
                 local currencyCost = GetCurrencyCostToUpgradeTamrielTome()
-                local currencyString = ZO_Currency_FormatGamepad(CURT_TOME_TOKENS, currencyCost, ZO_CURRENCY_FORMAT_WHITE_AMOUNT_WHITE_NAME)
+                local currencyString = ZO_Currency_FormatGamepad(CURT_TOME_TOKENS, currencyCost, ZO_CURRENCY_FORMAT_WHITE_AMOUNT_WHITE_NAME_ICON)
                 return zo_strformat(SI_TAMRIEL_TOMES_INSUFFICIENT_TOKENS_DIALOG_TEXT, currencyString)
             end,
         },

@@ -1,4 +1,4 @@
-<GuiXml>
+﻿<GuiXml>
     <Controls>
         <Control name="ZO_GamepadGuildSelectorTemplate" virtual="true">
             <OnInitialized>

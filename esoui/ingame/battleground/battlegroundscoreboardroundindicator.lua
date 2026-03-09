@@ -1,4 +1,4 @@
--- Battleground Scoreboard round winners summary.
+﻿-- Battleground Scoreboard round winners summary.
 
 local LIGHT_GRAY = ZO_ColorDef:New("CCCCCC")
 local KEYBOARD_BG_IMAGE_SMALL_WIDTH = 512

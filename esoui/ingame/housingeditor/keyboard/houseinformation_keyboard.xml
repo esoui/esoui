@@ -1,4 +1,4 @@
-<GuiXml>
+﻿<GuiXml>
     <Controls>
         <Control name="ZO_HouseInformation_Keyboard_Row_Header" virtual="true">
             <Dimensions x="300" y="25"/>

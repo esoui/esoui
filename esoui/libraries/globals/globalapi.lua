@@ -329,6 +329,38 @@ function zo_getSafeId64Key(id)
     return Id64ToString(id)
 end
 
+-- Convert one or more id64s to strings.
+function zo_id64ToString(...)
+    local inputValues = {...}
+    if type(inputValues[1]) == "table" then
+        -- If a table passed as the first parameter, process the table itself.
+        inputValues = inputValues[1]
+    end
+
+    local outputValues = {}
+    for _, inputValue in ipairs(inputValues) do
+        table.insert(outputValues, Id64ToString(inputValue))
+    end
+
+    return outputValues
+end
+
+-- Convert one or more strings to id64s.
+function zo_stringToId64(...)
+    local inputValues = {...}
+    if type(inputValues[1]) == "table" then
+        -- If a table passed as the first parameter, process the table itself.
+        inputValues = inputValues[1]
+    end
+
+    local outputValues = {}
+    for _, inputValue in ipairs(inputValues) do
+        table.insert(outputValues, StringToId64(inputValue))
+    end
+
+    return outputValues
+end
+
 function zo_distance(x1, y1, x2, y2)
     local diffX = x1 - x2
     local diffY = y1 - y2

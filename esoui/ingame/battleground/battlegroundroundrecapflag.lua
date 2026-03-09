@@ -1,4 +1,4 @@
--- A single Flag flag for Battlegrounds Round Recap
+﻿-- A single Flag flag for Battlegrounds Round Recap
 ZO_BATTLEGROUND_FLAG_WIDTH  = 320 -- 1.25 * 256
 ZO_BATTLEGROUND_FLAG_HEIGHT = 576 -- 1.125 * 512
 ZO_BATTLEGROUND_BAR_HEIGHT = 64

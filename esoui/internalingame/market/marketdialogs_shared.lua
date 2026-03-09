@@ -1,4 +1,4 @@
-function ZO_MarketDialogs_Shared_OpenGiftingLockedHelp(dialog)
+﻿function ZO_MarketDialogs_Shared_OpenGiftingLockedHelp(dialog)
     local helpCategory, helpIndex = GetGiftingAccountLockedHelpIndices()
     RequestShowSpecificHelp(helpCategory, helpIndex)
 end

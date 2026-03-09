@@ -33,7 +33,9 @@
         <Control name="ZO_AdvZoneBossControlEasy_Shared" inherits="ZO_AdvZoneBossControl_Shared" virtual="true">
             <Controls>
                 <Texture name="$(parent)Frame" override="true" textureFile="EsoUI/Art/AdventureZone/bossTreeFrameEasy.dds"/>
-                <Texture name="$(parent)Highlight" override="true" textureFile="EsoUI/Art/AdventureZone/bossTreeHighlight_easy.dds" level="2" hidden="true"/>
+                <Texture name="$(parent)Highlight" override="true" textureFile="EsoUI/Art/AdventureZone/bossTreeHighlight_easy.dds" level="2" hidden="true">
+                    <TextureCoords left="0" right="0.75" top="0" bottom="0.75"/>
+                </Texture>
             </Controls>
         </Control>
         <Control name="ZO_AdvZoneBossControlMedium_Shared" inherits="ZO_AdvZoneBossControl_Shared" virtual="true">

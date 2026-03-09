@@ -1783,7 +1783,6 @@ EsoUI\Ingame\Vengeance\Gamepad\Vengeance_Loadouts_Gamepad.xml
 EsoUI\Ingame\Vengeance\Gamepad\Vengeance_Perks_Gamepad.lua
 EsoUI\Ingame\Vengeance\Gamepad\Vengeance_Perks_Gamepad.xml
 
-EsoUI\Ingame\TamrielTomes\TamrielTomesData.lua
 EsoUI\Ingame\TamrielTomes\TamrielTomes_Manager.lua
 EsoUI\Ingame\TamrielTomes\TamrielTomesRewardTile_Shared.lua
 EsoUI\Ingame\TamrielTomes\TamrielTomesRewardTile_Shared.xml

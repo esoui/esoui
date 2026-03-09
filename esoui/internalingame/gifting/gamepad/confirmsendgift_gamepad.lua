@@ -195,7 +195,7 @@ do
                 end,
                 visible = function(dialog)
                     local targetData = dialog.entryList:GetTargetData()
-                    return (IsGameCoreUI() and targetData.recipientNameEntry and GetNumberConsoleFriends() > 0) or targetData.messageEntry
+                    return (ZO_IsConsoleOrGameCoreUI() and targetData.recipientNameEntry and GetNumberConsoleFriends() > 0) or targetData.messageEntry
                 end,
                 callback = function(dialog)
                     local targetData = dialog.entryList:GetTargetData()

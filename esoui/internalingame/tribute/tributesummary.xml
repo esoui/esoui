@@ -1,4 +1,4 @@
-<GuiXml>
+﻿<GuiXml>
     <Animations>
         <AnimationTimeline name="ZO_TributeModalUnderlayFade">
             <Animations>
@@ -496,7 +496,7 @@
                 </Label>
                 <Control name="$(parent)Prestige" hidden="true">
                     <Controls>
-                        <Label name="$(parent)Divider" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="�">
+                        <Label name="$(parent)Divider" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" text="—">
                             <Anchor point="CENTER" relativeTo="$(grandparent)Icon" offsetY="325"/>
                         </Label>
                         <Label name="$(parent)PlayerValue" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">

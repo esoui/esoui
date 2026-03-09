@@ -898,7 +898,7 @@ do
             end
             AddEntry(data)
 
-            if IsGameCoreUI() and GetNumberConsoleFriends() > 0 then
+            if ZO_IsConsoleOrGameCoreUI() and GetNumberConsoleFriends() > 0 then
                 data = ZO_GamepadEntryData:New(GetString(SI_GAMEPAD_GUILD_ADD_FRIEND), ICON_INVITE)
                 data.guildId = self.optionsGuildId
                 data.selectCallback = function(optionsSelectedData)

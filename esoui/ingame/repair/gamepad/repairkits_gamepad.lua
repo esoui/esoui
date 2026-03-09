@@ -1,4 +1,4 @@
-local ZO_RepairKits_Gamepad = ZO_InventoryItemImprovement_Gamepad:Subclass()
+﻿local ZO_RepairKits_Gamepad = ZO_InventoryItemImprovement_Gamepad:Subclass()
 
 function ZO_RepairKits_Gamepad:New(...)
     return ZO_InventoryItemImprovement_Gamepad.New(self, ...)

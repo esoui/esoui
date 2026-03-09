@@ -21,6 +21,8 @@ EsoUI\InternalIngame\Tutorial\Tutorial_Manager.lua
 
 EsoUI\InternalIngame\Help\Help_Manager.lua
 
+EsoUI\InternalIngame\Globals\InternalInGameDialogs.lua
+
 EsoUI\InternalIngame\Market\MarketDialogs_Shared.lua
 EsoUI\InternalIngame\Globals\MarketDialogs.lua
 EsoUI\InternalIngame\Globals\MarketDialogs.xml

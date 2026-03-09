@@ -2,8 +2,11 @@
     <Controls>
         <Control name="ZO_TamrielTomesIntroHighlight_Keyboard" inherits="ZO_TamrielTomesIntroHighlight_Shared" virtual="true">
             <Controls>
-                <Label name="$(parent)Title" override="true" font="$(ANTIQUE_FONT)|34"/>
-                <Label name="$(parent)BodyText" override="true" font="$(ANTIQUE_FONT)|22"/>
+                <Label name="$(parent)Title" override="true" font="$(BOLD_FONT)|$(KB_36)">
+                    <Anchor point="TOPLEFT" offsetX="4" offsetY="8"/>
+                    <Anchor point="TOPRIGHT" offsetX="-4" offsetY="8"/>
+                </Label>
+                <Label name="$(parent)BodyText" override="true" font="$(MEDIUM_FONT)|$(KB_24)"/>
             </Controls>
         </Control>
         <TopLevelControl name="ZO_TamrielTomesIntro_KeyboardTL" inherits="ZO_TamrielTomesIntro_SharedTL">
@@ -11,7 +14,7 @@
                 ZO_TamrielTomesIntroScreen_Keyboard.OnControlInitialized(self)
             </OnInitialized>
             <Controls>
-                <Label name="$(parent)Title" override="true" font="$(ANTIQUE_FONT)|48"/>
+                <Label name="$(parent)Title" override="true" font="$(BOLD_FONT)|$(KB_48)"/>
                 <Control name="$(parent)ButtonContainer">
                     <Dimensions y="78"/>
                     <Anchor point="BOTTOMLEFT" relativePoint="BOTTOM" offsetX="10" offsetY="-92"/>

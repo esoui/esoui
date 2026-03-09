@@ -1,4 +1,4 @@
---Shared Scroll Animation Functions
+﻿--Shared Scroll Animation Functions
 ---------------------------------------
 
 local MIN_SCROLL_VALUE = 0

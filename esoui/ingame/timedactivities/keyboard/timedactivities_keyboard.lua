@@ -43,34 +43,18 @@ function ZO_TimedActivityTile_Keyboard:PostInitializePlatform()
     local PIN_SIZE = 32
     self.pinTexture = zo_iconFormat(PIN_TEXTURE, PIN_SIZE, PIN_SIZE)
 
+    local NEW_INDICATOR_TEXTURE = "/esoui/art/miscellaneous/new_icon.dds"
+    local NEW_INDICATOR_SIZE = 32
+    self.newIndicatorTexture = zo_iconFormat(NEW_INDICATOR_TEXTURE, NEW_INDICATOR_SIZE, NEW_INDICATOR_SIZE)
+
     ZO_StatusBar_SetGradientColor(self.progressBar, ZO_XP_BAR_GRADIENT_COLORS)
 
     self.keybindStripDescriptor =
     {
-        -- Track
-        {
-            name = function()
-                if self.timedActivityData:IsTracked() then
-                    return GetString(SI_TAMRIEL_TOMES_CHALLENGES_ACTION_NAME_UNPIN)
-                end
-                return GetString(SI_TAMRIEL_TOMES_CHALLENGES_ACTION_NAME_PIN)
-            end,
-            keybind = "UI_SHORTCUT_PRIMARY",
-            callback = function()
-                self.timedActivityData:ToggleTracking()
-            end,
-            visible = function()
-                if self.timedActivityData then
-                    return self.timedActivityData:CanTrack() 
-                end
-                return false
-            end,
-        },
-
         -- Claim
         {
             name = GetString(SI_TAMRIEL_TOMES_CHALLENGES_ACTION_NAME_CLAIM),
-            keybind = "UI_SHORTCUT_SECONDARY",
+            keybind = "UI_SHORTCUT_PRIMARY",
             callback = function()
                 self.timedActivityData:Claim()
             end,
@@ -84,12 +68,32 @@ function ZO_TimedActivityTile_Keyboard:PostInitializePlatform()
             sound = SOUNDS.TAMRIEL_TOMES_CHALLENGE_REWARD_CLAIMED
         },
 
+        -- Track
+        {
+            name = function()
+                if self.timedActivityData:IsTracked() then
+                    return GetString(SI_TAMRIEL_TOMES_CHALLENGES_ACTION_NAME_UNPIN)
+                end
+                return GetString(SI_TAMRIEL_TOMES_CHALLENGES_ACTION_NAME_PIN)
+            end,
+            keybind = "UI_SHORTCUT_TERTIARY",
+            callback = function()
+                self.timedActivityData:ToggleTracking()
+            end,
+            visible = function()
+                if self.timedActivityData then
+                    return self.timedActivityData:CanTrack() 
+                end
+                return false
+            end,
+        },
+
         -- Reroll
         {
             name = function()
                 return zo_strformat(SI_TAMRIEL_TOMES_CHALLENGES_ACTION_NAME_REROLL, ZO_TimedActivities_Manager.GetNumRemainingRerollAttempts())
             end,
-            keybind = "UI_SHORTCUT_TERTIARY",
+            keybind = "UI_SHORTCUT_QUATERNARY",
             callback = function()
                 self.timedActivityData:Reroll()
             end,
@@ -99,6 +103,7 @@ function ZO_TimedActivityTile_Keyboard:PostInitializePlatform()
                 end
                 return false
             end,
+            sound = SOUNDS.TAMRIEL_TOMES_CHALLENGE_REROLL,
         },
     }
 end
@@ -130,6 +135,9 @@ do
         local titleText = timedActivityData:GetName()
         if timedActivityData:IsTracked() then
             titleText = string.format("%s%s", self.pinTexture, titleText)
+        end
+        if timedActivityData:CanClaim() or TIMED_ACTIVITIES_MANAGER:IsNewTimedActivity(timedActivityData) then
+            titleText = string.format("%s%s", self.newIndicatorTexture, titleText)
         end
         self:SetTitle(titleText)
 
@@ -177,7 +185,21 @@ end
 function ZO_TimedActivityTile_Keyboard:OnMouseExit()
     ZO_ContextualActionsTile_Keyboard.OnMouseExit(self)
 
+    if self.timedActivityData then
+        TIMED_ACTIVITIES_MANAGER:MarkTimedActivitiesAsSeen({self.timedActivityData})
+    end
+
     ClearTooltip(InformationTooltip)
+end
+
+function ZO_TimedActivityTile_Keyboard:OnMouseUp(button, upInside)
+    ZO_ContextualActionsTile_Keyboard.OnMouseUp(self, button, upInside)
+
+    if upInside and button == MOUSE_BUTTON_INDEX_LEFT then
+        if self.timedActivityData and self.timedActivityData:CanClaim() then
+            self.timedActivityData:Claim()
+        end
+    end
 end
 
 function ZO_TimedActivityTile_Keyboard:Reset()
@@ -224,6 +246,9 @@ function ZO_TimedActivities_Keyboard:InitializeControls()
     self.seasonalButton = tabsControl:GetNamedChild("SeasonalButton")
     self.currencyBalanceLabel = tabsControl:GetNamedChild("CurrencyBalance")
 
+    self.weeklyNewIndicatorTexture = self.weeklyButton:GetNamedChild("NewIndicator")
+    self.seasonalNewIndicatorTexture = self.seasonalButton:GetNamedChild("NewIndicator")
+
     self.weeklyButton.activityType = TIMED_ACTIVITY_TYPE_WEEKLY
     self.seasonalButton.activityType = TIMED_ACTIVITY_TYPE_SEASONAL
 
@@ -248,6 +273,7 @@ function ZO_TimedActivities_Keyboard:InitializeControls()
             callback = function()
                 SCENE_MANAGER:HideCurrentScene()
             end,
+            sound = SOUNDS.TAMRIEL_TOMES_NAVIGATE_BACK,
         }
     }
 end
@@ -263,6 +289,15 @@ function ZO_TimedActivities_Keyboard:SetCurrentActivityType(activityType)
 
     local activityTypeName = self:GetCurrentActivityTypeString()
     self.titleLabel:SetText(zo_strformat(SI_TIMED_ACTIVITIES_TYPE_HEADER, activityTypeName))
+
+    if activityType == TIMED_ACTIVITY_TYPE_WEEKLY then
+        self.weeklyButton:SetNormalTexture("EsoUI/Art/TamrielTomes/timedActivityCategory_weekly_down.dds")
+        self.seasonalButton:SetNormalTexture("EsoUI/Art/TamrielTomes/timedActivityCategory_seasonal_up.dds")
+    else
+        self.weeklyButton:SetNormalTexture("EsoUI/Art/TamrielTomes/timedActivityCategory_weekly_up.dds")
+        self.seasonalButton:SetNormalTexture("EsoUI/Art/TamrielTomes/timedActivityCategory_seasonal_down.dds")
+    end
+
     if activityType ~= self.currentActivityType then
         -- Order matters:
         self.currentActivityType = activityType
@@ -303,6 +338,12 @@ function ZO_TimedActivities_Keyboard:RefreshAvailability()
     end
     self.emptyMessage:SetHidden(isAvailable)
     self.gridListControl:SetHidden(not isAvailable)
+end
+
+function ZO_TimedActivities_Keyboard:RefreshNewIndicators()
+    ZO_TimedActivities_Shared.RefreshNewIndicators(self)
+
+    self.gridList:RefreshGridList()
 end
 
 function ZO_TimedActivities_Keyboard:OnShowing()

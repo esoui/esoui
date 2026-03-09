@@ -1,4 +1,4 @@
-<GuiXml>
+﻿<GuiXml>
     <Controls>
         <Label name="ZO_SpecializedCollection_Book_DefaultLabel_Keyboard" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true"/>
         <Label name="ZO_SpecializedCollection_Book_DefaultLabel_Dimensions_Keyboard" virtual="true">

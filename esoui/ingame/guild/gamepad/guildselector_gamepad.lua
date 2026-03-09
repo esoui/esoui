@@ -1,4 +1,4 @@
-ZO_GuildSelector_Gamepad = ZO_ComboBox_Gamepad:Subclass()
+﻿ZO_GuildSelector_Gamepad = ZO_ComboBox_Gamepad:Subclass()
 
 function ZO_GuildSelector_Gamepad:New(...)
     return ZO_ComboBox_Gamepad.New(self, ...)

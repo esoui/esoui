@@ -1,4 +1,4 @@
-<GuiXml>
+﻿<GuiXml>
     <Controls>
         <TopLevelControl name="ZO_HousingBook_Keyboard" inherits="ZO_SpecializedCollection_Book_Keyboard" mouseEnabled="true" hidden="true">
             <OnInitialized>

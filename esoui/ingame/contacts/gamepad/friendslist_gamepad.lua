@@ -49,7 +49,7 @@ function FriendsList_Gamepad:OnFriendCharacterInfoReceived(displayName, hasChara
 end
 
 function FriendsList_Gamepad:GetAddKeybind()
-    if not IsGameCoreUI() then
+    if not ZO_IsConsoleOrGameCoreUI() then
         local keybind =
         {
             alignment = KEYBIND_STRIP_ALIGN_LEFT,

@@ -1,4 +1,4 @@
-<GuiXml>
+﻿<GuiXml>
     <Controls>
         <Control name="ZO_HousingFurnitureBrowser_Gamepad_Row" virtual="true">
             <Dimensions x="ZO_GAMEPAD_CONTENT_WIDTH" y="30"/>

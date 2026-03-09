@@ -2,17 +2,31 @@
     <Controls>
         <Control name="ZO_PageNavigationIndicator" mouseEnabled="true" resizeToFitDescendents="true" virtual="true">
             <Dimensions x="46" y="40"/>
+            <OnMouseEnter>
+                self.owner:OnMouseEnter()
+            </OnMouseEnter>
+            <OnMouseExit>
+                self.owner:OnMouseExit()
+            </OnMouseExit>
             <OnMouseUp>
                 ZO_PageNavigationIndicator.OnMouseUp(self, upInside)
             </OnMouseUp>
             <Controls>
-                <Texture name="$(parent)Icon" layer="2" hidden="true">
+                <Texture name="$(parent)Selected" layer="TEXT" level="0" hidden="true" excludeFromResizeToFitExtents="true">
+                    <Anchor point="CENTER"/>
+                    <Dimensions x="64" y="64"/>
+                </Texture>
+                <Texture name="$(parent)Icon" layer="TEXT" level="1" hidden="true">
                     <Anchor point="CENTER"/>
                     <Dimensions x="32" y="32"/>
                 </Texture>
-                <Label name="$(parent)Number" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" horizontalAlignment="CENTER">
+                <Label name="$(parent)Number" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" level="2">
                     <Anchor point="CENTER"/>
                 </Label>
+                <Texture name="$(parent)Highlighted" layer="TEXT" level="3" hidden="true" excludeFromResizeToFitExtents="true">
+                    <Anchor point="CENTER"/>
+                    <Dimensions x="64" y="64"/>
+                </Texture>
             </Controls>
         </Control>
         <Control name="ZO_PageNavigation" resizeToFitDescendents="true" virtual="true">

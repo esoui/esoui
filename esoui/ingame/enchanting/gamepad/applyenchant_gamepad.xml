@@ -1,4 +1,4 @@
-<GuiXml>
+﻿<GuiXml>
     <Controls>
         <TopLevelControl name="ZO_Gamepad_ApplyEnchant" inherits="ZO_Gamepad_ParametricList_Screen" hidden="true">
             <OnInitialized>

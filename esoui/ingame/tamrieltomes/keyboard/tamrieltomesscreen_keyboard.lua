@@ -79,10 +79,6 @@ function ZO_TamrielTomesScreen_Keyboard:Initialize(control)
     self.RewardListEntryMouseExitHandler = function(control)
         self:OnRewardListEntryMouseExit(control)
     end
-
-    self.HideRewardListHandler = function()
-        self:EndPreviewRewardList()
-    end
 end
 
 function ZO_TamrielTomesScreen_Keyboard:InitializeControls()
@@ -162,11 +158,22 @@ function ZO_TamrielTomesScreen_Keyboard:InitializeKeybindStripDescriptor()
             name = GetString(SI_TAMRIEL_TOMES_PREVIEW_ACTION),
 
             callback = function()
+                local rewardListRewardData = self:GetActiveRewardListRewardData()
+                if rewardListRewardData then
+                    self:BeginPreview(ZO_TAMRIEL_TOMES_REWARD_DATA_PREVIEW_TYPES.FULL_PREVIEW, rewardListRewardData)
+                    return
+                end
+
                 local selectedData = self:GetSelectedTamrielTomesRewardData()
-                self:BeginPreview(ZO_TAMRIEL_TOMES_REWARD_DATA_PREVIEW_TYPES.ACTIVE_PREVIEW, selectedData)
+                self:BeginPreview(ZO_TAMRIEL_TOMES_REWARD_DATA_PREVIEW_TYPES.FULL_PREVIEW, selectedData:GetRewardData(), selectedData)
             end,
 
             visible = function()
+                local rewardListRewardData = self:GetActiveRewardListRewardData()
+                if rewardListRewardData and CanPreviewReward(rewardListRewardData:GetRewardId()) then
+                    return true
+                end
+
                 local selectedData = self:GetSelectedTamrielTomesRewardData()
                 return selectedData and selectedData:CanPreviewReward()
             end,
@@ -191,112 +198,95 @@ function ZO_TamrielTomesScreen_Keyboard:InitializeKeybindStripDescriptor()
             end,
 
             visible = function()
-                return self:GetCurrentPreviewType() ~= ZO_TAMRIEL_TOMES_REWARD_DATA_PREVIEW_TYPES.ACTIVE_PREVIEW
+                return self:GetActivePreviewType() ~= ZO_TAMRIEL_TOMES_REWARD_DATA_PREVIEW_TYPES.FULL_PREVIEW
             end,
         },
 
         {
-            keybind = "UI_SHORTCUT_NEGATIVE",
+            keybind = "UI_SHORTCUT_EXIT",
 
-            name = GetString(SI_TAMRIEL_TOMES_END_PREVIEW_ACTION),
+            order = -1000,
 
-            callback = function()
-                self:EndPreview()
+            name = function()
+                if self:GetActivePreviewType() == ZO_TAMRIEL_TOMES_REWARD_DATA_PREVIEW_TYPES.FULL_PREVIEW then
+                    return GetString(SI_TAMRIEL_TOMES_END_PREVIEW_ACTION)
+                end
+
+                return GetString(SI_EXIT_BUTTON)
             end,
 
-            visible = function()
-                return self:GetCurrentPreviewType() == ZO_TAMRIEL_TOMES_REWARD_DATA_PREVIEW_TYPES.ACTIVE_PREVIEW
+            callback = function()
+                self:ClearActiveRewardListData()
+
+                if self:GetActivePreviewType() == ZO_TAMRIEL_TOMES_REWARD_DATA_PREVIEW_TYPES.FULL_PREVIEW then
+                    self:QueueEndPreview(ZO_DEFAULT_QUEUED_END_PREVIEW_DELAY_SECONDS)
+                    self:UpdateSceneFragments()
+                    return
+                end
+
+                SCENE_MANAGER:HideCurrentScene()
             end,
         },
     }
 end
 
-function ZO_TamrielTomesScreen_Keyboard:EndPreviewInternal()
-    ZO_TamrielTomesScreen_Shared.EndPreviewInternal(self)
-
-    self:UpdateSceneFragments()
-end
-
-function ZO_TamrielTomesScreen_Keyboard:EndPreviewRewardList()
-    EVENT_MANAGER:UnregisterForUpdate("ZO_TamrielTomesScreen_Keyboard_HideRewardList")
-
-    if self.currentPreviewRewardListId then
-        POPUP_LIST:Hide()
-        ZO_Rewards_Shared_OnMouseExit()
-        self.currentPreviewRewardListId = nil
-    end
-end
-
-function ZO_TamrielTomesScreen_Keyboard:PreviewRewardList(rewardId, tileControl)
-    POPUP_LIST:ClearList()
-
-    local rewardListId = GetRewardListIdFromReward(rewardId)
-    self.currentPreviewRewardListId = rewardListId
-
-    local rewards = REWARDS_MANAGER:GetAllRewardInfoForRewardList(rewardListId)
-    for _, reward in ipairs(rewards) do
-        POPUP_LIST:AddItem(ZO_POPUP_LIST_DATA_TYPE_ITEM, reward)
-    end
-
-    POPUP_LIST:UpdateList()
-    POPUP_LIST:SetOnMouseEnterCallback(self.RewardListEntryMouseEnterHandler)
-    POPUP_LIST:SetOnMouseExitCallback(self.RewardListEntryMouseExitHandler)
-    POPUP_LIST.control:SetAnchor(RIGHT, tileControl or self.control, LEFT, -10)
-    POPUP_LIST.control:SetHidden(false)
-end
-
 function ZO_TamrielTomesScreen_Keyboard:OnRewardListEntryMouseEnter(control)
-    EVENT_MANAGER:UnregisterForUpdate("ZO_TamrielTomesScreen_Keyboard_HideRewardList")
-
     ZO_GridEntry_SetIconScaledUp(control, true)
-    ZO_Rewards_Shared_OnMouseEnter(control, LEFT, RIGHT, 5)
+    ZO_Rewards_Shared_OnMouseEnter(control, RIGHT, LEFT, -15)
+
     local rewardId = control.dataEntry.data.rewardId
-    self:QuickPreviewRewardInternal(rewardId)
+    if rewardId == 0 then
+        return
+    end
+
+    local rewardQuantity = control.dataEntry.data.quantity or 1
+    local rewardData = REWARDS_MANAGER:GetInfoForReward(rewardId, rewardQuantity)
+    self:SetActiveRewardListRewardData(rewardData)
+    self:BeginPreview(ZO_TAMRIEL_TOMES_REWARD_DATA_PREVIEW_TYPES.QUICK_PREVIEW, rewardData)
 end
 
 function ZO_TamrielTomesScreen_Keyboard:OnRewardListEntryMouseExit(control)
     ZO_GridEntry_SetIconScaledUp(control, false)
-
-    EVENT_MANAGER:RegisterForUpdate("ZO_TamrielTomesScreen_Keyboard_HideRewardList", 600, self.HideRewardListHandler)
+    self:ClearActiveRewardListRewardData()
 end
 
-function ZO_TamrielTomesScreen_Keyboard:OnBeginActivePreview()
-    self:EndPreviewRewardList()
+function ZO_TamrielTomesScreen_Keyboard:ClearActiveRewardListData()
+    if not self.activeRewardListData then
+        return
+    end
 
-    ZO_TamrielTomesScreen_Shared.OnBeginActivePreview(self)
-
-    SCENE_MANAGER:AddFragmentGroup(FRAGMENT_GROUP.FRAME_TARGET_CENTERED_NO_BLUR)
+    self.activeRewardListData = nil
+    self:ClearActiveRewardListRewardData()
+    self:UpdatePopupList()
 end
 
-function ZO_TamrielTomesScreen_Keyboard:OnBeginQuickPreview()
-    self:EndPreviewRewardList()
-
-    ZO_TamrielTomesScreen_Shared.OnBeginQuickPreview(self)
+function ZO_TamrielTomesScreen_Keyboard:GetActiveRewardListData()
+    return self.activeRewardListData
 end
 
-function ZO_TamrielTomesScreen_Keyboard:OnEndActivePreview()
-    ZO_TamrielTomesScreen_Shared.OnEndActivePreview(self)
+function ZO_TamrielTomesScreen_Keyboard:SetActiveRewardListData(rewardData)
+    if rewardData == self.activeRewardListData then
+        self:UpdatePopupListPosition()
+        return
+    end
 
-    SCENE_MANAGER:RemoveFragmentGroup(FRAGMENT_GROUP.FRAME_TARGET_CENTERED_NO_BLUR)
-    FRAME_TARGET_STANDARD_RIGHT_PANEL_FRAGMENT.UpdateTarget()
+    self.activeRewardListData = rewardData
+    self:ClearActiveRewardListRewardData()
+    self:UpdatePopupList()
 end
 
-function ZO_TamrielTomesScreen_Keyboard:OnShowing()
-    ZO_TamrielTomesScreen_Shared.OnShowing(self)
-
-    self:UpdateSceneFragments()
+function ZO_TamrielTomesScreen_Keyboard:ClearActiveRewardListRewardData()
+    self.activeRewardListRewardData = nil
+    self:UpdateKeybinds()
 end
 
-function ZO_TamrielTomesScreen_Keyboard:OnHiding()
-    self:SetSelectedTamrielTomesRewardData(nil)
-
-    ZO_TamrielTomesScreen_Shared.OnHiding(self)
+function ZO_TamrielTomesScreen_Keyboard:GetActiveRewardListRewardData()
+    return self.activeRewardListRewardData
 end
 
-function ZO_TamrielTomesScreen_Keyboard:OnPreviewedTamrielTomesRewardDataChanged(previousTamrielTomesRewardData, newTamrielTomesRewardData)
-    ZO_TamrielTomesScreen_Shared.OnPreviewedTamrielTomesRewardDataChanged(self, previousTamrielTomesRewardData, newTamrielTomesRewardData)
-
-    self:UpdateSceneFragments()
+function ZO_TamrielTomesScreen_Keyboard:SetActiveRewardListRewardData(rewardData)
+    self.activeRewardListRewardData = rewardData
+    self:UpdateKeybinds()
 end
 
 function ZO_TamrielTomesScreen_Keyboard:ShowIntroScreen()
@@ -308,12 +298,106 @@ function ZO_TamrielTomesScreen_Keyboard:ShowPurchaseScreen()
 end
 
 function ZO_TamrielTomesScreen_Keyboard:UpdateSceneFragments()
-    if self:GetCurrentPreviewType() == ZO_TAMRIEL_TOMES_REWARD_DATA_PREVIEW_TYPES.ACTIVE_PREVIEW then
-        self.scene:RemoveFragment(self.fragment)
+    local scene = self.scene
+    local showFullPreview = self:ShouldActivePreviewShowFullPreview()
+    if showFullPreview then
+        scene:RemoveFragment(self.fragment)
+        scene:RemoveFragment(FRAME_PLAYER_FRAGMENT)
+        scene:RemoveFragment(FRAME_TARGET_STANDARD_RIGHT_PANEL_FRAGMENT)
+        scene:AddFragmentGroup(FRAGMENT_GROUP.FRAME_TARGET_CENTERED_NO_BLUR)
     else
-        self.scene:AddFragment(self.fragment)
+        scene:RemoveFragmentGroup(FRAGMENT_GROUP.FRAME_TARGET_CENTERED_NO_BLUR)
+        scene:AddFragment(FRAME_TARGET_STANDARD_RIGHT_PANEL_FRAGMENT)
+        scene:AddFragment(FRAME_PLAYER_FRAGMENT)
+        scene:AddFragment(self.fragment)
     end
 end
+
+function ZO_TamrielTomesScreen_Keyboard:OnShowing()
+    ZO_TamrielTomesScreen_Shared.OnShowing(self)
+
+    self:UpdateSceneFragments()
+end
+
+function ZO_TamrielTomesScreen_Keyboard:OnHiding(...)
+    -- Order matters
+    ZO_TamrielTomesScreen_Shared.OnHiding(self, ...)
+    self:SetSelectedTamrielTomesRewardData(nil)
+    ZO_Rewards_Shared_OnMouseExit()
+    self:UpdatePopupListPosition()
+end
+
+function ZO_TamrielTomesScreen_Keyboard:OnPageChanged(...)
+    ZO_TamrielTomesScreen_Shared.OnPageChanged(self, ...)
+
+    self:ClearActiveRewardListData()
+    POPUP_LIST:Hide()
+end
+
+function ZO_TamrielTomesScreen_Keyboard:UpdatePopupList()
+    local rewardListData = self:GetActiveRewardListData()
+    if not (rewardListData and self:IsShowing()) then
+        self.activeRewardListData = nil
+        self.activeRewardListRewardData = nil
+        POPUP_LIST:Hide()
+        return
+    end
+
+    ZO_Rewards_Shared_OnMouseExit()
+
+    local selectedTile = self:GetSelectedTile()
+    if selectedTile then
+        POPUP_LIST:ShowRewardList(rewardListData:GetRewardId(), self.RewardListEntryMouseEnterHandler, self.RewardListEntryMouseExitHandler, BOTTOMRIGHT, selectedTile, BOTTOMLEFT, -5)
+        return
+    end
+
+    POPUP_LIST:ShowRewardList(rewardListData:GetRewardId(), self.RewardListEntryMouseEnterHandler, self.RewardListEntryMouseExitHandler, BOTTOMRIGHT, GuiRoot, BOTTOMRIGHT, -50, -100)
+end
+
+function ZO_TamrielTomesScreen_Keyboard:UpdatePopupListPosition()
+    if self.control:IsHidden() then
+        POPUP_LIST:SetAnchor(BOTTOMRIGHT, GuiRoot, BOTTOMRIGHT, -50, -100)
+    end
+end
+
+function ZO_TamrielTomesScreen_Keyboard:BeginPreviewInternal()
+    local previewType, rewardData, previewKey = self:GetActivePreviewInfo()
+    local rewardId = rewardData:GetRewardId()
+    local rewardType = rewardData:GetRewardType()
+    self:UpdateSceneFragments()
+
+    if previewKey then
+        if rewardType == REWARD_ENTRY_TYPE_REWARD_LIST then
+            -- This preview originated from a reward list tile.
+            self:SetActiveRewardListData(rewardData)
+            return
+        end
+
+        -- This preview originated from a non-reward list tile.
+        self:ClearActiveRewardListData()
+    end
+
+    local previewSystem = self.GetPreviewSystem()
+    previewSystem:PreviewReward(rewardId)
+
+    self:UpdatePopupListPosition()
+    self:RefreshPreviewControls()
+    return true
+end
+
+function ZO_TamrielTomesScreen_Keyboard:EndPreviewInternal()
+    local previewSystem = self.GetPreviewSystem()
+    previewSystem:EndCurrentPreview()
+
+    self:RefreshPreviewControls()
+    self:UpdateSceneFragments()
+
+    if not self:GetActiveRewardListData() then
+        POPUP_LIST:Hide()
+    end
+end
+
+-- Static methods
 
 function ZO_TamrielTomesScreen_Keyboard.OnControlInitialized(control)
     TAMRIEL_TOMES_SCREEN_KEYBOARD = ZO_TamrielTomesScreen_Keyboard:New(control)

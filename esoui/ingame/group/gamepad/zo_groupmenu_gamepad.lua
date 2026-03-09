@@ -252,7 +252,7 @@ function ZO_GroupMenu_Gamepad:UpdateMenuList()
 
     if IsGroupModificationAvailable() and (groupSize == 0 or (playerIsLeader and groupSize < MAX_GROUP_SIZE_THRESHOLD)) then
         table.insert(groupActionEntries, self.menuEntries[MENU_ENTRY_TYPE_INVITE_PLAYER])
-        if IsGameCoreUI() and GetNumberConsoleFriends() > 0 then
+        if ZO_IsConsoleOrGameCoreUI() and GetNumberConsoleFriends() > 0 then
             table.insert(groupActionEntries, self.menuEntries[MENU_ENTRY_TYPE_INVITE_FRIEND])
         end
     end

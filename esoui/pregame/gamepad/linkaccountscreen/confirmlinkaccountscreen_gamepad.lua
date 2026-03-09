@@ -17,7 +17,7 @@ function ZO_ConfirmLinkAccount_Gamepad:Initialize(control)
     local accountIcon
 
     local uiPlatform = GetUIPlatform()
-    if IsGameCoreUI() then
+    if ZO_IsConsoleOrGameCoreUI() then
         confirmation2Text = GetString(SI_CONSOLE_LINKACCOUNT_CONFIRM_2_XBOX)
         confirmation3Text = GetString(SI_CONSOLE_LINKACCOUNT_CONFIRM_3_XBOX)
         accountIcon = "EsoUI/Art/Login/Gamepad/console_LoginLogo_XB.dds"

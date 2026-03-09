@@ -234,6 +234,9 @@ local MENU_ENTRY_DATA =
         shouldDisableFunction = function()
             return TAMRIEL_TOMES_MANAGER and not TAMRIEL_TOMES_MANAGER:AreTomesAvailable()
         end,
+        isNewCallback = function()
+            return TAMRIEL_TOMES_MANAGER and (TAMRIEL_TOMES_MANAGER:HasNewTomes() or TIMED_ACTIVITIES_MANAGER:HasClaimableTimedActivities() or TIMED_ACTIVITIES_MANAGER:HasNewTimedActivities())
+        end,
     },
     [MENU_MAIN_ENTRIES.ANNOUNCEMENTS] =
     {

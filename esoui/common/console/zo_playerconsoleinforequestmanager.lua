@@ -120,7 +120,7 @@ end
 function PlayerConsoleInfoRequestManager:RequestIdFromDisplayNameOrFallbackType(displayName, block, fallbackRequestType, callback, ...)
     if ZO_IsPlaystationPlatform() then
         callback(true, displayName, 0)
-    elseif IsGameCoreUI() then
+    elseif ZO_IsConsoleOrGameCoreUI() then
         self:RequestId(fallbackRequestType, block, callback, ...)
     end
 end

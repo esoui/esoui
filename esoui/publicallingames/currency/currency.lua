@@ -490,6 +490,8 @@ ZO_CURRENCY_FORMAT_WHITE_AMOUNT_ICON = 5
 ZO_CURRENCY_FORMAT_ERROR_AMOUNT_ICON = 6
 ZO_CURRENCY_FORMAT_PLURAL_NAME_ICON = 7
 ZO_CURRENCY_FORMAT_STRIKETHROUGH_AMOUNT_ICON = 8
+ZO_CURRENCY_FORMAT_AMOUNT_NAME_ICON = 9
+ZO_CURRENCY_FORMAT_WHITE_AMOUNT_WHITE_NAME_ICON = 10
 
 local function GetCurrencyColor(currencyType, isGamepad)
     if isGamepad then
@@ -566,6 +568,16 @@ function ZO_Currency_Format(currencyAmount, currencyType, formatType, isGamepad,
         local color = extraOptions and extraOptions.color or GetCurrencyColor(currencyType, isGamepad)
         local strikethroughAmountString = zo_strikethroughTextFormat(formattedAmount)
         return string.format("%s|u0:6%%:currency:|u%s", color:Colorize(strikethroughAmountString), iconMarkup)
+    elseif formatType == ZO_CURRENCY_FORMAT_AMOUNT_NAME_ICON then
+        local currencyInfo = g_currenciesData[currencyType]
+        local currencyName = GetCurrencyName(currencyType, IsCountSingularForm(currencyAmount), currencyInfo.isDefaultLowercase)
+        local iconMarkup = GetCurrencyIconMarkup(currencyType, isGamepad, iconInheritColor)
+        return string.format("%s %s %s", formattedAmount, currencyName, iconMarkup)
+    elseif formatType == ZO_CURRENCY_FORMAT_WHITE_AMOUNT_WHITE_NAME_ICON then
+        local currencyInfo = g_currenciesData[currencyType]
+        local currencyName = GetCurrencyName(currencyType, IsCountSingularForm(currencyAmount), currencyInfo.isDefaultLowercase)
+        local iconMarkup = GetCurrencyIconMarkup(currencyType, isGamepad, iconInheritColor)
+        return string.format("|cffffff%s %s|r %s", formattedAmount, currencyName, iconMarkup)
     end
 end
 

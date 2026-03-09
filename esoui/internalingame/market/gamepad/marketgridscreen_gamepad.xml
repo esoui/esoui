@@ -1,4 +1,4 @@
-<GuiXml>
+﻿<GuiXml>
     <Controls>
         <Control name="ZO_GamepadMarket_TitleAnchors" virtual="true">
             <Anchor point="TOPLEFT"/>

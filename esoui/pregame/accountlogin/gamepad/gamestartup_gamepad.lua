@@ -531,7 +531,7 @@ function ZO_GameStartup_Gamepad:InitializeKeybindDescriptor()
                 ShowXboxAccountPicker()
             end,
             visible = function()
-                return IsGameCoreUI() and not self.profileSaveInProgress
+                return ZO_IsConsoleOrGameCoreUI() and not self.profileSaveInProgress
             end,
         },
 
@@ -635,7 +635,7 @@ function ZO_GameStartup_Gamepad:InitializeEvents()
     EVENT_MANAGER:RegisterForEvent("GameStartup", EVENT_ANNOUNCEMENTS_RESULT, OnAnnouncementsResult)
     EVENT_MANAGER:RegisterForEvent("GameStartup", EVENT_SAVE_DATA_START, function() OnProfileAccess(true) end)
     EVENT_MANAGER:RegisterForEvent("GameStartup", EVENT_SAVE_DATA_COMPLETE, function() OnProfileAccess(false) end)
-    if IsGameCoreUI() then
+    if ZO_IsConsoleOrGameCoreUI() then
         EVENT_MANAGER:RegisterForEvent("GameStartup", EVENT_DURANGO_ACCOUNT_PICKER_RETURNED, function(eventCode) self.isWaitingForDurangoAccountSelection = false end)
     end
 end

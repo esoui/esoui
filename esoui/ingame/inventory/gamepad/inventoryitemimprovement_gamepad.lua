@@ -1,4 +1,4 @@
-ZO_GAMEPAD_ITEM_IMPROVEMENT_DESCRIPTION_Y_OFFSET = 15
+﻿ZO_GAMEPAD_ITEM_IMPROVEMENT_DESCRIPTION_Y_OFFSET = 15
 local NO_MESSAGE = ""
 
 ZO_InventoryItemImprovement_Gamepad = ZO_Gamepad_ParametricList_Screen:Subclass()

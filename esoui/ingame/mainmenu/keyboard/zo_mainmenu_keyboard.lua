@@ -123,6 +123,12 @@ ZO_CATEGORY_LAYOUT_INFO =
         disabled = "EsoUI/Art/MainMenu/menuBar_tamrielTomes_disabled.dds",
         highlight = "EsoUI/Art/MainMenu/menuBar_tamrielTomes_over.dds",
 
+        indicators = function()
+            if TAMRIEL_TOMES_MANAGER and (TAMRIEL_TOMES_MANAGER:HasNewTomes() or TIMED_ACTIVITIES_MANAGER:HasClaimableTimedActivities() or TIMED_ACTIVITIES_MANAGER:HasNewTimedActivities()) then
+                return { ZO_KEYBOARD_NEW_ICON }
+            end
+        end,
+
         disableWhenNoTamrielTomesAreAvailable = true,
     },
     [MENU_CATEGORY_INVENTORY] =

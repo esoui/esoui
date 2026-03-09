@@ -1,4 +1,4 @@
-USE_INTERNAL_FORMAT = true
+﻿USE_INTERNAL_FORMAT = true
 
 function ZO_ShouldPreferUserId()
     local setting = IsInGamepadPreferredMode() and UI_SETTING_PRIMARY_PLAYER_NAME_GAMEPAD or UI_SETTING_PRIMARY_PLAYER_NAME_KEYBOARD

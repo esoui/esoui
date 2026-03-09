@@ -1,4 +1,4 @@
-ZO_TAMRIEL_TOMES_PURCHASE_REWARD_DIMENSIONS_GAMEPAD = 116
+ZO_TAMRIEL_TOMES_PURCHASE_REWARD_DIMENSIONS_GAMEPAD = 90
 ZO_TAMRIEL_TOMES_PURCHASE_VERTICAL_DIVIDER_WIDTH_GAMEPAD = 52
 ZO_TAMRIEL_TOMES_PURCHASE_REWARD_SPACING_GAMEPAD = 5
 ZO_TAMRIEL_TOMES_PURCHASE_GRID_WIDTH_GAMEPAD = ZO_TAMRIEL_TOMES_PURCHASE_REWARD_DIMENSIONS_GAMEPAD * 4 + ZO_TAMRIEL_TOMES_PURCHASE_VERTICAL_DIVIDER_WIDTH_GAMEPAD + ZO_TAMRIEL_TOMES_PURCHASE_REWARD_SPACING_GAMEPAD * 4 + ZO_SCROLL_BAR_WIDTH
@@ -8,9 +8,11 @@ ZO_TamrielTomesPurchaseScreen_Gamepad = ZO_Object.MultiSubclass(ZO_TamrielTomesP
 
 function ZO_TamrielTomesPurchaseScreen_Gamepad:Initialize(control)
     TAMRIEL_TOMES_PURCHASE_SCENE_GAMEPAD = ZO_Scene:New("TamrielTomesPurchaseSceneGamepad", SCENE_MANAGER)
+    SYSTEMS:RegisterGamepadRootScene("tamrielTomesPurchase", TAMRIEL_TOMES_PURCHASE_SCENE_GAMEPAD)
 
     ZO_TamrielTomesPurchaseScreen_Shared.Initialize(self, control, TAMRIEL_TOMES_PURCHASE_SCENE_GAMEPAD)
     ZO_GamepadMultiFocusArea_Manager.Initialize(self)
+    self:InitializePreview()
 end
 
 function ZO_TamrielTomesPurchaseScreen_Gamepad:OnDeferredInitialize()
@@ -18,17 +20,35 @@ function ZO_TamrielTomesPurchaseScreen_Gamepad:OnDeferredInitialize()
 
     self:InitializeMultiFocusAreas()
 
-    ZO_DIALOG_SYNC_OBJECT:SetHandler("OnShown", function()
-        if self:IsShowing() then
-            self:DeactivateInput()
-        end
-    end, "TamrielTomesPurchaseSceneGamepad")
+    local titleFonts =
+    {
+        {
+            font = "ZoFontGamepadBold48",
+            lineLimit = 1,
+        },
+        {
+            font = "ZoFontGamepadBold42",
+            lineLimit = 1,
+            dontUseForAdjusting = true,
+        },
+    }
+    ZO_FontAdjustingWrapLabel_OnInitialized(self.titleLabel, titleFonts, TEXT_WRAP_MODE_TRUNCATE)
+end
 
-    ZO_DIALOG_SYNC_OBJECT:SetHandler("OnHidden", function()
-        if self:IsShowing() then
-            self:ActivateInput()
-        end
-    end, "TamrielTomesPurchaseSceneGamepad")
+function ZO_TamrielTomesPurchaseScreen_Gamepad:OnDialogShown()
+    ZO_TamrielTomesPurchaseScreen_Shared.OnDialogShown(self)
+
+    if self:IsShowing() then
+        self:DeactivateInput()
+    end
+end
+
+function ZO_TamrielTomesPurchaseScreen_Gamepad:OnDialogHidden()
+    ZO_TamrielTomesPurchaseScreen_Shared.OnDialogHidden(self)
+
+    if self:IsShowing() then
+        self:ActivateInput()
+    end
 end
 
 function ZO_TamrielTomesPurchaseScreen_Gamepad:GetRewardEntryTemplate()
@@ -96,9 +116,31 @@ function ZO_TamrielTomesPurchaseScreen_Gamepad:InitializeKeybindStripDescriptors
                 return self:IsCurrentFocusArea(self.row1ButtonsFocusArea) or self:IsCurrentFocusArea(self.row2ButtonsFocusArea)
             end,
         },
+
+        {
+            name = function()
+                return self:GetPreviewFocusedRewardKeybindName()
+            end,
+
+            keybind = "UI_SHORTCUT_SECONDARY",
+
+            callback = function()
+                self:BeginPreviewFocusedReward()
+            end,
+
+            enabled = function()
+                return IsCharacterPreviewingAvailable(), GetString(SI_PREVIEW_UNAVAILABLE_ERROR)
+            end,
+
+            visible = function()
+                return self:CanPreviewFocusedReward()
+            end,
+        },
     }
 
-    ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.keybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON)
+    local DEFAULT_CALLBACK = nil
+    local DEFAULT_NAME = nil
+    ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.keybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON, DEFAULT_CALLBACK, DEFAULT_NAME, SOUNDS.TAMRIEL_TOMES_NAVIGATE_BACK)
 end
 
 function ZO_TamrielTomesPurchaseScreen_Gamepad:InitializeMultiFocusAreas()
@@ -109,9 +151,16 @@ function ZO_TamrielTomesPurchaseScreen_Gamepad:InitializeMultiFocusAreas()
         self:UpdateKeybinds()
 
         local tooltipShown = false
+        local ownsPremium = self.premiumButton.productData and self.premiumButton.productData:IsOwned()
         if self:IsCurrentFocusArea(self.row1ButtonsFocusArea) then
-            if self.row1ButtonsFocus:IsFocused(self.premiumButton) and (self.premiumButton.productData and self.premiumButton.productData:IsOwned())then
+            if self.row1ButtonsFocus:IsFocused(self.premiumButton) and ownsPremium then
                 GAMEPAD_TOOLTIPS:LayoutTextBlockTooltip(GAMEPAD_RIGHT_TOOLTIP, GetString(SI_TAMRIEL_TOMES_PREMIUM_UPGRADE_ALREADY_OWNED_TOOLTIP))
+                tooltipShown = true
+            end
+        elseif self:IsCurrentFocusArea(self.row2ButtonsFocusArea) then
+            -- If premium is owned, you can't use tokens. If both are owned, you can't even be in this screen.
+            if self.row2ButtonsFocus:IsFocused(self.tokenButton) and ownsPremium then
+                GAMEPAD_TOOLTIPS:LayoutTextBlockTooltip(GAMEPAD_RIGHT_TOOLTIP, GetString(SI_TAMRIEL_TOMES_PREMIUM_PLUS_UPGRADE_TOKENS_ALREADY_OWNED_TOOLTIP))
                 tooltipShown = true
             end
         end
@@ -205,6 +254,67 @@ function ZO_TamrielTomesPurchaseScreen_Gamepad:InitializeMultiFocusAreas()
     self:AddNextFocusArea(self.row2ButtonsFocusArea)
 end
 
+function ZO_TamrielTomesPurchaseScreen_Gamepad:InitializePreview()
+    self.previewKeybindStripDesciptor =
+    {
+        alignment = KEYBIND_STRIP_ALIGN_CENTER,
+
+        KEYBIND_STRIP:GenerateGamepadBackButtonDescriptor(function()
+            SCENE_MANAGER:HideCurrentScene()
+        end)
+    }
+    
+    local previewNarrationData =
+    {
+        canNarrate = function()
+            return IsCurrentlyPreviewing()
+        end,
+        selectedNarrationFunction = function()
+            return ITEM_PREVIEW_GAMEPAD:GetPreviewSpinnerNarrationText()
+        end,
+    }
+    SCREEN_NARRATION_MANAGER:RegisterCustomObject("tamrielTomesPurchasePreview", previewNarrationData)
+
+    TAMRIEL_TOMES_PURCHASE_PREVIEW_SCENE_GAMEPAD = ZO_Scene:New("tamrielTomesPurchasePreview_Gamepad", SCENE_MANAGER)
+    TAMRIEL_TOMES_PURCHASE_PREVIEW_SCENE_GAMEPAD:RegisterCallback("StateChange", function(oldState, newState)
+        if newState == SCENE_SHOWING then
+            self:OnPreviewShowing()
+        elseif newState == SCENE_SHOWN then
+            self:OnPreviewShown()
+        elseif newState == SCENE_HIDING then
+            self:OnPreviewHiding()
+        end
+    end)
+end
+
+function ZO_TamrielTomesPurchaseScreen_Gamepad:OnPreviewShowing()
+    KEYBIND_STRIP:AddKeybindButtonGroup(self.previewKeybindStripDesciptor)
+end
+
+function ZO_TamrielTomesPurchaseScreen_Gamepad:OnPreviewShown()
+    self:UpdatePreview(self.focusedRewardData)
+    if not self.refreshActionsCallback then
+        self.refreshActionsCallback = function()
+            SCREEN_NARRATION_MANAGER:QueueCustomEntry("tamrielTomesPurchasePreview")
+        end
+    end
+    ITEM_PREVIEW_GAMEPAD:RegisterCallback("RefreshActions", self.refreshActionsCallback)
+end
+
+function ZO_TamrielTomesPurchaseScreen_Gamepad:UpdatePreview(rewardData)
+    SYSTEMS:GetObject("itemPreview"):ClearPreviewCollection()
+    SYSTEMS:GetObject("itemPreview"):PreviewReward(rewardData:GetRewardId())
+    GAMEPAD_TOOLTIPS:LayoutRewardData(GAMEPAD_RIGHT_TOOLTIP, rewardData)
+    SCREEN_NARRATION_MANAGER:QueueCustomEntry("tamrielTomesPurchasePreview")
+end
+
+function ZO_TamrielTomesPurchaseScreen_Gamepad:OnPreviewHiding()
+    KEYBIND_STRIP:RemoveKeybindButtonGroup(self.previewKeybindStripDesciptor)
+    GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
+    ITEM_PREVIEW_GAMEPAD:UnregisterCallback("RefreshActions", self.refreshActionsCallback)
+    self.previewRewardData = nil
+end
+
 function ZO_TamrielTomesPurchaseScreen_Gamepad:ActivateInput()
     self:ActivateCurrentFocus()
     DIRECTIONAL_INPUT:Activate(self, self.control)
@@ -243,14 +353,10 @@ function ZO_TamrielTomesPurchaseScreen_Gamepad:OnGridListSelectedDataChanged(pre
         return
     end
 
-    if newData then
-        GAMEPAD_TOOLTIPS:LayoutRewardData(GAMEPAD_RIGHT_TOOLTIP, newData)
-    else
-        GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
-    end
-
     self.selectedGridEntry = newData
-    self:UpdateKeybinds()
+
+    local control = newData and newData.dataEntry.control or nil
+    self:SetFocusedRewardControl(control)
 end
 
 function ZO_TamrielTomesPurchaseScreen_Gamepad:UpdateKeybinds()
@@ -285,6 +391,30 @@ end
 function ZO_TamrielTomesPurchaseScreen_Gamepad:ShowInsufficientTokenRedemptionDialog()
     local dialogData = {}
     ZO_Dialogs_ShowGamepadDialog("TAMRIEL_TOME_INSUFFICIENT_TOKEN_REDEMPTION_GAMEPAD", dialogData)
+end
+
+function ZO_TamrielTomesPurchaseScreen_Gamepad:SetFocusedRewardControl(control)
+    ZO_TamrielTomesPurchaseScreen_Shared.SetFocusedRewardControl(self, control)
+
+    if self.focusedRewardData then
+        GAMEPAD_TOOLTIPS:LayoutRewardData(GAMEPAD_RIGHT_TOOLTIP, self.focusedRewardData)
+    else
+        GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
+    end
+end
+
+function ZO_TamrielTomesPurchaseScreen_Gamepad:BeginPreviewFocusedReward()
+    local rewardId = self.focusedRewardData:GetRewardId()
+    local rewardType = self.focusedRewardData:GetRewardType()
+    if rewardType == REWARD_ENTRY_TYPE_REWARD_LIST then
+        local rewardListId = GetRewardListIdFromReward(rewardId)
+        PREVIEW_REWARD_LIST_SCREEN_GAMEPAD:SetRewardList(rewardListId)
+        SCENE_MANAGER:Push("previewRewardList_Gamepad")
+        return
+    end
+
+    SCENE_MANAGER:Push("tamrielTomesPurchasePreview_Gamepad")
+    self:UpdateKeybinds()
 end
 
 ----

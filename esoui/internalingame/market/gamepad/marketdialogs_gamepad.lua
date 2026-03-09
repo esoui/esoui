@@ -1,4 +1,4 @@
-local FLOW_UNINITIALIZED = 0
+﻿local FLOW_UNINITIALIZED = 0
 local FLOW_WARNING = 1
 local FLOW_CONFIRMATION = 2
 local FLOW_CONFIRMATION_ESO_PLUS = 3
@@ -549,7 +549,7 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
                 end,
                 visible = function(dialog)
                     local targetData = dialog.entryList:GetTargetData()
-                    return (IsGameCoreUI() and targetData.recipientNameEntry and GetNumberConsoleFriends() > 0) or targetData.messageEntry
+                    return (ZO_IsConsoleOrGameCoreUI() and targetData.recipientNameEntry and GetNumberConsoleFriends() > 0) or targetData.messageEntry
                 end,
                 callback = function(dialog)
                     local targetData = dialog.entryList:GetTargetData()

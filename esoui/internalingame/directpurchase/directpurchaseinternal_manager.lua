@@ -11,17 +11,20 @@ function DirectPurchase_Manager:Initialize()
 
     EVENT_MANAGER:RegisterForEvent("DirectPurchase_Manager", EVENT_DIRECT_PURCHASE_QUERY_CATALOG_COMPLETE, OnQueryComplete)
 
-    local function OnPurchaseSkuResult(_, result)
-        self:FireCallbacks("PurchaseSkuResult", result)
+    local function OnPurchaseSkuResult(_, skuId, result)
+        self:FireCallbacks("PurchaseSkuResult", skuId, result)
     end
 
     EVENT_MANAGER:RegisterForEvent("DirectPurchase_Manager", EVENT_DIRECT_PURCHASE_PURCHASE_SKU_RESULT, OnPurchaseSkuResult)
 
+    local function OnPurchaseTamrielTomeResult(_, tomeId, result)
+        self:FireCallbacks("PurchaseTamrielTomeResult", tomeId, result)
+    end
+
+    EVENT_MANAGER:RegisterForEvent("DirectPurchase_Manager", EVENT_TAMRIEL_TOME_PURCHASE_RESULT, OnPurchaseTamrielTomeResult)
+
     local function OnConfirmPurchase(_, skuId)
-        local data =
-        {
-            skuId = skuId,
-        }
+        local data = ZO_DirectPurchaseSkuData:New(skuId)
         if IsInGamepadPreferredMode() then
             ZO_Dialogs_ShowGamepadDialog("DIRECT_PURCHASE_CONFIRM_PURCHASE_GAMEPAD", data)
         else
@@ -49,6 +52,7 @@ end
 
 function DirectPurchase_Manager:ConfirmPurchase(skuId)
     local purchaseRequestId = ConfirmPurchaseSku(skuId)
+    return purchaseRequestId ~= 0
 end
 
 DIRECT_PURCHASE_MANAGER = DirectPurchase_Manager:New()

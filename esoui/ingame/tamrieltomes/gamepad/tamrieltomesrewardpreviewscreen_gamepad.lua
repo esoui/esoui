@@ -4,6 +4,7 @@ function ZO_TamrielTomesRewardPreviewScreen_Gamepad:Initialize(control)
     local scene = ZO_Scene:New("TamrielTomesRewardPreviewSceneGamepad", SCENE_MANAGER)
     TAMRIEL_TOMES_PREVIEW_REWARD_SCENE_GAMEPAD = scene
     self.control = control
+    self.rewardId = nil
 
     ZO_DeferredInitializingObject.Initialize(self, scene)
 
@@ -20,57 +21,65 @@ function ZO_TamrielTomesRewardPreviewScreen_Gamepad:InitializeKeybindStripDescri
     ZO_Gamepad_AddBackNavigationKeybindDescriptorsWithSound(self.keybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON, nil, GetString(SI_TAMRIEL_TOMES_END_PREVIEW_ACTION))
 end
 
-function ZO_TamrielTomesRewardPreviewScreen_Gamepad:EndPreviewReward()
-    SYSTEMS:GetObject("itemPreview"):ClearPreviewCollection()
-    ApplyChangesToPreviewCollectionShown()
-    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+function ZO_TamrielTomesRewardPreviewScreen_Gamepad:SetRewardId(rewardId)
+    -- Order matters
+    self.rewardId = rewardId
+    self:UpdatePreviewControls()
 end
 
-function ZO_TamrielTomesRewardPreviewScreen_Gamepad:PreviewReward()
-    local tamrielTomesRewardData = self.tamrielTomesRewardData
-    if not tamrielTomesRewardData then
-        internalassert(false, "PreviewReward: tamrielTomesRewardData is required.")
+function ZO_TamrielTomesRewardPreviewScreen_Gamepad:UpdatePreviewControls()
+    if not self:IsShowing() then
         return
     end
 
-    local rewardData = tamrielTomesRewardData:GetRewardData()
-    if rewardData then
-        GAMEPAD_TOOLTIPS:LayoutRewardData(GAMEPAD_RIGHT_TOOLTIP, rewardData)
-    else
-        GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
-    end
-
-    local previewSystem = SYSTEMS:GetObject("itemPreview")
-    local rewardId = tamrielTomesRewardData:GetRewardId()
-    if GetRewardType(rewardId) == REWARD_ENTRY_TYPE_REWARD_LIST then
-        self:PreviewRewardList(rewardId)
-    elseif not self.isAlreadyPreviewingReward then
-        previewSystem:PreviewReward(rewardId)
-    else
-        -- Adds action keybinds for preview.
-        previewSystem:OnPreviewShowing()
-    end
-end
-
-function ZO_TamrielTomesRewardPreviewScreen_Gamepad:PreviewRewardList(rewardId)
-    -- TODO Tamriel Tomes
-end
-
-function ZO_TamrielTomesRewardPreviewScreen_Gamepad:SetTamrielTomesRewardData(tamrielTomesRewardData, isAlreadyPreviewingReward)
-    self.tamrielTomesRewardData = tamrielTomesRewardData
-    self.isAlreadyPreviewingReward = isAlreadyPreviewingReward
+    self:SetPreviewControlsHidden(self.rewardId == nil)
 end
 
 function ZO_TamrielTomesRewardPreviewScreen_Gamepad:OnShowing()
+    -- Order matters
     TAMRIEL_TOMES_SCENE_GROUP_GAMEPAD:SetActiveScene("TamrielTomesPreviewRewardSceneGamepad")
-    self:PreviewReward()
     KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
+    self:UpdatePreviewControls()
 end
 
 function ZO_TamrielTomesRewardPreviewScreen_Gamepad:OnHiding()
-    self:SetTamrielTomesRewardData(nil)
-    self:EndPreviewReward()
+    -- Order matters
+    self:SetRewardId(nil)
     KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
+    self:UpdatePreviewControls()
+end
+
+function ZO_TamrielTomesRewardPreviewScreen_Gamepad:SetPreviewActionsHidden(hidden)
+    local previewSystem = self.GetPreviewSystem()
+    if hidden then
+        previewSystem:SetActionControlsHidden(true)
+    else
+        previewSystem:SetupActionCarousel()
+    end
+end
+
+function ZO_TamrielTomesRewardPreviewScreen_Gamepad:SetPreviewVariationsHidden(hidden)
+    local previewSystem = self.GetPreviewSystem()
+    if hidden then
+        previewSystem:SetVariationControlsHidden(true)
+    else
+        previewSystem:SetupVariationControls()
+    end
+end
+
+function ZO_TamrielTomesRewardPreviewScreen_Gamepad:SetPreviewControlsHidden(hidden)
+    self:SetPreviewActionsHidden(hidden)
+    self:SetPreviewVariationsHidden(hidden)
+
+    if hidden then
+        SCENE_MANAGER:RemoveFragment(PREVIEW_KEYBIND_ACTION_LAYER_FRAGMENT)
+    else
+        SCENE_MANAGER:AddFragment(PREVIEW_KEYBIND_ACTION_LAYER_FRAGMENT)
+    end
+end
+
+function ZO_TamrielTomesRewardPreviewScreen_Gamepad.GetPreviewSystem()
+    return SYSTEMS:GetObject("itemPreview")
 end
 
 function ZO_TamrielTomesRewardPreviewScreen_Gamepad.OnControlInitialized(control)

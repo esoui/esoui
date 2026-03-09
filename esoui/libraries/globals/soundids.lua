@@ -1177,11 +1177,32 @@ SOUNDS =
     -- Tamriel Tomes
     TAMRIEL_TOMES_BOOK_CLOSED = "TamrielTomes_BookClosed",
     TAMRIEL_TOMES_BOOK_OPENED = "TamrielTomes_BookOpened",
+
+    TAMRIEL_TOMES_CHALLENGE_REROLL = "TamrielTomes_Challenge_Reroll",
     TAMRIEL_TOMES_CHALLENGE_REWARD_CLAIMED = "TamrielTomes_ChallengeRewardClaimed",
+
+    TAMRIEL_TOMES_MENU_DOWN = "TamrielTomes_Menu_Down",
+    TAMRIEL_TOMES_MENU_LEFT = "TamrielTomes_Menu_Left",
+    TAMRIEL_TOMES_MENU_RIGHT = "TamrielTomes_Menu_Right",
+    TAMRIEL_TOMES_MENU_UP = "TamrielTomes_Menu_Up",
+
+    TAMRIEL_TOMES_NAVIGATE_BACK = "TamrielTomes_Navigate_Back",
+    TAMRIEL_TOMES_NAVIGATE_FORWARD = "TamrielTomes_Navigate_Forward",
+
+    TAMRIEL_TOMES_PAGE_ZERO_CLOSED = "TamrielTomes_PageZero_Closed",
+    TAMRIEL_TOMES_PAGE_ZERO_OPENED = "TamrielTomes_PageZero_Opened",
+    TAMRIEL_TOMES_PAGE_ZERO_CONTINUE_TO_TOME = "TamrielTomes_PageZero_ContinueToTome",
+
     TAMRIEL_TOMES_PAGE_FLIPPED = "TamrielTomes_PageFlipped",
+    TAMRIEL_TOMES_PAGE_FLIPPED_BACK = "TamrielTomes_PageFlip_Back",
+    TAMRIEL_TOMES_PAGE_FLIPPED_FORWARD = "TamrielTomes_PageFlip_Forward",
+
     TAMRIEL_TOMES_PAGE_UNLOCKED = "TamrielTomes_PageUnlocked", -- TODO Tamriel Tomes
     TAMRIEL_TOMES_PASS_PURCHASED = "TamrielTomes_PassPurchased",
+
+    TAMRIEL_TOMES_REWARD_CLAIM_START = "TamrielTomes_RewardClaim_Start",
     TAMRIEL_TOMES_REWARD_PURCHASED = "TamrielTomes_RewardPurchased",
+
     TAMRIEL_TOMES_TOME_POINTS_ROLLING_ENDED = "TamrielTomes_TomePointsRollingEnded",
     TAMRIEL_TOMES_TOME_POINTS_ROLLING_STARTED = "TamrielTomes_TomePointsRollingStarted",
 

@@ -1,4 +1,4 @@
-<GuiXml>
+﻿<GuiXml>
     <Controls>
         <TopLevelControl name="ZO_HousingFurnitureRetrieveTo_TopLevel" hidden="true" resizeToFitDescendents="true">
             <Anchor point="BOTTOM" offsetX="-300" offsetY="-150"/>

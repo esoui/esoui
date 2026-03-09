@@ -265,6 +265,18 @@ function ZO_IndexOfElementInNumericallyIndexedTable(t, element)
     return nil
 end
 
+-- Returns true if every argument specified is in the numerically indexed table 't'.
+function ZO_AreElementsInNumericallyIndexedTable(t, ...)
+    local numElements = select('#', ...)
+    for elementIndex = 1, numElements do
+        local element = select(elementIndex, ...)
+        if not ZO_IsElementInNumericallyIndexedTable(t, element) then
+            return false
+        end
+    end
+    return true
+end
+
 function ZO_IsElementInNonContiguousTable(t, element)
     for key, value in pairs(t) do
         if value == element then
@@ -272,6 +284,18 @@ function ZO_IsElementInNonContiguousTable(t, element)
         end
     end
     return false
+end
+
+-- Returns true if every argument specified is in the non-contiguous table 't'.
+function ZO_AreElementsInNonContiguousTable(t, ...)
+    local numElements = select('#', ...)
+    for elementIndex = 1, numElements do
+        local element = select(elementIndex, ...)
+        if not ZO_IsElementInNonContiguousTable(t, element) then
+            return false
+        end
+    end
+    return true
 end
 
 function ZO_KeyOfFirstElementInNonContiguousTable(t, element)
@@ -423,16 +447,24 @@ function ZO_CreateSetFromArguments(...)
     return set
 end
 
+-- Returns true if the two tables contain the same values (using shallow comparison) in the same order.
 function ZO_AreNumericallyIndexedTablesEqual(left, right)
-    if #left == #right then
-        for index, value in ipairs(left) do
-            if right[index] ~= value then
-                return false
-            end
-        end
-        return true
+    if #left ~= #right then
+        return false
     end
-    return false
+
+    for index, value in ipairs(left) do
+        if right[index] ~= value then
+            return false
+        end
+    end
+
+    return true
+end
+
+-- Returns true if the two tables contain the same values (using shallow comparison) regardless of order.
+function ZO_AreNumericallyIndexedTablesEqualInAnyOrder(left, right)
+    return #left == #right and ZO_AreElementsInNumericallyIndexedTable(left, unpack(right)) and ZO_AreElementsInNumericallyIndexedTable(right, unpack(left))
 end
 
 -- Creates a non-contiguous table, the keys of which are the unique values

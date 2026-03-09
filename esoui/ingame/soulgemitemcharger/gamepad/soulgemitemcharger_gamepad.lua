@@ -1,4 +1,4 @@
-local ZO_SoulGemItemCharger_Gamepad = ZO_InventoryItemImprovement_Gamepad:Subclass()
+﻿local ZO_SoulGemItemCharger_Gamepad = ZO_InventoryItemImprovement_Gamepad:Subclass()
 
 function ZO_SoulGemItemCharger_Gamepad:New(...)
     return ZO_InventoryItemImprovement_Gamepad.New(self, ...)

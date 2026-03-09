@@ -3,6 +3,8 @@ ZO_TamrielTomesScreen_Gamepad = ZO_Object.MultiSubclass(ZO_TamrielTomesScreen_Sh
 function ZO_TamrielTomesScreen_Gamepad:Initialize(control)
     TAMRIEL_TOMES_SCENE_GAMEPAD = ZO_Scene:New("TamrielTomesSceneGamepad", SCENE_MANAGER)
 
+    self.isShowingFullPreview = false
+
     local templateData =
     {
         gridClass = ZO_GridScrollList_Gamepad,
@@ -84,6 +86,16 @@ function ZO_TamrielTomesScreen_Gamepad:InitializeControls()
     self:InitializeMultiFocusAreas()
 end
 
+function ZO_TamrielTomesScreen_Gamepad:InitializeGridList()
+    ZO_TamrielTomesScreen_Shared.InitializeGridList(self)
+
+    local gridList = self.gridList
+    gridList:SetNavigateDownSound(SOUNDS.TAMRIEL_TOMES_MENU_DOWN)
+    gridList:SetNavigateLeftSound(SOUNDS.TAMRIEL_TOMES_MENU_LEFT)
+    gridList:SetNavigateRightSound(SOUNDS.TAMRIEL_TOMES_MENU_RIGHT)
+    gridList:SetNavigateUpSound(SOUNDS.TAMRIEL_TOMES_MENU_UP)
+end
+
 function ZO_TamrielTomesScreen_Gamepad:OnDeferredInitialize()
     ZO_TamrielTomesScreen_Shared.OnDeferredInitialize(self)
     self:RebuildGridList()
@@ -160,7 +172,7 @@ function ZO_TamrielTomesScreen_Gamepad:InitializeKeybindStripDescriptor()
             end,
 
             visible = function()
-                if self:GetCurrentPreviewType() == ZO_TAMRIEL_TOMES_REWARD_DATA_PREVIEW_TYPES.ACTIVE_PREVIEW then
+                if self:GetActivePreviewType() == ZO_TAMRIEL_TOMES_REWARD_DATA_PREVIEW_TYPES.FULL_PREVIEW then
                     return false
                 end
 
@@ -180,11 +192,11 @@ function ZO_TamrielTomesScreen_Gamepad:InitializeKeybindStripDescriptor()
 
             callback = function()
                 local selectedData = self:GetSelectedTamrielTomesRewardData()
-                self:BeginPreview(ZO_TAMRIEL_TOMES_REWARD_DATA_PREVIEW_TYPES.ACTIVE_PREVIEW, selectedData)
+                self:BeginPreview(ZO_TAMRIEL_TOMES_REWARD_DATA_PREVIEW_TYPES.FULL_PREVIEW, selectedData:GetRewardData(), selectedData)
             end,
 
             visible = function()
-                if self:GetCurrentPreviewType() ~= ZO_TAMRIEL_TOMES_REWARD_DATA_PREVIEW_TYPES.ACTIVE_PREVIEW then
+                if self:GetActivePreviewType() ~= ZO_TAMRIEL_TOMES_REWARD_DATA_PREVIEW_TYPES.FULL_PREVIEW then
                     local selectedData = self:GetSelectedTamrielTomesRewardData()
                     return selectedData and selectedData:CanPreviewReward()
                 end
@@ -210,37 +222,21 @@ function ZO_TamrielTomesScreen_Gamepad:InitializeKeybindStripDescriptor()
             end,
 
             visible = function()
-                return self:GetCurrentPreviewType() ~= ZO_TAMRIEL_TOMES_REWARD_DATA_PREVIEW_TYPES.ACTIVE_PREVIEW
+                return self:GetActivePreviewType() ~= ZO_TAMRIEL_TOMES_REWARD_DATA_PREVIEW_TYPES.FULL_PREVIEW
             end,
         },
 
         {
-            alignment = function()
-                if self:GetCurrentPreviewType() == ZO_TAMRIEL_TOMES_REWARD_DATA_PREVIEW_TYPES.ACTIVE_PREVIEW then
-                    return KEYBIND_STRIP_ALIGN_CENTER
-                end
-
-                return KEYBIND_STRIP_ALIGN_LEFT
-            end,
+            alignment = KEYBIND_STRIP_ALIGN_LEFT,
 
             keybind = "UI_SHORTCUT_NEGATIVE",
 
             order = -1500,
 
-            name = function()
-                if self:GetCurrentPreviewType() == ZO_TAMRIEL_TOMES_REWARD_DATA_PREVIEW_TYPES.ACTIVE_PREVIEW then
-                    return GetString(SI_TAMRIEL_TOMES_END_PREVIEW_ACTION)
-                end
-
-                return GetString(SI_GAMEPAD_BACK_OPTION)
-            end,
+            name = GetString(SI_GAMEPAD_BACK_OPTION),
 
             callback = function()
-                if self:GetCurrentPreviewType() ~= ZO_TAMRIEL_TOMES_REWARD_DATA_PREVIEW_TYPES.NONE then
-                    self:EndPreview()
-                else
-                    SCENE_MANAGER:HideCurrentScene()
-                end
+                SCENE_MANAGER:HideCurrentScene()
             end,
         },
 
@@ -258,7 +254,10 @@ function ZO_TamrielTomesScreen_Gamepad:InitializeMultiFocusAreas()
     {
         highlight = self.challengesButton:GetNamedChild("Highlight"),
         control = self.challengesButton,
-        callback = ZO_ShowTimedActivities,
+        callback = function()
+            PlaySound(SOUNDS.TAMRIEL_TOMES_NAVIGATE_FORWARD)
+            ZO_ShowTimedActivities()
+        end,
         narrationText = function()
             local narrations = {}
             ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.challengesButton.text))
@@ -273,6 +272,7 @@ function ZO_TamrielTomesScreen_Gamepad:InitializeMultiFocusAreas()
         control = self.upgradeButton,
 
         callback = function()
+            PlaySound(SOUNDS.TAMRIEL_TOMES_NAVIGATE_FORWARD)
             self:ShowPurchaseScreen()
         end,
 
@@ -319,50 +319,21 @@ function ZO_TamrielTomesScreen_Gamepad:UpdateButtons()
     end
 end
 
-function ZO_TamrielTomesScreen_Gamepad:BeginActivePreviewInternal(previousPreviewRewardData, tamrielTomesRewardData)
-    -- Active preview is a higher priority than quick preview.
-    -- Order matters
-    local isCurrentlyPreviewing = self:GetCurrentPreviewTamrielTomesRewardData() == tamrielTomesRewardData
-    self.activePreviewTamrielTomesRewardData = nil
-
-    TAMRIEL_TOMES_REWARD_PREVIEW_SCREEN_GAMEPAD:SetTamrielTomesRewardData(tamrielTomesRewardData, isCurrentlyPreviewing)
-    SCENE_MANAGER:Push("TamrielTomesRewardPreviewSceneGamepad")
-end
-
-function ZO_TamrielTomesScreen_Gamepad:IsNextSceneRewardPreview()
-    local nextScene = SCENE_MANAGER:GetNextScene()
-    return nextScene == TAMRIEL_TOMES_PREVIEW_REWARD_SCENE_GAMEPAD
-end
-
-function ZO_TamrielTomesScreen_Gamepad:EndPreviewRewardList()
-    -- TODO Tamriel Tomes
-end
-
-function ZO_TamrielTomesScreen_Gamepad:PreviewRewardList(rewardId)
-    -- TODO Tamriel Tomes
-end
-
 function ZO_TamrielTomesScreen_Gamepad:OnGridSelectionChanged(previousData, newData)
-    self:SetSelectedTamrielTomesRewardData(newData)
-end
-
--- Indicates whether this scene should retain the current preview when hidden.
-function ZO_TamrielTomesScreen_Gamepad:ShouldRetainPreview()
-    return self:IsNextSceneRewardPreview()
+    if newData and self:IsShowing() then
+        self:SetSelectedTamrielTomesRewardData(newData)
+    end
 end
 
 function ZO_TamrielTomesScreen_Gamepad:OnHiding()
     ZO_TamrielTomesScreen_Shared.OnHiding(self)
+
     self:DeactivateCurrentFocus()
     DIRECTIONAL_INPUT:Deactivate(self)
 end
 
 function ZO_TamrielTomesScreen_Gamepad:OnSelectedTamrielTomesRewardDataChanged(previousData, newData, previousTileControl, newTileControl)
     ZO_TamrielTomesScreen_Shared.OnSelectedTamrielTomesRewardDataChanged(self, previousData, newData, previousTileControl, newTileControl)
-
-    if self:GetCurrentPreviewType() == ZO_TAMRIEL_TOMES_REWARD_DATA_PREVIEW_TYPES.ACTIVE_PREVIEW then
-        self:EndActivePreview()
-    end
 
     local hideTooltip = true
     if newData then
@@ -381,6 +352,7 @@ end
 function ZO_TamrielTomesScreen_Gamepad:OnShowing()
     ZO_TamrielTomesScreen_Shared.OnShowing(self)
 
+    ITEM_PREVIEW_GAMEPAD:GetFragment():SetHideOnSceneHidden(true)
     TAMRIEL_TOMES_SCENE_GROUP_GAMEPAD:SetActiveScene("TamrielTomesSceneGamepad")
 
     if self:GetCurrentFocus() then
@@ -394,32 +366,15 @@ function ZO_TamrielTomesScreen_Gamepad:OnShowing()
     self:UpdateKeybinds()
 end
 
-function ZO_TamrielTomesScreen_Gamepad:SetInputEnabled(enabled, overrideFocusArea)
-    if enabled == self.isInputEnabled then
-        return
-    end
-
-    if enabled then
-        if overrideFocusArea then
-            self:SelectFocusArea(overrideFocusArea)
-            self:ActivateFocusArea(overrideFocusArea)
-        else
-            self:ActivateCurrentFocus()
-        end
-        DIRECTIONAL_INPUT:Activate(self, self.control)
-    else
-        self:DeactivateCurrentFocus()
-        DIRECTIONAL_INPUT:Deactivate(self)
-    end
-
-    self.isInputEnabled = enabled
+function ZO_TamrielTomesScreen_Gamepad:ShouldHideKeybinds()
+    local isShowing = self.scene:IsShowing()
+    local isFullPreviewing = self:GetActivePreviewType() == ZO_TAMRIEL_TOMES_REWARD_DATA_PREVIEW_TYPES.FULL_PREVIEW
+    return (not isShowing) or isFullPreviewing
 end
 
 function ZO_TamrielTomesScreen_Gamepad:SetSelectedTamrielTomesRewardData(newData)
-    if self:IsNextSceneRewardPreview() then
-        -- Suppress any changes to the selected reward data while
-        -- transitioning to the Reward Preview scene as doing so
-        -- would cause the existing quick preview to be hidden.
+    if not newData and self:ShouldRetainPreview() then
+        -- Suppress clearing the selection while transitioning to a Full Preview.
         return
     end
 
@@ -433,6 +388,46 @@ end
 function ZO_TamrielTomesScreen_Gamepad:ShowPurchaseScreen()
     SCENE_MANAGER:Push("TamrielTomesPurchaseSceneGamepad")
 end
+
+-- Indicates whether this scene should retain the current preview when hidden.
+function ZO_TamrielTomesScreen_Gamepad:ShouldRetainPreview()
+    local nextScene = SCENE_MANAGER:GetNextScene()
+    return nextScene == TAMRIEL_TOMES_PREVIEW_REWARD_SCENE_GAMEPAD
+end
+
+function ZO_TamrielTomesScreen_Gamepad:BeginPreviewInternal()
+    local previewType, rewardData, previewKey = self:GetActivePreviewInfo()
+    local rewardId = rewardData:GetRewardId()
+    local rewardType = rewardData:GetRewardType()
+
+    if rewardType == REWARD_ENTRY_TYPE_REWARD_LIST then
+        local rewardListId = GetRewardListIdFromReward(rewardId)
+        PREVIEW_REWARD_LIST_SCREEN_GAMEPAD:SetRewardList(rewardListId)
+        SCENE_MANAGER:Push("previewRewardList_Gamepad")
+
+        return true
+    end
+
+    local previewSystem = self.GetPreviewSystem()
+    previewSystem:PreviewReward(rewardId)
+    self:RefreshPreviewControls()
+
+    if previewType == ZO_TAMRIEL_TOMES_REWARD_DATA_PREVIEW_TYPES.FULL_PREVIEW then
+        ITEM_PREVIEW_GAMEPAD:GetFragment():SetHideOnSceneHidden(false)
+        TAMRIEL_TOMES_REWARD_PREVIEW_SCREEN_GAMEPAD:SetRewardId(rewardId)
+        SCENE_MANAGER:Push(TAMRIEL_TOMES_PREVIEW_REWARD_SCENE_GAMEPAD:GetName())
+    end
+
+    return true
+end
+
+function ZO_TamrielTomesScreen_Gamepad:EndPreviewInternal()
+    local previewSystem = self.GetPreviewSystem()
+    previewSystem:EndCurrentPreview()
+    self:RefreshPreviewControls()
+end
+
+-- Static Methods
 
 function ZO_TamrielTomesScreen_Gamepad.OnControlInitialized(control)
     TAMRIEL_TOMES_SCREEN_GAMEPAD = ZO_TamrielTomesScreen_Gamepad:New(control)

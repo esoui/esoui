@@ -88,4 +88,5 @@ function ZO_TamrielTomesIntroScreen_Gamepad:AdvanceToTome()
     -- Play the page fip sound manually as the ZO_PageNavigation control
     -- is not technically changing pages in this context.
     PlaySound(SOUNDS.TAMRIEL_TOMES_PAGE_FLIPPED)
+    PlaySound(SOUNDS.TAMRIEL_TOMES_PAGE_ZERO_CONTINUE_TO_TOME)
 end

@@ -547,7 +547,7 @@ function ZO_MailSend_Gamepad:PopulateMainList()
 
         if ZO_IsPlaystationPlatform() then
             self:AddMainListEntry(GetString(SI_GAMEPAD_MAIL_SEND_TO), NO_HEADER, NO_ICON, userListCallback, NO_SECONDARY_CALLBACK_NAME, NO_SECONDARY_CALLBACK, mailSendNarrationText)
-        elseif IsGameCoreUI() then
+        elseif ZO_IsConsoleOrGameCoreUI() then
             if GetNumberConsoleFriends() > 0 then
                 self:AddMainListEntry(GetString(SI_GAMEPAD_MAIL_SEND_TO), NO_HEADER, NO_ICON, editBoxCallback, GetString(SI_GAMEPAD_CONSOLE_CHOOSE_FRIEND), userListCallback, mailSendNarrationText)
             else

@@ -11,11 +11,17 @@ function DirectPurchase_Manager:Initialize()
 
     EVENT_MANAGER:RegisterForEvent("DirectPurchase_Manager", EVENT_DIRECT_PURCHASE_QUERY_CATALOG_COMPLETE, OnQueryComplete)
 
-    local function OnPurchaseSkuResult(_, result)
-        self:FireCallbacks("PurchaseSkuResult", result)
+    local function OnPurchaseSkuResult(_, skuId, result)
+        self:FireCallbacks("PurchaseSkuResult", skuId, result)
     end
 
     EVENT_MANAGER:RegisterForEvent("DirectPurchase_Manager", EVENT_DIRECT_PURCHASE_PURCHASE_SKU_RESULT, OnPurchaseSkuResult)
+
+    local function OnPurchaseTamrielTomeResult(_, tomeId, result)
+        self:FireCallbacks("PurchaseTamrielTomeResult", tomeId, result)
+    end
+
+    EVENT_MANAGER:RegisterForEvent("DirectPurchase_Manager", EVENT_TAMRIEL_TOME_PURCHASE_RESULT, OnPurchaseTamrielTomeResult)
 
     local function OnRewardTrackSettingsUpdateReceived(_)
         self:FireCallbacks("SettingsUpdated")

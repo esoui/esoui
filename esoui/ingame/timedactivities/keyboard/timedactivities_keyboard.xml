@@ -33,6 +33,12 @@
         </Control>
         <Button name="ZO_TimedActivitiesKeyboard_TabButton" inherits="ZO_DefaultButton" virtual="true">
             <Dimensions x="64" y="64"/>
+            <Controls>
+                <Texture name="$(parent)NewIndicator" hidden="true" textureFile="/esoui/art/miscellaneous/new_icon.dds" tier="HIGH">
+                    <Anchor point="CENTER" relativePoint="LEFT"/>
+                    <Dimensions x="32" y="32"/>
+                </Texture>
+            </Controls>
         </Button>
         <TopLevelControl name="ZO_TimedActivities_KeyboardTL" hidden="true">
             <Anchor point="CENTER"/>

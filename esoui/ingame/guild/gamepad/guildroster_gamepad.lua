@@ -52,7 +52,7 @@ function ZO_GamepadGuildRosterManager:PerformDeferredInitialization()
     if self.initialized then return end
     self.initialized = true
 
-    if IsGameCoreUI() then
+    if ZO_IsConsoleOrGameCoreUI() then
         local keybind  =
         {
             alignment = KEYBIND_STRIP_ALIGN_LEFT,

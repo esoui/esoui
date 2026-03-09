@@ -17,6 +17,8 @@ function ZO_TamrielTomesIntroScreen_Shared:OnDeferredInitialize()
 
     self.titleLabel = self.control:GetNamedChild("Title")
     self.rewardImageControl = self.control:GetNamedChild("ImageBackground")
+
+    TAMRIEL_TOMES_MANAGER:RegisterCallback("SelectedTomeChanged", self.OnSelectedTomeChanged, self)
 end
 
 function ZO_TamrielTomesIntroScreen_Shared:OnShowing()
@@ -30,14 +32,31 @@ function ZO_TamrielTomesIntroScreen_Shared:OnShown()
 end
 
 function ZO_TamrielTomesIntroScreen_Shared:OnHiding()
-    -- TODO Tamriel Tomes
+    PlaySound(SOUNDS.TAMRIEL_TOMES_PAGE_ZERO_CLOSED)
 end
 
 function ZO_TamrielTomesIntroScreen_Shared:OnHidden()
     -- TODO Tamriel Tomes
 end
 
+function ZO_TamrielTomesIntroScreen_Shared:OnSelectedTomeChanged(tomeId)
+    if not self:IsShowing() then
+        return
+    end
+
+    local selectedTomeId = TAMRIEL_TOMES_MANAGER:GetSelectedTomeId()
+    self:ShowTomeInfo(selectedTomeId)
+end
+
 function ZO_TamrielTomesIntroScreen_Shared:ShowTomeInfo(tamrielTomeId)
+    if not (tamrielTomeId and tamrielTomeId ~= 0) then
+        -- There are no available Tomes.
+        SCENE_MANAGER:HideCurrentScene()
+        return
+    end
+
+    PlaySound(SOUNDS.TAMRIEL_TOMES_PAGE_ZERO_OPENED)
+
     self.highlightsControlPool:ReleaseAllObjects()
 
     local tomeData = ZO_TamrielTomeData:New(tamrielTomeId)
@@ -73,4 +92,5 @@ function ZO_TamrielTomesIntroScreen_Shared:AdvanceToTome()
     -- Play the page fip sound manually as the ZO_PageNavigation control
     -- is not technically changing pages in this context.
     PlaySound(SOUNDS.TAMRIEL_TOMES_PAGE_FLIPPED)
+    PlaySound(SOUNDS.TAMRIEL_TOMES_PAGE_ZERO_CONTINUE_TO_TOME)
 end
