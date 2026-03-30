@@ -10,7 +10,8 @@ local g_serviceType = GetPlatformServiceType()
 
 function ZO_OptionsPanel_IsAccountManagementAvailable()
     if g_serviceType == PLATFORM_SERVICE_TYPE_DMM then
-        return false
+        -- TODO DMM: Temp change
+        --return false
     end
     return IsInUI("pregame")
 end
@@ -55,7 +56,10 @@ local ZO_Panel_Account_ControlData =
             callback = function()
                 RequestResendAccountEmailVerification()
             end,
-            exists = ZO_OptionsPanel_IsAccountManagementAvailable,
+            exists = function()
+                -- TODO DMM: Temp change
+                return ZO_OptionsPanel_IsAccountManagementAvailable() and g_serviceType ~= PLATFORM_SERVICE_TYPE_DMM
+            end,
             visible = ZO_OptionsPanel_Account_CanResendActivation,
         },
     },
@@ -75,7 +79,10 @@ local ZO_Panel_Account_ControlData =
             -- If this setting doesn't exist, we won't attempt to load it, which would mean
             -- OPTIONS_CUSTOM_SETTING_RESEND_EMAIL_ACTIVATION could never be able to show
             exists = ZO_OptionsPanel_IsAccountManagementAvailable,
-            visible = false,
+            visible = function()
+                -- TODO DMM: Temp change
+                return g_serviceType == PLATFORM_SERVICE_TYPE_DMM
+            end,
             callback = function()
                 if IsInGamepadPreferredMode() then
                     local data =
@@ -106,7 +113,10 @@ local ZO_Panel_Account_ControlData =
                     end
                 end
             end,
-            exists = ZO_OptionsPanel_IsAccountManagementAvailable,
+            exists = function()
+                -- TODO DMM: Temp change
+                return ZO_OptionsPanel_IsAccountManagementAvailable() and g_serviceType ~= PLATFORM_SERVICE_TYPE_DMM
+            end,
             SetSettingOverride = function(control, value)
                 SetSecureSetting(control.data.system, control.data.settingId, tostring(value))
             end,

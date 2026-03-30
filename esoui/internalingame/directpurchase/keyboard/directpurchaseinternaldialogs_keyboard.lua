@@ -5,7 +5,7 @@
 local function PurchaseUpgradeDialog_Setup(dialog, skuData)
     local skuName = skuData:GetDisplayName()
     dialog.skuNameLabel:SetText(skuName)
-    
+
     local billingInfo, hasBillingAddress = GetBillingInfo()
     local hasBillingInfo = billingInfo ~= "" and hasBillingAddress
     local currentPriceString, _, taxPriceString, totalPriceString, isVatIncluded = skuData:GetPricingInfoWithTaxFormatted()
@@ -185,4 +185,30 @@ function ZO_DirectPurchaseConfirmPurchaseDialog_Keyboard_OnInitialized(control)
             },
         },
     })
+end
+
+do
+    local SUPPRESSION_DIALOG_NAMES =
+    {
+        "DIRECT_PURCHASE_RESULT",
+        "DIRECT_PURCHASE_CONFIRM_PURCHASE_KEYBOARD",
+        "KEYBOARD_PENDING_RESULT_DIALOG",
+    }
+
+    local function OnDirectPurchasePurchaseSkuResult(skuId, result)
+        if IsInGamepadPreferredMode() then
+            return
+        end
+
+        for _, dialogName in ipairs(SUPPRESSION_DIALOG_NAMES) do
+            if ZO_Dialogs_IsShowing(dialogName) then
+                return
+            end
+        end
+
+        -- Show the Result dialog (Keyboard) if none of the suppression dialogs are currently showing.
+        ShowResultDialog(skuId, result)
+    end
+
+    DIRECT_PURCHASE_MANAGER:RegisterCallback("PurchaseSkuResult", OnDirectPurchasePurchaseSkuResult)
 end

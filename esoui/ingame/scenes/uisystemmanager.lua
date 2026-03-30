@@ -147,7 +147,17 @@ function ZO_UISystemManager:TryShowInitialScreen()
     elseif self:TryShowReturningPlayerAnnouncement() then
         -- TryShowReturningPlayerAnnouncement has handled showing the announcement
     elseif not HasShownMarketAnnouncement() then
-        RequestMarketAnnouncement()
+        local accountTypeId = GetTrialInfo()
+        local isFreeTrial = accountTypeId > 0
+        local SHOW_INTRO = true
+        if (not isFreeTrial) and TAMRIEL_TOMES_MANAGER:TryOpenNewSeasonTamrielTome(SHOW_INTRO) then
+            -- TryOpenNewSeasonTamrielTome has handled showing the Tome
+
+            FlagReturningPlayerAnnouncementSeen()
+            FlagMarketAnnouncementSeen()
+        else
+            RequestMarketAnnouncement()
+        end
     end
 
     self.waitingForMarketAnnouncements = not HasShownMarketAnnouncement()

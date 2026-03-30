@@ -197,6 +197,15 @@ function TamrielTomes_Manager:GetSelectedTomeId()
     return self.selectedTomeId
 end
 
+function TamrielTomes_Manager:IsCurrentSeasonTamrielTomeNew()
+    local currentSeasonTomeId = self:GetActiveTomeId()
+    if not (currentSeasonTomeId and currentSeasonTomeId ~= 0) then
+        return false
+    end
+
+    return not self:HasSeenTome(currentSeasonTomeId)
+end
+
 function TamrielTomes_Manager:SelectTomeId(tomeId)
     if TAMRIEL_TOMES_MANAGER and not TAMRIEL_TOMES_MANAGER:AreTomesAvailable() then
         tomeId = nil
@@ -215,12 +224,32 @@ function TamrielTomes_Manager:SelectTomeId(tomeId)
     end
 end
 
-function TamrielTomes_Manager:OpenTamrielTome(tomeId)
+function TamrielTomes_Manager:OpenTamrielTome(tomeId, showIntro)
     if self:AreTomesAvailable() then
         self:SelectTomeId(tomeId)
-        SYSTEMS:ShowScene("tamrielTomes")
+
+        SYSTEMS:GetObject("mainMenu"):ToggleCategory(MENU_CATEGORY_TAMRIEL_TOMES)
         return true
     end
+
+    return false
+end
+
+function TamrielTomes_Manager:OpenCurrentSeasonTamrielTome(showIntro)
+    local currentSeasonTomeId = self:GetActiveTomeId()
+    if not (currentSeasonTomeId and currentSeasonTomeId ~= 0) then
+        return false
+    end
+
+    return self:OpenTamrielTome(currentSeasonTomeId, showIntro)
+end
+
+function TamrielTomes_Manager:TryOpenNewSeasonTamrielTome(showIntro)
+    if self:IsCurrentSeasonTamrielTomeNew() then
+        return self:OpenCurrentSeasonTamrielTome(showIntro)
+    end
+
+    return false
 end
 
 function TamrielTomes_Manager:GetFeaturedTomeRewards(tomeId)
@@ -306,7 +335,7 @@ function TamrielTomes_Manager:IsDirectPurchaseEnabled()
     end
 
     local accountTypeId = GetTrialInfo()
-    local isFreeTrial = accountTypeId and accountTypeId ~= 0
+    local isFreeTrial = accountTypeId > 0
     return not isFreeTrial
 end
 

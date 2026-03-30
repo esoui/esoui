@@ -221,6 +221,9 @@ function ZO_TimedActivities_Keyboard:Initialize(control)
     ZO_DeferredInitializingObject.Initialize(self, TIMED_ACTIVITIES_SCENE_KEYBOARD)
 
     TIMED_ACTIVITIES_SCENE_KEYBOARD:AddFragment(self.sceneFragment)
+
+    SYSTEMS:RegisterKeyboardRootScene("timedActivities", TIMED_ACTIVITIES_SCENE_KEYBOARD)
+    SYSTEMS:RegisterKeyboardObject("timedActivities", self)
 end
 
 function ZO_TimedActivities_Keyboard:OnDeferredInitialize()
@@ -266,15 +269,15 @@ function ZO_TimedActivities_Keyboard:InitializeControls()
     self.keybindStripDescriptor =
     {
         {
-            -- Pop the scene to go back
+            alignment = KEYBIND_STRIP_ALIGN_CENTER, 
             name = GetString(SI_TAMRIEL_TOMES_BACK_KEYBIND),
-            keybind = "UI_SHORTCUT_EXIT",
-            order = -10000,
+            keybind = "UI_SHORTCUT_NEGATIVE",
             callback = function()
+                -- Pop the scene to go back
                 SCENE_MANAGER:HideCurrentScene()
             end,
             sound = SOUNDS.TAMRIEL_TOMES_NAVIGATE_BACK,
-        }
+        },
     }
 end
 
@@ -282,6 +285,15 @@ function ZO_TimedActivities_Keyboard:InitializeGridList()
     self.gridList = ZO_SingleTemplateGridScrollList_Keyboard:New(self.gridListControl, ZO_GRID_SCROLL_LIST_DONT_AUTOFILL)
     local DEFAULT_HIDE_CALLBACK = nil
     self.gridList:SetGridEntryTemplate("ZO_TimedActivityTile_Keyboard_Control", ZO_TAMRIEL_TOMES_CHALLENGE_TILE_WIDTH_KEYBOARD, ZO_TAMRIEL_TOMES_CHALLENGE_TILE_HEIGHT_KEYBOARD, ZO_DefaultGridTileEntrySetup, DEFAULT_HIDE_CALLBACK, ZO_DefaultGridTileEntryReset, ZO_TAMRIEL_TOMES_CHALLENGE_TILE_SPACING_KEYBOARD, ZO_TAMRIEL_TOMES_CHALLENGE_TILE_SPACING_KEYBOARD)
+    
+    local function AreActivityRowsEqual(left, right)
+        return left:Equals(right)
+    end
+    self.gridList:SetEntryTemplateEqualityFunction("ZO_TimedActivityTile_Keyboard_Control", AreActivityRowsEqual)
+end
+
+function ZO_TimedActivities_Keyboard:SelectActivityTypeCategory(activityType)
+    self:SetCurrentActivityType(activityType)
 end
 
 function ZO_TimedActivities_Keyboard:SetCurrentActivityType(activityType)
@@ -296,12 +308,6 @@ function ZO_TimedActivities_Keyboard:SetCurrentActivityType(activityType)
     else
         self.weeklyButton:SetNormalTexture("EsoUI/Art/TamrielTomes/timedActivityCategory_weekly_up.dds")
         self.seasonalButton:SetNormalTexture("EsoUI/Art/TamrielTomes/timedActivityCategory_seasonal_down.dds")
-    end
-
-    if activityType ~= self.currentActivityType then
-        -- Order matters:
-        self.currentActivityType = activityType
-        self:MarkDirty()
     end
 end
 
@@ -324,10 +330,22 @@ function ZO_TimedActivities_Keyboard:RefreshList()
     local _, activityEntries = ZO_TimedActivities_Shared.RefreshList(self)
     
     self.gridList:ClearGridList()
+    local scrollToEntry = nil
     for _, entryData in ipairs(activityEntries) do
         self.gridList:AddEntry(entryData)
+        if self.selectTimedActivityDataOnRefresh and self.selectTimedActivityDataOnRefresh:Equals(entryData) then
+            scrollToEntry = entryData
+            self.selectTimedActivityDataOnRefresh = nil
+        end
     end
+
     self.gridList:CommitGridList()
+
+    if scrollToEntry then
+        local NO_CALLBACK = nil
+        local ANIMATE_INSTANTLY = true
+        self.gridList:ScrollDataToCenter(scrollToEntry, NO_CALLBACK, ANIMATE_INSTANTLY)
+    end
 end
 
 function ZO_TimedActivities_Keyboard:RefreshAvailability()
@@ -347,10 +365,9 @@ function ZO_TimedActivities_Keyboard:RefreshNewIndicators()
 end
 
 function ZO_TimedActivities_Keyboard:OnShowing()
-    KEYBIND_STRIP:RemoveDefaultExit()
-
     ZO_TimedActivities_Shared.OnShowing(self)
     
+    SCENE_MANAGER:CreateStackFromScratchWithoutSceneChange("TamrielTomesSceneKeyboard")
     KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
 end
 
@@ -370,10 +387,6 @@ function ZO_TimedActivities_Keyboard:OnHiding()
     ZO_TimedActivities_Shared.OnHiding(self)
     
     KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
-    -- Just in case we're leaving for any reason other than back (popping the stack), ensure next time we enter back in through the main screen and not challenges
-    -- e.g.: ShowBaseScene, or hitting the bind for another menu like Inventory
-    TAMRIEL_TOMES_SCENE_GROUP_KEYBOARD:SetActiveScene("TamrielTomesSceneKeyboard")
-    KEYBIND_STRIP:RestoreDefaultExit()
 end
 
 function ZO_TimedActivities_Keyboard:OnHidden()

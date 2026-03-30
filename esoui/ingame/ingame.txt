@@ -1661,6 +1661,13 @@ EsoUI\Ingame\GroupFinder\Gamepad\GroupFinder_ApplicationList_Gamepad.xml
 EsoUI\Ingame\GroupFinder\Gamepad\GroupFinder_SearchResults_Gamepad.lua
 EsoUI\Ingame\GroupFinder\Gamepad\GroupFinder_SearchResults_Gamepad.xml
 
+EsoUI\Ingame\TimedActivities\TimedActivities_Manager.lua
+EsoUI\Ingame\TimedActivities\TimedActivities_Shared.lua
+EsoUI\Ingame\TimedActivities\Gamepad\TimedActivities_Gamepad.lua
+EsoUI\Ingame\TimedActivities\Gamepad\TimedActivities_Gamepad.xml
+EsoUI\Ingame\TimedActivities\Keyboard\TimedActivities_Keyboard.lua
+EsoUI\Ingame\TimedActivities\Keyboard\TimedActivities_Keyboard.xml
+
 EsoUI\Ingame\SlashCommands\SlashCommands_Shared.lua
 EsoUI\Ingame\SlashCommands\PC\SlashCommands_PC.lua
 EsoUI\Ingame\PlayerToPlayer\PlayerToPlayer.lua
@@ -1719,13 +1726,6 @@ EsoUI\Ingame\Companion\Gamepad\CompanionCollectionBook_Gamepad.lua
 EsoUI\Ingame\Companion\Gamepad\CompanionCollectionBook_Gamepad.xml
 EsoUI\Ingame\Companion\Gamepad\Companion_Gamepad.lua
 EsoUI\Ingame\Companion\Gamepad\Companion_Gamepad.xml
-
-EsoUI\Ingame\TimedActivities\TimedActivities_Manager.lua
-EsoUI\Ingame\TimedActivities\TimedActivities_Shared.lua
-EsoUI\Ingame\TimedActivities\Gamepad\TimedActivities_Gamepad.lua
-EsoUI\Ingame\TimedActivities\Gamepad\TimedActivities_Gamepad.xml
-EsoUI\Ingame\TimedActivities\Keyboard\TimedActivities_Keyboard.lua
-EsoUI\Ingame\TimedActivities\Keyboard\TimedActivities_Keyboard.xml
 
 EsoUI\Ingame\Armory\ArmoryBuildData.lua
 EsoUI\Ingame\Armory\Armory_Manager.lua

@@ -259,6 +259,27 @@ function ZO_TimedActivityData:ToggleTracking(suppressSound)
     end
 end
 
+-- TODO Tamriel Tomes: Handle collectible-gated activities
+function ZO_TimedActivityData:GetRequiredCollectibleId()
+    local requiredCollectibleId = GetTimedActivityRequiredCollectible(self.timedActivityId)
+    return requiredCollectibleId
+end
+
+function ZO_TimedActivityData:GetRequiredCollectibleData()
+    local requiredCollectibleId = self:GetRequiredCollectibleId()
+    return ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(requiredCollectibleId)
+end
+
+function ZO_TimedActivityData:IsLocked()
+    local requiredCollectibleData = self:GetRequiredCollectibleData()
+    return requiredCollectibleData and requiredCollectibleData:IsLocked() or false
+end
+
+function ZO_TimedActivityData:IsExcludedFromHUDClaimPrompt()
+    local isExcluded = IsTimedActivityExcludedFromHUDClaimPrompt(self.timedActivityId)
+    return isExcluded
+end
+
 function ZO_TimedActivityData:Equals(otherData)
     return AreId64sEqual(self:GetEncodedId(), otherData:GetEncodedId())
 end
@@ -355,7 +376,7 @@ function ZO_TimedActivities_Manager:RegisterEvents()
     EVENT_MANAGER:RegisterForEvent("TimedActivitiesManager", EVENT_TIMED_ACTIVITY_TRACKING_UPDATED, OnActivitiesUpdated)
     EVENT_MANAGER:RegisterForEvent("TimedActivitiesManager", EVENT_TIMED_ACTIVITY_PROGRESS_UPDATED, OnActivityUpdated)
     EVENT_MANAGER:RegisterForEvent("TimedActivitiesManager", EVENT_TIMED_ACTIVITY_SYSTEM_STATUS_UPDATED, OnSystemStatusUpdated)
-    EVENT_MANAGER:RegisterForEvent("TimedActivitiesManager", EVENT_OPEN_TIMED_ACTIVITIES, ZO_ShowTimedActivities)
+    EVENT_MANAGER:RegisterForEvent("TimedActivitiesManager", EVENT_OPEN_TIMED_ACTIVITIES, ZO_GetEventForwardingFunction(self, self.ShowTimedActivitiesScene))
     EVENT_MANAGER:RegisterForEvent("TimedActivitiesManager", EVENT_HOLIDAYS_CHANGED, UpdateSeasonEndTime)
 end
 
@@ -392,18 +413,28 @@ function ZO_TimedActivities_Manager:GetActivityDatasByType(timedActivityType)
     return self:GetActivityDatasByFilter({ ActivityMatches })
 end
 
-function ZO_TimedActivities_Manager:GetClaimableActivityDatasByActivityType(timedActivityType)
-    local ActivityMatches
-    if timedActivityType then
-        ActivityMatches = function(activityData)
-            return activityData:CanClaim() and activityData:GetType() == timedActivityType
-        end
-    else
-        ActivityMatches = function(activityData)
-            return activityData:CanClaim()
-        end
+function ZO_TimedActivities_Manager:GetFirstClaimableTimedActivity(timedActivityType)
+    local function ActivityMatches(activityData)
+        return activityData:CanClaim() and (not timedActivityType or activityData:GetType() == timedActivityType)
     end
-    return self:GetActivityDatasByFilter({ ActivityMatches })
+    return self:GetFirstActivityDataByFilter({ ActivityMatches })
+end
+
+function ZO_TimedActivities_Manager:HasClaimableTimedActivities(timedActivityType)
+    local claimableActivityData = self:GetFirstClaimableTimedActivity(timedActivityType)
+    return claimableActivityData ~= nil
+end
+
+function ZO_TimedActivities_Manager:GetFirstClaimableTimedActivityForHUDPrompt(timedActivityType)
+    local function ActivityMatches(activityData)
+        return activityData:CanClaim() and not activityData:IsExcludedFromHUDClaimPrompt() and (not timedActivityType or activityData:GetType() == timedActivityType)
+    end
+    return self:GetFirstActivityDataByFilter({ ActivityMatches })
+end
+
+function ZO_TimedActivities_Manager:HasClaimableTimedActivitiesForHUDPrompt(timedActivityType)
+    local claimableActivityData = self:GetFirstClaimableTimedActivityForHUDPrompt(timedActivityType)
+    return claimableActivityData ~= nil
 end
 
 function ZO_TimedActivities_Manager:GetActivityDatasByEncodedIds(timedActivityEncodedIds)
@@ -495,11 +526,6 @@ function ZO_TimedActivities_Manager:HasNewTimedActivities(timedActivityType)
     return false
 end
 
-function ZO_TimedActivities_Manager:HasClaimableTimedActivities(timedActivityType)
-    local claimableActivityDatas = self:GetClaimableActivityDatasByActivityType(timedActivityType)
-    return next(claimableActivityDatas) ~= nil
-end
-
 function ZO_TimedActivities_Manager:MarkTimedActivitiesAsSeen(activityDatas)
     local encodedIds = {}
     for _, activityData in ipairs(activityDatas) do
@@ -508,9 +534,12 @@ function ZO_TimedActivities_Manager:MarkTimedActivitiesAsSeen(activityDatas)
     self.seenActivityEncodedIds:AddKeys(unpack(encodedIds))
 end
 
-function ZO_ShowTimedActivities()
-    local scene = IsInGamepadPreferredMode() and "TimedActivitiesGamepad" or "TimedActivitiesKeyboard"
-    SCENE_MANAGER:Push(scene)
+function ZO_TimedActivities_Manager:ShowTimedActivitiesScene(scrollToTimedActivityData)
+    if scrollToTimedActivityData then
+        SYSTEMS:GetObject("timedActivities"):BrowseToTimedActivityData(scrollToTimedActivityData)
+    else
+        SYSTEMS:ShowScene("timedActivities")
+    end
 end
 
 function ZO_ShowSealStore()

@@ -211,11 +211,9 @@ local MENU_ENTRY_DATA =
         sceneGroupPreferredSceneFunction = function()
             local selectedTomeId = TAMRIEL_TOMES_MANAGER:GetSelectedTomeId()
             local hasSeenTome = TAMRIEL_TOMES_MANAGER:HasSeenTome(selectedTomeId)
-            if hasSeenTome then
-                return "TamrielTomesSceneGamepad"
+            if not hasSeenTome then
+                return "TamrielTomesIntroSceneGamepad"
             end
-
-            return "TamrielTomesIntroSceneGamepad"
         end,
         onSelectedCallback = function()
             if MAIN_MENU_GAMEPAD:IsShowing() then

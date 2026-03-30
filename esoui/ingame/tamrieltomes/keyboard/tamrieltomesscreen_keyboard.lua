@@ -85,7 +85,7 @@ function ZO_TamrielTomesScreen_Keyboard:InitializeControls()
     ZO_TamrielTomesScreen_Shared.InitializeControls(self)
 
     self.pageNavigation:SetDefaultIndicatorFont("ZoFontCallout")
-    self.challengesButton:SetHandler("OnClicked", ZO_ShowTimedActivities)
+    self.challengesButton:SetHandler("OnClicked", function() TIMED_ACTIVITIES_MANAGER:ShowTimedActivitiesScene() end)
     self.upgradeButton:SetHandler("OnClicked", function() self:ShowPurchaseScreen() end)
 end
 

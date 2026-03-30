@@ -137,6 +137,14 @@ function ZO_TamrielTomesReward_Shared:SetClaimRewardMultiplier(multiplier)
         -- Progress will be increased or reduced.
         self.control:SetHandler("OnUpdate", self.control.onClaimUpdate)
     end
+
+    if multiplier == 1 then
+        -- Begin the wind up audio when increasing.
+        SetTamrielTomesNormalizedConfirmationAmount(100)
+    else
+        -- End the wind up audio immediately when decreasing or neutral.
+        SetTamrielTomesNormalizedConfirmationAmount(0)
+    end
 end
 
 function ZO_TamrielTomesReward_Shared:GetClaimRewardNormalizedProgress()

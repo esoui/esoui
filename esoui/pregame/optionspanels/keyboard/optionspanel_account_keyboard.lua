@@ -102,9 +102,24 @@ end
 
 local panelBuilder = ZO_KeyboardOptionsPanelBuilder:New(SETTING_PANEL_ACCOUNT)
 
+-- TODO DMM: Temp change
+if GetPlatformServiceType() == PLATFORM_SERVICE_TYPE_DMM then
+    ------------------------------
+    -- Account -> Email Address --
+    ------------------------------
+    panelBuilder:AddSetting({
+        controlName = "Options_Account_ChangeEmail",
+        template = "ZO_Options_Account_InvokeCallback_WithEmail",
+        settingType = SETTING_TYPE_ACCOUNT,
+        settingId = ACCOUNT_SETTING_ACCOUNT_EMAIL,
+        header = SI_INTERFACE_OPTIONS_ACCOUNT_EMAIL_HEADER,
+    })
+end
+
 --------------------------------------
 -- Account -> Marketing Preferences --
 --------------------------------------
+
 panelBuilder:AddSetting({
     controlName = "Options_Account_GetUpdates",
     settingType = SETTING_TYPE_ACCOUNT,

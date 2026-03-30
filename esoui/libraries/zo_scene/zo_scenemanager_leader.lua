@@ -142,6 +142,16 @@ function ZO_SceneManager_Leader:CreateStackFromScratch(...)
     end
 end
 
+function ZO_SceneManager_Leader:CreateStackFromScratchWithoutSceneChange(...)
+    self:ClearSceneStack()
+    local numScenes = select("#", ...)
+    if numScenes > 0 then
+        for i = 1, numScenes do
+            self:PushOnSceneStack(select(i, ...))
+        end
+    end
+end
+
 -- next scene overrides
 
 function ZO_SceneManager_Leader:SetNextScene(nextScene, push, nextSceneClearsSceneStack, numScenesNextScenePops)

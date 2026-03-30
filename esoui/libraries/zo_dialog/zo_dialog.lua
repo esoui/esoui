@@ -1418,7 +1418,7 @@ end
 
 do
     local LOADING_DELAY_MS = 500
-    local TIMEOUT_THRESHOLD_S = 5
+    local TIMEOUT_THRESHOLD_S = 30
 
     local function BasePendingResultDialogSetup(dialog, data)
         for _, eventData in ipairs(data.events) do
@@ -1477,7 +1477,7 @@ do
             customControl = control,
             setup = KeyboardPendingResultDialogSetup,
             finishedCallback = OnPendingResultDialogFinished,
-            updateFn = OnKeyboardPendingResultDialogUpdate,
+            updateFn = OnPendingResultDialogUpdate,
             title =
             {
                 text = function(dialog)

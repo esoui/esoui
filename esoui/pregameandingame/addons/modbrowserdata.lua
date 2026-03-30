@@ -146,9 +146,7 @@ function ZO_ModBrowserListingSearchData:GetImage(imageIndex)
 end
 
 function ZO_ModBrowserListingSearchData:GetNumDependencies()
-    --Temporary fix for an endless loop of requesting dependencies when one of the dependencies is unavailable. This code should be undone once a full fix goes in
-    return 0
-    --return GetModListingNumDependencies(self.listingIndex)
+    return GetModListingNumDependencies(self.listingIndex)
 end
 
 function ZO_ModBrowserListingSearchData:AreDependenciesReady()

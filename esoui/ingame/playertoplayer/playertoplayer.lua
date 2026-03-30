@@ -27,6 +27,7 @@ local INTERACT_TYPE =
     GROUP_FINDER_APPLICATION = 21,
     PROMOTIONAL_EVENT_REWARD = 22,
     CHANGE_VENGANCE_LOADOUTS = 23,
+    TIMED_ACTIVITY_REWARD = 24,
 }
 
 -- For use outside of this file (e.g. InGameDialogs)
@@ -828,6 +829,27 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
         self:RemoveFromIncomingQueue(INTERACT_TYPE.CHANGE_VENGANCE_LOADOUTS)
     end
 
+    local function OnTimedActivitiesUpdated()
+        local firstClaimableActivityData = TIMED_ACTIVITIES_MANAGER:GetFirstClaimableTimedActivityForHUDPrompt()
+        if firstClaimableActivityData and not IsActiveWorldStarterWorld() then
+            if not self:ExistsInQueue(INTERACT_TYPE.TIMED_ACTIVITY_REWARD) then
+                PlaySound(SOUNDS.PROMOTIONAL_EVENT_REWARD_TO_CLAIM_PROMPT) -- TODO Tamriel Tomes: Custom sound
+
+                local currencyName = ZO_Currency_FormatPlatform(CURT_TOME_POINTS, NO_AMOUNT, ZO_CURRENCY_FORMAT_PLURAL_NAME_ICON)
+                local claimRewardDescriptionText = zo_strformat(SI_PLAYER_TO_PLAYER_TIMED_ACTIVITY_CLAIMABLE_REWARD, ZO_WHITE:Colorize(currencyName))
+
+                local function AcceptClaimReward()
+                    TIMED_ACTIVITIES_MANAGER:ShowTimedActivitiesScene(firstClaimableActivityData)
+                end
+                local data = self:AddPromptToIncomingQueue(INTERACT_TYPE.TIMED_ACTIVITY_REWARD, nil, nil, claimRewardDescriptionText, AcceptClaimReward)
+                data.dontRemoveOnAccept = true
+                data.acceptText = GetString(SI_PLAYER_TO_PLAYER_TIMED_ACTIVITY_CLAIM_PROMPT)
+            end
+        else
+            self:RemoveFromIncomingQueue(INTERACT_TYPE.TIMED_ACTIVITY_REWARD)
+        end
+    end
+
     self.control:RegisterForEvent(EVENT_DUEL_INVITE_RECEIVED, OnDuelInviteReceived)
     self.control:RegisterForEvent(EVENT_DUEL_INVITE_REMOVED, OnDuelInviteRemoved)
     self.control:RegisterForEvent(EVENT_TRIBUTE_INVITE_RECEIVED, OnTributeInviteReceived)
@@ -867,6 +889,10 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
     PROMOTIONAL_EVENT_MANAGER:RegisterCallback("RewardsClaimed", OnPromotionalEventRewardsUpdated)
     PROMOTIONAL_EVENT_MANAGER:RegisterCallback("CampaignsUpdated", OnPromotionalEventRewardsUpdated)
     PROMOTIONAL_EVENT_MANAGER:RegisterCallback("ActivityProgressUpdated", OnPromotionalEventRewardsUpdated)
+
+    TIMED_ACTIVITIES_MANAGER:RegisterCallback("OnRefreshAvailability", OnTimedActivitiesUpdated)
+    TIMED_ACTIVITIES_MANAGER:RegisterCallback("OnActivitiesUpdated", OnTimedActivitiesUpdated)
+    TIMED_ACTIVITIES_MANAGER:RegisterCallback("OnActivityUpdated", OnTimedActivitiesUpdated)
 
     --Find member replacement prompt on a member leaving
     local function OnGroupingToolsFindReplacementNotificationNew()
@@ -1152,6 +1178,7 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
         OnGiftsUpdated()
         OnPlayerActivateOrLeaderUpdate()
         OnPromotionalEventRewardsUpdated()
+        OnTimedActivityRewardsUpdated()
     end
 
     local function OnPlayerDeactivated()
@@ -1168,6 +1195,7 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
         self:RemoveFromIncomingQueue(INTERACT_TYPE.TRAVEL_TO_LEADER)
         self:RemoveFromIncomingQueue(INTERACT_TYPE.PROMOTIONAL_EVENT_REWARD)
         self:RemoveFromIncomingQueue(INTERACT_TYPE.CHANGE_VENGANCE_LOADOUTS)
+        self:RemoveFromIncomingQueue(INTERACT_TYPE.TIMED_ACTIVITY_REWARD)
     end
 
     self.control:RegisterForEvent(EVENT_PLAYER_ACTIVATED, OnPlayerActivated)

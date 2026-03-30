@@ -3,6 +3,8 @@ ZO_TamrielTomesIntroScreen_Gamepad = ZO_TamrielTomesIntroScreen_Shared:Subclass(
 function ZO_TamrielTomesIntroScreen_Gamepad:Initialize(control)
     TAMRIEL_TOMES_INTRO_SCENE_GAMEPAD = ZO_Scene:New("TamrielTomesIntroSceneGamepad", SCENE_MANAGER)
 
+    SYSTEMS:RegisterGamepadRootScene("tamrielTomesIntro", TAMRIEL_TOMES_INTRO_SCENE_GAMEPAD)
+
     local HIGHLIGHT_TEMPLATE = "ZO_TamrielTomesIntroHighlight_Gamepad"
     ZO_TamrielTomesIntroScreen_Shared.Initialize(self, control, TAMRIEL_TOMES_INTRO_SCENE_GAMEPAD, HIGHLIGHT_TEMPLATE)
 end

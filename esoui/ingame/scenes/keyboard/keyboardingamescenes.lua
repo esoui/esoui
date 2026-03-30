@@ -1251,7 +1251,7 @@ do
         },
     }
 
-    TAMRIEL_TOMES_SCENE_GROUP_KEYBOARD = ZO_SceneGroup:New("TamrielTomesIntroSceneKeyboard", "TamrielTomesSceneKeyboard", "TimedActivitiesKeyboard", "TamrielTomesPurchaseSceneKeyboard")
+    TAMRIEL_TOMES_SCENE_GROUP_KEYBOARD = ZO_SceneGroup:New("TamrielTomesSceneKeyboard", "TamrielTomesIntroSceneKeyboard", "TimedActivitiesKeyboard", "TamrielTomesPurchaseSceneKeyboard")
     SCENE_MANAGER:AddSceneGroup("tamrielTomesSceneGroup", TAMRIEL_TOMES_SCENE_GROUP_KEYBOARD)
 
     TAMRIEL_TOMES_SCENE_GROUP_KEYBOARD:RegisterCallback("StateChange", function(_, newState)
@@ -1265,11 +1265,9 @@ do
     local function GetPreferredScene()
         local selectedTomeId = TAMRIEL_TOMES_MANAGER:GetSelectedTomeId()
         local hasSeenTome = TAMRIEL_TOMES_MANAGER:HasSeenTome(selectedTomeId)
-        if hasSeenTome then
-            return "TamrielTomesSceneKeyboard"
+        if not hasSeenTome then
+            return "TamrielTomesIntroSceneKeyboard"
         end
-
-        return "TamrielTomesIntroSceneKeyboard"
     end
 
     MAIN_MENU_KEYBOARD:AddSceneGroup(MENU_CATEGORY_TAMRIEL_TOMES, "tamrielTomesSceneGroup", iconData, GetPreferredScene)

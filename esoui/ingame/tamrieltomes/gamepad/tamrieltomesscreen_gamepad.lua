@@ -256,7 +256,7 @@ function ZO_TamrielTomesScreen_Gamepad:InitializeMultiFocusAreas()
         control = self.challengesButton,
         callback = function()
             PlaySound(SOUNDS.TAMRIEL_TOMES_NAVIGATE_FORWARD)
-            ZO_ShowTimedActivities()
+            TIMED_ACTIVITIES_MANAGER:ShowTimedActivitiesScene()
         end,
         narrationText = function()
             local narrations = {}

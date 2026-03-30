@@ -37,6 +37,9 @@ function ZO_TimedActivities_Gamepad:Initialize(control)
     ZO_TimedActivities_Shared.Initialize(self, control)
     
     self.scene:AddFragment(self.sceneFragment)
+
+    SYSTEMS:RegisterGamepadRootScene("timedActivities", TIMED_ACTIVITIES_SCENE_GAMEPAD)
+    SYSTEMS:RegisterGamepadObject("timedActivities", self)
 end
 
 -- Begin ZO_TimedActivities_Shared Overrides --
@@ -89,8 +92,12 @@ function ZO_TimedActivities_Gamepad:InitializeControls()
     self.activitiesControl = self.control:GetNamedChild("Activities")
     self.activitiesList = ZO_TimedActivitiesList_Gamepad:New(self.activitiesControl)
 
+    local function EqualityFunc(left, right)
+        return left.activityType == right.activityType
+    end
+
     self.categoryList = self:GetMainList()
-    self.categoryList:AddDataTemplate("ZO_GamepadItemEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
+    self.categoryList:AddDataTemplate("ZO_GamepadItemEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, EqualityFunc)
     self:RefreshCategoryList()
 
     local function OnTargetDataChanged(list, targetData, oldTargetData)
@@ -155,9 +162,19 @@ function ZO_TimedActivities_Gamepad:RefreshCategoryList()
     self.categoryList:Commit(RESET_SELECTION_TO_TOP)
 end
 
+function ZO_TimedActivities_Gamepad:SelectActivityTypeCategory(activityType)
+    local categoryIndex = self.categoryList:GetIndexForData("ZO_GamepadItemEntryTemplate", { activityType = activityType })
+    self.categoryList:SetSelectedIndexWithoutAnimation(categoryIndex)
+end
+
 function ZO_TimedActivities_Gamepad:RefreshList()
     local currentActivityType, activityEntries = ZO_TimedActivities_Shared.RefreshList(self)
-    self.activitiesList:RefreshList(currentActivityType, activityEntries)
+    local autoSelectActivityData = self.selectTimedActivityDataOnRefresh
+    self.selectTimedActivityDataOnRefresh = nil
+    self.activitiesList:RefreshList(currentActivityType, activityEntries, autoSelectActivityData)
+    if autoSelectActivityData then
+        self:ActivateActivitiesList()
+    end
 end
 
 function ZO_TimedActivities_Gamepad:RefreshNewIndicators()
@@ -216,7 +233,8 @@ function ZO_TimedActivities_Gamepad:OnShowing()
     ZO_TimedActivities_Shared.OnShowing(self)
     ZO_Gamepad_ParametricList_Screen.OnShowing(self)
 
-    TAMRIEL_TOMES_SCENE_GROUP_GAMEPAD:SetActiveScene("TamrielTomesChallengesSceneGamepad")
+    TAMRIEL_TOMES_SCENE_GROUP_GAMEPAD:SetActiveScene("TimedActivitiesGamepad")
+    SCENE_MANAGER:CreateStackFromScratchWithoutSceneChange("mainMenuGamepad", "TamrielTomesSceneGamepad")
     GAMEPAD_GENERIC_FOOTER:Refresh(self.footerData)
 end
 
@@ -234,10 +252,6 @@ end
 function ZO_TimedActivities_Gamepad:OnHiding()
     ZO_TimedActivities_Shared.OnHiding(self)
     ZO_Gamepad_ParametricList_Screen.OnHiding(self)
-
-    -- Just in case we're leaving for any reason other than back (popping the stack), ensure next time we enter back in through the main screen and not timed activities
-    -- e.g.: ShowBaseScene, or hitting the bind for another menu like Inventory
-    TAMRIEL_TOMES_SCENE_GROUP_GAMEPAD:SetActiveScene("TamrielTomesSceneGamepad")
 end
 
 function ZO_TimedActivities_Gamepad:OnHide()
@@ -348,7 +362,7 @@ function ZO_TimedActivitiesList_Gamepad:Initialize(control)
                 end
                 return GetString(SI_TAMRIEL_TOMES_CHALLENGES_ACTION_NAME_PIN)
             end,
-            keybind = "UI_SHORTCUT_SECONDARY",
+            keybind = "UI_SHORTCUT_TERTIARY",
             callback = function()
                 self:GetSelectedData():ToggleTracking()
             end,
@@ -366,7 +380,7 @@ function ZO_TimedActivitiesList_Gamepad:Initialize(control)
             name = function()
                 return zo_strformat(SI_TAMRIEL_TOMES_CHALLENGES_ACTION_NAME_REROLL, ZO_TimedActivities_Manager.GetNumRemainingRerollAttempts())
             end,
-            keybind = "UI_SHORTCUT_TERTIARY",
+            keybind = "UI_SHORTCUT_QUATERNARY",
             callback = function()
                 self:GetSelectedData():Reroll()
             end,
@@ -459,10 +473,11 @@ function ZO_TimedActivitiesList_Gamepad:SetupActivityRow(control, data)
     control.claimableHighlight:SetHidden(not dataSource:CanClaim())
 end
 
-function ZO_TimedActivitiesList_Gamepad:RefreshList(currentActivityType, activitiesList)
+function ZO_TimedActivitiesList_Gamepad:RefreshList(currentActivityType, activitiesList, autoSelectActivityData)
     local lastSelectedData = self:GetSelectedData()
-
+    local autoSelectEntryData = nil
     local listControl = self.listControl
+    local lastSelectedIndex = ZO_ScrollList_GetSelectedDataIndex(listControl)
     ZO_ScrollList_Clear(listControl)
 
     self.currentActivityType = currentActivityType
@@ -489,12 +504,32 @@ function ZO_TimedActivitiesList_Gamepad:RefreshList(currentActivityType, activit
         end
 
         table.insert(listData, ZO_ScrollList_CreateDataEntry(dataType, entryData))
+
+        if autoSelectActivityData and autoSelectActivityData:Equals(entryData) then
+            autoSelectEntryData = entryData
+            autoSelectActivityData = nil
+        end
     end
 
     self:CommitScrollList()
-    if lastSelectedData and self:IsActivated() then
+
+    if autoSelectEntryData then
+        ZO_ScrollList_SelectDataAndScrollIntoView(listControl, autoSelectEntryData)
+    elseif lastSelectedData and self:IsActivated() then
         ZO_ScrollList_SelectData(listControl, lastSelectedData)
     end
+
+    if not self:GetSelectedData() then
+        -- No entry was auto selected.
+        if lastSelectedIndex then
+            -- Try to select the entry at the same index as, or at an index adjacent to, the previously selected entry.
+            ZO_ScrollList_TrySelectIndexAndScrollIntoView(listControl, lastSelectedIndex, ZO_SCROLL_LIST_ENTRY_SEARCH_DIRECTION.BACKWARD)
+        else
+            -- Try to select the first entry, if any.
+            self:ResetToTop()
+        end
+    end
+
     local isListEmpty = not ZO_ScrollList_HasVisibleData(listControl)
     listControl:SetHidden(isListEmpty)
 end

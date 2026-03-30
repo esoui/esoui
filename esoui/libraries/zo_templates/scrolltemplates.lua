@@ -1927,6 +1927,73 @@ function ZO_ScrollList_ScrollDataIntoView(self, dataIndex, onScrollCompleteCallb
     end
 end
 
+ZO_SCROLL_LIST_ENTRY_SEARCH_DIRECTION =
+{
+    BACKWARD = 1,
+    FORWARD = 2,
+}
+
+-- Returns the first selectable data index by searching in
+-- 'searchDirection' direction starting from 'startIndex'.
+--
+-- 'searchDirection' defaults to ZO_SCROLL_LIST_ENTRY_SEARCH_DIRECTION.BACKWARD.
+--
+-- 'startIndex' defaults to the first entry index if 'searchDirection'
+-- is ZO_SCROLL_LIST_ENTRY_SEARCH_DIRECTION.FORWARD;
+-- otherwise, 'startIndex' defaults to the last entry index.
+--
+-- Returns nil if no selectable data index exists.
+function ZO_ScrollList_TryGetSelectableDataIndex(self, startIndex, searchDirection)
+    local numEntries = #self.data
+    if numEntries < 1 then
+        -- The list is empty.
+        return nil
+    end
+
+    -- Set up the list entry search parameters.
+    local isForwardSearch = searchDirection == ZO_SCROLL_LIST_ENTRY_SEARCH_DIRECTION.FORWARD
+    local endIndex = isForwardSearch and numEntries or 1
+    local step = isForwardSearch and 1 or -1
+    if startIndex then
+        startIndex = zo_clamp(startIndex, 1, numEntries)
+    else
+        startIndex = isForwardSearch and 1 or numEntries
+    end
+
+    -- Find the first or last selectable list entry.
+    for index = startIndex, endIndex, step do
+        if CanSelectData(self, index) then
+            return index
+        end
+    end
+
+    -- No selectable list entries exist.
+    return nil
+end
+
+-- Attempts to select and scroll into view the data at 'dataIndex'.
+--
+-- The optional 'fallBackSearchDirection' attempts to fall back to either
+-- the first or the last selectable entry in the list nearest to 'dataIndex'
+-- if the entry at 'dataIndex' no longer exists or is no longer selectable.
+--
+-- Returns true if an entry was selected; otherwise, returns false.
+function ZO_ScrollList_TrySelectIndexAndScrollIntoView(self, dataIndex, fallBackSearchDirection, onScrollCompleteCallback, animateInstantly)
+    if not CanSelectData(self, dataIndex) then
+        -- The requested index does not exist or is not selectable;
+        -- attempt to fall back to another list entry.
+        dataIndex = ZO_ScrollList_TryGetSelectableDataIndex(self, dataIndex, fallBackSearchDirection)
+        if not dataIndex then
+            -- No selectable fall back entry exists.
+            return false
+        end
+    end
+
+    -- Select the entry at that index and scroll it into view.
+    ZO_ScrollList_SelectDataAndScrollIntoView(self, self.data[dataIndex].data, onScrollCompleteCallback, shouldAnimateInstantly)
+    return true
+end
+
 function ZO_ScrollList_GetScrollValue(self)
     return self.scrollbar:GetValue()
 end

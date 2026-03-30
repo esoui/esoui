@@ -1,3 +1,5 @@
+local CHECKBOX_CLAIM_THRESHOLD = 0
+
 ZO_TimedActivities_Shared = ZO_InitializingObject:Subclass()
 
 function ZO_TimedActivities_Shared:Initialize(control)
@@ -68,6 +70,8 @@ end
 function ZO_TimedActivities_Shared:GetCurrentActivityTypeString()
     return GetString("SI_TIMEDACTIVITYTYPE", self.currentActivityType)
 end
+
+ZO_TimedActivities_Shared:MUST_IMPLEMENT("SelectActivityTypeCategory")
 
 function ZO_TimedActivities_Shared:SetCurrentActivityType(activityType)
     if activityType ~= self.currentActivityType then
@@ -142,7 +146,7 @@ function ZO_TimedActivities_Shared.SetupClaimProgress(timedActivityData, claimab
     local isFullyClaimedOrExpired = timedActivityData:IsFullyClaimedOrExpired()
     local numTimesClaimed = timedActivityData:GetNumTimesClaimed()
     local totalNumTimesClaimable = timedActivityData:GetTotalNumTimesClaimable()
-    if totalNumTimesClaimable <= 5 then
+    if totalNumTimesClaimable <= CHECKBOX_CLAIM_THRESHOLD then
         if totalNumTimesClaimable == 0 then
             claimableLabel:SetText(GetString(SI_TIMED_ACTIVITY_INFINITELY_REPEATABLE))
         else
@@ -224,7 +228,12 @@ ZO_TimedActivities_Shared:MUST_IMPLEMENT("InitializeControls")
 ZO_TimedActivities_Shared:MUST_IMPLEMENT("OnRerollCurrencyUpdated")
 
 function ZO_TimedActivities_Shared:OnShowing()
-    self.refreshGroups:UpdateRefreshGroups()
+    if self.browseTimedActivityDataOnShow then
+        self:BrowseToTimedActivityData(self.browseTimedActivityDataOnShow)
+        self.browseTimedActivityDataOnShow = nil
+    else
+        self.refreshGroups:UpdateRefreshGroups()
+    end
     self:RefreshNewIndicators()
 end
 
@@ -238,4 +247,17 @@ end
 
 function ZO_TimedActivities_Shared:OnHidden()
     -- Can be overridden
+end
+
+function ZO_TimedActivities_Shared:BrowseToTimedActivityData(timedActivityData)
+    if not self:IsShowing() then
+        self.browseTimedActivityDataOnShow = timedActivityData
+        SCENE_MANAGER:Show(self:GetScene():GetName())
+        return
+    end
+
+    self.selectTimedActivityDataOnRefresh = timedActivityData
+    self:SelectActivityTypeCategory(timedActivityData:GetType())
+    self:MarkDirty()
+    self.refreshGroups:UpdateRefreshGroups()
 end

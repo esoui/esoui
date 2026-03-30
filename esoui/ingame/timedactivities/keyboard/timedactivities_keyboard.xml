@@ -27,7 +27,7 @@
                     <FadeGradient x1="1" y1="0" size1="400" x2="-1" y2="0" size2="400"/>
                 </Texture>
                 <Label name="$(parent)TimeRemaining" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Claimable" relativePoint="TOPLEFT" offsetY="-5"/>
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Claimed" relativePoint="TOPLEFT" offsetY="-5"/>
                 </Label>
             </Controls>
         </Control>
@@ -57,10 +57,24 @@
                         <Button name="$(parent)WeeklyButton" inherits="ZO_TimedActivitiesKeyboard_TabButton">
                             <Anchor point="TOP" offsetY="64"/>
                             <Textures normal="EsoUI/Art/TamrielTomes/timedActivityCategory_weekly_up.dds" pressed="EsoUI/Art/TamrielTomes/timedActivityCategory_weekly_down.dds" mouseOver="EsoUI/Art/TamrielTomes/timedActivityCategory_weekly_over.dds"/>
+                            <OnMouseEnter>
+                                InitializeTooltip(InformationTooltip, self, LEFT, 0, 0)
+                                SetTooltipText(InformationTooltip, GetString("SI_TIMEDACTIVITYTYPE", TIMED_ACTIVITY_TYPE_WEEKLY))
+                            </OnMouseEnter>
+                            <OnMouseExit>
+                                ClearTooltip(InformationTooltip)
+                            </OnMouseExit>
                         </Button>
                         <Button name="$(parent)SeasonalButton" inherits="ZO_TimedActivitiesKeyboard_TabButton">
                             <Anchor point="TOP" relativeTo="$(parent)WeeklyButton" relativePoint="BOTTOM" offsetY="18"/>
                             <Textures normal="EsoUI/Art/TamrielTomes/timedActivityCategory_seasonal_up.dds" pressed="EsoUI/Art/TamrielTomes/timedActivityCategory_seasonal_down.dds" mouseOver="EsoUI/Art/TamrielTomes/timedActivityCategory_seasonal_over.dds"/>
+                            <OnMouseEnter>
+                                InitializeTooltip(InformationTooltip, self, LEFT, 0, 0)
+                                SetTooltipText(InformationTooltip, GetString("SI_TIMEDACTIVITYTYPE", TIMED_ACTIVITY_TYPE_SEASONAL))
+                            </OnMouseEnter>
+                            <OnMouseExit>
+                                ClearTooltip(InformationTooltip)
+                            </OnMouseExit>
                         </Button>
                         <Control name="$(parent)Divider" inherits="ZO_PlatformStyleDynamicHorizontalDivider ZO_PlatformStyleDynamicHorizontalDivider_Keyboard_Template">
                             <Anchor point="TOP" relativeTo="$(parent)SeasonalButton" relativePoint="BOTTOM" offsetY="24"/>
