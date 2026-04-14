@@ -64,15 +64,21 @@ function ZO_Tooltip:LayoutSkillProgression(skillProgressionData, showRankNeededL
 
     --Skill Point Spending Line
     if showPointSpendLine and not hadRankNeededLineToShow and skillPointAllocator:GetProgressionData() == skillProgressionData then
-        local availableSkillPoints = SKILL_POINT_ALLOCATION_MANAGER:GetAvailableSkillPoints()
-        local skillPointCost = skillData:GetSkillPointCostMultiplier()
+        -- TODO Class Mastery: Use a point allocation manager rather than GetNumClassMasteryPoints to get numAvailable class mastery points.
+        local availableSkillPoints = skillLineData:IsClassMastery() and SKILL_POINT_ALLOCATION_MANAGER:GetAvailableClassMasteryPointsForSkillLine(skillLineData) or SKILL_POINT_ALLOCATION_MANAGER:GetAvailableSkillPoints()
+        local skillPointCost = skillLineData:IsClassMastery() and skillLineData:GetClassMasteryCost() or skillData:GetSkillPointCostMultiplier()
         local hasEnoughSkillPoints = availableSkillPoints >= skillPointCost
         local colorStyle = hasEnoughSkillPoints and self:GetStyle("succeeded") or self:GetStyle("failed")
         if not isPurchased then
             --Skill progression data is the skill progression data that would be isPurchased
             local isLocked = skillProgressionData:IsLocked()
             if not isLocked then
-                local text = zo_strformat(SI_ABILITY_PURCHASE, skillPointCost)
+                local text = ""
+                if skillLineData:IsClassMastery() then
+                    text = zo_strformat(SI_ABILITY_PURCHASE_CLASS_MASTERY, skillPointCost)
+                else
+                    text = zo_strformat(SI_ABILITY_PURCHASE, skillPointCost)
+                end
                 headerSection:AddLine(text, colorStyle, self:GetStyle("abilityHeader"))
             end
         else
@@ -344,44 +350,49 @@ function ZO_Tooltip:LayoutSkillLinePreview(skillLineData, isReadOnly)
     end
 end
 
--- Returns narration text for a skill, formatted with upgrade status and bindings.
--- returns: (string) "<detailed skill name>[ Upgradable/Purchasable/Morphed/Locked][, bound to <key or button input>]"
---                   ex: "Scorch IV, Purchasable, bound to 3"
-function ZO_Tooltip:GetSkillLineNarrationText(skillData)
-    local narration = ""
-    
-    local skillProgressionData = skillData:GetPointAllocatorProgressionData()
-    local skillPointAllocator = skillData:GetPointAllocator()
-    local isActive = skillData:IsActive()
-    local isNonCraftedActive = isActive and not skillData:IsCraftedAbility()
-    local isMorph = isNonCraftedActive and skillProgressionData:IsMorph()
-    local increaseAction = skillPointAllocator:GetIncreaseSkillAction()
-    
-    -- Annotate the skill name with available actions.
-    local skillName = skillProgressionData:GetDetailedGamepadName()
-    if increaseAction == ZO_SKILL_POINT_ACTION.PURCHASE then
-        narration = zo_strformat(SI_TOOLTIP_SKILLS_SKILL_PURCHASABLE_NARRATION, skillName)
-    elseif increaseAction == ZO_SKILL_POINT_ACTION.INCREASE_RANK then
-        narration = zo_strformat(SI_TOOLTIP_SKILLS_SKILL_UPGRADABLE_NARRATION, skillName)
-    elseif increaseAction == ZO_SKILL_POINT_ACTION.MORPH then
-        narration = zo_strformat(SI_TOOLTIP_SKILLS_SKILL_MORPHED_NARRATION, skillName)
-    elseif not skillProgressionData:IsUnlocked() then
-        narration = zo_strformat(SI_TOOLTIP_SKILLS_SKILL_LOCKED_NARRATION, skillName)
-    else
-        narration = skillName
-    end
+do
+    local NOT_BOUND_ACTION_STRING = GetString(SI_ACTION_IS_NOT_BOUND)
+    local DEFAULT_SHOW_AS_HOLD = nil
 
-    -- Append ", bound to [key]" if applicable.
-    local actionSlotIndex = skillData:GetSlotOnCurrentHotbar()
-    if actionSlotIndex then
-        local hotbarCategory = overrideHotbar or ACTION_BAR_ASSIGNMENT_MANAGER:GetCurrentHotbarCategory()
-        local keyboardActionName, gamepadActionName = ACTION_BAR_ASSIGNMENT_MANAGER:GetKeyboardAndGamepadActionNameForSlot(actionSlotIndex, hotbarCategory)
-        local inputBindingText = ZO_Keybindings_GetPreferredHighestPriorityNarrationStringFromActions(keyboardActionName, gamepadActionName, DEFAULT_SHOW_AS_HOLD) or GetString(SI_ACTION_IS_NOT_BOUND)
+    -- Returns narration text for a skill, formatted with upgrade status and bindings.
+    -- returns: (string) "<detailed skill name>[ Upgradable/Purchasable/Morphed/Locked][, bound to <key or button input>]"
+    --                   ex: "Scorch IV, Purchasable, bound to 3"
+    function ZO_Tooltip:GetSkillLineNarrationText(skillData)
+        local narration = ""
+    
+        local skillProgressionData = skillData:GetPointAllocatorProgressionData()
+        local skillPointAllocator = skillData:GetPointAllocator()
+        local isActive = skillData:IsActive()
+        local isNonCraftedActive = isActive and not skillData:IsCraftedAbility()
+        local isMorph = isNonCraftedActive and skillProgressionData:IsMorph()
+        local increaseAction = skillPointAllocator:GetIncreaseSkillAction()
+    
+        -- Annotate the skill name with available actions.
+        local skillName = skillProgressionData:GetDetailedGamepadName()
+        if increaseAction == ZO_SKILL_POINT_ACTION.PURCHASE then
+            narration = zo_strformat(SI_TOOLTIP_SKILLS_SKILL_PURCHASABLE_NARRATION, skillName)
+        elseif increaseAction == ZO_SKILL_POINT_ACTION.INCREASE_RANK then
+            narration = zo_strformat(SI_TOOLTIP_SKILLS_SKILL_UPGRADABLE_NARRATION, skillName)
+        elseif increaseAction == ZO_SKILL_POINT_ACTION.MORPH then
+            narration = zo_strformat(SI_TOOLTIP_SKILLS_SKILL_MORPHED_NARRATION, skillName)
+        elseif not skillProgressionData:IsUnlocked() then
+            narration = zo_strformat(SI_TOOLTIP_SKILLS_SKILL_LOCKED_NARRATION, skillName)
+        else
+            narration = skillName
+        end
+
+        -- Append ", bound to [key]" if applicable.
+        local actionSlotIndex = skillData:GetSlotOnCurrentHotbar()
+        if actionSlotIndex then
+            local hotbarCategory = ACTION_BAR_ASSIGNMENT_MANAGER:GetCurrentHotbarCategory()
+            local keyboardActionName, gamepadActionName = ACTION_BAR_ASSIGNMENT_MANAGER:GetKeyboardAndGamepadActionNameForSlot(actionSlotIndex, hotbarCategory)
+            local inputBindingText = ZO_Keybindings_GetPreferredHighestPriorityNarrationStringFromActions(keyboardActionName, gamepadActionName, DEFAULT_SHOW_AS_HOLD) or NOT_BOUND_ACTION_STRING
         
-        narration = zo_strformat(SI_TOOLTIP_SKILLS_SKILL_BOUND_TO_NARRATION, narration, inputBindingText)
-    end
+            narration = zo_strformat(SI_TOOLTIP_SKILLS_SKILL_BOUND_TO_NARRATION, narration, inputBindingText)
+        end
 
-    return narration
+        return narration
+    end
 end
 
 function ZO_Tooltip:LayoutCompanionSkillLinePreview(skillLineData)

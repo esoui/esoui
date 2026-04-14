@@ -250,7 +250,7 @@ function ZO_GroupMenu_Gamepad:UpdateMenuList()
     list:AddEntry(MENU_ENTRY_TEMPLATE, self.menuEntries[MENU_ENTRY_TYPE_CURRENT_GROUP])
     list:AddEntryWithHeader("ZO_GroupMenuGamepadDungeonDifficultyEntry", self.menuEntries[MENU_ENTRY_TYPE_DUNGEON_DIFFICULTY])  
 
-    if IsGroupModificationAvailable() and (groupSize == 0 or (playerIsLeader and groupSize < MAX_GROUP_SIZE_THRESHOLD)) then
+    if IsGroupModificationAvailable() and (groupSize == 0 or (playerIsLeader and groupSize < GetGroupMaxSize())) then
         table.insert(groupActionEntries, self.menuEntries[MENU_ENTRY_TYPE_INVITE_PLAYER])
         if ZO_IsConsoleOrGameCoreUI() and GetNumberConsoleFriends() > 0 then
             table.insert(groupActionEntries, self.menuEntries[MENU_ENTRY_TYPE_INVITE_FRIEND])

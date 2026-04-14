@@ -37,9 +37,13 @@ function ZO_ActivityFinderTemplate_Keyboard:InitializeControls()
     self.clubRankControl = self.control:GetNamedChild("ClubRank")
     self.clubRankObject = ZO_TributeClubRank:New(self.clubRankControl)
 
+    self.veterancyRankControl = self.control:GetNamedChild("VeterancyRank")
+    self.veterancyRankObject = ZO_VeterancyRank:New(self.veterancyRankControl)
+
     self.buttonContainer = self.control:GetNamedChild("ActionButtonContainer")
     self.joinQueueButton = self.buttonContainer:GetNamedChild("QueueButton")
     self.viewRewardsButton = self.buttonContainer:GetNamedChild("ViewRewards")
+    self.viewVeterancyButton = self.buttonContainer:GetNamedChild("ViewVeterancy")
     self.acceptQuestButton = self.buttonContainer:GetNamedChild("AcceptQuest")
     self.unlockPermanentlyButton = self.buttonContainer:GetNamedChild("UnlockPermanently")
     self.chapterUpgradeButton = self.buttonContainer:GetNamedChild("ChapterUpgrade")
@@ -127,11 +131,13 @@ function ZO_ActivityFinderTemplate_Keyboard:InitializeFragment()
 
             local isTribute = false
             local isCompetitive = false
+            local isBattleground = false
             local selectedData = self.filterComboBox:GetSelectedItemData()
             if selectedData then
                 local filterData = selectedData.data
                 isTribute = filterData.isTribute
                 isCompetitive = filterData.isCompetitive
+                isBattleground = filterData.isBattleground
             end
 
             if isTribute then
@@ -147,6 +153,7 @@ function ZO_ActivityFinderTemplate_Keyboard:InitializeFragment()
             end
 
             self.clubRankControl:SetHidden(not isTribute)
+            self.veterancyRankControl:SetHidden(not isBattleground or not IsVeterancySeasonActive())
 
             if selectedData then
                 local filterData = selectedData.data
@@ -192,10 +199,12 @@ function ZO_ActivityFinderTemplate_Keyboard:RefreshView()
 
     self.tributeSeasonProgressControl:SetHidden(true)
     self.clubRankObject:Refresh()
+    self.veterancyRankObject:Refresh()
 
     local lockReasonText
-    
+
     self.viewRewardsButton:SetHidden(true)
+    self.viewVeterancyButton:SetHidden(true)
     self.acceptQuestButton:SetHidden(true)
     self.unlockPermanentlyButton:SetHidden(true)
     self.chapterUpgradeButton:SetHidden(true)
@@ -229,6 +238,9 @@ function ZO_ActivityFinderTemplate_Keyboard:RefreshView()
             self:RefreshTributeSeasonData(HIDE_IF_NOT_COMPETITIVE)
 
             self.viewRewardsButton:SetHidden(HIDE_IF_NOT_COMPETITIVE)
+
+            local HIDE_IF_NOT_BATTLEGROUND = not filterData.isBattleground
+            self.viewVeterancyButton:SetHidden(HIDE_IF_NOT_BATTLEGROUND)
         else
             self.navigationTree:Reset()
 
@@ -336,6 +348,10 @@ do
                                     if activityType == LFG_ACTIVITY_TRIBUTE_COMPETITIVE then
                                         location.isCompetitive = true
                                     end
+                                elseif activityType == LFG_ACTIVITY_BATTLE_GROUND_CHAMPION
+                                    or activityType == LFG_ACTIVITY_BATTLE_GROUND_NON_CHAMPION
+                                    or activityType == LFG_ACTIVITY_BATTLE_GROUND_LOW_LEVEL then
+                                    location.isBattleground = true
                                 end
                                 location.singular = true
                                 entry.data = location
@@ -405,9 +421,10 @@ do
 
         local acceptQuestButtonShown = not self.acceptQuestButton:IsControlHidden()
         local viewRewardsButtonShown = not self.viewRewardsButton:IsControlHidden()
+        local viewVeterancyButtonShown = not self.viewVeterancyButton:IsControlHidden()
         local unlockPermanentlyButtonShown = not self.unlockPermanentlyButton:IsControlHidden()
         local chapterUpgradeButtonShown = not self.chapterUpgradeButton:IsControlHidden()
-        if acceptQuestButtonShown or viewRewardsButtonShown or unlockPermanentlyButtonShown or chapterUpgradeButtonShown then
+        if acceptQuestButtonShown or viewRewardsButtonShown or viewVeterancyButtonShown or unlockPermanentlyButtonShown or chapterUpgradeButtonShown then
             ZO_ClearNumericallyIndexedTable(optionalButtons)
             if chapterUpgradeButtonShown then
                 table.insert(optionalButtons, self.chapterUpgradeButton)
@@ -421,6 +438,10 @@ do
             if viewRewardsButtonShown then
                 self.viewRewardsButton:SetEnabled(HasActiveCampaignStarted())
                 table.insert(optionalButtons, self.viewRewardsButton)
+            end
+            if viewVeterancyButtonShown then
+                self.viewVeterancyButton:SetEnabled(IsVeterancySeasonActive())
+                table.insert(optionalButtons, self.viewVeterancyButton)
             end
             for index, button in ipairs(optionalButtons) do
                 local anchorTo = index == 1 and self.joinQueueButton or optionalButtons[index - 1]
@@ -539,6 +560,11 @@ function ZO_ActivityFinderTemplate_Keyboard:OnTributeCampaignDataChanged()
     self:RefreshTributeSeasonData(hideIfNotCompetitive)
 end
 
+function ZO_ActivityFinderTemplate_Keyboard:OnVeterancyRankProgressed()
+    ZO_ActivityFinderTemplate_Shared.OnVeterancyRankProgressed(self)
+    self.veterancyRankObject:Refresh()
+end
+
 function ZO_ActivityFinderTemplate_Keyboard:ShowPrimaryControls()
     self.filterControl:SetHidden(false)
     self.joinQueueButton:SetHidden(false)
@@ -574,6 +600,11 @@ end
 
 function ZO_ActivityFinderTemplate_Keyboard:OnViewRewardsButtonClicked()
     ZO_Dialogs_ShowPlatformDialog("TRIBUTE_REWARDS_VIEW")
+end
+
+function ZO_ActivityFinderTemplate_Keyboard:OnViewVeterancyButtonClicked()
+    VETERANCY_KEYBOARD:SetIsFromActivityFinder(true)
+    SCENE_MANAGER:Push("VeterancySceneKeyboard")
 end
 
 function ZO_ActivityFinderTemplate_Keyboard:OnAcceptQuestButtonClicked()
@@ -663,6 +694,12 @@ function ZO_ActivityFinderTemplateViewRewardsKeyboard_OnClicked(control)
     local topLevelControl = control:GetParent():GetParent()
     local finderObjectKeyboard = topLevelControl.object
     finderObjectKeyboard:OnViewRewardsButtonClicked()
+end
+
+function ZO_ActivityFinderTemplateViewVeterancyKeyboard_OnClicked(control)
+    local topLevelControl = control:GetParent():GetParent()
+    local finderObjectKeyboard = topLevelControl.object
+    finderObjectKeyboard:OnViewVeterancyButtonClicked()
 end
 
 function ZO_ActivityFinderTemplateAcceptQuestKeyboard_OnClicked(control)

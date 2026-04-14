@@ -94,7 +94,7 @@ function ZO_ZoneStories_Gamepad:Initialize(control)
             self:SetFocusOnSelectedZone()
             TriggerTutorial(TUTORIAL_TRIGGER_ZONE_STORIES_SHOWN)
         elseif newState == SCENE_SHOWN then
-            HandleReturningPlayerUISystemShown(UI_SYSTEM_ZONE_GUIDE)
+            HandleUISystemShown(UI_SYSTEM_ZONE_GUIDE)
         end
     end)
 end

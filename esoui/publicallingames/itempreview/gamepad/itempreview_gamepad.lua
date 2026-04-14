@@ -178,6 +178,7 @@ function ZO_PreviewRewardList_Screen_Gamepad:Initialize(control)
             self.scene:AddFragment(self.fragment)
             self.scene:AddFragment(GAMEPAD_NAV_QUADRANT_1_BACKGROUND_FRAGMENT)
             self.scene:AddFragment(MINIMIZE_CHAT_FRAGMENT)
+            self.scene:AddFragment(PREVIEW_KEYBIND_ACTION_LAYER_FRAGMENT)
 
             self:SetOptionsFragment(GAMEPAD_NAV_QUADRANT_2_3_4_ITEM_PREVIEW_OPTIONS_FRAGMENT)
         end

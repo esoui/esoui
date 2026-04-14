@@ -1,7 +1,7 @@
 ZO_GAMEPAD_ACTIVITY_FINDER_BACKGROUND_TEXTURE_SQUARE_DIMENSION = 1024
 ZO_GAMEPAD_ACTIVITY_FINDER_BACKGROUND_TEXTURE_COORD_RIGHT = ZO_GAMEPAD_QUADRANT_2_3_CONTENT_BACKGROUND_WIDTH / ZO_GAMEPAD_ACTIVITY_FINDER_BACKGROUND_TEXTURE_SQUARE_DIMENSION
 
-local NAVIGATION_MODES = 
+local NAVIGATION_MODES =
 {
     CATEGORIES = 1,
     RANDOM_ENTRIES = 2,
@@ -231,26 +231,60 @@ function ZO_ActivityFinderTemplate_Gamepad:InitializeKeybindStripDescriptors()
             sound = SOUNDS.GAMEPAD_MENU_BACK,
         },
 
-        -- View Rewards
+        -- View Rewards/Veterancy
         {
-            name = GetString(SI_LFG_VIEW_REWARDS),
-
+            name = function()
+                local currentList = self:GetCurrentList()
+                if currentList then
+                    local targetData = currentList:GetTargetData()
+                    if targetData and targetData.data then
+                        if targetData.data.activityType == LFG_ACTIVITY_TRIBUTE_COMPETITIVE then
+                            return GetString(SI_LFG_VIEW_REWARDS)
+                        else
+                            return GetString(SI_LFG_VIEW_VETERANCY)
+                        end
+                    end
+                end
+            end,
             keybind = "UI_SHORTCUT_TERTIARY",
-
             callback = function()
-                SCENE_MANAGER:Push("tribute_rewards_gamepad")
+                local currentList = self:GetCurrentList()
+                if currentList then
+                    local targetData = currentList:GetTargetData()
+                    if targetData and targetData.data then
+                        if targetData.data.activityType == LFG_ACTIVITY_TRIBUTE_COMPETITIVE then
+                            SCENE_MANAGER:Push("tribute_rewards_gamepad")
+                         else
+                            SCENE_MANAGER:Push("VeterancySceneGamepad")
+                        end
+                    end
+                end
             end,
-
             enabled = function()
-                return HasActiveCampaignStarted()
+                local currentList = self:GetCurrentList()
+                if currentList then
+                    local targetData = currentList:GetTargetData()
+                    if targetData and targetData.data then
+                        if targetData.data.activityType == LFG_ACTIVITY_TRIBUTE_COMPETITIVE then
+                            return HasActiveCampaignStarted()
+                        else
+                            return IsVeterancySeasonActive(), GetString(SI_LFG_VETERANCY_INACTIVE)
+                        end
+                    end
+                end
+                return false
             end,
-
             visible = function()
                 local currentList = self:GetCurrentList()
                 if currentList then
                     local targetData = currentList:GetTargetData()
                     if targetData and targetData.data then
-                        return targetData.data.activityType == LFG_ACTIVITY_TRIBUTE_COMPETITIVE
+                        if targetData.data.activityType == LFG_ACTIVITY_TRIBUTE_COMPETITIVE
+                            or targetData.data.activityType == LFG_ACTIVITY_BATTLE_GROUND_CHAMPION
+                            or targetData.data.activityType == LFG_ACTIVITY_BATTLE_GROUND_NON_CHAMPION
+                            or targetData.data.activityType == LFG_ACTIVITY_BATTLE_GROUND_LOW_LEVEL then
+                            return true
+                        end
                     end
                 end
                 return false
@@ -635,10 +669,21 @@ function ZO_ActivityFinderTemplate_Gamepad:OnActivityFinderStatusUpdate()
     self:RefreshView()
 end
 
+function ZO_ActivityFinderTemplate_Gamepad:SetIsFromVeterancy(isFromVeterancy)
+    self.isFromVeterancy = isFromVeterancy
+end
+
 function ZO_ActivityFinderTemplate_Gamepad:OnShowing()
-    local navigationMode = self.hasCategories and NAVIGATION_MODES.CATEGORIES or self.defaultNavigationMode
+    local navigationMode = self.defaultNavigationMode
+    if self.isFromVeterancy then
+        navigationMode = self.navigationMode
+    elseif self.hasCategories then
+        navigationMode = NAVIGATION_MODES.CATEGORIES
+    end
+
     self.isShowingSingularPanel = false
     self:SetNavigationMode(navigationMode)
+    self:SetIsFromVeterancy(false)
     --If we have no categories we go straight into the default view, which means navigation mode never technically changes, so the header never gets reactivated
     if not self.hasCategories then
         local targetHeader
@@ -661,7 +706,9 @@ end
 function ZO_ActivityFinderTemplate_Gamepad:OnHiding()
     ZO_GamepadGenericHeader_Deactivate(self.header)
 
-    self:HideTributeRank()
+    local FORCE_HIDE = true
+    self:HideTributeRank(FORCE_HIDE)
+    self:HideVeterancyRank(FORCE_HIDE)
 end
 
 function ZO_ActivityFinderTemplate_Gamepad:ShowTributeRank()
@@ -685,14 +732,48 @@ function ZO_ActivityFinderTemplate_Gamepad:ShowTributeRank()
     end
 end
 
-function ZO_ActivityFinderTemplate_Gamepad:HideTributeRank()
+function ZO_ActivityFinderTemplate_Gamepad:HideTributeRank(forceHide)
     SCENE_MANAGER:RemoveFragment(GAMEPAD_ACTIVITY_TRIBUTE_RANK_FRAGMENT)
-    if self.defaultFooterAnchor then
-        local anchor = self.defaultFooterAnchor
-        ZO_GenericFooter_Gamepad:ClearAnchors()
-        ZO_GenericFooter_Gamepad:SetAnchor(anchor.point, anchor.relativeTo, anchor.relativePoint, anchor.offsetX, anchor.offsetY)
+    if not GAMEPAD_ACTIVITY_VETERANCY_RANK_FRAGMENT:IsShowing() or forceHide then
+        if self.defaultFooterAnchor then
+            local anchor = self.defaultFooterAnchor
+            ZO_GenericFooter_Gamepad:ClearAnchors()
+            ZO_GenericFooter_Gamepad:SetAnchor(anchor.point, anchor.relativeTo, anchor.relativePoint, anchor.offsetX, anchor.offsetY)
+        end
+        self.defaultFooterAnchor = nil
     end
-    self.defaultFooterAnchor = nil
+end
+
+function ZO_ActivityFinderTemplate_Gamepad:ShowVeterancyRank()
+    ZO_VETERANCY_MANAGER:RefreshRankData()
+    SCENE_MANAGER:AddFragment(GAMEPAD_ACTIVITY_VETERANCY_RANK_FRAGMENT)
+    if not self.defaultFooterAnchor then
+        local isValid, point, relativeTo, relativePoint, offsetX, offsetY = ZO_GenericFooter_Gamepad:GetAnchor(0)
+        if isValid then
+            self.defaultFooterAnchor =
+            {
+                point = point,
+                relativeTo = relativeTo,
+                relativePoint = relativePoint,
+                offsetX = offsetX,
+                offsetY = offsetY,
+            }
+        end
+    end
+    ZO_GenericFooter_Gamepad:ClearAnchors()
+    ZO_GenericFooter_Gamepad:SetAnchor(RIGHT, ZO_ActivityVeterancyRankFooter_Gamepad_TL, LEFT, ZO_GAMEPAD_CONTENT_INSET_X)
+end
+
+function ZO_ActivityFinderTemplate_Gamepad:HideVeterancyRank(forceHide)
+    SCENE_MANAGER:RemoveFragment(GAMEPAD_ACTIVITY_VETERANCY_RANK_FRAGMENT)
+    if not GAMEPAD_ACTIVITY_TRIBUTE_RANK_FRAGMENT:IsShowing() or forceHide then
+        if self.defaultFooterAnchor then
+            local anchor = self.defaultFooterAnchor
+            ZO_GenericFooter_Gamepad:ClearAnchors()
+            ZO_GenericFooter_Gamepad:SetAnchor(anchor.point, anchor.relativeTo, anchor.relativePoint, anchor.offsetX, anchor.offsetY)
+        end
+        self.defaultFooterAnchor = nil
+    end
 end
 
 function ZO_ActivityFinderTemplate_Gamepad:SetNavigationMode(navigationMode)
@@ -721,7 +802,7 @@ function ZO_ActivityFinderTemplate_Gamepad:SetNavigationMode(navigationMode)
     end
 
     --Refresh only if it's not already the current list
-    if self.navigationMode ~= navigationMode then
+    if self.navigationMode ~= navigationMode or self.isFromVeterancy then
         --Order is important because SetCurrentList will Deactivate the old list which can make it change selected data to complete its movement (if it is moving). If the mode has changed before
         --this it will react incorrectly to the selected data changed callback.
         self:SetCurrentList(targetList)
@@ -799,6 +880,14 @@ do
                             self:HideTributeRank()
                         end
 
+                        if IsVeterancySeasonActive() and (entryData.activityType == LFG_ACTIVITY_BATTLE_GROUND_CHAMPION
+                            or entryData.activityType == LFG_ACTIVITY_BATTLE_GROUND_NON_CHAMPION
+                            or entryData.activityType == LFG_ACTIVITY_BATTLE_GROUND_LOW_LEVEL) then
+                            self:ShowVeterancyRank()
+                        else
+                            self:HideVeterancyRank()
+                        end
+
                         ZO_ActivityFinderTemplate_Shared.AppendSetDataToControl(self.setTypesSectionControl, entryData)
 
                         local showMMR = entryData:IsSetEntryType() and entryData:HasMMR()
@@ -822,6 +911,7 @@ do
             SCENE_MANAGER:RemoveFragmentGroup(self.singularFragmentGroup)
             self.lockReasonTextFunction = nil
             GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
+            self:HideVeterancyRank()
             self.isShowingSingularPanel = false
         end
     end
@@ -845,6 +935,12 @@ end
 function ZO_ActivityFinderTemplate_Gamepad:OnTributeClubRankDataChanged()
     if self.fragment:IsShowing() then
         GAMEPAD_ACTIVITY_TRIBUTE_RANK:RefreshClubRank()
+    end
+end
+
+function ZO_ActivityFinderTemplate_Gamepad:OnVeterancyRankProgressed()
+    if self.fragment:IsShowing() then
+        GAMEPAD_ACTIVITY_VETERANCY_RANK:RefreshVeterancyRank()
     end
 end
 

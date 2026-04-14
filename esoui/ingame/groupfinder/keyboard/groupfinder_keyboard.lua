@@ -76,7 +76,7 @@ function ZO_GroupFinder_Keyboard:InitializeFragments()
             self.createGroupListingButton:SetEnabled(ZO_GroupFinder_CanDoCreateEdit())
             TriggerTutorial(TUTORIAL_TRIGGER_GROUP_FINDER_OPENED)
         elseif newState == SCENE_FRAGMENT_SHOWN then
-            HandleReturningPlayerUISystemShown(UI_SYSTEM_GROUP_FINDER)
+            HandleUISystemShown(UI_SYSTEM_GROUP_FINDER)
         elseif newState == SCENE_FRAGMENT_HIDING then
             --Only allow the exiting of the CREATE_EDIT mode via ExitCreateEditState
             if self.mode ~= ZO_GROUP_FINDER_MODES.CREATE_EDIT then

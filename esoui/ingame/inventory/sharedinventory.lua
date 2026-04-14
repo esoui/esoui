@@ -232,9 +232,10 @@ function ZO_SharedInventoryManager:Initialize()
         [CURRENCY_CHANGE_REASON_DEATH] = true,
         [CURRENCY_CHANGE_REASON_BANK_FEE] = true,
         [CURRENCY_CHANGE_REASON_PVP_KILL_TRANSFER] = true,
+        [CURRENCY_CHANGE_REASON_TAMRIEL_TOMES_END_OF_SEASON_ROLLOVER_CAP] = true,
     }
     
-    internalassert(CURRENCY_CHANGE_REASON_MAX_VALUE == 90, "Check if new currency change reason should play acquire sounds or suppress transact sounds")
+    internalassert(CURRENCY_CHANGE_REASON_MAX_VALUE == 91, "Check if new currency change reason should play acquire sounds or suppress transact sounds")
 
     local function OnCurrencyUpdated(_, currencyType, currencyLocation, newAmount, oldAmount, changeReason)
         if changeReason == CURRENCY_CHANGE_REASON_PLAYER_INIT then

@@ -198,7 +198,8 @@ function ZO_TamrielTomesScreen_Gamepad:InitializeKeybindStripDescriptor()
             visible = function()
                 if self:GetActivePreviewType() ~= ZO_TAMRIEL_TOMES_REWARD_DATA_PREVIEW_TYPES.FULL_PREVIEW then
                     local selectedData = self:GetSelectedTamrielTomesRewardData()
-                    return selectedData and selectedData:CanPreviewReward()
+                    return not ITEM_PREVIEW_GAMEPAD:IsWaitingForPreviewBegin()
+                        and selectedData and selectedData:CanPreviewReward()
                 end
 
                 return false
@@ -277,7 +278,6 @@ function ZO_TamrielTomesScreen_Gamepad:InitializeMultiFocusAreas()
         end,
 
         enabled = function()
-            -- TODO Tamriel Tomes: Error Text?
             return self.upgradeButton:GetState() ~= BSTATE_DISABLED
         end,
 
@@ -288,9 +288,36 @@ function ZO_TamrielTomesScreen_Gamepad:InitializeMultiFocusAreas()
         end,
     }
 
+    local selectTomeButtonFocusData =
+    {
+        highlight = self.selectTomeButton:GetNamedChild("Highlight"),
+
+        control = self.selectTomeButton,
+
+        callback = function()
+            PlaySound(SOUNDS.TAMRIEL_TOMES_NAVIGATE_FORWARD)
+            self:ShowSelectTomeScreen()
+        end,
+
+        canFocus = function()
+            return not self.selectTomeButton:IsHidden()
+        end,
+
+        enabled = function()
+            return not self.selectTomeButton:IsHidden()
+        end,
+
+        narrationText = function()
+            local narrations = {}
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_TAMRIEL_TOMES_SELECT_TAMRIEL_TOME)))
+            return narrations
+        end,
+    }
+
     self.buttonsFocus = ZO_GamepadFocus:New(self.buttonContainer, DEFAULT_MOVEMENT_CONTROLLER, MOVEMENT_CONTROLLER_DIRECTION_HORIZONTAL)
     self.buttonsFocus:AddEntry(viewChallengesButtonFocusData)
     self.buttonsFocus:AddEntry(upgradeTomeButtonFocusData)
+    self.buttonsFocus:AddEntry(selectTomeButtonFocusData)
     self.buttonsFocus:SetFocusChangedCallback(OnButtonFocusChanged)
 
     local function ButtonsActivateCallback()
@@ -317,6 +344,12 @@ function ZO_TamrielTomesScreen_Gamepad:UpdateButtons()
     else
         upgradeButtonBorder:SetEdgeColor(ZO_NORMAL_TEXT:UnpackRGB())
     end
+end
+
+function ZO_TamrielTomesScreen_Gamepad:UpdateFocusAreas()
+    ZO_TamrielTomesScreen_Shared.UpdateFocusAreas(self)
+
+    self.buttonsFocus:ValidateFocus()
 end
 
 function ZO_TamrielTomesScreen_Gamepad:OnGridSelectionChanged(previousData, newData)
@@ -387,6 +420,11 @@ end
 
 function ZO_TamrielTomesScreen_Gamepad:ShowPurchaseScreen()
     SCENE_MANAGER:Push("TamrielTomesPurchaseSceneGamepad")
+end
+
+function ZO_TamrielTomesScreen_Gamepad:ShowSelectTomeScreen()
+    -- TODO Tamriel Tomes:
+    -- SCENE_MANAGER:Push("TamrielTomesSelectTomeSceneGamepad")
 end
 
 -- Indicates whether this scene should retain the current preview when hidden.

@@ -54,10 +54,12 @@ function ZO_HUDTracker_Base:InitializeStyles()
     keyboardStyle.SUBLABEL_PRIMARY_ANCHOR = keyboardStyle.SUBLABEL_PRIMARY_ANCHOR or ZO_Anchor:New(TOPRIGHT, self.headerLabel, BOTTOMRIGHT, 0, keyboardStyle.SUBLABEL_PRIMARY_ANCHOR_OFFSET_Y)
     keyboardStyle.SUBLABEL_SECONDARY_ANCHOR = keyboardStyle.SUBLABEL_SECONDARY_ANCHOR or ZO_Anchor:New(TOPLEFT, self.headerLabel, BOTTOMLEFT, 10, keyboardStyle.SUBLABEL_PRIMARY_ANCHOR_OFFSET_Y)
     keyboardStyle.TEXT_TYPE_HEADER = keyboardStyle.TEXT_TYPE_HEADER or MODIFY_TEXT_TYPE_NONE
+    keyboardStyle.RESIZE_TO_FIT_PADDING_HEIGHT = keyboardStyle.RESIZE_TO_FIT_PADDING_HEIGHT or 10
 
     gamepadStyle.SUBLABEL_PRIMARY_ANCHOR_OFFSET_Y = gamepadStyle.SUBLABEL_PRIMARY_ANCHOR_OFFSET_Y or 10
     gamepadStyle.SUBLABEL_PRIMARY_ANCHOR = gamepadStyle.SUBLABEL_PRIMARY_ANCHOR or ZO_Anchor:New(TOPRIGHT, self.headerLabel, BOTTOMRIGHT, 0, gamepadStyle.SUBLABEL_PRIMARY_ANCHOR_OFFSET_Y)
     gamepadStyle.TEXT_TYPE_HEADER = gamepadStyle.TEXT_TYPE_HEADER or MODIFY_TEXT_TYPE_UPPERCASE
+    gamepadStyle.RESIZE_TO_FIT_PADDING_HEIGHT = gamepadStyle.RESIZE_TO_FIT_PADDING_HEIGHT or 20
 
     ZO_PlatformStyle:New(function(style) self:ApplyPlatformStyle(style) end, keyboardStyle, gamepadStyle)
 end
@@ -125,7 +127,7 @@ function ZO_HUDTracker_Base:ApplyPlatformStyle(style)
     self.headerLabel:SetFont(style.FONT_HEADER)
     self.headerLabel:SetText(self.headerText)
     self.subLabel:SetFont(style.FONT_SUBLABEL)
-    self.control:SetResizeToFitPadding(0, style.RESIZE_TO_FIT_PADDING_HEIGHT)
+    self.container:SetResizeToFitPadding(0, style.RESIZE_TO_FIT_PADDING_HEIGHT)
 
     self:RefreshAnchors()
 

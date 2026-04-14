@@ -175,7 +175,7 @@ function ZO_PromotionalEvents_Gamepad:InitializeActivityFinderCategory()
                 self:Activate()
             end,
             visible = function()
-                return PROMOTIONAL_EVENT_MANAGER:HasActiveCampaign() or (IsReturningPlayer() and (PROMOTIONAL_EVENT_MANAGER:AreAnyReturningPlayerCampaignsIncomplete() or RETURNING_PLAYER_MANAGER:AreAnyDailyLoginRewardsUnclaimed()))
+                return PROMOTIONAL_EVENT_MANAGER:HasActiveCampaign() or (PROMOTIONAL_EVENT_PERSONAL_CAMPAIGN_MANAGER:IsReturningPlayer() and (PROMOTIONAL_EVENT_MANAGER:AreAnyReturningPlayerCampaignsIncomplete() or RETURNING_PLAYER_MANAGER:AreAnyDailyLoginRewardsUnclaimed()))
             end,
             tooltipFunction = function(data, lockedText)
                 if not lockedText and PROMOTIONAL_EVENT_MANAGER:GetNumActiveCampaigns() > 1 then
@@ -478,7 +478,7 @@ function ZO_PromotionalEvents_Gamepad:InitializeFoci()
 
     local activitiesKeybindStripDescriptor =
     {
-        -- Claim / Go To Hero's Return
+        -- Claim / Menu Assistance
         alignment = KEYBIND_STRIP_ALIGN_CENTER,
         {
             name = function()
@@ -486,12 +486,8 @@ function ZO_PromotionalEvents_Gamepad:InitializeFoci()
                 if selectedActivityEntry:CanClaimReward() then
                     return GetString(SI_PROMOTIONAL_EVENT_CLAIM_REWARD_ACTION)
                 else
-                    local campaignKey, componentType, index = GetReturningPlayerIntroGameplayData()
-                    if componentType == PROMOTIONAL_EVENTS_COMPONENT_TYPE_ACTIVITY then
-                        if selectedActivityEntry:MatchesCampaignKey(campaignKey) and selectedActivityEntry:GetActivityIndex() == index then
-                            return zo_strformat(SI_PROMOTIONAL_EVENT_RETURNING_PLAYER_GO_TO_ACTION, RETURNING_PLAYER_MANAGER:GetColorizedIntroGameplayDisplayName())
-                        end
-                    end
+                    local menuAssistanceType, referenceData = selectedActivityEntry:GetMenuAssistanceInfo()
+                    return ZO_UI_SYSTEM_MANAGER:GetMenuAssistanceKeybindName(menuAssistanceType, referenceData)
                 end
             end,
 
@@ -505,11 +501,9 @@ function ZO_PromotionalEvents_Gamepad:InitializeFoci()
 
                 if selectedActivityEntry:CanClaimReward() then
                     return true
-                elseif not selectedActivityEntry:IsRewardClaimed() then
-                    local campaignKey, componentType, index = GetReturningPlayerIntroGameplayData()
-                    if componentType == PROMOTIONAL_EVENTS_COMPONENT_TYPE_ACTIVITY then
-                        return selectedActivityEntry:MatchesCampaignKey(campaignKey) and selectedActivityEntry:GetActivityIndex() == index
-                    end
+                elseif not selectedActivityEntry:IsComplete() then
+                    local menuAssistanceType, referenceData = selectedActivityEntry:GetMenuAssistanceInfo()
+                    return menuAssistanceType ~= MENU_ASSISTANCE_TYPE_NONE
                 end
 
                 return false
@@ -527,8 +521,8 @@ function ZO_PromotionalEvents_Gamepad:InitializeFoci()
                             SCREEN_NARRATION_MANAGER:QueueSortFilterListEntry(self)
                         end
                     end
-                elseif IsReturningPlayer() then
-                    SYSTEMS:ShowScene("returningPlayerIntro")
+                else
+                    selectedActivityEntry:TriggerMenuAssistance()
                 end
             end,
         },
@@ -1212,12 +1206,8 @@ function ZO_PromotionalEvents_CapstoneDialog_Gamepad:InitializeControls(control)
     local buttonsContainer = self.control:GetNamedChild("Buttons")
 
     local function HasNextCampaign()
-        local campaignData = self.campaignData
-        if campaignData:IsReturningPlayerCampaign() then
-            local nextCampaignKey = GetCampaignKeyForNextReturningPlayerCampaign(campaignData:GetId())
-            return nextCampaignKey ~= nil and nextCampaignKey ~= 0
-        end
-        return false
+        local nextCampaignKey = self.campaignData:GetNextPersonalCampaignKey()
+        return nextCampaignKey and nextCampaignKey ~= 0
     end
 
     self.nextCampaignDescriptor =

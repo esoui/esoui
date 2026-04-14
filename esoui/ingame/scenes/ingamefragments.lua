@@ -344,6 +344,7 @@ FRAME_EMOTE_FRAGMENT_CROWN_STORE = ZO_FrameEmoteFragment:New(FRAMING_SCREEN_CROW
 FRAME_EMOTE_FRAGMENT_CROWN_CRATES = ZO_FrameEmoteFragment:New(FRAMING_SCREEN_CROWN_CRATES)
 FRAME_EMOTE_FRAGMENT_ITEM_SETS_BOOK = ZO_FrameEmoteFragment:New(FRAMING_SCREEN_ITEM_SETS_BOOK)
 FRAME_EMOTE_FRAGMENT_REWARD_TRACK_BOOK = ZO_FrameEmoteFragment:New(FRAMING_SCREEN_REWARD_TRACK_BOOK)
+FRAME_EMOTE_FRAGMENT_VETERANCY = ZO_FrameEmoteFragment:New(FRAMING_SCREEN_VETERANCY)
 
 -------------------------------
 --Set Title Fragment (sets the title on the ZO_SharedTitle control when it becomes active)
@@ -1086,7 +1087,7 @@ BATTLEGROUND_HUD_ACTION_LAYER_FRAGMENT = ZO_ActionLayerFragment:New("Battlegroun
 BATTLEGROUND_SCOREBOARD_ACTION_LAYER_FRAGMENT = ZO_ActionLayerFragment:New("BattlegroundScoreboard")
 SPECIAL_TOGGLE_HELP_ACTION_LAYER_FRAGMENT = ZO_ActionLayerFragment:New("SpecialToggleHelp")
 SCREEN_ADJUST_ACTION_LAYER_FRAGMENT = ZO_ActionLayerFragment:New("ScreenAdjustActions")
-RETURNING_PLAYER_ANNOUNCEMENT_ACTION_LAYER_FRAGMENT = ZO_ActionLayerFragment:New("ReturningPlayerAnnouncementInterceptLayer")
+PROMOTIONAL_EVENT_PERSONAL_CAMPAIGN_ANNOUNCEMENT_ACTION_LAYER_FRAGMENT = ZO_ActionLayerFragment:New("PromotionalEventPersonalCampaignAnnouncementInterceptLayer")
 
 --Intercept Layer
 INTERACT_WINDOW_KEYBIND_INTERCEPT_LAYER_FRAGMENT = ZO_ActionLayerFragment:New("SceneChangeInterceptLayer")

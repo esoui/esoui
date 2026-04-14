@@ -60,10 +60,9 @@ function ZO_AdventureZoneHUDTracker:InitializeStyles()
         {
             CONTAINER_PRIMARY_ANCHOR = ZO_Anchor:New(TOPLEFT),
             CONTAINER_SECONDARY_ANCHOR = ZO_Anchor:New(TOPRIGHT),
-            CONTAINER_RESIZE_TO_FIT_PADDING = {0, 20},
             FONT_HEADER = "ZoFontGameShadow",
             FONT_SUBLABEL = "ZoFontGameShadow",
-            RESIZE_TO_FIT_PADDING_HEIGHT = 10,
+            RESIZE_TO_FIT_PADDING_HEIGHT = 30,
             KEYBIND_ANCHOR = ZO_Anchor:New(TOPRIGHT, self.headerLabel, TOPLEFT, 0, -7),
             KEYBIND_BUTTON_TEMPLATE = "ZO_KeybindButton_Keyboard_Template",
             TEXT_HORIZONTAL_ALIGNMENT = TEXT_ALIGN_LEFT,
@@ -74,10 +73,9 @@ function ZO_AdventureZoneHUDTracker:InitializeStyles()
         {
             CONTAINER_PRIMARY_ANCHOR = ZO_Anchor:New(TOPLEFT),
             CONTAINER_SECONDARY_ANCHOR = ZO_Anchor:New(TOPRIGHT, nil, nil, -15, 0),
-            CONTAINER_RESIZE_TO_FIT_PADDING = {0, 30},
             FONT_HEADER = "ZoFontGamepadBold27",
             FONT_SUBLABEL = "ZoFontGamepad34",
-            RESIZE_TO_FIT_PADDING_HEIGHT = 20,
+            RESIZE_TO_FIT_PADDING_HEIGHT = 50,
             KEYBIND_ANCHOR = ZO_Anchor:New(RIGHT, self.headerLabel, LEFT, -5, 5),
             KEYBIND_BUTTON_TEMPLATE = "ZO_KeybindButton_Gamepad_Template",
             TEXT_HORIZONTAL_ALIGNMENT = TEXT_ALIGN_RIGHT,
@@ -108,8 +106,6 @@ end
 function ZO_AdventureZoneHUDTracker:ApplyPlatformStyle(style)
     ZO_HUDTracker_Base.ApplyPlatformStyle(self, style)
 
-    self.container:SetResizeToFitPadding(unpack(style.CONTAINER_RESIZE_TO_FIT_PADDING))
-
     self.showOverviewKeybindButton:ClearAnchors()
     style.KEYBIND_ANCHOR:AddToControl(self.showOverviewKeybindButton)
     ApplyTemplateToControl(self.showOverviewKeybindButton, style.KEYBIND_BUTTON_TEMPLATE)
@@ -133,7 +129,7 @@ end
 
 function ZO_AdventureZoneHUDTracker:OnShown()
     KEYBIND_STRIP:AddKeybindButton(self.showOverviewKeybindDescriptor)
-    self:SetHeaderText(GetAdventureZoneDisplayName())
+    self:SetHeaderText(zo_strformat(SI_ADVENTURE_ZONE_TITLE_FORMATTER, GetAdventureZoneDisplayName()))
     self:RefreshAnchors()
     local UPDATE_IMMEDIATELY = true
     self:RefreshScores(UPDATE_IMMEDIATELY)

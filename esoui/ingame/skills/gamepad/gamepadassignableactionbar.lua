@@ -519,7 +519,7 @@ function ZO_GamepadAssignableActionBar_QuickMenu_Base:Initialize(control, assign
     self.control = control
     self.assignableActionBar = assignableActionBar
 
-    self.fragment = ZO_FadeSceneFragment:New(self.control:GetNamedChild("Container"), ALWAYS_ANIMATE)
+    self.fragment = ZO_FadeSceneFragment:New(self.control:GetNamedChild("Container"))
     self.fragment:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_FRAGMENT_SHOWING then
             self.keybindStripId = KEYBIND_STRIP:PushKeybindGroupState()

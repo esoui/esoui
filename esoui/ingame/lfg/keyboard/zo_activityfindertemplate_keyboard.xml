@@ -107,6 +107,13 @@
                                 ZO_ActivityFinderTemplateViewRewardsKeyboard_OnClicked(self, button)
                             </OnClicked>
                         </Button>
+                        <Button name="$(parent)ViewVeterancy" inherits="ZO_DefaultButton" text="SI_LFG_VIEW_VETERANCY" hidden="true">
+                            <Anchor point="TOPLEFT"/>
+                            <Dimensions x="200"/>
+                            <OnClicked>
+                                ZO_ActivityFinderTemplateViewVeterancyKeyboard_OnClicked(self, button)
+                            </OnClicked>
+                        </Button>
                         <Button name="$(parent)AcceptQuest" inherits="ZO_DefaultButton" text="SI_LFG_ACCEPT_QUEST" hidden="true">
                             <Anchor point="TOPLEFT"/>
                             <Dimensions x="200"/>
@@ -276,6 +283,25 @@
                         </Label>
                         <StatusBar name="$(parent)XPBar" mouseEnabled="true" inherits="ZO_ArrowStatusBarWithBG">
                             <Dimensions x="210"/>
+                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Rank" relativePoint="BOTTOMRIGHT" offsetX="15" offsetY="-11"/>
+                        </StatusBar>
+                    </Controls>
+                </Control>
+                <Control name="$(parent)VeterancyRank" resizeToFitDescendents="true" hidden="true">
+                    <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" offsetX="-5"/>
+                    <Controls>
+                        <Texture name="$(parent)Icon">
+                            <Anchor point="LEFT" offsetX="5"/>
+                            <Dimensions x="64" y="64"/>
+                        </Texture>
+                        <Label name="$(parent)Rank" font="ZoFontCallout3">
+                            <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="5"/>
+                        </Label>
+                        <Label name="$(parent)Name" font="ZoFontHeader2" modifyTextType="UPPERCASE">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Rank" relativePoint="TOPRIGHT" offsetX="15" offsetY="9"/>
+                        </Label>
+                        <StatusBar name="$(parent)XPBar" mouseEnabled="true" inherits="ZO_ArrowStatusBarWithBG">
+                            <Dimensions x="170"/>
                             <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Rank" relativePoint="BOTTOMRIGHT" offsetX="15" offsetY="-11"/>
                         </StatusBar>
                     </Controls>

@@ -43,6 +43,10 @@ do
             local HAS_CHOICE = true
             self:LayoutRewardList(rewardListId, HAS_CHOICE)
             return
+        elseif rewardType == REWARD_ENTRY_TYPE_ADD_TITLE then
+            local rewardTitleName, isAcquired = GetAddTitleRewardTitleInfo(rewardId)
+            self:LayoutRewardTitleTooltip(rewardTitleName, isAcquired)
+            return
         end
     end
 end
@@ -153,4 +157,21 @@ function ZO_Tooltip:LayoutRewardList(rewardListId, hasChoice)
     end
 
     self:AddSection(rewardsSection)
+end
+
+function ZO_Tooltip:LayoutRewardTitleTooltip(rewardTitleName, isAcquired)
+    local headerSection = self:AcquireSection(self:GetStyle("bodyHeader"))
+    local isAcquiredText = isAcquired and GetString(SI_REWARD_TITLE_TOOLTIP_ACQUIRED) or GetString(SI_REWARD_TITLE_TOOLTIP_NOT_ACQUIRED)
+    headerSection:AddLine(isAcquiredText)
+    headerSection:AddLine(GetString(SI_REWARD_TITLE_TOOLTIP_LABEL))
+    self:AddSection(headerSection)
+
+    local titleTextSection = self:AcquireSection(self:GetStyle("title"))
+    titleTextSection:AddLine(rewardTitleName)
+    self:AddSection(titleTextSection)
+
+    local descriptionSection = self:AcquireSection(self:GetStyle("bodySection"))
+    local colorizedTitle = ZO_SELECTED_TEXT:Colorize(rewardTitleName)
+    descriptionSection:AddLine(zo_strformat(SI_REWARD_TITLE_TOOLTIP_DESCRIPTION_FORMATTER, colorizedTitle), self:GetStyle("bodyDescription"))
+    self:AddSection(descriptionSection)
 end

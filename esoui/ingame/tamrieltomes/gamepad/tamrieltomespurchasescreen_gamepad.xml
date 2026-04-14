@@ -14,7 +14,7 @@
             <Dimensions x="ZO_TAMRIEL_TOMES_PURCHASE_VERTICAL_DIVIDER_WIDTH_GAMEPAD" y="ZO_TAMRIEL_TOMES_PURCHASE_REWARD_DIMENSIONS_GAMEPAD"/>
         </Control>
         <Button name="ZO_TamrielTomesPurchaseButton_Gamepad" inherits="ZO_TamrielTomes_GamepadButtonTemplate" font="ZoFontGamepad27" virtual="true">
-            <Dimensions x="400" y="65"/>
+            <Dimensions x="400" y="42"/>
         </Button>
         <TopLevelControl name="ZO_TamrielTomesPurchase_GamepadTL" inherits="ZO_TamrielTomesPurchase_SharedTL">
             <Anchor point="LEFT" offsetY="-50"/>
@@ -39,26 +39,18 @@
                     <Dimensions x="ZO_TAMRIEL_TOMES_PURCHASE_GRID_WIDTH_GAMEPAD" y="ZO_TAMRIEL_TOMES_PURCHASE_GRID_HEIGHT_GAMEPAD"/>
                 </Control>
                 <Control name="$(parent)Buttons" override="true">
-                    <Anchor point="TOP" relativePoint="BOTTOM" offsetX="15" offsetY="-160"/>
+                    <Anchor point="BOTTOM" offsetX="15" offsetY="-48"/>
                     <Controls>
                         <Control name="$(parent)Row1" override="true">
                             <Controls>
                                 <Button name="$(parent)PremiumButton" override="true" inherits="ZO_TamrielTomesPurchaseButton_Gamepad"/>
                                 <Button name="$(parent)PremiumPlusButton" override="true" inherits="ZO_TamrielTomesPurchaseButton_Gamepad"/>
-                                <Label name="$(parent)PremiumPlusDescription" override="true" font="ZoFontGamepad27">
-                                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)PremiumPlusButton" relativePoint="TOPLEFT" offsetX="5" offsetY="-5"/>
-                                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)PremiumPlusButton" relativePoint="TOPRIGHT" offsetX="-5" offsetY="-5"/>
-                                    <Controls>
-                                        <Texture name="$(parent)BG" override="true">
-                                            <Anchor point="TOPLEFT" offsetX="-15"/>
-                                            <Anchor point="BOTTOMRIGHT" offsetX="15"/>
-                                        </Texture>
-                                    </Controls>
-                                </Label>
+                                <Label name="$(parent)PremiumLabel" override="true" font="ZoFontGamepad34"/>
+                                <Label name="$(parent)PremiumPlusLabel" override="true" font="ZoFontGamepad34"/>
+                                <Label name="$(parent)PremiumPlusDescription" override="true" font="ZoFontGamepad27"/>
                             </Controls>
                         </Control>
                         <Control name="$(parent)Row2" override="true">
-                            <Anchor point="CENTER" relativeTo="$(parent)Row1" offsetY="80"/>
                             <Controls>
                                 <Button name="$(parent)TokenButton" override="true" inherits="ZO_TamrielTomesPurchaseButton_Gamepad"/>
                             </Controls>

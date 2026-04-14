@@ -622,7 +622,7 @@ local function AddRewards(self, achievementId)
     -- get item reward
     local hasRewardItem, itemName, iconTextureName, displayQuality = GetAchievementRewardItem(achievementId)
     if hasRewardItem then
-        self:AddIconReward(itemName, iconTextureName, displayQuality, 1)
+        self:AddIconReward(zo_strformat(SI_TOOLTIP_ITEM_NAME, itemName), iconTextureName, displayQuality, 1)
     end
 
     -- get title reward

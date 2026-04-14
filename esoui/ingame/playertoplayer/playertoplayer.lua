@@ -680,7 +680,7 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
         self:RemoveFromIncomingQueue(INTERACT_TYPE.CLAIM_LEVEL_UP_REWARDS)
 
         -- Don't show level up in the intro world because it overrides your bars and spending skill points is disabled
-        if not IsInReturningPlayerIntroWorld() then
+        if not IsInIntroGameplayExperienceWorld() then
             local pendingRewardLevel = GetPendingLevelUpRewardLevel()
             if pendingRewardLevel then
                 local data = self:AddPromptToIncomingQueue(INTERACT_TYPE.CLAIM_LEVEL_UP_REWARDS, nil, nil, zo_strformat(SI_LEVEL_UP_REWARDS_AVAILABLE_NOTIFICATION, pendingRewardLevel),

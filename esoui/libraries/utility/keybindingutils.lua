@@ -68,6 +68,10 @@ function ZO_Keybindings_GenerateTextKeyMarkup(name)
     return ("|u25%%:25%%:key:%s|u"):format(name)
 end
 
+function ZO_Keybindings_GenerateTextWideKeyMarkup(name)
+    return ("|u50%%:50%%:key:%s|u"):format(name)
+end
+
 --Gamepad and mouse keys use icons instead of text (with the exception of mouse button 4 and 5)
 function ZO_Keybindings_ShouldUseIconKeyMarkup(key)
     return ShouldKeyCodeUseKeyMarkup(key)
@@ -83,10 +87,15 @@ do
     local keyNameTable = {}
     local DEFAULT_SCALE_PERCENT = 180
 
-    local function GetKeyOrTexture(keyCode, textureOptions, scalePercent, useDisabledIcon)
+    -- additionalOptions supports the following fields:
+    -- useWideMarkup = calls ZO_Keybindings_GenerateTextWideKeyMarkup instead of ZO_Keybindings_GenerateTextKeyMarkup
+    local function GetKeyOrTexture(keyCode, textureOptions, scalePercent, useDisabledIcon, additionalOptions)
         if textureOptions == KEYBIND_TEXTURE_OPTIONS_EMBED_MARKUP then
             if ZO_Keybindings_ShouldUseIconKeyMarkup(keyCode) then
                 return ZO_Keybindings_GenerateIconKeyMarkup(keyCode, scalePercent or DEFAULT_SCALE_PERCENT, useDisabledIcon)
+            end
+            if additionalOptions and additionalOptions.useWideMarkup then
+                return ZO_Keybindings_GenerateTextWideKeyMarkup(GetKeyName(keyCode))
             end
             return ZO_Keybindings_GenerateTextKeyMarkup(GetKeyName(keyCode))
         else
@@ -111,23 +120,23 @@ do
         return GetString(SI_ACTION_IS_NOT_BOUND)
     end
 
-    local function TranslateKeys(key, mod1, mod2, mod3, mod4, textOptions, textureOptions, scalePercent, useDisabledIcon)
+    local function TranslateKeys(key, mod1, mod2, mod3, mod4, textOptions, textureOptions, scalePercent, useDisabledIcon, additionalOptions)
         if key ~= KEY_INVALID then
             ZO_ClearNumericallyIndexedTable(keyNameTable)
 
             textOptions = textOptions or KEYBIND_TEXT_OPTIONS_ABBREVIATED_NAME
             textureOptions = textureOptions or KEYBIND_TEXTURE_OPTIONS_NONE
 
-            if mod1 ~= KEY_INVALID then table.insert(keyNameTable, GetKeyOrTexture(mod1, textureOptions, scalePercent, useDisabledIcon)) end
-            if mod2 ~= KEY_INVALID then table.insert(keyNameTable, GetKeyOrTexture(mod2, textureOptions, scalePercent, useDisabledIcon)) end
-            if mod3 ~= KEY_INVALID then table.insert(keyNameTable, GetKeyOrTexture(mod3, textureOptions, scalePercent, useDisabledIcon)) end
-            if mod4 ~= KEY_INVALID then table.insert(keyNameTable, GetKeyOrTexture(mod4, textureOptions, scalePercent, useDisabledIcon)) end
+            if mod1 ~= KEY_INVALID then table.insert(keyNameTable, GetKeyOrTexture(mod1, textureOptions, scalePercent, useDisabledIcon, additionalOptions)) end
+            if mod2 ~= KEY_INVALID then table.insert(keyNameTable, GetKeyOrTexture(mod2, textureOptions, scalePercent, useDisabledIcon, additionalOptions)) end
+            if mod3 ~= KEY_INVALID then table.insert(keyNameTable, GetKeyOrTexture(mod3, textureOptions, scalePercent, useDisabledIcon, additionalOptions)) end
+            if mod4 ~= KEY_INVALID then table.insert(keyNameTable, GetKeyOrTexture(mod4, textureOptions, scalePercent, useDisabledIcon, additionalOptions)) end
 
             if textOptions == KEYBIND_TEXT_OPTIONS_ABBREVIATED_NAME and #keyNameTable > 0 then
                 table.insert(keyNameTable, textureOptions == KEYBIND_TEXTURE_OPTIONS_NONE and "-" or " - ")
             end
 
-            table.insert(keyNameTable, GetKeyOrTexture(key, textureOptions, scalePercent, useDisabledIcon))
+            table.insert(keyNameTable, GetKeyOrTexture(key, textureOptions, scalePercent, useDisabledIcon, additionalOptions))
 
             if textOptions == KEYBIND_TEXT_OPTIONS_FULL_NAME_SEPARATE_MODS then
                 return unpack(keyNameTable, 1, 4)
@@ -141,19 +150,19 @@ do
         return GetString(SI_ACTION_IS_NOT_BOUND)
     end
 
-    function ZO_Keybindings_GetBindingStringFromKeys(key, mod1, mod2, mod3, mod4, textOptions, textureOptions, textureWidthPercent, textureHeightPercent, useDisabledIcon)
-        return TranslateKeys(key, mod1, mod2, mod3, mod4, textOptions, textureOptions, textureWidthPercent, useDisabledIcon)
+    function ZO_Keybindings_GetBindingStringFromKeys(key, mod1, mod2, mod3, mod4, textOptions, textureOptions, textureWidthPercent, textureHeightPercent, useDisabledIcon, additionalOptions)
+        return TranslateKeys(key, mod1, mod2, mod3, mod4, textOptions, textureOptions, textureWidthPercent, useDisabledIcon, additionalOptions)
     end
 
     function ZO_Keybindings_GetNarrationStringFromKeys(key, mod1, mod2, mod3, mod4)
         return TranslateNarrationKeys(key, mod1, mod2, mod3, mod4)
     end
 
-    function ZO_Keybindings_GetBindingStringFromAction(actionName, textOptions, textureOptions, bindingIndex, textureWidthPercent, textureHeightPercent, useDisabledIcon)
+    function ZO_Keybindings_GetBindingStringFromAction(actionName, textOptions, textureOptions, bindingIndex, textureWidthPercent, textureHeightPercent, useDisabledIcon, additionalOptions)
         local layerIndex, categoryIndex, actionIndex = GetActionIndicesFromName(actionName)
         if layerIndex then
             local key, mod1, mod2, mod3, mod4 = GetActionBindingInfo(layerIndex, categoryIndex, actionIndex, bindingIndex or 1)
-            return ZO_Keybindings_GetBindingStringFromKeys(key, mod1, mod2, mod3, mod4, textOptions, textureOptions, textureWidthPercent, textureHeightPercent, useDisabledIcon)
+            return ZO_Keybindings_GetBindingStringFromKeys(key, mod1, mod2, mod3, mod4, textOptions, textureOptions, textureWidthPercent, textureHeightPercent, useDisabledIcon, additionalOptions)
         end
         return ""
     end
@@ -168,7 +177,7 @@ do
     end
 
     -- Doesn't return the GetString(SI_ACTION_IS_NOT_BOUND) automatically, just nil if theres no binds
-    function ZO_Keybindings_GetHighestPriorityBindingStringFromAction(actionName, textOptions, textureOptions, alwaysPreferGamepadMode, showAsHold, scalePercent, useDisabledIcon)
+    function ZO_Keybindings_GetHighestPriorityBindingStringFromAction(actionName, textOptions, textureOptions, alwaysPreferGamepadMode, showAsHold, scalePercent, useDisabledIcon, additionalOptions)
         local preferredKeybindType = ZO_Keybindings_GetPreferredKeyType(alwaysPreferGamepadMode)
         local key, mod1, mod2, mod3, mod4 = GetHighestPriorityActionBindingInfoFromNameAndInputDevice(actionName, preferredKeybindType)
 
@@ -182,7 +191,7 @@ do
                 key = holdKey
             end
         end
-        return ZO_Keybindings_GetBindingStringFromKeys(key, mod1, mod2, mod3, mod4, textOptions, textureOptions, scalePercent, scalePercent, useDisabledIcon), key, mod1, mod2, mod3, mod4
+        return ZO_Keybindings_GetBindingStringFromKeys(key, mod1, mod2, mod3, mod4, textOptions, textureOptions, scalePercent, scalePercent, useDisabledIcon, additionalOptions), key, mod1, mod2, mod3, mod4
     end
 
 

@@ -280,6 +280,10 @@ function ZO_PageNavigation:SetStartingPageNumber(pageNumber)
 end
 
 function ZO_PageNavigation:RefreshPageIndicators()
+    if self.hidePageIndicators then
+        return
+    end
+
     if not internalassert(self.defaultFont, "ZO_PageNavigation requires a platform-specific DefaultIndicatorFont.") then
         return
     end

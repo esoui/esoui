@@ -4,10 +4,13 @@ local function GetSystemDisplayList(numDisplays)
      local itemText = {}
 
      for i = 1, numDisplays do
-         local optionText = zo_strformat(SI_GRAPHICS_OPTIONS_VIDEO_ACTIVE_DISPLAY_FORMAT, i) 
          valid[i] = i - 1 -- Identifying indices start at 0
          events[i] = "ActiveDisplayChanged"
-         itemText[i] = optionText
+         if ZO_IsWindowsUI() then
+            itemText[i] = GetNameForDisplayAtIndex(i) -- Only supported on Windows.
+         else
+            itemText[i] =  zo_strformat(SI_GRAPHICS_OPTIONS_VIDEO_ACTIVE_DISPLAY_FORMAT, i)
+        end
      end
 
     return valid, events, itemText

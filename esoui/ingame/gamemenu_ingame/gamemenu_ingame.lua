@@ -64,20 +64,16 @@ local function ShowMarketAnnouncements()
     RequestMarketAnnouncement()
 end
 
-local function ShowReturningPlayerAnnouncements()
-    RETURNING_PLAYER_MANAGER:ShowReturningPlayerAnnouncementScreen()
-end
-
 local function AddAnnouncementsEntry(entryTable)
-    if RETURNING_PLAYER_MANAGER:ShouldShowReturningPlayerAnnouncementEntry() then
-        local campaignDisplayName = RETURNING_PLAYER_MANAGER:GetIntroCampaignDisplayName()
+    if PROMOTIONAL_EVENT_PERSONAL_CAMPAIGN_MANAGER:ShouldShowAnnouncementEntry() then
+        local campaignDisplayName = PROMOTIONAL_EVENT_PERSONAL_CAMPAIGN_MANAGER:GetCampaignDisplayName()
         local data =
         {
-            name = zo_strformat(SI_RETURNING_PLAYER_CAMPAIGN_NAME_FORMATTER, campaignDisplayName),
+            name = zo_strformat(SI_PROMOTIONAL_EVENT_PERSONAL_CAMPAIGN_NAME_FORMATTER, campaignDisplayName),
             normalColor = ZO_PROMOTIONAL_EVENT_SELECTED_COLOR,
             selectedColor = ZO_PROMOTIONAL_EVENT_SELECTED_COLOR,
             mouseOverColor = ZO_PROMOTIONAL_EVENT_HIGHLIGHT_COLOR,
-            callback = ShowReturningPlayerAnnouncements
+            callback = function() PROMOTIONAL_EVENT_PERSONAL_CAMPAIGN_MANAGER:ShowAnnouncementScreen() end,
         }
         table.insert(entryTable, data)
     else

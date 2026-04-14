@@ -126,6 +126,7 @@ function GetLostKeepCampaignEventDescription(campaignId, keepId, guildName)
 end
 
 local EMERGENCY_BACKGROUND = "EsoUI/Art/Guild/guildRanks_iconFrame_selected.dds"
+local VETERANCY_RANK_BACKGROUND = "EsoUI/Art/Veterancy/veterancy_rank_bg.dds"
 
 -- Return format is
 --  Category - The alert category to send the alert to
@@ -2014,6 +2015,47 @@ local CENTER_SCREEN_CALLBACK_HANDLERS =
             messageParams:SetText(zo_strformat(SI_CAMPAIGN_VENGEANCE_LOADOUT_EQUIP_ANNOUNCEMENT, equippedLoadoutData:GetName()), GetString(SI_CAMPAIGN_VENGEANCE_LOADOUT_ANNOUNCEMENT_DECRIPTION))
             messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_SYSTEM_BROADCAST)
             messageParams:SetSound(SOUNDS.VENGEANCE_LOADOUT_EQUIPPED_ANNOUNCEMENT)
+            return messageParams
+        end,
+    },
+
+    {
+        callbackManager = ZO_VETERANCY_MANAGER,
+        callbackRegistration = "OnVeterancyRankUp",
+        callbackFunction = function(rankIndex)
+            local currentRankData = ZO_VETERANCY_MANAGER:GetRankDataByIndex(rankIndex)
+            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
+            messageParams:SetText(GetString(SI_VETERANCY_RANK_UP_ANNOUNCEMENT_HEADER), currentRankData:GetName())
+            messageParams:SetIconData(currentRankData:GetIcon(), VETERANCY_RANK_BACKGROUND)
+            messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_VETERANCY_RANK_UP)
+            local soundId
+            if rankIndex < ZO_VETERANCY_RANK_GROUP_INDEX_UPPER_BOUND_LOW then
+                soundId = SOUNDS.VETERANCY_RANK_UP_LOW
+            elseif rankIndex < ZO_VETERANCY_RANK_GROUP_INDEX_UPPER_BOUND_HIGH then
+                soundId = SOUNDS.VETERANCY_RANK_UP_HIGH
+            elseif rankIndex == ZO_VETERANCY_RANK_GROUP_INDEX_UPPER_BOUND_HIGH then
+                soundId = SOUNDS.VETERANCY_RANK_UP_MAX
+            else
+                soundId = SOUNDS.VETERANCY_RANK_UP_REPEATABLE
+            end
+            messageParams:SetSound(soundId)
+            return messageParams
+        end,
+    },
+
+    {
+        callbackManager = ZO_VETERANCY_MANAGER,
+        callbackRegistration = "OnVeterancyRepeatableRankClaimed",
+        callbackFunction = function(claimedCount)
+            local currentRankData = ZO_VETERANCY_MANAGER:GetCurrentRankData()
+            local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.VETERANCY_RANK_UP_REPEATABLE)
+            local rankRewardData = currentRankData:GetRankRewardDataByIndex(1)
+            local rewardData = rankRewardData:GetRewardData()
+            local rewardText = rewardData:GetQuantity() > 1 and rewardData:GetFormattedNameWithStack() or rewardData:GetFormattedName()
+            local secondaryText = claimedCount > 1 and zo_strformat(SI_VETERANCY_MAX_RANK_CLAIMED_COUNT_FORMATTER, claimedCount, rewardText) or rewardText
+            messageParams:SetText(GetString(SI_VETERANCY_MAX_RANK_CLAIMED_ANNOUNCEMENT_HEADER), secondaryText)
+            messageParams:SetIconData(rewardData:GetPlatformLootIcon(), EMERGENCY_BACKGROUND)
+            messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_VETERANCY_MAX_REWARD_CLAIMED)
             return messageParams
         end,
     },

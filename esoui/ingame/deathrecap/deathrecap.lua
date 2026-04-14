@@ -38,6 +38,7 @@ function DeathRecap:Initialize(control)
     self.control = control
     self.scrollContainer = control:GetNamedChild("ScrollContainer")
     self.scrollControl = self.scrollContainer:GetNamedChild("ScrollChild")
+    self.difficultyLabel = self.scrollControl:GetNamedChild("DifficultyHeader")
     self.waitingToShowPrompt = false
     self.windowOpen = true
     self.deathRecapAvailable = false
@@ -390,6 +391,19 @@ function DeathRecap:GetStartAlpha()
     return (self.animateOnShow and not DEATH_RECAP_FRAGMENT:IsShowing()) and 0 or 1
 end
 
+function DeathRecap:SetupDifficulty()
+    if GetOverlandDifficultyDisabledReason() ~= OVERLAND_DIFFICULTY_DISABLED_REASON_NONE then
+        self.difficultyLabel:SetHidden(true)
+    else
+        local difficulty = GetOverlandDifficulty()
+        local difficultyName = GetString("SI_OVERLANDDIFFICULTYTYPE", difficulty)
+        local difficultyIcon = zo_iconFormat(ZO_CHALLENGE_DIFFICULTY_ICONS_GAMEPAD[difficulty], "135%", "135%")
+        local difficultyString = zo_strformat(SI_CHALLENGE_DIFFICULTY_DEATH_RECAP_LABEL, difficultyName, difficultyIcon)
+        self.difficultyLabel:SetText(difficultyString)
+        self.difficultyLabel:SetHidden(false)
+    end
+end
+
 function DeathRecap:SetupHints()
     self.hintPool:ReleaseAllObjects()
     self.hintTimeline:Stop()
@@ -455,6 +469,7 @@ function DeathRecap:SetupDeathRecap()
     self.isPlayerDead = IsUnitDead("player")
     local numAttacks = GetNumKillingAttacks()
     if numAttacks > 0 and IsUnitDead("player") then
+        self:SetupDifficulty()
         self:SetupAttacks()
         self:SetupHints()
         self:SetupTelvarStoneLoss()

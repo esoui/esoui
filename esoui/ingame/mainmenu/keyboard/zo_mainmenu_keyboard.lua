@@ -254,7 +254,7 @@ ZO_CATEGORY_LAYOUT_INFO =
     [MENU_CATEGORY_GROUP] =
     {
         binding = "TOGGLE_GROUP",
-        categoryName = SI_MAIN_MENU_GROUP,
+        categoryName = SI_SOCIAL_MENU_GROUP,
 
         descriptor = MENU_CATEGORY_GROUP,
         normal = function(button)

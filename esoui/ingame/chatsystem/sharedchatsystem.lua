@@ -1251,7 +1251,7 @@ function SharedChatSystem:Initialize(control, platformSettings)
 
     self.commandPrefixes = {}
     self.numUnreadMails = 0
-    self:OnNumUnreadMailChanged(GetNumUnreadMail())
+    self:OnNumUnreadMailChanged(MAIL_MANAGER:GetTotalNumUnreadMail())
     self.isAgentChatActive = false
     self:OnAgentChatUpdated()
     self.isMinimized = false
@@ -1386,7 +1386,6 @@ function SharedChatSystem:InitializeSharedEvents(eventKey)
         EVENT_MANAGER:RegisterForEvent(eventKey, EVENT_GUILD_RANK_CHANGED, function() self:ValidateChatChannel() end)
         EVENT_MANAGER:RegisterForEvent(eventKey, EVENT_GUILD_RANKS_CHANGED, function() self:ValidateChatChannel() end)
         EVENT_MANAGER:RegisterForEvent(eventKey, EVENT_GUILD_MEMBER_RANK_CHANGED, function() self:ValidateChatChannel() end)
-        EVENT_MANAGER:RegisterForEvent(eventKey, EVENT_MAIL_NUM_UNREAD_CHANGED, function(_, numUnread) self:OnNumUnreadMailChanged(numUnread) end)
         EVENT_MANAGER:RegisterForEvent(eventKey, EVENT_AGENT_CHAT_REQUESTED, OnAgentChatUpdated)
         EVENT_MANAGER:RegisterForEvent(eventKey, EVENT_AGENT_CHAT_FORCED, OnAgentChatUpdated)
         EVENT_MANAGER:RegisterForEvent(eventKey, EVENT_AGENT_CHAT_TERMINATED, OnAgentChatUpdated)
@@ -1394,6 +1393,8 @@ function SharedChatSystem:InitializeSharedEvents(eventKey)
         EVENT_MANAGER:RegisterForEvent(eventKey, EVENT_CHAT_CATEGORY_COLOR_CHANGED, OnChatCategoryColorChanged)
         EVENT_MANAGER:RegisterForEvent(eventKey, EVENT_INTERFACE_SETTING_CHANGED, OnInterfaceSettingChanged)
         EVENT_MANAGER:AddFilterForEvent(eventKey, EVENT_INTERFACE_SETTING_CHANGED, REGISTER_FILTER_SETTING_SYSTEM_TYPE, SETTING_TYPE_UI)
+
+        MAIL_MANAGER:RegisterCallback("NumUnreadMailChanged", function(numUnread) self:OnNumUnreadMailChanged(numUnread) end)
 
         local function OnGamepadUseKeyboardChatChanged()
             self:CloseTextEntry()

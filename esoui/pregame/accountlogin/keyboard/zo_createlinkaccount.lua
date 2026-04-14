@@ -42,6 +42,7 @@ function CreateLinkAccount_Keyboard:Initialize(control)
     self.emailEntry = newAccountScrollChild:GetNamedChild("EmailEntry")
     self.emailEntryEdit = self.emailEntry:GetNamedChild("Edit")
     self.subscribeCheckbox = newAccountScrollChild:GetNamedChild("Subscribe")
+    self.subscribeInfo = newAccountScrollChild:GetNamedChild("SubscribeInfo") 
     self.createAccountButton = newAccountScrollChild:GetNamedChild("CreateAccount")
 
     self.countryComboBox = ZO_ComboBox_ObjectFromContainer(self.countryDropdown)
@@ -245,7 +246,7 @@ function CreateLinkAccount_Keyboard:RefreshCheckboxHiddenStates()
     local platformDisablesSubscription = not DoesPlatformAllowForEmailSubscription()
     local noRegionOrAutoSubscription = not self.selectedCountry or self.selectedCountry.autoEmailSubscribe
     local subscriptionShouldBeHidden = platformDisablesSubscription or noRegionOrAutoSubscription
-    if subscriptionShouldBeHidden ~= self.subscribeCheckbox:IsControlHidden() then
+    if subscriptionShouldBeHidden ~= self.subscribeCheckbox:IsControlHidden() or subscriptionShouldBeHidden == self.subscribeInfo:IsControlHidden() then
         if subscriptionShouldBeHidden then
             -- Email subscription isn't allowed, so remove the checkbox
             ZO_CheckButton_SetUnchecked(self.subscribeCheckbox)
@@ -257,8 +258,9 @@ function CreateLinkAccount_Keyboard:RefreshCheckboxHiddenStates()
 end
 
 function CreateLinkAccount_Keyboard:ShowEmailSubscriptionCheckbox()
-    -- Show the email subscription checkbox, and reanchor the Create Account button
+    -- Show the email subscription checkbox, hide the subscription info text, and reanchor the Create Account button
     self.subscribeCheckbox:SetHidden(false)
+    self.subscribeInfo:SetHidden(true)
 
     -- use the Create Account button's current anchors, but use the subscribe checkbox as the relative point
     local _, point, _, relPoint, offsetX, offsetY = self.createAccountButton:GetAnchor(0)
@@ -268,15 +270,17 @@ function CreateLinkAccount_Keyboard:ShowEmailSubscriptionCheckbox()
 end
 
 function CreateLinkAccount_Keyboard:HideEmailSubscriptionCheckbox()
-    -- Hide the email subscription checkbox, and reanchor the Create Account button
+    -- Hide the email subscription checkbox, show the subscription info text, and reanchor the Create Account button
     self.subscribeCheckbox:SetHidden(true)
+    if self.selectedCountry then
+        self.subscribeInfo:SetHidden(false)
+    end
 
-    -- use the Create Account button's current anchors, but use the subscribe checkbox's relative point
-    local _, _, relTo = self.subscribeCheckbox:GetAnchor(0)
+    -- use the Create Account button's current anchors, but use the subscribe info as the relative point
     local _, point, _, relPoint, offsetX, offsetY = self.createAccountButton:GetAnchor(0)
 
     self.createAccountButton:ClearAnchors()
-    self.createAccountButton:SetAnchor(point, relTo, relPoint, offsetX, offsetY)
+    self.createAccountButton:SetAnchor(point, self.subscribeInfo, relPoint, offsetX, offsetY)
 end
 
 function CreateLinkAccount_Keyboard:SetCountryDropdownState(state)

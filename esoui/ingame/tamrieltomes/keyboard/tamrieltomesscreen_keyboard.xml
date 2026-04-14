@@ -13,7 +13,10 @@
                 </Texture>
                 <Control name="$(parent)Header" override="true">
                     <Controls>
-                        <Label name="$(parent)Title" override="true" font="ZoFontCallout"/>
+                        <Label name="$(parent)Title" override="true" font="ZoFontCallout">
+                            <Anchor point="TOPLEFT" offsetX="80"/>
+                            <Anchor point="TOPRIGHT" offsetX="-10"/>
+                        </Label>
                         <Label name="$(parent)Subtitle" override="true" font="ZoFontHeader3"/>
                         <Control name="$(parent)Buttons" override="true">
                             <Controls>
@@ -25,6 +28,9 @@
                                 </Button>
                             </Controls>
                         </Control>
+                        <Button name="$(parent)SelectTomeButton" override="true">
+                            <Anchor point="LEFT" offsetX="8"/>
+                        </Button>
                     </Controls>
                 </Control>
                 <Control name="$(parent)Book" override="true">
@@ -43,7 +49,7 @@
                                         <Control name="$(parent)Amount" override="true" inherits="ZO_RollingMeterLabel">
                                             <Anchor point="RIGHT" relativeTo="$(parent)Icon" relativePoint="LEFT" offsetX="-8"/>
                                         </Control>
-                                        <Label name="$(parent)Name" override="true" font="ZoFontHeader">
+                                        <Label name="$(parent)Name" override="true" font="ZoFontHeader2">
                                             <Anchor point="RIGHT" relativeTo="$(parent)Amount" relativePoint="LEFT" offsetX="-8"/>
                                         </Label>
                                     </Controls>
@@ -51,7 +57,7 @@
                                 <Control name="$(parent)Bonus" override="true">
                                     <Anchor point="TOPRIGHT" offsetX="-15" offsetY="16"/>
                                     <Controls>
-                                        <Label name="$(parent)Percent" override="true" font="ZoFontHeader">
+                                        <Label name="$(parent)Percent" override="true" font="ZoFontHeader2">
                                             <Anchor point="RIGHT" relativePoint="TOPRIGHT" offsetX="-48" offsetY="24"/>
                                         </Label>
                                         <Texture name="$(parent)Icon" override="true" textureFile="EsoUI/Art/TamrielTomes/currencyBonusArrow.dds">

@@ -81,6 +81,50 @@ function ZO_MailInboxShared_PopulateMailData(dataTable, mailId)
     dataTable.category = category
 end
 
+do
+    local GUILD_CHAT_CATEGORIES =
+    {
+        CHAT_CATEGORY_GUILD_1,
+        CHAT_CATEGORY_GUILD_2,
+        CHAT_CATEGORY_GUILD_3,
+        CHAT_CATEGORY_GUILD_4,
+        CHAT_CATEGORY_GUILD_5,
+    }
+
+    function ZO_MailInboxShared_PopulateGuildMailData(dataTable, mailId)
+        local guildId, subject, body, expiresInDays, expiresInSeconds, secsSinceReceived, senderDisplayName = GetGuildMailItemInfo(mailId)
+        dataTable.mailId = mailId
+        dataTable.subject = subject
+        dataTable.body = body
+        dataTable.guildId = guildId
+        dataTable.senderDisplayName = senderDisplayName
+        dataTable.isFromLocalPlayer = senderDisplayName == GetDisplayName()
+        dataTable.expiresInDays = expiresInDays
+        dataTable.expiresInSeconds = expiresInSeconds
+        dataTable.unread = not MAIL_MANAGER:HasReadGuildMail(mailId)
+        -- Guild Mail cannot have attachments
+        dataTable.numAttachments = 0
+        dataTable.attachedMoney = 0
+        dataTable.codAmount = 0
+        dataTable.secsSinceReceived = secsSinceReceived
+        dataTable.fromGuild = true
+        dataTable.fromSystem = false
+        dataTable.fromCS = false
+        dataTable.isFromPlayer = false
+        dataTable.returned = false
+        dataTable.GetFormattedSubject = GetFormattedSubject
+        dataTable.GetExpiresText = GetExpiresText
+        dataTable.GetReceivedText = GetReceivedText
+        dataTable.IsExpirationImminent = IsExpirationImminent
+
+        --Determine which chat category corresponds to this guild
+        local guildIndex = GetGuildIndex(guildId)
+        if guildIndex then
+            dataTable.chatCategory = GUILD_CHAT_CATEGORIES[guildIndex]
+        end
+    end
+end
+
 function ZO_GetNextMailIdIter(state, var1)
     return GetNextMailId(var1)
 end
@@ -91,17 +135,30 @@ function ZO_MailInboxShared_TakeAll(mailId)
 end
 
 function ZO_MailInboxShared_UpdateInbox(mailData, fromControl, subjectControl, expiresControl, receivedControl, bodyControl)
-    local body = ReadMail(mailData.mailId)
-    if body == "" then
-        body = GetString(SI_MAIL_READ_NO_BODY)
+    -- Header and Body.
+    local body
+    if mailData.fromGuild then
+        body = mailData.body
+        fromControl:SetText(zo_strformat(SI_GUILD_MAIL_SENDER_FORMATTER, GetGuildName(mailData.guildId)))
+        if mailData.chatCategory then
+            r, g, b = GetChatCategoryColor(mailData.chatCategory)
+            fromControl:SetColor(r, g, b, 1)
+        else
+            fromControl:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
+        end
+    else
+        body = ReadMail(mailData.mailId)
+
+        fromControl:SetText(mailData.senderDisplayName)
+        if mailData.fromCS or mailData.fromSystem then
+            fromControl:SetColor(ZO_GAME_REPRESENTATIVE_TEXT:UnpackRGBA())
+        else
+            fromControl:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
+        end
     end
 
-    -- Header and Body.
-    fromControl:SetText(mailData.senderDisplayName)
-    if(mailData.fromCS or mailData.fromSystem) then
-        fromControl:SetColor(ZO_GAME_REPRESENTATIVE_TEXT:UnpackRGBA())
-    else
-        fromControl:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
+    if body == "" then
+        body = GetString(SI_MAIL_READ_NO_BODY)
     end
 
     subjectControl:SetText(mailData:GetFormattedSubject())

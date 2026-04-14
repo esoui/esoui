@@ -1,14 +1,14 @@
 <GuiXml>
     <Controls>
         <StatusBar name="ZO_DynamicEventsTracker_ProgressBar_Keyboard_Template" inherits="ZO_ArrowProgressBarWithBG" virtual="true">
-            <Anchor point="TOPLEFT" relativeTo="$(parent)TimerLabel" relativePoint="BOTTOMLEFT"/>
+            <Anchor point="TOPLEFT" relativeTo="$(parent)SubLabel" relativePoint="BOTTOMLEFT"/>
             <Dimensions x="180" y="24"/>
             <Controls>
                 <Label name="$(parent)Progress" font="ZoFontWinH4"/>
             </Controls>
         </StatusBar>
         <StatusBar name="ZO_DynamicEventsTracker_ProgressBar_Gamepad_Template" inherits="ZO_GamepadArrowProgressBarWithBGMedium" virtual="true">
-            <Anchor point="TOPRIGHT" relativeTo="$(parent)TimerLabel" relativePoint="BOTTOMRIGHT"/>
+            <Anchor point="TOPRIGHT" relativeTo="$(parent)SubLabel" relativePoint="BOTTOMRIGHT"/>
             <Dimensions x="200"/>
         </StatusBar>
         <TopLevelControl name="ZO_DynamicEventsTracker_TL" inherits="ZO_HUDTracker_Base_Template" hidden="false">
@@ -19,8 +19,9 @@
             <Controls>
                 <Control name="$(parent)Container" override="true">
                     <Controls>
-                        <Label name="$(parent)TimerLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED"/>
                         <StatusBar name="$(parent)ProgressBar" inherits="ZO_ProgressBarWithGloss_Template_Base"/>
+                        <Label name="$(parent)TimerText" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED"/>
+                        <Label name="$(parent)TimerLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED"/>
                     </Controls>
                 </Control>
             </Controls>

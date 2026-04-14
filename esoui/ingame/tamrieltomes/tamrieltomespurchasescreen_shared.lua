@@ -90,11 +90,13 @@ function ZO_TamrielTomesPurchaseScreen_Shared:UpdateKeybinds()
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
 end
 
-function ZO_TamrielTomesPurchaseScreen_Shared:OnShowing()
+function ZO_TamrielTomesPurchaseScreen_Shared:OnShown()
     self:UpdateInfo()
     self:UpdateGridList()
+
     KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
     self:UpdateButtons()
+
     if ShowPlatformStoreIcon then
         ShowPlatformStoreIcon(PLATFORM_STORE_ICON_LOCATION_LOWER_RIGHT)
     end
@@ -110,6 +112,7 @@ end
 
 function ZO_TamrielTomesPurchaseScreen_Shared:OnSelectedTomeChanged()
     if self:IsShowing() then
+        KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
         SCENE_MANAGER:HideCurrentScene()
     end
 end
@@ -168,6 +171,7 @@ function ZO_TamrielTomesPurchaseScreen_Shared:UpdateButtons()
     end
 
     if not TAMRIEL_TOMES_MANAGER:CanPurchaseAnySelectedTomeProduct() then
+        KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
         SCENE_MANAGER:HideCurrentScene()
         return
     end
@@ -184,26 +188,31 @@ function ZO_TamrielTomesPurchaseScreen_Shared:UpdateButtons()
     local shouldEnablePremium = false
     if premiumProductData then
         shouldEnablePremium = premiumProductData:CanPurchase()
-        self.premiumButton:SetEnabled(shouldEnablePremium)
-
-        local priceString = premiumProductData:GetSkuData():GetPricingInfoFormatted()
-        self.premiumButton:SetText(zo_strformat(SI_TAMRIEL_TOMES_PREMIUM_UPGRADE_LABEL, priceString))
+        if shouldEnablePremium then
+            local priceString = premiumProductData:GetSkuData():GetPricingStringFormatted()
+            self.premiumButton:SetModifyTextType(MODIFY_TEXT_TYPE_NONE)
+            self.premiumButton:SetText(priceString)
+        else
+            self.premiumButton:SetModifyTextType(MODIFY_TEXT_TYPE_UPPERCASE)
+            self.premiumButton:SetText(GetString(SI_TAMRIEL_TOMES_PURCHASED_UPGRADE))
+        end
     else
         -- We shouldn't be in this screen if we don't have direct purchase data
-        self.premiumButton:SetEnabled(false)
-        self.premiumButton:SetText(GetString(SI_TAMRIEL_TOMES_PREMIUM_UPGRADE_WITHOUT_COST_LABEL))
+        self.premiumButton:SetText("")
     end
+
+    self.premiumButton:SetEnabled(shouldEnablePremium)
 
     local plusProductType = self:GetPremiumPlusProductType()
     local premiumPlusProductData = TAMRIEL_TOMES_MANAGER:GetPurchaseDataForSelectedTomeProductType(plusProductType)
     self.premiumPlusButton.productData = premiumPlusProductData
     local hasPremiumPlusProductData = premiumPlusProductData ~= nil
     if hasPremiumPlusProductData then
-        local priceString = premiumPlusProductData:GetSkuData():GetPricingInfoFormatted()
-        self.premiumPlusButton:SetText(zo_strformat(SI_TAMRIEL_TOMES_PREMIUM_PLUS_UPGRADE_LABEL, priceString))
+        local priceString = premiumPlusProductData:GetSkuData():GetPricingStringFormatted()
+        self.premiumPlusButton:SetText(priceString)
     else
         -- We shouldn't be in this screen if we don't have direct purchase data
-        self.premiumPlusButton:SetText(GetString(SI_TAMRIEL_TOMES_PREMIUM_PLUS_UPGRADE_WITHOUT_COST_LABEL))
+        self.premiumPlusButton:SetText("")
     end
 
     self.premiumPlusButton:SetEnabled(hasPremiumPlusProductData)
@@ -219,6 +228,7 @@ function ZO_TamrielTomesPurchaseScreen_Shared:UpdateButtons()
     local currencyName = GetCurrencyName(CURT_TOME_TOKENS, IsCountSingularForm(currencyCost), IS_UPPER)
     local tokenButtonString = zo_strformat(SI_TAMRIEL_TOMES_PREMIUM_PLUS_TOKEN_UPGRADE_LABEL, currencyCost, currencyName)
     self.tokenButton:SetText(tokenButtonString)
+
     self:UpdateKeybinds()
 end
 
@@ -271,9 +281,27 @@ function ZO_TamrielTomesPurchaseScreen_Shared.RewardGridEntrySetup(control, data
 
     control.icon:SetHidden(false)
     control.icon:SetTexture(data:GetPlatformLootIcon())
-    if data:GetQuantity() > 1 then
-        local quantity = data:GetAbbreviatedQuantity()
-        control.quantityLabel:SetText(quantity)
+
+    local quantity = nil
+    local quantityString = nil
+    if data:GetRewardType() == REWARD_ENTRY_TYPE_REWARD_LIST then
+        local rewardListId = GetRewardListIdFromReward(data:GetRewardId())
+        local numRewardListRewards = GetNumRewardListEntries(rewardListId)
+        if numRewardListRewards > 1 then
+            quantity = numRewardListRewards
+            quantityString = zo_strformat(SI_TAMRIEL_TOMES_REWARD_LIST_QUANTITY_FORMATTER, quantity - 1)
+        end
+    end
+
+    if not quantityString then
+        quantity = data:GetQuantity()
+        if quantity > 1 then
+            quantityString = data:GetAbbreviatedQuantity()
+        end
+    end
+
+    if quantityString then 
+        control.quantityLabel:SetText(quantityString)
         control.quantityLabel:SetHidden(false)
     else
         control.quantityLabel:SetHidden(true)
@@ -312,7 +340,7 @@ function ZO_TamrielTomesPurchaseScreen_Shared:CanPreviewFocusedReward()
             return true
         else
             local rewardId = self.focusedRewardData:GetRewardId()
-            return CanPreviewReward(rewardId) and not ITEM_PREVIEW_KEYBOARD:IsCurrentlyPreviewing(ZO_ITEM_PREVIEW_REWARD, rewardId)
+            return CanPreviewReward(rewardId) and not SYSTEMS:GetObject("itemPreview"):IsCurrentlyPreviewing(ZO_ITEM_PREVIEW_REWARD, rewardId)
         end
     end
     return false

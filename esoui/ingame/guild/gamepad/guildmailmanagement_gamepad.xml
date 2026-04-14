@@ -1,0 +1,78 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_GuildMailManagement_Mail_Row_Gamepad" virtual="true">
+            <Dimensions y="64"/>
+            <OnInitialized>
+                ZO_GuildMail_Management_List_Gamepad.OnRowControlInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Subject" font="ZoFontGamepad36" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" maxLineCount="1">
+                    <Anchor point="LEFT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_HIGHLIGHT_PADDING"/>
+                    <Dimensions x="ZO_GUILD_MAIL_MANAGEMENT_GAMEPAD_SUBJECT_COLUMN_SIZE"/>
+                </Label>
+                <Label name="$(parent)Sender" font="ZoFontGamepad36" wrapMode="ELLIPSIS" horizontalAlignment="LEFT" maxLineCount="1">
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Subject" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X"/>
+                    <Dimensions x="ZO_GUILD_MAIL_MANAGEMENT_GAMEPAD_SENDER_COLUMN_SIZE"/>
+                </Label>
+                <Label name="$(parent)Expires" font="ZoFontGamepad36" wrapMode="ELLIPSIS" horizontalAlignment="RIGHT" maxLineCount="1">
+                    <Anchor point="RIGHT" offsetX="-ZO_GAMEPAD_INTERACTIVE_FILTER_HIGHLIGHT_PADDING"/>
+                    <Dimensions x="ZO_GUILD_MAIL_MANAGEMENT_GAMEPAD_EXPIRES_COLUMN_SIZE"/>
+                </Label>
+            </Controls>
+        </Control>
+        <TopLevelControl name="ZO_GuildMailManagement_Gamepad_TL" tier="MEDIUM" hidden="true">
+            <OnInitialized>
+                ZO_GuildMailManagement_Gamepad.OnControlInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)ContentContainer" inherits="ZO_GuildHomeContentAnchor">
+                    <Controls>
+                        <Control name="$(parent)Manage" inherits="ZO_GamepadGrid_NavQuadrant_2_3_Anchors ZO_GamepadInteractiveSortFilterListControl" hidden="true">
+                            <Controls>
+                                <Label name="$(parent)PanelName" font="ZoFontGamepadBold54" horizontalAlignment="CENTER" text="SI_GUILD_RECRUITMENT_GUILD_MAIL_MANAGE" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                                    <Anchor point="TOPLEFT" offsetX="ZO_GAMEPAD_CONTENT_INSET_X"/>
+                                    <Anchor point="TOPRIGHT" offsetX="-ZO_GAMEPAD_CONTENT_INSET_X" offsetY="40"/>
+                                </Label>
+                                <Control name="$(parent)Container" override="true">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)PanelName" relativePoint="BOTTOMLEFT" offsetY="20"/>
+                                    <Anchor point="BOTTOMRIGHT" offsetX="-ZO_GAMEPAD_CONTENT_INSET_X"/>
+                                    <Controls>
+                                        <Control name="$(parent)ContentHeader" override="true" hidden="true"/>
+                                        <Control name="$(parent)Headers" override="true">
+                                            <ClearAnchors/>
+                                            <Anchor point="TOPLEFT"/>
+                                            <Anchor point="TOPRIGHT"/>
+                                            <Controls>
+                                                <Label name="$(parent)Subject" inherits="ZO_GamepadInteractiveFilterHeader">
+                                                    <Anchor point="TOPLEFT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_HIGHLIGHT_PADDING"/>
+                                                    <Dimensions x="ZO_GUILD_MAIL_MANAGEMENT_GAMEPAD_SUBJECT_COLUMN_SIZE"/>
+                                                    <OnInitialized>
+                                                        ZO_GamepadInteractiveSortFilterHeader_Initialize(self, GetString(SI_GUILD_MAIL_MANAGEMENT_SORT_HEADER_SUBJECT), "subject", TEXT_ALIGN_LEFT)
+                                                    </OnInitialized>
+                                                </Label>
+                                                <Label name="$(parent)Sender" inherits="ZO_GamepadInteractiveFilterHeader">
+                                                    <Anchor point="LEFT" relativeTo="$(parent)Subject" relativePoint="RIGHT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X"/>
+                                                    <Dimensions x="ZO_GUILD_MAIL_MANAGEMENT_GAMEPAD_SENDER_COLUMN_SIZE"/>
+                                                    <OnInitialized>
+                                                        ZO_GamepadInteractiveSortFilterHeader_Initialize(self, GetString(SI_GUILD_MAIL_MANAGEMENT_SORT_HEADER_SENDER), "senderDisplayName", TEXT_ALIGN_LEFT)
+                                                    </OnInitialized>
+                                                </Label>
+                                                <Label name="$(parent)Expires" inherits="ZO_GamepadInteractiveFilterHeader">
+                                                    <Anchor point="LEFT" relativeTo="$(parent)Sender" relativePoint="RIGHT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_HEADER_DOUBLE_PADDING_X"/>
+                                                    <Dimensions x="ZO_GUILD_MAIL_MANAGEMENT_GAMEPAD_EXPIRES_COLUMN_SIZE"/>
+                                                    <OnInitialized>
+                                                        ZO_GamepadInteractiveSortFilterHeader_Initialize(self, GetString(SI_GUILD_MAIL_MANAGEMENT_SORT_HEADER_EXPIRES), "expiresInSeconds", TEXT_ALIGN_RIGHT)
+                                                    </OnInitialized>
+                                                </Label>
+                                            </Controls>
+                                        </Control>
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

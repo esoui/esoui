@@ -16,7 +16,6 @@ function ZoneStoryTracker:InitializeStyles()
         {
             FONT_HEADER = "ZoFontGameShadow",
             FONT_SUBLABEL = "ZoFontGameShadow",
-            RESIZE_TO_FIT_PADDING_HEIGHT = 10,
 
             -- Quest Tracker anchors are old and complicated and there's not an easy way to set up a consitent scheme
             -- If we can one day refactor quest tracker to be more sensible this could be simplified
@@ -35,7 +34,6 @@ function ZoneStoryTracker:InitializeStyles()
         {
             FONT_HEADER = "ZoFontGamepadBold27",
             FONT_SUBLABEL = "ZoFontGamepad34",
-            RESIZE_TO_FIT_PADDING_HEIGHT = 20,
 
             TOP_LEVEL_PRIMARY_ANCHOR_QUEST_TRACKER = ZO_Anchor:New(TOPRIGHT, ZO_FocusedQuestTrackerPanelContainerQuestContainer, BOTTOMRIGHT, 0, 20),
             TOP_LEVEL_PRIMARY_ANCHOR_NO_QUEST_TRACKER = ZO_Anchor:New(TOPRIGHT, ZO_FocusedQuestTrackerPanelContainerQuestContainer, TOPRIGHT, 0, 20),

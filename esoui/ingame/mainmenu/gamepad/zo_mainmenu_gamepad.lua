@@ -245,14 +245,14 @@ local MENU_ENTRY_DATA =
             RequestMarketAnnouncement()
         end,
         isVisibleCallback = function()
-            return not RETURNING_PLAYER_MANAGER:ShouldShowReturningPlayerAnnouncementEntry()
-        end,
+            return not PROMOTIONAL_EVENT_PERSONAL_CAMPAIGN_MANAGER:ShouldShowAnnouncementEntry()
+        end
     },
     [MENU_MAIN_ENTRIES.RETURNING_PLAYER_ANNOUNCEMENTS] =
     {
         name = function()
-            local campaignDisplayName = RETURNING_PLAYER_MANAGER:GetIntroCampaignDisplayName()
-            return zo_strformat(SI_RETURNING_PLAYER_CAMPAIGN_NAME_FORMATTER, campaignDisplayName)
+            local campaignDisplayName = PROMOTIONAL_EVENT_PERSONAL_CAMPAIGN_MANAGER:GetCampaignDisplayName()
+            return zo_strformat(SI_PROMOTIONAL_EVENT_PERSONAL_CAMPAIGN_NAME_FORMATTER, campaignDisplayName)
         end,
         overrideNameColors = function()
             return ZO_PROMOTIONAL_EVENT_SELECTED_COLOR, ZO_PROMOTIONAL_EVENT_UNSELECTED_COLOR
@@ -262,8 +262,8 @@ local MENU_ENTRY_DATA =
             return ZO_PROMOTIONAL_EVENT_SELECTED_COLOR, ZO_PROMOTIONAL_EVENT_UNSELECTED_COLOR
         end,
         onSelectedCallback = function()
-            if MAIN_MENU_GAMEPAD:IsShowing() then
-                local campaignDisplayName = RETURNING_PLAYER_MANAGER:GetColorizedIntroCampaignDisplayName()
+            if MAIN_MENU_GAMEPAD:IsShowing() and IsReturningPlayer() then
+                local campaignDisplayName = PROMOTIONAL_EVENT_PERSONAL_CAMPAIGN_MANAGER:GetColorizedCampaignDisplayName()
                 local descriptionText = zo_strformat(SI_RETURNING_PLAYER_DAILY_LOGIN_REWARD_DESCRIPTION, campaignDisplayName)
 
                 GAMEPAD_TOOLTIPS:LayoutTitleAndDescriptionTooltip(GAMEPAD_LEFT_TOOLTIP, campaignDisplayName, descriptionText)
@@ -275,10 +275,10 @@ local MENU_ENTRY_DATA =
             end
         end,
         activatedCallback = function()
-            RETURNING_PLAYER_MANAGER:ShowReturningPlayerAnnouncementScreen()
+            PROMOTIONAL_EVENT_PERSONAL_CAMPAIGN_MANAGER:ShowAnnouncementScreen()
         end,
         isVisibleCallback = function()
-            return RETURNING_PLAYER_MANAGER:ShouldShowReturningPlayerAnnouncementEntry()
+            return PROMOTIONAL_EVENT_PERSONAL_CAMPAIGN_MANAGER:ShouldShowAnnouncementEntry()
         end,
         isNewCallback = function()
             return RETURNING_PLAYER_MANAGER:HasClaimableDailyReward()
@@ -528,7 +528,7 @@ local MENU_ENTRY_DATA =
                 name = GetString(SI_MAIN_MENU_MAIL),
                 icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_mail.dds",
                 isNewCallback = function()
-                    return HasUnreadMail()
+                    return MAIL_MANAGER:HasUnreadMail()
                 end,
                 disableWhenDead = true,
                 disableWhenInCombat = true,
@@ -908,13 +908,13 @@ function ZO_MainMenuManager_Gamepad:OnDeferredInitialize()
     SHARED_INVENTORY:RegisterCallback("FullInventoryUpdate", MarkNewnessDirty)
     SHARED_INVENTORY:RegisterCallback("SingleSlotInventoryUpdate", MarkNewnessDirty)
     EVENT_MANAGER:RegisterForEvent("mainMenuGamepad", EVENT_LEVEL_UPDATE, MarkNewnessDirty)
-    EVENT_MANAGER:RegisterForEvent("mainMenuGamepad", EVENT_MAIL_NUM_UNREAD_CHANGED, MarkNewnessDirty)
     GIFT_INVENTORY_MANAGER:RegisterCallback("GiftListsChanged", MarkNewnessDirty)
     EVENT_MANAGER:RegisterForEvent("mainMenuGamepad", EVENT_NEW_DAILY_LOGIN_REWARD_AVAILABLE, MarkNewnessDirty)
     EVENT_MANAGER:RegisterForEvent("mainMenuGamepad", EVENT_DAILY_LOGIN_REWARDS_CLAIMED, MarkNewnessDirty)
     PROMOTIONAL_EVENT_MANAGER:RegisterCallback("RewardsClaimed", MarkNewnessDirty)
     PROMOTIONAL_EVENT_MANAGER:RegisterCallback("CampaignSeenStateChanged", MarkNewnessDirty)
     PROMOTIONAL_EVENT_MANAGER:RegisterCallback("ActivityProgressUpdated", MarkNewnessDirty)
+    MAIL_MANAGER:RegisterCallback("NumUnreadMailChanged", MarkNewnessDirty)
 
     self:UpdateEntryEnabledStates()
 end

@@ -26,8 +26,8 @@ end
 
 function ZO_AdventureZoneEventTile_Shared:Layout(index)
     self.iconTexture:SetTexture(GetAdventureZoneEventLocationBackgroundFileIndex(index))
-    self.locationLabel:SetText(GetAdventureZoneEventLocationName(index))
-    self.titleLabel:SetText(GetAdventureZoneEventDisplayName(index))
+    self.locationLabel:SetText(zo_strformat(SI_ADVENTURE_ZONE_EVENT_FORMATTER, GetAdventureZoneEventLocationName(index)))
+    self.titleLabel:SetText(zo_strformat(SI_ADVENTURE_ZONE_EVENT_FORMATTER, GetAdventureZoneEventDisplayName(index)))
 
     local function UpdateTimer()
         if self.parentObject and self.parentObject:IsShowing() then

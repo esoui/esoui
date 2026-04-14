@@ -42,7 +42,7 @@
         </Button>
         <TopLevelControl name="ZO_TimedActivities_KeyboardTL" hidden="true">
             <Anchor point="CENTER"/>
-            <Dimensions x="1600" y="800"/>
+            <Dimensions x="1610" y="800"/>
             <OnInitialized>
                 ZO_TimedActivities_Keyboard.OnControlInitialized(self)
             </OnInitialized>
@@ -51,9 +51,12 @@
                     <AnchorFill/>
                 </Backdrop>
                 <Control name="$(parent)Tabs">
-                    <Anchor point="TOPLEFT" offsetY="10"/>
-                    <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMLEFT" offsetX="100" offsetY="-10"/>
+                    <Anchor point="TOPLEFT" offsetX="4" offsetY="4"/>
+                    <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMLEFT" offsetX="120" offsetY="-6"/>
                     <Controls>
+                        <Texture name="$(parent)Backdrop" color="30303040" excludeFromResizeToFitExtents="true">
+                            <AnchorFill/>
+                        </Texture>
                         <Button name="$(parent)WeeklyButton" inherits="ZO_TimedActivitiesKeyboard_TabButton">
                             <Anchor point="TOP" offsetY="64"/>
                             <Textures normal="EsoUI/Art/TamrielTomes/timedActivityCategory_weekly_up.dds" pressed="EsoUI/Art/TamrielTomes/timedActivityCategory_weekly_down.dds" mouseOver="EsoUI/Art/TamrielTomes/timedActivityCategory_weekly_over.dds"/>
@@ -76,18 +79,18 @@
                                 ClearTooltip(InformationTooltip)
                             </OnMouseExit>
                         </Button>
-                        <Control name="$(parent)Divider" inherits="ZO_PlatformStyleDynamicHorizontalDivider ZO_PlatformStyleDynamicHorizontalDivider_Keyboard_Template">
+                        <Texture name="$(parent)Divider" color="C6C39C">
                             <Anchor point="TOP" relativeTo="$(parent)SeasonalButton" relativePoint="BOTTOM" offsetY="24"/>
-                            <Dimensions x="90"/>
-                        </Control>
+                            <Dimensions x="108" y="2"/>
+                        </Texture>
                         <Label name="$(parent)CurrencyBalance" inherits="ZO_CurrencyTemplate" horizontalAlignment="CENTER">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)Divider" relativePoint="BOTTOMLEFT" offsetY="20"/>
-                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Divider" relativePoint="BOTTOMRIGHT" offsetY="20"/>
+                            <Anchor point="TOP" relativeTo="$(parent)Divider" relativePoint="BOTTOM" offsetY="20"/>
+                            <Dimensions x="110"/>
                         </Label>
                     </Controls>
                 </Control>
                 <Control name="$(parent)Content">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Tabs" relativePoint="TOPRIGHT" offsetX="10"/>
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Tabs" relativePoint="TOPRIGHT" offsetX="9"/>
                     <Anchor point="BOTTOMRIGHT" offsetX="-10" offsetY="-10"/>
                     <Controls>
                         <Control name="$(parent)Header">

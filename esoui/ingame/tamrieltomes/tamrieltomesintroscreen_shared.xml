@@ -31,7 +31,7 @@
                     <Anchor point="TOPRIGHT" relativePoint="TOP" offsetX="-70" offsetY="100"/>
                 </Label>
                 <Control name="$(parent)Image">
-                    <Dimensions x="770" y="435"/>
+                    <Dimensions x="768" y="384"/>
                     <Anchor point="TOP" relativeTo="$(parent)Title" relativePoint="BOTTOM" offsetX="-4" offsetY="60"/>
                     <Controls>
                         <Texture name="$(parent)Background" level="2" alpha="0.8">

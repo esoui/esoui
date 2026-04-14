@@ -28,6 +28,7 @@ function ZO_SkillsDataManager:Initialize()
     self.abilityIdToProgressionDataMap = {}
     self.skillLineDataInTrainingList = {}
     self.activeClassSkillLineDataList = {}
+    self.activeClassMasterySkillLineDataList = {}
 
     self:RegisterForEvents()
 
@@ -390,11 +391,20 @@ end
 
 function ZO_SkillsDataManager:RefreshActiveClassSkillLines()
     ZO_ClearNumericallyIndexedTable(self.activeClassSkillLineDataList)
+    ZO_ClearNumericallyIndexedTable(self.activeClassMasterySkillLineDataList)
+
+    local function IsNotClassMastery(object)
+        return not object:IsClassMastery()
+    end
 
     local skillTypeData = self:GetSkillTypeData(SKILL_TYPE_CLASS)
     -- ESO-914646: It's possible to have lines in Class that don't have a dedicated classId
-    for _, skillLineData in skillTypeData:SkillLineIterator({ ZO_ClassSkillLineData.HasClassId, ZO_ClassSkillLineData.IsActive }) do
+    for _, skillLineData in skillTypeData:SkillLineIterator({ ZO_ClassSkillLineData.HasClassId, ZO_ClassSkillLineData.IsActive, IsNotClassMastery }) do
         table.insert(self.activeClassSkillLineDataList, skillLineData)
+    end
+
+    for _, skillLineData in skillTypeData:SkillLineIterator({ ZO_ClassSkillLineData.HasClassId, ZO_ClassSkillLineData.IsActive, ZO_ClassSkillLineData.IsClassMastery }) do
+        table.insert(self.activeClassMasterySkillLineDataList, skillLineData)
     end
 end
 
@@ -406,6 +416,14 @@ function ZO_SkillsDataManager:GetActiveClassSkillLine(index)
     return self.activeClassSkillLineDataList[index]
 end
 
+function ZO_SkillsDataManager:GetNumActiveClassMasterySkillLines()
+    return #self.activeClassMasterySkillLineDataList
+end
+
+function ZO_SkillsDataManager:GetActiveClassMasterySkillLine(index)
+    return self.activeClassMasterySkillLineDataList[index]
+end
+
 function ZO_SkillsDataManager:GetNumPlayerClassActiveSkillLines()
     local numPlayerClassActiveSkillLines = 0
     for i, skillLineData in ipairs(self.activeClassSkillLineDataList) do
@@ -414,6 +432,19 @@ function ZO_SkillsDataManager:GetNumPlayerClassActiveSkillLines()
         end
     end
     return numPlayerClassActiveSkillLines
+end
+
+function ZO_SkillsDataManager:DeactivateClassMasterySkillLinesForRespec()
+    local numPlayerClassActiveSkillLines = self:GetNumPlayerClassActiveSkillLines()
+    if numPlayerClassActiveSkillLines == self:GetNumActiveClassSkillLines() then
+        for i = 1, self:GetNumActiveClassMasterySkillLines() do
+            local classMasterySkillLineData = self:GetActiveClassMasterySkillLine(i)
+            if classMasterySkillLineData:CanDeactivateForRespec() then
+                local SUPPRESS_CALLBACK = true
+                classMasterySkillLineData:DeactivateForRespec(SUPPRESS_CALLBACK)
+            end
+        end
+    end
 end
 
 function ZO_SkillsDataManager:GetFirstActiveSkillLineByClassId(classId)

@@ -67,6 +67,7 @@
                 <Texture name="$(parent)Spinner" textureFile="EsoUI/Art/LoadScreen/Keyboard/load_ourosboros.dds">
                     <Dimensions x="128" y="128"/>
                 </Texture>
+                <Label name="$(parent)Difficulty"/>
             </Controls>
         </Control>
     </Controls>

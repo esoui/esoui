@@ -249,6 +249,16 @@ function ZO_CreateAccount_Gamepad:SetupOptionsList()
     self.optionsList:AddDataTemplate("ZO_CheckBoxTemplate_Pregame_Gamepad", ZO_GamepadCheckBoxListEntryTemplate_Setup, ZO_GamepadMenuEntryTemplateParametricListFunction)
     self.optionsList:AddDataTemplate("ZO_PregameGamepadButtonWithTextTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
 
+    local function RefreshTooltip()
+        if self.autoEmailSubscribe then
+            GAMEPAD_TOOLTIPS:LayoutTextBlockTooltip(GAMEPAD_LEFT_TOOLTIP, GetString(SI_CREATEACCOUNT_EMAIL_SIGNUP_INFO))
+        else
+            GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
+        end
+    end
+
+    self.optionsList:SetOnSelectedDataChangedCallback(RefreshTooltip)
+
     local function SetupCountrySelector(control, data, selected, reselectingDuringRebuild, enabled, active)
         ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
         if self.comboControl ~= control then

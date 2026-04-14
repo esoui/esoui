@@ -18,7 +18,7 @@
         </Control>
         <TopLevelControl name="ZO_ReturningPlayerIntro_GamepadTL" inherits="ZO_ReturningPlayerIntro_SharedTL">
             <Anchor point="RIGHT" relativeTo="GuiRoot" offsetX="ZO_RETURNING_PLAYER_INTRO_PANEL_RIGHT_OFFSET_GAMEPAD"/>
-            <Dimensions x="970" y="645"/>
+            <Dimensions x="1116" y="718"/>
             <OnInitialized>
                 ZO_ReturningPlayerIntroScreen_Gamepad.OnControlInitialized(self)
             </OnInitialized>
@@ -46,9 +46,12 @@
                 </Control>
                 <Label name="$(parent)BodyText" override="true" font="ZoFontGamepad34"/>
                 <Control name="$(parent)GameplayInfo" override="true">
+                    <Dimensions x="1016" y="508"/>
                     <Controls>
                         <Label name="$(parent)Title" override="true" font="ZoFontGamepad34"/>
-                        <Label name="$(parent)Description" override="true" font="ZoFontGamepad34"/>
+                        <Label name="$(parent)Description" override="true" font="ZoFontGamepadCondensed34">
+                            <Dimensions x="550"/>
+                        </Label>
                         <Control name="$(parent)Rewards" override="true" inherits="ZO_GridScrollList_NotAnchored_Gamepad">
                             <Dimensions x="ZO_RETURNING_PLAYER_INTRO_REWARD_GRID_WIDTH_GAMEPAD" y="ZO_RETURNING_PLAYER_INTRO_REWARD_GRID_HEIGHT_GAMEPAD"/>
                         </Control>

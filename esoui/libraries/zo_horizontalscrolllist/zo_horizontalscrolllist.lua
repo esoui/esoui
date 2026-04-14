@@ -1,4 +1,4 @@
-ZO_HorizontalScrollList = ZO_Object:Subclass()
+ZO_HorizontalScrollList = ZO_InitializingObject:Subclass()
 
 ZO_HORIZONTALSCROLLLIST_MOVEMENT_TYPES = 
 {
@@ -23,12 +23,6 @@ function ZO_HorizontalScrollListPlaySound(type)
 end
 
 --[[ Public  API ]]--
-function ZO_HorizontalScrollList:New(...)
-    local horizontalScrollList = ZO_Object.New(self)
-    horizontalScrollList:Initialize(...)
-    return horizontalScrollList
-end
-
 local function DefaultEqualityFunction(leftData, rightData)
     return leftData == rightData
 end

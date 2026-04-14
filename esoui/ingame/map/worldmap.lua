@@ -143,6 +143,7 @@ local g_mapScale = 1
 local g_dataRegistration
 local g_cyrodiilMapIndex
 local g_imperialCityMapIndex
+local g_jerallPassMapIndex
 
 local g_mapDragX
 local g_mapDragY
@@ -522,7 +523,7 @@ do
         linkPool:ReleaseAllObjects()
         g_mapPinManager:RemovePins("restrictedLink")
 
-        if GetMapFilterType() ~= MAP_FILTER_TYPE_AVA_CYRODIIL or GetCurrentMapIndex() ~= g_cyrodiilMapIndex then
+        if GetMapFilterType() ~= MAP_FILTER_TYPE_AVA_CYRODIIL or (GetCurrentMapIndex() ~= g_cyrodiilMapIndex and GetCurrentMapIndex() ~= g_jerallPassMapIndex) then
             return
         end
 
@@ -2812,6 +2813,7 @@ function ZO_WorldMap_ShowKeepOnMap(keepId)
         return
     end
 
+    -- TODO Vengeance: Address this for Jerall Pass
     if g_cyrodiilMapIndex == nil then
         return
     end
@@ -3780,6 +3782,7 @@ do
             if addOnName == "ZO_Ingame" then
                 g_cyrodiilMapIndex = GetCyrodiilMapIndex()
                 g_imperialCityMapIndex = GetImperialCityMapIndex()
+                g_jerallPassMapIndex = GetJerallPassMapIndex()
 
                 local defaults = GetSavedVarDefaults()
                 g_savedVars = ZO_SavedVars:New("ZO_Ingame_SavedVariables", 4, "WorldMap", defaults)
@@ -5348,10 +5351,16 @@ function ZO_WorldMapManager:FindAvAKeepMap()
     local desiredMap
     local mode = self:GetMode()
     if mode == MAP_MODE_KEEP_TRAVEL or mode == MAP_MODE_AVA_KEEP_RECALL then
-        desiredMap = g_cyrodiilMapIndex
+        if IsInJerallPass() then
+            desiredMap = g_jerallPassMapIndex
+        else
+            desiredMap = g_cyrodiilMapIndex
+        end
     elseif mode == MAP_MODE_AVA_RESPAWN then
         if IsInImperialCity() then
             desiredMap = g_imperialCityMapIndex
+        elseif IsInJerallPass() then
+            desiredMap = g_jerallPassMapIndex
         else
             desiredMap = g_cyrodiilMapIndex
         end

@@ -108,10 +108,10 @@
                 self.declineText = GetString(SI_GAMEPAD_NOTIFICATIONS_DELETE_OPTION)
             </OnInitialized>
         </Control>
-        <Control name="ZO_GamepadNotificationsSpectacleEventUpdateRow" inherits="ZO_GamepadNotificationsBaseRow" virtual="true">
+        <Control name="ZO_GamepadNotificationsViewDismissRow" inherits="ZO_GamepadNotificationsBaseRow" virtual="true">
             <OnInitialized>
-                self.acceptText = GetString(SI_SPECTACLE_EVENTS_NOTIFICATION_VIEW)
-                self.declineText = GetString(SI_SPECTACLE_EVENTS_NOTIFICATION_DISMISS)
+                self.acceptText = GetString(SI_NOTIFICATIONS_VIEW)
+                self.declineText = GetString(SI_NOTIFICATIONS_DISMISS)
             </OnInitialized>
         </Control>
         <TopLevelControl name="ZO_GamepadNotifications" hidden="true" inherits="ZO_Gamepad_ParametricList_Screen">

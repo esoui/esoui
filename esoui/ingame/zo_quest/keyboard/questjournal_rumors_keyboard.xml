@@ -1,0 +1,168 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_QuestJournal_RumorNavigationEntry" inherits="ZO_SelectableTooltipIfTruncatedLabel" font="ZoFontHeader" virtual="true" verticalAlignment="CENTER">
+            <Dimensions x="220" y="22"/>
+            <OnMouseUp>
+                ZO_TreeEntry_OnMouseUp(self, upInside)
+            </OnMouseUp>
+        </Label>
+        <Control name="ZO_QuestJournal_RumorListEntry" inherits="ZO_ListEntry_BackdropAndHighlight_Template" mouseEnabled="true" virtual="true">
+            <Dimensions x="534" y="ZO_QUEST_JOURNAL_RUMOR_ENTRY_HEIGHT_KEYBOARD"/>
+            <OnMouseEnter>
+                ZO_QuestJournal_Rumors_Keyboard.OnMouseEnterRumorEntry(...)
+            </OnMouseEnter>
+            <OnMouseExit>
+                ZO_QuestJournal_Rumors_Keyboard.OnMouseExitRumorEntry(...)
+            </OnMouseExit>
+            <OnMouseUp>
+                ZO_QuestJournal_Rumors_Keyboard.OnMouseClickRumorEntry(...)
+            </OnMouseUp>
+            <Controls>
+                <Label name="$(parent)Name" font="ZoFontGameShadow" maxLineCount="2" wrapMode="ELLIPSIS">
+                    <Anchor point="LEFT" offsetX="60"/>
+                    <Anchor point="RIGHT" offsetX="-60"/>
+                </Label>
+            </Controls>
+        </Control>
+        <Control name="ZO_QuestJournal_RumorClueEntry" mouseEnabled="true" resizeToFitDescendents="true" virtual="true">
+            <DimensionConstraints maxX="100%" minY="32" maxY="64"/>
+            <OnInitialized>
+                ZO_QuestJournal_Rumors_Keyboard.OnInitializeClueEntry(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)Name" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" maxLineCount="2" wrapMode="ELLIPSIS">
+                    <DimensionConstraints maxX="360"/>
+                    <Anchor point="LEFT" offsetX="20"/>
+                </Label>
+                <Texture name="$(parent)Bullet" inherits="ZO_Bullet">
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Name" relativePoint="TOPLEFT" offsetX="-4" offsetY="4"/>
+                </Texture>
+                <Texture name="$(parent)Icon">
+                    <Dimensions x="32" y="32"/>
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="TOPRIGHT" offsetX="4" offsetY="-4"/>
+                </Texture>
+                <Button name="$(parent)OpenBook" mouseOverBlendMode="ADD" mouseEnabled="false" hidden="true">
+                    <Dimensions x="32" y="32"/>
+                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="4"/>
+                    <Textures normal="EsoUI/Art/Journal/journal_tabIcon_loreLibrary_up.dds" pressed="EsoUI/Art/Journal/journal_tabIcon_loreLibrary_down.dds" mouseOver="EsoUI/Art/Journal/journal_tabIcon_loreLibrary_over.dds"/>
+                </Button>
+            </Controls>
+        </Control>
+        <Control name="ZO_QuestJournal_RumorsPanel_Keyboard" inherits="ZO_RightPanelFootPrint" virtual="true">
+            <Controls>
+                <Label name="$(parent)RumorCount" font="ZoFontHeader3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPLEFT" offsetX="5" offsetY="7"/>
+                </Label>
+                <Control name="$(parent)Main">
+                    <AnchorFill/>
+                    <Controls>
+                        <Control name="$(parent)NavigationContainer" inherits="ZO_ScrollContainer">
+                            <Dimensions x="335"/>
+                            <Anchor point="TOPLEFT" relativeTo="$(grandparent)RumorCount" relativePoint="BOTTOMLEFT" offsetY="5"/>
+                            <Anchor point="BOTTOMLEFT"/>
+                        </Control>
+                        <Label name="$(parent)EmptyText" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" hidden="true">
+                            <Dimensions x="500"/>
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)NavigationContainer" relativePoint="TOPRIGHT" offsetX="10" offsetY="60"/>
+                        </Label>
+                        <Control name="$(parent)RumorListContainer" hidden="true">
+                            <Dimensions x="550"/>
+                            <Anchor point="TOPRIGHT" offsetX="-33" offsetY="70"/>
+                            <Anchor point="BOTTOMRIGHT" offsetX="-33" offsetY="50"/>
+                            <Controls>
+                                <Label name="$(parent)Description" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_QUEST_JOURNAL_RUMORS_ACTIVE_RUMORS_DESCRIPTION">
+                                    <Anchor point="TOPLEFT" offsetX="60"/>
+                                    <Anchor point="TOPRIGHT" offsetX="-76"/>
+                                </Label>
+                                <Control name="$(parent)List" inherits="ZO_ScrollList">
+                                    <Dimensions x="550"/>
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Description" relativePoint="BOTTOMLEFT" constrains="Y" offsetY="20"/>
+                                    <Anchor point="BOTTOMRIGHT"/>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+                <Control name="$(parent)Details" hidden="true">
+                    <AnchorFill/>
+                    <Controls>
+                        <Control name="$(parent)BackLabel" inherits="ZO_IconHeader" level="1">
+                            <Anchor point="TOPLEFT" relativeTo="$(grandparent)RumorCount" relativePoint="BOTTOMLEFT" offsetY="5"/>
+                            <Anchor point="BOTTOMLEFT"/>
+                            <Controls>
+                                <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Buttons/large_leftArrow_down.dds" override="true">
+                                    <Controls>
+                                        <Texture name="$(parent)Highlight" textureFile="EsoUI/Art/Buttons/large_leftArrow_over.dds" override="true"/>
+                                    </Controls>
+                                </Texture>
+                                <Label name="$(parent)Text" text="SI_QUEST_JOURNAL_RUMORS_BACK_ACTION" override="true"/>
+                            </Controls>
+                        </Control>
+                        <Label name="$(parent)Title" font="ZoFontWinH2" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                            <Dimensions x="500"/>
+                            <Anchor point="TOPRIGHT" offsetX="-83" offsetY="60"/>
+                        </Label>
+                        <Control name="$(parent)RumorInfoContainer" inherits="ZO_ScrollContainer">
+                            <Dimensions x="550"/>
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetY="15" constrains="Y"/>
+                            <Anchor point="BOTTOMRIGHT" relativePoint="RIGHT" offsetX="-33" offsetY="50"/>
+                            <Controls>
+                                <Control name="$(parent)Scroll" override="true">
+                                    <Controls>
+                                        <Control name="$(parent)Child" override="true">
+                                            <Controls>
+                                                <Label name="$(parent)BGTitle" text="SI_QUEST_JOURNAL_RUMORS_HEARSAY" font="ZoFontWinH3" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                                                    <Dimensions x="488"/>
+                                                    <Anchor point="TOPLEFT"/>
+                                                </Label>
+                                                <Label name="$(parent)BGText" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                                                    <Anchor point="TOPLEFT" relativeTo="$(parent)BGTitle" relativePoint="BOTTOMLEFT" offsetX="25" offsetY="10"/>
+                                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)BGTitle" relativePoint="BOTTOMRIGHT" offsetY="10"/>
+                                                </Label>
+                                                <Label name="$(parent)OutcomeTitle" text="SI_QUEST_JOURNAL_RUMORS_OUTCOME" font="ZoFontWinH3" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" hidden="true">
+                                                    <Dimensions x="488"/>
+                                                    <Anchor point="TOPLEFT"/>
+                                                </Label>
+                                                <Label name="$(parent)OutcomeText" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" hidden="true">
+                                                    <Anchor point="TOPLEFT" relativeTo="$(parent)OutcomeTitle" relativePoint="BOTTOMLEFT" offsetX="25" offsetY="10"/>
+                                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)OutcomeTitle" relativePoint="BOTTOMRIGHT" offsetY="10"/>
+                                                </Label>
+                                            </Controls>
+                                        </Control>
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Control>
+                        <Texture name="$(parent)Divider" textureFile="EsoUI/Art/Quest/questJournal_divider.dds">
+                            <Dimensions x="512" y="4"/>
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)RumorInfoContainer" relativePoint="BOTTOMLEFT" offsetY="5"/>
+                        </Texture>
+                        <Control name="$(parent)RumorClueContainer" inherits="ZO_ScrollContainer">
+                            <Dimensions x="550"/>
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Divider" relativePoint="BOTTOMLEFT" offsetY="10"/>
+                            <Anchor point="BOTTOMRIGHT" offsetX="-33" offsetY="-25"/>
+                            <Controls>
+                                <Control name="$(parent)Scroll" override="true">
+                                    <Controls>
+                                        <Control name="$(parent)Child" override="true">
+                                            <Controls>
+                                                <Label name="$(parent)CluesText" text="SI_QUEST_JOURNAL_RUMORS_CLUES" font="ZoFontWinH3" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                                                    <Dimensions x="500"/>
+                                                    <Anchor point="TOPLEFT"/>
+                                                </Label>
+                                                <Control name="$(parent)ClueListContainer" resizeToFitConstrains="Y">
+                                                    <Anchor point="TOPLEFT" relativeTo="$(parent)CluesText" relativePoint="BOTTOMLEFT" offsetX="25" offsetY="10"/>
+                                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)CluesText" relativePoint="BOTTOMRIGHT" offsetY="10"/>
+                                                </Control>
+                                            </Controls>
+                                        </Control>
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

@@ -531,7 +531,7 @@ function ZO_GameStartup_Gamepad:InitializeKeybindDescriptor()
                 ShowXboxAccountPicker()
             end,
             visible = function()
-                return ZO_IsConsoleOrGameCoreUI() and not self.profileSaveInProgress
+                return (GetUIPlatform() == UI_PLATFORM_XBOX or IsGameCoreUI()) and not self.profileSaveInProgress
             end,
         },
 

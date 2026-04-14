@@ -46,6 +46,10 @@ function ZO_GamepadMultiFocusArea_Base:UpdateKeybinds()
     end
 end
 
+function ZO_GamepadMultiFocusArea_Base:IsActive()
+    return self.active
+end
+
 function ZO_GamepadMultiFocusArea_Base:Activate()
     if not self.active then
         self.active = true
@@ -72,6 +76,14 @@ function ZO_GamepadMultiFocusArea_Base:Deactivate()
             self.deactivateCallback()
         end
     end
+end
+
+function ZO_GamepadMultiFocusArea_Base:GetAdditionalInputNarrationFunction()
+    return nil
+end
+
+function ZO_GamepadMultiFocusArea_Base:GetFooterNarration()
+    return nil
 end
 
 function ZO_GamepadMultiFocusArea_Base:HandleMovement(horizontalResult, verticalResult)

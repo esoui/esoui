@@ -72,16 +72,16 @@ function ZO_ReturningPlayerIntroScreen_Gamepad:OnGridListSelectedDataChanged(pre
 end
 
 function ZO_ReturningPlayerIntroScreen_Gamepad:GetPrimaryKeybindName()
-    local activityName = GetReturningPlayerIntroGameplayDisplayName()
-    return zo_strformat(SI_RETURNING_PLAYER_ENTER_GAMEPLAY_EXPERIENCE_ACTION, activityName)
+    local activityName = GetIntroGameplayExperienceDisplayName()
+    return zo_strformat(SI_ENTER_INTRO_GAMEPLAY_EXPERIENCE_ACTION, activityName)
 end
 
 function ZO_ReturningPlayerIntroScreen_Gamepad:ShouldShowPrimaryKeybind()
-    return RETURNING_PLAYER_MANAGER:CanJumpToIntroGameplay()
+    return PROMOTIONAL_EVENT_PERSONAL_CAMPAIGN_MANAGER:CanJumpToIntroGameplay()
 end
 
 function ZO_ReturningPlayerIntroScreen_Gamepad:OnPrimaryKeyPressed()
-    PlaySound(SOUNDS.RETURNING_PLAYER_ENTER_INTRO_GAMEPLAY)
+    PlaySound(SOUNDS.ENTER_INTRO_GAMEPLAY_EXPERIENCE)
     self:RequestJumpToIntroGameplay()
 end
 

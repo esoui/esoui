@@ -458,7 +458,7 @@ function ZO_GroupFinder_Gamepad:OnShowing()
 end
 
 function ZO_GroupFinder_Gamepad:OnShow()
-    HandleReturningPlayerUISystemShown(UI_SYSTEM_GROUP_FINDER)
+    HandleUISystemShown(UI_SYSTEM_GROUP_FINDER)
 end
 
 function ZO_GroupFinder_Gamepad:OnHide()

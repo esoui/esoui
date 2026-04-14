@@ -99,7 +99,7 @@ function ZO_GroupList_Keyboard:InitializeKeybindDescriptors()
             end,
             visible = function()
                 local playerIsGrouped, playerIsLeader, groupSize = ZO_ACTIVITY_FINDER_ROOT_MANAGER:GetGroupStatus()
-                return IsGroupModificationAvailable() and (not playerIsGrouped or (playerIsLeader and groupSize < MAX_GROUP_SIZE_THRESHOLD))
+                return IsGroupModificationAvailable() and (not playerIsGrouped or (playerIsLeader and groupSize < GetGroupMaxSize()))
             end
         },
         -- Whisper

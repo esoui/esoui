@@ -114,6 +114,15 @@ function ZO_Dialogs_IsDialogHiding(nameOrDialog)
     return dialog and dialog.hiding
 end
 
+-- When a gamepad dialog hides, it animates. During the animation, showing is still true but hiding is also true.
+-- This is probably not the way it should be, but changing it is likely too risky at this point.
+-- Use this when you want to ensure you only do logic when the dialog is showing and isn't about to be hidden.
+function ZO_Dialogs_IsDialogShowingAndNotHiding(nameOrDialog)
+    if ZO_Dialogs_IsShowing(nameOrDialog) then
+        return not g_displayedDialog.dialog.hiding
+    end
+end
+
 function ZO_Dialogs_IsShowingDialogThatShouldShowTooltip()
     local displayedDialog = GetDisplayedDialog()
     if not displayedDialog then

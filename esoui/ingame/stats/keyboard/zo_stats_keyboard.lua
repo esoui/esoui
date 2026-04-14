@@ -221,7 +221,7 @@ function ZO_Stats:OnShowing()
 end
 
 function ZO_Stats:OnShown()
-    HandleReturningPlayerUISystemShown(UI_SYSTEM_CHARACTER_STATS)
+    HandleUISystemShown(UI_SYSTEM_CHARACTER_STATS)
 end
 
 function ZO_Stats:OnHiding()
@@ -1180,9 +1180,11 @@ end
 function ZO_Stats:UpdateLevelUpRewards()
     if STATS_SCENE:IsShowing() then
         if HasPendingLevelUpReward() then
+            ZO_CHALLENGE_DIFFICULTY_KEYBOARD:Hide()
             ZO_KEYBOARD_UPCOMING_LEVEL_UP_REWARDS:Hide()
             ZO_KEYBOARD_CLAIM_LEVEL_UP_REWARDS:Show()
         elseif HasUpcomingLevelUpReward() then
+            ZO_CHALLENGE_DIFFICULTY_KEYBOARD:Hide()
             local wasClaimShowing = ZO_KEYBOARD_CLAIM_LEVEL_UP_REWARDS:IsShowing()
             ZO_KEYBOARD_CLAIM_LEVEL_UP_REWARDS:Hide()
             local fadeInUpcomingContents = wasClaimShowing
@@ -1190,6 +1192,7 @@ function ZO_Stats:UpdateLevelUpRewards()
         else
             ZO_KEYBOARD_CLAIM_LEVEL_UP_REWARDS:Hide()
             ZO_KEYBOARD_UPCOMING_LEVEL_UP_REWARDS:Hide()
+            ZO_CHALLENGE_DIFFICULTY_KEYBOARD:Show()
         end
 
         KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindButtons)

@@ -89,7 +89,7 @@ local function InitializeKeyboardMorphDialog()
 
             morphAbility2.skillProgressionData = morph2ProgressionData
             morphAbility2.icon:SetTexture(morph2ProgressionData:GetIcon())
-            ZO_Skills_SetKeyboardAbilityButtonTextures(morphAbility2) 
+            ZO_Skills_SetKeyboardAbilityButtonTextures(morphAbility2)
             morphAbility2.showAdvice = true
             morphAbility2.advised = ZO_SKILLS_ADVISOR_SINGLETON:IsSkillProgressionDataInSelectedBuild(morph2ProgressionData)
 
@@ -111,7 +111,12 @@ local function InitializeKeyboardMorphDialog()
                 morphAbility2.showAdvice = false
             end
 
-            dialog.warning:SetText(zo_strformat(SI_SKILLS_IMPROVEMENT_COST, skillData:GetSkillPointCostMultiplier()))
+            local skillLineData = skillData:GetSkillLineData()
+            if skillLineData:IsClassMastery() then
+                dialog.warning:SetText(zo_strformat(SI_SKILLS_CLASS_MASTERY_COST, skillLineData:GetClassMasteryCost()))
+            else
+                dialog.warning:SetText(zo_strformat(SI_SKILLS_IMPROVEMENT_COST, skillData:GetSkillPointCostMultiplier()))
+            end
         end
     end
 
@@ -164,7 +169,12 @@ local function InitializeKeyboardConfirmDialog()
             dialogAbility.icon:SetTexture(skillProgressionData:GetIcon())
             ZO_Skills_SetKeyboardAbilityButtonTextures(dialogAbility)
 
-            dialog.warning:SetText(zo_strformat(SI_SKILLS_IMPROVEMENT_COST, skillData:GetSkillPointCostMultiplier()))
+            local skillLineData = skillData:GetSkillLineData()
+            if skillLineData:IsClassMastery() then
+                dialog.warning:SetText(zo_strformat(SI_SKILLS_CLASS_MASTERY_COST, skillLineData:GetClassMasteryCost()))
+            else
+                dialog.warning:SetText(zo_strformat(SI_SKILLS_IMPROVEMENT_COST, skillData:GetSkillPointCostMultiplier()))
+            end
 
             local hideAdvisement = (not ZO_SKILLS_ADVISOR_SINGLETON:CanUseSkillsAdvisor()) or ZO_SKILLS_ADVISOR_SINGLETON:IsAdvancedModeSelected() or (not skillProgressionData:IsAdvised())
             dialog.advisementLabel:SetHidden(hideAdvisement)
@@ -236,7 +246,12 @@ local function InitializeKeyboardUpgradeDialog()
             upgradeAbility.icon:SetTexture(nextSkillProgressionData:GetIcon())
             ZO_Skills_SetKeyboardAbilityButtonTextures(upgradeAbility)
 
-            dialog.warning:SetText(zo_strformat(SI_SKILLS_IMPROVEMENT_COST, skillData:GetSkillPointCostMultiplier()))
+            local skillLineData = skillData:GetSkillLineData()
+            if skillLineData:IsClassMastery() then
+                dialog.warning:SetText(zo_strformat(SI_SKILLS_CLASS_MASTERY_COST, skillLineData:GetClassMasteryCost()))
+            else
+                dialog.warning:SetText(zo_strformat(SI_SKILLS_IMPROVEMENT_COST, skillData:GetSkillPointCostMultiplier()))
+            end
 
             local hideAdvisement = (not ZO_SKILLS_ADVISOR_SINGLETON:CanUseSkillsAdvisor()) or ZO_SKILLS_ADVISOR_SINGLETON:IsAdvancedModeSelected() or (not skillProgressionData:IsAdvised())
             advisementLabel:SetHidden(hideAdvisement)
@@ -530,6 +545,7 @@ function ZO_SkillsManager:InitializeControls()
     self.skyShardsLabel = control:GetNamedChild("SkyShards")
     self.advisedOverlay = ZO_Skills_SkillLineAdvisedOverlay:New(control:GetNamedChild("SkillLineAdvisedOverlay"))
     self.skillInfo = control:GetNamedChild("SkillInfo")
+    self.classMasteryLabel = control:GetNamedChild("ClassMasteryPoints")
     self.assignableActionBar = ZO_KeyboardAssignableActionBar:New(control:GetNamedChild("AssignableActionBar"))
 end
 
@@ -614,6 +630,35 @@ function ZO_SkillsManager:InitializeSkillLineList()
             node.control:SetHandler("OnMouseEnter", OnMouseEnter)
             node.control:SetHandler("OnMouseExit", OnMouseExit)
         else
+            if skillLineData:IsClassMastery() then
+                local isEnabled = SKILLS_DATA_MANAGER:GetNumPlayerClassActiveSkillLines() == SKILLS_DATA_MANAGER:GetNumActiveClassSkillLines()
+                node:SetEnabled(isEnabled)
+                node.control:SetEnabled(isEnabled)
+
+                if not isEnabled then
+                    local OnMouseEnter = function(control)
+                        ZO_SelectableLabel_OnMouseEnter(control)
+
+                        InitializeTooltip(InformationTooltip, control, RIGHT, -10)
+
+                        local SET_TO_FULL_SIZE = true
+                        local normalR, normalG, normalB = ZO_NORMAL_TEXT:UnpackRGB()
+                        InformationTooltip:AddLine(GetString(SI_SKILLS_CLASS_MASTERY_DISABLED_DESCRIPTION), "", normalR, normalG, normalB, LEFT, MODIFY_TEXT_TYPE_NONE, TEXT_ALIGN_LEFT, SET_TO_FULL_SIZE)
+                    end
+
+                    local OnMouseExit = function(control)
+                        ZO_SelectableLabel_OnMouseExit(control)
+                        ClearTooltip(InformationTooltip)
+                    end
+
+                    node.control:SetHandler("OnMouseEnter", OnMouseEnter)
+                    node.control:SetHandler("OnMouseExit", OnMouseExit)
+                else
+                    node.control:SetHandler("OnMouseEnter", ZO_SelectableLabel_OnMouseEnter)
+                    node.control:SetHandler("OnMouseExit", ZO_SelectableLabel_OnMouseExit)
+                end
+            end
+
             if SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeBatchSave() then
                 control:SetText(skillLineData:GetFormattedNameWithNumPointsAllocated())
             else
@@ -943,7 +988,7 @@ function ZO_SkillsManager:RegisterForEvents()
     local function OnSkillLineUpdated(skillLineData)
         if skillLineData == self:GetSelectedSkillLineData() then
             self:RefreshSkillLineInfo()
-            self.skillListRefreshGroup:MarkDirty("Visible")
+            self.skillListRefreshGroup:MarkDirty("List")
         end
     end
 
@@ -972,6 +1017,7 @@ function ZO_SkillsManager:RegisterForEvents()
         end
 
         self:RefreshSkillPointInfo()
+        self:RefreshSkillLineInfo()
         self.skillListRefreshGroup:MarkDirty("Visible")
     end
 
@@ -1350,11 +1396,24 @@ end
 
 function ZO_SkillsManager:RefreshSkillLineInfo(forceInit)
     local skillLineData = self:GetSelectedSkillLineData()
-    if skillLineData and not skillLineData.isSubclassingNode then
+    if skillLineData and not skillLineData.isSubclassingNode and not skillLineData:IsClassMastery() then
+        self.classMasteryLabel:SetHidden(true)
+        self.availablePointsLabel:SetHidden(false)
+        self.skyShardsLabel:SetHidden(false)
         self.skillInfo:SetHidden(false)
         ZO_SkillLineInfo_Keyboard_Refresh(self.skillInfo, skillLineData, forceInit)
     else
         self.skillInfo:SetHidden(true)
+        if skillLineData and skillLineData.IsClassMastery and skillLineData:IsClassMastery() then
+            self.availablePointsLabel:SetHidden(true)
+            self.skyShardsLabel:SetHidden(true)
+            self.classMasteryLabel:SetText(zo_strformat(SI_SKILLS_CLASS_MASTERY_NUM_POINTS, ZO_SELECTED_TEXT:Colorize(SKILL_POINT_ALLOCATION_MANAGER:GetAvailableClassMasteryPointsForSkillLine(skillLineData))))
+            self.classMasteryLabel:SetHidden(false)
+        else
+            self.classMasteryLabel:SetHidden(true)
+            self.availablePointsLabel:SetHidden(false)
+            self.skyShardsLabel:SetHidden(false)
+        end
     end
 end
 
@@ -1400,9 +1459,14 @@ end
 function ZO_SkillsManager:RefreshSkillLineDisplay(skillLineData)
     if skillLineData.isSubclassingNode then
         self.skillList:SetHidden(true)
+        self.advisedOverlay:Hide()
+        self.skillList:SetAlpha(1)
     else
         self.skillList:SetHidden(false)
-        if not skillLineData:IsAvailable() and skillLineData:IsAdvised() then
+        if (not skillLineData:IsAvailable() and skillLineData:IsAdvised())
+            or (skillLineData:IsClassMastery()
+                and HasMaxRankInAnyClassSkillLine()
+                and not HasMaxRankInAllClassSkillLines()) then
             self:StopSelectedSkillBuildSkillAnimations()
             self.advisedOverlay:Show(skillLineData)
             self.skillList:SetAlpha(0.1)
@@ -1442,7 +1506,7 @@ do
                 local node = self.skillLinesTree:AddNode("ZO_SkillsNavigationEntry", skillLineData, parent)
                 self.skillLineIdToNode[skillLineData:GetId()] = node
             end
-            if skillTypeData.skillType == SKILL_TYPE_CLASS then
+            if skillTypeData.skillType == SKILL_TYPE_CLASS and not IsCurrentCampaignVengeanceRuleset() then
                 local subclassingData =
                 {
                     isSubclassingNode = true
@@ -1493,7 +1557,7 @@ function ZO_SkillsManager:OnShown()
         TriggerTutorial(TUTORIAL_TRIGGER_WEAPON_SWAP_SHOWN_IN_SKILLS_AFTER_UNLOCK_POINTER_BOX)
     end
 
-    HandleReturningPlayerUISystemShown(UI_SYSTEM_SKILLS)
+    HandleUISystemShown(UI_SYSTEM_SKILLS)
 end
 
 function ZO_SkillsManager:OnHidden()

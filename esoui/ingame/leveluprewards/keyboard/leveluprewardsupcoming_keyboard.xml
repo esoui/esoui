@@ -50,6 +50,31 @@
                 <Label name="$(parent)Title" font="ZoFontHeader4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" text="SI_LEVEL_UP_REWARDS_UPCOMING_REWARDS_HEADER">
                     <Anchor point="BOTTOMLEFT" relativeTo="$(parent)TitleDivider" relativePoint="TOPLEFT" offsetY="2" offsetX="32"/>
                 </Label>
+                <Button name="$(parent)GoToDifficultyButton" inherits="ZO_DefaultButton">
+                    <Dimensions x="48" y="48"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)TitleDivider" relativePoint="TOPRIGHT"/>
+                    <Textures normal="EsoUI/Art/ChallengeDifficulty/goToDifficultyButton_normal.dds" pressed="EsoUI/Art/ChallengeDifficulty/goToDifficultyButton_mouseDown.dds" mouseOver="EsoUI/Art/ChallengeDifficulty/goToDifficultyButton_mouseOver.dds" disabled="EsoUI/Art/ChallengeDifficulty/goToDifficultyButton_disabled.dds"/>
+                    <OnClicked>
+                        ZO_LevelUpRewardsUpcoming_Keyboard.OnGoToDifficultyButtonClicked()
+                    </OnClicked>
+                    <OnMouseEnter>
+                        ZO_LevelUpRewardsUpcoming_Keyboard.OnGoToDifficultyButtonMouseEnter(self)
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ZO_LevelUpRewardsUpcoming_Keyboard.OnTabButtonMouseExit(self)
+                    </OnMouseExit>
+                </Button>
+                <Button name="$(parent)GoToLevelUpRewardsButton" inherits="ZO_DefaultButton">
+                    <Dimensions x="48" y="48"/>
+                    <Anchor point="RIGHT" relativeTo="$(parent)GoToDifficultyButton" relativePoint="LEFT" offsetX="-10"/>
+                    <Textures normal="EsoUI/Art/ChallengeDifficulty/goToLevelUpRewardsButton_normal.dds" pressed="EsoUI/Art/ChallengeDifficulty/goToLevelUpRewardsButton_mouseDown.dds" mouseOver="EsoUI/Art/ChallengeDifficulty/goToLevelUpRewardsButton_mouseOver.dds" disabled="EsoUI/Art/ChallengeDifficulty/goToLevelUpRewardsButton_disabled.dds"/>
+                    <OnMouseEnter>
+                        ZO_LevelUpRewardsUpcoming_Keyboard.OnGoToLevelUpRewardsButtonMouseEnter(self)
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ZO_LevelUpRewardsUpcoming_Keyboard.OnTabButtonMouseExit(self)
+                    </OnMouseExit>
+                </Button>
                 <Control name="$(parent)ScrollContainer" inherits="ZO_ScrollContainer">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)TitleDivider" relativePoint="BOTTOMLEFT" offsetX="32" offsetY="8"/>
                     <Anchor point="BOTTOMLEFT" offsetX="32"/>

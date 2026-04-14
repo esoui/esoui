@@ -106,6 +106,9 @@ function ZO_ComboBox_Gamepad:GetDropdownWidthOffset()
 end
 
 function ZO_ComboBox_Gamepad:AddMenuItems()
+    --Order matters: Do this anchoring first so that the calculations have accurate information in SetupMenuItemControl
+    self.m_dropdown:AnchorToControl(self.m_container, self.m_dropdownWidthOffset, 0)
+
     for i = 1, #self.m_sortedItems do
         -- The variable item must be defined locally here, otherwise it won't work as an upvalue to the selection helper
         local item = self.m_sortedItems[i]
@@ -125,8 +128,6 @@ function ZO_ComboBox_Gamepad:AddMenuItems()
         }
         self.m_focus:AddEntry(focusEntry)
     end
-
-    self.m_dropdown:AnchorToControl(self.m_container, self.m_dropdownWidthOffset, 0)
 end
 
 function ZO_ComboBox_Gamepad:SetupMenuItemControl(control, item)

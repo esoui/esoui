@@ -338,6 +338,8 @@ function ZO_RewardsManager:InternalCreateRewardData(rewardId, quantity, parentCh
         rewardData = self:GetTributeCardUpgradeEntryInfo(rewardId, parentChoice)
     elseif entryType == REWARD_ENTRY_TYPE_MAIL_ITEM then
         rewardData = self:GetMailItemEntryInfo(rewardId, parentChoice)
+    elseif entryType == REWARD_ENTRY_TYPE_ADD_TITLE then
+        rewardData = self:GetAddTitleEntryInfo(rewardId, parentChoice)
     end
 
     if rewardData then
@@ -548,6 +550,18 @@ function ZO_RewardsManager:GetMailItemEntryInfo(rewardId, parentChoice)
     return rewardData
 end
 
+function ZO_RewardsManager:GetAddTitleEntryInfo(rewardId, parentChoice)
+    local titleName = GetAddTitleRewardTitleInfo(rewardId)
+
+    local rewardData = ZO_RewardData:New(rewardId, parentChoice)
+    rewardData:SetRawName(titleName)
+    rewardData:SetFormattedName(titleName)
+    -- We don't have an icon to pull, so we use something generic.
+    rewardData:SetIcon("EsoUI/Art/Icons/u50_BestowedTitle.dds")
+
+    return rewardData
+end
+
 -- Helper function to make LFGActivityRewardUIData play nice with other rewards
 function ZO_RewardsManager:GetAllRewardInfoForLFGActivityRewardUIData(lfgRewardUIDataId)
     local rewardListInfo = {}
@@ -588,6 +602,8 @@ function ZO_RewardsManager:GetRewardListEntryInfo(rewardId, quantity, parentChoi
     local firstRewardListRewardId, firstRewardListRewardType = GetRewardListEntryInfo(rewardListId, 1)
     local icon = nil
     local gamepadIcon = nil
+    local lootIcon = nil
+    local gamepadLootIcon = nil
     local rawName = nil
     local formattedName = nil
 
@@ -620,6 +636,8 @@ function ZO_RewardsManager:GetRewardListEntryInfo(rewardId, quantity, parentChoi
         formattedName = zo_strformat(SI_CURRENCY_NAME_FORMAT, rawName)
         icon = GetCurrencyKeyboardIcon(currencyType)
         gamepadIcon = GetCurrencyGamepadIcon(currencyType)
+        lootIcon = GetCurrencyLootKeyboardIcon(currencyType)
+        gamepadLootIcon = GetCurrencyLootGamepadIcon(currencyType)
     elseif firstRewardListRewardType == REWARD_ENTRY_TYPE_INSTANT_UNLOCK then
         local instantUnlockId = GetInstantUnlockRewardInstantUnlockId(firstRewardListRewardId)
         rawName = GetInstantUnlockRewardDisplayName(instantUnlockId)
@@ -635,7 +653,7 @@ function ZO_RewardsManager:GetRewardListEntryInfo(rewardId, quantity, parentChoi
     rewardData:SetRawName(rawName)
     rewardData:SetFormattedName(formattedName)
     rewardData:SetIcon(icon, gamepadIcon)
-
+    rewardData:SetLootIcon(lootIcon, gamepadLootIcon)
     return rewardData
 end
 

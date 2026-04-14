@@ -27,6 +27,14 @@ EsoUI\Ingame\Particles\Particles.lua
 
 EsoUI\Ingame\Scenes\IngameSceneManager.lua
 
+; Ingame and InternalIngame should share the code in these files from PublicAllIngames
+; but the code creates a new scene which means the files need to be initialized after
+; the SceneManager in their respective GUIs. Each GUI will also be responsible for
+; adding appropriate fragments to PREVIEW_SCREEN_ACTIVE_PREVIEW_SCENE_GAMEPAD in their
+; respective scene files (GamepadIngameScenes.lua or InternalIngameScenes_Gamepad.lua)
+EsoUI\PublicAllIngames\ItemPreview\Gamepad\PreviewScreen_ActivePreview_Gamepad.lua
+EsoUI\PublicAllIngames\ItemPreview\Gamepad\PreviewScreen_ActivePreview_Gamepad.xml
+
 EsoUI\Ingame\Tooltip\ActivityFinderTooltips.lua
 EsoUI\Ingame\Tooltip\AntiquityTooltips.lua
 EsoUI\Ingame\Tooltip\ArmoryTooltips.lua
@@ -186,7 +194,11 @@ EsoUI\Ingame\LFG\Gamepad\ZO_GroupRolesBar_Gamepad.xml
 EsoUI\Ingame\Group\Gamepad\ZO_GroupMenu_Gamepad.lua
 EsoUI\Ingame\Group\Gamepad\ZO_GroupMenu_Gamepad.xml
 
+EsoUI\Ingame\Veterancy\VeterancyData.lua
+EsoUI\Ingame\Veterancy\Veterancy_Manager.lua
+
 EsoUI\Ingame\LFG\TributeClubRank.lua
+EsoUI\Ingame\LFG\VeterancyRank.lua
 EsoUI\Ingame\LFG\ZO_ActivityFinderTemplate_Manager.lua
 EsoUI\Ingame\LFG\ZO_ActivityFinderTemplate_Shared.lua
 EsoUI\Ingame\LFG\ZO_ActivityFinderTemplate_Shared.xml
@@ -205,6 +217,8 @@ EsoUI\Ingame\LFG\Gamepad\TributeRewards_Gamepad.lua
 EsoUI\Ingame\LFG\Gamepad\TributeRewards_Gamepad.xml
 EsoUI\Ingame\LFG\Gamepad\ZO_ActivityTributeRankFooter_Gamepad.lua
 EsoUI\Ingame\LFG\Gamepad\ZO_ActivityTributeRankFooter_Gamepad.xml
+EsoUI\Ingame\LFG\Gamepad\ZO_ActivityVeterancyRankFooter_Gamepad.lua
+EsoUI\Ingame\LFG\Gamepad\ZO_ActivityVeterancyRankFooter_Gamepad.xml
 
 EsoUI\Ingame\HouseTours\HouseTours_Search_Manager.lua
 EsoUI\Ingame\HouseTours\HouseTours_PlayerListings_Manager.lua
@@ -379,11 +393,22 @@ EsoUI\Ingame\LFG\ActivityTracker.xml
 EsoUI\Ingame\LFG\ReadyCheckTracker.lua
 EsoUI\Ingame\LFG\ReadyCheckTracker.xml
 EsoUI\Ingame\HUD\HUDTracker_Manager.lua
+
+EsoUI\Ingame\ZO_Quest\RumorData.lua
+EsoUI\Ingame\ZO_Quest\RumorManager.lua
 EsoUI\Ingame\ZO_Quest\QuestJournal_Manager.lua
 EsoUI\Ingame\ZO_Quest\QuestJournal_Shared.lua
 EsoUI\Ingame\ZO_Quest\QuestJournal_Shared.xml
+EsoUI\Ingame\ZO_Quest\Keyboard\QuestJournal_Quests_Keyboard.lua
+EsoUI\Ingame\ZO_Quest\Keyboard\QuestJournal_Quests_Keyboard.xml
+EsoUI\Ingame\ZO_Quest\Keyboard\QuestJournal_Rumors_Keyboard.lua
+EsoUI\Ingame\ZO_Quest\Keyboard\QuestJournal_Rumors_Keyboard.xml
 EsoUI\Ingame\ZO_Quest\Keyboard\QuestJournal_Keyboard.lua
 EsoUI\Ingame\ZO_Quest\Keyboard\QuestJournal_Keyboard.xml
+EsoUI\Ingame\ZO_Quest\Gamepad\QuestJournal_Quests_Gamepad.lua
+EsoUI\Ingame\ZO_Quest\Gamepad\QuestJournal_Quests_Gamepad.xml
+EsoUI\Ingame\ZO_Quest\Gamepad\QuestJournal_Rumors_Gamepad.lua
+EsoUI\Ingame\ZO_Quest\Gamepad\QuestJournal_Rumors_Gamepad.xml
 EsoUI\Ingame\ZO_Quest\Gamepad\QuestJournal_Gamepad.lua
 EsoUI\Ingame\ZO_Quest\Gamepad\QuestJournal_Gamepad.xml
 
@@ -585,6 +610,8 @@ EsoUI\Ingame\AlertText\Keyboard\AlertText_Keyboard.xml
 EsoUI\Ingame\AlertText\Gamepad\AlertText_Gamepad.lua
 EsoUI\Ingame\AlertText\Gamepad\AlertText_Gamepad.xml
 
+EsoUI\Ingame\Mail\Mail_Manager.lua
+
 EsoUI\Ingame\NotificationIcons\Console\NotificationIcons_Console.lua
 EsoUI\Ingame\NotificationIcons\Console\NotificationIcons_Console.xml
 
@@ -631,7 +658,6 @@ EsoUI\Ingame\TradeWindow\Keyboard\TradeWindow_Keyboard.xml
 EsoUI\Ingame\TradeWindow\Gamepad\TradeWindow_Gamepad.lua
 EsoUI\Ingame\TradeWindow\Gamepad\TradeWindow_Gamepad.xml
 
-EsoUI\Ingame\Mail\Mail_Manager.lua
 EsoUI\Ingame\Mail\MailInbox_Shared.lua
 EsoUI\Ingame\Mail\MailSend_Shared.lua
 
@@ -1187,6 +1213,9 @@ EsoUI\Ingame\GuildFinder\Keyboard\GuildRecruitment_ApplicationsDefaultMessage_Ke
 EsoUI\Ingame\GuildFinder\Keyboard\GuildRecruitment_Blacklist_Keyboard.lua
 EsoUI\Ingame\GuildFinder\Keyboard\GuildRecruitment_Blacklist_Keyboard.xml
 
+EsoUI\Ingame\Guild\Keyboard\GuildMailManagement_Keyboard.lua
+EsoUI\Ingame\Guild\Keyboard\GuildMailManagement_Keyboard.xml
+
 EsoUI\Ingame\Guild\Keyboard\GuildSelector_Keyboard.lua
 EsoUI\Ingame\Guild\Keyboard\GuildSelector_Keyboard.xml
 EsoUI\Ingame\Guild\Gamepad\GuildSelector_Gamepad.lua
@@ -1210,6 +1239,11 @@ EsoUI\Ingame\GuildHistory\Gamepad\GuildHistory_Gamepad.lua
 EsoUI\Ingame\GuildHistory\Gamepad\GuildHistory_Gamepad.xml
 EsoUI\Ingame\Guild\Gamepad\GuildWeeklyBids_Gamepad.lua
 EsoUI\Ingame\Guild\Gamepad\GuildWeeklyBids_Gamepad.xml
+
+EsoUI\Ingame\Guild\Gamepad\GuildMailManagement_Send_Gamepad.lua
+EsoUI\Ingame\Guild\Gamepad\GuildMailManagement_Send_Gamepad.xml
+EsoUI\Ingame\Guild\Gamepad\GuildMailManagement_Gamepad.lua
+EsoUI\Ingame\Guild\Gamepad\GuildMailManagement_Gamepad.xml
 
 EsoUI\Ingame\GuildFinder\Gamepad\GuildFinder_GuildInfo_Gamepad.xml
 EsoUI\Ingame\GuildFinder\Gamepad\GuildBrowser_Gamepad.lua
@@ -1382,6 +1416,8 @@ EsoUI\Ingame\Inventory\Gamepad\GuildBank_Gamepad.lua
 EsoUI\Ingame\Inventory\Gamepad\GuildBank_Gamepad.xml
 
 ; Loading before Champion.lua to avoid issues refreshing the gamepad main menu
+EsoUI\Ingame\PromotionalEvents\PromotionalEventPersonalCampaign_Manager.lua
+
 EsoUI\Ingame\ReturningPlayer\ReturningPlayer_Manager.lua
 EsoUI\Ingame\ReturningPlayer\ReturningPlayerIntroScreen_Shared.lua
 EsoUI\Ingame\ReturningPlayer\ReturningPlayerIntroScreen_Shared.xml
@@ -1395,6 +1431,15 @@ EsoUI\Ingame\ReturningPlayer\Keyboard\ReturningPlayerRewardScreen_Keyboard.lua
 EsoUI\Ingame\ReturningPlayer\Keyboard\ReturningPlayerRewardScreen_Keyboard.xml
 EsoUI\Ingame\ReturningPlayer\Gamepad\ReturningPlayerRewardScreen_Gamepad.lua
 EsoUI\Ingame\ReturningPlayer\Gamepad\ReturningPlayerRewardScreen_Gamepad.xml
+
+EsoUI\Ingame\LowLevelPlayer\LowLevelPlayer_Manager.lua
+
+EsoUI\Ingame\LowLevelPlayer\LowLevelPlayerScreen_Shared.lua
+EsoUI\Ingame\LowLevelPlayer\LowLevelPlayerScreen_Shared.xml
+EsoUI\Ingame\LowLevelPlayer\Keyboard\LowLevelPlayerScreen_Keyboard.lua
+EsoUI\Ingame\LowLevelPlayer\Keyboard\LowLevelPlayerScreen_Keyboard.xml
+EsoUI\Ingame\LowLevelPlayer\Gamepad\LowLevelPlayerScreen_Gamepad.lua
+EsoUI\Ingame\LowLevelPlayer\Gamepad\LowLevelPlayerScreen_Gamepad.xml
 
 EsoUI\Ingame\DeathRecap\DeathRecap.lua
 EsoUI\Ingame\DeathRecap\DeathRecap.xml
@@ -1814,6 +1859,17 @@ EsoUI\Ingame\TamrielTomes\Keyboard\TamrielTomesDialogs_Keyboard.lua
 EsoUI\Ingame\TamrielTomes\Keyboard\TamrielTomesDialogs_Keyboard.xml
 EsoUI\Ingame\TamrielTomes\Gamepad\TamrielTomesDialogs_Gamepad.lua
 EsoUI\Ingame\TamrielTomes\Gamepad\TamrielTomesDialogs_Gamepad.xml
+
+EsoUI\Ingame\Veterancy\Veterancy_Shared.lua
+EsoUI\Ingame\Veterancy\Veterancy_Shared.xml
+EsoUI\Ingame\Veterancy\Keyboard\Veterancy_Keyboard.lua
+EsoUI\Ingame\Veterancy\Keyboard\Veterancy_Keyboard.xml
+EsoUI\Ingame\Veterancy\Gamepad\Veterancy_Tooltips.lua
+EsoUI\Ingame\Veterancy\Gamepad\Veterancy_Gamepad.lua
+EsoUI\Ingame\Veterancy\Gamepad\Veterancy_Gamepad.xml
+
+EsoUI\Ingame\ChallengeDifficulty\Keyboard\ChallengeDifficulty_Keyboard.lua
+EsoUI\Ingame\ChallengeDifficulty\Keyboard\ChallengeDifficulty_Keyboard.xml
 
 EsoUI\Ingame\CenterScreenAnnounce\CenterScreenAnnounceHandlers.lua
 EsoUI\Ingame\CenterScreenAnnounce\CenterScreenAnnounce.lua

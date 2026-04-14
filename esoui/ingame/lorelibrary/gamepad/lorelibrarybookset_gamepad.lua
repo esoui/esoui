@@ -30,8 +30,8 @@ function ZO_LoreLibraryBookSet_Gamepad:InitializeEvents()
     self.control:RegisterForEvent(EVENT_LORE_LIBRARY_INITIALIZED, Refresh)
     self.control:RegisterForEvent(EVENT_LORE_BOOK_LEARNED, Refresh)
     self.control:RegisterForEvent(EVENT_LORE_BOOK_COLLECTION_LEARNED, Refresh)
-    self.control:RegisterForEvent(EVENT_UNLOCKED_HIRELING_CORRESPONDENCE_INITIALIZED, Refresh)
-    self.control:RegisterForEvent(EVENT_UNLOCKED_HIRELING_CORRESPONDENCE_UPDATED, Refresh)
+    self.control:RegisterForEvent(EVENT_MAIL_LISTS_INITIALIZED, Refresh)
+    self.control:RegisterForEvent(EVENT_MAIL_LISTS_UPDATED, Refresh)
 end
 
 function ZO_LoreLibraryBookSet_Gamepad:InitializeKeybindStripDescriptors()
@@ -47,8 +47,8 @@ function ZO_LoreLibraryBookSet_Gamepad:InitializeKeybindStripDescriptors()
             callback = function()
                 local selectedData = self:GetMainList():GetTargetData()
                 if selectedData and selectedData.bookIndex then
-                    if self.hirelingType then
-                        ZO_LoreLibrary_ReadHirelingCorrespondence(self.hirelingType, selectedData.bookIndex)
+                    if self.mailListIndex then
+                        ZO_LoreLibrary_ReadMailFromMailList(self.mailListIndex, selectedData.bookIndex)
                     else
                         if selectedData.enabled then
                             ZO_LoreLibrary_ReadBook(self.categoryIndex, self.collectionIndex, selectedData.bookIndex)
@@ -68,7 +68,7 @@ function ZO_LoreLibraryBookSet_Gamepad:InitializeKeybindStripDescriptors()
             name = GetString(SI_LORE_LIBRARY_TO_ACHIEVEMENT_ACTION),
             keybind = "UI_SHORTCUT_SECONDARY",
             visible = function()
-                if self.hirelingType then
+                if self.mailListIndex then
                     return false
                 else
                     local achievementId = GetLoreBookCollectionLinkedAchievement(self.categoryIndex, self.collectionIndex)
@@ -96,8 +96,8 @@ function ZO_LoreLibraryBookSet_Gamepad:Push(libraryData)
     local bookListIndex = libraryData.bookListIndex or 1
     local categoryIndex = libraryData.categoryIndex
     local collectionIndex = libraryData.collectionIndex
-    local hirelingType = libraryData.hirelingType
-    if (self.bookListIndex ~= bookListIndex) or (self.categoryIndex ~= categoryIndex) or (self.collectionIndex ~= collectionIndex) or (self.hirelingType ~= hirelingType) then
+    local mailListIndex = libraryData.mailListIndex
+    if (self.bookListIndex ~= bookListIndex) or (self.categoryIndex ~= categoryIndex) or (self.collectionIndex ~= collectionIndex) or (self.mailListIndex ~= mailListIndex) then
         self.dirty = true
     end
 
@@ -105,15 +105,15 @@ function ZO_LoreLibraryBookSet_Gamepad:Push(libraryData)
     self.bookListIndex = bookListIndex
     self.categoryIndex = categoryIndex
     self.collectionIndex = collectionIndex
-    self.hirelingType = hirelingType
+    self.mailListIndex = mailListIndex
     SCENE_MANAGER:Push("bookSetGamepad")
 end
 
 function ZO_LoreLibraryBookSet_Gamepad:PerformUpdate()
     self.dirty = false
-    --Layout the list differently depending on if this is a hireling category or not
-    if self.hirelingType then
-        self:LayoutHirelingCollection()
+
+    if self.mailListIndex then
+        self:LayoutMailList()
     else
         self:LayoutBookCollection()
     end
@@ -192,19 +192,19 @@ do
     end
 end
 
-function ZO_LoreLibraryBookSet_Gamepad:LayoutHirelingCollection()
+function ZO_LoreLibraryBookSet_Gamepad:LayoutMailList()
     local mainList = self:GetMainList()
     mainList:Clear()
 
     -- Get the list of correspondences we need to show.
-    local hirelingType = self.hirelingType
-    local currentUnlocked = GetNumUnlockedHirelingCorrespondence(hirelingType)
+    local mailListIndex = self.mailListIndex
+    local currentUnlocked = GetNumUnlockedMailsInMailList(mailListIndex)
 
     local currentSenderLower = ""
     for index = 1, currentUnlocked do
-        local sender, subject, _, icon = GetHirelingCorrespondenceInfoByIndex(hirelingType, index)
+        local sender, subject, _, icon = GetMailInfoFromMailList(mailListIndex, index)
         local senderLower = zo_strlower(sender)
-        local entryData = ZO_GamepadEntryData:New(zo_strformat(SI_LORE_LIBRARY_HIRELING_CORRESPONDENCE_ENTRY_FORMATTER, subject, index), icon)
+        local entryData = ZO_GamepadEntryData:New(zo_strformat(SI_LORE_LIBRARY_MAIL_ENTRY_FORMATTER, subject, index), icon)
         entryData.bookIndex = index
         entryData.bookListIndex = index
         entryData.enabled = true
@@ -220,7 +220,7 @@ function ZO_LoreLibraryBookSet_Gamepad:LayoutHirelingCollection()
             -- ESO-862381, ESO-888526: If the sender is all caps, lower it before formatting it.
             -- Otherwise, leave it alone so <<C:1>> works right in non-English languages
             local senderClean = zo_strIsUpper(sender) and senderLower or sender
-            entryData:SetHeader(zo_strformat(SI_LORE_LIBRARY_HIRELING_CORRESPONDENCE_SENDER_FORMATTER, senderClean))
+            entryData:SetHeader(zo_strformat(SI_LORE_LIBRARY_MAIL_SENDER_FORMATTER, senderClean))
             templateName = "ZO_GamepadSubMenuEntryTemplateWithHeader"
             currentSenderLower = senderLower
         else
@@ -235,13 +235,13 @@ function ZO_LoreLibraryBookSet_Gamepad:LayoutHirelingCollection()
 
     -- Update the collection count label.
     self.headerData.data1HeaderText = GetString(SI_GAMEPAD_LORE_LIBRARY_TOTAL_COLLECTED_TITLE)
-    self.headerData.data1Text = ZO_SELECTED_TEXT:Colorize(zo_strformat(SI_GAMEPAD_LORE_LIBRARY_HIRELING_CORRESPONDENCE_TOTAL_COLLECTED, currentUnlocked))
+    self.headerData.data1Text = ZO_SELECTED_TEXT:Colorize(zo_strformat(SI_GAMEPAD_LORE_LIBRARY_MAIL_LIST_TOTAL_COLLECTED, currentUnlocked))
 
     -- Update the key bindings.
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
 
     -- Update the header.
-    self.headerData.titleText = GetString("SI_HIRELINGTYPE", hirelingType)
+    self.headerData.titleText = GetMailListName(mailListIndex)
     ZO_GamepadGenericHeader_Refresh(self.header, self.headerData)
 end
 

@@ -26,14 +26,14 @@ function ZO_ReturningPlayerRewardScreen_Gamepad:OnDeferredInitialize()
     {
         name = function()
             local promotionalEventNameText = PROMOTIONAL_EVENT_MANAGER:GetPromotionalEventsColorizedDisplayName()
-            return zo_strformat(SI_RETURNING_PLAYER_REWARDS_NAVIGATION_ACTION, promotionalEventNameText)
+            return zo_strformat(SI_PROMOTIONAL_EVENT_PERSONAL_CAMPAIGN_NAVIGATION_TO_PROMOTIONAL_EVENT_ACTION, promotionalEventNameText)
         end,
         keybind = "UI_SHORTCUT_TERTIARY",
         ethereal = true,
         narrateEthereal = true,
         etherealNarrationOrder = 2,
         callback = function()
-            RETURNING_PLAYER_MANAGER:GoToPromotionalEvents()
+            PROMOTIONAL_EVENT_PERSONAL_CAMPAIGN_MANAGER:GoToPromotionalEvents()
         end,
     }
     self.goToPromotionalEventButton:SetKeybindButtonDescriptor(self.goToPromotionalEventDescriptor)

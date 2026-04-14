@@ -141,7 +141,7 @@ function ZO_GamepadSkills:Initialize(control)
                     self:ActivateAssignableActionBarFromList()
                 end
             end
-            HandleReturningPlayerUISystemShown(UI_SYSTEM_SKILLS)
+            HandleUISystemShown(UI_SYSTEM_SKILLS)
         elseif newState == SCENE_HIDING then
             --Disable now so it's not possible to change the selected skill live/skills advisor entry as the scene is hiding since the line filter list depends on it being a skill line
             self:DisableCurrentList()
@@ -164,6 +164,10 @@ function ZO_GamepadSkills:Initialize(control)
             --To pick up the new skill line that was just selected
             self.lineFilterListRefreshGroup:MarkDirty("List")
             self.lineFilterListRefreshGroup:TryClean()
+
+            if targetSkillLineData:IsClassMastery() then
+                GAMEPAD_SKILLS_LINE_FILTER_SCENE:RemoveFragment(self.skillLineXPBarFragment)
+            end
 
             -- If there was a skill data to select, find it and select it now that the skill list is showing
             local setSelectedIndex = false
@@ -202,6 +206,7 @@ function ZO_GamepadSkills:Initialize(control)
             if self.selectSkillData then
                 self.categoryListRefreshGroup:MarkDirty("List")
             end
+            GAMEPAD_SKILLS_LINE_FILTER_SCENE:AddFragment(self.skillLineXPBarFragment)
         end
     end)
 
@@ -432,6 +437,12 @@ function ZO_GamepadSkills:InitializeCategoryKeybindStrip()
             if targetData then
                 if targetData.isSubclassing then
                     return SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeAllowAccessToSubclassing()
+                elseif targetData.skillLineData and targetData.skillLineData.IsClassMastery and targetData.skillLineData:IsClassMastery() then
+                    if HasMaxRankInAllClassSkillLines() then
+                        return SKILLS_DATA_MANAGER:GetNumPlayerClassActiveSkillLines() == SKILLS_DATA_MANAGER:GetNumActiveClassSkillLines()
+                    else
+                        return false
+                    end
                 end
                 return true
             end
@@ -538,7 +549,7 @@ function ZO_GamepadSkills:InitializeCategoryKeybindStrip()
                     local helpCategoryIndex, helpIndex = GetSubclassingHelpIndices()
                     return helpCategoryIndex ~= nil
                 elseif SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeAllowClear() and not self.assignableActionBar:IsActive() then
-                    return not targetData.isSkillsAdvisor
+                    return not targetData.isSkillsAdvisor and not targetData.isScribeLibrary
                 end
             end
             return false
@@ -683,7 +694,9 @@ function ZO_GamepadSkills:InitializeLineFilterKeybindStrip()
 
         if actionType == ZO_SKILL_POINT_ACTION.PURCHASE then
             if SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeConfirmOnPurchase() then
-                local labelData = { titleParams = { availablePoints }, mainTextParams = { name, skillData:GetSkillPointCostMultiplier() } }
+                local skillLineData = skillData:GetSkillLineData()
+                local pointCost = skillLineData:IsClassMastery() and skillLineData:GetClassMasteryCost() or skillData:GetSkillPointCostMultiplier()
+                local labelData = { titleParams = { availablePoints }, mainTextParams = { name, pointCost } }
                 local dialogData = { purchaseSkillProgressionData = skillProgressionData, }
 
                 ZO_Dialogs_ShowGamepadDialog("GAMEPAD_SKILLS_PURCHASE_CONFIRMATION", dialogData, labelData)
@@ -692,7 +705,9 @@ function ZO_GamepadSkills:InitializeLineFilterKeybindStrip()
             end
         elseif actionType == ZO_SKILL_POINT_ACTION.INCREASE_RANK then
             if SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeConfirmOnIncreaseRank() then
-                local labelData = { titleParams = { availablePoints }, mainTextParams = { name, skillData:GetSkillPointCostMultiplier() } }
+                local skillLineData = skillData:GetSkillLineData()
+                local pointCost = skillLineData:IsClassMastery() and skillLineData:GetClassMasteryCost() or skillData:GetSkillPointCostMultiplier()
+                local labelData = { titleParams = { availablePoints }, mainTextParams = { name, pointCost } }
                 local dialogData = { currentSkillProgressionData = skillProgressionData }
 
                 ZO_Dialogs_ShowGamepadDialog("GAMEPAD_SKILLS_UPGRADE_CONFIRMATION", dialogData, labelData)
@@ -981,7 +996,15 @@ function ZO_GamepadSkills:InitializeCategoryList()
     end
 
     local function MenuEntryTemplateSetup(control, data, selected, reselectingDuringRebuild, enabled, activated)
-        if data.isSubclassing then
+        local skillLineData = data.skillLineData
+        if skillLineData then
+            if SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeBatchSave() then
+                data:SetText(skillLineData:GetFormattedNameWithNumPointsAllocated())
+            else
+                data:SetText(skillLineData:GetFormattedName())
+            end
+            data.enabled = SKILLS_DATA_MANAGER:GetNumPlayerClassActiveSkillLines() == SKILLS_DATA_MANAGER:GetNumActiveClassSkillLines()
+        elseif data.isSubclassing then
             data.enabled = SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeAllowAccessToSubclassing()
         end
         ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDuringRebuild, enabled, activated)
@@ -1383,7 +1406,9 @@ do
                 data.skillLineData = skillLineData
                 data.narrationText = skillLineNarrationText
 
-                if isHeader then
+                if skillLineData:IsClassMastery() then
+                    self.categoryList:AddEntry("ZO_GamepadMenuEntryTemplate", data)
+                elseif isHeader then
                     data:SetHeader(skillTypeData:GetName())
                     self.categoryList:AddEntry("ZO_GamepadSkillLineEntryTemplateWithHeader", data)
                 else
@@ -1392,7 +1417,7 @@ do
 
                 isHeader = false
             end
-            if skillTypeData.skillType == SKILL_TYPE_CLASS then
+            if skillTypeData.skillType == SKILL_TYPE_CLASS and not IsCurrentCampaignVengeanceRuleset() then
                 local data = ZO_GamepadEntryData:New(zo_strformat(SI_SKILLS_ENTRY_NAME_FORMAT, GetString(SI_SKILLS_SUBCLASSING_ENTRY_NAME)))
                 data.isSubclassing = true
                 self.categoryList:AddEntry("ZO_GamepadMenuEntryTemplate", data)
@@ -1411,6 +1436,8 @@ do
             self.categoryList:SetSelectedIndexWithoutAnimation(self.initialCategoryListIndex)
             self.initialCategoryListIndex = nil
         end
+
+        self:RefreshPointsDisplay()
     end
 end
 
@@ -1449,16 +1476,36 @@ do
         end
 
         list:Commit()
+
+        self:RefreshPointsDisplay()
     end
 end
 
 function ZO_GamepadSkills:RefreshPointsDisplay()
-    local availablePoints = SKILL_POINT_ALLOCATION_MANAGER:GetAvailableSkillPoints()
-    local skyShards = GetNumSkyShards()
+    local skillLineEntry = self.categoryList:GetTargetData()
+    if self.mode ~= ZO_GAMEPAD_SKILLS_SKILL_LIST_BROWSE_MODE
+        and skillLineEntry
+        and not (skillLineEntry.isSkillsAdvisor or skillLineEntry.isScribeLibrary or skillLineEntry.isSubclassing)
+        and skillLineEntry.skillLineData and skillLineEntry.skillLineData:IsClassMastery() then
+        local skillLineData = skillLineEntry.skillLineData
 
-    self.headerData.data1Text = availablePoints
-    self.headerData.data2Text = zo_strformat(SI_GAMEPAD_SKILLS_SKY_SHARDS_FOUND, skyShards, NUM_PARTIAL_SKILL_POINTS_FOR_FULL)
+        self.headerData.data1HeaderText = GetString(SI_GAMEPAD_SKILLS_CLASS_MASTER_POINTS)
+        self.headerData.data2HeaderText = nil
+        self.headerData.data1Text = SKILL_POINT_ALLOCATION_MANAGER:GetAvailableClassMasteryPointsForSkillLine(skillLineData)
+        self.headerData.data2Text = nil
 
+        ZO_GamepadGenericHeader_SetDataLayout(self.header, ZO_GAMEPAD_HEADER_LAYOUTS.DATA_PAIRS_SEPARATE)
+    else
+        local availablePoints = SKILL_POINT_ALLOCATION_MANAGER:GetAvailableSkillPoints()
+        local skyShards = GetNumSkyShards()
+
+        self.headerData.data1HeaderText = GetString(SI_GAMEPAD_SKILLS_AVAILABLE_POINTS)
+        self.headerData.data2HeaderText = GetString(SI_GAMEPAD_SKILLS_SKY_SHARDS)
+        self.headerData.data1Text = availablePoints
+        self.headerData.data2Text = zo_strformat(SI_GAMEPAD_SKILLS_SKY_SHARDS_FOUND, skyShards, NUM_PARTIAL_SKILL_POINTS_FOR_FULL)
+
+        ZO_GamepadGenericHeader_SetDataLayout(self.header, ZO_GAMEPAD_HEADER_LAYOUTS.DATA_PAIRS_TOGETHER)
+    end
     ZO_GamepadGenericHeader_RefreshData(self.header, self.headerData)
 end
 
@@ -1483,11 +1530,25 @@ do
             header = GetString(SI_GAMEPAD_SKILLS_AVAILABLE_POINTS),
         },
     }
-    local function SetupFunction(control)
-        local availablePoints = GetAvailableSkillPoints()
-   
-        g_purchaseAndUpgradeHeaderData.data1.value = availablePoints
-        control.setupFunc(control, g_purchaseAndUpgradeHeaderData)
+    local g_purchaseAndUpgradeClassMasteryHeaderData =
+    {
+        data1 =
+        {
+            header = GetString(SI_GAMEPAD_SKILLS_CLASS_MASTERY_POINTS),
+        },
+    }
+
+    local function SetupFunction(control, dialog)
+        local progressionData = dialog.purchaseSkillProgressionData or dialog.currentSkillProgressionData
+        local skillLineData = progressionData:GetSkillData():GetSkillLineData()
+        if skillLineData:IsClassMastery() then
+            g_purchaseAndUpgradeClassMasteryHeaderData.data1.value = SKILL_POINT_ALLOCATION_MANAGER:GetAvailableClassMasteryPointsForSkillLine(skillLineData)
+            control.setupFunc(control, g_purchaseAndUpgradeClassMasteryHeaderData)
+        else
+            local availablePoints = GetAvailableSkillPoints()
+            g_purchaseAndUpgradeHeaderData.data1.value = availablePoints
+            control.setupFunc(control, g_purchaseAndUpgradeHeaderData)
+        end
     end
 
     function ZO_GamepadSkills:InitializePurchaseAndUpgradeDialog()
@@ -1499,15 +1560,23 @@ do
                 dialogType = GAMEPAD_DIALOGS.BASIC,
                 allowRightStickPassThrough = true,
             },
-            title = 
+            title =
             {
                 text = GetString(SI_GAMEPAD_SKILLS_PURCHASE_TITLE),
             },
-            mainText = 
+            mainText =
             {
-                text = GetString(SI_GAMEPAD_SKILLS_PURCHASE_CONFIRM),
+                text = function(dialog)
+                    local progressionData = dialog.data.purchaseSkillProgressionData
+                    local skillLineData = progressionData:GetSkillData():GetSkillLineData()
+                    if skillLineData:IsClassMastery() then
+                        return GetString(SI_GAMEPAD_SKILLS_PURCHASE_CLASS_MASTERY_CONFIRM)
+                    else
+                        return GetString(SI_GAMEPAD_SKILLS_PURCHASE_CONFIRM)
+                    end
+                end,
             },
-            warning = 
+            warning =
             {
                 text = function(dialog)
                     if ZO_SKILLS_ADVISOR_SINGLETON:CanUseSkillsAdvisor() and not ZO_SKILLS_ADVISOR_SINGLETON:IsAdvancedModeSelected() and dialog.data.purchaseSkillProgressionData:IsAdvised() then
@@ -1519,18 +1588,16 @@ do
             },
             buttons =
             {
-                [1] =
                 {
-                    text =      SI_GAMEPAD_SKILLS_PURCHASE,
-                    callback =  function(dialog)
-                                    local purchaseSkillProgressionData = dialog.data.purchaseSkillProgressionData
-                                    local skillData = purchaseSkillProgressionData:GetSkillData()
-                                    skillData:GetPointAllocator():Purchase()
-                                end,
+                    text = SI_GAMEPAD_SKILLS_PURCHASE,
+                    callback = function(dialog)
+                        local purchaseSkillProgressionData = dialog.data.purchaseSkillProgressionData
+                        local skillData = purchaseSkillProgressionData:GetSkillData()
+                        skillData:GetPointAllocator():Purchase()
+                    end,
                 },
-                [2] =
                 {
-                    text =      SI_DIALOG_CANCEL,
+                    text = SI_DIALOG_CANCEL,
                 },
             },
         })
@@ -1543,15 +1610,23 @@ do
                 dialogType = GAMEPAD_DIALOGS.BASIC,
                 allowRightStickPassThrough = true,
             },
-            title = 
+            title =
             {
-                text = GetString(SI_GAMEPAD_SKILLS_PURCHASE_TITLE),
+                text = GetString(SI_GAMEPAD_SKILLS_UPDATE_TITLE),
             },
-            mainText = 
+            mainText =
             {
-                text = GetString(SI_GAMEPAD_SKILLS_UPGRADE_CONFIRM),
+                text = function(dialog)
+                    local progressionData = dialog.data.currentSkillProgressionData
+                    local skillLineData = progressionData:GetSkillData():GetSkillLineData()
+                    if skillLineData:IsClassMastery() then
+                        return GetString(SI_GAMEPAD_SKILLS_UPGRADE_CLASS_MASTERY_CONFIRM)
+                    else
+                        return GetString(SI_GAMEPAD_SKILLS_UPGRADE_CONFIRM)
+                    end
+                end,
             },
-            warning = 
+            warning =
             {
                 text = function(dialog)
                     local currentSkillProgressionData = dialog.data.currentSkillProgressionData
@@ -1565,18 +1640,16 @@ do
             },
             buttons =
             {
-                [1] =
                 {
-                    text =      SI_GAMEPAD_SKILLS_PURCHASE,
-                    callback =  function(dialog)
-                                    local currentSkillProgressionData = dialog.data.currentSkillProgressionData
-                                    local skillData = currentSkillProgressionData:GetSkillData()
-                                    skillData:GetPointAllocator():IncreaseRank()
-                                end,
+                    text = SI_GAMEPAD_SKILLS_PURCHASE,
+                    callback = function(dialog)
+                        local currentSkillProgressionData = dialog.data.currentSkillProgressionData
+                        local skillData = currentSkillProgressionData:GetSkillData()
+                        skillData:GetPointAllocator():IncreaseRank()
+                    end,
                 },
-                [2] =
                 {
-                    text =      SI_DIALOG_CANCEL,
+                    text = SI_DIALOG_CANCEL,
                 },
             },
         })
@@ -2284,7 +2357,17 @@ function ZO_GamepadSkills:RefreshSelectedTooltip()
         elseif selectedData then
             local skillLineData = selectedData.skillLineData
 
-            GAMEPAD_TOOLTIPS:LayoutSkillLinePreview(GAMEPAD_LEFT_TOOLTIP, skillLineData)
+            if skillLineData:IsClassMastery() then
+                if SKILLS_DATA_MANAGER:GetNumPlayerClassActiveSkillLines() ~= SKILLS_DATA_MANAGER:GetNumActiveClassSkillLines() then
+                    GAMEPAD_TOOLTIPS:LayoutTitleAndDescriptionTooltip(GAMEPAD_LEFT_TOOLTIP, skillLineData:GetFormattedName(), GetString(SI_SKILLS_CLASS_MASTERY_DISABLED_DESCRIPTION))
+                elseif HasMaxRankInAnyClassSkillLine() and not HasMaxRankInAllClassSkillLines() then
+                    GAMEPAD_TOOLTIPS:LayoutTitleAndDescriptionTooltip(GAMEPAD_LEFT_TOOLTIP, skillLineData:GetFormattedName(), skillLineData:GetUnlockText())
+                else
+                    GAMEPAD_TOOLTIPS:LayoutSkillLinePreview(GAMEPAD_LEFT_TOOLTIP, skillLineData)
+                end
+            else
+                GAMEPAD_TOOLTIPS:LayoutSkillLinePreview(GAMEPAD_LEFT_TOOLTIP, skillLineData)
+            end
         end
     else
         local skillEntry = self.lineFilterList:GetTargetData()
@@ -2330,6 +2413,7 @@ function ZO_GamepadSkills:SetMode(mode)
         self:DisableCurrentList()
         self.lineFilterListRefreshGroup:MarkDirty("Visible") -- The action bar reuses line filter list keybinds, so refresh those
     end
+    self:RefreshPointsDisplay()
 end
 
 function ZO_GamepadSkills:StartSingleAbilityAssignment(skillData)

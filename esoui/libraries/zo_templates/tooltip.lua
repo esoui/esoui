@@ -114,7 +114,7 @@ do
 
     local function DynamicAnchorLayout(tooltip, owner, quadrant, comparativeTooltip1, comparativeTooltip2, relativeAnchorsUsed)
         local isValid, point, relativeTo, relativePoint, offsetX, offsetY = tooltip:GetAnchor()
-        local positionToLeftByAnchors = relativeAnchorsUsed and isValid and point == TOPRIGHT or false
+        local positionToLeftByAnchors = relativeAnchorsUsed and isValid and ZO_FlagHelpers.MaskHasFlag(point, RIGHT) or false
         local positionToLeftByQuadrant = not relativeAnchorsUsed and quadrant and (quadrant == QUAD_TOPLEFT or quadrant == QUAD_BOTTOMLEFT)
 
         if comparativeTooltip1 and comparativeTooltip2 then

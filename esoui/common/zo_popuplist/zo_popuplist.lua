@@ -84,9 +84,26 @@ function ZO_PopupList:UpdateList(listData)
 end
 
 function ZO_PopupList:Hide()
+    -- Order matters
+    if self.control:IsHidden() then
+        return
+    end
+
+    local mouseOverControl = ZO_ScrollList_GetMouseOverControl(self.list)
+    if mouseOverControl and self.onMouseExitCallback then
+        self.onMouseExitCallback(mouseOverControl)
+    end
+
     self.control:SetHidden(true)
+
+    if self.onCloseCallback then
+        self.onCloseCallback(mouseOverControl)
+    end
+
     self.onMouseEnterCallback = nil
     self.onMouseExitCallback = nil
+    self.onMouseUpCallback = nil
+    self.onCloseCallback = nil
 end
 
 function ZO_PopupList:Show(...)
@@ -151,6 +168,14 @@ function ZO_PopupList:SetOnMouseExitCallback(onMouseExitCallback)
     self.onMouseExitCallback = onMouseExitCallback
 end
 
+function ZO_PopupList:SetOnMouseUpCallback(onMouseUpCallback)
+    self.onMouseUpCallback = onMouseUpCallback
+end
+
+function ZO_PopupList:SetOnCloseCallback(onCloseCallback)
+    self.onCloseCallback = onCloseCallback
+end
+
 function ZO_PopupList.OnControlInitialized(control)
     POPUP_LIST = ZO_PopupList:New(control)
 end
@@ -168,5 +193,11 @@ end
 function ZO_PopupList.OnMouseExit(control)
     if POPUP_LIST.onMouseExitCallback then
         POPUP_LIST.onMouseExitCallback(control)
+    end
+end
+
+function ZO_PopupList.OnMouseUp(...)
+    if POPUP_LIST.onMouseUpCallback then
+        POPUP_LIST.onMouseUpCallback(...)
     end
 end

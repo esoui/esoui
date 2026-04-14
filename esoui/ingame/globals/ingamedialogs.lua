@@ -99,7 +99,6 @@ ESO_Dialogs["ABANDON_QUEST"] =
     },
     buttons =
     {
-        [1] =
         {
             text = SI_ABANDON_QUEST_CONFIRM,
             callback = function(dialog)
@@ -107,7 +106,35 @@ ESO_Dialogs["ABANDON_QUEST"] =
                         end,
         },
 
-        [2] =
+        {
+            text = SI_DIALOG_CANCEL,
+        }
+    }
+}
+
+ESO_Dialogs["ABANDON_RUMOR"] =
+{
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    title =
+    {
+        text = SI_ABANDON_RUMOR_DIALOG_TITLE,
+    },
+    mainText =
+    {
+        text = SI_ABANDON_RUMOR_DIALOG_BODY,
+    },
+    buttons =
+    {
+        {
+            text = SI_ABANDON_RUMOR_DIALOG_CONFIRM,
+            callback = function(dialog)
+                RequestAbandonPendingRumor(dialog.data.rumorId)
+            end,
+        },
+
         {
             text = SI_DIALOG_CANCEL,
         }
@@ -861,6 +888,36 @@ ESO_Dialogs["DELETE_MAIL"] =
     }
 }
 
+ESO_Dialogs["DELETE_GUILD_MAIL"] =
+{
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    title =
+    {
+        text = SI_PROMPT_TITLE_DELETE_GUILD_MAIL,
+    },
+    mainText =
+    {
+        text = SI_GUILD_MAIL_CONFIRM_DELETE,
+    },
+    buttons =
+    {
+        [1] =
+        {
+            text = SI_DIALOG_CONFIRM,
+            callback = function(dialog)
+                dialog.data.confirmationCallback(dialog.data.guildMailId)
+            end,
+        },
+        [2] =
+        {
+            text = SI_DIALOG_CANCEL,
+        },
+    }
+}
+
 ESO_Dialogs["GAMEPAD_MAIL_TAKE_ATTACHMENT_COD"] =
 {
     gamepadInfo =
@@ -1024,6 +1081,7 @@ ESO_Dialogs["FAST_TRAVEL_CONFIRM"] =
     {
         {
             text = SI_DIALOG_CONFIRM,
+            clickSound = SOUNDS.MAP_WAYSHRINE_TELEPORT,
             callback = function(dialog)
                 local data = dialog.data
                 data.confirmedFastTravel = true
@@ -1112,6 +1170,7 @@ ESO_Dialogs["RECALL_CONFIRM"] =
     {
         {
             text = SI_DIALOG_CONFIRM,
+            clickSound = SOUNDS.MAP_WAYSHRINE_TELEPORT,
             callback = function(dialog)
                 -- this call to FastTravelToNode will play a player animation before the jump occurs
                 -- so we don't need to defer the call until the dialog hides
@@ -1186,6 +1245,7 @@ ESO_Dialogs["TRAVEL_TO_HOUSE_CONFIRM"] =
     {
         {
             text = SI_DIALOG_CONFIRM,
+            clickSound = SOUNDS.MAP_WAYSHRINE_TELEPORT,
             callback = function(dialog)
                 -- RequestJumpToHouse will play a player animation before the jump occurs
                 -- so we don't need to defer the call until the dialog hides
@@ -4360,7 +4420,6 @@ ESO_Dialogs["SKILL_RESPEC_CONFIRM_FREE"] =
     {
         text = function()
             local mainTextEntryTable = ZO_Dialogs_GetSkillsRespecMainTextEntryTable()
-            table.insert(mainTextEntryTable, GetString(SI_SKILL_RESPEC_CONFIRM_DIALOG_BODY_COST_FREE))
             return ZO_GenerateParagraphSeparatedList(mainTextEntryTable)
         end,
     },

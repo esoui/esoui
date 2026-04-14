@@ -1,0 +1,96 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_LowLevelPlayerReward_Shared" virtual="true">
+            <OnInitialized>
+                local container = self:GetNamedChild("Container")
+                self.icon = container:GetNamedChild("Icon")
+                self.quantityLabel = container:GetNamedChild("Quantity")
+                self.claimedMarkTexture = container:GetNamedChild("ClaimedMark")
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)Container">
+                    <AnchorFill/>
+                    <Controls>
+                        <Backdrop name="$(parent)Backdrop"/>
+                        <Texture name="$(parent)Icon" level="6" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
+                            <Dimensions x="52" y="52"/>
+                            <Anchor point="CENTER"/>
+                        </Texture>
+                        <Label name="$(parent)Quantity" horizontalAlignment="RIGHT" verticalAlignment="BOTTOM">
+                            <Dimensions x="80"/>
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icon" offsetX="4" offsetY="4"/>
+                        </Label>
+                        <Texture name="$(parent)ClaimedMark" textureFile="EsoUI/Art/Miscellaneous/check_icon_64.dds" layer="CONTROLS" level="1" hidden="true">
+                            <Anchor point="CENTER"/>
+                            <Dimensions x="48" y="48"/>
+                        </Texture>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+        <TopLevelControl name="ZO_LowLevelPlayer_SharedTL" hidden="true" virtual="true">
+            <Anchor point="CENTER"/>
+            <Controls>
+                <Control name="$(parent)Header" resizeToFitDescendents="true">
+                    <Anchor point="TOPLEFT" offsetY="20"/>
+                    <Anchor point="TOPRIGHT" offsetY="20"/>
+                    <Controls>
+                        <Control name="$(parent)TopDivider" inherits="ZO_PlatformStyleDynamicHorizontalDivider">
+                            <Anchor point="TOPLEFT" offsetX="20"/>
+                            <Anchor point="TOPRIGHT" offsetX="-20"/>
+                        </Control>
+                        <Label name="$(parent)Text" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE" horizontalAlignment="CENTER" verticalAlignment="CENTER">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)TopDivider" relativePoint="BOTTOMLEFT" offsetY="5"/>
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)TopDivider" relativePoint="BOTTOMRIGHT" offsetY="5"/>
+                        </Label>
+                        <Control name="$(parent)BottomDivider" inherits="ZO_PlatformStyleDynamicHorizontalDivider">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Text" relativePoint="BOTTOMLEFT" offsetY="5"/>
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Text" relativePoint="BOTTOMRIGHT" offsetY="5"/>
+                        </Control>
+                    </Controls>
+                </Control>
+                <Label name="$(parent)BodyText" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" horizontalAlignment="CENTER" verticalAlignment="CENTER">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" offsetY="5"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Header" relativePoint="BOTTOMRIGHT" offsetY="5"/>
+                </Label>
+                <Control name="$(parent)GameplayInfo">
+                    <Dimensions x="870" y="435"/>
+                    <Anchor point="TOP" relativeTo="$(parent)BodyText" relativePoint="BOTTOM" offsetY="20"/>
+                    <Controls>
+                        <Texture name="$(parent)Background" textureFile="EsoUI/Art/PromotionalEvent/lowLevelPlayer_Gameplay.dds" alpha="0.8" level="1">
+                            <AnchorFill/>
+                        </Texture>
+                        <Texture name="$(parent)OverlayGradient" textureFile="EsoUI/Art/AnnounceWindow/blackFade.dds" alpha="1" level="2">
+                            <AnchorFill/>
+                        </Texture>
+                        <Backdrop name="$(parent)OverlayBorder" centerColor="00000000" level="3">
+                            <Edge file="EsoUI/Art/Market/Gamepad/gp_market_cel_dark_edgeFrame_8.dds" edgeFileWidth="64" edgeFileHeight="8"/>
+                            <AnchorFill/>
+                        </Backdrop>
+                        <Label name="$(parent)Title" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                            <Dimensions x="480"/>
+                            <Anchor point="TOPLEFT" offsetX="15" offsetY="20"/>
+                        </Label>
+                        <Label name="$(parent)TimeRemaining" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER" verticalAlignment="CENTER">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT"/>
+                        </Label>
+                        <Label name="$(parent)Description" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                            <Dimensions x="480"/>
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)TimeRemaining" relativePoint="BOTTOMLEFT" offsetY="10"/>
+                            <Anchor point="BOTTOMLEFT" offsetX="15"/>
+                        </Label>
+                        <Control name="$(parent)Rewards">
+                            <Anchor point="TOPRIGHT" offsetX="-10" offsetY="40"/>
+                        </Control>
+                    </Controls>
+                </Control>
+                <Control name="$(parent)Close" inherits="ZO_KeybindButton">
+                    <Anchor point="BOTTOMRIGHT" offsetX="-25" offsetY="-20"/>
+                </Control>
+                <Control name="$(parent)Primary" inherits="ZO_KeybindButton">
+                    <Anchor point="RIGHT" relativeTo="$(parent)Close" relativePoint="LEFT" offsetX="-15"/>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

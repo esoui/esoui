@@ -17,7 +17,7 @@ function ZO_ReturningPlayerIntroScreen_Shared:OnDeferredInitialize()
     self.headerLabel:SetText(headerText)
 
     self.bodyTextLabel = self.control:GetNamedChild("BodyText")
-    local activityName = GetReturningPlayerIntroGameplayDisplayName()
+    local activityName = GetIntroGameplayExperienceDisplayName()
     local bodyText = zo_strformat(SI_RETURNING_PLAYER_INTRO_BODY, activityName)
     self.bodyTextLabel:SetText(bodyText)
 
@@ -26,10 +26,10 @@ function ZO_ReturningPlayerIntroScreen_Shared:OnDeferredInitialize()
     self.gameplayDescriptionLabel = infoContainer:GetNamedChild("Description")
     self.rewardContainer = infoContainer:GetNamedChild("Rewards")
 
-    local titleText = zo_strformat(SI_RETURNING_PLAYER_GAMEPLAY_EXPERIENCE_NAME_FORMATTER, activityName)
+    local titleText = zo_strformat(SI_INTRO_GAMEPLAY_EXPERIENCE_NAME_FORMATTER, activityName)
     self.gameplayTitleLabel:SetText(titleText)
 
-    local descriptionText = GetReturningPlayerIntroGameplayDescription()
+    local descriptionText = GetIntroGameplayExperienceDescription()
     self.gameplayDescriptionLabel:SetText(descriptionText)
 
     self:InitializeGridList()
@@ -107,7 +107,7 @@ end
 
 function ZO_ReturningPlayerIntroScreen_Shared:OnHiding()
     KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
-    FlagReturningPlayerAnnouncementSeen()
+    FlagPromotionalEventPersonalCampaignAnnouncementSeen()
 end
 
 function ZO_ReturningPlayerIntroScreen_Shared:OnHidden()
@@ -115,11 +115,18 @@ function ZO_ReturningPlayerIntroScreen_Shared:OnHidden()
 end
 
 function ZO_ReturningPlayerIntroScreen_Shared:OnConfirmHideScene(scene, nextSceneName, bypassHideSceneConfirmationReason)
-    if bypassHideSceneConfirmationReason == nil and ShouldShowReturningPlayerLeaveIntroPrompt() then
-        ZO_Dialogs_ShowPlatformDialog("CONFIRM_LEAVE_RETURNING_PLAYER_INTRO",
+    if bypassHideSceneConfirmationReason == nil and ShouldShowPromotionalEventPersonalCampaignLeaveIntroPrompt() then
+        ZO_Dialogs_ShowPlatformDialog("CONFIRM_LEAVE_PERSONAL_CAMPAIGN_INTRO",
         {
             confirmCallback = function() scene:AcceptHideScene() end,
             declineCallback = function() scene:RejectHideScene() end,
+        },
+        {
+            mainTextParams = 
+            {
+                PROMOTIONAL_EVENT_PERSONAL_CAMPAIGN_MANAGER:GetWhiteIntroGameplayDisplayName(),
+                PROMOTIONAL_EVENT_PERSONAL_CAMPAIGN_MANAGER:GetColorizedCampaignDisplayName()
+            },
         })
     else
         scene:AcceptHideScene()
@@ -127,7 +134,7 @@ function ZO_ReturningPlayerIntroScreen_Shared:OnConfirmHideScene(scene, nextScen
 end
 
 function ZO_ReturningPlayerIntroScreen_Shared:GetIntroCampaignRewards()
-    local rewardData = RETURNING_PLAYER_MANAGER:GetIntroCampaignRewardData()
+    local rewardData = PROMOTIONAL_EVENT_PERSONAL_CAMPAIGN_MANAGER:GetIntroCampaignRewardData()
     if rewardData then
         if rewardData:GetRewardType() == REWARD_ENTRY_TYPE_REWARD_LIST then
             local rewardId = rewardData:GetRewardId()
@@ -142,8 +149,8 @@ function ZO_ReturningPlayerIntroScreen_Shared:GetIntroCampaignRewards()
 end
 
 function ZO_ReturningPlayerIntroScreen_Shared:RequestJumpToIntroGameplay()
-    MarkReturningPlayerLeaveIntroPromptShown()
-    RequestJumpToReturningPlayerIntroGameplay()
+    MarkPromotionalEventPersonalCampaignLeaveIntroPromptShown()
+    RequestJumpToIntroGameplayExperience()
 end
 
 ZO_ReturningPlayerIntroScreen_Shared:MUST_IMPLEMENT("InitializeGridList")

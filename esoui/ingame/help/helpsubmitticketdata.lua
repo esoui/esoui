@@ -275,6 +275,10 @@ ZO_HELP_ASK_FOR_HELP_CATEGORY_INFO =
                     id = CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_GUILD_CATEGORY_INAPPROPRIATE_DECLINE,
                     ticketCategory = 1194,
                 },
+                {
+                    id = CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_GUILD_CATEGORY_INAPPROPRIATE_MAIL,
+                    ticketCategory = 1405,
+                },
             },
         },
         {

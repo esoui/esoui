@@ -281,7 +281,7 @@ end
 function ZO_DailyLoginRewards_Keyboard.OnReturningPlayerRewardsButtonEnter(control)
     InitializeTooltip(InformationTooltip, control, RIGHT, -10, 0, LEFT)
 
-    local campaignDisplayName = RETURNING_PLAYER_MANAGER:GetColorizedIntroCampaignDisplayName()
+    local campaignDisplayName = PROMOTIONAL_EVENT_PERSONAL_CAMPAIGN_MANAGER:GetColorizedCampaignDisplayName()
     local descriptionText = zo_strformat(SI_RETURNING_PLAYER_DAILY_LOGIN_REWARD_DESCRIPTION, campaignDisplayName)
     SetTooltipText(InformationTooltip, descriptionText)
 end

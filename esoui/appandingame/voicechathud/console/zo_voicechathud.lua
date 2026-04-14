@@ -1,6 +1,7 @@
 --AppAndIngame version of ZO_FormatUserFacingDisplayName for local use
 local function ZO_FormatUserFacingDisplayName(name)
-    return ZO_IsConsoleOrGameCoreUI() and UndecorateDisplayName(name) or name
+    -- App does not load Libraries, so can't use ZO_IsConsoleOrGameCoreUI() (ESO-949746)
+    return (IsConsoleUI() or IsGameCoreUI()) and UndecorateDisplayName(name) or name
 end
 
 ZO_VOICE_CHAT_CHANNEL_TO_COLOR =

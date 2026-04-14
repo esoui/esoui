@@ -2,13 +2,7 @@
 -- Guild Ranks Manager --
 ------------------
 
-ZO_GuildRanks_Manager = ZO_CallbackObject:Subclass()
-
-function ZO_GuildRanks_Manager:New(...)
-    local manager = ZO_CallbackObject.New(self)
-    manager:Initialize(...)
-    return manager
-end
+ZO_GuildRanks_Manager = ZO_InitializingCallbackObject:Subclass()
 
 function ZO_GuildRanks_Manager:Initialize()
     self:BuildPermissionsGridData()
@@ -71,6 +65,7 @@ function ZO_GuildRanks_Manager:BuildPermissionsGridData()
             {
                 GUILD_PERMISSION_SET_MOTD,
                 GUILD_PERMISSION_DESCRIPTION_EDIT,
+                GUILD_PERMISSION_SEND_DELETE_GUILD_MAILER,
             },
         },
         [self.permissionsCategories.ALLIANCE_WAR_CATEGORY] =

@@ -340,7 +340,13 @@ end
 function ZO_GamepadGuildRosterManager:BuildAddFriendOption()
     local callback = function()
         if ZO_IsConsoleOrGameCoreUI() then
-             ZO_ShowConsoleAddFriendDialogFromDisplayNameOrFallback(self.socialData.displayName, ZO_ID_REQUEST_TYPE_GUILD_INFO, self.guildId, self.socialData.index)
+            local requestType = ZO_ID_REQUEST_TYPE_GUILD_INFO
+            local index = self.socialData.index
+            if self.socialData.rankId == DEFAULT_INVITED_RANK then
+                requestType = ZO_ID_REQUEST_TYPE_GUILD_INVITEE_INFO
+                index = self.socialData.inviteeIndex
+            end
+            ZO_ShowConsoleAddFriendDialogFromDisplayNameOrFallback(self.socialData.displayName, requestType, self.guildId, index)
         else
             local data = { displayName = self.socialData.displayName, }
             ZO_Dialogs_ShowGamepadDialog("GAMEPAD_SOCIAL_ADD_FRIEND_DIALOG", data)
@@ -353,7 +359,13 @@ end
 function ZO_GamepadGuildRosterManager:BuildShowGamerCardOption()
     if ZO_IsConsoleOrGameCoreUI() then
         local callback = function()
-            ZO_ShowGamerCardFromDisplayNameOrFallback(self.socialData.displayName, ZO_ID_REQUEST_TYPE_GUILD_INFO, self.guildId, self.socialData.index)
+            local requestType = ZO_ID_REQUEST_TYPE_GUILD_INFO
+            local index = self.socialData.index
+            if self.socialData.rankId == DEFAULT_INVITED_RANK then
+                requestType = ZO_ID_REQUEST_TYPE_GUILD_INVITEE_INFO
+                index = self.socialData.inviteeIndex
+            end
+            ZO_ShowGamerCardFromDisplayNameOrFallback(self.socialData.displayName, requestType, self.guildId, index)
         end
         return self:BuildOptionEntry(nil, ZO_GetGamerCardStringId(), callback)
     end

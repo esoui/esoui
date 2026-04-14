@@ -274,16 +274,25 @@ function ZO_Tooltip:LayoutPromotionalEventCampaigns()
     end
 end
 
-function ZO_Tooltip:LayoutPromotionalEventActivityDescription(activityData)
-    local description = activityData:GetDescription()
-    local requiredCollectibleText = ZO_PromotionalEvents_Shared.GetActivityRequiredCollectibleText(activityData)
-    if requiredCollectibleText then
+local function AppendToDescription(description, appendText)
+    if appendText and appendText ~= "" then
         if description == "" then
-            description = requiredCollectibleText
+            return appendText
         else
-            description = string.format("%s\n\n%s", description, requiredCollectibleText)
+            return string.format("%s\n\n%s", description, appendText)
         end
     end
+    return description
+end
+
+function ZO_Tooltip:LayoutPromotionalEventActivityDescription(activityData)
+    local description = activityData:GetDescription()
+
+    local menuAssistanceText = activityData:GetMenuAssistanceDescriptionText("UI_SHORTCUT_PRIMARY")
+    description = AppendToDescription(description, menuAssistanceText)
+
+    local requiredCollectibleText = ZO_PromotionalEvents_Shared.GetActivityRequiredCollectibleText(activityData)
+    description = AppendToDescription(description, requiredCollectibleText)
 
     if description ~= "" then
         local bodySection = self:AcquireSection(self:GetStyle("bodySection"))

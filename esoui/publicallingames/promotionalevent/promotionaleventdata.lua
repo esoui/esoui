@@ -120,6 +120,30 @@ function ZO_PromotionalEventActivityData:IsLocked()
     return requiredCollectibleData and requiredCollectibleData:IsLocked() or false
 end
 
+function ZO_PromotionalEventActivityData:GetMenuAssistanceInfo()
+    local menuAssistanceType, referenceData = GetTimedActivityMenuAssistanceInfo(self.activityId)
+    return menuAssistanceType, referenceData
+end
+
+function ZO_PromotionalEventActivityData:HasMenuAssistance()
+    local menuAssistanceType, referenceData = self:GetMenuAssistanceInfo()
+    return menuAssistanceType ~= MENU_ASSISTANCE_TYPE_NONE
+end
+
+function ZO_PromotionalEventActivityData:GetMenuAssistanceDescriptionText(keybind)
+    local menuAssistanceType, referenceData = self:GetMenuAssistanceInfo()
+    return ZO_UI_SYSTEM_MANAGER:GetMenuAssistanceDescriptionText(menuAssistanceType, referenceData, keybind)
+end
+
+function ZO_PromotionalEventActivityData:TriggerMenuAssistance()
+    local menuAssistanceType, referenceData = self:GetMenuAssistanceInfo()
+    if menuAssistanceType == MENU_ASSISTANCE_TYPE_GRAVEYARD then
+        RequestJumpToTimedActivityMenuAssistanceInfo(self.activityId)
+    else
+        ZO_UI_SYSTEM_MANAGER:TriggerMenuAssistance(menuAssistanceType, referenceData)
+    end
+end
+
 -- Milestone Data --
 
 ZO_PromotionalEventMilestoneData = ZO_RewardableData_Base:Subclass()
@@ -265,6 +289,25 @@ end
 function ZO_PromotionalEventCampaignData:IsReturningPlayerCampaign()
     local isReturningPlayerCampaign = IsReturningPlayerPromotionalEventsCampaign(self.campaignKey)
     return isReturningPlayerCampaign
+end
+
+function ZO_PromotionalEventCampaignData:IsLowLevelPlayerCampaign()
+    local isLowLevelPlayerCampaign = IsLowLevelPlayerPromotionalEventsCampaign(self.campaignKey)
+    return isLowLevelPlayerCampaign
+end
+
+function ZO_PromotionalEventCampaignData:IsPersonalCampaign()
+    return self:IsLowLevelPlayerCampaign() or self:IsReturningPlayerCampaign()
+end
+
+function ZO_PromotionalEventCampaignData:GetNextPersonalCampaignKey()
+    if self:IsLowLevelPlayerCampaign() then
+        return GetCampaignKeyForNextLowLevelPlayerCampaign(self:GetId())
+    elseif self:IsReturningPlayerCampaign() then
+        return GetCampaignKeyForNextReturningPlayerCampaign(self:GetId())
+    end
+
+    return nil
 end
 
 function ZO_PromotionalEventCampaignData:ShouldCampaignBeVisible()

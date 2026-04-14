@@ -16,8 +16,9 @@ function ZO_DynamicEventsTracker:Initialize(...)
 end
 
 function ZO_DynamicEventsTracker:DeferredInitialize(...)
-    self.timerLabel = self.container:GetNamedChild("TimerLabel")
     self.progressBar = self.container:GetNamedChild("ProgressBar")
+    self.timerText = self.container:GetNamedChild("TimerText")
+    self.timerLabel = self.container:GetNamedChild("TimerLabel")
     ZO_StatusBar_SetGradientColor(self.progressBar, ZO_XP_BAR_GRADIENT_COLORS)
 
     ZO_HUDTracker_Base.DeferredInitialize(self, ...)
@@ -32,15 +33,18 @@ function ZO_DynamicEventsTracker:InitializeStyles()
             CONTAINER_SECONDARY_ANCHOR = ZO_Anchor:New(TOPRIGHT),
             FONT_HEADER = "ZoFontGameShadow",
             FONT_SUBLABEL = "ZoFontGameShadow",
+            FONT_TIMER_TEXT = "ZoFontWinT1",
+            COLOR_TIMER_TEXT = INTERFACE_TEXT_COLOR_SELECTED,
             FONT_TIMER_LABEL = "ZoFontWinT1",
             COLOR_TIMER_LABEL = INTERFACE_TEXT_COLOR_NORMAL,
-            RESIZE_TO_FIT_PADDING_HEIGHT = 10,
             TEXT_HORIZONTAL_ALIGNMENT = TEXT_ALIGN_LEFT,
             TOP_LEVEL_PRIMARY_ANCHOR = ZO_Anchor:New(TOPLEFT, ZO_AdvZoneHUDTracker, BOTTOMLEFT),
             TOP_LEVEL_SECONDARY_ANCHOR = ZO_Anchor:New(RIGHT, GuiRoot, RIGHT, 0, 0, ANCHOR_CONSTRAINS_X),
 
-            TIMER_LABEL_PRIMARY_ANCHOR = ZO_Anchor:New(TOPLEFT, self.subLabel, BOTTOMLEFT, 0, 2),
-            TIMER_LABEL_SECONDARY_ANCHOR = ZO_Anchor:New(TOPRIGHT, self.subLabel, BOTTOMRIGHT, 0, 2),
+            TIMER_TEXT_PRIMARY_ANCHOR = ZO_Anchor:New(TOPLEFT, self.progressBar, BOTTOMLEFT, 0, 2),
+            TIMER_TEXT_SECONDARY_ANCHOR = ZO_Anchor:New(TOPRIGHT, self.progressBar, BOTTOMRIGHT, 0, 2),
+            TIMER_LABEL_PRIMARY_ANCHOR = ZO_Anchor:New(TOPLEFT, self.timerText, BOTTOMLEFT, 0, 2),
+            TIMER_LABEL_SECONDARY_ANCHOR = ZO_Anchor:New(TOPRIGHT, self.timerText, BOTTOMRIGHT, 0, 2),
         },
         gamepad =
         {
@@ -48,14 +52,16 @@ function ZO_DynamicEventsTracker:InitializeStyles()
             CONTAINER_SECONDARY_ANCHOR = ZO_Anchor:New(TOPRIGHT, nil, nil, -15, 0),
             FONT_HEADER = "ZoFontGamepadBold27",
             FONT_SUBLABEL = "ZoFontGamepad34",
+            FONT_TIMER_TEXT = "ZoFontGamepadBold27",
+            COLOR_TIMER_TEXT = INTERFACE_TEXT_COLOR_SELECTED,
             FONT_TIMER_LABEL = "ZoFontGamepadBold27",
             COLOR_TIMER_LABEL = INTERFACE_TEXT_COLOR_SELECTED,
-            RESIZE_TO_FIT_PADDING_HEIGHT = 20,
             TEXT_HORIZONTAL_ALIGNMENT = TEXT_ALIGN_RIGHT,
             TOP_LEVEL_PRIMARY_ANCHOR = ZO_Anchor:New(TOPLEFT, ZO_AdvZoneHUDTracker, BOTTOMLEFT),
             TOP_LEVEL_SECONDARY_ANCHOR = ZO_Anchor:New(RIGHT, GuiRoot, RIGHT, 0, 0, ANCHOR_CONSTRAINS_X),
 
-            TIMER_LABEL_PRIMARY_ANCHOR = ZO_Anchor:New(TOPRIGHT, self.subLabel, BOTTOMRIGHT, 0, 10),
+            TIMER_TEXT_PRIMARY_ANCHOR = ZO_Anchor:New(TOPRIGHT, self.progressBar, BOTTOMRIGHT, 0, 10),
+            TIMER_LABEL_PRIMARY_ANCHOR = ZO_Anchor:New(TOPRIGHT, self.timerText, BOTTOMRIGHT, 0, 10),
         },
     }
 
@@ -72,7 +78,7 @@ function ZO_DynamicEventsTracker:RegisterEvents()
     self.control:RegisterForEvent(EVENT_WORLD_EVENT_PARTICIPATION_BEGIN, OnUpdate)
     self.control:RegisterForEvent(EVENT_WORLD_EVENT_PARTICIPATION_END, OnUpdate)
 
-    local function OnStepChanged(_, worldEventInstanceId, stepIndex)
+    local function OnStepChanged(_, worldEventInstanceId, stepDefId)
         if worldEventInstanceId == self.worldEventInstanceId then
             self:Update()
         end
@@ -80,8 +86,8 @@ function ZO_DynamicEventsTracker:RegisterEvents()
 
     self.control:RegisterForEvent(EVENT_WORLD_EVENT_STEP_CHANGED, OnStepChanged)
 
-    local function OnProgressChanged(_, worldEventInstanceId, stepIndex, newCurrentProgress, newMaxProgress)
-        if worldEventInstanceId == self.worldEventInstanceId and stepIndex == self.stepIndex then
+    local function OnProgressChanged(_, worldEventInstanceId, stepDefId, newCurrentProgress, newMaxProgress)
+        if worldEventInstanceId == self.worldEventInstanceId and stepDefId == self.stepDefId then
             self:RefreshProgress(newCurrentProgress, newMaxProgress)
         end
     end
@@ -92,6 +98,8 @@ end
 function ZO_DynamicEventsTracker:ApplyPlatformStyle(style)
     ZO_HUDTracker_Base.ApplyPlatformStyle(self, style)
 
+    self.timerText:SetFont(style.FONT_TIMER_TEXT)
+    self.timerText:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, style.COLOR_TIMER_TEXT))
     self.timerLabel:SetFont(style.FONT_TIMER_LABEL)
     self.timerLabel:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, style.COLOR_TIMER_LABEL))
     ZO_ApplyPlatformTemplateToControl(self.progressBar, "ZO_DynamicEventsTracker_ProgressBar")
@@ -111,17 +119,24 @@ function ZO_DynamicEventsTracker:OnShown()
 end
 
 function ZO_DynamicEventsTracker:Update()
-    local worldEventInstanceId, stepIndex = GetParticipatingWorldEventStep()
+    local worldEventInstanceId, stepDefId = GetParticipatingWorldEventStep()
     self.worldEventInstanceId = worldEventInstanceId
-    self.stepIndex = stepIndex
+    self.stepDefId = stepDefId
 
     local isInDynamicEvent = worldEventInstanceId ~= 0
     if isInDynamicEvent then
-        self:SetHeaderText(GetWorldEventStepName(worldEventInstanceId, stepIndex))
-        self:SetSubLabelText(GetWorldEventStepDescription(worldEventInstanceId, stepIndex))
+        self:SetHeaderText(GetWorldEventStepName(worldEventInstanceId, stepDefId))
+        self:SetSubLabelText(GetWorldEventStepDescription(stepDefId))
 
         self.expireTimeS = GetWorldEventCurrentStepExpireTimeS(worldEventInstanceId)
         self.timerLabel:SetHidden(self.expireTimeS == 0)
+
+        local timerText = GetWorldEventStepTimerTextOverride()
+        if timerText == "" then
+            timerText = GetString(SI_DYNAMIC_EVENTS_TIMER_LABEL)
+        end
+        self.timerText:SetText(timerText)
+        self.timerText:SetHidden(self.expireTimeS == 0)
 
         self:RefreshProgress()
     end
@@ -155,6 +170,7 @@ function ZO_DynamicEventsTracker:RefreshAnchors()
     ZO_HUDTracker_Base.RefreshAnchors(self)
 
     local style = self.currentStyle
+    self:RefreshAnchorSetOnControl(self.timerText, style.TIMER_TEXT_PRIMARY_ANCHOR, style.TIMER_TEXT_SECONDARY_ANCHOR)
     self:RefreshAnchorSetOnControl(self.timerLabel, style.TIMER_LABEL_PRIMARY_ANCHOR, style.TIMER_LABEL_SECONDARY_ANCHOR)
 end
 

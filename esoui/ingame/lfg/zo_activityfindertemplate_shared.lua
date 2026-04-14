@@ -60,6 +60,8 @@ function ZO_ActivityFinderTemplate_Shared:RegisterEvents()
     ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnTributeCampaignDataChanged", function() self:OnTributeCampaignDataChanged() end)
     ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnTributeLeaderboardRankChanged", function() self:OnTributeLeaderboardRankChanged() end)
 
+    ZO_VETERANCY_MANAGER:RegisterCallback("OnVeterancyRankProgressed", function(...) self:OnVeterancyRankProgressed(...) end)
+
     EVENT_MANAGER:RegisterForEvent(self:GetSystemName(), EVENT_GROUP_FINDER_APPLY_TO_GROUP_LISTING_RESULT, function() self:OnActivityFinderStatusUpdate() end)
     EVENT_MANAGER:RegisterForEvent(self:GetSystemName(), EVENT_GROUP_FINDER_RESOLVE_GROUP_LISTING_APPLICATION_RESULT, function() self:OnActivityFinderStatusUpdate() end)
     EVENT_MANAGER:RegisterForEvent(self:GetSystemName(), EVENT_GROUP_FINDER_REMOVE_GROUP_LISTING_APPLICATION, function() self:OnActivityFinderStatusUpdate() end)
@@ -377,6 +379,10 @@ end
 
 function ZO_ActivityFinderTemplate_Shared:OnTributeLeaderboardRankChanged()
     self:RefreshView()
+end
+
+function ZO_ActivityFinderTemplate_Shared:OnVeterancyRankProgressed()
+    --Can be overridden
 end
 
 do

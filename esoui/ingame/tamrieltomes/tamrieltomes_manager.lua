@@ -165,19 +165,19 @@ function TamrielTomes_Manager:HasNewTomes()
     return false
 end
 
--- Indicates whether there are any Tomes currently available.
-function TamrielTomes_Manager:AreTomesAvailable()
-    return self:GetNumActiveTomes() > 0
-end
-
 -- Returns the first active Tome Id, if any, or nil.
 function TamrielTomes_Manager:GetActiveTomeId()
     local activeTomeIds = self:GetActiveTomeIds()
     return activeTomeIds[1]
 end
 
--- Returns all active Tome Ids.
+-- Returns the active season Tome Id(s).
+-- Note that there should typically only be, at most, one.
 function TamrielTomes_Manager:GetActiveTomeIds()
+    if not IsTamrielTomesEnabled() then
+        return {}
+    end
+
     local activeTomeIds = { GetActiveReferenceTrackIdsForRewardTrackType(REWARD_TRACK_TYPE_TAMRIEL_TOMES) }
     return activeTomeIds
 end
@@ -185,6 +185,32 @@ end
 -- Returns the number of active Tomes.
 function TamrielTomes_Manager:GetNumActiveTomes()
     return #self:GetActiveTomeIds()
+end
+
+-- Indicates whether there are any Tomes currently available.
+function TamrielTomes_Manager:AreTomesAvailable()
+    return self:GetNumAvailableTomes() > 0
+end
+
+-- Returns the number of available Tomes.
+function TamrielTomes_Manager:GetNumAvailableTomes()
+    local numAvailableTomes = #self:GetAvailableTomeIds()
+    return numAvailableTomes
+end
+
+-- Returns all accessible Tome Ids that are available to view.
+function TamrielTomes_Manager:GetAvailableTomeIds()
+    if not IsTamrielTomesEnabled() then
+        return {}
+    end
+
+    local availableTomeIds = {}
+    local numAvailableTomes = GetNumReferenceTracksForType(REWARD_TRACK_TYPE_TAMRIEL_TOMES)
+    for tomeIndex = 1, numAvailableTomes do
+        local tomeId = GetReferenceTrackIdFromIndex(REWARD_TRACK_TYPE_TAMRIEL_TOMES, tomeIndex)
+        table.insert(availableTomeIds, tomeId)
+    end
+    return availableTomeIds
 end
 
 -- Indicates whether a valid Tome Id is selected.
@@ -207,14 +233,20 @@ function TamrielTomes_Manager:IsCurrentSeasonTamrielTomeNew()
 end
 
 function TamrielTomes_Manager:SelectTomeId(tomeId)
-    if TAMRIEL_TOMES_MANAGER and not TAMRIEL_TOMES_MANAGER:AreTomesAvailable() then
+    if not self:AreTomesAvailable() then
         tomeId = nil
     elseif tomeId == nil or tomeId == 0 then
         -- Default to the active season's tome.
         tomeId = self:GetActiveTomeId()
-    end
 
-    -- TODO Tamriel Tomes: Verify that 'tomeId' is a valid, accessible Tome Id.
+        if tomeId == nil or tomeId == 0 then
+            local availableTomeIds = self:GetAvailableTomeIds()
+            if #availableTomeIds ~= 0 then
+                -- Fallback to the first available season's tome.
+                tomeId = availableTomeIds[1]
+            end
+        end
+    end
 
     if tomeId ~= self.selectedTomeId then
         -- Order matters
@@ -286,8 +318,8 @@ end
 function TamrielTomes_Manager:UpdateTamrielTomesAvailability()
     -- Refresh the selected Tome to validate the selection now that the Tomes have changed.
     self:SelectTomeId(self.selectedTomeId)
-
     self:RefreshMainMenus()
+    self:FireCallbacks("AvailableTomesChanged")
 end
 
 function TamrielTomes_Manager:RefreshMainMenus()

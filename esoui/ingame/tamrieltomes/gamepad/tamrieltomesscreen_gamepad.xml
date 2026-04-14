@@ -34,7 +34,10 @@
                     <Anchor point="TOP"/>
                     <Dimensions x="850" y="150"/>
                     <Controls>
-                        <Label name="$(parent)Title" override="true" font="ZoFontGamepadBold48"/>
+                        <Label name="$(parent)Title" override="true" font="ZoFontGamepadBold48">
+                            <Anchor point="TOPLEFT" offsetX="10"/>
+                            <Anchor point="TOPRIGHT" offsetX="-80"/>
+                        </Label>
                         <Label name="$(parent)Subtitle" override="true" font="ZoFontGamepad27"/>
                         <Control name="$(parent)Buttons" override="true">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)Subtitle" relativePoint="BOTTOMLEFT" offsetY="36"/>
@@ -44,6 +47,9 @@
                                 <Button name="$(parent)UpgradeButton" override="true" inherits="ZO_TamrielTomes_GamepadButtonTemplate"/>
                             </Controls>
                         </Control>
+                        <Button name="$(parent)SelectTomeButton" override="true">
+                            <Anchor point="RIGHT" offsetX="-8"/>
+                        </Button>
                     </Controls>
                 </Control>
                 <Control name="$(parent)Book" override="true">
@@ -80,12 +86,14 @@
                                 </Control>
                                 <Texture name="$(parent)BalanceBackdrop" override="true">
                                     <Anchor point="LEFT" relativeTo="GuiRoot" constrains="X"/>
-                                    <Anchor point="CENTER" relativeTo="$(parent)Balance" constrains="Y" offsetY="-7"/>
+                                    <Anchor point="CENTER" relativeTo="$(parent)Balance" constrains="Y"/>
+                                    <Dimensions x="350" y="48"/>
                                     <TextureCoords left="1" top="0" right="0.1445" bottom="0.6953"/>
                                 </Texture>
                                 <Texture name="$(parent)FullBackdrop" override="true">
                                     <Anchor point="LEFT" relativeTo="GuiRoot" constrains="X"/>
                                     <Anchor point="CENTER" constrains="Y" offsetY="-7"/>
+                                    <Dimensions x="350" y="64"/>
                                     <TextureCoords left="1" top="0" right="0.1445" bottom="0.6953"/>
                                 </Texture>
                             </Controls>

@@ -365,8 +365,11 @@
                                 <Label name="$(parent)Title" font="ZoFontGamepadBold48">
                                     <Anchor point="BOTTOM" relativePoint="TOP" relativeTo="$(parent)AttacksDivider" offsetY="-10"/>
                                 </Label>
-                                <Label name="$(parent)AttacksHeader" font="ZoFontGamepad27" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                                <Label name="$(parent)DifficultyHeader" font="ZoFontGamepad27" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
                                     <Anchor point="TOPLEFT" relativeTo="$(parent)AttacksDivider" offsetX="5" offsetY="17"/>
+                                </Label>
+                                <Label name="$(parent)AttacksHeader" font="ZoFontGamepad27" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)AttacksDivider" relativePoint="TOPLEFT" offsetX="735" offsetY="17"/>
                                 </Label>
                                 <Control name="$(parent)Attacks">
                                     <DimensionConstraints minY="340"/>
@@ -425,8 +428,11 @@
                                 <Label name="$(parent)Title" font="ZoFontWinH1">
                                     <Anchor point="TOP"/>
                                 </Label>
-                                <Label name="$(parent)AttacksHeader" font="ZoFontWinH3" color="FFFFFF">
+                                <Label name="$(parent)DifficultyHeader" font="ZoFontWinH3">
                                     <Anchor point="TOPLEFT" offsetX="18" offsetY="50"/>
+                                </Label>
+                                <Label name="$(parent)AttacksHeader" font="ZoFontWinH3" color="FFFFFF">
+                                    <Anchor point="TOPRIGHT" relativePoint="TOPLEFT" offsetX="750" offsetY="50"/>
                                 </Label>
                                 <Control name="$(parent)Attacks">
                                     <DimensionConstraints minY="360"/>
@@ -480,11 +486,15 @@
                                 <Label name="$(parent)Title" font="ZoFontWinH1" text="SI_DEATH_RECAP_TITLE" modifyTextType="UPPERCASE">
                                     <Anchor point="TOP"/>
                                 </Label>
-                                <Label name="$(parent)AttacksHeader" font="ZoFontWinH3" text="SI_DEATH_RECAP_ATTACKS_HEADER" modifyTextType="UPPERCASE">
+                                <Label name="$(parent)DifficultyHeader" font="ZoFontWinH3" modifyTextType="UPPERCASE">
                                     <Anchor point="TOPLEFT" offsetX="18" offsetY="50"/>
                                 </Label>
+                                <Label name="$(parent)AttacksHeader" font="ZoFontWinH3" text="SI_DEATH_RECAP_ATTACKS_HEADER" modifyTextType="UPPERCASE">
+                                    <Anchor point="TOPRIGHT" relativePoint="TOPLEFT" offsetX="750" offsetY="50"/>
+                                </Label>
                                 <Control name="$(parent)Attacks" resizeToFitDescendents="true">
-                                    <Anchor point="TOPLEFT" relativeTo="$(parent)AttacksHeader" relativePoint="BOTTOMLEFT" offsetY="9"/>
+                                    <Anchor point="LEFT" offsetX="18" constrains="X"/>
+                                    <Anchor point="TOP" relativeTo="$(parent)AttacksHeader" relativePoint="BOTTOM" constrains="Y"/>
                                     <DimensionConstraints minY="360"/>
                                     <Controls>
                                         <Texture name="$(parent)KillingBlowIcon" excludeFromResizeToFitExtents="true" textureFile="EsoUI/Art/DeathRecap/deathRecap_killingBlow_icon.dds">

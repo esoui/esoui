@@ -112,6 +112,7 @@ local function ZO_QuestJournal_Manager_SortQuestEntries(entry1, entry2)
     return entry1.categoryType < entry2.categoryType
 end
 
+internalassert(QUEST_TYPE_MAX_VALUE == 20, "Handle categorizing new QuestType")
 ZO_IS_QUEST_TYPE_IN_OTHER_CATEGORY =
 {
     [QUEST_TYPE_MAIN_STORY] = true,
@@ -124,6 +125,8 @@ ZO_IS_QUEST_TYPE_IN_OTHER_CATEGORY =
     [QUEST_TYPE_COMPANION] = true,
     [QUEST_TYPE_TRIBUTE] = true,
     [QUEST_TYPE_SCRIBING] = true,
+    [QUEST_TYPE_FAVOR] = true,
+    [QUEST_TYPE_TAMRIEL_TALE] = true,
 }
 
 function ZO_QuestJournal_Manager:GetQuestCategoryNameAndType(questType, zone)

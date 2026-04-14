@@ -55,6 +55,7 @@ function CampaignBrowser:Initialize(control)
             KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
         elseif newState == SCENE_HIDDEN then
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
+            VETERANCY_KEYBOARD:SetPreviousCampaignScene("campaignBrowser")
         end
     end)
 end
@@ -66,11 +67,13 @@ function CampaignBrowser:InitializeTree()
         control.text:SetModifyTextType(MODIFY_TEXT_TYPE_UPPERCASE)
         control.text:SetText(GetString("SI_CAMPAIGNRULESETTYPE", rulesetType))
         control.rulesetType = rulesetType
-        
+
         local icons = ZO_CampaignBrowser_GetKeyboardIconsForRulesetType(rulesetType)
-        control.icon:SetTexture(down and icons.down or icons.up)
-        control.iconHighlight:SetTexture(icons.over)
-        
+        if icons then
+            control.icon:SetTexture(down and icons.down or icons.up)
+            control.iconHighlight:SetTexture(icons.over)
+        end
+
         ZO_IconHeader_Setup(control, down)
     end
 

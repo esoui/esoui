@@ -16,9 +16,14 @@
         <TopLevelControl name="ZO_SkillLineSwapSelectionDialog" inherits="ZO_CustomDialogBase">
             <Controls>
                 <Label name="$(parent)Description" inherits="ZO_DialogContentAnchors" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"/>
+                <Label name="$(parent)Warning" inherits="ZO_DialogContentAnchors" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <ClearAnchors/>
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Description" relativePoint="BOTTOMLEFT" offsetY="30"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Description" relativePoint="BOTTOMRIGHT" offsetY="30"/>
+                </Label>
                 <Control name="$(parent)Options">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Divider" relativePoint="BOTTOMLEFT" offsetY="100"/>
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Divider" relativePoint="BOTTOMRIGHT" offsetY="100"/>
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Warning" relativePoint="BOTTOMLEFT" offsetY="50"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Warning" relativePoint="BOTTOMRIGHT" offsetY="50"/>
                     <Controls>
                         <Control name="$(parent)CurrentSkillLine1" inherits="ZO_SkillsSubclassing_Swap_SkillLine_Keyboard">
                             <Anchor point="TOP" relativeTo="$(parent)Arrows" relativePoint="BOTTOM" offsetX="20"/>

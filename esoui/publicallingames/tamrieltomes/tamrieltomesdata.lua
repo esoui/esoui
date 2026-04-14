@@ -363,9 +363,20 @@ function ZO_DirectPurchaseSkuData:GetPricingInfo()
     return currentPrice, basePrice, currency
 end
 
+-- The prices returned have been processed by grammar.
 function ZO_DirectPurchaseSkuData:GetPricingInfoFormatted()
     local currentPriceString, basePriceString = GetSkuPricingInfoFormatted(self.skuId)
     return currentPriceString, basePriceString
+end
+
+-- The price(s) returned have been processed by grammar.
+function ZO_DirectPurchaseSkuData:GetPricingStringFormatted()
+    local currentPriceString, basePriceString = self:GetPricingInfoFormatted()
+    if currentPriceString == basePriceString then
+        return currentPriceString
+    end
+
+    return string.format("|DS%s|ds %s", basePriceString, currentPriceString)
 end
 
 function ZO_DirectPurchaseSkuData:GetPricingInfoWithTax()

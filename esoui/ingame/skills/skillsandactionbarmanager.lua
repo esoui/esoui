@@ -55,7 +55,7 @@ function ZO_SkillsAndActionBarManager:SetSkillPointAllocationMode(skillPointAllo
     end
 
     -- Debug: Trying to track down data in a bad state
-    internalassert(SKILL_POINT_ALLOCATION_MANAGER:HasValidChangesForMode(), "Skill point allocation manager has pending changes incompatible with current mode")
+    internalassert(SKILL_POINT_ALLOCATION_MANAGER:HasValidChangesForMode(), "Skill Point allocation manager has pending changes incompatible with current mode")
 end
 
 function ZO_SkillsAndActionBarManager:OnInteractionEnded(oldInteractionType)
@@ -149,7 +149,7 @@ function ZO_SkillsAndActionBarManager:OnStartRespec(allocationMode, paymentType)
 end
 
 do
-    internalassert(RESPEC_RESULT_MAX_VALUE == 77, "Update EXPECTED_RESPEC_FAILURES")
+    internalassert(RESPEC_RESULT_MAX_VALUE == 79, "Update EXPECTED_RESPEC_FAILURES")
     local EXPECTED_RESPEC_FAILURES =
     {
         [RESPEC_RESULT_IS_IN_COMBAT] = true,

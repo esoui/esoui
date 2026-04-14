@@ -199,6 +199,7 @@ end
 function ZO_TimedActivities_Gamepad:OnRerollCurrencyUpdated()
     GAMEPAD_GENERIC_FOOTER:Refresh(self.footerData)
     self:RefreshKeybinds()
+    self.activitiesList:UpdateKeybinds()
 end
 
 -- End ZO_TimedActivities_Shared Overrides --
@@ -388,6 +389,13 @@ function ZO_TimedActivitiesList_Gamepad:Initialize(control)
                 local selectedData = self:GetSelectedData()
                 if selectedData then
                     return selectedData:CanReroll()
+                end
+                return false
+            end,
+            enabled = function()
+                local selectedData = self:GetSelectedData()
+                if selectedData then
+                    return not selectedData:CanClaim()
                 end
                 return false
             end,

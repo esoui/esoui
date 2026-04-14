@@ -182,7 +182,7 @@ function CMapHandlers:ValidatePvPPinAllowed(pinType)
     local isDistrict = ZO_MapPin.DISTRICT_PIN_TYPES[pinType]
 
     if isAvARespawn or isForwardCamp or isFastTravelKeep or isKeep or isDistrict then
-        if IsInCyrodiil() then
+        if IsInCyrodiil() or IsInJerallPass() then
             return isAvARespawn or isForwardCamp or isFastTravelKeep or isKeep
         elseif IsInImperialCity() then
             return isDistrict or isAvARespawn

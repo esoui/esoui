@@ -149,9 +149,6 @@ GAMEPAD_ENCHANTING_INVENTORY_FRAGMENT = ZO_CreateQuadrantConveyorFragment(ZO_Gam
 GAMEPAD_SKILLS_FRAGMENT = ZO_SimpleSceneFragment:New(ZO_GamepadSkillsTopLevel)
 GAMEPAD_SKILLS_FRAGMENT:SetHideOnSceneHidden(true)
 
-GAMEPAD_QUEST_JOURNAL_FRAGMENT = ZO_SimpleSceneFragment:New(ZO_QuestJournal_GamepadTopLevel)
-GAMEPAD_QUEST_JOURNAL_FRAGMENT:SetHideOnSceneHidden(true)
-
 GAMEPAD_LEADERBOARDS_FRAGMENT = ZO_SimpleSceneFragment:New(ZO_Leaderboards_Gamepad)
 GAMEPAD_LEADERBOARDS_FRAGMENT:SetHideOnSceneHidden(true)
 GAMEPAD_LEADERBOARDS_LIST_FRAGMENT = ZO_FadeSceneFragment:New(ZO_LeaderboardList_Gamepad)

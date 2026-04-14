@@ -1,0 +1,238 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_Veterancy_RankTile_Template_Shared" inherits="ZO_ContextualActionsTile_Control" virtual="true">
+            <Dimensions x="ZO_VETERANCY_TEMPLATE_RANK_X" y="ZO_VETERANCY_TEMPLATE_RANK_Y"/>
+            <OnInitialized>
+                ZO_Veterancy_RankTile_Shared.OnControlInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Texture name="$(parent)Icon" level="5" override="true">
+                    <Dimensions x="150" y="150"/>
+                    <Anchor point="TOPLEFT" offsetY="35"/>
+                </Texture>
+                <Texture name="$(parent)Background" textureFile="EsoUI/Art/Veterancy/veterancy_rank_bg.dds">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Icon"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icon"/>
+                </Texture>
+                <Texture name="$(parent)Border" level="10" textureFile="EsoUI/Art/Veterancy/veterancy_rank_frame.dds">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Icon"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icon"/>
+                </Texture>
+                <Texture name="$(parent)Locked" color="000000" alpha="0.5" level="20" hidden="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Icon"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icon"/>
+                </Texture>
+                <Backdrop name="$(parent)OverlayBorder" override="true" hidden="true"/>
+                <Label name="$(parent)RankIndex">
+                    <Anchor point="BOTTOM" relativeTo="$(parent)Icon" relativePoint="TOP"/>
+                </Label>
+                <Label name="$(parent)Title" override="true" horizontalAlignment="CENTER" maxLineCount="2">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Icon" relativePoint="BOTTOMLEFT"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Icon" relativePoint="BOTTOMRIGHT"/>
+                </Label>
+                <StatusBar name="$(parent)ProgressBar" inherits="ZO_DefaultStatusBar">
+                    <Dimensions y="20"/>
+                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT"/>
+                    <Anchor point="RIGHT" constrains="X"/>
+                    <Controls>
+                        <Control name="$(parent)BG" tier="LOW">
+                            <AnchorFill/>
+                            <Controls>
+                                <Texture name="$(parent)Middle" textureFile="EsoUI/Art/Miscellaneous/progressbar_frame_bg.dds">
+                                    <Anchor point="TOPLEFT"/>
+                                    <Anchor point="BOTTOMRIGHT"/>
+                                    <TextureCoords left="0.0195" right="0.5898" top="0" bottom="0.6250"/>
+                                </Texture>
+                            </Controls>
+                        </Control>
+                        <Control name="$(parent)Overlay" tier="HIGH" layer="OVERLAY">
+                            <AnchorFill/>
+                            <Controls>
+                                <Texture name="$(parent)Middle" textureFile="EsoUI/Art/Miscellaneous/progressbar_frame.dds" layer="OVERLAY">
+                                    <Anchor point="TOPLEFT"/>
+                                    <Anchor point="BOTTOMRIGHT" offsetY="1"/>
+                                    <TextureCoords left="0.0195" right="0.5898" top="0" bottom="0.6250"/>
+                                </Texture>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </StatusBar>
+            </Controls>
+        </Control>
+        <Control name="ZO_Veterancy_RankTile_Empty_Template_Shared" inherits="ZO_ContextualActionsTile_Control" virtual="true">
+            <Dimensions x="ZO_VETERANCY_TEMPLATE_RANK_X" y="ZO_VETERANCY_TEMPLATE_RANK_Y"/>
+            <OnInitialized>
+                ZO_Veterancy_RankTile_Empty_Shared.OnControlInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Texture name="$(parent)Icon" override="true" hidden="true"/>
+                <Backdrop name="$(parent)OverlayBorder" override="true" hidden="true"/>
+                <Label name="$(parent)Title" override="true" hidden="true"/>
+            </Controls>
+        </Control>
+        <Control name="ZO_VeterancyReward_Template_Shared" virtual="true">
+            <Controls>
+                <Control name="$(parent)RewardIcon">
+                    <Dimensions x="ZO_VENGEANCE_PERK_TILE_KEYBOARD_ICON_DIMENSIONS" y="ZO_VENGEANCE_PERK_TILE_KEYBOARD_ICON_DIMENSIONS"/>
+                    <Anchor point="CENTER"/>
+                    <Controls>
+                        <Texture name="$(parent)Icon" level="3">
+                            <AnchorFill/>
+                            <Anchor point="CENTER"/>
+                        </Texture>
+                        <Texture name="$(parent)Background" level="2" textureFile="EsoUI/Art/Veterancy/itemreward_bg.dds">
+                            <AnchorFill/>
+                            <Anchor point="CENTER" relativeTo="$(parent)Icon"/>
+                        </Texture>
+                        <Texture name="$(parent)Border" level="10" textureFile="EsoUI/Art/Veterancy/itemreward_frame.dds" excludeFromResizeToFitExtents="true">
+                            <Dimensions x="ZO_VENGEANCE_PERK_TILE_KEYBOARD_ICON_BORDER_DIMENSIONS" y="ZO_VENGEANCE_PERK_TILE_KEYBOARD_ICON_BORDER_DIMENSIONS"/>
+                            <Anchor point="CENTER"/>
+                        </Texture>
+                        <Label name="$(parent)Quantity">
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icon" offsetX="4" offsetY="4"/>
+                            <Anchor point="LEFT" offsetX="4" constrains="X"/>
+                        </Label>
+                        <Texture name="$(parent)CompleteMark" textureFile="EsoUI/Art/Miscellaneous/check_icon_32.dds" inheritAlpha="false" level="12" hidden="true">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Icon"/>
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icon"/>
+                        </Texture>
+                        <Texture name="$(parent)Locked" alpha="0.5" level="20" textureFile="EsoUI/Art/Vengeance/reward_alpha_shadow.dds" excludeFromResizeToFitExtents="true" hidden="true">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Border"/>
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Border"/>
+                        </Texture>
+                        <Control name="$(parent)FxAnchorControl" tier="MEDIUM">
+                            <AnchorFill/>
+                        </Control>
+                    </Controls>
+                </Control>
+                <Control name="$(parent)PerkIcon" inherits="ZO_VengeancePerk_FramedIcon" level="10" hidden="true">
+                    <Anchor point="CENTER"/>
+                    <Controls>
+                        <Texture name="$(parent)Highlight" tier="HIGH" layer="OVERLAY" level="2" alpha="0" inheritScale="false" excludeFromResizeToFitExtents="true">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Border"/>
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Border"/>
+                        </Texture>
+                        <Texture name="$(parent)CompleteMark" textureFile="EsoUI/Art/Miscellaneous/check_icon_32.dds" inheritAlpha="false" level="12" hidden="true">
+                            <Dimensions x="40" y="40"/>
+                            <Anchor point="CENTER"/>
+                        </Texture>
+                        <Texture name="$(parent)Locked" alpha="0.5" level="20" hidden="true" excludeFromResizeToFitExtents="true">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Border"/>
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Border"/>
+                        </Texture>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+        <Control name="ZO_Veterancy_RewardTile_CenteredReward_Shared" inherits="ZO_ContextualActionsTile_Control" virtual="true">
+            <Dimensions x="ZO_VETERANCY_TEMPLATE_RANK_X" y="ZO_VETERANCY_TEMPLATE_REWARD_Y"/>
+            <Controls>
+                <Control name="$(parent)Reward">
+                    <Anchor point="TOPLEFT" offsetX="43" offsetY="5"/>
+                </Control>
+            </Controls>
+        </Control>
+        <Control name="ZO_Veterancy_RewardTile_LeftReward_Shared" inherits="ZO_ContextualActionsTile_Control" virtual="true">
+            <Dimensions x="ZO_VETERANCY_TEMPLATE_LEFT_REWARD_X" y="ZO_VETERANCY_TEMPLATE_REWARD_Y"/>
+            <Controls>
+                <Control name="$(parent)Reward">
+                    <Anchor point="TOPLEFT" offsetX="7" offsetY="5"/>
+                </Control>
+            </Controls>
+        </Control>
+        <Control name="ZO_Veterancy_RewardTile_RightReward_Shared" inherits="ZO_ContextualActionsTile_Control" virtual="true">
+            <Dimensions x="ZO_VETERANCY_TEMPLATE_RIGHT_REWARD_X" y="ZO_VETERANCY_TEMPLATE_REWARD_Y"/>
+            <Controls>
+                <Control name="$(parent)Reward">
+                    <Anchor point="TOPLEFT" offsetX="2" offsetY="5"/>
+                </Control>
+            </Controls>
+        </Control>
+        <Control name="ZO_Veterancy_RewardTile_NoReward_Shared" inherits="ZO_ContextualActionsTile_Control" virtual="true">
+            <Dimensions x="ZO_VETERANCY_TEMPLATE_RANK_X" y="ZO_VETERANCY_TEMPLATE_REWARD_Y"/>
+        </Control>
+        <Control name="ZO_Veterancy_GridList" virtual="true">
+            <Dimensions x="ZO_VETERANCY_GRIDLIST_WIDTH" y="ZO_VETERANCY_GRIDLIST_HEIGHT"/>
+        </Control>
+        <TopLevelControl name="ZO_Veterancy_SharedTL" hidden="true" virtual="true">
+            <AnchorFill/>
+            <Controls>
+                <Control name="$(parent)SeasonInfo">
+                    <Dimensions x="512" y="100"/>
+                    <Anchor point="TOPLEFT" offsetY="100"/>
+                    <Controls>
+                        <Texture name="$(parent)TopLineBorder" textureFile="EsoUI/Art/Veterancy/info_line_border.dds">
+                            <Dimensions x="512" y="8"/>
+                            <Anchor point="TOPLEFT"/>
+                            <Anchor point="TOPRIGHT"/>
+                        </Texture>
+                        <Label name="$(parent)SeasonName" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)TopLineBorder" offsetX="70" offsetY="10"/>
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)TopLineBorder" offsetY="10"/>
+                        </Label>
+                        <Label name="$(parent)TimeRemaining" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)SeasonName" relativePoint="BOTTOMLEFT" offsetY="10"/>
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)SeasonName" relativePoint="BOTTOMRIGHT" offsetY="10"/>
+                        </Label>
+                        <Label name="$(parent)CurrentRank" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)TimeRemaining" relativePoint="BOTTOMLEFT" offsetY="10"/>
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)TimeRemaining" relativePoint="BOTTOMRIGHT" offsetY="10"/>
+                        </Label>
+                        <Control name="$(parent)RepeatableRankReward" resizeToFitDescendents="true" hidden="true">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)CurrentRank" relativePoint="BOTTOMLEFT" offsetY="10"/>
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)CurrentRank" relativePoint="BOTTOMRIGHT" offsetY="10"/>
+                            <Controls>
+                                <Control name="$(parent)Reward">
+                                    <Anchor point="TOPLEFT"/>
+                                </Control>
+                                <Label name="$(parent)Name">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Reward" relativePoint="TOPRIGHT" offsetX="10"/>
+                                </Label>
+                                <StatusBar name="$(parent)Progress">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT"/>
+                                </StatusBar>
+                            </Controls>
+                        </Control>
+                        <Texture name="$(parent)BottomLineBorder" textureFile="EsoUI/Art/Veterancy/info_line_border.dds">
+                            <Dimensions x="512" y="8"/>
+                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)RepeatableRankReward" offsetX="-70"/>
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)RepeatableRankReward"/>
+                        </Texture>
+                        <Texture name="$(parent)Background" textureFile="EsoUI/Art/Veterancy/info_bg.dds">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)TopLineBorder" offsetY="4"/>
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)BottomLineBorder" offsetY="-8"/>
+                        </Texture>
+                    </Controls>
+                </Control>
+                <Control name="$(parent)RewardsContainer">
+                    <Dimensions y="540"/>
+                    <Anchor point="BOTTOMLEFT"/>
+                    <Anchor point="BOTTOMRIGHT"/>
+                    <Controls>
+                        <Texture name="$(parent)Background" textureFile="EsoUI/Art/Veterancy/progress_track_bg.dds">
+                            <Anchor point="TOPLEFT"/>
+                            <Anchor point="BOTTOMRIGHT" offsetY="150"/>
+                        </Texture>
+                        <Texture name="$(parent)Border" textureFile="EsoUI/Art/Veterancy/progress_track_TopBorder.dds">
+                            <Dimensions y="4"/>
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Background"/>
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Background"/>
+                        </Texture>
+                        <Control name="$(parent)ScrollList" inherits="ZO_HorizontalScrollListTemplate">
+                            <Dimensions x="ZO_VETERANCY_GRIDLIST_WIDTH" y="ZO_VETERANCY_GRIDLIST_HEIGHT"/>
+                            <Anchor point="BOTTOM" offsetX="20"/>
+                            <Controls>
+                                <Scroll name="$(parent)Scroll" override="true">
+                                    <FadeGradient x1="1" y1="0" size1="0" x2="-1" y2="0" size2="100"/>
+                                </Scroll>
+                            </Controls>
+                        </Control>
+                        <Control name="$(parent)PageNavigation" inherits="ZO_PageNavigation">
+                            <Anchor point="TOP" relativeTo="$(parent)ScrollList" relativePoint="BOTTOM"/>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

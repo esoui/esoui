@@ -10,7 +10,7 @@
             </OnDragStart>
             <Controls>
                 <Texture name="$(parent)Icon" override="true" hidden="true"/>
-                <Control name="$(parent)FramedIcon" inherits="ZO_VengeancePerk_FramedIcon">
+                <Control name="$(parent)FramedIcon" inherits="ZO_VengeancePerk_FramedIcon" hidden="true">
                     <Anchor point="CENTER" offsetY="41" relativePoint="TOP"/>
                 </Control>
                 <Label name="$(parent)Title" override="true" inherits="ZO_CollectibleTileDefaultLabel">

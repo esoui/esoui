@@ -639,7 +639,7 @@ function ZO_ChatSystem_OnFriendsClicked(control)
 end
 
 function ZO_ChatSystem_OnMailEnter(control)
-    local numUnreadMail = GetNumUnreadMail()
+    local numUnreadMail = MAIL_MANAGER:GetTotalNumUnreadMail()
     InitializeTooltip(InformationTooltip, control, TOPLEFT, 0, 0, BOTTOMRIGHT)
     if numUnreadMail == 0 then
         SetTooltipText(InformationTooltip, GetString(SI_MAIL_NO_UNREAD_MAIL))

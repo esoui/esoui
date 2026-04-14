@@ -39,6 +39,7 @@ ZO_KEYBOARD_NOTIFICATION_ICONS =
     [NOTIFICATION_TYPE_SLOTS_RESET] = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_character.dds",
     [NOTIFICATION_TYPE_CONSOLE_ADDON_MEMORY_LIMIT_REACHED] = "EsoUI/Art/Miscellaneous/ESO_Icon_Warning.dds",
     [NOTIFICATION_TYPE_CONSOLE_ADDON_SAVED_VARIABLES_LIMIT_REACHED] = "EsoUI/Art/Miscellaneous/ESO_Icon_Warning.dds",
+    [NOTIFICATION_TYPE_VETERANCY_RANKED_UP_HAS_REWARDS] = "EsoUI/Art/Notifications/notificationIcon_veterancyRankRewards.dds",
 }
 
 -- Provider Overrides
@@ -341,7 +342,7 @@ function ZO_KeyboardNotificationManager:InitializeNotificationList(control)
     ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_MARKET_PRODUCT_UNLOCKED_DATA, "ZO_NotificationsMarketProductUnlockedRow", ZO_NOTIFICATIONS_KEYBOARD_BASE_ROW_HEIGHT, SetupRequestWithMarketProductUnlockRow)
     ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_POINTS_RESET_DATA, "ZO_NotificationsPointsResetRow", ZO_NOTIFICATIONS_KEYBOARD_BASE_ROW_HEIGHT, SetupRequest)
     ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_HOUSE_TOURS_HOUSE_RECOMMENDED_DATA, "ZO_NotificationsHouseToursHouseRecommendedRow", ZO_NOTIFICATIONS_KEYBOARD_BASE_ROW_HEIGHT, SetupRequest)
-    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_SPECTACLE_EVENT_UPDATE_DATA, "ZO_NotificationsSpectacleEventUpdateRow", ZO_NOTIFICATIONS_KEYBOARD_BASE_ROW_HEIGHT, SetupRequest)
+    ZO_ScrollList_AddDataType(self.sortFilterList.list, NOTIFICATIONS_VIEW_DISMISS_DATA, "ZO_NotificationsViewDismissRow", ZO_NOTIFICATIONS_KEYBOARD_BASE_ROW_HEIGHT, SetupRequest)
     ZO_ScrollList_EnableHighlight(self.sortFilterList.list, "ZO_ThinListHighlight")
 
     self.totalNumNotifications = 0
@@ -383,6 +384,7 @@ function ZO_KeyboardNotificationManager:InitializeNotificationList(control)
         ZO_SpectacleEventNotificationProvider:New(self),
         ZO_ConsoleAddonsMemoryLimitProvider:New(self),
         ZO_ConsoleAddonsSavedVariableLimitProvider:New(self),
+        ZO_VeterancyRankUpRewardsNotificationProvider:New(self),
     }
 
     self.sortFilterList:SetEmptyText(GetString(SI_NO_NOTIFICATIONS_MESSAGE))

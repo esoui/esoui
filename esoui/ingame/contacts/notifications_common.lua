@@ -15,7 +15,7 @@ NOTIFICATIONS_GUILD_NEW_APPLICATIONS = 14
 NOTIFICATIONS_MARKET_PRODUCT_UNLOCKED_DATA = 15
 NOTIFICATIONS_POINTS_RESET_DATA = 16
 NOTIFICATIONS_HOUSE_TOURS_HOUSE_RECOMMENDED_DATA = 17
-NOTIFICATIONS_SPECTACLE_EVENT_UPDATE_DATA = 18
+NOTIFICATIONS_VIEW_DISMISS_DATA = 18
 
 NOTIFICATIONS_MENU_OPENED_FROM_KEYBIND = 1
 NOTIFICATIONS_MENU_OPENED_FROM_MOUSE = 2
@@ -2199,7 +2199,7 @@ function ZO_SpectacleEventNotificationProvider:BuildNotificationList()
 
                 table.insert(self.list,
                 {
-                    dataType = NOTIFICATIONS_SPECTACLE_EVENT_UPDATE_DATA,
+                    dataType = NOTIFICATIONS_VIEW_DISMISS_DATA,
                     message = notificationMessage,
                     notificationType = NOTIFICATION_TYPE_SPECTACLE_EVENT_PHASE_CHANGED,
                     notificationDescriptor = notificationDescriptor,
@@ -2234,6 +2234,82 @@ end
 function ZO_SpectacleEventNotificationProvider:GetNotificationDescriptor(spectacleEventPhaseChangeType, spectacleEventId, spectacleEventPhaseIndex)
     local notificationDescriptor = string.format("%s_%u_%u", spectacleEventPhaseChangeType, spectacleEventId, spectacleEventPhaseIndex)
     return notificationDescriptor
+end
+
+-- Veterancy Rank Up Rewards Notification Provider
+-----------------------------------------
+
+ZO_VeterancyRankUpRewardsNotificationProvider = ZO_NotificationProvider:Subclass()
+
+function ZO_VeterancyRankUpRewardsNotificationProvider:Initialize(notificationManager)
+    ZO_NotificationProvider.Initialize(self, notificationManager)
+
+    self.notificationType = "VeterancyRankUp"
+
+    local function UpdateVeterancyRankUpRewardsNotification()
+        self:PushUpdateToNotificationManager()
+    end
+
+    ZO_VETERANCY_MANAGER:RegisterCallback("OnVeterancyRankUp", UpdateVeterancyRankUpRewardsNotification)
+    CALLBACK_MANAGER:RegisterCallback("OnVeterancyNotificationsRefreshed", UpdateVeterancyRankUpRewardsNotification)
+
+    self:BuildNotificationList()
+end
+
+function ZO_VeterancyRankUpRewardsNotificationProvider:BuildNotificationList()
+    ZO_ClearNumericallyIndexedTable(self.list)
+
+    if IsVeterancySeasonActive() then
+        local currentClaimableRank = ZO_VETERANCY_MANAGER:GetHighestUnlockedRankWithClaimableRewards()
+        if currentClaimableRank then
+            local currentClaimableRankData = ZO_VETERANCY_MANAGER:GetRankDataByIndex(currentClaimableRank)
+
+            local notificationDescriptor = nil
+            if currentClaimableRankData:CanClaimRank() and not currentClaimableRankData:IsClaimed() then
+                notificationDescriptor = string.format("%u", currentClaimableRank)
+            end
+
+            if notificationDescriptor then
+                if not DISMISSED_NOTIFICATION_TRACKER:IsNotificationDismissed(self.notificationType, notificationDescriptor) then
+                    -- This notification has not been dismissed; create and append the notification.
+                    table.insert(self.list,
+                    {
+                        dataType = NOTIFICATIONS_VIEW_DISMISS_DATA,
+                        notificationType = NOTIFICATION_TYPE_VETERANCY_RANKED_UP_HAS_REWARDS,
+                        notificationDescriptor = notificationDescriptor,
+                        message = zo_strformat(SI_VETERANCY_RANK_UP_REWARDS_FORMATTER, currentClaimableRank),
+                        secsSinceRequest = ZO_NormalizeSecondsSince(0),
+                        shortDisplayText = GetString("SI_NOTIFICATIONTYPE", NOTIFICATION_TYPE_VETERANCY_RANKED_UP_HAS_REWARDS),
+                    })
+                end
+            end
+        end
+    end
+end
+
+function ZO_VeterancyRankUpRewardsNotificationProvider:Dismiss(notificationData)
+    DISMISSED_NOTIFICATION_TRACKER:DismissNotification(self.notificationType, notificationData.notificationDescriptor)
+    self:RefreshNotifications()
+    CALLBACK_MANAGER:FireCallbacks("OnVeterancyNotificationsRefreshed")
+end
+
+function ZO_VeterancyRankUpRewardsNotificationProvider:Accept(notificationData)
+    self:Dismiss(notificationData)
+
+    -- Show the Veterancy Screen or the Campaign screen?
+    if IsInGamepadPreferredMode() then
+        QueryCampaignSelectionData()
+        GAMEPAD_AVA_BROWSER:SetSelectVeterancy()
+        MAIN_MENU_GAMEPAD:SelectMenuEntry(ZO_MENU_MAIN_ENTRIES.CAMPAIGN)
+        SCENE_MANAGER:CreateStackFromScratch("mainMenuGamepad", "gamepad_campaign_root", "VeterancySceneGamepad")
+    else
+        VETERANCY_KEYBOARD:SetIsFromNotifications(true)
+        SCENE_MANAGER:Push("VeterancySceneKeyboard")
+    end
+end
+
+function ZO_VeterancyRankUpRewardsNotificationProvider:Decline(notificationData)
+    self:Dismiss(notificationData)
 end
 
 -- Sort List

@@ -52,7 +52,7 @@
                     <Dimensions x="870" y="435"/>
                     <Anchor point="TOP" relativeTo="$(parent)BodyText" relativePoint="BOTTOM" offsetY="20"/>
                     <Controls>
-                        <Texture name="$(parent)Background" textureFile="EsoUI/Art/ReturningPlayer/IntroBackground.dds" level="1">
+                        <Texture name="$(parent)Background" textureFile="EsoUI/Art/ReturningPlayer/IntroBackground.dds" alpha="0.8" level="1">
                             <AnchorFill/>
                         </Texture>
                         <Texture name="$(parent)OverlayGradient" textureFile="EsoUI/Art/AnnounceWindow/blackFade.dds" alpha="1" level="2">

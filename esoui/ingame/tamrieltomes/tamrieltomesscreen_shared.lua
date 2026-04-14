@@ -129,6 +129,7 @@ function ZO_TamrielTomesScreen_Shared:InitializeControls()
     self.challengesButton = self.buttonContainer:GetNamedChild("ChallengesButton")
     self.challengesButton:SetClickSound(SOUNDS.TAMRIEL_TOMES_NAVIGATE_FORWARD)
     self.upgradeButton = self.buttonContainer:GetNamedChild("UpgradeButton")
+    self.selectTomeButton = headerContainer:GetNamedChild("SelectTomeButton")
     self.upgradeButton:SetClickSound(SOUNDS.TAMRIEL_TOMES_NAVIGATE_FORWARD)
     self.upgradeButton:SetHandler("OnMouseEnter", function() self:OnUpgradeButtonFocusChanged(true) end, "DisabledMessage")
     self.upgradeButton:SetHandler("OnMouseExit", function() self:OnUpgradeButtonFocusChanged(false) end, "DisabledMessage")
@@ -242,12 +243,21 @@ function ZO_TamrielTomesScreen_Shared:RegisterForEvents()
         if self:IsShowing() then
             self:RefreshGridList()
             self:UpdatePageNavigation()
+            self:UpdateSelectTomeButton()
         end
     end
 
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", UpdateGridListAndNavigation)
     TAMRIEL_TOMES_MANAGER:RegisterCallback("ProgressUpdated", UpdateGridListAndNavigation)
     TAMRIEL_TOMES_MANAGER:RegisterCallback("RewardsUpdated", UpdateGridListAndNavigation)
+
+    local function UpdateAvailableTomes()
+        if self:IsShowing() then
+            self:UpdateSelectTomeButton()
+        end
+    end
+
+    TAMRIEL_TOMES_MANAGER:RegisterCallback("AvailableTomesChanged", UpdateAvailableTomes)
 
     local function OnRewardTrackRewardClaimed(_, rewardTrackType, rewardTrackId, rewardTrackTier, rewardTrackComponent, rewardIndex, isFallback)
         if self.control:IsHidden() then
@@ -316,6 +326,21 @@ function ZO_TamrielTomesScreen_Shared:UpdateTomeInfo(tomeId)
 
     self:UpdateButtons()
     self:UpdatePageNavigation()
+end
+
+function ZO_TamrielTomesScreen_Shared:UpdateSelectTomeButton()
+    local wasHidden = self.selectTomeButton:IsControlHidden()
+    local isHidden = TAMRIEL_TOMES_MANAGER:GetNumAvailableTomes() <= 1
+    if wasHidden == isHidden then
+        return
+    end
+
+    self.selectTomeButton:SetHidden(isHidden)
+    self:UpdateFocusAreas()
+end
+
+function ZO_TamrielTomesScreen_Shared:UpdateFocusAreas()
+    -- Can be overridden
 end
 
 function ZO_TamrielTomesScreen_Shared:MarkCurrentTierAsSeenIfUnlocked()
@@ -674,6 +699,8 @@ end
 function ZO_TamrielTomesScreen_Shared:UpdateButtons()
     local isEnabled = TAMRIEL_TOMES_MANAGER:GetPurchaseDisabledMessage() == nil
     self.upgradeButton:SetEnabled(isEnabled)
+
+    self:UpdateSelectTomeButton()
 end
 
 function ZO_TamrielTomesScreen_Shared:BeginClaimReward(tamrielTomesRewardData)
@@ -709,8 +736,8 @@ end
 function ZO_TamrielTomesScreen_Shared:SetKeybindsHidden(hidden)
     if hidden then
         if self.areKeybindsAdded then
-            KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
             self.areKeybindsAdded = false
+            KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
             KEYBIND_STRIP:RestoreDefaultExit()
         end
 
@@ -1004,7 +1031,7 @@ function ZO_TamrielTomesScreen_Shared:BeginPreview(previewType, rewardData, prev
         return false
     end
 
-    if rewardData ~= self.activePreviewRewardData then
+    if self.activePreviewRewardData and not self.AreRewardsEqual(rewardData, self.activePreviewRewardData) then
         self.GetPreviewSystem():EndCurrentPreview()
     end
 
@@ -1013,9 +1040,9 @@ function ZO_TamrielTomesScreen_Shared:BeginPreview(previewType, rewardData, prev
     self.activePreviewKey = previewKey
     self.activePreviewRewardData = rewardData
     self.activePreviewType = previewType
-    self:UpdateKeybinds()
     self:BeginPreviewInternal()
     self:OnBeginPreview(previewType, rewardData, previewKey)
+    self:UpdateKeybinds()
     return true
 end
 
@@ -1283,6 +1310,22 @@ function ZO_TamrielTomesScreen_Shared.GetSeenTiers()
         ZO_TamrielTomesScreen_Shared.seenTiers = seenTiers
     end
     return seenTiers
+end
+
+function ZO_TamrielTomesScreen_Shared.AreRewardsEqual(reward1, reward2)
+    if reward1 then
+        if not reward2 then
+            return false
+        end
+
+        if reward1:GetRewardId() ~= reward2:GetRewardId() then
+            return false
+        end
+    elseif reward2 then
+        return false
+    end
+
+    return true
 end
 
 function ZO_TamrielTomesScreen_Shared.SetAreSeenTiersInitialized(initialized)
