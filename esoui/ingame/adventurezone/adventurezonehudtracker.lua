@@ -133,7 +133,7 @@ end
 
 function ZO_AdventureZoneHUDTracker:OnShown()
     KEYBIND_STRIP:AddKeybindButton(self.showOverviewKeybindDescriptor)
-    self:SetHeaderText(GetAdventureZoneDisplayName())
+    self:SetHeaderText(zo_strformat(SI_ADVENTURE_ZONE_TITLE_FORMATTER, GetAdventureZoneDisplayName()))
     self:RefreshAnchors()
     local UPDATE_IMMEDIATELY = true
     self:RefreshScores(UPDATE_IMMEDIATELY)

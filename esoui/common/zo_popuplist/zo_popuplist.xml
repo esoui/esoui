@@ -8,6 +8,9 @@
             <OnMouseExit>
                 ZO_PopupList.OnMouseExit(self)
             </OnMouseExit>
+            <OnMouseUp>
+                ZO_PopupList.OnMouseUp(self, button, upInside, ctrl, alt, shift, command)
+            </OnMouseUp>
             <Controls>
                 <Texture name="$(parent)Icon">
                     <Dimensions x="40" y="40"/>
@@ -35,7 +38,7 @@
                 </Texture>
             </Controls>
         </Control>
-        <TopLevelControl name="ZO_PopupListTL" layer="OVERLAY" hidden="true">
+        <TopLevelControl name="ZO_PopupListTL" layer="OVERLAY" hidden="true" mouseEnabled="true">
             <Dimensions x="385" y="320"/>
             <OnInitialized>
                 ZO_PopupList.OnControlInitialized(self)

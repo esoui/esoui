@@ -43,7 +43,7 @@
                                         <Control name="$(parent)Amount" override="true" inherits="ZO_RollingMeterLabel">
                                             <Anchor point="RIGHT" relativeTo="$(parent)Icon" relativePoint="LEFT" offsetX="-8"/>
                                         </Control>
-                                        <Label name="$(parent)Name" override="true" font="ZoFontHeader">
+                                        <Label name="$(parent)Name" override="true" font="ZoFontHeader2">
                                             <Anchor point="RIGHT" relativeTo="$(parent)Amount" relativePoint="LEFT" offsetX="-8"/>
                                         </Label>
                                     </Controls>
@@ -51,7 +51,7 @@
                                 <Control name="$(parent)Bonus" override="true">
                                     <Anchor point="TOPRIGHT" offsetX="-15" offsetY="16"/>
                                     <Controls>
-                                        <Label name="$(parent)Percent" override="true" font="ZoFontHeader">
+                                        <Label name="$(parent)Percent" override="true" font="ZoFontHeader2">
                                             <Anchor point="RIGHT" relativePoint="TOPRIGHT" offsetX="-48" offsetY="24"/>
                                         </Label>
                                         <Texture name="$(parent)Icon" override="true" textureFile="EsoUI/Art/TamrielTomes/currencyBonusArrow.dds">

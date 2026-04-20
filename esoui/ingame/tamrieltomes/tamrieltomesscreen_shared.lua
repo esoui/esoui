@@ -709,8 +709,8 @@ end
 function ZO_TamrielTomesScreen_Shared:SetKeybindsHidden(hidden)
     if hidden then
         if self.areKeybindsAdded then
-            KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
             self.areKeybindsAdded = false
+            KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
             KEYBIND_STRIP:RestoreDefaultExit()
         end
 
@@ -1004,7 +1004,7 @@ function ZO_TamrielTomesScreen_Shared:BeginPreview(previewType, rewardData, prev
         return false
     end
 
-    if rewardData ~= self.activePreviewRewardData then
+    if self.activePreviewRewardData and not self.AreRewardsEqual(rewardData, self.activePreviewRewardData) then
         self.GetPreviewSystem():EndCurrentPreview()
     end
 
@@ -1013,9 +1013,9 @@ function ZO_TamrielTomesScreen_Shared:BeginPreview(previewType, rewardData, prev
     self.activePreviewKey = previewKey
     self.activePreviewRewardData = rewardData
     self.activePreviewType = previewType
-    self:UpdateKeybinds()
     self:BeginPreviewInternal()
     self:OnBeginPreview(previewType, rewardData, previewKey)
+    self:UpdateKeybinds()
     return true
 end
 
@@ -1283,6 +1283,22 @@ function ZO_TamrielTomesScreen_Shared.GetSeenTiers()
         ZO_TamrielTomesScreen_Shared.seenTiers = seenTiers
     end
     return seenTiers
+end
+
+function ZO_TamrielTomesScreen_Shared.AreRewardsEqual(reward1, reward2)
+    if reward1 then
+        if not reward2 then
+            return false
+        end
+
+        if reward1:GetRewardId() ~= reward2:GetRewardId() then
+            return false
+        end
+    elseif reward2 then
+        return false
+    end
+
+    return true
 end
 
 function ZO_TamrielTomesScreen_Shared.SetAreSeenTiersInitialized(initialized)

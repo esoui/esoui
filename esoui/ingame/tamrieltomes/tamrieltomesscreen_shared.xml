@@ -66,10 +66,10 @@
                                     </Controls>
                                 </Control>
                                 <Texture name="$(parent)BalanceBackdrop" textureFile="EsoUI/Art/TamrielTomes/tome_currency_backdrop.dds" hidden="true" excludeFromResizeToFitExtents="true" level="10">
-                                    <Dimensions x="350" y="40"/>
+                                    <Dimensions x="350" y="46"/>
                                 </Texture>
                                 <Texture name="$(parent)FullBackdrop" textureFile="EsoUI/Art/TamrielTomes/tome_currency_backdrop.dds" hidden="true" excludeFromResizeToFitExtents="true" level="10">
-                                    <Dimensions x="350" y="56"/>
+                                    <Dimensions x="350" y="66"/>
                                 </Texture>
                             </Controls>
                         </Control>

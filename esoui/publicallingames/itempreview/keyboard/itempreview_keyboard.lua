@@ -66,7 +66,9 @@ function ZO_ItemPreview_Keyboard:InitializeRotationControl()
                                         control.canRotate = true
                                         WINDOW_MANAGER:SetMouseCursor(MOUSE_CURSOR_ROTATE)
                                     else
-                                        if control.canRotate then
+                                        -- Reset the mouse cursor if rotation was previously enabled
+                                        -- and the Rotate mouse cursor is still active.
+                                        if control.canRotate and WINDOW_MANAGER:GetMouseCursor() == MOUSE_CURSOR_ROTATE then
                                             WINDOW_MANAGER:SetMouseCursor(MOUSE_CURSOR_DO_NOT_CARE)
                                         end
                                         control.canRotate = false
