@@ -372,6 +372,9 @@ function ZO_TimedActivities_Manager:RegisterEvents()
     end
 
     EVENT_MANAGER:RegisterForEvent("TimedActivitiesManager", EVENT_PLAYER_ACTIVATED, OnPlayerActivated)
+    -- TODO Tamriel Tomes: Consider single entry update
+    EVENT_MANAGER:RegisterForEvent("TimedActivitiesManager", EVENT_REWARD_TRACK_REWARD_CLAIMED, OnActivitiesUpdated)
+    EVENT_MANAGER:RegisterForEvent("TimedActivitiesManager", EVENT_REWARD_TRACK_REWARDS_CLAIMED, OnActivitiesUpdated)
     EVENT_MANAGER:RegisterForEvent("TimedActivitiesManager", EVENT_TIMED_ACTIVITIES_UPDATED, OnActivitiesUpdated)
     EVENT_MANAGER:RegisterForEvent("TimedActivitiesManager", EVENT_TIMED_ACTIVITY_TRACKING_UPDATED, OnActivitiesUpdated)
     EVENT_MANAGER:RegisterForEvent("TimedActivitiesManager", EVENT_TIMED_ACTIVITY_PROGRESS_UPDATED, OnActivityUpdated)
@@ -420,9 +423,8 @@ function ZO_TimedActivities_Manager:GetFirstClaimableTimedActivity(timedActivity
     return self:GetFirstActivityDataByFilter({ ActivityMatches })
 end
 
-function ZO_TimedActivities_Manager:HasClaimableTimedActivities(timedActivityType)
-    local claimableActivityData = self:GetFirstClaimableTimedActivity(timedActivityType)
-    return claimableActivityData ~= nil
+function ZO_TimedActivities_Manager:HasClaimableTimedActivities()
+    return HasAnyUnclaimedTimedActivityRewards()
 end
 
 function ZO_TimedActivities_Manager:GetFirstClaimableTimedActivityForHUDPrompt(timedActivityType)
@@ -485,6 +487,10 @@ end
 function ZO_TimedActivities_Manager.GetNumRemainingRerollAttempts()
     local currencyAmount = GetPlayerStoredCurrencyAmount(CURT_TOME_CHALLENGE_REROLLS)
     return currencyAmount
+end
+
+function ZO_TimedActivities_Manager:ClaimAllRewards()
+    ClaimAllTimedActivityRewards()
 end
 
 function ZO_TimedActivities_Manager:GetActiveSeasonEndTimeS()

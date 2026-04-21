@@ -121,6 +121,7 @@ function ZO_TimedActivities_Gamepad:InitializeControls()
             end,
             sound = SOUNDS.GAMEPAD_MENU_FORWARD,
         },
+
         -- Back
         {
             keybind = "UI_SHORTCUT_NEGATIVE",
@@ -129,6 +130,20 @@ function ZO_TimedActivities_Gamepad:InitializeControls()
                 SCENE_MANAGER:HideCurrentScene()
             end,
             sound = SOUNDS.TAMRIEL_TOMES_NAVIGATE_BACK,
+        },
+
+        -- Claim All
+        {
+            name = GetString(SI_TAMRIEL_TOMES_CHALLENGES_ACTION_NAME_CLAIM_ALL),
+            keybind = "UI_SHORTCUT_QUATERNARY",
+            callback = function()
+                TIMED_ACTIVITIES_MANAGER:ClaimAllRewards()
+            end,
+            visible = function()
+                return TIMED_ACTIVITIES_MANAGER:HasClaimableTimedActivities()
+            end,
+            -- This action cannot fail as long as the only rewards are the Tome Points currency and that currency continues to be uncapped.
+            sound = SOUNDS.TAMRIEL_TOMES_CHALLENGE_REWARD_CLAIMED,
         },
     }
     self:SetListsUseTriggerKeybinds(true)
@@ -327,6 +342,7 @@ function ZO_TimedActivitiesList_Gamepad:Initialize(control)
     self.keybindStripDescriptor =
     {
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
+
         -- Back
         {
             name = GetString(SI_GAMEPAD_BACK_OPTION),
@@ -351,8 +367,8 @@ function ZO_TimedActivitiesList_Gamepad:Initialize(control)
                 end
                 return false
             end,
-            -- Play the sound assuming there shouldn't be any real situation where this keybind is present but claiming fails
-            sound = SOUNDS.TAMRIEL_TOMES_CHALLENGE_REWARD_CLAIMED
+            -- This action cannot fail as long as the only rewards are the Tome Points currency and that currency continues to be uncapped.
+            sound = SOUNDS.TAMRIEL_TOMES_CHALLENGE_REWARD_CLAIMED,
         },
 
         -- Track
@@ -376,12 +392,26 @@ function ZO_TimedActivitiesList_Gamepad:Initialize(control)
             end,
         },
 
+        -- Claim All
+        {
+            name = GetString(SI_TAMRIEL_TOMES_CHALLENGES_ACTION_NAME_CLAIM_ALL),
+            keybind = "UI_SHORTCUT_QUATERNARY",
+            callback = function()
+                TIMED_ACTIVITIES_MANAGER:ClaimAllRewards()
+            end,
+            visible = function()
+                return TIMED_ACTIVITIES_MANAGER:HasClaimableTimedActivities()
+            end,
+            -- This action cannot fail as long as the only rewards are the Tome Points currency and that currency continues to be uncapped.
+            sound = SOUNDS.TAMRIEL_TOMES_CHALLENGE_REWARD_CLAIMED,
+        },
+
         -- Reroll
         {
             name = function()
                 return zo_strformat(SI_TAMRIEL_TOMES_CHALLENGES_ACTION_NAME_REROLL, ZO_TimedActivities_Manager.GetNumRemainingRerollAttempts())
             end,
-            keybind = "UI_SHORTCUT_QUATERNARY",
+            keybind = "UI_SHORTCUT_QUINARY",
             callback = function()
                 self:GetSelectedData():Reroll()
             end,
@@ -589,6 +619,8 @@ function ZO_TimedActivitiesList_Gamepad:OnSelectionChanged(oldData, newData)
     else
         self:ClearActivityTooltip()
     end
+
+    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
 end
 
 function ZO_TimedActivitiesList_Gamepad:GetHeaderNarration()

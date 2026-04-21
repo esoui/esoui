@@ -448,10 +448,16 @@ function ZO_PageNavigation:ChangePage(direction)
         elseif pageToSelect > highestPageNumber then
             pageToSelect = self.startingPageNumber
         end
+    elseif pageToSelect < self.startingPageNumber then
+        pageToSelect = self.startingPageNumber
+    elseif pageToSelect > self:GetHighestPageNumber() then
+        pageToSelect = self:GetHighestPageNumber()
     end
 
-    local DONT_SUPPRESS_SOUND = false
-    self:SelectPage(pageToSelect, DONT_SUPPRESS_SOUND, direction)
+    if pageToSelect ~= currentPage then
+        local DONT_SUPPRESS_SOUND = false
+        self:SelectPage(pageToSelect, DONT_SUPPRESS_SOUND, direction)
+    end
 end
 
 -- Sets the current page number.

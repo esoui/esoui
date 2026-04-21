@@ -139,8 +139,10 @@ function ZO_PromotionalEventActivity_Entry_Keyboard:OnMouseEnter()
     end
     local description = self.activityData:GetDescription()
 
-    local menuAssistanceText = self.activityData:GetMenuAssistanceDescriptionText("UI_SHORTCUT_PRIMARY")
-    description = AppendToDescription(description, menuAssistanceText)
+    if not self.activityData:IsComplete() then
+        local menuAssistanceText = self.activityData:GetMenuAssistanceDescriptionText("UI_SHORTCUT_PRIMARY")
+        description = AppendToDescription(description, menuAssistanceText)
+    end
 
     local requiredCollectibleText = ZO_PromotionalEvents_Shared.GetActivityRequiredCollectibleText(self.activityData)
     description = AppendToDescription(description, requiredCollectibleText)

@@ -1,3 +1,166 @@
+ZO_TAMRIEL_TOME_SEASON_SELECTED_ANIMATION_DURATION_SECONDS = 1.5
+ZO_TAMRIEL_TOME_SEASON_ENTRY_BORDER_BRIGHTNESS_SELECTED = 1
+ZO_TAMRIEL_TOME_SEASON_ENTRY_BORDER_BRIGHTNESS_UNSELECTED = 0.3
+
+ZO_TamrielTomeSeasonGridEntry_Shared = ZO_InitializingObject:Subclass()
+
+function ZO_TamrielTomeSeasonGridEntry_Shared:Initialize(control)
+    self.control = control
+    control.object = self
+end
+
+function ZO_TamrielTomeSeasonGridEntry_Shared.OnSelectedUpdate(control, frameTimeS)
+    local self = control.object
+    local endFrameTimeS = self.selectedAnimationEndFrameTimeS
+    local hasAnimationEnded = endFrameTimeS == nil
+
+    if endFrameTimeS then
+        local interval = 1 - zo_max(0, endFrameTimeS - frameTimeS) / ZO_TAMRIEL_TOME_SEASON_SELECTED_ANIMATION_DURATION_SECONDS
+        if interval >= 1 then
+            hasAnimationEnded = true
+        else
+            local easedInterval = 1 - zo_sin(ZO_HALF_PI - interval * ZO_HALF_PI)
+            local ORIGIN_X = 0.75
+            local originY = 1 + interval * 0.5
+            local blurStrength = easedInterval * 0.15
+            local NUM_SAMPLES = 21
+            local NORMALIZED_OFFSET = 0
+            local imageGlowTextureControl = control:GetNamedChild("ImageGlow")
+            imageGlowTextureControl:SetRadialBlur(ORIGIN_X, originY, NUM_SAMPLES, blurStrength, NORMALIZED_OFFSET)
+            imageGlowTextureControl:SetAlpha(zo_lerp(0, 0.7, zo_min(1, 3 * easedInterval)))
+        end
+    end
+
+    if hasAnimationEnded then
+        self.control:SetHandler("OnUpdate", nil)
+    end
+end
+
+function ZO_TamrielTomeSeasonGridEntry_Shared:IsHighlighted()
+    return self.isHighlighted
+end
+
+function ZO_TamrielTomeSeasonGridEntry_Shared:SetIsHighlighted(isHighlighted)
+    self.isHighlighted = isHighlighted
+
+    if isHighlighted and self.owner then
+        self.owner:SetTargetGridEntry(self)
+    end
+
+    self:Update()
+end
+
+function ZO_TamrielTomeSeasonGridEntry_Shared:IsSelected()
+    return self.data and self.data.isSelected()
+end
+
+function ZO_TamrielTomeSeasonGridEntry_Shared:Select()
+    if self:IsSelected() then
+        -- Prevent selection of the currently selected Tome.
+        return
+    end
+
+    if not self.TrySetIsSelectionPending(true) then
+        -- A different Tome is already pending selection.
+        return
+    end
+
+    self.selectedAnimationEndFrameTimeS = GetFrameTimeSeconds() + ZO_TAMRIEL_TOME_SEASON_SELECTED_ANIMATION_DURATION_SECONDS
+    self.control:SetHandler("OnUpdate", ZO_TamrielTomeSeasonGridEntry_Shared.OnSelectedUpdate)
+
+    local imageGlowTextureControl = self.control:GetNamedChild("ImageGlow")
+    imageGlowTextureControl:SetAlpha(0)
+    imageGlowTextureControl:SetHidden(false)
+
+    -- Schedule the Tome selection to occur just before the end of
+    -- the animation so that the scene transition is seamless.
+    local tomeId = self.data.tomeData:GetTamrielTomeId()
+    zo_callLater(function()
+        -- Order matters:
+        do
+            -- First, hide the Season Selection dialog.
+            SYSTEMS:GetObject("tamrielTomes"):HideSelectTomeDialog()
+
+            -- Then, clear the Selection Pending flag after hiding the dialog.
+            self.TrySetIsSelectionPending(false)
+
+            -- Finally, select the Tome.
+            TAMRIEL_TOMES_MANAGER:SelectTomeId(tomeId)
+        end
+    end, ZO_TAMRIEL_TOME_SEASON_SELECTED_ANIMATION_DURATION_SECONDS * ZO_ONE_SECOND_IN_MILLISECONDS * 0.9)
+
+    zo_callLater(function()
+        local sceneName = SYSTEMS:GetRootSceneName("tamrielTomes")
+        if not (SCENE_MANAGER:IsShowing(sceneName) or SCENE_MANAGER:IsSceneOnStack(sceneName)) then
+            -- Show the tome.
+            TAMRIEL_TOMES_MANAGER:OpenTamrielTome(tomeId)
+        end
+    end, ZO_TAMRIEL_TOME_SEASON_SELECTED_ANIMATION_DURATION_SECONDS * ZO_ONE_SECOND_IN_MILLISECONDS)
+end
+
+function ZO_TamrielTomeSeasonGridEntry_Shared:Setup(data, owner)
+    data.owner = self
+    self.data = data
+    self.owner = owner
+
+    local control = self.control
+    local nameLabel = control:GetNamedChild("Name")
+    nameLabel:SetText(data.text)
+    nameLabel:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
+
+    local tomeData = data.tomeData
+    local imageTexture = tomeData:GetIntroBackgroundFile()
+    control:GetNamedChild("Image"):SetTexture(imageTexture)
+
+    local imageGlowTextureControl = control:GetNamedChild("ImageGlow")
+    imageGlowTextureControl:SetTexture(imageTexture)
+    imageGlowTextureControl:SetHidden(true)
+    imageGlowTextureControl:SetAlpha(0)
+
+    control:GetNamedChild("Rewards"):SetColor(ZO_NORMAL_TEXT:UnpackRGBA())
+
+    local numClaimedRewards = tomeData:GetNumClaimedRewards()
+    local numRewards = tomeData:GetNumRewards()
+    local rewardCountString = zo_strformat(SI_TAMRIEL_TOME_SEASON_ENTRY_EARNED_REWARDS_FORMATTER, numClaimedRewards, numRewards)
+    local rewardCountLabel = control:GetNamedChild("RewardCount")
+    rewardCountLabel:SetText(rewardCountString)
+    rewardCountLabel:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
+
+    self:SetIsHighlighted(false)
+    self.control:SetHandler("OnUpdate", nil)
+    self.selectedAnimationEndFrameTimeS = nil
+    self:Update()
+end
+
+function ZO_TamrielTomeSeasonGridEntry_Shared:Update()
+    local isHighlighted = self:IsHighlighted()
+    local isSelected = self:IsSelected()
+
+    local factor = isHighlighted and (isSelected and 1 or 0.8) or (isSelected and 0.5 or 0.3)
+    self.control:GetNamedChild("Image"):SetTextureSampleProcessingWeight(TEX_SAMPLE_PROCESSING_RGB, factor)
+
+    local borderColor = isHighlighted and ZO_TAMRIEL_TOME_SEASON_ENTRY_BORDER_BRIGHTNESS_SELECTED or ZO_TAMRIEL_TOME_SEASON_ENTRY_BORDER_BRIGHTNESS_UNSELECTED
+    self.control:GetNamedChild("Border"):SetColor(borderColor, borderColor, borderColor, 1)
+end
+
+-- Static Methods
+
+-- Indicates whether the Selection Pending flag is set.
+function ZO_TamrielTomeSeasonGridEntry_Shared.IsSelectionPending()
+    return ZO_TamrielTomeSeasonGridEntry_Shared.isSelectionPending
+end
+
+-- Attempts to set the Selection Pending flag that indicates when a grid entry is animating toward the selection of a different Tome season.
+-- Returns true if successful.
+function ZO_TamrielTomeSeasonGridEntry_Shared.TrySetIsSelectionPending(isSelectionPending)
+    if isSelectionPending and ZO_TamrielTomeSeasonGridEntry_Shared.isSelectionPending then
+        return false
+    end
+
+    ZO_TamrielTomeSeasonGridEntry_Shared.isSelectionPending = isSelectionPending
+    return true
+end
+
 ZO_TAMRIEL_TOMES_REWARD_DATA_PREVIEW_TYPES =
 {
     NONE = 0,
@@ -80,8 +243,10 @@ ZO_TamrielTomesScreen_Shared = ZO_DeferredInitializingObject:Subclass()
 
 ZO_TamrielTomesScreen_Shared:MUST_IMPLEMENT("BeginPreviewInternal")
 ZO_TamrielTomesScreen_Shared:MUST_IMPLEMENT("EndPreviewInternal")
-ZO_TamrielTomesScreen_Shared:MUST_IMPLEMENT("InitializeKeybindStripDescriptor")
+ZO_TamrielTomesScreen_Shared:MUST_IMPLEMENT("InitializeKeybindStripDescriptors")
 ZO_TamrielTomesScreen_Shared:MUST_IMPLEMENT("ShowIntroScreen")
+ZO_TamrielTomesScreen_Shared:MUST_IMPLEMENT("ShowSelectTomeDialog")
+ZO_TamrielTomesScreen_Shared:MUST_IMPLEMENT("HideSelectTomeDialog")
 
 function ZO_TamrielTomesScreen_Shared:Initialize(control, scene, templateData)
     self.control = control
@@ -102,7 +267,7 @@ end
 
 function ZO_TamrielTomesScreen_Shared:OnDeferredInitialize()
     self:InitializeControls()
-    self:InitializeKeybindStripDescriptor()
+    self:InitializeKeybindStripDescriptors()
     self:InitializeParticleSystems()
     self:RegisterForEvents()
 
@@ -113,8 +278,7 @@ function ZO_TamrielTomesScreen_Shared:OnDeferredInitialize()
             originalOnFocusChangedFunction(self.buttonsFocus, ...)
 
             local focusItem = self.buttonsFocus:GetFocusItem()
-            local upgradeButtonHasFocus = focusItem and focusItem.control == self.upgradeButton
-            self:OnUpgradeButtonFocusChanged(upgradeButtonHasFocus)
+            self:UpdateTooltip(focusItem and focusItem.control or nil)
         end
     end
 end
@@ -123,16 +287,24 @@ function ZO_TamrielTomesScreen_Shared:InitializeControls()
     self.pageBackgroundTexture = self.control:GetNamedChild("PageBackground")
 
     local headerContainer = self.control:GetNamedChild("Header")
+    self.headerContainer = headerContainer
     self.titleLabel = headerContainer:GetNamedChild("Title")
     self.subtitleLabel = headerContainer:GetNamedChild("Subtitle")
-    self.buttonContainer = headerContainer:GetNamedChild("Buttons")
-    self.challengesButton = self.buttonContainer:GetNamedChild("ChallengesButton")
+    local buttonContainer = headerContainer:GetNamedChild("Buttons")
+    self.buttonContainer = buttonContainer
+
+    self.challengesButton = buttonContainer:GetNamedChild("ChallengesButton")
     self.challengesButton:SetClickSound(SOUNDS.TAMRIEL_TOMES_NAVIGATE_FORWARD)
-    self.upgradeButton = self.buttonContainer:GetNamedChild("UpgradeButton")
-    self.selectTomeButton = headerContainer:GetNamedChild("SelectTomeButton")
+
+    self.upgradeButton = buttonContainer:GetNamedChild("UpgradeButton")
     self.upgradeButton:SetClickSound(SOUNDS.TAMRIEL_TOMES_NAVIGATE_FORWARD)
-    self.upgradeButton:SetHandler("OnMouseEnter", function() self:OnUpgradeButtonFocusChanged(true) end, "DisabledMessage")
-    self.upgradeButton:SetHandler("OnMouseExit", function() self:OnUpgradeButtonFocusChanged(false) end, "DisabledMessage")
+    self.upgradeButton:SetHandler("OnMouseEnter", function() self:OnUpgradeButtonFocusChanged(true) end, "Tooltip")
+    self.upgradeButton:SetHandler("OnMouseExit", function() self:OnUpgradeButtonFocusChanged(false) end, "Tooltip")
+
+    self.selectTomeButton = headerContainer:GetNamedChild("SelectTomeButton")
+    self.selectTomeButton:SetClickSound(SOUNDS.TAMRIEL_TOMES_NAVIGATE_FORWARD)
+    self.selectTomeButton:SetHandler("OnMouseEnter", function() self:OnSelectTomeSeasonButtonFocusChanged(true) end, "Tooltip")
+    self.selectTomeButton:SetHandler("OnMouseExit", function() self:OnSelectTomeSeasonButtonFocusChanged(false) end, "Tooltip")
 
     local bookContainer = self.control:GetNamedChild("Book")
     self.particleGeneratorPositionControl = bookContainer:GetNamedChild("RewardParticleGeneratorPosition")
@@ -279,11 +451,23 @@ function ZO_TamrielTomesScreen_Shared:RegisterForEvents()
     self.control:RegisterForEvent(EVENT_REWARD_TRACK_REWARD_CLAIMED, OnRewardTrackRewardClaimed)
 
     local function OnSelectedTomeChanged(tomeId)
+        local FORCE_UPDATE = true
         if self:IsShowing() then
-            self:UpdateTomeInfo(tomeId)
-
-            local FORCE_UPDATE = true
+            self:HideSelectTomeDialog()
+            self:Refresh()
             self:UpdateSeenTiers(FORCE_UPDATE)
+        end
+
+        -- Order matters:
+        do
+            -- The Time Remaining label only shows when viewing the currently active season's Tamriel Tome.
+            local isTomeActive = TAMRIEL_TOMES_MANAGER:IsTomeActive(tomeId)
+            self.subtitleLabel:SetHidden(not isTomeActive)
+
+            if isTomeActive then
+                -- Force the Time Remaining label to update immediately.
+                self:UpdateTimeRemaining(GetFrameTimeSeconds(), FORCE_UPDATE)
+            end
         end
     end
 
@@ -328,15 +512,15 @@ function ZO_TamrielTomesScreen_Shared:UpdateTomeInfo(tomeId)
     self:UpdatePageNavigation()
 end
 
-function ZO_TamrielTomesScreen_Shared:UpdateSelectTomeButton()
-    local wasHidden = self.selectTomeButton:IsControlHidden()
-    local isHidden = TAMRIEL_TOMES_MANAGER:GetNumAvailableTomes() <= 1
-    if wasHidden == isHidden then
-        return
-    end
+function ZO_TamrielTomesScreen_Shared:CanSelectTome()
+    return TAMRIEL_TOMES_MANAGER:GetNumAvailableTomes() > 1
+end
 
-    self.selectTomeButton:SetHidden(isHidden)
-    self:UpdateFocusAreas()
+function ZO_TamrielTomesScreen_Shared:UpdateSelectTomeButton()
+    local isEnabled = self:CanSelectTome()
+    self.selectTomeButton:SetState(isEnabled and BSTATE_NORMAL or BSTATE_DISABLED)
+    self.selectTomeButton:SetEnabled(isEnabled)
+    self:UpdateKeybinds()
 end
 
 function ZO_TamrielTomesScreen_Shared:UpdateFocusAreas()
@@ -676,28 +860,60 @@ function ZO_TamrielTomesScreen_Shared:RefreshUnlockRequirements()
     end
 end
 
-function ZO_TamrielTomesScreen_Shared:OnUpgradeButtonFocusChanged(hasFocus)
-    local message = nil
-    if hasFocus then
-        message = TAMRIEL_TOMES_MANAGER:GetPurchaseDisabledMessage()
-    end
-
-    if message then
-        if IsInGamepadPreferredMode() then
-            GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
-            GAMEPAD_TOOLTIPS:LayoutTextBlockTooltip(GAMEPAD_RIGHT_TOOLTIP, message)
-        else
-            InitializeTooltip(InformationTooltip, self.upgradeButton, RIGHT)
-            InformationTooltip:AddLine(message, "", ZO_WHITE:UnpackRGB())
-        end
+function ZO_TamrielTomesScreen_Shared:GetSelectTomeTooltip()
+    if self:CanSelectTome() then
+        return GetString(SI_TAMRIEL_TOMES_SELECT_TAMRIEL_TOME_TOOLTIP)
     else
-        ClearTooltip(InformationTooltip)
-        GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
+        return GetString(SI_TAMRIEL_TOMES_NO_OTHER_TAMRIEL_TOMES_AVAILABLE_TOOLTIP)
     end
 end
 
+function ZO_TamrielTomesScreen_Shared:UpdateTooltip(focusControl)
+    ClearTooltip(InformationTooltip)
+    GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
+
+    if hidden or not self:IsShowing() then
+        return
+    end
+
+    local message = nil
+    if focusControl == self.upgradeButton then
+        message = TAMRIEL_TOMES_MANAGER:GetPurchaseDisabledMessage()
+    elseif focusControl == self.selectTomeButton then
+        message = self:GetSelectTomeTooltip()
+    end
+
+    if not message then
+        return
+    end
+
+    if IsInGamepadPreferredMode() then
+        GAMEPAD_TOOLTIPS:LayoutTextBlockTooltip(GAMEPAD_RIGHT_TOOLTIP, message)
+    else
+        InitializeTooltip(InformationTooltip, self.upgradeButton, RIGHT)
+        InformationTooltip:AddLine(message, "", ZO_WHITE:UnpackRGB())
+    end
+end
+
+function ZO_TamrielTomesScreen_Shared:OnUpgradeButtonFocusChanged(hasFocus)
+    local focusControl = nil
+    if hasFocus then
+        focusControl = self.upgradeButton
+    end
+    self:UpdateTooltip(focusControl)
+end
+
+function ZO_TamrielTomesScreen_Shared:OnSelectTomeSeasonButtonFocusChanged(hasFocus)
+    local focusControl = nil
+    if hasFocus then
+        focusControl = self.selectTomeButton
+    end
+    self:UpdateTooltip(focusControl)
+end
+
 function ZO_TamrielTomesScreen_Shared:UpdateButtons()
-    local isEnabled = TAMRIEL_TOMES_MANAGER:GetPurchaseDisabledMessage() == nil
+    local isActiveTomeSelected = TAMRIEL_TOMES_MANAGER:IsActiveTomeSelected()
+    local isEnabled = isActiveTomeSelected and TAMRIEL_TOMES_MANAGER:GetPurchaseDisabledMessage() == nil
     self.upgradeButton:SetEnabled(isEnabled)
 
     self:UpdateSelectTomeButton()
@@ -745,6 +961,7 @@ function ZO_TamrielTomesScreen_Shared:SetKeybindsHidden(hidden)
     end
 
     KEYBIND_STRIP:RemoveDefaultExit()
+
     if self.areKeybindsAdded then
         KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
     else
@@ -814,8 +1031,9 @@ function ZO_TamrielTomesScreen_Shared:OnSelectedTamrielTomesRewardDataChanged(pr
     self:QueuePreview(ZO_TAMRIEL_TOMES_REWARD_DATA_PREVIEW_TYPES.QUICK_PREVIEW, tamrielTomesRewardData:GetRewardData(), tamrielTomesRewardData, ZO_DEFAULT_QUEUED_PREVIEW_DELAY_SECONDS)
 end
 
-function ZO_TamrielTomesScreen_Shared:UpdateClaimReward(currentFrameTimeSeconds)
-    if not self.nextTimeRemainingUpdateS or currentFrameTimeSeconds > self.nextTimeRemainingUpdateS then
+function ZO_TamrielTomesScreen_Shared:UpdateTimeRemaining(currentFrameTimeSeconds, forceUpdate)
+    if (not self.nextTimeRemainingUpdateS or currentFrameTimeSeconds > self.nextTimeRemainingUpdateS) and not self.subtitleLabel:IsHidden() then
+        
         local endTimeS = GetActiveTamrielTomeSeasonEndTimeS()
         local timeRemainingS = zo_max(0, endTimeS - GetTimeStamp())
         local timeRemainingText = ""
@@ -1118,7 +1336,7 @@ end
 
 function ZO_TamrielTomesScreen_Shared:OnUpdate(currentFrameTimeS)
     self:UpdatePreview(currentFrameTimeS)
-    self:UpdateClaimReward(currentFrameTimeS)
+    self:UpdateTimeRemaining(currentFrameTimeS)
 end
 
 -- Queues the end of the active preview.

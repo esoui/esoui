@@ -186,13 +186,16 @@ function ZO_CampaignBrowser_Gamepad:UpdateContentPane(updateFromTimer)
             if IsVeterancySeasonActive() then
                 ZO_VETERANCY_MANAGER:RefreshRankData()
                 if ZO_VETERANCY_MANAGER:IsOnMaxRank() then
-                    descriptionText = zo_strformat(SI_VETERANCY_ACTIVE_MAX_RANK_TOOLTIP, ZO_VETERANCY_MANAGER:GetCurrentRank())
+                    descriptionText = zo_strformat(SI_VETERANCY_ACTIVE_MAX_RANK_TOOLTIP
+                        , ZO_VETERANCY_MANAGER:GetCurrentRank()
+                        , ZO_CommaDelimitNumber(ZO_VETERANCY_MANAGER:GetCurrentTierProgress())
+                        , ZO_CommaDelimitNumber(ZO_VETERANCY_MANAGER:GetCurrentTierTotal()))
                 else
                     descriptionText = zo_strformat(SI_VETERANCY_ACTIVE_TOOLTIP
-                            , ZO_VETERANCY_MANAGER:GetCurrentRank()
-                            , ZO_VETERANCY_MANAGER:GetCurrentRankName()
-                            , ZO_CommaDelimitNumber(ZO_VETERANCY_MANAGER:GetCurrentTierProgress())
-                            , ZO_CommaDelimitNumber(ZO_VETERANCY_MANAGER:GetCurrentTierTotal()))
+                        , ZO_VETERANCY_MANAGER:GetCurrentRank()
+                        , ZO_VETERANCY_MANAGER:GetCurrentRankName()
+                        , ZO_CommaDelimitNumber(ZO_VETERANCY_MANAGER:GetCurrentTierProgress())
+                        , ZO_CommaDelimitNumber(ZO_VETERANCY_MANAGER:GetCurrentTierTotal()))
                 end
             else
                 descriptionText = GetString(SI_VETERANCY_INACTIVE_TOOLTIP)

@@ -657,6 +657,12 @@ function ZO_SkillsManager:InitializeSkillLineList()
                     node.control:SetHandler("OnMouseEnter", ZO_SelectableLabel_OnMouseEnter)
                     node.control:SetHandler("OnMouseExit", ZO_SelectableLabel_OnMouseExit)
                 end
+            else
+                node:SetEnabled(true)
+                node.control:SetEnabled(true)
+
+                node.control:SetHandler("OnMouseEnter", nil)
+                node.control:SetHandler("OnMouseExit", nil)
             end
 
             if SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeBatchSave() then

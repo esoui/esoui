@@ -57,6 +57,7 @@ do
         ["mailGamepad"] = true,
         ["gamepad_market_purchase"] = true,
         ["codeRedemptionGamepad"] = true,
+        ["VeterancySceneGamepad"] = true,
     }
     function ZO_LootHistory_Gamepad:CanShowItemsInHistory()
         local currentSceneName = SCENE_MANAGER:GetCurrentSceneName()

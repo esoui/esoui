@@ -1466,6 +1466,8 @@ SAS(SI_DIRECTPURCHASEPURCHASESKURESULT3, "Transaction successfully canceled.", 0
 SAS(SI_DIRECTPURCHASEPURCHASESKURESULT4, "Transaction failed due to missing payment info.", 0)
 SAS(SI_DIRECTPURCHASEPURCHASESKURESULT5, "Transaction failed because the payment was declined.", 0)
 SAS(SI_DIRECTPURCHASEPURCHASESKURESULT6, "Transaction timed out. Please try again later.", 0)
+SAS(SI_DIRECTPURCHASEPURCHASESKURESULT7, "Слишком много попыток покупки. Попробуйте позже.", 0)
+SAS(SI_DIRECTPURCHASEPURCHASESKURESULT8, "Оверлей магазина недоступен. Включите его и перезапустите игру.", 0)
 SAS(SI_DISCONNECTED_FROM_SERVER, "Вы отключены от сервера.", 0)
 SAS(SI_DISMISS_UI_ERROR, "Закрыть", 1)
 SAS(SI_DISPLAY_NAME_LABEL, "ID игрока:", 1)

@@ -288,8 +288,10 @@ end
 function ZO_Tooltip:LayoutPromotionalEventActivityDescription(activityData)
     local description = activityData:GetDescription()
 
-    local menuAssistanceText = activityData:GetMenuAssistanceDescriptionText("UI_SHORTCUT_PRIMARY")
-    description = AppendToDescription(description, menuAssistanceText)
+    if not activityData:IsComplete() then
+        local menuAssistanceText = activityData:GetMenuAssistanceDescriptionText("UI_SHORTCUT_PRIMARY")
+        description = AppendToDescription(description, menuAssistanceText)
+    end
 
     local requiredCollectibleText = ZO_PromotionalEvents_Shared.GetActivityRequiredCollectibleText(activityData)
     description = AppendToDescription(description, requiredCollectibleText)

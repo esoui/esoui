@@ -42,6 +42,7 @@ end
 
 function ZO_GuildMailManagement_Keyboard:RegisterForEvents()
     self.control:RegisterForEvent(EVENT_GUILD_RANKS_CHANGED, function() self:RefreshRanks() end)
+    self.control:RegisterForEvent(EVENT_GUILD_MAIL_UPDATE, function() self:OnGuildMailUpdate() end)
     self.control:RegisterForEvent(EVENT_CREATE_GUILD_MAIL_RESULT, function(_, ...) self:OnCreateGuildMailResult(...) end)
     self.control:RegisterForEvent(EVENT_DELETE_GUILD_MAIL_RESULT, function(_, ...) self:OnDeleteGuildMailResult(...) end)
 end
@@ -203,6 +204,15 @@ end
 
 function ZO_GuildMailManagement_Keyboard:OnDeleteGuildMailResult(result)
     if result == GUILD_MAIL_RESULT_SUCCESS then
+        self:RefreshMailCount()
+        if KEYBOARD_GUILD_MAIL_MANAGEMENT_SEND_FRAGMENT:IsShowing() then
+            KEYBIND_STRIP:UpdateKeybindButtonGroup(self.sendKeybindStripDescriptor)
+        end
+    end
+end
+
+function ZO_GuildMailManagement_Keyboard:OnGuildMailUpdate()
+    if self:IsShowing() then
         self:RefreshMailCount()
         if KEYBOARD_GUILD_MAIL_MANAGEMENT_SEND_FRAGMENT:IsShowing() then
             KEYBIND_STRIP:UpdateKeybindButtonGroup(self.sendKeybindStripDescriptor)

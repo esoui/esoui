@@ -398,9 +398,9 @@ function ZO_Veterancy_HorizontalScrollList_Shared:EntrySetup(control, data, sele
     local rankInfoDataList = self.rankInfoDataListByPage[data.pageIndex]
 
     -- Build Rank Row
-    local maxRanksPerPage = self.parent:GetMaxRanksPerPage()
+    local maxRanksPerPage = self.parent.GetMaxRanksPerPage()
     local firstIndex = data.pageStartIndex
-    local numRanks = self.parent:GetNumRanksForPage(data.pageIndex)
+    local numRanks = self.parent.GetNumRanksForPage(data.pageIndex)
     local lastIndex = firstIndex + maxRanksPerPage - 1
     for i = firstIndex, lastIndex do
         if i <= firstIndex + numRanks - 1 then
@@ -624,12 +624,12 @@ end
 function ZO_Veterancy_Shared:RefreshScrollListRankData()
     if self:IsShowing() then
         self.scrollList:Clear()
-        local numRewardPages = self:GetNumRewardPages()
+        local numRewardPages = self.GetNumRewardPages()
         for i = 1, numRewardPages do
             local data =
             {
                 pageIndex = i,
-                pageStartIndex = (i - 1) * self:GetMaxRanksPerPage() + 1,
+                pageStartIndex = (i - 1) * self.GetMaxRanksPerPage() + 1,
                 templateData = self.templateData,
                 parentObject = self,
             }
@@ -703,23 +703,28 @@ function ZO_Veterancy_Shared:TryClaimAllRewards()
     ZO_VETERANCY_MANAGER:TryClaimAllRewards()
 end
 
-function ZO_Veterancy_Shared:GetMaxRanksPerPage()
+function ZO_Veterancy_Shared.GetMaxRanksPerPage()
     return ZO_VETERANCY_RANKS_PER_PAGE
 end
 
-function ZO_Veterancy_Shared:GetNumRewardPages()
+function ZO_Veterancy_Shared.GetNumRewardPages()
     local numRanks = ZO_VETERANCY_MANAGER:GetNumRanks()
     return zo_ceil(numRanks / ZO_VETERANCY_RANKS_PER_PAGE)
 end
 
-function ZO_Veterancy_Shared:GetNumRanksForPage(pageIndex)
-    local numPages = self:GetNumRewardPages()
+function ZO_Veterancy_Shared.GetNumRanksForPage(pageIndex)
+    local numPages = ZO_Veterancy_Shared.GetNumRewardPages()
     if numPages == pageIndex then
         local numRanks = ZO_VETERANCY_MANAGER:GetNumRanks()
-        return numRanks - ((numPages - 1) * self:GetMaxRanksPerPage())
+        return numRanks - ((numPages - 1) * ZO_Veterancy_Shared.GetMaxRanksPerPage())
     else
-        return self:GetMaxRanksPerPage()
+        return ZO_Veterancy_Shared.GetMaxRanksPerPage()
     end
+end
+
+function ZO_Veterancy_Shared.GetPageIndexFromRankIndex(rankIndex)
+    local pageIndex = zo_mod(rankIndex, ZO_VETERANCY_RANKS_PER_PAGE)
+    return pageIndex == 0 and ZO_VETERANCY_RANKS_PER_PAGE or pageIndex
 end
 
 function ZO_Veterancy_Shared:OnPageChanged(pageNumber)
@@ -737,7 +742,7 @@ function ZO_Veterancy_Shared:UpdatePageNavigation()
     end
 
     pageNavigation:Clear()
-    pageNavigation:AddPages(self:GetNumRewardPages())
+    pageNavigation:AddPages(self.GetNumRewardPages())
     pageNavigation:Commit(pageToSelect)
 end
 
@@ -760,7 +765,8 @@ end
 
 function ZO_Veterancy_Shared:OnRewardsClaimed(rankIndex, suppressSounds)
     if self:IsShowing() then
-        local rankInfoData = self.scrollList:GetRankInfoDataByIndex(rankIndex)
+        local pageIndex = self.GetPageIndexFromRankIndex(rankIndex)
+        local rankInfoData = self.scrollList:GetRankInfoDataByIndex(pageIndex)
         -- rankInfoData could be nil if the claimed rank is now shown in current view which can happen on claim all.
         if rankInfoData then
             local selectedData = self.scrollList:GetSelectedData()

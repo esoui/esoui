@@ -1,3 +1,13 @@
+ZO_TAMRIEL_TOME_SEASON_ENTRY_BORDER_KEYBOARD_WIDTH = 6
+ZO_TAMRIEL_TOME_SEASON_ENTRY_IMAGE_KEYBOARD_WIDTH = 614
+ZO_TAMRIEL_TOME_SEASON_ENTRY_IMAGE_KEYBOARD_HEIGHT = 307
+ZO_TAMRIEL_TOME_SEASON_ENTRY_KEYBOARD_PADDING = 8
+ZO_TAMRIEL_TOME_SEASON_ENTRY_KEYBOARD_WIDTH = ZO_TAMRIEL_TOME_SEASON_ENTRY_IMAGE_KEYBOARD_WIDTH + ZO_TAMRIEL_TOME_SEASON_ENTRY_BORDER_KEYBOARD_WIDTH
+ZO_TAMRIEL_TOME_SEASON_ENTRY_KEYBOARD_HEIGHT = ZO_TAMRIEL_TOME_SEASON_ENTRY_IMAGE_KEYBOARD_HEIGHT + ZO_TAMRIEL_TOME_SEASON_ENTRY_BORDER_KEYBOARD_WIDTH
+ZO_TAMRIEL_TOME_SEASON_GRID_KEYBOARD_WIDTH = ZO_TAMRIEL_TOME_SEASON_ENTRY_KEYBOARD_WIDTH + 24
+ZO_TAMRIEL_TOME_SEASON_DIALOG_KEYBOARD_WIDTH = ZO_TAMRIEL_TOME_SEASON_GRID_KEYBOARD_WIDTH + 40
+ZO_TAMRIEL_TOME_SEASON_DIALOG_KEYBOARD_MAX_HEIGHT = ZO_TAMRIEL_TOME_SEASON_ENTRY_KEYBOARD_HEIGHT * 2.1
+
 ZO_TamrielTomesScreen_Keyboard = ZO_TamrielTomesScreen_Shared:Subclass()
 
 function ZO_TamrielTomesScreen_Keyboard:Initialize(control)
@@ -70,6 +80,7 @@ function ZO_TamrielTomesScreen_Keyboard:Initialize(control)
 
     ZO_TamrielTomesScreen_Shared.Initialize(self, control, TAMRIEL_TOMES_SCENE_KEYBOARD, templateData)
 
+    SYSTEMS:RegisterKeyboardObject("tamrielTomes", self)
     SYSTEMS:RegisterKeyboardRootScene("tamrielTomes", self.scene)
 
     self.RewardListEntryMouseEnterHandler = function(control)
@@ -95,7 +106,7 @@ function ZO_TamrielTomesScreen_Keyboard:InitializeControls()
     self.pageNavigation:SetDefaultIndicatorFont("ZoFontCallout")
     self.challengesButton:SetHandler("OnClicked", function() TIMED_ACTIVITIES_MANAGER:ShowTimedActivitiesScene() end)
     self.upgradeButton:SetHandler("OnClicked", function() self:ShowPurchaseScreen() end)
-    self.selectTomeButton:SetHandler("OnClicked", function() self:ShowSelectTomeScreen() end)
+    self.selectTomeButton:SetHandler("OnClicked", function() self:ShowSelectTomeDialog() end)
 end
 
 function ZO_TamrielTomesScreen_Keyboard:OnDeferredInitialize()
@@ -113,7 +124,7 @@ function ZO_TamrielTomesScreen_Keyboard:InitializeCurrencyRollingMeter()
     self.currencyIconControl:SetTexture(currencyIcon)
 end
 
-function ZO_TamrielTomesScreen_Keyboard:InitializeKeybindStripDescriptor()
+function ZO_TamrielTomesScreen_Keyboard:InitializeKeybindStripDescriptors()
     self.keybindStripDescriptor =
     {
         alignment = KEYBIND_STRIP_ALIGN_RIGHT,
@@ -344,9 +355,15 @@ function ZO_TamrielTomesScreen_Keyboard:ShowPurchaseScreen()
     SCENE_MANAGER:Push("TamrielTomesPurchaseSceneKeyboard")
 end
 
-function ZO_TamrielTomesScreen_Keyboard:ShowSelectTomeScreen()
-    -- TODO Tamriel Tomes:
-    -- SCENE_MANAGER:Push("TamrielTomesSelectTomeSceneKeyboard")
+function ZO_TamrielTomesScreen_Keyboard:ShowSelectTomeDialog()
+    if self:CanSelectTome() then
+        SCENE_MANAGER:HideCurrentScene()
+        ZO_Dialogs_ShowPlatformDialog("TamrielTomesSelectSeasonDialogKeyboard", {})
+    end
+end
+
+function ZO_TamrielTomesScreen_Keyboard:HideSelectTomeDialog()
+    ZO_Dialogs_ReleaseDialog("TamrielTomesSelectSeasonDialogKeyboard")
 end
 
 function ZO_TamrielTomesScreen_Keyboard:UpdateSceneFragments()
@@ -456,4 +473,158 @@ end
 
 function ZO_TamrielTomesScreen_Keyboard.OnControlInitialized(control)
     TAMRIEL_TOMES_SCREEN_KEYBOARD = ZO_TamrielTomesScreen_Keyboard:New(control)
+end
+
+
+ZO_SelectTamrielTomeSeasonDialog_Keyboard = ZO_InitializingObject:Subclass()
+
+function ZO_SelectTamrielTomeSeasonDialog_Keyboard:Initialize(control)
+    self.control = control
+    self.templateData =
+    {
+        gridListClass = ZO_GridScrollList_Keyboard,
+        entryTemplate = "ZO_TamrielTomeSeasonEntry_Keyboard",
+        entryWidth = ZO_TAMRIEL_TOME_SEASON_ENTRY_KEYBOARD_WIDTH,
+        entryHeight = ZO_TAMRIEL_TOME_SEASON_ENTRY_KEYBOARD_HEIGHT,
+    }
+
+    self:InitializeControls()
+    self:InitializeGridList()
+    self:InitializeDialog()
+end
+
+function ZO_SelectTamrielTomeSeasonDialog_Keyboard:InitializeControls()
+    self.contentControl = self.control:GetNamedChild("ContentContainer")
+    self.gridControl = self.contentControl:GetNamedChild("TomesGrid")
+end
+
+function ZO_SelectTamrielTomeSeasonDialog_Keyboard:InitializeDialog()
+    self.dialogName = "TamrielTomesSelectSeasonDialogKeyboard"
+
+    local tomeId = TAMRIEL_TOMES_MANAGER:GetSelectedTomeId()
+    local control = self.control
+    ZO_Dialogs_RegisterCustomDialog(self.dialogName,
+    {
+        title =
+        {
+            text = SI_TAMRIEL_TOMES_SELECT_TOME_DIALOG_NAME_LABEL,
+        },
+
+        mainText =
+        {
+            text = "",
+        },
+
+        finishedCallback = function(dialog)
+            if not ZO_TamrielTomeSeasonGridEntry_Shared.IsSelectionPending() then
+                -- No selection was made; return to this Tome.
+                TAMRIEL_TOMES_MANAGER:OpenTamrielTome(tomeId)
+            end
+        end,
+
+        setup = function(dialog, data)
+            CHAT_SYSTEM:Minimize()
+            dialog.object = self
+            self:BuildGridList()
+            self:UpdateButtonStates()
+        end,
+
+        customControl = control,
+
+        buttons =
+        {
+            {
+                control = control:GetNamedChild("Select"),
+                text = SI_DIALOG_CONFIRM,
+                requiresTextInput = false,
+                noReleaseOnClick = true,
+                callback = function(dialog)
+                    if self.targetGridEntry then
+                        self.targetGridEntry:Select()
+                    end
+                end,
+                enabled = function()
+                    return self.targetGridEntry and not self.targetGridEntry:IsSelected()
+                end,
+            },
+
+            {
+                control = control:GetNamedChild("Close"),
+                text = SI_DIALOG_CLOSE,
+                requiresTextInput = false,
+                noReleaseOnClick = false,
+                callback = function(dialog)
+                    ZO_Dialogs_ReleaseDialog(self.dialogName)
+                end
+            },
+        },
+    })
+end
+
+function ZO_SelectTamrielTomeSeasonDialog_Keyboard:InitializeGridList()
+    local templateData = self.templateData
+    self.gridList = templateData.gridListClass:New(self.gridControl, templateData.highlightTemplate)
+
+    local function SetupGridEntry(...)
+        self:SetupGridEntry(...)
+    end
+
+    local NO_HIDE_CALLBACK = nil
+    local NO_RESET_CALLBACK = nil
+    local GRID_PADDING = ZO_TAMRIEL_TOME_SEASON_ENTRY_KEYBOARD_PADDING
+    self.gridList:AddEntryTemplate(templateData.entryTemplate, templateData.entryWidth, templateData.entryHeight, SetupGridEntry, NO_HIDE_CALLBACK, NO_RESET_CALLBACK, GRID_PADDING, GRID_PADDING)
+end
+
+function ZO_SelectTamrielTomeSeasonDialog_Keyboard:BuildGridList()
+    self.gridList:ClearGridList()
+    self:PopulateGridList()
+    self.gridList:CommitGridList()
+end
+
+function ZO_SelectTamrielTomeSeasonDialog_Keyboard:PopulateGridList()
+    local entryTemplate = self.templateData.entryTemplate
+    local tomeIds = TAMRIEL_TOMES_MANAGER:GetAvailableTomeIds()
+    for tomeIndex, tomeId in ipairs(tomeIds) do
+        local entryData = self:CreateGridEntryData(tomeId)
+        self.gridList:AddEntry(entryData, entryTemplate)
+    end
+
+    local numVisibleTomes = zo_max(1, #tomeIds)
+    local minGridHeight = numVisibleTomes * (ZO_TAMRIEL_TOME_SEASON_ENTRY_KEYBOARD_HEIGHT + ZO_TAMRIEL_TOME_SEASON_ENTRY_KEYBOARD_PADDING)
+    minGridHeight = zo_min(minGridHeight, ZO_TAMRIEL_TOME_SEASON_DIALOG_KEYBOARD_MAX_HEIGHT)
+    local MIN_X = nil
+    self.gridControl:SetDimensionConstraints(MIN_X, minGridHeight)
+end
+
+function ZO_SelectTamrielTomeSeasonDialog_Keyboard:CreateGridEntryData(tomeId)
+    local tomeData = ZO_TamrielTomeData:New(tomeId)
+    local entryData =
+    {
+        tomeData = tomeData,
+        text = tomeData:GetDisplayName(),
+        clickSound = SOUNDS.TAMRIEL_TOMES_BOOK_OPENED,
+        isSelected = function()
+            return tomeId == TAMRIEL_TOMES_MANAGER:GetSelectedTomeId()
+        end,
+        narrationText = self.templateData.narrationText,
+    }
+
+    return entryData
+end
+
+function ZO_SelectTamrielTomeSeasonDialog_Keyboard:SetTargetGridEntry(entry)
+    self.targetGridEntry = entry
+    self:UpdateButtonStates()
+end
+
+function ZO_SelectTamrielTomeSeasonDialog_Keyboard:SetupGridEntry(control, data)
+    control.object:Setup(data, self)
+end
+
+function ZO_SelectTamrielTomeSeasonDialog_Keyboard:UpdateButtonStates()
+    ZO_Dialogs_UpdateButtonVisibilityAndEnabledState(self.control)
+end
+
+function ZO_SelectTamrielTomeSeasonDialog_Keyboard.OnInitialized(control)
+    control.object = ZO_SelectTamrielTomeSeasonDialog_Keyboard:New(control)
 end

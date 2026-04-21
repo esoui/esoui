@@ -37,7 +37,7 @@
                             <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icon" offsetY="4"/>
                             <Anchor point="LEFT" offsetX="4" constrains="X"/>
                         </Label>
-                        <Texture name="$(parent)CompleteMark" override="true" textureFile="EsoUI/Art/Miscellaneous/check_icon_64.dds"/>
+                        <Texture name="$(parent)CompleteMark" override="true"/>
                         <Control name="$(parent)FxAnchorControl" override="true">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)Icon"/>
                             <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icon"/>

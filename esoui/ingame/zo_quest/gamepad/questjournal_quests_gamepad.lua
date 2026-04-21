@@ -52,18 +52,18 @@ function ZO_QuestJournal_Quests_Gamepad:Initialize(control, owner)
     -- Right Pane
     self.rightPane = control:GetNamedChild("RightPane")
     local rightPaneContent = self.rightPane:GetNamedChild("ContainerContent")
-    self.questStepContainer = rightPaneContent:GetNamedChild("QuestStepContainer")
+    self.questStepContainer = rightPaneContent:GetNamedChild("QuestStep")
 
     local questStepContainerScrollChild = self.questStepContainer:GetNamedChild("ScrollChild")
-    self.conditionTextLabel = questStepContainerScrollChild:GetNamedChild("ConditionTextLabel")
+    self.conditionTextLabel = questStepContainerScrollChild:GetNamedChild("ConditionLabel")
 
-    self.conditionTextBulletList = ZO_BulletList:New(questStepContainerScrollChild:GetNamedChild("ConditionTextBulletList"), "ZO_QuestJournal_ConditionBulletLabel_Gamepad", nil, "ZO_QuestJournal_CompletedTaskIcon_Gamepad")
+    self.conditionTextBulletList = ZO_BulletList:New(questStepContainerScrollChild:GetNamedChild("ConditionBulletList"), "ZO_QuestJournal_ConditionBulletLabel_Gamepad", nil, "ZO_QuestJournal_CompletedTaskIcon_Gamepad")
 
-    self.optionalStepTextLabel = questStepContainerScrollChild:GetNamedChild("OptionalStepTextLabel")
-    self.optionalStepTextBulletList = ZO_BulletList:New(questStepContainerScrollChild:GetNamedChild("OptionalStepTextBulletList"), "ZO_QuestJournal_ConditionBulletLabel_Gamepad")
+    self.optionalStepTextLabel = questStepContainerScrollChild:GetNamedChild("OptionalStepLabel")
+    self.optionalStepTextBulletList = ZO_BulletList:New(questStepContainerScrollChild:GetNamedChild("OptionalStepBulletList"), "ZO_QuestJournal_ConditionBulletLabel_Gamepad")
 
-    self.hintTextLabel = questStepContainerScrollChild:GetNamedChild("HintTextLabel")
-    self.hintTextBulletList = ZO_BulletList:New(questStepContainerScrollChild:GetNamedChild("HintTextBulletList"), "ZO_QuestJournal_HintBulletLabel_Gamepad")
+    self.hintTextLabel = questStepContainerScrollChild:GetNamedChild("HintLabel")
+    self.hintTextBulletList = ZO_BulletList:New(questStepContainerScrollChild:GetNamedChild("HintBulletList"), "ZO_QuestJournal_HintBulletLabel_Gamepad")
 
     self.rightPaneFragment = ZO_FadeSceneFragment:New(self.rightPane)
 

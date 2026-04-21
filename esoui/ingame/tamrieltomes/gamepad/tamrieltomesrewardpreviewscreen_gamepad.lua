@@ -13,10 +13,10 @@ function ZO_TamrielTomesRewardPreviewScreen_Gamepad:Initialize(control)
 end
 
 function ZO_TamrielTomesRewardPreviewScreen_Gamepad:OnDeferredInitialize()
-    self:InitializeKeybindStripDescriptor()
+    self:InitializeKeybindStripDescriptors()
 end
 
-function ZO_TamrielTomesRewardPreviewScreen_Gamepad:InitializeKeybindStripDescriptor()
+function ZO_TamrielTomesRewardPreviewScreen_Gamepad:InitializeKeybindStripDescriptors()
     self.keybindStripDescriptor = {}
     ZO_Gamepad_AddBackNavigationKeybindDescriptorsWithSound(self.keybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON, nil, GetString(SI_TAMRIEL_TOMES_END_PREVIEW_ACTION))
 end
@@ -37,7 +37,7 @@ end
 
 function ZO_TamrielTomesRewardPreviewScreen_Gamepad:OnShowing()
     -- Order matters
-    TAMRIEL_TOMES_SCENE_GROUP_GAMEPAD:SetActiveScene("TamrielTomesPreviewRewardSceneGamepad")
+    TAMRIEL_TOMES_SCENE_GROUP_GAMEPAD:SetActiveScene("TamrielTomesRewardPreviewSceneGamepad")
     KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
     self:UpdatePreviewControls()
 end

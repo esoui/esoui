@@ -1,5 +1,40 @@
 <GuiXml>
     <Controls>
+        <Control name="ZO_TamrielTomeSeasonEntry_Shared" virtual="true">
+            <OnInitialized>
+                ZO_TamrielTomeSeasonGridEntry_Shared:New(self)
+            </OnInitialized>
+            <OnEffectivelyHidden>
+                self.object:SetIsHighlighted(false)
+            </OnEffectivelyHidden>
+            <OnMouseEnter>
+                self.object:SetIsHighlighted(true)
+            </OnMouseEnter>
+            <OnMouseExit>
+                self.object:SetIsHighlighted(false)
+            </OnMouseExit>
+            <OnMouseUp>
+                if upInside and button == MOUSE_BUTTON_INDEX_LEFT then
+                    self.object:Select()
+                end
+            </OnMouseUp>
+            <Controls>
+                <Texture name="$(parent)Border">
+                    <AnchorFill/>
+                </Texture>
+                <Texture name="$(parent)Image">
+                    <Anchor point="CENTER"/>
+                </Texture>
+                <Texture name="$(parent)ImageGlow" alpha="0" blendMode="ADD" hidden="true" layer="OVERLAY" shaderEffectType="RADIAL_BLUR" tier="HIGH">
+                    <Anchor point="BOTTOM" relativeTo="$(parent)Image"/>
+                </Texture>
+                <Label name="$(parent)Name" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED"/>
+                <Label name="$(parent)Rewards" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_TAMRIEL_TOME_SEASON_ENTRY_REWARDS_LABEL"/>
+                <Label name="$(parent)RewardCount" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                    <Anchor point="LEFT" relativeTo="$(parent)Rewards" relativePoint="RIGHT" offsetX="5"/>
+                </Label>
+            </Controls>
+        </Control>
         <TopLevelControl name="ZO_TamrielTomes_SharedTL" hidden="true" resizeToFitDescendents="true" virtual="true" mouseEnabled="true">
             <Controls>
                 <Texture name="$(parent)PageBackground" textureFile="EsoUI/Art/TamrielTomes/single_side_full_tome.dds" level="1" excludeFromResizeToFitExtents="true">
@@ -24,20 +59,20 @@
                             <Anchor point="TOPRIGHT" relativeTo="$(parent)Title" relativePoint="BOTTOMRIGHT" offsetY="-4"/>
                         </Label>
                         <Control name="$(parent)Buttons">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)Subtitle" relativePoint="BOTTOMLEFT" offsetY="30"/>
-                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Subtitle" relativePoint="BOTTOMRIGHT" offsetY="30"/>
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Subtitle" relativePoint="BOTTOMLEFT" offsetY="10"/>
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Subtitle" relativePoint="BOTTOMRIGHT" offsetY="10"/>
                             <Controls>
                                 <Button name="$(parent)ChallengesButton" text="SI_TAMRIEL_TOMES_VIEW_CHALLENGES_LABEL">
-                                    <Anchor point="RIGHT" relativePoint="TOP" offsetX="-20"/>
+                                    <Anchor point="TOPRIGHT" relativePoint="TOP" offsetX="-20"/>
                                     <Dimensions x="400" y="75"/>
                                 </Button>
                                 <Button name="$(parent)UpgradeButton" text="SI_TAMRIEL_TOMES_UPGRADE_TOME_LABEL">
-                                    <Anchor point="LEFT" relativePoint="TOP" offsetX="20"/>
+                                    <Anchor point="TOPLEFT" relativePoint="TOP" offsetX="20"/>
                                     <Dimensions x="400" y="75"/>
                                 </Button>
                             </Controls>
                         </Control>
-                        <Button name="$(parent)SelectTomeButton" text="SI_TAMRIEL_TOMES_SELECT_TAMRIEL_TOME" excludeFromResizeToFitExtents="true">
+                        <Button name="$(parent)SelectTomeButton" excludeFromResizeToFitExtents="true">
                             <Dimensions x="64" y="64"/>
                             <Textures normal="EsoUI/Art/TamrielTomes/view_tomes_up.dds" pressed="EsoUI/Art/TamrielTomes/view_tomes_down.dds" mouseOver="EsoUI/Art/TamrielTomes/view_tomes_over.dds" disabled="EsoUI/Art/TamrielTomes/view_tomes_disabled.dds"/>
                         </Button>

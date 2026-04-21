@@ -64,7 +64,7 @@ function ZO_TimedActivityTile_Keyboard:PostInitializePlatform()
                 end
                 return false
             end,
-            -- Play the sound assuming there shouldn't be any real situation where this keybind is present but claiming fails
+            -- This action cannot fail as long as the only rewards are the Tome Points currency and that currency continues to be uncapped.
             sound = SOUNDS.TAMRIEL_TOMES_CHALLENGE_REWARD_CLAIMED
         },
 
@@ -93,27 +93,22 @@ function ZO_TimedActivityTile_Keyboard:PostInitializePlatform()
             name = function()
                 return zo_strformat(SI_TAMRIEL_TOMES_CHALLENGES_ACTION_NAME_REROLL, ZO_TimedActivities_Manager.GetNumRemainingRerollAttempts())
             end,
-
-            keybind = "UI_SHORTCUT_QUATERNARY",
-
+            keybind = "UI_SHORTCUT_QUINARY",
             callback = function()
                 self.timedActivityData:Reroll()
             end,
-
             visible = function()
                 if self.timedActivityData then
                     return self.timedActivityData:CanReroll()
                 end
                 return false
             end,
-
             enabled = function()
                 if self.timedActivityData then
                     return not self.timedActivityData:CanClaim()
                 end
                 return false
             end,
-
             sound = SOUNDS.TAMRIEL_TOMES_CHALLENGE_REROLL,
         },
     }
@@ -191,6 +186,8 @@ function ZO_TimedActivityTile_Keyboard:OnMouseEnter()
         ZO_Tooltips_SetupDynamicTooltipAnchors(InformationTooltip, self:GetControl())
         SetTooltipText(InformationTooltip, description)
     end
+
+    self:UpdateKeybinds()
 end
 
 function ZO_TimedActivityTile_Keyboard:OnMouseExit()
@@ -201,6 +198,8 @@ function ZO_TimedActivityTile_Keyboard:OnMouseExit()
     end
 
     ClearTooltip(InformationTooltip)
+
+    self:UpdateKeybinds()
 end
 
 function ZO_TimedActivityTile_Keyboard:OnMouseUp(button, upInside)
@@ -288,6 +287,20 @@ function ZO_TimedActivities_Keyboard:InitializeControls()
                 SCENE_MANAGER:HideCurrentScene()
             end,
             sound = SOUNDS.TAMRIEL_TOMES_NAVIGATE_BACK,
+        },
+
+        -- Claim All
+        {
+            name = GetString(SI_TAMRIEL_TOMES_CHALLENGES_ACTION_NAME_CLAIM_ALL),
+            keybind = "UI_SHORTCUT_QUATERNARY",
+            callback = function()
+                TIMED_ACTIVITIES_MANAGER:ClaimAllRewards()
+            end,
+            visible = function()
+                return TIMED_ACTIVITIES_MANAGER:HasClaimableTimedActivities()
+            end,
+            -- This action cannot fail as long as the only rewards are the Tome Points currency and that currency continues to be uncapped.
+            sound = SOUNDS.TAMRIEL_TOMES_CHALLENGE_REWARD_CLAIMED,
         },
     }
 end

@@ -1374,8 +1374,10 @@ do
         local skillLineNarrationText = function(entryData, entryControl)
             local narrations = {}
             local skillLineData = entryData.skillLineData
-            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_SKILLS_GAMEPAD_RANK_NARRATION)))
-            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(skillLineData.currentRank))
+            if not skillLineData.isClassMastery then
+                ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_SKILLS_GAMEPAD_RANK_NARRATION)))
+                ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(skillLineData.currentRank))
+            end
             ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(entryData.text))
             ZO_AppendNarration(narrations, ZO_GetSharedGamepadEntrySubLabelNarrationText(entryData, entryControl))
             ZO_AppendNarration(narrations, SkillLineGamepadEntryProgressBarNarrationText(skillLineData))

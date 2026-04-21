@@ -17,7 +17,10 @@ function ZO_VeterancyRank:Initialize(control)
         InitializeTooltip(InformationTooltip, self.statusBar, TOP)
 
         if ZO_VETERANCY_MANAGER:IsOnMaxRank() then
-            InformationTooltip:AddLine(zo_strformat(SI_VETERANCY_ACTIVE_MAX_RANK_TOOLTIP, ZO_VETERANCY_MANAGER:GetCurrentRank())
+            InformationTooltip:AddLine(zo_strformat(SI_VETERANCY_ACTIVE_MAX_RANK_TOOLTIP
+                , ZO_VETERANCY_MANAGER:GetCurrentRank()
+                , ZO_CommaDelimitNumber(ZO_VETERANCY_MANAGER:GetCurrentTierProgress())
+                , ZO_CommaDelimitNumber(ZO_VETERANCY_MANAGER:GetCurrentTierTotal()))
                 , "ZoFontGameMedium", r, g, b, TOPLEFT, MODIFY_TEXT_TYPE_NONE, TEXT_ALIGN_CENTER, FULL_WIDTH)
         else
             InformationTooltip:AddLine(zo_strformat(SI_VETERANCY_ACTIVE_TOOLTIP

@@ -84,20 +84,9 @@ function ZO_ChallengeDifficultyScreen_Keyboard:IsShowing()
     return ZO_CHALLENGE_DIFFICULTY_KEYBOARD_FRAGMENT:IsShowing()
 end
 
-do
-    local DIFFICULTY_SOUND_IDS =
-    {
-        [OVERLAND_DIFFICULTY_TYPE_BASEGAME] = SOUNDS.CHALLENGE_DIFFICULTY_SELECTED_BASEGAME,
-        [OVERLAND_DIFFICULTY_TYPE_JOURNEYMAN] = SOUNDS.CHALLENGE_DIFFICULTY_SELECTED_JOURNEYMAN,
-        [OVERLAND_DIFFICULTY_TYPE_ADVENTURER] = SOUNDS.CHALLENGE_DIFFICULTY_SELECTED_ADVENTURER,
-        [OVERLAND_DIFFICULTY_TYPE_VETERAN] = SOUNDS.CHALLENGE_DIFFICULTY_SELECTED_VETERAN,
-    }
-
-    function ZO_ChallengeDifficultyScreen_Keyboard:OnDifficultyButtonSelectionChanged(newButton, previousButton)
-        self.pendingDifficulty = newButton.difficulty
-        PlaySound(DIFFICULTY_SOUND_IDS[newButton.difficulty])
-        self:RefreshDifficulties()
-    end
+function ZO_ChallengeDifficultyScreen_Keyboard:OnDifficultyButtonSelectionChanged(newButton, previousButton)
+    self.pendingDifficulty = newButton.difficulty
+    self:RefreshDifficulties()
 end
 
 function ZO_ChallengeDifficultyScreen_Keyboard:RefreshDifficulties()
@@ -142,7 +131,6 @@ function ZO_ChallengeDifficultyScreen_Keyboard.OnControlInitialized(control)
 end
 
 function ZO_ChallengeDifficultyScreen_Keyboard.OnGoToLevelUpRewardsButtonClicked()
-    PlaySound(SOUNDS.CHALLENGE_DIFFICULTY_LEVEL_UP_REWARDS_TAB_CLICKED)
     ZO_CHALLENGE_DIFFICULTY_KEYBOARD:Hide()
     if HasPendingLevelUpReward() then
         ZO_KEYBOARD_CLAIM_LEVEL_UP_REWARDS:Show()

@@ -417,7 +417,7 @@ function MailInbox:InitializeKeybindDescriptors()
             visible = function()
                 if self.mailId and not self:HasAlreadyReportedSelectedMail() then
                     local mailData = self:GetMailData(self.mailId, self.isMailFromGuild)
-                    return mailData and (mailData.isFromPlayer or self.fromGuild) and not mailData.isFromLocalPlayer
+                    return mailData and (mailData.isFromPlayer or mailData.fromGuild) and not mailData.isFromLocalPlayer
                 end
             end,
 

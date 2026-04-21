@@ -125,6 +125,7 @@ function ZO_GuildMailManagement_Send_Gamepad:SetupSendList(list)
 
         dropdown:SetNoSelectionText(GetString(SI_GUILD_MAIL_MANAGEMENT_RANKS_DROPDOWN_NO_SELECTION_TEXT))
         dropdown:SetMultiSelectionTextFormatter(SI_GUILD_MAIL_MANAGEMENT_RANKS_DROPDOWN_TEXT_FORMATTER)
+        dropdown:SetSortsItems(false)
 
         dropdown:LoadData(self.rankDropdownEntries)
     end

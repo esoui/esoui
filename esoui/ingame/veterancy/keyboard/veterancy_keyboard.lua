@@ -109,7 +109,7 @@ do
         if rewardData:IsInstanceOf(ZO_VeterancyPerkData) then
             local rewardableEventData = rewardData:GetVeterancyRankPerkRewardData()
             local rankData = rewardableEventData:GetRankData()
-            local pageIndex = zo_mod(rankData:GetIndex(), ZO_VETERANCY_RANKS_PER_PAGE)
+            local pageIndex = ZO_Veterancy_Shared.GetPageIndexFromRankIndex(rankData:GetIndex())
             if pageIndex == 4 or pageIndex == 5 or (pageIndex ~= 7 and rankData:IsLeftTooltip()) then
                 InitializeTooltip(SkillTooltip, self.control, RIGHT, -5, 0, LEFT)
             else
@@ -129,10 +129,7 @@ do
                     local relativePoint = RIGHT
                     local offsetX = 5
                     local useRelativeAnchors = false
-                    local pageIndex = zo_mod(rankData:GetIndex(), ZO_VETERANCY_RANKS_PER_PAGE)
-                    if pageIndex == 0 then
-                        pageIndex = ZO_VETERANCY_RANKS_PER_PAGE
-                    end
+                    local pageIndex = ZO_Veterancy_Shared.GetPageIndexFromRankIndex(rankData:GetIndex())
                     if pageIndex == 4 or pageIndex == 5 then
                         useRelativeAnchors = true
                         point = RIGHT
@@ -182,7 +179,7 @@ function ZO_VeterancyReward_Keyboard:OnMouseUp(button, upInside)
         if button == MOUSE_BUTTON_INDEX_LEFT then
             if self.rewardableEventData:CanClaimReward() then
                 self.rewardableEventData:TryClaimReward()
-            elseif not ITEM_PREVIEW_KEYBOARD:IsWaitingForPreviewBegin() and g_VeterancyKeyboard.CanPreviewReward(self.rewardableEventData:GetRewardData()) then
+            elseif not ITEM_PREVIEW_KEYBOARD:IsWaitingForPreviewBegin() and self.rewardableEventData:CanPreviewReward() then
                 g_VeterancyKeyboard:BeginPreview(ZO_PREVIEW_SCREEN_REWARD_DATA_PREVIEW_TYPES.ACTIVE_PREVIEW, self.rewardableEventData)
                 self:UpdateKeybinds()
             end

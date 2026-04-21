@@ -1466,6 +1466,8 @@ SAS(SI_DIRECTPURCHASEPURCHASESKURESULT3, "Transaction successfully canceled.", 0
 SAS(SI_DIRECTPURCHASEPURCHASESKURESULT4, "Transaction failed due to missing payment info.", 0)
 SAS(SI_DIRECTPURCHASEPURCHASESKURESULT5, "Transaction failed because the payment was declined.", 0)
 SAS(SI_DIRECTPURCHASEPURCHASESKURESULT6, "Transaction timed out. Please try again later.", 0)
+SAS(SI_DIRECTPURCHASEPURCHASESKURESULT7, "尝试购买次数过多，请稍后再试。", 0)
+SAS(SI_DIRECTPURCHASEPURCHASESKURESULT8, "无法唤起游戏内商店界面，请开启该功能后重新启动游戏。", 0)
 SAS(SI_DISCONNECTED_FROM_SERVER, "与服务器断开连接。", 0)
 SAS(SI_DISMISS_UI_ERROR, "关闭", 1)
 SAS(SI_DISPLAY_NAME_LABEL, "用户ID：", 1)

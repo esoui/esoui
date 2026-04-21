@@ -18,6 +18,58 @@
                 </Texture>
             </Controls>
         </Button>
+        <Control name="ZO_TamrielTomeSeasonEntry_Gamepad" inherits="ZO_TamrielTomeSeasonEntry_Shared" mouseEnabled="true" virtual="true">
+            <Dimensions x="ZO_TAMRIEL_TOME_SEASON_ENTRY_GAMEPAD_WIDTH" y="ZO_TAMRIEL_TOME_SEASON_ENTRY_GAMEPAD_HEIGHT"/>
+            <Controls>
+                <Texture name="$(parent)Image" override="true">
+                    <Dimensions x="ZO_TAMRIEL_TOME_SEASON_ENTRY_IMAGE_GAMEPAD_WIDTH" y="ZO_TAMRIEL_TOME_SEASON_ENTRY_IMAGE_GAMEPAD_HEIGHT"/>
+                </Texture>
+                <Texture name="$(parent)ImageGlow" override="true">
+                    <Dimensions x="ZO_TAMRIEL_TOME_SEASON_ENTRY_IMAGE_GAMEPAD_WIDTH" y="ZO_TAMRIEL_TOME_SEASON_ENTRY_IMAGE_GAMEPAD_HEIGHT"/>
+                </Texture>
+                <Label name="$(parent)Name" override="true" font="ZoFontGamepadBold34">
+                    <Anchor point="TOPLEFT" offsetX="8" offsetY="8"/>
+                    <Anchor point="TOPRIGHT" offsetX="-8" offsetY="8"/>
+                </Label>
+                <Label name="$(parent)Rewards" override="true" font="ZoFontGamepadBold27">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT" offsetY="4"/>
+                </Label>
+                <Label name="$(parent)RewardCount" override="true" font="ZoFontGamepadBold27"/>
+            </Controls>
+        </Control>
+        <TopLevelControl name="ZO_SelectTamrielTomeSeason_Gamepad" inherits="ZO_CustomCenteredGamepadDialogTemplate" resizeToFitDescendents="true" resizeToFitConstrains="Y">
+            <Dimensions x="ZO_TAMRIEL_TOME_SEASON_DIALOG_GAMEPAD_WIDTH"/>
+            <ResizeToFitPadding width="40" height="72"/>
+            <OnInitialized name="TamrielTomes">
+                ZO_SelectTamrielTomeSeasonDialog_Gamepad.OnInitialized(self)
+            </OnInitialized>
+            <OnEffectivelyHidden name="TamrielTomes">
+                ZO_SelectTamrielTomeSeasonDialog_Gamepad.OnHidden(self)
+            </OnEffectivelyHidden>
+            <Controls>
+                <Label name="$(parent)Title" font="ZoFontGamepad42" horizontalAlignment="CENTER" modifyTextType="UPPERCASE">
+                    <Anchor point="TOPLEFT" offsetX="5" offsetY="38"/>
+                    <Anchor point="TOPRIGHT" offsetX="-5" offsetY="38"/>
+                </Label>
+                <Control name="$(parent)DividerSimple" inherits="ZO_GamepadHeaderHorizontalDivider">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetX="60"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Title" relativePoint="BOTTOMRIGHT" offsetX="-60" offsetY="30"/>
+                </Control>
+                <Control name="$(parent)Content" override="true">
+                    <Anchor point="TOP" relativeTo="$(parent)DividerSimple" relativePoint="BOTTOM" offsetY="30"/>
+                    <Dimensions x="ZO_TAMRIEL_TOME_SEASON_GRID_GAMEPAD_WIDTH"/>
+                    <Controls>
+                        <Control name="$(parent)TomesGrid" inherits="ZO_GridScrollList_Gamepad">
+                            <Anchor point="TOPLEFT"/>
+                            <Anchor point="TOPRIGHT"/>
+                            <!-- Minimum height dimension constraint is set by ZO_SelectTamrielTomeSeasonDialog_Gamepad:PopulateGridList() -->
+                        </Control>
+                    </Controls>
+                </Control>
+                <Control name="$(parent)Close" inherits="ZO_CustomDialogButton_Gamepad"/>
+                <Control name="$(parent)Select" inherits="ZO_CustomDialogButton_Gamepad"/>
+            </Controls>
+        </TopLevelControl>
         <TopLevelControl name="ZO_TamrielTomes_GamepadTL" inherits="ZO_TamrielTomes_SharedTL">
             <Anchor point="LEFT" offsetX="13" offsetY="24"/>
             <Dimensions x="850"/>
@@ -35,21 +87,26 @@
                     <Dimensions x="850" y="150"/>
                     <Controls>
                         <Label name="$(parent)Title" override="true" font="ZoFontGamepadBold48">
-                            <Anchor point="TOPLEFT" offsetX="10"/>
+                            <Anchor point="TOPLEFT" offsetX="80"/>
                             <Anchor point="TOPRIGHT" offsetX="-80"/>
                         </Label>
                         <Label name="$(parent)Subtitle" override="true" font="ZoFontGamepad27"/>
                         <Control name="$(parent)Buttons" override="true">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)Subtitle" relativePoint="BOTTOMLEFT" offsetY="36"/>
-                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Subtitle" relativePoint="BOTTOMRIGHT" offsetY="36"/>
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Subtitle" relativePoint="BOTTOMLEFT" offsetY="12"/>
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Subtitle" relativePoint="BOTTOMRIGHT" offsetY="12"/>
+                            <Dimensions y="40"/>
                             <Controls>
                                 <Button name="$(parent)ChallengesButton" override="true" inherits="ZO_TamrielTomes_GamepadButtonTemplate"/>
                                 <Button name="$(parent)UpgradeButton" override="true" inherits="ZO_TamrielTomes_GamepadButtonTemplate"/>
                             </Controls>
                         </Control>
                         <Button name="$(parent)SelectTomeButton" override="true">
-                            <Anchor point="RIGHT" offsetX="-8"/>
+                            <Anchor point="LEFT" relativeTo="$(parent)ButtonsUpgradeButton" relativePoint="RIGHT" offsetX="20"/>
+                            <Textures normal="EsoUI/Art/TamrielTomes/Gamepad/gp_view_tomes.dds" pressed="EsoUI/Art/TamrielTomes/Gamepad/gp_view_tomes.dds" mouseOver="EsoUI/Art/TamrielTomes/Gamepad/gp_view_tomes.dds" disabled="EsoUI/Art/TamrielTomes/Gamepad/gp_view_tomes.dds"/>
                         </Button>
+                        <Control name="$(parent)SelectTomeKeybind" inherits="ZO_KeybindButton_Gamepad">
+                            <Anchor point="LEFT" relativeTo="$(parent)SelectTomeButton" relativePoint="RIGHT"/>
+                        </Control>
                     </Controls>
                 </Control>
                 <Control name="$(parent)Book" override="true">

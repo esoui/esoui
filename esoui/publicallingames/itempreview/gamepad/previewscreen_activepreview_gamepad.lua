@@ -40,6 +40,7 @@ function ZO_PreviewScreen_ActivePreview_Gamepad:PreviewReward()
         self:PreviewRewardList(rewardId)
     elseif not self.isAlreadyPreviewingReward then
         previewSystem:PreviewReward(rewardId)
+        previewSystem:OnPreviewShowing()
     else
         -- Adds action keybinds for preview.
         previewSystem:OnPreviewShowing()

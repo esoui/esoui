@@ -1243,4 +1243,5 @@ SOUNDS =
     CHALLENGE_DIFFICULTY_SELECTED_VETERAN = "ChallengeDifficulty_VeteranSelected",
     CHALLENGE_DIFFICULTY_DIFFICULTY_TAB_CLICKED = "ChallengeDifficulty_DifficultyTabClicked",
     CHALLENGE_DIFFICULTY_LEVEL_UP_REWARDS_TAB_CLICKED = "ChallengeDifficulty_LevelUpRewardsTabClicked",
+    CHALLENGE_DIFFICULTY_CHANGE_DIFFICULTY_BUTTON_CLICKED = "ChallengeDifficulty_ChangeDifficulty_Confirm",
 }

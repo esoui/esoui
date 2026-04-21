@@ -2310,7 +2310,12 @@ function ZO_GamepadStats:UpdateDifficultyDropdownEntries(dropdown)
             difficultyName = GetString("SI_OVERLANDDIFFICULTYTYPE", difficulty)
         }
 
-        local difficultyListItem = dropdown:CreateItemEntry(difficultyInfo.difficultyName, function() RequestChangePlayerOverlandDifficulty(difficulty) end)
+        local function OnSelectionClicked()
+            RequestChangePlayerOverlandDifficulty(difficulty)
+            PlaySound(SOUNDS.CHALLENGE_DIFFICULTY_CHANGE_DIFFICULTY_BUTTON_CLICKED)
+        end
+
+        local difficultyListItem = dropdown:CreateItemEntry(difficultyInfo.difficultyName, OnSelectionClicked)
         difficultyListItem.difficultyInfo = difficultyInfo
         dropdown:AddItem(difficultyListItem, ZO_COMBOBOX_SUPPRESS_UPDATE)
     end 

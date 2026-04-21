@@ -429,7 +429,7 @@
                 </Texture>
                 <Texture name="$(parent)VeterancyRankIcon">
                     <Anchor point="RIGHT" relativeTo="$(parent)TextArea" relativePoint="LEFT"/>
-                    <Dimensions x="64" y="64"/>
+                    <Dimensions x="40" y="40"/>
                 </Texture>
                 <Texture name="$(parent)RankIcon">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)TextArea" relativePoint="TOPRIGHT" offsetX="2" offsetY="-4"/>

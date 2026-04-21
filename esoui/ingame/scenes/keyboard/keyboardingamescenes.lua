@@ -1531,7 +1531,10 @@ do
                     local r, g, b = ZO_TOOLTIP_DEFAULT_COLOR:UnpackRGB()
                     local FULL_WIDTH = true
                     if ZO_VETERANCY_MANAGER:IsOnMaxRank() then
-                        tooltip:AddLine(zo_strformat(SI_VETERANCY_ACTIVE_MAX_RANK_TOOLTIP, ZO_VETERANCY_MANAGER:GetCurrentRank())
+                        tooltip:AddLine(zo_strformat(SI_VETERANCY_ACTIVE_MAX_RANK_TOOLTIP
+                            , ZO_VETERANCY_MANAGER:GetCurrentRank()
+                            , ZO_CommaDelimitNumber(ZO_VETERANCY_MANAGER:GetCurrentTierProgress())
+                            , ZO_CommaDelimitNumber(ZO_VETERANCY_MANAGER:GetCurrentTierTotal()))
                             , "ZoFontGameMedium", r, g, b, TOPLEFT, MODIFY_TEXT_TYPE_NONE, TEXT_ALIGN_CENTER, FULL_WIDTH)
                     else
                         tooltip:AddLine(zo_strformat(SI_VETERANCY_ACTIVE_TOOLTIP

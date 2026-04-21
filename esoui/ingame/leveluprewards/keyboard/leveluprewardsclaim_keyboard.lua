@@ -316,7 +316,6 @@ function ZO_LevelUpRewardsClaim_Keyboard:UpdateClaimButtonState()
 end
 
 function ZO_LevelUpRewardsClaim_Keyboard.OnGoToDifficultyButtonClicked()
-    PlaySound(SOUNDS.CHALLENGE_DIFFICULTY_DIFFICULTY_TAB_CLICKED)
     ZO_KEYBOARD_CLAIM_LEVEL_UP_REWARDS:Hide()
     ZO_CHALLENGE_DIFFICULTY_KEYBOARD:Show()
 end

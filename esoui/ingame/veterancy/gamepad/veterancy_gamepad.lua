@@ -292,6 +292,7 @@ function Veterancy_GamepadFocus_HorizontalScrollList:Initialize(scrollList, mana
             gridList:SetOnSelectedDataChangedCallback(function(...) self:OnGridSelectionChanged(...) end)
             gridList.HandleMoveInDirection = function(...) self:HandleGridListMoveInDirection(...) end
             gridList:Activate(FOREGO_DIRECTIONAL_INPUT)
+            gridList:RemoveTriggerKeybinds()
         end
     end
 
@@ -302,6 +303,11 @@ function Veterancy_GamepadFocus_HorizontalScrollList:Initialize(scrollList, mana
         end
     end
     ZO_GamepadMultiFocusArea_Base.Initialize(self, manager, GridActivateCallback, GridDeactivateCallback)
+end
+
+function Veterancy_GamepadFocus_HorizontalScrollList:Deactivate()
+    ZO_GamepadMultiFocusArea_Base.Deactivate(self)
+    self.previousPage = nil
 end
 
 function Veterancy_GamepadFocus_HorizontalScrollList:GetCurrentGridList()
@@ -398,7 +404,7 @@ do
             end
         end
         if moveX == MOVEMENT_CONTROLLER_MOVE_NEXT then
-            if zo_mod(currentRankIndex, ZO_Veterancy_Shared.GetMaxRanksPerPage()) == 0
+            if ZO_Veterancy_Shared.GetPageIndexFromRankIndex(currentRankIndex) == ZO_Veterancy_Shared.GetMaxRanksPerPage()
                 and (currentRowIndex == ZO_VETERANCY_GRID_ROW.RANK
                 or currentRewardIndex == currentSelectionData.rewardData:GetRankNumRewards()
                 or (currentRowIndex == ZO_VETERANCY_GRID_ROW.REWARDS_1 and currentRewardIndex == REWARDS_PER_ROW)) then -- Move to next page
@@ -409,14 +415,11 @@ do
             elseif currentSelectionData.rewardData and currentRewardIndex == currentSelectionData.rewardData:GetRankNumRewards() or
                 zo_mod(currentRewardIndex, REWARDS_PER_ROW) == 0 then
                 local nextRankIndex = currentRankIndex + 1
-                if nextRankIndex >= ZO_VETERANCY_MANAGER:GetNumRanks() then
+                if nextRankIndex > ZO_VETERANCY_MANAGER:GetNumRanks() then
                     -- Can't go any further right, so do nothing rather than wrap
                     return
                 elseif currentRowIndex == ZO_VETERANCY_GRID_ROW.REWARDS_2 then
-                    local nextRankPageIndex = zo_mod(nextRankIndex, ZO_VETERANCY_RANKS_PER_PAGE)
-                    if nextRankPageIndex == 0 then
-                        nextRankPageIndex = ZO_VETERANCY_RANKS_PER_PAGE
-                    end
+                    local nextRankPageIndex = ZO_Veterancy_Shared.GetPageIndexFromRankIndex(nextRankIndex)
                     local data = gridList:GetData()
                     local nextRankData = data[nextRankPageIndex].data
                     local nextNumRewards = #nextRankData.rewardDataList
@@ -432,7 +435,7 @@ do
                 end
             end
         elseif moveX == MOVEMENT_CONTROLLER_MOVE_PREVIOUS then
-            if zo_mod(currentRankIndex, ZO_Veterancy_Shared.GetMaxRanksPerPage()) == 1
+            if ZO_Veterancy_Shared.GetPageIndexFromRankIndex(currentRankIndex) == 1
                 and (currentRowIndex == ZO_VETERANCY_GRID_ROW.RANK
                 or currentRewardIndex == 1
                 or (currentRowIndex == ZO_VETERANCY_GRID_ROW.REWARDS_2 and currentRewardIndex == REWARDS_PER_ROW + 1)) then -- Move to previous page
@@ -442,10 +445,7 @@ do
                 return
             elseif currentRewardIndex == REWARDS_PER_ROW + 1 then -- Move from last row of rewards to rewards at the previous rank
                 local previousRankIndex = currentRankIndex - 1
-                local previousRankPageIndex = zo_mod(previousRankIndex, ZO_VETERANCY_RANKS_PER_PAGE)
-                if previousRankPageIndex == 0 then
-                    previousRankPageIndex = ZO_VETERANCY_RANKS_PER_PAGE
-                end
+                local previousRankPageIndex = ZO_Veterancy_Shared.GetPageIndexFromRankIndex(previousRankIndex)
                 local data = gridList:GetData()
                 local previousRankData = data[previousRankPageIndex].data
                 local previousNumRewards = #previousRankData.rewardDataList
@@ -495,9 +495,15 @@ do
             return
         end
 
+        if not self.manager:IsCurrentFocusArea(self.manager.scrollListFocalArea) then
+            return
+        end
+
         gridList:SetOnSelectedDataChangedCallback(function(...) self:OnGridSelectionChanged(...) end)
         gridList.HandleMoveInDirection = function(...) self:HandleGridListMoveInDirection(...) end
         gridList:Activate(FOREGO_DIRECTIONAL_INPUT)
+        gridList:RemoveTriggerKeybinds()
+        gridList:RefreshLastHoldPosition()
 
         if self.previousPage then
             if self.previousPage > pageNavigation:GetCurrentPage() then
@@ -652,11 +658,17 @@ function ZO_Veterancy_Gamepad:OnDeferredInitialize()
 
     self.pageNavigation:SetDefaultIndicatorFont("ZoFontGamepad42")
 
-    self:InitializeKeybindStripDescriptors()
     self:InitializeMultiFocusAreas()
+
+    -- Function needs to be run after self.pageNavigation has been created
+    self:InitializeKeybindStripDescriptors()
 end
 
 function ZO_Veterancy_Gamepad:InitializeKeybindStripDescriptors()
+    if not self.pageNavigation then
+        return
+    end
+
     local previousKeybind = self.pageNavigation:GetPreviousPageKeybindDescriptor()
     local nextKeybind = self.pageNavigation:GetNextPageKeybindDescriptor()
 

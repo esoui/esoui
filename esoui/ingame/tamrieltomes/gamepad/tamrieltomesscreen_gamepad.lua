@@ -1,3 +1,13 @@
+ZO_TAMRIEL_TOME_SEASON_ENTRY_BORDER_GAMEPAD_WIDTH = 6
+ZO_TAMRIEL_TOME_SEASON_ENTRY_IMAGE_GAMEPAD_WIDTH = 614
+ZO_TAMRIEL_TOME_SEASON_ENTRY_IMAGE_GAMEPAD_HEIGHT = 307
+ZO_TAMRIEL_TOME_SEASON_ENTRY_GAMEPAD_PADDING = 8
+ZO_TAMRIEL_TOME_SEASON_ENTRY_GAMEPAD_WIDTH = ZO_TAMRIEL_TOME_SEASON_ENTRY_IMAGE_GAMEPAD_WIDTH + ZO_TAMRIEL_TOME_SEASON_ENTRY_BORDER_GAMEPAD_WIDTH
+ZO_TAMRIEL_TOME_SEASON_ENTRY_GAMEPAD_HEIGHT = ZO_TAMRIEL_TOME_SEASON_ENTRY_IMAGE_GAMEPAD_HEIGHT + ZO_TAMRIEL_TOME_SEASON_ENTRY_BORDER_GAMEPAD_WIDTH
+ZO_TAMRIEL_TOME_SEASON_GRID_GAMEPAD_WIDTH = ZO_TAMRIEL_TOME_SEASON_ENTRY_GAMEPAD_WIDTH + 100
+ZO_TAMRIEL_TOME_SEASON_DIALOG_GAMEPAD_WIDTH = ZO_TAMRIEL_TOME_SEASON_GRID_GAMEPAD_WIDTH + 40
+ZO_TAMRIEL_TOME_SEASON_DIALOG_GAMEPAD_MAX_HEIGHT = ZO_TAMRIEL_TOME_SEASON_ENTRY_GAMEPAD_HEIGHT * 1.85
+
 ZO_TamrielTomesScreen_Gamepad = ZO_Object.MultiSubclass(ZO_TamrielTomesScreen_Shared, ZO_GamepadMultiFocusArea_Manager)
 
 function ZO_TamrielTomesScreen_Gamepad:Initialize(control)
@@ -74,12 +84,14 @@ function ZO_TamrielTomesScreen_Gamepad:Initialize(control)
     ZO_TamrielTomesScreen_Shared.Initialize(self, control, TAMRIEL_TOMES_SCENE_GAMEPAD, templateData)
     ZO_GamepadMultiFocusArea_Manager.Initialize(self)
 
+    SYSTEMS:RegisterGamepadObject("tamrielTomes", self)
     SYSTEMS:RegisterGamepadRootScene("tamrielTomes", self.scene)
 end
 
 function ZO_TamrielTomesScreen_Gamepad:InitializeControls()
     ZO_TamrielTomesScreen_Shared.InitializeControls(self)
 
+    self.selectTomeKeybindButton = self.headerContainer:GetNamedChild("SelectTomeKeybind")
     self.pageNavigation:SetDefaultIndicatorFont("ZoFontGamepad42")
     self.gridList:SetHeaderPrePadding(0)
     self.gridList:SetOnSelectedDataChangedCallback(function(...) self:OnGridSelectionChanged(...) end)
@@ -110,9 +122,24 @@ function ZO_TamrielTomesScreen_Gamepad:InitializeCurrencyRollingMeter()
     self.currencyIconControl:SetTexture(currencyIcon)
 end
 
-function ZO_TamrielTomesScreen_Gamepad:InitializeKeybindStripDescriptor()
+function ZO_TamrielTomesScreen_Gamepad:InitializeKeybindStripDescriptors()
     local previousKeybind = self.pageNavigation:GetPreviousPageKeybindDescriptor()
     local nextKeybind = self.pageNavigation:GetNextPageKeybindDescriptor()
+
+    self.selectTomeKeybindDescriptor =
+    {
+        keybind = "UI_SHORTCUT_QUATERNARY",
+        ethereal = true,
+        callback = function()
+            self:ShowSelectTomeDialog()
+        end,
+        enabled = function()
+            local enabled = self:CanSelectTome()
+            local message = self:GetSelectTomeTooltip()
+            return enabled, message
+        end,
+    }
+    self.selectTomeKeybindButton:SetKeybindButtonDescriptor(self.selectTomeKeybindDescriptor)
 
     self.keybindStripDescriptor =
     {
@@ -243,6 +270,7 @@ function ZO_TamrielTomesScreen_Gamepad:InitializeKeybindStripDescriptor()
 
         previousKeybind,
         nextKeybind,
+        self.selectTomeKeybindDescriptor,
     }
 end
 
@@ -288,36 +316,9 @@ function ZO_TamrielTomesScreen_Gamepad:InitializeMultiFocusAreas()
         end,
     }
 
-    local selectTomeButtonFocusData =
-    {
-        highlight = self.selectTomeButton:GetNamedChild("Highlight"),
-
-        control = self.selectTomeButton,
-
-        callback = function()
-            PlaySound(SOUNDS.TAMRIEL_TOMES_NAVIGATE_FORWARD)
-            self:ShowSelectTomeScreen()
-        end,
-
-        canFocus = function()
-            return not self.selectTomeButton:IsHidden()
-        end,
-
-        enabled = function()
-            return not self.selectTomeButton:IsHidden()
-        end,
-
-        narrationText = function()
-            local narrations = {}
-            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_TAMRIEL_TOMES_SELECT_TAMRIEL_TOME)))
-            return narrations
-        end,
-    }
-
     self.buttonsFocus = ZO_GamepadFocus:New(self.buttonContainer, DEFAULT_MOVEMENT_CONTROLLER, MOVEMENT_CONTROLLER_DIRECTION_HORIZONTAL)
     self.buttonsFocus:AddEntry(viewChallengesButtonFocusData)
     self.buttonsFocus:AddEntry(upgradeTomeButtonFocusData)
-    self.buttonsFocus:AddEntry(selectTomeButtonFocusData)
     self.buttonsFocus:SetFocusChangedCallback(OnButtonFocusChanged)
 
     local function ButtonsActivateCallback()
@@ -422,9 +423,14 @@ function ZO_TamrielTomesScreen_Gamepad:ShowPurchaseScreen()
     SCENE_MANAGER:Push("TamrielTomesPurchaseSceneGamepad")
 end
 
-function ZO_TamrielTomesScreen_Gamepad:ShowSelectTomeScreen()
-    -- TODO Tamriel Tomes:
-    -- SCENE_MANAGER:Push("TamrielTomesSelectTomeSceneGamepad")
+function ZO_TamrielTomesScreen_Gamepad:ShowSelectTomeDialog()
+    if self:CanSelectTome() then
+        ZO_Dialogs_ShowPlatformDialog("TamrielTomesSelectSeasonDialogGamepad", {})
+    end
+end
+
+function ZO_TamrielTomesScreen_Gamepad:HideSelectTomeDialog()
+    ZO_Dialogs_ReleaseDialog("TamrielTomesSelectSeasonDialogGamepad")
 end
 
 -- Indicates whether this scene should retain the current preview when hidden.
@@ -469,4 +475,184 @@ end
 
 function ZO_TamrielTomesScreen_Gamepad.OnControlInitialized(control)
     TAMRIEL_TOMES_SCREEN_GAMEPAD = ZO_TamrielTomesScreen_Gamepad:New(control)
+end
+
+ZO_SelectTamrielTomeSeasonDialog_Gamepad = ZO_InitializingObject:Subclass()
+
+function ZO_SelectTamrielTomeSeasonDialog_Gamepad:Initialize(control)
+    control.object = self
+    self.control = control
+    self.templateData =
+    {
+        gridListClass = ZO_GridScrollList_Gamepad,
+        entryTemplate = "ZO_TamrielTomeSeasonEntry_Gamepad",
+        entryWidth = ZO_TAMRIEL_TOME_SEASON_ENTRY_GAMEPAD_WIDTH,
+        entryHeight = ZO_TAMRIEL_TOME_SEASON_ENTRY_GAMEPAD_HEIGHT,
+    }
+
+    self:InitializeControls()
+    self:InitializeGridList()
+    self:InitializeDialog()
+end
+
+function ZO_SelectTamrielTomeSeasonDialog_Gamepad:InitializeControls()
+    self.contentControl = self.control:GetNamedChild("Content")
+    self.gridControl = self.contentControl:GetNamedChild("TomesGrid")
+end
+
+function ZO_SelectTamrielTomeSeasonDialog_Gamepad:InitializeDialog()
+    self.dialogName = "TamrielTomesSelectSeasonDialogGamepad"
+
+    local dialogControl = self.control
+    ZO_Dialogs_RegisterCustomDialog(self.dialogName,
+    {
+        blockDialogReleaseOnPress = true,
+
+        gamepadInfo =
+        {
+            dialogType = GAMEPAD_DIALOGS.CUSTOM,
+        },
+
+        title =
+        {
+            text = SI_TAMRIEL_TOMES_SELECT_TOME_DIALOG_NAME_LABEL,
+        },
+
+        mainText =
+        {
+            text = "",
+        },
+
+        setup = function(dialog, data)
+            CHAT_SYSTEM:Minimize()
+            dialog.object = self
+            self:BuildGridList()
+            self:UpdateButtonStates()
+            self.gridList:Activate()
+        end,
+
+        customControl = dialogControl,
+
+        buttons =
+        {
+            {
+                control = dialogControl:GetNamedChild("Select"),
+                text = SI_DIALOG_CONFIRM,
+                requiresTextInput = false,
+                noReleaseOnClick = true,
+                callback = function(dialog)
+                    if self.targetGridEntry then
+                        self.targetGridEntry:Select()
+                    end
+                end,
+                enabled = function()
+                    local enabled = self.targetGridEntry and not self.targetGridEntry:IsSelected()
+                    return enabled
+                end,
+            },
+
+            {
+                control = dialogControl:GetNamedChild("Close"),
+                text = SI_DIALOG_CLOSE,
+                requiresTextInput = false,
+                noReleaseOnClick = false,
+                callback = function(dialog)
+                    ZO_Dialogs_ReleaseDialog(self.dialogName)
+                end
+            },
+        },
+    })
+end
+
+function ZO_SelectTamrielTomeSeasonDialog_Gamepad:InitializeGridList()
+    local templateData = self.templateData
+    self.gridList = templateData.gridListClass:New(self.gridControl, templateData.highlightTemplate)
+
+    local function SetupGridEntry(...)
+        self:SetupGridEntry(...)
+    end
+
+    local NO_HIDE_CALLBACK = nil
+    local NO_RESET_CALLBACK = nil
+    local GRID_PADDING = ZO_TAMRIEL_TOME_SEASON_ENTRY_GAMEPAD_PADDING
+    self.gridList:AddEntryTemplate(templateData.entryTemplate, templateData.entryWidth, templateData.entryHeight, SetupGridEntry, NO_HIDE_CALLBACK, NO_RESET_CALLBACK, GRID_PADDING, GRID_PADDING)
+
+    local function OnSelectedDataChanged(...)
+        self:OnSelectedDataChanged(...)
+    end
+
+    self.gridList:SetOnSelectedDataChangedCallback(OnSelectedDataChanged)
+end
+
+function ZO_SelectTamrielTomeSeasonDialog_Gamepad:BuildGridList()
+    self.gridList:ClearGridList()
+    self:PopulateGridList()
+    self.gridList:CommitGridList()
+end
+
+function ZO_SelectTamrielTomeSeasonDialog_Gamepad:PopulateGridList()
+    local entryTemplate = self.templateData.entryTemplate
+    local tomeIds = TAMRIEL_TOMES_MANAGER:GetAvailableTomeIds()
+    for tomeIndex, tomeId in ipairs(tomeIds) do
+        local entryData = self:CreateGridEntryData(tomeId)
+        self.gridList:AddEntry(entryData, entryTemplate)
+    end
+
+    local numVisibleTomes = zo_max(1, #tomeIds)
+    local minGridHeight = numVisibleTomes * (ZO_TAMRIEL_TOME_SEASON_ENTRY_GAMEPAD_HEIGHT + ZO_TAMRIEL_TOME_SEASON_ENTRY_GAMEPAD_PADDING) + 1
+    minGridHeight = zo_min(minGridHeight, ZO_TAMRIEL_TOME_SEASON_DIALOG_GAMEPAD_MAX_HEIGHT)
+    local MIN_X = nil
+    self.gridControl:SetDimensionConstraints(MIN_X, minGridHeight)
+end
+
+function ZO_SelectTamrielTomeSeasonDialog_Gamepad:CreateGridEntryData(tomeId)
+    local tomeData = ZO_TamrielTomeData:New(tomeId)
+    local entryData =
+    {
+        tomeData = tomeData,
+        text = tomeData:GetDisplayName(),
+        clickSound = SOUNDS.TAMRIEL_TOMES_BOOK_OPENED,
+        isSelected = function()
+            return tomeId == TAMRIEL_TOMES_MANAGER:GetSelectedTomeId()
+        end,
+        narrationText = self.templateData.narrationText,
+    }
+
+    return entryData
+end
+
+function ZO_SelectTamrielTomeSeasonDialog_Gamepad:SetTargetGridEntry(entry)
+    self.targetGridEntry = entry
+    self:UpdateButtonStates()
+end
+
+function ZO_SelectTamrielTomeSeasonDialog_Gamepad:OnSelectedDataChanged(previousData, newData)
+    if previousData then
+        previousData.owner:SetIsHighlighted(false)
+    end
+
+    if newData then
+        newData.owner:SetIsHighlighted(true)
+    end
+
+    if self.gridList:IsActive() then
+        self.gridList:RefreshSelection()
+        self:UpdateButtonStates()
+    end
+end
+
+function ZO_SelectTamrielTomeSeasonDialog_Gamepad:SetupGridEntry(control, data)
+    control.object:Setup(data, self)
+end
+
+function ZO_SelectTamrielTomeSeasonDialog_Gamepad:UpdateButtonStates()
+    ZO_GenericGamepadDialog_RefreshKeybinds(self.control)
+end
+
+function ZO_SelectTamrielTomeSeasonDialog_Gamepad.OnInitialized(control)
+    ZO_SelectTamrielTomeSeasonDialog_Gamepad:New(control)
+end
+
+function ZO_SelectTamrielTomeSeasonDialog_Gamepad.OnHidden(control)
+    control.object.gridList:Deactivate()
 end

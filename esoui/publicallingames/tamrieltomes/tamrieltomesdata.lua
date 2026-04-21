@@ -204,8 +204,7 @@ ZO_TamrielTomeData = ZO_InitializingObject:Subclass()
 function ZO_TamrielTomeData:Initialize(tamrielTomeId)
     self.tamrielTomeId = tamrielTomeId
     self.tamrielTomeIndex = GetReferenceTrackIndex(REWARD_TRACK_TYPE_TAMRIEL_TOMES, tamrielTomeId)
-
-    self:Update()
+    self.rewardTrackId = GetRewardTrackIdFromReferenceTrackId(REWARD_TRACK_TYPE_TAMRIEL_TOMES, tamrielTomeId)
 end
 
 function ZO_TamrielTomeData:GetTamrielTomeId()
@@ -285,10 +284,6 @@ function ZO_TamrielTomeData:GetEndTime()
     return endTime
 end
 
-function ZO_TamrielTomeData:GetDisplayFlags()
-    return self:GetRewardData():GetDisplayFlags()
-end
-
 function ZO_TamrielTomeData:GetDisplayName()
     return GetRewardTrackDisplayName(self.rewardTrackId)
 end
@@ -305,12 +300,45 @@ function ZO_TamrielTomeData:GetPremiumUpgradeBackgroundFile()
     return GetTamrielTomePremiumUpgradeBackgroundFileIndex(self.tamrielTomeId)
 end
 
+function ZO_TamrielTomeData:UpdateRewardStatisticsInternal()
+    local numClaimedRewards = 0
+    local numRewards = 0
+    local rewardTrackId = self:GetRewardTrackId()
+    local tomeIndex = self:GetTamrielTomeIndex()
+    local numTiers = self:GetNumTotalTiers()
+
+    for rewardComponent = REWARD_TRACK_COMPONENT_ITERATION_BEGIN, REWARD_TRACK_COMPONENT_ITERATION_END do
+        for rewardTier = 1, numTiers do
+            local numTierComponentRewards = GetNumRewardsAtRewardTrackTier(rewardTrackId, rewardTier, rewardComponent)
+            numRewards = numRewards + numTierComponentRewards
+
+            for rewardIndex = 1, numTierComponentRewards do
+                local isClaimed = GetRewardTrackRewardClaimedState(REWARD_TRACK_TYPE_TAMRIEL_TOMES, tomeIndex, rewardTier, rewardComponent, rewardIndex)
+                if isClaimed then
+                    numClaimedRewards = numClaimedRewards + 1
+                end
+            end
+        end
+    end
+
+    self.numClaimedRewards = numClaimedRewards
+    self.numRewards = numRewards
+end
+
 function ZO_TamrielTomeData:GetNumRewards()
-    -- TODO Tamriel Tomes
+    if not self.numRewards then
+        self:UpdateRewardStatisticsInternal()
+    end
+
+    return self.numRewards
 end
 
 function ZO_TamrielTomeData:GetNumClaimedRewards()
-    -- TODO Tamriel Tomes
+    if not self.numClaimedRewards then
+        self:UpdateRewardStatisticsInternal()
+    end
+
+    return self.numClaimedRewards
 end
 
 function ZO_TamrielTomeData:GetNumHighlights()
@@ -334,7 +362,7 @@ function ZO_TamrielTomeData:HasAccessToComponent(component)
 end
 
 function ZO_TamrielTomeData:Update()
-    self.rewardTrackId = GetRewardTrackIdFromReferenceTrackId(REWARD_TRACK_TYPE_TAMRIEL_TOMES, self.tamrielTomeId)
+    self:UpdateRewardStatisticsInternal()
 end
 
 

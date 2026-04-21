@@ -1619,6 +1619,9 @@ function ZO_UnitFrameObject:UpdateLevel()
 
     if self.veterancyRankIcon and veterancyRankData then
         self.championIcon:SetHidden(true)
+        if unitLevel >= ZO_VETERANCY_MANAGER:GetNumRanks() then
+            veterancyRankData = ZO_VeterancyRankData:New(ZO_VETERANCY_MANAGER:GetNumRanks())
+        end
         self.veterancyRankIcon:SetTexture(veterancyRankData:GetIcon())
         self.veterancyRankIcon:SetHidden(false)
     elseif self.championIcon then

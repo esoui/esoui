@@ -50,6 +50,7 @@ function TamrielTomes_Manager:Initialize()
 
     function OnCatalogUpdated()
         self:UpdateDirectPurchaseData()
+        self:UpdateTamrielTomesAvailability()
     end
 
     DIRECT_PURCHASE_MANAGER:RegisterCallback("CatalogUpdated", OnCatalogUpdated)
@@ -187,6 +188,12 @@ function TamrielTomes_Manager:GetNumActiveTomes()
     return #self:GetActiveTomeIds()
 end
 
+-- Returns true if the specified Tome Id is the currently active season.
+function TamrielTomes_Manager:IsTomeActive(tomeId)
+    local activeTomeIds = self:GetActiveTomeIds()
+    return ZO_IsElementInNumericallyIndexedTable(activeTomeIds, tomeId)
+end
+
 -- Indicates whether there are any Tomes currently available.
 function TamrielTomes_Manager:AreTomesAvailable()
     return self:GetNumAvailableTomes() > 0
@@ -213,9 +220,20 @@ function TamrielTomes_Manager:GetAvailableTomeIds()
     return availableTomeIds
 end
 
+-- Returns true if the specified Tome Id is accessible and available to view.
+function TamrielTomes_Manager:IsTomeAvailable(tomeId)
+    local availableTomeIds = self:GetAvailableTomeIds()
+    return ZO_IsElementInNumericallyIndexedTable(availableTomeIds, tomeId)
+end
+
 -- Indicates whether a valid Tome Id is selected.
 function TamrielTomes_Manager:HasSelectedTomeId()
     return self.selectedTomeId ~= nil
+end
+
+-- Indicates whether the selected Tome Id is the active season Tome Id.
+function TamrielTomes_Manager:IsActiveTomeSelected()
+    return self.selectedTomeId == self:GetActiveTomeId()
 end
 
 -- Returns the selected Tome Id, if any.
@@ -246,6 +264,11 @@ function TamrielTomes_Manager:SelectTomeId(tomeId)
                 tomeId = availableTomeIds[1]
             end
         end
+    end
+
+    if tomeId and not self:IsTomeAvailable(tomeId) then
+        -- The specified tome is neither the active season's tome nor an accessible tome from a past season.
+        tomeId = nil
     end
 
     if tomeId ~= self.selectedTomeId then
@@ -407,6 +430,8 @@ function TamrielTomes_Manager:GetPurchaseDisabledMessage()
         message = GetString(SI_TAMRIEL_TOMES_UPGRADE_DISABLED_FULLY_UPGRADED)
     elseif not self:IsDirectPurchaseEnabled() then
         message = ZO_ERROR_COLOR:Colorize(GetString(SI_TAMRIEL_TOMES_UPGRADE_DISABLED))
+    elseif not self:IsTomeActive(self:GetSelectedTomeId()) then
+        message = GetString(SI_TAMRIEL_TOMES_UPGRADE_CANNOT_UPGRADE_PAST_TOME)
     elseif not self:IsAnySelectedTomeProductAvailableForPurchase() then
         message = GetString(SI_TAMRIEL_TOMES_UPGRADE_DISABLED_NO_SKU_DATA)
     end

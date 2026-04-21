@@ -92,9 +92,9 @@
                             <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icon" offsetX="4" offsetY="4"/>
                             <Anchor point="LEFT" offsetX="4" constrains="X"/>
                         </Label>
-                        <Texture name="$(parent)CompleteMark" textureFile="EsoUI/Art/Miscellaneous/check_icon_32.dds" inheritAlpha="false" level="12" hidden="true">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)Icon"/>
-                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icon"/>
+                        <Texture name="$(parent)CompleteMark" textureFile="EsoUI/Art/Miscellaneous/check_icon_64.dds" inheritAlpha="false" level="12" hidden="true">
+                            <Anchor point="CENTER"/>
+                            <Dimensions x="40" y="40"/>
                         </Texture>
                         <Texture name="$(parent)Locked" alpha="0.5" level="20" textureFile="EsoUI/Art/Vengeance/reward_alpha_shadow.dds" excludeFromResizeToFitExtents="true" hidden="true">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)Border"/>

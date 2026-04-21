@@ -217,7 +217,7 @@ local MENU_ENTRY_DATA =
         end,
         onSelectedCallback = function()
             if MAIN_MENU_GAMEPAD:IsShowing() then
-                if TAMRIEL_TOMES_MANAGER and TAMRIEL_TOMES_MANAGER:GetNumActiveTomes() <= 0 then
+                if TAMRIEL_TOMES_MANAGER and not TAMRIEL_TOMES_MANAGER:AreTomesAvailable() then
                     GAMEPAD_TOOLTIPS:LayoutTitleAndDescriptionTooltip(GAMEPAD_LEFT_TOOLTIP, GetString(SI_MAIN_MENU_TAMRIEL_TOMES), GetString(SI_TAMRIEL_TOMES_ARE_UNAVAILABLE))
                 else
                     GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_LEFT_TOOLTIP)
