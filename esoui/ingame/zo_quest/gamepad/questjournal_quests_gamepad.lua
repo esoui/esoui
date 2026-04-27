@@ -629,7 +629,7 @@ do
             table.insert(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_SCREEN_NARRATION_TRACKED_ICON_NARRATION)))
         end
         --Get the narration text for both the middle and right panels
-        ZO_CombineNumericallyIndexedTables(narrations, QUEST_JOURNAL_GAMEPAD:GetDetailsNarrationText())
+        ZO_CombineNumericallyIndexedTables(narrations, ZO_QUEST_JOURNAL_QUESTS_GAMEPAD:GetDetailsNarrationText())
         return narrations
     end
 

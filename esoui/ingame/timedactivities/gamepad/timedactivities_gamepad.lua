@@ -40,6 +40,8 @@ function ZO_TimedActivities_Gamepad:Initialize(control)
 
     SYSTEMS:RegisterGamepadRootScene("timedActivities", TIMED_ACTIVITIES_SCENE_GAMEPAD)
     SYSTEMS:RegisterGamepadObject("timedActivities", self)
+
+    self:InitializeDialogs()
 end
 
 -- Begin ZO_TimedActivities_Shared Overrides --
@@ -111,6 +113,7 @@ function ZO_TimedActivities_Gamepad:InitializeControls()
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
         -- Primary
         {
+            order = 1,
             keybind = "UI_SHORTCUT_PRIMARY",
             name = GetString(SI_GAMEPAD_SELECT_OPTION),
             callback = function()
@@ -124,6 +127,7 @@ function ZO_TimedActivities_Gamepad:InitializeControls()
 
         -- Back
         {
+            order = 2,
             keybind = "UI_SHORTCUT_NEGATIVE",
             name = GetString(SI_GAMEPAD_BACK_OPTION),
             callback = function()
@@ -134,8 +138,9 @@ function ZO_TimedActivities_Gamepad:InitializeControls()
 
         -- Claim All
         {
+            order = 3,
             name = GetString(SI_TAMRIEL_TOMES_CHALLENGES_ACTION_NAME_CLAIM_ALL),
-            keybind = "UI_SHORTCUT_QUATERNARY",
+            keybind = "UI_SHORTCUT_QUINARY",
             callback = function()
                 TIMED_ACTIVITIES_MANAGER:ClaimAllRewards()
             end,
@@ -147,6 +152,75 @@ function ZO_TimedActivities_Gamepad:InitializeControls()
         },
     }
     self:SetListsUseTriggerKeybinds(true)
+end
+
+function ZO_TimedActivities_Gamepad:InitializeDialogs()
+    self.rerollDialogName = "REROLL_TIMED_ACTIVITY_GAMEPAD_DIALOG"
+
+    local dialogData =
+    {
+        data1 =
+        {
+            header = GetString(SI_TAMRIEL_TOMES_REROLL_CHALLENGE_DIALOG_BALANCE),
+        },
+        data2 =
+        {
+            header = GetString(SI_TAMRIEL_TOMES_REROLL_CHALLENGE_DIALOG_COST),
+        },
+    }
+
+    ZO_Dialogs_RegisterCustomDialog(self.rerollDialogName,
+    {
+        gamepadInfo =
+        {
+            dialogType = GAMEPAD_DIALOGS.BASIC,
+        },
+        title =
+        {
+            text = SI_TAMRIEL_TOMES_REROLL_CHALLENGE_DIALOG_TITLE,
+        },
+        mainText = 
+        {
+            text = function(dialog)
+                local timedActivityData = dialog.data
+                return timedActivityData:GetName()
+            end,
+        },
+        setup = function(dialog)
+            local currencyType, currencyCost = TIMED_ACTIVITIES_MANAGER.GetRerollCostCurrencyTypeAndCost()
+            local currencyBalance = GetPlayerStoredCurrencyAmount(currencyType)
+            local canAffordReroll = currencyBalance >= currencyCost
+            local IS_GAMEPAD = true
+            dialogData.data1.value = ZO_Currency_Format(currencyBalance, currencyType, ZO_CURRENCY_FORMAT_AMOUNT_ICON, IS_GAMEPAD)
+            dialogData.data2.value = ZO_Currency_Format(currencyCost, currencyType, canAffordReroll and ZO_CURRENCY_FORMAT_AMOUNT_ICON or ZO_CURRENCY_FORMAT_ERROR_AMOUNT_ICON, IS_GAMEPAD)
+
+            local showCost = currencyCost > 0
+            if showCost then
+                dialog.setupFunc(dialog, dialogData)
+            else
+                dialog.setupFunc(dialog)
+            end
+        end,
+        buttons =
+        {
+            {
+                keybind = "DIALOG_PRIMARY",
+                text = SI_DIALOG_CONFIRM,
+                callback = function(dialog)
+                    local timedActivityData = dialog.data
+                    timedActivityData:Reroll()
+                end,
+                enabled = function(dialog)
+                    local timedActivityData = dialog.data
+                    return timedActivityData:CanAffordReroll()
+                end,
+            },
+            {
+                keybind = "DIALOG_NEGATIVE",
+                text = SI_DIALOG_CANCEL,
+            },
+        },
+    })
 end
 
 function ZO_TimedActivities_Gamepad:GetCategoryData()
@@ -214,6 +288,10 @@ end
 function ZO_TimedActivities_Gamepad:OnRerollCurrencyUpdated()
     GAMEPAD_GENERIC_FOOTER:Refresh(self.footerData)
     self:RefreshKeybinds()
+    self:UpdateKeybinds()
+end
+
+function ZO_TimedActivities_Gamepad:UpdateKeybinds()
     self.activitiesList:UpdateKeybinds()
 end
 
@@ -345,6 +423,7 @@ function ZO_TimedActivitiesList_Gamepad:Initialize(control)
 
         -- Back
         {
+            order = 2,
             name = GetString(SI_GAMEPAD_BACK_OPTION),
             keybind = "UI_SHORTCUT_NEGATIVE",
             callback = function()
@@ -355,6 +434,7 @@ function ZO_TimedActivitiesList_Gamepad:Initialize(control)
 
         -- Claim
         {
+            order = 1,
             name = GetString(SI_TAMRIEL_TOMES_CHALLENGES_ACTION_NAME_CLAIM),
             keybind = "UI_SHORTCUT_PRIMARY",
             callback = function()
@@ -373,6 +453,7 @@ function ZO_TimedActivitiesList_Gamepad:Initialize(control)
 
         -- Track
         {
+            order = 3,
             name = function()
                 if self:GetSelectedData():IsTracked() then
                     return GetString(SI_TAMRIEL_TOMES_CHALLENGES_ACTION_NAME_UNPIN)
@@ -392,28 +473,18 @@ function ZO_TimedActivitiesList_Gamepad:Initialize(control)
             end,
         },
 
-        -- Claim All
-        {
-            name = GetString(SI_TAMRIEL_TOMES_CHALLENGES_ACTION_NAME_CLAIM_ALL),
-            keybind = "UI_SHORTCUT_QUATERNARY",
-            callback = function()
-                TIMED_ACTIVITIES_MANAGER:ClaimAllRewards()
-            end,
-            visible = function()
-                return TIMED_ACTIVITIES_MANAGER:HasClaimableTimedActivities()
-            end,
-            -- This action cannot fail as long as the only rewards are the Tome Points currency and that currency continues to be uncapped.
-            sound = SOUNDS.TAMRIEL_TOMES_CHALLENGE_REWARD_CLAIMED,
-        },
-
         -- Reroll
         {
+            order = 4,
             name = function()
-                return zo_strformat(SI_TAMRIEL_TOMES_CHALLENGES_ACTION_NAME_REROLL, ZO_TimedActivities_Manager.GetNumRemainingRerollAttempts())
+                local IS_GAMEPAD = true
+                local costString = ZO_TimedActivities_Manager.GetRerollCurrencyTypeAndCostStringForPlatform(IS_GAMEPAD)
+                return zo_strformat(SI_TAMRIEL_TOMES_CHALLENGES_ACTION_NAME_REROLL, costString)
             end,
-            keybind = "UI_SHORTCUT_QUINARY",
+            keybind = "UI_SHORTCUT_QUATERNARY",
             callback = function()
-                self:GetSelectedData():Reroll()
+                local timedActivityData = self:GetSelectedData()
+                TIMED_ACTIVITIES_GAMEPAD:TryRerollTimedActivity(timedActivityData)
             end,
             visible = function()
                 local selectedData = self:GetSelectedData()
@@ -430,6 +501,21 @@ function ZO_TimedActivitiesList_Gamepad:Initialize(control)
                 return false
             end,
             sound = SOUNDS.TAMRIEL_TOMES_CHALLENGE_REROLL,
+        },
+
+        -- Claim All
+        {
+            order = 5,
+            name = GetString(SI_TAMRIEL_TOMES_CHALLENGES_ACTION_NAME_CLAIM_ALL),
+            keybind = "UI_SHORTCUT_QUINARY",
+            callback = function()
+                TIMED_ACTIVITIES_MANAGER:ClaimAllRewards()
+            end,
+            visible = function()
+                return TIMED_ACTIVITIES_MANAGER:HasClaimableTimedActivities()
+            end,
+            -- This action cannot fail as long as the only rewards are the Tome Points currency and that currency continues to be uncapped.
+            sound = SOUNDS.TAMRIEL_TOMES_CHALLENGE_REWARD_CLAIMED,
         },
     }
 end

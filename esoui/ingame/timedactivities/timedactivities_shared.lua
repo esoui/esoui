@@ -22,22 +22,28 @@ function ZO_TimedActivities_Shared:OnDeferredInitialize()
     local function OnActivitiesUpdated()
         self:MarkDirty()
         self:RefreshNewIndicators()
+        self:UpdateKeybinds()
     end
 
     local function OnSeenActivitiesUpdated()
         self:RefreshNewIndicators()
     end
 
+    local function OnRerollCostReset()
+        self:UpdateKeybinds()
+    end
+
     TIMED_ACTIVITIES_MANAGER:RegisterCallback("OnRefreshAvailability", OnRefreshAvailability)
     TIMED_ACTIVITIES_MANAGER:RegisterCallback("OnActivitiesUpdated", OnActivitiesUpdated)
     TIMED_ACTIVITIES_MANAGER:RegisterCallback("OnActivityUpdated", OnActivitiesUpdated)
     TIMED_ACTIVITIES_MANAGER:RegisterCallback("SeenActivitiesUpdated", OnSeenActivitiesUpdated)
+    TIMED_ACTIVITIES_MANAGER:RegisterCallback("RerollCostReset", OnRerollCostReset)
 
-        -- eventId, currencyType, currencyLocation, delta, reason, reasonInfo
     local function OnCurrencyUpdated(_, currencyType)
         if not self.control:IsHidden() then
-            if currencyType == CURT_TOME_CHALLENGE_REROLLS then
+            if currencyType == CURT_TOME_CHALLENGE_REROLLS or currencyType == CURT_MONEY then
                 self:OnRerollCurrencyUpdated()
+                self:UpdateKeybinds()
             end
         end
     end
@@ -72,6 +78,7 @@ function ZO_TimedActivities_Shared:GetCurrentActivityTypeString()
 end
 
 ZO_TimedActivities_Shared:MUST_IMPLEMENT("SelectActivityTypeCategory")
+ZO_TimedActivities_Shared:MUST_IMPLEMENT("UpdateKeybinds")
 
 function ZO_TimedActivities_Shared:SetCurrentActivityType(activityType)
     if activityType ~= self.currentActivityType then
@@ -227,6 +234,10 @@ ZO_TimedActivities_Shared:MUST_IMPLEMENT("RefreshCurrentActivityInfo")
 ZO_TimedActivities_Shared:MUST_IMPLEMENT("InitializeControls")
 ZO_TimedActivities_Shared:MUST_IMPLEMENT("OnRerollCurrencyUpdated")
 
+function ZO_TimedActivities_Shared:IsShowing()
+    return not self.control:IsHidden()
+end
+
 function ZO_TimedActivities_Shared:OnShowing()
     if self.browseTimedActivityDataOnShow then
         self:BrowseToTimedActivityData(self.browseTimedActivityDataOnShow)
@@ -239,6 +250,7 @@ end
 
 function ZO_TimedActivities_Shared:OnShown()
     TriggerTutorial(TUTORIAL_TRIGGER_TAMRIEL_TOMES_CHALLENGES_OPENED)
+    self:OnRerollCurrencyUpdated()
 end
 
 function ZO_TimedActivities_Shared:OnHiding()
@@ -260,4 +272,17 @@ function ZO_TimedActivities_Shared:BrowseToTimedActivityData(timedActivityData)
     self:SelectActivityTypeCategory(timedActivityData:GetType())
     self:MarkDirty()
     self.refreshGroups:UpdateRefreshGroups()
+end
+
+function ZO_TimedActivities_Shared:TryRerollTimedActivity(timedActivityData)
+    if not timedActivityData:CanReroll() then
+        return
+    end
+
+    local currencyType, currencyCost = TIMED_ACTIVITIES_MANAGER.GetRerollCostCurrencyTypeAndCost()
+    if currencyType == CURT_MONEY then
+        ZO_Dialogs_ShowPlatformDialog(self.rerollDialogName, timedActivityData)
+    else
+        timedActivityData:Reroll()
+    end
 end

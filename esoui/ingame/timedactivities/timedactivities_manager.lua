@@ -1,4 +1,4 @@
-local PRIMARY_SYSTEM_CURRENCY = CURT_SEALS
+local PRIMARY_SYSTEM_CURRENCY = CURT_TOME_POINTS
 
 -- Timed Activity Data --
 
@@ -219,6 +219,12 @@ function ZO_TimedActivityData:Claim()
     ClaimTimedActivityReward(self.index)
 end
 
+function ZO_TimedActivityData:CanAffordReroll()
+    local currencyType, currencyCost = TIMED_ACTIVITIES_MANAGER.GetRerollCostCurrencyTypeAndCost()
+    local currencyBalance = GetPlayerStoredCurrencyAmount(currencyType)
+    return currencyBalance >= currencyCost
+end
+
 function ZO_TimedActivityData:CanReroll()
     return self:GetNumTimesClaimed() == 0 and not self:IsSeasonalActivity()
 end
@@ -376,11 +382,21 @@ function ZO_TimedActivities_Manager:RegisterEvents()
     EVENT_MANAGER:RegisterForEvent("TimedActivitiesManager", EVENT_REWARD_TRACK_REWARD_CLAIMED, OnActivitiesUpdated)
     EVENT_MANAGER:RegisterForEvent("TimedActivitiesManager", EVENT_REWARD_TRACK_REWARDS_CLAIMED, OnActivitiesUpdated)
     EVENT_MANAGER:RegisterForEvent("TimedActivitiesManager", EVENT_TIMED_ACTIVITIES_UPDATED, OnActivitiesUpdated)
+    EVENT_MANAGER:RegisterForEvent("TimedActivitiesManager", EVENT_TIMED_ACTIVITIES_REROLL_PRICE_RESET, ZO_GetEventForwardingFunction(self, self.OnRerollCostReset))
     EVENT_MANAGER:RegisterForEvent("TimedActivitiesManager", EVENT_TIMED_ACTIVITY_TRACKING_UPDATED, OnActivitiesUpdated)
     EVENT_MANAGER:RegisterForEvent("TimedActivitiesManager", EVENT_TIMED_ACTIVITY_PROGRESS_UPDATED, OnActivityUpdated)
+    EVENT_MANAGER:RegisterForEvent("TimedActivitiesManager", EVENT_TIMED_ACTIVITY_REROLL_RESULT, ZO_GetEventForwardingFunction(self, self.OnRerollResult))
     EVENT_MANAGER:RegisterForEvent("TimedActivitiesManager", EVENT_TIMED_ACTIVITY_SYSTEM_STATUS_UPDATED, OnSystemStatusUpdated)
     EVENT_MANAGER:RegisterForEvent("TimedActivitiesManager", EVENT_OPEN_TIMED_ACTIVITIES, ZO_GetEventForwardingFunction(self, self.ShowTimedActivitiesScene))
     EVENT_MANAGER:RegisterForEvent("TimedActivitiesManager", EVENT_HOLIDAYS_CHANGED, UpdateSeasonEndTime)
+end
+
+function ZO_TimedActivities_Manager:OnRerollCostReset()
+    self:FireCallbacks("RerollCostReset")
+end
+
+function ZO_TimedActivities_Manager:OnRerollResult(rerollResult)
+    self:FireCallbacks("RerollResult", rerollResult)
 end
 
 function ZO_TimedActivities_Manager:ActivitiesIterator(filterFunctions)
@@ -484,9 +500,37 @@ function ZO_TimedActivities_Manager:GetNumTimedActivities(activityType)
     return numActivities
 end
 
-function ZO_TimedActivities_Manager.GetNumRemainingRerollAttempts()
-    local currencyAmount = GetPlayerStoredCurrencyAmount(CURT_TOME_CHALLENGE_REROLLS)
-    return currencyAmount
+function ZO_TimedActivities_Manager.CanAffordReroll()
+    -- Determine whether the next reroll can be afforded.
+    local currencyType, cost = ZO_TimedActivities_Manager.GetRerollCostCurrencyTypeAndCost()
+    local currencyBalance = GetPlayerStoredCurrencyAmount(currencyType)
+    return currencyBalance >= cost
+end
+
+function ZO_TimedActivities_Manager.GetRerollCostCurrencyTypeAndCost()
+    -- Determine the currency type and cost for the next reroll.
+    local challengeRerollCurrencyBalance = GetPlayerStoredCurrencyAmount(CURT_TOME_CHALLENGE_REROLLS)
+    local currencyType = challengeRerollCurrencyBalance > 0 and CURT_TOME_CHALLENGE_REROLLS or CURT_MONEY
+    local cost = currencyType == CURT_TOME_CHALLENGE_REROLLS and 1 or GetGoldCostOfNextTimedActivityReroll()
+    return currencyType, cost
+end
+
+do
+    local CURRENCY_ERROR_OPTIONS =
+    {
+        color = ZO_ERROR_COLOR,
+        iconInheritColor = true,
+    }
+
+    function ZO_TimedActivities_Manager.GetRerollCurrencyTypeAndCostStringForPlatform(isGamepad)
+        local currencyType, cost = ZO_TimedActivities_Manager.GetRerollCostCurrencyTypeAndCost()
+        local currencyOptions = nil
+        if not ZO_TimedActivities_Manager.CanAffordReroll() then
+            currencyOptions = CURRENCY_ERROR_OPTIONS
+        end
+        local costString = ZO_Currency_Format(cost, currencyType, ZO_CURRENCY_FORMAT_AMOUNT_ICON, isGamepad, currencyOptions)
+        return costString
+    end
 end
 
 function ZO_TimedActivities_Manager:ClaimAllRewards()

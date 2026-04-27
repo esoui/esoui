@@ -2,6 +2,16 @@ ZO_TAMRIEL_TOME_SEASON_SELECTED_ANIMATION_DURATION_SECONDS = 1.5
 ZO_TAMRIEL_TOME_SEASON_ENTRY_BORDER_BRIGHTNESS_SELECTED = 1
 ZO_TAMRIEL_TOME_SEASON_ENTRY_BORDER_BRIGHTNESS_UNSELECTED = 0.3
 
+ZO_TAMRIEL_TOME_SEASON_END_DIALOG_WIDTH = 665
+ZO_TAMRIEL_TOME_SEASON_END_REWARD_ENTRY_BORDER_WIDTH = 32
+ZO_TAMRIEL_TOME_SEASON_END_REWARD_ENTRY_IMAGE_HEIGHT = 307
+ZO_TAMRIEL_TOME_SEASON_END_REWARD_ENTRY_IMAGE_WIDTH = 615
+ZO_TAMRIEL_TOME_SEASON_END_REWARD_ENTRY_PADDING = 4
+ZO_TAMRIEL_TOME_SEASON_END_REWARD_ENTRY_WIDTH = ZO_TAMRIEL_TOME_SEASON_END_REWARD_ENTRY_IMAGE_WIDTH - ZO_TAMRIEL_TOME_SEASON_END_REWARD_ENTRY_BORDER_WIDTH - ZO_TAMRIEL_TOME_SEASON_END_REWARD_ENTRY_PADDING * 2
+ZO_TAMRIEL_TOME_SEASON_END_REWARD_ENTRY_HEIGHT = 64 + ZO_TAMRIEL_TOME_SEASON_END_REWARD_ENTRY_PADDING * 2
+ZO_TAMRIEL_TOME_SEASON_END_GRID_HEIGHT_MAX = ZO_TAMRIEL_TOME_SEASON_END_REWARD_ENTRY_HEIGHT * 6
+ZO_TAMRIEL_TOME_SEASON_END_GRID_WIDTH = ZO_TAMRIEL_TOME_SEASON_END_REWARD_ENTRY_IMAGE_WIDTH
+
 ZO_TamrielTomeSeasonGridEntry_Shared = ZO_InitializingObject:Subclass()
 
 function ZO_TamrielTomeSeasonGridEntry_Shared:Initialize(control)
@@ -160,6 +170,66 @@ function ZO_TamrielTomeSeasonGridEntry_Shared.TrySetIsSelectionPending(isSelecti
     ZO_TamrielTomeSeasonGridEntry_Shared.isSelectionPending = isSelectionPending
     return true
 end
+
+
+ZO_TamrielTomeSeasonEndGridEntry_Shared = ZO_InitializingObject:Subclass()
+
+function ZO_TamrielTomeSeasonEndGridEntry_Shared:Initialize(control)
+    self.control = control
+    control.object = self
+
+    self.highlightBackdrop = control:GetNamedChild("Highlight")
+    self.rewardIconTexture = control:GetNamedChild("RewardIcon")
+    self.rewardNameLabel = control:GetNamedChild("RewardName")
+    self.rewardQuantityLabel = self.rewardIconTexture:GetNamedChild("Quantity")
+
+    self.control.GetRewardData = function()
+        return self.data and self.data.rewardData or nil
+    end
+
+    self:SetIsHighlighted(false)
+end
+
+function ZO_TamrielTomeSeasonEndGridEntry_Shared:IsHighlighted()
+    return self.isHighlighted
+end
+
+function ZO_TamrielTomeSeasonEndGridEntry_Shared:SetIsHighlighted(isHighlighted)
+    if isHighlighted == self.isHighlighted then
+        return
+    end
+
+    self.isHighlighted = isHighlighted
+
+    if self.highlightBackdrop then
+        self.highlightBackdrop:SetHidden(not isHighlighted)
+    end
+end
+
+function ZO_TamrielTomeSeasonEndGridEntry_Shared:OnMouseEnter()
+    if self.owner then
+        local PREVIOUS_DATA = nil
+        self.owner:SetSelectedData(self.data, PREVIOUS_DATA, self.control)
+    end
+end
+
+function ZO_TamrielTomeSeasonEndGridEntry_Shared:OnMouseExit()
+    if self.owner then
+        local CURRENT_DATA = nil
+        self.owner:SetSelectedData(CURRENT_DATA, self.data, self.control)
+    end
+end
+
+function ZO_TamrielTomeSeasonEndGridEntry_Shared:Setup(data, owner)
+    data.owner = self
+    self.data = data
+    self.owner = owner
+
+    self.rewardIconTexture:SetTexture(data.rewardIconTextureFile)
+    self.rewardNameLabel:SetText(data.rewardDisplayNameFormatted)
+    self.rewardQuantityLabel:SetText(data.rewardQuantityString)
+end
+
 
 ZO_TAMRIEL_TOMES_REWARD_DATA_PREVIEW_TYPES =
 {
@@ -369,7 +439,7 @@ function ZO_TamrielTomesScreen_Shared:InitializeGridList()
     gridList:SetIndentAmount(0)
     gridList:SetHeaderPrePadding(0)
     gridList:SetHeaderPostPadding(0)
-    gridList:SetYDistanceFromEdgeWhereSelectionCausesScroll(10)
+    gridList:SetYDistanceFromEdgeWhereSelectionCausesScroll(0)
 
     local function EntryEqualityFunction(left, right)
         if left.dataEntry.Equals and right.dataEntry.Equals then
@@ -1548,4 +1618,389 @@ end
 
 function ZO_TamrielTomesScreen_Shared.SetAreSeenTiersInitialized(initialized)
     ZO_TamrielTomesScreen_Shared.areSeenTiersInitialized = initialized
+end
+
+
+ZO_TamrielTomeSeasonEndDialog_Shared = ZO_InitializingObject:Subclass()
+
+function ZO_TamrielTomeSeasonEndDialog_Shared:Initialize(control)
+    self.control = control
+    control.object = self
+
+    self:InitializeControls()
+    self:InitializeGridList()
+    self:InitializeDialog()
+end
+
+function ZO_TamrielTomeSeasonEndDialog_Shared:InitializeControls()
+    self.summaryControl = self.control:GetNamedChild("Summary")
+    self.seasonImageTexture = self.summaryControl:GetNamedChild("SeasonImage")
+    self.seasonNameLabel = self.summaryControl:GetNamedChild("SeasonName")
+    self.seasonRewardCountLabel = self.summaryControl:GetNamedChild("SeasonRewardCount")
+    self.premiumExplanationLabel = self.summaryControl:GetNamedChild("PremiumExplanation")
+    self.tomePointRolloverLabel = self.summaryControl:GetNamedChild("TomePointRollover")
+    self.goldRolloverLabel = self.summaryControl:GetNamedChild("GoldRollover")
+    self.claimedRewardsLabel = self.summaryControl:GetNamedChild("ClaimedRewards")
+    self.dividerControl = self.summaryControl:GetNamedChild("Divider")
+    self.gridControl = self.control:GetNamedChild("RewardsGrid")
+end
+
+function ZO_TamrielTomeSeasonEndDialog_Shared:InitializeDialog()
+    local control = self.control
+    local dialogData =
+    {
+        title =
+        {
+            text = SI_TAMRIEL_TOMES_SEASON_END_DIALOG_TITLE,
+        },
+
+        mainText =
+        {
+            text = "",
+        },
+
+        setup = function(dialog, data)
+            -- Order matters:
+            dialog.object = self
+            self:UpdateSeason()
+            self:BuildGridList()
+
+            SetTamrielTomesEndOfSeasonRecapSeen(true)
+        end,
+
+        customControl = control,
+
+        buttons =
+        {
+            {
+                control = control:GetNamedChild("Close"),
+                keybind = "DIALOG_PRIMARY",
+                text = SI_TAMRIEL_TOMES_SEASON_END_DIALOG_CONTINUE,
+                clickSound = SOUNDS.DIALOG_ACCEPT,
+            },
+        },
+    }
+
+    if self.templateData.isGamepad then
+        dialogData.gamepadInfo =
+        {
+            dialogType = GAMEPAD_DIALOGS.CUSTOM,
+        }
+    end
+
+    ZO_Dialogs_RegisterCustomDialog(self.dialogName, dialogData)
+end
+
+do
+    local function SetupBulletLabel(labelControl, text)
+        if text and text ~= "" then
+            labelControl:SetText(text)
+            labelControl:SetHidden(false)
+        else
+            labelControl:SetText("")
+            labelControl:SetHidden(true)
+        end
+    end
+
+    function ZO_TamrielTomeSeasonEndDialog_Shared:UpdateSeason()
+        self.tomeId = GetTamrielTomesEndOfSeasonRecapTamrielTomeId()
+        self.rewardTrackId = GetTamrielTomesEndOfSeasonRecapRewardTrackId()
+        self.numClaimedRewards, self.numRewards = ZO_TamrielTomeData.GetRewardStatisticsForTamrielTome(self.tomeId)
+        self.numTomePointsRolledOver = GetTomePointsRolledOverIntoNextSeason()
+        self.numTomePointsConvertedToGold = GetEndOfSeasonTomePointsConvertedToGold()
+        self.goldGainedFromTomePoints = GetGoldGainedFromEndOfSeasonTomePointConversion()
+        self.hasPremiumTome = false
+
+        for productTypeId = TAMRIEL_TOME_PRODUCT_TYPE_ITERATION_BEGIN, TAMRIEL_TOME_PRODUCT_TYPE_ITERATION_END do
+            if HasTamrielTomeProductType(self.tomeId, productTypeId) then
+                self.hasPremiumTome = true
+                break
+            end
+        end
+
+        local seasonName = GetRewardTrackDisplayName(self.rewardTrackId)
+        self.seasonNameLabel:SetText(seasonName)
+
+        local seasonTextureFile = GetTamrielTomeIntroBackgroundFileIndex(self.rewardTrackId)
+        self.seasonImageTexture:SetTexture(seasonTextureFile)
+
+        local rewardCountString = zo_strformat(SI_TAMRIEL_TOME_SEASON_ENTRY_EARNED_REWARDS_FORMATTER, self.numClaimedRewards, self.numRewards)
+        self.seasonRewardCountLabel:SetText(rewardCountString)
+
+        SetupBulletLabel(self.premiumExplanationLabel, self.hasPremiumTome and GetString(SI_TAMRIEL_TOMES_SEASON_END_DIALOG_PREMIUM_EXPLANATION) or "")
+
+        local isGamepad = self.templateData.isGamepad
+        local currencyOptions =
+        {
+            color = ZO_SELECTED_TEXT,
+        }
+
+        local tomePointsRollOverString = nil
+        if self.numTomePointsRolledOver > 0 then
+            local numTomePointsRolledOverString = ZO_Currency_Format(self.numTomePointsRolledOver, CURT_TOME_POINTS, ZO_CURRENCY_FORMAT_AMOUNT_ICON, isGamepad, currencyOptions)
+            tomePointsRollOverString = zo_strformat(SI_TAMRIEL_TOMES_SEASON_END_DIALOG_TOME_POINT_ROLL_OVER, numTomePointsRolledOverString)
+        end
+        SetupBulletLabel(self.tomePointRolloverLabel, tomePointsRollOverString)
+
+        local tomePointsConvertedToGoldString = nil
+        if self.numTomePointsConvertedToGold > 0 and self.goldGainedFromTomePoints > 0 then
+            local numTomePointsConvertedToGoldString = ZO_Currency_Format(self.numTomePointsConvertedToGold, CURT_TOME_POINTS, ZO_CURRENCY_FORMAT_AMOUNT_ICON, isGamepad, currencyOptions)
+            local goldGainedFromTomePointsString = ZO_Currency_Format(self.goldGainedFromTomePoints, CURT_MONEY, ZO_CURRENCY_FORMAT_AMOUNT_ICON, isGamepad, currencyOptions)
+            tomePointsConvertedToGoldString = zo_strformat(SI_TAMRIEL_TOMES_SEASON_END_DIALOG_GOLD_ROLL_OVER, numTomePointsConvertedToGoldString, goldGainedFromTomePointsString)
+        end
+        SetupBulletLabel(self.goldRolloverLabel, tomePointsConvertedToGoldString)
+    end
+end
+
+function ZO_TamrielTomeSeasonEndDialog_Shared:InitializeGridList()
+    local templateData = self.templateData
+    local gridList = templateData.gridListClass:New(self.gridControl, templateData.highlightTemplate)
+    self.gridList = gridList
+    gridList:SetIndentAmount(0)
+    gridList:SetHeaderPrePadding(0)
+    gridList:SetHeaderPostPadding(0)
+    gridList:SetYDistanceFromEdgeWhereSelectionCausesScroll(templateData.entryHeight)
+
+    local function SetupGridEntry(...)
+        self:SetupGridEntry(...)
+    end
+
+    local NO_HIDE_CALLBACK = nil
+    local NO_RESET_CALLBACK = nil
+    local GRID_PADDING = ZO_TAMRIEL_TOME_SEASON_END_REWARD_ENTRY_PADDING
+    self.gridList:AddEntryTemplate(templateData.entryTemplate, templateData.entryWidth, templateData.entryHeight, SetupGridEntry, NO_HIDE_CALLBACK, NO_RESET_CALLBACK, GRID_PADDING, GRID_PADDING)
+end
+
+function ZO_TamrielTomeSeasonEndDialog_Shared:BuildGridList()
+    self.gridList:ClearGridList()
+    self:PopulateGridList()
+    self.gridList:CommitGridList()
+end
+
+-- Sort the automatically claimed rewards by:
+--  Display Quality (descending); then,
+--  Reward Tier (descending); then,
+--  Reward Component (ascending [Premium first]); finally,
+--  Reward Index within the Reward Tier & Reward Component (ascending).
+function ZO_TamrielTomeSeasonEndDialog_Shared.CompareRewardEntryData(entryData1, entryData2)
+    -- Rank by Reward Display Quality (descending).
+    if entryData1.rewardDisplayQuality > entryData2.rewardDisplayQuality then
+        return true
+    elseif entryData1.rewardDisplayQuality ~= entryData2.rewardDisplayQuality then
+        return false
+    end
+
+    -- Reward Display Qualities are equivalent; rank by Reward Tier (descending).
+    if entryData1.rewardTier > entryData2.rewardTier then
+        return true
+    elseif entryData1.rewardTier ~= entryData2.rewardTier then
+        return false
+    end
+
+    -- Reward Tiers are equivalent; rank by Reward Component (ascending).
+    if entryData1.rewardComponent < entryData2.rewardComponent then
+        return true
+    elseif entryData1.rewardComponent ~= entryData2.rewardComponent then
+        return false
+    end
+
+    -- Reward Components are equivalent; rank by Reward Index (ascending).
+    return entryData1.rewardIndex < entryData2.rewardIndex
+end
+
+function ZO_TamrielTomeSeasonEndDialog_Shared:PopulateGridList()
+    local entryTemplate = self.templateData.entryTemplate
+    local tomeId = self.tomeId
+    local rewardTrackId = self.rewardTrackId
+    local numRewardTiers = GetTotalNumTiersForRewardTrack(rewardTrackId)
+    local numRewards = 0
+    local numAutoClaimedRewards = 0
+    local entryDataList = {}
+
+    for rewardTier = numRewardTiers, 1, -1 do
+        for rewardComponent = REWARD_TRACK_COMPONENT_ITERATION_BEGIN, REWARD_TRACK_COMPONENT_ITERATION_END do
+            local numRewardTierComponentRewards = GetNumRewardsAtRewardTrackTier(rewardTrackId, rewardTier, rewardComponent)
+
+            for rewardIndex = 1, numRewardTierComponentRewards do
+                local rewardId, rewardQuantity, rewardCost, rewardDisplayQuality, hideRewardQuality = GetTamrielTomesRewardInfo(rewardTrackId, rewardTier, rewardComponent, rewardIndex)
+
+                if rewardId ~= 0 then
+                    numRewards = numRewards + 1
+                    local wasAutoClaimed, wasFallbackAutoClaim = GetTamrielTomesEndOfSeasonAutoClaimInfoForReward(rewardTier, rewardComponent, rewardIndex)
+
+                    if wasAutoClaimed or wasFallbackAutoClaim then
+                        local rewardData = REWARDS_MANAGER:GetInfoForReward(rewardId, rewardQuantity)
+
+                        if rewardData then
+                            local rewardDisplayName = rewardData:GetFormattedName()
+                            numAutoClaimedRewards = numAutoClaimedRewards + 1
+
+                            rewardDisplayQuality = rewardDisplayQuality or ITEM_DISPLAY_QUALITY_NORMAL
+                            local qualityColor = GetItemQualityColor(rewardDisplayQuality)
+                            local rewardDisplayNameFormatted = qualityColor:Colorize(rewardDisplayName)
+
+                            local rewardIconTextureFile = nil
+                            local rewardData = REWARDS_MANAGER:GetInfoForReward(rewardId, rewardQuantity)
+                            if rewardData then
+                                rewardIconTextureFile = rewardData:GetPlatformLootIcon()
+                            end
+
+                            local isRewardList = GetRewardType(rewardId) == REWARD_ENTRY_TYPE_REWARD_LIST
+                            if isRewardList then
+                                local rewardListId = GetRewardListIdFromReward(rewardId)
+                                local rewardListData = REWARDS_MANAGER:GetAllRewardInfoForRewardList(rewardListId)
+                                if rewardListData and #rewardListData >= 1 then
+                                    rewardQuantity = #rewardListData - 1
+
+                                    local rewardData = rewardListData[1]
+                                    if rewardData then
+                                        rewardIconTextureFile = rewardData:GetPlatformLootIcon()
+                                    end
+                                end
+                            end
+
+                            local rewardQuantityString = ""
+                            if rewardQuantity > 1 then
+                                rewardQuantityString = ZO_CommaDelimitNumber(rewardQuantity)
+                                if isRewardList then
+                                    rewardQuantityString = zo_strformat(SI_TAMRIEL_TOMES_REWARD_LIST_QUANTITY_FORMATTER, rewardQuantityString)
+                                end
+                            end
+
+                            local entryData = self:CreateGridEntryData(rewardData, rewardId, rewardIndex, rewardTier, rewardComponent, rewardDisplayQuality, rewardDisplayName, rewardDisplayNameFormatted, rewardQuantityString, rewardIconTextureFile)
+                            table.insert(entryDataList, entryData)
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    local MIN_X = nil
+    local MAX_X = nil
+    if numAutoClaimedRewards > 0 then
+        table.sort(entryDataList, self.CompareRewardEntryData)
+
+        for _, entryData in ipairs(entryDataList) do
+            self.gridList:AddEntry(entryData, entryTemplate)
+        end
+
+        -- Resize the grid height to be the minimum of either the height necessary to
+        -- fit the number entries in the grid or the maximum grid height allowed.
+        local gridHeight = numAutoClaimedRewards * (ZO_TAMRIEL_TOME_SEASON_END_REWARD_ENTRY_HEIGHT + ZO_TAMRIEL_TOME_SEASON_END_REWARD_ENTRY_PADDING)
+        gridHeight = zo_min(gridHeight, ZO_TAMRIEL_TOME_SEASON_END_GRID_HEIGHT_MAX)
+        self.gridControl:SetDimensionConstraints(MIN_X, gridHeight, MAX_X, gridHeight)
+        self.gridControl:SetHidden(false)
+    else
+        -- There were no automatically claimed rewards; resize the grid height to
+        -- occupy virtually no space.
+        local MIN_Y = 1
+        local MAX_Y = 1
+        self.gridControl:SetDimensionConstraints(MIN_X, MIN_Y, MAX_X, MAX_Y)
+        self.gridControl:SetHidden(true)
+    end
+
+    self.claimedRewardsLabel:SetText(numAutoClaimedRewards == 0 and "" or zo_strformat(SI_TAMRIEL_TOMES_SEASON_END_DIALOG_CLAIMED_REWARDS, numAutoClaimedRewards))
+end
+
+function ZO_TamrielTomeSeasonEndDialog_Shared:CreateGridEntryData(rewardData, rewardId, rewardIndex, rewardTier, rewardComponent, rewardDisplayQuality, rewardDisplayName, rewardDisplayNameFormatted, rewardQuantityString, rewardIconTextureFile)
+    local entryData =
+    {
+        rewardData = rewardData,
+        rewardId = rewardId,
+        rewardIndex = rewardIndex,
+        rewardTier = rewardTier,
+        rewardComponent = rewardComponent,
+        rewardDisplayQuality = rewardDisplayQuality,
+        rewardDisplayNameFormatted = rewardDisplayNameFormatted,
+        rewardQuantityString = rewardQuantityString,
+        rewardIconTextureFile = rewardIconTextureFile,
+        narrationText = rewardDisplayName,
+    }
+    return entryData
+end
+
+function ZO_TamrielTomeSeasonEndDialog_Shared:SetupGridEntry(control, data)
+    control.object:Setup(data, self)
+end
+
+function ZO_TamrielTomeSeasonEndDialog_Shared:SetSelectedData(data, previousData, control)
+    if data == self.selectedData then
+        return
+    end
+
+    if previousData and previousData ~= self.selectedData then
+        return
+    end
+
+    if self.selectedData and self.selectedData.owner then
+        self.selectedData.owner:SetIsHighlighted(false)
+    end
+
+    self.selectedData = data
+
+    if data and data.owner then
+        data.owner:SetIsHighlighted(true)
+        self:ShowRewardTooltip(data.rewardData, control)
+    else
+        self:HideRewardTooltip()
+    end
+end
+
+function ZO_TamrielTomeSeasonEndDialog_Shared:HideRewardTooltip()
+    ZO_Rewards_Shared_OnMouseExit()
+    GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
+end
+
+function ZO_TamrielTomeSeasonEndDialog_Shared:ShowRewardTooltip(rewardData, control)
+    if not rewardData then
+        self:HideRewardTooltip()
+        return
+    end
+
+    if IsInGamepadPreferredMode() then
+        GAMEPAD_TOOLTIPS:LayoutRewardData(GAMEPAD_RIGHT_TOOLTIP, rewardData)
+    else
+        ZO_Rewards_Shared_ShowRewardTooltip(rewardData, control or self.gridControl, LEFT, RIGHT, 20)
+    end
+end
+
+function ZO_TamrielTomeSeasonEndDialog_Shared:OnHidden()
+    -- Can be overridden
+end
+
+function ZO_TamrielTomeSeasonEndDialog_Shared:OnShown()
+    -- Can be overridden
+end
+
+function ZO_TamrielTomeSeasonEndDialog_Shared:OnSelectionChanged(previousSelectedData, currentSelectedData)
+    self:SetSelectedData(currentSelectedData, previousSelectedData)
+end
+
+function ZO_TamrielTomeSeasonEndDialog_Shared:Hide()
+    ZO_Dialogs_ReleaseDialog(self.dialogName)
+end
+
+function ZO_TamrielTomeSeasonEndDialog_Shared:Show()
+    ZO_Dialogs_ShowPlatformDialog(self.dialogName, {})
+end
+
+function ZO_TamrielTomeSeasonEndDialog_Shared:TryShow()
+    if not HasTamrielTomesEndOfSeasonRecap() then
+        return false
+    end
+
+    if HasPlayerSeenTamrielTomesEndOfSeasonRecap() then
+        return false
+    end
+
+    self:Show()
+    return true
+end
+
+function ZO_TamrielTomeSeasonEndDialog_Shared.TryShowPlatformDialog()
+    if IsInGamepadPreferredMode() then
+        return TAMRIEL_TOME_SEASON_END_DIALOG_GAMEPAD:TryShow()
+    end
+    return TAMRIEL_TOME_SEASON_END_DIALOG_KEYBOARD:TryShow()
 end

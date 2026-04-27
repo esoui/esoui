@@ -1341,6 +1341,12 @@ local AlertHandlers =
             return ALERT, GetString("SI_GUILDMAILERRESULT", result), SOUNDS.GENERAL_ALERT_ERROR
         end
     end,
+
+    [EVENT_TIMED_ACTIVITY_REROLL_RESULT] = function(result)
+        if result ~= TOMES_CHALLENGE_REROLL_RESULT_SUCCESS then
+            return ALERT, GetString("SI_TAMRIELTOMECHALLENGEREROLLRESULT", result), SOUNDS.GENERAL_ALERT_ERROR
+        end
+    end,
 }
 
 ZO_AntiquityScryingResultsToAlert =

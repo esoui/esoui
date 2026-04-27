@@ -656,3 +656,44 @@ end
 function ZO_SelectTamrielTomeSeasonDialog_Gamepad.OnHidden(control)
     control.object.gridList:Deactivate()
 end
+
+
+ZO_TamrielTomeSeasonEndDialog_Gamepad = ZO_TamrielTomeSeasonEndDialog_Shared:Subclass()
+
+function ZO_TamrielTomeSeasonEndDialog_Gamepad:Initialize(control)
+    -- Order matters:
+    ZO_CustomCenteredGamepadDialogTemplate_OnInitialized(control)
+    TAMRIEL_TOME_SEASON_END_DIALOG_GAMEPAD = self
+    self.dialogName = "TamrielTomesSeasonEndDialogGamepad"
+    self.templateData =
+    {
+        isGamepad = true,
+        gridListClass = ZO_GridScrollList_Gamepad,
+        entryTemplate = "ZO_TamrielTomeSeasonEndEntry_Gamepad",
+        entryWidth = ZO_TAMRIEL_TOME_SEASON_END_REWARD_ENTRY_WIDTH,
+        entryHeight = ZO_TAMRIEL_TOME_SEASON_END_REWARD_ENTRY_HEIGHT,
+    }
+    ZO_TamrielTomeSeasonEndDialog_Shared.Initialize(self, control)
+end
+
+function ZO_TamrielTomeSeasonEndDialog_Gamepad:InitializeGridList()
+    ZO_TamrielTomeSeasonEndDialog_Shared.InitializeGridList(self)
+
+    self.gridList:SetOnSelectedDataChangedCallback(function(...) self:OnSelectionChanged(...) end)
+end
+
+function ZO_TamrielTomeSeasonEndDialog_Gamepad:OnHidden()
+    ZO_TamrielTomeSeasonEndDialog_Shared.OnHidden(self)
+
+    self.gridList:Deactivate()
+end
+
+function ZO_TamrielTomeSeasonEndDialog_Gamepad:OnShown()
+    ZO_TamrielTomeSeasonEndDialog_Shared.OnShown(self)
+
+    self.gridList:Activate()
+end
+
+function ZO_TamrielTomeSeasonEndDialog_Gamepad.OnInitialized(control)
+    control.object = ZO_TamrielTomeSeasonEndDialog_Gamepad:New(control)
+end

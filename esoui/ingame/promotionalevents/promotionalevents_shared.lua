@@ -132,7 +132,7 @@ function ZO_PromotionalEventActivity_Entry_Shared:SetActivityData(activityData)
     local displayName = activityData:GetDisplayName()
     if isLocked then
         displayName = zo_iconTextFormat("EsoUI/Art/Miscellaneous/status_locked.dds", "100%", "100%", displayName)
-    elseif activityData:HasMenuAssistance() and not activityData:IsComplete() then
+    elseif activityData:ShouldShowMenuAssistance() then
         displayName = zo_iconTextFormat("EsoUI/Art/Miscellaneous/help_icon.dds", "100%", "100%", displayName)
     end
     self.nameLabel:SetText(displayName)

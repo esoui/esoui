@@ -75,7 +75,7 @@ end
 
 function ZO_VeterancyRankData:GetRankTierProgressValue()
     local _, currentRank, progressToNextRank = GetInfoForRewardTrack(self.trackType, self.veterancyTrackIndex)
-    if self.index == currentRank or currentRank == GetInfinitelyRepeatableTierForRewardTrack(self.rewardTrackId) then
+    if self.index == currentRank or self.index == GetInfinitelyRepeatableTierForRewardTrack(self.rewardTrackId) then
         return progressToNextRank
     elseif self.index < currentRank then
         return self:GetRankTierTotalValue()

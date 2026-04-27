@@ -139,7 +139,7 @@ function ZO_PromotionalEventActivity_Entry_Keyboard:OnMouseEnter()
     end
     local description = self.activityData:GetDescription()
 
-    if not self.activityData:IsComplete() then
+    if self.activityData:ShouldShowMenuAssistance() then
         local menuAssistanceText = self.activityData:GetMenuAssistanceDescriptionText("UI_SHORTCUT_PRIMARY")
         description = AppendToDescription(description, menuAssistanceText)
     end
@@ -471,12 +471,7 @@ local function ShouldPrimaryKeybindBeVisible(mouseOverObject)
         activityData = mouseOverObject.activityData
     end
 
-    if activityData and not activityData:IsComplete() then
-        local menuAssistanceType, referenceData = activityData:GetMenuAssistanceInfo()
-        return menuAssistanceType ~= MENU_ASSISTANCE_TYPE_NONE
-    end
-
-    return false
+    return activityData and activityData:ShouldShowMenuAssistance()
 end
 
 function ZO_PromotionalEvents_Keyboard:InitializeKeybindStripDescriptors()

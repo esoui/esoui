@@ -688,43 +688,56 @@ end
 
 function ZO_Rewards_Shared_OnMouseEnter(control, anchorPoint, anchorPointRelativeTo, anchorOffsetX, anchorOffsetY, useRelativeAnchors)
     local rewardData = control.GetRewardData and control.GetRewardData() or control.data
-    if rewardData then
-        local rewardType = rewardData:GetRewardType()
-        if rewardType then
-            anchorPoint = anchorPoint or LEFT
-            anchorPointRelativeTo = anchorPointRelativeTo or RIGHT
-            anchorOffsetX = anchorOffsetX or 0
-            anchorOffsetY = anchorOffsetY or 0
-            local rewardId = rewardData:GetRewardId()
-            local quantity = rewardData:GetQuantity()
-            local displayFlags = rewardData:GetDisplayFlags()
-
-            if rewardType == REWARD_ENTRY_TYPE_REWARD_LIST or rewardType == REWARD_ENTRY_TYPE_CHOICE then
-                InitializeTooltip(InformationTooltip, control, anchorPoint, anchorOffsetX, anchorOffsetY, anchorPointRelativeTo)
-                InformationTooltip:SetReward(rewardId, quantity, displayFlags)
-            else
-                InitializeTooltip(ItemTooltip, control, anchorPoint, anchorOffsetX, anchorOffsetY, anchorPointRelativeTo)
-                ItemTooltip:SetReward(rewardId, quantity, displayFlags)
-                ItemTooltip:HideComparativeTooltips()
-                if rewardType == REWARD_ENTRY_TYPE_ITEM then
-                    ItemTooltip:ShowComparativeTooltips()
-                    if ZO_PlayShowAnimationOnComparisonTooltip then
-                        -- These tooltip animations are not available for internal ingame.
-                        ZO_PlayShowAnimationOnComparisonTooltip(ComparativeTooltip1)
-                        ZO_PlayShowAnimationOnComparisonTooltip(ComparativeTooltip2)
-                    end
-                    if useRelativeAnchors == nil then
-                        useRelativeAnchors = true
-                    end
-                    ZO_Tooltips_SetupDynamicTooltipAnchors(ItemTooltip, control, ComparativeTooltip1, ComparativeTooltip2, useRelativeAnchors)
-                end
-            end
-        end
-    end
+    ZO_Rewards_Shared_ShowRewardTooltip(rewardData, control, anchorPoint, anchorPointRelativeTo, anchorOffsetX, anchorOffsetY, useRelativeAnchors)
 end
 
-function ZO_Rewards_Shared_OnMouseExit(control)
+function ZO_Rewards_Shared_OnMouseExit()
     ClearTooltip(ItemTooltip)
     ClearTooltip(InformationTooltip)
     ItemTooltip:HideComparativeTooltips()
+end
+
+function ZO_Rewards_Shared_ShowRewardTooltip(rewardData, control, anchorPoint, anchorPointRelativeTo, anchorOffsetX, anchorOffsetY, useRelativeAnchors)
+    if rewardData == nil then
+        return
+    end
+
+    local rewardType = rewardData:GetRewardType()
+    if rewardType == nil then
+        return
+    end
+
+    anchorPoint = anchorPoint or LEFT
+    anchorPointRelativeTo = anchorPointRelativeTo or RIGHT
+    anchorOffsetX = anchorOffsetX or 0
+    anchorOffsetY = anchorOffsetY or 0
+
+    local rewardId = rewardData:GetRewardId()
+    local quantity = rewardData:GetQuantity()
+    local displayFlags = rewardData:GetDisplayFlags()
+
+    if rewardType == REWARD_ENTRY_TYPE_REWARD_LIST or rewardType == REWARD_ENTRY_TYPE_CHOICE then
+        InitializeTooltip(InformationTooltip, control, anchorPoint, anchorOffsetX, anchorOffsetY, anchorPointRelativeTo)
+        InformationTooltip:SetReward(rewardId, quantity, displayFlags)
+    else
+        InitializeTooltip(ItemTooltip, control, anchorPoint, anchorOffsetX, anchorOffsetY, anchorPointRelativeTo)
+        ItemTooltip:SetReward(rewardId, quantity, displayFlags)
+        ItemTooltip:HideComparativeTooltips()
+
+        if rewardType == REWARD_ENTRY_TYPE_ITEM then
+            ItemTooltip:ShowComparativeTooltips()
+
+            if ZO_PlayShowAnimationOnComparisonTooltip then
+                -- These tooltip animations are not available for internal ingame.
+                ZO_PlayShowAnimationOnComparisonTooltip(ComparativeTooltip1)
+                ZO_PlayShowAnimationOnComparisonTooltip(ComparativeTooltip2)
+            end
+
+            if useRelativeAnchors == nil then
+                useRelativeAnchors = true
+            end
+
+            ZO_Tooltips_SetupDynamicTooltipAnchors(ItemTooltip, control, ComparativeTooltip1, ComparativeTooltip2, useRelativeAnchors)
+        end
+    end
 end

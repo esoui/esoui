@@ -300,12 +300,12 @@ function ZO_TamrielTomeData:GetPremiumUpgradeBackgroundFile()
     return GetTamrielTomePremiumUpgradeBackgroundFileIndex(self.tamrielTomeId)
 end
 
-function ZO_TamrielTomeData:UpdateRewardStatisticsInternal()
+function ZO_TamrielTomeData.GetRewardStatisticsForTamrielTome(tamrielTomeId)
+    local tomeIndex = GetReferenceTrackIndex(REWARD_TRACK_TYPE_TAMRIEL_TOMES, tamrielTomeId)
+    local rewardTrackId = GetRewardTrackIdFromReferenceTrackId(REWARD_TRACK_TYPE_TAMRIEL_TOMES, tamrielTomeId)
+    local numTiers = GetTotalNumTiersForRewardTrack(rewardTrackId)
     local numClaimedRewards = 0
     local numRewards = 0
-    local rewardTrackId = self:GetRewardTrackId()
-    local tomeIndex = self:GetTamrielTomeIndex()
-    local numTiers = self:GetNumTotalTiers()
 
     for rewardComponent = REWARD_TRACK_COMPONENT_ITERATION_BEGIN, REWARD_TRACK_COMPONENT_ITERATION_END do
         for rewardTier = 1, numTiers do
@@ -321,8 +321,12 @@ function ZO_TamrielTomeData:UpdateRewardStatisticsInternal()
         end
     end
 
-    self.numClaimedRewards = numClaimedRewards
-    self.numRewards = numRewards
+    return numClaimedRewards, numRewards
+end
+
+function ZO_TamrielTomeData:UpdateRewardStatisticsInternal()
+    local tamrielTomeId = self:GetTamrielTomeId()
+    self.numClaimedRewards, self.numRewards = self.GetRewardStatisticsForTamrielTome(tamrielTomeId)
 end
 
 function ZO_TamrielTomeData:GetNumRewards()

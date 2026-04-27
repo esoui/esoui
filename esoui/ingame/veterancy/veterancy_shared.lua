@@ -810,6 +810,7 @@ function ZO_Veterancy_Shared:OnRepeatableRankRewardClaimed()
             PlaySound(SOUNDS.VETERANCY_RANK_REWARD_CLAIM_REPEATABLE)
         end
         self.repeatableRankRewardControl.object:UpdateKeybinds()
+        self:UpdateKeybinds()
     end
 end
 

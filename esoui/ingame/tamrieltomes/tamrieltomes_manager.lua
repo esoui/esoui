@@ -39,6 +39,7 @@ function TamrielTomes_Manager:Initialize()
     local function OnRewardTrackStarted(_, rewardTrackType, rewardTrackId)
         if rewardTrackType == REWARD_TRACK_TYPE_TAMRIEL_TOMES then
             self:UpdateTamrielTomesAvailability()
+            self:FireCallbacks("RewardTrackStarted", rewardTrackId)
         end
     end
 
@@ -129,7 +130,12 @@ end
 function TamrielTomes_Manager:MarkTomeSeen(tomeId)
     local tomeSavedVars = self:GetOrCreateSavedVarsForTome(tomeId)
     if tomeSavedVars then
+        local wasNew = tomeSavedVars.lastSeenTimestamp == nil
         tomeSavedVars.lastSeenTimestamp = GetTimeStamp()
+
+        if wasNew then
+            self:FireCallbacks("NewTomeSeen", tomeId)
+        end
     end
 end
 
@@ -241,6 +247,17 @@ function TamrielTomes_Manager:GetSelectedTomeId()
     return self.selectedTomeId
 end
 
+-- Returns true if an End of Season recap is available to view.
+function TamrielTomes_Manager:HasEndOfSeasonRecap()
+    return HasTamrielTomesEndOfSeasonRecap()
+end
+
+-- Returns true if an End of Season recap that has not yet been seen by the player is available to view.
+function TamrielTomes_Manager:HasNewEndOfSeasonRecap()
+    return self:HasEndOfSeasonRecap() and not HasPlayerSeenTamrielTomesEndOfSeasonRecap()
+end
+
+-- Returns true if the currently active season Tome has not yet been seen by the player.
 function TamrielTomes_Manager:IsCurrentSeasonTamrielTomeNew()
     local currentSeasonTomeId = self:GetActiveTomeId()
     if not (currentSeasonTomeId and currentSeasonTomeId ~= 0) then

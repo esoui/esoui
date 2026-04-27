@@ -288,7 +288,7 @@ end
 function ZO_Tooltip:LayoutPromotionalEventActivityDescription(activityData)
     local description = activityData:GetDescription()
 
-    if not activityData:IsComplete() then
+    if activityData:ShouldShowMenuAssistance() then
         local menuAssistanceText = activityData:GetMenuAssistanceDescriptionText("UI_SHORTCUT_PRIMARY")
         description = AppendToDescription(description, menuAssistanceText)
     end

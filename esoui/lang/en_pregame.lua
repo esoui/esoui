@@ -4653,6 +4653,7 @@ SAS(SI_QUEUEFORCAMPAIGNRESPONSETYPE28, "Cannot log in to an alliance-locked camp
 SAS(SI_QUEUEFORCAMPAIGNRESPONSETYPE29, "Group size is too large to queue for campaign.", 0)
 SAS(SI_QUEUEFORCAMPAIGNRESPONSETYPE3, "Unable to queue for campaign: internal error.", 0)
 SAS(SI_QUEUEFORCAMPAIGNRESPONSETYPE30, "You cannot queue here while holding more than <<1[1 Tel Var Stone/$d Tel Var Stones]>>.", 0)
+SAS(SI_QUEUEFORCAMPAIGNRESPONSETYPE31, "Vengeance campaign is unavailable.", 0)
 SAS(SI_QUEUEFORCAMPAIGNRESPONSETYPE4, "You are already in that campaign.", 0)
 SAS(SI_QUEUEFORCAMPAIGNRESPONSETYPE5, "Unable to queue for campaign: invalid group.", 0)
 SAS(SI_QUEUEFORCAMPAIGNRESPONSETYPE6, "No one in your group is assigned to that campaign.", 0)

@@ -53,6 +53,7 @@ function ZO_TimedActivityTile_Keyboard:PostInitializePlatform()
     {
         -- Claim
         {
+            order = 5,
             name = GetString(SI_TAMRIEL_TOMES_CHALLENGES_ACTION_NAME_CLAIM),
             keybind = "UI_SHORTCUT_PRIMARY",
             callback = function()
@@ -70,6 +71,7 @@ function ZO_TimedActivityTile_Keyboard:PostInitializePlatform()
 
         -- Track
         {
+            order = 4,
             name = function()
                 if self.timedActivityData:IsTracked() then
                     return GetString(SI_TAMRIEL_TOMES_CHALLENGES_ACTION_NAME_UNPIN)
@@ -90,12 +92,15 @@ function ZO_TimedActivityTile_Keyboard:PostInitializePlatform()
 
         -- Reroll
         {
+            order = 3,
             name = function()
-                return zo_strformat(SI_TAMRIEL_TOMES_CHALLENGES_ACTION_NAME_REROLL, ZO_TimedActivities_Manager.GetNumRemainingRerollAttempts())
+                local IS_KEYBOARD = false
+                local costString = ZO_TimedActivities_Manager.GetRerollCurrencyTypeAndCostStringForPlatform(IS_KEYBOARD)
+                return zo_strformat(SI_TAMRIEL_TOMES_CHALLENGES_ACTION_NAME_REROLL, costString)
             end,
-            keybind = "UI_SHORTCUT_QUINARY",
+            keybind = "UI_SHORTCUT_QUATERNARY",
             callback = function()
-                self.timedActivityData:Reroll()
+                TIMED_ACTIVITIES_KEYBOARD:TryRerollTimedActivity(self.timedActivityData)
             end,
             visible = function()
                 if self.timedActivityData then
@@ -208,6 +213,7 @@ function ZO_TimedActivityTile_Keyboard:OnMouseUp(button, upInside)
     if upInside and button == MOUSE_BUTTON_INDEX_LEFT then
         if self.timedActivityData and self.timedActivityData:CanClaim() then
             self.timedActivityData:Claim()
+            PlaySound(SOUNDS.TAMRIEL_TOMES_CHALLENGE_REWARD_CLAIMED)
         end
     end
 end
@@ -234,6 +240,7 @@ function ZO_TimedActivities_Keyboard:Initialize(control)
 
     SYSTEMS:RegisterKeyboardRootScene("timedActivities", TIMED_ACTIVITIES_SCENE_KEYBOARD)
     SYSTEMS:RegisterKeyboardObject("timedActivities", self)
+    self.rerollDialogName = "REROLL_TIMED_ACTIVITY_KEYBOARD_DIALOG"
 end
 
 function ZO_TimedActivities_Keyboard:OnDeferredInitialize()
@@ -279,6 +286,7 @@ function ZO_TimedActivities_Keyboard:InitializeControls()
     self.keybindStripDescriptor =
     {
         {
+            order = 1,
             alignment = KEYBIND_STRIP_ALIGN_CENTER, 
             name = GetString(SI_TAMRIEL_TOMES_BACK_KEYBIND),
             keybind = "UI_SHORTCUT_NEGATIVE",
@@ -291,8 +299,9 @@ function ZO_TimedActivities_Keyboard:InitializeControls()
 
         -- Claim All
         {
+            order = 2,
             name = GetString(SI_TAMRIEL_TOMES_CHALLENGES_ACTION_NAME_CLAIM_ALL),
-            keybind = "UI_SHORTCUT_QUATERNARY",
+            keybind = "UI_SHORTCUT_QUINARY",
             callback = function()
                 TIMED_ACTIVITIES_MANAGER:ClaimAllRewards()
             end,
@@ -444,4 +453,81 @@ end
 
 function ZO_TimedActivities_Keyboard.OnControlInitialized(control)
     TIMED_ACTIVITIES_KEYBOARD = ZO_TimedActivities_Keyboard:New(control)
+end
+
+-- ZO_RerollTimedActivityDialog_Keyboard
+
+function ZO_RerollTimedActivityDialog_Keyboard_OnInitialized(control)
+    local CURRENCY_OPTIONS =
+    {
+        showTooltips = true,
+        font = "ZoFontGameShadow",
+        iconSide = RIGHT,
+    }
+
+    local CURRENCY_ERROR_OPTIONS =
+    {
+        showTooltips = true,
+        font = "ZoFontGameShadow",
+        iconSide = RIGHT,
+        color = ZO_ERROR_COLOR,
+    }
+
+    local function SetupDialog(dialog)
+        local currencyType, currencyCost = TIMED_ACTIVITIES_MANAGER.GetRerollCostCurrencyTypeAndCost()
+        local currencyBalance = GetPlayerStoredCurrencyAmount(currencyType)
+        local canAffordReroll = currencyBalance >= currencyCost
+        local showCost = currencyCost > 0
+
+        local balanceControl = control:GetNamedChild("Balance")
+        local balanceHeaderControl = control:GetNamedChild("BalanceHeader")
+        ZO_CurrencyControl_SetSimpleCurrency(balanceControl, currencyType, currencyBalance, CURRENCY_OPTIONS)
+        balanceControl:SetHidden(not showCost)
+        balanceHeaderControl:SetHidden(not showCost)
+
+        local costControl = control:GetNamedChild("Cost")
+        local costHeaderControl = control:GetNamedChild("CostHeader")
+        local currencyCostOptions = canAffordReroll and CURRENCY_OPTIONS or CURRENCY_ERROR_OPTIONS
+        ZO_CurrencyControl_SetSimpleCurrency(costControl, currencyType, currencyCost, currencyCostOptions)
+        costControl:SetHidden(not showCost)
+        costHeaderControl:SetHidden(not showCost)
+    end
+
+    ZO_Dialogs_RegisterCustomDialog("REROLL_TIMED_ACTIVITY_KEYBOARD_DIALOG",
+    {
+        customControl = control,
+        setup = SetupDialog,
+        title =
+        {
+            text = SI_TAMRIEL_TOMES_REROLL_CHALLENGE_DIALOG_TITLE,
+        },
+        mainText =
+        {
+            text = function(dialog)
+                local timedActivityData = dialog.data
+                return timedActivityData:GetName()
+            end,
+        },
+        buttons =
+        {
+            {
+                keybind = "DIALOG_PRIMARY",
+                control = control:GetNamedChild("Confirm"),
+                text = SI_DIALOG_CONFIRM,
+                callback =  function(dialog)
+                    local timedActivityData = dialog.data
+                    timedActivityData:Reroll()
+                end,
+                enabled = function(dialog)
+                    local timedActivityData = dialog.data
+                    return timedActivityData:CanAffordReroll()
+                end,
+            },
+            {
+                keybind = "DIALOG_NEGATIVE",
+                control = control:GetNamedChild("Cancel"),
+                text = SI_DIALOG_CANCEL,
+            },
+        }
+    })
 end

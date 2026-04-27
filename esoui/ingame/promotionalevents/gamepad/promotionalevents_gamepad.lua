@@ -501,12 +501,9 @@ function ZO_PromotionalEvents_Gamepad:InitializeFoci()
 
                 if selectedActivityEntry:CanClaimReward() then
                     return true
-                elseif not selectedActivityEntry:IsComplete() then
-                    local menuAssistanceType, referenceData = selectedActivityEntry:GetMenuAssistanceInfo()
-                    return menuAssistanceType ~= MENU_ASSISTANCE_TYPE_NONE
                 end
 
-                return false
+                return selectedActivityEntry:ShouldShowMenuAssistance()
             end,
 
             callback = function()

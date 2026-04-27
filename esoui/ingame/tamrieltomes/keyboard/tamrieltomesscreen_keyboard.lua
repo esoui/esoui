@@ -628,3 +628,24 @@ end
 function ZO_SelectTamrielTomeSeasonDialog_Keyboard.OnInitialized(control)
     control.object = ZO_SelectTamrielTomeSeasonDialog_Keyboard:New(control)
 end
+
+
+ZO_TamrielTomeSeasonEndDialog_Keyboard = ZO_TamrielTomeSeasonEndDialog_Shared:Subclass()
+
+function ZO_TamrielTomeSeasonEndDialog_Keyboard:Initialize(control)
+    -- Order matters:
+    TAMRIEL_TOME_SEASON_END_DIALOG_KEYBOARD = self
+    self.dialogName = "TamrielTomesSeasonEndDialogKeyboard"
+    self.templateData =
+    {
+        gridListClass = ZO_GridScrollList_Keyboard,
+        entryTemplate = "ZO_TamrielTomeSeasonEndEntry_Keyboard",
+        entryWidth = ZO_TAMRIEL_TOME_SEASON_END_REWARD_ENTRY_WIDTH,
+        entryHeight = ZO_TAMRIEL_TOME_SEASON_END_REWARD_ENTRY_HEIGHT,
+    }
+    ZO_TamrielTomeSeasonEndDialog_Shared.Initialize(self, control)
+end
+
+function ZO_TamrielTomeSeasonEndDialog_Keyboard.OnInitialized(control)
+    control.object = ZO_TamrielTomeSeasonEndDialog_Keyboard:New(control)
+end

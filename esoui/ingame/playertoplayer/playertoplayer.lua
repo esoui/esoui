@@ -28,6 +28,8 @@ local INTERACT_TYPE =
     PROMOTIONAL_EVENT_REWARD = 22,
     CHANGE_VENGANCE_LOADOUTS = 23,
     TIMED_ACTIVITY_REWARD = 24,
+    TAMRIEL_TOME_SEASON_ENDED = 25,
+    TAMRIEL_TOME_SEASON_STARTED = 26,
 }
 
 -- For use outside of this file (e.g. InGameDialogs)
@@ -850,6 +852,81 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
         end
     end
 
+    -- Tamriel Tomes Season Ended / Started
+
+    -- Stores the RewardTrackId of a newly started Tamriel Tome season.
+    self.newRewardTrackId = nil
+
+    local function TryShowTamrielTomeSeasonRecap()
+        local success = true
+        if TAMRIEL_TOMES_MANAGER:HasNewEndOfSeasonRecap() then
+            success = ZO_TamrielTomeSeasonEndDialog_Shared.TryShowPlatformDialog()
+        end
+        if success then
+            self:RemoveFromIncomingQueue(INTERACT_TYPE.TAMRIEL_TOME_SEASON_ENDED)
+        end
+    end
+
+    local function QueueTamrielTomeSeasonEndedInteract()
+        local interactData = self:AddPromptToIncomingQueue(INTERACT_TYPE.TAMRIEL_TOME_SEASON_ENDED, nil, nil, nil, TryShowTamrielTomeSeasonRecap)
+        interactData.dontRemoveOnAccept = true
+        interactData.acceptText = GetString(SI_PLAYER_TO_PLAYER_TAMRIEL_TOME_SEASON_ENDED_PROMPT)
+    end
+
+    local function HasNewTamrielSeasonStarted()
+        return self.newRewardTrackId and TAMRIEL_TOMES_MANAGER:IsCurrentSeasonTamrielTomeNew()
+    end
+
+    local function TryShowNewTamrielTomeSeason()
+        local success = true
+        if HasNewTamrielSeasonStarted() then
+            local SHOW_INTRO = true
+            success = TAMRIEL_TOMES_MANAGER:TryOpenNewSeasonTamrielTome(SHOW_INTRO)
+        end
+        if success then
+            self:RemoveFromIncomingQueue(INTERACT_TYPE.TAMRIEL_TOME_SEASON_STARTED)
+            self.newRewardTrackId = nil
+        end
+    end
+
+    local function QueueTamrielTomeSeasonStartedInteract()
+        local interactData = self:AddPromptToIncomingQueue(INTERACT_TYPE.TAMRIEL_TOME_SEASON_STARTED, nil, nil, nil, TryShowNewTamrielTomeSeason)
+        interactData.dontRemoveOnAccept = true
+        interactData.acceptText = GetString(SI_PLAYER_TO_PLAYER_TAMRIEL_TOME_SEASON_STARTED_PROMPT)
+    end
+
+    local function OnTamrielTomesUpdated()
+        local hasSeasonEnded = TAMRIEL_TOMES_MANAGER:HasNewEndOfSeasonRecap()
+        local isSeasonEndedQueued = self:ExistsInQueue(INTERACT_TYPE.TAMRIEL_TOME_SEASON_ENDED)
+        if hasSeasonEnded then
+            if not isSeasonEndedQueued then
+                QueueTamrielTomeSeasonEndedInteract()
+            end
+        else
+            if isSeasonEndedQueued then
+                self:RemoveFromIncomingQueue(INTERACT_TYPE.TAMRIEL_TOME_SEASON_ENDED)
+            end
+        end
+
+        local hasSeasonStarted = HasNewTamrielSeasonStarted()
+        local isSeasonStartedQueued = self:ExistsInQueue(INTERACT_TYPE.TAMRIEL_TOME_SEASON_STARTED)
+        if hasSeasonStarted then
+            if not isSeasonStartedQueued then
+                QueueTamrielTomeSeasonStartedInteract()
+            end
+        else
+            if isSeasonStartedQueued then
+                self:RemoveFromIncomingQueue(INTERACT_TYPE.TAMRIEL_TOME_SEASON_STARTED)
+            end
+        end
+    end
+
+    local function OnRewardTrackStarted(rewardTrackId)
+        -- Order matters:
+        self.newRewardTrackId = rewardTrackId
+        OnTamrielTomesUpdated()
+    end
+
     self.control:RegisterForEvent(EVENT_DUEL_INVITE_RECEIVED, OnDuelInviteReceived)
     self.control:RegisterForEvent(EVENT_DUEL_INVITE_REMOVED, OnDuelInviteRemoved)
     self.control:RegisterForEvent(EVENT_TRIBUTE_INVITE_RECEIVED, OnTributeInviteReceived)
@@ -893,6 +970,10 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
     TIMED_ACTIVITIES_MANAGER:RegisterCallback("OnRefreshAvailability", OnTimedActivitiesUpdated)
     TIMED_ACTIVITIES_MANAGER:RegisterCallback("OnActivitiesUpdated", OnTimedActivitiesUpdated)
     TIMED_ACTIVITIES_MANAGER:RegisterCallback("OnActivityUpdated", OnTimedActivitiesUpdated)
+
+    TAMRIEL_TOMES_MANAGER:RegisterCallback("AvailableTomesChanged", OnTamrielTomesUpdated)
+    TAMRIEL_TOMES_MANAGER:RegisterCallback("NewTomeSeen", OnTamrielTomesUpdated)
+    TAMRIEL_TOMES_MANAGER:RegisterCallback("RewardTrackStarted", OnRewardTrackStarted)
 
     --Find member replacement prompt on a member leaving
     local function OnGroupingToolsFindReplacementNotificationNew()

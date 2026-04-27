@@ -37,6 +37,10 @@ function ZO_PromotionalEventPersonalCampaign_Manager:IsLowLevelPlayer()
     return self.personalCampaignType  == PROMOTIONAL_EVENTS_PERSONAL_CAMPAIGN_TYPE_LOW_LEVEL_PLAYER
 end
 
+function ZO_PromotionalEventPersonalCampaign_Manager:HasPersonalCampaign()
+    return self.personalCampaignType
+end
+
 function ZO_PromotionalEventPersonalCampaign_Manager:GetIntroGameplayExperienceData()
     if not self.personalCampaignType then
         return nil

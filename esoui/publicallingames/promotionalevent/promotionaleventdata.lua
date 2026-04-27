@@ -130,6 +130,24 @@ function ZO_PromotionalEventActivityData:HasMenuAssistance()
     return menuAssistanceType ~= MENU_ASSISTANCE_TYPE_NONE
 end
 
+function ZO_PromotionalEventActivityData:ShouldShowMenuAssistance()
+    if self:IsComplete() then
+        return false
+    end
+
+    local menuAssistanceType, referenceData = self:GetMenuAssistanceInfo()
+
+    if menuAssistanceType == MENU_ASSISTANCE_TYPE_UI_SYSTEM and referenceData == UI_SYSTEM_ANNOUNCEMENT and PROMOTIONAL_EVENT_PERSONAL_CAMPAIGN_MANAGER:HasPersonalCampaign() then
+        -- Don't bother showing the assistance if it's not going to do anything anyway.
+        -- The personal campaign wants you to jump to the intro experience, but if you can't do the intro experience
+        -- (e.g.: you're in a tutorial area, or already in the intro experience) then there's no point trying to take you to the menu because 
+        -- it will fail to jump you.
+        return PROMOTIONAL_EVENT_PERSONAL_CAMPAIGN_MANAGER:CanJumpToIntroGameplay()
+    end
+
+    return menuAssistanceType ~= MENU_ASSISTANCE_TYPE_NONE
+end
+
 function ZO_PromotionalEventActivityData:GetMenuAssistanceDescriptionText(keybind)
     local menuAssistanceType, referenceData = self:GetMenuAssistanceInfo()
     return ZO_UI_SYSTEM_MANAGER:GetMenuAssistanceDescriptionText(menuAssistanceType, referenceData, keybind)
