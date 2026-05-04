@@ -1592,8 +1592,12 @@ function ZO_PlayerToPlayer:OnGroupingToolsReadyCheckUpdated()
             local activityTypeText = GetString("SI_LFGACTIVITY", activityType)
             local generalActivityText = ZO_ACTIVITY_FINDER_GENERALIZED_ACTIVITY_DESCRIPTORS[activityType]
             if role == LFG_ROLE_INVALID then
-                messageFormat = SI_LFG_READY_CHECK_NO_ROLE_TEXT
                 messageParams = { activityTypeText, generalActivityText }
+                if activityType == LFG_ACTIVITY_TRIBUTE_CASUAL or activityType == LFG_ACTIVITY_TRIBUTE_COMPETITIVE then
+                    messageFormat = SI_LFG_READY_CHECK_TRIBUTE_TEXT
+                else
+                    messageFormat = SI_LFG_READY_CHECK_NO_ROLE_TEXT
+                end
             else
                 local roleIconPath = ZO_GetRoleIcon(role)
                 local roleIconFormat = zo_iconFormat(roleIconPath, "100%", "100%")

@@ -900,9 +900,14 @@ local function UpdateMailIcons(mailData, entryData)
 
     --If this is guild mail, include the guild's crest as an icon
     if mailData.fromGuild then
-        local crestCategoryIndex, crestStyleIndex = select(5, GetGuildHeraldryAttribute(mailData.guildId))
-        local _, crestIconPath = GetHeraldryCrestStyleInfo(crestCategoryIndex, crestStyleIndex)
-        entryData:AddIcon(crestIconPath)
+        if DoesGuildHavePrivilege(mailData.guildId, GUILD_PRIVILEGE_HERALDRY) then
+            local crestCategoryIndex, crestStyleIndex = select(5, GetGuildHeraldryAttribute(mailData.guildId))
+            local _, crestIconPath = GetHeraldryCrestStyleInfo(crestCategoryIndex, crestStyleIndex)
+            entryData:AddIcon(crestIconPath)
+        else
+            local NO_HERALDRY_TEXTURE = "EsoUI/Art/GuildFinder/tabard_no_heraldry.dds"
+            entryData:AddIcon(NO_HERALDRY_TEXTURE)
+        end
     end
 end
 

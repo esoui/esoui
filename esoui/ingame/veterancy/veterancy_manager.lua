@@ -62,23 +62,12 @@ function ZO_Veterancy_Manager:Initialize()
         if trackType == self:GetVeterancyTrackType() then
             self:RefreshRankData()
             if rankIndex <= self:GetNumRanks() or previousRankIndex <= self:GetNumRanks() then
-                local claimableStateChanged = false
                 local nonRepeatableRankIndex = rankIndex
                 if nonRepeatableRankIndex > self:GetNumRanks() then
                     nonRepeatableRankIndex = self:GetNumRanks()
                 end
                 for i = 1, nonRepeatableRankIndex do
-                    local claimableBefore = self.rankData[i]:CanClaimRank()
                     self.rankData[i]:UpdateClaimedState()
-                    local claimableAfter = self.rankData[i]:CanClaimRank()
-
-                    if claimableBefore ~= claimableAfter then
-                        claimableStateChanged = true
-                    end
-                end
-
-                if claimableStateChanged then
-                    TriggerTutorial(TUTORIAL_TRIGGER_VETERANCY_INITIAL_CLAIMABLE_REWARDS_AVAILABLE)
                 end
 
                 if previousRankIndex < rankIndex then

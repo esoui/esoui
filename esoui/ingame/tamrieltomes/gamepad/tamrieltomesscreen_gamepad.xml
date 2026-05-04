@@ -18,7 +18,7 @@
                 </Texture>
             </Controls>
         </Button>
-        <Control name="ZO_TamrielTomeSeasonEntry_Gamepad" inherits="ZO_TamrielTomeSeasonEntry_Shared" mouseEnabled="true" virtual="true">
+        <Control name="ZO_TamrielTomeSeasonEntry_Gamepad" inherits="ZO_TamrielTomeSeasonEntry_Shared" virtual="true">
             <Dimensions x="ZO_TAMRIEL_TOME_SEASON_ENTRY_GAMEPAD_WIDTH" y="ZO_TAMRIEL_TOME_SEASON_ENTRY_GAMEPAD_HEIGHT"/>
             <Controls>
                 <Texture name="$(parent)Image" override="true">
@@ -43,9 +43,6 @@
             <OnInitialized name="TamrielTomes">
                 ZO_SelectTamrielTomeSeasonDialog_Gamepad.OnInitialized(self)
             </OnInitialized>
-            <OnEffectivelyHidden name="TamrielTomes">
-                ZO_SelectTamrielTomeSeasonDialog_Gamepad.OnHidden(self)
-            </OnEffectivelyHidden>
             <Controls>
                 <Label name="$(parent)Title" font="ZoFontGamepad42" horizontalAlignment="CENTER" modifyTextType="UPPERCASE">
                     <Anchor point="TOPLEFT" offsetX="5" offsetY="38"/>
@@ -142,10 +139,9 @@
                             <Anchor point="TOPLEFT" offsetX="80"/>
                             <Anchor point="TOPRIGHT" offsetX="-80"/>
                         </Label>
-                        <Label name="$(parent)Subtitle" override="true" font="ZoFontGamepad27"/>
+                        <Label name="$(parent)Subtitle" override="true" font="ZoFontGamepadBold27"/>
+                        <Label name="$(parent)PastSeason" override="true" font="ZoFontGamepadBold27"/>
                         <Control name="$(parent)Buttons" override="true">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)Subtitle" relativePoint="BOTTOMLEFT" offsetY="12"/>
-                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Subtitle" relativePoint="BOTTOMRIGHT" offsetY="12"/>
                             <Dimensions y="40"/>
                             <Controls>
                                 <Button name="$(parent)ChallengesButton" override="true" inherits="ZO_TamrielTomes_GamepadButtonTemplate"/>

@@ -286,6 +286,12 @@ do
         ["store"] = true,
         ["groupMenuKeyboard"] = true,
         ["promotionalEventsPreview_Gamepad"] = true,
+        ["previewRewardList_Gamepad"] = true,
+        ["VeterancySceneKeyboard"] = true,
+        ["VeterancySceneGamepad"] = true,
+        ["TamrielTomesSceneGamepad"] = true,
+        ["TamrielTomesRewardPreviewSceneGamepad"] = true,
+        ["TamrielTomesSceneKeyboard"] = true,
     }
 
     function ZO_IngameSceneManager:DoesCurrentSceneOverrideMountStateChange()

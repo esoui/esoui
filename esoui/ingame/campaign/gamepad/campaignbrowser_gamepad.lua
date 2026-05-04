@@ -134,6 +134,29 @@ function ZO_CampaignBrowser_Gamepad:HasCampaignInformation(campaignId)
     return campaignId == GetAssignedCampaignId() or campaignId == GetCurrentCampaignId()
 end
 
+function ZO_CampaignBrowser_Gamepad:GetVeterancyTooltipTitleAndDescription()
+    local titleText = GetString(SI_VETERANCY_MENU_TEXT)
+    local descriptionText
+    if IsVeterancySeasonActive() then
+        ZO_VETERANCY_MANAGER:RefreshRankData()
+        if ZO_VETERANCY_MANAGER:IsOnMaxRank() then
+            descriptionText = zo_strformat(SI_VETERANCY_ACTIVE_MAX_RANK_TOOLTIP
+                , ZO_VETERANCY_MANAGER:GetCurrentRank()
+                , ZO_CommaDelimitNumber(ZO_VETERANCY_MANAGER:GetCurrentTierProgress())
+                , ZO_CommaDelimitNumber(ZO_VETERANCY_MANAGER:GetCurrentTierTotal()))
+        else
+            descriptionText = zo_strformat(SI_VETERANCY_ACTIVE_TOOLTIP
+                , ZO_VETERANCY_MANAGER:GetCurrentRank()
+                , ZO_VETERANCY_MANAGER:GetCurrentRankName()
+                , ZO_CommaDelimitNumber(ZO_VETERANCY_MANAGER:GetCurrentTierProgress())
+                , ZO_CommaDelimitNumber(ZO_VETERANCY_MANAGER:GetCurrentTierTotal()))
+        end
+    else
+        descriptionText = GetString(SI_VETERANCY_INACTIVE_TOOLTIP)
+    end
+    return titleText, descriptionText
+end
+
 function ZO_CampaignBrowser_Gamepad:UpdateContentPane(updateFromTimer)
     local hideContent = true
     local hideScoring = true
@@ -181,26 +204,7 @@ function ZO_CampaignBrowser_Gamepad:UpdateContentPane(updateFromTimer)
             SCENE_MANAGER:AddFragment(GAMEPAD_NAV_QUADRANT_2_BACKGROUND_FRAGMENT)
             hideVengeance = false
         elseif displayContentType == CONTENT_TYPES.VETERANCY then
-            local titleText = GetString(SI_VETERANCY_MENU_TEXT)
-            local descriptionText
-            if IsVeterancySeasonActive() then
-                ZO_VETERANCY_MANAGER:RefreshRankData()
-                if ZO_VETERANCY_MANAGER:IsOnMaxRank() then
-                    descriptionText = zo_strformat(SI_VETERANCY_ACTIVE_MAX_RANK_TOOLTIP
-                        , ZO_VETERANCY_MANAGER:GetCurrentRank()
-                        , ZO_CommaDelimitNumber(ZO_VETERANCY_MANAGER:GetCurrentTierProgress())
-                        , ZO_CommaDelimitNumber(ZO_VETERANCY_MANAGER:GetCurrentTierTotal()))
-                else
-                    descriptionText = zo_strformat(SI_VETERANCY_ACTIVE_TOOLTIP
-                        , ZO_VETERANCY_MANAGER:GetCurrentRank()
-                        , ZO_VETERANCY_MANAGER:GetCurrentRankName()
-                        , ZO_CommaDelimitNumber(ZO_VETERANCY_MANAGER:GetCurrentTierProgress())
-                        , ZO_CommaDelimitNumber(ZO_VETERANCY_MANAGER:GetCurrentTierTotal()))
-                end
-            else
-                descriptionText = GetString(SI_VETERANCY_INACTIVE_TOOLTIP)
-            end
-            GAMEPAD_TOOLTIPS:LayoutTitleAndDescriptionTooltip(GAMEPAD_LEFT_TOOLTIP, titleText, descriptionText)
+            GAMEPAD_TOOLTIPS:LayoutTitleAndDescriptionTooltip(GAMEPAD_LEFT_TOOLTIP, self:GetVeterancyTooltipTitleAndDescription())
         end
     end
 
@@ -852,46 +856,52 @@ do
         -- Vengeance Entries - Only added if currently in a vengeance campaign
         if IsCurrentCampaignVengeanceRuleset() and self.campaignRulesetTypeFilter == CAMPAIGN_RULESET_TYPE_CYRODIIL then
             local vengeanceLoadoutsEntry = ZO_GamepadEntryData:New(GetString(SI_CAMPAIGN_OVERVIEW_SUBCATEGORY_LOADOUTS))
-            vengeanceLoadoutsEntry.displayContentType = CONTENT_TYPES.VENGEANCE_LOADOUTS
-            vengeanceLoadoutsEntry.entryType = ENTRY_TYPES.VENGEANCE
-            vengeanceLoadoutsEntry.contentHeaderTitle = GetString(SI_CAMPAIGN_OVERVIEW_SUBCATEGORY_LOADOUTS)
-            vengeanceLoadoutsEntry.campaignSort = VENGEANCE_MENUS_SORT_ID
-            vengeanceLoadoutsEntry.headerText = GetString(SI_CAMPAIGN_OVERVIEW_CATEGORY_VENGEANCE)
-            vengeanceLoadoutsEntry.name = GetString(SI_CAMPAIGN_OVERVIEW_SUBCATEGORY_LOADOUTS)
-            -- Entry requires an id for sorting, give it a negative number so as to never conflict with a real campaign data
-            vengeanceLoadoutsEntry.id = -2
+            local vengeanceLoadoutData =
+            {
+                displayContentType = CONTENT_TYPES.VENGEANCE_LOADOUTS,
+                entryType = ENTRY_TYPES.VENGEANCE,
+                contentHeaderTitle = GetString(SI_CAMPAIGN_OVERVIEW_SUBCATEGORY_LOADOUTS),
+                campaignSort = VENGEANCE_MENUS_SORT_ID,
+                headerText = GetString(SI_CAMPAIGN_OVERVIEW_CATEGORY_VENGEANCE),
+                name = GetString(SI_CAMPAIGN_OVERVIEW_SUBCATEGORY_LOADOUTS),
+                narrationText = function(listEntryData, listEntryControl)
+                    local narrations = {}
+                    -- Generate the standard parametric list entry narration
+                    ZO_AppendNarration(narrations, ZO_GetSharedGamepadEntryDefaultNarrationText(listEntryData, listEntryControl))
 
-            vengeanceLoadoutsEntry.narrationText = function(listEntryData, listEntryControl)
-                local narrations = {}
-                -- Generate the standard parametric list entry narration
-                ZO_AppendNarration(narrations, ZO_GetSharedGamepadEntryDefaultNarrationText(listEntryData, listEntryControl))
-
-                --Generate the narration for the selected campaign screen
-                ZO_AppendNarration(narrations, VENGEANCE_EQUIPPED_LOADOUT_OVERVIEW_GAMEPAD:GetNarrationText())
-                return narrations
-            end
+                    --Generate the narration for the selected campaign screen
+                    ZO_AppendNarration(narrations, VENGEANCE_EQUIPPED_LOADOUT_OVERVIEW_GAMEPAD:GetNarrationText())
+                    return narrations
+                end,
+                -- Entry requires an id for sorting, give it a negative number so as to never conflict with a real campaign data
+                id = -2,
+            }
+            vengeanceLoadoutsEntry:SetDataSource(vengeanceLoadoutData)
 
             table.insert(self.campaignEntries, vengeanceLoadoutsEntry)
 
             local vengeancePerksEntry = ZO_GamepadEntryData:New(GetString(SI_CAMPAIGN_OVERVIEW_SUBCATEGORY_PERKS))
-            vengeancePerksEntry.displayContentType = CONTENT_TYPES.VENGEANCE_PERKS
-            vengeancePerksEntry.entryType = ENTRY_TYPES.VENGEANCE
-            vengeancePerksEntry.contentHeaderTitle = GetString(SI_CAMPAIGN_OVERVIEW_SUBCATEGORY_PERKS)
-            vengeancePerksEntry.campaignSort = VENGEANCE_MENUS_SORT_ID
-            vengeancePerksEntry.headerText = GetString(SI_CAMPAIGN_OVERVIEW_CATEGORY_VENGEANCE)
-            vengeancePerksEntry.name = GetString(SI_CAMPAIGN_OVERVIEW_SUBCATEGORY_PERKS)
-            -- Entry requires an id for sorting, give it a negative number so as to never conflict with a real campaign data
-            vengeancePerksEntry.id = -1
+            local vengeancePerksData =
+            {
+                displayContentType = CONTENT_TYPES.VENGEANCE_PERKS,
+                entryType = ENTRY_TYPES.VENGEANCE,
+                contentHeaderTitle = GetString(SI_CAMPAIGN_OVERVIEW_SUBCATEGORY_PERKS),
+                campaignSort = VENGEANCE_MENUS_SORT_ID,
+                headerText = GetString(SI_CAMPAIGN_OVERVIEW_CATEGORY_VENGEANCE),
+                name = GetString(SI_CAMPAIGN_OVERVIEW_SUBCATEGORY_PERKS),
+                narrationText = function(listEntryData, listEntryControl)
+                    local narrations = {}
+                    -- Generate the standard parametric list entry narration
+                    ZO_AppendNarration(narrations, ZO_GetSharedGamepadEntryDefaultNarrationText(listEntryData, listEntryControl))
 
-            vengeancePerksEntry.narrationText = function(listEntryData, listEntryControl)
-                local narrations = {}
-                -- Generate the standard parametric list entry narration
-                ZO_AppendNarration(narrations, ZO_GetSharedGamepadEntryDefaultNarrationText(listEntryData, listEntryControl))
-
-                --Generate the narration for the selected campaign screen
-                ZO_AppendNarration(narrations, VENGEANCE_EQUIPPED_LOADOUT_OVERVIEW_GAMEPAD:GetNarrationText())
-                return narrations
-            end
+                    --Generate the narration for the selected campaign screen
+                    ZO_AppendNarration(narrations, VENGEANCE_EQUIPPED_LOADOUT_OVERVIEW_GAMEPAD:GetNarrationText())
+                    return narrations
+                end,
+                -- Entry requires an id for sorting, give it a negative number so as to never conflict with a real campaign data
+                id = -1,
+            }
+            vengeancePerksEntry:SetDataSource(vengeancePerksData)
 
             table.insert(self.campaignEntries, vengeancePerksEntry)
         end

@@ -4,9 +4,6 @@
             <OnInitialized>
                 ZO_TamrielTomeSeasonGridEntry_Shared:New(self)
             </OnInitialized>
-            <OnEffectivelyHidden>
-                self.object:SetIsHighlighted(false)
-            </OnEffectivelyHidden>
             <OnMouseEnter>
                 self.object:SetIsHighlighted(true)
             </OnMouseEnter>
@@ -25,7 +22,7 @@
                 <Texture name="$(parent)Image">
                     <Anchor point="CENTER"/>
                 </Texture>
-                <Texture name="$(parent)ImageGlow" alpha="0" blendMode="ADD" hidden="true" layer="OVERLAY" shaderEffectType="RADIAL_BLUR" tier="HIGH">
+                <Texture name="$(parent)ImageGlow" alpha="0" blendMode="ADD" hidden="true" layer="OVERLAY" tier="HIGH">
                     <Anchor point="BOTTOM" relativeTo="$(parent)Image"/>
                 </Texture>
                 <Label name="$(parent)Name" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED"/>
@@ -125,7 +122,7 @@
                     <Dimensions x="850" y="120"/>
                     <Anchor point="TOP" offsetY="118"/>
                     <Controls>
-                        <Texture name="$(parent)Backdrop" alpha="0.6" textureFile="EsoUI/Art/TamrielTomes/tome_rewards_title_bg.dds" level="1" excludeFromResizeToFitExtents="true">
+                        <Texture name="$(parent)Backdrop" alpha="0.75" textureFile="EsoUI/Art/TamrielTomes/tome_rewards_title_bg.dds" level="1" excludeFromResizeToFitExtents="true">
                             <Anchor point="TOPLEFT" offsetX="-3" offsetY="-3"/>
                             <Anchor point="BOTTOMRIGHT" offsetX="3" offsetY="3"/>
                             <Dimensions x="850" y="140"/>
@@ -136,12 +133,16 @@
                             <Anchor point="TOPRIGHT" offsetX="-10"/>
                         </Label>
                         <Label name="$(parent)Subtitle" horizontalAlignment="CENTER">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetY="-4"/>
-                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Title" relativePoint="BOTTOMRIGHT" offsetY="-4"/>
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetY="-2"/>
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Title" relativePoint="BOTTOMRIGHT" offsetY="-2"/>
+                        </Label>
+                        <Label name="$(parent)PastSeason" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_CURRENCY_HIGHLIGHT" hidden="true" horizontalAlignment="CENTER" text="SI_TAMRIEL_TOMES_PAST_TOME_LABEL">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetY="-2"/>
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Title" relativePoint="BOTTOMRIGHT" offsetY="-2"/>
                         </Label>
                         <Control name="$(parent)Buttons">
-                            <Anchor point="TOPLEFT" relativeTo="$(parent)Subtitle" relativePoint="BOTTOMLEFT" offsetY="10"/>
-                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Subtitle" relativePoint="BOTTOMRIGHT" offsetY="10"/>
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Subtitle" relativePoint="BOTTOMLEFT" offsetY="8"/>
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Subtitle" relativePoint="BOTTOMRIGHT" offsetY="8"/>
                             <Controls>
                                 <Button name="$(parent)ChallengesButton" text="SI_TAMRIEL_TOMES_VIEW_CHALLENGES_LABEL">
                                     <Anchor point="TOPRIGHT" relativePoint="TOP" offsetX="-20"/>

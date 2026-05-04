@@ -363,6 +363,7 @@ function ZO_TamrielTomesScreen_Gamepad:OnHiding()
     ZO_TamrielTomesScreen_Shared.OnHiding(self)
 
     self:DeactivateCurrentFocus()
+    self.gridList:Deactivate()
     DIRECTIONAL_INPUT:Deactivate(self)
 end
 
@@ -425,7 +426,7 @@ end
 
 function ZO_TamrielTomesScreen_Gamepad:ShowSelectTomeDialog()
     if self:CanSelectTome() then
-        ZO_Dialogs_ShowPlatformDialog("TamrielTomesSelectSeasonDialogGamepad", {})
+        ZO_Dialogs_ShowGamepadDialog("TamrielTomesSelectSeasonDialogGamepad", {})
     end
 end
 
@@ -477,6 +478,7 @@ function ZO_TamrielTomesScreen_Gamepad.OnControlInitialized(control)
     TAMRIEL_TOMES_SCREEN_GAMEPAD = ZO_TamrielTomesScreen_Gamepad:New(control)
 end
 
+
 ZO_SelectTamrielTomeSeasonDialog_Gamepad = ZO_InitializingObject:Subclass()
 
 function ZO_SelectTamrielTomeSeasonDialog_Gamepad:Initialize(control)
@@ -503,6 +505,13 @@ end
 function ZO_SelectTamrielTomeSeasonDialog_Gamepad:InitializeDialog()
     self.dialogName = "TamrielTomesSelectSeasonDialogGamepad"
 
+    local function OnDialogHidden()
+        self.gridList:Deactivate()
+        if TAMRIEL_TOMES_SCREEN_GAMEPAD:IsShowing() then
+            TAMRIEL_TOMES_SCREEN_GAMEPAD:ActivateCurrentFocus()
+        end
+    end
+
     local dialogControl = self.control
     ZO_Dialogs_RegisterCustomDialog(self.dialogName,
     {
@@ -528,8 +537,15 @@ function ZO_SelectTamrielTomeSeasonDialog_Gamepad:InitializeDialog()
             dialog.object = self
             self:BuildGridList()
             self:UpdateButtonStates()
+            if TAMRIEL_TOMES_SCREEN_GAMEPAD:IsShowing() then
+                TAMRIEL_TOMES_SCREEN_GAMEPAD:DeactivateCurrentFocus()
+            end
             self.gridList:Activate()
         end,
+
+        finishedCallback = OnDialogHidden,
+
+        noChoiceCallback = OnDialogHidden,
 
         customControl = dialogControl,
 
@@ -546,8 +562,10 @@ function ZO_SelectTamrielTomeSeasonDialog_Gamepad:InitializeDialog()
                     end
                 end,
                 enabled = function()
-                    local enabled = self.targetGridEntry and not self.targetGridEntry:IsSelected()
-                    return enabled
+                    if self.targetGridEntry and not self.targetGridEntry:IsSelected() then
+                        return true
+                    end
+                    return false
                 end,
             },
 
@@ -558,7 +576,7 @@ function ZO_SelectTamrielTomeSeasonDialog_Gamepad:InitializeDialog()
                 noReleaseOnClick = false,
                 callback = function(dialog)
                     ZO_Dialogs_ReleaseDialog(self.dialogName)
-                end
+                end,
             },
         },
     })
@@ -612,9 +630,6 @@ function ZO_SelectTamrielTomeSeasonDialog_Gamepad:CreateGridEntryData(tomeId)
         tomeData = tomeData,
         text = tomeData:GetDisplayName(),
         clickSound = SOUNDS.TAMRIEL_TOMES_BOOK_OPENED,
-        isSelected = function()
-            return tomeId == TAMRIEL_TOMES_MANAGER:GetSelectedTomeId()
-        end,
         narrationText = self.templateData.narrationText,
     }
 
@@ -627,17 +642,12 @@ function ZO_SelectTamrielTomeSeasonDialog_Gamepad:SetTargetGridEntry(entry)
 end
 
 function ZO_SelectTamrielTomeSeasonDialog_Gamepad:OnSelectedDataChanged(previousData, newData)
-    if previousData then
+    if previousData and previousData.owner then
         previousData.owner:SetIsHighlighted(false)
     end
 
-    if newData then
+    if newData and newData.owner then
         newData.owner:SetIsHighlighted(true)
-    end
-
-    if self.gridList:IsActive() then
-        self.gridList:RefreshSelection()
-        self:UpdateButtonStates()
     end
 end
 
@@ -651,10 +661,6 @@ end
 
 function ZO_SelectTamrielTomeSeasonDialog_Gamepad.OnInitialized(control)
     ZO_SelectTamrielTomeSeasonDialog_Gamepad:New(control)
-end
-
-function ZO_SelectTamrielTomeSeasonDialog_Gamepad.OnHidden(control)
-    control.object.gridList:Deactivate()
 end
 
 

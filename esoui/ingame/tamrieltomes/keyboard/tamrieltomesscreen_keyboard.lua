@@ -259,7 +259,21 @@ end
 
 function ZO_TamrielTomesScreen_Keyboard:OnRewardListEntryMouseEnter(control)
     ZO_GridEntry_SetIconScaledUp(control, true)
-    ZO_Rewards_Shared_OnMouseEnter(control, RIGHT, LEFT, -15)
+
+    local _, screenCenterY = GuiRoot:GetCenter()
+    local controlTopY = control:GetTop()
+    local controlBottomY = control:GetBottom()
+    local anchorFrom = BOTTOM
+    local anchorTo = TOP
+    local offsetY
+    if zo_abs(screenCenterY - controlTopY) > zo_abs(screenCenterY - controlBottomY) then
+        anchorFrom = TOP
+        anchorTo = BOTTOM
+        offsetY = POPUP_LIST:GetControl():GetBottom() - controlBottomY + 20
+    else
+        offsetY = POPUP_LIST:GetControl():GetTop() - controlTopY - 10
+    end
+    ZO_Rewards_Shared_OnMouseEnter(control, anchorFrom, anchorTo, 0, offsetY)
 
     local rewardId = control.dataEntry.data.rewardId
     if rewardId == 0 then
@@ -413,8 +427,12 @@ function ZO_TamrielTomesScreen_Keyboard:UpdatePopupList()
     end
 
     local selectedTile = self:GetSelectedTile()
-    if selectedTile then
-        POPUP_LIST:ShowRewardList(rewardListData:GetRewardId(), self.RewardListEntryMouseEnterHandler, self.RewardListEntryMouseExitHandler, BOTTOMRIGHT, selectedTile, BOTTOMLEFT, -5)
+    local selectedTileRewardControl = selectedTile and selectedTile:GetNamedChild("Reward") or nil
+    if selectedTileRewardControl then
+        POPUP_LIST:SetShowTooltipCallback(function(control)
+            ZO_Rewards_Shared_OnMouseEnter(control, BOTTOM, TOP, 0, -5)
+        end)
+        POPUP_LIST:ShowRewardList(rewardListData:GetRewardId(), self.RewardListEntryMouseEnterHandler, self.RewardListEntryMouseExitHandler, BOTTOM, selectedTileRewardControl, TOP, 0, -5)
     else
         POPUP_LIST:ShowRewardList(rewardListData:GetRewardId(), self.RewardListEntryMouseEnterHandler, self.RewardListEntryMouseExitHandler, BOTTOMRIGHT, GuiRoot, BOTTOMRIGHT, -50, -100)
     end
@@ -603,9 +621,6 @@ function ZO_SelectTamrielTomeSeasonDialog_Keyboard:CreateGridEntryData(tomeId)
         tomeData = tomeData,
         text = tomeData:GetDisplayName(),
         clickSound = SOUNDS.TAMRIEL_TOMES_BOOK_OPENED,
-        isSelected = function()
-            return tomeId == TAMRIEL_TOMES_MANAGER:GetSelectedTomeId()
-        end,
         narrationText = self.templateData.narrationText,
     }
 

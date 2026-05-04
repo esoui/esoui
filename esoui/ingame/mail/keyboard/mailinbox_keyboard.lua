@@ -227,9 +227,14 @@ function MailInbox:InitializeList()
 
         --If this is guild mail, include the guild's crest as an icon
         if mailData.fromGuild then
-            local _, _, _, _, crestCategoryIndex, crestStyleIndex = GetGuildHeraldryAttribute(mailData.guildId)
-            local _, crestIconPath = GetHeraldryCrestStyleInfo(crestCategoryIndex, crestStyleIndex)
-            iconTexture:AddIcon(crestIconPath)
+            if DoesGuildHavePrivilege(mailData.guildId, GUILD_PRIVILEGE_HERALDRY) then
+                local _, _, _, _, crestCategoryIndex, crestStyleIndex = GetGuildHeraldryAttribute(mailData.guildId)
+                local _, crestIconPath = GetHeraldryCrestStyleInfo(crestCategoryIndex, crestStyleIndex)
+                iconTexture:AddIcon(crestIconPath)
+            else
+                local NO_HERALDRY_TEXTURE = "EsoUI/Art/GuildFinder/tabard_no_heraldry.dds"
+                iconTexture:AddIcon(NO_HERALDRY_TEXTURE)
+            end
         end
 
         iconTexture:Show()

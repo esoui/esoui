@@ -101,7 +101,7 @@ function ZO_UISystemManager:Initialize()
         {
             displayName = SI_ACTIVITY_FINDER_CATEGORY_GROUP_FINDER,
             keyboardOpen = function()
-                GROUP_MENU_KEYBOARD:ShowCategory(GROUP_FINDER_KEYBOARD_FRAGMENT:GetFragment())
+                GROUP_MENU_KEYBOARD:ShowCategory(GROUP_FINDER_KEYBOARD_FRAGMENT)
             end,
             gamepadOpen = function()
                 ZO_ACTIVITY_FINDER_ROOT_GAMEPAD:ShowCategory(GROUP_FINDER_GAMEPAD:GetCategoryData())

@@ -995,6 +995,12 @@ function ZO_SkillsManager:RegisterForEvents()
         if skillLineData == self:GetSelectedSkillLineData() then
             self:RefreshSkillLineInfo()
             self.skillListRefreshGroup:MarkDirty("List")
+            local hasMaxRankInAnyClassSkillLine = HasMaxRankInAnyClassSkillLine()
+            if not self.previouslyHadMaxRankInAnyClassSkillLine
+                or self.previouslyHadMaxRankInAnyClassSkillLine ~= hasMaxRankInAnyClassSkillLine then
+                self.skillLinesTreeRefreshGroup:MarkDirty("List")
+            end
+            self.previouslyHadMaxRankInAnyClassSkillLine = hasMaxRankInAnyClassSkillLine
         end
     end
 

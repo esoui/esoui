@@ -105,8 +105,8 @@ end
 function ZO_VeterancyReward_Gamepad:SetSelected(isSelected)
     if isSelected then
         local rewardableEventData = self.control.object:GetRewardableEventData()
-        if self.rewardableEventData:IsInstanceOf(ZO_VeterancyRankPerkRewardData) then
-            self.perkHighlightControl:SetTexture(self.rewardableEventData:GetHighlightTexture())
+        if rewardableEventData:IsInstanceOf(ZO_VeterancyRankPerkRewardData) then
+            self.perkHighlightControl:SetTexture(rewardableEventData:GetHighlightTexture())
             self.perkHighlightControl:SetAlpha(1)
             self.highlightControl:SetAlpha(0)
         else

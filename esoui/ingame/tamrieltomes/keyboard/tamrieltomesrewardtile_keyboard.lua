@@ -33,7 +33,7 @@ function ZO_TamrielTomesReward_Keyboard:OnMouseEnter()
     ZO_GridEntry_SetIconScaledUp(self.control, true)
     local rewardData = self:GetTamrielTomesRewardData()
     TAMRIEL_TOMES_SCREEN_KEYBOARD:SetSelectedTamrielTomesRewardData(rewardData)
-    ZO_Rewards_Shared_OnMouseEnter(self.control, RIGHT, LEFT, -5)
+    ZO_Rewards_Shared_OnMouseEnter(self.control, BOTTOM, TOP, 0, -5)
 end
 
 function ZO_TamrielTomesReward_Keyboard:OnMouseExit()

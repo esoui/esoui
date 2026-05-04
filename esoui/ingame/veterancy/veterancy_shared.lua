@@ -287,8 +287,6 @@ end
 
 function ZO_Veterancy_RewardTile_Shared:Initialize(control)
     ZO_ContextualActionsTile.Initialize(self, control)
-
-    local control = self.control
     self.rewardControl = control:GetNamedChild("Reward")
 end
 
@@ -406,7 +404,7 @@ function ZO_Veterancy_HorizontalScrollList_Shared:EntrySetup(control, data, sele
         if i <= firstIndex + numRanks - 1 then
             local rankData = ZO_VETERANCY_MANAGER:GetRankDataByIndex(i)
             rankData:SetIsLeftTooltip(i - firstIndex > maxRanksPerPage / 2)
-            local data =
+            local gridListEntryData =
             {
                 rankData = rankData,
                 gridHeaderName = "",
@@ -414,19 +412,19 @@ function ZO_Veterancy_HorizontalScrollList_Shared:EntrySetup(control, data, sele
                 isProgressBarHidden = i == ZO_VETERANCY_MANAGER:GetNumRanks(),
                 narrationText = function(entryData, entryControl)
                     local narrations = {}
-                    local rankData = entryData.rankData
-                    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_VETERANCY_RANK_NARRATION_FORMATTER, rankData:GetIndex(), rankData:GetName())))
+                    local entryRankData = entryData.rankData
+                    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_VETERANCY_RANK_NARRATION_FORMATTER, entryRankData:GetIndex(), entryRankData:GetName())))
                     return narrations
                 end
             }
-            gridList:AddEntry(data, templateData[ZO_VETERANCY.TEMPLATE_TYPE.RANK][ZO_VETERANCY.ATTRIBUTE.ENTRY_TEMPLATE])
-            table.insert(rankInfoDataList, data)
+            gridList:AddEntry(gridListEntryData, templateData[ZO_VETERANCY.TEMPLATE_TYPE.RANK][ZO_VETERANCY.ATTRIBUTE.ENTRY_TEMPLATE])
+            table.insert(rankInfoDataList, gridListEntryData)
         else
-            local data =
+            local gridListEntryData =
             {
                 gridHeaderName = "",
             }
-            gridList:AddEntry(data, templateData[ZO_VETERANCY.TEMPLATE_TYPE.EMPTY_RANK][ZO_VETERANCY.ATTRIBUTE.ENTRY_TEMPLATE])
+            gridList:AddEntry(gridListEntryData, templateData[ZO_VETERANCY.TEMPLATE_TYPE.EMPTY_RANK][ZO_VETERANCY.ATTRIBUTE.ENTRY_TEMPLATE])
         end
     end
 
@@ -440,7 +438,7 @@ function ZO_Veterancy_HorizontalScrollList_Shared:EntrySetup(control, data, sele
                 local numRewards = rankInfoData.rankData:GetNumRewards()
                 local currentRowFirstIndex = 1 + ((row - 1) * MAX_NUM_REWARDS_PER_ROW)
                 if numRewards - currentRowFirstIndex == 0 then
-                    local data =
+                    local gridListEntryData =
                     {
                         rewardData = rankInfoData.rankData:GetRankRewardDataByIndex(currentRowFirstIndex),
                         gridHeaderName = "",
@@ -451,8 +449,8 @@ function ZO_Veterancy_HorizontalScrollList_Shared:EntrySetup(control, data, sele
                             return narrations
                         end
                     }
-                    gridList:AddEntry(data, templateData[ZO_VETERANCY.TEMPLATE_TYPE.CENTERED_REWARD][ZO_VETERANCY.ATTRIBUTE.ENTRY_TEMPLATE])
-                    table.insert(rankInfoData.rewardDataList, data)
+                    gridList:AddEntry(gridListEntryData, templateData[ZO_VETERANCY.TEMPLATE_TYPE.CENTERED_REWARD][ZO_VETERANCY.ATTRIBUTE.ENTRY_TEMPLATE])
+                    table.insert(rankInfoData.rewardDataList, gridListEntryData)
                 elseif numRewards - currentRowFirstIndex > 0 then
                     local leftData =
                     {
@@ -481,20 +479,20 @@ function ZO_Veterancy_HorizontalScrollList_Shared:EntrySetup(control, data, sele
                     gridList:AddEntry(rightData, templateData[ZO_VETERANCY.TEMPLATE_TYPE.RIGHT_REWARD][ZO_VETERANCY.ATTRIBUTE.ENTRY_TEMPLATE])
                     table.insert(rankInfoData.rewardDataList, rightData)
                 else
-                    local data =
+                    local gridListEntryData =
                     {
                         rankData = rankInfoData.rankData,
                         gridHeaderName = "",
                     }
-                    gridList:AddEntry(data, templateData[ZO_VETERANCY.TEMPLATE_TYPE.NO_REWARD][ZO_VETERANCY.ATTRIBUTE.ENTRY_TEMPLATE])
+                    gridList:AddEntry(gridListEntryData, templateData[ZO_VETERANCY.TEMPLATE_TYPE.NO_REWARD][ZO_VETERANCY.ATTRIBUTE.ENTRY_TEMPLATE])
                 end
             else
-                local data =
+                local gridListEntryData =
                 {
                     rankData = nil,
                     gridHeaderName = "",
                 }
-                gridList:AddEntry(data, templateData[ZO_VETERANCY.TEMPLATE_TYPE.NO_REWARD][ZO_VETERANCY.ATTRIBUTE.ENTRY_TEMPLATE])
+                gridList:AddEntry(gridListEntryData, templateData[ZO_VETERANCY.TEMPLATE_TYPE.NO_REWARD][ZO_VETERANCY.ATTRIBUTE.ENTRY_TEMPLATE])
             end
         end
     end
@@ -607,7 +605,7 @@ function ZO_Veterancy_Shared:InitializeScrollList()
     self.scrollList = templateData[ZO_VETERANCY.GRID_DATA.SCROLL_CLASS]:New(self.scrollListControl, templateData[ZO_VETERANCY.GRID_DATA.SCROLL_TEMPLATE])
     self.scrollList:SetParentObject(self)
 
-    function RefreshGridLists(newData, oldData, reselectingDuringRebuild)
+    local function RefreshGridLists(newData, oldData, reselectingDuringRebuild)
         self:RefreshHorizontalScrollList(newData, oldData, reselectingDuringRebuild)
     end
     self.scrollList:SetOnSelectedDataChangedCallback(RefreshGridLists)
@@ -747,6 +745,8 @@ function ZO_Veterancy_Shared:UpdatePageNavigation()
 end
 
 function ZO_Veterancy_Shared:OnShowing()
+    TriggerTutorial(TUTORIAL_TRIGGER_VETERANCY_OPENED)
+
     self:UpdatePageNavigation()
     self.scrollList:RefreshVisible()
     self:RefreshRepeatableRankDisplay()

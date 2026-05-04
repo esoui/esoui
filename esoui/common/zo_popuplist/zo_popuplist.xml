@@ -38,7 +38,7 @@
                 </Texture>
             </Controls>
         </Control>
-        <TopLevelControl name="ZO_PopupListTL" layer="OVERLAY" hidden="true" mouseEnabled="true">
+        <TopLevelControl name="ZO_PopupListTL" clampedToScreen="true" layer="OVERLAY" hidden="true" mouseEnabled="true">
             <Dimensions x="385" y="320"/>
             <OnInitialized>
                 ZO_PopupList.OnControlInitialized(self)

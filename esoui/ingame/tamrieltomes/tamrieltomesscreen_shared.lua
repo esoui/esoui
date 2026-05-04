@@ -1,6 +1,7 @@
 ZO_TAMRIEL_TOME_SEASON_SELECTED_ANIMATION_DURATION_SECONDS = 1.5
-ZO_TAMRIEL_TOME_SEASON_ENTRY_BORDER_BRIGHTNESS_SELECTED = 1
-ZO_TAMRIEL_TOME_SEASON_ENTRY_BORDER_BRIGHTNESS_UNSELECTED = 0.3
+ZO_TAMRIEL_TOME_SEASON_ENTRY_BORDER_BRIGHTNESS_HIGHLIGHTED = 1
+ZO_TAMRIEL_TOME_SEASON_ENTRY_BORDER_BRIGHTNESS_HIGHLIGHTED_SELECTED = 0.6
+ZO_TAMRIEL_TOME_SEASON_ENTRY_BORDER_BRIGHTNESS_UNHIGHLIGHTED = 0.3
 
 ZO_TAMRIEL_TOME_SEASON_END_DIALOG_WIDTH = 665
 ZO_TAMRIEL_TOME_SEASON_END_REWARD_ENTRY_BORDER_WIDTH = 32
@@ -30,14 +31,7 @@ function ZO_TamrielTomeSeasonGridEntry_Shared.OnSelectedUpdate(control, frameTim
             hasAnimationEnded = true
         else
             local easedInterval = 1 - zo_sin(ZO_HALF_PI - interval * ZO_HALF_PI)
-            local ORIGIN_X = 0.75
-            local originY = 1 + interval * 0.5
-            local blurStrength = easedInterval * 0.15
-            local NUM_SAMPLES = 21
-            local NORMALIZED_OFFSET = 0
-            local imageGlowTextureControl = control:GetNamedChild("ImageGlow")
-            imageGlowTextureControl:SetRadialBlur(ORIGIN_X, originY, NUM_SAMPLES, blurStrength, NORMALIZED_OFFSET)
-            imageGlowTextureControl:SetAlpha(zo_lerp(0, 0.7, zo_min(1, 3 * easedInterval)))
+            control:GetNamedChild("ImageGlow"):SetAlpha(zo_lerp(0, 0.625, zo_min(1, 3 * easedInterval)))
         end
     end
 
@@ -53,15 +47,23 @@ end
 function ZO_TamrielTomeSeasonGridEntry_Shared:SetIsHighlighted(isHighlighted)
     self.isHighlighted = isHighlighted
 
-    if isHighlighted and self.owner then
-        self.owner:SetTargetGridEntry(self)
+    if self.owner then
+        if isHighlighted then
+            self.owner:SetTargetGridEntry(self)
+        else
+            self.owner:SetTargetGridEntry(nil)
+        end
     end
 
     self:Update()
 end
 
 function ZO_TamrielTomeSeasonGridEntry_Shared:IsSelected()
-    return self.data and self.data.isSelected()
+    local data = self.data
+    if data and data.tomeData then
+        return data.tomeData:GetTamrielTomeId() == TAMRIEL_TOMES_MANAGER:GetSelectedTomeId()
+    end
+    return false
 end
 
 function ZO_TamrielTomeSeasonGridEntry_Shared:Select()
@@ -71,7 +73,7 @@ function ZO_TamrielTomeSeasonGridEntry_Shared:Select()
     end
 
     if not self.TrySetIsSelectionPending(true) then
-        -- A different Tome is already pending selection.
+        -- A Tome is already pending selection.
         return
     end
 
@@ -97,7 +99,7 @@ function ZO_TamrielTomeSeasonGridEntry_Shared:Select()
             -- Finally, select the Tome.
             TAMRIEL_TOMES_MANAGER:SelectTomeId(tomeId)
         end
-    end, ZO_TAMRIEL_TOME_SEASON_SELECTED_ANIMATION_DURATION_SECONDS * ZO_ONE_SECOND_IN_MILLISECONDS * 0.9)
+    end, ZO_TAMRIEL_TOME_SEASON_SELECTED_ANIMATION_DURATION_SECONDS * ZO_ONE_SECOND_IN_MILLISECONDS * 0.8)
 
     zo_callLater(function()
         local sceneName = SYSTEMS:GetRootSceneName("tamrielTomes")
@@ -105,13 +107,14 @@ function ZO_TamrielTomeSeasonGridEntry_Shared:Select()
             -- Show the tome.
             TAMRIEL_TOMES_MANAGER:OpenTamrielTome(tomeId)
         end
-    end, ZO_TAMRIEL_TOME_SEASON_SELECTED_ANIMATION_DURATION_SECONDS * ZO_ONE_SECOND_IN_MILLISECONDS)
+    end, ZO_TAMRIEL_TOME_SEASON_SELECTED_ANIMATION_DURATION_SECONDS * ZO_ONE_SECOND_IN_MILLISECONDS * 0.9)
 end
 
 function ZO_TamrielTomeSeasonGridEntry_Shared:Setup(data, owner)
     data.owner = self
     self.data = data
     self.owner = owner
+    self.isHighlighted = false
 
     local control = self.control
     local nameLabel = control:GetNamedChild("Name")
@@ -136,7 +139,6 @@ function ZO_TamrielTomeSeasonGridEntry_Shared:Setup(data, owner)
     rewardCountLabel:SetText(rewardCountString)
     rewardCountLabel:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
 
-    self:SetIsHighlighted(false)
     self.control:SetHandler("OnUpdate", nil)
     self.selectedAnimationEndFrameTimeS = nil
     self:Update()
@@ -146,11 +148,24 @@ function ZO_TamrielTomeSeasonGridEntry_Shared:Update()
     local isHighlighted = self:IsHighlighted()
     local isSelected = self:IsSelected()
 
-    local factor = isHighlighted and (isSelected and 1 or 0.8) or (isSelected and 0.5 or 0.3)
-    self.control:GetNamedChild("Image"):SetTextureSampleProcessingWeight(TEX_SAMPLE_PROCESSING_RGB, factor)
+    local imageControl = self.control:GetNamedChild("Image")
+    local desaturation = isSelected and 0.8 or 0
+    imageControl:SetDesaturation(desaturation)
+    local intensity = isHighlighted and 1 or 0.7
+    imageControl:SetTextureSampleProcessingWeight(TEX_SAMPLE_PROCESSING_RGB, intensity)
 
-    local borderColor = isHighlighted and ZO_TAMRIEL_TOME_SEASON_ENTRY_BORDER_BRIGHTNESS_SELECTED or ZO_TAMRIEL_TOME_SEASON_ENTRY_BORDER_BRIGHTNESS_UNSELECTED
-    self.control:GetNamedChild("Border"):SetColor(borderColor, borderColor, borderColor, 1)
+    local borderControl = self.control:GetNamedChild("Border")
+    local borderColor
+    if isHighlighted then
+        if isSelected then
+            borderColor = ZO_TAMRIEL_TOME_SEASON_ENTRY_BORDER_BRIGHTNESS_HIGHLIGHTED_SELECTED
+        else
+            borderColor = ZO_TAMRIEL_TOME_SEASON_ENTRY_BORDER_BRIGHTNESS_HIGHLIGHTED
+        end
+    else
+        borderColor = ZO_TAMRIEL_TOME_SEASON_ENTRY_BORDER_BRIGHTNESS_UNHIGHLIGHTED
+    end
+    borderControl:SetColor(borderColor, borderColor, borderColor, 1)
 end
 
 -- Static Methods
@@ -360,6 +375,7 @@ function ZO_TamrielTomesScreen_Shared:InitializeControls()
     self.headerContainer = headerContainer
     self.titleLabel = headerContainer:GetNamedChild("Title")
     self.subtitleLabel = headerContainer:GetNamedChild("Subtitle")
+    self.pastSeasonLabel = headerContainer:GetNamedChild("PastSeason")
     local buttonContainer = headerContainer:GetNamedChild("Buttons")
     self.buttonContainer = buttonContainer
 
@@ -520,28 +536,8 @@ function ZO_TamrielTomesScreen_Shared:RegisterForEvents()
 
     self.control:RegisterForEvent(EVENT_REWARD_TRACK_REWARD_CLAIMED, OnRewardTrackRewardClaimed)
 
-    local function OnSelectedTomeChanged(tomeId)
-        local FORCE_UPDATE = true
-        if self:IsShowing() then
-            self:HideSelectTomeDialog()
-            self:Refresh()
-            self:UpdateSeenTiers(FORCE_UPDATE)
-        end
-
-        -- Order matters:
-        do
-            -- The Time Remaining label only shows when viewing the currently active season's Tamriel Tome.
-            local isTomeActive = TAMRIEL_TOMES_MANAGER:IsTomeActive(tomeId)
-            self.subtitleLabel:SetHidden(not isTomeActive)
-
-            if isTomeActive then
-                -- Force the Time Remaining label to update immediately.
-                self:UpdateTimeRemaining(GetFrameTimeSeconds(), FORCE_UPDATE)
-            end
-        end
-    end
-
-    TAMRIEL_TOMES_MANAGER:RegisterCallback("SelectedTomeChanged", OnSelectedTomeChanged)
+    TAMRIEL_TOMES_MANAGER:RegisterCallback("SelectedTomeChanged", self.OnSelectedTomeChanged, self)
+    self:OnSelectedTomeChanged(TAMRIEL_TOMES_MANAGER:GetSelectedTomeId())
 
     local function UpdateButtonsAndPageNavigation()
         if self:IsShowing() then
@@ -642,6 +638,10 @@ function ZO_TamrielTomesScreen_Shared:GetSelectedTamrielTomesRewardData()
 end
 
 function ZO_TamrielTomesScreen_Shared:SetSelectedTamrielTomesRewardData(newData)
+    if newData and not (newData.IsInstanceOf and newData:IsInstanceOf(ZO_TamrielTomesRewardData)) then
+        return
+    end
+
     if newData == self.selectedTamrielTomesRewardData then
         return
     end
@@ -838,7 +838,6 @@ function ZO_TamrielTomesScreen_Shared:RebuildGridList()
     self.gridList:CommitGridList()
     if currentSelectedData then
         self.gridList:SelectData(currentSelectedData)
-        self:SetSelectedTamrielTomesRewardData(currentSelectedData)
     end
     self:RefreshUnlockRequirements()
     self:RefreshSeenTiers()
@@ -947,10 +946,13 @@ function ZO_TamrielTomesScreen_Shared:UpdateTooltip(focusControl)
     end
 
     local message = nil
+    local tooltipControl = nil
     if focusControl == self.upgradeButton then
         message = TAMRIEL_TOMES_MANAGER:GetPurchaseDisabledMessage()
+        tooltipControl = focusControl
     elseif focusControl == self.selectTomeButton then
         message = self:GetSelectTomeTooltip()
+        tooltipControl = focusControl
     end
 
     if not message then
@@ -960,7 +962,7 @@ function ZO_TamrielTomesScreen_Shared:UpdateTooltip(focusControl)
     if IsInGamepadPreferredMode() then
         GAMEPAD_TOOLTIPS:LayoutTextBlockTooltip(GAMEPAD_RIGHT_TOOLTIP, message)
     else
-        InitializeTooltip(InformationTooltip, self.upgradeButton, RIGHT)
+        InitializeTooltip(InformationTooltip, tooltipControl, BOTTOM, TOP, 0, -30)
         InformationTooltip:AddLine(message, "", ZO_WHITE:UnpackRGB())
     end
 end
@@ -981,6 +983,28 @@ function ZO_TamrielTomesScreen_Shared:OnSelectTomeSeasonButtonFocusChanged(hasFo
     self:UpdateTooltip(focusControl)
 end
 
+function ZO_TamrielTomesScreen_Shared:OnSelectedTomeChanged(tomeId)
+    local FORCE_UPDATE = true
+    if self:IsShowing() then
+        self:HideSelectTomeDialog()
+        self:Refresh()
+        self:UpdateSeenTiers(FORCE_UPDATE)
+    end
+
+    -- Order matters:
+    -- The Time Remaining label only shows when viewing the currently active season's Tamriel Tome.
+    local isTomeActive = TAMRIEL_TOMES_MANAGER:IsTomeActive(tomeId)
+    self.subtitleLabel:SetHidden(not isTomeActive)
+    self.pastSeasonLabel:SetHidden(isTomeActive)
+    if isTomeActive then
+        -- Force an immediate update of the season timer text.
+        self:UpdateTimeRemaining(GetFrameTimeSeconds(), FORCE_UPDATE)
+    else
+        -- Force the label to occupy the same vertical space for dependent anchoring.
+        self.subtitleLabel:SetText(" ")
+    end
+end
+
 function ZO_TamrielTomesScreen_Shared:UpdateButtons()
     local isActiveTomeSelected = TAMRIEL_TOMES_MANAGER:IsActiveTomeSelected()
     local isEnabled = isActiveTomeSelected and TAMRIEL_TOMES_MANAGER:GetPurchaseDisabledMessage() == nil
@@ -992,7 +1016,7 @@ end
 function ZO_TamrielTomesScreen_Shared:BeginClaimReward(tamrielTomesRewardData)
     local rewardObject = self:GetTamrielTomesRewardObject(tamrielTomesRewardData)
     if not rewardObject then
-        internalasset(false, "Tile control not found for Tamriel Tomes Reward Data.")
+        internalassert(false, "Tile control not found for Tamriel Tomes Reward Data.")
         return
     end
 
@@ -1003,7 +1027,7 @@ end
 function ZO_TamrielTomesScreen_Shared:EndClaimReward(tamrielTomesRewardData)
     local rewardObject = self:GetTamrielTomesRewardObject(tamrielTomesRewardData)
     if not rewardObject then
-        internalasset(false, "Tile control not found for Tamriel Tomes Reward Data.")
+        internalassert(false, "Tile control not found for Tamriel Tomes Reward Data.")
         return
     end
 
@@ -1102,8 +1126,11 @@ function ZO_TamrielTomesScreen_Shared:OnSelectedTamrielTomesRewardDataChanged(pr
 end
 
 function ZO_TamrielTomesScreen_Shared:UpdateTimeRemaining(currentFrameTimeSeconds, forceUpdate)
-    if (not self.nextTimeRemainingUpdateS or currentFrameTimeSeconds > self.nextTimeRemainingUpdateS) and not self.subtitleLabel:IsHidden() then
-        
+    if self.subtitleLabel:IsControlHidden() then
+        return
+    end
+
+    if forceUpdate or not self.nextTimeRemainingUpdateS or currentFrameTimeSeconds > self.nextTimeRemainingUpdateS then
         local endTimeS = GetActiveTamrielTomeSeasonEndTimeS()
         local timeRemainingS = zo_max(0, endTimeS - GetTimeStamp())
         local timeRemainingText = ""

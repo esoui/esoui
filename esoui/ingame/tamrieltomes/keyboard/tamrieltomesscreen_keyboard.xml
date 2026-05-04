@@ -111,6 +111,7 @@
                             <Anchor point="TOPRIGHT" offsetX="-80"/>
                         </Label>
                         <Label name="$(parent)Subtitle" override="true" font="ZoFontHeader3"/>
+                        <Label name="$(parent)PastSeason" override="true" font="ZoFontHeader3"/>
                         <Control name="$(parent)Buttons" override="true">
                             <Controls>
                                 <Button name="$(parent)ChallengesButton" override="true" inherits="ZO_DefaultButton" font="ZoFontWinH2">
