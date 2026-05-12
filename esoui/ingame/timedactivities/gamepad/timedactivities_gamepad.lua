@@ -287,11 +287,11 @@ end
 
 function ZO_TimedActivities_Gamepad:OnRerollCurrencyUpdated()
     GAMEPAD_GENERIC_FOOTER:Refresh(self.footerData)
-    self:RefreshKeybinds()
     self:UpdateKeybinds()
 end
 
 function ZO_TimedActivities_Gamepad:UpdateKeybinds()
+    self:RefreshKeybinds()
     self.activitiesList:UpdateKeybinds()
 end
 

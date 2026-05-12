@@ -17,6 +17,7 @@ function ZO_TimedActivities_Shared:OnDeferredInitialize()
     local function OnRefreshAvailability(availableActivityTypes)
         self.availableActivityTypes = availableActivityTypes
         self:RefreshAvailability()
+        self:UpdateKeybinds()
     end
 
     local function OnActivitiesUpdated()
@@ -117,10 +118,8 @@ function ZO_TimedActivities_Shared:RefreshList()
     end
 
     local activityEntries = {}
-    local activityDatas = {}
     for index, activityData in TIMED_ACTIVITIES_MANAGER:ActivitiesIterator(activityTypeFilters) do
         table.insert(activityEntries, ZO_EntryData:New(activityData))
-        table.insert(activityDatas, activityData)
     end
 
     return currentActivityType, activityEntries

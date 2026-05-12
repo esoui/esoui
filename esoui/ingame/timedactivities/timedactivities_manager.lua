@@ -1,5 +1,16 @@
 local PRIMARY_SYSTEM_CURRENCY = CURT_TOME_POINTS
 
+-- Safeguard against activityData argument being nil.
+local function IsValidTimedActivityData(activityData)
+    local isValid = activityData ~= nil and type(activityData) == "table" and activityData.IsInstanceOf and activityData:IsInstanceOf(ZO_TimedActivityData)
+    if isValid then
+        return true
+    end
+
+    internalassert(false, "'activityData' must be a valid ZO_TimedActivityData instance.")
+    return false
+end
+
 -- Timed Activity Data --
 
 ZO_TimedActivityData = ZO_InitializingObject:Subclass()
@@ -118,7 +129,7 @@ do
 
         if leftRewardType ~= rightRewardType then
             if leftRewardType == REWARD_ENTRY_TYPE_ADD_CURRENCY then
-                -- Currency reward before non-currnecy reward
+                -- Currency reward before non-currency reward
                 return true
             elseif rightRewardType == REWARD_ENTRY_TYPE_ADD_CURRENCY then
                 -- Non-currency reward after currency rewards
@@ -335,23 +346,40 @@ function ZO_TimedActivities_Manager:GetAvailableActivityTypes()
 end
 
 function ZO_TimedActivities_Manager:RefreshMasterList()
-    ZO_ClearNumericallyIndexedTable(self.activitiesData)
+    -- Order matters:
+    if self.isRefreshingMasterList then
+        -- The list is in the process of being refreshed.
+        return
+    end
+    self.isRefreshingMasterList = true
 
+    ZO_ClearNumericallyIndexedTable(self.activitiesData)
     local numTimedActivities = GetNumTimedActivities()
     for index = 1, numTimedActivities do
         local timedActivityData = ZO_TimedActivityData:New(index)
         table.insert(self.activitiesData, timedActivityData)
     end
 
+    -- Order matters:
     self:RefreshAvailability()
     self:FireCallbacks("OnActivitiesUpdated")
+    self.isRefreshingMasterList = false
 end
 
 function ZO_TimedActivities_Manager:RefreshSingleMasterListItem(index)
+    -- Order matters:
+    if self.isRefreshingMasterList then
+        -- The list is in the process of being refreshed.
+        return
+    end
+    self.isRefreshingMasterList = true
+
     self.activitiesData[index] = ZO_TimedActivityData:New(index)
 
+    -- Order matters:
     self:RefreshAvailability()
     self:FireCallbacks("OnActivityUpdated", index)
+    self.isRefreshingMasterList = false
 end
 
 function ZO_TimedActivities_Manager:RegisterEvents()
@@ -420,21 +448,30 @@ end
 
 function ZO_TimedActivities_Manager:GetActivityDataByTypeAndId(timedActivityType, timedActivityId)
     local function ActivityMatches(activityData)
-        return activityData:GetType() == timedActivityType and activityData:GetId() == timedActivityId
+        if IsValidTimedActivityData(activityData) then
+            return activityData:GetType() == timedActivityType and activityData:GetId() == timedActivityId
+        end
+        return false
     end
     return self:GetFirstActivityDataByFilter({ ActivityMatches })
 end
 
 function ZO_TimedActivities_Manager:GetActivityDatasByType(timedActivityType)
     local function ActivityMatches(activityData)
-        return activityData:GetType() == timedActivityType
+        if IsValidTimedActivityData(activityData) then
+            return activityData:GetType() == timedActivityType
+        end
+        return false
     end
     return self:GetActivityDatasByFilter({ ActivityMatches })
 end
 
 function ZO_TimedActivities_Manager:GetFirstClaimableTimedActivity(timedActivityType)
     local function ActivityMatches(activityData)
-        return activityData:CanClaim() and (not timedActivityType or activityData:GetType() == timedActivityType)
+        if IsValidTimedActivityData(activityData) then
+            return activityData:CanClaim() and (not timedActivityType or activityData:GetType() == timedActivityType)
+        end
+        return false
     end
     return self:GetFirstActivityDataByFilter({ ActivityMatches })
 end
@@ -445,7 +482,10 @@ end
 
 function ZO_TimedActivities_Manager:GetFirstClaimableTimedActivityForHUDPrompt(timedActivityType)
     local function ActivityMatches(activityData)
-        return activityData:CanClaim() and not activityData:IsExcludedFromHUDClaimPrompt() and (not timedActivityType or activityData:GetType() == timedActivityType)
+        if IsValidTimedActivityData(activityData) then
+            return activityData:CanClaim() and not activityData:IsExcludedFromHUDClaimPrompt() and (not timedActivityType or activityData:GetType() == timedActivityType)
+        end
+        return false
     end
     return self:GetFirstActivityDataByFilter({ ActivityMatches })
 end
@@ -457,14 +497,20 @@ end
 
 function ZO_TimedActivities_Manager:GetActivityDatasByEncodedIds(timedActivityEncodedIds)
     local function ActivityMatches(activityData)
-        return ZO_IsElementInNumericallyIndexedTable(timedActivityEncodedIds, activityData:GetEncodedId())
+        if IsValidTimedActivityData(activityData) then
+            return ZO_IsElementInNumericallyIndexedTable(timedActivityEncodedIds, activityData:GetEncodedId())
+        end
+        return false
     end
     return self:GetActivityDatasByFilter({ ActivityMatches })
 end
 
 function ZO_TimedActivities_Manager:GetActivityDataByEncodedId(timedActivityEncodedId)
     local function ActivityMatches(activityData)
-        return activityData:GetEncodedId() == timedActivityEncodedId
+        if IsValidTimedActivityData(activityData) then
+            return activityData:GetEncodedId() == timedActivityEncodedId
+        end
+        return false
     end
     return self:GetFirstActivityDataByFilter({ ActivityMatches })
 end

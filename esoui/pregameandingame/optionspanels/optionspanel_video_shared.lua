@@ -87,7 +87,7 @@ end
 
 function ZO_OptionsPanel_Video_InitializeResolution(control)
     local displayIndex = 1 + tonumber(GetSetting(SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_ACTIVE_DISPLAY))
-    InitializeResolution(control, GetDisplayModes(DEFAULT_DISPLAY_INDEX))
+    InitializeResolution(control, GetDisplayModes(displayIndex))
 end
 
 function ZO_OptionsPanel_Video_OnDisplayResolutionChanged(control)
@@ -1097,7 +1097,8 @@ end
 
 do
     local availableResolutionsSetting = ZO_OptionsPanel_Video_ControlData[SETTING_TYPE_GRAPHICS][GRAPHICS_SETTING_RESOLUTION]
-    local valid, itemText = GetResolutions(GetDisplayModes(DEFAULT_DISPLAY_INDEX))
+	local displayIndex = 1 + tonumber(GetSetting(SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_ACTIVE_DISPLAY))
+    local valid, itemText = GetResolutions(GetDisplayModes(displayIndex))
     availableResolutionsSetting.valid = valid
     availableResolutionsSetting.itemText = itemText
 end

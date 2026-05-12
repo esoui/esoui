@@ -643,6 +643,7 @@ function ZO_TamrielTomesScreen_Shared:SetSelectedTamrielTomesRewardData(newData)
     end
 
     if newData == self.selectedTamrielTomesRewardData then
+        self:UpdateKeybinds()
         return
     end
 
@@ -1748,7 +1749,7 @@ do
         local seasonName = GetRewardTrackDisplayName(self.rewardTrackId)
         self.seasonNameLabel:SetText(seasonName)
 
-        local seasonTextureFile = GetTamrielTomeIntroBackgroundFileIndex(self.rewardTrackId)
+        local seasonTextureFile = GetTamrielTomeIntroBackgroundFileIndex(self.tomeId)
         self.seasonImageTexture:SetTexture(seasonTextureFile)
 
         local rewardCountString = zo_strformat(SI_TAMRIEL_TOME_SEASON_ENTRY_EARNED_REWARDS_FORMATTER, self.numClaimedRewards, self.numRewards)

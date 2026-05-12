@@ -28,14 +28,18 @@ function ZO_TamrielTomesRewardPreviewScreen_Gamepad:SetRewardId(rewardId)
 end
 
 function ZO_TamrielTomesRewardPreviewScreen_Gamepad:UpdatePreviewControls()
-    if not self:IsShowing() then
-        return
-    end
-
-    self:SetPreviewControlsHidden(self.rewardId == nil)
+    local showControls = self.rewardId ~= nil and self:IsShowing()
+    self:SetPreviewControlsHidden(showControls)
 end
 
 function ZO_TamrielTomesRewardPreviewScreen_Gamepad:OnShowing()
+    if not self.rewardId then
+        -- A RewardId is required to show a preview.
+        TAMRIEL_TOMES_SCENE_GROUP_GAMEPAD:SetActiveScene("TamrielTomesSceneGamepad")
+        SCENE_MANAGER:Show("TamrielTomesSceneGamepad")
+        return
+    end
+
     -- Order matters
     TAMRIEL_TOMES_SCENE_GROUP_GAMEPAD:SetActiveScene("TamrielTomesRewardPreviewSceneGamepad")
     KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
@@ -47,6 +51,9 @@ function ZO_TamrielTomesRewardPreviewScreen_Gamepad:OnHiding()
     self:SetRewardId(nil)
     KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
     self:UpdatePreviewControls()
+
+    -- Set the scene that we should return to in case we are exiting to the HUD or another scene group altogether.
+    TAMRIEL_TOMES_SCENE_GROUP_GAMEPAD:SetActiveScene("TamrielTomesSceneGamepad")
 end
 
 function ZO_TamrielTomesRewardPreviewScreen_Gamepad:SetPreviewActionsHidden(hidden)
