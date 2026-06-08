@@ -541,7 +541,6 @@ function ZO_SelectTamrielTomeSeasonDialog_Keyboard:InitializeDialog()
         end,
 
         setup = function(dialog, data)
-            CHAT_SYSTEM:Minimize()
             dialog.object = self
             self:BuildGridList()
             self:UpdateButtonStates()

@@ -2256,6 +2256,7 @@ h5. QueueForCampaignResponseType
 * QUEUE_FOR_CAMPAIGN_RESULT_NO_PERMISSION
 * QUEUE_FOR_CAMPAIGN_RESULT_REQUIREMENT_NOT_MET
 * QUEUE_FOR_CAMPAIGN_RESULT_SUCCESS
+* QUEUE_FOR_CAMPAIGN_RESULT_VENGEANCE_UNAVAILABLE
 
 
 h5. ReleaseKeepResultType
@@ -10159,7 +10160,7 @@ h5. TutorialTrigger
 * TUTORIAL_TRIGGER_VENGEANCE_INVENTORY_OPENED
 * TUTORIAL_TRIGGER_VENGEANCE_LOADOUTS_OPENED
 * TUTORIAL_TRIGGER_VENGEANCE_PERKS_OPENED
-* TUTORIAL_TRIGGER_VETERANCY_INITIAL_CLAIMABLE_REWARDS_AVAILABLE
+* TUTORIAL_TRIGGER_VETERANCY_OPENED
 * TUTORIAL_TRIGGER_VOICE_CHAT_OPEN_CHANNELS
 * TUTORIAL_TRIGGER_VOICE_CHAT_OPEN_HISTORY
 * TUTORIAL_TRIGGER_WEAPON_SWAPPING_UNLOCKED
@@ -20110,7 +20111,7 @@ h2. Game API
 * HasAnyUnclaimedTimedActivityRewards()
 ** _Returns:_ *bool* _hasUnclaimedRewards_
 
-* RerollTimedActivity(*luaindex* _index_, *bool* _useGold_)
+* RerollTimedActivity(*luaindex* _index_)
 ** _Returns:_ *[TamrielTomeChallengeRerollResult|#TamrielTomeChallengeRerollResult]* _result_
 
 * GetGoldCostOfNextTimedActivityReroll()
@@ -20798,10 +20799,10 @@ h2. Game API
 ** _Returns:_ *string* _perkName_
 
 * GetVengeancePerkRankRequirementAtIndex(*luaindex* _perkIndex_, *luaindex:nilable* _roleIndex_)
-** _Returns:_ *integer* _rankRequirement_
+** _Returns:_ *luaindex* _rankRequirement_
 
 * GetVengeancePerkRankRequirement(*integer* _perkDefId_, *luaindex:nilable* _roleIndex_)
-** _Returns:_ *integer* _rankRequirement_
+** _Returns:_ *luaindex* _rankRequirement_
 
 * GetVengeancePerkTooltipTextAtIndex(*luaindex* _perkIndex_, *luaindex:nilable* _roleIndex_)
 ** _Returns:_ *string* _tooltipText_
@@ -21007,6 +21008,9 @@ h2. Game API
 * GetHighestTierPossibleForRewardTrack(*integer* _rewardTrackId_)
 ** _Returns:_ *integer* _numTiers_
 
+* GetEndOfSeasonTomePointToGoldConversionRate()
+** _Returns:_ *number* _conversionRate_
+
 * GetRewardTrackSettings()
 ** _Returns:_ *bool* _isSystemEnabled_
 
@@ -21032,6 +21036,12 @@ h2. Game API
 
 * GetTamrielTomesEndOfSeasonAutoClaimInfoForReward(*luaindex* _tier_, *[RewardTrackComponent|#RewardTrackComponent]* _rewardTrackComponent_, *luaindex* _rewardIndex_)
 ** _Returns:_ *bool* _wasAutoClaimed_, *bool* _wasFallbackAutoClaimed_
+
+* GetEndOfSeasonTomePointsConvertedToGold()
+** _Returns:_ *integer* _tomePointsConverted_
+
+* GetGoldGainedFromEndOfSeasonTomePointConversion()
+** _Returns:_ *integer* _goldGained_
 
 * IsTamrielTomesEnabled()
 ** _Returns:_ *bool* _isEnabled_
@@ -27765,6 +27775,7 @@ h2. Events
 * EVENT_TIMED_ACTIVITIES_REROLL_PRICE_RESET
 * EVENT_TIMED_ACTIVITIES_UPDATED
 * EVENT_TIMED_ACTIVITY_PROGRESS_UPDATED (*luaindex* _index_, *integer* _previousProgress_, *integer* _currentProgress_, *bool* _complete_)
+* EVENT_TIMED_ACTIVITY_REROLL_RESULT (*[TamrielTomeChallengeRerollResult|#TamrielTomeChallengeRerollResult]* _result_, *luaindex:nilable* _index_)
 * EVENT_TIMED_ACTIVITY_SYSTEM_STATUS_UPDATED
 * EVENT_TIMED_ACTIVITY_TRACKING_UPDATED (*id64* _timedActivityEncodedId_)
 * EVENT_TITLE_UPDATE (*string* _unitTag_)

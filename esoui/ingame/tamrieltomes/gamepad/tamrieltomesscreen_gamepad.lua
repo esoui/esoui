@@ -533,7 +533,6 @@ function ZO_SelectTamrielTomeSeasonDialog_Gamepad:InitializeDialog()
         },
 
         setup = function(dialog, data)
-            CHAT_SYSTEM:Minimize()
             dialog.object = self
             self:BuildGridList()
             self:UpdateButtonStates()

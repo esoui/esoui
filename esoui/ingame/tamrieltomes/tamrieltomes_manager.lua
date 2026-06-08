@@ -460,4 +460,46 @@ function TamrielTomes_Manager:GetPurchaseDataForSelectedTomeProductType(productT
     return purchaseData
 end
 
+-- The price(s) returned have been processed by grammar.
+function TamrielTomes_Manager:GetPricingInfoFormattedForSelectedTomeProductType(productType)
+    local purchaseData = self:GetPurchaseDataForSelectedTomeProductType(productType)
+    local purchaseSkuData = purchaseData and purchaseData:GetSkuData() or nil
+    if not purchaseSkuData then
+        return nil
+    end
+
+    local currentPriceString, basePriceString = purchaseSkuData:GetPricingInfoFormatted()
+    if productType ~= TAMRIEL_TOME_PRODUCT_TYPE_PREMIUM_PLUS_UPGRADE then
+        -- Return the prices unabridged for non-Premium Plus Upgrade products.
+        return currentPriceString, basePriceString
+    end
+
+    -- Look up the price data for the Premium Plus product.
+    local premiumPlusPurchaseData = self:GetPurchaseDataForSelectedTomeProductType(TAMRIEL_TOME_PRODUCT_TYPE_PREMIUM_PLUS)
+    local premiumPlusPurchaseSkuData = premiumPlusPurchaseData and premiumPlusPurchaseData:GetSkuData() or nil
+    if not premiumPlusPurchaseSkuData then
+        -- Fall back to the Premium Plus Upgrade pricing.
+        return currentPriceString, basePriceString
+    end
+
+    local _, premiumPlusBasePriceString = premiumPlusPurchaseSkuData:GetPricingInfoFormatted()
+    if not premiumPlusBasePriceString or premiumPlusBasePriceString == "" then
+        -- Fall back to the Premium Plus Upgrade pricing.
+        return currentPriceString, basePriceString
+    end
+
+    -- Override the Premium Plus Upgrade base price with the Premium Plus base price.
+    return currentPriceString, premiumPlusBasePriceString
+end
+
+-- The price(s) returned have been processed by grammar.
+function TamrielTomes_Manager:GetPricingStringFormattedForSelectedTomeProductType(productType)
+    local currentPriceString, basePriceString = self:GetPricingInfoFormattedForSelectedTomeProductType(productType)
+    if currentPriceString == basePriceString or not basePriceString or basePriceString == "" then
+        return currentPriceString
+    end
+
+    return string.format("%s %s", zo_strikethroughTextFormat(basePriceString), currentPriceString)
+end
+
 TAMRIEL_TOMES_MANAGER = TamrielTomes_Manager:New()

@@ -1,21 +1,21 @@
 <GuiXml>
     <Controls>
         <Control name="ZO_VengeancePerk_FramedIcon" virtual="true">
-            <Dimensions x="ZO_VENGEANCE_PERK_TILE_KEYBOARD_ICON_DIMENSIONS" y="ZO_VENGEANCE_PERK_TILE_KEYBOARD_ICON_DIMENSIONS"/>
+            <Dimensions x="ZO_VENGEANCE_PERK_TILE_ICON_DIMENSIONS" y="ZO_VENGEANCE_PERK_TILE_ICON_DIMENSIONS"/>
             <OnInitialized>
                 ZO_VengeancePerk_Icon.OnControlInitialized(self)
             </OnInitialized>
             <Controls>
                 <Texture name="$(parent)Icon" level="3" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
-                    <Dimensions x="ZO_VENGEANCE_PERK_TILE_KEYBOARD_ICON_DIMENSIONS" y="ZO_VENGEANCE_PERK_TILE_KEYBOARD_ICON_DIMENSIONS"/>
+                    <Dimensions x="ZO_VENGEANCE_PERK_TILE_ICON_DIMENSIONS" y="ZO_VENGEANCE_PERK_TILE_ICON_DIMENSIONS"/>
                     <Anchor point="CENTER"/>
                 </Texture>
                 <Texture name="$(parent)Background" level="2" textureFile="EsoUI/Art/Vengeance/perk_background.dds" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
-                    <Dimensions x="ZO_VENGEANCE_PERK_TILE_KEYBOARD_ICON_DIMENSIONS" y="ZO_VENGEANCE_PERK_TILE_KEYBOARD_ICON_DIMENSIONS"/>
+                    <Dimensions x="ZO_VENGEANCE_PERK_TILE_ICON_DIMENSIONS" y="ZO_VENGEANCE_PERK_TILE_ICON_DIMENSIONS"/>
                     <Anchor point="CENTER" relativeTo="$(parent)Icon"/>
                 </Texture>
                 <Texture name="$(parent)Border" level="10" excludeFromResizeToFitExtents="true" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
-                    <Dimensions x="ZO_VENGEANCE_PERK_TILE_KEYBOARD_ICON_BORDER_DIMENSIONS" y="ZO_VENGEANCE_PERK_TILE_KEYBOARD_ICON_BORDER_DIMENSIONS"/>
+                    <Dimensions x="ZO_VENGEANCE_PERK_TILE_ICON_BORDER_DIMENSIONS" y="ZO_VENGEANCE_PERK_TILE_ICON_BORDER_DIMENSIONS"/>
                     <Anchor point="CENTER" relativeTo="$(parent)Background"/>
                 </Texture>
             </Controls>

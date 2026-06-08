@@ -183,13 +183,14 @@ function ZO_TamrielTomesPurchaseScreen_Shared:UpdateButtons()
         return
     end
 
-    local premiumProductData = TAMRIEL_TOMES_MANAGER:GetPurchaseDataForSelectedTomeProductType(TAMRIEL_TOME_PRODUCT_TYPE_PREMIUM)
+    local premiumProductType = TAMRIEL_TOME_PRODUCT_TYPE_PREMIUM
+    local premiumProductData = TAMRIEL_TOMES_MANAGER:GetPurchaseDataForSelectedTomeProductType(premiumProductType)
     self.premiumButton.productData = premiumProductData
     local shouldEnablePremium = false
-    if premiumProductData then
+    if premiumProductData ~= nil then
         shouldEnablePremium = premiumProductData:CanPurchase()
         if shouldEnablePremium then
-            local priceString = premiumProductData:GetSkuData():GetPricingStringFormatted()
+            local priceString = TAMRIEL_TOMES_MANAGER:GetPricingStringFormattedForSelectedTomeProductType(premiumProductType)
             self.premiumButton:SetModifyTextType(MODIFY_TEXT_TYPE_NONE)
             self.premiumButton:SetText(priceString)
         else
@@ -197,7 +198,7 @@ function ZO_TamrielTomesPurchaseScreen_Shared:UpdateButtons()
             self.premiumButton:SetText(GetString(SI_TAMRIEL_TOMES_PURCHASED_UPGRADE))
         end
     else
-        -- We shouldn't be in this screen if we don't have direct purchase data
+        -- We shouldn't be in this screen if we don't have direct purchase data.
         self.premiumButton:SetText("")
     end
 
@@ -208,10 +209,11 @@ function ZO_TamrielTomesPurchaseScreen_Shared:UpdateButtons()
     self.premiumPlusButton.productData = premiumPlusProductData
     local hasPremiumPlusProductData = premiumPlusProductData ~= nil
     if hasPremiumPlusProductData then
-        local priceString = premiumPlusProductData:GetSkuData():GetPricingStringFormatted()
-        self.premiumPlusButton:SetText(priceString)
+        local premiumPlusPriceString = TAMRIEL_TOMES_MANAGER:GetPricingStringFormattedForSelectedTomeProductType(plusProductType)
+        self.premiumPlusButton:SetModifyTextType(MODIFY_TEXT_TYPE_NONE)
+        self.premiumPlusButton:SetText(premiumPlusPriceString)
     else
-        -- We shouldn't be in this screen if we don't have direct purchase data
+        -- We shouldn't be in this screen if we don't have direct purchase data.
         self.premiumPlusButton:SetText("")
     end
 

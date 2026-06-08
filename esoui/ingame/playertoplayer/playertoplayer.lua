@@ -2503,9 +2503,19 @@ do
 
         if isInGroup then
             local mountedState, isRidingGroupMount = GetTargetMountedStateInfo(currentTargetCharacterNameRaw)
+            -- The group Mount/Dismount option should appear whenever the target is the primary rider or passenger of a group mount and:
+            --   The local player is already a passenger of that mount (Dismount option); or,
+            --   The local player is not mounted (Mount option).
+            -- The other required criteria, such as being grouped together, is signaled via failure alerts.
             local isPassengerForTarget = IsGroupMountPassengerForTarget(currentTargetCharacterNameRaw)
-            local groupMountEnabled = (mountedState == MOUNTED_STATE_MOUNT_RIDER and isRidingGroupMount and (not IsMounted() or isPassengerForTarget))
-            local function MountOption() UseMountAsPassenger(currentTargetCharacterNameRaw) end
+            local groupMountEnabled = isRidingGroupMount
+                                      and (mountedState == MOUNTED_STATE_MOUNT_RIDER or mountedState == MOUNTED_STATE_MOUNT_PASSENGER)
+                                      and (isPassengerForTarget or not IsMounted())
+
+            local function MountOption()
+                UseMountAsPassenger(currentTargetCharacterNameRaw)
+            end
+
             local optionToShow = isPassengerForTarget and SI_PLAYER_TO_PLAYER_DISMOUNT or SI_PLAYER_TO_PLAYER_RIDE_MOUNT
             self:AddMenuEntry(GetString(optionToShow), platformIcons[optionToShow], groupMountEnabled, MountOption)  
         end

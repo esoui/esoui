@@ -45,7 +45,7 @@
                     </Controls>
                 </Control>
                 <Texture name="$(parent)Highlight" level="20" alpha="0" textureFile="EsoUI/Art/Veterancy/itemreward_frame_highlight.dds" excludeFromResizeToFitExtents="true">
-                    <Dimensions x="ZO_VENGEANCE_PERK_TILE_KEYBOARD_ICON_BORDER_DIMENSIONS" y="ZO_VENGEANCE_PERK_TILE_KEYBOARD_ICON_BORDER_DIMENSIONS"/>
+                    <Dimensions x="ZO_VENGEANCE_PERK_TILE_ICON_BORDER_DIMENSIONS" y="ZO_VENGEANCE_PERK_TILE_ICON_BORDER_DIMENSIONS"/>
                     <Anchor point="CENTER"/>
                 </Texture>
             </Controls>

@@ -396,19 +396,23 @@ function ZO_DirectPurchaseSkuData:GetPricingInfo()
 end
 
 -- The prices returned have been processed by grammar.
+-- Note that TAMRIEL_TOMES_MANAGER:GetPricingInfoFormattedForSelectedTomeProductType(productType)
+-- should be called instead for Tamriel Tomes-related SKUs.
 function ZO_DirectPurchaseSkuData:GetPricingInfoFormatted()
     local currentPriceString, basePriceString = GetSkuPricingInfoFormatted(self.skuId)
     return currentPriceString, basePriceString
 end
 
 -- The price(s) returned have been processed by grammar.
+-- Note that TAMRIEL_TOMES_MANAGER:GetPricingStringFormattedForSelectedTomeProductType(productType)
+-- should be called instead for Tamriel Tomes-related SKUs.
 function ZO_DirectPurchaseSkuData:GetPricingStringFormatted()
     local currentPriceString, basePriceString = self:GetPricingInfoFormatted()
     if currentPriceString == basePriceString then
         return currentPriceString
     end
 
-    return string.format("|DS%s|ds %s", basePriceString, currentPriceString)
+    return string.format("%s %s", zo_strikethroughTextFormat(basePriceString), currentPriceString)
 end
 
 function ZO_DirectPurchaseSkuData:GetPricingInfoWithTax()

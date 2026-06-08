@@ -4,8 +4,6 @@
 
 ZO_VENGEANCE_PERK_TILE_KEYBOARD_DIMENSIONS_X = 175
 ZO_VENGEANCE_PERK_TILE_KEYBOARD_DIMENSIONS_Y = 125
-ZO_VENGEANCE_PERK_TILE_KEYBOARD_ICON_DIMENSIONS = 52
-ZO_VENGEANCE_PERK_TILE_KEYBOARD_ICON_BORDER_DIMENSIONS = 104
 
 -- Primary logic class must be subclassed after the platform class so that platform specific functions will have priority over the logic class functionality
 ZO_VengeancePerkTile_Keyboard = ZO_Object.MultiSubclass(ZO_ContextualActionsTile_Keyboard, ZO_ContextualActionsTile)
