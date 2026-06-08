@@ -214,8 +214,8 @@ function ZO_GamepadTabBarScrollList:RefreshPips()
     self.pips:RefreshPips(numPips, selectedPipIndex)
 end
 
-function ZO_GamepadTabBarScrollList:SetSelectedIndex(selectedIndex, allowEvenIfDisabled, forceAnimation)
-    ZO_GamepadHorizontalParametricScrollList.SetSelectedIndex(self, selectedIndex, allowEvenIfDisabled, forceAnimation)
+function ZO_GamepadTabBarScrollList:SetSelectedIndex(selectedIndex, allowEvenIfDisabled, forceAnimation, jumpType, blockSelectionChangedCallback)
+    ZO_GamepadHorizontalParametricScrollList.SetSelectedIndex(self, selectedIndex, allowEvenIfDisabled, forceAnimation, jumpType, blockSelectionChangedCallback)
     self:RefreshPips()
 end
 

@@ -4,8 +4,6 @@
 
 ZO_VENGEANCE_PERK_TILE_KEYBOARD_DIMENSIONS_X = 175
 ZO_VENGEANCE_PERK_TILE_KEYBOARD_DIMENSIONS_Y = 125
-ZO_VENGEANCE_PERK_TILE_KEYBOARD_ICON_DIMENSIONS = 52
-ZO_VENGEANCE_PERK_TILE_KEYBOARD_ICON_BORDER_DIMENSIONS = 104
 
 -- Primary logic class must be subclassed after the platform class so that platform specific functions will have priority over the logic class functionality
 ZO_VengeancePerkTile_Keyboard = ZO_Object.MultiSubclass(ZO_ContextualActionsTile_Keyboard, ZO_ContextualActionsTile)
@@ -50,12 +48,7 @@ function ZO_VengeancePerkTile_Keyboard:PostInitializePlatform()
         end,
         enabled = function()
             local canEquip, result = self.perkData:CanEquipPerk()
-            local errorString = ""
-            if result == VENGEANCE_ACTION_RESULT_INVALID_SUBZONE then
-                errorString = GetString(SI_CAMPAIGN_VENGEANCE_PERKS_EDIT_INVALID_SUBZONE)
-            else
-                errorString = GetString("SI_VENGEANCEACTIONRESULT", result)
-            end
+            local errorString = self.perkData:GetResultStringForCanEquipPerk()
             return canEquip or result == VENGEANCE_ACTION_RESULT_PERK_ALREADY_EQUIPPED, errorString
         end,
         visible = function()
@@ -80,6 +73,9 @@ function ZO_VengeancePerkTile_Keyboard:LayoutPlatform(data)
 
     local desaturation = isDisabled and 1 or 0
     self:GetHighlightControl():SetDesaturation(desaturation)
+
+    local textColor = isDisabled and ZO_DISABLED_TEXT or ZO_SELECTED_TEXT
+    self:GetTitleLabel():SetColor(textColor:UnpackRGBA())
 
     -- Status
     local statusMultiIcon = self.statusMultiIcon
@@ -114,6 +110,7 @@ end
 -- End ZO_ContextualActionsTile Overrides --
 
 function ZO_VengeancePerkTile_Keyboard:Reset()
+    self.perkData = nil
     self:SetTitle("")
     self:SetIcon("")
     self.framedIconControl:SetHidden(true)
@@ -127,7 +124,7 @@ function ZO_VengeancePerkTile_Keyboard:RefreshMouseoverVisuals()
         local offsetX = self.control:GetParent():GetLeft() - self.control:GetLeft() - 5
         InitializeTooltip(SkillTooltip, self.control, RIGHT, offsetX, 0, LEFT)
         local _, disabledReason = self.perkData:IsPerkDisabled()
-        SkillTooltip:SetVengeancePerk(self.perkData:GetPerkIndex(), disabledReason)
+        SkillTooltip:SetVengeancePerk(self.perkData:GetPerkIndex(), self.perkData:GetSlot(), disabledReason)
     end
 end
 

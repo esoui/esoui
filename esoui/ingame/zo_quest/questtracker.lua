@@ -1164,10 +1164,7 @@ function ZO_TrackedHeader_MouseExit(label)
 end
 
 local function ShowQuestInJournal(header)
-    local questJournalObject = SYSTEMS:GetObject("questJournal")
-
-    questJournalObject:FocusQuestWithIndex(header.m_Data:GetJournalIndex())
-    SCENE_MANAGER:Show(questJournalObject:GetSceneName())
+    SYSTEMS:GetObject("questJournal"):OpenQuestJournalToQuest(header.m_Data:GetJournalIndex())
 end
 
 local function AbandonTrackedQuest(header)

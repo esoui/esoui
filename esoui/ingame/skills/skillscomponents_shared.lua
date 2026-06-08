@@ -72,7 +72,7 @@ function ZO_Skills_TieSkillInfoHeaderToCraftingSkill(skillInfoHeaderControl, cra
                 if craftingSkillLineData == nil then
                     local isSettingTemplate = IsSettingTemplate() and "true" or "false"
                     local numTradeSkillLinesInC = GetNumSkillLines(SKILL_TYPE_TRADESKILL)
-                    local message = string.format("CraftingType yielded no skill line data. Is Setting Template - %s; Num Trade Skill Lines in C - %d", isSettingTemplate, numTradeSkillLinesInC)
+                    local message = string.format("CraftingType yielded no skill line data. Is Setting Template - %s; Num Trade skill lines in C - %d", isSettingTemplate, numTradeSkillLinesInC)
                     internalassert(false, message)
                 end
 

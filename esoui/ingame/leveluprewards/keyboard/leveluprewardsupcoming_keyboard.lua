@@ -28,10 +28,17 @@ function ZO_LevelUpRewardsUpcoming_Keyboard:Initialize(control)
                                                         self:OnHidden()
                                                     end
                                                 end)
+
+    self.goToLevelUpRewardsButton = control:GetNamedChild("GoToLevelUpRewardsButton")
+    self.goToDifficultyButton = control:GetNamedChild("GoToDifficultyButton")
+    self.challengeDifficultyRadioButtonGroup = ZO_RadioButtonGroup:New()
+    self.challengeDifficultyRadioButtonGroup:Add(self.goToLevelUpRewardsButton)
+    self.challengeDifficultyRadioButtonGroup:Add(self.goToDifficultyButton)
 end
 
 function ZO_LevelUpRewardsUpcoming_Keyboard:OnShowing()
     self:LayoutUpcomingRewards()
+    self.challengeDifficultyRadioButtonGroup:SetClickedButton(self.goToLevelUpRewardsButton)
 end
 
 function ZO_LevelUpRewardsUpcoming_Keyboard:OnHidden()
@@ -142,6 +149,25 @@ end
 
 function ZO_LevelUpRewardsUpcoming_Keyboard:IsShowing()
     return ZO_KEYBOARD_UPCOMING_LEVEL_UP_REWARDS_FRAGMENT:IsShowing()
+end
+
+function ZO_LevelUpRewardsUpcoming_Keyboard.OnGoToDifficultyButtonClicked()
+    ZO_KEYBOARD_UPCOMING_LEVEL_UP_REWARDS:Hide()
+    ZO_CHALLENGE_DIFFICULTY_KEYBOARD:Show()
+end
+
+function ZO_LevelUpRewardsUpcoming_Keyboard.OnGoToLevelUpRewardsButtonMouseEnter(control)
+    InitializeTooltip(InformationTooltip, control, LEFT, 0, 0, RIGHT)
+    InformationTooltip:AddLine(GetString(SI_CHALLENGE_DIFFICULTY_TOOLTIP_LEVEL_UP_REWARDS_TAB))
+end
+
+function ZO_LevelUpRewardsUpcoming_Keyboard.OnGoToDifficultyButtonMouseEnter(control)
+    InitializeTooltip(InformationTooltip, control, LEFT, 0, 0, RIGHT)
+    InformationTooltip:AddLine(GetString(SI_CHALLENGE_DIFFICULTY_TOOLTIP_DIFFICULTY_TAB))
+end
+
+function ZO_LevelUpRewardsUpcoming_Keyboard.OnTabButtonMouseExit(control)
+    ClearTooltip(InformationTooltip)
 end
 
 --

@@ -4,9 +4,13 @@
 ZO_GUILD_RECRUITMENT_CATEGORY_KEYBOARD_GUILD_LISTING = 1
 ZO_GUILD_RECRUITMENT_CATEGORY_KEYBOARD_APPLICATIONS = 2
 ZO_GUILD_RECRUITMENT_CATEGORY_KEYBOARD_BLACKLIST = 3
+ZO_GUILD_RECRUITMENT_CATEGORY_KEYBOARD_GUILD_MAIL = 4
 
 ZO_GUILD_RECRUITMENT_APPLICATIONS_SUBCATEGORY_KEYBOARD_RECEIVED = 1
 ZO_GUILD_RECRUITMENT_APPLICATIONS_SUBCATEGORY_KEYBOARD_MESSAGE = 2
+
+ZO_GUILD_RECRUITMENT_GUILD_MAIL_SUBCATEGORY_SEND = 1
+ZO_GUILD_RECRUITMENT_GUILD_MAIL_SUBCATEGORY_MANAGE = 2
 
 local treeIdToCategoryInfo =
 {
@@ -40,6 +44,20 @@ local treeIdToCategoryInfo =
         down = "EsoUI/Art/GuildFinder/Keyboard/guildRecruitment_blacklist_down.dds",
         over = "EsoUI/Art/GuildFinder/Keyboard/guildRecruitment_blacklist_over.dds",
         visible = function(self) return DoesPlayerHaveGuildPermission(self.guildId, GUILD_PERMISSION_MANAGE_BLACKLIST) end,
+    },
+    [ZO_GUILD_RECRUITMENT_CATEGORY_KEYBOARD_GUILD_MAIL] =
+    {
+        categoryIndex = ZO_GUILD_RECRUITMENT_CATEGORY_KEYBOARD_GUILD_MAIL,
+        name = GetString(SI_GUILD_RECRUITMENT_CATEGORY_GUILD_MAIL),
+        up = "EsoUI/Art/MainMenu/menuBar_mail_up.dds",
+        down = "EsoUI/Art/MainMenu/menuBar_mail_down.dds",
+        over = "EsoUI/Art/MainMenu/menuBar_mail_over.dds",
+        visible = function(self) return DoesPlayerHaveGuildPermission(self.guildId, GUILD_PERMISSION_SEND_DELETE_GUILD_MAILER) end,
+        subCategories =
+        {
+            { name = GetString(SI_GUILD_RECRUITMENT_GUILD_MAIL_SEND), value = ZO_GUILD_RECRUITMENT_GUILD_MAIL_SUBCATEGORY_SEND },
+            { name = GetString(SI_GUILD_RECRUITMENT_GUILD_MAIL_MANAGE), value = ZO_GUILD_RECRUITMENT_GUILD_MAIL_SUBCATEGORY_MANAGE },
+        }
     },
 }
 
@@ -91,6 +109,8 @@ function ZO_GuildRecruitment_Keyboard:DeferredInitialize()
 
     treeIdToCategoryInfo[ZO_GUILD_RECRUITMENT_CATEGORY_KEYBOARD_APPLICATIONS].manager = GUILD_RECRUITMENT_APPLICATIONS_KEYBOARD
     treeIdToCategoryInfo[ZO_GUILD_RECRUITMENT_CATEGORY_KEYBOARD_BLACKLIST].manager = GUILD_RECRUITMENT_BLACKLIST_KEYBOARD
+
+    treeIdToCategoryInfo[ZO_GUILD_RECRUITMENT_CATEGORY_KEYBOARD_GUILD_MAIL].manager = GUILD_MAIL_MANAGEMENT_KEYBOARD
 
     self.hasDeferredInitialized = true
 

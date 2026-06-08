@@ -235,6 +235,7 @@ function ZO_VengeancePerkData:Initialize(slot, slotIndex)
     self.index = GetPerkIndexForSlotAtSlotIndex(slot, slotIndex)
     self.slot = slot
     self.slotIndex = slotIndex
+    self.rankRequirement = GetVengeancePerkRankRequirementAtIndex(self.index)
 end
 
 function ZO_VengeancePerkData:GetPerkIndex()
@@ -269,10 +270,25 @@ function ZO_VengeancePerkData:GetTooltipText()
     return GetVengeancePerkTooltipTextAtIndex(self.index)
 end
 
+function ZO_VengeancePerkData:GetRankRequirement()
+    return self.rankRequirement
+end
+
 function ZO_VengeancePerkData:CanEquipPerk()
     local canEquipResult = CanPerkBeSlottedInSlotForRole(self.index, self.slot)
     return canEquipResult == VENGEANCE_ACTION_RESULT_SUCCESS
         or canEquipResult == VENGEANCE_ACTION_RESULT_PERK_ALREADY_EQUIPPED, canEquipResult
+end
+
+function ZO_VengeancePerkData:GetResultStringForCanEquipPerk()
+    local canEquipResult = CanPerkBeSlottedInSlotForRole(self.index, self.slot)
+    if canEquipResult == VENGEANCE_ACTION_RESULT_INVALID_SUBZONE then
+        return GetString(SI_CAMPAIGN_VENGEANCE_PERKS_EDIT_INVALID_SUBZONE)
+    elseif canEquipResult == VENGEANCE_ACTION_RESULT_PERK_LOCKED then
+        return zo_strformat(GetString("SI_VENGEANCEACTIONRESULT", canEquipResult), self:GetRankRequirement())
+    else
+        return GetString("SI_VENGEANCEACTIONRESULT", canEquipResult)
+    end
 end
 
 function ZO_VengeancePerkData:IsPerkEquipped()
@@ -292,6 +308,9 @@ function ZO_VengeancePerkData:IsPerkDisabled()
         reason = VENGEANCE_ACTION_RESULT_PERK_ALREADY_EQUIPPED
     elseif isDisabled then
         reason = VENGEANCE_ACTION_RESULT_PERK_DISABLED
+    elseif self.rankRequirement > ZO_VETERANCY_MANAGER:GetCurrentRank() then
+        isDisabled = true
+        reason = VENGEANCE_ACTION_RESULT_PERK_LOCKED
     end
     return isDisabled, reason
 end
@@ -330,9 +349,18 @@ function ZO_Vengeance_Manager:Initialize()
         end
     end
 
+    local function OnVeterancyStateChanged()
+        ReleaseParsedPerkAvailabilityForCurrentSeason()
+        RequestParsedPerkAvailabilityForCurrentSeason()
+        self:RefreshPerkData()
+    end
+
     EVENT_MANAGER:RegisterForEvent("VengeanceManager", EVENT_PLAYER_ACTIVATED, function() self:RefreshPerkData() end)
     EVENT_MANAGER:RegisterForEvent("VengeanceManager", EVENT_VENGEANCE_LOADOUT_ROLE_UPDATED, OnVengeanceLoadoutRoleChanged)
     EVENT_MANAGER:RegisterForEvent("VengeanceManager", EVENT_VENGEANCE_PERKS_UPDATED, OnVengeanceLoadoutPerksChanged)
+    EVENT_MANAGER:RegisterForEvent("VengeanceManager", EVENT_HOLIDAYS_CHANGED, OnVeterancyStateChanged)
+    EVENT_MANAGER:RegisterForEvent("VengeanceManager", EVENT_REWARD_TRACK_STARTED, OnVeterancyStateChanged)
+
 end
 
 function ZO_Vengeance_Manager:PerformDeferredInitialization()

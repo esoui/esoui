@@ -44,14 +44,16 @@ function ZO_Market_Shared:Initialize(control, sceneName)
     self:InitializeFilters()
 
     ZO_DIALOG_SYNC_OBJECT:SetHandler("OnShown", function()
-        if self:IsShowing() then
+        -- Can't use self:IsShowing() here because gamepad overrides it with a different check
+        if self.marketScene:IsShowing() then
             self:OnDialogShowing()
             self:RemoveActionLayerForDialog()
         end
     end, self.sceneName)
 
     ZO_DIALOG_SYNC_OBJECT:SetHandler("OnHidden", function()
-        if self:IsShowing() then
+        -- Can't use self:IsShowing() here because gamepad overrides it with a different check
+        if self.marketScene:IsShowing() then
             self:RestoreActionLayerForDialog()
             self:OnDialogHidden()
         end

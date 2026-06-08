@@ -1,0 +1,142 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_QuestJournalNavigationEntry" inherits="ZO_SelectableTooltipIfTruncatedLabel" font="ZoFontHeader" virtual="true" verticalAlignment="CENTER">
+            <Dimensions x="220" y="22"/>
+            <OnInitialized>
+                ZO_SelectableLabel_OnInitialized(self, ZO_QuestJournal_Quests_Keyboard.GetJournalNavigationEntryTextColor)
+            </OnInitialized>
+            <OnMouseUp>
+                ZO_QuestJournal_Quests_Keyboard.QuestJournalNavigationEntry_OnMouseUp(self, button, upInside)
+            </OnMouseUp>
+            <Controls>
+                <Texture name="$(parent)Icon" level="3" hidden="true" mouseEnabled="true">
+                    <Dimensions x="22" y="22"/>
+                    <Anchor point="RIGHT" relativePoint="LEFT" offsetX="-2"/>
+                    <OnMouseEnter>
+                        if not self.selected then
+                        ZO_QuestJournal_Quests_Keyboard.QuestIcon_OnMouseEnter(self)
+                        end
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ZO_QuestJournal_Quests_Keyboard.QuestIcon_OnMouseExit()
+                    </OnMouseExit>
+                    <OnMouseUp>
+                        ZO_QuestJournal_Quests_Keyboard.QuestJournalNavigationEntry_OnMouseUp(self:GetParent(), button, upInside)
+                    </OnMouseUp>
+                </Texture>
+            </Controls>
+        </Label>
+        <Label name="ZO_QuestJournal_DetailText" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true"/>
+        <Label name="ZO_QuestJournal_StepText" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true"/>
+        <Label name="ZO_QuestJournal_HintBullet" text="SI_QUEST_JOURNAL_QUEST_HINT" font="ZoFontWinH4" modifyTextType="UPPERCASE" virtual="true">
+            <Dimensions y="23"/>
+        </Label>
+        <Label name="ZO_QuestJournal_HintBulletLabel" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true"/>
+        <Label name="ZO_QuestJournal_ConditionBulletLabel" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" virtual="true"/>
+        <Control name="ZO_QuestJournal_QuestsPanel_Keyboard" inherits="ZO_RightPanelFootPrint" virtual="true">
+            <Controls>
+                <Label name="$(parent)QuestCount" font="ZoFontHeader3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPLEFT" offsetX="5" offsetY="7"/>
+                </Label>
+                <Control name="$(parent)NavigationContainer" inherits="ZO_ScrollContainer">
+                    <Dimensions x="335"/>
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)QuestCount" relativePoint="BOTTOMLEFT" offsetY="5"/>
+                    <Anchor point="BOTTOMLEFT"/>
+                </Control>
+                <Control name="$(parent)QuestInfoContainer" inherits="ZO_ScrollContainer">
+                    <Dimensions x="550"/>
+                    <Anchor point="TOPRIGHT" offsetX="-33" offsetY="60"/>
+                    <Anchor point="BOTTOMRIGHT" relativePoint="RIGHT" offsetX="-33" offsetY="50"/>
+                    <Controls>
+                        <Control name="$(parent)Scroll" override="true">
+                            <Controls>
+                                <Control name="$(parent)Child" override="true">
+                                    <Controls>
+                                        <Label name="$(parent)TitleText" font="ZoFontWinH2" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                                            <Dimensions x="500"/>
+                                            <Anchor point="TOPLEFT"/>
+                                        </Label>
+                                        <Label name="$(parent)LevelText" inherits="ZO_QuestJournal_DetailText">
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)TitleText" relativePoint="BOTTOMLEFT" offsetY="5"/>
+                                        </Label>
+                                        <Texture name="$(parent)QuestIcon" tier="MEDIUM" mouseEnabled="true">
+                                            <Dimensions x="22" y="22"/>
+                                            <Anchor point="LEFT" relativeTo="$(parent)LevelText" relativePoint="RIGHT" offsetX="5"/>
+                                            <OnMouseEnter>
+                                                ZO_QuestJournal_Quests_Keyboard.QuestIcon_OnMouseEnter(self)
+                                            </OnMouseEnter>
+                                            <OnMouseExit>
+                                                ZO_QuestJournal_Quests_Keyboard.QuestIcon_OnMouseExit()
+                                            </OnMouseExit>
+                                        </Texture>
+                                        <Texture name="$(parent)RepeatableIcon" textureFile="EsoUI/Art/Journal/journal_Quest_Repeat.dds">
+                                            <Dimensions x="20" y="20"/>
+                                            <Anchor point="LEFT" relativeTo="$(parent)QuestIcon" relativePoint="RIGHT" offsetX="20"/>
+                                        </Texture>
+                                        <Label name="$(parent)RepeatableText" inherits="ZO_QuestJournal_DetailText">
+                                            <Anchor point="LEFT" relativeTo="$(parent)RepeatableIcon" relativePoint="RIGHT"/>
+                                        </Label>
+                                        <Label name="$(parent)BGText" inherits="ZO_QuestJournal_DetailText">
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)TitleText" relativePoint="BOTTOMLEFT" offsetX="25" offsetY="50"/>
+                                            <Anchor point="TOPRIGHT" relativeTo="$(parent)TitleText" relativePoint="BOTTOMRIGHT" offsetY="50"/>
+                                        </Label>
+                                        <Label name="$(parent)StepText" inherits="ZO_QuestJournal_DetailText">
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)BGText" relativePoint="BOTTOMLEFT" offsetY="15"/>
+                                            <Anchor point="TOPRIGHT" relativeTo="$(parent)BGText" relativePoint="BOTTOMRIGHT" offsetY="15"/>
+                                        </Label>
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+                <Control name="$(parent)QuestStepContainer" inherits="ZO_ScrollContainer">
+                    <Dimensions x="550"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)QuestInfoContainer" relativePoint="BOTTOMRIGHT" offsetY="5"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="-33" offsetY="-25"/>
+                    <Controls>
+                        <Control name="$(parent)Scroll" override="true">
+                            <Controls>
+                                <Control name="$(parent)Child" override="true">
+                                    <Controls>
+                                        <Texture name="$(parent)Divider" textureFile="EsoUI/Art/Quest/questJournal_divider.dds">
+                                            <Dimensions x="512" y="4"/>
+                                            <Anchor point="TOPLEFT"/>
+                                        </Texture>
+                                        <Label name="$(parent)TasksText" inherits="ZO_QuestJournal_StepText" text="SI_QUEST_JOURNAL_QUEST_TASKS" font="ZoFontWinH3" modifyTextType="UPPERCASE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)Divider" relativePoint="BOTTOMLEFT" offsetY="10"/>
+                                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Divider" relativePoint="BOTTOMRIGHT" offsetX="-12" offsetY="10"/>
+                                        </Label>
+                                        <Control name="$(parent)HintTextBulletList">
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)TasksText" relativePoint="BOTTOMLEFT" offsetX="25" offsetY="10"/>
+                                            <Anchor point="TOPRIGHT" relativeTo="$(parent)TasksText" relativePoint="BOTTOMRIGHT" offsetY="10"/>
+                                        </Control>
+                                        <Label name="$(parent)ConditionTextOrLabel" text="SI_QUEST_OR_DESCRIPTION" inherits="ZO_QuestJournal_StepText" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)HintTextBulletList" relativePoint="BOTTOMLEFT" offsetY="10"/>
+                                            <Anchor point="TOPRIGHT" relativeTo="$(parent)HintTextBulletList" relativePoint="BOTTOMRIGHT" offsetY="10"/>
+                                        </Label>
+                                        <Control name="$(parent)ConditionTextBulletList">
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)ConditionTextOrLabel" relativePoint="BOTTOMLEFT"/>
+                                            <Anchor point="TOPRIGHT" relativeTo="$(parent)ConditionTextOrLabel" relativePoint="BOTTOMRIGHT"/>
+                                        </Control>
+                                        <Label name="$(parent)OptionalStepTextLabel" text="SI_QUEST_OPTIONAL_STEPS_DESCRIPTION" inherits="ZO_QuestJournal_StepText" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)ConditionTextBulletList" relativePoint="BOTTOMLEFT" offsetY="10"/>
+                                            <Anchor point="TOPRIGHT" relativeTo="$(parent)ConditionTextBulletList" relativePoint="BOTTOMRIGHT" offsetY="10"/>
+                                        </Label>
+                                        <Control name="$(parent)OptionalStepTextBulletList">
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)OptionalStepTextLabel" relativePoint="BOTTOMLEFT"/>
+                                            <Anchor point="TOPRIGHT" relativeTo="$(parent)OptionalStepTextLabel" relativePoint="BOTTOMRIGHT"/>
+                                        </Control>
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+                <Control name="$(parent)ShowOnMap" inherits="ZO_KeybindButton">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)QuestStepContainer" relativePoint="BOTTOMLEFT"/>
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

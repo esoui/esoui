@@ -1822,20 +1822,6 @@ function ZO_GamepadCollectionsBook:InitializeActionsDialog()
                         end
                         return collectibleData:IsUsable(GAMEPLAY_ACTOR_CATEGORY_PLAYER) and not collectibleData:IsSkillStyle()
                     end,
-                    enabled = function(dialog)
-                        local collectibleData = dialog.data
-                        if collectibleData:IsActive(GAMEPLAY_ACTOR_CATEGORY_PLAYER) then
-                            return true
-                        end
-                        local remainingMs = GetCollectibleCooldownAndDuration(collectibleData:GetId())
-                        if remainingMs > 0 then
-                            return false
-                        end
-                        if collectibleData:IsBlocked(GAMEPLAY_ACTOR_CATEGORY_PLAYER) then
-                            return false
-                        end
-                        return true
-                    end,
                 },
             },
             -- Place Furniture

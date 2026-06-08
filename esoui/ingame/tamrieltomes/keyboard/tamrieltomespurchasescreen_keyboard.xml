@@ -28,8 +28,20 @@
                 ZO_TamrielTomesPurchaseScreen_Keyboard.OnControlInitialized(self)
             </OnInitialized>
             <Controls>
-                <Label name="$(parent)Title" override="true" font="ZoFontCallout2"/>
+                <Label name="$(parent)Title" override="true" font="ZoFontCallout">
+                    <Anchor point="LEFT" relativePoint="TOPLEFT" offsetX="120" offsetY="100"/>
+                    <Anchor point="RIGHT" relativePoint="TOPRIGHT" offsetX="-90" offsetY="100"/>
+                    <Controls>
+                        <Texture name="$(parent)BG" inherits="ZO_TamrielTomesPurchase_Contrast" override="true">
+                            <Dimensions x="850" y="95"/>
+                        </Texture>
+                    </Controls>
+                </Label>
+                <Texture name="$(parent)Image" override="true">
+                    <Anchor point="TOP" relativeTo="$(parent)Title" relativePoint="CENTER" offsetY="60"/>
+                </Texture>
                 <Control name="$(parent)GridList" override="true" inherits="ZO_GridScrollList_Keyboard">
+                    <Anchor point="TOP" relativeTo="$(parent)Image" relativePoint="BOTTOM" offsetY="25"/>
                     <Dimensions x="ZO_TAMRIEL_TOMES_PURCHASE_GRID_WIDTH_KEYBOARD" y="ZO_TAMRIEL_TOMES_PURCHASE_GRID_HEIGHT_KEYBOARD"/>
                 </Control>
                 <Control name="$(parent)Buttons" override="true">
@@ -38,7 +50,9 @@
                             <Controls>
                                 <Button name="$(parent)PremiumButton" override="true" inherits="ZO_TamrielTomesPurchaseButton_Keyboard"/>
                                 <Button name="$(parent)PremiumPlusButton" override="true" inherits="ZO_TamrielTomesPurchaseButton_Keyboard"/>
-                                <Label name="$(parent)PremiumPlusDescription" override="true" font="ZoFontWinH4"/>
+                                <Label name="$(parent)PremiumLabel" override="true" font="ZoFontWinH2"/>
+                                <Label name="$(parent)PremiumPlusLabel" override="true" font="ZoFontWinH2"/>
+                                <Label name="$(parent)PremiumPlusDescription" override="true" font="ZoFontWinH3"/>
                             </Controls>
                         </Control>
                         <Control name="$(parent)Row2" override="true">

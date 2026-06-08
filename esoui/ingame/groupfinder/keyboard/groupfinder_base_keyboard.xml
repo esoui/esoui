@@ -22,6 +22,7 @@
                     <Controls>
                         <Label name="$(parent)Title" font="ZoFontWinH3" maxLineCount="1" wrapMode="ELLIPSIS" override="true">
                             <Anchor point="TOPLEFT"/>
+                            <Anchor point="RIGHT" relativeTo="$(grandparent)RoleList" relativePoint="LEFT" offsetX="-5" constrains="X"/>
                         </Label>
                         <Label name="$(parent)Settings" font="ZoFontWinT1" wrapMode="ELLIPSIS" override="true">
                             <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT"/>

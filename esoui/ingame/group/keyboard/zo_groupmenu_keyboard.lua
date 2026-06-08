@@ -158,7 +158,7 @@ function GroupMenu_Keyboard:InitializeCategories()
         if node.enabled and open and userRequested then
             local selectedNode = self.navigationTree:GetSelectedNode()
             if not selectedNode or selectedNode.parentNode ~= node then
-                if categoryData.isPromotionalEvent and IsReturningPlayer() then
+                if categoryData.isPromotionalEvent and PROMOTIONAL_EVENT_PERSONAL_CAMPAIGN_MANAGER:IsReturningPlayer() then
                     local children = node:GetChildren()
                     if children then
                         local firstCampaign = children[2]

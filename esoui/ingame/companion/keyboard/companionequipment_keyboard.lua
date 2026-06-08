@@ -469,17 +469,11 @@ function ZO_CompanionEquipment_Keyboard:PlayItemAddedAlert(slot, suppressItemAle
         return
     end
 
-    local isSlotAdded = false
+    local addToFlashingSlots = false
     for _, filter in pairs(self.filters) do
         if ZO_ItemFilterUtils.IsSlotInItemTypeDisplayCategoryAndSubcategory(slot, ITEM_TYPE_DISPLAY_CATEGORY_COMPANION, filter.descriptor) then
             self:AddCategoryFlashAnimationControl(filter.control:GetNamedChild("Flash"))
-            if not self.categoryFlashAnimationTimeline:IsPlaying() then
-                self.categoryFlashAnimationTimeline:PlayFromStart()
-            end
-            if not isSlotAdded then
-                table.insert(self.flashingSlots, slot)
-                isSlotAdded = true
-            end
+            addToFlashingSlots = true
         end
     end
 
@@ -487,14 +481,15 @@ function ZO_CompanionEquipment_Keyboard:PlayItemAddedAlert(slot, suppressItemAle
     for _, subFilter in pairs(self.subFilters[currentFilter.descriptor]) do
         if ZO_ItemFilterUtils.IsCompanionSlotInItemTypeDisplayCategoryAndSubcategory(slot, currentFilter.descriptor, subFilter.descriptor) then
             self:AddCategoryFlashAnimationControl(subFilter.control:GetNamedChild("Flash"))
-            if not self.categoryFlashAnimationTimeline:IsPlaying() then
-                self.categoryFlashAnimationTimeline:PlayFromStart()
-            end
-            if not isSlotAdded then
-                table.insert(self.flashingSlots, slot)
-                isSlotAdded = true
-            end
+            addToFlashingSlots = true
         end
+    end
+
+    if addToFlashingSlots then
+        if not self.categoryFlashAnimationTimeline:IsPlaying() then
+            self.categoryFlashAnimationTimeline:PlayFromStart()
+        end
+        table.insert(self.flashingSlots, slot)
     end
 end
 

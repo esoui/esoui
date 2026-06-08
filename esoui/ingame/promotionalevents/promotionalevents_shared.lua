@@ -132,6 +132,8 @@ function ZO_PromotionalEventActivity_Entry_Shared:SetActivityData(activityData)
     local displayName = activityData:GetDisplayName()
     if isLocked then
         displayName = zo_iconTextFormat("EsoUI/Art/Miscellaneous/status_locked.dds", "100%", "100%", displayName)
+    elseif activityData:ShouldShowMenuAssistance() then
+        displayName = zo_iconTextFormat("EsoUI/Art/Miscellaneous/help_icon.dds", "100%", "100%", displayName)
     end
     self.nameLabel:SetText(displayName)
     self.rewardControl.object:SetRewardableEventData(self.activityData)
@@ -385,7 +387,7 @@ end
 
 function ZO_PromotionalEvents_Shared:OnCapstoneDialogClosed()
     -- This synchronizes the keyboard and gamepad objects; we only need to handle the one that isn't currently showing.
-    if not self:IsShowing() and IsReturningPlayer() then
+    if not self:IsShowing() and PROMOTIONAL_EVENT_PERSONAL_CAMPAIGN_MANAGER:IsReturningPlayer() then
         self:RefreshCampaignList()
     end
 end
@@ -642,7 +644,7 @@ function ZO_PromotionalEvents_Shared:RefreshDisplay()
         self:RefreshGridList(REBUILD)
     end
 
-    if not self.currentCampaignData and IsReturningPlayer() then
+    if not self.currentCampaignData and PROMOTIONAL_EVENT_PERSONAL_CAMPAIGN_MANAGER:IsReturningPlayer() then
         local firstVisibleCampaignData
         for _, iterCampaignData in PROMOTIONAL_EVENT_MANAGER:CampaignIterator({ ZO_PromotionalEventCampaignData.ShouldCampaignBeVisible }) do
             firstVisibleCampaignData = iterCampaignData
@@ -924,7 +926,7 @@ end
 
 function ZO_PromotionalEvents_CapstoneDialog_Shared:ShowNextCampaign(campaignData)
     self:RefreshCampaignList()
-    local nextCampaignKey = GetCampaignKeyForNextReturningPlayerCampaign(campaignData:GetId())
+    local nextCampaignKey = campaignData:GetNextPersonalCampaignKey()
     if nextCampaignKey and nextCampaignKey ~= 0 then
         local nextCampaignData = PROMOTIONAL_EVENT_MANAGER:GetCampaignDataByKey(nextCampaignKey)
         local DONT_SCROLL_TO_REWARD = false

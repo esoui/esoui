@@ -184,6 +184,7 @@ do
             internalassert(queueType ~= nil, "Campaign queue flow completed without picking a queue type")
             local isGroup = queueType == CAMPAIGN_QUEUE_TYPE_GROUP
             QueueForCampaign(campaignData.id, isGroup)
+            PlaySound(SOUNDS.CAMPAIGN_ENTER_CAMPAIGN)
             return
         end
     end

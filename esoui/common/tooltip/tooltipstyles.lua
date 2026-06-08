@@ -1940,6 +1940,20 @@ ZO_TOOLTIP_STYLES =
         widthPercent = 100,
         height = 32,
     },
+
+    --Guild Mail Management
+    guildMailManagementBodyHeader =
+    {
+        fontFace = "$(GAMEPAD_MEDIUM_FONT)",
+        fontSize = "$(GP_27)",
+        uppercase = true,
+        fontColorField = GENERAL_COLOR_OFF_WHITE,
+    },
+    guildMailManagementBodyDescription =
+    {
+        fontSize = "$(GP_42)",
+        fontColorField = GENERAL_COLOR_WHITE,
+    },
 }
 
 ZO_GAMEPAD_DYEING_TOOLTIP_STYLES =

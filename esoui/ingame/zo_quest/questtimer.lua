@@ -1,13 +1,6 @@
 local SUPPRESS_LAYOUT = true
 
-local QuestTimer = ZO_Object:Subclass()
-
-function QuestTimer:New(...)
-    local questTimer = ZO_Object.New(self)
-    questTimer:Initialize(...)
-    
-    return questTimer
-end
+local QuestTimer = ZO_InitializingObject:Subclass()
 
 function QuestTimer:Initialize(control)
     self.timers = {}
@@ -64,11 +57,11 @@ end
 function QuestTimer:OnQuestTimerPaused(index, isPaused)
     if self.timers[index] then
         self.timers[index].paused = isPaused
-		if not isPaused then
-			local starts, ends = GetJournalQuestTimerInfo(index)
-			self.timers[index].start = starts
-			self.timers[index].ends = ends
-		end
+        if not isPaused then
+            local starts, ends = GetJournalQuestTimerInfo(index)
+            self.timers[index].start = starts
+            self.timers[index].ends = ends
+        end
     end
 end
 
@@ -148,11 +141,11 @@ do
     end
 
     local function TimerComparer(left, right)
-        
         return GetTimeLeft(left) > GetTimeLeft(right)
     end
 
-    local GAMEPAD_CONSTANTS = {
+    local GAMEPAD_CONSTANTS =
+    {
         anchorPoint = TOPRIGHT,
         anchorRelativePoint = BOTTOMRIGHT,
         anchorRelativePointFirstEntry = TOPRIGHT,
@@ -162,7 +155,8 @@ do
         offsetY = 10,
     }
 
-    local KEYBOARD_CONSTANTS = {
+    local KEYBOARD_CONSTANTS =
+    {
         anchorPoint = TOPLEFT,
         anchorRelativePoint = BOTTOMLEFT,
         anchorRelativePointFirstEntry = TOPLEFT,
@@ -188,10 +182,10 @@ do
 
         for i, timer in ipairs(sortedTimers) do
             ApplyTemplateToControl(timer, template)
-			
-			-- Reapply caption so the text is updated with the new modify text type
-			local caption = GetJournalQuestTimerCaption(timer.index)
-			timer.label:SetText(caption)
+
+            -- Reapply caption so the text is updated with the new modify text type
+            local caption = GetJournalQuestTimerCaption(timer.index)
+            timer.label:SetText(caption)
 
             if i == 1 then
                 timer:SetAnchor(constants.anchorPoint, nil, constants.anchorRelativePointFirstEntry, constants.offsetX, constants.offsetFirstY)
@@ -204,7 +198,7 @@ end
 
 --[[ XML Handlers ]]--
 function ZO_QuestTimer_OnMouseUp(control)
-    SYSTEMS:GetObject("questJournal"):FocusQuestWithIndex(control.index) 
+    FOCUSED_QUEST_TRACKER:ForceAssist(control.index)
 end
 
 function ZO_QuestTimer_OnUpdate(control, time)

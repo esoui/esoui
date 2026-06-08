@@ -66,7 +66,7 @@ function ZO_ZoneStories_Keyboard:Initialize(control)
             TriggerTutorial(TUTORIAL_TRIGGER_ZONE_STORIES_SHOWN)
             KEYBIND_STRIP:AddKeybindButton(self.keybindStripDescriptor)
         elseif newState == SCENE_FRAGMENT_SHOWN then
-            HandleReturningPlayerUISystemShown(UI_SYSTEM_ZONE_GUIDE)
+            HandleUISystemShown(UI_SYSTEM_ZONE_GUIDE)
         elseif newState == SCENE_FRAGMENT_HIDING then
             KEYBIND_STRIP:RemoveKeybindButton(self.keybindStripDescriptor)
         end

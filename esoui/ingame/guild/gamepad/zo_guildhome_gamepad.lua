@@ -113,6 +113,7 @@ function ZO_GamepadGuildHome:RefreshHeader(blockTabBarCallbacks)
     self.headerData.data1Text = nil
     self.headerData.data2HeaderText = nil
     self.headerData.data2Text = nil
+    self.headerData.data2TextNarration = nil
 
     if self.currentFragment == GUILD_RANKS_GAMEPAD_FRAGMENT then
         self.headerData.messageText = GUILD_RANKS_GAMEPAD:GetMessageText()
@@ -122,6 +123,13 @@ function ZO_GamepadGuildHome:RefreshHeader(blockTabBarCallbacks)
         self.headerData.data1Text = headerData.data1Text
         self.headerData.data2HeaderText = headerData.data2HeaderText
         self.headerData.data2Text = headerData.data2Text
+    elseif self.currentFragment == GUILD_MAIL_MANAGEMENT_GAMEPAD_FRAGMENT then
+        local headerData = GUILD_MAIL_MANAGEMENT_GAMEPAD:GetHeaderData()
+        self.headerData.data1HeaderText = headerData.data1HeaderText
+        self.headerData.data1Text = headerData.data1Text
+        self.headerData.data2HeaderText = headerData.data2HeaderText
+        self.headerData.data2Text = headerData.data2Text
+        self.headerData.data2TextNarration = headerData.data2TextNarration
     end
 
     ZO_GamepadGenericHeader_Refresh(self.header, self.headerData, blockTabBarCallbacks)
@@ -151,6 +159,7 @@ end
 function ZO_GamepadGuildHome:RefreshFooter()
     local numGuildMembers, numOnline, _, numInvitees = GetGuildInfo(self.guildId)
     self.footerData.data1Text = zo_strformat(GetString(SI_GAMEPAD_GUILD_HEADER_MEMBERS_ONLINE_FORMAT), numOnline, numGuildMembers + numInvitees)
+    self.footerData.data1TextNarration = zo_strformat(SI_SCREEN_NARRATION_CURRENT_AND_MAX_VALUES_FORMATTER, numOnline, numGuildMembers + numInvitees)
 
     GAMEPAD_GENERIC_FOOTER:Refresh(self.footerData)
 end
@@ -237,12 +246,21 @@ function ZO_GamepadGuildHome:ShowWeeklyBids()
     self:SetCurrentPage(GUILD_WEEKLY_BIDS_GAMEPAD:GetListFragment(), GUILD_WEEKLY_BIDS_GAMEPAD, DONT_ACTIVATE_CURRENT_LIST)
 end
 
+function ZO_GamepadGuildHome:ShowGuildMail()
+    self:SetCurrentPage(GUILD_MAIL_MANAGEMENT_GAMEPAD_FRAGMENT, GUILD_MAIL_MANAGEMENT_GAMEPAD)
+end
+
 function ZO_GamepadGuildHome:GetContentHeaderNarrationText()
     return ZO_GamepadGenericHeader_GetNarrationText(self.contentHeader, self.contentHeaderData)
 end
 
 function ZO_GamepadGuildHome:GetFooterNarrationText()
     return GAMEPAD_GENERIC_FOOTER:GetNarrationText(self.footerData)
+end
+
+--Overridden from base
+function ZO_GamepadGuildHome:GetFooterNarration()
+    return self:GetFooterNarrationText()
 end
 
 --------------------

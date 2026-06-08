@@ -73,6 +73,14 @@ GAMEPAD_COLLECTIONS_ITEM_PREVIEW_OPTIONS_FRAGMENT = ZO_ItemPreviewOptionsFragmen
     previewBufferMS = 300,
 })
 
+GAMEPAD_RIGHT_TOOLTIP_MOUNTED_ITEM_PREVIEW_OPTIONS_FRAGMENT = ZO_ItemPreviewOptionsFragment:New({
+    paddingLeft = 0,
+    paddingRight = ZO_GAMEPAD_PANEL_WIDTH + ZO_GAMEPAD_SAFE_ZONE_INSET_X,
+    dynamicFramingConsumedWidth = 1150,
+    dynamicFramingConsumedHeight = 400,
+    forcePreparePreview = false,
+})
+
 local ZO_Gamepad_GuildNameFooterFragment = ZO_FadeSceneFragment:Subclass()
 
 function ZO_Gamepad_GuildNameFooterFragment:New(...)
@@ -148,9 +156,6 @@ GAMEPAD_ENCHANTING_INVENTORY_FRAGMENT = ZO_CreateQuadrantConveyorFragment(ZO_Gam
 
 GAMEPAD_SKILLS_FRAGMENT = ZO_SimpleSceneFragment:New(ZO_GamepadSkillsTopLevel)
 GAMEPAD_SKILLS_FRAGMENT:SetHideOnSceneHidden(true)
-
-GAMEPAD_QUEST_JOURNAL_FRAGMENT = ZO_SimpleSceneFragment:New(ZO_QuestJournal_GamepadTopLevel)
-GAMEPAD_QUEST_JOURNAL_FRAGMENT:SetHideOnSceneHidden(true)
 
 GAMEPAD_LEADERBOARDS_FRAGMENT = ZO_SimpleSceneFragment:New(ZO_Leaderboards_Gamepad)
 GAMEPAD_LEADERBOARDS_FRAGMENT:SetHideOnSceneHidden(true)

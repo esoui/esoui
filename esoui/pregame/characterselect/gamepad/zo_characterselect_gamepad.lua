@@ -655,6 +655,15 @@ local function InitKeybindingDescriptor(self)
         end,
     }
 
+    
+    local logoutKeybind =
+    {
+        name = GetString(SI_GAME_MENU_LOGOUT),
+        keybind = "UI_SHORTCUT_NEGATIVE",
+        order = -1000,
+        callback = ZO_Disconnect,
+    }
+
     self.charListKeybindStripDescriptorDefault =
     {
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
@@ -703,7 +712,7 @@ local function InitKeybindingDescriptor(self)
         },
         deleteKeybind,
         optionsKeybind,
-        KEYBIND_STRIP:GenerateGamepadBackButtonDescriptor(ZO_Disconnect),
+        logoutKeybind,
     }
     ZO_Gamepad_AddListTriggerKeybindDescriptors(self.charListKeybindStripDescriptorDefault, self.characterList)
 
@@ -724,7 +733,7 @@ local function InitKeybindingDescriptor(self)
         },
         deleteKeybind,
         optionsKeybind,
-        KEYBIND_STRIP:GenerateGamepadBackButtonDescriptor(ZO_Disconnect),
+        logoutKeybind,
     }
     ZO_Gamepad_AddListTriggerKeybindDescriptors(self.charListKeybindStripDescriptorRename, self.characterList)
 
@@ -745,7 +754,7 @@ local function InitKeybindingDescriptor(self)
             end,
         },
         optionsKeybind,
-        KEYBIND_STRIP:GenerateGamepadBackButtonDescriptor(ZO_Disconnect),
+        logoutKeybind,
     }
     ZO_Gamepad_AddListTriggerKeybindDescriptors(self.charListKeybindStripDescriptorCreateNew, self.characterList)
 
@@ -765,7 +774,7 @@ local function InitKeybindingDescriptor(self)
             end,
         },
         optionsKeybind,
-        KEYBIND_STRIP:GenerateGamepadBackButtonDescriptor(ZO_Disconnect),
+        logoutKeybind,
     }
     ZO_Gamepad_AddListTriggerKeybindDescriptors(self.charListKeybindStripDescriptorChapter, self.characterList)
 
@@ -784,7 +793,7 @@ local function InitKeybindingDescriptor(self)
             end,
         },
         optionsKeybind,
-        KEYBIND_STRIP:GenerateGamepadBackButtonDescriptor(ZO_Disconnect),
+        logoutKeybind,
     }
     ZO_Gamepad_AddListTriggerKeybindDescriptors(self.charListKeybindStripDescriptorEvent, self.characterList)
 
@@ -810,7 +819,7 @@ local function InitKeybindingDescriptor(self)
             end,
         },
         optionsKeybind,
-        KEYBIND_STRIP:GenerateGamepadBackButtonDescriptor(ZO_Disconnect),
+        logoutKeybind,
     }
     ZO_Gamepad_AddListTriggerKeybindDescriptors(self.charListKeybindStripDescriptorEsoPlus, self.characterList)
 
@@ -820,7 +829,7 @@ local function InitKeybindingDescriptor(self)
     {
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
         optionsKeybind,
-        KEYBIND_STRIP:GenerateGamepadBackButtonDescriptor(ZO_Disconnect),
+        logoutKeybind,
     }
 
     -- Keybinds for service token controls
@@ -855,7 +864,7 @@ local function InitKeybindingDescriptor(self)
             end,
         },
         optionsKeybind,
-        KEYBIND_STRIP:GenerateGamepadBackButtonDescriptor(ZO_Disconnect),
+        logoutKeybind,
     }
 
     -- Keybinds for using service tokens on the character list

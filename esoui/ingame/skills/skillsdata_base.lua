@@ -300,6 +300,14 @@ function ZO_SkillLineData_Base:HasMastery()
     return false
 end
 
+function ZO_SkillLineData_Base:IsClassMastery()
+    return false
+end
+
+function ZO_SkillLineData_Base:GetNumClassMasteryPoints()
+    return 0
+end
+
 function ZO_SkillLineData_Base:GetSkillPointCostMultiplier()
     return 1
 end

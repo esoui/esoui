@@ -30,6 +30,7 @@ SOUNDS =
     MAP_NAVIGATE_IN                 = "Map_Navigate_In";
     MAP_NAVIGATE_OUT                = "Map_Navigate_Out";
     MAP_SHOW_INFO                   = "Map_Show_Info";
+    MAP_WAYSHRINE_TELEPORT          = "Map_Wayshrine_Teleport";
     GROUP_WINDOW_OPEN               = "Group_Open",
     GROUP_WINDOW_CLOSE              = "Group_Close",
     CONTACTS_WINDOW_OPEN            = "Contacts_Open",
@@ -1158,7 +1159,13 @@ SOUNDS =
     RETURNING_PLAYER_CLOSE_KEYBOARD = "ReturningPlayer_Close",
     RETURNING_PLAYER_OPEN_GAMEPAD = "Console_ReturningPlayer_Open",
     RETURNING_PLAYER_CLOSE_GAMEPAD = "Console_ReturningPlayer_Close",
-    RETURNING_PLAYER_ENTER_INTRO_GAMEPLAY = "HerosReturn_Enter",
+    ENTER_INTRO_GAMEPLAY_EXPERIENCE = "HerosReturn_Enter",
+
+    -- Low Level Player
+    LOW_LEVEL_PLAYER_OPEN_KEYBOARD = "LowLevelPlayer_Open",
+    LOW_LEVEL_PLAYER_CLOSE_KEYBOARD = "LowLevelPlayer_Close",
+    LOW_LEVEL_PLAYER_OPEN_GAMEPAD = "Console_LowLevelPlayer_Open",
+    LOW_LEVEL_PLAYER_CLOSE_GAMEPAD = "Console_LowLevelPlayer_Close",
 
     -- Vengeance
     VENGEANCE_LOADOUT_EQUIPPED = "VengeanceLoadoutEquipped",
@@ -1169,6 +1176,20 @@ SOUNDS =
     VENGEANCE_PERK_PICKUP = "VengeancePerkPickup",
     VENGEANCE_PERK_DROP = "VengeancePerkDrop",
     VENGEANCE_CHANGE_LOADOUT_PROMPT = "VengeanceChangeLoadoutPrompt",
+
+    -- Veterancy
+    VETERANCY_RANK_UP_LOW = "VeterancyRankUpLow",
+    VETERANCY_RANK_UP_HIGH = "VeterancyRankUpHigh",
+    VETERANCY_RANK_UP_MAX = "VeterancyRankUpMax",
+    VETERANCY_RANK_UP_REPEATABLE = "VeterancyRankUpRepeatable",
+    VETERANCY_RANK_SCREEN_OPEN = "VeterancyRankScreenOpen",
+    VETERANCY_RANK_REWARD_CLAIM_ALL = "VeterancyRankRewardClaimAll",
+    VETERANCY_RANK_REWARD_CLAIM_RANK = "VeterancyRankRewardClaimRank",
+    VETERANCY_RANK_REWARD_CLAIM = "VeterancyRankRewardClaim",
+    VETERANCY_RANK_REWARD_CLAIM_REPEATABLE = "VeterancyRankRewardClaimRepeatable",
+    VETERANCY_RANK_REWARD_MAX_CLAIM = "VeterancyRankRewardMaxClaim",
+    VETERANCY_RANK_SCROLL_LEFT = "VeterancyRankScrollLeft",
+    VETERANCY_RANK_SCROLL_RIGHT = "VeterancyRankScrollRight",
 
     -- Respec Cast Time
     RESPEC_CAST_TIME_START = "RespecCastTime_Start",
@@ -1214,4 +1235,13 @@ SOUNDS =
     ADVENTURE_ZONE_BOSS_TREE_CLOSED = "AdventureZone_BossTreeClosed",
     ADVENTURE_ZONE_OVERVIEW_OPENED = "AdventureZone_OverviewOpened",
     ADVENTURE_ZONE_OVERVIEW_CLOSED = "AdventureZone_OverviewClosed",
+
+    -- Challenge Difficulty
+    CHALLENGE_DIFFICULTY_SELECTED_BASEGAME = "ChallengeDifficulty_BaseGameSelected",
+    CHALLENGE_DIFFICULTY_SELECTED_JOURNEYMAN = "ChallengeDifficulty_JourneymanSelected",
+    CHALLENGE_DIFFICULTY_SELECTED_ADVENTURER = "ChallengeDifficulty_AdventurerSelected",
+    CHALLENGE_DIFFICULTY_SELECTED_VETERAN = "ChallengeDifficulty_VeteranSelected",
+    CHALLENGE_DIFFICULTY_DIFFICULTY_TAB_CLICKED = "ChallengeDifficulty_DifficultyTabClicked",
+    CHALLENGE_DIFFICULTY_LEVEL_UP_REWARDS_TAB_CLICKED = "ChallengeDifficulty_LevelUpRewardsTabClicked",
+    CHALLENGE_DIFFICULTY_CHANGE_DIFFICULTY_BUTTON_CLICKED = "ChallengeDifficulty_ChangeDifficulty_Confirm",
 }

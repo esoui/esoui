@@ -296,8 +296,8 @@ function ZO_Mail_Gamepad:PerformDeferredInitialization()
 
                 if anyInboxFull then
                     return zo_strformat(SI_GAMEPAD_MAIL_INBOX_WINDOW_TITLE, GetString(SI_WINDOW_TITLE_INBOX_MAIL), GetString(SI_GAMEPAD_MAIL_INBOX_FULL))
-                elseif GetNumUnreadMail() > 0 then
-                    return zo_strformat(SI_GAMEPAD_MAIL_INBOX_WINDOW_TITLE, GetString(SI_WINDOW_TITLE_INBOX_MAIL), GetNumUnreadMail())
+                elseif MAIL_MANAGER:GetTotalNumUnreadMail() > 0 then
+                    return zo_strformat(SI_GAMEPAD_MAIL_INBOX_WINDOW_TITLE, GetString(SI_WINDOW_TITLE_INBOX_MAIL), MAIL_MANAGER:GetTotalNumUnreadMail())
                 else
                     return GetString(SI_WINDOW_TITLE_INBOX_MAIL)
                 end

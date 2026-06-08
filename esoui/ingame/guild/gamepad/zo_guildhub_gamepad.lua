@@ -22,6 +22,7 @@ local GUILD_HUB_SINGLE_GUILD_LIST_OPTION =
     RECRUITMENT = 3,
     HERALDRY = 4,
     HISTORY = 5,
+    GUILD_MAIL = 6,
 }
 
 local function SetupRequestEntry(control, data, selected, reselectingDuringRebuild, enabled, active)
@@ -1008,6 +1009,14 @@ function ZO_GamepadGuildHub:RefreshSingleGuildList()
     data.optionId = GUILD_HUB_SINGLE_GUILD_LIST_OPTION.RECRUITMENT
     data.selectCallback = self:GenerateShowGuildSubmenuCallback(function() GAMEPAD_GUILD_HOME:ShowRecruitment() end, title)
     self.singleGuildList:AddEntry(GAMEPAD_OPTIONS_LIST_ENTRY, data)
+
+    if DoesPlayerHaveGuildPermission(guildId, GUILD_PERMISSION_SEND_DELETE_GUILD_MAILER) then
+        title = GetString(SI_GUILD_RECRUITMENT_CATEGORY_GUILD_MAIL)
+        data = ZO_GamepadEntryData:New(title)
+        data.optionId = GUILD_HUB_SINGLE_GUILD_LIST_OPTION.GUILD_MAIL
+        data.selectCallback = self:GenerateShowGuildSubmenuCallback(function() GAMEPAD_GUILD_HOME:ShowGuildMail() end, title)
+        self.singleGuildList:AddEntry(GAMEPAD_OPTIONS_LIST_ENTRY, data)
+    end
 
     if DoesGuildHavePrivilege(guildId, GUILD_PRIVILEGE_HERALDRY) and IsPlayerAllowedToEditHeraldry(guildId) and not showEditRankHeaderTitle then
         title = GetString(SI_WINDOW_TITLE_GUILD_HERALDRY)

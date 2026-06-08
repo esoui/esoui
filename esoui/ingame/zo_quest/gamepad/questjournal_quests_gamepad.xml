@@ -1,0 +1,133 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_QuestJournal_HintBulletLabel_Gamepad" font="ZoFontGamepad34" virtual="true"/>
+        <Label name="ZO_QuestJournal_ConditionBulletLabel_Gamepad" font="ZoFontGamepad34" virtual="true"/>
+        <Label name="ZO_QuestJournal_DetailText_Gamepad" font="ZoFontGamepadCondensed42" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" virtual="true"/>
+        <Label name="ZO_QuestJournal_TasksText_Gamepad" font="ZoFontGamepadBold22" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" modifyTextType="UPPERCASE" virtual="true"/>
+        <Control name="ZO_QuestJournal_CompletedTaskIcon_Gamepad" virtual="true">
+            <Dimensions x="16" y="16"/>
+            <Controls>
+                <Texture name="$(parent)Texture" textureFile="EsoUI/Art/Journal/Gamepad/gp_journalCheck.dds">
+                    <Dimensions x="32" y="32"/>
+                    <Anchor point="CENTER"/>
+                </Texture>
+            </Controls>
+        </Control>
+        <Control name="ZO_QuestJournal_Gamepad_MenuEntryTemplate" inherits="ZO_GamepadSubMenuEntryTemplate" virtual="true">
+            <OnInitialized>
+                ZO_SharedGamepadEntry_OnInitialized(self)
+                ZO_SharedGamepadEntry_SetHeightFromLabels(self)
+                self.selectedIcon = self:GetNamedChild("SelectedIcon")
+                self.selectedIcon:GetNamedChild("Highlight"):SetHidden(true)
+            </OnInitialized>
+            <Controls>
+                <Texture name="$(parent)SelectedIcon" inherits="ZO_GamepadMenuEntryIconTemplate">
+                    <Dimensions x="32" y="32"/>
+                    <Anchor point="CENTER" relativePoint="LEFT" offsetX="20"/>
+                </Texture>
+            </Controls>
+        </Control>
+        <Control name="ZO_QuestJournal_QuestsPanel_Gamepad" inherits="ZO_Gamepad_ParametricList_Screen" virtual="true">
+            <Controls>
+                <Control name="$(parent)MiddlePane" inherits="ZO_GamepadGrid_NavQuadrant_2_3_Anchors" hidden="true">
+                    <Controls>
+                        <Control name="$(parent)Container" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
+                            <OnInitialized>
+                                self.header = self:GetNamedChild("GenericHeader")
+                            </OnInitialized>
+                            <Controls>
+                                <Control name="$(parent)GenericHeader" inherits="ZO_GamepadGenericContentHeader"/>
+                                <Control name="$(parent)Content">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)GenericHeader" relativePoint="BOTTOMLEFT" offsetY="50"/>
+                                    <Anchor point="BOTTOMRIGHT"/>
+                                    <Controls>
+                                        <Control name="$(parent)QuestInfoContainer" inherits="ZO_ScrollContainer_Gamepad">
+                                            <AnchorFill/>
+                                            <OnInitialized>
+                                                ZO_Scroll_Initialize_Gamepad(self)
+                                                ZO_Scroll_Gamepad_SetScrollIndicatorSide(self:GetNamedChild("ScrollIndicator"), ZO_SharedGamepadNavQuadrant_2_3_Background, LEFT, nil, ZO_GAMEPAD_PANEL_BG_SCROLL_INDICATOR_OFFSET_FOR_ARROW)
+                                            </OnInitialized>
+                                            <Controls>
+                                                <Control name="$(parent)Scroll" override="true">
+                                                    <Controls>
+                                                        <Control name="$(parent)Child" override="true">
+                                                            <Controls>
+                                                                <Label name="$(parent)BGText" inherits="ZO_QuestJournal_DetailText_Gamepad">
+                                                                    <Anchor point="TOPLEFT"/>
+                                                                    <Anchor point="TOPRIGHT" relativeTo="$(grandparent)"/>
+                                                                </Label>
+                                                                <Label name="$(parent)StepText" inherits="ZO_QuestJournal_DetailText_Gamepad">
+                                                                    <Anchor point="TOPLEFT" relativeTo="$(parent)BGText" relativePoint="BOTTOMLEFT" offsetY="15"/>
+                                                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)BGText" relativePoint="BOTTOMRIGHT" offsetY="15"/>
+                                                                </Label>
+                                                            </Controls>
+                                                        </Control>
+                                                    </Controls>
+                                                </Control>
+                                            </Controls>
+                                        </Control>
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+                <Control name="$(parent)RightPane" inherits="ZO_GamepadGrid_NavQuadrant_4_Anchors" hidden="true">
+                    <Controls>
+                        <Control name="$(parent)Container" inherits="ZO_GamepadGrid_NavQuadrant_ContainerAnchors">
+                            <Controls>
+                                <Control name="$(parent)Content">
+                                    <Anchor point="TOPLEFT" offsetY="124"/>
+                                    <Anchor point="BOTTOMRIGHT" offsetY="-124"/>
+                                    <Controls>
+                                        <Control name="$(parent)QuestStep" inherits="ZO_ScrollContainer_Gamepad">
+                                            <AnchorFill/>
+                                            <OnInitialized>
+                                                ZO_Scroll_Initialize_Gamepad(self)
+                                                ZO_Scroll_Gamepad_SetScrollIndicatorSide(self:GetNamedChild("ScrollIndicator"), ZO_SharedGamepadNavQuadrant_4_Background, LEFT)
+                                            </OnInitialized>
+                                            <Controls>
+                                                <Control name="$(parent)Scroll" override="true">
+                                                    <Controls>
+                                                        <Control name="$(parent)Child" override="true">
+                                                            <Controls>
+                                                                <Label name="$(parent)ConditionLabel" inherits="ZO_QuestJournal_TasksText_Gamepad">
+                                                                    <Anchor point="TOPLEFT" offsetY="50"/>
+                                                                    <Anchor point="RIGHT" relativeTo="$(grandparent)" constrains="X"/>
+                                                                </Label>
+                                                                <Control name="$(parent)ConditionBulletList">
+                                                                    <Anchor point="TOPLEFT" relativeTo="$(parent)ConditionLabel" relativePoint="BOTTOMLEFT" offsetX="-51"/>
+                                                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)ConditionLabel" relativePoint="BOTTOMRIGHT" offsetY="17"/>
+                                                                </Control>
+                                                                <Label name="$(parent)OptionalStepLabel" inherits="ZO_QuestJournal_TasksText_Gamepad" text="SI_GAMEPAD_QUEST_JOURNAL_OPTIONAL_STEPS_HEADER">
+                                                                    <Anchor point="TOPLEFT" relativeTo="$(parent)ConditionBulletList" relativePoint="BOTTOMLEFT" offsetX="50"/>
+                                                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)ConditionBulletList" relativePoint="BOTTOMRIGHT" offsetY="21"/>
+                                                                </Label>
+                                                                <Control name="$(parent)OptionalStepBulletList">
+                                                                    <Anchor point="TOPLEFT" relativeTo="$(parent)OptionalStepLabel" relativePoint="BOTTOMLEFT" offsetX="-51"/>
+                                                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)OptionalStepLabel" relativePoint="BOTTOMRIGHT" offsetY="17"/>
+                                                                </Control>
+                                                                <Label name="$(parent)HintLabel" inherits="ZO_QuestJournal_TasksText_Gamepad" text="SI_GAMEPAD_QUEST_JOURNAL_HINT_HEADER">
+                                                                    <Anchor point="TOPLEFT" relativeTo="$(parent)OptionalStepBulletList" relativePoint="BOTTOMLEFT" offsetX="50"/>
+                                                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)OptionalStepBulletList" relativePoint="BOTTOMRIGHT" offsetY="21"/>
+                                                                </Label>
+                                                                <Control name="$(parent)HintBulletList">
+                                                                    <Anchor point="TOPLEFT" relativeTo="$(parent)HintLabel" relativePoint="BOTTOMLEFT" offsetX="-51"/>
+                                                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)HintLabel" relativePoint="BOTTOMRIGHT" offsetY="17"/>
+                                                                </Control>
+                                                            </Controls>
+                                                        </Control>
+                                                    </Controls>
+                                                </Control>
+                                            </Controls>
+                                        </Control>
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

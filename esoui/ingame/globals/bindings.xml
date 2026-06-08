@@ -1883,7 +1883,7 @@
     </Layer>
 
     <!-- Not player facing -->
-    <Layer name="ReturningPlayerAnnouncementInterceptLayer" allowFallthrough="false">
+    <Layer name="PromotionalEventPersonalCampaignAnnouncementInterceptLayer" allowFallthrough="false">
         <Category>
             <!--UI Shortcuts-->
             <AllowAction name="UI_SHORTCUT_PRIMARY"/>

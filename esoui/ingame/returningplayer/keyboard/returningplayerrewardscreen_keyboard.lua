@@ -20,7 +20,7 @@ function ZO_ReturningPlayerRewardScreen_Keyboard:OnDeferredInitialize()
 
     self.goToPromotionalEventButton = self.control:GetNamedChild("GoToPromotionalEvent")
     local promotionalEventNameText = PROMOTIONAL_EVENT_MANAGER:GetPromotionalEventsColorizedDisplayName()
-    self.goToPromotionalEventButton:SetText(zo_strformat(SI_RETURNING_PLAYER_REWARDS_NAVIGATION_ACTION, promotionalEventNameText))
+    self.goToPromotionalEventButton:SetText(zo_strformat(SI_PROMOTIONAL_EVENT_PERSONAL_CAMPAIGN_NAVIGATION_TO_PROMOTIONAL_EVENT_ACTION, promotionalEventNameText))
 
     ApplyTemplateToControl(self.closeKeybindButton, "ZO_KeybindButton_Keyboard_Template")
     ApplyTemplateToControl(self.primaryKeybindButton, "ZO_KeybindButton_Keyboard_Template")
@@ -132,5 +132,5 @@ function ZO_ReturningPlayerRewardScreen_Keyboard.IntroReward_OnMouseUp(control, 
 end
 
 function ZO_ReturningPlayerRewardScreen_Keyboard.GoToPromotionalEvent_OnClicked(control)
-    RETURNING_PLAYER_MANAGER:GoToPromotionalEvents()
+    PROMOTIONAL_EVENT_PERSONAL_CAMPAIGN_MANAGER:GoToPromotionalEvents()
 end

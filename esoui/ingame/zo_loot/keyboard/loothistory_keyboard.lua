@@ -60,6 +60,7 @@ do
         ["esoPlusOffersSceneKeyboard"] = true,
         ["endeavorSealStoreSceneKeyboard"] = true,
         ["gildbarStoreSceneKeyboard"] = true,
+        ["VeterancySceneKeyboard"] = true,
     }
     function ZO_LootHistory_Keyboard:CanShowItemsInHistory()
         local currentSceneName = SCENE_MANAGER:GetCurrentSceneName()

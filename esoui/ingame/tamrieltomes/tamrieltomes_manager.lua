@@ -39,6 +39,7 @@ function TamrielTomes_Manager:Initialize()
     local function OnRewardTrackStarted(_, rewardTrackType, rewardTrackId)
         if rewardTrackType == REWARD_TRACK_TYPE_TAMRIEL_TOMES then
             self:UpdateTamrielTomesAvailability()
+            self:FireCallbacks("RewardTrackStarted", rewardTrackId)
         end
     end
 
@@ -50,6 +51,7 @@ function TamrielTomes_Manager:Initialize()
 
     function OnCatalogUpdated()
         self:UpdateDirectPurchaseData()
+        self:UpdateTamrielTomesAvailability()
     end
 
     DIRECT_PURCHASE_MANAGER:RegisterCallback("CatalogUpdated", OnCatalogUpdated)
@@ -128,7 +130,12 @@ end
 function TamrielTomes_Manager:MarkTomeSeen(tomeId)
     local tomeSavedVars = self:GetOrCreateSavedVarsForTome(tomeId)
     if tomeSavedVars then
+        local wasNew = tomeSavedVars.lastSeenTimestamp == nil
         tomeSavedVars.lastSeenTimestamp = GetTimeStamp()
+
+        if wasNew then
+            self:FireCallbacks("NewTomeSeen", tomeId)
+        end
     end
 end
 
@@ -165,19 +172,19 @@ function TamrielTomes_Manager:HasNewTomes()
     return false
 end
 
--- Indicates whether there are any Tomes currently available.
-function TamrielTomes_Manager:AreTomesAvailable()
-    return self:GetNumActiveTomes() > 0
-end
-
 -- Returns the first active Tome Id, if any, or nil.
 function TamrielTomes_Manager:GetActiveTomeId()
     local activeTomeIds = self:GetActiveTomeIds()
     return activeTomeIds[1]
 end
 
--- Returns all active Tome Ids.
+-- Returns the active season Tome Id(s).
+-- Note that there should typically only be, at most, one.
 function TamrielTomes_Manager:GetActiveTomeIds()
+    if not IsTamrielTomesEnabled() then
+        return {}
+    end
+
     local activeTomeIds = { GetActiveReferenceTrackIdsForRewardTrackType(REWARD_TRACK_TYPE_TAMRIEL_TOMES) }
     return activeTomeIds
 end
@@ -187,9 +194,52 @@ function TamrielTomes_Manager:GetNumActiveTomes()
     return #self:GetActiveTomeIds()
 end
 
+-- Returns true if the specified Tome Id is the currently active season.
+function TamrielTomes_Manager:IsTomeActive(tomeId)
+    local activeTomeIds = self:GetActiveTomeIds()
+    return ZO_IsElementInNumericallyIndexedTable(activeTomeIds, tomeId)
+end
+
+-- Indicates whether there are any Tomes currently available.
+function TamrielTomes_Manager:AreTomesAvailable()
+    return self:GetNumAvailableTomes() > 0
+end
+
+-- Returns the number of available Tomes.
+function TamrielTomes_Manager:GetNumAvailableTomes()
+    local numAvailableTomes = #self:GetAvailableTomeIds()
+    return numAvailableTomes
+end
+
+-- Returns all accessible Tome Ids that are available to view.
+function TamrielTomes_Manager:GetAvailableTomeIds()
+    if not IsTamrielTomesEnabled() then
+        return {}
+    end
+
+    local availableTomeIds = {}
+    local numAvailableTomes = GetNumReferenceTracksForType(REWARD_TRACK_TYPE_TAMRIEL_TOMES)
+    for tomeIndex = 1, numAvailableTomes do
+        local tomeId = GetReferenceTrackIdFromIndex(REWARD_TRACK_TYPE_TAMRIEL_TOMES, tomeIndex)
+        table.insert(availableTomeIds, tomeId)
+    end
+    return availableTomeIds
+end
+
+-- Returns true if the specified Tome Id is accessible and available to view.
+function TamrielTomes_Manager:IsTomeAvailable(tomeId)
+    local availableTomeIds = self:GetAvailableTomeIds()
+    return ZO_IsElementInNumericallyIndexedTable(availableTomeIds, tomeId)
+end
+
 -- Indicates whether a valid Tome Id is selected.
 function TamrielTomes_Manager:HasSelectedTomeId()
     return self.selectedTomeId ~= nil
+end
+
+-- Indicates whether the selected Tome Id is the active season Tome Id.
+function TamrielTomes_Manager:IsActiveTomeSelected()
+    return self.selectedTomeId == self:GetActiveTomeId()
 end
 
 -- Returns the selected Tome Id, if any.
@@ -197,6 +247,17 @@ function TamrielTomes_Manager:GetSelectedTomeId()
     return self.selectedTomeId
 end
 
+-- Returns true if an End of Season recap is available to view.
+function TamrielTomes_Manager:HasEndOfSeasonRecap()
+    return HasTamrielTomesEndOfSeasonRecap()
+end
+
+-- Returns true if an End of Season recap that has not yet been seen by the player is available to view.
+function TamrielTomes_Manager:HasNewEndOfSeasonRecap()
+    return self:HasEndOfSeasonRecap() and not HasPlayerSeenTamrielTomesEndOfSeasonRecap()
+end
+
+-- Returns true if the currently active season Tome has not yet been seen by the player.
 function TamrielTomes_Manager:IsCurrentSeasonTamrielTomeNew()
     local currentSeasonTomeId = self:GetActiveTomeId()
     if not (currentSeasonTomeId and currentSeasonTomeId ~= 0) then
@@ -207,14 +268,25 @@ function TamrielTomes_Manager:IsCurrentSeasonTamrielTomeNew()
 end
 
 function TamrielTomes_Manager:SelectTomeId(tomeId)
-    if TAMRIEL_TOMES_MANAGER and not TAMRIEL_TOMES_MANAGER:AreTomesAvailable() then
+    if not self:AreTomesAvailable() then
         tomeId = nil
     elseif tomeId == nil or tomeId == 0 then
         -- Default to the active season's tome.
         tomeId = self:GetActiveTomeId()
+
+        if tomeId == nil or tomeId == 0 then
+            local availableTomeIds = self:GetAvailableTomeIds()
+            if #availableTomeIds ~= 0 then
+                -- Fallback to the first available season's tome.
+                tomeId = availableTomeIds[1]
+            end
+        end
     end
 
-    -- TODO Tamriel Tomes: Verify that 'tomeId' is a valid, accessible Tome Id.
+    if tomeId and not self:IsTomeAvailable(tomeId) then
+        -- The specified tome is neither the active season's tome nor an accessible tome from a past season.
+        tomeId = nil
+    end
 
     if tomeId ~= self.selectedTomeId then
         -- Order matters
@@ -286,8 +358,8 @@ end
 function TamrielTomes_Manager:UpdateTamrielTomesAvailability()
     -- Refresh the selected Tome to validate the selection now that the Tomes have changed.
     self:SelectTomeId(self.selectedTomeId)
-
     self:RefreshMainMenus()
+    self:FireCallbacks("AvailableTomesChanged")
 end
 
 function TamrielTomes_Manager:RefreshMainMenus()
@@ -375,6 +447,8 @@ function TamrielTomes_Manager:GetPurchaseDisabledMessage()
         message = GetString(SI_TAMRIEL_TOMES_UPGRADE_DISABLED_FULLY_UPGRADED)
     elseif not self:IsDirectPurchaseEnabled() then
         message = ZO_ERROR_COLOR:Colorize(GetString(SI_TAMRIEL_TOMES_UPGRADE_DISABLED))
+    elseif not self:IsTomeActive(self:GetSelectedTomeId()) then
+        message = GetString(SI_TAMRIEL_TOMES_UPGRADE_CANNOT_UPGRADE_PAST_TOME)
     elseif not self:IsAnySelectedTomeProductAvailableForPurchase() then
         message = GetString(SI_TAMRIEL_TOMES_UPGRADE_DISABLED_NO_SKU_DATA)
     end
@@ -384,6 +458,48 @@ end
 function TamrielTomes_Manager:GetPurchaseDataForSelectedTomeProductType(productType)
     local purchaseData = self.selectedTomePurchaseData[productType]
     return purchaseData
+end
+
+-- The price(s) returned have been processed by grammar.
+function TamrielTomes_Manager:GetPricingInfoFormattedForSelectedTomeProductType(productType)
+    local purchaseData = self:GetPurchaseDataForSelectedTomeProductType(productType)
+    local purchaseSkuData = purchaseData and purchaseData:GetSkuData() or nil
+    if not purchaseSkuData then
+        return nil
+    end
+
+    local currentPriceString, basePriceString = purchaseSkuData:GetPricingInfoFormatted()
+    if productType ~= TAMRIEL_TOME_PRODUCT_TYPE_PREMIUM_PLUS_UPGRADE then
+        -- Return the prices unabridged for non-Premium Plus Upgrade products.
+        return currentPriceString, basePriceString
+    end
+
+    -- Look up the price data for the Premium Plus product.
+    local premiumPlusPurchaseData = self:GetPurchaseDataForSelectedTomeProductType(TAMRIEL_TOME_PRODUCT_TYPE_PREMIUM_PLUS)
+    local premiumPlusPurchaseSkuData = premiumPlusPurchaseData and premiumPlusPurchaseData:GetSkuData() or nil
+    if not premiumPlusPurchaseSkuData then
+        -- Fall back to the Premium Plus Upgrade pricing.
+        return currentPriceString, basePriceString
+    end
+
+    local _, premiumPlusBasePriceString = premiumPlusPurchaseSkuData:GetPricingInfoFormatted()
+    if not premiumPlusBasePriceString or premiumPlusBasePriceString == "" then
+        -- Fall back to the Premium Plus Upgrade pricing.
+        return currentPriceString, basePriceString
+    end
+
+    -- Override the Premium Plus Upgrade base price with the Premium Plus base price.
+    return currentPriceString, premiumPlusBasePriceString
+end
+
+-- The price(s) returned have been processed by grammar.
+function TamrielTomes_Manager:GetPricingStringFormattedForSelectedTomeProductType(productType)
+    local currentPriceString, basePriceString = self:GetPricingInfoFormattedForSelectedTomeProductType(productType)
+    if currentPriceString == basePriceString or not basePriceString or basePriceString == "" then
+        return currentPriceString
+    end
+
+    return string.format("%s %s", zo_strikethroughTextFormat(basePriceString), currentPriceString)
 end
 
 TAMRIEL_TOMES_MANAGER = TamrielTomes_Manager:New()

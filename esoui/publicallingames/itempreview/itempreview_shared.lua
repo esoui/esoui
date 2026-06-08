@@ -594,6 +594,10 @@ function ZO_ItemPreview_Shared:IsPreviewEnabled()
     return self.enabledPreview
 end
 
+function ZO_ItemPreview_Shared:IsWaitingForPreviewBegin()
+    return self.waitingForPreviewBegin
+end
+
 function ZO_ItemPreview_Shared:SetupPreview()
     self:RefreshDynamicFramingOpening()
     self:RefreshPreviewInEmptyWorld()
@@ -823,8 +827,10 @@ end
 
 function ZO_ItemPreview_Shared:Apply()
     self.previewAtMS = nil
-    self.currentPreviewTypeObject:Apply(self.previewVariationIndex)
-    self.currentPreviewTypeObject:ApplyAction(self.previewActionIndex)
+    if self.currentPreviewTypeObject then
+        self.currentPreviewTypeObject:Apply(self.previewVariationIndex)
+        self.currentPreviewTypeObject:ApplyAction(self.previewActionIndex)
+    end
     self.lastSetChangeTime = GetFrameTimeMilliseconds()
     ApplyChangesToPreviewCollectionShown()
     self.oldPreviewVariationIndex = nil
@@ -856,7 +862,9 @@ function ZO_ItemPreview_Shared:PreviewNextVariation()
         self:ApplyOrBuffer()
     end
 
-    self:SetVariationLabel(self.currentPreviewTypeObject:GetVariationName(self.previewVariationIndex))
+    if self.currentPreviewTypeObject then
+        self:SetVariationLabel(self.currentPreviewTypeObject:GetVariationName(self.previewVariationIndex))
+    end
 end
 
 function ZO_ItemPreview_Shared:PreviewPreviousVariation()
@@ -875,7 +883,9 @@ function ZO_ItemPreview_Shared:PreviewPreviousVariation()
         self:ApplyOrBuffer()
     end
 
-    self:SetVariationLabel(self.currentPreviewTypeObject:GetVariationName(self.previewVariationIndex))
+    if self.currentPreviewTypeObject then
+        self:SetVariationLabel(self.currentPreviewTypeObject:GetVariationName(self.previewVariationIndex))
+    end
 end
 
 function ZO_ItemPreview_Shared:HasVariations()
@@ -894,7 +904,9 @@ function ZO_ItemPreview_Shared:PreviewNextAction()
         self:ApplyOrBuffer()
     end
 
-    self:SetActionLabel(self.currentPreviewTypeObject:GetActionName(self.previewVariationIndex, self.previewActionIndex))
+    if self.currentPreviewTypeObject then
+        self:SetActionLabel(self.currentPreviewTypeObject:GetActionName(self.previewVariationIndex, self.previewActionIndex))
+    end
 end
 
 function ZO_ItemPreview_Shared:PreviewPreviousAction()
@@ -917,20 +929,24 @@ function ZO_ItemPreview_Shared:HasActions()
 end
 
 function ZO_ItemPreview_Shared:SetupActionCarousel()
-    self.numPreviewActions = self.currentPreviewTypeObject:GetNumActions(self.previewVariationIndex)
+    if self.currentPreviewTypeObject then
+        self.numPreviewActions = self.currentPreviewTypeObject:GetNumActions(self.previewVariationIndex)
 
-    if self.numPreviewActions > 1 then
-        self:SetActionControlsHidden(false)
-        self.actionLabel:SetText(self.currentPreviewTypeObject:GetActionName(self.previewVariationIndex, self.previewActionIndex))
-    else
-        self:SetActionControlsHidden(true)
+        if self.numPreviewActions > 1 then
+            self:SetActionControlsHidden(false)
+            self.actionLabel:SetText(self.currentPreviewTypeObject:GetActionName(self.previewVariationIndex, self.previewActionIndex))
+        else
+            self:SetActionControlsHidden(true)
+        end
     end
 end
 
 function ZO_ItemPreview_Shared:SetupVariationControls()
     if self.numPreviewVariations > 1 then
         self:SetVariationControlsHidden(false)
-        self.variationLabel:SetText(self.currentPreviewTypeObject:GetVariationName(self.previewVariationIndex))
+        if self.currentPreviewTypeObject then
+            self.variationLabel:SetText(self.currentPreviewTypeObject:GetVariationName(self.previewVariationIndex))
+        end
     else
         self:SetVariationControlsHidden(true)
     end

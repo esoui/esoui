@@ -44,7 +44,7 @@
                 ZO_TreeEntry_OnMouseUp(self, upInside)
             </OnMouseUp>
             <Controls>
-                <Texture name="$(parent)Icon" inherits="ZO_MultiIcon">
+                <Texture name="$(parent)Icon" inherits="ZO_MultiIcon" level="2">
                     <Anchor point="LEFT"/>
                     <Dimensions x="32" y="32"/>
                 </Texture>

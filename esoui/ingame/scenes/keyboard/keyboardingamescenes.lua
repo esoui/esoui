@@ -1081,65 +1081,65 @@ MAIN_MENU_KEYBOARD:AddScene(MENU_CATEGORY_MAP, "worldMap")
 
 do
     local iconData =
+    {
         {
-            {
-                categoryName = SI_CROWN_STORE_MENU_CROWN_STORE_LABEL,
-                descriptor = "market",
-                normal = "EsoUI/Art/Market/Keyboard/tabIcon_crownStore_up.dds",
-                pressed = "EsoUI/Art/Market/Keyboard/tabIcon_crownStore_down.dds",
-                highlight = "EsoUI/Art/Market/Keyboard/tabIcon_crownStore_over.dds",
-            },
-            {
-                categoryName = SI_CROWN_STORE_MENU_TRADE_BAR_STORE_LABEL,
-                descriptor = "gildbarStoreSceneKeyboard",
-                normal = "EsoUI/Art/Market/Keyboard/tabIcon_gildbarStore_up.dds",
-                pressed = "EsoUI/Art/Market/Keyboard/tabIcon_gildbarStore_down.dds",
-                highlight = "EsoUI/Art/Market/Keyboard/tabIcon_gildbarStore_over.dds",
-            },
-            {
-                categoryName = SI_CROWN_STORE_MENU_SEALS_STORE_LABEL,
-                descriptor = "endeavorSealStoreSceneKeyboard",
-                normal = "EsoUI/Art/Market/Keyboard/tabIcon_sealsStore_up.dds",
-                pressed = "EsoUI/Art/Market/Keyboard/tabIcon_sealsStore_down.dds",
-                highlight = "EsoUI/Art/Market/Keyboard/tabIcon_sealsStore_over.dds",
-            },
-            {
-                categoryName = SI_CROWN_STORE_MENU_ESO_PLUS_LABEL,
-                descriptor = "esoPlusOffersSceneKeyboard",
-                normal = "esoui/art/treeicons/store_indexIcon_ESOPlus_up.dds",
-                pressed = "esoui/art/treeicons/store_indexIcon_ESOPlus_down.dds",
-                highlight = "esoui/art/treeicons/store_indexIcon_ESOPlus_over.dds",
-            },
-            {
-                categoryName = SI_CROWN_STORE_MENU_DAILY_LOGIN_LABEL,
-                descriptor = "dailyLoginRewards",
-                normal = "EsoUI/Art/Market/Keyboard/tabIcon_daily_up.dds",
-                pressed = "EsoUI/Art/Market/Keyboard/tabIcon_daily_down.dds",
-                highlight = "EsoUI/Art/Market/Keyboard/tabIcon_daily_over.dds",
-                statusIcon = function()
-                    if GetDailyLoginClaimableRewardIndex() then
-                        return ZO_KEYBOARD_NEW_ICON
-                    end
-                    return nil
-                end,
-                visible = function()
-                    return not ZO_DAILYLOGINREWARDS_MANAGER:IsDailyRewardsLocked()
-                end,
-            },
-            {
-                categoryName = SI_CROWN_STORE_MENU_GIFT_INVENTORY_LABEL,
-                descriptor = "giftInventoryKeyboard",
-                normal = "EsoUI/Art/Market/Keyboard/tabIcon_gifting_up.dds",
-                pressed = "EsoUI/Art/Market/Keyboard/tabIcon_gifting_down.dds",
-                highlight = "EsoUI/Art/Market/Keyboard/tabIcon_gifting_over.dds",
-                statusIcon = function()
-                    if GIFT_INVENTORY_MANAGER:HasAnyUnseenGifts() then
-                        return ZO_KEYBOARD_NEW_ICON
-                    end
-                    return nil
-                end,
-            },
-        }
+            categoryName = SI_CROWN_STORE_MENU_CROWN_STORE_LABEL,
+            descriptor = "market",
+            normal = "EsoUI/Art/Market/Keyboard/tabIcon_crownStore_up.dds",
+            pressed = "EsoUI/Art/Market/Keyboard/tabIcon_crownStore_down.dds",
+            highlight = "EsoUI/Art/Market/Keyboard/tabIcon_crownStore_over.dds",
+        },
+        {
+            categoryName = SI_CROWN_STORE_MENU_TRADE_BAR_STORE_LABEL,
+            descriptor = "gildbarStoreSceneKeyboard",
+            normal = "EsoUI/Art/Market/Keyboard/tabIcon_gildbarStore_up.dds",
+            pressed = "EsoUI/Art/Market/Keyboard/tabIcon_gildbarStore_down.dds",
+            highlight = "EsoUI/Art/Market/Keyboard/tabIcon_gildbarStore_over.dds",
+        },
+        {
+            categoryName = SI_CROWN_STORE_MENU_SEALS_STORE_LABEL,
+            descriptor = "endeavorSealStoreSceneKeyboard",
+            normal = "EsoUI/Art/Market/Keyboard/tabIcon_sealsStore_up.dds",
+            pressed = "EsoUI/Art/Market/Keyboard/tabIcon_sealsStore_down.dds",
+            highlight = "EsoUI/Art/Market/Keyboard/tabIcon_sealsStore_over.dds",
+        },
+        {
+            categoryName = SI_CROWN_STORE_MENU_ESO_PLUS_LABEL,
+            descriptor = "esoPlusOffersSceneKeyboard",
+            normal = "esoui/art/treeicons/store_indexIcon_ESOPlus_up.dds",
+            pressed = "esoui/art/treeicons/store_indexIcon_ESOPlus_down.dds",
+            highlight = "esoui/art/treeicons/store_indexIcon_ESOPlus_over.dds",
+        },
+        {
+            categoryName = SI_CROWN_STORE_MENU_DAILY_LOGIN_LABEL,
+            descriptor = "dailyLoginRewards",
+            normal = "EsoUI/Art/Market/Keyboard/tabIcon_daily_up.dds",
+            pressed = "EsoUI/Art/Market/Keyboard/tabIcon_daily_down.dds",
+            highlight = "EsoUI/Art/Market/Keyboard/tabIcon_daily_over.dds",
+            statusIcon = function()
+                if GetDailyLoginClaimableRewardIndex() then
+                    return ZO_KEYBOARD_NEW_ICON
+                end
+                return nil
+            end,
+            visible = function()
+                return not ZO_DAILYLOGINREWARDS_MANAGER:IsDailyRewardsLocked()
+            end,
+        },
+        {
+            categoryName = SI_CROWN_STORE_MENU_GIFT_INVENTORY_LABEL,
+            descriptor = "giftInventoryKeyboard",
+            normal = "EsoUI/Art/Market/Keyboard/tabIcon_gifting_up.dds",
+            pressed = "EsoUI/Art/Market/Keyboard/tabIcon_gifting_down.dds",
+            highlight = "EsoUI/Art/Market/Keyboard/tabIcon_gifting_over.dds",
+            statusIcon = function()
+                if GIFT_INVENTORY_MANAGER:HasAnyUnseenGifts() then
+                    return ZO_KEYBOARD_NEW_ICON
+                end
+                return nil
+            end,
+        },
+    }
 
     SCENE_MANAGER:AddSceneGroup("marketSceneGroup", ZO_SceneGroup:New("market", "gildbarStoreSceneKeyboard", "endeavorSealStoreSceneKeyboard", "esoPlusOffersSceneKeyboard", "dailyLoginRewards", "giftInventoryKeyboard"))
     local NO_PREFERRED_SCENE_FUNCTION = nil
@@ -1285,7 +1285,8 @@ do
         return nil
     end
 
-    local iconData = {
+    local iconData =
+    {
         {
             categoryName = SI_COLLECTION_BOOK_TITLE,
             descriptor = "collectionsBook",
@@ -1357,7 +1358,8 @@ end
 --Contacts
 
 do
-    local iconData = {
+    local iconData =
+    {
         {
             categoryName = SI_WINDOW_TITLE_FRIENDS_LIST,
             descriptor = "friendsList",
@@ -1380,7 +1382,8 @@ end
 --Guilds
 
 do
-    local iconData = {
+    local iconData =
+    {
         {
             categoryName = SI_WINDOW_TITLE_GUILD_HOME,
             descriptor = "guildHome",
@@ -1406,7 +1409,7 @@ do
             highlight = "EsoUI/Art/Guild/tabIcon_ranks_over.dds",
         },
         {
-            categoryName = SI_WINDOW_TITLE_GUILD_RECRUITMENT,
+            categoryName = SI_KEYBOARD_WINDOW_TITLE_GUILD_TOOLS,
             descriptor = "guildRecruitmentKeyboard",
             normal = "EsoUI/Art/GuildFinder/tabIcon_recruitment_up.dds",
             pressed = "EsoUI/Art/GuildFinder/tabIcon_recruitment_down.dds",
@@ -1443,7 +1446,8 @@ end
 --Journal
 
 do
-    local iconData = {
+    local iconData =
+    {
         {
             categoryName = SI_JOURNAL_MENU_QUESTS,
             descriptor = "questJournal",
@@ -1501,7 +1505,8 @@ end
 --Alliance War
 
 do
-    local iconData = {
+    local iconData =
+    {
         {
             categoryName = SI_WINDOW_TITLE_CAMPAIGN_OVERVIEW,
             descriptor = "campaignOverview",
@@ -1511,23 +1516,77 @@ do
             highlight = "EsoUI/Art/Campaign/campaign_tabIcon_summary_over.dds",
         },
         {
+            categoryName = SI_VETERANCY_MENU_TEXT,
+            descriptor = "VeterancySceneKeyboard",
+            normal = "EsoUI/Art/Campaign/campaign_tabIcon_veterancy_up.dds",
+            pressed = "EsoUI/Art/Campaign/campaign_tabIcon_veterancy_down.dds",
+            disabled = "EsoUI/Art/Campaign/campaign_tabIcon_veterancy_disabled.dds",
+            highlight = "EsoUI/Art/Campaign/campaign_tabIcon_veterancy_over.dds",
+            enabled = IsVeterancySeasonActive,
+            alwaysShowTooltip = true,
+            CustomTooltipFunction = function(tooltip)
+                tooltip:AddLine(GetString(SI_VETERANCY_MENU_TEXT))
+                if IsVeterancySeasonActive() then
+                    ZO_VETERANCY_MANAGER:RefreshRankData()
+                    local r, g, b = ZO_TOOLTIP_DEFAULT_COLOR:UnpackRGB()
+                    local FULL_WIDTH = true
+                    if ZO_VETERANCY_MANAGER:IsOnMaxRank() then
+                        tooltip:AddLine(zo_strformat(SI_VETERANCY_ACTIVE_MAX_RANK_TOOLTIP
+                            , ZO_VETERANCY_MANAGER:GetCurrentRank()
+                            , ZO_CommaDelimitNumber(ZO_VETERANCY_MANAGER:GetCurrentTierProgress())
+                            , ZO_CommaDelimitNumber(ZO_VETERANCY_MANAGER:GetCurrentTierTotal()))
+                            , "ZoFontGameMedium", r, g, b, TOPLEFT, MODIFY_TEXT_TYPE_NONE, TEXT_ALIGN_CENTER, FULL_WIDTH)
+                    else
+                        tooltip:AddLine(zo_strformat(SI_VETERANCY_ACTIVE_TOOLTIP
+                            , ZO_VETERANCY_MANAGER:GetCurrentRank()
+                            , ZO_VETERANCY_MANAGER:GetCurrentRankName()
+                            , ZO_CommaDelimitNumber(ZO_VETERANCY_MANAGER:GetCurrentTierProgress())
+                            , ZO_CommaDelimitNumber(ZO_VETERANCY_MANAGER:GetCurrentTierTotal()))
+                            , "ZoFontGameMedium", r, g, b, TOPLEFT, MODIFY_TEXT_TYPE_NONE, TEXT_ALIGN_CENTER, FULL_WIDTH)
+                    end
+                else
+                    tooltip:AddLine(GetString(SI_VETERANCY_INACTIVE_TOOLTIP))
+                end
+            end,
+            statusIcon = function()
+                if ZO_VETERANCY_MANAGER:HasUnclaimedRankRewards() then
+                    return ZO_KEYBOARD_NEW_ICON
+                end
+                return nil
+            end,
+            hideSceneGroupBar = true,
+        },
+        {
             categoryName = SI_WINDOW_TITLE_CAMPAIGN_BROWSER,
             descriptor = "campaignBrowser",
             normal = "EsoUI/Art/Campaign/campaign_tabIcon_browser_up.dds",
             pressed = "EsoUI/Art/Campaign/campaign_tabIcon_browser_down.dds",
             highlight = "EsoUI/Art/Campaign/campaign_tabIcon_browser_over.dds",
         },
+
     }
-    SCENE_MANAGER:AddSceneGroup("allianceWarSceneGroup", ZO_SceneGroup:New("campaignOverview", "campaignBrowser"))
-    MAIN_MENU_KEYBOARD:AddSceneGroup(MENU_CATEGORY_ALLIANCE_WAR, "allianceWarSceneGroup", iconData)
+
+    local function allianceWarPreferredSceneFunction()
+        if ZO_CampaignSelector_Shared_ShouldShowCampaignSelector() then
+            return "campaignOverview"
+        end
+        return "campaignBrowser"
+    end
+
+    ZO_ALLIANCE_WAR_SCENE_GROUP_KEYBOARD = ZO_SceneGroup:New("campaignOverview", "campaignBrowser", "VeterancySceneKeyboard")
+    SCENE_MANAGER:AddSceneGroup("allianceWarSceneGroup", ZO_ALLIANCE_WAR_SCENE_GROUP_KEYBOARD)
+    MAIN_MENU_KEYBOARD:AddSceneGroup(MENU_CATEGORY_ALLIANCE_WAR, "allianceWarSceneGroup", iconData, allianceWarPreferredSceneFunction)
     MAIN_MENU_KEYBOARD:EvaluateSceneGroupVisibilityOnEvent("allianceWarSceneGroup", EVENT_CURRENT_CAMPAIGN_CHANGED)
     MAIN_MENU_KEYBOARD:EvaluateSceneGroupVisibilityOnEvent("allianceWarSceneGroup", EVENT_ASSIGNED_CAMPAIGN_CHANGED)
+    MAIN_MENU_KEYBOARD:EvaluateSceneGroupVisibilityOnEvent("allianceWarSceneGroup", EVENT_HOLIDAYS_CHANGED)
+    MAIN_MENU_KEYBOARD:EvaluateSceneGroupVisibilityOnEvent("allianceWarSceneGroup", EVENT_REWARD_TRACK_STARTED)
 end
 
 --Help
 
 do
-    local iconData = {
+    local iconData =
+    {
         {
             categoryName = SI_HELP_TUTORIALS,
             descriptor = "helpTutorials",
@@ -1557,7 +1616,8 @@ end
 --Mail
 
 do
-    local iconData = {
+    local iconData =
+    {
         {
             categoryName = SI_WINDOW_TITLE_INBOX_MAIL,
             descriptor = "mailInbox",
@@ -1602,14 +1662,22 @@ SCRIBING_SCENE_KEYBOARD:AddFragment(PLAYER_PROGRESS_BAR_FRAGMENT)
 RETURNING_PLAYER_INTRO_SCENE_KEYBOARD:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW_NO_KEYBIND_BACKGROUND_WINDOW)
 RETURNING_PLAYER_INTRO_SCENE_KEYBOARD:AddFragment(UNIFORM_BLUR_FRAGMENT)
 RETURNING_PLAYER_INTRO_SCENE_KEYBOARD:AddFragment(MINIMIZE_CHAT_FRAGMENT)
-RETURNING_PLAYER_INTRO_SCENE_KEYBOARD:AddFragment(RETURNING_PLAYER_ANNOUNCEMENT_ACTION_LAYER_FRAGMENT)
+RETURNING_PLAYER_INTRO_SCENE_KEYBOARD:AddFragment(PROMOTIONAL_EVENT_PERSONAL_CAMPAIGN_ANNOUNCEMENT_ACTION_LAYER_FRAGMENT)
 
 RETURNING_PLAYER_REWARD_SCENE_KEYBOARD:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW_NO_KEYBIND_BACKGROUND_WINDOW)
 RETURNING_PLAYER_REWARD_SCENE_KEYBOARD:AddFragment(UNIFORM_BLUR_FRAGMENT)
 RETURNING_PLAYER_REWARD_SCENE_KEYBOARD:AddFragment(MINIMIZE_CHAT_FRAGMENT)
-RETURNING_PLAYER_REWARD_SCENE_KEYBOARD:AddFragment(RETURNING_PLAYER_ANNOUNCEMENT_ACTION_LAYER_FRAGMENT)
+RETURNING_PLAYER_REWARD_SCENE_KEYBOARD:AddFragment(PROMOTIONAL_EVENT_PERSONAL_CAMPAIGN_ANNOUNCEMENT_ACTION_LAYER_FRAGMENT)
 
-RETURNING_PLAYER_SCENE_GROUP_KEYBOARD = ZO_SceneGroup:New(RETURNING_PLAYER_INTRO_SCENE_KEYBOARD:GetName(), RETURNING_PLAYER_REWARD_SCENE_KEYBOARD:GetName())
+
+------------------------
+--Low Level Player Scene
+------------------------
+
+LOW_LEVEL_PLAYER_SCENE_KEYBOARD:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW_NO_KEYBIND_BACKGROUND_WINDOW)
+LOW_LEVEL_PLAYER_SCENE_KEYBOARD:AddFragment(UNIFORM_BLUR_FRAGMENT)
+LOW_LEVEL_PLAYER_SCENE_KEYBOARD:AddFragment(MINIMIZE_CHAT_FRAGMENT)
+LOW_LEVEL_PLAYER_SCENE_KEYBOARD:AddFragment(PROMOTIONAL_EVENT_PERSONAL_CAMPAIGN_ANNOUNCEMENT_ACTION_LAYER_FRAGMENT)
 
 ----------------------------
 --Tamriel Tomes Scenes
@@ -1663,3 +1731,14 @@ ADVENTURE_ZONE_OVERVIEW_SCENE_KEYBOARD:AddFragment(MINIMIZE_CHAT_FRAGMENT)
 ADVENTURE_ZONE_BOSS_TREE_SCENE_KEYBOARD:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW)
 ADVENTURE_ZONE_BOSS_TREE_SCENE_KEYBOARD:AddFragment(UNIFORM_BLUR_FRAGMENT)
 ADVENTURE_ZONE_BOSS_TREE_SCENE_KEYBOARD:AddFragment(MINIMIZE_CHAT_FRAGMENT)
+
+------------------------------
+-- Vengeance Veterancy Scenes
+------------------------------
+
+VETERANCY_SCENE_KEYBOARD:AddFragmentGroup(FRAGMENT_GROUP.MOUSE_DRIVEN_UI_WINDOW)
+VETERANCY_SCENE_KEYBOARD:AddFragmentGroup(FRAGMENT_GROUP.FRAME_TARGET_CENTERED)
+VETERANCY_SCENE_KEYBOARD:AddFragment(VETERANCY_PREVIEW_OPTIONS_FRAGMENT)
+VETERANCY_SCENE_KEYBOARD:AddFragment(ITEM_PREVIEW_KEYBOARD:GetFragment())
+VETERANCY_SCENE_KEYBOARD:AddFragment(FRAME_EMOTE_FRAGMENT_VETERANCY)
+VETERANCY_SCENE_KEYBOARD:AddFragment(MINIMIZE_CHAT_FRAGMENT)

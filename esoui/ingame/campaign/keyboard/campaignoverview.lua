@@ -107,6 +107,8 @@ function ZO_CampaignOverviewManager:Initialize(control)
                 self:SetCurrentCategoryByData(self.categoryDataToShow)
                 self.categoryDataToShow = nil
             end
+        elseif newState == SCENE_HIDDEN then
+            VETERANCY_KEYBOARD:SetPreviousCampaignScene("campaignOverview")
         end
     end
 

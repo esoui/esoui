@@ -6,6 +6,14 @@ ZO_ADVANCED_STATS_GAMEPAD_CONSTANTS_GRID_PADDING_X = 40
 ZO_ADVANCED_STATS_GAMEPAD_CONSTANTS_GRID_PADDING_Y = 0
 ZO_ADVANCED_STATS_GAMEPAD_CONSTANTS_SECTION_SPACING = 40
 
+ZO_CHALLENGE_DIFFICULTY_ICONS_GAMEPAD =
+{
+    [OVERLAND_DIFFICULTY_TYPE_BASEGAME] = "EsoUI/Art/ChallengeDifficulty/Gamepad/gp_challengeDifficulty_basegame.dds",
+    [OVERLAND_DIFFICULTY_TYPE_JOURNEYMAN] = "EsoUI/Art/ChallengeDifficulty/Gamepad/gp_challengeDifficulty_journeyman.dds",
+    [OVERLAND_DIFFICULTY_TYPE_ADVENTURER] = "EsoUI/Art/ChallengeDifficulty/Gamepad/gp_challengeDifficulty_adventurer.dds",
+    [OVERLAND_DIFFICULTY_TYPE_VETERAN] = "EsoUI/Art/ChallengeDifficulty/Gamepad/gp_challengeDifficulty_veteran.dds",
+}
+
 --Attribute Spinner
 
 ZO_AttributeSpinner_Gamepad = ZO_AttributeSpinner_Shared:Subclass()
@@ -242,6 +250,7 @@ local GAMEPAD_STATS_DISPLAY_MODE =
     ADVANCED_ATTRIBUTES = 8,
     MUNDUS = 9,
     GUILD = 10,
+    DIFFICULTY = 11,
 }
 
 ZO_GamepadStats = ZO_InitializingObject.MultiSubclass(ZO_Stats_Common, ZO_Gamepad_ParametricList_Screen)
@@ -311,9 +320,13 @@ function ZO_GamepadStats:OnStateChanged(oldState, newState)
 
         ZO_OUTFITS_SELECTOR_GAMEPAD:SetCurrentActorCategory(GAMEPLAY_ACTOR_CATEGORY_PLAYER)
     elseif newState == SCENE_SHOWN then
-        HandleReturningPlayerUISystemShown(UI_SYSTEM_CHARACTER_STATS)
+        HandleUISystemShown(UI_SYSTEM_CHARACTER_STATS)
     elseif newState == SCENE_HIDDEN then
         self:DeactivateMainList()
+
+        if self.currentDifficultyDropdown ~= nil then
+            self.currentDifficultyDropdown:Deactivate(true)
+        end
 
         if self.currentTitleDropdown ~= nil then
             self.currentTitleDropdown:Deactivate(true)
@@ -473,6 +486,17 @@ function ZO_GamepadStats:DeactivateMainList()
     end
 end
 
+function ZO_GamepadStats:ActivateDifficultyDropdown()
+    if self.currentDifficultyDropdown ~= nil then
+        self:DeactivateMainList()
+
+        self.currentDifficultyDropdown:Activate()
+
+        local currentDifficultyIndex = self:GetDropdownDifficultyIndex(self.currentDifficultyDropdown)
+        self.currentDifficultyDropdown:SetHighlightedItem(currentDifficultyIndex)
+    end
+end
+
 function ZO_GamepadStats:ActivateTitleDropdown()
     if self.currentTitleDropdown ~= nil then
         self:DeactivateMainList()
@@ -501,6 +525,15 @@ end
 
 function ZO_GamepadStats:ShowLevelUpRewards()
     ZO_GAMEPAD_CLAIM_LEVEL_UP_REWARDS:Show()
+end
+
+function ZO_GamepadStats:OnDifficultyDropdownDeactivated()
+    self:ActivateMainList()
+    if self.refreshMainListOnDropdownClose then
+        self:RefreshMainList()
+        self.refreshMainListOnDropdownClose = false
+    end
+    self:UpdateScreenVisibility()
 end
 
 function ZO_GamepadStats:OnTitleDropdownDeactivated()
@@ -604,6 +637,7 @@ function ZO_GamepadStats:InitializeKeybindStripDescriptors()
         {
             name = function()
                 if self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.OUTFIT
+                    or self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.DIFFICULTY
                     or self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.TITLE
                     or self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.LEVEL_UP_REWARDS 
                     or self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.GUILD then
@@ -620,14 +654,18 @@ function ZO_GamepadStats:InitializeKeybindStripDescriptors()
             end,
             keybind = "UI_SHORTCUT_PRIMARY",
             enabled = function()
+                local challengeDifficultyDisabledReason = GetOverlandDifficultyDisabledReason()
                 if self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.OUTFIT and not self.previewAvailable then
                     return false, GetString("SI_EQUIPOUTFITRESULT", EQUIP_OUTFIT_RESULT_OUTFIT_SWITCHING_UNAVAILABLE)
+                elseif self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.DIFFICULTY and challengeDifficultyDisabledReason ~= OVERLAND_DIFFICULTY_DISABLED_REASON_NONE then
+                    return false, GetString("SI_OVERLANDDIFFICULTYDISABLEDREASON", challengeDifficultyDisabledReason)
                 end
 
                 return true
             end,
             visible = function()
                 if self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.OUTFIT
+                    or self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.DIFFICULTY
                     or self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.TITLE
                     or self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.LEVEL_UP_REWARDS then
                     return true
@@ -646,6 +684,8 @@ function ZO_GamepadStats:InitializeKeybindStripDescriptors()
             callback = function()
                 if self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.OUTFIT then
                     self:ShowOutfitSelector()
+                elseif self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.DIFFICULTY then
+                    self:ActivateDifficultyDropdown()
                 elseif self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.TITLE then
                     self:ActivateTitleDropdown()
                 elseif self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.GUILD then
@@ -869,6 +909,8 @@ function ZO_GamepadStats:UpdateScreenVisibility()
         GAMEPAD_TOOLTIPS:LayoutMundusTooltip(GAMEPAD_RIGHT_TOOLTIP, targetData.data)
     elseif self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.GUILD then
         GAMEPAD_TOOLTIPS:LayoutGuildNameplateTooltip(GAMEPAD_LEFT_TOOLTIP)
+    elseif self.displayMode == GAMEPAD_STATS_DISPLAY_MODE.DIFFICULTY and (not self.currentDifficultyDropdown or not self.currentDifficultyDropdown:IsActive()) then
+        GAMEPAD_TOOLTIPS:LayoutChallengeDifficultyTooltip(GAMEPAD_LEFT_TOOLTIP, GetOverlandDifficulty())
     end
 
     self.characterStatsPanel:SetHidden(isCharacterHidden)
@@ -1101,6 +1143,18 @@ do
             return narrations
         end
 
+        --Difficulty Entry
+        local currentDifficulty = GetOverlandDifficulty()
+        local icon = ZO_CHALLENGE_DIFFICULTY_ICONS_GAMEPAD[currentDifficulty]
+        local text = GetString("SI_OVERLANDDIFFICULTYTYPE", currentDifficulty)
+        self.difficultyEntry = ZO_GamepadEntryData:New(text, icon)
+        self.difficultyEntry.displayMode = GAMEPAD_STATS_DISPLAY_MODE.DIFFICULTY
+        self.difficultyEntry.statsObject = self
+        self.difficultyEntry:SetHeader(GetString(SI_CHALLENGE_DIFFICULTY_TITLE))
+        self.difficultyEntry.narrationText = function(entryData, entryControl)
+            return self.currentDifficultyDropdown:GetNarrationText()
+        end
+
         --Title Entry
         self.titleEntry = ZO_GamepadEntryData:New("")
         self.titleEntry.displayMode = GAMEPAD_STATS_DISPLAY_MODE.TITLE
@@ -1287,6 +1341,9 @@ do
     function ZO_GamepadStats:SetupList(list)
         list:SetHandleDynamicViewProperties(true)
 
+        list:AddDataTemplate("ZO_GamepadStatDifficultyRow", ZO_GamepadStatDifficultyRow_Setup, ZO_GamepadMenuEntryTemplateParametricListFunction)
+        list:AddDataTemplateWithHeader("ZO_GamepadStatDifficultyRow", ZO_GamepadStatDifficultyRow_Setup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
+
         list:AddDataTemplate("ZO_GamepadStatTitleRow", ZO_GamepadStatTitleRow_Setup, ZO_GamepadMenuEntryTemplateParametricListFunction)
         list:AddDataTemplateWithHeader("ZO_GamepadStatTitleRow", ZO_GamepadStatTitleRow_Setup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
 
@@ -1337,6 +1394,11 @@ do
     end
 
     function ZO_GamepadStats:RefreshMainList()
+        if self.currentDifficultyDropdown and self.currentDifficultyDropdown:IsDropdownVisible() then
+            self.refreshMainListOnDropdownClose = true
+            return
+        end
+
         if self.currentTitleDropdown and self.currentTitleDropdown:IsDropdownVisible() then
             self.refreshMainListOnDropdownClose = true
             return
@@ -1355,6 +1417,9 @@ do
         elseif HasUpcomingLevelUpReward() then
             self.mainList:AddEntry("ZO_GamepadMenuEntryTemplate", self.upcomingRewardsEntry)
         end
+
+        --Difficulty
+        self.mainList:AddEntryWithHeader("ZO_GamepadStatDifficultyRow", self.difficultyEntry)
 
         --Title
         self.mainList:AddEntryWithHeader("ZO_GamepadStatTitleRow", self.titleEntry)
@@ -2218,6 +2283,52 @@ function ZO_GamepadStats_OnInitialize(control)
     GAMEPAD_STATS = ZO_GamepadStats:New(control)
 end
 
+function ZO_GamepadStats:GetDropdownDifficultyIndex(dropdown)
+    local currentDifficulty = GetOverlandDifficulty()
+    local function IsItemCurrentDifficulty(item)
+        return item.difficultyInfo and item.difficultyInfo.difficulty == currentDifficulty
+    end
+    return dropdown:GetIndexByEval(IsItemCurrentDifficulty)
+end
+
+function ZO_GamepadStats:UpdateDifficultyDropdownSelection(dropdown)
+    local dropdownDifficultyIndex = self:GetDropdownDifficultyIndex(dropdown)
+    if dropdownDifficultyIndex then
+        dropdown:SelectItemByIndex(dropdownDifficultyIndex, ZO_COMBOBOX_SUPPRESS_UPDATE)
+    else
+        dropdown:SelectItemByIndex(1, ZO_COMBOBOX_SUPPRESS_UPDATE)
+    end
+end
+
+function ZO_GamepadStats:UpdateDifficultyDropdownEntries(dropdown)
+    dropdown:ClearItems()
+
+    for difficulty = OVERLAND_DIFFICULTY_TYPE_ITERATION_BEGIN, OVERLAND_DIFFICULTY_TYPE_ITERATION_END do
+        local difficultyInfo =
+        {
+            difficulty = difficulty,
+            difficultyName = GetString("SI_OVERLANDDIFFICULTYTYPE", difficulty)
+        }
+
+        local function OnSelectionClicked()
+            RequestChangePlayerOverlandDifficulty(difficulty)
+            PlaySound(SOUNDS.CHALLENGE_DIFFICULTY_CHANGE_DIFFICULTY_BUTTON_CLICKED)
+        end
+
+        local difficultyListItem = dropdown:CreateItemEntry(difficultyInfo.difficultyName, OnSelectionClicked)
+        difficultyListItem.difficultyInfo = difficultyInfo
+        dropdown:AddItem(difficultyListItem, ZO_COMBOBOX_SUPPRESS_UPDATE)
+    end 
+
+    dropdown:UpdateItems()
+
+    self:UpdateDifficultyDropdownSelection(dropdown)
+end
+
+function ZO_GamepadStats:SetCurrentDifficultyDropdown(dropdown)
+    self.currentDifficultyDropdown = dropdown
+end
+
 function ZO_GamepadStats:SetCurrentTitleDropdown(dropdown)
     self.currentTitleDropdown = dropdown
 end
@@ -2278,6 +2389,42 @@ function ZO_GamepadStats:InitializeRespecConfirmationGoldDialog()
     })
 end
 
+-----------------------------------
+-- Stat Difficulty Attribute Row --
+-----------------------------------
+do
+    local DIFFICULTY_SOUND_IDS =
+    {
+        [OVERLAND_DIFFICULTY_TYPE_BASEGAME] = SOUNDS.CHALLENGE_DIFFICULTY_SELECTED_BASEGAME,
+        [OVERLAND_DIFFICULTY_TYPE_JOURNEYMAN] = SOUNDS.CHALLENGE_DIFFICULTY_SELECTED_JOURNEYMAN,
+        [OVERLAND_DIFFICULTY_TYPE_ADVENTURER] = SOUNDS.CHALLENGE_DIFFICULTY_SELECTED_ADVENTURER,
+        [OVERLAND_DIFFICULTY_TYPE_VETERAN] = SOUNDS.CHALLENGE_DIFFICULTY_SELECTED_VETERAN,
+    }
+
+    function ZO_GamepadStatDifficultyRow_Setup(control, data, selected, selectedDuringRebuild, enabled, activated)
+        -- Order matters: this must run before ZO_SharedGamepadEntry_OnSetup.
+        control.label = control:GetNamedChild("DropdownSelectedItemText")
+        data:SetDisabledNameColors(ZO_GAMEPAD_DISABLED_SELECTED_COLOR, ZO_GAMEPAD_DISABLED_UNSELECTED_COLOR)
+        data:SetDisabledIconTint(ZO_GAMEPAD_DISABLED_SELECTED_COLOR, ZO_GAMEPAD_DISABLED_UNSELECTED_COLOR)
+        data:SetEnabled(GetOverlandDifficultyDisabledReason() == OVERLAND_DIFFICULTY_DISABLED_REASON_NONE)
+
+        ZO_SharedGamepadEntry_OnSetup(control, data, selected, selectedDuringRebuild, enabled, activated)
+        control.dropdown:SetSortsItems(false)
+        control.dropdown:SetName(GetString(SI_CHALLENGE_DIFFICULTY_TITLE))
+
+        local statsObject = data.statsObject
+        statsObject:SetCurrentDifficultyDropdown(control.dropdown)
+        statsObject:UpdateDifficultyDropdownEntries(control.dropdown)
+
+        control.dropdown:SetDeactivatedCallback(statsObject.OnDifficultyDropdownDeactivated, statsObject)
+
+        control.dropdown:RegisterCallback("OnItemSelected", function(itemControl, itemData)
+            PlaySound(DIFFICULTY_SOUND_IDS[itemData.difficultyInfo.difficulty])
+            GAMEPAD_TOOLTIPS:LayoutChallengeDifficultyTooltip(GAMEPAD_LEFT_TOOLTIP, itemData.difficultyInfo.difficulty)
+        end)
+    end
+end
+
 ------------------------------
 -- Stat Title Attribute Row --
 ------------------------------
@@ -2287,12 +2434,10 @@ function ZO_GamepadStatTitleRow_Setup(control, data, selected, selectedDuringReb
     control.dropdown:SetSortsItems(false)
     control.dropdown:SetName(GetString(SI_STATS_TITLE))
 
-    data.statsObject:SetCurrentTitleDropdown(control.dropdown)
-    data.statsObject:UpdateTitleDropdownTitles(control.dropdown)
     local statsObject = data.statsObject
     statsObject:SetCurrentTitleDropdown(control.dropdown)
     statsObject:UpdateTitleDropdownTitles(control.dropdown)
-    
+
     local function OnDropdownItemDeselected(control, data)
         if data.titleInfo and data.titleInfo.isNew then
             TITLE_MANAGER:ClearTitleNew(data.titleInfo.name)
@@ -2302,7 +2447,7 @@ function ZO_GamepadStatTitleRow_Setup(control, data, selected, selectedDuringReb
     end
 
     control.dropdown:RegisterCallback("OnItemDeselected", OnDropdownItemDeselected)
-    control.dropdown:SetDeactivatedCallback(data.statsObject.OnTitleDropdownDeactivated, data.statsObject)
+    control.dropdown:SetDeactivatedCallback(statsObject.OnTitleDropdownDeactivated, statsObject)
     control.dropdown:SetSelectedItemTextColor(selected)
 end
 
@@ -2314,8 +2459,6 @@ function ZO_GamepadStatGuildRow_Setup(control, data, selected, selectedDuringReb
     ZO_SharedGamepadEntry_OnSetup(control, data, selected, selectedDuringRebuild, enabled, activated)
     control.dropdown:SetSortsItems(false)
 
-    data.statsObject:SetCurrentGuildDropdown(control.dropdown)
-    data.statsObject:UpdateGuildDropdownGuilds(control.dropdown)
     local statsObject = data.statsObject
     statsObject:SetCurrentGuildDropdown(control.dropdown)
     statsObject:UpdateGuildDropdownGuilds(control.dropdown)
@@ -2326,7 +2469,7 @@ function ZO_GamepadStatGuildRow_Setup(control, data, selected, selectedDuringReb
     control.dropdown:SetNormalColor(normalColor:UnpackRGB())
     control.dropdown:SetHighlightedColor(highlightColor:UnpackRGB())
 
-    control.dropdown:SetDeactivatedCallback(data.statsObject.OnGuildDropdownDeactivated, data.statsObject)
+    control.dropdown:SetDeactivatedCallback(statsObject.OnGuildDropdownDeactivated, statsObject)
     control.dropdown:SetSelectedItemTextColor(selected)
 end
 

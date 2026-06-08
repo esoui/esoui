@@ -18,7 +18,7 @@ function NotificationIcons_Console:Initialize(control)
     self.fadeTimeMS = 10000
     self.reshowTimeMS = 150000
 
-    EVENT_MANAGER:RegisterForEvent("NotificationIcons_Console", EVENT_MAIL_NUM_UNREAD_CHANGED, function(_, numUnread) self:OnNumUnreadMailChanged(numUnread) end)
+    MAIL_MANAGER:RegisterCallback("NumUnreadMailChanged", function(numUnread) self:OnNumUnreadMailChanged(numUnread) end)
     control:SetHandler("OnUpdate", function() self:OnUpdate() end)
 
     --setup the animation for the control as a whole

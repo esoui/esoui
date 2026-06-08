@@ -728,17 +728,17 @@ function ZO_TreeNode:SetOpenPercentage(openPercentage)
 end
 
 function ZO_TreeNode:OnSelected(reselectingDuringRebuild)
+    self.selected = true
     if self.selectionFunction then
         self.selectionFunction(self.control, self.data, true, reselectingDuringRebuild)
     end
-    self.selected = true
 end
 
 function ZO_TreeNode:OnUnselected()
+    self.selected = false
     if self.selectionFunction then
         self.selectionFunction(self.control, self.data, false, false)
     end
-    self.selected = false
 end
 
 function ZO_TreeNode:GetHeight()

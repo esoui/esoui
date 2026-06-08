@@ -1,0 +1,56 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_LowLevelPlayerReward_Keyboard" inherits="ZO_LowLevelPlayerReward_Shared" mouseEnabled="true" virtual="true">
+            <Dimensions x="ZO_LOW_LEVEL_PLAYER_REWARD_DIMENSIONS_KEYBOARD" y="ZO_LOW_LEVEL_PLAYER_REWARD_DIMENSIONS_KEYBOARD"/>
+            <OnMouseEnter>
+                ZO_LowLevelPlayerScreen_Keyboard.Reward_OnMouseEnter(self)
+            </OnMouseEnter>
+            <OnMouseExit>
+                ZO_LowLevelPlayerScreen_Keyboard.Reward_OnMouseExit(self)
+            </OnMouseExit>
+            <Controls>
+                <Control name="$(parent)Container" override="true">
+                    <Controls>
+                        <Backdrop name="$(parent)Backdrop" override="true" inherits="ZO_CenterlessBackdrop"/>
+                        <Label name="$(parent)Quantity" override="true" font="ZoFontGameOutline" inheritScale="false"/>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+        <TopLevelControl name="ZO_LowLevelPlayer_KeyboardTL" inherits="ZO_LowLevelPlayer_SharedTL">
+            <Dimensions x="970" y="615"/>
+            <OnInitialized>
+                ZO_LowLevelPlayerScreen_Keyboard.OnControlInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Backdrop name="$(parent)BG" inherits="ZO_DefaultBackdrop">
+                    <AnchorFill/>
+                </Backdrop>
+                <Control name="$(parent)Header" override="true">
+                    <Controls>
+                        <Control name="$(parent)TopDivider" override="true" inherits="ZO_PlatformStyleDynamicHorizontalDivider_Keyboard_Template"/>
+                        <Label name="$(parent)Text" override="true" font="ZoFontKeyboard24ThickOutline">
+                            <Dimensions y="24"/>
+                        </Label>
+                        <Control name="$(parent)BottomDivider" override="true" inherits="ZO_PlatformStyleDynamicHorizontalDivider_Keyboard_Template"/>
+                    </Controls>
+                </Control>
+                <Label name="$(parent)BodyText" override="true" font="ZoFontTooltipTitle"/>
+                <Control name="$(parent)GameplayInfo" override="true">
+                    <Controls>
+                        <Label name="$(parent)Title" override="true" font="ZoFontWinH1"/>
+                        <Label name="$(parent)TimeRemaining" override="true" font="ZoFontWinH4"/>
+                        <Label name="$(parent)Description" override="true" font="ZoFontWinH3"/>
+                        <Control name="$(parent)Rewards" override="true" inherits="ZO_GridScrollList_Keyboard">
+                            <Dimensions x="ZO_LOW_LEVEL_PLAYER_REWARD_GRID_WIDTH_KEYBOARD" y="ZO_LOW_LEVEL_PLAYER_REWARD_GRID_HEIGHT_KEYBOARD"/>
+                        </Control>
+                        <Button name="$(parent)NavigateButton" inherits="ZO_ExtraLargeButton" font="ZoFontWinH2">
+                            <Dimensions x="300" y="78"/>
+                            <Anchor point="BOTTOM" offsetY="-15"/>
+                        </Button>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

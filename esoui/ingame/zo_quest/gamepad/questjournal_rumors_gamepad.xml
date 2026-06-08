@@ -1,0 +1,5 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_QuestJournal_RumorsPanel_Gamepad" inherits="ZO_Gamepad_ParametricList_Screen" virtual="true"/>
+    </Controls>
+</GuiXml>

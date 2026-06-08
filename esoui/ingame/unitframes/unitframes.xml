@@ -427,6 +427,10 @@
                     <Anchor point="RIGHT" relativeTo="$(parent)TextArea" relativePoint="LEFT" offsetX="-2"/>
                     <Dimensions x="22" y="22"/>
                 </Texture>
+                <Texture name="$(parent)VeterancyRankIcon">
+                    <Anchor point="RIGHT" relativeTo="$(parent)TextArea" relativePoint="LEFT"/>
+                    <Dimensions x="40" y="40"/>
+                </Texture>
                 <Texture name="$(parent)RankIcon">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)TextArea" relativePoint="TOPRIGHT" offsetX="2" offsetY="-4"/>
                     <Dimensions x="32" y="32"/>
@@ -474,6 +478,10 @@
                 <Texture name="$(parent)ChampionIcon">
                     <Anchor point="RIGHT" relativeTo="$(parent)TextArea" relativePoint="LEFT" offsetX="-2"/>
                     <Dimensions x="32" y="32"/>
+                </Texture>
+                <Texture name="$(parent)VeterancyRankIcon">
+                    <Anchor point="RIGHT" relativeTo="$(parent)TextArea" relativePoint="LEFT"/>
+                    <Dimensions x="64" y="64"/>
                 </Texture>
                 <Texture name="$(parent)RankIcon">
                     <Anchor point="LEFT" relativeTo="$(parent)TextArea" relativePoint="RIGHT" offsetX="2"/>
@@ -528,6 +536,10 @@
                 <Texture name="$(parent)ChampionIcon" hidden="true" textureFile="EsoUI/Art/Champion/champion_icon_32.dds">
                     <Anchor point="RIGHT" relativeTo="$(parent)TextArea" relativePoint="LEFT" offsetX="-2"/>
                     <Dimensions x="22" y="22"/>
+                </Texture>
+                <Texture name="$(parent)VeterancyRankIcon">
+                    <Anchor point="RIGHT" relativeTo="$(parent)TextArea" relativePoint="LEFT"/>
+                    <Dimensions x="64" y="64"/>
                 </Texture>
                 <Texture name="$(parent)RankIcon" hidden="true">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)TextArea" relativePoint="TOPRIGHT" offsetX="2" offsetY="-4"/>

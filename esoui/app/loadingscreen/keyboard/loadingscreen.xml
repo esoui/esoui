@@ -68,6 +68,10 @@
                 <Texture name="$(parent)Spinner" override="true">
                     <Anchor point="BOTTOMRIGHT" offsetX="0" offsetY="-2"/>
                 </Texture>
+                <Label name="$(parent)Difficulty" override="true" font="ZoFontWinH2" color="FFFFFF">
+                    <Anchor point="LEFT" offsetX="25" constrains="X"/>
+                    <Anchor point="TOP" relativeTo="$(parent)ZoneDescription" constrains="Y"/>
+                </Label>
             </Controls>
         </TopLevelControl>
     </Controls>

@@ -293,7 +293,7 @@ function ZO_GamepadEntryData:ClearIcons()
 end
 
 function ZO_GamepadEntryData:GetNameColor(selected)
-    if self.enabled then
+    if self:IsEnabled() then
         if selected then
             return self.selectedNameColor or ZO_GAMEPAD_SELECTED_COLOR
         else
@@ -403,7 +403,7 @@ function ZO_GamepadEntryData:SetEnabled(isEnabled)
 end
 
 function ZO_GamepadEntryData:IsEnabled()
-    return self.enabled
+    return ZO_Eval(self.enabled)
 end
 
 function ZO_GamepadEntryData:SetDisabledNameColors(selectedColor, unselectedColor)

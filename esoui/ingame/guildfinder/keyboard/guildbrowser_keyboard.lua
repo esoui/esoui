@@ -108,7 +108,7 @@ function ZO_GuildBrowser_Keyboard:OnShowing()
 end
 
 function ZO_GuildBrowser_Keyboard:OnShow()
-    HandleReturningPlayerUISystemShown(UI_SYSTEM_GUILD_FINDER)
+    HandleUISystemShown(UI_SYSTEM_GUILD_FINDER)
 end
 
 function ZO_GuildBrowser_Keyboard:OnHidden()

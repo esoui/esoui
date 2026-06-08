@@ -4,10 +4,13 @@ local function GetSystemDisplayList(numDisplays)
      local itemText = {}
 
      for i = 1, numDisplays do
-         local optionText = zo_strformat(SI_GRAPHICS_OPTIONS_VIDEO_ACTIVE_DISPLAY_FORMAT, i) 
          valid[i] = i - 1 -- Identifying indices start at 0
          events[i] = "ActiveDisplayChanged"
-         itemText[i] = optionText
+         if ZO_IsWindowsUI() then
+            itemText[i] = GetNameForDisplayAtIndex(i) -- Only supported on Windows.
+         else
+            itemText[i] =  zo_strformat(SI_GRAPHICS_OPTIONS_VIDEO_ACTIVE_DISPLAY_FORMAT, i)
+        end
      end
 
     return valid, events, itemText
@@ -84,7 +87,7 @@ end
 
 function ZO_OptionsPanel_Video_InitializeResolution(control)
     local displayIndex = 1 + tonumber(GetSetting(SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_ACTIVE_DISPLAY))
-    InitializeResolution(control, GetDisplayModes(DEFAULT_DISPLAY_INDEX))
+    InitializeResolution(control, GetDisplayModes(displayIndex))
 end
 
 function ZO_OptionsPanel_Video_OnDisplayResolutionChanged(control)
@@ -1094,7 +1097,8 @@ end
 
 do
     local availableResolutionsSetting = ZO_OptionsPanel_Video_ControlData[SETTING_TYPE_GRAPHICS][GRAPHICS_SETTING_RESOLUTION]
-    local valid, itemText = GetResolutions(GetDisplayModes(DEFAULT_DISPLAY_INDEX))
+	local displayIndex = 1 + tonumber(GetSetting(SETTING_TYPE_GRAPHICS, GRAPHICS_SETTING_ACTIVE_DISPLAY))
+    local valid, itemText = GetResolutions(GetDisplayModes(displayIndex))
     availableResolutionsSetting.valid = valid
     availableResolutionsSetting.itemText = itemText
 end

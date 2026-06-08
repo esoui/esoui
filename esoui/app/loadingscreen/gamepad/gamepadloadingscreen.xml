@@ -63,6 +63,10 @@
                 <Texture name="$(parent)Spinner" override="true" textureFile="EsoUI/Art/LoadScreen/Gamepad/load_ouroboros.dds" alpha="0">
                     <Anchor point="BOTTOM" offsetY="-60"/>
                 </Texture>
+                <Label name="$(parent)Difficulty" override="true" font="ZoFontGamepad61" modifyTextType="UPPERCASE" color="C5C29E">
+                    <Anchor point="LEFT" offsetX="25" constrains="X"/>
+                    <Anchor point="TOP" relativeTo="$(parent)Spinner" constrains="Y"/>
+                </Label>
             </Controls>
         </TopLevelControl>
     </Controls>

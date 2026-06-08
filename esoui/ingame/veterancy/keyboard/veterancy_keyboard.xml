@@ -1,0 +1,135 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_Veterancy_RankTile_Template_Keyboard" inherits="ZO_Veterancy_RankTile_Template_Shared ZO_ContextualActionsTile_Keyboard_Control" virtual="true">
+            <OnInitialized>
+                ZO_Veterancy_RankTile_Keyboard.OnControlInitialized(self)
+            </OnInitialized>
+            <OnMouseEnter>
+                self.object:OnMouseEnter()
+            </OnMouseEnter>
+            <OnMouseExit>
+                self.object:OnMouseExit()
+            </OnMouseExit>
+            <OnMouseUp>
+                self.object:OnMouseUp(button, upInside)
+            </OnMouseUp>
+            <Controls>
+                <Label name="$(parent)RankIndex" override="true" font="ZoFontWindowSubtitle">
+                    <Anchor point="BOTTOM" relativeTo="$(parent)Icon" relativePoint="TOP" offsetY="-5"/>
+                </Label>
+                <Label name="$(parent)Title" override="true" font="ZoFontWindowSubtitle">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Icon" relativePoint="BOTTOMLEFT" offsetY="5"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Icon" relativePoint="BOTTOMRIGHT" offsetY="5"/>
+                </Label>
+                <Texture name="$(parent)Highlight" override="true">
+                    <ClearAnchors/>
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Icon"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icon"/>
+                </Texture>
+            </Controls>
+        </Control>
+        <Control name="ZO_Veterancy_RankTile_Empty_Template_Keyboard" inherits="ZO_Veterancy_RankTile_Empty_Template_Shared ZO_ContextualActionsTile_Keyboard_Control" virtual="true">
+            <OnInitialized>
+                ZO_Veterancy_RankTile_Empty_Keyboard.OnControlInitialized(self)
+            </OnInitialized>
+        </Control>
+        <Control name="ZO_VeterancyReward_Template_Keyboard" inherits="ZO_VeterancyReward_Template_Shared" mouseEnabled="true" virtual="true">
+            <Dimensions x="64" y="64"/>
+            <OnInitialized>
+                ZO_VeterancyReward_Keyboard.OnControlInitialized(self)
+            </OnInitialized>
+            <OnMouseEnter>
+                self.object:OnMouseEnter()
+            </OnMouseEnter>
+            <OnMouseExit>
+                self.object:OnMouseExit()
+            </OnMouseExit>
+            <OnMouseUp>
+                self.object:OnMouseUp(button, upInside)
+            </OnMouseUp>
+            <Controls>
+                <Control name="$(parent)RewardIcon" override="true">
+                    <Controls>
+                        <Texture name="$(parent)Icon" override="true">
+                            <Dimensions x="40" y="40"/>
+                        </Texture>
+                        <Label name="$(parent)Quantity" override="true" font="ZoFontGameOutline" horizontalAlignment="RIGHT" verticalAlignment="BOTTOM" inheritScale="false"/>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+        <Control name="ZO_Veterancy_RewardTile_CenteredReward_Keyboard" inherits="ZO_Veterancy_RewardTile_CenteredReward_Shared ZO_Tile_Keyboard_Control" virtual="true">
+            <OnInitialized>
+                ZO_Veterancy_RewardTile_Keyboard.OnControlInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)Reward" override="true" inherits="ZO_VeterancyReward_Template_Keyboard"/>
+                <Backdrop name="$(parent)OverlayBorder" override="true" hidden="true"/>
+            </Controls>
+        </Control>
+        <Control name="ZO_Veterancy_RewardTile_LeftReward_Keyboard" inherits="ZO_Veterancy_RewardTile_LeftReward_Shared ZO_Tile_Keyboard_Control" virtual="true">
+            <OnInitialized>
+                ZO_Veterancy_RewardTile_Keyboard.OnControlInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)Reward" override="true" inherits="ZO_VeterancyReward_Template_Keyboard"/>
+                <Backdrop name="$(parent)OverlayBorder" override="true" hidden="true"/>
+            </Controls>
+        </Control>
+        <Control name="ZO_Veterancy_RewardTile_RightReward_Keyboard" inherits="ZO_Veterancy_RewardTile_RightReward_Shared ZO_Tile_Keyboard_Control" virtual="true">
+            <OnInitialized>
+                ZO_Veterancy_RewardTile_Keyboard.OnControlInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)Reward" override="true" inherits="ZO_VeterancyReward_Template_Keyboard"/>
+                <Backdrop name="$(parent)OverlayBorder" override="true" hidden="true"/>
+            </Controls>
+        </Control>
+        <Control name="ZO_Veterancy_RewardTile_NoReward_Keyboard" inherits="ZO_Veterancy_RewardTile_NoReward_Shared ZO_Tile_Keyboard_Control" virtual="true">
+            <OnInitialized>
+                ZO_Veterancy_NoRewardTile_Keyboard.OnControlInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Backdrop name="$(parent)OverlayBorder" override="true" hidden="true"/>
+            </Controls>
+        </Control>
+        <Control name="ZO_Veterancy_GridList_Keyboard" inherits="ZO_Veterancy_GridList ZO_GridScrollList_Keyboard" virtual="true"/>
+        <TopLevelControl name="ZO_Veterancy_KeyboardTL" inherits="ZO_Veterancy_SharedTL">
+            <OnInitialized>
+                ZO_Veterancy_Keyboard.OnControlInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)SeasonInfo" override="true">
+                    <Controls>
+                        <Label name="$(parent)SeasonName" override="true" font="ZoFontWinH2"/>
+                        <Label name="$(parent)TimeRemaining" override="true" font="ZoFontWinH3"/>
+                        <Label name="$(parent)CurrentRank" override="true" font="ZoFontWinH3"/>
+                        <Control name="$(parent)RepeatableRankReward" override="true">
+                            <Controls>
+                                <Control name="$(parent)Reward" override="true" inherits="ZO_VeterancyReward_Template_Keyboard"/>
+                                <Label name="$(parent)Name" override="true" font="ZoFontWindowSubtitle"/>
+                                <StatusBar name="$(parent)Progress" override="true" inherits="ZO_ArrowProgressBarWithBG"/>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+                <Control name="$(parent)RewardsContainer" override="true">
+                    <Controls>
+                        <Control name="$(parent)PageNavigation" override="true" inherits="ZO_PageNavigation_Keyboard">
+                            <Controls>
+                                <Button name="$(parent)PreviousPage" override="true">
+                                    <ClearAnchors/>
+                                    <Anchor point="RIGHT" relativeTo="$(grandparent)ScrollList" relativePoint="LEFT" offsetY="-100"/>
+                                </Button>
+                                <Button name="$(parent)NextPage" override="true">
+                                    <ClearAnchors/>
+                                    <Anchor point="LEFT" relativeTo="$(grandparent)ScrollList" relativePoint="RIGHT" offsetX="-50" offsetY="-100"/>
+                                </Button>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

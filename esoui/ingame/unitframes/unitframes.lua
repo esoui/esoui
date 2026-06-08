@@ -126,12 +126,13 @@ ZO_GAMEPAD_COMPANION_FRAME_HEIGHT = 70
 ZO_GAMEPAD_GROUP_COMPANION_FRAME_WIDTH = 160
 ZO_GAMEPAD_GROUP_COMPANION_FRAME_HEIGHT = 130
 
+internalassert(MAX_GROUP_SIZE_THRESHOLD == 24, "The max group size has changed, make sure that GROUP_FRAMES_PER_COLUMN and NUM_COLUMNS are updated accordingly")
 local GAMEPAD_CONSTANTS =
 {
     GROUP_LEADER_ICON = "EsoUI/Art/UnitFrames/Gamepad/gp_Group_Leader.dds",
 
-    GROUP_FRAMES_PER_COLUMN = 6,
-    NUM_COLUMNS = MAX_GROUP_SIZE_THRESHOLD / 6, --The denominator should be the same value as GROUP_FRAMES_PER_COLUMN
+    GROUP_FRAMES_PER_COLUMN = 12,
+    NUM_COLUMNS = MAX_GROUP_SIZE_THRESHOLD / 12, --The denominator should be the same value as GROUP_FRAMES_PER_COLUMN
 
     GROUP_STRIDE = 3,
 
@@ -1207,6 +1208,7 @@ function ZO_UnitFrameObject:Initialize(unitTag, anchors, barTextMode, style, tem
     self.rankIcon = self:AddFadeComponent("RankIcon", DONT_COLOR_RANK_ICON)
     self.assignmentIcon = self:AddFadeComponent("AssignmentIcon", DONT_COLOR_RANK_ICON)
     self.championIcon = self:AddFadeComponent("ChampionIcon")
+    self.veterancyRankIcon = self:AddFadeComponent("VeterancyRankIcon")
     self.leftBracket = self:AddFadeComponent("LeftBracket")
     self.leftBracketGlow = self.frame:GetNamedChild("LeftBracketGlow")
     self.leftBracketUnderlay = self.frame:GetNamedChild("LeftBracketUnderlay")
@@ -1577,28 +1579,56 @@ function ZO_UnitFrameObject:ShouldShowLevel()
     end
 end
 
+function ZO_UnitFrameObject:ShouldShowVeterancyInfo()
+    --show info for remote players when in Veterancy areas
+    local unitTag = self:GetUnitTag()
+    return IsUnitPlayer(unitTag) and IsVeterancySeasonActive() and IsInVeterancyProgressionZone()
+end
+
 function ZO_UnitFrameObject:UpdateLevel()
     local showLevel = self:ShouldShowLevel()
+    local shouldShowVeterancyInfo = self:ShouldShowVeterancyInfo()
+    local unitTag = self:GetUnitTag()
+    local isChampion = IsUnitChampion(unitTag)
     local unitLevel
-    local isChampion = IsUnitChampion(self:GetUnitTag())
-    if isChampion then
-        unitLevel = GetUnitEffectiveChampionPoints(self:GetUnitTag())
+    local veterancyRankData
+
+    if shouldShowVeterancyInfo then
+        unitLevel = GetUnitVeterancyRank(unitTag)
+        veterancyRankData = ZO_VeterancyRankData:New(unitLevel)
+    elseif isChampion then
+        unitLevel = GetUnitEffectiveChampionPoints(unitTag)
     else
-        unitLevel = GetUnitLevel(self:GetUnitTag())
+        unitLevel = GetUnitLevel(unitTag)
     end
 
     if self.levelLabel then
-        if showLevel and unitLevel > 0 then
+        if showLevel and (veterancyRankData or unitLevel > 0) then
             self.levelLabel:SetHidden(false)
-            self.levelLabel:SetText(unitLevel)
             self.nameLabel:SetAnchor(TOPLEFT, self.levelLabel, TOPRIGHT, 10, 0)
+            if veterancyRankData then
+                self.levelLabel:SetText(zo_strformat(SI_VETERANCY_RANK_AND_TITLE_FORMATTER, unitLevel, veterancyRankData:GetName()))
+            else
+                self.levelLabel:SetText(unitLevel)
+            end
         else
             self.levelLabel:SetHidden(true)
             self.nameLabel:SetAnchor(TOPLEFT)
         end
     end
 
-    if self.championIcon then
+    if self.veterancyRankIcon and veterancyRankData then
+        self.championIcon:SetHidden(true)
+        if unitLevel >= ZO_VETERANCY_MANAGER:GetNumRanks() then
+            veterancyRankData = ZO_VeterancyRankData:New(ZO_VETERANCY_MANAGER:GetNumRanks())
+        end
+        self.veterancyRankIcon:SetTexture(veterancyRankData:GetIcon())
+        self.veterancyRankIcon:SetHidden(false)
+    elseif self.championIcon then
+        if self.veterancyRankIcon then
+            self.veterancyRankIcon:SetHidden(true)
+        end
+
         if showLevel and isChampion then
             self.championIcon:SetHidden(false)
         else
@@ -1699,13 +1729,44 @@ function ZO_UnitFrameObject:SetPlatformDifficultyTextures(difficulty)
     end
 end
 
+local CHALLENGE_DIFFICULTY_NAME_LOOKUP =
+{
+    [OVERLAND_DIFFICULTY_TYPE_BASEGAME] = "basegame",
+    [OVERLAND_DIFFICULTY_TYPE_JOURNEYMAN] = "journeyman",
+    [OVERLAND_DIFFICULTY_TYPE_ADVENTURER] = "adventurer",
+    [OVERLAND_DIFFICULTY_TYPE_VETERAN] = "veteran",
+}
+
+function ZO_UnitFrameObject:SetPlatformChallengeDifficultyTextures(difficulty)
+    local difficultyName = CHALLENGE_DIFFICULTY_NAME_LOOKUP[difficulty]
+    if IsInGamepadPreferredMode() then
+        local texture = string.format("EsoUI/Art/UnitFrames/Gamepad/gp_targetUnitFrame_challengeDifficulty_%s.dds", difficultyName)
+        self.leftBracket:SetTexture(texture)
+        self.rightBracket:SetTexture(texture)
+        self.leftBracketGlow:SetHidden(true)
+        self.rightBracketGlow:SetHidden(true)
+    else
+        self.leftBracket:SetTexture(string.format("EsoUI/Art/UnitFrames/targetUnitFrame_challengeDifficulty_%s_left.dds", difficultyName))
+        self.rightBracket:SetTexture(string.format("EsoUI/Art/UnitFrames/targetUnitFrame_challengeDifficulty_%s_right.dds", difficultyName))
+        self.leftBracketGlow:SetHidden(true)
+        self.rightBracketGlow:SetHidden(true)
+    end
+end
+
 function ZO_UnitFrameObject:UpdateDifficulty()
     if self.leftBracket then
-        local difficulty = GetUnitDifficulty(self:GetUnitTag())
+        local unitTag = self:GetUnitTag()
+        local isUnitPlayer = IsUnitPlayer(unitTag)
+        local difficulty = isUnitPlayer and GetUnitOverlandDifficulty(unitTag) or GetUnitDifficulty(unitTag)
 
         --show difficulty for neutral and hostile NPCs
-        local unitReaction = GetUnitReaction(self:GetUnitTag())
-        local showsDifficulty = (difficulty > MONSTER_DIFFICULTY_EASY) and (unitReaction == UNIT_REACTION_NEUTRAL or unitReaction == UNIT_REACTION_HOSTILE)
+        local unitReaction = GetUnitReaction(unitTag)
+        local showsDifficulty = false
+        if isUnitPlayer and difficulty > OVERLAND_DIFFICULTY_TYPE_BASEGAME then
+            showsDifficulty = true
+        elseif (difficulty > MONSTER_DIFFICULTY_EASY) and (unitReaction == UNIT_REACTION_NEUTRAL or unitReaction == UNIT_REACTION_HOSTILE) then
+            showsDifficulty = true
+        end
 
         self.leftBracket:SetHidden(not showsDifficulty)
         self.rightBracket:SetHidden(not showsDifficulty)
@@ -1713,15 +1774,19 @@ function ZO_UnitFrameObject:UpdateDifficulty()
         self.rightBracketUnderlay:SetHidden(true)
 
         if showsDifficulty then
-            self:SetPlatformDifficultyTextures(difficulty)
+            if isUnitPlayer then
+                self:SetPlatformChallengeDifficultyTextures(difficulty)
+            else
+                self:SetPlatformDifficultyTextures(difficulty)
 
-            if difficulty == MONSTER_DIFFICULTY_DEADLY and not IsInGamepadPreferredMode() then
-                self.leftBracketUnderlay:SetHidden(false)
-                self.rightBracketUnderlay:SetHidden(false)
-            end
+                if difficulty == MONSTER_DIFFICULTY_DEADLY and not IsInGamepadPreferredMode() then
+                    self.leftBracketUnderlay:SetHidden(false)
+                    self.rightBracketUnderlay:SetHidden(false)
+                end
 
-            if unitReaction == UNIT_REACTION_HOSTILE then
-                TriggerTutorial(TUTORIAL_TRIGGER_COMBAT_MONSTER_DIFFICULTY)
+                if unitReaction == UNIT_REACTION_HOSTILE then
+                    TriggerTutorial(TUTORIAL_TRIGGER_COMBAT_MONSTER_DIFFICULTY)
+                end
             end
         end
     end
@@ -1762,8 +1827,25 @@ function ZO_UnitFrameObject:UpdateName()
             end
         elseif IsUnitPlayer(tag) then
             name = ZO_GetPrimaryPlayerNameFromUnitTag(tag)
+
+            local unitDifficulty = GetUnitOverlandDifficulty(tag)
+            if unitDifficulty > OVERLAND_DIFFICULTY_TYPE_BASEGAME and GetOverlandDifficultyDisabledReason() == OVERLAND_DIFFICULTY_DISABLED_REASON_NONE then
+                -- Both UIs use the gamepad icons in this context.
+                local iconPath = ZO_CHALLENGE_DIFFICULTY_ICONS_GAMEPAD[unitDifficulty]
+                name = zo_iconTextFormatNoSpaceAlignedRight(iconPath, "115%", "115%", name)
+            end
         else
             name = GetUnitName(tag)
+
+            local playerDifficulty = GetOverlandDifficulty()
+            if playerDifficulty > OVERLAND_DIFFICULTY_TYPE_BASEGAME
+                and IsUnitMonster(tag)
+                and IsUnitAttackable(tag)
+                and GetOverlandDifficultyDisabledReason() == OVERLAND_DIFFICULTY_DISABLED_REASON_NONE then
+                -- Both UIs use the gamepad icons in this context.
+                local iconPath = ZO_CHALLENGE_DIFFICULTY_ICONS_GAMEPAD[playerDifficulty]
+                name = zo_iconTextFormatNoSpaceAlignedRight(iconPath, "115%", "115%", name)
+            end
         end
 
         local nameText
@@ -1771,9 +1853,9 @@ function ZO_UnitFrameObject:UpdateName()
         if targetMarkerType ~= TARGET_MARKER_TYPE_NONE then
             local iconPath = ZO_GetPlatformTargetMarkerIcon(targetMarkerType)
             if self.style == TARGET_UNIT_FRAME then
-                nameText = zo_iconTextFormatNoSpaceAlignedRight(iconPath, 20, 20, name)
+                nameText = zo_iconTextFormatNoSpaceAlignedRight(iconPath, "100%", "100%", name)
             else
-                nameText = zo_iconTextFormatNoSpace(iconPath, 20, 20, name)
+                nameText = zo_iconTextFormatNoSpace(iconPath, "100%", "100%", name)
             end
         else
             nameText = name

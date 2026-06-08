@@ -204,8 +204,7 @@ ZO_TamrielTomeData = ZO_InitializingObject:Subclass()
 function ZO_TamrielTomeData:Initialize(tamrielTomeId)
     self.tamrielTomeId = tamrielTomeId
     self.tamrielTomeIndex = GetReferenceTrackIndex(REWARD_TRACK_TYPE_TAMRIEL_TOMES, tamrielTomeId)
-
-    self:Update()
+    self.rewardTrackId = GetRewardTrackIdFromReferenceTrackId(REWARD_TRACK_TYPE_TAMRIEL_TOMES, tamrielTomeId)
 end
 
 function ZO_TamrielTomeData:GetTamrielTomeId()
@@ -285,10 +284,6 @@ function ZO_TamrielTomeData:GetEndTime()
     return endTime
 end
 
-function ZO_TamrielTomeData:GetDisplayFlags()
-    return self:GetRewardData():GetDisplayFlags()
-end
-
 function ZO_TamrielTomeData:GetDisplayName()
     return GetRewardTrackDisplayName(self.rewardTrackId)
 end
@@ -305,12 +300,49 @@ function ZO_TamrielTomeData:GetPremiumUpgradeBackgroundFile()
     return GetTamrielTomePremiumUpgradeBackgroundFileIndex(self.tamrielTomeId)
 end
 
+function ZO_TamrielTomeData.GetRewardStatisticsForTamrielTome(tamrielTomeId)
+    local tomeIndex = GetReferenceTrackIndex(REWARD_TRACK_TYPE_TAMRIEL_TOMES, tamrielTomeId)
+    local rewardTrackId = GetRewardTrackIdFromReferenceTrackId(REWARD_TRACK_TYPE_TAMRIEL_TOMES, tamrielTomeId)
+    local numTiers = GetTotalNumTiersForRewardTrack(rewardTrackId)
+    local numClaimedRewards = 0
+    local numRewards = 0
+
+    for rewardComponent = REWARD_TRACK_COMPONENT_ITERATION_BEGIN, REWARD_TRACK_COMPONENT_ITERATION_END do
+        for rewardTier = 1, numTiers do
+            local numTierComponentRewards = GetNumRewardsAtRewardTrackTier(rewardTrackId, rewardTier, rewardComponent)
+            numRewards = numRewards + numTierComponentRewards
+
+            for rewardIndex = 1, numTierComponentRewards do
+                local isClaimed = GetRewardTrackRewardClaimedState(REWARD_TRACK_TYPE_TAMRIEL_TOMES, tomeIndex, rewardTier, rewardComponent, rewardIndex)
+                if isClaimed then
+                    numClaimedRewards = numClaimedRewards + 1
+                end
+            end
+        end
+    end
+
+    return numClaimedRewards, numRewards
+end
+
+function ZO_TamrielTomeData:UpdateRewardStatisticsInternal()
+    local tamrielTomeId = self:GetTamrielTomeId()
+    self.numClaimedRewards, self.numRewards = self.GetRewardStatisticsForTamrielTome(tamrielTomeId)
+end
+
 function ZO_TamrielTomeData:GetNumRewards()
-    -- TODO Tamriel Tomes
+    if not self.numRewards then
+        self:UpdateRewardStatisticsInternal()
+    end
+
+    return self.numRewards
 end
 
 function ZO_TamrielTomeData:GetNumClaimedRewards()
-    -- TODO Tamriel Tomes
+    if not self.numClaimedRewards then
+        self:UpdateRewardStatisticsInternal()
+    end
+
+    return self.numClaimedRewards
 end
 
 function ZO_TamrielTomeData:GetNumHighlights()
@@ -334,7 +366,7 @@ function ZO_TamrielTomeData:HasAccessToComponent(component)
 end
 
 function ZO_TamrielTomeData:Update()
-    self.rewardTrackId = GetRewardTrackIdFromReferenceTrackId(REWARD_TRACK_TYPE_TAMRIEL_TOMES, self.tamrielTomeId)
+    self:UpdateRewardStatisticsInternal()
 end
 
 
@@ -363,9 +395,24 @@ function ZO_DirectPurchaseSkuData:GetPricingInfo()
     return currentPrice, basePrice, currency
 end
 
+-- The prices returned have been processed by grammar.
+-- Note that TAMRIEL_TOMES_MANAGER:GetPricingInfoFormattedForSelectedTomeProductType(productType)
+-- should be called instead for Tamriel Tomes-related SKUs.
 function ZO_DirectPurchaseSkuData:GetPricingInfoFormatted()
     local currentPriceString, basePriceString = GetSkuPricingInfoFormatted(self.skuId)
     return currentPriceString, basePriceString
+end
+
+-- The price(s) returned have been processed by grammar.
+-- Note that TAMRIEL_TOMES_MANAGER:GetPricingStringFormattedForSelectedTomeProductType(productType)
+-- should be called instead for Tamriel Tomes-related SKUs.
+function ZO_DirectPurchaseSkuData:GetPricingStringFormatted()
+    local currentPriceString, basePriceString = self:GetPricingInfoFormatted()
+    if currentPriceString == basePriceString then
+        return currentPriceString
+    end
+
+    return string.format("%s %s", zo_strikethroughTextFormat(basePriceString), currentPriceString)
 end
 
 function ZO_DirectPurchaseSkuData:GetPricingInfoWithTax()

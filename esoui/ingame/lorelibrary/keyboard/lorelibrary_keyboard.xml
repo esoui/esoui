@@ -41,7 +41,7 @@
                 </Label>
             </Controls>
         </Control>
-        <Control name="ZO_LoreLibrary_HirelingMessageHeader" mouseEnabled="true" virtual="true">
+        <Control name="ZO_LoreLibrary_MailHeader" mouseEnabled="true" virtual="true">
             <Dimensions x="450" y="60"/>
             <OnInitialized>
                 self.text = self:GetNamedChild("Text")

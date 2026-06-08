@@ -135,6 +135,10 @@
                                         </Label>
                                     </Controls>
                                 </Button>
+                                <Label name="$(parent)SubscribeInfo" inherits="ZO_LoginMenuInfoLabel" font="ZoFontWinH5" text="SI_CREATEACCOUNT_EMAIL_SIGNUP_INFO" hidden="true">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)EmailEntry" relativePoint="BOTTOMLEFT" offsetY="20"/>
+                                    <DimensionConstraints maxX="475"/>
+                                </Label>
                                 <Button name="$(parent)CreateAccount" inherits="ZO_LoginMenuButton" text="SI_CREATEACCOUNT_CREATE_ACCOUNT_BUTTON">
                                     <Anchor point="TOP" relativeTo="$(parent)Subscribe" relativePoint="BOTTOMLEFT" offsetX="250" offsetY="50"/>
                                     <OnClicked>

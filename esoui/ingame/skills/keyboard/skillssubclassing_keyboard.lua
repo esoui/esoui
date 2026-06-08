@@ -447,12 +447,14 @@ end
 function ZO_SkillsSubclassing_Keyboard:InitializeSkillLineSwapDialog()
     local dialogControl = ZO_SkillLineSwapSelectionDialog
     dialogControl.description = dialogControl:GetNamedChild("Description")
+    dialogControl.warning = dialogControl:GetNamedChild("Warning")
+    dialogControl.options = dialogControl:GetNamedChild("Options")
 
     dialogControl.currentSkillLineControls =
     {
-        dialogControl:GetNamedChild("OptionsCurrentSkillLine1"),
-        dialogControl:GetNamedChild("OptionsCurrentSkillLine2"),
-        dialogControl:GetNamedChild("OptionsCurrentSkillLine3"),
+        dialogControl.options:GetNamedChild("CurrentSkillLine1"),
+        dialogControl.options:GetNamedChild("CurrentSkillLine2"),
+        dialogControl.options:GetNamedChild("CurrentSkillLine3"),
     }
 
     local function OnMouseEnter(clickableAreaControl)
@@ -496,6 +498,24 @@ function ZO_SkillsSubclassing_Keyboard:InitializeSkillLineSwapDialog()
         local swapInSkillLineClassId = skillLineData:GetClassId()
         local swapInClassActiveSkillLine = SKILLS_DATA_MANAGER:GetFirstActiveSkillLineByClassId(swapInSkillLineClassId)
         local swapInSkillLineName = ZO_WHITE:Colorize(skillLineData:GetName())
+
+        -- If all skill lines are for the current player class, the swap in can't be
+        if numPlayerClassActiveSkillLines == SKILLS_DATA_MANAGER:GetNumActiveClassSkillLines() then
+            if SKILLS_DATA_MANAGER:GetNumActiveClassMasterySkillLines() > 0 then
+                local classMasterySkillLineText = SKILLS_DATA_MANAGER:GetActiveClassMasterySkillLine(1):GetName()
+                dialog.warning:SetHidden(false)
+                dialog.warning:SetText(zo_strformat(SI_SKILLS_CLASS_MASTERY_SUBCLASSING_WARNING, ZO_WHITE:Colorize(classMasterySkillLineText)))
+                dialogControl.options:ClearAnchors()
+                dialogControl.options:SetAnchor(TOPLEFT, dialog.warning, BOTTOMLEFT, 0, 30)
+                dialogControl.options:SetAnchor(TOPRIGHT, dialog.warning, BOTTOMRIGHT, 0, 30)
+            end
+        else
+            dialog.warning:SetHidden(true)
+            dialogControl.options:ClearAnchors()
+            dialogControl.options:SetAnchor(TOPLEFT, dialog.description, BOTTOMLEFT, 0, 30)
+            dialogControl.options:SetAnchor(TOPRIGHT, dialog.description, BOTTOMRIGHT, 0, 30)
+        end
+
         for i, control in ipairs(dialog.currentSkillLineControls) do
             local currentSkillLineData = SKILLS_DATA_MANAGER:GetActiveClassSkillLine(i)
             local currentSkillLineName = ZO_WHITE:Colorize(currentSkillLineData:GetName())
@@ -588,6 +608,7 @@ function ZO_SkillsSubclassing_Keyboard:InitializeSkillLineSwapDialog()
                     if dialog.selectedSkillLineData:CanDeactivateForRespec() then
                         if dialog.swapInSkillLineData:CanActivateForRespec() then
                             local SUPPRESS_CALLBACK = true
+                            SKILLS_DATA_MANAGER:DeactivateClassMasterySkillLinesForRespec()
                             dialog.selectedSkillLineData:DeactivateForRespec(SUPPRESS_CALLBACK)
                             dialog.swapInSkillLineData:ActivateForRespec()
                             PlaySound(SOUNDS.SKILLS_SUBCLASSING_SWAP_SKILL_LINE_CONFIRM)

@@ -2048,7 +2048,7 @@ function ChampionPerks:UpdateVirtualMousePosition()
             deltaY = mouseY - radialNodeY
         end
 
-        self:UpdateCursorInfo(deltaX, deltaY)
+        self:UpdateCursorInfo(deltaX, -deltaY) -- atan2 assumes +y = up
     end
 end
 
@@ -2062,7 +2062,7 @@ function ChampionPerks:UpdateRingDirectionalInput()
 end
 
 function ChampionPerks:UpdateCursorInfo(deltaX, deltaY)
-    local angle = ClampRadialSelectorAngle(math.atan2(-deltaY, deltaX)) -- atan2 assumes +y = up
+    local angle = ClampRadialSelectorAngle(math.atan2(deltaY, deltaX))
     self:MoveConstellationSelectorToAngle(angle)
 end
 

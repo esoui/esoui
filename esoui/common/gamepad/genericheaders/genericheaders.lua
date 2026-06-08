@@ -346,6 +346,12 @@ function ZO_GamepadGenericHeader_SetDataLayout(control, layout)
     local anchorSets = IsScreenHeader(controls) and SCREEN_HEADER_ANCHORS[layout] or CONTENT_HEADER_ANCHORS[layout]
     assert(anchorSets ~= nil)
 
+    -- Clear all anchors before applying set to avoid anchoring cycles when switching layouts
+    for k, anchors in pairs(anchorSets) do
+        local dataControl = controls[k]
+        dataControl:ClearAnchors()
+    end
+
     for k, anchors in pairs(anchorSets) do
         local dataControl = controls[k]
         ApplyAnchorSetToControl(dataControl, anchors, controls)
@@ -704,9 +710,9 @@ function ZO_GamepadGenericHeader_Deactivate(control)
     end
 end
 
-function ZO_GamepadGenericHeader_SetActiveTabIndex(control, tabIndex, allowEvenIfDisabled)
+function ZO_GamepadGenericHeader_SetActiveTabIndex(control, tabIndex, allowEvenIfDisabled, blockSelectionChangedCallback)
     if control.tabBar then
-        control.tabBar:SetSelectedIndex(tabIndex, allowEvenIfDisabled)
+        control.tabBar:SetSelectedIndex(tabIndex, allowEvenIfDisabled, blockSelectionChangedCallback)
     end
 end
 

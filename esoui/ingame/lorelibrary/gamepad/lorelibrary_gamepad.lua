@@ -30,8 +30,8 @@ function ZO_LoreLibrary_Gamepad:InitializeEvents()
     self.control:RegisterForEvent(EVENT_LORE_LIBRARY_INITIALIZED, Refresh)
     self.control:RegisterForEvent(EVENT_LORE_BOOK_LEARNED, Refresh)
     self.control:RegisterForEvent(EVENT_LORE_BOOK_COLLECTION_LEARNED, Refresh)
-    self.control:RegisterForEvent(EVENT_UNLOCKED_HIRELING_CORRESPONDENCE_INITIALIZED, Refresh)
-    self.control:RegisterForEvent(EVENT_UNLOCKED_HIRELING_CORRESPONDENCE_UPDATED, Refresh)
+    self.control:RegisterForEvent(EVENT_MAIL_LISTS_INITIALIZED, Refresh)
+    self.control:RegisterForEvent(EVENT_MAIL_LISTS_UPDATED, Refresh)
 end
 
 function ZO_LoreLibrary_Gamepad:InitializeKeybindStripDescriptors()
@@ -46,11 +46,11 @@ function ZO_LoreLibrary_Gamepad:InitializeKeybindStripDescriptors()
             keybind = "UI_SHORTCUT_PRIMARY",
             visible = function()
                 local selectedData = self:GetMainList():GetTargetData()
-                return selectedData and (selectedData.collectionIndex or selectedData.hirelingType)
+                return selectedData and (selectedData.collectionIndex or selectedData.mailListIndex)
             end,
             enabled = function()
                 local selectedData = self:GetMainList():GetTargetData()
-                if selectedData.hirelingType ~= nil then
+                if selectedData.mailListIndex ~= nil then
                     return selectedData.enabled
                 else
                     return true
@@ -100,17 +100,6 @@ do
     local function NameSorter(left, right)
         return left.name < right.name
     end
-
-    internalassert(HIRELING_TYPE_MAX_VALUE == 5, "A new hireling type has been added. Make sure to update the HIRELING_CORRESPONDENCE_ICONS table below.")
-    local HIRELING_CORRESPONDENCE_ICONS =
-    {
-        [HIRELING_TYPE_ENCHANTING] = "EsoUI/Art/LoreLibrary/Gamepad/loreLibrary_hirelingIcon_enchanting.dds",
-        [HIRELING_TYPE_PROVISIONING] = "EsoUI/Art/LoreLibrary/Gamepad/loreLibrary_hirelingIcon_provisioning.dds",
-        [HIRELING_TYPE_BLACKSMITHING] = "EsoUI/Art/LoreLibrary/Gamepad/loreLibrary_hirelingIcon_blacksmithing.dds",
-        [HIRELING_TYPE_WOODWORKING] = "EsoUI/Art/LoreLibrary/Gamepad/loreLibrary_hirelingIcon_woodworking.dds",
-        [HIRELING_TYPE_CLOTHIER] = "EsoUI/Art/LoreLibrary/Gamepad/loreLibrary_hirelingIcon_clothier.dds",
-        [HIRELING_TYPE_JEWELRYCRAFTING] = "EsoUI/Art/LoreLibrary/Gamepad/loreLibrary_hirelingIcon_jewelrycrafting.dds",
-    }
 
     function ZO_LoreLibrary_Gamepad:PerformUpdate()
         self.dirty = false
@@ -175,7 +164,7 @@ do
                 local isHeader = (index == 1)
 
                 local entryData = ZO_GamepadEntryData:New(collectionData.name, collectionData.icon)
-                entryData:AddSubLabel(zo_strformat("<<1>>/<<2>>", collectionData.knownBooks, collectionData.totalBooks))
+                entryData:AddSubLabel(zo_strformat(SI_CURRENT_AND_MAX_VALUES_FORMATTER, collectionData.knownBooks, collectionData.totalBooks))
                 entryData.categoryIndex = collectionData.categoryIndex
                 entryData.collectionIndex = collectionData.collectionIndex
                 entryData.description = collectionData.description
@@ -209,19 +198,20 @@ do
             end
         end
 
-        --Add the hireling correspondence section
+        --Add the mail lists
         local firstEntry = true
-        for hirelingType = HIRELING_TYPE_ITERATION_BEGIN, HIRELING_TYPE_ITERATION_END do
-            local currentUnlocked, maxUnlocked = GetNumUnlockedHirelingCorrespondence(hirelingType)
-            if maxUnlocked > 0 then
-                local entryData = ZO_GamepadEntryData:New(GetString("SI_HIRELINGTYPE", hirelingType), HIRELING_CORRESPONDENCE_ICONS[hirelingType])
-                if currentUnlocked == maxUnlocked then
-                    entryData:AddSubLabel(zo_strformat("<<1>>/<<2>>", currentUnlocked, maxUnlocked))
+        local mailLists = ZO_LoreLibrary_GetSortedMailLists()
+        for index, mailList in ipairs(mailLists) do
+            if mailList.total > 0 then
+                local icon = GetMailListGamepadIcon(mailList.mailListIndex)
+                local entryData = ZO_GamepadEntryData:New(mailList.name, icon)
+                if mailList.numUnlocked == mailList.total then
+                    entryData:AddSubLabel(zo_strformat(SI_CURRENT_AND_MAX_VALUES_FORMATTER, mailList.numUnlocked, mailList.total))
                 else
-                    entryData:AddSubLabel(zo_strformat(SI_GAMEPAD_LORE_LIBRARY_HIRELING_CORRESPONDENCE_TOTAL_COLLECTED, currentUnlocked))
+                    entryData:AddSubLabel(zo_strformat(SI_GAMEPAD_LORE_LIBRARY_MAIL_LIST_TOTAL_COLLECTED, mailList.numUnlocked))
                 end
-                entryData.hirelingType = hirelingType
-                if currentUnlocked > 0 then
+                entryData.mailListIndex = mailList.mailListIndex
+                if mailList.numUnlocked > 0 then
                     entryData.enabled = true
                     entryData:SetNameColors(ZO_SELECTED_TEXT, ZO_CONTRAST_TEXT)
                     entryData:SetSubLabelColors(ZO_SELECTED_TEXT, ZO_CONTRAST_TEXT)
@@ -238,7 +228,7 @@ do
                 local templateName
                 if firstEntry then
                     firstEntry = false
-                    entryData:SetHeader(GetString(SI_LORE_LIBRARY_HIRELING_CORRESPONDENCE_HEADER))
+                    entryData:SetHeader(GetString(SI_LORE_LIBRARY_MAIL_LIST_HEADER))
                     templateName = "ZO_GamepadLoreCollectionEntryTemplateWithHeader"
                 else
                     templateName = "ZO_GamepadLoreCollectionEntryTemplate"

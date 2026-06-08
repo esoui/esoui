@@ -113,3 +113,19 @@ function ZO_Tooltip:LayoutGuildNameplateTooltip()
         self:AddSection(tabardEquippedSection)
     end
 end
+
+function ZO_Tooltip:LayoutChallengeDifficultyTooltip(difficulty)
+    local headerSection = self:AcquireSection(self:GetStyle("title"))
+    local icon = zo_iconFormat(ZO_CHALLENGE_DIFFICULTY_ICONS_GAMEPAD[difficulty], "100%", "100%")
+    local headerText = string.format("%s %s", icon, GetString("SI_OVERLANDDIFFICULTYTYPE", difficulty))
+    headerSection:AddLine(headerText)
+    self:AddSection(headerSection)
+
+    local bodySection = self:AcquireSection(self:GetStyle("bodySection"))
+    bodySection:AddLine(GetOverlandDifficultyDescription(difficulty), self:GetStyle("bodyDescription"))
+    self:AddSection(bodySection)
+
+    local effectsSection = self:AcquireSection(self:GetStyle("bodySection"))
+    effectsSection:AddLine(GetOverlandDifficultyEffects(difficulty), self:GetStyle("bodyDescription"))
+    self:AddSection(effectsSection)
+end

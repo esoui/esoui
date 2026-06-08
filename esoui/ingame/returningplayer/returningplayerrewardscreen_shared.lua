@@ -147,7 +147,7 @@ function ZO_ReturningPlayerRewardScreen_Shared:OnHiding()
     EVENT_MANAGER:UnregisterForUpdate(self.scene:GetName())
     self.blastParticleSystem:Stop()
 
-    FlagReturningPlayerAnnouncementSeen()
+    FlagPromotionalEventPersonalCampaignAnnouncementSeen()
 end
 
 function ZO_ReturningPlayerRewardScreen_Shared:OnHidden()
@@ -159,14 +159,14 @@ ZO_ReturningPlayerRewardScreen_Shared:MUST_IMPLEMENT("OnPrimaryKeyPressed")
 ZO_ReturningPlayerRewardScreen_Shared:MUST_IMPLEMENT("ShouldShowPrimaryKeybind")
 
 function ZO_ReturningPlayerRewardScreen_Shared:UpdateDisplayText()
-    local subheaderTitleText = zo_strformat(SI_RETURNING_PLAYER_SUBHEADER_TITLE, RETURNING_PLAYER_MANAGER:GetIntroCampaignDisplayName())
+    local subheaderTitleText = zo_strformat(SI_RETURNING_PLAYER_SUBHEADER_TITLE, PROMOTIONAL_EVENT_PERSONAL_CAMPAIGN_MANAGER:GetCampaignDisplayName())
     self.subHeaderTitle:SetText(subheaderTitleText)
 
-    local campaignDisplayName = RETURNING_PLAYER_MANAGER:GetColorizedIntroCampaignDisplayName()
-    local titleText = zo_strformat(SI_RETURNING_PLAYER_CAMPAIGN_NAME_FORMATTER, campaignDisplayName)
+    local campaignDisplayName = PROMOTIONAL_EVENT_PERSONAL_CAMPAIGN_MANAGER:GetColorizedCampaignDisplayName()
+    local titleText = zo_strformat(SI_PROMOTIONAL_EVENT_PERSONAL_CAMPAIGN_NAME_FORMATTER, campaignDisplayName)
     self.campaignInfoTitleLabel:SetText(titleText)
 
-    local remainingTimeText = RETURNING_PLAYER_MANAGER:GetCampaignRemainingTimeDisplayText()
+    local remainingTimeText = PROMOTIONAL_EVENT_PERSONAL_CAMPAIGN_MANAGER:GetCampaignRemainingTimeDisplayText()
     self.subHeaderTimeRemaining:SetText(remainingTimeText)
 
     local campaignDescriptionText = RETURNING_PLAYER_MANAGER:GetCampaignRewardsDescriptionText()
@@ -176,7 +176,7 @@ end
 function ZO_ReturningPlayerRewardScreen_Shared:UpdatePrimaryRewardGridList()
     self.primaryRewardGridList:ClearGridList()
 
-    local rewards = RETURNING_PLAYER_MANAGER:GetPrimaryRewards()
+    local rewards = PROMOTIONAL_EVENT_PERSONAL_CAMPAIGN_MANAGER:GetPrimaryRewards()
     for index, reward in ipairs(rewards) do
         local rewardEntry = ZO_GridSquareEntryData_Shared:New(reward)
         self.primaryRewardGridList:AddEntry(rewardEntry)

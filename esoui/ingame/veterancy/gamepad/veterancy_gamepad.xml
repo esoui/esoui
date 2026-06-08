@@ -1,0 +1,150 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_Veterancy_RankTile_Template_Gamepad" inherits="ZO_Veterancy_RankTile_Template_Shared ZO_ContextualActionsTile_Gamepad_Control" virtual="true">
+            <OnInitialized>
+                ZO_Veterancy_RankTile_Gamepad.OnControlInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)RankIndex" override="true" font="ZoFontGamepad34">
+                    <Anchor point="BOTTOM" relativeTo="$(parent)Icon" relativePoint="TOP"/>
+                </Label>
+                <Label name="$(parent)Title" override="true" font="ZoFontGamepad27"/>
+                <Backdrop name="$(parent)Highlight" override="true" inherits="ZO_GamepadWhiteOutlineHighlight" tier="HIGH" layer="OVERLAY" level="2" blendMode="ADD" alpha="0">
+                    <Dimensions x="128" y="128"/>
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Icon"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icon"/>
+                </Backdrop>
+            </Controls>
+        </Control>
+        <Control name="ZO_Veterancy_RankTile_Empty_Template_Gamepad" inherits="ZO_Veterancy_RankTile_Empty_Template_Shared ZO_ContextualActionsTile_Gamepad_Control" virtual="true">
+            <OnInitialized>
+                ZO_Veterancy_RankTile_Empty_Gamepad.OnControlInitialized(self)
+            </OnInitialized>
+        </Control>
+        <Backdrop name="ZO_Veterancy_Rank_Gamepad_Highlight_Template" centerColor="00000000" virtual="true"/>
+        <Control name="ZO_VeterancyReward_Template_Gamepad" inherits="ZO_VeterancyReward_Template_Shared" mouseEnabled="true" virtual="true">
+            <Dimensions x="64" y="64"/>
+            <OnInitialized>
+                ZO_VeterancyReward_Gamepad.OnControlInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)RewardIcon" override="true">
+                    <Controls>
+                        <Texture name="$(parent)Icon" override="true">
+                            <Dimensions x="52" y="52"/>
+                        </Texture>
+                        <Label name="$(parent)Quantity" override="true" inherits="ZO_GamepadMenuEntryStackCountTemplate">
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icon" offsetY="4"/>
+                            <Anchor point="LEFT" offsetX="4" constrains="X"/>
+                        </Label>
+                        <Texture name="$(parent)CompleteMark" override="true"/>
+                        <Control name="$(parent)FxAnchorControl" override="true">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Icon"/>
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icon"/>
+                        </Control>
+                    </Controls>
+                </Control>
+                <Texture name="$(parent)Highlight" level="20" alpha="0" textureFile="EsoUI/Art/Veterancy/itemreward_frame_highlight.dds" excludeFromResizeToFitExtents="true">
+                    <Dimensions x="ZO_VENGEANCE_PERK_TILE_ICON_BORDER_DIMENSIONS" y="ZO_VENGEANCE_PERK_TILE_ICON_BORDER_DIMENSIONS"/>
+                    <Anchor point="CENTER"/>
+                </Texture>
+            </Controls>
+        </Control>
+        <Control name="ZO_Veterancy_RewardTile_CenteredReward_Gamepad" inherits="ZO_Veterancy_RewardTile_CenteredReward_Shared ZO_ContextualActionsTile_Gamepad_Control" virtual="true">
+            <OnInitialized>
+                ZO_Veterancy_RewardTile_Gamepad.OnControlInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)Reward" override="true" inherits="ZO_VeterancyReward_Template_Gamepad">
+                    <Dimensions x="64" y="64"/>
+                </Control>
+                <Backdrop name="$(parent)OverlayBorder" override="true" hidden="true">
+                    <ClearAnchors/>
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Reward"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Reward"/>
+                </Backdrop>
+            </Controls>
+        </Control>
+        <Control name="ZO_Veterancy_RewardTile_LeftReward_Gamepad" inherits="ZO_Veterancy_RewardTile_LeftReward_Shared ZO_ContextualActionsTile_Gamepad_Control" virtual="true">
+            <OnInitialized>
+                ZO_Veterancy_RewardTile_Gamepad.OnControlInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)Reward" override="true" inherits="ZO_VeterancyReward_Template_Gamepad">
+                    <Dimensions x="64" y="64"/>
+                </Control>
+                <Backdrop name="$(parent)OverlayBorder" override="true" hidden="true">
+                    <ClearAnchors/>
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Reward"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Reward"/>
+                </Backdrop>
+            </Controls>
+        </Control>
+        <Control name="ZO_Veterancy_RewardTile_RightReward_Gamepad" inherits="ZO_Veterancy_RewardTile_RightReward_Shared ZO_ContextualActionsTile_Gamepad_Control" virtual="true">
+            <OnInitialized>
+                ZO_Veterancy_RewardTile_Gamepad.OnControlInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)Reward" override="true" inherits="ZO_VeterancyReward_Template_Gamepad">
+                    <Dimensions x="64" y="64"/>
+                </Control>
+                <Backdrop name="$(parent)OverlayBorder" override="true" hidden="true">
+                    <ClearAnchors/>
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Reward"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Reward"/>
+                </Backdrop>
+            </Controls>
+        </Control>
+        <Control name="ZO_Veterancy_RewardTile_NoReward_Gamepad" inherits="ZO_Veterancy_RewardTile_NoReward_Shared ZO_ContextualActionsTile_Gamepad_Control" virtual="true">
+            <OnInitialized>
+                ZO_Veterancy_NoRewardTile_Gamepad.OnControlInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Backdrop name="$(parent)OverlayBorder" override="true" hidden="true"/>
+            </Controls>
+        </Control>
+        <Control name="ZO_Veterancy_GridList_Gamepad" inherits="ZO_Veterancy_GridList ZO_GridScrollList_Gamepad" virtual="true">
+            <Dimensions x="ZO_VETERANCY_GRIDLIST_WIDTH_GAMEPAD" y="ZO_VETERANCY_GRIDLIST_HEIGHT"/>
+        </Control>
+        <TopLevelControl name="ZO_Veterancy_GamepadTL" inherits="ZO_Veterancy_SharedTL">
+            <OnInitialized>
+                ZO_Veterancy_Gamepad.OnControlInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)SeasonInfo" override="true">
+                    <Controls>
+                        <Label name="$(parent)SeasonName" override="true" font="ZoFontGamepad34"/>
+                        <Label name="$(parent)TimeRemaining" override="true" font="ZoFontGamepad27"/>
+                        <Label name="$(parent)CurrentRank" override="true" font="ZoFontGamepad27"/>
+                        <Control name="$(parent)RepeatableRankReward" override="true">
+                            <Controls>
+                                <Control name="$(parent)Reward" override="true" inherits="ZO_VeterancyReward_Template_Gamepad"/>
+                                <Label name="$(parent)Name" override="true" font="ZoFontGamepad34"/>
+                                <StatusBar name="$(parent)Progress" override="true" inherits="ZO_ArrowProgressBarWithBG"/>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+                <Control name="$(parent)RewardsContainer" override="true">
+                    <Controls>
+                        <Control name="$(parent)ScrollList" override="true">
+                            <Dimensions x="ZO_VETERANCY_GRIDLIST_WIDTH_GAMEPAD" y="ZO_VETERANCY_GRIDLIST_HEIGHT"/>
+                        </Control>
+                        <Control name="$(parent)PageNavigation" override="true" inherits="ZO_PageNavigation_Gamepad">
+                            <Controls>
+                                <Label name="$(parent)PreviousPage" override="true">
+                                    <ClearAnchors/>
+                                    <Anchor point="RIGHT" relativeTo="$(grandparent)ScrollList" relativePoint="LEFT" offsetX="20" offsetY="-100"/>
+                                </Label>
+                                <Label name="$(parent)NextPage" override="true">
+                                    <ClearAnchors/>
+                                    <Anchor point="LEFT" relativeTo="$(grandparent)ScrollList" relativePoint="RIGHT" offsetX="-70" offsetY="-100"/>
+                                </Label>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

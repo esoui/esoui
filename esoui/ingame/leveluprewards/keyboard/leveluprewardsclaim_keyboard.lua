@@ -43,6 +43,11 @@ function ZO_LevelUpRewardsClaim_Keyboard:Initialize(control)
     self.artTileControl = self.rewardListScrollChild:GetNamedChild("ArtTile")
     self.artTexture = self.artTileControl:GetNamedChild("Art")
     self.claimButton = control:GetNamedChild("ClaimButton")
+    self.goToLevelUpRewardsButton = control:GetNamedChild("GoToLevelUpRewardsButton")
+    self.goToDifficultyButton = control:GetNamedChild("GoToDifficultyButton")
+    self.challengeDifficultyRadioButtonGroup = ZO_RadioButtonGroup:New()
+    self.challengeDifficultyRadioButtonGroup:Add(self.goToLevelUpRewardsButton)
+    self.challengeDifficultyRadioButtonGroup:Add(self.goToDifficultyButton)
 
     self.layout = ZO_LevelUpRewardsLayout_Keyboard:New()
 
@@ -129,6 +134,7 @@ end
 function ZO_LevelUpRewardsClaim_Keyboard:OnShowing()
     self:ShowLevelUpRewards()
     CENTER_SCREEN_ANNOUNCE:SupressAnnouncementByType(CENTER_SCREEN_ANNOUNCE_TYPE_SKILL_POINTS_GAINED)
+    self.challengeDifficultyRadioButtonGroup:SetClickedButton(self.goToLevelUpRewardsButton)
 end
 
 function ZO_LevelUpRewardsClaim_Keyboard:OnHidden()
@@ -307,6 +313,25 @@ end
 
 function ZO_LevelUpRewardsClaim_Keyboard:UpdateClaimButtonState()
     self.claimButton:SetEnabled(DoAllValidLevelUpRewardChoicesHaveSelections())
+end
+
+function ZO_LevelUpRewardsClaim_Keyboard.OnGoToDifficultyButtonClicked()
+    ZO_KEYBOARD_CLAIM_LEVEL_UP_REWARDS:Hide()
+    ZO_CHALLENGE_DIFFICULTY_KEYBOARD:Show()
+end
+
+function ZO_LevelUpRewardsClaim_Keyboard.OnGoToLevelUpRewardsButtonMouseEnter(control)
+    InitializeTooltip(InformationTooltip, control, LEFT, 0, 0, RIGHT)
+    InformationTooltip:AddLine(GetString(SI_CHALLENGE_DIFFICULTY_TOOLTIP_LEVEL_UP_REWARDS_TAB))
+end
+
+function ZO_LevelUpRewardsClaim_Keyboard.OnGoToDifficultyButtonMouseEnter(control)
+    InitializeTooltip(InformationTooltip, control, LEFT, 0, 0, RIGHT)
+    InformationTooltip:AddLine(GetString(SI_CHALLENGE_DIFFICULTY_TOOLTIP_DIFFICULTY_TAB))
+end
+
+function ZO_LevelUpRewardsClaim_Keyboard.OnTabButtonMouseExit(control)
+    ClearTooltip(InformationTooltip)
 end
 
 --

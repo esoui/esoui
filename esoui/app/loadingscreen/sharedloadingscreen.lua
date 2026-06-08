@@ -8,6 +8,17 @@ local MAX_ROTATION = math.pi * 2
 local ROTATION_PER_FRAME = -MAX_ROTATION * 0.01
 local MINIMUM_TIME_TO_HOLD_LOADING_TIP_MS = 15000
 
+-- Difficulty icons
+------------------------------
+
+local CHALLENGE_DIFFICULTY_ICONS =
+{
+    [OVERLAND_DIFFICULTY_TYPE_BASEGAME] = "EsoUI/Art/ChallengeDifficulty/Gamepad/gp_challengeDifficulty_basegame.dds",
+    [OVERLAND_DIFFICULTY_TYPE_JOURNEYMAN] = "EsoUI/Art/ChallengeDifficulty/Gamepad/gp_challengeDifficulty_journeyman.dds",
+    [OVERLAND_DIFFICULTY_TYPE_ADVENTURER] = "EsoUI/Art/ChallengeDifficulty/Gamepad/gp_challengeDifficulty_adventurer.dds",
+    [OVERLAND_DIFFICULTY_TYPE_VETERAN] = "EsoUI/Art/ChallengeDifficulty/Gamepad/gp_challengeDifficulty_veteran.dds",
+}
+
 -- Instance type icons 
 ------------------------------
 
@@ -84,6 +95,7 @@ function LoadingScreen_Base:Initialize()
     self.descriptionBg = self:GetNamedChild("DescriptionBg")
     self.instanceTypeIcon = zoneInfoContainer:GetNamedChild("InstanceTypeIcon")
     self.instanceType = zoneInfoContainer:GetNamedChild("InstanceType")
+    self.difficultyLabel = self:GetNamedChild("Difficulty")
     self.spinner = self:GetNamedChild("Spinner")
 
     EVENT_MANAGER:RegisterForEvent(self:GetSystemName(), EVENT_AREA_LOAD_STARTED, function(...) self:OnAreaLoadStarted(...) end)
@@ -92,6 +104,7 @@ function LoadingScreen_Base:Initialize()
     EVENT_MANAGER:RegisterForEvent(self:GetSystemName(), EVENT_JUMP_FAILED, function(...) self:OnJumpFailed(...) end)
     EVENT_MANAGER:RegisterForEvent(self:GetSystemName(), EVENT_DISCONNECTED_FROM_SERVER, function(...) self:OnDisconnectedFromServer(...) end)
     EVENT_MANAGER:RegisterForEvent(self:GetSystemName(), EVENT_RESUME_FROM_SUSPEND, function(...) self:OnResumeFromSuspend(...) end)
+    EVENT_MANAGER:RegisterForEvent(self:GetSystemName(), EVENT_OVERLAND_DIFFICULTY_CHANGED, function(...) self:UpdateOverlandDifficultyLabel(...) end)
 
     local function OnSubsystemLoadStateChanged(eventCode, system, isComplete)
         if not isComplete then
@@ -140,12 +153,14 @@ end
 function LoadingScreen_Base:OnAreaLoadStarted(evt, worldId, instanceNum, zoneName, zoneDescription, loadingTexture, zoneDisplayType)
     self:Log(string.format("Load Screen - OnAreaLoadStarted - (%d) %s", worldId, zoneName == "" and "Unknown Zone" or zoneName))
     self:UpdateBattlegroundId(zoneDisplayType)
+    self:UpdateOverlandDifficultyLabel()
     self:Show(zoneName, zoneDescription, loadingTexture, zoneDisplayType)
 end
 
 function LoadingScreen_Base:OnPrepareForJump(evt, zoneName, zoneDescription, loadingTexture, zoneDisplayType)
     self:Log(string.format("Load Screen - OnPrepareForJump - %s", zoneName == "" and "Unknown Zone" or zoneName))
     self:UpdateBattlegroundId(zoneDisplayType)
+    self:UpdateOverlandDifficultyLabel()
     self:Show(zoneName, zoneDescription, loadingTexture, zoneDisplayType)
 end
 
@@ -185,7 +200,7 @@ local GAMEPAD_BATTLEGROUND_TEAM_TEXTURES =
 
 internalassert(BATTLEGROUND_TEAM_MAX_VALUE == 3, "Update load screen battleground team textures")
 
-function LoadingScreen_Base:Show(zoneName, zoneDescription, loadingTexture, zoneDisplayType)
+function LoadingScreen_Base:Show(zoneName, zoneDescription, loadingTexture, zoneDisplayType, isOverlandDifficultyDisabled)
     if self:IsHidden() and self:IsPreferredScreen() then
         self:Log("Load Screen - Show")
         self.lastUpdate = GetFrameTimeMilliseconds()
@@ -218,6 +233,8 @@ function LoadingScreen_Base:Show(zoneName, zoneDescription, loadingTexture, zone
         local showZoneDisplayType = zoneDisplayType ~= ZONE_DISPLAY_TYPE_NONE and (zoneDisplayType ~= ZONE_DISPLAY_TYPE_BATTLEGROUND or self.battlegroundId ~= 0)
         self.instanceTypeIcon:SetHidden(not showZoneDisplayType)
         self.instanceType:SetHidden(not showZoneDisplayType)
+
+        self:UpdateOverlandDifficultyLabel()
 
         if not isDefaultTexture then
             local shouldHideName = false
@@ -428,6 +445,19 @@ function LoadingScreen_Base:SetZoneDescription(tip)
     end
     self.zoneDescription:SetText(tip)
     ReleaseAllKeyEdgeFiles()
+end
+
+function LoadingScreen_Base:UpdateOverlandDifficultyLabel()
+    local difficulty = GetSelectedOverlandDifficulty()
+    if difficulty then
+        local difficultyName = GetString("SI_OVERLANDDIFFICULTYTYPE", difficulty)
+        local difficultyIcon = string.format("|t%s:%s:%s|t", "100%", "100%", CHALLENGE_DIFFICULTY_ICONS[difficulty])
+        local difficultyString = string.format("%s %s", difficultyIcon, difficultyName)
+        self.difficultyLabel:SetText(difficultyString)
+        self.difficultyLabel:SetHidden(false)
+    else
+        self.difficultyLabel:SetHidden(true)
+    end
 end
 
 function LoadingScreen_Base:UpdateBattlegroundId(zoneDisplayType)

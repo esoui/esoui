@@ -36,7 +36,6 @@ function ZO_HouseInformationTracker:InitializeStyles()
             FONT_POPULATION = "ZoFontGameShadow",
             FONT_SUBLABEL = "ZoFontGameShadow",
             FONT_TAGS = "ZoFontGameShadow",
-            RESIZE_TO_FIT_PADDING_HEIGHT = 10,
 
             POPULATION_HEADERLABEL_PRIMARY_ANCHOR = ZO_Anchor:New(TOPLEFT, self.headerLabel, BOTTOMLEFT, 10, 2),
             POPULATION_HEADERLABEL_SECONDARY_ANCHOR = ZO_Anchor:New(TOPRIGHT, self.headerLabel, BOTTOMRIGHT, 0, 2),
@@ -61,7 +60,6 @@ function ZO_HouseInformationTracker:InitializeStyles()
             FONT_POPULATION = "ZoFontGamepad34",
             FONT_SUBLABEL = "ZoFontGamepad34",
             FONT_TAGS = "ZoFontGamepad34",
-            RESIZE_TO_FIT_PADDING_HEIGHT = 20,
 
             POPULATION_HEADERLABEL_PRIMARY_ANCHOR = ZO_Anchor:New(TOPRIGHT, self.headerLabel, BOTTOMRIGHT, 0, 10),
 

@@ -338,6 +338,8 @@ function ZO_RewardsManager:InternalCreateRewardData(rewardId, quantity, parentCh
         rewardData = self:GetTributeCardUpgradeEntryInfo(rewardId, parentChoice)
     elseif entryType == REWARD_ENTRY_TYPE_MAIL_ITEM then
         rewardData = self:GetMailItemEntryInfo(rewardId, parentChoice)
+    elseif entryType == REWARD_ENTRY_TYPE_ADD_TITLE then
+        rewardData = self:GetAddTitleEntryInfo(rewardId, parentChoice)
     end
 
     if rewardData then
@@ -548,6 +550,18 @@ function ZO_RewardsManager:GetMailItemEntryInfo(rewardId, parentChoice)
     return rewardData
 end
 
+function ZO_RewardsManager:GetAddTitleEntryInfo(rewardId, parentChoice)
+    local titleName = GetAddTitleRewardTitleInfo(rewardId)
+
+    local rewardData = ZO_RewardData:New(rewardId, parentChoice)
+    rewardData:SetRawName(titleName)
+    rewardData:SetFormattedName(titleName)
+    -- We don't have an icon to pull, so we use something generic.
+    rewardData:SetIcon("EsoUI/Art/Icons/u50_BestowedTitle.dds")
+
+    return rewardData
+end
+
 -- Helper function to make LFGActivityRewardUIData play nice with other rewards
 function ZO_RewardsManager:GetAllRewardInfoForLFGActivityRewardUIData(lfgRewardUIDataId)
     local rewardListInfo = {}
@@ -588,6 +602,8 @@ function ZO_RewardsManager:GetRewardListEntryInfo(rewardId, quantity, parentChoi
     local firstRewardListRewardId, firstRewardListRewardType = GetRewardListEntryInfo(rewardListId, 1)
     local icon = nil
     local gamepadIcon = nil
+    local lootIcon = nil
+    local gamepadLootIcon = nil
     local rawName = nil
     local formattedName = nil
 
@@ -620,6 +636,8 @@ function ZO_RewardsManager:GetRewardListEntryInfo(rewardId, quantity, parentChoi
         formattedName = zo_strformat(SI_CURRENCY_NAME_FORMAT, rawName)
         icon = GetCurrencyKeyboardIcon(currencyType)
         gamepadIcon = GetCurrencyGamepadIcon(currencyType)
+        lootIcon = GetCurrencyLootKeyboardIcon(currencyType)
+        gamepadLootIcon = GetCurrencyLootGamepadIcon(currencyType)
     elseif firstRewardListRewardType == REWARD_ENTRY_TYPE_INSTANT_UNLOCK then
         local instantUnlockId = GetInstantUnlockRewardInstantUnlockId(firstRewardListRewardId)
         rawName = GetInstantUnlockRewardDisplayName(instantUnlockId)
@@ -635,7 +653,7 @@ function ZO_RewardsManager:GetRewardListEntryInfo(rewardId, quantity, parentChoi
     rewardData:SetRawName(rawName)
     rewardData:SetFormattedName(formattedName)
     rewardData:SetIcon(icon, gamepadIcon)
-
+    rewardData:SetLootIcon(lootIcon, gamepadLootIcon)
     return rewardData
 end
 
@@ -670,43 +688,56 @@ end
 
 function ZO_Rewards_Shared_OnMouseEnter(control, anchorPoint, anchorPointRelativeTo, anchorOffsetX, anchorOffsetY, useRelativeAnchors)
     local rewardData = control.GetRewardData and control.GetRewardData() or control.data
-    if rewardData then
-        local rewardType = rewardData:GetRewardType()
-        if rewardType then
-            anchorPoint = anchorPoint or LEFT
-            anchorPointRelativeTo = anchorPointRelativeTo or RIGHT
-            anchorOffsetX = anchorOffsetX or 0
-            anchorOffsetY = anchorOffsetY or 0
-            local rewardId = rewardData:GetRewardId()
-            local quantity = rewardData:GetQuantity()
-            local displayFlags = rewardData:GetDisplayFlags()
-
-            if rewardType == REWARD_ENTRY_TYPE_REWARD_LIST or rewardType == REWARD_ENTRY_TYPE_CHOICE then
-                InitializeTooltip(InformationTooltip, control, anchorPoint, anchorOffsetX, anchorOffsetY, anchorPointRelativeTo)
-                InformationTooltip:SetReward(rewardId, quantity, displayFlags)
-            else
-                InitializeTooltip(ItemTooltip, control, anchorPoint, anchorOffsetX, anchorOffsetY, anchorPointRelativeTo)
-                ItemTooltip:SetReward(rewardId, quantity, displayFlags)
-                ItemTooltip:HideComparativeTooltips()
-                if rewardType == REWARD_ENTRY_TYPE_ITEM then
-                    ItemTooltip:ShowComparativeTooltips()
-                    if ZO_PlayShowAnimationOnComparisonTooltip then
-                        -- These tooltip animations are not available for internal ingame.
-                        ZO_PlayShowAnimationOnComparisonTooltip(ComparativeTooltip1)
-                        ZO_PlayShowAnimationOnComparisonTooltip(ComparativeTooltip2)
-                    end
-                    if useRelativeAnchors == nil then
-                        useRelativeAnchors = true
-                    end
-                    ZO_Tooltips_SetupDynamicTooltipAnchors(ItemTooltip, control, ComparativeTooltip1, ComparativeTooltip2, useRelativeAnchors)
-                end
-            end
-        end
-    end
+    ZO_Rewards_Shared_ShowRewardTooltip(rewardData, control, anchorPoint, anchorPointRelativeTo, anchorOffsetX, anchorOffsetY, useRelativeAnchors)
 end
 
-function ZO_Rewards_Shared_OnMouseExit(control)
+function ZO_Rewards_Shared_OnMouseExit()
     ClearTooltip(ItemTooltip)
     ClearTooltip(InformationTooltip)
     ItemTooltip:HideComparativeTooltips()
+end
+
+function ZO_Rewards_Shared_ShowRewardTooltip(rewardData, control, anchorPoint, anchorPointRelativeTo, anchorOffsetX, anchorOffsetY, useRelativeAnchors)
+    if rewardData == nil then
+        return
+    end
+
+    local rewardType = rewardData:GetRewardType()
+    if rewardType == nil then
+        return
+    end
+
+    anchorPoint = anchorPoint or LEFT
+    anchorPointRelativeTo = anchorPointRelativeTo or RIGHT
+    anchorOffsetX = anchorOffsetX or 0
+    anchorOffsetY = anchorOffsetY or 0
+
+    local rewardId = rewardData:GetRewardId()
+    local quantity = rewardData:GetQuantity()
+    local displayFlags = rewardData:GetDisplayFlags()
+
+    if rewardType == REWARD_ENTRY_TYPE_REWARD_LIST or rewardType == REWARD_ENTRY_TYPE_CHOICE then
+        InitializeTooltip(InformationTooltip, control, anchorPoint, anchorOffsetX, anchorOffsetY, anchorPointRelativeTo)
+        InformationTooltip:SetReward(rewardId, quantity, displayFlags)
+    else
+        InitializeTooltip(ItemTooltip, control, anchorPoint, anchorOffsetX, anchorOffsetY, anchorPointRelativeTo)
+        ItemTooltip:SetReward(rewardId, quantity, displayFlags)
+        ItemTooltip:HideComparativeTooltips()
+
+        if rewardType == REWARD_ENTRY_TYPE_ITEM then
+            ItemTooltip:ShowComparativeTooltips()
+
+            if ZO_PlayShowAnimationOnComparisonTooltip then
+                -- These tooltip animations are not available for internal ingame.
+                ZO_PlayShowAnimationOnComparisonTooltip(ComparativeTooltip1)
+                ZO_PlayShowAnimationOnComparisonTooltip(ComparativeTooltip2)
+            end
+
+            if useRelativeAnchors == nil then
+                useRelativeAnchors = true
+            end
+
+            ZO_Tooltips_SetupDynamicTooltipAnchors(ItemTooltip, control, ComparativeTooltip1, ComparativeTooltip2, useRelativeAnchors)
+        end
+    end
 end

@@ -1400,7 +1400,13 @@ function ZO_ScreenNarrationManager:NarrateDialog(dialog, narrateBaseText, narrat
 
                     --Dialogs only narrate tooltips when one is specifically specified
                     if entryData.narrationTooltip then
-                        ZO_AppendNarration(narrations, self:GetTooltipNarration(entryData.narrationTooltip))
+                        if type(entryData.narrationTooltip) == "table" then
+                            for _, narrationTooltip in ipairs(entryData.narrationTooltip) do
+                                ZO_AppendNarration(narrations, self:GetTooltipNarration(narrationTooltip))
+                            end
+                        else
+                            ZO_AppendNarration(narrations, self:GetTooltipNarration(entryData.narrationTooltip))
+                        end
                     end
                 end
             end

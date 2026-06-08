@@ -265,6 +265,10 @@
                     <Anchor point="TOP" offsetY="-5" constrains="Y"/>
                     <Anchor point="LEFT" relativeTo="$(parent)SkillLinesContainer" relativePoint="RIGHT" offsetX="45" constrains="X"/>
                 </Control>
+                <Label name="$(parent)ClassMasteryPoints" font="ZoFontHeader3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOP" offsetY="10" constrains="Y"/>
+                    <Anchor point="LEFT" relativeTo="$(parent)SkillLinesContainer" relativePoint="RIGHT" offsetX="45" constrains="X"/>
+                </Label>
                 <Control name="$(parent)SkillList" inherits="ZO_ScrollList">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)SkillInfo" relativePoint="BOTTOMLEFT" offsetX="-45"/>
                     <Anchor point="BOTTOMRIGHT" offsetX="-33" offsetY="-55"/>

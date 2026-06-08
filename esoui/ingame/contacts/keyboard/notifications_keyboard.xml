@@ -276,10 +276,10 @@
                 </Button>
             </Controls>
         </Control>
-        <Control name="ZO_NotificationsSpectacleEventUpdateRow" inherits="ZO_NotificationsTwoButtonRow" virtual="true">
+        <Control name="ZO_NotificationsViewDismissRow" inherits="ZO_NotificationsTwoButtonRow" virtual="true">
             <OnInitialized>
-                self.acceptText = GetString(SI_SPECTACLE_EVENTS_NOTIFICATION_VIEW)
-                self.declineText = GetString(SI_SPECTACLE_EVENTS_NOTIFICATION_DISMISS)
+                self.acceptText = GetString(SI_NOTIFICATIONS_VIEW)
+                self.declineText = GetString(SI_NOTIFICATIONS_DISMISS)
             </OnInitialized>
         </Control>
         <TopLevelControl name="ZO_Notifications" inherits="ZO_RightPanelFootPrint" hidden="true">

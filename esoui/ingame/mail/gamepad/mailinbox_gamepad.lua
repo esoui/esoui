@@ -13,42 +13,47 @@ local function IsMailSystem(mailData)
 end
 
 local function IsMailReportable(mailData)
-    return mailData and (not IsMailSystem(mailData))
+    return mailData and not IsMailSystem(mailData) and not mailData.isFromLocalPlayer
 end
 
 local function GetEntryColors(mailData)
-    local hasCOD = (mailData.codAmount > 0)
-    local hasEnoughMoney = (mailData.codAmount <= GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER))
-    if not hasEnoughMoney then
-        return ZO_MAIL_COD_MONEY_INSUFFICIENT_COLOR_GAMEPAD, ZO_MAIL_COD_MONEY_INSUFFICIENT_COLOR_GAMEPAD
-    end
+    if mailData.fromGuild then
+        if mailData.chatCategory then
+            --The guild name color should be the same as the setting for the guild's corresponding chat category
+            local chatCategoryColor = ZO_ColorDef:New(GetChatCategoryColor(mailData.chatCategory))
+            return chatCategoryColor, chatCategoryColor:GetDim()
+        end
+    else
+        local hasCOD = mailData.codAmount > 0
+        local hasEnoughMoney = mailData.codAmount <= GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)
+        if not hasEnoughMoney then
+            return ZO_MAIL_COD_MONEY_INSUFFICIENT_COLOR_GAMEPAD, ZO_MAIL_COD_MONEY_INSUFFICIENT_COLOR_GAMEPAD
+        end
 
-    if hasCOD then
-        return ZO_MAIL_COD_MONEY_COLOR_GAMEPAD, ZO_MAIL_COD_MONEY_COLOR_UNSELECTED_GAMEPAD
-    end
+        if hasCOD then
+            return ZO_MAIL_COD_MONEY_COLOR_GAMEPAD, ZO_MAIL_COD_MONEY_COLOR_UNSELECTED_GAMEPAD
+        end
 
-    local isSystem = IsMailSystem(mailData)
-    if isSystem then
-        return ZO_GAME_REPRESENTATIVE_TEXT, ZO_GAME_REPRESENTATIVE_TEXT_UNSELECTED
+        local isSystem = IsMailSystem(mailData)
+        if isSystem then
+            return ZO_GAME_REPRESENTATIVE_TEXT, ZO_GAME_REPRESENTATIVE_TEXT_UNSELECTED
+        end
     end
 
     return ZO_SELECTED_TEXT, ZO_DISABLED_TEXT
 end
 
 -- The main class.
-ZO_MailInbox_Gamepad = ZO_Object:Subclass()
+ZO_MailInbox_Gamepad = ZO_InitializingObject:Subclass()
 
-function ZO_MailInbox_Gamepad:New(...)
-    local mailInbox = ZO_Object.New(self)
-    mailInbox:InitializeInbox(...)
-    return mailInbox
-end
-
-function ZO_MailInbox_Gamepad:InitializeInbox(control)
+function ZO_MailInbox_Gamepad:Initialize(control)
     self.control = control
     self.mailDataById = {}
+    self.guildMailDataById = {}
     self.dirty = true
     self.dirtyMail = nil
+    self.dirtyMailFromGuild = nil
+    self.isLoading = true
 
     self.activeLinks = ZO_GamepadLinks:New()
     self.activeLinks:SetUseKeybind("UI_SHORTCUT_LEFT_STICK")
@@ -77,7 +82,7 @@ function ZO_MailInbox_Gamepad:OnShowing()
     if self.dirtyMail then
         -- Suppress link updating as this is initially handled by OnShown.
         local SUPPRESS_LINK_UPDATE = true
-        self:ShowMailItem(self.dirtyMail, SUPPRESS_LINK_UPDATE)
+        self:ShowMailItem(self.dirtyMail, self.dirtyMailFromGuild, SUPPRESS_LINK_UPDATE)
     end
 end
 
@@ -225,6 +230,20 @@ function ZO_MailInbox_Gamepad:InitializeOptionsDialog()
         },
     }
 
+    local REPORT_GUILD_ENTRY =
+    {
+        template = "ZO_GamepadFullWidthLeftLabelEntryTemplate",
+        templateData =
+        {
+            text = GetString(SI_MAIL_READ_REPORT_GUILD),
+            setup = ZO_SharedGamepadEntry_OnSetup,
+            callback = function(dialog)
+                self:ReportGuild()
+                ZO_Dialogs_ReleaseDialogOnButtonPress("GAMEPAD_MAIL_INBOX_OPTIONS")
+            end,
+        },
+    }
+
     local DELETE_ON_CLAIM_ENTRY =
     {
         template = "ZO_CheckBoxTemplate_WithoutIndent_Gamepad",
@@ -271,18 +290,23 @@ function ZO_MailInbox_Gamepad:InitializeOptionsDialog()
             ZO_ClearNumericallyIndexedTable(parametricListEntries)
 
             local mailData = self:GetActiveMailData()
-            if mailData and not IsMailSystem(mailData) then
+            if mailData and not mailData.fromGuild and not IsMailSystem(mailData) then
                 if ZO_IsConsoleOrGameCoreUI() then
                     table.insert(parametricListEntries, SHOW_GAMERCARD_ENTRY)
                 end
 
                 table.insert(parametricListEntries, REPLY_ENTRY)
 
-                if IsMailReturnable(self:GetActiveMailId()) then
+                local activeMailId = self:GetActiveMailId()
+                if IsMailReturnable(activeMailId) then
                     table.insert(parametricListEntries, RETURN_TO_SENDER_ENTRY)
                 end
+            end
 
-                if IsMailReportable(mailData) then
+            if IsMailReportable(mailData) then
+                if mailData.fromGuild then
+                    table.insert(parametricListEntries, REPORT_GUILD_ENTRY)
+                else
                     table.insert(parametricListEntries, REPORT_PLAYER_ENTRY)
                 end
             end
@@ -401,24 +425,31 @@ end
 function ZO_MailInbox_Gamepad:InitializeKeybindDescriptors()
     local function IsReadInfoReady()
         local mailData = self:GetActiveMailData()
-        return mailData and mailData.isReadInfoReady
+        return mailData and (mailData.fromGuild or mailData.isReadInfoReady)
     end
+
     local function CanTakeAttachments()
         local mailData = self:GetActiveMailData()
+        if mailData and mailData.fromGuild then
+            return false
+        end
+
         local hasEnoughCOD = mailData and mailData.codAmount <= GetCurrencyAmount(CURT_MONEY, CURRENCY_LOCATION_CHARACTER)
 
         return IsReadInfoReady() and (self:GetActiveMailHasAttachedItems() or self:GetActiveMailHasAttachedGold()) and hasEnoughCOD
     end
-    local takeAttachmentsBind = {
+
+    local takeAttachmentsBind =
+    {
             name = GetString(SI_MAIL_READ_ATTACHMENTS_TAKE),
             keybind = "UI_SHORTCUT_PRIMARY",
             callback =  function()
-                            if CanTakeAttachments() then
-                                self:TryTakeAll()
-                            end
-                        end,
+                if CanTakeAttachments() then
+                    self:TryTakeAll()
+                end
+            end,
             visible = CanTakeAttachments,
-        }
+    }
 
     local backToMailListBind = KEYBIND_STRIP:GenerateGamepadBackButtonDescriptor(function() self:EnterMailList() end)
 
@@ -435,6 +466,7 @@ function ZO_MailInbox_Gamepad:InitializeKeybindDescriptors()
     local function CanViewAttachments()
         return IsReadInfoReady() and self:GetActiveMailHasAttachedItems()
     end
+
     self.mainKeybindDescriptor =
     {
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
@@ -452,12 +484,12 @@ function ZO_MailInbox_Gamepad:InitializeKeybindDescriptors()
             callback = function()
                     self:HideAll()
                     MAIL_GAMEPAD:SwitchToKeybind(nil)
-                    
                     self:Delete()
                 end,
             visible = function() 
                 local mailId = self:GetActiveMailId()
-                return mailId ~= nil and not IsMailReturnable(mailId) 
+                local fromGuild = self:IsActiveMailFromGuild()
+                return mailId ~= nil and (fromGuild or not IsMailReturnable(mailId))
             end,
         },
         
@@ -494,10 +526,10 @@ function ZO_MailInbox_Gamepad:InitializeKeybindDescriptors()
             keybind = "UI_SHORTCUT_RIGHT_STICK",
             visible = CanViewAttachments,
             callback = function()
-                            if CanViewAttachments() then
-                                self:EnterViewAttachments()
-                            end
-                        end,
+                if CanViewAttachments() then
+                    self:EnterViewAttachments()
+                end
+            end,
         },
     }
     ZO_Gamepad_AddListTriggerKeybindDescriptors(self.mainKeybindDescriptor, self.mailList)
@@ -531,14 +563,14 @@ function ZO_MailInbox_Gamepad:InitializeEvents()
     local function OnMoneyUpdated()
         local mailId = self:GetActiveMailId()
         if mailId then
-            self:ShowMailItem(mailId)
+            self:ShowMailItem(mailId, self:IsActiveMailFromGuild())
         end
         self:UpdateMailColors()
         self.mailList:RefreshVisible()
         MAIL_GAMEPAD:RefreshHeader()
     end
 
-    local function OnMailRemoved(evt, mailId)
+    local function OnMailRemoved()
         MAIL_GAMEPAD:RefreshHeader()
         self:RefreshMailList()
     end
@@ -551,12 +583,15 @@ function ZO_MailInbox_Gamepad:InitializeEvents()
     end
 
     self.control:RegisterForEvent(EVENT_MAIL_INBOX_UPDATE, function() self:MailboxUpdated() end)
+    self.control:RegisterForEvent(EVENT_GUILD_MAIL_UPDATE, function()
+        local FROM_GUILD = true
+        self:MailboxUpdated(FROM_GUILD) 
+    end)
     self.control:RegisterForEvent(EVENT_MAIL_READABLE, OnMailReadable)
     self.control:RegisterForEvent(EVENT_MAIL_TAKE_ATTACHED_ITEM_SUCCESS, TakeAttachment)
     self.control:RegisterForEvent(EVENT_MAIL_TAKE_ATTACHED_MONEY_SUCCESS, TakeAttachment)
     self.control:RegisterForEvent(EVENT_MAIL_REMOVED, OnMailRemoved)
     self.control:RegisterForEvent(EVENT_MONEY_UPDATE, OnMoneyUpdated)
-    self.control:RegisterForEvent(EVENT_MAIL_NUM_UNREAD_CHANGED, function(...) MAIL_GAMEPAD:RefreshHeader() end)
     self.control:RegisterForEvent(EVENT_MAIL_TAKE_ALL_ATTACHMENTS_IN_CATEGORY_RESPONSE, OnTakeAllComplete)
 
     self.control:RegisterForEvent(EVENT_DELETE_MAIL_RESPONSE, function(eventCode, mailId, result)
@@ -565,10 +600,13 @@ function ZO_MailInbox_Gamepad:InitializeEvents()
         end
     end)
 
+    MAIL_MANAGER:RegisterCallback("NumUnreadMailChanged", function(...) MAIL_GAMEPAD:RefreshHeader() end)
+    MAIL_MANAGER:RegisterCallback("GuildMailDeleted", OnMailRemoved)
 end
 
-function ZO_MailInbox_Gamepad:MailboxUpdated()
-    if self.isLoading then
+function ZO_MailInbox_Gamepad:MailboxUpdated(fromGuild)
+    --Guild mail being updated should not end the loading of regular mail
+    if self.isLoading and not fromGuild then
         self.isLoading = false
         
         if not self.inboxControl:IsHidden() then
@@ -596,21 +634,25 @@ end
 
 function ZO_MailInbox_Gamepad:Delete()
     local mailId = self:GetActiveMailId()
+    local fromGuild = self:IsActiveMailFromGuild()
+
     if mailId then
         local numAttachments, attachedMoney = GetMailAttachmentInfo(mailId)
-        if numAttachments > 0 or attachedMoney > 0 then
+        if not fromGuild and (numAttachments > 0 or attachedMoney > 0) then
             DeleteMail(mailId)
         else
-            ZO_Dialogs_ShowPlatformDialog(
-                "DELETE_MAIL", 
-                {
-                    confirmationCallback = function(...) 
-                        DeleteMail(mailId) 
-                        PlaySound(SOUNDS.MAIL_ITEM_DELETED) 
-                    end, 
-                    mailId = mailId,
-                }
-            )
+            ZO_Dialogs_ShowPlatformDialog("DELETE_MAIL",
+            {
+                confirmationCallback = function(...)
+                    if fromGuild then
+                        MAIL_MANAGER:MarkGuildMailDeleted(mailId)
+                    else
+                        DeleteMail(mailId)
+                    end
+                    PlaySound(SOUNDS.MAIL_ITEM_DELETED)
+                end, 
+                mailId = mailId,
+            })
             self:EnterMailList()
         end
     end
@@ -703,10 +745,24 @@ function ZO_MailInbox_Gamepad:GetActiveMailId()
     return nil
 end
 
+function ZO_MailInbox_Gamepad:IsActiveMailFromGuild()
+    local selectedData = self.mailList:GetTargetData()
+    if selectedData then
+        return selectedData.fromGuild or false
+    end
+    return false
+end
+
 function ZO_MailInbox_Gamepad:GetActiveMailData()
     local mailId = self:GetActiveMailId()
     if mailId then
-        return self.mailDataById[zo_getSafeId64Key(mailId)]
+        local fromGuild = self:IsActiveMailFromGuild()
+
+        if fromGuild then
+            return self.guildMailDataById[zo_getSafeId64Key(mailId)]
+        else
+            return self.mailDataById[zo_getSafeId64Key(mailId)]
+        end
     end
     return nil
 end
@@ -728,9 +784,20 @@ function ZO_MailInbox_Gamepad:GetActiveMailCategory()
 end
 
 function ZO_MailInbox_Gamepad:ReportPlayer()
-    if IsMailReportable(self:GetActiveMailData()) then
+    local mailData = self:GetActiveMailData()
+    if IsMailReportable(mailData) and not mailData.fromGuild then
         local displayName = self:GetActiveMailSender()
         ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:OpenReportPlayerTicketScene(displayName)
+    else
+        ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, GetString(SI_GAMEPAD_MAIL_INBOX_CANNOT_REPORT))
+    end
+end
+
+function ZO_MailInbox_Gamepad:ReportGuild()
+    local mailData = self:GetActiveMailData()
+    if IsMailReportable(mailData) and mailData.fromGuild then
+        local guildName = GetGuildName(mailData.guildId)
+        ZO_HELP_GENERIC_TICKET_SUBMISSION_MANAGER:OpenReportGuildTicketScene(guildName, CUSTOMER_SERVICE_ASK_FOR_HELP_REPORT_GUILD_CATEGORY_INAPPROPRIATE_MAIL)
     else
         ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, GetString(SI_GAMEPAD_MAIL_INBOX_CANNOT_REPORT))
     end
@@ -797,7 +864,14 @@ function ZO_MailInbox_Gamepad:OnMailTargetChanged(list, targetData)
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.mainKeybindDescriptor)
 
     if targetData and targetData.mailId then
-        RequestReadMail(targetData.mailId)
+        if targetData.fromGuild then
+           --Unlike other mail, guild mail is readable right away
+            MAIL_MANAGER:MarkGuildMailRead(targetData.mailId)
+            self:ShowMailItem(targetData.mailId, targetData.fromGuild)
+            MAIL_GAMEPAD:RefreshKeybind()
+        else
+            RequestReadMail(targetData.mailId)
+        end
     else
         self.inbox:SetHidden(true)
     end
@@ -819,173 +893,280 @@ local function UpdateMailIcons(mailData, entryData)
     elseif mailData.fromCS then
         entryData:AddIcon(CUSTOMERSERVICE_MAIL_ICON)
     end
+
     if mailData:IsExpirationImminent() then
         entryData:AddIcon(EXPIRATION_IMMINENT_ICON)
     end
-end
 
-function ZO_MailInbox_Gamepad:UpdateMailColors()
-    if self.inboxControl:IsHidden() then
-        self.dirty = true
-        return
-    end
-
-    for mailId in ZO_GetNextMailIdIter do
-        local mailData = self.mailDataById[zo_getSafeId64Key(mailId)]
-
-        if mailData then
-            local selectedColor, unselectedColor = GetEntryColors(mailData)
-            local entryData = self.mailEntryDataById[zo_getSafeId64Key(mailId)]
-
-            entryData:SetNameColors(selectedColor, unselectedColor)
-            entryData:SetSubLabelColors(selectedColor, unselectedColor)
+    --If this is guild mail, include the guild's crest as an icon
+    if mailData.fromGuild then
+        if DoesGuildHavePrivilege(mailData.guildId, GUILD_PRIVILEGE_HERALDRY) then
+            local crestCategoryIndex, crestStyleIndex = select(5, GetGuildHeraldryAttribute(mailData.guildId))
+            local _, crestIconPath = GetHeraldryCrestStyleInfo(crestCategoryIndex, crestStyleIndex)
+            entryData:AddIcon(crestIconPath)
+        else
+            local NO_HERALDRY_TEXTURE = "EsoUI/Art/GuildFinder/tabard_no_heraldry.dds"
+            entryData:AddIcon(NO_HERALDRY_TEXTURE)
         end
     end
 end
 
-local function GetMailNarrationText(entryData, entryControl)
-    local narrations = {}
-    ZO_AppendNarration(narrations, ZO_GetSharedGamepadEntryDefaultNarrationText(entryData, entryControl))
-
-    local moneyHeader
-    local moneyText
-    local hasAttachedMoney = entryData.attachedMoney > 0
-    local hasCod = entryData.codAmount > 0
-
-    --Generate the COD Fee/Sent Gold text
-    if hasAttachedMoney then
-        moneyHeader = GetString(SI_MAIL_READ_SENT_GOLD_LABEL)
-        moneyText = ZO_Currency_FormatGamepad(CURT_MONEY, entryData.attachedMoney, ZO_CURRENCY_FORMAT_AMOUNT_NAME)
-    elseif hasCod then
-        moneyHeader = GetString(SI_MAIL_READ_COD_LABEL)
-        moneyText = ZO_Currency_FormatGamepad(CURT_MONEY, entryData.codAmount, ZO_CURRENCY_FORMAT_AMOUNT_NAME)
-        --If this mail has a COD Fee, include the narration for the COD notice
-        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_MAIL_INBOX_COD_NOTICE)))
-    else
-        moneyHeader = GetString(SI_MAIL_READ_SENT_GOLD_LABEL)
-        moneyText = GetString(SI_GAMEPAD_MAIL_INBOX_NO_ATTACHED_GOLD)
+do
+    local function GetNextValidGuildMailIdIter(_, previousMailId)
+        return GetNextValidGuildMailId(previousMailId)
     end
 
-    --Generate the narration for the From section
-    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_MAIL_INBOX_FROM)))
-    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(entryData.senderDisplayName))
-
-    --Generate the narration for the Subject section
-    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_MAIL_SUBJECT_LABEL)))
-    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(entryData:GetFormattedSubject()))
-
-    --Generate the narration for the Message section
-    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_MAIL_BODY_LABEL)))
-    local body = ReadMail(entryData.mailId)
-    if body == "" then
-        body = GetString(SI_MAIL_READ_NO_BODY)
-    end
-    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(body))
-
-    --Generate the narration for the attached money/cod fee
-    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(moneyHeader))
-    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(moneyText))
-
-    --Generate the narration for the attachments
-    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_MAIL_ATTACHMENTS_HEADER)))
-    if entryData.numAttachments > 0 then
-        local totalAttachments = 0
-        for i = 1, entryData.numAttachments do
-            local _, stack = GetAttachedItemInfo(entryData.mailId, i)
-            totalAttachments = totalAttachments + stack
+    function ZO_MailInbox_Gamepad:UpdateMailColors()
+        if self.inboxControl:IsHidden() then
+            self.dirty = true
+            return
         end
-        --Narrate the total stack count of all the attachments, not just the number of unique attachments
-        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(totalAttachments))
-    else
-        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_MAIL_INBOX_NO_ATTACHMENTS)))
-    end
-    return narrations
-end
 
-function ZO_MailInbox_Gamepad:RefreshMailList(resetToTop)
-    if not GAMEPAD_MAIL_INBOX_FRAGMENT:IsShowing() then
-        self.dirty = true
-        return
-    end
-    self.dirty = false
+        for mailId in ZO_GetNextMailIdIter do
+            local mailData = self.mailDataById[zo_getSafeId64Key(mailId)]
 
-    -- Update the inbox list.
-    self.mailDataById = {}
-    self.mailEntryDataById = {}
-    self.mailList:Clear()
+            if mailData then
+                local selectedColor, unselectedColor = GetEntryColors(mailData)
+                local entryData = self.mailEntryDataById[zo_getSafeId64Key(mailId)]
 
-    for category = MAIL_CATEGORY_ITERATION_BEGIN, MAIL_CATEGORY_ITERATION_END do
-        local numMailItems = GetNumMailItemsByCategory(category)
-        for index = 1, numMailItems do
-            local mailId = GetMailIdByIndex(category, index)
-            -- Get mail data.
-            local mailData = {}
-            ZO_MailInboxShared_PopulateMailData(mailData, mailId)
-
-            local selectedColor, unselectedColor = GetEntryColors(mailData)
-
-            local subject = mailData.subject
-            if (not subject) or (subject == "") then
-                subject = GetString(SI_MAIL_READ_NO_SUBJECT)
+                entryData:SetNameColors(selectedColor, unselectedColor)
+                entryData:SetSubLabelColors(selectedColor, unselectedColor)
             end
+        end
 
-            -- Basic setup.
-            local entryData = ZO_GamepadEntryData:New(subject)
-            entryData:SetDataSource(mailData)
-            entryData:SetNameColors(selectedColor, unselectedColor)
-            entryData:SetSubLabelColors(selectedColor, unselectedColor)
-            entryData:AddSubLabel(zo_strformat(SI_GAMEPAD_MAIL_INBOX_RECEIVED_TEXT, mailData:GetReceivedText()))
-            entryData.narrationText = GetMailNarrationText
+       for guildMailId in GetNextValidGuildMailIdIter do
+            if not MAIL_MANAGER:HasDeletedGuildMail(guildMailId) then
+                local mailData = self.guildMailDataById[zo_getSafeId64Key(guildMailId)]
 
-            local expiresText = zo_strformat(SI_MAIL_INBOX_EXPIRES_TEXT, mailData:GetExpiresText())
-            if mailData:IsExpirationImminent() then
-                expiresText = ZO_ERROR_COLOR:Colorize(expiresText)
-            end
-            entryData:AddSubLabel(expiresText)
+                if mailData then
+                    local selectedColor, unselectedColor = GetEntryColors(mailData)
+                    local entryData = self.guildMailEntryDataById[zo_getSafeId64Key(guildMailId)]
 
-            local safeIdKey = zo_getSafeId64Key(mailId)
-            self.mailDataById[safeIdKey] = mailData
-            self.mailEntryDataById[safeIdKey] = entryData
-
-            -- Setup icons.
-            UpdateMailIcons(mailData, entryData)
-
-            if index == 1 then
-                entryData:SetHeader(GetString("SI_MAILCATEGORY", category))
-                self.mailList:AddEntryWithHeader("ZO_GamepadMenuEntryNoCapitalization", entryData)
-            else
-                self.mailList:AddEntry("ZO_GamepadMenuEntryNoCapitalization", entryData)
+                    entryData:SetNameColors(selectedColor, unselectedColor)
+                    entryData:SetSubLabelColors(ZO_SELECTED_TEXT, ZO_DISABLED_TEXT)
+                end
             end
         end
     end
 
-    self.mailList:Commit(resetToTop)
+    local function GetMailNarrationText(entryData, entryControl)
+        local narrations = {}
+        ZO_AppendNarration(narrations, ZO_GetSharedGamepadEntryDefaultNarrationText(entryData, entryControl))
 
-    -- If we have a queued message update, update it.
-    if self.dirtyMail then
-        self:ShowMailItem(self.dirtyMail)
+        local moneyHeader
+        local moneyText
+        local hasAttachedMoney = entryData.attachedMoney > 0
+        local hasCod = entryData.codAmount > 0
+
+        --Generate the COD Fee/Sent Gold text
+        if hasAttachedMoney then
+            moneyHeader = GetString(SI_MAIL_READ_SENT_GOLD_LABEL)
+            moneyText = ZO_Currency_FormatGamepad(CURT_MONEY, entryData.attachedMoney, ZO_CURRENCY_FORMAT_AMOUNT_NAME)
+        elseif hasCod then
+            moneyHeader = GetString(SI_MAIL_READ_COD_LABEL)
+            moneyText = ZO_Currency_FormatGamepad(CURT_MONEY, entryData.codAmount, ZO_CURRENCY_FORMAT_AMOUNT_NAME)
+            --If this mail has a COD Fee, include the narration for the COD notice
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_MAIL_INBOX_COD_NOTICE)))
+        else
+            moneyHeader = GetString(SI_MAIL_READ_SENT_GOLD_LABEL)
+            moneyText = GetString(SI_GAMEPAD_MAIL_INBOX_NO_ATTACHED_GOLD)
+        end
+
+        --Generate the narration for the From section
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_MAIL_INBOX_FROM)))
+        if entryData.fromGuild then
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_GUILD_MAIL_SENDER_FORMATTER, GetGuildName(entryData.guildId))))
+        else
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(entryData.senderDisplayName))
+        end
+
+        --Generate the narration for the Subject section
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_MAIL_SUBJECT_LABEL)))
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(entryData:GetFormattedSubject()))
+
+        --Generate the narration for the Message section
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_MAIL_BODY_LABEL)))
+
+        local body
+        if entryData.fromGuild then
+            body = entryData.body
+        else
+            body = ReadMail(entryData.mailId)
+        end
+
+        if body == "" then
+            body = GetString(SI_MAIL_READ_NO_BODY)
+        end
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(body))
+
+        --Generate the narration for the attached money/cod fee
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(moneyHeader))
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(moneyText))
+
+        --Generate the narration for the attachments
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_MAIL_ATTACHMENTS_HEADER)))
+        if entryData.numAttachments > 0 then
+            local totalAttachments = 0
+            for i = 1, entryData.numAttachments do
+                local _, stack = GetAttachedItemInfo(entryData.mailId, i)
+                totalAttachments = totalAttachments + stack
+            end
+            --Narrate the total stack count of all the attachments, not just the number of unique attachments
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(totalAttachments))
+        else
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_MAIL_INBOX_NO_ATTACHMENTS)))
+        end
+        return narrations
     end
 
-    MAIL_GAMEPAD:RefreshKeybind()
+    function ZO_MailInbox_Gamepad:RefreshMailList(resetToTop)
+        if not GAMEPAD_MAIL_INBOX_FRAGMENT:IsShowing() then
+            self.dirty = true
+            return
+        end
+        self.dirty = false
 
-    self.inbox:SetHidden(not self.mailList:HasEntries())
+        -- Update the inbox list.
+        self.mailDataById = {}
+        self.guildMailDataById = {}
+        self.mailEntryDataById = {}
+        self.guildMailEntryDataById = {}
+        self.mailList:Clear()
+
+        for category = MAIL_CATEGORY_ITERATION_BEGIN, MAIL_CATEGORY_ITERATION_END do
+            local numMailItems = GetNumMailItemsByCategory(category)
+            for index = 1, numMailItems do
+                local mailId = GetMailIdByIndex(category, index)
+                -- Get mail data.
+                local mailData = {}
+                ZO_MailInboxShared_PopulateMailData(mailData, mailId)
+
+                local selectedColor, unselectedColor = GetEntryColors(mailData)
+
+                local subject = mailData.subject
+                if (not subject) or (subject == "") then
+                    subject = GetString(SI_MAIL_READ_NO_SUBJECT)
+                end
+
+                -- Basic setup.
+                local entryData = ZO_GamepadEntryData:New(subject)
+                entryData:SetDataSource(mailData)
+                entryData:SetNameColors(selectedColor, unselectedColor)
+                entryData:SetSubLabelColors(selectedColor, unselectedColor)
+                entryData:AddSubLabel(zo_strformat(SI_GAMEPAD_MAIL_INBOX_RECEIVED_TEXT, mailData:GetReceivedText()))
+                entryData.narrationText = GetMailNarrationText
+
+                local expiresText = zo_strformat(SI_MAIL_INBOX_EXPIRES_TEXT, mailData:GetExpiresText())
+                if mailData:IsExpirationImminent() then
+                    expiresText = ZO_ERROR_COLOR:Colorize(expiresText)
+                end
+                entryData:AddSubLabel(expiresText)
+
+                local safeIdKey = zo_getSafeId64Key(mailId)
+                self.mailDataById[safeIdKey] = mailData
+                self.mailEntryDataById[safeIdKey] = entryData
+
+                -- Setup icons.
+                UpdateMailIcons(mailData, entryData)
+
+                if index == 1 then
+                    entryData:SetHeader(GetString("SI_MAILCATEGORY", category))
+                    self.mailList:AddEntryWithHeader("ZO_GamepadMenuEntryNoCapitalization", entryData)
+                else
+                    self.mailList:AddEntry("ZO_GamepadMenuEntryNoCapitalization", entryData)
+                end
+            end
+
+            --Don't try to add any guild mails until the mail system is fully loaded
+            if category == MAIL_CATEGORY_SYSTEM_MAIL and not self.isLoading then
+                local guildMailData = {}
+                for guildMailId in GetNextValidGuildMailIdIter do
+                    --Only show guild mail that has not been deleted
+                    if not MAIL_MANAGER:HasDeletedGuildMail(guildMailId) then
+                        local mailData = {}
+                        ZO_MailInboxShared_PopulateGuildMailData(mailData, guildMailId)
+                        table.insert(guildMailData, mailData)
+                    end
+                end
+
+                --Sort so mail expiring sooner is at the top
+                table.sort(guildMailData, function(left, right)
+                    if left.expiresInSeconds == right.expiresInSeconds then
+                        return left.secsSinceReceived < right.secsSinceReceived
+                    else
+                        return left.expiresInSeconds < right.expiresInSeconds
+                    end
+                end)
+
+                for i, mailData in ipairs(guildMailData) do
+                    local selectedColor, unselectedColor = GetEntryColors(mailData)
+                    
+                    local guildName = zo_strformat(SI_GUILD_MAIL_SENDER_FORMATTER, GetGuildName(mailData.guildId))
+
+                    -- Basic setup.
+                    local entryData = ZO_GamepadEntryData:New(guildName)
+                    entryData:SetDataSource(mailData)
+                    entryData:SetNameColors(selectedColor, unselectedColor)
+                    entryData:SetSubLabelColors(ZO_SELECTED_TEXT, ZO_DISABLED_TEXT)
+                    entryData:AddSubLabel(mailData:GetFormattedSubject())
+                    entryData:AddSubLabel(zo_strformat(SI_GAMEPAD_MAIL_INBOX_RECEIVED_TEXT, mailData:GetReceivedText()))
+                    entryData.narrationText = GetMailNarrationText
+
+                    local expiresText = zo_strformat(SI_MAIL_INBOX_EXPIRES_TEXT, mailData:GetExpiresText())
+                    if mailData:IsExpirationImminent() then
+                        expiresText = ZO_ERROR_COLOR:Colorize(expiresText)
+                    end
+                    entryData:AddSubLabel(expiresText)
+
+                    local safeIdKey = zo_getSafeId64Key(mailData.mailId)
+                    self.guildMailDataById[safeIdKey] = mailData
+                    self.guildMailEntryDataById[safeIdKey] = entryData
+
+                    -- Setup icons.
+                    UpdateMailIcons(mailData, entryData)
+
+                    if i == 1 then
+                        entryData:SetHeader(GetString(SI_GUILD_MAIL_CATEGORY_TITLE))
+                        self.mailList:AddEntryWithHeader("ZO_GamepadMenuEntryNoCapitalization", entryData)
+                    else
+                        self.mailList:AddEntry("ZO_GamepadMenuEntryNoCapitalization", entryData)
+                    end
+                end
+            end
+        end
+
+        self.mailList:Commit(resetToTop)
+
+        -- If we have a queued message update, update it.
+        if self.dirtyMail then
+            self:ShowMailItem(self.dirtyMail, self.dirtyMailFromGuild)
+        end
+
+        MAIL_GAMEPAD:RefreshKeybind()
+
+        self.inbox:SetHidden(not self.mailList:HasEntries())
+    end
 end
 
-function ZO_MailInbox_Gamepad:ShowMailItem(mailId, suppressLinkUpdate)
+function ZO_MailInbox_Gamepad:ShowMailItem(mailId, fromGuild, suppressLinkUpdate)
+    --Force nil to false
+    fromGuild = fromGuild or false
     self.activeLinks:ResetLinks()
 
     -- If the mail Id does not match the current selection, ignore the update. This could happen if the user
     --  changes active messages and the messages are still loading.
-    if (not AreId64sEqual(mailId, self:GetActiveMailId())) then
+    if not AreId64sEqual(mailId, self:GetActiveMailId()) or not fromGuild == self:IsActiveMailFromGuild() then
         return
     end
 
     -- If we have a queued message list refresh, or the control is hidden, queue a refresh of the mail message.
     if self.dirty or self.inboxControl:IsHidden() then
         self.dirtyMail = mailId
+        self.dirtyMailFromGuild = fromGuild
         return
     end
     self.dirtyMail = nil
+    self.dirtyMailFromGuild = nil
 
     -- Basic display setup.
     self.inbox:SetHidden(false)
@@ -993,17 +1174,37 @@ function ZO_MailInbox_Gamepad:ShowMailItem(mailId, suppressLinkUpdate)
 
     -- Get the data.
     local safeIdKey = zo_getSafeId64Key(mailId)
-    local mailData = self.mailDataById[safeIdKey]
-    local entryData = self.mailEntryDataById[safeIdKey]
+    local mailData
+    local entryData
+
+    if fromGuild then
+        mailData = self.guildMailDataById[safeIdKey]
+        entryData = self.guildMailEntryDataById[safeIdKey]
+    else
+        mailData = self.mailDataById[safeIdKey]
+        entryData = self.mailEntryDataById[safeIdKey]
+    end
+
     local wasUnread = mailData.unread
     local oldFirstItemIcon = mailData.firstItemIcon
-    ZO_MailInboxShared_PopulateMailData(mailData, mailId)
+
+    if fromGuild then
+        ZO_MailInboxShared_PopulateGuildMailData(mailData, mailId)
+    else
+        ZO_MailInboxShared_PopulateMailData(mailData, mailId)
+    end
 
     if mailData.unread ~= wasUnread or mailData.firstItemIcon ~= oldFirstItemIcon then
         UpdateMailIcons(mailData, entryData)
     end
 
-    local body = ReadMail(mailData.mailId)
+    local body
+    if fromGuild then
+        body = mailData.body
+    else
+        body = ReadMail(mailData.mailId)
+    end
+
     if body == "" then
         body = GetString(SI_MAIL_READ_NO_BODY)
     end
@@ -1012,7 +1213,17 @@ function ZO_MailInbox_Gamepad:ShowMailItem(mailId, suppressLinkUpdate)
     local noAttachments = (mailData.numAttachments == 0)
 
     -- System mail should not add platform ID icon formatting, the name is already undecorated and ready to display if from the system
-    local displayName = isSystem and mailData.senderDisplayName or ZO_FormatUserFacingDisplayName(mailData.senderDisplayName)
+    local displayName
+    if fromGuild then
+        displayName = zo_strformat(SI_GUILD_MAIL_SENDER_FORMATTER, GetGuildName(mailData.guildId))
+        if mailData.chatCategory then
+            local r, g, b = GetChatCategoryColor(mailData.chatCategory)
+            local guildColor = ZO_ColorDef:New(r, g, b)
+            displayName = guildColor:Colorize(displayName)
+        end
+    else
+        displayName = isSystem and mailData.senderDisplayName or ZO_FormatUserFacingDisplayName(mailData.senderDisplayName)
+    end
 
     self.inbox:Display(mailData.codAmount, mailData.attachedMoney, displayName, mailData:GetFormattedSubject(), body, isSystem, noAttachments)
 
@@ -1029,9 +1240,6 @@ function ZO_MailInbox_Gamepad:ShowMailItem(mailId, suppressLinkUpdate)
     if noAttachments and MAIL_GAMEPAD:IsCurrentList(self.attachmentsList) then
         self:EnterMailList()
     end
-
-    -- Update the mail list (mostly for unread icon update).
-    self.mailList:RefreshVisible()
 
     if not suppressLinkUpdate then
         self:UpdateLinks()

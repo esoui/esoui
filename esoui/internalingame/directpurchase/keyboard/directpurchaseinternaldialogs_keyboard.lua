@@ -149,9 +149,11 @@ function ZO_DirectPurchaseConfirmPurchaseDialog_Keyboard_OnInitialized(control)
                                 -- add a delay so the dialog transition is smoother and so the dialog has time to finish setting up
                                 if not dialog.data:ConfirmPurchase() then
                                     zo_callLater(function()
-                                        ZO_Dialogs_ReleaseDialogOnButtonPress("KEYBOARD_PENDING_RESULT_DIALOG")
-                                        ShowResultDialog(dialog.data:GetSkuId(), DIRECT_PURCHASE_PURCHASE_SKU_RESULT_ERROR)
-                                    end, 500)
+                                        if ZO_Dialogs_IsShowing("DIRECT_PURCHASE_CONFIRM_PURCHASE_KEYBOARD") then
+                                            ZO_Dialogs_ReleaseDialogOnButtonPress("KEYBOARD_PENDING_RESULT_DIALOG")
+                                            ShowResultDialog(dialog.data:GetSkuId(), DIRECT_PURCHASE_PURCHASE_SKU_RESULT_ERROR)
+                                        end
+                                    end, 1000)
                                 end
                             end,
                             onTimeout = function()
@@ -170,12 +172,21 @@ function ZO_DirectPurchaseConfirmPurchaseDialog_Keyboard_OnInitialized(control)
                         ZO_Dialogs_ShowDialog("KEYBOARD_PENDING_RESULT_DIALOG", pendingDialogData)
                     else
                         RefreshBillingAndSkuInfo()
-                        zo_callLater(function()
-                            PurchaseUpgradeDialog_Setup(dialog, dialog.data)
-                            ZO_Dialogs_UpdateButtonVisibilityAndEnabledState(dialog)
-                            ZO_Dialogs_RefreshButtonTexts(dialog)
+                        dialog.refreshBillingCallId = zo_callLater(function()
+                            dialog.refreshBillingCallId = nil
+                            -- ESO-954424 - If you close the dialog right before the later time procs, it can still be considered showing during the hide animation.
+                            -- Really only a problem for gamepad (keyboard doesn't animate), but I want to keep the two consistent.
+                            if ZO_Dialogs_IsDialogShowingAndNotHiding("DIRECT_PURCHASE_CONFIRM_PURCHASE_KEYBOARD") then
+                                PurchaseUpgradeDialog_Setup(dialog, dialog.data)
+                                ZO_Dialogs_UpdateButtonVisibilityAndEnabledState(dialog)
+                                ZO_Dialogs_RefreshButtonTexts(dialog)
+                            end
                         end, 1000)
+                        ZO_Dialogs_UpdateButtonVisibilityAndEnabledState(dialog)
                     end
+                end,
+                enabled = function(dialog)
+                    return dialog.refreshBillingCallId == nil
                 end,
             },
 

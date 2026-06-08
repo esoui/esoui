@@ -399,6 +399,9 @@ function ActivityFinderRoot_Manager:UpdateLocationData()
                     location:SetLockReasonText(lockReasonText)
                     location:SetCountsForAverageRoleTime(false)
                     collectibleData:ReleaseObject()
+                elseif DoesTelVarAmountPreventQueuing() then
+                    local lockReasonText = zo_strformat(SI_LFG_LOCK_REASON_IC_TEL_VAR_LIMIT, GetTelVarQueueThreshold())
+                    location:SetLockReasonText(lockReasonText)
                 else
                     local groupTooLarge = isGroupRelevant and self.groupSize > location:GetMaxGroupSize()
                     if groupTooLarge then

@@ -91,7 +91,7 @@ local function AddBackEntry(entryTable)
         ZO_Disconnect()
     end
 
-    local data = {name = GetString(SI_GAME_MENU_BACK), callback = BackCallback}
+    local data = {name = GetString(SI_GAME_MENU_LOGOUT), callback = BackCallback}
     table.insert(entryTable, data)
 end
 

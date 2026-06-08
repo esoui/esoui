@@ -881,13 +881,26 @@ function ZO_SkillsSubclassing_Gamepad.OnDialogInitialized(control)
             local swapInSkillLineClassId = skillLineData:GetClassId()
             local swapInClassActiveSkillLine = SKILLS_DATA_MANAGER:GetFirstActiveSkillLineByClassId(swapInSkillLineClassId)
             local swapInSkillLineName = ZO_WHITE:Colorize(skillLineData:GetName())
+
+            if numPlayerClassActiveSkillLines == numActiveClassSkillLines then
+                GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
+                if SKILLS_DATA_MANAGER:GetNumActiveClassMasterySkillLines() > 0 then
+                    local classMasterySkillLineText = SKILLS_DATA_MANAGER:GetActiveClassMasterySkillLine(1):GetName()
+                    GAMEPAD_TOOLTIPS:LayoutTextBlockTooltip(GAMEPAD_RIGHT_TOOLTIP, zo_strformat(SI_SKILLS_CLASS_MASTERY_SUBCLASSING_WARNING, ZO_WHITE:Colorize(classMasterySkillLineText)))
+                end
+            end
+
             for i = 1, numActiveClassSkillLines do
                 local currentSkillLineData = SKILLS_DATA_MANAGER:GetActiveClassSkillLine(i)
                 local entryData = ZO_GamepadEntryData:New()
                 entryData.skillLineData = currentSkillLineData
                 entryData.errorTooltips = {}
                 entryData.setup = DialogSkillLineEntryTemplateSetup
-                entryData.narrationTooltip = GAMEPAD_LEFT_TOOLTIP
+                entryData.narrationTooltip = 
+                {
+                    GAMEPAD_LEFT_TOOLTIP,
+                    GAMEPAD_RIGHT_TOOLTIP,
+                }
                 local currentSkillLineName = ZO_WHITE:Colorize(currentSkillLineData:GetName())
 
                 local currentSkillLineClassId = currentSkillLineData:GetClassId()
@@ -945,6 +958,7 @@ function ZO_SkillsSubclassing_Gamepad.OnDialogInitialized(control)
                 callback = function(dialog)
                     local targetData = dialog.entryList:GetTargetData()
                     local SUPPRESS_CALLBACK = true
+                    SKILLS_DATA_MANAGER:DeactivateClassMasterySkillLinesForRespec()
                     targetData.skillLineData:DeactivateForRespec(SUPPRESS_CALLBACK)
                     dialog.swapInSkillLineData:ActivateForRespec()
                     PlaySound(SOUNDS.SKILLS_SUBCLASSING_SWAP_SKILL_LINE_CONFIRM)

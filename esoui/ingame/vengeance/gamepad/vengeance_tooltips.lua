@@ -49,7 +49,7 @@ end
 function ZO_Tooltip:LayoutPerkTooltip(perkData, slot)
     if perkData and slot then
         local perkSlotSection = self:AcquireSection(self:GetStyle("bodyHeader"))
-        local perkSlotText = ZO_VENGEANCE_MANAGER:GetPerkColorBySlot(slot):Colorize(zo_strformat(SI_GAMEPAD_VENGEANCE_PERKS_SLOT, ZO_VENGEANCE_MANAGER:GetPerkSlotName(perkData:GetSlot())))
+        local perkSlotText = ZO_VENGEANCE_MANAGER:GetPerkColorBySlot(slot):Colorize(zo_strformat(SI_CAMPAIGN_VENGEANCE_PERKS_SLOT, ZO_VENGEANCE_MANAGER:GetPerkSlotName(perkData:GetSlot())))
         perkSlotSection:AddLine(perkSlotText)
         self:AddSection(perkSlotSection)
 
@@ -64,7 +64,13 @@ function ZO_Tooltip:LayoutPerkTooltip(perkData, slot)
         local isDisabled, reason = perkData:IsPerkDisabled()
         if isDisabled then
             local errorSection = self:AcquireSection(self:GetStyle("bodySection"))
-            errorSection:AddLine(GetString("SI_VENGEANCEACTIONRESULT", reason), self:GetStyle("requirementFail"))
+            local errorText
+            if reason == VENGEANCE_ACTION_RESULT_PERK_LOCKED then
+                errorText = zo_strformat(GetString("SI_VENGEANCEACTIONRESULT", reason), perkData:GetRankRequirement())
+            else
+                errorText = GetString("SI_VENGEANCEACTIONRESULT", reason)
+            end
+            errorSection:AddLine(errorText, self:GetStyle("requirementFail"))
             self:AddSection(errorSection)
         end
     end

@@ -267,12 +267,21 @@ do
         SetupAbilityIconFrame(control, skillData:IsPassive(), isActive, isInSkillBuild)
 
         --Label Color
+        local DEFAULT_COLOR = nil
         if displayView == ZO_SKILL_ABILITY_DISPLAY_INTERACTIVE then
             if not skillEntry.isPreview and isPurchased then
                 skillEntry:SetNameColors(PURCHASED_COLOR, PURCHASED_UNSELECTED_COLOR)
+            elseif skillEntry.isPreview then
+                local skillPointAllocator = skillData:GetPointAllocator()
+                local color = skillPointAllocator:IsPurchased() and ZO_SELECTED_TEXT or ZO_DISABLED_TEXT
+                skillEntry:SetNameColors(color, color)
+            else
+                skillEntry:SetNameColors(DEFAULT_COLOR, DEFAULT_COLOR)
             end
         elseif skillEntry.enabled then
             skillEntry:SetNameColors(PURCHASED_COLOR, PURCHASED_COLOR)
+        else
+            skillEntry:SetNameColors(DEFAULT_COLOR, DEFAULT_COLOR)
         end
         control.label:SetColor(skillEntry:GetNameColor(selected):UnpackRGBA())
 

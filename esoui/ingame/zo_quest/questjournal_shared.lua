@@ -2,17 +2,17 @@
 --Quest Journal Shared
 ---------------------
 
+ZO_QUEST_JOURNAL_MODE =
+{
+    QUESTS = 1,
+    RUMORS = 2,
+}
+
 -- Used for indexing into icon/tooltip tables if we don't care what the quest or instance display types are
 ZO_ANY_QUEST_TYPE = "all_quests"
 ZO_ANY_ZONE_DISPLAY_TYPE = "all_instances"
 
-ZO_QuestJournal_Shared = ZO_CallbackObject:Subclass()
-
-function ZO_QuestJournal_Shared:New()
-    local newObject = ZO_CallbackObject.New(self)
-
-    return newObject
-end
+ZO_QuestJournal_Shared = ZO_InitializingCallbackObject:Subclass()
 
 function ZO_QuestJournal_Shared:Initialize(control)
     self.control = control
@@ -25,11 +25,9 @@ function ZO_QuestJournal_Shared:Initialize(control)
     self:RegisterIcons()
     self:RegisterTooltips()
 
-    self:InitializeQuestList(control)
     self:InitializeKeybindStripDescriptors()
     self:RefreshQuestList()
     self:RefreshQuestCount()
-    self:InitializeScenes()
 
     QUEST_JOURNAL_MANAGER:RegisterCallback("QuestListUpdated", function() self:OnQuestsUpdated() end)
 
@@ -63,7 +61,7 @@ local function QuestJournal_Shared_GetDataFromTable(table, questType, zoneDispla
     return data
 end
 
---TODO: Get ride of this exstensibility.  The icon should only be controlled by the display type.
+--TODO: Get rid of this extensibility. The icon should only be controlled by the display type.
 function ZO_QuestJournal_Shared:RegisterIconTexture(questType, zoneDisplayType, texturePath)
     QuestJournal_Shared_RegisterDataInTable(self.icons, questType, zoneDisplayType, texturePath)
 end
@@ -96,34 +94,6 @@ function ZO_QuestJournal_Shared:GetTooltipText(questType, zoneDisplayType, quest
     return text
 end
 
-function ZO_QuestJournal_Shared:InitializeQuestList()
-    -- Should be overridden
-end
-
-function ZO_QuestJournal_Shared:InitializeKeybindStripDescriptors()
-    -- Should be overridden
-end
-
-function ZO_QuestJournal_Shared:InitializeScenes()
-    -- Should be overridden
-end
-
-function ZO_QuestJournal_Shared:GetSelectedQuestData()
-    -- Should be overridden
-end
-
-function ZO_QuestJournal_Shared:RefreshQuestList()
-    -- Should be overridden
-end
-
-function ZO_QuestJournal_Shared:RegisterIcons()
-    -- Should be overridden
-end
-
-function ZO_QuestJournal_Shared:RegisterTooltips()
-    -- Should be overridden
-end
-
 function ZO_QuestJournal_Shared:OnLevelUpdated(unitTag)
     if self.control:IsHidden() then
         self.listDirty = true
@@ -142,7 +112,7 @@ function ZO_QuestJournal_Shared:BuildTextForStepVisibility(questIndex, visibilit
             if stepJournalText ~= "" then
                 table.insert(questStrings, zo_strformat(SI_QUEST_JOURNAL_TEXT, stepJournalText))
             end
-            
+
             if stepOverrideText and (stepOverrideText ~= "") then
                 table.insert(questStrings, stepOverrideText)
             end
@@ -169,14 +139,6 @@ function ZO_QuestJournal_Shared:CanShareQuest()
         return GetIsQuestSharable(selectedQuestIndex) and IsUnitGrouped("player")
     end
     return false
-end
-
-function ZO_QuestJournal_Shared:RefreshDetails()
-    --to be overridden
-end
-
-function ZO_QuestJournal_Shared:RefreshQuestCount()
-    -- This function is overridden by sub-classes.
 end
 
 function ZO_QuestJournal_Shared:OnQuestsUpdated()
@@ -213,13 +175,13 @@ function ZO_QuestJournal_Shared:GetNextSortedQuestForQuestIndex(questIndex)
     return QUEST_JOURNAL_MANAGER:GetNextSortedQuestForQuestIndex(questIndex)
 end
 
-function ZO_QuestJournal_Shared:GetSceneName()
-    -- Should be overridden
-end
-
-function ZO_QuestJournal_Shared:OpenQuestJournalToQuest()
-    -- Should be overridden
-end
+ZO_QuestJournal_Shared:MUST_IMPLEMENT("InitializeKeybindStripDescriptors")
+ZO_QuestJournal_Shared:MUST_IMPLEMENT("GetSelectedQuestData")
+ZO_QuestJournal_Shared:MUST_IMPLEMENT("RefreshQuestList")
+ZO_QuestJournal_Shared:MUST_IMPLEMENT("RegisterIcons")
+ZO_QuestJournal_Shared:MUST_IMPLEMENT("RegisterTooltips")
+ZO_QuestJournal_Shared:MUST_IMPLEMENT("RefreshDetails")
+ZO_QuestJournal_Shared:MUST_IMPLEMENT("RefreshQuestCount")
 
 -- When the next Quest Journal screen opens, it will open to this quest.
 function ZO_QuestJournal_Shared:QueuePendingJournalQuestIndex(questIndex)

@@ -340,9 +340,11 @@ end
 
 function ZO_PassiveSkillProgressionData:SetKeyboardTooltip(tooltip, showSkillPointCost)
     local skillType, skillLineIndex, skillIndex = self:GetIndices()
-    local skillPointAllocator = self:GetSkillData():GetPointAllocator()
+    local skillData = self:GetSkillData()
+    local skillLineData = skillData:GetSkillLineData()
+    local skillPointAllocator = skillData:GetPointAllocator()
     local currentRank = skillPointAllocator:IsPurchased() and skillPointAllocator:GetSkillProgressionKey() or 0
-    local numAvailableSkillPoints = SKILL_POINT_ALLOCATION_MANAGER:GetAvailableSkillPoints()
+    local numAvailableSkillPoints = skillLineData:IsClassMastery() and SKILL_POINT_ALLOCATION_MANAGER:GetAvailableClassMasteryPointsForSkillLine(skillLineData) or SKILL_POINT_ALLOCATION_MANAGER:GetAvailableSkillPoints()
     tooltip:SetPassiveSkill(skillType, skillLineIndex, skillIndex, self:GetRank(), currentRank, numAvailableSkillPoints, showSkillPointCost)
 end
 
@@ -665,7 +667,11 @@ function ZO_ActiveSkillData:GetNumPointsAllocated()
             pointsAllocated = pointsAllocated + 1
         end
     end
-    return pointsAllocated * self:GetSkillPointCostMultiplier()
+    if self.skillLineData:IsClassMastery() then
+        return pointsAllocated
+    else
+        return pointsAllocated * self:GetSkillPointCostMultiplier()
+    end
 end
 
 function ZO_ActiveSkillData:GetHeaderText()
@@ -903,7 +909,11 @@ function ZO_PassiveSkillData:GetNumPointsAllocated()
             pointsAllocated = self:GetCurrentRank()
         end
     end
-    return pointsAllocated * self:GetSkillPointCostMultiplier()
+    if self.skillLineData:IsClassMastery() then
+        return pointsAllocated
+    else
+        return pointsAllocated * self:GetSkillPointCostMultiplier()
+    end
 end
 
 function ZO_PassiveSkillData:GetHeaderText()
@@ -982,6 +992,14 @@ function ZO_SkillLineData:IsAdvised()
     return self.isAdvised
 end
 
+function ZO_SkillLineData:IsClassMastery()
+    return self.isClassMastery
+end
+
+function ZO_SkillLineData:GetClassMasteryCost()
+    return 0
+end
+
 -- End overriding methods in ZO_SkillLineData_Base --
 
 -- Begin implementing methods in ZO_SkillLineData_Base --
@@ -1024,8 +1042,13 @@ function ZO_SkillLineData:RefreshDynamicData(refreshChildren)
 
     local wasAvailable = self:IsAvailable()
 
-    self.currentRank, self.isAdvised, self.isActive, self.isDiscovered, self.isProgressionAccountWide, self.isInTraining = GetSkillLineDynamicInfo(skillType, skillLineIndex)
+    self.currentRank, self.isAdvised, self.isActive, self.isDiscovered, self.isProgressionAccountWide, self.isInTraining, self.isClassMastery = GetSkillLineDynamicInfo(skillType, skillLineIndex)
     self.lastRankXP, self.nextRankXP, self.currentXP = GetSkillLineXPInfo(skillType, skillLineIndex)
+
+    -- Treat class mastery skill lines as always active for player class on the lua side and manage the show, hide, disable states in lua
+    if self.isClassMastery and self:GetClassId() == GetUnitClassId("player") then
+        self.isActive = true
+    end
 
     local isAvailable = self:IsAvailable()
 
@@ -1156,6 +1179,7 @@ function ZO_ClassSkillLineData:BuildStaticData(skillTypeData, skillLineIndex)
     self.classAccessCollectibleId = GetClassAccessCollectibleId(self.classId)
     self.masteryCollectible = GetSkillLineMasteryCollectibleId(self.id)
     self.isPlayerClassSkillLine = IsPlayerClassSkillLineById(self.id)
+    self.classMasteryCost = GetClassMasteryCostBySkillLineId(self.id)
 end
 
 function ZO_ClassSkillLineData:RefreshDynamicData(refreshChildren)
@@ -1167,6 +1191,10 @@ end
 
 function ZO_ClassSkillLineData:IsDiscovered()
     if self:IsPendingActivation() then
+        return true
+    end
+
+    if self:IsClassMastery() and HasMaxRankInAnyClassSkillLine() then
         return true
     end
 
@@ -1200,6 +1228,10 @@ function ZO_ClassSkillLineData:GetFormattedNameWithNumPointsAllocated()
     else
         return self:GetFormattedName()
     end
+end
+
+function ZO_ClassSkillLineData:SetClassId(classId)
+    self.classId = classId
 end
 
 function ZO_ClassSkillLineData:GetClassId()
@@ -1255,6 +1287,17 @@ function ZO_ClassSkillLineData:HasMastery()
         return collectibleData:IsUnlocked()
     end
     return false
+end
+
+function ZO_ClassSkillLineData:GetNumClassMasteryPoints()
+    if self:IsClassMastery() then
+        return GetNumClassMasteryPointsBySkillLineId(self.id)
+    end
+    return 0
+end
+
+function ZO_ClassSkillLineData:GetClassMasteryCost()
+    return self.classMasteryCost
 end
 
 function ZO_ClassSkillLineData:GetSkillPointCostMultiplier()
@@ -1329,7 +1372,9 @@ function ZO_ClassSkillLineData:DeactivateForRespec(suppressCallback)
     if self:CanDeactivateForRespec() then
         local IGNORE_CALLBACKS = true
         SKILL_POINT_ALLOCATION_MANAGER:ClearPointsOnSkillLine(self, IGNORE_CALLBACKS)
-        SKILL_LINE_ASSIGNMENT_MANAGER:DeactivateSkillLine(self, suppressCallback)
+        if not self:IsClassMastery() then
+            SKILL_LINE_ASSIGNMENT_MANAGER:DeactivateSkillLine(self, suppressCallback)
+        end
     end
 end
 

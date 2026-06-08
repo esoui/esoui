@@ -1,4 +1,15 @@
-local PRIMARY_SYSTEM_CURRENCY = CURT_SEALS
+local PRIMARY_SYSTEM_CURRENCY = CURT_TOME_POINTS
+
+-- Safeguard against activityData argument being nil.
+local function IsValidTimedActivityData(activityData)
+    local isValid = activityData ~= nil and type(activityData) == "table" and activityData.IsInstanceOf and activityData:IsInstanceOf(ZO_TimedActivityData)
+    if isValid then
+        return true
+    end
+
+    internalassert(false, "'activityData' must be a valid ZO_TimedActivityData instance.")
+    return false
+end
 
 -- Timed Activity Data --
 
@@ -118,7 +129,7 @@ do
 
         if leftRewardType ~= rightRewardType then
             if leftRewardType == REWARD_ENTRY_TYPE_ADD_CURRENCY then
-                -- Currency reward before non-currnecy reward
+                -- Currency reward before non-currency reward
                 return true
             elseif rightRewardType == REWARD_ENTRY_TYPE_ADD_CURRENCY then
                 -- Non-currency reward after currency rewards
@@ -217,6 +228,12 @@ end
 
 function ZO_TimedActivityData:Claim()
     ClaimTimedActivityReward(self.index)
+end
+
+function ZO_TimedActivityData:CanAffordReroll()
+    local currencyType, currencyCost = TIMED_ACTIVITIES_MANAGER.GetRerollCostCurrencyTypeAndCost()
+    local currencyBalance = GetPlayerStoredCurrencyAmount(currencyType)
+    return currencyBalance >= currencyCost
 end
 
 function ZO_TimedActivityData:CanReroll()
@@ -329,23 +346,40 @@ function ZO_TimedActivities_Manager:GetAvailableActivityTypes()
 end
 
 function ZO_TimedActivities_Manager:RefreshMasterList()
-    ZO_ClearNumericallyIndexedTable(self.activitiesData)
+    -- Order matters:
+    if self.isRefreshingMasterList then
+        -- The list is in the process of being refreshed.
+        return
+    end
+    self.isRefreshingMasterList = true
 
+    ZO_ClearNumericallyIndexedTable(self.activitiesData)
     local numTimedActivities = GetNumTimedActivities()
     for index = 1, numTimedActivities do
         local timedActivityData = ZO_TimedActivityData:New(index)
         table.insert(self.activitiesData, timedActivityData)
     end
 
+    -- Order matters:
     self:RefreshAvailability()
     self:FireCallbacks("OnActivitiesUpdated")
+    self.isRefreshingMasterList = false
 end
 
 function ZO_TimedActivities_Manager:RefreshSingleMasterListItem(index)
+    -- Order matters:
+    if self.isRefreshingMasterList then
+        -- The list is in the process of being refreshed.
+        return
+    end
+    self.isRefreshingMasterList = true
+
     self.activitiesData[index] = ZO_TimedActivityData:New(index)
 
+    -- Order matters:
     self:RefreshAvailability()
     self:FireCallbacks("OnActivityUpdated", index)
+    self.isRefreshingMasterList = false
 end
 
 function ZO_TimedActivities_Manager:RegisterEvents()
@@ -372,12 +406,25 @@ function ZO_TimedActivities_Manager:RegisterEvents()
     end
 
     EVENT_MANAGER:RegisterForEvent("TimedActivitiesManager", EVENT_PLAYER_ACTIVATED, OnPlayerActivated)
+    -- TODO Tamriel Tomes: Consider single entry update
+    EVENT_MANAGER:RegisterForEvent("TimedActivitiesManager", EVENT_REWARD_TRACK_REWARD_CLAIMED, OnActivitiesUpdated)
+    EVENT_MANAGER:RegisterForEvent("TimedActivitiesManager", EVENT_REWARD_TRACK_REWARDS_CLAIMED, OnActivitiesUpdated)
     EVENT_MANAGER:RegisterForEvent("TimedActivitiesManager", EVENT_TIMED_ACTIVITIES_UPDATED, OnActivitiesUpdated)
+    EVENT_MANAGER:RegisterForEvent("TimedActivitiesManager", EVENT_TIMED_ACTIVITIES_REROLL_PRICE_RESET, ZO_GetEventForwardingFunction(self, self.OnRerollCostReset))
     EVENT_MANAGER:RegisterForEvent("TimedActivitiesManager", EVENT_TIMED_ACTIVITY_TRACKING_UPDATED, OnActivitiesUpdated)
     EVENT_MANAGER:RegisterForEvent("TimedActivitiesManager", EVENT_TIMED_ACTIVITY_PROGRESS_UPDATED, OnActivityUpdated)
+    EVENT_MANAGER:RegisterForEvent("TimedActivitiesManager", EVENT_TIMED_ACTIVITY_REROLL_RESULT, ZO_GetEventForwardingFunction(self, self.OnRerollResult))
     EVENT_MANAGER:RegisterForEvent("TimedActivitiesManager", EVENT_TIMED_ACTIVITY_SYSTEM_STATUS_UPDATED, OnSystemStatusUpdated)
     EVENT_MANAGER:RegisterForEvent("TimedActivitiesManager", EVENT_OPEN_TIMED_ACTIVITIES, ZO_GetEventForwardingFunction(self, self.ShowTimedActivitiesScene))
     EVENT_MANAGER:RegisterForEvent("TimedActivitiesManager", EVENT_HOLIDAYS_CHANGED, UpdateSeasonEndTime)
+end
+
+function ZO_TimedActivities_Manager:OnRerollCostReset()
+    self:FireCallbacks("RerollCostReset")
+end
+
+function ZO_TimedActivities_Manager:OnRerollResult(rerollResult)
+    self:FireCallbacks("RerollResult", rerollResult)
 end
 
 function ZO_TimedActivities_Manager:ActivitiesIterator(filterFunctions)
@@ -401,33 +448,44 @@ end
 
 function ZO_TimedActivities_Manager:GetActivityDataByTypeAndId(timedActivityType, timedActivityId)
     local function ActivityMatches(activityData)
-        return activityData:GetType() == timedActivityType and activityData:GetId() == timedActivityId
+        if IsValidTimedActivityData(activityData) then
+            return activityData:GetType() == timedActivityType and activityData:GetId() == timedActivityId
+        end
+        return false
     end
     return self:GetFirstActivityDataByFilter({ ActivityMatches })
 end
 
 function ZO_TimedActivities_Manager:GetActivityDatasByType(timedActivityType)
     local function ActivityMatches(activityData)
-        return activityData:GetType() == timedActivityType
+        if IsValidTimedActivityData(activityData) then
+            return activityData:GetType() == timedActivityType
+        end
+        return false
     end
     return self:GetActivityDatasByFilter({ ActivityMatches })
 end
 
 function ZO_TimedActivities_Manager:GetFirstClaimableTimedActivity(timedActivityType)
     local function ActivityMatches(activityData)
-        return activityData:CanClaim() and (not timedActivityType or activityData:GetType() == timedActivityType)
+        if IsValidTimedActivityData(activityData) then
+            return activityData:CanClaim() and (not timedActivityType or activityData:GetType() == timedActivityType)
+        end
+        return false
     end
     return self:GetFirstActivityDataByFilter({ ActivityMatches })
 end
 
-function ZO_TimedActivities_Manager:HasClaimableTimedActivities(timedActivityType)
-    local claimableActivityData = self:GetFirstClaimableTimedActivity(timedActivityType)
-    return claimableActivityData ~= nil
+function ZO_TimedActivities_Manager:HasClaimableTimedActivities()
+    return HasAnyUnclaimedTimedActivityRewards()
 end
 
 function ZO_TimedActivities_Manager:GetFirstClaimableTimedActivityForHUDPrompt(timedActivityType)
     local function ActivityMatches(activityData)
-        return activityData:CanClaim() and not activityData:IsExcludedFromHUDClaimPrompt() and (not timedActivityType or activityData:GetType() == timedActivityType)
+        if IsValidTimedActivityData(activityData) then
+            return activityData:CanClaim() and not activityData:IsExcludedFromHUDClaimPrompt() and (not timedActivityType or activityData:GetType() == timedActivityType)
+        end
+        return false
     end
     return self:GetFirstActivityDataByFilter({ ActivityMatches })
 end
@@ -439,14 +497,20 @@ end
 
 function ZO_TimedActivities_Manager:GetActivityDatasByEncodedIds(timedActivityEncodedIds)
     local function ActivityMatches(activityData)
-        return ZO_IsElementInNumericallyIndexedTable(timedActivityEncodedIds, activityData:GetEncodedId())
+        if IsValidTimedActivityData(activityData) then
+            return ZO_IsElementInNumericallyIndexedTable(timedActivityEncodedIds, activityData:GetEncodedId())
+        end
+        return false
     end
     return self:GetActivityDatasByFilter({ ActivityMatches })
 end
 
 function ZO_TimedActivities_Manager:GetActivityDataByEncodedId(timedActivityEncodedId)
     local function ActivityMatches(activityData)
-        return activityData:GetEncodedId() == timedActivityEncodedId
+        if IsValidTimedActivityData(activityData) then
+            return activityData:GetEncodedId() == timedActivityEncodedId
+        end
+        return false
     end
     return self:GetFirstActivityDataByFilter({ ActivityMatches })
 end
@@ -482,9 +546,41 @@ function ZO_TimedActivities_Manager:GetNumTimedActivities(activityType)
     return numActivities
 end
 
-function ZO_TimedActivities_Manager.GetNumRemainingRerollAttempts()
-    local currencyAmount = GetPlayerStoredCurrencyAmount(CURT_TOME_CHALLENGE_REROLLS)
-    return currencyAmount
+function ZO_TimedActivities_Manager.CanAffordReroll()
+    -- Determine whether the next reroll can be afforded.
+    local currencyType, cost = ZO_TimedActivities_Manager.GetRerollCostCurrencyTypeAndCost()
+    local currencyBalance = GetPlayerStoredCurrencyAmount(currencyType)
+    return currencyBalance >= cost
+end
+
+function ZO_TimedActivities_Manager.GetRerollCostCurrencyTypeAndCost()
+    -- Determine the currency type and cost for the next reroll.
+    local challengeRerollCurrencyBalance = GetPlayerStoredCurrencyAmount(CURT_TOME_CHALLENGE_REROLLS)
+    local currencyType = challengeRerollCurrencyBalance > 0 and CURT_TOME_CHALLENGE_REROLLS or CURT_MONEY
+    local cost = currencyType == CURT_TOME_CHALLENGE_REROLLS and 1 or GetGoldCostOfNextTimedActivityReroll()
+    return currencyType, cost
+end
+
+do
+    local CURRENCY_ERROR_OPTIONS =
+    {
+        color = ZO_ERROR_COLOR,
+        iconInheritColor = true,
+    }
+
+    function ZO_TimedActivities_Manager.GetRerollCurrencyTypeAndCostStringForPlatform(isGamepad)
+        local currencyType, cost = ZO_TimedActivities_Manager.GetRerollCostCurrencyTypeAndCost()
+        local currencyOptions = nil
+        if not ZO_TimedActivities_Manager.CanAffordReroll() then
+            currencyOptions = CURRENCY_ERROR_OPTIONS
+        end
+        local costString = ZO_Currency_Format(cost, currencyType, ZO_CURRENCY_FORMAT_AMOUNT_ICON, isGamepad, currencyOptions)
+        return costString
+    end
+end
+
+function ZO_TimedActivities_Manager:ClaimAllRewards()
+    ClaimAllTimedActivityRewards()
 end
 
 function ZO_TimedActivities_Manager:GetActiveSeasonEndTimeS()

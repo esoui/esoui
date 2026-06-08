@@ -25,6 +25,7 @@ function ZO_ItemPreview_Keyboard:Initialize(control)
     self:InitializeActionArrowButton(self.previewActionRightArrow, ITEM_PREVIEW_DIRECTION_NEXT)
 
     self:InitializeRotationControl()
+    self:ResetCurrentPreviewObject()
 end
 
 function ZO_ItemPreview_Keyboard:InitializeRotationControl()

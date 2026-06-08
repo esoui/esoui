@@ -28,6 +28,8 @@ local INTERACT_TYPE =
     PROMOTIONAL_EVENT_REWARD = 22,
     CHANGE_VENGANCE_LOADOUTS = 23,
     TIMED_ACTIVITY_REWARD = 24,
+    TAMRIEL_TOME_SEASON_ENDED = 25,
+    TAMRIEL_TOME_SEASON_STARTED = 26,
 }
 
 -- For use outside of this file (e.g. InGameDialogs)
@@ -680,7 +682,7 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
         self:RemoveFromIncomingQueue(INTERACT_TYPE.CLAIM_LEVEL_UP_REWARDS)
 
         -- Don't show level up in the intro world because it overrides your bars and spending skill points is disabled
-        if not IsInReturningPlayerIntroWorld() then
+        if not IsInIntroGameplayExperienceWorld() then
             local pendingRewardLevel = GetPendingLevelUpRewardLevel()
             if pendingRewardLevel then
                 local data = self:AddPromptToIncomingQueue(INTERACT_TYPE.CLAIM_LEVEL_UP_REWARDS, nil, nil, zo_strformat(SI_LEVEL_UP_REWARDS_AVAILABLE_NOTIFICATION, pendingRewardLevel),
@@ -850,6 +852,81 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
         end
     end
 
+    -- Tamriel Tomes Season Ended / Started
+
+    -- Stores the RewardTrackId of a newly started Tamriel Tome season.
+    self.newRewardTrackId = nil
+
+    local function TryShowTamrielTomeSeasonRecap()
+        local success = true
+        if TAMRIEL_TOMES_MANAGER:HasNewEndOfSeasonRecap() then
+            success = ZO_TamrielTomeSeasonEndDialog_Shared.TryShowPlatformDialog()
+        end
+        if success then
+            self:RemoveFromIncomingQueue(INTERACT_TYPE.TAMRIEL_TOME_SEASON_ENDED)
+        end
+    end
+
+    local function QueueTamrielTomeSeasonEndedInteract()
+        local interactData = self:AddPromptToIncomingQueue(INTERACT_TYPE.TAMRIEL_TOME_SEASON_ENDED, nil, nil, nil, TryShowTamrielTomeSeasonRecap)
+        interactData.dontRemoveOnAccept = true
+        interactData.acceptText = GetString(SI_PLAYER_TO_PLAYER_TAMRIEL_TOME_SEASON_ENDED_PROMPT)
+    end
+
+    local function HasNewTamrielSeasonStarted()
+        return self.newRewardTrackId and TAMRIEL_TOMES_MANAGER:IsCurrentSeasonTamrielTomeNew()
+    end
+
+    local function TryShowNewTamrielTomeSeason()
+        local success = true
+        if HasNewTamrielSeasonStarted() then
+            local SHOW_INTRO = true
+            success = TAMRIEL_TOMES_MANAGER:TryOpenNewSeasonTamrielTome(SHOW_INTRO)
+        end
+        if success then
+            self:RemoveFromIncomingQueue(INTERACT_TYPE.TAMRIEL_TOME_SEASON_STARTED)
+            self.newRewardTrackId = nil
+        end
+    end
+
+    local function QueueTamrielTomeSeasonStartedInteract()
+        local interactData = self:AddPromptToIncomingQueue(INTERACT_TYPE.TAMRIEL_TOME_SEASON_STARTED, nil, nil, nil, TryShowNewTamrielTomeSeason)
+        interactData.dontRemoveOnAccept = true
+        interactData.acceptText = GetString(SI_PLAYER_TO_PLAYER_TAMRIEL_TOME_SEASON_STARTED_PROMPT)
+    end
+
+    local function OnTamrielTomesUpdated()
+        local hasSeasonEnded = TAMRIEL_TOMES_MANAGER:HasNewEndOfSeasonRecap()
+        local isSeasonEndedQueued = self:ExistsInQueue(INTERACT_TYPE.TAMRIEL_TOME_SEASON_ENDED)
+        if hasSeasonEnded then
+            if not isSeasonEndedQueued then
+                QueueTamrielTomeSeasonEndedInteract()
+            end
+        else
+            if isSeasonEndedQueued then
+                self:RemoveFromIncomingQueue(INTERACT_TYPE.TAMRIEL_TOME_SEASON_ENDED)
+            end
+        end
+
+        local hasSeasonStarted = HasNewTamrielSeasonStarted()
+        local isSeasonStartedQueued = self:ExistsInQueue(INTERACT_TYPE.TAMRIEL_TOME_SEASON_STARTED)
+        if hasSeasonStarted then
+            if not isSeasonStartedQueued then
+                QueueTamrielTomeSeasonStartedInteract()
+            end
+        else
+            if isSeasonStartedQueued then
+                self:RemoveFromIncomingQueue(INTERACT_TYPE.TAMRIEL_TOME_SEASON_STARTED)
+            end
+        end
+    end
+
+    local function OnRewardTrackStarted(rewardTrackId)
+        -- Order matters:
+        self.newRewardTrackId = rewardTrackId
+        OnTamrielTomesUpdated()
+    end
+
     self.control:RegisterForEvent(EVENT_DUEL_INVITE_RECEIVED, OnDuelInviteReceived)
     self.control:RegisterForEvent(EVENT_DUEL_INVITE_REMOVED, OnDuelInviteRemoved)
     self.control:RegisterForEvent(EVENT_TRIBUTE_INVITE_RECEIVED, OnTributeInviteReceived)
@@ -893,6 +970,10 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
     TIMED_ACTIVITIES_MANAGER:RegisterCallback("OnRefreshAvailability", OnTimedActivitiesUpdated)
     TIMED_ACTIVITIES_MANAGER:RegisterCallback("OnActivitiesUpdated", OnTimedActivitiesUpdated)
     TIMED_ACTIVITIES_MANAGER:RegisterCallback("OnActivityUpdated", OnTimedActivitiesUpdated)
+
+    TAMRIEL_TOMES_MANAGER:RegisterCallback("AvailableTomesChanged", OnTamrielTomesUpdated)
+    TAMRIEL_TOMES_MANAGER:RegisterCallback("NewTomeSeen", OnTamrielTomesUpdated)
+    TAMRIEL_TOMES_MANAGER:RegisterCallback("RewardTrackStarted", OnRewardTrackStarted)
 
     --Find member replacement prompt on a member leaving
     local function OnGroupingToolsFindReplacementNotificationNew()
@@ -1511,8 +1592,12 @@ function ZO_PlayerToPlayer:OnGroupingToolsReadyCheckUpdated()
             local activityTypeText = GetString("SI_LFGACTIVITY", activityType)
             local generalActivityText = ZO_ACTIVITY_FINDER_GENERALIZED_ACTIVITY_DESCRIPTORS[activityType]
             if role == LFG_ROLE_INVALID then
-                messageFormat = SI_LFG_READY_CHECK_NO_ROLE_TEXT
                 messageParams = { activityTypeText, generalActivityText }
+                if activityType == LFG_ACTIVITY_TRIBUTE_CASUAL or activityType == LFG_ACTIVITY_TRIBUTE_COMPETITIVE then
+                    messageFormat = SI_LFG_READY_CHECK_TRIBUTE_TEXT
+                else
+                    messageFormat = SI_LFG_READY_CHECK_NO_ROLE_TEXT
+                end
             else
                 local roleIconPath = ZO_GetRoleIcon(role)
                 local roleIconFormat = zo_iconFormat(roleIconPath, "100%", "100%")
@@ -2418,9 +2503,19 @@ do
 
         if isInGroup then
             local mountedState, isRidingGroupMount = GetTargetMountedStateInfo(currentTargetCharacterNameRaw)
+            -- The group Mount/Dismount option should appear whenever the target is the primary rider or passenger of a group mount and:
+            --   The local player is already a passenger of that mount (Dismount option); or,
+            --   The local player is not mounted (Mount option).
+            -- The other required criteria, such as being grouped together, is signaled via failure alerts.
             local isPassengerForTarget = IsGroupMountPassengerForTarget(currentTargetCharacterNameRaw)
-            local groupMountEnabled = (mountedState == MOUNTED_STATE_MOUNT_RIDER and isRidingGroupMount and (not IsMounted() or isPassengerForTarget))
-            local function MountOption() UseMountAsPassenger(currentTargetCharacterNameRaw) end
+            local groupMountEnabled = isRidingGroupMount
+                                      and (mountedState == MOUNTED_STATE_MOUNT_RIDER or mountedState == MOUNTED_STATE_MOUNT_PASSENGER)
+                                      and (isPassengerForTarget or not IsMounted())
+
+            local function MountOption()
+                UseMountAsPassenger(currentTargetCharacterNameRaw)
+            end
+
             local optionToShow = isPassengerForTarget and SI_PLAYER_TO_PLAYER_DISMOUNT or SI_PLAYER_TO_PLAYER_RIDE_MOUNT
             self:AddMenuEntry(GetString(optionToShow), platformIcons[optionToShow], groupMountEnabled, MountOption)  
         end

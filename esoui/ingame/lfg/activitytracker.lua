@@ -31,7 +31,6 @@ function ActivityTracker:InitializeStyles()
         {
             FONT_HEADER = "ZoFontGameShadow",
             FONT_SUBLABEL = "ZoFontGameShadow",
-            RESIZE_TO_FIT_PADDING_HEIGHT = 10,
 
             TOP_LEVEL_PRIMARY_ANCHOR = ZO_Anchor:New(TOPLEFT, ZO_HouseInformationTrackerTopLevel, BOTTOMLEFT),
             TOP_LEVEL_SECONDARY_ANCHOR = ZO_Anchor:New(RIGHT, GuiRoot, RIGHT, 0, 0, ANCHOR_CONSTRAINS_X),
@@ -43,7 +42,6 @@ function ActivityTracker:InitializeStyles()
         {
             FONT_HEADER = "ZoFontGamepadBold27",
             FONT_SUBLABEL = "ZoFontGamepad34",
-            RESIZE_TO_FIT_PADDING_HEIGHT = 20,
 
             TOP_LEVEL_PRIMARY_ANCHOR = ZO_Anchor:New(TOPRIGHT, ZO_HouseInformationTrackerTopLevel, BOTTOMRIGHT),
 

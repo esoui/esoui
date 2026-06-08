@@ -1,0 +1,125 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_GuildMailManagement_MailRow_Keyboard" mouseEnabled="true" virtual="true">
+            <Dimensions y="32"/>
+            <OnMouseEnter>
+                self.listObject:Row_OnMouseEnter(self)
+            </OnMouseEnter>
+            <OnMouseExit>
+                self.listObject:Row_OnMouseExit(self)
+            </OnMouseExit>
+            <OnMouseUp>
+                self.listObject:Row_OnMouseUp(self, button, upInside)
+            </OnMouseUp>
+            <Controls>
+                <Texture name="$(parent)BG" inherits="ZO_ThinListBgStrip"/>
+                <Label name="$(parent)Subject" font="ZoFontGame" wrapMode="ELLIPSIS" maxLineCount="1">
+                    <Anchor point="LEFT"/>
+                    <Dimensions x="ZO_GUILD_MAIL_MANAGEMENT_KEYBOARD_SUBJECT_COLUMN_SIZE"/>
+                </Label>
+                <Label name="$(parent)Sender" font="ZoFontGame" wrapMode="ELLIPSIS" maxLineCount="1">
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Subject" offsetX="ZO_GUILD_MAIL_MANAGEMENT_KEYBOARD_COLUMN_OFFSET_X"/>
+                    <Dimensions x="ZO_GUILD_MAIL_MANAGEMENT_KEYBOARD_SENDER_COLUMN_SIZE"/>
+                </Label>
+                <Label name="$(parent)Expires" font="ZoFontGame" wrapMode="ELLIPSIS" horizontalAlignment="RIGHT" maxLineCount="1">
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Sender" offsetX="ZO_GUILD_MAIL_MANAGEMENT_KEYBOARD_COLUMN_OFFSET_X"/>
+                    <Dimensions x="ZO_GUILD_MAIL_MANAGEMENT_KEYBOARD_EXPIRY_COLUMN_SIZE"/>
+                </Label>
+            </Controls>
+        </Control>
+        <TopLevelControl name="ZO_GuildMailManagement" inherits="ZO_RightPanelFootPrint" hidden="true">
+            <OnInitialized>
+                ZO_GuildMailManagement_Keyboard.OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)MailCount" font="ZoFontGameLargeBold">
+                    <Anchor point="TOPRIGHT" offsetX="-25" offsetY="4"/>
+                </Label>
+                <Label name="$(parent)MailCountHeader" font="ZoFontGameLargeBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_GUILD_MAIL_MANAGEMENT_ACTIVE_MAIL_HEADER_KEYBOARD">
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)MailCount" relativePoint="TOPLEFT" offsetX="-2"/>
+                </Label>
+                <Control name="$(parent)Send" hidden="true">
+                    <AnchorFill/>
+                    <Controls>
+                        <Label name="$(parent)ToLabel" font="ZoFontWinH3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_GUILD_MAIL_SEND_TO_LABEL_KEYBOARD">
+                            <Anchor point="TOPLEFT" relativeTo="ZO_GuildRecruitment_Keyboard_TopLevelList" relativePoint="TOPRIGHT" offsetX="40"/>
+                            <Anchor point="RIGHT" constrains="X" offsetX="-20"/>
+                        </Label>
+                        <Control name="$(parent)RankSelector" inherits="ZO_ComboBox">
+                            <Dimensions x="270" y="33"/>
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)ToLabel" relativePoint="BOTTOMLEFT" offsetY="5"/>
+                        </Control>
+                        <Label name="$(parent)SubjectLabel" font="ZoFontWinH3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" text="SI_GUILD_MAIL_SUBJECT_LABEL_KEYBOARD">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)RankSelector" relativePoint="BOTTOMLEFT" offsetY="15"/>
+                        </Label>
+                        <Backdrop name="$(parent)Subject" inherits="ZO_SingleLineEditBackdrop_Keyboard">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)SubjectLabel" relativePoint="BOTTOMLEFT" offsetY="5"/>
+                            <Dimensions x="600"/>
+                            <Controls>
+                                <EditBox name="$(parent)Field" inherits="ZO_DefaultEditForBackdrop" maxInputCharacters="MAIL_MAX_SUBJECT_CHARACTERS"/>
+                            </Controls>
+                        </Backdrop>
+                        <Backdrop name="$(parent)Body" inherits="ZO_MultiLineEditBackdrop_Keyboard">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)SubjectLabel" relativePoint="BOTTOMLEFT"/>
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Subject" relativePoint="BOTTOMRIGHT" offsetY="15"/>
+                            <Dimensions y="320"/>
+                            <Controls>
+                                <EditBox name="$(parent)Field" inherits="ZO_DefaultEditMultiLineForBackdrop" maxInputCharacters="MAIL_MAX_BODY_CHARACTERS">
+                                    <OnTextChanged>
+                                        GUILD_MAIL_MANAGEMENT_KEYBOARD:RefreshBodyCount()
+                                    </OnTextChanged>
+                                </EditBox>
+                            </Controls>
+                        </Backdrop>
+                        <Label name="$(parent)BodyLimit" font="ZoFontGameLargeBold">
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Body" relativePoint="BOTTOMRIGHT" offsetY="10"/>
+                        </Label>
+                    </Controls>
+                </Control>
+                <Control name="$(parent)Manage" hidden="true">
+                    <AnchorFill/>
+                    <Controls>
+                        <Control name="$(parent)Headers">
+                            <Anchor point="TOPLEFT" relativeTo="ZO_GuildRecruitment_Keyboard_TopLevelList" relativePoint="TOPRIGHT" offsetX="40"/>
+                            <Dimensions y="32"/>
+                            <Controls>
+                                <Control name="$(parent)Subject" inherits="ZO_SortHeader">
+                                    <Anchor point="LEFT"/>
+                                    <Dimensions x="ZO_GUILD_MAIL_MANAGEMENT_KEYBOARD_SUBJECT_COLUMN_SIZE" y="32"/>
+                                    <OnInitialized>
+                                        ZO_SortHeader_Initialize(self, GetString(SI_GUILD_MAIL_MANAGEMENT_SORT_HEADER_SUBJECT), "subject", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
+                                    </OnInitialized>
+                                </Control>
+                                <Control name="$(parent)Sender" inherits="ZO_SortHeader">
+                                    <Anchor point="LEFT" relativeTo="$(parent)Subject" relativePoint="RIGHT" offsetX="ZO_GUILD_MAIL_MANAGEMENT_KEYBOARD_COLUMN_OFFSET_X"/>
+                                    <Dimensions x="ZO_GUILD_MAIL_MANAGEMENT_KEYBOARD_SENDER_COLUMN_SIZE" y="32"/>
+                                    <OnInitialized>
+                                        ZO_SortHeader_Initialize(self, GetString(SI_GUILD_MAIL_MANAGEMENT_SORT_HEADER_SENDER), "senderDisplayName", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
+                                    </OnInitialized>
+                                </Control>
+                                <Control name="$(parent)Expires" inherits="ZO_SortHeader">
+                                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Sender" offsetX="ZO_GUILD_MAIL_MANAGEMENT_KEYBOARD_COLUMN_OFFSET_X"/>
+                                    <Dimensions x="ZO_GUILD_MAIL_MANAGEMENT_KEYBOARD_EXPIRY_COLUMN_SIZE" y="32"/>
+                                    <OnInitialized>
+                                        ZO_SortHeader_Initialize(self, GetString(SI_GUILD_MAIL_MANAGEMENT_SORT_HEADER_EXPIRES), "expiresInSeconds", ZO_SORT_ORDER_UP, TEXT_ALIGN_RIGHT, "ZoFontGameLargeBold")
+                                    </OnInitialized>
+                                </Control>
+                            </Controls>
+                        </Control>
+                        <Control name="$(parent)List" inherits="ZO_ScrollList">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Headers" relativePoint="BOTTOMLEFT" offsetY="3"/>
+                            <Anchor point="BOTTOMRIGHT"/>
+                        </Control>
+                        <Control name="$(parent)NoMailRow" inherits="ZO_SortFilterListEmptyRow_Keyboard" hidden="true">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)List"/>
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)List"/>
+                            <Controls>
+                                <Label name="$(parent)Message" override="true" text="SI_GUILD_MAIL_MANAGEMENT_MAIL_LIST_EMPTY_TEXT"/>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

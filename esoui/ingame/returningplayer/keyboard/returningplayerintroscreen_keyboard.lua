@@ -21,18 +21,18 @@ function ZO_ReturningPlayerIntroScreen_Keyboard:OnDeferredInitialize()
 
     local infoContainer = self.control:GetNamedChild("GameplayInfo")
     self.enterGameplayButton = infoContainer:GetNamedChild("EnterButton")
-    self.enterGameplayButton:SetClickSound(SOUNDS.RETURNING_PLAYER_ENTER_INTRO_GAMEPLAY)
+    self.enterGameplayButton:SetClickSound(SOUNDS.ENTER_INTRO_GAMEPLAY_EXPERIENCE)
     self.enterGameplayButton:SetHandler("OnClicked", function() self:RequestJumpToIntroGameplay() end)
 
-    local activityName = GetReturningPlayerIntroGameplayDisplayName()
-    local buttonText = zo_strformat(SI_RETURNING_PLAYER_ENTER_GAMEPLAY_EXPERIENCE_ACTION, activityName)
+    local activityName = GetIntroGameplayExperienceDisplayName()
+    local buttonText = zo_strformat(SI_ENTER_INTRO_GAMEPLAY_EXPERIENCE_ACTION, activityName)
     self.enterGameplayButton:SetText(buttonText)
 end
 
 function ZO_ReturningPlayerIntroScreen_Keyboard:OnShowing()
     ZO_ReturningPlayerIntroScreen_Shared.OnShowing(self)
 
-    local enableButton = RETURNING_PLAYER_MANAGER:CanJumpToIntroGameplay()
+    local enableButton = PROMOTIONAL_EVENT_PERSONAL_CAMPAIGN_MANAGER:CanJumpToIntroGameplay()
     self.enterGameplayButton:SetEnabled(enableButton)
 
     PlaySound(SOUNDS.RETURNING_PLAYER_OPEN_KEYBOARD)

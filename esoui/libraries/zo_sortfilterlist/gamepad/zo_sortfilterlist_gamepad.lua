@@ -67,7 +67,7 @@ function ZO_SortFilterList_Gamepad:MoveNext()
 end
 
 function ZO_SortFilterList_Gamepad:ResetToTop(onScrollCompleteCallback, shouldAnimateInstantly)
-    if not ZO_ScrollList_AtTopOfList(self.list) then
+    if self:HasEntries() and not ZO_ScrollList_AtTopOfList(self.list) then
         if self.isActive then
             ZO_ScrollList_TrySelectFirstData(self.list, onScrollCompleteCallback, shouldAnimateInstantly)
             self:UpdateKeybinds()

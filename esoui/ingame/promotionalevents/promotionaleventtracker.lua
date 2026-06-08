@@ -24,7 +24,6 @@ function ZO_PromotionalEventTracker:InitializeStyles()
             FONT_HEADER = "ZoFontGameShadow",
             FONT_SUBLABEL = "ZoFontGameShadow",
             FONT_PROGRESS_LABEL = "ZoFontGameShadow",
-            RESIZE_TO_FIT_PADDING_HEIGHT = 10,
 
             TOP_LEVEL_PRIMARY_ANCHOR = ZO_Anchor:New(TOPLEFT, ZO_ZoneStoryTracker, BOTTOMLEFT),
             TOP_LEVEL_SECONDARY_ANCHOR = ZO_Anchor:New(RIGHT, GuiRoot, RIGHT, 0, 0, ANCHOR_CONSTRAINS_X),
@@ -43,7 +42,6 @@ function ZO_PromotionalEventTracker:InitializeStyles()
             FONT_HEADER = "ZoFontGamepadBold27",
             FONT_SUBLABEL = "ZoFontGamepad34",
             FONT_PROGRESS_LABEL = "ZoFontGamepad34",
-            RESIZE_TO_FIT_PADDING_HEIGHT = 20,
 
             TOP_LEVEL_PRIMARY_ANCHOR = ZO_Anchor:New(TOPLEFT, ZO_ZoneStoryTracker, BOTTOMLEFT),
             TOP_LEVEL_SECONDARY_ANCHOR = ZO_Anchor:New(RIGHT, GuiRoot, RIGHT, -15, 0, ANCHOR_CONSTRAINS_X),

@@ -1392,6 +1392,7 @@ local KEEP_TRAVEL_BIND =
             canTravelToKeep = startKeepId and keepId ~= startKeepId
         end
         if canTravelToKeep then
+            PlaySound(SOUNDS.MAP_WAYSHRINE_TELEPORT)
             TravelToKeep(keepId)
             ZO_WorldMap_HideWorldMap()
         end
@@ -2264,7 +2265,8 @@ function ZO_MapPin:ValidatePvPPinAllowed()
     if self:IsAvAPin() then
         if mapContentType == MAP_CONTENT_AVA then
             local currentMapIndex = GetCurrentMapIndex()
-            if currentMapIndex == GetCyrodiilMapIndex() then
+            if currentMapIndex == GetCyrodiilMapIndex()
+                or currentMapIndex == GetJerallPassMapIndex() then
                 return self:IsCyrodiilPin()
             elseif currentMapIndex == GetImperialCityMapIndex() then
                 return self:IsImperialCityPin()

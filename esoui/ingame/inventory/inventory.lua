@@ -1899,40 +1899,27 @@ function ZO_InventoryManager:PlayItemAddedAlert(slot, inventory)
         return
     end
 
-    local isSlotAdded = false
+    -- Verify that this slot isn't ommited from this kind of bag
+    if not self:DoesSlotPassAdditionalFilters(inventory, slot) then
+        return
+    end
+
+    local addToFlashingSlots = false
     for _, tabFilter in pairs(inventory.tabFilters) do
         if slot.actorCategory == GAMEPLAY_ACTOR_CATEGORY_COMPANION then
             if tabFilter.filterType == ITEM_TYPE_DISPLAY_CATEGORY_COMPANION then
                 self:AddCategoryFlashAnimationControl(tabFilter.control:GetNamedChild("Flash"))
 
-                if not self.categoryFlashAnimationTimeline:IsPlaying() then
-                    self.categoryFlashAnimationTimeline:PlayFromStart()
-                end
-
-                if not isSlotAdded then
-                    table.insert(self.flashingSlots, slot)
-                    slotAdded = true
-                end
+                addToFlashingSlots = true
             end
         else
             for _, data in ipairs(slot.filterData) do
                 local filterItemTypeDisplayCategory = ZO_ItemFilterUtils.GetItemTypeDisplayCategoryByItemFilterType(data)
                 if filterItemTypeDisplayCategory == tabFilter.filterType or tabFilter.filterType == ITEM_TYPE_DISPLAY_CATEGORY_ALL then
-                    -- Verify that this slot is visible.
-                    if self:ShouldAddSlotToList(inventory, slot) then
-                        self:AddCategoryFlashAnimationControl(tabFilter.control:GetNamedChild("Flash"))
+                    self:AddCategoryFlashAnimationControl(tabFilter.control:GetNamedChild("Flash"))
 
-                        if not self.categoryFlashAnimationTimeline:IsPlaying() then
-                            self.categoryFlashAnimationTimeline:PlayFromStart()
-                        end
-
-                        if not isSlotAdded then
-                            table.insert(self.flashingSlots, slot)
-                            slotAdded = true
-                        end
-
-                        break
-                    end
+                    addToFlashingSlots = true
+                    break
                 end
             end
         end
@@ -1943,27 +1930,22 @@ function ZO_InventoryManager:PlayItemAddedAlert(slot, inventory)
         if currentFilter == ITEM_TYPE_DISPLAY_CATEGORY_COMPANION then
             if ZO_ItemFilterUtils.IsCompanionSlotInItemTypeDisplayCategoryAndSubcategory(slot, currentFilter, subFilter.filterType) then
                 self:AddCategoryFlashAnimationControl(subFilter.control:GetNamedChild("Flash"))
-            end
 
-            if not isSlotAdded then
-                table.insert(self.flashingSlots, slot)
-                slotAdded = true
+                addToFlashingSlots = true
             end
         elseif ZO_ItemFilterUtils.IsSlotInItemTypeDisplayCategoryAndSubcategory(slot, currentFilter, subFilter.filterType) then
-            -- Verify that this slot is visible.
-            if self:ShouldAddSlotToList(inventory, slot) then
-                self:AddCategoryFlashAnimationControl(subFilter.control:GetNamedChild("Flash"))
+            self:AddCategoryFlashAnimationControl(subFilter.control:GetNamedChild("Flash"))
 
-                if not self.categoryFlashAnimationTimeline:IsPlaying() then
-                    self.categoryFlashAnimationTimeline:PlayFromStart()
-                end
-
-                if not isSlotAdded then
-                    table.insert(self.flashingSlots, slot)
-                    slotAdded = true
-                end
-            end
+            addToFlashingSlots = true
         end
+    end
+
+    if addToFlashingSlots then
+        if not self.categoryFlashAnimationTimeline:IsPlaying() then
+            self.categoryFlashAnimationTimeline:PlayFromStart()
+        end
+
+        table.insert(self.flashingSlots, slot)
     end
 end
 
@@ -2092,11 +2074,11 @@ do
     end
 end
 
-local function DoesSlotPassAdditionalFilter(slot, currentFilter, additionalFilter)
-    if type(additionalFilter) == "function" then
-        return additionalFilter(slot)
-    elseif type(additionalFilter) == "number" then
-        return ZO_ItemFilterUtils.IsSlotInItemTypeDisplayCategoryAndSubcategory(slot, currentFilter, additionalFilter)
+local function DoesSlotPassFilter(slot, currentFilter, subFilter)
+    if type(subFilter) == "function" then
+        return subFilter(slot)
+    elseif type(subFilter) == "number" then
+        return ZO_ItemFilterUtils.IsSlotInItemTypeDisplayCategoryAndSubcategory(slot, currentFilter, subFilter)
     end
 
     return true
@@ -2117,15 +2099,11 @@ function ZO_InventoryManager:ShouldAddSlotToList(inventory, slot)
 
     local currentFilter = inventory.currentFilter
 
-    if not DoesSlotPassAdditionalFilter(slot, currentFilter, inventory.subFilter) then
+    if not DoesSlotPassFilter(slot, currentFilter, inventory.subFilter) then
         return false
     end
 
-    if not DoesSlotPassAdditionalFilter(slot, currentFilter, inventory.additionalFilter) then
-        return false
-    end
-
-    if self.appliedLayout and self.appliedLayout.additionalFilter and not DoesSlotPassAdditionalFilter(slot,  currentFilter, self.appliedLayout.additionalFilter) then
+    if not self:DoesSlotPassAdditionalFilters(inventory, slot) then
         return false
     end
 
@@ -2134,6 +2112,18 @@ function ZO_InventoryManager:ShouldAddSlotToList(inventory, slot)
     else
         return ZO_ItemFilterUtils.IsSlotFilterDataInItemTypeDisplayCategory(slot, currentFilter)
     end
+end
+
+function ZO_InventoryManager:DoesSlotPassAdditionalFilters(inventory, slot)
+    if not DoesSlotPassFilter(slot, currentFilter, inventory.additionalFilter) then
+        return false
+    end
+
+    if self.appliedLayout and self.appliedLayout.additionalFilter and not DoesSlotPassFilter(slot, currentFilter, self.appliedLayout.additionalFilter) then
+        return false
+    end
+
+    return true
 end
 
 function ZO_InventoryManager:UpdateList(inventoryType, updateEvenIfHidden)

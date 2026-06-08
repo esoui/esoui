@@ -276,11 +276,11 @@ function zo_callLater(func, ms)
     local name = "CallLaterFunction"..id
     ZO_CallLaterId = ZO_CallLaterId + 1
 
+    local DO_ONCE = true
     EVENT_MANAGER:RegisterForUpdate(name, ms,
         function()
-            EVENT_MANAGER:UnregisterForUpdate(name)
             func(id)
-        end)
+        end, DO_ONCE)
     return id
 end
 

@@ -1,3 +1,6 @@
+ZO_VENGEANCE_PERK_TILE_ICON_DIMENSIONS = 52
+ZO_VENGEANCE_PERK_TILE_ICON_BORDER_DIMENSIONS = 104
+
 -----------------------------
 -- Vengeance Perk Framed Icon
 -----------------------------

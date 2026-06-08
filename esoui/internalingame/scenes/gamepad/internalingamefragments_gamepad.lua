@@ -85,7 +85,7 @@ GAMEPAD_NAV_QUADRANT_2_3_4_ITEM_PREVIEW_OPTIONS_FRAGMENT = ZO_ItemPreviewOptions
 GAMEPAD_MARKET_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GamepadMarket)
 GAMEPAD_MARKET_PREVIEW_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GamepadMarket_Preview)
 GAMEPAD_MARKET_BUNDLE_CONTENTS_FRAGMENT = ZO_FadeSceneFragment:New(ZO_GamepadMarket_BundleContents)
-GAMEPAD_MARKET_LOCKED_FRAGMENT = ZO_CreateQuadrantConveyorFragment(ZO_GamepadMarket_Locked, ALWAYS_ANIMATE)
+GAMEPAD_MARKET_LOCKED_FRAGMENT = ZO_CreateQuadrantConveyorFragment(ZO_GamepadMarket_Locked)
 
 ZO_GAMEPAD_KEYBINDS_FRAGMENT_GROUP =
 {

@@ -66,7 +66,7 @@ function ZO_AnimatedSceneFragment:Initialize(animationTemplate, control, alwaysA
                                     end
 
                                     control:SetHidden(true)
-                                                                    
+
                                     ReleaseAnimation(self.animationTemplate, self.animationKey)
                                     self.animation = nil
                                     self.animationKey = nil
@@ -80,9 +80,9 @@ function ZO_AnimatedSceneFragment:Initialize(animationTemplate, control, alwaysA
 end
 
 function ZO_AnimatedSceneFragment:GetAnimation()
-    if(self.animation == nil) then
+    if self.animation == nil then
         self.animation, self.animationKey = AcquireAnimation(self.animationTemplate)
-        for i=1, self.animation:GetNumAnimations() do
+        for i = 1, self.animation:GetNumAnimations() do
             self.animation:GetAnimation(i):SetDuration(self.duration)
         end
         self.animation:ApplyAllAnimationsToControl(self.control)
@@ -95,8 +95,16 @@ function ZO_AnimatedSceneFragment:GetControl()
     return self.control
 end
 
+function ZO_AnimatedSceneFragment:GetAlwaysAnimate()
+    return self.alwaysAnimate
+end
+
+function ZO_AnimatedSceneFragment:SetAlwaysAnimate(alwaysAnimate)
+    self.alwaysAnimate = alwaysAnimate
+end
+
 function ZO_AnimatedSceneFragment:AddInstantScene(scene)
-    if(not self.instantScenes) then
+    if not self.instantScenes then
         self.instantScenes = {}
     end
     table.insert(self.instantScenes, scene)
@@ -104,11 +112,11 @@ end
 
 function ZO_AnimatedSceneFragment:IsAnimatedInCurrentScene()
     local currentScene = self.sceneManager:GetCurrentScene()
-    if(self.instantScenes) then
+    if self.instantScenes then
         for _, scene in ipairs(self.instantScenes) do
-            if(currentScene == scene) then
+            if currentScene == scene then
                 return false
-            end 
+            end
         end
     end
 
@@ -120,9 +128,9 @@ function ZO_AnimatedSceneFragment:Show()
     local animation = self:GetAnimation()
     animation:SetHandler("OnStop", self.animationOnStop)
     self.control:SetHidden(false)
-    if((currentScene:GetState() ~= SCENE_SHOWN or self.alwaysAnimate) and self:IsAnimatedInCurrentScene()) then
+    if (currentScene:GetState() ~= SCENE_SHOWN or self.alwaysAnimate) and self:IsAnimatedInCurrentScene() then
 
-        if(animation:IsPlaying()) then     
+        if animation:IsPlaying() then
             animation:PlayForward()
         else
             animation:PlayFromStart()
@@ -137,8 +145,8 @@ function ZO_AnimatedSceneFragment:Hide()
     local animation = self:GetAnimation()
     animation:SetHandler("OnStop", self.animationReverseOnStop)
 
-    if((currentScene:GetState() == SCENE_HIDING or self.alwaysAnimate) and self:IsAnimatedInCurrentScene()) then
-        if(animation:IsPlaying()) then     
+    if (currentScene:GetState() == SCENE_HIDING or self.alwaysAnimate) and self:IsAnimatedInCurrentScene() then
+        if animation:IsPlaying() then
             animation:PlayBackward()
         else
             animation:PlayFromEnd()
@@ -443,6 +451,14 @@ end
 
 function ZO_ConveyorSceneFragment:GetControl()
     return self.control
+end
+
+function ZO_ConveyorSceneFragment:GetAlwaysAnimate()
+    return self.alwaysAnimate
+end
+
+function ZO_ConveyorSceneFragment:SetAlwaysAnimate(alwaysAnimate)
+    self.alwaysAnimate = alwaysAnimate
 end
 
 function ZO_ConveyorSceneFragment:AddInstantScene(scene)

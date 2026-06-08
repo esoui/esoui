@@ -28,7 +28,7 @@ function ZO_VengeancePerk_Icon_Keyboard:ShowTooltip()
     if self.perkData then
         ClearTooltip(SkillTooltip)
         InitializeTooltip(SkillTooltip, self.control, self.tooltipAnchors.point, self.tooltipAnchors.offsetX, self.tooltipAnchors.offsetY, self.tooltipAnchors.relativePoint)
-        SkillTooltip:SetVengeancePerk(self.perkData:GetPerkIndex())
+        SkillTooltip:SetVengeancePerk(self.perkData:GetPerkIndex(), self.perkData:GetSlot())
     end
 end
 

@@ -186,11 +186,19 @@ ZO_Dialogs_RegisterCustomDialog("DIRECT_PURCHASE_CONFIRM_PURCHASE_GAMEPAD",
                         ZO_Dialogs_ShowGamepadDialog("GAMEPAD_PENDING_RESULT_DIALOG", pendingDialogData)
                     else
                         RefreshBillingAndSkuInfo()
-                        zo_callLater(function()
-                            PurchaseUpgradeDialog_Setup(dialog, dialog.data)
-                            ZO_GenericGamepadDialog_RefreshKeybinds(dialog)
+                        dialog.refreshBillingCallId = zo_callLater(function()
+                            dialog.refreshBillingCallId = nil
+                            -- ESO-954424 - If you close the dialog right before the later time procs, it can still be considered showing during the hide animation
+                            if ZO_Dialogs_IsDialogShowingAndNotHiding("DIRECT_PURCHASE_CONFIRM_PURCHASE_GAMEPAD") then
+                                PurchaseUpgradeDialog_Setup(dialog, dialog.data)
+                                ZO_GenericGamepadDialog_RefreshKeybinds(dialog)
+                            end
                         end, 1000)
+                        ZO_GenericGamepadDialog_RefreshKeybinds(dialog)
                     end
+                end,
+                enabled = function(dialog)
+                    return dialog.refreshBillingCallId == nil
                 end,
             },
             --Back

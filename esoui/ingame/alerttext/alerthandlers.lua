@@ -409,7 +409,12 @@ local AlertHandlers =
 
     [EVENT_ACTIVITY_QUEUE_RESULT] = function(result)
         if result ~= ACTIVITY_QUEUE_RESULT_SUCCESS then
-            return ERROR, GetString("SI_ACTIVITYQUEUERESULT", result), SOUNDS.GENERAL_ALERT_ERROR
+            if result == ACTIVITY_QUEUE_RESULT_IC_TEL_VAR_LIMIT then 
+                local resultParameter = GetTelVarQueueThreshold()
+                return ERROR, zo_strformat(GetString("SI_ACTIVITYQUEUERESULT", result), resultParameter), SOUNDS.GENERAL_ALERT_ERROR
+            else
+                return ERROR, GetString("SI_ACTIVITYQUEUERESULT", result), SOUNDS.GENERAL_ALERT_ERROR
+            end
         end
     end,
 
@@ -1308,16 +1313,38 @@ local AlertHandlers =
         return alertType, GetString("SI_HOUSETOURSAVERECOMMENDATIONRESULT", result)
     end,
 
-    [EVENT_RETURNING_PLAYER_INSTANCE_JUMP_RESULT] = function(result)
-        if result ~= RETURNING_PLAYER_INSTANCE_JUMP_RESULT_SUCCESS then
-            local activityName = GetReturningPlayerIntroGameplayDisplayName()
-            return ALERT, zo_strformat(GetString("SI_RETURNINGPLAYERINSTANCEJUMPRESULT", result), activityName)
+    [EVENT_INTRO_GAMEPLAY_EXPERIENCE_JUMP_RESULT] = function(result)
+        if result ~= INTRO_GAMEPLAY_EXPERIENCE_JUMP_RESULT_SUCCESS then
+            local activityName = GetIntroGameplayExperienceDisplayName()
+            return ALERT, zo_strformat(GetString("SI_INTROGAMEPLAYEXPERIENCEJUMPRESULT", result), activityName)
         end
     end,
 
     [EVENT_VENGEANCE_ACTION_RESULT] = function(result)
         if result ~= VENGEANCE_ACTION_RESULT_SUCCESS then
             return ALERT, GetString("SI_VENGEANCEACTIONRESULT", result), SOUNDS.GENERAL_ALERT_ERROR
+        end
+    end,
+
+    [EVENT_CREATE_GUILD_MAIL_RESULT] = function(result)
+        if result == GUILD_MAIL_RESULT_SUCCESS then
+            return ALERT, GetString(SI_GUILD_MAIL_MANAGEMENT_MAIL_SENT), SOUNDS.MAIL_SENT
+        else
+            return ALERT, GetString("SI_GUILDMAILERRESULT", result), SOUNDS.GENERAL_ALERT_ERROR
+        end
+    end,
+
+    [EVENT_DELETE_GUILD_MAIL_RESULT] = function(result)
+        if result == GUILD_MAIL_RESULT_SUCCESS then
+            return ALERT, GetString(SI_GUILD_MAIL_MANAGEMENT_MAIL_DELETED), SOUNDS.MAIL_ITEM_DELETED
+        else
+            return ALERT, GetString("SI_GUILDMAILERRESULT", result), SOUNDS.GENERAL_ALERT_ERROR
+        end
+    end,
+
+    [EVENT_TIMED_ACTIVITY_REROLL_RESULT] = function(result)
+        if result ~= TOMES_CHALLENGE_REROLL_RESULT_SUCCESS then
+            return ALERT, GetString("SI_TAMRIELTOMECHALLENGEREROLLRESULT", result), SOUNDS.GENERAL_ALERT_ERROR
         end
     end,
 }

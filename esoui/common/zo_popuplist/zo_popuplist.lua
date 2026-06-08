@@ -16,6 +16,10 @@ function ZO_PopupList:Initialize(control)
     ZO_ScrollList_AddDataType(self.list, ZO_POPUP_LIST_DATA_TYPE_ITEM, "ZO_PopupListItemSlot", ZO_POPUP_LIST_ENTRY_HEIGHT, function(control, data) self:SetUpListRewardItem(control, data) end)
 end
 
+function ZO_PopupList:GetControl()
+    return self.control
+end
+
 function ZO_PopupList:SetUpListRewardItem(control, data)
     control.data = data
 
@@ -85,10 +89,27 @@ end
 
 function ZO_PopupList:Hide()
     -- Order matters
+    if self.control:IsHidden() then
+        return
+    end
+
+    local mouseOverControl = ZO_ScrollList_GetMouseOverControl(self.list)
+    if mouseOverControl and self.onMouseExitCallback then
+        self.onMouseExitCallback(mouseOverControl)
+    end
+
     self.control:SetHidden(true)
+
+    if self.onCloseCallback then
+        self.onCloseCallback(mouseOverControl)
+    end
+
     self.onMouseEnterCallback = nil
     self.onMouseExitCallback = nil
     self.onMouseUpCallback = nil
+    self.onCloseCallback = nil
+    self.hideTooltipCallback = nil
+    self.showTooltipCallback = nil
 end
 
 function ZO_PopupList:Show(...)
@@ -113,7 +134,12 @@ do
             if highlight and highlight:GetType() == CT_TEXTURE then
                 g_highlightAnimationProvider:PlayForward(highlight)
             end
-            ZO_Rewards_Shared_OnMouseEnter(control, RIGHT, LEFT, -5)
+
+            if self.showTooltipCallback then
+                self.showTooltipCallback(control)
+            else
+                ZO_Rewards_Shared_OnMouseEnter(control, RIGHT, LEFT, -5)
+            end
 
             if onMouseEnterCallback then
                 onMouseEnterCallback(control)
@@ -125,8 +151,13 @@ do
             if highlight and highlight:GetType() == CT_TEXTURE then
                 g_highlightAnimationProvider:PlayBackward(highlight)
             end
-            ZO_Rewards_Shared_OnMouseExit()
-            
+
+            if self.hideTooltipCallback then
+                self.hideTooltipCallback(control)
+            else
+                ZO_Rewards_Shared_OnMouseExit()
+            end
+
             if onMouseExitCallback then
                 onMouseExitCallback(control)
             end
@@ -155,6 +186,18 @@ end
 
 function ZO_PopupList:SetOnMouseUpCallback(onMouseUpCallback)
     self.onMouseUpCallback = onMouseUpCallback
+end
+
+function ZO_PopupList:SetOnCloseCallback(onCloseCallback)
+    self.onCloseCallback = onCloseCallback
+end
+
+function ZO_PopupList:SetHideTooltipCallback(callback)
+    self.hideTooltipCallback = callback
+end
+
+function ZO_PopupList:SetShowTooltipCallback(callback)
+    self.showTooltipCallback = callback
 end
 
 function ZO_PopupList.OnControlInitialized(control)

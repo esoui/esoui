@@ -1,5 +1,98 @@
 <GuiXml>
     <Controls>
+        <Control name="ZO_TamrielTomeSeasonEntry_Keyboard" inherits="ZO_TamrielTomeSeasonEntry_Shared" mouseEnabled="true" virtual="true">
+            <Dimensions x="ZO_TAMRIEL_TOME_SEASON_ENTRY_KEYBOARD_WIDTH" y="ZO_TAMRIEL_TOME_SEASON_ENTRY_KEYBOARD_HEIGHT"/>
+            <Controls>
+                <Texture name="$(parent)Image" override="true">
+                    <Dimensions x="ZO_TAMRIEL_TOME_SEASON_ENTRY_IMAGE_KEYBOARD_WIDTH" y="ZO_TAMRIEL_TOME_SEASON_ENTRY_IMAGE_KEYBOARD_HEIGHT"/>
+                </Texture>
+                <Texture name="$(parent)ImageGlow" override="true">
+                    <Dimensions x="ZO_TAMRIEL_TOME_SEASON_ENTRY_IMAGE_KEYBOARD_WIDTH" y="ZO_TAMRIEL_TOME_SEASON_ENTRY_IMAGE_KEYBOARD_HEIGHT"/>
+                </Texture>
+                <Label name="$(parent)Name" override="true" font="ZoFontWinH2">
+                    <Anchor point="TOPLEFT" offsetX="8" offsetY="8"/>
+                    <Anchor point="TOPRIGHT" offsetX="-8" offsetY="8"/>
+                </Label>
+                <Label name="$(parent)Rewards" override="true" font="ZoFontWinH3">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT" offsetY="4"/>
+                </Label>
+                <Label name="$(parent)RewardCount" override="true" font="ZoFontWinH3"/>
+            </Controls>
+        </Control>
+        <TopLevelControl name="ZO_SelectTamrielTomeSeason_Keyboard" inherits="ZO_CustomDialogBase">
+            <Dimensions x="ZO_TAMRIEL_TOME_SEASON_DIALOG_KEYBOARD_WIDTH"/>
+            <OnInitialized name="TamrielTomes">
+                ZO_SelectTamrielTomeSeasonDialog_Keyboard.OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)ContentContainer" resizeToFitDescendents="true">
+                    <Anchor point="TOP" relativeTo="$(parent)Title" relativePoint="BOTTOM" offsetY="30"/>
+                    <Dimensions x="ZO_TAMRIEL_TOME_SEASON_GRID_KEYBOARD_WIDTH"/>
+                    <Controls>
+                        <Control name="$(parent)TomesGrid" inherits="ZO_GridScrollList_Keyboard">
+                            <Anchor point="TOPLEFT"/>
+                            <Anchor point="TOPRIGHT"/>
+                            <!-- Minimum height dimension constraint is set by ZO_SelectTamrielTomeSeasonDialog_Keyboard:PopulateGridList() -->
+                        </Control>
+                    </Controls>
+                </Control>
+                <Control name="$(parent)Close" inherits="ZO_CustomDialogButton"/>
+                <Control name="$(parent)Select" inherits="ZO_CustomDialogButton"/>
+            </Controls>
+        </TopLevelControl>
+        <Label name="ZO_TamrielTomeSeasonEndInfoBulletLabel_Keyboard" font="ZoFontGameLargeBold" virtual="true" level="2">
+            <Controls>
+                <Texture name="$(parent)Bullet" textureFile="EsoUI/Art/Miscellaneous/bullet.dds" level="3">
+                    <Anchor point="RIGHT" relativePoint="LEFT" offsetX="-8"/>
+                    <Dimensions x="16" y="16"/>
+                </Texture>
+            </Controls>
+        </Label>
+        <Control name="ZO_TamrielTomeSeasonEndEntry_Keyboard" inherits="ZO_TamrielTomeSeasonEndEntry_Shared" mouseEnabled="true" virtual="true">
+            <OnMouseEnter>
+                self.object:OnMouseEnter()
+            </OnMouseEnter>
+            <OnMouseExit>
+                self.object:OnMouseExit()
+            </OnMouseExit>
+            <Controls>
+                <Backdrop name="$(parent)Highlight" inherits="ZO_SelectionHighlight" excludeFromResizeToFitExtents="true"/>
+                <Texture name="$(parent)RewardIcon" override="true">
+                    <Controls>
+                        <Label name="$(parent)Quantity" override="true" font="ZoFontGameLargeBold"/>
+                    </Controls>
+                </Texture>
+                <Label name="$(parent)RewardName" override="true" font="ZoFontGameLargeBold"/>
+            </Controls>
+        </Control>
+        <TopLevelControl name="ZO_TamrielTomeSeasonEnd_Keyboard" inherits="ZO_TamrielTomeSeasonEnd_Shared ZO_CustomDialogBase">
+            <OnInitialized name="TamrielTomes">
+                ZO_TamrielTomeSeasonEndDialog_Keyboard.OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)Summary" override="true">
+                    <Anchor point="TOP" relativeTo="$(parent)Title" relativePoint="BOTTOM" offsetY="20"/>
+                    <Controls>
+                        <Label name="$(parent)SeasonName" override="true" font="ZoFontWinH2"/>
+                        <Label name="$(parent)SeasonRewards" override="true" font="ZoFontWinH3"/>
+                        <Label name="$(parent)SeasonRewardCount" override="true" font="ZoFontWinH3"/>
+                        <Label name="$(parent)PremiumExplanation" override="true" inherits="ZO_TamrielTomeSeasonEndInfoBulletLabel_Keyboard"/>
+                        <Label name="$(parent)TomePointRollover" override="true" inherits="ZO_TamrielTomeSeasonEndInfoBulletLabel_Keyboard"/>
+                        <Label name="$(parent)GoldRollover" override="true" inherits="ZO_TamrielTomeSeasonEndInfoBulletLabel_Keyboard"/>
+                        <Label name="$(parent)ClaimedRewards" override="true" font="ZoFontGameLargeBold"/>
+                    </Controls>
+                </Control>
+                <Control name="$(parent)RewardsGrid" inherits="ZO_GridScrollList_Keyboard">
+                    <Anchor point="TOP" relativeTo="$(parent)Summary" relativePoint="BOTTOM" offsetY="12"/>
+                    <Dimensions x="ZO_TAMRIEL_TOME_SEASON_END_GRID_WIDTH"/>
+                    <!-- Minimum height dimension constraint is set by ZO_SelectTamrielTomeSeasonEndDialog_Shared:PopulateGridList() -->
+                    <Controls>
+                        <Backdrop name="$(parent)BG" inherits="ZO_DefaultBackdrop" excludeFromResizeToFitExtents="true"/>
+                    </Controls>
+                </Control>
+                <Control name="$(parent)Close" inherits="ZO_CustomDialogButton"/>
+            </Controls>
+        </TopLevelControl>
         <TopLevelControl name="ZO_TamrielTomes_KeyboardTL" inherits="ZO_TamrielTomes_SharedTL">
             <Anchor point="BOTTOMRIGHT" offsetX="-10"/>
             <OnInitialized>
@@ -13,8 +106,12 @@
                 </Texture>
                 <Control name="$(parent)Header" override="true">
                     <Controls>
-                        <Label name="$(parent)Title" override="true" font="ZoFontCallout"/>
+                        <Label name="$(parent)Title" override="true" font="ZoFontCallout">
+                            <Anchor point="TOPLEFT" offsetX="80"/>
+                            <Anchor point="TOPRIGHT" offsetX="-80"/>
+                        </Label>
                         <Label name="$(parent)Subtitle" override="true" font="ZoFontHeader3"/>
+                        <Label name="$(parent)PastSeason" override="true" font="ZoFontHeader3"/>
                         <Control name="$(parent)Buttons" override="true">
                             <Controls>
                                 <Button name="$(parent)ChallengesButton" override="true" inherits="ZO_DefaultButton" font="ZoFontWinH2">
@@ -25,6 +122,9 @@
                                 </Button>
                             </Controls>
                         </Control>
+                        <Button name="$(parent)SelectTomeButton" override="true">
+                            <Anchor point="LEFT" offsetX="8"/>
+                        </Button>
                     </Controls>
                 </Control>
                 <Control name="$(parent)Book" override="true">

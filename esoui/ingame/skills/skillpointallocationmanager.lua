@@ -142,8 +142,12 @@ function ZO_SkillPointAllocator:GetNumPointsAllocated()
         end
     end
 
-    local multiplier = self.skillData:GetSkillPointCostMultiplier()
-    return pointsAllocated * multiplier
+    if self:GetSkillLineData():IsClassMastery() then
+        return pointsAllocated
+    else
+        local multiplier = self.skillData:GetSkillPointCostMultiplier()
+        return pointsAllocated * multiplier
+    end
 end
 
 function ZO_SkillPointAllocator:HasValidChangesForMode(allocationMode)
@@ -172,8 +176,14 @@ function ZO_SkillPointAllocator:HasAvailableSkillPoints()
 end
 
 function ZO_SkillPointAllocator:HasEnoughAvailableSkillPointsForSingleTransaction()
-    local costPerTransaction = self.skillData:GetSkillPointCostMultiplier()
-    return self.manager:GetAvailableSkillPoints() >= costPerTransaction
+    local skillLineData = self.skillData:GetSkillLineData()
+    if skillLineData:IsClassMastery() then
+        local availableClassMasteryPoints = SKILL_POINT_ALLOCATION_MANAGER:GetAvailableClassMasteryPointsForSkillLine(skillLineData)
+        return availableClassMasteryPoints >= skillLineData:GetClassMasteryCost()
+    else
+        local costPerTransaction = self.skillData:GetSkillPointCostMultiplier()
+        return self.manager:GetAvailableSkillPoints() >= costPerTransaction
+    end
 end
 
 function ZO_SkillPointAllocator:CanPurchase()
@@ -696,6 +706,11 @@ ZO_SkillPointAllocationManager = ZO_SkillsAssignmentManager_Base:Subclass()
 function ZO_SkillPointAllocationManager:Initialize()
     SKILL_POINT_ALLOCATION_MANAGER = self
 
+    self.classMasterySkillLinePoints = {}
+    self.classMasteryInitialAvailablePoints = {}
+
+    self:RefreshInitialClassMasteryAvailablePoints()
+
     local function PurchaseOnlyFactory()
         return ZO_PurchaseOnlySkillPointAllocator:New(self)
     end
@@ -773,9 +788,21 @@ function ZO_SkillPointAllocationManager:OnFullSystemUpdated()
     self:BroadcastSkillPointsChanged()
 end
 
+function ZO_SkillPointAllocationManager:RefreshInitialClassMasteryAvailablePoints()
+    ZO_ClearTable(self.classMasteryInitialAvailablePoints)
+    local numActiveClassSkillLines = SKILLS_DATA_MANAGER:GetNumActiveClassMasterySkillLines()
+    for i = 1, numActiveClassSkillLines do
+        local skillLineData = SKILLS_DATA_MANAGER:GetActiveClassMasterySkillLine(i)
+        if skillLineData and skillLineData:IsClassMastery() then
+            self.classMasteryInitialAvailablePoints[skillLineData:GetId()] = skillLineData:GetNumClassMasteryPoints() - skillLineData:GetNumPointsAllocated()
+        end
+    end
+end
+
 function ZO_SkillPointAllocationManager:OnSkillPointAllocationModeChanged(newSkillPointAllocationMode, oldSkillPointAllocationMode)
     local oldAllocatorPool = self.allocatorPools[oldSkillPointAllocationMode]
     oldAllocatorPool:ReleaseAllObjects()
+    self:RefreshInitialClassMasteryAvailablePoints()
     self:UpdateAvailableSkillPoints(BROADCAST)
 end
 
@@ -826,11 +853,25 @@ end
 function ZO_SkillPointAllocationManager:UpdateAvailableSkillPoints(broadcast)
     local oldAvailableSkillPoints = self.availableSkillPoints
     local availableSkillPoints = self.rawAvailableSkillPoints
+    local classMasterySkillLinePoints = self.classMasterySkillLinePoints
+    local oldClassMasterySkillLinePoints = ZO_ShallowTableCopy(classMasterySkillLinePoints)
+    local classMasteryPointsChanged = false
+    ZO_ClearTable(classMasterySkillLinePoints)
     for _, allocator in self:AllocatorIterator() do
+        local skillLineData = allocator:GetSkillLineData()
         -- If the skill line is inactive, we don't really care what any allocators are doing, leave them be and ignore them so we can bring back their state later if desired
         -- The actual delta for lines being removed will be tallied below via the SKILL_LINE_ASSIGNMENT_MANAGER
-        if allocator:GetSkillLineData():IsActive() then
-            availableSkillPoints = availableSkillPoints - allocator:GetPendingPointAllocationDelta()
+        if skillLineData:IsActive() then
+            if skillLineData:IsClassMastery() then
+                local skillLineId = skillLineData:GetId()
+                if not classMasterySkillLinePoints[skillLineId] then
+                    classMasterySkillLinePoints[skillLineId] = self.classMasteryInitialAvailablePoints[skillLineId]
+                end
+                classMasterySkillLinePoints[skillLineData:GetId()] = classMasterySkillLinePoints[skillLineId] - allocator:GetPendingPointAllocationDelta()
+                classMasteryPointsChanged = classMasteryPointsChanged or oldClassMasterySkillLinePoints[skillLineId] ~= classMasterySkillLinePoints[skillLineId]
+            else
+                availableSkillPoints = availableSkillPoints - allocator:GetPendingPointAllocationDelta()
+            end
         end
     end
 
@@ -842,7 +883,7 @@ function ZO_SkillPointAllocationManager:UpdateAvailableSkillPoints(broadcast)
 
     self.availableSkillPoints = availableSkillPoints
 
-    if broadcast and oldAvailableSkillPoints ~= availableSkillPoints then
+    if broadcast and (oldAvailableSkillPoints ~= availableSkillPoints or classMasteryPointsChanged) then
         self:BroadcastSkillPointsChanged()
     end
 end
@@ -865,6 +906,19 @@ end
 
 function ZO_SkillPointAllocationManager:GetAvailableSkillPoints()
     return self.availableSkillPoints
+end
+
+function ZO_SkillPointAllocationManager:GetAvailableClassMasteryPointsForSkillLine(skillLineData)
+    if skillLineData:IsClassMastery() then
+        if SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeBatchSave() then
+            local classMasterySkillLinePoints = self.classMasterySkillLinePoints[skillLineData:GetId()]
+            if classMasterySkillLinePoints then
+                return classMasterySkillLinePoints
+            end
+        end
+        return skillLineData:GetNumClassMasteryPoints() - skillLineData:GetNumPointsAllocated()
+    end
+    return 0
 end
 
 function ZO_SkillPointAllocationManager:IsAnyChangePending()

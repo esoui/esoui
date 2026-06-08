@@ -124,7 +124,8 @@ function ZO_Vengeance_Perks_Gamepad:InitializeLists()
             enabled = function()
                 local selectedPerk = self.perksList:GetTargetData()
                 local canEquip, result = selectedPerk:CanEquipPerk()
-                return canEquip or result == VENGEANCE_ACTION_RESULT_PERK_ALREADY_EQUIPPED, GetString("SI_VENGEANCEACTIONRESULT", result)
+                local errorString = selectedPerk:GetResultStringForCanEquipPerk()
+                return canEquip or result == VENGEANCE_ACTION_RESULT_PERK_ALREADY_EQUIPPED, errorString
             end,
             visible = function()
                 local selectedPerk = self.perksList:GetTargetData()

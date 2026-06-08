@@ -38,6 +38,7 @@ ZO_GAMEPAD_NOTIFICATION_ICONS =
     [NOTIFICATION_TYPE_CONSOLE_ADDON_MEMORY_LIMIT_REACHED] = "EsoUI/Art/Miscellaneous/Gamepad/gp_icon_new_64.dds",
     [NOTIFICATION_TYPE_CONSOLE_ADDON_SAVED_VARIABLES_LIMIT_REACHED] = "EsoUI/Art/Miscellaneous/Gamepad/gp_icon_new_64.dds",
     [NOTIFICATION_TYPE_SPECTACLE_EVENT_PHASE_CHANGED] = "EsoUI/Art/Notifications/Gamepad/gp_notificationIcon_WrithingWall.dds",
+    [NOTIFICATION_TYPE_VETERANCY_RANKED_UP_HAS_REWARDS] = "EsoUI/Art/Notifications/Gamepad/gp_notificationIcon_veterancyRankRewards.dds",
 }
 
 ZO_NOTIFICATION_TYPE_TO_GAMEPAD_TEMPLATE = 
@@ -59,7 +60,7 @@ ZO_NOTIFICATION_TYPE_TO_GAMEPAD_TEMPLATE =
     [NOTIFICATIONS_MARKET_PRODUCT_UNLOCKED_DATA] = "ZO_GamepadNotificationsBaseRow",
     [NOTIFICATIONS_POINTS_RESET_DATA] = "ZO_GamepadNotificationsPointsResetRow",
     [NOTIFICATIONS_HOUSE_TOURS_HOUSE_RECOMMENDED_DATA] = "ZO_GamepadNotificationsHouseRecommendedRow",
-    [NOTIFICATIONS_SPECTACLE_EVENT_UPDATE_DATA] = "ZO_GamepadNotificationsSpectacleEventUpdateRow",
+    [NOTIFICATIONS_VIEW_DISMISS_DATA] = "ZO_GamepadNotificationsViewDismissRow",
 }
 
 -- Provider Overrides
@@ -75,7 +76,7 @@ function ZO_GamepadFriendRequestProvider:Decline(data, button, openedFromKeybind
         ZO_PlatformIgnorePlayer(data.displayName, ZO_ID_REQUEST_TYPE_FRIEND_REQUEST, data.incomingFriendIndex)
     end
 
-    local dialogData = 
+    local dialogData =
     {
         mainText = function()
             return zo_strformat(SI_GAMEPAD_NOTIFICATIONS_FRIEND_REQUEST_DECLINE_HEADER, data.displayName)
@@ -498,7 +499,7 @@ function ZO_GamepadNotificationManager:SetupList(list)
         ["ZO_GamepadNotificationsGuildNewApplicationsRow"] = SetupRequest,
         ["ZO_GamepadNotificationsPointsResetRow"] = SetupRequest,
         ["ZO_GamepadNotificationsHouseRecommendedRow"] = SetupRequest,
-        ["ZO_GamepadNotificationsSpectacleEventUpdateRow"] = SetupRequest,
+        ["ZO_GamepadNotificationsViewDismissRow"] = SetupRequest,
     }
 
     for template, setupCallback in pairs(TEMPLATE_TO_SETUP) do
@@ -551,6 +552,7 @@ function ZO_GamepadNotificationManager:InitializeNotificationList(control)
         ZO_SpectacleEventNotificationProvider:New(self),
         ZO_ConsoleAddonsMemoryLimitProvider:New(self),
         ZO_ConsoleAddonsSavedVariableLimitProvider:New(self),
+        ZO_VeterancyRankUpRewardsNotificationProvider:New(self),
     }
 end
 
