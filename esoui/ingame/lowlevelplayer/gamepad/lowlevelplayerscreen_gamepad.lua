@@ -72,17 +72,27 @@ function ZO_LowLevelPlayerScreen_Gamepad:OnGridListSelectedDataChanged(previousD
 end
 
 function ZO_LowLevelPlayerScreen_Gamepad:GetPrimaryKeybindName()
-    local activityName = GetIntroGameplayExperienceDisplayName()
-    return zo_strformat(SI_ENTER_INTRO_GAMEPLAY_EXPERIENCE_ACTION, activityName)
+    if PROMOTIONAL_EVENT_PERSONAL_CAMPAIGN_MANAGER:IsIntroCampaignComplete() or IsActiveWorldStarterWorld() then
+        local promotionalEventNameText = PROMOTIONAL_EVENT_MANAGER:GetPromotionalEventsColorizedDisplayName()
+        return zo_strformat(SI_PROMOTIONAL_EVENT_PERSONAL_CAMPAIGN_NAVIGATION_TO_PROMOTIONAL_EVENT_ACTION, promotionalEventNameText)
+    else
+        local activityName = GetIntroGameplayExperienceDisplayName()
+        return zo_strformat(SI_ENTER_INTRO_GAMEPLAY_EXPERIENCE_ACTION, activityName)
+    end
 end
 
 function ZO_LowLevelPlayerScreen_Gamepad:ShouldShowPrimaryKeybind()
-    return PROMOTIONAL_EVENT_PERSONAL_CAMPAIGN_MANAGER:CanJumpToIntroGameplay()
+    return true
 end
 
 function ZO_LowLevelPlayerScreen_Gamepad:OnPrimaryKeyPressed()
-    PlaySound(SOUNDS.ENTER_INTRO_GAMEPLAY_EXPERIENCE)
-    self:RequestJumpToIntroGameplay()
+    if PROMOTIONAL_EVENT_PERSONAL_CAMPAIGN_MANAGER:IsIntroCampaignComplete() or IsActiveWorldStarterWorld() then
+        PlaySound(SOUNDS.DEFAULT_CLICK)
+        PROMOTIONAL_EVENT_PERSONAL_CAMPAIGN_MANAGER:GoToPromotionalEvents()
+    else
+        PlaySound(SOUNDS.ENTER_INTRO_GAMEPLAY_EXPERIENCE)
+        self:RequestJumpToIntroGameplay()
+    end
 end
 
 function ZO_LowLevelPlayerScreen_Gamepad.OnControlInitialized(control)

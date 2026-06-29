@@ -184,14 +184,6 @@ end
 
 function ZO_KeybindButtonMixin:SetKeybindButtonDescriptor(keybindDescriptor)
     self.keybindDescriptorReference = keybindDescriptor
-
-    if keybindDescriptor.name then
-        local name = keybindDescriptor.name
-        if type(keybindDescriptor.name) == "function" then
-            name = keybindDescriptor.name()
-        end
-       self:SetText(name)
-    end
     
     if keybindDescriptor.keybind then
         self:SetKeybind(keybindDescriptor.keybind)
@@ -211,6 +203,20 @@ function ZO_KeybindButtonMixin:SetKeybindButtonDescriptor(keybindDescriptor)
 
     if keybindDescriptor.customKeyIcon then
         self:SetCustomKeyIcon(keybindDescriptor.customKeyIcon)
+    end
+
+    self:UpdateDescriptor()
+end
+
+function ZO_KeybindButtonMixin:UpdateDescriptor()
+    local keybindDescriptor = self.keybindDescriptorReference
+    if not keybindDescriptor then
+        return
+    end
+
+    if keybindDescriptor.name then
+        local name = ZO_Eval(keybindDescriptor.name)
+        self:SetText(name)
     end
 end
 

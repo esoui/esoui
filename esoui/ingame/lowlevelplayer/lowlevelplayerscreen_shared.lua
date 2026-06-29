@@ -66,7 +66,8 @@ function ZO_LowLevelPlayerScreen_Shared:OnDeferredInitialize()
         callback = function()
             self:OnPrimaryKeyPressed()
         end,
-        visible = ShouldShowPrimaryKeybind,
+        visible = ShouldShowPrimaryKeybind, -- For the keybind button, ethereal isn't a thing, so we need to set visible as well
+        enabled = ShouldShowPrimaryKeybind, -- For the keybind strip, ethereal doesn't check visible
     }
     self.primaryKeybindButton:SetKeybindButtonDescriptor(self.primaryKeybindDescriptor)
 
@@ -88,6 +89,7 @@ function ZO_LowLevelPlayerScreen_Shared:UpdateKeybinds()
 end
 
 function ZO_LowLevelPlayerScreen_Shared:UpdateKeybindVisibility()
+    self.primaryKeybindButton:UpdateDescriptor() -- Refresh the text
     self.primaryKeybindButton:UpdateVisibility()
 end
 

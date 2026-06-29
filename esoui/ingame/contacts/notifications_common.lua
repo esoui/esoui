@@ -1247,8 +1247,8 @@ end
 
 ZO_LFGUpdateProvider = ZO_NotificationProvider:Subclass()
 
-function ZO_LFGUpdateProvider:Initialize(notificationManager)
-    ZO_NotificationProvider.Initialize(self, notificationManager)
+function ZO_LFGUpdateProvider:Initialize(notificationManager, notificationEventCallback)
+    ZO_NotificationProvider.Initialize(self, notificationManager, notificationEventCallback)
     self:SetHasTimer(true)
 
     self:RegisterUpdateEvent(EVENT_GROUPING_TOOLS_READY_CHECK_UPDATED)

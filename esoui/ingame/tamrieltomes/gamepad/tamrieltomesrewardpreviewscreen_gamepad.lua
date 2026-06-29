@@ -29,7 +29,7 @@ end
 
 function ZO_TamrielTomesRewardPreviewScreen_Gamepad:UpdatePreviewControls()
     local showControls = self.rewardId ~= nil and self:IsShowing()
-    self:SetPreviewControlsHidden(showControls)
+    self:SetPreviewControlsHidden(not showControls)
 end
 
 function ZO_TamrielTomesRewardPreviewScreen_Gamepad:OnShowing()

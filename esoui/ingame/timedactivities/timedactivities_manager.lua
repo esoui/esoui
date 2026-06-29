@@ -345,6 +345,13 @@ function ZO_TimedActivities_Manager:GetAvailableActivityTypes()
     return self.availableActivityTypes
 end
 
+function ZO_TimedActivities_Manager:TryRefreshMasterList()
+    if self.isMasterListDirty then
+        -- RefreshMasterList will reset the dirty flag when successful.
+        self:RefreshMasterList()
+    end
+end
+
 function ZO_TimedActivities_Manager:RefreshMasterList()
     -- Order matters:
     if self.isRefreshingMasterList then
@@ -364,9 +371,17 @@ function ZO_TimedActivities_Manager:RefreshMasterList()
     self:RefreshAvailability()
     self:FireCallbacks("OnActivitiesUpdated")
     self.isRefreshingMasterList = false
+    self.isMasterListDirty = false
 end
 
 function ZO_TimedActivities_Manager:RefreshSingleMasterListItem(index)
+    local numActivities = #self.activitiesData
+    if index > (numActivities + 1) then
+        -- An out-of-order activity was created.
+        self.isMasterListDirty = true
+        return
+    end
+
     -- Order matters:
     if self.isRefreshingMasterList then
         -- The list is in the process of being refreshed.
@@ -428,6 +443,7 @@ function ZO_TimedActivities_Manager:OnRerollResult(rerollResult)
 end
 
 function ZO_TimedActivities_Manager:ActivitiesIterator(filterFunctions)
+    self:TryRefreshMasterList()
     return ZO_FilteredNumericallyIndexedTableIterator(self.activitiesData, filterFunctions)
 end
 
@@ -516,6 +532,7 @@ function ZO_TimedActivities_Manager:GetActivityDataByEncodedId(timedActivityEnco
 end
 
 function ZO_TimedActivities_Manager:GetActivityDataByIndex(activityIndex)
+    self:TryRefreshMasterList()
     return self.activitiesData[activityIndex]
 end
 
@@ -592,6 +609,10 @@ function ZO_TimedActivities_Manager:GetNewTimedActivityEncodedIds(activityDatas)
         return {}
     end
 
+    if not activityDatas then
+        self:TryRefreshMasterList()
+    end
+
     local allEncodedIds = zo_id64ToString(self:GetEncodedIdsForActivityDatas(activityDatas or self.activitiesData))
     local foundEncodedIds, missingEncodedIds = self.seenActivityEncodedIds:FindKeys(allEncodedIds)
     return zo_stringToId64(missingEncodedIds)
@@ -604,6 +625,7 @@ end
 
 function ZO_TimedActivities_Manager:HasNewTimedActivities(timedActivityType)
     -- Get the encoded ids of any activities that have not been seen yet.
+    self:TryRefreshMasterList()
     local newActivityEncodedIds = self:GetNewTimedActivityEncodedIds(self.activitiesData)
 
     if timedActivityType == nil then
