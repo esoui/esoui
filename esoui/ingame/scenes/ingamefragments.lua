@@ -1097,6 +1097,14 @@ INTERACT_WINDOW_KEYBIND_INTERCEPT_LAYER_FRAGMENT:SetConditional(function()
 
 -- Preview Intercept Layer
 PREVIEW_KEYBIND_INTERCEPT_LAYER_FRAGMENT = ZO_ActionLayerFragment:New("PreviewInterceptLayer")
+-- ESO-968627: Force the hide of the fragment while PlayerUnit still exists, the function
+-- RemoveActionLayerByName called to hide this fragment is dependent on PlayerUnit existing
+EVENT_MANAGER:RegisterForEvent("PreviewKeybindInterceptLayer", EVENT_PLAYER_DEACTIVATED, function()
+    PREVIEW_KEYBIND_INTERCEPT_LAYER_FRAGMENT:SetHiddenForReason("ZoneChange", true)
+end)
+EVENT_MANAGER:RegisterForEvent("PreviewKeybindInterceptLayer", EVENT_PLAYER_ACTIVATED, function()
+    PREVIEW_KEYBIND_INTERCEPT_LAYER_FRAGMENT:SetHiddenForReason("ZoneChange", false)
+end)
 
 --Crafting window keybind intercept layer
 ZO_CraftingWindowKeybindInterceptLayerFragment = ZO_ActionLayerFragment:Subclass()
