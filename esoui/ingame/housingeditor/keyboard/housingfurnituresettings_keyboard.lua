@@ -44,7 +44,7 @@ function ZO_HousingFurnitureSettings_Keyboard:InitializeSettingsPanels()
     self.activePanel = self.generalOptionsPanel
 
     self.generalOptionsScrollList = self.generalOptionsPanel:GetNamedChild("Settings")
-    local generalOptionsScrollChild = GetControl(self.generalOptionsScrollList, "ScrollChild")
+    local generalOptionsScrollChild = self.generalOptionsScrollList:GetNamedChild("ScrollChild")
 
     local function OnPrimaryResidenceClicked(button)
         local currentHouse = GetCurrentZoneHouseId()
@@ -212,8 +212,6 @@ function ZO_HousingFurnitureSettings_Keyboard:UpdateGuildVisitorSettings()
 end
 
 do
-    local CAN_ACCESS = true
-
     local function GetStringFromData(data)
         local dataType = type(data)
         if dataType == "function" then
@@ -227,8 +225,8 @@ do
 
     function ZO_HousingFurnitureSettings_Keyboard:UpdateButtonSettings(control)
         local data = control.data
-        local buttonControl = GetControl(control, "Button")
-        local nameControl = GetControl(control, "Name")
+        local buttonControl = control:GetNamedChild("Button")
+        local nameControl = control:GetNamedChild("Name")
 
         local buttonText = GetStringFromData(data.buttonText)
         buttonControl:SetText(buttonText)
@@ -239,8 +237,8 @@ do
 
     function ZO_HousingFurnitureSettings_Keyboard:BuildDefaultAccessSettings(control)
         local data = control.data
-        local dropDownControl = GetControl(control, "DropDown")
-        local nameControl = GetControl(control, "Name")
+        local dropDownControl = control:GetNamedChild("DropDown")
+        local nameControl = control:GetNamedChild("Name")
 
         local labelText = GetStringFromData(data.text)
         nameControl:SetText(labelText)
@@ -349,7 +347,7 @@ function ZO_HousingSettingsRow_OnMouseUp(control, button, upInside)
 
         local data = ZO_ScrollList_GetData(control)
         if data.dataEntry.typeId == ZO_SETTINGS_OCCUPANT_DATA_TYPE then
-            if IsOwnerOfCurrentHouse() then
+            if IsOwnerOfCurrentHouse() and data.crossplayDisplayName ~= GetCurrentHouseOwner()then
                 AddMenuItem(GetString(SI_HOUSING_OCCUPANTS_KICK_OCCUPANT), function() ZO_Dialogs_ShowDialog("HOUSING_CONFIRM_KICK_OCCUPANT", data) end)
                 control.panel:ShowMenu(control)
             end
@@ -388,7 +386,16 @@ function ZO_HousingSettings_BanList_Row_OnClick(control)
     end
 end
 
+function ZO_HousingFurnitureSettings_Keyboard.OnDisplayNameHeaderInitialized(control)
+    
 
+
+    
+    ZO_SortHeader_Initialize(control, ZO_GetPlatformAccountLabel(), "displayName", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT, "ZoFontGameLargeBold")
+    
+end
+
+---------------------
 -- Setting Dialogs --
 ---------------------
 
@@ -438,7 +445,7 @@ do
     local CANNOT_EDIT = false
 
     local function SetupPresetComboBox(dialog)
-        local presetsComboBoxControl = GetControl(dialog, "Presets")
+        local presetsComboBoxControl = dialog:GetNamedChild("Presets")
         dialog.presetsComboBox = ZO_ComboBox_ObjectFromContainer(presetsComboBoxControl)
         dialog.presetsComboBox:SetSortsItems(false)
 
@@ -459,7 +466,7 @@ do
     end
 
     local function SetupHousesComboBox(dialog)
-        local housesComboBoxControl = GetControl(dialog, "HousesComboBox")
+        local housesComboBoxControl = dialog:GetNamedChild("HousesComboBox")
         dialog.housesComboBox = ZO_ComboBox_ObjectFromContainer(housesComboBoxControl)
         dialog.housesComboBox:SetSortsItems(false) -- sorted on setup
     end
@@ -573,7 +580,7 @@ do
         local dialogTitle = activePanel:GetAddUserGroupDialogTitle()
 
         dialog:GetNamedChild("Title"):SetText(dialogTitle)
-        GetControl(dialog, "NameEdit"):SetText("")
+        dialog:GetNamedChild("NameEdit"):SetText("")
 
         local editCheckBoxControl = dialog:GetNamedChild("AllHouses")
         ZO_CheckButton_SetCheckState(editCheckBoxControl, HOUSE_SETTINGS_MANAGER:GetApplyToAllHousesFlag())
@@ -603,7 +610,7 @@ do
                                     local editCheckBoxControl = dialog:GetNamedChild("AllHouses")
                                     local isAllHousesChecked = ZO_CheckButton_IsChecked(editCheckBoxControl)
                                     HOUSE_SETTINGS_MANAGER:SetApplyToAllHousesFlag(isAllHousesChecked)
-                                    local name = GetControl(dialog, "NameEdit"):GetText()
+                                    local name = dialog:GetNamedChild("NameEdit"):GetText()
 
                                     AddHousingPermission(data.currentHouse, userGroup, ALLOW_ACCESS, dialog.selectedPreset, isAllHousesChecked, name)
                                 end
@@ -618,8 +625,8 @@ do
         SetupPresetComboBox(self)
 
         local addUserGroupFields = ZO_RequiredTextFields:New()
-        addUserGroupFields:AddButton(GetControl(self, "Confirm"))
-        addUserGroupFields:AddTextField(GetControl(self, "NameEdit"))
+        addUserGroupFields:AddButton(self:GetNamedChild("Confirm"))
+        addUserGroupFields:AddTextField(self:GetNamedChild("NameEdit"))
     end
 
     function ZO_RequestBanUserGroupDialog_OnInitialized(self, dialogName)
@@ -639,7 +646,7 @@ do
                                     local editCheckBoxControl = dialog:GetNamedChild("AllHouses")
                                     local isAllHousesChecked = ZO_CheckButton_IsChecked(editCheckBoxControl)
                                     HOUSE_SETTINGS_MANAGER:SetApplyToAllHousesFlag(isAllHousesChecked)
-                                    local name = GetControl(dialog, "NameEdit"):GetText()
+                                    local name = dialog:GetNamedChild("NameEdit"):GetText()
 
                                     AddHousingPermission(data.currentHouse, userGroup, not ALLOW_ACCESS, HOUSE_PERMISSION_PRESET_SETTING_INVALID, isAllHousesChecked, name)
                                 end
@@ -652,8 +659,8 @@ do
         })
 
         local banUserGroupFields = ZO_RequiredTextFields:New()
-        banUserGroupFields:AddButton(GetControl(self, "Confirm"))
-        banUserGroupFields:AddTextField(GetControl(self, "NameEdit"))
+        banUserGroupFields:AddButton(self:GetNamedChild("Confirm"))
+        banUserGroupFields:AddTextField(self:GetNamedChild("NameEdit"))
     end
 
     function ZO_CopyHousingPermissionsDialog_OnInitialized(self)

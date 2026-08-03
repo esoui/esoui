@@ -16,7 +16,7 @@
                         <Texture name="$(parent)Frame" textureFile="EsoUI/Art/ActionBar/abilityFrame64_up.dds" layer="CONTROLS">
                             <AnchorFill/>
                         </Texture>
-                        <Texture name="$(parent)CharacterFrame" textureFile="EsoUI/Art/Achievements/achievement_character_icon_frame.dds" layer="OVERLAY" hidden="true">
+                        <Texture name="$(parent)CharacterFrame" override="true" textureFile="EsoUI/Art/Achievements/achievement_character_icon_frame.dds">
                             <Anchor point="TOPLEFT" offsetX="-9" offsetY="-9"/>
                             <Anchor point="BOTTOMRIGHT" offsetX="9" offsetY="9"/>
                         </Texture>

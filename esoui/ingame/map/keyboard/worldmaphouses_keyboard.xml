@@ -25,6 +25,10 @@
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT" offsetX="10"/>
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)Name" relativePoint="BOTTOMRIGHT"/>
                 </Label>
+                <Texture name="$(parent)Status" inherits="ZO_MultiIcon">
+                    <Anchor point="RIGHT" relativeTo="$(parent)Name" relativePoint="LEFT"/>
+                    <Dimensions x="24" y="24"/>
+                </Texture>
             </Controls>
         </Control>
         <TopLevelControl name="ZO_WorldMapHouses" inherits="ZO_WorldMapInfoContent">

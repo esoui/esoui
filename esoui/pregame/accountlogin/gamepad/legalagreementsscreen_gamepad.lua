@@ -1,156 +1,14 @@
---[[
-    Legal docs providers abstract out the platform specific details of obtaining non-eula legal docs, they should implement:
-    ShouldShowEULA() -> bool
-    NextLegalDoc() -> LegalDocData or nil
-    PreviousLegalDoc() -> LegalDocData or nil
-    OnDocsFinished()
-]]--
-
--- PC EULAs are loaded from disk
-local ZO_PCLegalDocsProvider = ZO_Object:Subclass()
-
-function ZO_PCLegalDocsProvider:New(...)
-    local object = ZO_Object.New(self)
-    return object
-end
-
-function ZO_PCLegalDocsProvider:ShouldShowEULA()
-    return self:GetNextEULAType() ~= nil
-end
-
-function ZO_PCLegalDocsProvider:GetNextEULAType()
-    for _, eulaType in ipairs(ZO_PREGAME_EULAS) do
-        if ShouldShowEULA(eulaType) then
-            return eulaType
-        end
-    end
-    return nil
-end
-
-function ZO_PCLegalDocsProvider:NextLegalDoc()
-    local eulaType = self:GetNextEULAType()
-    if eulaType then
-        local eulaText, agreeText, disagreeText, hasAgreed, eulaTitle, readCheckText = GetEULADetails(eulaType)
-        if eulaTitle == "" then
-            eulaTitle = GetString(SI_WINDOW_TITLE_EULA)
-        end
-
-        return
-        {
-            name = eulaTitle,
-            text = eulaText,
-            positiveButtonPrompt = agreeText,
-            negativeButtonPrompt = disagreeText,
-            acceptFunction = function() AgreeToEULA(eulaType) end,
-        }
-    end
-    return nil
-end
-
-function ZO_PCLegalDocsProvider:PreviousLegalDoc()
-    -- not supported
-    return nil
-end
-
-function ZO_PCLegalDocsProvider:OnDocsFinished()
-    -- log in
-    ZO_PregameStateManager_AdvanceState()
-end
-
--- On consoles, EULAs are loaded from disk, but other types of docs need to be asynchronously fetched from services. We only fetch the docs that have not yet been accepted.
-local ZO_ConsoleLegalDocsProvider = ZO_Object:Subclass()
-
-function ZO_ConsoleLegalDocsProvider:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
-
-function ZO_ConsoleLegalDocsProvider:Initialize()
-    self.haveFetchedRemoteDocs = false
-    self.nextLegalDocIndex = nil
-    EVENT_MANAGER:RegisterForEvent("ZO_ConsoleLegalDocsProvider", EVENT_FETCHED_LEGAL_DOCS, function()
-        self.haveFetchedRemoteDocs = true
-        self.nextLegalDocIndex = 1
-        ZO_PregameStateManager_SetState("LegalAgreements")
-    end)
-end
-
-function ZO_ConsoleLegalDocsProvider:ShouldShowEULA()
-    return ShouldShowEULA(EULA_TYPE_PREGAME_EULA)
-end
-
-function ZO_ConsoleLegalDocsProvider:NextLegalDoc()
-    if self:ShouldShowEULA() then
-        local eulaText, agreeText, disagreeText = GetEULADetails(ET_PREGAME_EULA)
-        return
-        {
-            name = GetString(SI_WINDOW_TITLE_EULA), 
-            text = eulaText,
-            positiveButtonPrompt = agreeText,
-            negativeButtonPrompt = disagreeText,
-            acceptFunction = function() AgreeToEULA() end,
-        }
-    elseif self.haveFetchedRemoteDocs and self.nextLegalDocIndex <= GetNumLegalDocs() then
-        local i = self.nextLegalDocIndex
-        self.nextLegalDocIndex = self.nextLegalDocIndex + 1
-        return
-        {
-            name = GetLegalDocTitle(i),
-            text = GetLegalDocContent(i),
-            positiveButtonPrompt = GetString(SI_CONSOLE_LEGAL_BUTTON_AGREE),
-            negativeButtonPrompt = GetString(SI_CONSOLE_LEGAL_BUTTON_DISAGREE),
-            acceptFunction = function() end,
-        }
-    end
-    return nil
-end
-
-function ZO_ConsoleLegalDocsProvider:PreviousLegalDoc()
-    -- Set next legal doc to the doc before the current doc.
-    -- current nextLegalDoc index is currentDocIndex + 1, so subtract 2 to counteract that
-    if self.haveFetchedRemoteDocs and self.nextLegalDocIndex > 2 then
-        self.nextLegalDocIndex = self.nextLegalDocIndex - 2
-        return self:NextLegalDoc()
-    end
-    return nil
-end
-
-function ZO_ConsoleLegalDocsProvider:OnDocsFinished()
-    if not self.haveFetchedRemoteDocs then
-        -- we need to attempt to log in, which will fail us if there are any remote docs we need to accept. To do this we'll just advance the state
-        -- then we will fetch those docs and restart the flow
-        ZO_PregameStateManager_AdvanceState()
-    else
-        -- We have already fetched the docs and accepted at this point, but remote legal docs require an extra confirmation step before we consider them to be accepted, then we'll advance
-        ZO_Dialogs_ShowGamepadDialog("LEGAL_AGREEMENT_UPDATED_ACKNOWLEDGE")
-    end
-end
-
 local MIN_SCROLL_VALUE = 0
-local MAX_SCROLL_VALUE = 100
 
 ---------------------------------------
 -- The main class.
-local ZO_LegalAgreementsScreen_Gamepad = ZO_Object:Subclass()
-
-function ZO_LegalAgreementsScreen_Gamepad:New(...)
-    local legalAgreements = ZO_Object.New(self)
-    legalAgreements:Initialize(...)
-    return legalAgreements
-end
+local ZO_LegalAgreementsScreen_Gamepad = ZO_InitializingObject:Subclass()
 
 function ZO_LegalAgreementsScreen_Gamepad:Initialize(control)
     self.control = control
     self.scrollAvailableAtMS = nil
     self.docData = nil
-    if ZO_IsConsoleOrGameCoreUI() then
-        self.docProvider = ZO_ConsoleLegalDocsProvider:New()
-    elseif ZO_IsPCUI() then
-        self.docProvider = ZO_PCLegalDocsProvider:New()
-    elseif IsGamepadUISupported() then
-        internalassert(false, "platform eulas not supported")
-    end
+    self.docProvider = REMOTE_LEGAL_DOCS_PROVIDER
 
     local legalAgreementsScreenFragment = ZO_FadeSceneFragment:New(control)
     LEGAL_AGREEMENTS_GAMEPAD_SCENE = ZO_Scene:New("LegalAgreementsScreen_Gamepad", SCENE_MANAGER)
@@ -296,7 +154,7 @@ function ZO_LegalAgreementsScreen_Gamepad:ShowEULA()
     SCENE_MANAGER:Show("LegalAgreementsScreen_Gamepad")
 end
 
-function ZO_LegalAgreementsScreen_Gamepad:ShowConsoleFetchedDocs()
+function ZO_LegalAgreementsScreen_Gamepad:ShowFetchedDocs()
     self.docData = self.docProvider:NextLegalDoc()
     SCENE_MANAGER:Show("LegalAgreementsScreen_Gamepad")
 end

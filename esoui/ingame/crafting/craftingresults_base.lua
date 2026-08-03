@@ -386,14 +386,16 @@ end
 function ZO_CraftingResults_Base:OnTooltipAnimationStopped(craftingType)
     if self.tooltipAnimationCompleted == false then
         self.tooltipAnimationCompleted = true
-        self:CheckCraftProcessCompleted(craftingType)
+        local FORCE_STOP = true
+        self:CheckCraftProcessCompleted(craftingType, FORCE_STOP)
     end
 end
 
 function ZO_CraftingResults_Base:OnContextualAnimationStopped(craftingType)
     if self.contextualAnimationCompleted == false then
         self.contextualAnimationCompleted = true
-        self:CheckCraftProcessCompleted(craftingType)
+        local FORCE_STOP = true
+        self:CheckCraftProcessCompleted(craftingType, FORCE_STOP)
     end
 end
 
@@ -468,7 +470,7 @@ do
         return ZO_TableOrderingFunction(left, right, "displayQuality", CRAFTING_RESULT_SORT_ORDER, ZO_SORT_ORDER_DOWN)
     end
 
-    function ZO_CraftingResults_Base:CheckCraftProcessCompleted(craftingType)
+    function ZO_CraftingResults_Base:CheckCraftProcessCompleted(craftingType, forceStop)
         if self:IsActive() and not self:IsCraftInProgress() then
             if GetNumLastCraftingResultLearnedTraits() > 0 then
                 self:DisplayDiscoveredTraits()
@@ -604,6 +606,9 @@ do
             if GetNumLastCraftingResultLearnedTranslations() > 0 then
                 self:DisplayTranslatedRunes()
             end
+        elseif forceStop and not self:IsActive() then
+            -- Ensures the stop callback gets called even if the stop caused the screen to become inactive.
+            CALLBACK_MANAGER:FireCallbacks("CraftingAnimationsStopped")
         end
     end
 end

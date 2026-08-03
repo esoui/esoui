@@ -91,11 +91,7 @@ function ZO_TamrielTomesRewardData:GetRewardIndex()
 end
 
 function ZO_TamrielTomesRewardData:GetPlatformLootIcon()
-    local rewardData = self:GetRewardListRewardDataByIndex(1)
-    if not rewardData then
-        rewardData = self:GetRewardData()
-    end
-
+    local rewardData = self:GetRewardData()
     if rewardData then
         return rewardData:GetPlatformLootIcon()
     end

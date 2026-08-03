@@ -1,9 +1,5 @@
 ZO_TradingHouseSearchCategoryFeature_Keyboard = ZO_TradingHouseSearchCategoryFeature_Shared:Subclass()
 
-function ZO_TradingHouseSearchCategoryFeature_Keyboard:New(...)
-    return ZO_TradingHouseSearchCategoryFeature_Shared.New(self, ...)
-end
-
 function ZO_TradingHouseSearchCategoryFeature_Keyboard:AttachToControl(categoryControl, subcategoryControl, featuresParentControl)
     self:InitializeFeatures(featuresParentControl)
     self:InitializeSubcategoryTabs(subcategoryControl)

@@ -11,6 +11,24 @@
         </AnimationTimeline>
     </Animations>
     <Controls>
+        <!-- Wrap early, and when wrapping, indent the next line to make it clear that the line is part of the same label -->
+        <Label name="ZO_Achievements_SubCategory" inherits="ZO_TreeStatusLabelSubCategory" maxLineCount="2" newLineIndent="10" virtual="true">
+            <Dimensions x="228"/>
+        </Label>
+        <Control name="ZO_Achievements_StatusIconHeader" inherits="ZO_StatusIconHeader" virtual="true">
+            <Controls>
+                <Label name="$(parent)Text" override="true">
+                    <DimensionConstraints maxX="227"/>
+                </Label>
+            </Controls>
+        </Control>
+        <Control name="ZO_Achievements_StatusIconChildlessHeader" inherits="ZO_StatusIconChildlessHeader" virtual="true">
+            <Controls>
+                <Label name="$(parent)Text" override="true">
+                    <DimensionConstraints maxX="227"/>
+                </Label>
+            </Controls>
+        </Control>
         <Texture name="ZO_AchievementIconCharacterFrameBorder" textureFile="EsoUI/Art/Achievements/achievement_character_icon_frame.dds" layer="OVERLAY" hidden="true" virtual="true"/>
         <Label name="ZO_AchievementsDefaultLabel_Keyboard" font="ZoFontWinH5" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" virtual="true"/>
         <Label name="ZO_AchievementsLargeLabel_Keyboard" inherits="ZO_AchievementsDefaultLabel_Keyboard" font="ZoFontWinH2" modifyTextType="UPPERCASE" virtual="true"/>
@@ -251,9 +269,9 @@
                     <Anchor point="BOTTOMRIGHT" offsetX="-5"/>
                     <Controls>
                         <Control name="$(parent)Categories" inherits="ZO_ScrollContainer">
-                            <Dimensions x="335"/>
-                            <Anchor point="TOPLEFT" offsetX="-10" offsetY="72"/>
-                            <Anchor point="BOTTOMLEFT" offsetX="-10"/>
+                            <Dimensions x="353"/>
+                            <Anchor point="TOPLEFT" offsetX="-28" offsetY="77"/>
+                            <Anchor point="BOTTOMLEFT" offsetX="-28"/>
                         </Control>
                         <Backdrop name="$(parent)Search" tier="HIGH" inherits="ZO_SingleLineEditBackdrop_Keyboard">
                             <Anchor point="TOPLEFT" offsetX="9" offsetY="33"/>

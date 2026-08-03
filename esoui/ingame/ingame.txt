@@ -50,6 +50,7 @@ EsoUI\Ingame\Tooltip\GroupTooltips.lua
 EsoUI\Ingame\Tooltip\GuildKioskTooltips.lua
 EsoUI\Ingame\Tooltip\GuildTooltips.lua
 EsoUI\Ingame\Tooltip\HousingTooltips.lua
+EsoUI\Ingame\Tooltip\JournalTooltips.lua
 EsoUI\Ingame\Tooltip\MapTooltips.lua
 EsoUI\Ingame\Tooltip\NotificationsTooltips.lua
 EsoUI\Ingame\Tooltip\OutfitTooltips.lua
@@ -81,6 +82,11 @@ EsoUI\Ingame\Scenes\InteractScene.lua
 EsoUI\Ingame\Utility\ZO_SlotUtil.lua
 
 EsoUI\Ingame\DirectPurchase\DirectPurchase_Manager.lua
+
+EsoUI\Ingame\HUD\HUDManager.lua
+EsoUI\Ingame\HUD\HUDManager.xml
+EsoUI\Ingame\HUD\Keyboard\HUDEditor_Keyboard.lua
+EsoUI\Ingame\HUD\Keyboard\HUDEditor_Keyboard.xml
 
 EsoUI\Ingame\RzChroma\IngameRzChroma_Manager.lua
 EsoUI\Ingame\RzChroma\IngameRzChroma_Effects.lua
@@ -373,26 +379,31 @@ EsoUI\Ingame\Collections\CombinationPromptManager.lua
 EsoUI\Ingame\HUD\HUDTracker_Base.lua
 EsoUI\Ingame\HUD\HUDTracker_Base.xml
 
-EsoUI\Ingame\EndlessDungeon\EndlessDungeonHUDTracker.lua
+EsoUI\Ingame\HUD\HUDTracker_Manager.lua
+EsoUI\Ingame\HUD\HUDTracker_Manager.xml
+
 EsoUI\Ingame\EndlessDungeon\EndlessDungeonHUDTracker.xml
+EsoUI\Ingame\EndlessDungeon\EndlessDungeonHUDTracker.lua
 
-EsoUI\Ingame\AdventureZone\AdventureZoneHUDTracker.lua
 EsoUI\Ingame\AdventureZone\AdventureZoneHUDTracker.xml
+EsoUI\Ingame\AdventureZone\AdventureZoneHUDTracker.lua
 
-EsoUI\Ingame\DynamicEvents\DynamicEventsTracker.lua
+EsoUI\Ingame\GenericSelector\GenericSelectorHUDTracker.xml
+EsoUI\Ingame\GenericSelector\GenericSelectorHUDTracker.lua
+
 EsoUI\Ingame\DynamicEvents\DynamicEventsTracker.xml
+EsoUI\Ingame\DynamicEvents\DynamicEventsTracker.lua
 
 EsoUI\Ingame\ZO_Quest\QuestTimer.lua
 EsoUI\Ingame\ZO_Quest\QuestTimer.xml
-EsoUI\Ingame\ZO_Quest\QuestTracker.lua
 EsoUI\Ingame\ZO_Quest\QuestTracker.xml
-EsoUI\Ingame\ZoneStories\ZoneStoryTracker.lua
+EsoUI\Ingame\ZO_Quest\QuestTracker.lua
 EsoUI\Ingame\ZoneStories\ZoneStoryTracker.xml
-EsoUI\Ingame\LFG\ActivityTracker.lua
+EsoUI\Ingame\ZoneStories\ZoneStoryTracker.lua
 EsoUI\Ingame\LFG\ActivityTracker.xml
-EsoUI\Ingame\LFG\ReadyCheckTracker.lua
+EsoUI\Ingame\LFG\ActivityTracker.lua
 EsoUI\Ingame\LFG\ReadyCheckTracker.xml
-EsoUI\Ingame\HUD\HUDTracker_Manager.lua
+EsoUI\Ingame\LFG\ReadyCheckTracker.lua
 
 EsoUI\Ingame\ZO_Quest\RumorData.lua
 EsoUI\Ingame\ZO_Quest\RumorManager.lua
@@ -405,12 +416,15 @@ EsoUI\Ingame\ZO_Quest\Keyboard\QuestJournal_Rumors_Keyboard.lua
 EsoUI\Ingame\ZO_Quest\Keyboard\QuestJournal_Rumors_Keyboard.xml
 EsoUI\Ingame\ZO_Quest\Keyboard\QuestJournal_Keyboard.lua
 EsoUI\Ingame\ZO_Quest\Keyboard\QuestJournal_Keyboard.xml
+EsoUI\Ingame\ZO_Quest\Keyboard\RumorRewards_Keyboard.lua
+EsoUI\Ingame\ZO_Quest\Keyboard\RumorRewards_Keyboard.xml
 EsoUI\Ingame\ZO_Quest\Gamepad\QuestJournal_Quests_Gamepad.lua
 EsoUI\Ingame\ZO_Quest\Gamepad\QuestJournal_Quests_Gamepad.xml
 EsoUI\Ingame\ZO_Quest\Gamepad\QuestJournal_Rumors_Gamepad.lua
 EsoUI\Ingame\ZO_Quest\Gamepad\QuestJournal_Rumors_Gamepad.xml
 EsoUI\Ingame\ZO_Quest\Gamepad\QuestJournal_Gamepad.lua
 EsoUI\Ingame\ZO_Quest\Gamepad\QuestJournal_Gamepad.xml
+EsoUI\Ingame\ZO_Quest\Gamepad\RumorRewards_Gamepad.lua
 
 EsoUI\Ingame\Cadwell\Cadwell_Shared.lua
 EsoUI\Ingame\Cadwell\Keyboard\Cadwell.lua
@@ -763,6 +777,8 @@ EsoUI\Ingame\Achievements\Keyboard\Achievements.lua
 EsoUI\Ingame\Achievements\Keyboard\Achievements.xml
 EsoUI\Ingame\Achievements\Gamepad\Achievements_Gamepad.lua
 EsoUI\Ingame\Achievements\Gamepad\Achievements_Gamepad.xml
+EsoUI\Ingame\Achievements\AchievementTracker.xml
+EsoUI\Ingame\Achievements\AchievementTracker.lua
 
 EsoUI\Ingame\Map\WorldMapZoneStory_Shared.lua
 EsoUI\Ingame\Map\Keyboard\WorldMapZoneStory_Keyboard.lua
@@ -1479,8 +1495,8 @@ EsoUI\Ingame\HousingEditor\HousingFurnitureRetrieveTo_Shared.lua
 EsoUI\Ingame\HousingEditor\HousingFurnitureSettings_Base.lua
 EsoUI\Ingame\HousingEditor\HousingFurnitureBrowser_Base.lua
 EsoUI\Ingame\HousingEditor\HouseInformation_Shared.lua
-EsoUI\Ingame\HousingEditor\HouseInformationTracker.lua
 EsoUI\Ingame\HousingEditor\HouseInformationTracker.xml
+EsoUI\Ingame\HousingEditor\HouseInformationTracker.lua
 EsoUI\Ingame\HousingEditor\Keyboard\FurnitureClasses_Keyboard.lua
 EsoUI\Ingame\HousingEditor\Gamepad\FurnitureClasses_Gamepad.lua
 EsoUI\Ingame\HousingEditor\Gamepad\FurnitureClasses_Gamepad.xml
@@ -1650,14 +1666,14 @@ EsoUI\Ingame\ZoneStories\ZoneStory_AchievementTile.lua
 EsoUI\Ingame\ZoneStories\ZoneStory_AchievementTile.xml
 EsoUI\Ingame\ZoneStories\Keyboard\ZoneStory_AchievementTile_Keyboard.lua
 EsoUI\Ingame\ZoneStories\Keyboard\ZoneStory_AchievementTile_Keyboard.xml
-EsoUI\Ingame\ZoneStories\Keyboard\ZoneStory_TaskCompletionTile_Keyboard.lua
-EsoUI\Ingame\ZoneStories\Keyboard\ZoneStory_TaskCompletionTile_Keyboard.xml
+EsoUI\Ingame\ZoneStories\Keyboard\ZoneStory_ActivityCompletionTile_Keyboard.lua
+EsoUI\Ingame\ZoneStories\Keyboard\ZoneStory_ActivityCompletionTile_Keyboard.xml
 EsoUI\Ingame\ZoneStories\Keyboard\ZoneStories_Keyboard.lua
 EsoUI\Ingame\ZoneStories\Keyboard\ZoneStories_Keyboard.xml
 EsoUI\Ingame\ZoneStories\Gamepad\ZoneStory_AchievementTile_Gamepad.lua
 EsoUI\Ingame\ZoneStories\Gamepad\ZoneStory_AchievementTile_Gamepad.xml
-EsoUI\Ingame\ZoneStories\Gamepad\ZoneStory_TaskCompletionTile_Gamepad.lua
-EsoUI\Ingame\ZoneStories\Gamepad\ZoneStory_TaskCompletionTile_Gamepad.xml
+EsoUI\Ingame\ZoneStories\Gamepad\ZoneStory_ActivityCompletionTile_Gamepad.lua
+EsoUI\Ingame\ZoneStories\Gamepad\ZoneStory_ActivityCompletionTile_Gamepad.xml
 EsoUI\Ingame\ZoneStories\Gamepad\ZoneStories_Gamepad.lua
 EsoUI\Ingame\ZoneStories\Gamepad\ZoneStories_Gamepad.xml
 
@@ -1712,6 +1728,8 @@ EsoUI\Ingame\TimedActivities\Gamepad\TimedActivities_Gamepad.lua
 EsoUI\Ingame\TimedActivities\Gamepad\TimedActivities_Gamepad.xml
 EsoUI\Ingame\TimedActivities\Keyboard\TimedActivities_Keyboard.lua
 EsoUI\Ingame\TimedActivities\Keyboard\TimedActivities_Keyboard.xml
+EsoUI\Ingame\TimedActivities\TimedActivityTracker.xml
+EsoUI\Ingame\TimedActivities\TimedActivityTracker.lua
 
 EsoUI\Ingame\TamrielTomes\TamrielTomes_Manager.lua
 EsoUI\Ingame\TamrielTomes\TamrielTomesRewardTile_Shared.lua
@@ -1840,8 +1858,6 @@ EsoUI\Ingame\PromotionalEvents\Gamepad\PromotionalEventsList_Gamepad.lua
 EsoUI\Ingame\PromotionalEvents\Gamepad\PromotionalEventsList_Gamepad.xml
 EsoUI\Ingame\PromotionalEvents\Gamepad\PromotionalEvents_Gamepad.lua
 EsoUI\Ingame\PromotionalEvents\Gamepad\PromotionalEvents_Gamepad.xml
-EsoUI\Ingame\PromotionalEvents\PromotionalEventTracker.lua
-EsoUI\Ingame\PromotionalEvents\PromotionalEventTracker.xml
 
 EsoUI\Ingame\Vengeance\Vengeance_Manager.lua
 EsoUI\Ingame\Vengeance\Vengeance_Templates.lua
@@ -1870,6 +1886,23 @@ EsoUI\Ingame\Veterancy\Gamepad\Veterancy_Gamepad.xml
 
 EsoUI\Ingame\ChallengeDifficulty\Keyboard\ChallengeDifficulty_Keyboard.lua
 EsoUI\Ingame\ChallengeDifficulty\Keyboard\ChallengeDifficulty_Keyboard.xml
+
+EsoUI\Ingame\GenericSelector\GenericSelector_Shared.lua
+EsoUI\Ingame\GenericSelector\GenericSelector_Shared.xml
+EsoUI\Ingame\GenericSelector\Keyboard\GenericSelector_Keyboard.lua
+EsoUI\Ingame\GenericSelector\Keyboard\GenericSelector_Keyboard.xml
+EsoUI\Ingame\GenericSelector\Keyboard\GenericSelectorRewards_Keyboard.lua
+EsoUI\Ingame\GenericSelector\Keyboard\GenericSelectorRewards_Keyboard.xml
+EsoUI\Ingame\GenericSelector\Gamepad\GenericSelector_Gamepad.lua
+EsoUI\Ingame\GenericSelector\Gamepad\GenericSelector_Gamepad.xml
+EsoUI\Ingame\GenericSelector\GenericSelectorTooltips.lua
+
+EsoUI\Ingame\TrialProgression\TrialProgression_Shared.lua
+EsoUI\Ingame\TrialProgression\Keyboard\TrialProgression_Keyboard.lua
+EsoUI\Ingame\TrialProgression\Keyboard\TrialProgression_Keyboard.xml
+EsoUI\Ingame\TrialProgression\Gamepad\TrialProgression_Gamepad.lua
+EsoUI\Ingame\TrialProgression\Gamepad\TrialProgression_Gamepad.xml
+EsoUI\Ingame\TrialProgression\Gamepad\TrialProgressionTooltips.lua
 
 EsoUI\Ingame\CenterScreenAnnounce\CenterScreenAnnounceHandlers.lua
 EsoUI\Ingame\CenterScreenAnnounce\CenterScreenAnnounce.lua

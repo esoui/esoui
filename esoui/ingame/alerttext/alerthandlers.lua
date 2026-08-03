@@ -437,8 +437,8 @@ local AlertHandlers =
         end
     end,
 
-    [EVENT_TRADE_INVITE_CONSIDERING] = function(inviterCharacterName, inviterDisplayName)
-        local name = ZO_GetPrimaryPlayerName(inviterDisplayName, inviterCharacterName)
+    [EVENT_TRADE_INVITE_CONSIDERING] = function(inviterCharacterName, inviterCrossplayDisplayName, inviterPlatformDisplayName)
+        local name = ZO_GetPrimaryPlayerName(inviterCrossplayDisplayName, inviterCharacterName, inviterPlatformDisplayName)
         return ALERT, zo_strformat(SI_TRADE_INVITE, name)
     end,
 
@@ -827,10 +827,9 @@ local AlertHandlers =
                 if descriptor == ZO_GROUP_ELECTION_DESCRIPTORS.READY_CHECK and resultType == GROUP_ELECTION_RESULT_ELECTION_LOST then
                     local unreadyUnitTags = { GetGroupElectionUnreadyUnitTags() }
                     local unreadyPlayers = {}
-                    local DO_NOT_USE_INTERNAL_FORMAT = false
                     for _, unitTag in pairs(unreadyUnitTags) do
                         if IsUnitOnline(unitTag) then
-                            table.insert(unreadyPlayers, ZO_GetPrimaryPlayerNameFromUnitTag(unitTag, DO_NOT_USE_INTERNAL_FORMAT))
+                            table.insert(unreadyPlayers, ZO_GetPrimaryPlayerNameFromUnitTag(unitTag))
                         end
                     end
                     local unreadyList = ZO_GenerateCommaSeparatedListWithAnd(unreadyPlayers)
@@ -876,23 +875,24 @@ local AlertHandlers =
         return ALERT, alertText, SOUNDS.GROUP_ELECTION_REQUESTED
     end,
 
-    [EVENT_DUEL_INVITE_FAILED] = function(reason, targetCharacterName, targetDisplayName)
-        local userFacingName = ZO_GetPrimaryPlayerNameWithSecondary(targetDisplayName, targetCharacterName)
-        if userFacingName then
-            return ERROR, zo_strformat(GetString("SI_DUELINVITEFAILREASON", reason), userFacingName), SOUNDS.GENERAL_ALERT_ERROR
-        else
-            return ERROR, GetString("SI_DUELINVITEFAILREASON", reason), SOUNDS.GENERAL_ALERT_ERROR
+    [EVENT_DUEL_INVITE_FAILED] = function(reason, targetCharacterName, targetCrossplayDisplayName, targetPlatformDisplayName)
+        -- not all failure reasons have a valid target, so only format the string if we have a valid target name to insert
+        if targetCrossplayDisplayName ~= "" then
+            local primaryDisplayName, secondaryDisplayName = ZO_GetPrimarySecondaryAndTertiaryPlayerNames(targetCrossplayDisplayName, targetCharacterName, targetPlatformDisplayName)
+            return ERROR, zo_strformat(GetString("SI_DUELINVITEFAILREASON", reason), primaryDisplayName, secondaryDisplayName), SOUNDS.GENERAL_ALERT_ERROR
         end
+
+        return ERROR, GetString("SI_DUELINVITEFAILREASON", reason), SOUNDS.GENERAL_ALERT_ERROR
     end,
 
-    [EVENT_DUEL_INVITE_RECEIVED] = function(inviterCharacterName, inviterDisplayName)
-        local userFacingName = ZO_GetPrimaryPlayerName(inviterDisplayName, inviterCharacterName)
-        return ALERT, zo_strformat(SI_DUEL_INVITE_RECEIVED, userFacingName)
+    [EVENT_DUEL_INVITE_RECEIVED] = function(inviterCharacterName, inviterCrossplayDisplayName, timeRemainingMs, inviterPlatformDisplayName)
+        local primaryDisplayName, secondaryDisplayName = ZO_GetPrimarySecondaryAndTertiaryPlayerNames(inviterCrossplayDisplayName, inviterCharacterName, inviterPlatformDisplayName)
+        return ALERT, zo_strformat(SI_DUEL_INVITE_RECEIVED, primaryDisplayName, secondaryDisplayName)
     end,
 
-    [EVENT_DUEL_INVITE_SENT] = function(inviteeCharacterName, inviteeDisplayName)
-        local userFacingName = ZO_GetPrimaryPlayerName(inviteeDisplayName, inviteeCharacterName)
-        return ALERT, zo_strformat(SI_DUEL_INVITE_SENT, userFacingName)
+    [EVENT_DUEL_INVITE_SENT] = function(inviteeCharacterName, inviteeCrossplayDisplayName, inviteePlatformDisplayName)
+        local primaryDisplayName, secondaryDisplayName = ZO_GetPrimarySecondaryAndTertiaryPlayerNames(inviteeCrossplayDisplayName, inviteeCharacterName, inviteePlatformDisplayName)
+        return ALERT, zo_strformat(SI_DUEL_INVITE_SENT, primaryDisplayName, secondaryDisplayName)
     end,
 
     [EVENT_DUEL_INVITE_ACCEPTED] = function()
@@ -1346,6 +1346,10 @@ local AlertHandlers =
         if result ~= TOMES_CHALLENGE_REROLL_RESULT_SUCCESS then
             return ALERT, GetString("SI_TAMRIELTOMECHALLENGEREROLLRESULT", result), SOUNDS.GENERAL_ALERT_ERROR
         end
+    end,
+
+    [EVENT_RUMOR_START_FAILED] = function(rumorId, reason)
+        return ALERT, GetString("SI_STARTRUMORFAILREASON", reason), SOUNDS.GENERAL_ALERT_ERROR
     end,
 }
 

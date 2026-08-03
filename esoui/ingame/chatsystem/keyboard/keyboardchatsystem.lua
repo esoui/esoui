@@ -271,6 +271,9 @@ function ZO_ChatSystem:InitializeSharedControlManagement(control)
     self.minBar.maxButton = self.minBar:GetNamedChild("Maximize")
     self.minBar.bgHighlight = self.minBar:GetNamedChild("BGHighlight")
     self.newChatFadeAnim = ZO_AlphaAnimation:New(self.minBar.bgHighlight)
+    local elementName = GetString(SI_HUD_EDITOR_KEYBOARD_CHAT_MIN_BAR)
+    HUD_MANAGER:RegisterKeyboardElement(self.minBar, elementName)
+    HUD_MANAGER:RegisterGamepadElement(self.minBar, elementName, { isValid = ZO_ChatSystem_ShouldUseKeyboardChatSystem })
 end
 
 function ZO_ChatSystem:TryNotificationAndMailBursts()

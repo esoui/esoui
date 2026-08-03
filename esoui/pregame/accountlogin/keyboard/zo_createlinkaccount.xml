@@ -61,7 +61,7 @@
                     <Controls>
                         <Control name="$(parent)ScrollChild" override="true">
                             <Controls>
-                                <Label name="$(parent)AccountNameLabel" inherits="ZO_LoginMenuEditLabel" text="SI_KEYBOARD_CREATEACCOUNT_ACCOUNT_NAME_LABEL">
+                                <Label name="$(parent)AccountNameLabel" inherits="ZO_LoginMenuEditLabel" text="SI_CREATEACCOUNT_ACCOUNT_NAME_LABEL">
                                     <Anchor point="TOPLEFT"/>
                                 </Label>
                                 <Backdrop name="$(parent)AccountNameEntry" inherits="ZO_SingleLineEditBackdrop_Keyboard" level="1">
@@ -87,7 +87,7 @@
                                         </EditBox>
                                     </Controls>
                                 </Backdrop>
-                                <Label name="$(parent)AccountNameDescription" inherits="ZO_LoginMenuInfoLabel" text="SI_KEYBOARD_CREATEACCOUNT_ACCOUNT_NAME_DESCRIPTION">
+                                <Label name="$(parent)AccountNameDescription" inherits="ZO_LoginMenuInfoLabel" text="SI_CREATEACCOUNT_ACCOUNT_NAME_DESCRIPTION">
                                     <Anchor point="TOPLEFT" relativeTo="$(parent)AccountNameEntry" relativePoint="BOTTOMLEFT" offsetY="10"/>
                                     <Anchor point="TOPRIGHT" relativeTo="$(parent)AccountNameEntry" relativePoint="BOTTOMRIGHT" offsetY="10"/>
                                 </Label>

@@ -31,7 +31,7 @@
             </OnInitialized>
             <Controls>
                 <Texture name="$(parent)Icon" override="true" hidden="true"/>
-                <Label name="$(parent)Title" override="true" font="ZoFontWinH3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" maxLineCount="1" wrapMode="ELLIPSIS" inherits="ZO_TooltipIfTruncatedLabel ZO_PropagateMouseOverBehavior ZO_PropagateMouseButtonBehavior">
+                <Label name="$(parent)Title" override="true" font="ZoFontWinH3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" maxLineCount="1" wrapMode="ELLIPSIS" inherits="ZO_TooltipIfTruncatedLabel ZO_PropagateMouseButtonBehavior">
                     <Anchor point="TOPLEFT" offsetX="16" offsetY="12"/>
                     <Anchor point="TOPRIGHT" offsetX="-16" offsetY="12"/>
                 </Label>

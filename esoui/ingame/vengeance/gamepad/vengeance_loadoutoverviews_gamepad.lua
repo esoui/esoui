@@ -37,7 +37,7 @@ end
 function ZO_Vengeance_EquippedLoadoutOverview_Gamepad:OnShowing()
     local loadoutData = ZO_VENGEANCE_MANAGER:GetEquippedLoadoutData()
     if loadoutData then
-        self.loadoutNameControl:SetText(loadoutData:GetName())
+        self.loadoutNameControl:SetText(loadoutData:GetFormattedName())
 
         self.skillBarRow1:AssignSkillsData(loadoutData:GetPrimaryActionBarData())
         self.skillBarRow2:AssignSkillsData(loadoutData:GetBackupActionBarData())
@@ -46,7 +46,7 @@ function ZO_Vengeance_EquippedLoadoutOverview_Gamepad:OnShowing()
             control.icon:SetPerkSlot(slot)
             control.icon:SetPerkData(loadoutData:GetPerkDataBySlot(slot))
 
-            control.name:SetText(loadoutData:GetPerkNameBySlot(slot))
+            control.name:SetText(loadoutData:GetFormattedPerkNameBySlot(slot))
         end
 
         self.loadoutData = loadoutData
@@ -60,7 +60,7 @@ function ZO_Vengeance_EquippedLoadoutOverview_Gamepad:GetNarrationText()
         ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_EQUIPPED_ITEM_HEADER)))
 
         -- Loadout Name
-        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.loadoutData:GetName()))
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.loadoutData:GetFormattedName()))
 
         -- Skill Hotbars
         ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_VENGEANCE_LOADOUT_SKILLS_CATEGORY)))
@@ -70,7 +70,7 @@ function ZO_Vengeance_EquippedLoadoutOverview_Gamepad:GetNarrationText()
         -- Perks
         ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_VENGEANCE_LOADOUT_PERKS_CATEGORY)))
         for slot, control in pairs(self.perkControls) do
-            local perkNarrationText = zo_strformat(SI_GAMEPAD_VENGEANCE_PERK_NARRATION_FORMATTER, ZO_VENGEANCE_MANAGER:GetPerkSlotName(slot), self.loadoutData:GetPerkNameBySlot(slot))
+            local perkNarrationText = zo_strformat(SI_GAMEPAD_VENGEANCE_PERK_NARRATION_FORMATTER, ZO_VENGEANCE_MANAGER:GetRawPerkSlotName(slot), self.loadoutData:GetRawPerkNameBySlot(slot))
             ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(perkNarrationText))
         end
     end
@@ -129,7 +129,7 @@ end
 function ZO_Vengeance_UnequippedLoadoutOverview_Gamepad:UpdateLoadout()
     local loadoutData = self.loadoutData
     if loadoutData then
-        self.loadoutNameControl:SetText(loadoutData:GetName())
+        self.loadoutNameControl:SetText(loadoutData:GetFormattedName())
 
         self.skillBarRow1:AssignSkillsData(loadoutData:GetPrimaryActionBarData())
         self.skillBarRow2:AssignSkillsData(loadoutData:GetBackupActionBarData())
@@ -179,7 +179,7 @@ function ZO_Vengeance_UnequippedLoadoutOverview_Gamepad:GetNarrationText()
     local narrations = {}
     if self.loadoutData then
         -- Loadout Name
-        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.loadoutData:GetName()))
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.loadoutData:GetFormattedName()))
 
         -- Skill Hotbars
         ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_VENGEANCE_LOADOUT_SKILLS_CATEGORY)))
@@ -189,7 +189,7 @@ function ZO_Vengeance_UnequippedLoadoutOverview_Gamepad:GetNarrationText()
         -- Perks
         ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_GAMEPAD_VENGEANCE_LOADOUT_PERKS_CATEGORY)))
         for slot, icon in pairs(self.perkIcons) do
-            local perkNarrationText = zo_strformat(SI_GAMEPAD_VENGEANCE_PERK_NARRATION_FORMATTER, ZO_VENGEANCE_MANAGER:GetPerkSlotName(slot), self.loadoutData:GetPerkNameBySlot(slot))
+            local perkNarrationText = zo_strformat(SI_GAMEPAD_VENGEANCE_PERK_NARRATION_FORMATTER, ZO_VENGEANCE_MANAGER:GetRawPerkSlotName(slot), self.loadoutData:GetRawPerkNameBySlot(slot))
             ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(perkNarrationText))
         end
 

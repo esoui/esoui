@@ -127,6 +127,16 @@ function GamepadChatContainer:GetChatFont()
     return ZoFontGamepadChat
 end
 
+function GamepadChatContainer:StartDraggingTab()
+    -- Not supported, managed through Customizable HUD
+    return
+end
+
+function GamepadChatContainer:StopDraggingTab()
+    -- Not supported, managed through Customizable HUD
+    return
+end
+
 --
 --[[ Chat System ]]--
 --
@@ -186,6 +196,16 @@ function ZO_GamepadChatSystem:Initialize(control)
         end
 
         control:SetHandler("OnUpdate", OnUpdate)
+
+        local DISPLAY_NAME = IsKeyboardUISupported() and GetString(SI_HUD_EDITOR_GAMEPAD_CHAT) or GetString(SI_HUD_EDITOR_CONSOLE_CHAT)
+        local CONFIG =
+        {
+            defaultAnchor = ZO_Anchor:New(ANCHOR_SETTINGS.point, nil, ANCHOR_SETTINGS.relPoint, ANCHOR_SETTINGS.x, ANCHOR_SETTINGS.y),
+            isValid = function(element)
+                return IsChatSystemAvailableForCurrentPlatform() and not ZO_ChatSystem_ShouldUseKeyboardChatSystem()
+            end,
+        }
+        self.hudElement = HUD_MANAGER:RegisterGamepadElement(self.control, DISPLAY_NAME, CONFIG)
     end
 
     self.UIModeInputEater =
@@ -211,6 +231,10 @@ end
 
 function ZO_GamepadChatSystem:InitializeSharedControlManagement(control)
     SharedChatSystem.InitializeSharedControlManagement(self, control, NewContainerHelper, "ZO_GamepadChatWindowTemplate", "ZO_ChatWindowTab_Gamepad")
+end
+
+function ZO_GamepadChatSystem:GetHUDElement()
+    return self.hudElement
 end
 
 function ZO_GamepadChatSystem:IsHUDEnabled()
@@ -333,6 +357,7 @@ function ZO_GamepadChatSystem:Maximize()
         self.isPinnedAndFaded = false
 
         CALLBACK_MANAGER:FireCallbacks("GamepadChatSystemActiveOnScreen")
+        CALLBACK_MANAGER:FireCallbacks("GamepadChatSystemStateChanged", self.isMinimized)
     end
 end
 
@@ -361,6 +386,7 @@ function ZO_GamepadChatSystem:Minimize()
         self.primaryContainer.windowContainer:SetHidden(true)
 
         self.isMinimized = true
+        CALLBACK_MANAGER:FireCallbacks("GamepadChatSystemStateChanged", self.isMinimized)
     end
 end
 

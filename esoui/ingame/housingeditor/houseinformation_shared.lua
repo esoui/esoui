@@ -170,6 +170,7 @@ function ZO_HouseInformation_Shared:UpdateHouseTourInformation()
         if IsHouseListed(currentHouseId) then
             -- The local player owns this house and it is listed in House Tours;
             -- fetch the lifetime recommendation count.
+            local USE_LOWERCASE_NUMBER_SUFFIXES = false
             recommendationCount = ZO_AbbreviateAndLocalizeNumber(GetNumHouseToursPlayerListingRecommendations(currentHouseId), NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES)
         end
     end

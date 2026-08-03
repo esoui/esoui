@@ -31,10 +31,6 @@ end
 function ZO_QuestJournal_Keyboard:InitializeModeBar()
     self.modeBar = self.control:GetNamedChild("ModeBar")
 
-    
-    self.modeBar:SetHidden(true)
-    
-
     self.tabs = ZO_SceneFragmentBar:New(self.modeBar)
 
     self.questsTab =

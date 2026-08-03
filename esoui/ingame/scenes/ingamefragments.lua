@@ -206,12 +206,19 @@ do
         return x, y
     end
     FRAME_TARGET_CRAFTING_FRAGMENT = ZO_NormalizedPointFragment:New(CalculateCraftingFramingTarget, SetFrameLocalPlayerTarget)
-    
+
     local function CalculateCraftingGamepadFramingTarget()
         local screenWidth, screenHeight = GuiRoot:GetDimensions()
         return .65 * screenWidth, .55 * screenHeight
     end
     FRAME_TARGET_CRAFTING_GAMEPAD_FRAGMENT = ZO_NormalizedPointFragment:New(CalculateCraftingGamepadFramingTarget, SetFrameLocalPlayerTarget)
+
+   local function CalculateCompanionFramingTarget()
+        local x = zo_lerp(ZO_SharedThinLeftPanelBackground:GetRight(), ZO_SharedRightBackground:GetLeft(), .45)
+        local y = zo_lerp(ZO_TopBarBackground:GetBottom(), ZO_KeybindStripMungeBackgroundTexture:GetTop(), .55)
+        return x, y
+    end
+    FRAME_TARGET_COMPANION_FRAGMENT = ZO_NormalizedPointFragment:New(CalculateCompanionFramingTarget, SetFrameLocalPlayerTarget)
 
     local function CalculateCenteredFramingTarget()
         local screenWidth, screenHeight = GuiRoot:GetDimensions()
@@ -1085,6 +1092,7 @@ HOUSING_EDITOR_HUD_PLACEMENT_MODE_ACTION_LAYER_FRAGMENT = ZO_ActionLayerFragment
 HOUSING_HUD_ACTION_LAYER_FRAGMENT = ZO_ActionLayerFragment:New(GetString(SI_KEYBINDINGS_LAYER_HUD_HOUSING))
 BATTLEGROUND_HUD_ACTION_LAYER_FRAGMENT = ZO_ActionLayerFragment:New("BattlegroundHud")
 BATTLEGROUND_SCOREBOARD_ACTION_LAYER_FRAGMENT = ZO_ActionLayerFragment:New("BattlegroundScoreboard")
+BATTLEGROUND_SCOREBOARD_BLOCKING_ACTION_LAYER_FRAGMENT = ZO_ActionLayerFragment:New("BattlegroundBlocking")
 SPECIAL_TOGGLE_HELP_ACTION_LAYER_FRAGMENT = ZO_ActionLayerFragment:New("SpecialToggleHelp")
 SCREEN_ADJUST_ACTION_LAYER_FRAGMENT = ZO_ActionLayerFragment:New("ScreenAdjustActions")
 PROMOTIONAL_EVENT_PERSONAL_CAMPAIGN_ANNOUNCEMENT_ACTION_LAYER_FRAGMENT = ZO_ActionLayerFragment:New("PromotionalEventPersonalCampaignAnnouncementInterceptLayer")
@@ -1097,14 +1105,6 @@ INTERACT_WINDOW_KEYBIND_INTERCEPT_LAYER_FRAGMENT:SetConditional(function()
 
 -- Preview Intercept Layer
 PREVIEW_KEYBIND_INTERCEPT_LAYER_FRAGMENT = ZO_ActionLayerFragment:New("PreviewInterceptLayer")
--- ESO-968627: Force the hide of the fragment while PlayerUnit still exists, the function
--- RemoveActionLayerByName called to hide this fragment is dependent on PlayerUnit existing
-EVENT_MANAGER:RegisterForEvent("PreviewKeybindInterceptLayer", EVENT_PLAYER_DEACTIVATED, function()
-    PREVIEW_KEYBIND_INTERCEPT_LAYER_FRAGMENT:SetHiddenForReason("ZoneChange", true)
-end)
-EVENT_MANAGER:RegisterForEvent("PreviewKeybindInterceptLayer", EVENT_PLAYER_ACTIVATED, function()
-    PREVIEW_KEYBIND_INTERCEPT_LAYER_FRAGMENT:SetHiddenForReason("ZoneChange", false)
-end)
 
 --Crafting window keybind intercept layer
 ZO_CraftingWindowKeybindInterceptLayerFragment = ZO_ActionLayerFragment:Subclass()

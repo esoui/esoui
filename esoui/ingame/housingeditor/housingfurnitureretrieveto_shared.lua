@@ -64,6 +64,10 @@ end
 function ZO_HousingFurnitureRetrieveToBag:GetNumUsedAndTotalSlots()
     local numUsedSlots = GetNumBagUsedSlots(self.bagId)
     local numSlots = GetBagUseableSize(self.bagId)
+    if self.bagId == BAG_BANK then
+        numUsedSlots = numUsedSlots + GetNumBagUsedSlots(BAG_SUBSCRIBER_BANK)
+        numSlots = numSlots + GetBagUseableSize(BAG_SUBSCRIBER_BANK)
+    end
     return numUsedSlots, numSlots
 end
 

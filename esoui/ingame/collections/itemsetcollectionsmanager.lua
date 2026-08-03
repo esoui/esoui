@@ -60,7 +60,7 @@ function ZO_ItemSetCollectionsManager:InitializeOptionsDialog()
     local apparelFilterTypesDropdownEntry = CreateEquipmentFilterTypesDropdownEntry(GetString(SI_ITEM_SETS_BOOK_APPAREL_TYPES_DROPDOWN_TEXT_DEFAULT), SI_ITEM_SETS_BOOK_APPAREL_TYPES_DROPDOWN_TEXT, apparelFilterTypesData)
     local weaponFilterTypesDropdownEntry = CreateEquipmentFilterTypesDropdownEntry(GetString(SI_ITEM_SETS_BOOK_WEAPON_TYPES_DROPDOWN_TEXT_DEFAULT), SI_ITEM_SETS_BOOK_WEAPON_TYPES_DROPDOWN_TEXT, weaponFilterTypesData)
 
-    function OnEquipmentFilterTypesChanged(equipmentFilterTypes)
+    local function OnEquipmentFilterTypesChanged(equipmentFilterTypes)
         apparelFilterTypesData:ClearAllSelections()
         weaponFilterTypesData:ClearAllSelections()
 

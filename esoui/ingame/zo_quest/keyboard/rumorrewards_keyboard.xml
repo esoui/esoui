@@ -1,0 +1,44 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_RumorRewards_Keyboard_RewardRow" inherits="ZO_ListEntry_BackdropAndHighlight_Template" mouseEnabled="true" virtual="true">
+            <Dimensions x="250" y="ZO_RUMOR_REWARDS_DIALOG_KEYBOARD_ROW_HEIGHT"/>
+            <OnMouseEnter>
+                ZO_RumorRewardsDialog_Keyboard.OnListMouseEnter(self)
+            </OnMouseEnter>
+            <OnMouseExit>
+                ZO_RumorRewardsDialog_Keyboard.OnListMouseExit(self)
+            </OnMouseExit>
+            <Controls>
+                <Texture name="$(parent)Icon">
+                    <Dimensions x="40" y="40"/>
+                    <Anchor point="CENTER" relativePoint="TOPLEFT" offsetX="47" offsetY="26"/>
+                    <Controls>
+                        <Label name="$(parent)StackCount" horizontalAlignment="RIGHT" verticalAlignment="BOTTOM" font="ZoFontGameOutline" inheritScale="false">
+                            <Anchor point="TOPLEFT" offsetX="-10" offsetY="1"/>
+                            <!-- Allow extra space for large stack counts like 898.8k -->
+                            <Anchor point="BOTTOMRIGHT" offsetX="2" offsetY="-1"/>
+                        </Label>
+                    </Controls>
+                </Texture>
+                <Label name="$(parent)Name" font="ZoFontGameShadow" maxLineCount="2" wrapMode="ELLIPSIS">
+                    <Anchor point="LEFT" offsetX="85"/>
+                    <Anchor point="RIGHT"/>
+                </Label>
+            </Controls>
+        </Control>
+        <TopLevelControl name="ZO_RumorRewards_Keyboard_TL" inherits="ZO_CustomDialogBase">
+            <OnInitialized>
+                ZO_RumorRewardsDialog_Keyboard.OnDialogInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)List" inherits="ZO_ScrollList">
+                    <Dimensions x="356" y="326"/>
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetY="20"/>
+                </Control>
+                <!-- Order matters for these buttons -->
+                <Control name="$(parent)CloseButton" inherits="ZO_CustomDialogButton"/>
+                <Control name="$(parent)ConfirmButton" inherits="ZO_CustomDialogButton"/>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

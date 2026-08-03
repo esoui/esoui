@@ -54,7 +54,7 @@ function ZO_Tooltip:LayoutPerkTooltip(perkData, slot)
         self:AddSection(perkSlotSection)
 
         local titleTextSection = self:AcquireSection(self:GetStyle("title"))
-        titleTextSection:AddLine(perkData:GetName())
+        titleTextSection:AddLine(perkData:GetFormattedName())
         self:AddSection(titleTextSection)
 
         local descriptionSection = self:AcquireSection(self:GetStyle("bodySection"))

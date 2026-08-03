@@ -32,6 +32,12 @@ ZO_HUD_DAEDRIC_ENERGY_METER_LAYER_SIZE = 128
 ZO_HUD_DAEDRIC_ENERGY_METER_HAMMER_SIZE = 128
 ZO_HUD_DAEDRIC_ENERGY_METER_HAMMER_CELLS = 16
 ZO_HUD_DAEDRIC_ENERGY_METER_HAMMER_RIGHT_COORD = (ZO_HUD_DAEDRIC_ENERGY_METER_HAMMER_SIZE * ZO_HUD_DAEDRIC_ENERGY_METER_HAMMER_CELLS) / 2048
+
+
+
+
+
+
 -- End dimensions
 
 local ENERGY_WARNING_THRESHOLD = .2
@@ -40,13 +46,7 @@ local ENERGY_WARNING_THRESHOLD = .2
 -- Base Weapon Animation --
 ---------------------------
 
-local ZO_HUDDaedricEnergyMeter_BaseAnimation = ZO_Object:Subclass()
-
-function ZO_HUDDaedricEnergyMeter_BaseAnimation:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
+ZO_HUDDaedricEnergyMeter_BaseAnimation = ZO_InitializingObject:Subclass()
 
 function ZO_HUDDaedricEnergyMeter_BaseAnimation:Initialize(weaponControl)
     -- Override me
@@ -76,21 +76,76 @@ end
 -- No Weapon Animation --
 ---------------------------
 
-local ZO_HUDDaedricEnergyMeter_NoAnimation = ZO_HUDDaedricEnergyMeter_BaseAnimation:Subclass()
+ZO_HUDDaedricEnergyMeter_NoAnimation = ZO_HUDDaedricEnergyMeter_BaseAnimation:Subclass()
 
-function ZO_HUDDaedricEnergyMeter_NoAnimation:New(...)
-    return ZO_HUDDaedricEnergyMeter_BaseAnimation.New(self, ...)
-end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ----------------
 -- Volendrung --
 ----------------
 
-local ZO_HUDDaedricEnergyMeter_VolendrungAnimation = ZO_HUDDaedricEnergyMeter_BaseAnimation:Subclass()
-
-function ZO_HUDDaedricEnergyMeter_VolendrungAnimation:New(...)
-    return ZO_HUDDaedricEnergyMeter_BaseAnimation.New(self, ...)
-end
+ZO_HUDDaedricEnergyMeter_VolendrungAnimation = ZO_HUDDaedricEnergyMeter_BaseAnimation:Subclass()
 
 function ZO_HUDDaedricEnergyMeter_VolendrungAnimation:Initialize(weaponControl)
     self.control = weaponControl
@@ -147,22 +202,17 @@ function ZO_HUDDaedricEnergyMeter_VolendrungAnimation:OnEnergyValueChanged(curre
     self.hammerIdleTexture:SetAlpha(alpha)
 end
 
+
 --------------------------
 -- Daedric Energy Meter --
 --------------------------
 
-local ZO_HUDDaedricEnergyMeter = ZO_CallbackObject:Subclass()
-
-function ZO_HUDDaedricEnergyMeter:New(...)
-    local object = ZO_CallbackObject.New(self)
-    object:Initialize(...)
-    return object
-end
+ZO_HUDDaedricEnergyMeter = ZO_InitializingCallbackObject:Subclass()
 
 function ZO_HUDDaedricEnergyMeter:Initialize(control)
     -- Initialize state
     self.hiddenReasons = ZO_HiddenReasons:New()
-    
+
     -- Set up controls
     self.control = control
     self.barControl = control:GetNamedChild("Bar")
@@ -178,20 +228,39 @@ function ZO_HUDDaedricEnergyMeter:Initialize(control)
     self.arrow = arrow
 
     -- Weapon animations
-    internalassert(DAEDRIC_ARTIFACT_VISUAL_TYPE_MAX_VALUE == 1, "Make new weapon animation for visual type")
+    internalassert(DAEDRIC_ARTIFACT_VISUAL_TYPE_MAX_VALUE == 3, "Make new weapon animation for visual type")
     self.animationsForArtifactVisualType =
     {
         [DAEDRIC_ARTIFACT_VISUAL_TYPE_NONE] = ZO_HUDDaedricEnergyMeter_NoAnimation:New(),
+
         [DAEDRIC_ARTIFACT_VISUAL_TYPE_VOLENDRUNG] = ZO_HUDDaedricEnergyMeter_VolendrungAnimation:New(control:GetNamedChild("WeaponVolendrung")),
+
+
+
+
+
+
     }
-    self.activeWeapon = self.animationsForArtifactVisualType[DAEDRIC_ARTIFACT_VISUAL_TYPE_NONE] 
+    self.activeWeapon = self.animationsForArtifactVisualType[DAEDRIC_ARTIFACT_VISUAL_TYPE_NONE]
+
+    local KEYBOARD_CONFIG =
+    {
+        defaultAnchor = ZO_Anchor:New(BOTTOMRIGHT),
+    }
+    local GAMEPAD_CONFIG =
+    {
+        defaultAnchor = ZO_Anchor:New(BOTTOMLEFT),
+    }
+    local DISPLAY_NAME = GetString(SI_HUD_EDITOR_DAEDRIC_ARTIFACT_METER)
+    self.keyboardHUDElement = HUD_MANAGER:RegisterKeyboardElement(control, DISPLAY_NAME, KEYBOARD_CONFIG)
+    self.gamepadHUDElement = HUD_MANAGER:RegisterGamepadElement(control, DISPLAY_NAME, GAMEPAD_CONFIG)
 
     -- Set up platform styles
     local ARROW_OFFSET_Y = 1
     local ARROW_END_X_PADDING = 3
     local ARROW_TEXTURE_WIDTH = 16
-    self.keyboardStyle = 
-    { 
+    self.keyboardStyle =
+    {
         template = "ZO_HUDDaedricEnergyMeter_KeyboardTemplate",
         arrowTemplate = "ZO_ArrowRegeneration_Keyboard_Template",
         setupArrowCallback = function(barControl, arrow)
@@ -203,9 +272,10 @@ function ZO_HUDDaedricEnergyMeter:Initialize(control)
             arrow.burstAnim:GetFirstAnimation():SetTranslateDeltas(-startOffsetX - ARROW_END_X_PADDING, 0)
             arrow:SetTextureCoords(0, 1, 0, 1)
         end,
+        hudElement = self.keyboardHUDElement,
     }
-    self.gamepadStyle = 
-    { 
+    self.gamepadStyle =
+    {
         template = "ZO_HUDDaedricEnergyMeter_GamepadTemplate",
         arrowTemplate = "ZO_ArrowRegeneration_Gamepad_Template",
         setupArrowCallback = function(barControl, arrow)
@@ -217,10 +287,12 @@ function ZO_HUDDaedricEnergyMeter:Initialize(control)
             arrow.burstAnim:GetFirstAnimation():SetTranslateDeltas(startOffsetX - ARROW_END_X_PADDING, 0)
             arrow:SetTextureCoords(1, 0, 0, 1)
         end,
+        hudElement = self.gamepadHUDElement,
     }
     local function ApplyPlatformStyle(styleTable)
         ApplyTemplateToControl(self.control, styleTable.template)
         ApplyTemplateToControl(self.arrow, styleTable.arrowTemplate)
+        styleTable.hudElement:RevertOffsetModifications()
 
         if self.arrow.burstAnim:IsPlaying() then
             self.arrow.burstAnim:PlayInstantlyToStart()

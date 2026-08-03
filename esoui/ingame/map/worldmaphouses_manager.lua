@@ -1,11 +1,5 @@
 -- Singleton shared data
-ZO_MapHousesData_Manager = ZO_Object:Subclass()
-
-function ZO_MapHousesData_Manager:New(...)
-    local singleton = ZO_Object.New(self)
-    singleton:Initialize(...)
-    return singleton
-end
+ZO_MapHousesData_Manager = ZO_InitializingObject:Subclass()
 
 function ZO_MapHousesData_Manager:Initialize()
     self.houseMapData = {}
@@ -13,11 +7,19 @@ end
 
 do
     local function HouseMapDataSort(lhs, rhs)
-        if lhs.unlocked == rhs.unlocked then
-            return lhs.houseName < rhs.houseName
-        else
+        if lhs.isPrimaryResidence ~= rhs.isPrimaryResidence then
+            return lhs.isPrimaryResidence
+        end
+
+        if lhs.isFavorite ~= rhs.isFavorite then
+            return lhs.isFavorite
+        end
+
+        if lhs.unlocked ~= rhs.unlocked then
             return lhs.unlocked
         end
+
+        return lhs.houseName < rhs.houseName
     end
 
     function ZO_MapHousesData_Manager:RefreshHouseList()
@@ -41,6 +43,8 @@ do
                             houseName = houseCollectibleData:GetFormattedName(),
                             foundInZoneName = houseCollectibleData:GetFormattedHouseLocation(),
                             unlocked = houseCollectibleData:IsUnlocked(),
+                            isFavorite = houseCollectibleData:IsFavorite(),
+                            isPrimaryResidence = houseCollectibleData:IsPrimaryResidence(),
                             mapIndex = mapIndex,
                             nodeIndex = nodeIndex,
                         }

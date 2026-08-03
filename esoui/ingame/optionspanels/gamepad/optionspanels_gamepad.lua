@@ -277,6 +277,24 @@ GAMEPAD_SETTINGS_DATA =
             settingId = GRAPHICS_SETTING_SHOW_ADDITIONAL_ALLY_EFFECTS,
             header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_GRAPHICS,
         },
+        {
+            panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_VFX_SELF_INTENSITY,
+            header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_GRAPHICS,
+        },
+        {
+            panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_VFX_FRIENDLY_INTENSITY,
+            header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_GRAPHICS,
+        },
+        {
+            panel = SETTING_PANEL_VIDEO,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_VFX_ENEMY_INTENSITY,
+            header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_GRAPHICS,
+        },
     },
     [SETTING_PANEL_CAMERA] =
     {
@@ -509,6 +527,11 @@ GAMEPAD_SETTINGS_DATA =
             panel = SETTING_PANEL_GAMEPLAY,
             system = SETTING_TYPE_COMBAT,
             settingId = COMBAT_SETTING_ALLOW_COMPANION_AUTO_ULTIMATE,
+        },
+        {
+            panel = SETTING_PANEL_GAMEPLAY,
+            system = SETTING_TYPE_COMBAT,
+            settingId = COMBAT_SETTING_DAMAGE_SHIELD_VISIBILITY,
         },
         {
             panel = SETTING_PANEL_GAMEPLAY,
@@ -949,7 +972,13 @@ GAMEPAD_SETTINGS_DATA =
         {
             panel = SETTING_PANEL_INTERFACE,
             system = SETTING_TYPE_UI,
-            settingId = UI_SETTING_PRIMARY_PLAYER_NAME_GAMEPAD,
+            settingId = UI_SETTING_PRIMARY_PLAYER_NAME_PC,
+            header = SI_INTERFACE_OPTIONS_HEADS_UP_DISPLAY,
+        },
+        {
+            panel = SETTING_PANEL_INTERFACE,
+            system = SETTING_TYPE_UI,
+            settingId = UI_SETTING_PRIMARY_PLAYER_NAME_CONSOLE,
             header = SI_INTERFACE_OPTIONS_HEADS_UP_DISPLAY,
         },
         {
@@ -1478,11 +1507,6 @@ GAMEPAD_SETTINGS_DATA =
             system = SETTING_TYPE_BUFFS,
             settingId = BUFFS_SETTING_ALL_ENABLED,
             header = SI_BUFFS_OPTIONS_SECTION_TITLE,
-        },
-        {
-            panel = SETTING_PANEL_COMBAT,
-            system = SETTING_TYPE_BUFFS,
-            settingId = BUFFS_SETTING_BUFFS_ENABLED,
         },
         {
             panel = SETTING_PANEL_COMBAT,

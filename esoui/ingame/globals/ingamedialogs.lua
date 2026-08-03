@@ -8,7 +8,11 @@ ESO_Dialogs["CHAT_TAB_REMOVE"] =
     {
         text = SI_CHAT_DIALOG_REMOVE_TAB,
     },
-
+    drawTier = function()
+        if SYSTEMS:IsShowing("hudEditor") then
+            return DT_HIGH
+        end
+    end,
     buttons =
     {
         [1] =
@@ -37,7 +41,11 @@ ESO_Dialogs["CHAT_TAB_RESET"] =
     {
         text = SI_CHAT_DIALOG_RESET_TAB,
     },
-
+    drawTier = function()
+        if SYSTEMS:IsShowing("hudEditor") then
+            return DT_HIGH
+        end
+    end,
     buttons =
     {
         [1] =
@@ -65,7 +73,11 @@ ESO_Dialogs["CHAT_RESET"] =
     {
         text = SI_CHAT_DIALOG_RESET_CHAT,
     },
-
+    drawTier = function()
+        if SYSTEMS:IsShowing("hudEditor") then
+            return DT_HIGH
+        end
+    end,
     buttons =
     {
         [1] =
@@ -1081,7 +1093,6 @@ ESO_Dialogs["FAST_TRAVEL_CONFIRM"] =
     {
         {
             text = SI_DIALOG_CONFIRM,
-            clickSound = SOUNDS.MAP_WAYSHRINE_TELEPORT,
             callback = function(dialog)
                 local data = dialog.data
                 data.confirmedFastTravel = true
@@ -1102,6 +1113,7 @@ ESO_Dialogs["FAST_TRAVEL_CONFIRM"] =
         -- appears, resulting in the dialog action layer not getting removed
         local data = dialog.data
         if data.confirmedFastTravel then
+            PlaySound(SOUNDS.MAP_WAYSHRINE_TELEPORT)
             FastTravelToNode(data.nodeIndex)
             SCENE_MANAGER:ShowBaseScene()
         end
@@ -1170,7 +1182,6 @@ ESO_Dialogs["RECALL_CONFIRM"] =
     {
         {
             text = SI_DIALOG_CONFIRM,
-            clickSound = SOUNDS.MAP_WAYSHRINE_TELEPORT,
             callback = function(dialog)
                 -- this call to FastTravelToNode will play a player animation before the jump occurs
                 -- so we don't need to defer the call until the dialog hides
@@ -1245,7 +1256,6 @@ ESO_Dialogs["TRAVEL_TO_HOUSE_CONFIRM"] =
     {
         {
             text = SI_DIALOG_CONFIRM,
-            clickSound = SOUNDS.MAP_WAYSHRINE_TELEPORT,
             callback = function(dialog)
                 -- RequestJumpToHouse will play a player animation before the jump occurs
                 -- so we don't need to defer the call until the dialog hides
@@ -5380,4 +5390,33 @@ ESO_Dialogs["TAMRIEL_TOME_PURCHASE_RESULT"] =
             text = SI_DIALOG_BACK,
         },
     },
+}
+
+ESO_Dialogs["HUD_EDITOR_RESET_ALL_POSITIONS_CONFIRMATION"] =
+{
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    title =
+    {
+        text = SI_HUD_EDITOR_INFO_BOX_RESET_ALL_TO_DEFAULT,
+    },
+    mainText = 
+    {
+        text = SI_HUD_EDITOR_INFO_BOX_RESET_ALL_TO_DEFAULT_CONFIRMATION_BODY,
+    },
+    drawTier = DT_HIGH,
+    buttons =
+    {
+        {
+            text = SI_DIALOG_CONFIRM,
+            callback =  function(dialog)
+                HUD_EDITOR_KEYBOARD:ResetAllToDefault()
+            end,
+        },
+        {
+            text = SI_DIALOG_CANCEL,
+        }
+    }
 }

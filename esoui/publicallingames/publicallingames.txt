@@ -44,6 +44,8 @@ EsoUI\PublicAllIngames\ItemPreview\Gamepad\ItemPreviewListHelper_Gamepad.lua
 EsoUI\PublicAllIngames\ItemPreview\Gamepad\ItemPreviewListHelper_Gamepad.xml
 
 EsoUI\PublicAllIngames\ItemPreview\PreviewScreen_Shared.lua
+EsoUI\PublicAllIngames\ItemPreview\Keyboard\PreviewScreen_Keyboard.lua
+EsoUI\PublicAllIngames\ItemPreview\Gamepad\PreviewScreen_Gamepad.lua
 
 EsoUI\PublicAllIngames\MarketCurrency\MarketCurrency_Shared.lua
 EsoUI\PublicAllIngames\MarketCurrency\Keyboard\MarketCurrency_Keyboard.lua

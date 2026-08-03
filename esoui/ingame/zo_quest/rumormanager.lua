@@ -22,10 +22,26 @@ function ZO_RumorManager:RegisterForEvents()
     end
 
     EVENT_MANAGER:RegisterForEvent("RumorManager", EVENT_RUMOR_UPDATED, OnSingleRumorUpdated)
+    EVENT_MANAGER:RegisterForEvent("RumorManager", EVENT_RUMOR_STARTED, OnSingleRumorUpdated)
+    EVENT_MANAGER:RegisterForEvent("RumorManager", EVENT_RUMOR_COMPLETED, OnSingleRumorUpdated)
 
     if EVENT_RUMOR_DATA_CHANGED then
         EVENT_MANAGER:RegisterForEvent("RumorManager", EVENT_RUMOR_DATA_CHANGED, function() self:RebuildRumors() end)
     end
+
+    function OnEndingInitiated(eventId, rumorId, rumorEnding)
+        local dialogData =
+        {
+            rumorId = rumorId,
+            rumorEnding = rumorEnding,
+        }
+        if IsInGamepadPreferredMode() then
+            ZO_Dialogs_ShowGamepadDialog("RUMOR_REWARDS_CLAIM_GAMEPAD", dialogData)
+        else
+            ZO_Dialogs_ShowDialog("RUMOR_REWARDS_CLAIM_KEYBOARD", dialogData)
+        end
+    end
+    EVENT_MANAGER:RegisterForEvent("RumorManager", EVENT_RUMOR_ENDING_INITIATED, OnEndingInitiated)
 end
 
 function ZO_RumorManager:RumorIterator(filterFunctions)
@@ -83,7 +99,6 @@ end
 function ZO_RumorManager:RefreshRumor(rumorId)
     local rumorData = self:GetRumorData(rumorId)
     if rumorData then
-        -- TODO Rumors: Refresh rumorData
         self:FireCallbacks("SingleRumorUpdated", rumorData)
     else
         internalassert(false, string.format("Invalid rumorId (%s)", tostring(rumorId) or "nil"))
@@ -91,9 +106,6 @@ function ZO_RumorManager:RefreshRumor(rumorId)
 end
 
 function ZO_RumorManager:RefreshAll()
-    for _, rumorData in self:RumorIterator() do
-        -- TODO Rumors: Refresh rumorData
-    end
     self:FireCallbacks("RumorsUpdated")
 end
 
@@ -107,6 +119,63 @@ function ZO_RumorManager:RebuildRumors()
     end
 
     self:FireCallbacks("RumorsUpdated")
+end
+
+function ZO_RumorManager:GetActiveRumorListForRumorType(rumorType)
+    local rumorList = {}
+
+    for index, rumorData in RUMOR_MANAGER:RumorTypeRumorIterator(rumorType, {ZO_RumorData.IsNotComplete}) do
+        table.insert(rumorList, rumorData)
+    end
+
+    local function RumorSortFunction(left, right)
+        -- Pending rumors first
+        local leftPending = left:IsPending()
+        local rightPending = right:IsPending()
+        if leftPending ~= rightPending then
+            return leftPending
+        end
+
+        -- If they're both pending, alphabetically sort
+        -- Rumors that aren't pending all have the same display name
+        if leftPending then
+            local leftDisplayName = left:GetDisplayName()
+            local rightDisplayName = right:GetDisplayName()
+            if leftDisplayName ~= rightDisplayName then
+                return leftDisplayName < rightDisplayName
+            end
+        end
+
+        -- fallback to the rumorId
+        return left:GetId() < right:GetId()
+    end
+
+    table.sort(rumorList, RumorSortFunction)
+
+    return rumorList
+end
+
+function ZO_RumorManager:GetCompletedRumorListForRumorType(rumorType)
+    local rumorList = {}
+
+    for index, rumorData in RUMOR_MANAGER:RumorTypeRumorIterator(rumorType, {ZO_RumorData.IsComplete}) do
+        table.insert(rumorList, rumorData)
+    end
+
+    local function RumorSortFunction(left, right)
+        local leftDisplayName = left:GetDisplayName()
+        local rightDisplayName = right:GetDisplayName()
+        if leftDisplayName ~= rightDisplayName then
+            return leftDisplayName < rightDisplayName
+        end
+
+        -- fallback to the rumorId
+        return left:GetId() < right:GetId()
+    end
+
+    table.sort(rumorList, RumorSortFunction)
+
+    return rumorList
 end
 
 function ZO_RumorManager:ConfirmAbandonRumor(rumorId)

@@ -14,6 +14,8 @@ function ZO_RetraitStation_Retrait_Gamepad:Initialize(control, interactScene)
         end
     end)
 
+    self.interactScene = interactScene
+
     self.sourceTooltip = self.control:GetNamedChild("SourceTooltip")
     self.sourceTooltip.tip:SetClearOnHidden(false)
     self.qualityBridge = self.control:GetNamedChild("QualityBridge")
@@ -53,7 +55,7 @@ function ZO_RetraitStation_Retrait_Gamepad:Initialize(control, interactScene)
     local narrationInfo =
     {
         canNarrate = function()
-            return self:IsShowing()
+            return self.interactScene:IsShowing()
         end,
         headerNarrationFunction = function()
             return ZO_GamepadGenericHeader_GetNarrationText(self.header, self.headerData)
@@ -96,7 +98,7 @@ function ZO_RetraitStation_Retrait_Gamepad:InitializeTraitList()
     local narrationInfo =
     {
         canNarrate = function()
-            return self:IsShowing()
+            return self.interactScene:IsShowing()
         end,
     }
     SCREEN_NARRATION_MANAGER:RegisterParametricList(self.traitList, narrationInfo)
@@ -484,7 +486,7 @@ function ZO_RetraitStation_Retrait_Gamepad:PerformRetrait()
 end
 
 function ZO_RetraitStation_Retrait_Gamepad:OnRetraitAnimationsStopped(result)
-    if self:IsShowing() then
+    if self.interactScene:IsShowing() then
         self:SetTraitListActive(false)
         self:SetInventoryActive(true)
 
@@ -494,6 +496,11 @@ function ZO_RetraitStation_Retrait_Gamepad:OnRetraitAnimationsStopped(result)
         ZO_GamepadGenericHeader_Activate(self.header)
         self:ShowRetraitResult(false)
     end
+
+    -- ESO-958157: Forces sourceTooltip back to full alpha in the event the selection changed while the animation was fading out.
+    self.sourceTooltip:SetAlpha(1)
+    self.qualityBridge:SetAlpha(1)
+    self.resultTooltip:SetAlpha(1)
 end
 
 do

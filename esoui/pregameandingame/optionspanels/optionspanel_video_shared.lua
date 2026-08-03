@@ -940,6 +940,39 @@ local ZO_OptionsPanel_Video_ControlData =
             tooltipText = SI_GRAPHICS_OPTIONS_VIDEO_SHOW_ADDITIONAL_ALLY_EFFECTS_TOOLTIP,
             exists = ZO_IsPCUI,
         },
+        [GRAPHICS_SETTING_VFX_SELF_INTENSITY] =
+        {
+            controlType = OPTIONS_FINITE_LIST,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_VFX_SELF_INTENSITY,
+            panel = SETTING_PANEL_VIDEO,
+            text = SI_GRAPHICS_OPTIONS_VIDEO_VFX_SELF_INTENSITY,
+            tooltipText = SI_GRAPHICS_OPTIONS_VIDEO_VFX_SELF_INTENSITY_TOOLTIP,
+            valid = { VFX_INTENSITY_VALUE_NORMAL, VFX_INTENSITY_VALUE_LOW, VFX_INTENSITY_VALUE_MINIMAL},
+            valueStringPrefix = "SI_VFXINTENSITYVALUE",
+        },
+        [GRAPHICS_SETTING_VFX_FRIENDLY_INTENSITY] =
+        {
+            controlType = OPTIONS_FINITE_LIST,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_VFX_FRIENDLY_INTENSITY,
+            panel = SETTING_PANEL_VIDEO,
+            text = SI_GRAPHICS_OPTIONS_VIDEO_VFX_FRIENDLY_INTENSITY,
+            tooltipText = SI_GRAPHICS_OPTIONS_VIDEO_VFX_FRIENDLY_INTENSITY_TOOLTIP,
+            valid = { VFX_INTENSITY_VALUE_NORMAL, VFX_INTENSITY_VALUE_LOW, VFX_INTENSITY_VALUE_MINIMAL},
+            valueStringPrefix = "SI_VFXINTENSITYVALUE",
+        },
+        [GRAPHICS_SETTING_VFX_ENEMY_INTENSITY] =
+        {
+            controlType = OPTIONS_FINITE_LIST,
+            system = SETTING_TYPE_GRAPHICS,
+            settingId = GRAPHICS_SETTING_VFX_ENEMY_INTENSITY,
+            panel = SETTING_PANEL_VIDEO,
+            text = SI_GRAPHICS_OPTIONS_VIDEO_VFX_ENEMY_INTENSITY,
+            tooltipText = SI_GRAPHICS_OPTIONS_VIDEO_VFX_ENEMY_INTENSITY_TOOLTIP,
+            valid = { VFX_INTENSITY_VALUE_NORMAL, VFX_INTENSITY_VALUE_LOW, VFX_INTENSITY_VALUE_MINIMAL},
+            valueStringPrefix = "SI_VFXINTENSITYVALUE",
+        },
     },
 
     --UI Settings

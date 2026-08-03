@@ -34,6 +34,22 @@ local function AddControlsEntries(entryTable)
     table.insert(entryTable, keybindingsData)
 end
 
+-- Edit HUD
+
+local function ShowEditHUD()
+    SCENE_MANAGER:Show("hud_editor_keyboard")
+end
+
+local function AddEditHUDEntry(entryTable)
+    local editHudData =
+    {
+        name = GetString(SI_GAME_MENU_EDIT_HUD),
+        callback = ShowEditHUD,
+    }
+
+    table.insert(entryTable, editHudData)
+end
+
 -- Addons
 
 local function ShowAddons()
@@ -115,6 +131,7 @@ local function RebuildTree(gameMenu)
     AddResumeEntry(g_gameEntries)
     AddSettingsEntries(g_gameEntries)
     AddControlsEntries(g_gameEntries)
+    AddEditHUDEntry(g_gameEntries)
     AddAddonsEntry(g_gameEntries)
     AddAnnouncementsEntry(g_gameEntries)
     AddLogoutEntry(g_gameEntries)

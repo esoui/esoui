@@ -2,8 +2,11 @@
 -- Zone Stories Manager --
 --------------------------
 
-ZO_ZONE_STORY_ACTIVITY_COMPLETION_TYPES_SORTED_LIST = 
+ZO_ZONE_STORY_ACTIVITY_COMPLETION_TYPES_SORTED_LIST =
 {
+
+
+
     ZONE_COMPLETION_TYPE_PRIORITY_QUESTS,
     ZONE_COMPLETION_TYPE_WAYSHRINES,
     ZONE_COMPLETION_TYPE_DELVES,
@@ -24,6 +27,10 @@ ZO_ZONE_STORY_NON_TRACKABLE_TYPES =
     [ZONE_COMPLETION_TYPE_NONE] = true,
     [ZONE_COMPLETION_TYPE_FEATURED_ACHIEVEMENTS] = true,
     [ZONE_COMPLETION_TYPE_MAGES_GUILD_BOOKS] = true,
+
+
+
+
 }
 
 ZO_ZoneStories_Manager = ZO_InitializingCallbackObject:Subclass()
@@ -73,6 +80,8 @@ function ZO_ZoneStories_Manager.SetTrackedZoneStoryAssisted(assisted)
     if IsZoneStoryTracked() and IsZoneStoryAssisted() ~= assisted then
         SetTrackedZoneStoryAssisted(assisted)
         HUD_TRACKER_MANAGER:UpdateVisibility()
+        ZONE_STORY_TRACKER:UpdateAssistedKeybind()
+        FOCUSED_QUEST_TRACKER:AdjustHUDElementHeight()
     end
 end
 
@@ -134,7 +143,7 @@ do
             disabledMenuIcon = "EsoUI/Art/LFG/Gamepad/LFG_menuIcon_zoneStories_disabled.dds",
             sceneName = "zoneStoriesGamepad",
             tooltipDescription = GetString(SI_GAMEPAD_ACTIVITY_FINDER_TOOLTIP_ZONE_STORIES),
-            isLocked = function() 
+            isLocked = function()
                 return ZONE_STORIES_MANAGER:GetZoneData(ZONE_STORIES_MANAGER.GetDefaultZoneSelection()) == nil
             end,
             lockedText = GetString(SI_ZONE_STORY_TOOLTIP_UNAVAILABLE_IN_ZONE),
@@ -149,21 +158,21 @@ do
     end
 end
 
-function ZO_ZoneStories_Manager.GetActivityCompletionProgressValues(zoneId, completionType)
+function ZO_ZoneStories_Manager.GetActivityCompletionProgressValues(zoneId, completionType, completionIndex)
     local numCompletedActivities = 0
     local totalActivities = 0
     local numUnblockedActivities = 0
     local blockingBranchErrorStringId = 0
-    
-    numCompletedActivities = GetNumCompletedZoneActivitiesForZoneCompletionType(zoneId, completionType)
-    totalActivities = GetNumZoneActivitiesForZoneCompletionType(zoneId, completionType)
-    numUnblockedActivities, blockingBranchErrorStringId = GetNumUnblockedZoneStoryActivitiesForZoneCompletionType(zoneId, completionType)
+
+    numCompletedActivities = GetNumCompletedZoneActivitiesForZoneCompletionTypeAndIndex(zoneId, completionType, completionIndex)
+    totalActivities = GetNumZoneActivitiesForZoneCompletionTypeAndIndex(zoneId, completionType, completionIndex)
+    numUnblockedActivities, blockingBranchErrorStringId = GetNumUnblockedZoneStoryActivitiesForZoneCompletionTypeAndIndex(zoneId, completionType, completionIndex)
 
     return numCompletedActivities, totalActivities, numUnblockedActivities, blockingBranchErrorStringId
 end
 
-function ZO_ZoneStories_Manager.GetActivityCompletionProgressValuesAndText(zoneId, completionType)
-    local numCompletedActivities, totalActivities, numUnblockedActivities, blockingBranchErrorStringId = ZO_ZoneStories_Manager.GetActivityCompletionProgressValues(zoneId, completionType)
+function ZO_ZoneStories_Manager.GetActivityCompletionProgressValuesAndText(zoneId, completionType, completionIndex)
+    local numCompletedActivities, totalActivities, numUnblockedActivities, blockingBranchErrorStringId = ZO_ZoneStories_Manager.GetActivityCompletionProgressValues(zoneId, completionType, completionIndex)
     local text = nil
     if DoesZoneCompletionTypeInZoneHaveBranchesWithDifferentLengths(zoneId, completionType) then
         text = zo_strformat(SI_ZONE_STORY_ACTIVITY_COMPLETION_VALUES_TOTAL_PLUS, numCompletedActivities, totalActivities)
@@ -173,8 +182,8 @@ function ZO_ZoneStories_Manager.GetActivityCompletionProgressValuesAndText(zoneI
     return numCompletedActivities, totalActivities, numUnblockedActivities, blockingBranchErrorStringId, text
 end
 
-function ZO_ZoneStories_Manager.GetActivityCompletionProgressText(zoneId, completionType)
-    return select(5, ZO_ZoneStories_Manager.GetActivityCompletionProgressValuesAndText(zoneId, completionType))
+function ZO_ZoneStories_Manager.GetActivityCompletionProgressText(zoneId, completionType, completionIndex)
+    return select(5, ZO_ZoneStories_Manager.GetActivityCompletionProgressValuesAndText(zoneId, completionType, completionIndex))
 end
 
 function ZO_ZoneStories_Manager.CanTrackCompletionType(completionType)
@@ -185,8 +194,8 @@ function ZO_ZoneStories_Manager.IsZoneComplete(zoneId)
     return IsZoneStoryComplete(zoneId)
 end
 
-function ZO_ZoneStories_Manager.IsZoneCompletionTypeComplete(zoneId, completionType)
-    return AreAllZoneStoryActivitiesCompleteForZoneCompletionType(zoneId, completionType)
+function ZO_ZoneStories_Manager.IsZoneCompletionTypeComplete(zoneId, completionType, completionIndex)
+    return AreAllZoneStoryActivitiesCompleteForZoneCompletionTypeAndIndex(zoneId, completionType, completionIndex)
 end
 
 function ZO_ZoneStories_Manager.GetZoneAvailability(zoneId)
@@ -194,13 +203,13 @@ function ZO_ZoneStories_Manager.GetZoneAvailability(zoneId)
     return isZoneAvailable, errorString
 end
 
-function ZO_ZoneStories_Manager.GetZoneCompletionTypeBlockingInfo(zoneId, completionType)
+function ZO_ZoneStories_Manager.GetZoneCompletionTypeBlockingInfo(zoneId, completionType, completionIndex)
     local blockingErrorStringText = nil
 
     local isCompletionTypeBlocked = not ZO_ZoneStories_Manager.IsZoneCompletionTypeComplete(zoneId, completionType)
                                     and not CanZoneStoryContinueTrackingActivitiesForCompletionType(zoneId, completionType)
     if isCompletionTypeBlocked then
-        local numUnblockedActivities, blockingBranchErrorStringId = GetNumUnblockedZoneStoryActivitiesForZoneCompletionType(zoneId, completionType)
+        local numUnblockedActivities, blockingBranchErrorStringId = GetNumUnblockedZoneStoryActivitiesForZoneCompletionTypeAndIndex(zoneId, completionType, completionIndex)
         if blockingBranchErrorStringId ~= 0 then
             blockingErrorStringText = GetErrorString(blockingBranchErrorStringId)
         end
@@ -227,8 +236,12 @@ do
         [ZONE_COMPLETION_TYPE_SET_STATIONS] = "EsoUI/Art/ZoneStories/completionTypeIcon_setStation.dds",
     }
 
-    function ZO_ZoneStories_Manager.GetCompletionTypeIcon(zoneCompletionType)
-        return ZONE_COMPLETION_TYPE_ICON_MAP[zoneCompletionType]
+    function ZO_ZoneStories_Manager.GetCompletionTypeIcon(zoneCompletionType, completionIndex)
+        if completionIndex then
+            return GetZoneStoryActivityIconForCompletionTypeAndIndex(zoneCompletionType, completionIndex)
+        else
+            return ZONE_COMPLETION_TYPE_ICON_MAP[zoneCompletionType]
+        end
     end
 end
 

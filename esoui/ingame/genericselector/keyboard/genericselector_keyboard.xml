@@ -1,0 +1,33 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_GenericSelectorEmptyItem_Keyboard" virtual="true"/>
+        <Control name="ZO_GenericSelectorItem_Keyboard" inherits="ZO_GenericSelectorItem_Shared" virtual="true">
+            <Dimensions x="ZO_GENERIC_SELECTOR_ITEM_GRID_ENTRY_DIMENSIONS_KEYBOARD_X" y="ZO_GENERIC_SELECTOR_ITEM_GRID_ENTRY_DIMENSIONS_KEYBOARD_Y"/>
+            <OnMouseDoubleClick>
+                self.owner:OnGridEntryDoubleClick(self)
+            </OnMouseDoubleClick>
+            <OnMouseEnter>
+                self.owner:OnGridEntryMouseEnter(self)
+            </OnMouseEnter>
+            <OnMouseExit>
+                self.owner:OnGridEntryMouseExit(self)
+            </OnMouseExit>
+            <Controls>
+                <Label name="$(parent)Name" override="true" font="ZoFontWinH2"/>
+            </Controls>
+        </Control>
+        <TopLevelControl name="ZO_GenericSelector_KeyboardTL" inherits="ZO_GenericSelector_SharedTL">
+            <OnInitialized>
+                ZO_GenericSelector_Keyboard.OnControlInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Backdrop name="$(parent)BG" override="true" inherits="ZO_DefaultBackdrop"/>
+                <Label name="$(parent)Title" override="true" font="ZoFontWinH1"/>
+                <Control name="$(parent)List" override="true" inherits="ZO_GridScrollList_CenteredResize_Keyboard">
+                    <Anchor point="TOP" relativeTo="$(parent)Title" relativePoint="BOTTOM" offsetX="ZO_GENERIC_SELECTOR_GRID_LIST_OFFSET_X" offsetY="ZO_GENERIC_SELECTOR_GRID_LIST_OFFSET_Y"/>
+                    <DimensionConstraints minX="50" minY="23" maxX="ZO_GENERIC_SELECTOR_GRID_LIST_MAX_WIDTH_KEYBOARD" maxY="500"/>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

@@ -43,54 +43,23 @@ function ZO_EndlessDungeonHUDTracker:DeferredInitialize(...)
     ZO_HUDTracker_Base.DeferredInitialize(self, ...)
 end
 
-function ZO_EndlessDungeonHUDTracker:InitializeStyles()
-    self.styles =
-    {
-        keyboard =
-        {
-            CONTAINER_PRIMARY_ANCHOR = ZO_Anchor:New(TOPLEFT),
-            CONTAINER_SECONDARY_ANCHOR = ZO_Anchor:New(TOPRIGHT),
-            FONT_HEADER = "ZoFontGameShadow",
-            FONT_SUBLABEL = "ZoFontGameShadow",
-            RESIZE_TO_FIT_PADDING_HEIGHT = 30,
-            KEYBIND_ANCHOR = ZO_Anchor:New(TOPRIGHT, self.headerLabel, TOPLEFT, 0, -7),
-            KEYBIND_BUTTON_TEMPLATE = "ZO_KeybindButton_Keyboard_Template",
-            TEXT_HORIZONTAL_ALIGNMENT = TEXT_ALIGN_LEFT,
-            TOP_LEVEL_PRIMARY_ANCHOR = ZO_Anchor:New(TOPLEFT, GuiRoot, TOPRIGHT, -230, 90),
-            TOP_LEVEL_SECONDARY_ANCHOR = ZO_Anchor:New(TOPRIGHT, GuiRoot, nil, 0, 90),
-        },
-        gamepad =
-        {
-            CONTAINER_PRIMARY_ANCHOR = ZO_Anchor:New(TOPLEFT),
-            CONTAINER_SECONDARY_ANCHOR = ZO_Anchor:New(TOPRIGHT, nil, nil, -15, 0),
-            FONT_HEADER = "ZoFontGamepadBold27",
-            FONT_SUBLABEL = "ZoFontGamepad34",
-            RESIZE_TO_FIT_PADDING_HEIGHT = 50,
-            KEYBIND_ANCHOR = ZO_Anchor:New(RIGHT, self.headerLabel, LEFT, -5, 5),
-            KEYBIND_BUTTON_TEMPLATE = "ZO_KeybindButton_Gamepad_Template",
-            TEXT_HORIZONTAL_ALIGNMENT = TEXT_ALIGN_RIGHT,
-            TOP_LEVEL_PRIMARY_ANCHOR = ZO_Anchor:New(TOPLEFT, GuiRoot, TOPRIGHT, -275, 0),
-            TOP_LEVEL_SECONDARY_ANCHOR = ZO_Anchor:New(TOPRIGHT, GuiRoot, nil, 0, 100),
-        },
-    }
+do
+    local DISPLAY_NAME = GetString(SI_ENDLESS_DUNGEON_HUD_TRACKER_TITLE)
 
-    ZO_HUDTracker_Base.InitializeStyles(self)
+    function ZO_EndlessDungeonHUDTracker:GetHUDElementInfo()
+        return DISPLAY_NAME
+    end
+
+    function ZO_EndlessDungeonHUDTracker:GetHUDElementOptionKeys()
+        local KEY = "Infinite"
+        return KEY, DISPLAY_NAME
+    end
 end
 
 function ZO_EndlessDungeonHUDTracker:ApplyPlatformStyle(style)
     ZO_HUDTracker_Base.ApplyPlatformStyle(self, style)
 
-    self.showBuffTrackerKeybindButton:ClearAnchors()
-    style.KEYBIND_ANCHOR:AddToControl(self.showBuffTrackerKeybindButton)
-    ApplyTemplateToControl(self.showBuffTrackerKeybindButton, style.KEYBIND_BUTTON_TEMPLATE)
-end
-
-function ZO_EndlessDungeonHUDTracker:GetPrimaryAnchor()
-    return self.currentStyle.TOP_LEVEL_PRIMARY_ANCHOR
-end
-
-function ZO_EndlessDungeonHUDTracker:GetSecondaryAnchor()
-    return self.currentStyle.TOP_LEVEL_SECONDARY_ANCHOR
+    ApplyTemplateToControl(self.showBuffTrackerKeybindButton, ZO_GetPlatformTemplate("ZO_KeybindButton"))
 end
 
 function ZO_EndlessDungeonHUDTracker:OnDungeonStateChanged(newState, oldState)
@@ -98,10 +67,14 @@ function ZO_EndlessDungeonHUDTracker:OnDungeonStateChanged(newState, oldState)
 end
 
 function ZO_EndlessDungeonHUDTracker:OnHiding()
+    ZO_HUDTracker_Base.OnHiding(self)
+
     KEYBIND_STRIP:RemoveKeybindButton(self.showBuffTrackerKeybindDescriptor)
 end
 
 function ZO_EndlessDungeonHUDTracker:OnShown()
+    ZO_HUDTracker_Base.OnShown(self)
+
     KEYBIND_STRIP:AddKeybindButton(self.showBuffTrackerKeybindDescriptor)
     self:RefreshAnchors()
 end
@@ -116,7 +89,8 @@ end
 function ZO_EndlessDungeonHUDTracker:Update()
     local hidden = not ENDLESS_DUNGEON_MANAGER:IsEndlessDungeonStarted()
     self:GetFragment():SetHiddenForReason("InactiveDungeon", hidden, DEFAULT_HUD_DURATION, DEFAULT_HUD_DURATION)
-    return true
+
+    ZO_HUDTracker_Base.Update(self)
 end
 
 function ZO_EndlessDungeonHUDTracker:UpdateProgress()
@@ -128,6 +102,12 @@ function ZO_EndlessDungeonHUDTracker:UpdateProgress()
     end
 end
 
+function ZO_EndlessDungeonHUDTracker:GetPriority()
+    return ZO_HUD_TRACKER_PRIORITY.ENDLESS_DUNGEON
+end
+
 function ZO_EndlessDungeonHUDTracker.OnInitialized(control)
     ENDLESS_DUNGEON_HUD_TRACKER = ZO_EndlessDungeonHUDTracker:New(control)
 end
+
+HUD_TRACKER_MANAGER:RegisterTracker("ZO_EndDunHUDTracker_Template", "ZO_EndDunHUDTracker")

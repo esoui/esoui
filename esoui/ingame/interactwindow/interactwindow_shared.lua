@@ -655,7 +655,7 @@ local function SetupAdventureZoneFactionPointsReward(control, name, icon)
     control:SetHidden(false)
 end
 
-internalassert(REWARD_TYPE_MAX_VALUE == 17, "Check if new RewardType needs REWARD_CREATORS")
+internalassert(REWARD_TYPE_MAX_VALUE == 18, "Check if new RewardType needs REWARD_CREATORS")
 local REWARD_CREATORS =
 {
     [REWARD_TYPE_AUTO_ITEM] =
@@ -728,6 +728,10 @@ local REWARD_CREATORS =
     [REWARD_TYPE_ADVENTURE_ZONE_FACTION_POINTS] =
         function(control, name, amount, icon)
             SetupAdventureZoneFactionPointsReward(control, name, icon)
+        end,
+    [REWARD_TYPE_UNDAUNTED_CRESTS] =
+        function(control, name, amount, icon)
+            SetupCurrencyReward(control, CURT_UNDAUNTED_CRESTS, amount, currencyOptions)
         end,
 }
 

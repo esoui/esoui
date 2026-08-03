@@ -2,13 +2,7 @@
 -- ZO_Subtitle
 ----
 
-local ZO_Subtitle = ZO_Object:Subclass()
-
-function ZO_Subtitle:New(...)
-    local subtitle = ZO_Object.New(self)
-    subtitle:Initialize(...)
-    return subtitle
-end
+local ZO_Subtitle = ZO_InitializingObject:Subclass()
 
 do
     local CHARACTERS_PER_SECOND_DEFAULT = 10
@@ -76,13 +70,7 @@ end
 -- ZO_SubtitleManager
 ----
 
-ZO_SubtitleManager = ZO_Object:Subclass()
-
-function ZO_SubtitleManager:New(...)
-    local manager = ZO_Object.New(self)
-    manager:Initialize(...)
-    return manager
-end
+ZO_SubtitleManager = ZO_InitializingObject:Subclass()
 
 function ZO_SubtitleManager:Initialize(control)
     SUBTITLE_HUD_FRAGMENT = ZO_HUDFadeSceneFragment:New(control)
@@ -97,27 +85,57 @@ function ZO_SubtitleManager:Initialize(control)
 
     self.control:RegisterForEvent(EVENT_SHOW_SUBTITLE, function(event, ...) self:OnShowSubtitle(...) end)
     EVENT_MANAGER:RegisterForUpdate("ZO_SubtitleManager", 1000, function(...) self:OnUpdate(...) end)
+
+    local SUBTITLE_OPTIONS =
+    {
+        {
+            type = ZO_HUD_EDITOR_OPTION_TYPES.BOOLEAN,
+            name = GetString(SI_HUD_EDITOR_CUSTOM_OPTION_VISIBLE),
+            tooltipText = GetString(SI_AUDIO_OPTIONS_NPC_SUBTITLES_ENABLED_TOOLTIP),
+            key = "Visible",
+            defaultValue = function()
+                return GetSetting_Bool(SETTING_TYPE_SUBTITLES, SUBTITLE_SETTING_ENABLED_FOR_NPCS)
+            end,
+            dontSave = true,
+            callback = function(element, subKey, oldValue, value)
+                if value ~= oldValue then
+                    SetSetting(SETTING_TYPE_SUBTITLES, SUBTITLE_SETTING_ENABLED_FOR_NPCS, tostring(value))
+                end
+            end,
+        }
+    }
+
+    local DEFAULT_CONFIG = nil
+    local elementName = GetString(SI_HUD_EDITOR_SUBTITLES)
+    HUD_MANAGER:RegisterKeyboardElement(self.control, elementName, DEFAULT_CONFIG, SUBTITLE_OPTIONS)
+    HUD_MANAGER:RegisterGamepadElement(self.control, elementName, DEFAULT_CONFIG, SUBTITLE_OPTIONS)
 end
 
---platform style
+do
+    --Platform style
+    local KEYBOARD_STYLES = 
+    {
+        textTemplate = "ZO_Subtitles_Text_Keyboard_Template",
+        hudElementRefTemplate = "ZO_Subtitles_Text_HUDElementRef_Keyboard_Template",
+        textWidth = 1200,
+    }
 
-local KEYBOARD_STYLES = {
-                            textTemplate = "ZO_Subtitles_Text_Keyboard_Template",
-                            textWidth = 1200,
-                        }
+    local GAMEPAD_STYLES = 
+    {
+        textTemplate = "ZO_Subtitles_Text_Gamepad_Template",
+        hudElementRefTemplate = "ZO_Subtitles_Text_HUDElementRef_Gamepad_Template",
+        textWidth = 890,
+    }
 
-local GAMEPAD_STYLES =  {
-                            textTemplate = "ZO_Subtitles_Text_Gamepad_Template",
-                            textWidth = 890,
-                        }
+    function ZO_SubtitleManager:UpdatePlatformStyles(styleTable)
+        ApplyTemplateToControl(self.messageText, styleTable.textTemplate)
+        ApplyTemplateToControl(self.control.hudElementRef, styleTable.hudElementRefTemplate)
+        self.messageText:SetWidth(styleTable.textWidth)
+    end
 
-function ZO_SubtitleManager:UpdatePlatformStyles(styleTable)
-    ApplyTemplateToControl(self.messageText, styleTable.textTemplate)
-    self.messageText:SetWidth(styleTable.textWidth)
-end
-
-function ZO_SubtitleManager:InitializePlatformStyles()
-    ZO_PlatformStyle:New(function(...) self:UpdatePlatformStyles(...) end, KEYBOARD_STYLES, GAMEPAD_STYLES)
+    function ZO_SubtitleManager:InitializePlatformStyles()
+        ZO_PlatformStyle:New(function(...) self:UpdatePlatformStyles(...) end, KEYBOARD_STYLES, GAMEPAD_STYLES)
+    end
 end
 
 function ZO_SubtitleManager:FadeInSubtitle()

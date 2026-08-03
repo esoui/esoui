@@ -1,16 +1,9 @@
-ACTIVE_COMBAT_TIP_SYSTEM = nil
-ZO_ActiveCombatTip = ZO_Object:Subclass()
+ZO_ActiveCombatTip = ZO_InitializingObject:Subclass()
 
 local FADE_OUT_TIME = 750
 local FADE_IN_TIME = 250
 
 local MIN_TIME_BETWEEN_MESSAGES = 5000
-
-function ZO_ActiveCombatTip:New(...)
-    local acts = ZO_Object.New(self)
-    acts:Initialize(...)
-    return acts
-end
 
 function ZO_ActiveCombatTip:Initialize(control)
     self.control = control
@@ -30,6 +23,41 @@ function ZO_ActiveCombatTip:Initialize(control)
 
     control:RegisterForEvent(EVENT_DISPLAY_ACTIVE_COMBAT_TIP, function(eventCode, ...) self:OnDisplayActiveCombatTip(...) end)
     control:RegisterForEvent(EVENT_REMOVE_ACTIVE_COMBAT_TIP, function(eventCode, ...) self:OnRemoveActiveCombatTip(...) end)
+
+    local KEYBOARD_CONFIG =
+    {
+        defaultAnchor = ZO_Anchor:New(BOTTOM, nil, BOTTOM, 0, ZO_COMMON_INFO_DEFAULT_KEYBOARD_BOTTOM_OFFSET_Y)
+    }
+    local GAMEPAD_CONFIG =
+    {
+        defaultAnchor = ZO_Anchor:New(BOTTOM, nil, BOTTOM, 0, ZO_COMMON_INFO_DEFAULT_GAMEPAD_BOTTOM_OFFSET_Y)
+    }
+
+    local SETTING_ID = 0 -- ACTs don't have a variable for the setting id, it's just 0
+    local OPTIONS =
+    {
+        {
+            type = ZO_HUD_EDITOR_OPTION_TYPES.ENUM,
+            name = GetString(SI_HUD_EDITOR_CUSTOM_OPTION_VISIBLE),
+            tooltipText = GetString(SI_INTERFACE_OPTIONS_ACT_SETTING_LABEL_TOOLTIP),
+            key = "Visible",
+            valueStringPrefix = "SI_ACTIVECOMBATTIPSETTING",
+            values = { ACT_SETTING_OFF, ACT_SETTING_AUTO, ACT_SETTING_ALWAYS, },
+            defaultValue = function()
+                return tonumber(GetSetting(SETTING_TYPE_ACTIVE_COMBAT_TIP, SETTING_ID))
+            end,
+            dontSave = true,
+            callback = function(element, subKey, oldValue, value)
+                if value ~= oldValue then
+                    SetSetting(SETTING_TYPE_ACTIVE_COMBAT_TIP, SETTING_ID, tostring(value))
+                end
+            end,
+        },
+    }
+
+    local DISPLAY_NAME = GetString(SI_INTERFACE_OPTIONS_ACT_SETTING_LABEL)
+    HUD_MANAGER:RegisterKeyboardElement(self.tip, DISPLAY_NAME, KEYBOARD_CONFIG, OPTIONS)
+    HUD_MANAGER:RegisterGamepadElement(self.tip, DISPLAY_NAME, GAMEPAD_CONFIG, OPTIONS)
 
     self:ApplyStyle() -- Setup initial visual style based on current mode.
     control:RegisterForEvent(EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function() self:OnGamepadPreferredModeChanged() end)

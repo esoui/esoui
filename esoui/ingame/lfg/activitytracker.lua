@@ -14,10 +14,6 @@ local HEADER_MAPPING =
 
 local ActivityTracker = ZO_HUDTracker_Base:Subclass()
 
-function ActivityTracker:New(...)
-    return ZO_HUDTracker_Base.New(self, ...)
-end
-
 function ActivityTracker:Initialize(control)
     ZO_HUDTracker_Base.Initialize(self, control)
 
@@ -29,26 +25,27 @@ function ActivityTracker:InitializeStyles()
     {
         keyboard =
         {
-            FONT_HEADER = "ZoFontGameShadow",
-            FONT_SUBLABEL = "ZoFontGameShadow",
-
-            TOP_LEVEL_PRIMARY_ANCHOR = ZO_Anchor:New(TOPLEFT, ZO_HouseInformationTrackerTopLevel, BOTTOMLEFT),
-            TOP_LEVEL_SECONDARY_ANCHOR = ZO_Anchor:New(RIGHT, GuiRoot, RIGHT, 0, 0, ANCHOR_CONSTRAINS_X),
-
-            CONTAINER_PRIMARY_ANCHOR = ZO_Anchor:New(TOPLEFT),
-            CONTAINER_SECONDARY_ANCHOR = ZO_Anchor:New(TOPRIGHT),
+            HUD_ELEMENT_HEIGHT = 115,
         },
         gamepad =
         {
-            FONT_HEADER = "ZoFontGamepadBold27",
-            FONT_SUBLABEL = "ZoFontGamepad34",
-
-            TOP_LEVEL_PRIMARY_ANCHOR = ZO_Anchor:New(TOPRIGHT, ZO_HouseInformationTrackerTopLevel, BOTTOMRIGHT),
-
-            CONTAINER_PRIMARY_ANCHOR = ZO_Anchor:New(TOPRIGHT),
+            HUD_ELEMENT_HEIGHT = 195,
         }
     }
     ZO_HUDTracker_Base.InitializeStyles(self)
+end
+
+do
+    local DISPLAY_NAME = GetString(SI_HUD_EDITOR_ACTIVITY_TRACKER)
+
+    function ActivityTracker:GetHUDElementInfo()
+        return DISPLAY_NAME
+    end
+
+    function ActivityTracker:GetHUDElementOptionKeys()
+        local KEY = "Activity"
+        return KEY, DISPLAY_NAME
+    end
 end
 
 function ActivityTracker:RegisterEvents()
@@ -59,6 +56,12 @@ function ActivityTracker:RegisterEvents()
     end
 
     ZO_ACTIVITY_FINDER_ROOT_MANAGER:RegisterCallback("OnActivityFinderStatusUpdate", Update)
+end
+
+function ActivityTracker:ApplyPlatformStyle(style)
+    ZO_HUDTracker_Base.ApplyPlatformStyle(self, style)
+
+    self.hudElementRef:SetHeight(style.HUD_ELEMENT_HEIGHT)
 end
 
 function ActivityTracker:Update()
@@ -84,16 +87,16 @@ function ActivityTracker:Update()
     self.activityType = activityType
 
     self:RefreshAnchors()
+
+    ZO_HUDTracker_Base.Update(self)
 end
 
-function ActivityTracker:GetPrimaryAnchor()
-    return self.currentStyle.TOP_LEVEL_PRIMARY_ANCHOR
-end
-
-function ActivityTracker:GetSecondaryAnchor()
-    return self.currentStyle.TOP_LEVEL_SECONDARY_ANCHOR
+function ActivityTracker:GetPriority()
+    return ZO_HUD_TRACKER_PRIORITY.ACTIVITY
 end
 
 function ZO_ActivityTracker_OnInitialized(control)
     ACTIVITY_TRACKER = ActivityTracker:New(control)
 end
+
+HUD_TRACKER_MANAGER:RegisterTracker("ZO_ActivityTracker_Template", "ZO_ActivityTracker")

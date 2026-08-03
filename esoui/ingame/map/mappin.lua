@@ -161,6 +161,16 @@ do
         [MAP_PIN_TYPE_AVA_DAEDRIC_ARTIFACT_VOLENDRUNG_ALDMERI]      = { level = 100, size = CONSTANTS.DAEDRIC_ARTIFACT_PIN_SIZE, texture = "EsoUI/Art/MapPins/AvA_daedricArtifact_volendrung_aldmeri.dds", hitInsetX = 15, hitInsetY = 11},
         [MAP_PIN_TYPE_AVA_DAEDRIC_ARTIFACT_VOLENDRUNG_EBONHEART]    = { level = 100, size = CONSTANTS.DAEDRIC_ARTIFACT_PIN_SIZE, texture = "EsoUI/Art/MapPins/AvA_daedricArtifact_volendrung_ebonheart.dds", hitInsetX = 15, hitInsetY = 11},
         [MAP_PIN_TYPE_AVA_DAEDRIC_ARTIFACT_VOLENDRUNG_DAGGERFALL]   = { level = 100, size = CONSTANTS.DAEDRIC_ARTIFACT_PIN_SIZE, texture = "EsoUI/Art/MapPins/AvA_daedricArtifact_volendrung_daggerfall.dds", hitInsetX = 15, hitInsetY = 11},
+
+
+
+
+
+
+
+
+
+
         [MAP_PIN_TYPE_BGPIN_FLAG_FIRE_DRAKES]                       = { level = 99, size = CONSTANTS.CARRYABLE_OBJECTIVE_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_flag_pin_orange.dds", hitInsetX = 15, hitInsetY = 11},
         [MAP_PIN_TYPE_BGPIN_FLAG_FIRE_DRAKES_AURA]                  = { level = 98, size = CONSTANTS.CARRYABLE_OBJECTIVE_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_flag_halo_orange.dds", tint = GetObjectiveAuraPinTint, hitInsetX = 15, hitInsetY = 11},
         [MAP_PIN_TYPE_BGPIN_FLAG_PIT_DAEMONS]                       = { level = 97, size = CONSTANTS.CARRYABLE_OBJECTIVE_PIN_SIZE, texture = "EsoUI/Art/MapPins/battlegrounds_flag_pin_green.dds", hitInsetX = 15, hitInsetY = 11},
@@ -281,7 +291,7 @@ do
         [MAP_PIN_TYPE_POI_SUGGESTED]                                = { level = 46, size = CONSTANTS.POI_PIN_SIZE, texture = GetPOIPinTexture, tint = GetPOIPinTint, hitInsetX = 5, hitInsetY = 10, showsPinAndArea = true},
         [MAP_PIN_TYPE_POI_SEEN]                                     = { level = 46, size = CONSTANTS.POI_PIN_SIZE, texture = GetPOIPinTexture, tint = GetPOIPinTint, hitInsetX = 5, hitInsetY = 10},
         [MAP_PIN_TYPE_POI_COMPLETE]                                 = { level = 45, size = CONSTANTS.POI_PIN_SIZE, texture = GetPOIPinTexture, tint = GetPOIPinTint, hitInsetX = 5, hitInsetY = 10},
-        [MAP_PIN_TYPE_LOCATION]                                     = { level = 45, size = CONSTANTS.MAP_LOCATION_PIN_SIZE, texture = GetLocationPinTexture},
+        [MAP_PIN_TYPE_LOCATION]                                     = { level = 45, size = CONSTANTS.MAP_LOCATION_PIN_SIZE, texture = GetLocationPinTexture, showsPinAndArea = true},
         [MAP_PIN_TYPE_WORLD_EVENT_POI_ACTIVE]                       = { level = 44, size = CONSTANTS.POI_PIN_SIZE, texture = GetWorldEventPOIPinTexture, isAnimated = true, framesWide = 16, framesHigh = 1, framesPerSecond = 12 },
         [MAP_PIN_TYPE_SKYSHARD_SUGGESTED]                           = { level = 43, size = CONSTANTS.POI_PIN_SIZE, texture = "EsoUI/Art/MapPins/skyshard_seen.dds", insetX = 5, insetY = 3, showsPinAndArea = true},
         [MAP_PIN_TYPE_SKYSHARD_SEEN]                                = { level = 43, size = CONSTANTS.POI_PIN_SIZE, texture = "EsoUI/Art/MapPins/skyshard_seen.dds", insetX = 5, insetY = 3},
@@ -474,6 +484,16 @@ ZO_MapPin.OBJECTIVE_PIN_TYPES =
     [MAP_PIN_TYPE_AVA_DAEDRIC_ARTIFACT_VOLENDRUNG_ALDMERI] = true,
     [MAP_PIN_TYPE_AVA_DAEDRIC_ARTIFACT_VOLENDRUNG_EBONHEART] = true,
     [MAP_PIN_TYPE_AVA_DAEDRIC_ARTIFACT_VOLENDRUNG_DAGGERFALL] = true,
+
+
+
+
+
+
+
+
+
+
 }
 
 ZO_MapPin.SPAWN_OBJECTIVE_PIN_TYPES =
@@ -680,6 +700,15 @@ ZO_MapPin.PIN_TYPE_TO_PIN_GROUP =
     [MAP_PIN_TYPE_AVA_DAEDRIC_ARTIFACT_VOLENDRUNG_ALDMERI] = MAP_FILTER_AVA_OBJECTIVES,
     [MAP_PIN_TYPE_AVA_DAEDRIC_ARTIFACT_VOLENDRUNG_EBONHEART] = MAP_FILTER_AVA_OBJECTIVES,
     [MAP_PIN_TYPE_AVA_DAEDRIC_ARTIFACT_VOLENDRUNG_DAGGERFALL] = MAP_FILTER_AVA_OBJECTIVES,
+
+
+
+
+
+
+
+
+
 
     [MAP_PIN_TYPE_TRI_BATTLE_SMALL] = MAP_FILTER_KILL_LOCATIONS,
     [MAP_PIN_TYPE_TRI_BATTLE_MEDIUM] = MAP_FILTER_KILL_LOCATIONS,
@@ -1291,6 +1320,16 @@ do
         [MAP_PIN_TYPE_AVA_DAEDRIC_ARTIFACT_VOLENDRUNG_ALDMERI]      =   SHARED_TOOLTIP_CREATORS.DAEDRIC_ARTIFACT,
         [MAP_PIN_TYPE_AVA_DAEDRIC_ARTIFACT_VOLENDRUNG_EBONHEART]    =   SHARED_TOOLTIP_CREATORS.DAEDRIC_ARTIFACT,
         [MAP_PIN_TYPE_AVA_DAEDRIC_ARTIFACT_VOLENDRUNG_DAGGERFALL]   =   SHARED_TOOLTIP_CREATORS.DAEDRIC_ARTIFACT,
+
+
+
+
+
+
+
+
+
+
         [MAP_PIN_TYPE_ACTIVE_COMPANION]                             =   SHARED_TOOLTIP_CREATORS.COMPANION_PIN,
         [MAP_PIN_TYPE_ALDMERI_VS_EBONHEART_SMALL]                   =   SHARED_TOOLTIP_CREATORS.KILL_LOCATION,
         [MAP_PIN_TYPE_ALDMERI_VS_EBONHEART_MEDIUM]                  =   SHARED_TOOLTIP_CREATORS.KILL_LOCATION,
@@ -1392,7 +1431,7 @@ local KEEP_TRAVEL_BIND =
             canTravelToKeep = startKeepId and keepId ~= startKeepId
         end
         if canTravelToKeep then
-            PlaySound(SOUNDS.MAP_WAYSHRINE_TELEPORT)
+            PlaySound(SOUNDS.MAP_WAYSHRINE_KEEP_TELEPORT)
             TravelToKeep(keepId)
             ZO_WorldMap_HideWorldMap()
         end

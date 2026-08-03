@@ -470,6 +470,27 @@ local MENU_ENTRY_DATA =
         name = GetString(SI_MAIN_MENU_SOCIAL),
         icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_multiplayer.dds",
         isNewCallback = IsAnySubMenuNewCallback,
+        subMenuHeaderData = function()
+            local headerData =
+            {
+                titleText = GetString(SI_MAIN_MENU_SOCIAL),
+            }
+
+            local platformDisplayName = GetPlatformDisplayName()
+            if platformDisplayName ~= "" then
+                headerData.data1HeaderText = ZO_GetPlatformAccountLabel()
+                headerData.data1Text = ZO_FormatPlatformDisplayName(platformDisplayName)
+                headerData.data2HeaderText = GetString(SI_GAMEPAD_MAIN_MENU_ESO_USERID_LABEL)
+                headerData.data2Text = GetCrossplayDisplayName()
+
+                return headerData
+            end
+
+            headerData.data1HeaderText = GetString(SI_GAMEPAD_MAIN_MENU_ESO_USERID_LABEL)
+            headerData.data1Text = GetCrossplayDisplayName()
+
+            return headerData
+        end,
         subMenu =
         {
             [MENU_SOCIAL_ENTRIES.VOICE_CHAT] =
@@ -671,7 +692,6 @@ function ZO_MainMenuManager_Gamepad:Initialize(control)
 
     local DONT_ACTIVATE_ON_SHOW = false
     ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE, DONT_ACTIVATE_ON_SHOW, MAIN_MENU_GAMEPAD_SCENE)
-    control.header:SetHidden(true)
 
     self.mainList = self:GetMainList()
     self.subList = self:AddList("Submenu")
@@ -738,18 +758,23 @@ function ZO_MainMenuManager_Gamepad:OnHiding()
     self:DeactivateHelperPanel()
 end
 
-do
-    local function ReanchorList(list)
-        local control = list:GetControl()
-        local container = control:GetParent()
-        control:ClearAnchors()
-        control:SetAnchorFill(container)
-    end
+function ZO_MainMenuManager_Gamepad:ReanchorListOverHeader(list)
+    local control = list:GetControl()
+    local container = control:GetParent()
+    control:ClearAnchors()
+    control:SetAnchorFill(container)
+end
 
-    function ZO_MainMenuManager_Gamepad:ReanchorListsOverHeader()
-        ReanchorList(self.mainList)
-        ReanchorList(self.subList)
-    end
+function ZO_MainMenuManager_Gamepad:ReanchorListToHeader(list)
+    local control = list:GetControl()
+    control:ClearAnchors()
+    control:SetAnchor(TOPLEFT, self.headerContainer, BOTTOMLEFT)
+    control:SetAnchor(BOTTOMRIGHT)
+end
+
+function ZO_MainMenuManager_Gamepad:ReanchorListsOverHeader()
+    self:ReanchorListOverHeader(self.mainList)
+    self:ReanchorListOverHeader(self.subList)
 end
 
 do
@@ -1029,6 +1054,8 @@ do
     end
 
     function ZO_MainMenuManager_Gamepad:RefreshMainList()
+        self.header:SetHidden(true)
+
         self.mainList:Clear()
 
         self.mainMenuEntryToListIndex = {}
@@ -1058,6 +1085,15 @@ do
     end
 
     function ZO_MainMenuManager_Gamepad:RefreshSubList(mainListEntry)
+        local headerData = ZO_Eval(mainListEntry.data.subMenuHeaderData)
+        self.header:SetHidden(not headerData)
+        if headerData then
+            ZO_GamepadGenericHeader_Refresh(self.header, headerData)
+            self:ReanchorListToHeader(self.subList)
+        else
+            self:ReanchorListOverHeader(self.subList)
+        end
+
         self.subList:Clear()
         self.subMenuEntryToListIndex = {}
 

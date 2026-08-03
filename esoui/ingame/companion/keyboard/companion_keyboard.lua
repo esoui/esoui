@@ -75,7 +75,12 @@ do
                 disabled = "EsoUI/Art/Companion/Keyboard/companion_character_disabled.dds",
                 highlight = "EsoUI/Art/Companion/Keyboard/companion_character_over.dds",
                 statusIcon = function()
+
                     if SHARED_INVENTORY and SHARED_INVENTORY:AreAnyItemsNew(ZO_InventoryUtils_DoesNewItemMatchFilterType, ITEMFILTERTYPE_COMPANION, BAG_BACKPACK) then
+
+
+
+
                         return ZO_KEYBOARD_NEW_ICON
                     end
                     return nil

@@ -35,6 +35,10 @@ local FORCE_HIDE_PROGRESS_TEXT = true
 ZO_ACHIEVEMENT_DISABLED_COLOR = ZO_ColorDef:New(0.6, 0.6, 0.6)
 ZO_ACHIEVEMENT_DISABLED_DESATURATION = 0.5
 
+local PIN_TEXTURE = "EsoUI/Art/Buttons/radiobutton_pin_down.dds"
+local PIN_SIZE = 32
+local PIN_ICON_FORMAT = zo_iconFormat(PIN_TEXTURE, PIN_SIZE, PIN_SIZE)
+
 local function GetTextColor(enabled, normalColor, disabledColor)
     if enabled then
         return (normalColor or ZO_NORMAL_TEXT):UnpackRGBA()
@@ -112,8 +116,9 @@ end
 function Achievement:InitializeKeybindDescriptors()
     self.keybindStripDescriptor =
     {
+        alignment = KEYBIND_STRIP_ALIGN_RIGHT,
+
         {
-            alignment = KEYBIND_STRIP_ALIGN_CENTER,
             name = function()
                 if GetSkyshardAchievementZoneId(self.achievementId) ~= 0 then
                     return GetString(SI_ZONE_STORY_OPEN_FROM_ACHIEVEMENT_ACTION)
@@ -125,11 +130,9 @@ function Achievement:InitializeKeybindDescriptors()
             callback = function()
                 local zoneId = GetSkyshardAchievementZoneId(self.achievementId)
                 if zoneId ~= 0 then
-                    KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
                     ZONE_STORIES_MANAGER:ShowZoneStoriesScene(zoneId)
                 else
                     local bookCollectionId = GetAchievementLinkedBookCollectionId(self.achievementId)
-                    KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
                     LORE_LIBRARY:SetCollectionIdToSelect(bookCollectionId)
                     MAIN_MENU_KEYBOARD:ShowScene("loreLibrary")
                 end
@@ -137,6 +140,31 @@ function Achievement:InitializeKeybindDescriptors()
             visible = function()
                 return GetSkyshardAchievementZoneId(self.achievementId) ~= 0 or GetAchievementLinkedBookCollectionId(self.achievementId) ~= 0
             end
+        },
+
+        {
+            name = function()
+                local achievementId, criterionIndex = GetTrackedAchievement()
+                if achievementId == self.achievementId then
+                    return GetString(SI_ACHIEVEMENT_ACTION_NAME_UNPIN)
+                else
+                    return GetString(SI_ACHIEVEMENT_ACTION_NAME_PIN)
+                end
+            end,
+            keybind = "UI_SHORTCUT_TERTIARY",
+            callback = function()
+                local achievementId, criterionIndex = GetTrackedAchievement()
+                if achievementId == self.achievementId then
+                    SetTrackedAchievement(0)
+                else
+                    SetTrackedAchievement(self.achievementId)
+                    HUD_TRACKER_MANAGER:SetAssistedAspiration(ZO_HUD_TRACKER_ASPIRATION.ACHIEVEMENT)
+                end
+                KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+            end,
+            visible = function()
+                return not self.completed
+            end,
         },
     }
 end
@@ -159,14 +187,11 @@ end
 
 function Achievement:Show(achievementId)
     self.achievementId = achievementId
-    local name, description, points, icon, completed, date = self:GetAchievementInfo(achievementId)
+    local _, description, points, icon, completed, date = self:GetAchievementInfo(achievementId)
 
-    local titleText
     local persistenceLevel = GetAchievementPersistenceLevel(achievementId)
     self.isCharacterPersistent = persistenceLevel == ACHIEVEMENT_PERSISTENCE_CHARACTER
     if self.isCharacterPersistent then
-        local titleIcon = zo_iconFormatInheritColor("EsoUI/Art/Miscellaneous/Gamepad/gp_charNameIcon.dds", "100%", "100%")
-        titleText = zo_strformat(SI_ACHIEVEMENT_TITLE_CHARACTER_LEVEL, titleIcon, name)
         local frameColor = completed and ZO_SECOND_SELECTED_TEXT or ZO_SECOND_NORMAL_TEXT
         local iconFrameBorder
         if self.control.iconFrameBorderKey then
@@ -181,14 +206,13 @@ function Achievement:Show(achievementId)
         end
         iconFrameBorder:SetColor(frameColor:UnpackRGBA())
     else
-        titleText = zo_strformat(name)
         if self.control.iconFrameBorderKey then
             self.characterFrameBorderControlPool:ReleaseObject(self.control.iconFrameBorderKey)
             self.control.iconFrameBorderKey = nil
         end
     end
 
-    self.title:SetText(titleText)
+    self:UpdateTitle()
     self.description:SetText(zo_strformat(description))
     self.icon:SetTexture(icon)
 
@@ -235,6 +259,24 @@ function Achievement:Show(achievementId)
     self:UpdateExpandedStateIcon()
 
     self.control:SetHidden(false)
+end
+
+function Achievement:UpdateTitle()
+    local titleText
+    local name = GetAchievementName(self.achievementId)
+    if self.isCharacterPersistent then
+        local titleIcon = zo_iconFormatInheritColor("EsoUI/Art/Miscellaneous/Gamepad/gp_charNameIcon.dds", "100%", "100%")
+        titleText = zo_strformat(SI_ACHIEVEMENT_TITLE_CHARACTER_LEVEL, titleIcon, name)
+    else
+        titleText = zo_strformat(name)
+    end
+
+    local trackedAchievementId = GetTrackedAchievement()
+    if trackedAchievementId == self.achievementId then
+        titleText = string.format("%s%s", PIN_ICON_FORMAT, titleText)
+    end
+
+    self.title:SetText(titleText)
 end
 
 function Achievement:SetRewardThumb(achievementId)
@@ -1156,11 +1198,11 @@ function Achievements:InitializeCategories()
         return false
     end
 
-    local CHILD_INDENT = 60
+    local CHILD_INDENT = 76
     local CHILD_SPACING = 0
-    self.categoryTree:AddTemplate("ZO_IconHeader", TreeHeaderSetup_Child, nil, TreeEqualityFunction, CHILD_INDENT, CHILD_SPACING)
-    self.categoryTree:AddTemplate("ZO_IconChildlessHeader", TreeHeaderSetup_Childless, TreeEntryOnSelected_Childless, TreeEqualityFunction)
-    self.categoryTree:AddTemplate("ZO_TreeLabelSubCategory", TreeEntrySetup, TreeEntryOnSelected, TreeEqualityFunction)
+    self.categoryTree:AddTemplate("ZO_Achievements_StatusIconHeader", TreeHeaderSetup_Child, nil, TreeEqualityFunction, CHILD_INDENT, CHILD_SPACING)
+    self.categoryTree:AddTemplate("ZO_Achievements_StatusIconChildlessHeader", TreeHeaderSetup_Childless, TreeEntryOnSelected_Childless, TreeEqualityFunction)
+    self.categoryTree:AddTemplate("ZO_Achievements_SubCategory", TreeEntrySetup, TreeEntryOnSelected, TreeEqualityFunction)
 
     self.categoryTree:SetExclusive(true)
     self.categoryTree:SetOpenAnimation("ZO_TreeOpenAnimation")
@@ -1185,9 +1227,14 @@ function Achievements:InitializeEvents()
         end
     end
 
+    local function OnTrackingUpdated()
+        self:UpdateAllCategoryStatusIcons()
+    end
+
     self.control:RegisterForEvent(EVENT_ACHIEVEMENTS_UPDATED, OnAchievementsUpdated)
     self.control:RegisterForEvent(EVENT_ACHIEVEMENT_UPDATED, OnAchievementUpdated)
     self.control:RegisterForEvent(EVENT_ACHIEVEMENT_AWARDED, OnAchievementAwarded)
+    self.control:RegisterForEvent(EVENT_ACHIEVEMENT_TRACKING_UPDATE, OnTrackingUpdated)
     self.control:SetHandler("OnUpdate", OnUpdate)
 
     self.refreshGroups = ZO_Refresh:New()
@@ -1212,6 +1259,12 @@ function Achievements:InitializeEvents()
         end,
     })
 
+    self.refreshGroups:AddRefreshGroup("StatusIcons",
+    {
+        RefreshAll = function()
+            self:UpdateAllCategoryStatusIcons()
+        end,
+    })
 
     local function OnUpdateSearchResults()
         if self.scene:IsShowing() then
@@ -1719,6 +1772,7 @@ function Achievements:OnAchievementsUpdated()
     self:UpdateSummary()
     self:UpdatePointDisplay()
     self:UpdateSelectionDisplay()
+    self:UpdateAllCategoryStatusIcons()
 end
 
 function Achievements:UpdatePointDisplay()
@@ -1933,7 +1987,7 @@ do
         local searchResults = ACHIEVEMENTS_MANAGER:GetSearchResults()
 
         local hasChildren = numSubCategories > 0
-        local nodeTemplate = hasChildren and "ZO_IconHeader" or "ZO_IconChildlessHeader"
+        local nodeTemplate = hasChildren and "ZO_Achievements_StatusIconHeader" or "ZO_Achievements_StatusIconChildlessHeader"
         local hasFakedSubcategory = false
 
         if isSummary then
@@ -1955,7 +2009,7 @@ do
         if hasFakedSubcategory then
             local IS_FAKED_SUBCATEGORY = true
             local NO_ICONS = nil
-            self:AddCategory(lookup, tree, "ZO_TreeLabelSubCategory", parentNode, categoryIndex, GetString(SI_JOURNAL_PROGRESS_CATEGORY_GENERAL), hidesUnearned, NO_ICONS, NO_ICONS, NO_ICONS, NOT_SUMMARY, IS_FAKED_SUBCATEGORY)
+            self:AddCategory(lookup, tree, "ZO_Achievements_SubCategory", parentNode, categoryIndex, GetString(SI_JOURNAL_PROGRESS_CATEGORY_GENERAL), hidesUnearned, NO_ICONS, NO_ICONS, NO_ICONS, NOT_SUMMARY, IS_FAKED_SUBCATEGORY)
         end
 
         if not isSummary then
@@ -1963,14 +2017,14 @@ do
                 for subcategoryIndex, data in pairs(searchResults[categoryIndex]) do
                     if subcategoryIndex ~= ZO_COLLECTIONS_SEARCH_ROOT then
                         local subCategoryName, _, _, _, subcategoryHidesUnearned = GetAchievementSubCategoryInfo(categoryIndex, subcategoryIndex)
-                        self:AddCategory(lookup, tree, "ZO_TreeLabelSubCategory", parentNode, subcategoryIndex, subCategoryName, subcategoryHidesUnearned)
+                        self:AddCategory(lookup, tree, "ZO_Achievements_SubCategory", parentNode, subcategoryIndex, subCategoryName, subcategoryHidesUnearned)
                     end
                 end
             else
                 for subcategoryIndex = 1, numSubCategories do
                     local subCategoryName, subCategoryNumAchievements, _, totalPoints, subcategoryHidesUnearned = GetAchievementSubCategoryInfo(categoryIndex, subcategoryIndex)
                     if subCategoryNumAchievements > 0 or totalPoints > 0 then
-                        self:AddCategory(lookup, tree, "ZO_TreeLabelSubCategory", parentNode, subcategoryIndex, subCategoryName, subcategoryHidesUnearned)
+                        self:AddCategory(lookup, tree, "ZO_Achievements_SubCategory", parentNode, subcategoryIndex, subCategoryName, subcategoryHidesUnearned)
                     end
                 end
             end
@@ -1978,6 +2032,53 @@ do
 
         return parentNode
     end
+end
+
+function Achievements:UpdateAllCategoryStatusIcons()
+    for _, categoryNode in pairs(self.nodeLookupData) do
+        self:UpdateCategoryStatusIcon(categoryNode.node)
+        for _, subcategoryNode in pairs(categoryNode.subCategories) do
+            self:UpdateCategoryStatusIcon(subcategoryNode)
+        end
+    end
+
+    for _, achievement in self.achievementPool:ActiveObjectIterator() do
+        achievement:UpdateTitle()
+    end
+end
+
+function Achievements:UpdateCategoryStatusIcon(categoryNode)
+    local categoryData = categoryNode.data
+    local categoryControl = categoryNode.control
+
+    if not categoryControl.statusIcon then
+        categoryControl.statusIcon = categoryControl:GetNamedChild("StatusIcon")
+    end
+
+    categoryControl.statusIcon:ClearIcons()
+
+    -- TODO Achievement: Handle multiple pinned achievements if we implement that
+    -- For now just take a shortcut
+    local trackedAchievementId = GetTrackedAchievement()
+    if trackedAchievementId == 0 then
+        return
+    end
+
+    local isTopLevel = not categoryData.parentData
+    
+    local categoryIndex, subcategoryIndex = self:GetCategoryIndicesFromData(categoryData)
+    local trackedCategoryIndex, trackedSubcategoryIndex = GetCategoryInfoFromAchievementId(trackedAchievementId)
+    if categoryIndex ~= trackedCategoryIndex then
+        return
+    end
+
+    if subcategoryIndex ~= trackedSubcategoryIndex and not isTopLevel then
+        return
+    end
+
+    categoryControl.statusIcon:AddIcon("EsoUI/Art/Buttons/radiobutton_pin_down.dds")
+
+    categoryControl.statusIcon:Show()
 end
 
 --[[ XML Handlers ]]--

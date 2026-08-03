@@ -23,12 +23,14 @@ function ZO_ZoneStory_ActivityCompletionTile_Gamepad:Layout(data)
 
     local zoneId = data.zoneData.id
     local completionType = data.completionType
+    local completionIndex = data.completionIndex
     self.zoneData = data.zoneData
     self.zoneId = zoneId
     self.completionType = completionType
+    self.completionIndex = completionIndex
 
-    self.iconControl:SetTexture(ZO_ZoneStories_Manager.GetCompletionTypeIcon(completionType))
-    local text = ZO_ZoneStories_Manager.GetActivityCompletionProgressText(zoneId, completionType)
+    self.iconControl:SetTexture(ZO_ZoneStories_Manager.GetCompletionTypeIcon(completionType, completionIndex))
+    local text = ZO_ZoneStories_Manager.GetActivityCompletionProgressText(zoneId, completionType, completionIndex)
     self.valueControl:SetText(text)
 
     local color = ZO_ZoneStories_Manager.IsZoneCompletionTypeComplete(zoneId, completionType) and ZO_NORMAL_TEXT or ZO_SELECTED_TEXT

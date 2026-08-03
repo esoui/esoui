@@ -31,13 +31,7 @@ ZO_HOUSING_FURNITURE_LIMIT_TYPE_FILTER_ALL = ZO_HOUSING_FURNITURE_LIMIT_FILTERS[
 --
 --[[ FurnitureDataBase ]]--
 --
-ZO_FurnitureDataBase = ZO_Object:Subclass()
-
-function ZO_FurnitureDataBase:New(...)
-    local furniture = ZO_Object.New(self)
-    furniture:Initialize(...)
-    return furniture
-end
+ZO_FurnitureDataBase = ZO_InitializingObject:Subclass()
 
 function ZO_FurnitureDataBase:Initialize(...)
     self.passesTextFilter = true
@@ -803,13 +797,7 @@ end
 --
 --[[ FurnitureCategory ]]--
 --
-ZO_FurnitureCategory = ZO_Object:Subclass()
-
-function ZO_FurnitureCategory:New(...)
-    local furnitureCategory = ZO_Object.New(self)
-    furnitureCategory:Initialize(...)
-    return furnitureCategory
-end
+ZO_FurnitureCategory = ZO_InitializingObject:Subclass()
 
 function ZO_FurnitureCategory:Initialize(parent, categoryId)
     internalassert(parent ~= nil or self:IsRoot(), "Non-root categories must have a parent category")
@@ -1043,11 +1031,12 @@ end
 function ZO_HousingSettings_BuildMasterList_Occupant(currentHouse, masterList, createScrollDataFunction)
     ZO_ClearNumericallyIndexedTable(masterList)
 
-    local occupantNameKey = ZO_ShouldPreferUserId() and "accountName" or "characterName"
     local occupantList = HOUSING_EDITOR_STATE:GetOccupants()
     for occupantIndex, occupantData in ipairs(occupantList) do
-        local displayName = occupantData[occupantNameKey]
-        local nextData = createScrollDataFunction(displayName, currentHouse, occupantIndex, occupantData["accountName"])
+        local crossplayDisplayName = occupantData.crossplayDisplayName
+        local characterName = occupantData.characterName
+        local platformDisplayName = occupantData.platformDisplayName
+        local nextData = createScrollDataFunction(crossplayDisplayName, characterName, platformDisplayName, currentHouse, occupantIndex)
         table.insert(masterList, nextData)
     end
 end
@@ -1060,6 +1049,7 @@ function ZO_HousingSettings_BuildMasterList_Visitor(currentHouse, userGroup, num
         if canAccess then
             local markedForDelete = IsHousingPermissionMarkedForDelete(currentHouse, userGroup, i)
             if not markedForDelete then
+                -- TODO Crossplay
                 local displayName = ZO_FormatUserFacingDisplayName(GetHousingUserGroupDisplayName(currentHouse, userGroup, i))
                 local permissionPresetName = HOUSE_SETTINGS_MANAGER:GetPresetNameFromPermissionData(currentHouse, userGroup, i)
                 local nextData = createScrollDataFunction(displayName, currentHouse, userGroup, i, permissionPresetName)
@@ -1077,6 +1067,7 @@ function ZO_HousingSettings_BuildMasterList_Ban(currentHouse, userGroup, numPerm
         if not canAccess then
             local markedForDelete = IsHousingPermissionMarkedForDelete(currentHouse, userGroup, i)
             if not markedForDelete then
+                -- TODO Crossplay
                 local displayName = ZO_FormatUserFacingDisplayName(GetHousingUserGroupDisplayName(currentHouse, userGroup, i))
                 local nextData = createScrollDataFunction(displayName, currentHouse, userGroup, i)
                 table.insert(masterList, nextData)

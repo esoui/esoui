@@ -444,8 +444,8 @@ function ZO_GameStartup_Gamepad:InitializeKeybindDescriptor()
                         if username == "" then
                             local dialogData =
                             {
-                                title = GetString(SI_ESO_ACCOUNT_LOGIN_ERROR_NO_USERNAME_TITLE), 
-                                body = GetString(SI_ESO_ACCOUNT_LOGIN_ERROR_NO_USERNAME_TEXT), 
+                                title = GetString(SI_ESO_ACCOUNT_LOGIN_ERROR_NO_ACCOUNT_NAME_TITLE),
+                                body = GetString(SI_ESO_ACCOUNT_LOGIN_ERROR_NO_ACCOUNT_NAME_TEXT),
                             }
                             ZO_Dialogs_ShowPlatformDialog("BAD_LOGIN_NO_USERNAME_OR_PASSWORD", dialogData )
                             return

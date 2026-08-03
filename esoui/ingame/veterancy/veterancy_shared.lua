@@ -66,7 +66,7 @@ function ZO_Veterancy_RankTile_Shared:Layout(data)
     self.lockedTexture:SetHidden(isAvailable)
     self.rankIndexLabel:SetText(self.rankData:GetIndex())
     self.rankIndexLabel:SetColor(textColor:UnpackRGBA())
-    self.titleLabel:SetText(self.rankData:GetName())
+    self.titleLabel:SetText(self.rankData:GetFormattedName())
     self.titleLabel:SetColor(textColor:UnpackRGBA())
     self.progressControl:SetValue(self.rankData:GetProgressPercent())
     self:SetProgressBarHidden(data.isProgressBarHidden)
@@ -197,7 +197,6 @@ function ZO_VeterancyReward_Shared:Refresh()
         end
         self.displayRewardData = displayRewardData
 
-        local shouldHideQuantityLabel = true
         if self.rewardableEventData:IsInstanceOf(ZO_VeterancyRankPerkRewardData) then
             self.rewardIconControl:SetHidden(true)
             self.perkIcon:SetPerkData(self.rewardableEventData)
@@ -210,25 +209,6 @@ function ZO_VeterancyReward_Shared:Refresh()
             self.rewardIconControl:SetHidden(false)
             self.rewardIconTexture:SetTexture(displayRewardData:GetPlatformLootIcon())
 
-            local rewardId = displayRewardData:GetRewardId()
-            if GetRewardType(rewardId) == REWARD_ENTRY_TYPE_REWARD_LIST then
-                local rewardListId = GetRewardListIdFromReward(rewardId)
-                local rewardListData = REWARDS_MANAGER:GetAllRewardInfoForRewardList(rewardListId)
-                local quantity = GetNumRewardListEntries(rewardListId)
-                shouldHideQuantityLabel = not (quantity > 1)
-                if not shouldHideQuantityLabel then
-                    quantity = zo_strformat(SI_PROMOTIONAL_EVENT_REWARD_LIST_QUANTITY_FORMATTER, quantity - 1)
-                    self.rewardQuantityLabel:SetText(quantity)
-                end
-                local firstRewardData = rewardListData[1]
-                if firstRewardData then
-                    self.rewardIconTexture:SetTexture(firstRewardData:GetPlatformLootIcon())
-                end
-            elseif displayRewardData:GetQuantity() > 1 then
-                local quantity = displayRewardData:GetAbbreviatedQuantity()
-                self.rewardQuantityLabel:SetText(quantity)
-                shouldHideQuantityLabel = false
-            end
             self.rewardLockedTexture:SetHidden(isAvailable)
 
             local hasPendingLoop = self.rewardFxAnchorControl.pendingLoop ~= nil
@@ -246,7 +226,8 @@ function ZO_VeterancyReward_Shared:Refresh()
                 self.rewardIconTexture:SetColor(0.7, 0.7, 0.7)
             else
                 self.rewardCompleteMarkTexture:SetHidden(true)
-                self.rewardQuantityLabel:SetHidden(shouldHideQuantityLabel)
+                self.rewardQuantityLabel:SetText(displayRewardData:GetFormattedDisplayQuantity())
+                self.rewardQuantityLabel:SetHidden(false)
                 self.rewardIconTexture:SetColor(1, 1, 1)
             end
         end
@@ -307,6 +288,10 @@ end
 
 function ZO_Veterancy_RewardTile_Shared:OnRewardClaimed()
     self.rewardControl.object:OnRewardClaimed()
+end
+
+function ZO_Veterancy_RewardTile_Shared:UpdateKeybinds()
+    self.rewardControl.object:UpdateKeybinds()
 end
 
 function ZO_Veterancy_RewardTile_Shared.OnControlInitialized(control)
@@ -413,7 +398,7 @@ function ZO_Veterancy_HorizontalScrollList_Shared:EntrySetup(control, data, sele
                 narrationText = function(entryData, entryControl)
                     local narrations = {}
                     local entryRankData = entryData.rankData
-                    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_VETERANCY_RANK_NARRATION_FORMATTER, entryRankData:GetIndex(), entryRankData:GetName())))
+                    ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_VETERANCY_RANK_NARRATION_FORMATTER, entryRankData:GetIndex(), entryRankData:GetRawName())))
                     return narrations
                 end
             }
@@ -445,7 +430,7 @@ function ZO_Veterancy_HorizontalScrollList_Shared:EntrySetup(control, data, sele
                         narrationText = function(entryData, entryControl)
                             local narrations = {}
                             local rankData = entryData.rewardData.rankData
-                            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_VETERANCY_RANK_NARRATION_FORMATTER, rankData:GetIndex(), rankData:GetName())))
+                            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_VETERANCY_RANK_NARRATION_FORMATTER, rankData:GetIndex(), rankData:GetRawName())))
                             return narrations
                         end
                     }
@@ -459,7 +444,7 @@ function ZO_Veterancy_HorizontalScrollList_Shared:EntrySetup(control, data, sele
                         narrationText = function(entryData, entryControl)
                             local narrations = {}
                             local rankData = entryData.rewardData.rankData
-                            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_VETERANCY_RANK_NARRATION_FORMATTER, rankData:GetIndex(), rankData:GetName())))
+                            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_VETERANCY_RANK_NARRATION_FORMATTER, rankData:GetIndex(), rankData:GetRawName())))
                             return narrations
                         end
                     }
@@ -472,7 +457,7 @@ function ZO_Veterancy_HorizontalScrollList_Shared:EntrySetup(control, data, sele
                         narrationText = function(entryData, entryControl)
                             local narrations = {}
                             local rankData = entryData.rewardData.rankData
-                            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_VETERANCY_RANK_NARRATION_FORMATTER, rankData:GetIndex(), rankData:GetName())))
+                            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_VETERANCY_RANK_NARRATION_FORMATTER, rankData:GetIndex(), rankData:GetRawName())))
                             return narrations
                         end
                     }
@@ -551,17 +536,12 @@ ZO_VETERANCY =
     },
 }
 
-ZO_Veterancy_Shared = ZO_PreviewScreen_Shared:Subclass()
+ZO_Veterancy_Shared = ZO_InitializingObject:Subclass()
 
-function ZO_Veterancy_Shared:Initialize(control, scene, templateData)
+function ZO_Veterancy_Shared:Initialize(control, templateData)
     self.control = control
-
     self.templateData = templateData
-
-    ZO_PreviewScreen_Shared.Initialize(self, scene)
-
     self.fragment = ZO_FadeSceneFragment:New(control)
-    scene:AddFragment(self.fragment)
 end
 
 function ZO_Veterancy_Shared:OnDeferredInitialize()
@@ -595,8 +575,6 @@ function ZO_Veterancy_Shared:OnDeferredInitialize()
     ZO_VETERANCY_MANAGER:RegisterCallback("OnVeterancyRankProgressed", function(...) self:OnRankProgressed(...) end)
     ZO_VETERANCY_MANAGER:RegisterCallback("OnVeterancyRepeatableRankClaimed", function(...) self:OnRepeatableRankRewardClaimed(...) end)
     ZO_VETERANCY_MANAGER:RegisterCallback("OnVeterancyRankDataUpdated", function(...) self:RefreshScrollListRankData(...) end)
-
-    self.control:SetHandler("OnUpdate", function(_, currentFrameTimeSeconds) self:UpdateSeasonInfo(currentFrameTimeSeconds) end)
 end
 
 function ZO_Veterancy_Shared:InitializeScrollList()
@@ -613,6 +591,10 @@ function ZO_Veterancy_Shared:InitializeScrollList()
 
     ZO_VETERANCY_MANAGER:RefreshRankData()
     self:RefreshScrollListRankData()
+end
+
+function ZO_Veterancy_Shared:OnUpdate(currentFrameTimeS)
+    self:UpdateSeasonInfo(currentFrameTimeSeconds)
 end
 
 function ZO_Veterancy_Shared:RefreshHorizontalScrollList(newData, oldData, reselectingDuringRebuild)
@@ -720,9 +702,15 @@ function ZO_Veterancy_Shared.GetNumRanksForPage(pageIndex)
     end
 end
 
-function ZO_Veterancy_Shared.GetPageIndexFromRankIndex(rankIndex)
-    local pageIndex = zo_mod(rankIndex, ZO_VETERANCY_RANKS_PER_PAGE)
-    return pageIndex == 0 and ZO_VETERANCY_RANKS_PER_PAGE or pageIndex
+function ZO_Veterancy_Shared.GetPageRankIndexFromRankIndex(rankIndex)
+    local pageRankIndex = zo_mod(rankIndex, ZO_VETERANCY_RANKS_PER_PAGE)
+    return pageRankIndex == 0 and ZO_VETERANCY_RANKS_PER_PAGE or pageRankIndex
+end
+
+function ZO_Veterancy_Shared:IsRankIndexOnCurrentPage(rankIndex)
+    local selectedData = self.scrollList:GetSelectedData()
+    local pageIndex = zo_floor(selectedData.pageStartIndex / ZO_VETERANCY_RANKS_PER_PAGE)
+    return rankIndex >= selectedData.pageStartIndex and rankIndex < selectedData.pageStartIndex + self:GetNumRanksForPage(pageIndex)
 end
 
 function ZO_Veterancy_Shared:OnPageChanged(pageNumber)
@@ -755,18 +743,10 @@ function ZO_Veterancy_Shared:OnShowing()
     self:UpdateKeybinds()
 end
 
-function ZO_Veterancy_Shared:OnShown()
-    -- Can be overridden
-end
-
-function ZO_Veterancy_Shared:OnHidden()
-    -- Can be overridden
-end
-
 function ZO_Veterancy_Shared:OnRewardsClaimed(rankIndex, suppressSounds)
-    if self:IsShowing() then
-        local pageIndex = self.GetPageIndexFromRankIndex(rankIndex)
-        local rankInfoData = self.scrollList:GetRankInfoDataByIndex(pageIndex)
+    if self:IsShowing() and self:IsRankIndexOnCurrentPage(rankIndex) then
+        local pageRankIndex = self.GetPageRankIndexFromRankIndex(rankIndex)
+        local rankInfoData = self.scrollList:GetRankInfoDataByIndex(pageRankIndex)
         -- rankInfoData could be nil if the claimed rank is now shown in current view which can happen on claim all.
         if rankInfoData then
             local selectedData = self.scrollList:GetSelectedData()
@@ -780,6 +760,7 @@ function ZO_Veterancy_Shared:OnRewardsClaimed(rankIndex, suppressSounds)
                         PlaySound(SOUNDS.VETERANCY_RANK_REWARD_CLAIM)
                     end
                 end
+                rewardTile.object:UpdateKeybinds()
             end
             if not suppressSounds then
                 if rankIndex == ZO_VETERANCY_RANK_GROUP_INDEX_UPPER_BOUND_HIGH then
@@ -789,8 +770,11 @@ function ZO_Veterancy_Shared:OnRewardsClaimed(rankIndex, suppressSounds)
                 end
             end
             local rankTile = gridList:GetControlFromData(rankInfoData)
-            rankTile.object:UpdateKeybinds()
+            if rankTile and rankTile.object then
+                rankTile.object:UpdateKeybinds()
+            end
         end
+        self:UpdateKeybinds()
     end
 end
 
@@ -814,10 +798,6 @@ function ZO_Veterancy_Shared:OnRepeatableRankRewardClaimed()
     end
 end
 
-function ZO_Veterancy_Shared:InitializeKeybindStripDescriptor()
-    -- Can be overridden
-end
-
 function ZO_Veterancy_Shared:GetControlByPreviewableRewardData(previewableRewardData)
     if previewableRewardData then
         local selectedData = self.scrollList:GetSelectedData()
@@ -826,12 +806,4 @@ function ZO_Veterancy_Shared:GetControlByPreviewableRewardData(previewableReward
     end
 
     return nil
-end
-
-function ZO_Veterancy_Shared:PreviewRewardList(rewardId, control)
-    -- Can be overridden
-end
-
-function ZO_Veterancy_Shared:EndPreviewRewardList()
-    -- Can be overridden
 end

@@ -1758,23 +1758,19 @@ do
         SetupBulletLabel(self.premiumExplanationLabel, self.hasPremiumTome and GetString(SI_TAMRIEL_TOMES_SEASON_END_DIALOG_PREMIUM_EXPLANATION) or "")
 
         local isGamepad = self.templateData.isGamepad
-        local currencyOptions =
-        {
-            color = ZO_SELECTED_TEXT,
-        }
+        local currencyIconFunction = isGamepad and ZO_Currency_GetGamepadFormattedCurrencyIcon or ZO_Currency_GetKeyboardFormattedCurrencyIcon
+        local tomePointsIconFormat = currencyIconFunction(CURT_TOME_POINTS)
 
         local tomePointsRollOverString = nil
         if self.numTomePointsRolledOver > 0 then
-            local numTomePointsRolledOverString = ZO_Currency_Format(self.numTomePointsRolledOver, CURT_TOME_POINTS, ZO_CURRENCY_FORMAT_AMOUNT_ICON, isGamepad, currencyOptions)
-            tomePointsRollOverString = zo_strformat(SI_TAMRIEL_TOMES_SEASON_END_DIALOG_TOME_POINT_ROLL_OVER, numTomePointsRolledOverString)
+            tomePointsRollOverString = zo_strformat(SI_TAMRIEL_TOMES_SEASON_END_DIALOG_TOME_POINT_ROLL_OVER, self.numTomePointsRolledOver, tomePointsIconFormat)
         end
         SetupBulletLabel(self.tomePointRolloverLabel, tomePointsRollOverString)
 
         local tomePointsConvertedToGoldString = nil
         if self.numTomePointsConvertedToGold > 0 and self.goldGainedFromTomePoints > 0 then
-            local numTomePointsConvertedToGoldString = ZO_Currency_Format(self.numTomePointsConvertedToGold, CURT_TOME_POINTS, ZO_CURRENCY_FORMAT_AMOUNT_ICON, isGamepad, currencyOptions)
-            local goldGainedFromTomePointsString = ZO_Currency_Format(self.goldGainedFromTomePoints, CURT_MONEY, ZO_CURRENCY_FORMAT_AMOUNT_ICON, isGamepad, currencyOptions)
-            tomePointsConvertedToGoldString = zo_strformat(SI_TAMRIEL_TOMES_SEASON_END_DIALOG_GOLD_ROLL_OVER, numTomePointsConvertedToGoldString, goldGainedFromTomePointsString)
+            local goldGainedFromTomePointsString = ZO_Currency_Format(self.goldGainedFromTomePoints, CURT_MONEY, ZO_CURRENCY_FORMAT_WHITE_AMOUNT_ICON, isGamepad)
+            tomePointsConvertedToGoldString = zo_strformat(SI_TAMRIEL_TOMES_SEASON_END_DIALOG_GOLD_ROLL_OVER, self.numTomePointsConvertedToGold, tomePointsIconFormat, goldGainedFromTomePointsString)
         end
         SetupBulletLabel(self.goldRolloverLabel, tomePointsConvertedToGoldString)
     end
@@ -1868,31 +1864,11 @@ function ZO_TamrielTomeSeasonEndDialog_Shared:PopulateGridList()
                             local rewardDisplayNameFormatted = qualityColor:Colorize(rewardDisplayName)
 
                             local rewardIconTextureFile = nil
+                            local rewardQuantityString = ""
                             local rewardData = REWARDS_MANAGER:GetInfoForReward(rewardId, rewardQuantity)
                             if rewardData then
                                 rewardIconTextureFile = rewardData:GetPlatformLootIcon()
-                            end
-
-                            local isRewardList = GetRewardType(rewardId) == REWARD_ENTRY_TYPE_REWARD_LIST
-                            if isRewardList then
-                                local rewardListId = GetRewardListIdFromReward(rewardId)
-                                local rewardListData = REWARDS_MANAGER:GetAllRewardInfoForRewardList(rewardListId)
-                                if rewardListData and #rewardListData >= 1 then
-                                    rewardQuantity = #rewardListData - 1
-
-                                    local rewardData = rewardListData[1]
-                                    if rewardData then
-                                        rewardIconTextureFile = rewardData:GetPlatformLootIcon()
-                                    end
-                                end
-                            end
-
-                            local rewardQuantityString = ""
-                            if rewardQuantity > 1 then
-                                rewardQuantityString = ZO_CommaDelimitNumber(rewardQuantity)
-                                if isRewardList then
-                                    rewardQuantityString = zo_strformat(SI_TAMRIEL_TOMES_REWARD_LIST_QUANTITY_FORMATTER, rewardQuantityString)
-                                end
+                                rewardQuantityString = rewardData:GetFormattedDisplayQuantity()
                             end
 
                             local entryData = self:CreateGridEntryData(rewardData, rewardId, rewardIndex, rewardTier, rewardComponent, rewardDisplayQuality, rewardDisplayName, rewardDisplayNameFormatted, rewardQuantityString, rewardIconTextureFile)

@@ -283,7 +283,7 @@ function ZO_CreateAccount_Gamepad:ResetMainList()
     self.optionsList:Clear()
 
     if not ZO_IsConsoleOrGameCoreUI() then
-        self:AddTextEdit(GetString(SI_KEYBOARD_CREATEACCOUNT_ACCOUNT_NAME_LABEL), function(data) return self.enteredAccountName end, function(control, data) self:ActivateEditbox(control.edit, true) end, function(newText) self.enteredAccountName = newText end)
+        self:AddTextEdit(GetString(SI_CREATEACCOUNT_ACCOUNT_NAME_LABEL), function(data) return self.enteredAccountName end, function(control, data) self:ActivateEditbox(control.edit, true) end, function(newText) self.enteredAccountName = newText end)
     end
 
     self:AddComboBox(GetString(SI_CREATEACCOUNT_REGION), function(data) return self.selectedCountry end, function(control, data)

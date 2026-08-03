@@ -26,6 +26,10 @@ function QuestTimer:InitializeEvents()
         self:RemoveTimerByIndex(index)
     end
 
+    local function OnQuestListUpdated()
+        self:StartExistingTimers()
+    end
+
     local function OnGamepadPreferredModeChanged()
         self:PerformLayout()
     end
@@ -33,6 +37,7 @@ function QuestTimer:InitializeEvents()
     self.control:RegisterForEvent(EVENT_QUEST_TIMER_UPDATED, OnQuestTimerUpdated)
 	self.control:RegisterForEvent(EVENT_QUEST_TIMER_PAUSED, OnQuestTimerPaused)
 	self.control:RegisterForEvent(EVENT_QUEST_REMOVED, OnQuestRemoved)
+    self.control:RegisterForEvent(EVENT_QUEST_LIST_UPDATED, OnQuestListUpdated)
     self.control:RegisterForEvent(EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, OnGamepadPreferredModeChanged)
 end
 
@@ -92,7 +97,7 @@ function QuestTimer:UpdateTimer(timer, now)
     if not timer.paused and timer.nextUpdate <= now then
         local remainingTime = timer.ends - now
         if remainingTime > 0 then
-            local timeText, nextUpdateDelta = ZO_FormatTime(remainingTime, TIME_FORMAT_STYLE_COLONS, TIME_FORMAT_PRECISION_SECONDS, TIME_FORMAT_DIRECTION_DESCENDING)
+            local timeText, nextUpdateDelta = ZO_FormatTimeLargestTwo(remainingTime, TIME_FORMAT_STYLE_DESCRIPTIVE_MINIMAL)
             timer.time:SetText(timeText)
             timer.nextUpdate = now + nextUpdateDelta
         else
@@ -122,6 +127,8 @@ function QuestTimer:CreateTimerFromIndex(index, suppressLayout)
         if not suppressLayout then
             self:PerformLayout()
         end
+    else
+        self:RemoveTimerByIndex(index, suppressLayout)
     end
 end
 
@@ -129,6 +136,8 @@ function QuestTimer:StartExistingTimers()
 	for i=1, MAX_JOURNAL_QUESTS do
         if IsValidQuestIndex(i) then
             self:CreateTimerFromIndex(i, SUPPRESS_LAYOUT)
+        else
+            self:RemoveTimerByIndex(i, SUPPRESS_LAYOUT)
         end
     end
 
@@ -146,21 +155,11 @@ do
 
     local GAMEPAD_CONSTANTS =
     {
-        anchorPoint = TOPRIGHT,
-        anchorRelativePoint = BOTTOMRIGHT,
-        anchorRelativePointFirstEntry = TOPRIGHT,
-
-        offsetX = -40,
-        offsetFirstY = 9,
         offsetY = 10,
     }
 
     local KEYBOARD_CONSTANTS =
     {
-        anchorPoint = TOPLEFT,
-        anchorRelativePoint = BOTTOMLEFT,
-        anchorRelativePointFirstEntry = TOPLEFT,
-
         offsetY = 5,
     }
 
@@ -188,9 +187,9 @@ do
             timer.label:SetText(caption)
 
             if i == 1 then
-                timer:SetAnchor(constants.anchorPoint, nil, constants.anchorRelativePointFirstEntry, constants.offsetX, constants.offsetFirstY)
+                timer:SetAnchor(TOPRIGHT, nil, TOPRIGHT, 0, 0)
             else
-                timer:SetAnchor(constants.anchorPoint, sortedTimers[i - 1], constants.anchorRelativePoint, constants.offsetX, constants.offsetY)
+                timer:SetAnchor(TOPRIGHT, sortedTimers[i - 1], BOTTOMRIGHT, 0, constants.offsetY)
             end
         end
     end

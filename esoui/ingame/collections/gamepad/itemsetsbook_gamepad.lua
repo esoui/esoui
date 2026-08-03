@@ -163,7 +163,7 @@ function ZO_ItemSetsBook_Gamepad_Base:BuildSubcategoryList(parentCategoryData)
         local MIN_PIECES = 0
         entryData:SetBarValues(MIN_PIECES, numPieces, numUnlockedPieces)
 
-        subcategoryList:AddEntry("ZO_ItemSetsBook_Summary_Gamepad", entryData)
+        subcategoryList:AddEntry("ZO_GamepadMenuEntryWithBarTemplate", entryData)
     end
 
     subcategoryList:Commit()
@@ -499,7 +499,7 @@ function ZO_ItemSetsBook_Gamepad_Base:RefreshCategories()
     end
 
     for _, entryData in ipairs(entryList) do
-        categoryList:AddEntry("ZO_ItemSetsBook_Summary_Gamepad", entryData)
+        categoryList:AddEntry("ZO_GamepadMenuEntryWithBarTemplate", entryData)
     end
 
     categoryList:Commit()
@@ -681,7 +681,7 @@ function ZO_ItemSetsBook_Gamepad_Base:SetupList(list)
     end
 
     list:AddDataTemplateWithHeader("ZO_GamepadMenuEntryTemplate", CategoryEntrySetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate", ZO_ItemSetCollectionCategoryData.Equals)
-    list:AddDataTemplate("ZO_ItemSetsBook_Summary_Gamepad", CategoryEntrySetup, ZO_GamepadMenuEntryTemplateParametricListFunction, ZO_ItemSetCollectionCategoryData.Equals, "Summary")
+    list:AddDataTemplate("ZO_GamepadMenuEntryWithBarTemplate", CategoryEntrySetup, ZO_GamepadMenuEntryTemplateParametricListFunction, ZO_ItemSetCollectionCategoryData.Equals, "Summary")
     list:SetReselectBehavior(ZO_PARAMETRIC_SCROLL_LIST_RESELECT_BEHAVIOR.MATCH_OR_RESET_TO_DEFAULT)
 end
 

@@ -480,7 +480,14 @@
             </Action>
 
             <Action name="ASSIST_NEXT_TRACKED_QUEST">
-                <Down>FOCUSED_QUEST_TRACKER:AssistNext()</Down>
+                <Down>HUD_TRACKER_MANAGER:BeginAssistInteract()</Down>
+                <Up>HUD_TRACKER_MANAGER:EndAssistInteract()</Up>
+            </Action>
+
+            <Action name="GAMEPAD_CYCLE_PINNED_HUD_ACTION">
+                <Down>
+                    HUD_TRACKER_MANAGER:CycleAssistedAspiration()
+                </Down>
             </Action>
 
             <Action name="TOGGLE_ACTIVITY_HUD_TRACKER">
@@ -493,6 +500,8 @@
                         end
                     elseif IsInAdventureZone and IsInAdventureZone() then
                         ADVENTURE_ZONE_MANAGER:ToggleAdventureZonePanel()
+                    elseif IsViewGenericSelectionMenuAvailable() then
+                        SYSTEMS:ShowScene("genericSelector")
                     end
                 </Down>
             </Action>
@@ -736,6 +745,7 @@
             <AllowAction name="START_CHAT_SLASH"/>
             <AllowAction name="CHAT_REPLY_TO_LAST_WHISPER"/>
             <AllowAction name="ASSIST_NEXT_TRACKED_QUEST"/>
+            <AllowAction name="GAMEPAD_CYCLE_PINNED_HUD_ACTION"/>
             <AllowAction name="TOGGLE_HUD_UI"/>
             <AllowAction name="GAME_CAMERA_GAMEPAD_ZOOM"/>
             <AllowAction name="CLEAR_ACTIVE_NARRATION"/>
@@ -1565,6 +1575,16 @@
                 </Down>
                 <Up>return ZO_KeybindStrip_HandleKeybindUp(keybind)</Up>
             </Action>
+        </Category>
+    </Layer>
+
+    <!-- Bindings that block the player using attacks and blocks because those
+    same buttons are used to navigate the battleground scoreboard menu -->
+    <Layer name="BattlegroundBlocking">
+        <Category>
+            <BlockAction name="SPECIAL_MOVE_ATTACK" />
+            <BlockAction name="SPECIAL_MOVE_BLOCK" />
+            <BlockAction name="SPECIAL_MOVE_INTERRUPT" />
         </Category>
     </Layer>
 

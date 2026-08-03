@@ -154,6 +154,10 @@ function ZO_TreeControl:New(initialAnchor, indentXOffset, verticalSpacing)
     return tree
 end
 
+function ZO_TreeControl:GetAnchor()
+    return self.m_InitialAnchor
+end
+
 function ZO_TreeControl:AddChild(atNode, insertedControl, childIndent)
     atNode = atNode or self.m_Root
     

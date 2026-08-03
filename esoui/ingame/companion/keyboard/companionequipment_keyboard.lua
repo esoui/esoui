@@ -34,6 +34,7 @@ function ZO_CompanionEquipment_Keyboard:Initialize(control)
     local DEFAULT_SELECT_SOUND = nil
     ZO_ScrollList_AddDataType(self.list, DATA_TYPE_ITEM, "ZO_PlayerInventorySlot", LIST_ENTRY_HEIGHT, function(rowControl, data) self:SetupItemRow(rowControl, data) end, DEFAULT_HIDE_CALLBACK, DEFAULT_SELECT_SOUND, ZO_InventorySlot_OnPoolReset)
 
+
     -- tabs
     local FILTER_KEYS =
     {
@@ -89,6 +90,7 @@ function ZO_CompanionEquipment_Keyboard:Initialize(control)
 
     self.subFilters = GetSearchFilters(SEARCH_FILTER_KEYS, INVENTORY_BACKPACK)
 
+
     -- sort headers
     local sortKeys = ZO_Inventory_GetDefaultHeaderSortKeys()
 
@@ -111,7 +113,15 @@ function ZO_CompanionEquipment_Keyboard:Initialize(control)
     local SUPPRESS_CALLBACKS = true
     self.sortHeaders:SelectHeaderByKey("statusSortOrder", SUPPRESS_CALLBACKS)
 
+
     ZO_MenuBar_SelectDescriptor(self.tabs, ITEM_TYPE_DISPLAY_CATEGORY_ALL)
+
+
+
+
+
+
+
 
     self.searchBox = control:GetNamedChild("SearchFiltersTextSearchBox");
 
@@ -191,6 +201,7 @@ function ZO_CompanionEquipment_Keyboard:Initialize(control)
     COMPANION_EQUIPMENT_KEYBOARD_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_FRAGMENT_SHOWING then
             TEXT_SEARCH_MANAGER:ActivateTextSearch("companionEquipmentTextSearch")
+            self:UpdateFilters()
             self:UpdateList()
             self:UpdateFreeSlots()
         elseif newState == SCENE_FRAGMENT_HIDDEN then
@@ -206,6 +217,96 @@ function ZO_CompanionEquipment_Keyboard:Initialize(control)
         end
     end)
 end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 function ZO_CompanionEquipment_Keyboard:OnInventoryItemAdded(inventoryType, bagId, slotIndex, newSlotData, suppressItemAlert)
     -- play a brief flash animation on all the filter tabs that match this item's filterTypes
@@ -471,7 +572,13 @@ function ZO_CompanionEquipment_Keyboard:PlayItemAddedAlert(slot, suppressItemAle
 
     local addToFlashingSlots = false
     for _, filter in pairs(self.filters) do
+
         if ZO_ItemFilterUtils.IsSlotInItemTypeDisplayCategoryAndSubcategory(slot, ITEM_TYPE_DISPLAY_CATEGORY_COMPANION, filter.descriptor) then
+
+
+
+
+
             self:AddCategoryFlashAnimationControl(filter.control:GetNamedChild("Flash"))
             addToFlashingSlots = true
         end
@@ -479,7 +586,13 @@ function ZO_CompanionEquipment_Keyboard:PlayItemAddedAlert(slot, suppressItemAle
 
     local currentFilter = self.currentFilter
     for _, subFilter in pairs(self.subFilters[currentFilter.descriptor]) do
+
         if ZO_ItemFilterUtils.IsCompanionSlotInItemTypeDisplayCategoryAndSubcategory(slot, currentFilter.descriptor, subFilter.descriptor) then
+
+
+
+
+
             self:AddCategoryFlashAnimationControl(subFilter.control:GetNamedChild("Flash"))
             addToFlashingSlots = true
         end

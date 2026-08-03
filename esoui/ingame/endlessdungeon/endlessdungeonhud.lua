@@ -7,6 +7,7 @@ function ZO_EndlessDungeonHUD:Initialize(control)
 
     -- Order matters:
     self:InitializeControls()
+    self:InitializeStyles()
     self:InitializeEvents()
     self:RefreshState()
 end
@@ -14,22 +15,25 @@ end
 function ZO_EndlessDungeonHUD:InitializeControls()
     local control = self.control
     control.object = self
+    local scoreContainer = control:GetNamedChild("ScoreContainer")
+    self.scoreContainer = scoreContainer
+    self.hudElementRef = scoreContainer:GetNamedChild("HUDElementRef")
 
     self.alphaTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_EndlessDungeonHUD_AlphaAnimation", self.control)
 
-    self.reviveIconTexture = control:GetNamedChild("ReviveIcon")
+    self.reviveIconTexture = self.scoreContainer:GetNamedChild("ReviveIcon")
     self.reviveIconTexture:SetColor(ZO_NORMAL_TEXT:UnpackRGBA())
 
-    self.reviveLabel = control:GetNamedChild("ReviveLabel")
+    self.reviveLabel = self.scoreContainer:GetNamedChild("ReviveCount")
     self.reviveLabel:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
     self.reviveLabel:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
     self.reviveLabel:SetResizeToFitLabels(true)
     self.reviveLabelTransitionManager = self.reviveLabel:GetOrCreateTransitionManager()
     self.reviveLabelTransitionManager:SetMaxTransitionSteps(50)
 
-    self.scoreHeadingLabel = control:GetNamedChild("ScoreHeadingLabel")
+    self.scoreHeaderLabel = self.scoreContainer:GetNamedChild("Header")
 
-    self.scoreLabel = control:GetNamedChild("ScoreLabel")
+    self.scoreLabel = self.scoreContainer:GetNamedChild("Score")
     self.scoreLabel:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
     self.scoreLabel:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
     self.scoreLabel:SetResizeToFitLabels(true)
@@ -45,11 +49,73 @@ function ZO_EndlessDungeonHUD:InitializeControls()
     ENDLESS_DUNGEON_HUD_FRAGMENT = self.fragment
 end
 
+function ZO_EndlessDungeonHUD:InitializeStyles()
+    local KEYBOARD_STYLE =
+    {
+        containerAnchor = ZO_Anchor:New(BOTTOMRIGHT),
+        scoreHeaderAnchor = ZO_Anchor:New(LEFT, nil, LEFT, 0, 2),
+        scoreOffsetY = -2,
+        reviveIconAnchor = ZO_Anchor:New(LEFT, self.scoreLabel, RIGHT, 17),
+        reviveCountOffsetY = 0,
+        headerFont = "ZoFontGameLargeBold",
+        valueFont = "ZoFontWinH2",
+        iconSize = 40,
+        modifyTextType = MODIFY_TEXT_TYPE_NONE,
+    }
+    local GAMEPAD_STYLE =
+    {
+        containerAnchor = ZO_Anchor:New(BOTTOMLEFT),
+        reviveIconAnchor = ZO_Anchor:New(LEFT),
+        reviveCountOffsetY = 0,
+        scoreHeaderAnchor = ZO_Anchor:New(LEFT, self.reviveLabel, RIGHT, 20, 5),
+        scoreOffsetY = -5,
+        headerFont = "ZoFontGamepad27",
+        valueFont = "ZoFontGamepad42",
+        iconSize = 44,
+        modifyTextType = MODIFY_TEXT_TYPE_UPPERCASE,
+    }
+
+    local KEYBOARD_CONFIG =
+    {
+        defaultAnchor = KEYBOARD_STYLE.containerAnchor,
+    }
+    local GAMEPAD_CONFIG =
+    {
+        defaultAnchor = GAMEPAD_STYLE.containerAnchor,
+    }
+
+    local ENDLESS_DUNGEON_SCORE_OPTIONS =
+    {
+        {
+            type = ZO_HUD_EDITOR_OPTION_TYPES.ENUM,
+            name = GetString(SI_INTERFACE_OPTIONS_SHOW_RAID_LIVES),
+            tooltipText = GetString(SI_INTERFACE_OPTIONS_SHOW_RAID_LIVES_TOOLTIP),
+            key = "ShowLives",
+            valueStringPrefix = "SI_RAIDLIFEVISIBILITYCHOICE",
+            values = { RAID_LIFE_VISIBILITY_CHOICE_OFF, RAID_LIFE_VISIBILITY_CHOICE_AUTOMATIC, RAID_LIFE_VISIBILITY_CHOICE_ON, },
+            defaultValue = function()
+                return tonumber(GetSetting(SETTING_TYPE_UI, UI_SETTING_SHOW_RAID_LIVES))
+            end,
+            dontSave = true,
+            callback = function(element, subKey, oldValue, value)
+                if value ~= oldValue then
+                    SetSetting(SETTING_TYPE_UI, UI_SETTING_SHOW_RAID_LIVES, tostring(value))
+                end
+            end,
+        },
+    }
+
+    local DISPLAY_NAME = GetString(SI_HUD_EDITOR_ENDLESS_DUNGEON_SCORE)
+    HUD_MANAGER:RegisterKeyboardElement(self.scoreContainer, DISPLAY_NAME, KEYBOARD_CONFIG, ENDLESS_DUNGEON_SCORE_OPTIONS)
+    HUD_MANAGER:RegisterGamepadElement(self.scoreContainer, DISPLAY_NAME, GAMEPAD_CONFIG, ENDLESS_DUNGEON_SCORE_OPTIONS)
+    
+    ZO_PlatformStyle:New(ZO_GetCallbackForwardingFunction(self, self.OnPlatformStyleChanged), KEYBOARD_STYLE, GAMEPAD_STYLE)
+end
+
 function ZO_EndlessDungeonHUD:InitializeEvents()
     ENDLESS_DUNGEON_MANAGER:RegisterCallback("AttemptsRemainingChanged", ZO_GetCallbackForwardingFunction(self, self.OnDungeonLivesRemainingUpdated))
     ENDLESS_DUNGEON_MANAGER:RegisterCallback("ScoreChanged", ZO_GetCallbackForwardingFunction(self, self.OnDungeonScoreUpdated))
     ENDLESS_DUNGEON_MANAGER:RegisterCallback("StateChanged", ZO_GetCallbackForwardingFunction(self, self.OnDungeonStateChanged))
-    ZO_PlatformStyle:New(ZO_GetCallbackForwardingFunction(self, self.OnPlatformStyleChanged))
 
     EVENT_MANAGER:RegisterForEvent("EndlessDungeonHUD", EVENT_INTERFACE_SETTING_CHANGED, ZO_GetEventForwardingFunction(self, self.OnInterfaceSettingChanged))
     EVENT_MANAGER:RegisterForEvent("EndlessDungeonHUD", EVENT_PLAYER_ACTIVATED, ZO_GetEventForwardingFunction(self, self.OnPlayerActivated))
@@ -222,51 +288,20 @@ function ZO_EndlessDungeonHUD:OnInterfaceSettingChanged(settingType, settingId)
     end
 end
 
-function ZO_EndlessDungeonHUD:OnPlatformStyleChanged()
-    self.reviveIconTexture:ClearAnchors()
-    self.reviveLabel:ClearAnchors()
-    self.scoreHeadingLabel:ClearAnchors()
-    self.scoreLabel:ClearAnchors()
+function ZO_EndlessDungeonHUD:OnPlatformStyleChanged(style)
+    style.containerAnchor:Set(self.hudElementRef)
+    self.scoreContainer:SetHeight(style.iconSize)
 
-    local useGamepadStyle = IsInGamepadPreferredMode()
-    if useGamepadStyle then
-        self.reviveIconTexture:SetAnchor(BOTTOMLEFT)
-        self.reviveLabel:SetAnchor(LEFT, self.reviveIconTexture, RIGHT, 5, 0)
-        self.scoreHeadingLabel:SetAnchor(LEFT, self.reviveLabel, RIGHT, 20, 5)
-        self.scoreLabel:SetAnchor(LEFT, self.scoreHeadingLabel, RIGHT, 10, -5)
-    else
-        self.reviveLabel:SetAnchor(BOTTOMRIGHT)
-        self.reviveIconTexture:SetAnchor(RIGHT, self.reviveLabel, LEFT, -5, 0)
-        self.scoreLabel:SetAnchor(RIGHT, self.reviveLabel, LEFT, -62, 0)
-        self.scoreHeadingLabel:SetAnchor(RIGHT, self.scoreLabel, LEFT, -5, 2)
-    end
-
-    local headingFont
-    local iconSize
-    local labelFont
-    local modifyTextType
-    local textAlignment
-    if useGamepadStyle then
-        headingFont = "ZoFontGamepad27"
-        iconSize = 44
-        labelFont = "ZoFontGamepad42"
-        modifyTextType = MODIFY_TEXT_TYPE_UPPERCASE
-        textAlignment = TEXT_ALIGN_LEFT
-    else
-        headingFont = "ZoFontGameLargeBold"
-        iconSize = 40
-        labelFont = "ZoFontWinH2"
-        modifyTextType = MODIFY_TEXT_TYPE_NONE
-        textAlignment = TEXT_ALIGN_RIGHT
-    end
-
-    self.reviveIconTexture:SetDimensions(iconSize, iconSize)
-    self.reviveLabel:SetFont(labelFont)
-    self.reviveLabel:SetHorizontalAlignment(textAlignment)
-    self.scoreHeadingLabel:SetFont(headingFont)
-    self.scoreHeadingLabel:SetModifyTextType(modifyTextType)
-    self.scoreLabel:SetFont(labelFont)
-    self.scoreLabel:SetHorizontalAlignment(textAlignment)
+    self.reviveIconTexture:ClearAnchors() -- Prevent cyclic anchoring
+    style.scoreHeaderAnchor:Set(self.scoreHeaderLabel)
+    self.scoreHeaderLabel:SetFont(style.headerFont)
+    self.scoreHeaderLabel:SetModifyTextType(style.modifyTextType)
+    self.scoreLabel:SetAnchorOffsets(5, style.scoreOffsetY)
+    self.scoreLabel:SetFont(style.valueFont)
+    style.reviveIconAnchor:Set(self.reviveIconTexture)
+    self.reviveIconTexture:SetDimensions(style.iconSize, style.iconSize)
+    self.reviveLabel:SetAnchorOffsets(5, style.reviveCountOffsetY)
+    self.reviveLabel:SetFont(style.valueFont)
 end
 
 function ZO_EndlessDungeonHUD:OnPlayerActivated()

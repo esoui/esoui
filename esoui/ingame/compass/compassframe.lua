@@ -2,13 +2,10 @@ ZO_COMPASS_FRAME_HEIGHT_KEYBOARD = 39
 ZO_COMPASS_FRAME_HEIGHT_GAMEPAD = 24
 ZO_COMPASS_FRAME_HEIGHT_BOSSBAR_GAMEPAD = 23
 
-local CompassFrame = ZO_Object:Subclass()
+local MIN_WIDTH = 400
+local MAX_WIDTH = 800
 
-function CompassFrame:New(...)
-    local compassFrame = ZO_Object.New(self)
-    compassFrame:Initialize(...)
-    return compassFrame
-end
+local CompassFrame = ZO_InitializingObject:Subclass()
 
 function CompassFrame:Initialize(control)
     self.control = control
@@ -21,6 +18,112 @@ function CompassFrame:Initialize(control)
 
     control:RegisterForEvent(EVENT_PLAYER_ACTIVATED, function() self:OnPlayerActivated() end)
     control:RegisterForEvent(EVENT_SCREEN_RESIZED, function() self:UpdateWidth() end)
+    
+    ApplyTemplateToControl(self.control, ZO_GetPlatformTemplate("ZO_CompassFrame"))
+
+    local COMPASS_OPTIONS =
+    {
+        {
+            type = ZO_HUD_EDITOR_OPTION_TYPES.ENUM,
+            name = GetString(SI_INTERFACE_OPTIONS_COMPASS_ACTIVE_QUESTS),
+            tooltipText = GetString(SI_INTERFACE_OPTIONS_COMPASS_ACTIVE_QUESTS_TOOLTIP),
+            key = "ActiveQuests",
+            valueStringPrefix = "SI_COMPASSACTIVEQUESTSCHOICE",
+            values = { COMPASS_ACTIVE_QUESTS_CHOICE_OFF, COMPASS_ACTIVE_QUESTS_CHOICE_ON, COMPASS_ACTIVE_QUESTS_CHOICE_FOCUSED, },
+            valueTooltips = { GetString(SI_INTERFACE_OPTIONS_COMPASS_ACTIVE_QUESTS_OFF_RESTRICTION), "", GetString(SI_INTERFACE_OPTIONS_COMPASS_ACTIVE_QUESTS_FOCUSED_RESTRICTION) },
+            defaultValue = function()
+                return tonumber(GetSetting(SETTING_TYPE_UI, UI_SETTING_COMPASS_ACTIVE_QUESTS))
+            end,
+            dontSave = true,
+            callback = function(element, subKey, oldValue, value)
+                if value ~= oldValue then
+                    SetSetting(SETTING_TYPE_UI, UI_SETTING_COMPASS_ACTIVE_QUESTS, tostring(value))
+                end
+            end,
+        },
+        {
+            type = ZO_HUD_EDITOR_OPTION_TYPES.BOOLEAN,
+            name = GetString(SI_INTERFACE_OPTIONS_SHOW_QUEST_BESTOWERS),
+            tooltipText = GetString(SI_INTERFACE_OPTIONS_SHOW_QUEST_BESTOWERS_TOOLTIP),
+            key = "QuestBestowers",
+            defaultValue = function()
+                return GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_SHOW_QUEST_BESTOWER_INDICATORS)
+            end,
+            dontSave = true,
+            callback = function(element, subKey, oldValue, value)
+                if value ~= oldValue then
+                    SetSetting(SETTING_TYPE_UI, UI_SETTING_SHOW_QUEST_BESTOWER_INDICATORS, tostring(value))
+                end
+            end,
+        },
+        {
+            type = ZO_HUD_EDITOR_OPTION_TYPES.BOOLEAN,
+            name = GetString(SI_INTERFACE_OPTIONS_COMPASS_QUEST_GIVERS),
+            tooltipText = GetString(SI_INTERFACE_OPTIONS_COMPASS_QUEST_GIVERS_TOOLTIP),
+            key = "CompassQuestGivers",
+            defaultValue = function()
+                return GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_COMPASS_QUEST_GIVERS)
+            end,
+            enabled = function()
+                return GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_SHOW_QUEST_BESTOWER_INDICATORS)
+            end,
+            dontSave = true,
+            callback = function(element, subKey, oldValue, value)
+                if value ~= oldValue then
+                    SetSetting(SETTING_TYPE_UI, UI_SETTING_COMPASS_QUEST_GIVERS, tostring(value))
+                end
+            end,
+        },
+        {
+            type = ZO_HUD_EDITOR_OPTION_TYPES.BOOLEAN,
+            name = GetString(SI_INTERFACE_OPTIONS_COMPASS_COMPANION),
+            tooltipText = GetString(SI_INTERFACE_OPTIONS_COMPASS_COMPANION_TOOLTIP),
+            key = "Companions",
+            defaultValue = function()
+                return GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_COMPASS_COMPANION)
+            end,
+            dontSave = true,
+            callback = function(element, subKey, oldValue, value)
+                if value ~= oldValue then
+                    SetSetting(SETTING_TYPE_UI, UI_SETTING_COMPASS_COMPANION, tostring(value))
+                end
+            end,
+        },
+        {
+            type = ZO_HUD_EDITOR_OPTION_TYPES.BOOLEAN,
+            name = GetString(SI_INTERFACE_OPTIONS_COMPASS_TARGET_MARKERS),
+            tooltipText = GetString(SI_INTERFACE_OPTIONS_COMPASS_TARGET_MARKERS_TOOLTIP),
+            key = "TargetMarkers",
+            defaultValue = function()
+                return GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_COMPASS_TARGET_MARKERS)
+            end,
+            dontSave = true,
+            callback = function(element, subKey, oldValue, value)
+                if value ~= oldValue then
+                    SetSetting(SETTING_TYPE_UI, UI_SETTING_COMPASS_TARGET_MARKERS, tostring(value))
+                end
+            end,
+        },
+        {
+            type = ZO_HUD_EDITOR_OPTION_TYPES.BOOLEAN,
+            name = GetString(SI_INTERFACE_OPTIONS_COMPASS_DISTANCE_TRACKING),
+            tooltipText = GetString(SI_INTERFACE_OPTIONS_COMPASS_DISTANCE_TRACKING_TOOLTIP),
+            key = "DistanceTracking",
+            defaultValue = function()
+                return GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_COMPASS_DISTANCE_TRACKING)
+            end,
+            dontSave = true,
+            callback = function(element, subKey, oldValue, value)
+                if value ~= oldValue then
+                    SetSetting(SETTING_TYPE_UI, UI_SETTING_COMPASS_DISTANCE_TRACKING, tostring(value))
+                end
+            end,
+        }
+    }
+
+    local elementName = GetString(SI_HUD_EDITOR_COMPASS)
+    self.keyboardHUDElement = HUD_MANAGER:RegisterKeyboardElement(self.control, elementName, { defaultAnchor = ZO_Anchor:New(TOP, nil, TOP, 0, 40) }, COMPASS_OPTIONS)
+    self.gamepadHUDElement = HUD_MANAGER:RegisterGamepadElement(self.control, elementName, { defaultAnchor = ZO_Anchor:New(TOP, nil, TOP, 0, 58) }, COMPASS_OPTIONS)
 
     self:ApplyStyle() -- Setup initial visual style based on current mode.
     self.control:RegisterForEvent(EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function() self:OnGamepadPreferredModeChanged() end)
@@ -41,15 +144,15 @@ function CompassFrame:ApplyStyle()
             frame:GetNamedChild("Left"):SetHeight(ZO_COMPASS_FRAME_HEIGHT_BOSSBAR_GAMEPAD)
             frame:GetNamedChild("Right"):SetHeight(ZO_COMPASS_FRAME_HEIGHT_BOSSBAR_GAMEPAD)
         end
+        self.gamepadHUDElement:RevertOffsetModifications()
+    else
+        self.keyboardHUDElement:RevertOffsetModifications()
     end
 end
 
 function CompassFrame:OnGamepadPreferredModeChanged()
     self:ApplyStyle()
 end
-
-local MIN_WIDTH = 400
-local MAX_WIDTH = 800
 
 function CompassFrame:UpdateWidth()
     local screenWidth = GuiRoot:GetWidth()

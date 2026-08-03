@@ -289,26 +289,10 @@ function ZO_TamrielTomesReward_Shared:Refresh()
     local tamrielTomesRewardData = self:GetTamrielTomesRewardData()
     ZO_CurrencyControl_SetSimpleCurrency(self.costLabel, CURT_TOME_POINTS, tamrielTomesRewardData.rewardCost, self.currencyOptions)
 
-    local quantity = tamrielTomesRewardData.rewardQuantity
-    local isRewardList = tamrielTomesRewardData:IsRewardList()
-    if isRewardList then
-        local rewardListData = tamrielTomesRewardData:GetRewardListData()
-        if rewardListData then
-            quantity = #rewardListData - 1
-        end
-    end
-    if quantity <= 1 then
-        quantity = ""
-    else
-        quantity = ZO_CommaDelimitNumber(quantity)
-        if isRewardList then
-            quantity = zo_strformat(SI_TAMRIEL_TOMES_REWARD_LIST_QUANTITY_FORMATTER, quantity)
-        end
-    end
-    self.quantityLabel:SetText(quantity)
-
-    local iconTextureFile = tamrielTomesRewardData:GetPlatformLootIcon()
-    self.iconTexture:SetTexture(iconTextureFile)
+    local rewardData = tamrielTomesRewardData:GetRewardData()
+    local rewardQuantityString = rewardData and rewardData:GetFormattedDisplayQuantity() or ""
+    self.quantityLabel:SetText(rewardQuantityString)
+    self.iconTexture:SetTexture(tamrielTomesRewardData:GetPlatformLootIcon())
 
     local displayQuality = tamrielTomesRewardData:GetRewardDisplayQuality()
     local displayQualityColor = GetItemQualityColor(displayQuality)

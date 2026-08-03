@@ -70,7 +70,30 @@ function ZO_WorldMapZoneStory_Gamepad:RefreshInfo()
         local maxProgressLabelWidth = 0
         local zoneId = self:GetCurrentZoneStoryZoneId()
         for _, zoneCompletionType in ipairs(ZO_ZONE_STORY_ACTIVITY_COMPLETION_TYPES_SORTED_LIST) do
-            if GetNumZoneActivitiesForZoneCompletionType(zoneId, zoneCompletionType) > 0 then
+            local numZoneActivitiesForZoneCompletionType = GetNumZoneActivitiesForZoneCompletionTypeAndIndex(zoneId, zoneCompletionType)
+            if DoesZoneStoryActivityCompletionTypeUseIndex(zoneCompletionType) then
+                for zoneCompletionIndex = 1, numZoneActivitiesForZoneCompletionType do
+                    local control = self.rowPool:AcquireObject()
+                    control.icon:SetTexture(ZO_ZoneStories_Manager.GetCompletionTypeIcon(zoneCompletionType, zoneCompletionIndex))
+                    local numCompletedActivities, totalActivities, numUnblockedActivities, blockingBranchErrorStringId, text = ZO_ZoneStories_Manager.GetActivityCompletionProgressValuesAndText(zoneId, zoneCompletionType, zoneCompletionIndex)
+                    --Clear out the desired width so the label sizes based on the text in it
+                    control.progressLabel:SetWidth(0)
+                    control.progressLabel:SetText(text)
+                    local color = ZO_ZoneStories_Manager.IsZoneCompletionTypeComplete(zoneId, zoneCompletionType, zoneCompletionIndex) and ZO_NORMAL_TEXT or ZO_SELECTED_TEXT
+                    control.progressLabel:SetColor(color:UnpackRGB())
+                    maxProgressLabelWidth = zo_max(maxProgressLabelWidth, control.progressLabel:GetTextWidth())
+                    control.progressBar:SetMinMax(0, totalActivities > 0 and totalActivities or 1)
+                    control.progressBar:SetValue(numCompletedActivities)
+
+                    if previousControl then
+                        control:SetAnchor(TOPLEFT, previousControl, BOTTOMLEFT, 0, 5)
+                    else
+                        control:SetAnchor(TOPLEFT, self.scrollChild)
+                    end
+
+                    previousControl = control
+                end
+            elseif numZoneActivitiesForZoneCompletionType > 0 then
                 local control = self.rowPool:AcquireObject()
                 control.icon:SetTexture(ZO_ZoneStories_Manager.GetCompletionTypeIcon(zoneCompletionType))
                 local numCompletedActivities, totalActivities, numUnblockedActivities, blockingBranchErrorStringId, text = ZO_ZoneStories_Manager.GetActivityCompletionProgressValuesAndText(zoneId, zoneCompletionType)
@@ -134,7 +157,8 @@ function ZO_WorldMapInfoZoneStory_Gamepad:UpdateTooltip()
         if targetData then
             local zoneData = targetData.zoneData
             local zoneCompletionType = targetData.zoneCompletionType
-            ZO_ZoneStories_Gamepad.LayoutCompletionTypeTooltip(zoneData, zoneCompletionType, self.tooltipSelectedIndex)
+            local zoneCompletionIndex = targetData.zoneCompletionIndex
+            ZO_ZoneStories_Gamepad.LayoutCompletionTypeTooltip(zoneData, zoneCompletionType, self.tooltipSelectedIndex, zoneCompletionIndex)
         end
     end
 end
@@ -148,7 +172,7 @@ function ZO_WorldMapInfoZoneStory_Gamepad:InitializeList()
         self.tooltipSelectedIndex = COMPLETION_ACTIVITY_DESCRIPTION_TOOLTIP_INDEX
         local targetData = self.list:GetTargetData()
         if targetData then
-            local completedActivities = ZO_ZoneStories_Manager.GetActivityCompletionProgressValues(targetData.zoneData.id, targetData.zoneCompletionType)
+            local completedActivities = ZO_ZoneStories_Manager.GetActivityCompletionProgressValues(targetData.zoneData.id, targetData.zoneCompletionType, targetData.zoneCompletionIndex)
             if completedActivities > 0 then
                 -- the first tooltip is the activity description tooltip so if we've already completed some of the
                 -- activities for this type we want to skip to the next tooltip
@@ -237,7 +261,26 @@ function ZO_WorldMapInfoZoneStory_Gamepad:RefreshInfo()
         local zoneId = self:GetCurrentZoneStoryZoneId()
         local zoneData = ZONE_STORIES_MANAGER:GetZoneData(zoneId)
         for _, zoneCompletionType in ipairs(ZO_ZONE_STORY_ACTIVITY_COMPLETION_TYPES_SORTED_LIST) do
-            if GetNumZoneActivitiesForZoneCompletionType(zoneId, zoneCompletionType) > 0 then
+            local numZoneActivitiesForZoneCompletionType = GetNumZoneActivitiesForZoneCompletionTypeAndIndex(zoneId, zoneCompletionType)
+            if DoesZoneStoryActivityCompletionTypeUseIndex(zoneCompletionType) then
+                for zoneCompletionIndex = 1, numZoneActivitiesForZoneCompletionType do
+                    local descriptor = GetZoneStoryActivityNameForCompletionTypeAndIndex(zoneId, zoneCompletionType, zoneCompletionIndex)
+                    local icon = ZO_ZoneStories_Manager.GetCompletionTypeIcon(zoneCompletionType, zoneCompletionIndex)
+                    local numCompletedActivities, totalActivities, numUnblockedActivities, _, text = ZONE_STORIES_MANAGER.GetActivityCompletionProgressValuesAndText(zoneId, zoneCompletionType, zoneCompletionIndex)
+
+                    local entryData = ZO_GamepadEntryData:New(descriptor, icon)
+                    entryData.zoneData = zoneData
+                    entryData.zoneCompletionType = zoneCompletionType
+                    entryData.zoneCompletionIndex = zoneCompletionIndex
+                    local MIN_ACTIVITIES = 0
+                    entryData:SetBarValues(MIN_ACTIVITIES, totalActivities, numCompletedActivities)
+                    entryData:AddSubLabel(text)
+                    entryData:SetFontScaleOnSelection(false)
+                    entryData:SetShowUnselectedSublabels(true)
+                    entryData:SetShowBarEvenWhenUnselected(false)
+                    self.list:AddEntry("ZO_WorldMapInfoZoneStoryEntry_Gamepad", entryData)
+                end
+            elseif numZoneActivitiesForZoneCompletionType > 0 then
                 local descriptor = GetString("SI_ZONECOMPLETIONTYPE", zoneCompletionType)
                 local icon = ZO_ZoneStories_Manager.GetCompletionTypeIcon(zoneCompletionType)
                 local numCompletedActivities, totalActivities, numUnblockedActivities, _, text = ZONE_STORIES_MANAGER.GetActivityCompletionProgressValuesAndText(zoneId, zoneCompletionType)

@@ -11,12 +11,7 @@ function ZO_QuestJournal_Quests_Gamepad:Initialize(control, owner)
     self.owner = owner
 
     local DONT_ACTIVATE_ON_SHOW = false -- we'll manually set our list
-    
-    ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_DONT_CREATE, DONT_ACTIVATE_ON_SHOW)
-    
-    
-
-
+    ZO_Gamepad_ParametricList_Screen.Initialize(self, control, ZO_GAMEPAD_HEADER_TABBAR_CREATE, DONT_ACTIVATE_ON_SHOW)
 
     self:GetHeaderFragment():SetAlwaysAnimate(false)
 
@@ -175,6 +170,8 @@ function ZO_QuestJournal_Quests_Gamepad:OnHiding()
 
     ZO_GamepadGenericHeader_Deactivate(self.header)
 
+    GAMEPAD_QUEST_JOURNAL_ROOT_SCENE:RemoveFragmentGroup(self.questInfoFragmentGroup)
+
     self:SwitchActiveList(nil)
 
     self:SetKeybindButtonGroup(nil)
@@ -214,10 +211,8 @@ function ZO_QuestJournal_Quests_Gamepad:SwitchActiveList(listDescriptor)
 
             self:SetCurrentList(self.questList)
 
-            
-
-
-
+            local tabBarEntries = self.owner:GetTabBarEntries()
+            self.headerData.tabBarEntries = tabBarEntries
             local BLOCK_CALLBACKS = true
             ZO_GamepadGenericHeader_Refresh(self.header, self.headerData, BLOCK_CALLBACKS)
             ZO_GamepadGenericHeader_Refresh(self.contentHeader, self.contentHeaderData)
@@ -231,7 +226,7 @@ function ZO_QuestJournal_Quests_Gamepad:SwitchActiveList(listDescriptor)
     end
 end
 
-internalassert(ZONE_DISPLAY_TYPE_MAX_VALUE == 13, "A zone display type has been added. Please add it to RegisterIcons and RegisterTooltips")
+internalassert(ZONE_DISPLAY_TYPE_MAX_VALUE == 14, "A zone display type has been added. Please add it to RegisterIcons and RegisterTooltips")
 
 function ZO_QuestJournal_Quests_Gamepad:RegisterIcons()
     self:RegisterIconTexture(ZO_ANY_QUEST_TYPE, ZONE_DISPLAY_TYPE_SOLO,             "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_instance.dds")
@@ -246,6 +241,7 @@ function ZO_QuestJournal_Quests_Gamepad:RegisterIcons()
     self:RegisterIconTexture(ZO_ANY_QUEST_TYPE, ZONE_DISPLAY_TYPE_COMPANION,        "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_companion.dds")
     self:RegisterIconTexture(ZO_ANY_QUEST_TYPE, ZONE_DISPLAY_TYPE_ENDLESS_DUNGEON,  "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_endlessDungeon.dds")
     self:RegisterIconTexture(ZO_ANY_QUEST_TYPE, ZONE_DISPLAY_TYPE_ADVENTURE_ZONE,   "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_adventureZone.dds")
+    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE, ZONE_DISPLAY_TYPE_SOLO_DUNGEON,     "EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_solo_dungeon.dds")
 end
 
 function ZO_QuestJournal_Quests_Gamepad:RegisterTooltips()
@@ -262,6 +258,7 @@ function ZO_QuestJournal_Quests_Gamepad:RegisterTooltips()
     local companionIcon = zo_iconFormat("EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_companion.dds", ICON_SIZE, ICON_SIZE)
     local endlessDungeonIcon = zo_iconFormat("EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_endlessDungeon.dds", ICON_SIZE, ICON_SIZE)
     local adventureZoneIcon = zo_iconFormat("EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_adventureZone.dds", ICON_SIZE, ICON_SIZE)
+    local soloDungeonIcon = zo_iconFormat("EsoUI/Art/Journal/Gamepad/gp_questTypeIcon_solo_dungeon.dds", ICON_SIZE, ICON_SIZE)
 
     self:RegisterTooltipText(ZO_ANY_QUEST_TYPE, ZONE_DISPLAY_TYPE_SOLO,             zo_strformat(SI_GAMEPAD_QUEST_JOURNAL_INSTANCE_TYPE_SOLO, soloIcon))
     self:RegisterTooltipText(ZO_ANY_QUEST_TYPE, ZONE_DISPLAY_TYPE_DUNGEON,          zo_strformat(SI_GAMEPAD_QUEST_JOURNAL_INSTANCE_TYPE_DUNGEON, dungeonIcon))
@@ -275,6 +272,7 @@ function ZO_QuestJournal_Quests_Gamepad:RegisterTooltips()
     self:RegisterTooltipText(ZO_ANY_QUEST_TYPE, ZONE_DISPLAY_TYPE_COMPANION,        zo_strformat(SI_GAMEPAD_QUEST_JOURNAL_COMPANION, companionIcon))
     self:RegisterTooltipText(ZO_ANY_QUEST_TYPE, ZONE_DISPLAY_TYPE_ENDLESS_DUNGEON,  zo_strformat(SI_GAMEPAD_QUEST_JOURNAL_ENDLESS_DUNGEON, endlessDungeonIcon))
     self:RegisterTooltipText(ZO_ANY_QUEST_TYPE, ZONE_DISPLAY_TYPE_ADVENTURE_ZONE,   zo_strformat(SI_GAMEPAD_QUEST_JOURNAL_ADVENTURE_ZONE, adventureZoneIcon))
+    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE, ZONE_DISPLAY_TYPE_SOLO_DUNGEON,     zo_strformat(SI_GAMEPAD_QUEST_JOURNAL_SOLO_DUNGEON, soloDungeonIcon))
 end
 
 function ZO_QuestJournal_Quests_Gamepad:GetQuestDataString()
@@ -443,9 +441,7 @@ function ZO_QuestJournal_Quests_Gamepad:RefreshDetails()
     ZO_GamepadGenericHeader_Refresh(self.contentHeader, self.contentHeaderData)
 
     local questData = self:GetSelectedQuestData()
-
-    -- TODO Rumors: make sure we want to add the fragments this way
-    local hasQuestData = (questData ~= nil)
+    local hasQuestData = questData ~= nil
     if hasQuestData then
         GAMEPAD_QUEST_JOURNAL_ROOT_SCENE:AddFragmentGroup(self.questInfoFragmentGroup)
     else
@@ -465,7 +461,7 @@ function ZO_QuestJournal_Quests_Gamepad:RefreshDetails()
 
         if completed then
             local goalCondition, _, _, _, goalBackgroundText, goalDescription = GetJournalQuestEnding(questIndex)
-       
+
             self.bgText:SetText(goalBackgroundText)
             self.stepText:SetText(goalDescription)
             self.conditionTextLabel:SetText(GetString(SI_QUEST_JOURNAL_QUEST_TASKS))

@@ -1144,11 +1144,11 @@ end
 
 function ZO_MapLocationPins_Manager:AddLocation(locationIndex)
     if IsMapLocationVisible(locationIndex) then
-        local icon, x, y = GetMapLocationIcon(locationIndex)
+        local icon, x, y, radius = GetMapLocationIcon(locationIndex)
 
         if icon ~= "" and ZO_WorldMap_IsNormalizedPointInsideMapBounds(x, y) then
             local tag = ZO_MapPin.CreateLocationPinTag(locationIndex, icon)
-            ZO_WorldMap_GetPinManager():CreatePin(MAP_PIN_TYPE_LOCATION, tag, x, y)
+            ZO_WorldMap_GetPinManager():CreatePin(MAP_PIN_TYPE_LOCATION, tag, x, y, radius)
         end
     end
 end

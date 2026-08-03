@@ -1,16 +1,20 @@
 ZO_KEYBOARD_LOOT_HISTORY_ENTRY_SPACING_Y = -1
 local KEYBOARD_LOOT_HISTORY_ENTRY_TEMPLATE = "ZO_LootHistory_KeyboardEntry"
 
-local ZO_LootHistory_Keyboard = ZO_LootHistory_Shared:Subclass()
+ZO_LOOT_HISTORY_KEYBOARD_HUD_ELEMENT_WIDTH = 350
+ZO_LOOT_HISTORY_KEYBOARD_HUD_ELEMENT_MIN_HEIGHT = 330
 
-function ZO_LootHistory_Keyboard:New(...)
-    return ZO_LootHistory_Shared.New(self, ...)
-end
+local ZO_LootHistory_Keyboard = ZO_LootHistory_Shared:Subclass()
 
 function ZO_LootHistory_Keyboard:Initialize(control)
     self.control = control
 
     ZO_LootHistory_Shared.Initialize(self, control)
+    
+    local DISPLAY_NAME = ZO_LootHistory_Shared.GetHUDManagerElementDisplayName()
+    local DEFAULT_CONFIG = nil
+    local OPTIONS = ZO_LootHistory_Shared.GetHUDManagerElementOptions()
+    HUD_MANAGER:RegisterKeyboardElement(control, DISPLAY_NAME, DEFAULT_CONFIG, ZO_LootHistory_Shared.GetHUDManagerElementOptions())
 end
 
 function ZO_LootHistory_Keyboard:InitializeFragment()
@@ -27,12 +31,10 @@ function ZO_LootHistory_Keyboard:InitializeFragment()
 end
 
 function ZO_LootHistory_Keyboard:InitializeFadingControlBuffer(control)
-    local HORIZ_OFFSET = 0
-    local VERTICAL_OFFSET = -84
     local MAX_ENTRIES = 6
     local CONTAINER_SHOW_TIME_MS = self:GetContainerShowTime()
     local PERSISTENT_CONTAINER_SHOW_TIME_MS = self:GetPersistentContainerShowTime()
-    local anchor = ZO_Anchor:New(BOTTOMRIGHT, GuiRoot, BOTTOMRIGHT, HORIZ_OFFSET, VERTICAL_OFFSET)
+    local anchor = ZO_Anchor:New(BOTTOMRIGHT, self.control, BOTTOMRIGHT, 0, 11, ANCHOR_CONSTRAINS_X)
 
     self.lootStreamPersistent = self:CreateFadingStationaryControlBuffer(control:GetNamedChild("PersistentContainer"), "ZO_LootHistory_FadeShared", "ZO_LootHistory_IconEntranceShared", "ZO_LootHistory_ContainerFadeShared", anchor, MAX_ENTRIES, PERSISTENT_CONTAINER_SHOW_TIME_MS, "KeyboardPersistent")
     self.lootStream = self:CreateFadingStationaryControlBuffer(control:GetNamedChild("Container"), "ZO_LootHistory_FadeShared", "ZO_LootHistory_IconEntranceShared", "ZO_LootHistory_ContainerFadeShared", anchor, MAX_ENTRIES, CONTAINER_SHOW_TIME_MS, "Keyboard")

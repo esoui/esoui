@@ -31,6 +31,8 @@ EsoUI\Pregame\PregameAnimatedBackground\OneTamrielBackground.xml
 EsoUI\Pregame\Gamepad\PreloginOverlay.lua
 EsoUI\Pregame\Gamepad\PreloginOverlay.xml
 
+EsoUI\Pregame\AccountLogin\LegalDocsProvider.lua
+
 EsoUI\Pregame\AccountLogin\Keyboard\ZO_LoginManager.lua
 EsoUI\Pregame\AccountLogin\Keyboard\ZO_LoginTemplates.xml
 EsoUI\Pregame\AccountLogin\Keyboard\ZO_LoginBase.lua

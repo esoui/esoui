@@ -92,7 +92,7 @@ end
 -- Zone Display Type --
 do
     -- If this assert is hit, also check SharedLoadingScreen.lua's ZONE_DISPLAY_TYPE_ICONS table.
-    internalassert(ZONE_DISPLAY_TYPE_MAX_VALUE == 13, "A new Zone Display Type may need a new icon")
+    internalassert(ZONE_DISPLAY_TYPE_MAX_VALUE == 14, "A new Zone Display Type may need a new icon")
     local ZONE_DISPLAY_TYPE_ICONS =
     {
         [ZONE_DISPLAY_TYPE_SOLO] = "EsoUI/Art/Icons/mapKey/mapKey_soloInstance.dds",
@@ -106,6 +106,7 @@ do
         [ZONE_DISPLAY_TYPE_ZONE_STORY] = "EsoUI/Art/Icons/mapKey/mapKey_zoneStory.dds",
         [ZONE_DISPLAY_TYPE_ENDLESS_DUNGEON] = "EsoUI/Art/Icons/mapKey/mapKey_endlessDungeon.dds",
         [ZONE_DISPLAY_TYPE_ADVENTURE_ZONE] = "EsoUI/Art/Icons/mapKey/mapKey_adventureZone.dds",
+        [ZONE_DISPLAY_TYPE_SOLO_DUNGEON] = "EsoUI/Art/Icons/mapKey/mapKey_solo_dungeon.dds",
     }
 
     function ZO_GetZoneDisplayTypeIcon(zoneDisplayType)

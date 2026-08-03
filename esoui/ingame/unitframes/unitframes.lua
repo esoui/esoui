@@ -1884,7 +1884,7 @@ function ZO_UnitFrameObject:UpdateCaption()
         local caption = ""
         local unitTag = self:GetUnitTag()
         if IsUnitPlayer(unitTag) then
-            caption = ZO_GetSecondaryPlayerNameWithTitleFromUnitTag(unitTag)
+            caption = ZO_GetSecondaryPlayerNameWithTertiaryAndTitleFromUnitTag(unitTag)
         else
             local unitCaption = GetUnitCaption(unitTag)
             if unitCaption then
@@ -2009,6 +2009,22 @@ local function CreateGroupAnchorFrames()
     smallFrame:SetDimensions(constants.GROUP_FRAME_SIZE_X, (constants.GROUP_FRAME_SIZE_Y + constants.GROUP_FRAME_PAD_Y) * STANDARD_GROUP_SIZE_THRESHOLD)
     smallFrame:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, constants.GROUP_FRAME_BASE_OFFSET_X, constants.GROUP_FRAME_BASE_OFFSET_Y)
 
+    --TODO Custom HUD: Look into being able to move each small group unit frame individually
+    --Register small frames with the HUD Editor
+    local SMALL_GROUP_KEYBOARD_FRAME_CONFIG =
+    {
+        defaultAnchor = ZO_Anchor:New(TOPLEFT, GuiRoot, TOPLEFT, KEYBOARD_CONSTANTS.GROUP_FRAME_BASE_OFFSET_X, KEYBOARD_CONSTANTS.GROUP_FRAME_BASE_OFFSET_Y)
+    }
+
+    local SMALL_GROUP_GAMEPAD_FRAME_CONFIG =
+    {
+        defaultAnchor = ZO_Anchor:New(TOPLEFT, GuiRoot, TOPLEFT, GAMEPAD_CONSTANTS.GROUP_FRAME_BASE_OFFSET_X, GAMEPAD_CONSTANTS.GROUP_FRAME_BASE_OFFSET_Y)
+    }
+
+    local smallFrameElementName = GetString(SI_HUD_EDITOR_SMALL_GROUP_UNIT_FRAMES)
+    HUD_MANAGER:RegisterKeyboardElement(smallFrame, smallFrameElementName, SMALL_GROUP_KEYBOARD_FRAME_CONFIG)
+    HUD_MANAGER:RegisterGamepadElement(smallFrame, smallFrameElementName, SMALL_GROUP_GAMEPAD_FRAME_CONFIG)
+
     -- Create raid group anchor frames, these are positioned at the default locations
     for i = 1, NUM_SUBGROUPS do
         local raidFrame = CreateControlFromVirtual("ZO_LargeGroupAnchorFrame"..i, ZO_UnitFramesGroups, "ZO_RaidFrameAnchor")
@@ -2034,6 +2050,30 @@ local function CreateGroupAnchorFrames()
 
         local x, y = GetGroupAnchorFrameOffsets(i, constants.GROUP_STRIDE, constants)
         raidFrame:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, x, y)
+
+        --TODO Custom HUD: Look into being able to large group unit frames as a single element
+        --We create more columns than the UI actually uses, so only register the columns with the HUD Editor if it's possible to use them
+        if i <= KEYBOARD_CONSTANTS.NUM_COLUMNS then
+            local keyboardX, keyboardY = GetGroupAnchorFrameOffsets(i, KEYBOARD_CONSTANTS.GROUP_STRIDE, KEYBOARD_CONSTANTS)
+            local LARGE_GROUP_KEYBOARD_FRAME_CONFIG =
+            {
+                defaultAnchor = ZO_Anchor:New(TOPLEFT, GuiRoot, TOPLEFT, keyboardX, keyboardY)
+            }
+
+            local elementName = zo_strformat(SI_HUD_EDITOR_LARGE_GROUP_UNIT_FRAMES_COLUMN, i)
+            HUD_MANAGER:RegisterKeyboardElement(raidFrame, elementName, LARGE_GROUP_KEYBOARD_FRAME_CONFIG)
+        end
+
+        --We create more columns than the UI actually uses, so only register the columns with the HUD Editor if it's possible to use them
+        if i <= GAMEPAD_CONSTANTS.NUM_COLUMNS then
+            local gamepadX, gamepadY = GetGroupAnchorFrameOffsets(i, GAMEPAD_CONSTANTS.GROUP_STRIDE, GAMEPAD_CONSTANTS)
+            local LARGE_GROUP_GAMEPAD_FRAME_CONFIG =
+            {
+                defaultAnchor = ZO_Anchor:New(TOPLEFT, GuiRoot, TOPLEFT, gamepadX, gamepadY)
+            }
+            local elementName = zo_strformat(SI_HUD_EDITOR_LARGE_GROUP_UNIT_FRAMES_COLUMN, i)
+            HUD_MANAGER:RegisterGamepadElement(raidFrame, elementName, LARGE_GROUP_GAMEPAD_FRAME_CONFIG)
+        end
     end
 end
 
@@ -2077,11 +2117,25 @@ end
 
 local function UpdateAnchorFrameVisuals()
     local constants = GetPlatformConstants()
+    local gamepadMode = IsInGamepadPreferredMode()
 
-    -- Note: Small group anchor frame is currently the same for all platforms.
+    -- Small group anchor frame
     local groupFrame = ZO_SmallGroupAnchorFrame
+    local groupFrameTemplate = ZO_GetPlatformTemplate("ZO_GroupFrameAnchor")
+    ApplyTemplateToControl(groupFrame, groupFrameTemplate)
     groupFrame:SetDimensions(constants.GROUP_FRAME_SIZE_X, (constants.GROUP_FRAME_SIZE_Y + constants.GROUP_FRAME_PAD_Y) * STANDARD_GROUP_SIZE_THRESHOLD)
     SetAnchorOffsets(groupFrame, constants.GROUP_FRAME_BASE_OFFSET_X, constants.GROUP_FRAME_BASE_OFFSET_Y)
+
+    local smallFrameElement
+    if gamepadMode then
+        smallFrameElement = HUD_MANAGER:GetGamepadElementForControl(groupFrame)
+    else
+        smallFrameElement = HUD_MANAGER:GetKeyboardElementForControl(groupFrame)
+    end
+
+    if smallFrameElement then
+        smallFrameElement:RevertOffsetModifications()
+    end
 
     -- Raid group anchor frames.
     local raidTemplate = ZO_GetPlatformTemplate("ZO_RaidFrameAnchor")
@@ -2131,6 +2185,17 @@ local function UpdateAnchorFrameVisuals()
         raidFrame:SetDimensions(constants.RAID_FRAME_ANCHOR_CONTAINER_WIDTH, constants.RAID_FRAME_ANCHOR_CONTAINER_HEIGHT)
         local offsetX, offsetY = GetGroupAnchorFrameOffsets(i, constants.GROUP_STRIDE, constants)
         SetAnchorOffsets(raidFrame, offsetX, offsetY)
+
+        local largeFrameElement
+        if gamepadMode then
+            largeFrameElement = HUD_MANAGER:GetGamepadElementForControl(raidFrame)
+        else
+            largeFrameElement = HUD_MANAGER:GetKeyboardElementForControl(raidFrame)
+        end
+
+        if largeFrameElement then
+            largeFrameElement:RevertOffsetModifications()
+        end
     end
 
     CALLBACK_MANAGER:FireCallbacks("OnUnitFrameAnchorsUpdated")
@@ -2309,6 +2374,32 @@ local function CreateTargetFrame()
     local NO_TEMPLATE = nil
     local targetFrame = UnitFrames:CreateFrame("reticleover", targetFrameAnchor, ZO_UNIT_FRAME_BAR_TEXT_MODE_HIDDEN, "ZO_TargetUnitFrame", NO_TEMPLATE, CreateTargetFrameVisualizer)
     targetFrame:SetAnimateShowHide(true)
+
+    local TARGET_FRAME_OPTIONS =
+    {
+        {
+            type = ZO_HUD_EDITOR_OPTION_TYPES.ENUM,
+            name = GetString(SI_INTERFACE_OPTIONS_RESOURCE_NUMBERS),
+            tooltipText = GetString(SI_INTERFACE_OPTIONS_RESOURCE_NUMBERS_TOOLTIP),
+            key = "ResourceNumbers",
+            valueStringPrefix = "SI_RESOURCENUMBERSSETTING",
+            values = { RESOURCE_NUMBERS_SETTING_OFF, RESOURCE_NUMBERS_SETTING_NUMBER_ONLY, RESOURCE_NUMBERS_SETTING_PERCENT_ONLY, RESOURCE_NUMBERS_SETTING_NUMBER_AND_PERCENT, },
+            defaultValue = function()
+                return tonumber(GetSetting(SETTING_TYPE_UI, UI_SETTING_RESOURCE_NUMBERS))
+            end,
+            dontSave = true,
+            callback = function(element, subKey, oldValue, value)
+                if value ~= oldValue then
+                    SetSetting(SETTING_TYPE_UI, UI_SETTING_RESOURCE_NUMBERS, tostring(value))
+                end
+            end,
+        },
+    }
+
+    local elementName = GetString(SI_HUD_EDITOR_TARGET_UNIT_FRAME)
+    local DEFAULT_CONFIG = nil
+    HUD_MANAGER:RegisterKeyboardElement(targetFrame.frame, elementName, DEFAULT_CONFIG, TARGET_FRAME_OPTIONS)
+    HUD_MANAGER:RegisterGamepadElement(targetFrame.frame, elementName, DEFAULT_CONFIG, TARGET_FRAME_OPTIONS)
 
     ZO_UnitFrames_UpdateWindow("reticleover", UNIT_CHANGED)
 
@@ -2852,6 +2943,10 @@ local function RegisterForEvents()
         UnitFrames:UpdateNames()
     end
 
+    local function OnOverlandDifficultyUpdated()
+        UnitFrames:UpdateNames()
+    end
+
     ZO_UnitFrames:RegisterForEvent(EVENT_TARGET_CHANGED, OnTargetChanged)
     ZO_UnitFrames:AddFilterForEvent(EVENT_TARGET_CHANGED, REGISTER_FILTER_UNIT_TAG, "reticleover")
     ZO_UnitFrames:RegisterForEvent(EVENT_UNIT_CHARACTER_NAME_CHANGED, OnUnitCharacterNameChanged)
@@ -2883,6 +2978,7 @@ local function RegisterForEvents()
     ZO_UnitFrames:RegisterForEvent(EVENT_GROUP_ELECTION_PROGRESS_UPDATED, OnGroupElectionUpdate)
     ZO_UnitFrames:RegisterForEvent(EVENT_GROUP_ELECTION_RESULT, OnGroupElectionUpdate)
     ZO_UnitFrames:RegisterForEvent(EVENT_TARGET_MARKER_UPDATE, OnTargetMarkerUpdate)
+    ZO_UnitFrames:RegisterForEvent(EVENT_OVERLAND_DIFFICULTY_CHANGED, OnOverlandDifficultyUpdated)
 
     CALLBACK_MANAGER:RegisterCallback("TargetOfTargetEnabledChanged", OnTargetOfTargetEnabledChanged)
 end

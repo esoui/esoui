@@ -17,17 +17,19 @@ local PLAYER_UNIT_TAG = "player"
 local TARGET_UNIT_TAG = "reticleover"
 local BUFF_PADDING = 5
 
+local function IsBuffDebuffEnabled()
+    return tonumber(GetSetting(SETTING_TYPE_BUFFS, BUFFS_SETTING_ALL_ENABLED)) ~= 0
+end
+
+local function AreDebuffsEnabled()
+    return IsBuffDebuffEnabled() and tonumber(GetSetting(SETTING_TYPE_BUFFS, BUFFS_SETTING_DEBUFFS_ENABLED)) ~= 0
+end
+
 -------------------------
 --Unit Container Object--
 -------------------------
 
-ZO_BuffDebuff_ContainerObject = ZO_Object:Subclass()
-
-function ZO_BuffDebuff_ContainerObject:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
+ZO_BuffDebuff_ContainerObject = ZO_InitializingObject:Subclass()
 
 function ZO_BuffDebuff_ContainerObject:Initialize(control, buffControlPool, unitTag, initEvent)
     self.control = control
@@ -224,20 +226,108 @@ end
 --Top Level Class--
 -------------------
 
-ZO_BuffDebuff = ZO_Object:Subclass()
-
-function ZO_BuffDebuff:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
+ZO_BuffDebuff = ZO_InitializingObject:Subclass()
 
 function ZO_BuffDebuff:Initialize(control)
     self.control = control
     self.controlPool = ZO_ControlPool:New("ZO_BuffDebuffIcon", nil, "Buff")
 
-    local selfContainer = ZO_BuffDebuff_ContainerObject:New(control:GetNamedChild("SelfContainer"), self.controlPool, PLAYER_UNIT_TAG, EVENT_PLAYER_ACTIVATED)
+    local selfContainerControl = control:GetNamedChild("SelfContainer")
+    local selfContainer = ZO_BuffDebuff_ContainerObject:New(selfContainerControl, self.controlPool, PLAYER_UNIT_TAG, EVENT_PLAYER_ACTIVATED)
     local targetContainer = ZO_BuffDebuff_ContainerObject:New(control:GetNamedChild("TargetContainer"), self.controlPool, TARGET_UNIT_TAG, EVENT_RETICLE_TARGET_CHANGED)
+
+    local PLAYER_BUFF_DEBUFF_OPTIONS =
+    {
+        {
+            type = ZO_HUD_EDITOR_OPTION_TYPES.ENUM,
+            name = GetString(SI_HUD_EDITOR_CUSTOM_OPTION_VISIBLE),
+            tooltipText = GetString(SI_BUFFS_OPTIONS_ALL_ENABLED_TOOLTIP),
+            key = "Visible",
+            valueStringPrefix = "SI_BUFFDEBUFFENABLEDCHOICE",
+            values = { BUFF_DEBUFF_ENABLED_CHOICE_DONT_SHOW, BUFF_DEBUFF_ENABLED_CHOICE_AUTOMATIC, BUFF_DEBUFF_ENABLED_CHOICE_ALWAYS_SHOW, },
+            defaultValue = function()
+                return tonumber(GetSetting(SETTING_TYPE_BUFFS, BUFFS_SETTING_ALL_ENABLED))
+            end,
+            dontSave = true,
+            callback = function(element, subKey, oldValue, value)
+                if value ~= oldValue then
+                    SetSetting(SETTING_TYPE_BUFFS, BUFFS_SETTING_ALL_ENABLED, tostring(value))
+                end
+            end,
+        },
+        {
+            type = ZO_HUD_EDITOR_OPTION_TYPES.BOOLEAN,
+            name = GetString(SI_BUFFS_OPTIONS_BUFFS_ENABLED_FOR_SELF),
+            tooltipText = GetString(SI_BUFFS_OPTIONS_BUFFS_ENABLED_FOR_SELF_TOOLTIP),
+            key = "Buffs",
+            defaultValue = function()
+                return GetSetting_Bool(SETTING_TYPE_BUFFS, BUFFS_SETTING_BUFFS_ENABLED_FOR_SELF)
+            end,
+            enabled = function()
+                return IsBuffDebuffEnabled() and tonumber(GetSetting(SETTING_TYPE_BUFFS, BUFFS_SETTING_BUFFS_ENABLED)) ~= BUFF_DEBUFF_ENABLED_CHOICE_DONT_SHOW
+            end,
+            dontSave = true,
+            callback = function(element, subKey, oldValue, value)
+                if value ~= oldValue then
+                    SetSetting(SETTING_TYPE_BUFFS, BUFFS_SETTING_BUFFS_ENABLED_FOR_SELF, tostring(value))
+                end
+            end,
+        },
+        {
+            type = ZO_HUD_EDITOR_OPTION_TYPES.BOOLEAN,
+            name = GetString(SI_BUFFS_OPTIONS_DEBUFFS_ENABLED_FOR_SELF),
+            tooltipText = GetString(SI_BUFFS_OPTIONS_DEBUFFS_ENABLED_FOR_SELF_TOOLTIP),
+            key = "Debuffs",
+            defaultValue = function()
+                return GetSetting_Bool(SETTING_TYPE_BUFFS, BUFFS_SETTING_DEBUFFS_ENABLED_FOR_SELF)
+            end,
+            enabled = AreDebuffsEnabled,
+            dontSave = true,
+            callback = function(element, subKey, oldValue, value)
+                if value ~= oldValue then
+                    SetSetting(SETTING_TYPE_BUFFS, BUFFS_SETTING_DEBUFFS_ENABLED_FOR_SELF, tostring(value))
+                end
+            end,
+        },
+        {
+            type = ZO_HUD_EDITOR_OPTION_TYPES.BOOLEAN,
+            name = GetString(SI_BUFFS_OPTIONS_LONG_EFFECTS),
+            tooltipText = GetString(SI_BUFFS_OPTIONS_LONG_EFFECTS_TOOLTIP),
+            key = "LongEffects",
+            defaultValue = function()
+                return GetSetting_Bool(SETTING_TYPE_BUFFS, BUFFS_SETTING_LONG_EFFECTS)
+            end,
+            enabled = IsBuffDebuffEnabled,
+            dontSave = true,
+            callback = function(element, subKey, oldValue, value)
+                if value ~= oldValue then
+                    SetSetting(SETTING_TYPE_BUFFS, BUFFS_SETTING_LONG_EFFECTS, tostring(value))
+                end
+            end,
+        },
+        {
+            type = ZO_HUD_EDITOR_OPTION_TYPES.BOOLEAN,
+            name = GetString(SI_BUFFS_OPTIONS_PERMANENT_EFFECTS),
+            tooltipText = GetString(SI_BUFFS_OPTIONS_PERMANENT_EFFECTS_TOOLTIP),
+            key = "PermanentEffects",
+            defaultValue = function()
+                return GetSetting_Bool(SETTING_TYPE_BUFFS, BUFFS_SETTING_PERMANENT_EFFECTS)
+            end,
+            enabled = IsBuffDebuffEnabled,
+            dontSave = true,
+            callback = function(element, subKey, oldValue, value)
+                if value ~= oldValue then
+                    SetSetting(SETTING_TYPE_BUFFS, BUFFS_SETTING_PERMANENT_EFFECTS, tostring(value))
+                end
+            end,
+        },
+    }
+
+    -- Target will be registered after the anchor is processed in OnTargetFrameCreated
+    local DEFAULT_CONFIG = nil
+    local elementName = GetString(SI_HUD_EDITOR_BUFF_DEBUFF_PLAYER)
+    HUD_MANAGER:RegisterKeyboardElement(selfContainerControl, elementName, DEFAULT_CONFIG, PLAYER_BUFF_DEBUFF_OPTIONS)
+    HUD_MANAGER:RegisterGamepadElement(selfContainerControl, elementName, DEFAULT_CONFIG, PLAYER_BUFF_DEBUFF_OPTIONS)
 
     self.containerObjectsByUnitTag =
     {
@@ -297,6 +387,98 @@ function ZO_BuffDebuff:RegisterForEvents()
         local targetContainerControl = self.containerObjectsByUnitTag[TARGET_UNIT_TAG]:GetControl()
         targetContainerControl:SetAnchor(CENTER, targetFrameControl:GetNamedChild("Caption"), BOTTOM, 0, 40)
         targetContainerControl:SetParent(targetFrameControl)
+
+        local TARGET_BUFF_DEBUFF_OPTIONS =
+        {
+            {
+                type = ZO_HUD_EDITOR_OPTION_TYPES.ENUM,
+                name = GetString(SI_HUD_EDITOR_CUSTOM_OPTION_VISIBLE),
+                tooltipText = GetString(SI_BUFFS_OPTIONS_ALL_ENABLED_TOOLTIP),
+                key = "Visible",
+                valueStringPrefix = "SI_BUFFDEBUFFENABLEDCHOICE",
+                values = { BUFF_DEBUFF_ENABLED_CHOICE_DONT_SHOW, BUFF_DEBUFF_ENABLED_CHOICE_AUTOMATIC, BUFF_DEBUFF_ENABLED_CHOICE_ALWAYS_SHOW, },
+                defaultValue = function()
+                    return tonumber(GetSetting(SETTING_TYPE_BUFFS, BUFFS_SETTING_ALL_ENABLED))
+                end,
+                dontSave = true,
+                callback = function(element, subKey, oldValue, value)
+                    if value ~= oldValue then
+                        SetSetting(SETTING_TYPE_BUFFS, BUFFS_SETTING_ALL_ENABLED, tostring(value))
+                    end
+                end,
+            },
+            {
+                type = ZO_HUD_EDITOR_OPTION_TYPES.BOOLEAN,
+                name = GetString(SI_BUFFS_OPTIONS_DEBUFFS_ENABLED_FOR_TARGET),
+                tooltipText = GetString(SI_BUFFS_OPTIONS_DEBUFFS_ENABLED_FOR_TARGET_TOOLTIP),
+                key = "Debuffs",
+                defaultValue = function()
+                    return GetSetting_Bool(SETTING_TYPE_BUFFS, BUFFS_SETTING_DEBUFFS_ENABLED_FOR_TARGET)
+                end,
+                enabled = AreDebuffsEnabled,
+                dontSave = true,
+                callback = function(element, subKey, oldValue, value)
+                    if value ~= oldValue then
+                        SetSetting(SETTING_TYPE_BUFFS, BUFFS_SETTING_DEBUFFS_ENABLED_FOR_TARGET, tostring(value))
+                    end
+                end,
+            },
+            {
+                type = ZO_HUD_EDITOR_OPTION_TYPES.BOOLEAN,
+                name = GetString(SI_BUFFS_OPTIONS_DEBUFFS_ENABLED_FOR_TARGET_FROM_OTHERS),
+                tooltipText = GetString(SI_BUFFS_OPTIONS_DEBUFFS_ENABLED_FOR_TARGET_FROM_OTHERS_TOOLTIP),
+                key = "DebuffsFromOthers",
+                defaultValue = function()
+                    return GetSetting_Bool(SETTING_TYPE_BUFFS, BUFFS_SETTING_DEBUFFS_ENABLED_FOR_TARGET_FROM_OTHERS)
+                end,
+                enabled = function()
+                    return IsBuffDebuffEnabled() and tonumber(GetSetting(SETTING_TYPE_BUFFS, BUFFS_SETTING_DEBUFFS_ENABLED_FOR_TARGET)) ~= 0
+                end,
+                dontSave = true,
+                callback = function(element, subKey, oldValue, value)
+                    if value ~= oldValue then
+                        SetSetting(SETTING_TYPE_BUFFS, BUFFS_SETTING_DEBUFFS_ENABLED_FOR_TARGET_FROM_OTHERS, tostring(value))
+                    end
+                end,
+            },
+            {
+                type = ZO_HUD_EDITOR_OPTION_TYPES.BOOLEAN,
+                name = GetString(SI_BUFFS_OPTIONS_LONG_EFFECTS),
+                tooltipText = GetString(SI_BUFFS_OPTIONS_LONG_EFFECTS_TOOLTIP),
+                key = "LongEffects",
+                defaultValue = function()
+                    return GetSetting_Bool(SETTING_TYPE_BUFFS, BUFFS_SETTING_LONG_EFFECTS)
+                end,
+                enabled = IsBuffDebuffEnabled,
+                dontSave = true,
+                callback = function(element, subKey, oldValue, value)
+                    if value ~= oldValue then
+                        SetSetting(SETTING_TYPE_BUFFS, BUFFS_SETTING_LONG_EFFECTS, tostring(value))
+                    end
+                end,
+            },
+            {
+                type = ZO_HUD_EDITOR_OPTION_TYPES.BOOLEAN,
+                name = GetString(SI_BUFFS_OPTIONS_PERMANENT_EFFECTS),
+                tooltipText = GetString(SI_BUFFS_OPTIONS_PERMANENT_EFFECTS_TOOLTIP),
+                key = "PermanentEffects",
+                defaultValue = function()
+                    return GetSetting_Bool(SETTING_TYPE_BUFFS, BUFFS_SETTING_PERMANENT_EFFECTS)
+                end,
+                enabled = IsBuffDebuffEnabled,
+                dontSave = true,
+                callback = function(element, subKey, oldValue, value)
+                    if value ~= oldValue then
+                        SetSetting(SETTING_TYPE_BUFFS, BUFFS_SETTING_PERMANENT_EFFECTS, tostring(value))
+                    end
+                end,
+            },
+        }
+
+        local DEFAULT_CONFIG = nil
+        local elementName = GetString(SI_HUD_EDITOR_BUFF_DEBUFF_TARGET)
+        HUD_MANAGER:RegisterKeyboardElement(targetContainerControl, elementName, DEFAULT_CONFIG, TARGET_BUFF_DEBUFF_OPTIONS)
+        HUD_MANAGER:RegisterGamepadElement(targetContainerControl, elementName, DEFAULT_CONFIG, TARGET_BUFF_DEBUFF_OPTIONS)
     end
 
     self.control:RegisterForEvent(EVENT_INTERFACE_SETTING_CHANGED, function(_, _, settingId) OnInterfaceSettingChanged(settingId) end)

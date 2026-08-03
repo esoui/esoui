@@ -111,9 +111,25 @@ local COMPANION_ORDERED_EQUIP_TYPES =
     EQUIP_SLOT_RING2,
 }
 
+
+
+
+
+
+
+
 function ZO_Character_EnumerateOrderedEquipSlots(bagId)
     if bagId == BAG_COMPANION_WORN then
+
         return ipairs(COMPANION_ORDERED_EQUIP_TYPES)
+
+
+
+
+
+
+
+
     else
         return ipairs(ORDERED_EQUIP_TYPES)
     end
@@ -174,3 +190,14 @@ local SLOT_TEXTURES =
 function ZO_Character_GetEmptyEquipSlotTexture(equipSlot)
     return SLOT_TEXTURES[equipSlot]
 end
+
+
+
+
+
+
+
+
+
+
+

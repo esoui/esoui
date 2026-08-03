@@ -32,6 +32,10 @@ function KeepUpgradeType_Shared:GetRate()
     return GetKeepUpgradeRate(self.keepId, self.bgQueryType, self.upgradeLine)
 end
 
+function KeepUpgradeType_Shared:GetHighestUpgradeLevel()
+    return GetKeepHighestUpgradeLevel(self.keepId, self.bgQueryType, self.upgradeLine)
+end
+
 --Keep Upgrade Type
 
 ZO_KeepUpgrade_Shared = KeepUpgradeType_Shared:Subclass()
@@ -46,7 +50,8 @@ function ZO_KeepUpgrade_Shared:SetResourceType(resourceType)
 end
 
 function ZO_KeepUpgrade_Shared:GetUpgradeLevel()
-    return GetKeepResourceLevel(self.keepId, self.bgQueryType, self.resourceType)
+    local LIMIT_TO_HIGHEST_UPGRADE_LEVEL = true
+    return GetKeepResourceLevel(self.keepId, self.bgQueryType, self.resourceType, LIMIT_TO_HIGHEST_UPGRADE_LEVEL)
 end
 
 function ZO_KeepUpgrade_Shared:GetUpgradeLevelProgress(level)
@@ -112,10 +117,12 @@ function ZO_ResourceUpgrade_Shared:SetUpgradePath(path)
 end
 
 function ZO_ResourceUpgrade_Shared:GetUpgradeLevel()
+    local LIMIT_TO_HIGHEST_UPGRADE_LEVEL = true
+
     if(self.upgradePath == UPGRADEPATH_DEFENSIVE) then
-        return GetKeepDefensiveLevel(self.keepId, self.bgQueryType)
+        return GetKeepDefensiveLevel(self.keepId, self.bgQueryType, LIMIT_TO_HIGHEST_UPGRADE_LEVEL)
     else
-        return GetKeepProductionLevel(self.keepId, self.bgQueryType)
+        return GetKeepProductionLevel(self.keepId, self.bgQueryType, LIMIT_TO_HIGHEST_UPGRADE_LEVEL)
     end
 end
 

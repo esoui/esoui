@@ -430,7 +430,7 @@ function ZO_SkillLineData_Base:GetRankXPValues()
 end
 
 function ZO_SkillLineData_Base:IsSkillLineOrAbilitiesNew()
-    return self:IsNew() or self:AnySkillHasUpdatedStatus()
+    return (self:IsNew() or self:AnySkillHasUpdatedStatus()) and self:IsAvailable()
 end
 
 --[[

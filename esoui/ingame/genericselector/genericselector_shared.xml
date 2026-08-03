@@ -1,0 +1,41 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_GenericSelectorItem_Shared" hidden="true" mouseEnabled="true" virtual="true">
+            <OnInitialized name="GenericSelectorItemShared">
+                ZO_GenericSelectorItem_Shared.OnControlInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Texture name="$(parent)Icon" level="3">
+                    <Anchor point="TOP"/>
+                    <Dimensions x="140" y="140"/>
+                </Texture>
+                <Texture name="$(parent)Highlight" level="1">
+                    <Anchor point="CENTER" relativeTo="$(parent)Icon"/>
+                    <Dimensions x="140" y="140"/>
+                </Texture>
+                <Label name="$(parent)Name" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" horizontalAlignment="CENTER" maxLineCount="2" wrapMode="ELLIPSIS">
+                    <Anchor point="CENTER" relativePoint="BOTTOM" offsetY="-30"/>
+                    <Dimensions x="220"/>
+                </Label>
+                <Texture name="$(parent)SelectedIcon" textureFile="EsoUI\Art\Miscellaneous\check_icon_64.dds" level="4">
+                    <Anchor point="TOPLEFT" offsetX="15" offsetY="10"/>
+                    <Dimensions x="32" y="32"/>
+                </Texture>
+            </Controls>
+        </Control>
+        <TopLevelControl name="ZO_GenericSelector_SharedTL" resizeToFitDescendents="true" hidden="true" virtual="true">
+            <Anchor point="CENTER" offsetY="-10"/>
+            <ResizeToFitPadding width="100" height="100"/>
+            <Controls>
+                <Backdrop name="$(parent)BG" excludeFromResizeToFitExtents="true">
+                    <Anchor point="TOPLEFT" offsetX="-20" offsetY="-20"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="20" offsetY="20"/>
+                </Backdrop>
+                <Label name="$(parent)Title" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE">
+                    <Anchor point="TOP" offsetY="50"/>
+                </Label>
+                <Control name="$(parent)List"/>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

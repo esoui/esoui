@@ -47,7 +47,15 @@ function ZO_Tooltip:AddTypeSlotUniqueLine(itemLink, itemType, section, text1, te
     end
 
     if GetItemLinkActorCategory(itemLink) == GAMEPLAY_ACTOR_CATEGORY_COMPANION then
-        section:AddLine(GetString(SI_ITEM_FORMAT_STR_COMPANION))
+
+
+
+
+
+            section:AddLine(GetString(SI_ITEM_FORMAT_STR_COMPANION))
+
+
+
     end
 
     local lineText

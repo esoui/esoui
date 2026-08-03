@@ -1,34 +1,14 @@
-local KEYBOARD_STYLE =
-{
-    FONT_COUNT = "ZoFontGameShadow",
-    TOP_LEVEL_PRIMARY_ANCHOR_OFFSET_Y = 10,
-}
-
-local GAMEPAD_STYLE =
-{
-    FONT_COUNT = "ZoFontGamepad34",
-    TOP_LEVEL_PRIMARY_ANCHOR_OFFSET_Y = 20,
-}
-
 local MAX_ICON_COUNT = 4
 
 ------------------
 --Initialization--
 ------------------
 
-ZO_ReadyCheckTracker = ZO_Object:Subclass()
-
-function ZO_ReadyCheckTracker:New(...)
-    local tracker = ZO_Object.New(self)
-    tracker:Initialize(...)
-    return tracker
-end
+ZO_ReadyCheckTracker = ZO_HUDTracker_Base:Subclass()
 
 function ZO_ReadyCheckTracker:Initialize(control)
-    self.control = control
-    control.owner = self
+    ZO_HUDTracker_Base.Initialize(self, control)
 
-    self.container = control:GetNamedChild("Container")
     self.iconsContainer = self.container:GetNamedChild("Icons")
 
     self.iconControls = {}
@@ -36,30 +16,37 @@ function ZO_ReadyCheckTracker:Initialize(control)
         table.insert(self.iconControls, self.iconsContainer:GetNamedChild("Icon" .. i))
     end
 
-    self.countLabel = self.container:GetNamedChild("Count")
+    READY_CHECK_TRACKER_FRAGMENT = self:GetFragment()
+end
 
-    local allConstants = { KEYBOARD_STYLE, GAMEPAD_STYLE }
-    for _, constants in ipairs(allConstants) do
-        constants.TOP_LEVEL_PRIMARY_ANCHOR = ZO_Anchor:New(TOPRIGHT, ZO_ActivityTracker, BOTTOMRIGHT, 0, constants.TOP_LEVEL_PRIMARY_ANCHOR_OFFSET_Y)
-        constants.CONTAINER_PRIMARY_ANCHOR = ZO_Anchor:New(TOPRIGHT)
-        constants.COUNT_PRIMARY_ANCHOR = ZO_Anchor:New(TOPRIGHT)
-    end
+function ZO_ReadyCheckTracker:InitializeStyles()
+    self.styles =
+    {
+        gamepad =
+        {
+            FONT_HEADER = "ZoFontGamepad34",
+        }
+    }
+    ZO_HUDTracker_Base.InitializeStyles(self)
+end
 
-    KEYBOARD_STYLE.TOP_LEVEL_SECONDARY_ANCHOR = ZO_Anchor:New(TOPLEFT, ZO_ActivityTracker, BOTTOMLEFT, 0, KEYBOARD_STYLE.TOP_LEVEL_PRIMARY_ANCHOR_OFFSET_Y)
-    KEYBOARD_STYLE.CONTAINER_SECONDARY_ANCHOR = ZO_Anchor:New(TOPLEFT)
-    KEYBOARD_STYLE.COUNT_SECONDARY_ANCHOR = ZO_Anchor:New(TOPLEFT)
+function ZO_ReadyCheckTracker:GetHUDElementInfo()
+    local DISPLAY_NAME = nil -- Will be controlled via ActivityTracker
+    return DISPLAY_NAME
+end
 
-    KEYBOARD_STYLE.ICONS_PRIMARY_ANCHOR = ZO_Anchor:New(TOPLEFT)
-    GAMEPAD_STYLE.ICONS_PRIMARY_ANCHOR = ZO_Anchor:New(TOPRIGHT)
+function ZO_ReadyCheckTracker:GetHUDElementOptionKeys()
+    local KEY = nil -- Will be controlled via ActivityTracker
+    return KEY
+end
 
-    ZO_PlatformStyle:New(function(style) self:ApplyPlatformStyle(style) end, KEYBOARD_STYLE, GAMEPAD_STYLE)
-
-    READY_CHECK_TRACKER_FRAGMENT = ZO_HUDFadeSceneFragment:New(self.container)
-
-    self:RegisterEvents()
+function ZO_ReadyCheckTracker:GetParentTracker()
+    return ACTIVITY_TRACKER
 end
 
 function ZO_ReadyCheckTracker:RegisterEvents()
+    ZO_HUDTracker_Base.RegisterEvents(self)
+
     local function Update()
         self:Update()
     end
@@ -101,7 +88,7 @@ do
             local activityType = GetLFGReadyCheckActivityType()
 
             if ZO_IsActivityTypeDungeon(activityType) and pendingTotal <= MAX_ICON_COUNT then
-                self.countLabel:SetHidden(true)
+                self.headerLabel:SetHidden(true)
                 self.iconsContainer:SetHidden(false)
 
                 local currentIndex = 1
@@ -117,42 +104,27 @@ do
                     iconControls[unusedIndex]:SetHidden(true)
                 end
             else
-                self.countLabel:SetText(zo_strformat(SI_READY_CHECK_TRACKER_COUNT_FORMAT, pendingTotal))
-                self.countLabel:SetHidden(false)
+                self.headerLabel:SetText(zo_strformat(SI_READY_CHECK_TRACKER_COUNT_FORMAT, pendingTotal))
+                self.headerLabel:SetHidden(false)
                 self.iconsContainer:SetHidden(true)
             end
+            self:GetFragment():SetHiddenForReason("Inactive", false, DEFAULT_HUD_DURATION, DEFAULT_HUD_DURATION)
         else
             self.iconsContainer:SetHidden(true)
-            self.countLabel:SetHidden(true)
+            self.headerLabel:SetHidden(true)
+            self:GetFragment():SetHiddenForReason("Inactive", true, DEFAULT_HUD_DURATION, DEFAULT_HUD_DURATION)
         end
+
+        ZO_HUDTracker_Base.Update(self)
     end
 end
 
-function ZO_ReadyCheckTracker:ApplyPlatformStyle(style)
-    self.countLabel:SetFont(style.FONT_COUNT)
-
-    self.control:ClearAnchors()
-    style.TOP_LEVEL_PRIMARY_ANCHOR:AddToControl(self.control)
-    if style.TOP_LEVEL_SECONDARY_ANCHOR then
-        style.TOP_LEVEL_SECONDARY_ANCHOR:AddToControl(self.control)
-    end
-
-    self.container:ClearAnchors()
-    style.CONTAINER_PRIMARY_ANCHOR:AddToControl(self.container)
-    if style.CONTAINER_SECONDARY_ANCHOR then
-        style.CONTAINER_SECONDARY_ANCHOR:AddToControl(self.container)
-    end
-
-    self.iconsContainer:ClearAnchors()
-    style.ICONS_PRIMARY_ANCHOR:AddToControl(self.iconsContainer)
-
-    self.countLabel:ClearAnchors()
-    style.COUNT_PRIMARY_ANCHOR:AddToControl(self.countLabel)
-    if style.COUNT_SECONDARY_ANCHOR then
-        style.COUNT_SECONDARY_ANCHOR:AddToControl(self.countLabel)
-    end
+function ZO_ReadyCheckTracker:GetPriority()
+    return ZO_HUD_TRACKER_PRIORITY.READY_CHECK
 end
 
 function ZO_ReadyCheckTracker_OnInitialized(control)
     READY_CHECK_TRACKER = ZO_ReadyCheckTracker:New(control)
 end
+
+HUD_TRACKER_MANAGER:RegisterTracker("ZO_ReadyCheckTracker_Template", "ZO_ReadyCheckTrackerTopLevel")

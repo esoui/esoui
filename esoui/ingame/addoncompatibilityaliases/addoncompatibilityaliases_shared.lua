@@ -87,3 +87,58 @@ end
 function GetReturningPlayerPrimaryRewardData(rewardIndex)
     return GetPromotionalEventPersonalCampaignPrimaryRewardData(PROMOTIONAL_EVENTS_PERSONAL_CAMPAIGN_TYPE_RETURNING_PLAYER, rewardIndex)
 end
+
+function ZoIsOfficialLanguageSupported()
+    return true
+end
+
+-- Refactored the names to make more sense
+ZO_Tracker.GetContainerControl = ZO_Tracker.GetTrackerControl
+
+-- Renamed tracker
+ZO_PromotionalEventTracker = ZO_TimedActivityTracker
+PROMOTIONAL_EVENT_TRACKER_FRAGMENT = TIMED_ACTIVITY_TRACKER_FRAGMENT
+PROMOTIONAL_EVENT_TRACKER = TIMED_ACTIVITY_TRACKER
+ZO_PromotionalEventTracker_TL = ZO_TimedActivityTracker_TL
+
+-- Zone Guide Updates
+AreAllZoneStoryActivitiesCompleteForZoneCompletionType = AreAllZoneStoryActivitiesCompleteForZoneCompletionTypeAndIndex
+GetNumZoneActivitiesForZoneCompletionType = GetNumZoneActivitiesForZoneCompletionTypeAndIndex
+GetNumUnblockedZoneStoryActivitiesForZoneCompletionType = GetNumUnblockedZoneStoryActivitiesForZoneCompletionTypeAndIndex
+GetNumCompletedZoneActivitiesForZoneCompletionType = GetNumCompletedZoneActivitiesForZoneCompletionTypeAndIndex
+
+-- Crossplay changes
+PRIMARY_PLAYER_NAME_SETTING_PREFER_USERID = PRIMARY_PLAYER_NAME_SETTING_PREFER_PLATFORM
+
+-- Furniture Action Preview changes
+local NO_VARIATION_INDEX = 0
+
+GetNumInventoryItemPreviewCollectibleActions = GetNumInventoryItemPreviewActions
+GetInventoryItemPreviewCollectibleActionDisplayName = GetInventoryItemPreviewActionDisplayName
+PreviewInventoryItemCollectibleAction = function(bag, slotIndex, action)
+    PreviewInventoryItemAction(bag, slotIndex, NO_VARIATION_INDEX, action)
+end
+
+GetNumRewardPreviewCollectibleActions = GetNumRewardPreviewActions
+GetRewardPreviewCollectibleActionDisplayName = GetRewardPreviewActionDisplayName
+PreviewRewardCollectibleAction = function(rewardId, action)
+    PreviewRewardAction(rewardId, NO_VARIATION_INDEX, action)
+end
+
+GetNumStoreEntryPreviewCollectibleActions = GetNumStoreEntryPreviewActions
+GetStoreEntryPreviewCollectibleActionDisplayName = GetStoreEntryPreviewActionDisplayName
+PreviewStoreEntryCollectibleAction = function(storeEntryIndex, action)
+    PreviewStoreEntryAction(storeEntryIndex, NO_VARIATION_INDEX, action)
+end
+
+GetNumTradingHouseSearchResultItemPreviewCollectibleActions = GetNumTradingHouseSearchResultItemPreviewActions
+GetTradingHouseSearchResultItemPreviewCollectibleActionDisplayName = GetTradingHouseSearchResultItemPreviewActionDisplayName
+PreviewTradingHouseSearchResultItemCollectibleAction = function(index, action)
+    PreviewTradingHouseSearchResultItemAction(index, NO_VARIATION_INDEX, action)
+end
+
+ZO_VengeanceLoadoutData.GetName = ZO_VengeanceLoadoutData.GetRawName
+ZO_VengeancePerkData.GetName = ZO_VengeancePerkData.GetRawName
+ZO_VeterancyRankData.GetName = ZO_VeterancyRankData.GetRawName
+ZO_VengeanceLoadoutData.GetPerkNameBySlot = ZO_VengeanceLoadoutData.GetRawPerkNameBySlot
+ZO_Veterancy_Manager.GetCurrentRankName = ZO_Veterancy_Manager.GetCurrentRankRawName

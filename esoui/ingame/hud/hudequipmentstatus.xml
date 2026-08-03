@@ -17,6 +17,9 @@
                 <Texture name="$(parent)ArmorIndicator" textureFile="EsoUI/Art/HUD/broken_armor.dds">
                     <Dimensions x="40" y="40"/>
                 </Texture>
+                <Control name="$(parent)HUDElementRef">
+                    <Dimensions x="80"/>
+                </Control>
             </Controls>
         </Control>
         <Control name="ZO_HUDEquipmentStatus_Gamepad_Template" virtual="true">
@@ -28,9 +31,12 @@
                 <Texture name="$(parent)ArmorIndicator" textureFile="EsoUI/Art/HUD/Gamepad/gp_broken_armor.dds">
                     <Dimensions x="48" y="48"/>
                 </Texture>
+                <Control name="$(parent)HUDElementRef">
+                    <Dimensions x="96"/>
+                </Control>
             </Controls>
         </Control>
-        <TopLevelControl name="ZO_HUDEquipmentStatus">
+        <TopLevelControl name="ZO_HUDEquipmentStatus" inherits="ZO_HUDManager_Element">
             <OnInitialized>
                 ZO_HUDEquipmentStatus_Initialize(self)
             </OnInitialized>
@@ -41,6 +47,10 @@
                 <Texture name="$(parent)ArmorIndicator" inherits="ZO_HUDEquipmentStatus_Indicator">
                     <Anchor point="TOPRIGHT"/>
                 </Texture>
+                <Control name="$(parent)HUDElementRef" override="true">
+                    <Anchor point="TOPRIGHT"/>
+                    <Anchor point="BOTTOMRIGHT"/>
+                </Control>
             </Controls>
         </TopLevelControl>
     </Controls>

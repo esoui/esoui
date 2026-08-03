@@ -49,7 +49,7 @@ function ZO_Vengeance_Loadouts_Keyboard:InitializeList()
     self.attributeRowControls = {}
 
     local function SetupCollapsedLoadoutEntry(control, data)
-        control.nameLabel:SetText(data:GetName())
+        control.nameLabel:SetText(data:GetFormattedName())
         control.iconTexture:SetTexture(data:GetIcon())
         control.isEquippedIndicator:SetHidden(not IsLoadoutRoleEquippedAtIndex(data:GetLoadoutIndex()))
     end
@@ -58,7 +58,7 @@ function ZO_Vengeance_Loadouts_Keyboard:InitializeList()
         control:SetHeight(self.expandedHeight)
 
         --Setup the header
-        control.nameLabel:SetText(data:GetName())
+        control.nameLabel:SetText(data:GetFormattedName())
         control.iconTexture:SetTexture(data:GetIcon())
 
         local isEquippedLoadout = IsLoadoutRoleEquippedAtIndex(data:GetLoadoutIndex())
@@ -125,7 +125,7 @@ function ZO_Vengeance_Loadouts_Keyboard:InitializeKeybindStripDescriptors()
         {
             name = function()
                 local loadoutData = ZO_VENGEANCE_MANAGER:GetLoadoutDataByIndex(self.selectedLoadoutIndex)
-                return zo_strformat(SI_CAMPAIGN_VENGEANCE_LOADOUT_EQUIP_ACTION, loadoutData:GetName())
+                return zo_strformat(SI_CAMPAIGN_VENGEANCE_LOADOUT_EQUIP_ACTION, loadoutData:GetRawName())
             end,
             keybind = "UI_SHORTCUT_PRIMARY",
             onShowCooldown = function()

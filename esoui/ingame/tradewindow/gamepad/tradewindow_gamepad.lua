@@ -347,7 +347,7 @@ do
     end
 
     function ZO_GamepadTradeWindow:UpdateHeaders()
-        self.myName = ZO_GetPrimaryPlayerName(GetUnitDisplayName("player"), GetUnitName("player"))
+        self.myName = ZO_GetPrimaryPlayerNameFromUnitTag("player")
         local myTitle
         if self.confirm[TRADE_ME] == TRADE_CONFIRM_EDIT then
             myTitle = zo_strformat(SI_GAMEPAD_TRADE_USERNAME, self.myName)

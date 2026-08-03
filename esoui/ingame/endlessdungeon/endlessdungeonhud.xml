@@ -24,10 +24,21 @@
                 ZO_EndlessDungeonHUD.OnControlInitialized(self)
             </OnInitialized>
             <Controls>
-                <Texture name="$(parent)ReviveIcon" textureFile="EsoUI/Art/Trials/VitalityDepletion.dds"/>
-                <Control name="$(parent)ReviveLabel" inherits="ZO_RollingMeterLabel"/>
-                <Label name="$(parent)ScoreHeadingLabel" text="SI_REVIVE_COUNTER_SCORE" font="ZoFontGameLargeBold" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"/>
-                <Control name="$(parent)ScoreLabel" inherits="ZO_RollingMeterLabel"/>
+                <Control name="$(parent)ScoreContainer" inherits="ZO_HUDManager_Element" resizeToFitConstrains="X">
+                    <Controls>
+                        <Label name="$(parent)Header" text="SI_REVIVE_COUNTER_SCORE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"/>
+                        <Control name="$(parent)Score" inherits="ZO_RollingMeterLabel">
+                            <Anchor point="LEFT" relativeTo="$(parent)Header" relativePoint="RIGHT"/>
+                        </Control>
+                        <Texture name="$(parent)ReviveIcon" textureFile="EsoUI/Art/Trials/VitalityDepletion.dds"/>
+                        <Control name="$(parent)ReviveCount" inherits="ZO_RollingMeterLabel">
+                            <Anchor point="LEFT" relativeTo="$(parent)ReviveIcon" relativePoint="RIGHT"/>
+                        </Control>
+                        <Control name="$(parent)HUDElementRef" override="true">
+                            <DimensionConstraints minX="100"/>
+                        </Control>
+                    </Controls>
+                </Control>
             </Controls>
         </TopLevelControl>
     </Controls>

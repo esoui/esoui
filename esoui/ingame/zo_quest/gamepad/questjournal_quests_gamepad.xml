@@ -54,7 +54,7 @@
                                                             <Controls>
                                                                 <Label name="$(parent)BGText" inherits="ZO_QuestJournal_DetailText_Gamepad">
                                                                     <Anchor point="TOPLEFT"/>
-                                                                    <Anchor point="TOPRIGHT" relativeTo="$(grandparent)"/>
+                                                                    <Anchor point="TOPRIGHT" relativeTo="$(grandparent)" constrains="X"/>
                                                                 </Label>
                                                                 <Label name="$(parent)StepText" inherits="ZO_QuestJournal_DetailText_Gamepad">
                                                                     <Anchor point="TOPLEFT" relativeTo="$(parent)BGText" relativePoint="BOTTOMLEFT" offsetY="15"/>

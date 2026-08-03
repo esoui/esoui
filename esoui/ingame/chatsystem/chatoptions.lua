@@ -66,6 +66,11 @@ local function SetupChatOptionsDialog(control)
             text = SI_WINDOW_TITLE_CHAT_CHANNEL_OPTIONS,
         },
         setup = function(self) CHAT_OPTIONS:Initialize(control) end,
+        drawTier = function()
+            if SYSTEMS:IsShowing("hudEditor") then
+                return DT_HIGH
+            end
+        end,
         buttons =
         {
             {

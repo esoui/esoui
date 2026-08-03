@@ -80,10 +80,16 @@
                 </Label>
             </Controls>
         </Control>
-        <Control name="ZO_BuffDebuffContainerTemplate" virtual="true">
+        <Control name="ZO_BuffDebuffContainerTemplate" inherits="ZO_HUDManager_Element" virtual="true">
             <Controls>
                 <Control name="$(parent)Container1" resizeToFitDescendents="true"/>
                 <Control name="$(parent)Container2" resizeToFitDescendents="true"/>
+                <Control name="$(parent)HUDElementRef" override="true">
+                    <ClearAnchors/>
+                    <Anchor point="TOP"/>
+                    <Anchor point="BOTTOM"/>
+                    <Dimensions x="500"/>
+                </Control>
             </Controls>
         </Control>
         <TopLevelControl name="ZO_BuffDebuffTopLevel">

@@ -545,7 +545,7 @@ function ZO_HousingSettingsList:ColorRow(control, data, mouseIsOver)
     ZO_SocialList_ColorRow(control, data, textColor, iconColor, textColor)
 
     if data.permissionPresetName then
-        local permissions = GetControl(control, "Permissions")
+        local permissions = control:GetNamedChild("Permissions")
         permissions:SetColor(iconColor:UnpackRGBA())
     end
 end
@@ -557,11 +557,11 @@ end
 function ZO_HousingSettingsList:SetupRow(control, data)
     ZO_SortFilterList.SetupRow(self, control, data)
 
-    local displayName = GetControl(control, "DisplayName")
-    local permissions = GetControl(control, "Permissions")
+    local displayName = control:GetNamedChild("DisplayName")
+    local permissions = control:GetNamedChild("Permissions")
 
     if displayName then
-        displayName:SetText(ZO_FormatUserFacingDisplayName(data.displayName))
+        displayName:SetText(data.displayName)
     end
 
     if permissions then
@@ -592,21 +592,24 @@ function ZO_HousingSettingsList:GetUserGroup()
     return self.userGroup
 end
 
-function ZO_HousingSettingsList_CreateOccupantScrollData(displayName, currentHouse, index)
-    return { 
-                displayName = displayName, 
+function ZO_HousingSettingsList_CreateOccupantScrollData(crossplayDisplayName, characterName, platformDisplayName, currentHouse, index)
+    return {
+                crossplayDisplayName = crossplayDisplayName,
+                characterName = characterName,
+                platformDisplayName = platformDisplayName,
+                displayName = crossplayDisplayName,
                 index = index,
-                currentHouse = currentHouse, 
+                currentHouse = currentHouse,
                 online = true, -- Assumed because this player is currently occupying this house.
            }
 end
 
 function ZO_HousingSettingsList_CreateScrollData(displayName, currentHouse, userGroup, index, permissionPresetName)
-    return { 
-                displayName = displayName, 
+    return {
+                displayName = displayName,
                 userGroup = userGroup,
                 index = index,
-                currentHouse = currentHouse, 
+                currentHouse = currentHouse,
                 permissionPresetName = permissionPresetName,
                 online = true, -- since we are using this data in a social list, and we don't know the status of the individual or guild, we are default to true so that the text is properly colorized
            }

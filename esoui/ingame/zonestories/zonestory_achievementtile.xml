@@ -2,7 +2,11 @@
     <Controls>
         <Control name="ZO_ZoneStory_AchievementTile_Control" inherits="ZO_Tile_Control" virtual="true">
             <Controls>
-                <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Icons/icon_missing.dds"/>
+                <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Icons/icon_missing.dds">
+                    <Controls>
+                        <Texture name="$(parent)CharacterFrame" layer="OVERLAY" hidden="true"/>
+                    </Controls>
+                </Texture>
                 <Control name="$(parent)TextContainer" resizeToFitDescendents="true">
                     <Controls>
                         <Label name="$(parent)Title" maxLineCount="1" wrapMode="ELLIPSIS"/>

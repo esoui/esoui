@@ -3,21 +3,24 @@ ZO_BATTLEGROUND_SCOREBOARD_PADDING_HEIGHT = 30
 ZO_BATTLEGROUND_SCOREBOARD_PADDING_WIDTH_KEYBOARD = ZO_BATTLEGROUND_SCOREBOARD_PADDING_WIDTH + 59
 ZO_BATTLEGROUND_SCOREBOARD_PADDING_HEIGHT_KEYBOARD = ZO_BATTLEGROUND_SCOREBOARD_PADDING_HEIGHT + 63
 
-ZO_BATTLEGROUND_SCOREBOARD_HEADER_WIDTH = 902
+ZO_BATTLEGROUND_SCOREBOARD_HEADER_WIDTH = 1052
 ZO_BATTLEGROUND_SCOREBOARD_HEADER_HEIGHT = 90
 ZO_BATTLEGROUND_SCOREBOARD_HEADER_PADDING = 5
 ZO_BATTLEGROUND_SCOREBOARD_HEADER_DOUBLE_PADDING = ZO_BATTLEGROUND_SCOREBOARD_HEADER_PADDING * 2
+ZO_BATTLEGROUND_SCOREBOARD_HEADER_DIVIDER_WIDTH = ZO_BATTLEGROUND_SCOREBOARD_HEADER_WIDTH + 40
 
 ZO_BATTLEGROUND_SCOREBOARD_PANEL_WIDTH = ZO_BATTLEGROUND_SCOREBOARD_HEADER_WIDTH + ZO_BATTLEGROUND_SCOREBOARD_PADDING_WIDTH * 2
 ZO_BATTLEGROUND_SCOREBOARD_PANEL_HEIGHT = 220
-ZO_BATTLEGROUND_SCOREBOARD_LARGE_PANEL_HEIGHT_KEYBOARD = 330
-ZO_BATTLEGROUND_SCOREBOARD_LARGE_PANEL_HEIGHT_GAMEPAD = 350
 
 ZO_BATTLEGROUND_SCOREBOARD_BACKGROUND_WIDTH = ZO_BATTLEGROUND_SCOREBOARD_PANEL_WIDTH
 ZO_BATTLEGROUND_SCOREBOARD_BACKGROUND_HEIGHT = ZO_BATTLEGROUND_SCOREBOARD_PANEL_HEIGHT * 3 + ZO_BATTLEGROUND_SCOREBOARD_HEADER_HEIGHT + ZO_BATTLEGROUND_SCOREBOARD_PADDING_HEIGHT * 2
+ZO_BATTLEGROUND_SCOREBOARD_BACKGROUND_WIDTH_KEYBOARD = ZO_BATTLEGROUND_SCOREBOARD_HEADER_WIDTH + 246
 
 ZO_BATTLEGROUND_SCOREBOARD_PANEL_ALLIANCE_ICON_WIDTH = 48
 ZO_BATTLEGROUND_SCOREBOARD_PANEL_ALLIANCE_ICON_HEIGHT = ZO_BATTLEGROUND_SCOREBOARD_PANEL_ALLIANCE_ICON_WIDTH
+
+ZO_BATTLEGROUND_SCOREBOARD_TEAM_WIDTH_KEYBOARD = ZO_BATTLEGROUND_SCOREBOARD_HEADER_WIDTH + 248
+ZO_BATTLEGROUND_SCOREBOARD_TEAM_WIDTH_GAMEPAD = ZO_BATTLEGROUND_SCOREBOARD_HEADER_WIDTH + 36
 
 ZO_BATTLEGROUND_SCOREBOARD_HEADER_TEAM_SCORE_OFFSET_X = 28
 ZO_BATTLEGROUND_SCOREBOARD_HEADER_TEAM_SCORE_WIDTH = 188 - ZO_BATTLEGROUND_SCOREBOARD_HEADER_TEAM_SCORE_OFFSET_X
@@ -26,6 +29,10 @@ ZO_BATTLEGROUND_SCOREBOARD_HEADER_MEDALS_WIDTH = 180
 ZO_BATTLEGROUND_SCOREBOARD_HEADER_KILLS_WIDTH = 50
 ZO_BATTLEGROUND_SCOREBOARD_HEADER_ASSISTS_WIDTH = ZO_BATTLEGROUND_SCOREBOARD_HEADER_KILLS_WIDTH
 ZO_BATTLEGROUND_SCOREBOARD_HEADER_DEATHS_WIDTH = ZO_BATTLEGROUND_SCOREBOARD_HEADER_KILLS_WIDTH
+ZO_BATTLEGROUND_SCOREBOARD_HEADER_DAMAGE_WIDTH = ZO_BATTLEGROUND_SCOREBOARD_HEADER_KILLS_WIDTH
+ZO_BATTLEGROUND_SCOREBOARD_HEADER_HEALS_WIDTH = ZO_BATTLEGROUND_SCOREBOARD_HEADER_KILLS_WIDTH
+ZO_BATTLEGROUND_SCOREBOARD_HEADER_GAME_TYPE_WIDTH = ZO_BATTLEGROUND_SCOREBOARD_HEADER_KILLS_WIDTH
+ZO_BATTLEGROUND_SCOREBOARD_HEADER_ICON_SIZE = 32
 
 ZO_BATTLEGROUND_SCOREBOARD_PANEL_NAME_OFFSET_Y = 15
 ZO_BATTLEGROUND_SCOREBOARD_PANEL_NAME_WIDTH = ZO_BATTLEGROUND_SCOREBOARD_HEADER_TEAM_SCORE_WIDTH - ZO_BATTLEGROUND_SCOREBOARD_HEADER_DOUBLE_PADDING - ZO_BATTLEGROUND_SCOREBOARD_PANEL_ALLIANCE_ICON_WIDTH + ZO_BATTLEGROUND_SCOREBOARD_HEADER_TEAM_SCORE_OFFSET_X
@@ -33,6 +40,8 @@ ZO_BATTLEGROUND_SCOREBOARD_PANEL_SCORE_OFFSET_Y = 0
 
 ZO_BATTLEGROUND_SCOREBOARD_PANEL_OFFSET_Y = 10
 
+ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_HEIGHT_KEYBOARD = 30
+ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_HEIGHT_GAMEPAD = 32
 ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_INITIAL_OFFSET_Y = 20
 ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_OFFSET_Y = 10
 ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_LIVES_WIDTH = 30
@@ -51,6 +60,12 @@ ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_WIDTH = ZO_BATTLEGROUND_SCOREBOARD_PLAYER_
                                                 + ZO_BATTLEGROUND_SCOREBOARD_HEADER_DOUBLE_PADDING
                                                 + ZO_BATTLEGROUND_SCOREBOARD_HEADER_ASSISTS_WIDTH
                                                 + ZO_BATTLEGROUND_SCOREBOARD_HEADER_DOUBLE_PADDING
+                                                + ZO_BATTLEGROUND_SCOREBOARD_HEADER_DAMAGE_WIDTH
+                                                + ZO_BATTLEGROUND_SCOREBOARD_HEADER_DOUBLE_PADDING
+                                                + ZO_BATTLEGROUND_SCOREBOARD_HEADER_HEALS_WIDTH
+                                                + ZO_BATTLEGROUND_SCOREBOARD_HEADER_DOUBLE_PADDING
+                                                + ZO_BATTLEGROUND_SCOREBOARD_HEADER_GAME_TYPE_WIDTH
+                                                + ZO_BATTLEGROUND_SCOREBOARD_HEADER_DOUBLE_PADDING
 
 ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_HIGHLIGHT_ALPHA_MIN = 0
 ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_HIGHLIGHT_ALPHA_MAX = 1
@@ -61,14 +76,18 @@ ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_NAVIGATION_THROTTLE_MS = 25
 
 ZO_BATTLEGROUND_SCOREBOARD_PANEL_CONTAINER_WIDTH = ZO_BATTLEGROUND_SCOREBOARD_PANEL_WIDTH + ZO_SCROLL_BAR_WIDTH
 ZO_BATTLEGROUND_SCOREBOARD_PANEL_CONTAINER_MAX_HEIGHT = ZO_BATTLEGROUND_SCOREBOARD_PANEL_HEIGHT * 3 + ZO_BATTLEGROUND_SCOREBOARD_PANEL_OFFSET_Y * 2
+ZO_BATTLEGROUND_SCOREBOARD_PANEL_CONTAINER_MAX_HEIGHT_WITH_ROUNDS = ZO_BATTLEGROUND_SCOREBOARD_PANEL_CONTAINER_MAX_HEIGHT - 34
 ZO_BATTLEGROUND_SCOREBOARD_PANEL_CONTAINER_OFFSET_X = -2
 
 ZO_BATTLEGROUND_SCOREBOARD_PANEL_BG_PADDING = 20
 ZO_BATTLEGROUND_SCOREBOARD_PANEL_BG_OFFSET_X = -ZO_BATTLEGROUND_SCOREBOARD_PADDING_WIDTH + ZO_BATTLEGROUND_SCOREBOARD_PANEL_BG_PADDING
 ZO_BATTLEGROUND_SCOREBOARD_PANEL_BG_WIDTH = ZO_BATTLEGROUND_SCOREBOARD_BACKGROUND_WIDTH - ZO_BATTLEGROUND_SCOREBOARD_PANEL_BG_PADDING * 2
 
+local BACKGROUND_DEFAULT_OFFSET_X = 0
+local BACKGROUND_DEFAULT_OFFSET_X_GAMEPAD = -10
 local BACKGROUND_DEFAULT_OFFSET_Y = -20
-local BACKGROUND_ROUNDS_OFFSET_Y = -117
+local BACKGROUND_ROUNDS_OFFSET_Y_KEYBOARD = -60
+local BACKGROUND_ROUNDS_OFFSET_Y_GAMEPAD = -117
 
 local ANIMATE_PLAYER_ROW_HIGHLIGHT = true
 local DONT_ANIMATE_PLAYER_ROW_HIGHLIGHT = false
@@ -301,9 +320,17 @@ function Battleground_Scoreboard_Fragment:InitializeNarrationInfo()
             ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_BATTLEGROUND_SCOREBOARD_HEADER_KILLS_NARRATION)))
             ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(selectedData.kills))
             ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_BATTLEGROUND_SCOREBOARD_HEADER_DEATHS_NARRATION)))
-            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(selectedData.assists))
-            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_BATTLEGROUND_SCOREBOARD_HEADER_ASSISTS_NARRATION)))
             ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(selectedData.deaths))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_BATTLEGROUND_SCOREBOARD_HEADER_ASSISTS_NARRATION)))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(selectedData.assists))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_BATTLEGROUND_SCOREBOARD_HEADER_DAMAGE_NARRATION)))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(selectedData.damage))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_BATTLEGROUND_SCOREBOARD_HEADER_HEALS_NARRATION)))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(selectedData.heals))
+
+            local _, gameTypeScoreNarrationText = self:GetGameTypeScoreTrackerType()
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(gameTypeScoreNarrationText)))
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(selectedData.gameTypeScore))
 
             -- Selection Side Panel
             local matchInfo = SYSTEMS:GetObject("matchInfo")
@@ -473,17 +500,28 @@ do
         local totalTeamPanelsHeight = teamPanelHeight * numBattlegroundTeams + ZO_BATTLEGROUND_SCOREBOARD_PANEL_OFFSET_Y * (numBattlegroundTeams - 1)
         -- add some padding so we're not right against the scroll limits
         totalTeamPanelsHeight = totalTeamPanelsHeight + 5
-        local containerHeight = zo_min(totalTeamPanelsHeight, ZO_BATTLEGROUND_SCOREBOARD_PANEL_CONTAINER_MAX_HEIGHT)
+        local maxContainerHeight = hasRounds and ZO_BATTLEGROUND_SCOREBOARD_PANEL_CONTAINER_MAX_HEIGHT_WITH_ROUNDS or ZO_BATTLEGROUND_SCOREBOARD_PANEL_CONTAINER_MAX_HEIGHT
+        local containerHeight = zo_min(totalTeamPanelsHeight, maxContainerHeight)
         self.panelContainer:SetHeight(containerHeight)
 
         local backgroundsHeight = containerHeight + ZO_BATTLEGROUND_SCOREBOARD_HEADER_HEIGHT + ZO_BATTLEGROUND_SCOREBOARD_PADDING_HEIGHT * 2
         self.backgroundsContainer:SetHeight(backgroundsHeight)
         self.backgroundsContainer:ClearAnchors()
         local backgroundsContainerOffsetY = BACKGROUND_DEFAULT_OFFSET_Y
-        if hasRounds and containerHeight >= ZO_BATTLEGROUND_SCOREBOARD_PANEL_CONTAINER_MAX_HEIGHT then
-            backgroundsContainerOffsetY = BACKGROUND_ROUNDS_OFFSET_Y
+        if hasRounds and containerHeight >= maxContainerHeight then
+            if IsInGamepadPreferredMode() then
+                backgroundsContainerOffsetY = BACKGROUND_ROUNDS_OFFSET_Y_GAMEPAD
+            else
+                backgroundsContainerOffsetY = BACKGROUND_ROUNDS_OFFSET_Y_KEYBOARD
+            end
         end
-        self.backgroundsContainer:SetAnchor(CENTER, nil, CENTER, 0, backgroundsContainerOffsetY)
+
+        local backgroundsContainerOffsetX = BACKGROUND_DEFAULT_OFFSET_X
+        if IsInGamepadPreferredMode() then
+            backgroundsContainerOffsetX = BACKGROUND_DEFAULT_OFFSET_X_GAMEPAD
+        end
+
+        self.backgroundsContainer:SetAnchor(CENTER, nil, CENTER, backgroundsContainerOffsetX, backgroundsContainerOffsetY)
 
         local hasLimitedLives = DoesBattlegroundHaveLimitedPlayerLives(self.currentBattlegroundId)
         self.livesHeaderControl:SetHidden(not hasLimitedLives)
@@ -525,12 +563,25 @@ do
         end
     end
 
+    function Battleground_Scoreboard_Fragment:GetGameTypeScoreTrackerType()
+        local gameType = GetBattlegroundGameType(self.currentBattlegroundId, self.viewedRound)
+        if gameType == BATTLEGROUND_GAME_TYPE_DEATHMATCH then
+            return SCORE_TRACKER_TYPE_DAMAGE_TAKEN, SI_BATTLEGROUND_SCOREBOARD_HEADER_DAMAGE_TAKEN_NARRATION
+        elseif gameType == BATTLEGROUND_GAME_TYPE_MURDERBALL then
+            return SCORE_TRACKER_TYPE_FLAG_CARRIED_TIME, SI_BATTLEGROUND_SCOREBOARD_HEADER_TIME_FLAG_CARRIED_NARRATION
+        else -- All other game types should fall through (CAPTURE_THE_FLAG, KING_OF_THE_HILL, DOMINATION, CRAZY_KING)
+            return SCORE_TRACKER_TYPE_FLAG_CAPTURED, SI_BATTLEGROUND_SCOREBOARD_HEADER_CAPTURED_FLAGS_NARRATION
+        end
+    end
+
     function Battleground_Scoreboard_Fragment:RebuildPlayerData()
         ZO_ClearNumericallyIndexedTable(self.playerEntryData)
         local showAggregate = self:ShouldShowAggregateScores()
         local roundIndex = showAggregate and GetCurrentBattlegroundRoundIndex() or self.viewedRound
         local hasLimitedLives = DoesBattlegroundHaveLimitedPlayerLives(self.currentBattlegroundId)
         local numScoreboardEntries = GetNumScoreboardEntries(roundIndex)
+        local gameTypeScoreTrackerType = self:GetGameTypeScoreTrackerType()
+        local isGameTypeScoreTimeFormat = gameTypeScoreTrackerType == SCORE_TRACKER_TYPE_FLAG_CARRIED_TIME
         for entryIndex = 1, numScoreboardEntries do
             local characterName, displayName, battlegroundTeam, isLocalPlayer = GetScoreboardEntryInfo(entryIndex, roundIndex)
 
@@ -540,12 +591,18 @@ do
             local kills
             local deaths
             local assists
+            local damage
+            local heals
+            local gameTypeScore
             if not showAggregate then
                 lives = GetScoreboardEntryNumLivesRemaining(entryIndex, roundIndex)
                 medalScore = GetScoreboardEntryScoreByType(entryIndex, SCORE_TRACKER_TYPE_SCORE, roundIndex)
                 kills = GetScoreboardEntryScoreByType(entryIndex, SCORE_TRACKER_TYPE_KILL, roundIndex)
                 deaths = GetScoreboardEntryScoreByType(entryIndex, SCORE_TRACKER_TYPE_DEATH, roundIndex)
                 assists = GetScoreboardEntryScoreByType(entryIndex, SCORE_TRACKER_TYPE_ASSISTS, roundIndex)
+                damage = GetScoreboardEntryScoreByType(entryIndex, SCORE_TRACKER_TYPE_DAMAGE_DONE, roundIndex)
+                heals = GetScoreboardEntryScoreByType(entryIndex, SCORE_TRACKER_TYPE_HEALING_DONE, roundIndex)
+                gameTypeScore = GetScoreboardEntryScoreByType(entryIndex, gameTypeScoreTrackerType, roundIndex)
             else
                 showLives = false
                 lives = 0
@@ -553,6 +610,18 @@ do
                 kills = GetBattlegroundCumulativeScoreForScoreboardEntryByType(entryIndex, SCORE_TRACKER_TYPE_KILL, roundIndex)
                 deaths = GetBattlegroundCumulativeScoreForScoreboardEntryByType(entryIndex, SCORE_TRACKER_TYPE_DEATH, roundIndex)
                 assists = GetBattlegroundCumulativeScoreForScoreboardEntryByType(entryIndex, SCORE_TRACKER_TYPE_ASSISTS, roundIndex)
+                damage = GetBattlegroundCumulativeScoreForScoreboardEntryByType(entryIndex, SCORE_TRACKER_TYPE_DAMAGE_DONE, roundIndex)
+                heals = GetBattlegroundCumulativeScoreForScoreboardEntryByType(entryIndex, SCORE_TRACKER_TYPE_HEALING_DONE, roundIndex)
+                gameTypeScore = GetBattlegroundCumulativeScoreForScoreboardEntryByType(entryIndex, gameTypeScoreTrackerType, roundIndex)
+            end
+
+            -- Format damage, heals and gameTypeScore values to fit in the space allotted as those numbers can get large.
+            damage = ZO_AbbreviateAndLocalizeNumber(damage, NUMBER_ABBREVIATION_PRECISION_LARGEST_UNIT, USE_LOWERCASE_NUMBER_SUFFIXES)
+            heals = ZO_AbbreviateAndLocalizeNumber(heals, NUMBER_ABBREVIATION_PRECISION_LARGEST_UNIT, USE_LOWERCASE_NUMBER_SUFFIXES)
+            if isGameTypeScoreTimeFormat then
+                gameTypeScore = ZO_FormatTime(zo_ceil(gameTypeScore / 1000), TIME_FORMAT_STYLE_DESCRIPTIVE_SHORT_SHOW_ZERO_SECS, TIME_FORMAT_PRECISION_SECONDS)
+            else
+                gameTypeScore = ZO_AbbreviateAndLocalizeNumber(gameTypeScore, NUMBER_ABBREVIATION_PRECISION_LARGEST_UNIT, USE_LOWERCASE_NUMBER_SUFFIXES)
             end
 
             local playerEntry =
@@ -566,6 +635,9 @@ do
                 kills = kills,
                 deaths = deaths,
                 assists = assists,
+                damage = damage,
+                heals = heals,
+                gameTypeScore = gameTypeScore,
                 characterName = characterName,
                 displayName = displayName,
                 isLocalPlayer = isLocalPlayer,
@@ -670,7 +742,7 @@ function Battleground_Scoreboard_Fragment:OnBattlegroundStateChanged(previousSta
 end
 
 function Battleground_Scoreboard_Fragment:OnInterfaceSettingChanged(settingSystemType, settingId)
-    if settingId == UI_SETTING_PRIMARY_PLAYER_NAME_KEYBOARD or settingId == UI_SETTING_PRIMARY_PLAYER_NAME_GAMEPAD then
+    if settingId == UI_SETTING_PRIMARY_PLAYER_NAME_PC or settingId == UI_SETTING_PRIMARY_PLAYER_NAME_CONSOLE then
         self:UpdateAll()
     end
 end
@@ -739,7 +811,7 @@ function Battleground_Scoreboard_Fragment:SetSelectedPlayerData(newPlayerData, a
         self.selectedPlayerData = newPlayerData
 
         if self.selectedPlayerData then
-            self.panelContainer:ScrollControlIntoCentralView(self.selectedPlayerData.rowObject:GetControl())
+            self.panelContainer:ScrollControlIntoView(self.selectedPlayerData.rowObject:GetControl())
         end
 
         self:RefreshMatchInfoDisplay()
@@ -1112,11 +1184,11 @@ function ZO_Battleground_Scoreboard_Team_Panel_Object.GetPanelHeight(teamSize)
     if teamSize <= DEFAULT_TEAM_SIZE then
         return ZO_BATTLEGROUND_SCOREBOARD_PANEL_HEIGHT
     else
+        local rowHeight = ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_HEIGHT_KEYBOARD
         if IsInGamepadPreferredMode() then
-            return ZO_BATTLEGROUND_SCOREBOARD_LARGE_PANEL_HEIGHT_GAMEPAD
-        else
-            return ZO_BATTLEGROUND_SCOREBOARD_LARGE_PANEL_HEIGHT_KEYBOARD
+            rowHeight = ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_HEIGHT_GAMEPAD
         end
+        return (teamSize * (rowHeight + ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_OFFSET_Y)) + ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_INITIAL_OFFSET_Y
     end
 end
 
@@ -1135,6 +1207,9 @@ function ZO_Battleground_Scoreboard_Player_Row_Object:Initialize(control)
     self.killsLabel = control:GetNamedChild("Kills")
     self.assistsLabel = control:GetNamedChild("Assists")
     self.deathsLabel = control:GetNamedChild("Deaths")
+    self.damageLabel = control:GetNamedChild("Damage")
+    self.healsLabel = control:GetNamedChild("Heals")
+    self.gameTypeScoreLabel = control:GetNamedChild("GameTypeScore")
     self.highlight = control:GetNamedChild("Highlight")
     self.highlight.keyboardTexture = self.highlight:GetNamedChild("Keyboard")
     self.highlight.gamepadBackdrop = self.highlight:GetNamedChild("Gamepad")
@@ -1259,6 +1334,9 @@ function ZO_Battleground_Scoreboard_Player_Row_Object:UpdateRow()
     self.killsLabel:SetHidden(isPlaceholderEntry)
     self.deathsLabel:SetHidden(isPlaceholderEntry)
     self.assistsLabel:SetHidden(isPlaceholderEntry)
+    self.damageLabel:SetHidden(isPlaceholderEntry)
+    self.healsLabel:SetHidden(isPlaceholderEntry)
+    self.gameTypeScoreLabel:SetHidden(isPlaceholderEntry)
 
     local r, g, b
     if isPlaceholderEntry then
@@ -1287,12 +1365,18 @@ function ZO_Battleground_Scoreboard_Player_Row_Object:UpdateRow()
         self.killsLabel:SetText(data.kills)
         self.deathsLabel:SetText(data.deaths)
         self.assistsLabel:SetText(data.assists)
+        self.damageLabel:SetText(data.damage)
+        self.healsLabel:SetText(data.heals)
+        self.gameTypeScoreLabel:SetText(data.gameTypeScore)
 
         self.livesLabel:SetColor(r, g, b)
         self.medalScoreLabel:SetColor(r, g, b)
         self.killsLabel:SetColor(r, g, b)
         self.deathsLabel:SetColor(r, g, b)
         self.assistsLabel:SetColor(r, g, b)
+        self.damageLabel:SetColor(r, g, b)
+        self.healsLabel:SetColor(r, g, b)
+        self.gameTypeScoreLabel:SetColor(r, g, b)
     else
         self.nameLabel:SetText(GetString(SI_BATTLEGROUND_SCOREBOARD_LOOKING_FOR_PLAYER))
     end

@@ -149,20 +149,33 @@ end
 function ZO_TimedActivities_Shared.SetupClaimProgress(timedActivityData, claimableLabel, checkboxControlPool)
     checkboxControlPool:ReleaseAllObjects()
 
+    local totalNumTimesClaimable = timedActivityData:GetTotalNumTimesClaimable()
+    local totalNumTimesClaimableString = nil
+    if timedActivityData:IsEffectivelyInfinitelyClaimable() then
+        totalNumTimesClaimableString = zo_iconFormatInheritColor("EsoUI/Art/TamrielTomes/infinity_loop.dds", 22, 22)
+    elseif totalNumTimesClaimable > CHECKBOX_CLAIM_THRESHOLD then
+        totalNumTimesClaimableString = tostring(totalNumTimesClaimable)
+    else
+        -- No claimable text to show.
+    end
+
     local isFullyClaimedOrExpired = timedActivityData:IsFullyClaimedOrExpired()
     local numTimesClaimed = timedActivityData:GetNumTimesClaimed()
-    local totalNumTimesClaimable = timedActivityData:GetTotalNumTimesClaimable()
-    if totalNumTimesClaimable <= CHECKBOX_CLAIM_THRESHOLD then
-        if totalNumTimesClaimable == 0 then
-            claimableLabel:SetText(GetString(SI_TIMED_ACTIVITY_INFINITELY_REPEATABLE))
-        else
-            claimableLabel:SetText(" ") -- Force a height so the time remaining label can anchor nicely
-        end
+    if totalNumTimesClaimableString then
+        local formatter = isFullyClaimedOrExpired and SI_TIMED_ACTIVITY_CLAIMED_PROGRESS_DISABLED or SI_TIMED_ACTIVITY_CLAIMED_PROGRESS
+        claimableLabel:SetText(zo_strformat(formatter, numTimesClaimed, totalNumTimesClaimableString))
+    else
+        -- Force a height so the time remaining label can anchor nicely.
+        claimableLabel:SetText(" ")
+    end
 
+    local isWithinCheckboxClaimThreshold = totalNumTimesClaimable <= CHECKBOX_CLAIM_THRESHOLD
+    if isWithinCheckboxClaimThreshold then
         local previousCheckboxControl = nil
         for i = 1, totalNumTimesClaimable do
             local checkboxControl = checkboxControlPool:AcquireObject()
             checkboxControl:SetParent(claimableLabel)
+
             if previousCheckboxControl then
                 checkboxControl:SetAnchor(BOTTOMLEFT, previousCheckboxControl, BOTTOMRIGHT, 5)
             else
@@ -179,9 +192,6 @@ function ZO_TimedActivities_Shared.SetupClaimProgress(timedActivityData, claimab
 
             previousCheckboxControl = checkboxControl
         end
-    else
-        local formatter = isFullyClaimedOrExpired and SI_TIMED_ACTIVITY_CLAIMED_PROGRESS_DISABLED or SI_TIMED_ACTIVITY_CLAIMED_PROGRESS
-        claimableLabel:SetText(zo_strformat(formatter, numTimesClaimed, totalNumTimesClaimable))
     end
 
     local claimableLabelColor = isFullyClaimedOrExpired and ZO_NORMAL_TEXT:GetDim() or ZO_NORMAL_TEXT

@@ -453,6 +453,24 @@ do
         ITEM_TRAIT_TYPE_NONE,
     })
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     local companionAllTraitParams = CreateDropDownFeatureParams("CompanionAllTraits")
     companionAllTraitParams:SetDisplayName(GetString("SI_TRADINGHOUSEFEATURECATEGORY", TRADING_HOUSE_FEATURE_CATEGORY_TRAIT))
     AddEnumSearcher(companionAllTraitParams, TRADING_HOUSE_FILTER_TYPE_TRAIT, GetItemLinkTraitType)

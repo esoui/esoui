@@ -26,6 +26,15 @@ function ZO_MapHouses_Keyboard:InitializeList(control)
         houseNameLabel:SetSelected(false)
         houseNameLabel:SetEnabled(listEnabled)
         houseNameLabel:SetMouseEnabled(listEnabled)
+        local statusTexture = control:GetNamedChild("Status")
+        statusTexture:ClearIcons()
+        if data.isPrimaryResidence then 
+            statusTexture:AddIcon("EsoUI/Art/Collections/PrimaryHouse.dds")
+        end
+        if data.isFavorite then 
+            statusTexture:AddIcon("EsoUI/Art/Collections/Favorite_StarOnly.dds")
+        end
+        statusTexture:Show()
 
         local locationLabel = control:GetNamedChild("Location")
         locationLabel:SetText(data.foundInZoneName)
@@ -71,18 +80,6 @@ function ZO_MapHouses_Keyboard:RefreshHouseList()
     end
 
     ZO_ScrollList_Commit(self.list)
-end
-
-function ZO_MapHouses_Keyboard:SetupHouse(control, data)
-    local listEnabled = self:IsListEnabled()
-    local houseNameLabel = control:GetNamedChild("Name")
-    houseNameLabel:SetText(data.houseName)
-    houseNameLabel:SetSelected(false)
-    houseNameLabel:SetEnabled(listEnabled)
-    houseNameLabel:SetMouseEnabled(listEnabled)
-
-    local locationLabel = control:GetNamedChild("Location")
-    locationLabel:SetText(data.foundInZoneName)
 end
 
 --Global XML

@@ -43,8 +43,12 @@ function ZO_VeterancyRankData:GetIndex()
     return self.index
 end
 
-function ZO_VeterancyRankData:GetName()
+function ZO_VeterancyRankData:GetRawName()
     return GetVeterancyRankTitle(self.index)
+end
+
+function ZO_VeterancyRankData:GetFormattedName()
+    return ZO_CachedStrFormat(SI_VETERANCY_RANK_FORMATTER, self:GetRawName())
 end
 
 function ZO_VeterancyRankData:GetIcon()
@@ -173,6 +177,10 @@ function ZO_VeterancyRankRewardData:TryClaimReward()
 end
 
 function ZO_VeterancyRankRewardData:CanPreviewReward()
+    local rewardData = self:GetRewardData()
+    if rewardData and rewardData:GetRewardType() == REWARD_ENTRY_TYPE_REWARD_LIST then
+        return true
+    end
     return CanPreviewReward(self.rewardId)
 end
 

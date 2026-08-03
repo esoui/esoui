@@ -12,9 +12,11 @@ function ZO_CompanionOverview_Keyboard:Initialize(control)
     self.readOnlyActionBar = ZO_KeyboardAssignableActionBar:New(control:GetNamedChild("ReadOnlyActionBar"))
     self.readOnlyActionBar:SetHotbarEditsEnabled(false)
 
+
     local RAPPORT_GRADIENT_START = ZO_ColorDef:New("722323") --Red
     local RAPPORT_GRADIENT_END = ZO_ColorDef:New("009966") --Green
     local RAPPORT_GRADIENT_MIDDLE = ZO_ColorDef:New("9D840D") --Yellow
+
 
     --Grab the rapport controls
     local rapportContainer = control:GetNamedChild("RapportContainer")
@@ -22,10 +24,15 @@ function ZO_CompanionOverview_Keyboard:Initialize(control)
     self.rapportStatusLabel = rapportContainer:GetNamedChild("StatusValue")
     self.rapportDescriptionLabel = rapportContainer:GetNamedChild("Description")
 
+
+
+
     --Initialize the rapport bar
     self.rapportBar = ZO_SlidingStatusBar:New(self.rapportBarControl)
+
     self.rapportBar:SetGradientColors(RAPPORT_GRADIENT_START, RAPPORT_GRADIENT_END, RAPPORT_GRADIENT_MIDDLE)
     self.rapportBar:SetMinMax(GetMinimumRapport(), GetMaximumRapport())
+
 
     --Initialize the dropdown control
     self.outfitContainer = control:GetNamedChild("Outfit")
@@ -42,6 +49,9 @@ function ZO_CompanionOverview_Keyboard:Initialize(control)
                     self.initialized = true
                     self:OnDeferredInitialize()
                 end
+
+
+
                 self.levelBar:OnShowing()
                 self:RefreshCompanionRapport()
                 self:RefreshPassivePerk()
@@ -141,6 +151,29 @@ end
 
 function ZO_CompanionOverview_Keyboard:RefreshCompanionRapport()
     if HasActiveCompanion() and COMPANION_OVERVIEW_KEYBOARD_FRAGMENT:IsShowing() then
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         --Grab the rapport value, level, and description for the active companion
         local rapportValue = GetActiveCompanionRapport()
         local rapportLevel = GetActiveCompanionRapportLevel()

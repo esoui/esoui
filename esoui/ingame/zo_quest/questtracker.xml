@@ -1,8 +1,7 @@
 <GuiXml>
     <Controls>
-        <Label name="ZO_TrackedHeader" mouseEnabled="true" virtual="true">
+        <Label name="ZO_TrackedHeader" inherits="ZO_HUDTracker_Base_HeaderLabel_Template" virtual="true">
             <Anchor point="TOPLEFT" offsetX="22"/>
-            <Dimensions x="226" y="0"/>
             <OnInitialized>
                 self.icon = self:GetNamedChild("Icon")
             </OnInitialized>
@@ -16,35 +15,32 @@
                 ZO_TrackedHeader_MouseExit(self)
             </OnMouseExit>
             <Controls>
-                <Texture name="$(parent)Icon" level="3" hidden="true">
+                <Texture name="$(parent)Icon" level="3" excludeFromResizeToFitExtents="true" hidden="true">
                     <Anchor point="RIGHT" relativePoint="LEFT" offsetX="-3"/>
                 </Texture>
             </Controls>
         </Label>
-        <Label name="ZO_QuestCondition" virtual="true" mouseEnabled="true">
-            <Dimensions x="200" y="0"/>
+        <Label name="ZO_QuestCondition" mouseEnabled="true" horizontalAlignment="RIGHT" virtual="true">
+            <Dimensions x="ZO_HUD_TRACKER_MAX_WIDTH"/>
         </Label>
-        <Label name="ZO_QuestStepDescription" virtual="true">
-            <Dimensions x="200" y="0"/>
+        <Label name="ZO_QuestStepDescription" horizontalAlignment="RIGHT" virtual="true">
+            <Dimensions x="ZO_HUD_TRACKER_MAX_WIDTH"/>
         </Label>
-        <TopLevelControl name="ZO_FocusedQuestTrackerPanel">
-            <Dimensions x="275"/>
-            <Anchor point="TOPRIGHT" relativeTo="ZO_DynamicEventsTracker_TL" relativePoint="BOTTOMRIGHT"/>
+        <Control name="ZO_FocusedQuestTrackerPanel_Template" inherits="ZO_HUDTracker_Base_Template" virtual="true">
             <OnInitialized>
                 ZO_FocusedQuestTracker_OnInitialized(self)
             </OnInitialized>
             <Controls>
-                <Control name="$(parent)TimerAnchor" resizeToFitDescendents="true">
-                    <Anchor point="TOPLEFT" offsetX="10"/>
-                    <OnInitialized>
-                        ZO_QuestTimer_CreateInContainer(self)
-                    </OnInitialized>
-                </Control>
-                <Control name="$(parent)Container" hidden="true">
-                    <AnchorFill/>
+                <Control name="$(parent)Container" override="true">
                     <Controls>
+                        <Control name="$(parent)TimerAnchor" resizeToFitDescendents="true">
+                            <Anchor point="TOPRIGHT"/>
+                            <OnInitialized>
+                                ZO_QuestTimer_CreateInContainer(self)
+                            </OnInitialized>
+                        </Control>
                         <Control name="$(parent)QuestContainer" mouseEnabled="true" resizeToFitDescendents="true">
-                            <Anchor point="TOPLEFT" relativeTo="$(grandparent)TimerAnchor" relativePoint="BOTTOMLEFT" offsetX="35" offsetY="5"/>
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)TimerAnchor" relativePoint="BOTTOMRIGHT"/>
                             <Controls>
                                 <Control name="$(parent)Assisted" inherits="ZO_KeybindButton" excludeFromResizeToFitExtents="true">
                                     <OnInitialized>
@@ -58,6 +54,6 @@
                     </Controls>
                 </Control>
             </Controls>
-        </TopLevelControl>
+        </Control>
     </Controls>
 </GuiXml>

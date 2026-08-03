@@ -1,11 +1,9 @@
 ZO_TradingHouseSearchCategoryFeature_Gamepad = ZO_TradingHouseSearchCategoryFeature_Shared:Subclass()
 
-function ZO_TradingHouseSearchCategoryFeature_Gamepad:New(...)
-    return ZO_TradingHouseSearchCategoryFeature_Shared.New(self, ...)
-end
-
 -- Override
 function ZO_TradingHouseSearchCategoryFeature_Gamepad:Initialize()
+    ZO_TradingHouseSearchCategoryFeature_Shared.Initialize(self)
+
     self.headers = {}
     self.headerToCategoriesMap = {}
     self.featureKeyToFeatureObjectMap = {}

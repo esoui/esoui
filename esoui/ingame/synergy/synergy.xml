@@ -6,7 +6,7 @@
                 ZO_Synergy_OnInitialized(self)
             </OnInitialized>
             <Controls>
-                <Control name="$(parent)Container" resizeToFitDescendents="true">
+                <Control name="$(parent)Container" inherits="ZO_HUDManager_Element" resizeToFitDescendents="true">
                     <Anchor point="BOTTOM" offsetY="ZO_COMMON_INFO_DEFAULT_KEYBOARD_BOTTOM_OFFSET_Y"/>
                     <ResizeToFitPadding width="10"/>
                     <Controls>

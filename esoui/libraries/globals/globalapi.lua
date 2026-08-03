@@ -249,10 +249,12 @@ function zo_iconTextFormatNoSpaceAlignedRight(path, width, height, text, inherit
     return string.format("%s%s", text, iconFormatter(path, width, height))
 end
 
-function zo_bulletFormat(label, text)
-    local bulletSpacer = GetString(SI_FORMAT_BULLET_SPACING)
-    local bulletSpacingWidth = label:GetStringWidth(bulletSpacer)
-    label:SetNewLineX(bulletSpacingWidth)
+function zo_bulletFormat(label, text, indent)
+    if indent then
+        local bulletSpacer = GetString(SI_FORMAT_BULLET_SPACING)
+        local bulletSpacingWidth = label:GetStringWidth(bulletSpacer)
+        label:SetNewLineX(bulletSpacingWidth)
+    end
     label:SetText(zo_strformat(SI_FORMAT_BULLET_TEXT, text))
 end
 
@@ -367,11 +369,24 @@ function zo_distance(x1, y1, x2, y2)
     return zo_sqrt(diffX * diffX + diffY * diffY)
 end
 
+function zo_distanceSquared(x1, y1, x2, y2)
+    local diffX = x1 - x2
+    local diffY = y1 - y2
+    return diffX * diffX + diffY * diffY
+end
+
 function zo_distance3D(x1, y1, z1, x2, y2, z2)
     local diffX = x1 - x2
     local diffY = y1 - y2
     local diffZ = z1 - z2
     return zo_sqrt(diffX * diffX + diffY * diffY + diffZ * diffZ)
+end
+
+function zo_distanceSquared3D(x1, y1, z1, x2, y2, z2)
+    local diffX = x1 - x2
+    local diffY = y1 - y2
+    local diffZ = z1 - z2
+    return diffX * diffX + diffY * diffY + diffZ * diffZ
 end
 
 function zo_normalize(value, min, max)
@@ -428,7 +443,7 @@ function ZO_Rotate2D(angle, x, y)
 end
 
 function ZO_ScaleAndRotateTextureCoords(control, angle, originX, originY, scaleX, scaleY)
-    -- protect against 1 / 0
+    -- Guard against division by zero.
     if scaleX == 0 then
         scaleX = 0.0001
     end
@@ -437,10 +452,11 @@ function ZO_ScaleAndRotateTextureCoords(control, angle, originX, originY, scaleX
     end
 
     local scaleCoefficientX, scaleCoefficientY = 1 / scaleX, 1 / scaleY
-    local topLeftX, topLeftY = ZO_Rotate2D(angle, -0.5 * scaleCoefficientX, -0.5 * scaleCoefficientY)
-    local topRightX, topRightY = ZO_Rotate2D(angle,  0.5 * scaleCoefficientX, -0.5 * scaleCoefficientY)
-    local bottomLeftX, bottomLeftY = ZO_Rotate2D(angle, -0.5 * scaleCoefficientX,  0.5 * scaleCoefficientY)
-    local bottomRightX, bottomRightY = ZO_Rotate2D(angle,  0.5 * scaleCoefficientX,  0.5 * scaleCoefficientY)
+    local offsetX, offsetY = ZO_Rotate2D(angle, 0.5 * scaleCoefficientX, 0.5 * scaleCoefficientY)
+    local bottomRightX, bottomRightY = offsetX, offsetY
+    local bottomLeftX, bottomLeftY = -offsetY, offsetX
+    local topLeftX, topLeftY = -offsetX, -offsetY
+    local topRightX, topRightY = offsetY, -offsetX
 
     control:SetVertexUV(VERTEX_POINTS_TOPLEFT, originX + topLeftX, originY + topLeftY)
     control:SetVertexUV(VERTEX_POINTS_TOPRIGHT, originX + topRightX, originY + topRightY)
@@ -730,6 +746,17 @@ function ZO_GetControlOwnerObject(control)
 end
 
 function ZO_Eval(valueOrFunction, ...)
+    if type(valueOrFunction) == "function" then
+        return valueOrFunction(...)
+    end
+    return valueOrFunction
+end
+
+function ZO_EvalDefaultTrue(valueOrFunction, ...)
+    if valueOrFunction == nil then
+        return true
+    end
+
     if type(valueOrFunction) == "function" then
         return valueOrFunction(...)
     end

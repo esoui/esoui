@@ -129,7 +129,7 @@ function ZO_MapKeepUpgrade_Shared:RefreshBarLabel()
 end
 
 function ZO_MapKeepUpgrade_Shared:GenerateRemainingTimeLabel(current, forNextLevel, resourceRate, level)
-    if level >= GetKeepMaxUpgradeLevel(self.keepUpgradeObject:GetKeep()) or forNextLevel <= 0 or current > forNextLevel then
+    if level >= self.keepUpgradeObject:GetHighestUpgradeLevel() or forNextLevel <= 0 or current > forNextLevel then
         return nil
     elseif resourceRate <= 0 then
         return GetString(SI_KEEP_UPGRADE_INVALID_TIME)
@@ -160,7 +160,7 @@ end
 function ZO_MapKeepUpgrade_Shared:RefreshLevels()
     self.levelsGridList:ClearGridList()
 
-    for currentLevel = 0, GetKeepMaxUpgradeLevel(self.keepUpgradeObject:GetKeep()) do
+    for currentLevel = 0, self.keepUpgradeObject:GetHighestUpgradeLevel() do
         local numUpgrades = self.keepUpgradeObject:GetNumLevelUpgrades(currentLevel)
         if numUpgrades > 0 then
             local levelHeaderText = zo_strformat(SI_KEEP_UPGRADE_LEVEL_SECTION_HEADER, currentLevel)

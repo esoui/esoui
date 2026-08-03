@@ -348,32 +348,40 @@ function ZO_CompanionSkills_Gamepad:InitializeSkillLinesList()
     self.skillLineListRefreshGroup = skillLineListRefreshGroup
 end
 
-local AVAILABLE_COMPANION_SKILLS_FILTER = { ZO_CompanionSkillLineData.IsAvailableOrAdvised }
-function ZO_CompanionSkills_Gamepad:BuildSkillLineList(list)
-    list:Clear()
+do
 
-    for _, skillTypeData in COMPANION_SKILLS_DATA_MANAGER:SkillTypeIterator() do
-        local hasHeader = true
-        for _, skillLineData in skillTypeData:SkillLineIterator(AVAILABLE_COMPANION_SKILLS_FILTER) do
-            local function IsSkillLineNew()
-                return skillLineData:IsSkillLineOrAbilitiesNew()
+    local AVAILABLE_COMPANION_SKILLS_FILTER = { ZO_CompanionSkillLineData.IsAvailableOrAdvised }
+
+
+
+
+
+    function ZO_CompanionSkills_Gamepad:BuildSkillLineList(list)
+        list:Clear()
+
+        for _, skillTypeData in COMPANION_SKILLS_DATA_MANAGER:SkillTypeIterator() do
+            local hasHeader = true
+            for _, skillLineData in skillTypeData:SkillLineIterator(AVAILABLE_COMPANION_SKILLS_FILTER) do
+                local function IsSkillLineNew()
+                    return skillLineData:IsSkillLineOrAbilitiesNew()
+                end
+
+                local data = ZO_GamepadEntryData:New()
+                data:SetNew(IsSkillLineNew)
+                data.skillLineData = skillLineData
+
+                if hasHeader then
+                    data:SetHeader(skillTypeData:GetName())  
+                    list:AddEntry("ZO_GamepadSkillLineEntryTemplateWithHeader", data)
+                else
+                    list:AddEntry("ZO_GamepadSkillLineEntryTemplate", data)
+                end
+
+                hasHeader = false
             end
-
-            local data = ZO_GamepadEntryData:New()
-            data:SetNew(IsSkillLineNew)
-            data.skillLineData = skillLineData
-
-            if hasHeader then
-                data:SetHeader(skillTypeData:GetName())  
-                list:AddEntry("ZO_GamepadSkillLineEntryTemplateWithHeader", data)
-            else
-                list:AddEntry("ZO_GamepadSkillLineEntryTemplate", data)
-            end
-
-            hasHeader = false
         end
+        list:Commit()
     end
-    list:Commit()
 end
 
 function ZO_CompanionSkills_Gamepad:GetSelectedSkillLineData()

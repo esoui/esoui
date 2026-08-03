@@ -7,8 +7,19 @@
                 ZO_AdventureZoneHUD.OnControlInitialized(self)
             </OnInitialized>
             <Controls>
-                <Texture name="$(parent)PlayerFactionIcon"/>
-                <Control name="$(parent)PlayerScoreLabel" inherits="ZO_RollingMeterLabel"/>
+                <Control name="$(parent)PlayerScoreContainer" inherits="ZO_HUDManager_Element" resizeToFitConstrains="X">
+                    <Controls>
+                        <Texture name="$(parent)FactionIcon">
+                            <Anchor point="LEFT"/>
+                        </Texture>
+                        <Control name="$(parent)Score" inherits="ZO_RollingMeterLabel">
+                            <Anchor point="LEFT" relativeTo="$(parent)FactionIcon" relativePoint="RIGHT" offsetX="5"/>
+                        </Control>
+                        <Control name="$(parent)HUDElementRef" override="true">
+                            <DimensionConstraints minX="100"/>
+                        </Control>
+                    </Controls>
+                </Control>
             </Controls>
         </TopLevelControl>
     </Controls>

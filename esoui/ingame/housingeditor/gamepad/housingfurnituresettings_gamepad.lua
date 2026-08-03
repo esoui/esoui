@@ -490,6 +490,15 @@ function ZO_HousingFurnitureSettings_Gamepad:ShowHouseToursTooltip()
     GAMEPAD_TOOLTIPS:LayoutTitleAndDescriptionTooltip(GAMEPAD_LEFT_TOOLTIP, title, body)
 end
 
+function ZO_HousingFurnitureSettings_Gamepad.OnDisplayNameHeaderInitialized(control)
+    
+
+
+    
+    ZO_GamepadInteractiveSortFilterHeader_Initialize(control, ZO_GetPlatformAccountLabel(), "displayName", TEXT_ALIGN_LEFT)
+    
+end
+
 -----------------------------
 -- Gamepad Setting Dialogs --
 -----------------------------

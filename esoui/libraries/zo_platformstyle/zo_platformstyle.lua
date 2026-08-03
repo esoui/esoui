@@ -1,36 +1,24 @@
-local ZO_PlatformStyleManager = ZO_Object:Subclass()
+local PlatformStyleManager = ZO_InitializingObject:Subclass()
 
-function ZO_PlatformStyleManager:New()
-    local obj = ZO_Object.New(self)
-    obj:Initialize()
-    return obj
-end
-
-function ZO_PlatformStyleManager:Initialize()
+function PlatformStyleManager:Initialize()
     self.objects = {}
     EVENT_MANAGER:RegisterForEvent("ZO_PlatformStyleManager", EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function() self:OnGamepadPreferredModeChanged() end)
 end
 
-function ZO_PlatformStyleManager:Add(object)
+function PlatformStyleManager:Add(object)
     table.insert(self.objects, object)
 end
 
-function ZO_PlatformStyleManager:OnGamepadPreferredModeChanged()
+function PlatformStyleManager:OnGamepadPreferredModeChanged()
     for _, object in ipairs(self.objects) do
         object:Apply()
     end
 end
 
-local PLATFORM_STYLE_MANAGER = ZO_PlatformStyleManager:New()
+local PLATFORM_STYLE_MANAGER = PlatformStyleManager:New()
 
 
-ZO_PlatformStyle = ZO_Object:Subclass()
-
-function ZO_PlatformStyle:New(...)
-    local obj = ZO_Object.New(self)
-    obj:Initialize(...)
-    return obj
-end
+ZO_PlatformStyle = ZO_InitializingObject:Subclass()
 
 function ZO_PlatformStyle:Initialize(applyFunction, keyboardStyle, gamepadStyle)
     self.applyFunction = applyFunction
@@ -41,7 +29,7 @@ function ZO_PlatformStyle:Initialize(applyFunction, keyboardStyle, gamepadStyle)
 end
 
 function ZO_PlatformStyle:Apply()
-    local style = self:GetStyle()    
+    local style = self:GetStyle()
     self.applyFunction(style)
 end
 

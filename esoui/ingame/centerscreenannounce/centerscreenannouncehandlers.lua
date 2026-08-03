@@ -1150,17 +1150,14 @@ do
     end
 end
 
-CENTER_SCREEN_EVENT_HANDLERS[EVENT_DUEL_FINISHED] = function(result, wasLocalPlayersResult, opponentCharacterName, opponentDisplayName)
-    local resultString = GetString("SI_DUELRESULT", result)
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_DUEL_FINISHED] = function(result, wasLocalPlayersResult, opponentCharacterName, opponentCrossplayDisplayName, _, _, _, _, opponentPlatformDisplayName)
     local userFacingName
     if wasLocalPlayersResult then
-        local playerDisplayName = GetDisplayName()
-        local playerCharacterName = GetUnitName("player")
-        userFacingName = ZO_GetPrimaryPlayerNameWithSecondary(playerDisplayName, playerCharacterName)
+        userFacingName = ZO_GetPrimaryPlayerNameWithSecondaryFromUnitTag("player")
     else
-        userFacingName = ZO_GetPrimaryPlayerNameWithSecondary(opponentDisplayName, opponentCharacterName)
+        userFacingName = ZO_GetPrimaryPlayerNameWithSecondary(opponentCrossplayDisplayName, opponentCharacterName, opponentPlatformDisplayName)
     end
-    resultString = zo_strformat(resultString, userFacingName)
+    local resultString = zo_strformat(GetString("SI_DUELRESULT", result), userFacingName)
 
     local localPlayerWonDuel = (result == DUEL_RESULT_WON and wasLocalPlayersResult) or 
                                 (result == DUEL_RESULT_FORFEIT and not wasLocalPlayersResult)
@@ -1401,6 +1398,26 @@ CENTER_SCREEN_EVENT_HANDLERS[EVENT_CONSOLIDATED_STATION_SETS_UPDATED] = function
     end
 end
 
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_RUMOR_STARTED] = function(rumorId)
+    local rumorData = RUMOR_MANAGER:GetRumorData(rumorId)
+    if rumorData then
+        local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
+        messageParams:SetText(GetString(SI_RUMOR_STARTED_ANOUNCEMENT_TITLE), rumorData:GetFormattedDisplayName())
+        messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_RUMOR_ADDED)
+        return messageParams
+    end
+end
+
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_RUMOR_COMPLETED] = function(rumorId)
+    local rumorData = RUMOR_MANAGER:GetRumorData(rumorId)
+    if rumorData then
+        local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
+        messageParams:SetText(GetString(SI_RUMOR_COMPLETED_ANOUNCEMENT_TITLE), rumorData:GetFormattedDisplayName())
+        messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_RUMOR_COMPLETED)
+        return messageParams
+    end
+end
+
 function ZO_CenterScreenAnnounce_GetEventHandlers()
     return CENTER_SCREEN_EVENT_HANDLERS
 end
@@ -1437,6 +1454,8 @@ function ZO_CenterScreenAnnounce_InitializePriorities()
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_EXPERIENCE_GAIN)
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_OBJECTIVE_COMPLETED)
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_DISPLAY_ANNOUNCEMENT)
+    ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_RUMOR_COMPLETED)
+    ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_RUMOR_ADDED)
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_COMPLETED)
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_PROGRESSION_CHANGED)
     ZO_CenterScreenAnnounce_SetPriority(CENTER_SCREEN_ANNOUNCE_TYPE_QUEST_CONDITION_COMPLETED)
@@ -2012,7 +2031,7 @@ local CENTER_SCREEN_CALLBACK_HANDLERS =
         callbackFunction = function()
             local equippedLoadoutData = ZO_VENGEANCE_MANAGER:GetEquippedLoadoutData()
             local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
-            messageParams:SetText(zo_strformat(SI_CAMPAIGN_VENGEANCE_LOADOUT_EQUIP_ANNOUNCEMENT, equippedLoadoutData:GetName()), GetString(SI_CAMPAIGN_VENGEANCE_LOADOUT_ANNOUNCEMENT_DECRIPTION))
+            messageParams:SetText(zo_strformat(SI_CAMPAIGN_VENGEANCE_LOADOUT_EQUIP_ANNOUNCEMENT, equippedLoadoutData:GetRawName()), GetString(SI_CAMPAIGN_VENGEANCE_LOADOUT_ANNOUNCEMENT_DECRIPTION))
             messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_SYSTEM_BROADCAST)
             messageParams:SetSound(SOUNDS.VENGEANCE_LOADOUT_EQUIPPED_ANNOUNCEMENT)
             return messageParams
@@ -2025,7 +2044,7 @@ local CENTER_SCREEN_CALLBACK_HANDLERS =
         callbackFunction = function(rankIndex)
             local currentRankData = ZO_VETERANCY_MANAGER:GetRankDataByIndex(rankIndex)
             local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
-            messageParams:SetText(GetString(SI_VETERANCY_RANK_UP_ANNOUNCEMENT_HEADER), currentRankData:GetName())
+            messageParams:SetText(GetString(SI_VETERANCY_RANK_UP_ANNOUNCEMENT_HEADER), currentRankData:GetRawName())
             messageParams:SetIconData(currentRankData:GetIcon(), VETERANCY_RANK_BACKGROUND)
             messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_VETERANCY_RANK_UP)
             local soundId

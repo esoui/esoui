@@ -41,7 +41,7 @@ function ZO_KeyboardIgnoreListManager:Initialize(control)
     self:InitializeDirtyLogic(IGNORE_LIST_FRAGMENT)
 end
 
-function ZO_KeyboardIgnoreListManager:PerformDeferredInitialization()   
+function ZO_KeyboardIgnoreListManager:PerformDeferredInitialization()
     if self.staticKeybindStripDescriptor ~= nil then return end
     self:RefreshData()
     self:InitializeKeybindDescriptors()
@@ -123,25 +123,23 @@ end
 --Events
 ------------
 
-local function GetNoteEditFunction(owner, displayName, callback)    
-    return function()
-        for i = 1, GetNumIgnored() do
-            local curDisplayName, note = GetIgnoredInfo(i)
-            if(displayName == curDisplayName) then
-                ZO_Dialogs_ShowDialog("EDIT_NOTE", {displayName = displayName, note = note, changedCallback = callback})
-                break
-            end
-        end
-    end
+local function ShowEditNoteDialogForData(data)
+    local dialogData =
+    {
+        displayName = data.displayName,
+        note = data.note,
+        changedCallback = IGNORE_LIST_MANAGER:GetNoteEditedFunction(),
+    }
+    ZO_Dialogs_ShowDialog("EDIT_NOTE", dialogData)
 end
 
 function ZO_KeyboardIgnoreListManager:IgnoreListPanelRow_OnMouseUp(control, button, upInside)
-    if(button == MOUSE_BUTTON_INDEX_RIGHT and upInside) then
+    if button == MOUSE_BUTTON_INDEX_RIGHT and upInside then
         ClearMenu()
-        
+
         local data = ZO_ScrollList_GetData(control)
         if data then
-            AddMenuItem(GetString(SI_SOCIAL_MENU_EDIT_NOTE), GetNoteEditFunction(self.control, data.displayName, IGNORE_LIST_MANAGER:GetNoteEditedFunction()))
+            AddMenuItem(GetString(SI_SOCIAL_MENU_EDIT_NOTE), function() ShowEditNoteDialogForData(data) end)
             AddMenuItem(GetString(SI_IGNORE_MENU_REMOVE_IGNORE), function() RemoveIgnore(data.displayName) end)
 
             self:ShowMenu(control)
@@ -166,8 +164,7 @@ end
 function ZO_KeyboardIgnoreListManager:IgnoreListPanelRowNote_OnClicked(control)
     local data = ZO_ScrollList_GetData(control:GetParent())
     if data then
-        local displayName, note = GetIgnoredInfo(data.index)
-        ZO_Dialogs_ShowDialog("EDIT_NOTE", {displayName = displayName, note = note, changedCallback = IGNORE_LIST_MANAGER:GetNoteEditedFunction()})
+        ShowEditNoteDialogForData(data)
     end
 end
 

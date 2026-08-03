@@ -19,7 +19,7 @@ function ZO_ZoneStories_Gamepad:Initialize(control)
     {
         gridListClass = ZO_GridScrollList_Gamepad,
         gridListClassInitExtraArgs = { "ZO_ZoneStories_Gamepad_GridScrollList_Highlight" },
-        achievements = 
+        achievements =
         {
             entryTemplate = "ZO_ZoneStory_AchievementTile_Gamepad_Control",
             dimensionsX = ZO_ZONE_STORIES_ACHIEVEMENT_TILE_GAMEPAD_DIMENSIONS_X,
@@ -27,6 +27,17 @@ function ZO_ZoneStories_Gamepad:Initialize(control)
             gridPaddingX = 5,
             gridPaddingY = 25,
         },
+
+
+
+
+
+
+
+
+
+
+
         activityCompletion =
         {
             headerTemplate = "ZO_ZoneStory_ActivityCompletionHeader_Gamepad",
@@ -161,12 +172,16 @@ function ZO_ZoneStories_Gamepad:InitializeKeybindStripDescriptors()
         callback = function()
             local zoneId = self:GetSelectedZoneId()
             if ZO_ZoneStories_Shared.IsZoneCollectibleUnlocked(zoneId) then
-                local completionType = self:GetSelectedCompletionType()
-                if completionType and completionType ~= ZONE_COMPLETION_TYPE_FEATURED_ACHIEVEMENTS then
-                    local SET_AUTO_MAP_NAVIGATION_TARGET = true
-                    TrackNextActivityForZoneStory(zoneId, completionType, SET_AUTO_MAP_NAVIGATION_TARGET)
-                    self:BuildZonesList()
-                    return
+                local selectedData = self.gridList:IsActive() and self.gridList:GetSelectedData()
+                if selectedData then
+                    local completionType = selectedData.completionType
+                    if completionType ~= ZONE_COMPLETION_TYPE_FEATURED_ACHIEVEMENTS then
+                        local completionIndex = selectedData.completionIndex
+                        local SET_AUTO_MAP_NAVIGATION_TARGET = true
+                        TrackNextActivityForZoneStory(zoneId, completionType, completionIndex, SET_AUTO_MAP_NAVIGATION_TARGET)
+                        self:BuildZonesList()
+                        return
+                    end
                 end
             end
 
@@ -291,10 +306,13 @@ function ZO_ZoneStories_Gamepad:InitializeKeybindStripDescriptors()
             visible = function()
                 local selectedData = self.gridList:GetSelectedData()
                 if selectedData then
-                    -- data with a completion type of ZONE_COMPLETION_TYPE_FEATURED_ACHIEVEMENTS is a different
-                    -- entry type than the others (it doesn't have zoneData) and it only ever shows 1 tooltip
-                    -- all the other types have at least 2 tooltips to show and so always cycle
+                    -- Data with a completion type of ZONE_COMPLETION_TYPE_FEATURED_ACHIEVEMENTS is a different
+                    -- entry type than the others (it doesn't have zoneData) and it only ever shows 1 tooltip.
+                    -- All the other types have at least 2 tooltips to show and so always cycle
                     return selectedData.completionType ~= ZONE_COMPLETION_TYPE_FEATURED_ACHIEVEMENTS
+
+
+
                 end
 
                 return false
@@ -305,8 +323,9 @@ function ZO_ZoneStories_Gamepad:InitializeKeybindStripDescriptors()
                 if selectedData then
                     local zoneData = selectedData.zoneData
                     local completionType = selectedData.completionType
+                    local completionIndex = selectedData.completionIndex
                     self.tooltipSelectedIndex = ZO_ZoneStories_Gamepad.GetValidatedTooltipIndex(zoneData, completionType, self.tooltipSelectedIndex + 1)
-                    ZO_ZoneStories_Gamepad.LayoutCompletionTypeTooltip(zoneData, completionType, self.tooltipSelectedIndex)
+                    ZO_ZoneStories_Gamepad.LayoutCompletionTypeTooltip(zoneData, completionType, self.tooltipSelectedIndex, completionIndex)
                     --Re-narrate when cycling the tooltip
                     SCREEN_NARRATION_MANAGER:QueueGridListEntry(self.gridList)
                 end
@@ -322,10 +341,13 @@ function ZO_ZoneStories_Gamepad:InitializeKeybindStripDescriptors()
             visible = function()
                 local selectedData = self.gridList:GetSelectedData()
                 if selectedData then
-                    -- data with a completion type of ZONE_COMPLETION_TYPE_FEATURED_ACHIEVEMENTS is a different
-                    -- entry type than the others (it doesn't have zoneData) and it only ever shows 1 tooltip
-                    -- all the other types have at least 2 tooltips to show and so always cycle
+                    -- Data with a completion type of ZONE_COMPLETION_TYPE_FEATURED_ACHIEVEMENTS is a different
+                    -- entry type than the others (it doesn't have zoneData) and it only ever shows 1 tooltip.
+                    -- All the other types have at least 2 tooltips to show and so always cycle
                     return selectedData.completionType ~= ZONE_COMPLETION_TYPE_FEATURED_ACHIEVEMENTS
+
+
+
                 end
 
                 return false
@@ -336,8 +358,9 @@ function ZO_ZoneStories_Gamepad:InitializeKeybindStripDescriptors()
                 if selectedData then
                     local zoneData = selectedData.zoneData
                     local completionType = selectedData.completionType
+                    local completionIndex = selectedData.completionIndex
                     self.tooltipSelectedIndex = ZO_ZoneStories_Gamepad.GetValidatedTooltipIndex(zoneData, completionType, self.tooltipSelectedIndex - 1)
-                    ZO_ZoneStories_Gamepad.LayoutCompletionTypeTooltip(zoneData, completionType, self.tooltipSelectedIndex)
+                    ZO_ZoneStories_Gamepad.LayoutCompletionTypeTooltip(zoneData, completionType, self.tooltipSelectedIndex, completionIndex)
                     --Re-narrate when cycling the tooltip
                     SCREEN_NARRATION_MANAGER:QueueGridListEntry(self.gridList)
                 end
@@ -367,17 +390,21 @@ function ZO_ZoneStories_Gamepad.GetValidatedTooltipIndex(zoneData, completionTyp
     end
 end
 
-function ZO_ZoneStories_Gamepad.LayoutCompletionTypeTooltip(zoneData, completionType, tooltipIndex)
+function ZO_ZoneStories_Gamepad.LayoutCompletionTypeTooltip(zoneData, completionType, tooltipIndex, completionIndex)
     GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP, true)
 
     if tooltipIndex == COMPLETION_ACTIVITY_DESCRIPTION_TOOLTIP_INDEX then
-        GAMEPAD_TOOLTIPS:LayoutZoneStoryActivityCompletion(GAMEPAD_RIGHT_TOOLTIP, zoneData, completionType)
+        if DoesZoneStoryActivityCompletionTypeUseIndex(completionType) then
+            GAMEPAD_TOOLTIPS:LayoutZoneStoryActivityCompletionTypeAndIndex(GAMEPAD_RIGHT_TOOLTIP, zoneData, completionType, completionIndex)
+        else
+            GAMEPAD_TOOLTIPS:LayoutZoneStoryActivityCompletion(GAMEPAD_RIGHT_TOOLTIP, zoneData, completionType)
+        end
     else
         local achievementId = GetAssociatedAchievementIdForZoneCompletionType(zoneData.id, completionType, tooltipIndex)
         if achievementId ~= 0 then
             GAMEPAD_TOOLTIPS:LayoutAchievement(GAMEPAD_RIGHT_TOOLTIP, achievementId)
         else
-            GAMEPAD_TOOLTIPS:LayoutZoneStoryActivityCompletionTypeList(GAMEPAD_RIGHT_TOOLTIP, zoneData, completionType)
+            GAMEPAD_TOOLTIPS:LayoutZoneStoryActivityCompletionTypeList(GAMEPAD_RIGHT_TOOLTIP, zoneData, completionType, completionIndex)
         end
     end
 end
@@ -466,8 +493,14 @@ function ZO_ZoneStories_Gamepad:OnGridSelectionChanged(oldSelectedData, selected
         local completionType = selectedData.completionType
         if completionType == ZONE_COMPLETION_TYPE_FEATURED_ACHIEVEMENTS then
             GAMEPAD_TOOLTIPS:LayoutAchievement(GAMEPAD_RIGHT_TOOLTIP, selectedData.achievementId)
+
+
+
+
+
         else
             local zoneData = selectedData.zoneData
+            local completionIndex = selectedData.completionIndex
             local completedActivities = ZO_ZoneStories_Manager.GetActivityCompletionProgressValues(zoneData.id, completionType)
             if completedActivities > 0 then
                 -- the first tooltip is the activity description tooltip so if we've already completed some of the
@@ -475,7 +508,7 @@ function ZO_ZoneStories_Gamepad:OnGridSelectionChanged(oldSelectedData, selected
                 -- this should resolve to 1 and since we are guaranteed to have 2 tooltips it doesn't need to be validated
                 self.tooltipSelectedIndex = self.tooltipSelectedIndex + 1
             end
-            ZO_ZoneStories_Gamepad.LayoutCompletionTypeTooltip(zoneData, completionType, self.tooltipSelectedIndex)
+            ZO_ZoneStories_Gamepad.LayoutCompletionTypeTooltip(zoneData, completionType, self.tooltipSelectedIndex, completionIndex)
         end
     else
         GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)

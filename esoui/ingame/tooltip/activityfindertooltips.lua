@@ -14,29 +14,129 @@ function ZO_Tooltip:LayoutZoneStoryActivityCompletion(zoneData, completionType)
     self:AddSection(bodySection)
 end
 
-function ZO_Tooltip:LayoutZoneStoryActivityCompletionTypeList(zoneData, completionType)
+function ZO_Tooltip:LayoutZoneStoryActivityCompletionTypeList(zoneData, completionType, completionIndex)
+    local completionTypeUsesIndex = DoesZoneStoryActivityCompletionTypeUseIndex(completionType)
+
     -- Title
+    local tooltipTitleText
+    if completionTypeUsesIndex then
+        tooltipTitleText = GetZoneStoryActivityNameForCompletionTypeAndIndex(zoneId, completionType, completionIndex)
+    else
+        tooltipTitleText = GetString("SI_ZONECOMPLETIONTYPE", completionType)
+    end
     local titleTextSection = self:AcquireSection(self:GetStyle("topSection"))
-    titleTextSection:AddLine(zo_strformat(SI_ZONE_STORY_LIST_TOOLTIP_TITLE_FORMATTER, zoneData.name, GetString("SI_ZONECOMPLETIONTYPE", completionType)), self:GetStyle("title"))
+    titleTextSection:AddLine(zo_strformat(SI_ZONE_STORY_LIST_TOOLTIP_TITLE_FORMATTER, zoneData.name, tooltipTitleText), self:GetStyle("title"))
     self:AddSection(titleTextSection)
 
     -- Checkboxes
-    local numUnblockedActivities, blockingBranchErrorStringId = select(3, ZO_ZoneStories_Manager.GetActivityCompletionProgressValues(zoneData.id, completionType))
+    local numUnblockedActivities, blockingBranchErrorStringId = select(3, ZO_ZoneStories_Manager.GetActivityCompletionProgressValues(zoneData.id, completionType, completionIndex))
     local activityListSection = self:AcquireSection(self:GetStyle("achievementCriteriaSection"))
 
-    for i = 1, numUnblockedActivities do
-        local name = GetZoneStoryActivityNameByActivityIndex(zoneData.id, completionType, i)
-        local isComplete = IsZoneStoryActivityComplete(zoneData.id, completionType, i)
+    local numVisibleCheckControls = completionTypeUsesIndex and numUnblockedActivities <= 1 and 0 or numUnblockedActivities
+    for i = 1, numVisibleCheckControls do
+        local name = GetZoneStoryActivityNameByActivityIndex(zoneData.id, completionType, i, completionIndex)
+        local isComplete = IsZoneStoryActivityComplete(zoneData.id, completionType, i, completionIndex)
         activityListSection:AddSection(self:GetCheckboxSection(zo_strformat(SI_ZONE_STORY_LIST_TOOLTIP_ACTIVITY_NAME_FORMATTER, name), isComplete))
     end
 
     self:AddSection(activityListSection)
 
-    if blockingBranchErrorStringId ~= 0 then
+    local additionalInfoDisplayText
+    if completionTypeUsesIndex then
+        additionalInfoDisplayText = GetZoneStoryActivityAttainTextForCompletionTypeAndIndex(zoneId, completionType, completionIndex)
+    elseif blockingBranchErrorStringId ~= 0 then
+        additionalInfoDisplayText = GetErrorString(blockingBranchErrorStringId)
+    end
+
+    if additionalInfoDisplayText then
         local blockingBranchRequirementSection = self:AcquireSection(self:GetStyle("bodySection"))
-        local errorStringText = GetErrorString(blockingBranchErrorStringId)
-        blockingBranchRequirementSection:AddLine(errorStringText, self:GetStyle("flavorText"))
+        blockingBranchRequirementSection:AddLine(additionalInfoDisplayText, self:GetStyle("flavorText"))
         self:AddSection(blockingBranchRequirementSection)
+    end
+end
+
+function ZO_Tooltip:LayoutZoneStoryActivityCompletionTypeAndIndex(zoneData, completionType, completionIndex)
+    local headerSection = self:AcquireSection(self:GetStyle("topSection"))
+    headerSection:AddLine(GetZoneStoryActivityNameForCompletionTypeAndIndex(zoneData.id, completionType, completionIndex), self:GetStyle("title"))
+    headerSection:AddLine(zoneData.name)
+    self:AddSection(headerSection)
+
+    local statValuePair = self:AcquireStatValuePair(self:GetStyle("statValuePair"))
+    statValuePair:SetStat(GetString("SI_ZONECOMPLETIONTYPE_PROGRESSHEADER", completionType), self:GetStyle("statValuePairStat"))
+    statValuePair:SetValue(ZO_ZoneStories_Manager.GetActivityCompletionProgressText(zoneData.id, completionType, completionIndex), self:GetStyle("statValuePairValue"))
+    self:AddStatValuePair(statValuePair)
+
+    local bodySection = self:AcquireSection(self:GetStyle("bodySection"))
+    bodySection:AddLine(GetZoneStoryActivityDescriptionForCompletionTypeAndIndex(zoneData.id, completionType, completionIndex), self:GetStyle("flavorText"))
+    self:AddSection(bodySection)
+end
+
+function ZO_Tooltip:LayoutZoneStoryMilestoneCompletionType(zoneId, milestoneId)
+    local name, icon, isLocked, lockedText = GetZoneStoryMilestoneInfo(milestoneId)
+    local criteriaTable = {}
+    local numTotalCriteria = GetZoneStoryMilestoneNumCriteria(milestoneId)
+    local numCriteriaCompleted = 0
+    for criterionIndex = 1, numTotalCriteria do
+        local criterionDescription, criterionCompleted = GetZoneStoryMilestoneCriterionByIndex(milestoneId, criterionIndex)
+        table.insert(criteriaTable, { description = criterionDescription, completed = criterionCompleted })
+        if criterionCompleted then
+            numCriteriaCompleted = numCriteriaCompleted + 1
+        end
+    end
+
+    local completionText
+    if numCriteriaCompleted >= numTotalCriteria then
+        completionText = GetString(SI_ZONE_STORY_MILESTONE_FINISHED_GAMEPAD)
+    else
+        completionText = GetString(SI_ZONE_STORY_MILESTONE_UNFINISHED_GAMEPAD)
+    end
+
+    local headerSection = self:AcquireSection(self:GetStyle("topSection"))
+    headerSection:AddLine(name, self:GetStyle("title"))
+    headerSection:AddLine(completionText)
+
+    local titleIcon = zo_iconFormatInheritColor("EsoUI/Art/Miscellaneous/Gamepad/gp_charNameIcon.dds", "75%", "75%")
+    local titleText = zo_strformat(SI_ACHIEVEMENT_TITLE_CHARACTER_LEVEL, titleIcon, GetString(SI_ZONE_STORY_CHARACTER_PERSISTENT_GAMEPAD))
+    headerSection:AddLine(titleText, self:GetStyle("achievementCharacterHeading"))
+
+    self:AddSection(headerSection)
+
+    local statValuePair = self:AcquireStatValuePair(self:GetStyle("statValuePair"))
+    statValuePair:SetStat(GetString(SI_ZONE_STORY_MILESTONE_CRITERIA_LABEL), self:GetStyle("statValuePairStat"))
+    statValuePair:SetValue(zo_strformat(SI_CURRENT_AND_MAX_VALUES_FORMATTER, numCriteriaCompleted, numTotalCriteria), self:GetStyle("statValuePairValue"))
+    self:AddStatValuePair(statValuePair)
+
+    local bodySection = self:AcquireSection(self:GetStyle("bodySection"))
+    bodySection:AddLine(GetZoneStoryMilestoneDescription(milestoneId), self:GetStyle("flavorText"))
+    self:AddSection(bodySection)
+
+    for _, criterion in ipairs(criteriaTable) do
+        if criterion.description ~= "" then
+            local lineStyle
+            local checkIconText
+            local criterionSection
+            if criterion.completed then
+                criterionSection = self:AcquireSection(self:GetStyle("zoneGuideMilestoneCriteriaCompleteSection"))
+                checkIconText = zo_iconTextFormat(ZO_CHECK_ICON, "100%", "100%", criterion.description)
+                lineStyle = self:GetStyle("zoneGuideMilestoneCriteriaCompleted")
+            else
+                criterionSection = self:AcquireSection(self:GetStyle("zoneGuideMilestoneCriteriaSection"))
+                checkIconText = criterion.description
+                lineStyle = self:GetStyle("zoneGuideMilestoneCriteria")
+            end
+            criterionSection:AddLine(zo_strformat(SI_ZONE_STORY_MILESTONE_CRITERION_TOOLTIP_FORMATTER_GAMEPAD, checkIconText), lineStyle)
+            self:AddSection(criterionSection)
+        end
+    end
+
+    local rewardSection = self:AcquireSection(self:GetStyle("bodySection"))
+    rewardSection:AddLine(GetZoneStoryMilestoneReward(milestoneId), self:GetStyle("flavorText"))
+    self:AddSection(rewardSection)
+
+    if isLocked then
+        local lockedSection = self:AcquireSection(self:GetStyle("bodySection"))
+        lockedSection:AddLine(lockedText, self:GetStyle("flavorText"))
+        self:AddSection(lockedSection)
     end
 end
 

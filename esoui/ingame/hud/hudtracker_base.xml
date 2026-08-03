@@ -1,12 +1,37 @@
 <GuiXml>
     <Controls>
-        <Control name="ZO_HUDTracker_Base_Template" resizeToFitDescendents="true" virtual="true">
+        <Label name="ZO_HUDTracker_Base_HeaderLabel_Template" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="RIGHT" mouseEnabled="true" virtual="true">
+            <DimensionConstraints maxX="ZO_HUD_TRACKER_MAX_WIDTH"/>
+        </Label>
+        <Label name="ZO_HUDTracker_Base_SubLabel_Template" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" horizontalAlignment="RIGHT" mouseEnabled="true" virtual="true">
+            <Dimensions x="ZO_HUD_TRACKER_MAX_WIDTH"/>
+        </Label>
+        <StatusBar name="ZO_HUDTracker_Base_ProgressBar_Keyboard_Template" inherits="ZO_ArrowProgressBarWithBG" virtual="true">
+            <Dimensions x="180" y="24"/>
+            <Controls>
+                <Label name="$(parent)Progress" font="ZoFontWinH4"/>
+            </Controls>
+        </StatusBar>
+        <StatusBar name="ZO_HUDTracker_Base_ProgressBar_Gamepad_Template" inherits="ZO_GamepadArrowProgressBarWithBGMedium" virtual="true">
+            <Dimensions x="200"/>
+            <Controls>
+                <Label name="$(parent)Progress" font="ZoFontGamepadBold27"/>
+            </Controls>
+        </StatusBar>
+        <Control name="ZO_HUDTracker_Base_Template" inherits="ZO_HUDManager_Element" resizeToFitDescendents="true" virtual="true">
+            <Anchor point="TOPRIGHT"/>
             <Controls>
                 <Control name="$(parent)Container" resizeToFitDescendents="true" hidden="true">
                     <Controls>
-                        <Label name="$(parent)Header" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"/>
-                        <Label name="$(parent)SubLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED"/>
+                        <Label name="$(parent)Header" inherits="ZO_HUDTracker_Base_HeaderLabel_Template"/>
+                        <Label name="$(parent)SubLabel" inherits="ZO_HUDTracker_Base_SubLabel_Template"/>
                     </Controls>
+                </Control>
+                <Control name="$(parent)HUDElementRef" override="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Container"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Container"/>
+                    <DimensionConstraints minY="50"/>
+                    <Dimensions y="100%"/>
                 </Control>
             </Controls>
         </Control>

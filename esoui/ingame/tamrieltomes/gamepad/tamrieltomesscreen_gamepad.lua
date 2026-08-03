@@ -93,6 +93,18 @@ function ZO_TamrielTomesScreen_Gamepad:InitializeControls()
 
     self.selectTomeKeybindButton = self.headerContainer:GetNamedChild("SelectTomeKeybind")
     self.pageNavigation:SetDefaultIndicatorFont("ZoFontGamepad42")
+
+    self.titleLabel.dontUseMaxLinesForAdjusting = true
+    local fonts =
+    {
+        { font = "ZoFontGamepadBold48", lineLimit = 1, },
+        { font = "ZoFontGamepadBold42", lineLimit = 1, },
+        { font = "ZoFontGamepadBold34", lineLimit = 1, },
+        { font = "ZoFontGamepadBold27", lineLimit = 1, },
+        { font = "ZoFontGamepadBold25", lineLimit = 1, },
+    }
+    ZO_FontAdjustingWrapLabel_OnInitialized(self.titleLabel, fonts, TEXT_WRAP_MODE_ELLIPSIS)
+
     self.gridList:SetHeaderPrePadding(0)
     self.gridList:SetOnSelectedDataChangedCallback(function(...) self:OnGridSelectionChanged(...) end)
     self:InitializeMultiFocusAreas()

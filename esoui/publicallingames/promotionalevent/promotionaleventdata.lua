@@ -99,6 +99,7 @@ function ZO_PromotionalEventActivityData:ToggleTracking(suppressSound)
         end
     else
         TrackPromotionalEventActivity(self:GetCampaignKey(), self.activityIndex)
+        HUD_TRACKER_MANAGER:SetAssistedAspiration(ZO_HUD_TRACKER_ASPIRATION.PROMOTIONAL_EVENT)
         if not suppressSound then
             PlaySound(SOUNDS.PROMOTIONAL_EVENT_TRACK_ACTIVITY_CLICK)
         end

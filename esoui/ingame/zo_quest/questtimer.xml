@@ -2,28 +2,22 @@
     <Controls>
         <Control name="ZO_QuestTimer_Keyboard_Template" virtual="true">
             <Controls>
-                <Label name="$(parent)Time" maxLineCount="1" font="ZoFontGameOutline">
-                    <Anchor point="RIGHT" offsetX="-3"/>
-                </Label>
-                <Label name="$(parent)Label" maxLineCount="1" wrapMode="ELLIPSIS" horizontalAlignment="LEFT" modifyTextType="NONE" font="ZoFontGameOutline">
-                    <Dimensions x="230"/>
-                    <Anchor point="RIGHT" relativeTo="$(parent)Time" relativePoint="LEFT" offsetX="-5"/>
+                <Label name="$(parent)Time" font="ZoFontGameOutline"/>
+                <Label name="$(parent)Label" modifyTextType="NONE" font="ZoFontGameOutline">
+                    <Anchor point="RIGHT" relativeTo="$(parent)Time" relativePoint="LEFT" offsetX="-10"/>
                 </Label>
             </Controls>
         </Control>
         <Control name="ZO_QuestTimer_Gamepad_Template" virtual="true">
             <Controls>
-                <Label name="$(parent)Label" horizontalAlignment="RIGHT" modifyTextType="UPPERCASE" font="ZoFontGamepadBold27">
-                    <Dimensions x="450"/>
-                    <Anchor point="RIGHT" offsetX="-4"/>
-                </Label>
-                <Label name="$(parent)Time" maxLineCount="1" font="ZoFontGamepad42">
-                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Label" relativePoint="BOTTOMRIGHT"/>
+                <Label name="$(parent)Time" font="ZoFontGamepad36"/>
+                <Label name="$(parent)Label" modifyTextType="UPPERCASE" font="ZoFontGamepadBold27">
+                    <AnchorToBaseline side="LEFT" relativeToLabel="$(parent)Time" offsetX="-15"/>
                 </Label>
             </Controls>
         </Control>
         <Control name="ZO_QuestTimerTemplate" mouseEnabled="true" virtual="true">
-            <Dimensions x="230" y="20"/>
+            <Dimensions x="200" y="20"/>
             <OnMouseUp>
                 if upInside then
                     ZO_QuestTimer_OnMouseUp(self)
@@ -33,8 +27,12 @@
                 ZO_QuestTimer_OnUpdate(self, time)
             </OnUpdate>
             <Controls>
-                <Label name="$(parent)Time" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"/>
-                <Label name="$(parent)Label" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"/>
+                <Label name="$(parent)Time" maxLineCount="1" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPRIGHT"/>
+                </Label>
+                <Label name="$(parent)Label" maxLineCount="1" wrapMode="ELLIPSIS" horizontalAlignment="RIGHT" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <DimensionConstraints maxX="400"/>
+                </Label>
             </Controls>
         </Control>
     </Controls>

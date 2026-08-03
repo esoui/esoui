@@ -1,0 +1,171 @@
+<GuiXml>
+    <Controls>
+        <!-- TODO Custom HUD: See if any of this can be shared with gamepad-->
+        <Backdrop name="ZO_CustomizableHUDElement_Keyboard" edgeColor="02E1FF" centerColor="2002E1FF" tier="HIGH" mouseEnabled="true" clampedToScreen="true" virtual="true">
+            <Edge file="EsoUI/Art/Miscellaneous/borderedInsetTransparent_white_edgeFile.dds" edgeFileWidth="128" edgeFileHeight="16"/>
+            <Insets left="2" top="2" right="-2" bottom="-2"/>
+            <OnInitialized>
+                ZO_HUDEditorElement_Keyboard:New(self)
+            </OnInitialized>
+            <OnMouseEnter>
+                self.object:OnMouseEnter(self)
+            </OnMouseEnter>
+            <OnMouseExit>
+                self.object:OnMouseExit(self)
+            </OnMouseExit>
+            <OnMouseUp>
+                self.object:OnMouseUp(self, button, upInside)
+            </OnMouseUp>
+            <OnDragStart>
+                self.object:OnDragStart(self, button)
+            </OnDragStart>
+            <Controls>
+                <Label name="$(parent)Name" font="ZoFontKeyboard18ThickOutline" layer="BACKGROUND" level="2" horizontalAlignment="CENTER" wrapMode="ELLIPSIS" maxLineCount="2" hidden="true">
+                    <Anchor point="LEFT" relativePoint="LEFT"/>
+                    <Anchor point="RIGHT" relativePoint="RIGHT" offsetY="4"/>
+                </Label>
+            </Controls>
+        </Backdrop>
+        <Button name="ZO_HUDInfoBoxCheckButton_Keyboard" inherits="ZO_CheckButton" level="ZO_HUD_EDITOR_KEYBOARD_INFO_BOX_INTERACTABLE_ELEMENT_LEVEL" virtual="true"/>
+        <Control name="ZO_HUDInfoBoxDropdown_Keyboard" resizeToFitConstrains="Y" level="ZO_HUD_EDITOR_KEYBOARD_INFO_BOX_INTERACTABLE_ELEMENT_LEVEL" mouseEnabled="true" virtual="true">
+            <Dimensions x="100%"/>
+            <Controls>
+                <Label name="$(parent)Name" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPLEFT"/>
+                    <Anchor point="TOPRIGHT" relativePoint="CENTER" offsetX="-15" constrains="X"/>
+                </Label>
+                <Control name="$(parent)ComboBox" inherits="ZO_ComboBox ZO_PropagateMouseOverBehavior" level="ZO_HUD_EDITOR_KEYBOARD_INFO_BOX_INTERACTABLE_ELEMENT_LEVEL">
+                    <Anchor point="TOPRIGHT"/>
+                    <Anchor point="LEFT" relativePoint="CENTER" offsetX="15" constrains="X"/>
+                    <Controls>
+                        <Backdrop name="$(parent)BG" override="true" layer="CONTROLS"/>
+                        <Button name="$(parent)OpenDropdown" override="true" level="ZO_HUD_EDITOR_KEYBOARD_INFO_BOX_INTERACTABLE_ELEMENT_LEVEL"/>
+                    </Controls>
+                </Control>
+                <Texture name="$(parent)WarningIcon" textureFile="EsoUI\Art\Miscellaneous\ESO_Icon_Warning.dds" mouseEnabled="true" layer="CONTROLS" level="ZO_HUD_EDITOR_KEYBOARD_INFO_BOX_INTERACTABLE_ELEMENT_LEVEL" hidden="true">
+                    <Anchor point="RIGHT" relativeTo="$(parent)ComboBox" relativePoint="LEFT"/>
+                    <Dimensions x="24" y="24"/>
+                </Texture>
+            </Controls>
+        </Control>
+        <TopLevelControl name="ZO_HUDEditor_Keyboard_TL" mouseEnabled="true" tier="HIGH" hidden="true">
+            <AnchorFill/>
+            <OnInitialized>
+                ZO_HUDEditor_Keyboard.OnControlInitialized(self)
+            </OnInitialized>
+            <OnMouseWheel>
+                <!--Eat the mouse wheel input so scrolling doesn't change the camera -->
+            </OnMouseWheel>
+            <Controls>
+                <Control name="$(parent)InfoBox" hidden="true" mouseEnabled="true" tier="HIGH" level="10" movable="true" clampedToScreen="true" resizeToFitConstrains="Y">
+                    <Anchor point="TOP" relativePoint="CENTER" offsetY="-300"/>
+                    <Dimensions x="440"/>
+                    <DimensionConstraints minY="133"/>
+                    <ResizeToFitPadding height="30"/>
+                    <Controls>
+                        <Backdrop name="$(parent)BG" layer="CONTROLS" inherits="ZO_DefaultBackdrop" excludeFromResizeToFitExtents="true">
+                            <AnchorFill/>
+                        </Backdrop>
+                        <Button name="$(parent)Close" inherits="ZO_CloseButton" level="ZO_HUD_EDITOR_KEYBOARD_INFO_BOX_INTERACTABLE_ELEMENT_LEVEL" excludeFromResizeToFitExtents="true">
+                            <Anchor point="TOPRIGHT" offsetY="5" offsetX="-5"/>
+                            <OnClicked>
+                                HUD_EDITOR_KEYBOARD:DeselectElements()
+                            </OnClicked>
+                        </Button>
+                        <Control name="$(parent)Header" resizeToFitDescendents="true">
+                            <Anchor point="TOP" offsetY="10"/>
+                            <Controls>
+                                <Control name="$(parent)Selector" inherits="ZO_ComboBox" level="ZO_HUD_EDITOR_KEYBOARD_INFO_BOX_INTERACTABLE_ELEMENT_LEVEL">
+                                    <Anchor point="TOP"/>
+                                    <Dimensions x="275"/>
+                                    <Controls>
+                                        <Backdrop name="$(parent)BG" override="true" layer="CONTROLS"/>
+                                        <Label name="$(parent)SelectedItemText" override="true" horizontalAlignment="CENTER"/>
+                                        <Button name="$(parent)OpenDropdown" override="true" level="ZO_HUD_EDITOR_KEYBOARD_INFO_BOX_INTERACTABLE_ELEMENT_LEVEL"/>
+                                    </Controls>
+                                </Control>
+                                <Button name="$(parent)Previous" level="ZO_HUD_EDITOR_KEYBOARD_INFO_BOX_INTERACTABLE_ELEMENT_LEVEL">
+                                    <Dimensions x="32" y="32"/>
+                                    <Anchor point="RIGHT" relativeTo="$(parent)Selector" relativePoint="LEFT"/>
+                                    <Textures normal="EsoUI/Art/Buttons/large_leftArrow_up.dds" pressed="EsoUI/Art/Buttons/large_leftArrow_down.dds" mouseOver="EsoUI/Art/Buttons/large_leftArrow_over.dds" disabled="EsoUI/Art/Buttons/large_leftArrow_disabled.dds"/>
+                                    <OnClicked>
+                                        HUD_EDITOR_KEYBOARD:SelectPrevious()
+                                    </OnClicked>
+                                </Button>
+                                <Button name="$(parent)Next" level="ZO_HUD_EDITOR_KEYBOARD_INFO_BOX_INTERACTABLE_ELEMENT_LEVEL">
+                                    <Dimensions x="32" y="32"/>
+                                    <Anchor point="LEFT" relativeTo="$(parent)Selector" relativePoint="RIGHT"/>
+                                    <Textures normal="EsoUI/Art/Buttons/large_rightArrow_up.dds" pressed="EsoUI/Art/Buttons/large_rightArrow_down.dds" mouseOver="EsoUI/Art/Buttons/large_rightArrow_over.dds" disabled="EsoUI/Art/Buttons/large_rightArrow_disabled.dds"/>
+                                    <OnClicked>
+                                        HUD_EDITOR_KEYBOARD:SelectNext()
+                                    </OnClicked>
+                                </Button>
+                            </Controls>
+                        </Control>
+                        <Control name="$(parent)Coordinates" resizeToFitConstrains="Y">
+                            <Anchor point="TOP" relativeTo="$(parent)Header" relativePoint="BOTTOM" offsetY="30"/>
+                            <Dimensions x="90%"/>
+                            <Controls>
+                                <Label name="$(parent)Header" font="ZoFontGame" text="SI_HUD_EDITOR_INFO_BOX_COORDINATES_LABEL" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                                    <Anchor point="TOPLEFT"/>
+                                    <Anchor point="TOPRIGHT" relativePoint="CENTER" offsetX="-15" constrains="X"/>
+                                </Label>
+                                <Control name="$(parent)XCoords" resizeToFitDescendents="true">
+                                    <Anchor point="TOP" relativeTo="$(parent)Header" constrains="Y"/>
+                                    <Anchor point="LEFT" relativePoint="CENTER" offsetX="15" constrains="X"/>
+                                    <Controls>
+                                        <Label name="$(parent)Name" font="ZoFontGame" text="SI_HUD_EDITOR_INFO_BOX_COORDINATES_X" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                                            <Dimensions x="15"/>
+                                            <Anchor point="TOPLEFT"/>
+                                        </Label>
+                                        <Backdrop name="$(parent)Backdrop" layer="CONTROLS" inherits="ZO_SingleLineEditBackdrop_Keyboard">
+                                            <Anchor point="LEFT" relativeTo="$(parent)Name" relativePoint="RIGHT" offsetX="5"/>
+                                            <Dimensions x="50" y="18"/>
+                                            <Controls>
+                                                <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop" maxInputCharacters="4" textType="NUMERIC_UNSIGNED_INT" level="ZO_HUD_EDITOR_KEYBOARD_INFO_BOX_INTERACTABLE_ELEMENT_LEVEL"/>
+                                            </Controls>
+                                        </Backdrop>
+                                    </Controls>
+                                </Control>
+                                <Control name="$(parent)YCoords" resizeToFitDescendents="true">
+                                    <Anchor point="LEFT" relativeTo="$(parent)XCoords" relativePoint="RIGHT" offsetX="15"/>
+                                    <Controls>
+                                        <Label name="$(parent)Name" font="ZoFontGame" text="SI_HUD_EDITOR_INFO_BOX_COORDINATES_Y" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                                            <Dimensions x="15"/>
+                                            <Anchor point="TOPLEFT"/>
+                                        </Label>
+                                        <Backdrop name="$(parent)Backdrop" layer="CONTROLS" inherits="ZO_SingleLineEditBackdrop_Keyboard">
+                                            <Anchor point="LEFT" relativeTo="$(parent)Name" relativePoint="RIGHT" offsetX="5"/>
+                                            <Dimensions x="50" y="18"/>
+                                            <Controls>
+                                                <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop" maxInputCharacters="4" textType="NUMERIC_UNSIGNED_INT" level="ZO_HUD_EDITOR_KEYBOARD_INFO_BOX_INTERACTABLE_ELEMENT_LEVEL"/>
+                                            </Controls>
+                                        </Backdrop>
+                                    </Controls>
+                                </Control>
+                            </Controls>
+                        </Control>
+                        <Control name="$(parent)CustomOptions" resizeToFitDescendents="true">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Coordinates" relativePoint="BOTTOMLEFT" offsetY="10"/>
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Coordinates" relativePoint="BOTTOMRIGHT" offsetY="10"/>
+                        </Control>
+                        <Button name="$(parent)Defaults" inherits="ZO_DefaultButton" text="SI_HUD_EDITOR_INFO_BOX_RESET_TO_DEFAULT" level="ZO_HUD_EDITOR_KEYBOARD_INFO_BOX_INTERACTABLE_ELEMENT_LEVEL">
+                            <Anchor point="TOP" relativeTo="$(parent)CustomOptions" relativePoint="BOTTOM" offsetY="20"/>
+                            <Dimensions x="200"/>
+                            <OnClicked>
+                                HUD_EDITOR_KEYBOARD:ResetSelectedToDefault()
+                            </OnClicked>
+                        </Button>
+                        <Button name="$(parent)GlobalDefaults" inherits="ZO_DefaultButton" text="SI_HUD_EDITOR_INFO_BOX_RESET_ALL_TO_DEFAULT" level="ZO_HUD_EDITOR_KEYBOARD_INFO_BOX_INTERACTABLE_ELEMENT_LEVEL">
+                            <Anchor point="TOP" relativeTo="$(parent)Defaults" relativePoint="BOTTOM" offsetY="10"/>
+                            <Dimensions x="200"/>
+                            <OnClicked>
+                                ZO_Dialogs_ShowPlatformDialog("HUD_EDITOR_RESET_ALL_POSITIONS_CONFIRMATION")
+                            </OnClicked>
+                        </Button>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

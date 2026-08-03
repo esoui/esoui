@@ -1,8 +1,8 @@
 <GuiXml>
     <Controls>
-        <TopLevelControl name="ZO_PromotionalEventTracker_TL" inherits="ZO_HUDTracker_Base_Template">
+        <Control name="ZO_TimedActivityTracker_Template" inherits="ZO_HUDTracker_Base_Template" virtual="true">
             <OnInitialized>
-                ZO_PromotionalEventTracker.OnControlInitialized(self)
+                ZO_TimedActivityTracker.OnControlInitialized(self)
             </OnInitialized>
             <Controls>
                 <Control name="$(parent)Container" override="true">
@@ -13,12 +13,18 @@
                                     <Dimensions x="32" y="32"/>
                                     <Anchor point="RIGHT" relativePoint="LEFT" offsetX="-5"/>
                                 </Texture>
+                                <Control name="$(parent)Assisted" inherits="ZO_KeybindButton" excludeFromResizeToFitExtents="true">
+                                    <Anchor point="RIGHT" relativeTo="$(parent)Icon" relativePoint="LEFT" offsetX="-5"/>
+                                    <OnInitialized>
+                                        ZO_KeybindButtonTemplate_OnInitialized(self)
+                                    </OnInitialized>
+                                </Control>
                             </Controls>
                         </Label>
-                        <Label name="$(parent)ProgressLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED"/>
+                        <StatusBar name="$(parent)ProgressBar" inherits="ZO_ProgressBarWithGloss_Template_Base"/>
                     </Controls>
                 </Control>
             </Controls>
-        </TopLevelControl>
+        </Control>
     </Controls>
 </GuiXml>

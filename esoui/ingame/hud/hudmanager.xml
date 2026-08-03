@@ -1,0 +1,17 @@
+<GuiXml>
+    <Controls>
+        <!-- Any elements that register with the HUD Manager should inherit from this control-->
+        <Control name="ZO_HUDManager_Element" virtual="true">
+            <OnInitialized name="ZO_HUDManager_Element">
+                self.hudElementRef = self:GetNamedChild("HUDElementRef")
+            </OnInitialized>
+            <Controls>
+                <!-- This control can be overridden in order to define custom dimensions for the element in the HUD editor view.-->
+                <Control name="$(parent)HUDElementRef" excludeFromResizeToFitExtents="true">
+                    <Anchor point="CENTER"/>
+                    <Dimensions x="100%" y="100%"/>
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

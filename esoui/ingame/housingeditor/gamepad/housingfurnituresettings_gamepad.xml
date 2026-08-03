@@ -21,7 +21,7 @@
             <Dimensions x="ZO_GAMEPAD_HOUSING_SETTINGS_DISPLAY_NAME_WIDTH"/>
             <Anchor point="TOPLEFT" offsetX="ZO_GAMEPAD_INTERACTIVE_FILTER_HIGHLIGHT_PADDING"/>
             <OnInitialized>
-                ZO_GamepadInteractiveSortFilterHeader_Initialize(self, ZO_GetPlatformAccountLabel(), "displayName", TEXT_ALIGN_LEFT)
+                ZO_HousingFurnitureSettings_Gamepad.OnDisplayNameHeaderInitialized(self)
             </OnInitialized>
         </Control>
         <Control name="ZO_Furniture_Setting_Panel_Header_GuildName_Gamepad" inherits="ZO_GamepadInteractiveFilterHeader" virtual="true">

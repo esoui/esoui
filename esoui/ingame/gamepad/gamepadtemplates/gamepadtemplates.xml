@@ -38,6 +38,11 @@
                 <Texture name="$(parent)StatusIndicator" inherits="ZO_GamepadMenuEntryStatusIndicationTemplate"/>
             </Controls>
         </Control>
+        <Control name="ZO_GamepadMenuEntryTemplateWithStatusLowercase42" inherits="ZO_GamepadMenuEntryTemplateLowercase42" virtual="true">
+            <Controls>
+                <Texture name="$(parent)StatusIndicator" inherits="ZO_GamepadMenuEntryStatusIndicationTemplate"/>
+            </Controls>
+        </Control>
         <Control name="ZO_GamepadSubMenuEntryTemplateWithStatusLowercase42" inherits="ZO_GamepadSubMenuEntryTemplateLowercase42" virtual="true">
             <Controls>
                 <Texture name="$(parent)StatusIndicator" inherits="ZO_GamepadMenuEntryStatusIndicationTemplate"/>
@@ -67,6 +72,7 @@
                         ZO_StatusBar_SetGradientColor(self, ZO_SKILL_XP_BAR_GRADIENT_COLORS)
                     </OnInitialized>
                 </StatusBar>
+                <Texture name="$(parent)StatusIndicator" inherits="ZO_GamepadMenuEntryStatusIndicationTemplate"/>
             </Controls>
         </Control>
         <!-- Tooltip Templates -->
@@ -120,7 +126,6 @@
                     <Anchor point="RIGHT" relativeTo="$(parent)Label" relativePoint="LEFT" offsetX="-10"/>
                 </Label>
                 <Texture name="$(parent)Icon" override="true" hidden="true"/>
-                <Texture name="$(parent)StatusIndicator" inherits="ZO_GamepadMenuEntryStatusIndicationTemplate"/>
             </Controls>
         </Control>
         <Control name="ZO_GamepadSimpleAbilityEntryTemplateBase" virtual="true">

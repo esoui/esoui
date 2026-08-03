@@ -12,6 +12,7 @@ LOOT_ENTRY_TYPE_COMPANION_EXPERIENCE = 11
 LOOT_ENTRY_TYPE_COMPANION_RAPPORT = 12
 LOOT_ENTRY_TYPE_TRIBUTE_CARD_UPGRADE = 13
 LOOT_ENTRY_TYPE_ADVENTURE_ZONE_FACTION_REPUTATION = 14
+LOOT_ENTRY_TYPE_TRIAL_PROGRESSION_POINTS = 15
 
 LOOT_EXPERIENCE_ICON = "EsoUI/Art/Icons/Icon_Experience.dds"
 LOOT_LEADERBOARD_SCORE_ICON = "EsoUI/Art/Icons/Battleground_Score.dds"
@@ -35,13 +36,7 @@ local USE_LOWERCASE_NUMBER_SUFFIXES = false
 --[[ ZO_LootHistory_Shared ]]--
 --
 
-ZO_LootHistory_Shared = ZO_Object:Subclass()
-
-function ZO_LootHistory_Shared:New(...)
-    local history = ZO_Object.New(self)
-    history:Initialize(...)
-    return history
-end
+ZO_LootHistory_Shared = ZO_InitializingObject:Subclass()
 
 function ZO_LootHistory_Shared:Initialize(control)
     self:InitializeFragment()
@@ -172,6 +167,13 @@ do
                 SetupIconOverlayText(control, currentEntryData)
                 ZO_CraftingResults_Base_PlayPulse(control.icon)
             end
+        elseif currentEntryData.entryType == LOOT_ENTRY_TYPE_TRIAL_PROGRESSION_POINTS then
+            currentEntryData.gainedPoints = currentEntryData.gainedPoints + newEntryData.gainedPoints
+            currentEntryData.stackCount = currentEntryData.gainedPoints
+            if control then
+                SetupIconOverlayText(control, currentEntryData)
+                ZO_CraftingResults_Base_PlayPulse(control.icon)
+            end
         elseif currentEntryData.entryType ~= LOOT_ENTRY_TYPE_MEDAL and currentEntryData.entryType ~= LOOT_ENTRY_TYPE_SCORE then
             currentEntryData.stackCount = currentEntryData.stackCount + newEntryData.stackCount
             if control and control.iconOverlayText then
@@ -252,6 +254,35 @@ do
 
     function ZO_LootHistory_Shared:GetPersistentContainerShowTime()
         return PERSISTENT_CONTAINER_SHOW_TIME_MS
+    end
+end
+
+do
+    local OPTIONS =
+    {
+        {
+            type = ZO_HUD_EDITOR_OPTION_TYPES.BOOLEAN,
+            name = GetString(SI_HUD_EDITOR_CUSTOM_OPTION_VISIBLE),
+            tooltipText = GetString(SI_INTERFACE_OPTIONS_LOOT_TOGGLE_LOOT_HISTORY_TOOLTIP),
+            key = "Visible",
+            defaultValue = function()
+                return tonumber(GetSetting(SETTING_TYPE_LOOT, LOOT_SETTING_LOOT_HISTORY))
+            end,
+            dontSave = true,
+            callback = function(element, subKey, oldValue, value)
+                if value ~= oldValue then
+                    SetSetting(SETTING_TYPE_LOOT, LOOT_SETTING_LOOT_HISTORY, tostring(value))
+                end
+            end,
+        },
+    }
+
+    function ZO_LootHistory_Shared.GetHUDManagerElementOptions()
+        return OPTIONS
+    end
+
+    function ZO_LootHistory_Shared.GetHUDManagerElementDisplayName()
+        return GetString(SI_INTERFACE_OPTIONS_LOOT_TOGGLE_LOOT_HISTORY)
     end
 end
 
@@ -481,14 +512,33 @@ function ZO_LootHistory_Shared:AddTributeCardUpgradeEntry(cardData)
 end
 
 function ZO_LootHistory_Shared:AddAdventureZoneFactionReputation(reputationAdded)
+    local lootData =
+    {
+        text = GetString(SI_LOOT_HISTORY_ADVENTURE_ZONE_FACTION_REPUTATION),
+        icon = ZO_ADVENTURE_ZONE_FACTION_ICONS[GetUnitAdventureZoneFaction("player")],
+        stackCount = reputationAdded,
+        color = ZO_SELECTED_TEXT,
+        gainedRep = reputationAdded,
+        entryType = LOOT_ENTRY_TYPE_ADVENTURE_ZONE_FACTION_REPUTATION,
+        iconOverlayText = ZO_LootHistory_Shared.GetStackCountStringFromData,
+        showIconOverlayText = ZO_LootHistory_Shared.ShouldShowStackCountStringFromData
+    }
+    local lootEntry = self:CreateLootEntry(lootData)
+    lootEntry.isPersistent = true
+    self:InsertOrQueue(lootEntry)
+end
+
+function ZO_LootHistory_Shared:AddTrialProgressionPoints(pointsAdded)
+    local currentTrialProgressionTrack = GetCurrentlyAttunedTrialProgressionTrack()
+    if currentTrialProgressionTrack then
         local lootData =
         {
-            text = GetString(SI_LOOT_HISTORY_ADVENTURE_ZONE_FACTION_REPUTATION),
-            icon = ZO_ADVENTURE_ZONE_FACTION_ICONS[GetUnitAdventureZoneFaction("player")],
-            stackCount = reputationAdded,
+            text = GetTrialProgressionTrackLootStreamTextByIndex(currentTrialProgressionTrack),
+            icon = GetTrialProgressionTrackPointsIconByIndex(currentTrialProgressionTrack),
+            stackCount = pointsAdded,
             color = ZO_SELECTED_TEXT,
-            gainedRep = reputationAdded,
-            entryType = LOOT_ENTRY_TYPE_ADVENTURE_ZONE_FACTION_REPUTATION,
+            gainedPoints = pointsAdded,
+            entryType = LOOT_ENTRY_TYPE_TRIAL_PROGRESSION_POINTS,
             iconOverlayText = ZO_LootHistory_Shared.GetStackCountStringFromData,
             showIconOverlayText = ZO_LootHistory_Shared.ShouldShowStackCountStringFromData
         }
@@ -496,6 +546,7 @@ function ZO_LootHistory_Shared:AddAdventureZoneFactionReputation(reputationAdded
         lootEntry.isPersistent = true
         self:InsertOrQueue(lootEntry)
     end
+end
 
 function ZO_LootHistory_Shared:OnNewItemReceived(itemLinkOrName, stackCount, itemSound, lootType, questItemIcon, itemId, isVirtual, isStolen, bonusDropSource, isLockedSetPiece, canBeUsedToLearn)
     if self:CanShowItemsInHistory() then
@@ -676,6 +727,12 @@ end
 function ZO_LootHistory_Shared:OnAdventureZoneFactionReputationChanged(newReputation, deltaReputation)
     if deltaReputation ~= 0 then
         self:AddAdventureZoneFactionReputation(deltaReputation)
+    end
+end
+
+function ZO_LootHistory_Shared:OnTrialProgressionPointsChanged(oldPoints, newPoints)
+    if oldPoints ~= newPoints then
+        self:AddTrialProgressionPoints(newPoints - oldPoints)
     end
 end
 

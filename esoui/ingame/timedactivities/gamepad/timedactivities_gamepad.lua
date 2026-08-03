@@ -582,6 +582,7 @@ function ZO_TimedActivitiesList_Gamepad:SetupActivityRow(control, data)
         activityReward:SetParent(control.rewardContainer)
         activityReward:SetAnchor(BOTTOMRIGHT)
 
+        local USE_LOWERCASE_NUMBER_SUFFIXES = false
         activityReward.amountLabel:SetText(ZO_AbbreviateAndLocalizeNumber(rewardCurrencyQuantity, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES))
         activityReward.amountLabel:SetColor(selectedTextColor:UnpackRGBA())
         activityReward.iconTexture:SetTexture(GetCurrencyGamepadIcon(rewardCurrencyType))

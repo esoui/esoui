@@ -25,6 +25,18 @@ function ZO_Tooltip:LayoutSettingAccountResendActivation(hasActivatedEmail, acco
     end
 end
 
+function ZO_Tooltip:LayoutSettingAccountChangeEmail(accountEmail)
+    self:AddLine(GetString(SI_INTERFACE_OPTIONS_ACCOUNT_RESEND_ACTIVATION_TOOLTIP_LABEL), self:GetStyle("statValuePairStat"))
+
+    local emailText = accountEmail
+    if emailText == "" then
+        emailText = GetString(SI_INTERFACE_OPTIONS_ACCOUNT_NO_EMAIL_TEXT)
+    end
+    local statValueSection = self:AcquireSection(self:GetStyle("accountValueStatsSection"))
+    statValueSection:AddLine(emailText)
+    self:AddSection(statValueSection)
+end
+
 function ZO_Tooltip:LayoutSettingAccountGetUpdates(hasActivatedEmail)
     self:AddLine(GetString(SI_INTERFACE_OPTIONS_ACCOUNT_GET_UPDATES_TOOLTIP_TITLE), self:GetStyle("title"))
 

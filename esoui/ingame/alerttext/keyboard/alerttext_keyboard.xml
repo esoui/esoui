@@ -17,11 +17,17 @@
             <DimensionConstraints maxX="600"/>
             <Anchor point="TOPRIGHT"/>
         </Label>
-        <TopLevelControl name="ZO_AlertTextNotification" tier="HIGH" level="ZO_HIGH_TIER_ALERT_TEXT">
-            <Anchor point="TOPRIGHT" relativeTo="GuiRoot" offsetX="-15" offsetY="15"/>
+        <TopLevelControl name="ZO_AlertTextNotification" inherits="ZO_HUDManager_Element" tier="HIGH" level="ZO_HIGH_TIER_ALERT_TEXT">
+            <Anchor point="TOPRIGHT" relativeTo="GuiRoot"/>
             <OnInitialized>
                 ZO_AlertTextKeyboard_OnInitialized(self)
             </OnInitialized>
+            <Controls>
+                <Control name="$(parent)HUDElementRef" override="true">
+                    <Anchor point="TOPRIGHT"/>
+                    <Dimensions x="550" y="100"/>
+                </Control>
+            </Controls>
         </TopLevelControl>
     </Controls>
 </GuiXml>

@@ -70,6 +70,10 @@
                 <Label name="$(parent)TelvarDisplay">
                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Frame" relativePoint="BOTTOMRIGHT" offsetX="-100" offsetY="-10"/>
                 </Label>
+                <Control name="$(parent)HUDElementRef">
+                    <Anchor point="TOPLEFT" offsetX="30" offsetY="35"/>
+                    <Anchor point="BOTTOMRIGHT"/>
+                </Control>
             </Controls>
         </Control>
         <Control name="ZO_HUDTelvarMeter_GamepadTemplate" virtual="true">
@@ -100,6 +104,10 @@
                 <Label name="$(parent)TelvarDisplay">
                     <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Frame" offsetX="105" offsetY="-4"/>
                 </Label>
+                <Control name="$(parent)HUDElementRef">
+                    <Anchor point="TOPLEFT" offsetY="30"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="15"/>
+                </Control>
             </Controls>
         </Control>
         <TopLevelControl name="ZO_HUDTelvarAlertBorder" alpha="0" tier="HIGH">
@@ -113,7 +121,7 @@
                 </Backdrop>
             </Controls>
         </TopLevelControl>
-        <TopLevelControl name="ZO_HUDTelvarMeter" hidden="true">
+        <TopLevelControl name="ZO_HUDTelvarMeter" inherits="ZO_HUDManager_Element" hidden="true">
             <OnInitialized>
                 ZO_HUDTelvarMeter_Initialize(self)
             </OnInitialized>

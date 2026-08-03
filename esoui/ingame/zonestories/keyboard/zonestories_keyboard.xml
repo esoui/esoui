@@ -106,7 +106,7 @@
                 <Control name="$(parent)CheckList" resizeToFitDescendents="true">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetY="10"/>
                 </Control>
-                <Label name="$(parent)BlockedBranchRequirementText" font="ZoFontGame" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" hidden="true"/>
+                <Label name="$(parent)AdditionalInfoText" font="ZoFontGame" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" hidden="true"/>
             </Controls>
         </TopLevelControl>
     </Controls>

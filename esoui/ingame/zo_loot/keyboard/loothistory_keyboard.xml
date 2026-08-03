@@ -38,6 +38,11 @@
                 <Control name="$(parent)Container" override="true">
                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)PersistentContainer" relativePoint="TOPRIGHT" offsetY="ZO_GAMEPAD_LOOT_HISTORY_ENTRY_SPACING_Y"/>
                 </Control>
+                <Control name="$(parent)HUDElementRef" override="true">
+                    <Anchor point="BOTTOMRIGHT"/>
+                    <Dimensions x="ZO_LOOT_HISTORY_KEYBOARD_HUD_ELEMENT_WIDTH"/>
+                    <DimensionConstraints minY="ZO_LOOT_HISTORY_KEYBOARD_HUD_ELEMENT_MIN_HEIGHT"/>
+                </Control>
             </Controls>
         </TopLevelControl>
     </Controls>

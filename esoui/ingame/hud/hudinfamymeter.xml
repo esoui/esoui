@@ -66,6 +66,10 @@
                 <Label name="$(parent)BountyDisplay" inherits="ZO_BountyDisplay" tier="MEDIUM" level="6">
                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Background" relativePoint="BOTTOMLEFT" offsetX="25" offsetY="-25"/>
                 </Label>
+                <Control name="$(parent)HUDElementRef">
+                    <Anchor point="TOPLEFT" offsetX="30" offsetY="30"/>
+                    <Anchor point="BOTTOMRIGHT"/>
+                </Control>
             </Controls>
         </Control>
         <Control name="ZO_HUDInfamyMeter_GamepadTemplate" virtual="true">
@@ -102,9 +106,13 @@
                 <Label name="$(parent)BountyDisplay" inherits="ZO_BountyDisplay" tier="MEDIUM" level="6">
                     <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Background" relativePoint="BOTTOMRIGHT" offsetX="-15" offsetY="-14"/>
                 </Label>
+                <Control name="$(parent)HUDElementRef">
+                    <Anchor point="TOPLEFT" offsetY="20"/>
+                    <Anchor point="BOTTOMRIGHT"/>
+                </Control>
             </Controls>
         </Control>
-        <TopLevelControl name="ZO_HUDInfamyMeter" hidden="true" alpha="0">
+        <TopLevelControl name="ZO_HUDInfamyMeter" inherits="ZO_HUDManager_Element" hidden="true" alpha="0">
             <OnInitialized>
                 ZO_HUDInfamyMeter_Initialize(self)
             </OnInitialized>

@@ -155,7 +155,8 @@ end
 local AddConditionLine = function(self, labels, text)
     local conditionLabel = self.labelPool:AcquireObject()
     conditionLabel:SetWidth(0)
-    zo_bulletFormat(conditionLabel, text)
+    local INDENT = true
+    zo_bulletFormat(conditionLabel, text, INDENT)
     table.insert(labels, conditionLabel)
 end
 

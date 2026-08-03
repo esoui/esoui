@@ -1,10 +1,4 @@
-local ZO_EULA = ZO_Object:Subclass()
-
-function ZO_EULA:New(control)
-    local object = ZO_Object.New(self)
-    object:Initialize(control)
-    return object
-end
+local ZO_EULA = ZO_InitializingObject:Subclass()
 
 function ZO_EULA:Initialize(control)
     self.control = control
@@ -15,14 +9,15 @@ function ZO_EULA:Initialize(control)
     self.readTextCheckBox = self.readTextCheckContainer:GetNamedChild("CheckBox")
     self.scroll = control:GetNamedChild("ContainerScroll")
     self:InitializeDialog(control)
-    self:CreateEULAScene()
     LINK_HANDLER:RegisterCallback(LINK_HANDLER.LINK_CLICKED_EVENT, function(...) self:OnLinkClicked(...) end)
     CALLBACK_MANAGER:RegisterCallback("AllDialogsHidden", function()
         if self.isShowingLinkConfirmation then
-            self:ShowNextEULA()
+            self:RefreshEULA()
             self.isShowingLinkConfirmation = false
         end
     end)
+
+    self.docProvider = REMOTE_LEGAL_DOCS_PROVIDER
 end
 
 function ZO_EULA:OnLinkClicked(link, button, text, color, linkType, ...)
@@ -34,30 +29,29 @@ function ZO_EULA:OnLinkClicked(link, button, text, color, linkType, ...)
     end
 end
 
-function ZO_EULA:GetNextEulaType()
-    for k, eulaType in ipairs(ZO_PREGAME_EULAS) do
-        if ShouldShowEULA(eulaType) then
-            return eulaType
-        end
-    end
-end
+function ZO_EULA:RefreshEULA()
+    local currentData = self.docData
+    if currentData then
+        ZO_Dialogs_ReleaseDialog("SHOW_EULA")
+        ZO_Dialogs_ReleaseDialog("LOGIN_REQUESTED")
+        ZO_Dialogs_ReleaseDialog("LINKED_LOGIN_KEYBOARD")
 
-function ZO_EULA:ShowNextEULA()
-    self.eulaType = self:GetNextEulaType()
-    if self.eulaType then
-        if ZO_Dialogs_IsShowing("SHOW_EULA") then
-            ZO_Dialogs_ReleaseDialog("SHOW_EULA")
-        end
-        local eulaText, agreeText, disagreeText, hasAgreed, eulaTitle, readCheckText = GetEULADetails(self.eulaType)
+        local eulaText = currentData.text
+        local agreeText = currentData.positiveButtonPrompt
+        local disagreeText = currentData.negativeButtonPrompt
+        local eulaTitle = currentData.name
+
         if eulaTitle == "" then
             eulaTitle = SI_WINDOW_TITLE_EULA
         end
         self.titleEulaText = eulaTitle
         self.mainEulaText = eulaText
         self:SetupButtonTextData(agreeText, disagreeText)
-        local notifyUpdatedText = GetString("SI_EULATYPE_NOTIFYUPDATED", self.eulaType)
+
+        local notifyUpdatedText = GetString("SI_EULATYPE_NOTIFYUPDATED", currentData.eulaType)
         self.notifyUpdatedTextLabel:SetText(notifyUpdatedText)
 
+        local readCheckText = GetString("SI_EULATYPE_READCHECK", currentData.eulaType)
         if readCheckText ~= "" then
             ZO_CheckButton_SetLabelText(self.readTextCheckBox, readCheckText)
             ZO_CheckButton_SetToggleFunction(self.readTextCheckBox, function() self:CheckEnableAgreeButton() end)
@@ -70,12 +64,8 @@ function ZO_EULA:ShowNextEULA()
         self:ResetDialog()
         ZO_Dialogs_ShowDialog("SHOW_EULA")
     else
-        SCENE_MANAGER:Hide("eula")
+        ZO_Dialogs_ReleaseDialog("SHOW_EULA")
     end
-end
-
-function ZO_EULA:AcceptCurrentEULA()
-    AgreeToEULA(self.eulaType)
 end
 
 function ZO_EULA:InitializeDialog(dialogControl)
@@ -104,21 +94,32 @@ function ZO_EULA:InitializeDialog(dialogControl)
         {
             [1] =
             {
-                control = GetControl(dialogControl, "Agree"),
+                control = dialogControl:GetNamedChild("Agree"),
                 text = SI_EULA_BUTTON_AGREE,
                 noReleaseOnClick = true, -- Don't release because the scene needs to fade out, will release later
                 callback = function(dialog)
-                    self:AcceptCurrentEULA()
-                    self:ShowNextEULA()
+                    self.docData.acceptFunction()
+                    self.docData = self.docProvider:NextLegalDoc()
+                    if not self.docData then
+                        self.docProvider:OnDocsFinished()
+                    end
+                    self:RefreshEULA()
                 end,
             },
 
             [2] =
             {
-                control = GetControl(dialogControl, "Disagree"),
+                control = dialogControl:GetNamedChild("Disagree"),
+                noReleaseOnClick = true,
                 text = SI_EULA_BUTTON_DISAGREE,
                 callback = function(dialog)
-                    ZO_Dialogs_ShowDialog("EULA_DECLINED")
+                    self.docData = self.docProvider:PreviousLegalDoc()
+                    if not self.docData then
+                        ZO_Dialogs_ReleaseDialog("SHOW_EULA")
+                        ZO_Dialogs_ShowDialog("EULA_DECLINED")
+                    else
+                        self:RefreshEULA()
+                    end
                 end,
             }
         }
@@ -142,7 +143,7 @@ end
 
 function ZO_EULA:CheckEnableAgreeButton(verticalOffset)
     if not self.scrolledToBottomOnce then
-        if(verticalOffset == nil) then
+        if verticalOffset == nil then
             local _
             _, verticalOffset = self.scroll:GetScrollOffsets()
         end
@@ -175,7 +176,7 @@ function ZO_EULA:ResetDialog()
             self.scroll:SetHandler("OnUpdate", nil)
         end
 
-        if(GetFrameTimeMilliseconds() > automaticEnableTime) then
+        if GetFrameTimeMilliseconds() > automaticEnableTime then
             if self.readTextCheckContainer:IsHidden() then
                 self.agreeButton:SetEnabled(true)
             else
@@ -197,16 +198,18 @@ function ZO_EULA:SetupButtonTextData(agreeText, disagreeText)
     self.dialogInfo.buttons[2].text = (#disagreeText > 0) and disagreeText or SI_EULA_BUTTON_DISAGREE
 end
 
-function ZO_EULA:CreateEULAScene()
-    EULA_SCENE = ZO_Scene:New("eula", SCENE_MANAGER)
-    EULA_SCENE:RegisterCallback("StateChange", function(oldState, newState)
-        if newState == SCENE_SHOWING then
-            self:ShowNextEULA()
-        elseif newState == SCENE_HIDDEN then
-            ZO_Dialogs_ReleaseDialog("SHOW_EULA")
-            ZO_PregameStateManager_AdvanceStateFromState("ShowEULA")
-        end
-    end)
+function ZO_EULA:ShowFetchedDocs()
+    self.docData = self.docProvider:NextLegalDoc()
+    self:RefreshEULA()
+end
+
+function ZO_EULA:ShowEULA()
+    self.docData = self.docProvider:NextLegalDoc()
+    self:RefreshEULA()
+end
+
+function ZO_EULA:ShouldShowEULA()
+    return self.docProvider:ShouldShowEULA()
 end
 
 --[[
@@ -215,13 +218,4 @@ end
 
 function ZO_EULAInit(control)
     EULA_SCREEN = ZO_EULA:New(control)
-end
-
-function ZO_ShouldShowEULAScreen()
-    for k, eulaType in ipairs(ZO_PREGAME_EULAS) do
-        if ShouldShowEULA(eulaType) then
-            return true
-        end
-    end
-    return false
 end

@@ -210,6 +210,13 @@ function ActivityFinderRoot_Manager:RegisterForEvents()
         self:UpdateLocationData()
     end
 
+    local function OnCurrencyUpdated(eventCode, currencyType, currentAmount, oldAmount, reason)
+        -- Tel Var Stones in inventory can prevent queuing for Battlegrounds from Imperial City
+        if currencyType == CURT_TELVAR_STONES then
+            self:UpdateLocationData()
+        end
+    end
+
     EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_ACTIVITY_FINDER_STATUS_UPDATE, function(eventCode, ...) self:OnActivityFinderStatusUpdate(...) end)
     EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_ACTIVITY_FINDER_COOLDOWNS_UPDATE, OnCooldownsUpdate)
     EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_CURRENT_CAMPAIGN_CHANGED, OnCurrentCampaignChanged)
@@ -244,6 +251,8 @@ function ActivityFinderRoot_Manager:RegisterForEvents()
     EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_LEADER_UPDATE, UpdateGroupStatus)
     EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_DISABLED_ACTIVITIES_UPDATE, OnDisabledActivitiesUpdate)
     EVENT_MANAGER:RegisterForUpdate("ActivityFinderRoot_Manager", 0, function() self:OnUpdate() end)
+
+    EVENT_MANAGER:RegisterForEvent("ActivityFinderRoot_Manager", EVENT_CARRIED_CURRENCY_UPDATE, OnCurrencyUpdated)
 end
 
 function ActivityFinderRoot_Manager:InitializeLocationData()

@@ -93,6 +93,28 @@
                 </Texture>
             </Controls>
         </Control>
+        <Control name="ZO_VerticalArrowStatusBarOverlay" tier="HIGH" layer="OVERLAY" virtual="true">
+            <AnchorFill/>
+            <Controls>
+                <Texture name="$(parent)Bottom" textureFile="EsoUI/Art/Miscellaneous/progressbar_vertical_frame.dds" layer="OVERLAY">
+                    <Dimensions y="10"/>
+                    <Anchor point="BOTTOMLEFT"/>
+                    <Anchor point="BOTTOMRIGHT"/>
+                    <TextureCoords left="0" right="0.6250" top="0.9805" bottom="1"/>
+                </Texture>
+                <Texture name="$(parent)Top" textureFile="EsoUI/Art/Miscellaneous/progressbar_vertical_frame.dds" layer="OVERLAY">
+                    <Dimensions y="10"/>
+                    <Anchor point="TOPLEFT"/>
+                    <Anchor point="TOPRIGHT"/>
+                    <TextureCoords left="0" right="0.6250" top="0.3867" bottom="0.4062"/>
+                </Texture>
+                <Texture name="$(parent)Middle" textureFile="EsoUI/Art/Miscellaneous/progressbar_vertical_frame.dds" layer="OVERLAY">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Bottom" relativePoint="TOPLEFT"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Top" relativePoint="BOTTOMRIGHT"/>
+                    <TextureCoords left="0" right="0.6250" top="0.4102" bottom="0.9805"/>
+                </Texture>
+            </Controls>
+        </Control>
         <Control name="ZO_ArrowStatusBarBG" virtual="true">
             <AnchorFill/>
             <Controls>
@@ -112,6 +134,28 @@
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Left" relativePoint="TOPRIGHT"/>
                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Right" relativePoint="BOTTOMLEFT"/>
                     <TextureCoords left="0.0195" right="0.5898" top="0" bottom="0.6250"/>
+                </Texture>
+            </Controls>
+        </Control>
+        <Control name="ZO_VerticalArrowStatusBarBG" virtual="true">
+            <AnchorFill/>
+            <Controls>
+                <Texture name="$(parent)Bottom" textureFile="EsoUI/Art/Miscellaneous/progressbar_vertical_frame_bg.dds" level="1">
+                    <Dimensions y="10"/>
+                    <Anchor point="BOTTOMLEFT"/>
+                    <Anchor point="BOTTOMRIGHT"/>
+                    <TextureCoords left="0" right="0.6250" top="0.9805" bottom="1"/>
+                </Texture>
+                <Texture name="$(parent)Top" textureFile="EsoUI/Art/Miscellaneous/progressbar_vertical_frame_bg.dds" level="1">
+                    <Dimensions y="10"/>
+                    <Anchor point="TOPLEFT"/>
+                    <Anchor point="TOPRIGHT"/>
+                    <TextureCoords left="0" right="0.6250" top="0.3867" bottom="0.4062"/>
+                </Texture>
+                <Texture name="$(parent)Middle" textureFile="EsoUI/Art/Miscellaneous/progressbar_vertical_frame_bg.dds" level="1">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Bottom" relativePoint="TOPLEFT"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Top" relativePoint="BOTTOMRIGHT"/>
+                    <TextureCoords left="0" right="0.6250" top="0.4102" bottom="0.9805"/>
                 </Texture>
             </Controls>
         </Control>
@@ -142,6 +186,35 @@
             <Controls>
                 <Control name="$(parent)BG" inherits="ZO_ArrowStatusBarBG"/>
                 <Control name="$(parent)Overlay" inherits="ZO_ArrowStatusBarOverlay"/>
+            </Controls>
+        </StatusBar>
+        <StatusBar name="ZO_VerticalArrowStatusBar" orientation="ORIENTATION_VERTICAL" textureFile="EsoUI/Art/Miscellaneous/progressbar_vertical_genericFill.dds" virtual="true">
+            <Dimensions x="20" y="315"/>
+            <LeadingEdge textureFile="EsoUI/Art/Miscellaneous/progressbar_vertical_genericFill_leadingEdge.dds" width="20" height="8"/>
+            <TextureCoords left="0" right="0.625" top="0" bottom="1"/>
+            <LeadingEdgeTextureCoords left="0" right="0.625" top="0" bottom="1"/>
+            <OnInitialized>
+                self.gloss = self:GetNamedChild("Gloss")
+            </OnInitialized>
+            <OnMinMaxValueChanged>
+                self.gloss:SetMinMax(min, max)
+            </OnMinMaxValueChanged>
+            <OnValueChanged>
+                self.gloss:SetValue(value)
+            </OnValueChanged>
+            <Controls>
+                <StatusBar name="$(parent)Gloss" orientation="ORIENTATION_VERTICAL" textureFile="EsoUI/Art/Miscellaneous/progressbar_vertical_genericFill_gloss.dds">
+                    <AnchorFill/>
+                    <LeadingEdge textureFile="EsoUI/Art/Miscellaneous/progressbar_vertical_genericFill_leadingEdge_gloss.dds" width="20" height="8"/>
+                    <TextureCoords left="0" right="0.625" top="0" bottom="1"/>
+                    <LeadingEdgeTextureCoords left="0" right="0.625" top="0" bottom="1"/>
+                </StatusBar>
+            </Controls>
+        </StatusBar>
+        <StatusBar name="ZO_VerticalArrowStatusBarWithBG" inherits="ZO_VerticalArrowStatusBar" virtual="true">
+            <Controls>
+                <Control name="$(parent)BG" inherits="ZO_VerticalArrowStatusBarBG"/>
+                <Control name="$(parent)Overlay" inherits="ZO_VerticalArrowStatusBarOverlay"/>
             </Controls>
         </StatusBar>
         <StatusBar name="ZO_ArrowProgressBarWithBG" inherits="ZO_ArrowStatusBarWithBG" virtual="true">

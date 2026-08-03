@@ -174,6 +174,13 @@ panelBuilder:AddSetting({
     header = SI_AUDIO_OPTIONS_COMBAT,
 })
 
+panelBuilder:AddSetting({
+    controlName = "Options_Gameplay_DamageShieldVisibility",
+    settingType = SETTING_TYPE_COMBAT,
+    settingId = COMBAT_SETTING_DAMAGE_SHIELD_VISIBILITY,
+    header = SI_AUDIO_OPTIONS_COMBAT,
+})
+
 -------------------------
 -- Gameplay -> Gamepad --
 -------------------------

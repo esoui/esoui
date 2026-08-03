@@ -29,7 +29,9 @@ function ZO_QuestJournal_Rumors_Keyboard:Initialize(control, owner)
                 self:RefreshNavigationTree()
             end
 
-            self:ShowMainPanel()
+            if SCENE_MANAGER:GetPreviousSceneName() ~= "loreReaderCustomKeyboard" then
+                self:ShowMainPanel()
+            end
         elseif newState == ZO_STATE.HIDDEN then
         end
     end)
@@ -51,16 +53,16 @@ function ZO_QuestJournal_Rumors_Keyboard:InitializeKeybindStripDescriptor()
             keybind = "UI_SHORTCUT_NEGATIVE",
             callback = function()
                 local rumorId
-                if self.mouseOverRumorEntry then
-                    rumorId = self.mouseOverRumorEntry.data:GetId()
+                if self.mouseOverRumorData then
+                    rumorId = self.mouseOverRumorData:GetId()
                 else
                     rumorId = self.selectedRumorData:GetId()
                 end
                 RUMOR_MANAGER:ConfirmAbandonRumor(rumorId)
             end,
             visible = function()
-                if self.mouseOverRumorEntry then
-                    return self.mouseOverRumorEntry.data:IsPending()
+                if self.mouseOverRumorData then
+                    return self.mouseOverRumorData:IsPending()
                 end
                 if self.selectedRumorData then
                     return self.selectedRumorData:IsPending()
@@ -254,7 +256,8 @@ function ZO_QuestJournal_Rumors_Keyboard:RefreshActiveRumorList(rumorType)
 
     local scrollData = ZO_ScrollList_GetDataList(list)
 
-    for index, rumorData in RUMOR_MANAGER:RumorTypeRumorIterator(rumorType, {ZO_RumorData.IsNotComplete}) do
+    local rumors = RUMOR_MANAGER:GetActiveRumorListForRumorType(rumorType)
+    for index, rumorData in ipairs(rumors) do
         local entryData =
         {
             rumorData = rumorData,
@@ -265,30 +268,6 @@ function ZO_QuestJournal_Rumors_Keyboard:RefreshActiveRumorList(rumorType)
 
         table.insert(scrollData, entryData)
     end
-
-    local function RumorSortFunction(left, right)
-        -- Pending rumors first
-        local leftPending = left:IsPending()
-        local rightPending = right:IsPending()
-        if leftPending ~= rightPending then
-            return leftPending
-        end
-
-        -- If they're both pending, alphabetical sort
-        -- rumors that aren't pending all have the same display name
-        if leftPending then
-            local leftDisplayName = left:GetDisplayName()
-            local rightDisplayName = right:GetDisplayName()
-            if leftDisplayName ~= rightDisplayName then
-                return leftDisplayName < rightDisplayName
-            end
-        end
-
-        -- fallback to the rumorId
-        return left:GetId() < right:GetId()
-    end
-
-    table.sort(scrollData, RumorSortFunction)
 
     if #scrollData == 0 then
         local rumorCategoryString = ZO_SELECTED_TEXT:Colorize(GetString("SI_RUMORTYPE_JOURNALCATEGORY", rumorType))
@@ -316,7 +295,8 @@ function ZO_QuestJournal_Rumors_Keyboard:RefreshCompletedRumorList(rumorType)
 
     local scrollData = ZO_ScrollList_GetDataList(list)
 
-    for index, rumorData in RUMOR_MANAGER:RumorTypeRumorIterator(rumorType, {ZO_RumorData.IsComplete}) do
+    local rumors = RUMOR_MANAGER:GetCompletedRumorListForRumorType(rumorType)
+    for index, rumorData in ipairs(rumors) do
         local entryData =
         {
             rumorData = rumorData,
@@ -327,19 +307,6 @@ function ZO_QuestJournal_Rumors_Keyboard:RefreshCompletedRumorList(rumorType)
 
         table.insert(scrollData, entryData)
     end
-
-    local function RumorSortFunction(left, right)
-        local leftDisplayName = left:GetDisplayName()
-        local rightDisplayName = right:GetDisplayName()
-        if leftDisplayName ~= rightDisplayName then
-            return leftDisplayName < rightDisplayName
-        end
-
-        -- fallback to the rumorId
-        return left:GetId() < right:GetId()
-    end
-
-    table.sort(scrollData, RumorSortFunction)
 
     self.emptyTextLabel:SetHidden(true)
     self.rumorListContainer:SetHidden(false)
@@ -464,29 +431,39 @@ function ZO_QuestJournal_Rumors_Keyboard:TrySelectRumorEntryFromList(control)
 end
 
 function ZO_QuestJournal_Rumors_Keyboard:OnRumorEntryMouseEnter(control)
-    self:SetMouseOverRumorEntry(control)
+    local rumorData = control.data
+    self:SetMouseOverRumorData(rumorData)
 
     ZO_ScrollList_MouseEnter(self.rumorList, control)
+
+    if rumorData:IsNotStarted() then
+        local starterHint = rumorData:GetStarterHint()
+        if starterHint ~= "" then
+            InitializeTooltip(InformationTooltip, control, RIGHT, 0, 0, LEFT)
+            SetTooltipText(InformationTooltip, starterHint)
+        end
+    end
 end
 
 function ZO_QuestJournal_Rumors_Keyboard:OnRumorEntryMouseExit(control)
-    self:SetMouseOverRumorEntry(nil)
+    self:SetMouseOverRumorData(nil)
 
     ZO_ScrollList_MouseExit(self.rumorList, control)
+    ClearTooltip(InformationTooltip)
 end
 
-function ZO_QuestJournal_Rumors_Keyboard:SetMouseOverRumorEntry(control)
-    self.mouseOverRumorEntry = control
+function ZO_QuestJournal_Rumors_Keyboard:SetMouseOverRumorData(rumorData)
+    self.mouseOverRumorData = rumorData
 
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
 end
 
-function ZO_QuestJournal_Rumors_Keyboard:GetMouseOverRumorEntry()
-    return self.mouseOverRumorEntry
+function ZO_QuestJournal_Rumors_Keyboard:GetMouseOverRumorData()
+    return self.mouseOverRumorData
 end
 
-function ZO_QuestJournal_Rumors_Keyboard:HasMouseOverRumorEntry()
-    return self.mouseOverRumorEntry ~= nil
+function ZO_QuestJournal_Rumors_Keyboard:HasMouseOverRumorData()
+    return self.mouseOverRumorData ~= nil
 end
 
 -- Clue Entry

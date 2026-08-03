@@ -1833,6 +1833,30 @@ ZO_TOOLTIP_STYLES =
         fontColorField = GENERAL_COLOR_OFF_WHITE,
     },
 
+    -- Zone Guide
+    zoneGuideMilestoneCriteriaSection =
+    {
+        paddingLeft = 48,
+        widthPercent = 100,
+    },
+    zoneGuideMilestoneCriteriaCompleteSection =
+    {
+        widthPercent = 100,
+    },
+    zoneGuideMilestoneCriteria =
+    {
+        fontSize = "$(GP_34)",
+        fontFace = "$(GAMEPAD_LIGHT_FONT)",
+        fontColorField = GENERAL_COLOR_OFF_WHITE,
+    },
+    zoneGuideMilestoneCriteriaCompleted =
+    {
+        newLineX = 48,
+        fontSize = "$(GP_34)",
+        fontFace = "$(GAMEPAD_LIGHT_FONT)",
+        fontColorField = GENERAL_COLOR_WHITE,
+    },
+
     --Character Select
     characterDetailsHeader =
     {
@@ -1954,6 +1978,47 @@ ZO_TOOLTIP_STYLES =
         fontSize = "$(GP_42)",
         fontColorField = GENERAL_COLOR_WHITE,
     },
+
+    -- Begin Journal Tooltip Styles
+
+    rumorClueHeader =
+    {
+        fontFace = "$(GAMEPAD_BOLD_FONT)",
+        fontSize = "$(GP_22)",
+        fontStyle = "soft-shadow-thick",
+        uppercase = true,
+        fontColorField = GENERAL_COLOR_OFF_WHITE,
+        widthPercent = 100,
+        customSpacing = 8,
+    },
+
+    rumorClueSection =
+    {
+        layoutPrimaryDirection = "right",
+        layoutSecondaryDirection = "down",
+        widthPercent = 100,
+        -- spacing between children in the primary direction
+        childSpacing = 2,
+        -- spacing between children in the secondary direction
+        childSecondarySpacing = 5,
+    },
+
+    rumorClueLine =
+    {
+        fontFace = "$(GAMEPAD_MEDIUM_FONT)",
+        fontSize = "$(GP_34)",
+        fontStyle = "soft-shadow-thick",
+        fontColorField = GENERAL_COLOR_WHITE,
+        widthPercent = 80,
+    },
+
+    rumorClueIcon =
+    {
+        width = 40,
+        height = 40,
+    },
+
+    -- End Journal Tooltip Styles
 }
 
 ZO_GAMEPAD_DYEING_TOOLTIP_STYLES =

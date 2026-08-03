@@ -102,5 +102,5 @@ function ZO_GuildBrowser_GuildInfo_Shared:OnHidden()
 end
 
 function ZO_GuildBrowser_GuildInfo_Shared:IsShown()
-    asset(false) -- To be overridden
+    internalassert(false) -- To be overridden
 end

@@ -73,6 +73,9 @@
                     <Dimensions x="18" y="ZO_COMPASS_FRAME_HEIGHT_KEYBOARD"/>
                     <TextureCoords left="0.28125" right="0" top="0" bottom="0.609375"/>
                 </Texture>
+                <Control name="$(parent)HUDElementRef">
+                    <Dimensions y="80"/>
+                </Control>
             </Controls>
         </Control>
         <Control name="ZO_CompassFrame_Gamepad_Template" virtual="true">
@@ -90,9 +93,12 @@
                     <Dimensions x="14" y="ZO_COMPASS_FRAME_HEIGHT_GAMEPAD"/>
                     <TextureCoords left="0.4375" right="0" top="0" bottom="0.75"/>
                 </Texture>
+                <Control name="$(parent)HUDElementRef">
+                    <Dimensions y="90"/>
+                </Control>
             </Controls>
         </Control>
-        <TopLevelControl name="ZO_CompassFrame" hidden="true">
+        <TopLevelControl name="ZO_CompassFrame" inherits="ZO_HUDManager_Element" hidden="true">
             <OnInitialized>
                 ZO_CompassFrame_OnInitialized(self)
             </OnInitialized>
@@ -118,6 +124,10 @@
                 <Texture name="$(parent)Right">
                     <Anchor point="LEFT" relativeTo="$(parent)Center" relativePoint="RIGHT"/>
                 </Texture>
+                <Control name="$(parent)HUDElementRef" override="true">
+                    <Anchor point="BOTTOMLEFT" offsetX="-15"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="15"/>
+                </Control>
             </Controls>
         </TopLevelControl>
     </Controls>

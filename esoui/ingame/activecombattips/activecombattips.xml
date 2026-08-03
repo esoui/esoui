@@ -33,7 +33,7 @@
                 ZO_ActiveCombatTips_Initialize(self)
             </OnInitialized>
             <Controls>
-                <Control name="$(parent)Tip" alpha="0" resizeToFitDescendents="true">
+                <Control name="$(parent)Tip" alpha="0" inherits="ZO_HUDManager_Element" resizeToFitDescendents="true">
                     <ResizeToFitPadding width="10"/>
                     <Controls>
                         <Texture name="$(parent)Icon" resizeToFitFile="true">
@@ -41,6 +41,10 @@
                         </Texture>
                         <!-- Anchors set in Lua -->
                         <Label name="$(parent)TipText" font="ZoInteractionPrompt" inherits="ZO_LargeKeyMarkupLabel"/>
+                        <Control name="$(parent)HUDElementRef" override="true">
+                            <Anchor point="BOTTOM"/>
+                            <DimensionConstraints minX="150" minY="30"/>
+                        </Control>
                     </Controls>
                 </Control>
             </Controls>

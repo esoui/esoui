@@ -107,6 +107,17 @@ function ZO_TamrielTomesScreen_Keyboard:InitializeControls()
     self.challengesButton:SetHandler("OnClicked", function() TIMED_ACTIVITIES_MANAGER:ShowTimedActivitiesScene() end)
     self.upgradeButton:SetHandler("OnClicked", function() self:ShowPurchaseScreen() end)
     self.selectTomeButton:SetHandler("OnClicked", function() self:ShowSelectTomeDialog() end)
+
+    self.titleLabel.dontUseMaxLinesForAdjusting = true
+    local fonts =
+    {
+        { font = "ZoFontCallout", lineLimit = 1, },
+        { font = "ZoFontHeader4", lineLimit = 1, },
+        { font = "ZoFontHeader3", lineLimit = 1, },
+        { font = "ZoFontHeader2", lineLimit = 1, },
+        { font = "ZoFontHeader", lineLimit = 1, },
+    }
+    ZO_FontAdjustingWrapLabel_OnInitialized(self.titleLabel, fonts, TEXT_WRAP_MODE_ELLIPSIS)
 end
 
 function ZO_TamrielTomesScreen_Keyboard:OnDeferredInitialize()
@@ -243,15 +254,23 @@ function ZO_TamrielTomesScreen_Keyboard:InitializeKeybindStripDescriptors()
             end,
 
             callback = function()
-                self:ClearActiveRewardListData()
-
                 if self:GetActivePreviewType() == ZO_TAMRIEL_TOMES_REWARD_DATA_PREVIEW_TYPES.FULL_PREVIEW then
-                    self:QueueEndPreview(ZO_DEFAULT_QUEUED_END_PREVIEW_DELAY_SECONDS)
-                    self:UpdateSceneFragments()
-                    return
+                    local previewType, rewardData, previewKey = self:GetActivePreviewInfo()
+                    if previewKey and rewardType == REWARD_ENTRY_TYPE_REWARD_LIST then
+                        -- A full screen preview of a Reward List is closing.
+                        self:ClearActiveRewardListData()
+                        self:EndPreview()
+                    else
+                        -- A full screen preview of a single Reward is closing.
+                        self:QueueEndPreview(ZO_DEFAULT_QUEUED_END_PREVIEW_DELAY_SECONDS)
+                        self:UpdateSceneFragments()
+                    end
+                else
+                    -- The Tome itself is closing.
+                    SCENE_MANAGER:HideCurrentScene()
                 end
 
-                SCENE_MANAGER:HideCurrentScene()
+                self:ClearActiveRewardListData()
             end,
         },
     }

@@ -1540,6 +1540,9 @@ local function GetBestItemCategoryDescription(itemData)
         end
     end
 
+
+
+
     local categoryType = GetCategoryTypeFromWeaponType(itemData.bagId, itemData.slotIndex)
     if categoryType ==  GAMEPAD_WEAPON_CATEGORY_UNCATEGORIZED then
         local weaponType = GetItemWeaponType(itemData.bagId, itemData.slotIndex)
@@ -1552,6 +1555,9 @@ local function GetBestItemCategoryDescription(itemData)
     if armorType ~= ARMORTYPE_NONE then
         return GetString("SI_ARMORTYPE", armorType)
     end
+
+
+
 
     return ZO_InventoryUtils_Gamepad_GetBestItemCategoryDescription(itemData)
 end

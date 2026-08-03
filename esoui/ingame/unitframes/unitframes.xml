@@ -71,7 +71,22 @@
         <Label name="ZO_UnitFrameBarText_Keyboard_Template" font="ZoFontGameOutline" modifyTextType="NONE" virtual="true"/>
         <Label name="ZO_UnitFrameBarText_Gamepad_Template" font="ZoFontGamepad18" modifyTextType="UPPERCASE" virtual="true"/>
         <Label name="ZO_UnitFrameResourceNumbers_Gamepad_Template" inherits="ZO_PlayerAttributeResourceNumbers_Gamepad_Template" font="ZoFontGamepadBold20" virtual="true"/>
-        <Control name="ZO_GroupFrameAnchor" clampedToScreen="true" virtual="true"/>
+        <Control name="ZO_GroupFrameAnchor_Keyboard_Template" virtual="true">
+            <Controls>
+                <Control name="$(parent)HUDElementRef">
+                    <AnchorFill/>
+                </Control>
+            </Controls>
+        </Control>
+        <Control name="ZO_GroupFrameAnchor_Gamepad_Template" virtual="true">
+            <Controls>
+                <Control name="$(parent)HUDElementRef">
+                    <Anchor point="TOPLEFT" offsetX="-54"/>
+                    <Anchor point="BOTTOMRIGHT"/>
+                </Control>
+            </Controls>
+        </Control>
+        <Control name="ZO_GroupFrameAnchor" inherits="ZO_HUDManager_Element" clampedToScreen="true" virtual="true"/>
         <Control name="ZO_RaidFrameAnchor_Keyboard_Template" virtual="true">
             <Controls>
                 <Label name="$(parent)GroupName" font="ZoFontGameOutline" modifyTextType="NONE"/>
@@ -94,6 +109,10 @@
                     <Dimensions x="64" y="64"/>
                     <Anchor point="TOPRIGHT" relativePoint="TOPLEFT" offsetX="-10"/>
                 </Texture>
+                <Control name="$(parent)HUDElementRef" override="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)GroupName" relativePoint="TOPLEFT"/>
+                    <Anchor point="BOTTOMRIGHT"/>
+                </Control>
             </Controls>
         </Control>
         <!-- Empty unitframe-sized backgrounds to help arrange group members for drag and drop -->
@@ -464,10 +483,13 @@
                 <Texture name="$(parent)FrameRight" inherits="ZO_TargetAttributeFrameRightAngle_Keyboard_Template"/>
                 <Texture name="$(parent)FrameCenter" inherits="ZO_TargetAttributeFrameCenter_Keyboard_Template"/>
                 <Label name="$(parent)ResourceNumbers" inherits="ZO_PlayerAttributeResourceNumbers_Keyboard_Template"/>
+                <Control name="$(parent)HUDElementRef">
+                    <Dimensions y="53"/>
+                </Control>
             </Controls>
         </Control>
         <Control name="ZO_TargetUnitFrame_Gamepad_Template" virtual="true">
-            <Anchor point="TOP" relativeTo="ZO_CompassFrame" relativePoint="BOTTOM" offsetY="20"/>
+            <Anchor point="TOP" relativeTo="GuiRoot" offsetY="102"/>
             <Controls>
                 <Control name="$(parent)TextArea">
                     <Controls>
@@ -517,9 +539,12 @@
                 <Texture name="$(parent)FrameRight" inherits="ZO_TargetAttributeFrameRightAngle_Gamepad_Template"/>
                 <Texture name="$(parent)FrameCenter" inherits="ZO_TargetAttributeFrameCenter_Gamepad_Template"/>
                 <Label name="$(parent)ResourceNumbers" inherits="ZO_UnitFrameResourceNumbers_Gamepad_Template"/>
+                <Control name="$(parent)HUDElementRef">
+                    <Dimensions y="73"/>
+                </Control>
             </Controls>
         </Control>
-        <Control name="ZO_TargetUnitFrame" inherits="ZO_PlayerAttributeContainer" virtual="true">
+        <Control name="ZO_TargetUnitFrame" inherits="ZO_PlayerAttributeContainer ZO_HUDManager_Element" virtual="true">
             <Dimensions x="281"/>
             <Controls>
                 <Control name="$(parent)TextArea" resizeToFitDescendents="true">
@@ -528,7 +553,8 @@
                         <Label name="$(grandparent)Level">
                             <Anchor point="TOPLEFT"/>
                         </Label>
-                        <Label name="$(grandparent)Name">
+                        <!-- Text here is a hack to ensure the height is always determined. -->
+                        <Label name="$(grandparent)Name" text=" ">
                             <Anchor point="TOPLEFT"/>
                         </Label>
                     </Controls>
@@ -596,6 +622,9 @@
                 <Texture name="$(parent)FrameCenter" inherits="ZO_TargetAttributeFrameCenter"/>
                 <Control name="$(parent)Warner" inherits="ZO_PlayerAttributeWarner"/>
                 <Label name="$(parent)ResourceNumbers" inherits="ZO_PlayerAttributeBarText"/>
+                <Control name="$(parent)HUDElementRef" override="true">
+                    <Anchor point="TOP"/>
+                </Control>
             </Controls>
         </Control>
         <TopLevelControl name="ZO_UnitFrames">

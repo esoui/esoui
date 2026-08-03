@@ -49,7 +49,7 @@
                 </Texture>
             </Controls>
         </Control>
-        <Control name="ZO_LootHistory_Shared" virtual="true">
+        <Control name="ZO_LootHistory_Shared" inherits="ZO_HUDManager_Element" resizeToFitConstrains="Y" virtual="true">
             <Controls>
                 <Control name="$(parent)PersistentContainer" resizeToFitDescendents="true">
                     <Anchor point="BOTTOMRIGHT"/>

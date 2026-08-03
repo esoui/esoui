@@ -209,6 +209,11 @@ function ZO_TimedActivityData:GetNumTimesClaimed()
     return GetTimedActivityNumTimesClaimed(self.index)
 end
 
+function ZO_TimedActivityData:IsEffectivelyInfinitelyClaimable()
+    local totalNumTimesClaimable = self:GetTotalNumTimesClaimable()
+    return totalNumTimesClaimable == 0 or totalNumTimesClaimable >= 99
+end
+
 function ZO_TimedActivityData:IsFullyClaimed()
     local totalNumTimesClaimable = self:GetTotalNumTimesClaimable()
     if totalNumTimesClaimable > 0 then
@@ -270,6 +275,7 @@ function ZO_TimedActivityData:ToggleTracking(suppressSound)
         end
     else
         TrackTimedActivity(self.index)
+        HUD_TRACKER_MANAGER:SetAssistedAspiration(ZO_HUD_TRACKER_ASPIRATION.TIMED_ACTIVITY)
         if not suppressSound then
             PlaySound(SOUNDS.TRACK_TIMED_ACTIVITY_CLICK)
         end
@@ -306,6 +312,8 @@ end
 ZO_TimedActivities_Manager = ZO_InitializingCallbackObject:Subclass()
 
 function ZO_TimedActivities_Manager:Initialize()
+    TIMED_ACTIVITIES_MANAGER = self
+
     self.availableActivityTypes = {}
     self.activitiesData = {}
     self.seenActivityEncodedIds = SAVED_KEYS:GetOrCreateSavedKeys("SeenActivityEncodedIds")
@@ -360,11 +368,15 @@ function ZO_TimedActivities_Manager:RefreshMasterList()
     end
     self.isRefreshingMasterList = true
 
+    local trackedIndex = GetTrackedTimedActivityInfo()
     ZO_ClearNumericallyIndexedTable(self.activitiesData)
     local numTimedActivities = GetNumTimedActivities()
     for index = 1, numTimedActivities do
         local timedActivityData = ZO_TimedActivityData:New(index)
         table.insert(self.activitiesData, timedActivityData)
+        if trackedIndex == index and timedActivityData:IsFullyClaimedOrExpired() then
+            timedActivityData:ToggleTracking()
+        end
     end
 
     -- Order matters:
@@ -389,7 +401,11 @@ function ZO_TimedActivities_Manager:RefreshSingleMasterListItem(index)
     end
     self.isRefreshingMasterList = true
 
-    self.activitiesData[index] = ZO_TimedActivityData:New(index)
+    local timedActivityData = ZO_TimedActivityData:New(index)
+    self.activitiesData[index] = timedActivityData
+    if timedActivityData:IsTracked() and timedActivityData:IsFullyClaimedOrExpired() then
+        timedActivityData:ToggleTracking()
+    end
 
     -- Order matters:
     self:RefreshAvailability()
@@ -668,4 +684,4 @@ function ZO_ShowSealStore()
     end
 end
 
-TIMED_ACTIVITIES_MANAGER = ZO_TimedActivities_Manager:New()
+ZO_TimedActivities_Manager:New()

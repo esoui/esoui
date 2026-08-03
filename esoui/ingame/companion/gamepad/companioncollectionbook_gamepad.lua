@@ -176,7 +176,7 @@ function ZO_CompanionCollectionBook_Gamepad:InitializeKeybindStripDescriptors()
             enabled = function()
                 local collectibleData = self:GetCurrentTargetData()
                 if collectibleData:IsInstanceOf(ZO_CollectibleData) then
-                    local remainingMs = GetCollectibleCooldownAndDuration(collectibleData:GetId())
+                    local remainingMs = collectibleData:GetCooldownAndDurationMs()
                     if collectibleData:IsActive(GAMEPLAY_ACTOR_CATEGORY_COMPANION) then
                         return true
                     elseif remainingMs > 0 then
@@ -271,6 +271,7 @@ end
 
 function ZO_CompanionCollectionBook_Gamepad:OnShowing()
     ZO_Gamepad_ParametricList_Screen.OnShowing(self)
+    self:BuildCategoryList()
     self:ShowList(self.categoryList)
     local browseInfo = self.browseToCollectibleInfo
     if browseInfo ~= nil then
@@ -480,7 +481,7 @@ function ZO_CompanionCollectionBook_Gamepad:BuildCategoryList()
     self.categoryList.list:Clear()
 
     -- Add the categories entries
-    for categoryIndex, categoryData in ZO_COLLECTIBLE_DATA_MANAGER:CategoryIterator({ ZO_CollectibleCategoryData.IsStandardCategory, ZO_CollectibleCategoryData.HasShownCollectiblesInCollection, ZO_CollectibleCategoryData.HasAnyCompanionUsableCollectibles }) do
+    for categoryIndex, categoryData in ZO_COLLECTIBLE_DATA_MANAGER:CategoryIterator({ ZO_CollectibleCategoryData.IsStandardCategory, ZO_CollectibleCategoryData.HasShownCollectiblesInCollection, ZO_CollectibleCategoryData.HasAnyActiveCompanionUsableCollectibles }) do
         local formattedCategoryName = categoryData:GetFormattedName()
         local gamepadIcon = categoryData:GetGamepadIcon()
 
@@ -504,9 +505,9 @@ function ZO_CompanionCollectionBook_Gamepad:BuildSubcategoryList(categoryData)
     subcategoryListInfo.titleText = categoryData:GetFormattedName()
 
     -- Add the categories entries
-    for subcategoryIndex, subcategoryData in categoryData:SubcategoryIterator({ ZO_CollectibleCategoryData.HasShownCollectiblesInCollection, ZO_CollectibleCategoryData.HasAnyCompanionUsableCollectibles }) do
+    for subcategoryIndex, subcategoryData in categoryData:SubcategoryIterator({ ZO_CollectibleCategoryData.HasShownCollectiblesInCollection, ZO_CollectibleCategoryData.HasAnyActiveCompanionUsableCollectibles }) do
         local formattedSubcategoryName = subcategoryData:GetFormattedName()
-        
+
         local entryData = ZO_GamepadEntryData:New(formattedSubcategoryName)
         entryData:SetDataSource(subcategoryData)
         entryData:SetIconTintOnSelection(true)
@@ -530,8 +531,8 @@ function ZO_CompanionCollectionBook_Gamepad:BuildCollectionList(categoryData, re
 
     local unlockedData = {}
     local lockedData = {}
-    
-    for _, collectibleData in categoryData:SortedCollectibleIterator({ ZO_CollectibleData.IsShownInCollection, ZO_CollectibleData.IsCollectibleCategoryCompanionUsable, ZO_CollectibleData.IsCollectibleAvailableToCompanion }) do
+
+    for _, collectibleData in categoryData:SortedCollectibleIterator({ ZO_CollectibleData.IsShownInCollection, ZO_CollectibleData.IsCollectibleCategoryActiveCompanionUsable, ZO_CollectibleData.IsCollectibleAvailableToCompanion }) do
         local entryData = self:BuildCollectibleData(collectibleData)
         if collectibleData:IsUnlocked() then
             table.insert(unlockedData, entryData)
@@ -623,7 +624,7 @@ function ZO_CompanionCollectionBook_Gamepad:BuildCollectibleData(collectibleData
 
     ZO_UpdateCollectibleEntryDataIconVisuals(entryData, GAMEPLAY_ACTOR_CATEGORY_COMPANION)
 
-    local remainingMs, durationMs = GetCollectibleCooldownAndDuration(collectibleId)
+    local remainingMs, durationMs = collectibleData:GetCooldownAndDurationMs()
     if remainingMs > 0 and durationMs > 0 then
         entryData:SetCooldown(remainingMs, durationMs)
         entryData.refreshWhenFinished = true
@@ -722,7 +723,7 @@ end
 
 function ZO_CompanionCollectionBook_Gamepad:OnUpdateCooldowns()
     for i, collectibleData in ipairs(self.updateList) do
-        local remainingMs = GetCollectibleCooldownAndDuration(collectibleData:GetId())
+        local remainingMs = collectibleData:GetCooldownAndDurationMs()
         if remainingMs ~= collectibleData:GetCooldownTimeRemainingMs() or (remainingMs <= 0 and collectibleData.refreshWhenFinished) then
             self:OnCollectibleUpdated(collectibleData:GetId())
             return

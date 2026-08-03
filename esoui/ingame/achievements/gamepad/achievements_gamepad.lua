@@ -91,7 +91,9 @@ function ZO_Achievements_Gamepad:Initialize(control)
 end
 
 function ZO_Achievements_Gamepad:SetupList(list)
-    function ZO_Gamepad_Achivement_Entry_OnSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
+    local function Achievement_Entry_OnSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
+        data.isPinned = data.achievementId == self.trackedAchievementId
+
         ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
 
         local persistenceLevel = GetAchievementPersistenceLevel(data.achievementId)
@@ -104,10 +106,15 @@ function ZO_Achievements_Gamepad:SetupList(list)
 
             if data.isEarnedAchievement then
                 local NO_TINT = nil
-                control.statusIndicator:AddIcon("EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_equipped.dds", NO_TINT, GetString(SI_SCREEN_NARRATION_ACHIEVEMENT_EARNED_ICON_NARRATION))
+                control.statusIndicator:AddIcon(CHECKED_ICON, NO_TINT, GetString(SI_SCREEN_NARRATION_ACHIEVEMENT_EARNED_ICON_NARRATION))
             end
 
             control.statusIndicator:AddIcon("EsoUI/Art/Miscellaneous/Gamepad/gp_charNameIcon.dds", characterPersistentColor, GetString(SI_GAMEPAD_ACHIEVEMENTS_CHARACTER_PERSISTENT))
+
+            if data.isPinned then
+                control.statusIndicator:AddIcon("EsoUI/Art/Buttons/Gamepad/gp_trackingPin.dds", GetString(SI_SCREEN_NARRATION_PINNED_ICON_NARRATION))
+            end
+
             control.statusIndicator:Show()
 
             local iconFrameBorder
@@ -130,9 +137,15 @@ function ZO_Achievements_Gamepad:SetupList(list)
         end
     end
 
-    list:AddDataTemplate("ZO_GamepadAchievementsEntryTemplate", ZO_Gamepad_Achivement_Entry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
-    list:AddDataTemplateWithHeader("ZO_GamepadAchievementsEntryTemplate", ZO_Gamepad_Achivement_Entry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
-    list:AddDataTemplate("ZO_GamepadMenuEntryWithBarTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
+    local function Category_OnSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
+        data.isPinned = self.trackedCategoryIndex and data.categoryIndex == self.trackedCategoryIndex
+
+        ZO_SharedGamepadEntry_OnSetup(control, data, selected, reselectingDuringRebuild, enabled, active)
+    end
+
+    list:AddDataTemplate("ZO_GamepadAchievementsEntryTemplate", Achievement_Entry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
+    list:AddDataTemplateWithHeader("ZO_GamepadAchievementsEntryTemplate", Achievement_Entry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
+    list:AddDataTemplate("ZO_GamepadMenuEntryWithBarTemplate", Category_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
 
     self.itemList = list
 end
@@ -219,6 +232,8 @@ function ZO_Achievements_Gamepad:OnDeferredInitialize()
     self.chainFocus, self.chainControls = SetupAchievementList(self.chainContainer, MAX_CHAIN_SIZE, {ZO_DI_LEFT_STICK}, CanFocusAchievement)
     self.chainFocus:SetFocusChangedCallback(function(...) self:AchievementListSelectionChanged(self.chainFocus, ...) end)
 
+    self:RefreshTrackedAchievement()
+
     self:InitializeOptionsDialog()
     self:InitializeEvents()
 end
@@ -240,6 +255,12 @@ function ZO_Achievements_Gamepad:InitializeEvents()
     self.control:RegisterForEvent(EVENT_ACHIEVEMENTS_UPDATED, Update)
     self.control:RegisterForEvent(EVENT_ACHIEVEMENT_UPDATED, OnAchievementUpdated)
     self.control:RegisterForEvent(EVENT_ACHIEVEMENT_AWARDED, Update)
+
+    local function OnTrackingUpdated()
+        self:RefreshTrackedAchievement()
+        self.itemList:RefreshVisible()
+    end
+    self.control:RegisterForEvent(EVENT_ACHIEVEMENT_TRACKING_UPDATE, OnTrackingUpdated)
 end
 
 function ZO_Achievements_Gamepad:SetRecentAchievementsHidden(hidden)
@@ -539,7 +560,7 @@ function ZO_Achievements_Gamepad:InitializeKeybindStripDescriptors()
                     end
                 end
             end,
-            keybind = "UI_SHORTCUT_SECONDARY",
+            keybind = "UI_SHORTCUT_QUATERNARY",
             callback = function()
                 local targetData = self.itemList:GetTargetData()
                 local zoneId = GetSkyshardAchievementZoneId(targetData.achievementId)
@@ -555,6 +576,38 @@ function ZO_Achievements_Gamepad:InitializeKeybindStripDescriptors()
             visible = function()
                 local targetData = self.itemList:GetTargetData()
                 return targetData and (GetSkyshardAchievementZoneId(targetData.achievementId) ~= 0 or GetAchievementLinkedBookCollectionId(targetData.achievementId) ~= 0)
+            end,
+        },
+
+        -- Pin/Unpin
+        {
+            name = function()
+                local targetData = self.itemList:GetTargetData()
+                local achievementId, criterionIndex = GetTrackedAchievement()
+                if achievementId == targetData.achievementId then
+                    return GetString(SI_ACHIEVEMENT_ACTION_NAME_UNPIN)
+                else
+                    return GetString(SI_ACHIEVEMENT_ACTION_NAME_PIN)
+                end
+            end,
+            keybind = "UI_SHORTCUT_SECONDARY",
+            callback = function()
+                local targetData = self.itemList:GetTargetData()
+                local achievementId, criterionIndex = GetTrackedAchievement()
+                if achievementId == targetData.achievementId then
+                    SetTrackedAchievement(0)
+                else
+                    SetTrackedAchievement(targetData.achievementId)
+                    HUD_TRACKER_MANAGER:SetAssistedAspiration(ZO_HUD_TRACKER_ASPIRATION.ACHIEVEMENT)
+                end
+                KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
+            end,
+            visible = function()
+                local targetData = self.itemList:GetTargetData()
+                if targetData and targetData.achievementId then
+                    return not targetData.isEarnedAchievement
+                end
+                return false
             end,
         },
     }
@@ -861,6 +914,15 @@ function ZO_Achievements_Gamepad:PerformUpdate()
 
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
     ZO_GamepadGenericHeader_Refresh(self.header, self.headerData)
+end
+
+function ZO_Achievements_Gamepad:RefreshTrackedAchievement()
+    self.trackedAchievementId = GetTrackedAchievement()
+    if self.trackedAchievementId == 0 then
+        self.trackedCategoryIndex = nil
+    else
+        self.trackedCategoryIndex = GetCategoryInfoFromAchievementId(self.trackedAchievementId)
+    end
 end
 
 --Overridden from base

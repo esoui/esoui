@@ -127,7 +127,7 @@
             </Controls>
         </Control>
         <!-- Generic Gamepad Dialogs -->
-        <TopLevelControl name="ZO_GenericGamepadDialogBase" inherits="ZO_GamepadGrid_NavQuadrant_1_Anchors" hidden="true" tier="MEDIUM" level="100" virtual="true">
+        <TopLevelControl name="ZO_GenericGamepadDialogBase" inherits="ZO_GamepadGrid_NavQuadrant_1_Anchors" hidden="true" tier="MEDIUM" level="ZO_MEDIUM_TIER_KEYBOARD_STANDARD_GAMEPAD_DIALOG" virtual="true">
             <OnInitialized>
                 ZO_GenericGamepadDialog_OnInitialized(self)
             </OnInitialized>

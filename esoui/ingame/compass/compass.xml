@@ -200,7 +200,8 @@
                 ZO_Compass_OnInitialize(self)
             </OnInitialized>
             <Controls>
-                <Label name="$(parent)CenterOverPinLabel" tier="MEDIUM" alpha="0"/>
+                <!-- Text here is a hack to ensure the height is always determined. -->
+                <Label name="$(parent)CenterOverPinLabel" tier="MEDIUM" alpha="0" text=" "/>
                 <Scroll name="$(parent)AreaOverride">
                     <Dimensions y="24"/>
                     <Controls>

@@ -54,19 +54,15 @@ function ZO_GetAnchorPointNearestScreenCenter(controlCenterX, controlCenterY)
     return weakAnchor
 end
 
-ZO_Anchor = ZO_Object:Subclass ()
+ZO_Anchor = ZO_InitializingObject:Subclass()
 
-function ZO_Anchor:New(pointOnMe, target, pointOnTarget, offsetX, offsetY, constraints)
-    local a = ZO_Object.New(self)
-    
+function ZO_Anchor:Initialize(pointOnMe, target, pointOnTarget, offsetX, offsetY, constraints)    
     if type(pointOnMe) == "table" then
         local copy = pointOnMe.data
-        a.data = { copy[POINT], copy[TARGET], copy[REL_POINT], copy[OFFS_X], copy[OFFS_Y], copy[CONSTRAINTS] }
+        self.data = { copy[POINT], copy[TARGET], copy[REL_POINT], copy[OFFS_X], copy[OFFS_Y], copy[CONSTRAINTS] }
     else
-        a.data = { pointOnMe or TOPLEFT, target, pointOnTarget or a[POINT], offsetX or 0, offsetY or 0, constraints or ANCHOR_CONSTRAINS_XY }
+        self.data = { pointOnMe or TOPLEFT, target, pointOnTarget or pointOnMe or TOPLEFT, offsetX or 0, offsetY or 0, constraints or ANCHOR_CONSTRAINS_XY }
     end
-    
-    return a
 end
 
 function ZO_Anchor:ResetToAnchor(anchorObj)
@@ -134,12 +130,10 @@ function ZO_Anchor:SetOffsets(offsetX, offsetY)
 end
 
 function ZO_Anchor:AddOffsets(offsetX, offsetY)
-    if(offsetX)
-    then
+    if offsetX then
         self.data[OFFS_X] = offsetX + self.data[OFFS_X]
     end
-    if(offsetY)
-    then
+    if offsetY then
         self.data[OFFS_Y] = offsetY + self.data[OFFS_Y]
     end
 end
@@ -153,8 +147,7 @@ function ZO_Anchor:SetConstraints(constraints)
 end
 
 function ZO_Anchor:Set(control)
-    if(control)
-    then
+    if control then
         control:ClearAnchors()
         local data = self.data
         control:SetAnchor(data[POINT], data[TARGET], data[REL_POINT], data[OFFS_X], data[OFFS_Y], data[CONSTRAINTS])
@@ -162,8 +155,7 @@ function ZO_Anchor:Set(control)
 end
 
 function ZO_Anchor:AddToControl(control)
-    if(control)
-    then
+    if control then
         local data = self.data
         control:SetAnchor(data[POINT], data[TARGET], data[REL_POINT], data[OFFS_X], data[OFFS_Y], data[CONSTRAINTS])
     end
@@ -233,8 +225,8 @@ function ZO_Anchor_DynamicAnchorTo(control, anchorTo, offsetX, offsetY)
 
     control:ClearAnchors()
 
-    if(anchorToCenterX < UICenterX) then
-        if(anchorToCenterY < UICenterY) then
+    if anchorToCenterX < UICenterX then
+        if anchorToCenterY < UICenterY then
             --TOPLEFT
             control:SetAnchor(TOPLEFT, anchorTo, BOTTOMRIGHT, offsetX, offsetY)
         else
@@ -242,7 +234,7 @@ function ZO_Anchor_DynamicAnchorTo(control, anchorTo, offsetX, offsetY)
             control:SetAnchor(BOTTOMLEFT, anchorTo, TOPRIGHT, offsetX, -offsetY)
         end
     else
-        if(anchorToCenterY < UICenterY) then
+        if anchorToCenterY < UICenterY then
             --TOPRIGHT
             control:SetAnchor(TOPRIGHT, anchorTo, BOTTOMLEFT, -offsetX, offsetY)
         else
@@ -273,7 +265,7 @@ function ZO_Anchor_OnRing(control, anchorToControl, x, y, radiusArg)
 	local vMagSq = vx*vx + vy*vy
 	local rx, ry
 	
-	if(vMagSq > 0.001) then
+	if vMagSq > 0.001 then
 		--scale the vector toward the origin of rotation
 		local radiusSq = radius * radius
 		local factor = math.sqrt(radiusSq / vMagSq)

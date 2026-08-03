@@ -82,6 +82,18 @@ function ZO_HUDInfamyMeter:Initialize(control)
     self.centerIconPersistentTexture = control:GetNamedChild("CenterIconPersistentTexture")
     self.bountyLabel = control:GetNamedChild("BountyDisplay")
 
+    local KEYBOARD_CONFIG =
+    {
+        defaultAnchor = ZO_Anchor:New(BOTTOMRIGHT),
+    }
+    local GAMEPAD_CONFIG =
+    {
+        defaultAnchor = ZO_Anchor:New(BOTTOMLEFT, nil, BOTTOMLEFT, 5, -5),
+    }
+    local DISPLAY_NAME = GetString(SI_HUD_EDITOR_BOUNTY_METER)
+    self.keyboardHUDElement = HUD_MANAGER:RegisterKeyboardElement(self.control, DISPLAY_NAME, KEYBOARD_CONFIG)
+    self.gamepadHUDElement = HUD_MANAGER:RegisterGamepadElement(self.control, DISPLAY_NAME, GAMEPAD_CONFIG)
+
     -- Set up fade in/out animations
     self.fadeAnim = ZO_AlphaAnimation:New(control)
     self.fadeAnim:SetMinMaxAlpha(0.0, 1.0)
@@ -107,24 +119,22 @@ function ZO_HUDInfamyMeter:Initialize(control)
     self.centerIconScaleOutAnimation:GetAnimation(2):SetAnimatedControl(self.centerIconAnimatingTexture)
     self.centerIconScaleOutAnimation:GetAnimation(3):SetAnimatedControl(self.centerIconPersistentTexture)
 
+    local function OnInfamyUpdated(forceIfEnabled)
+        if self:ShouldProcessUpdateEvent(forceIfEnabled) then
+            self:OnInfamyUpdated(UPDATE_TYPE_EVENT)
+        end
+    end
     -- Register for events
-    control:RegisterForEvent(EVENT_JUSTICE_INFAMY_UPDATED, function()
-        if self:ShouldProcessUpdateEvent() then
-            self:OnInfamyUpdated(UPDATE_TYPE_EVENT)
-        end
-    end)
-
-    control:RegisterForEvent(EVENT_LEVEL_UPDATE, function()
-        if self:ShouldProcessUpdateEvent() then
-            self:OnInfamyUpdated(UPDATE_TYPE_EVENT)
-        end
+    control:RegisterForEvent(EVENT_JUSTICE_INFAMY_UPDATED, OnInfamyUpdated)
+    control:RegisterForEvent(EVENT_LEVEL_UPDATE, OnInfamyUpdated)
+    control:RegisterForEvent(EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function()
+        local FORCE_IF_ENABLED = true
+        OnInfamyUpdated(FORCE_IF_ENABLED)
     end)
 
     control:RegisterForEvent(EVENT_PLAYER_ACTIVATED, function() 
         if IsInJusticeEnabledZone() then
-            if self:ShouldProcessUpdateEvent() then
-                self:OnInfamyUpdated(UPDATE_TYPE_EVENT)
-            end
+            OnInfamyUpdated()
         else
             self.control:SetHidden(true)
             self.control:SetAlpha(0)
@@ -132,12 +142,28 @@ function ZO_HUDInfamyMeter:Initialize(control)
     end)
 end
 
-function ZO_HUDInfamyMeter:ShouldProcessUpdateEvent()
+function ZO_HUDInfamyMeter:ShouldProcessUpdateEvent(forceIfEnabled)
+    if not IsInJusticeEnabledZone() then
+        return false
+    end
+
+    if forceIfEnabled and not self.control:IsControlHidden() then
+        return true
+    end
+
+    if self.hiddenExternalRequest then
+        return false
+    end
+
     local infamy = GetInfamy()
+    if infamy ~= 0 and infamy ~= self.infamyMeterState.infamy then
+        return true
+    end
+
     local isTrespassing = IsTrespassing()
-    return IsInJusticeEnabledZone() 
-           and not self.hiddenExternalRequest 
-           and ((infamy ~= 0 and infamy ~= self.infamyMeterState.infamy) or isTrespassing ~= self.infamyMeterState.isTrespassing)
+    if isTrespassing ~= self.infamyMeterState.isTrespassing then
+        return true
+    end
 end
 
 function ZO_HUDInfamyMeter:Update(time)
@@ -159,12 +185,14 @@ function ZO_HUDInfamyMeter:OnInfamyUpdated(updateType)
             self.currencyOptions.font = "ZoFontGamepadHeaderDataValue"
             self.currencyOptions.isGamepad = true
             ApplyTemplateToControl(self.control, "ZO_HUDInfamyMeter_GamepadTemplate")
+            self.gamepadHUDElement:RevertOffsetModifications()
             self.isInGamepadMode = true
         elseif not IsInGamepadPreferredMode() and self.isInGamepadMode then
             self.currencyOptions.font = "ZoFontGameLargeBold"
             self.currencyOptions.isGamepad = false
             self.currencyOptions.iconSize = nil
             ApplyTemplateToControl(self.control, "ZO_HUDInfamyMeter_KeyboardTemplate")
+            self.keyboardHUDElement:RevertOffsetModifications()
             self.isInGamepadMode = false
         end
 

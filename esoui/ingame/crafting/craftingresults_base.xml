@@ -92,7 +92,7 @@
         </AnimationTimeline>
     </Animations>
     <Controls>
-        <Control name="ZO_CraftingResultPulseTexture" virtual="true">
+        <Control name="ZO_CraftingResultPulseTexture" excludeFromResizeToFitExtents="true" virtual="true">
             <AnchorFill/>
             <OnInitialized>
                 local timeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("CraftingBurstRotationTimeline")
