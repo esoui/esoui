@@ -201,7 +201,9 @@ function ZO_CompanionEquipment_Keyboard:Initialize(control)
     COMPANION_EQUIPMENT_KEYBOARD_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_FRAGMENT_SHOWING then
             TEXT_SEARCH_MANAGER:ActivateTextSearch("companionEquipmentTextSearch")
-            self:UpdateFilters()
+            
+
+
             self:UpdateList()
             self:UpdateFreeSlots()
         elseif newState == SCENE_FRAGMENT_HIDDEN then

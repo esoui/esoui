@@ -34,72 +34,28 @@ function ZO_GenericSelector_Gamepad:InitializeControls()
 end
 
 function ZO_GenericSelector_Gamepad:InitializeKeybindStripDescriptor()
-    self.keybindStripDescriptor =
+    ZO_GenericSelector_Shared.InitializeKeybindStripDescriptor(self)
+
+    self.keybindStripDescriptor.alignment = KEYBIND_STRIP_ALIGN_LEFT
+    table.insert(self.keybindStripDescriptor, 
     {
-        alignment = KEYBIND_STRIP_ALIGN_LEFT,
-        {
-            name = function()
-                local selected = self.focusGridEntry and self.focusGridEntry:IsSelected()
-                local keybindString = selected and SI_GAMEPAD_DESELECT_OPTION or SI_GAMEPAD_SELECT_OPTION
-                return GetString(keybindString)
-            end,
-            keybind = "UI_SHORTCUT_PRIMARY",
-            clickSound = SOUNDS.GENERIC_SELECTOR_CHOICE_SELECTED,
-            callback = function()
-                self:ToggleItemSelected(self.focusGridEntry)
-            end,
-            visible = function()
-                return self.focusGridEntry ~= nil
-            end,
-            enabled = function()
-                if IsViewGenericSelectionMenuAvailable() then
-                    return false
-                end
-                local selected = self.focusGridEntry and self.focusGridEntry:IsSelected()
-                if selected then
-                    return true
-                end
-                local numCurrentSelections = GetNumGenericSelectorSelectedChoices()
-                return numCurrentSelections == 0 or (numCurrentSelections >= GetMinGenericSelectorChoices() and numCurrentSelections <= GetMaxGenericSelectorChoices())
-            end,
-        },
-        {
-            name = function()
-                local numCurrentSelections = GetNumGenericSelectorSelectedChoices()
-                local minSelections = GetMinGenericSelectorChoices()
-                local maxSelections = GetMaxGenericSelectorChoices()
-                if IsViewGenericSelectionMenuAvailable() or (minSelections == maxSelections and (numCurrentSelections ~= 0 and numCurrentSelections ~= minSelections)) then
-                    return GetString(SI_DIALOG_CLOSE)
-                else
-                    return GetString(SI_GENERIC_SELECTOR_SAVE_CLOSE)
-                end
-            end,
-            keybind = "UI_SHORTCUT_NEGATIVE",
-            clickSound = SOUNDS.GENERIC_SELECTOR_SUBMIT_CHOICES,
-            callback = function()
-                ConfirmGenericSelectionPrompt()
-                GENERIC_SELECTOR_HUD_TRACKER:Update()
-            end,
-        },
-        {
-            name = GetString(SI_GENERIC_SELECTOR_REWARDS_TOGGLE_GAMEPAD),
-            keybind = "UI_SHORTCUT_SECONDARY",
-            alignment = KEYBIND_STRIP_ALIGN_RIGHT,
-            callback = function()
-                self.tooltipMode = self.tooltipMode == TOOLTIP_MODES.CHOICE and TOOLTIP_MODES.REWARD or TOOLTIP_MODES.CHOICE
-                local index = nil
-                local data = self.gridList:GetSelectedData()
-                if data.dataSource and data.dataSource.dataSource then
-                    index = data.dataSource.dataSource.index
-                end
-                self:RefreshTooltip(index)
-                SCREEN_NARRATION_MANAGER:QueueGridListEntry(self.gridList)
-            end,
-            visible = function()
-                return GetNumGenericSelectorRewards() > 0
-            end,
-        },
-    }
+        name = GetString(SI_GENERIC_SELECTOR_REWARDS_TOGGLE_GAMEPAD),
+        keybind = "UI_SHORTCUT_SECONDARY",
+        alignment = KEYBIND_STRIP_ALIGN_RIGHT,
+        callback = function()
+            self.tooltipMode = self.tooltipMode == TOOLTIP_MODES.CHOICE and TOOLTIP_MODES.REWARD or TOOLTIP_MODES.CHOICE
+            local index = nil
+            local data = self.gridList:GetSelectedData()
+            if data.dataSource and data.dataSource.dataSource then
+                index = data.dataSource.dataSource.index
+            end
+            self:RefreshTooltip(index)
+            SCREEN_NARRATION_MANAGER:QueueGridListEntry(self.gridList)
+        end,
+        visible = function()
+            return GetNumGenericSelectorRewards() > 0
+        end,
+    })
 end
 
 function ZO_GenericSelector_Gamepad:InitializeGridList()
@@ -161,6 +117,10 @@ function ZO_GenericSelector_Gamepad:RefreshTitle()
 end
 
 function ZO_GenericSelector_Gamepad:OnGridEntrySelected(previousData, currentData)
+    if previousData then
+        self:SetGridEntryFocus(previousData.dataEntry.control, false)
+    end
+
     if currentData then
         self:SetGridEntryFocus(currentData.dataEntry.control, true)
         if currentData.dataSource and currentData.dataSource.dataSource then

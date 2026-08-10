@@ -1234,6 +1234,9 @@ SOUNDS =
     -- Riding Skill Improvement
     RIDING_SKILL_IMPROVEMENT = "Stable_Upgrade_Announce",
 
+    RUMOR_STARTED = "Rumor_Started",
+    RUMOR_COMPLETED = "Rumor_Completed",
+
     -- Adventure Zone
     ADVENTURE_ZONE_BOSS_TREE_OPENED = "AdventureZone_BossTreeOpened",
     ADVENTURE_ZONE_BOSS_TREE_CLOSED = "AdventureZone_BossTreeClosed",

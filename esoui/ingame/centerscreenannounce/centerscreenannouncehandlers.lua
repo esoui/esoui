@@ -1401,7 +1401,7 @@ end
 CENTER_SCREEN_EVENT_HANDLERS[EVENT_RUMOR_STARTED] = function(rumorId)
     local rumorData = RUMOR_MANAGER:GetRumorData(rumorId)
     if rumorData then
-        local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
+        local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.RUMOR_STARTED)
         messageParams:SetText(GetString(SI_RUMOR_STARTED_ANOUNCEMENT_TITLE), rumorData:GetFormattedDisplayName())
         messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_RUMOR_ADDED)
         return messageParams
@@ -1411,7 +1411,7 @@ end
 CENTER_SCREEN_EVENT_HANDLERS[EVENT_RUMOR_COMPLETED] = function(rumorId)
     local rumorData = RUMOR_MANAGER:GetRumorData(rumorId)
     if rumorData then
-        local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT)
+        local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.RUMOR_COMPLETED)
         messageParams:SetText(GetString(SI_RUMOR_COMPLETED_ANOUNCEMENT_TITLE), rumorData:GetFormattedDisplayName())
         messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_RUMOR_COMPLETED)
         return messageParams

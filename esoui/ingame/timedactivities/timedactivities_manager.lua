@@ -508,8 +508,11 @@ function ZO_TimedActivities_Manager:GetFirstClaimableTimedActivity(timedActivity
     return self:GetFirstActivityDataByFilter({ ActivityMatches })
 end
 
-function ZO_TimedActivities_Manager:HasClaimableTimedActivities()
-    return HasAnyUnclaimedTimedActivityRewards()
+function ZO_TimedActivities_Manager:HasClaimableTimedActivities(timedActivityType)
+    if timedActivityType == nil then
+        return HasAnyUnclaimedTimedActivityRewards()
+    end
+    return self:GetFirstClaimableTimedActivity(timedActivityType) ~= nil
 end
 
 function ZO_TimedActivities_Manager:GetFirstClaimableTimedActivityForHUDPrompt(timedActivityType)

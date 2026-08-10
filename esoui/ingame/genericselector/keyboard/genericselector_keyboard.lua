@@ -67,8 +67,10 @@ function ZO_GenericSelector_Keyboard:OnGridEntryMouseExit(itemControl)
     ClearTooltip(InformationTooltip)
 end
 
-function ZO_GenericSelector_Keyboard:OnGridEntryDoubleClick(itemControl)
-    self:ToggleItemSelected(itemControl)
+function ZO_GenericSelector_Keyboard:OnGridEntryMouseUp(itemControl, button, upInside)
+    if button == MOUSE_BUTTON_INDEX_LEFT and upInside then
+        self:ToggleItemSelected(itemControl)
+    end
 end
 
 function ZO_GenericSelector_Keyboard:GetSceneName()

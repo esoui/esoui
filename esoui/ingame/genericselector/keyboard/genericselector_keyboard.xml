@@ -3,14 +3,14 @@
         <Control name="ZO_GenericSelectorEmptyItem_Keyboard" virtual="true"/>
         <Control name="ZO_GenericSelectorItem_Keyboard" inherits="ZO_GenericSelectorItem_Shared" virtual="true">
             <Dimensions x="ZO_GENERIC_SELECTOR_ITEM_GRID_ENTRY_DIMENSIONS_KEYBOARD_X" y="ZO_GENERIC_SELECTOR_ITEM_GRID_ENTRY_DIMENSIONS_KEYBOARD_Y"/>
-            <OnMouseDoubleClick>
-                self.owner:OnGridEntryDoubleClick(self)
-            </OnMouseDoubleClick>
+            <OnMouseUp>
+                self.owner:OnGridEntryMouseUp(...)
+            </OnMouseUp>
             <OnMouseEnter>
-                self.owner:OnGridEntryMouseEnter(self)
+                self.owner:OnGridEntryMouseEnter(...)
             </OnMouseEnter>
             <OnMouseExit>
-                self.owner:OnGridEntryMouseExit(self)
+                self.owner:OnGridEntryMouseExit(...)
             </OnMouseExit>
             <Controls>
                 <Label name="$(parent)Name" override="true" font="ZoFontWinH2"/>

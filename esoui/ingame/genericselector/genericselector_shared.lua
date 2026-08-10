@@ -2,6 +2,7 @@ ZO_GENERIC_SELECTOR_GRID_LIST_OFFSET_X = ZO_SCROLL_BAR_WIDTH
 ZO_GENERIC_SELECTOR_GRID_LIST_OFFSET_Y = 15
 
 local DEFAULT_HIGHLIGHT = "EsoUI/Art/GenericSelector/genericSelectorChoiceDefaultHighlight.dds"
+local g_hoverAnimationProvider = ZO_ReversibleAnimationProvider:New("ShowOnMouseOverLabelAnimation")
 
 ZO_GenericSelectorItem_Shared = ZO_Object:Subclass()
 
@@ -9,6 +10,7 @@ function ZO_GenericSelectorItem_Shared.OnControlInitialized(control)
     zo_mixin(control, ZO_GenericSelectorItem_Shared)
 
     control.highlightTexture = control:GetNamedChild("Highlight")
+    control.hoverTexture = control:GetNamedChild("Hover")
     control.iconTexture = control:GetNamedChild("Icon")
     control.nameLabel = control:GetNamedChild("Name")
     control.selectedIconTexture = control:GetNamedChild("SelectedIcon")
@@ -19,6 +21,7 @@ function ZO_GenericSelectorItem_Shared:Layout(data)
     self.iconTexture:SetTexture(data.icon)
     self.nameLabel:SetText(ZO_CachedStrFormat(SI_ABILITY_NAME, data.name))
     self.highlightTexture:SetTexture(data.highlightTexture)
+    self.hoverTexture:SetTexture(data.hoverTexture)
     self:SetSelected(data.selected)
 end
 
@@ -35,6 +38,14 @@ function ZO_GenericSelectorItem_Shared:SetSelected(selected)
         self.selected = selected
         self.selectedIconTexture:SetHidden(not selected)
         self:SetHighlightHidden(not selected)
+    end
+end
+
+function ZO_GenericSelectorItem_Shared:SetHovered(hovered)
+    if hovered then
+        g_hoverAnimationProvider:PlayForward(self.hoverTexture)
+    else
+        g_hoverAnimationProvider:PlayBackward(self.hoverTexture)
     end
 end
 
@@ -109,9 +120,14 @@ function ZO_GenericSelector_Shared:InitializeKeybindStripDescriptor()
         {
             name = function()
                 local numCurrentSelections = GetNumGenericSelectorSelectedChoices()
+                if IsViewGenericSelectionMenuAvailable() or numCurrentSelections == 0 then
+                    return GetString(SI_DIALOG_CLOSE)
+                end
+
                 local minSelections = GetMinGenericSelectorChoices()
                 local maxSelections = GetMaxGenericSelectorChoices()
-                if IsViewGenericSelectionMenuAvailable() or (minSelections == maxSelections and (numCurrentSelections ~= 0 and numCurrentSelections ~= minSelections)) then
+
+                if minSelections == maxSelections and numCurrentSelections ~= minSelections then
                     return GetString(SI_DIALOG_CLOSE)
                 else
                     return GetString(SI_GENERIC_SELECTOR_SAVE_CLOSE)
@@ -120,8 +136,21 @@ function ZO_GenericSelector_Shared:InitializeKeybindStripDescriptor()
             keybind = "UI_SHORTCUT_NEGATIVE",
             clickSound = SOUNDS.GENERIC_SELECTOR_SUBMIT_CHOICES,
             callback = function()
-                ConfirmGenericSelectionPrompt()
-                GENERIC_SELECTOR_HUD_TRACKER:Update()
+                local needsConfirmation = false
+                -- Read-only/no choices won't lock you in to anything permanent, so no need to confirm
+                if not IsViewGenericSelectionMenuAvailable() then
+                    local numCurrentSelections = GetNumGenericSelectorSelectedChoices()
+                    if numCurrentSelections > 0 then
+                        needsConfirmation = numCurrentSelections >= GetMinGenericSelectorChoices() and numCurrentSelections <= GetMaxGenericSelectorChoices()
+                    end
+                end
+                
+                if needsConfirmation then
+                    ZO_Dialogs_ShowPlatformDialog("GENERIC_SELECTOR_CONFIRM_CHOICES")
+                else
+                    ConfirmGenericSelectionPrompt()
+                    GENERIC_SELECTOR_HUD_TRACKER:Update()
+                end
             end,
         }
     }
@@ -177,12 +206,15 @@ function ZO_GenericSelector_Shared:RefreshItems()
             highlightTexture = GetGenericSelectorChoiceSelectionHighlightOverrideAtIndex(itemIndex)
         end
 
+        local hoverTexture = GetGenericSelectorChoiceHoverOverrideAtIndex(itemIndex)
+
         local itemData =
         {
             index = itemIndex,
             name = GetGenericSelectorChoiceNameAtIndex(itemIndex),
             icon = GetGenericSelectorChoiceIconAtIndex(itemIndex),
             highlightTexture = highlightTexture,
+            hoverTexture = hoverTexture,
             selected = selected,
         }
         local entryData = ZO_GridSquareEntryData_Shared:New(itemData)
@@ -219,6 +251,7 @@ end
 
 function ZO_GenericSelector_Shared:SetGridEntryFocus(control, isFocus)
     if not isFocus then
+        self.focusGridEntry:SetHovered(false)
         self.focusGridEntry = nil
     end
 
@@ -226,6 +259,7 @@ function ZO_GenericSelector_Shared:SetGridEntryFocus(control, isFocus)
         if isFocus then
             self.focusGridEntry = control
         end
+        control:SetHovered(isFocus)
     end
 end
 

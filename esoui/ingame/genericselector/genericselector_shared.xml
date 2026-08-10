@@ -13,6 +13,10 @@
                     <Anchor point="CENTER" relativeTo="$(parent)Icon"/>
                     <Dimensions x="140" y="140"/>
                 </Texture>
+                <Texture name="$(parent)Hover" level="2" alpha="0">
+                    <Anchor point="CENTER" relativeTo="$(parent)Icon"/>
+                    <Dimensions x="140" y="140"/>
+                </Texture>
                 <Label name="$(parent)Name" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" horizontalAlignment="CENTER" maxLineCount="2" wrapMode="ELLIPSIS">
                     <Anchor point="CENTER" relativePoint="BOTTOM" offsetY="-30"/>
                     <Dimensions x="220"/>

@@ -115,7 +115,7 @@ function ZO_RumorManager:RebuildRumors()
     local numRumors = GetNumRumors()
     for rumorIndex = 1, numRumors do
         local rumorId = GetRumorIdAtIndex(rumorIndex)
-        self:GetOrCreateRumorData(rumorIndex)
+        self:GetOrCreateRumorData(rumorId)
     end
 
     self:FireCallbacks("RumorsUpdated")

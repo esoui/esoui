@@ -35,6 +35,7 @@ local function PurchaseUpgradeDialog_Setup(dialog, skuData)
 
     local billingInfo, hasBillingAddress = GetBillingInfo()
     local hasBillingInfo = billingInfo ~= "" and hasBillingAddress
+    dialog.canConfirmPurchase = hasBillingInfo
     local currentPriceString, _, taxPriceString, totalPriceString, isVatIncluded = skuData:GetPricingInfoWithTaxFormatted()
 
     if hasBillingInfo then
@@ -144,18 +145,14 @@ ZO_Dialogs_RegisterCustomDialog("DIRECT_PURCHASE_CONFIRM_PURCHASE_GAMEPAD",
             --Confirm
             {
                 keybind = "DIALOG_PRIMARY",
-                text = function()
-                    local billingInfo, hasBillingAddress = GetBillingInfo()
-                    if billingInfo ~= "" and hasBillingAddress then
-                        return GetString(SI_MARKET_CONFIRM_PURCHASE_KEYBIND_TEXT)
-                    else
-                        return GetString(SI_DIRECT_PURCHASE_REFRESH_KEYBIND_TEXT)
-                    end
+                text = function(dialog)
+                    return dialog.canConfirmPurchase
+                        and GetString(SI_MARKET_CONFIRM_PURCHASE_KEYBIND_TEXT)
+                        or GetString(SI_DIRECT_PURCHASE_REFRESH_KEYBIND_TEXT)
                 end,
                 clickSound = SOUNDS.DIALOG_ACCEPT,
                 callback = function(dialog)
-                    local billingInfo, hasBillingAddress = GetBillingInfo()
-                    if billingInfo ~= "" and hasBillingAddress then
+                    if dialog.canConfirmPurchase then
                         ZO_Dialogs_ReleaseDialogOnButtonPress("DIRECT_PURCHASE_CONFIRM_PURCHASE_GAMEPAD")
                         local pendingDialogData =
                         {

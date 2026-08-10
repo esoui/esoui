@@ -8,6 +8,7 @@ local function PurchaseUpgradeDialog_Setup(dialog, skuData)
 
     local billingInfo, hasBillingAddress = GetBillingInfo()
     local hasBillingInfo = billingInfo ~= "" and hasBillingAddress
+    dialog.canConfirmPurchase = hasBillingInfo
     local currentPriceString, _, taxPriceString, totalPriceString, isVatIncluded = skuData:GetPricingInfoWithTaxFormatted()
 
     local subtotalAmountLabel = dialog.subtotalContainer.value
@@ -67,6 +68,10 @@ local function PurchaseUpgradeDialog_Setup(dialog, skuData)
         dialog.infoLabel:SetAnchor(TOPLEFT, dialog.subtotalContainer, BOTTOMLEFT, 0, 10)
         dialog.infoLabel:SetAnchor(TOPRIGHT, dialog.subtotalContainer, BOTTOMRIGHT, 0, 10)
     end
+
+    -- Make sure to update the keybinds since this setup function will run after the initial setup of the buttons
+    ZO_Dialogs_UpdateButtonVisibilityAndEnabledState(dialog)
+    ZO_Dialogs_RefreshButtonTexts(dialog)
 end
 
 local function ShowResultDialog(skuId, result)
@@ -129,17 +134,13 @@ function ZO_DirectPurchaseConfirmPurchaseDialog_Keyboard_OnInitialized(control)
             {
                 noReleaseOnClick = true,
                 control = control:GetNamedChild("Confirm"),
-                text = function()
-                    local billingInfo, hasBillingAddress = GetBillingInfo()
-                    if billingInfo ~= "" and hasBillingAddress then
-                        return GetString(SI_MARKET_CONFIRM_PURCHASE_KEYBIND_TEXT)
-                    else
-                        return GetString(SI_DIRECT_PURCHASE_REFRESH_KEYBIND_TEXT)
-                    end
+                text = function(dialog)
+                    return dialog.canConfirmPurchase
+                        and GetString(SI_MARKET_CONFIRM_PURCHASE_KEYBIND_TEXT)
+                        or GetString(SI_DIRECT_PURCHASE_REFRESH_KEYBIND_TEXT)
                 end,
                 callback = function(dialog)
-                    local billingInfo, hasBillingAddress = GetBillingInfo()
-                    if billingInfo ~= "" and hasBillingAddress then
+                    if dialog.canConfirmPurchase then
                         ZO_Dialogs_ReleaseDialog("DIRECT_PURCHASE_CONFIRM_PURCHASE_KEYBOARD")
                         local pendingDialogData =
                         {

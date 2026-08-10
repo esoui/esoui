@@ -5420,3 +5420,33 @@ ESO_Dialogs["HUD_EDITOR_RESET_ALL_POSITIONS_CONFIRMATION"] =
         }
     }
 }
+
+ESO_Dialogs["GENERIC_SELECTOR_CONFIRM_CHOICES"] =
+{
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    title =
+    {
+        text = SI_GENERIC_SELECTOR_CONFIRM_CHOICES_DIALOG_TITLE,
+    },
+    mainText = 
+    {
+        text = SI_GENERIC_SELECTOR_CONFIRM_CHOICES_DIALOG_BODY,
+    },
+    drawTier = DT_HIGH,
+    buttons =
+    {
+        {
+            text = SI_DIALOG_CONFIRM,
+            callback =  function(dialog)
+                ConfirmGenericSelectionPrompt()
+                GENERIC_SELECTOR_HUD_TRACKER:Update()
+            end,
+        },
+        {
+            text = SI_DIALOG_CANCEL,
+        }
+    }
+}
