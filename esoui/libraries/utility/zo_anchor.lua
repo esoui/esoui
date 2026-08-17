@@ -88,6 +88,11 @@ function ZO_Anchor:SetFromControlAnchor(control, anchorIndex)
     end
 end
 
+function ZO_Anchor:Get()
+    local data = self.data
+    return data[POINT], data[TARGET], data[REL_POINT], data[OFFS_X], data[OFFS_Y], data[CONSTRAINTS]
+end
+
 function ZO_Anchor:GetTarget()
     return self.data[TARGET]
 end
@@ -149,15 +154,14 @@ end
 function ZO_Anchor:Set(control)
     if control then
         control:ClearAnchors()
-        local data = self.data
-        control:SetAnchor(data[POINT], data[TARGET], data[REL_POINT], data[OFFS_X], data[OFFS_Y], data[CONSTRAINTS])
+        control:SetAnchor(self:Get())
     end
 end
 
 function ZO_Anchor:AddToControl(control)
     if control then
         local data = self.data
-        control:SetAnchor(data[POINT], data[TARGET], data[REL_POINT], data[OFFS_X], data[OFFS_Y], data[CONSTRAINTS])
+        control:SetAnchor(self:Get())
     end
 end
 

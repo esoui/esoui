@@ -3,7 +3,7 @@ ZO_HUD_EDITOR_OPTION_TYPES =
 {
     BOOLEAN = 1,
     MULTI_SELECT_DROPDOWN = 2,
-    ENUM,
+    ENUM = 3,
 }
 
 ZO_HUD_EDITOR_ELEMENT_DRAW_LEVELS =
@@ -41,7 +41,7 @@ function ZO_HUDManager_Element:Initialize(control, displayName, config, options)
     self.options = options or {}
     self.saveKey = control:GetName()
 
-    local primaryAnchorPoint = defaultAnchor:GetMyPoint()
+    local primaryAnchorPoint, relativeTo, _, offsetX, offsetY = defaultAnchor:Get()
     self.defaultAnchor = defaultAnchor
     self.workingAnchor = ZO_Anchor:New(primaryAnchorPoint, GuiRoot, primaryAnchorPoint)
     self.savedAnchor = ZO_Anchor:New(primaryAnchorPoint, GuiRoot, primaryAnchorPoint)
