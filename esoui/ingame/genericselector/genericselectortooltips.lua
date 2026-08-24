@@ -21,8 +21,9 @@ function ZO_Tooltip:LayoutGenericSelectorRewardsTooltip()
 
     for index = 1, GetNumGenericSelectorRewards() do
         local rewardText = GetGenericSelectorRewardDescriptionAtIndex(index)
-        local rewardTextColor = IsGenericSelectorRewardActiveAtIndex(index) and ZO_NORMAL_TEXT or ZO_DISABLED_TEXT
-        descriptionSection:AddLine(rewardTextColor:Colorize(rewardText), self:GetStyle("bodyDescription"))
+        local colorStyle = IsGenericSelectorRewardActiveAtIndex(index) and { fontColorField = INTERFACE_TEXT_COLOR_NORMAL } or { fontColorField = INTERFACE_TEXT_COLOR_DISABLED }
+        colorStyle["fontColorType"] = INTERFACE_COLOR_TYPE_TEXT_COLORS
+        descriptionSection:AddLine(rewardText, self:GetStyle("bodyDescription"), colorStyle)
     end
 
     self:AddSection(descriptionSection)

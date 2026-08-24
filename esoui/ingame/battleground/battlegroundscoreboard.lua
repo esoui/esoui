@@ -619,7 +619,7 @@ do
             damage = ZO_AbbreviateAndLocalizeNumber(damage, NUMBER_ABBREVIATION_PRECISION_LARGEST_UNIT, USE_LOWERCASE_NUMBER_SUFFIXES)
             heals = ZO_AbbreviateAndLocalizeNumber(heals, NUMBER_ABBREVIATION_PRECISION_LARGEST_UNIT, USE_LOWERCASE_NUMBER_SUFFIXES)
             if isGameTypeScoreTimeFormat then
-                gameTypeScore = ZO_FormatTime(zo_ceil(gameTypeScore / 1000), TIME_FORMAT_STYLE_DESCRIPTIVE_SHORT_SHOW_ZERO_SECS, TIME_FORMAT_PRECISION_SECONDS)
+                gameTypeScore = zo_strformat(SI_TIME_FORMAT_SECONDS, gameTypeScore)
             else
                 gameTypeScore = ZO_AbbreviateAndLocalizeNumber(gameTypeScore, NUMBER_ABBREVIATION_PRECISION_LARGEST_UNIT, USE_LOWERCASE_NUMBER_SUFFIXES)
             end

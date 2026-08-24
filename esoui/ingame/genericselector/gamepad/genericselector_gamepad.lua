@@ -68,8 +68,6 @@ function ZO_GenericSelector_Gamepad:InitializeGridList()
     self.gridList = ZO_GridScrollList_Gamepad:New(self.gridListControl, "ZO_GridScrollList_Highlight_Gamepad", NO_AUTO_FILL_ROWS, RESIZE_TO_FIT_COLUMN_MAX, RESIZE_TO_FIT_ROW_MAX)
 
     local NO_HIDE_CALLBACK = nil
-    local NO_RESET_CALLBACK = nil
-    local CONSIDER_HEADER_WIDTH = true
     local gridList = self.gridList
     gridList:AddEntryTemplate("ZO_GenericSelectorItem_Gamepad", ZO_GENERIC_SELECTOR_ITEM_GRID_ENTRY_DIMENSIONS_GAMEPAD_X, ZO_GENERIC_SELECTOR_ITEM_GRID_ENTRY_DIMENSIONS_GAMEPAD_Y, ZO_GetCallbackForwardingFunction(self, self.SetupGridEntry), NO_HIDE_CALLBACK, ZO_GetCallbackForwardingFunction(self, self.ResetGridEntry), ZO_GENERIC_SELECTOR_ITEM_GRID_ENTRY_PADDING_GAMEPAD_X, ZO_GENERIC_SELECTOR_ITEM_GRID_ENTRY_PADDING_GAMEPAD_Y)
     gridList:SetAutoFillEntryTemplate("ZO_GenericSelectorEmptyItem_Gamepad")
@@ -99,6 +97,16 @@ function ZO_GenericSelector_Gamepad:OnShowing()
     local ANIMATE_INSTANTLY = true
     local SCROLL_INTO_VIEW = true
     self.gridList:RefreshSelection(ANIMATE_INSTANTLY, SCROLL_INTO_VIEW)
+end
+
+function ZO_GenericSelector_Gamepad:ToggleItemSelected(itemControl)
+    ZO_GenericSelector_Shared.ToggleItemSelected(self, itemControl)
+    local index = nil
+    local data = self.gridList:GetSelectedData()
+    if data.dataSource and data.dataSource.dataSource then
+        index = data.dataSource.dataSource.index
+    end
+    self:RefreshTooltip(index)
 end
 
 function ZO_GenericSelector_Gamepad:RefreshTooltip(index)

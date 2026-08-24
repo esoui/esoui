@@ -1253,6 +1253,11 @@ SOUNDS =
     CHALLENGE_DIFFICULTY_CHANGE_DIFFICULTY_BUTTON_CLICKED = "ChallengeDifficulty_ChangeDifficulty_Confirm",
 
     -- Generic Selector
+    GENERIC_SELECTOR_OPENED = "GenericSelector_Opened",
+    GENERIC_SELECTOR_CLOSED = "GenericSelector_Closed",
     GENERIC_SELECTOR_CHOICE_SELECTED = "GenericSelector_ChoiceSelected",
+    GENERIC_SELECTOR_CHOICE_DESELECTED = "GenericSelector_ChoiceDeselected",
     GENERIC_SELECTOR_SUBMIT_CHOICES = "GenericSelector_SubmitChoices",
+    GENERIC_SELECTOR_REWARDS_INCREASED = "GenericSelector_RewardsIncreased",
+    GENERIC_SELECTOR_REWARDS_DECREASED = "GenericSelector_RewardsDecreased",
 }

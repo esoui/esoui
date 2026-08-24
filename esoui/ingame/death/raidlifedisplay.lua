@@ -11,6 +11,12 @@ function RaidLifeDisplay:Initialize(control)
     self.scoreLabel = control:GetNamedChild("ScoreLabel")
     self.trialProgressionLabel = control:GetNamedChild("TrialProgressionLabel")
     self.trialProgressionPointsControl = control:GetNamedChild("TrialProgressionPoints")
+    local function UpdateTrialProgressionAnchoring()
+        self:UpdateTrialProgressionAnchoring()
+    end
+    self.trialProgressionPointsControl:SetHandler("OnShow", UpdateTrialProgressionAnchoring)
+    self.trialProgressionPointsControl:SetHandler("OnHide", UpdateTrialProgressionAnchoring)
+
     self.icon = control:GetNamedChild("Icon")
     self.hudElementRef = control:GetNamedChild("HUDElementRef")
     self.totalScore = -1
@@ -217,23 +223,29 @@ end
 
 function RaidLifeDisplay:UpdateTrialProgressionControl()
     if GetCurrentlyAttunedTrialProgressionTrack() then
-        local previousPoints = self.trialProgressionPoints
         local currentPoints = self:GetPlayerCurrentTrialProgressionPoints()
-
-        if previousPoints == currentPoints then
-            self.trialProgressionPointsControl:SetHidden(false)
-            return
-        end
-
-        self.trialProgressionPoints = currentPoints
-        if ZO_CraftingResults_Base_PlayPulse then
-            ZO_CraftingResults_Base_PlayPulse(self.trialProgressionPointsControl)
-        end
-        self.trialProgressionPointsControl:SetText(currentPoints)
         self.trialProgressionPointsControl:SetHidden(false)
+        self.trialProgressionPointsControl:SetText(currentPoints)
+
+        if self.trialProgressionPoints ~= currentPoints then
+            self.trialProgressionPoints = currentPoints
+            if ZO_CraftingResults_Base_PlayPulse then
+                ZO_CraftingResults_Base_PlayPulse(self.trialProgressionPointsControl)
+            end
+        end
     else
         self.trialProgressionPointsControl:SetHidden(true)
-        self.trialProgressionPointsControl:SetText("")
+        self.trialProgressionPoints = -1
+    end
+end
+
+function RaidLifeDisplay:UpdateTrialProgressionAnchoring()
+    if not IsInGamepadPreferredMode() then
+        if self.trialProgressionPointsControl:IsControlHidden() then
+            self.scoreLabel:SetAnchor(LEFT, nil, LEFT, 0, 2)
+        else
+            self.scoreLabel:SetAnchor(LEFT, self.trialProgressionPointsControl, RIGHT, 20, 2)
+        end
     end
 end
 
@@ -305,6 +317,7 @@ function RaidLifeDisplay:ApplyPlatformStyle(style)
     ApplyTemplateToControl(self.control, ZO_GetPlatformTemplate("ZO_RaidLifeDisplay"))
     style.containerAnchor:Set(self.hudElementRef)
     self:UpdateTrialProgressionLabel()
+    self:UpdateTrialProgressionAnchoring()
 end
 
 --Global XML

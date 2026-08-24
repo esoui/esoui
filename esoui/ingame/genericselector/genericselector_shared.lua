@@ -98,7 +98,6 @@ function ZO_GenericSelector_Shared:InitializeKeybindStripDescriptor()
                 return GetString(keybindString)
             end,
             keybind = "UI_SHORTCUT_PRIMARY",
-            clickSound = SOUNDS.GENERIC_SELECTOR_CHOICE_SELECTED,
             callback = function()
                 self:ToggleItemSelected(self.focusGridEntry)
             end,
@@ -174,11 +173,13 @@ function ZO_GenericSelector_Shared:OnShowing()
     self:RefreshTitle()
     KEYBIND_STRIP:RemoveDefaultExit()
     KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
+    PlaySound(SOUNDS.GENERIC_SELECTOR_OPENED)
 end
 
 function ZO_GenericSelector_Shared:OnHiding()
     KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
     KEYBIND_STRIP:RestoreDefaultExit()
+    PlaySound(SOUNDS.GENERIC_SELECTOR_CLOSED)
 end
 
 function ZO_GenericSelector_Shared:SetupGridEntry(control, data)
@@ -245,8 +246,21 @@ function ZO_GenericSelector_Shared:RefreshKeybinds()
 end
 
 function ZO_GenericSelector_Shared:ToggleItemSelected(itemControl)
-    itemControl:SetSelected(not itemControl:IsSelected())
+    local isItemSelected = itemControl:IsSelected()
+    itemControl:SetSelected(not isItemSelected)
     self:RefreshKeybinds()
+    if isItemSelected then
+        PlaySound(SOUNDS.GENERIC_SELECTOR_CHOICE_DESELECTED)
+    else
+        PlaySound(SOUNDS.GENERIC_SELECTOR_CHOICE_SELECTED)
+    end
+
+    local hasRewards = GetNumGenericSelectorRewards() > 0
+    if isItemSelected and hasRewards then
+        PlaySound(SOUNDS.GENERIC_SELECTOR_REWARDS_DECREASED)
+    elseif hasRewards then
+        PlaySound(SOUNDS.GENERIC_SELECTOR_REWARDS_INCREASED)
+    end
 end
 
 function ZO_GenericSelector_Shared:SetGridEntryFocus(control, isFocus)

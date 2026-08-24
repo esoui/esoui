@@ -119,11 +119,13 @@
                             <Controls>
                                 <Button name="$(parent)PreviousPage" override="true">
                                     <ClearAnchors/>
-                                    <Anchor point="RIGHT" relativeTo="$(grandparent)ScrollList" relativePoint="LEFT" offsetY="-100"/>
+                                    <Anchor point="LEFT" relativeTo="GuiRoot" constrains="X"/>
+                                    <Anchor point="RIGHT" relativeTo="$(grandparent)ScrollList" relativePoint="LEFT" offsetY="-100" constrains="Y"/>
                                 </Button>
                                 <Button name="$(parent)NextPage" override="true">
                                     <ClearAnchors/>
-                                    <Anchor point="LEFT" relativeTo="$(grandparent)ScrollList" relativePoint="RIGHT" offsetX="-50" offsetY="-100"/>
+                                    <Anchor point="RIGHT" relativeTo="GuiRoot" constrains="X"/>
+                                    <Anchor point="LEFT" relativeTo="$(grandparent)ScrollList" relativePoint="RIGHT" offsetY="-100" constrains="Y"/>
                                 </Button>
                             </Controls>
                         </Control>

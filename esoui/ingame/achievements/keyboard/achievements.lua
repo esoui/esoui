@@ -1228,7 +1228,7 @@ function Achievements:InitializeEvents()
     end
 
     local function OnTrackingUpdated()
-        self:UpdateAllCategoryStatusIcons()
+        self.refreshGroups:RefreshAll("StatusIcons")
     end
 
     self.control:RegisterForEvent(EVENT_ACHIEVEMENTS_UPDATED, OnAchievementsUpdated)
@@ -1271,6 +1271,7 @@ function Achievements:InitializeEvents()
             self.forceUpdateContentOnCategoryReselect = true
             self:BuildCategories()
             self.forceUpdateContentOnCategoryReselect = false
+            self.refreshGroups:RefreshAll("StatusIcons")
         end
     end
 

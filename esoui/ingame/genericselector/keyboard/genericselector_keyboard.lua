@@ -45,11 +45,16 @@ function ZO_GenericSelector_Keyboard:InitializeGridList()
     self.gridList = ZO_GridScrollList_Keyboard:New(self.gridListControl, NO_AUTO_FILL_ROWS, RESIZE_TO_FIT_COLUMN_MAX, RESIZE_TO_FIT_ROW_MAX)
 
     local NO_HIDE_CALLBACK = nil
-    local NO_RESET_CALLBACK = nil
-    local CONSIDER_HEADER_WIDTH = true
     local gridList = self.gridList
     gridList:AddEntryTemplate("ZO_GenericSelectorItem_Keyboard", ZO_GENERIC_SELECTOR_ITEM_GRID_ENTRY_DIMENSIONS_KEYBOARD_X, ZO_GENERIC_SELECTOR_ITEM_GRID_ENTRY_DIMENSIONS_KEYBOARD_Y, ZO_GetCallbackForwardingFunction(self, self.SetupGridEntry), NO_HIDE_CALLBACK, ZO_GetCallbackForwardingFunction(self, self.ResetGridEntry), ZO_GENERIC_SELECTOR_ITEM_GRID_ENTRY_PADDING_KEYBOARD_X, ZO_GENERIC_SELECTOR_ITEM_GRID_ENTRY_PADDING_KEYBOARD_Y)
     gridList:SetAutoFillEntryTemplate("ZO_GenericSelectorEmptyItem_Keyboard")
+end
+
+function ZO_GenericSelector_Keyboard:ToggleItemSelected(itemControl)
+    ZO_GenericSelector_Shared.ToggleItemSelected(self, itemControl)
+    if ZO_GENERIC_SELECTOR_REWARDS:ShouldShow() then
+        ZO_GENERIC_SELECTOR_REWARDS:SetupRewards()
+    end
 end
 
 function ZO_GenericSelector_Keyboard:OnGridEntryMouseEnter(itemControl)
