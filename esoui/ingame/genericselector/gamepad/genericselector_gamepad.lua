@@ -58,6 +58,10 @@ function ZO_GenericSelector_Gamepad:InitializeKeybindStripDescriptor()
     })
 end
 
+function ZO_GenericSelector_Gamepad:GetCloseKeybindDescriptor()
+    return self:CreateCloseKeybindDescriptor("UI_SHORTCUT_TERTIARY")
+end
+
 function ZO_GenericSelector_Gamepad:InitializeGridList()
     self.gridEntryTemplateName = "ZO_GenericSelectorItem_Gamepad"
     self.entryDataObjectPool = ZO_EntryDataPool:New(ZO_EntryData)

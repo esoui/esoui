@@ -81,24 +81,47 @@ function ZO_QuestJournal_Rumors_Keyboard:InitializeNavigationTree()
     self.navigationContainer = self.mainPanel:GetNamedChild("NavigationContainer")
     self.navigationTree = ZO_Tree:New(self.navigationContainer:GetNamedChild("ScrollChild"), 60, -10, 300)
 
-    local function TreeHeaderSetup(node, control, name, open, userRequested)
-        control:SimpleArrowSetup(name, open)
+    local function TreeHeaderSetup(node, control, data, open, userRequested)
+        control:SimpleArrowSetup(data.name, open)
 
         ZO_IconHeader_UpdateSize(control)
+
+        if not control.statusIcon then
+            control.statusIcon = control:GetNamedChild("StatusIcon")
+        end
+
+        control.statusIcon:ClearIcons()
+
+        if data.containsNewRumor then
+            control.statusIcon:AddIcon(ZO_KEYBOARD_NEW_ICON)
+        end
+
+        control.statusIcon:Show()
 
         if open and userRequested then
             self.navigationTree:SelectFirstChild(node)
         end
     end
 
-    self.navigationTree:AddTemplate("ZO_SimpleArrowIconHeader", TreeHeaderSetup, nil, nil, nil, 0)
+    self.navigationTree:AddTemplate("ZO_StatusSimpleArrowIconHeader", TreeHeaderSetup, nil, nil, nil, 0)
 
     local function TreeEntrySetup(node, control, data, open)
         local categoryName = GetString("SI_RUMORTYPE_JOURNALCATEGORY", data.rumorType)
         control:SetText(categoryName)
 
         control:SetSelected(false)
-        local NOT_SELECTED = false
+
+        if not control.statusIcon then
+            control.statusIcon = control:GetNamedChild("StatusIcon")
+        end
+
+        control.statusIcon:ClearIcons()
+
+        if data.containsNewRumor then
+            control.statusIcon:AddIcon(ZO_KEYBOARD_NEW_ICON)
+        end
+
+        control.statusIcon:Show()
     end
 
     local function TreeEntryOnSelected(control, data, selected, reselectingDuringRebuild)
@@ -110,7 +133,7 @@ function ZO_QuestJournal_Rumors_Keyboard:InitializeNavigationTree()
     end
 
     local function TreeEntryEquality(left, right)
-        return left.rumorType == right.rumorType
+        return left.rumorType == right.rumorType and left.categoryType == right.categoryType
     end
     self.navigationTree:AddTemplate("ZO_QuestJournal_RumorNavigationEntry", TreeEntrySetup, TreeEntryOnSelected, TreeEntryEquality)
 
@@ -128,6 +151,15 @@ function ZO_QuestJournal_Rumors_Keyboard:InitializeRumorList()
         control.data = data
         local nameLabel = control:GetNamedChild("Name")
         nameLabel:SetText(data:GetFormattedDisplayName())
+
+        local statusIcon = control:GetNamedChild("StatusIcon")
+        statusIcon:ClearIcons()
+
+        if data:IsNew() then
+            statusIcon:AddIcon(ZO_KEYBOARD_NEW_ICON)
+        end
+
+        statusIcon:Show()
     end
 
     ZO_ScrollList_AddDataType(self.rumorList, RUMOR_LIST_RUMOR_ENTRY_ID, "ZO_QuestJournal_RumorListEntry", ZO_QUEST_JOURNAL_RUMOR_ENTRY_HEIGHT_KEYBOARD, RumorEntrySetup)
@@ -165,20 +197,21 @@ function ZO_QuestJournal_Rumors_Keyboard:RegisterForEvents()
     local function OnRumorUpdated(rumorData)
         if self:IsShowing() then
             self:RefreshRumorCount()
-            if self.selectedRumorData and self.selectedRumorData:GetId() == rumorData:GetId() then
-                if rumorData:IsPending() or rumorData:IsComplete() then
-                    self:RefreshRumorDetails()
-                else
-                    -- we must have abandoned the rumor
-                    self:RefreshNavigationTree()
-                    self:ShowMainPanel()
-                end
-            else
+            if rumorData:IsNotStarted() then
+                -- we must have abandoned the rumor
                 self:RefreshNavigationTree()
+                self:ShowMainPanel()
+            elseif self.selectedRumorData and self.selectedRumorData:GetId() == rumorData:GetId() then
+                self:RefreshRumorDetails()
+            else
+                local RESELECT_NODE = true
+                self:RefreshNavigationTree(RESELECT_NODE)
             end
         else
             self.listDirty = true
         end
+
+        MAIN_MENU_KEYBOARD:RefreshCategoryIndicators()
     end
     RUMOR_MANAGER:RegisterCallback("SingleRumorUpdated", OnRumorUpdated)
 
@@ -190,6 +223,8 @@ function ZO_QuestJournal_Rumors_Keyboard:RegisterForEvents()
         else
             self.listDirty = true
         end
+
+        MAIN_MENU_KEYBOARD:RefreshCategoryIndicators()
     end
     RUMOR_MANAGER:RegisterCallback("RumorsUpdated", OnRumorsUpdated)
 end
@@ -202,28 +237,39 @@ function ZO_QuestJournal_Rumors_Keyboard:RefreshRumorCount()
     self.rumorCountLabel:SetText(zo_strformat(SI_QUEST_JOURNAL_RUMORS_CURRENT_MAX_RUMORS_KEYBOARD, GetNumPendingRumors(), GetMaxPendingRumors()))
 end
 
-function ZO_QuestJournal_Rumors_Keyboard:RefreshNavigationTree()
+function ZO_QuestJournal_Rumors_Keyboard:RefreshNavigationTree(reselectNode)
     self.rumorIndexToTreeNode = {}
 
     ClearTooltip(InformationTooltip)
 
+    local previouslySelectedData = self.navigationTree:GetSelectedData()
+
     self.navigationTree:Reset()
 
-    local activeCategoryString = GetString(SI_QUEST_JOURNAL_RUMORS_ACTIVE_CATEGORY)
-    local activeRumorsNode = self.navigationTree:AddNode("ZO_SimpleArrowIconHeader", activeCategoryString)
+    local activeRumorsData =
+    {
+        name = GetString(SI_QUEST_JOURNAL_RUMORS_ACTIVE_CATEGORY),
+        containsNewRumor = RUMOR_MANAGER:HasNewActiveRumor(),
+    }
+    local activeRumorsNode = self.navigationTree:AddNode("ZO_StatusSimpleArrowIconHeader", activeRumorsData)
 
     for rumorType = RUMOR_TYPE_ITERATION_BEGIN, RUMOR_TYPE_ITERATION_END do
         local subCategoryInfo =
         {
             rumorType = rumorType,
             categoryType = CATEGORY_TYPE_ACTIVE,
+            containsNewRumor = RUMOR_MANAGER:DoesRumorTypeHaveMatchingRumor(rumorType, {ZO_RumorData.IsNotComplete, ZO_RumorData.IsNew}),
         }
         local rumorNode = self.navigationTree:AddNode("ZO_QuestJournal_RumorNavigationEntry", subCategoryInfo, activeRumorsNode)
     end
 
     if GetNumCompleteRumors() > 0 then
-        local completedCategoryString = GetString(SI_QUEST_JOURNAL_RUMORS_COMPLETED_CATEGORY)
-        local completedRumorsNode = self.navigationTree:AddNode("ZO_SimpleArrowIconHeader", completedCategoryString)
+        local completedRumorsData =
+        {
+            name = GetString(SI_QUEST_JOURNAL_RUMORS_COMPLETED_CATEGORY),
+            containsNewRumor = RUMOR_MANAGER:HasNewCompletedRumor(),
+        }
+        local completedRumorsNode = self.navigationTree:AddNode("ZO_StatusSimpleArrowIconHeader", completedRumorsData)
 
         for rumorType = RUMOR_TYPE_ITERATION_BEGIN, RUMOR_TYPE_ITERATION_END do
             if RUMOR_MANAGER:DoesRumorTypeHaveMatchingRumor(rumorType, {ZO_RumorData.IsComplete}) then
@@ -231,13 +277,19 @@ function ZO_QuestJournal_Rumors_Keyboard:RefreshNavigationTree()
                 {
                     rumorType = rumorType,
                     categoryType = CATEGORY_TYPE_COMPLETE,
+                    containsNewRumor = RUMOR_MANAGER:DoesRumorTypeHaveMatchingRumor(rumorType, {ZO_RumorData.IsComplete, ZO_RumorData.IsNew}),
                 }
                 local rumorNode = self.navigationTree:AddNode("ZO_QuestJournal_RumorNavigationEntry", subCategoryInfo, completedRumorsNode)
             end
         end
     end
 
-    self.navigationTree:Commit()
+    local nodeToSelect = nil
+    if reselectNode then
+        nodeToSelect = self.navigationTree:GetTreeNodeByData(previouslySelectedData)
+    end
+
+    self.navigationTree:Commit(nodeToSelect)
 
     self:RefreshRumorList()
 
@@ -332,6 +384,7 @@ function ZO_QuestJournal_Rumors_Keyboard:RefreshRumorDetails()
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
 
     local rumorData = self.selectedRumorData
+    rumorData:MarkAsSeen()
 
     self.rumorDetailsTitleLabel:SetText(rumorData:GetFormattedDisplayName())
 
@@ -432,6 +485,7 @@ end
 
 function ZO_QuestJournal_Rumors_Keyboard:OnRumorEntryMouseEnter(control)
     local rumorData = control.data
+    rumorData:MarkAsSeen()
     self:SetMouseOverRumorData(rumorData)
 
     ZO_ScrollList_MouseEnter(self.rumorList, control)

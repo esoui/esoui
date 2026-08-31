@@ -50,6 +50,10 @@ function ZO_GenericSelector_Keyboard:InitializeGridList()
     gridList:SetAutoFillEntryTemplate("ZO_GenericSelectorEmptyItem_Keyboard")
 end
 
+function ZO_GenericSelector_Keyboard:GetCloseKeybindDescriptor()
+    return self:CreateCloseKeybindDescriptor("UI_SHORTCUT_SECONDARY")
+end
+
 function ZO_GenericSelector_Keyboard:ToggleItemSelected(itemControl)
     ZO_GenericSelector_Shared.ToggleItemSelected(self, itemControl)
     if ZO_GENERIC_SELECTOR_REWARDS:ShouldShow() then

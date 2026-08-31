@@ -52,6 +52,14 @@ function ZO_RumorData:GetCompleteText()
     return GetRumorCompleteText(self.rumorId)
 end
 
+function ZO_RumorData:IsNew()
+    return IsRumorNew(self.rumorId)
+end
+
+function ZO_RumorData:MarkAsSeen()
+    return MarkRumorSeen(self.rumorId)
+end
+
 function ZO_RumorData:GetNumHints()
     return GetNumHintsForPendingRumor(self.rumorId)
 end

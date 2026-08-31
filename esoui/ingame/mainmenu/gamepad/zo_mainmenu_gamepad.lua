@@ -425,6 +425,9 @@ local MENU_ENTRY_DATA =
                 name = GetString(SI_GAMEPAD_MAIN_MENU_JOURNAL_QUESTS),
                 icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_quests.dds",
                 header = GetString(SI_MAIN_MENU_JOURNAL),
+                isNewCallback = function()
+                    return RUMOR_MANAGER:HasAnyNewRumor()
+                end,
             },
             [MENU_JOURNAL_ENTRIES.CADWELLS_JOURNAL] =
             {

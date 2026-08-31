@@ -114,28 +114,27 @@ do
 
     local function DynamicAnchorLayout(tooltip, owner, quadrant, comparativeTooltip1, comparativeTooltip2, relativeAnchorsUsed)
         local isValid, point, relativeTo, relativePoint, offsetX, offsetY = tooltip:GetAnchor()
-        local positionToLeftByAnchors = relativeAnchorsUsed and isValid and ZO_FlagHelpers.MaskHasFlag(point, RIGHT) or false
-        local positionToLeftByQuadrant = not relativeAnchorsUsed and quadrant and (quadrant == QUAD_TOPLEFT or quadrant == QUAD_BOTTOMLEFT)
+        local anchorTooltipsLeftward = (relativeAnchorsUsed and isValid and ZO_FlagHelpers.MaskHasFlag(point, RIGHT)) or
+                                     (not relativeAnchorsUsed and quadrant and (quadrant == QUAD_TOPRIGHT or quadrant == QUAD_BOTTOMRIGHT))
 
         if comparativeTooltip1 and comparativeTooltip2 then
-            if positionToLeftByAnchors or positionToLeftByQuadrant then
-                comparativeTooltip1:SetOwner(tooltip, TOPLEFT, BETWEEN_TOOLTIP_OFFSET_X, 0)
-                comparativeTooltip2:SetOwner(comparativeTooltip1, TOPLEFT, BETWEEN_TOOLTIP_OFFSET_X, 0, TOPRIGHT)
-            else
+            if anchorTooltipsLeftward then
                 comparativeTooltip1:SetOwner(tooltip, TOPRIGHT, -BETWEEN_TOOLTIP_OFFSET_X, 0)
                 comparativeTooltip2:SetOwner(comparativeTooltip1, TOPRIGHT, -BETWEEN_TOOLTIP_OFFSET_X, 0, TOPLEFT)
+            else
+                comparativeTooltip1:SetOwner(tooltip, TOPLEFT, BETWEEN_TOOLTIP_OFFSET_X, 0)
+                comparativeTooltip2:SetOwner(comparativeTooltip1, TOPLEFT, BETWEEN_TOOLTIP_OFFSET_X, 0, TOPRIGHT)
             end
 
             comparativeTooltip1:SetClampedToScreenInsets(0, comparativeTooltip1.topClampedToScreenInset, 0, 0)
             comparativeTooltip2:SetClampedToScreenInsets(0, comparativeTooltip2.topClampedToScreenInset, 0, 0)
         elseif comparativeTooltip1 then
-            if positionToLeftByAnchors or positionToLeftByQuadrant then
-                comparativeTooltip1:SetOwner(tooltip, TOPLEFT, BETWEEN_TOOLTIP_OFFSET_X, 0)
-                comparativeTooltip1:SetClampedToScreenInsets(0, comparativeTooltip1.topClampedToScreenInset, 0, 0)
-            else
+            if anchorTooltipsLeftward then
                 comparativeTooltip1:SetOwner(tooltip, TOPRIGHT, -BETWEEN_TOOLTIP_OFFSET_X, 0)
-                comparativeTooltip1:SetClampedToScreenInsets(0, comparativeTooltip1.topClampedToScreenInset, 0, 0)
+            else
+                comparativeTooltip1:SetOwner(tooltip, TOPLEFT, BETWEEN_TOOLTIP_OFFSET_X, 0)
             end
+            comparativeTooltip1:SetClampedToScreenInsets(0, comparativeTooltip1.topClampedToScreenInset, 0, 0)
         end
     end
 

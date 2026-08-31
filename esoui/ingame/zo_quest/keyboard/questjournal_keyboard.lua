@@ -53,9 +53,25 @@ function ZO_QuestJournal_Keyboard:InitializeModeBar()
         highlight = "EsoUI/Art/Journal/journal_rumors_tabIcon_over.dds",
         disabled = "EsoUI/Art/Journal/journal_rumors_tabIcon_disabled.dds",
         callback = function() self:SetMode(ZO_QUEST_JOURNAL_MODE.RUMORS) end,
+        statusIcon = function()
+            if RUMOR_MANAGER:HasAnyNewRumor() then
+                return ZO_KEYBOARD_NEW_ICON
+            end
+            return nil
+        end,
     }
 
     self.tabs:SetStartingFragment(self.questsTab.categoryName)
+
+    self:RegisterForEvents()
+end
+
+function ZO_QuestJournal_Keyboard:RegisterForEvents()
+    local function RefreshModeBar()
+        self.tabs:UpdateButtons()
+    end
+    RUMOR_MANAGER:RegisterCallback("SingleRumorUpdated", RefreshModeBar)
+    RUMOR_MANAGER:RegisterCallback("RumorsUpdated", RefreshModeBar)
 end
 
 function ZO_QuestJournal_Keyboard:OnShowing()

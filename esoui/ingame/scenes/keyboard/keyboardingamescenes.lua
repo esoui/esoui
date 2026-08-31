@@ -1467,6 +1467,12 @@ do
             normal = "EsoUI/Art/Journal/journal_tabIcon_quest_up.dds",
             pressed = "EsoUI/Art/Journal/journal_tabIcon_quest_down.dds",
             highlight = "EsoUI/Art/Journal/journal_tabIcon_quest_over.dds",
+            statusIcon = function()
+                if RUMOR_MANAGER and RUMOR_MANAGER:HasAnyNewRumor() then
+                    return ZO_KEYBOARD_NEW_ICON
+                end
+                return nil
+            end,
         },
         {
             categoryName = SI_JOURNAL_MENU_ANTIQUITIES,

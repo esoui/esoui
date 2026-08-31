@@ -37,11 +37,14 @@ function ZO_QuestJournal_Rumors_Gamepad:Initialize(control, owner)
         data1HeaderText = GetString(SI_GAMEPAD_QUEST_JOURNAL_RUMORS_CURRENT_MAX_LABEL),
         data1Text = function() return zo_strformat(SI_GAMEPAD_QUEST_JOURNAL_RUMORS_CURRENT_MAX, GetNumPendingRumors(), GetMaxPendingRumors()) end,
     }
+
+    self.trySetMarkSeenCallId = 0
 end
 
 function ZO_QuestJournal_Rumors_Gamepad:RegisterForEvents()
     local function Update()
         self:Update()
+        MAIN_MENU_GAMEPAD:RefreshLists()
     end
     RUMOR_MANAGER:RegisterCallback("SingleRumorUpdated", Update)
     RUMOR_MANAGER:RegisterCallback("RumorsUpdated", Update)
@@ -94,6 +97,7 @@ function ZO_QuestJournal_Rumors_Gamepad:InitializeKeybindStripDescriptors()
             keybind = "UI_SHORTCUT_PRIMARY",
             callback = function()
                 self:SetMode(MODE.CLUES)
+                self:GetSelectedRumorData():MarkAsSeen()
             end,
             visible = function()
                 local selectedRumorData = self:GetSelectedRumorData()
@@ -194,13 +198,15 @@ function ZO_QuestJournal_Rumors_Gamepad:BuildRumorCategoryList()
     local activeCategoryString = GetString(SI_QUEST_JOURNAL_RUMORS_ACTIVE_CATEGORY)
     local activeCategoryEntry = ZO_GamepadEntryData:New(activeCategoryString)
     activeCategoryEntry.categoryType = CATEGORY_TYPE_ACTIVE
-    self.rumorCategoryList:AddEntry("ZO_GamepadMenuEntryTemplate", activeCategoryEntry)
+    activeCategoryEntry:SetNew(RUMOR_MANAGER:HasNewActiveRumor())
+    self.rumorCategoryList:AddEntry("ZO_GamepadNewMenuEntryTemplate", activeCategoryEntry)
 
     if GetNumCompleteRumors() > 0 then
         local completedCategoryString = GetString(SI_QUEST_JOURNAL_RUMORS_COMPLETED_CATEGORY)
         local completedCategoryEntry = ZO_GamepadEntryData:New(completedCategoryString)
         completedCategoryEntry.categoryType = CATEGORY_TYPE_COMPLETE
-        self.rumorCategoryList:AddEntry("ZO_GamepadMenuEntryTemplate", completedCategoryEntry)
+        completedCategoryEntry:SetNew(RUMOR_MANAGER:HasNewCompletedRumor())
+        self.rumorCategoryList:AddEntry("ZO_GamepadNewMenuEntryTemplate", completedCategoryEntry)
     end
 
     self.rumorCategoryList:Commit()
@@ -211,14 +217,17 @@ function ZO_QuestJournal_Rumors_Gamepad:BuildRumorTypeList()
 
     for rumorType = RUMOR_TYPE_ITERATION_BEGIN, RUMOR_TYPE_ITERATION_END do
         local shouldAddType = true
+        local rumorStatusFilter = ZO_RumorData.IsNotComplete
         if self:GetSelectedRumorCategory() == CATEGORY_TYPE_COMPLETE then
             shouldAddType = RUMOR_MANAGER:DoesRumorTypeHaveMatchingRumor(rumorType, {ZO_RumorData.IsComplete})
+            rumorStatusFilter = ZO_RumorData.IsComplete
         end
         if shouldAddType then
             local rumorTypeName = GetString("SI_RUMORTYPE_JOURNALCATEGORY", rumorType)
             local rumorTypeEntry = ZO_GamepadEntryData:New(rumorTypeName)
             rumorTypeEntry.rumorType = rumorType
-            self.rumorTypeList:AddEntry("ZO_GamepadMenuEntryTemplate", rumorTypeEntry)
+            rumorTypeEntry:SetNew(RUMOR_MANAGER:DoesRumorTypeHaveMatchingRumor(rumorType, {rumorStatusFilter, ZO_RumorData.IsNew}))
+            self.rumorTypeList:AddEntry("ZO_GamepadNewMenuEntryTemplate", rumorTypeEntry)
         end
     end
 
@@ -255,7 +264,8 @@ do
             local rumorEntry = ZO_GamepadEntryData:New(rumorName)
             rumorEntry.rumorData = rumorData
             rumorEntry.narrationText = GetRumorEntryNarrationText
-            self.rumorList:AddEntry("ZO_GamepadMenuEntryTemplate", rumorEntry)
+            rumorEntry:SetNew(rumorData:IsNew())
+            self.rumorList:AddEntry("ZO_GamepadNewMenuEntryTemplate", rumorEntry)
         end
 
         self.rumorList:Commit()
@@ -285,6 +295,13 @@ end
 
 -- Start ZO_Gamepad_ParametricList_Screen overrides
 
+function ZO_QuestJournal_Rumors_Gamepad:SetupList(list)
+    list:AddDataTemplate("ZO_GamepadNewMenuEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
+    local DEFAULT_EQUALITY_FUNCTION = nil
+    list:AddDataTemplateWithHeader("ZO_GamepadNewMenuEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, DEFAULT_EQUALITY_FUNCTION, "ZO_GamepadMenuEntryHeaderTemplate")
+end
+
+
 function ZO_QuestJournal_Rumors_Gamepad:OnDeferredInitialize()
     self.rumorCategoryList = self:GetMainList()
     self.rumorTypeList = self:AddList("RumorTypes")
@@ -292,7 +309,8 @@ function ZO_QuestJournal_Rumors_Gamepad:OnDeferredInitialize()
 
     self.clueList = self:AddList("Clues")
     self.clueList:AddDataTemplate("ZO_GamepadNewMenuEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
-    self.clueList:AddDataTemplateWithHeader("ZO_GamepadNewMenuEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
+    local DEFAULT_EQUALITY_FUNCTION = nil
+    self.clueList:AddDataTemplateWithHeader("ZO_GamepadNewMenuEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, DEFAULT_EQUALITY_FUNCTION, "ZO_GamepadMenuEntryHeaderTemplate")
 
     -- Middle Pane
     self.middlePane = self.control:GetNamedChild("MiddlePane")
@@ -371,6 +389,8 @@ end
 
 function ZO_QuestJournal_Rumors_Gamepad:OnHiding()
     ZO_GamepadGenericHeader_Deactivate(self.header)
+
+    self.trySetMarkSeenCallId = self.trySetMarkSeenCallId + 1
 end
 
 function ZO_QuestJournal_Rumors_Gamepad:OnSelectionChanged(list, selectedData, oldSelectedData)
@@ -378,6 +398,7 @@ function ZO_QuestJournal_Rumors_Gamepad:OnSelectionChanged(list, selectedData, o
 
     self:UpdateTooltips()
     self:RefreshRumorDetails()
+    self:TryMarkSelectedRumorAsSeen()
 end
 
 -- End ZO_Gamepad_ParametricList_Screen overrides
@@ -418,6 +439,43 @@ function ZO_QuestJournal_Rumors_Gamepad:GetSelectedRumorData()
     end
 
     return nil
+end
+
+function ZO_QuestJournal_Rumors_Gamepad:TryMarkSelectedRumorAsSeen()
+    self.trySetMarkSeenCallId = self.trySetMarkSeenCallId + 1
+
+    if self.mode ~= MODE.RUMORS then
+        return
+    end
+
+    local rumorData = self:GetSelectedRumorData()
+    if not rumorData or not rumorData:IsNew() then
+        return
+    end
+
+    -- We defer marking the rumor as seen to avoid clearing the new status
+    -- when just navigating past the rumor.
+    local callId = self.trySetMarkSeenCallId
+    zo_callLater(function()
+        self:TrySetMarkSeen(callId)
+    end, 200)
+end
+
+function ZO_QuestJournal_Rumors_Gamepad:TrySetMarkSeen(callId)
+    if callId ~= self.trySetMarkSeenCallId then
+        return
+    end
+
+    if self.mode ~= MODE.RUMORS or not self:IsShowing() then
+        return
+    end
+
+    local rumorData = self:GetSelectedRumorData()
+    if not rumorData or not rumorData:IsNew() then
+        return
+    end
+
+    rumorData:MarkAsSeen()
 end
 
 function ZO_QuestJournal_Rumors_Gamepad:UpdateTooltips()

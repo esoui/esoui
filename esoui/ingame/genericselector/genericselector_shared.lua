@@ -88,6 +88,7 @@ function ZO_GenericSelector_Shared:InitializeControls()
 end
 
 function ZO_GenericSelector_Shared:InitializeKeybindStripDescriptor()
+    local closeKeybindDescriptor = self:GetCloseKeybindDescriptor()
     self.keybindStripDescriptor =
     {
         alignment = KEYBIND_STRIP_ALIGN_CENTER,
@@ -116,43 +117,49 @@ function ZO_GenericSelector_Shared:InitializeKeybindStripDescriptor()
                 return numCurrentSelections == 0 or (numCurrentSelections >= GetMinGenericSelectorChoices() and numCurrentSelections <= GetMaxGenericSelectorChoices())
             end,
         },
-        {
-            name = function()
-                local numCurrentSelections = GetNumGenericSelectorSelectedChoices()
-                if IsViewGenericSelectionMenuAvailable() or numCurrentSelections == 0 then
-                    return GetString(SI_DIALOG_CLOSE)
-                end
-
-                local minSelections = GetMinGenericSelectorChoices()
-                local maxSelections = GetMaxGenericSelectorChoices()
-
-                if minSelections == maxSelections and numCurrentSelections ~= minSelections then
-                    return GetString(SI_DIALOG_CLOSE)
-                else
-                    return GetString(SI_GENERIC_SELECTOR_SAVE_CLOSE)
-                end
-            end,
-            keybind = "UI_SHORTCUT_NEGATIVE",
-            clickSound = SOUNDS.GENERIC_SELECTOR_SUBMIT_CHOICES,
-            callback = function()
-                local needsConfirmation = false
-                -- Read-only/no choices won't lock you in to anything permanent, so no need to confirm
-                if not IsViewGenericSelectionMenuAvailable() then
-                    local numCurrentSelections = GetNumGenericSelectorSelectedChoices()
-                    if numCurrentSelections > 0 then
-                        needsConfirmation = numCurrentSelections >= GetMinGenericSelectorChoices() and numCurrentSelections <= GetMaxGenericSelectorChoices()
-                    end
-                end
-                
-                if needsConfirmation then
-                    ZO_Dialogs_ShowPlatformDialog("GENERIC_SELECTOR_CONFIRM_CHOICES")
-                else
-                    ConfirmGenericSelectionPrompt()
-                    GENERIC_SELECTOR_HUD_TRACKER:Update()
-                end
-            end,
-        }
+        closeKeybindDescriptor,
     }
+end
+
+function ZO_GenericSelector_Shared:CreateCloseKeybindDescriptor(keybind)
+    local keybindDescriptor =
+    {
+        name = function()
+            local numCurrentSelections = GetNumGenericSelectorSelectedChoices()
+            if IsViewGenericSelectionMenuAvailable() or numCurrentSelections == 0 then
+                return GetString(SI_DIALOG_CLOSE)
+            end
+
+            local minSelections = GetMinGenericSelectorChoices()
+            local maxSelections = GetMaxGenericSelectorChoices()
+
+            if minSelections == maxSelections and numCurrentSelections ~= minSelections then
+                return GetString(SI_DIALOG_CLOSE)
+            else
+                return GetString(SI_GENERIC_SELECTOR_SAVE_CLOSE)
+            end
+        end,
+        keybind = keybind,
+        clickSound = SOUNDS.GENERIC_SELECTOR_SUBMIT_CHOICES,
+        callback = function()
+            local needsConfirmation = false
+            -- Read-only/no choices won't lock you in to anything permanent, so no need to confirm
+            if not IsViewGenericSelectionMenuAvailable() then
+                local numCurrentSelections = GetNumGenericSelectorSelectedChoices()
+                if numCurrentSelections > 0 then
+                    needsConfirmation = numCurrentSelections >= GetMinGenericSelectorChoices() and numCurrentSelections <= GetMaxGenericSelectorChoices()
+                end
+            end
+                
+            if needsConfirmation then
+                ZO_Dialogs_ShowPlatformDialog("GENERIC_SELECTOR_CONFIRM_CHOICES")
+            else
+                ConfirmGenericSelectionPrompt()
+                GENERIC_SELECTOR_HUD_TRACKER:Update()
+            end
+        end,
+    }
+    return keybindDescriptor
 end
 
 function ZO_GenericSelector_Shared:RegisterForEvents()
@@ -283,3 +290,4 @@ end
 
 ZO_GenericSelector_Shared:MUST_IMPLEMENT("GetSceneName")
 ZO_GenericSelector_Shared:MUST_IMPLEMENT("InitializeGridList")
+ZO_GenericSelector_Shared:MUST_IMPLEMENT("GetCloseKeybindDescriptor")

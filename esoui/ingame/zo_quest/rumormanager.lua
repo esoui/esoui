@@ -24,6 +24,7 @@ function ZO_RumorManager:RegisterForEvents()
     EVENT_MANAGER:RegisterForEvent("RumorManager", EVENT_RUMOR_UPDATED, OnSingleRumorUpdated)
     EVENT_MANAGER:RegisterForEvent("RumorManager", EVENT_RUMOR_STARTED, OnSingleRumorUpdated)
     EVENT_MANAGER:RegisterForEvent("RumorManager", EVENT_RUMOR_COMPLETED, OnSingleRumorUpdated)
+    EVENT_MANAGER:RegisterForEvent("RumorManager", EVENT_RUMOR_NEW_STATUS_CLEARED, OnSingleRumorUpdated)
 
     if EVENT_RUMOR_DATA_CHANGED then
         EVENT_MANAGER:RegisterForEvent("RumorManager", EVENT_RUMOR_DATA_CHANGED, function() self:RebuildRumors() end)
@@ -187,6 +188,19 @@ function ZO_RumorManager:ConfirmAbandonRumor(rumorId)
     local rumorName = rumorData:GetDisplayName()
     rumorName = ZO_WHITE:Colorize(rumorName)
     ZO_Dialogs_ShowPlatformDialog("ABANDON_RUMOR", {rumorId = rumorId}, {mainTextParams = {rumorName}})
+end
+
+
+function ZO_RumorManager:HasNewActiveRumor()
+    return self:HasMatchingRumor({ZO_RumorData.IsNotComplete, ZO_RumorData.IsNew})
+end
+
+function ZO_RumorManager:HasNewCompletedRumor()
+    return self:HasMatchingRumor({ZO_RumorData.IsComplete, ZO_RumorData.IsNew})
+end
+
+function ZO_RumorManager:HasAnyNewRumor()
+    return self:HasMatchingRumor({ZO_RumorData.IsNew})
 end
 
 ZO_RumorManager:New()
