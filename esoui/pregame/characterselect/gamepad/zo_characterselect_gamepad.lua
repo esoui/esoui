@@ -1236,8 +1236,8 @@ function ZO_CharacterSelect_Gamepad_Initialize(self)
 
     self:RegisterForEvent(EVENT_CHARACTER_DELETED, ContextFilter(CharacterDeleted))
     self:RegisterForEvent(EVENT_ENTITLEMENT_STATE_CHANGED, function()
-        -- Need the game data to be loaded before we can recreate the list, which is handled by OnPregameFullyLoaded()
-        if ZO_PregameIsFullyLoaded() then
+        -- Need the game data to be loaded AND the character list to be received before we can recreate the list
+        if ZO_PregameIsFullyLoaded() and ZO_PREGAME_CHARACTER_LIST_RECEIVED then
             RecreateList(self)
         end
     end)

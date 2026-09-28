@@ -21320,6 +21320,11 @@ h2. Game API
 * GetRumorCompleteText(*integer* _rumorId_)
 ** _Returns:_ *string* _completeText_
 
+* IsRumorNew(*integer* _rumorId_)
+** _Returns:_ *bool* _isNew_
+
+* MarkRumorSeen(*integer* _rumorId_)
+
 * GetNumHintsForPendingRumor(*integer* _pendingRumorId_)
 ** _Returns:_ *integer* _numHints_
 
@@ -27967,6 +27972,7 @@ h2. Events
 * EVENT_RUMORS_UPDATED
 * EVENT_RUMOR_COMPLETED (*integer* _rumorId_)
 * EVENT_RUMOR_ENDING_INITIATED (*integer* _rumorId_, *integer* _rumorEndingId_)
+* EVENT_RUMOR_NEW_STATUS_CLEARED (*integer* _rumorId_)
 * EVENT_RUMOR_STARTED (*integer* _rumorId_)
 * EVENT_RUMOR_START_FAILED (*integer* _rumorId_, *[StartRumorFailReason|#StartRumorFailReason]* _reason_)
 * EVENT_RUMOR_UPDATED (*integer* _rumorId_)
