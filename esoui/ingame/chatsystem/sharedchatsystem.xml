@@ -57,12 +57,14 @@
             <OnMouseEnter>
                 ZO_ChatSystem_OnMouseEnter(self)
                 ZO_TabButton_OnMouseEnter(self)
+                WINDOW_MANAGER:SetMouseCursor(MOUSE_CURSOR_PAN)
             </OnMouseEnter>
             <OnMouseExit>
                 ZO_TabButton_OnMouseExit(self)
+                WINDOW_MANAGER:SetMouseCursor(MOUSE_CURSOR_DO_NOT_CARE)
             </OnMouseExit>
         </Control>
-        <TopLevelControl name="ZO_ChatContainerTemplate" resizeHandleSize="8" mouseEnabled="true" clampedToScreen="true" virtual="true">
+        <TopLevelControl name="ZO_ChatContainerTemplate" resizeHandleSize="16" mouseEnabled="true" clampedToScreen="true" virtual="true">
             <Dimensions x="350" y="155"/>
             <ClampedToScreenInsets top="-24"/>
             <OnResizeStart>
@@ -82,8 +84,8 @@
             </OnMouseEnter>
             <Controls>
                 <Backdrop name="$(parent)Bg" integralWrapping="true">
-                    <Anchor point="TOPLEFT" offsetX="-8" offsetY="-6"/>
-                    <Anchor point="BOTTOMRIGHT" offsetX="4" offsetY="4"/>
+                    <Anchor point="TOPLEFT" offsetX="3" offsetY="-15"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="-4" offsetY="7"/>
                     <Edge file="EsoUI/Art/ChatWindow/chat_BG_edge.dds" edgeFileWidth="256" edgeFileHeight="256" edgeSize="32"/>
                     <Center file="EsoUI/Art/ChatWindow/chat_BG_center.dds"/>
                     <Insets left="32" top="32" right="-32" bottom="-32"/>

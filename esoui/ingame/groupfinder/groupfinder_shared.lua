@@ -55,7 +55,7 @@ function ZO_GroupFinder_Shared:Initialize(control)
     self:InitializeFragments()
     self:InitializeGroupFinderCategories()
 
-    function OnGroupVeteranDifficultyChanged()
+    local function OnGroupVeteranDifficultyChanged()
         ResetGroupFinderFilterAndDraftDifficultyToDefault()
     end
 

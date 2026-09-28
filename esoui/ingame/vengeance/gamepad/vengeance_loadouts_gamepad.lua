@@ -74,7 +74,7 @@ function ZO_Vengeance_Loadouts_Gamepad:InitializeKeybindStripDescriptors()
             name = function()
                 local targetData = self:GetTargetData()
                 local loadoutData = ZO_VENGEANCE_MANAGER:GetLoadoutDataByIndex(targetData.data:GetLoadoutIndex())
-                return zo_strformat(SI_CAMPAIGN_VENGEANCE_LOADOUT_EQUIP_ACTION, loadoutData:GetName())
+                return zo_strformat(SI_CAMPAIGN_VENGEANCE_LOADOUT_EQUIP_ACTION, loadoutData:GetRawName())
             end,
             keybind = "UI_SHORTCUT_PRIMARY",
             onShowCooldown = function()
@@ -165,7 +165,7 @@ function ZO_Vengeance_Loadouts_Gamepad:RefreshLoadouts()
     list:Clear()
 
     for _, loadoutData in ZO_VENGEANCE_MANAGER:LoadoutDataIterator() do
-        local entryData = ZO_GamepadEntryData:New(loadoutData:GetName(), loadoutData:GetIcon())
+        local entryData = ZO_GamepadEntryData:New(loadoutData:GetFormattedName(), loadoutData:GetIcon())
         entryData.data = loadoutData
         entryData.isSelected = loadoutData:IsEquipped()
         entryData:SetIconTintOnSelection(true)

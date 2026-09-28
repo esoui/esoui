@@ -1,6 +1,6 @@
 <GuiXml>
     <Controls>
-        <TopLevelControl name="ZO_ZoneStoryTracker" inherits="ZO_HUDTracker_Base_Template">
+        <Control name="ZO_ZoneStoryTracker_Template" inherits="ZO_HUDTracker_Base_Template" virtual="true">
             <OnInitialized>
                 ZO_ZoneStoryTracker_OnInitialized(self)
             </OnInitialized>
@@ -12,7 +12,7 @@
                             <Anchor point="RIGHT" relativeTo="$(parent)Header" relativePoint="LEFT"/>
                         </Texture>
                         <Control name="$(parent)Assisted" inherits="ZO_KeybindButton" excludeFromResizeToFitExtents="true">
-                            <Anchor point="RIGHT" relativeTo="$(parent)Header" relativePoint="LEFT" offsetX="-5" offsetY="5"/>
+                            <Anchor point="RIGHT" relativeTo="$(parent)Header" relativePoint="LEFT" offsetX="-5" offsetY="-1"/>
                             <OnInitialized>
                                 ZO_KeybindButtonTemplate_OnInitialized(self)
                                 local HIDE_UNBOUND = false
@@ -22,6 +22,6 @@
                     </Controls>
                 </Control>
             </Controls>
-        </TopLevelControl>
+        </Control>
     </Controls>
 </GuiXml>

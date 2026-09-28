@@ -738,6 +738,11 @@ function ZO_CompanionEquipment_Gamepad:GetItemDataFilterComparator(filteredEquip
             return false
         end
 
+
+
+
+
+
         if filteredEquipSlot then
             return ZO_Character_DoesEquipSlotUseEquipType(filteredEquipSlot, itemData.equipType)
         end

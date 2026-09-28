@@ -16,6 +16,7 @@ EsoUI\Libraries\Utility\ZO_AuditObject.lua
 EsoUI\Libraries\Utility\ZO_ColorDef.lua
 EsoUI\Libraries\Utility\ZO_TableUtils.lua
 EsoUI\Libraries\Utility\ZO_ObjectPool.lua
+EsoUI\Libraries\ZO_Templates\ObjectPoolTemplates.lua
 EsoUI\Libraries\Utility\ZO_TreeControl.lua
 EsoUI\Libraries\Utility\ZO_CategoryManager.lua
 EsoUI\Libraries\Utility\ZO_RadioButtonGroup.lua
@@ -81,7 +82,6 @@ EsoUI\Libraries\ZO_Templates\StatusBarTemplates.lua
 EsoUI\Libraries\ZO_Templates\StatusBarTemplates.xml
 EsoUI\Libraries\ZO_Templates\Gamepad\StatusBarTemplates_Gamepad.xml
 
-EsoUI\Libraries\ZO_Templates\ObjectPoolTemplates.lua
 EsoUI\Libraries\ZO_Templates\ZO_ItemScreenTemplates.xml
 
 EsoUI\Libraries\ScreenNarration\ScreenNarrationManager.lua

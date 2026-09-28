@@ -49,13 +49,29 @@ function TamrielTomes_Manager:Initialize()
     EVENT_MANAGER:RegisterForEvent("TamrielTomes_Manager", EVENT_REWARD_TRACK_SETTINGS_UPDATE_RECEIVED, UpdateTamrielTomesAvailability)
     EVENT_MANAGER:RegisterForEvent("TamrielTomes_Manager", EVENT_REWARD_TRACK_STARTED, OnRewardTrackStarted)
 
-    function OnCatalogUpdated()
+    local function OnCatalogUpdated()
         self:UpdateDirectPurchaseData()
         self:UpdateTamrielTomesAvailability()
     end
 
     DIRECT_PURCHASE_MANAGER:RegisterCallback("CatalogUpdated", OnCatalogUpdated)
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", OnCatalogUpdated)
+
+    EVENT_MANAGER:RegisterForEvent("TamrielTomes_Manager", EVENT_GUI_UNLOADING, function()
+        -- make sure to hide any on screen platform store icon in case the UI is reloaded while the icon is showing
+        if HidePlatformStoreIcon then
+            HidePlatformStoreIcon()
+        end
+    end)
+
+    local function OnPlayerActivated()
+        -- restore the platform store icon if necessary after a UI reload
+        if ShowPlatformStoreIcon and SYSTEMS:IsShowing("tamrielTomesPurchase") then
+            ShowPlatformStoreIcon(PLATFORM_STORE_ICON_LOCATION_LOWER_RIGHT)
+        end
+    end
+    EVENT_MANAGER:RegisterForEvent("TamrielTomes_Manager", EVENT_PLAYER_ACTIVATED, OnPlayerActivated)
+
 end
 
 function TamrielTomes_Manager:SetupSavedVars()

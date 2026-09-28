@@ -93,7 +93,7 @@ function ZO_VeterancyReward_Gamepad:Initialize(control)
         keybind = "UI_SHORTCUT_QUATERNARY",
         name = GetString(SI_VETERANCY_PREVIEW_ACTION_TEXT),
         callback = function()
-            VETERANCY_GAMEPAD:BeginPreview(ZO_PREVIEW_SCREEN_REWARD_DATA_PREVIEW_TYPES.ACTIVE_PREVIEW, self:GetRewardableEventData())
+            VETERANCY_GAMEPAD:BeginPreview(ZO_PREVIEW_SCREEN_REWARD_DATA_PREVIEW_TYPES.FULL_PREVIEW, self:GetRewardableEventData():GetRewardData())
         end,
         visible = function()
             return not ITEM_PREVIEW_GAMEPAD:IsWaitingForPreviewBegin()
@@ -370,15 +370,23 @@ function Veterancy_GamepadFocus_HorizontalScrollList:OnGridSelectionChanged(oldS
     if selectedData and selectedData.dataEntry then
         if selectedData.dataEntry.control then
             selectedData.dataEntry.control.object:SetSelected(true)
-        end
-        selectedData.isSelected = true
 
-        if oldSelectedData and oldSelectedData.dataEntry then
-            local gridList = self:GetCurrentGridList()
-            if gridList then
-                self.currentGridListSelectedData = gridList:GetSelectedData()
+           local rewardableEventData = selectedData.dataEntry.control.object.rewardData
+           local rewardData = rewardableEventData and rewardableEventData.GetRewardData and rewardableEventData:GetRewardData()
+           if rewardableEventData and rewardData then
+               if not (rewardableEventData.CanPreviewReward and rewardableEventData:CanPreviewReward()) then
+                    if VETERANCY_GAMEPAD:ShouldRetainPreview() then
+                        return
+                    end
+
+                    VETERANCY_GAMEPAD:QueueEndPreview(ZO_DEFAULT_QUEUED_PREVIEW_DELAY_SECONDS)
+                    VETERANCY_GAMEPAD:ClearQueuedPreview()
+                    return
+                end
+                VETERANCY_GAMEPAD:QueuePreview(ZO_PREVIEW_SCREEN_REWARD_DATA_PREVIEW_TYPES.QUICK_PREVIEW, rewardData, rewardableEventData, ZO_QUEUED_PREVIEW_DEFAULT_DELAY_SECONDS)
             end
         end
+        selectedData.isSelected = true
     end
 end
 
@@ -404,7 +412,7 @@ do
             end
         end
         if moveX == MOVEMENT_CONTROLLER_MOVE_NEXT then
-            if ZO_Veterancy_Shared.GetPageIndexFromRankIndex(currentRankIndex) == ZO_Veterancy_Shared.GetMaxRanksPerPage()
+            if ZO_Veterancy_Shared.GetPageRankIndexFromRankIndex(currentRankIndex) == ZO_Veterancy_Shared.GetMaxRanksPerPage()
                 and (currentRowIndex == ZO_VETERANCY_GRID_ROW.RANK
                 or currentRewardIndex == currentSelectionData.rewardData:GetRankNumRewards()
                 or (currentRowIndex == ZO_VETERANCY_GRID_ROW.REWARDS_1 and currentRewardIndex == REWARDS_PER_ROW)) then -- Move to next page
@@ -419,9 +427,9 @@ do
                     -- Can't go any further right, so do nothing rather than wrap
                     return
                 elseif currentRowIndex == ZO_VETERANCY_GRID_ROW.REWARDS_2 then
-                    local nextRankPageIndex = ZO_Veterancy_Shared.GetPageIndexFromRankIndex(nextRankIndex)
+                    local nextPageRankIndex = ZO_Veterancy_Shared.GetPageRankIndexFromRankIndex(nextRankIndex)
                     local data = gridList:GetData()
-                    local nextRankData = data[nextRankPageIndex].data
+                    local nextRankData = data[nextPageRankIndex].data
                     local nextNumRewards = #nextRankData.rewardDataList
                     local dataToSelect = nil
                     if nextNumRewards > REWARDS_PER_ROW then
@@ -435,7 +443,7 @@ do
                 end
             end
         elseif moveX == MOVEMENT_CONTROLLER_MOVE_PREVIOUS then
-            if ZO_Veterancy_Shared.GetPageIndexFromRankIndex(currentRankIndex) == 1
+            if ZO_Veterancy_Shared.GetPageRankIndexFromRankIndex(currentRankIndex) == 1
                 and (currentRowIndex == ZO_VETERANCY_GRID_ROW.RANK
                 or currentRewardIndex == 1
                 or (currentRowIndex == ZO_VETERANCY_GRID_ROW.REWARDS_2 and currentRewardIndex == REWARDS_PER_ROW + 1)) then -- Move to previous page
@@ -445,9 +453,9 @@ do
                 return
             elseif currentRewardIndex == REWARDS_PER_ROW + 1 then -- Move from last row of rewards to rewards at the previous rank
                 local previousRankIndex = currentRankIndex - 1
-                local previousRankPageIndex = ZO_Veterancy_Shared.GetPageIndexFromRankIndex(previousRankIndex)
+                local previousPageRankIndex = ZO_Veterancy_Shared.GetPageRankIndexFromRankIndex(previousRankIndex)
                 local data = gridList:GetData()
-                local previousRankData = data[previousRankPageIndex].data
+                local previousRankData = data[previousPageRankIndex].data
                 local previousNumRewards = #previousRankData.rewardDataList
                 local dataToSelect = previousRankData.rewardDataList[previousNumRewards]
                 gridList:SelectData(dataToSelect)
@@ -571,10 +579,11 @@ end
 -- Veterancy
 --------------------------
 
-ZO_Veterancy_Gamepad = ZO_Object.MultiSubclass(ZO_Veterancy_Shared, ZO_GamepadMultiFocusArea_Manager)
+ZO_Veterancy_Gamepad = ZO_Object.MultiSubclass(ZO_Veterancy_Shared, ZO_PreviewScreen_Gamepad, ZO_GamepadMultiFocusArea_Manager)
 
 function ZO_Veterancy_Gamepad:Initialize(control)
     VETERANCY_SCENE_GAMEPAD = ZO_Scene:New("VeterancySceneGamepad", SCENE_MANAGER)
+    self.sceneGroup = ZO_SceneGroup:New(VETERANCY_SCENE_GAMEPAD:GetName(), PREVIEW_SCREEN_ACTIVE_PREVIEW_SCENE_GAMEPAD:GetName())
 
     local function RewardTileSetupFunction(control, data)
         ZO_DefaultGridTileEntrySetup(control, data)
@@ -645,13 +654,17 @@ function ZO_Veterancy_Gamepad:Initialize(control)
         },
     }
 
-    ZO_Veterancy_Shared.Initialize(self, control, VETERANCY_SCENE_GAMEPAD, templateData)
+    ZO_Veterancy_Shared.Initialize(self, control, templateData)
+    ZO_PreviewScreen_Gamepad.Initialize(self, control, VETERANCY_SCENE_GAMEPAD)
+
+    self.scene:AddFragment(self.fragment)
 
     SYSTEMS:RegisterGamepadRootScene("veterancy", self.scene)
 end
 
 function ZO_Veterancy_Gamepad:OnDeferredInitialize()
     ZO_Veterancy_Shared.OnDeferredInitialize(self)
+    ZO_PreviewScreen_Gamepad.OnDeferredInitialize(self)
     ZO_GamepadMultiFocusArea_Manager.Initialize(self)
 
     ZO_StatusBar_InitializeDefaultColors(self.repeatableRankRewardProgressControl)
@@ -662,6 +675,8 @@ function ZO_Veterancy_Gamepad:OnDeferredInitialize()
 
     -- Function needs to be run after self.pageNavigation has been created
     self:InitializeKeybindStripDescriptors()
+
+    self:SetQuickPreviewEnabled(false)
 end
 
 function ZO_Veterancy_Gamepad:InitializeKeybindStripDescriptors()
@@ -692,9 +707,15 @@ function ZO_Veterancy_Gamepad:InitializeKeybindStripDescriptors()
     local function OnBack()
         BATTLEGROUND_FINDER_GAMEPAD:SetIsFromVeterancy(true)
         SCENE_MANAGER:HideCurrentScene()
+        PlaySound(SOUNDS.GAMEPAD_MENU_BACK)
     end
 
     ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.keybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON, OnBack)
+end
+
+-- Must call ZO_Veterancy_Shared parent rather than defaulting to PreviewScreen_Gamepad
+function ZO_Veterancy_Gamepad:GetControlByPreviewableRewardData(previewableRewardData)
+    ZO_Veterancy_Shared.GetControlByPreviewableRewardData(self, previewableRewardData)
 end
 
 function ZO_Veterancy_Gamepad:InitializeMultiFocusAreas()
@@ -716,7 +737,7 @@ function ZO_Veterancy_Gamepad:InitializeMultiFocusAreas()
 end
 
 function ZO_Veterancy_Gamepad:ExitVeterancy()
-    if self:GetCurrentPreviewType() ~= ZO_PREVIEW_SCREEN_REWARD_DATA_PREVIEW_TYPES.NONE then
+    if self:GetActivePreviewType() ~= ZO_PREVIEW_SCREEN_REWARD_DATA_PREVIEW_TYPES.NONE then
         self:EndPreview()
     end
     SCENE_MANAGER:HideCurrentScene()
@@ -729,8 +750,21 @@ function ZO_Veterancy_Gamepad:RefreshHorizontalScrollList(newData, oldData, rese
     end
 end
 
+function ZO_Veterancy_Gamepad:OnUpdate(currentFrameTimeS)
+    ZO_Veterancy_Shared.OnUpdate(self, currentFrameTimeS)
+    ZO_PreviewScreen_Gamepad.OnUpdate(self, currentFrameTimeS)
+end
+
+function ZO_Veterancy_Gamepad:OnRewardsClaimed(...)
+    ZO_Veterancy_Shared.OnRewardsClaimed(self, ...)
+
+    self:UpdateKeybinds()
+end
+
 function ZO_Veterancy_Gamepad:OnShowing()
-    PREVIEW_SCREEN_ACTIVE_PREVIEW_SCREEN_GAMEPAD:SetSceneGroup(VETERANCY_SCENE_GROUP_GAMEPAD)
+    ZO_PreviewScreen_Gamepad.OnShowing(self)
+
+    PREVIEW_SCREEN_ACTIVE_PREVIEW_SCREEN_GAMEPAD:SetSceneGroup(self.sceneGroup)
 
     if self:GetCurrentFocus() then
         self:ActivateCurrentFocus()
@@ -748,24 +782,17 @@ function ZO_Veterancy_Gamepad:OnShowing()
 end
 
 function ZO_Veterancy_Gamepad:OnHiding()
-    ZO_Veterancy_Shared.OnHiding(self)
+    ZO_PreviewScreen_Gamepad.OnHiding(self)
 
     self:DeactivateCurrentFocus()
     DIRECTIONAL_INPUT:Deactivate(self)
-    self.currentGridListSelectedData = nil
 
     KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
 end
 
 function ZO_Veterancy_Gamepad:UpdateKeybinds()
+    ZO_PreviewScreen_Gamepad.UpdateKeybinds(self)
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
-end
-
-function ZO_Veterancy_Gamepad:ActivePreviewRewardInternal(rewardId)
-    if CanPreviewReward(rewardId) then
-        PREVIEW_SCREEN_ACTIVE_PREVIEW_SCREEN_GAMEPAD:SetPreviewableRewardData(self.activePreviewableRewardData)
-        SCENE_MANAGER:Push("PreviewScreenActivePreviewSceneGamepad")
-    end
 end
 
 function ZO_Veterancy_Gamepad:SelectGridList()

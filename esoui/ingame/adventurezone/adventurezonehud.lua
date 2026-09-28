@@ -5,6 +5,7 @@ function ZO_AdventureZoneHUD:Initialize(control)
 
     -- Order matters:
     self:InitializeControls()
+    self:InitializeStyles()
     self:InitializeEvents()
     self:RefreshState()
 end
@@ -13,9 +14,11 @@ function ZO_AdventureZoneHUD:InitializeControls()
     local control = self.control
     control.object = self
 
-    self.playerFactionIcon = control:GetNamedChild("PlayerFactionIcon")
+    self.playerScoreContainer = control:GetNamedChild("PlayerScoreContainer")
+    self.playerFactionIcon = self.playerScoreContainer:GetNamedChild("FactionIcon")
+    self.playerScoreLabel = self.playerScoreContainer:GetNamedChild("Score")
+    self.hudElementRef = self.playerScoreContainer:GetNamedChild("HUDElementRef")
 
-    self.playerScoreLabel = control:GetNamedChild("PlayerScoreLabel")
     self.playerScoreLabel:SetColor(ZO_SELECTED_TEXT:UnpackRGBA())
     self.playerScoreLabel:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
     self.playerScoreLabel:SetResizeToFitLabels(true)
@@ -26,9 +29,40 @@ function ZO_AdventureZoneHUD:InitializeControls()
     ADVENTURE_ZONE_HUD_FRAGMENT = self.fragment
 end
 
-function ZO_AdventureZoneHUD:InitializeEvents()
-    ZO_PlatformStyle:New(ZO_GetCallbackForwardingFunction(self, self.OnPlatformStyleChanged))
+function ZO_AdventureZoneHUD:InitializeStyles()
+    local KEYBOARD_STYLE =
+    {
+        anchor = ZO_Anchor:New(BOTTOMRIGHT),
+        labelFont = "ZoFontWinH2",
+        iconSize = 40,
+    }
+    local GAMEPAD_STYLE =
+    {
+        anchor = ZO_Anchor:New(BOTTOMLEFT),
+        labelFont = "ZoFontGamepad42",
+        iconSize = 44,
+    }
 
+    local KEYBOARD_CONFIG =
+    {
+        defaultAnchor = KEYBOARD_STYLE.anchor,
+        isValid = IsAdventureZoneActive,
+    }
+    local GAMEPAD_CONFIG =
+    {
+        defaultAnchor = GAMEPAD_STYLE.anchor,
+        isValid = IsAdventureZoneActive,
+    }
+    local DISPLAY_NAME = function()
+        return zo_strformat(SI_HUD_EDITOR_ADVENTURE_ZONE_SCORE, GetAdventureZoneDisplayName())
+    end
+    HUD_MANAGER:RegisterKeyboardElement(self.playerScoreContainer, DISPLAY_NAME, KEYBOARD_CONFIG)
+    HUD_MANAGER:RegisterGamepadElement(self.playerScoreContainer, DISPLAY_NAME, GAMEPAD_CONFIG)
+
+    ZO_PlatformStyle:New(ZO_GetCallbackForwardingFunction(self, self.OnPlatformStyleChanged), KEYBOARD_STYLE, GAMEPAD_STYLE)
+end
+
+function ZO_AdventureZoneHUD:InitializeEvents()
     EVENT_MANAGER:RegisterForEvent("AdventureZoneHUD", EVENT_ADVENTURE_ZONE_FACTION_REPUTATION_CHANGED, ZO_GetEventForwardingFunction(self, self.OnFactionReputationChanged))
     EVENT_MANAGER:RegisterForEvent("AdventureZoneHUD", EVENT_PLAYER_ACTIVATED, ZO_GetEventForwardingFunction(self, self.OnPlayerActivated))
     EVENT_MANAGER:RegisterForEvent("AdventureZoneHUD", EVENT_ADVENTURE_ZONE_FACTION_CHOSEN, ZO_GetEventForwardingFunction(self, self.RefreshState))
@@ -109,41 +143,11 @@ function ZO_AdventureZoneHUD:OnFactionReputationChanged(score)
     end, 1200)
 end
 
-function ZO_AdventureZoneHUD:OnPlatformStyleChanged()
-    self.playerFactionIcon:ClearAnchors()
-    self.playerScoreLabel:ClearAnchors()
-
-    local useGamepadStyle = IsInGamepadPreferredMode()
-    if useGamepadStyle then
-        self.playerFactionIcon:SetAnchor(BOTTOMLEFT)
-        self.playerScoreLabel:SetAnchor(LEFT, self.playerFactionIcon, RIGHT, 5, 0)
-    else
-        self.playerScoreLabel:SetAnchor(BOTTOMRIGHT)
-        self.playerFactionIcon:SetAnchor(RIGHT, self.playerScoreLabel, LEFT, -5, 0)
-    end
-
-    local headingFont
-    local iconSize
-    local labelFont
-    local modifyTextType
-    local textAlignment
-    if useGamepadStyle then
-        headingFont = "ZoFontGamepad27"
-        iconSize = 44
-        labelFont = "ZoFontGamepad42"
-        modifyTextType = MODIFY_TEXT_TYPE_UPPERCASE
-        textAlignment = TEXT_ALIGN_LEFT
-    else
-        headingFont = "ZoFontGameLargeBold"
-        iconSize = 40
-        labelFont = "ZoFontWinH2"
-        modifyTextType = MODIFY_TEXT_TYPE_NONE
-        textAlignment = TEXT_ALIGN_RIGHT
-    end
-
-    self.playerFactionIcon:SetDimensions(iconSize, iconSize)
-    self.playerScoreLabel:SetFont(labelFont)
-    self.playerScoreLabel:SetHorizontalAlignment(textAlignment)
+function ZO_AdventureZoneHUD:OnPlatformStyleChanged(style)
+    style.anchor:Set(self.hudElementRef)
+    self.playerScoreContainer:SetHeight(style.iconSize)
+    self.playerFactionIcon:SetDimensions(style.iconSize, style.iconSize)
+    self.playerScoreLabel:SetFont(style.labelFont)
 end
 
 function ZO_AdventureZoneHUD:OnPlayerActivated()

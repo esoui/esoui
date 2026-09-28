@@ -29,6 +29,7 @@ local CREATE_BUCKET_WINDOW_DATA =
         previousTab = CREATE_BUCKET_RACE,
         onExpandFn = function()
             SetCharacterCameraZoomAmount(-1)
+            CharacterCreateQueueCurrentClassFx()
         end,
     },
 

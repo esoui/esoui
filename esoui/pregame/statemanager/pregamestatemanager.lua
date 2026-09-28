@@ -463,7 +463,11 @@ local g_sharedPregameStates =
 
         GetStateTransitionData = function()
             if ZO_IsConsoleOrGameCoreUI() or not DoesPlatformSelectServer() then
-                return "ShowEULA"
+                if IsInGamepadPreferredMode() then
+                    return "ShowEULA"
+                else
+                    return "WaitForPreloginWorld"
+                end
             else
                 return "AccountLoginEntryPoint"
             end

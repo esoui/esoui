@@ -253,7 +253,8 @@ local GAMEPAD_CONSTANTS =
     showWeaponSwapButton = false,
     weaponSwapOffsetX = 61,
     weaponSwapOffsetY = 4,
-
+    hudElementRefPrimaryAnchor = ZO_Anchor:New(TOPLEFT, nil, TOPLEFT, -125, -18),
+    hudElementRefSecondaryAnchor = ZO_Anchor:New(BOTTOMRIGHT, nil, BOTTOMRIGHT, 52, 22),
 }
 
 local KEYBOARD_CONSTANTS =
@@ -271,6 +272,8 @@ local KEYBOARD_CONSTANTS =
     showWeaponSwapButton = true,
     weaponSwapOffsetX = 59,
     weaponSwapOffsetY = -4,
+    hudElementRefPrimaryAnchor = ZO_Anchor:New(TOPLEFT, nil, TOPLEFT, -68, -20),
+    hudElementRefSecondaryAnchor = ZO_Anchor:New(BOTTOMRIGHT, nil, BOTTOMRIGHT, 2, 0),
 }
 
 local function GetPlatformConstants()
@@ -304,7 +307,6 @@ local function SetCompanionAnchors()
 end
 
 local function ApplyStyle(style)
-    ZO_ActionBar1:ClearAnchors()
     style.anchor:Set(ZO_ActionBar1)
     ZO_ActionBar1:SetWidth(style.width)
 
@@ -356,6 +358,9 @@ local function ApplyStyle(style)
     g_quickslotButton:ApplyStyle(buttonTemplate)
     ZO_ActionBar1:GetNamedChild("KeybindBG"):SetHidden(not style.showKeybindBG)
     ZO_WeaponSwap_SetPermanentlyHidden(ZO_ActionBar1:GetNamedChild("WeaponSwap"), not style.showWeaponSwapButton)
+
+    style.hudElementRefPrimaryAnchor:Set(ZO_ActionBar1.hudElementRef)
+    style.hudElementRefSecondaryAnchor:AddToControl(ZO_ActionBar1.hudElementRef)
 end
 
 local function PlayBackBarSwapAnimation(physicalSlot)
@@ -717,4 +722,80 @@ function ZO_ActionBar_OnInitialized(control)
     HideHiddenButtons()
 
     ACTION_BAR_FRAGMENT = ZO_HUDFadeSceneFragment:New(control)
+
+    local ACTION_BAR_OPTIONS =
+    {
+        {
+            type = ZO_HUD_EDITOR_OPTION_TYPES.ENUM,
+            name = GetString(SI_HUD_EDITOR_CUSTOM_OPTION_VISIBLE),
+            tooltipText = GetString(SI_INTERFACE_OPTIONS_ACTION_BAR_TOOLTIP),
+            key = "Visible",
+            valueStringPrefix = "SI_ACTIONBARSETTINGCHOICE",
+            values = {ACTION_BAR_SETTING_CHOICE_OFF, ACTION_BAR_SETTING_CHOICE_AUTOMATIC, ACTION_BAR_SETTING_CHOICE_ON,},
+            defaultValue = function()
+                return tonumber(GetSetting(SETTING_TYPE_UI, UI_SETTING_SHOW_ACTION_BAR))
+            end,
+            dontSave = true,
+            callback = function(element, subKey, oldValue, value)
+                if value ~= oldValue then
+                    SetSetting(SETTING_TYPE_UI, UI_SETTING_SHOW_ACTION_BAR, tostring(value))
+                end
+            end,
+        },
+        {
+            type = ZO_HUD_EDITOR_OPTION_TYPES.BOOLEAN,
+            name = GetString(SI_INTERFACE_OPTIONS_ACTION_BAR_TIMERS),
+            tooltipText = GetString(SI_INTERFACE_OPTIONS_ACTION_BAR_TIMERS_TOOLTIP),
+            key = "Timers",
+            defaultValue = function()
+                return GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_SHOW_ACTION_BAR_TIMERS)
+            end,
+            enabled = function()
+                return tonumber(GetSetting(SETTING_TYPE_UI, UI_SETTING_SHOW_ACTION_BAR)) ~= ACTION_BAR_SETTING_CHOICE_OFF
+            end,
+            dontSave = true,
+            callback = function(element, subKey, oldValue, value)
+                if value ~= oldValue then
+                    SetSetting(SETTING_TYPE_UI, UI_SETTING_SHOW_ACTION_BAR_TIMERS, tostring(value))
+                end
+            end,
+        },
+        {
+            type = ZO_HUD_EDITOR_OPTION_TYPES.BOOLEAN,
+            name = GetString(SI_INTERFACE_OPTIONS_ACTION_BAR_BACK_ROW),
+            tooltipText = GetString(SI_INTERFACE_OPTIONS_ACTION_BAR_BACK_ROW_TOOLTIP),
+            key = "BackBar",
+            defaultValue = function()
+                return GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_SHOW_ACTION_BAR_BACK_ROW)
+            end,
+            enabled = function()
+                return tonumber(GetSetting(SETTING_TYPE_UI, UI_SETTING_SHOW_ACTION_BAR)) ~= ACTION_BAR_SETTING_CHOICE_OFF
+            end,
+            dontSave = true,
+            callback = function(element, subKey, oldValue, value)
+                if value ~= oldValue then
+                    SetSetting(SETTING_TYPE_UI, UI_SETTING_SHOW_ACTION_BAR_BACK_ROW, tostring(value))
+                end
+            end,
+        },
+        {
+            type = ZO_HUD_EDITOR_OPTION_TYPES.BOOLEAN,
+            name = GetString(SI_INTERFACE_OPTIONS_ULTIMATE_NUMBER),
+            tooltipText = GetString(SI_INTERFACE_OPTIONS_ULTIMATE_NUMBER_TOOLTIP),
+            key = "Ultimate",
+            defaultValue = function()
+                return GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_ULTIMATE_NUMBER)
+            end,
+            dontSave = true,
+            callback = function(element, subKey, oldValue, value)
+                if value ~= oldValue then
+                    SetSetting(SETTING_TYPE_UI, UI_SETTING_ULTIMATE_NUMBER, tostring(value))
+                end
+            end,
+        }
+    }
+
+    local elementName = GetString(SI_HUD_EDITOR_ACTION_BAR)
+    HUD_MANAGER:RegisterKeyboardElement(control, elementName, { defaultAnchor = KEYBOARD_CONSTANTS.anchor }, ACTION_BAR_OPTIONS)
+    HUD_MANAGER:RegisterGamepadElement(control, elementName, { defaultAnchor = GAMEPAD_CONSTANTS.anchor }, ACTION_BAR_OPTIONS)
 end

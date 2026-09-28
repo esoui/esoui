@@ -203,6 +203,7 @@ local pregameStates =
         end,
     },
 
+    --This is specifically for the pregame EULA. Other legal docs will show later if necessary
     ["ShowEULA"] =
     {
         ShouldAdvance = function()
@@ -506,4 +507,48 @@ local pregameStates =
 
 }
 
+local legalDocPregameStates =
+{
+    ["LegalAgreements"] =
+    {
+        ShouldAdvance = function()
+            return false
+        end,
+
+        OnEnter = function()
+            LEGAL_AGREEMENT_SCREEN_GAMEPAD:ShowFetchedDocs()
+        end,
+
+        OnExit = function()
+        end,
+
+        GetStateTransitionData = function()
+            return "AcceptLegalDocs"
+        end,
+    },
+
+    ["AcceptLegalDocs"] =
+    {
+        ShouldAdvance = function()
+            return false
+        end,
+
+        OnEnter = function()
+            --TODO Legal Docs: This is currently kind of janky in that we are using this for all login types (not just linked login), but it works, so we're leaving it for now
+            CREATE_LINK_LOADING_SCREEN_GAMEPAD:Show("AccountLogin", AcceptLegalDocs, GetString(SI_GAMEPAD_PREGAME_LOADING))
+        end,
+
+        OnExit = function()
+        end,
+
+        GetStateTransitionData = function()
+            return "NoCreateLinkAccountLoading"
+        end,
+    },
+}
+
 ZO_PregameStateManager_AddGamepadStates(pregameStates)
+
+if GetPlatformServiceType() ~= PLATFORM_SERVICE_TYPE_DMM then
+    ZO_PregameStateManager_AddGamepadStates(legalDocPregameStates)
+end

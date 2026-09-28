@@ -86,7 +86,7 @@ function ZO_ItemPreviewType:Apply(variationIndex)
 end
 
 
-function ZO_ItemPreviewType:ApplyAction(actionIndex)
+function ZO_ItemPreviewType:ApplyAction(variationIndex, actionIndex)
     --Can be overridden
 end
 
@@ -126,8 +126,8 @@ function ZO_ItemPreviewType_MarketProduct:Apply(variationIndex)
     PreviewMarketProduct(self.marketProductId, variationIndex)
 end
 
-function ZO_ItemPreviewType_MarketProduct:ApplyAction(actionIndex)
-    PreviewMarketProductCollectibleAction(self.marketProductId, actionIndex)
+function ZO_ItemPreviewType_MarketProduct:ApplyAction(variationIndex, actionIndex)
+    PreviewMarketProductCollectibleAction(self.marketProductId, variationIndex, actionIndex)
 end
 
 function ZO_ItemPreviewType_MarketProduct:GetNumVariations()
@@ -163,6 +163,10 @@ function ZO_ItemPreviewType_FurnitureMarketProduct:Apply(variationIndex)
     PreviewFurnitureMarketProduct(self.marketProductId, variationIndex)
 end
 
+function ZO_ItemPreviewType_FurnitureMarketProduct:ApplyAction(variationIndex, actionIndex)
+    PreviewFurnitureMarketProductAction(self.marketProductId, variationIndex, actionIndex)
+end
+
 -- Collectible As Furniture
 
 ZO_ItemPreviewType_CollectibleAsFurniture = ZO_ItemPreviewType:Subclass()
@@ -183,12 +187,24 @@ function ZO_ItemPreviewType_CollectibleAsFurniture:Apply(variationIndex)
     PreviewCollectibleAsFurniture(self.collectibleId, variationIndex)
 end
 
+function ZO_ItemPreviewType_CollectibleAsFurniture:ApplyAction(variationIndex, actionIndex)
+    PreviewCollectibleAction(self.collectibleId, variationIndex, actionIndex)
+end
+
 function ZO_ItemPreviewType_CollectibleAsFurniture:GetNumVariations()
     return GetNumCollectibleAsFurniturePreviewVariations(self.collectibleId)
 end
 
 function ZO_ItemPreviewType_CollectibleAsFurniture:GetVariationName(variationIndex)
     return GetCollectibleAsFurniturePreviewVariationDisplayName(self.collectibleId, variationIndex)
+end
+
+function ZO_ItemPreviewType_CollectibleAsFurniture:GetNumActions(variationIndex)
+    return GetNumCollectibleAsFurniturePreviewActions(self.collectibleId, variationIndex)
+end
+
+function ZO_ItemPreviewType_CollectibleAsFurniture:GetActionName(variationIndex, actionIndex)
+    return GetCollectibleAsFurniturePreviewActionDisplayName(self.collectibleId, variationIndex, actionIndex)
 end
 
 -- Placed Furniture
@@ -211,12 +227,24 @@ function ZO_ItemPreviewType_PlacedFurniture:Apply(variationIndex)
     PreviewPlacedFurniture(self.furnitureId, variationIndex)
 end
 
+function ZO_ItemPreviewType_PlacedFurniture:ApplyAction(variationIndex, actionIndex)
+    PreviewPlacedFurnitureAction(self.furnitureId, variationIndex, actionIndex)
+end
+
 function ZO_ItemPreviewType_PlacedFurniture:GetNumVariations()
     return GetNumPlacedFurniturePreviewVariations(self.furnitureId)
 end
 
 function ZO_ItemPreviewType_PlacedFurniture:GetVariationName(variationIndex)
     return GetPlacedFurniturePreviewVariationDisplayName(self.furnitureId, variationIndex)
+end
+
+function ZO_ItemPreviewType_PlacedFurniture:GetNumActions(variationIndex)
+    return GetNumPlacedFurniturePreviewActions(self.furnitureId, variationIndex)
+end
+
+function ZO_ItemPreviewType_PlacedFurniture:GetActionName(variationIndex, actionIndex)
+    return GetPlacedFurniturePreviewActionDisplayName(self.furnitureId, variationIndex, actionIndex)
 end
 
 -- Provisioner Item as Furniture
@@ -241,6 +269,10 @@ function ZO_ItemPreviewType_ProvisionerItemAsFurniture:Apply(variationIndex)
     PreviewProvisionerItemAsFurniture(self.recipeListIndex, self.recipeIndex, variationIndex)
 end
 
+function ZO_ItemPreviewType_ProvisionerItemAsFurniture:ApplyAction(variationIndex, actionIndex)
+    PreviewProvisionerItemAsFurnitureAction(self.recipeListIndex, self.recipeIndex, variationIndex, actionIndex)
+end
+
 function ZO_ItemPreviewType_ProvisionerItemAsFurniture:GetNumVariations()
     return GetNumProvisionerItemAsFurniturePreviewVariations(self.recipeListIndex, self.recipeIndex)
 end
@@ -249,7 +281,15 @@ function ZO_ItemPreviewType_ProvisionerItemAsFurniture:GetVariationName(variatio
     return GetProvisionerItemAsFurniturePreviewVariationDisplayName(self.recipeListIndex, self.recipeIndex, variationIndex)
 end
 
---Trading House Search Result
+function ZO_ItemPreviewType_ProvisionerItemAsFurniture:GetNumActions(variationIndex)
+    return GetNumProvisionerItemAsFurniturePreviewActions(self.recipeListIndex, self.recipeIndex, variationIndex)
+end
+
+function ZO_ItemPreviewType_ProvisionerItemAsFurniture:GetActionName(variationIndex, actionIndex)
+    return GetProvisionerItemAsFurniturePreviewActionDisplayName(self.recipeListIndex, self.recipeIndex, variationIndex, actionIndex)
+end
+
+-- Trading House Search Result
 
 ZO_ItemPreviewType_TradingHouseSearchResult = ZO_ItemPreviewType:Subclass()
 
@@ -269,8 +309,8 @@ function ZO_ItemPreviewType_TradingHouseSearchResult:Apply(variationIndex)
     PreviewTradingHouseSearchResultItem(self.tradingHouseIndex, variationIndex)
 end
 
-function ZO_ItemPreviewType_TradingHouseSearchResult:ApplyAction(actionIndex)
-    PreviewTradingHouseSearchResultItemCollectibleAction(self.tradingHouseIndex, actionIndex)
+function ZO_ItemPreviewType_TradingHouseSearchResult:ApplyAction(variationIndex, actionIndex)
+    PreviewTradingHouseSearchResultItemAction(self.tradingHouseIndex, variationIndex, actionIndex)
 end
 
 function ZO_ItemPreviewType_TradingHouseSearchResult:GetNumVariations()
@@ -282,11 +322,11 @@ function ZO_ItemPreviewType_TradingHouseSearchResult:GetVariationName(variationI
 end
 
 function ZO_ItemPreviewType_TradingHouseSearchResult:GetNumActions(variationIndex)
-    return GetNumTradingHouseSearchResultItemPreviewCollectibleActions(self.tradingHouseIndex, variationIndex)
+    return GetNumTradingHouseSearchResultItemPreviewActions(self.tradingHouseIndex, variationIndex)
 end
 
 function ZO_ItemPreviewType_TradingHouseSearchResult:GetActionName(variationIndex, actionIndex)
-    local previewActionDisplayName = GetTradingHouseSearchResultItemPreviewCollectibleActionDisplayName(self.tradingHouseIndex, variationIndex, actionIndex)
+    local previewActionDisplayName = GetTradingHouseSearchResultItemPreviewActionDisplayName(self.tradingHouseIndex, variationIndex, actionIndex)
     if previewActionDisplayName == "" then
         return tostring(actionIndex)
     else
@@ -314,8 +354,8 @@ function ZO_ItemPreviewType_StoreEntry:Apply(variationIndex)
     PreviewStoreEntry(self.storeEntryIndex, variationIndex)
 end
 
-function ZO_ItemPreviewType_StoreEntry:ApplyAction(actionIndex)
-    PreviewStoreEntryCollectibleAction(self.storeEntryIndex, actionIndex)
+function ZO_ItemPreviewType_StoreEntry:ApplyAction(variationIndex, actionIndex)
+    PreviewStoreEntryAction(self.storeEntryIndex, variationIndex, actionIndex)
 end
 
 function ZO_ItemPreviewType_StoreEntry:GetNumVariations()
@@ -327,11 +367,11 @@ function ZO_ItemPreviewType_StoreEntry:GetVariationName(variationIndex)
 end
 
 function ZO_ItemPreviewType_StoreEntry:GetNumActions(variationIndex)
-    return GetNumStoreEntryPreviewCollectibleActions(self.storeEntryIndex, variationIndex)
+    return GetNumStoreEntryPreviewActions(self.storeEntryIndex, variationIndex)
 end
 
 function ZO_ItemPreviewType_StoreEntry:GetActionName(variationIndex, actionIndex)
-    local previewActionDisplayName = GetStoreEntryPreviewCollectibleActionDisplayName(self.storeEntryIndex, variationIndex, actionIndex)
+    local previewActionDisplayName = GetStoreEntryPreviewActionDisplayName(self.storeEntryIndex, variationIndex, actionIndex)
     if previewActionDisplayName == "" then
         return tostring(actionIndex)
     else
@@ -385,8 +425,8 @@ function ZO_ItemPreviewType_Reward:Apply(variationIndex)
     PreviewReward(self.rewardId, variationIndex)
 end
 
-function ZO_ItemPreviewType_Reward:ApplyAction(actionIndex)
-    PreviewRewardCollectibleAction(self.rewardId, actionIndex)
+function ZO_ItemPreviewType_Reward:ApplyAction(variationIndex, actionIndex)
+    PreviewRewardAction(self.rewardId, variationIndex, actionIndex)
 end
 
 function ZO_ItemPreviewType_Reward:GetNumVariations()
@@ -398,14 +438,15 @@ function ZO_ItemPreviewType_Reward:GetVariationName(variationIndex)
 end
 
 function ZO_ItemPreviewType_Reward:GetNumActions(variationIndex)
-    return GetNumRewardPreviewCollectibleActions(self.rewardId, variationIndex)
+    return GetNumRewardPreviewActions(self.rewardId, variationIndex)
 end
 
 function ZO_ItemPreviewType_Reward:GetActionName(variationIndex, actionIndex)
-    return GetRewardPreviewCollectibleActionDisplayName(self.rewardId, variationIndex, actionIndex)
+    return GetRewardPreviewActionDisplayName(self.rewardId, variationIndex, actionIndex)
 end
 
 -- Inventory Item
+
 ZO_ItemPreviewType_InventoryItem = ZO_ItemPreviewType:Subclass()
 
 function ZO_ItemPreviewType_InventoryItem:SetStaticParameters(bag, slot)
@@ -426,8 +467,8 @@ function ZO_ItemPreviewType_InventoryItem:Apply(variationIndex)
     PreviewInventoryItem(self.bag, self.slot, variationIndex)
 end
 
-function ZO_ItemPreviewType_InventoryItem:ApplyAction(actionIndex)
-    PreviewInventoryItemCollectibleAction(self.bag, self.slot, actionIndex)
+function ZO_ItemPreviewType_InventoryItem:ApplyAction(variationIndex, actionIndex)
+    PreviewInventoryItemAction(self.bag, self.slot, variationIndex, actionIndex)
 end
 
 function ZO_ItemPreviewType_InventoryItem:GetNumVariations()
@@ -439,11 +480,11 @@ function ZO_ItemPreviewType_InventoryItem:GetVariationName(variationIndex)
 end
 
 function ZO_ItemPreviewType_InventoryItem:GetNumActions(variationIndex)
-    return GetNumInventoryItemPreviewCollectibleActions(self.bag, self.slot, variationIndex)
+    return GetNumInventoryItemPreviewActions(self.bag, self.slot, variationIndex)
 end
 
 function ZO_ItemPreviewType_InventoryItem:GetActionName(variationIndex, actionIndex)
-    return GetInventoryItemPreviewCollectibleActionDisplayName(self.bag, self.slot, variationIndex, actionIndex)
+    return GetInventoryItemPreviewActionDisplayName(self.bag, self.slot, variationIndex, actionIndex)
 end
 
 -- Collectible
@@ -466,8 +507,8 @@ function ZO_ItemPreviewType_Collectible:Apply(variationIndex)
     PreviewCollectible(self.collectibleId, variationIndex)
 end
 
-function ZO_ItemPreviewType_Collectible:ApplyAction(actionIndex)
-    PreviewCollectibleAction(self.collectibleId, actionIndex)
+function ZO_ItemPreviewType_Collectible:ApplyAction(variationIndex, actionIndex)
+    PreviewCollectibleAction(self.collectibleId, variationIndex, actionIndex)
 end
 
 function ZO_ItemPreviewType_Collectible:GetNumVariations()
@@ -829,7 +870,18 @@ function ZO_ItemPreview_Shared:Apply()
     self.previewAtMS = nil
     if self.currentPreviewTypeObject then
         self.currentPreviewTypeObject:Apply(self.previewVariationIndex)
-        self.currentPreviewTypeObject:ApplyAction(self.previewActionIndex)
+
+        if self.currentPreviewTypeObject:GetNumActions(self.previewVariationIndex) > 0 then
+            self.currentPreviewTypeObject:ApplyAction(self.previewVariationIndex, self.previewActionIndex)
+        end
+
+        if not self:AreVariationControlsHidden() then
+            self:SetupVariationControls()
+        end
+
+        if not self:AreActionControlsHidden() then
+            self:SetupActionCarousel()
+        end
     end
     self.lastSetChangeTime = GetFrameTimeMilliseconds()
     ApplyChangesToPreviewCollectionShown()
@@ -1021,11 +1073,19 @@ function ZO_ItemPreview_Shared:SetInteractionCameraPreviewEnabled(enabled, frami
     end
 end
 
+function ZO_ItemPreview_Shared:AreVariationControlsHidden()
+    -- optional override
+end
+
 function ZO_ItemPreview_Shared:SetVariationControlsHidden(shouldHide)
     -- optional override
 end
 
 function ZO_ItemPreview_Shared:SetVariationLabel(variationName)
+    -- optional override
+end
+
+function ZO_ItemPreview_Shared:AreActionControlsHidden()
     -- optional override
 end
 

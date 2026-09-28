@@ -24,7 +24,7 @@ function CampaignEmperor_Gamepad:Initialize(control)
     self.scrollKeyDown = control:GetNamedChild("ScrollKeyDown")
     ZO_Scroll_Gamepad_SetScrollIndicatorSide(self.scrollIndicator, ZO_SharedGamepadNavQuadrant_2_3_Background, RIGHT)
 
-    function OnInputChanged()
+    local function OnInputChanged()
         local gamepadInput = WasLastInputGamepad()
         if not self.scrollIndicator:IsHidden() then
             if not gamepadInput then

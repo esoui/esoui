@@ -1,5 +1,4 @@
-
-
+-- TODO Crossplay: move away from using this function
 function ZO_FormatUserFacingDisplayName(name)
     return ZO_IsConsoleOrGameCoreUI() and UndecorateDisplayName(name) or name
 end
@@ -12,12 +11,12 @@ do
         if name ~= "" then
             if IsInGamepadPreferredMode() then
                 return zo_iconTextFormat(CHARACTER_NAME_ICON, CHARACTER_NAME_ICON_SIZE, CHARACTER_NAME_ICON_SIZE, name)
-            else
-                return name
             end
-        else
-            return ""
+
+            return name
         end
+
+        return ""
     end
 end
 
@@ -32,6 +31,29 @@ end
 internalassert(UI_PLATFORM_MAX_VALUE == ACCOUNT_LABEL_MAX_VALUE, "There should be a platform account label for every platform")
 function ZO_GetPlatformAccountLabel()
     return GetString("SI_PLATFORMACCOUNTLABEL", GetUIPlatform())
+end
+
+do
+    internalassert(UI_PLATFORM_MAX_VALUE == 4, "Check if new platform requires icon")
+    local ICONS =
+    {
+        [UI_PLATFORM_XBOX] = "EsoUI/Art/Contacts/Gamepad/gp_social_xboxIcon.dds",
+        [UI_PLATFORM_PS4] = "EsoUI/Art/Contacts/Gamepad/gp_social_playstationIcon.dds",
+        [UI_PLATFORM_PS5] = "EsoUI/Art/Contacts/Gamepad/gp_social_playstationIcon.dds",
+    }
+
+    function ZO_GetPlatformDisplayNameIcon()
+        return ICONS[GetUIPlatform()]
+    end
+end
+
+function ZO_FormatPlatformDisplayName(displayName)
+    local platformIcon = ZO_GetPlatformDisplayNameIcon()
+    if platformIcon then
+        return string.format("%s %s", zo_iconFormat(platformIcon, "90%", "90%"), displayName)
+    end
+
+    return displayName
 end
 
 internalassert(PLATFORM_STORE_LABEL_MAX_VALUE == PLATFORM_SERVICE_TYPE_MAX_VALUE, "There should be a platform store label for every platform service")

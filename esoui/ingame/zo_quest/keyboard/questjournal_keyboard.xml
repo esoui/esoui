@@ -14,7 +14,7 @@
                             buttonTemplate = "ZO_MenuBarTooltipButton",
                             normalSize = 48,
                             downSize = 52,
-                            buttonPadding = 0,
+                            buttonPadding = 10,
                             animationDuration = 180,
                         }
                         ZO_MenuBar_SetData(self, barData)

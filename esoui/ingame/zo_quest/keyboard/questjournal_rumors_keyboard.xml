@@ -5,6 +5,12 @@
             <OnMouseUp>
                 ZO_TreeEntry_OnMouseUp(self, upInside)
             </OnMouseUp>
+            <Controls>
+                <Texture name="$(parent)StatusIcon" inherits="ZO_MultiIcon">
+                    <Dimensions x="24" y="24"/>
+                    <Anchor point="RIGHT" relativePoint="LEFT" offsetX="-3"/>
+                </Texture>
+            </Controls>
         </Label>
         <Control name="ZO_QuestJournal_RumorListEntry" inherits="ZO_ListEntry_BackdropAndHighlight_Template" mouseEnabled="true" virtual="true">
             <Dimensions x="534" y="ZO_QUEST_JOURNAL_RUMOR_ENTRY_HEIGHT_KEYBOARD"/>
@@ -22,6 +28,10 @@
                     <Anchor point="LEFT" offsetX="60"/>
                     <Anchor point="RIGHT" offsetX="-60"/>
                 </Label>
+                <Texture name="$(parent)StatusIcon" inherits="ZO_MultiIcon">
+                    <Dimensions x="24" y="24"/>
+                    <Anchor point="RIGHT" relativeTo="$(parent)Name" relativePoint="LEFT" offsetX="-3"/>
+                </Texture>
             </Controls>
         </Control>
         <Control name="ZO_QuestJournal_RumorClueEntry" mouseEnabled="true" resizeToFitDescendents="true" virtual="true">

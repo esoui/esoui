@@ -1,0 +1,27 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_GenericSelectorEmptyItem_Gamepad" virtual="true"/>
+        <Control name="ZO_GenericSelectorItem_Gamepad" inherits="ZO_GenericSelectorItem_Shared" virtual="true">
+            <Dimensions x="ZO_GENERIC_SELECTOR_ITEM_GRID_ENTRY_DIMENSIONS_GAMEPAD_X" y="ZO_GENERIC_SELECTOR_ITEM_GRID_ENTRY_DIMENSIONS_GAMEPAD_Y"/>
+            <Controls>
+                <Label name="$(parent)Name" override="true" font="ZoFontGamepad36">
+                    <Anchor point="CENTER" relativePoint="BOTTOM" offsetY="-45"/>
+                </Label>
+            </Controls>
+        </Control>
+        <TopLevelControl name="ZO_GenericSelector_GamepadTL" inherits="ZO_GenericSelector_SharedTL">
+            <Anchor point="CENTER" relativeTo="ZO_SharedGamepadNavQuadrantSpace_1_Left_To_4_Left" offsetY="-10"/>
+            <OnInitialized>
+                ZO_GenericSelector_Gamepad.OnControlInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Backdrop name="$(parent)BG" override="true" inherits="ZO_DefaultBackdrop_Gamepad" alpha="1" edgeColor="INTERFACE_COLOR_TYPE_GENERAL:INTERFACE_GENERAL_COLOR_ENABLED" centerColor="INTERFACE_COLOR_TYPE_GENERAL:INTERFACE_GENERAL_COLOR_ENABLED"/>
+                <Label name="$(parent)Title" override="true" font="ZoFontGamepadBold48"/>
+                <Control name="$(parent)List" override="true" inherits="ZO_GridScrollList_CenteredResize_Gamepad">
+                    <Anchor point="TOP" relativeTo="$(parent)Title" relativePoint="BOTTOM" offsetX="ZO_GENERIC_SELECTOR_GRID_LIST_OFFSET_X" offsetY="ZO_GENERIC_SELECTOR_GRID_LIST_OFFSET_Y"/>
+                    <DimensionConstraints maxX="ZO_GENERIC_SELECTOR_GRID_LIST_MAX_WIDTH_GAMEPAD" maxY="1030" minY="1"/>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

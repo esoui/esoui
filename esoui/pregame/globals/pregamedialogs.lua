@@ -1566,7 +1566,9 @@ ESO_Dialogs["EULA_DECLINED"] =
             text = SI_DIALOG_CLOSE,
             keybind = "DIALOG_NEGATIVE",
             callback = function()
-                EULA_SCREEN:ShowNextEULA()
+                if ZO_PregameStateManager_GetCurrentState() ~= "AccountLogin" then
+                    ZO_PregameStateManager_SetState("AccountLogin")
+                end
             end,
         },
     }
@@ -1676,6 +1678,65 @@ ESO_Dialogs["ADDITIONAL_CONTENT_PURCHASE_CONFIRMATION"] =
             keybind = "DIALOG_NEGATIVE",
             callback = function(dialog)
                 ZO_Dialogs_ShowPlatformDialog("ADDITIONAL_CONTENT_ENTITLEMENT_WAIT")
+            end,
+        },
+    }
+}
+
+ESO_Dialogs["LEGAL_AGREEMENT_UPDATED_ACKNOWLEDGE_GAMEPAD"] =
+{
+    mustChoose = true,
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    mainText = 
+    {
+        text = SI_LEGAL_AGREEMENT_UPDATED_ACKNOWLEDGE_DIALOG_BODY,
+    },
+    buttons =
+    {
+        {
+            text = SI_LEGAL_AGREEMENT_UPDATED_ACKNOWLEDGE,
+            keybind = "DIALOG_PRIMARY",
+            callback = function(dialog)
+                ZO_PregameStateManager_AdvanceState()
+            end,
+        },
+
+        {
+            text = SI_LEGAL_AGREEMENT_UPDATED_CANCEL,
+            keybind = "DIALOG_NEGATIVE",
+            callback = function(dialog)
+                PREGAME_INITIAL_SCREEN_GAMEPAD:ShowError(GetString(SI_LEGAL_DECLINE_HEADER), GetString(SI_LEGAL_DECLINE_PROMPT))
+            end,
+        },
+    }
+}
+
+ESO_Dialogs["LEGAL_AGREEMENT_UPDATED_ACKNOWLEDGE_KEYBOARD"] =
+{
+    canQueue = true,
+    mustChoose = true,
+    mainText = 
+    {
+        text = SI_LEGAL_AGREEMENT_UPDATED_ACKNOWLEDGE_DIALOG_BODY,
+    },
+    buttons =
+    {
+        {
+            text = SI_LEGAL_AGREEMENT_UPDATED_ACKNOWLEDGE,
+            keybind = "DIALOG_PRIMARY",
+            callback = function(dialog)
+                ZO_PregameStateManager_AdvanceState()
+            end,
+        },
+
+        {
+            text = SI_LEGAL_AGREEMENT_UPDATED_CANCEL,
+            keybind = "DIALOG_NEGATIVE",
+            callback = function(dialog)
+                ZO_Dialogs_ShowDialog("EULA_DECLINED")
             end,
         },
     }

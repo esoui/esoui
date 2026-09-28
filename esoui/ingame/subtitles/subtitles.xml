@@ -10,7 +10,13 @@
         <!-- Templates -->
         <Label name="ZO_Subtitles_Text_Keyboard_Template" font="ZoFontSubtitleText" virtual="true"/>
         <Label name="ZO_Subtitles_Text_Gamepad_Template" font="ZoFontGamepad42" virtual="true"/>
-        <TopLevelControl name="ZO_Subtitles" layer="BACKGROUND" tier="LOW" level="1">
+        <Control name="ZO_Subtitles_Text_HUDElementRef_Keyboard_Template" virtual="true">
+            <Dimensions y="36"/>
+        </Control>
+        <Control name="ZO_Subtitles_Text_HUDElementRef_Gamepad_Template" virtual="true">
+            <Dimensions y="50"/>
+        </Control>
+        <TopLevelControl name="ZO_Subtitles" inherits="ZO_HUDManager_Element" layer="BACKGROUND" tier="LOW" level="1">
             <Anchor point="BOTTOM" relativeTo="ZO_PlayerToPlayerAreaPromptContainerTarget" relativePoint="TOP"/>
             <OnInitialized>
                 ZO_Subtitles_OnInitialize(self)
@@ -40,6 +46,10 @@
                         </Texture>
                     </Controls>
                 </Label>
+                <Control name="$(parent)HUDElementRef" override="true">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Text" relativePoint="BOTTOMLEFT"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Text" relativePoint="BOTTOMRIGHT"/>
+                </Control>
             </Controls>
         </TopLevelControl>
     </Controls>

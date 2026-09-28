@@ -205,7 +205,7 @@ function ZO_CompanionCollectionBook_Keyboard:BuildCategories()
     local function AddCategoryByCategoryIndex(categoryIndex)
         local categoryData = ZO_COLLECTIBLE_DATA_MANAGER:GetCategoryDataByIndicies(categoryIndex)
         --Some categories are handled by specialized scenes.
-        if categoryData:IsStandardCategory() and categoryData:HasAnyCompanionUsableCollectibles() then
+        if categoryData:IsStandardCategory() and categoryData:HasAnyActiveCompanionUsableCollectibles() then
             self:AddTopLevelCategory(categoryData)
         end
     end
@@ -216,7 +216,7 @@ function ZO_CompanionCollectionBook_Keyboard:BuildCategories()
             AddCategoryByCategoryIndex(categoryIndex)
         end
     else
-        for categoryIndex, _ in ZO_COLLECTIBLE_DATA_MANAGER:CategoryIterator({ ZO_CollectibleCategoryData.HasShownCollectiblesInCollection, ZO_CollectibleCategoryData.HasAnyCompanionUsableCollectibles }) do
+        for categoryIndex, _ in ZO_COLLECTIBLE_DATA_MANAGER:CategoryIterator({ ZO_CollectibleCategoryData.HasShownCollectiblesInCollection, ZO_CollectibleCategoryData.HasAnyActiveCompanionUsableCollectibles }) do
             AddCategoryByCategoryIndex(categoryIndex)
         end
     end
@@ -234,8 +234,7 @@ do
             local nodeTemplate = hasChildren and "ZO_CompanionCollectionsBook_StatusIconHeader" or "ZO_CompanionCollectionsBook_StatusIconChildlessHeader"
 
             local parentNode = self:AddCategory(nodeTemplate, categoryData)
-
-            for _, subcategoryData in categoryData:SubcategoryIterator({ ZO_CollectibleCategoryData.HasShownCollectiblesInCollection, ZO_CollectibleCategoryData.HasAnyCompanionUsableCollectibles }) do
+            for _, subcategoryData in categoryData:SubcategoryIterator({ ZO_CollectibleCategoryData.HasShownCollectiblesInCollection, ZO_CollectibleCategoryData.HasAnyActiveCompanionUsableCollectibles }) do
                 self:AddCategory("ZO_CompanionCollectionsBook_SubCategory", subcategoryData, parentNode)
             end
         else
@@ -247,7 +246,7 @@ do
             for subcategoryIndex, _ in pairs(searchResults[categoryIndex]) do
                 if subcategoryIndex ~= ZO_COLLECTIONS_SEARCH_ROOT then
                     local subcategoryData = ZO_COLLECTIBLE_DATA_MANAGER:GetCategoryDataByIndicies(categoryIndex, subcategoryIndex)
-                    if subcategoryData:HasAnyCompanionUsableCollectibles() then
+                    if subcategoryData:HasAnyActiveCompanionUsableCollectibles() then
                         if not parentNode then
                             parentNode = self:AddCategory(nodeTemplate, categoryData)
                         end
@@ -297,7 +296,7 @@ local function GetCollectiblesDataFromCategory(categoryData, sorted)
 
     local iterator = sorted and ZO_CollectibleCategoryData.SortedCollectibleIterator or ZO_CollectibleCategoryData.CollectibleIterator
     for _, collectibleData in iterator(categoryData, { ZO_CollectibleData.IsShownInCollection }) do
-        if (not searchResultsSubcategory or searchResultsSubcategory[collectibleData:GetIndex()]) and collectibleData:IsCollectibleCategoryCompanionUsable() then
+        if (not searchResultsSubcategory or searchResultsSubcategory[collectibleData:GetIndex()]) and collectibleData:IsCollectibleCategoryActiveCompanionUsable() then
             table.insert(collectiblesData, collectibleData)
         end
     end
@@ -420,7 +419,7 @@ function ZO_CompanionCollectionBook_Keyboard:UpdateCollection()
             for subcategoryIndex, _ in pairs(searchResults[categoryIndex]) do
                 if subcategoryIndex ~= ZO_COLLECTIONS_SEARCH_ROOT then
                     local subcategoryData = ZO_COLLECTIBLE_DATA_MANAGER:GetCategoryDataByIndicies(categoryIndex, subcategoryIndex)
-                    if subcategoryData:HasAnyCompanionUsableCollectibles() then
+                    if subcategoryData:HasAnyActiveCompanionUsableCollectibles() then
                         searchResultsHaveCompanionUsableCollectibles = true
                         break
                     end

@@ -16,7 +16,7 @@ local pregameStates =
 
         GetStateTransitionData = function()
             if not DoesPlatformSelectServer() then
-                return "ShowEULA"
+                return "WaitForPreloginWorld"
             else
                 return "ServerSelectIntro"
             end
@@ -35,24 +35,6 @@ local pregameStates =
         OnExit = function()
             TrySaveCharacterListOrder()
         end
-    },
-
-    ["ShowEULA"] =
-    {
-        ShouldAdvance = function()
-            return not ZO_ShouldShowEULAScreen()
-        end,
-
-        OnEnter = function()
-            SCENE_MANAGER:Show("eula")
-        end,
-
-        OnExit = function()
-        end,
-
-        GetStateTransitionData = function()
-            return "WaitForPreloginWorld"
-        end,
     },
 
     ["WaitForPreloginWorld"] =
@@ -153,12 +135,54 @@ local pregameStates =
         end,
 
         GetStateTransitionData = function()
-            return "ShowEULA"
+            return "WaitForPreloginWorld"
         end
     },
 }
 
+local legalDocPregameStates =
+{
+    ["LegalAgreements"] =
+    {
+        ShouldAdvance = function()
+            return false
+        end,
+
+        OnEnter = function()
+            EULA_SCREEN:ShowFetchedDocs()
+        end,
+
+        OnExit = function()
+        end,
+
+        GetStateTransitionData = function()
+            return "AcceptLegalDocs"
+        end,
+    },
+
+    ["AcceptLegalDocs"] =
+    {
+        ShouldAdvance = function()
+            return false
+        end,
+
+        OnEnter = function()
+            AcceptLegalDocs()
+            if IsUsingLinkedLogin() then
+                ZO_Dialogs_ShowDialog("LINKED_LOGIN_KEYBOARD")
+            end
+        end,
+
+        OnExit = function()
+        end,
+    },
+}
+
 ZO_PregameStateManager_AddKeyboardStates(pregameStates)
+
+if GetPlatformServiceType() ~= PLATFORM_SERVICE_TYPE_DMM then
+   ZO_PregameStateManager_AddKeyboardStates(legalDocPregameStates)
+end
 
 --[[
 Various PC-only functions.

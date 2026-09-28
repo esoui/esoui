@@ -5,36 +5,10 @@ ZO_SharedTradeWindow = ZO_InitializingObject:Subclass()
 --Event Handlers and Helpers
 --
 
---You just got invited to trade.
-local function OnTradeWindowInviteConsidering(self, eventCode, inviterCharacterName, inviterDisplayName)
-    TRADE_WINDOW.state = TRADE_STATE_INVITE_CONSIDERING
-    TRADE_WINDOW.target = ZO_GetPrimaryPlayerName(inviterDisplayName, inviterCharacterName)
-    TRADE_WINDOW.partnerUndecoratedDisplayName = UndecorateDisplayName(inviterDisplayName)
-end
-
---You were notified that your target is considering your trade offer.
-local function OnTradeWindowInviteWaiting(self, eventCode, inviteeCharacterName, inviteeDisplayName)
-    TRADE_WINDOW.target = ZO_GetPrimaryPlayerName(inviteeDisplayName, inviteeCharacterName)
-    TRADE_WINDOW.state = TRADE_STATE_INVITE_WAITING
-    TRADE_WINDOW.partnerUndecoratedDisplayName = UndecorateDisplayName(inviteeDisplayName)
-end
-
---Either you or they declined an offer
-local function OnTradeWindowInviteDeclined(self, eventCode)
-    --reset
-    TRADE_WINDOW.state = TRADE_STATE_IDLE    
-end
-
---Either you or they canceled the invite
-local function OnTradeWindowInviteCanceled(self, eventCode)
-    --You canceled your trade invite
-    TRADE_WINDOW.state = TRADE_STATE_IDLE    
-end
-
 local function ShowTradeWindow(self)
     self:PrepareWindowForNewTrade()
     --reset state info
-    TRADE_WINDOW.state = TRADE_STATE_TRADING
+    TRADE_WINDOW:SetState(TRADE_STATE_TRADING)
     self.confirm[TRADE_ME] = TRADE_CONFIRM_EDIT
     self.confirm[TRADE_THEM] = TRADE_CONFIRM_EDIT
 
@@ -57,7 +31,7 @@ function TradeWindowDebugShow()
 
     self:PrepareWindowForNewTrade()
     --reset state info
-    TRADE_WINDOW.state = TRADE_STATE_TRADING
+    TRADE_WINDOW:SetState(TRADE_STATE_TRADING)
     self.confirm[TRADE_ME] = TRADE_CONFIRM_EDIT
     self.confirm[TRADE_THEM] = TRADE_CONFIRM_EDIT
 
@@ -87,7 +61,7 @@ end
 local function OnTradeWindowCanceled(self, eventCode, who)
     if TRADE_WINDOW:IsTrading() then
         SYSTEMS:HideScene("trade")
-        TRADE_WINDOW.state = TRADE_STATE_IDLE
+        TRADE_WINDOW:SetState(TRADE_STATE_IDLE)
     end
 end
 
@@ -95,12 +69,12 @@ end
 local function OnPlayerDead(self, eventCode, who)
     if TRADE_WINDOW:IsTrading() then
         SYSTEMS:HideScene("trade")
-        TRADE_WINDOW.state = TRADE_STATE_IDLE
+        TRADE_WINDOW:SetState(TRADE_STATE_IDLE)
     end
 end
 
 function ZO_SharedTradeWindow.CloseTradeWindow()
-    TRADE_WINDOW.state = TRADE_STATE_IDLE
+    TRADE_WINDOW:SetState(TRADE_STATE_IDLE)
     SYSTEMS:HideScene("trade")
 end
 
@@ -201,10 +175,6 @@ end
 
 local EventCallbacks =
 {
-    [EVENT_TRADE_INVITE_CONSIDERING] = OnTradeWindowInviteConsidering,
-    [EVENT_TRADE_INVITE_WAITING] = OnTradeWindowInviteWaiting,
-    [EVENT_TRADE_INVITE_DECLINED] = OnTradeWindowInviteDeclined,
-    [EVENT_TRADE_INVITE_CANCELED] = OnTradeWindowInviteCanceled,
     [EVENT_TRADE_INVITE_ACCEPTED] = OnTradeWindowInviteAccepted,
     [EVENT_TRADE_MONEY_CHANGED] = OnTradeWindowMoneyChanged,
     [EVENT_TRADE_CANCELED] = OnTradeWindowCanceled,
@@ -225,7 +195,7 @@ local function ContextFilter(object, callback)
     return function(...)
         local target = SYSTEMS:GetObject("trade")
 
-        if  target == object then
+        if target == object then
             callback(object, ...)
         end
     end

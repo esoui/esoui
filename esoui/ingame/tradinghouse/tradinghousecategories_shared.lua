@@ -1,13 +1,7 @@
-ZO_TradingHouseSearchCategoryFeature_Shared = ZO_Object:Subclass()
-
-function ZO_TradingHouseSearchCategoryFeature_Shared:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
+ZO_TradingHouseSearchCategoryFeature_Shared = ZO_InitializingObject:Subclass()
 
 function ZO_TradingHouseSearchCategoryFeature_Shared:Initialize(...)
-    -- override me
+    -- can be overridden
 end
 
 function ZO_TradingHouseSearchCategoryFeature_Shared:SelectCategoryParams(categoryParams, subcategoryKey)
@@ -148,13 +142,7 @@ function ZO_TradingHouseSearchCategoryFeature_Shared:LoadFromItem(itemLink)
     end
 end
 
-ZO_TradingHouseCategory_Params = ZO_Object:Subclass()
-
-function ZO_TradingHouseCategory_Params:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
+ZO_TradingHouseCategory_Params = ZO_InitializingObject:Subclass()
 
 function ZO_TradingHouseCategory_Params:Initialize(key)
     self.key = key
@@ -1181,6 +1169,9 @@ do
         ITEM_TYPE_DISPLAY_CATEGORY_WEAPONS,
         ITEM_TYPE_DISPLAY_CATEGORY_ARMOR,
         ITEM_TYPE_DISPLAY_CATEGORY_JEWELRY,
+
+
+
     }
     local iconsForCompanionEquipmentType = {}
     local enumValuesForCompanionEquipmentType = {}
@@ -1286,11 +1277,30 @@ do
             search:SetFilter(TRADING_HOUSE_FILTER_TYPE_GAMEPLAY_ACTOR_CATEGORY, GAMEPLAY_ACTOR_CATEGORY_COMPANION)
         end
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         local APPLY_TO_SEARCH_FUNCTIONS =
         {
             [ITEM_TYPE_DISPLAY_CATEGORY_WEAPONS] = ApplyCompanionEquipmentWeaponsToSearch,
             [ITEM_TYPE_DISPLAY_CATEGORY_ARMOR] = ApplyCompanionEquipmentArmorToSearch,
             [ITEM_TYPE_DISPLAY_CATEGORY_JEWELRY] = ApplyCompanionEquipmentJewelryToSearch,
+
+
+
         }
 
         local FEATURE_KEYS =
@@ -1298,6 +1308,9 @@ do
             [ITEM_TYPE_DISPLAY_CATEGORY_WEAPONS] = "CompanionWeaponTraits",
             [ITEM_TYPE_DISPLAY_CATEGORY_ARMOR] = "CompanionArmorTraits",
             [ITEM_TYPE_DISPLAY_CATEGORY_JEWELRY] = "CompanionJewelryTraits",
+
+
+
         }
 
         local categoryParams = AddCategory(string.format("Companion%d", companionEquipmentDisplayCategory))
@@ -1539,6 +1552,10 @@ AddCompanionEquipmentCategory(ITEM_TYPE_DISPLAY_CATEGORY_WEAPONS)
 AddCompanionEquipmentCategory(ITEM_TYPE_DISPLAY_CATEGORY_ARMOR)
 AddCompanionEquipmentCategory(ITEM_TYPE_DISPLAY_CATEGORY_JEWELRY)
 
+
+
+
+
 -- Misc
 -- Misc does not have an "all" category
 AddMiscCategory(ITEMTYPE_SOUL_GEM)
@@ -1547,3 +1564,12 @@ AddMiscCategory(ITEMTYPE_TOOL)
 AddMiscCategory(ITEMTYPE_SIEGE)
 AddTrophyCategory()
 AddGuildTabardCategory()
+
+
+
+
+
+
+
+
+

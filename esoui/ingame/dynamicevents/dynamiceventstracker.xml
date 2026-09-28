@@ -1,30 +1,20 @@
 <GuiXml>
     <Controls>
-        <StatusBar name="ZO_DynamicEventsTracker_ProgressBar_Keyboard_Template" inherits="ZO_ArrowProgressBarWithBG" virtual="true">
-            <Anchor point="TOPLEFT" relativeTo="$(parent)SubLabel" relativePoint="BOTTOMLEFT"/>
-            <Dimensions x="180" y="24"/>
-            <Controls>
-                <Label name="$(parent)Progress" font="ZoFontWinH4"/>
-            </Controls>
-        </StatusBar>
-        <StatusBar name="ZO_DynamicEventsTracker_ProgressBar_Gamepad_Template" inherits="ZO_GamepadArrowProgressBarWithBGMedium" virtual="true">
-            <Anchor point="TOPRIGHT" relativeTo="$(parent)SubLabel" relativePoint="BOTTOMRIGHT"/>
-            <Dimensions x="200"/>
-        </StatusBar>
-        <TopLevelControl name="ZO_DynamicEventsTracker_TL" inherits="ZO_HUDTracker_Base_Template" hidden="false">
-            <Anchor point="TOPRIGHT" relativeTo="ZO_AdvZoneHUDTracker" relativePoint="BOTTOMRIGHT"/>
+        <Control name="ZO_DynamicEventsTracker_Template" inherits="ZO_HUDTracker_Base_Template" hidden="false" virtual="true">
             <OnInitialized>
                 ZO_DynamicEventsTracker.OnInitialized(self)
             </OnInitialized>
             <Controls>
                 <Control name="$(parent)Container" override="true">
                     <Controls>
-                        <StatusBar name="$(parent)ProgressBar" inherits="ZO_ProgressBarWithGloss_Template_Base"/>
+                        <StatusBar name="$(parent)ProgressBar" inherits="ZO_ProgressBarWithGloss_Template_Base">
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)SubLabel" relativePoint="BOTTOMRIGHT"/>
+                        </StatusBar>
                         <Label name="$(parent)TimerText" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED"/>
                         <Label name="$(parent)TimerLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED"/>
                     </Controls>
                 </Control>
             </Controls>
-        </TopLevelControl>
+        </Control>
     </Controls>
 </GuiXml>

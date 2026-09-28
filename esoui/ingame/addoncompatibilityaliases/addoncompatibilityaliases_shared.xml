@@ -1,5 +1,7 @@
 <GuiXml>
     <Controls>
         <!-- Put any XML aliases that we want to exist on both PC and Console here -->
+        <Control name="ZO_ConsolidatedSmithingSetCategory_Gamepad_Template" inherits="ZO_GamepadMenuEntryWithBarTemplate" virtual="true"/>
+        <Control name="ZO_ItemSetsBook_Summary_Gamepad" inherits="ZO_GamepadMenuEntryWithBarTemplate" virtual="true"/>
     </Controls>
 </GuiXml>

@@ -1,7 +1,7 @@
 ﻿<GuiXml>
     <Controls>
         <TopLevelControl name="ZO_HousingFurnitureRetrieveTo_TopLevel" hidden="true" resizeToFitDescendents="true">
-            <Anchor point="BOTTOM" offsetX="-300" offsetY="-150"/>
+            <Anchor point="TOPLEFT" offsetX="30" offsetY="30"/>
             <ResizeToFitPadding width="32" height="32"/>
             <OnInitialized>
                 ZO_HousingFurnitureRetrieveTo_Keyboard.OnControlInitialized(self)

@@ -11,9 +11,16 @@ panelBuilder:AddSetting({
 })
 
 panelBuilder:AddSetting({
-    controlName = "Options_Interface_PrimaryPlayerNameKeyboard",
+    controlName = "Options_Interface_PrimaryPlayerNamePC",
     settingType = SETTING_TYPE_UI,
-    settingId = UI_SETTING_PRIMARY_PLAYER_NAME_KEYBOARD,
+    settingId = UI_SETTING_PRIMARY_PLAYER_NAME_PC,
+    header = SI_INTERFACE_OPTIONS_HEADS_UP_DISPLAY,
+})
+
+panelBuilder:AddSetting({
+    controlName = "Options_Interface_PrimaryPlayerNameConsole",
+    settingType = SETTING_TYPE_UI,
+    settingId = UI_SETTING_PRIMARY_PLAYER_NAME_CONSOLE,
     header = SI_INTERFACE_OPTIONS_HEADS_UP_DISPLAY,
 })
 

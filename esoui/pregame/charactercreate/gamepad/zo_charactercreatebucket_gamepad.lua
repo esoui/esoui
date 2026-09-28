@@ -25,6 +25,10 @@ ZO_CHARACTER_CREATE_BUCKET_WINDOW_DATA_GAMEPAD =
             SetCharacterCameraZoomAmount(-1)
         end,
 
+        onActivateFn = function()
+            CharacterCreateQueueCurrentClassFx()
+        end,
+
         -- Controls for the tab
         controls =
         {
@@ -273,6 +277,18 @@ function ZO_CharacterCreateBucket_Gamepad:Collapse()
     end
 end
 
+function ZO_CharacterCreateBucket_Gamepad:Activate(onTargetDataChangedCallback)
+    local scrollChild = self:GetScrollChild()
+    scrollChild:SetOnTargetDataChangedCallback(onTargetDataChangedCallback)
+    scrollChild:Activate()
+    scrollChild:RefreshVisible()
+
+    local onActivateFn = self.windowData.onActivateFn
+    if onActivateFn then
+        onActivateFn()
+    end
+end
+
 --[[ Character Creation Bucket Manager ]]--
 
 -- order specified here is the order they will appear in game
@@ -353,9 +369,7 @@ function ZO_CharacterCreateBucketManager_Gamepad:Activate()
         self.active = true
         if self.currentBucket then
             self.currentBucket:Expand()
-            self.currentBucket:GetScrollChild():SetOnTargetDataChangedCallback(self.onTargetDataChangedCallback)
-            self.currentBucket:GetScrollChild():Activate()
-            self.currentBucket:GetScrollChild():RefreshVisible()
+            self.currentBucket:Activate(self.onTargetDataChangedCallback)
         end
     end
 end
@@ -402,9 +416,7 @@ function ZO_CharacterCreateBucketManager_Gamepad:SwitchBucketsInternal(bucketCat
         bucket:Expand()
         self.currentBucket = bucket
         if self.active then
-            self.currentBucket:GetScrollChild():SetOnTargetDataChangedCallback(self.onTargetDataChangedCallback)
-            self.currentBucket:GetScrollChild():Activate()
-            self.currentBucket:GetScrollChild():RefreshVisible()
+            self.currentBucket:Activate(self.onTargetDataChangedCallback)
         end
     end
 end

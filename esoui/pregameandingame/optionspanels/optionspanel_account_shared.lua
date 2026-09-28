@@ -74,7 +74,7 @@ local ZO_Panel_Account_ControlData =
             panel = SETTING_PANEL_ACCOUNT,
             text = SI_INTERFACE_OPTIONS_ACCOUNT_CHANGE_EMAIL,
             gamepadCustomTooltipFunction = function(tooltip, text)
-                GAMEPAD_TOOLTIPS:LayoutSettingAccountResendActivation(tooltip, HasActivatedEmail(), ZO_OptionsPanel_GetAccountEmail())
+                GAMEPAD_TOOLTIPS:LayoutSettingAccountChangeEmail(tooltip, ZO_OptionsPanel_GetAccountEmail())
             end,
             -- If this setting doesn't exist, we won't attempt to load it, which would mean
             -- OPTIONS_CUSTOM_SETTING_RESEND_EMAIL_ACTIVATION could never be able to show

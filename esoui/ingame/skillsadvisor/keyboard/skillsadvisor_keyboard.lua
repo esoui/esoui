@@ -46,7 +46,7 @@ function ZO_SkillsAdvisor_Keyboard:Initialize(control)
         end
     end)
 
-    function OnDataUpdated()
+    local function OnDataUpdated()
         if SKILLS_ADVISOR_FRAGMENT:GetState() ~= SCENE_FRAGMENT_HIDDEN then
             self:UpdateSkillsAdvisorBuildSelection()
         else

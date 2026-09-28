@@ -116,9 +116,9 @@ function ZO_GroupFinder_Keyboard:InitializeFragments()
     EVENT_MANAGER:RegisterForEvent("GroupFinder_Keyboard", EVENT_GROUP_FINDER_RESOLVE_GROUP_LISTING_APPLICATION_RESULT, OnRefreshApplication)
     EVENT_MANAGER:RegisterForEvent("GroupFinder_Keyboard", EVENT_GROUP_FINDER_REMOVE_GROUP_LISTING_APPLICATION, OnRefreshApplication)
 
-    function OnApplicationsListUpdated()
+    local function OnApplicationsListUpdated()
         self.createGroupListingContent:UpdateCreateEditButton()
-   end
+    end
 
     GROUP_FINDER_APPLICATIONS_LIST_MANAGER:RegisterCallback("ApplicationsListUpdated", OnApplicationsListUpdated)
 end
@@ -210,7 +210,7 @@ function ZO_GroupFinder_Keyboard:InitializeGroupFinderCategories()
         table.insert(categories, overview)
 
         for _, category in ipairs(self.categoryData) do
-            if ZO_Eval(category.visible) then
+            if ZO_EvalDefaultTrue(category.visible) then
                 table.insert(categories, category)
             end
         end

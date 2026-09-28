@@ -1,93 +1,118 @@
-local PAB_TEMPLATES = {
-    [COMBAT_MECHANIC_FLAGS_MAGICKA] = {
-        background = {
+local PAB_TEMPLATES =
+{
+    [COMBAT_MECHANIC_FLAGS_MAGICKA] =
+    {
+        background =
+        {
             Left = "ZO_PlayerAttributeBgLeftArrow",
             Right = "ZO_PlayerAttributeBgRight",
             Center = "ZO_PlayerAttributeBgCenter",
         },
-        frame = {
+        frame =
+        {
             Left = "ZO_PlayerAttributeFrameLeftArrow",
             Right = "ZO_PlayerAttributeFrameRight",
             Center = "ZO_PlayerAttributeFrameCenter",
         },
-        warner = {
+        warner =
+        {
             texture = "ZO_PlayerAttributeMagickaWarnerTexture",
             Left = "ZO_PlayerAttributeWarnerLeftArrow",
             Right = "ZO_PlayerAttributeWarnerRight",
             Center = "ZO_PlayerAttributeWarnerCenter",
         },
-        anchors = {
+        anchors =
+        {
             "ZO_PlayerAttributeBarAnchorLeft",
         },
     },
-    [COMBAT_MECHANIC_FLAGS_HEALTH] = {
-        background = {
+    [COMBAT_MECHANIC_FLAGS_HEALTH] =
+    {
+        background =
+        {
             Left = "ZO_PlayerAttributeBgLeftArrow",
             Right = "ZO_PlayerAttributeBgRightArrow",
             Center = "ZO_PlayerAttributeBgCenter",
             small = "ZO_PlayerAttributeBgSmallCenter",
         },
-        frame = {
+        frame =
+        {
             Left = "ZO_PlayerAttributeFrameLeftArrow",
             Right = "ZO_PlayerAttributeFrameRightArrow",
             Center = "ZO_PlayerAttributeFrameCenter",
             small = "ZO_PlayerAttributeFrameSmallCenter",
         },
-        warner = {
+        warner =
+        {
             texture = "ZO_PlayerAttributeHealthWarnerTexture",
             Left = "ZO_PlayerAttributeWarnerLeftArrow",
             Right = "ZO_PlayerAttributeWarnerRightArrow",
             Center = "ZO_PlayerAttributeWarnerCenter",
         },
-        anchors = {
+        anchors =
+        {
             "ZO_PlayerAttributeHealthBarAnchorLeft",
             "ZO_PlayerAttributeHealthBarAnchorRight",
         },
-        smallAnchors = {
+        smallAnchors =
+        {
             "ZO_PlayerAttributeHealthBarSmallAnchorLeft",
             "ZO_PlayerAttributeHealthBarSmallAnchorRight",
         },
     },
-    [COMBAT_MECHANIC_FLAGS_STAMINA] = {
-        background = {
+    [COMBAT_MECHANIC_FLAGS_STAMINA] =
+    {
+        background =
+        {
             Left = "ZO_PlayerAttributeBgLeft",
             Right = "ZO_PlayerAttributeBgRightArrow",
             Center = "ZO_PlayerAttributeBgCenter",
         },
-        frame = {
+        frame =
+        {
             Left = "ZO_PlayerAttributeFrameLeft",
             Right = "ZO_PlayerAttributeFrameRightArrow",
             Center = "ZO_PlayerAttributeFrameCenter",
         },
-        warner = {
+        warner =
+        {
             texture = "ZO_PlayerAttributeStaminaWarnerTexture",
             Left = "ZO_PlayerAttributeWarnerLeft",
             Right = "ZO_PlayerAttributeWarnerRightArrow",
             Center = "ZO_PlayerAttributeWarnerCenter",
         },
-        anchors = {
+        anchors =
+        {
             "ZO_PlayerAttributeBarAnchorRight",
         },
     },
-    [COMBAT_MECHANIC_FLAGS_WEREWOLF] = {
-        background = {
+    [COMBAT_MECHANIC_FLAGS_WEREWOLF] =
+    {
+        background =
+        {
             small = "ZO_PlayerAttributeBgSmallLeft",
         },
-        frame = {
+        frame =
+        {
             small = "ZO_PlayerAttributeFrameSmallLeft",
         },
-        smallAnchors = {
+        smallAnchors =
+        {
             "ZO_PlayerAttributeSmallAnchorLeft",
         },
     },
-    [COMBAT_MECHANIC_FLAGS_MOUNT_STAMINA] = {
-        background = {
+    [COMBAT_MECHANIC_FLAGS_MOUNT_STAMINA] =
+    {
+        background =
+        {
             small = "ZO_PlayerAttributeBgSmallRight",
         },
-        frame = {
+        frame =
+        {
             small = "ZO_PlayerAttributeFrameSmallRight",
         },
-        smallAnchors = {
+        smallAnchors =
+        {
             "ZO_PlayerAttributeSmallAnchorRight",
         },
     },
@@ -457,16 +482,16 @@ function ZO_PlayerAttributeBars:New(control)
     
     local bars = {}
 
-    local healthControl = GetControl(control, "Health")
-    local healthBarControls = {GetControl(healthControl, "BarLeft"), GetControl(healthControl, "BarRight")}
+    local healthControl = control:GetNamedChild("Health")
+    local healthBarControls = { healthControl:GetNamedChild("BarLeft"), healthControl:GetNamedChild("BarRight") }
     healthControl.barControls = healthBarControls
-    healthControl.resourceNumbersLabel = GetControl(healthControl, "ResourceNumbers")
+    healthControl.resourceNumbersLabel = healthControl:GetNamedChild("ResourceNumbers")
     local healthAttributeBar = ZO_PlayerAttributeBar:New(healthControl, healthBarControls, COMBAT_MECHANIC_FLAGS_HEALTH)
     table.insert(bars, healthAttributeBar)
     healthControl.warner = ZO_HealthWarner:New(healthControl)
 
-    local siegeHealthControl = GetControl(control, "SiegeHealth")
-    local siegeHealthBarControls = {GetControl(siegeHealthControl, "BarLeft"), GetControl(siegeHealthControl, "BarRight")}
+    local siegeHealthControl = control:GetNamedChild("SiegeHealth")
+    local siegeHealthBarControls = { siegeHealthControl:GetNamedChild("BarLeft"), siegeHealthControl:GetNamedChild("BarRight") }
     siegeHealthControl.barControls = siegeHealthBarControls
     local siegeHealthAttributeBar = ZO_PlayerAttributeBar:New(siegeHealthControl, siegeHealthBarControls, COMBAT_MECHANIC_FLAGS_HEALTH, "controlledsiege", "escortedram")
     table.insert(bars, siegeHealthAttributeBar)
@@ -481,16 +506,16 @@ function ZO_PlayerAttributeBars:New(control)
     siegeHealthAttributeBar:SetExternalVisibilityRequirement(function() return IsGameCameraSiegeControlled() or IsPlayerEscortingRam() end)
     healthAttributeBar:LinkVisibility(siegeHealthAttributeBar)
 
-    local magickaControl = GetControl(control, "Magicka")
-    local magickaBarControls = {GetControl(magickaControl, "Bar")}
+    local magickaControl = control:GetNamedChild("Magicka")
+    local magickaBarControls = { magickaControl:GetNamedChild("Bar") }
     magickaControl.barControls = magickaBarControls
-    magickaControl.resourceNumbersLabel = GetControl(magickaControl, "ResourceNumbers")
+    magickaControl.resourceNumbersLabel = magickaControl:GetNamedChild("ResourceNumbers")
     local magickaAttributeBar = ZO_PlayerAttributeBar:New(magickaControl, magickaBarControls, COMBAT_MECHANIC_FLAGS_MAGICKA)
     table.insert(bars, magickaAttributeBar)
     magickaControl.warner = ZO_ResourceWarner:New(magickaControl, COMBAT_MECHANIC_FLAGS_MAGICKA)
 
-    local werewolfControl = GetControl(control, "Werewolf")
-    local werewolfBarControls = {GetControl(werewolfControl, "Bar")}
+    local werewolfControl = control:GetNamedChild("Werewolf")
+    local werewolfBarControls = { werewolfControl:GetNamedChild("Bar") }
     werewolfControl.barControls = werewolfBarControls
     local werewolfAttributeBar = ZO_PlayerAttributeBar:New(werewolfControl, werewolfBarControls, COMBAT_MECHANIC_FLAGS_WEREWOLF)
     table.insert(bars, werewolfAttributeBar)
@@ -499,16 +524,16 @@ function ZO_PlayerAttributeBars:New(control)
     werewolfAttributeBar:SetExternalVisibilityRequirement(IsPlayerInWerewolfForm)
     magickaAttributeBar:LinkVisibility(werewolfAttributeBar)
 
-    local staminaControl = GetControl(control, "Stamina")
-    local staminaBarControls = {GetControl(staminaControl, "Bar")}
+    local staminaControl = control:GetNamedChild("Stamina")
+    local staminaBarControls = { staminaControl:GetNamedChild("Bar") }
     staminaControl.barControls = staminaBarControls
-    staminaControl.resourceNumbersLabel = GetControl(staminaControl, "ResourceNumbers")
+    staminaControl.resourceNumbersLabel = staminaControl:GetNamedChild("ResourceNumbers")
     local staminaAttributeBar = ZO_PlayerAttributeBar:New(staminaControl, staminaBarControls, COMBAT_MECHANIC_FLAGS_STAMINA)
     table.insert(bars, staminaAttributeBar)
     staminaControl.warner = ZO_ResourceWarner:New(staminaControl, COMBAT_MECHANIC_FLAGS_STAMINA)
 
-    local mountStaminaControl = GetControl(control, "MountStamina")
-    local mountStaminaBarControls = {GetControl(mountStaminaControl, "Bar")}
+    local mountStaminaControl = control:GetNamedChild("MountStamina")
+    local mountStaminaBarControls = { mountStaminaControl:GetNamedChild("Bar") }
     mountStaminaControl.barControls = mountStaminaBarControls
     local mountStaminaAttributeBar = ZO_PlayerAttributeBar:New(mountStaminaControl, mountStaminaBarControls, COMBAT_MECHANIC_FLAGS_MOUNT_STAMINA)
     table.insert(bars, mountStaminaAttributeBar)
@@ -606,6 +631,162 @@ function ZO_PlayerAttributeBars:New(control)
     barGroup:ApplyStyle() -- Setup initial visual style based on current mode.
     control:RegisterForEvent(EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function() barGroup:OnGamepadPreferredModeChanged() end)
 
+    local KEYBOARD_FRAME_CONFIG =
+    {
+        defaultAnchor = ZO_Anchor:New(BOTTOM, nil, BOTTOM, 0, -74),
+        isValid = function(element) 
+            --Only show this element in the HUD Editor when Combined Resources is true
+            return element:GetCustomOptionValue("Combine")
+        end,
+    }
+
+    local GAMEPAD_FRAME_CONFIG =
+    {
+        defaultAnchor = ZO_Anchor:New(BOTTOM, nil, BOTTOM, 0, -105),
+        isValid = function(element) 
+            --Only show this element in the HUD Editor when Combined Resources is true
+            return element:GetCustomOptionValue("Combine")
+        end,
+    }
+
+    --Custom HUD Editor option to choose whether to treat the resource bars as a single element or not
+    local FRAME_OPTIONS = 
+    {
+        {
+            type = ZO_HUD_EDITOR_OPTION_TYPES.ENUM,
+            name = GetString(SI_HUD_EDITOR_CUSTOM_OPTION_VISIBLE),
+            tooltipText = GetString(SI_INTERFACE_OPTIONS_RESOURCE_BARS_TOOLTIP),
+            key = "Visible",
+            valueStringPrefix = "SI_RESOURCEBARSSETTINGCHOICE",
+            values = { RESOURCE_BARS_SETTING_CHOICE_DONT_SHOW, RESOURCE_BARS_SETTING_CHOICE_AUTOMATIC, RESOURCE_BARS_SETTING_CHOICE_ALWAYS_SHOW, },
+            defaultValue = function()
+                return tonumber(GetSetting(SETTING_TYPE_UI, UI_SETTING_SHOW_RESOURCE_BARS))
+            end,
+            dontSave = true,
+            callback = function(element, subKey, oldValue, value)
+                if value ~= oldValue then
+                    SetSetting(SETTING_TYPE_UI, UI_SETTING_SHOW_RESOURCE_BARS, tostring(value))
+                end
+            end,
+        },
+        {
+            type = ZO_HUD_EDITOR_OPTION_TYPES.ENUM,
+            name = GetString(SI_INTERFACE_OPTIONS_RESOURCE_NUMBERS),
+            tooltipText = GetString(SI_INTERFACE_OPTIONS_RESOURCE_NUMBERS_TOOLTIP),
+            key = "ResourceNumbers",
+            valueStringPrefix = "SI_RESOURCENUMBERSSETTING",
+            values = { RESOURCE_NUMBERS_SETTING_OFF, RESOURCE_NUMBERS_SETTING_NUMBER_ONLY, RESOURCE_NUMBERS_SETTING_PERCENT_ONLY, RESOURCE_NUMBERS_SETTING_NUMBER_AND_PERCENT, },
+            defaultValue = function()
+                return tonumber(GetSetting(SETTING_TYPE_UI, UI_SETTING_RESOURCE_NUMBERS))
+            end,
+            dontSave = true,
+            callback = function(element, subKey, oldValue, value)
+                if value ~= oldValue then
+                    SetSetting(SETTING_TYPE_UI, UI_SETTING_RESOURCE_NUMBERS, tostring(value))
+                end
+            end,
+        },
+        {
+            type = ZO_HUD_EDITOR_OPTION_TYPES.BOOLEAN,
+            name = GetString(SI_HUD_EDITOR_PLAYER_ATTRIBUTES_CUSTOM_OPTION_COMBINED_RESOURCES),
+            tooltipText = GetString(SI_HUD_EDITOR_PLAYER_ATTRIBUTES_CUSTOM_OPTION_COMBINED_RESOURCES_TOOLTIP),
+            key = "Combine",
+            defaultValue = true,
+            callback = function(element, _, _, newValue)
+                if newValue then
+                    --If the resource elements are being re-combined, reset each of the individual elements back to their default anchors
+                    if element:IsKeyboard() then
+                        self.keyboardHealthElement:ResetToDefaultAnchor()
+                        self.keyboardMagickaElement:ResetToDefaultAnchor()
+                        self.keyboardStaminaElement:ResetToDefaultAnchor()
+                    else
+                        self.gamepadHealthElement:ResetToDefaultAnchor()
+                        self.gamepadMagickaElement:ResetToDefaultAnchor()
+                        self.gamepadStaminaElement:ResetToDefaultAnchor()
+                    end
+                end
+            end,
+        }
+    }
+    -- Main bar
+    local elementName = GetString(SI_HUD_EDITOR_PLAYER_ATTRIBUTES)
+    self.keyboardFrameElement = HUD_MANAGER:RegisterKeyboardElement(control, elementName, KEYBOARD_FRAME_CONFIG, FRAME_OPTIONS)
+    self.gamepadFrameElement = HUD_MANAGER:RegisterGamepadElement(control, elementName, GAMEPAD_FRAME_CONFIG, FRAME_OPTIONS)
+
+    RESOURCE_CONFIG =
+    {
+        isValid = function(element)
+            local frameElement = element:IsKeyboard() and self.keyboardFrameElement or self.gamepadFrameElement
+            --Only show this element in the HUD Editor when Combined Resources is false
+            return not frameElement:GetCustomOptionValue("Combine")
+        end,
+    }
+
+    local RESOURCE_OPTIONS = 
+    {
+        {
+            type = ZO_HUD_EDITOR_OPTION_TYPES.ENUM,
+            name = GetString(SI_HUD_EDITOR_CUSTOM_OPTION_VISIBLE),
+            tooltipText = GetString(SI_INTERFACE_OPTIONS_RESOURCE_BARS_TOOLTIP),
+            key = "Visible",
+            valueStringPrefix = "SI_RESOURCEBARSSETTINGCHOICE",
+            values = { RESOURCE_BARS_SETTING_CHOICE_DONT_SHOW, RESOURCE_BARS_SETTING_CHOICE_AUTOMATIC, RESOURCE_BARS_SETTING_CHOICE_ALWAYS_SHOW, },
+            defaultValue = function()
+                return tonumber(GetSetting(SETTING_TYPE_UI, UI_SETTING_SHOW_RESOURCE_BARS))
+            end,
+            dontSave = true,
+            callback = function(element, subKey, oldValue, value)
+                if value ~= oldValue then
+                    SetSetting(SETTING_TYPE_UI, UI_SETTING_SHOW_RESOURCE_BARS, tostring(value))
+                end
+            end,
+        },
+        {
+            type = ZO_HUD_EDITOR_OPTION_TYPES.ENUM,
+            name = GetString(SI_INTERFACE_OPTIONS_RESOURCE_NUMBERS),
+            tooltipText = GetString(SI_INTERFACE_OPTIONS_RESOURCE_NUMBERS_TOOLTIP),
+            key = "ResourceNumbers",
+            valueStringPrefix = "SI_RESOURCENUMBERSSETTING",
+            values = { RESOURCE_NUMBERS_SETTING_OFF, RESOURCE_NUMBERS_SETTING_NUMBER_ONLY, RESOURCE_NUMBERS_SETTING_PERCENT_ONLY, RESOURCE_NUMBERS_SETTING_NUMBER_AND_PERCENT, },
+            defaultValue = function()
+                return tonumber(GetSetting(SETTING_TYPE_UI, UI_SETTING_RESOURCE_NUMBERS))
+            end,
+            dontSave = true,
+            callback = function(element, subKey, oldValue, value)
+                if value ~= oldValue then
+                    SetSetting(SETTING_TYPE_UI, UI_SETTING_RESOURCE_NUMBERS, tostring(value))
+                end
+            end,
+        },
+        {
+            type = ZO_HUD_EDITOR_OPTION_TYPES.BOOLEAN,
+            name = GetString(SI_HUD_EDITOR_PLAYER_ATTRIBUTES_CUSTOM_OPTION_COMBINED_RESOURCES),
+            tooltipText = GetString(SI_HUD_EDITOR_PLAYER_ATTRIBUTES_CUSTOM_OPTION_COMBINED_RESOURCES_TOOLTIP),
+            key = "Combine",
+            defaultValue = false,
+            dontSave = true,
+            callback = function(element, subKey, oldValue, value)
+                if value then
+                    local frameElement = element:IsKeyboard() and self.keyboardFrameElement or self.gamepadFrameElement
+                    frameElement:SetCustomOptionValue("Combine", subKey, true)
+                end
+            end,
+        }
+    }
+    -- Health + Siege Health
+    local healthElementName = GetString(SI_HUD_EDITOR_PLAYER_HEALTH)
+    self.keyboardHealthElement = HUD_MANAGER:RegisterKeyboardElement(healthControl, healthElementName, RESOURCE_CONFIG, RESOURCE_OPTIONS)
+    self.gamepadHealthElement = HUD_MANAGER:RegisterGamepadElement(healthControl, healthElementName, RESOURCE_CONFIG, RESOURCE_OPTIONS)
+
+    -- Magicka + Werewolf
+    local magickaElementName = GetString(SI_HUD_EDITOR_PLAYER_MAGICKA)
+    self.keyboardMagickaElement = HUD_MANAGER:RegisterKeyboardElement(magickaControl, magickaElementName, RESOURCE_CONFIG, RESOURCE_OPTIONS)
+    self.gamepadMagickaElement = HUD_MANAGER:RegisterGamepadElement(magickaControl, magickaElementName, RESOURCE_CONFIG, RESOURCE_OPTIONS)
+
+    -- Stamina + Mount Stamina
+    local staminaElementName = GetString(SI_HUD_EDITOR_PLAYER_STAMINA)
+    self.keyboardStaminaElement = HUD_MANAGER:RegisterKeyboardElement(staminaControl, staminaElementName, RESOURCE_CONFIG, RESOURCE_OPTIONS)
+    self.gamepadStaminaElement = HUD_MANAGER:RegisterGamepadElement(staminaControl, staminaElementName, RESOURCE_CONFIG, RESOURCE_OPTIONS)
     return barGroup
 end
 

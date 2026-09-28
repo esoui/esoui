@@ -157,7 +157,7 @@
                         ZO_TabButton_Select(self)
                     </OnMouseDown>
                 </Control>
-                <Control name="$(parent)MinBar" hidden="true">
+                <Control name="$(parent)MinBar" inherits="ZO_HUDManager_Element" hidden="true">
                     <Dimensions x="128" y="512"/>
                     <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot" offsetY="-20"/>
                     <Controls>
@@ -177,6 +177,11 @@
                               ZO_ChatSystem_OnMinMaxClicked()
                           </OnClicked>
                         </Button>
+                        <Control name="$(parent)HUDElementRef" override="true">
+                            <ClearAnchors/>
+                            <Anchor point="BOTTOMLEFT" offsetY="-25"/>
+                            <Dimensions x="32" y="270"/>
+                        </Control>
                     </Controls>
                 </Control>
                 <Control name="$(parent)TextEntry" override="true">

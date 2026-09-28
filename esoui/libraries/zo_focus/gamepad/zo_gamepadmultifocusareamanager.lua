@@ -64,6 +64,14 @@ function ZO_GamepadMultiFocusArea_Base:Activate()
     end
 end
 
+function ZO_GamepadMultiFocusArea_Base:SetActivateCallback(activateCallback)
+    self.activateCallback = activateCallback
+end
+
+function ZO_GamepadMultiFocusArea_Base:SetDeactivateCallback(deactivateCallback)
+    self.deactivateCallback = deactivateCallback
+end
+
 function ZO_GamepadMultiFocusArea_Base:Deactivate()
     if self.active then
         self.active = false
@@ -269,6 +277,16 @@ function ZO_GamepadMultiFocusArea_Manager:AddPreviousFocusArea(focusArea)
     end
     focusArea:SetNextSibling(previousFocus)
     table.insert(self.focusAreas, 1, focusArea)
+end
+
+function ZO_GamepadMultiFocusArea_Manager:ClearFocusAreas()
+    local hasActiveFocus = self:HasActiveFocus()
+    if self.currentFocalArea and hasActiveFocus then
+        self.currentFocalArea:Deactivate()
+    end
+
+    self.currentFocalArea = nil
+    ZO_ClearNumericallyIndexedTable(self.focusAreas)
 end
 
 function ZO_GamepadMultiFocusArea_Manager:UpdateDirectionalInput()

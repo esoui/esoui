@@ -29,7 +29,9 @@ function GroupMenu_Keyboard:Initialize(control)
 
             --Order matters. Do this AFTER we clean the refresh group so that this isn't overwritten
             if self.categoryDataToShow then
-                self:SetCurrentCategoryByData(self.categoryDataToShow)
+                -- We have a categoryDataToShow because we couldn't show it when we set it.
+                local FORCE_SELECT_NODE = true
+                self:SetCurrentCategoryByData(self.categoryDataToShow, FORCE_SELECT_NODE)
                 self.categoryDataToShow = nil
             end
         elseif newState == ZO_STATE.HIDDEN then
@@ -294,14 +296,14 @@ function GroupMenu_Keyboard:SetCurrentCategory(categoryFragment)
 end
 
 -- Show the specified category data, if the Group Menu is showing, or queue it to show.
-function GroupMenu_Keyboard:SetCurrentCategoryByData(categoryData)
+function GroupMenu_Keyboard:SetCurrentCategoryByData(categoryData, forceNodeSelect)
     if KEYBOARD_GROUP_MENU_SCENE:IsShowing() then
         -- Look up the tree node associated with the queued category data and select it.
         local node = self:GetTreeNodeByCategoryData(categoryData)
         if node then
             local nodeIsSelected = node == self.navigationTree:GetSelectedNode()
             if nodeIsSelected then
-                if not self.currentCategoryFragment or self.currentCategoryFragment ~= categoryData.categoryFragment then
+                if forceNodeSelect or not self.currentCategoryFragment or self.currentCategoryFragment ~= categoryData.categoryFragment then
                     -- In this case the node was auto-selected while hidden or on selection
                     -- was not called before the screen was hidden we need to force the node's
                     -- selection function to run again so it runs it's on showing code.

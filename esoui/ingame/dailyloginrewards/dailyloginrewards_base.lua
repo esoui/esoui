@@ -18,7 +18,6 @@ function ZO_DailyLoginRewards_Base:Initialize(control)
     self.blastParticleSystem = ZO_BlastParticleSystem:New()
     self.blastParticleSystem:SetSound(SOUNDS.DAILY_LOGIN_REWARDS_CLAIM_FANFARE)
 
-    local USE_LOWERCASE_NUMBER_SUFFIXES = false
     self.dailyLoginRewardsGridEntrySetup = function(control, data, selected)
         control.data = data
         data.displayRewardData = nil

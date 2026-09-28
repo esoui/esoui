@@ -66,7 +66,7 @@ function ZO_VengeancePerkTile_Keyboard:LayoutPlatform(data)
 
     local isDisabled = self.perkData:IsPerkDisabled()
 
-    self:SetTitle(data:GetName())
+    self:SetTitle(data:GetFormattedName())
     self.framedIcon:SetPerkData(self.perkData)
     self.framedIcon:SetPerkDisabled(isDisabled)
     self.framedIconControl:SetHidden(false)
@@ -281,7 +281,7 @@ function ZO_Vengeance_Perks_Keyboard:UpdateInstructionText()
 
     if not isErrorText then
         local loadout = ZO_VENGEANCE_MANAGER:GetEquippedLoadoutData()
-        self.instructionLabel:SetText(zo_strformat(SI_CAMPAIGN_VENGEANCE_PERKS_LOADOUT_HEADER, loadout:GetName()))
+        self.instructionLabel:SetText(zo_strformat(SI_CAMPAIGN_VENGEANCE_PERKS_LOADOUT_HEADER, loadout:GetRawName()))
         self.instructionLabel:SetColor(ZO_NORMAL_TEXT:UnpackRGBA())
     end
 end
@@ -319,7 +319,7 @@ end
 function ZO_Vengeance_Perks_Keyboard:RefreshLoadoutHeader()
     local loadoutData = ZO_VENGEANCE_MANAGER:GetEquippedLoadoutData()
     if loadoutData then
-        self.loadoutHeader:SetText(zo_strformat(SI_CAMPAIGN_VENGEANCE_PERKS_LOADOUT_HEADER, loadoutData:GetName()))
+        self.loadoutHeader:SetText(zo_strformat(SI_CAMPAIGN_VENGEANCE_PERKS_LOADOUT_HEADER, loadoutData:GetRawName()))
     else
         internalassert(false, "No Loadout is Equipped, this shound never happen!")
     end
@@ -330,7 +330,7 @@ function ZO_Vengeance_Perks_Keyboard:RefreshEquippedPerks()
         local perkData = ZO_VENGEANCE_MANAGER:GetEquippedPerkDataBySlot(slot)
         control.icon:SetPerkData(perkData)
         if perkData then
-            control.name:SetText(perkData:GetName())
+            control.name:SetText(perkData:GetFormattedName())
         else
             control.name:SetText(ZO_VENGEANCE_MANAGER:GetEmptyPerkName())
         end

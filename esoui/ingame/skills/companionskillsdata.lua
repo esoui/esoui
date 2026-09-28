@@ -338,3 +338,18 @@ end
 function ZO_CompanionSkillLineData:GetIndices()
     return self.skillTypeData:GetSkillType(), self.skillLineIndex
 end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

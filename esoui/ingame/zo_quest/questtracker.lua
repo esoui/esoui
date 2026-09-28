@@ -11,38 +11,23 @@ local QUEST_TRACKER_TREE_CONDITION              = 2
 local QUEST_TRACKER_TREE_SUBCATEGORY_TITLE      = 3
 local QUEST_TRACKER_TREE_SUBCATEGORY_CONDITION  = 4
 
-
 --Style
 
 local KEYBOARD_CONSTANTS =
 {
-    CONTAINER_ANCHOR_POINT = TOPLEFT,
-    CONTAINER_ANCHOR_RELATIVE_POINT = BOTTOMLEFT,
-    CONTAINER_OFFSET_X = 35,
-    CONTAINER_OFFSET_Y = 5,
-
-    QUEST_TIMER_ANCHOR_POINT = TOPLEFT,
-    QUEST_TIMER_OFFSET_X = 10,
-    QUEST_TIMER_OFFSET_Y = 0,
+    RESIZE_TO_FIT_PADDING_HEIGHT = 10,
 
     FONT_HEADER = "ZoFontGameShadow",
     FONT_SUBCATEGORY = "ZoFontGameShadow",
     FONT_GENERAL = "ZoFontGameShadow",
 
-    STEP_HORIZONTAL_ALIGNMENT = TEXT_ALIGN_LEFT,
-    CONDITION_HORIZONTAL_ALIGNMENT = TEXT_ALIGN_LEFT,
-
     HEADER_INHERIT_ALPHA = true,
     TEXT_TYPE_HEADER = MODIFY_TEXT_TYPE_NONE,
 
-    QUEST_LINE_BASE_WIDTH = 212,
-    QUEST_LINE_HEADER_WIDTH = 222,
     QUEST_LINE_HEADER_ICON_WIDTH_AND_HEIGHT = 22,
-    QUEST_TRACKER_TREE_INDENT = 10,
-    QUEST_TRACKER_TREE_ANCHOR_POINT = TOPLEFT,
-    QUEST_TRACKER_TREE_RELATIVE_POINT = BOTTOMLEFT,
 
-    QUEST_TRACKER_TREE_LINE_SPACING = {
+    QUEST_TRACKER_TREE_LINE_SPACING =
+    {
         [QUEST_TRACKER_TREE_HEADER] = 18,
         [QUEST_TRACKER_TREE_CONDITION] = 2,
         [QUEST_TRACKER_TREE_SUBCATEGORY_TITLE] = 2,
@@ -51,42 +36,22 @@ local KEYBOARD_CONSTANTS =
 
     QUEST_TRACKER_TREE_SUBCATEGORY_VERTICAL_ALIGNMENT = TEXT_ALIGN_TOP,
 
-    ASSISTED_TEXTURE_ANCHOR_POINT = TOPRIGHT,
-    ASSISTED_TEXTURE_RELATIVE_POINT = TOPLEFT,
-    ASSISTED_TEXTURE_OFFSET_X = 0,
-    ASSISTED_TEXTURE_OFFSET_Y = -7,
-
     HIDE_HEADER_TEXTURES = true,
 }
 
 local GAMEPAD_CONSTANTS =
 {
-    CONTAINER_ANCHOR_POINT = TOPRIGHT,
-    CONTAINER_ANCHOR_RELATIVE_POINT = BOTTOMRIGHT,
-    CONTAINER_OFFSET_X = -44,
-    CONTAINER_OFFSET_Y = 15,
-
-    QUEST_TIMER_ANCHOR_POINT = TOPRIGHT,
-    QUEST_TIMER_OFFSET_X = 29,
-    QUEST_TIMER_OFFSET_Y = 0,
+    RESIZE_TO_FIT_PADDING_HEIGHT = 20,
 
     FONT_HEADER = "ZoFontGamepadBold27",
     FONT_SUBCATEGORY = "ZoFontGamepadBold22",
     FONT_GENERAL = "ZoFontGamepad34",
 
-    STEP_HORIZONTAL_ALIGNMENT = TEXT_ALIGN_RIGHT,
-    CONDITION_HORIZONTAL_ALIGNMENT = TEXT_ALIGN_RIGHT,
-
     HEADER_INHERIT_ALPHA = false,
     TEXT_TYPE_HEADER = MODIFY_TEXT_TYPE_UPPERCASE,
 
-    QUEST_LINE_BASE_WIDTH = 350,
-
     QUEST_LINE_HEADER_ICON_WIDTH_AND_HEIGHT = 48,
     QUEST_HEADER_BASE_HEIGHT = 28,
-    QUEST_TRACKER_TREE_INDENT = 0,
-    QUEST_TRACKER_TREE_ANCHOR_POINT = TOPRIGHT,
-    QUEST_TRACKER_TREE_RELATIVE_POINT = BOTTOMRIGHT,
     QUEST_TRACKER_TREE_SUBCATEGORY_VERTICAL_ALIGNMENT = TEXT_ALIGN_BOTTOM,
 
     QUEST_TRACKER_TREE_LINE_SPACING = {
@@ -97,11 +62,6 @@ local GAMEPAD_CONSTANTS =
     },
 
     QUEST_TRACKER_EXTRA_STEP_OFFSET_Y = 6,
-
-    ASSISTED_TEXTURE_ANCHOR_POINT = RIGHT,
-    ASSISTED_TEXTURE_RELATIVE_POINT = LEFT,
-    ASSISTED_TEXTURE_OFFSET_X = -5,
-    ASSISTED_TEXTURE_OFFSET_Y = 5,
 
     HIDE_HEADER_TEXTURES = false,
 
@@ -124,7 +84,7 @@ local function ApplyPlatformStyleToHeader(control)
     local constants = GetPlatformConstants()
 
     control:ClearAnchors()
-    control:SetDimensions(constants.QUEST_LINE_HEADER_WIDTH, constants.QUEST_HEADER_BASE_HEIGHT)
+    control:SetDimensions(0, constants.QUEST_HEADER_BASE_HEIGHT)
     control.icon:SetDimensions(constants.QUEST_LINE_HEADER_ICON_WIDTH_AND_HEIGHT, constants.QUEST_LINE_HEADER_ICON_WIDTH_AND_HEIGHT)
     control:SetFont(constants.FONT_HEADER)
     control:SetModifyTextType(constants.TEXT_TYPE_HEADER)
@@ -147,16 +107,12 @@ local function ApplyPlatformStyleToHeader(control)
         control.m_TreeNode:SetOffsetY(constants.QUEST_TRACKER_TREE_LINE_SPACING[QUEST_TRACKER_TREE_HEADER])
     end
 
-    control.extraWidth = constants.DISTANCE_BUTTON_TO_HEADER 
+    control.extraWidth = constants.DISTANCE_BUTTON_TO_HEADER
 end
-
-local UNCONSTRAINED_HEIGHT = 0
 
 local function ApplyPlatformStyleToCondition(control)
     local constants = GetPlatformConstants()
-    control:SetDimensions(constants.QUEST_LINE_BASE_WIDTH, UNCONSTRAINED_HEIGHT)
     control:SetFont(constants.FONT_GENERAL)
-    control:SetHorizontalAlignment(constants.CONDITION_HORIZONTAL_ALIGNMENT)
     if control.m_TreeNode then
         control.m_TreeNode:SetOffsetY(constants.QUEST_TRACKER_TREE_LINE_SPACING[control.entryType])
     end
@@ -164,10 +120,8 @@ end
 
 local function ApplyPlatformStyleToStepDescription(control)
     local constants = GetPlatformConstants()
-    control:SetDimensions(constants.QUEST_LINE_BASE_WIDTH, UNCONSTRAINED_HEIGHT)
     control:SetFont(constants.FONT_SUBCATEGORY)
     control:SetVerticalAlignment(constants.QUEST_TRACKER_TREE_SUBCATEGORY_VERTICAL_ALIGNMENT)
-    control:SetHorizontalAlignment(constants.STEP_HORIZONTAL_ALIGNMENT)
     if control.m_TreeNode then
         control.m_TreeNode:SetOffsetY(constants.QUEST_TRACKER_TREE_LINE_SPACING[QUEST_TRACKER_TREE_SUBCATEGORY_TITLE])
     end
@@ -180,7 +134,7 @@ local function ApplyPlatformStyleToAssistedTexture(assistedTexture, assistedHead
     if assistedHeader.isUsingIcon then
         targetRelativeTo = assistedHeader.icon
     end
-    assistedTexture:SetAnchor(constants.ASSISTED_TEXTURE_ANCHOR_POINT, targetRelativeTo, constants.ASSISTED_TEXTURE_RELATIVE_POINT, constants.ASSISTED_TEXTURE_OFFSET_X, constants.ASSISTED_TEXTURE_OFFSET_Y)
+    assistedTexture:SetAnchor(RIGHT, targetRelativeTo, LEFT, -5, 0)
     assistedTexture:SetInheritAlpha(constants.HEADER_INHERIT_ALPHA)
 end
 
@@ -188,185 +142,225 @@ end
 -- Tracked Data
 --
 
-ZO_TrackedData = ZO_Object:Subclass()
+ZO_TrackedData = ZO_InitializingObject:Subclass()
 
-function ZO_TrackedData:New(trackType, arg1, arg2)
-    local data = ZO_Object.New(self)
-    
-    data.trackType = trackType
-    data.arg1 = arg1
-    data.arg2 = arg2
-    
-    return data
+function ZO_TrackedData:Initialize(trackType, arg1, arg2)
+    self.trackType = trackType
+    self.arg1 = arg1
+    self.arg2 = arg2
 end
 
 function ZO_TrackedData:GetJournalIndex()
-    return (self.trackType == TRACK_TYPE_QUEST and self.arg1) or nil
+    return self.trackType == TRACK_TYPE_QUEST and self.arg1 or nil
 end
 
 function ZO_TrackedData:Equals(trackType, arg1, arg2)
-    return (self.trackType == trackType and self.arg1 == arg1 and self.arg2 == arg2)
+    return self.trackType == trackType and self.arg1 == arg1 and self.arg2 == arg2
 end
 
 function ZO_TrackedData:EqualsTrackedData(trackedData)
     if trackedData == nil then
         return false
     end
-    return (self.trackType == trackedData.trackType and self.arg1 == trackedData.arg1 and self.arg2 == trackedData.arg2)
+    return self:Equals(trackedData.trackType, trackedData.arg1, trackedData.arg2)
 end
 
 --
 -- Tracker
 --        
 
-ZO_Tracker = ZO_CallbackObject:Subclass()
+ZO_Tracker = ZO_HUDTracker_Base:Subclass()
 
-function ZO_Tracker:New(...)
-    local tracker = ZO_CallbackObject.New(self)
-    tracker:Initialize(...)
-    return tracker
-end
+function ZO_Tracker:Initialize(primaryControl)
+    ZO_HUDTracker_Base.Initialize(self, primaryControl)
 
-function ZO_Tracker:Initialize(trackerPanel, trackerControl)
-    local stepDescriptionResetFunction = function(control)
-                                            control:SetText("")
-                                            control.m_TreeNode = nil
-                                         end
+    local function StepDescriptionResetFunction(control)
+        control:SetText("")
+        control.m_TreeNode = nil
+    end
 
-    local conditionResetFunction =  function(control)
-                                        control:SetText("")
-                                        control.isGroupCreditShared = false
-                                        control.m_TreeNode = nil
-                                    end
+    local function ConditionResetFunction(control)
+        control:SetText("")
+        control.isGroupCreditShared = false
+        control.m_TreeNode = nil
+    end
     
-    local headerResetFunction = function(control)
-                                    if control.m_ChildConditionControls then
-                                        self:RemoveAndReleaseConditionsFromHeader(control)
-                                    end
+    local function HeaderResetFunction(control)
+        if control.m_ChildConditionControls then
+            self:RemoveAndReleaseConditionsFromHeader(control)
+        end
 
-                                    if control.m_StepDescriptionControls then
-                                        for _, stepControl in ipairs(control.m_StepDescriptionControls) do
-                                            self.stepDescriptionPool:ReleaseObject(stepControl.key)
-                                            self.treeView:RemoveNode(stepControl.treeNode)
-                                        end
-                                    end
+        if control.m_StepDescriptionControls then
+            for _, stepControl in ipairs(control.m_StepDescriptionControls) do
+                self.stepDescriptionPool:ReleaseObject(stepControl.key)
+                self.treeView:RemoveNode(stepControl.treeNode)
+            end
+        end
 
-                                    control:SetText("")
-                                    control.m_StepDescriptionControls = nil
-                                    control.m_BGStorage = nil
-                                    control.m_TreeNode = nil
-                                    control.headerText = nil
-                                    control.questType = nil
-                                    -- control.instanceDisplayType is deprecated, included here for addon backwards compatibility
-                                    control.instanceDisplayType = nil
-                                    control.displayType = nil
-                                end
+        control:SetText("")
+        control.m_StepDescriptionControls = nil
+        control.m_BGStorage = nil
+        control.m_TreeNode = nil
+        control.headerText = nil
+        control.questType = nil
+        -- control.instanceDisplayType is deprecated, included here for addon backwards compatibility
+        control.instanceDisplayType = nil
+        control.displayType = nil
+    end
 
-    trackerControl:GetParent().tracker = self
+    self.primaryControl = primaryControl
+    local container = self.container
+    container.tracker = self
+    self.timerControl = container:GetNamedChild("TimerAnchor")
+    local trackerControl = container:GetNamedChild("QuestContainer")
     self.trackerControl = trackerControl
-    self.trackerPanel = trackerPanel
-    self.timerControl = GetControl(trackerPanel, "TimerAnchor")
-    
+    self.assistedTexture = trackerControl:GetNamedChild("Assisted")
+
     self.headerPool = ZO_ControlPool:New("ZO_TrackedHeader", trackerControl, "TrackedHeader")
     self.conditionPool = ZO_ControlPool:New("ZO_QuestCondition", trackerControl, "QuestCondition")
     self.stepDescriptionPool = ZO_ControlPool:New("ZO_QuestStepDescription", trackerControl, "QuestStepDescription")
 
-    self.headerPool:SetCustomResetBehavior(headerResetFunction)
-    self.conditionPool:SetCustomResetBehavior(conditionResetFunction)
-    self.stepDescriptionPool:SetCustomResetBehavior(stepDescriptionResetFunction)
+    self.headerPool:SetCustomResetBehavior(HeaderResetFunction)
+    self.conditionPool:SetCustomResetBehavior(ConditionResetFunction)
+    self.stepDescriptionPool:SetCustomResetBehavior(StepDescriptionResetFunction)
 
     self.headerPool:SetCustomAcquireBehavior(ApplyPlatformStyleToHeader)
     self.conditionPool:SetCustomAcquireBehavior(ApplyPlatformStyleToCondition)
     self.stepDescriptionPool:SetCustomAcquireBehavior(ApplyPlatformStyleToStepDescription)
-
-    self:CreatePlatformAnchors()
     
-    local constants = GetPlatformConstants()
-    self.treeView = ZO_TreeControl:New(constants.QUEST_TRACKER_TREE_ANCHOR, constants.QUEST_TRACKER_TREE_INDENT)
+    local NO_INDENT = 0
+    self.treeView = ZO_TreeControl:New(ZO_Anchor:New(TOPRIGHT, self.trackerControl, TOPRIGHT), NO_INDENT)
+    self.treeView:SetRelativePoint(BOTTOMRIGHT)
     
     self.tracked = {}
     self.MAX_TRACKED = 1 -- never allow more than this many quests...this is only controlled by the UI, not the client
     self.isMouseInside = false
-    self.assistedTexture = GetControl(trackerControl, "Assisted")
-
-    local function OnAddOnLoaded(eventCode, addOnName)
-        if addOnName == "ZO_Ingame" then
-            self:UpdateVisibility()
-
-            local function OnInterfaceSettingChanged(eventCode, settingType, settingId)
-                if settingType == SETTING_TYPE_UI then
-                    if settingId == UI_SETTING_SHOW_QUEST_TRACKER then
-                        self:UpdateVisibility()
-                    end
-                end
-            end
-
-            trackerPanel:RegisterForEvent(EVENT_INTERFACE_SETTING_CHANGED, OnInterfaceSettingChanged)
-
-            local function OnZoneStoryQuestActivityTracked(eventId, questIndex)
-                self:ForceAssist(questIndex)
-                ZO_WorldMap_ShowQuestOnMap(questIndex)
-            end
-
-            trackerPanel:RegisterForEvent(EVENT_ZONE_STORY_QUEST_ACTIVITY_TRACKED, OnZoneStoryQuestActivityTracked)
-
-            trackerPanel:RegisterForEvent(EVENT_QUEST_CONDITION_COUNTER_CHANGED, function(_, index) self:OnQuestConditionUpdated(index) end)
-            trackerPanel:RegisterForEvent(EVENT_QUEST_CONDITION_OVERRIDE_TEXT_CHANGED, function(_, index) self:OnQuestConditionUpdated(index) end)
-            trackerPanel:RegisterForEvent(EVENT_QUEST_ADVANCED, function(_, questIndex, questName, isPushed, isComplete, mainStepChanged) self:OnQuestAdvanced(questIndex, questName, isPushed, isComplete, mainStepChanged) end)
-            trackerPanel:RegisterForEvent(EVENT_QUEST_ADDED, function(_, questIndex) self:OnQuestAdded(questIndex) end)
-            trackerPanel:RegisterForEvent(EVENT_QUEST_REMOVED, function(_, completed, questIndex, questName, zoneIndex, poiIndex, questID) self:OnQuestRemoved(questIndex, completed, questID) end)
-            trackerPanel:RegisterForEvent(EVENT_LEVEL_UPDATE, function(_, tag, level) self:OnLevelUpdated(tag) end)
-            trackerPanel:RegisterForEvent(EVENT_TRACKING_UPDATE, function() self:OnTrackingUpdate() end)
-
-            trackerPanel:UnregisterForEvent(EVENT_ADD_ON_LOADED)
-
-            self:InitialTrackingUpdate()
-        end
-    end
-
-    trackerPanel:RegisterForEvent(EVENT_ADD_ON_LOADED, OnAddOnLoaded)
-
-    self:RegisterCallbacks()
-    self:ApplyPlatformStyle()
-
-    self.fragment = ZO_HUDFadeSceneFragment:New(self.trackerPanel:GetNamedChild("Container"))
-    self.fragment:RegisterCallback("StateChange", function(oldState, newState) self:FireCallbacks("QuestTrackerFragmentStateChange", oldState, newState) end)
 
     FOCUSED_QUEST_TRACKER_FRAGMENT = self:GetFragment()
 end
 
-function ZO_Tracker:GetFragment()
-    return self.fragment
+function ZO_Tracker:DeferredInitialize()
+    ZO_HUDTracker_Base.DeferredInitialize(self)
+
+    self:InitialTrackingUpdate()
 end
 
-function ZO_Tracker:RegisterCallbacks()
-    self.trackerControl:RegisterForEvent(EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function() self:OnGamepadPreferredModeChanged() end)
+function ZO_Tracker:InitializeStyles()
+    self.styles =
+    {
+        keyboard = KEYBOARD_CONSTANTS,
+        gamepad = GAMEPAD_CONSTANTS,
+    }
+
+    ZO_HUDTracker_Base.InitializeStyles(self)
 end
 
-function ZO_Tracker:GetContainerControl()
-    return self.trackerControl
-end
+do
+    local DISPLAY_NAME = GetString(SI_HUD_EDITOR_QUEST_TRACKER)
+    local DEFAULT_CONFIG = nil
 
-function ZO_Tracker:CreatePlatformAnchors()
-    local allConstants = { KEYBOARD_CONSTANTS, GAMEPAD_CONSTANTS }
+    function ZO_Tracker:GetHUDElementInfo()
+        local options =
+        {
+            {
+                type = ZO_HUD_EDITOR_OPTION_TYPES.BOOLEAN,
+                name = GetString(SI_HUD_EDITOR_CUSTOM_OPTION_VISIBLE),
+                tooltipText = GetString(SI_INTERFACE_OPTIONS_SHOW_QUEST_TRACKER_TOOLTIP),
+                key = "Visible",
+                defaultValue = function()
+                    return GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_SHOW_QUEST_TRACKER)
+                end,
+                dontSave = true,
+                callback = function(element, subKey, oldValue, value)
+                    if value ~= oldValue then
+                        SetSetting(SETTING_TYPE_UI, UI_SETTING_SHOW_QUEST_TRACKER, tostring(value))
+                    end
+                end,
+            },
+        }
+        return DISPLAY_NAME, DEFAULT_CONFIG, options
+    end
 
-    for _, constants in ipairs(allConstants) do
-        constants.QUEST_TRACKER_TREE_ANCHOR = ZO_Anchor:New(constants.QUEST_TRACKER_TREE_ANCHOR_POINT, self.trackerControl, constants.QUEST_TRACKER_TREE_ANCHOR_POINT)
-        constants.CONTAINER_ANCHOR = ZO_Anchor:New(constants.CONTAINER_ANCHOR_POINT, self.timerControl, constants.CONTAINER_ANCHOR_RELATIVE_POINT, constants.CONTAINER_OFFSET_X, constants.CONTAINER_OFFSET_Y)
-        constants.QUEST_TIMER_ANCHOR = ZO_Anchor:New(constants.QUEST_TIMER_ANCHOR_POINT, self.trackerPanel, constants.QUEST_TIMER_ANCHOR_POINT, constants.QUEST_TIMER_OFFSET_X, constants.QUEST_TIMER_OFFSET_Y) 
+    function ZO_Tracker:GetHUDElementOptionKeys()
+        local KEY = "Quest"
+        return KEY, DISPLAY_NAME
     end
 end
 
-function ZO_Tracker:ApplyPlatformStyle()
-    local constants = GetPlatformConstants()
+function ZO_Tracker:RegisterEvents(...)
+    ZO_HUDTracker_Base.RegisterEvents(self, ...)
 
-    -- Reanchor quest timer
-    self.timerControl:ClearAnchors()
-    constants.QUEST_TIMER_ANCHOR:AddToControl(self.timerControl)
+    local primaryControl = self.primaryControl
 
-    -- Reanchor the container
-    self.trackerControl:ClearAnchors()
-    constants.CONTAINER_ANCHOR:AddToControl(self.trackerControl)
+    local function OnInterfaceSettingChanged(eventCode, settingType, settingId)
+        if settingType == SETTING_TYPE_UI and settingId == UI_SETTING_SHOW_QUEST_TRACKER then
+            local isTrackerVisible = GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_SHOW_QUEST_TRACKER)
+            if not isTrackerVisible and IsZoneStoryTracked() and not IsZoneStoryAssisted() then
+                ZO_ZoneStories_Manager.SetTrackedZoneStoryAssisted(true)
+            end
+            self:Update()
+        end
+    end
+
+    primaryControl:RegisterForEvent(EVENT_INTERFACE_SETTING_CHANGED, OnInterfaceSettingChanged)
+
+    local function OnZoneStoryQuestActivityTracked(_, questIndex)
+        self:ForceAssist(questIndex)
+        ZO_WorldMap_ShowQuestOnMap(questIndex)
+    end
+
+    primaryControl:RegisterForEvent(EVENT_ZONE_STORY_QUEST_ACTIVITY_TRACKED, OnZoneStoryQuestActivityTracked)
+
+    local function OnQuestConditionUpdated(_, index)
+        self:OnQuestConditionUpdated(index)
+    end
+    primaryControl:RegisterForEvent(EVENT_QUEST_CONDITION_COUNTER_CHANGED, OnQuestConditionUpdated)
+    primaryControl:RegisterForEvent(EVENT_QUEST_CONDITION_OVERRIDE_TEXT_CHANGED, OnQuestConditionUpdated)
+    primaryControl:RegisterForEvent(EVENT_QUEST_ADVANCED, function(_, questIndex, questName, isPushed, isComplete, mainStepChanged) self:OnQuestAdvanced(questIndex, questName, isPushed, isComplete, mainStepChanged) end)
+    primaryControl:RegisterForEvent(EVENT_QUEST_ADDED, function(_, questIndex) self:OnQuestAdded(questIndex) end)
+    primaryControl:RegisterForEvent(EVENT_QUEST_REMOVED, function(_, completed, questIndex, questName, zoneIndex, poiIndex, questID) self:OnQuestRemoved(questIndex, completed, questID) end)
+    primaryControl:RegisterForEvent(EVENT_LEVEL_UPDATE, function(_, tag, level) self:OnLevelUpdated(tag) end)
+    primaryControl:RegisterForEvent(EVENT_TRACKING_UPDATE, function() self:OnTrackingUpdate() end)
+
+    local function UpdateAssistedVisibility()
+      self:UpdateAssistedVisibility()
+    end
+    primaryControl:RegisterForEvent(EVENT_ZONE_STORY_ACTIVITY_TRACKED, UpdateAssistedVisibility)
+    primaryControl:RegisterForEvent(EVENT_ZONE_STORY_ACTIVITY_UNTRACKED, UpdateAssistedVisibility)
+
+    local function AdjustHUDElementHeight()
+        self:AdjustHUDElementHeight()
+    end
+
+    self.container:SetHandler("OnRectHeightChanged", AdjustHUDElementHeight)
+    ZONE_STORY_TRACKER:GetContainerControl():SetHandler("OnRectHeightChanged", AdjustHUDElementHeight)
+end
+
+function ZO_Tracker:AdjustHUDElementHeight()
+    local height = 0
+    if IsZoneStoryAssisted() then
+        height = ZONE_STORY_TRACKER:GetContainerControl():GetHeight()
+    else
+        height = self.container:GetHeight()
+    end
+
+    self.hudElementRef:SetHeight(height)
+end
+
+function ZO_Tracker:OnFragmentStateChanged(oldState, newState)
+    self:FireCallbacks("QuestTrackerFragmentStateChange", oldState, newState)
+end
+
+function ZO_Tracker:GetTrackerControl()
+    return self.trackerControl
+end
+
+function ZO_Tracker:GetContainer()
+    return self.container
+end
+
+function ZO_Tracker:ApplyPlatformStyle(style)
+    ZO_HUDTracker_Base.ApplyPlatformStyle(self, style)
 
     -- Set the correct style for the controls
     local header = self.headerPool:GetActiveObjects()
@@ -392,15 +386,14 @@ function ZO_Tracker:ApplyPlatformStyle()
     end
 
     -- Update the quest tree anchors
-    self.treeView:SetIndent(constants.QUEST_TRACKER_TREE_INDENT)
-    self.treeView:SetRelativePoint(constants.QUEST_TRACKER_TREE_RELATIVE_POINT)
     self:UpdateTreeView()
 
     ApplyTemplateToControl(self.assistedTexture, ZO_GetPlatformTemplate("ZO_KeybindButton"))
 end
 
 function ZO_Tracker:UpdateAssistedVisibility()
-    self.assistedTexture:SetAlpha(GetNumJournalQuests() == 1 and 0 or 1)
+    local showAssistedKeybind = GetNumJournalQuests() > 1 or IsZoneStoryTracked()
+    self.assistedTexture:SetHidden(not showAssistedKeybind)
 end
 
 function ZO_Tracker:OnTrackingUpdate()
@@ -437,15 +430,21 @@ end
 
 function ZO_Tracker:SetEnabled(enabled)
     self.enabled = enabled
-    self:UpdateVisibility()
+    self:Update()
 end
 
-function ZO_Tracker:UpdateVisibility()
+function ZO_Tracker:Update()
     local numTrackedQuests = self:GetNumTracked()
     FOCUSED_QUEST_TRACKER_FRAGMENT:SetHiddenForReason("NoTrackedQuests", numTrackedQuests == 0, DEFAULT_HUD_DURATION, DEFAULT_HUD_DURATION)
 
     local isTrackerVisible = GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_SHOW_QUEST_TRACKER)
     FOCUSED_QUEST_TRACKER_FRAGMENT:SetHiddenForReason("DisabledBySetting", not isTrackerVisible, 0, 0)
+
+    if isTrackerVisible then
+        self:UpdateAssistedVisibility()
+    end
+
+    ZO_HUDTracker_Base.Update(self)
 end
 
 function ZO_Tracker:ForceAssist(questIndex)
@@ -463,7 +462,7 @@ function ZO_Tracker:AssistAnotherQuestWithTheSameQuestJournalCategory(questId)
     self.disableAudio = false
 end
 
-function ZO_Tracker:AssistNext(ignoreSceneRestriction)
+function ZO_Tracker:AssistNext(ignoreSceneRestriction, skipZoneStory)
     local isShowingBase = SCENE_MANAGER:IsShowingBaseScene()
     
     local wasZoneStoryAssisted = IsZoneStoryAssisted()
@@ -479,12 +478,10 @@ function ZO_Tracker:AssistNext(ignoreSceneRestriction)
                 -- Looped past all the quests.  Check if we want to display a zone guide before displaying the first item.
                
                 -- if the zone story was visible and we just closed it, don't reopen it.
-                if not wasZoneStoryAssisted and IsZoneStoryTracked() then
-                    ZO_ZoneStories_Manager.SetTrackedZoneStoryAssisted(true)
-                    if not self.disableAudio then
-                        PlaySound(SOUNDS.QUEST_FOCUSED)
+                if not skipZoneStory and not wasZoneStoryAssisted then
+                    if self:AssistZoneStory() then
+                        return -- Don't advance the quest now, wait for the zone tracker to be hidden.
                     end
-                    return -- Don't advance the quest now, wait for the zone tracker to be hidden.
                 end
             end
 
@@ -501,11 +498,26 @@ function ZO_Tracker:AssistNext(ignoreSceneRestriction)
             if IsValidQuestIndex(i) then
                 if self:BeginTracking(TRACK_TYPE_QUEST, i) then
                     CALLBACK_MANAGER:FireCallbacks("QuestTrackerUpdatedOnScreen")
-                    break
+                    return
                 end
             end
         end
+
+        -- If no other quest got tracker, assist the zone story
+        self:AssistZoneStory()
     end
+end
+
+function ZO_Tracker:AssistZoneStory()
+    -- if the zone story was visible and we just closed it, don't reopen it.
+    if IsZoneStoryTracked() and not IsZoneStoryAssisted() then
+        ZO_ZoneStories_Manager.SetTrackedZoneStoryAssisted(true)
+        if not self.disableAudio then
+            PlaySound(SOUNDS.QUEST_FOCUSED)
+        end
+        return true
+    end
+    return false
 end
 
 --
@@ -583,22 +595,22 @@ end
 function ZO_Tracker:PopulateStepQuestConditions(questIndex, stepIndex, questHeader, treeNode, desiredVisibility, entryType)
     local _, visibility, stepType, stepOverrideText, conditionCount = GetJournalQuestStepInfo(questIndex, stepIndex)
 
-    if((desiredVisibility ~= nil) and (desiredVisibility ~= visibility)) then
+    if (desiredVisibility ~= nil) and (desiredVisibility ~= visibility) then
         return
     end
 
-    local isOptionalStep = (stepIndex > 1)
+    local isOptionalStep = stepIndex > 1
     local style = DEFAULT_STYLE
     if visibility == QUEST_STEP_VISIBILITY_HINT then
         style = HINT_STYLE
     end
     
     -- Don't display endings of optional quest lines
-    if(isOptionalStep) then
-        if(stepType == QUEST_STEP_TYPE_END) then
+    if isOptionalStep then
+        if stepType == QUEST_STEP_TYPE_END then
             return
         else
-            if(not questHeader.m_hasAddedSectionHeader) then
+            if not questHeader.m_hasAddedSectionHeader then
                 questHeader.m_hasAddedSectionHeader = true
                 
                 if visibility == QUEST_STEP_VISIBILITY_HINT then
@@ -612,12 +624,12 @@ function ZO_Tracker:PopulateStepQuestConditions(questIndex, stepIndex, questHead
     
     local constants = GetPlatformConstants()
         
-    if(stepOverrideText ~= "") then
+    if stepOverrideText ~= "" then
         -- Step override text condition
         local stepOverride, stepOverrideKey = self.conditionPool:AcquireObject()
         stepOverride.entryType = entryType
         
-        if(stepType ~= QUEST_STEP_TYPE_END) then
+        if stepType ~= QUEST_STEP_TYPE_END then
             -- A step type of OR is implied here...it's not legal to have an AND step with override text.
             -- Do a quick check to see if any of the conditions have been completed to determine the icon type.
             
@@ -625,7 +637,7 @@ function ZO_Tracker:PopulateStepQuestConditions(questIndex, stepIndex, questHead
                 local currentValue, maximumValue, isFailCondition, isComplete, isGroupCreditShared = GetJournalQuestConditionValues(questIndex, stepIndex, conditionIndex)
                 -- We're going to ignore the individual conditions' isVisible field here, since we have override text for the whole step which we always want to show
 
-                if(not isFailCondition and isComplete) then
+                if not isFailCondition and isComplete then
                     stepOverride.isGroupCreditShared = isGroupCreditShared
                     break -- done, at least one non-fail condition was complete
                 end
@@ -649,14 +661,14 @@ function ZO_Tracker:PopulateStepQuestConditions(questIndex, stepIndex, questHead
         self:InitializeQuestCondition(stepOverride, questHeader, stepOverrideKey, conditionTreeNode)
     else
         -- Process the conditions as usual
-        if(stepType == QUEST_STEP_TYPE_OR) then
+        if stepType == QUEST_STEP_TYPE_OR then
             local visibleConditionFound = false
             for conditionIndex = 1, conditionCount do
                 local isVisible = select(7, GetJournalQuestConditionInfo(questIndex, stepIndex, conditionIndex))
                 if isVisible then
                     if visibleConditionFound then
                         -- We've already found one visible condition, insert the "Choose one" step description and quit
-                        InsertStepDescription(self, questHeader, treeNode, GetString(SI_QUEST_OR_DESCRIPTION))		
+                        InsertStepDescription(self, questHeader, treeNode, GetString(SI_QUEST_OR_DESCRIPTION), style)
                         break
                     else
                         visibleConditionFound = true
@@ -668,7 +680,7 @@ function ZO_Tracker:PopulateStepQuestConditions(questIndex, stepIndex, questHead
         for conditionIndex = 1, conditionCount do
             local conditionText, curCount, maxCount, isFailCondition, isComplete, isGroupCreditShared, isVisible = GetJournalQuestConditionInfo(questIndex, stepIndex, conditionIndex)
 
-            if((not isFailCondition) and (conditionText ~= "") and not isComplete and isVisible) then
+            if (not isFailCondition) and (conditionText ~= "") and not isComplete and isVisible then
                 local questCondition, questConditionKey = self.conditionPool:AcquireObject()
                 questCondition.entryType = entryType
 
@@ -707,17 +719,17 @@ function ZO_Tracker:PopulateQuestConditions(questIndex, questName, stepType, ste
 end
 
 function ZO_Tracker:RebuildConditions(questIndex, questHeader, questName, stepType, stepTrackerText, isComplete, tracked)
-    if(questHeader == nil) then
+    if questHeader == nil then
         questHeader = self:GetHeaderForIndex(TRACK_TYPE_QUEST, questIndex)
     end
 
-    if(questName == nil) then
+    if questName == nil then
         local _
         questName, _, _, stepType, stepTrackerText, isComplete, tracked = GetJournalQuestInfo(questIndex)
     end
 
-    if(questHeader and questName) then
-        if(questHeader.m_ChildConditionControls) then
+    if questHeader and questName then
+        if questHeader.m_ChildConditionControls then
             -- first thing...remove all conditions from the tree...
             self:RemoveAndReleaseConditionsFromHeader(questHeader)
            
@@ -725,7 +737,7 @@ function ZO_Tracker:RebuildConditions(questIndex, questHeader, questName, stepTy
             questHeader.m_ChildConditionControls = {}
         end
 
-        if(questHeader.m_StepDescriptionControls) then
+        if questHeader.m_StepDescriptionControls then
             for _, control in ipairs(questHeader.m_StepDescriptionControls) do
                 self.stepDescriptionPool:ReleaseObject(control.key)
                 self.treeView:RemoveNode(control.treeNode)
@@ -737,7 +749,7 @@ function ZO_Tracker:RebuildConditions(questIndex, questHeader, questName, stepTy
         -- then populate the conditions correctly
         self:PopulateQuestConditions(questIndex, questName, stepType, stepTrackerText, isComplete, tracked, questHeader, questHeader.m_TreeNode)
 
-        if(questHeader.m_TreeNode:IsExpanded()) then
+        if questHeader.m_TreeNode:IsExpanded() then
             self:UpdateTreeView()
         end
     end
@@ -801,7 +813,7 @@ function ZO_Tracker:OnQuestRemoved(questIndex, completed, questId)
         --Wait to see if we assist something to replace this before updating visibility
         self:StopTracking(TRACK_TYPE_QUEST, questIndex, nil, DONT_UPDATE_VISIBILITY)
         self:AssistAnotherQuestWithTheSameQuestJournalCategory(questId)
-        self:UpdateVisibility()
+        self:Update()
     end
     self:UpdateAssistedVisibility()
 end
@@ -822,7 +834,7 @@ function ZO_Tracker:OnQuestAdvanced(questIndex, questName, isPushed, isComplete,
 end
 
 function ZO_Tracker:OnLevelUpdated(tag)
-    if(tag == "player") then
+    if tag == "player" then
         self:RefreshHeaderConColors()
     end
 end
@@ -834,7 +846,7 @@ end
 function ZO_Tracker:GetHeaderForIndex(trackType, arg1, arg2)
     local headerList = self.headerPool:GetActiveObjects()
    
-    for k, header in pairs(headerList) do
+    for _, header in pairs(headerList) do
         if header.m_Data:Equals(trackType, arg1, arg2) then
             return header
         end
@@ -891,9 +903,7 @@ function ZO_Tracker:GetTrackingIndex(trackType, arg1, arg2)
     -- 4. Abandoned
     -- 5. Completed
     
-    for i = 1, #self.tracked do
-        local trackedData = self.tracked[i]
-        
+    for i, trackedData in ipairs(self.tracked) do
         if trackedData:Equals(trackType, arg1, arg2) then
             return i
         end
@@ -903,10 +913,8 @@ function ZO_Tracker:GetTrackingIndex(trackType, arg1, arg2)
 end
 
 function ZO_Tracker:SetTrackedQuestComplete(questIndex, isComplete)
-    for i = 1, #self.tracked do
-        local trackedData = self.tracked[i]
-        
-        if(trackedData.trackType == TRACK_TYPE_QUEST) then
+    for _, trackedData in ipairs(self.tracked) do
+        if trackedData.trackType == TRACK_TYPE_QUEST then
             -- Found the quest, mark it complete.
             if trackedData:GetJournalIndex() == questIndex then
                 trackedData.isComplete = isComplete
@@ -917,8 +925,7 @@ function ZO_Tracker:SetTrackedQuestComplete(questIndex, isComplete)
 end
 
 function ZO_Tracker:IsOnTracker(trackType, arg1, arg2)
-    for i = 1, #self.tracked do
-        local trackedData = self.tracked[i]
+    for _, trackedData in ipairs(self.tracked) do
         if trackedData:Equals(trackType, arg1, arg2) then
             return true
         end
@@ -930,17 +937,18 @@ end
 function ZO_Tracker:AddQuest(data)
     local questIndex = data:GetJournalIndex()
     local questName, _, _, stepType, stepTrackerText, isComplete, tracked, _, _, questType, zoneDisplayType = GetJournalQuestInfo(questIndex)
-    
+
     -- This line prevents quests from being tracked multiple times but allows quests to be properly tracked
     -- when the UI is reloaded.
-    
-    --if this quest isnt on the c++ tracker or it isnt on the lua tracker then give up
-    if((not tracked) or (not self:IsOnTracker(TRACK_TYPE_QUEST, questIndex))) then return end
-    
-    local questHeader, treeNode = self:CreateQuestHeader(data, questName, questType, isComplete, zoneDisplayType)
 
-    self:PopulateQuestConditions(questIndex, questName, stepType, stepTrackerText, isComplete, tracked, questHeader, treeNode)    
-    
+    --if this quest isnt on the c++ tracker or it isnt on the lua tracker then give up
+    if (not tracked) or (not self:IsOnTracker(TRACK_TYPE_QUEST, questIndex)) then 
+        return
+    end
+
+    local questHeader, treeNode = self:CreateQuestHeader(data, questName, questType, isComplete, zoneDisplayType)
+    self:PopulateQuestConditions(questIndex, questName, stepType, stepTrackerText, isComplete, tracked, questHeader, treeNode)
+
     return questHeader
 end
 
@@ -994,8 +1002,7 @@ function ZO_Tracker:BeginTracking(trackType, arg1, arg2)
         self:SetAssisted(header.m_Data, true)
     end
 
-    self:UpdateVisibility()
-    self:UpdateAssistedVisibility()
+    self:Update()
 
     self:FireCallbacks("QuestTrackerTrackingStateChanged", self, true, trackType, arg1, arg2)
 
@@ -1030,7 +1037,7 @@ function ZO_Tracker:StopTracking(trackType, arg1, arg2, updateVisibility)
     
         self:UpdateTreeView()
         if updateVisibility == nil or updateVisibility == true then
-            self:UpdateVisibility()
+            self:Update()
         end
     
         self:FireCallbacks("QuestTrackerTrackingStateChanged", self, false, trackType, arg1, arg2)
@@ -1051,9 +1058,8 @@ function ZO_Tracker:ClearTracker()
         SetTracked(trackType, false, arg1, arg2)
     end
 
-    for i = 1, #self.tracked do
-        local trackedData = self.tracked[i]
-        if(trackedData.trackType == TRACK_TYPE_QUEST) then
+    for _, trackedData in ipairs(self.tracked) do
+        if trackedData.trackType == TRACK_TYPE_QUEST then
             SetMapQuestPinsTrackingLevel(trackedData.arg1, TRACKING_LEVEL_UNTRACKED)
         end
     end
@@ -1061,18 +1067,19 @@ function ZO_Tracker:ClearTracker()
     self.tracked = {}
     self.assistedData = nil
     self:UpdateTreeView()
-    self:UpdateVisibility()
+    self:Update()
 end
 
 function ZO_Tracker:UpdateTreeView()
-    if(self:GetNumTracked() > 0) then
+    if self:GetNumTracked() > 0 then
         local constants = GetPlatformConstants()
-        self.treeView:Update(nil, nil, ZO_Anchor:New(constants.QUEST_TRACKER_TREE_ANCHOR))
+        self.treeView:Update()
 
+        local anchor = self.treeView:GetAnchor()
         local headerEntries = self.headerPool:GetActiveObjects()
         for _, header in pairs(headerEntries) do
             header:ClearAnchors()
-            constants.QUEST_TRACKER_TREE_ANCHOR:AddToControl(header)
+            anchor:AddToControl(header)
         end
     end
 end
@@ -1105,10 +1112,6 @@ function ZO_Tracker:SetAssisted(data, assisted)
 
         self:FireCallbacks("QuestTrackerAssistStateChanged", unassistedData, self.assistedData)
     end
-end
-
-function ZO_Tracker:OnGamepadPreferredModeChanged()
-    self:ApplyPlatformStyle()
 end
 
 do
@@ -1148,15 +1151,19 @@ end
 -- NOTE: This function takes a label because it is called from control script handlers...
 function ZO_Tracker:DoHeaderNameHighlight(label, state)
     local data = label.m_Data
-    if(state == MOUSE_ENTER) then
+    if state == MOUSE_ENTER then
         label:SetColor(ZO_HIGHLIGHT_TEXT:UnpackRGBA())
     else
         label:SetColor(GetConColor(data.level))
     end
 end
 
+function ZO_Tracker:GetPriority()
+    return ZO_HUD_TRACKER_PRIORITY.QUEST
+end
+
 function ZO_TrackedHeader_MouseEnter(label)
-    ZO_QuestTracker_ShowTrackedHeaderTooltip(label)  
+    ZO_QuestTracker_ShowTrackedHeaderTooltip(label)
 end
 
 function ZO_TrackedHeader_MouseExit(label)
@@ -1195,16 +1202,16 @@ local function ShowTrackingMenu(header)
 end
 
 function ZO_TrackedHeader_MouseUp(label, button, upInside)
-    if(upInside) then
+    if upInside then
         PlaySound(SOUNDS.DEFAULT_CLICK)
         local header = label
-        if(button == MOUSE_BUTTON_INDEX_RIGHT) then
+        if button == MOUSE_BUTTON_INDEX_RIGHT then
             ShowTrackingMenu(header)
         end
     end
 end
 
-function ZO_QuestTracker_ShowTrackedHeaderTooltip(trackedLabel)  
+function ZO_QuestTracker_ShowTrackedHeaderTooltip(trackedLabel)
     local trackerControl = trackedLabel:GetParent():GetParent()
     trackerControl.tracker:DoHeaderNameHighlight(trackedLabel, MOUSE_ENTER)
 end
@@ -1220,5 +1227,7 @@ function ZO_QuestTracker_SetEnabled(enabled)
 end
 
 function ZO_FocusedQuestTracker_OnInitialized(control)
-    FOCUSED_QUEST_TRACKER = ZO_Tracker:New(control, control:GetNamedChild("Container"):GetNamedChild("QuestContainer"))
+    FOCUSED_QUEST_TRACKER = ZO_Tracker:New(control)
 end
+
+HUD_TRACKER_MANAGER:RegisterTracker("ZO_FocusedQuestTrackerPanel_Template", "ZO_FocusedQuestTrackerPanel")

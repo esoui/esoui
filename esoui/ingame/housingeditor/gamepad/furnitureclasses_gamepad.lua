@@ -1083,6 +1083,14 @@ end
 function ZO_HousingSettingsList_Gamepad:BuildOptionsList()
     local groupingId = self:AddOptionTemplateGroup(ZO_SocialOptionsDialogGamepad.GetDefaultHeader)
 
+    local function ShouldShowKickOccupantOption()
+        if not self:IsOccupantsListAndHomeowner() then
+            return false
+        end
+
+        return self.socialData.crossplayDisplayName ~= GetCurrentHouseOwner()
+    end
+
     local function BuildKickOccupantOption()
         return self:BuildKickOccupantOption()
     end
@@ -1096,11 +1104,20 @@ function ZO_HousingSettingsList_Gamepad:BuildOptionsList()
     end
 
     local function ShouldShowGamerCardOption()
-        return ZO_IsConsoleOrGameCoreUI() and (self.rowDataType == ZO_SETTINGS_VISITOR_DATA_TYPE or self.rowDataType == ZO_SETTINGS_BANLIST_DATA_TYPE or self.rowDataType == ZO_SETTINGS_OCCUPANT_DATA_TYPE)
+        if not ZO_IsConsoleOrGameCoreUI() then
+            return false
+        end
+
+        if self.rowDataType == ZO_SETTINGS_OCCUPANT_DATA_TYPE then
+            local platformDisplayName = self.socialData.platformDisplayName
+            return platformDisplayName and platformDisplayName ~= ""
+        end
+
+        return self.rowDataType == ZO_SETTINGS_VISITOR_DATA_TYPE or self.rowDataType == ZO_SETTINGS_BANLIST_DATA_TYPE
     end
 
     self:AddOptionTemplate(groupingId, BuildChangeUserGroupPermissionsOption, ZO_HousingSettingsList_Gamepad.SelectedDataHasPreset)
-    self:AddOptionTemplate(groupingId, BuildKickOccupantOption, ZO_HousingSettingsList_Gamepad.IsOccupantsListAndHomeowner)
+    self:AddOptionTemplate(groupingId, BuildKickOccupantOption, ShouldShowKickOccupantOption)
     self:AddOptionTemplate(groupingId, BuildRemoveUserGroupOption, ZO_HousingSettingsList_Gamepad.IsNotOccupantsList)
     self:AddOptionTemplate(groupingId, ZO_SocialOptionsDialogGamepad.BuildGamerCardOption, ShouldShowGamerCardOption)
 end
@@ -1262,11 +1279,18 @@ function ZO_HousingSettingsList_Gamepad:DoesEntryPassFilter(data)
     return self:IsMatch(self:GetCurrentSearch(), data)
 end
 
-function ZO_HousingSettingsList_Gamepad_CreateOccupantScrollData(displayName, currentHouse, index, accountName)
+function ZO_HousingSettingsList_Gamepad_CreateOccupantScrollData(crossplayDisplayName, characterName, platformDisplayName, currentHouse, index)
     return
-    { 
-        displayName = displayName,
-        gamerCardDisplayName = accountName,
+    {
+        crossplayDisplayName = crossplayDisplayName,
+        characterName = characterName,
+        platformDisplayName = platformDisplayName,
+
+
+
+
+        displayName = ZO_TryGetPlatformDisplayName(crossplayDisplayName, platformDisplayName),
+
         currentHouse = currentHouse,
         index = index,
         type = ZO_GAMEPAD_INTERACTIVE_FILTER_LIST_SEARCH_TYPE_NAMES,

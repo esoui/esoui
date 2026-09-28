@@ -254,6 +254,14 @@ local ITEM_TYPE_DISPLAY_CATEGORY_ICONS =
         down = "EsoUI/Art/Inventory/inventory_tabIcon_furnishing_material_Down.dds",
         over = "EsoUI/Art/Inventory/inventory_tabIcon_furnishing_material_Over.dds",
     },
+
+
+
+
+
+
+
+
 }
 
 local EQUIPMENT_FILTER_TYPE_ICONS =
@@ -717,6 +725,9 @@ local ITEM_TYPE_DISPLAY_CATEGORY_ITEMTYPES =
         ITEM_TYPE_DISPLAY_CATEGORY_WEAPONS,
         ITEM_TYPE_DISPLAY_CATEGORY_ARMOR,
         ITEM_TYPE_DISPLAY_CATEGORY_JEWELRY,
+
+
+
     },
     [ITEM_TYPE_DISPLAY_CATEGORY_CONSUMABLE] =
     {
@@ -1037,6 +1048,7 @@ local FILTER_INFO_TYPE_CONSUMABLE_TYPE = 4
 local FILTER_INFO_TYPE_SPECIALIZED_ITEM_TYPE = 5
 local FILTER_INFO_TYPE_MISCELLANEOUS_TYPE = 6
 local FILTER_INFO_TYPE_PROVISIONING_TYPE = 7
+local FILTER_INFO_TYPE_COMPANION_TYPE = 8
 
 local ITEM_TYPE_DISPLAY_CATEGORY_FILTER_INFO_TYPE =
 {
@@ -1047,7 +1059,7 @@ local ITEM_TYPE_DISPLAY_CATEGORY_FILTER_INFO_TYPE =
     [ITEM_TYPE_DISPLAY_CATEGORY_CONSUMABLE] = FILTER_INFO_TYPE_CONSUMABLE_TYPE,
     [ITEM_TYPE_DISPLAY_CATEGORY_CRAFTING] = FILTER_INFO_TYPE_ITEM_TYPE_DISPLAY_CATEGORY,
     [ITEM_TYPE_DISPLAY_CATEGORY_FURNISHING] = FILTER_INFO_TYPE_SPECIALIZED_ITEM_TYPE,
-    [ITEM_TYPE_DISPLAY_CATEGORY_COMPANION] = FILTER_INFO_TYPE_ITEM_TYPE_DISPLAY_CATEGORY,
+    [ITEM_TYPE_DISPLAY_CATEGORY_COMPANION] = FILTER_INFO_TYPE_COMPANION_TYPE,
     [ITEM_TYPE_DISPLAY_CATEGORY_MISCELLANEOUS] = FILTER_INFO_TYPE_MISCELLANEOUS_TYPE,
     [ITEM_TYPE_DISPLAY_CATEGORY_QUEST] = FILTER_INFO_TYPE_ITEM_TYPE_DISPLAY_CATEGORY,
     [ITEM_TYPE_DISPLAY_CATEGORY_JUNK] = FILTER_INFO_TYPE_ITEM_TYPE_DISPLAY_CATEGORY,
@@ -1136,6 +1148,9 @@ local ITEM_TYPE_DISPLAY_CATEGORY_SUBCATEGORY_TYPES =
         ITEM_TYPE_DISPLAY_CATEGORY_WEAPONS,
         ITEM_TYPE_DISPLAY_CATEGORY_ARMOR,
         ITEM_TYPE_DISPLAY_CATEGORY_JEWELRY,
+
+
+
     },
     [ITEM_TYPE_DISPLAY_CATEGORY_MISCELLANEOUS] =
     {
@@ -1232,6 +1247,16 @@ local ITEM_TYPE_DISPLAY_CATEGORY_SUBCATEGORY_TYPES =
         ITEMTYPE_JEWELRY_TRAIT,
         ITEMTYPE_FURNISHING_MATERIAL,
     },
+
+
+
+
+
+
+
+
+
+
 }
 
 -- Text Search Types
@@ -1335,7 +1360,8 @@ function ZO_ItemFilterUtils.GetSearchFilterData(itemTypeDisplayCategory, subCate
         if itemTypeDisplayCategoryFilterInfoType == FILTER_INFO_TYPE_ITEM_TYPE_DISPLAY_CATEGORY
             or itemTypeDisplayCategoryFilterInfoType == FILTER_INFO_TYPE_PROVISIONING_TYPE
             or itemTypeDisplayCategoryFilterInfoType == FILTER_INFO_TYPE_MISCELLANEOUS_TYPE
-            or itemTypeDisplayCategoryFilterInfoType == FILTER_INFO_TYPE_CONSUMABLE_TYPE then
+            or itemTypeDisplayCategoryFilterInfoType == FILTER_INFO_TYPE_CONSUMABLE_TYPE
+            or itemTypeDisplayCategoryFilterInfoType == FILTER_INFO_TYPE_COMPANION_TYPE then
             return ZO_ItemFilterUtils.GetItemTypeDisplayCategoryFilterDisplayInfo(subCategory)
         elseif itemTypeDisplayCategoryFilterInfoType == FILTER_INFO_TYPE_EQUIPMENT_FILTER_TYPE then
             return ZO_ItemFilterUtils.GetEquipmentFilterTypeFilterDisplayInfo(subCategory)
@@ -1518,7 +1544,11 @@ function ZO_ItemFilterUtils.IsSlotInItemTypeDisplayCategoryAndSubcategory(slot, 
     end
 
     if itemTypeDisplayCategory == ITEM_TYPE_DISPLAY_CATEGORY_COMPANION then
-        return ZO_ItemFilterUtils.IsSlotFilterDataInItemTypeDisplayCategory(slot, itemTypeSubCategory)
+
+
+
+
+
     elseif slot.actorCategory == GAMEPLAY_ACTOR_CATEGORY_COMPANION then
         return false
     end
@@ -1553,6 +1583,8 @@ function ZO_ItemFilterUtils.IsSlotInItemTypeDisplayCategoryAndSubcategory(slot, 
         return ZO_ItemFilterUtils.IsSlotInMiscellaneousSubcategory(slot, itemTypeSubCategory)
     elseif itemTypeDisplayCategoryFilterInfoType == FILTER_INFO_TYPE_PROVISIONING_TYPE then
         return ZO_ItemFilterUtils.IsSlotInProvisioningSubcategory(slot, itemTypeSubCategory)
+    elseif itemTypeDisplayCategoryFilterInfoType == FILTER_INFO_TYPE_COMPANION_TYPE then
+        return ZO_ItemFilterUtils.IsSlotInCompanionSubcategory(slot, itemTypeSubCategory)
     end
 end
 
@@ -1595,6 +1627,8 @@ function ZO_ItemFilterUtils.IsCompanionSlotInItemTypeDisplayCategoryAndSubcatego
         return ZO_ItemFilterUtils.IsSlotInMiscellaneousSubcategory(slot, itemTypeSubCategory)
     elseif itemTypeDisplayCategoryFilterInfoType == FILTER_INFO_TYPE_PROVISIONING_TYPE then
         return ZO_ItemFilterUtils.IsSlotInProvisioningSubcategory(slot, itemTypeSubCategory)
+    elseif itemTypeDisplayCategoryFilterInfoType == FILTER_INFO_TYPE_COMPANION_TYPE then
+        return ZO_ItemFilterUtils.IsSlotInCompanionSubcategory(slot, itemTypeSubCategory)
     end
 end
 
@@ -1829,6 +1863,58 @@ function ZO_ItemFilterUtils.IsSlotInMiscellaneousSubcategory(slot, itemTypeDispl
     return false
 end
 
+function ZO_ItemFilterUtils.IsSlotInCompanionSubcategory(slot, itemTypeDisplayCategory)
+    if itemTypeDisplayCategory == ITEM_TYPE_DISPLAY_CATEGORY_ALL then
+        return true
+    end
+
+    local itemType = GetItemType(slot.bagId, slot.slotIndex)
+    local itemTypes = ITEM_TYPE_DISPLAY_CATEGORY_ITEMTYPES[itemTypeDisplayCategory]
+
+    -- Since shields are weapons under the hood but we want them to show in the filters
+    -- as armor we need to force the itemType to armor if it is a shield
+    local weaponType = GetItemWeaponType(slot.bagId, slot.slotIndex)
+    if weaponType == WEAPONTYPE_SHIELD then
+        itemType = ITEMTYPE_ARMOR
+    end
+
+    -- Since there is no itemType for jewelry we need to determine if the item belongs in a jewelry
+    -- equip slot and then compare the current display category with the jewelry display category
+    local equipType = GetItemEquipType(slot.bagId, slot.slotIndex)
+    if equipType == EQUIP_TYPE_RING or equipType == EQUIP_TYPE_NECK then
+
+
+
+
+
+
+        return itemTypeDisplayCategory == ITEM_TYPE_DISPLAY_CATEGORY_JEWELRY
+
+    end
+
+    if itemTypes
+
+
+
+        and ZO_IsElementInNumericallyIndexedTable(itemTypes, itemType) then
+        return true
+    end
+
+
+
+
+
+
+
+
+
+
+
+
+
+    return false
+end
+
 function ZO_ItemFilterUtils.IsItemLinkInMiscellaneousSubcategory(itemLink, itemTypeDisplayCategory)
     if itemTypeDisplayCategory == ITEM_TYPE_DISPLAY_CATEGORY_ALL then
         return true
@@ -1894,3 +1980,27 @@ function ZO_ItemFilterUtils.IsItemLinkInProvisioningSubcategory(itemLink, itemTy
 end
 
 ITEM_FILTER_UTILS = ZO_ItemFilterUtils:New()
+
+-- Global helper comparators
+
+function ZO_InventoryUtils_DoesNewItemMatchFilterType(itemData, currentFilter)
+    if not currentFilter then return true end
+
+    for i, filter in ipairs(itemData.filterData) do
+        if filter == currentFilter then
+            return true
+        end
+    end
+    return false
+end
+
+function ZO_InventoryUtils_DoesNewItemMatchFilterAndActiveCompanionType(itemData, currentFilter)
+    if not currentFilter then return true end
+
+    for i, filter in ipairs(itemData.filterData) do
+        if filter == currentFilter and itemData.companionType == GetActiveCompanionType() then
+            return true
+        end
+    end
+    return false
+end

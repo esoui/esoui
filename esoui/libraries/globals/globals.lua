@@ -107,9 +107,9 @@ end
 
 local ABBREVIATION_THRESHOLD = zo_pow(10, GetDigitGroupingSize())
 -- Anywhere using ZO_AbbreviateNumber needs to ultimately run through ZO_FastFormatDecimalNumber because <<f:1>> does not work with suffixes.
-function ZO_AbbreviateNumber(amount, precision, useUppercaseSuffixes)
+function ZO_AbbreviateNumber(amount, precision, useUppercaseSuffixes, roundToZero)
     if amount >= ABBREVIATION_THRESHOLD then
-        local shortAmount, suffix = AbbreviateNumber(amount, precision, useUppercaseSuffixes)
+        local shortAmount, suffix = AbbreviateNumber(amount, precision, useUppercaseSuffixes, roundToZero)
 
         return ZO_CommaDelimitDecimalNumber(shortAmount) .. suffix
     else
@@ -118,9 +118,9 @@ function ZO_AbbreviateNumber(amount, precision, useUppercaseSuffixes)
 end
 
 -- Anywhere using ZO_AbbreviateAndLocalizeNumber must NOT get passed through a <<f:1>> grammar format
-function ZO_AbbreviateAndLocalizeNumber(amount, precision, useUppercaseSuffixes)
+function ZO_AbbreviateAndLocalizeNumber(amount, precision, useUppercaseSuffixes, roundToZero)
     if amount >= ABBREVIATION_THRESHOLD then
-        local shortAmount, suffix = AbbreviateNumber(amount, precision, useUppercaseSuffixes)
+        local shortAmount, suffix = AbbreviateNumber(amount, precision, useUppercaseSuffixes, roundToZero)
 
         local formattedNumber = ZO_CommaDelimitDecimalNumber(shortAmount) .. suffix
         return ZO_FastFormatDecimalNumber(formattedNumber)
@@ -144,4 +144,28 @@ end
 
 function ZO_GetCraftingSkillName(craftingType)
     return GetCraftingSkillName(craftingType)
+end
+
+function ZO_GetControlPointOffsetFromGuiRoot(control, point)
+    local offsetX = 0
+    local centerX, centerY = control:GetCenter()
+    local guiRootCenterX, guiRootCenterY = GuiRoot:GetCenter()
+    if point == TOPLEFT or point == LEFT or point == BOTTOMLEFT then
+        offsetX = control:GetLeft() -- Relative to the left of GuiRoot
+    elseif point == TOP or point == CENTER or point == BOTTOM then
+        offsetX = centerX - guiRootCenterX -- Relative to the center of GuiRoot
+    else
+        offsetX = control:GetRight() - GuiRoot:GetRight() -- Relative to the right of GuiRoot
+    end
+
+    local offsetY = 0
+    if point == TOPLEFT or point == TOP or point == TOPRIGHT then
+        offsetY = control:GetTop() -- Relative to the top of GuiRoot
+    elseif point == LEFT or point == CENTER or point == RIGHT then
+        offsetY = centerY - guiRootCenterY -- Relative to the center of GuiRoot
+    else
+        offsetY = control:GetBottom() - GuiRoot:GetBottom() -- Relative to the bottom of GuiRoot
+    end
+
+    return offsetX, offsetY
 end

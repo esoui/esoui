@@ -92,6 +92,10 @@ function ZO_ItemPreview_Keyboard:InitializeActionArrowButton(control, direction)
     control:SetHandler("OnClicked", function(control) self:CyclePreviewActions(direction) end)
 end
 
+function ZO_ItemPreview_Keyboard:AreVariationControlsHidden()
+    return self.variationLabel:IsHidden()
+end
+
 function ZO_ItemPreview_Keyboard:SetVariationControlsHidden(hidden)
     self.previewVariationLeftArrow:SetHidden(hidden)
     self.previewVariationRightArrow:SetHidden(hidden)
@@ -100,6 +104,10 @@ end
 
 function ZO_ItemPreview_Keyboard:SetVariationLabel(variationName)
     self.variationLabel:SetText(zo_strformat(SI_COLLECTIBLE_NAME_FORMATTER, variationName))
+end
+
+function ZO_ItemPreview_Keyboard:AreActionControlsHidden()
+    return self.actionLabel:IsHidden()
 end
 
 function ZO_ItemPreview_Keyboard:SetActionControlsHidden(hidden)

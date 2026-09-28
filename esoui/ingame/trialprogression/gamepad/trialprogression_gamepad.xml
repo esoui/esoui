@@ -1,0 +1,83 @@
+<GuiXml>
+    <Controls>
+        <StatusBar name="ZO_TrialProgression_Gamepad_ProgressBar" level="0" inherits="ZO_VerticalGamepadArrowStatusBarWithBGMedium" virtual="true">
+            <Dimensions x="33"/>
+            <Controls>
+                <Control name="$(parent)Overlay" override="true" tier="LOW" layer="CONTROLS">
+                    <Controls>
+                        <Texture name="$(parent)Bottom" override="true" layer="CONTROLS"/>
+                        <Texture name="$(parent)Top" override="true" layer="CONTROLS"/>
+                        <Texture name="$(parent)Middle" override="true" layer="CONTROLS"/>
+                    </Controls>
+                </Control>
+            </Controls>
+        </StatusBar>
+        <Control name="ZO_TrialProgression_Gamepad_Perk" tier="HIGH" virtual="true">
+            <Dimensions x="ZO_TRIAL_PROGRESSION_GAMEPAD_PERK_SIZE" y="ZO_TRIAL_PROGRESSION_GAMEPAD_PERK_SIZE"/>
+            <Controls>
+                <Texture name="$(parent)Icon" tier="HIGH" layer="CONTROLS" pixelRoundingEnabled="false" textureFile="EsoUI/Art/Icons/icon_missing.dds">
+                    <Dimensions x="40" y="40"/>
+                    <Anchor point="CENTER"/>
+                    <Controls>
+                        <Texture name="$(parent)LockIcon" layer="CONTROLS" textureFile="EsoUI/Art/Miscellaneous/status_locked.dds" pixelRoundingEnabled="false" level="1">
+                            <AnchorFill/>
+                        </Texture>
+                    </Controls>
+                </Texture>
+                <Texture name="$(parent)CircleFrame" tier="HIGH" layer="OVERLAY" pixelRoundingEnabled="false" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_passiveFrame_64.dds" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Icon" offsetX="-5" offsetY="-5"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Icon" offsetX="5" offsetY="5"/>
+                    <Controls>
+                        <Texture name="$(parent)Highlight" layer="CONTROLS" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_passiveFrame_64_glow.dds" pixelRoundingEnabled="false" level="1">
+                            <AnchorFill/>
+                        </Texture>
+                    </Controls>
+                </Texture>
+            </Controls>
+        </Control>
+        <Control name="ZO_TrialProgression_Gamepad_Track" resizeToFitDescendents="true" virtual="true">
+            <DimensionConstraints maxY="ZO_TRIAL_PROGRESSION_GAMEPAD_MAX_TRACK_HEIGHT"/>
+            <OnInitialized>
+                ZO_TrialProgression_Track_Gamepad:New(self)
+            </OnInitialized>
+            <Controls>
+                <Texture name="$(parent)BG" excludeFromResizeToFitExtents="true">
+                    <Dimensions x="ZO_TRIAL_PROGRESSION_GAMEPAD_BG_WIDTH" y="890"/>
+                    <Anchor point="CENTER" relativePoint="CENTER" offsetY="-30"/>
+                    <TextureCoords left="0" right="0.78125" top="0" bottom="0.869140625"/>
+                </Texture>
+                <Texture name="$(parent)Highlight" excludeFromResizeToFitExtents="true" level="1">
+                    <Dimensions x="ZO_TRIAL_PROGRESSION_GAMEPAD_BG_WIDTH" y="890"/>
+                    <Anchor point="CENTER" relativePoint="CENTER" relativeTo="$(parent)BG"/>
+                    <TextureCoords left="0" right="0.78125" top="0" bottom="0.869140625"/>
+                </Texture>
+            </Controls>
+        </Control>
+        <Label name="ZO_TrialProgression_Gamepad_Track_Points" font="ZoFontGamepadBold34" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" horizontalAlignment="CENTER" virtual="true"/>
+        <TopLevelControl name="ZO_TrialProgression_Gamepad_TL" inherits="ZO_GamepadGrid_NavQuadrant_1_2_3_4_Anchors" hidden="true">
+            <OnInitialized>
+                ZO_TrialProgression_Gamepad.OnControlInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)Header">
+                    <Anchor point="TOPLEFT" offsetX="ZO_GAMEPAD_QUADRANT_1_LEFT_OFFSET"/>
+                    <Dimensions x="ZO_TRIAL_PROGRESSION_GAMEPAD_MAX_HEADER_WIDTH" y="120"/>
+                    <Controls>
+                        <Label name="$(parent)Title" font="ZoFontGamepadBold48" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" horizontalAlignment="CENTER" modifyTextType="UPPERCASE">
+                            <Anchor point="TOPLEFT" offsetX="10"/>
+                            <Anchor point="TOPRIGHT" offsetX="-10" offsetY="20"/>
+                        </Label>
+                        <Label name="$(parent)Subtitle" font="ZoFontGamepadBold34" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER" modifyTextType="UPPERCASE">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetY="-2"/>
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Title" relativePoint="BOTTOMRIGHT" offsetY="-2"/>
+                        </Label>
+                    </Controls>
+                </Control>
+                <Control name="$(parent)Tracks" resizeToFitDescendents="true">
+                    <Anchor point="TOP" relativeTo="$(parent)Header" relativePoint="BOTTOM" offsetY="50"/>
+                    <DimensionConstraints maxX="ZO_TRIAL_PROGRESSION_GAMEPAD_MAX_TRACKS_WIDTH"/>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

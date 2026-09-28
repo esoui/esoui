@@ -50,19 +50,6 @@ function ZO_PromotionalEventReward_Shared:Refresh()
         self.displayRewardData = displayRewardData
 
         self.iconTexture:SetTexture(displayRewardData:GetPlatformLootIcon())
-        local shouldHideQuantityLabel = true
-        if GetRewardType(displayRewardData:GetRewardId()) == REWARD_ENTRY_TYPE_REWARD_LIST then
-            local quantity = GetNumRewardListEntries(GetRewardListIdFromReward(displayRewardData:GetRewardId()))
-            shouldHideQuantityLabel = not (quantity > 1)
-            if not shouldHideQuantityLabel then
-                quantity = zo_strformat(SI_PROMOTIONAL_EVENT_REWARD_LIST_QUANTITY_FORMATTER, quantity - 1)
-                self.quantityLabel:SetText(quantity)
-            end
-        elseif displayRewardData:GetQuantity() > 1 then
-            local quantity = displayRewardData:GetAbbreviatedQuantity()
-            self.quantityLabel:SetText(quantity)
-            shouldHideQuantityLabel = false
-        end
 
         local hasPendingLoop = self.fxAnchorControl.pendingLoop ~= nil
         if canClaim ~= hasPendingLoop then
@@ -79,7 +66,8 @@ function ZO_PromotionalEventReward_Shared:Refresh()
             self.iconTexture:SetColor(0.7, 0.7, 0.7)
         else
             self.completeMarkTexture:SetHidden(true)
-            self.quantityLabel:SetHidden(shouldHideQuantityLabel)
+            self.quantityLabel:SetText(displayRewardData:GetFormattedDisplayQuantity())
+            self.quantityLabel:SetHidden(false)
             self.iconTexture:SetColor(1, 1, 1)
         end
     else
@@ -258,22 +246,11 @@ function ZO_PromotionalEvents_Shared.RewardGridEntrySetup(control, data, selecte
             control.nameLabel:SetColor(GetItemQualityColor(data.displayQuality):UnpackRGBA())
         end
     end
-    local shouldHideQuantityLabel = true
-    if GetRewardType(data:GetRewardId()) == REWARD_ENTRY_TYPE_REWARD_LIST then
-        local quantity = GetNumRewardListEntries(GetRewardListIdFromReward(data:GetRewardId()))
-        shouldHideQuantityLabel = not (quantity > 1)
-        if not shouldHideQuantityLabel then
-            quantity = zo_strformat(SI_PROMOTIONAL_EVENT_REWARD_LIST_QUANTITY_FORMATTER, quantity - 1)
-            control.quantityLabel:SetText(quantity)
-        end
+    if data:GetRewardType() == REWARD_ENTRY_TYPE_REWARD_LIST then
         local displayQualityColor = GetItemQualityColor(data.displayQuality) or ZO_WHITE
         control.nameLabel:SetColor(displayQualityColor:UnpackRGBA())
-    elseif data:GetQuantity() > 1 then
-        local quantity = data:GetAbbreviatedQuantity()
-        control.quantityLabel:SetText(quantity)
-        shouldHideQuantityLabel = false
     end
-    control.quantityLabel:SetHidden(shouldHideQuantityLabel)
+    control.quantityLabel:SetText(data:GetFormattedDisplayQuantity())
     local alpha = (data.isClaimed or data.isLocked) and 0.4 or 1
     control:SetAlpha(alpha)
     control.claimedMark:SetHidden(not data.isClaimed)

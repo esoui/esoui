@@ -303,7 +303,7 @@
             </Controls>
         </Texture>
         <Control name="ZO_CenterScreenAnnounce_Keyboard_Template" virtual="true">
-            <Anchor point="TOP" relativeTo="GuiRoot" offsetY="230"/>
+            <Anchor point="TOP" relativeTo="GuiRoot" offsetY="ZO_CENTER_SCREEN_ANNOUNCE_KEYBOARD_OFFSET_Y"/>
             <Controls>
                 <Control name="$(parent)MajorLineContainer">
                     <Anchor point="TOP" offsetY="10"/>
@@ -314,7 +314,7 @@
             </Controls>
         </Control>
         <Control name="ZO_CenterScreenAnnounce_Gamepad_Template" virtual="true">
-            <Anchor point="TOP" relativeTo="GuiRoot" offsetY="290"/>
+            <Anchor point="TOP" relativeTo="GuiRoot" offsetY="ZO_CENTER_SCREEN_ANNOUNCE_GAMEPAD_OFFSET_Y"/>
             <Controls>
                 <Control name="$(parent)MajorLineContainer">
                     <Anchor point="TOP"/>
@@ -331,7 +331,7 @@
                 </Texture>
             </Controls>
         </TopLevelControl>
-        <TopLevelControl name="ZO_CenterScreenAnnounce" tier="HIGH" level="ZO_HIGH_TIER_CENTER_SCREEN_ANNOUNCE">
+        <TopLevelControl name="ZO_CenterScreenAnnounce" inherits="ZO_HUDManager_Element" tier="HIGH" level="ZO_HIGH_TIER_CENTER_SCREEN_ANNOUNCE">
             <Dimensions x="1160"/>
             <OnInitialized>
                 ZO_CenterScreenAnnounce_Initialize(self)
@@ -350,6 +350,10 @@
                             <Dimensions x="100%"/>
                         </Texture>
                     </Controls>
+                </Control>
+                <Control name="$(parent)HUDElementRef" override="true">
+                    <Anchor point="TOP"/>
+                    <Dimensions x="600" y="125"/>
                 </Control>
             </Controls>
         </TopLevelControl>

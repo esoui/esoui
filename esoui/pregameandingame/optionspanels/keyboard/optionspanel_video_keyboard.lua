@@ -350,3 +350,27 @@ panelBuilder:AddSetting({
     header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_GRAPHICS,
     indentLevel = 1,
 })
+
+panelBuilder:AddSetting({
+    controlName = "Options_Video_VFX_Self_Intensity",
+    settingType = SETTING_TYPE_GRAPHICS,
+    settingId = GRAPHICS_SETTING_VFX_SELF_INTENSITY,
+    header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_GRAPHICS,
+    indentLevel = 1,
+})
+
+panelBuilder:AddSetting({
+    controlName = "Options_Video_VFX_Friendly_Intensity",
+    settingType = SETTING_TYPE_GRAPHICS,
+    settingId = GRAPHICS_SETTING_VFX_FRIENDLY_INTENSITY,
+    header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_GRAPHICS,
+    indentLevel = 1,
+})
+
+panelBuilder:AddSetting({
+    controlName = "Options_Video_VFX_Enemy_Intensity",
+    settingType = SETTING_TYPE_GRAPHICS,
+    settingId = GRAPHICS_SETTING_VFX_ENEMY_INTENSITY,
+    header = SI_GRAPHICS_OPTIONS_VIDEO_CATEGORY_GRAPHICS,
+    indentLevel = 1,
+})

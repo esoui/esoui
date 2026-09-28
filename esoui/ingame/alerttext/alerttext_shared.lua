@@ -1,32 +1,26 @@
 -- Singleton that registers for the alert events
-local ZO_AlertText_Manager = ZO_Object:Subclass()
-
-function ZO_AlertText_Manager:New()
-    local manager = ZO_Object.New(self)
-    manager:Initialize()
-    return manager
-end
+local ZO_AlertText_Manager = ZO_InitializingObject:Subclass()
 
 local function OnAlertEvent(eventCode, ...)
-	local alertHandlers = ZO_AlertText_GetHandlers()
-	if alertHandlers[eventCode] then
-		local category, message, soundId, noSuppression = alertHandlers[eventCode](...)
-		if category then
-			if message and message ~= "" then
-				if noSuppression then
-					ZO_AlertNoSuppression(category, soundId, message)
-				else
-					ZO_Alert(category, soundId, message)
-				end
-			else
-				ZO_SoundAlert(category, soundId)
-			end
-		end
-	end
+    local alertHandlers = ZO_AlertText_GetHandlers()
+    if alertHandlers[eventCode] then
+        local category, message, soundId, noSuppression = alertHandlers[eventCode](...)
+        if category then
+            if message and message ~= "" then
+                if noSuppression then
+                    ZO_AlertNoSuppression(category, soundId, message)
+                else
+                    ZO_Alert(category, soundId, message)
+                end
+            else
+                ZO_SoundAlert(category, soundId)
+            end
+        end
+    end
 end
 
 function ZO_AlertEvent(eventId, ...)
-	OnAlertEvent(eventId, ...)
+    OnAlertEvent(eventId, ...)
 end
 
 function ZO_AlertText_Manager:Initialize()
@@ -49,15 +43,8 @@ end
 
 ALERT_EVENT_MANAGER = ZO_AlertText_Manager:New()
 
-
 -- Base Class
-ZO_AlertText_Base = ZO_Object:Subclass()
-
-function ZO_AlertText_Base:New(...)
-    local manager = ZO_Object.New(self)
-    manager:Initialize(...)
-    return manager
-end
+ZO_AlertText_Base = ZO_InitializingObject:Subclass()
 
 function ZO_AlertText_Base:Initialize(control)
     -- Should be overridden
@@ -67,22 +54,22 @@ end
 -- Previous colors: error = INTERFACE_GENERAL_COLOR_ERROR, alert = INTERFACE_GENERAL_COLOR_ALERT, colorType = INTERFACE_COLOR_TYPE_GENERAL
 local AlertParams =
 {
-	[UI_ALERT_CATEGORY_ERROR] =
-	{
-		color = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_SELECTED)),
-	},
-	[UI_ALERT_CATEGORY_ALERT] =
-	{
-		color = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_SELECTED)),
-	},
+    [UI_ALERT_CATEGORY_ERROR] =
+    {
+        color = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_SELECTED)),
+    },
+    [UI_ALERT_CATEGORY_ALERT] =
+    {
+        color = ZO_ColorDef:New(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_SELECTED)),
+    },
 }
 
 function ZO_AlertText_Base:GetAlertColor(category)
-	local color = AlertParams[UI_ALERT_CATEGORY_ALERT].color
-	local params = AlertParams[category]
-	if(params) then
-		color = params.color or color
-	end
+    local color = AlertParams[UI_ALERT_CATEGORY_ALERT].color
+    local params = AlertParams[category]
+    if params then
+        color = params.color or color
+    end
 
     return color
 end
@@ -97,28 +84,38 @@ end
 
 --[[ Global Alert Functions ]]--
 function ZO_Alert(category, soundId, message, ...)
-    if(not message) then return end
-    message = zo_strformat(message, ...)
-    if(message == "") then return end
+    if not message then 
+        return
+    end
 
-	if(ALERT_EVENT_MANAGER:ShouldDisplayMessage(message)) then
-		InternalPerformAlert(category, soundId, message)
+    message = zo_strformat(message, ...)
+    if message == "" then
+        return
+    end
+
+    if ALERT_EVENT_MANAGER:ShouldDisplayMessage(message) then
+        InternalPerformAlert(category, soundId, message)
     else
         ZO_SoundAlert(category, soundId)
     end
 end
 
 function ZO_AlertNoSuppression(category, soundId, message, ...)
-	if(not message) then return end
-    message = zo_strformat(message, ...)
-    if(message == "") then return end
+    if not message then
+        return
+    end
 
-	InternalPerformAlert(category, soundId, message)
+    message = zo_strformat(message, ...)
+    if message == "" then
+        return
+    end
+
+    InternalPerformAlert(category, soundId, message)
 end
 
 function ZO_SoundAlert(category, soundId)
-	if(soundId and soundId ~= "" and ALERT_EVENT_MANAGER:ShouldDisplayMessage(soundId)) then
-		PlaySound(soundId)
+    if soundId and soundId ~= "" and ALERT_EVENT_MANAGER:ShouldDisplayMessage(soundId) then
+        PlaySound(soundId)
         ALERT_EVENT_MANAGER:AddRecent(soundId)
-	end
+    end
 end

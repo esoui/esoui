@@ -115,7 +115,12 @@ function ZO_CompanionCharacter_Keyboard:BuildNavigationTree()
             pressedIcon = "EsoUI/Art/Companion/Keyboard/companion_inventory_down.dds",
             mouseoverIcon = "EsoUI/Art/Companion/Keyboard/companion_inventory_over.dds",
             statusIcon = function()
+
                 if SHARED_INVENTORY and SHARED_INVENTORY:AreAnyItemsNew(ZO_InventoryUtils_DoesNewItemMatchFilterType, ITEMFILTERTYPE_COMPANION, BAG_BACKPACK) then
+
+
+
+
                     return ZO_KEYBOARD_NEW_ICON
                 end
                 return nil

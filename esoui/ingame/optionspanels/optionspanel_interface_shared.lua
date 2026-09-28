@@ -41,33 +41,49 @@ local ZO_OptionsPanel_Interface_ControlData =
     --UI Settings
     [SETTING_TYPE_UI] =
     {
-        [UI_SETTING_PRIMARY_PLAYER_NAME_KEYBOARD] =
+        [UI_SETTING_PRIMARY_PLAYER_NAME_PC] =
         {
             controlType = OPTIONS_FINITE_LIST,
             system = SETTING_TYPE_UI,
             panel = SETTING_PANEL_INTERFACE,
-            settingId = UI_SETTING_PRIMARY_PLAYER_NAME_KEYBOARD,
-            text = SI_INTERFACE_OPTIONS_PRIMARY_PLAYER_NAME_KEYBOARD,
-            tooltipText = SI_INTERFACE_OPTIONS_PRIMARY_PLAYER_NAME_TOOLTIP_KEYBOARD,
-            valid = {PRIMARY_PLAYER_NAME_SETTING_PREFER_USERID, PRIMARY_PLAYER_NAME_SETTING_PREFER_CHARACTER,},
+            settingId = UI_SETTING_PRIMARY_PLAYER_NAME_PC,
+            text = SI_INTERFACE_OPTIONS_PRIMARY_PLAYER_NAME,
+            tooltipText = SI_INTERFACE_OPTIONS_PRIMARY_PLAYER_NAME_TOOLTIP,
+            exists = ZO_IsPCUI,
+            valid =
+            {
+                PRIMARY_PLAYER_NAME_SETTING_PREFER_CROSSPLAY,
+                PRIMARY_PLAYER_NAME_SETTING_PREFER_CHARACTER,
+            },
             valueStrings =
             {
-                function() return zo_strformat(GetString("SI_PRIMARYPLAYERNAMESETTING", PRIMARY_PLAYER_NAME_SETTING_PREFER_USERID), ZO_GetPlatformAccountLabel()) end,
-                function() return GetString("SI_PRIMARYPLAYERNAMESETTING", PRIMARY_PLAYER_NAME_SETTING_PREFER_CHARACTER) end
+                function() return GetString("SI_PRIMARYPLAYERNAMESETTING", PRIMARY_PLAYER_NAME_SETTING_PREFER_CROSSPLAY) end,
+                function() return GetString("SI_PRIMARYPLAYERNAMESETTING", PRIMARY_PLAYER_NAME_SETTING_PREFER_CHARACTER) end,
             }
         },
-        [UI_SETTING_PRIMARY_PLAYER_NAME_GAMEPAD] =
+        [UI_SETTING_PRIMARY_PLAYER_NAME_CONSOLE] =
         {
             controlType = OPTIONS_FINITE_LIST,
             system = SETTING_TYPE_UI,
             panel = SETTING_PANEL_INTERFACE,
-            settingId = UI_SETTING_PRIMARY_PLAYER_NAME_GAMEPAD,
-            text = SI_GAMEPAD_INTERFACE_OPTIONS_PRIMARY_PLAYER_NAME,
-            tooltipText = SI_GAMEPAD_INTERFACE_OPTIONS_PRIMARY_PLAYER_NAME_TOOLTIP,
-            valid = {PRIMARY_PLAYER_NAME_SETTING_PREFER_USERID, PRIMARY_PLAYER_NAME_SETTING_PREFER_CHARACTER,},
+            settingId = UI_SETTING_PRIMARY_PLAYER_NAME_CONSOLE,
+            text = SI_INTERFACE_OPTIONS_PRIMARY_PLAYER_NAME,
+            tooltipText = SI_INTERFACE_OPTIONS_PRIMARY_PLAYER_NAME_TOOLTIP,
+            exists = ZO_IsConsoleOrGameCoreUI,
+            valid =
+            {
+                PRIMARY_PLAYER_NAME_SETTING_PREFER_PLATFORM,
+                 
+
+
+                PRIMARY_PLAYER_NAME_SETTING_PREFER_CHARACTER,
+            },
             valueStrings =
             {
-                function() return zo_strformat(GetString("SI_PRIMARYPLAYERNAMESETTING", PRIMARY_PLAYER_NAME_SETTING_PREFER_USERID), ZO_GetPlatformAccountLabel()) end,
+                function() return zo_strformat(GetString("SI_PRIMARYPLAYERNAMESETTING", PRIMARY_PLAYER_NAME_SETTING_PREFER_PLATFORM), ZO_GetPlatformAccountLabel()) end,
+                
+
+
                 function() return GetString("SI_PRIMARYPLAYERNAMESETTING", PRIMARY_PLAYER_NAME_SETTING_PREFER_CHARACTER) end
             }
         },

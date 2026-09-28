@@ -34,6 +34,11 @@ function ZO_ZoneStories_Shared:InitializeGridList()
     self.gridList:AddHeaderTemplate(activityCompletionData.headerTemplate, activityCompletionData.headerHeight, ZO_DefaultGridTileHeaderSetup)
     self.gridList:SetHeaderPrePadding(self.templateData.headerPrePadding)
 
+
+
+
+
+
     self:BuildGridList()
 end
 
@@ -127,6 +132,9 @@ function ZO_ZoneStories_Shared:BuildGridList()
         self.gridList:ClearGridList()
 
         self:BuildAchievementList()
+
+
+
         self:BuildActivityCompletionList()
 
         self.gridList:CommitGridList()
@@ -136,7 +144,7 @@ end
 function ZO_ZoneStories_Shared:BuildAchievementList()
     if self.gridList then
         local zoneId = self:GetSelectedZoneId()
-        local numAchievements = GetNumUnblockedZoneStoryActivitiesForZoneCompletionType(zoneId, ZONE_COMPLETION_TYPE_FEATURED_ACHIEVEMENTS)
+        local numAchievements = GetNumUnblockedZoneStoryActivitiesForZoneCompletionTypeAndIndex(zoneId, ZONE_COMPLETION_TYPE_FEATURED_ACHIEVEMENTS)
         for i = 1, numAchievements do
             local achievementId = GetZoneActivityIdForZoneCompletionType(zoneId, ZONE_COMPLETION_TYPE_FEATURED_ACHIEVEMENTS, i)
             local data =
@@ -150,21 +158,59 @@ function ZO_ZoneStories_Shared:BuildAchievementList()
     end
 end
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 function ZO_ZoneStories_Shared:BuildActivityCompletionList()
     if self.gridList then
         local zoneData = self:GetSelectedStoryData()
         if zoneData then
             for _, completionType in ipairs(ZO_ZONE_STORY_ACTIVITY_COMPLETION_TYPES_SORTED_LIST) do
-                if GetNumZoneActivitiesForZoneCompletionType(zoneData.id, completionType) > 0 then
-                    local data =
-                    {
-                        zoneData = zoneData,
-                        completionType = completionType,
-                        gridHeaderName = GetString(SI_ZONE_STORY_ACTIVITY_COMPLETION_HEADER),
-                        gridHeaderTemplate = self.templateData.activityCompletion.headerTemplate,
-                    }
-                    self.lastData = data
-                    self.gridList:AddEntry(data, self.templateData.activityCompletion.entryTemplate)
+                local numZoneActivitiesForCompletionType = GetNumZoneActivitiesForZoneCompletionTypeAndIndex(zoneData.id, completionType)
+                if numZoneActivitiesForCompletionType > 0 then
+                    if DoesZoneStoryActivityCompletionTypeUseIndex(completionType) then
+                        for i = 1, numZoneActivitiesForCompletionType do
+                            local numZoneItemTypes = GetNumZoneActivitiesForZoneCompletionTypeAndIndex(zoneData.id, completionType, i)
+                            if numZoneItemTypes > 0 then
+                                local data =
+                                {
+                                    zoneData = zoneData,
+                                    completionType = completionType,
+                                    completionIndex = i,
+                                    gridHeaderName = GetString(SI_ZONE_STORY_ACTIVITY_COMPLETION_HEADER),
+                                    gridHeaderTemplate = self.templateData.activityCompletion.headerTemplate,
+                                }
+                                self.lastData = data
+                                self.gridList:AddEntry(data, self.templateData.activityCompletion.entryTemplate)
+                            end
+                        end
+                    else
+                        local data =
+                        {
+                            zoneData = zoneData,
+                            completionType = completionType,
+                            gridHeaderName = GetString(SI_ZONE_STORY_ACTIVITY_COMPLETION_HEADER),
+                            gridHeaderTemplate = self.templateData.activityCompletion.headerTemplate,
+                        }
+                        self.lastData = data
+                        self.gridList:AddEntry(data, self.templateData.activityCompletion.entryTemplate)
+                    end
                 end
             end
         end
@@ -194,7 +240,8 @@ function ZO_ZoneStories_Shared:TrackNextActivity()
         if ZO_ZoneStories_Shared.IsZoneCollectibleUnlocked(zoneId) then
             local SET_AUTO_MAP_NAVIGATION_TARGET = true
             local completionType = self:GetTrackedCompletionTypeForSelectedZone()
-            TrackNextActivityForZoneStory(zoneId, completionType, SET_AUTO_MAP_NAVIGATION_TARGET)
+            local NO_COMPLETION_INDEX = nil
+            TrackNextActivityForZoneStory(zoneId, completionType, NO_COMPLETION_INDEX, SET_AUTO_MAP_NAVIGATION_TARGET)
         else
             local lockedZoneCollectibleId = GetCollectibleIdForZone(GetZoneIndex(zoneId))
             local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(lockedZoneCollectibleId)

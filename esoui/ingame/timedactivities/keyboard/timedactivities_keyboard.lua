@@ -49,6 +49,18 @@ function ZO_TimedActivityTile_Keyboard:PostInitializePlatform()
 
     ZO_StatusBar_SetGradientColor(self.progressBar, ZO_XP_BAR_GRADIENT_COLORS)
 
+    -- Propagate the mouse enter and exit events from the title control to the main control
+    -- If we have the title inherit from ZO_PropagateMouseOverBehavior then the named mouse handlers
+    -- will not be called by the scroll list on commit since it only calls the unnamed handler
+    local titleLabel = self:GetTitleLabel()
+    ZO_PostHookHandler(titleLabel, "OnMouseEnter", function()
+        self:OnMouseEnter()
+    end)
+
+    ZO_PostHookHandler(titleLabel, "OnMouseExit", function()
+        self:OnMouseExit()
+    end)
+
     self.keybindStripDescriptor =
     {
         -- Claim

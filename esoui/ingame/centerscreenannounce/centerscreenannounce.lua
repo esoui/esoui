@@ -50,6 +50,9 @@ local MAX_SMALL_LINE_FADE_OUT_TIME = 3400
 local MAX_SMALL_TEXT_LINES = 4
 local MAX_MAJOR_TEXT_LINES = 2
 
+ZO_CENTER_SCREEN_ANNOUNCE_KEYBOARD_OFFSET_Y = 230
+ZO_CENTER_SCREEN_ANNOUNCE_GAMEPAD_OFFSET_Y = 290
+
 ---------------------------------------------
 -- Center Screen Player Progress Bar Params
 ---------------------------------------------
@@ -1211,6 +1214,18 @@ do
 
         self.control:SetHandler("OnUpdate", OnCenterScreenAnnounceUpdate)
 
+        local KEYBOARD_CONFIG =
+        {
+            defaultAnchor = ZO_Anchor:New(TOP, nil, TOP, 0, ZO_CENTER_SCREEN_ANNOUNCE_KEYBOARD_OFFSET_Y),
+        }
+        local GAMEPAD_CONFIG =
+        {
+            defaultAnchor = ZO_Anchor:New(TOP, nil, TOP, 0, ZO_CENTER_SCREEN_ANNOUNCE_GAMEPAD_OFFSET_Y)
+        }
+        local DISPLAY_NAME = GetString(SI_HUD_EDITOR_CENTER_SCREEN_ANNOUNCE)
+        HUD_MANAGER:RegisterKeyboardElement(control, DISPLAY_NAME, KEYBOARD_CONFIG)
+        HUD_MANAGER:RegisterGamepadElement(control, DISPLAY_NAME, GAMEPAD_CONFIG)
+
         self.platformStyle = ZO_PlatformStyle:New(function() self:ApplyPlatformStyle() end)
 
         -- Events
@@ -1790,15 +1805,15 @@ local setupFunctions =
             if messageParams:GetShowBackground() then
                 local backgroundControl = self.backgroundContainer:GetNamedChild("BG")
                 backgroundControl:ClearAnchors()
-                backgroundControl:SetAnchor(TOP, largeMessageLine.largeText, TOP, 0, -70)
+                backgroundControl:SetAnchor(TOP, largeMessageLine.largeText, TOP, 0, -70, ANCHOR_CONSTRAINS_Y)
                 if messageParams:GetSecondaryText() then
                     if messageParams:GetLargeInformationIconData() then
-                        backgroundControl:SetAnchor(BOTTOM, largeMessageLine.largeInformationIcon, BOTTOM, 0, 100)
+                        backgroundControl:SetAnchor(BOTTOM, largeMessageLine.largeInformationIcon, BOTTOM, 0, 100, ANCHOR_CONSTRAINS_Y)
                     else
-                        backgroundControl:SetAnchor(BOTTOM, largeMessageLine.smallCombinedText, BOTTOM, 0, 80)
+                        backgroundControl:SetAnchor(BOTTOM, largeMessageLine.smallCombinedText, BOTTOM, 0, 80, ANCHOR_CONSTRAINS_Y)
                     end
                 else
-                    backgroundControl:SetAnchor(BOTTOM, largeMessageLine.largeText, BOTTOM, 0, 70)
+                    backgroundControl:SetAnchor(BOTTOM, largeMessageLine.largeText, BOTTOM, 0, 70, ANCHOR_CONSTRAINS_Y)
                 end
                 self.backgroundContainerFadeInTimeline:PlayFromStart()
                 largeMessageLine:PlayWipeFadeAnimation()

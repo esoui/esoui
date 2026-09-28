@@ -300,8 +300,8 @@ do
 
     SLASH_COMMANDS[RANDOM_ROLL_COMMAND] = ZO_RandomRollCommand
 
-    local function OnRandomDiceRoll(_, displayName, characterName, maxValue, numRolls, modifier, rollResult)
-        local playerName = ZO_GetPrimaryPlayerName(displayName, characterName)
+    local function OnRandomDiceRoll(_, crossplayDisplayName, characterName, maxValue, numRolls, modifier, rollResult, platformDisplayName)
+        local playerName = ZO_GetPrimaryPlayerName(crossplayDisplayName, characterName, platformDisplayName)
         local maxValueParam = ZO_SELECTED_TEXT:Colorize(maxValue)
         local numRollsParam = ZO_SELECTED_TEXT:Colorize(numRolls)
         local rollResultParam = ZO_SELECTED_TEXT:Colorize(rollResult)
@@ -317,8 +317,8 @@ do
         OutputSystemMessage("%s %s", RANDOM_ROLL_TEXTURE, message)
     end
 
-    local function OnRandomRangeRoll(_, displayName, characterName, minValue, maxValue, rollResult)
-        local playerName = ZO_GetPrimaryPlayerName(displayName, characterName)
+    local function OnRandomRangeRoll(_, crossplayDisplayName, characterName, minValue, maxValue, rollResult, platformDisplayName)
+        local playerName = ZO_GetPrimaryPlayerName(crossplayDisplayName, characterName, platformDisplayName)
         local minValueParam = ZO_SELECTED_TEXT:Colorize(minValue)
         local maxValueParam = ZO_SELECTED_TEXT:Colorize(maxValue)
         local rollResultParam = ZO_SELECTED_TEXT:Colorize(rollResult)

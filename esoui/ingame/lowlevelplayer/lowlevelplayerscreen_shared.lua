@@ -181,22 +181,7 @@ end
 function ZO_LowLevelPlayerScreen_Shared.RewardGridEntrySetup(control, data, selected)
     control.data = data
     control.icon:SetTexture(data:GetPlatformLootIcon())
-
-    if data:GetRewardType() == REWARD_ENTRY_TYPE_REWARD_LIST then
-        local quantity = GetNumRewardListEntries(GetRewardListIdFromReward(data:GetRewardId()))
-        local shouldHideQuantityLabel = not (quantity > 1)
-        if not shouldHideQuantityLabel then
-            quantity = zo_strformat(SI_PROMOTIONAL_EVENT_REWARD_LIST_QUANTITY_FORMATTER, quantity - 1)
-            control.quantityLabel:SetText(quantity)
-        end
-        control.quantityLabel:SetHidden(shouldHideQuantityLabel)
-    elseif data:GetQuantity() > 1 then
-        local quantity = data:GetAbbreviatedQuantity()
-        control.quantityLabel:SetText(quantity)
-        control.quantityLabel:SetHidden(false)
-    else
-        control.quantityLabel:SetHidden(true)
-    end
+    control.quantityLabel:SetText(data:GetFormattedDisplayQuantity())
 
     local alpha = data.claimed and 0.4 or 1
     control.icon:SetAlpha(alpha)

@@ -722,10 +722,10 @@ end
 function ZO_TradeInviteProvider:BuildNotificationList()
     ZO_ClearNumericallyIndexedTable(self.list)
 
-    local inviterCharacterName, aMillisecondsSinceRequest, inviterDisplayName = GetTradeInviteInfo()
-    if(inviterCharacterName ~= "") then
-        local userFacingInviterName = ZO_GetPrimaryPlayerName(inviterDisplayName, inviterCharacterName)
-        local formattedPlayerNames = ZO_GetPrimaryPlayerNameWithSecondary(inviterDisplayName, inviterCharacterName)
+    local inviterCharacterName, aMillisecondsSinceRequest, inviterCrossplayDisplayName, inviterPlatformDisplayName = GetTradeInviteInfo()
+    if inviterCharacterName ~= "" then
+        local userFacingInviterName = ZO_GetPrimaryPlayerName(inviterCrossplayDisplayName, inviterCharacterName, inviterPlatformDisplayName)
+        local formattedPlayerNames = ZO_GetPrimaryPlayerNameWithSecondaryAndTertiary(inviterCrossplayDisplayName, inviterCharacterName, inviterPlatformDisplayName)
         table.insert(self.list,
         {
             dataType = NOTIFICATIONS_REQUEST_DATA,
@@ -1407,16 +1407,16 @@ end
 function ZO_DuelInviteProvider:BuildNotificationList()
     ZO_ClearNumericallyIndexedTable(self.list)
 
-    local duelState, duelPartnerCharacterName, duelPartnerDisplayName = GetDuelInfo()
+    local duelState, duelPartnerCharacterName, duelPartnerCrossplayDisplayName, _, duelPartnerPlatformDisplayName = GetDuelInfo()
     if duelState == DUEL_STATE_INVITE_CONSIDERING then
-        local userFacingInviterName = ZO_GetPrimaryPlayerName(duelPartnerDisplayName, duelPartnerCharacterName)
-        local formattedInviterNames = ZO_GetPrimaryPlayerNameWithSecondary(duelPartnerDisplayName, duelPartnerCharacterName)
+        local displayName = ZO_GetPrimaryPlayerName(duelPartnerCrossplayDisplayName, duelPartnerCharacterName, duelPartnerPlatformDisplayName)
+        local formattedInviterNames = ZO_GetPrimaryPlayerNameWithSecondary(duelPartnerCrossplayDisplayName, duelPartnerCharacterName, duelPartnerPlatformDisplayName)
         table.insert(self.list,
         {
             dataType = NOTIFICATIONS_REQUEST_DATA,
             notificationType = NOTIFICATION_TYPE_DUEL,
             message = zo_strformat(SI_DUEL_INVITE_MESSAGE, formattedInviterNames),
-            shortDisplayText = zo_strformat(SI_NOTIFICATIONS_LIST_ENTRY, userFacingInviterName),
+            shortDisplayText = zo_strformat(SI_NOTIFICATIONS_LIST_ENTRY, displayName),
             characterNameForGamercard = ZO_StripGrammarMarkupFromCharacterName(duelPartnerCharacterName),
             secsSinceRequest = ZO_NormalizeSecondsSince(0),
         })

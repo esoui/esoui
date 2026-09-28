@@ -199,10 +199,18 @@ function ZO_Veterancy_Manager:GetHighestUnlockedRankWithClaimableRewards()
     end
 end
 
-function ZO_Veterancy_Manager:GetCurrentRankName()
+function ZO_Veterancy_Manager:GetCurrentRankRawName()
     local rankData = self:GetCurrentRankData()
     if rankData then
-        return rankData:GetName()
+        return rankData:GetRawName()
+    end
+    return ""
+end
+
+function ZO_Veterancy_Manager:GetCurrentRankFormattedName()
+    local rankData = self:GetCurrentRankData()
+    if rankData then
+        return rankData:GetFormattedName()
     end
     return ""
 end

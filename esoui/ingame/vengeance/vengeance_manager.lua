@@ -55,8 +55,12 @@ function ZO_VengeanceLoadoutData:GetLoadoutIndex()
     return self.index
 end
 
-function ZO_VengeanceLoadoutData:GetName()
+function ZO_VengeanceLoadoutData:GetRawName()
     return GetVengeanceRoleNameAtIndex(self.index)
+end
+
+function ZO_VengeanceLoadoutData:GetFormattedName()
+    return ZO_CachedStrFormat(SI_CAMPAIGN_VENGEANCE_LOADOUT_FORMATTER, self:GetRawName())
 end
 
 function ZO_VengeanceLoadoutData:GetIcon()
@@ -190,10 +194,19 @@ function ZO_VengeanceLoadoutData:GetPerkIconBySlot(slot)
     end
 end
 
-function ZO_VengeanceLoadoutData:GetPerkNameBySlot(slot)
+function ZO_VengeanceLoadoutData:GetRawPerkNameBySlot(slot)
     local perkData = self:GetPerkDataBySlot(slot)
     if perkData then
-        return perkData:GetName()
+        return perkData:GetRawName()
+    else
+        return ZO_VENGEANCE_MANAGER:GetEmptyPerkName()
+    end
+end
+
+function ZO_VengeanceLoadoutData:GetFormattedPerkNameBySlot(slot)
+    local perkData = self:GetPerkDataBySlot(slot)
+    if perkData then
+        return perkData:GetFormattedName()
     else
         return ZO_VENGEANCE_MANAGER:GetEmptyPerkName()
     end
@@ -250,8 +263,12 @@ function ZO_VengeancePerkData:GetSlotIndex()
     return self.slotIndex
 end
 
-function ZO_VengeancePerkData:GetName()
+function ZO_VengeancePerkData:GetRawName()
     return GetVengeancePerkNameAtIndex(self.index)
+end
+
+function ZO_VengeancePerkData:GetFormattedName()
+    return ZO_CachedStrFormat(SI_CAMPAIGN_VENGEANCE_PERK_FORMATTER, self:GetRawName())
 end
 
 function ZO_VengeancePerkData:GetIcon()

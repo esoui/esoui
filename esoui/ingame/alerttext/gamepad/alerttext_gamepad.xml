@@ -22,13 +22,20 @@
     </Animations>
     <Controls>
         <Label name="ZO_AlertLineGamepad" horizontalAlignment="RIGHT" font="ZoFontGamepad34" modifyTextType="UPPERCASE" virtual="true">
+            <DimensionConstraints maxX="750"/>
             <Anchor point="TOPRIGHT"/>
         </Label>
-        <TopLevelControl name="ZO_AlertTextNotificationGamepad" tier="HIGH" level="ZO_HIGH_TIER_ALERT_TEXT">
-            <Anchor point="TOPRIGHT" relativeTo="GuiRoot" offsetX="-15" offsetY="10"/>
+        <TopLevelControl name="ZO_AlertTextNotificationGamepad" inherits="ZO_HUDManager_Element" tier="HIGH" level="ZO_HIGH_TIER_ALERT_TEXT">
+            <Anchor point="TOPRIGHT" relativeTo="GuiRoot" offsetX="-15" offsetY="4"/>
             <OnInitialized>
                 ZO_AlertTextGamepad_OnInitialized(self)
             </OnInitialized>
+            <Controls>
+                <Control name="$(parent)HUDElementRef" override="true">
+                    <Anchor point="TOPRIGHT"/>
+                    <Dimensions x="550" y="115"/>
+                </Control>
+            </Controls>
         </TopLevelControl>
     </Controls>
 </GuiXml>

@@ -183,7 +183,7 @@ function ZO_UISystemManager:Initialize()
 
     self.queuedUISystem = nil
     self.queuedParams = {}
-    self.waitingForMarketAnnouncements = not HasShownMarketAnnouncement()
+    self.waitingForMarketAnnouncements = false
     self.waitingForPromotionalEvents = not HasReceivedPromotionalEventUpdate()
 end
 
@@ -203,29 +203,34 @@ end
 -- This function should only be called once IsPlayerActivated() and self.waitingForPromotionalEvents
 -- are both true.
 function ZO_UISystemManager:TryShowInitialScreen()
+    local hasShownMarketAnnouncement = HasShownMarketAnnouncement()
+    if hasShownMarketAnnouncement or self.waitingForMarketAnnouncements then
+        -- Suppress all announcements after any type of announcement has been shown during the
+        -- current login session or when a request for Market Announcements is pending.
+        return
+    end
+
     -- We only want to show one popup, check each one in priority order
     if TRIAL_ACCOUNT_SPLASH_DIALOG:ShouldShowSplash() then
         TRIAL_ACCOUNT_SPLASH_DIALOG:ShowSplash()
-
         FlagPromotionalEventPersonalCampaignAnnouncementSeen()
         FlagMarketAnnouncementSeen()
     elseif self:TryShowPromotionalEventPersonalCampaignAnnouncement() then
         -- TryShowPromotionalEventPersonalCampaignAnnouncement has handled showing the announcement
-    elseif not HasShownMarketAnnouncement() then
+        FlagMarketAnnouncementSeen()
+    elseif not hasShownMarketAnnouncement then
         local accountTypeId = GetTrialInfo()
         local isFreeTrial = accountTypeId > 0
         local SHOW_INTRO = true
         if (not isFreeTrial) and TAMRIEL_TOMES_MANAGER:TryOpenNewSeasonTamrielTome(SHOW_INTRO) then
             -- TryOpenNewSeasonTamrielTome has handled showing the Tome
-
             FlagPromotionalEventPersonalCampaignAnnouncementSeen()
             FlagMarketAnnouncementSeen()
         else
             RequestMarketAnnouncement()
+            self.waitingForMarketAnnouncements = true
         end
     end
-
-    self.waitingForMarketAnnouncements = not HasShownMarketAnnouncement()
 
     self:TryOpenQueuedUISystem()
 end
@@ -277,6 +282,7 @@ function ZO_UISystemManager:OnMarketAnnouncementUpdated(shouldShow, isLocked)
 
     if shouldShow and not (HasShownMarketAnnouncement() or SCENE_MANAGER:IsShowing("marketAnnouncement")) then
         SCENE_MANAGER:Show("marketAnnouncement")
+        FlagMarketAnnouncementSeen()
     else
         self:TryOpenQueuedUISystem()
     end

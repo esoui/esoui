@@ -28,6 +28,10 @@ function ZO_RumorData:IsNotComplete()
     return not self:IsComplete()
 end
 
+function ZO_RumorData:IsNotStarted()
+    return not (self:IsPending() or self:IsComplete())
+end
+
 function ZO_RumorData:GetDisplayName()
     return GetRumorDisplayName(self.rumorId)
 end
@@ -36,12 +40,24 @@ function ZO_RumorData:GetFormattedDisplayName()
     return zo_strformat(SI_RUMOR_NAME_FORMATTER, GetRumorDisplayName(self.rumorId))
 end
 
+function ZO_RumorData:GetStarterHint()
+    return GetRumorStarterHint(self.rumorId)
+end
+
 function ZO_RumorData:GetBackgroundText()
     return GetRumorBackgroundText(self.rumorId)
 end
 
 function ZO_RumorData:GetCompleteText()
     return GetRumorCompleteText(self.rumorId)
+end
+
+function ZO_RumorData:IsNew()
+    return IsRumorNew(self.rumorId)
+end
+
+function ZO_RumorData:MarkAsSeen()
+    return MarkRumorSeen(self.rumorId)
 end
 
 function ZO_RumorData:GetNumHints()

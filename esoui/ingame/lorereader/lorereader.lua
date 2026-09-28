@@ -40,16 +40,34 @@ function LoreReader:Initialize(control)
     control:RegisterForEvent(EVENT_HIDE_BOOK, OnHideBook)
     control:RegisterForEvent(EVENT_ALL_GUI_SCREENS_RESIZED, OnAllGuiScreensResized)
 
+    local function OnAddOnLoaded(_, name)
+        if name == "ZO_Ingame" then
+            -- these fragments won't exist when this file is loaded, so we need this deferred initialization
+            self.customSceneInfo =
+            {
+                ["journal"] =
+                {
+                    emoteFragment = FRAME_EMOTE_FRAGMENT_JOURNAL,
+                    keyboardFramingFragment = FRAGMENT_GROUP.FRAME_TARGET_STANDARD_RIGHT_PANEL,
+                    gamepadFramingFragment = FRAGMENT_GROUP.FRAME_TARGET_GAMEPAD,
+                },
+                ["inventory"] =
+                {
+                    emoteFragment = FRAME_EMOTE_FRAGMENT_INVENTORY,
+                    keyboardFramingFragment = FRAGMENT_GROUP.FRAME_TARGET_CENTERED_UNIFORM_BLUR,
+                    gamepadFramingFragment = FRAGMENT_GROUP.FRAME_TARGET_GAMEPAD,
+                },
+                
+            }
+
+            EVENT_MANAGER:UnregisterForEvent("LoreReader", EVENT_ADD_ON_LOADED)
+        end
+    end
+    EVENT_MANAGER:RegisterForEvent("LoreReader", EVENT_ADD_ON_LOADED, OnAddOnLoaded)
+
     self:InitializeKeybindStripDescriptors()
 
-    LORE_READER_INVENTORY_SCENE = ZO_Scene:New("loreReaderInventory", SCENE_MANAGER)
-    LORE_READER_LORE_LIBRARY_SCENE = ZO_Scene:New("loreReaderLoreLibrary", SCENE_MANAGER)
-    LORE_READER_DEFAULT_SCENE = ZO_Scene:New("loreReaderDefault", SCENE_MANAGER)
-    GAMEPAD_LORE_READER_INVENTORY_SCENE = ZO_Scene:New("gamepad_loreReaderInventory", SCENE_MANAGER)
-    GAMEPAD_LORE_READER_LORE_LIBRARY_SCENE = ZO_Scene:New("gamepad_loreReaderLoreLibrary", SCENE_MANAGER)
-    GAMEPAD_LORE_READER_DEFAULT_SCENE = ZO_Scene:New("gamepad_loreReaderDefault", SCENE_MANAGER)
-
-    local function OnPCSceneStateChange(oldState, newState)
+    local function OnKeyboardSceneStateChange(oldState, newState)
         if newState == SCENE_SHOWING then
             KEYBIND_STRIP:RemoveDefaultExit()
             KEYBIND_STRIP:AddKeybindButtonGroup(self.PCKeybindStripDescriptor)
@@ -59,6 +77,11 @@ function LoreReader:Initialize(control)
             KEYBIND_STRIP:RestoreDefaultExit()
         end
     end
+
+    LORE_READER_DEFAULT_SCENE = ZO_Scene:New("loreReaderDefault", SCENE_MANAGER)
+    LORE_READER_DEFAULT_SCENE:RegisterCallback("StateChange", OnKeyboardSceneStateChange)
+    LORE_READER_CUSTOM_SCENE_KEYBOARD = ZO_Scene:New("loreReaderCustomKeyboard", SCENE_MANAGER)
+    LORE_READER_CUSTOM_SCENE_KEYBOARD:RegisterCallback("StateChange", OnKeyboardSceneStateChange)
 
     local function OnGamepadSceneStateChange(oldState, newState)
         if newState == SCENE_SHOWING then
@@ -70,17 +93,15 @@ function LoreReader:Initialize(control)
         end
     end
 
-    LORE_READER_INVENTORY_SCENE:RegisterCallback("StateChange", OnPCSceneStateChange)
-    LORE_READER_LORE_LIBRARY_SCENE:RegisterCallback("StateChange", OnPCSceneStateChange)
-    LORE_READER_DEFAULT_SCENE:RegisterCallback("StateChange", OnPCSceneStateChange)
-    GAMEPAD_LORE_READER_INVENTORY_SCENE:RegisterCallback("StateChange", OnGamepadSceneStateChange)
-    GAMEPAD_LORE_READER_LORE_LIBRARY_SCENE:RegisterCallback("StateChange", OnGamepadSceneStateChange)
+    GAMEPAD_LORE_READER_DEFAULT_SCENE = ZO_Scene:New("gamepad_loreReaderDefault", SCENE_MANAGER)
     GAMEPAD_LORE_READER_DEFAULT_SCENE:RegisterCallback("StateChange", OnGamepadSceneStateChange)
+    LORE_READER_CUSTOM_SCENE_GAMEPAD = ZO_Scene:New("loreReaderCustomGamepad", SCENE_MANAGER)
+    LORE_READER_CUSTOM_SCENE_GAMEPAD:RegisterCallback("StateChange", OnGamepadSceneStateChange)
 
     local narrationInfo =
     {
         canNarrate = function()
-            return GAMEPAD_LORE_READER_INVENTORY_SCENE:IsShowing() or GAMEPAD_LORE_READER_LORE_LIBRARY_SCENE:IsShowing() or GAMEPAD_LORE_READER_DEFAULT_SCENE:IsShowing()
+            return GAMEPAD_LORE_READER_DEFAULT_SCENE:IsShowing() or LORE_READER_CUSTOM_SCENE_GAMEPAD:IsShowing()
         end,
         selectedNarrationFunction = function()
             return self:GetNarrationText()
@@ -147,20 +168,36 @@ function LoreReader:InitializeKeybindStripDescriptors()
     ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.gamepadKeybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON)
 end
 
-function LoreReader:GetCustomSceneName(currentSceneName)
-    if currentSceneName == "loreLibrary" or currentSceneName == "bookSetGamepad" then
-        return IsInGamepadPreferredMode() and "gamepad_loreReaderLoreLibrary" or "loreReaderLoreLibrary"
+function LoreReader:GetCustomSceneInfo(currentSceneName)
+    if currentSceneName == "loreLibrary" or currentSceneName == "bookSetGamepad"
+        or currentSceneName == "questJournal" or currentSceneName == "gamepad_quest_journal" then
+        return self.customSceneInfo["journal"]
     elseif currentSceneName == "inventory" or currentSceneName == "gamepad_inventory_item_filter" or currentSceneName == "gamepad_inventory_root" then
-        return IsInGamepadPreferredMode() and "gamepad_loreReaderInventory" or "loreReaderInventory"
+        return self.customSceneInfo["inventory"]
     end
+
+    return nil
 end
 
 function LoreReader:Show(title, body, medium, showTitle, overrideImage, overrideImageTitlePosition)
     local isGamepad = IsInGamepadPreferredMode()
     self:SetupBook(title, body, medium, showTitle, isGamepad, overrideImage, overrideImageTitlePosition)
-    local customSceneName = self:GetCustomSceneName(SCENE_MANAGER:GetCurrentScene():GetName())
-    if customSceneName then
-        SCENE_MANAGER:Push(customSceneName)
+    local customSceneInfo = self:GetCustomSceneInfo(SCENE_MANAGER:GetCurrentScene():GetName())
+    if customSceneInfo then
+        local scene = isGamepad and LORE_READER_CUSTOM_SCENE_GAMEPAD or LORE_READER_CUSTOM_SCENE_KEYBOARD
+
+        if customSceneInfo.emoteFragment then
+            scene:AddTemporaryFragment(customSceneInfo.emoteFragment)
+        end
+
+        local framingFragment = isGamepad and customSceneInfo.gamepadFramingFragment or customSceneInfo.keyboardFramingFragment
+        if type(framingFragment) == "table" then
+            scene:AddTemporaryFragmentGroup(framingFragment)
+        elseif framingFragment then
+            scene:AddTemporaryFragment(framingFragment)
+        end
+
+        SCENE_MANAGER:Push(scene:GetName())
     else
         --If we are not pushing a custom scene, just fall back to the default
         local defaultSceneName = isGamepad and "gamepad_loreReaderDefault" or "loreReaderDefault"

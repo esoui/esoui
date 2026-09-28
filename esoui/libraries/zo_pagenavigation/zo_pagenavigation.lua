@@ -365,7 +365,7 @@ function ZO_PageNavigation:UpdateNavigationButtons()
         local canMoveNext = false
         local canMovePrevious = false
         if currentPage then
-            canMoveNext = self.allowWrapping or currentPage < numPages
+            canMoveNext = self.allowWrapping or currentPage < self:GetHighestPageNumber()
             canMovePrevious = self.allowWrapping or currentPage > self.startingPageNumber
         end
 

@@ -1,12 +1,6 @@
 ZO_ACHIEVEMENTS_ROOT_SUBCATEGORY = "root"
 
-local Achievements_Manager = ZO_CallbackObject:Subclass()
-
-function Achievements_Manager:New(...)
-    local manager = ZO_CallbackObject.New(self)
-    manager:Initialize(...)
-    return manager
-end
+local Achievements_Manager = ZO_InitializingCallbackObject:Subclass()
 
 function Achievements_Manager:Initialize()
     self.searchString = ""
@@ -23,11 +17,19 @@ function Achievements_Manager:Initialize()
             local FORCE_REFRESH = true
             self:SetSearchString(currentSearch, FORCE_REFRESH)
         end
+
+        self:ProcessTrackedAchievement()
     end
 
     EVENT_MANAGER:RegisterForEvent("Achievements_Manager", EVENT_ACHIEVEMENTS_UPDATED, OnAchievementsUpdated)
     EVENT_MANAGER:RegisterForEvent("Achievements_Manager", EVENT_ACHIEVEMENT_AWARDED, OnAchievementsUpdated)
     EVENT_MANAGER:RegisterForEvent("Achievements_Manager", EVENT_ACHIEVEMENTS_SEARCH_RESULTS_READY, function() self:UpdateSearchResults() end)
+
+    local function ProcessTrackedAchievement()
+        self:ProcessTrackedAchievement()
+    end
+
+    EVENT_MANAGER:RegisterForEvent("Achievements_Manager", EVENT_PLAYER_ACTIVATED, ProcessTrackedAchievement)
 end
 
 function Achievements_Manager:ClearSearch(requiresImmediateRefresh)
@@ -98,6 +100,18 @@ function Achievements_Manager:IsInSearchResults(categoryIndex, subcategoryIndex,
         return searchResults[categoryIndex] and searchResults[categoryIndex][effectiveSubcategoryIndex] and searchResults[categoryIndex][effectiveSubcategoryIndex][achievementIndex]
     else
         return true
+    end
+end
+
+function Achievements_Manager:ProcessTrackedAchievement()
+    local trackedAchievementId = GetTrackedAchievement()
+    if trackedAchievementId > 0 and IsAchievementComplete(trackedAchievementId) then
+        local nextAchievementId = GetNextAchievementInLine(trackedAchievementId)
+        if nextAchievementId > 0 then
+            SetTrackedAchievement(nextAchievementId)
+        else
+            SetTrackedAchievement(0)
+        end
     end
 end
 

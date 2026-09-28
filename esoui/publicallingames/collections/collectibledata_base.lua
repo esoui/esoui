@@ -354,6 +354,10 @@ function ZO_CollectibleData_Base:IsCollectibleCategoryCompanionUsable()
     return self:IsCollectibleCategoryUsable(GAMEPLAY_ACTOR_CATEGORY_COMPANION)
 end
 
+function ZO_CollectibleData_Base:IsCollectibleCategoryActiveCompanionUsable()
+    return IsCollectibleCategoryActiveCompanionUsable(self:GetCategoryType())
+end
+
 function ZO_CollectibleData_Base:IsUsable(actorCategory)
     actorCategory = actorCategory or GAMEPLAY_ACTOR_CATEGORY_PLAYER
     return self:IsActiveStateSuppressed(actorCategory) or IsCollectibleUsable(self.collectibleId, actorCategory)
@@ -575,6 +579,11 @@ function ZO_CollectibleData_Base:GetContentRequiresCollectibleText()
         end
     end
     return nil
+end
+
+function ZO_CollectibleData_Base:GetCooldownAndDurationMs()
+    local remaining, duration = GetCollectibleCooldownAndDuration(self.collectibleId)
+    return remaining, duration
 end
 
 -- Pool --

@@ -139,11 +139,17 @@ function ZO_TooltipStyledObject:FormatLabel(label, text, ...)
             end
         end
     end
-    local interfaceHorizontalAlignmentField = self:GetProperty("horizontalAlignment", ...)
-    if(interfaceHorizontalAlignmentField ~= nil) then
-        label:SetHorizontalAlignment(interfaceHorizontalAlignmentField)
+    local horizontalAlignmentField = self:GetProperty("horizontalAlignment", ...)
+    if(horizontalAlignmentField ~= nil) then
+        label:SetHorizontalAlignment(horizontalAlignmentField)
     else
         label:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
+    end
+    local newLineXField = self:GetProperty("newLineX", ...)
+    if(newLineXField ~= nil) then
+        label:SetNewLineX(newLineXField)
+    else
+        label:SetNewLineX(0)
     end
 end
 

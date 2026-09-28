@@ -99,6 +99,10 @@ function ZO_RewardData:SetRewardType(rewardType)
     self.rewardType = rewardType
 end
 
+function ZO_RewardData:SetAdditionalListQuantity(additionalListQuantity)
+    self.additionalListQuantity = additionalListQuantity
+end
+
 function ZO_RewardData:SetValidationFunction(validationFunction)
     self.validationFunction = validationFunction
 end
@@ -240,6 +244,28 @@ function ZO_RewardData:GetRewardType()
     return self.rewardType
 end
 
+function ZO_RewardData:GetAdditionalListQuantity()
+    return self.additionalListQuantity
+end
+
+function ZO_RewardData:GetFormattedAdditionalListQuantity()
+    if self.additionalListQuantity and self.additionalListQuantity > 0 then
+        return zo_strformat(SI_REWARD_LIST_QUANTITY_FORMATTER, self.additionalListQuantity)
+    end
+    return ""
+end
+
+function ZO_RewardData:GetFormattedDisplayQuantity()
+    if self:GetRewardType() == REWARD_ENTRY_TYPE_REWARD_LIST then
+        -- Lists display the number of additional rewards beyond the first
+        return self:GetFormattedAdditionalListQuantity()
+    elseif self:GetQuantity() > 1 then
+        -- Non-lists display the quantity if that quantity is greater than 1
+        return self:GetAbbreviatedQuantity()
+    end
+    return ""
+end
+
 function ZO_RewardData:GetColor()
     return self.colorDef
 end
@@ -278,6 +304,8 @@ end
 ---------------------
 -- Rewards Manager
 ---------------------
+
+local USE_LOWERCASE_NUMBER_SUFFIXES = false
 
 ZO_RewardsManager = ZO_InitializingCallbackObject:Subclass()
 
@@ -599,6 +627,7 @@ end
 function ZO_RewardsManager:GetRewardListEntryInfo(rewardId, quantity, parentChoice)
     local rewardData = ZO_RewardData:New(rewardId, parentChoice)
     local rewardListId = GetRewardListIdFromReward(rewardId)
+    local numRewards = GetNumRewardListEntries(rewardListId)
     local firstRewardListRewardId, firstRewardListRewardType = GetRewardListEntryInfo(rewardListId, 1)
     local icon = nil
     local gamepadIcon = nil
@@ -654,6 +683,8 @@ function ZO_RewardsManager:GetRewardListEntryInfo(rewardId, quantity, parentChoi
     rewardData:SetFormattedName(formattedName)
     rewardData:SetIcon(icon, gamepadIcon)
     rewardData:SetLootIcon(lootIcon, gamepadLootIcon)
+    rewardData:SetAdditionalListQuantity(numRewards - 1)
+
     return rewardData
 end
 

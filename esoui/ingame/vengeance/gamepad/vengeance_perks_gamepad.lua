@@ -22,7 +22,7 @@ function ZO_Vengeance_Perks_Gamepad:Initialize(control)
                 else
                     local loadout = ZO_VENGEANCE_MANAGER:GetEquippedLoadoutData()
                     headerControl:SetColor(ZO_NORMAL_TEXT:UnpackRGBA())
-                    return zo_strformat(SI_CAMPAIGN_VENGEANCE_PERKS_LOADOUT_HEADER, loadout:GetName())
+                    return zo_strformat(SI_CAMPAIGN_VENGEANCE_PERKS_LOADOUT_HEADER, loadout:GetRawName())
                 end
             end
         end,
@@ -173,7 +173,7 @@ function ZO_Vengeance_Perks_Gamepad:RefreshCategories(resetSelectionToTop)
         local perkName
         local perkIcon
         if perkData then
-            perkName = perkData:GetName()
+            perkName = perkData:GetFormattedName()
             perkIcon = perkData:GetIcon()
         else
             perkName = ZO_VENGEANCE_MANAGER:GetEmptyPerkName()
@@ -198,7 +198,7 @@ function ZO_Vengeance_Perks_Gamepad:RefreshPerks(slot, resetSelectionToTop)
     end
 
     for _, perkData in ZO_VENGEANCE_MANAGER:PerkDataIterator({ filterFunction }) do
-        local perkName = perkData:GetName()
+        local perkName = perkData:GetFormattedName()
         local perkIcon = perkData:GetIcon()
         local entryData = ZO_GamepadEntryData:New(perkName, perkIcon)
         entryData:SetDataSource(perkData)

@@ -1,10 +1,12 @@
 <GuiXml>
     <Animations>
+        <!-- TODO DaedricArtifact: Remove public code block when ready -->
         <AnimationTimeline name="ZO_HUDDaedricEnergyMeter_HammerIdle" playbackType="LOOP" loopCount="LOOP_INDEFINITELY">
             <Animations>
                 <TextureAnimation cellsWide="ZO_HUD_DAEDRIC_ENERGY_METER_HAMMER_CELLS" cellsHigh="1" framerate="12"/>
             </Animations>
         </AnimationTimeline>
+        <!-- TODO DaedricArtifact: Remove internal tags when ready -->
         <AnimationTimeline name="ZO_HUDDaedricEnergyMeter_RotateOnce">
             <Animations>
                 <TextureRotateAnimation duration="1500" startRotation="ZO_TWO_PI" endRotation="-ZO_TWO_PI">
@@ -60,6 +62,10 @@
                     <Anchor point="CENTER" relativePoint="TOPLEFT" offsetX="207" offsetY="79"/>
                     <Dimensions x="108" y="108"/>
                 </Control>
+                <Control name="$(parent)HUDElementRef">
+                    <Anchor point="TOPLEFT" offsetX="20" offsetY="30"/>
+                    <Anchor point="BOTTOMRIGHT"/>
+                </Control>
             </Controls>
         </Control>
         <Control name="ZO_HUDDaedricEnergyMeter_GamepadTemplate" virtual="true">
@@ -83,6 +89,10 @@
                     <Anchor point="CENTER" relativePoint="TOPLEFT" offsetX="53" offsetY="64"/>
                     <Dimensions x="128" y="128"/>
                 </Control>
+                <Control name="$(parent)HUDElementRef">
+                    <Anchor point="TOPLEFT" offsetY="5"/>
+                    <Anchor point="BOTTOMRIGHT"/>
+                </Control>
             </Controls>
         </Control>
         <Control name="ZO_HUDDaedricEnergyMeter_WeaponContainer" hidden="true" virtual="true">
@@ -93,6 +103,7 @@
             <!-- Inherits from weapon container -->
             <AnchorFill/>
         </Control>
+        <!-- TODO DaedricArtifact: Remove public code block when ready -->
         <Control name="ZO_HUDDaedricEnergyMeter_Volendrung" inherits="ZO_HUDDaedricEnergyMeter_WeaponContainer" virtual="true">
             <Controls>
                 <Texture name="$(parent)Glow" inherits="ZO_HUDDaedricEnergyMeter_WeaponLayer" textureFile="EsoUI/Art/HUD/Volendrung/DaedricArtifact_Volendrung_BehindIconGLOW.dds"/>
@@ -105,7 +116,8 @@
                 <Texture name="$(parent)Burst2" inherits="ZO_HUDDaedricEnergyMeter_WeaponLayer" hidden="true" textureFile="EsoUI/Art/HUD/Volendrung/DaedricArtifact_Volendrung_OnKILL.dds"/>
             </Controls>
         </Control>
-        <TopLevelControl name="ZO_HUDDaedricEnergyMeter" tier="MEDIUM" hidden="true">
+        <!-- TODO DaedricArtifact: Remove internal tags when ready -->
+        <TopLevelControl name="ZO_HUDDaedricEnergyMeterTopLevel" inherits="ZO_HUDManager_Element" tier="MEDIUM" hidden="true">
             <OnInitialized>
                 ZO_HUDDaedricEnergyMeter_Initialize(self)
             </OnInitialized>
@@ -118,6 +130,7 @@
                     <Controls>
                         <!-- Add new daedric weapon animations here and they will be automatically anchored to match the frame -->
                         <Control name="$(parent)Volendrung" hidden="true" inherits="ZO_HUDDaedricEnergyMeter_Volendrung"/>
+                        <!-- TODO DaedricArtifact: Remove internal tags when ready -->
                     </Controls>
                 </Control>
             </Controls>

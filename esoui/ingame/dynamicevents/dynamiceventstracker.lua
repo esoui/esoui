@@ -29,36 +29,20 @@ function ZO_DynamicEventsTracker:InitializeStyles()
     {
         keyboard =
         {
-            CONTAINER_PRIMARY_ANCHOR = ZO_Anchor:New(TOPLEFT),
-            CONTAINER_SECONDARY_ANCHOR = ZO_Anchor:New(TOPRIGHT),
-            FONT_HEADER = "ZoFontGameShadow",
-            FONT_SUBLABEL = "ZoFontGameShadow",
             FONT_TIMER_TEXT = "ZoFontWinT1",
             COLOR_TIMER_TEXT = INTERFACE_TEXT_COLOR_SELECTED,
             FONT_TIMER_LABEL = "ZoFontWinT1",
             COLOR_TIMER_LABEL = INTERFACE_TEXT_COLOR_NORMAL,
-            TEXT_HORIZONTAL_ALIGNMENT = TEXT_ALIGN_LEFT,
-            TOP_LEVEL_PRIMARY_ANCHOR = ZO_Anchor:New(TOPLEFT, ZO_AdvZoneHUDTracker, BOTTOMLEFT),
-            TOP_LEVEL_SECONDARY_ANCHOR = ZO_Anchor:New(RIGHT, GuiRoot, RIGHT, 0, 0, ANCHOR_CONSTRAINS_X),
 
-            TIMER_TEXT_PRIMARY_ANCHOR = ZO_Anchor:New(TOPLEFT, self.progressBar, BOTTOMLEFT, 0, 2),
-            TIMER_TEXT_SECONDARY_ANCHOR = ZO_Anchor:New(TOPRIGHT, self.progressBar, BOTTOMRIGHT, 0, 2),
-            TIMER_LABEL_PRIMARY_ANCHOR = ZO_Anchor:New(TOPLEFT, self.timerText, BOTTOMLEFT, 0, 2),
-            TIMER_LABEL_SECONDARY_ANCHOR = ZO_Anchor:New(TOPRIGHT, self.timerText, BOTTOMRIGHT, 0, 2),
+            TIMER_TEXT_PRIMARY_ANCHOR = ZO_Anchor:New(TOPRIGHT, self.progressBar, BOTTOMRIGHT, 0, 2),
+            TIMER_LABEL_PRIMARY_ANCHOR = ZO_Anchor:New(TOPRIGHT, self.timerText, BOTTOMRIGHT, 0, 2),
         },
         gamepad =
         {
-            CONTAINER_PRIMARY_ANCHOR = ZO_Anchor:New(TOPLEFT),
-            CONTAINER_SECONDARY_ANCHOR = ZO_Anchor:New(TOPRIGHT, nil, nil, -15, 0),
-            FONT_HEADER = "ZoFontGamepadBold27",
-            FONT_SUBLABEL = "ZoFontGamepad34",
             FONT_TIMER_TEXT = "ZoFontGamepadBold27",
             COLOR_TIMER_TEXT = INTERFACE_TEXT_COLOR_SELECTED,
             FONT_TIMER_LABEL = "ZoFontGamepadBold27",
             COLOR_TIMER_LABEL = INTERFACE_TEXT_COLOR_SELECTED,
-            TEXT_HORIZONTAL_ALIGNMENT = TEXT_ALIGN_RIGHT,
-            TOP_LEVEL_PRIMARY_ANCHOR = ZO_Anchor:New(TOPLEFT, ZO_AdvZoneHUDTracker, BOTTOMLEFT),
-            TOP_LEVEL_SECONDARY_ANCHOR = ZO_Anchor:New(RIGHT, GuiRoot, RIGHT, 0, 0, ANCHOR_CONSTRAINS_X),
 
             TIMER_TEXT_PRIMARY_ANCHOR = ZO_Anchor:New(TOPRIGHT, self.progressBar, BOTTOMRIGHT, 0, 10),
             TIMER_LABEL_PRIMARY_ANCHOR = ZO_Anchor:New(TOPRIGHT, self.timerText, BOTTOMRIGHT, 0, 10),
@@ -66,6 +50,19 @@ function ZO_DynamicEventsTracker:InitializeStyles()
     }
 
     ZO_HUDTracker_Base.InitializeStyles(self)
+end
+
+do
+    local DISPLAY_NAME = GetString(SI_HUD_EDITOR_DYNAMIC_EVENT_TRACKER)
+
+    function ZO_DynamicEventsTracker:GetHUDElementInfo()
+        return DISPLAY_NAME
+    end
+
+    function ZO_DynamicEventsTracker:GetHUDElementOptionKeys()
+        local KEY = "Dynamic"
+        return KEY, DISPLAY_NAME
+    end
 end
 
 function ZO_DynamicEventsTracker:RegisterEvents()
@@ -102,18 +99,12 @@ function ZO_DynamicEventsTracker:ApplyPlatformStyle(style)
     self.timerText:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, style.COLOR_TIMER_TEXT))
     self.timerLabel:SetFont(style.FONT_TIMER_LABEL)
     self.timerLabel:SetColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, style.COLOR_TIMER_LABEL))
-    ZO_ApplyPlatformTemplateToControl(self.progressBar, "ZO_DynamicEventsTracker_ProgressBar")
-end
-
-function ZO_DynamicEventsTracker:GetPrimaryAnchor()
-    return self.currentStyle.TOP_LEVEL_PRIMARY_ANCHOR
-end
-
-function ZO_DynamicEventsTracker:GetSecondaryAnchor()
-    return self.currentStyle.TOP_LEVEL_SECONDARY_ANCHOR
+    ZO_ApplyPlatformTemplateToControl(self.progressBar, "ZO_HUDTracker_Base_ProgressBar")
 end
 
 function ZO_DynamicEventsTracker:OnShown()
+    ZO_HUDTracker_Base.OnShown(self)
+
     self:RefreshTimer()
     self:RefreshAnchors()
 end
@@ -141,7 +132,8 @@ function ZO_DynamicEventsTracker:Update()
         self:RefreshProgress()
     end
     self:GetFragment():SetHiddenForReason("NotInDynamicEvent", not isInDynamicEvent, DEFAULT_HUD_DURATION, DEFAULT_HUD_DURATION)
-    return true
+
+    ZO_HUDTracker_Base.Update(self)
 end
 
 function ZO_DynamicEventsTracker:RefreshTimer()
@@ -156,13 +148,13 @@ function ZO_DynamicEventsTracker:RefreshProgress(currentProgress, maxProgress)
         currentProgress, maxProgress = GetWorldEventCurrentStepProgress(self.worldEventInstanceId)
     end
 
+    local progressBar = self.progressBar
     if maxProgress > 1 then
-        self.progressBar:SetMinMax(0, maxProgress)
-        self.progressBar:SetValue(currentProgress)
-        self.progressBar.progressBarLabel:SetText(string.format("%.0f%%", currentProgress / maxProgress * 100))
-        self.progressBar:SetHidden(false)
+        ZO_StatusBar_SmoothTransition(progressBar, currentProgress, maxProgress)
+        progressBar.progressBarLabel:SetText(string.format("%.0f%%", currentProgress / maxProgress * 100))
+        progressBar:SetHidden(false)
     else
-        self.progressBar:SetHidden(true)
+        progressBar:SetHidden(true)
     end
 end
 
@@ -174,6 +166,12 @@ function ZO_DynamicEventsTracker:RefreshAnchors()
     self:RefreshAnchorSetOnControl(self.timerLabel, style.TIMER_LABEL_PRIMARY_ANCHOR, style.TIMER_LABEL_SECONDARY_ANCHOR)
 end
 
+function ZO_DynamicEventsTracker:GetPriority()
+    return ZO_HUD_TRACKER_PRIORITY.DYNAMIC_EVENTS
+end
+
 function ZO_DynamicEventsTracker.OnInitialized(control)
     DYNAMIC_EVENTS_TRACKER = ZO_DynamicEventsTracker:New(control)
 end
+
+HUD_TRACKER_MANAGER:RegisterTracker("ZO_DynamicEventsTracker_Template", "ZO_DynamicEventsTracker_TL")

@@ -1,7 +1,7 @@
 local SPAM_WARNING_PERIOD_SECONDS = 600
 local g_lastSpamWarnings = {}
 
-function OnSpamWarningReceived(eventCode, spamType)
+local function OnSpamWarningReceived(eventCode, spamType)
     local currentTime = GetFrameTimeSeconds()
     local spamTypeTime = g_lastSpamWarnings[spamType]
 

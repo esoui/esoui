@@ -33,6 +33,18 @@ function ZO_HUDTelvarMeter:Initialize(control)
     self.multiplierFractionalPart = self.multiplierContainer:GetNamedChild("FractionalPart")
     self.control = control
 
+    local KEYBOARD_CONFIG =
+    {
+        defaultAnchor = ZO_Anchor:New(BOTTOMRIGHT),
+    }
+    local GAMEPAD_CONFIG =
+    {
+        defaultAnchor = ZO_Anchor:New(BOTTOMLEFT, nil, BOTTOMLEFT, 5, -5),
+    }
+    local DISPLAY_NAME = GetString(SI_HUD_EDITOR_TEL_VAR_METER)
+    self.keyboardHUDElement = HUD_MANAGER:RegisterKeyboardElement(control, DISPLAY_NAME, KEYBOARD_CONFIG)
+    self.gamepadHUDElement = HUD_MANAGER:RegisterGamepadElement(control, DISPLAY_NAME, GAMEPAD_CONFIG)
+
     -- Set up platform styles
     self.keyboardStyle = 
     { 
@@ -44,6 +56,7 @@ function ZO_HUDTelvarMeter:Initialize(control)
             font = "ZoFontGameLargeBold",
             iconSide = RIGHT,
         },
+        hudElement = self.keyboardHUDElement,
     }
     self.gamepadStyle = 
     { 
@@ -55,6 +68,7 @@ function ZO_HUDTelvarMeter:Initialize(control)
             font = "ZoFontGamepadHeaderDataValue",
             iconSide = RIGHT,
         },
+        hudElement = self.gamepadHUDElement,
     }
     ZO_PlatformStyle:New(function(...) self:UpdatePlatformStyle(...) end, self.keyboardStyle, self.gamepadStyle)
 
@@ -154,6 +168,7 @@ end
 function ZO_HUDTelvarMeter:UpdatePlatformStyle(styleTable)
     ApplyTemplateToControl(self.control, styleTable.template)
     ZO_CurrencyControl_SetSimpleCurrency(self.telvarDisplayControl, CURT_TELVAR_STONES, GetCurrencyAmount(CURT_TELVAR_STONES, CURRENCY_LOCATION_CHARACTER), styleTable.currencyOptions, CURRENCY_SHOW_ALL) 
+    styleTable.hudElement:RevertOffsetModifications()
 
     local isMaxThreshold = IsMaxTelvarStoneMultiplierThreshold(self.telvarStoneThreshold)
     self.meterBarControl:SetHidden(isMaxThreshold)

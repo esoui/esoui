@@ -49,8 +49,8 @@
                 <Texture name="$(parent)AccessoriesSection" inherits="ZO_CharacterSheetDivider">
                     <Anchor point="TOPLEFT" offsetY="314"/>
                     <OnInitialized>
-                        self:GetNamedChild("Text"):SetText(GetString("SI_EQUIPSLOTVISUALCATEGORY", EQUIP_SLOT_VISUAL_CATEGORY_ACCESSORIES))
-                    </OnInitialized>
+                            self:GetNamedChild("Text"):SetText(GetString("SI_EQUIPSLOTVISUALCATEGORY", EQUIP_SLOT_VISUAL_CATEGORY_ACCESSORIES))
+                        </OnInitialized>
                 </Texture>
                 <Button name="$(parent)EquipmentSlotsNeck" inherits="ZO_InventoryEquippedSlot">
                     <Anchor point="TOPLEFT" offsetX="10" offsetY="345"/>
@@ -65,8 +65,8 @@
                 <Texture name="$(parent)WeaponsSection" inherits="ZO_CharacterSheetDivider">
                     <Anchor point="TOPLEFT" offsetY="400"/>
                     <OnInitialized>
-                        self:GetNamedChild("Text"):SetText(GetString("SI_EQUIPSLOTVISUALCATEGORY", EQUIP_SLOT_VISUAL_CATEGORY_WEAPONS))
-                    </OnInitialized>
+                            self:GetNamedChild("Text"):SetText(GetString("SI_EQUIPSLOTVISUALCATEGORY", EQUIP_SLOT_VISUAL_CATEGORY_WEAPONS))
+                        </OnInitialized>
                 </Texture>
                 <Button name="$(parent)EquipmentSlotsMainHand" inherits="ZO_InventoryWeaponSlot">
                     <Anchor point="TOPLEFT" offsetX="10" offsetY="432"/>

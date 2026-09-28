@@ -11,6 +11,7 @@ local ITEM_IS_HIDDEN_TEXTURE = "EsoUI/Art/Inventory/inventory_icon_hiddenBy.dds"
 local MAIL_ATTACHED_TEXTURE = "EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_equipped.dds"
 local TRADE_ITEM_TEXTURE = "EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_equipped.dds"
 local ACHIEVEMENT_EARNED_TEXTURE = "EsoUI/Art/Inventory/Gamepad/gp_inventory_icon_equipped.dds"
+local PINNED_TEXTURE = "EsoUI/Art/Buttons/Gamepad/gp_trackingPin.dds"
 local CAN_LEVEL_TEXTURE = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_statusIcon_pointsToSpend.dds"
 local UPGRADE_SKILL_TEXTURE = "EsoUI/Art/Progression/Gamepad/gp_purchase.dds"
 local ASSISTED_TEXTURE = "EsoUI/Art/Journal/Gamepad/gp_trackedQuestIcon.dds"
@@ -24,6 +25,7 @@ local PRIMARY_RESIDENCE_TEXTURE = "EsoUI/Art/Collections/PrimaryHouse.dds"
 local LISTED_RESIDENCE_TEXTURE = "EsoUI/Art/HouseTours/houseTours_listed.dds"
 local HOUSE_TOURS_FAVORITED_TEXTURE = "EsoUI/Art/HouseTours/houseTours_favorite.dds"
 local SKILLS_SUBCLASSING_TRAINING_TEXTURE = "EsoUI/Art/Progression/Gamepad/gp_training.dds"
+local BOOK_TEXTURE = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_loreLibrary.dds"
 
 local NORMAL_FONT_SELECTED = "ZoFontGamepad42"
 local NORMAL_FONT_UNSELECTED = "ZoFontGamepad34"
@@ -410,6 +412,10 @@ local function ZO_SharedGamepadEntryStatusIndicatorSetup(statusIndicator, data)
             statusIndicator:AddIcon(ACHIEVEMENT_EARNED_TEXTURE, NO_TINT, GetString(SI_SCREEN_NARRATION_ACHIEVEMENT_EARNED_ICON_NARRATION))
         end
 
+        if data.isPinned then
+            statusIndicator:AddIcon(PINNED_TEXTURE, NO_TINT, GetString(SI_SCREEN_NARRATION_PINNED_ICON_NARRATION))
+        end
+
         if data:CanLevel() then
             statusIndicator:AddIcon(CAN_LEVEL_TEXTURE, NO_TINT, GetString(SI_SCREEN_NARRATION_AVAILABLE_ICON_NARRATION))
         end
@@ -481,6 +487,10 @@ local function ZO_SharedGamepadEntryStatusIndicatorSetup(statusIndicator, data)
 
         if data.isSkillLineInTraining then
             statusIndicator:AddIcon(SKILLS_SUBCLASSING_TRAINING_TEXTURE, NO_TINT, GetString(SI_SCREEN_NARRATION_TRAINING_ICON_NARRATION))
+        end
+
+        if data.hasBook then
+            statusIndicator:AddIcon(BOOK_TEXTURE)
         end
 
         statusIndicator:Show()

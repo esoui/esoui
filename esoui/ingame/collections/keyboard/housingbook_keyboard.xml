@@ -15,6 +15,9 @@
                             <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT" offsetY="5"/>
                         </Label>
                         <Control name="$(parent)ScrollContainer" override="true">
+                            <Dimensions y="330"/>
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Image" relativePoint="BOTTOMLEFT" offsetY="10"/>
+                            <Anchor point="BOTTOMRIGHT" offsetY="-32"/>
                             <Controls>
                                 <Control name="$(parent)ScrollChild" override="true">
                                     <Controls>

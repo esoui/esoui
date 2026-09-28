@@ -96,6 +96,7 @@ function ZO_GamepadTradingHouse_BrowseResults:SetupResultItemRow(control, itemDa
     -- icon/stack count
     control.slotIcon:SetTexture(itemData.icon)
     if itemData.stackCount and itemData.stackCount > 1 then
+        local USE_LOWERCASE_NUMBER_SUFFIXES = false
         control.slotStackCount:SetText(ZO_AbbreviateAndLocalizeNumber(itemData.stackCount, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES))
         control.slotStackCount:SetHidden(false)
     else

@@ -1,9 +1,9 @@
 <GuiXml>
     <Controls>
-        <TopLevelControl name="ZO_ActivityTracker" inherits="ZO_HUDTracker_Base_Template">
+        <Control name="ZO_ActivityTracker_Template" inherits="ZO_HUDTracker_Base_Template" virtual="true">
             <OnInitialized>
                 ZO_ActivityTracker_OnInitialized(self)
             </OnInitialized>
-        </TopLevelControl>
+        </Control>
     </Controls>
 </GuiXml>

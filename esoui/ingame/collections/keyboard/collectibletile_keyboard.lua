@@ -367,7 +367,7 @@ function ZO_CollectibleTile_Keyboard:OnUpdateCooldowns()
     else
         local collectibleData = self.collectibleData
         if collectibleData and collectibleData:IsUsable(self:GetActorCategory()) then
-            local remaining, duration = GetCollectibleCooldownAndDuration(collectibleData:GetId())
+            local remaining, duration = collectibleData:GetCooldownAndDurationMs()
             if remaining > 0 and duration > 0 then
                 self.cooldownDuration = duration
                 self.cooldownStartTime = GetFrameTimeMilliseconds() - (duration - remaining)

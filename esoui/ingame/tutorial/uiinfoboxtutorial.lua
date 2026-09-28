@@ -24,6 +24,11 @@ function ZO_UiInfoBoxTutorial:Initialize()
         noChoiceCallback = function(dialog)
             dialog.data.owner:RemoveTutorial(dialog.data.tutorialIndex, TUTORIAL_SEEN)
         end,
+        drawTier = function()
+            if SYSTEMS:IsShowing("hudEditor") then
+                return DT_HIGH
+            end
+        end,
         buttons =
         {
             {

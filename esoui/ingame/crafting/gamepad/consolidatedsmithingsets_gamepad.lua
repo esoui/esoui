@@ -303,7 +303,7 @@ end
 function ZO_ConsolidatedSmithingSetSelection_Gamepad:InitializeLists()
     local function SetupCategoryList(list)
         list:AddDataTemplate("ZO_GamepadItemEntryTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, ZO_ConsolidatedSmithingSetCategoryData.Equals, "DefaultCategory")
-        list:AddDataTemplate("ZO_ConsolidatedSmithingSetCategory_Gamepad_Template", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, ZO_ConsolidatedSmithingSetCategoryData.Equals, "Category")
+        list:AddDataTemplate("ZO_GamepadMenuEntryWithBarTemplate", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, ZO_ConsolidatedSmithingSetCategoryData.Equals, "Category")
     end
 
     local function SetupSetsList(list)
@@ -359,7 +359,7 @@ do
                     end
                     return false
                 end
-                list:AddEntry("ZO_ConsolidatedSmithingSetCategory_Gamepad_Template", CreateCategoryEntry(categoryData, ShouldShowQuestPin))
+                list:AddEntry("ZO_GamepadMenuEntryWithBarTemplate", CreateCategoryEntry(categoryData, ShouldShowQuestPin))
             end
         end
 

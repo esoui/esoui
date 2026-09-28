@@ -35,6 +35,7 @@ local ZONE_DISPLAY_TYPE_ICONS =
     [ZONE_DISPLAY_TYPE_ZONE_STORY] = "EsoUI/Art/Icons/mapKey/mapKey_zoneStory.dds",
     [ZONE_DISPLAY_TYPE_ENDLESS_DUNGEON] = "EsoUI/Art/Icons/mapKey/mapKey_endlessDungeon.dds",
     [ZONE_DISPLAY_TYPE_ADVENTURE_ZONE] = "EsoUI/Art/Icons/mapKey/mapKey_adventureZone.dds",
+    [ZONE_DISPLAY_TYPE_SOLO_DUNGEON] = "EsoUI/Art/Icons/mapKey/mapKey_solo_dungeon.dds",
 }
 
 function ZO_GetZoneDisplayTypeIcon(zoneDisplayType)

@@ -25,7 +25,7 @@ function ZO_VeterancyRank:Initialize(control)
         else
             InformationTooltip:AddLine(zo_strformat(SI_VETERANCY_ACTIVE_TOOLTIP
                 , ZO_VETERANCY_MANAGER:GetCurrentRank()
-                , ZO_VETERANCY_MANAGER:GetCurrentRankName()
+                , ZO_VETERANCY_MANAGER:GetCurrentRankRawName()
                 , ZO_CommaDelimitNumber(ZO_VETERANCY_MANAGER:GetCurrentTierProgress())
                 , ZO_CommaDelimitNumber(ZO_VETERANCY_MANAGER:GetCurrentTierTotal()))
                 , "ZoFontGameMedium", r, g, b, TOPLEFT, MODIFY_TEXT_TYPE_NONE, TEXT_ALIGN_CENTER, FULL_WIDTH)
@@ -55,7 +55,7 @@ function ZO_VeterancyRank:Refresh()
         end
 
         self.valueLabel:SetText(veterancyRankData:GetIndex())
-        self.nameLabel:SetText(veterancyRankData:GetName())
+        self.nameLabel:SetText(veterancyRankData:GetFormattedName())
         self.iconTexture:SetTexture(veterancyRankData:GetIcon())
         self.statusBar:SetValue(veterancyRankData:GetProgressPercent())
     end

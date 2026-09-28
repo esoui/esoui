@@ -239,13 +239,9 @@ function ZO_ReturningPlayerRewardScreen_Shared.RewardGridEntrySetup(control, dat
         control.completeMark:SetHidden(true)
         control.icon:SetHidden(false)
         control.icon:SetTexture(data:GetPlatformLootIcon())
-        if data:GetQuantity() > 1 then
-            local quantity = data:GetAbbreviatedQuantity()
-            control.quantityLabel:SetText(quantity)
-            control.quantityLabel:SetHidden(false)
-        else
-            control.quantityLabel:SetHidden(true)
-        end
+        control.quantityLabel:SetText(data:GetFormattedDisplayQuantity())
+        control.quantityLabel:SetHidden(false)
+
         if data.type == ZO_RETURNING_PLAYER_REWARD_TYPE.DAILY_REWARD then
             if data.index > GetNumClaimableReturningPlayerRewards() then
                 control.icon:SetDesaturation(1)

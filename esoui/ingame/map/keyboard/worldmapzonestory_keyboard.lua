@@ -36,7 +36,7 @@ function ZO_WorldMapZoneStory_Keyboard:OnMouseEnterRow(control)
         local OFFSET_X = 40
         local anchor = ZO_Anchor:New(LEFT, control, RIGHT, OFFSET_X)
         local data = control.dataEntry.data
-        ZONE_STORIES_KEYBOARD:ShowActivityCompletionTooltip(data.zoneId, data.zoneCompletionType, anchor, DESCRIPTION_TO_ACHIEVEMENT_ANCHOR)
+        ZONE_STORIES_KEYBOARD:ShowActivityCompletionTooltip(data.zoneId, data.zoneCompletionType, anchor, DESCRIPTION_TO_ACHIEVEMENT_ANCHOR, data.zoneCompletionIndex)
 
         self.mouseoverRow = control
 
@@ -60,9 +60,10 @@ function ZO_WorldMapZoneStory_Keyboard:InitializeList()
     local function SetupCompletionType(control, data)
         local zoneId = data.zoneId
         local zoneCompletionType = data.zoneCompletionType
+        local zoneCompletionIndex = data.zoneCompletionIndex
 
-        local icon = ZO_ZoneStories_Manager.GetCompletionTypeIcon(zoneCompletionType)
-        local numCompletedActivities, totalActivities, numUnblockedActivities, _, progressText = ZONE_STORIES_MANAGER.GetActivityCompletionProgressValuesAndText(zoneId, zoneCompletionType)
+        local icon = ZO_ZoneStories_Manager.GetCompletionTypeIcon(zoneCompletionType, zoneCompletionIndex)
+        local numCompletedActivities, totalActivities, numUnblockedActivities, _, progressText = ZONE_STORIES_MANAGER.GetActivityCompletionProgressValuesAndText(zoneId, zoneCompletionType, zoneCompletionIndex)
 
         control.icon:SetTexture(icon)
         control.progressBar:SetMinMax(0, totalActivities)
@@ -116,11 +117,24 @@ function ZO_WorldMapZoneStory_Keyboard:RefreshInfo()
         ZO_ScrollList_Clear(self.list)
         local scrollData = ZO_ScrollList_GetDataList(self.list)
 
+        local zoneId = self:GetCurrentZoneStoryZoneId()
         for _, zoneCompletionType in ipairs(ZO_ZONE_STORY_ACTIVITY_COMPLETION_TYPES_SORTED_LIST) do
-            if GetNumZoneActivitiesForZoneCompletionType(self:GetCurrentZoneStoryZoneId(), zoneCompletionType) > 0 then
+            local numZoneActivitiesForZoneCompletionType = GetNumZoneActivitiesForZoneCompletionTypeAndIndex(zoneId, zoneCompletionType)
+            if DoesZoneStoryActivityCompletionTypeUseIndex(zoneCompletionType) then
+                for i = 1, numZoneActivitiesForZoneCompletionType do
+                    local data =
+                    {
+                        zoneId = zoneId,
+                        zoneCompletionType = zoneCompletionType,
+                        zoneCompletionIndex = i,
+                    }
+                    local dataEntry = ZO_ScrollList_CreateDataEntry(ZONE_COMPLETION_TYPE_ROW_DATA, data)
+                    table.insert(scrollData, dataEntry)
+                end
+            elseif numZoneActivitiesForZoneCompletionType > 0 then
                 local data =
                 {
-                    zoneId = self:GetCurrentZoneStoryZoneId(),
+                    zoneId = zoneId,
                     zoneCompletionType = zoneCompletionType,
                 }
                 local dataEntry = ZO_ScrollList_CreateDataEntry(ZONE_COMPLETION_TYPE_ROW_DATA, data)

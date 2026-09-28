@@ -220,6 +220,10 @@ ZO_CATEGORY_LAYOUT_INFO =
             if ANTIQUITY_DATA_MANAGER and ANTIQUITY_DATA_MANAGER:HasNewLead() then
                 return { ZO_KEYBOARD_NEW_ICON }
             end
+
+            if RUMOR_MANAGER and RUMOR_MANAGER:HasAnyNewRumor() then
+                return { ZO_KEYBOARD_NEW_ICON }
+            end
         end,
     },
     [MENU_CATEGORY_COLLECTIONS] =

@@ -67,9 +67,13 @@
                 ZO_HousingHUDFragmentTopLevel_Initialize(self)
             </OnInitialized>
             <Controls>
-                <!-- These controls will largely be setup by the fragment -->
-                <Control name="$(parent)KeybindButton" inherits="ZO_KeybindButton" excludeFromResizeToFitExtents="true"/>
-                <Control name="$(parent)CycleTargetKeybindButton" inherits="ZO_KeybindButton" hidden="true" excludeFromResizeToFitExtents="true"/>
+                <Control name="$(parent)KeybindButton" inherits="ZO_KeybindButton ZO_HUDManager_Element" excludeFromResizeToFitExtents="true">
+                    <Controls>
+                        <Control name="$(parent)HUDElementRef" override="true">
+                            <DimensionConstraints minX="100"/>
+                        </Control>
+                    </Controls>
+                </Control>
             </Controls>
         </TopLevelControl>
         <TopLevelControl name="ZO_HousingEditorHistory_TopLevel" hidden="true">

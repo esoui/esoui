@@ -1,0 +1,29 @@
+<GuiXml>
+    <Controls>
+        <Label name="ZO_GenericSelectorRewards_RewardLabel" font="ZoFontGameMedium" horizontalAlignment="CENTER" virtual="true">
+            <DimensionConstraints maxX="385"/>
+        </Label>
+        <TopLevelControl name="ZO_GenericSelectorRewards_KeyboardTL" resizeToFitConstrains="y" hidden="true">
+            <Anchor point="LEFT" relativeTo="ZO_GenericSelector_KeyboardTL" relativePoint="RIGHT" offsetX="20"/>
+            <ResizeToFitPadding height="10"/>
+            <Dimensions x="400"/>
+            <OnInitialized>
+                ZO_GenericSelectorRewards_Keyboard.OnControlInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Backdrop name="$(parent)BG" inherits="ZO_DefaultBackdrop" excludeFromResizeToFitExtents="true"/>
+                <Label name="$(parent)Title" text="SI_GENERIC_SELECTOR_REWARDS_TITLE" font="ZoFontWinH1" modifyTextType="UPPERCASE">
+                    <Anchor point="TOP" offsetY="5"/>
+                </Label>
+                <Control name="$(parent)Divider" inherits="ZO_DynamicHorizontalDivider">
+                    <Anchor point="TOP" relativeTo="$(parent)Title" relativePoint="BOTTOM" offsetY="10"/>
+                    <Dimensions x="350"/>
+                </Control>
+                <Control name="$(parent)List" resizeToFitDescendents="true">
+                    <Anchor point="TOP" relativeTo="$(parent)Divider" relativePoint="BOTTOM" offsetY="10"/>
+                    <DimensionConstraints maxX="385"/>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

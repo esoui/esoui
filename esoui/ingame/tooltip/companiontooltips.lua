@@ -2,6 +2,15 @@ local RAPPORT_GRADIENT_START = ZO_ColorDef:New("722323") --Red
 local RAPPORT_GRADIENT_END = ZO_ColorDef:New("009966") --Green
 local RAPPORT_GRADIENT_MIDDLE = ZO_ColorDef:New("9D840D") --Yellow
 
+
+
+
+
+
+
+
+
+
 function ZO_Tooltip:LayoutCompanionOverview(companionData)
     --Section containing the numerical XP Progress
     local xpProgressSection = self:AcquireSection(self:GetStyle("companionXpProgressSection"))
@@ -70,16 +79,34 @@ function ZO_Tooltip:LayoutCompanionOverview(companionData)
 
     --Section containing the rapport bar
     local rapportBarSection = self:AcquireSection(self:GetStyle("companionRapportBarSection"))
-    
+
     --The rapport bar is a special type of status bar, so we have to create as a custom control and set it up manually
     local rapportBarControl = self:AcquireCustomControl(self:GetStyle("companionRapportBar"))
     local rapportBar = ZO_SlidingStatusBar:New(rapportBarControl)
+
     rapportBar:SetGradientColors(RAPPORT_GRADIENT_START, RAPPORT_GRADIENT_END, RAPPORT_GRADIENT_MIDDLE)
+
+
+
+
+
+
+
+
     rapportBar:SetMinMax(GetMinimumRapport(), GetMaximumRapport())
     rapportBar:SetValue(rapportValue)
 
     --Add the rapport bar in between the two rapport icons
+
     rapportBarSection:AddTexture("EsoUI/Art/HUD/lootHistory_icon_rapportDecrease_generic.dds", self:GetStyle("companionRapportTexture"))
+
+
+
+
+
+
+
+
     rapportBarSection:AddCustomControl(rapportBarControl)
     rapportBarSection:AddTexture("EsoUI/Art/HUD/lootHistory_icon_rapportIncrease_generic.dds", self:GetStyle("companionRapportTexture"))
     self:AddSection(rapportBarSection)

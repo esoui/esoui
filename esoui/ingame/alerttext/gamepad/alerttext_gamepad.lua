@@ -38,24 +38,31 @@ local function OnScriptAccessViolation(eventCode, functionName)
     ZO_Dialogs_ShowGamepadDialog("SCRIPT_ACCESS_VIOLATION", nil, {mainTextParams = {functionName}})
 end
 
-local function SetupFunction(control, data)
-    control:SetWidth(GuiRoot:GetRight() - ZO_Compass:GetRight() - ZO_GAMEPAD_CONTENT_INSET_X - ZO_GAMEPAD_SAFE_ZONE_INSET_X)
-    control:SetText(data.text)
-    control:SetColor(data.color:UnpackRGBA())
-
-    ZO_SoundAlert(data.category, data.soundId)
-end
-
 function ZO_AlertText_Gamepad:Initialize(control)
     ZO_AlertText_Base.Initialize(self)
 
     control:RegisterForEvent(EVENT_SCRIPT_ACCESS_VIOLATION, OnScriptAccessViolation)
 
-    local anchor = ZO_Anchor:New(TOPRIGHT, GuiRoot, TOPRIGHT, -15, 4)
+    local anchor = ZO_Anchor:New(TOPRIGHT, ZO_AlertTextNotificationGamepad, TOPRIGHT, -15, 4)
 
     local MAX_DISPLAYED_ENTRIES_GAMEPAD = 2
     local MAX_HEIGHT_GAMEPAD = 900
     local NO_MAX_LINES_PER_ENTRY_GAMEPAD = nil
+
+    local function SetupFunction(entryControl, data)
+        local compassHUDElement = HUD_MANAGER:GetGamepadElementForControl(ZO_CompassFrame)
+        if self.hudElement:IsUsingDefaultAnchor() and compassHUDElement:IsUsingDefaultAnchor() then
+            --If both alerts and the compass are in their default position, take the position of the compass into account to prevent overlap when determining the width
+            entryControl:SetWidth(GuiRoot:GetRight() - ZO_Compass:GetRight() - ZO_GAMEPAD_CONTENT_INSET_X - ZO_GAMEPAD_SAFE_ZONE_INSET_X)
+        else
+            --If either the compass or alerts have been moved, allow the element to grow up to its maximum width
+            entryControl:SetWidth(0)
+        end
+        entryControl:SetText(data.text)
+        entryControl:SetColor(data.color:UnpackRGBA())
+
+        ZO_SoundAlert(data.category, data.soundId)
+    end
 
     self.alerts = ZO_FadingControlBuffer:New(control, MAX_DISPLAYED_ENTRIES_GAMEPAD, MAX_HEIGHT_GAMEPAD, NO_MAX_LINES_PER_ENTRY_GAMEPAD, "AlertFadeGamepad", "AlertTranslateGamepad", anchor)
     self.alerts:AddTemplate(DEFAULT_GAMEPAD_ALERT_TEMPLATE, {setup = SetupFunction})
@@ -74,6 +81,8 @@ function ZO_AlertText_Gamepad:Initialize(control)
     if not GetGuiHidden("App") then
         self.alerts:SetHoldDisplayingEntries(true)
     end
+
+    self.hudElement = HUD_MANAGER:RegisterGamepadElement(control, GetString(SI_HUD_EDITOR_ALERTS))
 end
 
 function ZO_AlertText_Gamepad:HasActiveEntries()

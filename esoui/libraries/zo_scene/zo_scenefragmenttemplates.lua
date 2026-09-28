@@ -542,6 +542,10 @@ function ZO_HideableSceneFragmentMixin:IsHiddenForReason(reason)
     return self.hiddenReasons:IsHiddenForReason(reason)
 end
 
+function ZO_HideableSceneFragmentMixin:IsHiddenForAnyReason()
+    return self.hiddenReasons:IsHidden()
+end
+
 function ZO_MixinHideableSceneFragment(self)
     zo_mixin(self, ZO_HideableSceneFragmentMixin)
     self.hiddenReasons = ZO_HiddenReasons:New()

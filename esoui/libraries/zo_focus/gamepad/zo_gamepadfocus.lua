@@ -96,8 +96,12 @@ function ZO_GamepadFocus:Deactivate(retainFocus)
     self:SetActive(false, retainFocus)
 end
 
-function ZO_GamepadFocus:AddEntry(entry)
-    table.insert(self.data, entry)
+function ZO_GamepadFocus:AddEntry(entry, addToFront)
+    if addToFront then
+        table.insert(self.data, 1, entry)
+    else
+        table.insert(self.data, entry)
+    end
 
     if not entry.highlightFadeAnimation and entry.highlight then
         entry.highlightFadeAnimation = ANIMATION_MANAGER:CreateTimelineFromVirtual("FocusAlphaFadeAnimation", entry.highlight)

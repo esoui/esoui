@@ -1,0 +1,92 @@
+<GuiXml>
+    <Controls>
+        <StatusBar name="ZO_TrialProgression_Keyboard_ProgressBar" inherits="ZO_VerticalArrowStatusBarWithBG" virtual="true">
+            <Controls>
+                <Control name="$(parent)Overlay" override="true" tier="LOW" layer="CONTROLS">
+                    <Controls>
+                        <Texture name="$(parent)Bottom" override="true" layer="CONTROLS"/>
+                        <Texture name="$(parent)Top" override="true" layer="CONTROLS"/>
+                        <Texture name="$(parent)Middle" override="true" layer="CONTROLS"/>
+                    </Controls>
+                </Control>
+            </Controls>
+        </StatusBar>
+        <Button name="ZO_TrialProgression_Keyboard_Perk" tier="MEDIUM" level="1" virtual="true">
+            <Dimensions x="ZO_TRIAL_PROGRESSION_KEYBOARD_PERK_SIZE" y="ZO_TRIAL_PROGRESSION_KEYBOARD_PERK_SIZE"/>
+            <OnMouseEnter>
+                ZO_TrialProgression_Track_Keyboard.OnPerkMouseEnter(self)
+            </OnMouseEnter>
+            <OnMouseExit>
+                ZO_TrialProgression_Track_Keyboard.OnPerkMouseExit(self)
+            </OnMouseExit>
+            <Textures normal="EsoUI/Art/ActionBar/passiveAbilityFrame_round_up.dds" pressed="EsoUI/Art/ActionBar/passiveAbilityFrame_round_up.dds" mouseOver="EsoUI/Art/ActionBar/passiveAbilityFrame_round_over.dds" disabled="EsoUI/Art/ActionBar/passiveAbilityFrame_round_up.dds"/>
+            <Controls>
+                <Texture name="$(parent)Icon" layer="CONTROLS" textureFile="EsoUI/Art/Icons/icon_missing.dds">
+                    <Anchor point="TOPLEFT" offsetX="2" offsetY="2"/>
+                    <Anchor point="BOTTOMRIGHT" offsetX="-2" offsetY="-2"/>
+                    <Controls>
+                        <Texture name="$(parent)LockIcon" layer="CONTROLS" textureFile="EsoUI/Art/Miscellaneous/status_locked.dds" pixelRoundingEnabled="false" level="1">
+                            <AnchorFill/>
+                        </Texture>
+                    </Controls>
+                </Texture>
+            </Controls>
+        </Button>
+        <Control name="ZO_TrialProgression_Keyboard_Track" resizeToFitDescendents="true" virtual="true">
+            <DimensionConstraints maxY="ZO_TRIAL_PROGRESSION_KEYBOARD_MAX_TRACK_HEIGHT"/>
+            <OnInitialized>
+                ZO_TrialProgression_Track_Keyboard:New(self)
+            </OnInitialized>
+            <Controls>
+                <Texture name="$(parent)BG" mouseEnabled="true" excludeFromResizeToFitExtents="true">
+                    <Dimensions x="ZO_TRIAL_PROGRESSION_KEYBOARD_BG_WIDTH" y="890"/>
+                    <Anchor point="CENTER" relativePoint="CENTER" constrains="X"/>
+                    <Anchor point="CENTER" relativeTo="ZO_TrialProgression_Keyboard_TL" relativePoint="CENTER" constrains="Y"/>
+                    <TextureCoords left="0" right="0.78125" top="0" bottom="0.869140625"/>
+                    <OnMouseEnter>
+                        ZO_TrialProgression_Track_Keyboard.OnMouseEnter(self)
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        ZO_TrialProgression_Track_Keyboard.OnMouseExit(self)
+                    </OnMouseExit>
+                </Texture>
+                <Texture name="$(parent)Highlight" excludeFromResizeToFitExtents="true" level="1">
+                    <Dimensions x="ZO_TRIAL_PROGRESSION_KEYBOARD_BG_WIDTH" y="890"/>
+                    <Anchor point="CENTER" relativePoint="CENTER" relativeTo="$(parent)BG"/>
+                    <TextureCoords left="0" right="0.78125" top="0" bottom="0.869140625"/>
+                </Texture>
+            </Controls>
+        </Control>
+        <Label name="ZO_TrialProgression_Keyboard_Track_Points" font="ZoFontCallout" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" horizontalAlignment="CENTER" virtual="true"/>
+        <TopLevelControl name="ZO_TrialProgression_Keyboard_TL" hidden="true">
+            <Dimensions x="1600" y="900"/>
+            <Anchor point="CENTER"/>
+            <OnInitialized>
+                ZO_TrialProgression_Keyboard.OnControlInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Backdrop name="$(parent)BG" inherits="ZO_DefaultBackdrop">
+                    <AnchorFill/>
+                </Backdrop>
+                <Control name="$(parent)Header">
+                    <Anchor point="TOP"/>
+                    <Dimensions x="ZO_TRIAL_PROGRESSION_KEYBOARD_MAX_TRACKS_WIDTH" y="120"/>
+                    <Controls>
+                        <Label name="$(parent)Title" font="ZoFontCallout" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" horizontalAlignment="CENTER" modifyTextType="UPPERCASE">
+                            <Anchor point="TOPLEFT" offsetX="10"/>
+                            <Anchor point="TOPRIGHT" offsetX="-10" offsetY="20"/>
+                        </Label>
+                        <Label name="$(parent)Subtitle" font="ZoFontHeader2" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER" modifyTextType="UPPERCASE">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetY="-2"/>
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Title" relativePoint="BOTTOMRIGHT" offsetY="-2"/>
+                        </Label>
+                    </Controls>
+                </Control>
+                <Control name="$(parent)Tracks" resizeToFitDescendents="true">
+                    <Anchor point="TOP" relativeTo="$(parent)Header" relativePoint="BOTTOM" offsetY="50"/>
+                    <DimensionConstraints maxX="ZO_TRIAL_PROGRESSION_KEYBOARD_MAX_TRACKS_WIDTH"/>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

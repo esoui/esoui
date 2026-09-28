@@ -147,7 +147,7 @@ function ZO_CampaignBrowser_Gamepad:GetVeterancyTooltipTitleAndDescription()
         else
             descriptionText = zo_strformat(SI_VETERANCY_ACTIVE_TOOLTIP
                 , ZO_VETERANCY_MANAGER:GetCurrentRank()
-                , ZO_VETERANCY_MANAGER:GetCurrentRankName()
+                , ZO_VETERANCY_MANAGER:GetCurrentRankRawName()
                 , ZO_CommaDelimitNumber(ZO_VETERANCY_MANAGER:GetCurrentTierProgress())
                 , ZO_CommaDelimitNumber(ZO_VETERANCY_MANAGER:GetCurrentTierTotal()))
         end
@@ -624,6 +624,7 @@ function ZO_CampaignBrowser_Gamepad:InitializeKeybindStripDescriptors()
                     end
                 elseif entryType == ENTRY_TYPES.VETERANCY then
                     SCENE_MANAGER:Push("VeterancySceneGamepad")
+                    PlaySound(SOUNDS.GAMEPAD_MENU_FORWARD)
                 end
             end,
             visible = function()

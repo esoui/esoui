@@ -6,7 +6,7 @@
                 <TextBuffer name="$(parent)Buffer" inherits="ZO_GamepadChatBuffer" linkEnabled="true"/>
             </Controls>
         </Control>
-        <TopLevelControl name="ZO_GamepadTextChat" inherits="ZO_ChatWindowTopLevelTemplate" hidden="true">
+        <TopLevelControl name="ZO_GamepadTextChat" inherits="ZO_ChatWindowTopLevelTemplate ZO_HUDManager_Element" hidden="true">
             <OnInitialized>
                 ZO_GamepadTextChat_OnInitialize(self)
             </OnInitialized>
@@ -38,6 +38,10 @@
                     <Dimensions x="32" y="32"/>
                     <Anchor point="LEFT" relativeTo="$(parent)TextEntry" relativePoint="RIGHT"/>
                 </Texture>
+                <Control name="$(parent)HUDElementRef" override="true">
+                    <Anchor point="TOPLEFT" offsetX="-10" offsetY="-20"/>
+                    <Anchor point="BOTTOMRIGHT"/>
+                </Control>
             </Controls>
         </TopLevelControl>
     </Controls>

@@ -8,13 +8,7 @@ local ARMOR_INDICATOR = "ArmorIndicator"
 -- HUDIndicator
 ----------------
 
-local HUDIndicator = ZO_Object:Subclass()
-
-function HUDIndicator:New(control, data)
-    local object = ZO_Object.New(self)
-    object:Initialize(control, data)
-    return object
-end
+local HUDIndicator = ZO_InitializingObject:Subclass()
 
 function HUDIndicator:Initialize(control, data)
     self.control = control
@@ -25,13 +19,12 @@ function HUDIndicator:Initialize(control, data)
     self.refreshFunction = data.refreshFunction
 
     local function OnInterfaceSettingChanged(_, settingType, settingId)
-        if settingType == SETTING_TYPE_UI then
-            if settingId == self.displaySetting then
-                self:Refresh()
-            end
+        if settingId == self.displaySetting then
+            self:Refresh()
         end
     end
     control:RegisterForEvent(EVENT_INTERFACE_SETTING_CHANGED, OnInterfaceSettingChanged)
+    control:AddFilterForEvent(EVENT_INTERFACE_SETTING_CHANGED, REGISTER_FILTER_SETTING_SYSTEM_TYPE, SETTING_TYPE_UI)
 
     self.control.indicator = self
 end
@@ -42,7 +35,7 @@ function HUDIndicator:Refresh()
 
     --Play notify sound if the equipment status changed (or queue sound to play later if the HUD is hidden)
     local wasHidden = self.control:IsHidden()
-    if (wasHidden and showIndicator) then
+    if wasHidden and showIndicator then
         local shouldPlaySound = not self.control:GetParent():IsHidden()
         if shouldPlaySound then
             PlaySound(self.notifySound)
@@ -88,7 +81,7 @@ end
 -- HUDEquipmentStatus
 ----------------------
 
-local ZO_HUDEquipmentStatus = ZO_Object:Subclass()
+local ZO_HUDEquipmentStatus = ZO_InitializingObject:Subclass()
 
 ZO_HUDEquipmentStatus.WEAPON_INDICATOR_DATA =
 {
@@ -132,12 +125,6 @@ ZO_HUDEquipmentStatus.ARMOR_INDICATOR_DATA =
     end,
 }
 
-function ZO_HUDEquipmentStatus:New(...)
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-end
-
 function ZO_HUDEquipmentStatus:Initialize(control)
     self.control = control
     --ZO_ActionBar_GetButton always returns the quickslot button when the category is HOTBAR_CATEGORY_QUICKSLOT_WHEEL, so there is no reason to pass in a slot
@@ -145,14 +132,23 @@ function ZO_HUDEquipmentStatus:Initialize(control)
     local quickslotButton = ZO_ActionBar_GetButton(UNUSED, HOTBAR_CATEGORY_QUICKSLOT_WHEEL)
     self.control:SetAnchor(RIGHT, quickslotButton.slot, LEFT, -10, 0)
     self.indicators = {}
-    self.indicators[WEAPON_INDICATOR] = HUDIndicator:New(GetControl(self.control, WEAPON_INDICATOR), ZO_HUDEquipmentStatus.WEAPON_INDICATOR_DATA)
-    self.indicators[ARMOR_INDICATOR] = HUDIndicator:New(GetControl(self.control, ARMOR_INDICATOR), ZO_HUDEquipmentStatus.ARMOR_INDICATOR_DATA)
+    self.indicators[WEAPON_INDICATOR] = HUDIndicator:New(self.control:GetNamedChild(WEAPON_INDICATOR), ZO_HUDEquipmentStatus.WEAPON_INDICATOR_DATA)
+    self.indicators[ARMOR_INDICATOR] = HUDIndicator:New(self.control:GetNamedChild(ARMOR_INDICATOR), ZO_HUDEquipmentStatus.ARMOR_INDICATOR_DATA)
+
+    local function AdjustWidth()
+        self:AdjustWidth()
+    end
+
+    for _, indicator in pairs(self.indicators) do
+        indicator.control:SetHandler("OnEffectivelyHidden", AdjustWidth)
+        indicator.control:SetHandler("OnEffectivelyShown", AdjustWidth)
+    end
 
     self:UpdateAllIndicators()
 
     --Events
     local function OnInventorySingleSlotUpdate(bagId)
-        if(bagId == BAG_WORN) then
+        if bagId == BAG_WORN then
             self:UpdateAllIndicators()
         end
     end
@@ -163,9 +159,9 @@ function ZO_HUDEquipmentStatus:Initialize(control)
     end
 
     SHARED_INVENTORY:RegisterCallback("SingleSlotInventoryUpdate", OnInventorySingleSlotUpdate)
-    EVENT_MANAGER:RegisterForEvent("ZO_HUDEquipmentStatus", EVENT_INVENTORY_FULL_UPDATE, function() self:UpdateAllIndicators() end)
-    EVENT_MANAGER:RegisterForEvent("ZO_HUDEquipmentStatus", EVENT_ACTIVE_WEAPON_PAIR_CHANGED, OnWeaponSwitch)
-    EVENT_MANAGER:RegisterForEvent("ZO_HUDEquipmentStatus", EVENT_PLAYER_ACTIVATED, function() self:UpdateAllIndicators() end)
+    control:RegisterForEvent(EVENT_INVENTORY_FULL_UPDATE, function() self:UpdateAllIndicators() end)
+    control:RegisterForEvent(EVENT_ACTIVE_WEAPON_PAIR_CHANGED, OnWeaponSwitch)
+    control:RegisterForEvent(EVENT_PLAYER_ACTIVATED, function() self:UpdateAllIndicators() end)
 
     local KEYBOARD_STYLE =
     {
@@ -179,10 +175,53 @@ function ZO_HUDEquipmentStatus:Initialize(control)
 
     HUD_EQUIPMENT_STATUS_FRAGMENT = ZO_HUDFadeSceneFragment:New(control)
     HUD_EQUIPMENT_STATUS_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
-        if(newState == SCENE_FRAGMENT_SHOWING) then    
+        if(newState == SCENE_FRAGMENT_SHOWING) then
             self:OnShow()
         end
     end)
+
+    local elementName = GetString(SI_HUD_EDITOR_EQUIPMENT_STATUS)
+    local CONFIG =
+    {
+        overrideDrawLevel = ZO_HUD_EDITOR_ELEMENT_DRAW_LEVELS.LOW
+    }
+
+    local EQUIPMENT_STATUS_OPTIONS =
+    {
+        {
+            type = ZO_HUD_EDITOR_OPTION_TYPES.BOOLEAN,
+            name = GetString(SI_ARMOR_INDICATOR),
+            tooltipText = GetString(SI_ARMOR_INDICATOR_SETTINGS_TOOLTIP),
+            key = "ArmorIndicatorVisible",
+            defaultValue = function()
+                return GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_SHOW_ARMOR_INDICATOR)
+            end,
+            dontSave = true,
+            callback = function(element, subKey, oldValue, value)
+                if value ~= oldValue then
+                    SetSetting(SETTING_TYPE_UI, UI_SETTING_SHOW_ARMOR_INDICATOR, tostring(value))
+                end
+            end,
+        },
+        {
+            type = ZO_HUD_EDITOR_OPTION_TYPES.BOOLEAN,
+            name = GetString(SI_WEAPON_INDICATOR),
+            tooltipText = GetString(SI_WEAPON_INDICATOR_SETTINGS_TOOLTIP),
+            key = "WeaponIndicatorVisible",
+            defaultValue = function()
+                return GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_SHOW_WEAPON_INDICATOR)
+            end,
+            dontSave = true,
+            callback = function(element, subKey, oldValue, value)
+                if value ~= oldValue then
+                    SetSetting(SETTING_TYPE_UI, UI_SETTING_SHOW_WEAPON_INDICATOR, tostring(value))
+                end
+            end,
+        }
+    }
+
+    HUD_MANAGER:RegisterKeyboardElement(self.control, elementName, CONFIG, EQUIPMENT_STATUS_OPTIONS)
+    HUD_MANAGER:RegisterGamepadElement(self.control, elementName, CONFIG, EQUIPMENT_STATUS_OPTIONS)
 end
 
 function ZO_HUDEquipmentStatus:OnShow()

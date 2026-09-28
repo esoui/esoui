@@ -85,14 +85,13 @@ function ZO_VeterancyReward_Keyboard:Initialize(control)
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
         keybind = "UI_SHORTCUT_SECONDARY",
         name = GetString(SI_VETERANCY_PREVIEW_ACTION_TEXT),
-        callback = function(control)
-            self:OnMouseExit()
-            g_VeterancyKeyboard:BeginPreview(ZO_PREVIEW_SCREEN_REWARD_DATA_PREVIEW_TYPES.ACTIVE_PREVIEW, self:GetMousedOverPreviewableRewardListEntry() or self:GetRewardableEventData())
+        callback = function()
+            g_VeterancyKeyboard:SetFocusedControl(self.control)
         end,
         visible = function()
             return not ITEM_PREVIEW_KEYBOARD:IsWaitingForPreviewBegin()
                 and ((g_VeterancyKeyboard:IsMouseOverObject(self) and self:GetRewardableEventData():CanPreviewReward())
-                or self:IsMousedOverPreviewableRewardListEntry())
+                or g_VeterancyKeyboard:GetActiveRewardListRewardData())
         end,
     })
 end
@@ -107,35 +106,33 @@ do
     function ZO_VeterancyReward_Keyboard:OnMouseEnter()
         local rewardData = self.control.GetRewardData and self.control.GetRewardData() or self.control.data
         if rewardData:IsInstanceOf(ZO_VeterancyPerkData) then
-            local rewardableEventData = rewardData:GetVeterancyRankPerkRewardData()
-            local rankData = rewardableEventData:GetRankData()
-            local pageIndex = ZO_Veterancy_Shared.GetPageIndexFromRankIndex(rankData:GetIndex())
-            if pageIndex == 4 or pageIndex == 5 or (pageIndex ~= 7 and rankData:IsLeftTooltip()) then
+            local rankData = self.rewardableEventData:GetRankData()
+            local pageRankIndex = ZO_Veterancy_Shared.GetPageRankIndexFromRankIndex(rankData:GetIndex())
+            if pageRankIndex == 4 or pageRankIndex == 5 or (pageRankIndex ~= 7 and rankData:IsLeftTooltip()) then
                 InitializeTooltip(SkillTooltip, self.control, RIGHT, -5, 0, LEFT)
             else
                 InitializeTooltip(SkillTooltip, self.control, LEFT, 5, 0, RIGHT)
             end
-            SkillTooltip:SetVengeancePerkId(rewardData.rewardId, rewardableEventData:GetSlotFlags())
-            self.perkHighlightControl:SetTexture(rewardableEventData:GetHighlightTexture())
+            SkillTooltip:SetVengeancePerkId(rewardData.rewardId, self.rewardableEventData:GetSlotFlags())
+            self.perkHighlightControl:SetTexture(self.rewardableEventData:GetHighlightTexture())
             self.perkHighlightControl:SetAlpha(1)
         else
-            local rankRewardData = self.control.object:GetRewardableEventData()
-            if rankRewardData then
-                local rankData = rankRewardData:GetRankData()
-                if rankRewardData:IsRepeatableRank() then
+            if self.rewardableEventData then
+                local rankData = self.rewardableEventData:GetRankData()
+                if self.rewardableEventData:IsRepeatableRank() then
                     ZO_Rewards_Shared_OnMouseEnter(self.control, LEFT, RIGHT, 400)
                 else
                     local point = LEFT
                     local relativePoint = RIGHT
                     local offsetX = 5
                     local useRelativeAnchors = false
-                    local pageIndex = ZO_Veterancy_Shared.GetPageIndexFromRankIndex(rankData:GetIndex())
-                    if pageIndex == 4 or pageIndex == 5 then
+                    local pageRankIndex = ZO_Veterancy_Shared.GetPageRankIndexFromRankIndex(rankData:GetIndex())
+                    if pageRankIndex == 4 or pageRankIndex == 5 then
                         useRelativeAnchors = true
                         point = RIGHT
                         relativePoint = LEFT
                         offsetX = -5
-                    elseif pageIndex == 6 or pageIndex == 7 then
+                    elseif pageRankIndex == 6 or pageRankIndex == 7 then
                         useRelativeAnchors = true
                     elseif rankData:IsLeftTooltip() then
                         point = RIGHT
@@ -153,8 +150,12 @@ do
             end
             self.rewardBorderTexture:SetTexture(REWARD_FRAME_TEXTURE.HIGHLIGHT)
 
-            if CanPreviewReward(self.displayRewardData:GetRewardId()) and not self.rewardableEventData:CanClaimReward() then
+            if g_VeterancyKeyboard.CanPreviewReward(rewardData) and not self.rewardableEventData:CanClaimReward() then
                 WINDOW_MANAGER:SetMouseCursor(MOUSE_CURSOR_PREVIEW)
+                if rewardData:GetRewardType() == REWARD_ENTRY_TYPE_REWARD_LIST then
+                    g_VeterancyKeyboard:SetActiveRewardListRewardData(rewardData)
+                end
+                g_VeterancyKeyboard:QueuePreview(ZO_PREVIEW_SCREEN_REWARD_DATA_PREVIEW_TYPES.QUICK_PREVIEW, rewardData, self.rewardableEventData, ZO_QUEUED_PREVIEW_DEFAULT_DELAY_SECONDS)
             end
         end
 
@@ -171,6 +172,10 @@ do
         self.rewardBorderTexture:SetTexture(REWARD_FRAME_TEXTURE.NORMAL)
         self:RemoveKeybinds()
         g_VeterancyKeyboard:SetMouseOverObject(nil)
+        if g_VeterancyKeyboard:GetActivePreviewType() ~= ZO_PREVIEW_SCREEN_REWARD_DATA_PREVIEW_TYPES.FULL_PREVIEW then
+            g_VeterancyKeyboard:SetActiveRewardListRewardData(nil)
+            g_VeterancyKeyboard:EndPreview()
+        end
     end
 end
 
@@ -180,7 +185,8 @@ function ZO_VeterancyReward_Keyboard:OnMouseUp(button, upInside)
             if self.rewardableEventData:CanClaimReward() then
                 self.rewardableEventData:TryClaimReward()
             elseif not ITEM_PREVIEW_KEYBOARD:IsWaitingForPreviewBegin() and self.rewardableEventData:CanPreviewReward() then
-                g_VeterancyKeyboard:BeginPreview(ZO_PREVIEW_SCREEN_REWARD_DATA_PREVIEW_TYPES.ACTIVE_PREVIEW, self.rewardableEventData)
+                g_VeterancyKeyboard:SetFocusedControl(self.control)
+                g_VeterancyKeyboard:BeginPreview(ZO_PREVIEW_SCREEN_REWARD_DATA_PREVIEW_TYPES.FULL_PREVIEW, self.rewardableEventData:GetRewardData(), self.rewardableEventData)
                 self:UpdateKeybinds()
             end
         elseif button == MOUSE_BUTTON_INDEX_RIGHT then
@@ -195,9 +201,11 @@ function ZO_VeterancyReward_Keyboard:OnMouseUp(button, upInside)
             end
 
             local canPreviewReward = not ITEM_PREVIEW_KEYBOARD:IsWaitingForPreviewBegin() and CanPreviewReward(rewardId)
-            if canPreviewReward then
-                AddMenuItem(GetString(SI_REWARD_PREVIEW_ACTION), function()
-                    g_VeterancyKeyboard:BeginPreview(rewardId, self.control)
+            local isRewardList = self.displayRewardData:GetRewardType() == REWARD_ENTRY_TYPE_REWARD_LIST
+            if canPreviewReward or isRewardList then
+                local menuString = isRewardList and SI_REWARD_LIST_VIEW_ACTION or SI_REWARD_PREVIEW_ACTION
+                AddMenuItem(GetString(menuString), function()
+                    g_VeterancyKeyboard:BeginPreview(ZO_PREVIEW_SCREEN_REWARD_DATA_PREVIEW_TYPES.FULL_PREVIEW, self.rewardableEventData:GetRewardData())
                     g_VeterancyKeyboard:UpdateKeybinds()
                 end)
                 showMenu = true
@@ -214,50 +222,6 @@ function ZO_VeterancyReward_Keyboard:Refresh()
     ZO_VeterancyReward_Shared.Refresh(self)
     self.rewardListObject = nil
     POPUP_LIST:Hide()
-end
-
-function ZO_VeterancyReward_Keyboard:PreviewRewardList(rewardId, anchorControl)
-    local function OnMouseEnter(control)
-        local rewardListRewardData = ZO_VeterancyRewardListRewardData:New(control.dataEntry.data)
-        self.activeRewardListRewardData = rewardListRewardData
-        self:SetMouseOverObject(control.dataEntry.data)
-    end
-
-    local function OnMouseExit(control)
-        self.activeRewardListRewardData = nil
-        self:SetMouseOverObject(nil)
-    end
-
-    local function OnMouseUp(control)
-        self:OnMouseExit()
-        g_VeterancyKeyboard:BeginPreview(ZO_PREVIEW_SCREEN_REWARD_DATA_PREVIEW_TYPES.ACTIVE_PREVIEW, self:GetMousedOverPreviewableRewardListEntry())
-    end
-
-    self.rewardListObject = self.mouseOverObject
-    local anchorControl = anchorControl or self.mouseOverObject.control
-    POPUP_LIST:ShowRewardList(rewardId, OnMouseEnter, OnMouseExit, BOTTOMRIGHT, anchorControl, BOTTOMLEFT)
-    POPUP_LIST:SetOnMouseUpCallback(OnMouseUp)
-end
-
-function ZO_VeterancyReward_Keyboard:SetMouseOverObject(mouseOverObject)
-    self.mouseOverObject = mouseOverObject
-    if mouseOverObject then
-        KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
-    else
-        self.rewardListObject = nil
-        KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
-    end
-end
-
-function ZO_VeterancyReward_Keyboard:IsMousedOverPreviewableRewardListEntry()
-    if self.activeRewardListRewardData then
-        return self.activeRewardListRewardData:CanPreviewReward()
-    end
-    return false
-end
-
-function ZO_VeterancyReward_Keyboard:GetMousedOverPreviewableRewardListEntry()
-    return self.activeRewardListRewardData
 end
 
 function ZO_VeterancyReward_Keyboard.OnControlInitialized(control)
@@ -296,7 +260,7 @@ end
 -- Veterancy
 --------------------------
 
-ZO_Veterancy_Keyboard = ZO_Veterancy_Shared:Subclass()
+ZO_Veterancy_Keyboard = ZO_Object.MultiSubclass(ZO_Veterancy_Shared, ZO_PreviewScreen_Keyboard)
 
 function ZO_Veterancy_Keyboard:Initialize(control)
     VETERANCY_SCENE_KEYBOARD = ZO_Scene:New("VeterancySceneKeyboard", SCENE_MANAGER)
@@ -358,25 +322,29 @@ function ZO_Veterancy_Keyboard:Initialize(control)
         },
     }
 
-    ZO_Veterancy_Shared.Initialize(self, control, VETERANCY_SCENE_KEYBOARD, templateData)
+    ZO_Veterancy_Shared.Initialize(self, control, templateData)
+    ZO_PreviewScreen_Keyboard.Initialize(self, control, VETERANCY_SCENE_KEYBOARD)
+
+    self.scene:AddFragment(self.fragment)
 end
 
 function ZO_Veterancy_Keyboard:OnDeferredInitialize()
     ZO_Veterancy_Shared.OnDeferredInitialize(self)
+    ZO_PreviewScreen_Keyboard.OnDeferredInitialize(self)
 
     ZO_StatusBar_SetGradientColor(self.repeatableRankRewardProgressControl, ZO_XP_BAR_GRADIENT_COLORS)
 
     self.pageNavigation:SetDefaultIndicatorFont("ZoFontCallout")
 
-    self:InitializeKeybindStripDescriptor()
+    self:SetQuickPreviewEnabled(false)
 end
 
-function ZO_Veterancy_Keyboard:BeginPreview(previewType, previewableRewardData)
-    ZO_PreviewScreen_Shared.BeginPreview(self, previewType, previewableRewardData)
-    POPUP_LIST:Hide()
+function ZO_Veterancy_Keyboard:OnUpdate(currentFrameTimeS)
+    ZO_Veterancy_Shared.OnUpdate(self, currentFrameTimeS)
+    ZO_PreviewScreen_Keyboard.OnUpdate(self, currentFrameTimeS)
 end
 
-function ZO_Veterancy_Keyboard:InitializeKeybindStripDescriptor()
+function ZO_Veterancy_Keyboard:InitializeKeybindStripDescriptors()
     self.keybindStripDescriptor =
     {
         alignment = KEYBIND_STRIP_ALIGN_LEFT,
@@ -395,7 +363,8 @@ function ZO_Veterancy_Keyboard:InitializeKeybindStripDescriptor()
             keybind = "UI_SHORTCUT_NEGATIVE",
             order = -10000,
             callback = function()
-                if self:GetCurrentPreviewType() == ZO_PREVIEW_SCREEN_REWARD_DATA_PREVIEW_TYPES.ACTIVE_PREVIEW then
+                if self:GetActivePreviewType() == ZO_PREVIEW_SCREEN_REWARD_DATA_PREVIEW_TYPES.FULL_PREVIEW then
+                    self:ClearActiveRewardListData()
                     self:EndPreview()
                     self:UpdateSceneFragments()
                 else
@@ -404,6 +373,37 @@ function ZO_Veterancy_Keyboard:InitializeKeybindStripDescriptor()
             end,
         },
     }
+
+    self.rewardListKeybindStripDescriptor =
+    {
+        alignment = KEYBIND_STRIP_ALIGN_LEFT,
+        {
+            keybind = "UI_SHORTCUT_SECONDARY",
+            name = GetString(SI_VETERANCY_PREVIEW_ACTION_TEXT),
+            callback = function()
+                local rewardListRewardData = self:GetActiveRewardListRewardData()
+                if rewardListRewardData then
+                    self:BeginPreview(ZO_PREVIEW_SCREEN_REWARD_DATA_PREVIEW_TYPES.FULL_PREVIEW, rewardListRewardData)
+                    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.rewardListKeybindStripDescriptor)
+                end
+            end,
+            visible = function()
+                local rewardData = self:GetActiveRewardListRewardData()
+                if rewardData then
+                    local rewardId = rewardData:GetRewardId()
+                    return CanPreviewReward(rewardId) and not IsPreviewingReward(rewardId)
+                end
+                return false
+            end,
+        },
+    }
+
+    self:SetRewardListKeybinds(self.rewardListKeybindStripDescriptor)
+end
+
+-- Must call ZO_Veterancy_Shared parent rather than defaulting to PreviewScreen_Keyboard
+function ZO_Veterancy_Keyboard:GetControlByPreviewableRewardData(previewableRewardData)
+    ZO_Veterancy_Shared.GetControlByPreviewableRewardData(self, previewableRewardData)
 end
 
 function ZO_Veterancy_Keyboard:SetPreviousCampaignScene(previousCampaignScene)
@@ -427,7 +427,7 @@ function ZO_Veterancy_Keyboard:IsFromNotifications()
 end
 
 function ZO_Veterancy_Keyboard:ExitVeterancy()
-    if self:GetCurrentPreviewType() == ZO_PREVIEW_SCREEN_REWARD_DATA_PREVIEW_TYPES.ACTIVE_PREVIEW then
+    if self:GetActivePreviewType() == ZO_PREVIEW_SCREEN_REWARD_DATA_PREVIEW_TYPES.FULL_PREVIEW then
         self:EndPreview()
         self:UpdateSceneFragments()
     end
@@ -440,13 +440,14 @@ end
 
 function ZO_Veterancy_Keyboard:OnShowing()
     ZO_Veterancy_Shared.OnShowing(self)
+    ZO_PreviewScreen_Keyboard.OnShowing(self)
 
     self:UpdateSceneFragments()
     KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
 end
 
 function ZO_Veterancy_Keyboard:OnHiding()
-    ZO_Veterancy_Shared.OnHiding(self)
+    ZO_PreviewScreen_Keyboard.OnHiding(self)
 
     self:UpdateSceneFragments()
     KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
@@ -466,6 +467,7 @@ end
 
 function ZO_Veterancy_Keyboard:SetMouseOverObject(mouseOverObject)
     self.mouseOverObject = mouseOverObject
+    self:SetFocusedRewardData(self.mouseOverObject and self.mouseOverObject:GetRewardableEventData())
     KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
 end
 
@@ -479,34 +481,6 @@ function ZO_Veterancy_Keyboard:OnRewardsClaimed(...)
     if self:IsShowing() then
         KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
     end
-end
-
-function ZO_Veterancy_Keyboard:EndPreviewInternal()
-    ZO_Veterancy_Shared.EndPreviewInternal(self)
-
-    self:UpdateSceneFragments()
-end
-
-function ZO_Veterancy_Keyboard:EndPreviewRewardList()
-    -- TODO Veterancy: Implement
-end
-
-function ZO_Veterancy_Keyboard:PreviewRewardList(rewardId, control)
-    -- TODO Veterancy: Implement
-end
-
-function ZO_Veterancy_Keyboard:UpdateSceneFragments()
-    if self:GetCurrentPreviewType() == ZO_PREVIEW_SCREEN_REWARD_DATA_PREVIEW_TYPES.ACTIVE_PREVIEW then
-        self.scene:RemoveFragment(self.fragment)
-    else
-        self.scene:AddFragment(self.fragment)
-    end
-end
-
-function ZO_Veterancy_Keyboard:OnPreviewedPreviewableRewardDataChanged(previousPreviewableRewardData, newPreviewableRewardData)
-    ZO_Veterancy_Shared.OnPreviewedPreviewableRewardDataChanged(self, previousPreviewableRewardData, newPreviewableRewardData)
-
-    self:UpdateSceneFragments()
 end
 
 --------------------------

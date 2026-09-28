@@ -63,5 +63,8 @@
             </OnEffectivelyHidden>
         </Control>
         <Control name="ZO_KeybindButtonChroma" inherits="ZO_KeybindButton ZO_KeybindButton_ChromaBehavior" virtual="true"/>
+        <Texture name="ZO_KeybindButton_Keyboard_HoldIndicator" textureFile="EsoUI/Art/Buttons/Keyboard/Nav_PC_Hold.dds" layer="TEXT" level="1" virtual="true">
+            <Dimensions x="24" y="24"/>
+        </Texture>
     </Controls>
 </GuiXml>

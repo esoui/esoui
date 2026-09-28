@@ -27,10 +27,11 @@ SOUNDS =
     CODEX_WINDOW_CLOSE              = "Codex_Close",
     MAP_WINDOW_OPEN                 = "Map_Open",
     MAP_WINDOW_CLOSE                = "Map_Close",
-    MAP_NAVIGATE_IN                 = "Map_Navigate_In";
-    MAP_NAVIGATE_OUT                = "Map_Navigate_Out";
-    MAP_SHOW_INFO                   = "Map_Show_Info";
-    MAP_WAYSHRINE_TELEPORT          = "Map_Wayshrine_Teleport";
+    MAP_NAVIGATE_IN                 = "Map_Navigate_In",
+    MAP_NAVIGATE_OUT                = "Map_Navigate_Out",
+    MAP_SHOW_INFO                   = "Map_Show_Info",
+    MAP_WAYSHRINE_TELEPORT          = "Map_Wayshrine_Teleport",
+    MAP_WAYSHRINE_KEEP_TELEPORT     = "Map_Wayshrine_Keep_Teleport",
     GROUP_WINDOW_OPEN               = "Group_Open",
     GROUP_WINDOW_CLOSE              = "Group_Close",
     CONTACTS_WINDOW_OPEN            = "Contacts_Open",
@@ -260,6 +261,9 @@ SOUNDS =
     -- Imperial Fragment currency sounds
     IMPERIAL_FRAGMENTS_ACQUIRE  = "ImperialFragment_Acquire",
     IMPERIAL_FRAGMENTS_TRANSACT = "ImperialFragment_Transact",
+
+    -- Do NOT add hardcoded currency transact/acquire sounds here anymore!
+    -- It's CurrencyDef driven now!
 
     --Justice sounds
     JUSTICE_STATE_CHANGED           = "Justice_StateChanged",
@@ -1230,6 +1234,9 @@ SOUNDS =
     -- Riding Skill Improvement
     RIDING_SKILL_IMPROVEMENT = "Stable_Upgrade_Announce",
 
+    RUMOR_STARTED = "Rumor_Started",
+    RUMOR_COMPLETED = "Rumor_Completed",
+
     -- Adventure Zone
     ADVENTURE_ZONE_BOSS_TREE_OPENED = "AdventureZone_BossTreeOpened",
     ADVENTURE_ZONE_BOSS_TREE_CLOSED = "AdventureZone_BossTreeClosed",
@@ -1244,4 +1251,13 @@ SOUNDS =
     CHALLENGE_DIFFICULTY_DIFFICULTY_TAB_CLICKED = "ChallengeDifficulty_DifficultyTabClicked",
     CHALLENGE_DIFFICULTY_LEVEL_UP_REWARDS_TAB_CLICKED = "ChallengeDifficulty_LevelUpRewardsTabClicked",
     CHALLENGE_DIFFICULTY_CHANGE_DIFFICULTY_BUTTON_CLICKED = "ChallengeDifficulty_ChangeDifficulty_Confirm",
+
+    -- Generic Selector
+    GENERIC_SELECTOR_OPENED = "GenericSelector_Opened",
+    GENERIC_SELECTOR_CLOSED = "GenericSelector_Closed",
+    GENERIC_SELECTOR_CHOICE_SELECTED = "GenericSelector_ChoiceSelected",
+    GENERIC_SELECTOR_CHOICE_DESELECTED = "GenericSelector_ChoiceDeselected",
+    GENERIC_SELECTOR_SUBMIT_CHOICES = "GenericSelector_SubmitChoices",
+    GENERIC_SELECTOR_REWARDS_INCREASED = "GenericSelector_RewardsIncreased",
+    GENERIC_SELECTOR_REWARDS_DECREASED = "GenericSelector_RewardsDecreased",
 }

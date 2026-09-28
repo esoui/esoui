@@ -52,6 +52,7 @@ function ZO_PopupList:SetUpListRewardItem(control, data)
     local stackCount = data.quantity
     local stackCountLabel = iconControl:GetNamedChild("StackCount")
     if stackCount and stackCount > 1 then
+        local USE_LOWERCASE_NUMBER_SUFFIXES = false
         stackCountLabel:SetText(ZO_AbbreviateAndLocalizeNumber(stackCount, NUMBER_ABBREVIATION_PRECISION_TENTHS, USE_LOWERCASE_NUMBER_SUFFIXES))
     else
         stackCountLabel:SetText("")

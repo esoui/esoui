@@ -819,6 +819,7 @@ function ZO_SharedInventoryManager:CreateOrUpdateSlotData(existingSlotData, bagI
     slot.sellInformation = GetItemSellInformation(bagId, slotIndex)
     slot.sellInformationSortOrder = ZO_GetItemSellInformationCustomSortOrder(slot.sellInformation)
     slot.actorCategory = GetItemActorCategory(bagId, slotIndex)
+    slot.companionType = GetItemCompanionType(bagId, slotIndex)
     --Don't bother checking for guild bank or buyback because we don't care in those cases
     --In the case of the craft bag or companion worn bag, it isn't possible for a build item to live there, so we can just immediately infer false
     if bagId == BAG_GUILDBANK or bagId == BAG_BUYBACK or bagId == BAG_VIRTUAL or bagId == BAG_COMPANION_WORN then

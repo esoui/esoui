@@ -222,7 +222,7 @@ function LoginManager_Keyboard:OnLoginSuccessful()
     if IsUsingLinkedLogin() then
         self:SwitchToLoginFragment()
     end
-    if ZO_PregameStateManager_GetCurrentState() == "AccountLogin" then
+    if ZO_PregameStateManager_GetCurrentState() == "AccountLogin" or ZO_PregameStateManager_GetCurrentState() == "AcceptLegalDocs" then
         ZO_PregameStateManager_SetState("WorldSelect_Requested")
     end
 end

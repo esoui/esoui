@@ -148,6 +148,9 @@ function ZO_GamepadCollectionsBook:InitializeHousingPanel()
     housingPanel.locationLabel = container:GetNamedChild("LocationValue")
     housingPanel.houseTypeLabel = container:GetNamedChild("HouseTypeValue")
     housingPanel.supportsWeatherControlValueLabel = container:GetNamedChild("SupportsWeatherControlValue")
+
+
+
     housingPanel.recommendCountHeader = container:GetNamedChild("RecommendCountHeader")
     housingPanel.recommendCountValue = container:GetNamedChild("RecommendCountValue")
 
@@ -618,7 +621,7 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
                     local cannotJumpString = collectibleData:IsUnlocked() and GetString(SI_COLLECTIONS_CANNOT_JUMP_TO_HOUSE_FROM_LOCATION) or GetString(SI_COLLECTIONS_CANNOT_PREVIEW_HOUSE_FROM_LOCATION)
                     return CanJumpToHouseFromCurrentLocation(), cannotJumpString
                 elseif collectibleData:IsUsable(GAMEPLAY_ACTOR_CATEGORY_PLAYER) then
-                    local remainingMs = GetCollectibleCooldownAndDuration(collectibleData:GetId())
+                    local remainingMs = collectibleData:GetCooldownAndDurationMs()
                     if collectibleData:IsActive(GAMEPLAY_ACTOR_CATEGORY_PLAYER) then
                         return true
                     elseif remainingMs > 0 then
@@ -1284,6 +1287,14 @@ function ZO_GamepadCollectionsBook:BuildCollectibleData(collectibleData)
         ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_HOUSING_HOUSE_SUPPORTS_WEATHER_CONTROL_HEADER)))
         ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(hasWeatherControlSupportString))
 
+
+
+
+
+
+
+
+
         --Home Tour Recommendations narration
         local houseId = entryData:GetReferenceId()
         local recommendCount = GetNumHouseToursPlayerListingRecommendations(houseId)
@@ -1351,7 +1362,7 @@ function ZO_GamepadCollectionsBook:BuildCollectibleData(collectibleData)
 
     ZO_UpdateCollectibleEntryDataIconVisuals(entryData, GAMEPLAY_ACTOR_CATEGORY_PLAYER)
 
-    local remainingMs, durationMs = GetCollectibleCooldownAndDuration(collectibleId)
+    local remainingMs, durationMs = collectibleData:GetCooldownAndDurationMs()
     if remainingMs > 0 and durationMs > 0 then
         entryData:SetCooldown(remainingMs, durationMs)
         entryData.refreshWhenFinished = true
@@ -1511,6 +1522,12 @@ function ZO_GamepadCollectionsBook:RefreshHousingTooltip(collectibleData)
     local hasWeatherControlSupport = ZO_FlagHelpers.MaskHasFlag(houseFlags, HOUSE_FLAGS_SUPPORTS_WEATHER_CONTROL)
     local hasWeatherControlSupportString = hasWeatherControlSupport and GetString(SI_YES) or GetString(SI_NO)
     housingPanel.supportsWeatherControlValueLabel:SetText(hasWeatherControlSupportString)
+
+
+
+
+
+
 
     local houseId = collectibleData:GetReferenceId()
     local recommendCount = GetNumHouseToursPlayerListingRecommendations(houseId)
@@ -2241,7 +2258,7 @@ end
 
 function ZO_GamepadCollectionsBook:OnUpdateCooldowns()
     for i, collectibleData in ipairs(self.updateList) do
-        local remainingMs = GetCollectibleCooldownAndDuration(collectibleData:GetId())
+        local remainingMs = collectibleData:GetCooldownAndDurationMs()
         if remainingMs ~= collectibleData:GetCooldownTimeRemainingMs() or (remainingMs <= 0 and collectibleData.refreshWhenFinished) then
             self:OnCollectibleUpdated(collectibleData:GetId())
             return

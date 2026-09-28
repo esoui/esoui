@@ -1108,6 +1108,24 @@ function ZO_CollectibleCategoryData:HasAnyCompanionUsableCollectibles()
     return false
 end
 
+function ZO_CollectibleCategoryData:HasAnyActiveCompanionUsableCollectibles()
+    for _, collectibleData in ipairs(self.orderedCollectibles) do
+        if collectibleData:IsCollectibleCategoryActiveCompanionUsable() and collectibleData:IsCollectibleAvailableToCompanion() then
+            return true
+        end
+    end
+
+    if self.isTopLevelCategory then
+        for _, subcategoryData in ipairs(self.orderedSubcategories) do
+            if subcategoryData:HasAnyActiveCompanionUsableCollectibles() then
+                return true
+            end
+        end
+    end
+
+    return false
+end
+
 function ZO_CollectibleCategoryData:GetCollectibleCategoryTypesInCategory()
     if not self.collectibleCategoryTypesInCategory then
         local collectibleCategoryTypesInCategory = {}

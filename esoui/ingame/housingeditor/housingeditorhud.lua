@@ -219,26 +219,26 @@ function ZO_HousingEditorState:OnHouseChanged(currentHouseId, currentIsOwner, cu
     self:FireCallbacks("HouseChanged", currentHouseId, currentIsOwner, currentOwnerName, previousHouseId, previousIsOwner, previousOwnerName)
 end
 
-function ZO_HousingEditorState:OnOccupantArrived(accountName, characterName)
+function ZO_HousingEditorState:OnOccupantArrived(crossplayDisplayName, characterName, platformDisplayName)
     if not IsPlayerActivated() then
         -- Disregard arrival events while jumping.
         return
     end
 
-    self:FireCallbacks("OccupantArrived", accountName, characterName)
-    local preferredName = ZO_ShouldPreferUserId() and accountName or characterName
+    self:FireCallbacks("OccupantArrived", crossplayDisplayName, characterName, platformDisplayName)
+    local preferredName = ZO_GetPrimaryPlayerName(crossplayDisplayName, characterName, platformDisplayName)
     local message = zo_strformat(SI_HOUSING_PLAYER_ARRIVED, ZO_SELECTED_TEXT:Colorize(preferredName))
     ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, message)
 end
 
-function ZO_HousingEditorState:OnOccupantDeparted(accountName, characterName)
+function ZO_HousingEditorState:OnOccupantDeparted(crossplayDisplayName, characterName, platformDisplayName)
     if not IsPlayerActivated() then
         -- Disregard departure events while jumping.
         return
     end
 
-    self:FireCallbacks("OccupantDeparted", accountName, characterName)
-    local preferredName = ZO_ShouldPreferUserId() and accountName or characterName
+    self:FireCallbacks("OccupantDeparted", crossplayDisplayName, characterName, platformDisplayName)
+    local preferredName = ZO_GetPrimaryPlayerName(crossplayDisplayName, characterName, platformDisplayName)
     local message = zo_strformat(SI_HOUSING_PLAYER_DEPARTED, ZO_SELECTED_TEXT:Colorize(preferredName))
     ZO_Alert(UI_ALERT_CATEGORY_ALERT, nil, message)
 end
@@ -263,11 +263,13 @@ function ZO_HousingEditorState:RefreshOccupants()
     self.population = numOccupants
 
     for occupantIndex = 1, numOccupants do
-        local accountName, characterName = GetHouseOccupantName(occupantIndex)
+        local crossplayDisplayName, characterName, platformDisplayName = GetHouseOccupantName(occupantIndex)
         local occupantData =
         {
-            accountName = accountName,
+            crossplayDisplayName = crossplayDisplayName,
+            accountName = crossplayDisplayName, -- left for addon compatibility
             characterName = characterName,
+            platformDisplayName = platformDisplayName,
         }
         table.insert(self.occupants, occupantData)
     end
@@ -412,15 +414,7 @@ function HousingHUDFragment:Initialize(control)
     self.nextCombatUpdateTimeMS = 0
 
     self.keybindButton = self.control:GetNamedChild("KeybindButton")
-    self.cycleTargetKeybindButton = self.control:GetNamedChild("CycleTargetKeybindButton")
-
-    self.OnCycleTargetKeybindButtonPressed = function()
-        local result = HousingEditorCycleTarget()
-        ZO_AlertEvent(EVENT_HOUSING_EDITOR_REQUEST_RESULT, result)
-        if result == HOUSING_REQUEST_RESULT_SUCCESS then
-            PlaySound(SOUNDS.RADIAL_MENU_SELECTION)
-        end
-    end
+    self.keybindButtonHudElementRef = self.keybindButton:GetNamedChild("HUDElementRef")
 
     self.OnDeferredCombatUpdate = function()
         if GetFrameTimeMilliseconds() < self.nextCombatUpdateTimeMS then
@@ -486,44 +480,38 @@ function HousingHUDFragment:InitializeKeybinds()
 end
 
 do
-    local DEFAULT_RELATIVE_TO = nil
-
     local KEYBOARD_PLATFORM_STYLE =
     {
-        keybindButtonTemplate = "ZO_KeybindButton_Keyboard_Template",
-        keybindButtonAnchor = ZO_Anchor:New(BOTTOMRIGHT, DEFAULT_RELATIVE_TO, BOTTOMRIGHT, -80, -25),
-
-        cycleTargetKeybindButtonTemplate = "ZO_KeybindButton_Keyboard_Template",
-        cycleTargetKeybindButtonAnchor = ZO_Anchor:New(RIGHT, DEFAULT_RELATIVE_TO, LEFT, -25, 0),
-        cycleTargetKeybindButtonAction = "CYCLE_PREFERRED_ENEMY_TARGET",
+        keybindButtonAnchor = ZO_Anchor:New(BOTTOMRIGHT, nil, BOTTOMRIGHT, -80, -25),
     }
 
     local GAMEPAD_PLATFORM_STYLE =
     {
-        keybindButtonTemplate = "ZO_KeybindButton_Gamepad_Template",
-        keybindButtonAnchor = ZO_Anchor:New(BOTTOMLEFT, DEFAULT_RELATIVE_TO, BOTTOMLEFT, 80, -40),
-
-        cycleTargetKeybindButtonTemplate = "ZO_KeybindButton_Gamepad_Template",
-        cycleTargetKeybindButtonAnchor = ZO_Anchor:New(BOTTOMRIGHT, DEFAULT_RELATIVE_TO, BOTTOMRIGHT, -80, -40),
-        cycleTargetKeybindButtonAction = "GAMEPAD_CYCLE_PREFERRED_ENEMY_TARGET",
+        keybindButtonAnchor = ZO_Anchor:New(BOTTOMLEFT, nil, BOTTOMLEFT, 80, -40),
     }
 
     function HousingHUDFragment:InitializePlatformStyle()
-        KEYBOARD_PLATFORM_STYLE.cycleTargetKeybindButtonAnchor:SetTarget(self.keybindButton)
-
         self.platformStyle = ZO_PlatformStyle:New(function(style) self:ApplyPlatformStyle(style) end, KEYBOARD_PLATFORM_STYLE, GAMEPAD_PLATFORM_STYLE)
+
+        local KEYBOARD_CONFIG =
+        {
+            defaultAnchor = KEYBOARD_PLATFORM_STYLE.keybindButtonAnchor,
+        }
+        local GAMEPAD_CONFIG =
+        {
+            defaultAnchor = GAMEPAD_PLATFORM_STYLE.keybindButtonAnchor,
+        }
+        local DISPLAY_NAME = GetString(SI_HOUSING_HUD_FRAGMENT_OPTIONS_KEYBIND)
+        HUD_MANAGER:RegisterKeyboardElement(self.keybindButton, DISPLAY_NAME, KEYBOARD_CONFIG)
+        HUD_MANAGER:RegisterGamepadElement(self.keybindButton, DISPLAY_NAME, GAMEPAD_CONFIG)
     end
 end
 
 function HousingHUDFragment:ApplyPlatformStyle(style)
-    ApplyTemplateToControl(self.keybindButton, style.keybindButtonTemplate)
+    ZO_ApplyPlatformTemplateToControl(self.keybindButton, "ZO_KeybindButton")
     style.keybindButtonAnchor:Set(self.keybindButton)
-
-    ApplyTemplateToControl(self.cycleTargetKeybindButton, style.cycleTargetKeybindButtonTemplate)
-    style.cycleTargetKeybindButtonAnchor:Set(self.cycleTargetKeybindButton)
-    local buttonLabelString = GetString(SI_BINDING_NAME_HOUSING_EDITOR_CYCLE_TARGET_ACTION)
-    ZO_KeybindButtonTemplate_Setup(self.cycleTargetKeybindButton, style.cycleTargetKeybindButtonAction, self.OnCycleTargetKeybindButtonPressed, buttonLabelString)
-    self.cycleTargetKeybindButton:SetText(buttonLabelString)
+    self.keybindButtonHudElementRef:ClearAnchors()
+    self.keybindButtonHudElementRef:SetAnchor(style.keybindButtonAnchor:GetMyPoint())
 
     self:UpdateKeybind()
 end
@@ -1044,7 +1032,7 @@ function ZO_HousingEditorHud:UpdateKeybinds()
     -- Fetch the new keybind descriptors for the current editor mode.
     local currentMode = GetHousingEditorMode()
     local targetFurnitureId = HousingEditorGetTargetInfo()
-    local hasValidTarget = targetFurnitureId ~= 0
+    local hasValidTarget = not IsId64EqualToNumber(targetFurnitureId, 0)
     self.currentKeybindDescriptor, self.currentPaletteKeybindDescriptor = self:GetKeybindStripDescriptorForMode(currentMode, hasValidTarget)
 
     if HOUSING_EDITOR_HUD_SCENE:IsShowing() then
@@ -2355,12 +2343,8 @@ do
                             HousingEditorSetPlacementType(HOUSING_EDITOR_PLACEMENT_TYPE_PICKUP)
                         end,
             -- Palette descriptors are ethereal and shown in a keybind button. We need both visible and enabled so it acts properly
-            enabled = function()
-                return HOUSING_EDITOR_STATE:CanLocalPlayerEditHouse() and (HousingEditorCanSelectTargettedFurniture() or HousingEditorHasSelectablePathNode())
-            end,
-            visible = function()
-                return HOUSING_EDITOR_STATE:CanLocalPlayerEditHouse() and (HousingEditorCanSelectTargettedFurniture() or HousingEditorHasSelectablePathNode())
-            end,
+            enabled = CanEditAndHasValidFurnitureOrPathTarget,
+            visible = CanEditAndHasValidFurnitureOrPathTarget,
             order = 20,
             ethereal = true,
         }
@@ -2430,6 +2414,18 @@ do
            gamepadEditPathDescriptor,
         }
 
+        local function CanBrowseFurniture()
+            return HOUSING_EDITOR_STATE:CanLocalPlayerBrowseFurniture()
+        end
+
+        local function CanUndoLastAction()
+            return HOUSING_EDITOR_STATE:CanLocalPlayerEditHouse() and CanUndoLastHousingEditorCommand()
+        end
+
+        local function CanRedoLastAction()
+            return HOUSING_EDITOR_STATE:CanLocalPlayerEditHouse() and CanRedoLastHousingEditorCommand()
+        end
+
         self.selectionModeKeybindStripDescriptor =
         {
             alignment = KEYBIND_STRIP_ALIGN_CENTER,
@@ -2439,12 +2435,8 @@ do
                 name = GetString(SI_HOUSING_EDITOR_BROWSE),
                 keybind = "HOUSING_EDITOR_SECONDARY_ACTION",
                 -- Palette descriptors are ethereal and shown in a keybind button. We need both visible and enabled so it acts properly
-                enabled = function()
-                              return HOUSING_EDITOR_STATE:CanLocalPlayerBrowseFurniture()
-                          end,
-                visible = function() 
-                              return HOUSING_EDITOR_STATE:CanLocalPlayerBrowseFurniture()
-                          end,
+                enabled = CanBrowseFurniture,
+                visible = CanBrowseFurniture,
                 callback = function()
                                HousingEditorRequestModeChange(HOUSING_EDITOR_MODE_BROWSE)
                            end,
@@ -2486,12 +2478,8 @@ do
                 name = GetString(SI_HOUSING_EDITOR_UNDO),
                 keybind = "HOUSING_EDITOR_UNDO_ACTION",
                 -- Palette descriptors are ethereal and shown in a keybind button. We need both visible and enabled so it acts properly
-                enabled = function()
-                              return HOUSING_EDITOR_STATE:CanLocalPlayerEditHouse() and CanUndoLastHousingEditorCommand()
-                          end,
-                visible = function()
-                              return HOUSING_EDITOR_STATE:CanLocalPlayerEditHouse() and CanUndoLastHousingEditorCommand()
-                          end,
+                enabled = CanUndoLastAction,
+                visible = CanUndoLastAction,
                 callback = function()
                                UndoLastHousingEditorCommand()
                            end,
@@ -2503,12 +2491,8 @@ do
                 name = GetString(SI_HOUSING_EDITOR_REDO),
                 keybind = "HOUSING_EDITOR_REDO_ACTION",
                 -- Palette descriptors are ethereal and shown in a keybind button. We need both visible and enabled so it acts properly
-                enabled = function()
-                              return HOUSING_EDITOR_STATE:CanLocalPlayerEditHouse() and CanRedoLastHousingEditorCommand()
-                          end,
-                visible = function()
-                              return HOUSING_EDITOR_STATE:CanLocalPlayerEditHouse() and CanRedoLastHousingEditorCommand()
-                          end,
+                enabled = CanRedoLastAction,
+                visible = CanRedoLastAction,
                 callback = function()
                                RedoLastHousingEditorCommand()
                            end,
@@ -3265,12 +3249,8 @@ do
             name = GetString(SI_HOUSING_EDITOR_PATH_SELECT_NODE),
             keybind = "HOUSING_EDITOR_PRIMARY_ACTION",
             -- Palette descriptors are ethereal and shown in a keybind button. We need both visible and enabled so it acts properly
-            visible =   function()
-                            return HousingEditorHasSelectablePathNode()
-                        end,
-            enabled =   function()
-                            return HousingEditorHasSelectablePathNode()
-                        end,
+            visible = HousingEditorHasSelectablePathNode,
+            enabled = HousingEditorHasSelectablePathNode,
             callback =  function()
                             local result = HousingEditorSelectTargettedPathNode()
                             ZO_AlertEvent(EVENT_HOUSING_EDITOR_REQUEST_RESULT, result)
@@ -3298,12 +3278,8 @@ do
                             HousingEditorSetPlacementType(HOUSING_EDITOR_PLACEMENT_TYPE_PICKUP)
                         end,
             -- Palette descriptors are ethereal and shown in a keybind button. We need both visible and enabled so it acts properly
-            visible =   function()
-                            return HousingEditorHasSelectablePathNode()
-                        end,
-            enabled =   function()
-                            return HousingEditorHasSelectablePathNode()
-                        end,
+            visible = HousingEditorHasSelectablePathNode,
+            enabled = HousingEditorHasSelectablePathNode,
             order = 12,
             ethereal = true,
         }
@@ -3316,12 +3292,8 @@ do
                         return zo_strformat(SI_HOUSING_EDITOR_PATH_NODE_SPEED, ZO_SELECTED_TEXT:Colorize(placeSpeed))
                     end,
             -- Palette descriptors are ethereal and shown in a keybind button. We need both visible and enabled so it acts properly
-            visible =   function()
-                            return HousingEditorHasSelectablePathNode()
-                        end,
-            enabled =   function()
-                            return HousingEditorHasSelectablePathNode()
-                        end,
+            visible = HousingEditorHasSelectablePathNode,
+            enabled = HousingEditorHasSelectablePathNode,
             callback =  function()
                             local result = HousingEditorToggleSelectedPathNodeSpeed()
                             ZO_AlertEvent(EVENT_HOUSING_EDITOR_REQUEST_RESULT, result)
@@ -3348,12 +3320,8 @@ do
                         return zo_strformat(SI_HOUSING_EDITOR_PATH_NODE_WAIT_TIME, ZO_SELECTED_TEXT:Colorize(delayTimeS))
                     end,
             -- Palette descriptors are ethereal and shown in a keybind button. We need both visible and enabled so it acts properly
-            visible =   function()
-                            return HousingEditorHasSelectablePathNode()
-                        end,
-            enabled =   function()
-                            return HousingEditorHasSelectablePathNode()
-                        end,
+            visible = HousingEditorHasSelectablePathNode,
+            enabled = HousingEditorHasSelectablePathNode,
             callback =  function()
                             local result = HousingEditorToggleSelectedPathNodeDelayTime()
                             ZO_AlertEvent(EVENT_HOUSING_EDITOR_REQUEST_RESULT, result)
@@ -3770,53 +3738,74 @@ do
         }
     end
 
-    function ZO_HousingEditorHud:GetKeybindStripDescriptorForMode(mode, hasValidTarget)
-        if mode == HOUSING_EDITOR_MODE_SELECTION then
-            if IsInGamepadPreferredMode() then
-                if hasValidTarget and HOUSING_EDITOR_STATE:CanLocalPlayerEditHouse() then
-                    return self.selectionModeGamepadKeybindStripDescriptor, self.selectionModeKeybindPaletteGamepadDescriptor
+    do
+        local keybindStripDescriptorAccessorsByHousingEditorMode =
+        {
+            [HOUSING_EDITOR_MODE_SELECTION] = function(self, hasValidTarget, isInGamepadPreferredMode)
+                if isInGamepadPreferredMode then
+                    if hasValidTarget and HOUSING_EDITOR_STATE:CanLocalPlayerEditHouse() then
+                        return self.selectionModeGamepadKeybindStripDescriptor, self.selectionModeKeybindPaletteGamepadDescriptor
+                    else
+                        return self.selectionModeNoTargetGamepadKeybindStripDescriptor, nil
+                    end
                 else
-                    return self.selectionModeNoTargetGamepadKeybindStripDescriptor, nil
+                    if hasValidTarget then
+                        return self.selectionModeKeybindStripDescriptor, self.selectionModeKeybindPaletteDescriptor
+                    else
+                        return self.selectionModeNoTargetKeybindStripDescriptor, nil
+                    end
                 end
-            else
-                if hasValidTarget then
-                    return self.selectionModeKeybindStripDescriptor, self.selectionModeKeybindPaletteDescriptor
+            end,
+
+            [HOUSING_EDITOR_MODE_PLACEMENT] = function(self, hasValidTarget, isInGamepadPreferredMode)
+                if self:IsPrecisionEditingEnabled() then
+                    if self:IsPrecisionPlacementRotationMode() then
+                        return self.precisionRotatePlacementModeKeybindStripDescriptor, self.precisionRotatePlacementModeKeybindPaletteDescriptor
+                    else
+                        return self.precisionMovePlacementModeKeybindStripDescriptor, self.precisionMovePlacementModeKeybindPaletteDescriptor
+                    end
                 else
-                    return self.selectionModeNoTargetKeybindStripDescriptor, nil
+                    return self.placementModeKeybindStripDescriptor, self.placementModeKeybindPaletteDescriptor
                 end
+            end,
+
+            [HOUSING_EDITOR_MODE_LINK] = function(self, hasValidTarget, isInGamepadPreferredMode)
+                return self.linkModeKeybindStripDescriptor, self.linkModeKeybindPaletteDescriptor
+            end,
+
+            [HOUSING_EDITOR_MODE_PATH] = function(self, hasValidTarget, isInGamepadPreferredMode)
+                if isInGamepadPreferredMode then
+                    return self.pathModeKeybindStripGamepadDescriptor, self.pathModeKeybindPaletteGamepadDescriptor
+                else
+                    return self.pathModeKeybindStripDescriptor, self.pathModeKeybindPaletteDescriptor
+                end
+            end,
+
+            [HOUSING_EDITOR_MODE_NODE_PLACEMENT] = function(self, hasValidTarget, isInGamepadPreferredMode)
+                if self:IsPrecisionEditingEnabled() then
+                    if self:IsPrecisionPlacementRotationMode() then
+                        return self.precisionRotatePlacementModeKeybindStripDescriptor, self.precisionRotatePlacementModeKeybindPaletteDescriptor
+                    else
+                        return self.precisionMovePlacementModeKeybindStripDescriptor, self.precisionMovePlacementModeKeybindPaletteDescriptor
+                    end
+                else
+                    if isInGamepadPreferredMode then
+                        return self.nodePlacementModeKeybindStripGamepadDescriptor, self.nodePlacementModeKeybindPaletteDescriptor
+                    else
+                        return self.nodePlacementModeKeybindStripDescriptor, self.nodePlacementModeKeybindPaletteDescriptor
+                    end
+                end
+            end,
+        }
+
+        function ZO_HousingEditorHud:GetKeybindStripDescriptorForMode(mode, hasValidTarget)
+            local accessorFunction = keybindStripDescriptorAccessorsByHousingEditorMode[mode]
+            if not accessorFunction then
+                return
             end
-        elseif mode == HOUSING_EDITOR_MODE_PLACEMENT then
-            if self:IsPrecisionEditingEnabled() then
-                if self:IsPrecisionPlacementRotationMode() then
-                    return self.precisionRotatePlacementModeKeybindStripDescriptor, self.precisionRotatePlacementModeKeybindPaletteDescriptor
-                else
-                    return self.precisionMovePlacementModeKeybindStripDescriptor, self.precisionMovePlacementModeKeybindPaletteDescriptor
-                end
-            else
-                return self.placementModeKeybindStripDescriptor, self.placementModeKeybindPaletteDescriptor
-            end
-        elseif mode == HOUSING_EDITOR_MODE_LINK then
-            return self.linkModeKeybindStripDescriptor, self.linkModeKeybindPaletteDescriptor
-        elseif mode == HOUSING_EDITOR_MODE_PATH then
-            if IsInGamepadPreferredMode() then
-                return self.pathModeKeybindStripGamepadDescriptor, self.pathModeKeybindPaletteGamepadDescriptor
-            else
-                return self.pathModeKeybindStripDescriptor, self.pathModeKeybindPaletteDescriptor
-            end
-        elseif mode == HOUSING_EDITOR_MODE_NODE_PLACEMENT then
-            if self:IsPrecisionEditingEnabled() then
-                if self:IsPrecisionPlacementRotationMode() then
-                    return self.precisionRotatePlacementModeKeybindStripDescriptor, self.precisionRotatePlacementModeKeybindPaletteDescriptor
-                else
-                    return self.precisionMovePlacementModeKeybindStripDescriptor, self.precisionMovePlacementModeKeybindPaletteDescriptor
-                end
-            else
-                if IsInGamepadPreferredMode() then
-                    return self.nodePlacementModeKeybindStripGamepadDescriptor, self.nodePlacementModeKeybindPaletteDescriptor
-                else
-                    return self.nodePlacementModeKeybindStripDescriptor, self.nodePlacementModeKeybindPaletteDescriptor
-                end
-            end
+
+            local isInGamepadPreferredMode = IsInGamepadPreferredMode()
+            return accessorFunction(self, hasValidTarget, isInGamepadPreferredMode)
         end
     end
 

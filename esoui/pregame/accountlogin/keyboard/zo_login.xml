@@ -102,7 +102,7 @@
                             <Dimensions x="ZO_LOGIN_EDITBOX_WIDTH"/>
                             <Anchor point="TOPLEFT" offsetX="50" offsetY="70"/>
                             <Controls>
-                                <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" font="ZoFontWinH4" maxInputCharacters="MAX_EMAIL_LENGTH" defaultText="SI_LOGON_ACCOUNT_NAME_DEFAULT_TEXT_PC">
+                                <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" font="ZoFontWinH4" maxInputCharacters="MAX_EMAIL_LENGTH" defaultText="SI_LOGIN_ACCOUNT_NAME_DEFAULT_TEXT">
                                     <OnEnter>
                                         ZO_Login_PasswordEdit_TakeFocus()
                                     </OnEnter>

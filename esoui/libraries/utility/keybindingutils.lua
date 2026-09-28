@@ -83,6 +83,18 @@ function ZO_Keybindings_GenerateIconKeyMarkup(key, scalePercent, useDisabledIcon
     return ("|k%.1f%%:%s%s|k"):format(scale, key, useDisabledIconString)
 end
 
+local function EvaluateShowAsHold(showAsHold, preferredKeybindType)
+    if type(showAsHold) == "table" then
+        if preferredKeybindType == PREFERRED_INPUT_DEVICE_TYPE_GAMEPAD then
+            return showAsHold.gamepad
+        else
+            return showAsHold.keyboard
+        end
+    end
+
+    return showAsHold
+end
+
 do
     local keyNameTable = {}
     local DEFAULT_SCALE_PERCENT = 180
@@ -185,7 +197,7 @@ do
             return nil
         end
 
-        if showAsHold then
+        if EvaluateShowAsHold(showAsHold, preferredKeybindType) then
             local holdKey = ConvertKeyPressToHold(key)
             if holdKey ~= KEY_INVALID then
                 key = holdKey
@@ -204,7 +216,7 @@ do
             return nil
         end
 
-        if showAsHold then
+        if EvaluateShowAsHold(showAsHold, preferredKeybindType) then
             local holdKey = ConvertKeyPressToHold(key)
             if holdKey ~= KEY_INVALID then
                 key = holdKey
@@ -224,7 +236,7 @@ do
             return nil
         end
 
-        if showAsHold then
+        if EvaluateShowAsHold(showAsHold, preferredKeybindType) then
             local holdKey = ConvertKeyPressToHold(key)
             if holdKey ~= KEY_INVALID then
                 key = holdKey
@@ -280,14 +292,28 @@ local function RegisterLabelForBindingUpdate(label, actionName, showUnbound, gam
     UpdateRegisteredKeybind()
 end
 
-function ZO_Keybindings_RegisterLabelForBindingUpdate(label, actionName, showUnbound, gamepadActionName, onChangedCallback, alwaysPreferGamepadMode, showAsHold, scalePercent, useDisabledIcon)
-    local function OnKeybindUpdate(label, bindingText, key, mod1, mod2, mod3, mod4)
-        label:SetText(bindingText)
-        if onChangedCallback then
-            onChangedCallback(label, bindingText, key, mod1, mod2, mod3, mod4)
+do
+    local holdIndicatorPool = ZO_ControlPool:New("ZO_KeybindButton_Keyboard_HoldIndicator", GuiRoot)
+
+    function ZO_Keybindings_RegisterLabelForBindingUpdate(label, actionName, showUnbound, gamepadActionName, onChangedCallback, alwaysPreferGamepadMode, showAsHold, scalePercent, useDisabledIcon)
+        local function OnKeybindUpdate(label, bindingText, key, mod1, mod2, mod3, mod4)
+            label:SetText(bindingText)
+            local preferredKeybindType = ZO_Keybindings_GetPreferredKeyType(alwaysPreferGamepadMode)
+            if preferredKeybindType ~= PREFERRED_INPUT_DEVICE_TYPE_GAMEPAD and EvaluateShowAsHold(showAsHold, preferredKeybindType) then
+                local holdIndicator = holdIndicatorPool:AcquireObject(label)
+                holdIndicator:SetParent(label)
+                label.holdIndicator = holdIndicator
+                holdIndicator:SetAnchor(CENTER, label, BOTTOMLEFT, 5, -3)
+            elseif label.holdIndicator then
+                holdIndicatorPool:ReleaseObject(label)
+            end
+
+            if onChangedCallback then
+                onChangedCallback(label, bindingText, key, mod1, mod2, mod3, mod4)
+            end
         end
+        RegisterLabelForBindingUpdate(label, actionName, showUnbound, gamepadActionName, OnKeybindUpdate, alwaysPreferGamepadMode, showAsHold, scalePercent, useDisabledIcon)
     end
-    RegisterLabelForBindingUpdate(label, actionName, showUnbound, gamepadActionName, OnKeybindUpdate, alwaysPreferGamepadMode, showAsHold, scalePercent, useDisabledIcon)
 end
 
 --This function is identical to the more general ZO_Keybdinging_RegisterLabelForBindingUpdate with the exception that it does
@@ -313,9 +339,9 @@ function ZO_Keybindings_UnregisterLabelForBindingUpdate(label)
     label.updateRegisteredKeybindCallback = nil
 end
 
-function ZO_Keybinding_GetGamepadActionName(actionName)
+function ZO_Keybinding_GetGamepadActionName(actionName, forceConsole)
     local localizedConsoleActionName = ""
-    if ZO_IsConsoleOrGameCoreUI() then
+    if ZO_IsConsoleOrGameCoreUI() or forceConsole then
         localizedConsoleActionName = GetString(_G["SI_BINDING_NAME_CONSOLE_"..actionName])
     end
 

@@ -115,7 +115,7 @@ local ARMOR_EQUIP_TYPE_TO_CATEGORY_MAP = {
 }
 
 -- Convert inventory/store weapon/armor item categories for companion variants.
-local ARMOR_AND_WEAPONS_FOR_COMPANIONS_CATEGORY_MAP = 
+local ARMOR_AND_WEAPONS_FOR_COMPANIONS_CATEGORY_MAP =
 {
     [GAMEPAD_ITEM_CATEGORY_AMULET]    = GAMEPAD_ITEM_CATEGORY_COMPANION_AMULET,
     [GAMEPAD_ITEM_CATEGORY_AXE]       = GAMEPAD_ITEM_CATEGORY_COMPANION_AXE,
@@ -142,7 +142,7 @@ local function GetCategoryFromArmor(itemData)
 end
 
 function ZO_InventoryUtils_Gamepad_GetBestItemCategoryDescription(itemData)
-    local category = nil 
+    local category = nil
 
     if itemData.itemType == ITEMTYPE_WEAPON then
         category = GetCategoryFromWeapon(itemData)
@@ -152,10 +152,19 @@ function ZO_InventoryUtils_Gamepad_GetBestItemCategoryDescription(itemData)
         category = GetCategoryFromItemType(itemData.itemType)
     end
     if itemData.actorCategory == GAMEPLAY_ACTOR_CATEGORY_COMPANION then
+
+
+
+
+
+
         local companionCategory = ARMOR_AND_WEAPONS_FOR_COMPANIONS_CATEGORY_MAP[category]
         if companionCategory then
             category = companionCategory
         end
+
+
+
     end
 
     if category then
@@ -166,17 +175,6 @@ function ZO_InventoryUtils_Gamepad_GetBestItemCategoryDescription(itemData)
 end
 
  --helper comparators
-function ZO_InventoryUtils_DoesNewItemMatchFilterType(itemData, currentFilter)
-    if not currentFilter then return true end
-
-    for i, filter in ipairs(itemData.filterData) do
-        if filter == currentFilter then
-            return true
-        end
-    end
-    return false
-end
-
 function ZO_InventoryUtils_DoesNewItemMatchSupplies(itemData)
     return itemData.equipType == EQUIP_TYPE_INVALID
             and not ZO_InventoryUtils_DoesNewItemMatchFilterType(itemData, ITEMFILTERTYPE_QUICKSLOT)

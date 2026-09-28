@@ -499,6 +499,13 @@ function ZO_Dialogs_ShowDialog(name, data, textParams, isGamepad)
     dialog.data = data
     dialog.textParams = textParams
 
+    --Tier
+    local drawTier = ZO_Eval(dialogInfo.drawTier)
+    if drawTier then
+        dialog.oldTier = dialog:GetDrawTier()
+        dialog:SetDrawTier(drawTier)
+    end
+
     --Title
 
     local titleControl = dialog:GetNamedChild("Title")
@@ -534,10 +541,7 @@ function ZO_Dialogs_ShowDialog(name, data, textParams, isGamepad)
             local buttonInfo = buttonInfos[i]
             local button = GetButtonControl(dialog, i)
 
-            local buttonVisible = true
-            if buttonInfo.visible ~= nil then
-                buttonVisible = ZO_Eval(buttonInfo.visible, dialog)
-            end
+            local buttonVisible = ZO_EvalDefaultTrue(buttonInfo.visible, dialog)
 
             if not buttonVisible then
                 button:SetHidden(true)
@@ -572,10 +576,7 @@ function ZO_Dialogs_ShowDialog(name, data, textParams, isGamepad)
                     hasKeybind = false
                 end
 
-                local isButtonEnabled
-                if buttonInfo.enabled ~= nil then
-                    isButtonEnabled = ZO_Eval(buttonInfo.enabled, dialog)
-                end
+                local isButtonEnabled = ZO_Eval(buttonInfo.enabled, dialog)
 
                 if isButtonEnabled ~= nil then
                     button:SetEnabled(isButtonEnabled)
@@ -998,6 +999,11 @@ function ZO_CompleteReleaseDialogOnDialogHidden(dialog, releasedFromButton)
         ZO_DIALOG_SYNC_OBJECT:Hide()
     end
 
+    if dialog.oldTier then
+        dialog:SetDrawTier(dialog.oldTier)
+        dialog.oldTier = nil
+    end
+
     if dialogInfo.noChoiceCallback and not releasedFromButton then
         dialogInfo.noChoiceCallback(dialog)
     end
@@ -1130,19 +1136,13 @@ function ZO_Dialogs_UpdateButtonVisibilityAndEnabledState(dialog)
             local buttonInfo = buttonInfos[i]
             local button = GetButtonControl(dialog, i)
 
-            local buttonVisible = true
-            if buttonInfo.visible ~= nil then
-                buttonVisible = ZO_Eval(buttonInfo.visible, dialog)
-            end
+            local buttonVisible = ZO_EvalDefaultTrue(buttonInfo.visible, dialog)
 
             if not buttonVisible then
                 button:SetHidden(true)
                 button:SetKeybindEnabled(false)
             else
-                local isButtonEnabled = true
-                if buttonInfo.enabled ~= nil then
-                    isButtonEnabled = ZO_Eval(buttonInfo.enabled, dialog)
-                end
+                local isButtonEnabled = ZO_EvalDefaultTrue(buttonInfo.enabled, dialog)
 
                 local hasKeybind = button:GetKeybind() ~= nil
                 button:SetHidden(false)
@@ -1160,10 +1160,7 @@ function ZO_Dialogs_RefreshButtonTexts(dialog)
         for i, buttonInfo in ipairs(buttonInfos) do
             local button = GetButtonControl(dialog, i)
 
-            local buttonVisible = true
-            if buttonInfo.visible ~= nil then
-                buttonVisible = ZO_Eval(buttonInfo.visible, dialog)
-            end
+            local buttonVisible = ZO_EvalDefaultTrue(buttonInfo.visible, dialog)
 
             if buttonVisible then
                 local buttonText

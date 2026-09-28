@@ -4,6 +4,7 @@ function ZO_PreviewScreen_ActivePreview_Gamepad:Initialize(control)
     local scene = ZO_Scene:New("PreviewScreenActivePreviewSceneGamepad", SCENE_MANAGER)
     PREVIEW_SCREEN_ACTIVE_PREVIEW_SCENE_GAMEPAD = scene
     self.control = control
+    self.rewardId = nil
 
     ZO_DeferredInitializingObject.Initialize(self, scene)
 
@@ -12,70 +13,78 @@ function ZO_PreviewScreen_ActivePreview_Gamepad:Initialize(control)
 end
 
 function ZO_PreviewScreen_ActivePreview_Gamepad:OnDeferredInitialize()
-    self:InitializeKeybindStripDescriptor()
+    self:InitializeKeybindStripDescriptors()
 end
 
-function ZO_PreviewScreen_ActivePreview_Gamepad:InitializeKeybindStripDescriptor()
+function ZO_PreviewScreen_ActivePreview_Gamepad:InitializeKeybindStripDescriptors()
     self.keybindStripDescriptor = {}
     ZO_Gamepad_AddBackNavigationKeybindDescriptorsWithSound(self.keybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON, nil, GetString(SI_ACTIVE_PREVIEW_END_PREVIEW_ACTION))
 end
 
-function ZO_PreviewScreen_ActivePreview_Gamepad:PreviewReward()
-    local previewableRewardData = self.previewableRewardData
-    if not previewableRewardData then
-        internalassert(false, "PreviewReward: previewableRewardData is required.")
+function ZO_PreviewScreen_ActivePreview_Gamepad:SetRewardId(rewardId)
+    -- Order matters
+    self.rewardId = rewardId
+    self:UpdatePreviewControls()
+end
+
+function ZO_PreviewScreen_ActivePreview_Gamepad:UpdatePreviewControls()
+    if not self:IsShowing() then
         return
     end
 
-    local rewardData = previewableRewardData:GetRewardData()
-    if rewardData then
-        GAMEPAD_TOOLTIPS:LayoutRewardData(GAMEPAD_RIGHT_TOOLTIP, rewardData)
-    else
-        GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
-    end
-
-    local previewSystem = SYSTEMS:GetObject("itemPreview")
-    local rewardId = previewableRewardData:GetRewardId()
-    if GetRewardType(rewardId) == REWARD_ENTRY_TYPE_REWARD_LIST then
-        self:PreviewRewardList(rewardId)
-    elseif not self.isAlreadyPreviewingReward then
-        previewSystem:PreviewReward(rewardId)
-        previewSystem:OnPreviewShowing()
-    else
-        -- Adds action keybinds for preview.
-        previewSystem:OnPreviewShowing()
-    end
-end
-
-function ZO_PreviewScreen_ActivePreview_Gamepad:EndPreviewReward()
-    SYSTEMS:GetObject("itemPreview"):ClearPreviewCollection()
-    ApplyChangesToPreviewCollectionShown()
-    KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindStripDescriptor)
-end
-
-function ZO_PreviewScreen_ActivePreview_Gamepad:PreviewRewardList(rewardId)
-    -- TODO Veterancy
+    self:SetPreviewControlsHidden(self.rewardId == nil)
 end
 
 function ZO_PreviewScreen_ActivePreview_Gamepad:SetSceneGroup(sceneGroup)
     self.sceneGroup = sceneGroup
 end
 
-function ZO_PreviewScreen_ActivePreview_Gamepad:SetPreviewableRewardData(previewableRewardData, isAlreadyPreviewingReward)
-    self.previewableRewardData = previewableRewardData
-    self.isAlreadyPreviewingReward = isAlreadyPreviewingReward
-end
-
 function ZO_PreviewScreen_ActivePreview_Gamepad:OnShowing()
+    -- Order matters
     self.sceneGroup:SetActiveScene("ZO_PreviewScreenActivePreviewSceneGamepad")
-    self:PreviewReward()
     KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
+    self:UpdatePreviewControls()
 end
 
 function ZO_PreviewScreen_ActivePreview_Gamepad:OnHiding()
-    self:SetPreviewableRewardData(nil)
-    self:EndPreviewReward()
+    -- Order matters
+    self:SetRewardId(nil)
     KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
+    self:UpdatePreviewControls()
+    CALLBACK_MANAGER:FireCallbacks("OnGamepadPreviewScreenHidden")
+end
+
+function ZO_PreviewScreen_ActivePreview_Gamepad:SetPreviewActionsHidden(hidden)
+    local previewSystem = self.GetPreviewSystem()
+    if hidden then
+        previewSystem:SetActionControlsHidden(true)
+    else
+        previewSystem:SetupActionCarousel()
+    end
+end
+
+function ZO_PreviewScreen_ActivePreview_Gamepad:SetPreviewVariationsHidden(hidden)
+    local previewSystem = self.GetPreviewSystem()
+    if hidden then
+        previewSystem:SetVariationControlsHidden(true)
+    else
+        previewSystem:SetupVariationControls()
+    end
+end
+
+function ZO_PreviewScreen_ActivePreview_Gamepad:SetPreviewControlsHidden(hidden)
+    self:SetPreviewActionsHidden(hidden)
+    self:SetPreviewVariationsHidden(hidden)
+
+    if hidden then
+        SCENE_MANAGER:RemoveFragment(PREVIEW_KEYBIND_ACTION_LAYER_FRAGMENT)
+    else
+        SCENE_MANAGER:AddFragment(PREVIEW_KEYBIND_ACTION_LAYER_FRAGMENT)
+    end
+end
+
+function ZO_PreviewScreen_ActivePreview_Gamepad.GetPreviewSystem()
+    return SYSTEMS:GetObject("itemPreview")
 end
 
 function ZO_PreviewScreen_ActivePreview_Gamepad.OnControlInitialized(control)

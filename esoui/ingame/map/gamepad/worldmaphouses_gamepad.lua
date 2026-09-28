@@ -9,8 +9,8 @@ end
 function ZO_MapHouses_Gamepad:InitializeList(control)
     self.list = ZO_GamepadVerticalParametricScrollList:New(control:GetNamedChild("Main"):GetNamedChild("List"))
 
-    self.list:AddDataTemplate("ZO_GamepadMenuEntryTemplateLowercase42", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
-    self.list:AddDataTemplateWithHeader("ZO_GamepadMenuEntryTemplateLowercase42", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
+    self.list:AddDataTemplate("ZO_GamepadMenuEntryTemplateWithStatusLowercase42", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
+    self.list:AddDataTemplateWithHeader("ZO_GamepadMenuEntryTemplateWithStatusLowercase42", ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, "ZO_GamepadMenuEntryHeaderTemplate")
     self.list:SetAlignToScreenCenter(true)
     local narrationInfo = 
     {
@@ -61,9 +61,9 @@ function ZO_MapHouses_Gamepad:RefreshHouseList()
         entryData:AddSubLabel(houseEntry.foundInZoneName)
         if headerText then
             entryData:SetHeader(headerText)
-            self.list:AddEntry("ZO_GamepadMenuEntryTemplateLowercase42WithHeader", entryData)
+            self.list:AddEntry("ZO_GamepadMenuEntryTemplateWithStatusLowercase42WithHeader", entryData)
         else
-            self.list:AddEntry("ZO_GamepadMenuEntryTemplateLowercase42", entryData)
+            self.list:AddEntry("ZO_GamepadMenuEntryTemplateWithStatusLowercase42", entryData)
         end
     end
 

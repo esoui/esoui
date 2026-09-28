@@ -484,6 +484,9 @@ function ZO_InventoryManager:Initialize(control)
         },
         [ITEM_TYPE_DISPLAY_CATEGORY_COMPANION] =
         {
+
+
+
             ITEM_TYPE_DISPLAY_CATEGORY_JEWELRY,
             ITEM_TYPE_DISPLAY_CATEGORY_ARMOR,
             ITEM_TYPE_DISPLAY_CATEGORY_WEAPONS,

@@ -14,6 +14,9 @@ ZO_GAMEPAD_OPTIONS_CATEGORY_SORT_ORDER =
 }
 
 local SETTING_PANEL_GAMEPAD_CATEGORIES_ROOT = -1
+-- The console action name effectively removes the word "gamepad" from the binding display name
+-- so we use this on the button chart image to save some space and because it's redundant
+local FORCE_CONSOLE_GAMEPAD_ACTION_NAME = true
 
 ZO_GamepadOptions = ZO_Object.MultiSubclass(ZO_SharedOptions, ZO_Gamepad_ParametricList_Screen)
 
@@ -546,7 +549,7 @@ local function SetupGameCameraZoomLabels(control, isHoldKey, labelToUse, linesUs
     labelToUse = labelToUse + 1 --use an extra label to show Toggle
     linesUsed = linesUsed + control:GetNamedChild("Label" .. labelToUse):GetNumLines()
     local chordedActionString = control.alignment == RIGHT and SI_BINDING_NAME_GAMEPAD_CHORD_LEFT or SI_BINDING_NAME_GAMEPAD_CHORD_RIGHT --put bind texture on left if right aligned
-    control:GetNamedChild("Label" .. labelToUse):SetText(zo_strformat(GetString(chordedActionString), ZO_Keybinding_GetGamepadActionName("GAME_CAMERA_GAMEPAD_ZOOM"), zo_iconFormat(GetGamepadBothDpadDownAndRightStickScrollIcon(), 80, 40)))
+    control:GetNamedChild("Label" .. labelToUse):SetText(zo_strformat(GetString(chordedActionString), ZO_Keybinding_GetGamepadActionName("GAME_CAMERA_GAMEPAD_ZOOM", FORCE_CONSOLE_GAMEPAD_ACTION_NAME), zo_iconFormat(GetGamepadBothDpadDownAndRightStickScrollIcon(), 80, 40)))
     return labelToUse, linesUsed
 end
 
@@ -635,7 +638,7 @@ do
             local holdActionName = GetActionNameFromKey(generalLayer, holdKey)
             --regular key
             if actionName and actionName ~= "" then
-                local localizedActionName = ZO_Keybinding_GetGamepadActionName(actionName)
+                local localizedActionName = ZO_Keybinding_GetGamepadActionName(actionName, FORCE_CONSOLE_GAMEPAD_ACTION_NAME)
                 if actionName == "GAME_CAMERA_GAMEPAD_ZOOM" then --special keybind that chords a button with a thumbstick direction and also can toggle camera
                     local NOT_HOLD_KEY = false
                     labelToUse, linesUsed = SetupGameCameraZoomLabels(labelGroupControl, NOT_HOLD_KEY, labelToUse, linesUsed)
@@ -651,7 +654,7 @@ do
 
             --hold key
             if holdActionName and holdActionName ~= "" then
-                local localizedActionName = ZO_Keybinding_GetGamepadActionName(holdActionName)           
+                local localizedActionName = ZO_Keybinding_GetGamepadActionName(holdActionName, FORCE_CONSOLE_GAMEPAD_ACTION_NAME)
                 if holdActionName == "GAME_CAMERA_GAMEPAD_ZOOM" then --special keybind that chords a button with a thumbstick direction
                     local HOLD_KEY = true
                     labelToUse, linesUsed = SetupGameCameraZoomLabels(labelGroupControl, HOLD_KEY, labelToUse, linesUsed)
@@ -670,7 +673,8 @@ do
                     if actionName and actionName ~= "" then
                         if linesUsed < 4 and not isChordedKeySetupMap[chordedKey] then
                             local buttonMarkup = self:GetButtonMarkupFromActionName(actionName)
-                            local localizedActionName = ZO_Keybinding_GetGamepadActionName(actionName)
+
+                            local localizedActionName = ZO_Keybinding_GetGamepadActionName(actionName, FORCE_CONSOLE_GAMEPAD_ACTION_NAME)
                             local chordedActionString = labelGroupControl.alignment == RIGHT and SI_BINDING_NAME_GAMEPAD_CHORD_LEFT or SI_BINDING_NAME_GAMEPAD_CHORD_RIGHT --put bind texture on left if right aligned
                             labelGroupControl:GetNamedChild("Label" .. labelToUse):SetText(zo_strformat(GetString(chordedActionString), localizedActionName, buttonMarkup))
                             
@@ -698,7 +702,10 @@ do
         end
 
         for key, isSetup in pairs(isChordedKeySetupMap) do
-            assert(isSetup) --in case we make a control scheme with enough chords they can't be nicely placed
+            if not isSetup then
+                local actionName = GetActionNameFromKey(generalLayer, key)
+                internalassert(false, string.format("Chorded key %s could not be set up in the options display", actionName)) --in case we make a control scheme with enough chords they can't be nicely placed
+            end
         end
     end
 end

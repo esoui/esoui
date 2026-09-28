@@ -34,7 +34,7 @@ function ZO_ActivityVeterancyRankFooter_Gamepad:RefreshVeterancyRank()
         end
 
         self.rankLabel:SetText(veterancyRankData:GetIndex())
-        self.rankNameLabel:SetText(veterancyRankData:GetName())
+        self.rankNameLabel:SetText(veterancyRankData:GetFormattedName())
         self.iconTexture:SetTexture(veterancyRankData:GetIcon())
         self.xpBar:SetValue(veterancyRankData:GetIndex(), veterancyRankData:GetProgressPercent(), 1)
     end

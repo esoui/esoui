@@ -126,6 +126,10 @@ function ZO_ItemPreview_Gamepad:TryPreviewPreviousAction(playClickSound)
     return false
 end
 
+function ZO_ItemPreview_Gamepad:AreVariationControlsHidden()
+    return self.variationLabel:IsHidden()
+end
+
 function ZO_ItemPreview_Gamepad:SetVariationControlsHidden(shouldHide)
     self.variationLabel:SetHidden(shouldHide)
     self.previewVariationLeftIcon:SetHidden(shouldHide)
@@ -134,6 +138,10 @@ end
 
 function ZO_ItemPreview_Gamepad:SetVariationLabel(variationName)
     self.variationLabel:SetText(zo_strformat(SI_COLLECTIBLE_NAME_FORMATTER, variationName))
+end
+
+function ZO_ItemPreview_Gamepad:AreActionControlsHidden()
+    return self.actionLabel:IsHidden()
 end
 
 function ZO_ItemPreview_Gamepad:SetActionControlsHidden(shouldHide)
@@ -162,7 +170,7 @@ end
 ZO_PreviewRewardList_Screen_Gamepad = ZO_Gamepad_ParametricList_Screen:Subclass()
 
 function ZO_PreviewRewardList_Screen_Gamepad:Initialize(control)
-    function OnAddOnLoaded(_, name)
+    local function OnAddOnLoaded(_, name)
         if name == "ZO_Ingame" then
             PREVIEW_REWARD_LIST_SCENE = ZO_Scene:New("previewRewardList_Gamepad", SCENE_MANAGER)
             local ACTIVATE_ON_SHOW = true
@@ -358,6 +366,7 @@ end
 function ZO_PreviewRewardList_Screen_Gamepad:EndPreview()
     ITEM_PREVIEW_GAMEPAD:EndCurrentPreview()
     self:RefreshKeybinds()
+    CALLBACK_MANAGER:FireCallbacks("OnGamepadPreviewScreenHidden")
 end
 
 function ZO_PreviewRewardList_Screen_Gamepad:PerformUpdate()

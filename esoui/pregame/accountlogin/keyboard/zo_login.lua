@@ -444,13 +444,21 @@ function Login_Keyboard:AttemptLoginFromPasswordEdit()
     local state = self.loginButton:GetState()
     if state == BSTATE_NORMAL then
         self.passwordEdit:LoseFocus()
-        self:DoLogin()
+        self:TryLogin()
     end
 end
 
 function Login_Keyboard:AttemptAutomaticLogin()
     -- Only attempt an automatic login on first showing the Login screen
     if ShouldAttemptAutoLogin() and not ZO_PREGAME_HAD_GLOBAL_ERROR then
+        self:TryLogin()
+    end
+end
+
+function Login_Keyboard:TryLogin()
+    if EULA_SCREEN:ShouldShowEULA() then
+        EULA_SCREEN:ShowEULA()
+    else
         self:DoLogin()
     end
 end
@@ -504,7 +512,7 @@ function ZO_Login_AttemptLoginFromPasswordEdit()
 end
 
 function ZO_Login_LoginButton_OnClicked()
-    LOGIN_KEYBOARD:DoLogin()
+    LOGIN_KEYBOARD:TryLogin()
 end
 
 function ZO_Login_Announcemnt_OnMouseUp()

@@ -283,31 +283,7 @@ function ZO_TamrielTomesPurchaseScreen_Shared.RewardGridEntrySetup(control, data
 
     control.icon:SetHidden(false)
     control.icon:SetTexture(data:GetPlatformLootIcon())
-
-    local quantity = nil
-    local quantityString = nil
-    if data:GetRewardType() == REWARD_ENTRY_TYPE_REWARD_LIST then
-        local rewardListId = GetRewardListIdFromReward(data:GetRewardId())
-        local numRewardListRewards = GetNumRewardListEntries(rewardListId)
-        if numRewardListRewards > 1 then
-            quantity = numRewardListRewards
-            quantityString = zo_strformat(SI_TAMRIEL_TOMES_REWARD_LIST_QUANTITY_FORMATTER, quantity - 1)
-        end
-    end
-
-    if not quantityString then
-        quantity = data:GetQuantity()
-        if quantity > 1 then
-            quantityString = data:GetAbbreviatedQuantity()
-        end
-    end
-
-    if quantityString then 
-        control.quantityLabel:SetText(quantityString)
-        control.quantityLabel:SetHidden(false)
-    else
-        control.quantityLabel:SetHidden(true)
-    end
+    control.quantityLabel:SetText(data:GetFormattedDisplayQuantity())
 end
 
 function ZO_TamrielTomesPurchaseScreen_Shared:SetFocusedRewardControl(control, isPopUpRewardData)

@@ -1,4 +1,4 @@
-local PlayerConsoleInfoRequestManager = ZO_Object:Subclass()
+local PlayerConsoleInfoRequestManager = ZO_InitializingObject:Subclass()
 
 local REQUEST_TIMEOUT_MS = 4000
 local TEXT_VALIDATION_OVERRIDE_REQUEST_TIMEOUT_MS = 30000
@@ -8,12 +8,6 @@ ZO_PLAYER_CONSOLE_INFO_REQUEST_DONT_BLOCK = false
 
 local REQUEST_ID = "id"
 local REQUEST_TEXT_VALIDATION = "textValidation"
-
-function PlayerConsoleInfoRequestManager:New(...)
-    local obj = ZO_Object.New(self)
-    obj:Initialize(...)
-    return obj
-end
 
 function PlayerConsoleInfoRequestManager:Initialize()
     self.pendingRequests = {}
@@ -113,7 +107,9 @@ end
 function PlayerConsoleInfoRequestManager:RequestIdFromDisplayName(displayName, block, callback)
     if ZO_IsPlaystationPlatform() then
         --PlayStation doesn't have a console id so we can just return 0 for it immediately
-        callback(true, displayName, 0)
+        local FOUND_ID = true
+        local CONSOLE_ID = 0
+        callback(FOUND_ID, displayName, CONSOLE_ID)
     else
         self:RequestId(ZO_ID_REQUEST_TYPE_DISPLAY_NAME, block, callback, displayName)
     end
@@ -121,7 +117,10 @@ end
 
 function PlayerConsoleInfoRequestManager:RequestIdFromDisplayNameOrFallbackType(displayName, block, fallbackRequestType, callback, ...)
     if ZO_IsPlaystationPlatform() then
-        callback(true, displayName, 0)
+        --PlayStation doesn't have a console id so we can just return 0 for it immediately
+        local FOUND_ID = true
+        local CONSOLE_ID = 0
+        callback(FOUND_ID, displayName, CONSOLE_ID)
     elseif ZO_IsConsoleOrGameCoreUI() then
         self:RequestId(fallbackRequestType, block, callback, ...)
     end

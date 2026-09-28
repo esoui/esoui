@@ -743,7 +743,8 @@ end
 
 function ZO_PromotionalEvents_Gamepad:IsReturningPlayerRewardsEntrySelected()
     local selectedCampaignData = self:GetSelectedCampaignData()
-    if selectedCampaignData.isReturningPlayerRewardsEntry then
+    -- ESO-978199: This check is necessary because the selected campaign data can be nil, though we don't know the repro how
+    if selectedCampaignData and selectedCampaignData.isReturningPlayerRewardsEntry then
         return true
     end
     return false

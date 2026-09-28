@@ -79,10 +79,6 @@
                                 <Label name="$(parent)PendingResurrectInfo" excludeFromResizeToFitExtents="true" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
                                     <Anchor point="TOP" offsetY="2"/>
                                 </Label>
-                                <!-- Console Specific Player to Player Menu Entry -->
-                                <Label name="$(parent)GamerID" font="ZoFontGamepad36" excludeFromResizeToFitExtents="true" horizontalAlignment="CENTER">
-                                    <Anchor point="TOP" offsetY="35"/>
-                                </Label>
                             </Controls>
                         </Control>
                         <Cooldown name="$(parent)ResurrectProgress" textureFile="EsoUI/Art/HUD/reviveMeter_progbar.dds" alpha="0">

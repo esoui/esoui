@@ -104,6 +104,18 @@ function ZO_Scene:RemoveFragmentGroup(fragments)
     end
 end
 
+function ZO_Scene:AddTemporaryFragmentGroup(fragments)
+    for _, fragment in pairs(fragments) do
+        self:AddTemporaryFragment(fragment)
+    end
+end
+
+function ZO_Scene:RemoveTemporaryFragmentGroup(fragments)
+    for _, fragment in pairs(fragments) do
+        self:RemoveTemporaryFragment(fragment)
+    end
+end
+
 function ZO_Scene:GetName()
     return self.name
 end

@@ -12,39 +12,26 @@ end
 function ZoneStoryTracker:InitializeStyles()
     self.styles =
     {
-        keyboard =
-        {
-            FONT_HEADER = "ZoFontGameShadow",
-            FONT_SUBLABEL = "ZoFontGameShadow",
-
-            -- Quest Tracker anchors are old and complicated and there's not an easy way to set up a consitent scheme
-            -- If we can one day refactor quest tracker to be more sensible this could be simplified
-            -- In the mean time, anything anchored after this should be simple
-            TOP_LEVEL_PRIMARY_ANCHOR_QUEST_TRACKER = ZO_Anchor:New(TOPLEFT, ZO_FocusedQuestTrackerPanelContainerQuestContainer, BOTTOMLEFT, 0, 10),
-            TOP_LEVEL_PRIMARY_ANCHOR_NO_QUEST_TRACKER = ZO_Anchor:New(TOPLEFT, ZO_FocusedQuestTrackerPanelContainerQuestContainer, TOPLEFT, 0, 10),
-            TOP_LEVEL_SECONDARY_ANCHOR = ZO_Anchor:New(RIGHT, GuiRoot, RIGHT, 0, 0, ANCHOR_CONSTRAINS_X),
-
-            CONTAINER_PRIMARY_ANCHOR = ZO_Anchor:New(TOPLEFT),
-            CONTAINER_SECONDARY_ANCHOR = ZO_Anchor:New(TOPRIGHT),
-
-            KEYBIND_BUTTON_TEMPLATE = "ZO_KeybindButton_Keyboard_Template",
-            KEYBIND_ANCHOR = ZO_Anchor:New(RIGHT, self.headerLabel, LEFT, -5, 5),
-        },
         gamepad =
         {
-            FONT_HEADER = "ZoFontGamepadBold27",
-            FONT_SUBLABEL = "ZoFontGamepad34",
-
-            TOP_LEVEL_PRIMARY_ANCHOR_QUEST_TRACKER = ZO_Anchor:New(TOPRIGHT, ZO_FocusedQuestTrackerPanelContainerQuestContainer, BOTTOMRIGHT, 0, 20),
-            TOP_LEVEL_PRIMARY_ANCHOR_NO_QUEST_TRACKER = ZO_Anchor:New(TOPRIGHT, ZO_FocusedQuestTrackerPanelContainerQuestContainer, TOPRIGHT, 0, 20),
-
-            CONTAINER_PRIMARY_ANCHOR = ZO_Anchor:New(TOPRIGHT),
-
-            KEYBIND_BUTTON_TEMPLATE = "ZO_KeybindButton_Gamepad_Template",
-            KEYBIND_ANCHOR = ZO_Anchor:New(RIGHT, self.headerLabel, LEFT, -5, 0),
+            SUBLABEL_PRIMARY_ANCHOR_OFFSET_Y = 12,
         }
     }
     ZO_HUDTracker_Base.InitializeStyles(self)
+end
+
+function ZoneStoryTracker:GetHUDElementInfo()
+    local DISPLAY_NAME = nil -- Will be controlled by FocusedQuestTracker
+    return DISPLAY_NAME
+end
+
+function ZoneStoryTracker:GetHUDElementOptionKeys()
+    local KEY = nil -- Will be controlled by FocusedQuestTracker
+    return KEY
+end
+
+function ZoneStoryTracker:GetParentTracker()
+    return FOCUSED_QUEST_TRACKER
 end
 
 function ZoneStoryTracker:RegisterEvents()
@@ -57,6 +44,21 @@ function ZoneStoryTracker:RegisterEvents()
     self.control:RegisterForEvent(EVENT_ZONE_STORY_ACTIVITY_TRACKED, Update)
     self.control:RegisterForEvent(EVENT_ZONE_STORY_ACTIVITY_UNTRACKED, Update)
     self.control:RegisterForEvent(EVENT_ZONE_STORY_ACTIVITY_TRACKING_INIT, Update)
+    
+    local function OnInterfaceSettingChanged(eventCode, settingType, settingId)
+        if settingType == SETTING_TYPE_UI and settingId == UI_SETTING_SHOW_QUEST_TRACKER then
+            self:UpdateAssistedKeybind()
+        end
+    end
+
+    self.control:RegisterForEvent(EVENT_INTERFACE_SETTING_CHANGED, OnInterfaceSettingChanged)
+    
+    local function UpdateAssistedKeybind()
+        self:UpdateAssistedKeybind()
+    end
+
+    self.control:RegisterForEvent(EVENT_QUEST_ADDED, UpdateAssistedKeybind)
+    self.control:RegisterForEvent(EVENT_QUEST_REMOVED, UpdateAssistedKeybind)
 end
 
 function ZoneStoryTracker:Update()
@@ -67,36 +69,30 @@ function ZoneStoryTracker:Update()
 
         self:SetHeaderText(ZO_CachedStrFormat(SI_ZONE_STORY_TRACKER_TITLE, data.name))
         self:SetSubLabelText(subLabelText)
+
+        self:UpdateAssistedKeybind()
     end
+
+    ZO_HUDTracker_Base.Update(self)
+end
+
+function ZoneStoryTracker:UpdateAssistedKeybind()
+    local showAssistedKeybind = GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_SHOW_QUEST_TRACKER) and FOCUSED_QUEST_TRACKER:GetNumTracked() > 0
+    self.assistedKeybindButton:SetHidden(not showAssistedKeybind)
 end
 
 function ZoneStoryTracker:ApplyPlatformStyle(style)
     ZO_HUDTracker_Base.ApplyPlatformStyle(self, style)
 
-    ApplyTemplateToControl(self.assistedKeybindButton, style.KEYBIND_BUTTON_TEMPLATE)
-    self.assistedKeybindButton:ClearAnchors()
-    style.KEYBIND_ANCHOR:AddToControl(self.assistedKeybindButton)
+    ApplyTemplateToControl(self.assistedKeybindButton, ZO_GetPlatformTemplate("ZO_KeybindButton"))
 end
 
-function ZoneStoryTracker:GetPrimaryAnchor()
-    local style = self.currentStyle
-    if FOCUSED_QUEST_TRACKER_FRAGMENT:IsShowing() then
-        return style.TOP_LEVEL_PRIMARY_ANCHOR_QUEST_TRACKER
-    else
-        return style.TOP_LEVEL_PRIMARY_ANCHOR_NO_QUEST_TRACKER
-    end
-end
-
-function ZoneStoryTracker:GetSecondaryAnchor()
-    return self.currentStyle.TOP_LEVEL_SECONDARY_ANCHOR
-end
-
-function ZoneStoryTracker:SetHidden(isHidden)
-    ZO_HUDTracker_Base.SetHidden(self, isHidden)
-
-    self.iconControl:SetHidden(isHidden)
+function ZoneStoryTracker:GetPriority()
+    return ZO_HUD_TRACKER_PRIORITY.ZONE_STORY
 end
 
 function ZO_ZoneStoryTracker_OnInitialized(control)
     ZONE_STORY_TRACKER = ZoneStoryTracker:New(control)
 end
+
+HUD_TRACKER_MANAGER:RegisterTracker("ZO_ZoneStoryTracker_Template", "ZO_ZoneStoryTracker")

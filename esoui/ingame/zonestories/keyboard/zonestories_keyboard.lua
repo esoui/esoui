@@ -21,6 +21,18 @@ function ZO_ZoneStories_Keyboard:Initialize(control)
             gridPaddingX = 2,
             gridPaddingY = 20,
         },
+
+
+
+
+
+
+
+
+
+
+
+
         activityCompletion =
         {
             headerTemplate = "ZO_ZoneStory_ActivityCompletionHeader_Keyboard",
@@ -215,7 +227,7 @@ function ZO_ZoneStories_Keyboard:SetKeyboardActivityCompletionListTooltipInfo(co
         control = control,
         titleControl = control:GetNamedChild("Title"),
         listControl = control:GetNamedChild("CheckList"),
-        blockedBranchRequirementLabel = control:GetNamedChild("BlockedBranchRequirementText"),
+        additionalInfoLabel = control:GetNamedChild("AdditionalInfoText"),
     }
 
     local checkPool = ZO_ControlPool:New("ZO_CompletionTypeCheckbox", self.activityCompletionListTooltipInfo.listControl)
@@ -231,7 +243,7 @@ end
 do
     local INITIAL_INDEX = 1
 
-    function ZO_ZoneStories_Keyboard:ShowActivityCompletionTooltip(zoneId, completionType, anchor, descriptionToAchievementAnchor)
+    function ZO_ZoneStories_Keyboard:ShowActivityCompletionTooltip(zoneId, completionType, anchor, descriptionToAchievementAnchor, completionIndex)
         local activityCompletionTooltipInfo = self.activityCompletionTooltipInfo
         local activityCompletionListTooltipInfo = self.activityCompletionListTooltipInfo
         activityCompletionTooltipInfo.anchor = anchor
@@ -254,7 +266,8 @@ do
             activityCompletionListTooltipInfo.checkControlPool:ReleaseAllObjects()
             activityCompletionListTooltipInfo.columnControlPool:ReleaseAllObjects()
 
-            self:SetupCompletionTypeListTooltip(zoneId, completionType)
+            self:SetupCompletionTypeListTooltip(zoneId, completionType, completionIndex)
+
             anchor:Set(activityCompletionListTooltipInfo.control)
 
             local detailsAnchor = ZO_Anchor:New(descriptionToAchievementAnchor:GetMyPoint(), activityCompletionListTooltipInfo.control, descriptionToAchievementAnchor:GetRelativePoint(), descriptionToAchievementAnchor:GetOffsetX(), descriptionToAchievementAnchor:GetOffsetY())
@@ -262,8 +275,21 @@ do
             activityCompletionListTooltipInfo.control:SetHidden(false)
         end
 
-        activityCompletionTooltipInfo.textControl:SetText(GetString("SI_ZONECOMPLETIONTYPE_DESCRIPTION", completionType))
-        activityCompletionTooltipInfo.control:SetHidden(false)
+        if DoesZoneStoryActivityCompletionTypeUseIndex(completionType) then
+
+
+
+
+
+                activityCompletionTooltipInfo.textControl:SetText(GetZoneStoryActivityDescriptionForCompletionTypeAndIndex(zoneId, completionType, completionIndex))
+                activityCompletionTooltipInfo.control:SetHidden(false)
+
+
+
+        else
+            activityCompletionTooltipInfo.textControl:SetText(GetString("SI_ZONECOMPLETIONTYPE_DESCRIPTION", completionType))
+            activityCompletionTooltipInfo.control:SetHidden(false)
+        end
     end
 
     local function ActivityDataComparator(left, right)
@@ -278,25 +304,50 @@ do
     local MAX_COLUMNS = 2
     local MAX_VISIBLE_CHECKBOX_CONTROLS = MAX_COLUMNS * MAX_CONTROLS_PER_COLUMN
 
-    function ZO_ZoneStories_Keyboard:SetupCompletionTypeListTooltip(zoneId, completionType)
+    function ZO_ZoneStories_Keyboard:SetupCompletionTypeListTooltip(zoneId, completionType, completionIndex)
+        local PADDING_Y = 10
+        local MIN_WIDTH = 250
+        local MAX_WIDTH = 330
+        local AUTO_SIZE = 0
         local activityCompletionListTooltipInfo = self.activityCompletionListTooltipInfo
-
-        activityCompletionListTooltipInfo.titleControl:SetText(zo_strformat(SI_ZONE_STORY_LIST_TOOLTIP_TITLE_FORMATTER, GetZoneNameById(zoneId), GetString("SI_ZONECOMPLETIONTYPE", completionType)))
+        local additionalInfoLabel = activityCompletionListTooltipInfo.additionalInfoLabel
+        local completionTypeUsesIndex = DoesZoneStoryActivityCompletionTypeUseIndex(completionType)
+        local additionalInfoDisplayText
+        local tooltipTitleText
+        if completionTypeUsesIndex then
+            tooltipTitleText = GetZoneStoryActivityNameForCompletionTypeAndIndex(zoneId, completionType, completionIndex)
+        else
+            tooltipTitleText = GetString("SI_ZONECOMPLETIONTYPE", completionType)
+        end
+        activityCompletionListTooltipInfo.titleControl:SetText(zo_strformat(SI_ZONE_STORY_LIST_TOOLTIP_TITLE_FORMATTER, GetZoneNameById(zoneId), tooltipTitleText))
 
         local numActivityColumnsAdded = 0
-        local numUnblockedActivities, blockingBranchErrorStringId = select(3, ZO_ZoneStories_Manager.GetActivityCompletionProgressValues(zoneId, completionType))
+        local numUnblockedActivities, blockingBranchErrorStringId = select(3, ZO_ZoneStories_Manager.GetActivityCompletionProgressValues(zoneId, completionType, completionIndex))
         if numUnblockedActivities > 0 then
             local activityData = {}
             for activityIndex = 1, numUnblockedActivities do
-                local complete = IsZoneStoryActivityComplete(zoneId, completionType, activityIndex)
-                table.insert(activityData, { activityIndex = activityIndex, complete = complete })
+                local complete = IsZoneStoryActivityComplete(zoneId, completionType, activityIndex, completionIndex)
+                local name = GetZoneStoryActivityNameByActivityIndex(zoneId, completionType, activityIndex, completionIndex)
+                local data =
+                {
+                    activityIndex = activityIndex,
+                    complete = complete,
+                    name = zo_strformat(SI_ZONE_STORY_LIST_TOOLTIP_ACTIVITY_NAME_FORMATTER, name),
+                }
+                table.insert(activityData, data)
             end
 
-            local numVisibleCheckControls = numUnblockedActivities
+            local numVisibleCheckControls = completionTypeUsesIndex and numUnblockedActivities <= 1 and 0 or numUnblockedActivities
             local addAdditionalActivitiesControl = false
 
+            if completionTypeUsesIndex then
+                additionalInfoDisplayText = GetZoneStoryActivityAttainTextForCompletionTypeAndIndex(zoneId, completionType, completionIndex)
+            else
+                additionalInfoDisplayText = GetErrorString(blockingBranchErrorStringId)
+            end
+
             -- check to see if there are more activities than can be shown in the tooltip
-            -- if so we will add a label at the end indiciating how many more activites are hidden
+            -- if so we will add a label at the end indiciating how many more activities are hidden
             if numUnblockedActivities > MAX_VISIBLE_CHECKBOX_CONTROLS then
                 addAdditionalActivitiesControl = true
                 numVisibleCheckControls = MAX_VISIBLE_CHECKBOX_CONTROLS - 1 -- -1 because we will add the "hidden" label
@@ -333,8 +384,7 @@ do
                 checkControl:SetAlpha(activityInfo.complete and 1 or 0)
                 checkControl:SetHidden(false)
 
-                local name = GetZoneStoryActivityNameByActivityIndex(zoneId, completionType, activityInfo.activityIndex)
-                checkControl.label:SetText(zo_strformat(SI_ZONE_STORY_LIST_TOOLTIP_ACTIVITY_NAME_FORMATTER, name))
+                checkControl.label:SetText(activityInfo.name)
                 ZO_Achievements_ApplyTextColorToLabel(checkControl.label, activityInfo.complete, ZO_SELECTED_TEXT)
 
                 -- check if we need to start a new column
@@ -360,13 +410,13 @@ do
             if addAdditionalActivitiesControl then
                 -- since the data has been sorted so all the completed activities are at the end
                 -- if the first hidden activity is complete then all the others must be as well
-                local allHiddenActivitesComplete = activityData[numVisibleCheckControls + 1].complete
+                local allHiddenActivitiesComplete = activityData[numVisibleCheckControls + 1].complete
                 local checkControl = checkControlPool:AcquireObject()
 
-                ZO_Achievements_ApplyTextColorToLabel(checkControl.label, allHiddenActivitesComplete, ZO_SELECTED_TEXT)
+                ZO_Achievements_ApplyTextColorToLabel(checkControl.label, allHiddenActivitiesComplete, ZO_SELECTED_TEXT)
                 local numHiddenActivities = numUnblockedActivities - numVisibleCheckControls
                 checkControl.label:SetText(zo_strformat(SI_ZONE_STORY_LIST_TOOLTIP_ADDITIONAL_ACTVITIES_FORMATTER, numHiddenActivities))
-                checkControl:SetAlpha(allHiddenActivitesComplete and 1 or 0)
+                checkControl:SetAlpha(allHiddenActivitiesComplete and 1 or 0)
                 checkControl:SetHidden(false)
                 -- this should always be the last control in the current column, so no need
                 -- to check if we need a new column
@@ -376,35 +426,24 @@ do
         end
 
         activityCompletionListTooltipInfo.listControl:SetHidden(numUnblockedActivities == 0)
-
-        local blockedBranchRequirementLabel = activityCompletionListTooltipInfo.blockedBranchRequirementLabel
-        if blockingBranchErrorStringId == 0 then
-            blockedBranchRequirementLabel:SetHidden(true)
+        additionalInfoLabel:ClearAnchors()
+        if numUnblockedActivities == 0 then
+            additionalInfoLabel:SetAnchor(TOPLEFT, activityCompletionListTooltipInfo.titleControl, BOTTOMLEFT, 0, PADDING_Y)
+            additionalInfoLabel:SetDimensionConstraints(MIN_WIDTH, AUTO_SIZE, MAX_WIDTH, AUTO_SIZE)
         else
-            local PADDING_Y = 10
-            local MIN_WIDTH = 250
-            local MAX_WIDTH = 330
-            local AUTO_SIZE = 0
-            blockedBranchRequirementLabel:ClearAnchors()
-            if numUnblockedActivities == 0 then
-                blockedBranchRequirementLabel:SetAnchor(TOPLEFT, activityCompletionListTooltipInfo.titleControl, BOTTOMLEFT, 0, PADDING_Y)
-                blockedBranchRequirementLabel:SetDimensionConstraints(MIN_WIDTH, AUTO_SIZE, MAX_WIDTH, AUTO_SIZE)
-            else
-                blockedBranchRequirementLabel:SetAnchor(TOPLEFT, activityCompletionListTooltipInfo.listControl, BOTTOMLEFT, 0, PADDING_Y)
+            additionalInfoLabel:SetAnchor(TOPLEFT, activityCompletionListTooltipInfo.listControl, BOTTOMLEFT, 0, PADDING_Y)
 
-                -- numActivityColumnsAdded should never be 0 here because numUnblockedActivities == 0 means there shouldn't be any columns added
-                if numActivityColumnsAdded == 1 then
-                    blockedBranchRequirementLabel:SetDimensionConstraints(MIN_WIDTH, AUTO_SIZE, MAX_WIDTH, AUTO_SIZE)
-                else
-                    blockedBranchRequirementLabel:SetAnchor(TOPRIGHT, activityCompletionListTooltipInfo.listControl, BOTTOMRIGHT, 0, PADDING_Y)
-                    blockedBranchRequirementLabel:SetDimensionConstraints(AUTO_SIZE, AUTO_SIZE, AUTO_SIZE, AUTO_SIZE)
-                end
+            -- numActivityColumnsAdded should never be 0 here because numUnblockedActivities == 0 means there shouldn't be any columns added
+            if numActivityColumnsAdded == 1 then
+                additionalInfoLabel:SetDimensionConstraints(MIN_WIDTH, AUTO_SIZE, MAX_WIDTH, AUTO_SIZE)
+            else
+                additionalInfoLabel:SetAnchor(TOPRIGHT, activityCompletionListTooltipInfo.listControl, BOTTOMRIGHT, 0, PADDING_Y)
+                additionalInfoLabel:SetDimensionConstraints(AUTO_SIZE, AUTO_SIZE, AUTO_SIZE, AUTO_SIZE)
             end
-            
-            local errorStringText = GetErrorString(blockingBranchErrorStringId)
-            blockedBranchRequirementLabel:SetText(errorStringText)
-            blockedBranchRequirementLabel:SetHidden(false)
         end
+
+        additionalInfoLabel:SetText(additionalInfoDisplayText)
+        additionalInfoLabel:SetHidden(false)
     end
 
     function ZO_ZoneStories_Keyboard:HideActivityCompletionTooltip()
@@ -420,7 +459,7 @@ do
         local tooltipIndex = activityCompletionTooltipInfo.currentIndex
 
         tooltipIndex = tooltipIndex + 1
-    
+
         local numAchievements = GetNumAssociatedAchievementsForZoneCompletionType(zoneId, completionType)
         if tooltipIndex > numAchievements then
             tooltipIndex = INITIAL_INDEX

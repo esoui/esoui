@@ -51,11 +51,12 @@ function ZO_ZoneStory_ActivityCompletionTile_Keyboard:PostInitializePlatform(...
         enabled = function()
             local zoneId = self.zoneId
             local completionType = self.completionType
-            if ZO_ZoneStories_Manager.IsZoneCompletionTypeComplete(zoneId, completionType) then
+            local completionIndex = self.completionIndex
+            if ZO_ZoneStories_Manager.IsZoneCompletionTypeComplete(zoneId, completionType, completionIndex) then
                 return false, GetString(SI_ZONE_STORY_SPECIFIC_ACTION_DISABLED_COMPLETE)
             end
 
-            local isCompletionTypeBlocked, blockingErrorStringText = ZO_ZoneStories_Manager.GetZoneCompletionTypeBlockingInfo(zoneId, completionType)
+            local isCompletionTypeBlocked, blockingErrorStringText = ZO_ZoneStories_Manager.GetZoneCompletionTypeBlockingInfo(zoneId, completionType, completionIndex)
             if isCompletionTypeBlocked then
                 return false, blockingErrorStringText
             end
@@ -94,12 +95,14 @@ function ZO_ZoneStory_ActivityCompletionTile_Keyboard:Layout(data)
 
     local zoneId = data.zoneData.id
     local completionType = data.completionType
+    local completionIndex = data.completionIndex
     self.zoneData = data.zoneData
     self.zoneId = zoneId
     self.completionType = completionType
+    self.completionIndex = completionIndex
 
-    self.iconControl:SetTexture(ZO_ZoneStories_Manager.GetCompletionTypeIcon(completionType))
-    local text = ZO_ZoneStories_Manager.GetActivityCompletionProgressText(zoneId, completionType)
+    self.iconControl:SetTexture(ZO_ZoneStories_Manager.GetCompletionTypeIcon(completionType, completionIndex))
+    local text = ZO_ZoneStories_Manager.GetActivityCompletionProgressText(zoneId, completionType, completionIndex)
     self.valueControl:SetText(text)
 
     local color = ZO_ZoneStories_Manager.IsZoneCompletionTypeComplete(zoneId, completionType) and ZO_NORMAL_TEXT or ZO_SELECTED_TEXT
@@ -115,16 +118,16 @@ end
 
 function ZO_ZoneStory_ActivityCompletionTile_Keyboard:Track()
     local SET_AUTO_MAP_NAVIGATION_TARGET = true
-    TrackNextActivityForZoneStory(self.zoneId, self.completionType, SET_AUTO_MAP_NAVIGATION_TARGET)
+    TrackNextActivityForZoneStory(self.zoneId, self.completionType, self.completionIndex, SET_AUTO_MAP_NAVIGATION_TARGET)
 end
 
 function ZO_ZoneStory_ActivityCompletionTile_Keyboard:OnMouseEnter()
     ZO_ContextualActionsTile_Keyboard.OnMouseEnter(self)
-    
+
     local offsetX = self.control:GetParent():GetLeft() - self.control:GetLeft() - 15
     local anchor = ZO_Anchor:New(RIGHT, self.control, LEFT, offsetX)
 
-    ZONE_STORIES_KEYBOARD:ShowActivityCompletionTooltip(self.zoneId, self.completionType, anchor, DESCRIPTION_TO_ACHIEVEMENT_ANCHOR)
+    ZONE_STORIES_KEYBOARD:ShowActivityCompletionTooltip(self.zoneId, self.completionType, anchor, DESCRIPTION_TO_ACHIEVEMENT_ANCHOR, self.completionIndex)
 end
 
 function ZO_ZoneStory_ActivityCompletionTile_Keyboard:OnMouseExit()

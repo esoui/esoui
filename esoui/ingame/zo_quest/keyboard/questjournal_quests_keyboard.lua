@@ -51,7 +51,7 @@ function ZO_QuestJournal_Quests_Keyboard:Initialize(control, owner)
     self:RefreshQuestList()
 end
 
-internalassert(ZONE_DISPLAY_TYPE_MAX_VALUE == 13, "A zone display type has been added. Please add it to RegisterIcons and RegisterTooltips")
+internalassert(ZONE_DISPLAY_TYPE_MAX_VALUE == 14, "A zone display type has been added. Please add it to RegisterIcons and RegisterTooltips")
 
 function ZO_QuestJournal_Quests_Keyboard:RegisterIcons()
     self:RegisterIconTexture(ZO_ANY_QUEST_TYPE, ZONE_DISPLAY_TYPE_SOLO,             "EsoUI/Art/Journal/journal_Quest_Instance.dds")
@@ -66,6 +66,7 @@ function ZO_QuestJournal_Quests_Keyboard:RegisterIcons()
     self:RegisterIconTexture(ZO_ANY_QUEST_TYPE, ZONE_DISPLAY_TYPE_COMPANION,        "EsoUI/Art/Journal/journal_Quest_Companion.dds")
     self:RegisterIconTexture(ZO_ANY_QUEST_TYPE, ZONE_DISPLAY_TYPE_ENDLESS_DUNGEON,  "EsoUI/Art/Journal/journal_Quest_EndlessDungeon.dds")
     self:RegisterIconTexture(ZO_ANY_QUEST_TYPE, ZONE_DISPLAY_TYPE_ADVENTURE_ZONE,   "EsoUI/Art/Journal/journal_Quest_AdventureZone.dds")
+    self:RegisterIconTexture(ZO_ANY_QUEST_TYPE, ZONE_DISPLAY_TYPE_SOLO_DUNGEON,     "EsoUI/Art/Journal/journal_Quest_Solo_Dungeon.dds")
 end
 
 function ZO_QuestJournal_Quests_Keyboard:RegisterTooltips()
@@ -89,6 +90,7 @@ function ZO_QuestJournal_Quests_Keyboard:RegisterTooltips()
     self:RegisterTooltipText(ZO_ANY_QUEST_TYPE, ZONE_DISPLAY_TYPE_ZONE_STORY,       SI_QUEST_JOURNAL_ZONE_STORY_TOOLTIP, ZoneStoryParamFunction)
     self:RegisterTooltipText(ZO_ANY_QUEST_TYPE, ZONE_DISPLAY_TYPE_COMPANION,        SI_QUEST_JOURNAL_COMPANION_TOOLTIP)
     self:RegisterTooltipText(ZO_ANY_QUEST_TYPE, ZONE_DISPLAY_TYPE_ENDLESS_DUNGEON,  SI_QUEST_JOURNAL_ENDLESS_DUNGEON_TOOLTIP)
+    self:RegisterTooltipText(ZO_ANY_QUEST_TYPE, ZONE_DISPLAY_TYPE_SOLO_DUNGEON,     SI_QUEST_JOURNAL_SOLO_DUNGEON_TOOLTIP)
 end
 
 function ZO_QuestJournal_Quests_Keyboard:SetIconTexture(iconControl, iconData, selected)
@@ -200,7 +202,8 @@ function ZO_QuestJournal_Quests_Keyboard:InitializeKeybindStripDescriptors()
             keybind = "UI_SHORTCUT_QUATERNARY",
             callback = function()
                 local IGNORE_SCENE_RESTRICTION = true
-                FOCUSED_QUEST_TRACKER:AssistNext(IGNORE_SCENE_RESTRICTION)
+                local SKIP_ZONE_STORY = true
+                FOCUSED_QUEST_TRACKER:AssistNext(IGNORE_SCENE_RESTRICTION, SKIP_ZONE_STORY)
                 self:FocusQuestWithIndex(QUEST_JOURNAL_MANAGER:GetFocusedQuestIndex())
             end,
             visible = function()
