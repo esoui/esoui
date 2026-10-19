@@ -1443,26 +1443,35 @@ do
     function ZO_SkillsManager:RebuildSkillList()
         self:StopSelectedSkillBuildSkillAnimations()
 
+        local skillList = self.skillList
         local skillLineData = self:GetSelectedSkillLineData()
-        local scrollData = ZO_ScrollList_GetDataList(self.skillList)
-        ZO_ScrollList_Clear(self.skillList)
-        ZO_ClearTable(g_shownHeaderTexts)
 
-        local function IsSkillVisible(skillData)
-            return not skillData:IsHidden()
-        end
+        if skillLineData.isSubclassingNode then
+            -- A relatively common UI error implies that there's a timing issue where we can hit a refresh list call while we're in the process
+            -- of switching to the subclassing node, and the subclassing node doesn't have a SkillIterator. So rather than try to lock down all the edge cases,
+            -- just ensure that RebuildSkillList can gracefully handle getting in here on the subclassing node
+            ZO_ScrollList_RefreshVisible(skillList)
+        else
+            local scrollData = ZO_ScrollList_GetDataList(skillList)
+            ZO_ScrollList_Clear(skillList)
+            ZO_ClearTable(g_shownHeaderTexts)
 
-        for _, skillData in skillLineData:SkillIterator({ IsSkillVisible }) do
-            local headerText = skillData:GetHeaderText()
-            if not g_shownHeaderTexts[headerText] then
-                table.insert(scrollData, ZO_ScrollList_CreateDataEntry(SKILL_HEADER_DATA, { headerText = headerText }))
-                g_shownHeaderTexts[headerText] = true
+            local function IsSkillVisible(skillData)
+                return not skillData:IsHidden()
             end
 
-            table.insert(scrollData, ZO_ScrollList_CreateDataEntry(SKILL_ABILITY_DATA,  { skillData = skillData, }))
-        end
+            for _, skillData in skillLineData:SkillIterator({ IsSkillVisible }) do
+                local headerText = skillData:GetHeaderText()
+                if not g_shownHeaderTexts[headerText] then
+                    table.insert(scrollData, ZO_ScrollList_CreateDataEntry(SKILL_HEADER_DATA, { headerText = headerText }))
+                    g_shownHeaderTexts[headerText] = true
+                end
 
-        ZO_ScrollList_Commit(self.skillList)
+                table.insert(scrollData, ZO_ScrollList_CreateDataEntry(SKILL_ABILITY_DATA,  { skillData = skillData, }))
+            end
+
+            ZO_ScrollList_Commit(skillList)
+        end
 
         self:RefreshSkillLineDisplay(skillLineData)
     end

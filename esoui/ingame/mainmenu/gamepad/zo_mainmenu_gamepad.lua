@@ -473,27 +473,29 @@ local MENU_ENTRY_DATA =
         name = GetString(SI_MAIN_MENU_SOCIAL),
         icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_multiplayer.dds",
         isNewCallback = IsAnySubMenuNewCallback,
-        subMenuHeaderData = function()
-            local headerData =
-            {
-                titleText = GetString(SI_MAIN_MENU_SOCIAL),
-            }
+        
 
-            local platformDisplayName = GetPlatformDisplayName()
-            if platformDisplayName ~= "" then
-                headerData.data1HeaderText = ZO_GetPlatformAccountLabel()
-                headerData.data1Text = ZO_FormatPlatformDisplayName(platformDisplayName)
-                headerData.data2HeaderText = GetString(SI_GAMEPAD_MAIN_MENU_ESO_USERID_LABEL)
-                headerData.data2Text = GetCrossplayDisplayName()
 
-                return headerData
-            end
 
-            headerData.data1HeaderText = GetString(SI_GAMEPAD_MAIN_MENU_ESO_USERID_LABEL)
-            headerData.data1Text = GetCrossplayDisplayName()
 
-            return headerData
-        end,
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         subMenu =
         {
             [MENU_SOCIAL_ENTRIES.VOICE_CHAT] =

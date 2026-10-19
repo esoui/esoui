@@ -196,17 +196,17 @@ function ZO_GamepadChatSystem:Initialize(control)
         end
 
         control:SetHandler("OnUpdate", OnUpdate)
-
-        local DISPLAY_NAME = IsKeyboardUISupported() and GetString(SI_HUD_EDITOR_GAMEPAD_CHAT) or GetString(SI_HUD_EDITOR_CONSOLE_CHAT)
-        local CONFIG =
-        {
-            defaultAnchor = ZO_Anchor:New(ANCHOR_SETTINGS.point, nil, ANCHOR_SETTINGS.relPoint, ANCHOR_SETTINGS.x, ANCHOR_SETTINGS.y),
-            isValid = function(element)
-                return IsChatSystemAvailableForCurrentPlatform() and not ZO_ChatSystem_ShouldUseKeyboardChatSystem()
-            end,
-        }
-        self.hudElement = HUD_MANAGER:RegisterGamepadElement(self.control, DISPLAY_NAME, CONFIG)
     end
+
+    local DISPLAY_NAME = IsKeyboardUISupported() and GetString(SI_HUD_EDITOR_GAMEPAD_CHAT) or GetString(SI_HUD_EDITOR_CONSOLE_CHAT)
+    local CONFIG =
+    {
+        defaultAnchor = ZO_Anchor:New(ANCHOR_SETTINGS.point, nil, ANCHOR_SETTINGS.relPoint, ANCHOR_SETTINGS.x, ANCHOR_SETTINGS.y),
+        isValid = function(element)
+            return IsChatSystemAvailableForCurrentPlatform() and not ZO_ChatSystem_ShouldUseKeyboardChatSystem()
+        end,
+    }
+    self.hudElement = HUD_MANAGER:RegisterGamepadElement(self.control, DISPLAY_NAME, CONFIG)
 
     self.UIModeInputEater =
     {

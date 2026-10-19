@@ -4923,7 +4923,7 @@ SAS(SI_RETRAITRESPONSE5, "Предмет уже имеет эту особенн
 SAS(SI_RETRAITRESPONSE6, "Невозможно изменить особенность этого предмета.", 0)
 SAS(SI_RETRAITRESPONSE7, "Сначала вы должны изучить эту особенность.", 0)
 SAS(SI_RIDINGTRAINTYPE1, "Скорость", 0)
-SAS(SI_RIDINGTRAINTYPE2, "Переносимый вес", 0)
+SAS(SI_RIDINGTRAINTYPE2, "Грузоподъемность", 0)
 SAS(SI_RIDINGTRAINTYPE3, "Запас сил", 0)
 SAS(SI_RUMORTYPE1, "Шепоток", 0)
 SAS(SI_RUMORTYPE2, "Интрига", 0)

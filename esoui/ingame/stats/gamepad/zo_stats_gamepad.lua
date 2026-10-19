@@ -797,11 +797,10 @@ function ZO_GamepadStats:InitializeKeybindStripDescriptors()
             end,
             callback = function()
                 if self:DoesAttributePointAllocationModeBatchSave() then
-                    self:ResetAttributeData()
                     for index, attributeData in ipairs(self.attributeEntries) do
                         local control = self.mainList:GetControlFromData(attributeData)
-                        control.pointLimitedSpinner:RefreshSpinnerMax()
                         control.pointLimitedSpinner.pointsSpinner:SetValue(0)
+                        control.pointLimitedSpinner:RefreshSpinnerMax()
                     end
                 elseif GetInteractionType() == INTERACTION_ATTRIBUTE_RESPEC then
                     --If the interaction is already active we just need to update the allocation mode and refresh
