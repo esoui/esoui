@@ -18,6 +18,8 @@
                 <AlphaAnimation delay="2000" duration="500" startAlpha="0" endAlpha="1"/>
                 <AlphaAnimation delay="2000" duration="500" startAlpha="0" endAlpha="1"/>
                 <AlphaAnimation delay="2000" duration="500" startAlpha="0" endAlpha="1"/>
+                <!-- Difficulty -->
+                <AlphaAnimation delay="2000" duration="500" startAlpha="0" endAlpha="1"/>
             </Animations>
         </AnimationTimeline>
     </Animations>

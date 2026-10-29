@@ -370,6 +370,7 @@ ZO_HIDDEN_COLUMN_KEYS_BY_RULESET_TYPE =
 {
     [CAMPAIGN_RULESET_TYPE_CYRODIIL] = {},
     [CAMPAIGN_RULESET_TYPE_IMPERIAL_CITY] = {["numGroupMembers"] = true, ["numFriends"] = true, ["numGuildMembers"] = true},
+    [CAMPAIGN_RULESET_TYPE_JERALL_PASS] = {["numGroupMembers"] = true, ["numFriends"] = true, ["numGuildMembers"] = true},
 }
 function CampaignBrowser:FilterScrollList()
     -- Apply filter to list

@@ -372,10 +372,6 @@ HOUSING_EDITOR_STATE = ZO_HousingEditorState:New()
 
 ZO_HousingEditorHUDFragment = ZO_SceneFragment:Subclass()
 
-function ZO_HousingEditorHUDFragment:New(control)
-    return ZO_SceneFragment.New(self, control)
-end
-
 function ZO_HousingEditorHUDFragment:Show()
     ZO_SceneFragment.Show(self)
 
@@ -401,10 +397,6 @@ end
 --------------------
 
 local HousingHUDFragment = ZO_HUDFadeSceneFragment:Subclass()
-
-function HousingHUDFragment:New(...)
-    return ZO_HUDFadeSceneFragment.New(self, ...)
-end
 
 function HousingHUDFragment:Initialize(control)
     ZO_HUDFadeSceneFragment.Initialize(self, control)

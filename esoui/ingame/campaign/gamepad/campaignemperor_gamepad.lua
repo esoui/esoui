@@ -81,9 +81,12 @@ function CampaignEmperor_Gamepad:Initialize(control)
             self:SetDirectionalInputEnabled(true)
 
             local localPlayerEntry = self:GetLocalPlayerLeaderboardEntry()
-            if localPlayerEntry and not self:CanLeaderboardCharacterBecomeEmperor(localPlayerEntry) then
-                GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
-                GAMEPAD_TOOLTIPS:LayoutTextBlockTooltip(GAMEPAD_RIGHT_TOOLTIP, GetString(SI_CAMPAIGN_EMPEROR_CHARACTER_INELIGIBLE_TEXT))
+            if localPlayerEntry then
+                local eligible, ineligibleReason = self:CanLeaderboardCharacterBecomeEmperor(localPlayerEntry)
+                if not eligible then
+                    GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)
+                    GAMEPAD_TOOLTIPS:LayoutTextBlockTooltip(GAMEPAD_RIGHT_TOOLTIP, ineligibleReason)
+                end
             end
         elseif newState == SCENE_FRAGMENT_HIDDEN then
             GAMEPAD_TOOLTIPS:ClearTooltip(GAMEPAD_RIGHT_TOOLTIP)

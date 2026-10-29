@@ -158,11 +158,17 @@ function ZO_LeaderboardsManager_Keyboard:AddEntry(leaderboardObject, name, title
     return node
 end
 
+function ZO_LeaderboardsManager_Keyboard:SetEntryDropdownInfo(entryData, addDropdownEntriesCallback)
+    -- Not supported atm, do nothing
+end
+
 function ZO_LeaderboardsManager_Keyboard:GetSelectedLeaderboardData()
     return self.navigationTree:GetSelectedData()
 end
 
 function ZO_LeaderboardsManager_Keyboard:UpdateCategories()
+    QueryCampaignSelectionData()
+
     self.previouslySelectedData = self.navigationTree:GetSelectedData()
     self.nodeToReselect = nil
     self.navigationTree:Reset()

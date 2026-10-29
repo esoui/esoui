@@ -2,12 +2,9 @@
 
 ZO_SimpleSceneFragment = ZO_SceneFragment:Subclass()
 
-function ZO_SimpleSceneFragment:New(...)
-    return ZO_SceneFragment.New(self, ...)
-end
-
 function ZO_SimpleSceneFragment:Initialize(control)
     ZO_SceneFragment.Initialize(self)
+
     self.control = control
 end
 
@@ -39,10 +36,6 @@ do
 end
 
 ZO_AnimatedSceneFragment = ZO_SceneFragment:Subclass()
-
-function ZO_AnimatedSceneFragment:New(...)
-    return ZO_SceneFragment.New(self, ...)
-end
 
 function ZO_AnimatedSceneFragment:Initialize(animationTemplate, control, alwaysAnimate, duration)
     ZO_SceneFragment.Initialize(self)
@@ -158,39 +151,35 @@ end
 
 ZO_FadeSceneFragment = ZO_AnimatedSceneFragment:Subclass()
 
-function ZO_FadeSceneFragment:New(control, alwaysAnimate, duration)
-    return ZO_AnimatedSceneFragment.New(self, "FadeSceneAnimation", control, alwaysAnimate, duration)
+function ZO_FadeSceneFragment:Initialize(control, alwaysAnimate, duration)
+    ZO_AnimatedSceneFragment.Initialize(self, "FadeSceneAnimation", control, alwaysAnimate, duration)
 end
 
 ZO_TranslateFromLeftSceneFragment = ZO_AnimatedSceneFragment:Subclass()
 
-function ZO_TranslateFromLeftSceneFragment:New(control, alwaysAnimate, duration)
-    return ZO_AnimatedSceneFragment.New(self, "TranslateFromLeftSceneAnimation", control, alwaysAnimate, duration)
+function ZO_TranslateFromLeftSceneFragment:Initialize(control, alwaysAnimate, duration)
+    ZO_AnimatedSceneFragment.Initialize(self, "TranslateFromLeftSceneAnimation", control, alwaysAnimate, duration)
 end
 
 ZO_TranslateFromRightSceneFragment = ZO_AnimatedSceneFragment:Subclass()
 
-function ZO_TranslateFromRightSceneFragment:New(control, alwaysAnimate, duration)
-    return ZO_AnimatedSceneFragment.New(self, "TranslateFromRightSceneAnimation", control, alwaysAnimate, duration)
+function ZO_TranslateFromRightSceneFragment:Initialize(control, alwaysAnimate, duration)
+    ZO_AnimatedSceneFragment.Initialize(self, "TranslateFromRightSceneAnimation", control, alwaysAnimate, duration)
 end
 
 ZO_TranslateFromBottomSceneFragment = ZO_AnimatedSceneFragment:Subclass()
 
-function ZO_TranslateFromBottomSceneFragment:New(control, alwaysAnimate, duration)
-    return ZO_AnimatedSceneFragment.New(self, "TranslateFromBottomSceneAnimation", control, alwaysAnimate, duration)
+function ZO_TranslateFromBottomSceneFragment:Initialize(control, alwaysAnimate, duration)
+    ZO_AnimatedSceneFragment.Initialize(self, "TranslateFromBottomSceneAnimation", control, alwaysAnimate, duration)
 end
 
 ZO_TranslateFromTopSceneFragment = ZO_AnimatedSceneFragment:Subclass()
 
-function ZO_TranslateFromTopSceneFragment:New(control, alwaysAnimate, duration)
-    return ZO_AnimatedSceneFragment.New(self, "TranslateFromTopSceneAnimation", control, alwaysAnimate, duration)
+function ZO_TranslateFromTopSceneFragment:Initialize(control, alwaysAnimate, duration)
+    ZO_AnimatedSceneFragment.Initialize(self, "TranslateFromTopSceneAnimation", control, alwaysAnimate, duration)
 end
 
 ZO_CustomAnimationSceneFragment = ZO_SceneFragment:Subclass()
-
-function ZO_CustomAnimationSceneFragment:New(...)
-    return ZO_SceneFragment.New(self, ...)
-end
 
 function ZO_CustomAnimationSceneFragment:Initialize(control, showAnimationTemplate, hideAnimationTemplate)
     ZO_SceneFragment.Initialize(self)
@@ -281,10 +270,6 @@ function ZO_CustomAnimationSceneFragment:Hide()
 end
 
 ZO_ConveyorSceneFragment = ZO_SceneFragment:Subclass()
-
-function ZO_ConveyorSceneFragment:New(...)
-    return ZO_SceneFragment.New(self, ...)
-end
 
 function ZO_ConveyorSceneFragment:Initialize(control, alwaysAnimate, inAnimation, outAnimation)
     ZO_SceneFragment.Initialize(self)
@@ -559,10 +544,6 @@ end
 DEFAULT_HUD_DURATION = 250
 ZO_HUDFadeSceneFragment = ZO_SceneFragment:Subclass()
 
-function ZO_HUDFadeSceneFragment:New(...)
-    return ZO_SceneFragment.New(self, ...)
-end
-
 function ZO_HUDFadeSceneFragment:Initialize(control, showDuration, hideDuration)
     ZO_SceneFragment.Initialize(self)
 
@@ -671,10 +652,6 @@ end
 
 ZO_AnchorSceneFragment = ZO_SceneFragment:Subclass()
 
-function ZO_AnchorSceneFragment:New(...)
-    return ZO_SceneFragment.New(self, ...)
-end
-
 function ZO_AnchorSceneFragment:Initialize(control, anchor)
     ZO_SceneFragment.Initialize(self)
     self.control = control
@@ -763,10 +740,6 @@ end
 -------------------------
 
 ZO_ActionLayerFragment = ZO_SceneFragment:Subclass()
-
-function ZO_ActionLayerFragment:New(...)
-    return ZO_SceneFragment.New(self, ...)
-end
 
 function ZO_ActionLayerFragment:Initialize(actionLayerName)
     ZO_SceneFragment.Initialize(self)

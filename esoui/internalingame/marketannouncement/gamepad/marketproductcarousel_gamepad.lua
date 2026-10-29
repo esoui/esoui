@@ -25,13 +25,7 @@ function ZO_MarketProductCarousel_Gamepad:Initialize(...)
             if data then
                 local marketProductId = data.marketProduct and data.marketProduct.productData and data.marketProduct.productData.marketProductId
                 if marketProductId then
-                    local openBehavior = GetMarketProductOpenMarketBehavior(marketProductId)
-                    if openBehavior == OPEN_MARKET_BEHAVIOR_SHOW_CHAPTER_UPGRADE then
-                        keybindStringId = SI_MARKET_ANNOUNCEMENT_VIEW_CHAPTER_UPGRADE
-                    else
-                        keybindStringId = SI_MARKET_ANNOUNCEMENT_VIEW_CROWN_STORE
-                    end
-                    return GetString(keybindStringId)
+                    return GetString(SI_MARKET_ANNOUNCEMENT_VIEW_CROWN_STORE)
                 end
             end
             return GetString(SI_GAMEPAD_SELECT_OPTION)

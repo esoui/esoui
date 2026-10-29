@@ -209,17 +209,22 @@ function ZO_TimedActivityData:GetNumTimesClaimed()
     return GetTimedActivityNumTimesClaimed(self.index)
 end
 
+function ZO_TimedActivityData:IsInfinitelyClaimable()
+    local totalNumTimesClaimable = self:GetTotalNumTimesClaimable()
+    return totalNumTimesClaimable == 0
+end
+
 function ZO_TimedActivityData:IsEffectivelyInfinitelyClaimable()
     local totalNumTimesClaimable = self:GetTotalNumTimesClaimable()
-    return totalNumTimesClaimable == 0 or totalNumTimesClaimable >= 99
+    return self:IsInfinitelyClaimable() or totalNumTimesClaimable >= 99
 end
 
 function ZO_TimedActivityData:IsFullyClaimed()
-    local totalNumTimesClaimable = self:GetTotalNumTimesClaimable()
-    if totalNumTimesClaimable > 0 then
-        return self:GetNumTimesClaimed() == totalNumTimesClaimable
-    else
+    if self:IsInfinitelyClaimable() then
         return false
+    else
+        local totalNumTimesClaimable = self:GetTotalNumTimesClaimable()
+        return self:GetNumTimesClaimed() == totalNumTimesClaimable
     end
 end
 
@@ -251,6 +256,10 @@ function ZO_TimedActivityData:Reroll()
 end
 
 function ZO_TimedActivityData:CanTrack()
+    if self:IsInfinitelyClaimable() then
+        return true
+    end
+
     local numTimesClaimed = self:GetNumTimesClaimed()
     local numTimesClaimable = self:GetTotalNumTimesClaimable()
     local numClaimsRemaining = numTimesClaimable - numTimesClaimed

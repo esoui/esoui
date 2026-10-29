@@ -11,8 +11,6 @@
                         <Label name="$(grandparent)DetailsTextLine" override="true" text="SI_CUSTOMER_SERVICE_ITEM_ASSISTANCE_NAME_INSTRUCTIONS"/>
                     </Controls>
                 </Control>
-                <Label name="$(parent)DescriptionTitle" override="true" hidden="true"/>
-                <Backdrop name="$(parent)DescriptionBody" override="true" hidden="true"/>
                 <Button name="$(parent)SubmitButton" override="true">
                     <OnClicked>
                         ZO_HelpItemAssistance_Keyboard_AttemptToSendTicket()

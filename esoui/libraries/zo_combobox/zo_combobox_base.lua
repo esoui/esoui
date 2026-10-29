@@ -131,7 +131,7 @@ function ZO_ComboBox_Base:SetVisible(visible)
     self.m_isDropdownVisible = visible
 end
 
-function ZO_ComboBox_Base:CreateItemEntry(name, callback, enabled)
+function ZO_ComboBox_Base:CreateItemEntry(name, callback, enabled, customEntryTemplate)
     local isEnabled = enabled
     if isEnabled == nil then
         -- Evaluate nil to be equivalent to true for backwards compatibility.
@@ -143,6 +143,7 @@ function ZO_ComboBox_Base:CreateItemEntry(name, callback, enabled)
         name = name,
         callback = callback,
         enabled = isEnabled,
+        customEntryTemplate = customEntryTemplate,
     }
     return itemEntry
 end

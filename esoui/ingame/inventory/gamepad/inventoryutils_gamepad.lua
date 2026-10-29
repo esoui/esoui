@@ -152,19 +152,14 @@ function ZO_InventoryUtils_Gamepad_GetBestItemCategoryDescription(itemData)
         category = GetCategoryFromItemType(itemData.itemType)
     end
     if itemData.actorCategory == GAMEPLAY_ACTOR_CATEGORY_COMPANION then
-
-
-
-
-
-
-        local companionCategory = ARMOR_AND_WEAPONS_FOR_COMPANIONS_CATEGORY_MAP[category]
-        if companionCategory then
-            category = companionCategory
+        if itemData.companionType == COMPANION_TYPE_ANIMAL then
+            category = GAMEPAD_ITEM_CATEGORY_ANIMAL_COMPANION
+        else
+            local companionCategory = ARMOR_AND_WEAPONS_FOR_COMPANIONS_CATEGORY_MAP[category]
+            if companionCategory then
+                category = companionCategory
+            end
         end
-
-
-
     end
 
     if category then

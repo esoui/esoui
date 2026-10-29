@@ -226,6 +226,7 @@ function ZO_RestyleSheetWindow_Keyboard:InitializeCompanionEquipmentSheet()
     {
         [ZO_RESTYLE_SHEET_CONTAINER.PRIMARY] =
         {
+            [EQUIP_SLOT_HEAD] = { row = 1, column = 1, controlName = "Head" },
             [EQUIP_SLOT_SHOULDERS] = { row = 2, column = 1, controlName = "Shoulders" }, [EQUIP_SLOT_CHEST] = { row = 2, column = 2, controlName = "Chest" },
             [EQUIP_SLOT_HAND] = { row = 3, column = 1, controlName = "Hand" }, [EQUIP_SLOT_WAIST] = { row = 3, column = 2, controlName = "Waist" },
             [EQUIP_SLOT_LEGS] = { row = 4, column = 1, controlName = "Legs" }, [EQUIP_SLOT_FEET] = { row = 4, column = 2, controlName = "Feet" },
@@ -244,7 +245,7 @@ function ZO_RestyleSheetWindow_Keyboard:InitializeCompanionCollectibleSheet()
     {
         [ZO_RESTYLE_SHEET_CONTAINER.PRIMARY] =
         {
-            [COLLECTIBLE_CATEGORY_TYPE_COSTUME] = { row = 1, column = 2, controlName = "Costume" },
+            [COLLECTIBLE_CATEGORY_TYPE_HAT] = { row = 1, column = 1, controlName = "Hat" }, [COLLECTIBLE_CATEGORY_TYPE_COSTUME] = { row = 1, column = 2, controlName = "Costume" },
         },
     }
     self.companionCollectiblesSheet = self:InitializeSheet(ZO_RestyleCompanionCollectibleSlotsSheet, slotGridData)
@@ -255,6 +256,7 @@ function ZO_RestyleSheetWindow_Keyboard:InitializeCompanionOutfitStylesSheet()
     {
         [ZO_RESTYLE_SHEET_CONTAINER.PRIMARY] =
         {
+            [OUTFIT_SLOT_HEAD] = { row = 1, column = 1, controlName = "Head" },
             [OUTFIT_SLOT_SHOULDERS] = { row = 2, column = 1, controlName = "Shoulders" }, [OUTFIT_SLOT_CHEST] = { row = 2, column = 2, controlName = "Chest" },
             [OUTFIT_SLOT_HANDS] = { row = 3, column = 1, controlName = "Hands" }, [OUTFIT_SLOT_WAIST] = { row = 3, column = 2, controlName = "Waist" },
             [OUTFIT_SLOT_LEGS] = { row = 4, column = 1, controlName = "Legs" }, [OUTFIT_SLOT_FEET] = { row = 4, column = 2, controlName = "Feet" },

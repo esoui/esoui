@@ -40,6 +40,7 @@
                         <Control name="$(parent)PvE" inherits="ZO_GamepadWorldMapFilterPanelTemplate"/>
                         <Control name="$(parent)PvP" inherits="ZO_GamepadWorldMapFilterPanelTemplate"/>
                         <Control name="$(parent)ImperialPvP" inherits="ZO_GamepadWorldMapFilterPanelTemplate"/>
+                        <Control name="$(parent)JerallPvP" inherits="ZO_GamepadWorldMapFilterPanelTemplate"/>
                         <Control name="$(parent)Battleground" inherits="ZO_GamepadWorldMapFilterPanelTemplate"/>
                         <Control name="$(parent)Global" inherits="ZO_GamepadWorldMapFilterPanelTemplate"/>
                     </Controls>

@@ -109,6 +109,21 @@ function ZO_SharedProvisioner:Initialize(control)
     end)
 end
 
+function ZO_SharedProvisioner:HasSuppliesRecipes()
+    local craftingInteractionType = GetCraftingInteractionType()
+    local recipeLists = PROVISIONER_MANAGER:GetRecipeListData(craftingInteractionType)
+
+    for _, recipeList in pairs(recipeLists) do
+        for _, recipe in ipairs(recipeList.recipes) do
+            if recipe.requiredCraftingStationType == craftingInteractionType and recipe.specialIngredientType == PROVISIONER_SPECIAL_INGREDIENT_TYPE_SUPPLIES then
+                return true
+            end
+        end
+    end
+
+    return false
+end
+
 function ZO_SharedProvisioner:CreateInteractScene(sceneName)
     return ZO_InteractScene:New(sceneName, SCENE_MANAGER, self.provisionerStationInteraction)
 end

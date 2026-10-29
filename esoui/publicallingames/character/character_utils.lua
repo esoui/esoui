@@ -111,25 +111,19 @@ local COMPANION_ORDERED_EQUIP_TYPES =
     EQUIP_SLOT_RING2,
 }
 
-
-
-
-
-
-
+local ANIMAL_COMPANION_ORDERED_EQUIP_TYPES =
+{
+    EQUIP_SLOT_CHEST,
+    EQUIP_SLOT_NECK,
+}
 
 function ZO_Character_EnumerateOrderedEquipSlots(bagId)
     if bagId == BAG_COMPANION_WORN then
-
-        return ipairs(COMPANION_ORDERED_EQUIP_TYPES)
-
-
-
-
-
-
-
-
+        if IsActiveCompanionAnimal() then
+            return ipairs(ANIMAL_COMPANION_ORDERED_EQUIP_TYPES)
+        else
+            return ipairs(COMPANION_ORDERED_EQUIP_TYPES)
+        end
     else
         return ipairs(ORDERED_EQUIP_TYPES)
     end
@@ -191,13 +185,12 @@ function ZO_Character_GetEmptyEquipSlotTexture(equipSlot)
     return SLOT_TEXTURES[equipSlot]
 end
 
+local ANIMAL_SLOT_TEXTURES =
+{
+    [EQUIP_SLOT_NECK]       = "EsoUI/Art/CharacterWindow/gearSlot_neck_animal.dds",
+    [EQUIP_SLOT_CHEST]      = "EsoUI/Art/CharacterWindow/gearSlot_chest_animal.dds",
+}
 
-
-
-
-
-
-
-
-
-
+function ZO_Character_GetAnimalEmptyEquipSlotTexture(equipSlot)
+    return ANIMAL_SLOT_TEXTURES[equipSlot]
+end

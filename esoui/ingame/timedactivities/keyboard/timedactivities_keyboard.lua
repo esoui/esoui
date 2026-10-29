@@ -185,7 +185,7 @@ do
         else
             local progress = timedActivityData:GetProgress()
             self.progressBar:SetValue(progress)
-            self.progressBarProgressLabel:SetText(zo_strformat(SI_TAMRIEL_TOMES_CHALLENGES_PROGRESS, progress, maxProgress))
+            self.progressBarProgressLabel:SetText(zo_strformat(SI_CURRENT_AND_MAX_VALUES_FORMATTER_WITH_SPACES, progress, maxProgress))
             self.progressBarProgressLabel:SetHidden(false)
             ZO_StatusBar_SetOverlayColor(self.progressBar, 1, 1, 1, 1)
         end

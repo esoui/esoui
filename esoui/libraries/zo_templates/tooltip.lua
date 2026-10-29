@@ -45,8 +45,7 @@ end
 function SetTooltipText(tooltip, text, color, colorG, colorB, lineAnchor, modifyTextType, textAlignment, setToFullSize, minWidth, lineSpacing)
     if text and #text > 0 then
         local r, g, b
-        if(type(color) == "number")
-        then
+        if type(color) == "number" then
             r = color
             g = colorG
             b = colorB
@@ -54,6 +53,24 @@ function SetTooltipText(tooltip, text, color, colorG, colorB, lineAnchor, modify
             color = color or ZO_TOOLTIP_DEFAULT_COLOR
             r, g, b = color:UnpackRGB()
         end
+        tooltip:AddLine(text, "", r, g, b, lineAnchor, modifyTextType, textAlignment, setToFullSize, minWidth, lineSpacing)
+    else
+        ClearTooltip(tooltip)
+    end
+end
+
+function SetTooltipTextWithTitle(tooltip, text, title, color, colorG, colorB, lineAnchor, modifyTextType, textAlignment, setToFullSize, minWidth, lineSpacing)
+    if title and #title > 0 and text and #text > 0 then
+        local r, g, b
+        if type(color) == "number" then
+            r = color
+            g = colorG
+            b = colorB
+        else
+            color = color or ZO_TOOLTIP_DEFAULT_COLOR
+            r, g, b = color:UnpackRGB()
+        end
+        tooltip:AddLine(title, "", r, g, b, lineAnchor, modifyTextType, TEXT_ALIGN_CENTER, setToFullSize, minWidth, lineSpacing)
         tooltip:AddLine(text, "", r, g, b, lineAnchor, modifyTextType, textAlignment, setToFullSize, minWidth, lineSpacing)
     else
         ClearTooltip(tooltip)

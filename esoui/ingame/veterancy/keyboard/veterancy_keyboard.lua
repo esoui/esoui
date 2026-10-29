@@ -87,6 +87,7 @@ function ZO_VeterancyReward_Keyboard:Initialize(control)
         name = GetString(SI_VETERANCY_PREVIEW_ACTION_TEXT),
         callback = function()
             g_VeterancyKeyboard:SetFocusedControl(self.control)
+            g_VeterancyKeyboard:BeginPreview(ZO_PREVIEW_SCREEN_REWARD_DATA_PREVIEW_TYPES.FULL_PREVIEW, self.rewardableEventData:GetRewardData(), self.rewardableEventData)
         end,
         visible = function()
             return not ITEM_PREVIEW_KEYBOARD:IsWaitingForPreviewBegin()

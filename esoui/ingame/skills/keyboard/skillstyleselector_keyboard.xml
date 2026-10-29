@@ -4,7 +4,7 @@
             <Dimensions x="ZO_SKILL_STYLE_ICON_SELECTOR_PICK_KEYBOARD_SIZE" y="ZO_SKILL_STYLE_ICON_SELECTOR_PICK_KEYBOARD_SIZE"/>
             <Controls>
                 <Control name="$(parent)IconContainer">
-                    <Anchor point="TOPLEFT" offsetX="ZO_SKILL_STYLE_ICON_SELECTOR_ICON_KEYBOARD_OFFSET_X" offsetY="ZO_SKILL_STYLE_ICON_SELECTOR_ICON_KEYBOARD_OFFSET_Y"/>
+                    <Anchor point="CENTER"/>
                     <Dimensions x="ZO_SKILL_STYLE_ICON_SELECTOR_ICON_KEYBOARD_SIZE" y="ZO_SKILL_STYLE_ICON_SELECTOR_ICON_KEYBOARD_SIZE"/>
                     <Controls>
                         <Button name="$(parent)Frame" inherits="ZO_CheckButton" tier="MEDIUM">

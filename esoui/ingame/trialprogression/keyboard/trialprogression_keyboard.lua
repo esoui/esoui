@@ -70,10 +70,12 @@ function ZO_TrialProgression_Track_Keyboard.OnPerkMouseEnter(control)
         InitializeTooltip(AbilityTooltip, control, RIGHT, -5, 0, LEFT)
         AbilityTooltip:SetTrialProgressionPassive(control.trackIndex, control.perkIndex)
     end
+    PlaySound(SOUNDS.TRIAL_PROGRESSION_PERK_MOUSE_ENTER)
 end
 
 function ZO_TrialProgression_Track_Keyboard.OnPerkMouseExit(control)
     local NO_SELECTED_INDEX = nil
     TRIAL_PROGRESSION_KEYBOARD:SetSelectedTrackIndex(NO_SELECTED_INDEX)
     ClearTooltip(AbilityTooltip)
+    PlaySound(SOUNDS.TRIAL_PROGRESSION_PERK_MOUSE_EXIT)
 end

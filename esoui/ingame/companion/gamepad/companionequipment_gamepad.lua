@@ -23,7 +23,6 @@ function ZO_CompanionEquipment_Gamepad:Initialize(control)
             self.listWaitingOnDestroyRequest:Activate()
             self.listWaitingOnDestroyRequest = nil
         end
-        ZO_Dialogs_ReleaseDialog(ZO_GAMEPAD_CONFIRM_DESTROY_DIALOG)
     end
 
     local function OnUpdate(updateControl, currentFrameTimeSeconds)
@@ -738,10 +737,9 @@ function ZO_CompanionEquipment_Gamepad:GetItemDataFilterComparator(filteredEquip
             return false
         end
 
-
-
-
-
+        if itemData.companionType ~= GetActiveCompanionType() then
+            return false
+        end
 
         if filteredEquipSlot then
             return ZO_Character_DoesEquipSlotUseEquipType(filteredEquipSlot, itemData.equipType)

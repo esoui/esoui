@@ -9,9 +9,9 @@ ZO_ADVANCED_STATS_GAMEPAD_CONSTANTS_SECTION_SPACING = 40
 ZO_CHALLENGE_DIFFICULTY_ICONS_GAMEPAD =
 {
     [OVERLAND_DIFFICULTY_TYPE_BASEGAME] = "EsoUI/Art/ChallengeDifficulty/Gamepad/gp_challengeDifficulty_basegame.dds",
-    [OVERLAND_DIFFICULTY_TYPE_JOURNEYMAN] = "EsoUI/Art/ChallengeDifficulty/Gamepad/gp_challengeDifficulty_journeyman.dds",
-    [OVERLAND_DIFFICULTY_TYPE_ADVENTURER] = "EsoUI/Art/ChallengeDifficulty/Gamepad/gp_challengeDifficulty_adventurer.dds",
-    [OVERLAND_DIFFICULTY_TYPE_VETERAN] = "EsoUI/Art/ChallengeDifficulty/Gamepad/gp_challengeDifficulty_veteran.dds",
+    [OVERLAND_DIFFICULTY_TYPE_SEASONED] = "EsoUI/Art/ChallengeDifficulty/Gamepad/gp_challengeDifficulty_journeyman.dds",
+    [OVERLAND_DIFFICULTY_TYPE_MASTER] = "EsoUI/Art/ChallengeDifficulty/Gamepad/gp_challengeDifficulty_adventurer.dds",
+    [OVERLAND_DIFFICULTY_TYPE_VESTIGE] = "EsoUI/Art/ChallengeDifficulty/Gamepad/gp_challengeDifficulty_veteran.dds",
 }
 
 --Attribute Spinner
@@ -418,6 +418,11 @@ do
 
         self.control:RegisterForEvent(EVENT_START_ATTRIBUTE_RESPEC_CAST, OnStartRespecCast)
         self.control:RegisterForEvent(EVENT_ATTRIBUTE_RESPEC_RESULT, OnAttributeRespecResult)
+        self.control:RegisterForEvent(EVENT_OVERLAND_DIFFICULTY_CHANGED, function(_, level, fromInit, isLocalPlayer)
+            if isLocalPlayer and not fromInit then
+                PlaySound(SOUNDS.CHALLENGE_DIFFICULTY_CHANGE_DIFFICULTY_BUTTON_CLICKED)
+            end
+        end)
     end
 
     function ZO_GamepadStats:UnregisterForEvents()
@@ -432,9 +437,13 @@ do
         self.control:UnregisterForEvent(EVENT_CHAMPION_SYSTEM_UNLOCKED)
         self.control:UnregisterForEvent(EVENT_ARTIFICIAL_EFFECT_ADDED)
         self.control:UnregisterForEvent(EVENT_ARTIFICIAL_EFFECT_REMOVED)
+        self.control:UnregisterForEvent(EVENT_OVERLAND_DIFFICULTY_CHANGED)
         STABLE_MANAGER:UnregisterCallback("StableMountInfoUpdated", OnUpdate)
         ZO_LEVEL_UP_REWARDS_MANAGER:UnregisterCallback("OnLevelUpRewardsUpdated", OnUpdate)
         self.control:SetHandler("OnUpdate", nil)
+        self.control:UnregisterForEvent(EVENT_START_ATTRIBUTE_RESPEC_CAST)
+        self.control:UnregisterForEvent(EVENT_ATTRIBUTE_RESPEC_RESULT)
+        self.control:UnregisterForEvent(EVENT_OVERLAND_DIFFICULTY_CHANGED)
     end
 end
 
@@ -2311,7 +2320,6 @@ function ZO_GamepadStats:UpdateDifficultyDropdownEntries(dropdown)
 
         local function OnSelectionClicked()
             RequestChangePlayerOverlandDifficulty(difficulty)
-            PlaySound(SOUNDS.CHALLENGE_DIFFICULTY_CHANGE_DIFFICULTY_BUTTON_CLICKED)
         end
 
         local difficultyListItem = dropdown:CreateItemEntry(difficultyInfo.difficultyName, OnSelectionClicked)
@@ -2395,9 +2403,9 @@ do
     local DIFFICULTY_SOUND_IDS =
     {
         [OVERLAND_DIFFICULTY_TYPE_BASEGAME] = SOUNDS.CHALLENGE_DIFFICULTY_SELECTED_BASEGAME,
-        [OVERLAND_DIFFICULTY_TYPE_JOURNEYMAN] = SOUNDS.CHALLENGE_DIFFICULTY_SELECTED_JOURNEYMAN,
-        [OVERLAND_DIFFICULTY_TYPE_ADVENTURER] = SOUNDS.CHALLENGE_DIFFICULTY_SELECTED_ADVENTURER,
-        [OVERLAND_DIFFICULTY_TYPE_VETERAN] = SOUNDS.CHALLENGE_DIFFICULTY_SELECTED_VETERAN,
+        [OVERLAND_DIFFICULTY_TYPE_SEASONED] = SOUNDS.CHALLENGE_DIFFICULTY_SELECTED_JOURNEYMAN,
+        [OVERLAND_DIFFICULTY_TYPE_MASTER] = SOUNDS.CHALLENGE_DIFFICULTY_SELECTED_ADVENTURER,
+        [OVERLAND_DIFFICULTY_TYPE_VESTIGE] = SOUNDS.CHALLENGE_DIFFICULTY_SELECTED_VETERAN,
     }
 
     function ZO_GamepadStatDifficultyRow_Setup(control, data, selected, selectedDuringRebuild, enabled, activated)

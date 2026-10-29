@@ -219,6 +219,15 @@ function ZO_ImperialPvPWorldMapFilterPanel_Gamepad:Initialize(...)
     ZO_WorldMapFilterPanel_Gamepad.Initialize(self, ...)
 end
 
+--Jerall PvP Filter Panel
+
+ZO_JerallPvPWorldMapFilterPanel_Gamepad = ZO_Object.MultiSubclass(ZO_JerallPvPWorldMapFilterPanel_Shared, ZO_WorldMapFilterPanel_Gamepad)
+
+function ZO_JerallPvPWorldMapFilterPanel_Gamepad:Initialize(...)
+    ZO_JerallPvPWorldMapFilterPanel_Shared.Initialize(self, ...)
+    ZO_WorldMapFilterPanel_Gamepad.Initialize(self, ...)
+end
+
 --Battleground Filter Panel
 
 ZO_BattlegroundWorldMapFilterPanel_Gamepad = ZO_Object.MultiSubclass(ZO_BattlegroundWorldMapFilterPanel_Shared, ZO_WorldMapFilterPanel_Gamepad)
@@ -254,6 +263,7 @@ function ZO_WorldMapFilters_Gamepad:Initialize(control)
         self.pvePanel = ZO_PvEWorldMapFilterPanel_Gamepad:New(self.control:GetNamedChild("Main"):GetNamedChild("PvE"), MAP_FILTER_TYPE_STANDARD, savedVars)
         self.pvpPanel = ZO_PvPWorldMapFilterPanel_Gamepad:New(self.control:GetNamedChild("Main"):GetNamedChild("PvP"), MAP_FILTER_TYPE_AVA_CYRODIIL, savedVars)
         self.imperialPvPPanel = ZO_ImperialPvPWorldMapFilterPanel_Gamepad:New(self.control:GetNamedChild("Main"):GetNamedChild("ImperialPvP"), MAP_FILTER_TYPE_AVA_IMPERIAL, savedVars)
+        self.jerallPvPPanel = ZO_JerallPvPWorldMapFilterPanel_Gamepad:New(self.control:GetNamedChild("Main"):GetNamedChild("JerallPvP"), MAP_FILTER_TYPE_AVA_JERALL, savedVars)
         self.battlegroundPanel = ZO_BattlegroundWorldMapFilterPanel_Gamepad:New(self.control:GetNamedChild("Main"):GetNamedChild("Battleground"), MAP_FILTER_TYPE_BATTLEGROUND, savedVars)
         self.globalPanel = ZO_GlobalWorldMapFilterPanel_Gamepad:New(self.control:GetNamedChild("Main"):GetNamedChild("Global"), MAP_FILTER_TYPE_GLOBAL, savedVars)
     end)

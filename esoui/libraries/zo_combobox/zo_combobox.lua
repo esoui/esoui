@@ -42,7 +42,7 @@ function ZO_ComboBox:Initialize(control)
     control:SetHandler("OnEffectivelyHidden", OnEffectivelyHidden)
 end
 
-function ZO_ComboBox:AddCustomEntryTemplate(entryTemplate, entryHeight, setupFunction)
+function ZO_ComboBox:AddCustomEntryTemplate(entryTemplate, entryHeight, setupFunction, extraWidthPadding)
     if not self.m_customEntryTemplateInfos then
         self.m_customEntryTemplateInfos = {}
     end
@@ -52,11 +52,12 @@ function ZO_ComboBox:AddCustomEntryTemplate(entryTemplate, entryHeight, setupFun
         entryTemplate = entryTemplate,
         entryHeight = entryHeight,
         setupFunction = setupFunction,
+        extraWidthPadding = extraWidthPadding,
     }
 
     self.m_customEntryTemplateInfos[entryTemplate] = customEntryInfo
 
-    self.m_dropdownObject:AddCustomEntryTemplate(entryTemplate, entryHeight, setupFunction)
+    self.m_dropdownObject:AddCustomEntryTemplate(entryTemplate, entryHeight, setupFunction, extraWidthPadding)
 end
 
 function ZO_ComboBox.SetItemEntryCustomTemplate(itemEntry, entryTemplate)
@@ -68,7 +69,7 @@ function ZO_ComboBox:SetDropdownObject(dropdownObject)
 
     if self.m_customEntryTemplateInfos then
         for entryTemplate, entryInfo in pairs(self.m_customEntryTemplateInfos) do
-            self.m_dropdownObject:AddCustomEntryTemplate(entryInfo.entryTemplate, entryInfo.entryHeight, entryInfo.setupFunction)
+            self.m_dropdownObject:AddCustomEntryTemplate(entryInfo.entryTemplate, entryInfo.entryHeight, entryInfo.setupFunction, entryInfo.extraWidthPadding)
         end
     end
 
@@ -462,7 +463,7 @@ function ZO_ComboBoxDropdown_Keyboard:SetupScrollList()
     ZO_ScrollList_EnableHighlight(self.scrollControl, "ZO_TallListHighlight")
 end
 
-function ZO_ComboBoxDropdown_Keyboard:AddCustomEntryTemplate(entryTemplate, entryHeight, setupFunction)
+function ZO_ComboBoxDropdown_Keyboard:AddCustomEntryTemplate(entryTemplate, entryHeight, setupFunction, extraWidthPadding)
     if not self.customEntryTemplateInfos then
         self.customEntryTemplateInfos = {}
     end
@@ -476,6 +477,7 @@ function ZO_ComboBoxDropdown_Keyboard:AddCustomEntryTemplate(entryTemplate, entr
     {
         typeId = self.nextScrollTypeId,
         entryHeight = entryHeight,
+        extraWidthPadding = extraWidthPadding,
     }
 
     self.customEntryTemplateInfos[entryTemplate] = customEntryInfo
@@ -546,12 +548,16 @@ function ZO_ComboBoxDropdown_Keyboard:Show(comboBox, itemTable, minWidth, maxHei
 
         local isLastEntry = i == numItems
         local entryHeight = ZO_COMBO_BOX_ENTRY_TEMPLATE_HEIGHT
+        local extraWidthPadding = 0
         local entryType = DEFAULT_ENTRY_ID
         if self.customEntryTemplateInfos and item.customEntryTemplate then
             local templateInfo = self.customEntryTemplateInfos[item.customEntryTemplate]
             if templateInfo then
                 entryType = templateInfo.typeId
                 entryHeight = templateInfo.entryHeight
+                if templateInfo.extraWidthPadding then
+                    extraWidthPadding = templateInfo.extraWidthPadding
+                end
             end
         end
 
@@ -567,7 +573,7 @@ function ZO_ComboBoxDropdown_Keyboard:Show(comboBox, itemTable, minWidth, maxHei
         table.insert(dataList, entry)
 
         local fontObject = self.owner:GetDropdownFontObject()
-        local nameWidth = GetStringWidthScaled(fontObject, item.name, 1, SPACE_INTERFACE)
+        local nameWidth = GetStringWidthScaled(fontObject, item.name, 1, SPACE_INTERFACE) + extraWidthPadding
         if nameWidth > largestEntryWidth then
             largestEntryWidth = nameWidth
         end
@@ -621,12 +627,18 @@ function ZO_ComboBoxDropdown_Keyboard:IsMouseOverControl()
 end
 
 function ZO_ComboBoxDropdown_Keyboard:OnMouseEnterEntry(control)
-    ZO_ScrollList_MouseEnter(self.scrollControl, control)
+    local data = control.m_data
+    local enabled = ZO_EvalDefaultTrue(data.enabled)
+
+    if enabled then
+        ZO_ScrollList_MouseEnter(self.scrollControl, control) -- Highlight
+    end
 
     if self.owner then
         self.owner:OnMouseEnterEntryBase(control)
-        local data = control.m_data
-        self.owner:HighlightLabel(control.m_label, data)
+        if enabled then
+            self.owner:HighlightLabel(control.m_label, data)
+        end
         if data.onEnter then
             data.onEnter(control)
         end
@@ -634,12 +646,18 @@ function ZO_ComboBoxDropdown_Keyboard:OnMouseEnterEntry(control)
 end
 
 function ZO_ComboBoxDropdown_Keyboard:OnMouseExitEntry(control)
-    ZO_ScrollList_MouseExit(self.scrollControl, control)
+    local data = control.m_data
+    local enabled = ZO_EvalDefaultTrue(data.enabled)
+    
+    if enabled then
+        ZO_ScrollList_MouseExit(self.scrollControl, control) -- Highlight
+    end
 
     if self.owner then
         self.owner:OnMouseExitEntryBase(control)
-        local data = control.m_data
-        self.owner:UnhighlightLabel(control.m_label, data)
+        if enabled then
+            self.owner:UnhighlightLabel(control.m_label, data)
+        end
         if data.onExit then
             data.onExit(control)
         end
@@ -675,6 +693,11 @@ end
 
 function ZO_ComboBoxDropdown_Keyboard.OnEntryMouseUp(control, button, upInside)
     if button == MOUSE_BUTTON_INDEX_LEFT and upInside then
+        local data = control.m_data
+        if data.enabled == false then
+            return
+        end
+
         local dropdown = control.m_dropdownObject
         if dropdown then
             dropdown:OnEntrySelected(control)

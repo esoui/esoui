@@ -348,7 +348,10 @@ end
 
 local TEXT_CALLOUT_BACKGROUND_ALPHA = 0.9
 local function MarketPurchaseConfirmationDialogSetupPricingControls(dialog, data)
+    local purchaseLimitContainer = dialog.purchaseLimitContainer
+
     local marketPurchaseData
+    local hasPurchaseLimit = false
     if data.marketProductData then
         local quantity = data.quantity or MIN_PURCHASE_QUANTITY
         local marketCurrencyType, cost, costAfterDiscount, discountPercent, esoPlusCost = data.marketProductData:GetMarketProductPricingByPresentation()
@@ -369,10 +372,32 @@ local function MarketPurchaseConfirmationDialogSetupPricingControls(dialog, data
             discountPercent = discountPercent,
             esoPlusCost = esoPlusCost,
         }
+
+        hasPurchaseLimit = data.marketProductData:HasPurchaseLimit()
+        if hasPurchaseLimit then
+            local purchaseLimit = data.marketProductData:GetPurchaseLimit()
+            local purchaseCount = data.marketProductData:GetPurchaseCount()
+
+            purchaseLimitContainer.resetTypeLabel:SetText(GetString("SI_PURCHASELIMITRESETTYPE_TAG", data.marketProductData:GetPurchaseLimitResetType()))
+            purchaseLimitContainer.limitAmount:SetText(zo_strformat(SI_CURRENT_AND_MAX_VALUES_FORMATTER, purchaseCount, purchaseLimit))
+        end
     elseif data.marketPurchaseOptions then
         local currencyType, options = next(data.marketPurchaseOptions)
         marketPurchaseData = options
         marketPurchaseData.marketCurrencyType = currencyType
+    end
+
+    if purchaseLimitContainer then
+        purchaseLimitContainer:SetHidden(not hasPurchaseLimit)
+
+        local confirmPurchaseLabel = dialog.confirmPurchaseLabel
+        confirmPurchaseLabel:ClearAnchors()
+        if hasPurchaseLimit then
+            confirmPurchaseLabel:SetAnchor(TOPLEFT, purchaseLimitContainer, BOTTOMLEFT, 0, 30)
+            confirmPurchaseLabel:SetAnchor(TOPRIGHT, purchaseLimitContainer, BOTTOMRIGHT, 0, 30)
+        else
+            ApplyTemplateToControl(confirmPurchaseLabel, "ZO_DialogContentAnchors")
+        end
     end
 
     local currencyType = GetCurrencyTypeFromMarketCurrencyType(marketPurchaseData.marketCurrencyType)
@@ -763,6 +788,9 @@ function ZO_MarketPurchaseConfirmationDialog_OnQuantityChanged(dialog, quantity)
 end
 
 function ZO_MarketPurchaseConfirmationDialog_OnInitialized(control)
+    control.confirmPurchaseLabel = control:GetNamedChild("ConfirmPurchase")
+    control.purchaseLimitContainer = control:GetNamedChild("PurchaseLimitContainer")
+
     -- Radio buttons
     local radioButtonContainer = control:GetNamedChild("RadioButtons")
     local forMeRadioButton = radioButtonContainer:GetNamedChild("ForMe")

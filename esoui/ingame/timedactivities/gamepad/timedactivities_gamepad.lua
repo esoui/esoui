@@ -566,7 +566,7 @@ function ZO_TimedActivitiesList_Gamepad:SetupActivityRow(control, data)
     else
         local progress = dataSource:GetProgress()
         control.progressStatusBar:SetValue(progress)
-        control.progressLabel:SetText(zo_strformat(SI_TIMED_ACTIVITIES_ACTIVITY_COMPLETION_VALUES, progress, maxProgress))
+        control.progressLabel:SetText(zo_strformat(SI_CURRENT_AND_MAX_VALUES_FORMATTER, progress, maxProgress))
         control.progressLabel:SetHidden(false)
         ZO_StatusBar_SetOverlayColor(control.progressStatusBar, 1, 1, 1, 1)
     end

@@ -4,13 +4,11 @@ ZO_MARKET_DISPLAY_LOADING_DELAY_MS = 500
 ZO_MARKET_CATEGORY_TYPE_NONE = "none"
 ZO_MARKET_CATEGORY_TYPE_FEATURED = "featured"
 ZO_MARKET_CATEGORY_TYPE_ESO_PLUS = "esoPlus"
-ZO_MARKET_CATEGORY_TYPE_CHAPTER_UPGRADE = "chapterUpgrade"
 ZO_MARKET_CATEGORY_TYPE_ESO_PLUS_OFFERS = "esoPlusOffers"
 
 ZO_MARKET_FEATURED_CATEGORY_INDEX = 0
 ZO_MARKET_ESO_PLUS_CATEGORY_INDEX = -1
-ZO_MARKET_CHAPTER_UPGRADE_CATEGORY_INDEX = -2
-ZO_MARKET_ESO_PLUS_OFFERS_CATEGORY_INDEX = -3
+ZO_MARKET_ESO_PLUS_OFFERS_CATEGORY_INDEX = -2
 
 ZO_NO_MARKET_SUBCATEGORY = nil
 
@@ -70,6 +68,8 @@ function ZO_Market_Shared:RegisterForMarketSingletonCallbacks()
     ZO_MARKET_MANAGER:RegisterCallback("OnMarketProductAvailabilityUpdated", function(...) self:OnMarketProductAvailabilityUpdated(...) end)
     ZO_MARKET_MANAGER:RegisterCallback("OnMarketSearchResultsReady", function(...) self:OnMarketSearchResultsReady(...) end)
     ZO_MARKET_MANAGER:RegisterCallback("OnMarketSearchResultsCanceled", function(...) self:OnMarketSearchResultsCanceled(...) end)
+    ZO_MARKET_MANAGER:RegisterCallback("OnMarketProductPurchaseLimitUpdated", function(...) self:OnMarketPurchaseLimitUpdated(...) end)
+    ZO_MARKET_MANAGER:RegisterCallback("OnMarketPurchaseLimitsUpdated", function(...) self:OnMarketPurchaseLimitUpdated(...) end)
 
     -- events we only need to react to if we're showing
     ZO_MARKET_MANAGER:RegisterCallback("OnMarketPurchaseResult", function(...) if self:IsShowing() then self:OnMarketPurchaseResult(...) end end)
@@ -149,6 +149,14 @@ function ZO_Market_Shared:OnMarketPurchaseResult()
     self:UpdateCurrentCategory()
 end
 
+function ZO_Market_Shared:OnMarketPurchaseLimitUpdated()
+    if self:IsShowing() then
+        self:UpdateCurrentCategory()
+    else
+        self.refreshCategories = true
+    end
+end
+
 function ZO_Market_Shared:OnMarketSearchResultsReady(taskId)
     self.isSearching = false
 
@@ -178,8 +186,6 @@ function ZO_Market_Shared:UpdateCurrentCategory()
     if self.currentCategoryData then
         if self.currentCategoryData.categoryIndex == ZO_MARKET_ESO_PLUS_CATEGORY_INDEX then
             self:RefreshEsoPlusPage()
-        elseif self.currentCategoryData.type == ZO_MARKET_CATEGORY_TYPE_CHAPTER_UPGRADE then
-            self:RefreshChapterUpgradePage()
         else
             self:RefreshProducts()
         end
@@ -247,11 +253,6 @@ function ZO_Market_Shared:OnShowEsoPlusPage()
     self:RequestShowCategory(ZO_MARKET_ESO_PLUS_CATEGORY_INDEX)
 end
 
-function ZO_Market_Shared:OnShowChapterUpgrade(chapterUpgradeId)
-    SCENE_MANAGER:Show("show_market")
-    self:RequestShowCategory(ZO_MARKET_CHAPTER_UPGRADE_CATEGORY_INDEX, chapterUpgradeId) -- the subcategory id for the chapter is the chapterUpdradeId
-end
-
 function ZO_Market_Shared:OnShowMarketProductCategory(marketProductCategoryId)
     SCENE_MANAGER:Show("show_market")
     self:RequestShowCategoryById(marketProductCategoryId)
@@ -267,10 +268,11 @@ function ZO_Market_Shared:RequestShowMarket(openSource, openBehavior, additional
         self:OnShowMarketProduct(additionalData)
     elseif openBehavior == OPEN_MARKET_BEHAVIOR_SHOW_FEATURED_CATEGORY then
         self:OnShowFeaturedCategory()
+    elseif openBehavior == OPEN_MARKET_BEHAVIOR_SHOW_CHAPTER_UPGRADE then
+        internalassert(false, "Nothing should be using the CHAPTER_UPGRADE open behavior")  -- Deprecated
+        self:OnShowFeaturedCategory()
     elseif openBehavior == OPEN_MARKET_BEHAVIOR_SHOW_ESO_PLUS_CATEGORY then
         self:OnShowEsoPlusPage()
-    elseif openBehavior == OPEN_MARKET_BEHAVIOR_SHOW_CHAPTER_UPGRADE then
-        self:OnShowChapterUpgrade(additionalData)
     elseif openBehavior == OPEN_MARKET_BEHAVIOR_SHOW_MARKET_PRODUCT_CATEGORY then
         self:OnShowMarketProductCategory(additionalData)
     end
@@ -1019,10 +1021,6 @@ function ZO_Market_Shared:BuildMarketProductList(data)
 end
 
 function ZO_Market_Shared:RefreshEsoPlusPage()
-end
-
-function ZO_Market_Shared:RefreshChapterUpgradePage()
-    -- To be overridden
 end
 
 function ZO_Market_Shared:RemoveActionLayerForDialog()

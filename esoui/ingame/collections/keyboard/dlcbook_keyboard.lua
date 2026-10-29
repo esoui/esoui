@@ -16,7 +16,6 @@ function DLCBook_Keyboard:InitializeControls()
     local buttons = contents:GetNamedChild("DLCInteractButtons")
     self.questAcceptButton = buttons:GetNamedChild("QuestAccept")
     self.unlockPermanentlyButton = buttons:GetNamedChild("UnlockPermanently")
-    self.chapterUpgrade = buttons:GetNamedChild("ChapterUpgrade")
 
     self.subscribeButton = contents:GetNamedChild("SubscribeButton")
 end
@@ -55,7 +54,6 @@ function DLCBook_Keyboard:RefreshDetails()
         local questDescriptionControl = self.questDescriptionControl
         local canUnlockOnStore = isNotOwned and collectibleData:IsPurchasable()
         local canUnlockWithSubscription = not IsESOPlusSubscriber() and collectibleData:IsUnlockedViaSubscription()
-        local isChapter = collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_CHAPTER)
         if showsQuest then
             questAvailableControl:SetText(GetString(SI_COLLECTIONS_QUEST_AVAILABLE))
             questAvailableControl:SetHidden(false)
@@ -63,9 +61,8 @@ function DLCBook_Keyboard:RefreshDetails()
             questDescriptionControl:SetText(collectibleData:GetQuestDescription())
             questDescriptionControl:SetHidden(false)
         elseif isLocked then
-            if canUnlockOnStore or canUnlockWithSubscription or isChapter then
-                local acquireText = isChapter and GetString(SI_COLLECTIONS_QUEST_AVAILABLE_WITH_UPGRADE) or GetString(SI_COLLECTIONS_QUEST_AVAILABLE_WITH_UNLOCK)
-                questAvailableControl:SetText(acquireText)
+            if canUnlockOnStore or canUnlockWithSubscription then
+                questAvailableControl:SetText(GetString(SI_COLLECTIONS_QUEST_AVAILABLE_WITH_UNLOCK))
                 questAvailableControl:SetHidden(false)
             else
                 questAvailableControl:SetHidden(true)
@@ -81,7 +78,6 @@ function DLCBook_Keyboard:RefreshDetails()
         self.questAcceptButton:SetEnabled(not (isLocked or isActive))
         self.unlockPermanentlyButton:SetHidden(not canUnlockOnStore)
         self.subscribeButton:SetHidden(not canUnlockWithSubscription)
-        self.chapterUpgrade:SetHidden(not (isChapter and isNotOwned))
     end
 end
 
@@ -117,10 +113,6 @@ end
 
 function ZO_DLCBook_Keyboard_OnSubscribeClicked(control)
     ZO_ShowBuySubscriptionPlatformDialog()
-end
-
-function ZO_DLCBook_Keyboard_OnChapterUpgradeClicked(control)
-    ZO_ShowChapterUpgradePlatformScreen(MARKET_OPEN_OPERATION_COLLECTIONS_DLC)
 end
 
 function ZO_DLCBook_Keyboard_OnInitialize(control)

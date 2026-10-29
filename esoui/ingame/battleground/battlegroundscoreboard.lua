@@ -41,9 +41,10 @@ ZO_BATTLEGROUND_SCOREBOARD_PANEL_SCORE_OFFSET_Y = 0
 ZO_BATTLEGROUND_SCOREBOARD_PANEL_OFFSET_Y = 10
 
 ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_HEIGHT_KEYBOARD = 30
-ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_HEIGHT_GAMEPAD = 32
+ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_HEIGHT_GAMEPAD = 40
+ZO_BATTLEGROUND_SCOREBOARD_PLAYER_SMALL_ROW_HEIGHT_GAMEPAD = 32
 ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_INITIAL_OFFSET_Y = 20
-ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_OFFSET_Y = 10
+ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_OFFSET_Y = 9
 ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_LIVES_WIDTH = 30
 ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_MEDAL_USER_ID_DIFFERENCE = 100
 ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_MEDALS_WIDTH = ZO_BATTLEGROUND_SCOREBOARD_HEADER_MEDALS_WIDTH - ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_MEDAL_USER_ID_DIFFERENCE
@@ -98,10 +99,6 @@ local FORCE_REFRESH_PLAYER_SELECTION = true
 -----------------------------------
 
 local Battleground_Scoreboard_Fragment = ZO_HUDFadeSceneFragment:Subclass()
-
-function Battleground_Scoreboard_Fragment:New(...)
-    return ZO_HUDFadeSceneFragment.New(self, ...)
-end
 
 function Battleground_Scoreboard_Fragment:Initialize(control)
     ZO_HUDFadeSceneFragment.Initialize(self, control)
@@ -184,10 +181,20 @@ do
         teamNameFonts =
         {
             {
-                font = "ZoFontHeader3",
+                font = "ZoFontHeader4",
+                lineLimit = 1,
             },
             {
-                font = "ZoFontHeader4",
+                font = "ZoFontHeader3",
+                lineLimit = 2,
+            },
+            {
+                font = "ZoFontHeader2",
+                lineLimit = 2,
+            },
+            {
+                font = "ZoFontHeader",
+                lineLimit = 3,
             },
         }
     }
@@ -496,7 +503,7 @@ do
 
         local numBattlegroundTeams = GetBattlegroundNumTeams(self.currentBattlegroundId)
         local teamSize = GetBattlegroundTeamSize(self.currentBattlegroundId)
-        local teamPanelHeight = ZO_Battleground_Scoreboard_Team_Panel_Object.GetPanelHeight(teamSize)
+        local teamPanelHeight = ZO_Battleground_Scoreboard_Team_Panel_Object.GetPanelHeight(teamSize, self:ShouldScoreboardUseSmallPlayerEntries())
         local totalTeamPanelsHeight = teamPanelHeight * numBattlegroundTeams + ZO_BATTLEGROUND_SCOREBOARD_PANEL_OFFSET_Y * (numBattlegroundTeams - 1)
         -- add some padding so we're not right against the scroll limits
         totalTeamPanelsHeight = totalTeamPanelsHeight + 5
@@ -557,8 +564,9 @@ do
             teamPanel:RemoveAllPlayers()
             if DoesBattlegroundHaveTeam(self.currentBattlegroundId, battlegroundTeam) then
                 teamPanel:UpdateScore()
-                teamPanel:SetTeamSize(teamSize)
+                -- Order matters. SetTeamSize relies on the value for useSmallPlayerEntries.
                 teamPanel:UseSmallPlayerEntries(useSmallEntries)
+                teamPanel:SetTeamSize(teamSize)
             end
         end
     end
@@ -1159,7 +1167,7 @@ function ZO_Battleground_Scoreboard_Team_Panel_Object:ShouldUseSmallPlayerEntrie
 end
 
 function ZO_Battleground_Scoreboard_Team_Panel_Object:UpdatePanelHeight()
-    local panelHeight = self.GetPanelHeight(self.teamSize)
+    local panelHeight = self.GetPanelHeight(self.teamSize, self:ShouldUseSmallPlayerEntries())
     self.control:SetHeight(panelHeight)
 end
 
@@ -1179,14 +1187,14 @@ function ZO_Battleground_Scoreboard_Team_Panel_Object:GetBottomPlayerRow()
     return self.sortedPlayerRows[#self.sortedPlayerRows]
 end
 
-function ZO_Battleground_Scoreboard_Team_Panel_Object.GetPanelHeight(teamSize)
+function ZO_Battleground_Scoreboard_Team_Panel_Object.GetPanelHeight(teamSize, useSmallPlayerEntries)
     local DEFAULT_TEAM_SIZE = 4
     if teamSize <= DEFAULT_TEAM_SIZE then
         return ZO_BATTLEGROUND_SCOREBOARD_PANEL_HEIGHT
     else
         local rowHeight = ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_HEIGHT_KEYBOARD
         if IsInGamepadPreferredMode() then
-            rowHeight = ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_HEIGHT_GAMEPAD
+            rowHeight = useSmallPlayerEntries and ZO_BATTLEGROUND_SCOREBOARD_PLAYER_SMALL_ROW_HEIGHT_GAMEPAD or ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_HEIGHT_GAMEPAD
         end
         return (teamSize * (rowHeight + ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_OFFSET_Y)) + ZO_BATTLEGROUND_SCOREBOARD_PLAYER_ROW_INITIAL_OFFSET_Y
     end
@@ -1398,6 +1406,57 @@ end
 
 function ZO_Battleground_Scoreboard_Player_Row_Object:SetMouseOver(isMouseOver)
     self.isMouseOver = isMouseOver
+end
+
+function ZO_Battleground_Scoreboard_Player_Row_Object.OnScoreControlInitialized(control)
+    local keyboardFonts =
+    {
+        {
+            font = "ZoFontWinH2",
+            lineLimit = 1,
+        },
+        {
+            font = "ZoFontWinH3",
+            lineLimit = 1,
+        },
+        {
+            font = "ZoFontWinH4",
+            lineLimit = 1,
+            dontUseForAdjusting = true,
+        },
+    }
+
+    local gamepadFonts =
+    {
+        {
+            font = "ZoFontGamepad34",
+            lineLimit = 1,
+        },
+        {
+            font = "ZoFontGamepad27",
+            lineLimit = 1,
+            dontUseForAdjusting = true,
+        },
+    }
+
+    local smallGamepadFonts =
+    {
+        {
+            font = "ZoFontGamepad27",
+            lineLimit = 1,
+        },
+    }
+
+    local function GetGamepadFonts()
+        local rowObject = control:GetParent().owner
+        if rowObject and rowObject.panel:ShouldUseSmallPlayerEntries() then
+            return smallGamepadFonts
+        else
+            return gamepadFonts
+        end
+    end
+
+    ZO_PlatformStyleFontAdjustingWrapLabel_OnInitialized(control, keyboardFonts, GetGamepadFonts, TEXT_WRAP_MODE_TRUNCATE)
 end
 
 --[[ xml functions ]]--

@@ -1,0 +1,105 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_ZoneStory_MilestoneHeader_Keyboard" virtual="true">
+            <Controls>
+                <Label name="$(parent)Text" font="ZoFontWinH2" modifyTextType="UPPERCASE">
+                    <Anchor point="TOPLEFT"/>
+                </Label>
+            </Controls>
+        </Control>
+        <Control name="ZO_ZoneStory_MilestoneTooltip_CriterionEntry_Keyboard" resizeToFitConstrains="Y" virtual="true">
+            <DimensionConstraints minY="32"/>
+            <Controls>
+                <Texture name="$(parent)CriterionCheckmark" hidden="true" textureFile="EsoUI/Art/Miscellaneous/check_icon_32.dds">
+                    <Anchor point="TOPLEFT"/>
+                    <Dimensions x="32" y="32"/>
+                </Texture>
+                <Label name="$(parent)CriterionText" font="ZoFontWinH5" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)CriterionCheckmark" relativePoint="TOPRIGHT" offsetY="5"/>
+                    <Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" offsetY="5"/>
+                </Label>
+            </Controls>
+        </Control>
+        <Control name="ZO_ZoneStory_MilestoneTile_Keyboard_Control" inherits="ZO_ZoneStory_MilestoneTile_Control ZO_Tile_Keyboard_Control" mouseEnabled="true" virtual="true">
+            <Dimensions x="ZO_ZONE_STORIES_MILESTONE_TILE_KEYBOARD_DIMENSIONS_X" y="ZO_ZONE_STORIES_MILESTONE_TILE_KEYBOARD_DIMENSIONS_Y"/>
+            <OnInitialized>
+                ZO_ZoneStory_MilestoneTile_Keyboard_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Texture name="$(parent)Icon" override="true" level="3">
+                    <Dimensions x="ZO_ZONE_STORIES_MILESTONE_TILE_KEYBOARD_ICON_DIMENSIONS" y="ZO_ZONE_STORIES_MILESTONE_TILE_KEYBOARD_ICON_DIMENSIONS"/>
+                    <Anchor point="TOPLEFT" offsetX="5" offsetY="5"/>
+                    <Controls>
+                        <Texture name="$(parent)EmergencyBG" textureFile="EsoUI/Art/Achievements/achievements_iconBG.dds" level="2">
+                            <AnchorFill/>
+                        </Texture>
+                        <Texture name="$(parent)Frame" textureFile="EsoUI/Art/ActionBar/abilityFrame64_up.dds" layer="CONTROLS">
+                            <AnchorFill/>
+                        </Texture>
+                        <Texture name="$(parent)Overlay" textureFile="EsoUI/Art/ActionBar/actionBar_mouseOver.dds" blendMode="ADD" layer="OVERLAY" level="2" hidden="true">
+                            <AnchorFill/>
+                        </Texture>
+                    </Controls>
+                </Texture>
+                <Texture name="$(parent)Locked" override="true" textureFile="EsoUI/Art/Miscellaneous/status_locked.dds"/>
+                <Control name="$(parent)TextContainer" override="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Icon" relativePoint="TOPRIGHT" offsetX="10" offsetY="-5"/>
+                    <Anchor point="RIGHT" constrains="X"/>
+                    <Controls>
+                        <Label name="$(parent)Title" override="true" font="ZoFontWinH4" maxLineCount="2">
+                            <Anchor point="TOPLEFT"/>
+                            <Anchor point="TOPRIGHT"/>
+                        </Label>
+                        <Label name="$(parent)Status" override="true" font="ZoFontWinH4">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT"/>
+                        </Label>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+        <TopLevelControl name="ZO_ZoneStory_Milestone_Tooltip" resizeToFitConstrains="Y" hidden="true" clampedToScreen="true" tier="HIGH" level="ZO_HIGH_TIER_TOOLTIPS">
+            <Dimensions x="565"/>
+            <DimensionConstraints minY="88"/>
+            <ResizeToFitPadding height="20"/>
+            <Anchor point="CENTER" relativeTo="GuiRoot"/>
+            <Controls>
+                <Backdrop name="$(parent)BG" inherits="ZO_DefaultBackdrop" excludeFromResizeToFitExtents="true">
+                    <Anchor point="TOPLEFT"/>
+                    <Anchor point="BOTTOMRIGHT" offsetY="4"/>
+                </Backdrop>
+                <Texture name="$(parent)Icon" level="3">
+                    <Anchor point="TOPLEFT" offsetX="38" offsetY="10"/>
+                    <Dimensions x="52" y="52"/>
+                    <Controls>
+                        <Texture name="$(parent)EmergencyBG" textureFile="EsoUI/Art/Achievements/achievements_iconBG.dds" level="2">
+                            <AnchorFill/>
+                        </Texture>
+                        <Texture name="$(parent)Frame" textureFile="EsoUI/Art/ActionBar/abilityFrame64_up.dds" layer="CONTROLS">
+                            <AnchorFill/>
+                        </Texture>
+                    </Controls>
+                </Texture>
+                <Label name="$(parent)Title" font="ZoFontWindowSubtitle" wrapMode="ELLIPSIS" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                    <Dimensions x="450"/>
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Icon" relativePoint="TOPRIGHT" offsetX="6"/>
+                </Label>
+                <Label name="$(parent)Description" font="ZoFontWinH5" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Title" relativePoint="BOTTOMRIGHT"/>
+                </Label>
+                <Control name="$(parent)Criteria" resizeToFitConstrains="Y">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Description" relativePoint="BOTTOMLEFT"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Description" relativePoint="BOTTOMRIGHT"/>
+                </Control>
+                <Label name="$(parent)Reward" font="ZoFontWinH5" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Criteria" relativePoint="BOTTOMLEFT" offsetY="20"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Description" relativePoint="BOTTOMRIGHT" offsetY="20" constrains="X"/>
+                </Label>
+                <Label name="$(parent)Locked" font="ZoFontWinH5" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Reward" relativePoint="BOTTOMLEFT" offsetY="20"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Description" relativePoint="BOTTOMRIGHT" offsetY="20" constrains="X"/>
+                </Label>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

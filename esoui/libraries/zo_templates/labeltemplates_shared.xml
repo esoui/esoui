@@ -77,22 +77,32 @@
             <OnUpdate name="RollingMeterLabel">
                 self:OnUpdate(time)
             </OnUpdate>
+            <OnHide>
+                ZO_RollingMeterLabel_OnHide(self)
+            </OnHide>
+            <OnShow>
+                ZO_RollingMeterLabel_OnShow(self)
+            </OnShow>
+            <Controls>
+                <Control name="$(parent)WheelContainer">
+                    <Anchor point="TOPLEFT"/>
+                </Control>
+            </Controls>
+        </Control>
+        <Control name="ZO_RollingMeterLabelWheel" autoRectClipChildren="true" virtual="true">
+            <OnInitialized name="RollingMeterLabelWheel">
+                ZO_RollingMeterLabelWheel_OnInitialized(self)
+            </OnInitialized>
             <Controls>
                 <Label name="$(parent)InLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                    <OnRectHeightChanged>
-                        self:GetParent():OnLabelRectChanged(self, newHeight, oldHeight)
-                    </OnRectHeightChanged>
-                    <OnRectWidthChanged>
-                        self:GetParent():OnLabelRectChanged(self, newWidth, oldWidth)
-                    </OnRectWidthChanged>
+                    <OnDimensionsChanged>
+                        ZO_RollingMeterLabelWheel_OnRectChanged(self)
+                    </OnDimensionsChanged>
                 </Label>
                 <Label name="$(parent)OutLabel" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                    <OnRectHeightChanged>
-                        self:GetParent():OnLabelRectChanged(self, newHeight, oldHeight)
-                    </OnRectHeightChanged>
-                    <OnRectWidthChanged>
-                        self:GetParent():OnLabelRectChanged(self, newWidth, oldWidth)
-                    </OnRectWidthChanged>
+                    <OnDimensionsChanged>
+                        ZO_RollingMeterLabelWheel_OnRectChanged(self)
+                    </OnDimensionsChanged>
                 </Label>
             </Controls>
         </Control>

@@ -922,22 +922,16 @@ end
 
 function ZO_Options_OnMouseEnter(control)
     local data = control.data
-    local tooltipText = data.tooltipText
+    local tooltipText = ZO_EvalStringId(data.tooltipText)
 
-    if tooltipText ~= nil then
-        local tooltipTextType = type(tooltipText)
-        if tooltipTextType == "number" then
-            tooltipText = GetString(tooltipText)
-        elseif tooltipTextType == "function" then
-            tooltipText = tooltipText()
-        end
-
-        if tooltipText == "" then
-            return
-        end
-
+    if tooltipText ~= nil and tooltipText ~= "" then
         InitializeTooltip(InformationTooltip, control, BOTTOMLEFT, 0, -2, TOPLEFT)
-        SetTooltipText(InformationTooltip, tooltipText)
+        local titleText = ZO_EvalStringId(data.text, control)
+        if titleText ~= nil and titleText ~= "" then
+            SetTooltipTextWithTitle(InformationTooltip, tooltipText, titleText)
+        else
+            SetTooltipText(InformationTooltip, tooltipText)
+        end
     end
 end
 

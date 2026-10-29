@@ -10,9 +10,6 @@ function ZO_ItemSetsBook_Shared:Initialize(control, scene)
     self.fragment:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_FRAGMENT_SHOWING then
             self:OnFragmentShowing()
-            if self:IsSearchSupported() then
-                self:ActivateTextSearch()
-            end
         elseif newState == SCENE_FRAGMENT_HIDDEN then
             if self:IsSearchSupported() then
                 self:DeactivateTextSearch()
@@ -395,6 +392,10 @@ function ZO_ItemSetsBook_Shared:OnFragmentShowing()
         -- reconstruction mode to display the appropriate categories contextually.
         self.wasReconstructing = isReconstructing
         self.categoriesRefreshGroup:MarkDirty("List")
+    end
+
+    if self:IsSearchSupported() then
+        self:ActivateTextSearch()
     end
 
     self.categoriesRefreshGroup:TryClean()

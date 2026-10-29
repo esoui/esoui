@@ -549,7 +549,7 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
                 end,
                 visible = function(dialog)
                     local targetData = dialog.entryList:GetTargetData()
-                    return (ZO_IsConsoleOrGameCoreUI() and targetData.recipientNameEntry and GetNumberConsoleFriends() > 0) or targetData.messageEntry
+                    return (ZO_IsConsoleOrGameCoreUI() and targetData.recipientNameEntry and HasConsoleFriends()) or targetData.messageEntry
                 end,
                 callback = function(dialog)
                     local targetData = dialog.entryList:GetTargetData()
@@ -871,12 +871,13 @@ function ZO_GamepadMarketPurchaseManager:Initialize()
     ZO_Dialogs_RegisterCustomDialog(DIALOG_FLOW[FLOW_FAILED],
     {
         setup = function(dialog)
-            local data1, data2, data3 = self:GetMarketProductPricingHeaderData()
+            local data1, data2, data3, data4 = self:GetMarketProductPricingHeaderData()
             local displayData =
             {
                 data1 = data1,
                 data2 = data2,
                 data3 = data3,
+                data4 = data4,
                 purchaseResult = dialog.data.purchaseResult,
             }
 
@@ -1113,25 +1114,37 @@ function ZO_GamepadMarketPurchaseManager:GetMarketProductPricingHeaderData(updat
         hasEsoPlusCost = priceData.esoPlusCost ~= nil and IsEligibleForEsoPlusPricing()
     end
 
-    local data1 = GetAvailableCurrencyHeaderData(priceData.currencyType)
+    local headerData = {}
 
-    local data2
-    local data3
+    if self.marketProductData:HasPurchaseLimit() then
+        local purchaseLimit = self.marketProductData:GetPurchaseLimit()
+        local purchaseCount = self.marketProductData:GetPurchaseCount()
+
+        local purchaseLimitData =
+        {
+            header = GetString("SI_PURCHASELIMITRESETTYPE", self.marketProductData:GetPurchaseLimitResetType()),
+            value = zo_strformat(SI_CURRENT_AND_MAX_VALUES_FORMATTER, purchaseCount, purchaseLimit),
+        }
+        table.insert(headerData, purchaseLimitData)
+    end
+
+    table.insert(headerData, GetAvailableCurrencyHeaderData(priceData.currencyType))
+
     if hasNormalCost then
         if not hasEsoPlusCost and priceData.discountPercent > 0 then
-            data2 = GetProductCostHeaderData(priceData.cost, priceData.currencyType, hasEsoPlusCost, priceData.discountPercent, updateDiscountPercentParentControl)
-            data3 = GetProductCostHeaderData(priceData.costAfterDiscount, priceData.currencyType, hasEsoPlusCost)
+            table.insert(headerData, GetProductCostHeaderData(priceData.cost, priceData.currencyType, hasEsoPlusCost, priceData.discountPercent, updateDiscountPercentParentControl))
+            table.insert(headerData, GetProductCostHeaderData(priceData.costAfterDiscount, priceData.currencyType, hasEsoPlusCost))
         else
-            data2 = GetProductCostHeaderData(priceData.costAfterDiscount, priceData.currencyType, hasEsoPlusCost)
+            table.insert(headerData, GetProductCostHeaderData(priceData.costAfterDiscount, priceData.currencyType, hasEsoPlusCost))
             if hasEsoPlusCost then
-                data3 = GetProductEsoPlusCostHeaderData(priceData.esoPlusCost, priceData.currencyType)
+                table.insert(headerData, GetProductEsoPlusCostHeaderData(priceData.esoPlusCost, priceData.currencyType))
             end
         end
     elseif hasEsoPlusCost then
-        data2 = GetProductEsoPlusCostHeaderData(priceData.esoPlusCost, priceData.currencyType)
+        table.insert(headerData, GetProductEsoPlusCostHeaderData(priceData.esoPlusCost, priceData.currencyType))
     end
 
-    return data1, data2, data3
+    return unpack(headerData)
 end
 
 local g_dialogDiscountPercentControl = nil
@@ -1169,13 +1182,14 @@ function ZO_GamepadMarketPurchaseManager:MarketPurchaseConfirmationDialogSetup(d
 
     g_dialogDiscountPercentParentControl = nil
     local UPDATE_DISCOUNT_PERCENT_PARENT = true
-    local data1, data2, data3 = self:GetMarketProductPricingHeaderData(UPDATE_DISCOUNT_PERCENT_PARENT)
+    local data1, data2, data3, data4 = self:GetMarketProductPricingHeaderData(UPDATE_DISCOUNT_PERCENT_PARENT)
 
     local displayData =
     {
         data1 = data1,
         data2 = data2,
         data3 = data3,
+        data4 = data4,
     }
     local DONT_LIMIT_NUM_ENTRIES = nil
     dialog.setupFunc(dialog, DONT_LIMIT_NUM_ENTRIES, displayData)
@@ -1199,13 +1213,14 @@ function ZO_GamepadMarketPurchaseManager:MarketSelectHouseTemplateDialogSetup(di
 
     g_dialogDiscountPercentParentControl = nil
     local UPDATED_DISCOUNT_PERCENT_PARENT = true
-    local data1, data2, data3 = self:GetMarketProductPricingHeaderData(UPDATED_DISCOUNT_PERCENT_PARENT)
+    local data1, data2, data3, data4 = self:GetMarketProductPricingHeaderData(UPDATED_DISCOUNT_PERCENT_PARENT)
 
     local displayData =
     {
         data1 = data1,
         data2 = data2,
         data3 = data3,
+        data4 = data4,
     }
     local DONT_LIMIT_NUM_ENTRIES = nil
     dialog.setupFunc(dialog, DONT_LIMIT_NUM_ENTRIES, displayData)
@@ -1232,12 +1247,13 @@ do
                         self:BuildMarketPurchaseConfirmationDialogEntries(dialog)
                         ZO_GenericParametricListGamepadDialogTemplate_RebuildEntryList(dialog)
 
-                        local data1, data2, data3 = self:GetMarketProductPricingHeaderData()
+                        local data1, data2, data3, data4 = self:GetMarketProductPricingHeaderData()
                         local headerData =
                         {
                             data1 = data1,
                             data2 = data2,
                             data3 = data3,
+                            data4 = data4,
                         }
                         ZO_GenericGamepadDialog_RefreshHeaderData(dialog, headerData)
 
@@ -1369,12 +1385,13 @@ do
                         self:BuildMarketSelectHouseTemplateDialogEntries(dialog)
                         ZO_GenericParametricListGamepadDialogTemplate_RebuildEntryList(dialog)
 
-                        local data1, data2, data3 = self:GetMarketProductPricingHeaderData()
+                        local data1, data2, data3, data4 = self:GetMarketProductPricingHeaderData()
                         local headerData =
                         {
                             data1 = data1,
                             data2 = data2,
                             data3 = data3,
+                            data4 = data4,
                         }
                         ZO_GenericGamepadDialog_RefreshHeaderData(dialog, headerData)
                         --Re-narrate the header when the price changes
@@ -1519,12 +1536,13 @@ do
                     ZO_GenericGamepadDialog_ShowTooltip(self)
                 end
 
-                local data1, data2, data3 = self:GetMarketProductPricingHeaderData()
+                local data1, data2, data3, data4 = self:GetMarketProductPricingHeaderData()
                 local headerData =
                 {
                     data1 = data1,
                     data2 = data2,
                     data3 = data3,
+                    data4 = data4,
                 }
                 ZO_GenericGamepadDialog_RefreshHeaderData(itemQuantityEntryData.dialog, headerData)
 

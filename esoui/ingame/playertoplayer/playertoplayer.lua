@@ -391,9 +391,9 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
     local function OnTradeWindowInviteConsidering(eventCode, inviterCharacterName, inviterCrossplayDisplayName, inviterPlatformDisplayName)
         PlaySound(SOUNDS.TRADE_INVITE_RECEIVED)
         self:RemoveFromIncomingQueue(INTERACT_TYPE.TRADE_INVITE)
-        local userFacingName = ZO_GetPrimaryPlayerNameWithSecondaryAndTertiary(inviterCrossplayDisplayName, inviterCharacterName, inviterPlatformDisplayName)
+        local playerNames = ZO_GetPrimaryPlayerNameWithSecondaryAndTertiary(inviterCrossplayDisplayName, inviterCharacterName, inviterPlatformDisplayName)
         -- There is server message received when trade is cancelled/accepted/declined, which sends a Lua event which will play a sound in AlertHandlers.lua
-        self:AddPromptToIncomingQueue(INTERACT_TYPE.TRADE_INVITE, inviterCharacterName, inviterCrossplayDisplayName, inviterPlatformDisplayName, zo_strformat(SI_PLAYER_TO_PLAYER_INCOMING_TRADE, ZO_SELECTED_TEXT:Colorize(userFacingName)),
+        self:AddPromptToIncomingQueue(INTERACT_TYPE.TRADE_INVITE, inviterCharacterName, inviterCrossplayDisplayName, inviterPlatformDisplayName, zo_strformat(SI_PLAYER_TO_PLAYER_INCOMING_TRADE, ZO_SELECTED_TEXT:Colorize(playerNames)),
             function()
                 TradeInviteAccept()
             end,
@@ -411,10 +411,9 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
 
     local function OnQuestShared(eventCode, questId)
         PlaySound(SOUNDS.QUEST_SHARED)
-        local questName, characterName, _, displayName = GetOfferedQuestShareInfo(questId)
-        -- TODO Crossplay
-        local name = ZO_GetPrimaryPlayerNameWithSecondary(displayName, characterName)
-        local data = self:AddPromptToIncomingQueue(INTERACT_TYPE.QUEST_SHARE, characterName, displayName, MISSING_PLATFORM_DISPLAY_NAME, zo_strformat(SI_PLAYER_TO_PLAYER_INCOMING_QUEST_SHARE, ZO_SELECTED_TEXT:Colorize(name), ZO_SELECTED_TEXT:Colorize(questName)),
+        local questName, characterName, _, crossplayDisplayName, platformDisplayName = GetOfferedQuestShareInfo(questId)
+        local playerNames = ZO_GetPrimaryPlayerNameWithSecondaryAndTertiary(crossplayDisplayName, characterName, platformDisplayName)
+        local data = self:AddPromptToIncomingQueue(INTERACT_TYPE.QUEST_SHARE, characterName, crossplayDisplayName, platformDisplayName, zo_strformat(SI_PLAYER_TO_PLAYER_INCOMING_QUEST_SHARE, ZO_SELECTED_TEXT:Colorize(playerNames), ZO_SELECTED_TEXT:Colorize(questName)),
             function()
                 AcceptSharedQuest(questId)
             end,
@@ -422,7 +421,7 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
                 DeclineSharedQuest(questId)
             end,
             function()
-                self:RemoveFromIncomingQueue(INTERACT_TYPE.QUEST_SHARE, characterName, displayName)
+                self:RemoveFromIncomingQueue(INTERACT_TYPE.QUEST_SHARE, characterName, crossplayDisplayName)
             end)
         data.questId = questId
         data.uniqueSounds = {
@@ -883,6 +882,10 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
     end
 
     local function TryShowNewTamrielTomeSeason()
+        if TAMRIEL_TOMES_MANAGER:HasNewEndOfSeasonRecap() then
+            return
+        end
+
         local success = true
         if HasNewTamrielSeasonStarted() then
             local SHOW_INTRO = true
@@ -913,9 +916,9 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
             end
         end
 
-        local hasSeasonStarted = HasNewTamrielSeasonStarted()
+        local shouldQueueSeasonStartedInteraction = HasNewTamrielSeasonStarted() and not hasSeasonEnded
         local isSeasonStartedQueued = self:ExistsInQueue(INTERACT_TYPE.TAMRIEL_TOME_SEASON_STARTED)
-        if hasSeasonStarted then
+        if shouldQueueSeasonStartedInteraction then
             if not isSeasonStartedQueued then
                 QueueTamrielTomeSeasonStartedInteract()
             end
@@ -1006,6 +1009,7 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
     TAMRIEL_TOMES_MANAGER:RegisterCallback("AvailableTomesChanged", OnTamrielTomesUpdated)
     TAMRIEL_TOMES_MANAGER:RegisterCallback("NewTomeSeen", OnTamrielTomesUpdated)
     TAMRIEL_TOMES_MANAGER:RegisterCallback("RewardTrackStarted", OnRewardTrackStarted)
+    self.control:RegisterForEvent(EVENT_TAMRIEL_TOMES_END_OF_SEASON_RECAP_AVAILABLE, OnTamrielTomesUpdated)
 
     COLLECTIONS_BOOK_SINGLETON:RegisterCallback("OnUpdateCooldowns", OnDigSiteUpdate)
     ANTIQUITY_DATA_MANAGER:RegisterCallback("SingleAntiquityDigSitesUpdated", OnDigSiteUpdate)
@@ -1208,7 +1212,7 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
             OnTravelToLeaderPromptReceived()
         end
     end
-    local function OnGroupMemberJoined(characterName, displayName, isLocalPlayer)
+    local function OnGroupMemberJoined(characterName, crossplayDisplayName, isLocalPlayer, platformDisplayName)
         if isLocalPlayer then
             local groupLeaderUnitTag = GetGroupLeaderUnitTag()
             if not AreUnitsEqual(groupLeaderUnitTag, "player") then
@@ -1222,7 +1226,7 @@ function ZO_PlayerToPlayer:InitializeIncomingEvents()
             OnTravelToLeaderPromptReceived()
         end
     end
-    local function OnGroupMemberLeft(eventCode, characterName, reason, isLocalPlayer, amLeader)
+    local function OnGroupMemberLeft(eventCode, characterName, reason, isLocalPlayer, isLeader, crossplayDisplayName, actionRequiredVote, platformDisplayName)
         if isLocalPlayer then
             self:RemoveFromIncomingQueue(INTERACT_TYPE.TRAVEL_TO_LEADER)
         end

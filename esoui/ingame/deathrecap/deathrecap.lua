@@ -43,7 +43,7 @@ function DeathRecap:Initialize(control)
     self.windowOpen = true
     self.deathRecapAvailable = false
 
-    self.killingBlowIcon = GetControl(self.scrollControl, "AttacksKillingBlowIcon")
+    self.killingBlowIcon = self.scrollControl:GetNamedChild("AttacksKillingBlowIcon")
     self.killingBlowTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_DeathRecapKillingBlowAnimation", self.killingBlowIcon)
 
     self:InitializeAttackPool()
@@ -302,16 +302,16 @@ function DeathRecap:SetupAttacks()
         local attackerNameControl = attackTextControl:GetNamedChild("AttackerName")
         local frameControl
         if DoesKillingAttackHaveAttacker(attackInfo.index) then
-            local attackerRawName, attackerChampionPoints, attackerLevel, attackerAvARank, isPlayer, isBoss, alliance, minionName, attackerDisplayName = GetKillingAttackerInfo(attackInfo.index)
+            local attackerRawName, attackerChampionPoints, attackerLevel, attackerAvARank, isPlayer, isBoss, alliance, minionName, attackerCrossplayDisplayName, attackerPlatformDisplayName = GetKillingAttackerInfo(attackInfo.index)
             local battlegroundTeam = GetKillingAttackerBattlegroundTeam(attackInfo.index)
 
             local attackerNameLine
             if isPlayer then
                 local nameToShow
                 if showBothPlayerNames then
-                    nameToShow = ZO_GetPrimaryPlayerNameWithSecondary(attackerDisplayName, attackerRawName)
+                    nameToShow = ZO_GetPrimaryPlayerNameWithSecondary(attackerCrossplayDisplayName, attackerRawName, attackerPlatformDisplayName)
                 else
-                    nameToShow = ZO_GetPrimaryPlayerName(attackerDisplayName, attackerRawName)
+                    nameToShow = ZO_GetPrimaryPlayerName(attackerCrossplayDisplayName, attackerRawName, attackerPlatformDisplayName)
                 end
 
                 if battlegroundTeam == BATTLEGROUND_TEAM_INVALID then

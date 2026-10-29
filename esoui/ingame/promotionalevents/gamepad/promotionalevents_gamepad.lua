@@ -596,12 +596,8 @@ function ZO_PromotionalEvents_Gamepad:InitializeFoci()
 
             callback = function()
                 local requiredCollectibleData = self:GetSelectedActivity():GetRequiredCollectibleData()
-                if requiredCollectibleData:GetCategoryType() == COLLECTIBLE_CATEGORY_TYPE_CHAPTER then
-                    ZO_ShowChapterUpgradePlatformScreen(MARKET_OPEN_OPERATION_PROMOTIONAL_EVENTS)
-                else
-                    local searchTerm = zo_strformat(SI_CROWN_STORE_SEARCH_FORMAT_STRING, requiredCollectibleData:GetName())
-                    ShowMarketAndSearch(searchTerm, MARKET_OPEN_OPERATION_PROMOTIONAL_EVENTS)
-                end
+                local searchTerm = zo_strformat(SI_CROWN_STORE_SEARCH_FORMAT_STRING, requiredCollectibleData:GetName())
+                ShowMarketAndSearch(searchTerm, MARKET_OPEN_OPERATION_PROMOTIONAL_EVENTS)
             end,
 
             visible = function()
@@ -1093,6 +1089,14 @@ function ZO_PromotionalEvents_Gamepad:ScrollToFirstClaimableReward()
     end
 
     self:Activate()
+end
+
+function ZO_PromotionalEvents_Gamepad:OnActivityListScrollCompleted()
+    ZO_PromotionalEvents_Shared.OnActivityListScrollCompleted(self)
+
+    if self:IsCurrentFocusArea(self.activitiesFocalArea) then
+        self.activitiesFocalArea:UpdateKeybinds()
+    end
 end
 
 -- Overridden from ZO_SortFilterList_Gamepad

@@ -150,14 +150,14 @@ function ZO_GroupMenu_Gamepad:InitializeEvents()
         end 
     end
 
-    local function OnGroupMemberLeft(characterName, reason, isLocalPlayer, isLeader)
+    local function OnGroupMemberLeft(characterName, reason, isLocalPlayer, isLeader, crossplayDisplayName, actionRequiredVote, platformDisplayName)
         if not self.control:IsControlHidden() then
             self:UpdateMenuList()
 
             if isLocalPlayer then
                 self:SelectMenuList()
                 ZO_Dialogs_ReleaseAllDialogsOfName("GAMEPAD_SOCIAL_OPTIONS_DIALOG")
-            elseif self.selectedGroupMemberData and self.selectedGroupMemberData.rawCharacterName == characterName then
+            elseif self.selectedGroupMemberData and self.selectedGroupMemberData.rawCharacterName == characterName then -- TODO Crossplay: check crossplayDisplayName instead?
                 ZO_Dialogs_ReleaseAllDialogsOfName("GAMEPAD_SOCIAL_OPTIONS_DIALOG")
             end
 
@@ -252,7 +252,7 @@ function ZO_GroupMenu_Gamepad:UpdateMenuList()
 
     if IsGroupModificationAvailable() and (groupSize == 0 or (playerIsLeader and groupSize < GetGroupMaxSize())) then
         table.insert(groupActionEntries, self.menuEntries[MENU_ENTRY_TYPE_INVITE_PLAYER])
-        if ZO_IsConsoleOrGameCoreUI() and GetNumberConsoleFriends() > 0 then
+        if ZO_IsConsoleOrGameCoreUI() and HasConsoleFriends() then
             table.insert(groupActionEntries, self.menuEntries[MENU_ENTRY_TYPE_INVITE_FRIEND])
         end
     end

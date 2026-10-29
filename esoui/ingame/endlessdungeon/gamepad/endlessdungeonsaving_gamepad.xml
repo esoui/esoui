@@ -1,0 +1,48 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_EndlessDungeon_SaveDetails_Gamepad_Template" inherits="ZO_EndlessDungeon_SaveDetails_Template" virtual="true">
+            <OnInitialized>
+                ZO_EndlessDungeonSaveDetails_Gamepad.OnControlInitialized(self)
+            </OnInitialized>
+        </Control>
+        <TopLevelControl name="ZO_EndlessDungeonStartRun_Gamepad_TopLevel" inherits="ZO_Gamepad_ParametricList_Screen" hidden="true">
+            <OnInitialized>
+                ZO_EndlessDungeon_StartRun_Gamepad.OnControlInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)RightPane" inherits="ZO_GamepadGrid_NavQuadrant_2_3_Anchors">
+                    <Controls>
+                        <Control name="$(parent)ContentContainer" inherits="ZO_GamepadContentHeaderContainer ZO_GamepadGrid_NavQuadrant_ContainerAnchors"/>
+                        <Control name="$(parent)SaveDetails" inherits="ZO_EndlessDungeon_SaveDetails_Gamepad_Template">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)ContentContainerHeader" relativePoint="BOTTOMLEFT"/>
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)ContentContainer" relativePoint="BOTTOMRIGHT"/>
+                            <Controls>
+                                <Label name="$(parent)ProgressionText" override="true" font="ZoFontGamepadBold34" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                                    <Anchor point="TOPLEFT"/>
+                                </Label>
+                                <Control name="$(parent)Lives" override="true">
+                                    <Anchor point="TOPRIGHT"/>
+                                    <Dimensions y="34"/>
+                                    <Controls>
+                                        <Texture name="$(parent)Icon" override="true">
+                                            <Dimensions x="32" y="32"/>
+                                        </Texture>
+                                        <Label name="$(parent)Text" override="true" font="ZoFontGamepadBold34" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                                            <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="2" offsetY="2"/>
+                                        </Label>
+                                    </Controls>
+                                </Control>
+                                <Label name="$(parent)AdditionalMember" override="true" font="ZoFontGamepad36" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)ProgressionText" relativePoint="BOTTOMLEFT" offsetY="20"/>
+                                </Label>
+                                <Label name="$(parent)MemberDisplayName" override="true" font="ZoFontGamepad42" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Lives" relativePoint="BOTTOMRIGHT" offsetY="20"/>
+                                </Label>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

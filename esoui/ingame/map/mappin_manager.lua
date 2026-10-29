@@ -664,7 +664,7 @@ do
         ZO_ClearNumericallyIndexedTable(self.objectiveMovingPins)
 
         local mapFilterType = GetMapFilterType()
-        if mapFilterType ~= MAP_FILTER_TYPE_AVA_CYRODIIL and mapFilterType ~= MAP_FILTER_TYPE_BATTLEGROUND then
+        if mapFilterType ~= MAP_FILTER_TYPE_AVA_CYRODIIL and mapFilterType ~= MAP_FILTER_TYPE_BATTLEGROUND and mapFilterType ~= MAP_FILTER_TYPE_AVA_JERALL then
             return
         end
 

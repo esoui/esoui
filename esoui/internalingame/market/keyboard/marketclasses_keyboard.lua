@@ -1,7 +1,9 @@
 ZO_MARKET_PRODUCT_WIDTH = 302
 ZO_MARKET_PRODUCT_COLUMN_PADDING = 10
 ZO_MARKET_PRODUCT_BUNDLE_WIDTH = 2 * ZO_MARKET_PRODUCT_WIDTH + ZO_MARKET_PRODUCT_COLUMN_PADDING
-ZO_MARKET_PRODUCT_HEIGHT = 200
+ZO_MARKET_PRODUCT_HEIGHT = 230
+ZO_MARKET_PRODUCT_BACKGROUND_HEIGHT = 200
+ZO_MARKET_PRODUCT_BACKGROUND_BOTTOM_FADE_HEIGHT = 30
 ZO_MARKET_PRODUCT_INSET = 20
 
 ZO_MARKET_DEFAULT_BACKGROUND_COLOR = ZO_ColorDef:New(1, 1, 1)
@@ -58,7 +60,7 @@ function MarketProduct_Keyboard:LayoutBackground()
         local backgroundDesaturation = self:GetBackgroundDesaturation(self:IsPurchaseLocked())
         self.control.background:SetDesaturation(backgroundDesaturation)
 
-        local isAvailable = not self:IsPurchaseLocked()
+        local isAvailable = not self:IsPurchaseLocked() or self:IsPurchaseLimitReached()
         local backgroundColor = isAvailable and ZO_MARKET_DEFAULT_BACKGROUND_COLOR or ZO_MARKET_PURCHASED_BACKGROUND_COLOR
         self.control.background:SetColor(backgroundColor:UnpackRGB())
     end

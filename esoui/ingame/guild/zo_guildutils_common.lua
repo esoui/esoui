@@ -1,10 +1,6 @@
 
-local function GetGuildDialogFunction(playerGuildId, data, isGamepad)
-    local showDialogFunc = ZO_Dialogs_ShowDialog
+local function GetGuildDialogFunction(playerGuildId, data)
     local allianceIconSize = 17
-    if(isGamepad) then
-        showDialogFunc = ZO_Dialogs_ShowGamepadDialog
-    end
 
     local guildName = GetGuildName(playerGuildId)
     local numGuildMembers = GetNumGuildMembers(playerGuildId)
@@ -15,23 +11,21 @@ local function GetGuildDialogFunction(playerGuildId, data, isGamepad)
     local allianceIcon = zo_iconFormat(ZO_GetPlatformAllianceSymbolIcon(guildAlliance), allianceIconSize, allianceIconSize)
     local isLastMemberOfGuild = (numGuildMembers == 1)
 
-    if(data == nil) then
+    if data == nil then
         data = {}
     end
 
-    if(isGamepad) then
+    data.guildId = playerGuildId
+    data.isLastMemberOfGuild = isLastMemberOfGuild
+    data.playerIsGuildmaster = playerIsGuildmaster
+
+    if IsInGamepadPreferredMode() then
         allianceIcon = ""
         guildName = ZO_AllianceIconNameFormatter(guildAlliance, guildName)
     end
 
-    data.guildId = playerGuildId
-
-    if(isLastMemberOfGuild) then
-        return function() showDialogFunc("GUILD_DISBAND", data, { mainTextParams = { allianceIcon, guildName }}) end
-    elseif(playerIsGuildmaster) then
-        return function() showDialogFunc("GUILD_LEAVE_LEADER", data, { mainTextParams = { allianceIcon, guildName }}) end
-    else
-        return function() showDialogFunc("GUILD_LEAVE", data, { mainTextParams = { allianceIcon, guildName }}) end
+    return function() 
+        ZO_Dialogs_ShowPlatformDialog("GUILD_LEAVE", data, { mainTextParams = { allianceIcon, guildName }})
     end
 end
 
@@ -39,8 +33,8 @@ function ZO_AddLeaveGuildMenuItem(playerGuildId)
     AddMenuItem(GetString(SI_GUILD_LEAVE), GetGuildDialogFunction(playerGuildId))
 end
 
-function ZO_ShowLeaveGuildDialog(playerGuildId, data, isGamepad)
-    GetGuildDialogFunction(playerGuildId, data, isGamepad)()
+function ZO_ShowLeaveGuildDialog(playerGuildId, data)
+    GetGuildDialogFunction(playerGuildId, data)()
 end
 
 function ZO_CanPlayerCreateGuild()

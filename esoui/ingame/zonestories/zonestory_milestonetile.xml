@@ -1,0 +1,19 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_ZoneStory_MilestoneTile_Control" inherits="ZO_Tile_Control" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Icons/icon_missing.dds"/>
+                <Texture name="$(parent)Locked" level="5" layer="OVERLAY" hidden="true">
+                    <Dimensions x="32" y="32"/>
+                    <Anchor point="CENTER" relativeTo="$(parent)Icon" relativePoint="BOTTOM"/>
+                </Texture>
+                <Control name="$(parent)TextContainer" resizeToFitDescendents="true">
+                    <Controls>
+                        <Label name="$(parent)Title" maxLineCount="1" wrapMode="ELLIPSIS"/>
+                        <Label name="$(parent)Status"/>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

@@ -12,27 +12,15 @@ function ZO_CompanionOverview_Keyboard:Initialize(control)
     self.readOnlyActionBar = ZO_KeyboardAssignableActionBar:New(control:GetNamedChild("ReadOnlyActionBar"))
     self.readOnlyActionBar:SetHotbarEditsEnabled(false)
 
-
-    local RAPPORT_GRADIENT_START = ZO_ColorDef:New("722323") --Red
-    local RAPPORT_GRADIENT_END = ZO_ColorDef:New("009966") --Green
-    local RAPPORT_GRADIENT_MIDDLE = ZO_ColorDef:New("9D840D") --Yellow
-
-
     --Grab the rapport controls
     local rapportContainer = control:GetNamedChild("RapportContainer")
     self.rapportBarControl = rapportContainer:GetNamedChild("ProgressBar")
     self.rapportStatusLabel = rapportContainer:GetNamedChild("StatusValue")
     self.rapportDescriptionLabel = rapportContainer:GetNamedChild("Description")
-
-
-
+    self.rapportLeftIcon = rapportContainer:GetNamedChild("ProgressIconLeft")
 
     --Initialize the rapport bar
     self.rapportBar = ZO_SlidingStatusBar:New(self.rapportBarControl)
-
-    self.rapportBar:SetGradientColors(RAPPORT_GRADIENT_START, RAPPORT_GRADIENT_END, RAPPORT_GRADIENT_MIDDLE)
-    self.rapportBar:SetMinMax(GetMinimumRapport(), GetMaximumRapport())
-
 
     --Initialize the dropdown control
     self.outfitContainer = control:GetNamedChild("Outfit")
@@ -49,9 +37,7 @@ function ZO_CompanionOverview_Keyboard:Initialize(control)
                     self.initialized = true
                     self:OnDeferredInitialize()
                 end
-
-
-
+                self.outfitContainer:SetHidden(IsActiveCompanionAnimal())
                 self.levelBar:OnShowing()
                 self:RefreshCompanionRapport()
                 self:RefreshPassivePerk()
@@ -149,39 +135,38 @@ function ZO_CompanionOverview_Keyboard:UpdateOutfitDropdownOutfits()
     self.outfitDropdown:SelectItem(defaultEntry)
 end
 
-function ZO_CompanionOverview_Keyboard:RefreshCompanionRapport()
-    if HasActiveCompanion() and COMPANION_OVERVIEW_KEYBOARD_FRAGMENT:IsShowing() then
+do
+    local RAPPORT_GRADIENT_START = ZO_ColorDef:New("722323") --Red
+    local RAPPORT_GRADIENT_END = ZO_ColorDef:New("009966") --Green
+    local RAPPORT_GRADIENT_MIDDLE = ZO_ColorDef:New("9D840D") --Yellow
 
+    function ZO_CompanionOverview_Keyboard:RefreshCompanionRapport()
+        if HasActiveCompanion() and COMPANION_OVERVIEW_KEYBOARD_FRAGMENT:IsShowing() then
+            local RAPPORT_LEFT_ICON =
+            {
+                DEFAULT = "EsoUI/Art/HUD/lootHistory_icon_rapportDecrease_generic.dds",
+                ANIMAL = "EsoUI/Art/HUD/lootHistory_icon_rapportNeutral_generic.dds"
+            }
 
+            --Setup rapport bar
+            if IsActiveCompanionAnimal() then
+                self.rapportBar:SetGradientColors(RAPPORT_GRADIENT_MIDDLE, RAPPORT_GRADIENT_END, RAPPORT_GRADIENT_MIDDLE)
+                self.rapportLeftIcon:SetTexture(RAPPORT_LEFT_ICON.ANIMAL)
+            else
+                self.rapportBar:SetGradientColors(RAPPORT_GRADIENT_START, RAPPORT_GRADIENT_END, RAPPORT_GRADIENT_MIDDLE)
+                self.rapportLeftIcon:SetTexture(RAPPORT_LEFT_ICON.DEFAULT)
+            end
+            self.rapportBar:SetMinMax(GetMinimumRapport(), GetMaximumRapport())
 
+            --Grab the rapport value, level, and description for the active companion
+            local rapportValue = GetActiveCompanionRapport()
+            local rapportLevel = GetActiveCompanionRapportLevel()
+            local rapportDescription = GetActiveCompanionRapportLevelDescription(rapportLevel)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        --Grab the rapport value, level, and description for the active companion
-        local rapportValue = GetActiveCompanionRapport()
-        local rapportLevel = GetActiveCompanionRapportLevel()
-        local rapportDescription = GetActiveCompanionRapportLevelDescription(rapportLevel)
-
-        self.rapportBar:SetValue(rapportValue)
-        self.rapportStatusLabel:SetText(GetString("SI_COMPANIONRAPPORTLEVEL", rapportLevel))
-        self.rapportDescriptionLabel:SetText(rapportDescription)
+            self.rapportBar:SetValue(rapportValue)
+            self.rapportStatusLabel:SetText(GetString("SI_COMPANIONRAPPORTLEVEL", rapportLevel))
+            self.rapportDescriptionLabel:SetText(rapportDescription)
+        end
     end
 end
 

@@ -34,10 +34,9 @@ function ZO_ZoneStories_Shared:InitializeGridList()
     self.gridList:AddHeaderTemplate(activityCompletionData.headerTemplate, activityCompletionData.headerHeight, ZO_DefaultGridTileHeaderSetup)
     self.gridList:SetHeaderPrePadding(self.templateData.headerPrePadding)
 
-
-
-
-
+    local milestoneData = self.templateData.milestones
+    self.gridList:AddEntryTemplate(milestoneData.entryTemplate, milestoneData.dimensionsX, milestoneData.dimensionsY, ZO_DefaultGridTileEntrySetup, HIDE_CALLBACK, ZO_DefaultGridTileEntryReset, milestoneData.gridPaddingX, milestoneData.gridPaddingY)
+    self.gridList:AddHeaderTemplate(milestoneData.headerTemplate, milestoneData.headerHeight, ZO_DefaultGridTileHeaderSetup)
 
     self:BuildGridList()
 end
@@ -114,15 +113,7 @@ end
 
 function ZO_ZoneStories_Shared.GetZoneCollectibleUnlockText(zoneId)
     if not ZO_ZoneStories_Shared.IsZoneCollectibleUnlocked(zoneId) then
-        local zoneIndex = GetZoneIndex(zoneId)
-        local lockedZoneCollectibleId = GetCollectibleIdForZone(zoneIndex)
-        local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(lockedZoneCollectibleId)
-        local categoryType = collectibleData:GetCategoryType()
-        if categoryType == COLLECTIBLE_CATEGORY_TYPE_CHAPTER then
-            return GetString(SI_ZONE_STORY_UPGRADE_ACTION)
-        elseif categoryType == COLLECTIBLE_CATEGORY_TYPE_DLC then
-            return GetString(SI_ZONE_STORY_UNLOCK_ACTION)
-        end
+        return GetString(SI_ZONE_STORY_UNLOCK_ACTION)
     end
     return ""
 end
@@ -132,9 +123,7 @@ function ZO_ZoneStories_Shared:BuildGridList()
         self.gridList:ClearGridList()
 
         self:BuildAchievementList()
-
-
-
+        self:BuildMilestoneList()
         self:BuildActivityCompletionList()
 
         self.gridList:CommitGridList()
@@ -158,24 +147,22 @@ function ZO_ZoneStories_Shared:BuildAchievementList()
     end
 end
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+function ZO_ZoneStories_Shared:BuildMilestoneList()
+    if self.gridList then
+        local zoneId = self:GetSelectedZoneId()
+        local numMilestones = GetNumUnblockedZoneStoryActivitiesForZoneCompletionTypeAndIndex(zoneId, ZONE_COMPLETION_TYPE_MILESTONES)
+        for i = 1, numMilestones do
+            local milestoneId = GetZoneActivityIdForZoneCompletionType(zoneId, ZONE_COMPLETION_TYPE_MILESTONES, i)
+            local data =
+            {
+                milestoneId = milestoneId,
+                completionType = ZONE_COMPLETION_TYPE_MILESTONES,
+                gridHeaderName = "",
+            }
+            self.gridList:AddEntry(data, self.templateData.milestones.entryTemplate)
+        end
+    end
+end
 
 function ZO_ZoneStories_Shared:BuildActivityCompletionList()
     if self.gridList then
@@ -245,13 +232,8 @@ function ZO_ZoneStories_Shared:TrackNextActivity()
         else
             local lockedZoneCollectibleId = GetCollectibleIdForZone(GetZoneIndex(zoneId))
             local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(lockedZoneCollectibleId)
-            local categoryType = collectibleData:GetCategoryType()
-            if categoryType == COLLECTIBLE_CATEGORY_TYPE_CHAPTER then
-                ZO_ShowChapterUpgradePlatformScreen(MARKET_OPEN_OPERATION_ZONE_STORIES)
-            else
-                local searchTerm = zo_strformat(SI_CROWN_STORE_SEARCH_FORMAT_STRING, collectibleData:GetName())
-                ShowMarketAndSearch(searchTerm, MARKET_OPEN_OPERATION_ZONE_STORIES)
-            end
+            local searchTerm = zo_strformat(SI_CROWN_STORE_SEARCH_FORMAT_STRING, collectibleData:GetName())
+            ShowMarketAndSearch(searchTerm, MARKET_OPEN_OPERATION_ZONE_STORIES)
         end
     end
 end

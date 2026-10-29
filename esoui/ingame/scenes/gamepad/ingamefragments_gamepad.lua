@@ -84,10 +84,6 @@ GAMEPAD_RIGHT_TOOLTIP_MOUNTED_ITEM_PREVIEW_OPTIONS_FRAGMENT = ZO_ItemPreviewOpti
 
 local ZO_Gamepad_GuildNameFooterFragment = ZO_FadeSceneFragment:Subclass()
 
-function ZO_Gamepad_GuildNameFooterFragment:New(...)
-    return ZO_FadeSceneFragment.New(self, ...)
-end
-
 function ZO_Gamepad_GuildNameFooterFragment:Initialize(...)
     ZO_FadeSceneFragment.Initialize(self, ...)
 

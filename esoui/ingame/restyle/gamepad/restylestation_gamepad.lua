@@ -4,18 +4,6 @@ local ACTION_DYES = 2
 
 local OUTFIT_SWATCH_SLOT_ANCHOR_PADDING = 2
 
-local RESTYLE_MODE_OMITTED_SLOT_TYPES =
-{
-    [RESTYLE_MODE_COMPANION_OUTFIT] =
-    {
-        [EQUIP_SLOT_HEAD] = true,
-    },
-    [RESTYLE_MODE_COMPANION_COLLECTIBLE] =
-    {
-        [COLLECTIBLE_CATEGORY_TYPE_HAT] = true,
-    },
-}
-
 ZO_RestyleStation_Gamepad = ZO_Gamepad_MultiFocus_ParametricList_Screen:Subclass()
 
 function ZO_RestyleStation_Gamepad:New(...)
@@ -1051,7 +1039,7 @@ function ZO_RestyleStation_Gamepad:PerformUpdate()
                                      or offHandOutfitSlot == outfitSlotIndex
                                      or backupMainHandOutfitSlot == outfitSlotIndex
                                      or backupOffHandOutfitSlot == outfitSlotIndex)
-            local isOmittedSlotType = RESTYLE_MODE_OMITTED_SLOT_TYPES[restyleMode] and RESTYLE_MODE_OMITTED_SLOT_TYPES[restyleMode][outfitSlotIndex]
+            local isOmittedSlotType = ZO_RESTYLE_MODE_OMITTED_SLOT_TYPES[restyleMode] and ZO_RESTYLE_MODE_OMITTED_SLOT_TYPES[restyleMode][outfitSlotIndex]
 
             if (isArmor or isEquippedWeapon) and not isOmittedSlotType then
                 local slotManipulator = self.currentOutfitManipulator:GetSlotManipulator(outfitSlotIndex)
@@ -1086,7 +1074,7 @@ function ZO_RestyleStation_Gamepad:PerformUpdate()
         -- Companion Equipment mode is not allowed to dye so the dyeable slots may be nil
         if slotsByMode then
             for _, dyeableSlotData in ipairs(slotsByMode) do
-                local isOmittedSlotType = RESTYLE_MODE_OMITTED_SLOT_TYPES[restyleMode] and RESTYLE_MODE_OMITTED_SLOT_TYPES[restyleMode][dyeableSlotData:GetRestyleSlotType()]
+                local isOmittedSlotType = ZO_RESTYLE_MODE_OMITTED_SLOT_TYPES[restyleMode] and ZO_RESTYLE_MODE_OMITTED_SLOT_TYPES[restyleMode][dyeableSlotData:GetRestyleSlotType()]
                 if not dyeableSlotData:ShouldBeHidden() and not isOmittedSlotType then
                     local name = zo_strformat(SI_CHARACTER_EQUIP_SLOT_FORMAT, dyeableSlotData:GetDefaultDescriptor())
                     local data = ZO_GamepadEntryData:New(name, dyeableSlotData:GetIcon())

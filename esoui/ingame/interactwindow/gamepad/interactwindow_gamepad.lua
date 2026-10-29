@@ -314,7 +314,7 @@ function ZO_GamepadInteraction:ShowQuestRewards(journalQuestIndex)
         elseif rewardData.rewardType == REWARD_TYPE_SKILL_LINE then
             rewardData.name = ZO_QuestReward_GetSkillLineEarnedText(rewardData.name)
         elseif rewardData.rewardType == REWARD_TYPE_AUTO_ITEM and rewardData.itemType == REWARD_ITEM_TYPE_COLLECTIBLE then
-            rewardData.itemId = GetJournalQuestRewardCollectibleId(journalQuestIndex, i)
+            rewardData.itemId = GetJournalQuestRewardCollectibleId(journalQuestIndex, rewardData.index)
         elseif self:IsCurrencyReward(rewardData.rewardType) then
             local currencyType = self:GetCurrencyTypeFromReward(rewardData.rewardType)
             --Intentionally use the keyboard icon here because we want the graphic look

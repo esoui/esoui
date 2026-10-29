@@ -161,6 +161,7 @@ function ZO_StoreManager_GetStoreItems()
                 sellInformation = sellInformation,
                 sellInformationSortOrder = ZO_GetItemSellInformationCustomSortOrder(sellInformation),
                 actorCategory = actorCategory,
+                canBeUsedToLearn = CanItemLinkBeUsedToLearn(itemLink),
             }
 
             if entryType == STORE_ENTRY_TYPE_QUEST_ITEM then

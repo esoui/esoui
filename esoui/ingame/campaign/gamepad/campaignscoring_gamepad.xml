@@ -1,5 +1,17 @@
 <GuiXml>
     <Controls>
+        <Control name="ZO_CampaignScoring_HoldingContainer_GamepadTemplate" virtual="true">
+            <Controls>
+                <Control name="$(parent)Container">
+                    <Dimensions x="183"/>
+                    <Controls>
+                        <Label name="$(parent)Value" font="ZoFontGamepad42">
+                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Icon" relativePoint="BOTTOMRIGHT" offsetX="-10" offsetY="-5"/>
+                        </Label>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
         <Control name="ZO_CampaignScoringAllianceSection_Gamepad" inherits="ZO_CampaignScoringAllianceSectionTemplate" virtual="true" override="true">
             <Dimensions y="200"/>
             <Controls>
@@ -23,34 +35,67 @@
                 <Label name="$(parent)PotentialPoints" override="true" font="ZoFontGamepad42">
                     <Anchor point="BOTTOMLEFT" relativeTo="$(parent)PotentialPointsLabel" relativePoint="BOTTOMRIGHT" offsetX="4" offsetY="3"/>
                 </Label>
-                <Texture name="$(parent)KeepIcon" override="true" textureFile="EsoUI/Art/Campaign/Gamepad/gp_overview_keepIcon.dds">
-                    <Dimensions x="64" y="64"/>
+                <Control name="$(parent)Keeps" override="true">
                     <Anchor point="TOPLEFT" offsetX="104" offsetY="113"/>
-                </Texture>
-                <Label name="$(parent)NumKeeps" override="true" font="ZoFontGamepad42">
-                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)KeepIcon" relativePoint="BOTTOMRIGHT" offsetX="-10" offsetY="-5"/>
-                </Label>
-                <Texture name="$(parent)OutpostIcon" override="true" textureFile="EsoUI/Art/Campaign/Gamepad/gp_overview_outpostIcon.dds">
-                    <Dimensions x="64" y="64"/>
-                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)KeepIcon" offsetX="183"/>
-                </Texture>
-                <Label name="$(parent)NumOutposts" override="true" font="ZoFontGamepad42">
-                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)OutpostIcon" relativePoint="BOTTOMRIGHT" offsetX="-10" offsetY="-5"/>
-                </Label>
-                <Texture name="$(parent)ResourcesIcon" override="true" textureFile="EsoUI/Art/Campaign/Gamepad/gp_overview_resourceIcon.dds">
-                    <Dimensions x="64" y="64"/>
-                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)OutpostIcon" offsetX="183"/>
-                </Texture>
-                <Label name="$(parent)NumResources" override="true" font="ZoFontGamepad42">
-                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)ResourcesIcon" relativePoint="BOTTOMRIGHT" offsetX="-10" offsetY="-5"/>
-                </Label>
-                <Texture name="$(parent)ScrollIcon" override="true" textureFile="EsoUI/Art/Campaign/Gamepad/gp_overview_scrollIcon.dds">
-                    <Dimensions x="64" y="64"/>
-                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)ResourcesIcon" offsetX="183"/>
-                </Texture>
-                <Label name="$(parent)NumScrolls" override="true" font="ZoFontGamepad42">
-                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)ScrollIcon" relativePoint="BOTTOMRIGHT" offsetX="-10" offsetY="-5"/>
-                </Label>
+                    <OnInitialized>
+                        ApplyTemplateToControl(self, "ZO_CampaignScoring_HoldingContainer_GamepadTemplate")
+                    </OnInitialized>
+                    <Controls>
+                        <Control name="$(parent)Container" override="true">
+                            <Controls>
+                                <Texture name="$(parent)Icon" override="true" textureFile="EsoUI/Art/Campaign/Gamepad/gp_overview_keepIcon.dds"/>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+                <Control name="$(parent)ImperialDistricts" override="true">
+                    <OnInitialized>
+                        ApplyTemplateToControl(self, "ZO_CampaignScoring_HoldingContainer_GamepadTemplate")
+                    </OnInitialized>
+                    <Controls>
+                        <Control name="$(parent)Container" override="true">
+                            <Controls>
+                                <Texture name="$(parent)Icon" override="true" textureFile="EsoUI/Art/Campaign/Gamepad/gp_overview_imperialCityDistrictIcon.dds"/>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+                <Control name="$(parent)Outposts" override="true">
+                    <OnInitialized>
+                        ApplyTemplateToControl(self, "ZO_CampaignScoring_HoldingContainer_GamepadTemplate")
+                    </OnInitialized>
+                    <Controls>
+                        <Control name="$(parent)Container" override="true">
+                            <Controls>
+                                <Texture name="$(parent)Icon" override="true" textureFile="EsoUI/Art/Campaign/Gamepad/gp_overview_outpostIcon.dds"/>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+                <Control name="$(parent)Resources" override="true">
+                    <OnInitialized>
+                        ApplyTemplateToControl(self, "ZO_CampaignScoring_HoldingContainer_GamepadTemplate")
+                    </OnInitialized>
+                    <Controls>
+                        <Control name="$(parent)Container" override="true">
+                            <Controls>
+                                <Texture name="$(parent)Icon" override="true" textureFile="EsoUI/Art/Campaign/Gamepad/gp_overview_resourceIcon.dds"/>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+                <Control name="$(parent)Scrolls" override="true">
+                    <OnInitialized>
+                        ApplyTemplateToControl(self, "ZO_CampaignScoring_HoldingContainer_GamepadTemplate")
+                    </OnInitialized>
+                    <Controls>
+                        <Control name="$(parent)Container" override="true">
+                            <Controls>
+                                <Texture name="$(parent)Icon" override="true" textureFile="EsoUI/Art/Campaign/Gamepad/gp_overview_scrollIcon.dds"/>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
             </Controls>
         </Control>
         <Control name="ZO_CampaignScoringHorizontalDivider" resizeToFitDescendents="true" alpha="0.5" virtual="true">

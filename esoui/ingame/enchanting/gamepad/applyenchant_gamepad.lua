@@ -114,7 +114,7 @@ end
 function ZO_ApplyEnchant_Gamepad:ImproveItem()
     if self.improvementKitBag and self.itemBag then
         if IsItemPlayerLocked(self.itemBag, self.itemIndex) then
-            ZO_Dialogs_ShowPlatformDialog("GAMEPAD_CONFIRM_ENCHANT_LOCKED_ITEM", { onAcceptCallback = function() self:PerformItemImprovement() end })
+            ZO_Dialogs_ShowPlatformDialog("CONFIRM_ENCHANT_LOCKED_ITEM", { onAcceptCallback = function() self:PerformItemImprovement() end })
         else
             self:PerformItemImprovement()
         end

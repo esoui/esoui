@@ -254,14 +254,12 @@ local ITEM_TYPE_DISPLAY_CATEGORY_ICONS =
         down = "EsoUI/Art/Inventory/inventory_tabIcon_furnishing_material_Down.dds",
         over = "EsoUI/Art/Inventory/inventory_tabIcon_furnishing_material_Over.dds",
     },
-
-
-
-
-
-
-
-
+    [ITEM_TYPE_DISPLAY_CATEGORY_ANIMAL_COMPANION] =
+    {
+        up = "EsoUI/Art/Inventory/inventory_tabIcon_animalCompanion_up.dds",
+        down = "EsoUI/Art/Inventory/inventory_tabIcon_animalCompanion_down.dds",
+        over = "EsoUI/Art/Inventory/inventory_tabIcon_animalCompanion_over.dds",
+    },
 }
 
 local EQUIPMENT_FILTER_TYPE_ICONS =
@@ -590,6 +588,12 @@ local SPECIALIZED_ITEM_TYPE_ICONS =
         down = "EsoUI/Art/Crafting/provisioner_indexIcon_beer_down.dds",
         over = "EsoUI/Art/Crafting/provisioner_indexIcon_beer_over.dds",
     },
+    [SPECIALIZED_ITEMTYPE_RECIPE_PROVISIONING_SUPPLIES] =
+    {
+        up = "EsoUI/Art/Crafting/provisioner_indexIcon_supplies_up.dds",
+        down = "EsoUI/Art/Crafting/provisioner_indexIcon_supplies_down.dds",
+        over = "EsoUI/Art/Crafting/provisioner_indexIcon_supplies_over.dds",
+    },
     [SPECIALIZED_ITEMTYPE_RECIPE_BLACKSMITHING_DIAGRAM_FURNISHING] =
     {
         up = "EsoUI/Art/Crafting/diagrams_tabIcon_up.dds",
@@ -706,6 +710,12 @@ local SPECIALIZED_ITEM_TYPE_ICONS =
         down = "EsoUI/Art/TradingHouse/Tradinghouse_Consumable_Ability_Down.dds",
         over = "EsoUI/Art/TradingHouse/Tradinghouse_Consumable_Ability_Over.dds",
     },
+    [SPECIALIZED_ITEMTYPE_TRINKET] =
+    {
+        up = "EsoUI/Art/TradingHouse/Tradinghouse_Trinket_Up.dds",
+        down = "EsoUI/Art/TradingHouse/Tradinghouse_Trinket_Down.dds",
+        over = "EsoUI/Art/TradingHouse/Tradinghouse_Trinket_Over.dds",
+    },
 }
 
 -- Setup Types Tables
@@ -725,9 +735,7 @@ local ITEM_TYPE_DISPLAY_CATEGORY_ITEMTYPES =
         ITEM_TYPE_DISPLAY_CATEGORY_WEAPONS,
         ITEM_TYPE_DISPLAY_CATEGORY_ARMOR,
         ITEM_TYPE_DISPLAY_CATEGORY_JEWELRY,
-
-
-
+        ITEM_TYPE_DISPLAY_CATEGORY_ANIMAL_COMPANION,
     },
     [ITEM_TYPE_DISPLAY_CATEGORY_CONSUMABLE] =
     {
@@ -1148,9 +1156,7 @@ local ITEM_TYPE_DISPLAY_CATEGORY_SUBCATEGORY_TYPES =
         ITEM_TYPE_DISPLAY_CATEGORY_WEAPONS,
         ITEM_TYPE_DISPLAY_CATEGORY_ARMOR,
         ITEM_TYPE_DISPLAY_CATEGORY_JEWELRY,
-
-
-
+        ITEM_TYPE_DISPLAY_CATEGORY_ANIMAL_COMPANION,
     },
     [ITEM_TYPE_DISPLAY_CATEGORY_MISCELLANEOUS] =
     {
@@ -1247,16 +1253,14 @@ local ITEM_TYPE_DISPLAY_CATEGORY_SUBCATEGORY_TYPES =
         ITEMTYPE_JEWELRY_TRAIT,
         ITEMTYPE_FURNISHING_MATERIAL,
     },
-
-
-
-
-
-
-
-
-
-
+    [ITEM_TYPE_DISPLAY_CATEGORY_ANIMAL_COMPANION] =
+    {
+        EQUIPMENT_FILTER_TYPE_NONE,
+        EQUIPMENT_FILTER_TYPE_LIGHT,
+        EQUIPMENT_FILTER_TYPE_MEDIUM,
+        EQUIPMENT_FILTER_TYPE_HEAVY,
+        EQUIPMENT_FILTER_TYPE_NECK,
+    },
 }
 
 -- Text Search Types
@@ -1544,11 +1548,9 @@ function ZO_ItemFilterUtils.IsSlotInItemTypeDisplayCategoryAndSubcategory(slot, 
     end
 
     if itemTypeDisplayCategory == ITEM_TYPE_DISPLAY_CATEGORY_COMPANION then
-
-
-
-
-
+        if itemTypeSubCategory == ITEM_TYPE_DISPLAY_CATEGORY_ANIMAL_COMPANION then
+            return slot.companionType == COMPANION_TYPE_ANIMAL
+        end
     elseif slot.actorCategory == GAMEPLAY_ACTOR_CATEGORY_COMPANION then
         return false
     end
@@ -1882,35 +1884,27 @@ function ZO_ItemFilterUtils.IsSlotInCompanionSubcategory(slot, itemTypeDisplayCa
     -- equip slot and then compare the current display category with the jewelry display category
     local equipType = GetItemEquipType(slot.bagId, slot.slotIndex)
     if equipType == EQUIP_TYPE_RING or equipType == EQUIP_TYPE_NECK then
-
-
-
-
-
-
-        return itemTypeDisplayCategory == ITEM_TYPE_DISPLAY_CATEGORY_JEWELRY
-
+        if slot.companionType ~= COMPANION_TYPE_ANIMAL then
+            return itemTypeDisplayCategory == ITEM_TYPE_DISPLAY_CATEGORY_JEWELRY
+        end
     end
 
     if itemTypes
-
-
-
+        and slot.companionType ~= COMPANION_TYPE_ANIMAL
         and ZO_IsElementInNumericallyIndexedTable(itemTypes, itemType) then
         return true
     end
 
-
-
-
-
-
-
-
-
-
-
-
+    if slot.companionType == COMPANION_TYPE_ANIMAL
+        and itemTypeDisplayCategory == ITEM_TYPE_DISPLAY_CATEGORY_ANIMAL_COMPANION then
+        local companionTypes = ITEM_TYPE_DISPLAY_CATEGORY_SUBCATEGORY_TYPES[ITEM_TYPE_DISPLAY_CATEGORY_ANIMAL_COMPANION]
+        for companionItemTypeDisplayCategoryIndex, companionItemTypeDisplayCategory in pairs(companionTypes) do
+            local companionItemTypes = ITEM_TYPE_DISPLAY_CATEGORY_ITEMTYPES[companionItemTypeDisplayCategory]
+            if companionItemTypes and ZO_IsElementInNumericallyIndexedTable(companionItemTypes, itemType) then
+                return true
+            end
+        end
+    end
 
     return false
 end

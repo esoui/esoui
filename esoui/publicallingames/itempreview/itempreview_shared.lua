@@ -4,11 +4,9 @@
 
 ZO_ItemPreviewOptionsFragment = ZO_SceneFragment:Subclass()
 
-function ZO_ItemPreviewOptionsFragment:New(...)
-    return ZO_SceneFragment.New(self, ...)
-end
-
 function ZO_ItemPreviewOptionsFragment:Initialize(options)
+    ZO_SceneFragment.Initialize(self)
+
     self.options = options
 end
 

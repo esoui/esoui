@@ -439,10 +439,8 @@ end
 
 ZO_GamepadNotificationManager = ZO_Object:MultiSubclass(ZO_NotificationManager, ZO_Gamepad_ParametricList_Screen)
 
-function ZO_GamepadNotificationManager:New(control)
-    local notificationManager = ZO_Object.New(self)
-    notificationManager:Initialize(control)
-    return notificationManager
+function ZO_GamepadNotificationManager:New(...)
+    return ZO_NotificationManager.New(self, ...)
 end
 
 function ZO_GamepadNotificationManager:Initialize(control)
@@ -517,13 +515,6 @@ function ZO_GamepadNotificationManager:InitializeNotificationList(control)
 
     self.eventNamespace = EVENT_NAMESPACE
 
-    local function notificationEventCallback()
-        local _, tanksPending, _, healersPending, _, dpsPending = GetLFGReadyCheckCounts()
-        if tanksPending == 0 and healersPending == 0 and dpsPending == 0 then
-            SCENE_MANAGER:HideCurrentScene()
-        end
-    end
-
     self.providers =
     {
         ZO_GamepadFriendRequestProvider:New(self),
@@ -541,7 +532,7 @@ function ZO_GamepadNotificationManager:InitializeNotificationList(control)
         ZO_GamepadAgentChatRequestProvider:New(self),
         ZO_GamepadLeaderboardScoreProvider:New(self),
         ZO_GamepadCollectionsUpdateProvider:New(self),
-        ZO_GamepadLFGUpdateProvider:New(self, notificationEventCallback),
+        ZO_GamepadLFGUpdateProvider:New(self),
         ZO_CraftBagAutoTransferProvider:New(self),
         ZO_GamepadDuelInviteProvider:New(self),
         ZO_GamepadEsoPlusSubscriptionStatusProvider:New(self),

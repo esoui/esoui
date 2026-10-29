@@ -265,7 +265,7 @@ function ZO_PromotionalEvents_Keyboard:InitializeActivityFinderCategory()
         end
 
         control.statusIcon:ClearIcons()
-        if categoryData and categoryData.campaignData and categoryData.campaignData:IsAnyRewardClaimable() then
+        if categoryData and categoryData.campaignData and categoryData.campaignData:HasCallout() then
             control.statusIcon:AddIcon(ZO_KEYBOARD_NEW_ICON)
             control.statusIcon:Show()
         end
@@ -574,12 +574,8 @@ function ZO_PromotionalEvents_Keyboard:InitializeKeybindStripDescriptors()
 
             callback = function()
                 local requiredCollectibleData = self.mouseOverObject.activityData:GetRequiredCollectibleData()
-                if requiredCollectibleData:GetCategoryType() == COLLECTIBLE_CATEGORY_TYPE_CHAPTER then
-                    ZO_ShowChapterUpgradePlatformScreen(MARKET_OPEN_OPERATION_PROMOTIONAL_EVENTS)
-                else
-                    local searchTerm = zo_strformat(SI_CROWN_STORE_SEARCH_FORMAT_STRING, requiredCollectibleData:GetName())
-                    ShowMarketAndSearch(searchTerm, MARKET_OPEN_OPERATION_PROMOTIONAL_EVENTS)
-                end
+                local searchTerm = zo_strformat(SI_CROWN_STORE_SEARCH_FORMAT_STRING, requiredCollectibleData:GetName())
+                ShowMarketAndSearch(searchTerm, MARKET_OPEN_OPERATION_PROMOTIONAL_EVENTS)
             end,
 
             visible = function()

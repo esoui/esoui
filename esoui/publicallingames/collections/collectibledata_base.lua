@@ -219,7 +219,7 @@ end
 
 function ZO_CollectibleData_Base:IsStory()
     local categoryType = self:GetCategoryType()
-    return categoryType == COLLECTIBLE_CATEGORY_TYPE_DLC or categoryType == COLLECTIBLE_CATEGORY_TYPE_CHAPTER
+    return categoryType == COLLECTIBLE_CATEGORY_TYPE_DLC
 end
 
 function ZO_CollectibleData_Base:IsUnlockedViaSubscription()
@@ -403,7 +403,7 @@ function ZO_CollectibleData_Base:GetPrimaryInteractionStringId(actorCategory)
             return SI_COLLECTIBLE_ACTION_PUT_AWAY
         end
     else
-        if categoryType == COLLECTIBLE_CATEGORY_TYPE_DLC or categoryType == COLLECTIBLE_CATEGORY_TYPE_CHAPTER then
+        if categoryType == COLLECTIBLE_CATEGORY_TYPE_DLC then
             return SI_COLLECTIBLE_ACTION_ACCEPT_QUEST
         elseif categoryType == COLLECTIBLE_CATEGORY_TYPE_HOUSE then
             return self:IsUnlocked() and SI_HOUSING_BOOK_ACTION_TRAVEL_TO_HOUSE or SI_HOUSING_BOOK_ACTION_PREVIEW_HOUSE
@@ -570,9 +570,7 @@ end
 function ZO_CollectibleData_Base:GetContentRequiresCollectibleText()
     if self:IsLocked() then
         local categoryType = self:GetCategoryType()
-        if categoryType == COLLECTIBLE_CATEGORY_TYPE_CHAPTER then
-            return zo_strformat(SI_CONTENT_REQUIRES_CHAPTER_FORMATTER, self:GetName())
-        elseif categoryType == COLLECTIBLE_CATEGORY_TYPE_DLC then
+        if categoryType == COLLECTIBLE_CATEGORY_TYPE_DLC then
             return zo_strformat(SI_CONTENT_REQUIRES_DLC_FORMATTER, self:GetName(), self:GetCategoryName())
         else
             return zo_strformat(SI_CONTENT_REQUIRES_NON_ESO_PLUS_COLLECTIBLE_FORMATTER, self:GetName(), self:GetCategoryName())

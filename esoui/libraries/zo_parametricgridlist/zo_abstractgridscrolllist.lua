@@ -7,8 +7,10 @@ function ZO_AbstractGridScrollList:Initialize(control, autofillRows, resizeToFit
     self.control = control
     self.container = control:GetNamedChild("Container")
     self.list = self.container:GetNamedChild("List")
-    self:AddResizeOnScreenResize()
     self.scrollbar = self.list:GetNamedChild("ScrollBar")
+    self.isCommittingGridList = false
+    self.lastCommittedHeight = nil
+    self:RegisterResizeEvents()
     self.currentHeaderName = nil -- Maintaining backwards compatability
     self.currentHeaderData = nil
     self.nextOperationId = 1
@@ -34,12 +36,24 @@ function ZO_AbstractGridScrollList:Initialize(control, autofillRows, resizeToFit
     end
 end
 
-function ZO_AbstractGridScrollList:AddResizeOnScreenResize()
+function ZO_AbstractGridScrollList:RegisterResizeEvents()
+    local function OnHeightChanged()
+        local height = self.list:GetHeight()
+        if not self.isCommittingGridList and height ~= self.lastCommittedHeight then
+            self:CommitGridList()
+        end
+    end
+    self.list:SetHandler("OnRectHeightChanged", OnHeightChanged)
+
     local function OnScreenResized()
         ZO_ScrollList_SetHeight(self.list, self.list:GetHeight())
-        self:CommitGridList()
     end
     self.list:RegisterForEvent(EVENT_SCREEN_RESIZED, OnScreenResized)
+end
+
+function ZO_AbstractGridScrollList:UnregisterResizeEvents()
+    self.list:SetHandler("OnRectHeightChanged", nil)
+    self.list:UnregisterForEvent(EVENT_SCREEN_RESIZED)
 end
 
 function ZO_AbstractGridScrollList:SetHeaderPrePadding(prePadding)
@@ -164,6 +178,12 @@ function ZO_AbstractGridScrollList:FillRowWithEmptyCells(gridHeaderData)
 end
 
 function ZO_AbstractGridScrollList:CommitGridList()
+    if self.isCommittingGridList then
+        return
+    end
+
+    self.isCommittingGridList = true
+
     local scrollData = ZO_ScrollList_GetDataList(self.list)
     if #scrollData > 0 then -- only try to fill in a row if there exists a row to fill in
         self:FillRowWithEmptyCells(self.currentHeaderData)
@@ -186,6 +206,9 @@ function ZO_AbstractGridScrollList:CommitGridList()
     if self.resizeToFitRowMax ~= 0 then
         self.list:SetHeight(zo_min(self.maxHeight, self.list.maxDimensionY))
     end
+
+    self.lastCommittedHeight = self.list:GetHeight()
+    self.isCommittingGridList = false
 end
 
 function ZO_AbstractGridScrollList:RecalculateVisibleEntries()

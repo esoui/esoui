@@ -2,13 +2,9 @@
 
 ZO_PlayerProgressBarFragment = ZO_SceneFragment:Subclass()
 
-function ZO_PlayerProgressBarFragment:New(...)
-    local fragment = ZO_SceneFragment.New(self)
-    fragment:Initialize(...)
-    return fragment
-end
-
 function ZO_PlayerProgressBarFragment:Initialize()
+    ZO_SceneFragment.Initialize(self)
+
     self.suppressFadeTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_PlayerProgressBarSuppressFade")
     self.suppressFadeTimeline:SetHandler("OnStop", function(timeline, completed)
         if(completed) then
@@ -32,12 +28,12 @@ end
 
 ZO_PlayerProgressBarCurrentFragment = ZO_SceneFragment:Subclass()
 
-function ZO_PlayerProgressBarCurrentFragment:New(...)
-    local fragment = ZO_SceneFragment.New(self)
+function ZO_PlayerProgressBarCurrentFragment:Initialize()
+    ZO_SceneFragment.Initialize(self)
+    
     EVENT_MANAGER:RegisterForEvent("PlayerProgressBarCurrentFragment", EVENT_EXPERIENCE_GAIN, function()
-        fragment:RefreshBaseType()
+        self:RefreshBaseType()
     end)
-    return fragment
 end
 
 function ZO_PlayerProgressBarCurrentFragment:RefreshBaseType()

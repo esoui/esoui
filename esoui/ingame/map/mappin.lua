@@ -1551,13 +1551,9 @@ local WAYSHRINE_LMB =
         
         callback = function(pin)
             if pin:IsLockedByLinkedCollectible() then
-                if pin:GetLinkedCollectibleType() == COLLECTIBLE_CATEGORY_TYPE_CHAPTER then
-                    ZO_ShowChapterUpgradePlatformScreen(MARKET_OPEN_OPERATION_DLC_FAILURE_WORLD_MAP)
-                else
-                    local collectibleData = pin:GetLinkedCollectibleData()
-                    local searchTerm = zo_strformat(SI_CROWN_STORE_SEARCH_FORMAT_STRING, collectibleData:GetName())
-                    ShowMarketAndSearch(searchTerm, MARKET_OPEN_OPERATION_DLC_FAILURE_WORLD_MAP)
-                end
+                local collectibleData = pin:GetLinkedCollectibleData()
+                local searchTerm = zo_strformat(SI_CROWN_STORE_SEARCH_FORMAT_STRING, collectibleData:GetName())
+                ShowMarketAndSearch(searchTerm, MARKET_OPEN_OPERATION_DLC_FAILURE_WORLD_MAP)
             else
                 ZO_Dialogs_ReleaseDialog("FAST_TRAVEL_CONFIRM")
                 ZO_Dialogs_ReleaseDialog("RECALL_CONFIRM")
@@ -1595,13 +1591,9 @@ local WAYSHRINE_LMB =
 
         callback = function(pin)
             if pin:IsLockedByLinkedCollectible() then
-                if pin:GetLinkedCollectibleType() == COLLECTIBLE_CATEGORY_TYPE_CHAPTER then
-                    ZO_ShowChapterUpgradePlatformScreen(MARKET_OPEN_OPERATION_DLC_FAILURE_WORLD_MAP)
-                else
-                    local collectibleData = pin:GetLinkedCollectibleData()
-                    local searchTerm = zo_strformat(SI_CROWN_STORE_SEARCH_FORMAT_STRING, collectibleData:GetName())
-                    ShowMarketAndSearch(searchTerm, MARKET_OPEN_OPERATION_DLC_FAILURE_WORLD_MAP)
-                end
+                local collectibleData = pin:GetLinkedCollectibleData()
+                local searchTerm = zo_strformat(SI_CROWN_STORE_SEARCH_FORMAT_STRING, collectibleData:GetName())
+                ShowMarketAndSearch(searchTerm, MARKET_OPEN_OPERATION_DLC_FAILURE_WORLD_MAP)
             else
                 ZO_Dialogs_ReleaseDialog("FAST_TRAVEL_CONFIRM")
                 ZO_Dialogs_ReleaseDialog("RECALL_CONFIRM")
@@ -1902,7 +1894,6 @@ do
         self.m_Control = control
         self.highlightControl = control:GetNamedChild("Highlight")
         self.backgroundControl = control:GetNamedChild("Background")
-        self.labelControl = control:GetNamedChild("Label")
         self.scaleModifier = 1
         self.pinId = nextPinId
 
@@ -2622,11 +2613,7 @@ function ZO_MapPin:GetLinkedCollectibleType()
 end
 
 function ZO_MapPin:GetLockedByLinkedCollectibleInteractString()
-    if self:GetLinkedCollectibleType() == COLLECTIBLE_CATEGORY_TYPE_CHAPTER then
-        return GetString(SI_WORLD_MAP_ACTION_UPGRADE_CHAPTER)
-    else
-        return GetString(SI_WORLD_MAP_ACTION_GO_TO_CROWN_STORE)
-    end
+    return GetString(SI_WORLD_MAP_ACTION_GO_TO_CROWN_STORE)
 end
 
 function ZO_MapPin:GetBattlegroundContext()
@@ -2941,8 +2928,6 @@ do
             pinTag = "group"
         end
 
-        self.labelControl:SetText("")
-
         local singlePinData = ZO_MapPin.PIN_DATA[pinType]
         if singlePinData ~= nil then
             -- Set up texture
@@ -2979,7 +2964,6 @@ do
 
             self.backgroundControl:SetDrawLevel(pinLevel)
             self.highlightControl:SetDrawLevel(pinLevel - 1)
-            self.labelControl:SetDrawLevel(pinLevel + 1)
 
             if IsPinAnimated(self, singlePinData.isAnimated) then
                 self:PlayTextureAnimation(singlePinData.framesWide, singlePinData.framesHigh, singlePinData.framesPerSecond)

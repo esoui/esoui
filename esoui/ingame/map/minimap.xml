@@ -1,0 +1,304 @@
+<GuiXml>
+    <Animations>
+        <AnimationTimeline name="MapPinSlowFadeIn">
+            <Animations>
+                <AlphaAnimation duration="750" startAlpha="0" endAlpha="1"/>
+            </Animations>
+        </AnimationTimeline>
+        <AnimationTimeline name="MapPinSlowFadeOut">
+            <Animations>
+                <AlphaAnimation duration="750" startAlpha="1" endAlpha="0"/>
+            </Animations>
+        </AnimationTimeline>
+        <AnimationTimeline name="MapPOIPinScaleUp">
+            <Animations>
+                <ScaleAnimation duration="750" startScale="1" endScale="1.75"/>
+            </Animations>
+        </AnimationTimeline>
+    </Animations>
+    <Controls>
+        <TopLevelControl name="ZO_Minimap_TopLevel_Keyboard_Template" virtual="true">
+            <Controls>
+                <Label name="$(parent)MapName" mouseEnabled="true"/>
+                <MapDisplay name="$(parent)Display" pinFont="ZoFontGameOutline" mouseEnabled="true"/>
+            </Controls>
+        </TopLevelControl>
+        <TopLevelControl name="ZO_Minimap_TopLevel_Gamepad_Template" virtual="true">
+            <Controls>
+                <Label name="$(parent)MapName" mouseEnabled="false"/>
+                <!-- We don't actually even use pin text, but just for safety we'll set this to something -->
+                <MapDisplay name="$(parent)Display" pinFont="ZoFontGamepad27" mouseEnabled="false"/>
+            </Controls>
+        </TopLevelControl>
+        <TopLevelControl name="ZO_Minimap_TopLevel" inherits="ZO_HUDManager_Element" hidden="true">
+            <Dimensions x="288" y="283"/>
+            <Anchor point="TOPLEFT" offsetY="4"/>
+            <OnInitialized>
+                ZO_Minimap.OnControlInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Label name="$(parent)MapName" font="ZoFontGameLargeBoldShadow" mouseEnabled="true" wrapMode="ELLIPSIS" tier="MEDIUM" horizontalAlignment="CENTER" maxLineCount="2">
+                    <DimensionConstraints maxX="230"/>
+                    <Anchor point="TOP" relativePoint="BOTTOM" offsetY="-33"/>
+                    <OnMouseEnter>
+                        MINIMAP:MapNameMouseEnter()
+                    </OnMouseEnter>
+                    <OnMouseExit>
+                        MINIMAP:MapNameMouseExit()
+                    </OnMouseExit>
+                </Label>
+                <Texture name="$(parent)POIIcon">
+                    <Dimensions x="32" y="32"/>
+                    <Anchor point="CENTER" relativeTo="$(parent)MapName" relativePoint="LEFT" offsetX="-16" offsetY="-1"/>
+                </Texture>
+                <Texture name="$(parent)MapNameHighlight" textureFile="EsoUI/Art/Buttons/ESO_buttonLarge_mouseOver.dds" alpha="0">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)MapName"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)MapName"/>
+                </Texture>
+                <MapDisplay name="$(parent)Display" mouseEnabled="true" pinFont="ZoFontGameOutline" tier="LOW" shape="CIRCLE" layer="CONTROLS" level="0">
+                    <Dimensions x="216" y="216"/>
+                    <Anchor point="TOP" offsetY="27"/>
+                    <MapGutter size="32" offset="-16"/>
+                    <MapPinType name="PLAYER" pinTexture="$(MAP_PIN_PATH)UI-WorldMapPlayerPip.dds"/>
+                    <MapPinType name="GROUP_LEADER" arrowType="GUTTER" pinSize="32" pinXInset="5" pinYInset="5" pinTexture="$(COMPASS_PATH)groupLeader.dds" aboveTexture="$(COMPASS_PATH)groupLeader.dds" belowTexture="$(COMPASS_PATH)groupLeader.dds" linkTexture="$(COMPASS_PATH)groupLeader_door.dds" layer="OVERLAY" drawLevelOffsetBase="1"/>
+                    <MapPinType name="GROUP" pinSize="32" pinXInset="5" pinYInset="5" pinTexture="$(COMPASS_PATH)groupMember.dds" linkTexture="$(COMPASS_PATH)groupMember_door.dds" layer="OVERLAY" drawLevelOffsetBase="2"/>
+                    <MapPinType name="UNIT_COMBAT_HEALTHY" drawLevelOffsetBase="3"/>
+                    <MapPinType name="UNIT_COMBAT_WEAK" drawLevelOffsetBase="3"/>
+                    <MapPinType name="UNIT_IDLE_HEALTHY" drawLevelOffsetBase="3"/>
+                    <MapPinType name="UNIT_IDLE_WEAK" drawLevelOffsetBase="3"/>
+                    <MapPinType name="QUEST_OFFER" pinSize="32" pinXInset="5" pinYInset="5" pinTexture="$(COMPASS_PATH)quest_available_icon.dds" aboveTexture="$(COMPASS_PATH)quest_available_icon.dds" belowTexture="$(COMPASS_PATH)quest_available_icon.dds" layer="OVERLAY" drawLevelOffsetBase="4"/>
+                    <MapPinType name="QUEST_OFFER_REPEATABLE" pinSize="32" pinXInset="5" pinYInset="5" pinTexture="$(COMPASS_PATH)repeatableQuest_available_icon.dds" aboveTexture="$(COMPASS_PATH)repeatableQuest_available_icon.dds" belowTexture="$(COMPASS_PATH)repeatableQuest_available_icon.dds" layer="OVERLAY" drawLevelOffsetBase="4"/>
+                    <MapPinType name="QUEST_OFFER_ZONE_STORY" pinSize="32" pinXInset="5" pinYInset="5" pinTexture="$(COMPASS_PATH)zoneStoryQuest_available_icon.dds" aboveTexture="$(COMPASS_PATH)zoneStoryQuest_available_icon.dds" belowTexture="$(COMPASS_PATH)zoneStoryQuest_available_icon.dds" layer="OVERLAY" drawLevelOffsetBase="4"/>
+                    <!-- These inherit the style depending on the type of condition they are overriding. -->
+                    <MapPinType name="QUEST_COMPLETE" pinSize="32" drawLevelOffsetBase="6"/>
+                    <MapPinType name="QUEST_TALK_TO" pinSize="32" drawLevelOffsetBase="6"/>
+                    <MapPinType name="QUEST_INTERACT" pinSize="32" drawLevelOffsetBase="6"/>
+                    <MapPinType name="QUEST_GIVE_ITEM" pinSize="32" drawLevelOffsetBase="6"/>
+                    <MapPinType name="TRACKED_QUEST_OFFER_ZONE_STORY" arrowType="GUTTER" pinSize="32" pinXInset="5" pinYInset="5" pinTexture="$(COMPASS_PATH)zoneStoryQuest_available_icon.dds" aboveTexture="$(COMPASS_PATH)zoneStoryQuest_available_icon.dds" belowTexture="$(COMPASS_PATH)zoneStoryQuest_available_icon.dds" linkTexture="$(COMPASS_PATH)zoneStoryQuest_available_icon_door.dds" areaTexture="$(MAP_PIN_PATH)map_areaPin.dds" layer="TEXT" drawLevelOffsetBase="8"/>
+                    <MapPinType name="ASSISTED_QUEST_CONDITION" arrowType="GUTTER" pinSize="32" pinXInset="5" pinYInset="5" pinTexture="$(COMPASS_PATH)quest_icon_assisted.dds" aboveTexture="$(COMPASS_PATH)quest_icon_assisted.dds" belowTexture="$(COMPASS_PATH)quest_icon_assisted.dds" linkTexture="$(COMPASS_PATH)quest_icon_door_assisted.dds" areaTexture="$(MAP_PIN_PATH)map_assistedAreaPin.dds" layer="TEXT" drawLevelOffsetBase="9"/>
+                    <MapPinType name="ASSISTED_QUEST_OPTIONAL_CONDITION" arrowType="GUTTER" pinSize="32" pinXInset="5" pinYInset="5" pinTexture="$(COMPASS_PATH)quest_icon_assisted.dds" aboveTexture="$(COMPASS_PATH)quest_icon_assisted.dds" belowTexture="$(COMPASS_PATH)quest_icon_assisted.dds" linkTexture="$(COMPASS_PATH)quest_icon_door_assisted.dds" areaTexture="$(MAP_PIN_PATH)map_assistedAreaPin.dds" layer="TEXT" drawLevelOffsetBase="9"/>
+                    <MapPinType name="ASSISTED_QUEST_ENDING" arrowType="GUTTER" pinSize="32" pinXInset="5" pinYInset="5" pinTexture="$(COMPASS_PATH)quest_icon_assisted.dds" aboveTexture="$(COMPASS_PATH)quest_icon_assisted.dds" belowTexture="$(COMPASS_PATH)quest_icon_assisted.dds" linkTexture="$(COMPASS_PATH)quest_icon_door_assisted.dds" areaTexture="$(MAP_PIN_PATH)map_assistedAreaPin.dds" layer="TEXT" drawLevelOffsetBase="9"/>
+                    <MapPinType name="ASSISTED_QUEST_REPEATABLE_CONDITION" arrowType="GUTTER" pinSize="32" pinXInset="5" pinYInset="5" pinTexture="$(COMPASS_PATH)repeatableQuest_icon_assisted.dds" aboveTexture="$(COMPASS_PATH)repeatableQuest_icon_assisted.dds" belowTexture="$(COMPASS_PATH)repeatableQuest_icon_assisted.dds" linkTexture="$(COMPASS_PATH)repeatableQuest_icon_door_assisted.dds" areaTexture="$(MAP_PIN_PATH)map_assistedAreaPin.dds" layer="TEXT" drawLevelOffsetBase="12"/>
+                    <MapPinType name="ASSISTED_QUEST_REPEATABLE_OPTIONAL_CONDITION" arrowType="GUTTER" pinSize="32" pinXInset="5" pinYInset="5" pinTexture="$(COMPASS_PATH)repeatableQuest_icon_assisted.dds" aboveTexture="$(COMPASS_PATH)repeatableQuest_icon_assisted.dds" belowTexture="$(COMPASS_PATH)repeatableQuest_icon_assisted.dds" linkTexture="$(COMPASS_PATH)repeatableQuest_icon_door_assisted.dds" areaTexture="$(MAP_PIN_PATH)map_assistedAreaPin.dds" layer="TEXT" drawLevelOffsetBase="12"/>
+                    <MapPinType name="ASSISTED_QUEST_REPEATABLE_ENDING" arrowType="GUTTER" pinSize="32" pinXInset="5" pinYInset="5" pinTexture="$(COMPASS_PATH)repeatableQuest_icon_assisted.dds" aboveTexture="$(COMPASS_PATH)repeatableQuest_icon_assisted.dds" belowTexture="$(COMPASS_PATH)repeatableQuest_icon_assisted.dds" linkTexture="$(COMPASS_PATH)repeatableQuest_icon_door_assisted.dds" areaTexture="$(MAP_PIN_PATH)map_assistedAreaPin.dds" layer="TEXT" drawLevelOffsetBase="12"/>
+                    <MapPinType name="ASSISTED_QUEST_ZONE_STORY_CONDITION" arrowType="GUTTER" pinSize="32" pinXInset="5" pinYInset="5" pinTexture="$(COMPASS_PATH)zoneStoryQuest_icon_assisted.dds" aboveTexture="$(COMPASS_PATH)zoneStoryQuest_icon_assisted.dds" belowTexture="$(COMPASS_PATH)zoneStoryQuest_icon_assisted.dds" linkTexture="$(COMPASS_PATH)zoneStoryQuest_icon_door_assisted.dds" areaTexture="$(MAP_PIN_PATH)map_assistedAreaPin.dds" layer="TEXT" drawLevelOffsetBase="13"/>
+                    <MapPinType name="ASSISTED_QUEST_ZONE_STORY_OPTIONAL_CONDITION" arrowType="GUTTER" pinSize="32" pinXInset="5" pinYInset="5" pinTexture="$(COMPASS_PATH)zoneStoryQuest_icon_assisted.dds" aboveTexture="$(COMPASS_PATH)zoneStoryQuest_icon_assisted.dds" belowTexture="$(COMPASS_PATH)zoneStoryQuest_icon_assisted.dds" linkTexture="$(COMPASS_PATH)zoneStoryQuest_icon_door_assisted.dds" areaTexture="$(MAP_PIN_PATH)map_assistedAreaPin.dds" layer="TEXT" drawLevelOffsetBase="13"/>
+                    <MapPinType name="ASSISTED_QUEST_ZONE_STORY_ENDING" arrowType="GUTTER" pinSize="32" pinXInset="5" pinYInset="5" pinTexture="$(COMPASS_PATH)zoneStoryQuest_icon_assisted.dds" aboveTexture="$(COMPASS_PATH)zoneStoryQuest_icon_assisted.dds" belowTexture="$(COMPASS_PATH)zoneStoryQuest_icon_assisted.dds" linkTexture="$(COMPASS_PATH)zoneStoryQuest_icon_door_assisted.dds" areaTexture="$(MAP_PIN_PATH)map_assistedAreaPin.dds" layer="TEXT" drawLevelOffsetBase="13"/>
+                    <MapPinType name="TRACKED_QUEST_CONDITION" arrowType="GUTTER" pinSize="32" pinXInset="5" pinYInset="5" pinTexture="$(COMPASS_PATH)quest_icon.dds" aboveTexture="$(COMPASS_PATH)quest_icon.dds" belowTexture="$(COMPASS_PATH)quest_icon.dds" linkTexture="$(COMPASS_PATH)quest_icon_door.dds" areaTexture="$(MAP_PIN_PATH)map_areaPin.dds" layer="TEXT" drawLevelOffsetBase="15"/>
+                    <MapPinType name="TRACKED_QUEST_OPTIONAL_CONDITION" arrowType="GUTTER" pinSize="32" pinXInset="5" pinYInset="5" pinTexture="$(COMPASS_PATH)quest_icon.dds" aboveTexture="$(COMPASS_PATH)quest_icon.dds" belowTexture="$(COMPASS_PATH)quest_icon.dds" linkTexture="$(COMPASS_PATH)quest_icon_door.dds" areaTexture="$(MAP_PIN_PATH)map_areaPin.dds" layer="TEXT" drawLevelOffsetBase="15"/>
+                    <MapPinType name="TRACKED_QUEST_ENDING" arrowType="GUTTER" pinSize="32" pinXInset="5" pinYInset="5" pinTexture="$(COMPASS_PATH)quest_icon.dds" aboveTexture="$(COMPASS_PATH)quest_icon.dds" belowTexture="$(COMPASS_PATH)quest_icon.dds" linkTexture="$(COMPASS_PATH)quest_icon_door.dds" areaTexture="$(MAP_PIN_PATH)map_areaPin.dds" layer="TEXT" drawLevelOffsetBase="15"/>
+                    <MapPinType name="TRACKED_QUEST_REPEATABLE_CONDITION" arrowType="GUTTER" pinSize="32" pinXInset="5" pinYInset="5" pinTexture="$(COMPASS_PATH)repeatableQuest_icon.dds" aboveTexture="$(COMPASS_PATH)repeatableQuest_icon.dds" belowTexture="$(COMPASS_PATH)repeatableQuest_icon.dds" linkTexture="$(COMPASS_PATH)repeatableQuest_icon_door.dds" areaTexture="$(MAP_PIN_PATH)map_areaPin.dds" layer="TEXT" drawLevelOffsetBase="18"/>
+                    <MapPinType name="TRACKED_QUEST_REPEATABLE_OPTIONAL_CONDITION" arrowType="GUTTER" pinSize="32" pinXInset="5" pinYInset="5" pinTexture="$(COMPASS_PATH)repeatableQuest_icon.dds" aboveTexture="$(COMPASS_PATH)repeatableQuest_icon.dds" belowTexture="$(COMPASS_PATH)repeatableQuest_icon.dds" linkTexture="$(COMPASS_PATH)repeatableQuest_icon_door.dds" areaTexture="$(MAP_PIN_PATH)map_areaPin.dds" layer="TEXT" drawLevelOffsetBase="18"/>
+                    <MapPinType name="TRACKED_QUEST_REPEATABLE_ENDING" arrowType="GUTTER" pinSize="32" pinXInset="5" pinYInset="5" pinTexture="$(COMPASS_PATH)repeatableQuest_icon.dds" aboveTexture="$(COMPASS_PATH)repeatableQuest_icon.dds" belowTexture="$(COMPASS_PATH)repeatableQuest_icon.dds" linkTexture="$(COMPASS_PATH)repeatableQuest_icon_door.dds" areaTexture="$(MAP_PIN_PATH)map_areaPin.dds" layer="TEXT" drawLevelOffsetBase="18"/>
+                    <MapPinType name="TRACKED_QUEST_ZONE_STORY_CONDITION" arrowType="GUTTER" pinSize="32" pinXInset="5" pinYInset="5" pinTexture="$(COMPASS_PATH)zoneStoryQuest_icon.dds" aboveTexture="$(COMPASS_PATH)zoneStoryQuest_icon.dds" belowTexture="$(COMPASS_PATH)zoneStoryQuest_icon.dds" linkTexture="$(COMPASS_PATH)zoneStoryQuest_icon_door.dds" areaTexture="$(MAP_PIN_PATH)map_areaPin.dds" layer="TEXT" drawLevelOffsetBase="18"/>
+                    <MapPinType name="TRACKED_QUEST_ZONE_STORY_OPTIONAL_CONDITION" arrowType="GUTTER" pinSize="32" pinXInset="5" pinYInset="5" pinTexture="$(COMPASS_PATH)zoneStoryQuest_icon.dds" aboveTexture="$(COMPASS_PATH)zoneStoryQuest_icon.dds" belowTexture="$(COMPASS_PATH)zoneStoryQuest_icon.dds" linkTexture="$(COMPASS_PATH)zoneStoryQuest_icon_door.dds" areaTexture="$(MAP_PIN_PATH)map_areaPin.dds" layer="TEXT" drawLevelOffsetBase="18"/>
+                    <MapPinType name="TRACKED_QUEST_ZONE_STORY_ENDING" arrowType="GUTTER" pinSize="32" pinXInset="5" pinYInset="5" pinTexture="$(COMPASS_PATH)zoneStoryQuest_icon.dds" aboveTexture="$(COMPASS_PATH)zoneStoryQuest_icon.dds" belowTexture="$(COMPASS_PATH)zoneStoryQuest_icon.dds" linkTexture="$(COMPASS_PATH)zoneStoryQuest_icon_door.dds" areaTexture="$(MAP_PIN_PATH)map_areaPin.dds" layer="TEXT" drawLevelOffsetBase="18"/>
+                    <MapPinType name="QUEST_CONDITION" arrowType="GUTTER" pinSize="32" pinXInset="5" pinYInset="5" pinTexture="$(COMPASS_PATH)quest_icon.dds" aboveTexture="$(COMPASS_PATH)quest_icon.dds" belowTexture="$(COMPASS_PATH)quest_icon.dds" linkTexture="$(COMPASS_PATH)quest_icon_door.dds" areaTexture="$(MAP_PIN_PATH)map_areaPin.dds" layer="TEXT" drawLevelOffsetBase="19"/>
+                    <MapPinType name="QUEST_OPTIONAL_CONDITION" arrowType="GUTTER" pinSize="32" pinXInset="5" pinYInset="5" pinTexture="$(COMPASS_PATH)quest_icon.dds" aboveTexture="$(COMPASS_PATH)quest_icon.dds" belowTexture="$(COMPASS_PATH)quest_icon.dds" linkTexture="$(COMPASS_PATH)quest_icon_door.dds" areaTexture="$(MAP_PIN_PATH)map_areaPin.dds" layer="TEXT" drawLevelOffsetBase="19"/>
+                    <MapPinType name="QUEST_ENDING" arrowType="GUTTER" pinSize="32" pinXInset="5" pinYInset="5" pinTexture="$(COMPASS_PATH)quest_icon.dds" aboveTexture="$(COMPASS_PATH)quest_icon.dds" belowTexture="$(COMPASS_PATH)quest_icon.dds" linkTexture="$(COMPASS_PATH)quest_icon_door.dds" areaTexture="$(MAP_PIN_PATH)map_areaPin.dds" layer="TEXT" drawLevelOffsetBase="19"/>
+                    <MapPinType name="QUEST_REPEATABLE_CONDITION" arrowType="GUTTER" pinSize="32" pinXInset="5" pinYInset="5" pinTexture="$(COMPASS_PATH)repeatableQuest_icon.dds" aboveTexture="$(COMPASS_PATH)repeatableQuest_icon.dds" belowTexture="$(COMPASS_PATH)repeatableQuest_icon.dds" linkTexture="$(COMPASS_PATH)repeatableQuest_icon_door.dds" areaTexture="$(MAP_PIN_PATH)map_areaPin.dds" layer="TEXT" drawLevelOffsetBase="20"/>
+                    <MapPinType name="QUEST_REPEATABLE_OPTIONAL_CONDITION" arrowType="GUTTER" pinSize="32" pinXInset="5" pinYInset="5" pinTexture="$(COMPASS_PATH)repeatableQuest_icon.dds" aboveTexture="$(COMPASS_PATH)repeatableQuest_icon.dds" belowTexture="$(COMPASS_PATH)repeatableQuest_icon.dds" linkTexture="$(COMPASS_PATH)repeatableQuest_icon_door.dds" areaTexture="$(MAP_PIN_PATH)map_areaPin.dds" layer="TEXT" drawLevelOffsetBase="20"/>
+                    <MapPinType name="QUEST_REPEATABLE_ENDING" arrowType="GUTTER" pinSize="32" pinXInset="5" pinYInset="5" pinTexture="$(COMPASS_PATH)repeatableQuest_icon.dds" aboveTexture="$(COMPASS_PATH)repeatableQuest_icon.dds" belowTexture="$(COMPASS_PATH)repeatableQuest_icon.dds" linkTexture="$(COMPASS_PATH)repeatableQuest_icon_door.dds" areaTexture="$(MAP_PIN_PATH)map_areaPin.dds" layer="TEXT" drawLevelOffsetBase="20"/>
+                    <MapPinType name="QUEST_ZONE_STORY_CONDITION" arrowType="GUTTER" pinSize="32" pinXInset="5" pinYInset="5" pinTexture="$(COMPASS_PATH)zoneStoryQuest_icon.dds" aboveTexture="$(COMPASS_PATH)zoneStoryQuest_icon.dds" belowTexture="$(COMPASS_PATH)zoneStoryQuest_icon.dds" linkTexture="$(COMPASS_PATH)zoneStoryQuest_icon_door.dds" areaTexture="$(MAP_PIN_PATH)map_areaPin.dds" layer="TEXT" drawLevelOffsetBase="20"/>
+                    <MapPinType name="QUEST_ZONE_STORY_OPTIONAL_CONDITION" arrowType="GUTTER" pinSize="32" pinXInset="5" pinYInset="5" pinTexture="$(COMPASS_PATH)zoneStoryQuest_icon.dds" aboveTexture="$(COMPASS_PATH)zoneStoryQuest_icon.dds" belowTexture="$(COMPASS_PATH)zoneStoryQuest_icon.dds" linkTexture="$(COMPASS_PATH)zoneStoryQuest_icon_door.dds" areaTexture="$(MAP_PIN_PATH)map_areaPin.dds" layer="TEXT" drawLevelOffsetBase="20"/>
+                    <MapPinType name="QUEST_ZONE_STORY_ENDING" arrowType="GUTTER" pinSize="32" pinXInset="5" pinYInset="5" pinTexture="$(COMPASS_PATH)zoneStoryQuest_icon.dds" aboveTexture="$(COMPASS_PATH)zoneStoryQuest_icon.dds" belowTexture="$(COMPASS_PATH)zoneStoryQuest_icon.dds" linkTexture="$(COMPASS_PATH)zoneStoryQuest_icon_door.dds" areaTexture="$(MAP_PIN_PATH)map_areaPin.dds" layer="TEXT" drawLevelOffsetBase="20"/>
+                    <MapPinType name="SKYSHARD_SUGGESTED" arrowType="GUTTER" pinSize="32" pinTexture="$(COMPASS_PATH)skyshard_seen.dds" drawLevelOffsetBase="21"/>
+                    <MapPinType name="SKYSHARD_SEEN" arrowType="GUTTER" pinSize="32" pinTexture="$(COMPASS_PATH)skyshard_seen.dds" addedAnimation="MapPinSlowFadeIn" removedAnimation="MapPinSlowFadeOut" animationTarget="MAP_AND_GUTTER" drawLevelOffsetBase="21"/>
+                    <MapPinType name="POI_SUGGESTED" pinSize="32" drawLevelOffsetBase="21"/>
+                    <MapPinType name="POI_SEEN" arrowType="GUTTER" pinSize="32" addedAnimation="MapPinSlowFadeIn" removedAnimation="MapPinSlowFadeOut" animationTarget="MAP_AND_GUTTER" drawLevelOffsetBase="21"/>
+                    <MapPinType name="POI_COMPLETE" arrowType="GUTTER" pinSize="32" addedAnimation="MapPinSlowFadeIn" removedAnimation="MapPinSlowFadeOut" animationTarget="MAP_AND_GUTTER" drawLevelOffsetBase="22"/>
+                    <MapPinType name="WORLD_EVENT_POI_ACTIVE" pinSize="32" removedAnimation="MapPinSlowFadeOut" animationTarget="MAP_ONLY" drawLevelOffsetBase="23"/>
+                    <MapPinType name="ANTIQUITY_DIG_SITE" arrowType="GUTTER" pinSize="32" pinTexture="$(COMPASS_PATH)antiquity_digSite_icon.dds" drawLevelOffsetBase="23"/>
+                    <MapPinType name="TRACKED_ANTIQUITY_DIG_SITE" arrowType="GUTTER" pinSize="32" pinTexture="$(COMPASS_PATH)antiquity_trackedDigSite_icon.dds" drawLevelOffsetBase="24"/>
+                    <MapPinType name="BGPIN_FLAG_FIRE_DRAKES" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)battlegrounds_flag_pin_orange.dds" drawLevelOffsetBase="30"/>
+                    <MapPinType name="BGPIN_FLAG_FIRE_DRAKES_AURA" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)battlegrounds_flag_halo_orange.dds" drawLevelOffsetBase="31"/>
+                    <MapPinType name="BGPIN_FLAG_PIT_DAEMONS" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)battlegrounds_flag_pin_green.dds" drawLevelOffsetBase="32"/>
+                    <MapPinType name="BGPIN_FLAG_PIT_DAEMONS_AURA" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)battlegrounds_flag_halo_green.dds" drawLevelOffsetBase="33"/>
+                    <MapPinType name="BGPIN_FLAG_STORM_LORDS" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)battlegrounds_flag_pin_purple.dds" drawLevelOffsetBase="34"/>
+                    <MapPinType name="BGPIN_FLAG_STORM_LORDS_AURA" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)battlegrounds_flag_halo_purple.dds" drawLevelOffsetBase="35"/>
+                    <MapPinType name="BGPIN_FLAG_NEUTRAL" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)battlegrounds_flag_pin_neutral.dds" drawLevelOffsetBase="36"/>
+                    <MapPinType name="BGPIN_FLAG_NEUTRAL_AURA" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)battlegrounds_flag_halo_neutral.dds" drawLevelOffsetBase="37"/>
+                    <MapPinType name="BGPIN_MURDERBALL_NEUTRAL" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)battlegrounds_murderball_neutral.dds" aboveTexture="$(MAP_PIN_PATH)battlegrounds_murderball_neutral.dds" belowTexture="$(MAP_PIN_PATH)battlegrounds_murderball_neutral.dds" drawLevelOffsetBase="38"/>
+                    <MapPinType name="BGPIN_MURDERBALL_FIRE_DRAKES" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)battlegrounds_murderball_orange.dds" aboveTexture="$(MAP_PIN_PATH)battlegrounds_murderball_orange.dds" belowTexture="$(MAP_PIN_PATH)battlegrounds_murderball_orange.dds" drawLevelOffsetBase="38"/>
+                    <MapPinType name="BGPIN_MURDERBALL_PIT_DAEMONS" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)battlegrounds_murderball_green.dds" aboveTexture="$(MAP_PIN_PATH)battlegrounds_murderball_green.dds" belowTexture="$(MAP_PIN_PATH)battlegrounds_murderball_green.dds" drawLevelOffsetBase="38"/>
+                    <MapPinType name="BGPIN_MURDERBALL_STORM_LORDS" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)battlegrounds_murderball_purple.dds" aboveTexture="$(MAP_PIN_PATH)battlegrounds_murderball_purple.dds" belowTexture="$(MAP_PIN_PATH)battlegrounds_murderball_purple.dds" drawLevelOffsetBase="38"/>
+                    <MapPinType name="ARTIFACT_ALDMERI_OFFENSIVE" pinSize="32" pinTexture="$(MAP_PIN_PATH)AvA_artifact_altadoon.dds" layer="TEXT" drawLevelOffsetBase="40"/>
+                    <MapPinType name="ARTIFACT_ALDMERI_DEFENSIVE" pinSize="32" pinTexture="$(MAP_PIN_PATH)AvA_artifact_mnem.dds" layer="TEXT" drawLevelOffsetBase="41"/>
+                    <MapPinType name="ARTIFACT_EBONHEART_OFFENSIVE" pinSize="32" pinTexture="$(MAP_PIN_PATH)AvA_artifact_ghartok.dds" layer="TEXT" drawLevelOffsetBase="42"/>
+                    <MapPinType name="ARTIFACT_EBONHEART_DEFENSIVE" pinSize="32" pinTexture="$(MAP_PIN_PATH)AvA_artifact_chim.dds" layer="TEXT" drawLevelOffsetBase="43"/>
+                    <MapPinType name="ARTIFACT_DAGGERFALL_OFFENSIVE" pinSize="32" pinTexture="$(MAP_PIN_PATH)AvA_artifact_nimohk.dds" layer="TEXT" drawLevelOffsetBase="44"/>
+                    <MapPinType name="ARTIFACT_DAGGERFALL_DEFENSIVE" pinSize="32" pinTexture="$(MAP_PIN_PATH)AvA_artifact_almaruma.dds" layer="TEXT" drawLevelOffsetBase="45"/>
+                    <MapPinType name="AVA_DAEDRIC_ARTIFACT_VOLENDRUNG_ALDMERI" pinSize="32" pinTexture="$(COMPASS_PATH)AvA_daedricArtifact_volendrung_aldmeri.dds" layer="TEXT" drawLevelOffsetBase="46"/>
+                    <MapPinType name="AVA_DAEDRIC_ARTIFACT_VOLENDRUNG_EBONHEART" pinSize="32" pinTexture="$(COMPASS_PATH)AvA_daedricArtifact_volendrung_ebonheart.dds" layer="TEXT" drawLevelOffsetBase="46"/>
+                    <MapPinType name="AVA_DAEDRIC_ARTIFACT_VOLENDRUNG_DAGGERFALL" pinSize="32" pinTexture="$(COMPASS_PATH)AvA_daedricArtifact_volendrung_daggerfall.dds" layer="TEXT" drawLevelOffsetBase="46"/>
+                    <MapPinType name="AVA_DAEDRIC_ARTIFACT_VOLENDRUNG_NEUTRAL" pinSize="32" pinTexture="$(COMPASS_PATH)AvA_daedricArtifact_volendrung_neutral.dds" layer="TEXT" drawLevelOffsetBase="46"/>
+                    <MapPinType name="AVA_CAPTURE_AREA_ALDMERI" pinSize="32" pinTexture="$(COMPASS_PATH)AvA_captureArea_Aldmeri.dds" drawLevelOffsetBase="50"/>
+                    <MapPinType name="AVA_CAPTURE_AREA_EBONHEART" pinSize="32" pinTexture="$(COMPASS_PATH)AvA_captureArea_Ebonheart.dds" drawLevelOffsetBase="50"/>
+                    <MapPinType name="AVA_CAPTURE_AREA_DAGGERFALL" pinSize="32" pinTexture="$(COMPASS_PATH)AvA_captureArea_Daggerfall.dds" drawLevelOffsetBase="50"/>
+                    <MapPinType name="AVA_CAPTURE_AREA_NEUTRAL" pinSize="32" pinTexture="$(COMPASS_PATH)AvA_captureArea_Neutral.dds" drawLevelOffsetBase="50"/>
+                    <MapPinType name="BGPIN_MOBILE_CAPTURE_AREA_FIRE_DRAKES" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)battlegrounds_mobileCapturePoint_pin_orange.dds" drawLevelOffsetBase="50"/>
+                    <MapPinType name="BGPIN_MOBILE_CAPTURE_AREA_PIT_DAEMONS" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)battlegrounds_mobileCapturePoint_pin_green.dds" drawLevelOffsetBase="50"/>
+                    <MapPinType name="BGPIN_MOBILE_CAPTURE_AREA_STORM_LORDS" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)battlegrounds_mobileCapturePoint_pin_purple.dds" drawLevelOffsetBase="50"/>
+                    <MapPinType name="BGPIN_MOBILE_CAPTURE_AREA_NEUTRAL" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)battlegrounds_mobileCapturePoint_pin_neutral.dds" drawLevelOffsetBase="50"/>
+                    <MapPinType name="BGPIN_MOBILE_CAPTURE_AREA_A_FIRE_DRAKES" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)battlegrounds_mobileCapturePoint_pin_orange_A.dds" drawLevelOffsetBase="50"/>
+                    <MapPinType name="BGPIN_MOBILE_CAPTURE_AREA_A_PIT_DAEMONS" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)battlegrounds_mobileCapturePoint_pin_green_A.dds" drawLevelOffsetBase="50"/>
+                    <MapPinType name="BGPIN_MOBILE_CAPTURE_AREA_A_STORM_LORDS" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)battlegrounds_mobileCapturePoint_pin_purple_A.dds" drawLevelOffsetBase="50"/>
+                    <MapPinType name="BGPIN_MOBILE_CAPTURE_AREA_A_NEUTRAL" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)battlegrounds_mobileCapturePoint_pin_neutral_A.dds" drawLevelOffsetBase="50"/>
+                    <MapPinType name="BGPIN_MOBILE_CAPTURE_AREA_B_FIRE_DRAKES" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)battlegrounds_mobileCapturePoint_pin_orange_B.dds" drawLevelOffsetBase="50"/>
+                    <MapPinType name="BGPIN_MOBILE_CAPTURE_AREA_B_PIT_DAEMONS" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)battlegrounds_mobileCapturePoint_pin_green_B.dds" drawLevelOffsetBase="50"/>
+                    <MapPinType name="BGPIN_MOBILE_CAPTURE_AREA_B_STORM_LORDS" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)battlegrounds_mobileCapturePoint_pin_purple_B.dds" drawLevelOffsetBase="50"/>
+                    <MapPinType name="BGPIN_MOBILE_CAPTURE_AREA_B_NEUTRAL" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)battlegrounds_mobileCapturePoint_pin_neutral_B.dds" drawLevelOffsetBase="50"/>
+                    <MapPinType name="BGPIN_MOBILE_CAPTURE_AREA_C_FIRE_DRAKES" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)battlegrounds_mobileCapturePoint_pin_orange_C.dds" drawLevelOffsetBase="50"/>
+                    <MapPinType name="BGPIN_MOBILE_CAPTURE_AREA_C_PIT_DAEMONS" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)battlegrounds_mobileCapturePoint_pin_green_C.dds" drawLevelOffsetBase="50"/>
+                    <MapPinType name="BGPIN_MOBILE_CAPTURE_AREA_C_STORM_LORDS" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)battlegrounds_mobileCapturePoint_pin_purple_C.dds" drawLevelOffsetBase="50"/>
+                    <MapPinType name="BGPIN_MOBILE_CAPTURE_AREA_C_NEUTRAL" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)battlegrounds_mobileCapturePoint_pin_neutral_C.dds" drawLevelOffsetBase="50"/>
+                    <MapPinType name="BGPIN_MOBILE_CAPTURE_AREA_D_FIRE_DRAKES" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)battlegrounds_mobileCapturePoint_pin_orange_D.dds" drawLevelOffsetBase="50"/>
+                    <MapPinType name="BGPIN_MOBILE_CAPTURE_AREA_D_PIT_DAEMONS" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)battlegrounds_mobileCapturePoint_pin_green_D.dds" drawLevelOffsetBase="50"/>
+                    <MapPinType name="BGPIN_MOBILE_CAPTURE_AREA_D_STORM_LORDS" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)battlegrounds_mobileCapturePoint_pin_purple_D.dds" drawLevelOffsetBase="50"/>
+                    <MapPinType name="BGPIN_MOBILE_CAPTURE_AREA_D_NEUTRAL" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)battlegrounds_mobileCapturePoint_pin_neutral_D.dds" drawLevelOffsetBase="50"/>
+                    <MapPinType name="BGPIN_CAPTURE_AREA_FIRE_DRAKES" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)battlegrounds_capturePoint_pin_orange.dds" drawLevelOffsetBase="50"/>
+                    <MapPinType name="BGPIN_CAPTURE_AREA_PIT_DAEMONS" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)battlegrounds_capturePoint_pin_green.dds" drawLevelOffsetBase="50"/>
+                    <MapPinType name="BGPIN_CAPTURE_AREA_STORM_LORDS" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)battlegrounds_capturePoint_pin_purple.dds" drawLevelOffsetBase="50"/>
+                    <MapPinType name="BGPIN_CAPTURE_AREA_NEUTRAL" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)battlegrounds_capturePoint_pin_neutral.dds" drawLevelOffsetBase="50"/>
+                    <MapPinType name="BGPIN_CAPTURE_AREA_A_FIRE_DRAKES" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)battlegrounds_multiCapturePoint_A_pin_orange.dds" drawLevelOffsetBase="50"/>
+                    <MapPinType name="BGPIN_CAPTURE_AREA_A_PIT_DAEMONS" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)battlegrounds_multiCapturePoint_A_pin_green.dds" drawLevelOffsetBase="50"/>
+                    <MapPinType name="BGPIN_CAPTURE_AREA_A_STORM_LORDS" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)battlegrounds_multiCapturePoint_A_pin_purple.dds" drawLevelOffsetBase="50"/>
+                    <MapPinType name="BGPIN_CAPTURE_AREA_A_NEUTRAL" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)battlegrounds_multiCapturePoint_A_pin_neutral.dds" drawLevelOffsetBase="50"/>
+                    <MapPinType name="BGPIN_CAPTURE_AREA_B_FIRE_DRAKES" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)battlegrounds_multiCapturePoint_B_pin_orange.dds" drawLevelOffsetBase="50"/>
+                    <MapPinType name="BGPIN_CAPTURE_AREA_B_PIT_DAEMONS" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)battlegrounds_multiCapturePoint_B_pin_green.dds" drawLevelOffsetBase="50"/>
+                    <MapPinType name="BGPIN_CAPTURE_AREA_B_STORM_LORDS" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)battlegrounds_multiCapturePoint_B_pin_purple.dds" drawLevelOffsetBase="50"/>
+                    <MapPinType name="BGPIN_CAPTURE_AREA_B_NEUTRAL" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)battlegrounds_multiCapturePoint_B_pin_neutral.dds" drawLevelOffsetBase="50"/>
+                    <MapPinType name="BGPIN_CAPTURE_AREA_C_FIRE_DRAKES" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)battlegrounds_multiCapturePoint_C_pin_orange.dds" drawLevelOffsetBase="50"/>
+                    <MapPinType name="BGPIN_CAPTURE_AREA_C_PIT_DAEMONS" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)battlegrounds_multiCapturePoint_C_pin_green.dds" drawLevelOffsetBase="50"/>
+                    <MapPinType name="BGPIN_CAPTURE_AREA_C_STORM_LORDS" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)battlegrounds_multiCapturePoint_C_pin_purple.dds" drawLevelOffsetBase="50"/>
+                    <MapPinType name="BGPIN_CAPTURE_AREA_C_NEUTRAL" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)battlegrounds_multiCapturePoint_C_pin_neutral.dds" drawLevelOffsetBase="50"/>
+                    <MapPinType name="BGPIN_CAPTURE_AREA_D_FIRE_DRAKES" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)battlegrounds_multiCapturePoint_D_pin_orange.dds" drawLevelOffsetBase="50"/>
+                    <MapPinType name="BGPIN_CAPTURE_AREA_D_PIT_DAEMONS" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)battlegrounds_multiCapturePoint_D_pin_green.dds" drawLevelOffsetBase="50"/>
+                    <MapPinType name="BGPIN_CAPTURE_AREA_D_STORM_LORDS" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)battlegrounds_multiCapturePoint_D_pin_purple.dds" drawLevelOffsetBase="50"/>
+                    <MapPinType name="BGPIN_CAPTURE_AREA_D_NEUTRAL" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)battlegrounds_multiCapturePoint_D_pin_neutral.dds" drawLevelOffsetBase="50"/>
+                    <MapPinType name="AVA_CAPTURE_AREA_AURA" pinSize="32" pinTexture="$(COMPASS_PATH)captureArea_halo.dds" drawLevelOffsetBase="51"/>
+                    <MapPinType name="BGPIN_CAPTURE_AREA_AURA" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)battlegrounds_capturePoint_halo.dds" drawLevelOffsetBase="51"/>
+                    <MapPinType name="BGPIN_MOBILE_CAPTURE_AREA_AURA" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)battlegrounds_mobileCapturePoint_halo.dds" drawLevelOffsetBase="51"/>
+                    <MapPinType name="BGPIN_FLAG_SPAWN_FIRE_DRAKES" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)battlegrounds_flagSpawn_pin_orange.dds" drawLevelOffsetBase="60"/>
+                    <MapPinType name="BGPIN_FLAG_SPAWN_PIT_DAEMONS" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)battlegrounds_flagSpawn_pin_green.dds" drawLevelOffsetBase="60"/>
+                    <MapPinType name="BGPIN_FLAG_SPAWN_STORM_LORDS" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)battlegrounds_flagSpawn_pin_purple.dds" drawLevelOffsetBase="60"/>
+                    <MapPinType name="BGPIN_FLAG_SPAWN_NEUTRAL" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)battlegrounds_flagSpawn_pin_neutral.dds" drawLevelOffsetBase="60"/>
+                    <MapPinType name="BGPIN_MURDERBALL_SPAWN_NEUTRAL" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)battlegrounds_murderballSpawn_pin_neutral.dds" drawLevelOffsetBase="60"/>
+                    <MapPinType name="BGPIN_FLAG_RETURN_FIRE_DRAKES" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)battlegrounds_returnPoint_pin_orange.dds" drawLevelOffsetBase="65"/>
+                    <MapPinType name="BGPIN_FLAG_RETURN_PIT_DAEMONS" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)battlegrounds_returnPoint_pin_green.dds" drawLevelOffsetBase="65"/>
+                    <MapPinType name="BGPIN_FLAG_RETURN_STORM_LORDS" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)battlegrounds_returnPoint_pin_purple.dds" drawLevelOffsetBase="65"/>
+                    <MapPinType name="KEEP_NEUTRAL" pinSize="32" pinTexture="$(COMPASS_PATH)AvA_largeKeep_neutral.dds" drawLevelOffsetBase="80"/>
+                    <MapPinType name="KEEP_ALDMERI_DOMINION" pinSize="32" pinTexture="$(COMPASS_PATH)AvA_largeKeep_Aldmeri.dds" drawLevelOffsetBase="80"/>
+                    <MapPinType name="KEEP_EBONHEART_PACT" pinSize="32" pinTexture="$(COMPASS_PATH)AvA_largeKeep_Ebonheart.dds" drawLevelOffsetBase="80"/>
+                    <MapPinType name="KEEP_DAGGERFALL_COVENANT" pinSize="32" pinTexture="$(COMPASS_PATH)AvA_largeKeep_Daggerfall.dds" drawLevelOffsetBase="80"/>
+                    <MapPinType name="BORDER_KEEP_ALDMERI_DOMINION" pinSize="32" pinTexture="$(MAP_PIN_PATH)AvA_borderKeep_pin_aldmeri.dds" drawLevelOffsetBase="80"/>
+                    <MapPinType name="BORDER_KEEP_EBONHEART_PACT" pinSize="32" pinTexture="$(MAP_PIN_PATH)AvA_borderKeep_pin_ebonheart.dds" drawLevelOffsetBase="80"/>
+                    <MapPinType name="BORDER_KEEP_DAGGERFALL_COVENANT" pinSize="32" pinTexture="$(MAP_PIN_PATH)AvA_borderKeep_pin_daggerfall.dds" drawLevelOffsetBase="80"/>
+                    <MapPinType name="OUTPOST_NEUTRAL" pinSize="32" pinTexture="$(MAP_PIN_PATH)AvA_outpost_neutral.dds" drawLevelOffsetBase="80"/>
+                    <MapPinType name="OUTPOST_ALDMERI_DOMINION" pinSize="32" pinTexture="$(MAP_PIN_PATH)AvA_outpost_aldmeri.dds" drawLevelOffsetBase="80"/>
+                    <MapPinType name="OUTPOST_EBONHEART_PACT" pinSize="32" pinTexture="$(MAP_PIN_PATH)AvA_outpost_ebonheart.dds" drawLevelOffsetBase="80"/>
+                    <MapPinType name="OUTPOST_DAGGERFALL_COVENANT" pinSize="32" pinTexture="$(MAP_PIN_PATH)AvA_outpost_daggerfall.dds" drawLevelOffsetBase="80"/>
+                    <MapPinType name="ARTIFACT_GATE_OPEN_ALDMERI_DOMINION" pinSize="32" pinTexture="$(COMPASS_PATH)AvA_artifactGate_aldmeri_open.dds" drawLevelOffsetBase="80"/>
+                    <MapPinType name="ARTIFACT_GATE_CLOSED_ALDMERI_DOMINION" pinSize="32" pinTexture="$(COMPASS_PATH)AvA_artifactGate_aldmeri_closed.dds" drawLevelOffsetBase="80"/>
+                    <MapPinType name="ARTIFACT_GATE_OPEN_EBONHEART_PACT" pinSize="32" pinTexture="$(COMPASS_PATH)AvA_artifactGate_ebonheart_open.dds" drawLevelOffsetBase="80"/>
+                    <MapPinType name="ARTIFACT_GATE_CLOSED_EBONHEART_PACT" pinSize="32" pinTexture="$(COMPASS_PATH)AvA_artifactGate_ebonheart_closed.dds" drawLevelOffsetBase="80"/>
+                    <MapPinType name="ARTIFACT_GATE_OPEN_DAGGERFALL_COVENANT" pinSize="32" pinTexture="$(COMPASS_PATH)AvA_artifactGate_daggerfall_open.dds" drawLevelOffsetBase="80"/>
+                    <MapPinType name="ARTIFACT_GATE_CLOSED_DAGGERFALL_COVENANT" pinSize="32" pinTexture="$(COMPASS_PATH)AvA_artifactGate_daggerfall_closed.dds" drawLevelOffsetBase="80"/>
+                    <MapPinType name="ARTIFACT_KEEP_ALDMERI_DOMINION" pinSize="32" pinTexture="$(COMPASS_PATH)AvA_artifactTemple_Aldmeri.dds" drawLevelOffsetBase="80"/>
+                    <MapPinType name="ARTIFACT_KEEP_EBONHEART_PACT" pinSize="32" pinTexture="$(COMPASS_PATH)AvA_artifactTemple_Ebonheart.dds" drawLevelOffsetBase="80"/>
+                    <MapPinType name="ARTIFACT_KEEP_DAGGERFALL_COVENANT" pinSize="32" pinTexture="$(COMPASS_PATH)AvA_artifactTemple_Daggerfall.dds" drawLevelOffsetBase="80"/>
+                    <MapPinType name="IMPERIAL_DISTRICT_NEUTRAL" pinSize="32" pinTexture="$(MAP_PIN_PATH)AvA_imperialDistrict_Neutral.dds" drawLevelOffsetBase="80"/>
+                    <MapPinType name="IMPERIAL_DISTRICT_ALDMERI_DOMINION" pinSize="32" pinTexture="$(MAP_PIN_PATH)AvA_imperialDistrict_Aldmeri.dds" drawLevelOffsetBase="80"/>
+                    <MapPinType name="IMPERIAL_DISTRICT_EBONHEART_PACT" pinSize="32" pinTexture="$(MAP_PIN_PATH)AvA_imperialDistrict_Ebonheart.dds" drawLevelOffsetBase="80"/>
+                    <MapPinType name="IMPERIAL_DISTRICT_DAGGERFALL_COVENANT" pinSize="32" pinTexture="$(MAP_PIN_PATH)AvA_imperialDistrict_Daggerfall.dds" drawLevelOffsetBase="80"/>
+                    <MapPinType name="AVA_TOWN_NEUTRAL" pinSize="32" pinTexture="$(MAP_PIN_PATH)AvA_town_Neutral.dds" drawLevelOffsetBase="80"/>
+                    <MapPinType name="AVA_TOWN_ALDMERI_DOMINION" pinSize="32" pinTexture="$(MAP_PIN_PATH)AvA_town_Aldmeri.dds" drawLevelOffsetBase="80"/>
+                    <MapPinType name="AVA_TOWN_EBONHEART_PACT" pinSize="32" pinTexture="$(MAP_PIN_PATH)AvA_town_Ebonheart.dds" drawLevelOffsetBase="80"/>
+                    <MapPinType name="AVA_TOWN_DAGGERFALL_COVENANT" pinSize="32" pinTexture="$(MAP_PIN_PATH)AvA_town_Daggerfall.dds" drawLevelOffsetBase="80"/>
+                    <MapPinType name="FARM_NEUTRAL" pinSize="32" pinTexture="$(MAP_PIN_PATH)AvA_farm_Neutral.dds" drawLevelOffsetBase="90"/>
+                    <MapPinType name="FARM_ALDMERI_DOMINION" pinSize="32" pinTexture="$(MAP_PIN_PATH)AvA_farm_Aldmeri.dds" drawLevelOffsetBase="90"/>
+                    <MapPinType name="FARM_EBONHEART_PACT" pinSize="32" pinTexture="$(MAP_PIN_PATH)AvA_farm_Ebonheart.dds" drawLevelOffsetBase="90"/>
+                    <MapPinType name="FARM_DAGGERFALL_COVENANT" pinSize="32" pinTexture="$(MAP_PIN_PATH)AvA_farm_Daggerfall.dds" drawLevelOffsetBase="90"/>
+                    <MapPinType name="MINE_NEUTRAL" pinSize="32" pinTexture="$(MAP_PIN_PATH)AvA_mine_Neutral.dds" drawLevelOffsetBase="90"/>
+                    <MapPinType name="MINE_ALDMERI_DOMINION" pinSize="32" pinTexture="$(MAP_PIN_PATH)AvA_mine_Aldmeri.dds" drawLevelOffsetBase="90"/>
+                    <MapPinType name="MINE_EBONHEART_PACT" pinSize="32" pinTexture="$(MAP_PIN_PATH)AvA_mine_Ebonheart.dds" drawLevelOffsetBase="90"/>
+                    <MapPinType name="MINE_DAGGERFALL_COVENANT" pinSize="32" pinTexture="$(MAP_PIN_PATH)AvA_mine_Daggerfall.dds" drawLevelOffsetBase="90"/>
+                    <MapPinType name="MILL_NEUTRAL" pinSize="32" pinTexture="$(MAP_PIN_PATH)AvA_lumbermill_Neutral.dds" drawLevelOffsetBase="90"/>
+                    <MapPinType name="MILL_ALDMERI_DOMINION" pinSize="32" pinTexture="$(MAP_PIN_PATH)AvA_lumbermill_Aldmeri.dds" drawLevelOffsetBase="90"/>
+                    <MapPinType name="MILL_EBONHEART_PACT" pinSize="32" pinTexture="$(MAP_PIN_PATH)AvA_lumbermill_Ebonheart.dds" drawLevelOffsetBase="90"/>
+                    <MapPinType name="MILL_DAGGERFALL_COVENANT" pinSize="32" pinTexture="$(MAP_PIN_PATH)AvA_lumbermill_Daggerfall.dds" drawLevelOffsetBase="90"/>
+                    <MapPinType name="KEEP_ATTACKED_LARGE" pinSize="32" pinTexture="$(MAP_PIN_PATH)AvA_attackBurst_32.dds" drawLevelOffsetBase="95"/>
+                    <MapPinType name="KEEP_BRIDGE" pinSize="32" pinTexture="$(COMPASS_PATH)AvA_bridge_passable.dds" drawLevelOffsetBase="80"/>
+                    <MapPinType name="KEEP_BRIDGE_IMPASSABLE" pinSize="32" pinTexture="$(COMPASS_PATH)AvA_bridge_not_passable.dds" drawLevelOffsetBase="80"/>
+                    <MapPinType name="KEEP_MILEGATE" pinSize="32" pinTexture="$(COMPASS_PATH)AvA_milegate_passable.dds" drawLevelOffsetBase="80"/>
+                    <MapPinType name="KEEP_MILEGATE_CENTER_DESTROYED" pinSize="32" pinTexture="$(COMPASS_PATH)AvA_milegate_center_destroyed.dds" drawLevelOffsetBase="80"/>
+                    <MapPinType name="KEEP_MILEGATE_IMPASSABLE" pinSize="32" pinTexture="$(COMPASS_PATH)AvA_milegate_not_passable.dds" drawLevelOffsetBase="80"/>
+                    <!-- TODO Minimap: allowUpdatesWhenAnimating -->
+                    <MapPinType name="PING" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)MapPing.dds" animation="MapPing" drawLevelOffsetBase="127"/>
+                    <!-- TODO Minimap: allowUpdatesWhenAnimating -->
+                    <MapPinType name="RALLY_POINT" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)MapRallyPoint.dds" animation="MapPing" drawLevelOffsetBase="128"/>
+                    <MapPinType name="PLAYER_WAYPOINT" arrowType="GUTTER" pinSize="32" pinTexture="$(COMPASS_PATH)compass_waypoint_white.dds" layer="OVERLAY" drawLevelOffsetBase="129"/>
+                    <MapPinType name="TRI_BATTLE_SMALL" pinSize="16" pinTexture="$(MAP_PIN_PATH)AvA_3Way.dds" drawLevelOffsetBase="130"/>
+                    <MapPinType name="TRI_BATTLE_MEDIUM" pinSize="20" pinTexture="$(MAP_PIN_PATH)AvA_3Way.dds" drawLevelOffsetBase="131"/>
+                    <MapPinType name="TRI_BATTLE_LARGE" pinSize="24" pinTexture="$(MAP_PIN_PATH)AvA_3Way.dds" drawLevelOffsetBase="132"/>
+                    <MapPinType name="TARGET_MARKER_TYPE_ONE" arrowType="GUTTER" pinSize="24" pinTexture="$(COMPASS_PATH)Target_Blue_Square.dds" layer="OVERLAY" drawLevelOffsetBase="129"/>
+                    <MapPinType name="TARGET_MARKER_TYPE_TWO" arrowType="GUTTER" pinSize="24" pinTexture="$(COMPASS_PATH)Target_Gold_Star.dds" layer="OVERLAY" drawLevelOffsetBase="129"/>
+                    <MapPinType name="TARGET_MARKER_TYPE_THREE" arrowType="GUTTER" pinSize="24" pinTexture="$(COMPASS_PATH)Target_Green_Circle.dds" layer="OVERLAY" drawLevelOffsetBase="129"/>
+                    <MapPinType name="TARGET_MARKER_TYPE_FOUR" arrowType="GUTTER" pinSize="24" pinTexture="$(COMPASS_PATH)Target_Orange_Triangle.dds" layer="OVERLAY" drawLevelOffsetBase="129"/>
+                    <MapPinType name="TARGET_MARKER_TYPE_FIVE" arrowType="GUTTER" pinSize="24" pinTexture="$(COMPASS_PATH)Target_Pink_Moons.dds" layer="OVERLAY" drawLevelOffsetBase="129"/>
+                    <MapPinType name="TARGET_MARKER_TYPE_SIX" arrowType="GUTTER" pinSize="24" pinTexture="$(COMPASS_PATH)Target_Purple_Oblivion.dds" layer="OVERLAY" drawLevelOffsetBase="129"/>
+                    <MapPinType name="TARGET_MARKER_TYPE_SEVEN" arrowType="GUTTER" pinSize="24" pinTexture="$(COMPASS_PATH)Target_Red_Weapons.dds" layer="OVERLAY" drawLevelOffsetBase="129"/>
+                    <MapPinType name="TARGET_MARKER_TYPE_EIGHT" arrowType="GUTTER" pinSize="24" pinTexture="$(COMPASS_PATH)Target_White_Skull.dds" layer="OVERLAY" drawLevelOffsetBase="129"/>
+                    <MapPinType name="SCRIPTED_EVENT" pinSize="32" pinTexture="EsoUI/Art/FloatingMarkers/interactableObject_icon_assisted.dds" aboveTexture="EsoUI/Art/FloatingMarkers/interactableObject_icon_assisted.dds" belowTexture="EsoUI/Art/FloatingMarkers/interactableObject_icon_assisted.dds" layer="OVERLAY" drawLevelOffsetBase="3"/>
+                    <MapPinType name="ALDMERI_VS_EBONHEART_SMALL" pinSize="16" pinTexture="$(MAP_PIN_PATH)AvA_AldmeriVEbonheart.dds" drawLevelOffsetBase="133"/>
+                    <MapPinType name="ALDMERI_VS_EBONHEART_MEDIUM" pinSize="20" pinTexture="$(MAP_PIN_PATH)AvA_AldmeriVEbonheart.dds" drawLevelOffsetBase="134"/>
+                    <MapPinType name="ALDMERI_VS_EBONHEART_LARGE" pinSize="24" pinTexture="$(MAP_PIN_PATH)AvA_AldmeriVEbonheart.dds" drawLevelOffsetBase="135"/>
+                    <MapPinType name="ALDMERI_VS_DAGGERFALL_SMALL" pinSize="16" pinTexture="$(MAP_PIN_PATH)AvA_AldmeriVDaggerfall.dds" drawLevelOffsetBase="136"/>
+                    <MapPinType name="ALDMERI_VS_DAGGERFALL_MEDIUM" pinSize="20" pinTexture="$(MAP_PIN_PATH)AvA_AldmeriVDaggerfall.dds" drawLevelOffsetBase="137"/>
+                    <MapPinType name="ALDMERI_VS_DAGGERFALL_LARGE" pinSize="24" pinTexture="$(MAP_PIN_PATH)AvA_AldmeriVDaggerfall.dds" drawLevelOffsetBase="138"/>
+                    <MapPinType name="EBONHEART_VS_DAGGERFALL_SMALL" pinSize="16" pinTexture="$(MAP_PIN_PATH)AvA_EbonheartVDaggerfall.dds" drawLevelOffsetBase="139"/>
+                    <MapPinType name="EBONHEART_VS_DAGGERFALL_MEDIUM" pinSize="20" pinTexture="$(MAP_PIN_PATH)AvA_EbonheartVDaggerfall.dds" drawLevelOffsetBase="140"/>
+                    <MapPinType name="EBONHEART_VS_DAGGERFALL_LARGE" pinSize="24" pinTexture="$(MAP_PIN_PATH)AvA_EbonheartVDaggerfall.dds" drawLevelOffsetBase="141"/>
+                    <MapPinType name="AGGRO" pinSize="24" pinTexture="$(MAP_PIN_PATH)hostile_pin.dds" layer="OVERLAY" drawLevelOffsetBase="161"/>
+                    <MapPinType name="TIMELY_ESCAPE_NPC" pinSize="32" pinTexture="$(COMPASS_PATH)timely_escape_npc.dds" layer="OVERLAY" drawLevelOffsetBase="162"/>
+                    <MapPinType name="ZONE_STORY_SUGGESTED_AREA" areaTexture="$(MAP_PIN_PATH)map_areaPin.dds" drawLevelOffsetBase="200"/>
+                    <MapPinType name="WORLD_EVENT_MAP_LOCATION_ACTIVE" drawLevelOffsetBase="3"/>
+                    <!-- TODO Minimap: Figure out why this isn't working -->
+                    <OnMouseWheel>
+                        if delta &gt; 0 then
+                            MINIMAP:Zoom(ZO_MINIMAP_ZOOM_IN)
+                        else
+                            MINIMAP:Zoom(ZO_MINIMAP_ZOOM_OUT)
+                        end
+                    </OnMouseWheel>
+                    <!-- TODO Minimap: Figure out why this isn't working -->
+                    <OnMouseDown>
+                        MINIMAP:MouseDown(button, ctrl, alt, shift)
+                    </OnMouseDown>
+                </MapDisplay>
+                <Control name="$(parent)Frame" tier="LOW">
+                    <Dimensions x="320" y="320"/>
+                    <Anchor point="TOP" offsetX="6" offsetY="-18"/>
+                    <Controls>
+                        <Texture name="$(parent)TopLeft" textureFile="EsoUI/Art/Minimap/minimap_frame_topLeft.dds" layer="CONTROLS" level="1">
+                            <Dimensions x="256" y="256"/>
+                            <Anchor point="TOPLEFT"/>
+                        </Texture>
+                        <Texture name="$(parent)TopRight" textureFile="EsoUI/Art/Minimap/minimap_frame_topRight.dds" layer="CONTROLS" level="1">
+                            <Dimensions x="64" y="256"/>
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)TopLeft" relativePoint="TOPRIGHT"/>
+                        </Texture>
+                        <Texture name="$(parent)BottomLeft" textureFile="EsoUI/Art/Minimap/minimap_frame_bottomLeft.dds" layer="CONTROLS" level="1">
+                            <Dimensions x="256" y="64"/>
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)TopLeft" relativePoint="BOTTOMLEFT"/>
+                        </Texture>
+                        <Texture name="$(parent)BottomRight" textureFile="EsoUI/Art/Minimap/minimap_frame_bottomRight.dds" layer="CONTROLS" level="1">
+                            <Dimensions x="64" y="64"/>
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)BottomLeft" relativePoint="TOPRIGHT"/>
+                        </Texture>
+                    </Controls>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

@@ -3,12 +3,9 @@ ZO_GAMEPAD_PLAYER_INVENTORY_FOOTER_SCREEN_EDGE_OFFSET_Y = -61
 
 ZO_Gamepad_PlayerInventoryFooterFragment = ZO_FadeSceneFragment:Subclass()
 
-function ZO_Gamepad_PlayerInventoryFooterFragment:New(...)
-    return ZO_FadeSceneFragment.New(self, ...)
-end
-
 function ZO_Gamepad_PlayerInventoryFooterFragment:Initialize(...)
-    ZO_AnimatedSceneFragment.Initialize(self, ...)
+    ZO_FadeSceneFragment.Initialize(self, ...)
+
     self.capacityAmountLabel = self.control:GetNamedChild("InventoryCapacityAmount")
 
     local function CapacityUpdate()
@@ -32,6 +29,6 @@ do
     local FORCE_CAPACITY_UPDATE = true
     function ZO_Gamepad_PlayerInventoryFooterFragment:Show()
         self:CapacityUpdate(FORCE_CAPACITY_UPDATE)
-        ZO_AnimatedSceneFragment.Show(self)
+        ZO_FadeSceneFragment.Show(self)
     end
 end

@@ -1,9 +1,5 @@
 local ZO_HUDFragment = ZO_SceneFragment:Subclass()
 
-function ZO_HUDFragment:New(...)
-    return ZO_SceneFragment.New(self, ...)
-end
-
 function ZO_HUDFragment:Initialize(...)
     ZO_SceneFragment.Initialize(self, ...)
 
@@ -57,10 +53,6 @@ HUD_FRAGMENT = ZO_HUDFragment:New()
 
 local ZO_ReticleModeFragment = ZO_SceneFragment:Subclass()
 
-function ZO_ReticleModeFragment:New()
-    return ZO_SceneFragment.New(self)
-end
-
 function ZO_ReticleModeFragment:Show()
     PLAYER_TO_PLAYER:SetTopLevelHidden(false)
     self:OnShown()
@@ -113,6 +105,7 @@ local HUD_FRAGMENT_GROUP =
     TIMED_ACTIVITY_TRACKER_FRAGMENT,
     ACHIEVEMENT_TRACKER_FRAGMENT,
     SPECTATOR_CAMERA_ACTION_LAYER_FRAGMENT,
+    MINIMAP_FRAGMENT,
 }
 
 ZO_NO_DEAD_FRAGMENTS =
@@ -138,6 +131,7 @@ ZO_NO_DEAD_FRAGMENTS =
     HOUSING_EDITOR_INSPECTION_HUD_FRAGMENT,
     TIMED_ACTIVITY_TRACKER_FRAGMENT,
     ACHIEVEMENT_TRACKER_FRAGMENT,
+    MINIMAP_FRAGMENT,
 }
 
 local DEAD_ONLY_FRAGMENTS =

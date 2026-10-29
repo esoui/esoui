@@ -128,7 +128,7 @@ function ZO_PromotionalEventActivity_Entry_Shared:SetActivityData(activityData)
 
     local progress = self.activityData:GetProgress()
     local completionThreshold = self.activityData:GetCompletionThreshold()
-    local progressText = zo_strformat(SI_TIMED_ACTIVITIES_ACTIVITY_COMPLETION_VALUES, ZO_CommaDelimitNumber(progress), ZO_CommaDelimitNumber(completionThreshold))
+    local progressText = zo_strformat(SI_CURRENT_AND_MAX_VALUES_FORMATTER, progress, completionThreshold)
     self.progressStatusBar:SetValue(progress / completionThreshold)
     self.progressStatusBar.progress:SetText(progressText)
     self:Refresh()
@@ -136,7 +136,7 @@ end
 
 function ZO_PromotionalEventActivity_Entry_Shared:OnProgressUpdated(previousProgress, newProgress, rewardFlags)
     local completionThreshold = self.activityData:GetCompletionThreshold()
-    local progressText = zo_strformat(SI_TIMED_ACTIVITIES_ACTIVITY_COMPLETION_VALUES, ZO_CommaDelimitNumber(newProgress), ZO_CommaDelimitNumber(completionThreshold))
+    local progressText = zo_strformat(SI_CURRENT_AND_MAX_VALUES_FORMATTER, newProgress, completionThreshold)
     self.progressStatusBar:SetValue(newProgress / completionThreshold)
     self.progressStatusBar.progress:SetText(progressText)
     self.rewardControl.object:Refresh()
@@ -432,7 +432,7 @@ function ZO_PromotionalEvents_Shared:RefreshCampaignPanel(rebuild)
 
         local completedActivities = self.currentCampaignData:GetNumActivitiesCompleted()
         local capstoneThreshold = self.currentCampaignData:GetCapstoneRewardThreshold()
-        local progressText = zo_strformat(SI_TIMED_ACTIVITIES_ACTIVITY_COMPLETION_VALUES, ZO_CommaDelimitNumber(completedActivities), ZO_CommaDelimitNumber(capstoneThreshold))
+        local progressText = zo_strformat(SI_CURRENT_AND_MAX_VALUES_FORMATTER, completedActivities, capstoneThreshold)
         self.campaignProgress:SetValue(completedActivities / capstoneThreshold)
         self.campaignProgress.progress:SetText(progressText)
 
@@ -751,10 +751,17 @@ function ZO_PromotionalEvents_Shared:ScrollToFirstClaimableReward()
     local activityData, activityDataIndex = ZO_ScrollList_FindDataByQuery(self.activityList, ActivityQuery)
     if activityData then
         claimableActivityData = activityData.data
-        ZO_ScrollList_ScrollDataIntoView(self.activityList, activityDataIndex)
+        local function OnScrollCompleted()
+            self:OnActivityListScrollCompleted()
+        end
+        ZO_ScrollList_ScrollDataIntoView(self.activityList, activityDataIndex, OnScrollCompleted)
     end
 
     return claimableMilestoneData, claimableCapstoneData, claimableActivityData -- For override behavior
+end
+
+function ZO_PromotionalEvents_Shared:OnActivityListScrollCompleted()
+    -- Optional override
 end
 
 ZO_PromotionalEvents_Shared:MUST_IMPLEMENT("InitializeActivityFinderCategory")

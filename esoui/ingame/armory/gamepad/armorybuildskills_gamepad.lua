@@ -173,6 +173,9 @@ function ZO_ArmoryBuildSkills_Gamepad:SortScrollList()
                             headerText = zo_strformat(SI_GAMEPAD_ARMORY_SKILL_BAR_FORMATTER, GetString("SI_HOTBARCATEGORY", hotbarCategory))
                         end
 
+                        -- Builds can have different crafted ability configurations, so refresh the potential underlying ability
+                        -- before trying to get the name/icon or layout any tooltips
+                        skillProgressionData:RefreshDynamicData()
                         local name = skillProgressionData:GetFormattedName()
                         local entryData = ZO_GamepadEntryData:New(name, skillProgressionData:GetIcon())
                         entryData.hotbarCategory = hotbarCategory

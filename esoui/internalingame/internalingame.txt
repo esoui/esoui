@@ -29,10 +29,6 @@ EsoUI\InternalIngame\Globals\MarketDialogs.xml
 EsoUI\InternalIngame\Market\Gamepad\MarketDialogs_Gamepad.lua
 EsoUI\InternalIngame\Market\Gamepad\MarketDialogs_Gamepad.xml
 
-EsoUI\InternalIngame\ChapterUpgrade\ChapterUpgradeUtils.lua
-EsoUI\InternalIngame\ChapterUpgrade\Keyboard\ChapterUpgrade_Keyboard.lua
-EsoUI\InternalIngame\ChapterUpgrade\Keyboard\ChapterUpgrade_Keyboard.xml
-
 EsoUI\InternalIngame\Market\MarketColorDefs.lua
 EsoUI\InternalIngame\Market\MarketProductData.lua
 EsoUI\InternalIngame\Market\Market_Manager.lua

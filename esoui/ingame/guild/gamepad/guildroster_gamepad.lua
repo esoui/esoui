@@ -64,7 +64,7 @@ function ZO_GamepadGuildRosterManager:PerformDeferredInitialization()
             callback = function() ZO_ShowConsoleInviteToGuildFromUserListSelector(GUILD_ROSTER_MANAGER:GetGuildId()) end,
 
             visible = function()
-                return GetNumberConsoleFriends() > 0 and DoesPlayerHaveGuildPermission(GUILD_ROSTER_MANAGER:GetGuildId(), GUILD_PERMISSION_INVITE)
+                return HasConsoleFriends() and DoesPlayerHaveGuildPermission(GUILD_ROSTER_MANAGER:GetGuildId(), GUILD_PERMISSION_INVITE)
             end
         }
 
@@ -330,9 +330,8 @@ function ZO_GamepadGuildRosterManager:BuildLeaveGuildOption()
     local callback = function()
         local data = {
             hideSceneOnLeave = true
-        }   
-        local IS_GAMEPAD = true
-        ZO_ShowLeaveGuildDialog(self.guildId, data, IS_GAMEPAD)
+        }
+        ZO_ShowLeaveGuildDialog(self.guildId, data)
     end
     return self:BuildOptionEntry(nil, SI_GUILD_LEAVE, callback)
 end

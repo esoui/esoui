@@ -8,6 +8,8 @@ function ZO_ArmoryBuildOverview_Gamepad:Initialize(control)
                                                 function(oldState, newState)
                                                     if newState == SCENE_FRAGMENT_SHOWING then
                                                         self:OnShowing()
+                                                    elseif newState == SCENE_FRAGMENT_HIDDEN then
+                                                        ClearTemporaryCraftedAbilityScriptSelectionsForBuild()
                                                     end
                                                 end)
 
@@ -66,6 +68,8 @@ do
             self:ReleaseAllEquipmentControls()
 
             ZO_ClearNumericallyIndexedTable(self.equipmentEntryData)
+
+            SetTemporaryCraftedAbilityScriptSelectionsForBuild(self.armoryBuildData:GetBuildIndex())
 
             -- Setup the skills row data
             local totalSkillPoints = self.armoryBuildData:GetSkillsTotalSpentPoints()

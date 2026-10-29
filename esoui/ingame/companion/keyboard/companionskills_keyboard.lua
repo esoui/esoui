@@ -190,13 +190,8 @@ function ZO_CompanionSkills_Keyboard:RegisterForEvents()
 end
 
 do
-
+    -- TODO AnimalCompanion: add ZO_CompanionSkillLineData.IsSkillTypeActiveCompanionUsable to list if data can't be setup right
     local AVAILABLE_COMPANION_SKILLS_FILTER = { ZO_CompanionSkillLineData.IsAvailableOrAdvised }
-
-
-
-
-
     function ZO_CompanionSkills_Keyboard:RefreshSkillLines()
         self.skillLinesTree:Reset()
         for _, skillTypeData in COMPANION_SKILLS_DATA_MANAGER:SkillTypeIterator() do

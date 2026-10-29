@@ -15,6 +15,7 @@ local CREATE_BUCKET_WINDOW_DATA =
                 CharacterCreateSetIdlePosture()
             end
             SetCharacterCameraZoomAmount(-1)
+            CharacterCreateQueueClassFxRemoval()
         end,
     },
 
@@ -44,6 +45,7 @@ local CREATE_BUCKET_WINDOW_DATA =
         previousTab = CREATE_BUCKET_CLASS,
         onExpandFn = function()
             SetCharacterCameraZoomAmount(-1)
+            CharacterCreateQueueClassFxRemoval()
         end,
 
         subCategoryData =
@@ -66,6 +68,7 @@ local CREATE_BUCKET_WINDOW_DATA =
         previousTab = CREATE_BUCKET_BODY,
         onExpandFn = function()
             SetCharacterCameraZoomAmount(1)
+            CharacterCreateQueueClassFxRemoval()
         end,
 
         subCategoryData =

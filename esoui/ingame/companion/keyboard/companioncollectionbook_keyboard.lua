@@ -47,6 +47,7 @@ function ZO_CompanionCollectionBook_Keyboard:InitializeEvents()
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleUpdated", function(...) self:OnCollectibleUpdated(...) end)
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", function(...) self:OnCollectionUpdated(...) end)
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleNewStatusCleared", function(...) self:OnCollectibleNewStatusCleared(...) end)
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleUserFlagsUpdated", function(...) self:OnCollectibleUserFlagsUpdated(...) end)
 
     self.refreshGroups = ZO_Refresh:New()
     self.refreshGroups:AddRefreshGroup("FullUpdate",
@@ -390,7 +391,12 @@ do
                     entryData:SetDataSource(collectibleData)
                     local headerState = collectibleData:IsUnlocked() and COLLECTIBLE_UNLOCK_STATE_UNLOCKED_OWNED or COLLECTIBLE_UNLOCK_STATE_LOCKED
                     entryData.gridHeaderTemplate = ZO_GRID_SCROLL_LIST_DEFAULT_HEADER_TEMPLATE_KEYBOARD
-                    entryData.gridHeaderName = GetString("SI_COLLECTIBLEUNLOCKSTATE", headerState)
+                    if collectibleData:IsFavorite() then
+                        entryData.gridHeaderName = GetString(SI_COLLECTIONS_FAVORITES_CATEGORY_HEADER)
+                    else
+                        local headerState = collectibleData:IsUnlocked() and COLLECTIBLE_UNLOCK_STATE_UNLOCKED_OWNED or COLLECTIBLE_UNLOCK_STATE_LOCKED
+                        entryData.gridHeaderName = GetString("SI_COLLECTIBLEUNLOCKSTATE", headerState)
+                    end
                     gridListPanelList:AddEntry(entryData, "ZO_CollectibleTile_Keyboard_Control")
                 end
             end
@@ -493,6 +499,20 @@ end
 
 function ZO_CompanionCollectionBook_Keyboard:OnCollectibleNewStatusCleared(collectibleId)
     self:OnCollectibleStatusUpdated(collectibleId)
+end
+
+function ZO_CompanionCollectionBook_Keyboard:OnCollectibleUserFlagsUpdated(collectibleId)
+    -- Please update handling as further flags are added
+    internalassert(COLLECTIBLE_USER_FLAG_MAX_VALUE == 1)
+    
+    local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
+    if collectibleData then
+        local categoryData = collectibleData:GetCategoryData()
+        local selectedCategoryData = self.categoryTree:GetSelectedData()
+        if categoryData == selectedCategoryData  then
+            self:BuildContentList(categoryData)
+        end
+    end
 end
 
 function ZO_CompanionCollectionBook_Keyboard:GetSetDefaultEntryByType(categoryType)

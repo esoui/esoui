@@ -58,10 +58,6 @@ do
 
     ZO_GammaAdjustFragment = ZO_FadeSceneFragment:Subclass()
 
-    function ZO_GammaAdjustFragment:New(...)
-        return ZO_FadeSceneFragment.New(self, ...)
-    end
-
     function ZO_GammaAdjustFragment:Initialize(...)
         ZO_FadeSceneFragment.Initialize(self, ...)
         self.dialog = self.control

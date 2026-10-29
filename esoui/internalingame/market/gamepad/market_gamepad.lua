@@ -541,7 +541,7 @@ function GamepadMarket:InitializeKeybindDescriptors()
                 local selectedEntry = self.selectedGridEntry
                 if selectedEntry then
                     if selectedEntry:GetEntryType() == ZO_GAMEPAD_MARKET_ENTRY_MARKET_PRODUCT then
-                        return not selectedEntry:IsPurchaseLocked()
+                        return not selectedEntry:IsPurchaseLocked() or selectedEntry:IsPurchaseLimitReached()
                     elseif selectedEntry:GetEntryType() == ZO_GAMEPAD_MARKET_ENTRY_MEMBERSHIP_INFO_TILE then
                         return not IsESOPlusSubscriber() or IsOnESOPlusFreeTrial()
                     elseif selectedEntry:GetEntryType() == ZO_GAMEPAD_MARKET_ENTRY_FREE_TRIAL_TILE then
@@ -554,7 +554,7 @@ function GamepadMarket:InitializeKeybindDescriptors()
                 if self:HasQueuedTutorial() then
                     return false
                 elseif self.selectedGridEntry:GetEntryType() == ZO_GAMEPAD_MARKET_ENTRY_MARKET_PRODUCT then
-                    return self.selectedGridEntry:CanBePurchased()
+                    return self.selectedGridEntry:CanBePurchased() and not self.selectedGridEntry:IsPurchaseLimitReached()
                 else
                     return true
                 end
@@ -586,12 +586,20 @@ function GamepadMarket:InitializeKeybindDescriptors()
             keybind = "UI_SHORTCUT_RIGHT_STICK",
             visible = function()
                 if self.selectedGridEntry and self.selectedGridEntry:GetEntryType() == ZO_GAMEPAD_MARKET_ENTRY_MARKET_PRODUCT then
-                    return self.selectedGridEntry:IsGiftable()
+                    return self.selectedGridEntry:IsGiftable() or self.selectedGridEntry:IsPurchaseLimitReached()
                 end
                 return false
             end,
             enabled = function()
-                return not self:HasQueuedTutorial()
+                if self:HasQueuedTutorial() then
+                    return false
+                end
+
+                local selectedEntry = self.selectedGridEntry
+                if selectedEntry and selectedEntry:GetEntryType() == ZO_GAMEPAD_MARKET_ENTRY_MARKET_PRODUCT then
+                    return not selectedEntry:IsPurchaseLimitReached()
+                end
+                return true
             end,
             callback = function()
                 self.isLockedForCategoryRefresh = true
@@ -778,6 +786,16 @@ do
 end
 
 function GamepadMarket:OnCurrencyUpdated()
+    if not self.control:IsHidden() then
+        self:RefreshKeybinds()
+    elseif GAMEPAD_MARKET_BUNDLE_CONTENTS_SCENE and GAMEPAD_MARKET_BUNDLE_CONTENTS_SCENE:IsShowing() then
+        ZO_GAMEPAD_MARKET_BUNDLE_CONTENTS:RefreshKeybinds()
+    end
+end
+
+function GamepadMarket:OnMarketPurchaseLimitUpdated()
+    ZO_Market_Shared.OnMarketPurchaseLimitUpdated(self)
+
     if not self.control:IsHidden() then
         self:RefreshKeybinds()
     elseif GAMEPAD_MARKET_BUNDLE_CONTENTS_SCENE and GAMEPAD_MARKET_BUNDLE_CONTENTS_SCENE:IsShowing() then
@@ -1838,9 +1856,11 @@ function GamepadMarketBundleContents:PerformDeferredInitialization()
                 name = GetString(SI_MARKET_PURCHASE_BUNDLE_KEYBIND_TEXT),
                 keybind = "UI_SHORTCUT_PRIMARY",
                 visible = function()
-                    return not self.marketProductData:IsPurchaseLocked()
+                    return not self.marketProductData:IsPurchaseLocked() or self.marketProductData:IsPurchaseLimitReached()
                 end,
-                enabled = function() return not self:HasQueuedTutorial() end,
+                enabled = function()
+                    return not self:HasQueuedTutorial() and not self.marketProductData:IsPurchaseLimitReached()
+                end,
                 callback = function()
                     self.prePurchaseSelectedIndex = self.focusList:GetSelectedIndex()
                     ZO_GAMEPAD_MARKET:PurchaseMarketProductInternal(self.marketProductData, RefreshOnPurchase, QueueTutorial)
@@ -1851,9 +1871,11 @@ function GamepadMarketBundleContents:PerformDeferredInitialization()
                 name = GetString(SI_MARKET_GIFT_BUNDLE_KEYBIND_TEXT),
                 keybind = "UI_SHORTCUT_RIGHT_STICK",
                 visible = function()
-                                return self.marketProductData:IsGiftable()
+                                return self.marketProductData:IsGiftable() or self.marketProductData:IsPurchaseLimitReached()
                             end,
-                enabled = function() return not self:HasQueuedTutorial() end,
+                enabled = function()
+                    return not self:HasQueuedTutorial() and not self.marketProductData:IsPurchaseLimitReached()
+                end,
                 callback = function()
                     self.prePurchaseSelectedIndex = self.focusList:GetSelectedIndex()
                     ZO_GAMEPAD_MARKET:GiftMarketProductInternal(self.marketProductData, RefreshOnPurchase, QueueTutorial)

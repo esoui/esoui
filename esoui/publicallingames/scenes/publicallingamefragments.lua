@@ -4,12 +4,12 @@
 
 ZO_FullscreenEffectFragment = ZO_SceneFragment:Subclass()
 
-function ZO_FullscreenEffectFragment:New(effectType, ...)
-    local fragment = ZO_SceneFragment.New(self)
-    fragment.effectType = effectType
-    fragment.params = {...}
-    fragment:SetHideOnSceneHidden(true)
-    return fragment
+function ZO_FullscreenEffectFragment:Initialize(effectType, ...)
+    ZO_SceneFragment.Initialize(self)
+
+    self.effectType = effectType
+    self.params = {...}
+    self:SetHideOnSceneHidden(true)
 end
 
 function ZO_FullscreenEffectFragment:Show()

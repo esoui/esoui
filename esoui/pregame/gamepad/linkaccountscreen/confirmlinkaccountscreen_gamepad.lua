@@ -31,13 +31,8 @@ function ZO_ConfirmLinkAccount_Gamepad:Initialize(control)
         confirmation2Text = zo_strformat(GetString(SI_LINKACCOUNT_CONFIRM_2_FORMAT), GetString("SI_PLATFORMSERVICETYPE", serviceType))
         confirmation3Text = ""
 
-        if serviceType == PLATFORM_SERVICE_TYPE_DMM then
-            confirmation3Text = GetString(SI_KEYBOARD_LINKACCOUNT_CROWN_LOSS_WARNING)
-        end
-
         local PLATFORM_SERVICE_ICONS =
         {
-            [PLATFORM_SERVICE_TYPE_DMM] = "EsoUI/Art/Login/link_Login_DMM.dds",
             [PLATFORM_SERVICE_TYPE_STEAM] = "EsoUI/Art/Login/link_Login_Steam.dds",
             [PLATFORM_SERVICE_TYPE_EPIC] = "EsoUI/Art/Login/link_Login_Epic.dds",
         }
@@ -109,8 +104,6 @@ function ZO_ConfirmLinkAccount_Gamepad:Show(username, password)
     local accountName
     if ZO_IsConsoleOrGameCoreUI() then
         accountName = GetOnlineIdForActiveProfile()
-    elseif GetPlatformServiceType() == PLATFORM_SERVICE_TYPE_DMM then
-        accountName = GetString(SI_KEYBOARD_LINKACCOUNT_GENERIC_ACCOUNT_NAME_DMM)
     else
         accountName = GetExternalName()
     end

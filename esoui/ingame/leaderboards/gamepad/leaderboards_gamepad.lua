@@ -1,4 +1,5 @@
 local CATEGORY_LIST_TEMPLATE = "ZO_GamepadMenuEntryTemplate"
+local CATEGORY_LIST_DROPDOWN_TEMPLATE = "ZO_Leaderboards_Gamepad_DropdownMenuEntry"
 local HEADER_TEMPLATE = "ZO_GamepadMenuEntryHeaderTemplate"
 
 local ZO_LeaderboardsManager_Gamepad = ZO_Object.MultiSubclass(ZO_Gamepad_ParametricList_Screen, ZO_LeaderboardsManager_Shared)
@@ -24,6 +25,27 @@ end
 function ZO_LeaderboardsManager_Gamepad:SetupList(list)
     list:AddDataTemplate(CATEGORY_LIST_TEMPLATE, ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction)
     list:AddDataTemplateWithHeader(CATEGORY_LIST_TEMPLATE, ZO_SharedGamepadEntry_OnSetup, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, HEADER_TEMPLATE)
+
+    local function OnDropdownDeactivated()
+        if self:IsShowing() then
+            self:ActivateCategories()
+        end
+    end
+
+    local function SetupDropdownEntry(control, data, selected, selectedDuringRebuild, enabled, active)
+        ZO_SharedGamepadEntry_OnSetup(control, data, selected, selectedDuringRebuild, enabled, active)
+
+        local dropdown = control.dropdown
+        data.dropdown = dropdown
+
+        dropdown:SetSortsItems(true)
+        dropdown:SetDeactivatedCallback(OnDropdownDeactivated)
+
+        data:addDropdownEntriesCallback(dropdown)
+    end
+    
+    list:AddDataTemplate(CATEGORY_LIST_DROPDOWN_TEMPLATE, SetupDropdownEntry, ZO_GamepadMenuEntryTemplateParametricListFunction)
+    list:AddDataTemplateWithHeader(CATEGORY_LIST_DROPDOWN_TEMPLATE, SetupDropdownEntry, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, HEADER_TEMPLATE)
 end
 
 function ZO_LeaderboardsManager_Gamepad:OnTargetChanged(list, targetLeaderboard)
@@ -32,6 +54,8 @@ function ZO_LeaderboardsManager_Gamepad:OnTargetChanged(list, targetLeaderboard)
         listWasActivated = GAMEPAD_LEADERBOARD_LIST:IsActivated()
         self:DeactivateLeaderboard()
     end
+
+    self:DeactivateCategoryDropdown()
 
     self:OnLeaderboardSelected(targetLeaderboard)
     self:ActivateLeaderboard()
@@ -43,7 +67,7 @@ function ZO_LeaderboardsManager_Gamepad:OnTargetChanged(list, targetLeaderboard)
 end
 
 function ZO_LeaderboardsManager_Gamepad:GetSelectedEntry()
-    return ZO_ScrollList_GetSelectedData(self.list)
+    return self.categoryList:GetTargetData()
 end
 
 function ZO_LeaderboardsManager_Gamepad:InitializeKeybindStripDescriptors()
@@ -58,11 +82,16 @@ function ZO_LeaderboardsManager_Gamepad:InitializeKeybindStripDescriptors()
             keybind = "UI_SHORTCUT_PRIMARY",
 
             visible = function()
+                local selectedEntry = self.categoryList:GetTargetData()
+                if selectedEntry and selectedEntry.addDropdownEntriesCallback then
+                    return true
+                end
                 local IGNORE_FILTERS = true
                 return GAMEPAD_LEADERBOARD_LIST:HasEntries(IGNORE_FILTERS)
             end,
 
             callback = function()
+                local selectedEntry = self.categoryList:GetTargetData()
                 self:ActivateLeaderboardList()
             end,
         },
@@ -81,12 +110,7 @@ function ZO_LeaderboardsManager_Gamepad:RefreshLeaderboardType(leaderboardType)
 end
 
 function ZO_LeaderboardsManager_Gamepad:PerformUpdate()
-    if self.campaignName then
-        self.headerData.messageText = zo_strformat(SI_GAMEPAD_CAMPAIGN_LEADERBOARDS_ACTIVE_CAMPAIGN, self.campaignIcon, self.campaignName)
-    else
-        self.headerData.messageText = ""
-    end
-    ZO_GamepadGenericHeader_RefreshData(self.header, self.headerData)
+    self.dirty = false
 end
 
 function ZO_LeaderboardsManager_Gamepad:OnShowing()
@@ -101,6 +125,7 @@ end
 
 function ZO_LeaderboardsManager_Gamepad:OnHiding()
     self:DeactivateLeaderboard()
+    self:DeactivateCategoryDropdown()
 end
 
 function ZO_LeaderboardsManager_Gamepad:InitializeHeader()
@@ -160,6 +185,10 @@ function ZO_LeaderboardsManager_Gamepad:AddEntry(leaderboardObject, name, titleN
     return entryData
 end
 
+function ZO_LeaderboardsManager_Gamepad:SetEntryDropdownInfo(entryData, addDropdownEntriesCallback)
+    entryData.addDropdownEntriesCallback = addDropdownEntriesCallback
+end
+
 local CATEGORY_SORT_KEYS =
 {
     group = { tiebreaker = "index" },
@@ -172,6 +201,8 @@ local function SortFunc(item1, item2)
 end
 
 function ZO_LeaderboardsManager_Gamepad:UpdateCategories()
+    QueryCampaignSelectionData()
+
     self.categoryListData = {}
 
     for _, systemObject in ipairs(self.leaderboardSystemObjects) do
@@ -253,6 +284,20 @@ function ZO_LeaderboardsManager_Gamepad:ActivateLeaderboardList()
     GAMEPAD_LEADERBOARD_LIST:Activate()
 end
 
+function ZO_LeaderboardsManager_Gamepad:ActivateCategoryDropdown(entryData)
+    self:DeactivateCurrentList()
+    KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
+    self:RemoveLeaderboardObjectKeybind()
+    entryData.dropdown:Activate()
+    self.activeDropdown = entryData.dropdown
+end
+
+function ZO_LeaderboardsManager_Gamepad:DeactivateCategoryDropdown()
+    if self.activeDropdown then
+        self.activeDropdown:Deactivate()
+    end
+end
+
 function ZO_LeaderboardsManager_Gamepad:SelectNode(leaderboardNode)
     self.categoryList:SetSelectedIndex(leaderboardNode.index)
 end
@@ -266,11 +311,12 @@ function ZO_LeaderboardsManager_Gamepad:RefreshCategoryList()
 
     local lastGroup = nil
     for i, data in ipairs(self.categoryListData) do
+        local template = data.addDropdownEntriesCallback and CATEGORY_LIST_DROPDOWN_TEMPLATE or CATEGORY_LIST_TEMPLATE
         if data.group and data.group ~= lastGroup then
             data:SetHeader(data.group)
-            self.categoryList:AddEntryWithHeader(CATEGORY_LIST_TEMPLATE, data)
+            self.categoryList:AddEntryWithHeader(template, data)
         else
-            self.categoryList:AddEntry(CATEGORY_LIST_TEMPLATE, data)
+            self.categoryList:AddEntry(template, data)
         end
 
         lastGroup = data.group

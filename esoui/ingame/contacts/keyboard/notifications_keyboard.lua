@@ -50,11 +50,6 @@ ZO_KEYBOARD_NOTIFICATION_ICONS =
 
 ZO_KeyboardFriendRequestProvider = ZO_FriendRequestProvider:Subclass()
 
-function ZO_KeyboardFriendRequestProvider:New(notificationManager)
-    local provider = ZO_FriendRequestProvider.New(self, notificationManager)
-    return provider
-end
-
 function ZO_KeyboardFriendRequestProvider:Decline(data, button, openedFromKeybind)
     ClearMenu()
 
@@ -87,11 +82,6 @@ end
 -------------------------
 
 ZO_KeyboardGuildInviteProvider = ZO_GuildInviteProvider:Subclass()
-
-function ZO_KeyboardGuildInviteProvider:New(notificationManager)
-    local provider = ZO_GuildInviteProvider.New(self, notificationManager)
-    return provider
-end
 
 function ZO_KeyboardGuildInviteProvider:CreateMessage(guildAlliance, guildName, inviterDisplayName)
     local allianceIcon = zo_iconFormat(ZO_GetAllianceSymbolIcon(guildAlliance), 24, 24)
@@ -127,11 +117,6 @@ end
 
 ZO_KeyboardAgentChatRequestProvider = ZO_AgentChatRequestProvider:Subclass()
 
-function ZO_KeyboardAgentChatRequestProvider:New(notificationManager)
-    local provider = ZO_AgentChatRequestProvider.New(self, notificationManager)
-    return provider
-end
-
 function ZO_KeyboardAgentChatRequestProvider:CreateMessage()
     return GetString(SI_AGENT_CHAT_REQUEST_MESSAGE)
 end
@@ -141,7 +126,7 @@ end
 
 ZO_KeyboardLeaderboardScoreProvider = ZO_LeaderboardScoreProvider:Subclass()
 
-function ZO_KeyboardLeaderboardScoreProvider:New(notificationManager)
+function ZO_KeyboardLeaderboardScoreProvider:Initialize(notificationManager)
     -- Override leaderboard update callback to support audio
     local function notificationEventCallback(eventId)
         if eventId == EVENT_LEADERBOARD_SCORE_NOTIFICATION_ADDED and GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_SHOW_LEADERBOARD_NOTIFICATIONS) then
@@ -149,8 +134,7 @@ function ZO_KeyboardLeaderboardScoreProvider:New(notificationManager)
         end
     end
 
-    local provider = ZO_LeaderboardScoreProvider.New(self, notificationManager, notificationEventCallback)
-    return provider
+    ZO_LeaderboardScoreProvider.Initialize(self, notificationManager, notificationEventCallback)
 end
 
 function ZO_KeyboardLeaderboardScoreProvider:ShowMessageTooltip(data, control)
@@ -199,10 +183,6 @@ end
 
 ZO_KeyboardCollectionsUpdateProvider = ZO_CollectionsUpdateProvider:Subclass()
 
-function ZO_KeyboardCollectionsUpdateProvider:New(notificationManager)
-    return ZO_CollectionsUpdateProvider.New(self, notificationManager)
-end
-
 function ZO_KeyboardCollectionsUpdateProvider:Accept(entryData)
     ZO_CollectionsUpdateProvider.Accept(self, entryData)
 
@@ -230,10 +210,6 @@ end
 
 ZO_KeyboardEsoPlusSubscriptionStatusProvider = ZO_EsoPlusSubscriptionStatusProvider:Subclass()
 
-function ZO_KeyboardEsoPlusSubscriptionStatusProvider:New(notificationManager)
-    return ZO_EsoPlusSubscriptionStatusProvider.New(self, notificationManager)
-end
-
 function ZO_KeyboardEsoPlusSubscriptionStatusProvider:ShowMoreInfo(entryData)
     if entryData.moreInfo then
         HELP:ShowSpecificHelp(entryData.helpCategoryIndex, entryData.helpIndex)
@@ -244,10 +220,6 @@ end
 -------------------------------------------
 
 ZO_KeyboardGuildNewApplicationsProvider = ZO_GuildNewApplicationsProvider:Subclass()
-
-function ZO_KeyboardGuildNewApplicationsProvider:New(notificationManager)
-    return ZO_GuildNewApplicationsProvider.New(self, notificationManager)
-end
 
 function ZO_KeyboardGuildNewApplicationsProvider:Accept(entryData)
     ZO_GuildNewApplicationsProvider.Accept(self, entryData)
@@ -261,10 +233,6 @@ end
 -------------------------
 
 ZO_KeyboardMarketProductUnlockedProvider = ZO_MarketProductUnlockedProvider:Subclass()
-
-function ZO_KeyboardMarketProductUnlockedProvider:New(notificationManager)
-    return ZO_MarketProductUnlockedProvider.New(self, notificationManager)
-end
 
 function ZO_KeyboardMarketProductUnlockedProvider:ShowMoreInfo(entryData)
     if entryData.moreInfo then
@@ -306,10 +274,6 @@ end
 -------------------------
 
 ZO_KeyboardNotificationManager = ZO_NotificationManager:Subclass()
-
-function ZO_KeyboardNotificationManager:New(control)
-    return ZO_NotificationManager.New(self, control)
-end
 
 function ZO_KeyboardNotificationManager:InitializeNotificationList(control)
     self.sortFilterList = ZO_NotificationList:New(control)

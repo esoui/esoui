@@ -1529,7 +1529,7 @@ do
         {
             categoryName = SI_WINDOW_TITLE_CAMPAIGN_OVERVIEW,
             descriptor = "campaignOverview",
-            visible = ZO_CampaignSelector_Shared_ShouldShowCampaignSelector,
+            visible = function() return CAMPAIGN_SELECTOR:ShouldShowCampaignSelector() end,
             normal = "EsoUI/Art/Campaign/campaign_tabIcon_summary_up.dds",
             pressed = "EsoUI/Art/Campaign/campaign_tabIcon_summary_down.dds",
             highlight = "EsoUI/Art/Campaign/campaign_tabIcon_summary_over.dds",
@@ -1585,8 +1585,10 @@ do
 
     }
 
-    local function allianceWarPreferredSceneFunction()
-        if ZO_CampaignSelector_Shared_ShouldShowCampaignSelector() then
+    local function AllianceWarPreferredSceneFunction()
+        if ZO_ALLIANCE_WAR_SCENE_GROUP_KEYBOARD:GetActiveScene() == "campaignBrowser" then
+            return "campaignBrowser"
+        elseif CAMPAIGN_SELECTOR:ShouldShowCampaignSelector() then
             return "campaignOverview"
         end
         return "campaignBrowser"
@@ -1594,7 +1596,7 @@ do
 
     ZO_ALLIANCE_WAR_SCENE_GROUP_KEYBOARD = ZO_SceneGroup:New("campaignOverview", "campaignBrowser", "VeterancySceneKeyboard")
     SCENE_MANAGER:AddSceneGroup("allianceWarSceneGroup", ZO_ALLIANCE_WAR_SCENE_GROUP_KEYBOARD)
-    MAIN_MENU_KEYBOARD:AddSceneGroup(MENU_CATEGORY_ALLIANCE_WAR, "allianceWarSceneGroup", iconData, allianceWarPreferredSceneFunction)
+    MAIN_MENU_KEYBOARD:AddSceneGroup(MENU_CATEGORY_ALLIANCE_WAR, "allianceWarSceneGroup", iconData, AllianceWarPreferredSceneFunction)
     MAIN_MENU_KEYBOARD:EvaluateSceneGroupVisibilityOnEvent("allianceWarSceneGroup", EVENT_CURRENT_CAMPAIGN_CHANGED)
     MAIN_MENU_KEYBOARD:EvaluateSceneGroupVisibilityOnEvent("allianceWarSceneGroup", EVENT_ASSIGNED_CAMPAIGN_CHANGED)
     MAIN_MENU_KEYBOARD:EvaluateSceneGroupVisibilityOnEvent("allianceWarSceneGroup", EVENT_HOLIDAYS_CHANGED)

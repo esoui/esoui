@@ -98,6 +98,14 @@ function ZO_HUDManager_Element:IsUsingDefaultAnchor()
     return self.currentAnchor == self.defaultAnchor
 end
 
+function ZO_HUDManager_Element:SetDefaultAnchor(anchor, resetToDefault)
+    local isUsingDefaultAnchor = self:IsUsingDefaultAnchor()
+    self.defaultAnchor = anchor
+    if isUsingDefaultAnchor and resetToDefault then
+        self:ResetToDefaultAnchor()
+    end
+end
+
 function ZO_HUDManager_Element:GetHUDRefElement()
     return self.control.hudElementRef
 end
@@ -143,6 +151,14 @@ do
     function ZO_HUDManager_Element:ApplyOffset(refOffsetX, refOffsetY, autoSave)
         local refOffsetToPrimaryOffsetFunc = self.config.RefOffsetToPrimaryOffsetFunc or DefaultRefOffsetToPrimaryOffsetFunc
         local primaryOffsetX, primaryOffsetY = refOffsetToPrimaryOffsetFunc(self.control, refOffsetX, refOffsetY)
+
+        if self.currentAnchor == self.defaultAnchor then
+            local defaultOffsetX, defaultOffsetY = self.defaultAnchor:GetOffsets()
+            if primaryOffsetX == defaultOffsetX and primaryOffsetY == defaultOffsetY then
+                return
+            end
+        end
+
         self.workingAnchor:SetOffsets(primaryOffsetX, primaryOffsetY)
         self.workingAnchor:Set(self.control)
         self.currentAnchor = self.workingAnchor
@@ -297,7 +313,7 @@ function ZO_HUDManager:Initialize()
 end
 
 function ZO_HUDManager:SetupSavedVars()
-    local function OnAddOnsLoaded(_, name)
+    local function OnAddOnsLoaded()
         self:FireCallbacks("PreLoadSettings")
 
         local DEFAULTS =
@@ -317,7 +333,8 @@ function ZO_HUDManager:SetupSavedVars()
         EVENT_MANAGER:RegisterForEvent("ZO_HUDManager", EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, function() self:PropagateSettings() end)
         EVENT_MANAGER:RegisterForEvent("ZO_HUDManager", EVENT_SCREEN_RESIZED, function() self:PropagateSettings() end)
     end
-    EVENT_MANAGER:RegisterForEvent("ZO_HUDManager", EVENT_ADD_ONS_LOADED, OnAddOnsLoaded)
+    local DO_ONCE = true
+    EVENT_MANAGER:RegisterForEvent("ZO_HUDManager", EVENT_ADD_ONS_LOADED, OnAddOnsLoaded, DO_ONCE)
 end
 
 function ZO_HUDManager:RegisterKeyboardElement(control, displayName, config, options)

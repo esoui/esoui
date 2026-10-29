@@ -299,13 +299,7 @@ function ZO_ActivityFinderTemplate_Gamepad:InitializeKeybindStripDescriptors()
                 if lockingCollectibleId == 0 then
                     return GetString(SI_LFG_ACCEPT_QUEST)
                 else
-                    local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(lockingCollectibleId)
-                    local categoryType = collectibleData:GetCategoryType()
-                    if categoryType == COLLECTIBLE_CATEGORY_TYPE_CHAPTER then
-                        return GetString(SI_DLC_BOOK_ACTION_CHAPTER_UPGRADE)
-                    else
-                        return GetString(SI_GAMEPAD_DLC_BOOK_ACTION_OPEN_CROWN_STORE)
-                    end
+                    return GetString(SI_GAMEPAD_DLC_BOOK_ACTION_OPEN_CROWN_STORE)
                 end
             end,
 
@@ -319,12 +313,8 @@ function ZO_ActivityFinderTemplate_Gamepad:InitializeKeybindStripDescriptors()
                 else
                     local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(lockingCollectibleId)
                     local categoryType = collectibleData:GetCategoryType()
-                    if categoryType == COLLECTIBLE_CATEGORY_TYPE_CHAPTER then
-                        ZO_ShowChapterUpgradePlatformScreen(MARKET_OPEN_OPERATION_ACTIVITY_FINDER)
-                    else
-                        local searchTerm = zo_strformat(SI_CROWN_STORE_SEARCH_FORMAT_STRING, collectibleData:GetName())
-                        ShowMarketAndSearch(searchTerm, MARKET_OPEN_OPERATION_ACTIVITY_FINDER)
-                    end
+                    local searchTerm = zo_strformat(SI_CROWN_STORE_SEARCH_FORMAT_STRING, collectibleData:GetName())
+                    ShowMarketAndSearch(searchTerm, MARKET_OPEN_OPERATION_ACTIVITY_FINDER)
                 end
             end,
 

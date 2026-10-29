@@ -97,6 +97,7 @@ function ZO_MarketAnnouncementMarketProduct_Shared:LayoutCostAndText()
 
     -- layout the price labels
     self:SetupPricingDisplay()
+    self:SetupPurchaseLimitDisplay()
 
     self:SetupTextCalloutAnchors()
 
@@ -113,24 +114,41 @@ function ZO_MarketAnnouncementMarketProduct_Shared:SetupTextCalloutAnchors()
     control.previousCost:ClearAnchors()
     control.cost:ClearAnchors()
     control.esoPlusCost:ClearAnchors()
+    control.purchaseLimit:ClearAnchors()
     control.descriptionControl:ClearAnchors()
 
     local VERTICAL_SPACING = 5
+    local pricingAnchor = control.textCallout
+    local pricingOffsetX = 0
+    local pricingOffsetY = 0
+    if pricingAnchor:IsControlHidden() then
+        pricingAnchor = control.title
+        pricingOffsetX = ZO_MARKET_PRODUCT_CALLOUT_X_OFFSET
+        pricingOffsetY = VERTICAL_SPACING
+    end
+
+    if not control.purchaseLimit:IsHidden() then
+        control.purchaseLimit:SetAnchor(TOPLEFT, pricingAnchor, BOTTOMLEFT, pricingOffsetX, pricingOffsetY)
+        pricingAnchor = control.purchaseLimit
+        pricingOffsetX = 0
+        pricingOffsetY = 0
+    end
+
     local hasNormalCost = self:HasCost()
     if hasNormalCost then
         if self:IsOnSale() and not self:IsFree() then
-            control.previousCost:SetAnchor(TOPLEFT, control.textCallout, BOTTOMLEFT)
+            control.previousCost:SetAnchor(TOPLEFT, pricingAnchor, BOTTOMLEFT)
             control.cost:SetAnchor(LEFT, control.previousCost, RIGHT, 10)
             control.descriptionControl:SetAnchor(TOPLEFT, control.previousCost, BOTTOMLEFT)
         elseif control.textCallout:IsControlHidden() then
             if control.cost:IsControlHidden() then
-                control.descriptionControl:SetAnchor(TOPLEFT, control.title, BOTTOMLEFT, ZO_MARKET_PRODUCT_CALLOUT_X_OFFSET, VERTICAL_SPACING) 
+                control.descriptionControl:SetAnchor(TOPLEFT, pricingAnchor, BOTTOMLEFT, pricingOffsetX, pricingOffsetY)
             else
-                control.cost:SetAnchor(TOPLEFT, control.title, BOTTOMLEFT, ZO_MARKET_PRODUCT_CALLOUT_X_OFFSET, VERTICAL_SPACING)
+                control.cost:SetAnchor(TOPLEFT, pricingAnchor, BOTTOMLEFT, pricingOffsetX, pricingOffsetY)
                 control.descriptionControl:SetAnchor(TOPLEFT, control.cost, BOTTOMLEFT)
             end
         else
-            control.cost:SetAnchor(TOPLEFT, control.textCallout, BOTTOMLEFT)
+            control.cost:SetAnchor(TOPLEFT, pricingAnchor, BOTTOMLEFT, pricingOffsetX, pricingOffsetY)
             control.descriptionControl:SetAnchor(TOPLEFT, control.cost, BOTTOMLEFT)
         end
     end
@@ -141,9 +159,9 @@ function ZO_MarketAnnouncementMarketProduct_Shared:SetupTextCalloutAnchors()
             control.esoPlusCost:SetAnchor(BOTTOMLEFT, control.cost, BOTTOMRIGHT, 10)
         else
             if control.textCallout:IsControlHidden() then
-                control.esoPlusCost:SetAnchor(TOPLEFT, control.title, BOTTOMLEFT, ZO_MARKET_PRODUCT_CALLOUT_X_OFFSET, VERTICAL_SPACING)
+                control.esoPlusCost:SetAnchor(TOPLEFT, pricingAnchor, BOTTOMLEFT, pricingOffsetX, pricingOffsetY)
             else
-                control.esoPlusCost:SetAnchor(TOPLEFT, control.textCallout, BOTTOMLEFT)
+                control.esoPlusCost:SetAnchor(TOPLEFT, pricingAnchor, BOTTOMLEFT, pricingOffsetX, pricingOffsetY)
             end
             control.descriptionControl:SetAnchor(TOPLEFT, control.esoPlusCost, BOTTOMLEFT)
         end
@@ -153,9 +171,9 @@ function ZO_MarketAnnouncementMarketProduct_Shared:SetupTextCalloutAnchors()
     --This is technically not a valid setup, but we do this to handle things a bit more cleanly if it happens
     if not hasNormalCost and not hasEsoPlusCost then
         if control.textCallout:IsControlHidden() then
-            control.descriptionControl:SetAnchor(TOPLEFT, control.title, BOTTOMLEFT, ZO_MARKET_PRODUCT_CALLOUT_X_OFFSET, VERTICAL_SPACING)
+            control.descriptionControl:SetAnchor(TOPLEFT, pricingAnchor, BOTTOMLEFT, pricingOffsetX, pricingOffsetY)
         else
-            control.descriptionControl:SetAnchor(TOPLEFT, control.textCallout, BOTTOMLEFT)
+            control.descriptionControl:SetAnchor(TOPLEFT, pricingAnchor, BOTTOMLEFT, pricingOffsetX, pricingOffsetY)
         end
     end
 end

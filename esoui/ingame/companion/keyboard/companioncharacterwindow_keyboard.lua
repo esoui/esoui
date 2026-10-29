@@ -7,27 +7,17 @@ function ZO_CompanionCharacterWindow_Keyboard:Initialize(control)
     self.control = control
     self.isReadOnly = false
 
-
-
-
-
+    self.defaultLayout = control:GetNamedChild("DefaultLayout")
+    self.animalLayout = control:GetNamedChild("AnimalLayout")
 
     self:InitializeSlots()
 
-
-
-
-
-
-
-
-
-
-    local apparelLabel = control:GetNamedChild("ApparelSectionText")
+    local defaultApparelLabel = self.defaultLayout:GetNamedChild("ApparelSectionText")
+    local animalApparelLabel = self.animalLayout:GetNamedChild("ApparelSectionText")
     local isApparelHidden = IsEquipSlotVisualCategoryHidden(EQUIP_SLOT_VISUAL_CATEGORY_APPAREL, GAMEPLAY_ACTOR_CATEGORY_COMPANION)
     local apparelString = isApparelHidden and GetString(SI_CHARACTER_EQUIP_APPAREL_HIDDEN) or GetString("SI_EQUIPSLOTVISUALCATEGORY", EQUIP_SLOT_VISUAL_CATEGORY_APPAREL)
-    apparelLabel:SetText(apparelString)
-
+    defaultApparelLabel:SetText(apparelString)
+    animalApparelLabel:SetText(apparelString)
 
     self:RegisterForEvents()
 
@@ -39,26 +29,18 @@ function ZO_CompanionCharacterWindow_Keyboard:RegisterForEvents()
 
     local function OnActiveCompanionStateChanged()
         local companionId = GetActiveCompanionDefId()
-
-        local companionGender = GetCompanionGender(companionId)
-        local companionRaceId = GetCompanionRace(companionId)
-        local paperDollTexture = self.control:GetNamedChild("PaperDoll")
-        paperDollTexture:SetTexture(GetRaceAndGenderSilhouetteTexture(companionRaceId, companionGender))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        local isAnimalCompanion = IsActiveCompanionAnimal()
+        if isAnimalCompanion then
+            local paperDollTexture = self.animalLayout:GetNamedChild("PaperDoll")
+            paperDollTexture:SetTexture(GetActiveAnimalCompanionSilhouetteTexture())
+        else
+            local companionGender = GetCompanionGender(companionId)
+            local companionRaceId = GetCompanionRace(companionId)
+            local paperDollTexture = self.defaultLayout:GetNamedChild("PaperDoll")
+            paperDollTexture:SetTexture(GetRaceAndGenderSilhouetteTexture(companionRaceId, companionGender))
+        end
+        self.defaultLayout:SetHidden(isAnimalCompanion)
+        self.animalLayout:SetHidden(not isAnimalCompanion)
 
         self:RefreshWornInventory()
     end
@@ -71,17 +53,10 @@ function ZO_CompanionCharacterWindow_Keyboard:RegisterForEvents()
     end
 
     local function DoWornSlotUpdate(slotId, animationOption, updateReason)
-
-        if slotId and self.slots[slotId] then
-            self:RefreshSingleSlot(slotId, self.slots[slotId], animationOption, updateReason)
+        local slots = self:GetActiveSlots()
+        if slotId and slots[slotId] then
+            self:RefreshSingleSlot(slotId, slots[slotId], animationOption, updateReason)
         end
-
-
-
-
-
-
-
     end
 
     local function InventorySlotUpdated(eventCode, bagId, slotId, isNewItem, itemSoundCategory, updateReason)
@@ -150,48 +125,29 @@ function ZO_CompanionCharacterWindow_Keyboard:RegisterForEvents()
 end
 
 function ZO_CompanionCharacterWindow_Keyboard:InitializeSlots()
-
-    local control = self.control
-    self.slots =
+    local defaultLayout = self.defaultLayout
+    self.defaultSlots =
     {
-        [EQUIP_SLOT_HEAD]           = control:GetNamedChild("EquipmentSlotsHead"),
-        [EQUIP_SLOT_NECK]           = control:GetNamedChild("EquipmentSlotsNeck"),
-        [EQUIP_SLOT_CHEST]          = control:GetNamedChild("EquipmentSlotsChest"),
-        [EQUIP_SLOT_SHOULDERS]      = control:GetNamedChild("EquipmentSlotsShoulder"),
-        [EQUIP_SLOT_MAIN_HAND]      = control:GetNamedChild("EquipmentSlotsMainHand"),
-        [EQUIP_SLOT_OFF_HAND]       = control:GetNamedChild("EquipmentSlotsOffHand"),
-        [EQUIP_SLOT_WAIST]          = control:GetNamedChild("EquipmentSlotsBelt"),
-        [EQUIP_SLOT_LEGS]           = control:GetNamedChild("EquipmentSlotsLeg"),
-        [EQUIP_SLOT_FEET]           = control:GetNamedChild("EquipmentSlotsFoot"),
-        [EQUIP_SLOT_RING1]          = control:GetNamedChild("EquipmentSlotsRing1"),
-        [EQUIP_SLOT_RING2]          = control:GetNamedChild("EquipmentSlotsRing2"),
-        [EQUIP_SLOT_HAND]           = control:GetNamedChild("EquipmentSlotsGlove"),
+        [EQUIP_SLOT_HEAD]           = defaultLayout:GetNamedChild("EquipmentSlotsHead"),
+        [EQUIP_SLOT_NECK]           = defaultLayout:GetNamedChild("EquipmentSlotsNeck"),
+        [EQUIP_SLOT_CHEST]          = defaultLayout:GetNamedChild("EquipmentSlotsChest"),
+        [EQUIP_SLOT_SHOULDERS]      = defaultLayout:GetNamedChild("EquipmentSlotsShoulder"),
+        [EQUIP_SLOT_MAIN_HAND]      = defaultLayout:GetNamedChild("EquipmentSlotsMainHand"),
+        [EQUIP_SLOT_OFF_HAND]       = defaultLayout:GetNamedChild("EquipmentSlotsOffHand"),
+        [EQUIP_SLOT_WAIST]          = defaultLayout:GetNamedChild("EquipmentSlotsBelt"),
+        [EQUIP_SLOT_LEGS]           = defaultLayout:GetNamedChild("EquipmentSlotsLeg"),
+        [EQUIP_SLOT_FEET]           = defaultLayout:GetNamedChild("EquipmentSlotsFoot"),
+        [EQUIP_SLOT_RING1]          = defaultLayout:GetNamedChild("EquipmentSlotsRing1"),
+        [EQUIP_SLOT_RING2]          = defaultLayout:GetNamedChild("EquipmentSlotsRing2"),
+        [EQUIP_SLOT_HAND]           = defaultLayout:GetNamedChild("EquipmentSlotsGlove"),
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    local animalLayout = self.animalLayout
+    self.animalSlots =
+    {
+        [EQUIP_SLOT_NECK]           = animalLayout:GetNamedChild("EquipmentSlotsNeck"),
+        [EQUIP_SLOT_CHEST]          = animalLayout:GetNamedChild("EquipmentSlotsChest"),
+    }
 
     self.heldSlotLinkage =
     {
@@ -212,37 +168,26 @@ function ZO_CompanionCharacterWindow_Keyboard:InitializeSlots()
         self:RestoreMouseOverTexture(...)
     end
 
-
-    for equipSlot, slotControl in pairs(self.slots) do
+    for equipSlot, slotControl in pairs(self.defaultSlots) do
         ZO_Inventory_BindSlot(slotControl, SLOT_TYPE_EQUIPMENT, equipSlot, BAG_COMPANION_WORN)
         slotControl.CustomOnStopCallback = RestoreMouseOverTexture
         ZO_CreateSparkleAnimation(slotControl)
     end
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+    for equipSlot, slotControl in pairs(self.animalSlots) do
+        ZO_Inventory_BindSlot(slotControl, SLOT_TYPE_EQUIPMENT, equipSlot, BAG_COMPANION_WORN)
+        slotControl.CustomOnStopCallback = RestoreMouseOverTexture
+        ZO_CreateSparkleAnimation(slotControl)
+    end
 end
 
-
-
-
-
-
-
-
-
-
+function ZO_CompanionCharacterWindow_Keyboard:GetActiveSlots()
+    if IsActiveCompanionAnimal() then
+        return self.animalSlots
+    else
+        return self.defaultSlots
+    end
+end
 
 function ZO_CompanionCharacterWindow_Keyboard:UpdateSlotAppearance(equipSlot, slotControl, animationOption, copyFromLinkedFn)
     local slotHasItem, iconFile, isLocked
@@ -263,16 +208,11 @@ function ZO_CompanionCharacterWindow_Keyboard:UpdateSlotAppearance(equipSlot, sl
             ZO_PlaySparkleAnimation(slotControl)
         end
     else
-
-        iconControl:SetTexture(ZO_Character_GetEmptyEquipSlotTexture(equipSlot))
-
-
-
-
-
-
-
-
+        if IsActiveCompanionAnimal() then
+            iconControl:SetTexture(ZO_Character_GetAnimalEmptyEquipSlotTexture(equipSlot))
+        else
+            iconControl:SetTexture(ZO_Character_GetEmptyEquipSlotTexture(equipSlot))
+        end
     end
 
     -- need to set stack count so link in chat works
@@ -317,12 +257,7 @@ function ZO_CompanionCharacterWindow_Keyboard:RefreshSingleSlot(equipSlot, slotC
             if updateReason == INVENTORY_UPDATE_REASON_ITEM_CHARGE then
                 animateLinkedSlot = false
             end
-
-            self:RefreshSingleSlot(linkData.linksTo, self.slots[linkData.linksTo], animateLinkedSlot)
-
-
-
-
+            self:RefreshSingleSlot(linkData.linksTo, self:GetActiveSlots()[linkData.linksTo], animateLinkedSlot)
         elseif linkData.pullFromConditionFn() then
             pullFromFn = linkData.pullFromFn
             animationOption = NO_ANIMATION
@@ -337,25 +272,15 @@ function ZO_CompanionCharacterWindow_Keyboard:RefreshSingleSlot(equipSlot, slotC
 end
 
 function ZO_CompanionCharacterWindow_Keyboard:RefreshWornInventory()
-
-    for equipSlot, slotControl in pairs(self.slots) do
-
-
-
-
-
+    local slots = self:GetActiveSlots()
+    for equipSlot, slotControl in pairs(slots) do
         self:RefreshSingleSlot(equipSlot, slotControl)
     end
 end
 
 function ZO_CompanionCharacterWindow_Keyboard:HideAllEquipSlotDropCallouts()
-
-    for equipSlot, slotControl in pairs(self.slots) do
-
-
-
-
-
+    local slots = self:GetActiveSlots()
+    for equipSlot, slotControl in pairs(slots) do
         slotControl:GetNamedChild("DropCallout"):SetHidden(true)
     end
 end
@@ -378,14 +303,9 @@ function ZO_CompanionCharacterWindow_Keyboard:ShowAppropriateEquipSlotDropCallou
     end
 
     local _, _, _, meetsUsageRequirement, _, equipType = GetItemInfo(bagId, slotIndex)
-
+    local slots = self:GetActiveSlots()
     for equipSlot, equipTypes in ZO_Character_EnumerateEquipSlotToEquipTypes() do
-
-        local slotControl = self.slots[equipSlot]
-
-
-
-
+        local slotControl = slots[equipSlot]
         local isLocked = IsLockedWeaponSlot(equipSlot)
         if slotControl and not isLocked then
             for i = 1, #equipTypes do
@@ -400,13 +320,8 @@ end
 
 function ZO_CompanionCharacterWindow_Keyboard:OnReadOnlyStateChanged()
     local readOnly = self:IsReadOnly()
-
-    for equipSlot, slotControl in pairs(self.slots) do
-
-
-
-
-
+    local slots = self:GetActiveSlots()
+    for equipSlot, slotControl in pairs(slots) do
         self:RestoreMouseOverTexture(slotControl)
 
         --Make sure slots with a condition on them meet that condition.

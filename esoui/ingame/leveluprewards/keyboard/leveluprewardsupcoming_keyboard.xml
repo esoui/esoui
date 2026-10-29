@@ -51,7 +51,7 @@
                     <Anchor point="BOTTOMLEFT" relativeTo="$(parent)TitleDivider" relativePoint="TOPLEFT" offsetY="2" offsetX="32"/>
                 </Label>
                 <Button name="$(parent)GoToDifficultyButton" inherits="ZO_DefaultButton" clickSound="ChallengeDifficulty_DifficultyTabClicked">
-                    <Dimensions x="48" y="48"/>
+                    <Dimensions x="64" y="64"/>
                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)TitleDivider" relativePoint="TOPRIGHT"/>
                     <Textures normal="EsoUI/Art/ChallengeDifficulty/goToDifficultyButton_normal.dds" pressed="EsoUI/Art/ChallengeDifficulty/goToDifficultyButton_mouseDown.dds" mouseOver="EsoUI/Art/ChallengeDifficulty/goToDifficultyButton_mouseOver.dds" disabled="EsoUI/Art/ChallengeDifficulty/goToDifficultyButton_disabled.dds"/>
                     <OnClicked>
@@ -65,7 +65,7 @@
                     </OnMouseExit>
                 </Button>
                 <Button name="$(parent)GoToLevelUpRewardsButton" inherits="ZO_DefaultButton" clickSound="ChallengeDifficulty_LevelUpRewardsTabClicked">
-                    <Dimensions x="48" y="48"/>
+                    <Dimensions x="64" y="64"/>
                     <Anchor point="RIGHT" relativeTo="$(parent)GoToDifficultyButton" relativePoint="LEFT" offsetX="-10"/>
                     <Textures normal="EsoUI/Art/ChallengeDifficulty/goToLevelUpRewardsButton_normal.dds" pressed="EsoUI/Art/ChallengeDifficulty/goToLevelUpRewardsButton_mouseDown.dds" mouseOver="EsoUI/Art/ChallengeDifficulty/goToLevelUpRewardsButton_mouseOver.dds" disabled="EsoUI/Art/ChallengeDifficulty/goToLevelUpRewardsButton_disabled.dds"/>
                     <OnMouseEnter>

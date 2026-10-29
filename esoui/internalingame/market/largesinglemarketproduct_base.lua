@@ -90,6 +90,14 @@ function ZO_LargeSingleMarketProduct_Base:UpdateProductStyle()
 
     ZO_MarketClasses_Shared_ApplyTextColorToLabelByState(control.cost, isFocused, displayState)
 
+    local purchaseLimitTagColor = isFocused and ZO_MARKET_PRODUCT_NORMAL_COLOR or ZO_MARKET_PRODUCT_NORMAL_DIMMED_COLOR
+    control.purchaseLimitTag:SetColor(purchaseLimitTagColor:UnpackRGB())
+
+    ZO_MarketClasses_Shared_ApplyTextColorToLabelByState(control.purchaseLimitCount, isFocused, displayState)
+
+    local purchaseLimitColor = isFocused and ZO_MARKET_PRODUCT_ON_SALE_COLOR or ZO_MARKET_PRODUCT_ON_SALE_DIMMED_COLOR
+    control.purchaseLimitTimer:SetColor(purchaseLimitColor:UnpackRGB())
+
     ZO_MarketClasses_Shared_ApplyEsoPlusColorToLabelByState(control.esoPlusCost, isFocused, displayState)
 
     local textCalloutBackgroundColor

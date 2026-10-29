@@ -1,6 +1,5 @@
 local CONFIRM_SCENE_NAME = "gamepad_smithing_research_confirm"
 local CONFIRM_TEMPLATE_NAME = "ZO_GamepadSubMenuEntryTemplateWithStatus"
-ZO_GAMEPAD_CONFIRM_CANCEL_RESEARCH_DIALOG = "GAMEPAD_CONFIRM_CANCEL_RESEARCH"
 
 local GAMEPAD_SMITHING_RESEARCH_FILTER_INCLUDE_BANKED = 1
 
@@ -98,7 +97,6 @@ function ZO_GamepadSmithingResearch:PerformDeferredInitialization()
     self:InitializeKeybindStripDescriptors()
     self:InitializeConfirmList()
     self:InitializeFocusItems()
-    self:InitializeConfirmDestroyDialog()
     self:AnchorTimerBar()
     self:SetupSavedVars()
 end
@@ -263,60 +261,6 @@ function ZO_GamepadSmithingResearch:InitializeKeybindStripDescriptors()
     }
 
     ZO_Gamepad_AddBackNavigationKeybindDescriptors(self.confirmKeybindStripDescriptor, GAME_NAVIGATION_TYPE_BUTTON)
-end
-
-function ZO_GamepadSmithingResearch:InitializeConfirmDestroyDialog()
-    local function ReleaseDialog()
-        ZO_Dialogs_ReleaseDialogOnButtonPress(ZO_GAMEPAD_CONFIRM_CANCEL_RESEARCH_DIALOG)
-    end
-
-    ZO_Dialogs_RegisterCustomDialog(ZO_GAMEPAD_CONFIRM_CANCEL_RESEARCH_DIALOG,
-    {
-        blockDialogReleaseOnPress = true,
-        canQueue = true,
-
-        gamepadInfo = 
-        {
-            dialogType = GAMEPAD_DIALOGS.BASIC,
-            allowRightStickPassThrough = true,
-        },
-
-        setup = function(dialog)
-            self.destroyConfirmText = nil
-            dialog:setupFunc()
-        end,
-
-        title =
-        {
-            text = SI_CRAFTING_CONFIRM_CANCEL_RESEARCH_TITLE,
-        },
-
-        mainText = 
-        {
-            text = SI_GAMEPAD_CRAFTING_CONFIRM_CANCEL_RESEARCH_DESCRIPTION,
-        },
-      
-        buttons =
-        {
-            {
-                onShowCooldown = 2000,
-                keybind = "DIALOG_PRIMARY",
-                text = GetString(SI_YES),
-                callback = function(dialog)
-                    local data = dialog.data
-                    CancelSmithingTraitResearch(data.craftingType, data.researchLineIndex, data.traitIndex)
-                    ReleaseDialog()
-                end,
-            },
-            {
-                keybind = "DIALOG_NEGATIVE",
-                text = GetString(SI_NO),
-                callback = function()
-                    ReleaseDialog()
-                end,
-            },
-        }
-    })
 end
 
 function ZO_GamepadSmithingResearch:AcceptResearch(bagId, slotIndex)

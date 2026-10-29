@@ -11,6 +11,29 @@ function GuildSelector:Initialize(control)
     self.comboBox:SetSelectedItemFont("ZoFontWindowTitle")
     self.comboBox:SetDropdownFont("ZoFontHeader2")
     self.comboBox:SetSpacing(8)
+
+    local function SetupGuildEntry(control, data, ...)
+        data.m_dropdownObject:SetupEntry(control, data, ...)
+
+        local numGuilds = GetNumGuilds()
+        if numGuilds == 1 then
+            control:GetNamedChild("Up"):SetHidden(true)
+            control:GetNamedChild("Down"):SetHidden(true)
+        else
+            control:GetNamedChild("Up"):SetHidden(false)
+            control:GetNamedChild("Down"):SetHidden(false)
+
+            local guildIndex = GetGuildIndex(data.guildId)
+            local isFirst = guildIndex == 1
+            local isLast = guildIndex == numGuilds
+            control:GetNamedChild("Up"):SetEnabled(not isFirst)
+            control:GetNamedChild("Down"):SetEnabled(not isLast)
+        end
+    end
+
+    local EXTRA_WIDTH_PADDING = (ZO_SCROLL_BAR_WIDTH * 2) + 5
+    self.comboBox:AddCustomEntryTemplate("ZO_GuildSelector_GuildComboBoxEntry", ZO_COMBO_BOX_ENTRY_TEMPLATE_HEIGHT, SetupGuildEntry, EXTRA_WIDTH_PADDING)
+
     local comboBoxLabel = comboBoxControl:GetNamedChild("SelectedItemText")
 
     self.allianceIconControl = control:GetNamedChild("GuildIcon")
@@ -107,16 +130,18 @@ function GuildSelector:InitializeGuilds()
     local lastTradingHouseGuildId = GetSelectedTradingHouseGuildId()
     local isLastTradingHouseGuildFound = false
 
+    local wasDropdownOpen = self.comboBox:IsDropdownVisible()
     self.guildId = nil
     self.comboBox:ClearItems()
 
+    local DEFAULT_ENABLED = nil
     local numGuilds = GetNumGuilds()
     for i = 1, numGuilds do
         local guildId = GetGuildId(i)
         local guildName = GetGuildName(guildId)
         local guildAlliance = GetGuildAlliance(guildId)
         local entryText = zo_strformat(SI_GUILD_SELECTOR_FORMAT, ZO_GetAllianceSymbolIcon(guildAlliance), i, guildName)
-        local entry = self.comboBox:CreateItemEntry(entryText, self.OnGuildChanged)
+        local entry = self.comboBox:CreateItemEntry(entryText, self.OnGuildChanged, DEFAULT_ENABLED, "ZO_GuildSelector_GuildComboBoxEntry")
         entry.guildId = guildId
         entry.selectedText = guildName
         self.comboBox:AddItem(entry)
@@ -152,6 +177,10 @@ function GuildSelector:InitializeGuilds()
     else
         self.comboBox:SetSelectedItemText(selectedEntry.selectedText)
         self.OnGuildChanged(self.comboBox, selectedEntry.selectedText, selectedEntry)
+    end
+
+    if wasDropdownOpen then
+        self.comboBox:ShowDropdownOnMouseUp()
     end
 end
 
@@ -233,6 +262,24 @@ function GuildSelector:OnScenesCreated()
             self:SelectGuildById(ZO_GUILD_SELECTOR_MANAGER:GetSelectedGuildMenuId())
         end
     end)
+end
+
+function GuildSelector.OnGuildMoveUpClicked(control)
+    local parentControl = control:GetParent()
+    local guildId = parentControl.dataEntry.guildId
+    local guildIndex = GetGuildIndex(guildId)
+    if guildIndex > 1 then
+        AdjustGuildIndex(guildId, guildIndex - 1)
+    end
+end
+
+function GuildSelector.OnGuildMoveDownClicked(control)
+    local parentControl = control:GetParent()
+    local guildId = parentControl.dataEntry.guildId
+    local guildIndex = GetGuildIndex(guildId)
+    if guildIndex < GetNumGuilds() then
+        AdjustGuildIndex(guildId, guildIndex + 1)
+    end
 end
 
 --Global XML

@@ -4,10 +4,10 @@
 
 ZO_GamepadMenuSoundFragment = ZO_SceneFragment:Subclass()
 
-function ZO_GamepadMenuSoundFragment:New()
-    local fragment = ZO_SceneFragment.New(self)
-    fragment:SetForceRefresh(true)
-    return fragment
+function ZO_GamepadMenuSoundFragment:Initialize()
+    ZO_SceneFragment.Initialize(self)
+    
+    self:SetForceRefresh(true)
 end
 
 local OPEN_SOUND_SCENES = {

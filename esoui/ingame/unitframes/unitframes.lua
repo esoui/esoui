@@ -91,9 +91,11 @@ local KEYBOARD_CONSTANTS =
 
     GROUP_FRAME_BASE_OFFSET_X = 28,
     GROUP_FRAME_BASE_OFFSET_Y = 100,
+    GROUP_FRAME_MINIMAP_OFFSET_Y = 325,
 
     RAID_FRAME_BASE_OFFSET_X = 28,
     RAID_FRAME_BASE_OFFSET_Y = 100,
+    RAID_FRAME_MINIMAP_OFFSET_Y = 325,
 
     GROUP_FRAME_SIZE_X = ZO_KEYBOARD_GROUP_FRAME_WIDTH,
     GROUP_FRAME_SIZE_Y = ZO_KEYBOARD_GROUP_FRAME_HEIGHT,
@@ -138,9 +140,11 @@ local GAMEPAD_CONSTANTS =
 
     GROUP_FRAME_BASE_OFFSET_X = 70,
     GROUP_FRAME_BASE_OFFSET_Y = 55,
+    GROUP_FRAME_MINIMAP_OFFSET_Y = 305,
 
     RAID_FRAME_BASE_OFFSET_X = 100,
     RAID_FRAME_BASE_OFFSET_Y = 50,
+    RAID_FRAME_MINIMAP_OFFSET_Y = 300,
 
     GROUP_FRAME_SIZE_X = ZO_GAMEPAD_GROUP_FRAME_WIDTH,
     GROUP_FRAME_SIZE_Y = ZO_GAMEPAD_GROUP_FRAME_HEIGHT,
@@ -162,6 +166,18 @@ local GAMEPAD_CONSTANTS =
 
     SHOW_GROUP_LABELS = false,
     SHOW_BATTLEGROUND_TEAM = true,
+}
+
+local KEYBOARD_SMALL_FRAME_ANCHORS =
+{
+    minimapAnchor = ZO_Anchor:New(TOPLEFT, GuiRoot, TOPLEFT, KEYBOARD_CONSTANTS.GROUP_FRAME_BASE_OFFSET_X, KEYBOARD_CONSTANTS.GROUP_FRAME_MINIMAP_OFFSET_Y),
+    baseAnchor = ZO_Anchor:New(TOPLEFT, GuiRoot, TOPLEFT, KEYBOARD_CONSTANTS.GROUP_FRAME_BASE_OFFSET_X, KEYBOARD_CONSTANTS.GROUP_FRAME_BASE_OFFSET_Y),
+}
+
+local GAMEPAD_SMALL_FRAME_ANCHORS =
+{
+    minimapAnchor = ZO_Anchor:New(TOPLEFT, GuiRoot, TOPLEFT, GAMEPAD_CONSTANTS.GROUP_FRAME_BASE_OFFSET_X, GAMEPAD_CONSTANTS.GROUP_FRAME_MINIMAP_OFFSET_Y),
+    baseAnchor = ZO_Anchor:New(TOPLEFT, GuiRoot, TOPLEFT, GAMEPAD_CONSTANTS.GROUP_FRAME_BASE_OFFSET_X, GAMEPAD_CONSTANTS.GROUP_FRAME_BASE_OFFSET_Y),
 }
 
 function ZO_UnitFrames_GetPlatformConstants()
@@ -234,17 +250,23 @@ local function GetGroupFrameAnchor(groupIndex, groupSize, previousFrame, previou
     end
 end
 
-local function GetGroupAnchorFrameOffsets(subgroupIndex, groupStride, constants)
+local function GetGroupAnchorFrameOffsets(subgroupIndex, groupStride, constants, isUsingDefaultAnchor)
     groupStride = groupStride or NUM_SUBGROUPS
     local zeroBasedIndex = subgroupIndex - 1
     local row = zo_floor(zeroBasedIndex / groupStride)
     local column = zeroBasedIndex - (row * groupStride)
+    local offsetY
+    if GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_SHOW_MINIMAP) and isUsingDefaultAnchor then
+        offsetY = constants.RAID_FRAME_MINIMAP_OFFSET_Y
+    else
+        offsetY = constants.RAID_FRAME_BASE_OFFSET_Y
+    end
 
-    return (constants.RAID_FRAME_BASE_OFFSET_X + (column * constants.RAID_FRAME_OFFSET_X)), (constants.RAID_FRAME_BASE_OFFSET_Y + (row * constants.RAID_FRAME_ANCHOR_CONTAINER_HEIGHT))
+    return (constants.RAID_FRAME_BASE_OFFSET_X + (column * constants.RAID_FRAME_OFFSET_X)), (offsetY + (row * constants.RAID_FRAME_ANCHOR_CONTAINER_HEIGHT))
 end
 
-function ZO_UnitFrames_GetGroupAnchorFrameOffsets(subgroupIndex, groupStride, constants)
-    return GetGroupAnchorFrameOffsets(subgroupIndex, groupStride, constants)
+function ZO_UnitFrames_GetGroupAnchorFrameOffsets(subgroupIndex, groupStride, constants, isUsingDefaultAnchor)
+    return GetGroupAnchorFrameOffsets(subgroupIndex, groupStride, constants, isUsingDefaultAnchor)
 end
 
 ZO_MostRecentPowerUpdateHandler = ZO_MostRecentEventHandler:Subclass()
@@ -1732,9 +1754,9 @@ end
 local CHALLENGE_DIFFICULTY_NAME_LOOKUP =
 {
     [OVERLAND_DIFFICULTY_TYPE_BASEGAME] = "basegame",
-    [OVERLAND_DIFFICULTY_TYPE_JOURNEYMAN] = "journeyman",
-    [OVERLAND_DIFFICULTY_TYPE_ADVENTURER] = "adventurer",
-    [OVERLAND_DIFFICULTY_TYPE_VETERAN] = "veteran",
+    [OVERLAND_DIFFICULTY_TYPE_SEASONED] = "journeyman",
+    [OVERLAND_DIFFICULTY_TYPE_MASTER] = "adventurer",
+    [OVERLAND_DIFFICULTY_TYPE_VESTIGE] = "veteran",
 }
 
 function ZO_UnitFrameObject:SetPlatformChallengeDifficultyTextures(difficulty)
@@ -2003,6 +2025,7 @@ end
 
 local function CreateGroupAnchorFrames()
     local constants = GetPlatformConstants()
+    local isGamepad = IsInGamepadPreferredMode()
 
     -- Create small group anchor frame
     local smallFrame = CreateControlFromVirtual("ZO_SmallGroupAnchorFrame", ZO_UnitFramesGroups, "ZO_GroupFrameAnchor")
@@ -2011,14 +2034,38 @@ local function CreateGroupAnchorFrames()
 
     --TODO Custom HUD: Look into being able to move each small group unit frame individually
     --Register small frames with the HUD Editor
+    local keyboardDefaultAnchor
+    local gamepadDefaultAnchor
+
+    local IS_GAMEPAD = true
+    local IS_KEYBOARD = false
+
+    if GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_SHOW_MINIMAP) then
+        if MINIMAP:IsUsingDefaultAnchor(IS_KEYBOARD) then
+            keyboardDefaultAnchor = KEYBOARD_SMALL_FRAME_ANCHORS.minimapAnchor
+        else
+            keyboardDefaultAnchor = KEYBOARD_SMALL_FRAME_ANCHORS.baseAnchor
+        end
+
+        if MINIMAP:IsUsingDefaultAnchor(IS_GAMEPAD) then
+            gamepadDefaultAnchor = GAMEPAD_SMALL_FRAME_ANCHORS.minimapAnchor
+        else
+            gamepadDefaultAnchor = GAMEPAD_SMALL_FRAME_ANCHORS.baseAnchor
+        end
+    else
+        keyboardDefaultAnchor = KEYBOARD_SMALL_FRAME_ANCHORS.baseAnchor
+        gamepadDefaultAnchor = GAMEPAD_SMALL_FRAME_ANCHORS.baseAnchor
+    end
+
+
     local SMALL_GROUP_KEYBOARD_FRAME_CONFIG =
     {
-        defaultAnchor = ZO_Anchor:New(TOPLEFT, GuiRoot, TOPLEFT, KEYBOARD_CONSTANTS.GROUP_FRAME_BASE_OFFSET_X, KEYBOARD_CONSTANTS.GROUP_FRAME_BASE_OFFSET_Y)
+        defaultAnchor = keyboardDefaultAnchor
     }
 
     local SMALL_GROUP_GAMEPAD_FRAME_CONFIG =
     {
-        defaultAnchor = ZO_Anchor:New(TOPLEFT, GuiRoot, TOPLEFT, GAMEPAD_CONSTANTS.GROUP_FRAME_BASE_OFFSET_X, GAMEPAD_CONSTANTS.GROUP_FRAME_BASE_OFFSET_Y)
+        defaultAnchor = gamepadDefaultAnchor
     }
 
     local smallFrameElementName = GetString(SI_HUD_EDITOR_SMALL_GROUP_UNIT_FRAMES)
@@ -2048,25 +2095,24 @@ local function CreateGroupAnchorFrames()
             groupNameLabel:SetText(groupName)
         end
 
-        local x, y = GetGroupAnchorFrameOffsets(i, constants.GROUP_STRIDE, constants)
+        local x, y = GetGroupAnchorFrameOffsets(i, constants.GROUP_STRIDE, constants, MINIMAP:IsUsingDefaultAnchor(isGamepad))
         raidFrame:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, x, y)
 
         --TODO Custom HUD: Look into being able to large group unit frames as a single element
         --We create more columns than the UI actually uses, so only register the columns with the HUD Editor if it's possible to use them
         if i <= KEYBOARD_CONSTANTS.NUM_COLUMNS then
-            local keyboardX, keyboardY = GetGroupAnchorFrameOffsets(i, KEYBOARD_CONSTANTS.GROUP_STRIDE, KEYBOARD_CONSTANTS)
+            local keyboardX, keyboardY = GetGroupAnchorFrameOffsets(i, KEYBOARD_CONSTANTS.GROUP_STRIDE, KEYBOARD_CONSTANTS, MINIMAP:IsUsingDefaultAnchor(IS_KEYBOARD))
             local LARGE_GROUP_KEYBOARD_FRAME_CONFIG =
             {
                 defaultAnchor = ZO_Anchor:New(TOPLEFT, GuiRoot, TOPLEFT, keyboardX, keyboardY)
             }
-
             local elementName = zo_strformat(SI_HUD_EDITOR_LARGE_GROUP_UNIT_FRAMES_COLUMN, i)
             HUD_MANAGER:RegisterKeyboardElement(raidFrame, elementName, LARGE_GROUP_KEYBOARD_FRAME_CONFIG)
         end
 
         --We create more columns than the UI actually uses, so only register the columns with the HUD Editor if it's possible to use them
         if i <= GAMEPAD_CONSTANTS.NUM_COLUMNS then
-            local gamepadX, gamepadY = GetGroupAnchorFrameOffsets(i, GAMEPAD_CONSTANTS.GROUP_STRIDE, GAMEPAD_CONSTANTS)
+            local gamepadX, gamepadY = GetGroupAnchorFrameOffsets(i, GAMEPAD_CONSTANTS.GROUP_STRIDE, GAMEPAD_CONSTANTS, MINIMAP:IsUsingDefaultAnchor(IS_GAMEPAD))
             local LARGE_GROUP_GAMEPAD_FRAME_CONFIG =
             {
                 defaultAnchor = ZO_Anchor:New(TOPLEFT, GuiRoot, TOPLEFT, gamepadX, gamepadY)
@@ -2183,7 +2229,7 @@ local function UpdateAnchorFrameVisuals()
         end
 
         raidFrame:SetDimensions(constants.RAID_FRAME_ANCHOR_CONTAINER_WIDTH, constants.RAID_FRAME_ANCHOR_CONTAINER_HEIGHT)
-        local offsetX, offsetY = GetGroupAnchorFrameOffsets(i, constants.GROUP_STRIDE, constants)
+        local offsetX, offsetY = GetGroupAnchorFrameOffsets(i, constants.GROUP_STRIDE, constants,  MINIMAP:IsUsingDefaultAnchor(gamepadMode))
         SetAnchorOffsets(raidFrame, offsetX, offsetY)
 
         local largeFrameElement
@@ -2793,15 +2839,15 @@ local function RegisterForEvents()
         UnitFrames:ClearDirty()
     end
 
-    local function OnGroupMemberJoined(_, _, isLocalPlayer)
+    local function OnGroupMemberJoined(_, characterName, crossplayDisplayName, isLocalPlayer, platformDisplayName)
         if isLocalPlayer then
             UnitFrames:DisableLocalCompanionFrame()
         end
         UnitFrames:EndGroupElection(GROUP_ELECTION_RESULT_ABANDONED)
     end
 
-    local function OnGroupMemberLeft(_, characterName, reason, wasLocalPlayer)
-        if wasLocalPlayer then
+    local function OnGroupMemberLeft(_, characterName, reason, isLocalPlayer, isLeader, crossplayDisplayName, actionRequiredVote, platformDisplayName)
+        if isLocalPlayer then
             RefreshGroups()
             RefreshLocalCompanion()
         end
@@ -2910,10 +2956,95 @@ local function RegisterForEvents()
         ZO_UnitFrames_UpdateWindow("reticleovertarget", UNIT_CHANGED)
     end
 
-    local function OnInterfaceSettingChanged(eventCode)
+    local function RefreshDefaultSmallFrameAnchors()
+        local isGamepad = IsInGamepadPreferredMode()
+
+        local keyboardElement = HUD_MANAGER:GetKeyboardElementForControl(ZO_SmallGroupAnchorFrame)
+        local gamepadElement = HUD_MANAGER:GetGamepadElementForControl(ZO_SmallGroupAnchorFrame)
+
+        local defaultKeyboardAnchor
+        local defaultGamepadAnchor
+
+        if GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_SHOW_MINIMAP) then
+            local IS_KEYBOARD = false
+            if MINIMAP:IsUsingDefaultAnchor(IS_KEYBOARD) then
+                defaultKeyboardAnchor = KEYBOARD_SMALL_FRAME_ANCHORS.minimapAnchor
+            else
+                defaultKeyboardAnchor = KEYBOARD_SMALL_FRAME_ANCHORS.baseAnchor
+            end
+
+            local IS_GAMEPAD = true
+            if MINIMAP:IsUsingDefaultAnchor(IS_GAMEPAD) then
+                defaultGamepadAnchor = GAMEPAD_SMALL_FRAME_ANCHORS.minimapAnchor
+            else
+                defaultGamepadAnchor = GAMEPAD_SMALL_FRAME_ANCHORS.baseAnchor
+            end
+        else
+            defaultKeyboardAnchor = KEYBOARD_SMALL_FRAME_ANCHORS.baseAnchor
+            defaultGamepadAnchor = GAMEPAD_SMALL_FRAME_ANCHORS.baseAnchor
+        end
+
+        keyboardElement:SetDefaultAnchor(defaultKeyboardAnchor, not isGamepad)
+        gamepadElement:SetDefaultAnchor(defaultGamepadAnchor, isGamepad)
+    end
+
+    local function RefreshDefaultRaidFrameAnchors()
+        local isGamepad = IsInGamepadPreferredMode()
+
+        local IS_GAMEPAD = true
+        local IS_KEYBOARD = false
+
+        local isGamepadDefault =  MINIMAP:IsUsingDefaultAnchor(IS_GAMEPAD)
+        local isKeyboardDefault = MINIMAP:IsUsingDefaultAnchor(IS_KEYBOARD)
+
+        for i = 1, NUM_SUBGROUPS do
+            local raidFrame = GetControl("ZO_LargeGroupAnchorFrame"..i)
+
+            local keyboardElement = HUD_MANAGER:GetKeyboardElementForControl(raidFrame)
+            local gamepadElement = HUD_MANAGER:GetGamepadElementForControl(raidFrame)
+
+            if keyboardElement then
+                local keyboardOffsetX, keyboardOffsetY = GetGroupAnchorFrameOffsets(i, KEYBOARD_CONSTANTS.GROUP_STRIDE, KEYBOARD_CONSTANTS, isKeyboardDefault)
+                local defaultKeyboardAnchor = ZO_Anchor:New(TOPLEFT, GuiRoot, TOPLEFT, keyboardOffsetX, keyboardOffsetY)
+
+                keyboardElement:SetDefaultAnchor(defaultKeyboardAnchor, not isGamepad)
+            end
+
+            if gamepadElement then
+                local gamepadOffsetX, gamepadOffsetY = GetGroupAnchorFrameOffsets(i, GAMEPAD_CONSTANTS.GROUP_STRIDE, GAMEPAD_CONSTANTS, isGamepadDefault)
+                local defaultGamepadAnchor = ZO_Anchor:New(TOPLEFT, GuiRoot, TOPLEFT, gamepadOffsetX, gamepadOffsetY)
+
+                gamepadElement:SetDefaultAnchor(defaultGamepadAnchor, isGamepad)
+            end
+        end
+    end
+
+    local function OnInterfaceSettingChanged(eventCode, settingType, settingId)
+        if settingType == SETTING_TYPE_UI and settingId == UI_SETTING_SHOW_MINIMAP then
+            RefreshDefaultSmallFrameAnchors()
+            RefreshDefaultRaidFrameAnchors()
+
+            --For some unknown reason, the raid frame anchor's HUDElementRef does not properly update its anchors after running the above logic, so rebuild all elements to force the anchors to update
+            HUD_MANAGER:RebuildAllElements()
+        end
+
         -- Groups do not update every frame (they wait for events), so refresh if the primary name option may have changed
         RefreshGroups(eventCode)
     end
+
+    HUD_MANAGER:RegisterCallback("OffsetsChanged", function(element)
+        if MINIMAP:GetKeyboardElement() == element or MINIMAP:GetGamepadElement() == element then
+            RefreshDefaultSmallFrameAnchors()
+            RefreshDefaultRaidFrameAnchors()
+        end
+    end)
+
+    --Refresh the anchors for the unit frames once the hud manager has loaded in its saved vars
+    HUD_MANAGER:RegisterCallback("SavedVarsReady", function()
+        RefreshDefaultSmallFrameAnchors()
+        RefreshDefaultRaidFrameAnchors()
+    end)
+
 
     local function OnGuildNameAvailable()
         --only reticle over can show a guild name in a caption

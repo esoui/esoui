@@ -33,7 +33,6 @@ local MENU_CROWN_STORE_ENTRIES = ZO_CreateEnumTable(
     "ENDEAVOR_SEAL_STORE",
     "DAILY_LOGIN_REWARDS",
     "CROWN_CRATES",
-    "CHAPTERS",
     "GIFT_INVENTORY",
     "REDEEM_CODE"
 )
@@ -173,16 +172,6 @@ local MENU_ENTRY_DATA =
                     --An unusual case, we don't want to blow away this option if you're already in the scene when it's disabled
                     --Crown crates will properly refresh again when it closes its scene
                     return CanInteractWithCrownCratesSystem() or SYSTEMS:IsShowing("crownCrate")
-                end,
-            },
-            [MENU_CROWN_STORE_ENTRIES.CHAPTERS] =
-            {
-                scene = "chapterUpgradeGamepad",
-                sceneGroup = "gamepad_chapterUpgrade_scenegroup",
-                name = GetString(SI_MAIN_MENU_CHAPTERS),
-                icon = "EsoUI/Art/MenuBar/Gamepad/gp_playerMenu_icon_chapters.dds",
-                isVisibleCallback = function()
-                    return ZO_CHAPTER_UPGRADE_MANAGER:GetNumChapterUpgrades() > 0
                 end,
             },
             [MENU_CROWN_STORE_ENTRIES.GIFT_INVENTORY] =

@@ -178,8 +178,19 @@ function ZO_Market_Keyboard:InitializeKeybindDescriptors()
             visible =   function()
                             if self.bundleContentFragment:IsShowing() then
                                 return self.bundleContentFragment:CanPurchase()
+                                    or self.bundleContentFragment:IsPurchaseLimitReached()
                             else
-                                return self.selectedMarketProduct ~= nil and self.selectedMarketProduct:CanBePurchased()
+                                local selectedMarketProduct = self.selectedMarketProduct
+                                return selectedMarketProduct ~= nil
+                                    and (selectedMarketProduct:CanBePurchased() or selectedMarketProduct:IsPurchaseLimitReached())
+                            end
+                        end,
+            enabled =   function()
+                            if self.bundleContentFragment:IsShowing() then
+                                return not self.bundleContentFragment:IsPurchaseLimitReached()
+                            else
+                                local selectedMarketProduct = self.selectedMarketProduct
+                                return selectedMarketProduct ~= nil and not selectedMarketProduct:IsPurchaseLimitReached()
                             end
                         end,
             callback =  function()
@@ -272,8 +283,19 @@ function ZO_Market_Keyboard:InitializeKeybindDescriptors()
             visible =   function()
                             if self.bundleContentFragment:IsShowing() then
                                 return self.bundleContentFragment:CanGift()
+                                    or self.bundleContentFragment:IsPurchaseLimitReached()
                             else
-                                return self.selectedMarketProduct ~= nil and self.selectedMarketProduct:IsGiftable()
+                                local selectedMarketProduct = self.selectedMarketProduct
+                                return selectedMarketProduct ~= nil
+                                    and (selectedMarketProduct:IsGiftable() or selectedMarketProduct:IsPurchaseLimitReached())
+                            end
+                        end,
+            enabled =   function()
+                            if self.bundleContentFragment:IsShowing() then
+                                return not self.bundleContentFragment:IsPurchaseLimitReached()
+                            else
+                                local selectedMarketProduct = self.selectedMarketProduct
+                                return selectedMarketProduct ~= nil and not selectedMarketProduct:IsPurchaseLimitReached()
                             end
                         end,
             callback =  function()

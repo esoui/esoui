@@ -160,7 +160,6 @@ end
 
 function ZO_Anchor:AddToControl(control)
     if control then
-        local data = self.data
         control:SetAnchor(self:Get())
     end
 end
@@ -250,45 +249,45 @@ end
 
 --anchors a control to the centered text in a larger label
 function ZO_Anchor_ToCenteredLabel(control, anchor, labelWidth)
-	local label = anchor:GetTarget()
-	local textWidth, _ = label:GetTextDimensions()
-	local labelWidth = labelWidth or label:GetWidth()
-	local offX, offY = anchor:GetOffsets()
-	
-    control:SetAnchor(anchor:GetMyPoint(), label, anchor:GetRelativePoint(), labelWidth*0.5 - textWidth*0.5 + offX, offY)
+    local label = anchor:GetTarget()
+    local textWidth, _ = label:GetTextDimensions()
+    labelWidth = labelWidth or label:GetWidth()
+    local offX, offY = anchor:GetOffsets()
+
+    control:SetAnchor(anchor:GetMyPoint(), label, anchor:GetRelativePoint(), labelWidth * 0.5 - textWidth * 0.5 + offX, offY)
 end
 
 function ZO_Anchor_OnRing(control, anchorToControl, x, y, radiusArg)
-	local radius = radiusArg or anchorToControl:GetWidth() * 0.5
-	local anchorCenterX = anchorToControl:GetLeft() + anchorToControl:GetWidth() * 0.5
-	local anchorCenterY = anchorToControl:GetTop() + anchorToControl:GetHeight() * 0.5
-	
-	local vx = x - anchorCenterX
-	local vy = y - anchorCenterY
-	
-	local vMagSq = vx*vx + vy*vy
-	local rx, ry
-	
-	if vMagSq > 0.001 then
-		--scale the vector toward the origin of rotation
-		local radiusSq = radius * radius
-		local factor = math.sqrt(radiusSq / vMagSq)
-		
-		rx = vx * factor
-		ry = vy * factor
-	else
-		--just put it at the top, we're so close to the center that it doesn't really matter what side we're on
-		rx = 0
-		ry = -radius
-	end
-	
-	control:ClearAnchors()
-	control:SetAnchor(CENTER, anchorToControl, CENTER, rx, ry)
+    local radius = radiusArg or anchorToControl:GetWidth() * 0.5
+    local anchorCenterX = anchorToControl:GetLeft() + anchorToControl:GetWidth() * 0.5
+    local anchorCenterY = anchorToControl:GetTop() + anchorToControl:GetHeight() * 0.5
+
+    local vx = x - anchorCenterX
+    local vy = y - anchorCenterY
+
+    local vMagSq = vx * vx + vy * vy
+    local rx, ry
+
+    if vMagSq > 0.001 then
+        --scale the vector toward the origin of rotation
+        local radiusSq = radius * radius
+        local factor = math.sqrt(radiusSq / vMagSq)
+
+        rx = vx * factor
+        ry = vy * factor
+    else
+        --just put it at the top, we're so close to the center that it doesn't really matter what side we're on
+        rx = 0
+        ry = -radius
+    end
+
+    control:ClearAnchors()
+    control:SetAnchor(CENTER, anchorToControl, CENTER, rx, ry)
 end
 
 function ZO_Anchor_ByAngle(control, anchorToControl, theta, radiusArg)
-	local radius = radiusArg or anchorToControl:GetWidth() * 0.5	
-	control:SetAnchor(CENTER, anchorToControl, CENTER, math.cos(theta) * radius, (-math.sin(theta)) * radius)
+    local radius = radiusArg or anchorToControl:GetWidth() * 0.5
+    control:SetAnchor(CENTER, anchorToControl, CENTER, math.cos(theta) * radius, (-math.sin(theta)) * radius)
 end
 
 function ZO_Anchor_LineInContainer(line, container, startX, startY, endX, endY)

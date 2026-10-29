@@ -21,18 +21,16 @@ function ZO_ZoneStories_Keyboard:Initialize(control)
             gridPaddingX = 2,
             gridPaddingY = 20,
         },
-
-
-
-
-
-
-
-
-
-
-
-
+        milestones =
+        {
+            headerTemplate = "ZO_ZoneStory_MilestoneHeader_Keyboard",
+            entryTemplate = "ZO_ZoneStory_MilestoneTile_Keyboard_Control",
+            dimensionsX = ZO_ZONE_STORIES_MILESTONE_TILE_KEYBOARD_DIMENSIONS_X,
+            dimensionsY = ZO_ZONE_STORIES_MILESTONE_TILE_KEYBOARD_DIMENSIONS_Y,
+            gridPaddingX = 2,
+            gridPaddingY = 20,
+            headerHeight = 40,
+        },
         activityCompletion =
         {
             headerTemplate = "ZO_ZoneStory_ActivityCompletionHeader_Keyboard",
@@ -276,16 +274,12 @@ do
         end
 
         if DoesZoneStoryActivityCompletionTypeUseIndex(completionType) then
-
-
-
-
-
+            if completionType == ZONE_COMPLETION_TYPE_MILESTONES then
+                activityCompletionTooltipInfo.control:SetHidden(true)
+            else
                 activityCompletionTooltipInfo.textControl:SetText(GetZoneStoryActivityDescriptionForCompletionTypeAndIndex(zoneId, completionType, completionIndex))
                 activityCompletionTooltipInfo.control:SetHidden(false)
-
-
-
+            end
         else
             activityCompletionTooltipInfo.textControl:SetText(GetString("SI_ZONECOMPLETIONTYPE_DESCRIPTION", completionType))
             activityCompletionTooltipInfo.control:SetHidden(false)

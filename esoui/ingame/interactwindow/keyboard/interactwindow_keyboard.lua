@@ -299,9 +299,9 @@ function ZO_Interaction:ShowQuestRewards(journalQuestIndex)
                 control.index = reward.index
                 control.itemType = reward.itemType
                 if control.itemType == REWARD_ITEM_TYPE_COLLECTIBLE then
-                    control.itemId = GetJournalQuestRewardCollectibleId(journalQuestIndex, i)
+                    control.itemId = GetJournalQuestRewardCollectibleId(journalQuestIndex, reward.index)
                 elseif control.itemType == REWARD_ITEM_TYPE_TRIBUTE_CARD_UPGRADE then
-                    local patronDefId, cardIndex = GetJournalQuestRewardTributeCardUpgradeInfo(journalQuestIndex, i)
+                    local patronDefId, cardIndex = GetJournalQuestRewardTributeCardUpgradeInfo(journalQuestIndex, reward.index)
                     local patronData = TRIBUTE_DATA_MANAGER:GetTributePatronData(patronDefId)
                     local _, upgradeCardId = patronData:GetDockCardInfoByIndex(cardIndex)
                     control.patronDefId = patronDefId

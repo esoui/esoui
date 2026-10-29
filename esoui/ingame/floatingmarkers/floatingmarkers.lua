@@ -33,6 +33,8 @@ local function OnPlayerActivated()
 
     SetFloatingMarkerInfo(MAP_PIN_TYPE_TIMELY_ESCAPE_NPC, 32, "EsoUI/Art/FloatingMarkers/timely_escape_npc.dds", "EsoUI/Art/FloatingMarkers/timely_escape_npc.dds")
     SetFloatingMarkerInfo(MAP_PIN_TYPE_DARK_BROTHERHOOD_TARGET, 32, "EsoUI/Art/FloatingMarkers/darkbrotherhood_target.dds", "EsoUI/Art/FloatingMarkers/darkbrotherhood_target.dds")
+    -- This is defining the default icon for scripted events, but it can be overridden by the event itself.
+    SetFloatingMarkerInfo(MAP_PIN_TYPE_SCRIPTED_EVENT, 32, "EsoUI/Art/FloatingMarkers/interactableObject_icon_assisted.dds", "EsoUI/Art/FloatingMarkers/interactableObject_icon_assisted.dds")
 
     local PULSES = true
     SetFloatingMarkerInfo(MAP_PIN_TYPE_QUEST_OFFER, 32, "EsoUI/Art/FloatingMarkers/quest_available_icon.dds", "", PULSES)

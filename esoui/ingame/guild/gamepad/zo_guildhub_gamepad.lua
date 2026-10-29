@@ -835,6 +835,64 @@ function ZO_GamepadGuildHub:InitializeKeybindStripDescriptors()
             end,
         },
 
+        -- Move Guild Up
+        {
+            name = GetString(SI_GAMEPAD_GUILD_HUB_MOVE_UP_ACTION),
+
+            keybind = "UI_SHORTCUT_LEFT_SHOULDER",
+            
+            order = 100,
+
+            callback = function()
+                local targetData = self.guildList:GetTargetData()
+                local guildIndex = GetGuildIndex(targetData.guildId)
+                AdjustGuildIndex(targetData.guildId, guildIndex - 1)
+            end,
+
+            enabled = function()
+                local targetData = self.guildList:GetTargetData()
+                local guildIndex = GetGuildIndex(targetData.guildId)
+                return guildIndex > 1
+            end,
+
+            visible = function()
+                if self.displayMode == GUILD_HUB_DISPLAY_MODE.GUILDS_LIST and GetNumGuilds() > 1 then
+                    local targetData = self.guildList:GetTargetData()
+                    return targetData and targetData.guildId ~= nil
+                end
+                return false
+            end,
+        },
+
+        -- Move Guild Down
+        {
+            name = GetString(SI_GAMEPAD_GUILD_HUB_MOVE_DOWN_ACTION),
+
+            keybind = "UI_SHORTCUT_RIGHT_SHOULDER",
+
+            order = 101,
+
+            callback = function()
+                local targetData = self.guildList:GetTargetData()
+                local guildIndex = GetGuildIndex(targetData.guildId)
+                AdjustGuildIndex(targetData.guildId, guildIndex + 1)
+            end,
+
+            enabled = function()
+                local targetData = self.guildList:GetTargetData()
+                local guildIndex = GetGuildIndex(targetData.guildId)
+                return guildIndex < GetNumGuilds()
+            end,
+
+            visible = function()
+                if self.displayMode == GUILD_HUB_DISPLAY_MODE.GUILDS_LIST and GetNumGuilds() > 1 then
+                    local targetData = self.guildList:GetTargetData()
+                    return targetData and targetData.guildId ~= nil
+                end
+                return false
+            end,
+        },
+
         -- Back
         {
             name = GetString(SI_GAMEPAD_BACK_OPTION),
@@ -899,7 +957,7 @@ do
             end
             AddEntry(data)
 
-            if ZO_IsConsoleOrGameCoreUI() and GetNumberConsoleFriends() > 0 then
+            if ZO_IsConsoleOrGameCoreUI() and HasConsoleFriends() then
                 data = ZO_GamepadEntryData:New(GetString(SI_GAMEPAD_GUILD_ADD_FRIEND), ICON_INVITE)
                 data.guildId = self.optionsGuildId
                 data.selectCallback = function(optionsSelectedData)
@@ -952,7 +1010,7 @@ do
                 self:ActivateMainList()
             end
 
-            ZO_ShowLeaveGuildDialog(self.optionsGuildId, { leftGuildCallback = LeftGuildCallback }, true)
+            ZO_ShowLeaveGuildDialog(self.optionsGuildId, { leftGuildCallback = LeftGuildCallback })
         end
         AddEntry(data)
     end

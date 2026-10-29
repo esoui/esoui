@@ -155,7 +155,7 @@ function ZO_LeaderboardsListManager_Shared:QueryLeaderboardData(leaderboardType,
             self:OnBattlegroundLeaderboardDataReceived(queryData.battlegroundType)
         end
     elseif leaderboardType == LEADERBOARD_DATA_TYPE.CAMPAIGN then
-        readyState = QueryCampaignLeaderboardData(queryData.alliance)
+        readyState = QueryCampaignLeaderboardData(queryData.campaignId, queryData.alliance)
         if readyState == LEADERBOARD_DATA_READY then
             self:OnCampaignLeaderboardDataReceived(queryData.campaignId, queryData.alliance)
         end

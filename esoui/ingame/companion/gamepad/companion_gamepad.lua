@@ -235,9 +235,7 @@ function ZO_Companion_Gamepad:RefreshHeader()
         self.outfitSelectorNameLabel:SetText(GetString(SI_NO_OUTFIT_EQUIP_ENTRY))
     end
 
-
-
-
+    self.outfitSelectorControl:SetHidden(IsActiveCompanionAnimal())
     self.outfitSelectorHeaderFocus:Update()
     ZO_GamepadGenericHeader_Refresh(self.header, self.headerData)
 end

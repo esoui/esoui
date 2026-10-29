@@ -266,9 +266,7 @@ function ZO_WorldMap_GetWayshrineTooltipCollectibleLockedText(pin)
 
     local collectibleData = pin:GetLinkedCollectibleData()
     local stringId
-    if collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_CHAPTER) then
-        stringId = SI_TOOLTIP_POI_LINKED_CHAPTER_COLLECTIBLE_LOCKED
-    elseif collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_DLC) then
+    if collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_DLC) then
         stringId = SI_TOOLTIP_POI_LINKED_DLC_COLLECTIBLE_LOCKED
     else
         stringId = SI_TOOLTIP_POI_LINKED_CROWN_STORE_COLLECTIBLE_LOCKED
@@ -361,12 +359,7 @@ function InformationTooltipMixin:AppendWayshrineTooltip(pin)
         local r, g, b = GetInterfaceColor(INTERFACE_COLOR_TYPE_MARKET_COLORS, MARKET_COLORS_ON_SALE)
         local SET_TO_FULL_SIZE = true
         informationTooltip:AddLine(ZO_WorldMap_GetWayshrineTooltipCollectibleLockedText(pin), "", r, g, b, CENTER, MODIFY_TEXT_TYPE_NONE, TEXT_ALIGN_CENTER, SET_TO_FULL_SIZE)
-
-        if pin:GetLinkedCollectibleType() == COLLECTIBLE_CATEGORY_TYPE_CHAPTER then
-            informationTooltip:AddLine(GetString(SI_TOOLTIP_WAYSHRINE_CLICK_TO_UPGRADE_CHAPTER), "", ZO_HIGHLIGHT_TEXT:UnpackRGB())
-        else
-            informationTooltip:AddLine(GetString(SI_TOOLTIP_WAYSHRINE_CLICK_TO_OPEN_CROWN_STORE), "", ZO_HIGHLIGHT_TEXT:UnpackRGB())
-        end
+        informationTooltip:AddLine(GetString(SI_TOOLTIP_WAYSHRINE_CLICK_TO_OPEN_CROWN_STORE), "", ZO_HIGHLIGHT_TEXT:UnpackRGB())
     elseif IsUnitDead("player") then --NO CLICK: Dead
         informationTooltip:AddLine(GetString(SI_TOOLTIP_WAYSHRINE_CANT_RECALL_WHEN_DEAD), "", ZO_ERROR_COLOR:UnpackRGB())
     elseif g_fastTravelNodeIndex == nil then --Recall
@@ -505,14 +498,14 @@ function ZO_KeepNetwork:New(container)
 end
 
 function ZO_KeepNetwork:SetOpenNetwork(keepId)
-    g_mapRefresh:RefreshAll("keepNetwork")
+    ZO_WorldMap_RefreshKeepNetwork()
 end
 
 function ZO_KeepNetwork:ClearOpenNetwork()
     if self.container:IsHidden() then
         g_mapPinManager:RemovePins("fastTravelKeep")
     else
-        g_mapRefresh:RefreshAll("keepNetwork")
+        ZO_WorldMap_RefreshKeepNetwork()
     end
 end
 
@@ -523,7 +516,7 @@ do
         linkPool:ReleaseAllObjects()
         g_mapPinManager:RemovePins("restrictedLink")
 
-        if GetMapFilterType() ~= MAP_FILTER_TYPE_AVA_CYRODIIL or (GetCurrentMapIndex() ~= g_cyrodiilMapIndex and GetCurrentMapIndex() ~= g_jerallPassMapIndex) then
+        if GetMapFilterType() ~= MAP_FILTER_TYPE_AVA_CYRODIIL or GetCurrentMapIndex() ~= g_cyrodiilMapIndex then
             return
         end
 
@@ -1751,7 +1744,7 @@ local function IsMapShowingBattlegroundContext(bgContext)
 end
 
 local function IsPresentlyShowingKeeps()
-    return GetMapFilterType() == MAP_FILTER_TYPE_AVA_CYRODIIL or GetMapFilterType() == MAP_FILTER_TYPE_AVA_IMPERIAL
+    return GetMapFilterType() == MAP_FILTER_TYPE_AVA_CYRODIIL or GetMapFilterType() == MAP_FILTER_TYPE_AVA_IMPERIAL or GetMapFilterType() == MAP_FILTER_TYPE_AVA_JERALL
 end
 
 local function AddKeep(keepId, bgContext)
@@ -2003,21 +1996,30 @@ function ZO_WorldMap_RefreshRespawnTimer(currentTime)
     end
 end
 
-function ZO_WorldMap_RefreshForwardCamps()
-    g_mapPinManager:RemovePins("forwardCamp")
+do
+    local MAP_FILTER_TYPES_SUPPORTING_FORWARD_CAMPS =
+    {
+        [MAP_FILTER_TYPE_AVA_CYRODIIL] = true,
+        [MAP_FILTER_TYPE_AVA_JERALL] = true,
+    }
 
-    if GetMapFilterType() ~= MAP_FILTER_TYPE_AVA_CYRODIIL then
-        return
-    end
-    if not ZO_WorldMap_IsPinGroupShown(MAP_FILTER_AVA_GRAVEYARDS) then return end
+    function ZO_WorldMap_RefreshForwardCamps()
+        g_mapPinManager:RemovePins("forwardCamp")
 
-    for i = 1, GetNumForwardCamps(g_queryType) do
-        local pinType, normalizedX, normalizedY, normalizedRadius, useable = GetForwardCampPinInfo(g_queryType, i)
-        if ZO_WorldMap_IsNormalizedPointInsideMapBounds(normalizedX, normalizedY) then
-            if not ZO_WorldMap_IsPinGroupShown(MAP_FILTER_AVA_GRAVEYARD_AREAS) then
-                normalizedRadius = 0
+        if not MAP_FILTER_TYPES_SUPPORTING_FORWARD_CAMPS[GetMapFilterType()] then
+            return
+        end
+
+        if not ZO_WorldMap_IsPinGroupShown(MAP_FILTER_AVA_GRAVEYARDS) then return end
+
+        for i = 1, GetNumForwardCamps(g_queryType) do
+            local pinType, normalizedX, normalizedY, normalizedRadius, useable = GetForwardCampPinInfo(g_queryType, i)
+            if ZO_WorldMap_IsNormalizedPointInsideMapBounds(normalizedX, normalizedY) then
+                if not ZO_WorldMap_IsPinGroupShown(MAP_FILTER_AVA_GRAVEYARD_AREAS) then
+                    normalizedRadius = 0
+                end
+                g_mapPinManager:CreatePin(pinType, ZO_MapPin.CreateForwardCampPinTag(i), normalizedX, normalizedY, normalizedRadius)
             end
-            g_mapPinManager:CreatePin(pinType, ZO_MapPin.CreateForwardCampPinTag(i), normalizedX, normalizedY, normalizedRadius)
         end
     end
 end
@@ -2169,7 +2171,7 @@ function ZO_WorldMap_UpdateMap()
 
     -- Set up map location names
     g_mapRefresh:RefreshAll("location")
-    g_mapRefresh:RefreshAll("keepNetwork")
+    ZO_WorldMap_RefreshKeepNetwork()
     ZO_WorldMap_RefreshAllPOIs()
     WORLD_MAP_MANAGER:UpdateFloorAndLevelNavigation()
     ZO_WorldMap_RefreshObjectives()
@@ -2198,11 +2200,13 @@ local function UpdateMapCampaign()
     local lastQueryType = g_queryType
 
     local localCampaignId = GetCurrentCampaignId()
-    local isLocalCampaignImperialCity = IsImperialCityCampaign(localCampaignId)
+    local campaignWorldType = GetCampaignWorldType(localCampaignId)
+    local isLocalCampaignImperialCity = campaignWorldType == CAMPAIGN_WORLD_TYPE_IMPERIAL_CITY
+    local isLocalCampaignJerallPass = campaignWorldType == CAMPAIGN_WORLD_TYPE_JERALL_PASS
     local currentMapFilterType = GetMapFilterType()
 
     if currentMapFilterType == MAP_FILTER_TYPE_AVA_CYRODIIL then
-        if localCampaignId ~= 0 and not isLocalCampaignImperialCity then
+        if localCampaignId ~= 0 and not isLocalCampaignImperialCity and not isLocalCampaignJerallPass then
             g_queryType = BGQUERY_LOCAL
         else
             -- If we aren't in a cyrodiil campaign, show the home campaign. If we don't have a campaign this will behave like we didn't pick a query type
@@ -2213,6 +2217,13 @@ local function UpdateMapCampaign()
             g_queryType = BGQUERY_LOCAL
         else
             -- IC campaigns can never be homed, so never query the home campaign here
+            g_queryType = BGQUERY_UNKNOWN
+        end
+    elseif currentMapFilterType == MAP_FILTER_TYPE_AVA_JERALL then
+        if localCampaignId ~= 0 and isLocalCampaignJerallPass then
+            g_queryType = BGQUERY_LOCAL
+        else
+            -- Jerall Pass campaigns can never be homed, so never query the home campaign here
             g_queryType = BGQUERY_UNKNOWN
         end
     elseif currentMapFilterType == MAP_FILTER_TYPE_BATTLEGROUND then
@@ -2232,11 +2243,14 @@ local function UpdateMapCampaign()
     end
 
     if lastCampaignId ~= g_campaignId or lastQueryType ~= g_queryType then
-        if ZO_WorldMap_IsWorldMapShowing() and currentMapFilterType == MAP_FILTER_TYPE_AVA_CYRODIIL then
+        if ZO_WorldMap_IsWorldMapShowing() then
             ZO_WorldMap_RefreshKeeps()
-            g_mapRefresh:RefreshAll("objective")
-            g_mapRefresh:RefreshAll("keepNetwork")
-            ResetCampaignHistoryWindow(ZO_WorldMap_GetBattlegroundQueryType())
+
+            if currentMapFilterType == MAP_FILTER_TYPE_AVA_CYRODIIL then
+                ZO_WorldMap_RefreshObjectives()
+                ZO_WorldMap_RefreshKeepNetwork()
+                ResetCampaignHistoryWindow(ZO_WorldMap_GetBattlegroundQueryType())
+            end
         end
         g_dataRegistration:Refresh()
         CALLBACK_MANAGER:FireCallbacks("OnWorldMapCampaignChanged")
@@ -2420,8 +2434,8 @@ end
 
 local function RebuildMapHistory()
     ZO_WorldMap_RefreshKeeps()
-    g_mapRefresh:RefreshAll("keepNetwork")
-    g_mapRefresh:RefreshAll("objective")
+    ZO_WorldMap_RefreshKeepNetwork()
+    ZO_WorldMap_RefreshObjectives()
 end
 
 function ZO_WorldMapHistorySlider_OnValueChanged(slider, value, eventReason)
@@ -2644,7 +2658,7 @@ end
 
 function ZO_WorldMap_ShowAvAKeepRecall()
     WORLD_MAP_MANAGER:PushSpecialMode(MAP_MODE_AVA_KEEP_RECALL)
-    g_mapRefresh:RefreshAll("keepNetwork")
+    ZO_WorldMap_RefreshKeepNetwork()
     ZO_WorldMap_ShowWorldMap()
 end
 
@@ -2813,12 +2827,19 @@ function ZO_WorldMap_ShowKeepOnMap(keepId)
         return
     end
 
-    -- TODO Vengeance: Address this for Jerall Pass
     if g_cyrodiilMapIndex == nil then
         return
     end
 
-    local result = SetMapToMapListIndex(g_cyrodiilMapIndex)
+    local mapIndex = g_cyrodiilMapIndex
+    local campaignWorldType = GetKeepCampaignWorldType(keepId)
+    if campaignWorldType == CAMPAIGN_WORLD_TYPE_IMPERIAL_CITY then
+        mapIndex = g_imperialCityMapIndex
+    elseif campaignWorldType == CAMPAIGN_WORLD_TYPE_JERALL_PASS then
+        mapIndex = g_jerallPassMapIndex
+    end
+
+    local result = SetMapToMapListIndex(mapIndex)
 
     if result == SET_MAP_RESULT_FAILED then
         return
@@ -3265,6 +3286,11 @@ local function GetSavedVarDefaults()
                 {
                     [MAP_FILTER_ACQUIRED_SKYSHARDS] = false,
                 },
+                [MAP_FILTER_TYPE_AVA_JERALL] =
+                {
+                    [MAP_FILTER_OBJECTIVES] = false,
+                    [MAP_FILTER_ACQUIRED_SKYSHARDS] = false,
+                },
                 [MAP_FILTER_TYPE_BATTLEGROUND] = {},
                 [MAP_FILTER_TYPE_GLOBAL] =
                 {
@@ -3292,6 +3318,11 @@ local function GetSavedVarDefaults()
                 },
                 [MAP_FILTER_TYPE_AVA_IMPERIAL] =
                 {
+                    [MAP_FILTER_ACQUIRED_SKYSHARDS] = false,
+                },
+                [MAP_FILTER_TYPE_AVA_JERALL] =
+                {
+                    [MAP_FILTER_OBJECTIVES] = false,
                     [MAP_FILTER_ACQUIRED_SKYSHARDS] = false,
                 },
                 [MAP_FILTER_TYPE_BATTLEGROUND] = {},
@@ -3322,14 +3353,14 @@ local function GetSavedVarDefaults()
                     [MAP_FILTER_TRIALS] = false,
                     [MAP_FILTER_ACQUIRED_SKYSHARDS] = false,
                     [MAP_FILTER_TRANSIT_LINES_ALLIANCE] = MAP_TRANSIT_LINE_ALLIANCE_ALL,
-                }
+                },
             },
             disabledStickyPins =
             {
                 [MAP_FILTER_TYPE_AVA_CYRODIIL] =
                 {
                     [MAP_FILTER_RESOURCE_KEEPS] = true,
-                }
+                },
             },
         },
         [MAP_MODE_FAST_TRAVEL] =
@@ -3345,12 +3376,18 @@ local function GetSavedVarDefaults()
                 [MAP_FILTER_TYPE_AVA_CYRODIIL] =
                 {
                     [MAP_FILTER_KILL_LOCATIONS] = false,
-                    [MAP_FILTER_AVA_OBJECTIVES] = false,
+                    [MAP_FILTER_OBJECTIVES] = false,
                     [MAP_FILTER_TRANSIT_LINES_ALLIANCE] = MAP_TRANSIT_LINE_ALLIANCE_ALL,
                     [MAP_FILTER_ACQUIRED_SKYSHARDS] = false,
                 },
                 [MAP_FILTER_TYPE_AVA_IMPERIAL] =
                 {
+                    [MAP_FILTER_ACQUIRED_SKYSHARDS] = false,
+                },
+                [MAP_FILTER_TYPE_AVA_JERALL] =
+                {
+                    [MAP_FILTER_KILL_LOCATIONS] = false,
+                    [MAP_FILTER_OBJECTIVES] = false,
                     [MAP_FILTER_ACQUIRED_SKYSHARDS] = false,
                 },
                 [MAP_FILTER_TYPE_BATTLEGROUND] = {},
@@ -3371,11 +3408,11 @@ local function GetSavedVarDefaults()
                 [MAP_FILTER_TYPE_AVA_CYRODIIL] =
                 {
                     [MAP_FILTER_KILL_LOCATIONS] = false,
+                    [MAP_FILTER_OBJECTIVES] = false,
                     [MAP_FILTER_WAYSHRINES] = false,
                     [MAP_FILTER_DUNGEONS] = false,
                     [MAP_FILTER_ARENAS] = false,
                     [MAP_FILTER_TRIALS] = false,
-                    [MAP_FILTER_OBJECTIVES] = false,
                     [MAP_FILTER_RESOURCE_KEEPS] = false,
                     [MAP_FILTER_ACQUIRED_SKYSHARDS] = false,
                     [MAP_FILTER_TRANSIT_LINES_ALLIANCE] = MAP_TRANSIT_LINE_ALLIANCE_ALL,
@@ -3384,11 +3421,23 @@ local function GetSavedVarDefaults()
                 {
                     [MAP_FILTER_ACQUIRED_SKYSHARDS] = false,
                 },
+                [MAP_FILTER_TYPE_AVA_JERALL] =
+                {
+                    [MAP_FILTER_KILL_LOCATIONS] = false,
+                    [MAP_FILTER_OBJECTIVES] = false,
+                    [MAP_FILTER_WAYSHRINES] = false,
+                    [MAP_FILTER_RESOURCE_KEEPS] = false,
+                    [MAP_FILTER_ACQUIRED_SKYSHARDS] = false,
+                },
                 [MAP_FILTER_TYPE_BATTLEGROUND] = {},
             },
             disabledStickyPins =
             {
                 [MAP_FILTER_TYPE_AVA_CYRODIIL] =
+                {
+                    [MAP_FILTER_RESOURCE_KEEPS] = true,
+                },
+                [MAP_FILTER_TYPE_AVA_JERALL] =
                 {
                     [MAP_FILTER_RESOURCE_KEEPS] = true,
                 }
@@ -3413,14 +3462,14 @@ local function GetSavedVarDefaults()
                     [MAP_FILTER_TRIALS] = false,
                     [MAP_FILTER_TRANSIT_LINES] = false,
                     [MAP_FILTER_ACQUIRED_SKYSHARDS] = false,
-                }
+                },
             },
             disabledStickyPins =
             {
                 [MAP_FILTER_TYPE_AVA_CYRODIIL] =
                 {
                     [MAP_FILTER_RESOURCE_KEEPS] = true,
-                }
+                },
             },
         },
         [MAP_MODE_DIG_SITES] =
@@ -3445,6 +3494,7 @@ local function GetSavedVarDefaults()
                     [MAP_FILTER_TRANSIT_LINES_ALLIANCE] = MAP_TRANSIT_LINE_ALLIANCE_ALL,
                 },
                 [MAP_FILTER_TYPE_AVA_IMPERIAL] = {},
+                [MAP_FILTER_TYPE_AVA_JERALL] = {},
                 [MAP_FILTER_TYPE_BATTLEGROUND] = {},
                 [MAP_FILTER_TYPE_GLOBAL] =
                 {
@@ -3589,8 +3639,8 @@ do
             end
         end,
 
-        [EVENT_GROUP_MEMBER_LEFT] = function(evt, characterName, reason, wasLocalPlayer, amLeader)
-            if wasLocalPlayer then
+        [EVENT_GROUP_MEMBER_LEFT] = function(evt, characterName, reason, isLocalPlayer, isLeader, crossplayDisplayName, actionRequiredVote, platformDisplayName)
+            if isLocalPlayer then
                 g_mapRefresh:RefreshAll("group")
             end
         end,
@@ -3663,7 +3713,7 @@ do
         end,
 
         [EVENT_FAST_TRAVEL_KEEP_NETWORK_UPDATED] = function()
-            g_mapRefresh:RefreshAll("keepNetwork")
+            ZO_WorldMap_RefreshKeepNetwork()
         end,
 
         [EVENT_START_FAST_TRAVEL_KEEP_INTERACTION] = function(eventCode, keepId)
@@ -3684,17 +3734,17 @@ do
         end,
         [EVENT_ZONE_CHANGED] = function(eventId, zoneName, subzoneName)
             if WORLD_MAP_MANAGER:IsInMode(MAP_MODE_AVA_KEEP_RECALL) and subzoneName ~= "" then
-                g_mapRefresh:RefreshAll("keepNetwork")
+                ZO_WorldMap_RefreshKeepNetwork()
             end
         end,
         [EVENT_PLAYER_COMBAT_STATE] = function()
             if WORLD_MAP_MANAGER:IsInMode(MAP_MODE_AVA_KEEP_RECALL) then
-                g_mapRefresh:RefreshAll("keepNetwork")
+                ZO_WorldMap_RefreshKeepNetwork()
             end
         end,
         [EVENT_PLAYER_DEAD] = function()
             if WORLD_MAP_MANAGER:IsInMode(MAP_MODE_AVA_KEEP_RECALL) then
-                g_mapRefresh:RefreshAll("keepNetwork")
+                ZO_WorldMap_RefreshKeepNetwork()
             end
         end,
 
@@ -4855,6 +4905,8 @@ do
     {
         [ZONE_COMPLETION_TYPE_MAGES_GUILD_BOOKS] = true,
         [ZONE_COMPLETION_TYPE_FEATURED_ACHIEVEMENTS] = true,
+        [ZONE_COMPLETION_TYPE_MECHANICS] = true,
+        [ZONE_COMPLETION_TYPE_MILESTONES] = true
     }
 
     function ZO_WorldMapManager:RefreshSuggestionPins()
@@ -5815,10 +5867,7 @@ function ZO_WorldMapManager:UpdatePinTooltips(resetScroll)
                     end
 
                     if isCurrentSceneGamepad then
-                        local nextCategoryText = ZO_Eval(pinTooltipInfo.gamepadCategory, pin)
-                        if type(nextCategoryText) == "number" then
-                            nextCategoryText = GetString(nextCategoryText)
-                        end
+                        local nextCategoryText = ZO_EvalStringId(pinTooltipInfo.gamepadCategory, pin)
 
                         local nextCategory = nextCategoryText
                         if not nextCategory then
@@ -6095,6 +6144,8 @@ function ZO_WorldMapManager:TryTriggeringTutorials()
                 TriggerTutorial(TUTORIAL_TRIGGER_MAP_OPENED_CYRODIIL)
             elseif mapFilterType == MAP_FILTER_TYPE_AVA_IMPERIAL then
                 TriggerTutorial(TUTORIAL_TRIGGER_MAP_OPENED_IMPERIAL_CITY)
+            elseif mapFilterType == MAP_FILTER_TYPE_AVA_JERALL then
+                TriggerTutorial(TUTORIAL_TRIGGER_MAP_OPENED_JERALL_PASS)
             elseif mapFilterType == MAP_FILTER_TYPE_BATTLEGROUND then
                 TriggerTutorial(TUTORIAL_TRIGGER_MAP_OPENED_BATTLEGROUND)
             else

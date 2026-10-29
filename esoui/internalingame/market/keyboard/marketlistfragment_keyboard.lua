@@ -8,14 +8,9 @@ local MARKET_LIST_ENTRY_HEADER = 3
 
 ZO_MarketListFragment_Keyboard = ZO_SimpleSceneFragment:Subclass()
 
-function ZO_MarketListFragment_Keyboard:New(...)
-    local fragment = ZO_SimpleSceneFragment.New(self, ...)
-    fragment:Initialize(...)
-    return fragment
-end
-
 function ZO_MarketListFragment_Keyboard:Initialize(control, owner)
-    self.control = control
+    ZO_SimpleSceneFragment.Initialize(self, control)
+
     self.owner = owner
 
     self.list = control:GetNamedChild("List")

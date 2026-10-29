@@ -675,7 +675,6 @@ end
 function ZO_AntiquityJournalListGamepad:InitializeControl(control)
     self.control = control
     ZO_SortFilterList_Gamepad.Initialize(self, self.control)
-    ZO_SortFilterList_Gamepad.InitializeSortFilterList(self, self.control)
 
     self.titleLabel = self.control:GetNamedChild("Label")
     self.emptyLabel = self.control:GetNamedChild("EmptyLabel")

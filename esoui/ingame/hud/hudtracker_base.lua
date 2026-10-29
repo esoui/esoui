@@ -79,9 +79,10 @@ function ZO_HUDTracker_Base:Initialize(control)
 
     -- Defer remaining initialization until after all controls have loaded
     -- in order to guarantee that all anchor references will be valid.
-    self.control:RegisterForEvent(EVENT_ADD_ONS_LOADED, function(_, name)
+    local DO_ONCE = true
+    self.control:RegisterForEvent(EVENT_ADD_ONS_LOADED, function()
         self:DeferredInitialize()
-    end)
+    end, DO_ONCE)
 end
 
 function ZO_HUDTracker_Base:DeferredInitialize()

@@ -1,0 +1,38 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_ZoneStory_MilestoneHeader_Gamepad" virtual="true">
+            <Controls>
+                <Label name="$(parent)Text" font="ZoFontGamepad42" modifyTextType="UPPERCASE">
+                    <Anchor point="TOPLEFT" offsetX="15"/>
+                </Label>
+            </Controls>
+        </Control>
+        <Control name="ZO_ZoneStory_MilestoneTile_Gamepad_Control" inherits="ZO_ZoneStory_MilestoneTile_Control ZO_Tile_Gamepad_Control" virtual="true">
+            <Dimensions x="ZO_ZONE_STORIES_MILESTONE_TILE_GAMEPAD_DIMENSIONS_X" y="ZO_ZONE_STORIES_MILESTONE_TILE_GAMEPAD_DIMENSIONS_Y"/>
+            <OnInitialized>
+                ZO_ZoneStory_MilestoneTile_Gamepad_OnInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Texture name="$(parent)Icon" override="true" level="2" layer="CONTROLS">
+                    <Dimensions x="ZO_ZONE_STORIES_MILESTONE_TILE_GAMEPAD_ICON_DIMENSIONS" y="ZO_ZONE_STORIES_MILESTONE_TILE_GAMEPAD_ICON_DIMENSIONS"/>
+                    <Anchor point="LEFT" offsetX="20"/>
+                </Texture>
+                <Texture name="$(parent)Locked" override="true" textureFile="EsoUI/Art/Miscellaneous/Gamepad/gp_icon_locked32.dds"/>
+                <Backdrop name="$(parent)Frame" inherits="ZO_GamepadAbilityIconFrame" tier="LOW"/>
+                <Control name="$(parent)TextContainer" override="true">
+                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="15"/>
+                    <Anchor point="RIGHT" offsetX="-14"/>
+                    <Controls>
+                        <Label name="$(parent)Title" override="true" font="ZoFontGamepadCondensed34">
+                            <Anchor point="TOPLEFT"/>
+                            <Anchor point="TOPRIGHT"/>
+                        </Label>
+                        <Label name="$(parent)Status" override="true" font="ZoFontGamepadCondensed34">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT"/>
+                        </Label>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

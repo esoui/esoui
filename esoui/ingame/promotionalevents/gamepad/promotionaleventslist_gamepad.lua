@@ -59,7 +59,7 @@ function ZO_PromotionalEventsList_Gamepad:SetupList(list)
             data:SetNameColors(ZO_PROMOTIONAL_EVENT_SELECTED_COLOR, ZO_PROMOTIONAL_EVENT_UNSELECTED_COLOR)
         end
         data:ClearIcons()
-        if not data.isReturningPlayerRewardsEntry and (not data:HasBeenSeen() or data:IsAnyRewardClaimable()) then
+        if not data.isReturningPlayerRewardsEntry and data:HasCallout() then
             data:AddIcon(ZO_GAMEPAD_NEW_ICON_64)
         end
 

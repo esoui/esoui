@@ -89,6 +89,11 @@
                 self.marketProduct:OnDoubleClicked(button)
             </OnMouseDoubleClick>
             <Controls>
+                <Texture name="$(parent)BackgroundBottomFade" override="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Background" relativePoint="BOTTOMLEFT" offsetY="-ZO_MARKET_PRODUCT_BACKGROUND_BOTTOM_FADE_HEIGHT"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Background"/>
+                    <FadeGradient x1="0" y1="1" size1="ZO_MARKET_PRODUCT_BACKGROUND_BOTTOM_FADE_HEIGHT" x2="0" y2="-1" size2="0"/>
+                </Texture>
                 <Backdrop name="$(parent)OverlayBorder" override="true">
                     <Edge file="EsoUI/Art/Market/Keyboard/market_cel_dark_edgeFrame_8_thin.dds" edgeFileWidth="64" edgeFileHeight="8"/>
                 </Backdrop>
@@ -107,6 +112,13 @@
                 <Label name="$(parent)EsoPlusCost" override="true" font="ZoFontWinH4"/>
                 <Label name="$(parent)Purchased" override="true" font="ZoFontWinH4"/>
                 <Label name="$(parent)EsoPlusDeal" override="true" font="ZoFontWinH4"/>
+                <Control name="$(parent)PurchaseLimit" override="true">
+                    <Controls>
+                        <Label name="$(parent)Tag" override="true" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_MARKET_COLORS:MARKET_COLORS_NORMAL"/>
+                        <Label name="$(parent)Count" override="true" font="ZoFontWinH4"/>
+                        <Label name="$(parent)Timer" override="true" font="ZoFontWinH4" color="INTERFACE_COLOR_TYPE_MARKET_COLORS:MARKET_COLORS_ON_SALE"/>
+                    </Controls>
+                </Control>
                 <Label name="$(parent)TextCallout" override="true" inherits="ZO_MarketTextCallout_Keyboard">
                     <Controls>
                         <Control name="$(parent)Background" override="true" level="ZO_MARKET_TILE_TEXT_LEVEL">
@@ -147,6 +159,8 @@
             <Controls>
                 <Texture name="$(parent)Background" override="true">
                     <!-- 512x256 image cropped to 302x200-->
+                    <Dimensions x="ZO_MARKET_PRODUCT_WIDTH" y="ZO_MARKET_PRODUCT_BACKGROUND_HEIGHT"/>
+                    <Anchor point="TOPLEFT"/>
                     <TextureCoords left="0" right="0.58984375" top="0" bottom="0.78125"/>
                 </Texture>
             </Controls>
@@ -156,6 +170,8 @@
             <Controls>
                 <Texture name="$(parent)Background" override="true">
                     <!-- 1024x256 image cropped to 614x200-->
+                    <Dimensions x="ZO_MARKET_PRODUCT_BUNDLE_WIDTH" y="ZO_MARKET_PRODUCT_BACKGROUND_HEIGHT"/>
+                    <Anchor point="TOPLEFT"/>
                     <TextureCoords left="0" right="0.599609375" top="0" bottom="0.78125"/>
                 </Texture>
                 <Label name="$(parent)Title" override="true">

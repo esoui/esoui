@@ -51,8 +51,8 @@ function ZO_GroupList_Manager:RegisterForEvents()
         self:RefreshData()
     end
 
-    local function OnGroupMemberLeft(eventCode, characterName, reason, wasLocalPlayer, amLeader)
-        if(wasLocalPlayer) then
+    local function OnGroupMemberLeft(eventCode, characterName, reason, isLocalPlayer, isLeader, crossplayDisplayName, actionRequiredVote, platformDisplayName)
+        if isLocalPlayer then
             RefreshData()
         end
     end

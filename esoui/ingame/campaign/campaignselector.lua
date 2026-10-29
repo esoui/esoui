@@ -1,10 +1,5 @@
 local CampaignSelector = ZO_CampaignSelector_Shared:Subclass()
 
-function CampaignSelector:New(control)
-    local selector = ZO_CampaignSelector_Shared.New(self, control)
-    return selector
-end
-
 function CampaignSelector:Initialize(control)
     ZO_CampaignSelector_Shared.Initialize(self, control)
 
@@ -15,6 +10,22 @@ function CampaignSelector:Initialize(control)
     self.comboBox:SetSelectedItemFont("ZoFontWinH2")
     self.comboBox:SetDropdownFont("ZoFontHeader2")
     self.comboBox:SetSpacing(8)
+    self.comboBox:SetDisabledColor(ZO_DEFAULT_DISABLED_COLOR)
+
+    local function OnComboBoxEntryMouseEnter(_, entry)
+        local data = entry.m_data
+        local enabled = ZO_EvalDefaultTrue(data.enabled)
+        if not enabled and data.disabledText then
+            InitializeTooltip(InformationTooltip, entry, RIGHT, -10)
+            InformationTooltip:AddLine(data.disabledText, "", ZO_NORMAL_TEXT:UnpackRGBA())
+        end
+    end
+
+    local function OnComboBoxEntryMouseExit()
+        ClearTooltip(InformationTooltip)
+    end
+
+    self.comboBox:SetEntryMouseOverCallbacks(OnComboBoxEntryMouseEnter, OnComboBoxEntryMouseExit)
 
     self.scenesCreated = false
     self.OnQueryTypeChanged = function(_, entryText, entry)
@@ -25,17 +36,6 @@ function CampaignSelector:Initialize(control)
             self.dataRegistration:Refresh()
         end
     end
-
-    self.campaignWindows =
-    {
-        CAMPAIGN_OVERVIEW,
-        CAMPAIGN_SCORING,
-        CAMPAIGN_EMPEROR,
-        CAMPAIGN_BONUSES,
-    }
-
-    EVENT_MANAGER:RegisterForEvent("CampaignSelector", EVENT_CURRENT_CAMPAIGN_CHANGED, function() self:OnCurrentCampaignChanged() end)
-    EVENT_MANAGER:RegisterForEvent("CampaignSelector", EVENT_ASSIGNED_CAMPAIGN_CHANGED, function() self:OnAssignedCampaignChanged() end)
 
     CAMPAIGN_SELECTOR_FRAGMENT = ZO_FadeSceneFragment:New(control)
     CAMPAIGN_SELECTOR_FRAGMENT:RegisterCallback("StateChange", function(oldState, state)
@@ -49,31 +49,53 @@ function CampaignSelector:Initialize(control)
     self:RefreshQueryTypes()
 end
 
+function CampaignSelector:SetCampaignWindows()
+    self.campaignWindows =
+    {
+        CAMPAIGN_OVERVIEW,
+        CAMPAIGN_SCORING,
+        CAMPAIGN_EMPEROR,
+        CAMPAIGN_BONUSES,
+    }
+end
+
+local ORDERED_QUERY_TYPES =
+{
+    BGQUERY_ASSIGNED_CAMPAIGN,
+    BGQUERY_LOCAL
+}
+
 function CampaignSelector:RefreshQueryTypes()
     self.comboBox:ClearItems()
 
-    local homeEntry
-    if self:IsHomeSelectable() then
-        local homeCampaignDescription = GetString("SI_BATTLEGROUNDQUERYCONTEXTTYPE", BGQUERY_ASSIGNED_CAMPAIGN)
-        homeEntry = self.comboBox:CreateItemEntry(homeCampaignDescription, self.OnQueryTypeChanged)
-        homeEntry.selectedQueryType = BGQUERY_ASSIGNED_CAMPAIGN
-        self.comboBox:AddItem(homeEntry)
-    end
+    local anyEntry
+    local selectedQueryTypeEntry
+    for _, queryType in ipairs(ORDERED_QUERY_TYPES) do
+        if self:IsQueryTypeSelectable(queryType) then
+            local campaignDescription = GetString("SI_BATTLEGROUNDQUERYCONTEXTTYPE", queryType)
+            local enabled, disabledText = ZO_EvalDefaultTrue(self.queryTypeEnabledConditionFunction, queryType)
+            local entry = self.comboBox:CreateItemEntry(campaignDescription, self.OnQueryTypeChanged, enabled)
+            entry.selectedQueryType = queryType
+            entry.disabledText = disabledText
+            self.comboBox:AddItem(entry)
 
-    local localEntry
-    if self:IsLocalSelectable() then
-        local localCampaignDescription = GetString("SI_BATTLEGROUNDQUERYCONTEXTTYPE", BGQUERY_LOCAL)
-        localEntry = self.comboBox:CreateItemEntry(localCampaignDescription, self.OnQueryTypeChanged)
-        localEntry.selectedQueryType = BGQUERY_LOCAL
-        self.comboBox:AddItem(localEntry)
+            anyEntry = entry -- Always assigning means local will take priority over home, which is desired
+            if queryType == self.selectedQueryType then
+                selectedQueryTypeEntry = entry
+            end
+        end
     end
 
     if self.selectedQueryType == nil or not self:IsSelectedQueryStillValid() then
-        self.comboBox:SelectItem(localEntry or homeEntry)
+        self.comboBox:SelectItem(anyEntry)
     else
         local IGNORE_CALLBACKS = true
-        self.comboBox:SelectItem(self.selectedQueryType == BGQUERY_ASSIGNED_CAMPAIGN and homeEntry or localEntry, IGNORE_CALLBACKS)
+        self.comboBox:SelectItem(selectedQueryTypeEntry, IGNORE_CALLBACKS)
     end
+end
+
+function CampaignSelector:NeedsData()
+    return (CAMPAIGN_SELECTOR_FRAGMENT:IsShowing() and self.selectedQueryType == BGQUERY_ASSIGNED_CAMPAIGN)
 end
 
 --Global XML

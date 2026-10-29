@@ -48,6 +48,14 @@
                 </Texture>
             </Controls>
         </Control>
+        <Button name="ZO_HUDEditor_Keyboard_CoordsButton" level="ZO_HUD_EDITOR_KEYBOARD_INFO_BOX_INTERACTABLE_ELEMENT_LEVEL" virtual="true">
+            <OnMouseDown>
+                HUD_EDITOR_KEYBOARD:OnCoordsButtonDown(self)
+            </OnMouseDown>
+            <OnMouseUp>
+                HUD_EDITOR_KEYBOARD:OnCoordsButtonUp(self)
+            </OnMouseUp>
+        </Button>
         <TopLevelControl name="ZO_HUDEditor_Keyboard_TL" mouseEnabled="true" tier="HIGH" hidden="true">
             <AnchorFill/>
             <OnInitialized>
@@ -122,9 +130,21 @@
                                             <Anchor point="LEFT" relativeTo="$(parent)Name" relativePoint="RIGHT" offsetX="5"/>
                                             <Dimensions x="50" y="18"/>
                                             <Controls>
-                                                <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop" maxInputCharacters="4" textType="NUMERIC_UNSIGNED_INT" level="ZO_HUD_EDITOR_KEYBOARD_INFO_BOX_INTERACTABLE_ELEMENT_LEVEL"/>
+                                                <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop" maxInputCharacters="5" textType="NUMERIC_UNSIGNED_INT" level="ZO_HUD_EDITOR_KEYBOARD_INFO_BOX_INTERACTABLE_ELEMENT_LEVEL"/>
                                             </Controls>
                                         </Backdrop>
+                                        <Button name="$(parent)Left" inherits="ZO_ScrollLeftButton ZO_HUDEditor_Keyboard_CoordsButton">
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)Backdrop" relativePoint="BOTTOMLEFT" offsetY="2"/>
+                                            <OnInitialized>
+                                                self.direction = LEFT
+                                            </OnInitialized>
+                                        </Button>
+                                        <Button name="$(parent)Right" inherits="ZO_ScrollRightButton ZO_HUDEditor_Keyboard_CoordsButton">
+                                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Backdrop" relativePoint="BOTTOMRIGHT" offsetY="2"/>
+                                            <OnInitialized>
+                                                self.direction = RIGHT
+                                            </OnInitialized>
+                                        </Button>
                                     </Controls>
                                 </Control>
                                 <Control name="$(parent)YCoords" resizeToFitDescendents="true">
@@ -138,9 +158,21 @@
                                             <Anchor point="LEFT" relativeTo="$(parent)Name" relativePoint="RIGHT" offsetX="5"/>
                                             <Dimensions x="50" y="18"/>
                                             <Controls>
-                                                <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop" maxInputCharacters="4" textType="NUMERIC_UNSIGNED_INT" level="ZO_HUD_EDITOR_KEYBOARD_INFO_BOX_INTERACTABLE_ELEMENT_LEVEL"/>
+                                                <EditBox name="$(parent)Edit" inherits="ZO_DefaultEditForBackdrop" maxInputCharacters="5" textType="NUMERIC_UNSIGNED_INT" level="ZO_HUD_EDITOR_KEYBOARD_INFO_BOX_INTERACTABLE_ELEMENT_LEVEL"/>
                                             </Controls>
                                         </Backdrop>
+                                        <Button name="$(parent)Up" inherits="ZO_ScrollUpButton ZO_HUDEditor_Keyboard_CoordsButton">
+                                            <Anchor point="TOPLEFT" relativeTo="$(parent)Backdrop" relativePoint="BOTTOMLEFT" offsetY="2"/>
+                                            <OnInitialized>
+                                                self.direction = TOP
+                                            </OnInitialized>
+                                        </Button>
+                                        <Button name="$(parent)Down" inherits="ZO_ScrollDownButton ZO_HUDEditor_Keyboard_CoordsButton">
+                                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Backdrop" relativePoint="BOTTOMRIGHT" offsetY="2"/>
+                                            <OnInitialized>
+                                                self.direction = BOTTOM
+                                            </OnInitialized>
+                                        </Button>
                                     </Controls>
                                 </Control>
                             </Controls>

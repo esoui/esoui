@@ -291,17 +291,10 @@ function ZO_SharedSmithingImprovement:Improve()
     end
 
     local improveItemLink = GetItemLink(itemToImproveBagId, itemToImproveSlotIndex)
-    local dialogName = "CONFIRM_IMPROVE_ITEM"
-    if isItemLocked then
-        if IsInGamepadPreferredMode() then
-            dialogName = "GAMEPAD_CONFIRM_IMPROVE_LOCKED_ITEM"
-        else
-            dialogName = "CONFIRM_IMPROVE_LOCKED_ITEM"
-        end
-    end
+    local dialogName = isItemLocked and "CONFIRM_IMPROVE_LOCKED_ITEM" or "CONFIRM_IMPROVE_ITEM"
 
     local function ShowImprovementDialog()
-        ZO_Dialogs_ShowPlatformDialog(dialogName, { bagId = itemToImproveBagId, slotIndex = itemToImproveSlotIndex, boostersToApply = numBoostersToApply, chance = chance, }, {mainTextParams = { chance, improveItemLink, GetString(SI_PERFORM_ACTION_CONFIRMATION)}})
+        ZO_Dialogs_ShowPlatformDialog(dialogName, { bagId = itemToImproveBagId, slotIndex = itemToImproveSlotIndex, boostersToApply = numBoostersToApply, chance = chance, }, {mainTextParams = { chance, improveItemLink }})
     end
 
     if IsItemBoPAndTradeable(itemToImproveBagId, itemToImproveSlotIndex) then

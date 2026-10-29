@@ -13,13 +13,7 @@ ZO_CAMPAIGN_QUEUE_STEP_ALLIANCE_LOCK_CHECK = 4
 ZO_CAMPAIGN_QUEUE_STEP_SELECT_QUEUE_TYPE = 5
 ZO_CAMPAIGN_QUEUE_STEP_PERFORM_QUEUE = 6
 
-ZO_CampaignBrowser_Manager = ZO_CallbackObject:Subclass()
-
-function ZO_CampaignBrowser_Manager:New(...)
-    local object = ZO_CallbackObject.New(self)
-    object:Initialize(...)
-    return object
-end
+ZO_CampaignBrowser_Manager = ZO_InitializingCallbackObject:Subclass()
 
 function ZO_CampaignBrowser_Manager:Initialize()
     self.selectionCampaignList = {}
@@ -59,9 +53,23 @@ do
         return data and data.type == ZO_CAMPAIGN_DATA_TYPE_QUEUE
     end
 
+    function ZO_CampaignBrowser_Manager:DoesCampaignSupportBonuses(data)
+        if IsCampaignData(data) then
+            return data.isCyrodiilCampaign
+        end
+        return false
+    end
+
+    function ZO_CampaignBrowser_Manager:DoesCampaignSupportEmperorship(data)
+        if IsCampaignData(data) then
+            return data.isCyrodiilCampaign
+        end
+        return false
+    end
+
     function ZO_CampaignBrowser_Manager:CanSetHomeCampaign(data)
         if IsCampaignData(data) then
-            return not data.isImperialCityCampaign and GetAssignedCampaignId() ~= data.id and DoesPlayerMeetCampaignRequirements(data.id)
+            return not data.isImperialCityCampaign and not data.isJerallPassCampaign and GetAssignedCampaignId() ~= data.id and DoesPlayerMeetCampaignRequirements(data.id)
         end
         return false
     end
@@ -96,7 +104,7 @@ do
             return false
         end
 
-        return currentCampaignData.isImperialCityCampaign == targetCampaignData.isImperialCityCampaign
+        return currentCampaignData.isImperialCityCampaign == targetCampaignData.isImperialCityCampaign and currentCampaignData.isJerallPassCampaign == targetCampaignData.isJerallPassCampaign
     end
 
     function ZO_CampaignBrowser_Manager:CanQueueForCampaign(data)
@@ -246,7 +254,10 @@ do
             campaignData.allianceLockReason = GetSelectionCampaignAllianceLockReason(selectionIndex)
             campaignData.allianceLockConflictingCharacterName = GetSelectionCampaignAllianceLockConflictingCharacterName(selectionIndex)
 
-            campaignData.isImperialCityCampaign = IsImperialCityCampaign(campaignId)
+            local campaignWorldType = GetCampaignWorldType(campaignId)
+            campaignData.isCyrodiilCampaign = campaignWorldType == CAMPAIGN_WORLD_TYPE_CYRODIIL
+            campaignData.isImperialCityCampaign = campaignWorldType == CAMPAIGN_WORLD_TYPE_IMPERIAL_CITY
+            campaignData.isJerallPassCampaign = campaignWorldType == CAMPAIGN_WORLD_TYPE_JERALL_PASS
 
             campaignData.queue = self:CreateCampaignQueueData(campaignData, CAMPAIGN_QUEUE_INDIVIDUAL)
 
@@ -405,11 +416,18 @@ ZO_CAMPAIGN_RULESET_TYPE_KEYBOARD_ICONS =
         down = "EsoUI/Art/LFG/LFG_indexIcon_imperialCity_down.dds",
         over = "EsoUI/Art/LFG/LFG_indexIcon_imperialCity_over.dds",
     },
+    [CAMPAIGN_RULESET_TYPE_JERALL_PASS] =
+    {
+        up = "EsoUI/Art/LFG/LFG_indexIcon_JerallPass_up.dds",
+        down = "EsoUI/Art/LFG/LFG_indexIcon_JerallPass_down.dds",
+        over = "EsoUI/Art/LFG/LFG_indexIcon_JerallPass_over.dds",
+    },
 }
 local CAMPAIGN_RULESET_TYPE_GAMEPAD_ICONS =
 {
     [CAMPAIGN_RULESET_TYPE_CYRODIIL] = "EsoUI/Art/LFG/Gamepad/LFG_activityIcon_cyrodiil.dds",
     [CAMPAIGN_RULESET_TYPE_IMPERIAL_CITY] = "EsoUI/Art/LFG/Gamepad/LFG_activityIcon_imperialCity.dds",
+    [CAMPAIGN_RULESET_TYPE_JERALL_PASS] = "EsoUI/Art/LFG/Gamepad/LFG_activityIcon_jerallPass.dds",
 }
 
 function ZO_CampaignBrowser_GetKeyboardIconsForRulesetType(rulesetType)

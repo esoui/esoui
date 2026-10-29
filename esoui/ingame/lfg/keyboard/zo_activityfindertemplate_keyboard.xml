@@ -128,13 +128,6 @@
                                 ZO_ActivityFinderTemplateUnlockPermanentlyKeyboard_OnClicked(self)
                             </OnClicked>
                         </Button>
-                        <Button name="$(parent)ChapterUpgrade" inherits="ZO_DefaultButton" text="SI_DLC_BOOK_ACTION_CHAPTER_UPGRADE" hidden="true">
-                            <Anchor point="TOPLEFT"/>
-                            <Dimensions x="200"/>
-                            <OnClicked>
-                                ZO_ShowChapterUpgradePlatformScreen(MARKET_OPEN_OPERATION_ACTIVITY_FINDER)
-                            </OnClicked>
-                        </Button>
                     </Controls>
                 </Control>
                 <Label name="$(parent)LockReason" font="ZoFontWinH3" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" maxLineCount="2" wrapMode="ELLIPSIS">

@@ -26,7 +26,9 @@ function CampaignEmperor:Initialize(control)
     CAMPAIGN_EMPEROR_FRAGMENT = ZO_FadeSceneFragment:New(ZO_CampaignEmperor)
     CAMPAIGN_EMPEROR_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_FRAGMENT_SHOWN then
-            QueryCampaignLeaderboardData(self.listAlliance)
+            -- TODO Jerall: TO maintain current behavior, ask for assigned and it will get both assigned and local.
+            -- We should eventually refactor this to gracefully work based on just getting the leaderboard for what you're looking at right now.
+            QueryCampaignLeaderboardData(GetAssignedCampaignId(), self.listAlliance)
             self:RefreshData()
             self:RefreshEmperor()
         end
@@ -56,7 +58,7 @@ end
 
 function CampaignEmperor:IsIneligible_OnMouseEnter(control)
     InitializeTooltip(InformationTooltip, control, BOTTOM, 0, 0)
-    SetTooltipText(InformationTooltip, GetString(SI_CAMPAIGN_EMPEROR_CHARACTER_INELIGIBLE_TEXT))
+    SetTooltipText(InformationTooltip, control.ineligibleReason)
 end
 
 function CampaignEmperor:IsIneligible_OnMouseExit(control)

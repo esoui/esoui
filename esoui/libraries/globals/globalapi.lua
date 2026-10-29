@@ -404,6 +404,19 @@ function zo_clampLength2D(x, y, maxLength)
     return math.cos(angleRadians) * distance, math.sin(angleRadians) * distance
 end
 
+ZO_BOOLEAN_TRUE_CHARS = "ty1"
+ZO_BOOLEAN_FALSE_CHARS = "fn0"
+
+function ZO_IsBooleanStringTrue(sourceString)
+    local isTrue = (zo_strmatch(sourceString, "[" .. ZO_BOOLEAN_TRUE_CHARS .. "]") and true) or false
+    return isTrue
+end
+
+function ZO_IsBooleanStringFalse(sourceString)
+    local isFalse = (zo_strmatch(sourceString, "[" .. ZO_BOOLEAN_FALSE_CHARS .. "]") and true) or false
+    return isFalse
+end
+
 ZO_TOKENIZE_BY_SPACES_PATTERN = "%s*(%S+)"
 ZO_TOKENIZE_INTEGERS_PATTERN = "([0-9]+)"
 ZO_TOKENIZE_FLOATS_PATTERN = "([0-9]+[.]?[0-9]*)"
@@ -763,6 +776,15 @@ function ZO_EvalDefaultTrue(valueOrFunction, ...)
     return valueOrFunction
 end
 
+function ZO_EvalStringId(stringIdOrTextOrFunction, ...)
+    stringIdOrTextOrFunction = ZO_Eval(stringIdOrTextOrFunction, ...)
+
+    if type(stringIdOrTextOrFunction) == "number" then
+        return GetString(stringIdOrTextOrFunction)
+    end
+    return stringIdOrTextOrFunction
+end
+
 function ZO_CreateFontString(faceName, size, style)
     local styleString = GetFontStyleString(style)
     if styleString == "" then
@@ -782,4 +804,59 @@ function ZO_CreateEnumTable(...)
         tbl[key] = i
     end
     return tbl
+end
+
+-- Returns the scale factor that will scale controls that are designed to fit within a
+-- game client window of 'targetUIHeight' height.
+-- For example, given a 'targetUIHeight' of 1080 and a current game client window height
+-- of 2160, the scale factor returned would be 2.0
+function ZO_GetUIScaleForTargetUIHeight(targetUIHeight)
+    if targetUIHeight <= 0 then
+        return 1
+    end
+
+    local windowHeight = GuiRoot:GetHeight()
+    local uiScale = windowHeight / targetUIHeight
+    return uiScale
+end
+
+-- Returns the scale factor that will scale controls that are designed to fit within a
+-- game client window of 'targetUIWidth' width.
+-- For example, given a 'targetUIWidth' of 1920 and a current game client window width
+-- of 960, the scale factor returned would be 0.5
+function ZO_GetUIScaleForTargetUIWidth(targetUIWidth)
+    if targetUIWidth <= 0 then
+        return 1
+    end
+
+    local windowWidth = GuiRoot:GetWidth()
+    local uiScale = windowWidth / targetUIWidth
+    return uiScale
+end
+
+-- Returns the scale factor that will scale controls that are designed to fit within a
+-- game client window of 'targetUIWidth' and 'targetUIHeight' dimensions without
+-- exceeding the intended on-screen dimensions.
+function ZO_GetUIScaleForTargetUIDimensions(targetUIWidth, targetUIHeight)
+    local uiHeightScale = ZO_GetUIScaleForTargetUIHeight(targetUIHeight)
+    local uiWidthScale = ZO_GetUIScaleForTargetUIWidth(targetUIWidth)
+    return zo_min(uiHeightScale, uiWidthScale)
+end
+
+-- Returns the scale factor that will scale controls that are designed to fit within a game client window
+-- of default height without exceeding the intended on-screen height.
+function ZO_GetUIScaleForDefaultUIHeight()
+    return ZO_GetUIScaleForTargetUIHeight(DEFAULT_UI_HEIGHT)
+end
+
+-- Returns the scale factor that will scale controls that are designed to fit within a game client window
+-- of default width without exceeding the intended on-screen width.
+function ZO_GetUIScaleForDefaultUIWidth()
+    return ZO_GetUIScaleForTargetUIWidth(DEFAULT_UI_WIDTH)
+end
+
+-- Returns the scale factor that will scale controls that are designed to fit within a game client window
+-- of default width and height without exceeding the intended on-screen dimensions.
+function ZO_GetUIScaleForDefaultUIDimensions()
+    return ZO_GetUIScaleForTargetUIDimensions(DEFAULT_UI_WIDTH, DEFAULT_UI_HEIGHT)
 end

@@ -14,7 +14,7 @@ function ZO_SocialOptionsDialogGamepad:Initialize(control)
     self:BuildOptionsList()
 
     self.dialogData = {}
-    self.control:RegisterForEvent(EVENT_FRIEND_PLAYER_STATUS_CHANGED, function(_, displayName, characterName, oldStatus, newStatus) self:OnPlayerStatusChanged(displayName, characterName, oldStatus, newStatus) end)
+    self.control:RegisterForEvent(EVENT_FRIEND_PLAYER_STATUS_CHANGED, function(_, crossplayDisplayName, characterName, oldStatus, newStatus) self:OnPlayerStatusChanged(crossplayDisplayName, characterName, oldStatus, newStatus) end)
     self.control:RegisterForEvent(EVENT_GUILD_MEMBER_PLAYER_STATUS_CHANGED, function(_, _, displayName, characterName, oldStatus, newStatus) self:OnPlayerStatusChanged(displayName, characterName, oldStatus, newStatus) end)
 end
 

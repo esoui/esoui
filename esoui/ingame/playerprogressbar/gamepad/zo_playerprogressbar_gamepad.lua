@@ -2,11 +2,6 @@
 
 ZO_GamepadPlayerProgressBarHideNameLocationFragment = ZO_SceneFragment:Subclass()
 
-function ZO_GamepadPlayerProgressBarHideNameLocationFragment:New(...)
-    local fragment = ZO_SceneFragment.New(self)
-    return fragment
-end
-
 function ZO_GamepadPlayerProgressBarHideNameLocationFragment:Show()
     GAMEPAD_PLAYER_PROGRESS_BAR_NAME_LOCATION.control:SetHidden(true)
     self:OnShown()

@@ -219,9 +219,7 @@ function ZO_MarketAnnouncement_Shared:DoOpenMarketBehaviorForMarketProductId(mar
         additionalData = marketProductId
     end
 
-    if openBehavior == OPEN_MARKET_BEHAVIOR_SHOW_CHAPTER_UPGRADE then
-        ZO_ShowChapterUpgradePlatformScreen(MARKET_OPEN_OPERATION_ANNOUNCEMENT, additionalData)
-    elseif not IsInGamepadPreferredMode() and openBehavior == OPEN_MARKET_BEHAVIOR_SHOW_ESO_PLUS_CATEGORY then
+    if not IsInGamepadPreferredMode() and openBehavior == OPEN_MARKET_BEHAVIOR_SHOW_ESO_PLUS_CATEGORY then
         ESO_PLUS_OFFERS_KEYBOARD:RequestShowMarket(MARKET_OPEN_OPERATION_ANNOUNCEMENT, openBehavior, additionalData)
     else
         SYSTEMS:GetObject(ZO_MARKET_NAME):RequestShowMarket(MARKET_OPEN_OPERATION_ANNOUNCEMENT, openBehavior, additionalData)

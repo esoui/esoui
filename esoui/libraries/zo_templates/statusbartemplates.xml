@@ -217,11 +217,17 @@
                 <Control name="$(parent)Overlay" inherits="ZO_VerticalArrowStatusBarOverlay"/>
             </Controls>
         </StatusBar>
-        <StatusBar name="ZO_ArrowProgressBarWithBG" inherits="ZO_ArrowStatusBarWithBG" virtual="true">
+        <StatusBar name="ZO_ArrowProgressBar" inherits="ZO_ArrowStatusBar" virtual="true">
             <Controls>
                 <Label name="$(parent)Progress" font="ZoFontWinH5" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" horizontalAlignment="CENTER" verticalAlignment="CENTER" tier="HIGH" layer="OVERLAY" level="1">
                     <Anchor point="CENTER"/>
                 </Label>
+            </Controls>
+        </StatusBar>
+        <StatusBar name="ZO_ArrowProgressBarWithBG" inherits="ZO_ArrowProgressBar" virtual="true">
+            <Controls>
+                <Control name="$(parent)BG" inherits="ZO_ArrowStatusBarBG"/>
+                <Control name="$(parent)Overlay" inherits="ZO_ArrowStatusBarOverlay"/>
             </Controls>
         </StatusBar>
         <Control name="ZO_ArrowBarGlow" tier="HIGH" layer="OVERLAY" level="1" virtual="true">

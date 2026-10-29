@@ -1,12 +1,16 @@
 ﻿ZO_GAMEPAD_MARKET_INDIVIDUAL_PRODUCT_WIDTH = 407
-ZO_GAMEPAD_MARKET_INDIVIDUAL_PRODUCT_HEIGHT = 270
+ZO_GAMEPAD_MARKET_INDIVIDUAL_PRODUCT_HEIGHT = 293
+ZO_GAMEPAD_MARKET_INDIVIDUAL_BACKGROUND_HEIGHT = 270
+ZO_GAMEPAD_MARKET_PRODUCT_BACKGROUND_BOTTOM_FADE_HEIGHT = 50
 ZO_GAMEPAD_MARKET_PRODUCT_TEMPLATE = "ZO_Gamepad_MarketProductTemplate"
 ZO_GAMEPAD_MARKET_PRODUCT_BUNDLE_ATTACHMENT_TEMPLATE = "ZO_Gamepad_MarketProductBundleAttachmentTemplate"
 ZO_GAMEPAD_MARKET_BLANK_TILE_TEMPLATE = "ZO_Gamepad_MarketBlankTileTemplate"
 
+local GAMEPAD_TEXT_CALLOUT_BACKGROUND_BOTTOM_PADDING = 12
+
 -- single tiles are 512 x 512
 ZO_GAMEPAD_MARKET_INDIVIDUAL_TEXTURE_WIDTH_COORD = ZO_GAMEPAD_MARKET_INDIVIDUAL_PRODUCT_WIDTH / 512
-ZO_GAMEPAD_MARKET_INDIVIDUAL_TEXTURE_HEIGHT_COORD = ZO_GAMEPAD_MARKET_INDIVIDUAL_PRODUCT_HEIGHT / 512
+ZO_GAMEPAD_MARKET_INDIVIDUAL_TEXTURE_HEIGHT_COORD = ZO_GAMEPAD_MARKET_INDIVIDUAL_BACKGROUND_HEIGHT / 512
 
 ZO_GAMEPAD_MARKET_ENTRY_MARKET_PRODUCT = "marketProduct"
 ZO_GAMEPAD_MARKET_ENTRY_BLANK_TILE = "blankTile"
@@ -43,7 +47,7 @@ function ZO_GamepadMarketProduct:InitializeFonts()
     local function OnTextCallbackTextUpdated()
         local textCalloutBackground = self.control.textCallout:GetNamedChild("Background")
         local textCalloutHeight = self.control.textCallout:GetHeight()
-        textCalloutBackground:SetHeight(textCalloutHeight + 12)
+        textCalloutBackground:SetHeight(textCalloutHeight + GAMEPAD_TEXT_CALLOUT_BACKGROUND_BOTTOM_PADDING)
     end
 
     -- Initialize Textcallout Fonts
@@ -65,6 +69,14 @@ function ZO_GamepadMarketProduct:InitializeFonts()
     ZO_FontAdjustingWrapLabel_OnInitialized(self.control.textCallout, fonts, TEXT_WRAP_MODE_ELLIPSIS, OnTextCallbackTextUpdated)
 end
 
+function ZO_GamepadMarketProduct:GetTextCalloutYOffset()
+    if not self.control.purchaseLimit:IsHidden() then
+        return -GAMEPAD_TEXT_CALLOUT_BACKGROUND_BOTTOM_PADDING
+    end
+
+    return ZO_MarketProductBase.GetTextCalloutYOffset(self)
+end
+
 -- override of ZO_MarketProductBase:GetEsoPlusIcon()
 function ZO_GamepadMarketProduct:GetEsoPlusIcon()
     return zo_iconFormatInheritColor("EsoUI/Art/Market/Gamepad/gp_ESOPlus_Chalice_WHITE_64.dds", "100%", "100%")
@@ -77,7 +89,7 @@ end
 function ZO_GamepadMarketProduct:UpdateProductStyle()
     ZO_LargeSingleMarketProduct_Base.UpdateProductStyle(self)
 
-     if self:IsPurchaseLocked() then
+    if self:IsPurchaseLocked() and not self:IsPurchaseLimitReached() then
         self.control.highlightNormal:SetEdgeColor(ZO_MARKET_PRODUCT_PURCHASED_COLOR:UnpackRGB())
     else
         self.control.highlightNormal:SetEdgeColor(ZO_DEFAULT_ENABLED_COLOR:UnpackRGB())
@@ -150,6 +162,7 @@ function ZO_GamepadMarketProduct:GetNarrationText()
     local narrations = {}
     ZO_AppendNarration(narrations, self:GetTitleNarrationText())
     ZO_AppendNarration(narrations, self:GetCalloutNarrationText())
+    ZO_AppendNarration(narrations, self:GetPurchaseLimitNarrationText())
     ZO_AppendNarration(narrations, self:GetBundleNarrationText())
     ZO_AppendNarration(narrations, self:GetPricingNarrationText())
     ZO_AppendNarration(narrations, self:GetPurchasedNarrationText())

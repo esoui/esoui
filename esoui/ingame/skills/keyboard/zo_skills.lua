@@ -909,14 +909,7 @@ function ZO_SkillsManager:InitializeKeybindDescriptors()
             end
         },
         {
-            name = function()
-                local collectibleData = SCRIBING_DATA_MANAGER:GetScribingPurchasableCollectibleData()
-                if collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_CHAPTER) then
-                    return GetString(SI_SCRIBING_ACTION_UPGRADE)
-                else
-                    return GetString(SI_GAMEPAD_DLC_BOOK_ACTION_OPEN_CROWN_STORE)
-                end
-            end,
+            name = GetString(SI_GAMEPAD_DLC_BOOK_ACTION_OPEN_CROWN_STORE),
             keybind = "UI_SHORTCUT_TERTIARY",
             callback = function()
                 local collectibleData = SCRIBING_DATA_MANAGER:GetScribingPurchasableCollectibleData()
@@ -1433,8 +1426,8 @@ function ZO_SkillsManager:RefreshSkillPointInfo()
     local availablePoints = SKILL_POINT_ALLOCATION_MANAGER:GetAvailableSkillPoints()
     self.availablePointsLabel:SetText(zo_strformat(SI_SKILLS_POINTS_TO_SPEND, availablePoints))
 
-    local skyShards = GetNumSkyShards()
-    self.skyShardsLabel:SetText(zo_strformat(SI_SKILLS_SKY_SHARDS_COLLECTED, skyShards))
+    local partialSkillPoints = GetLeftoverPartialSkillPoints()
+    self.skyShardsLabel:SetText(zo_strformat(SI_SKILLS_SKY_SHARDS_COLLECTED, partialSkillPoints))
 end
 
 do

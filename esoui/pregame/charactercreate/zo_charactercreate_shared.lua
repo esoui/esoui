@@ -119,10 +119,10 @@ function ZO_CharacterCreate_Manager:Initialize()
         characterCreate:OnCharacterCreateRequested()
     end
 
-    local function OnChapterUpgraded()
+    local function OnEntitlementStateChanged()
         -- match the conditional in ZO_AttemptToFireCharacterConstructionReady which fires the "OnCharacterConstructionReady" callback
         -- if we don't check that the character list has been received we can attempt to generate a random character
-        -- before the pregame cahracter manager is ready
+        -- before the pregame character manager is ready
         if IsPregameCharacterConstructionReady() and ZO_PREGAME_CHARACTER_LIST_RECEIVED then
             OnCharacterConstructionReady()
         end
@@ -133,7 +133,7 @@ function ZO_CharacterCreate_Manager:Initialize()
     EVENT_MANAGER:RegisterForEvent("ZO_CharacterCreate_Gamepad", EVENT_CHARACTER_CREATE_FAILED, OnCharacterCreateFailed)
     EVENT_MANAGER:RegisterForEvent("ZO_CharacterCreate_Gamepad", EVENT_CHARACTER_EDIT_SUCCEEDED, OnCharacterEditSucceeded)
     EVENT_MANAGER:RegisterForEvent("ZO_CharacterCreate_Gamepad", EVENT_CHARACTER_EDIT_FAILED, OnCharacterEditFailed)
-    EVENT_MANAGER:RegisterForEvent("ZO_CharacterCreate_Gamepad", EVENT_ENTITLEMENT_STATE_CHANGED, OnChapterUpgraded)
+    EVENT_MANAGER:RegisterForEvent("ZO_CharacterCreate_Gamepad", EVENT_ENTITLEMENT_STATE_CHANGED, OnEntitlementStateChanged)
 
     CALLBACK_MANAGER:RegisterCallback("OnCharacterConstructionReady", OnCharacterConstructionReady)
     CALLBACK_MANAGER:RegisterCallback("CharacterCreateRequested", OnCharacterCreateRequested)

@@ -145,6 +145,7 @@ function ZO_TamrielTomesPurchaseScreen_Keyboard:OnHiding()
     TAMRIEL_TOMES_SCENE_GROUP_KEYBOARD:SetActiveScene("TamrielTomesSceneKeyboard")
     POPUP_LIST:Hide()
     KEYBIND_STRIP:RestoreDefaultExit()
+    ZO_Dialogs_ReleaseAllDialogs()
 end
 
 function ZO_TamrielTomesPurchaseScreen_Keyboard:ShowTokenRedemptionDialog()

@@ -9,42 +9,41 @@ local CAN_LEARN_ICON_TEXTURE = "EsoUI/Art/Inventory/inventory_can_learn_icon.dds
 ------------------------
 local ZO_LootSceneFragment = ZO_SceneFragment:Subclass()
 
-function ZO_LootSceneFragment:New(control)
-    local fragment = ZO_SceneFragment.New(self)
-    fragment.control = control
-    fragment.titleControl = GetControl(control, "Title")
-    fragment.alphaControl = GetControl(control, "AlphaContainer")
-    fragment.keybindButton = GetControl(control, "KeybindButton")
+function ZO_LootSceneFragment:Initialize(control)
+    ZO_SceneFragment.Initialize(self)
 
-    fragment.slideInStop =  function()
-                                LOOT_WINDOW.noTooltips = false
-                                local mousedOverItem = LOOT_WINDOW:GetMouseOverLootItem()
-                                if mousedOverItem then
-                                    LOOT_WINDOW:OnMouseOverUpdated(mousedOverItem, MOUSE_ENTER)
-                                end
-                            end
-    fragment.slideInAnimation = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_LootSlideInAnimation", control)
-    fragment.slideInAnimation:SetHandler("OnStop", fragment.slideInStop)
+    self.control = control
+    self.titleControl = control:GetNamedChild("Title")
+    self.alphaControl = control:GetNamedChild("AlphaContainer")
+    self.keybindButton = control:GetNamedChild("KeybindButton")
 
-    fragment.titleSlideInAnimation = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_LootTitleSlideInAnimation", fragment.titleControl)
-    fragment.interactFadeOutAnimation = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_LootInteractFadeOutAnimation", fragment.keybindButton)
+    self.slideInStop = function()
+        LOOT_WINDOW.noTooltips = false
+        local mousedOverItem = LOOT_WINDOW:GetMouseOverLootItem()
+        if mousedOverItem then
+            LOOT_WINDOW:OnMouseOverUpdated(mousedOverItem, MOUSE_ENTER)
+        end
+    end
+    self.slideInAnimation = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_LootSlideInAnimation", control)
+    self.slideInAnimation:SetHandler("OnStop", self.slideInStop)
 
-    fragment.alphaInStop =  function()
-                                fragment.alphaInDone = true
-                            end
-    fragment.alphaInAnimation = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_LootAlphaInAnimation", fragment.alphaControl)
-    fragment.alphaInAnimation:SetHandler("OnStop", fragment.alphaInStop)
+    self.titleSlideInAnimation = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_LootTitleSlideInAnimation", self.titleControl)
+    self.interactFadeOutAnimation = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_LootInteractFadeOutAnimation", self.keybindButton)
 
-    fragment.alphaOutStop = function()
-                                    SHARED_INFORMATION_AREA:SetHidden(control, true)
-                                    TUTORIAL_SYSTEM:SuppressTutorialType(TUTORIAL_TYPE_HUD_INFO_BOX, false, TUTORIAL_SUPPRESSED_BY_LOOT)
-                                    control:SetAlpha(1)
-                                    fragment:OnHidden()
-                                end
-    fragment.alphaOutAnimation = ANIMATION_MANAGER:CreateTimelineFromVirtual("FadeSceneAnimation", control)
-    fragment.alphaOutAnimation:SetHandler("OnStop", fragment.alphaOutStop)
+    self.alphaInStop = function()
+        self.alphaInDone = true
+    end
+    self.alphaInAnimation = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_LootAlphaInAnimation", self.alphaControl)
+    self.alphaInAnimation:SetHandler("OnStop", self.alphaInStop)
 
-    return fragment
+    self.alphaOutStop = function()
+        SHARED_INFORMATION_AREA:SetHidden(control, true)
+        TUTORIAL_SYSTEM:SuppressTutorialType(TUTORIAL_TYPE_HUD_INFO_BOX, false, TUTORIAL_SUPPRESSED_BY_LOOT)
+        control:SetAlpha(1)
+        self:OnHidden()
+    end
+    self.alphaOutAnimation = ANIMATION_MANAGER:CreateTimelineFromVirtual("FadeSceneAnimation", control)
+    self.alphaOutAnimation:SetHandler("OnStop", self.alphaOutStop)
 end
 
 function ZO_LootSceneFragment:AnimateNextShow()
@@ -107,14 +106,14 @@ function ZO_Loot:Initialize(control)
 
     SHARED_INFORMATION_AREA:AddLoot(control)
 
-    self.list = GetControl(control, "AlphaContainerList")
+    self.list = control:GetNamedChild("AlphaContainerList")
     ZO_ScrollList_AddDataType(self.list, DATA_TYPE_LOOT_ITEM, "ZO_LootItemSlot", 52, function(control, data) self:SetUpLootItem(control, data) end, nil, nil, ZO_InventorySlot_OnPoolReset)
     ZO_ScrollList_AddDataType(self.list, DATA_TYPE_LOOT_BLANK, "ZO_LootBlankItemSlot", 52, function(control, data) self:SetUpBlankLootItem(control, data) end, nil, nil, ZO_InventorySlot_OnPoolReset)
     ZO_Scroll_SetUseFadeGradient(self.list, false)
 
-    self.title = GetControl(control, "Title")
-    self.keyButton = GetControl(control, "KeybindButton")
-    self.buttons = { GetControl(control, "AlphaContainerButton1"), GetControl(control, "AlphaContainerButton2") }
+    self.title = control:GetNamedChild("Title")
+    self.keyButton = control:GetNamedChild("KeybindButton")
+    self.buttons = { control:GetNamedChild("AlphaContainerButton1"), control:GetNamedChild("AlphaContainerButton2") }
 
     local hideUnbound = false
     self.keyButton:SetKeybind("GAME_CAMERA_INTERACT", hideUnbound, "GAMEPAD_JUMP_OR_INTERACT")
@@ -123,24 +122,24 @@ function ZO_Loot:Initialize(control)
 
     LOOT_WINDOW_FRAGMENT = ZO_LootSceneFragment:New(control)
     LOOT_SCENE = ZO_LootScene:New("loot", SCENE_MANAGER)
-    LOOT_SCENE:RegisterCallback("StateChange",   function(oldState, newState)
-                                                    if(newState == SCENE_SHOWING) then
-                                                        local dontAutomaticallyExitScene = false
-                                                        SCENE_MANAGER:SetHUDUIScene("loot", dontAutomaticallyExitScene)
-                                                        KEYBIND_STRIP:RemoveDefaultExit()
-                                                        KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
-                                                        PushActionLayerByName("Loot")
-                                                    elseif(newState == SCENE_HIDING) then
-                                                        SCENE_MANAGER:RestoreHUDUIScene()
-                                                    elseif(newState == SCENE_HIDDEN) then
-                                                        ZO_InventorySlot_RemoveMouseOverKeybinds()
-                                                        KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
-                                                        KEYBIND_STRIP:RestoreDefaultExit()
-                                                        RemoveActionLayerByName("Loot")
-                                                        EndLooting()
-                                                        self.returnScene = nil
-                                                    end
-                                                end)
+    LOOT_SCENE:RegisterCallback("StateChange", function(oldState, newState)
+        if newState == SCENE_SHOWING then
+            local dontAutomaticallyExitScene = false
+            SCENE_MANAGER:SetHUDUIScene("loot", dontAutomaticallyExitScene)
+            KEYBIND_STRIP:RemoveDefaultExit()
+            KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
+            PushActionLayerByName("Loot")
+        elseif newState == SCENE_HIDING then
+            SCENE_MANAGER:RestoreHUDUIScene()
+        elseif newState == SCENE_HIDDEN then
+            ZO_InventorySlot_RemoveMouseOverKeybinds()
+            KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
+            KEYBIND_STRIP:RestoreDefaultExit()
+            RemoveActionLayerByName("Loot")
+            EndLooting()
+            self.returnScene = nil
+        end
+    end)
 
     self.stealthIcon = ZO_StealthIcon:New(control:GetNamedChild("StealthIcon"))
     control:RegisterForEvent(EVENT_STEALTH_STATE_CHANGED, function(event, unitTag, ...) if unitTag == "player" then self.stealthIcon:OnStealthStateChanged(...) end end)
@@ -309,7 +308,7 @@ function ZO_Loot:OnMouseOverUpdated(control, state)
     if state == MOUSE_ENTER then
         self.mouseOverLootItem = control
         if not self.noTooltips then
-            local slot = GetControl(control, "Button")
+            local slot = control:GetNamedChild("Button")
             local shouldShowSteal = slot.lootEntry.isStolen
             self.buttons[2]:SetText(GetString(shouldShowSteal and SI_LOOT_STEAL or SI_LOOT_TAKE))
             self.buttons[2]:SetNormalTextColor(shouldShowSteal and ZO_ERROR_COLOR or ZO_NORMAL_TEXT)
@@ -340,7 +339,7 @@ end
 function ZO_Loot:LootSingleItem()
     local mouseOver = self:GetMouseOverLootItem()
     if mouseOver then
-        local control = GetControl(mouseOver, "Button")
+        local control = mouseOver:GetNamedChild("Button")
         TakeLoot(control)
     end
 end
@@ -365,7 +364,7 @@ end
 
 function ZO_Loot_ButtonKeybindPressed(keybind)
     local btn = LOOT_WINDOW:GetButtonByKeybind(keybind)
-    if(btn and not btn:IsHidden()) then
+    if btn and not btn:IsHidden() then
         btn:OnClicked()
     end
 end

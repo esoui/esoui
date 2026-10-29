@@ -1236,6 +1236,7 @@ SOUNDS =
 
     RUMOR_STARTED = "Rumor_Started",
     RUMOR_COMPLETED = "Rumor_Completed",
+    RUMOR_HINT_UNLOCKED = "Rumor_Hint_Unlocked",
 
     -- Adventure Zone
     ADVENTURE_ZONE_BOSS_TREE_OPENED = "AdventureZone_BossTreeOpened",
@@ -1260,4 +1261,12 @@ SOUNDS =
     GENERIC_SELECTOR_SUBMIT_CHOICES = "GenericSelector_SubmitChoices",
     GENERIC_SELECTOR_REWARDS_INCREASED = "GenericSelector_RewardsIncreased",
     GENERIC_SELECTOR_REWARDS_DECREASED = "GenericSelector_RewardsDecreased",
+
+    -- Trial Progression
+    TRIAL_PROGRESSION_OPENED = "TrialProgression_Opened",
+    TRIAL_PROGRESSION_CLOSED = "TrialProgression_Closed",
+    TRIAL_PROGRESSION_ATTUNED = "TrialProgression_Attuned",
+    TRIAL_PROGRESSION_UNATTUNED = "TrialProgression_Unattuned",
+    TRIAL_PROGRESSION_PERK_MOUSE_ENTER = "TrialProgression_Perk_MouseEnter",
+    TRIAL_PROGRESSION_PERK_MOUSE_EXIT = "TrialProgression_Perk_MouseExit",
 }

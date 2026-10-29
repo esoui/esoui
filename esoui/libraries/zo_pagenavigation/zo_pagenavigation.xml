@@ -18,7 +18,7 @@
                 </Texture>
                 <Texture name="$(parent)Icon" layer="TEXT" level="1" hidden="true">
                     <Anchor point="CENTER"/>
-                    <Dimensions x="32" y="32"/>
+                    <Dimensions x="40" y="40"/>
                 </Texture>
                 <Label name="$(parent)Number" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" level="2">
                     <Anchor point="CENTER"/>

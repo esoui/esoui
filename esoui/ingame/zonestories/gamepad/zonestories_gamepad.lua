@@ -27,17 +27,15 @@ function ZO_ZoneStories_Gamepad:Initialize(control)
             gridPaddingX = 5,
             gridPaddingY = 25,
         },
-
-
-
-
-
-
-
-
-
-
-
+        milestones =
+        {
+            headerTemplate = "ZO_ZoneStory_MilestoneHeader_Gamepad",
+            entryTemplate = "ZO_ZoneStory_MilestoneTile_Gamepad_Control",
+            dimensionsX = ZO_ZONE_STORIES_MILESTONE_TILE_GAMEPAD_DIMENSIONS_X,
+            dimensionsY = ZO_ZONE_STORIES_MILESTONE_TILE_GAMEPAD_DIMENSIONS_Y,
+            gridPaddingX = 2,
+            gridPaddingY = 20,
+        },
         activityCompletion =
         {
             headerTemplate = "ZO_ZoneStory_ActivityCompletionHeader_Gamepad",
@@ -310,9 +308,7 @@ function ZO_ZoneStories_Gamepad:InitializeKeybindStripDescriptors()
                     -- entry type than the others (it doesn't have zoneData) and it only ever shows 1 tooltip.
                     -- All the other types have at least 2 tooltips to show and so always cycle
                     return selectedData.completionType ~= ZONE_COMPLETION_TYPE_FEATURED_ACHIEVEMENTS
-
-
-
+                        and selectedData.completionType ~= ZONE_COMPLETION_TYPE_MILESTONES
                 end
 
                 return false
@@ -345,9 +341,7 @@ function ZO_ZoneStories_Gamepad:InitializeKeybindStripDescriptors()
                     -- entry type than the others (it doesn't have zoneData) and it only ever shows 1 tooltip.
                     -- All the other types have at least 2 tooltips to show and so always cycle
                     return selectedData.completionType ~= ZONE_COMPLETION_TYPE_FEATURED_ACHIEVEMENTS
-
-
-
+                        and selectedData.completionType ~= ZONE_COMPLETION_TYPE_MILESTONES
                 end
 
                 return false
@@ -493,11 +487,9 @@ function ZO_ZoneStories_Gamepad:OnGridSelectionChanged(oldSelectedData, selected
         local completionType = selectedData.completionType
         if completionType == ZONE_COMPLETION_TYPE_FEATURED_ACHIEVEMENTS then
             GAMEPAD_TOOLTIPS:LayoutAchievement(GAMEPAD_RIGHT_TOOLTIP, selectedData.achievementId)
-
-
-
-
-
+        elseif completionType == ZONE_COMPLETION_TYPE_MILESTONES then
+            local zoneId = self:GetSelectedZoneId()
+            GAMEPAD_TOOLTIPS:LayoutZoneStoryMilestoneCompletionType(GAMEPAD_RIGHT_TOOLTIP, zoneId, selectedData.milestoneId)
         else
             local zoneData = selectedData.zoneData
             local completionIndex = selectedData.completionIndex

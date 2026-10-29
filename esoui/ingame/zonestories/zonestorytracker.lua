@@ -14,7 +14,7 @@ function ZoneStoryTracker:InitializeStyles()
     {
         gamepad =
         {
-            SUBLABEL_PRIMARY_ANCHOR_OFFSET_Y = 12,
+            SUBLABEL_PRIMARY_ANCHOR_OFFSET_Y = 10,
         }
     }
     ZO_HUDTracker_Base.InitializeStyles(self)

@@ -3,39 +3,38 @@
 ----------------------------------------
 
 ZO_BackpackLayoutFragment = ZO_SceneFragment:Subclass()
-local DEFAULT_BACKPACK_LAYOUT_DATA =
-{
-    inventoryFilterDividerTopOffsetY = DEFAULT_INVENTORY_FILTER_DIVIDER_TOP_OFFSET_Y,
-    width = 565,
-    backpackOffsetY = 136,
-    inventoryTopOffsetY = -20,
-    inventoryBottomOffsetY = -30,
-    sortByOffsetY = 103,
-    emptyLabelOffsetY = 200,
-    sortByHeaderWidth = 576,
-    sortByNameWidth = 241,
-    useSearchBar = true,
-    hideBankInfo = true,
-    hideCurrencyInfo = false,
-    hideBagUpgrade = true,
-}
 
-function ZO_BackpackLayoutFragment:New(...)
-    local fragment = ZO_SceneFragment.New(self)
-    fragment:Initialize(...)
-    return fragment
-end
+do
+    local DEFAULT_BACKPACK_LAYOUT_DATA =
+    {
+        inventoryFilterDividerTopOffsetY = DEFAULT_INVENTORY_FILTER_DIVIDER_TOP_OFFSET_Y,
+        width = 565,
+        backpackOffsetY = 136,
+        inventoryTopOffsetY = -20,
+        inventoryBottomOffsetY = -30,
+        sortByOffsetY = 103,
+        emptyLabelOffsetY = 200,
+        sortByHeaderWidth = 576,
+        sortByNameWidth = 241,
+        useSearchBar = true,
+        hideBankInfo = true,
+        hideCurrencyInfo = false,
+        hideBagUpgrade = true,
+    }
 
-function ZO_BackpackLayoutFragment:Initialize(layoutData)
-    if(layoutData) then
-        for k,v in pairs(DEFAULT_BACKPACK_LAYOUT_DATA) do
-            if layoutData[k] == nil then
-                layoutData[k] = v
+    function ZO_BackpackLayoutFragment:Initialize(layoutData)
+        ZO_SceneFragment.Initialize(self)
+
+        if layoutData then
+            for k,v in pairs(DEFAULT_BACKPACK_LAYOUT_DATA) do
+                if layoutData[k] == nil then
+                    layoutData[k] = v
+                end
             end
+            self.layoutData = layoutData
+        else
+            self.layoutData = DEFAULT_BACKPACK_LAYOUT_DATA
         end
-        self.layoutData = layoutData
-    else
-        self.layoutData = DEFAULT_BACKPACK_LAYOUT_DATA
     end
 end
 

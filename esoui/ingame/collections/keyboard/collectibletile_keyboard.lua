@@ -303,7 +303,7 @@ function ZO_CollectibleTile_Keyboard:AddMenuOptions()
             end
         end
 
-        if self:GetActorCategory() == GAMEPLAY_ACTOR_CATEGORY_PLAYER and collectibleData:IsFavoritable() then
+        if collectibleData:IsFavoritable() then
             if collectibleData:IsFavorite() then
                 AddMenuItem(GetString(SI_COLLECTIBLE_ACTION_REMOVE_FAVORITE), function()
                     SetOrClearCollectibleUserFlag(collectibleId, COLLECTIBLE_USER_FLAG_FAVORITE, false)

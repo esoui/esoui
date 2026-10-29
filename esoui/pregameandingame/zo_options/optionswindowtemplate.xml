@@ -62,10 +62,6 @@
                 checkboxControl:GetHandler("OnClicked")(checkboxControl, button)
             </OnMouseUp>
             <Controls>
-                <Label name="$(parent)Name" font="ZoFontWinH4" wrapMode="ELLIPSIS">
-                    <Dimensions x="290" y="26"/>
-                    <Anchor point="LEFT"/>
-                </Label>
                 <Button name="$(parent)Checkbox" inherits="ZO_CheckButton_Text" horizontalAlignment="LEFT" font="ZoFontWinH4" modifyTextType="UPPERCASE">
                     <Dimensions x="200" y="26"/>
                     <Anchor point="RIGHT"/>
@@ -79,6 +75,11 @@
                         self:SetPressedFontColor(GetInterfaceColor(INTERFACE_COLOR_TYPE_TEXT_COLORS, INTERFACE_TEXT_COLOR_NORMAL))
                     </OnMouseExit>
                 </Button>
+                <Label name="$(parent)Name" font="ZoFontWinH4" wrapMode="ELLIPSIS">
+                    <Dimensions y="26"/>
+                    <Anchor point="LEFT"/>
+                    <Anchor point="RIGHT" relativeTo="$(parent)Checkbox" relativePoint="LEFT" offsetX="-5"/>
+                </Label>
             </Controls>
         </Control>
         <Control name="ZO_Options_Checkbox_DynamicWarning" inherits="ZO_Options_Checkbox" virtual="true">
@@ -90,6 +91,10 @@
                         self.data = { tooltipText = "" }
                     </OnInitialized>
                 </Texture>
+                <Label name="$(parent)Name" override="true">
+                    <Anchor point="LEFT"/>
+                    <Anchor point="RIGHT" relativeTo="$(parent)WarningIcon" relativePoint="LEFT" offsetX="-5"/>
+                </Label>
             </Controls>
         </Control>
         <Control name="ZO_Options_Video_Checkbox_IncludeRestartWarning" inherits="ZO_Options_Checkbox_DynamicWarning" virtual="true">
@@ -130,8 +135,9 @@
                     </OnMouseExit>
                 </Control>
                 <Label name="$(parent)Name" font="ZoFontWinH4" wrapMode="ELLIPSIS">
+                    <Dimensions y="26"/>
                     <Anchor point="LEFT"/>
-                    <Anchor point="RIGHT" relativeTo="$(parent)Dropdown" relativePoint="LEFT"/>
+                    <Anchor point="RIGHT" relativeTo="$(parent)Dropdown" relativePoint="LEFT" offsetX="-5"/>
                 </Label>
             </Controls>
         </Control>
@@ -144,6 +150,10 @@
                         self.data = { tooltipText = "" }
                     </OnInitialized>
                 </Texture>
+                <Label name="$(parent)Name" override="true">
+                    <Anchor point="LEFT"/>
+                    <Anchor point="RIGHT" relativeTo="$(parent)WarningIcon" relativePoint="LEFT" offsetX="-5"/>
+                </Label>
             </Controls>
         </Control>
         <Control name="ZO_Options_Video_Dropdown_IncludeApplyScreenWarning" inherits="ZO_Options_Dropdown_DynamicWarning" virtual="true">
@@ -186,7 +196,7 @@
                 <Label name="$(parent)Name" font="ZoFontWinH4" wrapMode="ELLIPSIS" horizontalAlignment="LEFT" verticalAlignment="CENTER">
                     <Dimensions y="26"/>
                     <Anchor point="LEFT"/>
-                    <Anchor point="RIGHT" relativeTo="$(parent)Slider" relativePoint="LEFT" offsetY="-5"/>
+                    <Anchor point="RIGHT" relativeTo="$(parent)Slider" relativePoint="LEFT" offsetX="-5"/>
                 </Label>
                 <Label name="$(parent)ValueLabel" font="ZoFontWinH4" wrapMode="ELLIPSIS" verticalAlignment="CENTER" excludeFromResizeToFitExtents="true">
                     <Dimensions x="75" y="26"/>
@@ -203,6 +213,10 @@
                         self.data = { tooltipText = "" }
                     </OnInitialized>
                 </Texture>
+                <Label name="$(parent)Name" override="true">
+                    <Anchor point="LEFT"/>
+                    <Anchor point="RIGHT" relativeTo="$(parent)WarningIcon" relativePoint="LEFT" offsetX="-5"/>
+                </Label>
             </Controls>
         </Control>
         <Control name="ZO_Options_Video_Slider_IncludeMaxParticleSystemsWarning" virtual="true" inherits="ZO_Options_Video_Slider_DynamicWarning">
@@ -224,6 +238,7 @@
                 <Label name="$(parent)Name" override="true">
                     <ClearAnchors/>
                     <Anchor point="TOPLEFT"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Slider" relativePoint="TOPLEFT" offsetX="-5"/>
                 </Label>
                 <Label name="$(parent)ValueLabel" horizontalAlignment="CENTER" override="true">
                     <ClearAnchors/>
@@ -241,9 +256,6 @@
                 ZO_Options_ColorOnMouseExit(self)
             </OnMouseExit>
             <Controls>
-                <Label name="$(parent)Name" font="ZoFontWinH4" wrapMode="ELLIPSIS">
-                    <Anchor point="LEFT"/>
-                </Label>
                 <Control name="$(parent)ColorSection" mouseEnabled="true">
                     <Dimensions x="200" y="26"/>
                     <Anchor point="RIGHT"/>
@@ -266,6 +278,11 @@
                     <Dimensions x="40" y="26"/>
                     <Anchor point="CENTER" relativeTo="$(parent)Color"/>
                 </Texture>
+                <Label name="$(parent)Name" font="ZoFontWinH4" wrapMode="ELLIPSIS">
+                    <Dimensions y="26"/>
+                    <Anchor point="LEFT"/>
+                    <Anchor point="RIGHT" relativeTo="$(parent)ColorSection" relativePoint="LEFT" offsetX="-5"/>
+                </Label>
             </Controls>
         </Control>
         <Label name="ZO_Options_Social_GuildLabel" font="ZoFontWinH3" modifyTextType="UPPERCASE" virtual="true">

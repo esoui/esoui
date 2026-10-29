@@ -518,7 +518,8 @@ end
 
 function ZO_Scroll_SetScrollToRealOffsetAccountingForGradients(self, finalTotalHeight, controlFinalTopOffset, durationMS)
     local scroll = self.scroll
-    local scrollHeight = scroll:GetHeight()
+    -- zo_ceil is used to ensure that the comparisons performed on height/width values have predictable equivalency.
+    local scrollHeight = zo_ceil(scroll:GetHeight() / scroll:GetScale())
     local finalVerticalExtents = zo_max(finalTotalHeight - scrollHeight, 0)
     local finalVerticalOffset = controlFinalTopOffset
     if self.useFadeGradient then
@@ -560,7 +561,7 @@ function ZO_Scroll_UpdateScrollBar(self, forceUpdateBarValue)
     local _, verticalOffset = scroll:GetScrollOffsets()
     local _, verticalExtents   = scroll:GetScrollExtents()
     local scrollEnabled = verticalExtents > 0 or verticalOffset > 0
-    local scrollbar  = self.scrollbar
+    local scrollbar = self.scrollbar
     local scrollIndicator = self.scrollIndicator
     local scrollbarHidden = not self.useScrollbar or (self.hideScrollBarOnDisabled and not scrollEnabled) or self.isScrollBarEthereal
     local verticalExtentsChanged = self.verticalExtents ~= nil and not zo_floatsAreEqual(self.verticalExtents, verticalExtents)
@@ -569,10 +570,11 @@ function ZO_Scroll_UpdateScrollBar(self, forceUpdateBarValue)
     if scrollbar then
         --thumb resizing
         local scale = scroll:GetScale()
-        local scrollBarHeight = scrollbar:GetHeight() / scale
-        local scrollAreaHeight = scroll:GetHeight() / scale
+        -- zo_ceil is used to ensure that the comparisons performed on height/width values have predictable equivalency.
+        local scrollBarHeight = zo_ceil(scrollbar:GetHeight() / scale)
+        local scrollAreaHeight = zo_ceil(scroll:GetHeight() / scale)
         if verticalExtents > 0 and scrollBarHeight >= 0 and scrollAreaHeight >= 0 then
-            local thumbHeight = scrollBarHeight * scrollAreaHeight /(verticalExtents + scrollAreaHeight)
+            local thumbHeight = scrollBarHeight * scrollAreaHeight / (verticalExtents + scrollAreaHeight)
             scrollbar:SetThumbTextureHeight(thumbHeight)
         else
             scrollbar:SetThumbTextureHeight(scrollBarHeight)
@@ -769,11 +771,15 @@ function ZO_ScrollList_SetYDistanceFromEdgeWhereSelectionCausesScroll(self, yDis
 end
 
 function ZO_ScrollList_SetHeight(self, height)
-    self:SetHeight(height)
+    if height ~= nil then
+        -- zo_ceil is used to ensure that the comparisons performed on height/width values have predictable equivalency.
+        self:SetHeight(zo_ceil(height / self:GetScale()))
+    end
 end
 
 function ZO_ScrollList_GetHeight(self)
-    return self:GetHeight()
+    -- zo_ceil is used to ensure that the comparisons performed on height/width values have predictable equivalency.
+    return zo_ceil(self:GetHeight() / self:GetScale())
 end
 
 local function AreSelectionsEnabled(self)
@@ -877,11 +883,11 @@ function ZO_ScrollListOperation:IsDataVisible(data)
 end
 
 function ZO_ScrollListOperation:GetControlWidth()
-    return nil  -- Can be overridden in derived classes
+    return nil -- Can be overridden in derived classes
 end
 
 function ZO_ScrollListOperation:GetControlHeight()
-    return nil  -- Can be overridden in derived classes
+    return nil -- Can be overridden in derived classes
 end
 
 function ZO_ScrollListOperation:GetHeaderTextWidth(data, headerText)
@@ -890,6 +896,10 @@ end
 
 function ZO_ScrollListOperation:GetPositionsAndAdvance(layoutInfo, currentX, currentY, data)
     assert(false) -- Override in derived classes
+end
+
+function ZO_ScrollListOperation:GetAdditionalContentWidth(layoutInfo, data, measuredWidth)
+    return nil -- Can be overridden in derived classes
 end
 
 function ZO_ScrollListOperation:AddToScrollContents(contents, control, offset)
@@ -1079,6 +1089,21 @@ function ZO_ScrollList_AddControl_Operation:GetPositionsAndAdvance(layoutInfo, c
     end
 
     return currentX, currentY
+end
+
+function ZO_ScrollList_AddControl_Operation:GetAdditionalContentWidth(layoutInfo, dataEntry, measuredWidth)
+    local occupiedWidth = nil
+    if layoutInfo.direction == ZO_SCROLL_BUILD_DIRECTION_LEFT_TO_RIGHT then
+        occupiedWidth = dataEntry.right - layoutInfo.startPos
+    else
+        occupiedWidth = layoutInfo.startPos - dataEntry.left
+    end
+
+    if occupiedWidth > measuredWidth then
+        return occupiedWidth - measuredWidth
+    end
+
+    return nil
 end
 
 function ZO_ScrollList_AddControl_Operation:AddToScrollContents(contents, control, currentX, currentY, offset)
@@ -1778,7 +1803,8 @@ end
 
 local function ResizeScrollBar(self, scrollableDistance)
     local shouldHideScrollbar = self.isScrollBarEthereal
-    local scrollBarHeight = self.scrollbar:GetHeight()
+    -- zo_ceil is used to ensure that the comparisons performed on height/width values have predictable equivalency.
+    local scrollBarHeight = zo_ceil(self.scrollbar:GetHeight() / self:GetScale())
     local scrollListHeight = ZO_ScrollList_GetHeight(self)
 
     if scrollableDistance > 0 then
@@ -2227,23 +2253,31 @@ function ZO_ScrollList_SelectFirstIndexInCategory(self, direction)
         end
     end
 
-
+    local lastSelectableIndex = nextDataIndex
     while nextDataIndex > 0 and nextDataIndex <= #listData do
         if IsCategoryHeader(self, nextDataIndex) then
             -- we found header data, select the first selectable entry under it
             local lookAheadIndex = nextDataIndex + 1
-            ZO_ScrollList_SelectData(self, listData[lookAheadIndex].data)
-            ZO_ScrollList_ScrollDataToCenter(self, lookAheadIndex)
-            ZO_ScrollList_RefreshLastHoldPosition(self)
-            return
+            while lookAheadIndex <= #listData and not IsCategoryHeader(self, lookAheadIndex) do
+                if CanSelectData(self, lookAheadIndex) then
+                    ZO_ScrollList_SelectData(self, listData[lookAheadIndex].data)
+                    ZO_ScrollList_ScrollDataToCenter(self, lookAheadIndex)
+                    ZO_ScrollList_RefreshLastHoldPosition(self)
+                    return
+                end
+
+                lookAheadIndex = lookAheadIndex + 1
+            end
+        elseif CanSelectData(self, nextDataIndex) then
+            lastSelectableIndex = nextDataIndex
         end
 
         nextDataIndex = nextDataIndex + direction
     end
 
     -- could not find another header data, so just pick the last selectable value we found
-    ZO_ScrollList_SelectData(self, listData[nextDataIndex - direction].data)
-    ZO_ScrollList_ScrollDataToCenter(self, nextDataIndex - direction)
+    ZO_ScrollList_SelectData(self, listData[lastSelectableIndex].data)
+    ZO_ScrollList_ScrollDataToCenter(self, lastSelectableIndex)
     ZO_ScrollList_RefreshLastHoldPosition(self)
 end
 
@@ -2295,11 +2329,14 @@ function ZO_ScrollList_Commit(self)
         local layoutInfo = {}
         layoutInfo.lineBreakModifier = 0
         layoutInfo.direction = self.buildDirection
+        -- zo_ceil is used to ensure that the comparisons performed on height/width values have predictable equivalency.
+        -- Contents can still have stale dimensions during resize-to-fit commits, so derive its width instead.
+        local scrollWidth = zo_ceil((self:GetWidth() - self.scrollbar:GetWidth()) / self.contents:GetScale())
         if self.buildDirection == ZO_SCROLL_BUILD_DIRECTION_LEFT_TO_RIGHT then
             layoutInfo.startPos = 0
-            layoutInfo.endPos = self.contents:GetWidth()
+            layoutInfo.endPos = scrollWidth
         else
-            layoutInfo.startPos = self.contents:GetWidth()
+            layoutInfo.startPos = scrollWidth
             layoutInfo.endPos = 0
         end
         local currentX = layoutInfo.startPos
@@ -2314,8 +2351,15 @@ function ZO_ScrollList_Commit(self)
                     self.maxDimensionX = headerStringWidth
                 end
                 currentX, currentY = currentOperation:GetPositionsAndAdvance(layoutInfo, currentX, currentY, currentData)
-                if currentX > self.maxDimensionX then
-                    self.maxDimensionX = currentX
+                -- Normalize to a positive width from the start edge; raw currentX overstates width in right-to-left layouts.
+                local layoutAdvanceWidth = (currentX - layoutInfo.startPos) * layoutInfo.direction
+                -- Negative spacing can leave an entry extending past the current layout position. Include that extra
+                -- width in maxDimensionX; otherwise resize-to-fit can make the available width too small and wrap
+                -- entries on a later commit.
+                local additionalContentWidth = currentOperation:GetAdditionalContentWidth(layoutInfo, currentData, layoutAdvanceWidth)
+                local measuredWidth = layoutAdvanceWidth + (additionalContentWidth or 0)
+                if measuredWidth > self.maxDimensionX then
+                    self.maxDimensionX = measuredWidth
                 end
                 if currentY > self.maxDimensionY then
                     self.maxDimensionY = currentY

@@ -518,6 +518,10 @@ function ZO_PromotionalEventCampaignData:SetSeen(seen)
     return PROMOTIONAL_EVENT_MANAGER:SetCampaignSeen(self, seen)
 end
 
+function ZO_PromotionalEventCampaignData:HasCallout()
+    return not self:HasBeenSeen() or self:IsAnyRewardClaimable()
+end
+
 function ZO_PromotionalEventCampaignData:CompareTo(otherCampaignData)
     local isReturningPlayerCampaign = self:IsReturningPlayerCampaign()
     local otherIsReturningPlayerCampaign = otherCampaignData:IsReturningPlayerCampaign()

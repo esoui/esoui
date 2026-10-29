@@ -37,6 +37,7 @@
                     </OnPlay>
                 </TranslateAnimation>
                 <AlphaAnimation inherits="PopToFullAlphaAnimation"/>
+                <AlphaAnimation inherits="PopToFullAlphaAnimation"/>
             </Animations>
         </AnimationTimeline>
     </Animations>

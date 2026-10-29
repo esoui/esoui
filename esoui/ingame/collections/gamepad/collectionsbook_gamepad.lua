@@ -148,9 +148,7 @@ function ZO_GamepadCollectionsBook:InitializeHousingPanel()
     housingPanel.locationLabel = container:GetNamedChild("LocationValue")
     housingPanel.houseTypeLabel = container:GetNamedChild("HouseTypeValue")
     housingPanel.supportsWeatherControlValueLabel = container:GetNamedChild("SupportsWeatherControlValue")
-
-
-
+    housingPanel.supportsSkyControlValueLabel = container:GetNamedChild("SupportsSkyControlValue")
     housingPanel.recommendCountHeader = container:GetNamedChild("RecommendCountHeader")
     housingPanel.recommendCountValue = container:GetNamedChild("RecommendCountValue")
 
@@ -645,8 +643,6 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
                     return GetString(SI_GAMEPAD_ITEM_ACTION_QUICKSLOT_ASSIGN)
                 elseif self:CanPurchaseCurrentTarget() then
                     return GetString(SI_GAMEPAD_DLC_BOOK_ACTION_OPEN_CROWN_STORE)
-                elseif self:CanUpgradeCurrentTarget() then
-                    return GetString(SI_DLC_BOOK_ACTION_CHAPTER_UPGRADE)
                 end
             end,
             keybind = "UI_SHORTCUT_SECONDARY",
@@ -669,8 +665,6 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
                 elseif self:CanPurchaseCurrentTarget() then
                     local searchTerm = zo_strformat(SI_CROWN_STORE_SEARCH_FORMAT_STRING, collectibleData:GetName())
                     ShowMarketAndSearch(searchTerm, MARKET_OPEN_OPERATION_COLLECTIONS_DLC)
-                elseif self:CanUpgradeCurrentTarget() then
-                    ZO_ShowChapterUpgradePlatformScreen(MARKET_OPEN_OPERATION_COLLECTIONS_DLC)
                 end
             end,
             visible = function()
@@ -683,8 +677,6 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
                     elseif collectibleData:IsUnlocked() and collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_EMOTE) then
                         return true
                     elseif self:CanPurchaseCurrentTarget() then
-                        return true
-                    elseif self:CanUpgradeCurrentTarget() then
                         return true
                     end
                 end
@@ -716,13 +708,13 @@ function ZO_GamepadCollectionsBook:InitializeKeybindStripDescriptors()
             visible = function()
                 local collectibleData = self:GetCurrentTargetData()
                 if collectibleData then
-                    if not collectibleData:IsInstanceOf(ZO_CollectibleData) then
+                    if not (collectibleData:IsInstanceOf(ZO_CollectibleData) or collectibleData:IsInstanceOf(ZO_PseudoCollectibleData)) then
                         return false
                     end
 
                     local isHouse = collectibleData:IsHouse()
                     local isPrimaryResidence = collectibleData:IsPrimaryResidence()
-                    return IsChatSystemAvailableForCurrentPlatform() or collectibleData:IsRenameable() or self:CanPurchaseCurrentTarget() or self:CanUpgradeCurrentTarget() or collectibleData:IsFavoritable() or (isHouse and not isPrimaryResidence)
+                    return IsChatSystemAvailableForCurrentPlatform() or collectibleData:IsRenameable() or self:CanPurchaseCurrentTarget() or collectibleData:IsFavoritable() or (isHouse and not isPrimaryResidence)
                 end
 
                 return false
@@ -1243,9 +1235,8 @@ function ZO_GamepadCollectionsBook:BuildCollectibleData(collectibleData)
             questAvailableText = GetString(SI_COLLECTIONS_QUEST_AVAILABLE)
             questDescription = entryData:GetQuestDescription()
         elseif not isUnlocked then
-            local isChapter = entryData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_CHAPTER)
-            if entryData:IsPurchasable() or entryData:IsUnlockedViaSubscription() or isChapter then
-                questAvailableText = isChapter and GetString(SI_COLLECTIONS_QUEST_AVAILABLE_WITH_UPGRADE) or GetString(SI_COLLECTIONS_QUEST_AVAILABLE_WITH_UNLOCK)
+            if entryData:IsPurchasable() or entryData:IsUnlockedViaSubscription() then
+                questAvailableText = GetString(SI_COLLECTIONS_QUEST_AVAILABLE_WITH_UNLOCK)
             end
         end
 
@@ -1287,13 +1278,11 @@ function ZO_GamepadCollectionsBook:BuildCollectibleData(collectibleData)
         ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_HOUSING_HOUSE_SUPPORTS_WEATHER_CONTROL_HEADER)))
         ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(hasWeatherControlSupportString))
 
-
-
-
-
-
-
-
+        -- House supports sky control narration
+        local hasSkyControlSupport = ZO_FlagHelpers.MaskHasFlag(houseFlags, HOUSE_FLAGS_SUPPORTS_SKY_CONTROL)
+        local hasSkyControlSupportString = hasSkyControlSupport and GetString(SI_YES) or GetString(SI_NO)
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_HOUSING_HOUSE_SUPPORTS_SKY_CONTROL_HEADER)))
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(hasSkyControlSupportString))
 
         --Home Tour Recommendations narration
         local houseId = entryData:GetReferenceId()
@@ -1492,9 +1481,8 @@ function ZO_GamepadCollectionsBook:RefreshDLCTooltip(collectibleData)
         questAcceptDescription:SetText(collectibleData:GetQuestDescription())
         questAcceptDescription:SetHidden(false)
     elseif not isUnlocked then
-        local isChapter = collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_CHAPTER)
-        if collectibleData:IsPurchasable() or collectibleData:IsUnlockedViaSubscription() or isChapter then
-            local acquireText = isChapter and GetString(SI_COLLECTIONS_QUEST_AVAILABLE_WITH_UPGRADE) or GetString(SI_COLLECTIONS_QUEST_AVAILABLE_WITH_UNLOCK)
+        if collectibleData:IsPurchasable() or collectibleData:IsUnlockedViaSubscription() then
+            local acquireText = GetString(SI_COLLECTIONS_QUEST_AVAILABLE_WITH_UNLOCK)
             questAcceptIndicator:SetText(acquireText)
             questAcceptIndicator:SetHidden(false)
         else
@@ -1523,11 +1511,9 @@ function ZO_GamepadCollectionsBook:RefreshHousingTooltip(collectibleData)
     local hasWeatherControlSupportString = hasWeatherControlSupport and GetString(SI_YES) or GetString(SI_NO)
     housingPanel.supportsWeatherControlValueLabel:SetText(hasWeatherControlSupportString)
 
-
-
-
-
-
+    local hasSkyControlSupport = ZO_FlagHelpers.MaskHasFlag(houseFlags, HOUSE_FLAGS_SUPPORTS_SKY_CONTROL)
+    local hasSkyControlSupportString = hasSkyControlSupport and GetString(SI_YES) or GetString(SI_NO)
+    housingPanel.supportsSkyControlValueLabel:SetText(hasSkyControlSupportString)
 
     local houseId = collectibleData:GetReferenceId()
     local recommendCount = GetNumHouseToursPlayerListingRecommendations(houseId)
@@ -1788,14 +1774,6 @@ function ZO_GamepadCollectionsBook:CanPurchaseCurrentTarget()
     return false
 end
 
-function ZO_GamepadCollectionsBook:CanUpgradeCurrentTarget()
-    if self:IsViewingCollectionsList() then
-        local collectibleData = self:GetCurrentTargetData()
-        return collectibleData and collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_CHAPTER) and not collectibleData:IsOwned()
-    end
-    return false
-end
-
 -----------------
 -- Actions Dialog
 -----------------
@@ -1993,21 +1971,6 @@ function ZO_GamepadCollectionsBook:InitializeActionsDialog()
                     end,
                     visible = function()
                         return self:CanPurchaseCurrentTarget()
-                    end
-                },
-            },
-            -- Chapter Upgrade
-            {
-                template = "ZO_GamepadMenuEntryTemplate",
-                templateData = 
-                {
-                    text = GetString(SI_DLC_BOOK_ACTION_CHAPTER_UPGRADE),
-                    setup = ZO_SharedGamepadEntry_OnSetup,
-                    callback = function(dialog)
-                        ZO_ShowChapterUpgradePlatformScreen(MARKET_OPEN_OPERATION_COLLECTIONS_DLC)
-                    end,
-                    visible = function()
-                        return self:CanUpgradeCurrentTarget()
                     end
                 },
             },

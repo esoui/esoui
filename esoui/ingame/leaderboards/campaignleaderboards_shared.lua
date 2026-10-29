@@ -1,45 +1,124 @@
 -----------------
 -- Leaderboard Campaign Selector Shared
 -----------------
+
 ZO_CAMPAIGN_LEADERBOARD_SYSTEM_NAME = "campaignLeaderboards"
 
 ZO_LeaderboardCampaignSelector_Shared = ZO_CampaignSelector_Shared:Subclass()
 
-function ZO_LeaderboardCampaignSelector_Shared:New(control)
-    local selector = ZO_CampaignSelector_Shared.New(self, control)
-    return selector
-end
-
 function ZO_LeaderboardCampaignSelector_Shared:Initialize(control)
-    ZO_CampaignSelector_Shared.Initialize(self, control)
+    local ALLOW_ALL_ACTIVE_CAMPAIGNS = true
+    ZO_CampaignSelector_Shared.Initialize(self, control, ALLOW_ALL_ACTIVE_CAMPAIGNS)
 
     self.control = control
-    self.tabs = GetControl(control, "Tabs")
 
     self:SetCampaignWindows()
-
-    control:RegisterForEvent(EVENT_CURRENT_CAMPAIGN_CHANGED, function() self:OnCurrentCampaignChanged() end)
-    control:RegisterForEvent(EVENT_ASSIGNED_CAMPAIGN_CHANGED, function() self:OnAssignedCampaignChanged() end)
 end
 
-function ZO_LeaderboardCampaignSelector_Shared:SetCampaignWindows()
-    -- Should be overridden
+function ZO_LeaderboardCampaignSelector_Shared:IsGamepad()
+    -- To be overriden by gamepad
+    return false
 end
 
 function ZO_LeaderboardCampaignSelector_Shared:NeedsData()
-    -- Should be overridden
+    -- We only need the timer info, which will come from the selection states, so we don't need to ask for the full campaign states
+    return false
 end
 
-function ZO_LeaderboardCampaignSelector_Shared:RefreshQueryTypes()
-    -- Should be overridden
+function ZO_LeaderboardCampaignSelector_Shared:SetCampaignWindows()
+    self.campaignWindows =
+    {
+        SYSTEMS:GetObject(ZO_CAMPAIGN_LEADERBOARD_SYSTEM_NAME, self:IsGamepad()),
+    }
 end
 
-function ZO_LeaderboardCampaignSelector_Shared:OnQueryTypeChanged(tabData)
-    local selectedQueryType = tabData.queryType
-    if(selectedQueryType ~= self.selectedQueryType) then
-        self.selectedQueryType = selectedQueryType
+function ZO_LeaderboardCampaignSelector_Shared:SetCampaignsDropdown(dropdown)
+    self.campaignsDropdown = dropdown
+    self:RefreshQueryTypes()
+end
+
+do
+    local KEYBOARD_HOME_ICON = zo_iconFormat("EsoUI/Art/Campaign/campaignBrowser_homeCampaign.dds", "100%", "100%")
+    local GAMEPAD_HOME_ICON = zo_iconFormat("EsoUI/Art/Campaign/Gamepad/gp_overview_menuIcon_home.dds", "100%", "100%")
+    local KEYBOARD_GUEST_ICON = zo_iconFormat("EsoUI/Art/Campaign/campaignBrowser_guestCampaign.dds", "100%", "100%")
+    local GAMEPAD_GUEST_ICON = zo_iconFormat("EsoUI/Art/Campaign/Gamepad/gp_overview_menuIcon_guest.dds", "100%", "100%")
+
+    function ZO_LeaderboardCampaignSelector_Shared:RefreshQueryTypes()
+        local dropdown = self.campaignsDropdown
+        if not dropdown then
+            return
+        end
+
+        dropdown:ClearItems()
+
+        local assignedCampaignId = GetAssignedCampaignId()
+        local localCampaignId = nil
+        if self:IsLocalSelectable() then
+            localCampaignId = GetCurrentCampaignId()
+        end
+    
+        local function OnSelectedCallback(_, _, entry)
+            self:OnQueryTypeChanged(entry)
+        end
+
+        local reselectEntry = nil
+        local firstEntry = nil
+        local localEntry = nil
+        local homeEntry = nil
+        local isGamepad = IsInGamepadPreferredMode()
+        for selectionIndex = 1, GetNumSelectionCampaigns() do
+            local campaignId = GetSelectionCampaignId(selectionIndex)
+            local isHome = campaignId == assignedCampaignId
+            local isLocal = campaignId == localCampaignId
+
+            local campaignName = ZO_CachedStrFormat(SI_CAMPAIGN_NAME, GetCampaignName(campaignId))
+            local icon = nil
+            if isHome then
+                icon = isGamepad and GAMEPAD_HOME_ICON or KEYBOARD_HOME_ICON
+            elseif isLocal then
+                icon = isGamepad and GAMEPAD_GUEST_ICON or KEYBOARD_GUEST_ICON
+            end
+
+            if icon then
+                campaignName = string.format("%s %s", icon, campaignName)
+            end
+
+            local campaignEntry = dropdown:CreateItemEntry(campaignName, OnSelectedCallback)
+            campaignEntry.campaignId = campaignId
+            dropdown:AddItem(campaignEntry, ZO_COMBOBOX_SUPPRESS_UPDATE)
+            if not firstEntry then
+                firstEntry = campaignEntry
+            end
+
+            if campaignId == self.selectedCampaignId then
+                reselectEntry = campaignEntry
+            end
+
+            if isHome then
+                homeEntry = campaignEntry
+            end
+
+            if isLocal then
+                localEntry = campaignEntry
+            end
+        end
+
+        dropdown:UpdateItems()
+
+        if reselectEntry then
+            local IGNORE_CALLBACKS = true
+            dropdown:SelectItem(reselectEntry, IGNORE_CALLBACKS)
+        else
+            dropdown:SelectItem(localEntry or homeEntry or firstEntry)
+        end
+    end
+end
+
+function ZO_LeaderboardCampaignSelector_Shared:OnQueryTypeChanged(campaignEntry)
+    local selectedCampaignId = campaignEntry.campaignId
+    if selectedCampaignId ~= self.selectedCampaignId then
+        self.selectedCampaignId = selectedCampaignId
         self:UpdateCampaignWindows()
-        self.dataRegistration:Refresh()
     end
 end
 
@@ -104,8 +183,10 @@ function ZO_CampaignLeaderboardsManager_Shared:GetScoreAndRankTexts()
     local displayedScore
     if self.currentScoreData then
         displayedScore = self.currentScoreData
+    elseif playerCanHaveRank then
+        displayedScore = GetCampaignLeaderboardPlayerAlliancePoints(self.campaignId)
     else
-        displayedScore = playerCanHaveRank and 0 or GetString(SI_LEADERBOARDS_STAT_NOT_AVAILABLE)
+        displayedScore = GetString(SI_LEADERBOARDS_STAT_NOT_AVAILABLE)
     end
 
     local displayedRank
@@ -119,9 +200,7 @@ function ZO_CampaignLeaderboardsManager_Shared:GetScoreAndRankTexts()
 end
 
 function ZO_CampaignLeaderboardsManager_Shared:AddCategoriesToParentSystem()
-    local isInCampaign = GetCurrentCampaignId() ~= 0
-    local homeCampaignAssigned = GetAssignedCampaignId() ~= 0
-    if not (isInCampaign or homeCampaignAssigned) then
+    if GetCurrentCampaignId() == 0 and GetAssignedCampaignId() == 0 then
         return
     end
 
@@ -152,10 +231,23 @@ function ZO_CampaignLeaderboardsManager_Shared:AddCategoriesToParentSystem()
         return ZO_ID_REQUEST_TYPE_CAMPAIGN_LEADERBOARD, self.campaignId, index
     end
 
-    local NO_TITLE_NAME = nil
+    local function OnAddDropdownEntries(_, dropdown)
+        self.selector:SetCampaignsDropdown(dropdown)
+    end
+
+    local function GetTitleName(subType)
+        if IsInGamepadPreferredMode() then
+            local title = subType == ALLIANCE_NONE and GetString(SI_CAMPAIGN_LEADERBOARDS_OVERALL) or GetAllianceName(subType)
+            return ZO_CachedStrFormat(SI_CAMPAIGN_LEADERBOARDS_TITLE_FORMATTER, title, GetCampaignName(self.campaignId))
+        end
+        return subType == ALLIANCE_NONE and GetString(SI_CAMPAIGN_LEADERBOARDS_OVERALL) or ZO_CachedStrFormat(SI_ALLIANCE_NAME, GetAllianceName(subType))
+    end
+
     local NO_POINTS_FORMAT_FUNCTION = nil
     local NO_POINTS_HEADER_STRING = nil
-    self.leaderboardSystem:AddEntry(self, GetString(SI_CAMPAIGN_LEADERBOARDS_OVERALL), NO_TITLE_NAME, header, ALLIANCE_NONE, GetOverallCount, GetMaxRank, GetOverallInfo, NO_POINTS_FORMAT_FUNCTION, NO_POINTS_HEADER_STRING, GetOverallConsoleIdRequestParams, "EsoUI/Art/Leaderboards/gamepad/gp_leaderBoards_menuIcon_overall.dds", LEADERBOARD_TYPE_OVERALL, UpdatePlayerInfo)
+    local overallEntry = self.leaderboardSystem:AddEntry(self, GetString(SI_CAMPAIGN_LEADERBOARDS_OVERALL), GetTitleName, header, ALLIANCE_NONE, GetOverallCount, GetMaxRank, GetOverallInfo, NO_POINTS_FORMAT_FUNCTION, NO_POINTS_HEADER_STRING, GetOverallConsoleIdRequestParams, "EsoUI/Art/Leaderboards/gamepad/gp_leaderBoards_menuIcon_overall.dds", LEADERBOARD_TYPE_OVERALL, UpdatePlayerInfo)
+    -- Technically only for gamepad, keyboard doesn't do anything with this
+    self.leaderboardSystem:SetEntryDropdownInfo(overallEntry, OnAddDropdownEntries)
 
     local function GetSingleAllianceCount(alliance)
         return GetNumCampaignAllianceLeaderboardEntries(self.campaignId, alliance)

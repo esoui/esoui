@@ -8,10 +8,6 @@ local COUNTDOWN_TIMER_END_BATTLEGROUND_MS = ZO_ONE_MINUTE_IN_MILLISECONDS
 
 local BattlegroundHUDFragment = ZO_HUDFadeSceneFragment:Subclass()
 
-function BattlegroundHUDFragment:New(...)
-    return ZO_HUDFadeSceneFragment.New(self, ...)
-end
-
 function BattlegroundHUDFragment:Initialize(control)
     ZO_HUDFadeSceneFragment.Initialize(self, control)
 

@@ -9,9 +9,8 @@ local ACTIVATE_VIEWPORT = true
 local ENTRY_TYPE_EXTRA_INFO = 1
 local ENTRY_TYPE_CHARACTER = 2
 local ENTRY_TYPE_CREATE_NEW = 3
-local ENTRY_TYPE_CHAPTER = 4
-local ENTRY_TYPE_EVENT = 5
-local ENTRY_TYPE_ESO_PLUS = 6
+local ENTRY_TYPE_EVENT = 4
+local ENTRY_TYPE_ESO_PLUS = 5
 
 local CREATE_NEW_ICON = "EsoUI/Art/Buttons/Gamepad/gp_plus_large.dds"
 
@@ -403,30 +402,6 @@ local function CreateList(self, scrollToBest)
             slot = slot + 1
         end
 
-        
-        if CHAPTER_UPGRADE_MANAGER:CanRegister() then
-            local chapterUpgradeId = GetCurrentChapterUpgradeId()
-            local chapterCollectibleId = GetChapterCollectibleId(chapterUpgradeId)
-            local data =
-            {
-                index = slot,
-                type = ENTRY_TYPE_CHAPTER,
-                icon = GetCurrentChapterSmallLogoFileIndex(),
-                text = zo_strformat(SI_CHARACTER_SELECT_CHAPTER_LOCKED_FORMAT, GetCollectibleName(chapterCollectibleId))
-            }
-
-            local newEntry = ZO_GamepadEntryData:New(data.text, data.icon)
-            newEntry:SetDataSource(data)
-
-            local entryTemplate = "ZO_GamepadMenuEntryTemplate"
-            if slot == 1 then
-                newEntry:SetHeader(GetString(SI_CHARACTER_SELECT_GAMEPAD_UPGRADES_HEADER))
-                entryTemplate = "ZO_GamepadMenuEntryTemplateWithHeader"
-            end
-
-            AddCharacterListEntry(entryTemplate, newEntry, self.characterList)
-            slot = slot + 1
-        end
 
         -- Add entries for events into the parametric list
         local numEvents = CHARACTER_SELECT_MANAGER:GetNumEventAnnouncements()
@@ -585,8 +560,6 @@ local function RefreshKeybindStripForCharacterList(self, selectedData)
             ZO_CharacterSelect_Gamepad_RefreshKeybindStrip(self.charListKeybindStripDescriptorRename)
         elseif selectedData.type == ENTRY_TYPE_CREATE_NEW then
             ZO_CharacterSelect_Gamepad_RefreshKeybindStrip(self.charListKeybindStripDescriptorCreateNew)
-        elseif selectedData.type == ENTRY_TYPE_CHAPTER then
-            ZO_CharacterSelect_Gamepad_RefreshKeybindStrip(self.charListKeybindStripDescriptorChapter)
         elseif selectedData.type == ENTRY_TYPE_EVENT then
             ZO_CharacterSelect_Gamepad_RefreshKeybindStrip(self.charListKeybindStripDescriptorEvent)
         elseif selectedData.type == ENTRY_TYPE_ESO_PLUS then
@@ -757,26 +730,6 @@ local function InitKeybindingDescriptor(self)
         logoutKeybind,
     }
     ZO_Gamepad_AddListTriggerKeybindDescriptors(self.charListKeybindStripDescriptorCreateNew, self.characterList)
-
-    self.charListKeybindStripDescriptorChapter =
-    {
-        alignment = KEYBIND_STRIP_ALIGN_LEFT,
-        {
-            name = GetString(SI_CHARACTER_SELECT_CHAPTER_UPGRADE_REGISTER),
-            keybind = "UI_SHORTCUT_PRIMARY",
-            disabledDuringSceneHiding = true,
-
-            callback = function()
-                self.characterList:Deactivate() -- So we can't select a different character
-                PlaySound(SOUNDS.DIALOG_ACCEPT)
-                PlaySound(SOUNDS.GAMEPAD_MENU_FORWARD)
-                ZO_PregameStateManager_SetState("ChapterUpgrade")
-            end,
-        },
-        optionsKeybind,
-        logoutKeybind,
-    }
-    ZO_Gamepad_AddListTriggerKeybindDescriptors(self.charListKeybindStripDescriptorChapter, self.characterList)
 
     self.charListKeybindStripDescriptorEvent =
     {

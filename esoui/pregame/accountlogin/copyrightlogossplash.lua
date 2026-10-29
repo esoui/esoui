@@ -5,11 +5,8 @@ do
 
     local ZO_CopyrightLogosSplashFragment = ZO_FadeSceneFragment:Subclass()
 
-    function ZO_CopyrightLogosSplashFragment:New(control)
-        local fragment = ZO_FadeSceneFragment.New(self, control, false, 700)
-        fragment.control = control
-        control:GetNamedChild("DMMLogo"):SetHidden(GetPlatformServiceType() ~= PLATFORM_SERVICE_TYPE_DMM)
-        return fragment
+    function ZO_CopyrightLogosSplashFragment:Initialize(control)
+        ZO_FadeSceneFragment.Initialize(self, control, false, 700)
     end
 
     function ZO_CopyrightLogosSplashFragment:ApplyPlatformStyle(style)
@@ -18,7 +15,7 @@ do
 
     function ZO_CopyrightLogosSplashFragment:Show()
         self.copyrightInfoLabel = self.control:GetNamedChild("CopyrightInfo")
-        local COPYRIGHT_END_YEAR = 2026
+        local COPYRIGHT_END_YEAR = 2027
         self.copyrightInfoLabel:SetText(zo_strformat(SI_SPLASH_SCREEN_COPYRIGHT, COPYRIGHT_END_YEAR))
         ZO_PlatformStyle:New(function(style) self:ApplyPlatformStyle(style) end, KEYBOARD_STYLE, GAMEPAD_STYLE)
 

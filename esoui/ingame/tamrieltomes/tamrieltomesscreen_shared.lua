@@ -297,6 +297,13 @@ ZO_TAMRIEL_TOMES_REWARD_ENTRY_TEMPLATE_LAYOUT =
     ZO_TAMRIEL_TOMES_REWARD_TEMPLATE_TYPES.TEMPLATE_1X_WIDTH,
 }
 
+local PAGE_ZERO_PAGE_INDICATOR_INFO =
+{
+    icon = "/EsoUI/Art/TamrielTomes/PageZero_Up.dds",
+    highlightedTexture = "/EsoUI/Art/TamrielTomes/highlighted_page_backdrop.dds",
+    selectedTexture = "/EsoUI/Art/TamrielTomes/selected_page_outline.dds",
+}
+
 local UNLOCKED_PAGE_INDICATOR_INFO =
 {
     selectedTexture = "/EsoUI/Art/TamrielTomes/selected_page_outline.dds",
@@ -1097,7 +1104,7 @@ function ZO_TamrielTomesScreen_Shared:OnShowing()
 
     self:Refresh()
     self:RefreshGridList()
-    self:UpdateSeenTiers()
+    self:UpdatePageNavigation()
 
     DIRECT_PURCHASE_MANAGER:RequestCatalog()
 end
@@ -1240,7 +1247,7 @@ function ZO_TamrielTomesScreen_Shared:UpdatePageNavigation()
     pageNavigation:Clear()
 
     -- Add initial intro page (page 0).
-    pageNavigation:AddPage()
+    pageNavigation:AddPage(PAGE_ZERO_PAGE_INDICATOR_INFO)
 
     -- Add page 1 through n.
     local numBaseRewardPages = self:GetNumBaseRewardPages()
@@ -1694,6 +1701,11 @@ function ZO_TamrielTomeSeasonEndDialog_Shared:InitializeDialog()
             self:BuildGridList()
 
             SetTamrielTomesEndOfSeasonRecapSeen(true)
+        end,
+
+        finishedCallback = function()
+            local SHOW_INTRO = true
+            TAMRIEL_TOMES_MANAGER:TryOpenNewSeasonTamrielTome(SHOW_INTRO)
         end,
 
         customControl = control,

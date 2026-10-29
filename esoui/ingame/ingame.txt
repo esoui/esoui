@@ -131,6 +131,12 @@ EsoUI\Ingame\EndlessDungeon\EndlessDungeonHUD.lua
 EsoUI\Ingame\EndlessDungeon\EndlessDungeonHUD.xml
 EsoUI\Ingame\EndlessDungeon\EndlessDungeonSummary.lua
 EsoUI\Ingame\EndlessDungeon\EndlessDungeonSummary.xml
+EsoUI\Ingame\EndlessDungeon\EndlessDungeonSaving.lua
+EsoUI\Ingame\EndlessDungeon\EndlessDungeonSaving.xml
+EsoUI\Ingame\EndlessDungeon\Keyboard\EndlessDungeonSaving_Keyboard.lua
+EsoUI\Ingame\EndlessDungeon\Keyboard\EndlessDungeonSaving_Keyboard.xml
+EsoUI\Ingame\EndlessDungeon\Gamepad\EndlessDungeonSaving_Gamepad.lua
+EsoUI\Ingame\EndlessDungeon\Gamepad\EndlessDungeonSaving_Gamepad.xml
 
 EsoUI\Ingame\ZO_GuildSelectorManager\ZO_GuildSelectorManager.lua
 
@@ -431,6 +437,9 @@ EsoUI\Ingame\Cadwell\Keyboard\Cadwell.lua
 EsoUI\Ingame\Cadwell\Keyboard\Cadwell.xml
 EsoUI\Ingame\Cadwell\Gamepad\Cadwell_Gamepad.lua
 EsoUI\Ingame\Cadwell\Gamepad\Cadwell_Gamepad.xml
+
+EsoUI\Ingame\Map\Minimap.lua
+EsoUI\Ingame\Map\Minimap.xml
 
 EsoUI\Ingame\Map\WorldMapQuestBreadcrumbs.lua
 EsoUI\Ingame\Map\WorldMapInfo_Shared.lua
@@ -766,10 +775,6 @@ EsoUI\Ingame\Collections\Keyboard\TributePatronBook_Keyboard.lua
 EsoUI\Ingame\Collections\Keyboard\TributePatronBook_Keyboard.xml
 EsoUI\Ingame\Collections\Gamepad\TributePatronBook_Gamepad.lua
 EsoUI\Ingame\Collections\Gamepad\TributePatronBook_Gamepad.xml
-
-EsoUI\Ingame\ChapterUpgrade\ChapterUpgradeUtils.lua
-EsoUI\Ingame\ChapterUpgrade\Gamepad\ChapterUpgrade_Gamepad.lua
-EsoUI\Ingame\ChapterUpgrade\Gamepad\ChapterUpgrade_Gamepad.xml
 
 EsoUI\Ingame\Achievements\Achievements_Manager.lua
 EsoUI\Ingame\Achievements\Achievements_Shared.lua
@@ -1664,14 +1669,20 @@ EsoUI\Ingame\ZoneStories\ZoneStories_Shared.lua
 EsoUI\Ingame\ZoneStories\ZoneStories_Shared.xml
 EsoUI\Ingame\ZoneStories\ZoneStory_AchievementTile.lua
 EsoUI\Ingame\ZoneStories\ZoneStory_AchievementTile.xml
+EsoUI\Ingame\ZoneStories\ZoneStory_MilestoneTile.lua
+EsoUI\Ingame\ZoneStories\ZoneStory_MilestoneTile.xml
 EsoUI\Ingame\ZoneStories\Keyboard\ZoneStory_AchievementTile_Keyboard.lua
 EsoUI\Ingame\ZoneStories\Keyboard\ZoneStory_AchievementTile_Keyboard.xml
+EsoUI\Ingame\ZoneStories\Keyboard\ZoneStory_MilestoneTile_Keyboard.lua
+EsoUI\Ingame\ZoneStories\Keyboard\ZoneStory_MilestoneTile_Keyboard.xml
 EsoUI\Ingame\ZoneStories\Keyboard\ZoneStory_ActivityCompletionTile_Keyboard.lua
 EsoUI\Ingame\ZoneStories\Keyboard\ZoneStory_ActivityCompletionTile_Keyboard.xml
 EsoUI\Ingame\ZoneStories\Keyboard\ZoneStories_Keyboard.lua
 EsoUI\Ingame\ZoneStories\Keyboard\ZoneStories_Keyboard.xml
 EsoUI\Ingame\ZoneStories\Gamepad\ZoneStory_AchievementTile_Gamepad.lua
 EsoUI\Ingame\ZoneStories\Gamepad\ZoneStory_AchievementTile_Gamepad.xml
+EsoUI\Ingame\ZoneStories\Gamepad\ZoneStory_MilestoneTile_Gamepad.lua
+EsoUI\Ingame\ZoneStories\Gamepad\ZoneStory_MilestoneTile_Gamepad.xml
 EsoUI\Ingame\ZoneStories\Gamepad\ZoneStory_ActivityCompletionTile_Gamepad.lua
 EsoUI\Ingame\ZoneStories\Gamepad\ZoneStory_ActivityCompletionTile_Gamepad.xml
 EsoUI\Ingame\ZoneStories\Gamepad\ZoneStories_Gamepad.lua

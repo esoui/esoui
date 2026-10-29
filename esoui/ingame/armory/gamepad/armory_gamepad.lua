@@ -27,6 +27,7 @@ function ZO_Armory_Gamepad:Initialize(control)
             TriggerTutorial(TUTORIAL_TRIGGER_ARMORY_OPENED)
         elseif newState == SCENE_FRAGMENT_HIDDEN then
             self:ResetTooltips()
+            ClearTemporaryCraftedAbilityScriptSelectionsForBuild()
         end
     end)
 
@@ -138,6 +139,7 @@ function ZO_Armory_Gamepad:InitializeKeybindStripDescriptors()
                     ARMORY_BUILD_SKILLS_GAMEPAD:SetSelectedArmoryBuildData(self.selectedBuildData)
                     ARMORY_BUILD_CHAMPION_GAMEPAD:SetSelectedArmoryBuildData(self.selectedBuildData)
                     self.buildDetailsList:SetFirstIndexSelected()
+                    SetTemporaryCraftedAbilityScriptSelectionsForBuild(self.selectedBuildData:GetBuildIndex())
                     self:RefreshList()
                     self:SetActiveKeybinds(self.buildDetailsKeybindStripDescriptor)
                 end
@@ -241,6 +243,7 @@ function ZO_Armory_Gamepad:InitializeKeybindStripDescriptors()
             callback = function()
                 local targetData = self.buildDetailsList:GetTargetData()
                 self.mode = ARMORY_OVERVIEW_MODE
+                ClearTemporaryCraftedAbilityScriptSelectionsForBuild()
                 self:SetCurrentList(self.buildList)
                 self.buildList:SetSelectedIndex(self.selectedBuildData.buildIndex)
                 self:RefreshList()

@@ -7,8 +7,16 @@ end
 MARKET_PRODUCT_DISPLAY_STATE_NOT_PURCHASED = 0
 MARKET_PRODUCT_DISPLAY_STATE_PURCHASED = 1
 MARKET_PRODUCT_DISPLAY_STATE_INELIGIBLE = 2
+MARKET_PRODUCT_DISPLAY_STATE_PURCHASE_LIMIT_REACHED = 3
 
 function ZO_GetMarketProductDisplayState(marketProductId)
+    if DoesMarketProductHavePurchaseLimit(marketProductId) then
+        local availablePurchaseLimit = GetMarketProductAvailablePurchaseLimit(marketProductId)
+        if availablePurchaseLimit ~= nil and availablePurchaseLimit <= 0 then
+            return MARKET_PRODUCT_DISPLAY_STATE_PURCHASE_LIMIT_REACHED
+        end
+    end
+
     if IsMarketProductPurchased(marketProductId) then
         return MARKET_PRODUCT_DISPLAY_STATE_PURCHASED
     end

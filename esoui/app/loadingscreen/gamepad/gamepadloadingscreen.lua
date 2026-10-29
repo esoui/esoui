@@ -5,22 +5,28 @@ local function IsScreenNarrationEnabled()
 end
 
 function LoadingScreen_Gamepad:InitializeAnimations()
-    self.spinnerFadeAnimation = GetAnimationManager():CreateTimelineFromVirtual("SpinnerFadeAnimation", GamepadLoadingScreenSpinner)
+    local topMunge = self:GetNamedChild("TopMunge")
+    local bottomMunge = self:GetNamedChild("BottomMunge")
+    local zoneInfoContainer = self:GetNamedChild("ZoneInfoContainer")
+
+    self.spinnerFadeAnimation = GetAnimationManager():CreateTimelineFromVirtual("SpinnerFadeAnimation", self.spinner)
 
     self.animations = GetAnimationManager():CreateTimelineFromVirtual("GamepadLoadingCompleteAnimation")
-    self.animations:GetAnimation(1):SetAnimatedControl(GamepadLoadingScreenArt)
-    self.animations:GetAnimation(2):SetAnimatedControl(GamepadLoadingScreenTopMunge)
-    self.animations:GetAnimation(3):SetAnimatedControl(GamepadLoadingScreenBottomMunge)
-    self.animations:GetAnimation(4):SetAnimatedControl(GamepadLoadingScreenBottomMungeZoneInfoContainer)
-    self.animations:GetAnimation(5):SetAnimatedControl(GamepadLoadingScreenZoneDescription)
-    self.animations:GetAnimation(6):SetAnimatedControl(GamepadLoadingScreenDescriptionBg)
+    self.animations:GetAnimation(1):SetAnimatedControl(self.art)
+    self.animations:GetAnimation(2):SetAnimatedControl(topMunge)
+    self.animations:GetAnimation(3):SetAnimatedControl(bottomMunge)
+    self.animations:GetAnimation(4):SetAnimatedControl(zoneInfoContainer)
+    self.animations:GetAnimation(5):SetAnimatedControl(self.zoneDescription)
+    self.animations:GetAnimation(6):SetAnimatedControl(self.descriptionBg)
+    self.animations:GetAnimation(7):SetAnimatedControl(self.difficultyLabel)
     self.animations.control = self
     self.animations:SetHandler("OnStop", function(timeline) self:LoadingCompleteAnimation_OnStop(timeline) end)
 
     self.longLoadAnimation = GetAnimationManager():CreateTimelineFromVirtual("LongLoadingAnimation")
-    self.longLoadAnimation:GetAnimation(1):SetAnimatedControl(GamepadLoadingScreenTopMungeLongLoadMessage)
-    self.longLoadAnimation:GetAnimation(2):SetAnimatedControl(GamepadLoadingScreenTopMungeLongLoadMessage)
-    self.longLoadAnimation.control = GamepadLoadingScreenTopMungeLongLoadMessage
+    local longLoadMessage = topMunge:GetNamedChild("LongLoadMessage")
+    self.longLoadAnimation:GetAnimation(1):SetAnimatedControl(longLoadMessage)
+    self.longLoadAnimation:GetAnimation(2):SetAnimatedControl(longLoadMessage)
+    self.longLoadAnimation.control = longLoadMessage
 
     local function OnLongLoadAnimationStop(timeline, completed)
         timeline.control:SetAlpha(0)
@@ -77,7 +83,7 @@ function LoadingScreen_Gamepad:OnShown()
         RequestReadPendingNarrationTextToClient(NARRATION_TYPE_UI_SCREEN)
     end
     self.isNarrationDirty = false
-    GamepadLoadingScreenTopMungeLongLoadMessage:SetAlpha(0)
+    self.longLoadAnimation.control:SetAlpha(0)
 end
 
 function LoadingScreen_Gamepad:OnHidden()

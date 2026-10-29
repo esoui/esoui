@@ -1,0 +1,92 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_EndlessDungeon_SaveDetails_Keyboard_Template" inherits="ZO_EndlessDungeon_SaveDetails_Template" virtual="true">
+            <Dimensions x="550" y="300"/>
+            <OnInitialized>
+                ZO_EndlessDungeonSaveDetails_Keyboard.OnControlInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Backdrop name="$(parent)BG" inherits="ZO_DefaultBackdrop">
+                    <AnchorFill/>
+                </Backdrop>
+                <Label name="$(parent)Title" font="ZoFontWinT2" text="SI_ENDLESS_DUNGEON_LOAD_SAVE_DETAILS_TITLE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                    <Anchor point="TOPLEFT" offsetX="20" offsetY="10"/>
+                    <Anchor point="TOPRIGHT" offsetX="-20" offsetY="10"/>
+                    <Dimensions y="24"/>
+                </Label>
+                <Label name="$(parent)ProgressionText" override="true" font="ZoFontWinH3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" horizontalAlignment="RIGHT">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Title"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Lives" relativePoint="TOPLEFT" offsetX="-5"/>
+                    <Dimensions y="24"/>
+                </Label>
+                <Control name="$(parent)Lives" override="true">
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Title" relativePoint="TOPRIGHT"/>
+                    <Dimensions y="24"/>
+                    <Controls>
+                        <Texture name="$(parent)Icon" override="true">
+                            <Anchor point="TOPLEFT" offsetY="3"/>
+                            <Dimensions x="18" y="18"/>
+                        </Texture>
+                        <Label name="$(parent)Text" override="true" font="ZoFontWinH3" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Icon" relativePoint="TOPRIGHT" offsetX="2" offsetY="-3"/>
+                        </Label>
+                    </Controls>
+                </Control>
+                <Control name="$(parent)Divider" inherits="ZO_PlatformStyleDynamicHorizontalDivider ZO_PlatformStyleDynamicHorizontalDivider_Keyboard_Template">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetY="5"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Title" relativePoint="BOTTOMRIGHT" offsetY="5"/>
+                </Control>
+                <Label name="$(parent)AdditionalMember" override="true" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Divider" relativePoint="BOTTOMLEFT" offsetY="5"/>
+                </Label>
+                <Label name="$(parent)MemberDisplayName" override="true" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Divider" relativePoint="BOTTOMRIGHT" offsetY="5"/>
+                </Label>
+            </Controls>
+        </Control>
+        <TopLevelControl name="ZO_EndlessDungeonSaving_KeyboardTL" hidden="true" resizeToFitConstrains="Y">
+            <Anchor point="CENTER"/>
+            <Dimensions x="600"/>
+            <ResizeToFitPadding height="100"/>
+            <OnInitialized>
+                ZO_EndlessDungeonSaving_Keyboard.OnControlInitialized(self)
+            </OnInitialized>
+            <Controls>
+                <Backdrop name="$(parent)BG" inherits="ZO_DefaultBackdrop" excludeFromResizeToFitExtents="true">
+                    <AnchorFill/>
+                </Backdrop>
+                <Control name="$(parent)Header" resizeToFitDescendents="true">
+                    <Anchor point="TOPLEFT" offsetY="20"/>
+                    <Anchor point="TOPRIGHT" offsetY="20"/>
+                    <Controls>
+                        <Label name="$(parent)Text" font="ZoFontKeyboard24ThickOutline" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" horizontalAlignment="CENTER" verticalAlignment="CENTER">
+                            <Anchor point="TOPLEFT" offsetX="20"/>
+                            <Anchor point="TOPRIGHT" offsetX="-20"/>
+                            <Dimensions y="24"/>
+                        </Label>
+                        <Control name="$(parent)BottomDivider" inherits="ZO_PlatformStyleDynamicHorizontalDivider ZO_PlatformStyleDynamicHorizontalDivider_Keyboard_Template">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Text" relativePoint="BOTTOMLEFT" offsetY="5"/>
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Text" relativePoint="BOTTOMRIGHT" offsetY="5"/>
+                        </Control>
+                    </Controls>
+                </Control>
+                <Label name="$(parent)BodyText" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER" verticalAlignment="CENTER">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" offsetY="5"/>
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Header" relativePoint="BOTTOMRIGHT" offsetY="5"/>
+                </Label>
+                <Control name="$(parent)SaveDetails" inherits="ZO_EndlessDungeon_SaveDetails_Keyboard_Template" hidden="true">
+                    <Anchor point="TOP" relativeTo="$(parent)BodyText" relativePoint="BOTTOM" offsetY="10"/>
+                </Control>
+                <Control name="$(parent)Cancel" inherits="ZO_KeybindButton" excludeFromResizeToFitExtents="true">
+                    <Anchor point="BOTTOMRIGHT" offsetX="-25" offsetY="-20"/>
+                </Control>
+                <Control name="$(parent)Secondary" inherits="ZO_KeybindButton" excludeFromResizeToFitExtents="true">
+                    <Anchor point="RIGHT" relativeTo="$(parent)Cancel" relativePoint="LEFT" offsetX="-15"/>
+                </Control>
+                <Control name="$(parent)Primary" inherits="ZO_KeybindButton" excludeFromResizeToFitExtents="true">
+                    <Anchor point="RIGHT" relativeTo="$(parent)Secondary" relativePoint="LEFT" offsetX="-15"/>
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

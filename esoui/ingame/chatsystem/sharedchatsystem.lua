@@ -2301,7 +2301,7 @@ function SharedChatSystem:IsHidden()
 end
 
 function SharedChatSystem:OnUiInterfaceSettingChanged(settingId)
-    self:SetChannel(self:GetDefaultChatChannel())
+    self:ValidateChatChannel()
 end
 
 function SharedChatSystem:RefreshVisibility()

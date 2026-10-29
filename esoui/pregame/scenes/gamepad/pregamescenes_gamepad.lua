@@ -87,14 +87,6 @@ GAMEPAD_CREDITS_ROOT_SCENE:AddFragment(KEYBIND_STRIP_GAMEPAD_FRAGMENT)
 GAMEPAD_CREDITS_ROOT_SCENE:AddFragment(KEYBIND_STRIP_GAMEPAD_BACKDROP_FRAGMENT)
 
 -----------------------
--- Chapter Upgrade Scene
------------------------
-
-local chapterUpgradeScene = SCENE_MANAGER:GetScene("chapterUpgradeGamepad")
-chapterUpgradeScene:AddFragment(KEYBIND_STRIP_GAMEPAD_FRAGMENT)
-chapterUpgradeScene:AddFragment(KEYBIND_STRIP_GAMEPAD_BACKDROP_FRAGMENT)
-
------------------------
 --Legal Agreements
 -----------------------
 LEGAL_AGREEMENTS_GAMEPAD_SCENE:AddFragment(KEYBIND_STRIP_GAMEPAD_FRAGMENT)

@@ -445,6 +445,50 @@ end
 
 -- End ZO_CollectibleData_Base Overrides --
 
+-----------------------------
+-- Pseudo Collectible Data --
+-----------------------------
+
+ZO_PseudoCollectibleData = ZO_CollectibleData_Base:Subclass()
+
+function ZO_PseudoCollectibleData:BuildData(collectibleId)
+    self:SetId(collectibleId)
+
+    self.name = GetCollectibleName(collectibleId)
+    -- Speed up sorts by caching
+    self.sortOrder = GetCollectibleSortOrder(collectibleId)
+
+    ZO_COLLECTIBLE_DATA_MANAGER:MapCollectibleData(self)
+end
+
+function ZO_PseudoCollectibleData:Refresh()
+    -- Do nothing
+end
+
+function ZO_PseudoCollectibleData:GetNotificationId()
+    return 0
+end
+
+function ZO_PseudoCollectibleData:SetNotificationId()
+    -- Do nothing
+end
+
+-- Begin ZO_CollectibleData_Base Overrides --
+
+function ZO_PseudoCollectibleData:GetName()
+    return self.name
+end
+
+function ZO_PseudoCollectibleData:GetSortOrder()
+    return self.sortOrder
+end
+
+function ZO_PseudoCollectibleData:GetCategoryData()
+    return self.categoryData
+end
+
+-- End ZO_CollectibleData_Base Overrides --
+
 -----------------------------------
 -- Specialized Sorted Collectibles
 -----------------------------------
@@ -886,13 +930,24 @@ function ZO_CollectibleCategoryData:BuildData(categoryIndex, subcategoryIndex)
     for collectibleIndex = 1, numCollectibles do
         local collectibleData = self.collectibleObjectPool:AcquireObject()
         collectibleData:BuildData(self, collectibleIndex)
-        table.insert(self.orderedCollectibles, collectibleData)
-        self.specializedSortedCollectibles:InsertCollectible(collectibleData)
+        self:InsertCollectibleData(collectibleData)
     end
 
-    self.specializedSortedCollectibles:OnInsertFinished()
-
     ZO_COLLECTIBLE_DATA_MANAGER:MapCategoryData(self)
+end
+
+function ZO_CollectibleCategoryData:InsertCollectibleData(collectibleData)
+    table.insert(self.orderedCollectibles, collectibleData)
+    self.specializedSortedCollectibles:InsertCollectible(collectibleData)
+end
+
+function ZO_CollectibleCategoryData:OnInsertFinished()
+    if self.isTopLevelCategory then
+        for _, subcategoryData in self:SubcategoryIterator() do
+            subcategoryData:OnInsertFinished()
+        end
+    end
+    self.specializedSortedCollectibles:OnInsertFinished()
 end
 
 function ZO_CollectibleCategoryData:CreateSpecializedSortedCollectiblesTable()
@@ -1172,6 +1227,7 @@ function ZO_CollectibleDataManager:Initialize()
     self.categoryObjectPool = ZO_ObjectPool:New(CreateCategoryData, ZO_ObjectPool_DefaultResetObject)
     self.subcategoryObjectPool = ZO_ObjectPool:New(CreateSubcategoryData, ZO_ObjectPool_DefaultResetObject)
     self.collectibleObjectPool = ZO_ObjectPool:New(ZO_CollectibleData, ZO_ObjectPool_DefaultResetObject)
+    self.pseudoCollectibleObjectPool = ZO_ObjectPool:New(ZO_PseudoCollectibleData, ZO_ObjectPool_DefaultResetObject)
 
     --[[
         EVENT_COLLECTIBLE_UPDATED fires when a nickname changes or a collectible is set as active/inactive. It does not encompass unlock state changes.
@@ -1229,10 +1285,24 @@ function ZO_CollectibleDataManager:RebuildCollection()
     ZO_ClearTable(self.collectibleCategoryIdToDataMap)
 
     self.categoryObjectPool:ReleaseAllObjects()
+    self.pseudoCollectibleObjectPool:ReleaseAllObjects()
 
     for categoryIndex = 1, GetNumCollectibleCategories() do
         local categoryData = self.categoryObjectPool:AcquireObject(categoryIndex)
         categoryData:BuildData(categoryIndex)
+    end
+
+    for index, collectibleId in function(state, lastIndex) return GetNextPseudoCollectibleId(lastIndex) end do
+        local collectibleData = self.pseudoCollectibleObjectPool:AcquireObject()
+        collectibleData:BuildData(collectibleId)
+        local categoryData = self:GetCategoryDataById(collectibleData:GetCategoryId())
+        collectibleData.categoryData = categoryData
+
+        categoryData:InsertCollectibleData(collectibleData)
+    end
+
+    for _, categoryData in self:CategoryIterator() do
+        categoryData:OnInsertFinished()
     end
 
     -- No state to track changes for

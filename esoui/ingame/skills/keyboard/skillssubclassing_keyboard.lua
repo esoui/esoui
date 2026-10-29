@@ -699,12 +699,8 @@ function ZO_SkillsSubclassing_Keyboard:OnActionButtonBySkillLineData(skillLineDa
         if skillLineData:IsContentLocked() then
             local collectibleId = skillLineData:GetClassAccessCollectibleId()
             local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
-            if collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_CHAPTER) then
-                ZO_ShowChapterUpgradePlatformScreen(MARKET_OPEN_OPERATION_SKILLS_SUBCLASSING)
-            else
-                local searchTerm = zo_strformat(SI_CROWN_STORE_SEARCH_FORMAT_STRING, collectibleData:GetName())
-                ShowMarketAndSearch(searchTerm, MARKET_OPEN_OPERATION_SKILLS_SUBCLASSING)
-            end
+            local searchTerm = zo_strformat(SI_CROWN_STORE_SEARCH_FORMAT_STRING, collectibleData:GetName())
+            ShowMarketAndSearch(searchTerm, MARKET_OPEN_OPERATION_SKILLS_SUBCLASSING)
         elseif SKILLS_AND_ACTION_BAR_MANAGER:DoesSkillPointAllocationModeBatchSave() then
             if skillLineData:CanActivateForRespec() then
                 ZO_Dialogs_ShowDialog("SKILL_LINE_SWAP_SELECTION", skillLineData)

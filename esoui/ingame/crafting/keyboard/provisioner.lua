@@ -168,16 +168,22 @@ function ZO_Provisioner:InitializeSettings()
     local foodTab = GenerateTab(PROVISIONER_SPECIAL_INGREDIENT_TYPE_SPICES, "EsoUI/Art/Crafting/provisioner_indexIcon_meat_up.dds", "EsoUI/Art/Crafting/provisioner_indexIcon_meat_down.dds", "EsoUI/Art/Crafting/provisioner_indexIcon_meat_over.dds", "EsoUI/Art/Crafting/provisioner_indexIcon_meat_disabled.dds")
     local drinkTab = GenerateTab(PROVISIONER_SPECIAL_INGREDIENT_TYPE_FLAVORING, "EsoUI/Art/Crafting/provisioner_indexIcon_beer_up.dds", "EsoUI/Art/Crafting/provisioner_indexIcon_beer_down.dds", "EsoUI/Art/Crafting/provisioner_indexIcon_beer_over.dds", "EsoUI/Art/Crafting/provisioner_indexIcon_beer_disabled.dds")
     local furnishingsTab = GenerateTab(PROVISIONER_SPECIAL_INGREDIENT_TYPE_FURNISHING, "EsoUI/Art/Crafting/provisioner_indexIcon_furnishings_up.dds", "EsoUI/Art/Crafting/provisioner_indexIcon_furnishings_down.dds", "EsoUI/Art/Crafting/provisioner_indexIcon_furnishings_over.dds", "EsoUI/Art/Crafting/provisioner_indexIcon_furnishings_disabled.dds")
+    local suppliesTab = GenerateTab(PROVISIONER_SPECIAL_INGREDIENT_TYPE_SUPPLIES, "EsoUI/Art/Crafting/provisioner_indexIcon_supplies_up.dds", "EsoUI/Art/Crafting/provisioner_indexIcon_supplies_down.dds", "EsoUI/Art/Crafting/provisioner_indexIcon_supplies_over.dds", "EsoUI/Art/Crafting/provisioner_indexIcon_supplies_disabled.dds")
+    suppliesTab.visible = function()
+        return self:HasSuppliesRecipes()
+    end
 
     provisioningSettings.tabs = {}
     table.insert(provisioningSettings.tabs, filletTab)
     table.insert(provisioningSettings.tabs, foodTab)
     table.insert(provisioningSettings.tabs, drinkTab)
     table.insert(provisioningSettings.tabs, furnishingsTab)
+    table.insert(provisioningSettings.tabs, suppliesTab)
 
     local embeddedSettings = ZO_Provisioner.EMBEDDED_SETTINGS
     embeddedSettings.tabs = {}
     table.insert(embeddedSettings.tabs, furnishingsTab)
+    table.insert(embeddedSettings.tabs, suppliesTab)
 end
 
 function ZO_Provisioner:ConfigureFromSettings(settings)
@@ -479,6 +485,9 @@ function ZO_Provisioner:SetDetailsEnabled(enabled)
 end
 
 function ZO_Provisioner:RefreshRecipeList()
+    local FORCE_SELECTION = true
+    ZO_MenuBar_UpdateButtons(self.tabs, FORCE_SELECTION)
+
     self.recipeTree:Reset()
 
     local knowAnyRecipesInTab = false

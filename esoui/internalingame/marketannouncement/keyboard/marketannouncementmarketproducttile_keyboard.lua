@@ -27,16 +27,7 @@ function ZO_MarketAnnouncementMarketProductTile_Keyboard:Layout(data)
 
     local marketProduct = data.marketProduct
     if initializingMarketProduct or marketProduct.control ~= self.control or oldMarketProductId ~= marketProduct:GetId() then
-        local keybindStringId
-        local marketProductId = marketProduct:GetId()
-        local openBehavior = GetMarketProductOpenMarketBehavior(marketProductId)
-        if openBehavior == OPEN_MARKET_BEHAVIOR_SHOW_CHAPTER_UPGRADE then
-            keybindStringId = SI_MARKET_ANNOUNCEMENT_VIEW_CHAPTER_UPGRADE
-        else
-            keybindStringId = SI_MARKET_ANNOUNCEMENT_VIEW_CROWN_STORE
-        end
-
-        self.control.object:SetActionText(GetString(keybindStringId))
+        self.control.object:SetActionText(GetString(SI_MARKET_ANNOUNCEMENT_VIEW_CROWN_STORE))
     end
 
     if initializingMarketProduct then

@@ -155,10 +155,6 @@ end
 
 ZO_GamepadMarketPageFragment = ZO_ConveyorSceneFragment:Subclass()
 
-function ZO_GamepadMarketPageFragment:New(...)
-    return ZO_ConveyorSceneFragment.New(self, ...)
-end
-
 do
     local PAGE_IN_ANIMATION = "ZO_GamepadMarket_GridScreen_PageInSceneAnimation"
     local PAGE_OUT_ANIMATION = "ZO_GamepadMarket_GridScreen_PageOutSceneAnimation"

@@ -29,7 +29,7 @@ if ZO_IsConsoleOrGameCoreUI() then
 
         ADD_ON_MEMORY_DISPLAY_FRAGMENT = ZO_HUDFadeSceneFragment:New(control)
 
-        local function OnAddOnsLoaded(_, name)
+        local function OnAddOnsLoaded()
             local DEFAULTS = { isVisible = false }
             self.savedVars = ZO_SavedVars:New("ZO_Ingame_SavedVariables", 1, "ZO_AddOnMemoryDisplay", DEFAULTS)
             if self.savedVars.isVisible then
@@ -37,7 +37,8 @@ if ZO_IsConsoleOrGameCoreUI() then
                 HUD_UI_SCENE:AddFragment(ADD_ON_MEMORY_DISPLAY_FRAGMENT)
             end
         end
-        self.control:RegisterForEvent(EVENT_ADD_ONS_LOADED, OnAddOnsLoaded)
+        local DO_ONCE = true
+        self.control:RegisterForEvent(EVENT_ADD_ONS_LOADED, OnAddOnsLoaded, DO_ONCE)
     end
 
     function ZO_AddOnMemoryDisplay:Update(timeS)

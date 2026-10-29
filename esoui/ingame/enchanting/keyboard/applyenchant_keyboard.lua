@@ -32,7 +32,7 @@ function ZO_ApplyEnchant:Initialize(control)
             end
 
             if IsItemPlayerLocked(self.currentBag, self.currentIndex) then
-                ZO_Dialogs_ShowPlatformDialog("CONFIRM_ENCHANT_LOCKED_ITEM", { onAcceptCallback = DoEnchant }, { mainTextParams = { GetString(SI_PERFORM_ACTION_CONFIRMATION) } })
+                ZO_Dialogs_ShowPlatformDialog("CONFIRM_ENCHANT_LOCKED_ITEM", { onAcceptCallback = DoEnchant })
             else
                 DoEnchant()
             end

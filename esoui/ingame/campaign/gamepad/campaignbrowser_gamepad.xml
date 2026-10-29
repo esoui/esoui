@@ -74,6 +74,10 @@
                                     <Anchor point="TOPLEFT"/>
                                     <Anchor point="TOPRIGHT"/>
                                 </Label>
+                                <Label name="$(parent)PressToEnterMessage" inherits="ZO_LargeKeyMarkupLabel_Gamepad ZO_AvALabelCopyTemplate" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SUCCEEDED" horizontalAlignment="LEFT" hidden="true">
+                                    <Anchor point="TOPLEFT"/>
+                                    <Anchor point="TOPRIGHT"/>
+                                </Label>
                                 <Label name="$(parent)RulesContent" inherits="ZO_AvALabelCopyTemplate" horizontalAlignment="LEFT">
                                     <Anchor point="TOPLEFT" relativeTo="$(parent)StateMessage" relativePoint="BOTTOMLEFT" offsetY="ZO_GAMEPAD_CONTENT_VERT_OFFSET_PADDING"/>
                                     <Anchor point="TOPRIGHT" relativeTo="$(parent)StateMessage" relativePoint="BOTTOMRIGHT" offsetY="ZO_GAMEPAD_CONTENT_VERT_OFFSET_PADDING"/>

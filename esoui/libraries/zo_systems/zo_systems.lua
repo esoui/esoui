@@ -1,10 +1,4 @@
-local ZO_Systems = ZO_Object:Subclass()
-
-function ZO_Systems:New()
-    local obj = ZO_Object.New(self)
-    obj:Initialize()
-    return obj
-end
+ZO_Systems = ZO_InitializingObject:Subclass()
 
 function ZO_Systems:Initialize()
     self.systems = {}
@@ -60,8 +54,12 @@ function ZO_Systems:GetGamepadRootScene(systemName)
     return self:GetSystem(systemName).gamepadRootScene
 end
 
-function ZO_Systems:GetObject(systemName)
-    if IsInGamepadPreferredMode() then
+function ZO_Systems:GetObject(systemName, gamepad)
+    if gamepad == nil then
+        gamepad = IsInGamepadPreferredMode()
+    end
+
+    if gamepad then
         return self:GetGamepadObject(systemName)
     else
         return self:GetKeyboardObject(systemName)

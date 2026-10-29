@@ -12,6 +12,10 @@ ZO_CAMPAIGN_OVERVIEW_TYPE_VENGEANCE =
     PERKS = 2,
 }
 
+local INHERIT_COLOR = true
+local NO_GRAMMAR = true
+local CYRODIIL_ONLY_LOCK_TEXT = zo_iconTextFormat(ZO_KEYBOARD_LOCKED_ICON, "100%", "100%", GetString(SI_CAMPAIGN_OVERVIEW_CATEGORY_DISABLED_CYRODIIL_ONLY), INHERIT_COLOR, NO_GRAMMAR)
+
 ZO_CAMPAIGN_OVERVIEW_TYPE_INFO =
 {
     [ZO_CAMPAIGN_OVERVIEW_TYPE.SCORING] =
@@ -23,6 +27,7 @@ ZO_CAMPAIGN_OVERVIEW_TYPE_INFO =
         priority = ZO_CAMPAIGN_OVERVIEW_TYPE.SCORING * 10,
         categoryFragmentFunction = function()
             CAMPAIGN_OVERVIEW:RemoveAllCategoryFragments()
+            CAMPAIGN_SELECTOR:SetQueryTypeEnabledCondition(nil)
             CAMPAIGN_OVERVIEW:ShowCampaignSelector()
             CAMPAIGN_OVERVIEW_SCENE:AddFragment(CAMPAIGN_SCORING_FRAGMENT)
         end,
@@ -66,10 +71,17 @@ ZO_CAMPAIGN_OVERVIEW_TYPE_INFO =
         priority = ZO_CAMPAIGN_OVERVIEW_TYPE.BONUSES * 10,
         categoryFragmentFunction = function()
             CAMPAIGN_OVERVIEW:RemoveAllCategoryFragments()
+            CAMPAIGN_SELECTOR:SetQueryTypeEnabledCondition(function(queryType)
+                if queryType == BGQUERY_LOCAL then
+                    return CAMPAIGN_SELECTOR:DoesQueryTypeSupportBonuses(queryType), CYRODIIL_ONLY_LOCK_TEXT
+                end
+                return true
+            end)
             CAMPAIGN_OVERVIEW:ShowCampaignSelector()
             CAMPAIGN_OVERVIEW_SCENE:AddFragment(CAMPAIGN_BONUSES_FRAGMENT)
         end,
-        visible = function() return GetAssignedCampaignId() ~= 0 end,
+        enabled = function() return CAMPAIGN_SELECTOR and CAMPAIGN_SELECTOR:DoesQueryTypeSupportBonuses() end,
+        disabledText = CYRODIIL_ONLY_LOCK_TEXT,
     },
     [ZO_CAMPAIGN_OVERVIEW_TYPE.EMPEROR] =
     {
@@ -80,9 +92,17 @@ ZO_CAMPAIGN_OVERVIEW_TYPE_INFO =
         priority = ZO_CAMPAIGN_OVERVIEW_TYPE.EMPEROR * 10,
         categoryFragmentFunction = function()
             CAMPAIGN_OVERVIEW:RemoveAllCategoryFragments()
+            CAMPAIGN_SELECTOR:SetQueryTypeEnabledCondition(function(queryType)
+                if queryType == BGQUERY_LOCAL then
+                    return CAMPAIGN_SELECTOR:DoesQueryTypeSupportEmperor(queryType), CYRODIIL_ONLY_LOCK_TEXT
+                end
+                return true
+            end)
             CAMPAIGN_OVERVIEW:ShowCampaignSelector()
             CAMPAIGN_OVERVIEW_SCENE:AddFragment(CAMPAIGN_EMPEROR_FRAGMENT)
         end,
+        enabled = function() return CAMPAIGN_SELECTOR and CAMPAIGN_SELECTOR:DoesQueryTypeSupportEmperor() end,
+        disabledText = CYRODIIL_ONLY_LOCK_TEXT,
     },
 }
 
@@ -127,6 +147,7 @@ end
 
 function ZO_CampaignOverviewManager:SetCampaignAndQueryType(campaignId, queryType)
     self:UpdateCampaignName(campaignId)
+    self:RefreshCategories()
 end
 
 function ZO_CampaignOverviewManager:InitializeCategories()
@@ -134,7 +155,7 @@ function ZO_CampaignOverviewManager:InitializeCategories()
     self.categoryFragmentToNodeLookup = {}
     self.nodeList = {}
 
-    local function RefreshNode(control, categoryData, open)
+    local function RefreshNode(control, categoryData, open, enabled)
         if control.icon then
             local iconTexture = open and categoryData.pressedIcon or categoryData.normalIcon
             if type(iconTexture) == "function" then
@@ -157,7 +178,7 @@ function ZO_CampaignOverviewManager:InitializeCategories()
 
             statusIcon:Show()
 
-            ZO_IconHeader_Setup(control, open)
+            ZO_IconHeader_Setup(control, open, enabled)
         end
     end
 
@@ -165,8 +186,16 @@ function ZO_CampaignOverviewManager:InitializeCategories()
         control.text:SetText(categoryData.name)
         control.text:SetModifyTextType(MODIFY_TEXT_TYPE_UPPERCASE)
 
+        local enabled = ZO_EvalDefaultTrue(categoryData.enabled)
+         if not enabled and node:IsOpen() or node.selected then
+            local tree = node:GetTree()
+            tree:ClearSelectedNode()
+            node:SetOpen(false)
+        end
+
+
         local selected = node.selected or open
-        RefreshNode(control, categoryData, selected)
+        RefreshNode(control, categoryData, selected, enabled)
     end
 
     local function SetupParentNode(node, control, categoryData, open, userRequested)
@@ -413,7 +442,25 @@ do
             node.getChildrenFunction = nodeData.getChildrenFunction
         end
 
+        if not self.onCategoryMouseEnter then
+            self.onCategoryMouseEnter = function(...) self:OnCategoryMouseEnter(...) end
+        end
+        node.control.OnMouseEnter = self.onCategoryMouseEnter
+
         return node
+    end
+end
+
+function ZO_CampaignOverviewManager:OnCategoryMouseEnter(control)
+    ZO_IconHeader_OnMouseEnter(control)
+
+    if not control.enabled then
+        local data = control.node.data
+        local disabledText = ZO_Eval(data.disabledText)
+        if disabledText then
+            InitializeTooltip(InformationTooltip, control, RIGHT, -10)
+            SetTooltipText(InformationTooltip, disabledText)
+        end
     end
 end
 

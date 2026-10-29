@@ -2,6 +2,19 @@
 -- Global Helper Functions --
 -----------------------------
 
+--[[
+Format:
+    [RESTYLE_MODE_X] =
+    {
+        [SLOT_TYPE_FOR_MODE_Y] = true,
+    },
+]]
+
+ZO_RESTYLE_MODE_OMITTED_SLOT_TYPES =
+{
+    -- Nothing omitted anymore, for now
+}
+
 ZO_RESTYLE_DEFAULT_SET_INDEX = 1
 
 ZO_RESTYLE_TEXTURE_LEVEL_EQUIPPED = 2
@@ -84,6 +97,7 @@ do
         [RESTYLE_MODE_COMPANION_COLLECTIBLE] =
         {
             [COLLECTIBLE_CATEGORY_TYPE_COSTUME] = "EsoUI/Art/Dye/dye_costume.dds",
+            [COLLECTIBLE_CATEGORY_TYPE_HAT] = "EsoUI/Art/Dye/dye_hat.dds",
         },
         [RESTYLE_MODE_COMPANION_OUTFIT] =
         {
@@ -310,32 +324,18 @@ function ZO_RestyleSlotData:GetDyeChannelChangedStates()
     return changedChannels
 end
 
-do
-    local RESTYLE_MODE_OMITTED_SLOT_TYPES =
-    {
-        [RESTYLE_MODE_COMPANION_OUTFIT] =
-        {
-            [EQUIP_SLOT_HEAD] = true,
-        },
-        [RESTYLE_MODE_COMPANION_COLLECTIBLE] =
-        {
-            [COLLECTIBLE_CATEGORY_TYPE_HAT] = true,
-        },
-    }
+function ZO_RestyleSlotData:ShouldBeHidden()
+    local restyleSlotType = self.restyleSlotType
 
-    function ZO_RestyleSlotData:ShouldBeHidden()
-        local restyleSlotType = self.restyleSlotType
-
-        if self:IsOutfitSlot() then
-            if ZO_OUTFIT_MANAGER:IsOutfitSlotWeapon(restyleSlotType) then
-                local actorCategory = ZO_OUTFIT_MANAGER.GetActorCategoryByRestyleMode(self.restyleMode)
-                return not ZO_OUTFIT_MANAGER:IsWeaponOutfitSlotCurrentlyEquipped(restyleSlotType, actorCategory)
-            end
+    if self:IsOutfitSlot() then
+        if ZO_OUTFIT_MANAGER:IsOutfitSlotWeapon(restyleSlotType) then
+            local actorCategory = ZO_OUTFIT_MANAGER.GetActorCategoryByRestyleMode(self.restyleMode)
+            return not ZO_OUTFIT_MANAGER:IsWeaponOutfitSlotCurrentlyEquipped(restyleSlotType, actorCategory)
         end
-
-        local isOmittedSlotType = RESTYLE_MODE_OMITTED_SLOT_TYPES[self.restyleMode] and RESTYLE_MODE_OMITTED_SLOT_TYPES[self.restyleMode][restyleSlotType]
-        return isOmittedSlotType
     end
+
+    local isOmittedSlotType = ZO_RESTYLE_MODE_OMITTED_SLOT_TYPES[self.restyleMode] and ZO_RESTYLE_MODE_OMITTED_SLOT_TYPES[self.restyleMode][restyleSlotType]
+    return isOmittedSlotType
 end
 
 function ZO_RestyleSlotData:IsEquipment()

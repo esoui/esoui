@@ -139,7 +139,7 @@ local KEEP_ICONS =
 {
     [ALLIANCE_ALDMERI_DOMINION] = "EsoUI/Art/Campaign/overview_keepIcon_aldmeri.dds",
     [ALLIANCE_EBONHEART_PACT] = "EsoUI/Art/Campaign/overview_keepIcon_ebonheart.dds",
-    [ALLIANCE_DAGGERFALL_COVENANT] = "EsoUI/Art/Campaign/overview_keepIcon_daggefall.dds",
+    [ALLIANCE_DAGGERFALL_COVENANT] = "EsoUI/Art/Campaign/overview_keepIcon_daggerfall.dds",
 }
 
 function CampaignEmperor_Shared:RefreshImperialKeeps()
@@ -198,12 +198,15 @@ function CampaignEmperor_Shared:SetupLeaderboardEntry(control, data)
     control.allianceIcon = control:GetNamedChild("Alliance")
     control.pointsLabel = control:GetNamedChild("Points")
 
-    if self:CanLeaderboardCharacterBecomeEmperor(data) then
+    local eligible, ineligibleReason = self:CanLeaderboardCharacterBecomeEmperor(data)
+    if eligible then
         control.rankLabel:SetText(data.emperorRank)
         control.isIneligibleLabel:SetHidden(true)
+        control.isIneligibleLabel.ineligibleReason = nil
     else
         control.rankLabel:SetText(GetString(SI_CAMPAIGN_EMPEROR_RANK_NOT_APPLICABLE))
         control.isIneligibleLabel:SetHidden(false)
+        control.isIneligibleLabel.ineligibleReason = ineligibleReason
     end
 
     local userFacingName = ZO_GetPlatformUserFacingName(data.name, data.displayName)
@@ -274,7 +277,7 @@ function CampaignEmperor_Shared:AddAllianceToMasterList(alliance)
 
     for i = 1, numEntries do
         -- entry info is guaranteed to be sorted by alliancePointsRank
-        local isPlayer, alliancePointsRank, name, points, _, displayName, achievedEmperorForAlliance = GetCampaignAllianceLeaderboardEntryInfo(self.campaignId, alliance, i)
+        local isPlayer, alliancePointsRank, name, points, _, displayName, achievedEmperorForAlliance, flags = GetCampaignAllianceLeaderboardEntryInfo(self.campaignId, alliance, i)
 
         local data =
         {
@@ -285,6 +288,7 @@ function CampaignEmperor_Shared:AddAllianceToMasterList(alliance)
             points = points,
             displayName = displayName,
             achievedEmperorForAlliance = achievedEmperorForAlliance,
+            flags = flags
          }
 
         if self:CanLeaderboardCharacterBecomeEmperor(data) then
@@ -305,8 +309,16 @@ function CampaignEmperor_Shared:AddAllianceToMasterList(alliance)
 end
 
 function CampaignEmperor_Shared:CanLeaderboardCharacterBecomeEmperor(leaderboardEntry)
-    -- characters are inelgible for emperorship when it has already been achieved on an opposing alliance for this campaign
-    return leaderboardEntry.achievedEmperorForAlliance == ALLIANCE_NONE or leaderboardEntry.achievedEmperorForAlliance == leaderboardEntry.alliance
+    -- characters are ineligible for emperorship when it has already been achieved on an opposing alliance for this campaign
+    if leaderboardEntry.achievedEmperorForAlliance ~= ALLIANCE_NONE and leaderboardEntry.achievedEmperorForAlliance ~= leaderboardEntry.alliance then
+        return false, GetString(SI_CAMPAIGN_EMPEROR_CHARACTER_INELIGIBLE_ALLIANCE_TEXT)
+    end
+
+    if ZO_FlagHelpers.MaskHasFlag(leaderboardEntry.flags, CAMPAIGN_LEADERBOARD_FLAGS_INELIGIBLE_FOR_EMPEROR_NON_HOME) then
+        return false, GetString(SI_CAMPAIGN_EMPEROR_CHARACTER_INELIGIBLE_NON_HOME_TEXT)
+    end
+
+    return true
 end
 
 function CampaignEmperor_Shared:BuildMasterList()
@@ -341,7 +353,9 @@ function CampaignEmperor_Shared:QueryLeaderboardData(...)
     }
     self.pendingRequestData = data
 
-    local readyState = QueryCampaignLeaderboardData(...)
+    -- TODO Jerall: TO maintain current behavior, ask for assigned and it will get both assigned and local.
+    -- We should eventually refactor this to gracefully work based on just getting the leaderboard for what you're looking at right now.
+    local readyState = QueryCampaignLeaderboardData(GetAssignedCampaignId(), ...)
 
     if readyState == LEADERBOARD_DATA_READY then
         self:OnCampaignEmperorLeaderboardDataReceived(data.campaignId, data.alliances)
@@ -349,13 +363,12 @@ function CampaignEmperor_Shared:QueryLeaderboardData(...)
 end
 
 function CampaignEmperor_Shared:OnCampaignEmperorLeaderboardDataReceived(campaignId, requestedAlliances)
-    if not self.pendingRequestData.alliances or not self.pendingRequestData.campaignId then
+    local requestedCampaignId = self.pendingRequestData.campaignId
+    if not requestedCampaignId or requestedCampaignId ~= campaignId then
         return
     end
 
-    local passesAllianceCheck = requestedAlliances == self.pendingRequestData.alliances
-    local passesCampaignCheck = self.pendingRequestData.campaignId == campaignId
-    if passesAllianceCheck and passesCampaignCheck then
+    if IsCampaignLeaderboardDataReady(unpack(self.pendingRequestData.alliances)) then
         self:RefreshData()
         self:RefreshEmperor()
     end

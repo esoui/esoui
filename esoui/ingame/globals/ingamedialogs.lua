@@ -192,12 +192,12 @@ ESO_Dialogs["RITUAL_OF_MARA_PROMPT"] =
 
 ESO_Dialogs["DESTROY_ITEM_PROMPT"] =
 {
+    canQueue = true,
     gamepadInfo =
     {
         dialogType = GAMEPAD_DIALOGS.BASIC,
         allowRightStickPassThrough = true,
     },
-    canQueue = true,
     title =
     {
         text = SI_PROMPT_TITLE_DESTROY_ITEM_PROMPT,
@@ -207,40 +207,45 @@ ESO_Dialogs["DESTROY_ITEM_PROMPT"] =
         text = SI_DESTROY_ITEM_PROMPT,
     },
     noChoiceCallback = function()
-                            RespondToDestroyRequest(false)
-                        end,
+        RespondToDestroyRequest(false)
+    end,
     buttons =
     {
-        [1] =
         {
             text = SI_YES,
             callback = function(dialog)
-                            RespondToDestroyRequest(true)
-                        end,
+                RespondToDestroyRequest(true)
+            end,
         },
-        [2] =
         {
             text = SI_NO,
             callback = function(dialog)
-                            RespondToDestroyRequest(false)
-                        end,
+                RespondToDestroyRequest(false)
+            end,
         }
     }
 }
 
 ESO_Dialogs["CONFIRM_DESTROY_ITEM_PROMPT"] =
 {
+    canQueue = true,
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+        allowRightStickPassThrough = true,
+    },
     title =
     {
         text = SI_PROMPT_TITLE_DESTROY_ITEM_PROMPT,
     },
     mainText =
     {
-        text = SI_CONFIRM_DESTROY_ITEM_PROMPT,
+        text = SI_DESTROY_ITEM_PROMPT,
     },
-    editBox =
+    verifyConfirmationInfo =
     {
-        matchingString = GetString(SI_DESTROY_ITEM_CONFIRMATION)
+        onShowCooldown = 2000,
+        matchingString = GetString(SI_DESTROY_ITEM_CONFIRMATION),
     },
     noChoiceCallback = function()
         RespondToDestroyRequest(false)
@@ -248,16 +253,10 @@ ESO_Dialogs["CONFIRM_DESTROY_ITEM_PROMPT"] =
     buttons =
     {
         {
-            requiresTextInput = true,
+            requiresConfirmationVerification = true,
             text = SI_CHAT_DIALOG_CONFIRM_ITEM_DESTRUCTION,
             callback = function(dialog)
-                local confirmDelete = ZO_Dialogs_GetEditBoxText(dialog)
-                local compareString = GetString(SI_DESTROY_ITEM_CONFIRMATION)
-                if confirmDelete and confirmDelete ~= compareString then
-                    RespondToDestroyRequest(false)
-                else
-                    RespondToDestroyRequest(true)
-                end
+                RespondToDestroyRequest(true)
             end,
         },
         {
@@ -271,6 +270,12 @@ ESO_Dialogs["CONFIRM_DESTROY_ITEM_PROMPT"] =
 
 ESO_Dialogs["CONFIRM_DESTROY_ARMORY_ITEM_PROMPT"] =
 {
+    canQueue = true,
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+        allowRightStickPassThrough = true,
+    },
     title =
     {
         text = SI_DIALOG_DESTROY_ARMORY_ITEM_TITLE,
@@ -279,9 +284,10 @@ ESO_Dialogs["CONFIRM_DESTROY_ARMORY_ITEM_PROMPT"] =
     {
         text = SI_ARMORY_CONFIRM_DESTROY_ITEM_BODY,
     },
-    editBox =
+    verifyConfirmationInfo =
     {
-        matchingString = GetString(SI_DESTROY_ITEM_CONFIRMATION)
+        onShowCooldown = 2000,
+        matchingString = GetString(SI_DESTROY_ITEM_CONFIRMATION),
     },
     noChoiceCallback = function()
         RespondToDestroyRequest(false)
@@ -289,20 +295,14 @@ ESO_Dialogs["CONFIRM_DESTROY_ARMORY_ITEM_PROMPT"] =
     buttons =
     {
         {
-            requiresTextInput = true,
-            text = SI_CHAT_DIALOG_CONFIRM_ITEM_DESTRUCTION,
+            requiresConfirmationVerification = true,
+            text = SI_YES,
             callback = function(dialog)
-                local confirmDelete = ZO_Dialogs_GetEditBoxText(dialog)
-                local compareString = GetString(SI_DESTROY_ITEM_CONFIRMATION)
-                if confirmDelete and confirmDelete ~= compareString then
-                    RespondToDestroyRequest(false)
-                else
-                    RespondToDestroyRequest(true)
-                end
+                RespondToDestroyRequest(true)
             end,
         },
         {
-            text = SI_DIALOG_CANCEL,
+            text = SI_NO,
             callback = function(dialog)
                 RespondToDestroyRequest(false)
             end,
@@ -338,6 +338,38 @@ ESO_Dialogs["CONFIRM_ENDLESS_DUNGEON_COMPANION_SUMMONING"] =
         },
 
         [2] =
+        {
+            text = SI_DIALOG_CANCEL,
+        }
+    }
+}
+
+ESO_Dialogs["ENDLESS_DUNGEON_CONFIRM_START_NEW"] =
+{
+    gamepadInfo =
+    {
+        dialogType = GAMEPAD_DIALOGS.BASIC,
+    },
+    title =
+    {
+        text = SI_ENDLESS_DUNGEON_LOAD_SAVE_CONFIRM_NEW_TITLE,
+    },
+    mainText =
+    {
+        text = function()
+            local errorText = GetString(SI_ENDLESS_DUNGEON_LOAD_SAVE_CONFIRM_NEW_BODY_ERROR)
+            errorText = ZO_ERROR_COLOR:Colorize(errorText)
+            return zo_strformat(SI_ENDLESS_DUNGEON_LOAD_SAVE_CONFIRM_NEW_BODY, errorText)
+        end,
+    },
+    buttons =
+    {
+        {
+            text = SI_ENDLESS_DUNGEON_LOAD_SAVE_CONFIRM_NEW_ACCEPT,
+            callback = function(dialog)
+                dialog.data.onAcceptCallback()
+            end,
+        },
         {
             text = SI_DIALOG_CANCEL,
         }
@@ -1440,109 +1472,47 @@ ESO_Dialogs["GUILD_LEAVE"] =
     canQueue = true,
     title =
     {
-        text = SI_PROMPT_TITLE_LEAVE_GUILD,
+        text = function(dialog)
+            if dialog.data.isLastMemberOfGuild then
+                return SI_PROMPT_TITLE_DISBAND_GUILD
+            end
+            return SI_PROMPT_TITLE_LEAVE_GUILD
+        end,
     },
     mainText =
     {
-        text = SI_GUILD_LEAVE_WARNING,
+        text = function(dialog)
+            if dialog.data.isLastMemberOfGuild then
+                return SI_GUILD_DISBAND
+            elseif dialog.data.playerIsGuildmaster then
+                return SI_GUILD_LEAVE_WARNING_LEADER
+            end
+            return SI_GUILD_LEAVE_WARNING
+        end,
+    },
+    verifyConfirmationInfo =
+    {
+        onShowCooldown = 2000,
+        matchingString = GetString(SI_PERFORM_ACTION_CONFIRMATION),
     },
     buttons =
     {
-        [1] =
         {
+            requiresConfirmationVerification = true,
             text = SI_DIALOG_ACCEPT,
             callback = function(dialog)
-                             GuildLeave(dialog.data.guildId)
-                             dialog.hideSceneOnClose = dialog.data.hideSceneOnLeave
-                             dialog.data.leaveGuildSuccess = true
-                        end,
+                GuildLeave(dialog.data.guildId)
+                dialog.hideSceneOnClose = dialog.data.hideSceneOnLeave
+                dialog.data.leaveGuildSuccess = true
+            end,
         },
 
-        [2] =
         {
             text = SI_DIALOG_DECLINE,
         }
     },
     finishedCallback = function(dialog)
-        if(dialog.data.leftGuildCallback and dialog.data.leaveGuildSuccess) then
-            dialog.data.leftGuildCallback(dialog.data.guildId)
-        end
-    end,
-}
-
-ESO_Dialogs["GUILD_LEAVE_LEADER"] =
-{
-    gamepadInfo =
-    {
-        dialogType = GAMEPAD_DIALOGS.BASIC,
-    },
-    canQueue = true,
-    title =
-    {
-        text = SI_PROMPT_TITLE_LEAVE_GUILD,
-    },
-    mainText =
-    {
-        text = SI_GUILD_LEAVE_WARNING_LEADER,
-    },
-    buttons =
-    {
-        [1] =
-        {
-            text = SI_DIALOG_ACCEPT,
-            callback = function(dialog)
-                             GuildLeave(dialog.data.guildId)
-                             dialog.hideSceneOnClose = dialog.data.hideSceneOnLeave
-                             dialog.data.leaveGuildSuccess = true
-                        end,
-        },
-
-        [2] =
-        {
-            text = SI_DIALOG_DECLINE,
-        }
-    },
-    finishedCallback = function(dialog)
-        if(dialog.data.leftGuildCallback and dialog.data.leaveGuildSuccess) then
-            dialog.data.leftGuildCallback(dialog.data.guildId)
-        end
-    end,
-}
-
-ESO_Dialogs["GUILD_DISBAND"] =
-{
-    gamepadInfo =
-    {
-        dialogType = GAMEPAD_DIALOGS.BASIC,
-    },
-    canQueue = true,
-    title =
-    {
-        text = SI_PROMPT_TITLE_DISBAND_GUILD,
-    },
-    mainText =
-    {
-        text = SI_GUILD_DISBAND,
-    },
-    buttons =
-    {
-        [1] =
-        {
-            text = SI_DIALOG_ACCEPT,
-            callback = function(dialog)
-                             GuildLeave(dialog.data.guildId)
-                             dialog.hideSceneOnClose = dialog.data.hideSceneOnLeave
-                             dialog.data.leaveGuildSuccess = true
-                        end,
-        },
-
-        [2] =
-        {
-            text = SI_DIALOG_DECLINE,
-        }
-    },
-    finishedCallback = function(dialog)
-        if(dialog.data.leftGuildCallback and dialog.data.leaveGuildSuccess) then
+        if dialog.data.leftGuildCallback and dialog.data.leaveGuildSuccess then
             dialog.data.leftGuildCallback(dialog.data.guildId)
         end
     end,
@@ -1788,7 +1758,6 @@ do
         },
         buttons =
         {
-            [1] =
             {
                 text = SI_DIALOG_ACCEPT,
                 callback = function(dialog)
@@ -1796,7 +1765,6 @@ do
                     ImproveSmithingItem(data.bagId, data.slotIndex, data.boostersToApply)
                 end,
             },
-            [2] =
             {
                 text = SI_DIALOG_CANCEL,
             },
@@ -1804,45 +1772,6 @@ do
     }
 
     ESO_Dialogs["CONFIRM_IMPROVE_LOCKED_ITEM"] =
-    {
-        canQueue = true,
-        title =
-        {
-            text = SI_SMITHING_IMPROVE_ITEM_TITLE,
-        },
-        mainText =
-        {
-            text = SI_SMITHING_IMPROVE_LOCKED_ITEM_CONFIRM,
-        },
-        editBox =
-        {
-            matchingString = GetString(SI_PERFORM_ACTION_CONFIRMATION)
-        },
-        warning =
-        {
-            text = function(dialog)
-                return GetImproveWarningText(dialog.data)
-            end
-        },
-        buttons =
-        {
-            [1] =
-            {
-                requiresTextInput = true,
-                text = SI_DIALOG_ACCEPT,
-                callback = function(dialog)
-                    local data = dialog.data
-                    ImproveSmithingItem(data.bagId, data.slotIndex, data.boostersToApply)
-                end,
-            },
-            [2] =
-            {
-                text = SI_DIALOG_CANCEL,
-            },
-        },
-    }
-
-    ESO_Dialogs["GAMEPAD_CONFIRM_IMPROVE_LOCKED_ITEM"] =
     {
         canQueue = true,
         gamepadInfo =
@@ -1855,7 +1784,18 @@ do
         },
         mainText =
         {
-            text = SI_GAMEPAD_CRAFTING_CONFIRM_IMPROVE_LOCKED_ITEM,
+            text = function(dialog)
+                if dialog.isGamepad then
+                    return SI_GAMEPAD_CRAFTING_CONFIRM_IMPROVE_LOCKED_ITEM
+                end
+                return SI_SMITHING_IMPROVE_ITEM_CONFIRM
+            end,
+        },
+        verifyConfirmationInfo =
+        {
+            onShowCooldown = 2000,
+            matchingString = GetString(SI_PERFORM_ACTION_CONFIRMATION),
+            matchingStringInstructionsFormatter = GetString(SI_LOCKED_ITEM_CONFIRM),
         },
         warning =
         {
@@ -1865,16 +1805,14 @@ do
         },
         buttons =
         {
-            [1] =
             {
-                onShowCooldown = 2000,
+                requiresConfirmationVerification = true,
                 text = SI_DIALOG_ACCEPT,
                 callback = function(dialog)
                     local data = dialog.data
                     ImproveSmithingItem(data.bagId, data.slotIndex, data.boostersToApply)
                 end,
             },
-            [2] =
             {
                 text = SI_DIALOG_CANCEL,
             },
@@ -1899,14 +1837,12 @@ ESO_Dialogs["CONFIRM_CREATE_NONSET_ITEM"] =
     },
     buttons =
     {
-        [1] =
         {
             text = SI_DIALOG_ACCEPT,
             callback = function(dialog)
                 CraftSmithingItem(unpack(dialog.data.craftingParams))
             end,
         },
-        [2] =
         {
             text = SI_DIALOG_CANCEL,
         },
@@ -1915,41 +1851,6 @@ ESO_Dialogs["CONFIRM_CREATE_NONSET_ITEM"] =
 
 ESO_Dialogs["CONFIRM_DECONSTRUCT_ARMORY_ITEM"] =
 {
-    title =
-    {
-        text = function(dialog)
-            return GetString("SI_DECONSTRUCTACTIONNAME_PERFORMMULTIPLE", dialog.data.verb)
-        end,
-    },
-    mainText =
-    {
-        text = function(dialog)
-            local deconstructVerify = zo_strformat(SI_DECONSTRUCT_ARMORY_EQUIPMENT_KEYBOARD_VERIFY, GetString(SI_PERFORM_ACTION_CONFIRMATION))
-            return ZO_GenerateParagraphSeparatedList({ GetString(SI_DECONSTRUCT_ARMORY_EQUIPMENT_WARNING), deconstructVerify })
-        end,
-    },
-    editBox =
-    {
-        matchingString = GetString(SI_PERFORM_ACTION_CONFIRMATION)
-    },
-    buttons =
-    {
-        {
-            requiresTextInput = true,
-            text = SI_CHAT_DIALOG_CONFIRM_ITEM_DESTRUCTION,
-            callback = function(dialog)
-                dialog.data.deconstructFn()
-            end,
-        },
-        {
-            text = SI_DIALOG_CANCEL,
-        }
-    }
-}
-
-ESO_Dialogs["CONFIRM_DECONSTRUCT_ARMORY_ITEM_GAMEPAD"] =
-{
-    canQueue = true,
     gamepadInfo =
     {
         dialogType = GAMEPAD_DIALOGS.BASIC,
@@ -1957,14 +1858,22 @@ ESO_Dialogs["CONFIRM_DECONSTRUCT_ARMORY_ITEM_GAMEPAD"] =
     title =
     {
         text = function(dialog)
-            return GetString("SI_DECONSTRUCTACTIONNAME_PERFORMMULTIPLE", dialog.data.verb)
+            return GetString("SI_DECONSTRUCTACTIONNAME", dialog.data.verb)
         end,
     },
     mainText =
     {
         text = function(dialog)
-            return ZO_GenerateParagraphSeparatedList({ GetString(SI_DECONSTRUCT_ARMORY_EQUIPMENT_WARNING), GetString(SI_DECONSTRUCT_ARMORY_EQUIPMENT_GAMEPAD_CONTINUE) })
+            if dialog.isGamepad then
+                return ZO_GenerateParagraphSeparatedList({ GetString(SI_DECONSTRUCT_ARMORY_EQUIPMENT_WARNING), GetString(SI_DECONSTRUCT_ARMORY_EQUIPMENT_GAMEPAD_CONTINUE) })
+            end
+            return SI_DECONSTRUCT_ARMORY_EQUIPMENT_WARNING
         end,
+    },
+    verifyConfirmationInfo =
+    {
+        onShowCooldown = 2000,
+        matchingString = GetString(SI_PERFORM_ACTION_CONFIRMATION),
     },
     setup = function(dialog)
         local headerData =
@@ -1980,69 +1889,16 @@ ESO_Dialogs["CONFIRM_DECONSTRUCT_ARMORY_ITEM_GAMEPAD"] =
     buttons =
     {
         {
-            requiresTextInput = true,
-            text = SI_CHAT_DIALOG_CONFIRM_ITEM_DESTRUCTION,
-            callback = function(dialog)
-                dialog.data.deconstructFn()
-            end,
-        },
-        {
-            text = SI_DIALOG_CANCEL,
-        }
-    }
-}
-
-ESO_Dialogs["CONFIRM_MULTI_DECONSTRUCT_ARMORY_ITEM"] =
-{
-    canQueue = true,
-    gamepadInfo =
-    {
-        dialogType = GAMEPAD_DIALOGS.BASIC,
-    },
-    title =
-    {
-        text = function(dialog)
-            return GetString("SI_DECONSTRUCTACTIONNAME_PERFORMMULTIPLE", dialog.data.verb)
-        end,
-    },
-    mainText =
-    {
-        text = function(dialog)
-            local baseDialogContent = GetString("SI_DECONSTRUCTACTIONNAME_CONFIRMMULTIPLE", dialog.data.verb)
-            local deconstructVerify = zo_strformat(SI_DECONSTRUCT_ARMORY_EQUIPMENT_KEYBOARD_VERIFY, GetString(SI_PERFORM_ACTION_CONFIRMATION))
-            return ZO_GenerateParagraphSeparatedList({ baseDialogContent, GetString(SI_DECONSTRUCT_ARMORY_EQUIPMENT_WARNING), deconstructVerify })
-        end,
-    },
-    editBox =
-    {
-        matchingString = GetString(SI_PERFORM_ACTION_CONFIRMATION)
-    },
-    setup = function(dialog)
-        local headerData =
-        {
-            data1 =
-            {
-                header = GetString(SI_GAMEPAD_INVENTORY_CAPACITY),
-                value = zo_strformat(SI_GAMEPAD_INVENTORY_CAPACITY_FORMAT, GetNumBagUsedSlots(BAG_BACKPACK), GetBagSize(BAG_BACKPACK)),
-            }
-        }
-        dialog:setupFunc(headerData)
-    end,
-    buttons =
-    {
-        [1] =
-        {
-            requiresTextInput = true,
+            requiresConfirmationVerification = true,
             text = SI_DIALOG_ACCEPT,
             callback = function(dialog)
                 dialog.data.deconstructFn()
             end,
         },
-        [2] =
         {
             text = SI_DIALOG_CANCEL,
-        },
-    },
+        }
+    }
 }
 
 ESO_Dialogs["CONFIRM_DECONSTRUCT_MULTIPLE_ITEMS"] =
@@ -2069,6 +1925,16 @@ ESO_Dialogs["CONFIRM_DECONSTRUCT_MULTIPLE_ITEMS"] =
             end
         end,
     },
+    verifyConfirmationInfo = function(dialog)
+        if dialog.data.isAnyItemInArmoryBuild then
+            return
+            {
+                onShowCooldown = 2000,
+                matchingString = GetString(SI_PERFORM_ACTION_CONFIRMATION)
+            }
+        end
+        return nil
+    end,
     setup = function(dialog)
         local headerData =
         {
@@ -2082,14 +1948,18 @@ ESO_Dialogs["CONFIRM_DECONSTRUCT_MULTIPLE_ITEMS"] =
     end,
     buttons =
     {
-        [1] =
         {
+            requiresConfirmationVerification = function(dialog)
+                if dialog.data.isAnyItemInArmoryBuild then
+                    return true
+                end
+                return false
+            end,
             text = SI_DIALOG_ACCEPT,
             callback = function(dialog)
                 dialog.data.deconstructFn()
             end,
         },
-        [2] =
         {
             text = SI_DIALOG_CANCEL,
         },
@@ -3249,9 +3119,7 @@ ESO_Dialogs["COLLECTIBLE_REQUIREMENT_FAILED"] =
     {
         text = function(dialog)
             local collectibleData = dialog.data.collectibleData
-            if collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_CHAPTER) then
-                return SI_COLLECTIBLE_LOCKED_FAILURE_CHAPTER_DIALOG_BODY
-            elseif collectibleData:IsUnlockedViaSubscription() then
+            if collectibleData:IsUnlockedViaSubscription() then
                 return SI_COLLECTIBLE_LOCKED_FAILURE_DLC_DIALOG_BODY
             else
                 return SI_COLLECTIBLE_LOCKED_FAILURE_NON_ESO_PLUS_DIALOG_BODY
@@ -3261,22 +3129,12 @@ ESO_Dialogs["COLLECTIBLE_REQUIREMENT_FAILED"] =
     buttons =
     {
         {
-            text = function(dialog)
-                if dialog.data.collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_CHAPTER) then
-                    return GetString(SI_DLC_BOOK_ACTION_CHAPTER_UPGRADE)
-                else
-                    return GetString(SI_COLLECTIBLE_LOCKED_FAILURE_DIALOG_PRIMARY_BUTTON)
-                end
-            end,
+            text = SI_COLLECTIBLE_LOCKED_FAILURE_DIALOG_PRIMARY_BUTTON,
             callback = function(dialog)
                 local openSource = dialog.data.marketOpenOperation or MARKET_OPEN_OPERATION_COLLECTIBLE_FAILURE
                 local collectibleData = dialog.data.collectibleData
-                if collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_CHAPTER) then
-                    ZO_ShowChapterUpgradePlatformScreen(openSource)
-                else
-                    local searchTerm = zo_strformat(SI_CROWN_STORE_SEARCH_FORMAT_STRING, collectibleData:GetName())
-                    ShowMarketAndSearch(searchTerm, openSource)
-                end
+                local searchTerm = zo_strformat(SI_CROWN_STORE_SEARCH_FORMAT_STRING, collectibleData:GetName())
+                ShowMarketAndSearch(searchTerm, openSource)
             end,
         },
         {
@@ -3856,6 +3714,7 @@ ESO_Dialogs["CONFIRM_CANCEL_RESEARCH"] =
     gamepadInfo =
     {
         dialogType = GAMEPAD_DIALOGS.BASIC,
+        allowRightStickPassThrough = true,
     },
     title =
     {
@@ -3865,8 +3724,9 @@ ESO_Dialogs["CONFIRM_CANCEL_RESEARCH"] =
     {
         text = SI_CRAFTING_CONFIRM_CANCEL_RESEARCH_DESCRIPTION,
     },
-    editBox =
+    verifyConfirmationInfo =
     {
+        onShowCooldown = 2000,
         matchingString = GetString(SI_PERFORM_ACTION_CONFIRMATION)
     },
     warning =
@@ -3875,16 +3735,14 @@ ESO_Dialogs["CONFIRM_CANCEL_RESEARCH"] =
     },
     buttons =
     {
-        [1] =
         {
-            requiresTextInput = true,
+            requiresConfirmationVerification = true,
             text = SI_YES,
             callback = function(dialog)
-                            local data = dialog.data
-                            CancelSmithingTraitResearch(data.craftingType, data.researchLineIndex, data.traitIndex)
-                        end,
+                local data = dialog.data
+                CancelSmithingTraitResearch(data.craftingType, data.researchLineIndex, data.traitIndex)
+            end,
         },
-        [2] =
         {
             text = SI_NO,
         }
@@ -3967,39 +3825,6 @@ ESO_Dialogs["PTP_TIMED_RESPONSE_PROMPT"] =
 ESO_Dialogs["CONFIRM_ENCHANT_LOCKED_ITEM"] =
 {
     canQueue = true,
-    title =
-    {
-        text = SI_ENCHANTING_CONFIRM_LOCKED_ITEM_TITLE,
-    },
-    mainText =
-    {
-        text = SI_ENCHANTING_CONFIRM_LOCKED_ITEM_DESCRIPTION,
-    },
-    editBox =
-    {
-        matchingString = GetString(SI_PERFORM_ACTION_CONFIRMATION)
-    },
-    buttons =
-    {
-        [1] =
-        {
-            requiresTextInput = true,
-            text = SI_DIALOG_ACCEPT,
-            callback = function(dialog)
-                local data = dialog.data
-                data.onAcceptCallback()
-            end,
-        },
-        [2] =
-        {
-            text = SI_DIALOG_CANCEL,
-        },
-    }
-}
-
-ESO_Dialogs["GAMEPAD_CONFIRM_ENCHANT_LOCKED_ITEM"] =
-{
-    canQueue = true,
     gamepadInfo =
     {
         dialogType = GAMEPAD_DIALOGS.BASIC,
@@ -4010,23 +3835,27 @@ ESO_Dialogs["GAMEPAD_CONFIRM_ENCHANT_LOCKED_ITEM"] =
     },
     mainText =
     {
-        text = SI_GAMEPAD_ENCHANTING_CONFIRM_ENCHANT_LOCKED_ITEM,
+        text = SI_ENCHANTING_CONFIRM_LOCKED_ITEM_DESCRIPTION,
+    },
+    verifyConfirmationInfo =
+    {
+        onShowCooldown = 2000,
+        matchingString = GetString(SI_PERFORM_ACTION_CONFIRMATION)
     },
     buttons =
     {
-        [1] =
         {
-            onShowCooldown = 2000,
+            requiresConfirmationVerification = true,
             text = SI_DIALOG_ACCEPT,
             callback = function(dialog)
-                dialog.data.onAcceptCallback()
+                local data = dialog.data
+                data.onAcceptCallback()
             end,
         },
-        [2] =
         {
             text = SI_DIALOG_CANCEL,
         },
-    },
+    }
 }
 
 ESO_Dialogs["CONFIRM_RETRAIT_ITEM"] =
@@ -4043,17 +3872,16 @@ ESO_Dialogs["CONFIRM_RETRAIT_ITEM"] =
     mainText =
     {
         text = function(dialog)
-                    local data = dialog.data
-                    if IsItemBound(data.bagId, data.slotIndex) then
-                        return SI_RETRAIT_STATION_PERFORM_RETRAIT_DIALOG_CONFIRM
-                    else
-                        return SI_RETRAIT_STATION_PERFORM_RETRAIT_AND_BIND_DIALOG_CONFIRM
-                    end
-                end,
+            local data = dialog.data
+            if IsItemBound(data.bagId, data.slotIndex) then
+                return SI_RETRAIT_STATION_PERFORM_RETRAIT_DIALOG_CONFIRM
+            else
+                return ZO_GenerateParagraphSeparatedList({GetString(SI_RETRAIT_STATION_PERFORM_RETRAIT_DIALOG_CONFIRM), GetString(SI_RETRAIT_STATION_PERFORM_RETRAIT_BIND_WARNING)})
+            end
+        end,
     },
     buttons =
     {
-        [1] =
         {
             text = SI_DIALOG_ACCEPT,
             clickSound = SOUNDS.RETRAITING_START_RETRAIT,
@@ -4062,7 +3890,6 @@ ESO_Dialogs["CONFIRM_RETRAIT_ITEM"] =
                 RequestItemTraitChange(data.bagId, data.slotIndex, data.trait)
             end,
         },
-        [2] =
         {
             text = SI_DIALOG_CANCEL,
         },
@@ -4070,47 +3897,6 @@ ESO_Dialogs["CONFIRM_RETRAIT_ITEM"] =
 }
 
 ESO_Dialogs["CONFIRM_RETRAIT_LOCKED_ITEM"] =
-{
-    canQueue = true,
-    title =
-    {
-        text = SI_RETRAIT_STATION_PERFORM_RETRAIT_DIALOG_TITLE,
-    },
-    mainText =
-    {
-        text = function(dialog)
-                    local data = dialog.data
-                    if IsItemBound(data.bagId, data.slotIndex) then
-                        return SI_RETRAIT_STATION_PERFORM_RETRAIT_DIALOG_LOCKED_ITEM_CONFIRM
-                    else
-                        return SI_RETRAIT_STATION_PERFORM_RETRAIT_AND_BIND_DIALOG_LOCKED_ITEM_CONFIRM
-                    end
-                end,
-    },
-    editBox =
-    {
-        matchingString = GetString(SI_PERFORM_ACTION_CONFIRMATION)
-    },
-    buttons =
-    {
-        [1] =
-        {
-            requiresTextInput = true,
-            text = SI_DIALOG_ACCEPT,
-            clickSound = SOUNDS.RETRAITING_START_RETRAIT,
-            callback = function(dialog)
-                local data = dialog.data
-                RequestItemTraitChange(data.bagId, data.slotIndex, data.trait)
-            end,
-        },
-        [2] =
-        {
-            text = SI_DIALOG_CANCEL,
-        },
-    },
-}
-
-ESO_Dialogs["GAMEPAD_CONFIRM_RETRAIT_LOCKED_ITEM"] =
 {
     canQueue = true,
     gamepadInfo =
@@ -4124,19 +3910,23 @@ ESO_Dialogs["GAMEPAD_CONFIRM_RETRAIT_LOCKED_ITEM"] =
     mainText =
     {
         text = function(dialog)
-                    local data = dialog.data
-                    if IsItemBound(data.bagId, data.slotIndex) then
-                        return SI_GAMEPAD_RETRAIT_STATION_PERFORM_RETRAIT_DIALOG_LOCKED_ITEM_CONFIRM
-                    else
-                        return SI_GAMEPAD_RETRAIT_STATION_PERFORM_RETRAIT_AND_BIND_DIALOG_LOCKED_ITEM_CONFIRM
-                    end
-                end,
+            local data = dialog.data
+            if IsItemBound(data.bagId, data.slotIndex) then
+                return ZO_GenerateParagraphSeparatedList({GetString(SI_RETRAIT_STATION_PERFORM_RETRAIT_DIALOG_CONFIRM), GetString(SI_RETRAIT_STATION_PERFORM_RETRAIT_LOCKED_WARNING)})
+            else
+                return ZO_GenerateParagraphSeparatedList({GetString(SI_RETRAIT_STATION_PERFORM_RETRAIT_DIALOG_CONFIRM), GetString(SI_RETRAIT_STATION_PERFORM_RETRAIT_BIND_WARNING), GetString(SI_RETRAIT_STATION_PERFORM_RETRAIT_LOCKED_WARNING)})
+            end
+        end,
+    },
+    verifyConfirmationInfo =
+    {
+        onShowCooldown = 2000,
+        matchingString = GetString(SI_PERFORM_ACTION_CONFIRMATION),
     },
     buttons =
     {
-        [1] =
         {
-            onShowCooldown = 2000,
+            requiresConfirmationVerification = true,
             text = SI_DIALOG_ACCEPT,
             clickSound = SOUNDS.RETRAITING_START_RETRAIT,
             callback = function(dialog)
@@ -4144,7 +3934,6 @@ ESO_Dialogs["GAMEPAD_CONFIRM_RETRAIT_LOCKED_ITEM"] =
                 RequestItemTraitChange(data.bagId, data.slotIndex, data.trait)
             end,
         },
-        [2] =
         {
             text = SI_DIALOG_CANCEL,
         },

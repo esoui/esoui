@@ -333,12 +333,7 @@ function ZO_UniversalDeconstructionPanel_Shared:ConfirmExtractAll()
             isAnyItemInArmoryBuild = isAnyItemInArmoryBuild,
         }
 
-        local dialogName
-        if isMultiExtract then
-            dialogName = (not IsInGamepadPreferredMode() and isAnyItemInArmoryBuild) and "CONFIRM_MULTI_DECONSTRUCT_ARMORY_ITEM" or "CONFIRM_DECONSTRUCT_MULTIPLE_ITEMS"
-        else
-            dialogName = IsInGamepadPreferredMode() and "CONFIRM_DECONSTRUCT_ARMORY_ITEM_GAMEPAD" or "CONFIRM_DECONSTRUCT_ARMORY_ITEM"
-        end
+        local dialogName = isMultiExtract and "CONFIRM_DECONSTRUCT_MULTIPLE_ITEMS" or "CONFIRM_DECONSTRUCT_ARMORY_ITEM"
         ZO_Dialogs_ShowPlatformDialog(dialogName, dialogData, { mainTextParams = { ZO_CommaDelimitNumber(self.extractionSlot:GetStackCount()) } })
     else
         -- Extraction of a single item does not require a confirmation dialog.

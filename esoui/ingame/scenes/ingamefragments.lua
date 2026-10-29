@@ -6,10 +6,10 @@ local FRAGMENT_CATEGORY_TITLE = "Title"
 
 ZO_FramePlayerFragment = ZO_SceneFragment:Subclass()
 
-function ZO_FramePlayerFragment:New()
-    local fragment = ZO_SceneFragment.New(self)
+function ZO_FramePlayerFragment:Initialize()
+    ZO_SceneFragment.Initialize(self)
+    
     SetFrameLocalPlayerInGameCamera(false)
-    return fragment
 end
 
 function ZO_FramePlayerFragment:Show()
@@ -35,18 +35,10 @@ FRAME_PLAYER_FRAGMENT = ZO_FramePlayerFragment:New()
 
 ZO_FramePlayerOnSceneHiddenFragment = ZO_FramePlayerFragment:Subclass()
 
-function ZO_FramePlayerOnSceneHiddenFragment:New()
-    local fragment = ZO_FramePlayerFragment.New(self)
-    fragment:SetHideOnSceneHidden(true)
-    return fragment
-end
+function ZO_FramePlayerOnSceneHiddenFragment:Initialize(...)
+    ZO_FramePlayerFragment.Initialize(self, ...)
 
-function ZO_FramePlayerOnSceneHiddenFragment:Show()
-    ZO_FramePlayerFragment.Show(self)
-end
-
-function ZO_FramePlayerOnSceneHiddenFragment:Hide()
-    ZO_FramePlayerFragment.Hide(self)
+    self:SetHideOnSceneHidden(true)
 end
 
 FRAME_PLAYER_ON_SCENE_HIDDEN_FRAGMENT = ZO_FramePlayerOnSceneHiddenFragment:New()
@@ -58,18 +50,17 @@ FRAME_PLAYER_ON_SCENE_HIDDEN_FRAGMENT = ZO_FramePlayerOnSceneHiddenFragment:New(
 ZO_NormalizedPointFragment = ZO_SceneFragment:Subclass()
 ZO_NormalizedPointFragment.id = 0
 
-function ZO_NormalizedPointFragment:New(normalizedPointCallback, executeCallback)
-    local fragment = ZO_SceneFragment.New(self)
-    fragment.eventNamespace = "ZO_FramePlayerTargetFragment"..self.id
-    self.id = self.id + 1
+function ZO_NormalizedPointFragment:Initialize(normalizedPointCallback, executeCallback)
+    ZO_SceneFragment.Initialize(self)
+    
+    self.eventNamespace = "ZO_FramePlayerTargetFragment"..ZO_NormalizedPointFragment.id
+    ZO_NormalizedPointFragment.id = ZO_NormalizedPointFragment.id + 1
 
-    function fragment.UpdateTarget()
+    function self.UpdateTarget()
         local x, y = normalizedPointCallback()
         local normalizedX, normalizedY = NormalizeUICanvasPoint(x, y)
         executeCallback(normalizedX, normalizedY)
     end
-
-    return fragment
 end
 
 function ZO_NormalizedPointFragment:Show()
@@ -89,14 +80,16 @@ end
 
 ZO_CharacterFramingBlur = ZO_NormalizedPointFragment:Subclass()
 
-local function OnNormalizedPointChanged(normalizedX, normalizedY)
-    SetFullscreenEffect(FULLSCREEN_EFFECT_CHARACTER_FRAMING_BLUR, normalizedX, normalizedY)
-end
+do
+    local function OnNormalizedPointChanged(normalizedX, normalizedY)
+        SetFullscreenEffect(FULLSCREEN_EFFECT_CHARACTER_FRAMING_BLUR, normalizedX, normalizedY)
+    end
 
-function ZO_CharacterFramingBlur:New(normalizedPointCallback)
-    local fragment = ZO_NormalizedPointFragment.New(self, normalizedPointCallback, OnNormalizedPointChanged)
-    fragment:SetHideOnSceneHidden(true)
-    return fragment
+    function ZO_CharacterFramingBlur:Initialize(normalizedPointCallback)
+        ZO_NormalizedPointFragment.Initialize(self, normalizedPointCallback, OnNormalizedPointChanged)
+
+        self:SetHideOnSceneHidden(true)
+    end
 end
 
 function ZO_CharacterFramingBlur:Hide()
@@ -110,11 +103,11 @@ end
 
 ZO_CharacterFramingLookAtDistance = ZO_SceneFragment:Subclass()
 
-function ZO_CharacterFramingLookAtDistance:New(lookAtDistanceFactor)
-    local fragment = ZO_SceneFragment.New(self)
-    fragment:SetHideOnSceneHidden(true)
-    fragment.lookAtDistanceFactor = lookAtDistanceFactor
-    return fragment
+function ZO_CharacterFramingLookAtDistance:Initialize(lookAtDistanceFactor)
+    ZO_SceneFragment.Initialize(self)
+    
+    self:SetHideOnSceneHidden(true)
+    self.lookAtDistanceFactor = lookAtDistanceFactor
 end
 
 function ZO_CharacterFramingLookAtDistance:Show()
@@ -142,7 +135,7 @@ do
 
     ZO_InteractionFramingFragment = ZO_NormalizedPointFragment:Subclass()
 
-    function ZO_InteractionFramingFragment:New(normalizedPointCallback)
+    function ZO_InteractionFramingFragment:Initialize(normalizedPointCallback)
         local function SetFrameInteractionTargetRelativeToRightPanel(normalizedX, normalizedY)
             -- interaction camera data is authored assuming the frame offset is (.5, .5) ie. centered, with a manually created offset to make things look good in the UI.
             -- To re-use our framing target math, we need to undo the manual offset coming from the data.
@@ -152,9 +145,9 @@ do
             SetFrameInteractionTarget(.5 - centerOffsetX + normalizedX, .5 - centerOffsetY + normalizedY)
         end
 
-        local fragment = ZO_NormalizedPointFragment.New(self, normalizedPointCallback, SetFrameInteractionTargetRelativeToRightPanel)
-        fragment:SetHideOnSceneHidden(true)
-        return fragment
+        ZO_NormalizedPointFragment.Initialize(self, normalizedPointCallback, SetFrameInteractionTargetRelativeToRightPanel)
+
+        self:SetHideOnSceneHidden(true)
     end
 
     function ZO_InteractionFramingFragment:ShouldResetFrameInteractionTarget()
@@ -322,10 +315,10 @@ end
 
 ZO_FrameEmoteFragment = ZO_SceneFragment:Subclass()
 
-function ZO_FrameEmoteFragment:New(framingType)
-    local fragment = ZO_SceneFragment.New(self)
-    fragment.framingType = framingType
-    return fragment
+function ZO_FrameEmoteFragment:Initialize(framingType)
+    ZO_SceneFragment.Initialize(self)
+    
+    self.framingType = framingType
 end
 
 function ZO_FrameEmoteFragment:Show()
@@ -359,10 +352,10 @@ FRAME_EMOTE_FRAGMENT_VETERANCY = ZO_FrameEmoteFragment:New(FRAMING_SCREEN_VETERA
 
 ZO_SetTitleFragment = ZO_SceneFragment:Subclass()
 
-function ZO_SetTitleFragment:New(titleStringId)
-    local fragment = ZO_SceneFragment.New(self)
-    fragment.title = GetString(titleStringId)
-    return fragment
+function ZO_SetTitleFragment:Initialize(titleStringId)
+    ZO_SceneFragment.Initialize(self)
+    
+    self.title = GetString(titleStringId)
 end
 
 function ZO_SetTitleFragment:Show()
@@ -383,11 +376,11 @@ end
 
 ZO_WindowSoundFragment = ZO_SceneFragment:Subclass()
 
-function ZO_WindowSoundFragment:New(showSoundId, hideSoundId)
-    local fragment = ZO_SceneFragment.New(self)
-    fragment.showSoundId = showSoundId
-    fragment.hideSoundId = hideSoundId
-    return fragment
+function ZO_WindowSoundFragment:Initialize(showSoundId, hideSoundId)
+    ZO_SceneFragment.Initialize(self)
+
+    self.showSoundId = showSoundId
+    self.hideSoundId = hideSoundId
 end
 
 function ZO_WindowSoundFragment:Show()
@@ -409,11 +402,11 @@ end
 
 ZO_TutorialTriggerFragment = ZO_SceneFragment:Subclass()
 
-function ZO_TutorialTriggerFragment:New(onShowTutorialTriggerType)
-    local fragment = ZO_SceneFragment.New(self)
+function ZO_TutorialTriggerFragment:Initialize(onShowTutorialTriggerType)
+    ZO_SceneFragment.Initialize(self)
+    
     assert(onShowTutorialTriggerType)
-    fragment.onShowTutorialTriggerType = onShowTutorialTriggerType
-    return fragment
+    self.onShowTutorialTriggerType = onShowTutorialTriggerType
 end
 
 function ZO_TutorialTriggerFragment:Show()
@@ -431,10 +424,10 @@ end
 
 local ZO_ClearCursorFragment = ZO_SceneFragment:Subclass()
 
-function ZO_ClearCursorFragment:New()
-    local fragment = ZO_SceneFragment.New(self)
-    fragment:SetForceRefresh(true)
-    return fragment
+function ZO_ClearCursorFragment:Initialize()
+    ZO_SceneFragment.Initialize(self)
+
+    self:SetForceRefresh(true)
 end
 
 function ZO_ClearCursorFragment:Show()
@@ -452,11 +445,6 @@ end
 
 local ZO_UICombatOverlayFragment = ZO_SceneFragment:Subclass()
 
-function ZO_UICombatOverlayFragment:New()
-    local fragment = ZO_SceneFragment.New(self)
-    return fragment
-end
-
 function ZO_UICombatOverlayFragment:Show()
     ZO_UICombat:SetHidden(false)
     self:OnShown()
@@ -472,11 +460,6 @@ end
 ------------------------------------
 local ZO_HousingEditorEnabledFragment = ZO_SceneFragment:Subclass()
 
-function ZO_HousingEditorEnabledFragment:New()
-    local fragment = ZO_SceneFragment.New(self)
-    return fragment
-end
-
 function ZO_HousingEditorEnabledFragment:Hide()
     --Disable the housing editor if it isn't already
     if GetHousingEditorMode() ~= HOUSING_EDITOR_MODE_DISABLED then
@@ -490,11 +473,11 @@ end
 ----------------------------------------
 ZO_CharacterWindowFragment = ZO_FadeSceneFragment:Subclass()
 
-function ZO_CharacterWindowFragment:New(control, readOnly)
-    local fragment = ZO_FadeSceneFragment.New(self, control)
-    fragment.readOnly = readOnly
-    fragment:RegisterCallback("StateChange", function(...) fragment:OnStateChange(...) end)
-    return fragment
+function ZO_CharacterWindowFragment:Initialize(control, readOnly)
+    ZO_FadeSceneFragment.Initialize(self, control)
+
+    self.readOnly = readOnly
+    self:RegisterCallback("StateChange", function(...) self:OnStateChange(...) end)
 end
 
 function ZO_CharacterWindowFragment:OnStateChange(oldState, newState)
@@ -508,11 +491,6 @@ end
 ----------------------------------------
 
 local ZO_EndInWorldInteractionsFragment = ZO_SceneFragment:Subclass()
-
-function ZO_EndInWorldInteractionsFragment:New(actionLayerName)
-    local fragment = ZO_SceneFragment.New(self)
-    return fragment
-end
 
 function ZO_EndInWorldInteractionsFragment:Show()
     EndInteraction(INTERACTION_FISH)
@@ -533,10 +511,6 @@ END_IN_WORLD_INTERACTIONS_FRAGMENT = ZO_EndInWorldInteractionsFragment:New()
 ----------------------------------------
 
 local ZO_MinimizeChatFragment = ZO_SceneFragment:Subclass()
-
-function ZO_MinimizeChatFragment:New(actionLayerName)
-    return ZO_SceneFragment.New(self)
-end
 
 function ZO_MinimizeChatFragment:Show()
     local function MinimizeChat()
@@ -576,10 +550,6 @@ MINIMIZE_CHAT_FRAGMENT = ZO_MinimizeChatFragment:New()
 
 local ZO_StopMovementFragment = ZO_SceneFragment:Subclass()
 
-function ZO_StopMovementFragment:New()
-    return ZO_SceneFragment.New(self)
-end
-
 function ZO_StopMovementFragment:Show()
     StopAllMovement()
     self:OnShown()
@@ -597,20 +567,18 @@ STOP_MOVEMENT_FRAGMENT = ZO_StopMovementFragment:New()
 
 local ZO_HideMouseFragment = ZO_SceneFragment:Subclass()
 
-local ONLY_CONSIDER_MOUSE_VISIBILITY_WHILE_MOVING = true
+do
+    local ONLY_CONSIDER_MOUSE_VISIBILITY_WHILE_MOVING = true
 
-function ZO_HideMouseFragment:New()
-    return ZO_SceneFragment.New(self)
-end
+    function ZO_HideMouseFragment:Show()
+        HideMouse(ONLY_CONSIDER_MOUSE_VISIBILITY_WHILE_MOVING)
+        self:OnShown()
+    end
 
-function ZO_HideMouseFragment:Show()
-    HideMouse(ONLY_CONSIDER_MOUSE_VISIBILITY_WHILE_MOVING)
-    self:OnShown()
-end
-
-function ZO_HideMouseFragment:Hide()
-    ShowMouse(ONLY_CONSIDER_MOUSE_VISIBILITY_WHILE_MOVING)
-    self:OnHidden()
+    function ZO_HideMouseFragment:Hide()
+        ShowMouse(ONLY_CONSIDER_MOUSE_VISIBILITY_WHILE_MOVING)
+        self:OnHidden()
+    end
 end
 
 HIDE_MOUSE_FRAGMENT = ZO_HideMouseFragment:New()
@@ -621,17 +589,9 @@ HIDE_MOUSE_FRAGMENT = ZO_HideMouseFragment:New()
 
 local ZO_KeybindStripFragment = ZO_FadeSceneFragment:Subclass()
 
-function ZO_KeybindStripFragment:New(...)
-    return ZO_FadeSceneFragment.New(self, ...)
-end
-
 function ZO_KeybindStripFragment:Show()
     KEYBIND_STRIP:SetStyle(KEYBIND_STRIP_STANDARD_STYLE)
     ZO_FadeSceneFragment.Show(self)
-end
-
-function ZO_KeybindStripFragment:Hide()
-    ZO_FadeSceneFragment.Hide(self)
 end
 
 KEYBIND_STRIP_FADE_FRAGMENT = ZO_KeybindStripFragment:New(ZO_KeybindStripControl)
@@ -643,17 +603,9 @@ KEYBIND_STRIP_FADE_FRAGMENT:AddInstantScene(CROWN_CRATE_KEYBOARD_SCENE)
 
 local ZO_ChampionKeybindStripFragment = ZO_FadeSceneFragment:Subclass()
 
-function ZO_ChampionKeybindStripFragment:New(...)
-    return ZO_FadeSceneFragment.New(self, ...)
-end
-
 function ZO_ChampionKeybindStripFragment:Show()
     KEYBIND_STRIP:SetStyle(KEYBIND_STRIP_CHAMPION_KEYBOARD_STYLE)
     ZO_FadeSceneFragment.Show(self)
-end
-
-function ZO_ChampionKeybindStripFragment:Hide()
-    ZO_FadeSceneFragment.Hide(self)
 end
 
 CHAMPION_KEYBIND_STRIP_FADE_FRAGMENT = ZO_ChampionKeybindStripFragment:New(ZO_KeybindStripControl)
@@ -664,17 +616,9 @@ CHAMPION_KEYBIND_STRIP_FADE_FRAGMENT = ZO_ChampionKeybindStripFragment:New(ZO_Ke
 
 local ZO_GamepadKeybindStripFragment = ZO_TranslateFromBottomSceneFragment:Subclass()
 
-function ZO_GamepadKeybindStripFragment:New(...)
-    return ZO_TranslateFromBottomSceneFragment.New(self, ...)
-end
-
 function ZO_GamepadKeybindStripFragment:Show()
     KEYBIND_STRIP:SetStyle(KEYBIND_STRIP_GAMEPAD_STYLE)
     ZO_TranslateFromBottomSceneFragment.Show(self)
-end
-
-function ZO_GamepadKeybindStripFragment:Hide()
-    ZO_TranslateFromBottomSceneFragment.Hide(self)
 end
 
 KEYBIND_STRIP_GAMEPAD_FRAGMENT = ZO_GamepadKeybindStripFragment:New(ZO_KeybindStripControl)
@@ -685,10 +629,6 @@ KEYBIND_STRIP_GAMEPAD_FRAGMENT:AddInstantScene(CROWN_CRATE_GAMEPAD_SCENE)
 ----------------------------------------
 
 local ZO_ItemPreviewFragment = ZO_SceneFragment:Subclass()
-
-function ZO_ItemPreviewFragment:New()
-    return ZO_SceneFragment.New(self)
-end
 
 function ZO_ItemPreviewFragment:Show()
     EnablePreviewMode()
@@ -708,10 +648,6 @@ ITEM_PREVIEW_FRAGMENT = ZO_ItemPreviewFragment:New()
 
 local ZO_MarketKeybindStripFragment = ZO_SceneFragment:Subclass()
 
-function ZO_MarketKeybindStripFragment:New(...)
-    return ZO_SceneFragment.New(self, ...)
-end
-
 function ZO_MarketKeybindStripFragment:Show()
     KEYBIND_STRIP:SetBackgroundStyle(KEYBIND_STRIP_STANDARD_STYLE)
     ZO_SceneFragment.Show(self)
@@ -728,10 +664,6 @@ MARKET_KEYBIND_STRIP_FRAGMENT = ZO_MarketKeybindStripFragment:New()
 ----------------------------------------
 
 local ShowMarketFragment = ZO_SceneFragment:Subclass()
-
-function ShowMarketFragment:New(...)
-    return ZO_SceneFragment.New(self, ...)
-end
 
 function ShowMarketFragment:Show()
     self:OnShown()
@@ -756,10 +688,6 @@ SHOW_MARKET_FRAGMENT = ShowMarketFragment:New()
 
 local ShowEsoPlusFragment = ZO_SceneFragment:Subclass()
 
-function ShowMarketFragment:New(...)
-    return ZO_SceneFragment.New(self, ...)
-end
-
 function ShowEsoPlusFragment:Show()
     self:OnShown()
     -- This call needs to be after OnShown so we are in the correct state to show
@@ -780,10 +708,6 @@ SHOW_ESO_PLUS_FRAGMENT = ShowEsoPlusFragment:New()
 -------------------------------------------------
 
 local SuppressCollectibleNotificationsFragment = ZO_SceneFragment:Subclass()
-
-function SuppressCollectibleNotificationsFragment:New(...)
-    return ZO_SceneFragment.New(self, ...)
-end
 
 function SuppressCollectibleNotificationsFragment:Show()
     if NOTIFICATIONS then
@@ -813,10 +737,6 @@ SUPPRESS_COLLECTIBLE_NOTIFICATIONS_FRAGMENT = SuppressCollectibleNotificationsFr
 
 local SuppressCollectibleAnnouncementsFragment = ZO_SceneFragment:Subclass()
 
-function SuppressCollectibleAnnouncementsFragment:New(...)
-    return ZO_SceneFragment.New(self, ...)
-end
-
 function SuppressCollectibleAnnouncementsFragment:Show()
     CENTER_SCREEN_ANNOUNCE:SupressAnnouncementByType(CENTER_SCREEN_ANNOUNCE_TYPE_SINGLE_COLLECTIBLE_UPDATED)
     CENTER_SCREEN_ANNOUNCE:SupressAnnouncementByType(CENTER_SCREEN_ANNOUNCE_TYPE_COLLECTIBLES_UPDATED)
@@ -837,10 +757,10 @@ SUPPRESS_COLLECTIBLE_ANNOUNCEMENTS_FRAGMENT = SuppressCollectibleAnnouncementsFr
 
 ZO_UIMusicFragment = ZO_SceneFragment:Subclass()
 
-function ZO_UIMusicFragment:New(musicMode)
-    local fragment = ZO_SceneFragment.New(self)
-    fragment.musicMode = musicMode
-    return fragment
+function ZO_UIMusicFragment:Initialize(musicMode)
+    ZO_SceneFragment.Initialize(self)
+
+    self.musicMode = musicMode
 end
 
 function ZO_UIMusicFragment:Show()
@@ -864,10 +784,6 @@ CHAMPION_UI_MUSIC_FRAGMENT = ZO_UIMusicFragment:New(OVERRIDE_MUSIC_MODE_CHAMPION
 
 local ShowQueuedUISystemFragment = ZO_SceneFragment:Subclass()
 
-function ShowQueuedUISystemFragment:New(...)
-    return ZO_SceneFragment.New(self, ...)
-end
-
 function ShowQueuedUISystemFragment:Show()
     self:OnShown()
 end
@@ -888,10 +804,6 @@ SHOW_QUEUED_UI_SYSTEM_FRAGMENT = ShowQueuedUISystemFragment:New()
 -----------------------------------------------------
 
 local IgnoreEnergySustainabilityFrameCapFragment = ZO_SceneFragment:Subclass()
-
-function IgnoreEnergySustainabilityFrameCapFragment:New(...)
-    return ZO_SceneFragment.New(self, ...)
-end
 
 function IgnoreEnergySustainabilityFrameCapFragment:Show()
     if IsConsoleUI() then
@@ -1105,21 +1017,27 @@ INTERACT_WINDOW_KEYBIND_INTERCEPT_LAYER_FRAGMENT:SetConditional(function()
 
 -- Preview Intercept Layer
 PREVIEW_KEYBIND_INTERCEPT_LAYER_FRAGMENT = ZO_ActionLayerFragment:New("PreviewInterceptLayer")
+-- ESO-968627: Force the hide of the fragment while PlayerUnit still exists, the function
+-- RemoveActionLayerByName called to hide this fragment is dependent on PlayerUnit existing
+EVENT_MANAGER:RegisterForEvent("PreviewKeybindInterceptLayer", EVENT_PLAYER_DEACTIVATED, function()
+    PREVIEW_KEYBIND_INTERCEPT_LAYER_FRAGMENT:SetHiddenForReason("ZoneChange", true)
+end)
+EVENT_MANAGER:RegisterForEvent("PreviewKeybindInterceptLayer", EVENT_PLAYER_ACTIVATED, function()
+    PREVIEW_KEYBIND_INTERCEPT_LAYER_FRAGMENT:SetHiddenForReason("ZoneChange", false)
+end)
 
 --Crafting window keybind intercept layer
 ZO_CraftingWindowKeybindInterceptLayerFragment = ZO_ActionLayerFragment:Subclass()
 
-function ZO_CraftingWindowKeybindInterceptLayerFragment:New(actionLayerName)
-    local fragment = ZO_ActionLayerFragment.New(self, actionLayerName)
+function ZO_CraftingWindowKeybindInterceptLayerFragment:Initialize(actionLayerName)
+    ZO_ActionLayerFragment.Initialize(self, actionLayerName)
 
     CALLBACK_MANAGER:RegisterCallback("CraftingAnimationsStarted", function()
-        fragment:Refresh()
+        self:Refresh()
     end)
     CALLBACK_MANAGER:RegisterCallback("CraftingAnimationsStopped", function()
-        fragment:Refresh()
+        self:Refresh()
     end)
-
-    return fragment
 end
 
 CRAFTING_WINDOW_KEYBIND_INTERCEPT_LAYER_FRAGMENT = ZO_CraftingWindowKeybindInterceptLayerFragment:New("SceneChangeInterceptLayer")
@@ -1130,10 +1048,10 @@ end)
 -- Close Actions Intercept Layer
 ZO_CloseActionsInterceptLayerFragment = ZO_ActionLayerFragment:Subclass()
 
-function ZO_CloseActionsInterceptLayerFragment:New(actionLayerName)
-    local fragment = ZO_ActionLayerFragment.New(self, actionLayerName)
-    fragment:SetHandleOnce(true)
-    return fragment
+function ZO_CloseActionsInterceptLayerFragment:Initialize(actionLayerName)
+    ZO_ActionLayerFragment.Initialize(self, actionLayerName)
+
+    self:SetHandleOnce(true)
 end
 
 function ZO_CloseActionsInterceptLayerFragment:InterceptCloseAction(keybind)

@@ -484,9 +484,7 @@ function ZO_InventoryManager:Initialize(control)
         },
         [ITEM_TYPE_DISPLAY_CATEGORY_COMPANION] =
         {
-
-
-
+            ITEM_TYPE_DISPLAY_CATEGORY_ANIMAL_COMPANION,
             ITEM_TYPE_DISPLAY_CATEGORY_JEWELRY,
             ITEM_TYPE_DISPLAY_CATEGORY_ARMOR,
             ITEM_TYPE_DISPLAY_CATEGORY_WEAPONS,
@@ -1214,18 +1212,10 @@ do
         if needsConfirm then
             local armoryBuildListNames = { GetItemArmoryBuildList(bag, slot) }
             if #armoryBuildListNames == 0 then
-                local dialogName = "CONFIRM_DESTROY_ITEM_PROMPT"
-                if IsInGamepadPreferredMode() then
-                    dialogName = ZO_GAMEPAD_CONFIRM_DESTROY_DIALOG
-                end
-                ZO_Dialogs_ShowPlatformDialog(dialogName, nil, { mainTextParams = { coloredItemName, itemCount, GetString(SI_DESTROY_ITEM_CONFIRMATION) } })
+                ZO_Dialogs_ShowPlatformDialog("CONFIRM_DESTROY_ITEM_PROMPT", nil, { mainTextParams = { coloredItemName, itemCount } })
             else
-                local dialogName = "CONFIRM_DESTROY_ARMORY_ITEM_PROMPT"
-                if IsInGamepadPreferredMode() then
-                    dialogName = ZO_GAMEPAD_CONFIRM_DESTROY_ARMORY_ITEM_DIALOG
-                end
                 local armoryBuildList = ZO_GenerateCommaSeparatedListWithAnd(armoryBuildListNames)
-                ZO_Dialogs_ShowPlatformDialog(dialogName, nil, { mainTextParams = { ZO_SELECTED_TEXT:Colorize(armoryBuildList), #armoryBuildListNames, coloredItemName, itemCount, GetString(SI_DESTROY_ITEM_CONFIRMATION) } })
+                ZO_Dialogs_ShowPlatformDialog("CONFIRM_DESTROY_ARMORY_ITEM_PROMPT", nil, { mainTextParams = { ZO_SELECTED_TEXT:Colorize(armoryBuildList), #armoryBuildListNames, coloredItemName, itemCount } })
             end
         else
             ZO_Dialogs_ShowPlatformDialog("DESTROY_ITEM_PROMPT", nil, { mainTextParams = { coloredItemName, itemCount } })
@@ -2118,6 +2108,7 @@ function ZO_InventoryManager:ShouldAddSlotToList(inventory, slot)
 end
 
 function ZO_InventoryManager:DoesSlotPassAdditionalFilters(inventory, slot)
+    local currentFilter = inventory.currentFilter
     if not DoesSlotPassFilter(slot, currentFilter, inventory.additionalFilter) then
         return false
     end

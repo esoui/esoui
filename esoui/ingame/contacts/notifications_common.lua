@@ -70,7 +70,7 @@ Sample Usage:
         local notificationType = "SpectacleEventUpdate"
         local expirationAgeSeconds = 7 * ZO_ONE_DAY_IN_SECONDS
         tracker:SetNotificationTypeExpirationAgeSeconds(notificationType, expirationAgeSeconds)
-    end
+    end)
 
 --]]
 
@@ -219,8 +219,9 @@ function ZO_DismissedNotificationTracker:RemoveExpiredNotificationsInternal()
 
     -- Remove notifications of any notification type that were dismissed
     -- on or before the expiration timestamp.
-    local expirationTimestamp = GetTimeStamp() - ZO_DISMISSED_NOTIFICATION_EXPIRATION_AGE_SECONDS
     for notificationType, notifications in pairs(dismissedNotifications) do
+        local expirationAgeSeconds = self.notificationTypeExpirationAgeSeconds[notificationType] or ZO_DISMISSED_NOTIFICATION_EXPIRATION_AGE_SECONDS
+        local expirationTimestamp = GetTimeStamp() - expirationAgeSeconds
         for notificationDescriptor, dismissedTimestamp in pairs(notifications) do
             if dismissedTimestamp <= expirationTimestamp then
                 notifications[notificationDescriptor] = nil
@@ -767,19 +768,19 @@ function ZO_QuestShareProvider:BuildNotificationList()
 
     local questShareIds = { GetOfferedQuestShareIds() }
     for i, questId in ipairs(questShareIds) do
-        local questName, characterName, aMillisecondsSinceRequest, displayName = GetOfferedQuestShareInfo(questId)
-        local displayText = ZO_GetPrimaryPlayerName(displayName, characterName)
-        local formattedPlayerNames = ZO_GetPrimaryPlayerNameWithSecondary(displayName, characterName)
-        self.list[i] =  {
-                            dataType = NOTIFICATIONS_REQUEST_DATA,
-                            notificationType = NOTIFICATION_TYPE_QUEST_SHARE,
-                            secsSinceRequest = ZO_NormalizeSecondsSince(aMillisecondsSinceRequest / 1000),
-                            message = self:CreateMessage(formattedPlayerNames, questName),
-                            questId = questId,
-                            shortDisplayText = displayText,
-                            controlsOwnSounds = true,
-                            characterNameForGamercard = characterName,
-                        }
+        local questName, characterName, aMillisecondsSinceRequest, crossplayDisplayName, platformDisplayName = GetOfferedQuestShareInfo(questId)
+        local primaryPlayerName = ZO_GetPrimaryPlayerName(crossplayDisplayName, characterName, platformDisplayName)
+        local formattedPlayerNames = ZO_GetPrimaryPlayerNameWithSecondaryAndTertiary(crossplayDisplayName, characterName, platformDisplayName)
+        self.list[i] = {
+            dataType = NOTIFICATIONS_REQUEST_DATA,
+            notificationType = NOTIFICATION_TYPE_QUEST_SHARE,
+            secsSinceRequest = ZO_NormalizeSecondsSince(aMillisecondsSinceRequest / 1000),
+            message = self:CreateMessage(formattedPlayerNames, questName),
+            questId = questId,
+            shortDisplayText = primaryPlayerName,
+            controlsOwnSounds = true,
+            characterNameForGamercard = characterName,
+        }
     end
 end
 
@@ -1247,8 +1248,8 @@ end
 
 ZO_LFGUpdateProvider = ZO_NotificationProvider:Subclass()
 
-function ZO_LFGUpdateProvider:Initialize(notificationManager, notificationEventCallback)
-    ZO_NotificationProvider.Initialize(self, notificationManager, notificationEventCallback)
+function ZO_LFGUpdateProvider:Initialize(notificationManager)
+    ZO_NotificationProvider.Initialize(self, notificationManager)
     self:SetHasTimer(true)
 
     self:RegisterUpdateEvent(EVENT_GROUPING_TOOLS_READY_CHECK_UPDATED)
@@ -2244,8 +2245,6 @@ ZO_VeterancyRankUpRewardsNotificationProvider = ZO_NotificationProvider:Subclass
 function ZO_VeterancyRankUpRewardsNotificationProvider:Initialize(notificationManager)
     ZO_NotificationProvider.Initialize(self, notificationManager)
 
-    self.notificationType = "VeterancyRankUp"
-
     local function UpdateVeterancyRankUpRewardsNotification()
         self:PushUpdateToNotificationManager()
     end
@@ -2259,36 +2258,68 @@ end
 function ZO_VeterancyRankUpRewardsNotificationProvider:BuildNotificationList()
     ZO_ClearNumericallyIndexedTable(self.list)
 
-    if IsVeterancySeasonActive() then
-        local currentClaimableRank = ZO_VETERANCY_MANAGER:GetHighestUnlockedRankWithClaimableRewards()
-        if currentClaimableRank then
-            local currentClaimableRankData = ZO_VETERANCY_MANAGER:GetRankDataByIndex(currentClaimableRank)
+    if not IsVeterancySeasonActive() then
+        return
+    end
 
-            local notificationDescriptor = nil
-            if currentClaimableRankData:CanClaimRank() and not currentClaimableRankData:IsClaimed() then
-                notificationDescriptor = string.format("%u", currentClaimableRank)
-            end
+    local currentClaimableRank = ZO_VETERANCY_MANAGER:GetHighestUnlockedRankWithClaimableRewards()
+    if not currentClaimableRank then
+        return
+    end
 
-            if notificationDescriptor then
-                if not DISMISSED_NOTIFICATION_TRACKER:IsNotificationDismissed(self.notificationType, notificationDescriptor) then
-                    -- This notification has not been dismissed; create and append the notification.
-                    table.insert(self.list,
-                    {
-                        dataType = NOTIFICATIONS_VIEW_DISMISS_DATA,
-                        notificationType = NOTIFICATION_TYPE_VETERANCY_RANKED_UP_HAS_REWARDS,
-                        notificationDescriptor = notificationDescriptor,
-                        message = zo_strformat(SI_VETERANCY_RANK_UP_REWARDS_FORMATTER, currentClaimableRank),
-                        secsSinceRequest = ZO_NormalizeSecondsSince(0),
-                        shortDisplayText = GetString("SI_NOTIFICATIONTYPE", NOTIFICATION_TYPE_VETERANCY_RANKED_UP_HAS_REWARDS),
-                    })
-                end
-            end
+    -- Rewards to claim notification
+    local currentClaimableRankData = ZO_VETERANCY_MANAGER:GetRankDataByIndex(currentClaimableRank)
+    if currentClaimableRankData:CanClaimRank() and not currentClaimableRankData:IsClaimed() then
+        local notificationDescriptor = string.format("%u", currentClaimableRank)
+
+        if not DISMISSED_NOTIFICATION_TRACKER:IsNotificationDismissed("VeterancyRankUp", notificationDescriptor) then
+            -- This notification has not been dismissed; create and append the notification.
+            table.insert(self.list,
+            {
+                dataType = NOTIFICATIONS_VIEW_DISMISS_DATA,
+                notificationType = NOTIFICATION_TYPE_VETERANCY_RANKED_UP_HAS_REWARDS,
+                notificationDismissalType = "VeterancyRankUp",
+                notificationDescriptor = notificationDescriptor,
+                message = zo_strformat(SI_VETERANCY_RANK_UP_REWARDS_FORMATTER, currentClaimableRank),
+                secsSinceRequest = ZO_NormalizeSecondsSince(0),
+                shortDisplayText = GetString("SI_NOTIFICATIONTYPE", NOTIFICATION_TYPE_VETERANCY_RANKED_UP_HAS_REWARDS),
+            })
+        end
+    end
+    
+    -- Ending soon notification
+    local timeRemainingSeconds = GetCurrentVeterancySeasonTimeRemainingS()
+    if timeRemainingSeconds < ZO_ONE_WEEK_IN_SECONDS then
+        -- Show the season ending soon notification if you've reached a rank where rewards are relevant
+        -- Regardless of if they've already been claimed or not
+        local notificationDescriptor = nil
+        local message = nil
+        if timeRemainingSeconds < ZO_ONE_DAY_IN_SECONDS then
+            notificationDescriptor = "1_Day"
+            message = GetString(SI_VETERANCY_ENDING_SOON_NOTIFICATION_ONE_DAY)
+        else
+            notificationDescriptor = "7_Days"
+            message = GetString(SI_VETERANCY_ENDING_SOON_NOTIFICATION_ONE_WEEK)
+        end
+
+        if not DISMISSED_NOTIFICATION_TRACKER:IsNotificationDismissed("VeterancyEndingSoon", notificationDescriptor) then
+            -- This notification has not been dismissed; create and append the notification.
+            table.insert(self.list,
+            {
+                dataType = NOTIFICATIONS_VIEW_DISMISS_DATA,
+                notificationType = NOTIFICATION_TYPE_VETERANCY_RANKED_UP_HAS_REWARDS,
+                notificationDismissalType = "VeterancyEndingSoon",
+                notificationDescriptor = notificationDescriptor,
+                message = message,
+                secsSinceRequest = ZO_NormalizeSecondsSince(0),
+                shortDisplayText = GetString(SI_VETERANCY_ENDING_SOON_NOTIFICATION_SHORT_DESCRIPTION),
+            })
         end
     end
 end
 
 function ZO_VeterancyRankUpRewardsNotificationProvider:Dismiss(notificationData)
-    DISMISSED_NOTIFICATION_TRACKER:DismissNotification(self.notificationType, notificationData.notificationDescriptor)
+    DISMISSED_NOTIFICATION_TRACKER:DismissNotification(notificationData.notificationDismissalType, notificationData.notificationDescriptor)
     self:RefreshNotifications()
     CALLBACK_MANAGER:FireCallbacks("OnVeterancyNotificationsRefreshed")
 end

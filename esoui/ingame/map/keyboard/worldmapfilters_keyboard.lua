@@ -127,6 +127,15 @@ function ImperialPvPWorldMapFilterPanel:Initialize(...)
     WorldMapFilterPanel.Initialize(self, ...)
 end
 
+--Jerall PvP Filter Panel
+
+local JerallPvPWorldMapFilterPanel = ZO_Object.MultiSubclass(ZO_JerallPvPWorldMapFilterPanel_Shared, WorldMapFilterPanel)
+
+function JerallPvPWorldMapFilterPanel:Initialize(...)
+    ZO_JerallPvPWorldMapFilterPanel_Shared.Initialize(self, ...)
+    WorldMapFilterPanel.Initialize(self, ...)
+end
+
 --Battleground Filter Panel
 
 local BattlegroundWorldMapFilterPanel = ZO_Object.MultiSubclass(ZO_BattlegroundWorldMapFilterPanel_Shared, WorldMapFilterPanel)
@@ -153,6 +162,7 @@ function WorldMapFilters:Initialize(control)
         self.pvePanel = PvEWorldMapFilterPanel:New(self.control:GetNamedChild("PvE"), MAP_FILTER_TYPE_STANDARD, savedVars)
         self.pvpPanel = PvPWorldMapFilterPanel:New(self.control:GetNamedChild("PvP"), MAP_FILTER_TYPE_AVA_CYRODIIL, savedVars)
         self.imperialPvPPanel = ImperialPvPWorldMapFilterPanel:New(self.control:GetNamedChild("ImperialPvP"), MAP_FILTER_TYPE_AVA_IMPERIAL, savedVars)
+        self.jerallPvPPanel = JerallPvPWorldMapFilterPanel:New(self.control:GetNamedChild("JerallPvP"), MAP_FILTER_TYPE_AVA_JERALL, savedVars)
         self.battlegroundPanel = BattlegroundWorldMapFilterPanel:New(self.control:GetNamedChild("Battleground"), MAP_FILTER_TYPE_BATTLEGROUND, savedVars)
         self.globalPanel = GlobalWorldMapFilterPanel:New(self.control:GetNamedChild("Global"), MAP_FILTER_TYPE_GLOBAL, savedVars)
     end)

@@ -7,7 +7,14 @@
             </OnInitialized>
             <Controls>
                 <Texture name="$(parent)Background" override="true">
+                    <Dimensions x="ZO_GAMEPAD_MARKET_INDIVIDUAL_PRODUCT_WIDTH" y="ZO_GAMEPAD_MARKET_INDIVIDUAL_BACKGROUND_HEIGHT"/>
+                    <Anchor point="TOPLEFT"/>
                     <TextureCoords left="0" right="ZO_GAMEPAD_MARKET_INDIVIDUAL_TEXTURE_WIDTH_COORD" top="0" bottom="ZO_GAMEPAD_MARKET_INDIVIDUAL_TEXTURE_HEIGHT_COORD"/>
+                </Texture>
+                <Texture name="$(parent)BackgroundBottomFade" override="true">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Background" relativePoint="BOTTOMLEFT" offsetY="-ZO_GAMEPAD_MARKET_PRODUCT_BACKGROUND_BOTTOM_FADE_HEIGHT"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Background"/>
+                    <FadeGradient x1="0" y1="1" size1="ZO_GAMEPAD_MARKET_PRODUCT_BACKGROUND_BOTTOM_FADE_HEIGHT" x2="0" y2="-1" size2="0"/>
                 </Texture>
                 <Control name="$(parent)Highlight" hidden="true">
                     <AnchorFill/>
@@ -24,6 +31,13 @@
                 <Label name="$(parent)EsoPlusCost" override="true" font="ZoFontGamepadBold27"/>
                 <Label name="$(parent)Purchased" override="true" font="ZoFontGamepadBold27"/>
                 <Label name="$(parent)EsoPlusDeal" override="true" font="ZoFontGamepadBold27"/>
+                <Control name="$(parent)PurchaseLimit" override="true">
+                    <Controls>
+                        <Label name="$(parent)Tag" override="true" font="ZoFontGamepadBold27"/>
+                        <Label name="$(parent)Count" override="true" font="ZoFontGamepadBold27"/>
+                        <Label name="$(parent)Timer" override="true" font="ZoFontGamepadBold27"/>
+                    </Controls>
+                </Control>
                 <Label name="$(parent)TextCallout" override="true"/>
                 <Label name="$(parent)BundledProducts" override="true" font="ZoFontGamepad34">
                     <Anchor point="BOTTOMRIGHT" offsetX="-20" offsetY="-10"/>
@@ -65,8 +79,18 @@
             </OnInitialized>
             <Controls>
                 <Texture name="$(parent)Background" level="ZO_MARKET_TILE_BACKGROUND_LEVEL" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
+                    <Dimensions x="ZO_GAMEPAD_MARKET_INDIVIDUAL_PRODUCT_WIDTH" y="ZO_GAMEPAD_MARKET_INDIVIDUAL_BACKGROUND_HEIGHT"/>
+                    <Anchor point="TOPLEFT"/>
                     <TextureCoords left="0" right="ZO_GAMEPAD_MARKET_INDIVIDUAL_TEXTURE_WIDTH_COORD" top="0" bottom="ZO_GAMEPAD_MARKET_INDIVIDUAL_TEXTURE_HEIGHT_COORD"/>
-                    <AnchorFill/>
+                </Texture>
+                <Texture name="$(parent)BackgroundBottom" color="000000" level="ZO_MARKET_TILE_BACKGROUND_BOTTOM_LEVEL">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Background" relativePoint="BOTTOMLEFT"/>
+                    <Anchor point="BOTTOMRIGHT"/>
+                </Texture>
+                <Texture name="$(parent)BackgroundBottomFade" color="000000" level="ZO_MARKET_TILE_BACKGROUND_BOTTOM_LEVEL">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Background" relativePoint="BOTTOMLEFT" offsetY="-ZO_GAMEPAD_MARKET_PRODUCT_BACKGROUND_BOTTOM_FADE_HEIGHT"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Background"/>
+                    <FadeGradient x1="0" y1="1" size1="ZO_GAMEPAD_MARKET_PRODUCT_BACKGROUND_BOTTOM_FADE_HEIGHT" x2="0" y2="-1" size2="0"/>
                 </Texture>
                 <!-- The Overlay should appear over top of the background -->
                 <Texture name="$(parent)OverlayGradient" textureFile="EsoUI/Art/Market/market_ItemGradient_256.dds" alpha="0.6" level="ZO_MARKET_TILE_OVERLAY_LEVEL">

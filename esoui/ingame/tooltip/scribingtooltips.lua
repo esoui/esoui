@@ -2,14 +2,7 @@ function ZO_Tooltip:GetRequiredScribingCollectibleText()
     local collectibleData = SCRIBING_DATA_MANAGER:GetScribingPurchasableCollectibleData()
     local collectibleName = GetCollectibleName(collectibleData:GetId())
     if collectibleName ~= "" then
-        local formatterStringId
-        local collectibleCategory = GetCollectibleCategoryType(collectibleData:GetId())
-        if collectibleCategory == COLLECTIBLE_CATEGORY_TYPE_CHAPTER then
-            formatterStringId = SI_COLLECTIBLE_REQUIRED_TO_USE_SCRIBING_UPGRADE
-        else
-            formatterStringId = SI_COLLECTIBLE_REQUIRED_TO_USE_SCRIBING_CROWN_STORE
-        end
-        return zo_strformat(formatterStringId, collectibleName, GetCollectibleCategoryNameByCollectibleId(collectibleData:GetId()))
+        return zo_strformat(SI_COLLECTIBLE_REQUIRED_TO_USE_SCRIBING_CROWN_STORE, collectibleName, GetCollectibleCategoryNameByCollectibleId(collectibleData:GetId()))
     end
 
     return ""

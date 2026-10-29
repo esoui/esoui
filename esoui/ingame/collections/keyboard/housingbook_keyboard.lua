@@ -22,11 +22,7 @@ function HousingBook_Keyboard:InitializeControls()
     self.locationLabel = scrollSection:GetNamedChild("LocationLabel")
     self.houseTypeLabel = scrollSection:GetNamedChild("HouseTypeLabel")
     self.primaryResidenceLabel = scrollSection:GetNamedChild("PrimaryResidenceLabel")
-
-
-
-
-
+    self.supportsSkyControlLabel = scrollSection:GetNamedChild("SupportsSkyControlLabel")
     self.supportsWeatherControlLabel = scrollSection:GetNamedChild("SupportsWeatherControlLabel")
     self.recommendCountLabel = scrollSection:GetNamedChild("RecommendCountLabel")
     self.hintLabel = scrollSection:GetNamedChild("HintLabel")
@@ -131,11 +127,9 @@ function HousingBook_Keyboard:RefreshDetails()
         local hasWeatherControlSupportString = hasWeatherControlSupport and GetString(SI_YES) or GetString(SI_NO)
         self.supportsWeatherControlLabel:SetText(zo_strformat(SI_HOUSING_BOOK_SUPPORTS_WEATHER_CONTROL_FORMATTER, hasWeatherControlSupportString))
 
-
-
-
-
-
+        local hasSkyControlSupport = ZO_FlagHelpers.MaskHasFlag(houseFlags, HOUSE_FLAGS_SUPPORTS_SKY_CONTROL)
+        local hasSkyControlSupportString = hasSkyControlSupport and GetString(SI_YES) or GetString(SI_NO)
+        self.supportsSkyControlLabel:SetText(zo_strformat(SI_HOUSING_BOOK_SUPPORTS_SKY_CONTROL_FORMATTER, hasSkyControlSupportString))
 
         local houseId = collectibleData:GetReferenceId()
         local recommendCount = GetNumHouseToursPlayerListingRecommendations(houseId)

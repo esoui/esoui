@@ -271,6 +271,7 @@ function ActionButton:Clear()
     self.button.actionId = nil
     self.cooldownEdge:SetHidden(true)
     self.countText:SetText("")
+    self:SetStackCount(0)
 end
 
 function ActionButton:UpdateActivationHighlight()

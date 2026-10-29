@@ -39,7 +39,17 @@ function ZO_TrialProgression_Shared:InitializeKeybindStripDescriptor()
             name = GetString(SI_TRIAL_PROGRESSION_KEYBIND_ATTUNE),
             keybind = "UI_SHORTCUT_PRIMARY",
             callback = function()
+                local isCurrentTrackAttuned = self.selectedTrackIndex == GetCurrentlyAttunedTrialProgressionTrack()
                 ChangeAttunementForTrialProgressionTrackByIndex(self.selectedTrackIndex)
+                local soundToPlay
+                if isCurrentTrackAttuned then
+                    local trackUnattunedSound = GetTrialProgressionTrackUnattunedUISoundByIndex(self.selectedTrackIndex)
+                    soundToPlay = trackUnattunedSound ~= "" and trackUnattunedSound or SOUNDS.TRIAL_PROGRESSION_UNATTUNED
+                else
+                    local trackAttunedSound = GetTrialProgressionTrackAttunedUISoundByIndex(self.selectedTrackIndex)
+                    soundToPlay = trackAttunedSound ~= "" and trackAttunedSound or SOUNDS.TRIAL_PROGRESSION_ATTUNED
+                end
+                PlaySound(soundToPlay)
             end,
             visible = function()
                 return self.selectedTrackIndex
@@ -166,11 +176,13 @@ function ZO_TrialProgression_Shared:OnShowing()
     self:RefreshHighlights()
     KEYBIND_STRIP:RemoveDefaultExit()
     KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindStripDescriptor)
+    PlaySound(SOUNDS.TRIAL_PROGRESSION_OPENED)
 end
 
 function ZO_TrialProgression_Shared:OnHiding()
     KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
     KEYBIND_STRIP:RestoreDefaultExit()
+    PlaySound(SOUNDS.TRIAL_PROGRESSION_CLOSED)
 end
 
 function ZO_TrialProgression_Shared:SetSelectedTrackIndex(index)

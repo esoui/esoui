@@ -19,6 +19,23 @@ local QUEUED_DIALOG_INDEX_DATA = 2
 local QUEUED_DIALOG_INDEX_PARAMS = 3
 
 ZO_DIALOG_SYNC_OBJECT = GetOrCreateSynchronizingObject("dialog")
+local g_sendingBroadcast = false
+local g_handlingBroadcast = false
+
+ZO_DIALOG_SYNC_OBJECT:SetHandler("OnBroadcast", function(_, message)
+    if g_sendingBroadcast then
+        return
+    end
+
+    g_handlingBroadcast = true
+    local args = {zo_strsplit(" ", message:lower())}
+    local command = table.remove(args, 1)
+    if command == "releasealldialogs" then
+        local forceAll = ZO_IsBooleanStringTrue(table.remove(args, 1))
+        ZO_Dialogs_ReleaseAllDialogs(forceAll)
+    end
+    g_handlingBroadcast = false
+end)
 
 local function ContainsName(testName, ...)
     for i = 1, select("#", ...) do
@@ -173,15 +190,17 @@ end
 local function GetFormattedDialogText(text, params)
     if text then
         if params and #params > 0 then
-            text = zo_strformat(text, unpack(params))
-        elseif type(text) == "number" then
-            text = GetString(text)
+            return zo_strformat(text, unpack(params))
         end
-    else
-        text = ""
+
+        if type(text) == "number" then
+            return GetString(text)
+        end
+
+        return text
     end
 
-    return text
+    return ""
 end
 
 function ZO_GetFormattedDialogText(dialog, textTable, params)
@@ -550,12 +569,8 @@ function ZO_Dialogs_ShowDialog(name, data, textParams, isGamepad)
                 local buttonText
                 if textParams and textParams.buttonTextOverrides and textParams.buttonTextOverrides[i] then
                     buttonText = textParams.buttonTextOverrides[i]
-                elseif type(buttonInfo.text) == "number" then
-                    buttonText = GetString(buttonInfo.text)
-                elseif type(buttonInfo.text) == "function" then
-                    buttonText = buttonInfo.text(dialog)
                 else
-                    buttonText = buttonInfo.text
+                    buttonText = ZO_EvalStringId(buttonInfo.text, dialog)
                 end
                 button:SetText(buttonText)
                 button:SetHidden(false)
@@ -596,7 +611,7 @@ function ZO_Dialogs_ShowDialog(name, data, textParams, isGamepad)
                     end
                 end
 
-                if buttonInfo.requiresTextInput then
+                if buttonInfo.requiresTextInput or ZO_Eval(buttonInfo.requiresConfirmationVerification, dialog) then
                     dialog.requiredTextFields:AddButton(button)
                 end
             end
@@ -629,10 +644,26 @@ function ZO_Dialogs_ShowDialog(name, data, textParams, isGamepad)
 
         local controlAbove = textControl
 
-        if dialogInfo.editBox then
+        local editBoxInfo = dialogInfo.editBox
+        local verifyConfirmationInfo = ZO_Eval(dialogInfo.verifyConfirmationInfo, dialog)
+        if verifyConfirmationInfo then
+            editBoxInfo = ZO_ShallowTableCopy(verifyConfirmationInfo, editBoxInfo)
+        end
+        if editBoxInfo then
             local editControl = dialog:GetNamedChild("EditBox")
             local editContainer = dialog:GetNamedChild("Edit")
-            local editBoxInfo = dialogInfo.editBox
+            local matchingTextInstructionsLabel = dialog:GetNamedChild("MatchingTextInstructions")
+
+            local matchingString = ZO_Eval(editBoxInfo.matchingString, dialog)
+            if matchingString then
+                matchingTextInstructionsLabel:SetAnchor(TOPLEFT, controlAbove, BOTTOMLEFT, 0, 15)
+                matchingTextInstructionsLabel:SetAnchor(TOPRIGHT, controlAbove, BOTTOMRIGHT, 0, 15)
+                local formatter = editBoxInfo.matchingStringInstructionsFormatter or GetString(SI_DIALOG_MATCHING_STRING_TO_CONFIRM)
+                matchingTextInstructionsLabel:SetText(zo_strformat(formatter, matchingString))
+                matchingTextInstructionsLabel:SetHidden(false)
+                dialog.requiredTextFields:SetMatchingString(matchingString)
+                controlAbove = matchingTextInstructionsLabel
+            end
 
             editContainer:SetAnchor(TOPLEFT, controlAbove, BOTTOMLEFT, 0, 10)
             editContainer:SetAnchor(TOPRIGHT, controlAbove, BOTTOMRIGHT, 0, 10)
@@ -658,11 +689,8 @@ function ZO_Dialogs_ShowDialog(name, data, textParams, isGamepad)
                 editControl:SetMaxInputChars(128)
             end
 
-            local defaultText = textParams.editBoxDefaultText or editBoxInfo.defaultText
+            local defaultText = ZO_EvalStringId(textParams.editBoxDefaultText or editBoxInfo.defaultText)
             if defaultText then
-                if type(defaultText) == "number" then
-                    defaultText = GetString(defaultText)
-                end
                 editControl:SetDefaultText(defaultText)
             else
                 editControl:SetDefaultText("")
@@ -707,14 +735,6 @@ function ZO_Dialogs_ShowDialog(name, data, textParams, isGamepad)
                 editControl.validator = editBoxInfo.validator
             else
                 editControl.validator = nil
-            end
-
-            if editBoxInfo.matchingString then
-                dialog.requiredTextFields:SetMatchingString(editBoxInfo.matchingString)
-            end
-
-            if editBoxInfo.selectAll then
-                editControl:SelectAll()
             end
 
             controlAbove = editControl
@@ -823,7 +843,11 @@ function ZO_Dialogs_ShowDialog(name, data, textParams, isGamepad)
 
     --edit controls cant take focus when hidden
     if(dialogInfo.editBox) then
-        dialog:GetNamedChild("EditBox"):TakeFocus()
+        local editBox = dialog:GetNamedChild("EditBox")
+        editBox:TakeFocus()
+        if dialogInfo.editBox.selectAll then
+            editBox:SelectAll()
+        end
     end
 
     return dialog
@@ -847,18 +871,21 @@ function ZO_Dialogs_InitializeDialog(dialog, isGamepad)
     local button2Control = dialog:GetNamedChild("Button2")
     local buttonExtraText1Control = dialog:GetNamedChild("ButtonExtraText1")
     local buttonExtraText2Control = dialog:GetNamedChild("ButtonExtraText2")
+    local matchingTextInstructionsLabel = dialog:GetNamedChild("MatchingTextInstructions")
     local editContainer = dialog:GetNamedChild("Edit")
     local editControl = dialog:GetNamedChild("EditBox")
     local warningLabel = dialog:GetNamedChild("WarningText")
 
     textControl:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
     warningLabel:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
+    matchingTextInstructionsLabel:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
     buttonExtraText1Control:SetHidden(true)
     buttonExtraText2Control:SetHidden(true)
     button1Control:SetState(BSTATE_NORMAL, false)
     button2Control:SetState(BSTATE_NORMAL, false)
     button1Control:SetKeybindEnabled(true)
     button2Control:SetKeybindEnabled(true)
+    matchingTextInstructionsLabel:SetHidden(true)
     editContainer:SetHidden(true)
     warningLabel:SetHidden(true)
     editControl:SetText("")
@@ -1051,6 +1078,13 @@ function ZO_Dialogs_ReleaseAllDialogs(forceAll)
     end
 
     ZO_Dialogs_SetDialogQueuePaused(false)
+
+    if not g_handlingBroadcast then
+        g_sendingBroadcast = true
+        local broadcastMessage = string.format("ReleaseAllDialogs %s", forceAll and "true" or "false")
+        ZO_DIALOG_SYNC_OBJECT:Broadcast(broadcastMessage)
+        g_sendingBroadcast = false
+    end
 end
 
 -- If textTable is nil, the default mainText table (defined in the ESO_Dialogs table) is used
@@ -1166,12 +1200,8 @@ function ZO_Dialogs_RefreshButtonTexts(dialog)
                 local buttonText
                 if textParams and textParams.buttonTextOverrides and textParams.buttonTextOverrides[i] then
                     buttonText = textParams.buttonTextOverrides[i]
-                elseif type(buttonInfo.text) == "number" then
-                    buttonText = GetString(buttonInfo.text)
-                elseif type(buttonInfo.text) == "function" then
-                    buttonText = buttonInfo.text(dialog)
                 else
-                    buttonText = buttonInfo.text
+                    buttonText = ZO_EvalStringId(buttonInfo.text, dialog)
                 end
                 button:SetText(buttonText)
             end

@@ -44,9 +44,8 @@ local g_previousState = nil
 
 local g_loadingUpdates = false
 
--- We don't want to show the video or the chapter upsell when we're logging out, only when we're logging in
+-- We don't want to show the video when we're logging out, only when we're logging in
 local shouldTryToPlayOpeningCinematic = false
-local shouldTryToShowChapterInterstitial = false
 
 function ZO_Pregame_ShowScene(sceneName)
     SCENE_MANAGER:Show(sceneName)
@@ -133,7 +132,7 @@ local g_sharedPregameStates =
         end,
 
         GetStateTransitionData = function()
-            return "ChapterUpgradeInterstitial"
+            return "WaitForCharacterDataLoaded"
         end,
     },
 
@@ -197,54 +196,6 @@ local g_sharedPregameStates =
             ZO_Dialogs_ReleaseDialog("CHARACTER_CREATE_CREATING")
             SetCharacterCameraZoomAmount(-1) -- zoom all the way out when leaving this state
         end
-    },
-
-    ["ChapterUpgrade"] =
-    {
-        ShouldAdvance = function()
-            return false
-        end,
-
-        OnEnter = function()
-            if IsInGamepadPreferredMode() then
-                ZO_Pregame_ShowScene("chapterUpgradeGamepad")
-            else
-                ZO_Pregame_ShowScene("chapterUpgradeKeyboard")
-            end
-        end,
-
-        GetStateTransitionData = function()
-            return "CharacterSelect"
-        end,
-
-        OnExit = function()
-        end,
-    },
-
-    ["ChapterUpgradeInterstitial"] =
-    {
-        ShouldAdvance = function()
-            if not shouldTryToShowChapterInterstitial then
-                return true
-            end
-
-            return not CHAPTER_UPGRADE_MANAGER:ShouldShow()
-        end,
-
-        OnEnter = function()
-            if IsInGamepadPreferredMode() then
-                ZO_Pregame_ShowScene("chapterUpgradeGamepad")
-            else
-                ZO_Pregame_ShowScene("chapterUpgradeKeyboard")
-            end
-        end,
-
-        GetStateTransitionData = function()
-            return "WaitForCharacterDataLoaded"
-        end,
-
-        OnExit = function()
-        end,
     },
 
     ["WaitForCharacterDataLoaded"] =
@@ -331,26 +282,6 @@ local g_sharedPregameStates =
 
         OnEnter = function()
             SimpleLogoSplash_ShowWithTexture("EsoUI/Art/Login/havok_logo.dds")
-        end,
-
-        GetStateTransitionData = function()
-            return "ShowDMMVideo"
-        end,
-
-        OnExit = function()
-        end,
-    },
-
-    ["ShowDMMVideo"] =
-    {
-        ShouldAdvance = function()
-            local serviceType = GetPlatformServiceType()
-            return serviceType ~= PLATFORM_SERVICE_TYPE_DMM or ZO_Pregame_ShouldSkipVideos()
-        end,
-
-        OnEnter = function()
-            local skipMode = ZO_Pregame_CanSkipVideos() and VIDEO_SKIP_MODE_ALLOW_SKIP or VIDEO_SKIP_MODE_NO_SKIP
-            ZO_PlayVideoAndAdvance(PlayVideo, "Video/jp_DMM_logo.bk2", QUEUE_VIDEO, skipMode)
         end,
 
         GetStateTransitionData = function()
@@ -662,7 +593,7 @@ local function OnAreaLoadStarted()
     ZO_Dialogs_ReleaseAllDialogs(true)
 end
 
-function ZO_IsPlayingChapterOpeningCinematic()
+function ZO_IsPlayingOpeningCinematic()
     return ZO_PregameStateManager_GetCurrentState() == "PlayOpeningCinematic"
 end
 
@@ -682,7 +613,7 @@ function ZO_PregameIsFullyLoaded()
     return GetNumLoadedSubsystems() == GetNumTotalSubsystemsToLoad()
 end
 
-function ZO_AttemptToAdvancePastChapterOpeningCinematic()
+function ZO_AttemptToAdvancePastOpeningCinematic()
     if ZO_PregameIsFullyLoaded() then
         ZO_PregameStateManager_AdvanceStateFromState("PlayOpeningCinematic")
     end
@@ -711,8 +642,8 @@ local function OnSubsystemLoadStateChanged(_, subSystem, isComplete)
     end
 
     if ZO_PregameIsFullyLoaded() then
-        if ZO_IsPlayingChapterOpeningCinematic() then
-            ZO_AttemptToAdvancePastChapterOpeningCinematic()
+        if ZO_IsPlayingOpeningCinematic() then
+            ZO_AttemptToAdvancePastOpeningCinematic()
         end
 
         CALLBACK_MANAGER:FireCallbacks("PregameFullyLoaded")
@@ -829,7 +760,6 @@ end
 
 local function OnDisplayNameReady()
     shouldTryToPlayOpeningCinematic = true
-    shouldTryToShowChapterInterstitial = true
 end
 
 function ZO_Pregame_DisplayServerDisconnectedError()

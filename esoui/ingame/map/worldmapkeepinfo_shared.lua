@@ -158,11 +158,11 @@ end
 
 ZO_KeepResourceTypeFragment_Shared = ZO_SceneFragment:Subclass()
 
-function ZO_KeepResourceTypeFragment_Shared:New(resourceType, keepInfoObject)
-    local fragment = ZO_SceneFragment.New(self)
-    fragment.resourceType = resourceType
-    fragment.keepInfoObject = keepInfoObject
-    return fragment
+function ZO_KeepResourceTypeFragment_Shared:Initialize(resourceType, keepInfoObject)
+    ZO_SceneFragment.Initialize(self)
+    
+    self.resourceType = resourceType
+    self.keepInfoObject = keepInfoObject
 end
 
 function ZO_KeepResourceTypeFragment_Shared:Show()
@@ -178,11 +178,11 @@ end
 
 ZO_KeepUpgradePathFragment_Shared = ZO_SceneFragment:Subclass()
 
-function ZO_KeepUpgradePathFragment_Shared:New(upgradePath, keepInfoObject)
-    local fragment = ZO_SceneFragment.New(self)
-    fragment.upgradePath = upgradePath
-    fragment.keepInfoObject = keepInfoObject
-    return fragment
+function ZO_KeepUpgradePathFragment_Shared:Initialize(upgradePath, keepInfoObject)
+    ZO_SceneFragment.Initialize(self)
+    
+    self.upgradePath = upgradePath
+    self.keepInfoObject = keepInfoObject
 end
 
 function ZO_KeepUpgradePathFragment_Shared:Show()

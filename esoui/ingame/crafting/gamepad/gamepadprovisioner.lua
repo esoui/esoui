@@ -213,12 +213,16 @@ function ZO_GamepadProvisioner:InitializeSettings()
     local foodTab = GenerateTab(PROVISIONER_SPECIAL_INGREDIENT_TYPE_SPICES)
     local drinkTab = GenerateTab(PROVISIONER_SPECIAL_INGREDIENT_TYPE_FLAVORING)
     local furnishingsTab = GenerateTab(PROVISIONER_SPECIAL_INGREDIENT_TYPE_FURNISHING)
+    local suppliesTab = GenerateTab(PROVISIONER_SPECIAL_INGREDIENT_TYPE_SUPPLIES)
+    suppliesTab.visible = function()
+        return self:HasSuppliesRecipes()
+    end
 
     local provisioningSettings = ZO_GamepadProvisioner.PROVISIONING_SETTINGS
-    provisioningSettings.tabs = { foodTab, drinkTab, furnishingsTab }
+    provisioningSettings.tabs = { foodTab, drinkTab, furnishingsTab, suppliesTab }
 
     local embeddedSettings = ZO_GamepadProvisioner.EMBEDDED_SETTINGS
-    embeddedSettings.tabs = { furnishingsTab }
+    embeddedSettings.tabs = { furnishingsTab, suppliesTab }
 end
 
 function ZO_GamepadProvisioner:ResetMode()
@@ -656,7 +660,7 @@ end
 
 function ZO_GamepadProvisioner:RefreshRecipeList()
     -- This function is called from inventory update events, which is when we need to update the header with the player's current and total inventory slots
-    ZO_GamepadCraftingUtils_RefreshGenericHeaderData(self)
+    ZO_GamepadCraftingUtils_RefreshGenericHeader(self)
     self.recipeList:Clear()
 
     -- first construct the full table of filtered recipes

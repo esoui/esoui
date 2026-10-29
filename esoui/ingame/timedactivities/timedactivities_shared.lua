@@ -102,7 +102,7 @@ function ZO_TimedActivities_Shared:MarkDirty()
 end
 
 function ZO_TimedActivities_Shared:Refresh()
-    self:RefreshList(currentActivityType, activityEntries)
+    self:RefreshList()
     self:RefreshAvailability()
     self:RefreshCurrentActivityInfo()
 end

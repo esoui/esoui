@@ -580,12 +580,9 @@ function ZO_StoreManager:UpdateList()
 end
 
 function ZO_StoreManager:SetUpBuySlot(control, data)
-    local newStatusControl = control:GetNamedChild("Status")
     local slotControl = control:GetNamedChild("Button")
     local nameControl = control:GetNamedChild("Name")
     local priceControl = control:GetNamedChild("SellPriceText")
-
-    newStatusControl:SetHidden(true)
 
     -- Set info about what slot this is, on the top level slot control
     ZO_InventorySlot_SetType(slotControl, SLOT_TYPE_STORE_BUY)
@@ -636,6 +633,8 @@ function ZO_StoreManager:SetUpBuySlot(control, data)
     ZO_UpdateTraitInformationControlIcon(control, data)
 
     ZO_CurrencyControl_InitializeDisplayTypes(priceControl, unpack(ZO_VALID_CURRENCY_TYPES))
+
+    ZO_UpdateStatusControlIcons(control, data)
 
     local currencyType1 = data.currencyType1
     local currencyType2 = data.currencyType2

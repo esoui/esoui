@@ -328,3 +328,63 @@ end
 function ZO_MarketProductData:GetCategoryIndicesFromPresentation()
     return GetCategoryIndicesFromMarketProductPresentation(self.marketProductId, self.presentationIndex)
 end
+
+function ZO_MarketProductData:HasPurchaseLimit()
+    return DoesMarketProductHavePurchaseLimit(self.marketProductId)
+end
+
+function ZO_MarketProductData:GetPurchaseLimit()
+    return GetMarketProductPurchaseLimit(self.marketProductId)
+end
+
+function ZO_MarketProductData:GetPurchaseCount()
+    return GetMarketProductPurchaseCount(self.marketProductId)
+end
+
+function ZO_MarketProductData:GetAvailablePurchaseLimit()
+    return GetMarketProductAvailablePurchaseLimit(self.marketProductId)
+end
+
+function ZO_MarketProductData:GetPurchaseLimitResetType()
+    return GetMarketProductPurchaseLimitResetType(self.marketProductId)
+end
+
+function ZO_MarketProductData:GetPurchaseLimitResetTimeLeftInSeconds()
+    return GetMarketProductPurchaseLimitResetTimeLeftInSeconds(self.marketProductId)
+end
+
+function ZO_MarketProductData:IsPurchaseLimitReached()
+    if not self:HasPurchaseLimit() then
+        return false
+    end
+
+    local availablePurchaseLimit = self:GetAvailablePurchaseLimit()
+    return availablePurchaseLimit ~= nil and availablePurchaseLimit <= 0
+end
+
+function ZO_MarketProductData:HasPurchaseLimitResetTimerStarted()
+    if not self:HasPurchaseLimit() then
+        return false
+    end
+
+    local purchaseCount = self:GetPurchaseCount()
+    return purchaseCount ~= nil and purchaseCount > 0
+end
+
+function ZO_MarketProductData:ShouldShowPurchaseLimitReset()
+    if not self:HasPurchaseLimit() then
+        return false
+    end
+
+    if ShouldMarketProductHidePurchaseLimitResetTimer(self.marketProductId) then
+        return false
+    end
+
+    local resetTimeLeft = self:GetPurchaseLimitResetTimeLeftInSeconds()
+    if resetTimeLeft <= 0 then
+        return false
+    end
+
+    local ltoTimeLeft = self:GetLTOTimeLeftInSeconds()
+    return ltoTimeLeft <= 0 or resetTimeLeft <= ltoTimeLeft
+end

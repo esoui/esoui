@@ -9,12 +9,6 @@ function ZO_MapAntiquities_Gamepad:Initialize(control)
     self:SetNoItemsLabelControl(control:GetNamedChild("MainNoItemsLabel"))
     self:InitializeKeybindDescriptor()
     self:InitializeOptionsDialog()
-
-    self.control:RegisterForEvent(EVENT_ANTIQUITY_TRACKING_UPDATE, function()
-        if self.fragment:IsShowing() then
-            self:RefreshKeybinds()
-        end
-    end)
 end
 
 function ZO_MapAntiquities_Gamepad:InitializeOptionsDialog()
@@ -213,6 +207,10 @@ function ZO_MapAntiquities_Gamepad:RefreshList()
     end
 
     self.list:Commit()
+
+    if self.fragment:IsShowing() then
+        self:RefreshKeybinds()
+    end
 end
 
 function ZO_MapAntiquities_Gamepad:RefreshKeybinds()

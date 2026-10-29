@@ -34,63 +34,6 @@ function ZO_CompanionEquipment_Keyboard:Initialize(control)
     local DEFAULT_SELECT_SOUND = nil
     ZO_ScrollList_AddDataType(self.list, DATA_TYPE_ITEM, "ZO_PlayerInventorySlot", LIST_ENTRY_HEIGHT, function(rowControl, data) self:SetupItemRow(rowControl, data) end, DEFAULT_HIDE_CALLBACK, DEFAULT_SELECT_SOUND, ZO_InventorySlot_OnPoolReset)
 
-
-    -- tabs
-    local FILTER_KEYS =
-    {
-        ITEM_TYPE_DISPLAY_CATEGORY_JEWELRY, ITEM_TYPE_DISPLAY_CATEGORY_ARMOR, ITEM_TYPE_DISPLAY_CATEGORY_WEAPONS, ITEM_TYPE_DISPLAY_CATEGORY_ALL,
-    }
-
-    self.filters = {}
-    for _, key in ipairs(FILTER_KEYS) do
-        local filterData = ZO_ItemFilterUtils.GetItemTypeDisplayCategoryFilterDisplayInfo(key)
-        local filter = self:CreateNewTabFilterData(filterData.filterType, filterData.filterString, filterData.icons.up, filterData.icons.down, filterData.icons.over)
-        filter.control = ZO_MenuBar_AddButton(self.tabs, filter)
-        table.insert(self.filters, filter)
-    end
-
-    local IS_SUB_FILTER = true
-    local function GetSearchFilters(searchFilterKeys)
-        local searchFilters = {}
-        for filterId, subFilters in pairs(searchFilterKeys) do
-            searchFilters[filterId] = {}
-
-            local searchFilterAtId = searchFilters[filterId]
-            for _, subfilterKey in ipairs(subFilters) do
-                local filterData = ZO_ItemFilterUtils.GetSearchFilterData(filterId, subfilterKey)
-                local filter = self:CreateNewTabFilterData(filterData.filterType, filterData.filterString, filterData.icons.up, filterData.icons.down, filterData.icons.over, IS_SUB_FILTER)
-                table.insert(searchFilterAtId, filter)
-            end
-        end
-
-        return searchFilters
-    end
-
-    local SEARCH_FILTER_KEYS =
-    {
-        [ITEM_TYPE_DISPLAY_CATEGORY_ALL] =
-        {
-            ITEM_TYPE_DISPLAY_CATEGORY_ALL,
-        },
-        [ITEM_TYPE_DISPLAY_CATEGORY_WEAPONS] =
-        {
-            EQUIPMENT_FILTER_TYPE_RESTO_STAFF, EQUIPMENT_FILTER_TYPE_DESTRO_STAFF, EQUIPMENT_FILTER_TYPE_BOW,
-            EQUIPMENT_FILTER_TYPE_TWO_HANDED, EQUIPMENT_FILTER_TYPE_ONE_HANDED, EQUIPMENT_FILTER_TYPE_NONE,
-        },
-        [ITEM_TYPE_DISPLAY_CATEGORY_ARMOR] =
-        {
-            EQUIPMENT_FILTER_TYPE_SHIELD, EQUIPMENT_FILTER_TYPE_HEAVY, EQUIPMENT_FILTER_TYPE_MEDIUM,
-            EQUIPMENT_FILTER_TYPE_LIGHT, EQUIPMENT_FILTER_TYPE_NONE,
-        },
-        [ITEM_TYPE_DISPLAY_CATEGORY_JEWELRY] =
-        {
-            EQUIPMENT_FILTER_TYPE_RING, EQUIPMENT_FILTER_TYPE_NECK, EQUIPMENT_FILTER_TYPE_NONE,
-        },
-    }
-
-    self.subFilters = GetSearchFilters(SEARCH_FILTER_KEYS, INVENTORY_BACKPACK)
-
-
     -- sort headers
     local sortKeys = ZO_Inventory_GetDefaultHeaderSortKeys()
 
@@ -113,17 +56,13 @@ function ZO_CompanionEquipment_Keyboard:Initialize(control)
     local SUPPRESS_CALLBACKS = true
     self.sortHeaders:SelectHeaderByKey("statusSortOrder", SUPPRESS_CALLBACKS)
 
+    self.additionalFilter = function(slot)
+        return slot.companionType == GetActiveCompanionType()
+    end
 
-    ZO_MenuBar_SelectDescriptor(self.tabs, ITEM_TYPE_DISPLAY_CATEGORY_ALL)
+    self:UpdateFilters()
 
-
-
-
-
-
-
-
-    self.searchBox = control:GetNamedChild("SearchFiltersTextSearchBox");
+    self.searchBox = control:GetNamedChild("SearchFiltersTextSearchBox")
 
     local function OnTextSearchTextChanged(editBox)
         TEXT_SEARCH_MANAGER:SetSearchText("companionEquipmentTextSearch", editBox:GetText())
@@ -201,9 +140,7 @@ function ZO_CompanionEquipment_Keyboard:Initialize(control)
     COMPANION_EQUIPMENT_KEYBOARD_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_FRAGMENT_SHOWING then
             TEXT_SEARCH_MANAGER:ActivateTextSearch("companionEquipmentTextSearch")
-            
-
-
+            self:UpdateFilters()
             self:UpdateList()
             self:UpdateFreeSlots()
         elseif newState == SCENE_FRAGMENT_HIDDEN then
@@ -220,95 +157,93 @@ function ZO_CompanionEquipment_Keyboard:Initialize(control)
     end)
 end
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+function ZO_CompanionEquipment_Keyboard:UpdateFilters()
+    local FILTER_KEYS = {}
+    if IsActiveCompanionAnimal() then
+        FILTER_KEYS =
+        {
+            ITEM_TYPE_DISPLAY_CATEGORY_JEWELRY, ITEM_TYPE_DISPLAY_CATEGORY_ARMOR, ITEM_TYPE_DISPLAY_CATEGORY_ALL,
+        }
+    else
+        FILTER_KEYS =
+        {
+            ITEM_TYPE_DISPLAY_CATEGORY_JEWELRY, ITEM_TYPE_DISPLAY_CATEGORY_ARMOR, ITEM_TYPE_DISPLAY_CATEGORY_WEAPONS, ITEM_TYPE_DISPLAY_CATEGORY_ALL,
+        }
+    end
+
+    self.filters = {}
+    ZO_MenuBar_ClearButtons(self.tabs)
+    for _, key in ipairs(FILTER_KEYS) do
+        local filterData = ZO_ItemFilterUtils.GetItemTypeDisplayCategoryFilterDisplayInfo(key)
+        local filter = self:CreateNewTabFilterData(filterData.filterType, filterData.filterString, filterData.icons.up, filterData.icons.down, filterData.icons.over)
+        filter.control = ZO_MenuBar_AddButton(self.tabs, filter)
+        table.insert(self.filters, filter)
+    end
+
+    local IS_SUB_FILTER = true
+    local function GetSearchFilters(searchFilterKeys)
+        local searchFilters = {}
+        for filterId, subFilters in pairs(searchFilterKeys) do
+            searchFilters[filterId] = {}
+
+            local searchFilterAtId = searchFilters[filterId]
+            for _, subfilterKey in ipairs(subFilters) do
+                local filterData = ZO_ItemFilterUtils.GetSearchFilterData(filterId, subfilterKey)
+                local filter = self:CreateNewTabFilterData(filterData.filterType, filterData.filterString, filterData.icons.up, filterData.icons.down, filterData.icons.over, IS_SUB_FILTER)
+                table.insert(searchFilterAtId, filter)
+            end
+        end
+
+        return searchFilters
+    end
+
+    local SEARCH_FILTER_KEYS = {}
+    if IsActiveCompanionAnimal() then
+        SEARCH_FILTER_KEYS =
+        {
+            [ITEM_TYPE_DISPLAY_CATEGORY_ALL] =
+            {
+                ITEM_TYPE_DISPLAY_CATEGORY_ALL,
+            },
+            [ITEM_TYPE_DISPLAY_CATEGORY_ARMOR] =
+            {
+                EQUIPMENT_FILTER_TYPE_HEAVY, EQUIPMENT_FILTER_TYPE_MEDIUM,
+                EQUIPMENT_FILTER_TYPE_LIGHT, EQUIPMENT_FILTER_TYPE_NONE,
+            },
+            [ITEM_TYPE_DISPLAY_CATEGORY_JEWELRY] =
+            {
+                -- Remove both rings and neck because it doesn't make sense to have an all and only one other option.
+                EQUIPMENT_FILTER_TYPE_NONE,
+            },
+        }
+    else
+        SEARCH_FILTER_KEYS =
+        {
+            [ITEM_TYPE_DISPLAY_CATEGORY_ALL] =
+            {
+                ITEM_TYPE_DISPLAY_CATEGORY_ALL,
+            },
+            [ITEM_TYPE_DISPLAY_CATEGORY_WEAPONS] =
+            {
+                EQUIPMENT_FILTER_TYPE_RESTO_STAFF, EQUIPMENT_FILTER_TYPE_DESTRO_STAFF, EQUIPMENT_FILTER_TYPE_BOW,
+                EQUIPMENT_FILTER_TYPE_TWO_HANDED, EQUIPMENT_FILTER_TYPE_ONE_HANDED, EQUIPMENT_FILTER_TYPE_NONE,
+            },
+            [ITEM_TYPE_DISPLAY_CATEGORY_ARMOR] =
+            {
+                EQUIPMENT_FILTER_TYPE_SHIELD, EQUIPMENT_FILTER_TYPE_HEAVY, EQUIPMENT_FILTER_TYPE_MEDIUM,
+                EQUIPMENT_FILTER_TYPE_LIGHT, EQUIPMENT_FILTER_TYPE_NONE,
+            },
+            [ITEM_TYPE_DISPLAY_CATEGORY_JEWELRY] =
+            {
+                EQUIPMENT_FILTER_TYPE_RING, EQUIPMENT_FILTER_TYPE_NECK, EQUIPMENT_FILTER_TYPE_NONE,
+            },
+        }
+    end
+
+    self.subFilters = GetSearchFilters(SEARCH_FILTER_KEYS, INVENTORY_BACKPACK)
+
+    ZO_MenuBar_SelectDescriptor(self.tabs, ITEM_TYPE_DISPLAY_CATEGORY_ALL)
+end
 
 function ZO_CompanionEquipment_Keyboard:OnInventoryItemAdded(inventoryType, bagId, slotIndex, newSlotData, suppressItemAlert)
     -- play a brief flash animation on all the filter tabs that match this item's filterTypes
@@ -574,13 +509,8 @@ function ZO_CompanionEquipment_Keyboard:PlayItemAddedAlert(slot, suppressItemAle
 
     local addToFlashingSlots = false
     for _, filter in pairs(self.filters) do
-
-        if ZO_ItemFilterUtils.IsSlotInItemTypeDisplayCategoryAndSubcategory(slot, ITEM_TYPE_DISPLAY_CATEGORY_COMPANION, filter.descriptor) then
-
-
-
-
-
+        if ZO_ItemFilterUtils.IsSlotInItemTypeDisplayCategoryAndSubcategory(slot, ITEM_TYPE_DISPLAY_CATEGORY_COMPANION, filter.descriptor)
+            and self.additionalFilter(slot) then
             self:AddCategoryFlashAnimationControl(filter.control:GetNamedChild("Flash"))
             addToFlashingSlots = true
         end
@@ -588,13 +518,8 @@ function ZO_CompanionEquipment_Keyboard:PlayItemAddedAlert(slot, suppressItemAle
 
     local currentFilter = self.currentFilter
     for _, subFilter in pairs(self.subFilters[currentFilter.descriptor]) do
-
-        if ZO_ItemFilterUtils.IsCompanionSlotInItemTypeDisplayCategoryAndSubcategory(slot, currentFilter.descriptor, subFilter.descriptor) then
-
-
-
-
-
+        if ZO_ItemFilterUtils.IsCompanionSlotInItemTypeDisplayCategoryAndSubcategory(slot, currentFilter.descriptor, subFilter.descriptor)
+            and self.additionalFilter(slot) then
             self:AddCategoryFlashAnimationControl(subFilter.control:GetNamedChild("Flash"))
             addToFlashingSlots = true
         end

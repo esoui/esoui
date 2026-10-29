@@ -113,13 +113,13 @@ local BUILTIN_MESSAGE_FORMATTERS = {
         return string.format(GetString(SI_CHAT_MESSAGE_SYSTEM), GetString("SI_CHATCHANNELCATEGORIES", CHAT_CATEGORY_SYSTEM), zo_strformat(GetString("SI_BROADCASTTYPE", broadcastType), arg1))
     end,
 
-    [EVENT_FRIEND_PLAYER_STATUS_CHANGED] = function(displayName, characterName, oldStatus, newStatus)
+    [EVENT_FRIEND_PLAYER_STATUS_CHANGED] = function(crossplayDisplayName, characterName, oldStatus, newStatus)
         local wasOnline = oldStatus ~= PLAYER_STATUS_OFFLINE
         local isOnline = newStatus ~= PLAYER_STATUS_OFFLINE
 
         if wasOnline ~= isOnline then
             local text
-            local displayNameLink = ZO_LinkHandler_CreateDisplayNameLink(displayName)
+            local displayNameLink = ZO_LinkHandler_CreateDisplayNameLink(crossplayDisplayName)
             local characterNameLink = ZO_LinkHandler_CreateCharacterLink(characterName)
             if isOnline then
                 if characterName ~= "" then
@@ -135,7 +135,7 @@ local BUILTIN_MESSAGE_FORMATTERS = {
                 end
             end
 
-            return text, nil, displayName
+            return text, nil, crossplayDisplayName
         end
     end,
 
@@ -185,7 +185,7 @@ local BUILTIN_MESSAGE_FORMATTERS = {
         end
     end,
 
-    [EVENT_GROUP_MEMBER_LEFT] = function(characterName, reason, isLocalPlayer, isLeader, displayName, actionRequiredVote)
+    [EVENT_GROUP_MEMBER_LEFT] = function(characterName, reason, isLocalPlayer, isLeader, crossplayDisplayName, actionRequiredVote, platformDisplayName)
         if reason == GROUP_LEAVE_REASON_KICKED and isLocalPlayer and actionRequiredVote then
             return GetString(SI_GROUP_ELECTION_KICK_PLAYER_PASSED)
         end

@@ -335,7 +335,6 @@
                     <CompassPinType name="AVA_CAPTURE_AREA_AURA" pinTexture="$(COMPASS_PATH)captureArea_halo.dds" maxDistanceM="1450" drawLevelOffsetBase="51"/>
                     <CompassPinType name="BGPIN_CAPTURE_AREA_AURA" pinTexture="$(COMPASS_PATH)captureArea_halo.dds" maxDistanceM="1450" drawLevelOffsetBase="51"/>
                     <CompassPinType name="BGPIN_MOBILE_CAPTURE_AREA_AURA" pinTexture="$(COMPASS_PATH)compass_BG_mobileCapturePoint_halo.dds" maxDistanceM="1450" drawLevelOffsetBase="51"/>
-                    <CompassPinType name="BGPIN_CAPTURE_AREA_AURA" pinTexture="$(COMPASS_PATH)captureArea_halo.dds" maxDistanceM="1450" drawLevelOffsetBase="51"/>
                     <CompassPinType name="BGPIN_FLAG_SPAWN_FIRE_DRAKES" pinTexture="$(COMPASS_PATH)compass_BG_flagSpawn_orange.dds" maxDistanceM="1450" drawLevelOffsetBase="60"/>
                     <CompassPinType name="BGPIN_FLAG_SPAWN_PIT_DAEMONS" pinTexture="$(COMPASS_PATH)compass_BG_flagSpawn_green.dds" maxDistanceM="1450" drawLevelOffsetBase="60"/>
                     <CompassPinType name="BGPIN_FLAG_SPAWN_STORM_LORDS" pinTexture="$(COMPASS_PATH)compass_BG_flagSpawn_purple.dds" maxDistanceM="1450" drawLevelOffsetBase="60"/>
@@ -392,7 +391,7 @@
                     <CompassPinType name="KEEP_MILEGATE_IMPASSABLE" pinTexture="$(COMPASS_PATH)AvA_milegate_not_passable.dds" maxDistanceM="1450" drawLevelOffsetBase="80"/>
                     <CompassPinType name="PING" pinTexture="$(MAP_PIN_PATH)MapPing.dds" allowUpdatesWhenAnimating="true" animation="MapPing" maxDistanceM="COMPASS_PIN_NO_MAX_DISTANCE" closeScale="1" farScale="1" closeAlpha="1" farAlpha="1" drawLevelOffsetBase="127"/>
                     <CompassPinType name="RALLY_POINT" pinTexture="$(MAP_PIN_PATH)MapRallyPoint.dds" allowUpdatesWhenAnimating="true" animation="MapPing" maxDistanceM="COMPASS_PIN_NO_MAX_DISTANCE" closeScale="1" farScale="1" closeAlpha="1" farAlpha="1" drawLevelOffsetBase="128"/>
-                    <CompassPinType name="PLAYER_WAYPOINT" pinTexture="$(COMPASS_PATH)compass_waypoint.dds" maxDistanceM="COMPASS_PIN_NO_MAX_DISTANCE" closeAlpha="1.0" farAlpha="0.75" farAlphaDistanceM="85" farScaleDistanceM="200" layer="OVERLAY" clamped="true" drawLevelOffsetBase="129"/>
+                    <CompassPinType name="PLAYER_WAYPOINT" pinTexture="$(COMPASS_PATH)compass_waypoint_white.dds" maxDistanceM="COMPASS_PIN_NO_MAX_DISTANCE" closeAlpha="1.0" farAlpha="0.75" farAlphaDistanceM="85" farScaleDistanceM="200" layer="OVERLAY" clamped="true" drawLevelOffsetBase="129"/>
                     <CompassPinType name="TRI_BATTLE_SMALL" pinTexture="$(COMPASS_PATH)AvA_3Way.dds" maxDistanceM="230" farAlpha="0.7" drawLevelOffsetBase="130"/>
                     <CompassPinType name="TRI_BATTLE_MEDIUM" pinTexture="$(COMPASS_PATH)AvA_3Way.dds" maxDistanceM="230" farAlpha="0.7" drawLevelOffsetBase="131"/>
                     <CompassPinType name="TRI_BATTLE_LARGE" pinTexture="$(COMPASS_PATH)AvA_3Way.dds" maxDistanceM="230" farAlpha="0.7" drawLevelOffsetBase="132"/>
@@ -404,6 +403,7 @@
                     <CompassPinType name="TARGET_MARKER_TYPE_SIX" pinTexture="$(COMPASS_PATH)Target_Purple_Oblivion.dds" maxDistanceM="COMPASS_PIN_NO_MAX_DISTANCE" closeAlpha="1.0" farAlpha="0.75" farAlphaDistanceM="85" farScaleDistanceM="200" layer="OVERLAY" clamped="true" drawLevelOffsetBase="129"/>
                     <CompassPinType name="TARGET_MARKER_TYPE_SEVEN" pinTexture="$(COMPASS_PATH)Target_Red_Weapons.dds" maxDistanceM="COMPASS_PIN_NO_MAX_DISTANCE" closeAlpha="1.0" farAlpha="0.75" farAlphaDistanceM="85" farScaleDistanceM="200" layer="OVERLAY" clamped="true" drawLevelOffsetBase="129"/>
                     <CompassPinType name="TARGET_MARKER_TYPE_EIGHT" pinTexture="$(COMPASS_PATH)Target_White_Skull.dds" maxDistanceM="COMPASS_PIN_NO_MAX_DISTANCE" closeAlpha="1.0" farAlpha="0.75" farAlphaDistanceM="85" farScaleDistanceM="200" layer="OVERLAY" clamped="true" drawLevelOffsetBase="129"/>
+                    <CompassPinType name="SCRIPTED_EVENT" pinTexture="EsoUI/Art/FloatingMarkers/interactableObject_icon_assisted.dds" aboveTexture="EsoUI/Art/FloatingMarkers/interactableObject_icon_assisted.dds" belowTexture="EsoUI/Art/FloatingMarkers/interactableObject_icon_assisted.dds" maxDistanceM="500" closeAlpha="1.0" farAlpha="0.75" farAlphaDistanceM="85" farScaleDistanceM="200" layer="OVERLAY" drawLevelOffsetBase="3"/>
                     <CompassPinType name="ALDMERI_VS_EBONHEART_SMALL" pinTexture="$(COMPASS_PATH)AvA_AldmeriVEbonheart.dds" maxDistanceM="230" farAlpha="0.7" drawLevelOffsetBase="133"/>
                     <CompassPinType name="ALDMERI_VS_EBONHEART_MEDIUM" pinTexture="$(COMPASS_PATH)AvA_AldmeriVEbonheart.dds" maxDistanceM="230" farAlpha="0.7" drawLevelOffsetBase="134"/>
                     <CompassPinType name="ALDMERI_VS_EBONHEART_LARGE" pinTexture="$(COMPASS_PATH)AvA_AldmeriVEbonheart.dds" maxDistanceM="230" farAlpha="0.7" drawLevelOffsetBase="135"/>

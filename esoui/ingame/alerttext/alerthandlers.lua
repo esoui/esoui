@@ -1,6 +1,5 @@
 local playerName = GetRawUnitName("player")
-local currentGroupLeaderRawName = GetRawUnitName(GetGroupLeaderUnitTag())
-local currentGroupLeaderDisplayName = GetUnitDisplayName(GetGroupLeaderUnitTag())
+local currentGroupLeaderCrossplayDisplayName = GetUnitDisplayName(GetGroupLeaderUnitTag())
 
 local ERROR = UI_ALERT_CATEGORY_ERROR
 local ALERT = UI_ALERT_CATEGORY_ALERT
@@ -98,13 +97,13 @@ end
 
 local AlertHandlers =
 {
-    [EVENT_COMBAT_EVENT] = function(result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log)
+    [EVENT_COMBAT_EVENT] = function(result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, _, _, _, _, errorOverride)
         if playerName == sourceName then
             local soundId = CombatEventToSoundId[result]
             if type(soundId) == "table" then
                 soundId = soundId[powerType]
             end
-            local message = GetString("SI_ACTIONRESULT", result)
+            local message = errorOverride or GetString("SI_ACTIONRESULT", result)
 
             if log and message ~= "" then
                 return ERROR, zo_strformat(message), soundId
@@ -262,9 +261,9 @@ local AlertHandlers =
         return ERROR, zo_strformat(SI_LORE_LIBRARY_ALREADY_KNOW_BOOK, bookTitle)
     end,
 
-    [EVENT_QUEST_SHARE_RESULT] = function(shareTargetCharacterName, shareTargetDisplayName, questName, result)
-        local userFacingName = ZO_GetPrimaryPlayerName(shareTargetDisplayName, shareTargetCharacterName)
-        return ALERT, zo_strformat(GetString("SI_QUESTSHARERESULT", result), userFacingName, questName)
+    [EVENT_QUEST_SHARE_RESULT] = function(shareTargetCharacterName, shareTargetCrossplayDisplayName, questName, result, shareTargetPlatformDisplayName)
+        local primaryPlayerName = ZO_GetPrimaryPlayerName(shareTargetCrossplayDisplayName, shareTargetCharacterName, shareTargetPlatformDisplayName)
+        return ALERT, zo_strformat(GetString("SI_QUESTSHARERESULT", result), primaryPlayerName, questName)
     end,
 
     [EVENT_GROUP_INVITE_RESPONSE] = function(characterName, response, displayName)
@@ -295,18 +294,16 @@ local AlertHandlers =
         end
     end,
 
-    [EVENT_GROUP_MEMBER_JOINED] = function(characterName, displayName, isLocalPlayer)
+    [EVENT_GROUP_MEMBER_JOINED] = function(characterName, crossplayDisplayName, isLocalPlayer, platformDisplayName)
         if isLocalPlayer then
             return ALERT, zo_strformat(SI_NOTIFICATION_ACCEPTED, GetString(SI_NOTIFICATION_GROUP_INVITE))
-        else
-            local primaryNameToShow = ZO_GetPrimaryPlayerName(displayName, characterName)
-            local secondaryNameToShow = ZO_GetSecondaryPlayerName(displayName, characterName)
-
-            return ALERT, zo_strformat(SI_GROUP_ALERT_GROUP_MEMBER_JOINED, primaryNameToShow, secondaryNameToShow)
         end
+
+        local primaryPlayerName, secondaryPlayerName = ZO_GetPrimarySecondaryAndTertiaryPlayerNames(crossplayDisplayName, characterName, platformDisplayName)
+        return ALERT, zo_strformat(SI_GROUP_ALERT_GROUP_MEMBER_JOINED, primaryPlayerName, secondaryPlayerName)
     end,
 
-    [EVENT_FRIEND_ADDED] = function(displayName)
+    [EVENT_FRIEND_ADDED] = function()
         return ALERT, zo_strformat(SI_NOTIFICATION_ACCEPTED, GetString(SI_NOTIFICATION_FRIEND_INVITE))
     end,
 
@@ -337,17 +334,15 @@ local AlertHandlers =
     end,
 
     [EVENT_GROUP_UPDATE] = function()
-        currentGroupLeaderRawName = ""
-        currentGroupLeaderDisplayName = ""
+        currentGroupLeaderCrossplayDisplayName = ""
     end,
 
-    [EVENT_GROUP_MEMBER_LEFT] = function(characterName, reason, isLocalPlayer, isLeader, displayName, actionRequiredVote)
+    [EVENT_GROUP_MEMBER_LEFT] = function(characterName, reason, isLocalPlayer, isLeader, crossplayDisplayName, actionRequiredVote, platformDisplayName)
         local message = nil
         local sound = nil
 
-        local primaryNameToShow = ZO_GetPrimaryPlayerName(displayName, characterName)
-        local secondaryNameToShow = ZO_GetSecondaryPlayerName(displayName, characterName)
-        local hasValidNames = primaryNameToShow ~= "" and secondaryNameToShow ~= ""
+        local primaryPlayerName, secondaryPlayerName = ZO_GetPrimarySecondaryAndTertiaryPlayerNames(crossplayDisplayName, characterName, platformDisplayName)
+        local hasValidNames = primaryPlayerName ~= "" and secondaryPlayerName ~= ""
         local useDefaultReasonText = false
         if reason == GROUP_LEAVE_REASON_DISBAND then
             if isLeader and not isLocalPlayer then
@@ -360,7 +355,7 @@ local AlertHandlers =
                 if isLocalPlayer then
                     message = SI_GROUP_ELECTION_KICK_PLAYER_PASSED
                 elseif hasValidNames then
-                    message = zo_strformat(SI_GROUP_ELECTION_KICK_MEMBER_PASSED, primaryNameToShow, secondaryNameToShow)
+                    message = zo_strformat(SI_GROUP_ELECTION_KICK_MEMBER_PASSED, primaryPlayerName, secondaryPlayerName)
                 end
             else
                 if isLocalPlayer then
@@ -382,12 +377,11 @@ local AlertHandlers =
         end
 
         if useDefaultReasonText and hasValidNames then
-            message = zo_strformat(GetString("SI_GROUPLEAVEREASON", reason), primaryNameToShow, secondaryNameToShow)
+            message = zo_strformat(GetString("SI_GROUPLEAVEREASON", reason), primaryPlayerName, secondaryPlayerName)
         end
 
         if isLocalPlayer then
-            currentGroupLeaderRawName = ""
-            currentGroupLeaderDisplayName = ""
+            currentGroupLeaderCrossplayDisplayName = ""
         end
 
         return ALERT, message, sound
@@ -395,14 +389,12 @@ local AlertHandlers =
 
     -- This event only fires if the characterId of the leader has changed (it's a new leader)
     [EVENT_LEADER_UPDATE] = function(leaderTag)
-        local leaderRawName = GetRawUnitName(leaderTag)
-        local showAlert = leaderRawName ~= "" and currentGroupLeaderRawName ~= ""
-        currentGroupLeaderRawName = leaderRawName
-        currentGroupLeaderDisplayName = GetUnitDisplayName(leaderTag)
-
-        local leaderNameToShow = ZO_GetPrimaryPlayerName(currentGroupLeaderDisplayName, currentGroupLeaderRawName)
+        local leaderCrossplayDisplayName = GetUnitDisplayName(leaderTag)
+        local showAlert = leaderCrossplayDisplayName ~= "" and currentGroupLeaderCrossplayDisplayName ~= ""
+        currentGroupLeaderCrossplayDisplayName = leaderCrossplayDisplayName
 
         if showAlert then
+            local leaderNameToShow = ZO_GetPrimaryPlayerNameFromUnitTag(leaderTag)
             return ALERT, zo_strformat(SI_GROUP_NOTIFICATION_GROUP_LEADER_CHANGED, leaderNameToShow), SOUNDS.GROUP_PROMOTE
         end
     end,
@@ -878,21 +870,21 @@ local AlertHandlers =
     [EVENT_DUEL_INVITE_FAILED] = function(reason, targetCharacterName, targetCrossplayDisplayName, targetPlatformDisplayName)
         -- not all failure reasons have a valid target, so only format the string if we have a valid target name to insert
         if targetCrossplayDisplayName ~= "" then
-            local primaryDisplayName, secondaryDisplayName = ZO_GetPrimarySecondaryAndTertiaryPlayerNames(targetCrossplayDisplayName, targetCharacterName, targetPlatformDisplayName)
-            return ERROR, zo_strformat(GetString("SI_DUELINVITEFAILREASON", reason), primaryDisplayName, secondaryDisplayName), SOUNDS.GENERAL_ALERT_ERROR
+            local primaryPlayerName, secondaryPlayerName = ZO_GetPrimarySecondaryAndTertiaryPlayerNames(targetCrossplayDisplayName, targetCharacterName, targetPlatformDisplayName)
+            return ERROR, zo_strformat(GetString("SI_DUELINVITEFAILREASON", reason), primaryPlayerName, secondaryPlayerName), SOUNDS.GENERAL_ALERT_ERROR
         end
 
         return ERROR, GetString("SI_DUELINVITEFAILREASON", reason), SOUNDS.GENERAL_ALERT_ERROR
     end,
 
     [EVENT_DUEL_INVITE_RECEIVED] = function(inviterCharacterName, inviterCrossplayDisplayName, timeRemainingMs, inviterPlatformDisplayName)
-        local primaryDisplayName, secondaryDisplayName = ZO_GetPrimarySecondaryAndTertiaryPlayerNames(inviterCrossplayDisplayName, inviterCharacterName, inviterPlatformDisplayName)
-        return ALERT, zo_strformat(SI_DUEL_INVITE_RECEIVED, primaryDisplayName, secondaryDisplayName)
+        local primaryPlayerName, secondaryPlayerName = ZO_GetPrimarySecondaryAndTertiaryPlayerNames(inviterCrossplayDisplayName, inviterCharacterName, inviterPlatformDisplayName)
+        return ALERT, zo_strformat(SI_DUEL_INVITE_RECEIVED, primaryPlayerName, secondaryPlayerName)
     end,
 
     [EVENT_DUEL_INVITE_SENT] = function(inviteeCharacterName, inviteeCrossplayDisplayName, inviteePlatformDisplayName)
-        local primaryDisplayName, secondaryDisplayName = ZO_GetPrimarySecondaryAndTertiaryPlayerNames(inviteeCrossplayDisplayName, inviteeCharacterName, inviteePlatformDisplayName)
-        return ALERT, zo_strformat(SI_DUEL_INVITE_SENT, primaryDisplayName, secondaryDisplayName)
+        local primaryPlayerName, secondaryPlayerName = ZO_GetPrimarySecondaryAndTertiaryPlayerNames(inviteeCrossplayDisplayName, inviteeCharacterName, inviteePlatformDisplayName)
+        return ALERT, zo_strformat(SI_DUEL_INVITE_SENT, primaryPlayerName, secondaryPlayerName)
     end,
 
     [EVENT_DUEL_INVITE_ACCEPTED] = function()

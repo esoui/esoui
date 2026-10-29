@@ -179,10 +179,7 @@ local legalDocPregameStates =
 }
 
 ZO_PregameStateManager_AddKeyboardStates(pregameStates)
-
-if GetPlatformServiceType() ~= PLATFORM_SERVICE_TYPE_DMM then
-   ZO_PregameStateManager_AddKeyboardStates(legalDocPregameStates)
-end
+ZO_PregameStateManager_AddKeyboardStates(legalDocPregameStates)
 
 --[[
 Various PC-only functions.

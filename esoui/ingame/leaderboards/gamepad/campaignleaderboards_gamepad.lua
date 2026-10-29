@@ -1,70 +1,22 @@
-local ICON_SIZE = 60
-
-local HOME_TAB = {
-    queryType = BGQUERY_ASSIGNED_CAMPAIGN,
-    icon = zo_iconFormat("EsoUI/Art/Campaign/Gamepad/gp_overview_menuIcon_home.dds", ICON_SIZE, ICON_SIZE),
-}
-
-local LOCAL_TAB = {
-    queryType = BGQUERY_LOCAL,
-    icon = zo_iconFormat("EsoUI/Art/Campaign/Gamepad/gp_overview_menuIcon_guest.dds", ICON_SIZE, ICON_SIZE),
-}
-
 -----------------
 -- Leaderboard Campaign Selector Gamepad
 -----------------
 
 local ZO_LeaderboardCampaignSelector_Gamepad = ZO_LeaderboardCampaignSelector_Shared:Subclass()
 
-function ZO_LeaderboardCampaignSelector_Gamepad:New(control)
-    local selector = ZO_LeaderboardCampaignSelector_Shared.New(self, control)
-    return selector
+function ZO_LeaderboardCampaignSelector_Gamepad:IsGamepad()
+    return true
 end
 
-function ZO_LeaderboardCampaignSelector_Gamepad:Initialize(control)
-    ZO_LeaderboardCampaignSelector_Shared.Initialize(self, control)
-
-    self.dataRegistration = ZO_CampaignDataRegistration:New("CampaignLeaderboardSelectorData_Gamepad", function() return self:NeedsData() end)
-
-    self:RefreshQueryTypes()
-end
-
-function ZO_LeaderboardCampaignSelector_Gamepad:SetCampaignWindows()
-    self.campaignWindows =
-    {
-        SYSTEMS:GetGamepadObject(ZO_CAMPAIGN_LEADERBOARD_SYSTEM_NAME),
-    }
-end
-
-function ZO_LeaderboardCampaignSelector_Gamepad:NeedsData()
-    return (GAMEPAD_CAMPAIGN_LEADERBOARD_FRAGMENT:IsShowing() and self.selectedQueryType == BGQUERY_ASSIGNED_CAMPAIGN)
-end
-
-function ZO_LeaderboardCampaignSelector_Gamepad:RefreshQueryTypes()
-    if self.selectedQueryType and self:IsSelectedQueryStillValid() then
-        if self.selectedQueryType == HOME_TAB.queryType then
-            self:OnQueryTypeChanged(HOME_TAB)
-        else
-            self:OnQueryTypeChanged(LOCAL_TAB)
-        end
-    else
-        if self:IsHomeSelectable() then
-            self:OnQueryTypeChanged(HOME_TAB)
-        elseif self:IsLocalSelectable() then
-            self:OnQueryTypeChanged(LOCAL_TAB)
-        end
-    end
-end
-
-function ZO_LeaderboardCampaignSelector_Gamepad:OnQueryTypeChanged(tabData)
-    ZO_LeaderboardCampaignSelector_Shared.OnQueryTypeChanged(self, tabData)
-    self.selectedTabData = tabData
+function ZO_LeaderboardCampaignSelector_Gamepad:OnQueryTypeChanged(campaignEntry)
+    ZO_LeaderboardCampaignSelector_Shared.OnQueryTypeChanged(self, campaignEntry)
+    self.selectedCampaignData = campaignEntry
     self:SetActiveCampaign()
 end
 
 function ZO_LeaderboardCampaignSelector_Gamepad:SetActiveCampaign()
-    if self.selectedTabData then
-        GAMEPAD_LEADERBOARDS:SetActiveCampaign(GetCampaignName(self:GetCampaignId()), self.selectedTabData.icon)
+    if self.selectedCampaignData then
+        GAMEPAD_LEADERBOARDS:SetActiveCampaign(GetCampaignName(self:GetCampaignId()), self.selectedCampaignData.icon)
     else
         local NO_NAME, NO_ICON
         GAMEPAD_LEADERBOARDS:SetActiveCampaign(NO_NAME, NO_ICON)
@@ -84,10 +36,7 @@ function ZO_CampaignLeaderboardsManager_Gamepad:Initialize(control)
 
     GAMEPAD_CAMPAIGN_LEADERBOARD_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
         if newState == SCENE_FRAGMENT_SHOWING then
-            self.selector.dataRegistration:Refresh()
             self:SetActiveCampaign()
-        elseif newState == SCENE_FRAGMENT_HIDDEN then
-            self.selector.dataRegistration:Refresh()
         end
     end)
 
@@ -150,17 +99,17 @@ function ZO_CampaignLeaderboardsManager_Gamepad:InitializeKeybindStripDescriptor
         name = GetString(SI_GAMEPAD_LEADERBOARDS_SWITCH_CAMPAIGN_LEADERBOARD),
         keybind = "UI_SHORTCUT_SECONDARY",
         callback = function()
-            if self.selector.selectedQueryType == HOME_TAB.queryType then
-                self.selector:OnQueryTypeChanged(LOCAL_TAB)
-            else
-                self.selector:OnQueryTypeChanged(HOME_TAB)
-            end
+            local selectedEntry = GAMEPAD_LEADERBOARDS:GetSelectedLeaderboardData()
+            GAMEPAD_LEADERBOARDS:ActivateCategoryDropdown(selectedEntry)
         end,
-        visible = function() return self.selector:IsHomeSelectable() and self.selector:IsLocalSelectable() end,
+        visible = function()
+            local selectedEntry = GAMEPAD_LEADERBOARDS:GetSelectedLeaderboardData()
+            return selectedEntry and selectedEntry.addDropdownEntriesCallback
+        end,
         sound = SOUNDS.DEFAULT_CLICK,
     }
 end
 
-function ZO_CampaignLeaderboardsInformationArea_Gamepad_OnInitialized(self)
-    GAMEPAD_CAMPAIGN_LEADERBOARDS = ZO_CampaignLeaderboardsManager_Gamepad:New(self)
+function ZO_CampaignLeaderboardsManager_Gamepad.OnControlInitialized(control)
+    GAMEPAD_CAMPAIGN_LEADERBOARDS = ZO_CampaignLeaderboardsManager_Gamepad:New(control)
 end

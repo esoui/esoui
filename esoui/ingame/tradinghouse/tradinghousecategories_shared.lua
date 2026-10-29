@@ -318,7 +318,7 @@ end
 local AddAllWeaponsCategory
 local AddWeaponCategory
 do
-    internalassert(EQUIPMENT_FILTER_TYPE_MAX_VALUE == 11, "Update weapons in trading house")
+    internalassert(EQUIPMENT_FILTER_TYPE_MAX_VALUE == 12, "Update weapons in trading house")
     internalassert(WEAPONTYPE_MAX_VALUE == 15, "Update weapons in trading house")
     local ICONS_FOR_WEAPON_TYPE =
     {
@@ -608,7 +608,7 @@ do
         },
     }
 
-    internalassert(PROVISIONER_SPECIAL_INGREDIENT_TYPE_MAX_VALUE == 4, "Update trading house recipe categories")
+    internalassert(PROVISIONER_SPECIAL_INGREDIENT_TYPE_MAX_VALUE == 5, "Update trading house recipe categories")
     local SPECIALIZED_ITEM_TYPES_FOR_SPECIAL_INGREDIENT_TYPE = 
     {
         [PROVISIONER_SPECIAL_INGREDIENT_TYPE_SPICES] =
@@ -618,6 +618,10 @@ do
         [PROVISIONER_SPECIAL_INGREDIENT_TYPE_FLAVORING] =
         {
             SPECIALIZED_ITEMTYPE_RECIPE_PROVISIONING_STANDARD_DRINK,
+        },
+        [PROVISIONER_SPECIAL_INGREDIENT_TYPE_SUPPLIES] =
+        {
+            SPECIALIZED_ITEMTYPE_RECIPE_PROVISIONING_SUPPLIES,
         },
         [PROVISIONER_SPECIAL_INGREDIENT_TYPE_FURNISHING] =
         {
@@ -643,6 +647,7 @@ do
     {
         [SPECIALIZED_ITEMTYPE_RECIPE_PROVISIONING_STANDARD_FOOD] = ZO_ItemFilterUtils.GetSpecializedItemTypeFilterIcons(SPECIALIZED_ITEMTYPE_RECIPE_PROVISIONING_STANDARD_FOOD),
         [SPECIALIZED_ITEMTYPE_RECIPE_PROVISIONING_STANDARD_DRINK] = ZO_ItemFilterUtils.GetSpecializedItemTypeFilterIcons(SPECIALIZED_ITEMTYPE_RECIPE_PROVISIONING_STANDARD_DRINK),
+        [SPECIALIZED_ITEMTYPE_RECIPE_PROVISIONING_SUPPLIES] = ZO_ItemFilterUtils.GetSpecializedItemTypeFilterIcons(SPECIALIZED_ITEMTYPE_RECIPE_PROVISIONING_SUPPLIES),
         [SPECIALIZED_ITEMTYPE_RECIPE_BLACKSMITHING_DIAGRAM_FURNISHING] = ZO_ItemFilterUtils.GetSpecializedItemTypeFilterIcons(SPECIALIZED_ITEMTYPE_RECIPE_BLACKSMITHING_DIAGRAM_FURNISHING),
         [SPECIALIZED_ITEMTYPE_RECIPE_CLOTHIER_PATTERN_FURNISHING] = ZO_ItemFilterUtils.GetSpecializedItemTypeFilterIcons(SPECIALIZED_ITEMTYPE_RECIPE_CLOTHIER_PATTERN_FURNISHING),
         [SPECIALIZED_ITEMTYPE_RECIPE_ENCHANTING_SCHEMATIC_FURNISHING] = ZO_ItemFilterUtils.GetSpecializedItemTypeFilterIcons(SPECIALIZED_ITEMTYPE_RECIPE_ENCHANTING_SCHEMATIC_FURNISHING),
@@ -1169,9 +1174,7 @@ do
         ITEM_TYPE_DISPLAY_CATEGORY_WEAPONS,
         ITEM_TYPE_DISPLAY_CATEGORY_ARMOR,
         ITEM_TYPE_DISPLAY_CATEGORY_JEWELRY,
-
-
-
+        ITEM_TYPE_DISPLAY_CATEGORY_ANIMAL_COMPANION,
     }
     local iconsForCompanionEquipmentType = {}
     local enumValuesForCompanionEquipmentType = {}
@@ -1277,30 +1280,26 @@ do
             search:SetFilter(TRADING_HOUSE_FILTER_TYPE_GAMEPLAY_ACTOR_CATEGORY, GAMEPLAY_ACTOR_CATEGORY_COMPANION)
         end
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        local function ApplyCompanionEquipmentAnimalToSearch(search, subFilterType)
+            local animalTypes = {}
+            if type(subFilterType) == "table" then
+                search:SetFilter(TRADING_HOUSE_FILTER_TYPE_EQUIP, { EQUIP_TYPE_NECK, EQUIP_TYPE_CHEST })
+            else
+                if subFilterType == EQUIPMENT_FILTER_TYPE_NECK then
+                    search:SetFilter(TRADING_HOUSE_FILTER_TYPE_EQUIP, EQUIP_TYPE_NECK)
+                elseif subFilterType == EQUIP_TYPE_CHEST then
+                    search:SetFilter(TRADING_HOUSE_FILTER_TYPE_EQUIP, EQUIP_TYPE_CHEST)
+                end
+            end
+            search:SetFilter(TRADING_HOUSE_FILTER_TYPE_GAMEPLAY_ACTOR_CATEGORY, GAMEPLAY_ACTOR_CATEGORY_COMPANION)
+        end
 
         local APPLY_TO_SEARCH_FUNCTIONS =
         {
             [ITEM_TYPE_DISPLAY_CATEGORY_WEAPONS] = ApplyCompanionEquipmentWeaponsToSearch,
             [ITEM_TYPE_DISPLAY_CATEGORY_ARMOR] = ApplyCompanionEquipmentArmorToSearch,
             [ITEM_TYPE_DISPLAY_CATEGORY_JEWELRY] = ApplyCompanionEquipmentJewelryToSearch,
-
-
-
+            [ITEM_TYPE_DISPLAY_CATEGORY_ANIMAL_COMPANION] = ApplyCompanionEquipmentAnimalToSearch,
         }
 
         local FEATURE_KEYS =
@@ -1308,9 +1307,7 @@ do
             [ITEM_TYPE_DISPLAY_CATEGORY_WEAPONS] = "CompanionWeaponTraits",
             [ITEM_TYPE_DISPLAY_CATEGORY_ARMOR] = "CompanionArmorTraits",
             [ITEM_TYPE_DISPLAY_CATEGORY_JEWELRY] = "CompanionJewelryTraits",
-
-
-
+            [ITEM_TYPE_DISPLAY_CATEGORY_ANIMAL_COMPANION] = "CompanionAnimalTraits",
         }
 
         local categoryParams = AddCategory(string.format("Companion%d", companionEquipmentDisplayCategory))
@@ -1478,9 +1475,9 @@ end
     Any item that could be sold on the trading house should be categorized.
 ]]--
 
-internalassert(ITEMTYPE_MAX_VALUE == 76, "Do you need to update the trading house with your new itemtype?")
-internalassert(SPECIALIZED_ITEMTYPE_MAX_VALUE == 3350, "Do you need to update the trading house with your new specialized itemtype?")
-internalassert(EQUIP_TYPE_MAX_VALUE == 15, "Do you need to update the trading house with your new equip type?")
+internalassert(ITEMTYPE_MAX_VALUE == 77, "Do you need to update the trading house with your new itemtype?")
+internalassert(SPECIALIZED_ITEMTYPE_MAX_VALUE == 3400, "Do you need to update the trading house with your new specialized itemtype?")
+internalassert(EQUIP_TYPE_MAX_VALUE == 16, "Do you need to update the trading house with your new equip type?")
 
 -- All Items
 AddAllItemsCategory()
@@ -1513,6 +1510,7 @@ AddConsumableCategory(ITEMTYPE_POTION)
 AddConsumableCategory(ITEMTYPE_POISON)
 AddConsumableCategory(ITEMTYPE_RACIAL_STYLE_MOTIF)
 AddRecipeCategory(PROVISIONER_SPECIAL_INGREDIENT_TYPE_FURNISHING)
+AddRecipeCategory(PROVISIONER_SPECIAL_INGREDIENT_TYPE_SUPPLIES)
 AddConsumableCategory(ITEMTYPE_MASTER_WRIT)
 AddConsumableCategory(ITEMTYPE_CONTAINER, ITEMTYPE_CONTAINER_CURRENCY)
 AddConsumableCategory(ITEMTYPE_AVA_REPAIR)
@@ -1551,10 +1549,7 @@ AddAllCompanionEquipmentCategory()
 AddCompanionEquipmentCategory(ITEM_TYPE_DISPLAY_CATEGORY_WEAPONS)
 AddCompanionEquipmentCategory(ITEM_TYPE_DISPLAY_CATEGORY_ARMOR)
 AddCompanionEquipmentCategory(ITEM_TYPE_DISPLAY_CATEGORY_JEWELRY)
-
-
-
-
+AddCompanionEquipmentCategory(ITEM_TYPE_DISPLAY_CATEGORY_ANIMAL_COMPANION)
 
 -- Misc
 -- Misc does not have an "all" category
@@ -1562,14 +1557,6 @@ AddMiscCategory(ITEMTYPE_SOUL_GEM)
 AddMiscCategory(ITEMTYPE_LURE)
 AddMiscCategory(ITEMTYPE_TOOL)
 AddMiscCategory(ITEMTYPE_SIEGE)
+AddMiscCategory(ITEMTYPE_TRINKET) -- TODO Trinket: revisit following design / equip type support
 AddTrophyCategory()
 AddGuildTabardCategory()
-
-
-
-
-
-
-
-
-

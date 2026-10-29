@@ -1,6 +1,6 @@
 <GuiXml>
     <Controls>
-        <!-- Higher tier than ZO_PinBlob from WorlMap.xml since the pin icon should always draw above the area circle -->
+        <!-- Higher tier than ZO_PinBlob from WorldMap.xml since the pin icon should always draw above the area circle -->
         <Control name="ZO_MapPin" mouseEnabled="true" tier="HIGH" level="10" hidden="true" virtual="true">
             <Dimensions x="22" y="22"/>
             <OnMouseDown>
@@ -32,9 +32,6 @@
                 <Texture name="$(parent)Background" pixelRoundingEnabled="false">
                     <AnchorFill/>
                 </Texture>
-                <Label name="$(parent)Label" font="ZoFontGameOutline" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" horizontalAlignment="CENTER" verticalAlignment="CENTER" layer="BACKGROUND">
-                    <AnchorFill/>
-                </Label>
             </Controls>
         </Control>
         <Control name="ZO_WrithingWallMapPinFX" virtual="true">

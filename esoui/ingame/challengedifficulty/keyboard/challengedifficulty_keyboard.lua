@@ -37,9 +37,9 @@ function ZO_ChallengeDifficultyScreen_Keyboard:InitializeDifficultyButtons()
     self.difficultyButtons =
     {
         [OVERLAND_DIFFICULTY_TYPE_BASEGAME] = self.control:GetNamedChild("RadioContainerBaseGame"),
-        [OVERLAND_DIFFICULTY_TYPE_JOURNEYMAN] = self.control:GetNamedChild("RadioContainerJourneyman"),
-        [OVERLAND_DIFFICULTY_TYPE_ADVENTURER] = self.control:GetNamedChild("RadioContainerAdventurer"),
-        [OVERLAND_DIFFICULTY_TYPE_VETERAN] = self.control:GetNamedChild("RadioContainerVeteran"),
+        [OVERLAND_DIFFICULTY_TYPE_SEASONED] = self.control:GetNamedChild("RadioContainerJourneyman"),
+        [OVERLAND_DIFFICULTY_TYPE_MASTER] = self.control:GetNamedChild("RadioContainerAdventurer"),
+        [OVERLAND_DIFFICULTY_TYPE_VESTIGE] = self.control:GetNamedChild("RadioContainerVeteran"),
     }
 
     self.radioButtonGroup = ZO_RadioButtonGroup:New()
@@ -53,7 +53,12 @@ function ZO_ChallengeDifficultyScreen_Keyboard:InitializeDifficultyButtons()
 end
 
 function ZO_ChallengeDifficultyScreen_Keyboard:RegisterForEvents()
-    self.control:RegisterForEvent(EVENT_OVERLAND_DIFFICULTY_CHANGED, ZO_GetEventForwardingFunction(self, self.RefreshDifficulties))
+    self.control:RegisterForEvent(EVENT_OVERLAND_DIFFICULTY_CHANGED, function(_, level, fromInit, isLocalPlayer)
+        if isLocalPlayer and not fromInit then
+            PlaySound(SOUNDS.CHALLENGE_DIFFICULTY_CHANGE_DIFFICULTY_BUTTON_CLICKED)
+        end
+        self:RefreshDifficulties()
+    end)
 end
 
 function ZO_ChallengeDifficultyScreen_Keyboard:OnShowing()
@@ -109,7 +114,8 @@ end
 
 function ZO_ChallengeDifficultyScreen_Keyboard:RefreshChangeDifficultyButtonEnabledState()
     local isChallengeDifficultyDisabled = GetOverlandDifficultyDisabledReason() ~= OVERLAND_DIFFICULTY_DISABLED_REASON_NONE
-    self.changeDifficultyButton:SetEnabled(not isChallengeDifficultyDisabled)
+    local isCurrentDifficulty = self.pendingDifficulty == GetOverlandDifficulty()
+    self.changeDifficultyButton:SetEnabled(not (isChallengeDifficultyDisabled or isCurrentDifficulty))
 end
 
 function ZO_ChallengeDifficultyScreen_Keyboard:RefreshText()
@@ -159,9 +165,9 @@ do
     local DIFFICULTY_NAME_LOOKUP =
     {
         [OVERLAND_DIFFICULTY_TYPE_BASEGAME] = "basegame",
-        [OVERLAND_DIFFICULTY_TYPE_JOURNEYMAN] = "journeyman",
-        [OVERLAND_DIFFICULTY_TYPE_ADVENTURER] = "adventurer",
-        [OVERLAND_DIFFICULTY_TYPE_VETERAN] = "veteran",
+        [OVERLAND_DIFFICULTY_TYPE_SEASONED] = "journeyman",
+        [OVERLAND_DIFFICULTY_TYPE_MASTER] = "adventurer",
+        [OVERLAND_DIFFICULTY_TYPE_VESTIGE] = "veteran",
     }
 
     function ZO_ChallengeDifficultyScreen_Keyboard.OnDifficultyButtonInitialized(control, difficulty)

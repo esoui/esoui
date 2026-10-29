@@ -1,5 +1,5 @@
 {TOC:maxLevel=3}
-h1. ESO UI Documentation for API Version 101051
+h1. ESO UI Documentation for API Version 101052
 h2. VM Functions
 * ScriptBuildInfo()
 ** _Returns:_ *table* _buildInfo_
@@ -668,6 +668,7 @@ h5. NonCombatBonusType
 * NON_COMBAT_BONUS_HEAT_DECAY
 * NON_COMBAT_BONUS_IMPATIENCE
 * NON_COMBAT_BONUS_INVALID
+* NON_COMBAT_BONUS_JERALL_MARK_MULTIPLIER
 * NON_COMBAT_BONUS_JEWELRYCRAFTING_BOOSTER_BONUS
 * NON_COMBAT_BONUS_JEWELRYCRAFTING_CRAFT_PERCENT_DISCOUNT
 * NON_COMBAT_BONUS_JEWELRYCRAFTING_EXTRACT_LEVEL
@@ -799,10 +800,10 @@ h5. PlatformStoreIconLocation
 
 
 h5. PlatformStoreLabel
-* PLATFORM_STORE_LABEL_DMM
 * PLATFORM_STORE_LABEL_EPIC
 * PLATFORM_STORE_LABEL_PSN
 * PLATFORM_STORE_LABEL_REUSE_ME
+* PLATFORM_STORE_LABEL_REUSE_ME_2
 * PLATFORM_STORE_LABEL_STEAM
 * PLATFORM_STORE_LABEL_XBL
 * PLATFORM_STORE_LABEL_ZOS
@@ -1207,6 +1208,7 @@ h5. UnitAttributeVisual
 * ATTRIBUTE_VISUAL_DECREASED_MAX_POWER
 * ATTRIBUTE_VISUAL_DECREASED_REGEN_POWER
 * ATTRIBUTE_VISUAL_DECREASED_STAT
+* ATTRIBUTE_VISUAL_FORCE_ARMOR_SHRED
 * ATTRIBUTE_VISUAL_FORCE_INCREASED_POWER_STAT_VISUAL
 * ATTRIBUTE_VISUAL_INCREASED_MAX_POWER
 * ATTRIBUTE_VISUAL_INCREASED_REGEN_POWER
@@ -1363,6 +1365,7 @@ h5. AbilityType
 * ABILITY_TYPE_DAMAGELIMIT
 * ABILITY_TYPE_DAMAGESHIELD
 * ABILITY_TYPE_DAMAGETRANSFER
+* ABILITY_TYPE_DAMAGETYPEFILTER
 * ABILITY_TYPE_DEFEND
 * ABILITY_TYPE_DERIVEDSTATCACHE
 * ABILITY_TYPE_DESPAWNOVERRIDE
@@ -1392,6 +1395,7 @@ h5. AbilityType
 * ABILITY_TYPE_INTERACTREFUSALOVERRIDE
 * ABILITY_TYPE_INTERCEPT
 * ABILITY_TYPE_INTERRUPT
+* ABILITY_TYPE_ITEMSETCONTRIBUTION
 * ABILITY_TYPE_JUMP
 * ABILITY_TYPE_KNOCKBACK
 * ABILITY_TYPE_LOSMOVEPOSITION
@@ -1757,6 +1761,7 @@ h5. ResolveGroupListingApplicationRequest
 * RESOLVE_GROUP_LISTING_APPLICATION_REQUEST_REJECTED_IGNORE
 * RESOLVE_GROUP_LISTING_APPLICATION_REQUEST_REJECTED_LEADER_BUSY
 * RESOLVE_GROUP_LISTING_APPLICATION_REQUEST_REJECTED_LISTING_NOT_AVAILABLE
+* RESOLVE_GROUP_LISTING_APPLICATION_REQUEST_REJECTED_ROLE_NOT_AVAILABLE
 * RESOLVE_GROUP_LISTING_APPLICATION_REQUEST_RESCIND
 
 
@@ -1815,6 +1820,7 @@ h5. EquipOutfitResult
 
 
 h5. OutfitSlot
+* OUTFIT_SLOT_BACK_ORNAMENT
 * OUTFIT_SLOT_BODY_MARKING
 * OUTFIT_SLOT_CHEST
 * OUTFIT_SLOT_COSTUME
@@ -1969,10 +1975,17 @@ h5. CampaignAllianceLockReason
 
 h5. CampaignHoldingType
 * HOLDINGTYPE_DEFENSIVE_ARTIFACT
+* HOLDINGTYPE_IMPERIAL_CITY_DISTRICT
 * HOLDINGTYPE_KEEP
 * HOLDINGTYPE_OFFENSIVE_ARTIFACT
 * HOLDINGTYPE_OUTPOST
 * HOLDINGTYPE_RESOURCE
+
+
+h5. CampaignLeaderboardFlags
+* CAMPAIGN_LEADERBOARD_FLAGS_INELIGIBLE_FOR_EMPEROR_NON_HOME
+* CAMPAIGN_LEADERBOARD_FLAGS_SKIP_ALLIANCE_POINT_FACTION_RANK
+* CAMPAIGN_LEADERBOARD_FLAGS_SKIP_ALLIANCE_POINT_RANK
 
 
 h5. CampaignLevelRequirementType
@@ -2034,11 +2047,18 @@ h5. CampaignRulesetType
 * CAMPAIGN_RULESET_TYPE_DEPRECATED1
 * CAMPAIGN_RULESET_TYPE_DEPRECATED2
 * CAMPAIGN_RULESET_TYPE_IMPERIAL_CITY
+* CAMPAIGN_RULESET_TYPE_JERALL_PASS
 
 
 h5. CampaignUnassignRequestType
 * CAMPAIGN_UNASSIGN_TYPE_HOME_USE_ALLIANCE_POINTS
 * CAMPAIGN_UNASSIGN_TYPE_HOME_USE_GOLD
+
+
+h5. CampaignWorldType
+* CAMPAIGN_WORLD_TYPE_CYRODIIL
+* CAMPAIGN_WORLD_TYPE_IMPERIAL_CITY
+* CAMPAIGN_WORLD_TYPE_JERALL_PASS
 
 
 h5. ClaimKeepResultType
@@ -2282,6 +2302,8 @@ h5. ScoreTrackerEntryType
 * SCORE_TRACKER_TYPE_CAPTURE_DEFENSE_POINTS
 * SCORE_TRACKER_TYPE_CAPTURE_KILLED_ATTACKER
 * SCORE_TRACKER_TYPE_CAPTURE_KILLED_DEFENDER
+* SCORE_TRACKER_TYPE_CTF_DEFEND_ACTIVE
+* SCORE_TRACKER_TYPE_CTF_DEFEND_PASSIVE
 * SCORE_TRACKER_TYPE_DAMAGED_FLAG_CARRIER
 * SCORE_TRACKER_TYPE_DAMAGE_DONE
 * SCORE_TRACKER_TYPE_DAMAGE_SHIELDS_GRANTED
@@ -2290,13 +2312,16 @@ h5. ScoreTrackerEntryType
 * SCORE_TRACKER_TYPE_DEBUFFS_GRANTED
 * SCORE_TRACKER_TYPE_FLAG_CAPTURED
 * SCORE_TRACKER_TYPE_FLAG_CARRIED_TIME
+* SCORE_TRACKER_TYPE_HARD_CC
 * SCORE_TRACKER_TYPE_HEALED_FLAG_CARRIER
 * SCORE_TRACKER_TYPE_HEALING_DEFENDERS
 * SCORE_TRACKER_TYPE_HEALING_DONE
+* SCORE_TRACKER_TYPE_HEALING_LOW_PERCENTAGE_TURNAROUND
 * SCORE_TRACKER_TYPE_KILL
 * SCORE_TRACKER_TYPE_KILLED_FLAG_CARRIER
 * SCORE_TRACKER_TYPE_KILL_STREAK
 * SCORE_TRACKER_TYPE_NONE
+* SCORE_TRACKER_TYPE_REVIVES
 * SCORE_TRACKER_TYPE_SCORE
 
 
@@ -2758,7 +2783,9 @@ h5. CollectibleCategoryType
 * COLLECTIBLE_CATEGORY_TYPE_ABILITY_FX_OVERRIDE
 * COLLECTIBLE_CATEGORY_TYPE_ACCOUNT_SERVICE
 * COLLECTIBLE_CATEGORY_TYPE_ACCOUNT_UPGRADE
+* COLLECTIBLE_CATEGORY_TYPE_ANIMAL_COMPANION_SKIN
 * COLLECTIBLE_CATEGORY_TYPE_ASSISTANT
+* COLLECTIBLE_CATEGORY_TYPE_BACK_ORNAMENT
 * COLLECTIBLE_CATEGORY_TYPE_BODY_MARKING
 * COLLECTIBLE_CATEGORY_TYPE_CHAPTER
 * COLLECTIBLE_CATEGORY_TYPE_COMBINATION_FRAGMENT
@@ -2857,12 +2884,18 @@ h5. PlayerFxOverrideAbilityType
 * PLAYER_FX_OVERRIDE_ABILITY_TYPE_BASH
 * PLAYER_FX_OVERRIDE_ABILITY_TYPE_BLOCK
 * PLAYER_FX_OVERRIDE_ABILITY_TYPE_BREAK_FREE
+* PLAYER_FX_OVERRIDE_ABILITY_TYPE_COMPANION_SUMMON
 * PLAYER_FX_OVERRIDE_ABILITY_TYPE_WAYSHRINE
 
 
 h5. PlayerFxOverrideType
 * PLAYER_FX_OVERRIDE_TYPE_ABILITY
 * PLAYER_FX_OVERRIDE_TYPE_HARVEST
+
+
+h5. PseudoCollectibleType
+* PSEUDO_COLLECTIBLE_TYPE_DLC
+* PSEUDO_COLLECTIBLE_TYPE_NONE
 
 
 h5. SpecializedCollectibleType
@@ -2951,9 +2984,15 @@ h5. AdvancedStatDisplayType
 * ADVANCED_STAT_DISPLAY_TYPE_SPRINT_SPEED
 * ADVANCED_STAT_DISPLAY_TYPE_SUBSCRIBER_ALLIANCE_POINTS_BONUS
 * ADVANCED_STAT_DISPLAY_TYPE_SUBSCRIBER_ALL_XP
+* ADVANCED_STAT_DISPLAY_TYPE_SUBSCRIBER_CHALLENGE_REROLL_CAP
 * ADVANCED_STAT_DISPLAY_TYPE_SUBSCRIBER_COIN_BONUS
 * ADVANCED_STAT_DISPLAY_TYPE_SUBSCRIBER_INSPIRATION_BONUS
 * ADVANCED_STAT_DISPLAY_TYPE_SUBSCRIBER_TELVAR_BONUS
+* ADVANCED_STAT_DISPLAY_TYPE_SUBSCRIBER_TOME_POINT_GAIN
+* ADVANCED_STAT_DISPLAY_TYPE_SUBSCRIBER_WEEKLY_CHALLENGE_CAP
+* ADVANCED_STAT_DISPLAY_TYPE_SUBSCRIBER_WEEKLY_CHALLENGE_REROLL_GRANTS
+* ADVANCED_STAT_DISPLAY_TYPE_SUBSCRIBER_WEEKLY_GENERIC_CHALLENGE_GRANTS
+* ADVANCED_STAT_DISPLAY_TYPE_SUBSCRIBER_WEEKLY_THEMED_CHALLENGE_GRANTS
 * ADVANCED_STAT_DISPLAY_TYPE_TELVAR_BONUS
 * ADVANCED_STAT_DISPLAY_TYPE_ULTIMATE_REGEN_COMBAT
 
@@ -3116,6 +3155,25 @@ h5. DamageType
 * DAMAGE_TYPE_SHOCK
 
 
+h5. DamageTypeFlags
+* DAMAGE_TYPE_FLAGS_ALL
+* DAMAGE_TYPE_FLAGS_ALL_PHYSICAL
+* DAMAGE_TYPE_FLAGS_ALL_SPELL
+* DAMAGE_TYPE_FLAGS_BLEED
+* DAMAGE_TYPE_FLAGS_COLD
+* DAMAGE_TYPE_FLAGS_DISEASE
+* DAMAGE_TYPE_FLAGS_DROWN
+* DAMAGE_TYPE_FLAGS_EARTH
+* DAMAGE_TYPE_FLAGS_FIRE
+* DAMAGE_TYPE_FLAGS_GENERIC
+* DAMAGE_TYPE_FLAGS_MAGIC
+* DAMAGE_TYPE_FLAGS_OBLIVION
+* DAMAGE_TYPE_FLAGS_PHYSICAL
+* DAMAGE_TYPE_FLAGS_POISON
+* DAMAGE_TYPE_FLAGS_SHOCK
+* DAMAGE_TYPE_FLAGS_TYPELESS
+
+
 h5. DerivedStatDisplayType
 * DERIVED_STAT_DISPLAY_FLAT_VALUE
 * DERIVED_STAT_DISPLAY_PERCENT
@@ -3141,17 +3199,15 @@ h5. DerivedStats
 * STAT_DAMAGE_RESIST_POISON
 * STAT_DAMAGE_RESIST_SHOCK
 * STAT_DAMAGE_RESIST_START
-* STAT_DEPRECATED_0
-* STAT_DEPRECATED_1
-* STAT_DEPRECATED_2
-* STAT_DEPRECATED_3
 * STAT_DODGE
 * STAT_HEALING_DONE
 * STAT_HEALING_TAKEN
 * STAT_HEALTH_MAX
+* STAT_HEALTH_REGEN
 * STAT_HEALTH_REGEN_COMBAT
 * STAT_HEALTH_REGEN_IDLE
 * STAT_MAGICKA_MAX
+* STAT_MAGICKA_REGEN
 * STAT_MAGICKA_REGEN_COMBAT
 * STAT_MAGICKA_REGEN_IDLE
 * STAT_MISS
@@ -3164,12 +3220,14 @@ h5. DerivedStats
 * STAT_PHYSICAL_PENETRATION
 * STAT_PHYSICAL_RESIST
 * STAT_POWER
+* STAT_REGEN
 * STAT_SPELL_CRITICAL
 * STAT_SPELL_MITIGATION
 * STAT_SPELL_PENETRATION
 * STAT_SPELL_POWER
 * STAT_SPELL_RESIST
 * STAT_STAMINA_MAX
+* STAT_STAMINA_REGEN
 * STAT_STAMINA_REGEN_COMBAT
 * STAT_STAMINA_REGEN_IDLE
 * STAT_WEAPON_AND_SPELL_DAMAGE
@@ -3321,10 +3379,10 @@ h5. OverlandDifficultyDisabledReason
 
 
 h5. OverlandDifficultyType
-* OVERLAND_DIFFICULTY_TYPE_ADVENTURER
 * OVERLAND_DIFFICULTY_TYPE_BASEGAME
-* OVERLAND_DIFFICULTY_TYPE_JOURNEYMAN
-* OVERLAND_DIFFICULTY_TYPE_VETERAN
+* OVERLAND_DIFFICULTY_TYPE_MASTER
+* OVERLAND_DIFFICULTY_TYPE_SEASONED
+* OVERLAND_DIFFICULTY_TYPE_VESTIGE
 
 
 h5. ResurrectResult
@@ -3662,6 +3720,7 @@ h5. CurrencyType
 * CURT_CROWNS
 * CURT_CROWN_GEMS
 * CURT_IMPERIAL_FRAGMENTS
+* CURT_JERALL_MARKS
 * CURT_MONEY
 * CURT_NONE
 * CURT_SEALS
@@ -4151,6 +4210,7 @@ h5. HouseCategoryType
 h5. HouseFlags
 * HOUSE_FLAGS_RESERVED_1
 * HOUSE_FLAGS_RESERVED_2
+* HOUSE_FLAGS_SUPPORTS_SKY_CONTROL
 * HOUSE_FLAGS_SUPPORTS_WEATHER_CONTROL
 
 
@@ -4331,6 +4391,8 @@ h5. HousingEditorCommandResult
 * HOUSING_EDITOR_COMMAND_RESULT_FURNITURE_BEING_MOVED
 * HOUSING_EDITOR_COMMAND_RESULT_FURNITURE_LIMIT_REACHED
 * HOUSING_EDITOR_COMMAND_RESULT_INVALID_ITEM
+* HOUSING_EDITOR_COMMAND_RESULT_ITEM_AT_INSTANCE_CAPACITY
+* HOUSING_EDITOR_COMMAND_RESULT_ITEM_AT_STACK_CAPACITY
 * HOUSING_EDITOR_COMMAND_RESULT_ITEM_IS_UNIQUE
 * HOUSING_EDITOR_COMMAND_RESULT_LINK_INVALID
 * HOUSING_EDITOR_COMMAND_RESULT_METRICS_CRITICAL
@@ -4448,6 +4510,8 @@ h5. HousingRequestResult
 * HOUSING_REQUEST_RESULT_IN_COMBAT
 * HOUSING_REQUEST_RESULT_IN_SAFE_ZONE
 * HOUSING_REQUEST_RESULT_IS_DEAD
+* HOUSING_REQUEST_RESULT_ITEM_AT_INSTANCE_CAPACITY
+* HOUSING_REQUEST_RESULT_ITEM_AT_STACK_CAPACITY
 * HOUSING_REQUEST_RESULT_ITEM_REMOVE_FAILED
 * HOUSING_REQUEST_RESULT_ITEM_REMOVE_FAILED_ALREADY_OWN_UNIQUE
 * HOUSING_REQUEST_RESULT_ITEM_REMOVE_FAILED_INVENTORY_FULL
@@ -4796,6 +4860,8 @@ h5. MarketColors
 * MARKET_COLORS_INELIGIBLE_DIMMED
 * MARKET_COLORS_NEW
 * MARKET_COLORS_NEW_DIMMED
+* MARKET_COLORS_NORMAL
+* MARKET_COLORS_NORMAL_DIMMED
 * MARKET_COLORS_ON_SALE
 * MARKET_COLORS_ON_SALE_DIMMED
 * MARKET_COLORS_PRODUCT_BACKGROUND_BRIGHTNESS
@@ -4957,6 +5023,7 @@ h5. EquipSlot
 * EQUIP_SLOT_RING1
 * EQUIP_SLOT_RING2
 * EQUIP_SLOT_SHOULDERS
+* EQUIP_SLOT_TRINKET
 * EQUIP_SLOT_WAIST
 * EQUIP_SLOT_WRIST
 
@@ -4983,6 +5050,7 @@ h5. EquipType
 * EQUIP_TYPE_POISON
 * EQUIP_TYPE_RING
 * EQUIP_TYPE_SHOULDERS
+* EQUIP_TYPE_TRINKET
 * EQUIP_TYPE_TWO_HAND
 * EQUIP_TYPE_WAIST
 
@@ -5008,12 +5076,14 @@ h5. EquipmentFilterType
 * EQUIPMENT_FILTER_TYPE_RESTO_STAFF
 * EQUIPMENT_FILTER_TYPE_RING
 * EQUIPMENT_FILTER_TYPE_SHIELD
+* EQUIPMENT_FILTER_TYPE_TRINKET
 * EQUIPMENT_FILTER_TYPE_TWO_HANDED
 
 
 h5. GamepadItemCategory
 * GAMEPAD_ITEM_CATEGORY_ALCHEMY
 * GAMEPAD_ITEM_CATEGORY_AMULET
+* GAMEPAD_ITEM_CATEGORY_ANIMAL_COMPANION
 * GAMEPAD_ITEM_CATEGORY_AXE
 * GAMEPAD_ITEM_CATEGORY_BAIT
 * GAMEPAD_ITEM_CATEGORY_BLACKSMITH
@@ -5148,6 +5218,7 @@ h5. ItemDisplayQuality
 h5. ItemFilterType
 * ITEMFILTERTYPE_ALCHEMY
 * ITEMFILTERTYPE_ALL
+* ITEMFILTERTYPE_ANIMAL_COMPANION
 * ITEMFILTERTYPE_ARMOR
 * ITEMFILTERTYPE_BLACKSMITHING
 * ITEMFILTERTYPE_BUYBACK
@@ -5431,6 +5502,7 @@ h5. ItemType
 * ITEMTYPE_TOOL
 * ITEMTYPE_TRASH
 * ITEMTYPE_TREASURE
+* ITEMTYPE_TRINKET
 * ITEMTYPE_TROPHY
 * ITEMTYPE_WEAPON
 * ITEMTYPE_WEAPON_BOOSTER
@@ -5443,6 +5515,7 @@ h5. ItemType
 h5. ItemTypeDisplayCategory
 * ITEM_TYPE_DISPLAY_CATEGORY_ALCHEMY
 * ITEM_TYPE_DISPLAY_CATEGORY_ALL
+* ITEM_TYPE_DISPLAY_CATEGORY_ANIMAL_COMPANION
 * ITEM_TYPE_DISPLAY_CATEGORY_APPEARANCE
 * ITEM_TYPE_DISPLAY_CATEGORY_ARMOR
 * ITEM_TYPE_DISPLAY_CATEGORY_BLACKSMITHING
@@ -5582,6 +5655,8 @@ h5. LootItemResult
 * LOOT_ITEM_RESULT_INVENTORY_FULL_LOOT_ALL
 * LOOT_ITEM_RESULT_IS_UNIQUE
 * LOOT_ITEM_RESULT_IS_UNIQUE_LOOT_ALL
+* LOOT_ITEM_RESULT_ITEM_AT_INSTANCE_CAPACITY
+* LOOT_ITEM_RESULT_ITEM_AT_STACK_CAPACITY
 * LOOT_ITEM_RESULT_NOT_AVAILABLE
 * LOOT_ITEM_RESULT_NOT_IN_VENGEANCE
 * LOOT_ITEM_RESULT_QUEST_RESTRICTED
@@ -5738,6 +5813,7 @@ h5. SpecializedItemType
 * SPECIALIZED_ITEMTYPE_RECIPE_PROVISIONING_DESIGN_FURNISHING
 * SPECIALIZED_ITEMTYPE_RECIPE_PROVISIONING_STANDARD_DRINK
 * SPECIALIZED_ITEMTYPE_RECIPE_PROVISIONING_STANDARD_FOOD
+* SPECIALIZED_ITEMTYPE_RECIPE_PROVISIONING_SUPPLIES
 * SPECIALIZED_ITEMTYPE_RECIPE_WOODWORKING_BLUEPRINT_FURNISHING
 * SPECIALIZED_ITEMTYPE_SCRIBING_INK
 * SPECIALIZED_ITEMTYPE_SIEGE_BALLISTA
@@ -5756,6 +5832,7 @@ h5. SpecializedItemType
 * SPECIALIZED_ITEMTYPE_TOOL
 * SPECIALIZED_ITEMTYPE_TRASH
 * SPECIALIZED_ITEMTYPE_TREASURE
+* SPECIALIZED_ITEMTYPE_TRINKET
 * SPECIALIZED_ITEMTYPE_TROPHY_COLLECTIBLE_FRAGMENT
 * SPECIALIZED_ITEMTYPE_TROPHY_DUNGEON_BUFF_INGREDIENT
 * SPECIALIZED_ITEMTYPE_TROPHY_KEY
@@ -5782,6 +5859,8 @@ h5. StoreItemResult
 * STORE_ITEM_RESULT_INVALID_ITEM
 * STORE_ITEM_RESULT_INVENTORY_FULL
 * STORE_ITEM_RESULT_IS_UNIQUE
+* STORE_ITEM_RESULT_ITEM_AT_INSTANCE_CAPACITY
+* STORE_ITEM_RESULT_ITEM_AT_STACK_CAPACITY
 * STORE_ITEM_RESULT_SUCCESS
 
 
@@ -6715,6 +6794,7 @@ h5. UISetting
 * UI_SETTING_SHOW_HOUSE_TRACKER
 * UI_SETTING_SHOW_LATENCY
 * UI_SETTING_SHOW_LEADERBOARD_NOTIFICATIONS
+* UI_SETTING_SHOW_MINIMAP
 * UI_SETTING_SHOW_PVP_KILL_FEED_NOTIFICATIONS
 * UI_SETTING_SHOW_QUEST_BESTOWER_INDICATORS
 * UI_SETTING_SHOW_QUEST_TRACKER
@@ -6883,6 +6963,8 @@ h5. ClaimRewardResult
 * CLAIM_REWARD_RESULT_INVALID
 * CLAIM_REWARD_RESULT_INVALID_CHOICE
 * CLAIM_REWARD_RESULT_INVALID_LEVEL
+* CLAIM_REWARD_RESULT_ITEM_AT_INSTANCE_CAPACITY
+* CLAIM_REWARD_RESULT_ITEM_AT_STACK_CAPACITY
 * CLAIM_REWARD_RESULT_ITEM_INVALID_DEFS
 * CLAIM_REWARD_RESULT_ITEM_INVALID_QUANTITY
 * CLAIM_REWARD_RESULT_ITEM_INVALID_REQUIRED_LEVEL
@@ -6984,6 +7066,7 @@ h5. RewardType
 * REWARD_TYPE_CHAOTIC_CREATIA
 * REWARD_TYPE_IMPERIAL_FRAGMENTS
 * REWARD_TYPE_INSPIRATION
+* REWARD_TYPE_JERALL_MARKS
 * REWARD_TYPE_MONEY
 * REWARD_TYPE_NONE
 * REWARD_TYPE_PARTIAL_SKILL_POINTS
@@ -7413,6 +7496,7 @@ h5. MarketPurchasableResult
 * MARKET_PURCHASE_RESULT_NOT_ENOUGH_TRADE_BARS
 * MARKET_PURCHASE_RESULT_NOT_ENOUGH_VC
 * MARKET_PURCHASE_RESULT_PRODUCT_ALREADY_IN_GIFT_INVENTORY
+* MARKET_PURCHASE_RESULT_PURCHASE_LIMIT_REACHED
 * MARKET_PURCHASE_RESULT_QUEST_JOURNAL_FULL
 * MARKET_PURCHASE_RESULT_REQUIRES_ESO_PLUS
 * MARKET_PURCHASE_RESULT_SUCCESS
@@ -7437,6 +7521,14 @@ h5. OpenMarketBehavior
 * OPEN_MARKET_BEHAVIOR_SHOW_ESO_PLUS_CATEGORY
 * OPEN_MARKET_BEHAVIOR_SHOW_FEATURED_CATEGORY
 * OPEN_MARKET_BEHAVIOR_SHOW_MARKET_PRODUCT_CATEGORY
+
+
+h5. PurchaseLimitResetType
+* PURCHASE_LIMIT_RESET_TYPE_CUSTOM
+* PURCHASE_LIMIT_RESET_TYPE_DAILY
+* PURCHASE_LIMIT_RESET_TYPE_MONTHLY
+* PURCHASE_LIMIT_RESET_TYPE_SEASONAL
+* PURCHASE_LIMIT_RESET_TYPE_WEEKLY
 
 
 h5. ServiceTokenType
@@ -7498,6 +7590,7 @@ h5. MapFilter
 h5. MapFilterType
 * MAP_FILTER_TYPE_AVA_CYRODIIL
 * MAP_FILTER_TYPE_AVA_IMPERIAL
+* MAP_FILTER_TYPE_AVA_JERALL
 * MAP_FILTER_TYPE_BATTLEGROUND
 * MAP_FILTER_TYPE_GLOBAL
 * MAP_FILTER_TYPE_STANDARD
@@ -7563,6 +7656,8 @@ h5. ZoneCompletionType
 * ZONE_COMPLETION_TYPE_GROUP_BOSSES
 * ZONE_COMPLETION_TYPE_GROUP_DELVES
 * ZONE_COMPLETION_TYPE_MAGES_GUILD_BOOKS
+* ZONE_COMPLETION_TYPE_MECHANICS
+* ZONE_COMPLETION_TYPE_MILESTONES
 * ZONE_COMPLETION_TYPE_MUNDUS_STONES
 * ZONE_COMPLETION_TYPE_NONE
 * ZONE_COMPLETION_TYPE_POINTS_OF_INTEREST
@@ -7836,7 +7931,6 @@ h5. MarketingPreferencesRequestResult
 
 
 h5. PlatformServiceType
-* PLATFORM_SERVICE_TYPE_DMM
 * PLATFORM_SERVICE_TYPE_EPIC
 * PLATFORM_SERVICE_TYPE_PSN
 * PLATFORM_SERVICE_TYPE_STEAM
@@ -7845,7 +7939,6 @@ h5. PlatformServiceType
 
 
 h5. PlayerPlatformType
-* PLAYER_PLATFORM_DMM
 * PLAYER_PLATFORM_EPIC
 * PLAYER_PLATFORM_PC
 * PLAYER_PLATFORM_PLAYSTATION
@@ -8929,6 +9022,13 @@ h5. DialogueToneType
 * DIALOGUE_TONE_TYPE_RUTHLESS
 
 
+h5. InstanceManagementAction
+* INSTANCE_MANAGEMENT_ACTION_LOAD
+* INSTANCE_MANAGEMENT_ACTION_NONE
+* INSTANCE_MANAGEMENT_ACTION_RESET
+* INSTANCE_MANAGEMENT_ACTION_SAVE
+
+
 h5. InteractCancelContext
 * INTERACT_CANCEL_CONTEXT_COMBAT
 * INTERACT_CANCEL_CONTEXT_DEFAULT
@@ -8989,6 +9089,7 @@ h5. InteractType
 * CHATTER_END_GUILDKIOSK_PURCHASE
 * CHATTER_END_HARVEST
 * CHATTER_END_HIDEYHOLE
+* CHATTER_END_INSTANCE_MANAGEMENT
 * CHATTER_END_KEEP
 * CHATTER_END_KEEP_GUILD_CLAIM
 * CHATTER_END_KEEP_GUILD_RELEASE
@@ -9025,6 +9126,7 @@ h5. InteractType
 * CHATTER_GOODBYE
 * CHATTER_GUILDKIOSK_IN_TRANSITION
 * CHATTER_IMPROVE_ITEM
+* CHATTER_INSTANCE_MANAGEMENT_CONFIRM
 * CHATTER_INVALID
 * CHATTER_LOCK_PICK_BROKEN
 * CHATTER_LOOT_ADD_RADIUS_TARGET
@@ -9080,6 +9182,7 @@ h5. InteractType
 * CHATTER_START_GUILDKIOSK_PURCHASE
 * CHATTER_START_HARVEST
 * CHATTER_START_HIDEYHOLE
+* CHATTER_START_INSTANCE_MANAGEMENT
 * CHATTER_START_KEEP
 * CHATTER_START_KEEP_GUILD_CLAIM
 * CHATTER_START_KEEP_GUILD_RELEASE
@@ -9146,6 +9249,7 @@ h5. InteractionType
 * INTERACTION_GUILDKIOSK_PURCHASE
 * INTERACTION_HARVEST
 * INTERACTION_HIDEYHOLE
+* INTERACTION_INSTANCE_MANAGEMENT
 * INTERACTION_KEEP_GUILD_CLAIM
 * INTERACTION_KEEP_GUILD_RELEASE
 * INTERACTION_KEEP_INSPECT
@@ -9633,6 +9737,25 @@ h5. GenericSelectorChoiceCategory
 * GENERIC_SELECTOR_CHOICE_CATEGORY_PLAYER_DEBUFF
 
 
+h5. InstanceManagementResult
+* INSTANCE_MANAGEMENT_RESULT_BAD_STATE
+* INSTANCE_MANAGEMENT_RESULT_LOAD_FAIL
+* INSTANCE_MANAGEMENT_RESULT_LOAD_FAIL_SHUTDOWN
+* INSTANCE_MANAGEMENT_RESULT_LOAD_SUCCESS
+* INSTANCE_MANAGEMENT_RESULT_NOT_LEADER
+* INSTANCE_MANAGEMENT_RESULT_NOT_SAVEABLE
+* INSTANCE_MANAGEMENT_RESULT_NO_SAVE_TO_LOAD
+* INSTANCE_MANAGEMENT_RESULT_RESET_CANCEL_FAIL
+* INSTANCE_MANAGEMENT_RESULT_RESET_FAIL
+* INSTANCE_MANAGEMENT_RESULT_RESET_WAIT
+* INSTANCE_MANAGEMENT_RESULT_RUN_ENDED
+* INSTANCE_MANAGEMENT_RESULT_RUN_STARTED
+* INSTANCE_MANAGEMENT_RESULT_SAVE_CLEARED
+* INSTANCE_MANAGEMENT_RESULT_SAVE_FAIL
+* INSTANCE_MANAGEMENT_RESULT_SAVE_FAIL_SHUTDOWN
+* INSTANCE_MANAGEMENT_RESULT_SAVE_SUCCESS
+
+
 h5. ItemBonusSuppressionType
 * ITEM_BONUS_SUPPRESSION_TYPE_ABILITY
 * ITEM_BONUS_SUPPRESSION_TYPE_BATTLE_GROUND
@@ -9733,6 +9856,7 @@ h5. ProvisionerSpecialIngredientType
 * PROVISIONER_SPECIAL_INGREDIENT_TYPE_FURNISHING
 * PROVISIONER_SPECIAL_INGREDIENT_TYPE_NONE
 * PROVISIONER_SPECIAL_INGREDIENT_TYPE_SPICES
+* PROVISIONER_SPECIAL_INGREDIENT_TYPE_SUPPLIES
 
 
 h5. RecipeCraftingSystem
@@ -10126,6 +10250,7 @@ h5. TutorialTrigger
 * TUTORIAL_TRIGGER_MAP_OPENED_BATTLEGROUND
 * TUTORIAL_TRIGGER_MAP_OPENED_CYRODIIL
 * TUTORIAL_TRIGGER_MAP_OPENED_IMPERIAL_CITY
+* TUTORIAL_TRIGGER_MAP_OPENED_JERALL_PASS
 * TUTORIAL_TRIGGER_MAP_OPENED_PVE
 * TUTORIAL_TRIGGER_MARKET_OPENED
 * TUTORIAL_TRIGGER_MOUNTED
@@ -10159,7 +10284,6 @@ h5. TutorialTrigger
 * TUTORIAL_TRIGGER_RECEIVED_WHISPER
 * TUTORIAL_TRIGGER_REFUGE_ENTERED
 * TUTORIAL_TRIGGER_RETRAIT_STATION_OPENED
-* TUTORIAL_TRIGGER_REUSE_5
 * TUTORIAL_TRIGGER_REUSE_6
 * TUTORIAL_TRIGGER_RIDING_SKILL_MANAGEMENT_OPENED
 * TUTORIAL_TRIGGER_RUMOR_STARTED
@@ -10347,6 +10471,7 @@ h5. RewardTrackProgressResult
 * REWARD_TRACK_PROGRESS_RESULT_ALREADY_AT_HIGHEST_TIER
 * REWARD_TRACK_PROGRESS_RESULT_INTERNAL_ERROR
 * REWARD_TRACK_PROGRESS_RESULT_REWARD_TRACK_INACTIVE
+* REWARD_TRACK_PROGRESS_RESULT_REWARD_TRACK_PVP_ONLY
 * REWARD_TRACK_PROGRESS_RESULT_SUCCESS
 
 
@@ -10422,6 +10547,7 @@ h5. AllowMarkupType
 * ALLOW_MARKUP_TYPE_ALL
 * ALLOW_MARKUP_TYPE_COLOR_ONLY
 * ALLOW_MARKUP_TYPE_NONE
+* ALLOW_MARKUP_TYPE_NO_EXCEPTIONS
 
 
 h5. AnchorConstrains
@@ -10537,6 +10663,7 @@ h5. ControlType
 * CT_LINE
 * CT_MAPDISPLAY
 * CT_POLYGON
+* CT_QRCODE
 * CT_ROOT_WINDOW
 * CT_SCROLL
 * CT_SLIDER
@@ -10889,6 +11016,7 @@ h5. MapDisplayPinType
 * MAP_PIN_TYPE_RETURN_DAGGERFALL_COVENANT
 * MAP_PIN_TYPE_RETURN_EBONHEART_PACT
 * MAP_PIN_TYPE_RETURN_NEUTRAL
+* MAP_PIN_TYPE_SCRIPTED_EVENT
 * MAP_PIN_TYPE_SKYSHARD_COMPLETE
 * MAP_PIN_TYPE_SKYSHARD_SEEN
 * MAP_PIN_TYPE_SKYSHARD_SUGGESTED
@@ -10980,6 +11108,19 @@ h5. PolygonBorderDirection
 h5. PolygonPointLayout
 * POLYGON_POINT_LAYOUT_CLOCKWISE
 * POLYGON_POINT_LAYOUT_COUNTER_CLOCKWISE
+
+
+h5. QRCodeErrorCorrectionLevel
+* QR_CODE_ERROR_CORRECTION_LEVEL_HIGH
+* QR_CODE_ERROR_CORRECTION_LEVEL_LOW
+* QR_CODE_ERROR_CORRECTION_LEVEL_MEDIUM
+* QR_CODE_ERROR_CORRECTION_LEVEL_QUARTILE
+
+
+h5. QRCodeSegmentType
+* QR_CODE_SEGMENT_TYPE_ALPHANUMERIC
+* QR_CODE_SEGMENT_TYPE_BYTE
+* QR_CODE_SEGMENT_TYPE_NUMERIC
 
 
 h5. ReleaseReferenceOptions
@@ -11105,6 +11246,8 @@ h5. Globals
 * COMPASS_PIN_NO_MAX_DISTANCE
 * KEYBOARD_CUSTOM_UI_SCALE_LOWER_BOUND
 * KEYBOARD_CUSTOM_UI_SCALE_UPPER_BOUND
+* DEFAULT_UI_HEIGHT
+* DEFAULT_UI_WIDTH
 * GAMEPAD_CUSTOM_UI_SCALE_LOWER_BOUND
 * GAMEPAD_CUSTOM_UI_SCALE_UPPER_BOUND
 * IME_UNDERLINE_THICKNESS_PIXELS
@@ -11879,15 +12022,11 @@ h2. Game API
 * ShouldOpenURLTypeInOverlay *private* (*[ApprovedURLType|#ApprovedURLType]* _urlType_)
 ** _Returns:_ *bool* _urlOpensInOverlay_
 
-* OpenChapterUpgradeURL *private* (*integer* _chapterId_, *bool* _isCollectorsEdition_, *[ChapterUpgradeSource|#ChapterUpgradeSource]* _source_)
-
 * ShowPlatformStoreUI *private* ()
 
 * ShowPlatformESOCrownPacksUI *private* ()
 
 * ShowPlatformESOPlusSubscriptionUI *private* ()
-
-* ShowPlatformESOChapterUpgradeUI *private* (*integer* _chapterId_, *bool* _isCollectorsEdition_, *[ChapterUpgradeSource|#ChapterUpgradeSource]* _source_)
 
 * ShowPlatformESOVOAdditionalContentUI *private* ()
 
@@ -11969,7 +12108,7 @@ h2. Game API
 ** _Returns:_ *integer* _numFriends_
 
 * GetFriendInfo(*luaindex* _friendIndex_)
-** _Returns:_ *string* _displayName_, *string* _note_, *[PlayerStatus|#PlayerStatus]* _playerStatus_, *integer* _secsSinceLogoff_
+** _Returns:_ *string* _crossplayDisplayName_, *string* _note_, *[PlayerStatus|#PlayerStatus]* _playerStatus_, *integer* _secsSinceLogoff_, *string* _platformDisplayName_
 
 * GetFriendCharacterInfo(*luaindex* _friendIndex_)
 ** _Returns:_ *bool* _hasCharacter_, *string* _characterName_, *string* _zoneName_, *integer* _classType_, *[Alliance|#Alliance]* _alliance_, *integer* _level_, *integer* _championRank_, *integer* _zoneId_, *id64* _consoleId_
@@ -12010,9 +12149,9 @@ h2. Game API
 * GetOutgoingFriendRequestInfo(*luaindex* _index_)
 ** _Returns:_ *string* _displayName_, *integer* _secsSinceRequest_, *string* _note_
 
-* AcceptFriendRequest(*string* _displayName_)
+* AcceptFriendRequest(*string* _crossplayDisplayName_)
 
-* RejectFriendRequest(*string* _displayName_)
+* RejectFriendRequest(*string* _crossplayDisplayName_)
 
 * CancelFriendRequest(*luaindex* _index_)
 
@@ -12026,6 +12165,10 @@ h2. Game API
 
 * GetGuildIndex(*integer* _guildId_)
 ** _Returns:_ *luaindex:nilable* _guildIndex_
+
+* AdjustGuildIndex(*integer* _guildId_, *luaindex* _newGuildIndex_)
+
+* SetAllGuildsOrder(*integer* _guildId_)
 
 * GetNumGuilds()
 ** _Returns:_ *integer* _numGuilds_
@@ -12318,6 +12461,9 @@ h2. Game API
 * IsValidGuildMail(*id64* _guildMailId_)
 ** _Returns:_ *bool* _isValid_
 
+* IsGuildMailInitialized()
+** _Returns:_ *bool* _isInitialized_
+
 * GetNumActiveGuildMailsForGuild(*integer* _guildId_)
 ** _Returns:_ *integer* _numMails_
 
@@ -12559,15 +12705,6 @@ h2. Game API
 
 * IsCommunicationRestrictedAccount()
 ** _Returns:_ *bool* _isCommunicationRestrictedAccount_
-
-* GetCurrentChapterUpgradeId()
-** _Returns:_ *integer* _chapterUpgradeId_
-
-* GetChapterCollectibleId(*integer* _chapterUpgradeId_)
-** _Returns:_ *integer* _collectibleId_
-
-* IsChapterOwned(*integer* _chapterUpgradeId_)
-** _Returns:_ *bool* _isChapterOwned_
 
 * GetTrialInfo()
 ** _Returns:_ *integer* _accountTypeId_, *string* _title_, *string* _description_, *integer* _version_
@@ -13058,6 +13195,9 @@ h2. Game API
 
 * GetUnitCaption(*string* _unitTag_)
 ** _Returns:_ *string* _caption_
+
+* GetScriptedEventOverheadIcon(*string* _unitTag_)
+** _Returns:_ *textureName* _icon_
 
 * GetUnitSilhouetteTexture(*string* _unitTag_)
 ** _Returns:_ *string* _icon_
@@ -14526,7 +14666,7 @@ h2. Game API
 ** _Returns:_ *string* _dialogue_, *string* _response_
 
 * GetOfferedQuestShareInfo(*integer* _questId_)
-** _Returns:_ *string* _questName_, *string* _characterName_, *integer* _millisecondsSinceRequest_, *string* _displayName_
+** _Returns:_ *string* _questName_, *string* _characterName_, *integer* _millisecondsSinceRequest_, *string* _crossplayDisplayName_, *string* _platformDisplayName_
 
 * GetOfferedQuestShareIds()
 ** _Uses variable returns..._
@@ -15143,6 +15283,9 @@ h2. Game API
 * SetMapToPlayerLocation()
 ** _Returns:_ *[SetMapResultCode|#SetMapResultCode]* _setMapResult_
 
+* ShouldPlayerMinimapBeZoomedIn()
+** _Returns:_ *bool* _zoomIn_
+
 * DoesCurrentMapMatchMapForPlayerLocation()
 ** _Returns:_ *bool* _matches_
 
@@ -15180,6 +15323,9 @@ h2. Game API
 ** _Returns:_ *luaindex:nilable* _index_
 
 * GetImperialCityMapIndex()
+** _Returns:_ *luaindex:nilable* _index_
+
+* GetJerallPassMapIndex()
 ** _Returns:_ *luaindex:nilable* _index_
 
 * GetCurrentMapZoneIndex()
@@ -15384,6 +15530,9 @@ h2. Game API
 
 * IsInImperialCity()
 ** _Returns:_ *bool* _isInImperialCity_
+
+* IsInJerallPass()
+** _Returns:_ *bool* _isInJerallPass_
 
 * IsInAvAZone()
 ** _Returns:_ *bool* _isInAvAZone_
@@ -15893,8 +16042,11 @@ h2. Game API
 * GetCampaignSequenceId(*integer* _campaignId_)
 ** _Returns:_ *integer* _sequenceId_
 
-* QueryCampaignLeaderboardData(*[Alliance|#Alliance]* _alliance_)
+* QueryCampaignLeaderboardData(*integer* _campaignId_, *[Alliance|#Alliance]* _alliance_)
 ** _Returns:_ *[LeaderboardDataReadyState|#LeaderboardDataReadyState]* _readyState_
+
+* IsCampaignLeaderboardDataReady(*[Alliance|#Alliance]* _alliance_)
+** _Returns:_ *bool* _isDataReady_
 
 * GetLeaderboardCampaignSequenceId(*integer* _campaignId_)
 ** _Returns:_ *integer* _campaignSequenceId_
@@ -15908,11 +16060,14 @@ h2. Game API
 * GetNumCampaignAllianceLeaderboardEntries(*integer* _campaignId_, *[Alliance|#Alliance]* _alliance_)
 ** _Returns:_ *integer* _entryCount_
 
+* GetCampaignLeaderboardPlayerAlliancePoints(*integer* _campaignId_)
+** _Returns:_ *integer* _alliancePoints_
+
 * GetCampaignLeaderboardEntryInfo(*integer* _campaignId_, *luaindex* _entryIndex_)
-** _Returns:_ *bool* _isPlayer_, *integer* _ranking_, *string* _charName_, *integer* _alliancePoints_, *integer* _classId_, *[Alliance|#Alliance]* _alliance_, *string* _displayName_
+** _Returns:_ *bool* _isPlayer_, *integer* _ranking_, *string* _charName_, *integer* _alliancePoints_, *integer* _classId_, *[Alliance|#Alliance]* _alliance_, *string* _displayName_, *[CampaignLeaderboardFlags|#CampaignLeaderboardFlags]* _flags_
 
 * GetCampaignAllianceLeaderboardEntryInfo(*integer* _campaignId_, *[Alliance|#Alliance]* _alliance_, *luaindex* _entryIndex_)
-** _Returns:_ *bool* _isPlayer_, *integer* _ranking_, *string* _charName_, *integer* _alliancePoints_, *integer* _classId_, *string* _displayName_, *[Alliance|#Alliance]* _achievedEmperorAlliance_
+** _Returns:_ *bool* _isPlayer_, *integer* _ranking_, *string* _charName_, *integer* _alliancePoints_, *integer* _classId_, *string* _displayName_, *[Alliance|#Alliance]* _achievedEmperorAlliance_, *[CampaignLeaderboardFlags|#CampaignLeaderboardFlags]* _flags_
 
 * GetPlayerCampaignRewardTierInfo(*integer* _campaignId_)
 ** _Returns:_ *integer* _earnedTier_, *integer* _nextTierProgress_, *integer* _nextTierTotal_
@@ -16024,22 +16179,28 @@ h2. Game API
 ** _Returns:_ *integer* _pinType_, *number* _normalizedX_, *number* _normalizedY_
 
 * GetCampaignHoldings(*integer* _campaignId_, *[CampaignHoldingType|#CampaignHoldingType]* _holdingType_, *[Alliance|#Alliance]* _alliance_, *[Alliance|#Alliance]* _targetAlliance_)
-** _Returns:_ *integer* _holdingsControlled_
+** _Returns:_ *integer* _holdingsControlled_, *integer* _possibleHoldings_
+
+* GetPossibleCampaignHoldings(*integer* _campaignId_, *[CampaignHoldingType|#CampaignHoldingType]* _holdingType_, *[Alliance|#Alliance]* _alliance_)
+** _Returns:_ *integer* _possibleHoldings_
 
 * GetTotalCampaignHoldings(*integer* _campaignId_, *[CampaignHoldingType|#CampaignHoldingType]* _holdingType_, *[Alliance|#Alliance]* _alliance_)
-** _Returns:_ *integer* _holdingsControlled_
+** _Returns:_ *integer* _holdingsControlled_, *integer* _possibleHoldings_
 
 * GetCampaignAlliancePotentialScore(*integer* _campaignId_, *[Alliance|#Alliance]* _alliance_)
 ** _Returns:_ *integer* _potentialScore_
 
-* GetCampaignHoldingScoreValues(*integer* _campaignId_)
-** _Returns:_ *integer* _keepValue_, *integer* _resourceValue_, *integer* _outpostValue_, *integer* _defensiveArtifactValue_, *integer* _offensiveArtifactValue_
+* GetCampaignHoldingScoreValue(*integer* _campaignId_, *[CampaignHoldingType|#CampaignHoldingType]* _holdingType_)
+** _Returns:_ *integer* _scoreValue_
 
 * GetCampaignName(*integer* _campaignId_)
 ** _Returns:_ *string* _campaignName_
 
 * CanCampaignBeAllianceLocked(*integer* _campaignId_)
 ** _Returns:_ *bool* _canCampaignBeAllianceLocked_
+
+* GetCampaignWorldType(*integer* _campaignId_)
+** _Returns:_ *[CampaignWorldType|#CampaignWorldType]* _campaignWorldType_
 
 * IsImperialCityCampaign(*integer* _campaignId_)
 ** _Returns:_ *bool* _isImperialCityCampaign_
@@ -16253,6 +16414,9 @@ h2. Game API
 
 * GetKeepResourceType(*integer* _keepId_)
 ** _Returns:_ *[KeepResourceType|#KeepResourceType]* _resourceType_
+
+* GetKeepCampaignWorldType(*integer* _keepId_)
+** _Returns:_ *[CampaignWorldType|#CampaignWorldType]* _worldType_
 
 * GetKeepResourceInfo(*integer* _keepId_, *[BattlegroundQueryContextType|#BattlegroundQueryContextType]* _battlegroundContext_, *[KeepResourceType|#KeepResourceType]* _resourceType_, *integer* _level_)
 ** _Returns:_ *integer* _currentAmount_, *integer* _amountForNextLevel_, *integer* _upkeepPerMinute_
@@ -16524,8 +16688,8 @@ h2. Game API
 * GetAvailableSkillPoints()
 ** _Returns:_ *integer* _numPoints_
 
-* GetNumSkyShards()
-** _Returns:_ *integer* _numShards_
+* GetLeftoverPartialSkillPoints()
+** _Returns:_ *integer* _partialSkillPoints_
 
 * GetNumSkillTypes()
 ** _Returns:_ *integer* _numSkillTypes_
@@ -18076,7 +18240,7 @@ h2. Game API
 ** _Returns:_ *bool* _hasAttacker_
 
 * GetKillingAttackerInfo(*luaindex* _index_)
-** _Returns:_ *string* _attackerRawName_, *integer* _attackerChampionPoints_, *integer* _attackerLevel_, *integer* _attackerAvARank_, *bool* _isPlayer_, *bool* _isBoss_, *[Alliance|#Alliance]* _alliance_, *string* _minionName_, *string* _attackerDisplayName_
+** _Returns:_ *string* _attackerRawName_, *integer* _attackerChampionPoints_, *integer* _attackerLevel_, *integer* _attackerAvARank_, *bool* _isPlayer_, *bool* _isBoss_, *[Alliance|#Alliance]* _alliance_, *string* _minionName_, *string* _attackerCrossplayDisplayName_, *string* _attackerPlatformDisplayName_
 
 * GetKillingAttackerBattlegroundTeam(*luaindex* _index_)
 ** _Returns:_ *[BattlegroundTeam|#BattlegroundTeam]* _battlegroundTeam_
@@ -18617,8 +18781,6 @@ h2. Game API
 * RequestPurchaseMarketProduct(*integer* _marketProductId_, *luaindex* _presentationIndex_, *bool* _isGift_)
 
 * ShowEsoPlusPage(*[MarketOpenOperation|#MarketOpenOperation]* _source_)
-
-* RequestShowMarketChapterUpgrade(*[MarketOpenOperation|#MarketOpenOperation]* _source_, *integer* _chapterUpgradeId_)
 
 * GetNumMarketProductUnlockNotifications()
 ** _Returns:_ *integer* _numNotifications_
@@ -19389,7 +19551,7 @@ h2. Game API
 * IsItemTraitKnownForRetraitResult(*[Bag|#Bag]* _bagId_, *integer* _slotIndex_, *[ItemTraitType|#ItemTraitType]* _pendingTrait_)
 ** _Returns:_ *bool* _isKnown_
 
-* GetRearchLineInfoFromRetraitItem(*[Bag|#Bag]* _bagId_, *integer* _slotIndex_)
+* GetResearchLineInfoFromRetraitItem(*[Bag|#Bag]* _bagId_, *integer* _slotIndex_)
 ** _Returns:_ *[TradeskillType|#TradeskillType]* _craftingType_, *string* _researchLineName_
 
 * GetItemTraitTypeCategory(*[ItemTraitType|#ItemTraitType]* _itemTraitType_)
@@ -19583,10 +19745,10 @@ h2. Game API
 * GetAssociatedAchievementIdForZoneCompletionType(*integer* _zoneId_, *[ZoneCompletionType|#ZoneCompletionType]* _zoneCompletionType_, *luaindex* _associatedAchievementIndex_)
 ** _Returns:_ *integer* _associatedAchievementId_
 
-* IsZoneStoryActivityComplete(*integer* _zoneId_, *[ZoneCompletionType|#ZoneCompletionType]* _zoneCompletionType_, *luaindex* _activityIndex_, *integer* _zoneCompletionTypeIndex_)
+* IsZoneStoryActivityComplete(*integer* _zoneId_, *[ZoneCompletionType|#ZoneCompletionType]* _zoneCompletionType_, *luaindex* _activityIndex_, *luaindex* _zoneCompletionTypeIndex_)
 ** _Returns:_ *bool* _isActivityComplete_
 
-* GetZoneStoryActivityNameByActivityIndex(*integer* _zoneId_, *[ZoneCompletionType|#ZoneCompletionType]* _zoneCompletionType_, *luaindex* _activityIndex_, *integer* _zoneCompletionTypeIndex_)
+* GetZoneStoryActivityNameByActivityIndex(*integer* _zoneId_, *[ZoneCompletionType|#ZoneCompletionType]* _zoneCompletionType_, *luaindex* _activityIndex_, *luaindex* _zoneCompletionTypeIndex_)
 ** _Returns:_ *string* _name_
 
 * GetZoneStoryActivityNameByActivityId(*integer* _zoneId_, *[ZoneCompletionType|#ZoneCompletionType]* _zoneCompletionType_, *integer* _activityId_)
@@ -20180,6 +20342,12 @@ h2. Game API
 * HasSuppressedCompanion()
 ** _Returns:_ *bool* _hasSuppressedCompanion_
 
+* IsActiveCompanionAnimal()
+** _Returns:_ *bool* _isAnimalCompanion_
+
+* GetActiveCompanionType()
+** _Returns:_ *[CompanionType|#CompanionType]* _companionType_
+
 * GetActiveCompanionDefId()
 ** _Returns:_ *integer* _activeCompanionDefId_
 
@@ -20221,6 +20389,9 @@ h2. Game API
 
 * GetCompanionGender(*integer* _companionId_)
 ** _Returns:_ *[Gender|#Gender]* _gender_
+
+* GetActiveAnimalCompanionSilhouetteTexture()
+** _Returns:_ *textureName* _paperDollTexture_
 
 * IsTimedActivitySystemAvailable()
 ** _Returns:_ *bool* _available_
@@ -20394,6 +20565,10 @@ h2. Game API
 
 * GetArmoryOperationsCooldownDurationMs()
 ** _Returns:_ *integer* _durationMs_
+
+* SetTemporaryCraftedAbilityScriptSelectionsForBuild(*luaindex* _buildIndex_)
+
+* ClearTemporaryCraftedAbilityScriptSelectionsForBuild()
 
 * GetArmoryOperationsCooldownRemaining()
 ** _Returns:_ *integer* _remainingTime_
@@ -21284,6 +21459,12 @@ h2. Game API
 * GetOverlandDifficultyDisabledReason()
 ** _Returns:_ *[OverlandDifficultyDisabledReason|#OverlandDifficultyDisabledReason]* _disabledReason_
 
+* IsOverlandDifficultyEnabled(*integer* _zoneId_)
+** _Returns:_ *bool* _isEnabled_
+
+* IsOverlandDifficultyEnabledForWorld(*integer* _worldId_)
+** _Returns:_ *bool* _isEnabled_
+
 * GetNumPendingRumors()
 ** _Returns:_ *integer* _numRumors_
 
@@ -21388,6 +21569,12 @@ h2. Game API
 * GetTrialProgressionTrackLootStreamTextByIndex(*luaindex* _trackIndex_)
 ** _Returns:_ *string* _lootStreamName_
 
+* GetTrialProgressionTrackAttunedUISoundByIndex(*luaindex* _trackIndex_)
+** _Returns:_ *string* _soundId_
+
+* GetTrialProgressionTrackUnattunedUISoundByIndex(*luaindex* _trackIndex_)
+** _Returns:_ *string* _soundId_
+
 * GetPointsInTrialProgressionTrackByIndex(*luaindex* _trackIndex_)
 ** _Returns:_ *integer* _points_
 
@@ -21402,6 +21589,11 @@ h2. Game API
 
 * GetInfoForPassiveInTrialProgressionTrackByIndex(*luaindex* _trackIndex_, *luaindex* _passiveIndex_)
 ** _Returns:_ *integer* _cost_, *string* _title_, *string* _description_
+
+* ConfirmInstanceManagementAction(*[InstanceManagementAction|#InstanceManagementAction]* _managementAction_)
+
+* GetSavedInstanceEndlessDungeonSummary()
+** _Returns:_ *integer* _stage_, *integer* _cycle_, *integer* _arc_
 
 
 * IsGameCameraActive()
@@ -21883,13 +22075,13 @@ h2. Game API
 ** _Returns:_ *[ItemTraitType|#ItemTraitType]* _traitType_, *string* _traitDescription_
 
 * GetItemLinkSetInfo(*string* _itemLink_, *bool* _equipped_)
-** _Returns:_ *bool* _hasSet_, *string* _setName_, *integer* _numBonuses_, *integer* _numNormalEquipped_, *integer* _maxEquipped_, *integer* _setId_, *integer* _numPerfectedEquipped_
+** _Returns:_ *bool* _hasSet_, *string* _setName_, *integer* _numBonuses_, *integer* _numNormalEquipped_, *integer* _maxEquipped_, *integer* _setId_, *integer* _numPerfectedEquipped_, *integer* _numEffectContributions_, *integer* _numPerfectedEffectContributions_
 
 * GetItemLinkSetBonusInfo(*string* _itemLink_, *bool* _equipped_, *luaindex* _index_)
 ** _Returns:_ *integer* _numRequired_, *string* _bonusDescription_, *bool* _isPerfectedBonus_
 
 * GetItemSetInfo(*integer* _itemSetId_)
-** _Returns:_ *bool* _hasSet_, *string* _setName_, *integer* _numBonuses_, *integer* _numNormalEquipped_, *integer* _numPerfectedEquipped_, *integer* _maxEquipped_
+** _Returns:_ *bool* _hasSet_, *string* _setName_, *integer* _numBonuses_, *integer* _numNormalEquipped_, *integer* _numPerfectedEquipped_, *integer* _maxEquipped_, *integer* _numEffectContributions_, *integer* _numPerfectedEffectContributions_
 
 * GetItemSetBonusInfo(*integer* _itemSetId_, *luaindex* _index_)
 ** _Returns:_ *integer* _numRequired_, *string* _bonusDescription_, *bool* _isPerfectedBonus_
@@ -21904,7 +22096,7 @@ h2. Game API
 ** _Returns:_ *integer* _numSetIds_
 
 * GetItemLinkContainerSetInfo(*string* _itemLink_, *luaindex* _containerSetIndex_)
-** _Returns:_ *bool* _hasSet_, *string* _setName_, *integer* _numBonuses_, *integer* _numNormalEquipped_, *integer* _maxEquipped_, *integer* _setId_, *integer* _numPerfectedEquipped_
+** _Returns:_ *bool* _hasSet_, *string* _setName_, *integer* _numBonuses_, *integer* _numNormalEquipped_, *integer* _maxEquipped_, *integer* _setId_, *integer* _numPerfectedEquipped_, *integer* _numEffectContributions_, *integer* _numPerfectedEffectContributions_
 
 * GetItemLinkContainerSetBonusInfo(*string* _itemLink_, *luaindex* _containerSetIndex_, *luaindex* _bonusIndex_)
 ** _Returns:_ *integer* _numRequired_, *string* _bonusDescription_, *bool* _isPerfectedBonus_
@@ -22097,6 +22289,9 @@ h2. Game API
 
 * GetItemLinkActorCategory(*string* _itemLink_)
 ** _Returns:_ *[GameplayActorCategory|#GameplayActorCategory]* _actorCategory_
+
+* IsItemLinkAnimalCompanion(*string* _itemLink_)
+** _Returns:_ *bool* _isAnimalCompanion_
 
 * ShouldHideTooltipRequiredLevel(*string* _itemLink_)
 ** _Returns:_ *bool* _shouldHideLevel_
@@ -22438,6 +22633,9 @@ h2. Game API
 
 * GetCategoryInfoFromCollectibleCategoryId(*integer* _collectibleCategoryId_)
 ** _Returns:_ *luaindex:nilable* _topLevelIndex_, *luaindex:nilable* _categoryIndex_
+
+* GetNextPseudoCollectibleId(*luaindex:nilable* _lastIndex_)
+** _Returns:_ *luaindex:nilable* _nextIndex_, *integer:nilable* _nextId_
 
 * GetNumNewCollectibles()
 ** _Returns:_ *integer* _count_
@@ -22896,10 +23094,6 @@ h2. Game API
 ** _Uses variable returns..._
 ** _Returns:_ *integer* _marketProductId_, *luaindex* _presentationIndex_
 
-* GetActiveChapterUpgradeMarketProductListings(*[MarketDisplayGroup|#MarketDisplayGroup]* _displayGroup_)
-** _Uses variable returns..._
-** _Returns:_ *integer* _marketProductId_
-
 * OnMarketClose *private* ()
 
 * RequestMarketAnnouncement()
@@ -22929,6 +23123,27 @@ h2. Game API
 
 * GetExpiringMarketCurrencyInfo(*luaindex* _index_)
 ** _Returns:_ *integer* _marketCurrencyAmount_, *number* _timeLeftSeconds_
+
+* DoesMarketProductHavePurchaseLimit(*integer* _marketProductId_)
+** _Returns:_ *bool* _hasPurchaseLimit_
+
+* ShouldMarketProductHidePurchaseLimitResetTimer(*integer* _marketProductId_)
+** _Returns:_ *bool* _shouldHidePurchaseLimitResetTimer_
+
+* GetMarketProductPurchaseLimit(*integer* _marketProductId_)
+** _Returns:_ *integer* _purchaseLimit_
+
+* GetMarketProductPurchaseCount(*integer* _marketProductId_)
+** _Returns:_ *integer* _purchaseCount_
+
+* GetMarketProductAvailablePurchaseLimit(*integer* _marketProductId_)
+** _Returns:_ *integer:nilable* _availableCount_
+
+* GetMarketProductPurchaseLimitResetType(*integer* _marketProductId_)
+** _Returns:_ *[PurchaseLimitResetType|#PurchaseLimitResetType]* _purchaseLimitResetType_
+
+* GetMarketProductPurchaseLimitResetTimeLeftInSeconds(*integer* _marketProductId_)
+** _Returns:_ *number* _timeLeftSeconds_
 
 * GetEsoPlusSubscriptionBenefitsInfoHelpIndices()
 ** _Returns:_ *luaindex:nilable* _helpCategoryIndex_, *luaindex:nilable* _helpIndex_
@@ -23388,9 +23603,6 @@ h2. Game API
 * GetMarketProductPreviewVariationDisplayName(*integer* _marketProductId_, *luaindex* _variation_)
 ** _Returns:_ *string* _variationDisplayName_
 
-* GetMarketProductChapterUpgradeId(*integer* _marketProductId_)
-** _Returns:_ *integer* _chapterUpgradeId_
-
 * PreviewMarketProductCollectibleAction *private* (*integer* _marketProductId_, *luaindex* _variation_, *luaindex* _action_)
 
 * GetNumMarketProductCollectiblePreviewActions(*integer* _marketProductId_, *luaindex* _variation_)
@@ -23619,45 +23831,6 @@ h2. Game API
 
 * SetFrameInteractionTarget(*number* _normalizedScreenX_, *number* _normalizedScreenY_)
 
-* GetChapterSummary(*integer* _chapterUpgradeId_)
-** _Returns:_ *string* _chapterSummary_
-
-* GetChapterOverrideDisplayName(*integer* _chapterUpgradeId_)
-** _Returns:_ *string* _overrideDisplayName_
-
-* GetChapterMarketBackgroundFileImage(*integer* _chapterUpgradeId_)
-** _Returns:_ *textureName* _marketBackgroundFileIndex_
-
-* GetNumChapterPrePurchaseRewards(*integer* _chapterUpgradeId_)
-** _Returns:_ *integer* _numRewards_
-
-* GetChapterPrePurchaseRewardInfo(*integer* _chapterUpgradeId_, *luaindex* _index_)
-** _Returns:_ *integer* _marketProductId_, *bool* _isStandardReward_, *bool* _isCollectorsReward_
-
-* GetNumChapterPreOrderRewards(*integer* _chapterUpgradeId_)
-** _Returns:_ *integer* _numRewards_
-
-* GetChapterPreOrdereRewardInfo(*integer* _chapterUpgradeId_, *luaindex* _index_)
-** _Returns:_ *integer* _marketProductId_, *bool* _isStandardReward_, *bool* _isCollectorsReward_
-
-* GetNumChapterBasicRewards(*integer* _chapterUpgradeId_)
-** _Returns:_ *integer* _numRewards_
-
-* GetChapterBasicRewardInfo(*integer* _chapterUpgradeId_, *luaindex* _index_)
-** _Returns:_ *integer* _marketProductId_, *bool* _isStandardReward_, *bool* _isCollectorsReward_
-
-* IsChapterPreRelease(*integer* _chapterUpgradeId_)
-** _Returns:_ *bool* _isPreRelease_
-
-* GetChapterReleaseDateString(*integer* _chapterUpgradeId_)
-** _Returns:_ *string* _releaseDateString_
-
-* GetChapterEnumFromUpgradeId(*integer* _chapterUpgradeId_)
-** _Returns:_ *[Chapter|#Chapter]* _chapterEnum_
-
-* IsChapterContentPass(*integer* _chapterUpgradeId_)
-** _Returns:_ *bool* _isContentPass_
-
 * GetGiftMarketProductId(*id64* _giftId_)
 ** _Returns:_ *integer* _marketProductId_
 
@@ -23784,6 +23957,9 @@ h2. Game API
 
 * GetAchievementCriterion(*integer* _achievementId_, *luaindex* _criterionIndex_)
 ** _Returns:_ *string* _description_, *integer* _numCompleted_, *integer* _numRequired_
+
+* GetAchievementCriterionSkyshardId(*integer* _achievementId_, *luaindex* _criterionIndex_)
+** _Returns:_ *integer* _skyshardId_
 
 * GetAchievementRewardItem(*integer* _achievementId_)
 ** _Returns:_ *bool* _hasRewardOfType_, *string* _itemName_, *string* _iconTextureName_, *[ItemDisplayQuality|#ItemDisplayQuality]* _displayQuality_
@@ -25289,6 +25465,10 @@ h3. CanvasControl
 
 * SetFillColor(*number* _r_, *number* _g_, *number* _b_, *number* _a_)
 
+* SetFillColorLinearGradient(*string* _color1_, *string* _color2_, *number* _startLocationX_, *number* _startLocationY_, *number* _endLocationX_, *number* _endLocationY_)
+
+* SetFillColorRadialGradient(*string* _color1_, *string* _color2_, *number* _centerX_, *number* _centerY_, *number* _extent_)
+
 * SetObjectFit(*[ObjectFit|#ObjectFit]* _objectFit_)
 
 * SetStrokeCapStyle(*[StrokeCapStyle|#StrokeCapStyle]* _capStyle_)
@@ -25380,7 +25560,7 @@ h3. CompassDisplayControl
 
 h3. Control
 Objects that inherit behavior from *Control*
-[BackdropControl|#BackdropControl], [ButtonControl|#ButtonControl], [CanvasControl|#CanvasControl], [ColorSelectControl|#ColorSelectControl], [CompassDisplayControl|#CompassDisplayControl], [CooldownControl|#CooldownControl], [DebugTextControl|#DebugTextControl], [EditControl|#EditControl], [LabelControl|#LabelControl], [LineControl|#LineControl], [MapDisplayControl|#MapDisplayControl], [PolygonControl|#PolygonControl], [RootWindow|#RootWindow], [ScrollControl|#ScrollControl], [SliderControl|#SliderControl], [StatusBarControl|#StatusBarControl], [TextBufferControl|#TextBufferControl], [TextureCompositeControl|#TextureCompositeControl], [TextureControl|#TextureControl], [TooltipControl|#TooltipControl], [TopLevelWindow|#TopLevelWindow], [VectorControl|#VectorControl]
+[BackdropControl|#BackdropControl], [ButtonControl|#ButtonControl], [CanvasControl|#CanvasControl], [ColorSelectControl|#ColorSelectControl], [CompassDisplayControl|#CompassDisplayControl], [CooldownControl|#CooldownControl], [DebugTextControl|#DebugTextControl], [EditControl|#EditControl], [LabelControl|#LabelControl], [LineControl|#LineControl], [MapDisplayControl|#MapDisplayControl], [PolygonControl|#PolygonControl], [QRCodeControl|#QRCodeControl], [RootWindow|#RootWindow], [ScrollControl|#ScrollControl], [SliderControl|#SliderControl], [StatusBarControl|#StatusBarControl], [TextBufferControl|#TextBufferControl], [TextureCompositeControl|#TextureCompositeControl], [TextureControl|#TextureControl], [TooltipControl|#TooltipControl], [TopLevelWindow|#TopLevelWindow], [VectorControl|#VectorControl]
 
 * AddFilterForEvent(*integer* _event_, *variant* _filterParameter_)
 ** _Returns:_ *bool* _success_
@@ -26242,6 +26422,9 @@ h3. LabelControl
 * GetVerticalAlignment()
 ** _Returns:_ *[TextAlignment|#TextAlignment]* _align_
 
+* GetWrapMode()
+** _Returns:_ *[TextWrapMode|#TextWrapMode]* _wrapMode_
+
 * SetColor(*number* _r_, *number* _g_, *number* _b_, *number* _a_)
 
 * SetControlColor(*number* _r_, *number* _g_, *number* _b_, *number* _a_)
@@ -26284,7 +26467,7 @@ h3. LabelControl
 
 * SetVerticalAlignment(*[TextAlignment|#TextAlignment]* _align_)
 
-* SetWrapMode(*integer* _wrapMode_)
+* SetWrapMode(*[TextWrapMode|#TextWrapMode]* _wrapMode_)
 
 * WasTruncated()
 ** _Returns:_ *bool* _wasTruncated_
@@ -26346,7 +26529,7 @@ h3. MapDisplayControl
 * GetZoom()
 ** _Returns:_ *number* _normalizedRadius_
 
-* SetBasePinData(*[MapDisplayPinType|#MapDisplayPinType]* _pinType_, *[MapArrowType|#MapArrowType]* _arrowType_, *number* _pinSize_, *number* _pinXInset_, *number* _pinYInset_, *number* _arrowSize_, *string* _textureFilename_, *string* _arrowTextureFilename_, *string* _areaTextureFilename_, *string* _aboveTextureFilename_, *string* _belowTextureFilename_, *string* _linkTextureFilename_, *string* _animation_, *string* _addedAnimation_, *string* _removedAnimation_, *[MapPinAnimationTarget|#MapPinAnimationTarget]* _animationTarget_)
+* SetBasePinData(*[MapDisplayPinType|#MapDisplayPinType]* _pinType_, *[MapArrowType|#MapArrowType]* _arrowType_, *number* _pinSize_, *number* _pinXInset_, *number* _pinYInset_, *number* _arrowSize_, *string* _textureFilename_, *string* _arrowTextureFilename_, *string* _areaTextureFilename_, *string* _aboveTextureFilename_, *string* _belowTextureFilename_, *string* _linkTextureFilename_, *string* _animation_, *string* _addedAnimation_, *string* _removedAnimation_, *[MapPinAnimationTarget|#MapPinAnimationTarget]* _animationTarget_, *[DrawLayer|#DrawLayer]* _layer_, *integer* _drawLevelOffsetBase_)
 
 * SetGutterOffsetAndSize(*number* _offset_, *number* _size_)
 
@@ -26436,6 +26619,27 @@ h3. PolygonControl
 * SetPointLayout(*[PolygonPointLayout|#PolygonPointLayout]* _pointLayout_)
 
 * SetSmoothingEnabled(*bool* _isSmoothingEnabled_)
+
+
+h3. QRCodeControl
+* AddSegment(*string* _data_, *[QRCodeSegmentType|#QRCodeSegmentType]* _segmentType_)
+
+* AddSegments(*string* _data_)
+
+* BeginSegments()
+
+* Clear()
+
+* EncodeSegments(*[QRCodeErrorCorrectionLevel|#QRCodeErrorCorrectionLevel]* _errorCorrectionLevel_, *integer* _minVersion_, *integer* _maxVersion_, *integer* _mask_, *bool* _boostEcl_)
+
+* EncodeText(*string* _text_, *[QRCodeErrorCorrectionLevel|#QRCodeErrorCorrectionLevel]* _errorCorrectionLevel_)
+
+* GetObjectFit()
+** _Returns:_ *[ObjectFit|#ObjectFit]* _objectFit_
+
+* SetCanvasSize(*number* _width_, *number* _height_)
+
+* SetObjectFit(*[ObjectFit|#ObjectFit]* _objectFit_)
 
 
 h3. RootWindow
@@ -27065,8 +27269,13 @@ h3. TopLevelWindow
 
 
 h3. VectorControl
+* GetColor(*number* _r_, *number* _g_, *number* _b_, *number* _a_)
+
 * GetObjectFit()
 ** _Returns:_ *[ObjectFit|#ObjectFit]* _objectFit_
+
+* SetColor()
+** _Returns:_ *number* _r_, *number* _g_, *number* _b_, *number* _a_
 
 * SetObjectFit(*[ObjectFit|#ObjectFit]* _objectFit_)
 
@@ -27460,7 +27669,7 @@ h2. Events
 * EVENT_COLLECTIBLE_USER_FLAGS_UPDATED (*integer* _collectibleId_, *integer* _oldFlags_, *integer* _newFlags_)
 * EVENT_COLLECTIBLE_USE_RESULT (*[CollectibleUsageBlockReason|#CollectibleUsageBlockReason]* _result_, *bool* _isAttemptingActivation_)
 * EVENT_COLLECTION_UPDATED
-* EVENT_COMBAT_EVENT (*[ActionResult|#ActionResult]* _result_, *bool* _isError_, *string* _abilityName_, *integer* _abilityGraphic_, *[ActionSlotType|#ActionSlotType]* _abilityActionSlotType_, *string* _sourceName_, *[CombatUnitType|#CombatUnitType]* _sourceType_, *string* _targetName_, *[CombatUnitType|#CombatUnitType]* _targetType_, *integer* _hitValue_, *[CombatMechanicFlags|#CombatMechanicFlags]* _powerType_, *[DamageType|#DamageType]* _damageType_, *bool* _log_, *integer* _sourceUnitId_, *integer* _targetUnitId_, *integer* _abilityId_, *integer* _overflow_)
+* EVENT_COMBAT_EVENT (*[ActionResult|#ActionResult]* _result_, *bool* _isError_, *string* _abilityName_, *integer* _abilityGraphic_, *[ActionSlotType|#ActionSlotType]* _abilityActionSlotType_, *string* _sourceName_, *[CombatUnitType|#CombatUnitType]* _sourceType_, *string* _targetName_, *[CombatUnitType|#CombatUnitType]* _targetType_, *integer* _hitValue_, *[CombatMechanicFlags|#CombatMechanicFlags]* _powerType_, *[DamageType|#DamageType]* _damageType_, *bool* _log_, *integer* _sourceUnitId_, *integer* _targetUnitId_, *integer* _abilityId_, *integer* _overflow_, *string* _errorStringOverride_)
 * EVENT_COMPANION_ACTIVATED (*integer* _companionId_)
 * EVENT_COMPANION_DEACTIVATED
 * EVENT_COMPANION_EXPERIENCE_GAIN (*integer* _companionId_, *integer* _level_, *integer* _previousExperience_, *integer* _currentExperience_)
@@ -27552,6 +27761,7 @@ h2. Events
 * EVENT_ENDLESS_DUNGEON_RESET_BEST_SCORE (*string* _endlessDungeonName_, *bool* _isWeekly_)
 * EVENT_ENDLESS_DUNGEON_SCORE_UPDATED (*integer* _currentScore_, *[EndlessDungeonPointReason|#EndlessDungeonPointReason]* _reason_)
 * EVENT_ENDLESS_DUNGEON_STARTED
+* EVENT_ENDLESS_DUNGEON_START_SAVING
 * EVENT_END_CRAFTING_STATION_INTERACT (*[TradeskillType|#TradeskillType]* _craftSkill_, *[CraftingInteractionMode|#CraftingInteractionMode]* _craftMode_)
 * EVENT_END_CUTSCENE
 * EVENT_END_FAST_TRAVEL_INTERACTION
@@ -27632,8 +27842,8 @@ h2. Events
 * EVENT_GROUP_LISTING_INFO_REQUEST_COMPLETE (*integer* _groupListingId_)
 * EVENT_GROUP_MEMBER_CONNECTED_STATUS (*string* _unitTag_, *bool* _isOnline_)
 * EVENT_GROUP_MEMBER_IN_REMOTE_REGION (*string* _unitTag_, *bool* _isInRemoteRegion_)
-* EVENT_GROUP_MEMBER_JOINED (*string* _memberCharacterName_, *string* _memberDisplayName_, *bool* _isLocalPlayer_)
-* EVENT_GROUP_MEMBER_LEFT (*string* _memberCharacterName_, *[GroupLeaveReason|#GroupLeaveReason]* _reason_, *bool* _isLocalPlayer_, *bool* _isLeader_, *string* _memberDisplayName_, *bool* _actionRequiredVote_)
+* EVENT_GROUP_MEMBER_JOINED (*string* _memberCharacterName_, *string* _memberCrossplayDisplayName_, *bool* _isLocalPlayer_, *string* _memberPlatformDisplayName_)
+* EVENT_GROUP_MEMBER_LEFT (*string* _memberCharacterName_, *[GroupLeaveReason|#GroupLeaveReason]* _reason_, *bool* _isLocalPlayer_, *bool* _isLeader_, *string* _memberCrossplayDisplayName_, *bool* _actionRequiredVote_, *string* _memberPlatformDisplayName_)
 * EVENT_GROUP_MEMBER_POSITION_REQUEST_COMPLETE (*integer* _taskId_, *id64* _charId_, *bool* _isGroupLeader_, *bool* _isBreadcrumb_, *integer* _teleportNPCId_, *integer* _waypointId_)
 * EVENT_GROUP_MEMBER_ROLE_CHANGED (*string* _unitTag_, *[LFGRole|#LFGRole]* _newRole_)
 * EVENT_GROUP_MEMBER_SUBZONE_CHANGED
@@ -27734,6 +27944,7 @@ h2. Events
 * EVENT_HOUSING_TARGET_FURNITURE_CHANGED
 * EVENT_IMPACTFUL_HIT
 * EVENT_INSTANCE_KICK_TIME_UPDATE (*integer* _timeRemainingMs_)
+* EVENT_INSTANCE_MANAGEMENT_RESULT (*[InstanceManagementResult|#InstanceManagementResult]* _result_)
 * EVENT_INTERACTION_ENDED (*[InteractionType|#InteractionType]* _interactType_, *[InteractCancelContext|#InteractCancelContext]* _cancelContext_)
 * EVENT_INTERACT_BUSY
 * EVENT_INTRO_GAMEPLAY_EXPERIENCE_JUMP_RESULT (*[IntroGameplayExperienceJumpResult|#IntroGameplayExperienceJumpResult]* _result_)
@@ -27860,6 +28071,7 @@ h2. Events
 * EVENT_OPEN_FENCE (*bool* _allowSell_, *bool* _allowLaunder_)
 * EVENT_OPEN_GUILD_BANK
 * EVENT_OPEN_HOUSE_STORE
+* EVENT_OPEN_INSTANCE_MANAGEMENT (*[InstanceManagementAction|#InstanceManagementAction]* _managementAction_)
 * EVENT_OPEN_STORE
 * EVENT_OPEN_TIMED_ACTIVITIES
 * EVENT_OPEN_TRADING_HOUSE
@@ -27917,7 +28129,7 @@ h2. Events
 * EVENT_QUEST_REMOVED (*bool* _isCompleted_, *luaindex* _journalIndex_, *string* _questName_, *luaindex* _zoneIndex_, *luaindex* _poiIndex_, *integer* _questID_)
 * EVENT_QUEST_SHARED (*integer* _questId_)
 * EVENT_QUEST_SHARE_REMOVED (*integer* _questId_)
-* EVENT_QUEST_SHARE_RESULT (*string* _shareTargetCharacterName_, *string* _shareTargetDisplayName_, *string* _questName_, *[QuestShareResult|#QuestShareResult]* _result_)
+* EVENT_QUEST_SHARE_RESULT (*string* _shareTargetCharacterName_, *string* _shareTargetCrossplayDisplayName_, *string* _questName_, *[QuestShareResult|#QuestShareResult]* _result_, *string* _shareTargetPlatformDisplayName_)
 * EVENT_QUEST_SHOW_JOURNAL_ENTRY (*luaindex* _journalIndex_)
 * EVENT_QUEST_TIMER_PAUSED (*luaindex* _journalIndex_, *bool* _isPaused_)
 * EVENT_QUEST_TIMER_UPDATED (*luaindex* _journalIndex_)
@@ -27972,6 +28184,7 @@ h2. Events
 * EVENT_RUMORS_UPDATED
 * EVENT_RUMOR_COMPLETED (*integer* _rumorId_)
 * EVENT_RUMOR_ENDING_INITIATED (*integer* _rumorId_, *integer* _rumorEndingId_)
+* EVENT_RUMOR_HINT_UNLOCKED (*integer* _rumorId_, *luaindex* _hintIndex_)
 * EVENT_RUMOR_NEW_STATUS_CLEARED (*integer* _rumorId_)
 * EVENT_RUMOR_STARTED (*integer* _rumorId_)
 * EVENT_RUMOR_START_FAILED (*integer* _rumorId_, *[StartRumorFailReason|#StartRumorFailReason]* _reason_)
@@ -28176,6 +28389,8 @@ h2. Events
 * EVENT_ITEM_PREVIEW_READY
 * EVENT_MARKET_ANNOUNCEMENT_UPDATED (*bool* _shouldShow_, *bool* _isLocked_)
 * EVENT_MARKET_PRODUCT_AVAILABILITY_UPDATED (*[MarketDisplayGroup|#MarketDisplayGroup]* _displayGroup_)
+* EVENT_MARKET_PRODUCT_PURCHASE_LIMIT_UPDATED (*integer* _marketProductId_)
+* EVENT_MARKET_PURCHASE_LIMITS_UPDATED
 * EVENT_MARKET_PURCHASE_RESULT (*[MarketPurchasableResult|#MarketPurchasableResult]* _purchaseResult_, *integer* _tutorialProductId_, *bool* _wasGift_)
 * EVENT_MARKET_STATE_UPDATED (*[MarketDisplayGroup|#MarketDisplayGroup]* _displayGroup_, *[MarketState|#MarketState]* _marketState_)
 * EVENT_NEW_DAILY_LOGIN_REWARD_AVAILABLE
@@ -28207,15 +28422,15 @@ h2. Events
 * EVENT_DEFERRED_SETTING_REQUEST_COMPLETED (*[SettingSystemType|#SettingSystemType]* _settingSystemType_, *integer* _settingId_, *bool* _success_, *integer* _result_)
 * EVENT_FOLLOWER_SCENE_FINISHED_FRAGMENT_TRANSITION (*[SceneManagerMessageOrigin|#SceneManagerMessageOrigin]* _messageOrigin_, *string* _sceneName_, *integer* _sequenceNumber_)
 * EVENT_FORCE_DISABLED_ADDONS_UPDATED
-* EVENT_FRIEND_ADDED (*string* _displayName_)
-* EVENT_FRIEND_CHARACTER_CHAMPION_POINTS_CHANGED (*string* _displayName_, *string* _characterName_, *integer* _championRank_)
-* EVENT_FRIEND_CHARACTER_LEVEL_CHANGED (*string* _displayName_, *string* _characterName_, *integer* _level_)
-* EVENT_FRIEND_CHARACTER_UPDATED (*string* _displayName_)
-* EVENT_FRIEND_CHARACTER_ZONE_CHANGED (*string* _displayName_, *string* _characterName_, *string* _zoneName_)
-* EVENT_FRIEND_DISPLAY_NAME_CHANGED (*string* _oldDisplayName_, *string* _newDisplayName_)
-* EVENT_FRIEND_NOTE_UPDATED (*string* _displayName_, *string* _note_)
-* EVENT_FRIEND_PLAYER_STATUS_CHANGED (*string* _displayName_, *string* _characterName_, *[PlayerStatus|#PlayerStatus]* _oldStatus_, *[PlayerStatus|#PlayerStatus]* _newStatus_)
-* EVENT_FRIEND_REMOVED (*string* _displayName_)
+* EVENT_FRIEND_ADDED (*string* _crossplayDisplayName_)
+* EVENT_FRIEND_CHARACTER_CHAMPION_POINTS_CHANGED (*string* _crossplayDisplayName_, *string* _characterName_, *integer* _championRank_)
+* EVENT_FRIEND_CHARACTER_LEVEL_CHANGED (*string* _crossplayDisplayName_, *string* _characterName_, *integer* _level_)
+* EVENT_FRIEND_CHARACTER_UPDATED (*string* _crossplayDisplayName_)
+* EVENT_FRIEND_CHARACTER_ZONE_CHANGED (*string* _crossplayDisplayName_, *string* _characterName_, *string* _zoneName_)
+* EVENT_FRIEND_DISPLAY_NAME_CHANGED (*string* _oldCrossplayDisplayName_, *string* _newCrossplayDisplayName_)
+* EVENT_FRIEND_NOTE_UPDATED (*string* _crossplayDisplayName_, *string* _note_)
+* EVENT_FRIEND_PLAYER_STATUS_CHANGED (*string* _crossplayDisplayName_, *string* _characterName_, *[PlayerStatus|#PlayerStatus]* _oldStatus_, *[PlayerStatus|#PlayerStatus]* _newStatus_)
+* EVENT_FRIEND_REMOVED (*string* _crossplayDisplayName_)
 * EVENT_FULLSCREEN_MODE_CHANGED
 * EVENT_GAMEPAD_TYPE_CHANGED (*[GamepadType|#GamepadType]* _gamepadType_)
 * EVENT_GAMEPAD_USE_KEYBOARD_CHAT_CHANGED (*bool* _useKeyboardChat_)
@@ -28254,13 +28469,13 @@ h2. Events
 * EVENT_GUILD_SELF_JOINED_GUILD (*integer* _guildServerId_, *string* _characterName_, *integer* _guildId_)
 * EVENT_GUILD_SELF_LEFT_GUILD (*integer* _guildServerId_, *string* _characterName_, *integer* _guildId_)
 * EVENT_GUILD_TRADER_HIRED_UPDATED (*integer* _guildId_)
-* EVENT_IGNORE_ADDED (*string* _displayName_)
-* EVENT_IGNORE_NOTE_UPDATED (*string* _displayName_, *string* _note_)
-* EVENT_IGNORE_ONLINE_CHARACTER_CHANGED (*string* _displayName_)
-* EVENT_IGNORE_REMOVED (*string* _displayName_)
-* EVENT_INCOMING_FRIEND_INVITE_ADDED (*string* _displayName_)
-* EVENT_INCOMING_FRIEND_INVITE_NOTE_UPDATED (*string* _displayName_, *string* _message_)
-* EVENT_INCOMING_FRIEND_INVITE_REMOVED (*string* _displayName_)
+* EVENT_IGNORE_ADDED (*string* _crossplayDisplayName_)
+* EVENT_IGNORE_NOTE_UPDATED (*string* _crossplayDisplayName_, *string* _note_)
+* EVENT_IGNORE_ONLINE_CHARACTER_CHANGED (*string* _crossplayDisplayName_)
+* EVENT_IGNORE_REMOVED (*string* _crossplayDisplayName_)
+* EVENT_INCOMING_FRIEND_INVITE_ADDED (*string* _crossplayDisplayName_)
+* EVENT_INCOMING_FRIEND_INVITE_NOTE_UPDATED (*string* _crossplayDisplayName_, *string* _message_)
+* EVENT_INCOMING_FRIEND_INVITE_REMOVED (*string* _crossplayDisplayName_)
 * EVENT_INTERACT_VO_PLAYING_STATE_UPDATED
 * EVENT_INTERFACE_SETTING_CHANGED (*[SettingSystemType|#SettingSystemType]* _settingSystemType_, *integer* _settingId_)
 * EVENT_JUMP_FAILED (*[JumpResult|#JumpResult]* _reason_)
@@ -28274,11 +28489,11 @@ h2. Events
 * EVENT_MOD_LISTING_RELEASE_NOTE_LOAD_COMPLETE (*luaindex* _listingIndex_, *luaindex* _releaseIndex_, *[ModBrowserLoadReleaseNoteResult|#ModBrowserLoadReleaseNoteResult]* _result_)
 * EVENT_MOD_LISTING_REPORT_SUBMITTED (*[ModBrowserListingReportResult|#ModBrowserListingReportResult]* _result_)
 * EVENT_MOST_RECENT_GAMEPAD_TYPE_CHANGED (*[GamepadType|#GamepadType]* _mostRecentGamepadType_)
-* EVENT_OUTGOING_FRIEND_INVITE_ADDED (*string* _displayName_)
-* EVENT_OUTGOING_FRIEND_INVITE_REMOVED (*string* _displayName_)
-* EVENT_OVERLAND_DIFFICULTY_CHANGED (*[OverlandDifficultyType|#OverlandDifficultyType]* _newValue_)
+* EVENT_OUTGOING_FRIEND_INVITE_ADDED (*string* _crossplayDisplayName_)
+* EVENT_OUTGOING_FRIEND_INVITE_REMOVED (*string* _crossplayDisplayName_)
+* EVENT_OVERLAND_DIFFICULTY_CHANGED (*[OverlandDifficultyType|#OverlandDifficultyType]* _newValue_, *bool* _fromInit_, *bool* _isLocalPlayer_)
 * EVENT_PLAYER_STATUS_CHANGED (*[PlayerStatus|#PlayerStatus]* _oldStatus_, *[PlayerStatus|#PlayerStatus]* _newStatus_)
-* EVENT_PREPARE_FOR_JUMP (*string* _zoneName_, *string* _zoneDescription_, *string* _loadingTexture_, *[ZoneDisplayType|#ZoneDisplayType]* _zoneDisplayType_)
+* EVENT_PREPARE_FOR_JUMP (*string* _zoneName_, *string* _zoneDescription_, *string* _loadingTexture_, *[ZoneDisplayType|#ZoneDisplayType]* _zoneDisplayType_, *integer* _worldId_)
 * EVENT_REMOTE_SCENE_REQUEST (*[SceneManagerMessageOrigin|#SceneManagerMessageOrigin]* _messageOrigin_, *[RemoteSceneRequestType|#RemoteSceneRequestType]* _requestType_, *string* _sceneName_)
 * EVENT_REMOTE_TOP_LEVEL_CHANGE (*[SceneManagerMessageOrigin|#SceneManagerMessageOrigin]* _messageOrigin_, *[RemoteSceneRequestType|#RemoteSceneRequestType]* _requestType_)
 * EVENT_SAVE_DATA_COMPLETE
@@ -28293,7 +28508,7 @@ h2. Events
 
 * EVENT_ACTION_LAYER_POPPED (*luaindex* _layerIndex_, *luaindex* _activeLayerIndex_)
 * EVENT_ACTION_LAYER_PUSHED (*luaindex* _layerIndex_, *luaindex* _activeLayerIndex_)
-* EVENT_ADD_ONS_LOADED
+* EVENT_ADD_ONS_LOADED (*string* _guiName_)
 * EVENT_ADD_ON_LOADED (*string* _addonName_)
 * EVENT_ALL_GUI_SCREENS_RESIZED
 * EVENT_ALL_GUI_SCREENS_RESIZE_STARTED
@@ -28806,6 +29021,7 @@ h5. Control
 * [Child: HitInsets|#HitInsets]
 * [Child: MotionBlur|#MotionBlur]
 * [Child: OnChar|#OnChar]
+* [Child: OnDimensionsChanged|#OnDimensionsChanged]
 * [Child: OnDragStart|#OnDragStart]
 * [Child: OnEffectivelyHidden|#OnEffectivelyHidden]
 * [Child: OnEffectivelyShown|#OnEffectivelyShown]
@@ -28894,6 +29110,7 @@ h5. Controls
 * [Child: Line|#Line]
 * [Child: MapDisplay|#MapDisplay]
 * [Child: Polygon|#Polygon]
+* [Child: QRCode|#QRCode]
 * [Child: Scroll|#Scroll]
 * [Child: Slider|#Slider]
 * [Child: StatusBar|#StatusBar]
@@ -29131,6 +29348,8 @@ h5. MapPinType
 * _attribute:_ *string* _addedAnimation_
 * _attribute:_ *string* _removedAnimation_
 * _attribute:_ *[MapPinAnimationTarget|#MapPinAnimationTarget]* _animationTarget_
+* _attribute:_ *[DrawLayer|#DrawLayer]* _layer_
+* _attribute:_ *integer* _drawLevelOffsetBase_
 
 h5. MotionBlur
 * _attribute:_ *number* _blurVectorXAsAPercentageOfControlWidth_
@@ -29168,6 +29387,10 @@ h5. OnClicked
 h5. OnColorSelected
 * [Inherits: OnSetControlEventHandler|#OnSetControlEventHandler]
 * ScriptArguments: local self, r, g, b = ...
+
+h5. OnDimensionsChanged
+* [Inherits: OnSetControlEventHandler|#OnSetControlEventHandler]
+* ScriptArguments: local self, newWidth, oldWidth, newHeight, oldHeight = ...
 
 h5. OnDownArrow
 * [Inherits: OnSetControlEventHandler|#OnSetControlEventHandler]
@@ -29426,6 +29649,16 @@ h5. Polygon
 h5. PressedOffset
 * _attribute:_ *layout_measurement* _x_
 * _attribute:_ *layout_measurement* _y_
+
+h5. QRCode
+* [Inherits: Control|#Control]
+* [Child: CanvasSize|#CanvasSize]
+* [Child: QRText|#QRText]
+* [Child: objectFit|#Attributes]
+
+h5. QRText
+* _attribute:_ *string* _text_
+* _attribute:_ *[QRCodeErrorCorrectionLevel|#QRCodeErrorCorrectionLevel]* _errorCorrectionLevel_
 
 h5. RadialBlur
 * _attribute:_ *number* _originX_

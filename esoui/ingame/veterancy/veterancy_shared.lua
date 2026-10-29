@@ -357,25 +357,34 @@ end
 
 function ZO_Veterancy_HorizontalScrollList_Shared:EntrySetup(control, data, selected, reselectingDuringRebuild, enabled, activated)
     local templateData = data.templateData
-
-    -- Setup templates for grid list
-    -- Override default highlight template to hide white outline around tiles on gamepad
-    local gridList = templateData[ZO_VETERANCY.GRID_DATA.CLASS]:New(control, templateData[ZO_VETERANCY.GRID_DATA.GAMEPAD_HIGHLIGHT])
-
-    local DEFAULT_HIDE_CALLBACK = nil
-    local DEFAULT_ENTRIES_CENTERED = nil
     local ATTRIBUTE = ZO_VETERANCY.ATTRIBUTE
+    local TEMPLATE_TYPES = ZO_VETERANCY.TEMPLATE_TYPE
 
-    local templateTypes = ZO_VETERANCY.TEMPLATE_TYPE
-    for i, value in pairs(templateTypes) do
-        local typeData = templateData[value]
-        gridList:AddEntryTemplate(typeData[ATTRIBUTE.ENTRY_TEMPLATE], typeData[ATTRIBUTE.DIMENSION_X], typeData[ATTRIBUTE.DIMENSION_Y], typeData[ATTRIBUTE.SETUP_FUNCTION], DEFAULT_HIDE_CALLBACK, ZO_DefaultGridTileEntryReset, 0, 0, DEFAULT_ENTRIES_CENTERED, typeData[ATTRIBUTE.IS_SELECTABLE])
-        if typeData[ATTRIBUTE.EQUALITY_FUNCTION] then
-            gridList:SetEntryTemplateEqualityFunction(typeData[ATTRIBUTE.ENTRY_TEMPLATE], typeData[ATTRIBUTE.EQUALITY_FUNCTION])
+    if control.templateData ~= templateData then
+        if control.gridList then
+            control.gridList:UnregisterResizeEvents()
         end
+
+        -- Setup templates for grid list
+        -- Override default highlight template to hide white outline around tiles on gamepad
+        local gridList = templateData[ZO_VETERANCY.GRID_DATA.CLASS]:New(control, templateData[ZO_VETERANCY.GRID_DATA.GAMEPAD_HIGHLIGHT])
+
+        local DEFAULT_HIDE_CALLBACK = nil
+        local DEFAULT_ENTRIES_CENTERED = nil
+
+        for i, value in pairs(TEMPLATE_TYPES) do
+            local typeData = templateData[value]
+            gridList:AddEntryTemplate(typeData[ATTRIBUTE.ENTRY_TEMPLATE], typeData[ATTRIBUTE.DIMENSION_X], typeData[ATTRIBUTE.DIMENSION_Y], typeData[ATTRIBUTE.SETUP_FUNCTION], DEFAULT_HIDE_CALLBACK, ZO_DefaultGridTileEntryReset, 0, 0, DEFAULT_ENTRIES_CENTERED, typeData[ATTRIBUTE.IS_SELECTABLE])
+            if typeData[ATTRIBUTE.EQUALITY_FUNCTION] then
+                gridList:SetEntryTemplateEqualityFunction(typeData[ATTRIBUTE.ENTRY_TEMPLATE], typeData[ATTRIBUTE.EQUALITY_FUNCTION])
+            end
+        end
+        control.templateData = templateData
+        control.gridList = gridList
     end
 
     -- Populate Grid List
+    local gridList = control.gridList
     gridList:ClearGridList()
     self.rankInfoDataListByPage[data.pageIndex] = {}
     local rankInfoDataList = self.rankInfoDataListByPage[data.pageIndex]
@@ -402,14 +411,14 @@ function ZO_Veterancy_HorizontalScrollList_Shared:EntrySetup(control, data, sele
                     return narrations
                 end
             }
-            gridList:AddEntry(gridListEntryData, templateData[ZO_VETERANCY.TEMPLATE_TYPE.RANK][ZO_VETERANCY.ATTRIBUTE.ENTRY_TEMPLATE])
+            gridList:AddEntry(gridListEntryData, templateData[TEMPLATE_TYPES.RANK][ATTRIBUTE.ENTRY_TEMPLATE])
             table.insert(rankInfoDataList, gridListEntryData)
         else
             local gridListEntryData =
             {
                 gridHeaderName = "",
             }
-            gridList:AddEntry(gridListEntryData, templateData[ZO_VETERANCY.TEMPLATE_TYPE.EMPTY_RANK][ZO_VETERANCY.ATTRIBUTE.ENTRY_TEMPLATE])
+            gridList:AddEntry(gridListEntryData, templateData[TEMPLATE_TYPES.EMPTY_RANK][ATTRIBUTE.ENTRY_TEMPLATE])
         end
     end
 
@@ -434,7 +443,7 @@ function ZO_Veterancy_HorizontalScrollList_Shared:EntrySetup(control, data, sele
                             return narrations
                         end
                     }
-                    gridList:AddEntry(gridListEntryData, templateData[ZO_VETERANCY.TEMPLATE_TYPE.CENTERED_REWARD][ZO_VETERANCY.ATTRIBUTE.ENTRY_TEMPLATE])
+                    gridList:AddEntry(gridListEntryData, templateData[TEMPLATE_TYPES.CENTERED_REWARD][ATTRIBUTE.ENTRY_TEMPLATE])
                     table.insert(rankInfoData.rewardDataList, gridListEntryData)
                 elseif numRewards - currentRowFirstIndex > 0 then
                     local leftData =
@@ -448,7 +457,7 @@ function ZO_Veterancy_HorizontalScrollList_Shared:EntrySetup(control, data, sele
                             return narrations
                         end
                     }
-                    gridList:AddEntry(leftData, templateData[ZO_VETERANCY.TEMPLATE_TYPE.LEFT_REWARD][ZO_VETERANCY.ATTRIBUTE.ENTRY_TEMPLATE])
+                    gridList:AddEntry(leftData, templateData[TEMPLATE_TYPES.LEFT_REWARD][ATTRIBUTE.ENTRY_TEMPLATE])
                     table.insert(rankInfoData.rewardDataList, leftData)
                     local rightData =
                     {
@@ -461,7 +470,7 @@ function ZO_Veterancy_HorizontalScrollList_Shared:EntrySetup(control, data, sele
                             return narrations
                         end
                     }
-                    gridList:AddEntry(rightData, templateData[ZO_VETERANCY.TEMPLATE_TYPE.RIGHT_REWARD][ZO_VETERANCY.ATTRIBUTE.ENTRY_TEMPLATE])
+                    gridList:AddEntry(rightData, templateData[TEMPLATE_TYPES.RIGHT_REWARD][ATTRIBUTE.ENTRY_TEMPLATE])
                     table.insert(rankInfoData.rewardDataList, rightData)
                 else
                     local gridListEntryData =
@@ -469,7 +478,7 @@ function ZO_Veterancy_HorizontalScrollList_Shared:EntrySetup(control, data, sele
                         rankData = rankInfoData.rankData,
                         gridHeaderName = "",
                     }
-                    gridList:AddEntry(gridListEntryData, templateData[ZO_VETERANCY.TEMPLATE_TYPE.NO_REWARD][ZO_VETERANCY.ATTRIBUTE.ENTRY_TEMPLATE])
+                    gridList:AddEntry(gridListEntryData, templateData[TEMPLATE_TYPES.NO_REWARD][ATTRIBUTE.ENTRY_TEMPLATE])
                 end
             else
                 local gridListEntryData =
@@ -477,7 +486,7 @@ function ZO_Veterancy_HorizontalScrollList_Shared:EntrySetup(control, data, sele
                     rankData = nil,
                     gridHeaderName = "",
                 }
-                gridList:AddEntry(gridListEntryData, templateData[ZO_VETERANCY.TEMPLATE_TYPE.NO_REWARD][ZO_VETERANCY.ATTRIBUTE.ENTRY_TEMPLATE])
+                gridList:AddEntry(gridListEntryData, templateData[TEMPLATE_TYPES.NO_REWARD][ATTRIBUTE.ENTRY_TEMPLATE])
             end
         end
     end

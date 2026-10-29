@@ -99,6 +99,7 @@ function ZO_GenericSelector_Shared:InitializeKeybindStripDescriptor()
                 return GetString(keybindString)
             end,
             keybind = "UI_SHORTCUT_PRIMARY",
+            clickSound = SOUNDS.GENERIC_SELECTOR_CHOICE_SELECTED,
             callback = function()
                 self:ToggleItemSelected(self.focusGridEntry)
             end,

@@ -8,6 +8,17 @@
                 ZO_CampaignScoring_IconOnMouseExit(self)
             </OnMouseExit>
         </Texture>
+        <Control name="ZO_CampaignScoring_HoldingContainer_KeyboardTemplate" virtual="true">
+            <Controls>
+                <Control name="$(parent)Container">
+                    <Dimensions x="134"/>
+                    <Controls>
+                        <Texture name="$(parent)Icon" inherits="ZO_CampaignScoring_Icon"/>
+                        <Label name="$(parent)Value" font="ZoFontWinH2"/>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
         <Control name="ZO_CampaignScoringAllianceSection" inherits="ZO_CampaignScoringAllianceSectionTemplate" virtual="true" override="true">
             <Dimensions x="612" y="160"/>
             <Controls>
@@ -35,10 +46,77 @@
                         ClearTooltip(InformationTooltip)
                     </OnMouseExit>
                 </Texture>
-                <Texture name="$(parent)KeepIcon" inherits="ZO_CampaignScoring_Icon" override="true"/>
-                <Texture name="$(parent)OutpostIcon" inherits="ZO_CampaignScoring_Icon" override="true"/>
-                <Texture name="$(parent)ResourcesIcon" inherits="ZO_CampaignScoring_Icon" override="true"/>
-                <Texture name="$(parent)ScrollIcon" inherits="ZO_CampaignScoring_Icon" override="true"/>
+                <Control name="$(parent)Keeps" override="true">
+                    <Anchor point="BOTTOMLEFT" offsetX="68" offsetY="-25"/>
+                    <OnInitialized>
+                        ApplyTemplateToControl(self, "ZO_CampaignScoring_HoldingContainer_KeyboardTemplate")
+                    </OnInitialized>
+                    <Controls>
+                        <Control name="$(parent)Container" override="true">
+                            <Controls>
+                                <Label name="$(parent)Value" override="true">
+                                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Icon" relativePoint="BOTTOMRIGHT" offsetX="-18" offsetY="-11"/>
+                                </Label>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+                <Control name="$(parent)ImperialDistricts" override="true">
+                    <OnInitialized>
+                        ApplyTemplateToControl(self, "ZO_CampaignScoring_HoldingContainer_KeyboardTemplate")
+                    </OnInitialized>
+                    <Controls>
+                        <Control name="$(parent)Container" override="true">
+                            <Controls>
+                                <Label name="$(parent)Value" override="true">
+                                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Icon" relativePoint="BOTTOMRIGHT" offsetX="-12" offsetY="-11"/>
+                                </Label>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+                <Control name="$(parent)Outposts" override="true">
+                    <OnInitialized>
+                        ApplyTemplateToControl(self, "ZO_CampaignScoring_HoldingContainer_KeyboardTemplate")
+                    </OnInitialized>
+                    <Controls>
+                        <Control name="$(parent)Container" override="true">
+                            <Controls>
+                                <Label name="$(parent)Value" override="true">
+                                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Icon" relativePoint="BOTTOMRIGHT" offsetX="-15" offsetY="-11"/>
+                                </Label>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+                <Control name="$(parent)Resources" override="true">
+                    <OnInitialized>
+                        ApplyTemplateToControl(self, "ZO_CampaignScoring_HoldingContainer_KeyboardTemplate")
+                    </OnInitialized>
+                    <Controls>
+                        <Control name="$(parent)Container" override="true">
+                            <Controls>
+                                <Label name="$(parent)Value" override="true">
+                                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Icon" relativePoint="BOTTOMRIGHT" offsetX="-12" offsetY="-11"/>
+                                </Label>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+                <Control name="$(parent)Scrolls" override="true">
+                    <OnInitialized>
+                        ApplyTemplateToControl(self, "ZO_CampaignScoring_HoldingContainer_KeyboardTemplate")
+                    </OnInitialized>
+                    <Controls>
+                        <Control name="$(parent)Container" override="true">
+                            <Controls>
+                                <Label name="$(parent)Value" override="true">
+                                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Icon" relativePoint="BOTTOMRIGHT" offsetX="-8" offsetY="-11"/>
+                                </Label>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
             </Controls>
         </Control>
         <TopLevelControl name="ZO_CampaignScoring" inherits="ZO_CampaignOverviewSubwindow">

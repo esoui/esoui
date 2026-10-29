@@ -4,15 +4,10 @@
 
 ZO_MarketContentFragment_Keyboard = ZO_SimpleSceneFragment:Subclass()
 
-function ZO_MarketContentFragment_Keyboard:New(...)
-    local fragment = ZO_SimpleSceneFragment.New(self, ...)
-    fragment:Initialize(...)
-    return fragment
-end
-
 function ZO_MarketContentFragment_Keyboard:Initialize(owner, control, marketProductIconPool)
+    ZO_SimpleSceneFragment.Initialize(self, control)
+
     self.owner = owner
-    self.control = control
     self.contentHeader = control:GetNamedChild("ContentHeader")
     self.cost = control:GetNamedChild("Cost")
 
@@ -125,17 +120,16 @@ function ZO_MarketContentFragment_Keyboard:GetMarketProductData()
 end
 
 function ZO_MarketContentFragment_Keyboard:CanPurchase()
-    if self.marketProductData then
-        return self.marketProductData:CanBePurchased()
-    else
-        return false
-    end
+    local marketProductData = self:GetMarketProductData()
+    return marketProductData ~= nil and marketProductData:CanBePurchased()
 end
 
 function ZO_MarketContentFragment_Keyboard:CanGift()
-    if self.marketProductData then
-        return self.marketProductData:IsGiftable()
-    else
-        return false
-    end
+    local marketProductData = self:GetMarketProductData()
+    return marketProductData ~= nil and marketProductData:IsGiftable()
+end
+
+function ZO_MarketContentFragment_Keyboard:IsPurchaseLimitReached()
+    local marketProductData = self:GetMarketProductData()
+    return marketProductData ~= nil and marketProductData:IsPurchaseLimitReached()
 end

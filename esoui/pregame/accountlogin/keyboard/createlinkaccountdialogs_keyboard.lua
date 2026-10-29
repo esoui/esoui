@@ -2,7 +2,6 @@ local WARNING_COLOR = ZO_ColorDef:New("DC8122")
 
 local PARTNER_ICONS =
 {
-    [PLATFORM_SERVICE_TYPE_DMM] = "EsoUI/Art/Login/link_Login_DMM.dds",
     [PLATFORM_SERVICE_TYPE_STEAM] = "EsoUI/Art/Login/link_Login_Steam.dds",
     [PLATFORM_SERVICE_TYPE_EPIC] = "EsoUI/Art/Login/link_Login_Epic.dds",
 }
@@ -18,12 +17,7 @@ local function LinkAccountsDialogSetup(dialog, data)
         partnerIcon:SetTexture(iconPath)
     end
 
-    if serviceType == PLATFORM_SERVICE_TYPE_DMM then
-        optionalTextLabel:SetText(WARNING_COLOR:Colorize(GetString(SI_KEYBOARD_LINKACCOUNT_CROWN_LOSS_WARNING)))
-        partnerAccountName:SetText(GetString(SI_KEYBOARD_LINKACCOUNT_GENERIC_ACCOUNT_NAME_DMM))
-    else
-        partnerAccountName:SetText(data.partnerAccount or "")
-    end
+    partnerAccountName:SetText(data.partnerAccount or "")
 
     local accountTypeName = GetString("SI_PLATFORMSERVICETYPE", serviceType)
     if accountTypeName then

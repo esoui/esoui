@@ -8,6 +8,17 @@
                 <Texture name="$(parent)Background" level="ZO_MARKET_TILE_BACKGROUND_LEVEL" textureFileReleaseOption="RELEASE_TEXTURE_AT_ZERO_REFERENCES">
                     <AnchorFill/>
                 </Texture>
+                <Texture name="$(parent)BackgroundBottom" color="000000" level="ZO_MARKET_TILE_BACKGROUND_BOTTOM_LEVEL">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Background" relativePoint="BOTTOMLEFT"/>
+                    <Anchor point="BOTTOMRIGHT"/>
+                </Texture>
+                <Texture name="$(parent)BackgroundBottomFade" color="000000" level="ZO_MARKET_TILE_BACKGROUND_BOTTOM_FADE_LEVEL">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Background" relativePoint="BOTTOMLEFT"/>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Background" relativePoint="BOTTOMRIGHT"/>
+                </Texture>
+                <Texture name="$(parent)PurchaseLimitOverlay" color="00000000" alpha="0.35" level="ZO_MARKET_TILE_PURCHASE_LIMIT_OVERLAY_LEVEL" hidden="true">
+                    <AnchorFill/>
+                </Texture>
                 <!-- The Overlay should appear over top of the background -->
                 <Texture name="$(parent)OverlayGradient" textureFile="EsoUI/Art/Market/market_ItemGradient_256.dds" alpha="0.6" level="ZO_MARKET_TILE_OVERLAY_LEVEL">
                     <AnchorFill/>
@@ -37,6 +48,19 @@
                 <!-- anchored programmatically -->
                 <Label name="$(parent)Purchased" level="ZO_MARKET_TILE_TEXT_LEVEL" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_DEFAULT_TEXT" horizontalAlignment="RIGHT" maxLineCount="2" wrapMode="ELLIPSIS"/>
                 <Label name="$(parent)EsoPlusDeal" modifyTextType="UPPERCASE" level="ZO_MARKET_TILE_TEXT_LEVEL" horizontalAlignment="RIGHT"/>
+                <Control name="$(parent)PurchaseLimit" level="ZO_MARKET_TILE_TEXT_LEVEL" resizeToFitDescendents="true" hidden="true">
+                    <Controls>
+                        <Label name="$(parent)Tag" level="ZO_MARKET_TILE_TEXT_LEVEL">
+                            <Anchor point="TOPLEFT"/>
+                        </Label>
+                        <Label name="$(parent)Count" level="ZO_MARKET_TILE_TEXT_LEVEL">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Tag" relativePoint="TOPRIGHT" offsetX="5"/>
+                        </Label>
+                        <Label name="$(parent)Timer" level="ZO_MARKET_TILE_TEXT_LEVEL" hidden="true">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)Count" relativePoint="TOPRIGHT" offsetX="5"/>
+                        </Label>
+                    </Controls>
+                </Control>
             </Controls>
         </Control>
     </Controls>

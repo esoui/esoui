@@ -46,7 +46,6 @@ function ZO_ActivityFinderTemplate_Keyboard:InitializeControls()
     self.viewVeterancyButton = self.buttonContainer:GetNamedChild("ViewVeterancy")
     self.acceptQuestButton = self.buttonContainer:GetNamedChild("AcceptQuest")
     self.unlockPermanentlyButton = self.buttonContainer:GetNamedChild("UnlockPermanently")
-    self.chapterUpgradeButton = self.buttonContainer:GetNamedChild("ChapterUpgrade")
     self.lockReasonLabel = self.control:GetNamedChild("LockReason")
 
     local function OnLockReasonLabelUpdate()
@@ -207,7 +206,6 @@ function ZO_ActivityFinderTemplate_Keyboard:RefreshView()
     self.viewVeterancyButton:SetHidden(true)
     self.acceptQuestButton:SetHidden(true)
     self.unlockPermanentlyButton:SetHidden(true)
-    self.chapterUpgradeButton:SetHidden(true)
 
     local selectedData = self.filterComboBox:GetSelectedItemData()
     if selectedData then
@@ -221,13 +219,8 @@ function ZO_ActivityFinderTemplate_Keyboard:RefreshView()
                 local lockingCollectibleId = filterData:GetFirstLockingCollectible()
                 if lockingCollectibleId ~= 0 then
                     local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(lockingCollectibleId)
-                    local categoryType = collectibleData:GetCategoryType()
-                    if categoryType == COLLECTIBLE_CATEGORY_TYPE_CHAPTER then
-                        self.chapterUpgradeButton:SetHidden(false)
-                    elseif categoryType == COLLECTIBLE_CATEGORY_TYPE_DLC then
-                        self.unlockPermanentlyButton.searchTerm = collectibleData:GetName()
-                        self.unlockPermanentlyButton:SetHidden(false)
-                    end
+                    self.unlockPermanentlyButton.searchTerm = collectibleData:GetName()
+                    self.unlockPermanentlyButton:SetHidden(false)
                 else
                     self.acceptQuestButton.questId = filterData:GetQuestToUnlock()
                     self.acceptQuestButton:SetHidden(self.acceptQuestButton.questId == 0)
@@ -423,12 +416,9 @@ do
         local viewRewardsButtonShown = not self.viewRewardsButton:IsControlHidden()
         local viewVeterancyButtonShown = not self.viewVeterancyButton:IsControlHidden()
         local unlockPermanentlyButtonShown = not self.unlockPermanentlyButton:IsControlHidden()
-        local chapterUpgradeButtonShown = not self.chapterUpgradeButton:IsControlHidden()
-        if acceptQuestButtonShown or viewRewardsButtonShown or viewVeterancyButtonShown or unlockPermanentlyButtonShown or chapterUpgradeButtonShown then
+        if acceptQuestButtonShown or viewRewardsButtonShown or viewVeterancyButtonShown or unlockPermanentlyButtonShown then
             ZO_ClearNumericallyIndexedTable(optionalButtons)
-            if chapterUpgradeButtonShown then
-                table.insert(optionalButtons, self.chapterUpgradeButton)
-            elseif unlockPermanentlyButtonShown then
+            if unlockPermanentlyButtonShown then
                 table.insert(optionalButtons, self.unlockPermanentlyButton)
             elseif acceptQuestButtonShown then
                 self.acceptQuestButton:SetEnabled(not HasQuest(self.acceptQuestButton.questId))

@@ -31,13 +31,9 @@ end
 
 ZO_AccessibilityModeFragment = ZO_SceneFragment:Subclass()
 
-function ZO_AccessibilityModeFragment:New(control)
-    local fragment = ZO_SceneFragment.New(self, control)
-    fragment:Initialize(control)
-    return fragment
-end
-
 function ZO_AccessibilityModeFragment:Initialize(control)
+    ZO_SceneFragment.Initialize(self)
+
     self.dialog = control
     self.contentContainer = control:GetNamedChild("ContentContainer")
     self.enableCheckbox = self.contentContainer:GetNamedChild("EnableAccessibilityModeCheckbox")

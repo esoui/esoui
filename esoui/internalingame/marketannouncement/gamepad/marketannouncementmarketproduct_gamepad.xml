@@ -8,6 +8,13 @@
                 <Label name="$(parent)PreviousCost" override="true" font="ZoFontGamepadBold27"/>
                 <Label name="$(parent)Cost" override="true" font="ZoFontGamepadBold27"/>
                 <Label name="$(parent)EsoPlusCost" override="true" font="ZoFontGamepadBold27"/>
+                <Control name="$(parent)PurchaseLimit" override="true">
+                    <Controls>
+                        <Label name="$(parent)Tag" override="true" font="ZoFontGamepadBold27"/>
+                        <Label name="$(parent)Count" override="true" font="ZoFontGamepadBold27"/>
+                        <Label name="$(parent)Timer" override="true" font="ZoFontGamepadBold27"/>
+                    </Controls>
+                </Control>
                 <Label name="$(parent)Purchased" override="true" hidden="true"/>
                 <Label name="$(parent)EsoPlusDeal" override="true" font="ZoFontGamepadBold27"/>
                 <Control name="$(parent)ProductDescription" inherits="ZO_ScrollContainer_Gamepad">

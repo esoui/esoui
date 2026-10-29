@@ -79,13 +79,13 @@ function ZO_ChatMenu_Gamepad:RegisterForEvents()
         self:DirtyActiveChannel()
     end
 
-    local function OnGroupMemberJoined(eventCode, playerName)
-        if playerName == GetRawUnitName("player") then
+    local function OnGroupMemberJoined(eventCode, characterName, crossplayDisplayName, isLocalPlayer, platformDisplayName)
+        if isLocalPlayer then
             self:DirtyChannelDropdown()
         end
     end
 
-    local function OnGroupMemberLeft(eventCode, characterName, reason, isLocalPlayer)
+    local function OnGroupMemberLeft(eventCode, characterName, reason, isLocalPlayer, isLeader, crossplayDisplayName, actionRequiredVote, platformDisplayName)
         if isLocalPlayer then
             self:DirtyChannelDropdown()
         end

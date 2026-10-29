@@ -461,14 +461,7 @@ do
 
         --Tooltip (only shown if there is tooltip text and the controller info isn't shown and we aren't adjusting a camera setting)
         if not showingInfoPanel and not showingCameraPreview and (data.tooltipText or data.gamepadCustomTooltipFunction) then
-            local tooltipText
-            if type(data.tooltipText) == "number" then
-                tooltipText = GetString(data.tooltipText)
-            elseif type(data.tooltipText) == "function" then
-                tooltipText = data.tooltipText()
-            else
-                tooltipText = data.tooltipText
-            end
+            local tooltipText = ZO_EvalStringId(data.tooltipText)
 
             if data.gamepadCustomTooltipFunction then
                 data.gamepadCustomTooltipFunction(GAMEPAD_LEFT_TOOLTIP, data.tooltipText)

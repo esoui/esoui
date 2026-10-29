@@ -2,34 +2,7 @@
     <Controls>
         <Label name="ZO_Battleground_Scoreboard_Score_Template" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" virtual="true">
             <OnInitialized>
-                local keyboardFonts =
-                {
-                    {
-                        font = "ZoFontWinH2",
-                        lineLimit = 1,
-                    },
-                    {
-                        font = "ZoFontWinH3",
-                        lineLimit = 1,
-                    },
-                    {
-                        font = "ZoFontWinH4",
-                        lineLimit = 1,
-                    },
-                }
-
-                local gamepadFonts =
-                {
-                    {
-                        font = "ZoFontGamepad34",
-                        lineLimit = 1,
-                    },
-                    {
-                        font = "ZoFontGamepad27",
-                        lineLimit = 1,
-                    },
-                }
-                ZO_PlatformStyleFontAdjustingWrapLabel_OnInitialized(self, keyboardFonts, gamepadFonts, TEXT_WRAP_MODE_TRUNCATE)
+                ZO_Battleground_Scoreboard_Player_Row_Object.OnScoreControlInitialized(self)
             </OnInitialized>
         </Label>
         <Control name="ZO_Battleground_Scoreboard_Player_Row" resizeToFitConstrains="Y" virtual="true">
@@ -124,13 +97,6 @@
             <Controls>
                 <Label name="$(parent)Lives" font="ZoFontWinH2"/>
                 <Label name="$(parent)Name" font="ZoFontWinH2"/>
-                <Label name="$(parent)MedalScore" font="ZoFontWinH2"/>
-                <Label name="$(parent)Kills" font="ZoFontWinH2"/>
-                <Label name="$(parent)Deaths" font="ZoFontWinH2"/>
-                <Label name="$(parent)Assists" font="ZoFontWinH2"/>
-                <Label name="$(parent)Damage" font="ZoFontWinH2"/>
-                <Label name="$(parent)Heals" font="ZoFontWinH2"/>
-                <Label name="$(parent)GameTypeScore" font="ZoFontWinH2"/>
                 <Control name="$(parent)Highlight">
                     <Controls>
                         <Texture name="$(parent)Keyboard" hidden="false"/>
@@ -143,13 +109,6 @@
             <Controls>
                 <Label name="$(parent)Lives" font="ZoFontGamepad27"/>
                 <Label name="$(parent)Name" font="ZoFontGamepad27"/>
-                <Label name="$(parent)MedalScore" font="ZoFontGamepad27"/>
-                <Label name="$(parent)Kills" font="ZoFontGamepad27"/>
-                <Label name="$(parent)Deaths" font="ZoFontGamepad27"/>
-                <Label name="$(parent)Assists" font="ZoFontGamepad27"/>
-                <Label name="$(parent)Damage" font="ZoFontGamepad27"/>
-                <Label name="$(parent)Heals" font="ZoFontGamepad27"/>
-                <Label name="$(parent)GameTypeScore" font="ZoFontGamepad27"/>
                 <Control name="$(parent)Highlight">
                     <Controls>
                         <Texture name="$(parent)Keyboard" hidden="true"/>

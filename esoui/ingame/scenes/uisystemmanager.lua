@@ -222,7 +222,9 @@ function ZO_UISystemManager:TryShowInitialScreen()
         local accountTypeId = GetTrialInfo()
         local isFreeTrial = accountTypeId > 0
         local SHOW_INTRO = true
-        if (not isFreeTrial) and TAMRIEL_TOMES_MANAGER:TryOpenNewSeasonTamrielTome(SHOW_INTRO) then
+        if TAMRIEL_TOMES_MANAGER:HasNewEndOfSeasonRecap() then
+            FlagMarketAnnouncementSeen()
+        elseif (not isFreeTrial) and TAMRIEL_TOMES_MANAGER:TryOpenNewSeasonTamrielTome(SHOW_INTRO) then
             -- TryOpenNewSeasonTamrielTome has handled showing the Tome
             FlagPromotionalEventPersonalCampaignAnnouncementSeen()
             FlagMarketAnnouncementSeen()
@@ -352,11 +354,7 @@ end
 do
     local function GetUISystemDisplayName(nameField, system)
         if nameField then
-            local nameOrId = ZO_Eval(nameField)
-            if type(nameOrId) == "number" then
-                return GetString(nameOrId)
-            end
-            return nameOrId
+            return ZO_EvalStringId(nameField, system)
         end
         return GetString("SI_UISYSTEM", system)
     end

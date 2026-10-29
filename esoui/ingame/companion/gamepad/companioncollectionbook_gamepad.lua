@@ -42,6 +42,7 @@ function ZO_CompanionCollectionBook_Gamepad:Initialize(control)
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectionUpdated", function(...) self:OnCollectionUpdated(...) end)
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleNewStatusCleared", function(...) self:OnCollectibleNewStatusCleared(...) end)
     ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleNotificationRemoved", function(...) self:OnCollectibleNotificationRemoved(...) end)
+    ZO_COLLECTIBLE_DATA_MANAGER:RegisterCallback("OnCollectibleUserFlagsUpdated", function(...) self:OnCollectibleUserFlagsUpdated(...) end)
     COLLECTIONS_BOOK_SINGLETON:RegisterCallback("OnUpdateCooldowns", function(...) self:OnUpdateCooldowns(...) end)
 
     EVENT_MANAGER:RegisterForUpdate("ZO_GamepadCompanionCollectionsBook", 250, function() self:UpdateActiveCollectibleCooldownTimer() end)
@@ -477,6 +478,10 @@ function ZO_CompanionCollectionBook_Gamepad:OnCollectibleNewStatusCleared(collec
     self:OnCollectibleStatusUpdated()
 end
 
+function ZO_CompanionCollectionBook_Gamepad:OnCollectibleUserFlagsUpdated(collectibleId)
+    self:OnCollectibleUpdated(collectibleId)
+end
+
 function ZO_CompanionCollectionBook_Gamepad:BuildCategoryList()
     self.categoryList.list:Clear()
 
@@ -528,14 +533,19 @@ function ZO_CompanionCollectionBook_Gamepad:BuildCollectionList(categoryData, re
 
     collectionList:Clear()
     collectionListInfo.titleText = nil
-
+    
+    local favoriteData = {}
     local unlockedData = {}
     local lockedData = {}
 
     for _, collectibleData in categoryData:SortedCollectibleIterator({ ZO_CollectibleData.IsShownInCollection, ZO_CollectibleData.IsCollectibleCategoryActiveCompanionUsable, ZO_CollectibleData.IsCollectibleAvailableToCompanion }) do
         local entryData = self:BuildCollectibleData(collectibleData)
         if collectibleData:IsUnlocked() then
-            table.insert(unlockedData, entryData)
+            if collectibleData:IsFavorite() then
+                table.insert(favoriteData, entryData)
+            else
+                table.insert(unlockedData, entryData)
+            end
         else
             table.insert(lockedData, entryData)
         end
@@ -561,7 +571,8 @@ function ZO_CompanionCollectionBook_Gamepad:BuildCollectionList(categoryData, re
             collectionList:AddEntry("ZO_GamepadCompanionCollectible", randomMountEntryData)
         end
     end
-
+    
+    self:BuildListFromTable(collectionList, favoriteData, GetString(SI_COLLECTIONS_FAVORITES_CATEGORY_HEADER))
     self:BuildListFromTable(collectionList, unlockedData, GetString("SI_COLLECTIBLEUNLOCKSTATE", COLLECTIBLE_UNLOCK_STATE_UNLOCKED_OWNED))
     self:BuildListFromTable(collectionList, lockedData, GetString("SI_COLLECTIBLEUNLOCKSTATE", COLLECTIBLE_UNLOCK_STATE_LOCKED))
 
@@ -821,6 +832,26 @@ function ZO_CompanionCollectionBook_Gamepad:InitializeActionsDialog()
                     end,
                     visible = function()
                         return self:CanPurchaseCurrentTarget()
+                    end
+                },
+            },
+            -- Add/Remove Favorite
+            {
+                template = "ZO_GamepadMenuEntryTemplate",
+                text = function(dialog)
+                    local collectibleData = self:GetCurrentTargetData()
+                    return collectibleData:IsFavorite() and GetString(SI_COLLECTIBLE_ACTION_REMOVE_FAVORITE) or GetString(SI_COLLECTIBLE_ACTION_ADD_FAVORITE)
+                end,
+                templateData = 
+                {
+                    setup = ZO_SharedGamepadEntry_OnSetup,
+                    callback = function(dialog)
+                        local collectibleData = self:GetCurrentTargetData()
+                        SetOrClearCollectibleUserFlag(collectibleData:GetId(), COLLECTIBLE_USER_FLAG_FAVORITE, not collectibleData:IsFavorite())
+                    end,
+                    visible = function(dialog)
+                        local collectibleData = self:GetCurrentTargetData()
+                        return collectibleData:IsFavoritable()
                     end
                 },
             },

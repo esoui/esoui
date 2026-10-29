@@ -47,15 +47,11 @@ function ZO_Tooltip:AddTypeSlotUniqueLine(itemLink, itemType, section, text1, te
     end
 
     if GetItemLinkActorCategory(itemLink) == GAMEPLAY_ACTOR_CATEGORY_COMPANION then
-
-
-
-
-
+        if IsItemLinkAnimalCompanion(itemLink) then
+            section:AddLine(GetString(SI_ITEM_FORMAT_STR_ANIMAL_COMPANION))
+        else
             section:AddLine(GetString(SI_ITEM_FORMAT_STR_COMPANION))
-
-
-
+        end
     end
 
     local lineText
@@ -617,9 +613,9 @@ end
 function ZO_Tooltip:AddSet(itemLink, equipped, extraData)
     local itemBonusSuppressionType = ITEM_BONUS_SUPPRESSION_TYPE_NONE
     local itemBonusSuppressionRefId = 0
-    local hasSet, setName, numBonuses, numNormalEquipped, maxEquipped, setId, numPerfectedEquipped = GetItemLinkSetInfo(itemLink)
+    local hasSet, setName, numBonuses, numNormalEquipped, maxEquipped, setId, numPerfectedEquipped, effectContribution, perfectedEffectContribution = GetItemLinkSetInfo(itemLink)
     if hasSet then
-        local totalEquipped = zo_min(numNormalEquipped + numPerfectedEquipped, maxEquipped)
+        local totalEquipped = zo_min(numNormalEquipped + numPerfectedEquipped + effectContribution + perfectedEffectContribution, maxEquipped)
         local isPerfectedSet = GetItemSetUnperfectedSetId(setId) > 0
         local setSection = self:AcquireSection(self:GetStyle("bodySection"))
         local headerStyle = "bodyHeader"
@@ -635,13 +631,13 @@ function ZO_Tooltip:AddSet(itemLink, equipped, extraData)
             end
         end
         if isPerfectedSet then
-            setSection:AddLine(zo_strformat(SI_ITEM_FORMAT_STR_PERFECTED_SET_NAME, setName, totalEquipped, maxEquipped, numPerfectedEquipped), self:GetStyle(headerStyle))
+            setSection:AddLine(zo_strformat(SI_ITEM_FORMAT_STR_PERFECTED_SET_NAME, setName, totalEquipped, maxEquipped, zo_max(numPerfectedEquipped + perfectedEffectContribution, 0)), self:GetStyle(headerStyle))
         else
             setSection:AddLine(zo_strformat(SI_ITEM_FORMAT_STR_SET_NAME, setName, totalEquipped, maxEquipped), self:GetStyle(headerStyle))
         end
         for bonusIndex = 1, numBonuses do
             local numRequired, bonusDescription, isPerfectedBonus = GetItemLinkSetBonusInfo(itemLink, equipped, bonusIndex)
-            local numRelevantEquipped = isPerfectedBonus and numPerfectedEquipped or totalEquipped
+            local numRelevantEquipped = isPerfectedBonus and zo_max(numPerfectedEquipped + perfectedEffectContribution, 0) or totalEquipped
             if numRelevantEquipped >= numRequired then
                 setSection:AddLine(bonusDescription, self:GetStyle(bonusStyle), self:GetStyle("bodyDescription"))
             else
@@ -658,7 +654,7 @@ end
 function ZO_Tooltip:AddContainerSets(itemLink)
     local numContainerSets = GetItemLinkNumContainerSetIds(itemLink)
     for setIndex = 1, numContainerSets do
-        local hasSet, setName, numBonuses, numNormalEquipped, maxEquipped, setId, numPerfectedEquipped = GetItemLinkContainerSetInfo(itemLink, setIndex)
+        local hasSet, setName, numBonuses, numNormalEquipped, maxEquipped, setId, numPerfectedEquipped, effectContribution, perfectedEffectContribution = GetItemLinkContainerSetInfo(itemLink, setIndex)
         if hasSet then
             if setIndex > 1 then
                 local separatorSection = self:AcquireSection(self:GetStyle("itemSetSeparatorSection"))
@@ -668,17 +664,21 @@ function ZO_Tooltip:AddContainerSets(itemLink)
                 self:AddSection(separatorSection)
             end
             
-            local totalEquipped = zo_min(numNormalEquipped + numPerfectedEquipped, maxEquipped)
+            local rawNormalContribution = numNormalEquipped + effectContribution
+            local rawPerfectedContribution = numPerfectedEquipped + perfectedEffectContribution
+            local purePerfectedContribution = zo_max(rawPerfectedContribution, 0)
+            local totalEquipped = zo_min(rawNormalContribution + rawPerfectedContribution, maxEquipped)
+            totalEquipped = zo_max(totalEquipped, 0)
             local isPerfectedSet = GetItemSetUnperfectedSetId(setId) > 0
             local setSection = self:AcquireSection(self:GetStyle("bodySection"))
             if isPerfectedSet then
-                setSection:AddLine(zo_strformat(SI_ITEM_FORMAT_STR_PERFECTED_SET_NAME, setName, totalEquipped, maxEquipped, numPerfectedEquipped), self:GetStyle("bodyHeader"))
+                setSection:AddLine(zo_strformat(SI_ITEM_FORMAT_STR_PERFECTED_SET_NAME, setName, totalEquipped, maxEquipped, purePerfectedContribution), self:GetStyle("bodyHeader"))
             else
                 setSection:AddLine(zo_strformat(SI_ITEM_FORMAT_STR_SET_NAME, setName, totalEquipped, maxEquipped), self:GetStyle("bodyHeader"))
             end
             for bonusIndex = 1, numBonuses do
                 local numRequired, bonusDescription, isPerfectedBonus = GetItemLinkContainerSetBonusInfo(itemLink, setIndex, bonusIndex)
-                local numRelevantEquipped = isPerfectedBonus and numPerfectedEquipped or totalEquipped
+                local numRelevantEquipped = isPerfectedBonus and purePerfectedContribution or totalEquipped
                 if numRelevantEquipped >= numRequired then
                     setSection:AddLine(bonusDescription, self:GetStyle("activeBonus"), self:GetStyle("bodyDescription"))
                 else
@@ -727,9 +727,7 @@ function ZO_Tooltip:GetRequiredCollectibleText(collectibleId)
         if collectibleName ~= "" then
             local formatterStringId
             local collectibleCategory = GetCollectibleCategoryType(relevantCollectible)
-            if collectibleCategory == COLLECTIBLE_CATEGORY_TYPE_CHAPTER then
-                formatterStringId = SI_COLLECTIBLE_REQUIRED_TO_USE_ITEM_UPGRADE
-            elseif IsCollectiblePurchasable(relevantCollectible) then
+            if IsCollectiblePurchasable(relevantCollectible) then
                 formatterStringId = SI_COLLECTIBLE_REQUIRED_TO_USE_ITEM_CROWN_STORE
             else
                 formatterStringId = SI_COLLECTIBLE_REQUIRED_TO_USE_ITEM

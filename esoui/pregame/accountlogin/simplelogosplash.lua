@@ -2,10 +2,8 @@ local CreateSimpleLogoSplashScene
 do
     local ZO_SimpleLogoSplashFragment = ZO_FadeSceneFragment:Subclass()
 
-    function ZO_SimpleLogoSplashFragment:New(control)
-        local fragment = ZO_FadeSceneFragment.New(self, control, 700)
-        fragment.control = control
-        return fragment
+    function ZO_SimpleLogoSplashFragment:Initialize(control)
+        ZO_FadeSceneFragment.Initialize(self, control, 700)
     end
 
     function ZO_SimpleLogoSplashFragment:Show()

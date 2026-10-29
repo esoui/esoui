@@ -4,10 +4,6 @@
 
 ZO_MovieBackgroundFragment = ZO_SceneFragment:Subclass()
 
-function ZO_MovieBackgroundFragment:New(...)
-    return ZO_SceneFragment.New(self, ...)
-end
-
 function ZO_MovieBackgroundFragment:Initialize(movieFile)
     ZO_SceneFragment.Initialize(self)
     self.movieFile = movieFile
@@ -42,10 +38,6 @@ end
 ----------------------------------------
 
 ZO_PregameSceneStateAdvanceFromFragment = ZO_SceneFragment:Subclass()
-
-function ZO_PregameSceneStateAdvanceFromFragment:New(...)
-    return ZO_SceneFragment.New(self, ...)
-end
 
 function ZO_PregameSceneStateAdvanceFromFragment:Initialize(state)
     ZO_SceneFragment.Initialize(self)

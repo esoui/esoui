@@ -33,19 +33,21 @@ function ZO_Mail_Manager:SetupSavedVars()
     self.savedVars = ZO_SavedVars:NewAccountWide("ZO_Ingame_SavedVariables", 2, "MailOptions", defaults)
 
     --Clean up information for any mails that no longer exist
-    for mailId, isRead in pairs(self.savedVars.readGuildMail) do
-        if not IsValidGuildMail(StringToId64(mailId)) then
-            self.savedVars.readGuildMail[mailId] = nil
+    if IsGuildMailInitialized() then
+        for mailId, isRead in pairs(self.savedVars.readGuildMail) do
+            if not IsValidGuildMail(StringToId64(mailId)) then
+                self.savedVars.readGuildMail[mailId] = nil
+            end
         end
-    end
 
-    for mailId, isDeleted in pairs(self.savedVars.deletedGuildMail) do
-        if not IsValidGuildMail(StringToId64(mailId)) then
-            self.savedVars.deletedGuildMail[mailId] = nil
+        for mailId, isDeleted in pairs(self.savedVars.deletedGuildMail) do
+            if not IsValidGuildMail(StringToId64(mailId)) then
+                self.savedVars.deletedGuildMail[mailId] = nil
+            end
         end
-    end
 
-    ZO_SavePlayerConsoleProfile()
+        ZO_SavePlayerConsoleProfile()
+    end
 
     --If the total number of mail changed after initializing saved variables, fire off the mail changed callback
     local newTotalUnreadMail = self:GetTotalNumUnreadMail()

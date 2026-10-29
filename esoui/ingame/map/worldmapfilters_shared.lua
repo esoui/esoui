@@ -107,6 +107,9 @@ function ZO_WorldMapFilters_Shared:Initialize(control)
         elseif mapFilterType == MAP_FILTER_TYPE_AVA_IMPERIAL then
             newCurrentPanel = self.imperialPvPPanel
             self.imperialPvPPanel:SetMapMode(mode)
+        elseif mapFilterType == MAP_FILTER_TYPE_AVA_JERALL then
+            newCurrentPanel = self.jerallPvPPanel
+            self.jerallPvPPanel:SetMapMode(mode)
         elseif mapFilterType == MAP_FILTER_TYPE_BATTLEGROUND then
             newCurrentPanel = self.battlegroundPanel
             self.battlegroundPanel:SetMapMode(mode)
@@ -123,7 +126,7 @@ function ZO_WorldMapFilters_Shared:Initialize(control)
         self.currentPanel = newCurrentPanel
     end
 
-    internalassert(MAP_FILTER_TYPE_MAX_VALUE == 5, "New MapFilterType, account for it in OnMapChanged")
+    internalassert(MAP_FILTER_TYPE_MAX_VALUE == 6, "New MapFilterType, account for it in OnMapChanged")
 
     CALLBACK_MANAGER:RegisterCallback("OnWorldMapChanged", OnMapChanged)
     CALLBACK_MANAGER:RegisterCallback("OnWorldMapModeChanged", OnMapChanged)
@@ -206,6 +209,25 @@ function ZO_ImperialPvPWorldMapFilterPanel_Shared:BuildControls()
     self:AddPinFilterCheckBox(MAP_FILTER_OBJECTIVES, ZO_WorldMap_RefreshAllPOIs, GetString(SI_WORLD_MAP_FILTERS_SHOW_DETAILS))
     self:AddPinFilterCheckBox(MAP_FILTER_GROUP_MEMBERS, function() ZO_WorldMap_GetPinManager():RefreshGroupPins() end)
     self:AddPinFilterCheckBox(MAP_FILTER_KILL_LOCATIONS, ZO_WorldMap_RefreshKillLocations)
+    self:AddPinFilterCheckBox(MAP_FILTER_ACQUIRED_SKYSHARDS, function() WORLD_MAP_MANAGER:RefreshSkyshardPins() end)
+
+    self:PostBuildControls()
+end
+
+ZO_JerallPvPWorldMapFilterPanel_Shared = ZO_InitializingObject:Subclass()
+
+function ZO_JerallPvPWorldMapFilterPanel_Shared:BuildControls()
+    self:PreBuildControls()
+    
+    self:AddPinFilterCheckBox(MAP_FILTER_OBJECTIVES, ZO_WorldMap_RefreshAllPOIs, GetString(SI_WORLD_MAP_FILTERS_SHOW_DETAILS))
+    self:AddPinFilterCheckBox(MAP_FILTER_WAYSHRINES, ZO_WorldMap_RefreshWayshrines)
+    self:AddPinFilterCheckBox(MAP_FILTER_GROUP_MEMBERS, function() ZO_WorldMap_GetPinManager():RefreshGroupPins() end)
+    self:AddPinFilterCheckBox(MAP_FILTER_KILL_LOCATIONS, ZO_WorldMap_RefreshKillLocations)
+    self:AddPinFilterCheckBox(MAP_FILTER_RESOURCE_KEEPS, ZO_WorldMap_RefreshKeeps)
+    self:AddPinFilterCheckBox(MAP_FILTER_AVA_GRAVEYARDS, function() 
+        ZO_WorldMap_RefreshForwardCamps()
+        ZO_WorldMap_RefreshAccessibleAvAGraveyards()
+    end)
     self:AddPinFilterCheckBox(MAP_FILTER_ACQUIRED_SKYSHARDS, function() WORLD_MAP_MANAGER:RefreshSkyshardPins() end)
 
     self:PostBuildControls()

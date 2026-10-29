@@ -2,12 +2,15 @@
 -- controls are layered to ensure correct display order
 -- Background layer
 ZO_MARKET_TILE_BACKGROUND_LEVEL =   1
+ZO_MARKET_TILE_BACKGROUND_BOTTOM_LEVEL = 1
+ZO_MARKET_TILE_BACKGROUND_BOTTOM_FADE_LEVEL = 7
+ZO_MARKET_TILE_PURCHASE_LIMIT_OVERLAY_LEVEL = 8
 ZO_MARKET_TILE_OVERLAY_LEVEL =      9
 
 -- Text/Content layer
-ZO_MARKET_TILE_BORDER_LEVEL =       10
-ZO_MARKET_TILE_TEXT_LEVEL =         11
-ZO_MARKET_TILE_ABOVE_TEXT_LEVEL =   12
+ZO_MARKET_TILE_BORDER_LEVEL =       11
+ZO_MARKET_TILE_TEXT_LEVEL =         12
+ZO_MARKET_TILE_ABOVE_TEXT_LEVEL =   13
 
 -- Top layer
 ZO_MARKET_TILE_HIGHLIGHT_LEVEL =    20
@@ -26,6 +29,7 @@ do
         [MARKET_PRODUCT_DISPLAY_STATE_NOT_PURCHASED] = ZO_MARKET_DIMMED_COLOR,
         [MARKET_PRODUCT_DISPLAY_STATE_PURCHASED] = ZO_MARKET_PRODUCT_PURCHASED_DIMMED_COLOR,
         [MARKET_PRODUCT_DISPLAY_STATE_INELIGIBLE] = ZO_MARKET_PRODUCT_INELIGIBLE_DIMMED_COLOR,
+        [MARKET_PRODUCT_DISPLAY_STATE_PURCHASE_LIMIT_REACHED] = ZO_MARKET_DIMMED_COLOR,
     }
 
     local MARKET_PRODUCT_COLOR_MAP_FOCUSED =
@@ -33,6 +37,7 @@ do
         [MARKET_PRODUCT_DISPLAY_STATE_NOT_PURCHASED] = ZO_MARKET_SELECTED_COLOR,
         [MARKET_PRODUCT_DISPLAY_STATE_PURCHASED] = ZO_MARKET_PRODUCT_PURCHASED_COLOR,
         [MARKET_PRODUCT_DISPLAY_STATE_INELIGIBLE] = ZO_MARKET_PRODUCT_INELIGIBLE_COLOR,
+        [MARKET_PRODUCT_DISPLAY_STATE_PURCHASE_LIMIT_REACHED] = ZO_MARKET_SELECTED_COLOR,
     }
 
     function ZO_MarketClasses_Shared_ApplyTextColorToLabelByState(label, isFocused, displayState)
@@ -48,6 +53,7 @@ do
         [MARKET_PRODUCT_DISPLAY_STATE_NOT_PURCHASED] = ZO_MARKET_PRODUCT_ESO_PLUS_DIMMED_COLOR,
         [MARKET_PRODUCT_DISPLAY_STATE_PURCHASED] = ZO_MARKET_PRODUCT_ESO_PLUS_PURCHASED_DIMMED_COLOR,
         [MARKET_PRODUCT_DISPLAY_STATE_INELIGIBLE] = ZO_MARKET_PRODUCT_ESO_PLUS_PURCHASED_DIMMED_COLOR,
+        [MARKET_PRODUCT_DISPLAY_STATE_PURCHASE_LIMIT_REACHED] = ZO_MARKET_PRODUCT_ESO_PLUS_DIMMED_COLOR,
     }
 
     local FOCUSED_COLOR_MAP =
@@ -55,6 +61,7 @@ do
         [MARKET_PRODUCT_DISPLAY_STATE_NOT_PURCHASED] = ZO_MARKET_PRODUCT_ESO_PLUS_COLOR,
         [MARKET_PRODUCT_DISPLAY_STATE_PURCHASED] = ZO_MARKET_PRODUCT_ESO_PLUS_PURCHASED_COLOR,
         [MARKET_PRODUCT_DISPLAY_STATE_INELIGIBLE] = ZO_MARKET_PRODUCT_ESO_PLUS_PURCHASED_COLOR,
+        [MARKET_PRODUCT_DISPLAY_STATE_PURCHASE_LIMIT_REACHED] = ZO_MARKET_PRODUCT_ESO_PLUS_COLOR,
     }
 
     function ZO_MarketClasses_Shared_ApplyEsoPlusColorToLabelByState(label, isFocused, displayState)
@@ -89,6 +96,10 @@ end
 
 function ZO_MarketProductBase:SetTextCalloutYOffset(yOffset)
     self.textCalloutYOffset = yOffset
+end
+
+function ZO_MarketProductBase:GetTextCalloutYOffset()
+    return self.textCalloutYOffset
 end
 
 function ZO_MarketProductBase:SetControl(control)
@@ -221,8 +232,92 @@ function ZO_MarketProductBase:IsLimitedTimeProduct()
     return self.productData:IsLimitedTimeProduct()
 end
 
+function ZO_MarketProductBase:HasPurchaseLimit()
+    return self.productData:HasPurchaseLimit()
+end
+
+function ZO_MarketProductBase:GetPurchaseLimit()
+    return self.productData:GetPurchaseLimit()
+end
+
+function ZO_MarketProductBase:GetPurchaseCount()
+    return self.productData:GetPurchaseCount()
+end
+
+function ZO_MarketProductBase:GetAvailablePurchaseLimit()
+    return self.productData:GetAvailablePurchaseLimit()
+end
+
+function ZO_MarketProductBase:IsPurchaseLimitReached()
+    return self.productData:IsPurchaseLimitReached()
+end
+
+function ZO_MarketProductBase:GetPurchaseLimitResetType()
+    return self.productData:GetPurchaseLimitResetType()
+end
+
+function ZO_MarketProductBase:GetPurchaseLimitResetTimeLeftInSeconds()
+    return self.productData:GetPurchaseLimitResetTimeLeftInSeconds()
+end
+
+function ZO_MarketProductBase:HasPurchaseLimitResetTimerStarted()
+    return self.productData:HasPurchaseLimitResetTimerStarted()
+end
+
+function ZO_MarketProductBase:ShouldShowPurchaseLimitReset()
+    return self.productData:ShouldShowPurchaseLimitReset()
+end
+
+function ZO_MarketProductBase:UpdatePurchaseLimitText()
+    local control = self.control
+    local purchaseLimitContainer = control.purchaseLimit
+
+    local purchaseLimitTimerLabel = control.purchaseLimitTimer
+    if not self:HasPurchaseLimit() then
+        purchaseLimitContainer:SetHidden(true)
+        purchaseLimitTimerLabel:SetHidden(true)
+        purchaseLimitTimerLabel:SetHandler("OnUpdate", nil)
+        return
+    end
+
+    purchaseLimitContainer:SetHidden(false)
+
+    control.purchaseLimitTag:SetText(GetString("SI_PURCHASELIMITRESETTYPE_TAG", self:GetPurchaseLimitResetType()))
+
+    local purchaseLimitText = zo_strformat(SI_CURRENT_AND_MAX_VALUES_FORMATTER, self:GetPurchaseCount(), self:GetPurchaseLimit())
+    local purchaseLimitCountLabel = control.purchaseLimitCount
+    purchaseLimitCountLabel:SetText(purchaseLimitText)
+
+    if self:ShouldShowPurchaseLimitReset() then
+        local resetTime = ZO_FormatTimeLargestTwo(self:GetPurchaseLimitResetTimeLeftInSeconds(), TIME_FORMAT_STYLE_DESCRIPTIVE_MINIMAL)
+        purchaseLimitTimerLabel:SetText(string.format("(%s)", resetTime))
+        purchaseLimitTimerLabel:SetHidden(false)
+    else
+        purchaseLimitTimerLabel:SetText("")
+        purchaseLimitTimerLabel:SetHidden(true)
+        purchaseLimitTimerLabel:SetHandler("OnUpdate", nil)
+    end
+end
+
+function ZO_MarketProductBase:SetupPurchaseLimitDisplay()
+    local purchaseLimitTimerLabel = self.control.purchaseLimitTimer
+    self:UpdatePurchaseLimitText()
+
+    if self:ShouldShowPurchaseLimitReset() then
+        purchaseLimitTimerLabel:SetHandler("OnUpdate", function()
+            self:UpdatePurchaseLimitText()
+        end)
+    else
+        purchaseLimitTimerLabel:SetHandler("OnUpdate", nil)
+    end
+end
+
 function ZO_MarketProductBase:GetBackgroundDesaturation(isPurchased)
     return isPurchased and ZO_MARKET_PRODUCT_PURCHASED_DESATURATION or ZO_MARKET_PRODUCT_NOT_PURCHASED_DESATURATION
+end
+
+function ZO_MarketProductBase:UpdatePurchaseLimitOverlay()
+    self.control.purchaseLimitOverlay:SetHidden(self.displayState ~= MARKET_PRODUCT_DISPLAY_STATE_PURCHASE_LIMIT_REACHED)
 end
 
 function ZO_MarketProductBase:LayoutCostAndText()
@@ -231,20 +326,15 @@ function ZO_MarketProductBase:LayoutCostAndText()
     control.cost:ClearAnchors()
     control.textCallout:ClearAnchors()
     control.esoPlusCost:ClearAnchors()
+    control.purchaseLimit:ClearAnchors()
 
     local hasNormalCost = self:HasCost()
     if hasNormalCost then
         if self:IsOnSale() and not self:IsFree() then
             control.cost:SetAnchor(BOTTOMLEFT, control.previousCost, BOTTOMRIGHT, 10)
-            control.textCallout:SetAnchor(BOTTOMLEFT, control.previousCost, TOPLEFT, ZO_MARKET_PRODUCT_CALLOUT_X_OFFSET - 2, self.textCalloutYOffset) -- x offset to account for strikethrough
         else
             control.cost:SetAnchor(BOTTOMLEFT, control, BOTTOMLEFT, 10, -10)
-            control.textCallout:SetAnchor(BOTTOMLEFT, control.cost, TOPLEFT, ZO_MARKET_PRODUCT_CALLOUT_X_OFFSET, self.textCalloutYOffset)
         end
-    else
-        -- if we don't have a normal cost, then we need to anchor the callout to the ESO Plus cost
-        -- there should never be a case where a market product has neither a normal cost nor an ESO Plus cost (because then it would be unpurchasable)
-        control.textCallout:SetAnchor(BOTTOMLEFT, control.esoPlusCost, TOPLEFT, ZO_MARKET_PRODUCT_CALLOUT_X_OFFSET, self.textCalloutYOffset)
     end
 
     local hasEsoPlusCost = self:HasEsoPlusCost()
@@ -267,10 +357,51 @@ function ZO_MarketProductBase:LayoutCostAndText()
 
     self:SetupPurchaseLabelDisplay()
     self:SetupEsoPlusDealLabelDisplay()
+    self:SetupPurchaseLimitDisplay()
+    self:AnchorPurchaseLimit()
+    self:AnchorTextCallout()
 
     self:UpdateTextCalloutAnchors()
 
     ZO_MarketClasses_Shared_ApplyTextColorToLabelByState(control.title, self:IsFocused(), self.displayState)
+end
+
+function ZO_MarketProductBase:GetPricingAnchor()
+    local control = self.control
+    local anchorTarget = control.cost
+
+    if self:IsOnSale() and not self:IsFree() then
+        anchorTarget = control.previousCost
+    elseif not self:HasCost() then
+        -- if we don't have a normal cost, then we need to anchor the callout to the ESO Plus cost
+        -- there should never be a case where a market product has neither a normal cost nor an ESO Plus cost (because then it would be unpurchasable)
+        anchorTarget = control.esoPlusCost
+    end
+
+    return anchorTarget
+end
+
+function ZO_MarketProductBase:AnchorPurchaseLimit()
+    if not self:HasPurchaseLimit() then
+        return
+    end
+
+    local anchorTarget = self:GetPricingAnchor()
+    self.control.purchaseLimit:SetAnchor(BOTTOMLEFT, anchorTarget, TOPLEFT, 0, -2)
+end
+
+function ZO_MarketProductBase:AnchorTextCallout()
+    local control = self.control
+    local anchorTarget = self:GetPricingAnchor()
+    local anchorOffsetX = ZO_MARKET_PRODUCT_CALLOUT_X_OFFSET
+
+    if self:HasPurchaseLimit() then
+        anchorTarget = control.purchaseLimit
+    elseif self:IsOnSale() and not self:IsFree() then
+        anchorOffsetX = ZO_MARKET_PRODUCT_CALLOUT_X_OFFSET - 2 -- x offset to account for strikethrough
+    end
+
+    control.textCallout:SetAnchor(BOTTOMLEFT, anchorTarget, TOPLEFT, anchorOffsetX, self:GetTextCalloutYOffset())
 end
 
 function ZO_MarketProductBase:ShouldShowCallouts()
@@ -289,14 +420,18 @@ end
 
 function ZO_MarketProductBase:SetupCalloutsDisplay()
     local hideCallouts = true
+    local calloutUpdateHandler = nil
     self.textCalloutText = nil
     -- setup the callouts for new, on sale, and LTO
     if self:ShouldShowCallouts() then
-        local calloutUpdateHandler = nil
         if self:IsLimitedTimeProduct() then
             hideCallouts = false
             self:UpdateLTORemainingTimeCalloutText()
-            calloutUpdateHandler = function() self:UpdateLTORemainingTimeCalloutText() end
+            if self.productData:GetLTOTimeLeftInSeconds() > 0 then
+                calloutUpdateHandler = function()
+                    self:UpdateLTORemainingTimeCalloutText()
+                end
+            end
         elseif self:IsOnSale() then
             hideCallouts = false
             local onSaleMarketProductId = self.defaultHouseTemplateMarketProductId or self:GetId()
@@ -310,10 +445,9 @@ function ZO_MarketProductBase:SetupCalloutsDisplay()
             self.control.textCallout:SetText(self.textCalloutText)
             self.control.textCallout:SetModifyTextType(MODIFY_TEXT_TYPE_UPPERCASE)
         end
-
-        self.control.textCallout:SetHandler("OnUpdate", calloutUpdateHandler)
     end
 
+    self.control.textCallout:SetHandler("OnUpdate", calloutUpdateHandler)
     self.control.textCallout:SetHidden(hideCallouts)
 end
 
@@ -398,7 +532,9 @@ function ZO_MarketProductBase:SetupPurchaseLabelDisplay()
     local canBePurchased = self:CanBePurchased()
     if not canBePurchased then
         local purchasedString
-        if self:IsPromo() then
+        if self:IsPurchaseLimitReached() then
+            purchasedString = ""
+        elseif self:IsPromo() then
             purchasedString = ""
         elseif self.displayState == MARKET_PRODUCT_DISPLAY_STATE_NOT_PURCHASED and self:IsHouseCollectible() then
             purchasedString = ""
@@ -554,6 +690,8 @@ function ZO_MarketProductBase:UpdateLTORemainingTimeCalloutText()
             self.textCalloutText = zo_strformat(SI_TIME_DURATION_LEFT, ZO_FormatTimeLargestTwo(remainingTime, TIME_FORMAT_STYLE_DESCRIPTIVE_MINIMAL))
         end
         self.control.textCallout:SetText(self.textCalloutText)
+    else
+        self.control.textCallout:SetHandler("OnUpdate", nil)
     end
 end
 
@@ -576,6 +714,9 @@ function ZO_MarketProductBase:UpdateSaleRemainingTimeCalloutText(discountPercent
     else
         self.textCalloutText = discountPercentText
         self.control.textCallout:SetText(discountPercentText)
+        if remainingTime <= 0 then
+            self.control.textCallout:SetHandler("OnUpdate", nil)
+        end
     end
 end
 
@@ -607,6 +748,7 @@ function ZO_MarketProductBase:LayoutBackground()
     self.control.background:SetTexture(background)
     self.hasBackground = background ~= ZO_NO_TEXTURE_FILE
     self.control.background:SetHidden(not self.hasBackground)
+    self:UpdatePurchaseLimitOverlay()
 end
 
 function ZO_MarketProductBase:UpdatingPricingInformation()
@@ -671,6 +813,11 @@ function ZO_MarketProductBase:Reset()
     self.control:SetHidden(true)
     self.textCalloutText = nil
     self.control.textCallout:SetHidden(true)
+    self.control.textCallout:SetHandler("OnUpdate", nil)
+    self.control.purchaseLimit:SetHidden(true)
+    self.control.purchaseLimitTimer:SetHidden(true)
+    self.control.purchaseLimitTimer:SetHandler("OnUpdate", nil)
+    self.control.purchaseLimitOverlay:SetHidden(true)
     -- Clear the background's texture so that it can be cleared at zero references
     self.control.background:SetTexture("")
     self.productData = nil
@@ -694,6 +841,25 @@ end
 --Get the narration for the callouts section of this market product
 function ZO_MarketProductBase:GetCalloutNarrationText()
     return SCREEN_NARRATION_MANAGER:CreateNarratableObject(self.textCalloutText)
+end
+
+function ZO_MarketProductBase:GetPurchaseLimitNarrationText()
+    local narrations = {}
+    if self:HasPurchaseLimit() then
+        local resetType = self:GetPurchaseLimitResetType()
+        local purchaseLimitText = GetString("SI_PURCHASELIMITRESETTYPE", resetType)
+        local currentAndMaxText = zo_strformat(SI_SCREEN_NARRATION_CURRENT_AND_MAX_VALUES_FORMATTER, self:GetPurchaseCount(), self:GetPurchaseLimit())
+
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(purchaseLimitText))
+        ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(currentAndMaxText))
+
+        if self:ShouldShowPurchaseLimitReset() then
+            local resetTimeText = ZO_FormatTime(self:GetPurchaseLimitResetTimeLeftInSeconds(), TIME_FORMAT_STYLE_SHOW_LARGEST_UNIT_DESCRIPTIVE, TIME_FORMAT_PRECISION_SECONDS)
+            ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(zo_strformat(SI_TIME_DURATION_LEFT, resetTimeText)))
+        end
+    end
+
+    return narrations
 end
 
 --Get the narration for the pricing of this market product
@@ -933,6 +1099,11 @@ function ZO_MarketProductBase_OnInitialized(control)
     control.esoPlusCost = control:GetNamedChild("EsoPlusCost")
     control.purchaseLabelControl = control:GetNamedChild("Purchased")
     control.esoPlusDealLabelControl = control:GetNamedChild("EsoPlusDeal")
+    control.purchaseLimit = control:GetNamedChild("PurchaseLimit")
+    control.purchaseLimitTag = control.purchaseLimit:GetNamedChild("Tag")
+    control.purchaseLimitCount = control.purchaseLimit:GetNamedChild("Count")
+    control.purchaseLimitTimer = control.purchaseLimit:GetNamedChild("Timer")
+    control.purchaseLimitOverlay = control:GetNamedChild("PurchaseLimitOverlay")
     control.textCallout = control:GetNamedChild("TextCallout")
     control.textCalloutBackground = control.textCallout:GetNamedChild("Background")
     if control.textCalloutBackground then

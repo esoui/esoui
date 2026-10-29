@@ -805,7 +805,7 @@ function MainMenu_Keyboard:SetupSceneGroupBar(category, sceneGroupName)
             local sceneName = layoutData.descriptor
             layoutData.callback = function()
                 local currentCategoryName = self.sceneGroupBarLabel:GetText()
-                self.sceneGroupBarLabel:SetText(GetString(layoutData.categoryName))
+                self.sceneGroupBarLabel:SetText(ZO_EvalStringId(layoutData.categoryName))
 
                 if not self.ignoreCallbacks then
                     if MAIN_MENU_MANAGER:HasBlockingScene() then
@@ -858,7 +858,7 @@ function MainMenu_Keyboard:SetupSceneGroupBar(category, sceneGroupName)
             end
 
             self.sceneGroupBarLabel:SetHidden(false)
-            self.sceneGroupBarLabel:SetText(GetString(layoutData.categoryName))
+            self.sceneGroupBarLabel:SetText(ZO_EvalStringId(layoutData.categoryName))
         end
 
         self.ignoreCallbacks = false
@@ -1097,7 +1097,7 @@ function ZO_MainMenuCategoryBarButton_OnMouseEnter(self)
             tooltipText = GetString(SI_MAIN_MENU_TOOLTIP_DISABLED_BUTTON)
         end
     else
-        tooltipText = zo_strformat(SI_MAIN_MENU_KEYBIND, GetString(buttonData.categoryName), bindingString or GetString(SI_ACTION_IS_NOT_BOUND))
+        tooltipText = zo_strformat(SI_MAIN_MENU_KEYBIND, ZO_EvalStringId(buttonData.categoryName), bindingString or GetString(SI_ACTION_IS_NOT_BOUND))
     end
 
     if tooltipText then

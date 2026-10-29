@@ -222,33 +222,6 @@
                         ZO_CharacterSelect_DeleteSelected()
                     </OnClicked>
                 </Button>
-                <Control name="$(parent)ChapterUpgrade">
-                    <Dimensions x="300"/>
-                    <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot"/>
-                    <Controls>
-                        <Button name="$(parent)RegisterButton" inherits="ZO_DefaultButton" text="SI_CHARACTER_SELECT_CHAPTER_UPGRADE_REGISTER">
-                            <Dimensions x="140"/>
-                            <Anchor point="BOTTOM" offsetY="-16"/>
-                            <OnMouseEnter>
-                                ZO_CharacterSelectChapterUpgradeRegisterButton_OnMouseEnter(self)
-                            </OnMouseEnter>
-                            <OnMouseExit>
-                                ZO_CharacterSelectChapterUpgradeRegisterButton_OnMouseExit(self)
-                            </OnMouseExit>
-                            <OnClicked>
-                                ZO_PregameStateManager_SetState("ChapterUpgrade")
-                            </OnClicked>
-                        </Button>
-                        <Texture name="$(parent)Image">
-                            <Anchor point="BOTTOM" relativeTo="$(parent)RegisterButton" relativePoint="TOP"/>
-                            <Dimensions x="256" y="256"/>
-                        </Texture>
-                        <Label name="$(parent)Title" font="ZoFontWinH2" modifyTextType="UPPERCASE" horizontalAlignment="CENTER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
-                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Image" relativePoint="TOPLEFT" offsetY="-5"/>
-                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Image" relativePoint="TOPRIGHT" offsetY="-5"/>
-                        </Label>
-                    </Controls>
-                </Control>
                 <Control name="$(parent)EventMinimized">
                     <Dimensions x="512" y="512"/>
                     <Anchor point="BOTTOMLEFT" relativeTo="GuiRoot"/>

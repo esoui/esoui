@@ -1,5 +1,25 @@
 <GuiXml>
     <Controls>
+        <Control name="ZO_GuildSelector_GuildComboBoxEntry" inherits="ZO_ComboBoxEntry" virtual="true">
+            <Controls>
+                <Button name="$(parent)Up" inherits="ZO_ScrollUpButton" level="4">
+                    <Anchor point="RIGHT"/>
+                    <OnClicked>
+                        GuildSelector.OnGuildMoveUpClicked(self)
+                    </OnClicked>
+                </Button>
+                <Button name="$(parent)Down" inherits="ZO_ScrollDownButton" level="4">
+                    <Anchor point="RIGHT" relativeTo="$(parent)Up" relativePoint="LEFT" offsetX="-5"/>
+                    <OnClicked>
+                        GuildSelector.OnGuildMoveDownClicked(self)
+                    </OnClicked>
+                </Button>
+                <Label name="$(parent)Label" override="true">
+                    <Anchor point="LEFT" offsetX="ZO_COMBO_BOX_ENTRY_TEMPLATE_LABEL_PADDING"/>
+                    <Anchor point="RIGHT" relativeTo="$(parent)Down" relativePoint="LEFT"/>
+                </Label>
+            </Controls>
+        </Control>
         <TopLevelControl name="ZO_GuildSelector" hidden="true">
             <Dimensions x="1024" y="50"/>
             <Anchor point="RIGHT" relativeTo="GuiRoot" offsetX="30" offsetY="-335"/>

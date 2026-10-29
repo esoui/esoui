@@ -5,15 +5,17 @@ function ZO_CampaignScoringManager:New(control)
 
     CAMPAIGN_SCORING_FRAGMENT = ZO_FadeSceneFragment:New(ZO_CampaignScoring)
     CAMPAIGN_SCORING_FRAGMENT:RegisterCallback("StateChange", function(oldState, newState)
-                                                                    if newState == SCENE_FRAGMENT_SHOWN then
-                                                                        manager.shown = true
-                                                                        QueryCampaignLeaderboardData(ALLIANCE_NONE)
-                                                                        manager:UpdateRewardTier()
-                                                                        manager:UpdateScores()
-                                                                    elseif newState == SCENE_FRAGMENT_HIDDEN then
-                                                                        manager.shown = false
-                                                                    end
-                                                                end)
+        if newState == SCENE_FRAGMENT_SHOWN then
+            manager.shown = true
+            -- TODO Jerall: TO maintain current behavior, ask for assigned and it will get both assigned and local.
+            -- We should eventually refactor this to gracefully work based on just getting the leaderboard for what you're looking at right now.
+            QueryCampaignLeaderboardData(GetAssignedCampaignId(), ALLIANCE_NONE)
+            manager:UpdateRewardTier()
+            manager:UpdateScores()
+        elseif newState == SCENE_FRAGMENT_HIDDEN then
+            manager.shown = false
+        end
+    end)
 
     return manager
 end

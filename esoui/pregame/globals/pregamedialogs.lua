@@ -19,7 +19,6 @@ ESO_Dialogs["DELETE_SELECTED_CHARACTER"] =
     mustChoose = true,
     buttons =
     {
-        [1] =
         {
             requiresTextInput = true,
             text = SI_DELETE_CHARACTER_CONFIRMATION_BUTTON,
@@ -28,7 +27,6 @@ ESO_Dialogs["DELETE_SELECTED_CHARACTER"] =
             end
         },
         
-        [2] =
         {
             text = SI_DIALOG_CANCEL,
             callback = function(dialog)
@@ -1406,64 +1404,6 @@ ESO_Dialogs["CHARACTER_CREATE_CONFIRM_REVERT_CHANGES"] =
                         end,
         },
     }
-}
-
-ESO_Dialogs["CHAPTER_UPGRADE_CONTINUE"] = 
-{
-    canQueue = true,
-    mustChoose = true,
-
-    gamepadInfo =
-    {
-        dialogType = GAMEPAD_DIALOGS.BASIC,
-    },
-
-    title =
-    {
-        text = SI_CHAPTER_UPGRADE_CONTINUE_DIALOG_TITLE
-    },
-
-    mainText =
-    {
-        text = function()
-            local platformServiceType = GetPlatformServiceType()
-            local upgradeMethodsStringId = ZO_PLATFORM_ALLOWS_CHAPTER_CODE_ENTRY[platformServiceType] and SI_CHAPTER_UPGRADE_CONTINUE_DIALOG_BODY_UPGRADE_OR_CODE or SI_CHAPTER_UPGRADE_CONTINUE_DIALOG_BODY_UPGRADE_ONLY
-            local coloredPlatformStoreName = ZO_SELECTED_TEXT:Colorize(ZO_GetPlatformStoreName())
-            if platformServiceType == PLATFORM_SERVICE_TYPE_EPIC then
-                return zo_strformat(SI_CHAPTER_UPGRADE_CONTINUE_DIALOG_BODY_FORMAT_NO_RESTART, GetString(upgradeMethodsStringId), coloredPlatformStoreName)
-            else
-                local chapterUpgradeId = GetCurrentChapterUpgradeId()
-                local chapterCollectibleId = GetChapterCollectibleId(chapterUpgradeId)
-                local chapterCollectibleName = ZO_SELECTED_TEXT:Colorize(GetCollectibleName(chapterCollectibleId))
-                return zo_strformat(SI_CHAPTER_UPGRADE_CONTINUE_DIALOG_BODY_FORMAT, GetString(upgradeMethodsStringId), coloredPlatformStoreName, chapterCollectibleName)
-            end
-        end,
-    },
-
-    buttons =
-    {
-        {
-            text = SI_DIALOG_CONFIRM,
-            callback = function(dialog)
-                            if dialog.data then
-                                dialog.data.continue = true
-                            end
-                        end,
-        },
-        {
-            text = SI_DIALOG_CANCEL,
-            callback = function(dialog)
-                            if dialog.data then
-                                dialog.data.continue = false
-                            end
-                        end,
-        },
-    },
-    finishedCallback = function(dialog)
-        if dialog.data and dialog.data.finishedCallback then
-            dialog.data.finishedCallback(dialog)
-        end
-    end,
 }
 
 ESO_Dialogs["ACCOUNT_MANAGEMENT_REQUEST_FAILED"] =

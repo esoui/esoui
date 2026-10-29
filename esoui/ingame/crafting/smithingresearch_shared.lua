@@ -369,8 +369,6 @@ function ZO_SharedSmithingResearch:CancelResearch()
     local traitType = GetSmithingResearchLineTraitInfo(self.craftingType, self.researchLineIndex, researchingTrait)
     local researchLineName = GetSmithingResearchLineInfo(self.craftingType, self.researchLineIndex)
     dialogData.traitIndex = researchingTrait
-    dialogParams.mainTextParams = { researchLineName, GetString("SI_ITEMTRAITTYPE", traitType), GetString(SI_PERFORM_ACTION_CONFIRMATION) }
-
-    local dialogName = IsInGamepadPreferredMode() and ZO_GAMEPAD_CONFIRM_CANCEL_RESEARCH_DIALOG or "CONFIRM_CANCEL_RESEARCH"
-    ZO_Dialogs_ShowPlatformDialog(dialogName, dialogData, dialogParams)
+    dialogParams.mainTextParams = { researchLineName, GetString("SI_ITEMTRAITTYPE", traitType) }
+    ZO_Dialogs_ShowPlatformDialog("CONFIRM_CANCEL_RESEARCH", dialogData, dialogParams)
 end

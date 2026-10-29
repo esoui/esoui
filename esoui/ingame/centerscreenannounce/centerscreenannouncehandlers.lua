@@ -1408,6 +1408,18 @@ CENTER_SCREEN_EVENT_HANDLERS[EVENT_RUMOR_STARTED] = function(rumorId)
     end
 end
 
+CENTER_SCREEN_EVENT_HANDLERS[EVENT_RUMOR_HINT_UNLOCKED] = function(rumorId, hintIndex)
+    local rumorData = RUMOR_MANAGER:GetRumorData(rumorId)
+    if rumorData then
+        local messageParams = CENTER_SCREEN_ANNOUNCE:CreateMessageParams(CSA_CATEGORY_LARGE_TEXT, SOUNDS.RUMOR_HINT_UNLOCKED)
+        local messageTitle = zo_strformat(SI_RUMOR_HINT_UNLOCKED_ANNOUNCEMENT_TITLE, rumorData:GetDisplayName())
+        local messageBody = zo_strformat(SI_RUMOR_HINT_UNLOCKED_ANNOUNCEMENT_BODY, rumorData:GetHintDisplayName(hintIndex))
+        messageParams:SetText(messageTitle, messageBody)
+        messageParams:SetCSAType(CENTER_SCREEN_ANNOUNCE_TYPE_RUMOR_ADDED)
+        return messageParams
+    end
+end
+
 CENTER_SCREEN_EVENT_HANDLERS[EVENT_RUMOR_COMPLETED] = function(rumorId)
     local rumorData = RUMOR_MANAGER:GetRumorData(rumorId)
     if rumorData then

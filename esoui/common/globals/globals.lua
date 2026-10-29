@@ -5,6 +5,8 @@
 -------------------------------------
 
 function ZO_ReanchorControlForLeftSidePanel(control)
+    control:UnregisterForEvent(EVENT_SCREEN_RESIZED)
+
     local function DoLayout()
         -- Since the control could have been resized by it's anchors clear the anchors before getting it's hieght
         control:ClearAnchors()
@@ -20,6 +22,8 @@ function ZO_ReanchorControlForLeftSidePanel(control)
 end
 
 function ZO_ReanchorControlTopHorizontalMenu(control)
+    control:UnregisterForEvent(EVENT_SCREEN_RESIZED)
+
     local function DoLayout()
         local screenHeight = GuiRoot:GetHeight()
         local controlHeight = control:GetHeight()

@@ -1,4 +1,5 @@
 local AUTO_HIDE_DELAY_SECONDS = 7.0
+local POST_TRANSITION_HIDE_DELAY_SECONDS = 1.0
 
 ZO_EndlessDungeonHUD = ZO_InitializingObject:Subclass()
 
@@ -14,12 +15,12 @@ end
 
 function ZO_EndlessDungeonHUD:InitializeControls()
     local control = self.control
-    control.object = self
-    local scoreContainer = control:GetNamedChild("ScoreContainer")
-    self.scoreContainer = scoreContainer
-    self.hudElementRef = scoreContainer:GetNamedChild("HUDElementRef")
+    self.hudContainer = control:GetNamedChild("HUDContainer")
+    self.hudElementRef = self.hudContainer:GetNamedChild("HUDElementRef")
 
-    self.alphaTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_EndlessDungeonHUD_AlphaAnimation", self.control)
+    self.scoreContainer = self.hudContainer:GetNamedChild("ScoreContainer")
+    self.scoreContainer.object = self
+    self.alphaTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_EndlessDungeonHUD_AlphaAnimation", self.scoreContainer)
 
     self.reviveIconTexture = self.scoreContainer:GetNamedChild("ReviveIcon")
     self.reviveIconTexture:SetColor(ZO_NORMAL_TEXT:UnpackRGBA())
@@ -29,7 +30,10 @@ function ZO_EndlessDungeonHUD:InitializeControls()
     self.reviveLabel:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
     self.reviveLabel:SetResizeToFitLabels(true)
     self.reviveLabelTransitionManager = self.reviveLabel:GetOrCreateTransitionManager()
-    self.reviveLabelTransitionManager:SetMaxTransitionSteps(50)
+    self.reviveLabelTransitionManager:SetMaxTransitionSteps(10)
+    self.reviveLabelTransitionManager:SetTransitionCompleteCallback(function()
+        self:OnRollingMeterTransitionComplete()
+    end)
 
     self.scoreHeaderLabel = self.scoreContainer:GetNamedChild("Header")
 
@@ -38,12 +42,21 @@ function ZO_EndlessDungeonHUD:InitializeControls()
     self.scoreLabel:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
     self.scoreLabel:SetResizeToFitLabels(true)
     self.scoreLabelTransitionManager = self.scoreLabel:GetOrCreateTransitionManager()
-    self.scoreLabelTransitionManager:SetMaxTransitionSteps(50)
-    self.scoreLabelTransitionManager:SetTransitionAnimationStartedCallback(function(rollingMeterLabel, currentStep, numSteps, currentValue, targetValue)
-        if currentValue == targetValue and not self.fragment:IsHidden() then
+    self.scoreLabelTransitionManager:SetMaxTransitionSteps(30)
+    self.scoreLabelTransitionManager:SetTransitionSpeedFactor(1.5)
+    self.scoreLabelTransitionManager:SetTransitionCompleteCallback(function()
+        if not self.fragment:IsHidden() then
             PlaySound(SOUNDS.ENDLESS_DUNGEON_SCORE_FINAL_FLIP)
         end
+        self:OnRollingMeterTransitionComplete()
     end)
+
+    self.savingIndicator = self.hudContainer:GetNamedChild("SavingIndicator")
+    self.savingIndicatorText = self.savingIndicator:GetNamedChild("Text")
+    self.savingIndicatorIcon = self.savingIndicator:GetNamedChild("Icon")
+    self.savingIndicator.object = self
+    self.savingAlphaTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("ZO_EndlessDungeonHUD_AlphaAnimation", self.savingIndicator)
+    self.isSavingVisible = false
 
     self.fragment = ZO_HUDFadeSceneFragment:New(control)
     ENDLESS_DUNGEON_HUD_FRAGMENT = self.fragment
@@ -61,6 +74,8 @@ function ZO_EndlessDungeonHUD:InitializeStyles()
         valueFont = "ZoFontWinH2",
         iconSize = 40,
         modifyTextType = MODIFY_TEXT_TYPE_NONE,
+        leadingToParentAnchor = ZO_Anchor:New(LEFT, nil, LEFT, 0, 2),
+        savingIndicatorLeadingAnchor = ZO_Anchor:New(LEFT, self.savingIndicator, RIGHT, 10),
     }
     local GAMEPAD_STYLE =
     {
@@ -73,6 +88,8 @@ function ZO_EndlessDungeonHUD:InitializeStyles()
         valueFont = "ZoFontGamepad42",
         iconSize = 44,
         modifyTextType = MODIFY_TEXT_TYPE_UPPERCASE,
+        leadingToParentAnchor = ZO_Anchor:New(LEFT, nil, LEFT, 0, 2),
+        savingIndicatorTrailingAnchor = ZO_Anchor:New(LEFT, self.scoreContainer, RIGHT, 10),
     }
 
     local KEYBOARD_CONFIG =
@@ -106,8 +123,8 @@ function ZO_EndlessDungeonHUD:InitializeStyles()
     }
 
     local DISPLAY_NAME = GetString(SI_HUD_EDITOR_ENDLESS_DUNGEON_SCORE)
-    HUD_MANAGER:RegisterKeyboardElement(self.scoreContainer, DISPLAY_NAME, KEYBOARD_CONFIG, ENDLESS_DUNGEON_SCORE_OPTIONS)
-    HUD_MANAGER:RegisterGamepadElement(self.scoreContainer, DISPLAY_NAME, GAMEPAD_CONFIG, ENDLESS_DUNGEON_SCORE_OPTIONS)
+    HUD_MANAGER:RegisterKeyboardElement(self.hudContainer, DISPLAY_NAME, KEYBOARD_CONFIG, ENDLESS_DUNGEON_SCORE_OPTIONS)
+    HUD_MANAGER:RegisterGamepadElement(self.hudContainer, DISPLAY_NAME, GAMEPAD_CONFIG, ENDLESS_DUNGEON_SCORE_OPTIONS)
     
     ZO_PlatformStyle:New(ZO_GetCallbackForwardingFunction(self, self.OnPlatformStyleChanged), KEYBOARD_STYLE, GAMEPAD_STYLE)
 end
@@ -119,7 +136,15 @@ function ZO_EndlessDungeonHUD:InitializeEvents()
 
     EVENT_MANAGER:RegisterForEvent("EndlessDungeonHUD", EVENT_INTERFACE_SETTING_CHANGED, ZO_GetEventForwardingFunction(self, self.OnInterfaceSettingChanged))
     EVENT_MANAGER:RegisterForEvent("EndlessDungeonHUD", EVENT_PLAYER_ACTIVATED, ZO_GetEventForwardingFunction(self, self.OnPlayerActivated))
+    EVENT_MANAGER:RegisterForEvent("EndlessDungeonHUD", EVENT_ENDLESS_DUNGEON_START_SAVING, ZO_GetEventForwardingFunction(self, self.OnStartSaving))
     self.control:SetHandler("OnUpdate", ZO_GetEventForwardingFunction(self, self.OnUpdate))
+end
+
+function ZO_EndlessDungeonHUD:OnStartSaving()
+    if self.fragment:IsHidden() or self.alphaTimeline:IsPlayingBackward() then
+        self:Show()
+    end
+    self:ShowSavingIndicator()
 end
 
 -- User Interface
@@ -141,6 +166,13 @@ function ZO_EndlessDungeonHUD:CanUpdate()
 end
 
 function ZO_EndlessDungeonHUD:Hide()
+    if self.isSavingVisible then
+        -- Saving Indicator should always hide when the hud should hide as the save is expected to take a much
+        -- shorter time than the built-in hide delay and we want the player to see the saving indicator for
+        -- a reasonable amount of time before it goes away
+        self:HideSavingIndicator()
+    end
+
     if self.alwaysVisible then
         -- Suppress requests to hide when the Always Visible flag is set.
         return
@@ -206,6 +238,16 @@ end
 function ZO_EndlessDungeonHUD:Show()
     self.alphaTimeline:PlayForward()
     self:SetHidden(false)
+end
+
+function ZO_EndlessDungeonHUD:ShowSavingIndicator()
+    self.isSavingVisible = true
+    self.savingAlphaTimeline:PlayForward()
+end
+
+function ZO_EndlessDungeonHUD:HideSavingIndicator()
+    self.isSavingVisible = false
+    self.savingAlphaTimeline:PlayBackward()
 end
 
 function ZO_EndlessDungeonHUD:StartFadeOutTimer()
@@ -302,6 +344,18 @@ function ZO_EndlessDungeonHUD:OnPlatformStyleChanged(style)
     self.reviveIconTexture:SetDimensions(style.iconSize, style.iconSize)
     self.reviveLabel:SetAnchorOffsets(5, style.reviveCountOffsetY)
     self.reviveLabel:SetFont(style.valueFont)
+    self.savingIndicatorText:SetFont(style.headerFont)
+    self.savingIndicator:SetHeight(style.iconSize)
+
+    if style.savingIndicatorLeadingAnchor then
+        style.leadingToParentAnchor:Set(self.savingIndicator)
+        style.savingIndicatorLeadingAnchor:Set(self.scoreContainer)
+    elseif style.savingIndicatorTrailingAnchor then
+        style.leadingToParentAnchor:Set(self.scoreContainer)
+        style.savingIndicatorTrailingAnchor:Set(self.savingIndicator)
+    end
+    self.savingIndicatorText:SetModifyTextType(style.modifyTextType)
+    self.savingIndicatorIcon:SetDimensions(style.iconSize, style.iconSize)
 end
 
 function ZO_EndlessDungeonHUD:OnPlayerActivated()
@@ -324,9 +378,28 @@ function ZO_EndlessDungeonHUD:OnPlayerAlive()
     self:SetUpdateQueueEnabled(false)
 end
 
+function ZO_EndlessDungeonHUD:OnRollingMeterTransitionComplete()
+    if self.fragment:IsHidden() then
+        return
+    end
+
+    if self.reviveLabelTransitionManager:IsTransitioning()
+        or self.scoreLabelTransitionManager:IsTransitioning() then
+        return
+    end
+
+    if self.fadeOutTimeS then
+        self.fadeOutTimeS = zo_max(self.fadeOutTimeS, GetFrameTimeSeconds() + POST_TRANSITION_HIDE_DELAY_SECONDS)
+        self:OnUpdate()
+    end
+end
+
 function ZO_EndlessDungeonHUD:OnUpdate()
     if self.fadeOutTimeS and GetFrameTimeSeconds() >= self.fadeOutTimeS then
-        self:Hide()
+        if not self.reviveLabelTransitionManager:IsTransitioning()
+            and not self.scoreLabelTransitionManager:IsTransitioning() then
+            self:Hide()
+        end
     end
 end
 

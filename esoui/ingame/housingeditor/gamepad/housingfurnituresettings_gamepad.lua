@@ -852,7 +852,7 @@ do
                 if ZO_IsPlaystationPlatform() then
                     return true
                 elseif ZO_IsConsoleOrGameCoreUI() then
-                    if GetNumberConsoleFriends() > 0 then
+                    if HasConsoleFriends() then
                         return true
                     end
                 end

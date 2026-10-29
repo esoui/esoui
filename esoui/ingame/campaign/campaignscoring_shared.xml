@@ -3,6 +3,25 @@
         <Texture name="ZO_CampaignScoring_IconTemplate" virtual="true">
             <Dimensions x="64" y="64"/>
         </Texture>
+        <Control name="ZO_CampaignScoring_HoldingContainer" resizeToFitConstrains="X" virtual="true">
+            <Dimensions y="64"/>
+            <Controls>
+                <Control name="$(parent)Container">
+                    <OnInitialized>
+                        self.icon = self:GetNamedChild("Icon")
+                        self.value = self:GetNamedChild("Value")
+                    </OnInitialized>
+                    <Dimensions y="100%"/>
+                    <Anchor point="TOPLEFT"/>
+                    <Controls>
+                        <Texture name="$(parent)Icon" inherits="ZO_CampaignScoring_IconTemplate">
+                            <Anchor point="TOPLEFT"/>
+                        </Texture>
+                        <Label name="$(parent)Value"/>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
         <Control name="ZO_CampaignScoringAllianceSectionTemplate" virtual="true">
             <OnInitialized>
                 ZO_CampaignScoring_AllianceSection_OnInitialized(self)
@@ -40,30 +59,19 @@
                     <Dimensions x="32" y="32"/>
                     <!-- Anchors are set in Lua-->
                 </Texture>
-                <Texture name="$(parent)KeepIcon" inherits="ZO_CampaignScoring_IconTemplate">
-                    <Anchor point="BOTTOMLEFT" offsetX="68" offsetY="-25"/>
-                </Texture>
-                <Label name="$(parent)NumKeeps" font="ZoFontWinH2">
-                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)KeepIcon" relativePoint="BOTTOMRIGHT" offsetX="-18" offsetY="-11"/>
-                </Label>
-                <Texture name="$(parent)OutpostIcon" inherits="ZO_CampaignScoring_IconTemplate">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)KeepIcon" relativePoint="TOPRIGHT" offsetX="70"/>
-                </Texture>
-                <Label name="$(parent)NumOutposts" font="ZoFontWinH2">
-                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)OutpostIcon" relativePoint="BOTTOMRIGHT" offsetX="-15" offsetY="-11"/>
-                </Label>
-                <Texture name="$(parent)ResourcesIcon" inherits="ZO_CampaignScoring_IconTemplate">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)OutpostIcon" relativePoint="TOPRIGHT" offsetX="70"/>
-                </Texture>
-                <Label name="$(parent)NumResources" font="ZoFontWinH2">
-                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)ResourcesIcon" relativePoint="BOTTOMRIGHT" offsetX="-12" offsetY="-11"/>
-                </Label>
-                <Texture name="$(parent)ScrollIcon" inherits="ZO_CampaignScoring_IconTemplate">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)ResourcesIcon" relativePoint="TOPRIGHT" offsetX="70"/>
-                </Texture>
-                <Label name="$(parent)NumScrolls" font="ZoFontWinH2">
-                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)ScrollIcon" relativePoint="BOTTOMRIGHT" offsetX="-8" offsetY="-11"/>
-                </Label>
+                <Control name="$(parent)Keeps" inherits="ZO_CampaignScoring_HoldingContainer"/>
+                <Control name="$(parent)ImperialDistricts" inherits="ZO_CampaignScoring_HoldingContainer">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Keeps" relativePoint="TOPRIGHT"/>
+                </Control>
+                <Control name="$(parent)Outposts" inherits="ZO_CampaignScoring_HoldingContainer">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)ImperialDistricts" relativePoint="TOPRIGHT"/>
+                </Control>
+                <Control name="$(parent)Resources" inherits="ZO_CampaignScoring_HoldingContainer">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Outposts" relativePoint="TOPRIGHT"/>
+                </Control>
+                <Control name="$(parent)Scrolls" inherits="ZO_CampaignScoring_HoldingContainer">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Resources" relativePoint="TOPRIGHT"/>
+                </Control>
             </Controls>
         </Control>
     </Controls>

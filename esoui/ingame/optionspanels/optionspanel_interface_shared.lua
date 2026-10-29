@@ -99,6 +99,16 @@ local ZO_OptionsPanel_Interface_ControlData =
             valid = {RAID_LIFE_VISIBILITY_CHOICE_OFF, RAID_LIFE_VISIBILITY_CHOICE_AUTOMATIC, RAID_LIFE_VISIBILITY_CHOICE_ON,},
             valueStringPrefix = "SI_RAIDLIFEVISIBILITYCHOICE",
         },
+        --UI_Settings_ShowMinimap
+        [UI_SETTING_SHOW_MINIMAP] =
+        {
+            controlType = OPTIONS_CHECKBOX,
+            system = SETTING_TYPE_UI,
+            panel = SETTING_PANEL_INTERFACE,
+            settingId = UI_SETTING_SHOW_MINIMAP,
+            text = SI_INTERFACE_OPTIONS_SHOW_MINIMAP,
+            tooltipText = SI_INTERFACE_OPTIONS_SHOW_MINIMAP_TOOLTIP,
+        },
         --UI_Settings_ShowHouseTracker
         [UI_SETTING_SHOW_HOUSE_TRACKER] =
         {

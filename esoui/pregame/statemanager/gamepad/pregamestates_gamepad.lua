@@ -548,7 +548,4 @@ local legalDocPregameStates =
 }
 
 ZO_PregameStateManager_AddGamepadStates(pregameStates)
-
-if GetPlatformServiceType() ~= PLATFORM_SERVICE_TYPE_DMM then
-    ZO_PregameStateManager_AddGamepadStates(legalDocPregameStates)
-end
+ZO_PregameStateManager_AddGamepadStates(legalDocPregameStates)

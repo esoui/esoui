@@ -208,7 +208,7 @@
                     <Controls>
                         <Control name="$(parent)Panel" inherits="ZO_GridScrollList_CenteredResize_Keyboard">
                             <DimensionConstraints maxX="480" maxY="250"/>
-                            <Anchor point="TOP" offsetX="0"/>
+                            <Anchor point="TOP" offsetX="12"/>
                         </Control>
                     </Controls>
                 </Control>

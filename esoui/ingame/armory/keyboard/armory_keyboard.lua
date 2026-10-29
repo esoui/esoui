@@ -31,6 +31,7 @@ function ZO_Armory_Keyboard:Initialize(control)
             TriggerTutorial(TUTORIAL_TRIGGER_ARMORY_OPENED)
         elseif newState == SCENE_FRAGMENT_HIDDEN then
             KEYBIND_STRIP:RemoveKeybindButtonGroup(self.keybindStripDescriptor)
+            ClearTemporaryCraftedAbilityScriptSelectionsForBuild()
         end
     end)
 
@@ -135,6 +136,8 @@ function ZO_Armory_Keyboard:InitializeList()
     end
 
     local function SetupExpandedBuildEntry(control, data)
+        SetTemporaryCraftedAbilityScriptSelectionsForBuild(data:GetBuildIndex())
+
         --Setup the header
         control.nameLabel:SetText(data:GetName())
         control.iconTexture:SetTexture(data:GetIcon())

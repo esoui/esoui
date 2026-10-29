@@ -137,8 +137,152 @@ PreviewTradingHouseSearchResultItemCollectibleAction = function(index, action)
     PreviewTradingHouseSearchResultItemAction(index, NO_VARIATION_INDEX, action)
 end
 
+-- Challenge Difficulty
+OVERLAND_DIFFICULTY_TYPE_JOURNEYMAN = OVERLAND_DIFFICULTY_TYPE_SEASONED
+OVERLAND_DIFFICULTY_TYPE_ADVENTURER = OVERLAND_DIFFICULTY_TYPE_MASTER
+OVERLAND_DIFFICULTY_TYPE_VETERAN = OVERLAND_DIFFICULTY_TYPE_VESTIGE
+
+ZO_FriendsList.FindDataByDisplayName = ZO_FriendsList.FindDataByCrossplayDisplayName
+
 ZO_VengeanceLoadoutData.GetName = ZO_VengeanceLoadoutData.GetRawName
 ZO_VengeancePerkData.GetName = ZO_VengeancePerkData.GetRawName
 ZO_VeterancyRankData.GetName = ZO_VeterancyRankData.GetRawName
 ZO_VengeanceLoadoutData.GetPerkNameBySlot = ZO_VengeanceLoadoutData.GetRawPerkNameBySlot
 ZO_Veterancy_Manager.GetCurrentRankName = ZO_Veterancy_Manager.GetCurrentRankRawName
+
+-- Typo
+GetRearchLineInfoFromRetraitItem = GetResearchLineInfoFromRetraitItem
+
+function IsImperialCityCampaign(campaignId)
+    return GetCampaignWorldType(campaignId) == CAMPAIGN_WORLD_TYPE_IMPERIAL_CITY
+end
+
+-- Not to be confused with GetNumSkyshards
+GetNumSkyShards = GetLeftoverPartialSkillPoints
+
+function GetCampaignHoldingScoreValues(campaignId)
+    local keepValue = GetCampaignHoldingScoreValue(campaignId, HOLDINGTYPE_KEEP)
+    local resourceValue = GetCampaignHoldingScoreValue(campaignId, HOLDINGTYPE_RESOURCE)
+    local outpostValue = GetCampaignHoldingScoreValue(campaignId, HOLDINGTYPE_OUTPOST)
+    local defensiveScrollValue = GetCampaignHoldingScoreValue(campaignId, HOLDINGTYPE_DEFENSIVE_ARTIFACT)
+    local offensiveScrollValue = GetCampaignHoldingScoreValue(campaignId, HOLDINGTYPE_OFFENSIVE_ARTIFACT)
+    local districtValue = GetCampaignHoldingScoreValue(campaignId, HOLDINGTYPE_DISTRICT)
+    return keepValue, resourceValue, outpostValue, defensiveScrollValue, offensiveScrollValue, districtValue
+end
+
+-- Removing concept of Chapters
+
+function RequestShowMarketChapterUpgrade()
+    -- Nothing to do
+end
+
+function GetCurrentChapterUpgradeId()
+    return 0
+end
+
+function GetChapterCollectibleId()
+    return 0
+end
+
+function IsChapterOwned()
+    return false
+end
+
+function DoesCurrentChapterShowRegistration()
+    return false
+end
+
+function GetCurrentChapterVersion()
+    return 0
+end
+
+function GetCurrentChapterRegistrationInfo()
+    return "", "", "", ""
+end
+
+function GetCurrentChapterLargeLogoFileIndex()
+    return ""
+end
+
+function GetCurrentChapterMediumLogoFileIndex()
+    return ""
+end
+
+function GetCurrentChapterSmallLogoFileIndex()
+    return ""
+end
+
+function GetActiveChapterUpgradeMarketProductListings()
+    return nil
+end
+
+function GetMarketProductChapterUpgradeId()
+    return 0
+end
+
+function GetChapterSummary()
+    return ""
+end
+
+function GetChapterSummary()
+    return ""
+end
+
+function GetChapterOverrideDisplayName()
+    return ""
+end
+
+function GetChapterMarketBackgroundFileImage()
+    return ""
+end
+
+function GetNumChapterPrePurchaseRewards()
+    return 0
+end
+
+function GetChapterPrePurchaseRewardInfo()
+    return 0, false, false
+end
+
+function GetNumChapterPreOrderRewards()
+    return 0
+end
+
+function GetChapterPreOrderRewardInfo()
+    return 0, false, false
+end
+
+function GetNumChapterBasicRewards()
+    return 0
+end
+
+function GetChapterBasicRewardInfo()
+    return 0, false, false
+end
+
+function IsChapterPreRelease()
+    return false
+end
+
+function GetChapterReleaseDateString()
+    return ""
+end
+
+function GetChapterEnumFromUpgradeId()
+    return 0
+end
+
+function IsChapterContentPass()
+    return false
+end
+
+function ZO_CampaignSelector_Shared_IsQueryTypeSelectable(queryType)
+    return CAMPAIGN_SELECTOR:IsQueryTypeSelectable(queryType)
+end
+
+function ZO_CampaignSelector_Shared_ShouldShowCampaignSelector()
+    return CAMPAIGN_SELECTOR:ShouldShowCampaignSelector()
+end
+
+ZO_AbstractGridScrollList.AddResizeOnScreenResize = ZO_AbstractGridScrollList.RegisterResizeEvents
+ZO_AbstractGridScrollList.RemoveResizeOnScreenResize = ZO_AbstractGridScrollList.UnregisterResizeEvents

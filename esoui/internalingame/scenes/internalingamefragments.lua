@@ -6,17 +6,9 @@
 
 local ZO_KeybindStripFragment = ZO_FadeSceneFragment:Subclass()
 
-function ZO_KeybindStripFragment:New(...)
-    return ZO_FadeSceneFragment.New(self, ...)
-end
-
 function ZO_KeybindStripFragment:Show()
     KEYBIND_STRIP:SetStyle(KEYBIND_STRIP_STANDARD_STYLE)
     ZO_FadeSceneFragment.Show(self)
-end
-
-function ZO_KeybindStripFragment:Hide()
-    ZO_FadeSceneFragment.Hide(self)
 end
 
 KEYBIND_STRIP_FADE_FRAGMENT = ZO_KeybindStripFragment:New(ZO_KeybindStripControl)
@@ -40,11 +32,11 @@ KEYBIND_STRIP_MUNGE_BACKDROP_FRAGMENT = ZO_FadeSceneFragment:New(ZO_KeybindStrip
 
 ZO_WindowSoundFragment = ZO_SceneFragment:Subclass()
 
-function ZO_WindowSoundFragment:New(showSoundId, hideSoundId)
-    local fragment = ZO_SceneFragment.New(self)
-    fragment.showSoundId = showSoundId
-    fragment.hideSoundId = hideSoundId
-    return fragment
+function ZO_WindowSoundFragment:Initialize(showSoundId, hideSoundId)
+    ZO_SceneFragment.Initialize(self)
+
+    self.showSoundId = showSoundId
+    self.hideSoundId = hideSoundId
 end
 
 function ZO_WindowSoundFragment:Show()

@@ -391,12 +391,7 @@ function ZO_GamepadSkills:InitializeCategoryKeybindStrip()
             if self.assignableActionBar:IsActive() then
                 return GetString(SI_GAMEPAD_SKILLS_BUILD_PLANNER)
             elseif targetData and targetData.isScribeLibrary and not SCRIBING_DATA_MANAGER:IsScribingUnlocked() then
-                local collectibleData = SCRIBING_DATA_MANAGER:GetScribingPurchasableCollectibleData()
-                if collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_CHAPTER) then
-                    return GetString(SI_SCRIBING_ACTION_UPGRADE)
-                else
-                    return GetString(SI_GAMEPAD_DLC_BOOK_ACTION_OPEN_CROWN_STORE)
-                end
+                return GetString(SI_GAMEPAD_DLC_BOOK_ACTION_OPEN_CROWN_STORE)
             end
             return GetString(SI_GAMEPAD_SELECT_OPTION)
         end,
@@ -1499,12 +1494,12 @@ function ZO_GamepadSkills:RefreshPointsDisplay()
         ZO_GamepadGenericHeader_SetDataLayout(self.header, ZO_GAMEPAD_HEADER_LAYOUTS.DATA_PAIRS_SEPARATE)
     else
         local availablePoints = SKILL_POINT_ALLOCATION_MANAGER:GetAvailableSkillPoints()
-        local skyShards = GetNumSkyShards()
+        local partialSkillPoints = GetLeftoverPartialSkillPoints()
 
         self.headerData.data1HeaderText = GetString(SI_GAMEPAD_SKILLS_AVAILABLE_POINTS)
         self.headerData.data2HeaderText = GetString(SI_GAMEPAD_SKILLS_SKY_SHARDS)
         self.headerData.data1Text = availablePoints
-        self.headerData.data2Text = zo_strformat(SI_GAMEPAD_SKILLS_SKY_SHARDS_FOUND, skyShards, NUM_PARTIAL_SKILL_POINTS_FOR_FULL)
+        self.headerData.data2Text = zo_strformat(SI_GAMEPAD_SKILLS_SKY_SHARDS_FOUND, partialSkillPoints, NUM_PARTIAL_SKILL_POINTS_FOR_FULL)
 
         ZO_GamepadGenericHeader_SetDataLayout(self.header, ZO_GAMEPAD_HEADER_LAYOUTS.DATA_PAIRS_TOGETHER)
     end

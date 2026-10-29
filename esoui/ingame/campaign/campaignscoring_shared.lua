@@ -39,26 +39,34 @@ end
 function ZO_CampaignScoringManager_Shared:UpdateScores()
     local scoreInfos = {}
 
-    local keepScore, resourceValue, outpostValue, defensiveScrollValue, offensiveScrollValue = GetCampaignHoldingScoreValues(self.campaignId)
     local underdogLeaderAlliance = GetCampaignUnderdogLeaderAlliance(self.campaignId)
 
     for i = 1, NUM_ALLIANCES do
+        local holdings = {}
         local score = GetCampaignAllianceScore(self.campaignId, i)
-        local numKeeps = GetTotalCampaignHoldings(self.campaignId, HOLDINGTYPE_KEEP, i)
-        local numResources = GetTotalCampaignHoldings(self.campaignId, HOLDINGTYPE_RESOURCE, i)
-        local numOutposts = GetTotalCampaignHoldings(self.campaignId, HOLDINGTYPE_OUTPOST, i)
-        local numDefensiveScrolls = GetTotalCampaignHoldings(self.campaignId, HOLDINGTYPE_DEFENSIVE_ARTIFACT, i)
-        local numOffensiveScrolls = GetTotalCampaignHoldings(self.campaignId, HOLDINGTYPE_OFFENSIVE_ARTIFACT, i)
+
+        for holdingType = HOLDINGTYPE_ITERATION_BEGIN, HOLDINGTYPE_ITERATION_END do
+            local numHoldings, possibleHoldings = GetTotalCampaignHoldings(self.campaignId, holdingType, i)
+            if holdingType == HOLDINGTYPE_OFFENSIVE_ARTIFACT then
+                local defensiveArtifactHoldings = holdings[HOLDINGTYPE_DEFENSIVE_ARTIFACT]
+                defensiveArtifactHoldings.numHoldings = defensiveArtifactHoldings.numHoldings + numHoldings
+                defensiveArtifactHoldings.possibleHoldings = defensiveArtifactHoldings.possibleHoldings + possibleHoldings
+            else
+                holdings[holdingType] =
+                {
+                    numHoldings = numHoldings,
+                    possibleHoldings = possibleHoldings,
+                }
+            end
+        end
+
         local potentialScore = GetCampaignAlliancePotentialScore(self.campaignId, i)
         local isUnderpop = IsUnderpopBonusEnabled(self.campaignId, i)
         scoreInfos[i] =
         {
             alliance = i,
             score = score,
-            numKeeps = numKeeps,
-            numResources = numResources,
-            numOutposts = numOutposts,
-            numScrolls = numDefensiveScrolls + numOffensiveScrolls,
+            holdings = holdings,
             potentialScore = potentialScore,
             isUnderdog = underdogLeaderAlliance ~= 0 and underdogLeaderAlliance ~= i,
             isUnderpop = isUnderpop,
@@ -79,6 +87,8 @@ function ZO_CampaignScoringManager_Shared:UpdateRewardTier()
     self.tierProgressBar:SetValue(nextTierProgress)
 end
 
+internalassert(HOLDINGTYPE_MAX_VALUE == 5, "Handle new holding type in the Scoring files.")
+
 local ALLIANCE_SCORING_INFO =
 {
     [ALLIANCE_ALDMERI_DOMINION] = 
@@ -87,21 +97,29 @@ local ALLIANCE_SCORING_INFO =
         bgLeft = "EsoUI/Art/Campaign/overview_scoringBG_aldmeri_left.dds",
         bgRight = "EsoUI/Art/Campaign/overview_scoringBG_aldmeri_right.dds",
         allianceIcon = "EsoUI/Art/Campaign/overview_allianceIcon_aldmeri.dds",
-        keepIcon = "EsoUI/Art/Campaign/overview_keepIcon_aldmeri.dds",
-        outpostIcon = "EsoUI/Art/Campaign/overview_outpostIcon_aldmeri.dds",
-        resourcesIcon = "EsoUI/Art/Campaign/overview_resourcesIcon_aldmeri.dds",
-        scrollIcon = "EsoUI/Art/Campaign/overview_scrollIcon_aldmeri.dds",
+        holdingIcons =
+        {
+            [HOLDINGTYPE_KEEP] = "EsoUI/Art/Campaign/overview_keepIcon_aldmeri.dds",
+            [HOLDINGTYPE_IMPERIAL_CITY_DISTRICT] = "EsoUI/Art/Campaign/overview_imperialDistrictIcon_aldmeri.dds",
+            [HOLDINGTYPE_OUTPOST] = "EsoUI/Art/Campaign/overview_outpostIcon_aldmeri.dds",
+            [HOLDINGTYPE_RESOURCE] = "EsoUI/Art/Campaign/overview_resourcesIcon_aldmeri.dds",
+            [HOLDINGTYPE_DEFENSIVE_ARTIFACT] = "EsoUI/Art/Campaign/overview_scrollIcon_aldmeri.dds",
+        },
     },
     [ALLIANCE_DAGGERFALL_COVENANT] = 
     {
         allianceName = zo_strformat(SI_ALLIANCE_NAME, GetAllianceName(ALLIANCE_DAGGERFALL_COVENANT)),
         bgLeft = "EsoUI/Art/Campaign/overview_scoringBG_daggerfall_left.dds",
         bgRight = "EsoUI/Art/Campaign/overview_scoringBG_daggerfall_right.dds",
-        allianceIcon = "EsoUI/Art/Campaign/overview_allianceIcon_daggefall.dds",
-        keepIcon = "EsoUI/Art/Campaign/overview_keepIcon_daggefall.dds",
-        outpostIcon = "EsoUI/Art/Campaign/overview_outpostIcon_daggefall.dds",
-        resourcesIcon = "EsoUI/Art/Campaign/overview_resourcesIcon_daggefall.dds",
-        scrollIcon = "EsoUI/Art/Campaign/overview_scrollIcon_daggefall.dds",
+        allianceIcon = "EsoUI/Art/Campaign/overview_allianceIcon_daggerfall.dds",
+        holdingIcons =
+        {
+            [HOLDINGTYPE_KEEP] = "EsoUI/Art/Campaign/overview_keepIcon_daggerfall.dds",
+            [HOLDINGTYPE_IMPERIAL_CITY_DISTRICT] = "EsoUI/Art/Campaign/overview_imperialDistrictIcon_daggerfall.dds",
+            [HOLDINGTYPE_OUTPOST] = "EsoUI/Art/Campaign/overview_outpostIcon_daggerfall.dds",
+            [HOLDINGTYPE_RESOURCE] = "EsoUI/Art/Campaign/overview_resourcesIcon_daggerfall.dds",
+            [HOLDINGTYPE_DEFENSIVE_ARTIFACT] = "EsoUI/Art/Campaign/overview_scrollIcon_daggerfall.dds",
+        },
     },
     [ALLIANCE_EBONHEART_PACT] = 
     {
@@ -109,10 +127,14 @@ local ALLIANCE_SCORING_INFO =
         bgLeft = "EsoUI/Art/Campaign/overview_scoringBG_ebonheart_left.dds",
         bgRight = "EsoUI/Art/Campaign/overview_scoringBG_ebonheart_right.dds",
         allianceIcon = "EsoUI/Art/Campaign/overview_allianceIcon_ebonheart.dds",
-        keepIcon = "EsoUI/Art/Campaign/overview_keepIcon_ebonheart.dds",
-        outpostIcon = "EsoUI/Art/Campaign/overview_outpostIcon_ebonheart.dds",
-        resourcesIcon = "EsoUI/Art/Campaign/overview_resourcesIcon_ebonheart.dds",
-        scrollIcon = "EsoUI/Art/Campaign/overview_scrollIcon_ebonheart.dds",
+        holdingIcons =
+        {
+            [HOLDINGTYPE_KEEP] = "EsoUI/Art/Campaign/overview_keepIcon_ebonheart.dds",
+            [HOLDINGTYPE_IMPERIAL_CITY_DISTRICT] = "EsoUI/Art/Campaign/overview_imperialDistrictIcon_ebonheart.dds",
+            [HOLDINGTYPE_OUTPOST] = "EsoUI/Art/Campaign/overview_outpostIcon_ebonheart.dds",
+            [HOLDINGTYPE_RESOURCE] = "EsoUI/Art/Campaign/overview_resourcesIcon_ebonheart.dds",
+            [HOLDINGTYPE_DEFENSIVE_ARTIFACT] = "EsoUI/Art/Campaign/overview_scrollIcon_ebonheart.dds",
+        },
     },
 }
 
@@ -137,21 +159,26 @@ function ZO_CampaignScoringManager_Shared:UpdateScoreSection(index, scoreInfo)
     scoreSection.bgLeft:SetTexture(allianceInfo.bgLeft)
     scoreSection.bgRight:SetTexture(allianceInfo.bgRight)
     scoreSection.allianceIcon:SetTexture(allianceInfo.allianceIcon)
-    scoreSection.keepIcon:SetTexture(allianceInfo.keepIcon)
-    scoreSection.outpostIcon:SetTexture(allianceInfo.outpostIcon)
-    scoreSection.resourcesIcon:SetTexture(allianceInfo.resourcesIcon)
-    scoreSection.scrollIcon:SetTexture(allianceInfo.scrollIcon)
 
     scoreSection.allianceName:SetText(allianceInfo.allianceName)
     scoreSection.score:SetText(scoreInfo.score)
     scoreSection.potentialPoints:SetText(zo_strformat(SI_CAMPAIGN_SCORING_POTENTIAL_POINTS, scoreInfo.potentialScore))
 
     self:UpdateBonusIconVisibilities(scoreSection.potentialPoints, scoreSection.underdogScoreIcon, scoreInfo.isUnderdog, scoreSection.underdogPopIcon, scoreInfo.isUnderpop)
-
-    scoreSection.numKeeps:SetText(zo_strformat(SI_CAMPAIGN_SCORING_HOLDING, scoreInfo.numKeeps))
-    scoreSection.numOutposts:SetText(zo_strformat(SI_CAMPAIGN_SCORING_HOLDING, scoreInfo.numOutposts))
-    scoreSection.numResources:SetText(zo_strformat(SI_CAMPAIGN_SCORING_HOLDING, scoreInfo.numResources))
-    scoreSection.numScrolls:SetText(zo_strformat(SI_CAMPAIGN_SCORING_HOLDING, scoreInfo.numScrolls))
+    
+    for holdingType = HOLDINGTYPE_ITERATION_BEGIN, HOLDINGTYPE_ITERATION_END do
+        local container = scoreSection.holdingTypeToContainerMap[holdingType]
+        if container then
+            local holdings = scoreInfo.holdings[holdingType]
+            if holdings.possibleHoldings > 0 then
+                container:SetHidden(false)
+                container.icon:SetTexture(allianceInfo.holdingIcons[holdingType])
+                container.value:SetText(zo_strformat(SI_CAMPAIGN_SCORING_HOLDING, scoreInfo.holdings[holdingType].numHoldings))
+            else
+                container:SetHidden(true)
+            end
+        end
+    end
 end
 
 function ZO_CampaignScoringManager_Shared:OnTimeControlUpdate(control, timeFunction)
@@ -162,27 +189,40 @@ end
 --Global XML
 
 function ZO_CampaignScoring_AllianceSection_OnInitialized(control)
-    control.bgLeft = GetControl(control, "BGLeft")
-    control.bgRight = GetControl(control, "BGRight")
-    control.allianceIcon = GetControl(control, "AllianceIcon")
-    control.allianceName = GetControl(control, "AllianceName")
-    control.keepIcon = GetControl(control, "KeepIcon")
-    control.keepIcon.tooltipText = GetString(SI_CAMPAIGN_SCORING_KEEPS_TOOLTIP)
-    control.outpostIcon = GetControl(control, "OutpostIcon")
-    control.outpostIcon.tooltipText = GetString(SI_CAMPAIGN_SCORING_OUTPOSTS_TOOLTIP)
-    control.resourcesIcon = GetControl(control, "ResourcesIcon")
-    control.resourcesIcon.tooltipText = GetString(SI_CAMPAIGN_SCORING_RESOURCES_TOOLTIP)
-    control.scrollIcon = GetControl(control, "ScrollIcon")
-    control.scrollIcon.tooltipText = GetString(SI_CAMPAIGN_SCORING_SCROLLS_TOOLTIP)
+    control.bgLeft = control:GetNamedChild("BGLeft")
+    control.bgRight = control:GetNamedChild("BGRight")
+    control.allianceIcon = control:GetNamedChild("AllianceIcon")
+    control.allianceName = control:GetNamedChild("AllianceName")
 
-    control.score = GetControl(control, "AllianceScore")
-    control.potentialPoints = GetControl(control, "PotentialPoints")
-    control.underdogScoreIcon = GetControl(control, "UnderdogScoreIcon")
-    control.underdogPopIcon = GetControl(control, "UnderdogPopIcon")
-    control.numKeeps = GetControl(control, "NumKeeps")
-    control.numOutposts = GetControl(control, "NumOutposts")
-    control.numResources = GetControl(control, "NumResources")
-    control.numScrolls = GetControl(control, "NumScrolls")
+    local holdingTypeToContainerMap = {}
+
+    control.keepsContainer = control:GetNamedChild("KeepsContainer")
+    control.keepsContainer.icon.tooltipText = GetString(SI_CAMPAIGN_SCORING_KEEPS_TOOLTIP)
+    holdingTypeToContainerMap[HOLDINGTYPE_KEEP] = control.keepsContainer
+
+    control.imperialDistrictsContainer = control:GetNamedChild("ImperialDistrictsContainer")
+    control.imperialDistrictsContainer.icon.tooltipText = GetString(SI_CAMPAIGN_SCORING_IMPERIAL_DISTRICTS_TOOLTIP)
+    holdingTypeToContainerMap[HOLDINGTYPE_IMPERIAL_CITY_DISTRICT] = control.imperialDistrictsContainer
+
+    control.outpostsContainer = control:GetNamedChild("OutpostsContainer")
+    control.outpostsContainer.icon.tooltipText = GetString(SI_CAMPAIGN_SCORING_OUTPOSTS_TOOLTIP)
+    holdingTypeToContainerMap[HOLDINGTYPE_OUTPOST] = control.outpostsContainer
+
+    control.resourcesContainer = control:GetNamedChild("ResourcesContainer")
+    control.resourcesContainer.icon.tooltipText = GetString(SI_CAMPAIGN_SCORING_RESOURCES_TOOLTIP)
+    holdingTypeToContainerMap[HOLDINGTYPE_RESOURCE] = control.resourcesContainer
+
+    control.scrollsContainer = control:GetNamedChild("ScrollsContainer")
+    control.scrollsContainer.icon.tooltipText = GetString(SI_CAMPAIGN_SCORING_SCROLLS_TOOLTIP)
+    holdingTypeToContainerMap[HOLDINGTYPE_DEFENSIVE_ARTIFACT] = control.scrollsContainer
+
+    control.holdingTypeToContainerMap = holdingTypeToContainerMap
+
+    control.score = control:GetNamedChild("AllianceScore")
+    control.potentialPoints = control:GetNamedChild("PotentialPoints")
+    control.underdogScoreIcon = control:GetNamedChild("UnderdogScoreIcon")
+    control.underdogPopIcon = control:GetNamedChild("UnderdogPopIcon")
+
 end
 
 

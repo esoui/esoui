@@ -14,9 +14,9 @@ local MINIMUM_TIME_TO_HOLD_LOADING_TIP_MS = 15000
 local CHALLENGE_DIFFICULTY_ICONS =
 {
     [OVERLAND_DIFFICULTY_TYPE_BASEGAME] = "EsoUI/Art/ChallengeDifficulty/Gamepad/gp_challengeDifficulty_basegame.dds",
-    [OVERLAND_DIFFICULTY_TYPE_JOURNEYMAN] = "EsoUI/Art/ChallengeDifficulty/Gamepad/gp_challengeDifficulty_journeyman.dds",
-    [OVERLAND_DIFFICULTY_TYPE_ADVENTURER] = "EsoUI/Art/ChallengeDifficulty/Gamepad/gp_challengeDifficulty_adventurer.dds",
-    [OVERLAND_DIFFICULTY_TYPE_VETERAN] = "EsoUI/Art/ChallengeDifficulty/Gamepad/gp_challengeDifficulty_veteran.dds",
+    [OVERLAND_DIFFICULTY_TYPE_SEASONED] = "EsoUI/Art/ChallengeDifficulty/Gamepad/gp_challengeDifficulty_journeyman.dds",
+    [OVERLAND_DIFFICULTY_TYPE_MASTER] = "EsoUI/Art/ChallengeDifficulty/Gamepad/gp_challengeDifficulty_adventurer.dds",
+    [OVERLAND_DIFFICULTY_TYPE_VESTIGE] = "EsoUI/Art/ChallengeDifficulty/Gamepad/gp_challengeDifficulty_veteran.dds",
 }
 
 -- Instance type icons 
@@ -86,6 +86,7 @@ function LoadingScreen_Base:Initialize()
     self.currentRotation = 0
     self.lastUpdate = GetFrameTimeMilliseconds()
     self.animations = nil
+    self.destinationWorldId = nil
 
     local zoneInfoContainer = self:GetNamedChild("ZoneInfoContainer")
 
@@ -153,13 +154,15 @@ end
 
 function LoadingScreen_Base:OnAreaLoadStarted(evt, worldId, instanceNum, zoneName, zoneDescription, loadingTexture, zoneDisplayType)
     self:Log(string.format("Load Screen - OnAreaLoadStarted - (%d) %s", worldId, zoneName == "" and "Unknown Zone" or zoneName))
+    self.destinationWorldId = worldId
     self:UpdateBattlegroundId(zoneDisplayType)
     self:UpdateOverlandDifficultyLabel()
     self:Show(zoneName, zoneDescription, loadingTexture, zoneDisplayType)
 end
 
-function LoadingScreen_Base:OnPrepareForJump(evt, zoneName, zoneDescription, loadingTexture, zoneDisplayType)
+function LoadingScreen_Base:OnPrepareForJump(evt, zoneName, zoneDescription, loadingTexture, zoneDisplayType, worldId)
     self:Log(string.format("Load Screen - OnPrepareForJump - %s", zoneName == "" and "Unknown Zone" or zoneName))
+    self.destinationWorldId = worldId
     self:UpdateBattlegroundId(zoneDisplayType)
     self:UpdateOverlandDifficultyLabel()
     self:Show(zoneName, zoneDescription, loadingTexture, zoneDisplayType)
@@ -402,6 +405,8 @@ function LoadingScreen_Base:Hide()
 
     --State for controlling the load screen texture when it isn't set by a def
     self.randomLoadingTexture = nil
+
+    self.destinationWorldId = nil
 end
 
 function LoadingScreen_Base:Update()
@@ -449,8 +454,8 @@ function LoadingScreen_Base:SetZoneDescription(tip)
 end
 
 function LoadingScreen_Base:UpdateOverlandDifficultyLabel()
-    local difficulty = GetSelectedOverlandDifficulty()
-    if difficulty then
+    local difficulty = GetSelectedOverlandDifficultyForWorld(self.destinationWorldId)
+    if difficulty ~= nil and difficulty ~= OVERLAND_DIFFICULTY_TYPE_BASEGAME then
         local difficultyName = GetString("SI_OVERLANDDIFFICULTYTYPE", difficulty)
         local difficultyIcon = string.format("|t%s:%s:%s|t", "100%", "100%", CHALLENGE_DIFFICULTY_ICONS[difficulty])
         local difficultyString = string.format("%s %s", difficultyIcon, difficultyName)

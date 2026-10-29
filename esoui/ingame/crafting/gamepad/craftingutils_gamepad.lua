@@ -112,8 +112,8 @@ function ZO_GamepadCraftingUtils_InitializeGenericHeader(craftingObject, createT
         end
     end
 
-    craftingObject.control:RegisterForEvent(EVENT_INVENTORY_FULL_UPDATE, UpdateCapacity)
-    craftingObject.control:RegisterForEvent(EVENT_INVENTORY_SINGLE_SLOT_UPDATE, UpdateCapacity)
+    craftingObject.header:RegisterForEvent(EVENT_INVENTORY_FULL_UPDATE, UpdateCapacity)
+    craftingObject.header:RegisterForEvent(EVENT_INVENTORY_SINGLE_SLOT_UPDATE, UpdateCapacity)
 end
 
 function ZO_GamepadCraftingUtils_SetupGenericHeader(craftingObject, titleString, tabBarEntries, showCapacity, showItemSets)

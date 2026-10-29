@@ -183,11 +183,7 @@ end
 
 local ZO_MailInteractionFragment = ZO_SceneFragment:Subclass()
 
-function ZO_MailInteractionFragment:New()
-    return ZO_SceneFragment.New(self)
-end
-
-function ZO_MailInteractionFragment:Show()                            
+function ZO_MailInteractionFragment:Show()
     RequestOpenMailbox()
     self:OnShown()
 end

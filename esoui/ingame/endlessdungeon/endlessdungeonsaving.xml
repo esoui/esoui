@@ -1,0 +1,21 @@
+<GuiXml>
+    <Controls>
+        <Control name="ZO_EndlessDungeon_SaveDetails_Template" virtual="true">
+            <Controls>
+                <Label name="$(parent)ProgressionText" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED"/>
+                <Control name="$(parent)Lives" resizeToFitDescendents="true">
+                    <Controls>
+                        <Texture name="$(parent)Icon" textureFile="EsoUI/Art/Trials/VitalityDepletion.dds">
+                            <Anchor point="LEFT"/>
+                        </Texture>
+                        <Label name="$(parent)Text" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED">
+                            <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="2"/>
+                        </Label>
+                    </Controls>
+                </Control>
+                <Label name="$(parent)AdditionalMember" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"/>
+                <Label name="$(parent)MemberDisplayName" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED"/>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

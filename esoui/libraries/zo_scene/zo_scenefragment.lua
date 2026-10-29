@@ -4,13 +4,7 @@ SCENE_FRAGMENT_SHOWN = ZO_STATE.SHOWN
 SCENE_FRAGMENT_HIDING = ZO_STATE.HIDING
 SCENE_FRAGMENT_HIDDEN = ZO_STATE.HIDDEN
 
-ZO_SceneFragment = ZO_CallbackObject:Subclass()
-
-function ZO_SceneFragment:New(...)
-    local fragment = ZO_CallbackObject.New(self)
-    fragment:Initialize(...)
-    return fragment
-end
+ZO_SceneFragment = ZO_InitializingCallbackObject:Subclass()
 
 function ZO_SceneFragment:Initialize()
     self.state = SCENE_FRAGMENT_HIDDEN

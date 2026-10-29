@@ -63,10 +63,6 @@
                                     <Dimensions x="64" y="64"/>
                                     <ClearAnchors/>
                                     <Anchor point="CENTER" relativePoint="RIGHT" offsetX="35"/>
-                                    <OnInitialized>
-                                        ZO_GamepadTypeBasedControl_OnInitialized(self)
-                                        self:SetTextureSource(GetGamepadRightStickScrollIcon)
-                                    </OnInitialized>
                                 </Texture>
                             </Controls>
                         </Control>

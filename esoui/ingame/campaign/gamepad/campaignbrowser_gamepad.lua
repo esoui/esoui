@@ -294,17 +294,24 @@ function ZO_CampaignBrowser_Gamepad:GetStateMessageText(campaignData)
 end
 
 function ZO_CampaignBrowser_Gamepad:SetupStateMessage(stateMessageLabel, campaignData)
+    stateMessageLabel:SetHidden(true)
+    self.campaignPressToEnterMessage:SetHidden(true)
+    self.campaignInfoRules:ClearAnchors()
+
     local stateMessageText = self:GetStateMessageText(campaignData)
 
     if stateMessageText == "" then
-        stateMessageLabel:SetHidden(true)
-        self.campaignInfoRules:ClearAnchors()
-        self.campaignInfoRules:SetAnchor(TOPLEFT, self.campaignInfoRulesContainer, TOPLEFT, 0, 0)
-        self.campaignInfoRules:SetAnchor(TOPRIGHT, self.campaignInfoRulesContainer, TOPRIGHT, 0, 0)
+        if campaignData.entryType == ENTRY_TYPES.CAMPAIGN and self:CanQueueForCampaign(campaignData) then
+            self.campaignPressToEnterMessage:SetHidden(false)
+            self.campaignInfoRules:SetAnchor(TOPLEFT, self.campaignPressToEnterMessage, BOTTOMLEFT, 0, ZO_GAMEPAD_CONTENT_VERT_OFFSET_PADDING)
+            self.campaignInfoRules:SetAnchor(TOPRIGHT, self.campaignPressToEnterMessage, BOTTOMRIGHT, 0, ZO_GAMEPAD_CONTENT_VERT_OFFSET_PADDING)
+        else
+            self.campaignInfoRules:SetAnchor(TOPLEFT, self.campaignInfoRulesContainer, TOPLEFT, 0, 0)
+            self.campaignInfoRules:SetAnchor(TOPRIGHT, self.campaignInfoRulesContainer, TOPRIGHT, 0, 0)
+        end
     else
         stateMessageLabel:SetText(stateMessageText)
         stateMessageLabel:SetHidden(false)
-        self.campaignInfoRules:ClearAnchors()
         self.campaignInfoRules:SetAnchor(TOPLEFT, stateMessageLabel, BOTTOMLEFT, 0, ZO_GAMEPAD_CONTENT_VERT_OFFSET_PADDING)
         self.campaignInfoRules:SetAnchor(TOPRIGHT, stateMessageLabel, BOTTOMRIGHT, 0, ZO_GAMEPAD_CONTENT_VERT_OFFSET_PADDING)
     end
@@ -337,6 +344,17 @@ function ZO_CampaignBrowser_Gamepad:OnDeferredInitialize()
     self.campaignInfoRulesContainer = campaignRules
     self.campaignInfoRules = campaignRules:GetNamedChild("RulesContent") 
     self.campaignStateMessage = campaignRules:GetNamedChild("StateMessage")
+    
+    local SHOW_UNBOUND = true
+    local DEFAULT_GAMEPAD_ACTION_NAME = nil
+    local DONT_ALWAYS_PREFER_GAMEPAD = false
+    local DONT_SHOW_AS_HOLD = false
+    local SCALE_PERCENT = 110
+    local function CustomTextFunction(label, bindingText)
+        label:SetText(zo_strformat(SI_GAMEPAD_CAMPAIGN_BROWSER_ENTER_CAMPAIGN_INSTRUCTIONS, ZO_SELECTED_TEXT:Colorize(bindingText)))
+    end
+    self.campaignPressToEnterMessage = campaignRules:GetNamedChild("PressToEnterMessage")
+    ZO_Keybindings_RegisterLabelForInLineBindingUpdate(self.campaignPressToEnterMessage, "UI_SHORTCUT_PRIMARY", SHOW_UNBOUND, DEFAULT_GAMEPAD_ACTION_NAME, CustomTextFunction, DONT_ALWAYS_PREFER_GAMEPAD, DONT_SHOW_AS_HOLD, SCALE_PERCENT)
 
     self.dataRegistration = ZO_CampaignDataRegistration:New("CampaignSelectorData", function() return GAMEPAD_AVA_ROOT_SCENE:IsShowing() end)
 
@@ -786,8 +804,13 @@ function ZO_CampaignBrowser_Gamepad:IsQueuedForCampaign(data)
     return IsQueuedForCampaign(data.id, CAMPAIGN_QUEUE_INDIVIDUAL)
 end
 
+function ZO_CampaignBrowser_Gamepad:IsInCampaign(data)
+    local currentCampaign = GetCurrentCampaignId()
+    return data.id == currentCampaign
+end
+
 function ZO_CampaignBrowser_Gamepad:CanEnter(data)
-    return data.queue.state == CAMPAIGN_QUEUE_REQUEST_STATE_CONFIRMING
+    return data.queue.state == CAMPAIGN_QUEUE_REQUEST_STATE_CONFIRMING and not self:IsInCampaign(data)
 end
 
 do
@@ -818,6 +841,14 @@ function ZO_CampaignBrowser_Gamepad:DoLeaveCampaignQueue(data)
     return CAMPAIGN_BROWSER_MANAGER:DoLeaveCampaignQueue(data)
 end
 
+function ZO_CampaignBrowser_Gamepad:DoesCampaignSupportBonuses(data)
+    return CAMPAIGN_BROWSER_MANAGER:DoesCampaignSupportBonuses(data)
+end
+
+function ZO_CampaignBrowser_Gamepad:DoesCampaignSupportEmperorship(data)
+    return CAMPAIGN_BROWSER_MANAGER:DoesCampaignSupportEmperorship(data)
+end
+
 function ZO_CampaignBrowser_Gamepad:DoAbandon(data)
     if internalassert(data.id == GetAssignedCampaignId()) then
         local lockTimeLeft = GetCampaignUnassignCooldown()
@@ -830,7 +861,7 @@ function ZO_CampaignBrowser_Gamepad:DoAbandon(data)
 end
 
 function ZO_CampaignBrowser_Gamepad:CanQueueForCampaign(data)
-    return CAMPAIGN_BROWSER_MANAGER:CanQueueForCampaign(data)
+    return CAMPAIGN_BROWSER_MANAGER:CanQueueForCampaign(data) and not self:IsInCampaign(data)
 end
 
 function ZO_CampaignBrowser_Gamepad:DoQueueForCampaign(data)
@@ -970,6 +1001,9 @@ do
             ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetString(SI_SCREEN_NARRATION_LOCKED_ICON_NARRATION)))
         end
     end
+    
+    local NOT_BOUND_ACTION_STRING = GetString(SI_ACTION_IS_NOT_BOUND)
+    local DEFAULT_SHOW_AS_HOLD = nil
 
     function ZO_CampaignBrowser_Gamepad:GetCampaignScreenNarration(listEntryData)
         local narrations = {}
@@ -983,6 +1017,10 @@ do
             local stateMessageText = self:GetStateMessageText(targetData)
             if stateMessageText ~= "" then
                 ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(stateMessageText))
+            elseif targetData.entryType == ENTRY_TYPES.CAMPAIGN and self:CanQueueForCampaign(targetData) then
+                local inputBindingText = ZO_Keybindings_GetHighestPriorityNarrationStringFromAction("UI_SHORTCUT_PRIMARY", DEFAULT_SHOW_AS_HOLD) or NOT_BOUND_ACTION_STRING
+                local instructions = zo_strformat(SI_GAMEPAD_CAMPAIGN_BROWSER_ENTER_CAMPAIGN_INSTRUCTIONS, inputBindingText)
+                ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(instructions))
             end
 
             ZO_AppendNarration(narrations, SCREEN_NARRATION_MANAGER:CreateNarratableObject(GetCampaignRulesetDescription(targetData.rulesetId)))
@@ -1071,10 +1109,8 @@ end
 
 function ZO_CampaignBrowser_Gamepad:CreateExpandedCampaignEntries(campaignEntry)
     local entries = {}
-    -- ENTER CAMPAIGN
-    if self:CanQueueForCampaign(campaignEntry) or (self:IsQueuedForCampaign(campaignEntry) and not self:CanEnter(campaignEntry)) then
-        self:AddExpandedCampaignEntryToList(entries, campaignEntry, GetString(SI_CAMPAIGN_BROWSER_QUEUE_CAMPAIGN), ICON_ENTER, CONTENT_TYPES.CAMPAIGN, ENTRY_TYPES.ENTER_CAMPAIGN)
-    end
+    -- PRIMARY CAMPAIGN ENTRY
+    table.insert(entries, campaignEntry)
 
     -- TRAVEL TO / LEAVE CAMPAIGN
     if self:CanEnter(campaignEntry) then
@@ -1091,13 +1127,17 @@ function ZO_CampaignBrowser_Gamepad:CreateExpandedCampaignEntries(campaignEntry)
     end
 
     -- BONUSES
-    self:AddExpandedCampaignEntryToList(entries, campaignEntry, GetString(SI_CAMPAIGN_OVERVIEW_CATEGORY_BONUSES), ICON_BONUS, CONTENT_TYPES.BONUSES, ENTRY_TYPES.BONUSES)
+    if self:DoesCampaignSupportBonuses(campaignEntry) then
+        self:AddExpandedCampaignEntryToList(entries, campaignEntry, GetString(SI_CAMPAIGN_OVERVIEW_CATEGORY_BONUSES), ICON_BONUS, CONTENT_TYPES.BONUSES, ENTRY_TYPES.BONUSES)
+    end
 
     -- SCORING
     self:AddExpandedCampaignEntryToList(entries, campaignEntry, GetString(SI_CAMPAIGN_OVERVIEW_CATEGORY_SCORING), ICON_SCORING, CONTENT_TYPES.SCORING, ENTRY_TYPES.SCORING)
 
     -- EMPERORSHIP
-    self:AddExpandedCampaignEntryToList(entries, campaignEntry, GetString(SI_CAMPAIGN_OVERVIEW_CATEGORY_EMPERORSHIP), ICON_EMPEROR, CONTENT_TYPES.EMPERORSHIP, ENTRY_TYPES.EMPERORSHIP)
+    if self:DoesCampaignSupportEmperorship(campaignEntry) then
+        self:AddExpandedCampaignEntryToList(entries, campaignEntry, GetString(SI_CAMPAIGN_OVERVIEW_CATEGORY_EMPERORSHIP), ICON_EMPEROR, CONTENT_TYPES.EMPERORSHIP, ENTRY_TYPES.EMPERORSHIP)
+    end
 
     -- ABANDON
     if self:IsHomeAndNotLocalCampaign(campaignEntry) then

@@ -1,8 +1,6 @@
 
 ZO_GAMEPAD_INVENTORY_SCENE_NAME = "gamepad_inventory_root"
 
-ZO_GAMEPAD_CONFIRM_DESTROY_DIALOG = "GAMEPAD_CONFIRM_DESTROY_ITEM_PROMPT"
-ZO_GAMEPAD_CONFIRM_DESTROY_ARMORY_ITEM_DIALOG = "GAMEPAD_CONFIRM_DESTROY_ARMORY_ITEM_PROMPT"
 ZO_GAMEPAD_SPLIT_STACK_DIALOG = "GAMEPAD_SPLIT_STACK"
 
 local CATEGORY_ITEM_ACTION_MODE = 1
@@ -38,15 +36,12 @@ function ZO_GamepadInventory:Initialize(control)
 
     -- need this earlier than deferred init so trade can split stacks before inventory is possibly viewed
     self:InitializeSplitStackDialog()
-    self:InitializeConfirmDestroyDialog()
-    self:InitializeConfirmDestroyArmoryItemDialog()
 
     local function OnCancelDestroyItemRequest()
         if self.listWaitingOnDestroyRequest then
             self.listWaitingOnDestroyRequest:Activate()
             self.listWaitingOnDestroyRequest = nil
         end
-        ZO_Dialogs_ReleaseDialog(ZO_GAMEPAD_CONFIRM_DESTROY_DIALOG)
     end
 
     local function OnUpdate(updateControl, currentFrameTimeSeconds)
@@ -426,122 +421,6 @@ end
 -------------
 -- Dialogs --
 -------------
-
-function ZO_GamepadInventory:InitializeConfirmDestroyDialog()
-    local function ReleaseDialog(destroyItem)
-        RespondToDestroyRequest(destroyItem == true)
-        ZO_Dialogs_ReleaseDialogOnButtonPress(ZO_GAMEPAD_CONFIRM_DESTROY_DIALOG)
-    end
-
-    ZO_Dialogs_RegisterCustomDialog(ZO_GAMEPAD_CONFIRM_DESTROY_DIALOG,
-    {
-        blockDialogReleaseOnPress = true,
-
-        canQueue = true,
-
-        gamepadInfo =
-        {
-            dialogType = GAMEPAD_DIALOGS.BASIC,
-            allowRightStickPassThrough = true,
-        },
-
-        setup = function(dialog)
-            self.destroyConfirmText = nil
-            dialog:setupFunc()
-        end,
-
-        noChoiceCallback = function(dialog)
-            RespondToDestroyRequest(false)
-        end,
-
-        title =
-        {
-            text = SI_PROMPT_TITLE_DESTROY_ITEM_PROMPT,
-        },
-
-        mainText =
-        {
-            text = SI_DESTROY_ITEM_PROMPT,
-        },
-
-        buttons =
-        {
-            {
-                onShowCooldown = 2000,
-                keybind = "DIALOG_PRIMARY",
-                text = GetString(SI_YES),
-                callback = function()
-                    ReleaseDialog(true)
-                end,
-            },
-            {
-                keybind = "DIALOG_NEGATIVE",
-                text = GetString(SI_NO),
-                callback = function()
-                    ReleaseDialog()
-                end,
-            },
-        }
-    })
-end
-
-function ZO_GamepadInventory:InitializeConfirmDestroyArmoryItemDialog()
-    local function ReleaseDialog(destroyItem)
-        RespondToDestroyRequest(destroyItem == true)
-        ZO_Dialogs_ReleaseDialogOnButtonPress(ZO_GAMEPAD_CONFIRM_DESTROY_ARMORY_ITEM_DIALOG)
-    end
-
-    ZO_Dialogs_RegisterCustomDialog(ZO_GAMEPAD_CONFIRM_DESTROY_ARMORY_ITEM_DIALOG,
-    {
-        blockDialogReleaseOnPress = true,
-
-        canQueue = true,
-
-        gamepadInfo =
-        {
-            dialogType = GAMEPAD_DIALOGS.BASIC,
-            allowRightStickPassThrough = true,
-        },
-
-        setup = function(dialog)
-            self.destroyConfirmText = nil
-            dialog:setupFunc()
-        end,
-
-        noChoiceCallback = function(dialog)
-            RespondToDestroyRequest(false)
-        end,
-
-        title =
-        {
-            text = SI_DIALOG_DESTROY_ARMORY_ITEM_TITLE,
-        },
-
-        mainText =
-        {
-            text = SI_GAMEPAD_ARMORY_CONFIRM_DESTROY_ITEM_BODY,
-        },
-
-        buttons =
-        {
-            {
-                onShowCooldown = 2000,
-                keybind = "DIALOG_PRIMARY",
-                text = GetString(SI_YES),
-                callback = function()
-                    ReleaseDialog(true)
-                end,
-            },
-            {
-                keybind = "DIALOG_NEGATIVE",
-                text = GetString(SI_NO),
-                callback = function()
-                    ReleaseDialog()
-                end,
-            },
-        }
-    })
-end
 
 function ZO_GamepadInventory:InitializeSplitStackDialog()
     ZO_Dialogs_RegisterCustomDialog(ZO_GAMEPAD_SPLIT_STACK_DIALOG,
@@ -1540,24 +1419,20 @@ local function GetBestItemCategoryDescription(itemData)
         end
     end
 
+    if itemData.companionType ~= COMPANION_TYPE_ANIMAL then
+        local categoryType = GetCategoryTypeFromWeaponType(itemData.bagId, itemData.slotIndex)
+        if categoryType ==  GAMEPAD_WEAPON_CATEGORY_UNCATEGORIZED then
+            local weaponType = GetItemWeaponType(itemData.bagId, itemData.slotIndex)
+            return GetString("SI_WEAPONTYPE", weaponType)
+        elseif categoryType then
+            return GetString("SI_GAMEPADWEAPONCATEGORY", categoryType)
+        end
 
-
-
-    local categoryType = GetCategoryTypeFromWeaponType(itemData.bagId, itemData.slotIndex)
-    if categoryType ==  GAMEPAD_WEAPON_CATEGORY_UNCATEGORIZED then
-        local weaponType = GetItemWeaponType(itemData.bagId, itemData.slotIndex)
-        return GetString("SI_WEAPONTYPE", weaponType)
-    elseif categoryType then
-        return GetString("SI_GAMEPADWEAPONCATEGORY", categoryType)
+        local armorType = GetItemArmorType(itemData.bagId, itemData.slotIndex)
+        if armorType ~= ARMORTYPE_NONE then
+            return GetString("SI_ARMORTYPE", armorType)
+        end
     end
-
-    local armorType = GetItemArmorType(itemData.bagId, itemData.slotIndex)
-    if armorType ~= ARMORTYPE_NONE then
-        return GetString("SI_ARMORTYPE", armorType)
-    end
-
-
-
 
     return ZO_InventoryUtils_Gamepad_GetBestItemCategoryDescription(itemData)
 end

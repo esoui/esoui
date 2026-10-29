@@ -11,10 +11,6 @@ function ZO_Help_ItemAssistance_Gamepad:Initialize(control)
     self:SetDetailsInstructions(GetString(SI_CUSTOMER_SERVICE_ITEM_ASSISTANCE_NAME_INSTRUCTIONS))
 end
 
-function ZO_Help_ItemAssistance_Gamepad:AddDescriptionEntry()
-    --Do nothing, because we don't want item assistance having a description field anymore
-end
-
 function ZO_Help_ItemAssistance_Gamepad:GetSceneName()
    return "helpItemAssistanceGamepad"
 end

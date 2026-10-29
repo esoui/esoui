@@ -44,7 +44,10 @@ ZO_CHARACTER_CREATE_BUCKET_WINDOW_DATA_GAMEPAD =
     {
         windowName = "BodyTypeBucket_Gamepad",
         title = GetString(SI_CREATE_CHARACTER_GAMEPAD_BUCKET_TITLE_BODY_TYPE),
-        onExpandFn = function() SetCharacterCameraZoomAmount(-1) end,
+        onExpandFn = function() 
+            SetCharacterCameraZoomAmount(-1) 
+            CharacterCreateQueueClassFxRemoval()
+        end,
 
         controls =
         {
@@ -56,7 +59,10 @@ ZO_CHARACTER_CREATE_BUCKET_WINDOW_DATA_GAMEPAD =
     {
         windowName = "BodyShapeBucket_Gamepad",
         title = GetString(SI_CREATE_CHARACTER_BUCKET_TITLE_BODY),
-        onExpandFn = function() SetCharacterCameraZoomAmount(-1) end,
+        onExpandFn = function()
+            SetCharacterCameraZoomAmount(-1)
+            CharacterCreateQueueClassFxRemoval()
+        end,
 
         controls =
         {
@@ -80,7 +86,10 @@ ZO_CHARACTER_CREATE_BUCKET_WINDOW_DATA_GAMEPAD =
     {
         windowName = "HeadTypeBucket_Gamepad",
         title = GetString(SI_CREATE_CHARACTER_GAMEPAD_BUCKET_TITLE_HEAD_TYPE),
-        onExpandFn = function() SetCharacterCameraZoomAmount(1) end,
+        onExpandFn = function()
+            SetCharacterCameraZoomAmount(1)
+            CharacterCreateQueueClassFxRemoval()
+        end,
         controls =
         {
             { GAMEPAD_BUCKET_CONTROL_TYPE_CUSTOM, GAMEPAD_BUCKET_CUSTOM_CONTROL_FACE },
@@ -92,7 +101,10 @@ ZO_CHARACTER_CREATE_BUCKET_WINDOW_DATA_GAMEPAD =
         windowName = "FeaturesBucket_Gamepad",
         title = GetString(SI_CREATE_CHARACTER_GAMEPAD_BUCKET_TITLE_HEAD),
         previousTab = CREATE_BUCKET_CLASS,
-        onExpandFn = function() SetCharacterCameraZoomAmount(1) end,
+        onExpandFn = function()
+            SetCharacterCameraZoomAmount(1)
+            CharacterCreateQueueClassFxRemoval()
+        end,
 
         controls =
         {
@@ -119,7 +131,10 @@ ZO_CHARACTER_CREATE_BUCKET_WINDOW_DATA_GAMEPAD =
     {
         windowName = "FaceBucket_Gamepad",
         title = GetString(SI_CREATE_CHARACTER_BUCKET_TITLE_FACE),
-        onExpandFn = function() SetCharacterCameraZoomAmount(1) end,
+        onExpandFn = function()
+            SetCharacterCameraZoomAmount(1)
+            CharacterCreateQueueClassFxRemoval()
+        end,
 
         controls =
         {

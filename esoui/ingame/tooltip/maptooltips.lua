@@ -201,7 +201,7 @@ function ZO_MapInformationTooltip_Gamepad_Mixin:AppendWayshrineTooltip(pin)
             cantLeaveStringId = SI_TOOLTIP_WAYSHRINE_CANT_RECALL_FROM_LOCATION
         end
         self:LayoutIconStringLine(wayshrineSection, nil, GetString(cantLeaveStringId), self.tooltip:GetStyle("mapKeepInaccessible"), self.tooltip:GetStyle("keepBaseTooltipContent"))
-    elseif pin:IsLockedByLinkedCollectible() then --BUTTON: Open the store/Upgrade Chapter
+    elseif pin:IsLockedByLinkedCollectible() then --BUTTON: Open the store
         local currencyIcon
         if pin:GetLinkedCollectibleType() == COLLECTIBLE_CATEGORY_TYPE_DLC then
             currencyIcon = ZO_Currency_GetGamepadCurrencyIcon(CURT_CROWNS)

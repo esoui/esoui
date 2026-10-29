@@ -47,6 +47,7 @@ end
 ZO_MailInbox_Gamepad = ZO_InitializingObject:Subclass()
 
 function ZO_MailInbox_Gamepad:Initialize(control)
+    -- This is the mail parent control
     self.control = control
     self.mailDataById = {}
     self.guildMailDataById = {}
@@ -582,19 +583,19 @@ function ZO_MailInbox_Gamepad:InitializeEvents()
         end
     end
 
-    self.control:RegisterForEvent(EVENT_MAIL_INBOX_UPDATE, function() self:MailboxUpdated() end)
-    self.control:RegisterForEvent(EVENT_GUILD_MAIL_UPDATE, function()
+    self.inboxControl:RegisterForEvent(EVENT_MAIL_INBOX_UPDATE, function() self:MailboxUpdated() end)
+    self.inboxControl:RegisterForEvent(EVENT_GUILD_MAIL_UPDATE, function()
         local FROM_GUILD = true
         self:MailboxUpdated(FROM_GUILD) 
     end)
-    self.control:RegisterForEvent(EVENT_MAIL_READABLE, OnMailReadable)
-    self.control:RegisterForEvent(EVENT_MAIL_TAKE_ATTACHED_ITEM_SUCCESS, TakeAttachment)
-    self.control:RegisterForEvent(EVENT_MAIL_TAKE_ATTACHED_MONEY_SUCCESS, TakeAttachment)
-    self.control:RegisterForEvent(EVENT_MAIL_REMOVED, OnMailRemoved)
-    self.control:RegisterForEvent(EVENT_MONEY_UPDATE, OnMoneyUpdated)
-    self.control:RegisterForEvent(EVENT_MAIL_TAKE_ALL_ATTACHMENTS_IN_CATEGORY_RESPONSE, OnTakeAllComplete)
+    self.inboxControl:RegisterForEvent(EVENT_MAIL_READABLE, OnMailReadable)
+    self.inboxControl:RegisterForEvent(EVENT_MAIL_TAKE_ATTACHED_ITEM_SUCCESS, TakeAttachment)
+    self.inboxControl:RegisterForEvent(EVENT_MAIL_TAKE_ATTACHED_MONEY_SUCCESS, TakeAttachment)
+    self.inboxControl:RegisterForEvent(EVENT_MAIL_REMOVED, OnMailRemoved)
+    self.inboxControl:RegisterForEvent(EVENT_MONEY_UPDATE, OnMoneyUpdated)
+    self.inboxControl:RegisterForEvent(EVENT_MAIL_TAKE_ALL_ATTACHMENTS_IN_CATEGORY_RESPONSE, OnTakeAllComplete)
 
-    self.control:RegisterForEvent(EVENT_DELETE_MAIL_RESPONSE, function(eventCode, mailId, result)
+    self.inboxControl:RegisterForEvent(EVENT_DELETE_MAIL_RESPONSE, function(eventCode, mailId, result)
         if GAMEPAD_MAIL_INBOX_FRAGMENT:IsShowing() then
             self:EnterMailList()
         end

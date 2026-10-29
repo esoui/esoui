@@ -348,21 +348,11 @@ function ZO_CharacterSelect_Initialize(self)
 
         self.carousel:Commit()
 
-        -- update visibility of events/chapter upgrade as appropriate
+        -- update visibility of events as appropriate
 
         if numEvents > 0 then
             ZO_CharacterSelectEventMinimized:SetHidden(false)
-            ZO_CharacterSelectChapterUpgrade:SetHidden(true)
-        elseif not CHAPTER_UPGRADE_MANAGER:CanRegister() then
-            ZO_CharacterSelectChapterUpgrade:SetHidden(true)
-            ZO_CharacterSelectEventMinimized:SetHidden(true)
         else
-            local chapterUpgradeId = GetCurrentChapterUpgradeId()
-            local chapterCollectibleId = GetChapterCollectibleId(chapterUpgradeId)
-            ZO_CharacterSelectChapterUpgradeTitle:SetText(zo_strformat(SI_CHARACTER_SELECT_CHAPTER_LOCKED_FORMAT, GetCollectibleName(chapterCollectibleId)))
-            ZO_CharacterSelectChapterUpgradeImage:SetTexture(GetCurrentChapterMediumLogoFileIndex())
-
-            ZO_CharacterSelectChapterUpgrade:SetHidden(false)
             ZO_CharacterSelectEventMinimized:SetHidden(true)
         end
 
@@ -381,7 +371,7 @@ function ZO_CharacterSelect_Initialize(self)
         end
 
         if not self.carousel then
-            -- Setup events minimized display if we have events, otherwise show chapter upgrade if relevant, or show nothing
+            -- Setup events minimized display if we have events or show nothing
             self.carousel = ZO_Carousel_Shared:New(ZO_CharacterSelectEventMinimizedCarousel, "ZO_CharacterSelect_SmallEventTile_Keyboard_Control")
             self.carousel:SetSelectionIndicatorPipStateImages("EsoUI/Art/Buttons/RadioButtonDown.dds", "EsoUI/Art/Buttons/RadioButtonUp.dds", "EsoUI/Art/Buttons/RadioButtonHighlight.dds")
         end
@@ -575,14 +565,10 @@ end
 function ZO_CharacterSelect_DeleteSelected()
     local data = ZO_ScrollList_GetSelectedData(ZO_CharacterSelectScrollList)
     if data and not ZO_Dialogs_IsShowing("DELETE_SELECTED_CHARACTER") then
-        local confirmationString = GetString(SI_DELETE_CHARACTER_CONFIRMATION_TEXT)
-        local confirmationButtonName = GetString(SI_DELETE_CHARACTER_CONFIRMATION_BUTTON)
         local numCharacterDeletesRemaining = CHARACTER_SELECT_MANAGER:GetNumCharacterDeletesRemaining()
         local textParams =
         {
             data.name,
-            confirmationString,
-            confirmationButtonName,
             numCharacterDeletesRemaining
         }
         ZO_Dialogs_ShowDialog("DELETE_SELECTED_CHARACTER", { characterId = data.id }, { mainTextParams = textParams })
@@ -672,17 +658,6 @@ function ZO_CharacterSelectDelete_OnMouseEnter(control)
 end
 
 function ZO_CharacterSelectDelete_OnMouseExit()
-    ClearTooltip(InformationTooltip)
-end
-
-function ZO_CharacterSelectChapterUpgradeRegisterButton_OnMouseEnter(control)
-    local platformServiceType = GetPlatformServiceType()
-    local upgradeMethodsStringId = ZO_PLATFORM_ALLOWS_CHAPTER_CODE_ENTRY[platformServiceType] and SI_CHARACTER_SELECT_CHAPTER_UPGRADE_REGISTER_TOOLTIP_UPGRADE_OR_CODE or SI_CHARACTER_SELECT_CHAPTER_UPGRADE_REGISTER_TOOLTIP_UPGRADE_ONLY
-    InitializeTooltip(InformationTooltip, control, BOTTOMLEFT, 5, 0, BOTTOMRIGHT)
-    InformationTooltip:AddLine(GetString(upgradeMethodsStringId), "", ZO_NORMAL_TEXT:UnpackRGB())
-end
-
-function ZO_CharacterSelectChapterUpgradeRegisterButton_OnMouseExit()
     ClearTooltip(InformationTooltip)
 end
 

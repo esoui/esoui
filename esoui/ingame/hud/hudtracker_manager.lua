@@ -100,7 +100,8 @@ function ZO_HUDTracker_Manager:Initialize(control)
         self:UpdateVisibility()
         self:OnAnchorStateChanged()
     end
-    self.control:RegisterForEvent(EVENT_ADD_ONS_LOADED, OnAddOnsLoaded)
+    local DO_ONCE = true
+    self.control:RegisterForEvent(EVENT_ADD_ONS_LOADED, OnAddOnsLoaded, DO_ONCE)
     self.control:RegisterForEvent(EVENT_PLAYER_ACTIVATED, function()
         self.isFullyLoaded = true
         UpdatedAssistedAspiration()

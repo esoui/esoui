@@ -2,15 +2,7 @@
 --[[ Market Manager ]]--
 --
 
-local ZO_MARKET_EVENTS = "MarketManagerEvents"
-
-local Market_Manager = ZO_CallbackObject:Subclass()
-
-function Market_Manager:New(...)
-    local manager = ZO_CallbackObject.New(self)
-    manager:Initialize(...)
-    return manager
-end
+local Market_Manager = ZO_InitializingCallbackObject:Subclass()
 
 function Market_Manager:Initialize()
     self:InitializeEvents()
@@ -58,10 +50,6 @@ function Market_Manager:InitializeEvents()
         SYSTEMS:GetObject(ZO_MARKET_NAME):OnShowEsoPlusPage()
     end
 
-    local function OnShowChapterUpgrade(eventId, ...)
-        SYSTEMS:GetObject(ZO_MARKET_NAME):OnShowChapterUpgrade(...)
-    end
-
     local function OnEsoPlusSubscriptionStatusChanged(eventId, ...)
         self:FireCallbacks("OnEsoPlusSubscriptionStatusChanged", ...)
     end
@@ -70,23 +58,31 @@ function Market_Manager:InitializeEvents()
         SYSTEMS:GetObject(ZO_MARKET_NAME):TriggerCrownGemTutorial(...)
     end
 
-    EVENT_MANAGER:RegisterForEvent(ZO_MARKET_EVENTS, EVENT_MARKET_STATE_UPDATED, OnMarketStateUpdated)
-    EVENT_MANAGER:RegisterForEvent(ZO_MARKET_EVENTS, EVENT_MARKET_PRODUCT_AVAILABILITY_UPDATED, OnMarketProductAvailabilityUpdated)
-    EVENT_MANAGER:RegisterForEvent(ZO_MARKET_EVENTS, EVENT_MARKET_PURCHASE_RESULT, OnMarketPurchaseResult)
-    EVENT_MANAGER:RegisterForEvent(ZO_MARKET_EVENTS, EVENT_MARKET_PRODUCT_SEARCH_RESULTS_READY, OnMarketSearchResultsReady)
-    EVENT_MANAGER:RegisterForEvent(ZO_MARKET_EVENTS, EVENT_MARKET_PRODUCT_SEARCH_CANCELED, OnMarketSearchResultsCanceled)
-    EVENT_MANAGER:RegisterForEvent(ZO_MARKET_EVENTS, EVENT_COLLECTIBLES_UNLOCK_STATE_CHANGED, OnCollectiblesUnlockStateChanged)
-    EVENT_MANAGER:RegisterForEvent(ZO_MARKET_EVENTS, EVENT_MARKET_SHOW_MARKET_PRODUCT, OnShowMarketProduct)
-    EVENT_MANAGER:RegisterForEvent(ZO_MARKET_EVENTS, EVENT_MARKET_SHOW_MARKET_AND_SEARCH, OnShowMarketAndSearch)
-    EVENT_MANAGER:RegisterForEvent(ZO_MARKET_EVENTS, EVENT_MARKET_REQUEST_PURCHASE_MARKET_PRODUCT, OnRequestPurchaseMarketProduct)
-    EVENT_MANAGER:RegisterForEvent(ZO_MARKET_EVENTS, EVENT_MARKET_SHOW_ESO_PLUS_PAGE, OnShowEsoPlusPage)
-    EVENT_MANAGER:RegisterForEvent(ZO_MARKET_EVENTS, EVENT_MARKET_SHOW_CHAPTER_UPGRADE, OnShowChapterUpgrade)
-    EVENT_MANAGER:RegisterForEvent(ZO_MARKET_EVENTS, EVENT_ESO_PLUS_FREE_TRIAL_STATUS_CHANGED, OnEsoPlusSubscriptionStatusChanged)
-    EVENT_MANAGER:RegisterForEvent(ZO_MARKET_EVENTS, EVENT_REQUEST_CROWN_GEM_TUTORIAL, OnRequestCrownGemTutorial)
+    local function OnMarketProductPurchaseLimitUpdated(eventId, ...)
+        self:FireCallbacks("OnMarketProductPurchaseLimitUpdated", ...)
+    end
+
+    local function OnMarketPurchaseLimitsUpdated(eventId, ...)
+        self:FireCallbacks("OnMarketPurchaseLimitsUpdated", ...)
+    end
+
+    EVENT_MANAGER:RegisterForEvent("MarketManagerEvents", EVENT_MARKET_STATE_UPDATED, OnMarketStateUpdated)
+    EVENT_MANAGER:RegisterForEvent("MarketManagerEvents", EVENT_MARKET_PRODUCT_AVAILABILITY_UPDATED, OnMarketProductAvailabilityUpdated)
+    EVENT_MANAGER:RegisterForEvent("MarketManagerEvents", EVENT_MARKET_PURCHASE_RESULT, OnMarketPurchaseResult)
+    EVENT_MANAGER:RegisterForEvent("MarketManagerEvents", EVENT_MARKET_PRODUCT_SEARCH_RESULTS_READY, OnMarketSearchResultsReady)
+    EVENT_MANAGER:RegisterForEvent("MarketManagerEvents", EVENT_MARKET_PRODUCT_SEARCH_CANCELED, OnMarketSearchResultsCanceled)
+    EVENT_MANAGER:RegisterForEvent("MarketManagerEvents", EVENT_COLLECTIBLES_UNLOCK_STATE_CHANGED, OnCollectiblesUnlockStateChanged)
+    EVENT_MANAGER:RegisterForEvent("MarketManagerEvents", EVENT_MARKET_SHOW_MARKET_PRODUCT, OnShowMarketProduct)
+    EVENT_MANAGER:RegisterForEvent("MarketManagerEvents", EVENT_MARKET_SHOW_MARKET_AND_SEARCH, OnShowMarketAndSearch)
+    EVENT_MANAGER:RegisterForEvent("MarketManagerEvents", EVENT_MARKET_REQUEST_PURCHASE_MARKET_PRODUCT, OnRequestPurchaseMarketProduct)
+    EVENT_MANAGER:RegisterForEvent("MarketManagerEvents", EVENT_MARKET_SHOW_ESO_PLUS_PAGE, OnShowEsoPlusPage)
+    EVENT_MANAGER:RegisterForEvent("MarketManagerEvents", EVENT_ESO_PLUS_FREE_TRIAL_STATUS_CHANGED, OnEsoPlusSubscriptionStatusChanged)
+    EVENT_MANAGER:RegisterForEvent("MarketManagerEvents", EVENT_REQUEST_CROWN_GEM_TUTORIAL, OnRequestCrownGemTutorial)
+    EVENT_MANAGER:RegisterForEvent("MarketManagerEvents", EVENT_MARKET_PRODUCT_PURCHASE_LIMIT_UPDATED, OnMarketProductPurchaseLimitUpdated)
+    EVENT_MANAGER:RegisterForEvent("MarketManagerEvents", EVENT_MARKET_PURCHASE_LIMITS_UPDATED, OnMarketPurchaseLimitsUpdated)
 end
 
 function Market_Manager:InitializePlatformErrors()
-    local consoleStoreName
     local platformServiceType = GetPlatformServiceType()
 
     if ZO_IsConsoleOrGameCoreUI() then
@@ -95,7 +91,7 @@ function Market_Manager:InitializePlatformErrors()
         self.insufficientFundsMainText = zo_strformat(SI_MARKET_INSUFFICIENT_FUNDS_TEXT_STEAM, ZO_Currency_GetPlatformFormattedCurrencyIcon(CURT_CROWNS))
     elseif platformServiceType == PLATFORM_SERVICE_TYPE_EPIC then
         self.insufficientFundsMainText = zo_strformat(SI_MARKET_INSUFFICIENT_FUNDS_TEXT_EPIC, ZO_Currency_GetPlatformFormattedCurrencyIcon(CURT_CROWNS))
-    else -- _ZOS and _DMM
+    else -- PLATFORM_SERVICE_TYPE_ZOS
         self.insufficientFundsMainText = zo_strformat(SI_MARKET_INSUFFICIENT_FUNDS_TEXT_WEB, ZO_Currency_GetPlatformFormattedCurrencyIcon(CURT_CROWNS), ZO_GetPlatformStoreName())
     end
 end
@@ -126,7 +122,7 @@ function Market_Manager:AddMarketProductPurchaseWarningStringsToTable(marketProd
 end
 
 do
-    internalassert(MARKET_PURCHASE_RESULT_MAX_VALUE == 45, "Update market error flow to handle new purchase result")
+    internalassert(MARKET_PURCHASE_RESULT_MAX_VALUE == 46, "Update market error flow to handle new purchase result")
     local IS_SIMPLE_MARKET_PURCHASE_ERROR =
     {
         [MARKET_PURCHASE_RESULT_ALREADY_COMPLETED_INSTANT_UNLOCK] = true,
@@ -143,6 +139,7 @@ do
         [MARKET_PURCHASE_RESULT_TOO_MANY_PENDING_GIFTS] = true,
         [MARKET_PURCHASE_RESULT_CAMPAIGN_LOCKED] = true,
         [MARKET_PURCHASE_RESULT_NOT_ENOUGH_TRADE_BARS] = true,
+        [MARKET_PURCHASE_RESULT_PURCHASE_LIMIT_REACHED] = true,
     }
     function Market_Manager:GetMarketProductPurchaseErrorInfo(marketProductData)
         local expectedPurchaseResult = marketProductData:CouldPurchase()

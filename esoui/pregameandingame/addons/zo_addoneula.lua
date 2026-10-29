@@ -81,10 +81,9 @@ local ZO_AddOnEULAFragment
 do
     ZO_AddOnEULAFragment = ZO_FadeSceneFragment:Subclass()
 
-    function ZO_AddOnEULAFragment:New(control)
-        local fragment = ZO_FadeSceneFragment.New(self, control, 1500)
-        fragment.dialog = control
-        return fragment
+    function ZO_AddOnEULAFragment:Initialize(control)
+        ZO_FadeSceneFragment.Initialize(self, control, 1500)
+        self.dialog = control
     end
 
     function ZO_AddOnEULAFragment:Show()

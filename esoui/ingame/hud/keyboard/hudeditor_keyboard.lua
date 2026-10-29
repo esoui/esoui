@@ -50,6 +50,10 @@ function ZO_HUDEditor_Keyboard:Initialize(control)
         end
     end)
 
+    self.control:SetHandler("OnUpdate", function(_, currentFrameTimeS)
+        self:Update(currentFrameTimeS)
+    end)
+
     HUD_MANAGER:RegisterCallback("PropagateSettings", function() self:RefreshAllElements() end)
     HUD_MANAGER:RegisterCallback("RebuildAllElements", function() self:RebuildAllElements() end)
 end
@@ -508,6 +512,56 @@ function ZO_HUDEditor_Keyboard:InitializeControlPools()
         control.optionData = nil
         control.warningIcon:SetHidden(true)
     end)
+end
+
+function ZO_HUDEditor_Keyboard:OnCoordsButtonDown(control)
+    self.coordsButtonHeld = control
+    self.nextCoordsButtonUpdateTime = GetFrameTimeSeconds() + 0.3
+    self:AdjustCoordsForHeldButton()
+end
+
+function ZO_HUDEditor_Keyboard:OnCoordsButtonUp(control)
+    if self.coordsButtonHeld == control then
+        self.coordsButtonHeld = nil
+        self.nextCoordsButtonUpdateTime = nil
+    end
+end
+
+function ZO_HUDEditor_Keyboard:AdjustCoordsForHeldButton()
+    if self.coordsButtonHeld then
+        local direction = self.coordsButtonHeld.direction
+        local offsetX = tonumber(self.infoBoxXCoordsEditBox:GetText())
+        local offsetY = tonumber(self.infoBoxYCoordsEditBox:GetText())
+        local delta = 1
+        if IsShiftKeyDown() then
+            delta = 100
+        elseif IsControlKeyDown() then
+            delta = 10
+        end
+
+        if direction == LEFT then
+            offsetX = zo_max(offsetX - delta, 0)
+        elseif direction == RIGHT then
+            offsetX = zo_min(offsetX + delta, 99999)
+        elseif direction == TOP then
+            offsetY = zo_max(offsetY - delta, 0)
+        elseif direction == BOTTOM then
+            offsetY = zo_min(offsetY + delta, 99999)
+        else
+            assert(false, "HUD Editor Coords Buttons only support directions of TOP/LEFT/BOTTOM/RIGHT")
+        end
+
+        self.infoBoxXCoordsEditBox:SetText(offsetX)
+        self.infoBoxYCoordsEditBox:SetText(offsetY)
+        self:ApplyInfoBoxValues()
+    end
+end
+
+function ZO_HUDEditor_Keyboard:Update(currentFrameTimeS)
+    if self.coordsButtonHeld and self.nextCoordsButtonUpdateTime and self.nextCoordsButtonUpdateTime <= currentFrameTimeS then
+        self.nextCoordsButtonUpdateTime = currentFrameTimeS + 0.05
+        self:AdjustCoordsForHeldButton()
+    end
 end
 
 function ZO_HUDEditor_Keyboard.OnControlInitialized(control)

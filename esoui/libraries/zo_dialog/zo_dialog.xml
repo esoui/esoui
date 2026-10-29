@@ -116,6 +116,7 @@
                         ZO_Loading_Initialize(self)
                     </OnInitialized>
                 </Control>
+                <Label name="$(parent)MatchingTextInstructions" font="ZoFontGameMedium" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" hidden="true"/>
                 <Backdrop name="$(parent)Edit" inherits="ZO_SingleLineEditBackdrop_Keyboard" hidden="true">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)Text" offsetY="5"/>
                     <Controls>

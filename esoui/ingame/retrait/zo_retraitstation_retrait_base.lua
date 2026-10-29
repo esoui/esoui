@@ -30,15 +30,7 @@ function ZO_RetraitStation_Retrait_Base:ShowRetraitDialog(bagId, slotIndex, sele
 
     local isItemLocked = IsItemPlayerLocked(bagId, slotIndex)
 
-    local dialogName = "CONFIRM_RETRAIT_ITEM"
-    if isItemLocked then
-        if IsInGamepadPreferredMode() then
-            dialogName = "GAMEPAD_CONFIRM_RETRAIT_LOCKED_ITEM"
-        else
-            dialogName = "CONFIRM_RETRAIT_LOCKED_ITEM"
-        end
-    end
-
+    local dialogName = isItemLocked and "CONFIRM_RETRAIT_LOCKED_ITEM" or "CONFIRM_RETRAIT_ITEM"
     local itemDisplayQuality = GetItemDisplayQuality(bagId, slotIndex)
     local itemDisplayQualityColor = GetItemQualityColor(itemDisplayQuality)
     local itemName = itemDisplayQualityColor:Colorize(GetItemName(bagId, slotIndex))
@@ -52,7 +44,6 @@ function ZO_RetraitStation_Retrait_Base:ShowRetraitDialog(bagId, slotIndex, sele
         itemName,
         traitName,
         formattedRetraitCost,
-        GetString(SI_PERFORM_ACTION_CONFIRMATION)
     }
 
     local mainTextNarrationParams =
@@ -60,7 +51,6 @@ function ZO_RetraitStation_Retrait_Base:ShowRetraitDialog(bagId, slotIndex, sele
         itemName,
         traitName,
         formattedRetraitCostNarration,
-        GetString(SI_PERFORM_ACTION_CONFIRMATION)
     }
 
     local function ShowRetraitDialog()
@@ -75,7 +65,7 @@ function ZO_RetraitStation_Retrait_Base:ShowRetraitDialog(bagId, slotIndex, sele
 end
 
 function ZO_RetraitStation_Retrait_Base:UpdateRequireResearchTooltipString(bagId, slotIndex)
-    local tradeskillType = GetRearchLineInfoFromRetraitItem(bagId, slotIndex)
+    local tradeskillType = GetResearchLineInfoFromRetraitItem(bagId, slotIndex)
     local tradeskillName = GetCraftingSkillName(tradeskillType)
     self.requiredResearchTooltipString = zo_strformat(SI_RETRAIT_STATION_MUST_RESEARCH_TRAIT, tradeskillName)
 end

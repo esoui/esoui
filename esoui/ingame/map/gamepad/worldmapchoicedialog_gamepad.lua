@@ -95,14 +95,12 @@ do
     {
         HEADER_TRAVEL = 1,
         HEADER_CROWN_STORE = 2,
-        HEADER_UPGRADE_CHAPTER = 3,
     }
 
     local HEADER_STRINGS = 
     {
         [HEADER_TYPES.HEADER_TRAVEL] = GetString(SI_GAMEPAD_WORLD_MAP_TRAVEL),
         [HEADER_TYPES.HEADER_CROWN_STORE] = GetString(SI_WORLD_MAP_ACTION_GO_TO_CROWN_STORE),
-        [HEADER_TYPES.HEADER_UPGRADE_CHAPTER] = GetString(SI_WORLD_MAP_ACTION_UPGRADE_CHAPTER),
     }
 
     function ZO_WorldMapChoiceDialog_Gamepad:AddTravelDialogItems(parametricListEntries, mouseOverPinHandlers)
@@ -125,7 +123,7 @@ do
 
             local headerType = HEADER_TYPES.HEADER_TRAVEL
             if pin:IsLockedByLinkedCollectible() then
-                headerType = pin:GetLinkedCollectibleType() == COLLECTIBLE_CATEGORY_TYPE_CHAPTER and HEADER_TYPES.HEADER_UPGRADE_CHAPTER or HEADER_TYPES.HEADER_CROWN_STORE
+                headerType = HEADER_TYPES.HEADER_CROWN_STORE
             end
             local name, icon = GetTravelPinNodeInfo(pin)
             if handler.gamepadChoiceOverrideName then

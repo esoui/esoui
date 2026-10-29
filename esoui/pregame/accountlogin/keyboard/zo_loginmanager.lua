@@ -114,12 +114,11 @@ function LoginManager_Keyboard:OnCreateLinkAccountSuccessful()
 
     local textParams
     if not self.isLinking then
-        local note3 = GetPlatformServiceType() == PLATFORM_SERVICE_TYPE_DMM and SI_CREATEACCOUNT_SUCCESS_NOTE_3_DMM or SI_CREATEACCOUNT_SUCCESS_NOTE_3
         textParams = { mainTextParams = {
                                             GetString(SI_CREATEACCOUNT_SUCCESS_HEADER),
                                             GetString(SI_CREATEACCOUNT_SUCCESS_NOTE_1),
                                             GetString(SI_CREATEACCOUNT_SUCCESS_NOTE_2),
-                                            GetString(note3),
+                                            GetString(SI_CREATEACCOUNT_SUCCESS_NOTE_3),
                                         }
                      }
     end
@@ -146,11 +145,7 @@ function LoginManager_Keyboard:OnCreateLinkLoadingError(loginError, linkingError
             dialogName = "LINKED_LOGIN_ERROR_KEYBOARD"
             errorString = GetString("SI_LOGINAUTHERROR", loginError)
 
-            if loginError == LOGIN_AUTH_ERROR_MISSING_DMM_TOKEN or loginError == LOGIN_AUTH_ERROR_BAD_DMM_TOKEN then
-                -- If the issue was with the token, kinda have to restart, since that's supplied from the launcher
-                self.mustRelaunch = true
-                LOGIN_KEYBOARD:ShowRelaunchGameLabel()
-            elseif loginError == LOGIN_AUTH_ERROR_ACCOUNT_NOT_VERIFIED or loginError == LOGIN_AUTH_ERROR_GAME_ACCOUNT_NOT_VERIFIED then
+            if loginError == LOGIN_AUTH_ERROR_ACCOUNT_NOT_VERIFIED or loginError == LOGIN_AUTH_ERROR_GAME_ACCOUNT_NOT_VERIFIED then
                 dialogData =
                 {
                     showResendVerificationEmail = true,

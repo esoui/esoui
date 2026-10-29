@@ -44,11 +44,8 @@
                     <Anchor point="TOPLEFT" offsetY="42"/>
                     <Anchor point="TOPRIGHT" offsetY="42"/>
                 </Control>
-                <Label name="$(parent)Title" font="ZoFontHeader4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" text="SI_CHALLENGE_DIFFICULTY_TITLE">
-                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)TitleDivider" relativePoint="TOPLEFT" offsetY="2" offsetX="32"/>
-                </Label>
                 <Button name="$(parent)GoToDifficultyButton" inherits="ZO_DefaultButton" clickSound="ChallengeDifficulty_DifficultyTabClicked">
-                    <Dimensions x="48" y="48"/>
+                    <Dimensions x="64" y="64"/>
                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)TitleDivider" relativePoint="TOPRIGHT"/>
                     <Textures normal="EsoUI/Art/ChallengeDifficulty/goToDifficultyButton_normal.dds" pressed="EsoUI/Art/ChallengeDifficulty/goToDifficultyButton_mouseDown.dds" mouseOver="EsoUI/Art/ChallengeDifficulty/goToDifficultyButton_mouseOver.dds" disabled="EsoUI/Art/ChallengeDifficulty/goToDifficultyButton_disabled.dds"/>
                     <OnMouseEnter>
@@ -59,7 +56,7 @@
                     </OnMouseExit>
                 </Button>
                 <Button name="$(parent)GoToLevelUpRewardsButton" inherits="ZO_DefaultButton" clickSound="ChallengeDifficulty_LevelUpRewardsTabClicked">
-                    <Dimensions x="48" y="48"/>
+                    <Dimensions x="64" y="64"/>
                     <Anchor point="RIGHT" relativeTo="$(parent)GoToDifficultyButton" relativePoint="LEFT" offsetX="-10"/>
                     <Textures normal="EsoUI/Art/ChallengeDifficulty/goToLevelUpRewardsButton_normal.dds" pressed="EsoUI/Art/ChallengeDifficulty/goToLevelUpRewardsButton_mouseDown.dds" mouseOver="EsoUI/Art/ChallengeDifficulty/goToLevelUpRewardsButton_mouseOver.dds" disabled="EsoUI/Art/ChallengeDifficulty/goToLevelUpRewardsButton_disabled.dds"/>
                     <OnClicked>
@@ -72,6 +69,10 @@
                         ZO_ChallengeDifficultyScreen_Keyboard.OnTabButtonMouseExit(self)
                     </OnMouseExit>
                 </Button>
+                <Label name="$(parent)Title" font="ZoFontHeader4" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" modifyTextType="UPPERCASE" text="SI_CHALLENGE_DIFFICULTY_TITLE">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)TitleDivider" relativePoint="TOPLEFT" offsetY="2" offsetX="32"/>
+                    <Anchor point="RIGHT" relativeTo="$(parent)GoToLevelUpRewardsButton" relativePoint="LEFT" constrains="X"/>
+                </Label>
                 <Control name="$(parent)RadioContainer" resizeToFitDescendents="true">
                     <Anchor point="TOP" relativeTo="$(parent)TitleDivider" relativePoint="BOTTOM" offsetY="-2"/>
                     <Controls>
@@ -84,19 +85,19 @@
                         <Button name="$(parent)Journeyman" inherits="ZO_ChallengeDifficultyButton" clickSound="ChallengeDifficulty_JourneymanSelected">
                             <Anchor point="LEFT" relativeTo="$(parent)BaseGame" relativePoint="RIGHT" offsetX="ZO_CHALLENGE_DIFFICULTY_HORIZONTAL_PADDING"/>
                             <OnInitialized>
-                                ZO_ChallengeDifficultyScreen_Keyboard.OnDifficultyButtonInitialized(self, OVERLAND_DIFFICULTY_TYPE_JOURNEYMAN)
+                                ZO_ChallengeDifficultyScreen_Keyboard.OnDifficultyButtonInitialized(self, OVERLAND_DIFFICULTY_TYPE_SEASONED)
                             </OnInitialized>
                         </Button>
                         <Button name="$(parent)Adventurer" inherits="ZO_ChallengeDifficultyButton" clickSound="ChallengeDifficulty_AdventurerSelected">
                             <Anchor point="LEFT" relativeTo="$(parent)Journeyman" relativePoint="RIGHT" offsetX="ZO_CHALLENGE_DIFFICULTY_HORIZONTAL_PADDING"/>
                             <OnInitialized>
-                                ZO_ChallengeDifficultyScreen_Keyboard.OnDifficultyButtonInitialized(self, OVERLAND_DIFFICULTY_TYPE_ADVENTURER)
+                                ZO_ChallengeDifficultyScreen_Keyboard.OnDifficultyButtonInitialized(self, OVERLAND_DIFFICULTY_TYPE_MASTER)
                             </OnInitialized>
                         </Button>
                         <Button name="$(parent)Veteran" inherits="ZO_ChallengeDifficultyButton" clickSound="ChallengeDifficulty_VeteranSelected">
                             <Anchor point="LEFT" relativeTo="$(parent)Adventurer" relativePoint="RIGHT" offsetX="ZO_CHALLENGE_DIFFICULTY_HORIZONTAL_PADDING"/>
                             <OnInitialized>
-                                ZO_ChallengeDifficultyScreen_Keyboard.OnDifficultyButtonInitialized(self, OVERLAND_DIFFICULTY_TYPE_VETERAN)
+                                ZO_ChallengeDifficultyScreen_Keyboard.OnDifficultyButtonInitialized(self, OVERLAND_DIFFICULTY_TYPE_VESTIGE)
                             </OnInitialized>
                         </Button>
                     </Controls>
@@ -113,7 +114,7 @@
                     <Anchor point="BOTTOMLEFT"/>
                     <Anchor point="BOTTOMRIGHT" offsetY="-75"/>
                 </Control>
-                <Button name="$(parent)ChangeDifficultyButton" inherits="ZO_ExtraLargeButton" text="SI_CHALLENGE_DIFFICULTY_REQUEST_CHANGE_LABEL" clickSound="ChallengeDifficulty_ChangeDifficulty_Confirm">
+                <Button name="$(parent)ChangeDifficultyButton" inherits="ZO_ExtraLargeButton" text="SI_CHALLENGE_DIFFICULTY_REQUEST_CHANGE_LABEL">
                     <Anchor point="BOTTOM" relativeTo="$(parent)MainSectionDivider" relativePoint="TOP" offsetY="-25" constrains="Y"/>
                     <Anchor point="CENTER" constrains="X"/>
                     <Dimensions x="200" y="50"/>

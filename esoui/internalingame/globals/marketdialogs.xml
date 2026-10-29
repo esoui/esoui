@@ -5,6 +5,20 @@
                 ZO_MarketPurchaseConfirmationDialog_OnInitialized(self)
             </OnInitialized>
             <Controls>
+                <Control name="$(parent)PurchaseLimitContainer" inherits="ZO_DialogContentAnchors" hidden="true">
+                    <OnInitialized>
+                        self.resetTypeLabel = self:GetNamedChild("ResetType")
+                        self.limitAmount = self:GetNamedChild("Limit")
+                    </OnInitialized>
+                    <Controls>
+                        <Label name="$(parent)ResetType" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                            <Anchor point="TOPLEFT"/>
+                        </Label>
+                        <Label name="$(parent)Limit" font="ZoFontGame" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_SELECTED" horizontalAlignment="RIGHT">
+                            <Anchor point="TOPRIGHT"/>
+                        </Label>
+                    </Controls>
+                </Control>
                 <Label name="$(parent)ConfirmPurchase" inherits="ZO_DialogContentAnchors" font="ZoFontGame" text="SI_MARKET_CONFIRM_PURCHASE_RECIPIENT_SELECTOR_HEADER" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"/>
                 <Control name="$(parent)RadioButtons" resizeToFitDescendents="true">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)ConfirmPurchase" relativePoint="BOTTOMLEFT" offsetY="10"/>

@@ -339,17 +339,16 @@ function ZO_CompanionSkillLineData:GetIndices()
     return self.skillTypeData:GetSkillType(), self.skillLineIndex
 end
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+do
+    local ANIMAL_COMPANION_USABLE_SKILL_TYPE =
+    {
+        SKILL_TYPE_WORLD,
+    }
+    function ZO_CompanionSkillLineData:IsSkillTypeActiveCompanionUsable()
+        if GetActiveCompanionType() == COMPANION_TYPE_ANIMAL then
+            return ZO_IsElementInNonContiguousTable(ANIMAL_COMPANION_USABLE_SKILL_TYPE, self.skillTypeData:GetSkillType())
+        else
+            return true
+        end
+    end
+end

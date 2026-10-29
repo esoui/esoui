@@ -3,11 +3,6 @@
 
 ZO_SiegeHUDFragment = ZO_SceneFragment:Subclass()
 
-function ZO_SiegeHUDFragment:New()
-    local fragment = ZO_SceneFragment.New(self)
-    return fragment
-end
-
 function ZO_SiegeHUDFragment:UpdateVisibility()
     if self:GetState() == SCENE_FRAGMENT_HIDDEN then
         return

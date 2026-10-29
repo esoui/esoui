@@ -989,6 +989,11 @@ GAMEPAD_SETTINGS_DATA =
         {
             panel = SETTING_PANEL_INTERFACE,
             system = SETTING_TYPE_UI,
+            settingId = UI_SETTING_SHOW_MINIMAP,
+        },
+        {
+            panel = SETTING_PANEL_INTERFACE,
+            system = SETTING_TYPE_UI,
             settingId = UI_SETTING_SHOW_HOUSE_TRACKER,
         },
         {

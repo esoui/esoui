@@ -397,9 +397,7 @@ function ActivityFinderRoot_Manager:UpdateLocationData()
                     local collectibleId = location:GetFirstLockingCollectible()
                     local collectibleData = ZO_CollectibleData_Base.Acquire(collectibleId)
                     local lockReasonStringId = nil
-                    if collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_CHAPTER) then
-                        lockReasonStringId = SI_LFG_LOCK_REASON_COLLECTIBLE_NOT_UNLOCKED_UPGRADE
-                    elseif collectibleData:IsPurchasable() then
+                    if collectibleData:IsPurchasable() then
                         lockReasonStringId = SI_LFG_LOCK_REASON_COLLECTIBLE_NOT_UNLOCKED_CROWN_STORE
                     else
                         lockReasonStringId = SI_LFG_LOCK_REASON_COLLECTIBLE_NOT_UNLOCKED

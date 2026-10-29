@@ -2,7 +2,7 @@
     <Controls>
         <TopLevelControl name="ZO_CampaignLeaderboardsInformationArea_Gamepad" hidden="true">
             <OnInitialized>
-                ZO_CampaignLeaderboardsInformationArea_Gamepad_OnInitialized(self)
+                ZO_CampaignLeaderboardsManager_Gamepad.OnControlInitialized(self)
             </OnInitialized>
         </TopLevelControl>
     </Controls>

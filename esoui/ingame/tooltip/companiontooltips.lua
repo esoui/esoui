@@ -2,14 +2,11 @@ local RAPPORT_GRADIENT_START = ZO_ColorDef:New("722323") --Red
 local RAPPORT_GRADIENT_END = ZO_ColorDef:New("009966") --Green
 local RAPPORT_GRADIENT_MIDDLE = ZO_ColorDef:New("9D840D") --Yellow
 
-
-
-
-
-
-
-
-
+local RAPPORT_LEFT_ICON =
+{
+    DEFAULT = "EsoUI/Art/HUD/lootHistory_icon_rapportDecrease_generic.dds",
+    ANIMAL = "EsoUI/Art/HUD/lootHistory_icon_rapportNeutral_generic.dds"
+}
 
 function ZO_Tooltip:LayoutCompanionOverview(companionData)
     --Section containing the numerical XP Progress
@@ -82,30 +79,25 @@ function ZO_Tooltip:LayoutCompanionOverview(companionData)
 
     --The rapport bar is a special type of status bar, so we have to create as a custom control and set it up manually
     local rapportBarControl = self:AcquireCustomControl(self:GetStyle("companionRapportBar"))
-    local rapportBar = ZO_SlidingStatusBar:New(rapportBarControl)
-
-    rapportBar:SetGradientColors(RAPPORT_GRADIENT_START, RAPPORT_GRADIENT_END, RAPPORT_GRADIENT_MIDDLE)
-
-
-
-
-
-
-
-
-    rapportBar:SetMinMax(GetMinimumRapport(), GetMaximumRapport())
-    rapportBar:SetValue(rapportValue)
+    local rapportStatusBar = rapportBarControl.slidingStatusBar
+    if not rapportStatusBar then
+        rapportStatusBar = ZO_SlidingStatusBar:New(rapportBarControl)
+        rapportBarControl.slidingStatusBar = rapportStatusBar
+    end
+    if IsActiveCompanionAnimal() then
+        rapportStatusBar:SetGradientColors(RAPPORT_GRADIENT_MIDDLE, RAPPORT_GRADIENT_END, RAPPORT_GRADIENT_MIDDLE)
+    else
+        rapportStatusBar:SetGradientColors(RAPPORT_GRADIENT_START, RAPPORT_GRADIENT_END, RAPPORT_GRADIENT_MIDDLE)
+    end
+    rapportStatusBar:SetMinMax(GetMinimumRapport(), GetMaximumRapport())
+    rapportStatusBar:SetValue(rapportValue)
 
     --Add the rapport bar in between the two rapport icons
-
-    rapportBarSection:AddTexture("EsoUI/Art/HUD/lootHistory_icon_rapportDecrease_generic.dds", self:GetStyle("companionRapportTexture"))
-
-
-
-
-
-
-
+    if IsActiveCompanionAnimal() then
+        rapportBarSection:AddTexture(RAPPORT_LEFT_ICON.ANIMAL, self:GetStyle("companionRapportTexture"))
+    else
+        rapportBarSection:AddTexture(RAPPORT_LEFT_ICON.DEFAULT, self:GetStyle("companionRapportTexture"))
+    end
 
     rapportBarSection:AddCustomControl(rapportBarControl)
     rapportBarSection:AddTexture("EsoUI/Art/HUD/lootHistory_icon_rapportIncrease_generic.dds", self:GetStyle("companionRapportTexture"))

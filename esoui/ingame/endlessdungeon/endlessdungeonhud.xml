@@ -24,15 +24,33 @@
                 ZO_EndlessDungeonHUD.OnControlInitialized(self)
             </OnInitialized>
             <Controls>
-                <Control name="$(parent)ScoreContainer" inherits="ZO_HUDManager_Element" resizeToFitConstrains="X">
+                <Control name="$(parent)HUDContainer" inherits="ZO_HUDManager_Element" resizeToFitConstrains="X">
+                    <Dimensions y="44"/>
                     <Controls>
-                        <Label name="$(parent)Header" text="SI_REVIVE_COUNTER_SCORE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"/>
-                        <Control name="$(parent)Score" inherits="ZO_RollingMeterLabel">
-                            <Anchor point="LEFT" relativeTo="$(parent)Header" relativePoint="RIGHT"/>
+                        <Control name="$(parent)SavingIndicator" resizeToFitConstrains="X" alpha="0">
+                            <Controls>
+                                <Label name="$(parent)Text" text="SI_ENDLESS_DUNGEON_SAVING" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL">
+                                    <Anchor point="LEFT"/>
+                                </Label>
+                                <Control name="$(parent)Icon" inherits="ZO_LoadingIcon_Gamepad">
+                                    <Anchor point="LEFT" relativeTo="$(parent)Text" relativePoint="RIGHT"/>
+                                    <Controls>
+                                        <Texture name="$(parent)Animation" override="true" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"/>
+                                    </Controls>
+                                </Control>
+                            </Controls>
                         </Control>
-                        <Texture name="$(parent)ReviveIcon" textureFile="EsoUI/Art/Trials/VitalityDepletion.dds"/>
-                        <Control name="$(parent)ReviveCount" inherits="ZO_RollingMeterLabel">
-                            <Anchor point="LEFT" relativeTo="$(parent)ReviveIcon" relativePoint="RIGHT"/>
+                        <Control name="$(parent)ScoreContainer" resizeToFitConstrains="X">
+                            <Controls>
+                                <Label name="$(parent)Header" text="SI_REVIVE_COUNTER_SCORE" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"/>
+                                <Control name="$(parent)Score" inherits="ZO_RollingMeterLabel">
+                                    <Anchor point="LEFT" relativeTo="$(parent)Header" relativePoint="RIGHT"/>
+                                </Control>
+                                <Texture name="$(parent)ReviveIcon" textureFile="EsoUI/Art/Trials/VitalityDepletion.dds"/>
+                                <Control name="$(parent)ReviveCount" inherits="ZO_RollingMeterLabel">
+                                    <Anchor point="LEFT" relativeTo="$(parent)ReviveIcon" relativePoint="RIGHT"/>
+                                </Control>
+                            </Controls>
                         </Control>
                         <Control name="$(parent)HUDElementRef" override="true">
                             <DimensionConstraints minX="100"/>

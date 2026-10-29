@@ -402,12 +402,8 @@ function ZO_SkillsSubclassing_Gamepad:InitializeKeybindStripDescriptors()
                         -- Open Crown Store
                         local collectibleId = skillLineData:GetClassAccessCollectibleId()
                         local collectibleData = ZO_COLLECTIBLE_DATA_MANAGER:GetCollectibleDataById(collectibleId)
-                        if collectibleData:IsCategoryType(COLLECTIBLE_CATEGORY_TYPE_CHAPTER) then
-                            ZO_ShowChapterUpgradePlatformScreen(MARKET_OPEN_OPERATION_SKILLS_SUBCLASSING)
-                        else
-                            local searchTerm = zo_strformat(SI_CROWN_STORE_SEARCH_FORMAT_STRING, collectibleData:GetName())
-                            ShowMarketAndSearch(searchTerm, MARKET_OPEN_OPERATION_SKILLS_SUBCLASSING)
-                        end
+                        local searchTerm = zo_strformat(SI_CROWN_STORE_SEARCH_FORMAT_STRING, collectibleData:GetName())
+                        ShowMarketAndSearch(searchTerm, MARKET_OPEN_OPERATION_SKILLS_SUBCLASSING)
                     else
                         if skillLineData:CanActivateForRespec() then
                             -- Equip
@@ -579,10 +575,10 @@ end
 
 function ZO_SkillsSubclassing_Gamepad:RefreshPointsDisplay()
     local availablePoints = SKILL_POINT_ALLOCATION_MANAGER:GetAvailableSkillPoints()
-    local skyShards = GetNumSkyShards()
+    local partialSkillPoints = GetLeftoverPartialSkillPoints()
 
     self.headerData.data1Text = availablePoints
-    self.headerData.data2Text = zo_strformat(SI_GAMEPAD_SKILLS_SKY_SHARDS_FOUND, skyShards, NUM_PARTIAL_SKILL_POINTS_FOR_FULL)
+    self.headerData.data2Text = zo_strformat(SI_GAMEPAD_SKILLS_SKY_SHARDS_FOUND, partialSkillPoints, NUM_PARTIAL_SKILL_POINTS_FOR_FULL)
 
     ZO_GamepadGenericHeader_RefreshData(self.header, self.headerData)
 end

@@ -77,6 +77,7 @@ end
 ZO_MailSend_Gamepad = ZO_InitializingObject:Subclass()
 
 function ZO_MailSend_Gamepad:Initialize(control)
+    -- This is the mail parent control
     self.control = control
     self.sendControl = self.control:GetNamedChild("Send")
     self:InitializeFragment()
@@ -167,31 +168,31 @@ function ZO_MailSend_Gamepad:InitializeFragment()
 end
 
 function ZO_MailSend_Gamepad:ConnectShownEvents()
-    self.control:RegisterForEvent(EVENT_MAIL_COD_CHANGED, function() self:UpdateMoneyAttachment() end)
-    self.control:RegisterForEvent(EVENT_MAIL_ATTACHED_MONEY_CHANGED, function() self:UpdateMoneyAttachment() end)
-    self.control:RegisterForEvent(EVENT_MONEY_UPDATE, function() self:UpdatePostageMoney() end)
+    self.sendControl:RegisterForEvent(EVENT_MAIL_COD_CHANGED, function() self:UpdateMoneyAttachment() end)
+    self.sendControl:RegisterForEvent(EVENT_MAIL_ATTACHED_MONEY_CHANGED, function() self:UpdateMoneyAttachment() end)
+    self.sendControl:RegisterForEvent(EVENT_MONEY_UPDATE, function() self:UpdatePostageMoney() end)
 
     local function HandleInventoryChanged()
         self:PopulateMainList()
     end
 
-    self.control:RegisterForEvent(EVENT_INVENTORY_FULL_UPDATE, HandleInventoryChanged)
-    self.control:RegisterForEvent(EVENT_INVENTORY_SINGLE_SLOT_UPDATE, HandleInventoryChanged)
+    self.sendControl:RegisterForEvent(EVENT_INVENTORY_FULL_UPDATE, HandleInventoryChanged)
+    self.sendControl:RegisterForEvent(EVENT_INVENTORY_SINGLE_SLOT_UPDATE, HandleInventoryChanged)
 end
 
 function ZO_MailSend_Gamepad:DisconnectShownEvent()
-    self.control:UnregisterForEvent(EVENT_MAIL_COD_CHANGED)
-    self.control:UnregisterForEvent(EVENT_MAIL_ATTACHED_MONEY_CHANGED)
-    self.control:UnregisterForEvent(EVENT_MONEY_UPDATE)
-    self.control:UnregisterForEvent(EVENT_INVENTORY_FULL_UPDATE)
-    self.control:UnregisterForEvent(EVENT_INVENTORY_SINGLE_SLOT_UPDATE)
+    self.sendControl:UnregisterForEvent(EVENT_MAIL_COD_CHANGED)
+    self.sendControl:UnregisterForEvent(EVENT_MAIL_ATTACHED_MONEY_CHANGED)
+    self.sendControl:UnregisterForEvent(EVENT_MONEY_UPDATE)
+    self.sendControl:UnregisterForEvent(EVENT_INVENTORY_FULL_UPDATE)
+    self.sendControl:UnregisterForEvent(EVENT_INVENTORY_SINGLE_SLOT_UPDATE)
 end
 
 function ZO_MailSend_Gamepad:InitializeEvents()
-    self.control:RegisterForEvent(EVENT_MAIL_ATTACHMENT_ADDED, function(_, attachSlot) self:OnMailAttachmentAdded(attachSlot) end)
-    self.control:RegisterForEvent(EVENT_MAIL_ATTACHMENT_REMOVED, function(_, attachSlot) self:OnMailAttachmentRemoved(attachSlot) end)
-    self.control:RegisterForEvent(EVENT_MAIL_SEND_SUCCESS, function() self:OnMailSendSuccess() end)
-    self.control:RegisterForEvent(EVENT_MAIL_SEND_FAILED, function(_, ...) self:OnMailSendFailure(...) end)
+    self.sendControl:RegisterForEvent(EVENT_MAIL_ATTACHMENT_ADDED, function(_, attachSlot) self:OnMailAttachmentAdded(attachSlot) end)
+    self.sendControl:RegisterForEvent(EVENT_MAIL_ATTACHMENT_REMOVED, function(_, attachSlot) self:OnMailAttachmentRemoved(attachSlot) end)
+    self.sendControl:RegisterForEvent(EVENT_MAIL_SEND_SUCCESS, function() self:OnMailSendSuccess() end)
+    self.sendControl:RegisterForEvent(EVENT_MAIL_SEND_FAILED, function(_, ...) self:OnMailSendFailure(...) end)
 end
 
 --Global API
@@ -548,7 +549,7 @@ function ZO_MailSend_Gamepad:PopulateMainList()
         if ZO_IsPlaystationPlatform() then
             self:AddMainListEntry(GetString(SI_GAMEPAD_MAIL_SEND_TO), NO_HEADER, NO_ICON, userListCallback, NO_SECONDARY_CALLBACK_NAME, NO_SECONDARY_CALLBACK, mailSendNarrationText)
         elseif ZO_IsConsoleOrGameCoreUI() then
-            if GetNumberConsoleFriends() > 0 then
+            if HasConsoleFriends() then
                 self:AddMainListEntry(GetString(SI_GAMEPAD_MAIL_SEND_TO), NO_HEADER, NO_ICON, editBoxCallback, GetString(SI_GAMEPAD_CONSOLE_CHOOSE_FRIEND), userListCallback, mailSendNarrationText)
             else
                 self:AddMainListEntry(GetString(SI_GAMEPAD_MAIL_SEND_TO), NO_HEADER, NO_ICON, editBoxCallback, GetString(SI_GAMEPAD_CONSOLE_CHOOSE_FRIEND), NO_SECONDARY_CALLBACK, mailSendNarrationText)

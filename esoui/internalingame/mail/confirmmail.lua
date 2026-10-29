@@ -50,9 +50,12 @@ end)
 -- Delete mail dialog.  Title and mainText change based on types of attachments.
 ZO_Dialogs_RegisterCustomDialog("DELETE_MAIL_WITH_ATTACHMENTS",
     {
+        canQueue = true,
+
         gamepadInfo =
         {
             dialogType = GAMEPAD_DIALOGS.BASIC,
+            allowRightStickPassThrough = true,
         },
             
         title = 
@@ -65,9 +68,10 @@ ZO_Dialogs_RegisterCustomDialog("DELETE_MAIL_WITH_ATTACHMENTS",
             text = function(dialog) return dialog.data.body end, 
         },
 
-        editBox =
+        verifyConfirmationInfo =
         {
-            matchingString = GetString(SI_DELETE_MAIL_CONFIRMATION_TEXT)
+            onShowCooldown = 2000,
+            matchingString = GetString(SI_DELETE_MAIL_CONFIRMATION_TEXT),
         },
         
         noChoiceCallback = function(dialog)
@@ -76,20 +80,14 @@ ZO_Dialogs_RegisterCustomDialog("DELETE_MAIL_WITH_ATTACHMENTS",
 
         buttons =
         {
-            [1] =
             {
-                requiresTextInput = true,
+                requiresConfirmationVerification = true,
                 text = SI_MAIL_DELETE,
                 callback = function(dialog)
-                    local confirmDelete = ZO_Dialogs_GetEditBoxText(dialog)
-                    local compareString = GetString(SI_DELETE_MAIL_CONFIRMATION_TEXT)
-                    if confirmDelete and confirmDelete == compareString then
-                        dialog.data.confirmationCallback(dialog.data.mailId)
-                    end
+                    dialog.data.confirmationCallback(dialog.data.mailId)
                 end,
             },
         
-            [2] =
             {
                 text = SI_DIALOG_CANCEL,
                 callback = function(dialog)
@@ -101,67 +99,12 @@ ZO_Dialogs_RegisterCustomDialog("DELETE_MAIL_WITH_ATTACHMENTS",
     }
 )
 
--- Gamepad delete mail dialog.  Title and mainText change based on types of attachments.
-ZO_Dialogs_RegisterCustomDialog("DELETE_MAIL_WITH_ATTACHMENTS_GAMEPAD",
-    {
-        blockDialogReleaseOnPress = true,
-
-        canQueue = true,
-
-        gamepadInfo =
-        {
-            dialogType = GAMEPAD_DIALOGS.BASIC,
-            allowRightStickPassThrough = true,
-        },
-
-        noChoiceCallback = function(dialog)
-            CancelDeleteMail(dialog.data.mailId)
-        end,
-
-        title = 
-        { 
-            text = function(dialog) return dialog.data.title end, 
-        },
-
-        mainText = 
-        { 
-            text = function(dialog) return dialog.data.body end, 
-        },
-
-        buttons =
-        {
-            {
-                onShowCooldown = 2000,
-                keybind = "DIALOG_PRIMARY",
-                text = SI_MAIL_DELETE,
-                callback = function(dialog)
-                    dialog.data.confirmationCallback(dialog.data.mailId)
-                    ZO_Dialogs_ReleaseDialogOnButtonPress("DELETE_MAIL_WITH_ATTACHMENTS_GAMEPAD")
-                end,
-            },
-            {
-                keybind = "DIALOG_NEGATIVE",
-                text = SI_DIALOG_CANCEL,
-                callback = function(dialog)
-                    ZO_Dialogs_ReleaseDialog("DELETE_MAIL_WITH_ATTACHMENTS_GAMEPAD")
-                    CancelDeleteMail(dialog.data.mailId)
-                end,
-            },
-        }
-    }
-)
-
 EVENT_MANAGER:RegisterForEvent("ZoDeleteMail", EVENT_CONFIRM_DELETE_MAIL, function(eventCode, mailId)
     ZO_Dialogs_ReleaseDialog("DELETE_MAIL_WITH_ATTACHMENTS")
-    ZO_Dialogs_ReleaseDialog("DELETE_MAIL_WITH_ATTACHMENTS_GAMEPAD")
     local function OnDeleteMailConfirmed(mailId)
         ConfirmDeleteMail(mailId)
         PlaySound(SOUNDS.MAIL_ITEM_DELETED)
     end
-    local dialogTextParams = 
-    {
-        mainTextParams = { GetString(SI_DELETE_MAIL_CONFIRMATION_TEXT), },
-    }
 
     local numAttachments, attachedGold, codAmount = GetMailAttachmentInfo(mailId)
     local hasAttachments = numAttachments > 0
@@ -170,36 +113,33 @@ EVENT_MANAGER:RegisterForEvent("ZoDeleteMail", EVENT_CONFIRM_DELETE_MAIL, functi
         OnDeleteMailConfirmed(mailId)
     else
         local dialogName = "DELETE_MAIL_WITH_ATTACHMENTS"
-        if IsInGamepadPreferredMode() then
-            dialogName = "DELETE_MAIL_WITH_ATTACHMENTS_GAMEPAD"
-        end
         if hasAttachments and hasAttachedGold then
             local dialogCallbackData = 
             {
                 mailId = mailId, 
                 title = SI_PROMPT_TITLE_DELETE_MAIL_ATTACHMENTS,
-                body = IsInGamepadPreferredMode() and SI_MAIL_CONFIRM_DELETE_ATTACHMENTS_AND_MONEY_GAMEPAD or SI_MAIL_CONFIRM_DELETE_ATTACHMENTS_AND_MONEY,
+                body = SI_MAIL_CONFIRM_DELETE_ATTACHMENTS_AND_MONEY,
                 confirmationCallback = OnDeleteMailConfirmed,
             }
-            ZO_Dialogs_ShowPlatformDialog(dialogName, dialogCallbackData, dialogTextParams)
+            ZO_Dialogs_ShowPlatformDialog(dialogName, dialogCallbackData)
         elseif hasAttachments then
             local dialogCallbackData = 
             {
                 mailId = mailId, 
                 title = SI_PROMPT_TITLE_DELETE_MAIL_ATTACHMENTS,
-                body = IsInGamepadPreferredMode() and SI_MAIL_CONFIRM_DELETE_ATTACHMENTS_GAMEPAD or SI_MAIL_CONFIRM_DELETE_ATTACHMENTS,
+                body = SI_MAIL_CONFIRM_DELETE_ATTACHMENTS,
                 confirmationCallback = OnDeleteMailConfirmed,
             }
-            ZO_Dialogs_ShowPlatformDialog(dialogName, dialogCallbackData, dialogTextParams)
+            ZO_Dialogs_ShowPlatformDialog(dialogName, dialogCallbackData)
         elseif hasAttachedGold then
             local dialogCallbackData = 
             {
                 mailId = mailId, 
                 title = SI_PROMPT_TITLE_DELETE_MAIL_MONEY,
-                body = IsInGamepadPreferredMode() and SI_MAIL_CONFIRM_DELETE_MONEY_GAMEPAD or SI_MAIL_CONFIRM_DELETE_MONEY,
+                body = SI_MAIL_CONFIRM_DELETE_MONEY,
                 confirmationCallback = OnDeleteMailConfirmed,
             }
-            ZO_Dialogs_ShowPlatformDialog(dialogName, dialogCallbackData, dialogTextParams)
+            ZO_Dialogs_ShowPlatformDialog(dialogName, dialogCallbackData)
         end
     end
 end)

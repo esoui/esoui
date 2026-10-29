@@ -14,8 +14,7 @@ function CreateAccount_Gamepad_Final_Initialize(control)
     }
 
     local note3Label = control:GetNamedChild("ContainerScrollContainerScrollChildNote3")
-    local note3StringId = GetPlatformServiceType() == PLATFORM_SERVICE_TYPE_DMM and SI_CREATEACCOUNT_SUCCESS_NOTE_3_DMM or SI_CREATEACCOUNT_SUCCESS_NOTE_3
-    note3Label:SetText(GetString(note3StringId))
+    note3Label:SetText(GetString(SI_CREATEACCOUNT_SUCCESS_NOTE_3))
 
     local createAccount_Gamepad_Final_Fragment = ZO_FadeSceneFragment:New(control)
     CREATE_ACCOUNT_FINAL_GAMEPAD_SCENE = ZO_Scene:New("CreateAccount_Gamepad_Final", SCENE_MANAGER)

@@ -32,6 +32,13 @@ panelBuilder:AddSetting({
 })
 
 panelBuilder:AddSetting({
+    controlName = "UI_Settings_ShowMinimap",
+    settingType = SETTING_TYPE_UI,
+    settingId = UI_SETTING_SHOW_MINIMAP,
+    header = SI_INTERFACE_OPTIONS_HEADS_UP_DISPLAY,
+})
+
+panelBuilder:AddSetting({
     controlName = "UI_Settings_ShowHouseTracker",
     settingType = SETTING_TYPE_UI,
     settingId = UI_SETTING_SHOW_HOUSE_TRACKER,

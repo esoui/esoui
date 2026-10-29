@@ -57,26 +57,12 @@ function DialogKeybindStripDescriptor:Initialize(control)
     end
 
     self.name = function()
-        if self.buttonText then
-            if type(self.buttonText) == "function" then
-                return self.buttonText(self.dialog)
-            elseif type(self.buttonText) == "number" then
-                return GetString(self.buttonText)
-            else
-                return self.buttonText
-            end
-        end
+        return ZO_EvalStringId(self.buttonText, self.dialog)
     end
 
     self.narrationOverrideName = function()
         if self.narrationOverrideText then
-            if type(self.narrationOverrideText) == "function" then
-                return self.narrationOverrideText(self.dialog)
-            elseif type(self.narrationOverrideText) == "number" then
-                return GetString(self.narrationOverrideText)
-            else
-                return self.narrationOverrideText
-            end
+            return ZO_EvalStringId(self.narrationOverrideText, self.dialog)
         else
             return self.name()
         end
@@ -212,7 +198,12 @@ local function TryRefreshKeybind(dialog, keybindDesc, buttonData, twoOrMoreButto
     keybindDesc:SetEtherealNarrationOrder(buttonData.etherealNarrationOrder)
     keybindDesc:SetNarrationOverrideText(buttonData.narrationOverrideText)
     keybindDesc:SetEnabled(buttonData.enabled)
-    keybindDesc:SetOnShowCooldown(buttonData.onShowCooldown)
+    local onShowCooldown = buttonData.onShowCooldown
+    if not onShowCooldown and ZO_Eval(buttonData.requiresConfirmationVerification, dialog) then
+        local verifyConfirmationInfo = ZO_Eval(dialog.info.verifyConfirmationInfo, dialog)
+        onShowCooldown = verifyConfirmationInfo and verifyConfirmationInfo.onShowCooldown or nil
+    end
+    keybindDesc:SetOnShowCooldown(onShowCooldown)
     keybindDesc:SetHandlesKeyUp(buttonData.handlesKeyUp)
 
     if buttonData.clickSound then
@@ -243,7 +234,7 @@ local function TryShowKeybinds(dialog)
         KEYBIND_STRIP:AddKeybindButtonGroup(g_keybindGroupDesc, g_keybindState)
 
         for _, keybindDesc in ipairs(g_keybindGroupDesc) do
-            local onShowCooldown = keybindDesc:GetOnShowCooldown()
+            local onShowCooldown = ZO_Eval(keybindDesc:GetOnShowCooldown(), dialog)
             if onShowCooldown then
                 KEYBIND_STRIP:TriggerCooldown(keybindDesc, onShowCooldown, g_keybindState)
             end
@@ -802,11 +793,7 @@ do
                     if entryData == nil then
                         local entryDataText = entryInfoTable.text or entryDataOverrides.text
                         if entryDataText ~= nil then
-                            if type(entryDataText) == "number" then
-                                entryDataText = GetString(entryDataText)
-                            elseif type(entryDataText) == "function" then
-                                entryDataText = entryDataText(dialog)
-                            end
+                            entryDataText = ZO_EvalStringId(entryDataText, dialog)
                         else -- default entry text
                             entryDataText = "EntryItem" .. tostring(i)
                         end
@@ -834,13 +821,8 @@ do
                         dialog.entryList:AddDataTemplate(entryTemplate, ParametricListControlSetupFunc, ZO_GamepadMenuEntryTemplateParametricListFunction, nil, nil, entryInfoTable.controlReset)
                     end
 
-                    local headerText = entryInfoTable.header
+                    local headerText = ZO_EvalStringId(entryInfoTable.header, dialog)
                     if headerText ~= nil then
-                        if type(headerText) == "number" then
-                            headerText = GetString(headerText)
-                        elseif type(headerText) == "function" then
-                            headerText = headerText(dialog)
-                        end
                         entryData:SetHeader(headerText)
                         dialog.entryList:AddEntryWithHeader(entryTemplate, entryData)
                     else
