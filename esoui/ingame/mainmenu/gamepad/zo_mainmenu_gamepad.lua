@@ -998,7 +998,9 @@ function ZO_MainMenuManager_Gamepad:SwitchToSelectedScene(list)
         elseif entryData.subMenu then
             list:SetActive(false)
             SCENE_MANAGER:Push("playerSubmenu")
-        elseif activatedCallback then
+        end
+
+        if activatedCallback then
             activatedCallback(self)
         end
 

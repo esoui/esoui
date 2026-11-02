@@ -2486,6 +2486,10 @@ do
         --Whisper--
         if IsChatSystemAvailableForCurrentPlatform() then
             local nameToUse = ZO_IsConsoleOrGameCoreUI() and crossplayDisplayName or primaryNameUnformatted
+            if not ZO_IsConsoleOrGameCoreUI()
+                and ZO_GetPrimaryPlayerNamePreference() == PRIMARY_PLAYER_NAME_SETTING_PREFER_PLATFORM then
+                nameToUse = DecorateDisplayName(nameToUse)
+            end
             local function WhisperOption()
                 StartChatInput(nil, CHAT_CHANNEL_WHISPER, nameToUse)
             end

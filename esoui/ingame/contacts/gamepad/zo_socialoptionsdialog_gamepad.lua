@@ -209,7 +209,13 @@ function ZO_SocialOptionsDialogGamepad:ShouldAddWhisperOption()
 end
 
 function ZO_SocialOptionsDialogGamepad:BuildWhisperOption()
-    local finishCallback = function() StartChatInput("", CHAT_CHANNEL_WHISPER, self.socialData.displayName) end
+    local finishCallback = function()
+        local displayName = self.socialData.displayName
+        if not ZO_IsConsoleOrGameCoreUI() then
+            displayName = DecorateDisplayName(displayName)
+        end
+        StartChatInput("", CHAT_CHANNEL_WHISPER, displayName)
+    end
     local unusedHeader = nil
     return self:BuildOptionEntry(unusedHeader, SI_SOCIAL_LIST_PANEL_WHISPER, nil, finishCallback)
 end

@@ -445,7 +445,8 @@ function ZO_GamepadChatSystem:GetFontSizeFromSetting()
 end
 
 function ZO_GamepadChatSystem:SetChannel(newChannel, channelTarget)
-    if newChannel == CHAT_CHANNEL_WHISPER or newChannel == CHAT_CHANNEL_WHISPER_SENT then
+    if ZO_IsConsoleOrGameCoreUI()
+        and (newChannel == CHAT_CHANNEL_WHISPER or newChannel == CHAT_CHANNEL_WHISPER_SENT) then
         if channelTarget and channelTarget ~= "" then
             channelTarget = DecorateDisplayName(channelTarget)
         end

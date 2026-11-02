@@ -86,7 +86,7 @@ function ZO_GetPrimaryPlayerNameFromUnitTag(unitTag, dontUseFormatting)
         return ZO_TryGetPlatformDisplayNameForUnitTag(unitTag, dontUseFormatting)
     elseif namePreference == PRIMARY_PLAYER_NAME_SETTING_PREFER_CHARACTER then
         local characterName = GetUnitName(unitTag)
-        return ZO_FormatUserFacingCharacterName(characterName)
+        return dontUseFormatting and characterName or ZO_FormatUserFacingCharacterName(characterName)
     end
 end
 
@@ -97,7 +97,7 @@ function ZO_GetSecondaryPlayerNameFromUnitTag(unitTag, dontUseFormatting)
     end
 
     local characterName = GetUnitName(unitTag)
-    return ZO_FormatUserFacingCharacterName(characterName)
+    return dontUseFormatting and characterName or ZO_FormatUserFacingCharacterName(characterName)
 end
 
 function ZO_GetSecondaryPlayerNameWithTitleFromUnitTag(unitTag)

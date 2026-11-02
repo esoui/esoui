@@ -74,7 +74,7 @@ function ZO_MarketAnnouncement_Shared:Initialize(control, fragmentConditionFunct
         self:OnTileDataUpdated()
     end
 
-    ZO_MARKET_ANNOUNCEMENT_MANAGER:RegisterCallback("OnMarketAnnouncementDataUpdated", function() self:UpdateMarketCarousel() end)
+    ZO_MARKET_ANNOUNCEMENT_MANAGER:RegisterCallback("OnMarketAnnouncementDataUpdated", function() self:RefreshMarketAnnouncementView() end)
     ZO_MARKET_ANNOUNCEMENT_MANAGER:RegisterCallback("EventAnnouncementExpired", OnTileDataUpdated)
     PROMOTIONAL_EVENT_MANAGER:RegisterCallback("CampaignsUpdated", OnTileDataUpdated)
     PROMOTIONAL_EVENT_MANAGER:RegisterCallback("RewardsClaimed", OnTileDataUpdated)
@@ -129,6 +129,18 @@ function ZO_MarketAnnouncement_Shared:OnShowing()
         PlaySound(SOUNDS.PROMOTIONAL_EVENTS_ANNOUNCE)
     end
 
+    if not GetMarketAnnouncementCrownStoreLocked() then
+        UpdateMarketAnnouncement()
+    end
+
+    self:RefreshMarketAnnouncementView()
+end
+
+function ZO_MarketAnnouncement_Shared:RefreshMarketAnnouncementView()
+    if not self.fragment:IsShowing() then
+        return
+    end
+
     if ZO_MARKET_ANNOUNCEMENT_MANAGER:ShouldHideMarketProductAnnouncements() then
         if GetMarketAnnouncementCrownStoreLocked() then
             self.crownStoreLockedTitleControl:SetText(GetString(SI_MARKET_ANNOUNCEMENT_LOCKED_CROWN_STORE_TITLE))
@@ -138,10 +150,10 @@ function ZO_MarketAnnouncement_Shared:OnShowing()
             self.crownStoreLockedDescriptionControl:SetHidden(true)
         end
         self.carouselControl:SetHidden(true)
+        self.carousel:Deactivate()
         self.crownStoreLockedControl:SetHidden(false)
         self.crownStoreLockedTexture:SetTexture(GetMarketAnnouncementCrownStoreLockedBackground())
     else
-        UpdateMarketAnnouncement()
         self:UpdateMarketCarousel()
         self.carousel:Activate()
         self.carouselControl:SetHidden(false)

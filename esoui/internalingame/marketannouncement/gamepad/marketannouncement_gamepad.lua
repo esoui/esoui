@@ -176,10 +176,12 @@ function ZO_MarketAnnouncement_Gamepad:UpdateVerticalNavigation()
     self.verticalFocus:SetFocusToFirstEntry()
 end
 
-function ZO_MarketAnnouncement_Gamepad:OnShowing()
-    ZO_MarketAnnouncement_Shared.OnShowing(self)
+function ZO_MarketAnnouncement_Gamepad:RefreshMarketAnnouncementView()
+    ZO_MarketAnnouncement_Shared.RefreshMarketAnnouncementView(self)
 
-    self:UpdateVerticalNavigation()
+    if self.fragment:IsShowing() then
+        self:UpdateVerticalNavigation()
+    end
 end
 
 function ZO_MarketAnnouncement_Gamepad:OnShown()

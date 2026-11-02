@@ -218,7 +218,7 @@ do
                         if optionData.type == ZO_HUD_EDITOR_OPTION_TYPES.BOOLEAN then
                             local checkButton = self.infoBoxCheckButtonControlPool:AcquireObject()
                             checkButton.optionData = optionData
-                            ZO_CheckButton_SetLabelText(checkButton, optionData.name)
+                            ZO_CheckButton_SetLabelText(checkButton, optionData.name, "ZoFontGame")
                             ZO_CheckButton_SetCheckState(checkButton, selectedElement:GetCustomOptionValue(optionData.key))
 
                             if previousCustomOption then

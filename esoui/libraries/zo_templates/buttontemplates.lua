@@ -205,7 +205,7 @@ function ZO_CheckButtonLabel_SetTextColor(button, r, g, b)
     label:SetColor(r, g, b)
 end
 
-function ZO_CheckButton_SetLabelText(button, labelText)
+function ZO_CheckButton_SetLabelText(button, labelText, font)
     if not button.label then
         local label = CreateControlFromVirtual(button:GetName().."Label", button, "ZO_CheckButtonLabel")
         label:SetAnchor(LEFT, button, RIGHT, 5, 0)
@@ -239,6 +239,9 @@ function ZO_CheckButton_SetLabelText(button, labelText)
     end
 
     if button.label then
+        if font then
+            button.label:SetFont(font)
+        end
         button.label:SetText(labelText)
     end
 end

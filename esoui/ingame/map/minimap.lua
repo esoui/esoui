@@ -9,8 +9,7 @@ function ZO_Minimap:Initialize(control)
     self.mapNameLabel = control:GetNamedChild("MapName")
     self.poiIcon = control:GetNamedChild("POIIcon")
 
-    local FADE_IN_TIME_MS = 0
-    self.fragment = ZO_HUDFadeSceneFragment:New(control, FADE_IN_TIME_MS)
+    self.fragment = ZO_HUDFadeSceneFragment:New(control)
 
     ZO_DeferredInitializingObject.Initialize(self, self.fragment)
 
@@ -18,21 +17,6 @@ function ZO_Minimap:Initialize(control)
 
     local MINIMAP_OPTIONS =
     {
-        {
-            type = ZO_HUD_EDITOR_OPTION_TYPES.BOOLEAN,
-            name = GetString(SI_HUD_EDITOR_CUSTOM_OPTION_VISIBLE),
-            tooltipText = GetString(SI_INTERFACE_OPTIONS_SHOW_MINIMAP_TOOLTIP),
-            key = "Visible",
-            defaultValue = function()
-                return GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_SHOW_MINIMAP)
-            end,
-            dontSave = true,
-            callback = function(element, subKey, oldValue, value)
-                if value ~= oldValue then
-                    SetSetting(SETTING_TYPE_UI, UI_SETTING_SHOW_MINIMAP, tostring(value))
-                end
-            end,
-        },
         {
             type = ZO_HUD_EDITOR_OPTION_TYPES.ENUM,
             name = GetString(SI_INTERFACE_OPTIONS_COMPASS_ACTIVE_QUESTS),
@@ -53,6 +37,21 @@ function ZO_Minimap:Initialize(control)
         },
         {
             type = ZO_HUD_EDITOR_OPTION_TYPES.BOOLEAN,
+            name = GetString(SI_HUD_EDITOR_CUSTOM_OPTION_VISIBLE),
+            tooltipText = GetString(SI_INTERFACE_OPTIONS_SHOW_MINIMAP_TOOLTIP),
+            key = "Visible",
+            defaultValue = function()
+                return GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_SHOW_MINIMAP)
+            end,
+            dontSave = true,
+            callback = function(element, subKey, oldValue, value)
+                if value ~= oldValue then
+                    SetSetting(SETTING_TYPE_UI, UI_SETTING_SHOW_MINIMAP, tostring(value))
+                end
+            end,
+        },
+        {
+            type = ZO_HUD_EDITOR_OPTION_TYPES.BOOLEAN,
             name = GetString(SI_INTERFACE_OPTIONS_COMPASS_QUEST_GIVERS),
             tooltipText = GetString(SI_INTERFACE_OPTIONS_COMPASS_QUEST_GIVERS_TOOLTIP),
             key = "CompassQuestGivers",
@@ -66,6 +65,21 @@ function ZO_Minimap:Initialize(control)
             callback = function(element, subKey, oldValue, value)
                 if value ~= oldValue then
                     SetSetting(SETTING_TYPE_UI, UI_SETTING_COMPASS_QUEST_GIVERS, tostring(value))
+                end
+            end,
+        },
+        {
+            type = ZO_HUD_EDITOR_OPTION_TYPES.BOOLEAN,
+            name = GetString(SI_INTERFACE_OPTIONS_COMPASS_TARGET_MARKERS),
+            tooltipText = GetString(SI_INTERFACE_OPTIONS_COMPASS_TARGET_MARKERS_TOOLTIP),
+            key = "CompassTargetMarkers",
+            defaultValue = function()
+                return GetSetting_Bool(SETTING_TYPE_UI, UI_SETTING_COMPASS_TARGET_MARKERS)
+            end,
+            dontSave = true,
+            callback = function(element, subKey, oldValue, value)
+                if value ~= oldValue then
+                    SetSetting(SETTING_TYPE_UI, UI_SETTING_COMPASS_TARGET_MARKERS, tostring(value))
                 end
             end,
         },

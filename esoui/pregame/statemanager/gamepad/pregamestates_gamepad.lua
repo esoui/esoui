@@ -135,16 +135,6 @@ local pregameStates =
                     SCENE_MANAGER:Show("PregameInitialScreen_Gamepad")
                 end
             else
-                if ZO_IsConsoleOrGameCoreUI() then
-                    -- ESO-404970: reset overscan and gamma
-                    -- to default to handle the situation where a player loads
-                    -- between console profiles, which should have different
-                    -- user settings. For the IIS, we want to behave in an
-                    -- "agnostic" way and avoid settings leaking through both sides
-                    SetOverscanOffsets(0, 0, 0, 0)
-                    SetCVar("GAMMA_ADJUSTMENT", 100)
-                end
-
                 SetCurrentVideoPlaybackVolume(1.0, 4.0)
 
                 SCENE_MANAGER:Show("PregameInitialScreen_Gamepad")

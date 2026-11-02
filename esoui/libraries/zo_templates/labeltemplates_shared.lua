@@ -958,6 +958,10 @@ function RollingMeterLabel:UpdateWheelContainerAnchor()
     self.wheelContainer:SetAnchor(anchorPoint)
 end
 
+-- self.wheels is ordered left-to-right, matching the display.
+--     create order: A, B, C
+--     self.wheels: { C, B, A }
+-- For text "508", wheel C receives "5", wheel B "0", and wheel A "8".
 function RollingMeterLabel:CreateWheel()
     local wheel, wheelKey = self.wheelPool:AcquireObject()
     table.insert(self.wheels, 1, wheel)
@@ -1037,7 +1041,10 @@ function RollingMeterLabel:CommitValueText(text)
 
     self.visibleWheelCount = wheelCount
 
-    for wheelIndex = 1, wheelCount do
+    -- GetOrCreateWheel inserts new wheels at the beginning of self.wheels.
+    -- In a forward loop, each insertion shifts the wheel assigned in the previous iteration to the next index.
+    -- On the next iteration, GetOrCreateWheel returns that same wheel and overwrites its character.
+    for wheelIndex = wheelCount, 1, -1 do
         local wheel = self:GetOrCreateWheel(wheelIndex)
         wheel:SetStaticValue(self:GetWheelCharacter(text, wheelIndex, wheelCount))
     end

@@ -259,7 +259,7 @@
                     <MapPinType name="EBONHEART_VS_DAGGERFALL_SMALL" pinSize="16" pinTexture="$(MAP_PIN_PATH)AvA_EbonheartVDaggerfall.dds" drawLevelOffsetBase="139"/>
                     <MapPinType name="EBONHEART_VS_DAGGERFALL_MEDIUM" pinSize="20" pinTexture="$(MAP_PIN_PATH)AvA_EbonheartVDaggerfall.dds" drawLevelOffsetBase="140"/>
                     <MapPinType name="EBONHEART_VS_DAGGERFALL_LARGE" pinSize="24" pinTexture="$(MAP_PIN_PATH)AvA_EbonheartVDaggerfall.dds" drawLevelOffsetBase="141"/>
-                    <MapPinType name="AGGRO" pinSize="24" pinTexture="$(MAP_PIN_PATH)hostile_pin.dds" layer="OVERLAY" drawLevelOffsetBase="161"/>
+                    <MapPinType name="AGGRO" pinSize="16" pinTexture="$(MAP_PIN_PATH)hostile_pin.dds" layer="OVERLAY" drawLevelOffsetBase="161"/>
                     <MapPinType name="TIMELY_ESCAPE_NPC" pinSize="32" pinTexture="$(COMPASS_PATH)timely_escape_npc.dds" layer="OVERLAY" drawLevelOffsetBase="162"/>
                     <MapPinType name="ZONE_STORY_SUGGESTED_AREA" areaTexture="$(MAP_PIN_PATH)map_areaPin.dds" drawLevelOffsetBase="200"/>
                     <MapPinType name="WORLD_EVENT_MAP_LOCATION_ACTIVE" drawLevelOffsetBase="3"/>
