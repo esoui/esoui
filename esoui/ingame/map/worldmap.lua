@@ -5083,40 +5083,11 @@ end
 function ZO_WorldMapManager:TryAddDigSiteToMap(digSiteId, isTracked)
     local centerX, centerZ, isShownInCurrentMap = GetDigSiteNormalizedCenterPosition(digSiteId)
     if isShownInCurrentMap then
-        local points = {}
-
-        local minX = 1.0
-        local maxX = 0.0
-        local minY = 1.0
-        local maxY = 0.0
-
-        local borderPoints = { GetDigSiteNormalizedBorderPoints(digSiteId) }
-        for i = 1, #borderPoints, 2 do -- loop by 2 because we are getting x and z coordinates
-            local x = borderPoints[i]
-            local y = borderPoints[i + 1] -- UI is going to treat z as y
-
-            minX = zo_min(x, minX)
-            maxX = zo_max(x, maxX)
-
-            minY = zo_min(y, minY)
-            maxY = zo_max(y, maxY)
-
-            local coordinates =
-            {
-                x = x,
-                y = y,
-            }
-            table.insert(points, coordinates)
-        end
-
-        for index, coordinates in ipairs(points) do
-            coordinates.x = zo_normalize(coordinates.x, minX, maxX)
-            coordinates.y = zo_normalize(coordinates.y, minY, maxY)
-        end
+        local borderPoints, minX, maxX, minY, maxY = ZO_NormalizeCoordinates(GetDigSiteNormalizedBorderPoints(digSiteId))
 
         local borderInformation =
         {
-            borderPoints = points,
+            borderPoints = borderPoints,
             borderWidth = maxX - minX,
             borderHeight = maxY - minY,
         }

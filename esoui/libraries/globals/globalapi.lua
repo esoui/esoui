@@ -393,6 +393,39 @@ function zo_normalize(value, min, max)
     return (value - min) / (max - min)
 end
 
+function ZO_NormalizeCoordinates(...)
+    local normalizedCoordinates = {}
+
+    local minX = math.huge
+    local maxX = 0.0
+    local minY = math.huge
+    local maxY = 0.0
+
+    for i = 1, select("#", ...), 2 do
+        local x = select(i, ...)
+        local y = select(i + 1, ...)
+
+        minX = zo_min(x, minX)
+        maxX = zo_max(x, maxX)
+        minY = zo_min(y, minY)
+        maxY = zo_max(y, maxY)
+
+        local coordinates =
+        {
+            x = x,
+            y = y,
+        }
+        table.insert(normalizedCoordinates, coordinates)
+    end
+
+    for _, coordinates in ipairs(normalizedCoordinates) do
+        coordinates.x = zo_normalize(coordinates.x, minX, maxX)
+        coordinates.y = zo_normalize(coordinates.y, minY, maxY)
+    end
+
+    return normalizedCoordinates, minX, maxX, minY, maxY
+end
+
 function zo_clampLength2D(x, y, maxLength)
     local distance = zo_sqrt(x * x + y * y)
     if distance == 0 then

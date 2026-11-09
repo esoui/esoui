@@ -124,6 +124,12 @@ function WorldMapKey_Gamepad:RefreshKey()
         local headerRelativePoint = TOPLEFT
         local allFilledOnce = false
         local numSectionsPerColumn = {}
+        local lastAnchorByColumn = {}
+        for columnNumber = 1, NUM_COLUMNS do
+            self.symbols[columnNumber] = {}
+            numSectionsPerColumn[columnNumber] = 0
+            lastAnchorByColumn[columnNumber] = self.columns[columnNumber]
+        end
 
         local totalNumSymbols = 0
         local numSymbolsBySection = {}
@@ -152,7 +158,12 @@ function WorldMapKey_Gamepad:RefreshKey()
                     column = self.columns[columnIndex]
                     local symbolsInColumn = self.symbols[columnIndex]
                     numSymbolsInColumn = #symbolsInColumn
-                    previousAnchor = symbolsInColumn[numSymbolsInColumn]
+                    previousAnchor = lastAnchorByColumn[columnIndex]
+                    if previousAnchor == column then
+                        headerRelativePoint = TOPLEFT
+                    else
+                        headerRelativePoint = BOTTOMLEFT
+                    end
 
                     allFilledOnce = true
                 else
@@ -183,6 +194,7 @@ function WorldMapKey_Gamepad:RefreshKey()
 
             local offsetX = -params.HEADER_OFFSET_X
             previousAnchor = header
+            lastAnchorByColumn[columnIndex] = header
 
             for symbolIndex = 1, numSymbolsBySection[sectionIndex] do
                 numSymbolsInColumn = numSymbolsInColumn + 1
@@ -196,12 +208,9 @@ function WorldMapKey_Gamepad:RefreshKey()
                 symbol:SetAnchor(TOPLEFT, previousAnchor, BOTTOMLEFT, offsetX, params.SYMBOL_OFFSET_Y)
                 offsetX = 0
 
-                if self.symbols[columnIndex] == nil then
-                    self.symbols[columnIndex] = {}
-                end
-
                 table.insert(self.symbols[columnIndex], symbol)
                 previousAnchor = symbol
+                lastAnchorByColumn[columnIndex] = symbol
             end
         end
 

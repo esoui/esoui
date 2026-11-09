@@ -108,7 +108,7 @@
                     <MapPinType name="POI_SEEN" arrowType="GUTTER" pinSize="32" addedAnimation="MapPinSlowFadeIn" removedAnimation="MapPinSlowFadeOut" animationTarget="MAP_AND_GUTTER" drawLevelOffsetBase="21"/>
                     <MapPinType name="POI_COMPLETE" arrowType="GUTTER" pinSize="32" addedAnimation="MapPinSlowFadeIn" removedAnimation="MapPinSlowFadeOut" animationTarget="MAP_AND_GUTTER" drawLevelOffsetBase="22"/>
                     <MapPinType name="WORLD_EVENT_POI_ACTIVE" pinSize="32" removedAnimation="MapPinSlowFadeOut" animationTarget="MAP_ONLY" drawLevelOffsetBase="23"/>
-                    <MapPinType name="ANTIQUITY_DIG_SITE" arrowType="GUTTER" pinSize="32" pinTexture="$(COMPASS_PATH)antiquity_digSite_icon.dds" drawLevelOffsetBase="23"/>
+                    <MapPinType name="ANTIQUITY_DIG_SITE" pinSize="32" pinTexture="$(COMPASS_PATH)antiquity_digSite_icon.dds" drawLevelOffsetBase="23"/>
                     <MapPinType name="TRACKED_ANTIQUITY_DIG_SITE" arrowType="GUTTER" pinSize="32" pinTexture="$(COMPASS_PATH)antiquity_trackedDigSite_icon.dds" drawLevelOffsetBase="24"/>
                     <MapPinType name="BGPIN_FLAG_FIRE_DRAKES" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)battlegrounds_flag_pin_orange.dds" drawLevelOffsetBase="30"/>
                     <MapPinType name="BGPIN_FLAG_FIRE_DRAKES_AURA" arrowType="GUTTER" pinSize="32" pinTexture="$(MAP_PIN_PATH)battlegrounds_flag_halo_orange.dds" drawLevelOffsetBase="31"/>

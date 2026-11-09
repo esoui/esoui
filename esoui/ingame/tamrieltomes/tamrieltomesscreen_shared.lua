@@ -299,7 +299,7 @@ ZO_TAMRIEL_TOMES_REWARD_ENTRY_TEMPLATE_LAYOUT =
 
 local PAGE_ZERO_PAGE_INDICATOR_INFO =
 {
-    icon = "/EsoUI/Art/TamrielTomes/PageZero_Up.dds",
+    icon = "/EsoUI/Art/TamrielTomes/PageZero_Down.dds",
     highlightedTexture = "/EsoUI/Art/TamrielTomes/highlighted_page_backdrop.dds",
     selectedTexture = "/EsoUI/Art/TamrielTomes/selected_page_outline.dds",
 }
@@ -324,10 +324,10 @@ local UNLOCKED_BONUS_PAGE_INDICATOR_INFO =
 }
 local LOCKED_BONUS_PAGE_INDICATOR_INFO =
 {
-    color = ZO_ColorDef:New(.4, .4, .4, 1),
+    color = ZO_ColorDef:New(.6, .6, .6, 1),
     icon = "/EsoUI/Art/TamrielTomes/tome_bonus_page_icon.dds",
     highlightedTexture = "/EsoUI/Art/TamrielTomes/highlighted_page_backdrop.dds",
-    selectedColor = ZO_ColorDef:New(.55, .55, .55, 1),
+    selectedColor = ZO_ColorDef:New(.75, .75, .75, 1),
     selectedTexture = "/EsoUI/Art/TamrielTomes/selected_page_outline.dds",
 }
 

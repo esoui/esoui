@@ -286,3 +286,7 @@ end
 
 ZO_AbstractGridScrollList.AddResizeOnScreenResize = ZO_AbstractGridScrollList.RegisterResizeEvents
 ZO_AbstractGridScrollList.RemoveResizeOnScreenResize = ZO_AbstractGridScrollList.UnregisterResizeEvents
+
+function SetMapPinAssisted() end -- Deprecated, do nothing
+
+PLATFORM_STORE_LABEL_DMM = PLATFORM_STORE_LABEL_REUSE_ME_2

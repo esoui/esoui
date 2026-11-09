@@ -180,6 +180,8 @@ function GuildSelector:InitializeGuilds()
     end
 
     if wasDropdownOpen then
+        -- Call ShowDropdown first to force the global mouse up handler to register (ESO-985920)
+        self.comboBox:ShowDropdown()
         self.comboBox:ShowDropdownOnMouseUp()
     end
 end
